@@ -195,6 +195,7 @@ On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 
 | Treat given              | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                                                                                             |
 
 - `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog. Two statuses alternate every second, most recent first.
+- Each status has its own colour family and shape, apart from the leash's pink, dred and plum: soaked cyan drops, spooked white lines and a cyan drop, stinky pink lines, tangled green rope (teal rim) in two interlocked loops, tuckered-out yellow z's (plum rim). `icon-tangled` and `icon-tuckered-out` keep their overlay's colours and rim, which hold on cream, amber and the top bar's ink.
 - With reduced motion, bursts and stars play and the stumble is skipped.
 
 #### Comic words

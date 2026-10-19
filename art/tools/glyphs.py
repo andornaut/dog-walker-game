@@ -27,6 +27,8 @@ icon-zone-<zone>            snooze-crescent (a crescent moon over a roof), bark-
                             holds 3:1 on cream and tan as the need icons' does
 icon-soaked, icon-spooked   dog statuses beside icon-stinky (ui.py), on cream: water drops; a
                             wide-eyed, floppy-eared dog face with fright lines and a sweat drop
+icon-tangled                two loops of green leash knotted through each other, teal-outlined
+icon-tuckered-out           the dog face gone droopy: eyes shut, tongue out, a yellow z rising
 icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
                             (a yellow raincoat), rush-hour (an alarm clock), second-wind (two
@@ -507,7 +509,8 @@ def paws_promenade():
 
 # ---------- dog statuses, on the doghouse's cream heart board beside icon-stinky ----------
 # Like icon-stinky, each reads on cream by its outline (navy, blue, dbrown and plum hold 5.8:1
-# or more there) and differs from the others by shape: drops, a scared face, stink lines.
+# or more there) and differs from the others by shape: drops, a scared face, a knot, a sleepy
+# face, stink lines.
 
 def drop(g, cx, top, r, fill, sh=None, li=None):
     """A water drop: a point at (cx, top) over a round base of radius r."""
@@ -548,6 +551,55 @@ def spooked():
     for x, y in ((0, 5), (1, 5), (1, 1), (2, 2), (5, 0), (5, 1)):
         g.p(x, y, "white")
     bitmap(g, 12, 0, [".c.", "cwc", "cws", ".s."], {"c": "cyan", "w": "white", "s": "sky"})
+    return g
+
+
+class Drawn(Grid):
+    """A 16x16 icon already outlined part by part: outlined() returns its pixels as they are."""
+
+    def __init__(self, g):
+        super().__init__(16, 16)
+        self.px = g.px
+
+    def outlined(self, outline=True):
+        return [row[:] for row in self.px]
+
+
+def tangled():
+    """Two loops of leash knotted through each other, as in fx-status-tangled (hits.py) in a
+    thicker rope: green lit yellow and shaded dgreen, A over B at the upper crossing and under it
+    at the lower one, the loose ends trailing off. Each part takes the overlay's teal rim (8.3:1 on
+    cream, 6.4:1 on amber), laid in turn so the crossings read; on ink the green rope (8.4:1)
+    carries it."""
+    from hits import knot, rope_loop
+
+    a = rope_loop(16, 6, 6, 4.8, 4.4, 1.6, "dgreen")
+    b = rope_loop(16, 10.5, 10.5, 4.2, 3.8, 1.6, "dgreen")
+    for x, y in ((2, 10), (1, 11), (1, 12), (2, 13)):
+        a.p(x, y, "green")
+    for x, y in ((14, 7), (14, 6), (14, 5)):
+        b.p(x, y, "green")
+    return Drawn(knot(a, b, 6, 9))
+
+
+def tuckered_out():
+    """The dog's face from icon-spooked gone droopy: eyes shut under heavy lids, ears flat, tongue
+    lolling, and a yellow z rising off its head as in fx-status-tuckered-out (hits.py), the z
+    outlined in plum, so it holds on cream, amber and ink."""
+    g = Grid(16, 16)
+    g.edge = lambda c: K["plum"] if c == K["yellow"] else DARKER[DARKER[c]]
+    g.ell(7, 10.5, 5, 4.5, "tan", "brown")
+    for cx in (2, 12):
+        g.ell(cx, 11.5, 1.6, 3.6, "brown")
+    g.ell(7, 13, 3, 1.8, "cream")
+    # shut eyes: a brown lid over an ink lash line
+    for x in (4, 8):
+        g.rect(x, 9, 3, 1, "brown")
+        g.rect(x, 10, 3, 1, "ink")
+    g.rect(6, 12, 3, 1, "ink")
+    g.rect(7, 13, 2, 2, "pink")
+    g.p(8, 14, "red")
+    bitmap(g, 10, 1, ["zzzz", "..z.", ".z..", "zzzz"], {"z": "yellow"})
     return g
 
 
@@ -768,6 +820,8 @@ IMAGES = {
     "icon-zone-the-long-way-home": the_long_way_home,
     "icon-soaked": soaked,
     "icon-spooked": spooked,
+    "icon-tangled": tangled,
+    "icon-tuckered-out": tuckered_out,
     "icon-upgrade-belly-rubs": belly_rubs,
     "icon-upgrade-big-tipper": big_tipper,
     "icon-upgrade-good-leash": good_leash,

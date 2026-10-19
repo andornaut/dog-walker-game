@@ -1343,6 +1343,36 @@
       "json": "sprites/fx-status-stinky@75.json"
     },
     {
+      "key": "fx-status-tangled",
+      "png": "sprites/fx-status-tangled.png",
+      "json": "sprites/fx-status-tangled.json"
+    },
+    {
+      "key": "fx-status-tangled@50",
+      "png": "sprites/fx-status-tangled@50.png",
+      "json": "sprites/fx-status-tangled@50.json"
+    },
+    {
+      "key": "fx-status-tangled@75",
+      "png": "sprites/fx-status-tangled@75.png",
+      "json": "sprites/fx-status-tangled@75.json"
+    },
+    {
+      "key": "fx-status-tuckered-out",
+      "png": "sprites/fx-status-tuckered-out.png",
+      "json": "sprites/fx-status-tuckered-out.json"
+    },
+    {
+      "key": "fx-status-tuckered-out@50",
+      "png": "sprites/fx-status-tuckered-out@50.png",
+      "json": "sprites/fx-status-tuckered-out@50.json"
+    },
+    {
+      "key": "fx-status-tuckered-out@75",
+      "png": "sprites/fx-status-tuckered-out@75.png",
+      "json": "sprites/fx-status-tuckered-out@75.json"
+    },
+    {
       "key": "fx-tap",
       "png": "sprites/fx-tap.png",
       "json": "sprites/fx-tap.json"
@@ -5998,6 +6028,10 @@
       "png": "images/icon-style-hustle.png"
     },
     {
+      "key": "icon-tangled",
+      "png": "images/icon-tangled.png"
+    },
+    {
       "key": "icon-trait-chaser",
       "png": "images/icon-trait-chaser.png"
     },
@@ -6012,6 +6046,10 @@
     {
       "key": "icon-treat",
       "png": "images/icon-treat.png"
+    },
+    {
+      "key": "icon-tuckered-out",
+      "png": "images/icon-tuckered-out.png"
     },
     {
       "key": "icon-upgrade-belly-rubs",

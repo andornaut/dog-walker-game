@@ -44,6 +44,9 @@ fx-status-soaked   16x16  loop (4 frames, 150ms) drips falling off
 fx-status-soaked-mud, fx-status-soaked-milkshake  the same drips after the mud and milkshake
                    Splash skins: brown mud spots, cream milkshake drips, each plum-rimmed
 fx-status-spooked  16x16  loop (4 frames, 150ms) sweat drop popping, surprise lines
+fx-status-tangled  16x16  loop (4 frames, 150ms) two interlocked loops of green leash, teal-rimmed,
+                                                  working loose and tight, the loose ends swinging
+fx-status-tuckered-out  16x16  loop (4 frames, 180ms) yellow z's, plum-rimmed, rising off the head
                    each status also has @75 (12x12) and @50 (8x8), same tags and timing;
                    bottom-centre on the dog's centre column, 6px (4px at @75, 3px at
                    @50) below the dog's top opaque row, so the lower rows overlap the head
@@ -880,6 +883,89 @@ def status_spooked(size, step):
     return g
 
 
+# The tangle per size: loop A (centre and radii), loop B below and right of it, A's loose end and
+# B's (their last pixels swing), and how far A rises and B drops on each frame.
+TANGLE = {
+    16: ((5.5, 5.5, 4, 3.6), (10.5, 8.5, 3.6, 3.3), ((3, 9), (3, 10), (2, 11), (2, 12)), ((14, 9), (14, 10), (14, 11)),
+         (0, 1, 1, 0), (0, 0, 1, 1)),
+    12: ((4, 4.5, 3.2, 2.9), (8, 6.5, 2.9, 2.7), ((2, 7), (2, 8), (1, 9)), ((10, 7), (10, 8), (10, 9)),
+         (0, 1, 1, 0), (0, 0, 1, 1)),
+    8: ((3, 3, 2, 2), (5, 4, 2, 2), (), (), (0, 0, 0, 0), (0, 0, 1, 1)),
+}
+
+
+def rope_loop(size, cx, cy, rx, ry, thick=1, shade=None):
+    """A ring of green rope thick pixels across, lit yellow on its upper left."""
+    g = Grid(size, size)
+    g.ell(cx, cy, rx, ry, "green", shade, "yellow")
+    g.ell(cx, cy, rx - thick, ry - thick, None)
+    return g
+
+
+def knot(a, b, ax, top):
+    """Loop a, then loop b over it, then a's rope where it crosses b's top row (above row top, right
+    of column ax) laid back over b, each part rimmed in teal, so the loops pass through each other."""
+    size = a.w
+    over = Grid(size, size)
+    for y in range(top):
+        for x in range(int(ax) + 1, size):
+            if a.px[y][x] and any(0 <= x + dx < size and 0 <= y + dy < size and b.px[y + dy][x + dx]
+                                  for dx in (-1, 0, 1) for dy in (-1, 0, 1)):
+                over.px[y][x] = a.px[y][x]
+    g = Grid(size, size)
+    for part in (a, b, over):
+        layer(g, rim(part, "teal"))
+    return g
+
+
+def status_tangled(size, step):
+    """A leash knotted into two interlocked loops, A over B at their upper crossing and under it at
+    the lower one, its loose ends hanging into the head. A rises and B drops a pixel out of step
+    while the ends swing, so the knot works loose and tight over 4 frames. Green rope lit yellow,
+    each part rimmed in teal so the crossings read: green is no other status's colour and no
+    leash's (pink, dred, plum), the green and yellow carry Elm Avenue and the dimmed roads, and the
+    teal the light ones."""
+    (ax, ay, arx, ary), (bx, by, brx, bry), a_end, b_end, rise, drop = TANGLE[size]
+    up, down, swing = rise[step], drop[step], (0, 1, 0, -1)[step]
+    a = rope_loop(size, ax, ay - up, arx, ary)
+    b = rope_loop(size, bx, by + down, brx, bry)
+    for i, (x, y) in enumerate(a_end):
+        a.p(x + (swing if i == len(a_end) - 1 else 0), y, "green")
+    for i, (x, y) in enumerate(b_end):
+        b.p(x - (swing if i == len(b_end) - 1 else 0), y + down, "green")
+    return knot(a, b, ax, math.ceil(by + down - 1))
+
+
+# The z glyphs by height, 1px strokes.
+ZEDS = {5: ("zzzzz", "...z.", "..z..", ".z...", "zzzzz"), 4: ("zzzz", "..z.", ".z..", "zzzz")}
+# Per size: the slots a z steps through, each its top-left and height, from beside the head up and
+# to the right; None is a frame with that z gone. Each z moves one slot a frame, and the z's sit
+# a set number of slots apart, so a new one rises from the head as the top one leaves. At @50 one z
+# floats up and back, so no frame is empty.
+DRIFT = {16: (((1, 10, 4), (5, 6, 4), (9, 1, 5), None), 3),
+         12: (((1, 7, 4), (3, 5, 4), (5, 3, 4), (7, 1, 4)), 2),
+         8: (((1, 3, 4), (2, 2, 4), (3, 1, 4), (2, 2, 4)), 1)}
+
+
+def status_tuckered_out(size, step):
+    """Z's rising up and to the right off the head, growing as they go, so 4 frames loop. Yellow
+    in a plum rim, as the other statuses' rims: unlike the Willow Crescent chalk Z's (flat white
+    and light grey, unrimmed, lying on the road), and the yellow carries Elm Avenue and the
+    dimmed roads."""
+    g = Grid(size, size)
+    slots, count = DRIFT[size]
+    for k in range(count):
+        slot = slots[(step + k * 4 // count) % 4]
+        if slot is None:
+            continue
+        x0, y0, n = slot
+        for j, row in enumerate(ZEDS[n]):
+            for i, ch in enumerate(row):
+                if ch == "z":
+                    g.p(x0 + i, y0 + j, "yellow")
+    return rim(g, "plum")
+
+
 # Each burst: its drawing, its frame count, its comic word and the row its impact star is centred on.
 HITS = {
     "fx-hit-skunk": (hit_skunk, 8, "PEE-YEW!", 32),
@@ -920,6 +1006,8 @@ def sprites():
     for look in SOAKS:
         yield from sizes(f"fx-status-soaked{look}", lambda size, step, look=look: status_soaked(size, step, look), 150)
     yield from sizes("fx-status-spooked", status_spooked, 150)
+    yield from sizes("fx-status-tangled", status_tangled, 150)
+    yield from sizes("fx-status-tuckered-out", status_tuckered_out, 180)
 
 
 if __name__ == "__main__":
