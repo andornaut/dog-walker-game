@@ -5658,12 +5658,92 @@
       "png": "images/card-social-jogger-dog-sniff.png"
     },
     {
+      "key": "card-splash-milkshake-through",
+      "png": "images/card-splash-milkshake-through.png"
+    },
+    {
+      "key": "card-splash-milkshake-towel",
+      "png": "images/card-splash-milkshake-towel.png"
+    },
+    {
+      "key": "card-splash-mud-through",
+      "png": "images/card-splash-mud-through.png"
+    },
+    {
+      "key": "card-splash-mud-towel",
+      "png": "images/card-splash-mud-towel.png"
+    },
+    {
+      "key": "card-splash-shore-through",
+      "png": "images/card-splash-shore-through.png"
+    },
+    {
+      "key": "card-splash-shore-towel",
+      "png": "images/card-splash-shore-towel.png"
+    },
+    {
+      "key": "card-splash-sprinkler-through",
+      "png": "images/card-splash-sprinkler-through.png"
+    },
+    {
+      "key": "card-splash-sprinkler-towel",
+      "png": "images/card-splash-sprinkler-towel.png"
+    },
+    {
       "key": "card-squirrel-chase",
       "png": "images/card-squirrel-chase.png"
     },
     {
       "key": "card-squirrel-hold",
       "png": "images/card-squirrel-hold.png"
+    },
+    {
+      "key": "card-stink-compost-grooming",
+      "png": "images/card-stink-compost-grooming.png"
+    },
+    {
+      "key": "card-stink-compost-ignore",
+      "png": "images/card-stink-compost-ignore.png"
+    },
+    {
+      "key": "card-stink-compost-rinse",
+      "png": "images/card-stink-compost-rinse.png"
+    },
+    {
+      "key": "card-stink-fish-crate-grooming",
+      "png": "images/card-stink-fish-crate-grooming.png"
+    },
+    {
+      "key": "card-stink-fish-crate-ignore",
+      "png": "images/card-stink-fish-crate-ignore.png"
+    },
+    {
+      "key": "card-stink-fish-crate-rinse",
+      "png": "images/card-stink-fish-crate-rinse.png"
+    },
+    {
+      "key": "card-stink-garbage-truck-grooming",
+      "png": "images/card-stink-garbage-truck-grooming.png"
+    },
+    {
+      "key": "card-stink-garbage-truck-ignore",
+      "png": "images/card-stink-garbage-truck-ignore.png"
+    },
+    {
+      "key": "card-stink-garbage-truck-rinse",
+      "png": "images/card-stink-garbage-truck-rinse.png"
+    },
+    {
+      "key": "card-stink-seaweed-grooming",
+      "png": "images/card-stink-seaweed-grooming.png"
+    },
+    {
+      "key": "card-stink-seaweed-ignore",
+      "png": "images/card-stink-seaweed-ignore.png"
+    },
+    {
+      "key": "card-stink-seaweed-rinse",
+      "png": "images/card-stink-seaweed-rinse.png"
     },
     {
       "key": "card-stop-sign-dart",
