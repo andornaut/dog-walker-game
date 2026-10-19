@@ -11,6 +11,7 @@ export const SCENE_KEYS = {
   shop: "shop",
   start: "start",
   stats: "stats",
+  zoneCelebration: "zoneCelebration",
 } as const;
 
 export type SceneKey = (typeof SCENE_KEYS)[keyof typeof SCENE_KEYS];

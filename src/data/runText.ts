@@ -30,5 +30,14 @@ export const RUN_TEXT = {
   },
   hopOver: "Hop!",
   lowHearts: "1 ♥ left!",
+  newWalker: {
+    button: "Welcome!",
+    info: "{pace} · {style}",
+    title: "{walker} joins you!",
+  },
   outOfMoney: "you're out of money",
+  zoneDone: {
+    earnings: "+{fees} fees · +{tips} tips",
+    title: "{zone} done!",
+  },
 } as const satisfies RunText;

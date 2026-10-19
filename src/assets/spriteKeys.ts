@@ -132,6 +132,22 @@ export const NEED_ART = {
   pullFail: "fx-pull-fail",
 } as const;
 
+// The zone celebration's art, each with what stands in while it is missing: the banner over
+// it (ui-zone-banner, then a drawn band), the confetti falling over the road, played on a loop
+// (drawn confetti), and the walker-<name> tags: the walker in use cheers (idle), a new walker
+// runs in, then waves (idle).
+export const ZONE_CELEBRATION_ART = {
+  banner: "ui-celebration-banner",
+  bannerStandIn: "ui-zone-banner",
+  confetti: "fx-celebration-confetti",
+  confettiTag: "play",
+  walkerTags: {
+    cheer: ["cheer", "idle"],
+    joined: ["wave", "idle"],
+    run: ["walk", "idle"],
+  },
+} as const;
+
 // A road sprite's hand-drawn version for a depth step, such as dog-koda@62 for 0.625x, or
 // null at full size. Throws for a scale that is not a step.
 export function depthVariantKey(key: string, step: number): string | null {

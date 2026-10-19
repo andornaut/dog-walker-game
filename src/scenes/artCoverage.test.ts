@@ -218,6 +218,8 @@ describe("walker art", () => {
   it("has the default walker's sprite, which stands in for a walker whose art is missing", () => {
     expect(sprites.has(gameData.walkers[gameData.defaultWalker].spriteKey)).toBe(true);
   });
+
+  it.todo("names ZONE_CELEBRATION_ART's cheer tag, confetti and banner, once art lands");
 });
 
 describe("image art", () => {

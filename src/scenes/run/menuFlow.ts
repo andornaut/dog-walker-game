@@ -4,9 +4,11 @@ import type { ZoneId } from "../../data/types";
 import type { RunPause } from "../../hud/topBar";
 import type { CardView, Choice } from "../../rules/choices";
 import type { CardSceneData } from "../CardScene";
+import { openOverlay } from "../overlay";
 import type { PauseSceneData } from "../PauseScene";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
+import type { ZoneCelebrationSceneData } from "../ZoneCelebrationScene";
 
 // What the menus need of the run.
 export interface MenuFlowHost {
@@ -17,10 +19,11 @@ export interface MenuFlowHost {
   over: () => boolean;
 }
 
-// The scenes that hold the walk over the run scene: a card, and the pause menu or the Home
-// button's question.
+// The scenes that hold the walk over the run scene: a card, the zone celebration, and the
+// pause menu or the Home button's question.
 export class MenuFlow {
   private cardView: CardView | undefined;
+  private celebrating = false;
   private readonly host: MenuFlowHost;
   private pauseMode: PauseSceneData["mode"] = "menu";
   private pauseOpen = false;
@@ -38,6 +41,28 @@ export class MenuFlow {
 
   paused(): boolean {
     return this.pauseOpen;
+  }
+
+  // Whether the zone celebration holds the walk: from the zone's end, while its fee coins fly,
+  // until it closes.
+  celebration(): boolean {
+    return this.celebrating;
+  }
+
+  holdForCelebration(): void {
+    this.celebrating = true;
+  }
+
+  // The celebration over the paused run scene; onDone runs once it has closed.
+  showCelebration(data: ZoneCelebrationSceneData): void {
+    const launched: ZoneCelebrationSceneData = {
+      ...data,
+      onDone: () => {
+        this.celebrating = false;
+        data.onDone();
+      },
+    };
+    openOverlay(this.scene, SCENE_KEYS.zoneCelebration, launched);
   }
 
   // The card holds the walk from now; a replayed choice closes it before it shows.
@@ -76,7 +101,7 @@ export class MenuFlow {
   // it. The walk steps only while walking, so the menu stops it without pausing the run
   // scene: sprite animations loop on, while tweens and timers stop, keeping a hit moment in
   // step with its hit stop. The card under the menu pauses and hides, so no card shows beside
-  // the menu's panel. The HUD keeps running, so the top bar's buttons work and redraw. Asked
+  // the menu's panel; a zone celebration under it pauses. The HUD keeps running, so the top bar's buttons work and redraw. Asked
   // while the menu is up, the question replaces it.
   openPause(mode: PauseSceneData["mode"]): void {
     if (this.host.over()) {
@@ -100,6 +125,9 @@ export class MenuFlow {
       scene.scene.pause(SCENE_KEYS.card);
       scene.scene.setVisible(false, SCENE_KEYS.card);
     }
+    if (scene.scene.isActive(SCENE_KEYS.zoneCelebration)) {
+      scene.scene.pause(SCENE_KEYS.zoneCelebration);
+    }
     scene.scene.launch(SCENE_KEYS.pause, this.pauseData());
   }
 
@@ -116,6 +144,9 @@ export class MenuFlow {
     if (this.cardView !== undefined) {
       scene.scene.setVisible(true, SCENE_KEYS.card);
       scene.scene.resume(SCENE_KEYS.card);
+    }
+    if (scene.scene.isPaused(SCENE_KEYS.zoneCelebration)) {
+      scene.scene.resume(SCENE_KEYS.zoneCelebration);
     }
   }
 

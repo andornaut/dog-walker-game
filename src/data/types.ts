@@ -707,8 +707,8 @@ export interface RunText {
     // An upgrade card's plaque, by how long it lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeTitle: string;
-    // What a newly unlocked walker says at the greeting stop, the first time a walk finishes
-    // the zone that unlocks them.
+    // What a newly unlocked walker says as they join, the first time a walk finishes the zone
+    // that unlocks them.
     readonly walkerGreeting: string;
   };
   readonly fired: string;
@@ -722,8 +722,21 @@ export interface RunText {
   // Shown over each dog that hops over an area effect.
   readonly hopOver: string;
   readonly lowHearts: string;
+  // The zone celebration as a walker joins, the first time a walk finishes the zone that
+  // unlocks them: its title, their pace and style under their greeting, and the button.
+  readonly newWalker: {
+    readonly button: string;
+    readonly info: string;
+    readonly title: string;
+  };
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;
+  // The zone celebration after any other zone but the last: its title, and the zone's fees
+  // and tips.
+  readonly zoneDone: {
+    readonly earnings: string;
+    readonly title: string;
+  };
 }
 
 // The text of the menus and pages over the game: Settings, Stats, Help, the End screen, the

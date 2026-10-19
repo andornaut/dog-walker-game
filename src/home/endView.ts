@@ -18,7 +18,7 @@ const ORDER: readonly EarningsKind[] = ["fees", "tips", "luckyFinds", "cardCosts
 
 // A money change counts under its base cause: a fee or tip, or a card or lucky find's effect,
 // as a cost or a gain.
-function kindOf(change: MoneyChange): EarningsKind {
+export function earningsKind(change: MoneyChange): EarningsKind {
   const base = change.causes[0];
   switch (base?.kind) {
     case "fee":
@@ -42,7 +42,7 @@ export function earningsBreakdown(
   let counted = 0;
   for (const change of changes) {
     if (change.kind === "money") {
-      const kind = kindOf(change);
+      const kind = earningsKind(change);
       totals.set(kind, (totals.get(kind) ?? 0) + change.amount);
       counted += change.amount;
     }

@@ -31,6 +31,7 @@ import { SettingsScene } from "./scenes/SettingsScene";
 import { ShopScene } from "./scenes/ShopScene";
 import { StartScene } from "./scenes/StartScene";
 import { StatsScene } from "./scenes/StatsScene";
+import { ZoneCelebrationScene } from "./scenes/ZoneCelebrationScene";
 
 let game: Game | undefined;
 
@@ -79,9 +80,9 @@ function watchFirstWalk(game: Game): void {
   game.events.on(Core.Events.POST_STEP, check);
 }
 
-// Scenes render in list order: the HUD over the road, cards and the pause menu over the
-// HUD, help, settings and stats over those, and the dev overlay, which starts itself, over
-// everything. Boot runs first and starts the start screen.
+// Scenes render in list order: the HUD over the road, cards, the zone celebration and the
+// pause menu over the HUD, help, settings and stats over those, and the dev overlay, which
+// starts itself, over everything. Boot runs first and starts the start screen.
 function bootGame(): Game {
   const game = new Game({
     backgroundColor: "#181425",
@@ -97,6 +98,7 @@ function bootGame(): Game {
       RunScene,
       HudScene,
       CardScene,
+      ZoneCelebrationScene,
       PauseScene,
       EndScene,
       HelpScene,

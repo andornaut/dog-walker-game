@@ -8,6 +8,7 @@ import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
 import { cardHintTriggers } from "../hud/hintTriggers";
 import type { RunPause } from "../hud/topBar";
+import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { type CardView, type Choice, quirkActorsOf } from "../rules/choices";
 import { currentZone, currentZoneId } from "../rules/route";
@@ -44,6 +45,7 @@ import {
   finishRun,
   isMuted,
   onSettingsChanged,
+  profileSave,
   type Settings,
 } from "./profileStore";
 import { AccidentSpots } from "./run/accidentSpots";
@@ -84,6 +86,12 @@ export interface RunHudView {
 // the walk ahead.
 const STEP_MS = STEP_SECONDS * 1000;
 const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
+
+// The zone celebration due once a zone's fee coins have landed, delayMs from its end.
+interface Celebration {
+  celebration: ZoneCelebration;
+  delayMs: number;
+}
 
 // One run's views, input, menus and dev hooks, made as it starts.
 interface RunWorld {
@@ -336,9 +344,12 @@ export class RunScene extends Scene {
   private apply(step: SessionStep): void {
     this.session = step.session;
     let opened: CardView | undefined;
+    let celebration: Celebration | undefined;
     for (const event of step.events) {
       if (event.kind === "cardOpened") {
         opened = event.view;
+      } else if (event.kind === "zoneEnded") {
+        celebration = this.endZone(event);
       } else {
         this.react(event);
       }
@@ -349,13 +360,61 @@ export class RunScene extends Scene {
       return;
     }
     this.world?.moments.previewAchievements(run);
-    if (opened !== undefined) {
-      this.showCard(opened, run);
+    if (opened === undefined) {
+      return;
+    }
+    const card = opened;
+    if (celebration === undefined) {
+      this.showCard(card, run);
+    } else {
+      this.celebrate(celebration, () => this.showCard(card, run));
     }
   }
 
+  // Pays out the zone's fees and saves the walk between zones. Unless the walk is over or
+  // replayed, returns the celebration that plays once the coins land.
+  private endZone(event: Extract<SessionEvent, { kind: "zoneEnded" }>): Celebration | undefined {
+    const world = this.world;
+    if (world === undefined) {
+      return undefined;
+    }
+    const { after, before } = event;
+    const payout = world.moments.payOut(event.fees, before);
+    if (after.phase.kind === "ended") {
+      return undefined;
+    }
+    void checkpointRun(this, checkpointOf(gameData, after));
+    if (world.recorder.replaying()) {
+      return undefined;
+    }
+    const celebration = zoneCelebration(gameData, profileSave(this).owned.walkers, {
+      changes: payout.changes,
+      finished: after.zoneIndex,
+      walker: before.walker,
+      zone: currentZone(gameData, before).name,
+    });
+    return { celebration, delayMs: payout.ms };
+  }
+
+  // The celebration holds the walk while the fee coins land, then plays; next follows it.
+  private celebrate({ celebration, delayMs }: Celebration, next: () => void): void {
+    const menus = this.world?.menus;
+    if (menus === undefined) {
+      return;
+    }
+    menus.holdForCelebration();
+    this.time.delayedCall(delayMs, () => {
+      menus.showCelebration({
+        celebration,
+        onDone: next,
+        openPause: () => this.openPause(),
+        resume: SCENE_KEYS.run,
+      });
+    });
+  }
+
   // An event's sounds, bursts, hints and labels, and the input log.
-  private react(event: Exclude<SessionEvent, { kind: "cardOpened" }>): void {
+  private react(event: Exclude<SessionEvent, { kind: "cardOpened" | "zoneEnded" }>): void {
     const world = this.world;
     if (world === undefined) {
       return;
@@ -387,13 +446,6 @@ export class RunScene extends Scene {
         return;
       case "walked":
         moments.walked(event.step, packPoint(event.step.walk));
-        return;
-      case "zoneEnded":
-        // A checkpoint saves the walk between zones.
-        moments.payOut(event.fees, event.before);
-        if (event.after.phase.kind !== "ended") {
-          void checkpointRun(this, checkpointOf(gameData, event.after));
-        }
         return;
       case "zonePlanned":
         if (this.session !== undefined) {
@@ -431,7 +483,7 @@ export class RunScene extends Scene {
   // What holds the walk still, for the HUD's top bar and for lane moves and treats.
   runPause(): RunPause {
     return {
-      card: this.world?.menus.card() !== undefined,
+      card: this.world?.menus.card() !== undefined || this.world?.menus.celebration() === true,
       hitStop: this.session?.walk.road.hitStop != null,
       menu: this.world?.menus.menuState() ?? "closed",
     };
@@ -464,7 +516,8 @@ export class RunScene extends Scene {
     sound.setCardOpen(false);
     stopWakeLock();
     world.recorder.save();
-    for (const key of [SCENE_KEYS.hud, SCENE_KEYS.card, SCENE_KEYS.pause]) {
+    const overlays = [SCENE_KEYS.card, SCENE_KEYS.zoneCelebration, SCENE_KEYS.pause];
+    for (const key of [SCENE_KEYS.hud, ...overlays]) {
       this.scene.stop(key);
     }
     const showEnd = () => this.scene.start(SCENE_KEYS.end);

@@ -79,6 +79,13 @@ export function showHint(scene: Scene, event: HintTrigger): void {
   }
 }
 
+// A zone's payout: how long until its coins have landed and their amounts faded, and every
+// change the zone made, its fees included.
+export interface ZonePayout {
+  readonly changes: readonly Change[];
+  readonly ms: number;
+}
+
 export interface RunMomentsDeps {
   pack: PackView;
   quips: Random;
@@ -97,6 +104,8 @@ export class RunMoments {
   // How long the end screen waits for a final firing or payout.
   private endMoments = { firingSeconds: 0, payoutMs: 0 };
   private readonly scene: Scene;
+  // Where the current zone's changes start in changes.
+  private zoneStart = 0;
 
   constructor(scene: Scene, deps: RunMomentsDeps) {
     this.scene = scene;
@@ -297,7 +306,7 @@ export class RunMoments {
 
   // Each fee flies as a coin from its doghouse to the bank while its amount rises over the
   // doghouse.
-  payOut(fees: readonly MoneyChange[], run: RunState): void {
+  payOut(fees: readonly MoneyChange[], run: RunState): ZonePayout {
     this.changes.push(...fees);
     const cues = fees.flatMap((fee): PayoutCue[] =>
       fee.dog === null
@@ -305,9 +314,13 @@ export class RunMoments {
         : [{ amount: fee.amount, dog: fee.dog, text: amountText("money", fee.amount) }],
     );
     this.scene.events.emit(PAYOUT_EVENT, cues);
+    const ms = payoutMs(payoutFlights(cues, run.pack, this.deps.still()));
     if (run.zoneIndex >= walkLength(gameData) - 1) {
-      this.endMoments.payoutMs = payoutMs(payoutFlights(cues, run.pack, this.deps.still()));
+      this.endMoments.payoutMs = ms;
     }
+    const changes = this.changes.slice(this.zoneStart);
+    this.zoneStart = this.changes.length;
+    return { changes, ms };
   }
 
   // The hit moment over the stop, framed by the road and the backdrop band beside it, labelled

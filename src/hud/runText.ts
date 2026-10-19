@@ -11,4 +11,12 @@ export const RUN_TEXT_FIELDS = {
     walkerGreeting: ["walker"],
   },
   firedBy: ["owner"],
+  newWalker: {
+    info: ["pace", "style"],
+    title: ["walker"],
+  },
+  zoneDone: {
+    earnings: ["fees", "tips"],
+    title: ["zone"],
+  },
 } as const satisfies FieldTable;
