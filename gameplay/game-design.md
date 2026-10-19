@@ -40,7 +40,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Spawning always leaves a reachable path, so every hit is avoidable
 - After a hit, the obstacle is removed once its card closes, and obstacles are ignored for a short grace window; pickups still count
 - Scroll speed and obstacle density rise gently each zone
-- **Pulls:** each dog pulls the pack one lane now and then, at an interval set by its energy: toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel), otherwise to a random side. Shortly before a pull the dog leans toward that side and barks. When the pull's lane move finishes, lane input locks for a time set by the dog's size. During a drag, a pull re-anchors the drag at the pack's new lane, so getting back takes another drag
+- **Pulls:** each dog pulls the pack one lane now and then, at an interval set by its energy: toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel), otherwise to a random side (inward at the road edge). The interval varies a little each time so pulls aren't predictable. Shortly before a pull the dog leans toward that side and barks. When the pull's lane move finishes, lane input locks for a time set by the dog's size. During a drag, a pull re-anchors the drag at the pack's new lane, so getting back takes another drag
 - **Area effects** (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have a dog caught; small dogs are caught less often. The card shows which dogs were caught, so its outcomes are fixed. If no dog is caught, no card opens
 
 ### Resources
