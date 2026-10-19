@@ -21,6 +21,18 @@ describe("parseManifest", () => {
     expect(parseManifest({ fonts: [], images: [], sprites: [] }).sprites).toEqual([]);
   });
 
+  it("keeps a sprite's anchor and rejects impossible values", () => {
+    const sprite = { ...valid.sprites[0], anchor: { feetY: 31, opaqueWidth: 20 } };
+    expect(parseManifest({ ...valid, sprites: [sprite] }).sprites[0]?.anchor).toEqual({
+      feetY: 31,
+      opaqueWidth: 20,
+    });
+    const negative = { ...sprite, anchor: { feetY: -1, opaqueWidth: 20 } };
+    expect(() => parseManifest({ ...valid, sprites: [negative] })).toThrow("feetY");
+    const empty = { ...sprite, anchor: { feetY: 31, opaqueWidth: 0 } };
+    expect(() => parseManifest({ ...valid, sprites: [empty] })).toThrow("opaqueWidth");
+  });
+
   it("treats a missing sounds list as no sounds", () => {
     expect(parseManifest({ ...valid, sounds: undefined }).sounds).toEqual([]);
   });

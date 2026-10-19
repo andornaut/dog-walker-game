@@ -2,7 +2,14 @@ import * as v from "valibot";
 
 import { issuePath, record } from "./jsonSchema";
 
+// Where a road sprite stands, measured from frame 0 by the art pipeline, in frame pixels.
+export interface SpriteAnchor {
+  feetY: number;
+  opaqueWidth: number;
+}
+
 export interface SpriteAsset {
+  anchor?: SpriteAnchor;
   json: string;
   key: string;
   png: string;
@@ -76,7 +83,19 @@ const manifestSchema = v.pipe(
       ),
       [],
     ),
-    sprites: list(record({ json: pathField, key: keyField, png: pathField })),
+    sprites: list(
+      record({
+        anchor: v.exactOptional(
+          record({
+            feetY: v.pipe(v.number(), v.integer(), v.minValue(0, "must be 0 or more")),
+            opaqueWidth: v.pipe(v.number(), v.integer(), v.minValue(1, "must be 1 or more")),
+          }),
+        ),
+        json: pathField,
+        key: keyField,
+        png: pathField,
+      }),
+    ),
   }),
   v.rawCheck(({ addIssue, dataset }) => {
     if (!dataset.typed) {
