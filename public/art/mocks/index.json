@@ -18,5 +18,15 @@
     "title": "Menus",
     "path": "menus-screen.html",
     "description": "The pause menu and settings over the dimmed road, the end screen at sunset and the Stats page with the badge wall, drawn from the exported UI kit and BMFonts. Interactive, with sample data."
+  },
+  {
+    "title": "Run screen",
+    "path": "run-screen.html",
+    "description": "The new run screen with the real art: top bar and state strip, zone backdrop, doghouse column and the pseudo-3D road with the pack, pickups, obstacles, moving hazards and every hit moment. Interactive, with sample data."
+  },
+  {
+    "title": "80s style",
+    "path": "style-80s.html",
+    "description": "Three 80s box-art directions (Chrome & Sunset, Rainbow Cloud, Box Art Lineup) side by side: logo and tagline, the 360x560 home screen, a UI kit and the site hero at desktop and phone width."
   }
 ]
