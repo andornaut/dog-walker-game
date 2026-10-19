@@ -37,12 +37,13 @@ export const testContext: SaveContext = {
 // Awards from the live game data, stamped at a fixed time.
 export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000 };
 
-// A run with no bumps, debuffs or chases.
+// A run with no bumps, debuffs, chases or starting money.
 export const quietCounters = (): RunCounters => ({
   bumpsByZone: [],
   debuffZones: {},
   firstZone: 0,
   squirrelChases: 0,
+  startCents: cents(0),
 });
 
 // A new player: the free dogs, one slot, and no loadout until they pick a dog.

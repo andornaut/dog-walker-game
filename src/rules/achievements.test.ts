@@ -24,6 +24,7 @@ const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   firstZone: 0,
   packSize: 1,
   squirrelChases: 0,
+  startCents: cents(0),
   zonesFinished: 0,
   ...changes,
 });
@@ -82,6 +83,18 @@ describe("run conditions", () => {
     ["packSize, more dogs set out, fired or not", packOf2, { packSize: 3 }, true],
     ["earnings a cent short", payday, { earnedCents: cents(49_999) }, false],
     ["earnings at the dollars", payday, { earnedCents: cents(50_000) }, true],
+    [
+      "earnings at the dollars only with the starting money",
+      payday,
+      { earnedCents: cents(50_000), startCents: cents(2_000) },
+      false,
+    ],
+    [
+      "earnings at the dollars net of the starting money",
+      payday,
+      { earnedCents: cents(52_000), startCents: cents(2_000) },
+      true,
+    ],
     ["debuffZones below the count", stinky3, { debuffZones: { stinky: 2 } }, false],
     ["debuffZones at the count", stinky3, { debuffZones: { stinky: 3 } }, true],
   ])("%s", (_, condition, run, holds) => {

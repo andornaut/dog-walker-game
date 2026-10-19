@@ -42,6 +42,7 @@ export function withSetupStart(setup: RunSetup, state: RunState): RunState {
     firstZone: setup.zone - 1,
     money: setup.money === undefined ? state.money : cents(setup.money),
     route: setupRoute(setup, state),
+    startMoney: setup.money === undefined ? state.startMoney : cents(setup.money),
     zoneIndex: setup.zone - 1,
   };
 }

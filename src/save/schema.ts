@@ -45,6 +45,8 @@ const runCountersSchema = v.object({
   // Checkpoints saved before it walked from the first zone.
   firstZone: v.optional(count, 0),
   squirrelChases: count,
+  // Checkpoints saved before it count the starting money toward money goals.
+  startCents: v.optional(cents, 0),
 });
 
 // The zones a run walked, in order, by id. A save from before forks walked the pre-fork route.

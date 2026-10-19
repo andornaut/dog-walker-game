@@ -31,6 +31,7 @@ export function testState(
     route: ["street"],
     skipsLeft: 0,
     squirrelChases: 0,
+    startMoney: cents(0),
     treats: 0,
     upgradesPicked: [],
     walker: "casey",

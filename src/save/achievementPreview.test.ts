@@ -56,11 +56,10 @@ describe("previewAchievements", () => {
     expect(third.preview.shown).toEqual(["doubleLeash", "firstSteps", "cleanPaws"]);
   });
 
-  it("toasts Big Payday as the money reaches it mid-zone", () => {
+  it("never toasts Big Payday mid-walk, which waits for the banked total", () => {
     const { preview } = previewer();
-    const first = preview(NOTHING_PREVIEWED, start);
-    const rich = preview(first.preview, { ...start, money: earningsGoal("bigPayday") });
-    expect(rich.earned).toEqual(["bigPayday"]);
+    const rich = { ...zoneDone(start), money: earningsGoal("bigPayday") };
+    expect(preview(NOTHING_PREVIEWED, rich).earned).not.toContain("bigPayday");
   });
 
   it("does not toast Clean Paws for a zone with a bump", () => {

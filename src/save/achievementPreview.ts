@@ -1,4 +1,5 @@
 import type { AchievementId, GameData } from "../data/types";
+import { isMoneyGoal } from "../rules/achievements";
 import type { RunState } from "../state/runState";
 import { type AwardContext, earnedSince } from "./achievements";
 import { recordRunEnd, type RunResult } from "./checkpoint";
@@ -15,7 +16,8 @@ export function earnedIfBanked(
 }
 
 // A walk's mid-run toasts preview what heading home at that moment would earn, each badge once
-// a walk. They award nothing: the run's end (or its checkpoint, banked on the next launch)
+// a walk, leaving out money goals, which are checked only on the total the walk banks. They
+// award nothing: the run's end (or its checkpoint, banked on the next launch)
 // does, and the end screen celebrates every badge the walk earned, toasted or not. facts is
 // what the last look was taken at.
 export interface AchievementPreview {
@@ -25,16 +27,16 @@ export interface AchievementPreview {
 
 export const NOTHING_PREVIEWED: AchievementPreview = { facts: "", shown: [] };
 
-// Mid-run, only a finished zone, the money, a squirrel chase or a firing can earn a badge,
-// so the bank is looked at again only when one of them has changed. Finished walks count only
+// Mid-run, only a finished zone, a squirrel chase or a firing can earn a previewed badge, so
+// the bank is looked at again only when one of them has changed. Finished walks count only
 // at the end, and an ended run is left to the end screen.
 function previewFacts(run: RunState): string {
   const fired = run.pack.filter((slot) => slot.status === "fired").length;
-  return [run.zoneIndex, run.money, run.squirrelChases, fired].join(":");
+  return [run.zoneIndex, run.squirrelChases, fired].join(":");
 }
 
 export function previewAchievements(
-  data: Pick<GameData, "world">,
+  data: Pick<GameData, "achievements" | "world">,
   earned: (result: RunResult) => readonly AchievementId[],
   preview: AchievementPreview,
   run: RunState,
@@ -43,6 +45,9 @@ export function previewAchievements(
   if (run.phase.kind === "ended" || facts === preview.facts) {
     return { earned: [], preview };
   }
-  const fresh = earned(runResultOf(data, run)).filter((id) => !preview.shown.includes(id));
+  const money = new Set(data.achievements.filter(isMoneyGoal).map(({ id }) => id));
+  const fresh = earned(runResultOf(data, run)).filter(
+    (id) => !money.has(id) && !preview.shown.includes(id),
+  );
   return { earned: fresh, preview: { facts, shown: [...preview.shown, ...fresh] } };
 }

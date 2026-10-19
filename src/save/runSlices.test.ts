@@ -10,6 +10,7 @@ import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
+import { quietCounters } from "./fixtures";
 import { checkpointOf, runResultOf } from "./runSlices";
 
 const data = {
@@ -34,7 +35,7 @@ const midRun: RunState = {
 describe("checkpointOf", () => {
   it("records the zones paid, the money and each dog's zones", () => {
     expect(checkpointOf(data, midRun)).toEqual({
-      counters: { bumpsByZone: [], debuffZones: {}, firstZone: 0, squirrelChases: 0 },
+      counters: quietCounters(),
       dogs: [
         { fired: false, id: "koda", zonesFinished: 2 },
         { fired: true, id: "duchess", zonesFinished: 1 },
@@ -51,12 +52,14 @@ describe("checkpointOf", () => {
       bumpsByZone: [0, 2],
       debuffZones: { stinky: 1 },
       squirrelChases: 3,
+      startMoney: cents(500),
     };
     expect(checkpointOf(data, counted).counters).toEqual({
       bumpsByZone: [0, 2],
       debuffZones: { stinky: 1 },
       firstZone: 0,
       squirrelChases: 3,
+      startCents: 500,
     });
   });
 
@@ -70,7 +73,7 @@ describe("runResultOf", () => {
   it("ends a finished run in its last zone, every walking dog paid for all of them", () => {
     const finished = { ...midRun, phase: { kind: "ended", reason: "finished" } as const };
     expect(runResultOf(data, finished)).toEqual({
-      counters: { bumpsByZone: [], debuffZones: {}, firstZone: 0, squirrelChases: 0 },
+      counters: quietCounters(),
       dogs: [
         { fired: false, id: "koda", zonesFinished: 4 },
         { fired: true, id: "duchess", zonesFinished: 1 },

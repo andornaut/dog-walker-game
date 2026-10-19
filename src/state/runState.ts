@@ -123,6 +123,8 @@ export interface RunState {
   readonly skipsLeft: number;
   // Squirrel cards on which the chasers were let chase.
   readonly squirrelChases: number;
+  // The money the run began with, which a money goal leaves out.
+  readonly startMoney: Cents;
   // Carried, up to counts.treatCarryMax.
   readonly treats: number;
   // Picked upgrades leave the pool for the rest of the run.
@@ -190,6 +192,7 @@ export function newRun(
     route: [firstZoneId(data)],
     skipsLeft: 0,
     squirrelChases: 0,
+    startMoney: cents(0),
     treats: 0,
     upgradesPicked: [],
     walker,
@@ -208,9 +211,6 @@ export function newRun(
           data.shopGear[loadout.gear].effects,
           walked,
         );
-  return {
-    ...geared,
-    money: cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", 0)),
-    pack: packWith(geared.modifiers),
-  };
+  const money = cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", 0));
+  return { ...geared, money, pack: packWith(geared.modifiers), startMoney: money };
 }

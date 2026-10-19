@@ -1,4 +1,5 @@
 import type {
+  Achievement,
   AchievementCondition,
   AchievementId,
   CardOption,
@@ -19,15 +20,17 @@ export type AchievementData = Pick<
 
 // The counters a run keeps for its achievements, copied out of the run state for the save.
 // Zones before firstZone were skipped by a dev start: they are neither finished nor clean.
+// startCents is the money the run began with, which a money goal leaves out.
 export interface RunCounters {
   bumpsByZone: number[];
   debuffZones: Partial<Record<DebuffId, number>>;
   firstZone: number;
   squirrelChases: number;
+  startCents: Cents;
 }
 
-// What the run conditions judge: the run's counters, what it banked, how many dogs set out
-// and how many zones it finished.
+// What the run conditions judge: the run's counters, what it banked (starting money
+// included), how many dogs set out and how many zones it finished.
 export interface RunFacts extends RunCounters {
   readonly earnedCents: Cents;
   readonly packSize: number;
@@ -35,15 +38,29 @@ export interface RunFacts extends RunCounters {
 }
 
 export function runCountersOf(
-  run: Pick<RunState, "bumpsByZone" | "debuffZones" | "firstZone" | "squirrelChases">,
+  run: Pick<
+    RunState,
+    "bumpsByZone" | "debuffZones" | "firstZone" | "squirrelChases" | "startMoney"
+  >,
 ): RunCounters {
-  const { bumpsByZone, debuffZones, firstZone, squirrelChases } = run;
+  const { bumpsByZone, debuffZones, firstZone, squirrelChases, startMoney } = run;
   return {
     bumpsByZone: [...bumpsByZone],
     debuffZones: { ...debuffZones },
     firstZone,
     squirrelChases,
+    startCents: startMoney,
   };
+}
+
+// A money goal counts what the walk banked net of its starting money.
+function earnedNet(facts: RunFacts): number {
+  return facts.earnedCents - facts.startCents;
+}
+
+// Whether achievement is a money goal, which is checked only when the walk is banked.
+export function isMoneyGoal(achievement: Pick<Achievement, "conditions">): boolean {
+  return achievement.conditions.some((condition) => condition.kind === "earnings");
 }
 
 // Whether a run walked every zone up to the ones it finished: a dev start did not skip any.
@@ -116,7 +133,7 @@ export function conditionHolds(
     case "dogsOwned":
       return save !== null && save.owned.dogs.length >= needed(dogs, condition.count);
     case "earnings":
-      return facts !== null && facts.earnedCents >= dollarsToCents(condition.dollars);
+      return facts !== null && earnedNet(facts) >= dollarsToCents(condition.dollars);
     case "gearOwned":
       return (
         save !== null &&
@@ -185,7 +202,7 @@ export function achievementConditionText(
     case "dogsOwned":
       return `own ${thresholdText(condition.count, "dogs")}`;
     case "earnings":
-      return `bank $${condition.dollars} in one run`;
+      return `bank $${condition.dollars} in one run, net of starting money`;
     case "gearOwned":
       return `own ${thresholdText(condition.count, "gear items")}`;
     case "packSize":

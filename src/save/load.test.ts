@@ -110,7 +110,7 @@ describe("loadSave", () => {
       ["street", "pawsPromenade"],
     ],
     [
-      "a checkpoint's run counters, from the first zone when saved before firstZone",
+      "a checkpoint's run counters, from the first zone with no starting money when saved before them",
       (document) => {
         document.checkpoint = {
           counters: { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, squirrelChases: 2 },
@@ -120,7 +120,13 @@ describe("loadSave", () => {
         };
       },
       (save) => save.checkpoint?.counters,
-      { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, firstZone: 0, squirrelChases: 2 },
+      {
+        bumpsByZone: [0, 3],
+        debuffZones: { stinky: 1 },
+        firstZone: 0,
+        squirrelChases: 2,
+        startCents: 0,
+      },
     ],
     [
       "a last walk from before forks on the pre-fork route",
