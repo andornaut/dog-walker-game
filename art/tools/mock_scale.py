@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Mock: bigger road sprites on wider lanes, beside today's scale.
 
-Draws three full 360x560 Woof Way run screens in Endesga 32, each with today's top bar,
+Draws three full 360x560 Elm Avenue run screens in Endesga 32, each with today's top bar,
 backdrop and doghouse row:
 
 - today: 32px dogs, 32x48 walker, 5 lanes of 56px (road x 40 to 320 at the pack) and
@@ -21,8 +21,8 @@ The big sprites are redrawn, never upscaled: the drawing functions of dogs.py an
 run on a grid that scales every rect, ellipse and triangle by 1.25 (times the depth step)
 before it rasterizes, keeps 1px lines 1px, then outlines the result at its own size. The cone
 (after minis.cone, whose bands obstacles.cone cuts in full-size rows) and the 104px bench
-(after obstacles.bench) are drawn here on that grid. The 320px road strip is roads.py's Woof
-Way strip drawn 320 wide with dividers at 64k-1.
+(after obstacles.bench) are drawn here on that grid. The 320px road strip is roads.py's Elm
+Avenue strip drawn 320 wide with dividers at 64k-1.
 
 Usage:
   mock_scale.py build    write public/art/mocks/scale/*.png
@@ -196,7 +196,7 @@ def today_sprite(key, s):
 # ---------- the road: strip and verge per screen row ----------
 
 def wide_strip(width):
-    """roads.py's Woof Way strip drawn width wide, its dividers at lane k x width/5 - 1."""
+    """roads.py's Elm Avenue strip drawn width wide, its dividers at lane k x width/5 - 1."""
     w, div = roads.W, roads.DIVIDERS
     roads.W, roads.DIVIDERS = width, [k * width // 5 - 1 for k in range(1, 5)]
     try:

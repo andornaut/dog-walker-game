@@ -87,7 +87,7 @@ def clip(g, y0, y1, draw):
                 g.px[y][x] = s.px[y][x]
 
 
-# ---------- Woof Way: asphalt with a concrete gutter and white-grey dashes ----------
+# ---------- Elm Avenue: asphalt with a concrete gutter and white-grey dashes ----------
 
 def woof_way_ground(g):
     rnd = random.Random("road-woof-way")
@@ -125,7 +125,7 @@ def woof_way_lines(g):
             g.rect(x + 2, y + 1, 1, 12, "navy")
 
 
-# ---------- Bark Park: a dirt path between grass verges, with paw prints ----------
+# ---------- Fairview Park: a dirt path between grass verges, with paw prints ----------
 
 PAW = (".x.x.", "x...x", ".xxx.", ".xxx.")
 
@@ -178,7 +178,7 @@ def bark_park_lines(g):
             g.rect(x, y + 7, 2, 1, "plum")
 
 
-# ---------- Sniff Street Shops: pink pavers, cream gutter stones, white dashes ----------
+# ---------- Main Street: pink pavers, cream gutter stones, white dashes ----------
 
 def shops_ground(g):
     rnd = random.Random("road-sniff-street-shops")
@@ -271,7 +271,7 @@ def home_lines(g):
             g.rect(x, y + 14, 2, 1, "plum")
 
 
-# ---------- Snooze Crescent: worn pale asphalt, concrete gutters, a few chalk doodles ----------
+# ---------- Willow Crescent: worn pale asphalt, concrete gutters, a few chalk doodles ----------
 
 # chalk doodles: a crescent moon and a "Zz". Every stroke across the road is 2 rows tall, so
 # the projection keeps it
@@ -291,7 +291,7 @@ def stamp(g, x0, y0, rows, col):
 def snooze_ground(g):
     rnd = random.Random("road-snooze-crescent")
     g.rect(0, 0, W, H, "grey")
-    # sparse 2px grit, as on Woof Way but paler
+    # sparse 2px grit, as on Elm Avenue but paler
     for x, y in scatter(rnd, 60, 6, W - 7, 7):
         col = rnd.choice(("slate", "slate", "dslate", "lgrey", "lgrey"))
         if rnd.random() < 0.7:
@@ -333,7 +333,7 @@ def snooze_lines(g):
                 g.p(x + rnd.randrange(2), y + rnd.randrange(1, 11), "lgrey")
 
 
-# ---------- Paws Promenade: a pale boardwalk, boards along the road, timber edges ----------
+# ---------- Riverside Path: a pale boardwalk, boards along the road, timber edges ----------
 
 def paws_ground(g):
     rnd = random.Random("road-paws-promenade")
@@ -371,7 +371,7 @@ def paws_ground(g):
 def paws_lines(g):
     for x in DIVIDERS:
         for y in (6, 38):
-            # dbrown (5.9:1 on the boards), 20 rows in 32: a longer rhythm than Bark Park's
+            # dbrown (5.9:1 on the boards), 20 rows in 32: a longer rhythm than Fairview Park's
             g.rect(x, y, 2, 20, "dbrown")
 
 

@@ -6,7 +6,7 @@ nobody, and the coins that burst from the pack on a minor bump.
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
-ink holds on the light roads and the cream doghouse and the white on Woof Way
+ink holds on the light roads and the cream doghouse and the white on Elm Avenue
 and the dimmed road. The splash takes the navy rim, the puff fx-hit-skunk's
 mauve in its plum rim, the coins fx-coin-fly's coin in its plum rim.
 
@@ -66,8 +66,8 @@ from moments import coin_fly  # noqa: E402
 from needs import BROKEN, BROKEN_CRACK  # noqa: E402
 from pixel import DARKER, Grid, main  # noqa: E402
 
-# The six road colours (Woof Way, Bark Park, Sniff Street Shops, The Long Way Home, Snooze Crescent,
-# Paws Promenade), then each one ramp step darker: the road dimmed under a card.
+# The six road colours (Elm Avenue, Fairview Park, Main Street, The Long Way Home, Willow Crescent,
+# Riverside Path), then each one ramp step darker: the road dimmed under a card.
 ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 GROUNDS = ROADS + tuple(DARKER[c] for c in ROADS)
 

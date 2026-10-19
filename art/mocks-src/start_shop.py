@@ -335,7 +335,7 @@ def gate(cv, base, line, shop_new, pocket):
         cv.paste(home.crop((x, y, x + w, y + h)), (x, y))
     # the tree and owners the bubble area cut are in screen-home or below it; redraw the porch row
     cv.paste(base.crop((60, 94, 240, 126)), (60, 94))
-    body(cv, "Woof Way", 327, 75, "white", "centre", sc=1)
+    body(cv, "Elm Avenue", 327, 75, "white", "centre", sc=1)
     x, y, w, h = SHOP
     put(cv, frame("ui-pet-shop", "normal"), x, y)
     if shop_new:

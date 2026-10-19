@@ -10,17 +10,17 @@ stands), and works as a header on any other screen.
 screen-<name>: 360x560 backgrounds in Endesga 32, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
-- screen-home: morning on Woof Way, in Maplewood. The bar strip, then the gate
+- screen-home: morning on Elm Avenue, in Maplewood. The bar strip, then the gate
   scene (y 40 to 196: street, curb, sidewalk, fence with the open gate, front
   path, yard sign), then the porch deck from y 198 under the walker, dog and
   gear steps and Start walk. The street sign's board (300,72 54x11, a 52x9
   forest face) sits at the right edge, clear of the walker's speech bubble;
-  the game prints "Woof Way" on it in font-body, white, centred at 327,75 (39px
+  the game prints "Elm Avenue" on it in font-body, white, centred at 327,75 (48px
   wide in capitals). The yard's right lot is left for ui-pet-shop.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
-  Woof Way at night under NIGHT_SKY's bands, and the leash hooks. Below the
+  Elm Avenue at night under NIGHT_SKY's bands, and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
 - screen-end: sunset on The Long Way Home. Between the logo (116,40) and the
@@ -35,7 +35,7 @@ reads on them.
   brick road under the button (48,512 264x44). The houses, trees and fences
   stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
   margins show only sky, lawn and sidewalk.
-- screen-loading: Woof Way at night, shown while the game loads. The logo is
+- screen-loading: Elm Avenue at night, shown while the game loads. The logo is
   drawn in, centred at 116,92; NIGHT_SKY's bands (stars in the navy one)
   above the houses and street lamps; the sidewalk at y 350 to 365 carries the
   progress track, and the plain road below it (to y 450) leaves room for a
@@ -248,7 +248,7 @@ def home():
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
-    # Woof Way, Maplewood's street past the gate: asphalt, a dashed centre line, a manhole and a storm drain
+    # Elm Avenue, Maplewood's street past the gate: asphalt, a dashed centre line, a manhole and a storm drain
     cv.fill(0, 40, W, 52, "dslate")
     for _ in range(260):
         cv.fill(int(r() * W), 40 + int(r() * 52), 1, 1, "slate" if r() < 0.6 else "navy")
@@ -458,13 +458,13 @@ def image_rows(img):
 
 # ---------- screen-stats ----------
 
-# Woof Way's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading
+# Elm Avenue's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading
 # and through the window of screen-stats.
 NIGHT_SKY = ("navy", "purple", "mauve")
 
 
 def night(img, top=20, horizon=46):
-    """Woof Way after dark: the sky turns to NIGHT_SKY's bands from row top down to horizon, with stars
+    """Elm Avenue after dark: the sky turns to NIGHT_SKY's bands from row top down to horizon, with stars
     in the top band, everything else a ramp step darker, windows lit."""
     px = img.load()
     w, h = img.size
@@ -512,7 +512,7 @@ def stats():
     cv.fill(0, 548, W, 1, "brown")
     cv.fill(0, 549, W, 10, "plum")
     cv.fill(0, 559, W, 1, "ink")
-    # a low window onto Woof Way at night, between the photo and the leash hooks, above the tabs
+    # a low window onto Elm Avenue at night, between the photo and the leash hooks, above the tabs
     wx, wy, ww, wh = 140, 16, 100, 28
     view = night(bd.woof_way().img).crop((120, 20, 120 + ww, 20 + wh))
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
@@ -749,7 +749,7 @@ def loading():
         for dx in range(-10, 11):
             if dx * dx + dy * dy <= 100 and (dx + 5) ** 2 + (dy - 3) ** 2 > 64:
                 cv.fill(300 + dx, 48 + dy, 1, 1, "cream")
-    # Woof Way after dark, drawn by day and then taken two ramp steps down: trees, houses with front paths,
+    # Elm Avenue after dark, drawn by day and then taken two ramp steps down: trees, houses with front paths,
     # fences and the sidewalk the pair walks along
     strip = clear(W, 150)
     for cx, top, rad in ((10, 44, 16), (180, 40, 16), (356, 50, 14)):
@@ -761,7 +761,7 @@ def loading():
         bd.house(strip, x, w, wall, roof, door, top=top)
         doors.append(x + w // 2 - 5)
     bd.ground(strip)
-    # the sidewalk a step darker than ground() draws it, so by night it is Woof Way's dslate road colour,
+    # the sidewalk a step darker than ground() draws it, so by night it is Elm Avenue's dslate road colour,
     # where the pink leash holds 3.5:1 and the track's cream dots 6.6:1
     strip.fill(0, 130, W, 15, "grey")
     for x in range(0, W, 24):
@@ -968,7 +968,7 @@ def ui(cv, key):
             panel(x, 10, 20, 20, "tan")
         for x in (8, 332):
             panel(x, 46, 20, 20, "tan")
-        hp.text_c(cv, "WOOF WAY", 327, 75, "white")
+        hp.text_c(cv, "ELM AVENUE", 327, 75, "white")
         panel(130, 46, 100, 34, "white")
         cv.paste(pet_shop().img, *PET_SHOP_AT)
         panel(194, 166, 18, 18)

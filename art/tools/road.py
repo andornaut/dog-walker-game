@@ -53,7 +53,7 @@ def face_front(g, cx, y, mood="happy", eyes="ink", lips="dbrown"):
 
 
 def rim(g, rims):
-    """Light a dark figure's silhouette so it holds on Woof Way: an edge pixel of a colour in rims takes
+    """Light a dark figure's silhouette so it holds on Elm Avenue: an edge pixel of a colour in rims takes
     rims[colour] = (lit, shade), lit where the edge faces up or left into the light and shade where it
     faces right or down. A shade of None leaves that side dark."""
     rims = {K[c]: v for c, v in rims.items()}
@@ -73,7 +73,7 @@ def rim(g, rims):
     return g
 
 
-# The lit rim for every road sprite that fails 3:1 on Woof Way, for rim(): navy, ink and dslate take grey
+# The lit rim for every road sprite that fails 3:1 on Elm Avenue, for rim(): navy, ink and dslate take grey
 # (slate opposite), slate lgrey, dark browns skin2, mid browns and ochre tan, greens green, blues cyan, and reds,
 # mauves and purples pink. minis.py lights its hand-drawn maps with it too.
 LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"), slate=("lgrey", None),
@@ -496,7 +496,7 @@ WALKER_WAVE_MS = 150
 # ---------- pickups ----------
 
 def treat(lift=0):
-    """A bone, outlined in plum so it holds on the light roads; its cream carries Woof Way."""
+    """A bone, outlined in plum so it holds on the light roads; its cream carries Elm Avenue."""
     g = edged(Grid(16, 16))
     y = 6 + lift
     g.rect(4, y, 8, 3, "cream")
@@ -532,7 +532,7 @@ def skunk(sway=0):
     """The skunk facing the player at its own eye level, a squat front elevation: its tail fans up behind
     its right shoulder with a white stripe curving along its inner edge, and sways 1px; the head is in front
     of the body, the white blaze running up from the nose between the ears, front paws on the road. The road
-    outline and a grey rim on the dark fur so it holds on Woof Way."""
+    outline and a grey rim on the dark fur so it holds on Elm Avenue."""
     g = edged(Grid())
     s = sway
     # the tail: a plume up behind the right shoulder, a white crescent along its upper left
@@ -653,7 +653,7 @@ CLOUD_INK = dict(outer="plum", inner="pink", fill="mauve", dark="purple", wisp="
 def skunk_cloud(step):
     """88x40 stink haze drawn under the skunk, low and wide on the road: puffs with a solid rim and a 2x2-dithered
     mauve fill, so the road shows through. The puffs swell in turn; the base stays on the last row. The rim is
-    two pixels: plum outside, which holds 3:1 on the light roads, and pink inside it, which holds on Woof Way.
+    two pixels: plum outside, which holds 3:1 on the light roads, and pink inside it, which holds on Elm Avenue.
     Mauve keeps it apart from the green hedges, and matches fx-hit-skunk and fx-status-stinky."""
     w, h = CLOUD_W, CLOUD_H
     g = Grid(w, h)
@@ -914,7 +914,7 @@ def tourist_top(flash):
 
 
 def wallet(glint):
-    """The lost wallet, with the road outline. Its dark leather takes a light rim so it holds on Woof Way: the
+    """The lost wallet, with the road outline. Its dark leather takes a light rim so it holds on Elm Avenue: the
     flap's top edge catches the light in tan, the left edge skin2, and brown runs down the right and along
     the bottom."""
     g = edged(Grid(16, 16))
@@ -1185,7 +1185,7 @@ def mail_top(g, b):
 
 def mail_carrier(**q):
     """The mail carrier facing the player, with a light rim on the dark skin, brim and trousers so they hold
-    on Woof Way, and the road outline for the light roads."""
+    on Elm Avenue, and the road outline for the light roads."""
     g = edged(person(mail_top, legs="navy", shoes="ink", **q))
     return rim(g, dict(dbrown=("skin2", "brown"), plum=("skin2", "brown"), navy=("grey", "slate"),
                        ink=("grey", "slate"), sky=("cyan", None), blue=("sky", None)))

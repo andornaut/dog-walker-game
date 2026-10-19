@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Mock: Woof Way's verges with roadside scenery, beside today's plain lawn.
+"""Mock: Elm Avenue's verges with roadside scenery, beside today's plain lawn.
 
-Draws full 360x560 Woof Way run screens in Endesga 32 from the exported art (ui-top-bar, the
+Draws full 360x560 Elm Avenue run screens in Endesga 32 from the exported art (ui-top-bar, the
 road strip, walker, dogs, road objects, backdrop-woof-way, ui-doghouse), as horizon.py does:
 today's frame, then the same road with roadside billboards on the lawns beyond the sidewalks
 at three scroll positions, and one of those under the dimmed road a card or the pause menu
@@ -465,7 +465,7 @@ def shadow(cv, cx, foot, w):
 # ---------- frames ----------
 
 def frame(scroll, props=True):
-    """Woof Way at this scroll (road px walked): the road, the props and road objects back to
+    """Elm Avenue at this scroll (road px walked): the road, the props and road objects back to
     front, the pack, the backdrop band over them, the band's road rows, the HUD."""
     z = hz.ZONES[ZONE]
     cv = hz.Screen(ZONE)
@@ -504,7 +504,7 @@ def dimmed(cv):
 
 
 def sheet():
-    """Every prop at each depth step, bottoms aligned, on Woof Way's lawn."""
+    """Every prop at each depth step, bottoms aligned, on Elm Avenue's lawn."""
     keys = list(PROPS)
     gap, pad = 6, 8
     cols = [max(sprite(k, s)[0].width for s in STEPS) for k in keys]

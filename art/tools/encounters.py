@@ -55,8 +55,8 @@ from minis import STEPS, Mini, paint  # noqa: E402
 from pixel import ROADS, Grid, edged, main  # noqa: E402
 from road import LIT  # noqa: E402
 
-# Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Snooze Crescent
-# and Paws Promenade.
+# Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Willow Crescent
+# and Riverside Path.
 GROUNDS = (*ROADS, "8b9bb4", "ead4aa")
 
 

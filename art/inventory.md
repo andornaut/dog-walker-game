@@ -45,7 +45,7 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | `lost-wallet`                    | sprite | 16×16         | `idle`                               | core | Lucky                                                         |
 | `photo-op`                       | sprite | 32×48         | `idle`, `flash`                      | core | Lucky; tourist with a camera                                  |
 | `tip`, `treat`                   | sprite | 16×16         | `idle`                               | core | Pickups                                                       |
-| `barrier-2`, `barrier-3`         | sprite | 88×24, 144×24 | `idle`                               | core | Minor; Woof Way and Sniff Street Shops                        |
+| `barrier-2`, `barrier-3`         | sprite | 88×24, 144×24 | `idle`                               | core | Minor; Elm Avenue and Main Street                             |
 | `bench`                          | sprite | 88×24         | `idle`                               | core | Minor, 2 lanes                                                |
 | `bin`, `cone`                    | sprite | 32×32         | `idle`                               | core | Minor, 1 lane                                                 |
 | `hedge`                          | sprite | 144×24        | `idle`                               | core | Minor, 3 lanes                                                |

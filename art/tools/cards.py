@@ -1409,16 +1409,17 @@ def bark_park_view():
     a.treeline(15, ("dgreen", "green"), 0, 2, 5)
     bd.tree(a, 3, 9, r=6, base=18, girth=2)
     bd.tree(a, 72, 10, r=5, base=18, girth=2)
-    # the park gate's sign at the end of the path
-    for x in (12, 62):
-        a.fill(x, 8, 2, FAR_Y - 8, "dbrown")
-    a.fill(9, 2, 57, 9, "dgreen")
-    a.fill(9, 2, 57, 1, "green")
-    a.fill(9, 10, 57, 1, "forest")
-    bd.word(a, "BARK PARK", AW / 2, 3, "yellow")
+    # the park gate at the end of the path: its sign on two lines between two posts
+    for x in (11, 62):
+        a.fill(x, 1, 2, FAR_Y - 1, "dbrown")
+    a.fill(13, 2, 49, 17, "dgreen")
+    a.fill(13, 2, 49, 1, "green")
+    a.fill(13, 18, 49, 1, "forest")
+    bd.word(a, "FAIRVIEW", AW / 2, 3, "yellow")
+    bd.word(a, "PARK", AW / 2, 10, "yellow")
     a.street()
-    # the path on through the gate, widening to the cross trail
-    for py in range(13, CROSS_Y):
+    # the path on through the gate from under its sign, widening to the cross trail
+    for py in range(19, CROSS_Y):
         half = 7 + (py - 13) // 2
         for px in range(round(AW / 2) - half, round(AW / 2) + half):
             a.fill(px, py, 1, 1, trail(px, py))

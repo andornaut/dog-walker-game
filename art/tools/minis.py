@@ -399,7 +399,7 @@ def skunk(s, sway):
 def skunk_cloud(s, step):
     """road.skunk_cloud redrawn at its own size. The full-size fill is a dither on every other row, which
     nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim
-    keeps both of its pixels, plum outside for the light roads and pink inside it for Woof Way; the stink
+    keeps both of its pixels, plum outside for the light roads and pink inside it for Elm Avenue; the stink
     wisps scale with it, and a swelling puff still grows by a whole pixel. A puff near the frame's top or
     sides is trimmed so that, swollen, it still stops a pixel short of them; the frame's last row cuts the
     haze level, as at full size."""

@@ -244,7 +244,7 @@ KS = FOOT - YH
 S0 = (BAR + H - 0.5 - YH) / KS  # scale on the band's bottom row
 VISIBLE = F * KS / (BAR + H - YH) - F   # road in view below the band, to its bottom edge
 Z0 = F / S0 - F                 # the road distance on the band's bottom row
-# half the road, its curb and its sidewalk, as the game draws Woof Way's verge
+# half the road, its curb and its sidewalk, as the game draws Elm Avenue's verge
 ROAD = LAYOUT["regions"]["road"]["width"] // 2
 CURB, WALK = LAYOUT["verges"]["street"]["curbTo"], LAYOUT["verges"]["street"]["walkTo"]
 DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider lines, from the road's centre
@@ -590,7 +590,7 @@ def bark_park():
     cv.fill(CX - 62, 20, 124, 16, "dgreen")
     cv.fill(CX - 62, 20, 124, 1, "green")
     cv.fill(CX - 62, 35, 124, 1, "forest")
-    word(cv, "BARK PARK", CX, 24, "yellow")
+    word(cv, "FAIRVIEW PARK", CX, 24, "yellow")
     for x in (CX - 68, CX + 68):
         cv.fill(x, 44, 2, 24, "slate")
         cv.fill(x - 4, 38, 10, 7, "navy")
@@ -637,7 +637,7 @@ def rail(cv, x0, x1, z):
     front(cv, lo, hi, z, 12, 18, "brown")
 
 
-# Sniff Street Shops' flowers, in its planters and on its card
+# Main Street's flowers, in its planters and on its card
 SHOP_FLOWERS = ("red", "yellow", "white", "amber")
 # the planter along each curb, across: its brown sides on PLANTER[0]..+2 and PLANTER[1]-2..
 PLANTER = (CURB, CURB + 16)
@@ -672,7 +672,7 @@ def outline_box(cv, x, y, w, h, col):
 
 
 def shops_verge(x, z, span, px, py):
-    """Sniff Street Shops' verge: a white curb, a flower planter along it (brown sides round
+    """Main Street's verge: a white curb, a flower planter along it (brown sides round
     green and dgreen leaves, about one pixel in ten a flower), a tan edge, then cream paving
     with a tan seam every 32 rows of road and sparse tan specks."""
     a = abs(x)
@@ -789,7 +789,7 @@ def planter_wall(cv, x0, x1, z):
 
 
 # The two sunset zones' sky bands, top to horizon: The Long Way Home's warm sunset under a
-# striped sun, Snooze Crescent's dusk after the sun has gone, cool at the top.
+# striped sun, Willow Crescent's dusk after the sun has gone, cool at the top.
 LONG_WAY_SKY = ("pink", "orange", "amber", "yellow")
 SNOOZE_SKY = ("purple", "mauve", "pink", "skin1")
 

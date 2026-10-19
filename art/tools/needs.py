@@ -4,7 +4,7 @@ spots on the road, the fulfilment moment and the Regular dog's accident.
 
 Icons and the bubble carry cream and tan: icon outlines run down the ramp until
 they hold 3:1 on both, so an icon reads on the dog card, the detail card, the
-doghouse wall and inside the bubble. The bubble's cream paper carries Woof Way
+doghouse wall and inside the bubble. The bubble's cream paper carries Elm Avenue
 and its plum rim the light roads. Effects take the 1px plum rim (navy for
 water); road sprites take road_edge and the lit rim.
 
@@ -84,8 +84,8 @@ from moments import rounded  # noqa: E402
 from pixel import K, Grid, edged, icon_edge, main  # noqa: E402
 import road  # noqa: E402
 
-# The six road colours: Woof Way, Bark Park, Sniff Street Shops, The Long Way Home, Snooze Crescent
-# and Paws Promenade. Cream is also the cards' paper and tan the doghouse wall.
+# The six road colours: Elm Avenue, Fairview Park, Main Street, The Long Way Home, Willow Crescent
+# and Riverside Path. Cream is also the cards' paper and tan the doghouse wall.
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 NEEDS = ("regular", "playful", "friendly", "nosy", "thirsty")
 
@@ -290,7 +290,7 @@ def ticks(g, out):
 
 
 def blocked():
-    """10x10: the plum rim, a white ring that carries Woof Way, a red face and a white X."""
+    """10x10: the plum rim, a white ring that carries Elm Avenue, a red face and a white X."""
     g = Grid(10, 10)
     g.ell(5, 5, 5, 5, "plum")
     g.ell(5, 5, 4, 4, "white")
@@ -437,7 +437,7 @@ def accident(step):
 
 
 def accident_spot(fly):
-    """16x16 ground decal: the pile left on the road, no outline. brown carries Woof Way with its tan lit
+    """16x16 ground decal: the pile left on the road, no outline. brown carries Elm Avenue with its tan lit
     edge, the dbrown base the light roads. A fly circles it: ink with a white wing."""
     g = Grid(16, 16)
     bitmap(g, 3, 9, PILE, {"B": "brown", "D": "dbrown", "T": "tan"})

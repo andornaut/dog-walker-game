@@ -17,7 +17,7 @@ ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms)
 The side views face right; the game mirrors squirrel-dash, loose-dog and
 ui-warning-arrow for a crossing to the left. Every road sprite takes the road
 outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
-roads and its fill carries Woof Way. The warning cues are outlined in ink.
+roads and its fill carries Elm Avenue. The warning cues are outlined in ink.
 
 Depth variants, redrawn at their own size with a full outline (see minis.py):
 squirrel-dash@75, loose-dog@75 (24x24), squirrel-dash@50, loose-dog@50 (16x16),
@@ -184,7 +184,7 @@ BALL = {
 def ball_bounce(f, s=1):
     """Frame f of the bounce at scale s: squashed on contact (f == 0), stretched on the frames either side
     of it, round at the top. Unlike gag-ball it is white with two red stripes rolling across, so it reads
-    on the dark Woof Way road as well as the light ones."""
+    on the dark Elm Avenue road as well as the light ones."""
     q = BALL[s]
     w, h = q["size"]
     up = q["heights"][f]

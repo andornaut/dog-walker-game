@@ -796,8 +796,8 @@ UNDERSIDE = {"ffffff": "c0cbdc", "c0cbdc": "8b9bb4"}
 
 def underside(g):
     """Darken a white or grey coat's lower-right silhouette one ramp step: every coat pixel with open road
-    below it or to its right. The coat keeps its colour, and its shade sits a step darker than Sniff Street
-    Shops' light grey, so a white dog keeps its mass on the light roads. Works on the grid a small version
+    below it or to its right. The coat keeps its colour, and its shade sits a step darker than Main
+    Street's light grey, so a white dog keeps its mass on the light roads. Works on the grid a small version
     draws to as well."""
     px = getattr(g, "g", g).px
     h, w = len(px), len(px[0])

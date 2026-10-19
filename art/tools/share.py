@@ -4,8 +4,8 @@
 share-card: a 300x157 picture in Endesga 32, fully opaque, scaled 4x with
 nearest-neighbour to 1200x628, then padded with 1px of ink (its border colour)
 above and below to the 1200x630 Open Graph size. Dark wood boards on the left carry
-the logo and the tagline in font-title at 2x; on the right, a window onto Woof
-Way: the backdrop's houses and cross street, the road widening below them, and
+the logo and the tagline in font-title at 2x; on the right, a window onto Elm
+Avenue: the backdrop's houses and cross street, the road widening below them, and
 Casey walking Koda, Biscuit and Duchess up the middle in the
 help pages' pack layout, the leashes running behind Casey to her hands.
 
@@ -41,12 +41,12 @@ SCALE = 4
 OUT_W, OUT_H = 1200, 630
 TAGLINE = ("A COZY", "PIXEL-ART", "DOG-WALKING", "LANE RUNNER")
 
-# The window onto Woof Way: its left edge, and the backdrop rows it shows above the road
+# The window onto Elm Avenue: its left edge, and the backdrop rows it shows above the road
 VIEW_X = 152
 VIEW_W = W - 1 - VIEW_X
 BAND_TOP = 16              # the first backdrop row shown; the far side stands on band row bd.BASE
 BAND_ROWS = bd.H - BAND_TOP
-STREET = next(z for z, zone in hp.ZONES.items() if zone["art"] == "woof-way")   # Woof Way's zone id
+STREET = next(z for z, zone in hp.ZONES.items() if zone["art"] == "woof-way")   # Elm Avenue's zone id
 
 
 # ---------- font-title, read from its BMFont export ----------
@@ -96,7 +96,7 @@ def label(cv, s, mid, y, col, rim, sc=2):
         cv.fill(px, py, 1, 1, col)
 
 
-# ---------- the window onto Woof Way ----------
+# ---------- the window onto Elm Avenue ----------
 
 def street_view():
     """VIEW_W x (H - 2): the backdrop's street around its vanishing point, then the road strip

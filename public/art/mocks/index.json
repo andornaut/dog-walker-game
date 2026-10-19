@@ -2,17 +2,17 @@
   {
     "title": "Horizon",
     "path": "horizon.html",
-    "description": "An OutRun-style horizon in place of the backdrop's cross street: the road bends away past its far edge to a vanishing point under a low skyline, for Woof Way and Paws Promenade, each beside the current run screen. The camera is unchanged."
+    "description": "An OutRun-style horizon in place of the backdrop's cross street: the road bends away past its far edge to a vanishing point under a low skyline, for Elm Avenue and Riverside Path, each beside the current run screen. The camera is unchanged."
   },
   {
     "title": "Roadside",
     "path": "roadside.html",
-    "description": "Woof Way's lawns beyond the sidewalks with OutRun-style roadside billboards (houses behind picket fences and hedges, mailboxes, trees, lamp posts, a gnome, a bike, a washing line) that scale with depth and scroll with the road, beside today's bare verge, with the 18 new sprites and their sizes."
+    "description": "Elm Avenue's lawns beyond the sidewalks with OutRun-style roadside billboards (houses behind picket fences and hedges, mailboxes, trees, lamp posts, a gnome, a bike, a washing line) that scale with depth and scroll with the road, beside today's bare verge, with the 18 new sprites and their sizes."
   },
   {
     "title": "Sprite scale",
     "path": "scale.html",
-    "description": "Woof Way at today's scale beside 40px dogs, a 40x60 walker and 64px lanes on the same 360x560 screen, and the bigger scale with 3.5 s of road in view instead of 5.25 s, with the camera numbers for each."
+    "description": "Elm Avenue at today's scale beside 40px dogs, a 40x60 walker and 64px lanes on the same 360x560 screen, and the bigger scale with 3.5 s of road in view instead of 5.25 s, with the camera numbers for each."
   },
   {
     "title": "Start screen shop",

@@ -12,8 +12,8 @@ cone                32x32   1 lane, a glint runs down its highlight
 bin                 32x32   1 lane, the lid lifts in a breeze
 hydrant             32x32   the Regular dog's need spot (not an obstacle), a drip off the side cap
 bench               88x24   2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-barrier-2           88x24   2 lanes, a striped rail and plank on short legs; lamps blink (Woof Way,
-                            Sniff Street Shops)
+barrier-2           88x24   2 lanes, a striped rail and plank on short legs; lamps blink (Elm Avenue,
+                            Main Street)
 barrier-3           144x24  3 lanes, lamps blink
 hedge               144x24  3 lanes, a low hedge with a rounded, clumped top; leaves rustle at three
                             spots in turn
@@ -51,7 +51,7 @@ def lit(g):
 def cone(glint=None):
     """glint is the row of the highlight that flashes white, or None."""
     g = edged(Grid())
-    # squat: a wide base plate, grey, not dslate, which is Woof Way's road colour
+    # squat: a wide base plate, grey, not dslate, which is Elm Avenue's road colour
     g.rect(7, 25, 18, 4, "grey")
     g.rect(7, 25, 18, 1, "lgrey")
     g.tri((9, 26), (23, 26), (16, 6), "orange")
@@ -200,7 +200,7 @@ def parked_car(hazard=False):
     """A minivan from straight behind, wide and low: the roof edge, the rear window, the tailgate with its
     tail lights and plate, the bumper and both rear wheels under it, mirrors poking out at the sides. Its
     hazard lights, the outer end of each tail light, are lit when hazard is true. Cyan lights the top and
-    left edges, so the sky body holds on Woof Way."""
+    left edges, so the sky body holds on Elm Avenue."""
     g = edged(Grid(44, 28))
     # rear wheels, under the body at either side
     for x in (4, 33):

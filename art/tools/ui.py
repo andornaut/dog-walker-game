@@ -597,7 +597,7 @@ def dog_slot():
 def hit_label(face="dred", lit="red", shade="plum"):
     """ui-hit-label's 24x24 nine-slice, 8px corners: a plate (dred for normal, blue for lucky)
     stretched to 176x32. White text holds 7.34:1 on dred and 8.48:1 on blue; the cream band
-    carries Woof Way and the ink line the light roads."""
+    carries Elm Avenue and the ink line the light roads."""
     return plate(face, lit, shade)
 
 
@@ -1183,7 +1183,7 @@ def zone_banner():
     """248x48: a cream board in the chrome on navy ribbon ends, shown over the road between
     zones. The game writes two lines in font-title, plum, centred on x=124: the world and zone
     number ("MAPLEWOOD, ZONE 2") with its caps in rows 11 to 15, and the zone name at x2
-    ("BARK PARK", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
+    ("FAIRVIEW PARK", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
     g = Grid(248, 48)
     ribbon = Grid(248, 48)
     for x0 in (0, 220):

@@ -279,7 +279,7 @@ def build():
 
 
 def preview(out, scale=3):
-    samples = ["DOG WALKER  $42  ZONE 1: WOOF WAY", "Rosa: No rush, dear. ♥", "-2 ♥, dramatic   +$1.50 tip, solo",
+    samples = ["DOG WALKER  $42  ZONE 1: ELM AVENUE", "Rosa: No rush, dear. ♥", "-2 ♥, dramatic   +$1.50 tip, solo",
                "0123456789 !?.,:'+-/$%&()"]
     display = ["OOPS, PETUNIAS!", "WHICH WAY? $1.50 ♥"]
     sheet = Image.new("RGB", (300, 26 + 14 * len(samples) * len(FONTS) + 20 * len(display) * len(DISPLAY)),

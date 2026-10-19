@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the road effects for collisions and pickups, and the new-best burst on
 the end screen. fx-bump, fx-dizzy and fx-sparkle are warm light that
-holds 3:1 on Woof Way but fades into the three light roads, so each carries a
+holds 3:1 on Elm Avenue but fades into the three light roads, so each carries a
 1px plum rim (4.4:1 or more on those). fx-splash has no outline.
 fx-new-best carries the plum rim too, for the cream panel and
 the sunset sky of screen-end.
@@ -40,8 +40,8 @@ from pixel import Grid, main  # noqa: E402
 
 
 def rim(g, col="plum"):
-    """Ring the shape with a 1px outline in one colour, in place: plum holds 6.5:1 on Bark Park,
-    8.3:1 on the shops and 4.4:1 on The Long Way Home, and the fill inside it carries Woof Way."""
+    """Ring the shape with a 1px outline in one colour, in place: plum holds 6.5:1 on Fairview Park,
+    8.3:1 on the shops and 4.4:1 on The Long Way Home, and the fill inside it carries Elm Avenue."""
     edge = [(x, y) for y in range(g.h) for x in range(g.w) if not g.px[y][x] and any(
         0 <= x + dx < g.w and 0 <= y + dy < g.h and g.px[y + dy][x + dx]
         for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))]
@@ -238,7 +238,7 @@ def new_best(step):
 
 def bark_word(step):
     """32x16: WOOF! pops up 2px from below, overshoots by 1px and settles, in the comic lettering. Its ink
-    ring holds on the light roads and the yellow fill on Woof Way."""
+    ring holds on the light roads and the yellow fill on Elm Avenue."""
     return word(Grid(32, 16), "WOOF!", 16, (4, 1, 2, 2)[step])
 
 
