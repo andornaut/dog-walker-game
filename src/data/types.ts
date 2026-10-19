@@ -101,6 +101,7 @@ export interface Tuning {
     readonly ballBounceSeconds: number;
     readonly hitStopSeconds: number;
     readonly inputLockBySize: Table<Size>;
+    readonly lookAheadSeconds: number;
     readonly minorHitStopSeconds: number;
     readonly minorStumble: number;
     readonly moverWarningSeconds: number;

@@ -17,9 +17,6 @@ export const SCREEN_CONFIG: ScreenConfig = {
 
 export const LANE_COUNT = 5;
 
-// Seconds of road in view ahead of the walker at the base scroll speed.
-export const ROAD_LOOK_AHEAD_SECONDS = 5.25;
-
 // The pseudo-3D road's camera: the screen row the road's vanishing point sits on, and the
 // ground's screen speed at the walker's feet relative to sprite scale there. The road's far
 // edge, on the backdrop band's bottom edge, is at scale 0.5 whatever the speed, so the
@@ -29,5 +26,5 @@ export const ROAD_CAMERA = roadCameraFor({
   farScale: 0.5,
   farY: road.y,
   footY: walkerFootY(road),
-  visibleDistance: ROAD_LOOK_AHEAD_SECONDS * TUNING.pixels.roadScrollSpeed,
+  visibleDistance: TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed,
 });

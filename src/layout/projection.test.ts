@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, ROAD_LOOK_AHEAD_SECONDS, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import { walkerFootY } from "../runner/walkGeometry";
 import {
@@ -52,11 +52,11 @@ describe("roadProjection", () => {
     expect(project(projection, { distance: 1e9, x: 40 }).x).toBeCloseTo(180);
   });
 
-  it("shows 5.25 seconds of road ahead at the tuned base speed", () => {
+  it("shows the tuned look-ahead of road at the tuned base speed", () => {
     const speed = TUNING.pixels.roadScrollSpeed;
-    expect(ROAD_LOOK_AHEAD_SECONDS).toBe(5.25);
-    expect(projection.visibleDistance / speed).toBeCloseTo(5.25, 6);
-    expect(farEdgeAt(projection, 1000)).toBeCloseTo(1000 + 5.25 * speed, 6);
+    const seconds = TUNING.seconds.lookAheadSeconds;
+    expect(projection.visibleDistance / speed).toBeCloseTo(seconds, 6);
+    expect(farEdgeAt(projection, 1000)).toBeCloseTo(1000 + seconds * speed, 6);
   });
 
   it("keeps the vanishing row at -164 and the join's columns whatever the speed", () => {
