@@ -582,6 +582,31 @@
       "json": "sprites/fx-heart.json"
     },
     {
+      "key": "fx-hit-other-dog",
+      "png": "sprites/fx-hit-other-dog.png",
+      "json": "sprites/fx-hit-other-dog.json"
+    },
+    {
+      "key": "fx-hit-puddle",
+      "png": "sprites/fx-hit-puddle.png",
+      "json": "sprites/fx-hit-puddle.json"
+    },
+    {
+      "key": "fx-hit-skunk",
+      "png": "sprites/fx-hit-skunk.png",
+      "json": "sprites/fx-hit-skunk.json"
+    },
+    {
+      "key": "fx-hit-squirrel",
+      "png": "sprites/fx-hit-squirrel.png",
+      "json": "sprites/fx-hit-squirrel.json"
+    },
+    {
+      "key": "fx-hit-thief",
+      "png": "sprites/fx-hit-thief.png",
+      "json": "sprites/fx-hit-thief.json"
+    },
+    {
       "key": "fx-new-best",
       "png": "sprites/fx-new-best.png",
       "json": "sprites/fx-new-best.json"
@@ -595,6 +620,51 @@
       "key": "fx-splash",
       "png": "sprites/fx-splash.png",
       "json": "sprites/fx-splash.json"
+    },
+    {
+      "key": "fx-status-soaked",
+      "png": "sprites/fx-status-soaked.png",
+      "json": "sprites/fx-status-soaked.json"
+    },
+    {
+      "key": "fx-status-soaked@50",
+      "png": "sprites/fx-status-soaked@50.png",
+      "json": "sprites/fx-status-soaked@50.json"
+    },
+    {
+      "key": "fx-status-soaked@75",
+      "png": "sprites/fx-status-soaked@75.png",
+      "json": "sprites/fx-status-soaked@75.json"
+    },
+    {
+      "key": "fx-status-spooked",
+      "png": "sprites/fx-status-spooked.png",
+      "json": "sprites/fx-status-spooked.json"
+    },
+    {
+      "key": "fx-status-spooked@50",
+      "png": "sprites/fx-status-spooked@50.png",
+      "json": "sprites/fx-status-spooked@50.json"
+    },
+    {
+      "key": "fx-status-spooked@75",
+      "png": "sprites/fx-status-spooked@75.png",
+      "json": "sprites/fx-status-spooked@75.json"
+    },
+    {
+      "key": "fx-status-stinky",
+      "png": "sprites/fx-status-stinky.png",
+      "json": "sprites/fx-status-stinky.json"
+    },
+    {
+      "key": "fx-status-stinky@50",
+      "png": "sprites/fx-status-stinky@50.png",
+      "json": "sprites/fx-status-stinky@50.json"
+    },
+    {
+      "key": "fx-status-stinky@75",
+      "png": "sprites/fx-status-stinky@75.png",
+      "json": "sprites/fx-status-stinky@75.json"
     },
     {
       "key": "fx-stinky",
@@ -943,6 +1013,36 @@
       "key": "ui-heart",
       "png": "sprites/ui-heart.png",
       "json": "sprites/ui-heart.json"
+    },
+    {
+      "key": "ui-hit-flash-amber",
+      "png": "sprites/ui-hit-flash-amber.png",
+      "json": "sprites/ui-hit-flash-amber.json"
+    },
+    {
+      "key": "ui-hit-flash-green",
+      "png": "sprites/ui-hit-flash-green.png",
+      "json": "sprites/ui-hit-flash-green.json"
+    },
+    {
+      "key": "ui-hit-flash-orange",
+      "png": "sprites/ui-hit-flash-orange.png",
+      "json": "sprites/ui-hit-flash-orange.json"
+    },
+    {
+      "key": "ui-hit-flash-pink",
+      "png": "sprites/ui-hit-flash-pink.png",
+      "json": "sprites/ui-hit-flash-pink.json"
+    },
+    {
+      "key": "ui-hit-flash-sky",
+      "png": "sprites/ui-hit-flash-sky.png",
+      "json": "sprites/ui-hit-flash-sky.json"
+    },
+    {
+      "key": "ui-hit-label",
+      "png": "sprites/ui-hit-label.png",
+      "json": "sprites/ui-hit-label.json"
     },
     {
       "key": "ui-icon-button",
