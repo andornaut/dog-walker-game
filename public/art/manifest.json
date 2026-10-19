@@ -287,7 +287,7 @@
       "png": "sprites/bin@62.png",
       "json": "sprites/bin@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 15
       }
     },
@@ -296,7 +296,7 @@
       "png": "sprites/bin@75.png",
       "json": "sprites/bin@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 18
       }
     },
@@ -305,7 +305,7 @@
       "png": "sprites/bin@88.png",
       "json": "sprites/bin@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 21
       }
     },
@@ -323,7 +323,7 @@
       "png": "sprites/biscuit-neighbour@50.png",
       "json": "sprites/biscuit-neighbour@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 16
       }
     },
@@ -332,7 +332,7 @@
       "png": "sprites/biscuit-neighbour@62.png",
       "json": "sprites/biscuit-neighbour@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 19
       }
     },
@@ -341,7 +341,7 @@
       "png": "sprites/biscuit-neighbour@75.png",
       "json": "sprites/biscuit-neighbour@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 22
       }
     },
@@ -350,7 +350,7 @@
       "png": "sprites/biscuit-neighbour@88.png",
       "json": "sprites/biscuit-neighbour@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 27
       }
     },
@@ -432,7 +432,7 @@
       "png": "sprites/chase-cat@62.png",
       "json": "sprites/chase-cat@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 21
       }
     },
@@ -441,7 +441,7 @@
       "png": "sprites/chase-cat@75.png",
       "json": "sprites/chase-cat@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 24
       }
     },
@@ -450,7 +450,7 @@
       "png": "sprites/chase-cat@88.png",
       "json": "sprites/chase-cat@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 29
       }
     },
@@ -468,7 +468,7 @@
       "png": "sprites/chase-ducklings@50.png",
       "json": "sprites/chase-ducklings@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 18
       }
     },
@@ -477,7 +477,7 @@
       "png": "sprites/chase-ducklings@62.png",
       "json": "sprites/chase-ducklings@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 21
       }
     },
@@ -486,7 +486,7 @@
       "png": "sprites/chase-ducklings@75.png",
       "json": "sprites/chase-ducklings@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 24
       }
     },
@@ -513,7 +513,7 @@
       "png": "sprites/chase-pigeons@50.png",
       "json": "sprites/chase-pigeons@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 18
       }
     },
@@ -522,7 +522,7 @@
       "png": "sprites/chase-pigeons@62.png",
       "json": "sprites/chase-pigeons@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 23
       }
     },
@@ -531,7 +531,7 @@
       "png": "sprites/chase-pigeons@75.png",
       "json": "sprites/chase-pigeons@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 26
       }
     },
@@ -558,7 +558,7 @@
       "png": "sprites/chase-rabbit@50.png",
       "json": "sprites/chase-rabbit@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 13
       }
     },
@@ -567,7 +567,7 @@
       "png": "sprites/chase-rabbit@62.png",
       "json": "sprites/chase-rabbit@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 16
       }
     },
@@ -576,7 +576,7 @@
       "png": "sprites/chase-rabbit@75.png",
       "json": "sprites/chase-rabbit@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 17
       }
     },
@@ -603,7 +603,7 @@
       "png": "sprites/chatty-neighbour@50.png",
       "json": "sprites/chatty-neighbour@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 16
       }
     },
@@ -612,7 +612,7 @@
       "png": "sprites/chatty-neighbour@62.png",
       "json": "sprites/chatty-neighbour@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 19
       }
     },
@@ -621,7 +621,7 @@
       "png": "sprites/chatty-neighbour@75.png",
       "json": "sprites/chatty-neighbour@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 22
       }
     },
@@ -630,7 +630,7 @@
       "png": "sprites/chatty-neighbour@88.png",
       "json": "sprites/chatty-neighbour@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 27
       }
     },
@@ -648,7 +648,7 @@
       "png": "sprites/cone@50.png",
       "json": "sprites/cone@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 13
       }
     },
@@ -657,7 +657,7 @@
       "png": "sprites/cone@62.png",
       "json": "sprites/cone@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 15
       }
     },
@@ -666,7 +666,7 @@
       "png": "sprites/cone@75.png",
       "json": "sprites/cone@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 18
       }
     },
@@ -747,7 +747,7 @@
       "png": "sprites/cyclist@62.png",
       "json": "sprites/cyclist@62.json",
       "anchor": {
-        "feetY": 36,
+        "feetY": 37,
         "opaqueWidth": 21
       }
     },
@@ -765,7 +765,7 @@
       "png": "sprites/cyclist@88.png",
       "json": "sprites/cyclist@88.json",
       "anchor": {
-        "feetY": 51,
+        "feetY": 52,
         "opaqueWidth": 30
       }
     },
@@ -1402,7 +1402,7 @@
       "png": "sprites/goose@62.png",
       "json": "sprites/goose@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 23
       }
     },
@@ -1411,7 +1411,7 @@
       "png": "sprites/goose@75.png",
       "json": "sprites/goose@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 27
       }
     },
@@ -1420,7 +1420,7 @@
       "png": "sprites/goose@88.png",
       "json": "sprites/goose@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 32
       }
     },
@@ -1492,7 +1492,7 @@
       "png": "sprites/hydrant@62.png",
       "json": "sprites/hydrant@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 19
       }
     },
@@ -1501,7 +1501,7 @@
       "png": "sprites/hydrant@75.png",
       "json": "sprites/hydrant@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 23
       }
     },
@@ -1510,7 +1510,7 @@
       "png": "sprites/hydrant@88.png",
       "json": "sprites/hydrant@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 27
       }
     },
@@ -1642,7 +1642,7 @@
       "png": "sprites/kid@62.png",
       "json": "sprites/kid@62.json",
       "anchor": {
-        "feetY": 36,
+        "feetY": 37,
         "opaqueWidth": 17
       }
     },
@@ -1660,7 +1660,7 @@
       "png": "sprites/kid@88.png",
       "json": "sprites/kid@88.json",
       "anchor": {
-        "feetY": 51,
+        "feetY": 52,
         "opaqueWidth": 21
       }
     },
@@ -1687,7 +1687,7 @@
       "png": "sprites/lemonade-stand@62.png",
       "json": "sprites/lemonade-stand@62.json",
       "anchor": {
-        "feetY": 36,
+        "feetY": 37,
         "opaqueWidth": 25
       }
     },
@@ -1705,7 +1705,7 @@
       "png": "sprites/lemonade-stand@88.png",
       "json": "sprites/lemonade-stand@88.json",
       "anchor": {
-        "feetY": 51,
+        "feetY": 52,
         "opaqueWidth": 33
       }
     },
@@ -1723,7 +1723,7 @@
       "png": "sprites/loose-dog@50.png",
       "json": "sprites/loose-dog@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 20
       }
     },
@@ -1732,7 +1732,7 @@
       "png": "sprites/loose-dog@62.png",
       "json": "sprites/loose-dog@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 25
       }
     },
@@ -1741,7 +1741,7 @@
       "png": "sprites/loose-dog@75.png",
       "json": "sprites/loose-dog@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 28
       }
     },
@@ -1768,7 +1768,7 @@
       "png": "sprites/lost-wallet@50.png",
       "json": "sprites/lost-wallet@50.json",
       "anchor": {
-        "feetY": 8,
+        "feetY": 9,
         "opaqueWidth": 8
       }
     },
@@ -1777,7 +1777,7 @@
       "png": "sprites/lost-wallet@62.png",
       "json": "sprites/lost-wallet@62.json",
       "anchor": {
-        "feetY": 10,
+        "feetY": 12,
         "opaqueWidth": 10
       }
     },
@@ -1786,7 +1786,7 @@
       "png": "sprites/lost-wallet@75.png",
       "json": "sprites/lost-wallet@75.json",
       "anchor": {
-        "feetY": 12,
+        "feetY": 13,
         "opaqueWidth": 11
       }
     },
@@ -1795,7 +1795,7 @@
       "png": "sprites/lost-wallet@88.png",
       "json": "sprites/lost-wallet@88.json",
       "anchor": {
-        "feetY": 14,
+        "feetY": 15,
         "opaqueWidth": 13
       }
     },
@@ -1813,7 +1813,7 @@
       "png": "sprites/mail-carrier@50.png",
       "json": "sprites/mail-carrier@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 17
       }
     },
@@ -1822,7 +1822,7 @@
       "png": "sprites/mail-carrier@62.png",
       "json": "sprites/mail-carrier@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 21
       }
     },
@@ -1831,7 +1831,7 @@
       "png": "sprites/mail-carrier@75.png",
       "json": "sprites/mail-carrier@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 24
       }
     },
@@ -1840,7 +1840,7 @@
       "png": "sprites/mail-carrier@88.png",
       "json": "sprites/mail-carrier@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 29
       }
     },
@@ -2047,7 +2047,7 @@
       "png": "sprites/minor-gnome@62.png",
       "json": "sprites/minor-gnome@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 15
       }
     },
@@ -2056,7 +2056,7 @@
       "png": "sprites/minor-gnome@75.png",
       "json": "sprites/minor-gnome@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 18
       }
     },
@@ -2065,7 +2065,7 @@
       "png": "sprites/minor-gnome@88.png",
       "json": "sprites/minor-gnome@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 21
       }
     },
@@ -2173,7 +2173,7 @@
       "png": "sprites/minor-molehill@50.png",
       "json": "sprites/minor-molehill@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 16
       }
     },
@@ -2182,7 +2182,7 @@
       "png": "sprites/minor-molehill@62.png",
       "json": "sprites/minor-molehill@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 19
       }
     },
@@ -2191,7 +2191,7 @@
       "png": "sprites/minor-molehill@75.png",
       "json": "sprites/minor-molehill@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 24
       }
     },
@@ -2308,7 +2308,7 @@
       "png": "sprites/minor-sandwich-board@50.png",
       "json": "sprites/minor-sandwich-board@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 14
       }
     },
@@ -2317,7 +2317,7 @@
       "png": "sprites/minor-sandwich-board@62.png",
       "json": "sprites/minor-sandwich-board@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 19
       }
     },
@@ -2326,7 +2326,7 @@
       "png": "sprites/minor-sandwich-board@75.png",
       "json": "sprites/minor-sandwich-board@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 22
       }
     },
@@ -2398,7 +2398,7 @@
       "png": "sprites/minor-tackle-box@50.png",
       "json": "sprites/minor-tackle-box@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 14
       }
     },
@@ -2407,7 +2407,7 @@
       "png": "sprites/minor-tackle-box@62.png",
       "json": "sprites/minor-tackle-box@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 17
       }
     },
@@ -2416,7 +2416,7 @@
       "png": "sprites/minor-tackle-box@75.png",
       "json": "sprites/minor-tackle-box@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 20
       }
     },
@@ -2497,7 +2497,7 @@
       "png": "sprites/other-dog-owner@50.png",
       "json": "sprites/other-dog-owner@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 17
       }
     },
@@ -2506,7 +2506,7 @@
       "png": "sprites/other-dog-owner@62.png",
       "json": "sprites/other-dog-owner@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 20
       }
     },
@@ -2515,7 +2515,7 @@
       "png": "sprites/other-dog-owner@75.png",
       "json": "sprites/other-dog-owner@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 23
       }
     },
@@ -2524,7 +2524,7 @@
       "png": "sprites/other-dog-owner@88.png",
       "json": "sprites/other-dog-owner@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 28
       }
     },
@@ -2560,7 +2560,7 @@
       "png": "sprites/other-dog@88.png",
       "json": "sprites/other-dog@88.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 34,
         "opaqueWidth": 24
       }
     },
@@ -2731,7 +2731,7 @@
       "png": "sprites/petunias@88.png",
       "json": "sprites/petunias@88.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 34,
         "opaqueWidth": 89
       }
     },
@@ -2749,7 +2749,7 @@
       "png": "sprites/photo-op@50.png",
       "json": "sprites/photo-op@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 18
       }
     },
@@ -2758,7 +2758,7 @@
       "png": "sprites/photo-op@62.png",
       "json": "sprites/photo-op@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 23
       }
     },
@@ -2767,7 +2767,7 @@
       "png": "sprites/photo-op@75.png",
       "json": "sprites/photo-op@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 26
       }
     },
@@ -2776,7 +2776,7 @@
       "png": "sprites/photo-op@88.png",
       "json": "sprites/photo-op@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 31
       }
     },
@@ -2803,7 +2803,7 @@
       "png": "sprites/picnic@62.png",
       "json": "sprites/picnic@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 63
       }
     },
@@ -2812,7 +2812,7 @@
       "png": "sprites/picnic@75.png",
       "json": "sprites/picnic@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 76
       }
     },
@@ -2821,7 +2821,7 @@
       "png": "sprites/picnic@88.png",
       "json": "sprites/picnic@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 89
       }
     },
@@ -2848,7 +2848,7 @@
       "png": "sprites/puddle@62.png",
       "json": "sprites/puddle@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 63
       }
     },
@@ -2857,7 +2857,7 @@
       "png": "sprites/puddle@75.png",
       "json": "sprites/puddle@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 74
       }
     },
@@ -2866,7 +2866,7 @@
       "png": "sprites/puddle@88.png",
       "json": "sprites/puddle@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 87
       }
     },
@@ -2911,7 +2911,7 @@
       "png": "sprites/roadside-bike@88.png",
       "json": "sprites/roadside-bike@88.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 34,
         "opaqueWidth": 47
       }
     },
@@ -3181,7 +3181,7 @@
       "png": "sprites/roadside-house-cottage-pink@75.png",
       "json": "sprites/roadside-house-cottage-pink@75.json",
       "anchor": {
-        "feetY": 81,
+        "feetY": 82,
         "opaqueWidth": 90
       }
     },
@@ -3217,7 +3217,7 @@
       "png": "sprites/roadside-house-cottage@75.png",
       "json": "sprites/roadside-house-cottage@75.json",
       "anchor": {
-        "feetY": 81,
+        "feetY": 82,
         "opaqueWidth": 90
       }
     },
@@ -3262,7 +3262,7 @@
       "png": "sprites/roadside-house-porch-tan@62.png",
       "json": "sprites/roadside-house-porch-tan@62.json",
       "anchor": {
-        "feetY": 61,
+        "feetY": 62,
         "opaqueWidth": 88
       }
     },
@@ -3280,7 +3280,7 @@
       "png": "sprites/roadside-house-porch-tan@88.png",
       "json": "sprites/roadside-house-porch-tan@88.json",
       "anchor": {
-        "feetY": 86,
+        "feetY": 87,
         "opaqueWidth": 122
       }
     },
@@ -3298,7 +3298,7 @@
       "png": "sprites/roadside-house-porch@62.png",
       "json": "sprites/roadside-house-porch@62.json",
       "anchor": {
-        "feetY": 61,
+        "feetY": 62,
         "opaqueWidth": 88
       }
     },
@@ -3316,7 +3316,7 @@
       "png": "sprites/roadside-house-porch@88.png",
       "json": "sprites/roadside-house-porch@88.json",
       "anchor": {
-        "feetY": 86,
+        "feetY": 87,
         "opaqueWidth": 122
       }
     },
@@ -3361,7 +3361,7 @@
       "png": "sprites/roadside-house-tall-grey@75.png",
       "json": "sprites/roadside-house-tall-grey@75.json",
       "anchor": {
-        "feetY": 96,
+        "feetY": 97,
         "opaqueWidth": 81
       }
     },
@@ -3370,7 +3370,7 @@
       "png": "sprites/roadside-house-tall-grey@88.png",
       "json": "sprites/roadside-house-tall-grey@88.json",
       "anchor": {
-        "feetY": 112,
+        "feetY": 113,
         "opaqueWidth": 94
       }
     },
@@ -3397,7 +3397,7 @@
       "png": "sprites/roadside-house-tall@75.png",
       "json": "sprites/roadside-house-tall@75.json",
       "anchor": {
-        "feetY": 96,
+        "feetY": 97,
         "opaqueWidth": 81
       }
     },
@@ -3406,7 +3406,7 @@
       "png": "sprites/roadside-house-tall@88.png",
       "json": "sprites/roadside-house-tall@88.json",
       "anchor": {
-        "feetY": 112,
+        "feetY": 113,
         "opaqueWidth": 94
       }
     },
@@ -3739,7 +3739,7 @@
       "png": "sprites/skunk@50.png",
       "json": "sprites/skunk@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 15
       }
     },
@@ -3748,7 +3748,7 @@
       "png": "sprites/skunk@62.png",
       "json": "sprites/skunk@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 19
       }
     },
@@ -3757,7 +3757,7 @@
       "png": "sprites/skunk@75.png",
       "json": "sprites/skunk@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 21
       }
     },
@@ -3784,7 +3784,7 @@
       "png": "sprites/snatch-raccoon@50.png",
       "json": "sprites/snatch-raccoon@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 15
       }
     },
@@ -3793,7 +3793,7 @@
       "png": "sprites/snatch-raccoon@62.png",
       "json": "sprites/snatch-raccoon@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 19
       }
     },
@@ -3802,7 +3802,7 @@
       "png": "sprites/snatch-raccoon@75.png",
       "json": "sprites/snatch-raccoon@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 23
       }
     },
@@ -3811,7 +3811,7 @@
       "png": "sprites/snatch-raccoon@88.png",
       "json": "sprites/snatch-raccoon@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 26
       }
     },
@@ -3829,7 +3829,7 @@
       "png": "sprites/snatch-seagull@50.png",
       "json": "sprites/snatch-seagull@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 14
       }
     },
@@ -3838,7 +3838,7 @@
       "png": "sprites/snatch-seagull@62.png",
       "json": "sprites/snatch-seagull@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 17
       }
     },
@@ -3847,7 +3847,7 @@
       "png": "sprites/snatch-seagull@75.png",
       "json": "sprites/snatch-seagull@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 20
       }
     },
@@ -3856,7 +3856,7 @@
       "png": "sprites/snatch-seagull@88.png",
       "json": "sprites/snatch-seagull@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 23
       }
     },
@@ -3883,7 +3883,7 @@
       "png": "sprites/social-frisbee-dog-owner@50.png",
       "json": "sprites/social-frisbee-dog-owner@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 16
       }
     },
@@ -3892,7 +3892,7 @@
       "png": "sprites/social-frisbee-dog-owner@62.png",
       "json": "sprites/social-frisbee-dog-owner@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 19
       }
     },
@@ -3901,7 +3901,7 @@
       "png": "sprites/social-frisbee-dog-owner@75.png",
       "json": "sprites/social-frisbee-dog-owner@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 22
       }
     },
@@ -3910,7 +3910,7 @@
       "png": "sprites/social-frisbee-dog-owner@88.png",
       "json": "sprites/social-frisbee-dog-owner@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 27
       }
     },
@@ -3919,7 +3919,7 @@
       "png": "sprites/social-frisbee-dog@50.png",
       "json": "sprites/social-frisbee-dog@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 15
       }
     },
@@ -3928,7 +3928,7 @@
       "png": "sprites/social-frisbee-dog@62.png",
       "json": "sprites/social-frisbee-dog@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 18
       }
     },
@@ -3937,7 +3937,7 @@
       "png": "sprites/social-frisbee-dog@75.png",
       "json": "sprites/social-frisbee-dog@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 21
       }
     },
@@ -3973,7 +3973,7 @@
       "png": "sprites/social-gate-dog-owner@50.png",
       "json": "sprites/social-gate-dog-owner@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 18
       }
     },
@@ -3982,7 +3982,7 @@
       "png": "sprites/social-gate-dog-owner@62.png",
       "json": "sprites/social-gate-dog-owner@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 23
       }
     },
@@ -3991,7 +3991,7 @@
       "png": "sprites/social-gate-dog-owner@75.png",
       "json": "sprites/social-gate-dog-owner@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 26
       }
     },
@@ -4000,7 +4000,7 @@
       "png": "sprites/social-gate-dog-owner@88.png",
       "json": "sprites/social-gate-dog-owner@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 31
       }
     },
@@ -4036,7 +4036,7 @@
       "png": "sprites/social-gate-dog@88.png",
       "json": "sprites/social-gate-dog@88.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 34,
         "opaqueWidth": 31
       }
     },
@@ -4063,7 +4063,7 @@
       "png": "sprites/social-handbag-dog-owner@50.png",
       "json": "sprites/social-handbag-dog-owner@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 17
       }
     },
@@ -4072,7 +4072,7 @@
       "png": "sprites/social-handbag-dog-owner@62.png",
       "json": "sprites/social-handbag-dog-owner@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 21
       }
     },
@@ -4081,7 +4081,7 @@
       "png": "sprites/social-handbag-dog-owner@75.png",
       "json": "sprites/social-handbag-dog-owner@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 24
       }
     },
@@ -4090,7 +4090,7 @@
       "png": "sprites/social-handbag-dog-owner@88.png",
       "json": "sprites/social-handbag-dog-owner@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 29
       }
     },
@@ -4099,7 +4099,7 @@
       "png": "sprites/social-handbag-dog@50.png",
       "json": "sprites/social-handbag-dog@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 16
       }
     },
@@ -4108,7 +4108,7 @@
       "png": "sprites/social-handbag-dog@62.png",
       "json": "sprites/social-handbag-dog@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 21
       }
     },
@@ -4117,7 +4117,7 @@
       "png": "sprites/social-handbag-dog@75.png",
       "json": "sprites/social-handbag-dog@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 24
       }
     },
@@ -4153,7 +4153,7 @@
       "png": "sprites/social-jogger-dog-owner@50.png",
       "json": "sprites/social-jogger-dog-owner@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 16
       }
     },
@@ -4162,7 +4162,7 @@
       "png": "sprites/social-jogger-dog-owner@62.png",
       "json": "sprites/social-jogger-dog-owner@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 19
       }
     },
@@ -4171,7 +4171,7 @@
       "png": "sprites/social-jogger-dog-owner@75.png",
       "json": "sprites/social-jogger-dog-owner@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 22
       }
     },
@@ -4180,7 +4180,7 @@
       "png": "sprites/social-jogger-dog-owner@88.png",
       "json": "sprites/social-jogger-dog-owner@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 26
       }
     },
@@ -4189,7 +4189,7 @@
       "png": "sprites/social-jogger-dog@50.png",
       "json": "sprites/social-jogger-dog@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 14
       }
     },
@@ -4198,7 +4198,7 @@
       "png": "sprites/social-jogger-dog@62.png",
       "json": "sprites/social-jogger-dog@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 17
       }
     },
@@ -4207,7 +4207,7 @@
       "png": "sprites/social-jogger-dog@75.png",
       "json": "sprites/social-jogger-dog@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 21
       }
     },
@@ -4261,7 +4261,7 @@
       "png": "sprites/splash-milkshake@88.png",
       "json": "sprites/splash-milkshake@88.json",
       "anchor": {
-        "feetY": 33,
+        "feetY": 34,
         "opaqueWidth": 87
       }
     },
@@ -4369,7 +4369,7 @@
       "png": "sprites/splash-sprinkler@50.png",
       "json": "sprites/splash-sprinkler@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 49
       }
     },
@@ -4378,7 +4378,7 @@
       "png": "sprites/splash-sprinkler@62.png",
       "json": "sprites/splash-sprinkler@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 62
       }
     },
@@ -4387,7 +4387,7 @@
       "png": "sprites/splash-sprinkler@75.png",
       "json": "sprites/splash-sprinkler@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 74
       }
     },
@@ -4459,7 +4459,7 @@
       "png": "sprites/spot-stranger@50.png",
       "json": "sprites/spot-stranger@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 17
       }
     },
@@ -4468,7 +4468,7 @@
       "png": "sprites/spot-stranger@62.png",
       "json": "sprites/spot-stranger@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 21
       }
     },
@@ -4477,7 +4477,7 @@
       "png": "sprites/spot-stranger@75.png",
       "json": "sprites/spot-stranger@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 24
       }
     },
@@ -4486,7 +4486,7 @@
       "png": "sprites/spot-stranger@88.png",
       "json": "sprites/spot-stranger@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 29
       }
     },
@@ -4549,7 +4549,7 @@
       "png": "sprites/spot-water-bowl@50.png",
       "json": "sprites/spot-water-bowl@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 18
       }
     },
@@ -4558,7 +4558,7 @@
       "png": "sprites/spot-water-bowl@62.png",
       "json": "sprites/spot-water-bowl@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 22
       }
     },
@@ -4567,7 +4567,7 @@
       "png": "sprites/spot-water-bowl@75.png",
       "json": "sprites/spot-water-bowl@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 26
       }
     },
@@ -4603,7 +4603,7 @@
       "png": "sprites/squirrel-dash@50.png",
       "json": "sprites/squirrel-dash@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 20
       }
     },
@@ -4612,7 +4612,7 @@
       "png": "sprites/squirrel-dash@62.png",
       "json": "sprites/squirrel-dash@62.json",
       "anchor": {
-        "feetY": 22,
+        "feetY": 23,
         "opaqueWidth": 24
       }
     },
@@ -4621,7 +4621,7 @@
       "png": "sprites/squirrel-dash@75.png",
       "json": "sprites/squirrel-dash@75.json",
       "anchor": {
-        "feetY": 26,
+        "feetY": 27,
         "opaqueWidth": 28
       }
     },
@@ -4639,7 +4639,7 @@
       "png": "sprites/squirrel@50.png",
       "json": "sprites/squirrel@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 13
       }
     },
@@ -4648,7 +4648,7 @@
       "png": "sprites/squirrel@62.png",
       "json": "sprites/squirrel@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 16
       }
     },
@@ -4657,7 +4657,7 @@
       "png": "sprites/squirrel@75.png",
       "json": "sprites/squirrel@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 18
       }
     },
@@ -4684,7 +4684,7 @@
       "png": "sprites/stink-compost@50.png",
       "json": "sprites/stink-compost@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 20
       }
     },
@@ -4693,7 +4693,7 @@
       "png": "sprites/stink-compost@62.png",
       "json": "sprites/stink-compost@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 25
       }
     },
@@ -4702,7 +4702,7 @@
       "png": "sprites/stink-compost@75.png",
       "json": "sprites/stink-compost@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 30
       }
     },
@@ -4774,7 +4774,7 @@
       "png": "sprites/stink-fish-crate@50.png",
       "json": "sprites/stink-fish-crate@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 17
       }
     },
@@ -4783,7 +4783,7 @@
       "png": "sprites/stink-fish-crate@62.png",
       "json": "sprites/stink-fish-crate@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 21
       }
     },
@@ -4792,7 +4792,7 @@
       "png": "sprites/stink-fish-crate@75.png",
       "json": "sprites/stink-fish-crate@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 24
       }
     },
@@ -4864,7 +4864,7 @@
       "png": "sprites/stink-seaweed@50.png",
       "json": "sprites/stink-seaweed@50.json",
       "anchor": {
-        "feetY": 18,
+        "feetY": 19,
         "opaqueWidth": 18
       }
     },
@@ -4873,7 +4873,7 @@
       "png": "sprites/stink-seaweed@62.png",
       "json": "sprites/stink-seaweed@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 23
       }
     },
@@ -4882,7 +4882,7 @@
       "png": "sprites/stink-seaweed@75.png",
       "json": "sprites/stink-seaweed@75.json",
       "anchor": {
-        "feetY": 27,
+        "feetY": 28,
         "opaqueWidth": 28
       }
     },
@@ -4954,7 +4954,7 @@
       "png": "sprites/thief@50.png",
       "json": "sprites/thief@50.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 18
       }
     },
@@ -4963,7 +4963,7 @@
       "png": "sprites/thief@62.png",
       "json": "sprites/thief@62.json",
       "anchor": {
-        "feetY": 35,
+        "feetY": 37,
         "opaqueWidth": 21
       }
     },
@@ -4972,7 +4972,7 @@
       "png": "sprites/thief@75.png",
       "json": "sprites/thief@75.json",
       "anchor": {
-        "feetY": 42,
+        "feetY": 43,
         "opaqueWidth": 25
       }
     },
@@ -4981,7 +4981,7 @@
       "png": "sprites/thief@88.png",
       "json": "sprites/thief@88.json",
       "anchor": {
-        "feetY": 49,
+        "feetY": 50,
         "opaqueWidth": 30
       }
     },
@@ -5008,7 +5008,7 @@
       "png": "sprites/tip@62.png",
       "json": "sprites/tip@62.json",
       "anchor": {
-        "feetY": 11,
+        "feetY": 12,
         "opaqueWidth": 11
       }
     },
@@ -5017,7 +5017,7 @@
       "png": "sprites/tip@75.png",
       "json": "sprites/tip@75.json",
       "anchor": {
-        "feetY": 13,
+        "feetY": 14,
         "opaqueWidth": 13
       }
     },
@@ -5026,7 +5026,7 @@
       "png": "sprites/tip@88.png",
       "json": "sprites/tip@88.json",
       "anchor": {
-        "feetY": 15,
+        "feetY": 16,
         "opaqueWidth": 14
       }
     },
@@ -5053,7 +5053,7 @@
       "png": "sprites/trash-bins@62.png",
       "json": "sprites/trash-bins@62.json",
       "anchor": {
-        "feetY": 23,
+        "feetY": 24,
         "opaqueWidth": 63
       }
     },
@@ -5062,7 +5062,7 @@
       "png": "sprites/trash-bins@75.png",
       "json": "sprites/trash-bins@75.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 29,
         "opaqueWidth": 76
       }
     },
@@ -5071,7 +5071,7 @@
       "png": "sprites/trash-bins@88.png",
       "json": "sprites/trash-bins@88.json",
       "anchor": {
-        "feetY": 32,
+        "feetY": 33,
         "opaqueWidth": 87
       }
     },
@@ -5098,7 +5098,7 @@
       "png": "sprites/treat@62.png",
       "json": "sprites/treat@62.json",
       "anchor": {
-        "feetY": 8,
+        "feetY": 9,
         "opaqueWidth": 13
       }
     },
@@ -5116,7 +5116,7 @@
       "png": "sprites/treat@88.png",
       "json": "sprites/treat@88.json",
       "anchor": {
-        "feetY": 11,
+        "feetY": 12,
         "opaqueWidth": 16
       }
     },
