@@ -252,42 +252,45 @@ def biscuit(g):
     nose(g, 20, 29)
 
 
-# ---------- Dash: whippet, medium, grey brindle, knit sweater ----------
+# ---------- Archie: Australian Shepherd, medium, blue merle, one blue eye, red bandana ----------
 
-def dash(g):
-    legs(g, (25, 34), 50, "grey", "slate", w=4)
-    g.ell(47, 57, 9, 7, "grey", "slate", "lgrey")
-    # long neck into a knit sweater over the chest and back, cream stripes
-    g.rect(24, 32, 12, 12, "grey")
-    g.ell(34, 49, 15, 8, "dgreen", "forest", "green")
-    g.rect(19, 49, 30, 7, "dgreen")
-    g.rect(19, 55, 30, 1, "forest")
-    g.rect(48, 49, 1, 7, "forest")
-    for y in (46, 50):
-        stripe(g, y, "cream", ("dgreen", "forest", "green"))
-    # ribbed neck roll
-    g.rect(21, 40, 18, 3, "green")
-    for x in range(21, 39, 2):
-        g.p(x, 41, "dgreen")
-    for x in range(20, 48, 2):
-        g.p(x, 54, "forest")
-    # narrow head, rose ears folded back
-    g.tri((18, 13), (11, 9), (14, 21), "slate")
-    g.tri((40, 12), (49, 8), (46, 19), "slate")
-    g.ell(29, 23, 12, 13, "grey", "slate", "lgrey")
-    # grey brindle: slate streaks, a few dslate, slanting down the coat
-    for x, y in ((31, 14), (36, 16), (21, 17), (38, 21), (34, 26), (19, 27), (26, 34), (27, 38)):
-        g.rect(x, y, 3, 1, "slate")
-        g.p(x + 1, y + 1, "slate")
-    for x, y in ((32, 15), (37, 17), (27, 39)):
-        g.p(x, y, "dslate")
-    for x, y in ((42, 54), (47, 58), (51, 55)):
-        g.rect(x, y, 2, 1, "slate")
-    # white blaze down a long pale muzzle
-    g.rect(26, 11, 3, 18, "white")
-    g.ell(24, 32, 7, 6, "lgrey", "grey", "white")
-    eyes(g, 19, 31, 21)
-    nose(g, 20, 30)
+def archie(g):
+    # merle haunch and bobtail behind, a white ruff down the chest in front
+    g.ell(45, 54, 12, 9, "lgrey", "grey", "white")
+    g.ell(53, 46, 3.5, 3, "lgrey", "grey", "white")
+    for x, y, w, h in ((40, 49, 4, 3), (48, 55, 3, 3), (52, 46, 2, 2), (37, 58, 2, 2)):
+        g.rect(x, y, w, h, "navy")
+        g.p(x + w, y + h - 1, "dslate")
+    g.ell(31, 52, 13, 11, "white", "lgrey")
+    legs(g, (23, 33), 53, "white", "lgrey")
+    for x in (23, 33):
+        g.rect(x, 53, 5, 2, "ochre")
+    # the red bandana knotted at the throat, plain, with its fold in dred
+    g.tri((17, 40), (45, 40), (30, 57), "red")
+    g.tri((32, 46), (45, 40), (30, 57), "dred")
+    g.rect(17, 40, 28, 1, "dred")
+    # ears set high, the tips folding forward
+    g.tri((12, 21), (15, 7), (24, 13), "dslate")
+    g.tri((15, 7), (9, 13), (16, 13), "navy")
+    g.tri((47, 20), (45, 6), (36, 12), "dslate")
+    g.tri((45, 6), (51, 12), (44, 12), "navy")
+    g.ell(30, 26, 16, 14, "lgrey", "grey", "white")
+    # merle: a navy patch over the blue eye, blotches over the skull and cheek
+    g.ell(20, 23, 6.5, 6, "navy", None, "dslate")
+    for x, y, w, h in ((34, 13, 4, 2), (39, 17, 3, 3), (42, 27, 3, 2), (15, 31, 2, 3), (22, 14, 3, 2)):
+        g.rect(x, y, w, h, "navy")
+        g.p(x + w, y + h - 1, "dslate")
+    # white blaze into a white muzzle, copper brows and cheek
+    g.tri((27, 12), (31, 12), (29, 26), "white")
+    g.rect(27, 12, 4, 5, "white")
+    g.rect(34, 19, 3, 1, "ochre")
+    g.ell(38, 32, 3, 2.5, "ochre", "rust")
+    g.ell(25, 33, 9, 6.5, "white", "lgrey")
+    eye(g, 18, 22, 4, "sky")
+    # the near eye brown
+    eye(g, 33, 22, 5, "brown")
+    g.p(36, 26, "dbrown")
+    nose(g, 20, 29)
 
 
 # ---------- Snowball: Samoyed, big, fluffy white, collar with a bell ----------
@@ -317,35 +320,36 @@ def snowball(g):
     nose(g, 21, 28)
 
 
-# ---------- Waffles: Saint Bernard, big, brown and white, barrel collar ----------
+# ---------- Penny: golden retriever, big, golden coat, feathery tail, blue collar ----------
 
-def waffles(g):
-    g.ell(46, 53, 13, 10, "rust", "dbrown", "ochre")
-    g.ell(31, 51, 16, 13, "white", "lgrey")
-    legs(g, (21, 33), 53, "white", "lgrey", w=7)
-    g.rect(16, 41, 30, 2, "dbrown")
-    # a broad head, the widest of the dogs
-    g.ell(30, 26, 22, 16, "rust", "dbrown", "ochre")
-    # droopy ears, a dark mask round the eyes, white blaze and big white muzzle with heavy jowls
-    g.ell(7, 33, 5.5, 10, "dbrown", "plum")
-    g.ell(53, 33, 6, 10, "dbrown", "plum")
-    g.ell(20, 23, 7, 5.5, "dbrown", "plum")
-    g.ell(37, 23, 7.5, 5.5, "dbrown", "plum")
-    g.rect(27, 10, 4, 14, "white")
-    g.ell(26, 33, 13, 8, "white", "lgrey")
-    g.ell(17, 38, 6, 4.5, "white", "lgrey")
-    g.ell(35, 38, 6, 4.5, "white", "lgrey")
-    g.rect(22, 37, 1, 3, "lgrey")
-    g.rect(30, 37, 1, 3, "lgrey")
-    eyes(g, 18, 34, 21)
-    nose(g, 22, 29)
-    # brandy barrel hanging from the collar
-    g.rect(24, 44, 14, 9, "amber")
-    g.rect(24, 44, 14, 1, "yellow")
-    g.rect(24, 46, 14, 1, "brown")
-    g.rect(24, 50, 14, 1, "brown")
-    g.rect(35, 44, 3, 9, "orange")
-    g.rect(24, 52, 14, 1, "orange")
+def penny(g):
+    # the plumed tail sweeping up behind on the right, cream feathering fringing its far edge
+    g.ell(57, 36, 5.5, 11, "orange")
+    g.ell(56.5, 36, 4, 9.5, "amber", None, "yellow")
+    for y in range(28, 47, 2):
+        g.rect(61 - abs(y - 37) // 4, y, 2, 1, "cream")
+    g.ell(46, 53, 13, 10, "amber", "orange", "yellow")
+    g.ell(31, 51, 15, 13, "amber", "orange", "yellow")
+    legs(g, (22, 33), 53, "amber", "orange", w=6)
+    # a cream bib of feathering down the chest, wavy at its edge
+    g.ell(30, 49, 8, 6, "cream", "tan")
+    for x in (24, 28, 32, 36):
+        g.p(x, 54, "cream")
+    # blue collar and a silver tag
+    g.rect(16, 42, 30, 3, "blue")
+    g.rect(16, 42, 30, 1, "sky")
+    g.ell(30, 47.5, 2.5, 2.5, "lgrey", "grey", "white")
+    # drop ears hanging past the collar from under the head, wavy feathered ends
+    for x in (13, 47):
+        g.ell(x, 34, 5.5, 11, "orange", "ochre")
+        g.ell(x, 33, 4, 9.5, "amber", "orange")
+        g.p(x - 2, 44, "amber")
+        g.p(x + 1, 45, "orange")
+    g.ell(30, 25, 16, 14, "amber", "orange", "yellow")
+    g.rect(25, 13, 8, 1, "yellow")
+    g.ell(25, 32, 9, 6.5, "cream", "tan")
+    eyes(g, 18, 33, 21)
+    nose(g, 21, 28)
 
 
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
@@ -381,9 +385,9 @@ PORTRAITS = {
     "zippy": zippy,
     "pierre": pierre,
     "biscuit": biscuit,
-    "dash": dash,
+    "archie": archie,
     "snowball": snowball,
-    "waffles": waffles,
+    "penny": penny,
     "koda": koda,
 }
 

@@ -12,7 +12,7 @@ Priority: **M6** is in the Milestone 6 pixel pass, **core** is needed before the
 | --------------------- | ------ | ----- | ------------------------------------------------ | ---- | --------------------------------------------------------------------------------- |
 | `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | M6   | casey, ada, ben, trista                                                           |
 | `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                     |
-| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | M6   | duchess, biscuit, koda (starters), nugget, zippy, pierre, dash, snowball, waffles |
+| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | M6   | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny |
 | `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | M6   | Doghouse                                                                          |
 | `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | M6   | Keyed by dog                                                                      |
 | `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                       |

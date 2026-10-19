@@ -266,6 +266,33 @@
       }
     },
     {
+      "key": "dog-archie",
+      "png": "sprites/dog-archie.png",
+      "json": "sprites/dog-archie.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "dog-archie@50",
+      "png": "sprites/dog-archie@50.png",
+      "json": "sprites/dog-archie@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 9
+      }
+    },
+    {
+      "key": "dog-archie@75",
+      "png": "sprites/dog-archie@75.png",
+      "json": "sprites/dog-archie@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 12
+      }
+    },
+    {
       "key": "dog-biscuit",
       "png": "sprites/dog-biscuit.png",
       "json": "sprites/dog-biscuit.json",
@@ -401,6 +428,33 @@
       }
     },
     {
+      "key": "dog-penny",
+      "png": "sprites/dog-penny.png",
+      "json": "sprites/dog-penny.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "dog-penny@50",
+      "png": "sprites/dog-penny@50.png",
+      "json": "sprites/dog-penny@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "dog-penny@75",
+      "png": "sprites/dog-penny@75.png",
+      "json": "sprites/dog-penny@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "dog-pierre",
       "png": "sprites/dog-pierre.png",
       "json": "sprites/dog-pierre.json",
@@ -509,6 +563,11 @@
       }
     },
     {
+      "key": "face-dog-archie",
+      "png": "sprites/face-dog-archie.png",
+      "json": "sprites/face-dog-archie.json"
+    },
+    {
       "key": "face-dog-biscuit",
       "png": "sprites/face-dog-biscuit.png",
       "json": "sprites/face-dog-biscuit.json"
@@ -534,6 +593,11 @@
       "json": "sprites/face-dog-nugget.json"
     },
     {
+      "key": "face-dog-penny",
+      "png": "sprites/face-dog-penny.png",
+      "json": "sprites/face-dog-penny.json"
+    },
+    {
       "key": "face-dog-pierre",
       "png": "sprites/face-dog-pierre.png",
       "json": "sprites/face-dog-pierre.json"
@@ -552,6 +616,11 @@
       "key": "face-dog-zippy",
       "png": "sprites/face-dog-zippy.png",
       "json": "sprites/face-dog-zippy.json"
+    },
+    {
+      "key": "face-owner-archie",
+      "png": "sprites/face-owner-archie.png",
+      "json": "sprites/face-owner-archie.json"
     },
     {
       "key": "face-owner-biscuit",
@@ -577,6 +646,11 @@
       "key": "face-owner-nugget",
       "png": "sprites/face-owner-nugget.png",
       "json": "sprites/face-owner-nugget.json"
+    },
+    {
+      "key": "face-owner-penny",
+      "png": "sprites/face-owner-penny.png",
+      "json": "sprites/face-owner-penny.json"
     },
     {
       "key": "face-owner-pierre",
@@ -965,6 +1039,15 @@
       }
     },
     {
+      "key": "owner-archie",
+      "png": "sprites/owner-archie.png",
+      "json": "sprites/owner-archie.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 28
+      }
+    },
+    {
       "key": "owner-biscuit",
       "png": "sprites/owner-biscuit.png",
       "json": "sprites/owner-biscuit.json",
@@ -1007,6 +1090,15 @@
       "anchor": {
         "feetY": 45,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "owner-penny",
+      "png": "sprites/owner-penny.png",
+      "json": "sprites/owner-penny.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1806,6 +1898,10 @@
       "png": "images/logo.png"
     },
     {
+      "key": "portrait-dog-archie",
+      "png": "images/portrait-dog-archie.png"
+    },
+    {
       "key": "portrait-dog-biscuit",
       "png": "images/portrait-dog-biscuit.png"
     },
@@ -1824,6 +1920,10 @@
     {
       "key": "portrait-dog-nugget",
       "png": "images/portrait-dog-nugget.png"
+    },
+    {
+      "key": "portrait-dog-penny",
+      "png": "images/portrait-dog-penny.png"
     },
     {
       "key": "portrait-dog-pierre",

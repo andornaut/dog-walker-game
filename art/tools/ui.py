@@ -484,15 +484,22 @@ def slot_locked():
 
 # Each dog's roof: base, shingle shade and the dark ridge, gable edge and eave, from the dog's
 # accessory. Zippy's red collar takes dred with a red ridge and eave trim, so he stays apart from
-# Nugget's red, which carries the bandana's white dots; Dash's forest takes the sweater's cream
-# stripe, so it stays apart from Biscuit's light green.
+# Nugget's red, which carries the bandana's white dots; Archie's bandana is the red trim on a grey merle
+# roof, and Penny's blue collar trims her golden one.
 ROOFS = {
     "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
     "pierre": ("purple", "plum", "ink"), "biscuit": ("green", "dgreen", "forest"),
-    "dash": ("forest", "teal", "ink"), "snowball": ("sky", "blue", "navy"),
-    "waffles": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
+    "archie": ("grey", "slate", "navy"), "snowball": ("sky", "blue", "navy"),
+    "penny": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
     "empty": ("slate", "dslate", "navy"),
 }
+
+# The ridge and eave trim on a roof whose base alone would sit too close to another dog's.
+TRIMS = {"zippy": "red", "archie": "red", "penny": "blue"}
+
+# CLEANUP (added 2026-10-19): the game still keys Archie and Penny by their old ids; drop these tags
+# once src/data/dogs.ts uses archie and penny.
+OLD_KEYS = {"dash": "archie", "waffles": "penny"}
 
 # The 8x8 emblem on each gable, the dog's accessory: a letter is a colour, "." shows the vent behind.
 EMBLEMS = {
@@ -506,12 +513,12 @@ EMBLEMS = {
         "..MMMM..", ".MMPPMM.", ".MPKPPM.", ".MPPPPM.", ".MMPPMM.", "..MMMM..", "..M..M..", ".M....M."]),
     "biscuit": ({"G": "green", "D": "dgreen", "L": "lgrey", "W": "white"}, [  # collar and bone tag
         "GGGGGGGG", "DDDDDDDD", "...LL...", "WW.LL.WW", ".WWWWWW.", ".WWWWWL.", "WL....LL", "........"]),
-    "dash": ({"G": "dgreen", "C": "cream", "F": "forest"}, [  # striped sweater
-        "GG....GG", "GGGGGGGG", "GCCCCCCG", "F.GGGG.F", "..CCCC..", "..GGGG..", "..FFFF..", "........"]),
+    "archie": ({"R": "red", "D": "dred"}, [  # knotted bandana
+        "RD....DR", ".RD..DR.", "..RDDR..", ".RRRRRR.", ".RRRRRD.", "..RRRD..", "...RD...", "........"]),
     "snowball": ({"S": "sky", "B": "blue", "Y": "yellow", "A": "amber", "O": "orange", "R": "rust"}, [  # bell
         "SSSSSSSS", "BBBBBBBB", "...AY...", "..AYYA..", "..AAAO..", ".AAAAOO.", ".OOOOOO.", "...RR..."]),
-    "waffles": ({"A": "amber", "O": "orange", "B": "brown"}, [  # barrel
-        ".AAAAAO.", "BBBBBBBB", "AAAAAAAO", "AAAAAAAO", "AAAAAAAO", "AAAAAAAO", "BBBBBBBB", ".AAAAAO."]),
+    "penny": ({"S": "sky", "B": "blue", "L": "lgrey", "A": "amber", "Y": "yellow", "O": "orange"}, [  # heart tag
+        "SSSSSSSS", "BBBBBBBB", "...LL...", ".AA..AA.", "AYAAAAAO", ".AAAAAO.", "..AAOO..", "...OO..."]),
     "koda": ({"O": "orange", "R": "rust", "L": "lgrey", "G": "grey"}, [  # harness clip
         "O......O", "RO....OR", ".RO..OR.", "..LLLG..", "..L..G..", "..LGGG..", "...OO...", "...OR..."]),
 }
@@ -571,10 +578,11 @@ def doghouse(dog):
             for x in range(6 + 4 * (y // 4 % 2), HOUSE_W, 8):
                 if abs(x + 0.5 - 60) < roof_width(y) - 2:
                     g.p(x, y, "white")
-    if dog == "dash":
-        for y, c in ((2, "cream"), (3, "dgreen"), (16, "cream"), (17, "dgreen")):
-            w = roof_width(y)
-            g.rect(60 - w, y, 2 * w, 1, c)
+    if dog == "archie":
+        for y in (2, 6, 10, 14, 17):
+            for x in range(3 + 6 * (y // 4 % 3), HOUSE_W, 17):
+                if abs(x + 1.5 - 60) < roof_width(y) - 3:
+                    g.rect(x, y, 3, 2 if y < 17 else 1, "navy")
     # ridge and gable edges, then the eave
     g.rect(10, 0, 100, 1, dark)
     for y in range(4):
@@ -584,9 +592,9 @@ def doghouse(dog):
     g.rect(1, 3, 1, 16, dark)
     g.rect(118, 3, 1, 16, dark)
     g.rect(1, 19, 118, 2, dark)
-    if dog == "zippy":
-        g.rect(13, 1, 94, 1, "red")
-        g.rect(1, 19, 118, 1, "red")
+    if dog in TRIMS:
+        g.rect(13, 1, 94, 1, TRIMS[dog])
+        g.rect(1, 19, 118, 1, TRIMS[dog])
     # the gable vent and its emblem
     ring = "lgrey" if empty else "cream"
     g.rect(5, 5, 12, 10, ring)
@@ -1082,7 +1090,8 @@ IMAGES = {
 
 
 def sprites():
-    yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS]
+    yield "ui-doghouse", ([(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS]
+                          + [(old, [doghouse(new).outlined(False)], 1000) for old, new in OLD_KEYS.items()])
     warn = [doghouse_warn(i).outlined(False) for i in (0, 1, 2, 1)]
     yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]

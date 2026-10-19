@@ -356,9 +356,9 @@ OWNERS = {
     "zippy": (pruitt_top, "slate", "ink", None),
     "pierre": (lefevre_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),
-    "dash": (ophelia_top, "skin1", "plum", None),
+    "archie": (ophelia_top, "skin1", "plum", None),
     "snowball": (tiffany_top, "skin1", "pink", None),
-    "waffles": (hughes_top, "sky", "white", None),
+    "penny": (hughes_top, "sky", "white", None),
     "koda": (jesse_top, "skin2", "sky", None),
 }
 

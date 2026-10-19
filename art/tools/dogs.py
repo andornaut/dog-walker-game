@@ -363,58 +363,80 @@ def pierre_face(mood):
     return g
 
 
-# ---------- Dash: whippet, medium, grey brindle, knit sweater ----------
+# ---------- Archie: Australian Shepherd, medium, blue merle, one blue eye, red bandana ----------
 
-def dash_road(q):
+def archie_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    g.rect(9 + ln // 2, 16 + q["fl"] + b, 2, 5, "grey")
-    g.rect(21 + ln // 2, 16 + q["fr"] + b, 2, 5, "grey")
-    g.rect(11, 24 + q["bl"], 2, 5, "grey")
-    g.rect(19, 24 + q["br"], 2, 5, "grey")
-    # grey brindle: slate streaks over a grey coat, which shows past the sweater at the flanks and hips. A
-    # long, deep chest and a long head make it a medium dog, wider and longer than the small three
+    # white legs with copper points where they meet the coat
+    for x, y, d in ((9 + ln // 2, 17, q["fl"] + b), (21 + ln // 2, 17, q["fr"] + b), (10, 25, q["bl"]),
+                    (19, 25, q["br"])):
+        g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
+        g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
+    # a silver-grey coat torn by navy merle blotches, a fluffy white ruff at the nape. As wide as
+    # Biscuit, longer in the coat
     bx = 16 + ln // 2
-    g.ell(bx, 21 + b, 6, 6.5, "grey", None, "lgrey")
-    for dx, dy in ((-3, 24), (-2, 25), (1, 25), (2, 26), (-1, 26), (4, 18), (-5, 21), (-4, 22), (5, 23)):
-        g.p(bx + dx, dy + b, "slate")
-    g.ell(bx, 20 + b, 4.5, 5, "dgreen", "forest", "green")
-    g.rect(bx - 4, 18 + b, 8, 1, "cream")
-    g.rect(bx - 4, 21 + b, 8, 1, "cream")
+    g.ell(bx, 21.5 + b, 7, 6, "lgrey", "grey", "white")
+    merle(g, bx, b, ((-5, 20, 2, 2), (1, 19, 3, 2), (3, 23, 2, 2), (-2, 24, 3, 1), (-4, 23, 1, 1), (5, 20, 1, 2)))
+    g.ell(bx, 16.5 + b, 6, 2, "white", "lgrey")
+    # the red bandana's knot at the nape, its two ends flaring down the back
+    g.rect(bx - 5, 17 + b, 10, 1, "red")
+    g.rect(bx - 1, 16 + b, 2, 2, "dred")
+    for side in (-1, 1):
+        g.p(bx + (side - 1) // 2 + side, 18 + b, "red")
+        g.p(bx + (side - 1) // 2 + 2 * side, 19 + b, "dred")
+    # a short bobtail
     tx = 16 + q["tail"]
-    g.rect(tx, 26 + b, 1, 3, "grey")
-    g.p(tx + 1, 29 + b, "grey")
+    g.ell(tx, 27.5 + b, 2, 1.6, "lgrey", "grey", "white")
+    g.p(tx - 1, 27 + b, "navy")
+    # ears set high and tipped forward, the folded tips darker
     hx = 16 + ln
-    g.ell(hx, 10.5 + b, 4, 5, "grey", None, "lgrey")
-    for dx, dy in ((-2, 9), (-1, 10), (1, 8), (2, 9), (0, 12), (1, 13)):
-        g.p(hx + dx, dy + b, "slate")
-    # rose ears folded back, the fold in slate
-    for side, t in ((-1, 0), (1, q["twitch"])):
-        g.ell(hx + 4 * side, 8.5 + b - q["ears"] + t, 1.5, 1.5, "grey")
-        g.p(hx + 3.5 * side, 9 + b - q["ears"] + t, "slate")
+    e, t = q["ears"], q["twitch"]
+    g.tri((hx - 5.5, 10 + b), (hx - 5, 5 + b + e), (hx - 1.5, 7 + b), "dslate")
+    g.tri((hx + 5.5, 10 + b + t), (hx + 5, 5 + b + e + t), (hx + 1.5, 7 + b + t), "dslate")
+    g.rect(hx - 6, 5 + b + e, 2, 1, "navy")
+    g.rect(hx + 4, 5 + b + e + t, 2, 1, "navy")
+    g.ell(hx, 11.5 + b, 5.5, 5, "lgrey", "grey", "white")
+    merle(g, hx, b, ((-4, 9, 2, 2), (2, 8, 2, 1), (1, 12, 2, 2), (-2, 13, 1, 1)))
     spray(g, q["spray"])
     return g
 
 
-def dash_face(mood):
+def archie_face(mood):
     g = Grid()
     d = droop(mood)
-    g.rect(8, 26, 16, 4, "dgreen")
-    g.rect(8, 27, 16, 1, "cream")
-    g.rect(8, 29, 16, 1, "forest")
-    g.ell(16, 15.5, 6.5, 9, "grey", "slate", "lgrey")
-    # brindle streaks
-    for x, y in ((12, 9), (13, 10), (18, 9), (19, 10), (11, 12), (12, 13), (20, 12), (21, 13), (19, 17), (12, 18)):
-        g.p(x, y, "slate")
-    g.p(20, 11, "dslate")
-    g.p(11, 11, "dslate")
-    g.tri((10, 9), (6 - d / 2, 6 + 2 * d), (9, 13 + d), "slate")
-    g.tri((22, 9), (26 + d / 2, 6 + 2 * d), (23, 13 + d), "slate")
+    # ears set high, the tips folding forward and out
+    g.tri((7, 12), (8 - d, 3 + d), (13.5, 7 + d / 2), "dslate")
+    g.tri((25, 12), (24 + d, 3 + d), (18.5, 7 + d / 2), "dslate")
+    g.tri((8 - d, 3 + d), (4 - d, 6 + d), (9 - d, 6 + d), "navy")
+    g.tri((24 + d, 3 + d), (28 + d, 6 + d), (23 + d, 6 + d), "navy")
+    # a white ruff, the red bandana tied over it
+    g.ell(16, 27, 9, 3.5, "white", "lgrey")
+    g.tri((8, 25), (24, 25), (16, 31.5), "red")
+    g.tri((16, 25), (24, 25), (16, 31.5), "dred")
+    g.rect(8, 25, 16, 1, "dred")
+    g.ell(16, 16, 9.5, 8.5, "lgrey", "grey", "white")
+    # merle: a navy patch over the blue eye, blotches across the skull and cheek
+    g.ell(11, 14, 4, 3.5, "navy", "dslate")
+    for x, y, w, h in ((19, 9, 3, 2), (22, 12, 2, 2), (23, 18, 2, 2), (8, 19, 1, 2), (12, 8, 2, 1)):
+        g.rect(x, y, w, h, "navy")
+        g.p(x + w, y + h - 1, "dslate")
     g.rect(15, 7, 2, 9, "white")
-    g.ell(16, 21, 3.5, 3.5, "lgrey", "grey", "white")
-    eyes(g, 11, 19, 14, mood=mood)
-    g.rect(15, 20, 2, 2, "ink")
-    mouth(g, 23, mood)
+    # copper brows and cheeks
+    g.p(10, 11, "ochre")
+    g.p(21, 11, "ochre")
+    g.rect(9, 18, 2, 2, "ochre")
+    g.rect(22, 18, 2, 2, "ochre")
+    g.ell(16, 20.5, 5, 3.5, "white", "lgrey")
+    eyes(g, 10, 19, 14, iris="sky", mood=mood)
+    # the other eye brown
+    g.rect(19, 14, 3, 3, "brown")
+    g.p(20, 15, "ink")
+    g.p(21, 16, "dbrown")
+    g.p(19, 14, "white")
+    g.rect(14, 18, 4, 2, "ink")
+    g.p(14, 18, "slate")
+    mouth(g, 20, mood)
     return g
 
 
@@ -469,60 +491,61 @@ def snowball_face(mood):
     return g
 
 
-# ---------- Waffles: Saint Bernard, big, brown and white, barrel collar ----------
+# ---------- Penny: golden retriever, big, golden coat, feathery tail, blue collar ----------
 
-def waffles_road(q):
+def penny_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
-    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
-    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
-    g.rect(9, 26 + q["bl"], 3, 4, "white")
-    g.rect(20, 26 + q["br"], 3, 4, "white")
+    # legs shaded down the outside, cream feathering trailing from the backs of the front pair
+    for x, y, d in ((7 + ln // 2, 15 + o, q["fl"] + b), (22 + ln // 2, 15 + o, q["fr"] + b), (9, 26, q["bl"]),
+                    (20, 26, q["br"])):
+        g.rect(x, y + d, 3, 4, "amber")
+        g.rect(x + (2 if x > 16 else 0), y + d, 1, 4, "orange")
+    for x, d in ((6 + ln // 2, q["fl"] + b + o), (25 + ln // 2, q["fr"] + b + o)):
+        g.rect(x, 17 + d, 1, 2, "cream")
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 8, 6, "white", "lgrey")
-    g.ell(bx, 21.5 + o + b, 5.5, 4, "rust", "dbrown", "ochre")
-    # a white ruff at the nape between the head and the collar (the blaze is on the face, out of sight)
-    g.ell(bx, 16 + o + b, 5.5, 1.6, "white", "lgrey")
-    g.rect(bx - 6, 17 + o + b, 12, 1, "dbrown")
-    g.rect(bx + 5, 17 + o + b, 3, 3, "amber")
-    g.p(bx + 6, 18 + o + b, "brown")
-    tx = 16 + q["tail"]
-    g.rect(tx - 1, 26 + b, 2, 3, "rust")
-    g.rect(tx - 1, 29 + b, 2, 1, "white")
-    # the ears hang down beside the ruff from behind a round head
+    g.ell(bx, 20.5 + o + b, 7.5, 6, "amber", "orange", "yellow")
+    # the wavy coat down the back
+    for dx, dy in ((-4, 20), (2, 20), (-2, 23), (3, 24), (-5, 24)):
+        g.rect(bx + dx, dy + o + b, 2, 1, "orange")
+    g.rect(bx - 6, 16 + o + b, 12, 2, "blue")
+    g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
+    # a long plumed tail swinging low behind, cream feathering fringing its tip
+    tx = 16 + q["tail"] * 2
+    g.ell(tx, 27 + b, 3, 3.8, "orange")
+    g.ell(tx, 26.5 + b, 2, 3, "amber", None, "yellow")
+    for dx, dy in ((-2, 29), (-1, 30), (0, 31), (1, 30), (2, 29)):
+        g.p(tx + dx, dy + b, "cream")
+    # a broad head with drop ears hanging over its sides, darker than the coat
     hx = 16 + ln
-    g.ell(hx - 6, 12.5 + o + b - q["ears"], 2.2, 4, "dbrown", "plum")
-    g.ell(hx + 6, 12.5 + o + b - q["ears"] + q["twitch"], 2.2, 4, "dbrown", "plum")
-    g.ell(hx, 8.5 + o + b, 7, 6.2, "rust", "dbrown", "ochre")
+    g.ell(hx, 8.5 + o + b, 6.5, 6, "amber", "orange", "yellow")
+    g.ell(hx - 6, 11.5 + o + b - q["ears"], 2.2, 4.5, "orange", "ochre")
+    g.ell(hx + 6, 11.5 + o + b - q["ears"] + q["twitch"], 2.2, 4.5, "orange", "ochre")
     spray(g, q["spray"])
     return g
 
 
-def waffles_face(mood):
+def penny_face(mood):
     g = Grid()
     d = droop(mood)
-    g.ell(16, 28.5, 7, 3, "white", "lgrey")
-    # a broad head, wider than any other dog's, with heavy ears set low
-    g.ell(16, 16, 11.5, 8.5, "rust", "dbrown", "ochre")
-    g.ell(4.5, 19 + d, 2.5, 6.5, "dbrown", "plum")
-    g.ell(27.5, 19 + d, 2.5, 6.5, "dbrown", "plum")
-    # a dark mask around both eyes, split by the white blaze
-    g.ell(11, 15.5, 3.5, 2.5, "dbrown", "plum")
-    g.ell(21, 15.5, 3.5, 2.5, "dbrown", "plum")
-    g.rect(15, 8, 2, 8, "white")
-    # a white muzzle with heavy jowls hanging past the chin
-    g.ell(16, 21, 7, 4.5, "white", "lgrey")
-    g.ell(11.5, 23.5, 3, 2.5, "white", "lgrey")
-    g.ell(20.5, 23.5, 3, 2.5, "lgrey", "grey")
-    g.p(13, 23, "lgrey")
-    g.p(19, 23, "lgrey")
-    eyes(g, 10, 20, 14, mood=mood)
+    g.ell(16, 28.5, 7.5, 3, "amber", "orange", "yellow")
+    # long feathered ears hanging low, set apart from the head by a darker fold, wavy at the tips
+    for x, s in ((5, -1), (27, 1)):
+        g.ell(x + s * d / 2, 20 + d, 3.5, 7, "orange")
+        g.ell(x + s * d / 2, 20 + d, 2.5, 6, "amber", "orange", "yellow")
+        g.p(x + s * d / 2 - 2, 27 + d, "amber")
+        g.p(x + s * d / 2 + 1, 27 + d, "amber")
+    g.ell(16, 16, 9.5, 8.5, "amber", "orange", "yellow")
+    g.ell(16, 21, 5.5, 4, "cream", "tan")
+    g.rect(13, 9, 6, 1, "yellow")
+    # the blue collar and a round tag
+    g.rect(9, 26, 14, 2, "blue")
+    g.rect(9, 26, 14, 1, "sky")
+    g.ell(16, 29, 1.6, 1.6, "lgrey", "grey", "white")
+    eyes(g, 11, 19, 14, mood=mood)
     g.rect(14, 18, 4, 2, "ink")
-    mouth(g, 21, mood)
-    g.rect(13, 26, 6, 5, "amber")
-    g.rect(13, 27, 6, 1, "brown")
-    g.rect(13, 29, 6, 1, "brown")
-    g.rect(18, 26, 1, 5, "orange")
+    g.p(14, 18, "dslate")
+    mouth(g, 20, mood)
     return g
 
 
@@ -542,6 +565,14 @@ def puff(g, cx, cy, rx, ry, ring=False):
     if rx >= 2 and ry >= 2:
         g.p(cx + rx * 0.4, cy + ry * 0.3, "cream")
 
+
+
+def merle(g, cx, b, blots):
+    """Blue merle blotches on Archie's coat: each (dx, y, w, h) a navy patch at x cx + dx, row y + b, with a
+    dslate pixel ragging its lower-right corner."""
+    for dx, y, w, h in blots:
+        g.rect(cx + dx, y + b, w, h, "navy")
+        g.p(cx + dx + w, y + b + h - 1, "dslate")
 
 
 def spray(g, d):
@@ -617,9 +648,9 @@ DOGS = {
     "zippy": (zippy_road, zippy_face),
     "pierre": (pierre_road, pierre_face),
     "biscuit": (biscuit_road, biscuit_face),
-    "dash": (dash_road, dash_face),
+    "archie": (archie_road, archie_face),
     "snowball": (snowball_road, snowball_face),
-    "waffles": (waffles_road, waffles_face),
+    "penny": (penny_road, penny_face),
     "koda": (koda_road, koda_face),
 }
 

@@ -375,9 +375,9 @@ OWNERS = {
     "zippy": pruitt,
     "pierre": lefevre,
     "biscuit": sam,
-    "dash": ophelia,
+    "archie": ophelia,
     "snowball": tiffany,
-    "waffles": hughes,
+    "penny": hughes,
     "koda": jesse,
 }
 
