@@ -4,23 +4,11 @@ Every art asset the game needs, derived from the rulebook in `../gameplay/game-d
 
 Priority:
 
-- **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops)
+- **M6:** in the Milestone 6 pixel pass (see Milestones in `../gameplay/game-design.md`)
 - **core:** needed before the game ships, outside the Milestone 6 list
 - **later:** nice to have; placeholders are acceptable
 
 Sizes marked TBD depend on an open decision in the style guide.
-
-## Screen budget
-
-| Region      | Size (px)         | Notes                                      |
-| ----------- | ----------------- | ------------------------------------------ |
-| Canvas      | 360×640           | Portrait, nearest-neighbour scaling        |
-| Top bar     | 360×40            | Money, zone progress                       |
-| Backdrop    | 360×150 at y=40   | The zone's neighbourhood; scenery gags     |
-| Dog column  | 80×450 at y=190   | 3 slots of ~72×146, 4px padding            |
-| Road        | 280×450 at 80,190 | 5 lanes of 56px                            |
-| Choice card | ~83×140           | Up to 3 across the road, 8px gaps, centred |
-| Tile        | 32×32             | Road tiles, dogs, obstacles; ~12px margins |
 
 ## Characters (road)
 
@@ -38,17 +26,17 @@ Dogs are listed in their own section below. Each of the 9 dogs is a named charac
 
 Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react`, `pull` and `tell` (the lean and bark about 1s before a pull). Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
 
-| Dog               | Breed           | Size   | Look                                  | Owner                                  | Road sprite    | Face                | Owner face            | Priority |
-| ----------------- | --------------- | ------ | ------------------------------------- | -------------------------------------- | -------------- | ------------------- | --------------------- | -------- |
-| Duchess (starter) | Maltese         | Small  | White coat, pink bow                  | Rosa, retired florist (laid-back)      | `dog-duchess`  | `face-dog-duchess`  | `face-owner-duchess`  | M6       |
-| Biscuit (starter) | Beagle          | Medium | Tricolour, floppy ears, green collar  | Sam, barista (laid-back)               | `dog-biscuit`  | `face-dog-biscuit`  | `face-owner-biscuit`  | M6       |
-| Koda (starter)    | Husky           | Big    | Grey and white, blue eyes, harness    | Jesse, trail runner (laid-back)        | `dog-koda`     | `face-dog-koda`     | `face-owner-koda`     | M6       |
-| Nugget            | Pug             | Small  | Fawn, black mask, tiny bandana        | Kevin, pet influencer (dramatic)       | `dog-nugget`   | `face-dog-nugget`   | `face-owner-nugget`   | M6       |
-| Zippy             | Jack Russell    | Small  | White with tan patches, red collar    | Mr. Pruitt, retired accountant (fussy) | `dog-zippy`    | `face-dog-zippy`    | `face-owner-zippy`    | M6       |
-| Pierre            | Standard poodle | Medium | Apricot, show-clip pom-poms           | Madame Lefevre, dog-show judge (fussy) | `dog-pierre`   | `face-dog-pierre`   | `face-owner-pierre`   | M6       |
-| Dash              | Whippet         | Medium | Grey brindle, knit sweater            | Ophelia, stage actor (dramatic)        | `dog-dash`     | `face-dog-dash`     | `face-owner-dash`     | M6       |
-| Snowball          | Samoyed         | Big    | Fluffy white, collar with a bell      | Tiffany, wedding planner (dramatic)    | `dog-snowball` | `face-dog-snowball` | `face-owner-snowball` | M6       |
-| Waffles           | Saint Bernard   | Big    | Brown and white, little barrel collar | Dr. Hughes, dentist (fussy)            | `dog-waffles`  | `face-dog-waffles`  | `face-owner-waffles`  | M6       |
+| Dog               | Road sprite    | Face                | Owner face            | Priority |
+| ----------------- | -------------- | ------------------- | --------------------- | -------- |
+| Duchess (starter) | `dog-duchess`  | `face-dog-duchess`  | `face-owner-duchess`  | M6       |
+| Biscuit (starter) | `dog-biscuit`  | `face-dog-biscuit`  | `face-owner-biscuit`  | M6       |
+| Koda (starter)    | `dog-koda`     | `face-dog-koda`     | `face-owner-koda`     | M6       |
+| Nugget            | `dog-nugget`   | `face-dog-nugget`   | `face-owner-nugget`   | M6       |
+| Zippy             | `dog-zippy`    | `face-dog-zippy`    | `face-owner-zippy`    | M6       |
+| Pierre            | `dog-pierre`   | `face-dog-pierre`   | `face-owner-pierre`   | M6       |
+| Dash              | `dog-dash`     | `face-dog-dash`     | `face-owner-dash`     | M6       |
+| Snowball          | `dog-snowball` | `face-dog-snowball` | `face-owner-snowball` | M6       |
+| Waffles           | `dog-waffles`  | `face-dog-waffles`  | `face-owner-waffles`  | M6       |
 
 Starters come first: they are the dogs every new player sees.
 
@@ -84,7 +72,7 @@ Bumped with no card. An obstacle n lanes wide and m rows long is drawn 56n−24 
 
 ## Lucky encounters (road)
 
-Good things to bump into; each opens a choice card.
+Good things to bump into. The lost wallet opens a choice card; the biscuit neighbour and the photo op pay out at once with a popup.
 
 | Asset             | Key                 | Type   | Size  | Animations      | Priority | Notes                   |
 | ----------------- | ------------------- | ------ | ----- | --------------- | -------- | ----------------------- |
@@ -161,7 +149,7 @@ Each card is a frame plus an illustration plus text drawn in the pixel font. The
 | Enlarged frame | `card-frame-large` | sprite | 166×280 | core     | Tap-to-enlarge view: the `card-frame` layout at 2× with 1px detail, illustration at 2×; same tags                                                                 |
 | Cost badge     | `card-cost`        | image  | 71×13   | core     | Plaque over the frame's badge (at 2× on the large frame); the game writes the cost between the rivets                                                             |
 
-Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. All 39 are drawn. Forced-stop keys use the stop's data key (`card-kid-wants-to-pet-pet`), upgrades their id (`card-second-wind`), and Poop bags' Skip option is `card-skip`. Biscuit neighbour and photo op pay out at once without a card, so `card-biscuit-neighbour-take` and `card-photo-op-pose` serve as their popup art.
+Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. All are drawn. Forced-stop keys use the stop's data key (`card-kid-wants-to-pet-pet`), upgrades their id (`card-second-wind`), and Poop bags' Skip option is `card-skip`. Biscuit neighbour and photo op pay out at once without a card, so `card-biscuit-neighbour-take` and `card-photo-op-pose` serve as their popup art.
 
 | Encounter         | Options                                                                                                     | Count | Priority |
 | ----------------- | ----------------------------------------------------------------------------------------------------------- | ----- | -------- |
@@ -171,8 +159,8 @@ Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, 
 | Other dog         | let them sniff, pull away                                                                                   | 2     | M6       |
 | Thief             | chase them off, let it go                                                                                   | 2     | M6       |
 | Lost wallet       | return it, keep it                                                                                          | 2     | M6       |
-| Biscuit neighbour | take biscuits (popup art), politely pass                                                                    | 2     | M6       |
-| Photo op          | pose (popup art), wave and walk on                                                                          | 2     | M6       |
+| Biscuit neighbour | take biscuits (popup art)                                                                                   | 1     | M6       |
+| Photo op          | pose (popup art)                                                                                            | 1     | M6       |
 | Stop sign         | wait, dart across                                                                                           | 2     | M6       |
 | Kid               | let them pet, decline                                                                                       | 2     | M6       |
 | Ice cream truck   | buy pup cups, walk past                                                                                     | 2     | M6       |
@@ -182,7 +170,7 @@ Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, 
 | Poop bags         | skip (`card-skip`)                                                                                          | 1     | core     |
 | Upgrades          | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, second wind, sweet talker | 9     | core     |
 
-Total: 39 card illustrations, 29 of them in Milestone 6.
+Total: 37 card illustrations in use, 27 of them in Milestone 6. `card-biscuit-neighbour-pass` and `card-photo-op-wave` match no option and are unused.
 
 ## Help screen
 
@@ -203,7 +191,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper; drawn by `art/tools/glyphs.py`                                                                                                                                   |
 | Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic; drawn by `art/tools/glyphs.py`                                                                                                                            |
 | Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py`                                                                                            |
-| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price                                                                                                       |
+| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought: a padlock and the price                                                                                                                       |
 | Stats page           | `screen-stats`             | image  | 360×640          | core     | Evening den: a window onto Woof Way at night, a dog photo and leash hooks above y 130, dark panelling below for the stats and the badge wall                                          |
 | Achievement badges   | `badge-<achievement>`      | sprite | 32×32            | core     | 15 medals, rim by category (firsts bronze, mastery silver, collection gold, silly pink); tags `earned`, `locked` (grey with a padlock)                                                |
 | Badge celebration    | `fx-confetti`              | sprite | 64×64            | core     | Burst behind a badge as it is earned (tag `play`); the owners cheer with their `happy` faces                                                                                          |
@@ -223,7 +211,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Panel       | `ui-panel`                | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                                              |
 | Pause icon  | `icon-pause`              | image  | 16×16     | core     | Top bar; opens the pause menu                                                                            |
 | Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | A fingertip on a two-way track with fading touch marks; the game writes "drag to switch lanes" under it  |
-| App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later                              |
+| App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | `public/art/favicon.png` at 32 and 16, plus home-screen sizes                                            |
 
 ## Sounds
 
@@ -238,15 +226,3 @@ Ogg Vorbis plus AAC `.m4a`, mono 44.1kHz, listed under `sounds` in the manifest;
 | Card open  | `sfx-card`   | sound | 0.44s  | no   | M6       | Swish and chime as choice cards open       |
 | Fired      | `sfx-fired`  | sound | 1.80s  | no   | M6       | Sad descending phrase when a dog is fired  |
 | Walk music | `music-walk` | sound | 28.77s | yes  | M6       | 12 bars at about 100 BPM, loops seamlessly |
-
-## Counts
-
-| Priority | Sprites | Images           | Fonts | Sounds |
-| -------- | ------- | ---------------- | ----- | ------ |
-| M6       | ~41     | 29 (card illus.) | 1     | 7      |
-| core     | ~13     | ~45              | 0     | 0      |
-| later    | ~1      | ~23              | 0     | 0      |
-
-## Open questions
-
-- **Pack arrangement:** 1 to 3 dogs share one 56px lane ahead of the walker. Side by side does not fit 3×32px, so they need a staggered formation; the art needs to know the offsets.
