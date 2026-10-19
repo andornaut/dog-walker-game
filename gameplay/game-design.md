@@ -47,6 +47,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 ### Resources
 
 - **Money ($):** the only currency; earned during the run (tips, per-zone fees); spent in encounters (costs are per affected dog); banked at the end. Money is tracked in cents and shown in whole dollars
+- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog's slot or the bank (e.g. "−2 ♥, dramatic", "+$1.50 tip, solo"); a card's enlarged view lists the modifiers behind its numbers
 - **Owner happiness (♥):** one meter per dog, starts at 4 or 5 depending on the owner's temperament; max 6, 8 or 10 depending on the dog's size. Shown as the dog's and owner's faces plus the meter. At 0 the owner fires you (with a quip) and the dog leaves
 
 ### A run
@@ -153,7 +154,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - Rush hour: more tips _and_ more obstacles for the next zone (trade-off)
 - Raincoats: puddles can't upset anyone for the rest of the run
 - Treat magnet: treats count from one lane away
-- Steady hands: dogs pull the pack half as often
+- Second wind: +2 ♥ to the unhappiest owner now
 - Sweet talker: every per-dog $ cost on a card, missed tips included, is $4 less per dog for the rest of the run
 
 ### Home screen and progression
