@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 
+import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
 import { precachePlugin } from "./src/pwa/precachePlugin";
 
 export default defineConfig({
@@ -17,12 +18,14 @@ export default defineConfig({
     // Set just above it so that growth in game code still warns.
     chunkSizeWarningLimit: 1600,
   },
-  // Writes /sw.js, the service worker that precaches the game for offline play.
+  // precachePlugin writes /sw.js, the service worker that precaches the game for offline play.
+  // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
   plugins: [
     precachePlugin({
       pageHtmlFile: "play/index.html",
       serviceWorkerSource: "src/pwa/serviceWorker.ts",
     }),
+    securityHeadersPlugin(),
   ],
   // The container name the Playwright MCP reaches the dev or preview server by,
   // over the playwright-mcp Docker network. Vite rejects any other Host header.
