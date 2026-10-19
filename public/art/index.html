@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
 <style>
-/* A dark viewing room for pixel art: every asset in public/art/manifest.json, drawn at an integer zoom on a chosen ground colour. */
+/* A dark viewing room for pixel art: every asset in public/art/manifest.json, grouped by key family and drawn at an integer zoom on a chosen ground colour. */
 :root {
   --bg: #13101e;
   --surface: #1d1a2c;
@@ -41,31 +41,53 @@ h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 5vw
 header p { margin: 0; color: var(--muted); max-width: 70ch; }
 .counts { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--f-mono); font-size: 12px; }
 .counts span { background: var(--raise); padding: 2px 10px; border-radius: 999px; }
+.jump ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.jump a { display: inline-flex; gap: 6px; font-family: var(--f-mono); font-size: 13px; color: var(--fg); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 3px 9px; }
+.jump a:hover { border-color: var(--accent); }
+.jump a small { color: var(--muted); font-size: 12px; }
 .toolbar {
   position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
   background: var(--bg); border-bottom: 1px solid var(--line);
   display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding-block: 10px;
 }
-.toolbar label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; display: flex; gap: 8px; align-items: center; }
-.toolbar select, .toolbar input { font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; }
-.toolbar input { width: 12em; max-width: 100%; }
-section { display: grid; gap: 14px; }
-h2 { font-family: var(--f-display); font-weight: 400; font-size: 18px; letter-spacing: 0.06em; margin: 0; text-transform: uppercase; display: flex; gap: 10px; align-items: baseline; }
+.toolbar label, .toolbar .lbl { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; display: flex; gap: 8px; align-items: center; }
+.toolbar select, .toolbar input[type="search"] { font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; }
+.toolbar input[type="search"] { width: 12em; max-width: 100%; }
+/* Ground swatches: native radios, hidden behind their swatch so arrow keys and screen readers work as usual. */
+.grounds { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.grounds .lbl { margin-right: 2px; }
+.toolbar .gr { display: block; position: relative; cursor: pointer; }
+.gr input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.gr i { display: block; width: 24px; height: 24px; border-radius: 4px; border: 1px solid var(--line); }
+.gr input:checked + i { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent); }
+.gr input:focus-visible + i { outline: 2px solid var(--fg); outline-offset: 6px; }
+.grounds output { font-size: 13px; color: var(--muted); margin-left: 4px; min-width: 9em; }
+@media (max-width: 600px) { .toolbar { gap: 8px 14px; } .toolbar input[type="search"] { width: 9em; } .grounds output { display: none; } }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+section { display: grid; gap: 14px; scroll-margin-top: calc(var(--bar, 56px) + 16px); }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 18px; letter-spacing: 0.06em; margin: 0; text-transform: uppercase; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
 h2 small { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: 0; text-transform: none; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 12px; }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
 .view { display: grid; place-items: center; padding: 16px; min-height: 140px; overflow: auto; }
-.view.checker { background-color: #c0cbdc; background-image: conic-gradient(#8b9bb4 25%, transparent 0 50%, #8b9bb4 0 75%, transparent 0); background-size: 16px 16px; }
+.view.checker, .gr i.checker { background-color: #c0cbdc; background-image: conic-gradient(#8b9bb4 25%, transparent 0 50%, #8b9bb4 0 75%, transparent 0); background-size: 16px 16px; }
+.gr i.checker { background-size: 12px 12px; }
 canvas, .view img { display: block; image-rendering: pixelated; image-rendering: crisp-edges; max-width: none; }
 .meta { padding: 10px 12px; display: grid; gap: 8px; border-top: 1px solid var(--line); min-width: 0; }
-.meta .key { font-family: var(--f-mono); font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.meta .key, .sound .key { font-family: var(--f-mono); font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
 .meta .dims { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
 .tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .tags button { font: inherit; font-family: var(--f-mono); font-size: 12px; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; cursor: pointer; }
 .tags button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
-.tags button:focus-visible, .toolbar :focus-visible, .sw:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tags button:focus-visible, .toolbar :focus-visible, .sw:focus-visible, .jump a:focus-visible, .mock:focus-visible, .sound audio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .strip { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
 .strip canvas { background: rgba(255, 255, 255, 0.04); }
+.sounds { display: grid; gap: 8px; }
+.sound { display: grid; grid-template-columns: minmax(0, 14em) minmax(0, 420px) auto; grid-template-areas: "key audio loop"; gap: 8px 16px; align-items: center; justify-content: start; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; }
+.sound .key { grid-area: key; }
+.sound audio { grid-area: audio; display: block; width: 100%; }
+.sound .loop { grid-area: loop; font-family: var(--f-mono); font-size: 12px; background: var(--accent); color: var(--accent-ink); font-weight: 600; border-radius: 4px; padding: 2px 8px; }
+@media (max-width: 600px) { .sound { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "key loop" "audio audio"; } }
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 6px; padding: 16px; color: var(--muted); font-size: 14px; }
 .empty code, .meta code { font-family: var(--f-mono); font-size: 13px; color: var(--fg); }
 .mocks { display: grid; gap: 8px; }
@@ -85,29 +107,31 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 <main class="wrap">
   <header>
     <h1>Dog Walker Art</h1>
-    <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it. Sprites play their Aseprite animations. Mocks are design tests, not game assets.</p>
+    <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it, grouped by key prefix. Sprites play their Aseprite animations. Mocks are design tests, not game assets.</p>
     <div class="counts" id="counts"></div>
+    <p class="error" id="status" hidden></p>
   </header>
 
-  <div class="toolbar" role="group" aria-label="View options">
+  <nav class="jump" aria-label="Asset groups"><ul id="jump"></ul></nav>
+
+  <div class="toolbar" id="toolbar" role="group" aria-label="View options">
     <label for="zoom">Zoom <select id="zoom"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option><option value="6">6×</option></select></label>
-    <label for="ground">Ground <select id="ground">
-      <option value="#181425">Ink</option>
-      <option value="checker">Checker</option>
-      <option value="#3a4466">Street</option>
-      <option value="#e4a672">Park</option>
-      <option value="#c0cbdc">Shops</option>
-      <option value="#c28569">Home stretch</option>
-      <option value="#ead4aa">Card paper</option>
-    </select></label>
     <label for="filter">Filter <input id="filter" type="search" placeholder="key, e.g. dog-" autocomplete="off"></label>
+    <div class="grounds" role="radiogroup" aria-labelledby="ground-label">
+      <span class="lbl" id="ground-label">Ground</span>
+      <label class="gr" title="Ink"><input type="radio" name="ground" value="#181425"><i style="background:#181425"></i><span class="sr">Ink</span></label>
+      <label class="gr" title="Checker"><input type="radio" name="ground" value="checker"><i class="checker"></i><span class="sr">Checker</span></label>
+      <label class="gr" title="Woof Way road"><input type="radio" name="ground" value="#3a4466"><i style="background:#3a4466"></i><span class="sr">Woof Way road</span></label>
+      <label class="gr" title="Bark Park road"><input type="radio" name="ground" value="#e4a672"><i style="background:#e4a672"></i><span class="sr">Bark Park road</span></label>
+      <label class="gr" title="Sniff Street Shops road"><input type="radio" name="ground" value="#c0cbdc"><i style="background:#c0cbdc"></i><span class="sr">Sniff Street Shops road</span></label>
+      <label class="gr" title="The Long Way Home road"><input type="radio" name="ground" value="#c28569"><i style="background:#c28569"></i><span class="sr">The Long Way Home road</span></label>
+      <label class="gr" title="UI cream"><input type="radio" name="ground" value="#ead4aa"><i style="background:#ead4aa"></i><span class="sr">UI cream</span></label>
+      <output id="ground-name" aria-hidden="true"></output>
+    </div>
   </div>
 
-  <section aria-labelledby="h-sprites"><h2 id="h-sprites">Sprites <small id="n-sprites"></small></h2><div class="grid" id="sprites"></div></section>
-  <section aria-labelledby="h-images"><h2 id="h-images">Images <small id="n-images"></small></h2><div class="grid" id="images"></div></section>
-  <section aria-labelledby="h-fonts"><h2 id="h-fonts">Fonts <small id="n-fonts"></small></h2><div class="grid" id="fonts"></div></section>
-  <section aria-labelledby="h-mocks"><h2 id="h-mocks">Mocks <small id="n-mocks"></small></h2><div class="mocks" id="mocks"></div></section>
-  <section aria-labelledby="h-palette"><h2 id="h-palette">Palette <small>Endesga 32</small></h2><div class="palette" id="palette"></div></section>
+  <section id="s-mocks" aria-labelledby="h-mocks"><h2 id="h-mocks">Mocks <small id="n-mocks"></small></h2><div class="mocks" id="mocks"></div></section>
+  <section id="s-palette" aria-labelledby="h-palette"><h2 id="h-palette">Palette <small>Endesga 32</small></h2><div class="palette" id="palette"></div></section>
 </main>
 
 <script>
@@ -124,10 +148,43 @@ const el = (tag, props = {}, kids = []) => {
   return n;
 };
 
+// Gallery sections in page order. Sprites and images go to the first family whose prefix (or exact key) matches,
+// and to "road" when none does: road objects use their plain name. Fonts and sounds come from their own manifest lists.
+const GROUPS = [
+  { id: "dogs", title: "Dogs", prefixes: ["dog-"] },
+  { id: "faces", title: "Faces", prefixes: ["face-dog-", "face-owner-", "face-walker-"] },
+  { id: "portraits", title: "Portraits", prefixes: ["portrait-dog-"] },
+  { id: "walkers", title: "Walkers", prefixes: ["walker-"] },
+  { id: "road", title: "Road", hint: "no prefix: encounters, lucky finds, forced stops, obstacles, pickups" },
+  { id: "effects", title: "Effects", prefixes: ["fx-"] },
+  { id: "gags", title: "Gags", prefixes: ["gag-"] },
+  { id: "cards", title: "Cards", prefixes: ["card-"] },
+  { id: "help", title: "Help", prefixes: ["help-"] },
+  { id: "ui", title: "UI", prefixes: ["ui-", "icon-", "item-"] },
+  { id: "badges", title: "Badges", prefixes: ["badge-"] },
+  { id: "backdrops", title: "Backdrops", prefixes: ["backdrop-"] },
+  { id: "road-strips", title: "Road strips", prefixes: ["road-"] },
+  { id: "screens", title: "Screens", prefixes: ["screen-"], keys: ["logo"] },
+  { id: "fonts", title: "Fonts", list: "fonts" },
+  { id: "sounds", title: "Sounds", list: "sounds" },
+];
+// A depth variant such as dog-koda@50 groups and sorts with its base key.
+const baseKey = key => key.split("@")[0];
+const byKey = (x, y) => baseKey(x).localeCompare(baseKey(y)) || x.localeCompare(y);
+const familyOf = key => {
+  const k = baseKey(key);
+  return GROUPS.find(g => g.keys?.includes(k) || g.prefixes?.some(p => k.startsWith(p))) || GROUPS.find(g => g.id === "road");
+};
+
 const prefs = { zoom: 3, ground: "#181425" };
 try { Object.assign(prefs, JSON.parse(localStorage.getItem("dwg-art-gallery") || "{}")); } catch (e) { /* storage unavailable */ }
 const savePrefs = () => { try { localStorage.setItem("dwg-art-gallery", JSON.stringify(prefs)); } catch (e) { /* storage unavailable */ } };
-$("zoom").value = String(prefs.zoom); $("ground").value = prefs.ground;
+const groundInputs = [...document.querySelectorAll('input[name="ground"]')];
+if (!groundInputs.some(i => i.value === prefs.ground)) prefs.ground = groundInputs[0].value;
+$("zoom").value = String(prefs.zoom);
+groundInputs.forEach(i => { i.checked = i.value === prefs.ground; });
+const showGroundName = () => { $("ground-name").textContent = groundInputs.find(i => i.checked).parentElement.title; };
+showGroundName();
 
 const loadImage = src => new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => fail(new Error("Could not load " + src)); i.src = src; });
 const getJSON = async url => { const r = await fetch(url, { cache: "no-cache" }); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); };
@@ -141,7 +198,7 @@ function applyGround(v) { v.classList.toggle("checker", prefs.ground === "checke
 function makeView() { const v = el("div", { className: "view" }); views.push(v); applyGround(v); return v; }
 function sizeCanvas(c, w, h) { c.width = w; c.height = h; c.style.width = w * prefs.zoom + "px"; c.style.height = h * prefs.zoom + "px"; }
 function emptyCard(host, text) { host.replaceChildren(el("div", { className: "empty", innerHTML: text })); }
-function errorCard(host, key, err) { host.append(el("div", { className: "empty error", textContent: `${key}: ${err.message}` })); }
+function errorCard(host, key, err) { host.append(el("div", { className: "empty error", textContent: `${key}: ${err.message}`, dataset: { key } })); }
 
 // Aseprite "hash" JSON: frames keyed by name in export order, animations in meta.frameTags.
 function sequence(tag) {
@@ -221,29 +278,58 @@ async function addFont(host, s) {
   ])]));
 }
 
-async function fill(list, hostId, countId, add, noun) {
-  const host = $(hostId);
-  $(countId).textContent = String(list.length);
-  if (!list.length) { emptyCard(host, `No ${noun} exported yet. Sources go in <code>art/</code>, exports in <code>public/art/</code>, each with an entry in <code>manifest.json</code>.`); return; }
-  await Promise.all(list.map(s => add(host, s).catch(err => errorCard(host, s.key, err))));
-  [...host.children].sort((x, y) => (x.dataset.key || "").localeCompare(y.dataset.key || "")).forEach(c => host.append(c));
+// Ogg first, AAC for browsers without Vorbis, as the game loads them. Nothing downloads until play.
+async function addSound(host, s) {
+  const audio = el("audio", { controls: true, preload: "none", loop: !!s.loop }, [
+    el("source", { src: BASE + s.ogg, type: "audio/ogg" }),
+    el("source", { src: BASE + s.m4a, type: "audio/mp4" }),
+  ]);
+  audio.setAttribute("aria-label", s.key);
+  host.append(el("div", { className: "sound", dataset: { key: s.key } }, [
+    el("div", { className: "key", textContent: s.key }),
+    audio,
+    ...(s.loop ? [el("span", { className: "loop", textContent: "loop" })] : []),
+  ]));
+}
+
+// One section per group, inserted before Mocks, plus its link in the jump list.
+for (const g of GROUPS) {
+  const hint = g.hint || [...(g.prefixes || []).map(p => p + "*"), ...(g.keys || [])].join(" ");
+  $("s-mocks").before(el("section", { id: "s-" + g.id }, [
+    el("h2", { id: "h-" + g.id }, [g.title + " ", el("small", { id: "n-" + g.id }), ...(hint ? [el("small", { textContent: hint })] : [])]),
+    el("div", { className: g.list === "sounds" ? "sounds" : "grid", id: "g-" + g.id }),
+  ]));
+  $("s-" + g.id).setAttribute("aria-labelledby", "h-" + g.id);
+}
+const jumpTargets = [...GROUPS.map(g => [g.id, g.title]), ["mocks", "Mocks"], ["palette", "Palette"]];
+$("jump").replaceChildren(...jumpTargets.map(([id, title]) => el("li", { id: "j-" + id }, [el("a", { href: "#s-" + id }, [title, el("small", { id: "jn-" + id })])])));
+// Keep a jumped-to heading clear of the sticky toolbar, whose height changes as it wraps.
+new ResizeObserver(() => document.documentElement.style.setProperty("--bar", $("toolbar").offsetHeight + "px")).observe($("toolbar"));
+
+async function fill(g, items) {
+  const host = $("g-" + g.id);
+  if (!items.length) { emptyCard(host, `No ${g.title.toLowerCase()} exported yet. Sources go in <code>art/</code>, exports in <code>public/art/</code>, each with an entry in <code>manifest.json</code>.`); return; }
+  await Promise.all(items.map(([s, add]) => add(host, s).catch(err => errorCard(host, s.key, err))));
+  [...host.children].sort((x, y) => byKey(x.dataset.key || "", y.dataset.key || "")).forEach(c => host.append(c));
 }
 
 async function main() {
   let manifest;
-  try { manifest = await getJSON(BASE + "manifest.json"); } catch (err) { emptyCard($("sprites"), `<span class="error">Could not read the manifest: ${err.message}</span>`); manifest = {}; }
-  const sprites = manifest.sprites || [], images = manifest.images || [], fonts = manifest.fonts || [];
+  try { manifest = await getJSON(BASE + "manifest.json"); } catch (err) { Object.assign($("status"), { hidden: false, textContent: `Could not read the manifest: ${err.message}` }); manifest = {}; }
+  const sprites = manifest.sprites || [], images = manifest.images || [], fonts = manifest.fonts || [], sounds = manifest.sounds || [];
   let mocks = [];
   try { mocks = await getJSON(BASE + "mocks/index.json"); } catch (err) { /* no mocks listed */ }
-  $("counts").replaceChildren(...[[sprites, "sprites"], [images, "images"], [fonts, "fonts"], [mocks, "mocks"]].map(([l, n]) => el("span", { textContent: `${l.length} ${n}` })));
-  $("n-mocks").textContent = String(mocks.length);
+  $("counts").replaceChildren(...[[sprites, "sprites"], [images, "images"], [fonts, "fonts"], [sounds, "sounds"], [mocks, "mocks"]].map(([l, n]) => el("span", { textContent: `${l.length} ${n}` })));
+  $("n-mocks").textContent = $("jn-mocks").textContent = String(mocks.length);
   if (mocks.length) $("mocks").replaceChildren(...mocks.map(m => el("a", { className: "mock", href: BASE + "mocks/" + m.path }, [el("b", { textContent: m.title }), el("span", { textContent: m.description || "" })])));
   else emptyCard($("mocks"), "No mocks yet.");
-  await Promise.all([
-    fill(sprites, "sprites", "n-sprites", addSprite, "sprites"),
-    fill(images, "images", "n-images", addImage, "images"),
-    fill(fonts, "fonts", "n-fonts", addFont, "fonts"),
-  ]);
+  const lists = { fonts: fonts.map(s => [s, addFont]), sounds: sounds.map(s => [s, addSound]) };
+  const families = Object.fromEntries(GROUPS.map(g => [g.id, lists[g.list] || []]));
+  for (const s of sprites) families[familyOf(s.key).id].push([s, addSprite]);
+  for (const s of images) families[familyOf(s.key).id].push([s, addImage]);
+  for (const g of GROUPS) $("g-" + g.id).dataset.total = String(families[g.id].length);
+  applyFilter();
+  await Promise.all(GROUPS.map(g => fill(g, families[g.id])));
   applyFilter();
 }
 
@@ -252,13 +338,22 @@ $("palette").replaceChildren(...PAL.map((h, i) => {
   b.addEventListener("click", async () => { try { await navigator.clipboard.writeText("#" + h); b.lastChild.innerHTML = `<b>${i}</b> copied`; setTimeout(() => { b.lastChild.innerHTML = `<b>${i}</b> #${h}`; }, 900); } catch (e) { /* clipboard unavailable */ } });
   return b;
 }));
+$("jn-palette").textContent = String(PAL.length);
 
+// Hides non-matching cards and sound rows, and any group (and its jump link) left with none. Counts read "shown/total" while filtering.
 function applyFilter() {
   const q = $("filter").value.trim().toLowerCase();
-  for (const card of document.querySelectorAll("article.card")) card.hidden = !!q && !card.dataset.key.toLowerCase().includes(q);
+  for (const g of GROUPS) {
+    const host = $("g-" + g.id), total = Number(host.dataset.total || 0);
+    let shown = 0;
+    for (const item of host.querySelectorAll("[data-key]")) { item.hidden = !!q && !item.dataset.key.toLowerCase().includes(q); if (!item.hidden) shown++; }
+    const n = q ? `${shown}/${total}` : String(total);
+    $("n-" + g.id).textContent = $("jn-" + g.id).textContent = n;
+    $("s-" + g.id).hidden = $("j-" + g.id).hidden = !!q && !shown;
+  }
 }
 $("filter").addEventListener("input", applyFilter);
-$("ground").addEventListener("change", e => { prefs.ground = e.target.value; savePrefs(); views.forEach(applyGround); });
+for (const i of groundInputs) i.addEventListener("change", () => { prefs.ground = i.value; savePrefs(); showGroundName(); views.forEach(applyGround); });
 $("zoom").addEventListener("change", e => {
   prefs.zoom = Number(e.target.value); savePrefs();
   for (const s of scaled) { s.canvas.style.width = s.w * prefs.zoom + "px"; s.canvas.style.height = s.h * prefs.zoom + "px"; }
