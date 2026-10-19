@@ -165,6 +165,12 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
 - **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (skunk "SPRAYED!", puddle "SOAKED!", thief "PICKPOCKETED!", squirrel "SQUIRREL!", other dog "NEW FRIEND!") and the caught dogs shaking off
 - **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through) and Spooked (after a thief) are visual only and fade after 10 seconds
+- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays during the hit stop
+- **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
+- **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
+- **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows
+- **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
+- **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
 - **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, equipped gear); tap one for its description
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band; they open no card and have no effect.
