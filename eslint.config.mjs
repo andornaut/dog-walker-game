@@ -23,6 +23,25 @@ export default ts.config(
     plugins,
     rules: sourceRules,
   },
+  // Logic, layout and data stay free of Phaser and the scenes, so they run in unit
+  // tests without a renderer. Only the scenes and the entry point may import them.
+  {
+    files: ["src/**/*.ts"],
+    ignores: ["src/main.ts", "src/scenes/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["phaser", "phaser/*", "**/scenes", "**/scenes/*"],
+              message: "Only src/scenes/ and src/main.ts may import Phaser or a scene.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   // Config files: they produce what ships rather than being it.
   {
     files: ["*.ts", "*.js", "*.mjs"],
