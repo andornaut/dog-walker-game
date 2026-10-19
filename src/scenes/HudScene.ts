@@ -298,6 +298,12 @@ export class HudScene extends Scene {
     });
   }
 
+  // The topmost overlay over the walk, the pause menu or the card, else the HUD itself.
+  private overlayScene(): Scene {
+    const key = [SCENE_KEYS.pause, SCENE_KEYS.card].find((overlay) => this.scene.isActive(overlay));
+    return key === undefined ? this : this.scene.get(key);
+  }
+
   private runScene(): RunScene {
     return this.scene.get(SCENE_KEYS.run) as RunScene;
   }
@@ -789,7 +795,7 @@ export class HudScene extends Scene {
       if (now !== null) {
         markHintShown(this, now.id);
         this.strip?.closeBubble();
-        this.hintParts = this.drawHint(now);
+        this.hintParts = this.drawHint(held ? this.overlayScene() : this, now);
       }
     }
     if (now === null && this.hintParts.length > 0) {
@@ -805,27 +811,28 @@ export class HudScene extends Scene {
   }
 
   // A hint's bubble, centred in the hint lane with its bottom on the lane's, its tail pointing
-  // at the road. The drag hint also shows the touch picture over the road.
-  private drawHint(hint: RaisedHint): GameObjects.GameObject[] {
+  // at the road. The drag hint also shows the touch picture over the road. A hint raised under
+  // a card or a menu draws in that overlay, over its dim.
+  private drawHint(scene: Scene, hint: RaisedHint): GameObjects.GameObject[] {
     const { road } = LAYOUT;
     const lane = LANES.hint;
     const style = { color: PALETTE.plum, scale: 2 };
-    const lines = wrapPixelText(this, style, lane.width - 2 * HINT.padding, hint.text);
-    const text = addPixelText(this, 0, 0, lines.join("\n"), style);
+    const lines = wrapPixelText(scene, style, lane.width - 2 * HINT.padding, hint.text);
+    const text = addPixelText(scene, 0, 0, lines.join("\n"), style);
     const width = Math.ceil(text.width) + 2 * HINT.padding;
     const height = Math.ceil(text.height) + 2 * HINT.padding;
     const x = centredInLane(lane, lane.x + lane.width / 2, width);
     const y = lane.y + lane.height - height;
     placePixelText(text, x + HINT.padding, y + HINT.padding);
-    const parts: GameObjects.GameObject[] = [addPanel(this, { height, width, x, y }, "ui-hint")];
-    if (this.textures.exists("ui-hint-tail")) {
+    const parts: GameObjects.GameObject[] = [addPanel(scene, { height, width, x, y }, "ui-hint")];
+    if (scene.textures.exists("ui-hint-tail")) {
       parts.push(
-        this.add.image(road.x + road.width / 2, y + height - 1, "ui-hint-tail").setOrigin(0.5, 0),
+        scene.add.image(road.x + road.width / 2, y + height - 1, "ui-hint-tail").setOrigin(0.5, 0),
       );
     }
-    if (hint.id === "drag" && this.textures.exists("ui-touch-hint")) {
+    if (hint.id === "drag" && scene.textures.exists("ui-touch-hint")) {
       parts.push(
-        this.add.image(road.x + road.width / 2, road.y + road.height / 2, "ui-touch-hint"),
+        scene.add.image(road.x + road.width / 2, road.y + road.height / 2, "ui-touch-hint"),
       );
     }
     text.setDepth(1);
