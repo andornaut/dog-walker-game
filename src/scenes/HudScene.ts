@@ -36,6 +36,7 @@ import {
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
+  SOUND_BUTTON,
   TOP_BAR,
   topBarAction,
   type TopBarButton,
@@ -67,7 +68,7 @@ import {
   setPixelText,
   wrapPixelText,
 } from "./pixelText";
-import { isMuted, markHintShown, profileSave, setMuted, shownHints } from "./profileStore";
+import { isMuted, markHintShown, profileSave, shownHints, toggleMuted } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,
   CHANGE_LABELS_EVENT,
@@ -79,7 +80,7 @@ import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { firstTag, playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
-import { addPanel, artFits } from "./uiKit";
+import { addPanel, artFits, soundIcon } from "./uiKit";
 
 // The zone's name is right-aligned in its well, its icon just left of it, and the pips end
 // under the name's right edge.
@@ -143,6 +144,7 @@ export class HudScene extends Scene {
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
   private slots: SlotView[] = [];
+  private soundHolder: GameObjects.Container | undefined;
   private strip: StateStripView | undefined;
   private treats: GameObjects.BitmapText | undefined;
   private zoneIcon: GameObjects.Image | undefined;
@@ -179,6 +181,10 @@ export class HudScene extends Scene {
     }
     this.addButton(HOME_BUTTON);
     this.addHomeIcon();
+    this.addButton(SOUND_BUTTON);
+    // A container holds the icon's place in the draw order while it is swapped.
+    this.soundHolder = this.add.container(0, 0);
+    this.showSoundIcon(isMuted(this));
     this.addButton(PAUSE_BUTTON);
     const pauseIcon = buttonIcon(PAUSE_BUTTON, false);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
@@ -293,7 +299,7 @@ export class HudScene extends Scene {
         run.openPause("homeQuestion");
         break;
       case "mute":
-        setMuted(this, !isMuted(this));
+        toggleMuted(this);
         break;
       case "openMenu":
         run.openPause();
@@ -335,6 +341,17 @@ export class HudScene extends Scene {
     });
     fillRect(g, PALETTE.cream, { height: 6, width: 10, x: x + 3, y: y + 8 });
     fillRect(g, PALETTE.navy, { height: 4, width: 2, x: x + 7, y: y + 10 });
+  }
+
+  // icon-sound's on or off frame on the sound button's face, for M and Settings too.
+  private showSoundIcon(muted: boolean): void {
+    const holder = this.soundHolder;
+    if (holder === undefined) {
+      return;
+    }
+    holder.removeAll(true);
+    const { x, y } = buttonIcon(SOUND_BUTTON, false);
+    holder.add(soundIcon(this, !muted, x, y));
   }
 
   // The icon art when it is loaded, else cream pause bars or play triangle drawn on the face.
@@ -431,6 +448,7 @@ export class HudScene extends Scene {
       fill: Math.round(view.zoneFraction * PIP.width),
       modifiers: view.run.modifiers,
       money: this.shownMoney(view.run.money),
+      muted: isMuted(this),
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
       route: view.run.route,
@@ -439,6 +457,9 @@ export class HudScene extends Scene {
       zone: view.run.zoneIndex,
     };
     if (Object.keys(state).some((key) => state[key] !== this.drawn[key])) {
+      if (state.muted !== this.drawn.muted) {
+        this.showSoundIcon(isMuted(this));
+      }
       this.drawn = state;
       this.showPauseIcon(pause);
       this.redraw(view);

@@ -11,7 +11,7 @@ import { DOGHOUSE } from "../hud/doghouse";
 import { hudLanes } from "../hud/hudLanes";
 import { PAUSE_MENU_ITEMS, pauseMenuLayout } from "../hud/pauseMenu";
 import { STRIP } from "../hud/stateStrip";
-import { buttonIcon, HOME_BUTTON, PAUSE_BUTTON, TOP_BAR } from "../hud/topBar";
+import { buttonIcon, TOP_BAR, TOP_BAR_BUTTONS, type TopBarButton } from "../hud/topBar";
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
 import { gridRects } from "../layout/grid";
 import { laneCenterXs, laneDividerXs } from "../layout/lanes";
@@ -55,6 +55,11 @@ function roadRow(projection: RoadProjection, road: Rect, row: number) {
     row,
     scale: rowScale(projection, row),
   };
+}
+
+// A top-bar button with where its unpressed icon sits.
+function withIcon(button: TopBarButton) {
+  return { ...button, icon: buttonIcon(button, false) };
 }
 
 export function layoutExport(
@@ -150,8 +155,9 @@ export function layoutExport(
     screen: { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width },
     topBar: {
       buttons: {
-        home: { ...HOME_BUTTON, icon: buttonIcon(HOME_BUTTON, false) },
-        pause: { ...PAUSE_BUTTON, icon: buttonIcon(PAUSE_BUTTON, false) },
+        home: withIcon(TOP_BAR_BUTTONS.home),
+        pause: withIcon(TOP_BAR_BUTTONS.pause),
+        sound: withIcon(TOP_BAR_BUTTONS.sound),
       },
       // The state strip hangs under the bar at its right end.
       strip: STRIP,

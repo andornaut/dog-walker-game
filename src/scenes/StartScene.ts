@@ -105,10 +105,10 @@ import {
   currentSettings,
   isMuted,
   profileSave,
-  setMuted,
   setRunOverride,
   storageState,
   takeCelebrations,
+  toggleMuted,
   updateProfile,
   walkerSpriteKey,
 } from "./profileStore";
@@ -752,8 +752,7 @@ export class StartScene extends Scene {
         return;
       }
       case "mute": {
-        const muted = !isMuted(this);
-        setMuted(this, muted);
+        const muted = toggleMuted(this);
         const { noticeSoundOff, noticeSoundOn } = gameData.homeText;
         this.action = { kind: "notice", text: muted ? noticeSoundOff : noticeSoundOn };
         this.render();

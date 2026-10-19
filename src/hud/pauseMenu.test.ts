@@ -4,7 +4,7 @@ import { itemAt } from "../arrays";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { homeQuestionLayout, pauseMenuLayout } from "./pauseMenu";
-import { HOME_BUTTON, PAUSE_BUTTON } from "./topBar";
+import { TOP_BAR_BUTTONS } from "./topBar";
 
 const { road } = screenLayout(SCREEN_CONFIG);
 
@@ -47,7 +47,7 @@ describe("pauseMenuLayout hits", () => {
   // The top bar's buttons stay live while the menu is up, so no menu button may reach them.
   it("keeps every menu button's hit area clear of the top bar's buttons", () => {
     for (const hit of hits) {
-      for (const button of [HOME_BUTTON, PAUSE_BUTTON]) {
+      for (const button of Object.values(TOP_BAR_BUTTONS)) {
         expect(hit.y).toBeGreaterThanOrEqual(button.hit.y + button.hit.height);
       }
     }

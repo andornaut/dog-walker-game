@@ -122,6 +122,14 @@ export function setMuted(scene: Scene, muted: boolean): void {
   void setSettings(scene, { ...currentSettings(scene), muted });
 }
 
+// Flips mute, as the M key, the run's sound button and the home screen's do, and returns
+// whether sound is now muted.
+export function toggleMuted(scene: Scene): boolean {
+  const muted = !isMuted(scene);
+  setMuted(scene, muted);
+  return muted;
+}
+
 export function markHintShown(scene: Scene, hintId: HintId): void {
   void session(scene).markHintShown(hintId);
 }

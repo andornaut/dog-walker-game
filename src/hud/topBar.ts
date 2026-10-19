@@ -9,23 +9,35 @@ export const TOP_BAR = {
   zone: { height: 29, nameRight: 352, width: 144, x: 212, y: 5 },
 } as const;
 
-// A top-bar button: its 20x20 face, and a 44px-square hit area so a thumb finds it. Both hit
-// areas reach 4px into the band and meet at x=162 without overlapping; a press in one is
-// that button's and never a road gesture. Home's reaches over the treat well, which takes
-// no taps.
+// A top-bar button: its 20x20 face, and a 44px-square hit area so a thumb finds it. The faces
+// sit 2px apart, so neighbouring hit areas overlap, and a press where they do is the button
+// whose face centre is nearer. A press in any of them is that button's and never a road
+// gesture. Home's reaches over the treat well, which takes no taps, and pause's ends at
+// x=206, clear of the zone well and the state strip.
 export interface TopBarButton {
   face: Point;
   hit: Rect;
 }
 
-export const HOME_BUTTON: TopBarButton = {
-  face: { x: 130, y: 10 },
-  hit: { height: 44, width: 44, x: 118, y: 0 },
-};
+const FACE = 20;
+const HIT = 44;
 
-export const PAUSE_BUTTON: TopBarButton = {
-  face: { x: 174, y: 10 },
-  hit: { height: 44, width: 44, x: 162, y: 0 },
+function topBarButton(x: number, y: number): TopBarButton {
+  const inset = (HIT - FACE) / 2;
+  return { face: { x, y }, hit: { height: HIT, width: HIT, x: x - inset, y: 0 } };
+}
+
+export const HOME_BUTTON = topBarButton(130, 10);
+export const SOUND_BUTTON = topBarButton(152, 10);
+export const PAUSE_BUTTON = topBarButton(174, 10);
+
+// "sound" toggles mute, as the M key and the Settings switch do.
+export type TopBarPress = "home" | "pause" | "sound";
+
+export const TOP_BAR_BUTTONS: Readonly<Record<TopBarPress, TopBarButton>> = {
+  home: HOME_BUTTON,
+  pause: PAUSE_BUTTON,
+  sound: SOUND_BUTTON,
 };
 
 // The icon sits on the button's face, 2px lower while pressed.
@@ -33,15 +45,20 @@ export function buttonIcon(button: TopBarButton, pressed: boolean): Point {
   return { x: button.face.x + 2, y: button.face.y + (pressed ? 3 : 1) };
 }
 
-// "sound" is the M key's: sound has no button on the run's bar, and mutes from Settings.
-export type TopBarPress = "home" | "pause" | "sound";
-
-// The button a press at (x, y) lands on, if any.
+// The button a press at (x, y) lands on, if any: of the hit areas holding it, the one whose
+// face centre is nearest across.
 export function topBarButtonAt(x: number, y: number): TopBarPress | undefined {
-  if (containsPoint(HOME_BUTTON.hit, x, y)) {
-    return "home";
+  let found: { distance: number; press: TopBarPress } | undefined;
+  for (const [press, button] of Object.entries(TOP_BAR_BUTTONS) as [TopBarPress, TopBarButton][]) {
+    if (!containsPoint(button.hit, x, y)) {
+      continue;
+    }
+    const distance = Math.abs(x - (button.face.x + FACE / 2));
+    if (found === undefined || distance < found.distance) {
+      found = { distance, press };
+    }
   }
-  return containsPoint(PAUSE_BUTTON.hit, x, y) ? "pause" : undefined;
+  return found?.press;
 }
 
 // M mutes, and P and Escape are the pause button's. A held key's repeats press nothing.
@@ -76,11 +93,11 @@ export function gameplayAllowed(pause: RunPause): boolean {
 
 export type TopBarAction = "confirmHome" | "mute" | "openMenu" | "resume";
 
-// What a top-bar button does, pressed by a tap or by its key. Both buttons work whenever the
-// bar is in view: Home asks whether to head home, from the pause menu too, and pause opens
-// the menu, or resumes while the menu or the question is up. M mutes. Help and settings
-// cover the bar, so a tap there is theirs, and so are P and Escape, which close them. M still
-// mutes under help; settings flips its own sound switch on M.
+// What a top-bar button does, pressed by a tap or by its key. Every button works whenever the
+// bar is in view: Home asks whether to head home, from the pause menu too, sound and M mute
+// or unmute, and pause opens the menu, or resumes while the menu or the question is up. Help
+// and settings cover the bar, so a tap there is theirs, and so are P and Escape, which close
+// them. M still mutes under help; settings flips its own sound switch on M.
 export function topBarAction(
   pause: RunPause,
   via: "key" | "tap",

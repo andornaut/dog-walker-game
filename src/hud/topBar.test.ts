@@ -7,8 +7,12 @@ import {
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
+  SOUND_BUTTON,
+  TOP_BAR,
+  TOP_BAR_BUTTONS,
   type TopBarAction,
   topBarAction,
+  type TopBarButton,
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
@@ -26,10 +30,11 @@ describe("the top bar in each pause state", () => {
     gameplay: boolean;
     // Whether a card or a menu takes the walk's presses.
     covered: boolean;
-    // What a tap on Home, a tap or key on pause, and the M key do.
+    // What a tap on Home, a tap or key on pause, the M key and a tap on sound do.
     home: TopBarAction | undefined;
     pause: TopBarAction | undefined;
     mute: TopBarAction | undefined;
+    sound: TopBarAction | undefined;
   }
 
   const walking = {
@@ -39,10 +44,11 @@ describe("the top bar in each pause state", () => {
     icon: "icon-pause",
     mute: "mute",
     pause: "openMenu",
+    sound: "mute",
   } as const;
   const menu = { ...walking, covered: true, icon: "icon-play", pause: "resume" } as const;
   const confirm = { ...menu, home: undefined } as const;
-  const cover = { ...confirm, pause: undefined } as const;
+  const cover = { ...confirm, pause: undefined, sound: undefined } as const;
 
   it.each<[string, RunPause, Expected]>([
     ["walking", WALKING, { ...walking, gameplay: true }],
@@ -69,6 +75,7 @@ describe("the top bar in each pause state", () => {
       icon: pauseButtonIcon(pause),
       mute: topBarAction(pause, "key", "sound"),
       pause: tapPause,
+      sound: topBarAction(pause, "tap", "sound"),
     }).toEqual(expected);
   });
 });
@@ -96,13 +103,42 @@ describe("topBarButtonForKey", () => {
   });
 });
 
+describe("the top bar's buttons", () => {
+  // Each 20x20 face, 2px from the next, its icon at +2,+1, and its 44px-square hit area centred
+  // on it from the top of the bar.
+  it.each<[TopBarPress, TopBarButton, number]>([
+    ["home", HOME_BUTTON, 130],
+    ["sound", SOUND_BUTTON, 152],
+    ["pause", PAUSE_BUTTON, 174],
+  ])("puts %s's face at x %i", (press, button, x) => {
+    expect(TOP_BAR_BUTTONS[press]).toBe(button);
+    expect(button).toEqual({
+      face: { x, y: 10 },
+      hit: { height: 44, width: 44, x: x - 12, y: 0 },
+    });
+    expect(buttonIcon(button, false)).toEqual({ x: x + 2, y: 11 });
+    expect(buttonIcon(button, true)).toEqual({ x: x + 2, y: 13 });
+  });
+
+  it("keeps the faces and the hit areas clear of the zone well", () => {
+    for (const { face, hit } of Object.values(TOP_BAR_BUTTONS)) {
+      expect(face.x + 20).toBeLessThan(TOP_BAR.zone.x);
+      expect(hit.x + hit.width).toBeLessThanOrEqual(TOP_BAR.zone.x);
+    }
+  });
+});
+
 describe("topBarButtonAt", () => {
-  // The corners of each 44px hit area, which reaches 4px into the band, and points just outside
-  // them; the sound button is gone from the bar.
+  // The outer corners of the hit areas, which reach 4px into the band, points just outside
+  // them, and the overlaps, where the nearer face centre (140, 162 or 184) wins.
   it.each<[number, number, TopBarPress | undefined]>([
     [118, 0, "home"],
-    [161, 43, "home"],
-    [162, 0, "pause"],
+    [118, 43, "home"],
+    [150, 20, "home"],
+    [152, 20, "sound"],
+    [162, 43, "sound"],
+    [172, 20, "sound"],
+    [174, 20, "pause"],
     [205, 43, "pause"],
     [140, 44, undefined],
     [117, 20, undefined],
@@ -110,20 +146,5 @@ describe("topBarButtonAt", () => {
     [300, 20, undefined],
   ])("finds at (%i, %i) the %s button", (x, y, expected) => {
     expect(topBarButtonAt(x, y)).toBe(expected);
-  });
-
-  it("keeps both hit areas at least 44px square, without overlapping", () => {
-    for (const { hit } of [HOME_BUTTON, PAUSE_BUTTON]) {
-      expect(Math.min(hit.width, hit.height)).toBeGreaterThanOrEqual(44);
-    }
-    expect(HOME_BUTTON.hit.x + HOME_BUTTON.hit.width).toBeLessThanOrEqual(PAUSE_BUTTON.hit.x);
-  });
-});
-
-describe("buttonIcon", () => {
-  it("centres the 16px icons on x 140 and 184, 2px lower while pressed", () => {
-    expect(buttonIcon(HOME_BUTTON, false)).toEqual({ x: 132, y: 11 });
-    expect(buttonIcon(PAUSE_BUTTON, false)).toEqual({ x: 176, y: 11 });
-    expect(buttonIcon(PAUSE_BUTTON, true)).toEqual({ x: 176, y: 13 });
   });
 });
