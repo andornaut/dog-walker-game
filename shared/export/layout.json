@@ -1880,6 +1880,7 @@
   "verges": {
     "homeStretch": {
       "seamColor": 9149364,
+      "seamEvery": 32,
       "strips": [],
       "walkColor": 12635100,
       "walkDots": [],
@@ -1891,6 +1892,7 @@
     },
     "park": {
       "seamColor": 9149364,
+      "seamEvery": 32,
       "strips": [],
       "walkColor": 12635100,
       "walkDots": [],
@@ -1902,6 +1904,7 @@
     },
     "pawsPromenade": {
       "seamColor": 9149364,
+      "seamEvery": 32,
       "strips": [],
       "walkColor": 12635100,
       "walkDots": [],
@@ -1917,6 +1920,7 @@
       "lawn": "none",
       "leaves": false,
       "seamColor": 14984818,
+      "seamEvery": 32,
       "strips": [
         {
           "color": 12087120,
@@ -1968,6 +1972,7 @@
     },
     "snoozeCrescent": {
       "seamColor": 9149364,
+      "seamEvery": 32,
       "strips": [],
       "walkColor": 12635100,
       "walkDots": [],
@@ -1979,6 +1984,7 @@
     },
     "street": {
       "seamColor": 9149364,
+      "seamEvery": 32,
       "strips": [],
       "walkColor": 12635100,
       "walkDots": [],

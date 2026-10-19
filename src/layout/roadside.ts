@@ -29,9 +29,8 @@ const ORANGE = 0xf77622;
 const ROAD_HALF = 140;
 const CURB = 144;
 const WALK = 188;
-// A line across the sidewalk every SEAM_PERIOD; a row covering more road than SEAM_MAX_SPAN
-// draws none, as the seams would run together.
-const SEAM_PERIOD = 32;
+const SEAM_EVERY = 32;
+// A row covering more road than SEAM_MAX_SPAN draws no seams, as they would run together.
 const SEAM_MAX_SPAN = 16;
 // Mown stripe widths across the front lawns, outward from the sidewalk, alternating light and
 // dark, out to MOWN_REACH past the sidewalk. A dark stripe narrower than MOWN_MIN_PX on screen
@@ -66,8 +65,9 @@ export interface Verge {
   readonly leaves: boolean;
   // Mown stripes on the front lawns, or an unmown lawn with rough patches.
   readonly lawn: "mown" | "rough" | "none";
-  // The line across the sidewalk or paving every SEAM_PERIOD.
+  // The line across the sidewalk or paving, every seamEvery along the road.
   readonly seamColor: number;
+  readonly seamEvery: number;
   // The bands between the curb and the sidewalk or paving, outward.
   readonly strips: readonly VergeStrip[];
   readonly walkColor: number;
@@ -76,7 +76,13 @@ export interface Verge {
 }
 
 // A grey sidewalk with grey seams, straight off the curb.
-const SIDEWALK = { seamColor: GREY, strips: [], walkColor: LIGHT_GREY, walkDots: [] } as const;
+const SIDEWALK = {
+  seamColor: GREY,
+  seamEvery: SEAM_EVERY,
+  strips: [],
+  walkColor: LIGHT_GREY,
+  walkDots: [],
+} as const;
 
 export const VERGES: Readonly<Record<ZoneId, Verge>> = {
   homeStretch: {
@@ -112,6 +118,7 @@ export const VERGES: Readonly<Record<ZoneId, Verge>> = {
     lawn: "none",
     leaves: false,
     seamColor: TAN,
+    seamEvery: SEAM_EVERY,
     strips: [
       { color: BROWN, dots: [], to: 146 },
       {
@@ -189,14 +196,15 @@ export function crossesLine(period: number, z: number, span: number): boolean {
   return Math.floor(z / period) !== Math.floor((z - Math.max(span, 1)) / period);
 }
 
-// Whether this row of sidewalk or paving is a seam.
-export function seamRow(z: number, span: number): boolean {
-  return span < SEAM_MAX_SPAN && crossesLine(SEAM_PERIOD, z, span);
+// Whether this row of the verge's sidewalk or paving is a seam.
+export function seamRow(verge: Verge, z: number, span: number): boolean {
+  return span < SEAM_MAX_SPAN && crossesLine(verge.seamEvery, z, span);
 }
 
-// Whether the front lawn at across falls in a dark mown stripe, on a row of this scale.
-export function mownAt(across: number, scale: number): boolean {
-  let rest = across - WALK;
+// Whether the front lawn at across falls in a dark mown stripe, on a row of this scale; the
+// stripes start at the sidewalk's outer edge, walkTo.
+export function mownAt(walkTo: number, across: number, scale: number): boolean {
+  let rest = across - walkTo;
   if (rest < 0 || rest >= MOWN_REACH) {
     return false;
   }
@@ -223,7 +231,7 @@ export function vergeBase(verge: Verge, across: number, scale: number): number {
   if (across < verge.walkTo) {
     return verge.walkColor;
   }
-  return verge.lawn === "mown" && mownAt(across, scale) ? DARK_GREEN : GREEN;
+  return verge.lawn === "mown" && mownAt(verge.walkTo, across, scale) ? DARK_GREEN : GREEN;
 }
 
 // The next darker green, for a tuft or a rough patch on the lawn.

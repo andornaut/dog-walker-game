@@ -141,15 +141,16 @@ describe("the verge beside the road", () => {
     expect(baseRuns(zone)).toEqual(runs);
   });
 
-  // The second stripe, 62 wide, from 232 across.
+  // The second stripe, 62 wide, from 44 past the sidewalk.
   it.each([
-    [250, 0.5, true],
-    [250, 0.06, false],
-    [200, 1, false],
+    [62, 0.5, true],
+    [62, 0.06, false],
+    [12, 1, false],
   ])(
-    "mownAt(%d, %d) is %s: a dark stripe ends where it would draw under 4px wide",
-    (across, scale, mown) => {
-      expect(mownAt(across, scale)).toBe(mown);
+    "mownAt %d past the sidewalk at scale %d is %s: a dark stripe ends where it would draw under 4px wide",
+    (past, scale, mown) => {
+      const { walkTo } = VERGES.street;
+      expect(mownAt(walkTo, walkTo + past, scale)).toBe(mown);
     },
   );
 
@@ -218,7 +219,10 @@ describe("the verge beside the road", () => {
     expect(leaves("street")).toBe(false);
   });
 
-  const PLANTER_DOTS = itemAt(VERGES.shops.strips, 1).dots;
+  const PLANTER_DOTS = [
+    { colors: [DARK_GREEN], share: 0.35 },
+    { colors: FLOWERS, share: 0.1 },
+  ];
   it.each<[number, number | null]>([
     [0, DARK_GREEN],
     [0.349, DARK_GREEN],
@@ -228,43 +232,42 @@ describe("the verge beside the road", () => {
     [0.449, 0xf77622],
     [0.45, null],
     [0.99, null],
-  ])("dotColor picks %d's dot in the planter: %d", (value, color) => {
+  ])("dotColor picks %d's dot in a planter: %d", (value, color) => {
     expect(dotColor(PLANTER_DOTS, value)).toBe(color);
   });
 
-  it.each<[ZoneId, number, [number, number][]]>([
-    [
-      "shops",
-      162,
-      [
-        [146, 158],
-        [162, Number.POSITIVE_INFINITY],
-      ],
-    ],
-    ["street", 144, []],
+  // The shops strips: a brown edge, the planter, a brown edge, a tan edging.
+  const [edge, planter, , edging] = VERGES.shops.strips;
+  const planterBand = { from: edge?.to ?? 0, to: planter?.to ?? 0 };
+  const pavingBand = { from: edging?.to ?? 0, to: VERGES.shops.walkTo };
+
+  it.each<[ZoneId, number, { from: number; to: number }[]]>([
+    ["shops", pavingBand.from, [planterBand, pavingBand]],
+    ["street", VERGES.street.curbTo, []],
   ])("lays %s's paving from %d across, with dots on its bands %j", (zone, from, bands) => {
     expect(walkFrom(VERGES[zone])).toBe(from);
-    expect(dottedBands(VERGES[zone]).map((band) => [band.from, band.to])).toEqual(bands);
+    expect(dottedBands(VERGES[zone]).map((band) => ({ from: band.from, to: band.to }))).toEqual(
+      bands,
+    );
   });
 
   // The shops verge's dots over the rows below the approach, at a few scrolls: the share of a
-  // band's pixels in the given colours, leaving out the paving's seam rows.
+  // band's pixels in each dot's colours, leaving out the paving's seam rows.
   const shopsFrames = [0, 150, 300].map((scroll) => ({
     out: draw(frameOf({ current: look("shops", 0x123456), scroll })),
     scroll,
   }));
   it.each([
-    { colors: [DARK_GREEN], from: 146, name: "dark green", share: 0.35, to: 158 },
-    { colors: FLOWERS, from: 146, name: "flowers", share: 0.1, to: 158 },
-    { colors: [TAN], from: 162, name: "tan specks", share: 0.02, to: Number.POSITIVE_INFINITY },
-  ])("dots the shops verge with $name on about $share of a band", (dot) => {
+    ...(planter?.dots ?? []).map((dot) => ({ ...dot, ...planterBand, name: "the planter" })),
+    ...VERGES.shops.walkDots.map((dot) => ({ ...dot, ...pavingBand, name: "the paving" })),
+  ])("dots shops' $name with $colors on about $share of it", (dot) => {
     const words = dot.colors.map(pixelWord);
     const seen = new Set<number>();
     let band = 0;
     let dotted = 0;
     for (const { out, scroll } of shopsFrames) {
       raster.rows.forEach((row, y) => {
-        if (y < raster.approachRows || seamRow(scroll + row.distance, row.span)) {
+        if (y < raster.approachRows || seamRow(VERGES.shops, scroll + row.distance, row.span)) {
           return;
         }
         row.across.forEach((across, i) => {
@@ -295,7 +298,7 @@ describe("the verge beside the road", () => {
         }
         const seed = Math.floor(scroll + row.distance) >> row.level;
         row.across.forEach((across, i) => {
-          if (across >= 146 && across < 158) {
+          if (across >= planterBand.from && across < planterBand.to) {
             const key = `${row.level}:${row.roadX[i] ?? 0}:${seed}`;
             const word = out[y * view.width + i] ?? 0;
             const before = colors.get(key);

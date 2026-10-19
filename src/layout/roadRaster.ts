@@ -457,7 +457,7 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
       }
     }
 
-    if (verge.walkTo > plan.walkFrom && seamRow(z, row.span)) {
+    if (verge.walkTo > plan.walkFrom && seamRow(verge, z, row.span)) {
       const [innerLeft, innerRight] = splitAt(row, plan.walkFrom);
       const [walkLeft, walkRight] = splitAt(row, verge.walkTo);
       out.fill(plan.seamWord, offset + walkLeft, offset + innerLeft);
