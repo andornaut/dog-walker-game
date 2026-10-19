@@ -129,7 +129,7 @@ Same tags, frames and durations as the original.
 | `ui-doghouse`                                | sprite | 120×90            | one per dog key, `empty`, `heart-loss` | core | One per slot, three in a row; `heart-loss` is an overlay drawn over the house |
 | `ui-doghouse-warn`                           | sprite | 120×90            | `pulse`, `static`                      | core | Overlay at 1 ♥                                                                |
 | `ui-heart`                                   | sprite | 8×7               | `full`, `empty`                        | core | Full is darkRed, empty a hollow darkBrown outline                             |
-| `ui-fired-plate`                             | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic`       | core | Stretched to 72×28                                                            |
+| `ui-fired-plate`                             | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic`       | core | Stretched to 84×28                                                            |
 | `fx-fired-pop`                               | sprite | 64×64             | `play`                                 | core | Drawn at 2× behind the fired face                                             |
 | `fx-coin-fly`                                | sprite | 12×12             | `spin`                                 | core | Fee payout                                                                    |
 | `ui-payout-label`                            | sprite | 24×16 three-slice | `normal`                               | core | Stretched to 60×16                                                            |
