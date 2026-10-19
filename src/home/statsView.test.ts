@@ -16,7 +16,6 @@ describe("overallRows", () => {
       { label: "Lifetime earnings", value: "$300" },
       { label: "Times fired", value: "1 (most: Jesse)" },
       { label: "Best zone completed", value: "4" },
-      { label: "Maple Street finished", value: "2" },
     ]);
     expect(outcomes).toEqual([
       { label: "Finished", value: "2" },

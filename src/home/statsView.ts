@@ -8,10 +8,9 @@ export interface StatsRow {
   readonly value: string;
 }
 
-// The Stats page's overall figures, in the rulebook's order. Worlds finished equals runs
-// finished while there is one world.
+// The Stats page's overall figures, in the rulebook's order.
 export function overallRows(
-  data: Pick<GameData, "dogs" | "world">,
+  data: Pick<GameData, "dogs">,
   stats: SaveStats,
 ): { outcomes: StatsRow[]; overall: StatsRow[] } {
   const page = statsPage(stats);
@@ -29,7 +28,6 @@ export function overallRows(
       { label: "Lifetime earnings", value: dollarText(page.lifetimeCents) },
       { label: "Times fired", value: `${page.timesFired}${firedBy}` },
       { label: "Best zone completed", value: String(page.bestZoneFinished) },
-      { label: `${data.world.name} finished`, value: String(page.runs.finished) },
     ],
   };
 }
