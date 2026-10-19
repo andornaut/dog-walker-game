@@ -106,7 +106,7 @@ function detailsOf(report: CrashReport): string {
 export function crashView(dev: boolean, report: CrashReport): CrashView {
   return {
     action: "Reload",
-    body: "Your progress up to the last finished zone is kept.",
+    body: "Your saved progress is kept.",
     details: dev ? detailsOf(report) : undefined,
     title: "Something went wrong",
   };

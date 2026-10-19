@@ -125,7 +125,7 @@ describe("crashView", () => {
   it("says what happened, what is kept and how to recover", () => {
     expect(crashView(false, crash)).toEqual({
       action: "Reload",
-      body: "Your progress up to the last finished zone is kept.",
+      body: "Your saved progress is kept.",
       details: undefined,
       title: "Something went wrong",
     });
