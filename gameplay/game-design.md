@@ -56,7 +56,7 @@ Designed touch-first. v1 supports keyboard (web) and touch (mobile: tap the left
 
 ## Screen
 
-A top status bar (money, zone progress), a fixed-width dog column on the left with one slot per dog, and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in `art-style-guide.md`.
+A top status bar (money, zone progress), a fixed-width dog column on the left with one slot per dog, and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in [`art/style-guide.md`](../art/style-guide.md).
 
 ## Scope: v1 (web prototype)
 

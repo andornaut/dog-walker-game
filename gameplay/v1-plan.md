@@ -1,6 +1,6 @@
 # v1 Plan
 
-Goal: the smallest web game that proves the core loop is fun. Placeholder art is fine until Milestone 6. Design calls here were agreed 2026-10-18 (see `decisions.md`). Numbers (fees, ♥ values, durations, prices) and content lists are **starting values to tune by playing**, not decisions. Tech choices live in `tech-plan.md`.
+Goal: the smallest web game that proves the core loop is fun. Placeholder art is fine until Milestone 6. Design calls here were agreed 2026-10-18 (see `decisions.md`). Numbers (fees, ♥ values, durations, prices) and content lists are **starting values to tune by playing**, not decisions. Tech choices live in [`tech-plan.md`](../tech-plan.md).
 
 ## The v1 game in one paragraph
 
@@ -84,7 +84,7 @@ Mostly run-only boosts, plus a couple of trade-off cards. Pool to fill out to ~8
 - Money earned in a run is banked
 - Home screen has a simple shop with 3 loadout items (e.g. fanny pack: start with +$30; poop bags: once per run, an encounter card offers a free Skip option; Lucky collar: every owner starts at 6 ♥)
 - Pick up to 1 owned item before each run (none is allowed, e.g. on a first run)
-- Progress (bank, owned items) is saved between sessions. Where it is stored (e.g. browser storage) is a tech proposal; see `tech-plan.md`
+- Progress (bank, owned items) is saved between sessions. Where it is stored (e.g. browser storage) is a tech proposal; see [`tech-plan.md`](../tech-plan.md)
 
 ## Starting numbers
 
@@ -123,4 +123,4 @@ Minigames · branching paths between zones · unlockable dog slots · special do
 
 ## Tech
 
-Stack, hosting and save storage: see `tech-plan.md`.
+Stack, hosting and save storage: see [`tech-plan.md`](../tech-plan.md).
