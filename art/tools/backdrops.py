@@ -100,13 +100,51 @@ def cloud(cv, x, y, w, puff, seed):
             cv.fill(px, py, 1, 1, "lgrey" if shade else "white")
 
 
-def streaks(cv, rows, body="pink", lit="cream"):
-    """Sunset cloud streaks, (x, row, width): 2 rows of body, tapered at the ends, with the
-    underside lit by the low sun."""
-    for x, y, w in rows:
-        cv.fill(x + 3, y, w - 9, 1, body)
-        cv.fill(x, y + 1, w, 1, body)
-        cv.fill(x + 5, y + 2, w - 12, 1, lit)
+def band_rows(top, bottom, n, ratio=0.7):
+    """The rows of n sky bands from top down to bottom, each ratio times the height of the one
+    above it, as (first row, row after the last)."""
+    weights = [ratio ** i for i in range(n)]
+    edges, acc = [top], 0.0
+    for wt in weights:
+        acc += wt
+        edges.append(top + round((bottom - top) * acc / sum(weights)))
+    return list(zip(edges, edges[1:]))
+
+
+def bands(cv, top, bottom, cols, x0=0, w=W, ratio=0.7):
+    """A banded sunset sky: hard-edged stripes of cols from row top down to the horizon at
+    bottom, shrinking toward it. Above each seam the lower band's colour runs a 1-row line 2 rows
+    up, and on a band 12 rows or taller a second one 5 rows up, so the bands interleave."""
+    rows = band_rows(top, bottom, len(cols), ratio)
+    for (y0, y1), c in zip(rows, cols):
+        cv.fill(x0, y0, w, y1 - y0, c)
+    for ((a0, a1), (b0, _)), c in zip(zip(rows, rows[1:]), cols[1:]):
+        for up in (2, 5) if a1 - a0 >= 12 else (2,):
+            if b0 - up > a0:
+                cv.fill(x0, b0 - up, w, 1, c)
+    return rows
+
+
+def sun(cv, cx, cy, r, col, low=None):
+    """A striped sun: a disc of col centred on cx, cy, its visible part ending on row low (the
+    disc's bottom by default). Horizontal gaps cut the lower half of the visible part, the bars
+    between them thinning and the gaps widening toward low, and show the sky behind."""
+    low = cy + r if low is None else low
+    mid = (cy - r + low) / 2
+    gaps, y, k = set(), mid, 0
+    bar = max(2, round((low - mid) / 4))
+    while y <= low:
+        y += max(1, bar - k)
+        gap = 1 + k // 2
+        gaps.update(range(round(y), round(y) + gap))
+        y += gap
+        k += 1
+    for dy in range(-r, r + 1):
+        if cy + dy in gaps:
+            continue
+        for dx in range(-r, r + 1):
+            if dx * dx + dy * dy <= r * (r + 1):
+                cv.fill(cx + dx, cy + dy, 1, 1, col)
 
 
 def ground(cv, lawn="green"):
@@ -679,17 +717,18 @@ def planter_wall(cv, x0, x1, z):
         front(cv, x, x + 2, z, 0, PERCH_H - 6, "dbrown")
 
 
+# The two sunset zones' sky bands, top to horizon: The Long Way Home's warm sunset under a
+# striped sun, Snooze Crescent's dusk after the sun has gone, cool at the top.
+LONG_WAY_SKY = ("pink", "orange", "amber", "yellow")
+SNOOZE_SKY = ("purple", "mauve", "pink", "skin1")
+
+
 def long_way_home():
     cv = hp.Canvas(W, H)
-    sky(cv, "amber", "yellow")
-    # long streaks instead of puffs, and one across the sun below
-    streaks(cv, ((10, 5, 60), (CX - 92, 13, 40), (CX + 50, 7, 80), (CX + 110, 16, 44), (2, 22, 40)))
-    # the low sun at the end of the street, setting behind the trees beyond the back yards
-    for dy in range(-21, 1):
-        for dx in range(-21, 22):
-            if dx * dx + dy * dy <= 21 * 21:
-                cv.fill(CX + dx, 50 + dy, 1, 1, "white" if dx * dx + dy * dy <= 15 * 15 else "cream")
-    streaks(cv, ((CX - 36, 36, 72),))
+    # a banded sunset, warm all the way up, and the low sun at the end of the street, striped,
+    # setting behind the trees beyond the back yards
+    bands(cv, 0, BASE, LONG_WAY_SKY)
+    sun(cv, CX, 46, 24, "yellow", low=45)
     treeline(cv, 50, ("rust", "orange"), 4.0, 2, 7)
     leaves = grass()
 
@@ -706,7 +745,7 @@ def long_way_home():
 
     # the porch houses across the street either side of the sunset, orange trees beside them
     for cx, top, r in ((8, 32, 15), (352, 34, 15), (CX - 46, 42, 9)):
-        tree(cv, cx, top, "orange", "rust", r=r, base=BASE, girth=4 if r < 12 else 6)
+        tree(cv, cx, top, "rust", "dbrown", r=r, base=BASE, girth=4 if r < 12 else 6)
     for x, w, wall_c, roof, door in ((CX - 150, 76, "white", "dred", "dgreen"),
                                      (CX + 72, 78, "skin1", "navy", "red")):
         porch_house(cv, x, w, wall_c, roof, door)
@@ -758,12 +797,9 @@ def crescent_bend(px):
 def snooze_crescent():
     cv = hp.Canvas(W, H)
     road_c = SNOOZE_ROAD
-    # a dusk sky: purple above, mauve, then pink low down, a crescent moon and the first stars
-    sky(cv, "purple", "mauve")
-    cv.fill(0, 30, W, FAR_WALK - 30, "pink")
-    for i in range(0, W, 5):
-        cv.fill(i, 29 - (i // 5) % 2, 5, 1, "pink")
-    streaks(cv, ((24, 14, 56), (CX + 30, 20, 70), (CX - 70, 24, 36)), body="purple", lit="pink")
+    # a banded dusk sky, purple down to a last peach glow behind the roofs, a crescent moon and
+    # the first stars
+    bands(cv, 0, BASE, SNOOZE_SKY)
     for dy in range(-6, 7):
         for dx in range(-6, 7):
             if dx * dx + dy * dy <= 36 and (dx + 3) ** 2 + (dy - 2) ** 2 > 25:

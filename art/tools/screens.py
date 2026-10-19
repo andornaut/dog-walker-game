@@ -20,22 +20,26 @@ reads on them.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
-  Woof Way at night and the leash hooks. Below the tabs the wall is open for
-  the stats panel and the badge wall (8,108 to 352,552).
+  Woof Way at night under NIGHT_SKY's bands, and the leash hooks. Below the
+  tabs the wall is open for the stats panel and the badge wall (8,108 to
+  352,552).
 - screen-end: sunset on The Long Way Home. Between the logo (116,40) and the
   summary panel (24,112 to 336,412), the front of the house the pack comes
   home to: its gable peeks over the logo, the front door (171,73 18x23) opens
   onto a step (164,96 32x4), and a flagstone path (168,100 24x12) runs down
   behind the panel's top edge. The lawn from y 96 gives the waving owners
-  room either side, feet on y 110. Then a tall sky behind the panel, the
-  zone's houses with lit windows (from y 370), the yards, the sidewalk and the
+  room either side, feet on y 110. The zone's banded sunset fills the sky
+  twice: behind the house down to its lawn, under the striped sun at 300,44,
+  and behind the panel down to the far rooftops (y 450). Then the zone's
+  houses with lit windows (from y 370), the yards, the sidewalk and the
   brick road under the button (48,512 264x44). The houses, trees and fences
   stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
   margins show only sky, lawn and sidewalk.
 - screen-loading: Woof Way at night, shown while the game loads. The logo is
-  drawn in, centred at 116,92; a starry sky above the houses and street lamps;
-  the sidewalk at y 350 to 365 carries the progress track, and the plain road
-  below it (to y 450) leaves room for a status line.
+  drawn in, centred at 116,92; NIGHT_SKY's bands (stars in the navy one)
+  above the houses and street lamps; the sidewalk at y 350 to 365 carries the
+  progress track, and the plain road below it (to y 450) leaves room for a
+  status line.
 
 ui-loading-track: a 200x8 image, the dotted path the pair walks along, with a
 doghouse at the far end. The game draws it at TRACK_AT (80,357).
@@ -338,8 +342,14 @@ def home():
 
 # ---------- screen-stats ----------
 
-def night(img):
-    """Woof Way after dark: the sky turns navy with stars, everything else a ramp step darker, windows lit."""
+# Woof Way's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading
+# and through the window of screen-stats.
+NIGHT_SKY = ("navy", "purple", "mauve")
+
+
+def night(img, top=20, horizon=46):
+    """Woof Way after dark: the sky turns to NIGHT_SKY's bands from row top down to horizon, with stars
+    in the top band, everything else a ramp step darker, windows lit."""
     px = img.load()
     w, h = img.size
     skyc = {hp.rgb(c) for c in ("cyan", "sky", "white", "lgrey")}
@@ -352,12 +362,16 @@ def night(img):
         todo += [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
     out = img.copy()
     po = out.load()
+    banded = hp.Canvas(w, h)
+    banded.fill(0, 0, w, h, NIGHT_SKY[-1])
+    rows = bd.bands(banded, top, horizon, NIGHT_SKY, w=w)
+    bp = banded.img.load()
     cyan, white = hp.rgb("cyan"), hp.rgb("white")
     for y in range(h):
         for x in range(w):
             c = px[x, y]
             if (x, y) in sky:
-                po[x, y] = hp.rgb("navy" if y < 30 + (x // 5) % 2 else "dslate")
+                po[x, y] = bp[x, max(y, top)]
             elif c == cyan:
                 po[x, y] = hp.rgb("yellow")
             elif c == white and any(0 <= x + dx < w and px[x + dx, y] == cyan for dx in (-1, 1)):
@@ -367,7 +381,7 @@ def night(img):
     r = rand(11)
     for _ in range(40):
         x, y = int(r() * w), int(r() * 60)
-        if (x, y) in sky:
+        if (x, y) in sky and y < rows[0][1] - 2:
             po[x, y] = hp.rgb("white" if r() < 0.4 else "lgrey")
     return out
 
@@ -452,23 +466,12 @@ END_STREET = 370  # top of The Long Way Home strip on screen-end
 
 def end():
     cv = hp.Canvas(W, H)
-    # the sunset sky: orange at the top, amber, then yellow toward the roofs, with stepped edges
-    cv.fill(0, 0, W, 520, "yellow")
-    cv.fill(0, 0, W, 296, "amber")
-    cv.fill(0, 0, W, 96, "orange")
-    for i in range(0, W, 5):
-        cv.fill(i, 96 + (i // 5) % 2, 5, 1, "orange")
-        cv.fill(i, 296 + (i // 5) % 2, 5, 1, "amber")
-    # the sun, low in the west, and streaks of cloud
-    for dy in range(-22, 23):
-        for dx in range(-22, 23):
-            d = dx * dx + dy * dy
-            if d <= 22 * 22:
-                cv.fill(300 + dx, 44 + dy, 1, 1, "cream" if d <= 14 * 14 else "yellow")
-    for x, y, w, col in ((14, 20, 70, "amber"), (40, 26, 44, "amber"), (252, 74, 64, "amber"), (276, 80, 84, "amber"),
-                         (0, 176, 60, "yellow"), (300, 226, 50, "yellow"), (330, 232, 30, "yellow")):
-        cv.fill(x, y, w, 2, col)
-        cv.fill(x + 6, y - 2, w - 18, 2, col)
+    # The Long Way Home's banded sunset, twice: behind the house down to its lawn, with the striped sun low
+    # in the west, and behind the panel down to the far rooftops of the street below
+    cv.fill(0, 0, W, 520, bd.LONG_WAY_SKY[-1])
+    bd.bands(cv, 0, 96, bd.LONG_WAY_SKY)
+    bd.bands(cv, 112, END_STREET + 80, bd.LONG_WAY_SKY)
+    bd.sun(cv, 300, 44, 22, "yellow")
     # two birds heading home
     for bx, by in ((84, 50), (100, 42)):
         cv.fill(bx, by, 2, 1, "plum")
@@ -614,19 +617,14 @@ def after_dark(img, steps=2):
 def loading():
     cv = hp.Canvas(W, H)
     r = rand(13)
-    # the night sky: navy over a dslate band behind the roofs, stepped where they meet, with streaks of cloud
-    cv.fill(0, 0, W, STREET + 104, "dslate")
-    cv.fill(0, 0, W, STREET + 20, "navy")
-    for i in range(0, W, 5):
-        cv.fill(i, STREET + 20 + (i // 5) % 2, 5, 1, "navy")
-    for x, y, w in ((22, 140, 70), (244, 150, 84), (150, 196, 60)):
-        cv.fill(x, y, w, 2, "dslate")
-        cv.fill(x + 6, y - 2, w - 18, 2, "dslate")
-    # stars: single specks, and a few brighter crosses
+    # the night sky in bands, navy down to a last mauve glow behind the roofs
+    cv.fill(0, 0, W, STREET + 104, NIGHT_SKY[-1])
+    rows = bd.bands(cv, 0, STREET + 60, NIGHT_SKY)
+    # stars in the navy band: single specks, and a few brighter crosses
     for _ in range(90):
-        x, y = int(r() * W), int(r() * (STREET + 10))
+        x, y = int(r() * W), int(r() * (rows[0][1] - 3))
         cv.fill(x, y, 1, 1, "lgrey" if r() < 0.7 else "slate")
-    for x, y in ((40, 40), (176, 30), (64, 150), (330, 132), (210, 170), (20, 200)):
+    for x, y in ((40, 40), (176, 30), (64, 150), (330, 132), (210, 120), (20, 100)):
         cv.fill(x - 1, y, 3, 1, "lgrey")
         cv.fill(x, y - 1, 1, 3, "lgrey")
         cv.fill(x, y, 1, 1, "white")

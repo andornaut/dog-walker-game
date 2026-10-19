@@ -1457,14 +1457,12 @@ def shops_view():
 def long_way_home_view():
     lawn = leafy(tufted())
     a = ZoneView("the-long-way-home", flecked("skin2", "skin1", 31), lawn, "white", (4, 8), edge="plum", lawn=lawn)
-    a.sky("amber", "yellow")
-    bd.streaks(a, ((2, 3, 22), (50, 5, 26)))
-    # the low sun setting at the end of the street, behind the trees past the back yards
-    disc(a, 37, 16, 10, "cream")
-    disc(a, 37, 16, 7, "white")
-    bd.streaks(a, ((24, 11, 28),))
+    # the backdrop's banded sunset and its striped sun, setting at the end of the street behind
+    # the trees past the back yards
+    bd.bands(a, 0, 17, bd.LONG_WAY_SKY, w=AW)
+    bd.sun(a, 37, 15, 11, "yellow", low=14)
     a.treeline(17, ("rust", "orange"), 4, 1, 4)
-    bd.tree(a, 23, 11, "orange", "rust", r=4, base=FAR_Y, girth=2)
+    bd.tree(a, 23, 11, "rust", "dbrown", r=4, base=FAR_Y, girth=2)
     # porch houses either side of the sunset
     for x, w, wall_c, roof, door in ((-12, 28, "white", "dred", "dgreen"), (59, 28, "skin1", "navy", "red")):
         bd.house(a, x, w, wall_c, roof, door, top=3, base=FAR_Y, roof_h=8, parts=MINI)
@@ -1478,11 +1476,8 @@ def long_way_home_view():
 
 def snooze_crescent_view():
     a = ZoneView("snooze-crescent", flecked("grey", "slate", 23), tufted(), "white", (2, 6))
-    # a dusk sky: purple above, mauve, then pink low down, a crescent moon and the first stars
-    a.sky("purple", "mauve")
-    a.fill(0, 10, AW, FAR_Y - 10, "pink")
-    for i in range(0, AW, 5):
-        a.fill(i, 9 - (i // 5) % 2, 5, 1, "pink")
+    # the backdrop's banded dusk sky, a crescent moon and the first stars
+    bd.bands(a, 0, FAR_Y, bd.SNOOZE_SKY, w=AW)
     for dy in range(-4, 5):
         for dx in range(-4, 5):
             if dx * dx + dy * dy <= 16 and (dx + 2) ** 2 + (dy - 1) ** 2 > 10:

@@ -256,6 +256,22 @@ Where row 149 meets the road, left side (the right mirrors it):
 
 Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 93 to 95, x 0 to 82), the near-right lawn (x 274 to 359, rows 86 to 109), and both sidewalks.
 
+## Skies
+
+- Daytime skies (Bark Park, Paws Promenade, Sniff Street Shops, Woof Way) stay cyan over sky with clouds.
+- Sunset and night skies are hard-edged horizontal bands of flat colour (`bands` in `art/tools/backdrops.py`), each 0.7 times the height of the band above it, so they shrink toward the horizon. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.
+- The sun is a flat yellow disc (`sun`) whose visible lower half is cut by horizontal gaps that widen toward the horizon as the bars between them thin; the bands show through the gaps. It sits over the orange band, so the gaps hold against the yellow.
+- Bands, top to horizon:
+
+| Sky                    | Bands                       | Extras                 | Where                                                                     |
+| ---------------------- | --------------------------- | ---------------------- | ------------------------------------------------------------------------- |
+| The Long Way Home      | pink, orange, amber, yellow | Striped sun            | `backdrop-the-long-way-home`, `card-zone-the-long-way-home`, `screen-end` |
+| Snooze Crescent (dusk) | purple, mauve, pink, skin1  | Crescent moon, stars   | `backdrop-snooze-crescent`, `card-zone-snooze-crescent`                   |
+| Woof Way at night      | navy, purple, mauve         | Stars in the navy band | `screen-loading`, the window of `screen-stats`                            |
+
+- A zone card's sky repeats its backdrop's bands and sun. Scenery standing against a band never shares its colour: The Long Way Home's backdrop trees are rust and dbrown against the orange band.
+- Bands belong to skies only: never on sprites, UI or the road.
+
 ## Sound
 
 - Soft chiptune: square and triangle waves through gentle low-pass filters, short envelopes, nothing harsh.
