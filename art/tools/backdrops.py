@@ -21,6 +21,7 @@ Run from the repository root, after fonts.py build. A build overwrites the
 import json
 import math
 import os
+import random
 import subprocess
 import sys
 
@@ -56,15 +57,44 @@ def word(cv, s, mid, y, col):
         x += adv
 
 
-def sky(cv, top="cyan", low="sky"):
+def sky(cv, top="cyan", low="sky", clouds=()):
+    """The sky, with clouds given as (x, base row, width, puff): puff is the tallest lobe's radius."""
     cv.fill(0, 0, W, 104, low)
     cv.fill(0, 0, W, 14, top)
     for i in range(0, W, 5):
         cv.fill(i, 14 + (i // 5) % 2, 5, 1, top)
-    for x, y, w in ((30, 6, 26), (150, 10, 34), (270, 4, 22)):
-        cv.fill(x, y, w, 4, "white")
-        cv.fill(x + 4, y - 3, w - 10, 3, "white")
-        cv.fill(x, y + 4, w, 1, "lgrey")
+    for k, (x, y, w, puff) in enumerate(clouds):
+        cloud(cv, x, y, w, puff, k)
+
+
+def cloud(cv, x, y, w, puff, seed):
+    """A cumulus on a flat base at row y: a low body the full width with rounded ends, one big
+    dome of radius puff off centre and smaller ones beside it; lgrey on the base row and on each
+    dome's lower right."""
+    rnd = random.Random(f"cloud-{seed}")
+    big = x + w * rnd.uniform(0.35, 0.6)
+    domes = [(big, puff), (x + w * rnd.uniform(0.12, 0.25), max(2, puff * 0.55)),
+             (x + w * rnd.uniform(0.7, 0.85), max(2, puff * rnd.uniform(0.6, 0.75)))]
+    body = max(2, round(puff * 0.4))
+    for py in range(y - puff - 1, y + 1):
+        for px in range(x, x + w):
+            dx_end = min(px + 0.5 - x, x + w - px - 0.5)
+            in_body = py > y - body and dx_end >= (y - py) * 0.8
+            dome = next(((px + 0.5 - cx, py + 0.5 - (y - body + 1), r) for cx, r in domes
+                         if (px + 0.5 - cx) ** 2 + (py + 0.5 - (y - body + 1)) ** 2 <= r * r), None)
+            if not in_body and dome is None:
+                continue
+            shade = py == y or (dome is not None and dome[0] + dome[1] > dome[2] * 0.6 and py > y - body - 2)
+            cv.fill(px, py, 1, 1, "lgrey" if shade else "white")
+
+
+def streaks(cv, rows, body="pink", lit="cream"):
+    """Sunset cloud streaks, (x, row, width): 2 rows of body, tapered at the ends, with the
+    underside lit by the low sun."""
+    for x, y, w in rows:
+        cv.fill(x + 3, y, w - 9, 1, body)
+        cv.fill(x, y + 1, w, 1, body)
+        cv.fill(x + 5, y + 2, w - 12, 1, lit)
 
 
 def ground(cv, lawn="green"):
@@ -172,8 +202,17 @@ def poly(cv, pts, c):
     ImageDraw.Draw(cv.img).polygon(xy, fill=hp.rgb(K.get(c, c)))
 
 
+def noise(x, y):
+    """A fixed pseudo-random value in [0, 1) per pixel: a mixed integer hash, so picks fall
+    irregularly and no lattice or diagonal rhythm shows."""
+    h = (x * 374761393 + y * 668265263) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    return ((h ^ (h >> 16)) & 0xFFFF) / 65536
+
+
 def hashed(x, y, n):
-    return (x * 7919 + y * 104729 + x * y * 31) % n == 0
+    """About one pixel in n, picked irregularly."""
+    return noise(x, y) * n < 1
 
 
 def street(cv, paint):
@@ -325,9 +364,57 @@ def scene(cv, things):
         draw()
 
 
+# Lawn texture follows the road strips' rule: mown stripes run along the street and converge
+# on the vanishing point (stripes across it band and shimmer as rows span more lawn), their
+# widths vary, and each ends where it would draw under 4px wide. Tufts are 2-row marks, placed
+# irregularly and thinning out with distance, so far lawn stays plain.
+MOWN = (44, 62, 36, 70, 50, 58, 40, 66)
+
+
+def mown(x, s):
+    """Whether the lawn at x across falls in a darker mown stripe, at ground scale s. Only the
+    front lawns, out to 300 past the sidewalk, are mown."""
+    a, i = abs(x) - WALK, 0
+    if a >= 300:
+        return False
+    while a >= MOWN[i % len(MOWN)]:
+        a -= MOWN[i % len(MOWN)]
+        i += 1
+    return i % 2 == 1 and MOWN[i % len(MOWN)] * s >= 4
+
+
+def tuft(px, py, s, rate=0.03):
+    """A 2-row grass mark here: about rate of pixels on the band's bottom row, fewer further off."""
+    p = rate * (s / S0) ** 2
+    return noise(px, py) < p or noise(px, py - 1) < p
+
+
+def turf(x, z, px, py, lawn="green", stripes=True, patches=()):
+    """A lawn pixel: mown stripes or rough patches (world (x, z, rx, rz) ellipses), then tufts."""
+    s = F / (F + z)
+    c = lawn
+    if stripes and mown(x, s):
+        c = dk(lawn)
+    elif any(((x - qx) / rx) ** 2 + ((z - qz) / rz) ** 2 <= 1 for qx, qz, rx, rz in patches):
+        c = dk(lawn)
+    return dk(c) if tuft(px, py, s) else c
+
+
+def rough(seed, n, x0, x1, z0, z1):
+    """n rough patches either side of the street, dropping any that would draw under 6 rows tall."""
+    rnd = random.Random(seed)
+    out = []
+    while len(out) < n:
+        x, z = rnd.choice((-1, 1)) * rnd.uniform(x0, x1), rnd.uniform(z0, z1)
+        rx, rz = rnd.uniform(30, 90), rnd.uniform(50, 150)
+        if at(x, max(z - rz, 640))[1] - at(x, z + rz)[1] >= 6:
+            out.append((x, z, rx, rz))
+    return out
+
+
 def verge(road, lawn="green", walk="lgrey", seam="grey", curb="grey", stripes=True):
     """The game's verge beside the road: a curb, a sidewalk with a seam every 32 rows of
-    road, then a lawn mown in stripes 32 rows wide. road(x, z, span, px, py) paints the road."""
+    road, then a lawn (see turf). road(x, z, span, px, py) paints the road."""
     def paint(x, z, span, px, py):
         a = abs(x)
         if a < ROAD:
@@ -336,20 +423,20 @@ def verge(road, lawn="green", walk="lgrey", seam="grey", curb="grey", stripes=Tr
             return curb
         if a < WALK:
             return seam if span < 16 and crosses(z, span, 32) else walk
-        c = dk(lawn) if stripes and z % 64 >= 32 else lawn
-        return dk(c) if hashed(px, py, 23) else c
+        return turf(x, z, px, py, lawn, stripes)
     return paint
 
 
 def woof_way():
     cv = hp.Canvas(W, H)
-    sky(cv)
+    # fair-weather puffs of mixed sizes, spread unevenly
+    sky(cv, clouds=((8, 13, 46, 8), (120, 27, 20, 4), (230, 10, 34, 6), (318, 33, 18, 3)))
     horizon(cv, ("dgreen", "green"), 1.0)
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 3:
             return "grey"
-        return "slate" if hashed(px, py, 9) else "navy" if hashed(px, py + 3, 11) else "dslate"
+        return "slate" if hashed(px, py, 29) else "navy" if hashed(px, py + 3, 31) else "dslate"
 
     street(cv, verge(road))
     lanes(cv, "lgrey")
@@ -373,14 +460,17 @@ def woof_way():
 
 def bark_park():
     cv = hp.Canvas(W, H)
-    sky(cv)
+    # two big billowing clouds clear of the gate, and a small one
+    sky(cv, clouds=((2, 20, 58, 11), (128, 9, 18, 4), (284, 17, 66, 12)))
     horizon(cv, ("dgreen", "green"), 2.5, 3, 9)
+    # an unmown park: rough patches instead of stripes
+    patches = rough("bark-park-lawn", 26, ROAD + 30, 900, 640, 2000)
 
     def path(x, z, span, px, py):
         a = abs(x)
         if a >= ROAD - 2:
             return "brown"
-        return "brown" if hashed(px, py, 7) else "cream" if hashed(px, py + 5, 13) else "tan"
+        return "brown" if hashed(px, py, 13) else "cream" if hashed(px, py + 5, 23) else "tan"
 
     def paint(x, z, span, px, py):
         a = abs(x)
@@ -389,8 +479,7 @@ def bark_park():
         # the pond, on the left
         if ((x + 360) / 120) ** 2 + ((z - 1250) / 260) ** 2 <= 1:
             return "white" if hashed(px, py, 17) else "sky" if ((x + 360) / 120) ** 2 + ((z - 1250) / 260) ** 2 > 0.55 else "cyan"
-        c = "dgreen" if z % 64 >= 32 else "green"
-        return dk(c) if hashed(px, py, 23) else c
+        return turf(x, z, px, py, stripes=False, patches=patches)
 
     street(cv, paint)
     lanes(cv, "dbrown", dash=(7, 16))
@@ -447,7 +536,8 @@ def gate(cv, z, sign):
 
 def shops():
     cv = hp.Canvas(W, H)
-    sky(cv)
+    # flatter clouds above the rooftops, one long bank over the gap down the street
+    sky(cv, clouds=((28, 9, 28, 4), (148, 19, 72, 6), (292, 7, 26, 4)))
     horizon(cv, ("slate", "grey"), 0.4, 4, 12)
 
     def paint(x, z, span, px, py):
@@ -564,11 +654,14 @@ def planter_wall(cv, x0, x1, z):
 def long_way_home():
     cv = hp.Canvas(W, H)
     sky(cv, "amber", "yellow")
-    # the low sun behind the end of the road
+    # long streaks instead of puffs, and one across the sun below
+    streaks(cv, ((14, 8, 64), (96, 21, 38), (244, 11, 84), (286, 29, 50), (8, 35, 46)))
+    # the low sun behind the end of the road, behind the streaks
     for dy in range(-22, 1):
         for dx in range(-22, 23):
             if dx * dx + dy * dy <= 22 * 22:
                 cv.fill(CX + dx, HZ + dy, 1, 1, "white" if dx * dx + dy * dy <= 16 * 16 else "cream")
+    streaks(cv, ((180, 44, 76),))
     horizon(cv, ("rust", "orange"), 4.0, 2, 8, gap=24)
 
     def road(x, z, span, px, py):
@@ -580,15 +673,8 @@ def long_way_home():
             return "brown"
         return "skin1" if hashed(px, py, 31) else "skin2"
 
-    paint = verge(road)
-
-    def leafy(x, z, span, px, py):
-        c = paint(x, z, span, px, py)
-        if abs(x) >= ROAD and hashed(px, py, 37):
-            return "orange" if (px + py) % 3 else "rust"
-        return c
-
-    street(cv, leafy)
+    street(cv, verge(road))
+    fallen(cv, random.Random("home-leaves"), 90)
     lanes(cv, "white", "plum", dash=(14, 32))
     homes = (("white", "dred", "dgreen"), ("skin1", "navy", "red"), ("cream", "brown", "blue"), ("pink", "plum", "white"))
     things = []
@@ -602,6 +688,26 @@ def long_way_home():
     things.append((640, lambda: ffence(cv, -196, -470, 640)))
     scene(cv, things)
     return cv
+
+
+# leaves on the near verges: a lit half (f) and a shaded half (v), in rust and ochre
+LEAF_SHAPES = (("ff.", ".fv"), (".ff", "fv."), (".f", "fv"))
+LEAF_TONES = (("ochre", "rust"), ("rust", "dbrown"), ("ochre", "dbrown"))
+
+
+def fallen(cv, rnd, n):
+    """n leaves on the sidewalks and lawns below row 96, so none shrink under a pixel; they
+    fall thicker toward the band's bottom edge."""
+    for _ in range(n):
+        py = round(149 - (1 - rnd.random() ** 0.6) * 53)
+        px = rnd.randrange(W)
+        if abs((px + 0.5 - CX) / scale(py + 0.5)) < ROAD + 6:
+            continue
+        tones = dict(zip("fv", rnd.choice(LEAF_TONES)))
+        for j, row in enumerate(rnd.choice(LEAF_SHAPES)):
+            for k, ch in enumerate(row):
+                if ch != ".":
+                    cv.fill(px + k, py + j - 1, 1, 1, tones[ch])
 
 
 def porch_house(cv, side, z, wall_c, roof, door):

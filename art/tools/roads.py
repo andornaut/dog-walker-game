@@ -59,6 +59,19 @@ def specks(g, rnd, n, col, x0=0, x1=W, wide=0.0):
             wp(g, x + 1, y, col)
 
 
+def scatter(rnd, n, x0, x1, gap, y0=0, y1=H, ok=lambda x, y: True):
+    """Up to n points at least gap apart (wrapping top to bottom) where ok(x, y) holds, so
+    texture never falls into a regular rhythm or a clump."""
+    pts = []
+    for _ in range(n * 40):
+        if len(pts) == n:
+            break
+        x, y = rnd.randrange(x0, x1), rnd.randrange(y0, y1)
+        if ok(x, y) and all(abs(x - px) >= gap or min(abs(y - py), H - abs(y - py)) >= gap for px, py in pts):
+            pts.append((x, y))
+    return pts
+
+
 def wave(y, seed, base, amp):
     """A width that wobbles down the strip and repeats every 64 rows."""
     t = 2 * math.pi * y / H
@@ -80,17 +93,21 @@ def clip(g, y0, y1, draw):
 def woof_way_ground(g):
     rnd = random.Random("road-woof-way")
     g.rect(0, 0, W, H, "dslate")
-    specks(g, rnd, 260, "slate", 4, W - 4, 0.3)
-    specks(g, rnd, 160, "navy", 4, W - 4, 0.3)
-    specks(g, rnd, 18, "grey", 4, W - 4)
-    # hairline cracks, kept inside lanes
-    for x, y, steps in ((20, 50, 9), (150, 20, 11), (236, 58, 8)):
+    # sparse 2px grit, lighter and darker, spaced apart: dense 1px speckle reads as noise
+    for x, y in scatter(rnd, 70, 6, W - 7, 7):
+        col = rnd.choice(("slate", "slate", "navy", "navy", "navy", "grey"))
+        if rnd.random() < 0.7:
+            wrect(g, x, y, 1, 2, col)
+        else:
+            wrect(g, x, y, 2, 1, col)
+    # cracks running along the road, 1 to 2px wide, kept inside lanes
+    for x, y, steps in ((20, 50, 12), (150, 20, 14), (236, 58, 10), (93, 33, 8)):
         for _ in range(steps):
             wp(g, x, y, "navy")
-            x += rnd.choice((-1, 0, 1))
+            if rnd.random() < 0.25:
+                x += rnd.choice((-1, 1))
+                wp(g, x, y, "navy")
             y -= 1
-            if rnd.random() < 0.3:
-                wp(g, x + 1, y, "navy")
     # concrete gutters, with expansion joints every 16 rows
     for x0, edge in ((0, 3), (W - 3, W - 4)):
         g.rect(x0, 0, 3, H, "grey")
@@ -204,7 +221,15 @@ def shops_lines(g):
 
 # ---------- The Long Way Home: sunset brick, soldier-course edges, fallen leaves ----------
 
-LEAVES = (("orange", "rust"), ("amber", "orange"), ("rust", "dbrown"))
+# fallen leaves in rust and ochre (amber and orange read as coins): a pointed blade, lit (f) on
+# the upper left of a dark vein (v) that runs on out as the stem and shaded (s) below it, so each
+# reads as a leaf and not a round fleck
+LEAVES = (("ochre", "rust", "dbrown"), ("ochre", "rust", "dbrown"), ("rust", "rust", "dbrown"),
+          ("rust", "dbrown", "plum"))
+_TILTED = ("..fff", ".ffvf", "ffvss", "fvss.", "v....")
+_SMALL = ("..ff", ".fvf", "fvs.", "v...")
+LEAF_SHAPES = (_TILTED, tuple(r[::-1] for r in _TILTED), _SMALL, tuple(r[::-1] for r in _SMALL),
+               (".ff.", "fvfs", "fvss", ".vs.", ".v.."))
 
 
 def home_ground(g):
@@ -229,23 +254,17 @@ def home_ground(g):
             g.rect(x0, y + 6, 6, 2, "dbrown")
             g.rect(x0, y, 1, 6, "skin2")
         g.rect(line, 0, 1, H, "dbrown")
-    leaves(g, rnd, 11, 10, W - 10)
+    leaves(g, rnd, 6, 10, W - 10)
 
 
 def leaves(g, rnd, n, x0, x1, y0=0, y1=H):
-    for _ in range(n):
-        x, y = rnd.randrange(x0, x1), rnd.randrange(y0, y1)
-        if (x + 4) % 56 < 8:
-            continue
-        fill, vein = rnd.choice(LEAVES)
-        if rnd.random() < 0.5:
-            wrect(g, x, y, 3, 2, fill)
-            wp(g, x + 2, y + 1, vein)
-            wp(g, x + 3, y + 2, vein)
-        else:
-            wp(g, x + 1, y, fill)
-            wrect(g, x, y + 1, 3, 1, fill)
-            wp(g, x + 1, y + 2, vein)
+    """n leaves spaced apart, clear of the lane dividers."""
+    for x, y in scatter(rnd, n, x0, x1, 18, y0, y1, lambda x, y: (x + 7) % 56 >= 9):
+        tones = dict(zip("fsv", rnd.choice(LEAVES)))
+        for j, row in enumerate(rnd.choice(LEAF_SHAPES)):
+            for k, ch in enumerate(row):
+                if ch != ".":
+                    wp(g, x + k, y + j, tones[ch])
 
 
 def home_lines(g):
@@ -322,7 +341,7 @@ def soldier_band(g):
         g.rect(x, 24, 3, 2, "tan")
     g.rect(0, 30, W, 2, "dbrown")
     g.rect(0, 32, W, 2, "grey")
-    leaves(g, random.Random("road-the-long-way-home-start"), 8, 10, W - 10, 34, 54)
+    leaves(g, random.Random("road-the-long-way-home-start"), 5, 10, W - 10, 34, 54)
 
 
 # key: (previous zone, this zone, last row of this zone, crossing)
