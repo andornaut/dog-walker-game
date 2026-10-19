@@ -22,15 +22,12 @@ const HEADING =
 // page rule, with the hashes of every inline <script> and <style> in the built pages and the
 // pages copied from public/. Fails the build for a page that loads nav.js without nav.css.
 export function securityHeadersPlugin(): Plugin {
-  let publicDir = "";
   return {
     apply: "build",
-    configResolved(config) {
-      ({ publicDir } = config);
-    },
     enforce: "post",
     generateBundle: {
       async handler(_options, bundle) {
+        const { publicDir } = this.environment.config;
         const decoder = new TextDecoder();
         const readPublic = async (path: string): Promise<string> =>
           decoder.decode(await this.fs.readFile(`${publicDir}/${path}`));

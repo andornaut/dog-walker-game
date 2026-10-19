@@ -42,18 +42,15 @@ export function precachePlugin({
   pageHtmlFile,
   serviceWorkerSource,
 }: PrecachePluginOptions): Plugin {
-  let publicDir = "";
   return {
     apply: "build",
     buildStart() {
       this.emitFile({ fileName: SERVICE_WORKER_FILE_NAME, id: serviceWorkerSource, type: "chunk" });
     },
-    configResolved(config) {
-      ({ publicDir } = config);
-    },
     enforce: "post",
     generateBundle: {
       async handler(_options, bundle) {
+        const { publicDir } = this.environment.config;
         const encoder = new TextEncoder();
         const decoder = new TextDecoder();
         const bundleBytes = (url: string): Uint8Array | undefined => {
