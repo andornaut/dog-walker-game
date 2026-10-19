@@ -143,6 +143,21 @@ Two lucky finds open no card: bumping into them pays out at once, with a short p
 
 About half of the obstacles are minor: cones, bins and hydrants. Bumping one opens no card: the pack drops $2 in tips and stumbles (lane input locks briefly), shown with a cause label. They keep the road busy without adding cards.
 
+### Obstacle sizes
+
+Obstacles span lanes (columns) and rows. No obstacle is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of an obstacle counts as one hit; the whole obstacle is removed and the grace window starts.
+
+| Obstacle                                               | Kind      | Size (lanes × rows) |
+| ------------------------------------------------------ | --------- | ------------------- |
+| Skunk (with its spray cloud)                           | Encounter | 2 × 2               |
+| Puddle                                                 | Encounter | 2 × 1               |
+| Squirrel, other dog, thief                             | Encounter | 1 × 1               |
+| Cone, bin, hydrant                                     | Minor     | 1 × 1               |
+| Parked car                                             | Minor     | 1 × 3               |
+| Bench                                                  | Minor     | 2 × 1               |
+| Hedge                                                  | Minor     | 3 × 1               |
+| Construction barrier (Woof Way and Sniff Street Shops) | Minor     | 2 or 3 × 1          |
+
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band above the road; they open no card and have no effect.
 
 ### Forced stops (one per zone, drawn at random with no repeats in a run)
