@@ -1,6 +1,6 @@
-import { relative, sep } from "node:path";
+import { join, relative, sep } from "node:path";
 
-import type { Plugin, ViteDevServer } from "vite";
+import { createServerModuleRunner, type Plugin, type ViteDevServer } from "vite";
 
 import {
   ART_DIR,
@@ -25,16 +25,22 @@ function debounce(run: () => Promise<void>): () => void {
   };
 }
 
+export interface GeneratedFilesPluginOptions {
+  // The repository's root, which holds src/ and shared/export/. Vite's root is pages/.
+  repoRoot: string;
+}
+
 // On the dev server, keeps the committed generated files in step as their sources change:
 // public/art/manifest.json with the art files, and shared/export/ with src/. The game's modules
 // load through the server, never into this config, so editing a value file still updates the
 // game without a restart. A build writes the art manifest in atlasPlugin and shared/export/ in
 // npm's prebuild step.
-export function generatedFilesPlugin(): Plugin {
+export function generatedFilesPlugin({ repoRoot }: GeneratedFilesPluginOptions): Plugin {
   return {
     apply: (_config, { command, mode }) => command === "serve" && mode !== "test",
     configureServer(server: ViteDevServer) {
-      const { logger, publicDir, root } = server.config;
+      const { logger, publicDir } = server.config;
+      const srcDir = join(repoRoot, "src");
       const artDir = `${publicDir}/${ART_DIR}`;
       const log = (message: string) => logger.info(message, { timestamp: true });
       const fail = (what: string, error: unknown) =>
@@ -52,11 +58,15 @@ export function generatedFilesPlugin(): Plugin {
       });
       const writeExport = debounce(async () => {
         try {
-          const module = (await server.ssrLoadModule(
-            "/src/tools/dataExport.ts",
-          )) as DataExportModule;
-          for (const path of await writeFiles(root, module.currentDataExportFiles())) {
-            log(`wrote ${path}`);
+          // A fresh runner each time: a runner keeps every module it has evaluated.
+          const runner = createServerModuleRunner(server.environments.ssr, { hmr: false });
+          try {
+            const module = (await runner.import("/src/tools/dataExport.ts")) as DataExportModule;
+            for (const path of await writeFiles(repoRoot, module.currentDataExportFiles())) {
+              log(`wrote ${path}`);
+            }
+          } finally {
+            await runner.close();
           }
         } catch (error) {
           fail("shared/export", error);
@@ -65,6 +75,8 @@ export function generatedFilesPlugin(): Plugin {
 
       writeManifest();
       writeExport();
+      // Vite watches pages/ and public/, not src/.
+      server.watcher.add(srcDir);
       server.watcher.on("all", (_event, path) => {
         const inArt = relative(artDir, path).split(sep);
         const artFile =
@@ -73,8 +85,8 @@ export function generatedFilesPlugin(): Plugin {
         if (artFile) {
           writeManifest();
         }
-        const inRoot = relative(root, path).split(sep);
-        if (inRoot[0] === "src" && path.endsWith(".ts") && !path.endsWith(".test.ts")) {
+        const inSrc = relative(srcDir, path).split(sep)[0] !== "..";
+        if (inSrc && path.endsWith(".ts") && !path.endsWith(".test.ts")) {
           writeExport();
         }
       });

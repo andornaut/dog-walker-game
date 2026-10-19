@@ -39,7 +39,7 @@ export default defineConfig({
   // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
   plugins: [
     atlasPlugin(),
-    generatedFilesPlugin(),
+    generatedFilesPlugin({ repoRoot: repoPath(".") }),
     precachePlugin({
       pageHtmlFile: "play/index.html",
       serviceWorkerSource: repoPath("src/pwa/serviceWorker.ts"),
