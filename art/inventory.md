@@ -14,17 +14,17 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
 
-| Asset             | Key                  | Type   | Size  | Animations                 | Priority | Notes                                                                                                                                                                    |
-| ----------------- | -------------------- | ------ | ----- | -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Walkers           | `walker-<name>`      | sprite | 32×48 | `walk`, `react`, `stumble` | M6       | Seen from behind, all free: Casey (cap and hoodie), Ada (11, mixed race, long black curls), Ben (45, bald, chin beard, in black), Trista (50, teacher, dirty blonde bob) |
-| Walker portraits  | `face-walker-<name>` | sprite | 32×32 | `happy`, `neutral`         | core     | Front view for the walker picker                                                                                                                                         |
-| Other dog         | `other-dog`          | sprite | 32×32 | `walk`                     | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                                                                                                   |
-| Other dog's owner | `other-dog-owner`    | sprite | 32×48 | `walk`                     | M6       | Walks behind the other dog; the game draws the leash                                                                                                                     |
-| Stinky effect     | `fx-stinky`          | sprite | 32×32 | `loop`                     | core     | Green stink lines over the pack while Stinky lasts                                                                                                                       |
+| Asset             | Key                  | Type   | Size  | Animations                         | Priority | Notes                                                                                                                                                                    |
+| ----------------- | -------------------- | ------ | ----- | ---------------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Walkers           | `walker-<name>`      | sprite | 32×48 | `walk`, `react`, `stumble`, `idle` | M6       | Seen from behind, all free: Casey (cap and hoodie), Ada (11, mixed race, long black curls), Ben (45, bald, chin beard, in black), Trista (50, teacher, dirty blonde bob) |
+| Walker portraits  | `face-walker-<name>` | sprite | 32×32 | `happy`, `neutral`                 | core     | Front view for the walker picker                                                                                                                                         |
+| Other dog         | `other-dog`          | sprite | 32×32 | `walk`                             | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                                                                                                   |
+| Other dog's owner | `other-dog-owner`    | sprite | 32×48 | `walk`, `idle`                     | M6       | Walks behind the other dog; the game draws the leash                                                                                                                     |
+| Stinky effect     | `fx-stinky`          | sprite | 32×32 | `loop`                             | core     | Green stink lines over the pack while Stinky lasts                                                                                                                       |
 
 ## Dogs
 
-Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react`, `pull` and `tell` (the lean and bark about 1s before a pull). Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
+Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react`, `pull`, `tell` (the lean and bark about 1s before a pull) and `idle` (standing, for pauses). Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
 
 | Dog               | Road sprite    | Face                | Owner face            | Priority |
 | ----------------- | -------------- | ------------------- | --------------------- | -------- |
@@ -42,19 +42,19 @@ Starters come first: they are the dogs every new player sees.
 
 ## Obstacles and forced stops (road)
 
-| Asset             | Key                | Type   | Size  | Animations           | Priority | Notes                                                                                                   |
-| ----------------- | ------------------ | ------ | ----- | -------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
-| Skunk             | `skunk`            | sprite | 32×32 | `idle`               | M6       | Centred on its spray cloud                                                                              |
-| Skunk spray cloud | `skunk-cloud`      | sprite | 88×88 | `loop`               | M6       | 2×2 lanes and rows; dithered haze drawn under the skunk; the hit box                                    |
-| Squirrel          | `squirrel`         | sprite | 32×32 | `idle`, `run`        | M6       | Harmless scenery when no chaser is in the pack                                                          |
-| Puddle            | `puddle`           | sprite | 88×32 | `idle` (shimmer)     | M6       | 2 lanes. Ground decal: no outline, no shadow, drawn under everything; cards draw their own 32×16 puddle |
-| Thief             | `thief`            | sprite | 32×48 | `walk`, `flee`       | M6       | Pickpocket; flees from a pack with a big dog, with no card                                              |
-| Stop sign         | `stop-sign`        | sprite | 32×48 | `idle`               | M6       | Forced stop                                                                                             |
-| Chatty neighbour  | `chatty-neighbour` | sprite | 32×48 | `wave`               | M6       | Forced stop; holds a coffee mug                                                                         |
-| Kid               | `kid`              | sprite | 32×48 | `wave`, `sad`        | M6       | Forced stop: wants to pet the dogs; shorter than the adults                                             |
-| Ice cream truck   | `ice-cream-truck`  | sprite | 64×48 | `idle`               | M6       | Forced stop; two lanes wide                                                                             |
-| Construction      | `construction`     | sprite | 56×32 | `idle` (lamps blink) | M6       | Forced stop: one lane of barrier; the game repeats it across the road                                   |
-| Mail carrier      | `mail-carrier`     | sprite | 32×48 | `walk`               | M6       | Forced stop                                                                                             |
+| Asset             | Key                | Type   | Size  | Animations             | Priority | Notes                                                                                                   |
+| ----------------- | ------------------ | ------ | ----- | ---------------------- | -------- | ------------------------------------------------------------------------------------------------------- |
+| Skunk             | `skunk`            | sprite | 32×32 | `idle`                 | M6       | Centred on its spray cloud                                                                              |
+| Skunk spray cloud | `skunk-cloud`      | sprite | 88×88 | `loop`                 | M6       | 2×2 lanes and rows; dithered haze drawn under the skunk; the hit box                                    |
+| Squirrel          | `squirrel`         | sprite | 32×32 | `idle`, `run`          | M6       | Harmless scenery when no chaser is in the pack                                                          |
+| Puddle            | `puddle`           | sprite | 88×32 | `idle` (shimmer)       | M6       | 2 lanes. Ground decal: no outline, no shadow, drawn under everything; cards draw their own 32×16 puddle |
+| Thief             | `thief`            | sprite | 32×48 | `walk`, `flee`, `idle` | M6       | Pickpocket; flees from a pack with a big dog, with no card                                              |
+| Stop sign         | `stop-sign`        | sprite | 32×48 | `idle`                 | M6       | Forced stop                                                                                             |
+| Chatty neighbour  | `chatty-neighbour` | sprite | 32×48 | `wave`, `idle`         | M6       | Forced stop; holds a coffee mug                                                                         |
+| Kid               | `kid`              | sprite | 32×48 | `wave`, `sad`, `idle`  | M6       | Forced stop: wants to pet the dogs; shorter than the adults                                             |
+| Ice cream truck   | `ice-cream-truck`  | sprite | 64×48 | `idle`                 | M6       | Forced stop; two lanes wide                                                                             |
+| Construction      | `construction`     | sprite | 56×32 | `idle` (lamps blink)   | M6       | Forced stop: one lane of barrier; the game repeats it across the road                                   |
+| Mail carrier      | `mail-carrier`     | sprite | 32×48 | `walk`, `idle`         | M6       | Forced stop                                                                                             |
 
 ## Minor obstacles (road)
 
@@ -77,7 +77,7 @@ Good things to bump into. The lost wallet opens a choice card; the generous neig
 | Asset              | Key                 | Type   | Size  | Animations      | Priority | Notes                   |
 | ------------------ | ------------------- | ------ | ----- | --------------- | -------- | ----------------------- |
 | Lost wallet        | `lost-wallet`       | sprite | 16×16 | `idle` (glint)  | M6       | Lying on the road       |
-| Generous neighbour | `biscuit-neighbour` | sprite | 32×48 | `wave`          | M6       | Holds out a biscuit jar |
+| Generous neighbour | `biscuit-neighbour` | sprite | 32×48 | `wave`, `idle`  | M6       | Holds out a biscuit jar |
 | Photo op           | `photo-op`          | sprite | 32×48 | `idle`, `flash` | M6       | Tourist with a camera   |
 
 ## Depth variants (road)

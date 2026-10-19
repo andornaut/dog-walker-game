@@ -14,6 +14,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 200
+   },
+   "other-dog-owner 2.aseprite": {
+    "frame": { "x": 64, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 400
+   },
+   "other-dog-owner 3.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 400
    }
  },
  "meta": {
@@ -21,10 +37,11 @@
   "version": "1.2.30-x64",
   "image": "other-dog-owner.png",
   "format": "RGBA8888",
-  "size": { "w": 64, "h": 48 },
+  "size": { "w": 128, "h": 48 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 1, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "idle", "from": 2, "to": 3, "direction": "forward" }
   ]
  }
 }

@@ -4,8 +4,9 @@
 Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
 
 - dog-<name>: the road sprite, seen from above and behind. Tags: walk (4
-  frames), react (2), pull (2, leaning right; the game mirrors it for left)
-  and tell (2, the lean before a pull; the game adds the fx-bark pop).
+  frames), react (2), pull (2, leaning right; the game mirrors it for left),
+  tell (2, the lean before a pull; the game adds the fx-bark pop) and idle (4,
+  standing while the walk pauses: a slow tail wag and a twitch of the right ear).
 - face-dog-<name>: the dog column face. Tags: happy, neutral, upset.
 
 Usage:
@@ -43,12 +44,21 @@ TELL = [
     dict(bob=0, tail=1, lean=1, ears=-1),
     dict(bob=-1, tail=1, lean=2, ears=-1),
 ]
-ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("tell", TELL, 250)]
+# Standing still: the tail swings across and back, and the right ear lifts 1px as it comes home.
+IDLE = [
+    dict(tail=-1),
+    dict(tail=0),
+    dict(tail=1),
+    dict(tail=0, twitch=-1),
+]
+# Idle goes last so the frame indices of the other tags stay put.
+ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("tell", TELL, 250), ("idle", IDLE, 300)]
 FACE_TAGS = ["happy", "neutral", "upset"]
 
 
 def pose(q):
-    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0), **q)
+    """Every pose key with its default. twitch moves the right ear alone (negative is up)."""
+    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0), **q)
 
 
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
@@ -79,8 +89,9 @@ def koda_road(q):
     hx = 16 + ln
     e = q["ears"]
     tip = max(1, 1 + o + b + e)
+    t = q["twitch"]
     g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "slate")
-    g.tri((hx + 7, 7 + o + b), (hx + 6, tip), (hx + 2, 4.5 + o + b), "slate")
+    g.tri((hx + 7, 7 + o + b + t), (hx + 6, tip + t), (hx + 2, 4.5 + o + b + t), "slate")
     g.ell(hx, 9.5 + o + b, 8, 6, "slate", "dslate", "grey")
     g.ell(hx - 6.5, 12 + o + b, 2, 2.2, "lgrey")
     g.ell(hx + 6.5, 12 + o + b, 2, 2.2, "lgrey", "grey")
@@ -135,7 +146,7 @@ def biscuit_road(q):
     hx = 16 + ln
     g.ell(hx, 11.5 + b, 7, 5.5, "ochre", "rust", "tan")
     g.ell(hx - 6.5, 14 + b - q["ears"], 2.3, 4.5, "rust", "dbrown")
-    g.ell(hx + 6.5, 14 + b - q["ears"], 2.3, 4.5, "rust", "dbrown")
+    g.ell(hx + 6.5, 14 + b - q["ears"] + q["twitch"], 2.3, 4.5, "rust", "dbrown")
     return g
 
 
@@ -173,7 +184,7 @@ def duchess_road(q):
     g.p(tx + 1, 27 + b, "lgrey")
     hx = 16 + ln
     g.ell(hx - 4.5, 18 + b - q["ears"], 2.2, 4, "white", "lgrey")
-    g.ell(hx + 4.5, 18 + b - q["ears"], 2.2, 4, "lgrey")
+    g.ell(hx + 4.5, 18 + b - q["ears"] + q["twitch"], 2.2, 4, "lgrey")
     g.ell(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
     bow(g, hx, 10 + b)
     return g
@@ -212,7 +223,7 @@ def nugget_road(q):
     hx = 16 + ln
     g.ell(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
     g.ell(hx - 4.5, 12 + b - q["ears"], 1.8, 1.5, "navy")
-    g.ell(hx + 4.5, 12 + b - q["ears"], 1.8, 1.5, "navy")
+    g.ell(hx + 4.5, 12 + b - q["ears"] + q["twitch"], 1.8, 1.5, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
     return g
 
@@ -255,7 +266,8 @@ def zippy_road(q):
     g.ell(hx + 2, 14 + b, 2.5, 2, "ochre")
     e = q["ears"]
     g.tri((hx - 5, 14 + b), (hx - 4, 10 + b + e), (hx - 1.5, 12.5 + b), "ochre")
-    g.tri((hx + 5, 14 + b), (hx + 4, 10 + b + e), (hx + 1.5, 12.5 + b), "ochre")
+    t = q["twitch"]
+    g.tri((hx + 5, 14 + b + t), (hx + 4, 10 + b + e + t), (hx + 1.5, 12.5 + b + t), "ochre")
     return g
 
 
@@ -296,7 +308,7 @@ def pierre_road(q):
     g.ell(tx + 0.5, 28.5 + b, 2.2, 2, "skin1", "brown", "cream")
     hx = 16 + ln
     g.ell(hx - 5, 13.5 + b - q["ears"], 2.2, 4.5, "skin1", "brown")
-    g.ell(hx + 5, 13.5 + b - q["ears"], 2.2, 4.5, "skin1", "brown")
+    g.ell(hx + 5, 13.5 + b - q["ears"] + q["twitch"], 2.2, 4.5, "skin1", "brown")
     g.ell(hx, 12.5 + b, 4.5, 4, "skin1", "brown", "cream")
     g.ell(hx, 8 + b, 5, 4, "skin1", "brown", "cream")
     return g
@@ -338,7 +350,7 @@ def dash_road(q):
     g.ell(hx, 11.5 + b, 3.5, 4.5, "slate", "dslate", "grey")
     g.rect(hx - 1, 9 + b, 1, 4, "dslate")
     g.ell(hx - 3.5, 9.5 + b - q["ears"], 1.5, 1.5, "dslate")
-    g.ell(hx + 3.5, 9.5 + b - q["ears"], 1.5, 1.5, "dslate")
+    g.ell(hx + 3.5, 9.5 + b - q["ears"] + q["twitch"], 1.5, 1.5, "dslate")
     return g
 
 
@@ -382,8 +394,9 @@ def snowball_road(q):
     hx = 16 + ln
     e = q["ears"]
     tip = max(1, 1 + o + b + e)
+    t = q["twitch"]
     g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "white")
-    g.tri((hx + 7, 7 + o + b), (hx + 6, tip), (hx + 2, 4.5 + o + b), "lgrey")
+    g.tri((hx + 7, 7 + o + b + t), (hx + 6, tip + t), (hx + 2, 4.5 + o + b + t), "lgrey")
     g.ell(hx, 9.5 + o + b, 8, 6, "white", "lgrey")
     g.ell(hx - 7, 12 + o + b, 2, 2.2, "white")
     g.ell(hx + 7, 12 + o + b, 2, 2.2, "lgrey")
@@ -430,7 +443,7 @@ def waffles_road(q):
     hx = 16 + ln
     g.ell(hx, 9.5 + o + b, 8.5, 6.5, "rust", "dbrown", "ochre")
     g.ell(hx - 7.5, 12 + o + b - q["ears"], 2.5, 4, "dbrown", "plum")
-    g.ell(hx + 7.5, 12 + o + b - q["ears"], 2.5, 4, "dbrown", "plum")
+    g.ell(hx + 7.5, 12 + o + b - q["ears"] + q["twitch"], 2.5, 4, "dbrown", "plum")
     g.rect(hx - 1, 4 + o + b, 2, 4, "white")
     return g
 

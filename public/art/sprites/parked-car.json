@@ -1,11 +1,19 @@
 { "frames": {
-   "parked-car.aseprite": {
+   "parked-car 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 40, "h": 80 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 80 },
     "sourceSize": { "w": 40, "h": 80 },
-    "duration": 1000
+    "duration": 500
+   },
+   "parked-car 1.aseprite": {
+    "frame": { "x": 40, "y": 0, "w": 40, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 80 },
+    "sourceSize": { "w": 40, "h": 80 },
+    "duration": 500
    }
  },
  "meta": {
@@ -13,10 +21,10 @@
   "version": "1.2.30-x64",
   "image": "parked-car.png",
   "format": "RGBA8888",
-  "size": { "w": 40, "h": 80 },
+  "size": { "w": 80, "h": 80 },
   "scale": "1",
   "frameTags": [
-   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
   ]
  }
 }

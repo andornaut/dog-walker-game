@@ -1,0 +1,30 @@
+{ "frames": {
+   "other-dog@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 200
+   },
+   "other-dog@50 1.aseprite": {
+    "frame": { "x": 16, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "other-dog@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 32, "h": 16 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

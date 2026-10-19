@@ -112,6 +112,24 @@
       }
     },
     {
+      "key": "bin@50",
+      "png": "sprites/bin@50.png",
+      "json": "sprites/bin@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "bin@75",
+      "png": "sprites/bin@75.png",
+      "json": "sprites/bin@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "biscuit-neighbour",
       "png": "sprites/biscuit-neighbour.png",
       "json": "sprites/biscuit-neighbour.json",
@@ -149,6 +167,24 @@
       }
     },
     {
+      "key": "cone@50",
+      "png": "sprites/cone@50.png",
+      "json": "sprites/cone@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "cone@75",
+      "png": "sprites/cone@75.png",
+      "json": "sprites/cone@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "construction",
       "png": "sprites/construction.png",
       "json": "sprites/construction.json",
@@ -167,12 +203,48 @@
       }
     },
     {
+      "key": "dog-biscuit@50",
+      "png": "sprites/dog-biscuit@50.png",
+      "json": "sprites/dog-biscuit@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "dog-biscuit@75",
+      "png": "sprites/dog-biscuit@75.png",
+      "json": "sprites/dog-biscuit@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "dog-dash",
       "png": "sprites/dog-dash.png",
       "json": "sprites/dog-dash.json",
       "anchor": {
         "feetY": 30,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-dash@50",
+      "png": "sprites/dog-dash@50.png",
+      "json": "sprites/dog-dash@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "dog-dash@75",
+      "png": "sprites/dog-dash@75.png",
+      "json": "sprites/dog-dash@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 11
       }
     },
     {
@@ -185,12 +257,48 @@
       }
     },
     {
+      "key": "dog-duchess@50",
+      "png": "sprites/dog-duchess@50.png",
+      "json": "sprites/dog-duchess@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "dog-duchess@75",
+      "png": "sprites/dog-duchess@75.png",
+      "json": "sprites/dog-duchess@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 12
+      }
+    },
+    {
       "key": "dog-koda",
       "png": "sprites/dog-koda.png",
       "json": "sprites/dog-koda.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-koda@50",
+      "png": "sprites/dog-koda@50.png",
+      "json": "sprites/dog-koda@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "dog-koda@75",
+      "png": "sprites/dog-koda@75.png",
+      "json": "sprites/dog-koda@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
       }
     },
     {
@@ -203,12 +311,48 @@
       }
     },
     {
+      "key": "dog-nugget@50",
+      "png": "sprites/dog-nugget@50.png",
+      "json": "sprites/dog-nugget@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "dog-nugget@75",
+      "png": "sprites/dog-nugget@75.png",
+      "json": "sprites/dog-nugget@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 12
+      }
+    },
+    {
       "key": "dog-pierre",
       "png": "sprites/dog-pierre.png",
       "json": "sprites/dog-pierre.json",
       "anchor": {
         "feetY": 31,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "dog-pierre@50",
+      "png": "sprites/dog-pierre@50.png",
+      "json": "sprites/dog-pierre@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "dog-pierre@75",
+      "png": "sprites/dog-pierre@75.png",
+      "json": "sprites/dog-pierre@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
       }
     },
     {
@@ -221,6 +365,24 @@
       }
     },
     {
+      "key": "dog-snowball@50",
+      "png": "sprites/dog-snowball@50.png",
+      "json": "sprites/dog-snowball@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 11
+      }
+    },
+    {
+      "key": "dog-snowball@75",
+      "png": "sprites/dog-snowball@75.png",
+      "json": "sprites/dog-snowball@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "dog-waffles",
       "png": "sprites/dog-waffles.png",
       "json": "sprites/dog-waffles.json",
@@ -230,12 +392,48 @@
       }
     },
     {
+      "key": "dog-waffles@50",
+      "png": "sprites/dog-waffles@50.png",
+      "json": "sprites/dog-waffles@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "dog-waffles@75",
+      "png": "sprites/dog-waffles@75.png",
+      "json": "sprites/dog-waffles@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "dog-zippy",
       "png": "sprites/dog-zippy.png",
       "json": "sprites/dog-zippy.json",
       "anchor": {
         "feetY": 30,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "dog-zippy@50",
+      "png": "sprites/dog-zippy@50.png",
+      "json": "sprites/dog-zippy@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "dog-zippy@75",
+      "png": "sprites/dog-zippy@75.png",
+      "json": "sprites/dog-zippy@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 11
       }
     },
     {
@@ -449,6 +647,24 @@
       }
     },
     {
+      "key": "hydrant@50",
+      "png": "sprites/hydrant@50.png",
+      "json": "sprites/hydrant@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "hydrant@75",
+      "png": "sprites/hydrant@75.png",
+      "json": "sprites/hydrant@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json",
@@ -513,6 +729,15 @@
       }
     },
     {
+      "key": "other-dog@50",
+      "png": "sprites/other-dog@50.png",
+      "json": "sprites/other-dog@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 10
+      }
+    },
+    {
       "key": "parked-car",
       "png": "sprites/parked-car.png",
       "json": "sprites/parked-car.json",
@@ -558,12 +783,48 @@
       }
     },
     {
+      "key": "skunk-cloud@50",
+      "png": "sprites/skunk-cloud@50.png",
+      "json": "sprites/skunk-cloud@50.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 43
+      }
+    },
+    {
+      "key": "skunk@50",
+      "png": "sprites/skunk@50.png",
+      "json": "sprites/skunk@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "skunk@75",
+      "png": "sprites/skunk@75.png",
+      "json": "sprites/skunk@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 12
+      }
+    },
+    {
       "key": "squirrel",
       "png": "sprites/squirrel.png",
       "json": "sprites/squirrel.json",
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "squirrel@50",
+      "png": "sprites/squirrel@50.png",
+      "json": "sprites/squirrel@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 11
       }
     },
     {
@@ -594,12 +855,48 @@
       }
     },
     {
+      "key": "tip@50",
+      "png": "sprites/tip@50.png",
+      "json": "sprites/tip@50.json",
+      "anchor": {
+        "feetY": 7,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "tip@75",
+      "png": "sprites/tip@75.png",
+      "json": "sprites/tip@75.json",
+      "anchor": {
+        "feetY": 10,
+        "opaqueWidth": 10
+      }
+    },
+    {
       "key": "treat",
       "png": "sprites/treat.png",
       "json": "sprites/treat.json",
       "anchor": {
         "feetY": 10,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "treat@50",
+      "png": "sprites/treat@50.png",
+      "json": "sprites/treat@50.json",
+      "anchor": {
+        "feetY": 6,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "treat@75",
+      "png": "sprites/treat@75.png",
+      "json": "sprites/treat@75.json",
+      "anchor": {
+        "feetY": 8,
+        "opaqueWidth": 12
       }
     },
     {

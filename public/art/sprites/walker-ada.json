@@ -78,6 +78,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 90
+   },
+   "walker-ada 10.aseprite": {
+    "frame": { "x": 320, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 400
+   },
+   "walker-ada 11.aseprite": {
+    "frame": { "x": 352, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 400
    }
  },
  "meta": {
@@ -85,12 +101,13 @@
   "version": "1.2.30-x64",
   "image": "walker-ada.png",
   "format": "RGBA8888",
-  "size": { "w": 320, "h": 48 },
+  "size": { "w": 384, "h": 48 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
    { "name": "react", "from": 4, "to": 5, "direction": "forward" },
-   { "name": "stumble", "from": 6, "to": 9, "direction": "forward" }
+   { "name": "stumble", "from": 6, "to": 9, "direction": "forward" },
+   { "name": "idle", "from": 10, "to": 11, "direction": "forward" }
   ]
  }
 }

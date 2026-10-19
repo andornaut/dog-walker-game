@@ -78,6 +78,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
     "duration": 250
+   },
+   "dog-duchess@75 10.aseprite": {
+    "frame": { "x": 240, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "dog-duchess@75 11.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "dog-duchess@75 12.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
+   },
+   "dog-duchess@75 13.aseprite": {
+    "frame": { "x": 312, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 300
    }
  },
  "meta": {
@@ -85,13 +117,14 @@
   "version": "1.2.30-x64",
   "image": "dog-duchess@75.png",
   "format": "RGBA8888",
-  "size": { "w": 240, "h": 24 },
+  "size": { "w": 336, "h": 24 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
    { "name": "react", "from": 4, "to": 5, "direction": "forward" },
    { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
-   { "name": "tell", "from": 8, "to": 9, "direction": "forward" }
+   { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
+   { "name": "idle", "from": 10, "to": 13, "direction": "forward" }
   ]
  }
 }

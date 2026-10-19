@@ -11,6 +11,10 @@ Usage:
   road.py build             write art/road/*.aseprite, then export
                             public/art/sprites/*.png and *.json with Aseprite
 
+Everything that stands or waits on the road has a looping idle: people and
+walkers breathe (a 1px bob of the head and shoulders) and the stop sign glints.
+New tags go after the existing ones, so the frame indices the game uses stay put.
+
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
@@ -186,6 +190,10 @@ WALKER_REACT = [dict(lf=-4, rf=-4, bob=-4, arms=-3), dict(lf=-1, rf=-1, bob=-1, 
 # A bump: lurch left with the arms up, wobble back, steady (a right lean would push a tote out of the frame). Each pose is (lean, walker args).
 WALKER_STUMBLE = [(-3, dict(lf=-3, rf=0, bob=1, arms=-3)), (1, dict(lf=0, rf=-3, arms=-3)),
                   (-1, dict(lf=-1, rf=0, arms=1)), (0, dict(lf=-1, rf=-1, bob=-1))]
+# Waiting while the walk pauses: feet planted, arms at rest, a 1px breath.
+WALKER_IDLE = [dict(), dict(bob=-1)]
+# The breathing bob every standing person shares, and its frame duration in ms.
+BREATH, BREATH_MS = (0, -1), 400
 
 
 def lean(g, k):
@@ -490,7 +498,8 @@ def dog_owner_top(g, b):
 
 # ---------- forced stops ----------
 
-def stop_sign():
+def stop_sign(glint=None):
+    """glint is the diagonal x + y = glint along which a pink sheen crosses the red face, or None."""
     g = Grid(32, 48)
     g.rect(15, 22, 3, 24, "grey")
     g.rect(17, 22, 1, 24, "slate")
@@ -508,6 +517,10 @@ def stop_sign():
             for k in range(3):
                 if bits[r * 3 + k] == "1":
                     g.p(x + k, 11 + r, "white")
+    if glint is not None:
+        for y in range(4, 23):
+            if 0 <= glint - y < g.w and g.px[y][glint - y] == K["red"]:
+                g.p(glint - y, y, "pink")
     return g
 
 
@@ -536,33 +549,34 @@ def chatty_top(wave):
     return top
 
 
-def kid(wave=False, mood="happy"):
+def kid(wave=False, mood="happy", bob=0):
     g = Grid(32, 48)
+    b = bob
     for x in (12, 17):
-        g.rect(x, 38, 3, 6, "skin1")
+        g.rect(x, 38 + b, 3, 6 - b, "skin1")
         g.rect(x, 44, 3, 2, "red")
-    g.rect(10, 28, 12, 10, "yellow")
-    g.rect(19, 28, 3, 10, "amber")
-    g.rect(10, 35, 12, 3, "sky")
-    g.rect(7, 29, 3, 6, "yellow")
-    g.rect(7, 35, 3, 2, "skin1")
+    g.rect(10, 28 + b, 12, 10, "yellow")
+    g.rect(19, 28 + b, 3, 10, "amber")
+    g.rect(10, 35 + b, 12, 3, "sky")
+    g.rect(7, 29 + b, 3, 6, "yellow")
+    g.rect(7, 35 + b, 3, 2, "skin1")
     if wave:
-        g.rect(22, 20, 3, 8, "yellow")
-        g.rect(22, 18, 3, 2, "skin1")
+        g.rect(22, 20 + b, 3, 8, "yellow")
+        g.rect(22, 18 + b, 3, 2, "skin1")
     else:
-        g.rect(22, 29, 3, 6, "yellow")
-        g.rect(22, 35, 3, 2, "skin1")
-    g.ell(16, 20.5, 7.5, 7.5, "skin1", "skin2")
-    g.ell(16, 15.5, 8, 4, "red", "dred", "pink")
-    g.rect(16, 17, 9, 2, "red")
-    g.rect(8, 18, 2, 4, "ochre")
-    g.rect(22, 18, 2, 4, "ochre")
-    face_front(g, 16, 21, mood if mood != "sad" else "neutral")
+        g.rect(22, 29 + b, 3, 6, "yellow")
+        g.rect(22, 35 + b, 3, 2, "skin1")
+    g.ell(16, 20.5 + b, 7.5, 7.5, "skin1", "skin2")
+    g.ell(16, 15.5 + b, 8, 4, "red", "dred", "pink")
+    g.rect(16, 17 + b, 9, 2, "red")
+    g.rect(8, 18 + b, 2, 4, "ochre")
+    g.rect(22, 18 + b, 2, 4, "ochre")
+    face_front(g, 16, 21 + b, mood if mood != "sad" else "neutral")
     if mood == "sad":
-        g.rect(15, 26, 2, 1, "dbrown")
-        g.p(14, 27, "dbrown")
-        g.p(17, 27, "dbrown")
-        g.p(10, 23, "cyan")
+        g.rect(15, 26 + b, 2, 1, "dbrown")
+        g.p(14, 27 + b, "dbrown")
+        g.p(17, 27 + b, "dbrown")
+        g.p(10, 23 + b, "cyan")
     return g
 
 
@@ -727,7 +741,8 @@ def sprites():
     for key, draw in {"walker-casey": walker, **WALKERS}.items():
         yield key, [("walk", frames(draw(**q) for q in WALKER_WALK), 160),
                     ("react", frames(draw(**q) for q in WALKER_REACT), 120),
-                    ("stumble", frames(lean(draw(**q), k) for k, q in WALKER_STUMBLE), 90)]
+                    ("stumble", frames(lean(draw(**q), k) for k, q in WALKER_STUMBLE), 90),
+                    ("idle", frames(draw(**q) for q in WALKER_IDLE), BREATH_MS)]
     yield "treat", [("idle", frames([treat(0), treat(-1)]), 400)]
     yield "tip", [("idle", frames(tip(rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames([skunk(0), skunk(1)]), 400)]
@@ -737,15 +752,20 @@ def sprites():
     yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
     yield "other-dog", [("walk", frames([corgi(-1), corgi(1)]), 200)]
     yield "other-dog-owner", [("walk", [person(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
-                                        person(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200)]
+                                        person(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200),
+                              ("idle", [person(dog_owner_top, shoes="dbrown", bob=bb).outlined() for bb in BREATH],
+                               BREATH_MS)]
     yield "thief", [("walk", [person(thief_top(False), lf=-2).outlined(), person(thief_top(False), rf=-2).outlined()], 200),
                     ("flee", [person(thief_top(True), lf=-3, bob=-1).outlined(),
-                              person(thief_top(True), rf=-3, bob=-1).outlined()], 110)]
+                              person(thief_top(True), rf=-3, bob=-1).outlined()], 110),
+                    ("idle", [person(thief_top(False), bob=bb).outlined() for bb in BREATH], BREATH_MS)]
     yield "lost-wallet", [("idle", frames([wallet(False), wallet(True)]), 450)]
     yield "biscuit-neighbour", [("wave", [person(neighbour_top(w), legs="purple", shoes="dbrown").outlined()
-                                          for w in (False, True)], 350)]
+                                          for w in (False, True)], 350),
+                                ("idle", [person(neighbour_top(False), legs="purple", shoes="dbrown", bob=bb).outlined()
+                                          for bb in BREATH], BREATH_MS)]
     yield "photo-op", [("idle", [person(tourist_top(False), legs="skin2", shoes="sky", bob=bb).outlined()
-                                 for bb in (0, -1)], 400),
+                                 for bb in BREATH], BREATH_MS),
                        ("flash", [person(tourist_top(True), legs="skin2", shoes="sky").outlined(),
                                   person(tourist_top(False), legs="skin2", shoes="sky").outlined()], 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
@@ -753,13 +773,19 @@ def sprites():
                       ("react", frames([cat(1, alert=True), cat(2, alert=True)]), 200)]
     yield "gag-sprinkler", [("spray", frames(sprinkler(i) for i in range(4)), 140)]
     yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
-    yield "stop-sign", [("idle", frames([stop_sign()]), 1000)]
-    yield "chatty-neighbour", [("wave", [person(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350)]
-    yield "kid", [("wave", frames([kid(False), kid(True)]), 300), ("sad", frames([kid(False, "sad")]), 1000)]
+    # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
+    yield "stop-sign", [("idle", frames(stop_sign(c) for c in (None, None, 18, 24)), 400)]
+    yield "chatty-neighbour", [("wave", [person(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350),
+                               ("idle", [person(chatty_top(False), legs="brown", shoes="dbrown", bob=bb).outlined()
+                                         for bb in BREATH], BREATH_MS)]
+    yield "kid", [("wave", frames([kid(False), kid(True)]), 300), ("sad", frames([kid(False, "sad")]), 1000),
+                  ("idle", frames(kid(bob=bb) for bb in BREATH), BREATH_MS)]
     yield "ice-cream-truck", [("idle", frames([ice_cream_truck(0), ice_cream_truck(1)]), 400)]
     yield "construction", [("idle", frames([construction(0), construction(1)]), 500)]
     yield "mail-carrier", [("walk", [person(mail_top, legs="navy", shoes="ink", lf=-2).outlined(),
-                                     person(mail_top, legs="navy", shoes="ink", rf=-2).outlined()], 200)]
+                                     person(mail_top, legs="navy", shoes="ink", rf=-2).outlined()], 200),
+                           ("idle", [person(mail_top, legs="navy", shoes="ink", bob=bb).outlined() for bb in BREATH],
+                            BREATH_MS)]
 
 
 if __name__ == "__main__":

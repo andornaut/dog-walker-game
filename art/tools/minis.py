@@ -5,6 +5,8 @@
 legs blink and freezes 1px bobs. These are redrawn at the small size instead:
 the same drawing functions run on a grid that scales every rect, ellipse and
 triangle before it rasterizes, then the small sprite gets its own full outline.
+Where that still loses a feature (the treat's knobs, the faces of the skunk,
+squirrel and other dog), the sprite is a hand-drawn pixel map instead.
 
 <key>@75 and <key>@50 keep the original's tags, frame counts and durations,
 and their frames are round(original size x scale):
@@ -15,11 +17,14 @@ cone@75, bin@75, hydrant@75         24x24
 cone@50, bin@50, hydrant@50         16x16
 dog-<name>@75 (all nine dogs)       24x24
 dog-<name>@50                       16x16
+skunk@75                            24x24
+skunk@50, other-dog@50, squirrel@50 16x16
+skunk-cloud@50 (no outline)         44x44
 
 Usage:
   minis.py preview OUT.png   every small frame on the street colours
   minis.py compare OUT.png   each sprite at 1x, then plain nearest-neighbour and
-                             this file's version at 0.75x and 0.5x, at 4x zoom
+                             this file's version at each scale it has, at 4x zoom
   minis.py build             write art/minis/*.aseprite, export to
                              public/art/sprites/ and list them in the manifest
 
@@ -150,13 +155,26 @@ def tip(s, rx):
     return g
 
 
-# The bone drawn by hand: scaled, its four knobs merge unevenly. c cream, t tan, w the glint.
+# The colour of each letter in a hand-drawn pixel map; "." is empty.
+MAP = {"n": "navy", "d": "dslate", "#": "ink", "W": "white", "l": "lgrey", "p": "pink", "P": "plum",
+       "o": "ochre", "r": "rust", "t": "tan", "c": "cream", "a": "amber"}
+
+
+def paint(g, rows, x=0, y=0):
+    """Draw a pixel map on g with its top-left corner at (x, y)."""
+    for j, row in enumerate(rows):
+        for i, ch in enumerate(row):
+            if ch != ".":
+                g.p(x + i, y + j, MAP[ch])
+
+
+# The bone drawn by hand: scaled, its four knobs merge unevenly. W is the glint.
 TREAT = {
-    0.75: [".wc....cc.",
+    0.75: [".Wc....cc.",
            "cccccccccc",
            "cttttttttt",
            ".tt....tt."],
-    0.5: ["w....c",
+    0.5: ["W....c",
           "cccccc",
           "cttttt",
           "t....t"],
@@ -166,16 +184,13 @@ TREAT = {
 def treat(s, lift):
     """road.treat redrawn: a bone whose knobs stick out above and below the shaft at both ends."""
     g = Grid(round(16 * s), round(16 * s))
-    y = g.h // 2 - 2 + lift
-    for j, row in enumerate(TREAT[s]):
-        for i, ch in enumerate(row):
-            if ch != ".":
-                g.p(1 + i, y + j, {"c": "cream", "t": "tan", "w": "white"}[ch])
+    paint(g, TREAT[s], 1, g.h // 2 - 2 + lift)
     return g
 
 
-def cone(s):
-    """obstacles.cone with its two reflective bands cut at the small size."""
+def cone(s, glint=None):
+    """obstacles.cone with its two reflective bands cut at the small size; glint is the idle's
+    highlight row, as in obstacles.CONE_IDLE."""
     g = Mini(s)
     g.rect(8, 25, 16, 4, "dslate")
     g.rect(8, 25, 16, 1, "slate")
@@ -191,6 +206,136 @@ def cone(s):
                     g.g.p(x, yy + 1, "white" if x < mid else "lgrey")
     # the highlight stays just left of the centre line, where it is at full size
     g.g.rect(round(16 * s) - 1, g._edge(5), 1, g._edge(9) - g._edge(5), "amber")
+    if glint is not None:
+        g.g.p(round(16 * s) - 1, g._edge(glint), "white")
+    return g
+
+
+# road.skunk by hand, as (top row, map) for the tail, which sways, and for the body and head drawn over it.
+# Scaled, the stripe breaks where the head starts and the right eye sinks into the ink shading. At 0.5x
+# the stripe is 1px and each eye is a glint over ink, since ink alone does not show on navy.
+SKUNK = {
+    0.75: ((2, [".........ddnnnn.........",
+                "........ddnWWnnn........",
+                ".......ddnWWWWnnn.......",
+                ".......dnnWWWWlnn.......",
+                ".......nnnWWWlln#.......",
+                ".......nnnnWlln##.......",
+                ".......nnnnWlnn##.......",
+                "........nnnnn###........"]),
+           (10, [".........ddWlnn.........",
+                 "........ddnWlnnn........",
+                 ".......ddnnWlnnnn.......",
+                 ".......nnnnWlnnnn.......",
+                 ".......nnnnWlnn##.......",
+                 ".......nnnnWlnn##.......",
+                 ".......nnddWWnn##.......",
+                 "........dnnWWnnn........",
+                 "........nW#nnW#n........",
+                 "........n##nn##n........",
+                 "........nnnppn##........",
+                 "..........nn##.........."])),
+    0.5: ((1, ["......dnnn......",
+               ".....ddWWnn.....",
+               "....ddWWWlnn....",
+               "....dnWWWlnn....",
+               "....nnnWlnn#....",
+               ".....nnnnn##...."]),
+          (7, [".....dnWnnn.....",
+               "....dnnWnnnn....",
+               "....nnnWnnn#....",
+               ".....dnnnnn.....",
+               ".....nWnnWn.....",
+               ".....n#nn#n.....",
+               ".....nnppn#.....",
+               "......nn##......"])),
+}
+
+
+def skunk(s, sway):
+    """road.skunk redrawn: the tail moves a whole pixel."""
+    g = Grid(round(32 * s), round(32 * s))
+    (tail_y, tail), (body_y, body) = SKUNK[s]
+    paint(g, tail, sway, tail_y)
+    paint(g, body, 0, body_y)
+    return g
+
+
+# road.squirrel at 0.5x by hand: the tail, which swishes, and the body and head drawn over it, which shift.
+# Scaled, the eyes and nose merge into one dark row. The eyes are 1px of ink, the nose 2px of plum on the muzzle.
+SQUIRREL = ((1, ["......tooo......",
+                 "......ooooro....",
+                 "......oorroo....",
+                 ".......tottoo...",
+                 ".......tottor...",
+                 ".......oottor...",
+                 ".......oottrr...",
+                 "........ottr....",
+                 "........orrr...."]),
+            (8, [".....tooo.......",
+                 ".....occo.......",
+                 ".....occo.......",
+                 "....toooor......",
+                 "....o#oo#r......",
+                 "....ocPPcr......",
+                 ".....occr......."]))
+
+
+def squirrel(tail, shift):
+    """road.squirrel(tail, shift) at 0.5x: each offset moves a whole pixel."""
+    g = Grid(16, 16)
+    (tail_y, tail_rows), (body_y, body) = SQUIRREL
+    paint(g, tail_rows, tail, tail_y)
+    paint(g, body, shift, body_y)
+    return g
+
+
+# road.corgi at 0.5x by hand. Scaled, the collar breaks, one ear loses its pink and the 1px nose sits off
+# centre; here the blaze and nose are 2px on the centre line.
+CORGI = ["......tooo......",
+         ".....tooooo.....",
+         ".....oooooo.....",
+         ".....ooooor.....",
+         "....ooWWWWro....",
+         "....opWWWlpo....",
+         ".....aaaaaa.....",
+         ".....toWWoo.....",
+         ".....o#oo#r.....",
+         ".....oW##Wr.....",
+         ".....oWWllr....."]
+
+
+def corgi(step):
+    """road.corgi(step) at 0.5x: the raised hind leg peeks out above the back, left for -1 and right for 1."""
+    g = Grid(16, 16)
+    paint(g, CORGI, 0, 3)
+    g.p(5 if step < 0 else 10, 3, "ochre")
+    return g
+
+
+CLOUD_PUFFS = [(44, 44, 30), (24, 28, 17), (64, 26, 18), (22, 62, 18), (64, 64, 18), (44, 14, 13), (44, 74, 13),
+               (12, 44, 11), (76, 44, 11)]
+
+
+def skunk_cloud(s, step):
+    """road.skunk_cloud redrawn at its own size. The full-size fill is a dither on every other row, which
+    nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim is
+    1px, the stink wisps half as long, and a swelling puff still grows by a whole pixel."""
+    n = round(88 * s)
+    g = Grid(n, n)
+    puffs = [(cx * s, cy * s, r * s + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(CLOUD_PUFFS)]
+    for y in range(n):
+        for x in range(n):
+            d = min(((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2) ** 0.5 - r for cx, cy, r in puffs)
+            if d > 0:
+                continue
+            if d > -1:
+                g.p(x, y, "green" if y < n // 2 else "dgreen")
+            elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
+                g.p(x, y, "green" if (x + y) % 8 else "dgreen")
+    for x0, y0 in ((20, 22), (60, 18), (66, 58), (26, 58)):
+        for k in range(round(6 * s)):
+            g.p(x0 * s + (k + step) % 3 - 1, y0 * s + k, "dgreen")
     return g
 
 
@@ -199,12 +344,21 @@ def sprites():
     for suffix, s in SCALES:
         yield f"tip@{suffix}", [("idle", [tip(s, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
         yield f"treat@{suffix}", [("idle", [treat(s, lift).outlined() for lift in (0, -1)], 400)]
-        yield f"cone@{suffix}", [("idle", [cone(s).outlined()], 1000)]
-        yield f"bin@{suffix}", [("idle", [small(obstacles, s, obstacles.bin_).outlined()], 1000)]
-        yield f"hydrant@{suffix}", [("idle", [small(obstacles, s, obstacles.hydrant).outlined()], 1000)]
+        frames, ms = obstacles.CONE_IDLE
+        yield f"cone@{suffix}", [("idle", [cone(s, gl).outlined() for gl in frames], ms)]
+        # the lid's lift is in full-size pixels, so it is divided by the scale to stay 1px here
+        frames, ms = obstacles.BIN_IDLE
+        yield f"bin@{suffix}", [("idle", [small(obstacles, s, obstacles.bin_, a / s).outlined() for a in frames], ms)]
+        frames, ms = obstacles.HYDRANT_IDLE
+        yield f"hydrant@{suffix}", [("idle", [small(obstacles, s, obstacles.hydrant, d).outlined() for d in frames], ms)]
         for name, (draw, _) in dogs.DOGS.items():
             yield f"dog-{name}@{suffix}", [(tag, [small(dogs, s, draw, snap(dogs.pose(q), s)).outlined() for q in poses], ms)
                                            for tag, poses, ms in dogs.ROAD_TAGS]
+        yield f"skunk@{suffix}", [("idle", [skunk(s, sway).outlined() for sway in (0, 1)], 400)]
+    yield "skunk-cloud@50", [("loop", [skunk_cloud(0.5, i).outlined(False) for i in range(4)], 220)]
+    yield "other-dog@50", [("walk", [corgi(step).outlined() for step in (-1, 1)], 200)]
+    yield "squirrel@50", [("idle", [squirrel(0, 0).outlined(), squirrel(1, 0).outlined()], 300),
+                          ("run", [squirrel(0, -1).outlined(), squirrel(-1, 1).outlined()], 120)]
 
 
 def originals():
@@ -223,20 +377,21 @@ def nearest(f, s):
 
 
 def compare(out, grounds=("3a4466", "c0cbdc"), scale=4, gap=4):
-    """Per sprite and ground, three lines: every frame at 1x, then nearest-neighbour beside
-    this file's version at 0.75x, then the same at 0.5x."""
+    """Per sprite and ground, a line of every frame at 1x, then for each scale the sprite has a
+    line of nearest-neighbour beside this file's version."""
     from PIL import Image
 
     full = originals()
     minis = dict(sprites())
     lines = []
-    for key in [k[:-3] for k in minis if k.endswith("@75")]:
+    for key in dict.fromkeys(k.split("@")[0] for k in minis):
         frames = [f for _, fs, _ in full[key] for f in fs]
         for ground in grounds:
             lines.append(([frames], ground))
             for suffix, s in SCALES:
-                lines.append(([[nearest(f, s) for f in frames],
-                               [f for _, fs, _ in minis[f"{key}@{suffix}"] for f in fs]], ground))
+                if f"{key}@{suffix}" in minis:
+                    lines.append(([[nearest(f, s) for f in frames],
+                                   [f for _, fs, _ in minis[f"{key}@{suffix}"] for f in fs]], ground))
     width = max(sum(sum(len(f[0]) + gap for f in b) + 2 * gap for b in blocks) for blocks, _ in lines)
     height = sum(len(blocks[0][0]) + gap for blocks, _ in lines)
     img = Image.new("RGB", (width * scale, height * scale), (24, 20, 37))
