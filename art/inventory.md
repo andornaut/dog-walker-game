@@ -23,29 +23,28 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 ## Characters (road)
 
-| Asset             | Key          | Type   | Size        | Animations                        | Priority | Notes                                                |
-| ----------------- | ------------ | ------ | ----------- | --------------------------------- | -------- | ---------------------------------------------------- |
-| Walker            | `walker`     | sprite | 32×32 (TBD) | `walk`, `lane-left`, `lane-right` | M6       | Seen from behind (¾ top-down), at the bottom         |
-| Small dog         | `dog-small`  | sprite | 32×32       | `walk`, `react`, `pull`           | M6       | Chihuahua; fills well under the tile                 |
-| Medium dog        | `dog-medium` | sprite | 32×32       | `walk`, `react`, `pull`           | M6       | Lab                                                  |
-| Big dog           | `dog-big`    | sprite | 32×32       | `walk`, `react`, `pull`           | M6       | Husky; fills the tile                                |
-| Leash             | `leash`      | sprite | TBD         | none                              | v1       | Or drawn in code as a line; decide with tech         |
-| Other dog + owner | `other-dog`  | sprite | 32×32 (TBD) | `walk`                            | M6       | Encounter obstacle; may need a 32×48 owner alongside |
-| Stinky effect     | `fx-stinky`  | sprite | 32×32       | `loop`                            | v1       | Green stink lines over the pack while Stinky lasts   |
+| Asset             | Key          | Type   | Size  | Animations                        | Priority | Notes                                              |
+| ----------------- | ------------ | ------ | ----- | --------------------------------- | -------- | -------------------------------------------------- |
+| Walker            | `walker`     | sprite | 32×48 | `walk`, `lane-left`, `lane-right` | M6       | Seen from behind (¾ top-down), at the bottom       |
+| Small dog         | `dog-small`  | sprite | 32×32 | `walk`, `react`, `pull`           | M6       | Chihuahua; fills well under the tile               |
+| Medium dog        | `dog-medium` | sprite | 32×32 | `walk`, `react`, `pull`           | M6       | Lab                                                |
+| Big dog           | `dog-big`    | sprite | 32×32 | `walk`, `react`, `pull`           | M6       | Husky; fills the tile                              |
+| Other dog + owner | `other-dog`  | sprite | 32×32 | `walk`                            | M6       | Encounter obstacle; with a 32×48 owner alongside   |
+| Stinky effect     | `fx-stinky`  | sprite | 32×32 | `loop`                            | v1       | Green stink lines over the pack while Stinky lasts |
 
 ## Obstacles and forced stops (road)
 
-| Asset            | Key                | Type   | Size        | Animations       | Priority | Notes                                          |
-| ---------------- | ------------------ | ------ | ----------- | ---------------- | -------- | ---------------------------------------------- |
-| Skunk            | `skunk`            | sprite | 32×32       | `idle`           | M6       |                                                |
-| Squirrel         | `squirrel`         | sprite | 32×32       | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack |
-| Puddle           | `puddle`           | sprite | 32×32       | `idle` (shimmer) | M6       | Flat on the road; no shadow                    |
-| Stop sign        | `stop-sign`        | sprite | 32×48 (TBD) | none             | v1       | Forced stop; may span the full road            |
-| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 (TBD) | `wave`           | v1       | Forced stop                                    |
-| Kid              | `kid`              | sprite | 32×48 (TBD) | `wave`           | v1       | Forced stop: wants to pet the dogs             |
-| Ice cream truck  | `ice-cream-truck`  | sprite | TBD         | `idle`           | v1       | Forced stop; wider than a lane                 |
-| Construction     | `construction`     | sprite | TBD         | none             | v1       | Forced stop: detour barrier across the road    |
-| Mail carrier     | `mail-carrier`     | sprite | 32×48 (TBD) | `walk`           | v1       | Forced stop                                    |
+| Asset            | Key                | Type   | Size  | Animations       | Priority | Notes                                          |
+| ---------------- | ------------------ | ------ | ----- | ---------------- | -------- | ---------------------------------------------- |
+| Skunk            | `skunk`            | sprite | 32×32 | `idle`           | M6       |                                                |
+| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack |
+| Puddle           | `puddle`           | sprite | 32×32 | `idle` (shimmer) | M6       | Flat on the road; no shadow                    |
+| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | v1       | Forced stop; may span the full road            |
+| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | v1       | Forced stop                                    |
+| Kid              | `kid`              | sprite | 32×48 | `wave`           | v1       | Forced stop: wants to pet the dogs             |
+| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | v1       | Forced stop; wider than a lane                 |
+| Construction     | `construction`     | sprite | TBD   | none             | v1       | Forced stop: detour barrier across the road    |
+| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | v1       | Forced stop                                    |
 
 ## Pickups (road)
 
@@ -106,7 +105,7 @@ Each card is a frame plus an illustration plus text drawn in the pixel font. Car
 | Enlarged frame | `card-frame-large` | sprite | TBD     | v1       | Tap-to-enlarge view; same frames                              |
 | Cost badge     | `card-cost`        | image  | TBD     | v1       | Holds `$`, `$$$` or the ♥ change                              |
 
-Illustrations, one per option (`card-<encounter>-<option>`, type `image`):
+Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An encounter with two options shows two centred cards:
 
 | Encounter        | Options                                                                                                      | Count | Priority |
 | ---------------- | ------------------------------------------------------------------------------------------------------------ | ----- | -------- |
@@ -156,11 +155,13 @@ Total: 31 card illustrations, 9 of them in Milestone 6.
 | v1       | ~13     | ~45             | 0     |
 | later    | ~1      | ~23             | 0     |
 
+## Settled
+
+- **People are 32×48:** the walker, the other dog's owner and the forced-stop characters stand over a tile and a half, so they read taller than the dogs.
+- **The leash is drawn in code:** a 1px line from hand to collar in a palette colour, so it follows the dogs without art.
+- **One illustration per option:** each card shows its own outcome. Encounters with two options show two centred cards.
+
 ## Open questions
 
-- **Walker and tall obstacles:** does the walker fit in 32×32, or is it 32×48 standing over two tile rows? Same for the chatty neighbour, the other dog's owner and the stop sign.
 - **Pack arrangement:** 1 to 3 dogs share one 56px lane ahead of the walker. Side by side does not fit 3×32px, so they need a staggered formation; the art needs to know the offsets.
-- **Two-option encounters:** cards are three across, but most encounters have two options. Two centred cards, or a third card (e.g. a free "shrug it off")? This is a gameplay question.
-- **Card illustration per option or per encounter:** per option (above) is ~22 illustrations; per encounter with option text only would be ~6 plus upgrades.
-- **Leash:** sprite or a line drawn in code.
 - **Face size:** in the mock, two 32×32 faces and a row of 8 hearts (7px each) fill only the top ~75px of a 192px slot. 48×48 faces, or a full-body dog, would use the space.

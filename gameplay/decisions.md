@@ -71,3 +71,6 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Tech · Keep Cloudflare Workers Builds for deploys rather than a GitHub Actions deploy gated on CI: a commit with red CI still deploys
 - 2026-10-18 · Art · Palette is Endesga 32, with no other colours; darkening steps down each ramp instead of blending with black
 - 2026-10-18 · Art · Sprite outlines are coloured, two ramp steps darker than the fill: black outlines swallow dark sprites such as the skunk
+- 2026-10-18 · Art · People (walker, owners, forced-stop characters) are 32×48 sprites; dogs and obstacles stay 32×32
+- 2026-10-18 · Art · The leash is a 1px line drawn in code from hand to collar, not a sprite
+- 2026-10-18 · Art · Each card option gets its own illustration; an encounter with two options shows two centred cards
