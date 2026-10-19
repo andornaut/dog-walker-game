@@ -30,6 +30,8 @@ Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit des
 
 Encounter skins (`chase-`, `snatch-`, `social-` keys) are a zone's look for the squirrel, thief and other dog: the base kind's frame, tags, timings, feet rows and depth steps, laid out on the same 32-unit grid and drawn at 1.25×. Each picks fills that hold on its own zone's road and on that road dimmed. A Social dog's `run` is the loose dog's crossing: `loose-dog`'s gallop on the same skeleton, without the broken leash. A Snatch skin carries the thief's tan loot sack, and nothing a skin holds is a coin or a bone, so it never reads as a tip or a treat.
 
+Each zone's minor obstacle skins (`minor-*`) keep their base kind's frame, footprint, anchor line, `idle` and depth steps: 1×1 skins 40×40 as the cone, 2×1 104×30 as the bench, 3×1 168×30 as the hedge, 1×3 56×35 at the footprint's near edge as the parked car. They show objects only, never a person or a live animal, so they read as something to bump rather than an encounter or a pickup, and no large fill takes their zone's road colour (Willow Crescent grey, Fairview Park tan, Main Street pink, Riverside Path cream).
+
 ## Palette and outlines
 
 - [Endesga 32](https://lospec.com/palette-list/endesga-32) only, each pixel opaque or fully transparent. Colour names are the `K` names in `art/tools/pixel.py`.

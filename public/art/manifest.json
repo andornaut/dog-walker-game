@@ -1845,6 +1845,636 @@
       }
     },
     {
+      "key": "minor-cafe-table",
+      "png": "sprites/minor-cafe-table.png",
+      "json": "sprites/minor-cafe-table.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "minor-cafe-table@50",
+      "png": "sprites/minor-cafe-table@50.png",
+      "json": "sprites/minor-cafe-table@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "minor-cafe-table@62",
+      "png": "sprites/minor-cafe-table@62.png",
+      "json": "sprites/minor-cafe-table@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "minor-cafe-table@75",
+      "png": "sprites/minor-cafe-table@75.png",
+      "json": "sprites/minor-cafe-table@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "minor-cafe-table@88",
+      "png": "sprites/minor-cafe-table@88.png",
+      "json": "sprites/minor-cafe-table@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "minor-canoe-rack",
+      "png": "sprites/minor-canoe-rack.png",
+      "json": "sprites/minor-canoe-rack.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "minor-canoe-rack@50",
+      "png": "sprites/minor-canoe-rack@50.png",
+      "json": "sprites/minor-canoe-rack@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "minor-canoe-rack@62",
+      "png": "sprites/minor-canoe-rack@62.png",
+      "json": "sprites/minor-canoe-rack@62.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "minor-canoe-rack@75",
+      "png": "sprites/minor-canoe-rack@75.png",
+      "json": "sprites/minor-canoe-rack@75.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "minor-canoe-rack@88",
+      "png": "sprites/minor-canoe-rack@88.png",
+      "json": "sprites/minor-canoe-rack@88.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 47
+      }
+    },
+    {
+      "key": "minor-flower-bed",
+      "png": "sprites/minor-flower-bed.png",
+      "json": "sprites/minor-flower-bed.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 166
+      }
+    },
+    {
+      "key": "minor-flower-bed@50",
+      "png": "sprites/minor-flower-bed@50.png",
+      "json": "sprites/minor-flower-bed@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 84
+      }
+    },
+    {
+      "key": "minor-flower-bed@62",
+      "png": "sprites/minor-flower-bed@62.png",
+      "json": "sprites/minor-flower-bed@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 105
+      }
+    },
+    {
+      "key": "minor-flower-bed@75",
+      "png": "sprites/minor-flower-bed@75.png",
+      "json": "sprites/minor-flower-bed@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 125
+      }
+    },
+    {
+      "key": "minor-flower-bed@88",
+      "png": "sprites/minor-flower-bed@88.png",
+      "json": "sprites/minor-flower-bed@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 146
+      }
+    },
+    {
+      "key": "minor-flower-cart",
+      "png": "sprites/minor-flower-cart.png",
+      "json": "sprites/minor-flower-cart.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 162
+      }
+    },
+    {
+      "key": "minor-flower-cart@50",
+      "png": "sprites/minor-flower-cart@50.png",
+      "json": "sprites/minor-flower-cart@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 82
+      }
+    },
+    {
+      "key": "minor-flower-cart@62",
+      "png": "sprites/minor-flower-cart@62.png",
+      "json": "sprites/minor-flower-cart@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 102
+      }
+    },
+    {
+      "key": "minor-flower-cart@75",
+      "png": "sprites/minor-flower-cart@75.png",
+      "json": "sprites/minor-flower-cart@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 122
+      }
+    },
+    {
+      "key": "minor-flower-cart@88",
+      "png": "sprites/minor-flower-cart@88.png",
+      "json": "sprites/minor-flower-cart@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 142
+      }
+    },
+    {
+      "key": "minor-gnome",
+      "png": "sprites/minor-gnome.png",
+      "json": "sprites/minor-gnome.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "minor-gnome@50",
+      "png": "sprites/minor-gnome@50.png",
+      "json": "sprites/minor-gnome@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "minor-gnome@62",
+      "png": "sprites/minor-gnome@62.png",
+      "json": "sprites/minor-gnome@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "minor-gnome@75",
+      "png": "sprites/minor-gnome@75.png",
+      "json": "sprites/minor-gnome@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "minor-gnome@88",
+      "png": "sprites/minor-gnome@88.png",
+      "json": "sprites/minor-gnome@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "minor-kiddie-pool",
+      "png": "sprites/minor-kiddie-pool.png",
+      "json": "sprites/minor-kiddie-pool.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 104
+      }
+    },
+    {
+      "key": "minor-kiddie-pool@50",
+      "png": "sprites/minor-kiddie-pool@50.png",
+      "json": "sprites/minor-kiddie-pool@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "minor-kiddie-pool@62",
+      "png": "sprites/minor-kiddie-pool@62.png",
+      "json": "sprites/minor-kiddie-pool@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "minor-kiddie-pool@75",
+      "png": "sprites/minor-kiddie-pool@75.png",
+      "json": "sprites/minor-kiddie-pool@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 78
+      }
+    },
+    {
+      "key": "minor-kiddie-pool@88",
+      "png": "sprites/minor-kiddie-pool@88.png",
+      "json": "sprites/minor-kiddie-pool@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 91
+      }
+    },
+    {
+      "key": "minor-log",
+      "png": "sprites/minor-log.png",
+      "json": "sprites/minor-log.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "minor-log@50",
+      "png": "sprites/minor-log@50.png",
+      "json": "sprites/minor-log@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "minor-log@62",
+      "png": "sprites/minor-log@62.png",
+      "json": "sprites/minor-log@62.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "minor-log@75",
+      "png": "sprites/minor-log@75.png",
+      "json": "sprites/minor-log@75.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "minor-log@88",
+      "png": "sprites/minor-log@88.png",
+      "json": "sprites/minor-log@88.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "minor-molehill",
+      "png": "sprites/minor-molehill.png",
+      "json": "sprites/minor-molehill.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "minor-molehill@50",
+      "png": "sprites/minor-molehill@50.png",
+      "json": "sprites/minor-molehill@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "minor-molehill@62",
+      "png": "sprites/minor-molehill@62.png",
+      "json": "sprites/minor-molehill@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "minor-molehill@75",
+      "png": "sprites/minor-molehill@75.png",
+      "json": "sprites/minor-molehill@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "minor-molehill@88",
+      "png": "sprites/minor-molehill@88.png",
+      "json": "sprites/minor-molehill@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "minor-picnic-blanket",
+      "png": "sprites/minor-picnic-blanket.png",
+      "json": "sprites/minor-picnic-blanket.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 102
+      }
+    },
+    {
+      "key": "minor-picnic-blanket@50",
+      "png": "sprites/minor-picnic-blanket@50.png",
+      "json": "sprites/minor-picnic-blanket@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "minor-picnic-blanket@62",
+      "png": "sprites/minor-picnic-blanket@62.png",
+      "json": "sprites/minor-picnic-blanket@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "minor-picnic-blanket@75",
+      "png": "sprites/minor-picnic-blanket@75.png",
+      "json": "sprites/minor-picnic-blanket@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 77
+      }
+    },
+    {
+      "key": "minor-picnic-blanket@88",
+      "png": "sprites/minor-picnic-blanket@88.png",
+      "json": "sprites/minor-picnic-blanket@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 89
+      }
+    },
+    {
+      "key": "minor-rowboat-trailer",
+      "png": "sprites/minor-rowboat-trailer.png",
+      "json": "sprites/minor-rowboat-trailer.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 163
+      }
+    },
+    {
+      "key": "minor-rowboat-trailer@50",
+      "png": "sprites/minor-rowboat-trailer@50.png",
+      "json": "sprites/minor-rowboat-trailer@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 83
+      }
+    },
+    {
+      "key": "minor-rowboat-trailer@62",
+      "png": "sprites/minor-rowboat-trailer@62.png",
+      "json": "sprites/minor-rowboat-trailer@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 102
+      }
+    },
+    {
+      "key": "minor-rowboat-trailer@75",
+      "png": "sprites/minor-rowboat-trailer@75.png",
+      "json": "sprites/minor-rowboat-trailer@75.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 123
+      }
+    },
+    {
+      "key": "minor-rowboat-trailer@88",
+      "png": "sprites/minor-rowboat-trailer@88.png",
+      "json": "sprites/minor-rowboat-trailer@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 142
+      }
+    },
+    {
+      "key": "minor-sandwich-board",
+      "png": "sprites/minor-sandwich-board.png",
+      "json": "sprites/minor-sandwich-board.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "minor-sandwich-board@50",
+      "png": "sprites/minor-sandwich-board@50.png",
+      "json": "sprites/minor-sandwich-board@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "minor-sandwich-board@62",
+      "png": "sprites/minor-sandwich-board@62.png",
+      "json": "sprites/minor-sandwich-board@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "minor-sandwich-board@75",
+      "png": "sprites/minor-sandwich-board@75.png",
+      "json": "sprites/minor-sandwich-board@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "minor-sandwich-board@88",
+      "png": "sprites/minor-sandwich-board@88.png",
+      "json": "sprites/minor-sandwich-board@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "minor-scooter",
+      "png": "sprites/minor-scooter.png",
+      "json": "sprites/minor-scooter.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "minor-scooter@50",
+      "png": "sprites/minor-scooter@50.png",
+      "json": "sprites/minor-scooter@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "minor-scooter@62",
+      "png": "sprites/minor-scooter@62.png",
+      "json": "sprites/minor-scooter@62.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "minor-scooter@75",
+      "png": "sprites/minor-scooter@75.png",
+      "json": "sprites/minor-scooter@75.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "minor-scooter@88",
+      "png": "sprites/minor-scooter@88.png",
+      "json": "sprites/minor-scooter@88.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "minor-tackle-box",
+      "png": "sprites/minor-tackle-box.png",
+      "json": "sprites/minor-tackle-box.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "minor-tackle-box@50",
+      "png": "sprites/minor-tackle-box@50.png",
+      "json": "sprites/minor-tackle-box@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "minor-tackle-box@62",
+      "png": "sprites/minor-tackle-box@62.png",
+      "json": "sprites/minor-tackle-box@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "minor-tackle-box@75",
+      "png": "sprites/minor-tackle-box@75.png",
+      "json": "sprites/minor-tackle-box@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "minor-tackle-box@88",
+      "png": "sprites/minor-tackle-box@88.png",
+      "json": "sprites/minor-tackle-box@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "minor-tricycles",
+      "png": "sprites/minor-tricycles.png",
+      "json": "sprites/minor-tricycles.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "minor-tricycles@50",
+      "png": "sprites/minor-tricycles@50.png",
+      "json": "sprites/minor-tricycles@50.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "minor-tricycles@62",
+      "png": "sprites/minor-tricycles@62.png",
+      "json": "sprites/minor-tricycles@62.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "minor-tricycles@75",
+      "png": "sprites/minor-tricycles@75.png",
+      "json": "sprites/minor-tricycles@75.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "minor-tricycles@88",
+      "png": "sprites/minor-tricycles@88.png",
+      "json": "sprites/minor-tricycles@88.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 41
+      }
+    },
+    {
       "key": "other-dog",
       "png": "sprites/other-dog.png",
       "json": "sprites/other-dog.json",

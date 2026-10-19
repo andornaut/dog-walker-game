@@ -1,0 +1,46 @@
+{ "frames": {
+   "minor-flower-bed 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 168, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 168, "h": 30 },
+    "sourceSize": { "w": 168, "h": 30 },
+    "duration": 350
+   },
+   "minor-flower-bed 1.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 168, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 168, "h": 30 },
+    "sourceSize": { "w": 168, "h": 30 },
+    "duration": 350
+   },
+   "minor-flower-bed 2.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 168, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 168, "h": 30 },
+    "sourceSize": { "w": 168, "h": 30 },
+    "duration": 350
+   },
+   "minor-flower-bed 3.aseprite": {
+    "frame": { "x": 504, "y": 0, "w": 168, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 168, "h": 30 },
+    "sourceSize": { "w": 168, "h": 30 },
+    "duration": 350
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "minor-flower-bed.png",
+  "format": "RGBA8888",
+  "size": { "w": 672, "h": 30 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

@@ -20,41 +20,45 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 ## Road objects
 
-| Key                              | Type   | Size           | Tags                                 | Pri  | Note                                                          |
-| -------------------------------- | ------ | -------------- | ------------------------------------ | ---- | ------------------------------------------------------------- |
-| `cafe-patio`                     | sprite | 104×50         | `idle`                               | core | Encounter, 2 lanes                                            |
-| `goose`                          | sprite | 40×40          | `run`, `idle`                        | core | Encounter, a mover; side view facing right, mirrored for left |
-| `other-dog`                      | sprite | 40×40          | `walk`, `idle`                       | core | Encounter; a corgi                                            |
-| `other-dog-owner`                | sprite | 40×60          | `walk`, `idle`                       | core | Walks behind `other-dog`                                      |
-| `petunias`                       | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                            |
-| `picnic`                         | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                            |
-| `puddle`                         | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes; ground decal drawn under everything       |
-| `skunk`                          | sprite | 40×40          | `idle`                               | core | Encounter; centred on `skunk-cloud`                           |
-| `skunk-cloud`                    | sprite | 104×50         | `loop`                               | core | 2×2 lanes and rows; a low dithered haze under the skunk       |
-| `squirrel`                       | sprite | 40×40          | `idle`, `run`                        | core | Encounter                                                     |
-| `thief`                          | sprite | 40×60          | `walk`, `flee`, `idle`               | core | Encounter                                                     |
-| `trash-bins`                     | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                            |
-| `chatty-neighbour`               | sprite | 40×60          | `wave`, `idle`                       | core | Forced stop; coffee mug                                       |
-| `construction`                   | sprite | 64×40          | `idle`                               | core | Forced stop; one whole lane, repeated across the road         |
-| `ice-cream-truck`                | sprite | 104×55         | `idle`                               | core | Forced stop; 2 lanes; a rear-view van                         |
-| `kid`                            | sprite | 40×60          | `wave`, `sad`, `idle`                | core | Forced stop                                                   |
-| `mail-carrier`                   | sprite | 40×60          | `walk`, `idle`                       | core | Forced stop                                                   |
-| `stop-sign`                      | sprite | 40×60          | `idle`                               | core | Forced stop                                                   |
-| `biscuit-neighbour`              | sprite | 40×60          | `wave`, `idle`                       | core | Lucky; holds a biscuit jar                                    |
-| `lemonade-stand`                 | sprite | 40×60          | `idle`                               | core | Lucky; the kid behind a stand                                 |
-| `lost-wallet`                    | sprite | 20×20          | `idle`                               | core | Lucky                                                         |
-| `photo-op`                       | sprite | 40×60          | `idle`, `flash`                      | core | Lucky; tourist with a camera                                  |
-| `tip`, `treat`                   | sprite | 20×20          | `idle`                               | core | Pickups                                                       |
-| `barrier-2`, `barrier-3`         | sprite | 104×30, 168×30 | `idle`                               | core | Minor; Elm Avenue and Main Street                             |
-| `bench`                          | sprite | 104×30         | `idle`                               | core | Minor, 2 lanes                                                |
-| `bin`, `cone`                    | sprite | 40×40          | `idle`                               | core | Minor, 1 lane                                                 |
-| `hedge`                          | sprite | 168×30         | `idle`                               | core | Minor, 3 lanes                                                |
-| `parked-car`                     | sprite | 56×35          | `idle`                               | core | Minor, 1 lane by 3 rows; drawn at the footprint's near edge   |
-| `ball-bounce`                    | sprite | 20×30          | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`      |
-| `cyclist`                        | sprite | 40×60          | `ride`                               | core | Minor; rides down a lane                                      |
-| `loose-dog`                      | sprite | 40×40          | `run`                                | core | Crosser; the `other-dog` corgi with a broken leash            |
-| `squirrel-dash`                  | sprite | 40×40          | `run`                                | core | Crosser                                                       |
-| `ui-warning`, `ui-warning-arrow` | sprite | 16×16          | `pulse`; the arrow also `down-pulse` | core | Hazard cue at the lane edge                                   |
+| Key                                                                         | Type   | Size           | Tags                                 | Pri  | Note                                                                                                |
+| --------------------------------------------------------------------------- | ------ | -------------- | ------------------------------------ | ---- | --------------------------------------------------------------------------------------------------- |
+| `cafe-patio`                                                                | sprite | 104×50         | `idle`                               | core | Encounter, 2 lanes                                                                                  |
+| `goose`                                                                     | sprite | 40×40          | `run`, `idle`                        | core | Encounter, a mover; side view facing right, mirrored for left                                       |
+| `other-dog`                                                                 | sprite | 40×40          | `walk`, `idle`                       | core | Encounter; a corgi                                                                                  |
+| `other-dog-owner`                                                           | sprite | 40×60          | `walk`, `idle`                       | core | Walks behind `other-dog`                                                                            |
+| `petunias`                                                                  | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                                                                  |
+| `picnic`                                                                    | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                                                                  |
+| `puddle`                                                                    | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes; ground decal drawn under everything                                             |
+| `skunk`                                                                     | sprite | 40×40          | `idle`                               | core | Encounter; centred on `skunk-cloud`                                                                 |
+| `skunk-cloud`                                                               | sprite | 104×50         | `loop`                               | core | 2×2 lanes and rows; a low dithered haze under the skunk                                             |
+| `squirrel`                                                                  | sprite | 40×40          | `idle`, `run`                        | core | Encounter                                                                                           |
+| `thief`                                                                     | sprite | 40×60          | `walk`, `flee`, `idle`               | core | Encounter                                                                                           |
+| `trash-bins`                                                                | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                                                                  |
+| `chatty-neighbour`                                                          | sprite | 40×60          | `wave`, `idle`                       | core | Forced stop; coffee mug                                                                             |
+| `construction`                                                              | sprite | 64×40          | `idle`                               | core | Forced stop; one whole lane, repeated across the road                                               |
+| `ice-cream-truck`                                                           | sprite | 104×55         | `idle`                               | core | Forced stop; 2 lanes; a rear-view van                                                               |
+| `kid`                                                                       | sprite | 40×60          | `wave`, `sad`, `idle`                | core | Forced stop                                                                                         |
+| `mail-carrier`                                                              | sprite | 40×60          | `walk`, `idle`                       | core | Forced stop                                                                                         |
+| `stop-sign`                                                                 | sprite | 40×60          | `idle`                               | core | Forced stop                                                                                         |
+| `biscuit-neighbour`                                                         | sprite | 40×60          | `wave`, `idle`                       | core | Lucky; holds a biscuit jar                                                                          |
+| `lemonade-stand`                                                            | sprite | 40×60          | `idle`                               | core | Lucky; the kid behind a stand                                                                       |
+| `lost-wallet`                                                               | sprite | 20×20          | `idle`                               | core | Lucky                                                                                               |
+| `photo-op`                                                                  | sprite | 40×60          | `idle`, `flash`                      | core | Lucky; tourist with a camera                                                                        |
+| `tip`, `treat`                                                              | sprite | 20×20          | `idle`                               | core | Pickups                                                                                             |
+| `barrier-2`, `barrier-3`                                                    | sprite | 104×30, 168×30 | `idle`                               | core | Minor; Elm Avenue and Main Street                                                                   |
+| `bench`                                                                     | sprite | 104×30         | `idle`                               | core | Minor, 2 lanes                                                                                      |
+| `bin`, `cone`                                                               | sprite | 40×40          | `idle`                               | core | Minor, 1 lane                                                                                       |
+| `hedge`                                                                     | sprite | 168×30         | `idle`                               | core | Minor, 3 lanes                                                                                      |
+| `parked-car`                                                                | sprite | 56×35          | `idle`                               | core | Minor, 1 lane by 3 rows; drawn at the footprint's near edge                                         |
+| `ball-bounce`                                                               | sprite | 20×30          | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`                                            |
+| `cyclist`                                                                   | sprite | 40×60          | `ride`                               | core | Minor; rides down a lane                                                                            |
+| `loose-dog`                                                                 | sprite | 40×40          | `run`                                | core | Crosser; the `other-dog` corgi with a broken leash                                                  |
+| `squirrel-dash`                                                             | sprite | 40×40          | `run`                                | core | Crosser                                                                                             |
+| `ui-warning`, `ui-warning-arrow`                                            | sprite | 16×16          | `pulse`; the arrow also `down-pulse` | core | Hazard cue at the lane edge                                                                         |
+| `minor-gnome`, `minor-molehill`, `minor-sandwich-board`, `minor-tackle-box` | sprite | 40×40          | `idle`                               | core | Minor 1×1 zone skins (Willow Crescent, Fairview Park, Main Street, Riverside Path), as `cone`       |
+| `minor-cafe-table`, `minor-kiddie-pool`, `minor-picnic-blanket`             | sprite | 104×30         | `idle`                               | core | Minor 2×1 zone skins (Main Street, Willow Crescent, Fairview Park), as `bench`                      |
+| `minor-flower-bed`, `minor-flower-cart`, `minor-rowboat-trailer`            | sprite | 168×30         | `idle`                               | core | Minor 3×1 zone skins (Fairview Park, Main Street, Riverside Path), as `hedge`                       |
+| `minor-canoe-rack`, `minor-log`, `minor-scooter`, `minor-tricycles`         | sprite | 56×35          | `idle`                               | core | Minor 1×3 zone skins (Riverside Path, Fairview Park, Main Street, Willow Crescent), as `parked-car` |
 
 ### Depth variants
 
@@ -79,22 +83,26 @@ Same tags, frames and durations as the original.
 
 Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and has the same depth variants at every step (`@88`, `@75`, `@62`, `@50`: 35, 30, 25 and 20 square for the animals, 35×53, 30×45, 25×38 and 20×30 for the 40×60 skins). A Social dog also runs as the zone's loose dog: `run` is `loose-dog`'s gallop, 4 frames at 100ms, side view facing right, in the dog's 40×40 frame.
 
-| Key                        | Type   | Size  | Tags                   | Pri  | Note                                                            |
-| -------------------------- | ------ | ----- | ---------------------- | ---- | --------------------------------------------------------------- |
-| `chase-cat`                | sprite | 40×40 | `idle`, `run`          | core | Chase on Willow Crescent; a tuxedo cat sitting on a grass patch |
-| `chase-ducklings`          | sprite | 40×40 | `idle`, `run`          | core | Chase on Riverside Path; three ducklings                        |
-| `chase-pigeons`            | sprite | 40×40 | `idle`, `run`          | core | Chase on Main Street; three pigeons                             |
-| `chase-rabbit`             | sprite | 40×40 | `idle`, `run`          | core | Chase on The Long Way Home; a white rabbit                      |
-| `snatch-raccoon`           | sprite | 40×60 | `walk`, `flee`, `idle` | core | Snatch on Willow Crescent and The Long Way Home; holds a sack   |
-| `snatch-seagull`           | sprite | 40×60 | `walk`, `flee`, `idle` | core | Snatch on Fairview Park and Riverside Path; flees flying        |
-| `social-frisbee-dog`       | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Fairview Park; a border collie with a red frisbee     |
-| `social-frisbee-dog-owner` | sprite | 40×60 | `walk`, `idle`         | core | Walks behind `social-frisbee-dog`; a backwards cap              |
-| `social-gate-dog`          | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Willow Crescent; a beagle on a white picket gate      |
-| `social-gate-dog-owner`    | sprite | 40×60 | `walk`, `idle`         | core | Stands by `social-gate-dog`; a gardener in a straw hat          |
-| `social-handbag-dog`       | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Main Street; a chihuahua in a purple handbag          |
-| `social-handbag-dog-owner` | sprite | 40×60 | `walk`, `idle`         | core | Stands by `social-handbag-dog`; a shopper in sunglasses         |
-| `social-jogger-dog`        | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Riverside Path; a husky in a running harness          |
-| `social-jogger-dog-owner`  | sprite | 40×60 | `walk`, `idle`         | core | Runs behind `social-jogger-dog`; a jogger in a headband         |
+| Key                                                                         | Type          | Size  | Tags                   | Pri  | Note                                                            |
+| --------------------------------------------------------------------------- | ------------- | ----- | ---------------------- | ---- | --------------------------------------------------------------- |
+| `chase-cat`                                                                 | sprite        | 40×40 | `idle`, `run`          | core | Chase on Willow Crescent; a tuxedo cat sitting on a grass patch |
+| `chase-ducklings`                                                           | sprite        | 40×40 | `idle`, `run`          | core | Chase on Riverside Path; three ducklings                        |
+| `chase-pigeons`                                                             | sprite        | 40×40 | `idle`, `run`          | core | Chase on Main Street; three pigeons                             |
+| `chase-rabbit`                                                              | sprite        | 40×40 | `idle`, `run`          | core | Chase on The Long Way Home; a white rabbit                      |
+| `snatch-raccoon`                                                            | sprite        | 40×60 | `walk`, `flee`, `idle` | core | Snatch on Willow Crescent and The Long Way Home; holds a sack   |
+| `snatch-seagull`                                                            | sprite        | 40×60 | `walk`, `flee`, `idle` | core | Snatch on Fairview Park and Riverside Path; flees flying        |
+| `social-frisbee-dog`                                                        | sprite        | 40×40 | `walk`, `idle`, `run`  | core | Social on Fairview Park; a border collie with a red frisbee     |
+| `social-frisbee-dog-owner`                                                  | sprite        | 40×60 | `walk`, `idle`         | core | Walks behind `social-frisbee-dog`; a backwards cap              |
+| `social-gate-dog`                                                           | sprite        | 40×40 | `walk`, `idle`, `run`  | core | Social on Willow Crescent; a beagle on a white picket gate      |
+| `social-gate-dog-owner`                                                     | sprite        | 40×60 | `walk`, `idle`         | core | Stands by `social-gate-dog`; a gardener in a straw hat          |
+| `social-handbag-dog`                                                        | sprite        | 40×40 | `walk`, `idle`, `run`  | core | Social on Main Street; a chihuahua in a purple handbag          |
+| `social-handbag-dog-owner`                                                  | sprite        | 40×60 | `walk`, `idle`         | core | Stands by `social-handbag-dog`; a shopper in sunglasses         |
+| `social-jogger-dog`                                                         | sprite        | 40×40 | `walk`, `idle`, `run`  | core | Social on Riverside Path; a husky in a running harness          |
+| `social-jogger-dog-owner`                                                   | sprite        | 40×60 | `walk`, `idle`         | core | Runs behind `social-jogger-dog`; a jogger in a headband         |
+| `minor-cafe-table`, `minor-kiddie-pool`, `minor-picnic-blanket`             | 78×23, 52×15  | core  |
+| `minor-canoe-rack`, `minor-log`, `minor-scooter`, `minor-tricycles`         | 42×26, 28×18  | core  |
+| `minor-flower-bed`, `minor-flower-cart`, `minor-rowboat-trailer`            | 126×23, 84×15 | core  |
+| `minor-gnome`, `minor-molehill`, `minor-sandwich-board`, `minor-tackle-box` | 30×30, 20×20  | core  |
 
 ## Effects
 
