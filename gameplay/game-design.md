@@ -26,7 +26,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ## Player & world
 
 - You are the dog walker (one fixed character in v1).
-- A run is a walk through the **4 zones** of a **world**, each zone a fixed distance that takes about 3 minutes at base speed. v1: Maple Street, today's neighbourhood, on a fixed route.
+- A run is a walk through the **4 zones** of a **world**, each zone a fixed distance; a run takes about 12 minutes. v1: Maple Street, today's neighbourhood, on a fixed route.
 - **Worlds** expand the game sideways rather than upward: each has its own theme (e.g. fantasy, the future, the past, dinosaurs), obstacles and even mechanics. Finishing a full run in a world shows the next one in the shop; buying access lets you walk it. After v1.
 
 ## Dogs

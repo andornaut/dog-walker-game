@@ -26,7 +26,7 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 
 ### A run
 
-- 4 zones in a fixed order (e.g. street, park, shops, home stretch), each a fixed distance that takes ~3 minutes at base speed (a full run is ~12 minutes)
+- 4 zones in a fixed order (e.g. street, park, shops, home stretch), each a fixed distance. Zone 1 takes ~3.8 minutes at base speed, and the speed ramp shortens later zones to ~3.2, ~2.7 and ~2.4 minutes (a full run is ~12 minutes)
 - One forced stop per zone
 - After zones 1, 2 and 3: choose 1 of 3 upgrade cards
 - After each zone: every remaining dog pays a share of its fee; a dog fired mid-zone isn't paid for that zone
@@ -131,14 +131,14 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 
 ## Starting numbers
 
-Placeholders sized for ~3-minute zones. Once the tech session has these as typed data in `src/data/`, that becomes the source of truth for numbers and roster stats, and this table is replaced by a link to it. A full run is estimated at ~$96 with 1 dog, ~$92 with 2 and ~$83 with 3, before clawbacks and lucky encounters; buying everything in the shop ($1,775) takes ~20 runs.
+Placeholders sized for a ~12-minute run (zone 1 ~3.8 minutes at base speed). Once the tech session has these as typed data in `src/data/`, that becomes the source of truth for numbers and roster stats, and this table is replaced by a link to it. A full run is estimated at ~$110 with 1 dog, ~$95 with 2 and ~$75 with 3, before clawbacks and lucky encounters; buying everything in the shop ($1,775) takes ~18 runs.
 
 | What                         | Value                                                                                                                        |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | Scroll speed                 | +20% per zone (zone 4 at 1.6× base)                                                                                          |
-| Obstacles per zone           | 18 in zone 1, +3 per later zone                                                                                              |
-| Tips per zone                | 24 in zone 1, +3 per later zone                                                                                              |
-| Treats per zone              | 4 (carry up to 3)                                                                                                            |
+| Obstacles per zone           | 23 in zone 1, +4 per later zone                                                                                              |
+| Tips per zone                | 30 in zone 1, +4 per later zone                                                                                              |
+| Treats per zone              | 5 (carry up to 3)                                                                                                            |
 | Lucky encounters per zone    | 2                                                                                                                            |
 | Owner happiness              | Start 6 laid-back · 4 fussy · 5 dramatic; max 6 small · 8 medium · 10 big; treat +1; Lucky collar +1 start and +1 max        |
 | Fee per zone survived        | $10; fussy owners $13                                                                                                        |
