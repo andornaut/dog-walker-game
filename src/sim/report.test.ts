@@ -28,7 +28,13 @@ vi.mock("./simulate", async (importOriginal) => {
       choices: [],
       earnings: cents(random() * 10_000),
       finished: random() >= (config.player.kind === "rates" ? config.player.hitRate : 0.1),
-      firings: [],
+      firings:
+        config.player.kind === "rates" && config.player.hitRate === 0.5
+          ? [
+              { dog: "koda", zoneIndex: 0 },
+              { dog: "koda", zoneIndex: 1 },
+            ]
+          : [],
       hits: { afterPull: 1, all: 4 },
       inputs: [],
       items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
@@ -159,6 +165,22 @@ describe("simulateMatrix", () => {
     expect(row?.hitShare).toBeNull();
     expect(row?.meanTips).toBe(6);
   });
+
+  it.each([
+    { expected: 0, hitRate: 0.06 },
+    { expected: 1, hitRate: 0.5 },
+  ])(
+    "gives the share of walks with a firing, $expected at hit rate $hitRate",
+    ({ expected, hitRate }) => {
+      const [row] = simulateMatrix(gameData, 3, 4, {
+        ...SMALL,
+        players: [{ hitRate, kind: "rates" }],
+      });
+
+      expect(row?.firedShare).toBe(expected);
+      expect(row?.meanFirings).toBe(expected * 2);
+    },
+  );
 
   it("formats a header line and one line per row", () => {
     const rows = simulateMatrix(gameData, 3, 2, SMALL);

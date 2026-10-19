@@ -60,6 +60,8 @@ export interface MatrixRow {
   readonly afterPullShare: number | null;
   readonly bumpShare: number | null;
   readonly finishedShare: number;
+  // The share of walks with at least one firing.
+  readonly firedShare: number;
   // The gear equipped, or none.
   readonly gear: string;
   readonly hitShare: number | null;
@@ -259,6 +261,7 @@ export function summarizeCell(
     afterPullShare: hits === 0 ? null : afterPull / hits,
     bumpShare: touchedShare(countsOf(inCategory("minor"))),
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
+    firedShare: mean(results.map((result) => (result.firings.length > 0 ? 1 : 0))),
     gear: gearName(cell.gear),
     hitShare: touchedShare(countsOf(inCategory("obstacle"))),
     kindHitShares: Object.fromEntries(
@@ -336,6 +339,7 @@ export const MATRIX_HEADERS = [
   "p50",
   "p90",
   "Fired",
+  "Fired%",
   "Zones",
   "Finished",
   "Cards",
@@ -361,6 +365,7 @@ export function rowCells(row: MatrixRow): string[] {
     dollars(row.p50),
     dollars(row.p90),
     row.meanFirings.toFixed(2),
+    percent(row.firedShare),
     row.meanZones.toFixed(2),
     percent(row.finishedShare),
     row.meanCardsSeen.toFixed(1),
