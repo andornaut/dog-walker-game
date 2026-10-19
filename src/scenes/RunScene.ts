@@ -304,6 +304,9 @@ const PLACEHOLDER_HEIGHT = 32;
 
 // The walk: backdrop, road, walker, pack and everything spawned on the road. The simulation
 // steps at a fixed rate and stops while a card or the pause menu is up.
+// Road pixels the skunk stands behind its cloud's near edge, so it reads as inside the spray.
+const SKUNK_IN_CLOUD = 8;
+
 export class RunScene extends Scene {
   private accumulatorMs = 0;
   private achievements: AchievementPreview = NOTHING_PREVIEWED;
@@ -1758,8 +1761,8 @@ export class RunScene extends Scene {
   }
 
   // Each item stands once at the near edge of its hit box, however many rows it covers, and a
-  // lucky find on its frame's bottom. A puddle lies flat under the rest, and a skunk stands in
-  // the middle of its spray cloud, which lies flat too.
+  // lucky find on its frame's bottom. A puddle lies flat under the rest, and a skunk stands just
+  // inside the front of its spray cloud, which lies flat too.
   private addItemView(item: WalkItem): ItemView {
     const bottom = (shown: WalkItem) => shown.y + shown.height;
     const lucky = itemCategory(gameData, item.kind) === "lucky";
@@ -1803,7 +1806,7 @@ export class RunScene extends Scene {
     } else if (item.kind === "skunk") {
       parts = [
         part(SKUNK_CLOUD_KEY, flat),
-        part(encounterSpriteKey("skunk"), { footY: (shown) => shown.y + shown.height / 2 + 16 }),
+        part(encounterSpriteKey("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
       ];
     } else if (item.kind === "otherDog" && this.textures.exists("other-dog-owner")) {
       parts = [
