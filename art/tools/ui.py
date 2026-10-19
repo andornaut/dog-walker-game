@@ -749,7 +749,7 @@ def doghouse(dog):
     and 8px down, on the white hearts box (x 77 to 116, rows 23 to 54) ruled under each row, the
     n/max count centred at (98, 46) in font-title in the same box under a solid rule, up to two
     16x16 status icons at (78, 62) and (98, 62) in dashed boxes, the owner's name at (6, 62) in
-    font-body on the ID line (ruled on row 71, x 4 to 75) and the quirk icon (16x16) at (6, 72).
+    font-body on the ID line (ruled on row 70, x 4 to 75) and the quirk icon (16x16) at (6, 72), one clear row under the rule.
     The dog's emblem sits in a badge ringed in its colour (x 24 to 35, rows 76 to 87), and its
     colour runs along the foot stripe (x 38 to 115, rows 82 to 85) under a plum rule on row 81.
     The empty card (a fired dog's) is grey: a slate header, a white name plate, a dark dog photo, and only a dred plate built as
@@ -789,7 +789,7 @@ def doghouse(dog):
             g.p(x, y, "lgrey")
     g.rect(77, 43, 40, 1, "lgrey")
     # the ID line under the owner's name
-    g.rect(4, 71, 72, 1, lip)
+    g.rect(4, 70, 72, 1, lip)
     # the status spots: dashed boxes round each icon
     for x, y in STATUS_SPOTS:
         for i in range(0, 18, 3):

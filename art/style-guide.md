@@ -147,7 +147,7 @@ The dog row sits on `ui-dog-band` (360×94), drawn at 0,466 under the slots: the
 | Hearts            | From (78,26), rows of five, 8px across and 8px down, in the white hearts box (x 77 to 116, rows 23 to 54) |
 | "n/max" count     | Centred at (98,46) in `font-title` in the hearts box, under its solid rule                                |
 | Status icons      | 16×16 at (78,62) and (98,62), in dashed boxes                                                             |
-| Owner's name      | (6,62) in `font-body` on the ID line, ruled on row 71 (x 4 to 75)                                         |
+| Owner's name      | (6,62) in `font-body` on the ID line, ruled on row 70 (x 4 to 75), one clear row above the quirk icon     |
 | Quirk icon        | 16×16 at (6,72), left of the emblem badge (x 24 to 35, rows 76 to 87)                                     |
 | FIRED (fired dog) | Centred at (60,74), white, on the dred plate (built as `ui-fired-plate`) of the grey `empty` card         |
 
