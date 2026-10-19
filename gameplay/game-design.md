@@ -34,14 +34,17 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 - Designed touch-first: keyboard (web) and touch (mobile); mouse is not planned
 - Layout: a top status bar (money, zone progress); below it a neighbourhood backdrop band showing the current zone, where the scenery gags play; a fixed-width dog column on the left with one slot per dog; and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in [`art/style-guide.md`](../art/style-guide.md)
 - Portrait orientation, ¾ top-down view
-- 5 lanes. Keyboard: ←/→, A/D or H/L. Touch: tap the left/right half of the road, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
+- 5 lanes, a lane-width (56px) apart
+- **Drag** (the main way to play on touch): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack glides lane by lane toward the target lane at the normal lane-change speed
+- **Tap:** a tap without a drag moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead of moving
+- **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
 - The top bar holds the pause button; taps on it never move the pack. Pause offers Resume, Head home, Help and Settings
 - Spawning always leaves a path you can reach in time, so every hit is avoidable
 - A hit obstacle is removed after its card, then ~1s in which obstacles are ignored; pickups still count
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
 - Calm speed: scroll speed and density both rise gently per zone, never frantic
-- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. The size-based input lock starts when the pull's lane move finishes. About 1s before a pull, the dog leans toward that side and barks
+- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. During a drag, once the input lock ends the pack returns toward the lane the drag points at. The size-based input lock starts when the pull's lane move finishes. About 1s before a pull, the dog leans toward that side and barks
 - Area effects (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have someone caught; small dogs are nimble and roll half as often. The card then shows which dogs were caught, so its outcomes stay fixed; if nobody is caught, there is no card
 
 ### Resources
