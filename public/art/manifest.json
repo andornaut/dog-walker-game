@@ -5410,6 +5410,38 @@
       "png": "images/card-cafe-slink-away.png"
     },
     {
+      "key": "card-chase-cat-chase",
+      "png": "images/card-chase-cat-chase.png"
+    },
+    {
+      "key": "card-chase-cat-hold",
+      "png": "images/card-chase-cat-hold.png"
+    },
+    {
+      "key": "card-chase-ducklings-chase",
+      "png": "images/card-chase-ducklings-chase.png"
+    },
+    {
+      "key": "card-chase-ducklings-hold",
+      "png": "images/card-chase-ducklings-hold.png"
+    },
+    {
+      "key": "card-chase-pigeons-chase",
+      "png": "images/card-chase-pigeons-chase.png"
+    },
+    {
+      "key": "card-chase-pigeons-hold",
+      "png": "images/card-chase-pigeons-hold.png"
+    },
+    {
+      "key": "card-chase-rabbit-chase",
+      "png": "images/card-chase-rabbit-chase.png"
+    },
+    {
+      "key": "card-chase-rabbit-hold",
+      "png": "images/card-chase-rabbit-hold.png"
+    },
+    {
       "key": "card-chatty-neighbour-chat",
       "png": "images/card-chatty-neighbour-chat.png"
     },
@@ -5576,6 +5608,54 @@
     {
       "key": "card-skunk-rinse",
       "png": "images/card-skunk-rinse.png"
+    },
+    {
+      "key": "card-snatch-raccoon-chase",
+      "png": "images/card-snatch-raccoon-chase.png"
+    },
+    {
+      "key": "card-snatch-raccoon-let-go",
+      "png": "images/card-snatch-raccoon-let-go.png"
+    },
+    {
+      "key": "card-snatch-seagull-chase",
+      "png": "images/card-snatch-seagull-chase.png"
+    },
+    {
+      "key": "card-snatch-seagull-let-go",
+      "png": "images/card-snatch-seagull-let-go.png"
+    },
+    {
+      "key": "card-social-frisbee-dog-pull-away",
+      "png": "images/card-social-frisbee-dog-pull-away.png"
+    },
+    {
+      "key": "card-social-frisbee-dog-sniff",
+      "png": "images/card-social-frisbee-dog-sniff.png"
+    },
+    {
+      "key": "card-social-gate-dog-pull-away",
+      "png": "images/card-social-gate-dog-pull-away.png"
+    },
+    {
+      "key": "card-social-gate-dog-sniff",
+      "png": "images/card-social-gate-dog-sniff.png"
+    },
+    {
+      "key": "card-social-handbag-dog-pull-away",
+      "png": "images/card-social-handbag-dog-pull-away.png"
+    },
+    {
+      "key": "card-social-handbag-dog-sniff",
+      "png": "images/card-social-handbag-dog-sniff.png"
+    },
+    {
+      "key": "card-social-jogger-dog-pull-away",
+      "png": "images/card-social-jogger-dog-pull-away.png"
+    },
+    {
+      "key": "card-social-jogger-dog-sniff",
+      "png": "images/card-social-jogger-dog-sniff.png"
     },
     {
       "key": "card-squirrel-chase",

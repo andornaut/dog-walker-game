@@ -85,7 +85,7 @@ Same tags, frames and durations as the original.
 
 ### Encounter skins
 
-Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and has the same depth variants at every step (`@88`, `@75`, `@62`, `@50`: 35, 30, 25 and 20 square for the animals, 35×53, 30×45, 25×38 and 20×30 for the 40×60 skins). A Social dog also runs as the zone's loose dog: `run` is `loose-dog`'s gallop, 4 frames at 100ms, side view facing right, in the dog's 40×40 frame.
+Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and has the same depth variants at every step (`@88`, `@75`, `@62`, `@50`: 35, 30, 25 and 20 square for the animals, 35×53, 30×45, 25×38 and 20×30 for the 40×60 skins). A Social dog also runs as the zone's loose dog: `run` is `loose-dog`'s gallop, 4 frames at 100ms, side view facing right, in the dog's 40×40 frame. Each skin's card illustrations are in the choice cards table, drawn by `art/tools/skin_cards_animals.py`.
 
 | Key                        | Type   | Size  | Tags                   | Pri  | Note                                                            |
 | -------------------------- | ------ | ----- | ---------------------- | ---- | --------------------------------------------------------------- |
@@ -201,16 +201,19 @@ Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside ta
 
 ## Choice cards and help
 
-| Key                           | Type   | Size    | Tags                                             | Pri  | Note                                                                                   |
-| ----------------------------- | ------ | ------- | ------------------------------------------------ | ---- | -------------------------------------------------------------------------------------- |
-| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | core | `route` for a fork's path cards                                                        |
-| `card-frame-large`            | sprite | 166×280 | as `card-frame`                                  | core | Tap-to-enlarge view                                                                    |
-| `card-cost`                   | image  | 71×13   |                                                  | core | Cost plaque, at 2× on the large frame                                                  |
-| `card-<encounter>-<option>`   | image  | 75×56   |                                                  | core | One per option of the encounters, lucky encounters and forced stops                    |
-| `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | core | One per upgrade (9), and Poop bags' Skip                                               |
-| `card-<need card>-<option>`   | image  | 75×56   |                                                  | core | accident, good-spot, pee-mail, play-date, stranger-loves, water-stop; two options each |
-| `card-zone-<zone>`            | image  | 75×56   |                                                  | core | A fork's path card: the zone's road to a cross street, its backdrop scenery beyond     |
-| `help-<page>`                 | image  | 344×236 |                                                  | core | lanes, pickups, cards, owners, pulls, zones, needs                                     |
+| Key                                                        | Type   | Size    | Tags                                             | Pri  | Note                                                                                                                                                   |
+| ---------------------------------------------------------- | ------ | ------- | ------------------------------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `card-frame`                                               | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | core | `route` for a fork's path cards                                                                                                                        |
+| `card-frame-large`                                         | sprite | 166×280 | as `card-frame`                                  | core | Tap-to-enlarge view                                                                                                                                    |
+| `card-cost`                                                | image  | 71×13   |                                                  | core | Cost plaque, at 2× on the large frame                                                                                                                  |
+| `card-<encounter>-<option>`                                | image  | 75×56   |                                                  | core | One per option of the encounters, lucky encounters and forced stops                                                                                    |
+| `card-<chase skin>-hold`, `card-<chase skin>-chase`        | image  | 75×56   |                                                  | core | chase-cat, chase-ducklings, chase-pigeons, chase-rabbit: `card-squirrel-hold` and `-chase` with the skin on its zone's ground                          |
+| `card-<snatch skin>-chase`, `card-<snatch skin>-let-go`    | image  | 75×56   |                                                  | core | snatch-raccoon (Willow Crescent), snatch-seagull (Fairview Park): `card-thief-chase` and `-let-go` with the skin on its zone's ground                  |
+| `card-<social skin>-sniff`, `card-<social skin>-pull-away` | image  | 75×56   |                                                  | core | social-frisbee-dog, social-gate-dog, social-handbag-dog, social-jogger-dog: `card-other-dog-sniff` and `-pull-away` with the skin on its zone's ground |
+| `card-<upgrade>`, `card-skip`                              | image  | 75×56   |                                                  | core | One per upgrade (9), and Poop bags' Skip                                                                                                               |
+| `card-<need card>-<option>`                                | image  | 75×56   |                                                  | core | accident, good-spot, pee-mail, play-date, stranger-loves, water-stop; two options each                                                                 |
+| `card-zone-<zone>`                                         | image  | 75×56   |                                                  | core | A fork's path card: the zone's road to a cross street, its backdrop scenery beyond                                                                     |
+| `help-<page>`                                              | image  | 344×236 |                                                  | core | lanes, pickups, cards, owners, pulls, zones, needs                                                                                                     |
 
 Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). The generous neighbour and photo op open no card: `card-biscuit-neighbour-take` and `card-photo-op-pose` are their popup art. `card-accident-walk-on` shows the grumpy neighbour.
 

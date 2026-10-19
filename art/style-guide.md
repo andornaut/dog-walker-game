@@ -170,6 +170,7 @@ On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 
 
 - Band colour by card type: dred encounter, amber forced stop, blue lucky, forest upgrade.
 - Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge.
+- An encounter skin's card is its base card with the skin's road sprite in the base one's place, same pose and position, on a scrap of the skin's zone's ground; a skin in two zones shows the first one `inventory.md` names for it.
 - A disabled card is greyed with the grey ramp; the selected one is outlined in amber.
 
 ### Hits, moments and statuses

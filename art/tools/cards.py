@@ -244,20 +244,23 @@ def skunk_ignore():
     return a
 
 
-def squirrel_hold():
+# Chase, Snatch and Social take the zone's ground and the road sprite in the base kind's place, so
+# skin_cards_animals.py draws each encounter skin's cards from these.
+
+def squirrel_hold(zone="park", key="squirrel"):
     a = Art()
-    a.ground("park")
-    a.put("squirrel", "idle", 60, 37)
+    a.ground(zone)
+    a.put(key, "idle", 60, 37)
     c = a.put("dog-koda", "pull", 30, 54)
     # held back: the leash runs taut out of frame, behind the lunge
     a.lead(30, c, 14)
     return a
 
 
-def squirrel_chase():
+def squirrel_chase(zone="park", key="squirrel"):
     a = Art()
-    a.ground("park")
-    a.put("squirrel", "run", 58, 37, 1)
+    a.ground(zone)
+    a.put(key, "run", 58, 37, 1)
     a.put("dog-koda", "pull", 38, 56, 1)
     a.coins([(0, 20), (8, 28), (0, 36)])
     a.sparkle(26, 34, "yellow")
@@ -289,19 +292,19 @@ def puddle_towel():
     return a
 
 
-def other_dog_sniff():
+def other_dog_sniff(zone="park", key="other-dog"):
     a = Art()
-    a.ground("park")
-    a.put("other-dog", "walk", 38, 36)
+    a.ground(zone)
+    a.put(key, "walk", 38, 36)
     a.put("dog-biscuit", "walk", 38, 58)
     a.hearts([(24, 6), (46, 4)])
     return a
 
 
-def other_dog_pull_away():
+def other_dog_pull_away(zone="park", key="other-dog"):
     a = Art()
-    a.ground("park")
-    a.put("other-dog", "walk", 56, 36)
+    a.ground(zone)
+    a.put(key, "walk", 56, 36)
     c = a.put("dog-biscuit", "pull", 22, 56, flip=True)
     a.lead(22, c, 6)
     a.fill(59, 4, 2, 5, "red")
@@ -309,20 +312,20 @@ def other_dog_pull_away():
     return a
 
 
-def thief_chase():
+def thief_chase(zone="street", key="thief"):
     a = Art()
-    a.ground("street")
-    a.put("thief", "flee", 54, 59, 1)
+    a.ground(zone)
+    a.put(key, "flee", 54, 59, 1)
     a.put("dog-koda", "react", 22, 58)
     a.fill(30, 12, 2, 5, "red")
     a.fill(30, 18, 2, 2, "red")
     return a
 
 
-def thief_let_go():
+def thief_let_go(zone="street", key="thief"):
     a = Art()
-    a.ground("street")
-    a.put("thief", "walk", 52, 58)
+    a.ground(zone)
+    a.put(key, "walk", 52, 58)
     a.coins([(8, 30), (18, 36)], 1)
     a.bubble(4, 8, 24, ["-$$"], "dred")
     return a
