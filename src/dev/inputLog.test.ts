@@ -10,6 +10,7 @@ import {
   recordInput,
   replayInputs,
   startInputLog,
+  takeDueInputs,
 } from "./inputLog";
 import type { RunSetup, RunSetupLimits } from "./runSetup";
 
@@ -33,6 +34,7 @@ const events: InputEvent[] = [
   { direction: 1, kind: "lane", timeMs: 2500.5 },
   { choice: 2, kind: "card", timeMs: 4000 },
   { choice: "skip", kind: "card", timeMs: 9000 },
+  { kind: "treat", slot: 2, timeMs: 9500 },
 ];
 const logOf = (logEvents: readonly InputEvent[]): InputLog =>
   logEvents.reduce((log, event) => recordInput(event, log), startInputLog<string, string>(setup));
@@ -85,9 +87,28 @@ describe("encodeInputLog and decodeInputLog", () => {
     });
   });
 
+  it("write a treat as its slot", () => {
+    expect(JSON.parse(encodeInputLog(logOf(events.slice(4)))).events).toEqual([[9500, "t", 2]]);
+  });
+
+  it("still decode a version 1 log, from before treats were logged", () => {
+    const json = encoded({
+      events: [
+        [100, "l", -1],
+        [200, "c", "skip"],
+      ],
+    });
+    expect(decodeOk(json).events).toEqual([
+      { direction: -1, kind: "lane", timeMs: 100 },
+      { choice: "skip", kind: "card", timeMs: 200 },
+    ]);
+  });
+
   it.each([
     ["not JSON", "{"],
-    ["another version", encoded({ events: [], version: 2 })],
+    ["another version", encoded({ events: [], version: 3 })],
+    ["a treat in a version 1 log", encoded({ events: [[0, "t", 1]] })],
+    ["a fractional treat slot", encoded({ events: [[0, "t", 0.5]], version: 2 })],
     ["no events", encoded({ events: undefined })],
     ["an unknown event kind", encoded({ events: [[0, "x", 1]] })],
     ["a lane move of 2", encoded({ events: [[0, "l", 2]] })],
@@ -100,9 +121,33 @@ describe("encodeInputLog and decodeInputLog", () => {
   });
 });
 
+describe("takeDueInputs", () => {
+  const replayed: InputEvent[] = [
+    { direction: 1, kind: "lane", timeMs: 100 },
+    { kind: "treat", slot: 0, timeMs: 100 },
+    { kind: "treat", slot: 1, timeMs: 200 },
+    { choice: 0, kind: "card", timeMs: 200 },
+    { direction: -1, kind: "lane", timeMs: 250 },
+  ];
+
+  it("takes the lane moves and treats due by the step's time, in order", () => {
+    expect(takeDueInputs(replayed, 0, 150)).toEqual({ due: replayed.slice(0, 2), next: 2 });
+  });
+
+  it("applies a treat at the step it was given in, not before", () => {
+    expect(takeDueInputs(replayed, 2, 199)).toEqual({ due: [], next: 2 });
+    expect(takeDueInputs(replayed, 2, 200).due).toEqual([replayed[2]]);
+  });
+
+  it("stops at a card choice, which its card takes", () => {
+    expect(takeDueInputs(replayed, 3, 1000)).toEqual({ due: [], next: 3 });
+    expect(takeDueInputs(replayed, 4, 1000)).toEqual({ due: [replayed[4]], next: 5 });
+  });
+});
+
 describe("replayInputs", () => {
   it("yields the events in time order", () => {
-    const shuffled = [events[2], events[0], events[3], events[1]].map(defined);
+    const shuffled = [events[2], events[4], events[0], events[3], events[1]].map(defined);
     expect([...replayInputs(logOf(shuffled))]).toEqual(events);
   });
 

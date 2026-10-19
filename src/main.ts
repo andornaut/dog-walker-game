@@ -1,16 +1,22 @@
 import "./main.css";
 
-import { AUTO, Game, GameObjects, Scale } from "phaser";
+import { AUTO, Game, Scale } from "phaser";
 
 import { installCrashScreen } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
-import { DEV_STATE_EVENT, type DevState } from "./dev/devOverlay";
+import {
+  DEV_OVERLAY_TOGGLE_EVENT,
+  DEV_OVERLAY_VISIBLE_KEY,
+  DEV_ROAD_FADE_KEY,
+  DEV_STATE_EVENT,
+  type DevState,
+} from "./dev/devOverlay";
 import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { pageRunSetup } from "./dev/pageRunSetup";
 import { setOnHomeScreen, setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
-import { DEV_OVERLAY_SCENE_KEY, DevOverlayScene } from "./scenes/DevOverlayScene";
+import { DevOverlayScene } from "./scenes/DevOverlayScene";
 import { EndScene } from "./scenes/EndScene";
 import { HelpScene } from "./scenes/HelpScene";
 import { watchHomeScreen } from "./scenes/homeScreen";
@@ -33,24 +39,26 @@ installCrashScreen({
 
 setupPhoneApp();
 
-// The dev panel's view of the game. The overlay shows or hides by its text object's
-// visibility, the same flag DevOverlayScene's backquote toggle flips, so each control sees
-// the other's change.
+// The dev panel's view of the game. The panel asks the overlay to show or hide by an event, and
+// reads its visibility from the registry, which the backquote toggle also updates, so each
+// control sees the other's change. The road fade is a registry flag RunScene reads each frame.
 function devPanelHost(game: Game): DevPanelHost {
   let devState: DevState | undefined;
   game.events.on(DEV_STATE_EVENT, (state: DevState) => {
     devState = state;
   });
-  // Absent until the scene has booted and run create, which shows it when the URL has dev=1.
-  const overlayText = () =>
-    game.scene
-      .getScene(DEV_OVERLAY_SCENE_KEY)
-      ?.children?.list.find((child) => child instanceof GameObjects.Text);
   return {
     currentSetup: () => devState?.setup ?? pageRunSetup().setup,
-    overlayVisible: () => overlayText()?.visible ?? pageRunSetup().setup.dev,
+    // Unset until the overlay scene has run create, which shows it when the URL has dev=1.
+    overlayVisible: () =>
+      (game.registry.get(DEV_OVERLAY_VISIBLE_KEY) as boolean | undefined) ??
+      pageRunSetup().setup.dev,
+    roadFade: () => game.registry.get(DEV_ROAD_FADE_KEY) === true,
     setOverlayVisible: (visible) => {
-      overlayText()?.setVisible(visible);
+      game.events.emit(DEV_OVERLAY_TOGGLE_EVENT, visible);
+    },
+    setRoadFade: (on) => {
+      game.registry.set(DEV_ROAD_FADE_KEY, on);
     },
   };
 }

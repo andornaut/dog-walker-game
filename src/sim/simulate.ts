@@ -1,4 +1,4 @@
-import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, EncounterId, ForcedStopId, GameData, GearId, UpgradeId } from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
 import {
@@ -26,7 +26,7 @@ import {
   type WalkItemKind,
   walkScrollSpeed,
 } from "../runner/walk";
-import { walkGeometry } from "../runner/walkGeometry";
+import { walkGeometry, walkProjection } from "../runner/walkGeometry";
 import { packDogs } from "../state/pack";
 import { type CardSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { chooseCardOption, chooseUpgrade, type PolicyId, treatTarget } from "./policies";
@@ -255,6 +255,7 @@ function hasEnded(session: Session): boolean {
 // end, then an upgrade picked before the next zone. Deterministic for a given random.
 export function simulateRun(data: SimData, random: Random, config: SimConfig): RunResult {
   const road = screenLayout(SCREEN_CONFIG).road;
+  const view = walkProjection(ROAD_CAMERA, road);
   const session: Session = {
     cardsSeen: 0,
     choices: [],
@@ -266,7 +267,7 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
   };
   let walk: Walk = { road: startRoad(LANE_COUNT), run: session.run };
   while (!hasEnded(session)) {
-    const geometry = walkGeometry(LANE_COUNT, packDogs(session.run).length, road);
+    const geometry = walkGeometry(LANE_COUNT, packDogs(session.run).length, view, road);
     walk = planZone(data, geometry, random, { ...walk, run: session.run });
     playZone(data, random, config, session, walk);
     if (hasEnded(session)) {

@@ -76,6 +76,20 @@ export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
   return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
 }
 
+// A road sprite's hand-drawn version for a depth step, such as dog-koda@75 for 0.75x, or
+// null at full size.
+export function depthVariantKey(key: string, step: number): string | null {
+  return step >= 1 ? null : `${key}@${Math.round(step * 100)}`;
+}
+
+// Sprites drawn standing on the road or the backdrop, which need their feet line. Faces,
+// effects, badges, cards, icons and UI are placed by their frame instead.
+const UNMEASURED_PREFIXES = ["badge-", "card-", "face-", "fx-", "icon-", "portrait-", "ui-"];
+
+export function standsOnGround(key: string): boolean {
+  return !UNMEASURED_PREFIXES.some((prefix) => key.startsWith(prefix));
+}
+
 // The skunk stands on its spray cloud, which is its hit box.
 export const SKUNK_CLOUD_KEY = "skunk-cloud";
 

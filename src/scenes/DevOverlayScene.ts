@@ -1,7 +1,13 @@
 import { type GameObjects, Scene, Scenes } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
-import { DEV_STATE_EVENT, devOverlayLines, type DevState } from "../dev/devOverlay";
+import {
+  DEV_OVERLAY_TOGGLE_EVENT,
+  DEV_OVERLAY_VISIBLE_KEY,
+  DEV_STATE_EVENT,
+  devOverlayLines,
+  type DevState,
+} from "../dev/devOverlay";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import { runSetupLink } from "../dev/runSetup";
 import { screenLayout } from "../layout/screenLayout";
@@ -21,7 +27,8 @@ const TEXT_STYLE = {
 
 // Starts with the game and runs for the page's life, so the backquote key can show it at any
 // time; dev=1 shows it from the start. Listed last in the game config to draw over every scene.
-// It learns about the run only from DEV_STATE_EVENT on game.events.
+// It learns about the run only from DEV_STATE_EVENT on game.events, and shows or hides on
+// DEV_OVERLAY_TOGGLE_EVENT, keeping DEV_OVERLAY_VISIBLE_KEY in the registry current.
 export class DevOverlayScene extends Scene {
   private sinceRedrawMs = 0;
   private state: DevState | undefined;
@@ -39,19 +46,23 @@ export class DevOverlayScene extends Scene {
       .setVisible(pageRunSetup().setup.dev);
     this.redraw();
 
+    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, this.text.visible);
+
     const onDevState = (state: DevState) => {
       this.state = state;
     };
+    const onToggle = (visible: boolean) => this.setVisible(visible);
     this.game.events.on(DEV_STATE_EVENT, onDevState);
+    this.game.events.on(DEV_OVERLAY_TOGGLE_EVENT, onToggle);
     this.events.once(Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(DEV_STATE_EVENT, onDevState);
+      this.game.events.off(DEV_OVERLAY_TOGGLE_EVENT, onToggle);
     });
 
     // Matched on the physical key, so the toggle sits in the same place on every layout.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (event.code === "Backquote") {
-        this.text?.setVisible(!this.text.visible);
-        this.redraw();
+        this.setVisible(this.text?.visible !== true);
       } else if (event.key.toLowerCase() === "c" && this.text?.visible === true) {
         this.copyLink();
       }
@@ -63,6 +74,12 @@ export class DevOverlayScene extends Scene {
     if (this.sinceRedrawMs >= REDRAW_INTERVAL_MS) {
       this.redraw();
     }
+  }
+
+  private setVisible(visible: boolean): void {
+    this.text?.setVisible(visible);
+    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, visible);
+    this.redraw();
   }
 
   private redraw(): void {

@@ -12,6 +12,7 @@ import {
   backdropKey,
   CARD_FRAME_KEY,
   cardFrameTag,
+  depthVariantKey,
   dogFaceKey,
   doghouseTag,
   dogSpriteKey,
@@ -24,6 +25,7 @@ import {
   roadStartKey,
   roadTileKey,
   SKUNK_CLOUD_KEY,
+  standsOnGround,
   zoneArtName,
   zoneIconKey,
 } from "./spriteKeys";
@@ -35,6 +37,36 @@ describe("kebabCase", () => {
   it("splits camelCase words with hyphens", () => {
     expect(kebabCase("biscuitNeighbour")).toBe("biscuit-neighbour");
     expect(kebabCase("koda")).toBe("koda");
+  });
+});
+
+describe("depthVariantKey", () => {
+  it("names the @75 and @50 versions, and none at full size", () => {
+    expect(depthVariantKey("dog-koda", 0.75)).toBe("dog-koda@75");
+    expect(depthVariantKey("tip", 0.5)).toBe("tip@50");
+    expect(depthVariantKey("tip", 1)).toBeNull();
+  });
+
+  it("names variants the manifest has, each with its own anchor", () => {
+    const anchored = new Set(
+      manifest.sprites.filter((entry) => "anchor" in entry).map(({ key }) => key),
+    );
+    for (const key of ["dog-koda", "tip", "skunk"]) {
+      for (const step of [0.75, 0.5]) {
+        expect(anchored.has(depthVariantKey(key, step) ?? ""), `${key} ${step}`).toBe(true);
+      }
+    }
+  });
+});
+
+describe("standsOnGround", () => {
+  it("measures road and backdrop sprites, not faces, effects, badges or UI", () => {
+    for (const key of ["dog-koda", "tip", "walker-ada", "gag-cat", "dog-koda@50"]) {
+      expect(standsOnGround(key), key).toBe(true);
+    }
+    for (const key of ["face-dog-koda", "fx-bump", "badge-squirrel", "ui-button", "card-frame"]) {
+      expect(standsOnGround(key), key).toBe(false);
+    }
   });
 });
 

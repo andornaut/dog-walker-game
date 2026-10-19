@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene } from "phaser";
+import { type GameObjects, type Input, Scene, type Textures, WEBGL } from "phaser";
 
 import { itemAt } from "../arrays";
 import {
@@ -12,9 +12,9 @@ import {
   SKUNK_CLOUD_KEY,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, EncounterId, HintTrigger, Zone } from "../data/types";
-import { DEV_STATE_EVENT, type DevState } from "../dev/devOverlay";
+import { DEV_ROAD_FADE_KEY, DEV_STATE_EVENT, type DevState } from "../dev/devOverlay";
 import { DEV_LAST_LOG_KEY, DEV_REPLAY_KEY } from "../dev/devPanelModel";
 import {
   decodeInputLog,
@@ -24,6 +24,7 @@ import {
   recordInput,
   replayInputs,
   startInputLog,
+  takeDueInputs,
 } from "../dev/inputLog";
 import { pageRunSetup, runSetupLimitsFor } from "../dev/pageRunSetup";
 import { randomStream } from "../dev/randomStreams";
@@ -43,8 +44,19 @@ import {
 import { dogSlotForKey, isMuteKey, isPauseKey, laneDirectionForKey } from "../input/keyBindings";
 import { laneCenterXs, type LaneDirection } from "../layout/lanes";
 import { COLLAR_HEIGHT, leashHand, packPlacements } from "../layout/packFormation";
+import { project, type ScaleStep, snapScale } from "../layout/projection";
 import {
-  ballX,
+  drawRoad,
+  type PixelImage,
+  type RoadLook,
+  type RoadRaster,
+  roadRaster,
+  solidStrip,
+  STRIP,
+  stripLevels,
+} from "../layout/roadRaster";
+import {
+  ballAt,
   catReacts,
   catX,
   GAG_KEYS,
@@ -89,7 +101,7 @@ import {
   type WalkStep,
   zoneLength,
 } from "../runner/walk";
-import { walkerFootY, walkGeometry } from "../runner/walkGeometry";
+import { walkerFootY, walkGeometry, walkProjection } from "../runner/walkGeometry";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { packDogs } from "../state/pack";
 import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
@@ -115,10 +127,14 @@ import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import {
   addStandingSprite,
+  type DepthLook,
+  depthLook,
   ensurePlaceholder,
+  firstTag,
   playEffect,
   playTag,
   playTagOnce,
+  showDepthLook,
   spriteMetrics,
 } from "./sprites";
 
@@ -153,7 +169,12 @@ export const QUIPS_EVENT = "quips";
 // The simulation steps at a fixed rate, so a seed and an input log replay a run exactly.
 const STEP_MS = 1000 / 60;
 const LONGEST_FRAME_MS = 250;
-const ITEM_TAGS = ["idle", "walk", "wave", "loop"];
+// An item plays the first of these tags it has: its own motion while the walk goes on, and
+// standing still while a card or the pause menu holds the walk.
+const ITEM_TAGS = {
+  halted: ["idle", "loop", "walk", "wave"],
+  walking: ["walk", "wave", "loop", "idle"],
+} as const;
 // The backdrop band draws over the road's sprites, so what enters at the top of the road
 // comes out from behind the curb.
 const DEPTH = {
@@ -168,17 +189,35 @@ const DEPTH = {
   shadow: 3,
   sprite: 10,
 };
-const ROAD_TILE = 64;
 const LAYOUT = screenLayout(SCREEN_CONFIG);
+// Every road sprite, the road and its verge are drawn through this one projection.
+const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
+const ROAD_TEXTURE = "road-projected";
 // An instant lucky find's art pops up over the road, then floats up and fades.
 const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };
 const BANNER = { holdMs: 1800, key: "ui-zone-banner", slideMs: 300, width: 248, y: 70 };
 
-interface ItemView {
-  // Drawn under everything else on the road, with no shadow.
+// One sprite of an item. dx is across the road from the item's centre and footY the flat
+// road row it stands on, both in road pixels. feet "bottom" stands it on its frame's bottom
+// rather than its anchor. A flat sprite lies on the road, under everything else with no
+// shadow, foreshortened like the road.
+interface ItemPart {
+  dx: number;
+  feet: "anchor" | "bottom";
   flat: boolean;
-  sprites: { key: string; sprite: GameObjects.Sprite; y: (item: WalkItem) => number }[];
+  footY: (item: WalkItem) => number;
+  key: string;
+  sprite: GameObjects.Sprite;
 }
+
+interface ItemView {
+  parts: ItemPart[];
+}
+
+type Shadow = (look: DepthLook, x: number, footY: number, step: ScaleStep) => void;
+
+// The inputs a simulation step applies, waiting for it.
+type PendingInput = { direction: LaneDirection; kind: "lane" } | { kind: "treat"; slot: number };
 
 interface Gags {
   ball: GameObjects.Sprite;
@@ -200,7 +239,7 @@ const PLACEHOLDERS: readonly [string, number, number][] = [
   ["cone", 32, 32],
   ["hedge", 144, 32],
   ["hydrant", 32, 32],
-  ["parked-car", 40, 144],
+  ["parked-car", 40, 80],
   [SKUNK_CLOUD_KEY, 88, 88],
 ];
 
@@ -220,11 +259,10 @@ export class RunScene extends Scene {
   private gesture: GestureState = idleGesture;
   private graphics?: {
     leash: GameObjects.Graphics;
-    road: GameObjects.Graphics;
   };
-  // What the leashes and the road fill were last drawn for, so an unchanged frame skips them.
+  // What the leashes and the road were last drawn for, so an unchanged frame skips them.
   private drawnLeash = "";
-  private drawnRoadFill = "";
+  private drawnRoad = "";
   // Shadow images, reused frame to frame: the first shadowsUsed are in use this frame.
   private shadows: GameObjects.Image[] = [];
   private shadowsUsed = 0;
@@ -235,20 +273,21 @@ export class RunScene extends Scene {
   private laneXs: number[] = [];
   private needsZonePlan = false;
   private pauseOpen = false;
-  private pendingMoves: LaneDirection[] = [];
+  private packPose: "idle" | "walk" = "walk";
+  private pendingInputs: PendingInput[] = [];
   private pointerId: number | undefined;
   private random: { cards: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
   private replay: Replay | undefined;
-  private roads?: {
-    previous: GameObjects.TileSprite;
-    start: GameObjects.Image;
-    tiles: GameObjects.TileSprite;
-  };
+  // The projected road, drawn a row at a time into pixels, then uploaded to its texture.
+  private road: { pixels: Uint32Array; raster: RoadRaster; upload: () => void } | undefined;
+  // Each road strip's look and each backdrop's bottom row, read once from their textures.
+  private roadLooks = new Map<string, RoadLook>();
+  private bandRows = new Map<string, Uint32Array | null>();
   private runTimeMs = 0;
   private settings: Settings | undefined;
   private setup: RunSetup | undefined;
   private stinky: GameObjects.Sprite | undefined;
-  private stopSprites: GameObjects.Sprite[] = [];
+  private stopSprites: { key: string; sprites: GameObjects.Sprite[] } = { key: "", sprites: [] };
   private stumbling = false;
   private walk: Walk | undefined;
   private walker: { key: string; sprite: GameObjects.Sprite } | undefined;
@@ -328,11 +367,12 @@ export class RunScene extends Scene {
     this.buttonPointerId = undefined;
     this.needsZonePlan = false;
     this.pauseOpen = false;
-    this.pendingMoves = [];
+    this.packPose = "walk";
+    this.pendingInputs = [];
     this.pointerId = undefined;
     this.replay = undefined;
     this.runTimeMs = 0;
-    this.stopSprites = [];
+    this.stopSprites = { key: "", sprites: [] };
     this.stumbling = false;
     this.zoneEndPending = false;
     this.zoneShown = -1;
@@ -396,25 +436,10 @@ export class RunScene extends Scene {
     const { backdrop, road } = layout;
     this.backdrop = this.add.image(backdrop.x, backdrop.y, "__DEFAULT").setOrigin(0);
     this.backdrop.setDepth(DEPTH.backdrop);
-    this.roads = {
-      previous: this.add
-        .tileSprite(road.x, road.y, road.width, road.height, "__DEFAULT")
-        .setOrigin(0)
-        .setDepth(DEPTH.road)
-        .setVisible(false),
-      start: this.add.image(road.x, road.y, "__DEFAULT").setOrigin(0).setVisible(false),
-      tiles: this.add
-        .tileSprite(road.x, road.y, road.width, road.height, "__DEFAULT")
-        .setOrigin(0)
-        .setDepth(DEPTH.road),
-    };
-    this.roads.start.setDepth(DEPTH.road);
-    this.graphics = {
-      leash: this.add.graphics().setDepth(DEPTH.leash),
-      road: this.add.graphics().setDepth(DEPTH.road - 1),
-    };
+    this.createRoad(road);
+    this.graphics = { leash: this.add.graphics().setDepth(DEPTH.leash) };
     this.drawnLeash = "";
-    this.drawnRoadFill = "";
+    this.drawnRoad = "";
     this.shadows = [];
     this.dogSprites = new Map(
       loadout.dogs.map((dog) => {
@@ -483,7 +508,7 @@ export class RunScene extends Scene {
   }
 
   private geometry(run: RunState): RoadGeometry {
-    return walkGeometry(LANE_COUNT, packDogs(run).length, LAYOUT.road);
+    return walkGeometry(LANE_COUNT, packDogs(run).length, PROJECTION, LAYOUT.road);
   }
 
   private gestureContext(): GestureContext {
@@ -560,22 +585,17 @@ export class RunScene extends Scene {
     switch (action.kind) {
       case "move":
         if (this.replay === undefined) {
-          this.pendingMoves.push(action.direction);
+          this.pendingInputs.push({ direction: action.direction, kind: "lane" });
         }
         return;
       case "pause":
         this.openPause();
         return;
-      case "treat": {
-        const slot = walk.run.pack[action.slot];
-        if (slot === undefined) {
-          return;
+      case "treat":
+        if (this.replay === undefined) {
+          this.pendingInputs.push({ kind: "treat", slot: action.slot });
         }
-        const { change, state: run } = giveTreat(gameData, slot.dog, walk.run);
-        this.addChanges(change === null ? [] : [change]);
-        this.walk = { ...walk, run };
         return;
-      }
       default:
         action satisfies never;
     }
@@ -635,9 +655,12 @@ export class RunScene extends Scene {
     if (walk === undefined || random === undefined) {
       return;
     }
-    for (const direction of this.dueMoves()) {
-      walk = steerWalk(gameData, LANE_COUNT, direction, walk);
-      this.log({ direction, kind: "lane", timeMs: this.runTimeMs });
+    for (const input of this.dueInputs()) {
+      walk =
+        input.kind === "lane"
+          ? steerWalk(gameData, LANE_COUNT, input.direction, walk)
+          : this.treated(input.slot, walk);
+      this.log({ ...input, timeMs: this.runTimeMs });
     }
     const step = stepWalk(gameData, this.geometry(walk.run), random.rolls, STEP_MS / 1000, walk);
     this.runTimeMs += STEP_MS;
@@ -648,23 +671,27 @@ export class RunScene extends Scene {
     this.continueWalk();
   }
 
-  private dueMoves(): LaneDirection[] {
+  private dueInputs(): PendingInput[] {
     const replay = this.replay;
     if (replay === undefined) {
-      const moves = this.pendingMoves;
-      this.pendingMoves = [];
-      return moves;
+      const inputs = this.pendingInputs;
+      this.pendingInputs = [];
+      return inputs;
     }
-    const moves: LaneDirection[] = [];
-    for (let event = replay.events[replay.next]; event !== undefined;) {
-      if (event.kind !== "lane" || event.timeMs > this.runTimeMs) {
-        break;
-      }
-      moves.push(event.direction);
-      replay.next += 1;
-      event = replay.events[replay.next];
+    const { due, next } = takeDueInputs(replay.events, replay.next, this.runTimeMs);
+    replay.next = next;
+    return due;
+  }
+
+  // A treat from the dog column, for the dog in slot; an empty slot takes none.
+  private treated(slot: number, walk: Walk): Walk {
+    const dog = walk.run.pack[slot]?.dog;
+    if (dog === undefined) {
+      return walk;
     }
-    return moves;
+    const { change, state: run } = giveTreat(gameData, dog, walk.run);
+    this.addChanges(change === null ? [] : [change]);
+    return { ...walk, run };
   }
 
   // The next replayed card choice, if a replay is driving the run.
@@ -853,6 +880,8 @@ export class RunScene extends Scene {
     sound.play("cardOpen");
     sound.setCardOpen(true);
     if (!this.scene.isPaused()) {
+      // Drawn once more first, so the road holds still in its standing poses.
+      this.draw();
       this.scene.pause();
     }
     const data: CardSceneData = { onChoose: (choice) => this.choose(view, choice), view };
@@ -993,6 +1022,7 @@ export class RunScene extends Scene {
     this.pauseOpen = true;
     this.hint({ kind: "pause" });
     soundboardOf(this).setPaused(true);
+    this.draw();
     this.scene.pause();
     this.scene.pause(SCENE_KEYS.hud);
     this.events.emit(PAUSE_MENU_EVENT, true);
@@ -1066,6 +1096,7 @@ export class RunScene extends Scene {
     return itemAt(zones, Math.min(run.zoneIndex, zones.length - 1));
   }
 
+  // While a card or the pause menu holds the walk, the road's sprites stand still.
   private draw(): void {
     const walk = this.walk;
     const graphics = this.graphics;
@@ -1074,21 +1105,30 @@ export class RunScene extends Scene {
     }
     const zone = this.zone(walk.run);
     const shadowColor = colorFromHex(zone.roadShadowColor);
+    const halted = !this.walking();
     this.drawBackdrop(walk, zone);
-    this.drawRoad(walk, zone, graphics.road);
+    this.paintRoad(walk, zone);
 
     this.shadowsUsed = 0;
-    const shadow = (key: string, x: number, footY: number) =>
-      this.placeShadow(shadowColor, key, x, footY);
-    this.drawItems(walk, shadow);
-    this.drawForcedStop(walk, shadow);
-    this.drawPack(walk, shadow, graphics.leash);
+    const shadow: Shadow = (look, x, footY, step) =>
+      this.placeShadow(shadowColor, look, x, footY, step);
+    this.drawItems(walk, halted, shadow);
+    this.drawForcedStop(walk, halted, shadow);
+    this.drawPack(walk, halted, shadow, graphics.leash);
     this.shadows.slice(this.shadowsUsed).forEach((image) => image.setVisible(false));
   }
 
-  // A shadow under a sprite, centred on its x a pixel above its feet, from the pool.
-  private placeShadow(color: number, key: string, x: number, footY: number): void {
-    const { anchor, key: texture } = shadowTexture(this, color, spriteMetrics(key).opaqueWidth);
+  // A shadow under a sprite, centred on its x a pixel above its feet, from the pool. It
+  // shrinks with the sprite's depth step.
+  private placeShadow(
+    color: number,
+    look: DepthLook,
+    x: number,
+    footY: number,
+    step: ScaleStep,
+  ): void {
+    const width = spriteMetrics(look.key).opaqueWidth * look.scale;
+    const { anchor, key: texture } = shadowTexture(this, color, width, step);
     let image = this.shadows[this.shadowsUsed];
     if (image === undefined) {
       image = this.add.image(0, 0, texture).setOrigin(0).setDepth(DEPTH.shadow);
@@ -1118,18 +1158,16 @@ export class RunScene extends Scene {
       playTag(gags.cat.sprite, GAG_KEYS.cat, reacting ? "react" : "idle", still);
     }
     gags.sprinklers.forEach((sprite) => playTag(sprite, GAG_KEYS.sprinkler, "spray", still));
-    const x = still
-      ? backdrop.width - 60
-      : ballX(backdrop.width, walk.run.zoneDistance / walkScrollSpeed(gameData, walk.run));
-    gags.ball.setVisible(x !== null);
-    if (x !== null) {
-      gags.ball.setPosition(Math.round(x), backdrop.y + GAG_Y.ball);
+    const ball = ballAt(walk.run.zoneDistance / walkScrollSpeed(gameData, walk.run), still);
+    gags.ball.setVisible(ball !== null);
+    if (ball !== null) {
+      gags.ball.setPosition(ball.x, backdrop.y + ball.y);
       playTag(gags.ball, GAG_KEYS.ball, "roll", still);
     }
   }
 
-  // The zone's gags from its row of the table: a cat on one of its fences, its sprinklers and
-  // the ball.
+  // The zone's gags from its row of the table: a cat on its perch, its sprinklers and the
+  // ball.
   private placeGags(zone: Zone): void {
     const gags = this.gags;
     gags?.cat?.sprite.destroy();
@@ -1144,7 +1182,7 @@ export class RunScene extends Scene {
         .setDepth(DEPTH.gag);
     const left = catX(table, (this.random?.scenery ?? Math.random)());
     this.gags = {
-      ball: add(GAG_KEYS.ball, 0, GAG_Y.ball),
+      ball: add(GAG_KEYS.ball, 0, 0),
       cat: left === null ? null : { sprite: add(GAG_KEYS.cat, left, GAG_Y.cat), x: left },
       sprinklers: table.sprinklers.map((x) =>
         add(GAG_KEYS.sprinkler, x - GAG_SIZES.sprinkler.width / 2, GAG_Y.sprinkler),
@@ -1152,164 +1190,261 @@ export class RunScene extends Scene {
     };
   }
 
-  // The zone's road strip, scrolled with the walk; at a zone's start, its start strip rolls in
-  // from the top over the previous zone's road. Without the art, the zone's colour.
-  private drawRoad(walk: Walk, zone: Zone, fill: GameObjects.Graphics): void {
-    const roads = this.roads;
-    if (roads === undefined) {
-      return;
+  // One texture the size of the road, kept across runs, that the road is drawn into. Under
+  // WebGL its pixel buffer uploads straight to the GPU; the Canvas renderer, which cannot draw
+  // a buffer, gets a canvas texture instead.
+  private createRoad(road: { height: number; width: number; x: number; y: number }): void {
+    const raster = roadRaster(PROJECTION, road);
+    this.road = undefined;
+    if (this.renderer.type === WEBGL) {
+      const texture = this.textures.exists(ROAD_TEXTURE)
+        ? this.textures.get(ROAD_TEXTURE)
+        : this.textures.addUint8Array(
+            ROAD_TEXTURE,
+            new Uint8Array(road.width * road.height * 4),
+            road.width,
+            road.height,
+          );
+      const source = texture?.source[0];
+      if (source?.source instanceof Uint8Array) {
+        const pixels = new Uint32Array(source.source.buffer);
+        this.road = { pixels, raster, upload: () => source.update() };
+      }
+    } else {
+      const canvas = this.textures.exists(ROAD_TEXTURE)
+        ? (this.textures.get(ROAD_TEXTURE) as Textures.CanvasTexture)
+        : this.textures.createCanvas(ROAD_TEXTURE, road.width, road.height);
+      if (canvas !== null) {
+        const image = canvas.getContext().createImageData(road.width, road.height);
+        const upload = () => {
+          canvas.getContext().putImageData(image, 0, 0);
+          canvas.refresh();
+        };
+        this.road = { pixels: new Uint32Array(image.data.buffer), raster, upload };
+      }
     }
-    const { road } = LAYOUT;
-    const scrolled = this.distanceBeforeZone + walk.run.zoneDistance;
-    const phase = (top: number) =>
-      (((top - road.y - scrolled) % ROAD_TILE) + ROAD_TILE) % ROAD_TILE;
-    if (this.drawnRoadFill !== zone.roadColor) {
-      this.drawnRoadFill = zone.roadColor;
-      fill.clear();
-      fillRect(fill, colorFromHex(zone.roadColor), road);
-    }
-    const tileKey = roadTileKey(zone);
-    roads.tiles.setVisible(this.textures.exists(tileKey));
-    if (roads.tiles.texture.key !== tileKey && this.textures.exists(tileKey)) {
-      roads.tiles.setTexture(tileKey);
-    }
-    roads.tiles.tilePositionY = phase(road.y);
-
-    const previous = gameData.world.zones[walk.run.zoneIndex - 1];
-    const startKey = roadStartKey(zone);
-    const stripTop = road.y - ROAD_TILE + walk.run.zoneDistance;
-    const rolling =
-      previous !== undefined &&
-      this.textures.exists(startKey) &&
-      this.textures.exists(roadTileKey(previous)) &&
-      stripTop < road.y + road.height;
-    roads.start.setVisible(rolling);
-    roads.previous.setVisible(rolling);
-    if (!rolling) {
-      return;
-    }
-    roads.start.setTexture(startKey).setPosition(road.x, Math.round(stripTop));
-    roads.start.setCrop(0, Math.max(0, road.y - Math.round(stripTop)), road.width, ROAD_TILE);
-    const previousTop = Math.round(stripTop) + ROAD_TILE;
-    if (previousTop >= road.y + road.height) {
-      roads.previous.setVisible(false);
-      return;
-    }
-    const top = Math.max(road.y, previousTop);
-    roads.previous.setTexture(roadTileKey(previous));
-    roads.previous.setPosition(road.x, top).setSize(road.width, road.y + road.height - top);
-    roads.previous.tilePositionY = phase(top);
+    this.add.image(road.x, road.y, ROAD_TEXTURE).setOrigin(0).setDepth(DEPTH.road);
   }
 
-  private drawItems(walk: Walk, shadow: (key: string, x: number, footY: number) => void): void {
+  // The zone's road strip and verge, projected row by row; at a zone's start, its start strip
+  // rolls in from the far edge over the previous zone's road. Without the art, the zone's
+  // colour.
+  private paintRoad(walk: Walk, zone: Zone): void {
+    const road = this.road;
+    if (road === undefined) {
+      return;
+    }
+    const scroll = this.distanceBeforeZone + walk.run.zoneDistance;
+    const fade = this.registry.get(DEV_ROAD_FADE_KEY) === true;
+    const drawn = `${scroll}|${zone.id}|${fade}`;
+    if (drawn === this.drawnRoad) {
+      return;
+    }
+    this.drawnRoad = drawn;
+    const previous = gameData.world.zones[walk.run.zoneIndex - 1];
+    const startKey = roadStartKey(zone);
+    const transition =
+      previous !== undefined &&
+      this.textures.exists(startKey) &&
+      this.textures.exists(roadTileKey(previous))
+        ? {
+            previous: this.roadLook(previous, roadTileKey(previous)),
+            start: this.roadLook(zone, startKey),
+          }
+        : null;
+    drawRoad(
+      road.raster,
+      {
+        current: this.roadLook(zone, roadTileKey(zone)),
+        fade: fade ? this.bandRow(zone) : null,
+        scroll,
+        transition,
+        zoneStart: this.distanceBeforeZone,
+      },
+      road.pixels,
+    );
+    road.upload();
+  }
+
+  private roadLook(zone: Zone, key: string): RoadLook {
+    let look = this.roadLooks.get(key);
+    if (look === undefined) {
+      const image = this.imagePixels(key);
+      const fits = image?.width === STRIP.width && image.height === STRIP.height;
+      const strip = fits ? image : solidStrip(colorFromHex(zone.roadColor));
+      look = { strip: stripLevels(strip), zone: zone.id as RoadLook["zone"] };
+      this.roadLooks.set(key, look);
+    }
+    return look;
+  }
+
+  // The backdrop's bottom row across the road, which the far road fades into.
+  private bandRow(zone: Zone): Uint32Array | null {
+    const key = backdropKey(zone);
+    let row = this.bandRows.get(key);
+    if (row === undefined) {
+      const image = this.imagePixels(key);
+      const { road } = LAYOUT;
+      const start = image === null ? 0 : (image.height - 1) * image.width + road.x;
+      row = image === null ? null : image.pixels.slice(start, start + road.width);
+      this.bandRows.set(key, row);
+    }
+    return row;
+  }
+
+  // A loaded image's pixels, read once through a canvas.
+  private imagePixels(key: string): PixelImage | null {
+    if (!this.textures.exists(key)) {
+      return null;
+    }
+    const source = this.textures.get(key).getSourceImage();
+    if (!(source instanceof HTMLImageElement || source instanceof HTMLCanvasElement)) {
+      return null;
+    }
+    const { height, width } = source;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    if (context === null) {
+      return null;
+    }
+    context.drawImage(source, 0, 0);
+    const { data } = context.getImageData(0, 0, width, height);
+    return { height, pixels: new Uint32Array(data.buffer), width };
+  }
+
+  // Each item's sprites stand on the road through the projection, at the depth step of where
+  // they stand, using a hand-drawn variant for the step when the art has one.
+  private drawItems(walk: Walk, halted: boolean, shadow: Shadow): void {
     const seen = new Set<number>();
     const still = this.reducedMotion();
+    const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
     for (const item of walk.road.items) {
       seen.add(item.id);
       const view = this.items.get(item.id) ?? this.addItemView(item);
       const first = itemAt(this.laneXs, item.lane);
-      const x = (first + itemAt(this.laneXs, item.lane + item.laneSpan - 1)) / 2;
-      view.sprites.forEach(({ key, sprite, y }, i) => {
-        const offset =
-          item.kind === "otherDog" && view.sprites.length > 1 ? (i === 0 ? -8 : 10) : 0;
-        const footY = y(item);
-        sprite.setPosition(Math.round(x + offset), Math.round(footY));
-        ITEM_TAGS.forEach((tag) => playTag(sprite, key, tag, still));
-        if (view.flat && i === 0) {
-          sprite.setDepth(DEPTH.decal);
-        } else {
-          sprite.setDepth(DEPTH.sprite + footY);
-          shadow(key, x + offset, footY);
+      const laneX = (first + itemAt(this.laneXs, item.lane + item.laneSpan - 1)) / 2;
+      for (const part of view.parts) {
+        const distance = PROJECTION.footY - part.footY(item);
+        const placed = project(PROJECTION, { distance, x: laneX + part.dx });
+        const step = snapScale(placed.scale);
+        const look = depthLook(this, part.key, step);
+        showDepthLook(part.sprite, look, part.feet);
+        const x = Math.round(placed.x);
+        const y = Math.round(placed.y);
+        part.sprite.setPosition(x, y);
+        const tag = firstTag(this, look.key, tags);
+        if (tag !== undefined) {
+          playTag(part.sprite, look.key, tag, still);
         }
-      });
+        if (part.flat) {
+          // Foreshortened like the road it lies on: as long on screen as its rows of road.
+          const length = spriteMetrics(part.key).frameHeight;
+          const far = project(PROJECTION, { distance: distance + length, x: laneX }).y;
+          const scaleY = (placed.y - far) / spriteMetrics(look.key).frameHeight;
+          part.sprite.setScale(look.scale, scaleY).setDepth(DEPTH.decal);
+        } else {
+          part.sprite.setDepth(DEPTH.sprite + placed.y);
+          shadow(look, x, y, step);
+        }
+      }
     }
     for (const [id, view] of this.items) {
       if (!seen.has(id)) {
-        view.sprites.forEach(({ sprite }) => sprite.destroy());
+        view.parts.forEach(({ sprite }) => sprite.destroy());
         this.items.delete(id);
       }
     }
   }
 
-  // Each item stands at the bottom of its hit box. A puddle lies flat under the rest, and a
-  // skunk stands in the middle of its spray cloud, which lies flat too.
+  // Each item stands at the bottom of its hit box, and a lucky find on its frame's bottom. A
+  // puddle lies flat under the rest, a skunk stands in the middle of its spray cloud, which
+  // lies flat too, and a parked car stands at the near end of its footprint, past its hit box.
   private addItemView(item: WalkItem): ItemView {
     const bottom = (shown: WalkItem) => shown.y + shown.height;
-    const standing = (key: string) => ({
-      key,
-      sprite: addStandingSprite(this, key, 0, 0),
-      y: bottom,
-    });
-    let view: ItemView;
-    if (item.kind === "tip" || item.kind === "treat") {
-      view = { flat: false, sprites: [standing(item.kind)] };
-    } else if (isMinorObstacle(gameData, item.kind)) {
-      view = { flat: false, sprites: [standing(minorObstacleSpriteKey(item.kind))] };
-    } else if (item.kind === "skunk") {
-      const skunk = encounterSpriteKey("skunk");
-      view = {
-        flat: true,
-        sprites: [
-          standing(SKUNK_CLOUD_KEY),
-          {
-            key: skunk,
-            sprite: addStandingSprite(this, skunk, 0, 0),
-            y: (shown) => shown.y + shown.height / 2 + 16,
-          },
-        ],
-      };
-    } else if (item.kind === "otherDog" && this.textures.exists("other-dog-owner")) {
-      view = {
+    const lucky = itemCategory(gameData, item.kind) === "lucky";
+    const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
+      const made: ItemPart = {
+        dx: 0,
+        feet: lucky ? "bottom" : "anchor",
         flat: false,
-        sprites: [standing(encounterSpriteKey(item.kind)), standing("other-dog-owner")],
+        footY: bottom,
+        key,
+        sprite: addStandingSprite(this, key, 0, 0),
+        ...overrides,
       };
+      if (made.feet === "bottom") {
+        made.sprite.setOrigin(0.5, 1);
+      }
+      return made;
+    };
+    const flat = { feet: "bottom", flat: true } as const;
+    let parts: ItemPart[];
+    if (item.kind === "tip" || item.kind === "treat") {
+      parts = [part(item.kind)];
+    } else if (isMinorObstacle(gameData, item.kind)) {
+      const inset = this.walk === undefined ? 0 : this.geometry(this.walk.run).cell.inset;
+      const footY = item.kind === "parkedCar" ? (shown: WalkItem) => bottom(shown) + inset : bottom;
+      parts = [part(minorObstacleSpriteKey(item.kind), { footY })];
+    } else if (item.kind === "skunk") {
+      parts = [
+        part(SKUNK_CLOUD_KEY, flat),
+        part(encounterSpriteKey("skunk"), { footY: (shown) => shown.y + shown.height / 2 + 16 }),
+      ];
+    } else if (item.kind === "otherDog" && this.textures.exists("other-dog-owner")) {
+      parts = [
+        part(encounterSpriteKey(item.kind), { dx: -8 }),
+        part("other-dog-owner", { dx: 10 }),
+      ];
     } else {
-      view = { flat: item.kind === "puddle", sprites: [standing(encounterSpriteKey(item.kind))] };
+      parts = [part(encounterSpriteKey(item.kind), item.kind === "puddle" ? flat : {})];
     }
-    if (itemCategory(gameData, item.kind) === "lucky" || view.flat) {
-      view.sprites[0]?.sprite.setOrigin(0.5, 1);
-    }
+    const view = { parts };
     this.items.set(item.id, view);
     return view;
   }
 
   // A forced stop's figure stands in the middle of the road; a construction barrier is
   // repeated across every lane.
-  private drawForcedStop(
-    walk: Walk,
-    shadow: (key: string, x: number, footY: number) => void,
-  ): void {
+  private drawForcedStop(walk: Walk, halted: boolean, shadow: Shadow): void {
     const { road } = LAYOUT;
     const onRoad = walk.road.forcedStopOnRoad;
     if (onRoad === null) {
-      this.stopSprites.forEach((sprite) => sprite.destroy());
-      this.stopSprites = [];
+      this.stopSprites.sprites.forEach((sprite) => sprite.destroy());
+      this.stopSprites = { key: "", sprites: [] };
       return;
     }
     const key = forcedStopSpriteKey(onRoad.stop);
     const xs = onRoad.stop === "constructionDetour" ? this.laneXs : [road.x + road.width / 2];
-    if (this.stopSprites.length !== xs.length || this.stopSprites[0]?.texture.key !== key) {
-      this.stopSprites.forEach((sprite) => sprite.destroy());
-      this.stopSprites = xs.map(() => addStandingSprite(this, key, 0, 0));
+    if (this.stopSprites.sprites.length !== xs.length || this.stopSprites.key !== key) {
+      this.stopSprites.sprites.forEach((sprite) => sprite.destroy());
+      this.stopSprites = { key, sprites: xs.map(() => addStandingSprite(this, key, 0, 0)) };
     }
-    const footY = onRoad.y + this.geometry(walk.run).itemHeights.forcedStop;
+    const distance = PROJECTION.footY - (onRoad.y + this.geometry(walk.run).itemHeights.forcedStop);
     const still = this.reducedMotion();
-    this.stopSprites.forEach((sprite, i) => {
-      const x = itemAt(xs, i);
-      ITEM_TAGS.forEach((tag) => playTag(sprite, key, tag, still));
-      sprite.setPosition(Math.round(x), Math.round(footY)).setDepth(DEPTH.sprite + footY);
-      shadow(key, x, footY);
+    const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
+    this.stopSprites.sprites.forEach((sprite, i) => {
+      const placed = project(PROJECTION, { distance, x: itemAt(xs, i) });
+      const step = snapScale(placed.scale);
+      const look = depthLook(this, key, step);
+      showDepthLook(sprite, look);
+      const tag = firstTag(this, look.key, tags);
+      if (tag !== undefined) {
+        playTag(sprite, look.key, tag, still);
+      }
+      const x = Math.round(placed.x);
+      const y = Math.round(placed.y);
+      sprite.setPosition(x, y).setDepth(DEPTH.sprite + placed.y);
+      shadow(look, x, y, step);
     });
   }
 
-  private drawPack(
-    walk: Walk,
-    shadow: (key: string, x: number, footY: number) => void,
-    leash: GameObjects.Graphics,
-  ): void {
-    const { road } = LAYOUT;
+  // The walker stands on the feet line at scale 1; each dog stands where the projection puts
+  // its place in the formation. While the walk is held, they stand idle.
+  private drawPack(walk: Walk, halted: boolean, shadow: Shadow, leash: GameObjects.Graphics): void {
     const walkerX = Math.round(laneMotionX(this.laneXs, walk.road.control.motion));
-    const footY = walkerFootY(road);
+    const footY = PROJECTION.footY;
     const walking = packDogs(walk.run);
     const placements = packPlacements(walking.length);
     const leashColor = colorFromHex(this.zone(walk.run).leashColor);
@@ -1319,6 +1454,10 @@ export class RunScene extends Scene {
       this.drawnLeash = leashKey;
       leash.clear();
     }
+    const still = this.reducedMotion();
+    const pose = halted ? "idle" : "walk";
+    const posed = pose !== this.packPose;
+    this.packPose = pose;
     for (const [dog, sprite] of this.dogSprites) {
       const index = walking.indexOf(dog);
       sprite.setVisible(index >= 0);
@@ -1326,28 +1465,40 @@ export class RunScene extends Scene {
         continue;
       }
       const placement = itemAt(placements, index);
-      const x = walkerX + placement.dx;
-      const dogFoot = footY + placement.footDy;
+      const placed = project(PROJECTION, {
+        distance: -placement.footDy,
+        x: walkerX + placement.dx,
+      });
+      const step = snapScale(placed.scale);
+      const look = depthLook(this, dogSpriteKey(dog), step);
+      showDepthLook(sprite, look);
+      if (posed) {
+        playTag(sprite, look.key, pose, still && halted);
+      }
+      const x = Math.round(placed.x);
+      const dogFoot = Math.round(placed.y);
       sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
-      shadow(sprite.texture.key, x, dogFoot);
+      shadow(look, x, dogFoot, step);
       if (redrawLeash) {
         const hand = leashHand(placement);
         drawPixelLine(
           leash,
           leashColor,
           { x: walkerX + hand.dx, y: footY + hand.dy },
-          { x, y: dogFoot - COLLAR_HEIGHT },
+          { x, y: dogFoot - Math.round(COLLAR_HEIGHT * step) },
         );
       }
     }
     const walker = this.walker;
     if (walker !== undefined) {
       walker.sprite.setPosition(walkerX, footY).setDepth(DEPTH.sprite + footY);
-      shadow(walker.key, walkerX, footY);
+      if (posed) {
+        playTag(walker.sprite, walker.key, pose, still && halted);
+      }
+      shadow({ key: walker.key, scale: 1 }, walkerX, footY, 1);
     }
     // Dizzy stars circle the walker's head for as long as a stumble locks steering.
     this.stumbling &&= isSteeringLocked(walk.road.control);
-    const still = this.reducedMotion();
     if (this.dizzy !== undefined) {
       this.dizzy.setVisible(this.stumbling).setPosition(walkerX, footY - 52);
       playTag(this.dizzy, "fx-dizzy", "loop", still);

@@ -30,7 +30,9 @@ export interface DevPanelHost {
   // The running scene's setup once it reports one, else the URL's.
   currentSetup(): RunSetup;
   overlayVisible(): boolean;
+  roadFade(): boolean;
   setOverlayVisible(visible: boolean): void;
+  setRoadFade(on: boolean): void;
 }
 
 const BANK_TOP_UP = cents(100_000);
@@ -242,6 +244,20 @@ function overlaySection(host: DevPanelHost): { element: HTMLElement; refresh: ()
   return { element, refresh };
 }
 
+function roadSection(host: DevPanelHost): { element: HTMLElement; refresh: () => void } {
+  const box = el("input", { type: "checkbox" });
+  box.addEventListener("change", () => host.setRoadFade(box.checked));
+  const refresh = () => {
+    box.checked = host.roadFade();
+  };
+  const element = section(
+    "Road",
+    el("label", { className: "dev-check" }, box, "fade the far road into the backdrop"),
+    note("Dithers the farthest rows of the road into the band's bottom row. Off by default."),
+  );
+  return { element, refresh };
+}
+
 function linkSection(host: DevPanelHost): HTMLElement {
   const field = el("input", { className: "dev-field", hidden: true, readOnly: true, type: "text" });
   const status = note();
@@ -358,7 +374,7 @@ function replaySection(): { element: HTMLElement; refresh: () => void } {
       ": the log as encodeInputLog writes it, ",
       code(
         `{"version":${INPUT_LOG_VERSION},"setup":"seed=…","events":[[timeMs,"l",-1|1] | ` +
-          `[timeMs,"c",index|"skip"]]}`,
+          `[timeMs,"c",index|"skip"] | [timeMs,"t",slot]]}`,
       ),
       ". The run that plays it removes the key.",
     ),
@@ -466,6 +482,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   const bar = el("button", { className: "dev-bar", type: "button" });
   bar.setAttribute("aria-controls", sheet.id);
   const overlay = overlaySection(host);
+  const roadFade = roadSection(host);
   const replay = replaySection();
   const save = saveSection();
 
@@ -476,6 +493,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     sessionWrite(DEV_PANEL_OPEN_KEY, open ? "1" : "0");
     if (open) {
       overlay.refresh();
+      roadFade.refresh();
       replay.refresh();
       save.refresh();
     }
@@ -504,6 +522,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     ),
     runSection(),
     overlay.element,
+    roadFade.element,
     linkSection(host),
     replay.element,
     save.element,

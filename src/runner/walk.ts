@@ -86,10 +86,12 @@ export interface Walk {
   run: RunState;
 }
 
-// Screen pixels. packBand is the current pack's; tallestPackBand is any pack's, so spawns
-// stay avoidable whoever walks. An obstacle's footprint is cell.length per lane and row, and
-// its hit box the footprint less cell.inset at each end; itemHeights are everything else's.
-// sightLength is the road in view above the tallest pack.
+// Flat road pixels, where y grows toward the walker and the pack stands at scale 1, before
+// the pseudo-3D projection draws them. packBand is the current pack's; tallestPackBand is any
+// pack's, so spawns stay avoidable whoever walks. An obstacle's footprint is cell.length per
+// lane and row, and its hit box the footprint less cell.inset at each end; itemHeights are
+// everything else's. roadTop is the far edge of the road in view, where spawns come into
+// view, and sightLength the road in view above the tallest pack.
 export interface RoadGeometry {
   cell: { inset: number; length: number };
   itemHeights: Readonly<Record<"forcedStop" | "lucky" | PickupKind, number>>;

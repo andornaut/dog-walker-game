@@ -32,20 +32,23 @@ export function drawShadow(
 
 const SHADOW_RADIUS_Y = 2.5;
 
-// The shadow drawShadow draws, made once per colour and sprite width as a texture. anchor is
-// the texture pixel to place a pixel above the sprite's feet, at its x.
+// The shadow drawShadow draws, made once per colour, drawn sprite width and depth scale as a
+// texture: scale flattens it as the sprite shrinks with distance. anchor is the texture
+// pixel to place a pixel above the sprite's feet, at its x.
 export function shadowTexture(
   scene: Scene,
   color: number,
   spriteWidth: number,
+  scale = 1,
 ): { anchor: { x: number; y: number }; key: string } {
   const radiusX = shadowRadiusX(spriteWidth);
-  const anchor = { x: Math.ceil(radiusX) + 1, y: Math.ceil(SHADOW_RADIUS_Y) + 1 };
-  const key = `shadow-${color.toString(16)}-${radiusX}`;
+  const radiusY = Math.max(1, SHADOW_RADIUS_Y * scale);
+  const anchor = { x: Math.ceil(radiusX) + 1, y: Math.ceil(radiusY) + 1 };
+  const key = `shadow-${color.toString(16)}-${radiusX}-${radiusY}`;
   if (!scene.textures.exists(key)) {
     const graphics = scene.make.graphics({}, false);
     graphics.fillStyle(color);
-    for (const span of pixelEllipseSpans(anchor.x, anchor.y, radiusX, SHADOW_RADIUS_Y)) {
+    for (const span of pixelEllipseSpans(anchor.x, anchor.y, radiusX, radiusY)) {
       graphics.fillRect(span.x, span.y, span.width, 1);
     }
     graphics.generateTexture(key, 2 * anchor.x + 1, 2 * anchor.y + 1);

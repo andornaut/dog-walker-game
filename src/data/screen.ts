@@ -12,3 +12,8 @@ export const SCREEN_CONFIG: ScreenConfig = {
 };
 
 export const LANE_COUNT = 5;
+
+// The pseudo-3D road's camera: the screen row the road's vanishing point sits on, and the
+// ground's screen speed at the walker's feet relative to sprite scale there. The backdrops
+// are drawn to continue this road at their bottom row.
+export const ROAD_CAMERA = { horizonY: -260, ratio: 1.4 } as const;

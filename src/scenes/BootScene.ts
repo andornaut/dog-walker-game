@@ -90,7 +90,7 @@ export class BootScene extends Scene {
   }
 
   private finish(): void {
-    for (const { key } of this.manifest.sprites) {
+    for (const { anchor, key } of this.manifest.sprites) {
       if (!this.textures.exists(key)) {
         continue;
       }
@@ -101,7 +101,7 @@ export class BootScene extends Scene {
           const duration = frames.reduce((sum, frame) => sum + frame.duration, 0);
           this.anims.create({ duration, frames, key: spec.key, repeat: -1 });
         }
-        measureSprite(this, key);
+        measureSprite(this, key, anchor);
       } catch (error) {
         console.warn(`Sprite ${key} has no usable animations.`, error);
       }

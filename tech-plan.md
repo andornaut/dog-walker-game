@@ -19,6 +19,7 @@
 - **Rendering:** 360×640 internal, portrait, scaled with Phaser `Scale.FIT` and `pixelArt`. Every game UI element is drawn in the canvas; HTML is only the page shell, the dev panel and the crash screen.
 - **Crash screen:** `src/crash/` shows it once, on the first uncaught error or unhandled rejection, and ignores extension, cross-origin (`Script error.`) and ResizeObserver-loop errors. Phaser does not catch errors in its step, so they reach `window` and stop its loop. It pauses the game, writes nothing (the next launch banks the last zone checkpoint) and offers Reload; with `dev=1` it adds the message, stack and a Copy button.
 - **Screen layout:** top bar 360×40, backdrop band 360×150 (the zone's neighbourhood and scenery gags, never part of a lane), dog column 80×450 with 3 slots, and road 280×450 split into 5 lanes. A fired dog's slot empties, so the road never changes width.
+- **Pseudo-3D road:** game logic keeps the flat road (lane x, distance ahead of the walker in road pixels, scale 1 at the pack); only drawing goes through `src/layout/projection.ts` (`ROAD_CAMERA` in `src/data/screen.ts`). The road and verge are drawn row by row into one canvas texture (`src/layout/roadRaster.ts`), with 2x and 4x shrunk strips for rows that cover more than 2 strip rows. Sprites snap to 1, 0.75 or 0.5 scale and use a manifest's `<key>@75` or `<key>@50` when loaded. Spawns come into view at the far edge of the projected road, about 630 road pixels ahead.
 - **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
 - **Text:** bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x; text that doesn't fit is shortened, wrapped, or moved to the enlarged card.
 - **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull will re-anchor the drag once pulls are wired.
@@ -92,9 +93,9 @@
 | `dev`   | `1` shows the overlay           | `0`             |
 
 - One seed feeds independent random streams: `spawns-<zone>`, `rolls`, `cards`, `quips` and `scenery`.
-- Lane moves and card choices are recorded with their simulation time in a versioned input log. Treats are not logged yet, so a run with treats does not replay exactly. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
+- Lane moves, treats and card choices are recorded with their simulation step's time in a versioned input log that replays the run exactly. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run.
-- The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, run link, replay, and save tools (reset, +$1,000, unlock all).
+- The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, the far-road fade toggle (off by default), run link, replay, and save tools (reset, +$1,000, unlock all).
 
 ## Open questions
 

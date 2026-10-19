@@ -1,7 +1,10 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
-import { opaqueBounds } from "../layout/pixelShapes";
+import type { SpriteAnchor } from "../assets/manifest";
+import { depthVariantKey, standsOnGround } from "../assets/spriteKeys";
+import { opaqueBoundsOfRgba } from "../layout/pixelShapes";
+import type { ScaleStep } from "../layout/projection";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
 // opaqueWidth how wide its drawn pixels are; both from its first frame.
@@ -12,22 +15,84 @@ export interface SpriteMetrics {
 }
 
 const measured = new Map<string, SpriteMetrics>();
+let scanCanvas: HTMLCanvasElement | undefined;
 
-// Measures a loaded sprite once, so sprites of different sizes stand on the same line.
-export function measureSprite(scene: Scene, key: string): void {
+// Records a loaded sprite's feet line once, so sprites of different sizes stand on the same
+// line: from the manifest's anchor, or else from one read of its first frame's pixels.
+// Sprites that do not stand on the ground are not measured.
+export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | undefined): void {
   const texture = scene.textures.get(key);
-  const frameName = texture.getFrameNames()[0] ?? "__BASE";
-  const frame = texture.get(frameName);
-  const bounds = opaqueBounds(
-    frame.width,
-    frame.height,
-    (x, y) => scene.textures.getPixelAlpha(x, y, key, frameName) > 0,
-  );
+  const frame = texture.get(texture.getFrameNames()[0] ?? "__BASE");
+  const { height, width } = frame;
+  if (anchor !== undefined) {
+    measured.set(key, { ...anchor, frameHeight: height });
+    return;
+  }
+  if (!standsOnGround(key)) {
+    return;
+  }
+  scanCanvas ??= document.createElement("canvas");
+  scanCanvas.width = width;
+  scanCanvas.height = height;
+  const context = scanCanvas.getContext("2d", { willReadFrequently: true });
+  if (context === null) {
+    return;
+  }
+  context.clearRect(0, 0, width, height);
+  const image = frame.source.image as CanvasImageSource;
+  context.drawImage(image, frame.cutX, frame.cutY, width, height, 0, 0, width, height);
+  const bounds = opaqueBoundsOfRgba(width, height, context.getImageData(0, 0, width, height).data);
   measured.set(key, {
-    feetY: bounds?.bottom ?? frame.height,
-    frameHeight: frame.height,
-    opaqueWidth: bounds === undefined ? frame.width : bounds.right - bounds.left,
+    feetY: bounds?.bottom ?? height,
+    frameHeight: height,
+    opaqueWidth: bounds === undefined ? width : bounds.right - bounds.left,
   });
+}
+
+// How a road sprite shows at a depth step: its hand-drawn variant when one is loaded, else
+// the sprite scaled at runtime.
+export interface DepthLook {
+  key: string;
+  scale: number;
+}
+
+export function depthLook(scene: Scene, key: string, step: ScaleStep): DepthLook {
+  const variant = depthVariantKey(key, step);
+  return variant !== null && scene.textures.exists(variant)
+    ? { key: variant, scale: 1 }
+    : { key, scale: step };
+}
+
+// Switches a standing sprite to a depth look, on its feet line or, with feet "bottom", its
+// frame's bottom. A changed texture carries on the same tag from the same frame.
+export function showDepthLook(
+  sprite: GameObjects.Sprite,
+  look: DepthLook,
+  feet: "anchor" | "bottom" = "anchor",
+): void {
+  if (sprite.texture.key !== look.key) {
+    const current = sprite.anims.currentAnim;
+    const frame = sprite.anims.currentFrame;
+    const startFrame = current !== null && frame !== null ? current.frames.indexOf(frame) : 0;
+    const tag = current?.key.slice(current.key.indexOf(":") + 1);
+    const paused = sprite.anims.isPaused;
+    sprite.setTexture(look.key);
+    const { feetY, frameHeight } = spriteMetrics(look.key);
+    sprite.setOrigin(0.5, feet === "bottom" ? 1 : feetY / frameHeight);
+    const next = tag === undefined ? undefined : animationKey(look.key, tag);
+    if (next !== undefined && sprite.scene.anims.exists(next)) {
+      sprite.play({ key: next, startFrame: Math.max(0, startFrame) });
+      if (paused) {
+        sprite.anims.pause();
+      }
+    }
+  }
+  sprite.setScale(look.scale);
+}
+
+// The first of tags the sprite has an animation for.
+export function firstTag(scene: Scene, key: string, tags: readonly string[]): string | undefined {
+  return tags.find((tag) => scene.anims.exists(animationKey(key, tag)));
 }
 
 export function spriteMetrics(key: string): SpriteMetrics {

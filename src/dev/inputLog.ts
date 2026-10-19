@@ -3,17 +3,19 @@ import * as v from "valibot";
 import type { LaneDirection } from "../layout/lanes";
 import { parseRunSetup, type RunSetup, type RunSetupLimits, runSetupToQuery } from "./runSetup";
 
-export const INPUT_LOG_VERSION = 1;
+// Version 2 added treats; a version 1 log, which has none, still decodes.
+export const INPUT_LOG_VERSION = 2;
 
 // A card option's index in its source's data, or the Skip option, as chooseOption takes it.
 export type CardChoice = number | "skip";
 
 // timeMs is run time: the simulated milliseconds since the run started, not counting time
 // paused, taken at the step that applied the input. Replaying an event at the same step then
-// reproduces the run.
+// reproduces the run. A treat names the dog slot it was given to.
 export type InputEvent =
   | { readonly choice: CardChoice; readonly kind: "card"; readonly timeMs: number }
-  | { readonly direction: LaneDirection; readonly kind: "lane"; readonly timeMs: number };
+  | { readonly direction: LaneDirection; readonly kind: "lane"; readonly timeMs: number }
+  | { readonly kind: "treat"; readonly slot: number; readonly timeMs: number };
 
 export interface InputLog<DogId extends string = string, GearId extends string = string> {
   readonly events: readonly InputEvent[];
@@ -43,32 +45,72 @@ export function* replayInputs(log: InputLog): Generator<InputEvent, void, undefi
   yield* [...log.events].sort((a, b) => a.timeMs - b.timeMs);
 }
 
-// Each event is a tuple, [timeMs, "l", direction] or [timeMs, "c", choice], and the setup is
-// its URL query, which keeps a long replay small.
+// The inputs a simulation step applies: lane moves and treats.
+export type StepInput = Extract<InputEvent, { readonly kind: "lane" | "treat" }>;
+
+// The replayed step inputs due by timeMs, from events[next] on, and the index after them.
+// They stop at a card choice, which waits for its card to open.
+export function takeDueInputs(
+  events: readonly InputEvent[],
+  next: number,
+  timeMs: number,
+): { due: StepInput[]; next: number } {
+  const due: StepInput[] = [];
+  let index = next;
+  for (let event = events[index]; event !== undefined; event = events[index]) {
+    if (event.kind === "card" || event.timeMs > timeMs) {
+      break;
+    }
+    due.push(event);
+    index += 1;
+  }
+  return { due, next: index };
+}
+
+// Each event is a tuple, [timeMs, "l", direction], [timeMs, "c", choice] or
+// [timeMs, "t", slot], and the setup is its URL query, which keeps a long replay small.
 const timeMs = v.pipe(v.number(), v.finite(), v.minValue(0));
+const index = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
 const laneTuple = v.tuple([timeMs, v.literal("l"), v.picklist([-1, 1])]);
-const cardTuple = v.tuple([
-  timeMs,
-  v.literal("c"),
-  v.union([v.pipe(v.number(), v.safeInteger(), v.minValue(0)), v.literal("skip")]),
+const cardTuple = v.tuple([timeMs, v.literal("c"), v.union([index, v.literal("skip")])]);
+const treatTuple = v.tuple([timeMs, v.literal("t"), index]);
+const encodedSchema = v.variant("version", [
+  v.object({
+    events: v.array(v.union([laneTuple, cardTuple])),
+    setup: v.string(),
+    version: v.literal(1),
+  }),
+  v.object({
+    events: v.array(v.union([laneTuple, cardTuple, treatTuple])),
+    setup: v.string(),
+    version: v.literal(INPUT_LOG_VERSION),
+  }),
 ]);
-const encodedSchema = v.object({
-  events: v.array(v.union([laneTuple, cardTuple])),
-  setup: v.string(),
-  version: v.literal(INPUT_LOG_VERSION),
-});
-type EncodedEvent = v.InferOutput<typeof laneTuple> | v.InferOutput<typeof cardTuple>;
+type EncodedEvent =
+  | v.InferOutput<typeof cardTuple>
+  | v.InferOutput<typeof laneTuple>
+  | v.InferOutput<typeof treatTuple>;
 
 function encodeEvent(event: InputEvent): EncodedEvent {
-  return event.kind === "lane"
-    ? [event.timeMs, "l", event.direction]
-    : [event.timeMs, "c", event.choice];
+  switch (event.kind) {
+    case "card":
+      return [event.timeMs, "c", event.choice];
+    case "lane":
+      return [event.timeMs, "l", event.direction];
+    default:
+      return [event.timeMs, "t", event.slot];
+  }
 }
 
 function decodeEvent(event: EncodedEvent): InputEvent {
-  return event[1] === "l"
-    ? { direction: event[2], kind: "lane", timeMs: event[0] }
-    : { choice: event[2], kind: "card", timeMs: event[0] };
+  switch (event[1]) {
+    case "c":
+      return { choice: event[2], kind: "card", timeMs: event[0] };
+    case "l":
+      return { direction: event[2], kind: "lane", timeMs: event[0] };
+    default:
+      return { kind: "treat", slot: event[2], timeMs: event[0] };
+  }
 }
 
 export function encodeInputLog(log: InputLog): string {

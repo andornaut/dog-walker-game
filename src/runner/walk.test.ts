@@ -5,7 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type { EncounterId } from "../data/types";
@@ -40,7 +40,7 @@ import {
   walkScrollSpeed,
   zoneLength,
 } from "./walk";
-import { walkGeometry } from "./walkGeometry";
+import { walkGeometry, walkProjection } from "./walkGeometry";
 
 // 80px/s for 30s is a 2400px zone: 14 rows of spawns 160px apart.
 const tuning = {
@@ -129,7 +129,13 @@ describe("planZone", { timeout: 15_000 }, () => {
 
   it("fits the tuned spawns into every zone of the game's road, so none is dropped", () => {
     const tuned = { ...data, tuning: TUNING };
-    const gameRoad = walkGeometry(LANE_COUNT, 3, screenLayout(SCREEN_CONFIG).road);
+    const layoutRoad = screenLayout(SCREEN_CONFIG).road;
+    const gameRoad = walkGeometry(
+      LANE_COUNT,
+      3,
+      walkProjection(ROAD_CAMERA, layoutRoad),
+      layoutRoad,
+    );
     const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
     for (let zoneIndex = 0; zoneIndex < WORLD.zones.length; zoneIndex++) {
       for (const seed of [1, 2, 3]) {
@@ -158,7 +164,7 @@ describe("planZone", { timeout: 15_000 }, () => {
   it("leaves a way past every obstacle of the game's road, from any lane, up to zone 4's speed", () => {
     const tuned = { ...data, tuning: TUNING };
     const road = screenLayout(SCREEN_CONFIG).road;
-    const gameRoad = walkGeometry(LANE_COUNT, 3, road);
+    const gameRoad = walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
     const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
     for (const zoneIndex of [0, 3]) {
       const zoned = { ...run, zoneIndex };
@@ -185,6 +191,18 @@ describe("planZone", { timeout: 15_000 }, () => {
           expect(lanesReachedAtEnd(walkway, spans, start)).not.toEqual([]);
         }
       }
+    }
+  });
+
+  it("shows each row of the game's road in time to cross the whole road for it, up to zone 4", () => {
+    const tuned = { ...data, tuning: TUNING };
+    const road = screenLayout(SCREEN_CONFIG).road;
+    const gameRoad = walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
+    const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
+    const crossing = (LANE_COUNT - 1) * read(TUNING, "seconds", "laneMove");
+    for (const zoneIndex of [0, 3]) {
+      const lookAhead = gameRoad.sightLength / walkScrollSpeed(tuned, { ...run, zoneIndex });
+      expect(lookAhead).toBeGreaterThan(crossing + 1);
     }
   });
 

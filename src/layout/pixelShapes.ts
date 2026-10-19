@@ -105,3 +105,13 @@ export function opaqueBounds(
   }
   return bounds;
 }
+
+// opaqueBounds over RGBA bytes, as canvas ImageData holds them: a pixel is opaque when its
+// alpha byte is not 0.
+export function opaqueBoundsOfRgba(
+  width: number,
+  height: number,
+  rgba: ArrayLike<number>,
+): PixelBounds | undefined {
+  return opaqueBounds(width, height, (x, y) => (rgba[(y * width + x) * 4 + 3] ?? 0) > 0);
+}
