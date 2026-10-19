@@ -1,6 +1,6 @@
 // The site navigation bar: Home, Play, Data, the art gallery, each mock listed in
-// /art/mocks/index.json, and the repository on GitHub. Every link is a page on this site or the
-// root of an external site, never a page inside one. A page loads it with
+// /art/mocks/index.json, the repository on GitHub and the project's Cloudflare dashboard. Every
+// link is a page on this site, the root of an external site, or this project's dashboard. A page loads it with
 // <link rel="stylesheet" href="/nav.css"> and <script src="/nav.js" defer></script> in its head
 // and adds nothing else. The page links the stylesheet, rather than this script injecting it, so
 // the bar's style blocks the first paint and the CSP's 'self' covers it. On /play/ the bar is one
@@ -10,6 +10,9 @@
 (() => {
   "use strict";
   const REPO = "https://github.com/andornaut/dog-walker-game";
+  // /:account picks the signed-in account, so the URL names no account id.
+  const DASHBOARD =
+    "https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game";
   // Cloudflare serves /x.html as /x and /dir/index.html as /dir/, so compare without either.
   const norm = (path) => path.replace(/(index)?\.html$/, "").replace(/\/$/, "");
   const here = norm(location.pathname);
@@ -39,6 +42,7 @@
     item("Gallery", "/art/"),
     mocksAt,
     item("GitHub", REPO),
+    item("Cloudflare", DASHBOARD),
   );
 
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)");
