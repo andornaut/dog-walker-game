@@ -4,7 +4,7 @@
 // call the functions below.
 import { guardBackNavigation } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
-import { relayOrientationEvents, type Viewport } from "./orientation";
+import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
 import {
   createUpdatePrompt,
   noticePlacement,
@@ -43,6 +43,7 @@ function placeNoticeOverGame(notice: HTMLElement): () => void {
   return place;
 }
 
+let orientation: OrientationRelay | undefined;
 let screenWakeLock: ScreenWakeLock | undefined;
 let updatePrompt: UpdatePrompt | undefined;
 
@@ -105,13 +106,18 @@ export function setupPhoneApp(): void {
   registerServiceWorker();
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
-  relayOrientationEvents(readViewport, window);
+  orientation = relayOrientationEvents(readViewport, window);
   guardBackNavigation(window, history);
   const wakeLock = "wakeLock" in navigator ? navigator.wakeLock : undefined;
   screenWakeLock = createScreenWakeLock(wakeLock, document);
   // Held whenever the game is visible until the scenes take over with stopWakeLock and
   // startWakeLock (for example, letting the screen sleep on a menu).
   screenWakeLock.start();
+}
+
+// Whether the phone is on its side now, with the turn-upright notice over the game.
+export function isPhoneSideways(): boolean {
+  return orientation?.sideways() ?? false;
 }
 
 // Keep the screen on while the game is visible.

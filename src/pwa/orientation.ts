@@ -15,14 +15,20 @@ export function isSidewaysPhone({ coarsePointer, height, width }: Viewport): boo
   return coarsePointer && width > height && height <= SIDEWAYS_MAX_HEIGHT;
 }
 
+export interface OrientationRelay {
+  // Whether the phone is on its side as of the last event relayed: the state the turn-upright
+  // notice shows, for a scene that starts after the event went out.
+  sideways(): boolean;
+  stop(): void;
+}
+
 // Relays the phone's orientation as turned-sideways and turned-upright on eventTarget, each once
 // per change, rechecking on every resize of eventTarget. A page that starts sideways gets
-// turned-sideways at once, so listeners that drive the notice must be added first. Returns a
-// function that stops relaying.
+// turned-sideways at once, so listeners that drive the notice must be added first.
 export function relayOrientationEvents(
   readViewport: () => Viewport,
   eventTarget: EventTarget,
-): () => void {
+): OrientationRelay {
   let lastSideways = false;
   const check = () => {
     const sideways = isSidewaysPhone(readViewport());
@@ -37,5 +43,8 @@ export function relayOrientationEvents(
   };
   check();
   eventTarget.addEventListener("resize", check);
-  return () => eventTarget.removeEventListener("resize", check);
+  return {
+    sideways: () => lastSideways,
+    stop: () => eventTarget.removeEventListener("resize", check),
+  };
 }

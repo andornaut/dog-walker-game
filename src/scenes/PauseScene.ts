@@ -3,8 +3,9 @@ import { type Input, Scene } from "phaser";
 import { itemAt } from "../arrays";
 import { remapDarker } from "../assets/darkRamp";
 import { SCREEN_CONFIG } from "../data/screen";
-import { pauseMenuLayout, type PauseMenuTarget, pauseMenuTargetAt } from "../hud/pauseMenu";
-import { cardNumberForKey, isPauseKey } from "../input/keyBindings";
+import { pauseMenuLayout } from "../hud/pauseMenu";
+import { cardNumberForKey } from "../input/keyBindings";
+import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { fillRect } from "./draw";
@@ -32,12 +33,12 @@ interface MenuEntry {
   press: () => void;
 }
 
-// The pause menu over the dimmed road: resume, help, settings or head home. The top bar's
-// pause button shows play while it is up, and a press there resumes too.
+// The pause menu over the dimmed road: resume, help, settings or head home. The HUD keeps
+// running under it, so the top bar's buttons and their keys (P, Escape and M) stay with it.
 export class PauseScene extends Scene {
   private buttons: MenuButton[] = [];
   private entries: MenuEntry[] = [];
-  private pressed: PauseMenuTarget | undefined;
+  private pressed: number | undefined;
 
   constructor() {
     super(SCENE_KEYS.pause);
@@ -91,28 +92,19 @@ export class PauseScene extends Scene {
     // A press counts where it began and ended on the same target, so the release that resumes
     // the walk is never the road's.
     this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      this.pressed = pauseMenuTargetAt(layout.hits, pointer.x, pointer.y);
+      this.pressed = rectIndexAt(layout.hits, pointer.x, pointer.y);
       this.showPressed();
     });
     this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const target = pauseMenuTargetAt(layout.hits, pointer.x, pointer.y);
+      const target = rectIndexAt(layout.hits, pointer.x, pointer.y);
       const pressed = this.pressed;
       this.pressed = undefined;
       this.showPressed();
-      if (target === undefined || target !== pressed) {
-        return;
-      }
-      if (target === "resume") {
-        onResume();
-      } else {
+      if (target !== undefined && target === pressed) {
         this.entries[target]?.press();
       }
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (isPauseKey(event.key)) {
-        onResume();
-        return;
-      }
       const number = cardNumberForKey(this.entries.length, event.key);
       if (number !== undefined) {
         this.entries[number - 1]?.press();

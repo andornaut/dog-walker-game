@@ -1,4 +1,4 @@
-import { type GameObjects, Scene } from "phaser";
+import { type GameObjects, type Input, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { dogFaceKey, doghouseTag, ownerFaceKey, zoneIconKey } from "../assets/spriteKeys";
@@ -11,8 +11,13 @@ import {
   buttonIcon,
   PAUSE_BUTTON,
   pauseButtonIcon,
+  type RunPause,
   SOUND_BUTTON,
+  topBarAction,
   type TopBarButton,
+  topBarButtonAt,
+  topBarButtonForKey,
+  type TopBarPress,
 } from "../hud/topBar";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -23,11 +28,10 @@ import type { PackSlot, RunState } from "../state/runState";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
-import { isMuted } from "./profileStore";
+import { isMuted, setMuted } from "./profileStore";
 import {
   CHANGE_LABELS_EVENT,
   HINT_EVENT,
-  PAUSE_MENU_EVENT,
   type QuipBubble,
   QUIPS_EVENT,
   type RunHudView,
@@ -61,7 +65,9 @@ interface SlotView {
 
 // The top bar and dog column, drawn over the road for the whole walk and kept in view while
 // cards are up. It reads the run from RunScene every frame and redraws what changed, and
-// shows the run's change labels, first-time hints and owners' quips.
+// shows the run's change labels, first-time hints and owners' quips. It keeps running while
+// the walk is paused, so the top bar's buttons and their keys work in every state; its
+// animations run on too, being the bar's and not the walk's.
 export class HudScene extends Scene {
   private drawn: Record<string, unknown> = {};
   private dynamic: GameObjects.Graphics | undefined;
@@ -98,7 +104,6 @@ export class HudScene extends Scene {
     const pauseIcon = buttonIcon(PAUSE_BUTTON, false);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
-    this.showPauseIcon(false);
     this.addButton(SOUND_BUTTON);
     const soundIcon = buttonIcon(SOUND_BUTTON, false);
     this.mute = this.add.sprite(soundIcon.x, soundIcon.y, "icon-sound").setOrigin(0);
@@ -131,15 +136,41 @@ export class HudScene extends Scene {
     run.events.on(CHANGE_LABELS_EVENT, onLabels);
     run.events.on(HINT_EVENT, onHint);
     run.events.on(QUIPS_EVENT, onQuips);
-    // This scene is paused while the menu is up, but a paused scene still draws.
-    const onPauseMenu = (open: boolean) => this.showPauseIcon(open);
-    run.events.on(PAUSE_MENU_EVENT, onPauseMenu);
     this.events.once("shutdown", () => {
       run.events.off(CHANGE_LABELS_EVENT, onLabels);
       run.events.off(HINT_EVENT, onHint);
       run.events.off(QUIPS_EVENT, onQuips);
-      run.events.off(PAUSE_MENU_EVENT, onPauseMenu);
     });
+
+    // A button acts on the press, as the walk's gestures never see it.
+    this.input.on("pointerdown", (pointer: Input.Pointer) => {
+      const button = topBarButtonAt(pointer.x, pointer.y);
+      if (button !== undefined) {
+        this.press("tap", button);
+      }
+    });
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      const button = topBarButtonForKey(event.repeat, event.key);
+      if (button !== undefined) {
+        this.press("key", button);
+      }
+    });
+  }
+
+  private press(via: "key" | "tap", button: TopBarPress): void {
+    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    switch (topBarAction(run.runPause(), via, button)) {
+      case "mute":
+        setMuted(this, !isMuted(this));
+        break;
+      case "openMenu":
+        run.openPause();
+        break;
+      case "resume":
+        run.closePause();
+        break;
+      default:
+    }
   }
 
   // A 20x20 button face on the bar, drawn when the art is missing.
@@ -159,8 +190,8 @@ export class HudScene extends Scene {
   }
 
   // The icon art when it is loaded, else cream pause bars or play triangle drawn on the face.
-  private showPauseIcon(menuOpen: boolean): void {
-    const key = pauseButtonIcon(menuOpen);
+  private showPauseIcon(pause: RunPause): void {
+    const key = pauseButtonIcon(pause);
     const art = this.textures.exists(key);
     this.pauseIcon?.setTexture(art ? key : "__DEFAULT").setVisible(art);
     const g = this.pauseGlyph;
@@ -171,7 +202,7 @@ export class HudScene extends Scene {
     if (art) {
       return;
     }
-    if (menuOpen) {
+    if (key === "icon-play") {
       this.drawPlayTriangle(g);
     } else {
       this.drawPauseBars(g);
@@ -229,10 +260,12 @@ export class HudScene extends Scene {
   }
 
   override update(): void {
-    const view = (this.scene.get(SCENE_KEYS.run) as RunScene).hudView();
+    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const view = run.hudView();
     if (view === undefined) {
       return;
     }
+    const pause = run.runPause();
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
       affected: view.affected.join(),
@@ -241,11 +274,13 @@ export class HudScene extends Scene {
       money: view.run.money,
       muted: isMuted(this),
       pack: view.run.pack,
+      pauseIcon: pauseButtonIcon(pause),
       treats: view.run.treats,
       zone: view.run.zoneIndex,
     };
     if (Object.keys(state).some((key) => state[key] !== this.drawn[key])) {
       this.drawn = state;
+      this.showPauseIcon(pause);
       this.redraw(view);
     }
   }

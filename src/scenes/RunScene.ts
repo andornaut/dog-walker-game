@@ -31,7 +31,7 @@ import { randomStream } from "../dev/randomStreams";
 import type { RunSetup } from "../dev/runSetup";
 import { loadoutFor, withSetupStart } from "../dev/setupRun";
 import { type ChangeLabel, changeLabels } from "../hud/hudView";
-import { topBarButtonAt } from "../hud/topBar";
+import { gameplayAllowed, type RunPause, topBarButtonAt } from "../hud/topBar";
 import {
   type GestureAction,
   type GestureContext,
@@ -41,7 +41,7 @@ import {
   pointerMove,
   pointerUp,
 } from "../input/gestures";
-import { dogSlotForKey, isMuteKey, isPauseKey, laneDirectionForKey } from "../input/keyBindings";
+import { dogSlotForKey, laneDirectionForKey } from "../input/keyBindings";
 import { laneCenterXs, type LaneDirection } from "../layout/lanes";
 import { COLLAR_HEIGHT, leashHand, packPlacements } from "../layout/packFormation";
 import { project, type ScaleStep, snapScale } from "../layout/projection";
@@ -65,7 +65,7 @@ import {
   ZONE_GAGS,
 } from "../layout/sceneryGags";
 import { screenLayout } from "../layout/screenLayout";
-import { PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
+import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import type { Change } from "../rules/causes";
 import {
   cardFor,
@@ -127,7 +127,6 @@ import {
   markHintShown,
   onSettingsChanged,
   runLoadout,
-  setMuted,
   type Settings,
   shownHints,
 } from "./profileStore";
@@ -167,11 +166,9 @@ export interface QuipBubble {
 }
 
 // Emitted on this scene's events: ChangeLabel[] whenever money or hearts change, a first-time
-// hint's text, QuipBubble[] when owners react, and whether the pause menu is up when it opens
-// or closes.
+// hint's text, and QuipBubble[] when owners react.
 export const CHANGE_LABELS_EVENT = "change-labels";
 export const HINT_EVENT = "hint";
-export const PAUSE_MENU_EVENT = "pause-menu";
 export const QUIPS_EVENT = "quips";
 
 // The simulation steps at a fixed rate, so a seed and an input log replay a run exactly.
@@ -360,6 +357,11 @@ export class RunScene extends Scene {
       this.hint({ kind: "drag" });
     }
     this.draw();
+    // A phone already on its side, as when a walk starts from the page's URL, gets no
+    // turned-sideways event, so the walk opens paused under the turn-upright notice.
+    if (isPhoneSideways()) {
+      this.openPause();
+    }
   }
 
   // The settings' volumes, or silence while muted.
@@ -368,11 +370,6 @@ export class RunScene extends Scene {
     const sound = soundboardOf(this);
     sound.setVolumes({ music: settings.musicVolume, sfx: settings.sfxVolume });
     sound.setMuted(isMuted(this));
-  }
-
-  private toggleMute(): void {
-    setMuted(this, !isMuted(this));
-    this.applyVolumes();
   }
 
   private resetState(): void {
@@ -482,15 +479,6 @@ export class RunScene extends Scene {
     this.input.on("pointermove", (pointer: Input.Pointer) => this.onPointer("move", pointer));
     this.input.on("pointerup", (pointer: Input.Pointer) => this.onPointer("up", pointer));
     this.input.on("pointerupoutside", (pointer: Input.Pointer) => this.onPointer("up", pointer));
-    // A press that began before a pause belongs to the card or menu, not the road. Scene
-    // events outlive a restart, so the listener goes with the walk.
-    const onResume = () => {
-      this.gesture = idleGesture;
-      this.pointerId = undefined;
-      this.buttonPointerId = undefined;
-    };
-    this.events.on("resume", onResume);
-    this.events.once("shutdown", () => this.events.off("resume", onResume));
     const onBack = () => this.openPause();
     const onHidden = () => {
       this.openPause();
@@ -542,18 +530,11 @@ export class RunScene extends Scene {
     };
   }
 
+  // M, P and Escape are the top bar's keys, which the HUD handles.
   private onKey(key: string): void {
-    if (isMuteKey(key)) {
-      this.toggleMute();
-      return;
-    }
     const direction = laneDirectionForKey(key);
     if (direction !== undefined) {
       this.act({ direction, kind: "move" });
-      return;
-    }
-    if (isPauseKey(key)) {
-      this.act({ kind: "pause" });
       return;
     }
     const slot = dogSlotForKey(SCREEN_CONFIG.dogSlotCount, key);
@@ -563,7 +544,7 @@ export class RunScene extends Scene {
   }
 
   // Only the first finger down drives the gestures until it lifts. A press on a top-bar button
-  // presses it and is no gesture: the sound button never pauses, and neither moves the pack.
+  // is the HUD's and no gesture: the sound button never pauses, and neither moves the pack.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     if (pointer.id === this.buttonPointerId) {
       if (phase === "up") {
@@ -574,11 +555,15 @@ export class RunScene extends Scene {
     const button = phase === "down" ? topBarButtonAt(pointer.x, pointer.y) : undefined;
     if (button !== undefined) {
       this.buttonPointerId = pointer.id;
-      if (button === "sound") {
-        this.toggleMute();
-      } else {
-        this.act({ kind: "pause" });
-      }
+      return;
+    }
+    // This scene keeps running while a card or the pause menu holds the walk. A press then
+    // belongs to the card or menu, and one that was under way is dropped.
+    const walk = this.walk;
+    const walking = walk !== undefined && walk.run.phase.kind === "walking";
+    if (!walking || !gameplayAllowed(this.runPause())) {
+      this.gesture = idleGesture;
+      this.pointerId = undefined;
       return;
     }
     if (phase === "down" && this.pointerId === undefined) {
@@ -600,7 +585,10 @@ export class RunScene extends Scene {
   // Lane moves wait for the next simulation step, where they are logged.
   private act(action: GestureAction): void {
     const walk = this.walk;
-    if (walk === undefined || walk.run.phase.kind !== "walking" || this.pauseOpen) {
+    if (walk === undefined || walk.run.phase.kind !== "walking") {
+      return;
+    }
+    if (action.kind !== "pause" && !gameplayAllowed(this.runPause())) {
       return;
     }
     switch (action.kind) {
@@ -638,13 +626,18 @@ export class RunScene extends Scene {
     const hint = hintFor(gameData, [...shownHints(this)], event);
     if (hint !== null) {
       markHintShown(this, hint.id);
-      // On the next frame, so a hint raised as the run starts reaches the HUD it launches.
-      this.time.delayedCall(0, () => this.events.emit(HINT_EVENT, hint));
+      // A hint raised as the run starts waits a frame for the HUD it launches. The HUD keeps
+      // running while this scene is paused, so the pause menu's hint shows over the menu.
+      if (this.scene.isActive(SCENE_KEYS.hud)) {
+        this.events.emit(HINT_EVENT, hint);
+      } else {
+        this.time.delayedCall(0, () => this.events.emit(HINT_EVENT, hint));
+      }
     }
   }
 
   override update(_time: number, delta: number): void {
-    if (this.walk === undefined || this.scene.isPaused()) {
+    if (this.walk === undefined) {
       return;
     }
     this.accumulatorMs = Math.min(LONGEST_FRAME_MS, this.accumulatorMs + delta);
@@ -874,9 +867,6 @@ export class RunScene extends Scene {
       this.walk = this.planned(walk);
       this.showZoneBanner();
     }
-    if (this.scene.isPaused() && !this.pauseOpen) {
-      this.scene.resume();
-    }
   }
 
   // Pays the zone's fees, saves a checkpoint, then offers the upgrades before the next zone
@@ -919,11 +909,6 @@ export class RunScene extends Scene {
     const sound = soundboardOf(this);
     sound.play("cardOpen");
     sound.setCardOpen(true);
-    if (!this.scene.isPaused()) {
-      // Drawn once more first, so the road holds still in its standing poses.
-      this.draw();
-      this.scene.pause();
-    }
     const data: CardSceneData = { onChoose: (choice) => this.choose(view, choice), view };
     this.scene.launch(SCENE_KEYS.card, data);
   }
@@ -1054,36 +1039,66 @@ export class RunScene extends Scene {
     });
   }
 
-  private openPause(): void {
+  // What holds the walk still, for the HUD's top bar and for lane moves and treats.
+  runPause(): RunPause {
+    return {
+      card: this.cardView !== undefined,
+      hitStop: this.walk?.road.hitStop != null,
+      menu: this.pauseMenuState(),
+    };
+  }
+
+  private pauseMenuState(): RunPause["menu"] {
+    if (!this.pauseOpen) {
+      return "closed";
+    }
+    if (this.scene.isActive(SCENE_KEYS.help)) {
+      return "help";
+    }
+    return this.scene.isActive(SCENE_KEYS.settings) ? "settings" : "open";
+  }
+
+  // The pause menu over the walk, or over the card that holds it. The walk steps only while
+  // walking, so the menu stops it without pausing this scene: sprite animations loop on, while
+  // tweens and timers stop, keeping a hit moment in step with its hit stop. The card under the
+  // menu pauses. The HUD keeps running, so the top bar's buttons work and redraw.
+  openPause(): void {
     const walk = this.walk;
-    if (walk === undefined || this.pauseOpen || walk.run.phase.kind !== "walking") {
+    if (walk === undefined || this.pauseOpen || walk.run.phase.kind === "ended") {
       return;
     }
     this.pauseOpen = true;
     this.hint({ kind: "pause" });
     soundboardOf(this).setPaused(true);
-    this.draw();
-    this.scene.pause();
-    this.scene.pause(SCENE_KEYS.hud);
-    this.events.emit(PAUSE_MENU_EVENT, true);
-    const resume = () => {
-      this.scene.stop(SCENE_KEYS.pause);
-      this.pauseOpen = false;
-      this.events.emit(PAUSE_MENU_EVENT, false);
-      soundboardOf(this).setPaused(false);
-      this.scene.resume(SCENE_KEYS.hud);
-      this.scene.resume();
-    };
+    this.tweens.pauseAll();
+    this.time.paused = true;
+    if (this.cardView !== undefined) {
+      this.scene.pause(SCENE_KEYS.card);
+    }
     const data: PauseSceneData = {
       onHeadHome: () => {
-        resume();
+        this.closePause();
         if (this.walk !== undefined) {
           this.headHome(this.walk);
         }
       },
-      onResume: resume,
+      onResume: () => this.closePause(),
     };
     this.scene.launch(SCENE_KEYS.pause, data);
+  }
+
+  closePause(): void {
+    if (!this.pauseOpen) {
+      return;
+    }
+    this.scene.stop(SCENE_KEYS.pause);
+    this.pauseOpen = false;
+    soundboardOf(this).setPaused(false);
+    this.tweens.resumeAll();
+    this.time.paused = false;
+    if (this.cardView !== undefined) {
+      this.scene.resume(SCENE_KEYS.card);
+    }
   }
 
   // Logged at the run time of the step it comes before, which is where a replay applies it.

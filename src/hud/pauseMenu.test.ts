@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../arrays";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
-import { pauseMenuLayout, pauseMenuTargetAt } from "./pauseMenu";
+import { pauseMenuLayout } from "./pauseMenu";
 import { PAUSE_BUTTON, SOUND_BUTTON } from "./topBar";
 
 const { road } = screenLayout(SCREEN_CONFIG);
@@ -33,23 +33,15 @@ describe("pauseMenuLayout", () => {
   });
 });
 
-describe("pauseMenuTargetAt", () => {
+describe("pauseMenuLayout hits", () => {
   const { hits } = pauseMenuLayout(road, 4);
 
-  it("resumes from anywhere on the top bar's pause button", () => {
-    const { hit } = PAUSE_BUTTON;
-    expect(pauseMenuTargetAt(hits, hit.x, hit.y)).toBe("resume");
-    expect(pauseMenuTargetAt(hits, hit.x + hit.width - 1, hit.y + hit.height - 1)).toBe("resume");
-  });
-
-  it("finds a menu button by its hit area", () => {
-    expect(pauseMenuTargetAt(hits, 120, 323)).toBe(0);
-    expect(pauseMenuTargetAt(hits, 319, 510)).toBe(3);
-  });
-
-  it("finds nothing on the sound button or the panel around the buttons", () => {
-    expect(pauseMenuTargetAt(hits, SOUND_BUTTON.hit.x, SOUND_BUTTON.hit.y)).toBeUndefined();
-    expect(pauseMenuTargetAt(hits, 110, 400)).toBeUndefined();
-    expect(pauseMenuTargetAt(hits, 220, 520)).toBeUndefined();
+  // The top bar's buttons stay live while the menu is up, so no menu button may reach them.
+  it("keeps every menu button's hit area clear of the top bar's buttons", () => {
+    for (const hit of hits) {
+      for (const button of [PAUSE_BUTTON, SOUND_BUTTON]) {
+        expect(hit.y).toBeGreaterThanOrEqual(button.hit.y + button.hit.height);
+      }
+    }
   });
 });

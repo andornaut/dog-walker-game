@@ -31,12 +31,12 @@ function relay(start: Viewport) {
   const seen: string[] = [];
   window.addEventListener(PHONE_EVENTS.turnedSideways, () => seen.push("sideways"));
   window.addEventListener(PHONE_EVENTS.turnedUpright, () => seen.push("upright"));
-  const stop = relayOrientationEvents(() => viewport, window);
+  const { sideways, stop } = relayOrientationEvents(() => viewport, window);
   const resize = (next: Viewport) => {
     viewport = next;
     window.dispatchEvent(new Event("resize"));
   };
-  return { resize, seen, stop };
+  return { resize, seen, sideways, stop };
 }
 
 describe("relayOrientationEvents", () => {
@@ -52,6 +52,16 @@ describe("relayOrientationEvents", () => {
   it("dispatches turned-sideways at once for a page that starts sideways", () => {
     expect(relay(IPHONE_13_LANDSCAPE).seen).toEqual(["sideways"]);
     expect(relay(IPHONE_13_PORTRAIT).seen).toEqual([]);
+  });
+
+  it("reports the orientation it last relayed, for a walk that starts after the event", () => {
+    expect(relay(IPHONE_13_LANDSCAPE).sideways()).toBe(true);
+    const { resize, sideways } = relay(IPHONE_13_PORTRAIT);
+    expect(sideways()).toBe(false);
+    resize(IPHONE_13_LANDSCAPE);
+    expect(sideways()).toBe(true);
+    resize(IPHONE_13_PORTRAIT);
+    expect(sideways()).toBe(false);
   });
 
   it("stops relaying when disposed", () => {

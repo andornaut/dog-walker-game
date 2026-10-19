@@ -1,6 +1,4 @@
-import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
-import { topBarButtonAt } from "./topBar";
 
 const PANEL = { height: 260, width: 232 };
 // Offsets from the panel's top-left corner.
@@ -52,19 +50,4 @@ export function pauseMenuLayout(road: Rect, buttonCount: number): PauseMenuLayou
     panel,
     titleY: panel.y + TITLE_Y,
   };
-}
-
-// What a press lands on while the menu is up: a menu button's index, or "resume" for the top
-// bar's pause button, which shows play and resumes the walk.
-export type PauseMenuTarget = number | "resume";
-
-export function pauseMenuTargetAt(
-  hits: readonly Rect[],
-  x: number,
-  y: number,
-): PauseMenuTarget | undefined {
-  if (topBarButtonAt(x, y) === "pause") {
-    return "resume";
-  }
-  return rectIndexAt(hits, x, y);
 }
