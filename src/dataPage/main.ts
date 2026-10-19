@@ -1,3 +1,5 @@
+import "./main.css";
+
 import { gameData, onGameDataChange } from "../data";
 import type {
   CardOption,

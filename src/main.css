@@ -1,0 +1,53 @@
+/* The game page's layout: the nav bar, the game and the dev panel stacked in one screen. */
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #1d1d1d;
+  touch-action: none;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  /* The nav bar is the top element, so it clears the status bar and notch. */
+  padding-top: env(safe-area-inset-top, 0px);
+  box-sizing: border-box;
+}
+
+/* Margins rather than padding: Phaser sizes and centres the canvas in the parent's
+   border box, padding included. */
+#game {
+  flex: 1;
+  min-height: 0;
+  margin: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+}
+
+/* The dev panel's bar, under the game: its height comes out of #game's, and it takes
+   the bottom safe-area inset. src/dev/devPanel.css styles its contents. */
+#dev-panel {
+  flex: none;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Read by screen readers, not shown: the game's controls, which the canvas cannot expose. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

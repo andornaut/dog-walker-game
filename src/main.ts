@@ -1,3 +1,5 @@
+import "./main.css";
+
 import { AUTO, Game, GameObjects, Scale } from "phaser";
 
 import { SCREEN_CONFIG } from "./data/screen";
