@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dog Walker Art</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* A dark viewing room for pixel art: every asset in public/art/manifest.json, drawn at an integer zoom on a chosen ground colour. */
+:root {
+  --bg: #13101e;
+  --surface: #1d1a2c;
+  --raise: #2a2740;
+  --fg: #dfe4ee;
+  --muted: #8b9bb4;
+  --line: #33304a;
+  --accent: #feae34;
+  --accent-ink: #181425;
+  --f-display: "Silkscreen", ui-monospace, monospace;
+  --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+a { color: var(--accent); }
+.wrap {
+  max-width: 1240px; margin: 0 auto;
+  padding-block: 24px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 28px;
+}
+header { display: grid; gap: 8px; }
+.crumbs { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 14px; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 5vw, 40px); line-height: 1.05; margin: 0; letter-spacing: 0.02em; }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+.counts { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--f-mono); font-size: 12px; }
+.counts span { background: var(--raise); padding: 2px 10px; border-radius: 999px; }
+.toolbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; padding-block: 10px;
+}
+.toolbar label { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; display: flex; gap: 8px; align-items: center; }
+.toolbar select, .toolbar input { font: inherit; font-size: 14px; text-transform: none; letter-spacing: 0; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 4px 8px; }
+.toolbar input { width: 12em; max-width: 100%; }
+section { display: grid; gap: 14px; }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 18px; letter-spacing: 0.06em; margin: 0; text-transform: uppercase; display: flex; gap: 10px; align-items: baseline; }
+h2 small { font-family: var(--f-mono); font-size: 12px; color: var(--muted); letter-spacing: 0; text-transform: none; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 12px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; min-width: 0; }
+.view { display: grid; place-items: center; padding: 16px; min-height: 140px; overflow: auto; }
+.view.checker { background-color: #c0cbdc; background-image: conic-gradient(#8b9bb4 25%, transparent 0 50%, #8b9bb4 0 75%, transparent 0); background-size: 16px 16px; }
+canvas, .view img { display: block; image-rendering: pixelated; image-rendering: crisp-edges; max-width: none; }
+.meta { padding: 10px 12px; display: grid; gap: 8px; border-top: 1px solid var(--line); min-width: 0; }
+.meta .key { font-family: var(--f-mono); font-weight: 600; font-size: 14px; overflow-wrap: anywhere; }
+.meta .dims { font-family: var(--f-mono); font-size: 12px; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.tags button { font: inherit; font-family: var(--f-mono); font-size: 12px; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; cursor: pointer; }
+.tags button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.tags button:focus-visible, .toolbar :focus-visible, .sw:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.strip { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
+.strip canvas { background: rgba(255, 255, 255, 0.04); }
+.empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 6px; padding: 16px; color: var(--muted); font-size: 14px; }
+.empty code, .meta code { font-family: var(--f-mono); font-size: 13px; color: var(--fg); }
+.mocks { display: grid; gap: 8px; }
+.mock { display: grid; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; text-decoration: none; color: var(--fg); }
+.mock:hover { border-color: var(--accent); }
+.mock b { color: var(--accent); }
+.mock span { color: var(--muted); font-size: 14px; }
+.palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
+.sw { display: grid; gap: 4px; background: none; border: 0; padding: 0; color: var(--muted); font-family: var(--f-mono); font-size: 11px; cursor: pointer; text-align: left; }
+.sw i { display: block; height: 36px; border-radius: 4px; border: 1px solid var(--line); }
+.sw b { color: var(--fg); font-weight: 600; }
+.error { color: #f6757a; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <nav class="crumbs" aria-label="Site"><a href="/">Home</a><a href="/play/">Play</a><a href="https://github.com/andornaut/dog-walker-game/blob/main/art/inventory.md">Inventory</a><a href="https://github.com/andornaut/dog-walker-game/blob/main/art/style-guide.md">Style guide</a></nav>
+    <h1>Dog Walker Art</h1>
+    <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it. Sprites play their Aseprite animations. Mocks are design tests, not game assets.</p>
+    <div class="counts" id="counts"></div>
+  </header>
+
+  <div class="toolbar" role="group" aria-label="View options">
+    <label for="zoom">Zoom <select id="zoom"><option value="1">1×</option><option value="2">2×</option><option value="3">3×</option><option value="4">4×</option><option value="6">6×</option></select></label>
+    <label for="ground">Ground <select id="ground">
+      <option value="#181425">Ink</option>
+      <option value="checker">Checker</option>
+      <option value="#3a4466">Street</option>
+      <option value="#e4a672">Park</option>
+      <option value="#c0cbdc">Shops</option>
+      <option value="#c28569">Home stretch</option>
+      <option value="#ead4aa">Card paper</option>
+    </select></label>
+    <label for="filter">Filter <input id="filter" type="search" placeholder="key, e.g. dog-" autocomplete="off"></label>
+  </div>
+
+  <section aria-labelledby="h-sprites"><h2 id="h-sprites">Sprites <small id="n-sprites"></small></h2><div class="grid" id="sprites"></div></section>
+  <section aria-labelledby="h-images"><h2 id="h-images">Images <small id="n-images"></small></h2><div class="grid" id="images"></div></section>
+  <section aria-labelledby="h-fonts"><h2 id="h-fonts">Fonts <small id="n-fonts"></small></h2><div class="grid" id="fonts"></div></section>
+  <section aria-labelledby="h-mocks"><h2 id="h-mocks">Mocks <small id="n-mocks"></small></h2><div class="mocks" id="mocks"></div></section>
+  <section aria-labelledby="h-palette"><h2 id="h-palette">Palette <small>Endesga 32</small></h2><div class="palette" id="palette"></div></section>
+</main>
+
+<script>
+(() => {
+"use strict";
+const BASE = "/art/";
+const PAL = "be4a2f d77643 ead4aa e4a672 b86f50 733e39 3e2731 a22633 e43b44 f77622 feae34 fee761 63c74d 3e8948 265c42 193c3e 124e89 0099db 2ce8f5 ffffff c0cbdc 8b9bb4 5a6988 3a4466 262b44 181425 ff0044 68386c b55088 f6757a e8b796 c28569".split(" ");
+const $ = id => document.getElementById(id);
+const el = (tag, props = {}, kids = []) => {
+  const { dataset, ...rest } = props;
+  const n = Object.assign(document.createElement(tag), rest);
+  if (dataset) Object.assign(n.dataset, dataset);
+  for (const k of kids) n.append(k);
+  return n;
+};
+
+const prefs = { zoom: 3, ground: "#181425" };
+try { Object.assign(prefs, JSON.parse(localStorage.getItem("dwg-art-gallery") || "{}")); } catch (e) { /* storage unavailable */ }
+const savePrefs = () => { try { localStorage.setItem("dwg-art-gallery", JSON.stringify(prefs)); } catch (e) { /* storage unavailable */ } };
+$("zoom").value = String(prefs.zoom); $("ground").value = prefs.ground;
+
+const loadImage = src => new Promise((ok, fail) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => fail(new Error("Could not load " + src)); i.src = src; });
+const getJSON = async url => { const r = await fetch(url, { cache: "no-cache" }); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.json(); };
+const getText = async url => { const r = await fetch(url, { cache: "no-cache" }); if (!r.ok) throw new Error(`${url}: HTTP ${r.status}`); return r.text(); };
+
+const views = [];      // every .view, so ground changes reach all of them
+const scaled = [];     // { canvas, w, h } redrawn on zoom change
+const players = [];    // animated sprite players
+
+function applyGround(v) { v.classList.toggle("checker", prefs.ground === "checker"); v.style.backgroundColor = prefs.ground === "checker" ? "" : prefs.ground; }
+function makeView() { const v = el("div", { className: "view" }); views.push(v); applyGround(v); return v; }
+function sizeCanvas(c, w, h) { c.width = w; c.height = h; c.style.width = w * prefs.zoom + "px"; c.style.height = h * prefs.zoom + "px"; }
+function emptyCard(host, text) { host.replaceChildren(el("div", { className: "empty", innerHTML: text })); }
+function errorCard(host, key, err) { host.append(el("div", { className: "empty error", textContent: `${key}: ${err.message}` })); }
+
+// Aseprite "hash" JSON: frames keyed by name in export order, animations in meta.frameTags.
+function sequence(tag) {
+  const fwd = []; for (let i = tag.from; i <= tag.to; i++) fwd.push(i);
+  if (tag.direction === "reverse") return fwd.reverse();
+  if (tag.direction === "pingpong") return fwd.concat(fwd.slice(1, -1).reverse());
+  return fwd;
+}
+
+async function addSprite(host, s) {
+  const [img, data] = await Promise.all([loadImage(BASE + s.png), getJSON(BASE + s.json)]);
+  const frames = Object.values(data.frames).map(f => ({ ...f.frame, duration: f.duration || 100 }));
+  const tags = data.meta?.frameTags?.length ? data.meta.frameTags : [{ name: "all", from: 0, to: frames.length - 1, direction: "forward" }];
+  const fw = Math.max(...frames.map(f => f.w)), fh = Math.max(...frames.map(f => f.h));
+  const canvas = el("canvas"); sizeCanvas(canvas, fw, fh); scaled.push({ canvas, w: fw, h: fh });
+  const ctx = canvas.getContext("2d");
+  const player = { tag: tags[0], seq: sequence(tags[0]), i: 0, t: 0, draw() {
+    const f = frames[this.seq[this.i]]; ctx.clearRect(0, 0, fw, fh); ctx.drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+  } };
+  player.draw(); players.push({ player, frames });
+
+  const tagBar = el("div", { className: "tags" });
+  tags.forEach((t, n) => {
+    const b = el("button", { type: "button", textContent: `${t.name} (${t.to - t.from + 1})` });
+    b.setAttribute("aria-pressed", String(n === 0));
+    b.addEventListener("click", () => {
+      for (const o of tagBar.children) o.setAttribute("aria-pressed", "false");
+      b.setAttribute("aria-pressed", "true");
+      Object.assign(player, { tag: t, seq: sequence(t), i: 0, t: 0 }); player.draw();
+    });
+    tagBar.append(b);
+  });
+  const strip = el("div", { className: "strip", title: "Every frame in export order" });
+  frames.forEach(f => {
+    const c = el("canvas"); sizeCanvas(c, f.w, f.h); scaled.push({ canvas: c, w: f.w, h: f.h, frame: f, img });
+    c.getContext("2d").drawImage(img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+    strip.append(c);
+  });
+  const view = makeView(); view.append(canvas);
+  host.append(el("article", { className: "card", dataset: { key: s.key } }, [view, el("div", { className: "meta" }, [
+    el("div", { className: "key", textContent: s.key }),
+    el("div", { className: "dims", textContent: `${fw}×${fh} · ${frames.length} frames · ${s.png}` }),
+    tagBar, strip,
+  ])]));
+}
+
+async function addImage(host, s) {
+  const img = await loadImage(BASE + s.png);
+  const c = el("canvas"); sizeCanvas(c, img.width, img.height); scaled.push({ canvas: c, w: img.width, h: img.height, img });
+  c.getContext("2d").drawImage(img, 0, 0);
+  const view = makeView(); view.append(c);
+  host.append(el("article", { className: "card", dataset: { key: s.key } }, [view, el("div", { className: "meta" }, [
+    el("div", { className: "key", textContent: s.key }),
+    el("div", { className: "dims", textContent: `${img.width}×${img.height} · ${s.png}` }),
+  ])]));
+}
+
+// XML BMFont, the format Phaser's load.bitmapFont reads.
+async function addFont(host, s) {
+  const [img, xml] = await Promise.all([loadImage(BASE + s.png), getText(BASE + s.fnt)]);
+  const doc = new DOMParser().parseFromString(xml, "application/xml");
+  const num = (n, a) => Number(n.getAttribute(a)) || 0;
+  const common = doc.querySelector("common"), lineH = common ? num(common, "lineHeight") : 8;
+  const chars = new Map([...doc.querySelectorAll("char")].map(c => [num(c, "id"), { x: num(c, "x"), y: num(c, "y"), w: num(c, "width"), h: num(c, "height"), ox: num(c, "xoffset"), oy: num(c, "yoffset"), adv: num(c, "xadvance") }]));
+  const lines = ["THE QUICK BROWN FOX", "JUMPS OVER THE LAZY DOG", "the quick brown fox", "0123456789 $42 +1 -2 ♥", "YOU'RE FIRED! TIPS HALVED."];
+  const width = Math.max(...lines.map(l => [...l].reduce((w, ch) => w + (chars.get(ch.codePointAt(0))?.adv || 0), 0)));
+  const c = el("canvas"); const W = Math.max(1, width), H = lineH * lines.length;
+  sizeCanvas(c, W, H);
+  const draw = ctx => { lines.forEach((l, row) => { let x = 0; for (const ch of l) { const g = chars.get(ch.codePointAt(0)); if (!g) continue; ctx.drawImage(img, g.x, g.y, g.w, g.h, x + g.ox, row * lineH + g.oy, g.w, g.h); x += g.adv; } }); };
+  draw(c.getContext("2d")); scaled.push({ canvas: c, w: W, h: H, redraw: draw });
+  const missing = [...new Set(lines.join(""))].filter(ch => ch !== " " && !chars.has(ch.codePointAt(0)));
+  const view = makeView(); view.append(c);
+  host.append(el("article", { className: "card", dataset: { key: s.key } }, [view, el("div", { className: "meta" }, [
+    el("div", { className: "key", textContent: s.key }),
+    el("div", { className: "dims", textContent: `${chars.size} glyphs · line height ${lineH} · ${s.fnt}` }),
+    ...(missing.length ? [el("div", { className: "dims error", textContent: "Missing: " + missing.join(" ") })] : []),
+  ])]));
+}
+
+async function fill(list, hostId, countId, add, noun) {
+  const host = $(hostId);
+  $(countId).textContent = String(list.length);
+  if (!list.length) { emptyCard(host, `No ${noun} exported yet. Sources go in <code>art/</code>, exports in <code>public/art/</code>, each with an entry in <code>manifest.json</code>.`); return; }
+  await Promise.all(list.map(s => add(host, s).catch(err => errorCard(host, s.key, err))));
+}
+
+async function main() {
+  let manifest;
+  try { manifest = await getJSON(BASE + "manifest.json"); } catch (err) { emptyCard($("sprites"), `<span class="error">Could not read the manifest: ${err.message}</span>`); manifest = {}; }
+  const sprites = manifest.sprites || [], images = manifest.images || [], fonts = manifest.fonts || [];
+  let mocks = [];
+  try { mocks = await getJSON(BASE + "mocks/index.json"); } catch (err) { /* no mocks listed */ }
+  $("counts").replaceChildren(...[[sprites, "sprites"], [images, "images"], [fonts, "fonts"], [mocks, "mocks"]].map(([l, n]) => el("span", { textContent: `${l.length} ${n}` })));
+  $("n-mocks").textContent = String(mocks.length);
+  if (mocks.length) $("mocks").replaceChildren(...mocks.map(m => el("a", { className: "mock", href: BASE + "mocks/" + m.path }, [el("b", { textContent: m.title }), el("span", { textContent: m.description || "" })])));
+  else emptyCard($("mocks"), "No mocks yet.");
+  await Promise.all([
+    fill(sprites, "sprites", "n-sprites", addSprite, "sprites"),
+    fill(images, "images", "n-images", addImage, "images"),
+    fill(fonts, "fonts", "n-fonts", addFont, "fonts"),
+  ]);
+  applyFilter();
+}
+
+$("palette").replaceChildren(...PAL.map((h, i) => {
+  const b = el("button", { type: "button", className: "sw", title: "Copy #" + h }, [el("i", { style: `background:#${h}` }), el("span", { innerHTML: `<b>${i}</b> #${h}` })]);
+  b.addEventListener("click", async () => { try { await navigator.clipboard.writeText("#" + h); b.lastChild.innerHTML = `<b>${i}</b> copied`; setTimeout(() => { b.lastChild.innerHTML = `<b>${i}</b> #${h}`; }, 900); } catch (e) { /* clipboard unavailable */ } });
+  return b;
+}));
+
+function applyFilter() {
+  const q = $("filter").value.trim().toLowerCase();
+  for (const card of document.querySelectorAll("article.card")) card.hidden = !!q && !card.dataset.key.toLowerCase().includes(q);
+}
+$("filter").addEventListener("input", applyFilter);
+$("ground").addEventListener("change", e => { prefs.ground = e.target.value; savePrefs(); views.forEach(applyGround); });
+$("zoom").addEventListener("change", e => {
+  prefs.zoom = Number(e.target.value); savePrefs();
+  for (const s of scaled) { s.canvas.style.width = s.w * prefs.zoom + "px"; s.canvas.style.height = s.h * prefs.zoom + "px"; }
+});
+
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let last = performance.now();
+function tick(now) {
+  const dt = Math.max(0, now - last); last = now;
+  if (!reduced) for (const { player, frames } of players) {
+    if (player.seq.length < 2) continue;
+    player.t += dt;
+    const d = frames[player.seq[player.i]].duration;
+    if (player.t >= d) { player.t -= d; player.i = (player.i + 1) % player.seq.length; player.draw(); }
+  }
+  requestAnimationFrame(tick);
+}
+main().then(() => requestAnimationFrame(tick));
+})();
+</script>
+</body>
+</html>

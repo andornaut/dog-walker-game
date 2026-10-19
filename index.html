@@ -4,8 +4,442 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dog Walker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
+    />
+    <style>
+      /* Project home: a live road scene beside the title and Play, then the pillars, the dogs and the work-in-progress links. Colours are Endesga 32. */
+      :root {
+        --bg: #181425;
+        --surface: #262b44;
+        --line: #3a4466;
+        --fg: #ead4aa;
+        --muted: #8b9bb4;
+        --accent: #feae34;
+        --accent-deep: #f77622;
+        --accent-ink: #181425;
+        --f-display: "Silkscreen", ui-monospace, monospace;
+        --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--f-body);
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding-block: 40px 56px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 48px;
+      }
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 32px;
+        align-items: center;
+      }
+      .hero-text {
+        display: grid;
+        gap: 20px;
+        min-width: 0;
+      }
+      h1 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: clamp(40px, 7vw, 56px);
+        line-height: 1;
+        margin: 0;
+        letter-spacing: 0.02em;
+      }
+      .pitch {
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+        max-width: 40ch;
+      }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        align-items: center;
+      }
+      .play {
+        font-family: var(--f-display);
+        font-size: 24px;
+        text-decoration: none;
+        color: var(--accent-ink);
+        background: var(--accent);
+        padding: 10px 26px;
+        border-radius: 4px;
+        box-shadow: 0 4px 0 var(--accent-deep);
+      }
+      .play:hover {
+        background: #fee761;
+      }
+      .play:active {
+        transform: translateY(2px);
+        box-shadow: 0 2px 0 var(--accent-deep);
+      }
+      .keys {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      kbd {
+        font-family: var(--f-display);
+        font-size: 12px;
+        border: 1px solid var(--line);
+        border-bottom-width: 3px;
+        border-radius: 3px;
+        padding: 0 5px;
+        color: var(--fg);
+      }
+      .scene {
+        display: block;
+        width: 280px;
+        height: 240px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        border-radius: 4px;
+        outline: 4px solid var(--surface);
+        background: #3a4466;
+      }
+      @media (min-width: 960px) {
+        .scene {
+          width: 560px;
+          height: 480px;
+        }
+      }
+      @media (max-width: 640px) {
+        .hero {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .scene {
+          justify-self: center;
+        }
+      }
+      h2 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: 14px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0;
+      }
+      section {
+        display: grid;
+        gap: 14px;
+      }
+      .pillars,
+      .dogs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 12px;
+      }
+      @media (max-width: 720px) {
+        .pillars,
+        .dogs {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      .pillars div {
+        border-top: 4px solid var(--accent);
+        background: var(--surface);
+        padding: 14px 16px;
+        border-radius: 0 0 6px 6px;
+      }
+      .pillars b,
+      .dogs b {
+        display: block;
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: 15px;
+        margin-bottom: 4px;
+      }
+      .pillars p,
+      .dogs p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 15px;
+      }
+      .dogs div {
+        display: grid;
+        grid-template-columns: 64px minmax(0, 1fr);
+        gap: 14px;
+        align-items: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 12px;
+      }
+      .dogs canvas {
+        width: 64px;
+        height: 64px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        background: #3a4466;
+        border-radius: 4px;
+      }
+      .dogs .trait {
+        color: var(--accent);
+      }
+      nav {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+      @media (max-width: 640px) {
+        nav {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      nav a {
+        display: grid;
+        gap: 2px;
+        padding: 12px 14px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: var(--fg);
+        text-decoration: none;
+      }
+      nav a:hover {
+        border-color: var(--accent);
+      }
+      nav a b {
+        color: var(--accent);
+      }
+      nav a span {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      a:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+      }
+      footer {
+        color: var(--muted);
+        font-size: 13px;
+        border-top: 1px solid var(--line);
+        padding-top: 16px;
+      }
+    </style>
   </head>
   <body>
-    <p><a href="/play/">Play</a></p>
+    <main>
+      <section class="hero" aria-label="Dog Walker">
+        <div class="hero-text">
+          <h1>Dog Walker</h1>
+          <p class="pitch">
+            A cozy pixel-art lane runner. Walk a pack of dogs through the neighbourhood, and every
+            bump in the road turns into a choice.
+          </p>
+          <div class="actions">
+            <a class="play" href="/play/">Play</a>
+            <span class="keys"><kbd>←</kbd> <kbd>→</kbd> to switch lanes, or tap either side</span>
+          </div>
+        </div>
+        <canvas
+          class="scene"
+          id="scene"
+          width="280"
+          height="240"
+          role="img"
+          aria-label="A dog walker and three dogs walking up a street, switching lanes to collect tips"
+        ></canvas>
+      </section>
+
+      <section aria-labelledby="h-pillars">
+        <h2 id="h-pillars">The idea</h2>
+        <div class="pillars">
+          <div>
+            <b>Cozy, not frantic</b>
+            <p>A calm pace and gentle failure. You keep what you earn.</p>
+          </div>
+          <div>
+            <b>Every bump is a story</b>
+            <p>Hit a skunk or a puddle and pick a card: pay up or upset the owners.</p>
+          </div>
+          <div>
+            <b>Charming chaos</b>
+            <p>Cute dogs, dramatic owners and a silly neighbourhood.</p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-dogs">
+        <h2 id="h-dogs">The pack</h2>
+        <div class="dogs">
+          <div>
+            <canvas width="32" height="32" data-dog="0" aria-hidden="true"></canvas>
+            <p><b>Small dog</b><span class="trait">Fancy:</span> puddles upset its owner more.</p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="1" aria-hidden="true"></canvas>
+            <p>
+              <b>Medium dog</b><span class="trait">Food-driven:</span> pulls the pack toward treats.
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="2" aria-hidden="true"></canvas>
+            <p>
+              <b>Big dog</b><span class="trait">Chaser:</span> squirrels upset its owner, and it
+              pulls toward them.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-wip">
+        <h2 id="h-wip">Work in progress</h2>
+        <nav aria-labelledby="h-wip">
+          <a href="/art/"
+            ><b>Art</b
+            ><span>Every exported sprite, image and font, plus mocks and the palette</span></a
+          >
+          <a href="https://github.com/andornaut/dog-walker-game/tree/main/gameplay"
+            ><b>Design docs</b
+            ><span>Game design, v1 plan, decisions and ideas (GitHub, sign-in required)</span></a
+          >
+          <a href="https://github.com/andornaut/dog-walker-game"
+            ><b>GitHub</b><span>Source code, issues and CI (sign-in required)</span></a
+          >
+          <a href="https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game"
+            ><b>Cloudflare dashboard</b><span>Deploys, builds and logs (sign-in required)</span></a
+          >
+        </nav>
+      </section>
+
+      <footer>
+        Placeholder art, drawn in code in the Endesga 32 palette. Built with Phaser and served from
+        Cloudflare Workers.
+      </footer>
+    </main>
+
+    <script src="/art/mocks/placeholder-sprites.js"></script>
+    <script>
+      (() => {
+        const D = window.DWGPlaceholder;
+        if (!D) return;
+        const spr = D.build("colour");
+
+        document.querySelectorAll("canvas[data-dog]").forEach((c) => {
+          const ctx = c.getContext("2d");
+          ctx.drawImage(spr.dogFace[Number(c.dataset.dog)], 0, 0);
+        });
+
+        // A 5-lane street, 280 wide like the game's road, cycling through the four zones.
+        const cv = document.getElementById("scene");
+        const ctx = cv.getContext("2d");
+        const W = 280,
+          H = 240,
+          LOOP = 400;
+        const tiles = D.ZONE_ORDER.map((z) => D.roadTile(z));
+        const items = [
+          { k: "tip", lane: 1, y: 30 },
+          { k: "tip", lane: 1, y: 60 },
+          { k: "squirrel", lane: 4, y: 110 },
+          { k: "treat", lane: 3, y: 170 },
+          { k: "tip", lane: 0, y: 240 },
+          { k: "tip", lane: 2, y: 300 },
+          { k: "puddle", lane: 3, y: 360 },
+          { k: "tip", lane: 4, y: 420 },
+        ];
+        const pack = [
+          { k: "husky", dx: 0, foot: H - 52 },
+          { k: "lab", dx: -13, foot: H - 34 },
+          { k: "chi", dx: 13, foot: H - 31 },
+        ];
+        const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+        let scroll = 0,
+          t = 0,
+          lane = 2,
+          laneX = lane * 56 + 28,
+          nextTurn = 1800,
+          last = performance.now();
+        const fill = (x, y, w, h, col) => {
+          ctx.fillStyle = col;
+          ctx.fillRect(x, y, w, h);
+        };
+        const put = (img, cx, foot) =>
+          ctx.drawImage(img, Math.round(cx - img.width / 2), Math.round(foot - img.height));
+        function shadow(cx, foot, w, col) {
+          const rx = Math.max(3, w / 2 - 2);
+          for (let y = -3; y <= 3; y++)
+            for (let x = -rx - 1; x <= rx + 1; x++) {
+              const dx = (x + 0.5) / rx,
+                dy = (y + 0.5) / 2.5;
+              if (dx * dx + dy * dy <= 1)
+                fill(Math.floor(cx + x), Math.floor(foot - 1 + y), 1, 1, col);
+            }
+        }
+        function line(x0, y0, x1, y1, col) {
+          const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+          for (let i = 0; i <= n; i++)
+            fill(
+              Math.round(x0 + ((x1 - x0) * i) / n),
+              Math.round(y0 + ((y1 - y0) * i) / n),
+              1,
+              1,
+              col,
+            );
+        }
+        function draw() {
+          const zi = Math.floor(scroll / (64 * 12)) % 4;
+          const zone = D.ZONES[D.ZONE_ORDER[zi]];
+          const shade = D.dark(zone.base);
+          const fr = Math.floor(t / 260) % 2;
+          const off = Math.floor(scroll) % 64;
+          for (let y = -64 + off; y < H; y += 64) ctx.drawImage(tiles[zi], 0, y);
+          const list = items.map((o) => ({
+            img: spr[o.k][fr],
+            cx: o.lane * 56 + 28,
+            foot: ((o.y + Math.floor(scroll)) % LOOP) - 40,
+            decal: o.k === "puddle",
+          }));
+          const cx = Math.round(laneX);
+          for (const p of pack) list.push({ img: spr[p.k][fr], cx: cx + p.dx, foot: p.foot });
+          list.push({ img: spr.walker[fr], cx, foot: H - 6 });
+          list.sort((a, b) => (b.decal ? 1 : 0) - (a.decal ? 1 : 0) || a.foot - b.foot);
+          for (const it of list) if (!it.decal) shadow(it.cx, it.foot, it.img.width, shade);
+          for (const it of list) put(it.img, it.cx, it.foot);
+          const hand = [cx - 9, H - 18];
+          line(hand[0], hand[1], cx, H - 73, D.K.dred);
+          line(hand[0], hand[1], cx - 13, H - 51, D.K.dred);
+          line(cx + 8, H - 18, cx + 13, H - 44, D.K.dred);
+          D.textC(ctx, zone.name, W / 2 + 1, 9, D.K.ink);
+          D.textC(ctx, zone.name, W / 2, 8, D.K.white);
+        }
+        function frame(now) {
+          const dt = Math.max(0, Math.min(50, now - last));
+          last = now;
+          scroll += dt * 0.04;
+          t += dt;
+          nextTurn -= dt;
+          if (nextTurn <= 0) {
+            lane = Math.max(0, Math.min(4, lane + (Math.random() < 0.5 ? -1 : 1)));
+            nextTurn = 1600 + Math.random() * 1800;
+          }
+          laneX += (lane * 56 + 28 - laneX) * Math.min(1, dt / 90);
+          draw();
+          requestAnimationFrame(frame);
+        }
+        draw();
+        if (!reduced) requestAnimationFrame(frame);
+      })();
+    </script>
   </body>
 </html>
