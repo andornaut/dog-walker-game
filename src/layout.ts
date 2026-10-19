@@ -42,15 +42,24 @@ export function screenLayout(config: ScreenConfig): Layout {
   };
 }
 
-// Lays out a row of equal cards across an area, with the same gap at both edges
-// and between cards, centred vertically.
-export function cardRects(count: number, gap: number, cardHeight: number, area: Rect): Rect[] {
-  const cardWidth = (area.width - (count + 1) * gap) / count;
+// Lays out a row of cards centred in an area. Cards are sized so that maxCount of
+// them fill the width with the same gap at both edges and between cards, and a
+// shorter row keeps that size rather than stretching.
+export function cardRects(
+  maxCount: number,
+  gap: number,
+  cardHeight: number,
+  count: number,
+  area: Rect,
+): Rect[] {
+  const cardWidth = (area.width - (maxCount + 1) * gap) / maxCount;
+  const rowWidth = count * cardWidth + (count - 1) * gap;
+  const left = area.x + (area.width - rowWidth) / 2;
   const y = area.y + (area.height - cardHeight) / 2;
   return Array.from({ length: count }, (_, i) => ({
     height: cardHeight,
     width: cardWidth,
-    x: area.x + gap + i * (cardWidth + gap),
+    x: left + i * (cardWidth + gap),
     y,
   }));
 }

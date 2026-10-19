@@ -46,16 +46,29 @@ describe("screenLayout", () => {
 describe("cardRects", () => {
   const area = { height: 600, width: 280, x: 80, y: 40 };
 
-  it("leaves the same gap at both edges and between cards", () => {
-    const cards = cardRects(3, 8, 140, area);
-    expect(cards[0].x).toBe(area.x + 8);
+  it("fills the width with a full row, the same gap at both edges and between cards", () => {
+    const cards = cardRects(3, 8, 140, 3, area);
+    expect(cards[0].x).toBeCloseTo(area.x + 8);
     expect(cards[1].x - right(cards[0])).toBeCloseTo(8);
     expect(cards[2].x - right(cards[1])).toBeCloseTo(8);
     expect(right(area) - right(cards[2])).toBeCloseTo(8);
   });
 
+  it("keeps the full-row card size for a shorter row", () => {
+    const [full] = cardRects(3, 8, 140, 3, area);
+    for (const card of cardRects(3, 8, 140, 2, area)) {
+      expect(card.width).toBeCloseTo(full.width);
+    }
+  });
+
+  it("centres a shorter row horizontally", () => {
+    const cards = cardRects(3, 8, 140, 2, area);
+    expect(cards[1].x - right(cards[0])).toBeCloseTo(8);
+    expect(cards[0].x - area.x).toBeCloseTo(right(area) - right(cards[1]));
+  });
+
   it("centres the cards vertically in the area", () => {
-    const [card] = cardRects(3, 8, 140, area);
+    const [card] = cardRects(3, 8, 140, 3, area);
     expect(card.y - area.y).toBe(bottom(area) - bottom(card));
   });
 });

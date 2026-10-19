@@ -3,6 +3,7 @@ import { type GameObjects, Scene } from "phaser";
 import { HEIGHT, LANE_COUNT, SCREEN } from "../config";
 import { laneCenters } from "../lanes";
 import { screenLayout } from "../layout";
+import type { CardSceneData } from "./CardScene";
 import { addBox } from "./shapes";
 
 const DASH_COLOR = 0xe0e0e0;
@@ -54,11 +55,16 @@ export class RunScene extends Scene {
 
     this.scene.launch("hud");
 
-    // Opens placeholder cards until collisions do (Milestone 3).
-    this.input.keyboard?.on("keydown-E", () => {
-      this.scene.pause();
-      this.scene.launch("card");
-    });
+    // Open placeholder cards until collisions do (Milestone 3): E for three
+    // options, W for two.
+    this.input.keyboard?.on("keydown-E", () => this.openCards(3));
+    this.input.keyboard?.on("keydown-W", () => this.openCards(2));
+  }
+
+  private openCards(count: number): void {
+    const data: CardSceneData = { count };
+    this.scene.pause();
+    this.scene.launch("card", data);
   }
 
   update(_time: number, delta: number): void {
