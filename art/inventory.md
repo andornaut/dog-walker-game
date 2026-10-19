@@ -85,7 +85,6 @@ Same tags, frames and durations as the original.
 | `fx-sparkle`            | sprite | 16×16            | `play`            | core  | Pickup collected                                                                                                |
 | `fx-splash`             | sprite | 32×32            | `play`            | core  | Puddle                                                                                                          |
 | `fx-status-<status>`    | sprite | 16×16            | `loop`            | core  | soaked, spooked, stinky; over a dog's head                                                                      |
-| `fx-stinky`             | sprite | 32×32            | `loop`            | core  | Pack-wide stink lines; not shown in the run (per-dog `fx-status-stinky` replaces it)                            |
 | `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | core  | amber, green, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right |
 | `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | core  | Stretched to 176×32; `lucky` for lucky encounters                                                               |
 

@@ -2,7 +2,7 @@
 """Draw the road effects for collisions and pickups, and the new-best burst on
 the end screen. fx-bump, fx-dizzy, fx-coins and fx-sparkle are warm light that
 holds 3:1 on Woof Way but fades into the three light roads, so each carries a
-1px plum rim (4.4:1 or more on those). fx-splash and fx-stinky have no outline.
+1px plum rim (4.4:1 or more on those). fx-splash has no outline.
 fx-heart is a token, like fx-bark, so it keeps its ramp outline over the
 doghouse roofs. fx-new-best carries the plum rim too, for the cream panel and
 the sunset sky of screen-end.
@@ -11,7 +11,6 @@ fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
 fx-dizzy    32x16  loop (4 frames)  stars circling over the pack while it stumbles
 fx-coins    32x32  play (6 frames)  two coins knocked loose ($2 dropped on a minor bump)
 fx-splash   32x32  play (5 frames)  water thrown up by a puddle
-fx-stinky   32x32  loop (4 frames)  green stink lines over the pack while Stinky lasts
 fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
 fx-heart    16x16  up (5 frames)    a heart floating up from a dog slot (+1 heart)
                    down (5 frames)  a heart cracking and falling apart (-1 heart)
@@ -134,20 +133,6 @@ def splash(step):
     return g
 
 
-def stinky(step):
-    g = Grid(32, 32)
-    for i, x0 in enumerate((7, 15, 23)):
-        for y in range(4, 26):
-            phase = (y + step * 3 + i * 4) / 3.2
-            x = x0 + round(math.sin(phase) * 1.6)
-            fade = (y + step * 3 + i * 5) % 22
-            if fade > 3:
-                # green reads on the dark street, its teal edge on the light roads
-                g.p(x, y, "green")
-                g.p(x + 1, y, "teal")
-    return g
-
-
 def sparkle(step):
     g = Grid(16, 16)
     r = (2, 5, 3, 1)[step]
@@ -256,7 +241,6 @@ def sprites():
     yield "fx-dizzy", [("loop", [rim(dizzy(i)).outlined(False) for i in range(4)], 110)]
     yield "fx-coins", [("play", [coins(i).outlined(False) for i in range(6)], 80)]
     yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(5)], 70)]
-    yield "fx-stinky", [("loop", [stinky(i).outlined(False) for i in range(4)], 180)]
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-heart", [("up", [heart_up(i).outlined() for i in range(5)], 90),
                        ("down", [heart_down(i).outlined() for i in range(5)], 90)]

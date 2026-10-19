@@ -38,4 +38,4 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Remaining for the first build
 
-- **Cleanup:** retire `fx-stinky`, which nothing uses.
+Nothing is outstanding. New art follows the rulebook as it changes.

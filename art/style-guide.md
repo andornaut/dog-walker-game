@@ -142,7 +142,7 @@ At 1 ♥, `ui-doghouse-warn` pulses over the house (`static` with reduced motion
 | Puddle, pickup         | `fx-splash`, `fx-sparkle`                                                                                                                                                                                                                                                               |
 | Treat given            | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                                                                                             |
 
-- `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog, never with the pack-wide `fx-stinky`. Two statuses alternate every second, most recent first.
+- `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog. Two statuses alternate every second, most recent first.
 - With reduced motion, bursts and stars play and the stumble is skipped.
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane faces the player.
 

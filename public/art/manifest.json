@@ -1118,11 +1118,6 @@
       "json": "sprites/fx-status-stinky@75.json"
     },
     {
-      "key": "fx-stinky",
-      "png": "sprites/fx-stinky.png",
-      "json": "sprites/fx-stinky.json"
-    },
-    {
       "key": "fx-tap",
       "png": "sprites/fx-tap.png",
       "json": "sprites/fx-tap.json"
