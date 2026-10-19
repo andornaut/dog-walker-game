@@ -1,6 +1,7 @@
 import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
+import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -108,7 +109,7 @@ export class EndScene extends Scene {
       });
     }
     this.addReturnHome(reduced, walk);
-    // Over the pack: the walker's head reaches the logo's bottom edge.
+    // Over the house's roof, clear of the walker's head.
     if (this.textures.exists(LOGO.key)) {
       this.add.image(LOGO.x, LOGO.y, LOGO.key).setOrigin(0);
     }
@@ -171,8 +172,8 @@ export class EndScene extends Scene {
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
     text(SIDE.x, SIDE.bankY, words.bank, PALETTE.plum);
-    if (this.textures.exists("icon-money")) {
-      this.add.image(SIDE.x, SIDE.iconY, "icon-money").setOrigin(0);
+    if (this.textures.exists(MONEY_ICON_KEY)) {
+      this.add.image(SIDE.x, SIDE.iconY, MONEY_ICON_KEY).setOrigin(0);
     }
     title(SIDE.x + 20, SIDE.iconY + 2, dollarText(save.bankCents), PALETTE.plum);
 

@@ -1,6 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { quirkIconKey, statusIconKey } from "../assets/iconKeys";
+import { MONEY_ICON_KEY, quirkIconKey, statusIconKey, TREAT_ICON_KEY } from "../assets/iconKeys";
 import {
   dogFaceKey,
   doghouseTag,
@@ -191,7 +191,7 @@ export class HudScene extends Scene {
     this.pauseGlyph = this.add.graphics();
 
     const { money: moneyWell, treats: treatWell, zone: zoneWell } = TOP_BAR;
-    this.add.sprite(moneyWell.x + 4, moneyWell.y + 5, "tip").setOrigin(0);
+    this.add.image(moneyWell.x + 4, moneyWell.y + 5, MONEY_ICON_KEY).setOrigin(0);
     const money = { font: "title", scale: 2 } as const;
     const moneyX = moneyWell.x + 22;
     const dollar = addPixelText(this, moneyX, moneyWell.y + 7, "$", {
@@ -202,9 +202,10 @@ export class HudScene extends Scene {
       color: PALETTE.cream,
       ...money,
     });
-    // The count right-aligned in the narrow well, the treat's 16px frame just left of it.
-    this.add.sprite(treatWell.x - 1, treatWell.y + 5, "treat").setOrigin(0);
-    const treatsRight = treatWell.x + treatWell.width - 2;
+    // The count, such as 0/3, right-aligned in the narrow well, and the 16px treat icon at the
+    // well's left edge, whose bone ends 2px before the count starts.
+    this.add.image(treatWell.x, treatWell.y + 5, TREAT_ICON_KEY).setOrigin(0);
+    const treatsRight = treatWell.x + treatWell.width;
     this.treats = addPixelText(this, treatsRight, treatWell.y + 10, "0", {
       color: PALETTE.cream,
       font: "title",

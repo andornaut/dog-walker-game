@@ -345,7 +345,10 @@ export class HudFeedback {
   private flyFee(flight: PayoutFlight, rect: Rect): void {
     const { bow, chipMs, roof } = MOMENTS.payout;
     const from = { x: rect.x + roof.x, y: rect.y + roof.y };
-    const label = () => this.addPayoutLabel(flight.text, from.x, rect.y + 2);
+    // The amount rises in the doghouse and stops just under the roof's name plate, so it never
+    // covers the name and stays clear of the dimmed road behind a card.
+    const under = rect.y + DOGHOUSE.roof.height;
+    const label = () => this.addPayoutLabel(flight.text, from.x, under + PAYOUT_LABEL.rise);
     if (flight.landMs === flight.startMs) {
       this.fadeOut([label()], 0, chipMs);
       return;

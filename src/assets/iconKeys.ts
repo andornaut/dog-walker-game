@@ -28,6 +28,10 @@ export function needIconKey(need: NeedId): string {
 // The 16x16 growl in a nervous dog's bubble while she strains toward another dog.
 export const GROWL_ICON_KEY = "icon-growl";
 
+// The 16x16 coin and treat bone in the top bar's money and treat wells.
+export const MONEY_ICON_KEY = "icon-money";
+export const TREAT_ICON_KEY = "icon-treat";
+
 // The 16x16 icon of a dog's quirk, on its detail card and its doghouse, by the dog's art name.
 export function quirkIconKey(data: Pick<GameData, "dogs">, dog: DogId): string {
   return `icon-quirk-${data.dogs[dog].art}`;

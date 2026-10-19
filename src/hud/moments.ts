@@ -47,7 +47,7 @@ export const MOMENTS = {
 } as const;
 
 // The top bar's money and treat icons' centres, where coins land and treats leave from.
-export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 }, treats: { x: 103, y: 21 } } as const;
+export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 }, treats: { x: 104, y: 21 } } as const;
 
 // An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the
 // bubble's bottom rim, and tipX is the column it points from.

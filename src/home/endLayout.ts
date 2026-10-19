@@ -8,7 +8,7 @@ export const END_LAYOUT = {
   breakdown: { amountRight: 196, label: 40, pitch: 16, top: PANEL.y + 42 },
   // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone.
   button: { height: 44, width: 264, x: 48, y: 512 },
-  logo: { x: 116, y: 40 },
+  logo: { x: 116, y: 8 },
   panel: PANEL,
   quips: {
     bubble: { height: 38, width: 244, x: 80 },
@@ -19,21 +19,22 @@ export const END_LAYOUT = {
     top: PANEL.y + 174,
     well: { size: 34, x: 36, y: 0 },
   },
-  // The return home, between the logo and the panel: the walker and pack walk up the front
-  // path from behind the panel's top edge to the house's step while the owners wave either
-  // side. The house, lawn, path and step are part of screen-end; without it a tan path and
-  // step cross a strip of lawn. Spots are where feet end up, in pack order.
+  // The return home, under the logo and above the panel: the walker and pack walk up the
+  // front path from behind the panel's top edge to the house's step while the owners wave
+  // either side. The house, lawn, path and step are part of screen-end; without it a tan path
+  // and step cross a strip of lawn. Spots are where feet end up, in pack order, 34 apart so
+  // every 40px dog and 40x60 person shows.
   returnHome: {
     dogs: [
-      { x: 166, y: 106 },
-      { x: 194, y: 105 },
-      { x: 152, y: 108 },
+      { x: 146, y: 106 },
+      { x: 214, y: 105 },
+      { x: 248, y: 108 },
     ],
     lawn: { height: 16, width: 360, x: 0, y: 96 },
     owners: [
-      { x: 144, y: 110 },
-      { x: 216, y: 110 },
-      { x: 116, y: 110 },
+      { x: 112, y: 110 },
+      { x: 282, y: 110 },
+      { x: 78, y: 110 },
     ],
     path: { height: 12, width: 24, x: 168, y: 100 },
     step: { height: 4, width: 32, x: 164, y: 96 },
