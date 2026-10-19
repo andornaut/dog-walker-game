@@ -112,3 +112,6 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-19 · Design · Gear grows to 5 with the whistle (thieves flee without a big dog) and running shoes (no pull lock); fanny pack start drops to +$15; Lucky collar also raises the max by 1
 - 2026-10-19 · Design · Dog training and a walker kit are parked for after v1
 - 2026-10-19 · Design · Zones are lengthened so a run still takes ~12 minutes with the +20% ramp: zone 1 ~3.8 minutes at base speed; spawns per zone scaled to match
+- 2026-10-19 · Tech · Game data lives in typed TypeScript modules in src/data/ (gameplay edits values, tech owns types, rules and tests); card effects are a closed set of effect kinds and card text is generated from them; a deployed /data/ page shows every table; live tuning is by Vite HMR
+- 2026-10-19 · Tech · Units are distinct branded types in the rules (cents, hearts, seconds, probability, pixels, multipliers), hearts deltas are -3 to 3, and tsconfig adds noUncheckedIndexedAccess, noImplicitOverride, exactOptionalPropertyTypes and noFallthroughCasesInSwitch
+- 2026-10-19 · Tech · Player state is one versioned local save per browser, validated with Valibot on load and migrated between versions, behind an async storage interface; each zone checkpoints the run's earnings so a closed tab banks them as if heading home
