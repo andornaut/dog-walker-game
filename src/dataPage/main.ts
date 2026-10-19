@@ -29,6 +29,15 @@ import {
 import { modifiersOf } from "../rules/modifiers";
 import { price, unlockPrice } from "../rules/shop";
 import { zoneStats } from "../rules/zones";
+import { POLICY_NAMES } from "../sim/policies";
+import {
+  DEFAULT_MATRIX,
+  MATRIX_HEADERS,
+  matrixCells,
+  type MatrixRow,
+  rowCells,
+  simulateMatrixInBatches,
+} from "../sim/report";
 
 type Cell = number | string;
 interface Section {
@@ -324,6 +333,30 @@ function tuningSection(data: GameData): Section {
   };
 }
 
+// Fewer runs per row than npm run simulate, so the table fills in seconds.
+const SIMULATED_RUNS = 100;
+
+function simulatedSection(rows: readonly MatrixRow[]): Section {
+  const { luckyRate, policies, tipRate, treatRate } = DEFAULT_MATRIX;
+  const percent = (share: number) => `${Math.round(share * 100)}%`;
+  const total = matrixCells(DEFAULT_MATRIX).length;
+  return {
+    headers: MATRIX_HEADERS,
+    note: [
+      `Bots playing whole runs on the live rules and data, ${SIMULATED_RUNS} runs per row`,
+      "(npm run simulate runs 1,000). Hit is the chance of hitting each obstacle; tips, treats",
+      `and lucky finds are picked up at ${percent(tipRate)}, ${percent(treatRate)} and`,
+      `${percent(luckyRate)}. Fired and Cards are per run; Paid is the share of card choices`,
+      `that cost money. ${policies.map((id) => `${id}: ${POLICY_NAMES[id]}`).join(". ")}.`,
+      ...(rows.length < total ? [`Simulating: ${rows.length} of ${total} rows.`] : []),
+    ].join(" "),
+    rows: rows.map(rowCells),
+    title: "Simulated runs",
+  };
+}
+
+let stopSimulation = () => {};
+
 function render(): void {
   const root = document.getElementById("data");
   if (root === null) {
@@ -345,10 +378,26 @@ function render(): void {
     helpSection,
     tuningSection,
   ].map((section) => renderSection(section(data)));
+  let simulated = renderSection(simulatedSection([]));
   root.replaceChildren(
     element("h1", "Game data"),
     element("p", "Every table the game reads, with card text generated from the live values."),
     ...sections,
+    simulated,
+  );
+  stopSimulation();
+  stopSimulation = simulateMatrixInBatches(
+    data,
+    1,
+    SIMULATED_RUNS,
+    10,
+    (step) => setTimeout(step, 0),
+    (rows) => {
+      const next = renderSection(simulatedSection(rows));
+      simulated.replaceWith(next);
+      simulated = next;
+    },
+    DEFAULT_MATRIX,
   );
 }
 

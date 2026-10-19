@@ -17,6 +17,7 @@
     "lint": "prettier --check . && eslint --max-warnings 0 . && markdownlint-cli2",
     "format": "prettier --write . && eslint --fix .",
     "test": "vitest run",
+    "simulate": "tsx src/sim/cli.ts",
     "deploy": "npm run build && wrangler deploy",
     "clean": "rm -rf dist .wrangler"
   },
@@ -34,6 +35,7 @@
     "lint-staged": "^17.6.0",
     "markdownlint-cli2": "^0.23.3",
     "prettier": "^3.9.10",
+    "tsx": "4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2",
     "vite": "^8.3.4",
