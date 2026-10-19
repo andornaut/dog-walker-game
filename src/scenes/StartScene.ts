@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene, type Time } from "phaser";
+import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
@@ -70,6 +70,7 @@ import {
   drawSlotSign,
   drawStepPlate,
 } from "./homePanels";
+import { listenOnePress } from "./onePress";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
@@ -363,51 +364,59 @@ export class StartScene extends Scene {
     this.fxLayer = this.add.container(0, 0);
     this.render();
 
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      this.addBurst("fx-tap", pointer.x, pointer.y);
-      if (this.overlay !== undefined) {
-        this.overlayPress = { x: pointer.x, y: pointer.y };
-        return;
-      }
-      this.pressedTarget = this.targetAt(pointer.x, pointer.y);
-      const kind = this.pressedTarget?.kind;
-      this.hold =
-        kind === "dog" || kind === "gear"
-          ? startHold({ x: pointer.x, y: pointer.y }, this.time.now)
-          : undefined;
-      this.press =
-        this.pressedTarget === undefined
-          ? undefined
-          : { held: true, id: targetId(this.pressedTarget), startedMs: this.time.now };
-    });
-    this.input.on("pointermove", (pointer: Input.Pointer) => {
-      if (this.hold !== undefined && pointer.isDown) {
-        this.hold = moveHold(this.hold, { x: pointer.x, y: pointer.y });
-      }
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const down = this.overlayPress;
-      this.overlayPress = undefined;
-      if (down !== undefined) {
-        this.releaseOnOverlay(down, pointer.x, pointer.y);
-        return;
-      }
-      const target = this.targetAt(pointer.x, pointer.y);
-      const pressed = this.pressedTarget;
-      const release = this.hold === undefined ? "tap" : releaseHold(this.hold, this.time.now);
-      this.hold = undefined;
-      this.pressedTarget = undefined;
-      if (this.press !== undefined) {
-        this.press.held = false;
-      }
-      if (target === undefined || pressed === undefined || targetId(target) !== targetId(pressed)) {
-        return;
-      }
-      if (release === "hold") {
-        this.openDetail(pressed);
-      } else if (release === "tap") {
-        this.actAfterDip(target);
-      }
+    listenOnePress(this, {
+      down: (pointer) => {
+        this.addBurst("fx-tap", pointer.x, pointer.y);
+        if (this.overlay !== undefined) {
+          this.overlayPress = { x: pointer.x, y: pointer.y };
+          return;
+        }
+        this.pressedTarget = this.targetAt(pointer.x, pointer.y);
+        const kind = this.pressedTarget?.kind;
+        this.hold =
+          kind === "dog" || kind === "gear"
+            ? startHold({ x: pointer.x, y: pointer.y }, this.time.now)
+            : undefined;
+        this.press =
+          this.pressedTarget === undefined
+            ? undefined
+            : { held: true, id: targetId(this.pressedTarget), startedMs: this.time.now };
+      },
+      move: (pointer) => {
+        if (this.hold !== undefined && pointer.isDown) {
+          this.hold = moveHold(this.hold, { x: pointer.x, y: pointer.y });
+        }
+      },
+      up: (pointer, cancelled) => {
+        const down = this.overlayPress;
+        this.overlayPress = undefined;
+        if (down !== undefined) {
+          if (!cancelled) {
+            this.releaseOnOverlay(down, pointer.x, pointer.y);
+          }
+          return;
+        }
+        const target = cancelled ? undefined : this.targetAt(pointer.x, pointer.y);
+        const pressed = this.pressedTarget;
+        const release = this.hold === undefined ? "tap" : releaseHold(this.hold, this.time.now);
+        this.hold = undefined;
+        this.pressedTarget = undefined;
+        if (this.press !== undefined) {
+          this.press.held = false;
+        }
+        if (
+          target === undefined ||
+          pressed === undefined ||
+          targetId(target) !== targetId(pressed)
+        ) {
+          return;
+        }
+        if (release === "hold") {
+          this.openDetail(pressed);
+        } else if (release === "tap") {
+          this.actAfterDip(target);
+        }
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     // Badges earned on launch: a scene can pause itself only once it is running.

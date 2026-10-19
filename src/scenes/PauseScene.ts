@@ -1,4 +1,4 @@
-import { type Input, Scene } from "phaser";
+import { Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { remapDarker } from "../assets/darkRamp";
@@ -11,6 +11,7 @@ import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -102,18 +103,20 @@ export class PauseScene extends Scene {
 
     // A press counts where it began and ended on the same target, so the release that resumes
     // the walk is never the road's.
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      this.pressed = rectIndexAt(layout.hits, pointer.x, pointer.y);
-      this.showPressed();
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const target = rectIndexAt(layout.hits, pointer.x, pointer.y);
-      const pressed = this.pressed;
-      this.pressed = undefined;
-      this.showPressed();
-      if (target !== undefined && target === pressed) {
-        this.entries[target]?.press();
-      }
+    listenOnePress(this, {
+      down: (pointer) => {
+        this.pressed = rectIndexAt(layout.hits, pointer.x, pointer.y);
+        this.showPressed();
+      },
+      up: (pointer, cancelled) => {
+        const target = rectIndexAt(layout.hits, pointer.x, pointer.y);
+        const pressed = this.pressed;
+        this.pressed = undefined;
+        this.showPressed();
+        if (!cancelled && target !== undefined && target === pressed) {
+          this.entries[target]?.press();
+        }
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);

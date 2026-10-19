@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene, type Time } from "phaser";
+import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
@@ -21,6 +21,7 @@ import { formatDollars } from "../rules/effectText";
 import type { CardSource } from "../state/runState";
 import { fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
 import { currentSettings } from "./profileStore";
@@ -143,29 +144,31 @@ export class CardScene extends Scene {
     this.outline = this.add.graphics();
 
     // A tap picks a card; holding one enlarges it until the finger lifts, and picks nothing.
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      const index = rectIndexAt(this.cardRects, pointer.x, pointer.y);
-      this.pressed = index;
-      this.drawOutline();
-      if (index !== undefined) {
-        this.holdTimer = this.time.delayedCall(HOLD_MS, () => this.enlarge(index));
-      }
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const index = rectIndexAt(this.cardRects, pointer.x, pointer.y);
-      const pressed = this.pressed;
-      this.pressed = undefined;
-      this.holdTimer?.remove();
-      this.holdTimer = undefined;
-      this.drawOutline();
-      if (this.enlarged.length > 0) {
-        this.enlarged.forEach((part) => part.destroy());
-        this.enlarged = [];
-        return;
-      }
-      if (index !== undefined && index === pressed) {
-        this.choose(index);
-      }
+    listenOnePress(this, {
+      down: (pointer) => {
+        const index = rectIndexAt(this.cardRects, pointer.x, pointer.y);
+        this.pressed = index;
+        this.drawOutline();
+        if (index !== undefined) {
+          this.holdTimer = this.time.delayedCall(HOLD_MS, () => this.enlarge(index));
+        }
+      },
+      up: (pointer, cancelled) => {
+        const index = rectIndexAt(this.cardRects, pointer.x, pointer.y);
+        const pressed = this.pressed;
+        this.pressed = undefined;
+        this.holdTimer?.remove();
+        this.holdTimer = undefined;
+        this.drawOutline();
+        if (this.enlarged.length > 0) {
+          this.enlarged.forEach((part) => part.destroy());
+          this.enlarged = [];
+          return;
+        }
+        if (!cancelled && index !== undefined && index === pressed) {
+          this.choose(index);
+        }
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);

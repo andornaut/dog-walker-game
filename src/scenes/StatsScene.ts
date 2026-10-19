@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { gameData } from "../data";
@@ -15,6 +15,7 @@ import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { fillRect } from "./draw";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
@@ -91,31 +92,38 @@ export class StatsScene extends Scene {
     this.tab = "runs";
     this.render();
 
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      this.pressed = this.detail === undefined ? this.targetAt(pointer.x, pointer.y) : undefined;
-      this.pressedAt = this.time.now;
-      this.render();
-      addTapBurst(this, pointer.x, pointer.y);
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const target = this.targetAt(pointer.x, pointer.y);
-      const pressed = this.pressed;
-      if (this.detail !== undefined) {
-        this.detail = undefined;
-      } else if (target !== undefined && sameTarget(target, pressed)) {
-        if (target === "close") {
-          this.close();
+    listenOnePress(this, {
+      down: (pointer) => {
+        this.pressed = this.detail === undefined ? this.targetAt(pointer.x, pointer.y) : undefined;
+        this.pressedAt = this.time.now;
+        this.render();
+        addTapBurst(this, pointer.x, pointer.y);
+      },
+      up: (pointer, cancelled) => {
+        if (cancelled) {
+          this.pressed = undefined;
+          this.render();
           return;
         }
-        if ("tab" in target) {
-          this.openTab(target.tab, settleDelay(this.time.now, this.pressedAt));
-          return;
+        const target = this.targetAt(pointer.x, pointer.y);
+        const pressed = this.pressed;
+        if (this.detail !== undefined) {
+          this.detail = undefined;
+        } else if (target !== undefined && sameTarget(target, pressed)) {
+          if (target === "close") {
+            this.close();
+            return;
+          }
+          if ("tab" in target) {
+            this.openTab(target.tab, settleDelay(this.time.now, this.pressedAt));
+            return;
+          }
+          this.detail = target.badge;
+          this.burst = true;
         }
-        this.detail = target.badge;
-        this.burst = true;
-      }
-      this.pressed = undefined;
-      this.render();
+        this.pressed = undefined;
+        this.render();
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (this.detail !== undefined) {

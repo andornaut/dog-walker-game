@@ -1,6 +1,7 @@
 import { kebabCase } from "../assets/spriteKeys";
 import type { DebuffId, GameData, GearId, UpgradeId } from "../data/types";
-import type { Point, Rect } from "../layout/rect";
+import { exceedsTapDistance } from "../input/gestures";
+import { containsPoint, type Point, type Rect } from "../layout/rect";
 import { effectText, type TextData } from "../rules/effectText";
 import type { RunState } from "../state/runState";
 import type { RunPause } from "./topBar";
@@ -146,4 +147,30 @@ export function stripLayout(screenWidth: number, count: number): StripLayout | u
     tab,
     well,
   };
+}
+
+// Whether (x, y) is on the strip of count items; no items, no strip.
+export function onStrip(screenWidth: number, count: number, { x, y }: Point): boolean {
+  const layout = stripLayout(screenWidth, count);
+  return layout !== undefined && containsPoint(layout.hit, x, y);
+}
+
+// A press that starts on the strip. It taps the strip on release only if it never left the tap
+// distance; past it, the press is a drag, which the walk steers by.
+export interface StripPress {
+  readonly start: Point;
+  readonly tapping: boolean;
+}
+
+export function moveStripPress(
+  tapMaxDistance: number,
+  point: Point,
+  press: StripPress,
+): StripPress {
+  const tapping = press.tapping && !exceedsTapDistance(tapMaxDistance, press.start, point);
+  return { ...press, tapping };
+}
+
+export function stripTapped(tapMaxDistance: number, point: Point, press: StripPress): boolean {
+  return moveStripPress(tapMaxDistance, point, press).tapping;
 }

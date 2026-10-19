@@ -19,9 +19,11 @@ export interface Press {
   readonly id: number;
 }
 
-// onButton: the press went down on a top-bar button.
+// onButton: the press went down on a top-bar button. onStrip: on the top bar's state strip,
+// whose tap is the HUD's, so the press can drag but never taps.
 export interface PointerSample {
   readonly onButton: boolean;
+  readonly onStrip: boolean;
   readonly phase: PointerPhase;
   readonly point: Point;
   readonly press: Press;
@@ -51,7 +53,8 @@ function endedUnseen(press: Press, track: PointerTrack): PointerTrack {
   return track.press?.id === press.id && !samePress(track.press, press) ? idleTrack : track;
 }
 
-// The latest press drives the gestures. A press on a top-bar button is the HUD's and drives
+// The latest press drives the gestures, so a finger resting on the screen never holds the
+// steering from the one that lands after it. A press on a top-bar button is the HUD's and drives
 // none. held: a card or a menu takes every press, and the one under way is dropped. A hit stop
 // is no hold: its lane moves are dropped where they act, as a lock's are, and the drag goes on.
 export function trackPointer(
@@ -66,7 +69,12 @@ export function trackPointer(
     return none(idleTrack);
   }
   if (phase === "down") {
-    return none(sample.onButton ? current : { gesture: pointerDown(context, point).state, press });
+    if (sample.onButton) {
+      return none(current);
+    }
+    const { state } = pointerDown(context, point);
+    const gesture = sample.onStrip && state.kind !== "idle" ? { ...state, tapping: false } : state;
+    return none({ gesture, press });
   }
   if (!samePress(current.press, press)) {
     return none(current);

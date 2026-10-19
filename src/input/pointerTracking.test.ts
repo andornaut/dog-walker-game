@@ -12,7 +12,7 @@ import {
   steerLane,
 } from "../runner/laneControl";
 import { destinationLane, stillInLane } from "../runner/laneMotion";
-import { chance, type Random, randomInt, seededRandom } from "../runner/random";
+import { chance, type Random, randomInt, randomPick, seededRandom } from "../runner/random";
 import { type GestureAction, type GestureContext, reanchorDrag } from "./gestures";
 import {
   idleTrack,
@@ -45,6 +45,7 @@ const laneConfig = { laneCount: LANES, moveDuration: 0.2 };
 interface Event {
   held?: boolean;
   onButton?: boolean;
+  onStrip?: boolean;
   phase: PointerPhase;
   press: Press;
   x: number;
@@ -58,11 +59,12 @@ function feed(
 ): { actions: GestureAction[]; track: PointerTrack } {
   const actions: GestureAction[] = [];
   let current = track;
-  for (const { held = false, onButton = false, phase, press, x, y = 400 } of events) {
+  for (const event of events) {
+    const { held = false, onButton = false, onStrip = false, phase, press, x, y = 400 } = event;
     const result = trackPointer(
       context,
       held,
-      { onButton, phase, point: { x, y }, press },
+      { onButton, onStrip, phase, point: { x, y }, press },
       current,
     );
     actions.push(...result.actions);
@@ -165,6 +167,38 @@ describe("trackPointer", () => {
     ]);
     expect(actions).toEqual([right]);
   });
+
+  it("steers by the latest finger, ignoring one that rests on the screen", () => {
+    const thumb = finger(1, 1);
+    const steering = finger(2, 2);
+    const { actions } = feed([
+      { phase: "down", press: thumb, x: 40, y: 300 },
+      { phase: "down", press: steering, x: 200 },
+      { phase: "move", press: thumb, x: 140, y: 300 },
+      { phase: "move", press: steering, x: 257 },
+      { phase: "up", press: thumb, x: 140, y: 300 },
+      { phase: "move", press: steering, x: 313 },
+    ]);
+    expect(actions).toEqual([right, right]);
+  });
+
+  it("drags from the state strip but never taps there, as the tap is the strip's", () => {
+    const tap = finger(1);
+    expect(
+      feed([
+        { onStrip: true, phase: "down", press: tap, x: 330, y: 60 },
+        { phase: "up", press: tap, x: 331, y: 61 },
+      ]).actions,
+    ).toEqual([]);
+    const drag = finger(2);
+    expect(
+      feed([
+        { onStrip: true, phase: "down", press: drag, x: 330, y: 60 },
+        { phase: "move", press: drag, x: 273, y: 70 },
+        { phase: "up", press: drag, x: 273, y: 70 },
+      ]).actions,
+    ).toEqual([left]);
+  });
 });
 
 // Random walks over presses, losses, holds, hit stops, pulls and locks, against the real gesture
@@ -174,6 +208,8 @@ describe("trackPointer fuzz", () => {
     control: LaneControl;
     held: boolean;
     hitStop: boolean;
+    // The last press that went down on the walk itself, while nothing held it.
+    latest: Press | undefined;
     // The pointers physically down, by id, with their press.
     down: Map<number, Press & { x: number; y: number }>;
     time: number;
@@ -191,14 +227,39 @@ describe("trackPointer fuzz", () => {
     }
   }
 
-  function send(world: World, phase: PointerPhase, id: number, onButton = false): void {
+  const same = (a: Press | undefined, b: Press | undefined) =>
+    a?.id === b?.id && a?.downTime === b?.downTime;
+
+  function send(
+    world: World,
+    phase: PointerPhase,
+    id: number,
+    on: "button" | "strip" | "walk" = "walk",
+  ): void {
     const press = world.down.get(id);
     if (press === undefined) {
       return;
     }
-    const sample = { onButton, phase, point: { x: press.x, y: press.y }, press };
+    const sample = {
+      onButton: on === "button",
+      onStrip: on === "strip",
+      phase,
+      point: { x: press.x, y: press.y },
+      press,
+    };
+    const driver = world.track.press;
     const result = trackPointer(context, world.held, sample, world.track);
     world.track = result.track;
+    if (phase === "down" && on !== "button" && !world.held) {
+      world.latest = { downTime: press.downTime, id };
+    }
+    // Only the latest press acts, and only the press already driving it.
+    if (result.actions.length > 0) {
+      expect(same(driver, press)).toBe(true);
+    }
+    if (world.track.press !== undefined) {
+      expect(same(world.track.press, world.latest)).toBe(true);
+    }
     apply(world, result.actions);
     if (phase === "up" || phase === "cancel") {
       world.down.delete(id);
@@ -210,16 +271,16 @@ describe("trackPointer fuzz", () => {
 
   function randomStep(world: World, random: Random): void {
     world.time += 1 + randomInt(random, 0, 50);
-    const id = randomInt(random, 0, 2);
+    const id = randomInt(random, 0, 3);
     const roll = random();
     const pressed = world.down.get(id);
     if (roll < 0.2) {
       if (pressed !== undefined) {
         send(world, "up", id);
       }
-      const onButton = chance(random, 0.1);
+      const on = randomPick(random, ["button", "strip", "walk", "walk", "walk"] as const);
       world.down.set(id, { downTime: world.time, id, x: roadX(random), y: anyY(random) });
-      send(world, "down", id, onButton);
+      send(world, "down", id, on);
     } else if (roll < 0.55) {
       if (pressed !== undefined) {
         pressed.x += (random() - 0.5) * 3 * LANE_WIDTH;
@@ -267,6 +328,7 @@ describe("trackPointer fuzz", () => {
       down: new Map(),
       held: false,
       hitStop: false,
+      latest: undefined,
       time: 0,
       track: idleTrack,
     };
@@ -328,6 +390,44 @@ describe("trackPointer fuzz", () => {
       send(world, "up", id);
       const after = advanceLaneControl(laneConfig, 5, world.control);
       expect(world.track).toEqual(idleTrack);
+      expect(destinationLane(after.motion)).toBe(clampIndex(LANES, before + lanes));
+    }
+  });
+
+  it("steers N lanes by a new finger's drag while another rests and jitters", () => {
+    for (let seed = 1; seed <= 300; seed += 1) {
+      const random = seededRandom(seed);
+      const world = newWorld(random);
+      for (let i = 0; i < 80; i += 1) {
+        randomStep(world, random);
+      }
+      liftAll(world, random);
+      const rest = randomInt(random, 0, 3);
+      const id = (rest + randomInt(random, 1, 3)) % 3;
+      world.time += 1;
+      world.down.set(rest, { downTime: world.time, id: rest, x: 40, y: 300 });
+      send(world, "down", rest);
+      const lanes = randomInt(random, 1, 5) * (chance(random, 0.5) ? 1 : -1);
+      const startX = roadX(random);
+      const before = destinationLane(world.control.motion);
+      world.time += 1;
+      world.down.set(id, { downTime: world.time, id, x: startX, y: 400 });
+      send(world, "down", id);
+      const press = world.down.get(id);
+      const resting = world.down.get(rest);
+      if (press === undefined || resting === undefined) {
+        throw new Error("both fingers went down");
+      }
+      const lift = randomInt(random, 1, 7);
+      const endX = startX + (lanes + Math.sign(lanes) * random() * 0.9) * LANE_WIDTH;
+      for (let k = 1; k <= 6; k += 1) {
+        resting.x += (random() - 0.5) * 2 * LANE_WIDTH;
+        send(world, k === lift ? "up" : "move", rest);
+        press.x = startX + ((endX - startX) * k) / 6;
+        send(world, "move", id);
+      }
+      send(world, "up", id);
+      const after = advanceLaneControl(laneConfig, 5, world.control);
       expect(destinationLane(after.motion)).toBe(clampIndex(LANES, before + lanes));
     }
   });

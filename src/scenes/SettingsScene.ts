@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { FEEDBACK, settleDelay } from "../home/feedback";
@@ -20,6 +20,7 @@ import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import type { Settings } from "../save/schema";
 import { drawFocusRing, fillRect } from "./draw";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
@@ -117,51 +118,53 @@ export class SettingsScene extends Scene {
     this.render();
 
     let pressedAt = 0;
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), pointer.x, pointer.y));
-      if (row?.kind === "slider") {
-        if (!currentSettings(this).muted) {
-          this.dragging = row.key;
-          this.slideTo(pointer.x);
-          // The knob shows pressed while held.
+    listenOnePress(this, {
+      down: (pointer) => {
+        const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), pointer.x, pointer.y));
+        if (row?.kind === "slider") {
+          if (!currentSettings(this).muted) {
+            this.dragging = row.key;
+            this.slideTo(pointer.x);
+            // The knob shows pressed while held.
+            this.render();
+          }
+        } else {
+          this.pressed = this.targetAt(pointer.x, pointer.y);
+          pressedAt = this.time.now;
           this.render();
         }
-      } else {
-        this.pressed = this.targetAt(pointer.x, pointer.y);
-        pressedAt = this.time.now;
-        this.render();
-      }
-      addTapBurst(this, pointer.x, pointer.y);
-    });
-    this.input.on("pointermove", (pointer: Input.Pointer) => {
-      if (this.dragging !== undefined) {
-        this.slideTo(pointer.x);
-      }
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      if (this.dragging !== undefined) {
-        // A sample at the new level, so the player hears what they picked.
-        if (this.dragging === "sfxVolume") {
-          soundboardOf(this).play("tip");
+        addTapBurst(this, pointer.x, pointer.y);
+      },
+      move: (pointer) => {
+        if (this.dragging !== undefined) {
+          this.slideTo(pointer.x);
         }
-        this.dragging = undefined;
-        this.render();
-        return;
-      }
-      const target = this.targetAt(pointer.x, pointer.y);
-      const pressed = this.pressed;
-      if (target?.kind === "close" && pressed?.kind === "close") {
-        this.close();
-      } else if (
-        target?.kind === "switch" &&
-        pressed?.kind === "switch" &&
-        target.key === pressed.key
-      ) {
-        this.flipAfter(target.key, settleDelay(this.time.now, pressedAt));
-      } else {
-        this.pressed = undefined;
-        this.render();
-      }
+      },
+      up: (pointer, cancelled) => {
+        if (this.dragging !== undefined) {
+          // A sample at the new level, so the player hears what they picked.
+          if (!cancelled && this.dragging === "sfxVolume") {
+            soundboardOf(this).play("tip");
+          }
+          this.dragging = undefined;
+          this.render();
+          return;
+        }
+        const target = cancelled ? undefined : this.targetAt(pointer.x, pointer.y);
+        const pressed = this.pressed;
+        if (target?.kind === "close" && pressed?.kind === "close") {
+          this.close();
+        } else if (
+          target?.kind === "switch" &&
+          pressed?.kind === "switch" &&
+          target.key === pressed.key
+        ) {
+          this.flipAfter(target.key, settleDelay(this.time.now, pressedAt));
+        } else {
+          this.pressed = undefined;
+          this.render();
+        }
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     const onBack = () => this.close();

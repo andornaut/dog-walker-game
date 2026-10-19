@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { statusIconKey } from "../assets/iconKeys";
@@ -9,7 +9,13 @@ import type { AchievementId, HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
 import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
 import { bubbleX, DOWN_TAIL } from "../hud/moments";
-import { stripItems, stripTapAllowed } from "../hud/stateStrip";
+import {
+  moveStripPress,
+  stripItems,
+  type StripPress,
+  stripTapAllowed,
+  stripTapped,
+} from "../hud/stateStrip";
 import {
   buttonIcon,
   HOME_BUTTON,
@@ -33,6 +39,7 @@ import type { PackSlot, RunState } from "../state/runState";
 import { AchievementToasts } from "./achievementToast";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
 import { isMuted, setMuted } from "./profileStore";
@@ -187,12 +194,32 @@ export class HudScene extends Scene {
       run.events.off(ACHIEVEMENTS_EVENT, onAchievements);
     });
 
-    // A button acts on the press, as the walk's gestures never see it.
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      const button = topBarButtonAt(pointer.x, pointer.y);
-      if (button !== undefined) {
-        this.press("tap", button);
-      }
+    // A button acts on the press, as the walk's gestures never see it. A press on the strip
+    // taps it on release, and is the walk's drag if it travels.
+    const tapMaxDistance = read(gameData.tuning, "pixels", "tapMaxDistance");
+    let stripPress: StripPress | undefined;
+    listenOnePress(this, {
+      down: (pointer) => {
+        const point = { x: pointer.x, y: pointer.y };
+        const button = topBarButtonAt(point.x, point.y);
+        stripPress = this.strip?.contains(point) ? { start: point, tapping: true } : undefined;
+        if (button !== undefined) {
+          this.press("tap", button);
+        }
+      },
+      move: (pointer) => {
+        if (stripPress !== undefined) {
+          stripPress = moveStripPress(tapMaxDistance, { x: pointer.x, y: pointer.y }, stripPress);
+        }
+      },
+      up: (pointer, cancelled) => {
+        const press = stripPress;
+        stripPress = undefined;
+        const point = { x: pointer.x, y: pointer.y };
+        if (press !== undefined && !cancelled && stripTapped(tapMaxDistance, point, press)) {
+          this.strip?.tap(press.start);
+        }
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const button = topBarButtonForKey(event.repeat, event.key);

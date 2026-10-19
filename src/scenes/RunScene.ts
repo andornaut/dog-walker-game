@@ -48,6 +48,7 @@ import {
   TREAT_EVENT,
   type TreatCue,
 } from "../hud/moments";
+import { onStrip, stripItems } from "../hud/stateStrip";
 import { gameplayAllowed, type RunPause, topBarButtonAt, walkCovered } from "../hud/topBar";
 import type { GestureAction, GestureContext } from "../input/gestures";
 import { dogSlotForKey, laneDirectionForKey } from "../input/keyBindings";
@@ -617,6 +618,10 @@ export class RunScene extends Scene {
     const held = !walking || walkCovered(this.runPause());
     const sample: PointerSample = {
       onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
+      onStrip:
+        phase === "down" &&
+        walk !== undefined &&
+        onStrip(SCREEN_CONFIG.width, stripItems(gameData, walk.run).length, pointer),
       phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
       point: { x: pointer.x, y: pointer.y },
       press: { downTime: pointer.downTime, id: pointer.id },

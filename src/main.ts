@@ -71,6 +71,8 @@ function devPanelHost(game: Game): DevPanelHost {
 const game = new Game({
   backgroundColor: "#181425",
   height: SCREEN_CONFIG.height,
+  // Two touch pointers, so the walk sees a finger that lands while another rests.
+  input: { activePointers: 2 },
   parent: "game",
   pixelArt: true,
   scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.FIT },

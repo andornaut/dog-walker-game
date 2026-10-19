@@ -8,12 +8,15 @@ import { defined } from "../testing/defined";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import {
+  moveStripPress,
+  onStrip,
   STRIP,
   stripIconKey,
   type StripItem,
   stripItems,
   stripLayout,
   stripTapAllowed,
+  stripTapped,
   stripText,
 } from "./stateStrip";
 import { PAUSE_BUTTON } from "./topBar";
@@ -129,5 +132,28 @@ describe("stripLayout", () => {
       const last = itemAt(layout.icons, count - 1);
       expect(last.x + STRIP.icon).toBeLessThanOrEqual(hit.x + hit.width);
     }
+  });
+});
+
+describe("onStrip", () => {
+  it("is the strip's hit area, and nowhere while the strip is empty", () => {
+    const { hit } = defined(stripLayout(360, 2));
+    expect(onStrip(360, 2, { x: hit.x + 1, y: hit.y + 1 })).toBe(true);
+    expect(onStrip(360, 2, { x: hit.x - 1, y: hit.y + 1 })).toBe(false);
+    expect(onStrip(360, 0, { x: hit.x + 1, y: hit.y + 1 })).toBe(false);
+  });
+});
+
+describe("strip presses", () => {
+  const start = { x: 330, y: 60 };
+
+  it("tap the strip on a release within the tap distance", () => {
+    expect(stripTapped(10, { x: 336, y: 64 }, { start, tapping: true })).toBe(true);
+    expect(stripTapped(10, { x: 345, y: 60 }, { start, tapping: true })).toBe(false);
+  });
+
+  it("stay a drag after travelling past the tap distance and back", () => {
+    const dragged = moveStripPress(10, { x: 300, y: 60 }, { start, tapping: true });
+    expect(stripTapped(10, start, dragged)).toBe(false);
   });
 });

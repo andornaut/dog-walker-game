@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { dogSpriteKey, ownerFaceKey } from "../assets/spriteKeys";
@@ -22,6 +22,7 @@ import type { LastWalk } from "../save/schema";
 import type { EndReason } from "../state/runState";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { drawPixelLine, drawShadow, fillRect } from "./draw";
+import { listenOnePress } from "./onePress";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
@@ -232,16 +233,18 @@ export class EndScene extends Scene {
 
     const button = addMenuButton(this, BUTTON, "Back home");
     let pressed = false;
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      pressed = containsPoint(BUTTON, pointer.x, pointer.y);
-      button.setState(pressed ? "pressed" : "normal");
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      button.setState("normal");
-      if (pressed && containsPoint(BUTTON, pointer.x, pointer.y)) {
-        goHome();
-      }
-      pressed = false;
+    listenOnePress(this, {
+      down: (pointer) => {
+        pressed = containsPoint(BUTTON, pointer.x, pointer.y);
+        button.setState(pressed ? "pressed" : "normal");
+      },
+      up: (pointer, cancelled) => {
+        button.setState("normal");
+        if (!cancelled && pressed && containsPoint(BUTTON, pointer.x, pointer.y)) {
+          goHome();
+        }
+        pressed = false;
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (isConfirmKey(event.key)) {

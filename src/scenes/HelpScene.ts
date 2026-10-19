@@ -1,4 +1,4 @@
-import { type Input, Scene } from "phaser";
+import { Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
@@ -7,6 +7,7 @@ import { dotRects, HELP_LAYOUT, type Point } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { insetRect, type Rect } from "../layout/rect";
 import { addFilledRect } from "./draw";
+import { listenOnePress } from "./onePress";
 import { colorFromHex } from "./palette";
 import { addPixelText } from "./pixelText";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -63,20 +64,22 @@ export class HelpScene extends Scene {
       }
     });
     // Taps act on release, so a swipe that starts on a button turns the page instead.
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      this.pressStart = { x: pointer.x, y: pointer.y };
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const start = this.pressStart;
-      this.pressStart = undefined;
-      if (start === undefined) {
-        return;
-      }
-      const end = { x: pointer.x, y: pointer.y };
-      const action = helpActionForPointer(gameData.help.length, start, end);
-      if (action !== undefined) {
-        this.act(action);
-      }
+    listenOnePress(this, {
+      down: (pointer) => {
+        this.pressStart = { x: pointer.x, y: pointer.y };
+      },
+      up: (pointer, cancelled) => {
+        const start = this.pressStart;
+        this.pressStart = undefined;
+        if (start === undefined || cancelled) {
+          return;
+        }
+        const end = { x: pointer.x, y: pointer.y };
+        const action = helpActionForPointer(gameData.help.length, start, end);
+        if (action !== undefined) {
+          this.act(action);
+        }
+      },
     });
   }
 

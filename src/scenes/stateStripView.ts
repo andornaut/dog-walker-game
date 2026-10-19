@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
+  onStrip,
   stripIconKey,
   type StripItem,
   stripItemsKey,
@@ -10,6 +11,7 @@ import {
   stripLayout,
   stripText,
 } from "../hud/stateStrip";
+import type { Point } from "../layout/rect";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
@@ -24,7 +26,6 @@ const TAB_CORNER = 8;
 // The top bar's state strip and the bubble a tap on it opens.
 export class StateStripView {
   private bubble: GameObjects.GameObject[] = [];
-  private hit: GameObjects.Zone | undefined;
   private icons: GameObjects.Image[] = [];
   private items: readonly StripItem[] = [];
   private itemsKey: string | undefined;
@@ -57,8 +58,6 @@ export class StateStripView {
     this.icons.forEach((icon) => icon.destroy());
     this.tab?.destroy();
     this.tab = undefined;
-    this.hit?.destroy();
-    this.hit = undefined;
     const layout = this.layout;
     if (layout === undefined) {
       this.icons = [];
@@ -83,17 +82,20 @@ export class StateStripView {
       }
       return [this.scene.add.image(at.x, at.y, key).setOrigin(0).setDepth(DEPTH)];
     });
-    const { hit } = layout;
-    this.hit = this.scene.add
-      .zone(hit.x, hit.y, hit.width, hit.height)
-      .setOrigin(0)
-      .setInteractive()
-      .on("pointerdown", (pointer: { x: number; y: number }) => {
-        if (this.tappable()) {
-          addTapBurst(this.scene, pointer.x, pointer.y);
-          this.toggleBubble();
-        }
-      });
+  }
+
+  // Whether a press at point lands on the strip. The HUD reads presses at the scene, not
+  // through an interactive zone, which would keep them from the walk below.
+  contains(point: Point): boolean {
+    return onStrip(SCREEN_CONFIG.width, this.items.length, point);
+  }
+
+  // A tap on the strip, at point, opens or closes the bubble.
+  tap(point: Point): void {
+    if (this.tappable()) {
+      addTapBurst(this.scene, point.x, point.y);
+      this.toggleBubble();
+    }
   }
 
   private toggleBubble(): void {

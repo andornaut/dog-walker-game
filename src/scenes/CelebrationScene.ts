@@ -1,4 +1,4 @@
-import { Display, type Input, Scene } from "phaser";
+import { Display, Scene } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
@@ -6,6 +6,7 @@ import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -61,16 +62,18 @@ export class CelebrationScene extends Scene {
       this.scene.stop();
     };
     let pressed = false;
-    this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      pressed = containsPoint(buttonRect, pointer.x, pointer.y);
-      button.setState(pressed ? "pressed" : "normal");
-    });
-    this.input.on("pointerup", (pointer: Input.Pointer) => {
-      button.setState("normal");
-      if (pressed && containsPoint(buttonRect, pointer.x, pointer.y)) {
-        close();
-      }
-      pressed = false;
+    listenOnePress(this, {
+      down: (pointer) => {
+        pressed = containsPoint(buttonRect, pointer.x, pointer.y);
+        button.setState(pressed ? "pressed" : "normal");
+      },
+      up: (pointer, cancelled) => {
+        button.setState("normal");
+        if (!cancelled && pressed && containsPoint(buttonRect, pointer.x, pointer.y)) {
+          close();
+        }
+        pressed = false;
+      },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (isConfirmKey(event.key) || isPauseKey(event.key)) {
