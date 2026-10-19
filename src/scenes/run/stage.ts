@@ -24,7 +24,6 @@ export const DEPTH = {
   decal: 2,
   fx: 2500,
   gag: 2401,
-  leash: 2000,
   popup: 3000,
   road: 0,
   shadow: 3,

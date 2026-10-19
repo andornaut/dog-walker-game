@@ -11,10 +11,10 @@ export interface PackPlacement {
 
 // Indexed by pack size - 1; the first dog picked leads.
 const FORMATIONS: readonly (readonly PackPlacement[])[] = [
-  [{ dx: 0, footDy: -66 }],
+  [{ dx: 0, footDy: -58 }],
   [
-    { dx: -20, footDy: -64 },
-    { dx: 20, footDy: -61 },
+    { dx: -20, footDy: -58 },
+    { dx: 20, footDy: -55 },
   ],
   [
     { dx: 0, footDy: -68 },

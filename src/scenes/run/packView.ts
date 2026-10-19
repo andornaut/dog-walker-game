@@ -90,7 +90,7 @@ export class PackView {
 
   constructor(scene: Scene, dogs: readonly DogId[], walkerSprite: string) {
     this.scene = scene;
-    this.leash = scene.add.graphics().setDepth(DEPTH.leash);
+    this.leash = scene.add.graphics();
     this.dogSprites = new Map(
       dogs.map((dog) => {
         const key = dogSpriteKey(gameData, dog);
@@ -252,6 +252,9 @@ export class PackView {
     }
     const { walker } = this;
     walker.sprite.setPosition(walkerX, footY).setDepth(DEPTH.sprite + footY);
+    // The leashes run from the walker's hands up the road to the dogs: under the walker, whose
+    // body hides the part behind it, and over the dogs ahead.
+    leash.setDepth(DEPTH.sprite + footY - 0.5);
     if (posed) {
       playTag(walker.sprite, walker.key, pose, still && halted);
     }
