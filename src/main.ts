@@ -13,6 +13,7 @@ import {
 } from "./dev/devOverlay";
 import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { pageRunSetup } from "./dev/pageRunSetup";
+import { lostTouches } from "./input/touches";
 import { setOnHomeScreen, setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
@@ -92,6 +93,25 @@ const game = new Game({
 });
 
 mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
+
+// Phaser gives a new touch only a free pointer, so a touch whose end the browser never
+// delivered would hold its pointer and every later touch would be dropped. A touchstart lists
+// every touch on the screen, so a pointer holding one no longer there is freed before Phaser
+// handles it; the scenes take the new press on the freed pointer as a fresh one.
+window.addEventListener(
+  "touchstart",
+  (event) => {
+    const held = game.input.pointers.filter((pointer) => pointer.active && pointer.wasTouch);
+    const lost = lostTouches(
+      held.map((pointer) => pointer.identifier),
+      Array.from(event.touches, (touch) => touch.identifier),
+    );
+    held
+      .filter((pointer) => lost.includes(pointer.identifier))
+      .forEach((pointer) => pointer.reset());
+  },
+  { capture: true, passive: true },
+);
 
 // With dev=1, the game is reachable from the console and from headless checks.
 if (pageRunSetup().setup.dev) {

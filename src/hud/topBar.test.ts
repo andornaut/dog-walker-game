@@ -10,6 +10,7 @@ import {
   topBarAction,
   topBarButtonAt,
   topBarButtonForKey,
+  walkCovered,
 } from "./topBar";
 
 const WALKING: RunPause = { card: false, hitStop: false, menu: "closed" };
@@ -41,6 +42,16 @@ describe("gameplayAllowed", () => {
     expect(gameplayAllowed(WALKING)).toBe(true);
     for (const pause of HELD) {
       expect(gameplayAllowed(pause)).toBe(false);
+    }
+  });
+});
+
+describe("walkCovered", () => {
+  it("is true while a card or a menu takes the walk's presses, and not through a hit stop", () => {
+    expect(walkCovered(WALKING)).toBe(false);
+    expect(walkCovered(HIT_STOP)).toBe(false);
+    for (const pause of [CARD, MENU, MENU_OVER_CARD, MENU_OVER_HIT_STOP, HELP, SETTINGS]) {
+      expect(walkCovered(pause)).toBe(true);
     }
   });
 });

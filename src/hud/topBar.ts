@@ -54,9 +54,14 @@ export interface RunPause {
   menu: "closed" | "help" | "open" | "settings";
 }
 
+// A card or a menu over the walk takes every press. A hit stop covers nothing.
+export function walkCovered(pause: RunPause): boolean {
+  return pause.card || pause.menu !== "closed";
+}
+
 // Lane moves and treats act only while nothing holds the walk.
 export function gameplayAllowed(pause: RunPause): boolean {
-  return !pause.card && !pause.hitStop && pause.menu === "closed";
+  return !walkCovered(pause) && !pause.hitStop;
 }
 
 export type TopBarAction = "mute" | "openMenu" | "resume";

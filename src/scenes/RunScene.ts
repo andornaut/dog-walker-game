@@ -48,17 +48,15 @@ import {
   TREAT_EVENT,
   type TreatCue,
 } from "../hud/moments";
-import { gameplayAllowed, type RunPause, topBarButtonAt } from "../hud/topBar";
-import {
-  type GestureAction,
-  type GestureContext,
-  type GestureState,
-  idleGesture,
-  pointerDown,
-  pointerMove,
-  pointerUp,
-} from "../input/gestures";
+import { gameplayAllowed, type RunPause, topBarButtonAt, walkCovered } from "../hud/topBar";
+import type { GestureAction, GestureContext } from "../input/gestures";
 import { dogSlotForKey, laneDirectionForKey } from "../input/keyBindings";
+import {
+  idleTrack,
+  type PointerSample,
+  type PointerTrack,
+  trackPointer,
+} from "../input/pointerTracking";
 import { laneCenterXs, type LaneDirection } from "../layout/lanes";
 import { COLLAR_HEIGHT, leashHand, packPlacements } from "../layout/packFormation";
 import { project } from "../layout/projection";
@@ -301,7 +299,6 @@ export class RunScene extends Scene {
   // Owners who fired you since the walk last stepped, whose moment holds the walk.
   private firedNow: DogId[] = [];
   private gags: Gags | undefined;
-  private gesture: GestureState = idleGesture;
   private graphics?: {
     leash: GameObjects.Graphics;
   };
@@ -312,8 +309,6 @@ export class RunScene extends Scene {
   private shadows: GameObjects.Image[] = [];
   private shadowsUsed = 0;
   private inputLog: InputLog | undefined;
-  // A press that began on a top-bar button, which no gesture sees.
-  private buttonPointerId: number | undefined;
   private items = new Map<number, ItemView>();
   private laneXs: number[] = [];
   // Fired dogs trotting off the road, drawn by their trot and not with the pack.
@@ -322,7 +317,8 @@ export class RunScene extends Scene {
   private pauseOpen = false;
   private packPose: "idle" | "walk" = "walk";
   private pendingInputs: PendingInput[] = [];
-  private pointerId: number | undefined;
+  // The press driving the walk's gestures.
+  private pointers: PointerTrack = idleTrack;
   private pulls: Pulls = NO_PULLS;
   private random:
     { cards: Random; pulls: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
@@ -420,14 +416,12 @@ export class RunScene extends Scene {
     this.endMoments = { firingSeconds: 0, payoutMs: 0 };
     this.firedNow = [];
     this.leaving = new Set();
-    this.gesture = idleGesture;
     this.items = new Map();
-    this.buttonPointerId = undefined;
     this.needsZonePlan = false;
     this.pauseOpen = false;
     this.packPose = "walk";
     this.pendingInputs = [];
-    this.pointerId = undefined;
+    this.pointers = idleTrack;
     this.pulls = NO_PULLS;
     this.replay = undefined;
     this.runTimeMs = 0;
@@ -547,10 +541,13 @@ export class RunScene extends Scene {
       }
     };
     const onSideways = () => this.openPause();
+    const onBlur = () => this.dropPress();
+    window.addEventListener("blur", onBlur);
     window.addEventListener(PHONE_EVENTS.backPressed, onBack);
     window.addEventListener(PHONE_EVENTS.appHidden, onHidden);
     window.addEventListener(PHONE_EVENTS.turnedSideways, onSideways);
     this.events.once("shutdown", () => {
+      window.removeEventListener("blur", onBlur);
       window.removeEventListener(PHONE_EVENTS.backPressed, onBack);
       window.removeEventListener(PHONE_EVENTS.appHidden, onHidden);
       window.removeEventListener(PHONE_EVENTS.turnedSideways, onSideways);
@@ -608,43 +605,27 @@ export class RunScene extends Scene {
     }
   }
 
-  // Only the first finger down drives the gestures until it lifts. A press on a top-bar button
-  // is the HUD's and no gesture: the sound button never pauses, and neither moves the pack.
+  // Phaser reports a cancelled touch as a release with wasCanceled set. This scene keeps
+  // running while a card or the pause menu covers the walk, and the press is theirs then.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
-    if (pointer.id === this.buttonPointerId) {
-      if (phase === "up") {
-        this.buttonPointerId = undefined;
-      }
-      return;
-    }
-    const button = phase === "down" ? topBarButtonAt(pointer.x, pointer.y) : undefined;
-    if (button !== undefined) {
-      this.buttonPointerId = pointer.id;
-      return;
-    }
-    // This scene keeps running while a card or the pause menu holds the walk. A press then
-    // belongs to the card or menu, and one that was under way is dropped.
     const walk = this.walk;
     const walking = walk !== undefined && walk.run.phase.kind === "walking";
-    if (!walking || !gameplayAllowed(this.runPause())) {
-      this.gesture = idleGesture;
-      this.pointerId = undefined;
-      return;
-    }
-    if (phase === "down" && this.pointerId === undefined) {
-      this.pointerId = pointer.id;
-    }
-    if (pointer.id !== this.pointerId) {
-      return;
-    }
-    const sample = { x: pointer.x, y: pointer.y };
-    const handler = { down: pointerDown, move: pointerMove, up: pointerUp }[phase];
-    const result = handler(this.gestureContext(), sample, this.gesture);
-    this.gesture = result.state;
-    if (phase === "up") {
-      this.pointerId = undefined;
-    }
+    const held = !walking || walkCovered(this.runPause());
+    const sample: PointerSample = {
+      onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
+      phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
+      point: { x: pointer.x, y: pointer.y },
+      press: { downTime: pointer.downTime, id: pointer.id },
+    };
+    const result = trackPointer(this.gestureContext(), held, sample, this.pointers);
+    this.pointers = result.track;
     result.actions.forEach((action) => this.act(action));
+  }
+
+  // A press under way when a card or the menu opens, or the page loses focus, is dropped:
+  // its release may never arrive.
+  private dropPress(): void {
+    this.pointers = idleTrack;
   }
 
   // Lane moves wait for the next simulation step, where they are logged.
@@ -835,7 +816,10 @@ export class RunScene extends Scene {
       soundboardOf(this).play("bark");
       this.hint({ kind: "pull" });
     }
-    this.gesture = gestureAfterPulls(step.pulled, this.gesture);
+    this.pointers = {
+      ...this.pointers,
+      gesture: gestureAfterPulls(step.pulled, this.pointers.gesture),
+    };
   }
 
   // Sounds, bursts, labels and hints for what happened in a step.
@@ -1040,6 +1024,7 @@ export class RunScene extends Scene {
     const view = cardFor(gameData, run, source);
     this.walk = { ...walk, run };
     this.cardView = view;
+    this.dropPress();
     this.cardHints(source);
     const replayed = this.replayedChoice();
     if (replayed !== undefined) {
@@ -1218,6 +1203,7 @@ export class RunScene extends Scene {
       return;
     }
     this.pauseOpen = true;
+    this.dropPress();
     this.hint({ kind: "pause" });
     soundboardOf(this).setPaused(true);
     this.tweens.pauseAll();
