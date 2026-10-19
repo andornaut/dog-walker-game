@@ -71,7 +71,6 @@ import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { startWakeLock, stopWakeLock } from "../pwa";
-import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
@@ -163,7 +162,6 @@ const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
 const LOGBOOK_ICON = HOME_LAYOUT.logbook.icon;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
-const PACK_LOCK = HOME_LAYOUT.packLock;
 const POCKET = HOME_LAYOUT.pocket;
 const LOGO = { ...HOME_LAYOUT.logo, key: "logo" };
 const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
@@ -214,7 +212,6 @@ type Target =
   | { kind: "help" }
   | { kind: "logbook" }
   | { kind: "mute" }
-  | { kind: "packLock" }
   | { kind: "petShop" }
   | { kind: "settings" }
   | { kind: "start" }
@@ -659,14 +656,7 @@ export class StartScene extends Scene {
     if (hit !== undefined) {
       return hit[1];
     }
-    return this.slotForSale() && containsPoint(PACK_LOCK.hit, x, y)
-      ? { kind: "packLock" }
-      : undefined;
-  }
-
-  // Whether a dog slot is for sale: the Dogs band then carries the padlock.
-  private slotForSale(): boolean {
-    return nextDogSlot(gameData, this.save().owned.dogSlots) !== null;
+    return undefined;
   }
 
   // The shop over everything below the top bar, on a tab or framing the item tapped.
@@ -732,9 +722,6 @@ export class StartScene extends Scene {
         }
         return;
       }
-      case "packLock":
-        this.openShop({ focus: { kind: "dogSlot" } });
-        return;
       case "petShop":
         this.openShop({});
         return;
@@ -972,7 +959,7 @@ export class StartScene extends Scene {
     this.drawPackAtGate(root, g, save);
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
-      this.drawSection(root, SECTION_RECTS[id], sections[id], id === "dogs" && this.slotForSale());
+      this.drawSection(root, SECTION_RECTS[id], sections[id]);
     }
     this.drawWalkerPicker(root, save);
     // The sticker covers its tile's price line, which the tile then leaves out.
@@ -996,14 +983,8 @@ export class StartScene extends Scene {
 
   // A section's ui-section frame and band by its state, with the heading on the band's left
   // and its note on the right: ink on the lit (complete) band, cream and amber on the dark
-  // (neutral) one. While a dog slot is for sale, the Dogs band's padlock sits right of
-  // its note.
-  private drawSection(
-    root: GameObjects.Container,
-    rect: Rect,
-    section: Section,
-    locked: boolean,
-  ): void {
+  // (neutral) one.
+  private drawSection(root: GameObjects.Container, rect: Rect, section: Section): void {
     const frame = addNineSlice(this, "ui-section", rect, section.state);
     if (frame === undefined) {
       this.drawSectionFrame(root, rect, section.state);
@@ -1022,12 +1003,7 @@ export class StartScene extends Scene {
         font: "title",
       },
     );
-    let right = rect.x + rect.width - BAND_TEXT.inset;
-    if (locked) {
-      const view = this.tileView(root, "packLock");
-      addLock(this, view.container, right + PACK_LOCK.icon.dx, PACK_LOCK.icon.y);
-      right -= PACK_LOCK.noteShift;
-    }
+    const right = rect.x + rect.width - BAND_TEXT.inset;
     if (section.note !== "") {
       this.text(root, right, y, section.note, lit ? PALETTE.ink : PALETTE.amber, {
         font: "title",

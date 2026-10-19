@@ -1389,13 +1389,13 @@
         "y": 92
       },
       "dogOrigin": {
-        "x": 4,
+        "x": 14,
         "y": 294
       },
       "dogTileInset": 1,
       "dogTiles": {
         "cellHeight": 44,
-        "cellWidth": 112,
+        "cellWidth": 105,
         "columns": 3,
         "gapX": 8,
         "gapY": 0
@@ -1472,19 +1472,6 @@
           "y": 10
         }
       },
-      "packLock": {
-        "hit": {
-          "height": 44,
-          "width": 44,
-          "x": 316,
-          "y": 250
-        },
-        "icon": {
-          "dx": -16,
-          "y": 274
-        },
-        "noteShift": 20
-      },
       "path": {
         "width": 32,
         "x": 164
@@ -1554,8 +1541,8 @@
       "sections": {
         "dogs": {
           "height": 160,
-          "width": 360,
-          "x": 0,
+          "width": 352,
+          "x": 4,
           "y": 270
         },
         "pocket": {
@@ -1566,8 +1553,8 @@
         },
         "walker": {
           "height": 72,
-          "width": 360,
-          "x": 0,
+          "width": 352,
+          "x": 4,
           "y": 198
         }
       },
@@ -1607,7 +1594,7 @@
         "x": 180
       },
       "walkerOrigin": {
-        "x": 4,
+        "x": 14,
         "y": 223
       },
       "walkerTile": {
@@ -1635,7 +1622,7 @@
       },
       "walkerTiles": {
         "cellHeight": 44,
-        "cellWidth": 72,
+        "cellWidth": 77,
         "columns": 4,
         "gapX": 8,
         "gapY": 0
@@ -1643,56 +1630,56 @@
       "dogRects": [
         {
           "height": 44,
-          "width": 112,
-          "x": 4,
+          "width": 105,
+          "x": 14,
           "y": 294
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 124,
+          "width": 105,
+          "x": 127,
           "y": 294
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 244,
+          "width": 105,
+          "x": 240,
           "y": 294
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 4,
+          "width": 105,
+          "x": 14,
           "y": 338
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 124,
+          "width": 105,
+          "x": 127,
           "y": 338
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 244,
+          "width": 105,
+          "x": 240,
           "y": 338
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 4,
+          "width": 105,
+          "x": 14,
           "y": 382
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 124,
+          "width": 105,
+          "x": 127,
           "y": 382
         },
         {
           "height": 44,
-          "width": 112,
-          "x": 244,
+          "width": 105,
+          "x": 240,
           "y": 382
         }
       ],
@@ -1731,26 +1718,26 @@
       "walkerRects": [
         {
           "height": 44,
-          "width": 72,
-          "x": 4,
+          "width": 77,
+          "x": 14,
           "y": 223
         },
         {
           "height": 44,
-          "width": 72,
-          "x": 84,
+          "width": 77,
+          "x": 99,
           "y": 223
         },
         {
           "height": 44,
-          "width": 72,
-          "x": 164,
+          "width": 77,
+          "x": 184,
           "y": 223
         },
         {
           "height": 44,
-          "width": 72,
-          "x": 244,
+          "width": 77,
+          "x": 269,
           "y": 223
         }
       ]

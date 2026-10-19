@@ -26,11 +26,11 @@ export const HOME_LAYOUT = {
   },
   // The dog card's place on screen, and the gear card's height; the gear card is centred.
   dogCard: { height: 376, width: 300, x: 30, y: 92 },
-  dogOrigin: { x: 4, y: 294 },
+  dogOrigin: { x: 14, y: 294 },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,
   // The dog rows are hit areas 44 tall with no gap.
-  dogTiles: { cellHeight: 44, cellWidth: 112, columns: 3, gapX: GAP, gapY: 0 },
+  dogTiles: { cellHeight: 44, cellWidth: 105, columns: 3, gapX: GAP, gapY: 0 },
   gap: GAP,
   gate: GATE,
   // At the gate the pack spreads out around the walker, the first dog through the gate.
@@ -54,14 +54,6 @@ export const HOME_LAYOUT = {
   logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
   mute: { hit: { height: 44, width: 44, x: 272, y: 0 }, icon: { x: 284, y: 10 } },
-  // The padlock on the Dogs band while a dog slot is for sale, left of the pack count, which
-  // moves left to make room; it opens the shop on the next slot. Its hit area reaches up
-  // into the walker section's empty right end.
-  packLock: {
-    hit: { height: 44, width: 44, x: 316, y: 250 },
-    icon: { dx: -16, y: 274 },
-    noteShift: 20,
-  },
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -98,9 +90,9 @@ export const HOME_LAYOUT = {
   // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a
   // heading band over its tiles; then Start walk.
   sections: {
-    dogs: { height: 160, width: 360, x: 0, y: 270 },
+    dogs: { height: 160, width: 352, x: 4, y: 270 },
     pocket: { height: 78, width: 352, x: 4, y: 432 },
-    walker: { height: 72, width: 360, x: 0, y: 198 },
+    walker: { height: 72, width: 352, x: 4, y: 198 },
   },
   settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: 10 } },
   startButton: { height: 44, width: 352, x: 4, y: 514 },
@@ -113,10 +105,11 @@ export const HOME_LAYOUT = {
   tileSelectOutset: 1,
   topBar: { height: 40 },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
-  walkerOrigin: { x: 4, y: 223 },
+  walkerOrigin: { x: 14, y: 223 },
   // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
   // icon right of the box, and a locked walker's padlock over the tile's top-left corner and
-  // its name plate's caps, centred. The tiles stop short of the Dogs padlock's hit area.
+  // its name plate's caps, centred. The tiles sit 7px inside
+  // the section's inner frame edge, leaving the selected badge's overhang on screen.
   walkerTile: {
     box: { dx: 3, dy: 4, size: 34 },
     face: { dx: 4, dy: 5 },
@@ -124,7 +117,7 @@ export const HOME_LAYOUT = {
     lock: { dx: -2, dy: -3 },
     plateY: 28,
   },
-  walkerTiles: { cellHeight: 44, cellWidth: 72, columns: 4, gapX: GAP, gapY: 0 },
+  walkerTiles: { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 },
 } as const satisfies Readonly<Record<string, unknown>> & {
   dogTiles: GridSpec;
   gateSpots: readonly PackPlacement[];

@@ -9,6 +9,7 @@ import {
   type TileState,
 } from "../home/interaction";
 import { BUTTON_COLORS, DISABLED_COLORS, type SelectLook, selectLook } from "../home/selection";
+import { BADGE_OFFSET } from "../layout/badge";
 import { type CloseControl, closeControl } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
@@ -343,9 +344,6 @@ export function cogIcon(scene: Scene, x: number, y: number): Placed[] {
 // ui-select sits this far outside a selected item on each side by default; its inner ink
 // line then lies on the item's edge.
 export const SELECT_OUTSET = 3;
-
-// The ui-check badge overhangs the item's top-left corner by this much.
-const BADGE_OFFSET = { x: -6, y: -7 } as const;
 
 export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
   return insetRect(-outset, rect);
