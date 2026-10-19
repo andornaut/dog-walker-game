@@ -69,7 +69,8 @@ export interface PixelTextStyle {
   align?: "center" | "left" | "right";
   color: number;
   font?: FontRole;
-  // Wraps at spaces to stay within this many unscaled pixels.
+  // Wraps at spaces to stay within this many screen pixels: Phaser measures the wrap at the
+  // label's scale.
   maxWidth?: number;
   originX?: number;
   originY?: number;

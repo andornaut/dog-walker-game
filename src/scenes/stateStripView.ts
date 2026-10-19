@@ -120,7 +120,7 @@ export class StateStripView {
     const texts = this.items.map((item) =>
       addPixelText(this.scene, 0, 0, stripText(gameData, item), {
         color: PALETTE.plum,
-        maxWidth: room / 2,
+        maxWidth: room,
         scale: 2,
       }),
     );

@@ -302,7 +302,7 @@ export class HudFeedback {
   private addLine(text: string, at: Point, tail: Point): GameObjects.GameObject[] {
     const label = addPixelText(this.scene, 0, 0, text, {
       color: PALETTE.plum,
-      maxWidth: (LINE.maxWidth - 2 * LINE.padding) / 2,
+      maxWidth: LINE.maxWidth - 2 * LINE.padding,
       scale: 2,
     });
     const width = Math.ceil(label.width) + 2 * LINE.padding;

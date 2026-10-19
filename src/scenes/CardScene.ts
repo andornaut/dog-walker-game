@@ -325,7 +325,7 @@ export class CardScene extends Scene {
     }
     const body = addPixelText(this, x + LARGE.body.x, bodyY, lines.join("\n"), {
       color: PALETTE.plum,
-      maxWidth: LARGE.body.width / 2,
+      maxWidth: LARGE.body.width,
       scale: 2,
     });
     if (body.height > bodyHeight) {
@@ -506,7 +506,7 @@ export class CardScene extends Scene {
       effectY,
       text,
       grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum,
-      { maxWidth: EFFECT.width / 2, scale: 2 },
+      { maxWidth: EFFECT.width, scale: 2 },
     );
     // A word too long to wrap, such as a difficulty, is wider than its wrap width.
     if (effect.height > effectHeight || effect.width > EFFECT.width) {
