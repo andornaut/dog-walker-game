@@ -14,8 +14,8 @@ export const TUNING = {
     packSizeMax: 3,
     packSizeMin: 1,
     poopBagsSkipsPerRun: 1,
-    tipsFirstZone: 30,
-    tipsGainPerZone: 4,
+    tipsFirstZone: 60,
+    tipsGainPerZone: 8,
     treatCarryMax: 3,
     treatMagnetReachLanes: 1,
     treatsPerZone: 5,
@@ -56,7 +56,7 @@ export const TUNING = {
     squirrelChase: 10,
     sweetTalkerCostPerDog: -4,
     thiefLetGo: 20,
-    tip: 1,
+    tip: 0.5,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
@@ -79,7 +79,7 @@ export const TUNING = {
   },
   // Screen pixels at the 360x640 render size, or pixels per second for a speed.
   pixels: {
-    roadScrollSpeed: 80,
+    roadScrollSpeed: 120,
     // Road distance between rows of spawns; a row is all spawns at one distance.
     spawnRowSpacing: 160,
     // A horizontal drag this long is a swipe.

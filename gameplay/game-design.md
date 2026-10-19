@@ -139,6 +139,10 @@ Two lucky finds open no card: bumping into them pays out at once, with a short p
 - Biscuit neighbour: +1 treat per dog, up to the carry limit
 - Photo op: +$ tip, +1 ♥ to dramatic owners
 
+### Minor obstacles (no card)
+
+About half of the obstacles are minor: cones, bins and hydrants. Bumping one opens no card: the pack drops $2 in tips and stumbles (lane input locks briefly), shown with a cause label. They keep the road busy without adding cards.
+
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band above the road; they open no card and have no effect.
 
 ### Forced stops (one per zone, drawn at random with no repeats in a run)
