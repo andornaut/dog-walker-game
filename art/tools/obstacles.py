@@ -96,21 +96,22 @@ def hydrant(drip=0):
 
 
 def bench(leaf=(0, 0)):
-    """leaf offsets the fallen leaf on the seat; None leaves it off."""
+    """leaf offsets the fallen leaf on the seat; None leaves it off. Slats are 4 rows with 2-row plum
+    gaps, and every tone band is 2px on even pixels, so each slat and gap survives 0.5x."""
     g = Grid(88, 32)
+    # one colour per gap, so whichever of its rows a scaled sprite keeps, it is the same
+    for x, y, w in ((4, 6, 80), (4, 12, 80), (2, 18, 84)):
+        g.rect(x, y, w, 2, "plum")
     for x in (10, 74):
         g.rect(x, 12, 4, 17, "dslate")
-        g.rect(x, 12, 1, 17, "slate")
-    for y, c in ((3, "tan"), (8, "brown")):
+        g.rect(x, 12, 2, 17, "slate")
+    for y, c in ((2, "tan"), (8, "brown")):
         g.rect(4, y, 80, 4, c)
-        g.rect(4, y + 3, 80, 1, "dbrown")
-    g.rect(4, 3, 80, 1, "cream")
-    for y in (15, 20):
-        g.rect(2, y, 84, 4, "brown")
-        g.rect(2, y, 84, 1, "tan")
-        g.rect(2, y + 3, 84, 1, "dbrown")
     for x in (20, 44, 68):
-        g.rect(x, 4, 1, 7, "dbrown")
+        g.rect(x, 4, 2, 6, "dbrown")
+    for y in (14, 20):
+        g.rect(2, y, 84, 2, "tan")
+        g.rect(2, y + 2, 84, 2, "brown")
     if leaf:
         x, y = 56 + leaf[0], 16 + leaf[1]
         g.rect(x, y, 3, 1, "amber")
@@ -136,21 +137,24 @@ def hedge(w=144, rustle=()):
 
 
 def barrier(lanes, f):
+    """f swaps which lamp is lit. The rails are 8 rows from a row divisible by 4, striped 8px orange
+    every 16px and leaning right in 2px stairs, so each stripe keeps its width at 0.75x and 0.5x."""
     w = 56 * lanes - 24
     g = Grid(w, 32)
     for x in (4, w - 8):
-        g.rect(x, 12, 4, 17, "grey")
-        g.rect(x + 3, 12, 1, 17, "slate")
+        g.rect(x, 8, 4, 21, "grey")
+        g.rect(x + 2, 8, 2, 21, "slate")
         g.rect(x - 2, 27, 8, 2, "dslate")
-    for top in (12, 21):
-        g.rect(1, top, w - 2, 6, "white")
-        for x in range(1, w - 1, 10):
-            g.tri((x, top + 6), (x + 5, top), (x + 10, top), "orange")
-            g.tri((x, top + 6), (x + 5, top + 6), (x + 10, top), "orange")
-        g.rect(1, top + 5, w - 2, 1, "rust")
+    for top in (8, 20):
+        # the bottom stair is the rail's shaded lower edge
+        for k, (base, stripe) in enumerate((("white", "orange"),) * 3 + (("lgrey", "rust"),)):
+            y = top + 2 * k
+            g.rect(1, y, w - 2, 2, base)
+            for x in range(-8 - 2 * k, w - 1, 16):
+                g.rect(max(x, 1), y, min(x + 8, w - 1) - max(x, 1), 2, stripe)
     for i, x in enumerate((6, w - 6)):
         on = (i == 0) == bool(f)
-        g.ell(x, 7, 3, 3, "amber" if on else "orange", "orange", "yellow" if on else None)
+        g.ell(x, 4, 3, 3, "amber" if on else "orange", "orange", "yellow" if on else None)
     return g
 
 

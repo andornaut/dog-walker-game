@@ -1233,6 +1233,26 @@
       "png": "images/icon-energy-steady.png"
     },
     {
+      "key": "icon-gear-fanny-pack",
+      "png": "images/icon-gear-fanny-pack.png"
+    },
+    {
+      "key": "icon-gear-lucky-collar",
+      "png": "images/icon-gear-lucky-collar.png"
+    },
+    {
+      "key": "icon-gear-poop-bags",
+      "png": "images/icon-gear-poop-bags.png"
+    },
+    {
+      "key": "icon-gear-running-shoes",
+      "png": "images/icon-gear-running-shoes.png"
+    },
+    {
+      "key": "icon-gear-whistle",
+      "png": "images/icon-gear-whistle.png"
+    },
+    {
       "key": "icon-help",
       "png": "images/icon-help.png"
     },
@@ -1265,6 +1285,14 @@
       "png": "images/icon-play.png"
     },
     {
+      "key": "icon-soaked",
+      "png": "images/icon-soaked.png"
+    },
+    {
+      "key": "icon-spooked",
+      "png": "images/icon-spooked.png"
+    },
+    {
       "key": "icon-stinky",
       "png": "images/icon-stinky.png"
     },
@@ -1279,6 +1307,42 @@
     {
       "key": "icon-trait-food-driven",
       "png": "images/icon-trait-food-driven.png"
+    },
+    {
+      "key": "icon-upgrade-belly-rubs",
+      "png": "images/icon-upgrade-belly-rubs.png"
+    },
+    {
+      "key": "icon-upgrade-big-tipper",
+      "png": "images/icon-upgrade-big-tipper.png"
+    },
+    {
+      "key": "icon-upgrade-good-leash",
+      "png": "images/icon-upgrade-good-leash.png"
+    },
+    {
+      "key": "icon-upgrade-raincoats",
+      "png": "images/icon-upgrade-raincoats.png"
+    },
+    {
+      "key": "icon-upgrade-rush-hour",
+      "png": "images/icon-upgrade-rush-hour.png"
+    },
+    {
+      "key": "icon-upgrade-second-wind",
+      "png": "images/icon-upgrade-second-wind.png"
+    },
+    {
+      "key": "icon-upgrade-shortcut",
+      "png": "images/icon-upgrade-shortcut.png"
+    },
+    {
+      "key": "icon-upgrade-sweet-talker",
+      "png": "images/icon-upgrade-sweet-talker.png"
+    },
+    {
+      "key": "icon-upgrade-treat-magnet",
+      "png": "images/icon-upgrade-treat-magnet.png"
     },
     {
       "key": "icon-zone-bark-park",
