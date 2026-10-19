@@ -4,6 +4,7 @@ import {
   cardNumberForKey,
   dogSlotForKey,
   isConfirmKey,
+  isMuteKey,
   isPauseKey,
   laneDirectionForKey,
 } from "./keyBindings";
@@ -61,6 +62,14 @@ describe("dogSlotForKey", () => {
     for (const key of ["4", "0", "a"]) {
       expect(dogSlotForKey(3, key)).toBeUndefined();
     }
+  });
+});
+
+describe("isMuteKey", () => {
+  it("is M in either case, and no other key", () => {
+    expect(isMuteKey("m")).toBe(true);
+    expect(isMuteKey("M")).toBe(true);
+    expect(isMuteKey("n")).toBe(false);
   });
 });
 

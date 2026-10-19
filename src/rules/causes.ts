@@ -7,12 +7,12 @@ import { type Cents, cents, type Hearts } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
-// base: the effect, tip, fee, clawback or treat. The rest are what changed it: a temperament
+// base: the effect, tip, fee, clawback, treat or bump. The rest are what changed it: a temperament
 // multiplier, the pack-size tip factor, a modifier, or a limit (a meter held within 0 and its
 // max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
-  | { readonly amount: number; readonly kind: "clawback" | "fee" | "tip" | "treat" }
+  | { readonly amount: number; readonly kind: "bump" | "clawback" | "fee" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
   | { readonly amount: number; readonly kind: "packSize"; readonly packSize: number }
@@ -101,6 +101,7 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
     case "effect":
     case "modifier":
       return effectSourceName(data, cause.source);
+    case "bump":
     case "fee":
     case "tip":
     case "treat":

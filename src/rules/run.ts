@@ -22,7 +22,7 @@ export function tipValue(data: Pick<GameData, "debuffs" | "tuning">, state: RunS
   );
   const modifiers: ActiveModifier[] = [
     ...state.modifiers,
-    ...state.debuffs.flatMap((debuff) =>
+    ...state.debuffs.flatMap(({ debuff }) =>
       data.debuffs[debuff].modifiers.map((modifier) => ({
         ...modifier,
         source: { debuff, kind: "debuff" } as const,
@@ -36,6 +36,30 @@ export function tipValue(data: Pick<GameData, "debuffs" | "tuning">, state: RunS
     ...modifierCauses(factor.contributions, tip),
   ]);
   return { amount: cents(tip * factor.value), causes, dog: null, kind: "money" };
+}
+
+export interface Payment {
+  readonly change: MoneyChange | null;
+  readonly state: RunState;
+}
+
+// Bumping a minor obstacle drops money.minorBump in tips, once for the whole pack. Money never
+// goes below $0; a drop cut short there is reported as a limit, and no drop at all as null.
+export function minorBump(data: Pick<GameData, "tuning">, state: RunState): Payment {
+  const drop = -read(data.tuning, "money", "minorBump");
+  const money = nonNegativeCents(cents(state.money + drop));
+  const delta = money - state.money;
+  if (delta === 0) {
+    return { change: null, state };
+  }
+  const causes: Cause[] = [{ amount: drop, kind: "bump" }];
+  if (delta !== drop) {
+    causes.push({ amount: delta - drop, bound: "min", kind: "limit" });
+  }
+  return {
+    change: { amount: cents(delta), causes: centsCauses(causes), dog: null, kind: "money" },
+    state: { ...state, money },
+  };
 }
 
 export interface Payments {

@@ -2,10 +2,12 @@ import type { DEBUFFS } from "./debuffs";
 import type { DOGS } from "./dogs";
 import type { FORCED_STOPS } from "./forcedStops";
 import type { HINTS } from "./hints";
+import type { MINOR_OBSTACLES } from "./minorObstacles";
 import type { SHOP_GEAR } from "./shop";
 import type { TUNING } from "./tuning";
 import type { UPGRADES } from "./upgrades";
 import type { WALKERS } from "./walkers";
+import type { WORLD } from "./world";
 
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
@@ -28,8 +30,10 @@ export type DogId = keyof typeof DOGS;
 export type ForcedStopId = keyof typeof FORCED_STOPS;
 export type GearId = keyof typeof SHOP_GEAR;
 export type HintId = keyof typeof HINTS;
+export type MinorObstacleId = keyof typeof MINOR_OBSTACLES;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
+export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 
 // The tuning as the game reads it: every value is a number, so a live edit type-checks.
 export type LiveTuning = typeof TUNING;
@@ -53,6 +57,8 @@ type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 // The values the rules read by name; each group may hold more keys for cards to name.
 export interface Tuning {
   readonly counts: OpenGroup & {
+    readonly minorObstaclesFirstZone: number;
+    readonly minorObstaclesGainPerZone: number;
     readonly obstaclesFirstZone: number;
     readonly obstaclesGainPerZone: number;
     readonly packSizeMax: number;
@@ -71,6 +77,7 @@ export interface Tuning {
   readonly money: OpenGroup & {
     readonly feeByTemperament: Table<Temperament>;
     readonly prices: Table<string> & { readonly lockedDog: number };
+    readonly minorBump: number;
     readonly tip: number;
   };
   readonly multipliers: OpenGroup & {
@@ -82,6 +89,7 @@ export interface Tuning {
   readonly probability: OpenGroup & { readonly catchBySize: Table<Size> };
   readonly seconds: OpenGroup & {
     readonly inputLockBySize: Table<Size>;
+    readonly minorStumble: number;
     readonly pullIntervalByEnergy: Table<Energy>;
     readonly pullTell: number;
     readonly zoneAtBaseSpeed: number;
@@ -241,6 +249,13 @@ export interface InstantResolution {
 
 export type Resolution = CardResolution | InstantResolution;
 
+// What an obstacle covers on the road: lanes across and rows along it. One row is a lane-width
+// of road. The rulebook allows no obstacle wider than 3 lanes.
+export interface Shape {
+  readonly lanes: 1 | 2 | 3;
+  readonly rows: 1 | 2 | 3;
+}
+
 // "obstacle": hit by accident, always a card; "lucky": a good thing to bump into, a card or
 // instant. Nothing happens when no dog is affected, when the pack is immune, or when
 // noCardWhen holds.
@@ -250,8 +265,16 @@ export type Encounter = {
   readonly noCardWhen?: Condition;
 } & (
   | { readonly kind: "lucky"; readonly resolution: Resolution }
-  | { readonly kind: "obstacle"; readonly resolution: CardResolution }
+  | { readonly kind: "obstacle"; readonly resolution: CardResolution; readonly shape: Shape }
 );
+
+// An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
+// pack, and locks lane input for seconds.minorStumble. zones limits it to those zones.
+export interface MinorObstacle {
+  readonly name: string;
+  readonly shape: Shape;
+  readonly zones?: readonly ZoneId[];
+}
 
 export interface ForcedStop {
   readonly name: string;
@@ -290,8 +313,9 @@ export interface Debuff {
 
 export interface Zone {
   readonly id: string;
+  // Hex colours from the art palette. The leash stands out against the zone's road.
+  readonly leashColor: string;
   readonly name: string;
-  // Hex colours from the art palette.
   readonly roadColor: string;
   readonly roadShadowColor: string;
 }
@@ -322,7 +346,17 @@ export type HintTrigger =
   | { readonly debuff: DebuffId; readonly kind: "debuff" }
   | { readonly encounter: EncounterId; readonly kind: "encounter" }
   | {
-      readonly kind: "card" | "firedOwner" | "forcedStop" | "luckyFind" | "pull" | "tip" | "treat";
+      readonly kind:
+        | "card"
+        | "drag"
+        | "firedOwner"
+        | "forcedStop"
+        | "luckyFind"
+        | "minorBump"
+        | "pause"
+        | "pull"
+        | "tip"
+        | "treat";
     };
 
 // A one-line hint shown the first time its trigger happens.
@@ -341,6 +375,7 @@ export interface GameData {
   readonly forcedStops: Readonly<Record<ForcedStopId, ForcedStop>>;
   readonly help: readonly [HelpPage, ...HelpPage[]];
   readonly hints: Readonly<Record<HintId, Hint>>;
+  readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;

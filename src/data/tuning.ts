@@ -9,8 +9,13 @@ export const TUNING = {
     biscuitNeighbourTreatsPerDog: 1,
     loadoutMax: 1,
     luckyEncountersPerZone: 2,
+    // Obstacles that open no card, on top of obstaclesFirstZone.
+    minorObstaclesFirstZone: 23,
+    minorObstaclesGainPerZone: 4,
     obstaclesFirstZone: 23,
     obstaclesGainPerZone: 4,
+    // Every row of spawns leaves at least this many lanes free of obstacles.
+    openLanesPerRowMin: 2,
     packSizeMax: 3,
     packSizeMin: 1,
     poopBagsSkipsPerRun: 1,
@@ -40,6 +45,8 @@ export const TUNING = {
     fannyPackStart: 15,
     feeByTemperament: { dramatic: 20, fussy: 30, laidBack: 20 },
     lostWalletKeep: 30,
+    // The tips the pack drops on a minor obstacle, once for the pack.
+    minorBump: 2,
     missedTips: 10,
     photoOpTip: 10,
     prices: {
@@ -94,6 +101,8 @@ export const TUNING = {
     collisionGrace: 1,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
+    // A minor bump locks lane input this long.
+    minorStumble: 0.5,
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
     // How long a dog leans and barks before it pulls.
     pullTell: 1,

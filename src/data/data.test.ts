@@ -269,6 +269,7 @@ describe("run, world and walkers", () => {
     expect(world.zones).toHaveLength(4);
     for (const zone of world.zones) {
       expect(zone.roadColor).toMatch(/^#[0-9a-f]{6}$/);
+      expect(zone.leashColor).toMatch(/^#[0-9a-f]{6}$/);
       expect(zone.roadShadowColor).toMatch(/^#[0-9a-f]{6}$/);
     }
   });
@@ -330,10 +331,15 @@ describe("hints", () => {
     expect(hintList.map(({ trigger }) => trigger.kind).sort()).toEqual([
       "card",
       "debuff",
+      "drag",
+      "encounter",
+      "encounter",
       "encounter",
       "firedOwner",
       "forcedStop",
       "luckyFind",
+      "minorBump",
+      "pause",
       "pull",
       "tip",
       "treat",

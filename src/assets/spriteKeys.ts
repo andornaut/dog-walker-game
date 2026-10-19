@@ -1,4 +1,12 @@
-import type { DogId, EncounterId, ForcedStopId, GameData, GearId } from "../data/types";
+import type {
+  DogId,
+  EncounterId,
+  ForcedStopId,
+  GameData,
+  GearId,
+  MinorObstacleId,
+  Zone,
+} from "../data/types";
 import type { CardSource } from "../state/runState";
 
 // Forced stops whose sprite is named for the figure on the road rather than the stop.
@@ -51,4 +59,49 @@ export function gearIconKey(gear: GearId): string {
 // Owner faces are keyed by their dog.
 export function ownerFaceKey(dog: DogId): string {
   return `face-owner-${kebabCase(dog)}`;
+}
+
+// The doghouse slot's tag: the dog's roof, or the grey empty house of a fired dog.
+export function doghouseTag(dog: DogId | null): string {
+  return dog === null ? "empty" : kebabCase(dog);
+}
+
+// Minor obstacles whose sprite key is not their id in kebab case.
+const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>> = {
+  barrier2: "barrier-2",
+  barrier3: "barrier-3",
+};
+
+export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
+  return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
+}
+
+// The skunk stands on its spray cloud, which is its hit box.
+export const SKUNK_CLOUD_KEY = "skunk-cloud";
+
+// Zone art is keyed by the zone's name in kebab case: "The Long Way Home" is the-long-way-home.
+export function zoneArtName(zone: Pick<Zone, "name">): string {
+  return zone.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+// The 360x150 neighbourhood behind the zone.
+export function backdropKey(zone: Pick<Zone, "name">): string {
+  return `backdrop-${zoneArtName(zone)}`;
+}
+
+// The zone's 280x64 road strip, which tiles vertically.
+export function roadTileKey(zone: Pick<Zone, "name">): string {
+  return `road-${zoneArtName(zone)}`;
+}
+
+// The 280x64 strip joining the previous zone's road to this one's, scrolled in once.
+export function roadStartKey(zone: Pick<Zone, "name">): string {
+  return `road-${zoneArtName(zone)}-start`;
+}
+
+export function zoneIconKey(zone: Pick<Zone, "name">): string {
+  return `icon-zone-${zoneArtName(zone)}`;
 }

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
@@ -28,6 +29,7 @@ import {
 import { sampleProfile } from "./sampleProfile";
 
 const data = {
+  debuffs: DEBUFFS,
   defaultWalker: "casey",
   dogs: DOGS,
   quips: QUIPS,

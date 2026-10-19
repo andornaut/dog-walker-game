@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 
+import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { SHOP_GEAR } from "../data/shop";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { newRun } from "./runState";
 
-const data = { dogs: DOGS, shopGear: SHOP_GEAR, tuning: TEST_TUNING };
+const data = { debuffs: DEBUFFS, dogs: DOGS, shopGear: SHOP_GEAR, tuning: TEST_TUNING };
 
 describe("newRun", () => {
   it("starts each owner at their temperament's hearts, walking, with no money", () => {
@@ -22,7 +23,9 @@ describe("newRun", () => {
   });
 
   it("makes the pack immune to thieves with the whistle, and gives poop bags' skips", () => {
-    expect(newRun(data, 3, { dogs: ["koda"], gear: "whistle" }).immunities).toEqual(["thief"]);
+    expect(newRun(data, 3, { dogs: ["koda"], gear: "whistle" }).immunities).toEqual([
+      { encounter: "thief" },
+    ]);
     expect(newRun(data, 3, { dogs: ["koda"], gear: "poopBags" }).skipsLeft).toBe(
       TEST_TUNING.counts.poopBagsSkipsPerRun,
     );

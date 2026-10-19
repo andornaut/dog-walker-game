@@ -66,7 +66,7 @@ describe("causeLabel", () => {
   it("names Stinky on a halved tip", () => {
     const tip = tipValue(
       data,
-      testState({ duchess: 5, koda: 5, nugget: 5 }, { debuffs: ["stinky"] }),
+      testState({ duchess: 5, koda: 5, nugget: 5 }, { debuffs: [{ debuff: "stinky" }] }),
     );
     expect(causeLabel(data, tip)).toBe("+$0.50 tip, Stinky");
   });
@@ -120,7 +120,7 @@ describe("causeLabel", () => {
 
 describe("change causes", () => {
   it("add up to the change", () => {
-    const tip = tipValue(data, testState({ koda: 5 }, { debuffs: ["stinky"] }));
+    const tip = tipValue(data, testState({ koda: 5 }, { debuffs: [{ debuff: "stinky" }] }));
     const sum = (change: Change) => change.causes.reduce((total, { amount }) => total + amount, 0);
     expect(sum(tip)).toBe(changeAmount(tip));
     const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };

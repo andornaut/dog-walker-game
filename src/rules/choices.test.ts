@@ -202,7 +202,7 @@ describe("chooseOption", () => {
     const state = testState({ koda: 5 }, { money: cents(5000) });
     const once = choose(state, encounter("skunk", ["koda"]), 1).state;
     const twice = choose(once, encounter("skunk", ["koda"]), 1).state;
-    expect(twice.debuffs).toEqual(["stinky"]);
+    expect(twice.debuffs).toEqual([{ debuff: "stinky", untilZone: 0 }]);
   });
 
   it("fires an owner at 0 hearts, who takes back their dog's fees", () => {

@@ -35,6 +35,7 @@ export interface Volumes {
 export interface Mix {
   cardOpen: boolean;
   hidden: boolean;
+  muted: boolean;
   paused: boolean;
   volumes: Volumes;
 }
@@ -44,6 +45,7 @@ export const FULL_VOLUMES: Volumes = { music: 1, sfx: 1 };
 export const INITIAL_MIX: Mix = {
   cardOpen: false,
   hidden: false,
+  muted: false,
   paused: false,
   volumes: FULL_VOLUMES,
 };
@@ -56,10 +58,10 @@ export function clampVolume(volume: number): number {
   return Math.min(1, Math.max(0, volume));
 }
 
-// Channel volume times the master mute (silent while hidden or paused). Music also ducks while
-// a card is open.
+// Channel volume times the master mute (silent while muted, hidden or paused). Music also ducks
+// while a card is open.
 export function effectiveVolumes(mix: Mix): Volumes {
-  const master = mix.hidden || mix.paused ? 0 : 1;
+  const master = mix.muted || mix.hidden || mix.paused ? 0 : 1;
   const duck = mix.cardOpen ? CARD_OPEN_MUSIC_DUCK : 1;
   return {
     music: clampVolume(mix.volumes.music) * master * duck,

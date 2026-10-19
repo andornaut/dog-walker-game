@@ -5,6 +5,7 @@ import {
   isSteeringLocked,
   type LaneControl,
   laneControlIn,
+  lockSteering,
   pullLane,
   steerLane,
 } from "./laneControl";
@@ -42,13 +43,57 @@ describe("steerLane", () => {
     expect(control.lockSeconds).toBeCloseTo(0.5);
   });
 
-  it("drops a queued pull and its lock when a later press replaces it", () => {
+  it("lets a press during a pull's move change the target, and still locks on arrival", () => {
     let control = steerLane(config, 1, still(2));
     control = pullLane(config, 0.5, 1, control);
-    control = steerLane(config, 1, control);
+    control = steerLane(config, -1, control);
     control = advance(0.4, control);
-    expect(control.motion).toEqual(stillInLane(4));
-    expect(isSteeringLocked(control)).toBe(false);
+    expect(control.motion).toEqual(stillInLane(3));
+    expect(control.lockSeconds).toBeCloseTo(0.3);
+  });
+
+  it("ends a quick three-lane drag three lanes over", () => {
+    let control = still(1);
+    for (let i = 0; i < 3; i++) {
+      control = advance(0.02, steerLane(config, 1, control));
+    }
+    expect(advance(1, control).motion).toEqual(stillInLane(4));
+  });
+
+  it("ends two lanes over and one back a lane over, without turning around", () => {
+    let control = steerLane(config, 1, still(2));
+    control = steerLane(config, 1, advance(0.05, control));
+    control = steerLane(config, -1, advance(0.05, control));
+    expect(control.motion).toMatchObject({ from: 2, kind: "moving", to: 3 });
+    expect(advance(1, control).motion).toEqual(stillInLane(3));
+  });
+
+  it("turns around at once when the target falls behind the move", () => {
+    let control = advance(0.05, steerLane(config, 1, still(2)));
+    control = steerLane(config, -1, control);
+    expect(control.motion).toMatchObject({ from: 3, kind: "moving", to: 2 });
+    expect(advance(0.05, control).motion).toEqual(stillInLane(2));
+  });
+
+  it("holds the target at the road's edges", () => {
+    expect(steerLane(config, 1, still(4)).target).toBe(4);
+    let control = still(1);
+    control = steerLane(config, -1, steerLane(config, -1, control));
+    expect(control.target).toBe(0);
+    control = steerLane(config, 1, control);
+    expect(advance(1, control).motion).toEqual(stillInLane(1));
+  });
+});
+
+describe("lockSteering", () => {
+  it("drops steps until the lock runs out", () => {
+    const locked = lockSteering(0.5, still(2));
+    expect(steerLane(config, 1, locked)).toBe(locked);
+    expect(destinationLane(steerLane(config, 1, advance(0.5, locked)).motion)).toBe(3);
+  });
+
+  it("keeps a longer lock that is already running", () => {
+    expect(lockSteering(0.2, lockSteering(0.5, still(2))).lockSeconds).toBe(0.5);
   });
 });
 
@@ -93,7 +138,7 @@ describe("pullLane", () => {
     expect(control.lockSeconds).toBeCloseTo(0.2);
   });
 
-  it("replaces a player move queued mid-move", () => {
+  it("replaces the player's target mid-move", () => {
     let control = steerLane(config, 1, still(2));
     control = steerLane(config, 1, control);
     control = pullLane(config, 0.25, -1, control);
@@ -126,7 +171,7 @@ describe("advanceLaneControl", () => {
       const actual = advance(seconds, laneControlIn(motion)).motion;
       const expected = advanceLaneMotion(config, seconds, motion);
       if (actual.kind === "moving" && expected.kind === "moving") {
-        expect(actual).toMatchObject({ ...expected, elapsed: actual.elapsed });
+        expect(actual).toMatchObject({ from: expected.from, kind: "moving", to: expected.to });
         expect(actual.elapsed).toBeCloseTo(expected.elapsed);
       } else {
         expect(actual).toEqual(expected);

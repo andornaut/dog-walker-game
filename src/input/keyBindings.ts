@@ -31,6 +31,11 @@ export function isPauseKey(key: string): boolean {
   return key === "Escape" || key.toLowerCase() === "p";
 }
 
+// M, in either case, mutes and unmutes.
+export function isMuteKey(key: string): boolean {
+  return key.toLowerCase() === "m";
+}
+
 // Enter or Space presses the screen's main button.
 export function isConfirmKey(key: string): boolean {
   return key === "Enter" || key === " ";

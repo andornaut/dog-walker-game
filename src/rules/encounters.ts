@@ -36,7 +36,7 @@ export function opensCard(
   const { noCardWhen } = data.encounters[encounterId];
   return (
     affected.length > 0 &&
-    !state.immunities.includes(encounterId) &&
+    !state.immunities.some(({ encounter }) => encounter === encounterId) &&
     !(noCardWhen !== undefined && evaluateCondition(data.dogs, noCardWhen, packDogs(state)))
   );
 }

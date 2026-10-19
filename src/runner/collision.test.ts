@@ -12,11 +12,12 @@ const rules = {
 const still = { bottom: 560, lanes: [2], top: 520 };
 const midMove = { ...still, lanes: [2, 3] };
 
-const item = (id: number, kind: Kind, lane: number, y: number): RoadItem<Kind> => ({
+const item = (id: number, kind: Kind, lane: number, y: number, laneSpan = 1): RoadItem<Kind> => ({
   height: 32,
   id,
   kind,
   lane,
+  laneSpan,
   y,
 });
 
@@ -28,6 +29,13 @@ describe("touchesPack", () => {
 
   it("misses an item in a lane the pack is not in", () => {
     expect(touchesPack(still, item(1, "tip", 3, 530))).toBe(false);
+  });
+
+  it("touches an item spanning several lanes in any of them", () => {
+    expect(touchesPack(still, item(1, "obstacle", 0, 530, 3))).toBe(true);
+    expect(touchesPack(still, item(1, "obstacle", 2, 530, 2))).toBe(true);
+    expect(touchesPack(still, item(1, "obstacle", 0, 530, 2))).toBe(false);
+    expect(touchesPack(still, item(1, "obstacle", 3, 530, 2))).toBe(false);
   });
 
   it("misses an item that only meets the band's edge", () => {

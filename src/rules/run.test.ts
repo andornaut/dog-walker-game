@@ -32,11 +32,11 @@ describe("tipValue", () => {
   it("applies Big tipper and Stinky on top of the pack-size factor", () => {
     const pack = { duchess: 5, koda: 5, nugget: 5 };
     expect(tipValue(data, testState(pack, { modifiers: [bigTipper] })).amount).toBe(150);
-    expect(tipValue(data, testState(pack, { debuffs: ["stinky"] })).amount).toBe(50);
+    expect(tipValue(data, testState(pack, { debuffs: [{ debuff: "stinky" }] })).amount).toBe(50);
   });
 
   it("gives the tip, the pack-size factor and each modifier as causes", () => {
-    const tip = tipValue(data, testState({ koda: 5 }, { debuffs: ["stinky"] }));
+    const tip = tipValue(data, testState({ koda: 5 }, { debuffs: [{ debuff: "stinky" }] }));
     expect(tip).toEqual({
       amount: 75,
       causes: [

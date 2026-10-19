@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import type { DogId, Effect } from "../data/types";
 import type { EffectSource } from "../state/runState";
@@ -15,7 +16,7 @@ import {
 } from "./effects";
 import { cents } from "./units";
 
-const data = { dogs: DOGS, tuning: TEST_TUNING };
+const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING };
 const SKUNK_IGNORE: EffectSource = { encounter: "skunk", kind: "encounter", option: 2 };
 const context = (affected: readonly DogId[], random = () => 0): EffectContext => ({
   affected,
@@ -237,13 +238,13 @@ describe("applyEffects: other kinds", () => {
   it("refreshes a debuff the pack already has instead of stacking it", () => {
     const stinky: Effect = { debuff: "stinky", kind: "debuff" };
     const state = applyEffects(data, context([]), [stinky, stinky], testState({ koda: 5 }));
-    expect(state.debuffs).toEqual(["stinky"]);
+    expect(state.debuffs).toEqual([{ debuff: "stinky", untilZone: 0 }]);
   });
 
   it("records an immunity once", () => {
     const raincoats: Effect = { duration: "run", encounter: "puddle", kind: "immune" };
     const state = applyEffects(data, context([]), [raincoats, raincoats], testState({ koda: 5 }));
-    expect(state.immunities).toEqual(["puddle"]);
+    expect(state.immunities).toEqual([{ encounter: "puddle" }]);
   });
 
   it("keeps a modifier, with its source, for the rules that read its stat", () => {

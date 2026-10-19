@@ -30,6 +30,30 @@ export function drawShadow(
   }
 }
 
+const SHADOW_RADIUS_Y = 2.5;
+
+// The shadow drawShadow draws, made once per colour and sprite width as a texture. anchor is
+// the texture pixel to place a pixel above the sprite's feet, at its x.
+export function shadowTexture(
+  scene: Scene,
+  color: number,
+  spriteWidth: number,
+): { anchor: { x: number; y: number }; key: string } {
+  const radiusX = shadowRadiusX(spriteWidth);
+  const anchor = { x: Math.ceil(radiusX) + 1, y: Math.ceil(SHADOW_RADIUS_Y) + 1 };
+  const key = `shadow-${color.toString(16)}-${radiusX}`;
+  if (!scene.textures.exists(key)) {
+    const graphics = scene.make.graphics({}, false);
+    graphics.fillStyle(color);
+    for (const span of pixelEllipseSpans(anchor.x, anchor.y, radiusX, SHADOW_RADIUS_Y)) {
+      graphics.fillRect(span.x, span.y, span.width, 1);
+    }
+    graphics.generateTexture(key, 2 * anchor.x + 1, 2 * anchor.y + 1);
+    graphics.destroy();
+  }
+  return { anchor, key };
+}
+
 // A 1px line with no smoothing, so it stays on the palette.
 export function drawPixelLine(
   graphics: GameObjects.Graphics,

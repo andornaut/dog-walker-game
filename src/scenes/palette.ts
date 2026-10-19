@@ -9,6 +9,7 @@ export const PALETTE = {
   darkGreen: 0x3e8948,
   darkRed: 0xa22633,
   darkSlate: 0x3a4466,
+  forest: 0x265c42,
   green: 0x63c74d,
   grey: 0x8b9bb4,
   ink: 0x181425,
@@ -19,20 +20,14 @@ export const PALETTE = {
   pink: 0xf6757a,
   plum: 0x3e2731,
   red: 0xe43b44,
+  rust: 0xbe4a2f,
   slate: 0x5a6988,
   tan: 0xe4a672,
   white: 0xffffff,
+  yellow: 0xfee761,
 } as const;
 
 // The data files write colours as "#rrggbb".
 export function colorFromHex(hex: string): number {
   return Number.parseInt(hex.replace(/^#/, ""), 16);
 }
-
-// Lane markings, one step lighter or darker than each zone's road so the lanes read.
-export const LANE_MARK_COLORS: Readonly<Record<string, number>> = {
-  homeStretch: PALETTE.cream,
-  park: PALETTE.brown,
-  shops: PALETTE.slate,
-  street: PALETTE.lightGrey,
-};

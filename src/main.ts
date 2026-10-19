@@ -66,3 +66,8 @@ const game = new Game({
 });
 
 mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
+
+// With dev=1, the game is reachable from the console and from headless checks.
+if (pageRunSetup().setup.dev) {
+  Object.assign(globalThis, { dogWalkerGame: game });
+}

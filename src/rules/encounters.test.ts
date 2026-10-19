@@ -36,7 +36,7 @@ describe("opensCard", () => {
   });
 
   it("opens no card for an encounter the pack is immune to", () => {
-    const whistle = testState({ duchess: 5 }, { immunities: ["thief"] });
+    const whistle = testState({ duchess: 5 }, { immunities: [{ encounter: "thief" }] });
     expect(opensCard(data, ["duchess"], whistle, "thief")).toBe(false);
   });
 });

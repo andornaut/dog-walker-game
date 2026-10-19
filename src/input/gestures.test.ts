@@ -24,6 +24,7 @@ import {
 // Dog column x 0-80 with slot bands at y 40-240, 240-440 and 440-640; road x 80-360, so
 // five lanes are 56px wide.
 const screen: ScreenConfig = {
+  backdropHeight: 0,
   dogColumnWidth: 80,
   dogSlotCount: 3,
   dogSlotPadding: 4,

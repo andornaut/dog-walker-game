@@ -9,6 +9,7 @@ import type {
   UpgradeId,
 } from "../data/types";
 import { startHearts } from "../rules/dogs";
+import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
 import { modifiedStat } from "../rules/modifiers";
 import { type Cents, cents, type Hearts, type Pixels, pixels } from "../rules/units";
@@ -46,8 +47,14 @@ export type EffectSource =
 
 export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonly kind: "debuff" };
 
-// A modifier in effect, with what it came from so a change can name it.
-export type ActiveModifier = Modifier & { readonly source: ModifierSource };
+// A modifier in effect, with what it came from so a change can name it, and the last zone it
+// lasts through.
+export type ActiveModifier = Lasting & Modifier & { readonly source: ModifierSource };
+
+export type ActiveDebuff = Lasting & { readonly debuff: DebuffId };
+
+// No card opens for the encounter while the immunity lasts.
+export type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
 
 // What opened a card. affected is the dogs the encounter affected (caught by an area roll,
 // the chasers for a squirrel, or the whole pack); lucky encounters are encounters too.
@@ -73,11 +80,11 @@ export type Phase =
 
 export interface RunState {
   // Each debuff at most once: applying one the pack has refreshes it.
-  readonly debuffs: readonly DebuffId[];
+  readonly debuffs: readonly ActiveDebuff[];
   // Fees each dog has paid this run, which its owner takes back on firing you.
   readonly feesEarned: Readonly<Partial<Record<DogId, Cents>>>;
   readonly gear: GearId | null;
-  readonly immunities: readonly EncounterId[];
+  readonly immunities: readonly ActiveImmunity[];
   readonly modifiers: readonly ActiveModifier[];
   readonly money: Cents;
   readonly pack: Pack;
@@ -100,7 +107,7 @@ export interface Loadout {
 // A run's opening state: the gear applied, then each owner's starting hearts and the
 // starting money. Throws for a dog listed twice or more dogs than the player has slots.
 export function newRun(
-  data: Pick<GameData, "dogs" | "shopGear" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "shopGear" | "tuning">,
   dogSlots: number,
   loadout: Loadout,
 ): RunState {

@@ -68,6 +68,10 @@ describe("effectiveVolumes", () => {
     expect(effectiveVolumes(mix({ hidden: true }))).toEqual({ music: 0, sfx: 0 });
   });
 
+  it("silences both channels while the player has muted", () => {
+    expect(effectiveVolumes(mix({ muted: true }))).toEqual({ music: 0, sfx: 0 });
+  });
+
   it("mutes both channels while the game is paused", () => {
     expect(effectiveVolumes(mix({ paused: true }))).toEqual({ music: 0, sfx: 0 });
   });

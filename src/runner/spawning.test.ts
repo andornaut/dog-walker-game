@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
+import { lanesReachedAtEnd } from "../testing/avoidable";
 import { seededRandom } from "./random";
 import {
+  blockingLength,
   everyLaneReaches,
+  type Footprint,
+  hitLength,
   laneReach,
   planSpawns,
   type SpawnEvent,
@@ -12,44 +16,92 @@ import {
   takeDueSpawns,
 } from "./spawning";
 
-type Kind = "obstacle" | "tip" | "treat";
+type Kind = "bench" | "car" | "hedge" | "obstacle" | "skunk" | "tip" | "treat";
 
-// 9 rows at 100..900, 5 lanes. 50px of clear road between rows at 100px/s is 0.5s,
+// 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
+// row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
 // time for 5 moves of 0.1s, so the pack can reach any lane from any row.
 const plan: SpawnPlan<Kind> = {
-  blockingLength: 50,
+  cellInset: 5,
+  cellLength: 30,
   laneCount: 5,
   laneMoveSeconds: 0.1,
+  minOpenLanes: 1,
   minSpacing: 100,
+  packLength: 30,
   quotas: [
     { blocksLane: true, count: 6, kind: "obstacle" },
     { blocksLane: false, count: 9, kind: "tip" },
     { blocksLane: false, count: 3, kind: "treat" },
   ],
   scrollSpeed: 100,
+  sightLength: 1000,
   zoneLength: 1000,
 };
 
-// 0.3s between rows fits one 0.25s move; the 1.3s into the first row fits five.
+// A 70px window leaves 0.3s between rows, which fits one 0.25s move; the 1.3s into the first
+// row fits five.
 const tight: SpawnPlan<Kind> = {
   ...plan,
-  blockingLength: 70,
   laneMoveSeconds: 0.25,
+  packLength: 50,
   quotas: [
     { blocksLane: true, count: 27, kind: "obstacle" },
     { blocksLane: false, count: 9, kind: "tip" },
   ],
 };
 
-// The lanes no obstacle takes, row by row.
-function openLanesByRow(events: SpawnEvent<Kind>[]): number[][] {
-  return spawnRowDistances(100, 1000).map((distance) => {
-    const blocked = events
-      .filter((event) => event.distance === distance && event.kind === "obstacle")
-      .map((event) => event.lane);
+const FOOTPRINTS = {
+  bench: { lanes: 2, rows: 1 },
+  car: { lanes: 1, rows: 3 },
+  hedge: { lanes: 3, rows: 1 },
+  skunk: { lanes: 2, rows: 2 },
+} satisfies Partial<Record<Kind, Footprint>>;
+const footprintOf = (kind: Kind): Footprint =>
+  (FOOTPRINTS as Partial<Record<Kind, Footprint>>)[kind] ?? { lanes: 1, rows: 1 };
+
+// Footprints over several lanes and rows, two lanes always open, at a tight one-lane reach.
+const shaped: SpawnPlan<Kind> = {
+  ...tight,
+  minOpenLanes: 2,
+  quotas: [
+    { blocksLane: true, count: 3, footprint: FOOTPRINTS.hedge, kind: "hedge" },
+    { blocksLane: true, count: 2, footprint: FOOTPRINTS.car, kind: "car" },
+    { blocksLane: true, count: 2, footprint: FOOTPRINTS.skunk, kind: "skunk" },
+    { blocksLane: true, count: 3, footprint: FOOTPRINTS.bench, kind: "bench" },
+    { blocksLane: true, count: 4, kind: "obstacle" },
+    { blocksLane: false, count: 9, kind: "tip" },
+  ],
+  zoneLength: 2000,
+};
+
+const blocking = (event: SpawnEvent<Kind>) => event.kind !== "tip" && event.kind !== "treat";
+
+// The lanes no lane-blocking spawn overlaps in each row's window.
+function openLanesByRow(spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]): number[][] {
+  const window = blockingLength(spawnPlan, 1);
+  return spawnRowDistances(spawnPlan.minSpacing, spawnPlan.zoneLength).map((distance) => {
+    const blocked = events.filter(blocking).flatMap((event) => {
+      const { lanes, rows } = footprintOf(event.kind);
+      const overlaps =
+        event.distance < distance + window &&
+        distance < event.distance + blockingLength(spawnPlan, rows);
+      return overlaps ? Array.from({ length: lanes }, (_, i) => event.lane + i) : [];
+    });
     return [0, 1, 2, 3, 4].filter((lane) => !blocked.includes(lane));
   });
 }
+
+const spansOf = (spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]) =>
+  events.filter(blocking).map((event) => {
+    const { lanes, rows } = footprintOf(event.kind);
+    return {
+      distance: event.distance,
+      lane: event.lane,
+      laneSpan: lanes,
+      length: hitLength(spawnPlan, rows) + spawnPlan.packLength,
+    };
+  });
 
 const seeds = Array.from({ length: 50 }, (_, i) => i + 1);
 const countOf = (kind: Kind, events: { kind: Kind }[]) =>
@@ -68,6 +120,14 @@ describe("spawnRowDistances", () => {
 
   it("rejects a spacing that is not positive", () => {
     expect(() => spawnRowDistances(0, 1000)).toThrow();
+  });
+});
+
+describe("hitLength and blockingLength", () => {
+  it("insets the hit box from its footprint at both ends, and adds the pack", () => {
+    expect(hitLength(plan, 1)).toBe(20);
+    expect(hitLength(plan, 3)).toBe(80);
+    expect(blockingLength(plan, 2)).toBe(80);
   });
 });
 
@@ -121,6 +181,23 @@ describe("planSpawns", () => {
     }
   });
 
+  it("keeps minOpenLanes open on every row", () => {
+    const crowded: SpawnPlan<Kind> = {
+      ...plan,
+      minOpenLanes: 2,
+      quotas: [{ blocksLane: true, count: 9 * 3, kind: "obstacle" }],
+    };
+    for (const seed of seeds.slice(0, 10)) {
+      const open = openLanesByRow(crowded, planSpawns(seededRandom(seed), crowded));
+      expect(open.every((lanes) => lanes.length === 2)).toBe(true);
+    }
+    const tooMany = {
+      ...crowded,
+      quotas: [{ blocksLane: true, count: 9 * 3 + 1, kind: "obstacle" as const }],
+    };
+    expect(() => planSpawns(seededRandom(1), tooMany)).toThrow(/obstacle/);
+  });
+
   it("throws when the zone has no room for the obstacles asked for", () => {
     const tooMany: SpawnPlan<Kind> = {
       ...plan,
@@ -131,7 +208,7 @@ describe("planSpawns", () => {
 
   it("leaves an open lane within one move of every open lane on the row before", () => {
     for (const seed of seeds) {
-      const open = openLanesByRow(planSpawns(seededRandom(seed), tight));
+      const open = openLanesByRow(tight, planSpawns(seededRandom(seed), tight));
       open.slice(1).forEach((lanes, i) => {
         for (const from of itemAt(open, i)) {
           expect(lanes.some((lane) => Math.abs(lane - from) <= 1)).toBe(true);
@@ -146,10 +223,52 @@ describe("planSpawns", () => {
     }
   });
 
+  it("keeps a footprint on the road, its cells to itself, and two lanes open", () => {
+    for (const seed of seeds) {
+      const events = planSpawns(seededRandom(seed), shaped);
+      expect(events.filter(blocking)).toHaveLength(14);
+      for (const event of events) {
+        expect(event.lane + footprintOf(event.kind).lanes).toBeLessThanOrEqual(5);
+      }
+      for (const lanes of openLanesByRow(shaped, events)) {
+        expect(lanes.length).toBeGreaterThanOrEqual(2);
+      }
+      const tips = events.filter((event) => event.kind === "tip");
+      const open = openLanesByRow(shaped, events);
+      const rows = spawnRowDistances(100, 2000);
+      for (const tip of tips) {
+        expect(itemAt(open, rows.indexOf(tip.distance))).toContain(tip.lane);
+      }
+    }
+  });
+
+  it("leaves a way through footprints over several lanes and rows, from any lane", () => {
+    for (const seed of seeds) {
+      const spans = spansOf(shaped, planSpawns(seededRandom(seed), shaped));
+      for (const start of [0, 1, 2, 3, 4]) {
+        expect(lanesReachedAtEnd(shaped, spans, start)).not.toEqual([]);
+      }
+    }
+  });
+
+  it("ends a footprint more than one row long within the zone's last row", () => {
+    const cars: SpawnPlan<Kind> = {
+      ...shaped,
+      quotas: [{ blocksLane: true, count: 12, footprint: FOOTPRINTS.car, kind: "car" }],
+    };
+    for (const seed of seeds.slice(0, 10)) {
+      for (const event of planSpawns(seededRandom(seed), cars)) {
+        expect(event.distance + blockingLength(cars, 3)).toBeLessThanOrEqual(1900 + 70);
+      }
+    }
+  });
+
   it("throws when the rows are too close for the pack to pass between them", () => {
-    expect(() => planSpawns(seededRandom(1), { ...plan, blockingLength: 101 })).toThrow(
-      /minSpacing/,
-    );
+    expect(() => planSpawns(seededRandom(1), { ...plan, packLength: 81 })).toThrow(/minSpacing/);
+  });
+
+  it("throws when the next row is out of sight before the pack must steer for it", () => {
+    expect(() => planSpawns(seededRandom(1), { ...plan, sightLength: 49 })).toThrow(/sight/);
   });
 
   it("throws when no obstacle can be placed without blocking every reachable lane", () => {
@@ -157,8 +276,8 @@ describe("planSpawns", () => {
     // lane of the first row must stay open, and then of every row after it.
     const unreachable: SpawnPlan<Kind> = {
       ...plan,
-      blockingLength: 100,
       laneMoveSeconds: 2,
+      packLength: 80,
       quotas: [{ blocksLane: true, count: 1, kind: "obstacle" }],
     };
     expect(() => planSpawns(seededRandom(1), unreachable)).toThrow(/obstacle/);
@@ -192,6 +311,11 @@ describe("everyLaneReaches", () => {
   it("is false when one lane has no target within reach", () => {
     expect(everyLaneReaches(1, [0, 4], [1])).toBe(false);
     expect(everyLaneReaches(4, [0], [])).toBe(false);
+  });
+
+  it("is false when the only way crosses a lane that is not clear", () => {
+    expect(everyLaneReaches(2, [0], [2], (lane) => lane !== 1)).toBe(false);
+    expect(everyLaneReaches(2, [0], [0, 2], (lane) => lane !== 1)).toBe(true);
   });
 });
 

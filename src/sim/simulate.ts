@@ -11,12 +11,14 @@ import {
   openCard,
 } from "../rules/choices";
 import { affectedDogs, opensCard } from "../rules/encounters";
-import { tipValue } from "../rules/run";
+import { minorBump } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { addCents, type Cents, cents, read } from "../rules/units";
 import { chance, type Random } from "../runner/random";
 import {
+  collect,
   finishZone,
+  isMinorObstacle,
   planZone,
   startRoad,
   type Walk,
@@ -206,8 +208,6 @@ function playZone(
   const graceDistance =
     read(data.tuning, "seconds", "collisionGrace") * walkScrollSpeed(data, session.run);
   let graceUntil = -Infinity;
-  // SEAM (pickups): the tip and treat branches restate collect in walk.ts, which is private;
-  // call it instead once it is exported.
   for (const event of zoneEvents(walk)) {
     if (event.kind === "stop") {
       playCard(data, random, config, session, "forcedStop", {
@@ -216,14 +216,19 @@ function playZone(
       });
     } else if (event.item === "tip") {
       if (chance(random, config.tipRate)) {
-        const tip = tipValue(data, session.run).amount;
-        session.tips = addCents(session.tips, tip);
-        session.run = { ...session.run, money: addCents(session.run.money, tip) };
+        const pickup = collect(data, "tip", session.run);
+        session.tips = addCents(session.tips, pickup.tip?.amount ?? cents(0));
+        session.run = pickup.run;
       }
     } else if (event.item === "treat") {
       if (chance(random, config.treatRate)) {
-        const carryMax = read(data.tuning, "counts", "treatCarryMax");
-        session.run = { ...session.run, treats: Math.min(carryMax, session.run.treats + 1) };
+        session.run = collect(data, "treat", session.run).run;
+      }
+    } else if (isMinorObstacle(data, event.item)) {
+      // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
+      if (event.distance >= graceUntil && chance(random, config.hitRate)) {
+        graceUntil = event.distance + graceDistance;
+        session.run = minorBump(data, session.run).state;
       }
     } else if (data.encounters[event.item].kind === "lucky") {
       if (chance(random, config.luckyRate)) {
@@ -231,8 +236,6 @@ function playZone(
       }
     } else if (event.distance >= graceUntil && chance(random, config.hitRate)) {
       graceUntil = event.distance + graceDistance;
-      // SEAM (minor obstacles): a minor obstacle opens no card; apply its tip loss and
-      // stumble here once the rules expose it, instead of meeting it as an encounter.
       meet(data, random, config, session, "obstacle", event.item);
     }
     if (hasEnded(session)) {
@@ -269,8 +272,7 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     if (hasEnded(session)) {
       break;
     }
-    // SEAM (effect expiry): zone-long debuffs and next-zone upgrades expire at the zone's
-    // end. finishZone does not expire them yet; once it does, the simulator follows.
+    // finishZone pays the fees, then expires the zone-long debuffs and next-zone upgrades.
     const end = finishZone(data, session.run);
     session.zones.push({
       fees: end.fees.flatMap(({ amount, dog }) => (dog === null ? [] : [{ amount, dog }])),

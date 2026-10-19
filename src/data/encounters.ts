@@ -63,6 +63,7 @@ export const ENCOUNTERS = {
         },
       ],
     },
+    shape: { lanes: 1, rows: 1 },
   },
   photoOp: {
     affects: { kind: "all" },
@@ -105,6 +106,7 @@ export const ENCOUNTERS = {
         },
       ],
     },
+    shape: { lanes: 2, rows: 1 },
   },
   skunk: {
     affects: { kind: "caught" },
@@ -140,6 +142,7 @@ export const ENCOUNTERS = {
         },
       ],
     },
+    shape: { lanes: 2, rows: 2 },
   },
   squirrel: {
     affects: { kind: "trait", trait: "chaser" },
@@ -160,6 +163,7 @@ export const ENCOUNTERS = {
         },
       ],
     },
+    shape: { lanes: 1, rows: 1 },
   },
   thief: {
     affects: { kind: "all" },
@@ -181,5 +185,6 @@ export const ENCOUNTERS = {
         },
       ],
     },
+    shape: { lanes: 1, rows: 1 },
   },
 } as const satisfies Record<EncounterId, Encounter>;

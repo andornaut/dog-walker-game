@@ -21,8 +21,10 @@ export interface CollisionResult<Item extends RoadItem> {
   remaining: Item[];
 }
 
+// Touching any part of an item counts.
 export function touchesPack(pack: PackFootprint, item: RoadItem): boolean {
-  return pack.lanes.includes(item.lane) && item.y < pack.bottom && item.y + item.height > pack.top;
+  const inLane = pack.lanes.some((lane) => lane >= item.lane && lane < item.lane + item.laneSpan);
+  return inLane && item.y < pack.bottom && item.y + item.height > pack.top;
 }
 
 // Items nearest the bottom are hit first, so of two obstacles touching at once only the

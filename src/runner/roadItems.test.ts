@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { itemsOnRoad, scrollRoadItems } from "./roadItems";
 
-const tip = { height: 32, id: 1, kind: "tip", lane: 2, y: 100 };
+const tip = { height: 32, id: 1, kind: "tip", lane: 2, laneSpan: 1, y: 100 };
 
 describe("scrollRoadItems", () => {
   it("moves every item down by the distance scrolled, keeping its lane", () => {

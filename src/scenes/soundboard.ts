@@ -82,6 +82,10 @@ export class Soundboard {
     this.updateMix({ hidden });
   }
 
+  setMuted(muted: boolean): void {
+    this.updateMix({ muted });
+  }
+
   setPaused(paused: boolean): void {
     this.updateMix({ paused });
   }

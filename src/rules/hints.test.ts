@@ -17,6 +17,6 @@ describe("hintFor", () => {
   });
 
   it("returns nothing for an event no hint waits for", () => {
-    expect(hintFor(data, [], { encounter: "skunk", kind: "encounter" })).toBeNull();
+    expect(hintFor(data, [], { encounter: "thief", kind: "encounter" })).toBeNull();
   });
 });

@@ -5,6 +5,8 @@ export interface ZoneStats {
   // At base speed and before upgrades.
   readonly duration: Seconds;
   readonly luckyEncounters: number;
+  // Obstacles that open no card, on top of obstacles.
+  readonly minorObstacles: number;
   readonly obstacles: number;
   readonly scrollSpeed: Pixels;
   readonly tips: number;
@@ -19,6 +21,10 @@ export function zoneStats(tuning: LiveTuning, zoneIndex: number): ZoneStats {
   return {
     duration: seconds(read(tuning, "seconds", "zoneAtBaseSpeed") / speedFactor),
     luckyEncounters: read(tuning, "counts", "luckyEncountersPerZone"),
+    minorObstacles: counts(
+      tuning.counts.minorObstaclesFirstZone,
+      tuning.counts.minorObstaclesGainPerZone,
+    ),
     obstacles: counts(tuning.counts.obstaclesFirstZone, tuning.counts.obstaclesGainPerZone),
     scrollSpeed: pixels(read(tuning, "pixels", "roadScrollSpeed") * speedFactor),
     tips: counts(tuning.counts.tipsFirstZone, tuning.counts.tipsGainPerZone),

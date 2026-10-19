@@ -1,32 +1,56 @@
-import type { EncounterId, ForcedStopId, GameData } from "../data/types";
+import type { EncounterId, ForcedStopId, GameData, MinorObstacleId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import type { MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
+import { expireAtZoneEnd } from "../rules/durations";
 import { affectedDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
-import { payZoneFees, tipValue } from "../rules/run";
+import { minorBump, payZoneFees, tipValue } from "../rules/run";
 import { addCents, type Pixels, pixels, read } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import { collideWithPack, type PackFootprint, tickInvulnerability, touchesPack } from "./collision";
-import { advanceLaneControl, type LaneControl, laneControlIn, steerLane } from "./laneControl";
+import {
+  advanceLaneControl,
+  type LaneControl,
+  laneControlIn,
+  lockSteering,
+  steerLane,
+} from "./laneControl";
 import { type LaneMotionConfig, occupiedLanes, stillInLane } from "./laneMotion";
 import { type Random, randomInt, randomPick } from "./random";
 import { itemsOnRoad, type RoadItem, scrollRoadItems } from "./roadItems";
-import { planSpawns, type SpawnEvent, type SpawnQuota, takeDueSpawns } from "./spawning";
+import {
+  type Footprint,
+  hitLength,
+  planSpawns,
+  SINGLE_CELL,
+  type SpawnEvent,
+  type SpawnQuota,
+  takeDueSpawns,
+} from "./spawning";
 import { advanceZones } from "./zones";
 
 export type WalkData = Pick<
   GameData,
-  "debuffs" | "dogs" | "encounters" | "forcedStops" | "shopGear" | "tuning" | "upgrades" | "world"
+  | "debuffs"
+  | "dogs"
+  | "encounters"
+  | "forcedStops"
+  | "minorObstacles"
+  | "shopGear"
+  | "tuning"
+  | "upgrades"
+  | "world"
 >;
 
 export type PickupKind = "tip" | "treat";
-export type WalkItemKind = EncounterId | PickupKind;
+export type WalkItemKind = EncounterId | MinorObstacleId | PickupKind;
 export type WalkItem = RoadItem<WalkItemKind>;
-// What a road item is to the rules: an obstacle hit by accident, a lucky encounter, or a pickup.
-export type ItemCategory = "lucky" | "obstacle" | PickupKind;
+// What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
+// no card, a lucky encounter, or a pickup.
+export type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
 
 // distance is the zone distance at which the stop comes into view at the top of the road.
 export interface ForcedStopAhead {
@@ -41,7 +65,7 @@ export interface ForcedStopOnRoad {
 }
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
-// not yet in view, at zone distances.
+// not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
 export interface Road {
   control: LaneControl;
   forcedStopAhead: ForcedStopAhead | null;
@@ -51,6 +75,7 @@ export interface Road {
   items: readonly WalkItem[];
   nextItemId: number;
   pending: readonly SpawnEvent<WalkItemKind>[];
+  speedFactor: number;
 }
 
 export interface Walk {
@@ -59,13 +84,17 @@ export interface Walk {
 }
 
 // Screen pixels. packBand is the current pack's; tallestPackBand is any pack's, so spawns
-// stay avoidable whoever walks.
+// stay avoidable whoever walks. An obstacle's footprint is cell.length per lane and row, and
+// its hit box the footprint less cell.inset at each end; itemHeights are everything else's.
+// sightLength is the road in view above the tallest pack.
 export interface RoadGeometry {
-  itemHeights: Readonly<Record<ItemCategory | "forcedStop", number>>;
+  cell: { inset: number; length: number };
+  itemHeights: Readonly<Record<"forcedStop" | "lucky" | PickupKind, number>>;
   laneCount: number;
   packBand: { bottom: number; top: number };
   roadBottom: number;
   roadTop: number;
+  sightLength: number;
   tallestPackBand: number;
 }
 
@@ -75,9 +104,16 @@ export interface InstantFind {
   outcome: ChoiceOutcome;
 }
 
-// cards and instants are in the order the pack met them; tips are the money changes of the
-// tips collected; zoneEnded is set on the step that reaches the end of the zone.
+// A minor obstacle the pack bumped: the tips it dropped, or null with nothing to drop.
+export interface MinorBump {
+  change: MoneyChange | null;
+  item: WalkItem;
+}
+
+// bumps, cards and instants are in the order the pack met them; tips are the money changes of
+// the tips collected; zoneEnded is set on the step that reaches the end of the zone.
 export interface WalkStep {
+  bumps: MinorBump[];
   cards: CardSource[];
   collected: WalkItem[];
   instants: InstantFind[];
@@ -92,8 +128,45 @@ export interface ZoneEnd {
   run: RunState;
 }
 
-export function itemCategory(data: Pick<GameData, "encounters">, kind: WalkItemKind): ItemCategory {
-  return kind === "tip" || kind === "treat" ? kind : data.encounters[kind].kind;
+export function isMinorObstacle(
+  data: Pick<GameData, "minorObstacles">,
+  kind: WalkItemKind,
+): kind is MinorObstacleId {
+  return Object.hasOwn(data.minorObstacles, kind);
+}
+
+export function itemCategory(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): ItemCategory {
+  if (kind === "tip" || kind === "treat") {
+    return kind;
+  }
+  return isMinorObstacle(data, kind) ? "minor" : data.encounters[kind].kind;
+}
+
+// The lanes and rows an item covers: an obstacle's shape, or one cell.
+export function footprintOf(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): Footprint {
+  if (kind === "tip" || kind === "treat") {
+    return SINGLE_CELL;
+  }
+  if (isMinorObstacle(data, kind)) {
+    return data.minorObstacles[kind].shape;
+  }
+  const encounter = data.encounters[kind];
+  return encounter.kind === "obstacle" ? encounter.shape : SINGLE_CELL;
+}
+
+// What the pack steers around: obstacles, minor or not.
+export function blocksLane(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): boolean {
+  const category = itemCategory(data, kind);
+  return category === "minor" || category === "obstacle";
 }
 
 export function laneMotionConfig(
@@ -108,6 +181,18 @@ export function walkScrollSpeed(data: Pick<GameData, "tuning">, run: RunState): 
   return zoneStats(data.tuning, run.zoneIndex).scrollSpeed;
 }
 
+// The minor obstacles that may appear in the run's current zone.
+export function minorObstaclesIn(
+  data: Pick<GameData, "minorObstacles" | "world">,
+  zoneIndex: number,
+): MinorObstacleId[] {
+  const zone = data.world.zones[zoneIndex]?.id;
+  return (Object.keys(data.minorObstacles) as MinorObstacleId[]).filter((id) => {
+    const { zones } = data.minorObstacles[id] as { zones?: readonly string[] };
+    return zones === undefined || (zone !== undefined && zones.includes(zone));
+  });
+}
+
 // Every zone is the distance the base speed covers in zoneAtBaseSpeed, before upgrades.
 export function zoneLength(data: Pick<GameData, "tuning">, run: RunState): Pixels {
   const base =
@@ -116,7 +201,7 @@ export function zoneLength(data: Pick<GameData, "tuning">, run: RunState): Pixel
   return pixels(modifiedStat(data.tuning, run.modifiers, "zoneLength", base));
 }
 
-export function startRoad(laneCount: number): Road {
+export function startRoad(laneCount: number, speedFactor = 1): Road {
   return {
     control: laneControlIn(stillInLane(Math.floor(laneCount / 2))),
     forcedStopAhead: null,
@@ -126,6 +211,7 @@ export function startRoad(laneCount: number): Road {
     items: [],
     nextItemId: 0,
     pending: [],
+    speedFactor,
   };
 }
 
@@ -162,17 +248,38 @@ export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, 
   return last[0];
 }
 
-type SpawnGroup = "lucky" | "obstacle" | PickupKind;
-
-function spawnQuotas(data: WalkData, run: RunState): SpawnQuota<SpawnGroup>[] {
+// Each obstacle kind is drawn first, weighted, so its shape is known when it is placed; a
+// zone's minor obstacles are drawn evenly from those allowed in it. Rush hour and the like
+// scale both counts.
+function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
   const stats = zoneStats(data.tuning, run.zoneIndex);
   const scaled = (stat: "obstacleSpawns" | "tipSpawns", base: number) =>
     Math.round(modifiedStat(data.tuning, run.modifiers, stat, base));
+  const weights = obstacleWeights(data, run);
+  const minors = minorObstaclesIn(data, run.zoneIndex);
+  const lucky = (Object.keys(data.encounters) as EncounterId[]).filter(
+    (id) => data.encounters[id].kind === "lucky",
+  );
+  const drawn = <Kind extends WalkItemKind>(count: number, draw: () => Kind) =>
+    Array.from({ length: count }, draw);
+  const kinds: WalkItemKind[] = [
+    ...drawn(scaled("obstacleSpawns", stats.obstacles), () => pickWeighted(random, weights)),
+    ...(minors.length === 0
+      ? []
+      : drawn(scaled("obstacleSpawns", stats.minorObstacles), () => randomPick(random, minors))),
+    ...drawn(stats.luckyEncounters, () => randomPick(random, lucky)),
+  ];
+  const quotas = new Map<WalkItemKind, number>();
+  kinds.forEach((kind) => quotas.set(kind, (quotas.get(kind) ?? 0) + 1));
   return [
-    { blocksLane: true, count: scaled("obstacleSpawns", stats.obstacles), kind: "obstacle" },
+    ...[...quotas].map(([kind, count]) => ({
+      blocksLane: blocksLane(data, kind),
+      count,
+      footprint: footprintOf(data, kind),
+      kind,
+    })),
     { blocksLane: false, count: scaled("tipSpawns", stats.tips), kind: "tip" },
     { blocksLane: false, count: stats.treats, kind: "treat" },
-    { blocksLane: false, count: stats.luckyEncounters, kind: "lucky" },
   ];
 }
 
@@ -181,35 +288,28 @@ function spawnQuotas(data: WalkData, run: RunState): SpawnQuota<SpawnGroup>[] {
 // rows in the middle third of the zone.
 export function planZone(
   data: WalkData,
-  geometry: Pick<RoadGeometry, "itemHeights" | "laneCount" | "tallestPackBand">,
+  geometry: Pick<
+    RoadGeometry,
+    "cell" | "itemHeights" | "laneCount" | "sightLength" | "tallestPackBand"
+  >,
   random: Random,
   walk: Walk,
 ): Walk {
   const { road, run } = walk;
   const length = zoneLength(data, run);
   const spacing = read(data.tuning, "pixels", "spawnRowSpacing");
-  const plan = planSpawns(random, {
-    blockingLength: geometry.tallestPackBand + geometry.itemHeights.obstacle,
+  const pending = planSpawns(random, {
+    cellInset: geometry.cell.inset,
+    cellLength: geometry.cell.length,
     laneCount: geometry.laneCount,
     laneMoveSeconds: read(data.tuning, "seconds", "laneMove"),
+    minOpenLanes: read(data.tuning, "counts", "openLanesPerRowMin"),
     minSpacing: spacing,
-    quotas: spawnQuotas(data, run),
+    packLength: geometry.tallestPackBand,
+    quotas: spawnQuotas(data, random, run),
     scrollSpeed: walkScrollSpeed(data, run),
+    sightLength: geometry.sightLength,
     zoneLength: length,
-  });
-  const weights = obstacleWeights(data, run);
-  const lucky = (Object.keys(data.encounters) as EncounterId[]).filter(
-    (id) => data.encounters[id].kind === "lucky",
-  );
-  const pending = plan.map((event): SpawnEvent<WalkItemKind> => {
-    switch (event.kind) {
-      case "obstacle":
-        return { ...event, kind: pickWeighted(random, weights) };
-      case "lucky":
-        return { ...event, kind: randomPick(random, lucky) };
-      default:
-        return { ...event, kind: event.kind };
-    }
   });
 
   const stops = Object.keys(data.forcedStops) as ForcedStopId[];
@@ -240,12 +340,19 @@ export function steerWalk(
   return { ...walk, road: { ...walk.road, control } };
 }
 
-function heightOf(
-  data: Pick<GameData, "encounters">,
-  geometry: Pick<RoadGeometry, "itemHeights">,
+// An obstacle's hit box is as long as its rows less the inset at each end.
+export function itemHeight(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  geometry: Pick<RoadGeometry, "cell" | "itemHeights">,
   kind: WalkItemKind,
 ): number {
-  return geometry.itemHeights[itemCategory(data, kind)];
+  const category = itemCategory(data, kind);
+  return category === "minor" || category === "obstacle"
+    ? hitLength(
+        { cellInset: geometry.cell.inset, cellLength: geometry.cell.length },
+        footprintOf(data, kind).rows,
+      )
+    : geometry.itemHeights[category];
 }
 
 // Lanes within reach of the pack's, clamped to the road.
@@ -264,7 +371,7 @@ function widenLanes(laneCount: number, reach: number, lanes: readonly number[]):
 
 // A tip pays what tips are worth now, with its causes; a treat is carried, up to the carry
 // limit.
-function collect(
+export function collect(
   data: WalkData,
   kind: PickupKind,
   run: RunState,
@@ -283,10 +390,10 @@ function collect(
 }
 
 // One frame of walking. Scrolls the road at the zone's speed, brings spawns into view,
-// moves the pack, then collides: pickups are collected into the run, obstacles (outside
-// the grace window) and lucky encounters become cards for the dogs they affect or, for an
-// instant lucky find, apply at once, and a forced stop that reaches the pack always becomes
-// a card. Does nothing unless walking.
+// moves the pack, then collides: pickups are collected into the run, minor obstacles drop
+// tips and lock lane input, obstacles (outside the grace window) and lucky encounters become
+// cards for the dogs they affect or, for an instant lucky find, apply at once, and a forced
+// stop that reaches the pack always becomes a card. Does nothing unless walking.
 export function stepWalk(
   data: WalkData,
   geometry: RoadGeometry,
@@ -296,11 +403,14 @@ export function stepWalk(
 ): WalkStep {
   const { road, run } = walk;
   if (run.phase.kind !== "walking") {
-    return { cards: [], collected: [], instants: [], tips: [], walk, zoneEnded: false };
+    return { bumps: [], cards: [], collected: [], instants: [], tips: [], walk, zoneEnded: false };
   }
   const length = zoneLength(data, run);
   const zone = advanceZones(
-    { baseSpeed: walkScrollSpeed(data, run), zones: [{ length, speedMultiplier: 1 }] },
+    {
+      baseSpeed: walkScrollSpeed(data, run) * road.speedFactor,
+      zones: [{ length, speedMultiplier: 1 }],
+    },
     stepSeconds,
     { distance: run.zoneDistance, finished: false, zoneDistance: run.zoneDistance, zoneIndex: 0 },
   );
@@ -310,12 +420,13 @@ export function stepWalk(
   const due = takeDueSpawns(zoneDistance, road.pending);
   let nextItemId = road.nextItemId;
   const arrived = due.due.map((event): WalkItem => {
-    const height = heightOf(data, geometry, event.kind);
+    const height = itemHeight(data, geometry, event.kind);
     return {
       height,
       id: nextItemId++,
       kind: event.kind,
       lane: event.lane,
+      laneSpan: footprintOf(data, event.kind).lanes,
       y: geometry.roadTop - height + (zoneDistance - event.distance),
     };
   });
@@ -340,18 +451,17 @@ export function stepWalk(
     forcedStopAhead = null;
   }
 
-  const control = advanceLaneControl(
+  let control = advanceLaneControl(
     laneMotionConfig(data, geometry.laneCount),
     stepSeconds,
     road.control,
   );
   const lanes = occupiedLanes(control.motion);
   const footprint: PackFootprint = { ...geometry.packBand, lanes };
-  const isObstacle = (item: WalkItem) => itemCategory(data, item.kind) === "obstacle";
   const { hits, invulnerableSeconds, remaining } = collideWithPack(
     {
       invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
-      startsInvulnerability: isObstacle,
+      startsInvulnerability: (item: WalkItem) => blocksLane(data, item.kind),
     },
     footprint,
     tickInvulnerability(stepSeconds, road.invulnerableSeconds),
@@ -363,29 +473,36 @@ export function stepWalk(
   const treatsHit = treats.filter((item) => touchesPack(treatFootprint, item));
 
   let nextRun: RunState = { ...run, zoneDistance: pixels(zoneDistance) };
+  const bumps: MinorBump[] = [];
   const cards: CardSource[] = [];
   const collected: WalkItem[] = [];
   const instants: InstantFind[] = [];
   const tips: MoneyChange[] = [];
   for (const item of [...hits, ...treatsHit]) {
-    if (item.kind === "tip" || item.kind === "treat") {
-      const pickup = collect(data, item.kind, nextRun);
+    const { kind } = item;
+    if (kind === "tip" || kind === "treat") {
+      const pickup = collect(data, kind, nextRun);
       nextRun = pickup.run;
       if (pickup.tip !== null) {
         tips.push(pickup.tip);
       }
       collected.push(item);
+    } else if (isMinorObstacle(data, kind)) {
+      const bump = minorBump(data, nextRun);
+      nextRun = bump.state;
+      control = lockSteering(read(data.tuning, "seconds", "minorStumble"), control);
+      bumps.push({ change: bump.change, item });
     } else {
-      const affected = affectedDogs(data, random, nextRun, item.kind);
-      if (!opensCard(data, affected, nextRun, item.kind)) {
+      const affected = affectedDogs(data, random, nextRun, kind);
+      if (!opensCard(data, affected, nextRun, kind)) {
         continue;
       }
-      if (data.encounters[item.kind].resolution.kind === "instant") {
-        const outcome = applyInstantEncounter(data, random, nextRun, item.kind, affected);
+      if (data.encounters[kind].resolution.kind === "instant") {
+        const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
         nextRun = outcome.state;
-        instants.push({ encounter: item.kind, outcome });
+        instants.push({ encounter: kind, outcome });
       } else {
-        cards.push({ affected, encounter: item.kind, kind: "encounter" });
+        cards.push({ affected, encounter: kind, kind: "encounter" });
       }
     }
   }
@@ -398,6 +515,7 @@ export function stepWalk(
   }
 
   return {
+    bumps,
     cards,
     collected,
     instants,
@@ -419,16 +537,17 @@ export function stepWalk(
   };
 }
 
-// The end of a zone: every dog still walking is paid, then the run moves to the next zone,
-// or ends once the last zone is done.
+// The end of a zone: every dog still walking is paid, the effects that lasted the zone
+// expire, then the run moves to the next zone, or ends once the last zone is done.
 export function finishZone(data: WalkData, run: RunState): ZoneEnd {
   const { changes, state: paid } = payZoneFees(data, run);
+  const expired = expireAtZoneEnd(run.zoneIndex, paid);
   if (run.zoneIndex >= data.world.zones.length - 1) {
-    return { fees: changes, run: { ...paid, phase: { kind: "ended", reason: "finished" } } };
+    return { fees: changes, run: { ...expired, phase: { kind: "ended", reason: "finished" } } };
   }
   return {
     fees: changes,
-    run: { ...paid, zoneDistance: pixels(0), zoneIndex: run.zoneIndex + 1 },
+    run: { ...expired, zoneDistance: pixels(0), zoneIndex: run.zoneIndex + 1 },
   };
 }
 

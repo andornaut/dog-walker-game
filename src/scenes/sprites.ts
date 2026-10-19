@@ -65,10 +65,56 @@ export function addStandingSprite(
     .setOrigin(0.5, feetY / frameHeight);
 }
 
-// Plays one of the sprite's Aseprite tags, if it has it; a placeholder has none.
-export function playTag(sprite: GameObjects.Sprite, key: string, tag: string): void {
+// Plays one of the sprite's Aseprite tags, if it has it; a placeholder has none. still shows
+// the tag's first frame instead, for reduced motion.
+export function playTag(sprite: GameObjects.Sprite, key: string, tag: string, still = false): void {
   const animation = animationKey(key, tag);
-  if (sprite.scene.anims.exists(animation) && sprite.anims.currentAnim?.key !== animation) {
-    sprite.play(animation);
+  if (!sprite.scene.anims.exists(animation)) {
+    return;
   }
+  const current = sprite.anims.currentAnim?.key === animation;
+  if (still) {
+    if (!current || sprite.anims.isPlaying) {
+      sprite.play(animation);
+      sprite.anims.pause(sprite.anims.currentAnim?.frames[0]);
+    }
+    return;
+  }
+  if (!current) {
+    sprite.play(animation);
+  } else if (sprite.anims.isPaused) {
+    sprite.anims.resume();
+  }
+}
+
+// Plays a tag once, then calls done; done is called at once when the sprite lacks the tag.
+export function playTagOnce(
+  sprite: GameObjects.Sprite,
+  key: string,
+  tag: string,
+  done: () => void,
+): void {
+  const animation = animationKey(key, tag);
+  if (!sprite.scene.anims.exists(animation)) {
+    done();
+    return;
+  }
+  sprite.play({ key: animation, repeat: 0 });
+  sprite.once(`animationcomplete-${animation}`, done);
+}
+
+// A one-shot effect, such as a burst, at a point: it plays its tag once and is destroyed.
+// Nothing is drawn when the art is missing.
+export function playEffect(
+  scene: Scene,
+  key: string,
+  tag: string,
+  point: { x: number; y: number },
+  depth: number,
+): void {
+  if (!scene.textures.exists(key) || !scene.anims.exists(animationKey(key, tag))) {
+    return;
+  }
+  const sprite = scene.add.sprite(Math.round(point.x), Math.round(point.y), key).setDepth(depth);
+  playTagOnce(sprite, key, tag, () => sprite.destroy());
 }

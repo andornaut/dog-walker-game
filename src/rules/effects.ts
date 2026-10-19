@@ -19,10 +19,11 @@ import {
   type MoneyChange,
 } from "./causes";
 import { maxHearts } from "./dogs";
+import { lastingFor, longerLasting } from "./durations";
 import { statParts } from "./modifiers";
 import { type Cents, cents, clampHearts, nonNegativeCents, read, readTable } from "./units";
 
-export type RulesData = Pick<GameData, "dogs" | "tuning">;
+export type RulesData = Pick<GameData, "debuffs" | "dogs" | "tuning">;
 
 export interface EffectContext {
   // The dogs the encounter affected, such as those caught by an area roll.
@@ -161,7 +162,7 @@ export function canAfford(
 // multiplies it, then the meter is held within 0 and the dog's max. No change is reported
 // when the meter does not move.
 export function changeHearts(
-  data: RulesData,
+  data: Pick<GameData, "dogs" | "tuning">,
   base: Cause,
   dogId: DogId,
   state: RunState,
@@ -270,25 +271,33 @@ function applyEffect(
   state: RunState,
 ): Applied {
   switch (effect.kind) {
-    case "debuff":
+    case "debuff": {
       // Refreshing a debuff the pack has leaves one copy: debuffs never stack.
-      return unchanged(
-        state.debuffs.includes(effect.debuff)
-          ? state
-          : { ...state, debuffs: [...state.debuffs, effect.debuff] },
-      );
+      const lasting = lastingFor(data.debuffs[effect.debuff].duration, state);
+      const held = state.debuffs.find(({ debuff }) => debuff === effect.debuff);
+      const others = state.debuffs.filter(({ debuff }) => debuff !== effect.debuff);
+      const refreshed = held === undefined ? lasting : longerLasting(held, lasting);
+      return unchanged({ ...state, debuffs: [...others, { debuff: effect.debuff, ...refreshed }] });
+    }
     case "hearts":
       return applyHearts(data, context, effect, state);
-    case "immune":
-      return unchanged(
-        state.immunities.includes(effect.encounter)
-          ? state
-          : { ...state, immunities: [...state.immunities, effect.encounter] },
-      );
+    case "immune": {
+      const lasting = lastingFor(effect.duration, state);
+      const held = state.immunities.find(({ encounter }) => encounter === effect.encounter);
+      const others = state.immunities.filter(({ encounter }) => encounter !== effect.encounter);
+      const refreshed = held === undefined ? lasting : longerLasting(held, lasting);
+      return unchanged({
+        ...state,
+        immunities: [...others, { encounter: effect.encounter, ...refreshed }],
+      });
+    }
     case "modifier":
       return unchanged({
         ...state,
-        modifiers: [...state.modifiers, { ...effect, source: context.source }],
+        modifiers: [
+          ...state.modifiers,
+          { ...effect, source: context.source, ...lastingFor(effect.duration, state) },
+        ],
       });
     case "money":
       return applyMoney(data, context, effect, state);
