@@ -21,7 +21,7 @@ secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x2
 ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
 empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
-icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo, current, done,
+icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo,
 and <zone> and <zone>-done for each zone in ZONE_COLOURS).
 
 Usage:
@@ -952,27 +952,13 @@ def pip_rim(fill):
     return c
 
 
-def zone_pip(zone=None, done=False, state=None):
+def zone_pip(zone=None, done=False):
     """18x8, one per zone of the chosen route, 3px apart. todo (no zone) is a dashed dbrown rim
     around the bare well: not yet chosen. <zone> is chosen: a rim in the zone's colour (pip_rim) around a 16x6
     well at 1,1 in the zone's road shadow. The game fills the current pip's well from the left in
     the zone's colour (ZONE_COLOURS) as the zone goes by. <zone>-done is the full colour with a
-    tick (white, or plum where white falls under 3:1), so progress never relies on colour alone.
-    state "current" or "done" is the zone-free pip (orange rim, ink well filled amber; green with a
-    tick) for a screen that does not know the zone."""
+    tick (white, or plum where white falls under 3:1), so progress never relies on colour alone."""
     g = Grid(18, 8)
-    if state:
-        rim, hi, inner = {"done": ("dgreen", "green", "green"), "current": ("orange", "amber", "ink")}[state]
-        g.rect(1, 0, 16, 8, rim)
-        g.rect(0, 1, 18, 6, rim)
-        g.rect(1, 0, 16, 1, hi)
-        g.rect(1, 1, 16, 6, inner)
-        if state == "done":
-            g.rect(1, 1, 16, 1, "yellow")
-            for x, y in ((6, 4), (7, 5), (8, 4), (9, 3), (10, 2), (11, 1)):
-                g.p(x, y, "white")
-            g.p(7, 6, "dgreen")
-        return g
     if zone is None:
         for x in range(1, 17, 3):
             g.rect(x, 0, 2, 1, "dbrown")
@@ -1161,7 +1147,6 @@ def sprites():
     yield "icon-effects-panel", [(t, [effects(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "icon-motion-panel", [(t, [motion(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [
-        (state, [zone_pip(state=state).outlined(False)], 1000) for state in ("current", "done")] + [
         (zone + suffix, [zone_pip(zone, bool(suffix)).outlined(False)], 1000)
         for zone in ZONE_COLOURS for suffix in ("", "-done")]
 

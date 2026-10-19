@@ -102,22 +102,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
     "sourceSize": { "w": 18, "h": 8 },
     "duration": 1000
-   },
-   "ui-zone-pips 13.aseprite": {
-    "frame": { "x": 234, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
-   },
-   "ui-zone-pips 14.aseprite": {
-    "frame": { "x": 252, "y": 0, "w": 18, "h": 8 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
-    "sourceSize": { "w": 18, "h": 8 },
-    "duration": 1000
    }
  },
  "meta": {
@@ -125,24 +109,22 @@
   "version": "1.2.30-x64",
   "image": "ui-zone-pips.png",
   "format": "RGBA8888",
-  "size": { "w": 270, "h": 8 },
+  "size": { "w": 234, "h": 8 },
   "scale": "1",
   "frameTags": [
    { "name": "todo", "from": 0, "to": 0, "direction": "forward" },
-   { "name": "current", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "done", "from": 2, "to": 2, "direction": "forward" },
-   { "name": "woof-way", "from": 3, "to": 3, "direction": "forward" },
-   { "name": "woof-way-done", "from": 4, "to": 4, "direction": "forward" },
-   { "name": "bark-park", "from": 5, "to": 5, "direction": "forward" },
-   { "name": "bark-park-done", "from": 6, "to": 6, "direction": "forward" },
-   { "name": "sniff-street-shops", "from": 7, "to": 7, "direction": "forward" },
-   { "name": "sniff-street-shops-done", "from": 8, "to": 8, "direction": "forward" },
-   { "name": "the-long-way-home", "from": 9, "to": 9, "direction": "forward" },
-   { "name": "the-long-way-home-done", "from": 10, "to": 10, "direction": "forward" },
-   { "name": "snooze-crescent", "from": 11, "to": 11, "direction": "forward" },
-   { "name": "snooze-crescent-done", "from": 12, "to": 12, "direction": "forward" },
-   { "name": "paws-promenade", "from": 13, "to": 13, "direction": "forward" },
-   { "name": "paws-promenade-done", "from": 14, "to": 14, "direction": "forward" }
+   { "name": "woof-way", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "woof-way-done", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "bark-park", "from": 3, "to": 3, "direction": "forward" },
+   { "name": "bark-park-done", "from": 4, "to": 4, "direction": "forward" },
+   { "name": "sniff-street-shops", "from": 5, "to": 5, "direction": "forward" },
+   { "name": "sniff-street-shops-done", "from": 6, "to": 6, "direction": "forward" },
+   { "name": "the-long-way-home", "from": 7, "to": 7, "direction": "forward" },
+   { "name": "the-long-way-home-done", "from": 8, "to": 8, "direction": "forward" },
+   { "name": "snooze-crescent", "from": 9, "to": 9, "direction": "forward" },
+   { "name": "snooze-crescent-done", "from": 10, "to": 10, "direction": "forward" },
+   { "name": "paws-promenade", "from": 11, "to": 11, "direction": "forward" },
+   { "name": "paws-promenade-done", "from": 12, "to": 12, "direction": "forward" }
   ]
  }
 }

@@ -45,30 +45,30 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 
 Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
-| Pair                       | Ratio | Use                                                       |
-| -------------------------- | ----- | --------------------------------------------------------- |
-| plum on cream              | 9.42  | Body text on cream, quips                                 |
-| plum on tan                | 6.49  | Body text on tan                                          |
-| plum on amber              | 7.35  | Text on amber: forced-stop band, step number              |
-| plum on yellow             | 10.92 | Text on a selected face                                   |
-| darkBrown on cream         | 5.85  | Secondary text, empty heart outline                       |
-| forest on cream            | 5.39  | Money gained, affordable prices, Stinky status            |
-| darkRed on cream           | 5.07  | Money lost, unaffordable prices, full heart               |
-| ink on brown               | 4.65  | Text on a darkened tile                                   |
-| cream on darkBrown         | 5.85  | Text on the column or wood                                |
-| amber on darkBrown         | 4.57  | Warnings, "You're fired!"                                 |
-| yellow on darkBrown        | 6.79  | Floating gain on the column                               |
-| white on darkBrown         | 8.48  | Floating loss on the column, filled page dot              |
-| tan on darkBrown           | 4.04  | Empty slot dashed border, hollow page dots                |
-| white on forest            | 7.80  | Labels on chips and buttons                               |
-| white on rust              | 4.99  | Trait chip "Food"                                         |
-| white on darkRed, blue     | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`              |
-| slate on ink               | 3.27  | Unpicked tile frame                                       |
-| amber on navy              | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`             |
-| `ui-zone-pips` on ink      | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked      |
-| `ui-difficulty` on cream   | 9.42  | Plum outline; on plum: amber 7.35 filled, tan 6.49 hollow |
-| white over the dimmed road | 4.5+  | Card subtitle                                             |
-| tan on the dimmed road     | 3.0+  | 1px rim around the pause panel                            |
+| Pair                       | Ratio | Use                                                    |
+| -------------------------- | ----- | ------------------------------------------------------ |
+| plum on cream              | 9.42  | Body text on cream, quips                              |
+| plum on tan                | 6.49  | Body text on tan                                       |
+| plum on amber              | 7.35  | Text on amber: forced-stop band, step number           |
+| plum on yellow             | 10.92 | Text on a selected face                                |
+| darkBrown on cream         | 5.85  | Secondary text, empty heart outline                    |
+| forest on cream            | 5.39  | Money gained, affordable prices, Stinky status         |
+| darkRed on cream           | 5.07  | Money lost, unaffordable prices, full heart            |
+| ink on brown               | 4.65  | Text on a darkened tile                                |
+| cream on darkBrown         | 5.85  | Text on the column or wood                             |
+| amber on darkBrown         | 4.57  | Warnings, "You're fired!"                              |
+| yellow on darkBrown        | 6.79  | Floating gain on the column                            |
+| white on darkBrown         | 8.48  | Floating loss on the column, filled page dot           |
+| tan on darkBrown           | 4.04  | Empty slot dashed border, hollow page dots             |
+| white on forest            | 7.80  | Labels on chips and buttons                            |
+| white on rust              | 4.99  | Trait chip "Food"                                      |
+| white on darkRed, blue     | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`           |
+| slate on ink               | 3.27  | Unpicked tile frame                                    |
+| amber on navy              | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`          |
+| `ui-zone-pips` on ink      | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked   |
+| `ui-difficulty` on cream   | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim |
+| white over the dimmed road | 4.5+  | Card subtitle                                          |
+| tan on the dimmed road     | 3.0+  | 1px rim around the pause panel                         |
 
 ## UI
 

@@ -36,8 +36,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Remaining for the first build
 
-- **Cleanup:** remove the `card-grumpy-neighbour-*` cards (the neighbour appears in `card-accident-walk-on`); after forks, retire the zone-free `ui-zone-pips` tags (`current`, `done`); retire `fx-stinky`, which nothing uses.
+- **Cleanup:** retire `fx-stinky`, which nothing uses.
 - **Depth variants:** the `@88` and `@62` steps for every road sprite and need spot, once the game's step table lands.
 - **Encounter cards:** a card illustration per option of the six new encounters (16), in progress.
-- **Help:** rebuild `help-zones` for forks once they are in the game.
 - **Start screen:** for the uniform layout, the `ui-section` frame and band (`incomplete`, `complete`, `neutral`), a not-ready Start button and the repainted sign logo.

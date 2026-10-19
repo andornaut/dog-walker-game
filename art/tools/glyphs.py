@@ -532,13 +532,14 @@ PAW_PRINT = ("..ff.ff..", "..ff.ff..", "ff.....ff", "ff.....ff", "...fff...", ".
 
 
 def paw(g, x0, filled):
-    """One 11x10 paw at x0, outlined in plum by hand so a hollow pad's middle stays empty: filled
-    is amber, shaded orange along the pad's foot; hollow keeps only a tan rim."""
+    """One 11x10 paw at x0: filled is amber, shaded orange along the pad's foot, outlined in plum by
+    hand; hollow is only a tan rim with no outline, so the empty slots recede and the count reads
+    from the filled paws' silhouettes."""
     cells = {(x, y) for y, row in enumerate(PAW_PRINT) for x, ch in enumerate(row) if ch == "f"}
     sides = ((0, -1), (0, 1), (-1, 0), (1, 0))
     for x, y in cells:
         for dx, dy in sides:
-            if (x + dx, y + dy) not in cells:
+            if filled and (x + dx, y + dy) not in cells:
                 g.p(x0 + 1 + x + dx, 1 + y + dy, "plum")
     for x, y in cells:
         rim = any((x + dx, y + dy) not in cells for dx, dy in sides)
@@ -549,8 +550,8 @@ def paw(g, x0, filled):
 
 
 def difficulty(n):
-    """55x10: n filled paws, then hollow ones, out of five. Amber holds 7.4:1 on the frame's
-    plum and tan 6.5:1; the plum outline holds 9.4:1 on cream."""
+    """55x10: n filled paws, then hollow ones, out of five. The filled paw's plum outline holds 9.4:1
+    on cream and its amber 7.4:1 on the frame's plum; the hollow tan rim is a faint slot marker."""
     g = Grid(55, 10)
     for i in range(5):
         paw(g, i * 11, i < n)
