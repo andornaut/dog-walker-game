@@ -50,6 +50,7 @@ export const DEFAULT_MATRIX: Matrix = {
     { dogs: ["duchess"], name: "Duchess" },
     { dogs: ["biscuit"], name: "Biscuit" },
     { dogs: ["koda"], name: "Koda" },
+    { dogs: ["koda", "biscuit"], name: "Koda + Biscuit" },
     { dogs: ["duchess", "biscuit", "koda"], name: "Starters" },
     { dogs: ["zippy", "dash", "snowball"], name: "Risky trio" },
   ],

@@ -25,7 +25,7 @@ describe("simulateMatrix", () => {
   it("covers every policy, hit rate and pack of the default matrix", () => {
     const cells = matrixCells(DEFAULT_MATRIX);
 
-    expect(cells).toHaveLength(3 * 3 * 5);
+    expect(cells).toHaveLength(3 * 3 * 6);
     expect(
       new Set(cells.map(({ hitRate, pack, policy }) => `${policy} ${hitRate} ${pack.name}`)).size,
     ).toBe(cells.length);
