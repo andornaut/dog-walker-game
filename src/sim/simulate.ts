@@ -8,6 +8,7 @@ import type {
   GearId,
   UpgradeId,
 } from "../data/types";
+import { randomStream } from "../dev/randomStreams";
 import { screenLayout } from "../layout/screenLayout";
 import { countBump, earnedByRun, runCountersOf } from "../rules/achievements";
 import {
@@ -23,14 +24,18 @@ import { affectedDogs, opensCard } from "../rules/encounters";
 import { minorBump } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { addCents, type Cents, cents, read } from "../rules/units";
-import { isMoverObstacle } from "../runner/movers";
-import { chance, type Random } from "../runner/random";
+import { stepChase } from "../runner/chase";
+import { hasLeftRoad, isMoverObstacle, type MoverKind, moverPlace } from "../runner/movers";
+import { NO_PULLS, type Pulls, stepPulls } from "../runner/pulls";
+import { chance, type Random, seededRandom } from "../runner/random";
 import {
   collect,
   finishZone,
   isMinorObstacle,
   planZone,
+  type RoadGeometry,
   startRoad,
+  stepWalk,
   type Walk,
   type WalkData,
   type WalkItemKind,
@@ -39,22 +44,43 @@ import {
 import { walkGeometry, walkProjection } from "../runner/walkGeometry";
 import { packDogs } from "../state/pack";
 import { type CardSource, newRun, type PackDogs, type RunState } from "../state/runState";
+import {
+  actBot,
+  type Bot,
+  type BotRoad,
+  newBot,
+  nextBotTime,
+  observeChase,
+  observePulls,
+  observeRoad,
+} from "./bot";
 import { chooseCardOption, chooseUpgrade, type PolicyId, treatTarget } from "./policies";
+import type { Skill } from "./skills";
+import { nextWalkEvent } from "./walkEvents";
 
 export type SimData = ChoiceData &
   WalkData &
   Pick<GameData, "achievements" | "dogSlots" | "upgrades">;
 
-// Rates are chances from 0 to 1 per item spawned: hitRate for each obstacle, the others for
-// each pickup or lucky encounter the bot steers into.
+// Who plays the walk. rates: each item spawned is met in road order, and hit or collected by
+// chance, with rates from 0 to 1: hitRate for each obstacle, the others for each pickup or
+// lucky encounter. skill: a steering bot plays the real walk loop, and what it hits and
+// collects is measured.
+export type SimPlayer =
+  | {
+      readonly hitRate: number;
+      readonly kind: "rates";
+      readonly luckyRate: number;
+      readonly tipRate: number;
+      readonly treatRate: number;
+    }
+  | { readonly kind: "skill"; readonly skill: Skill };
+
 export interface SimConfig {
   readonly gear: GearId | null;
-  readonly hitRate: number;
-  readonly luckyRate: number;
   readonly pack: PackDogs;
+  readonly player: SimPlayer;
   readonly policy: PolicyId;
-  readonly tipRate: number;
-  readonly treatRate: number;
 }
 
 export const DEFAULT_RATES = { luckyRate: 0.7, tipRate: 0.7, treatRate: 0.7 } as const;
@@ -87,6 +113,17 @@ export interface ZoneRecord {
   readonly zoneIndex: number;
 }
 
+// Of the items of a kind that reached the pack, met counts them all and touched those that
+// touched it: an obstacle hit, or a pickup or lucky encounter collected. An obstacle passed
+// during the grace after a hit counts as met, not touched.
+export interface ItemCount {
+  met: number;
+  touched: number;
+}
+
+export type ItemCounts = Partial<Record<WalkItemKind, ItemCount>>;
+export type MoverCounts = Partial<Record<MoverKind, ItemCount>>;
+
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.
   readonly badges: readonly AchievementId[];
@@ -97,6 +134,9 @@ export interface RunResult {
   readonly earnings: Cents;
   readonly finished: boolean;
   readonly firings: readonly FiringRecord[];
+  // Items that do not move, by kind, and movers, by mover.
+  readonly items: ItemCounts;
+  readonly movers: MoverCounts;
   // The share of choices that cost money, 0 with no choices.
   readonly moneyShare: number;
   readonly tips: Cents;
@@ -107,7 +147,12 @@ export interface RunResult {
 
 // An item of a planned zone, or the zone's forced stop, at its zone distance.
 type ZoneEvent =
-  | { readonly distance: number; readonly kind: "item"; readonly item: WalkItemKind }
+  | {
+      readonly distance: number;
+      readonly item: WalkItemKind;
+      readonly kind: "item";
+      readonly mover: MoverKind | undefined;
+    }
   | { readonly distance: number; readonly kind: "stop"; readonly stop: ForcedStopId };
 
 function zoneEvents(walk: Walk): ZoneEvent[] {
@@ -116,6 +161,7 @@ function zoneEvents(walk: Walk): ZoneEvent[] {
     distance: spawn.distance,
     item: spawn.kind,
     kind: "item",
+    mover: spawn.mover?.mover,
   }));
   if (forcedStopAhead !== null) {
     events.push({ distance: forcedStopAhead.distance, kind: "stop", stop: forcedStopAhead.stop });
@@ -128,10 +174,27 @@ interface Session {
   cardsSeen: number;
   readonly choices: ChoiceRecord[];
   readonly firings: FiringRecord[];
+  readonly items: ItemCounts;
+  readonly movers: MoverCounts;
   run: RunState;
   tips: Cents;
   readonly upgrades: UpgradeId[];
   readonly zones: ZoneRecord[];
+}
+
+// An item that reached the pack: under its mover if it moves, otherwise under its kind.
+function countItem(
+  session: Session,
+  touched: boolean,
+  item: { readonly kind: WalkItemKind; readonly mover: MoverKind | undefined },
+): void {
+  const counts: Partial<Record<string, ItemCount>> =
+    item.mover === undefined ? session.items : session.movers;
+  const key = item.mover ?? item.kind;
+  const count = counts[key] ?? { met: 0, touched: 0 };
+  count.met += 1;
+  count.touched += touched ? 1 : 0;
+  counts[key] = count;
 }
 
 function recordFirings(session: Session, before: RunState, outcome: ChoiceOutcome): void {
@@ -213,12 +276,15 @@ function giveTreats(data: SimData, session: Session): void {
   }
 }
 
+type Rates = Extract<SimPlayer, { readonly kind: "rates" }>;
+
 // Plays one planned zone's items and forced stop in road order, until the zone ends or no
 // dogs are left.
-function playZone(
+function playZoneByRates(
   data: SimData,
   random: Random,
   config: SimConfig,
+  rates: Rates,
   session: Session,
   walk: Walk,
 ): void {
@@ -234,31 +300,40 @@ function playZone(
         stop: event.stop,
       });
     } else if (event.item === "tip") {
-      if (chance(random, config.tipRate)) {
+      const collected = chance(random, rates.tipRate);
+      countItem(session, collected, { kind: event.item, mover: event.mover });
+      if (collected) {
         const pickup = collect(data, "tip", session.run);
         session.tips = addCents(session.tips, pickup.tip?.amount ?? cents(0));
         session.run = pickup.run;
       }
     } else if (event.item === "treat") {
-      if (chance(random, config.treatRate)) {
+      const collected = chance(random, rates.treatRate);
+      countItem(session, collected, { kind: event.item, mover: event.mover });
+      if (collected) {
         session.run = collect(data, "treat", session.run).run;
       }
     } else if (isMinorObstacle(data, event.item) || isMoverObstacle(event.item)) {
       // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
-      if (event.distance >= graceUntil && chance(random, config.hitRate)) {
+      const hit = event.distance >= graceUntil && chance(random, rates.hitRate);
+      countItem(session, hit, { kind: event.item, mover: event.mover });
+      if (hit) {
         graceUntil = event.distance + graceDistance;
         session.run = minorBump(data, countBump(session.run)).state;
       }
     } else if (data.encounters[event.item].kind === "lucky") {
-      if (chance(random, config.luckyRate)) {
+      const collected = chance(random, rates.luckyRate);
+      countItem(session, collected, { kind: event.item, mover: event.mover });
+      if (collected) {
         meet(data, random, config, session, "lucky", event.item);
       }
-    } else if (
-      event.distance >= graceUntil &&
-      chance(random, config.hitRate) &&
-      meet(data, random, config, session, "obstacle", event.item)
-    ) {
-      graceUntil = event.distance + graceDistance;
+    } else {
+      // A hit that opens no card is scenery: it starts no grace window.
+      const hit = event.distance >= graceUntil && chance(random, rates.hitRate);
+      countItem(session, hit, { kind: event.item, mover: event.mover });
+      if (hit && meet(data, random, config, session, "obstacle", event.item)) {
+        graceUntil = event.distance + graceDistance;
+      }
     }
     if (hasEnded(session)) {
       return;
@@ -267,44 +342,229 @@ function playZone(
   }
 }
 
+// The game's own streams, as the run screen keeps them, and the bot's.
+interface Streams {
+  readonly bot: Random;
+  readonly cards: Random;
+  readonly pulls: Random;
+  readonly rolls: Random;
+  readonly spawnSeed: number;
+}
+
+function streamsFrom(random: Random): Streams {
+  const seed = () => Math.floor(random() * 2 ** 32);
+  return {
+    bot: seededRandom(seed()),
+    cards: seededRandom(seed()),
+    pulls: seededRandom(seed()),
+    rolls: seededRandom(seed()),
+    spawnSeed: seed(),
+  };
+}
+
+const ROAD = screenLayout(SCREEN_CONFIG).road;
+const VIEW = walkProjection(ROAD_CAMERA, ROAD);
+const GEOMETRIES = new Map<number, RoadGeometry>();
+
+function geometryOf(run: RunState): RoadGeometry {
+  const dogs = packDogs(run).length;
+  let geometry = GEOMETRIES.get(dogs);
+  if (geometry === undefined) {
+    geometry = walkGeometry(LANE_COUNT, dogs, VIEW, ROAD);
+    GEOMETRIES.set(dogs, geometry);
+  }
+  return geometry;
+}
+
+// The shortest step, so a step cut at a moment just reached still moves the walk.
+const MIN_STEP_SECONDS = 1e-6;
+
+// Counts the items that left the road in a step: those that left while still on it touched
+// the pack, and the rest scrolled past it or, for a crosser, ran off its side.
+function countLeaving(session: Session, geometry: RoadGeometry, before: Walk, after: Walk): void {
+  if (after.road.items === before.road.items) {
+    return;
+  }
+  const travel = after.run.zoneDistance - before.run.zoneDistance;
+  for (const item of before.road.items) {
+    if (after.road.items.some(({ id }) => id === item.id)) {
+      continue;
+    }
+    const { mover } = item;
+    if (mover === undefined) {
+      countItem(session, item.y + travel < geometry.roadBottom, {
+        kind: item.kind,
+        mover: undefined,
+      });
+    } else {
+      const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
+      const y = geometry.roadTop - item.height + place.travel;
+      const left = hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom;
+      countItem(session, !left, { kind: item.kind, mover: mover.path.mover });
+    }
+  }
+}
+
+function cardFrom(data: SimData, source: CardSource): CardFrom {
+  if (source.kind === "encounter") {
+    return data.encounters[source.encounter].kind === "lucky" ? "lucky" : "obstacle";
+  }
+  return "forcedStop";
+}
+
+// The bot walks the planned zone on the real walk loop, pulls and chases included, until the
+// zone ends or no dogs are left. The walk is stepped from moment to moment rather than frame
+// by frame: between the moments nextWalkEvent and the bot name, nothing reaches the pack
+// and nothing changes its lanes, so one long step plays out as the frames would.
+function playZoneBySkill(
+  data: SimData,
+  streams: Streams,
+  config: SimConfig,
+  session: Session,
+  bot: Bot,
+  state: { readonly pulls: Pulls; readonly walk: Walk },
+): { readonly pulls: Pulls; readonly walk: Walk } {
+  let { pulls, walk } = state;
+  const speed = walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
+  bot.replan = true;
+  // The geometry follows the pack, which changes only when an owner fires you.
+  let road: BotRoad & { readonly pack: RunState["pack"] } = {
+    data,
+    geometry: geometryOf(walk.run),
+    pack: walk.run.pack,
+    speed,
+  };
+  for (;;) {
+    if (walk.run.pack !== road.pack) {
+      road = { data, geometry: geometryOf(walk.run), pack: walk.run.pack, speed };
+    }
+    observeRoad(bot, road, walk);
+    walk = actBot(bot, road, pulls, walk);
+    const held = walk.road.hitStop !== null;
+    const seconds = Math.max(
+      MIN_STEP_SECONDS,
+      held
+        ? nextWalkEvent(road, pulls, walk)
+        : Math.min(nextWalkEvent(road, pulls, walk), nextBotTime(bot, road, walk) - bot.clock),
+    );
+    const pulled = stepPulls(data, road.geometry, streams.pulls, seconds, pulls, walk);
+    pulls = pulled.pulls;
+    // A chase needs a squirrel on the road; without one, stepChase leaves the walk as it is.
+    const chasing =
+      pulled.walk.road.chase !== null ||
+      pulled.walk.road.items.some((item) => item.kind === "squirrel");
+    const chased = chasing
+      ? stepChase(data, road.geometry, seconds, pulled.walk)
+      : { pulled: [], tells: [], walk: pulled.walk };
+    const step = stepWalk(data, road.geometry, streams.rolls, seconds, chased.walk);
+    bot.clock += seconds;
+    observePulls(bot, pulled.tells, pulled.pulled);
+    observeChase(bot, chased.pulled);
+    countLeaving(session, road.geometry, chased.walk, step.walk);
+    for (const { outcome } of step.instants) {
+      recordFirings(session, chased.walk.run, outcome);
+    }
+    session.tips = step.tips.reduce((sum, tip) => addCents(sum, tip.amount), session.tips);
+    session.run = step.walk.run;
+    for (const card of step.cards) {
+      if (card.kind !== "upgradeOffer" && !hasEnded(session)) {
+        playCard(data, streams.cards, config, session, cardFrom(data, card), card);
+      }
+    }
+    if (held || step.bumps.length > 0 || step.cards.length > 0) {
+      bot.replan = true;
+    }
+    if (!hasEnded(session)) {
+      giveTreats(data, session);
+    }
+    walk = { road: step.walk.road, run: session.run };
+    if (hasEnded(session) || step.zoneEnded) {
+      return { pulls, walk };
+    }
+  }
+}
+
 // A function, so a check after a call that replaced session.run is not narrowed away.
 function hasEnded(session: Session): boolean {
   return session.run.phase.kind === "ended";
 }
 
-// One run on the real rules: each zone planned as the game plans it, every item collected,
-// hit or avoided by the config's rates, cards chosen by the policy, fees paid at each zone's
-// end, then an upgrade picked before the next zone. Deterministic for a given random.
+// Pays the zone's fees, then picks an upgrade unless that was the last zone.
+function endZone(data: SimData, random: Random, session: Session): void {
+  // finishZone pays the fees, then expires the zone-long debuffs and next-zone upgrades.
+  const end = finishZone(data, session.run);
+  session.zones.push({
+    fees: end.fees.flatMap(({ amount, dog }) => (dog === null ? [] : [{ amount, dog }])),
+    zoneIndex: session.run.zoneIndex,
+  });
+  session.run = end.run;
+  if (!hasEnded(session)) {
+    pickUpgrade(data, random, session);
+  }
+}
+
+function playByRates(
+  data: SimData,
+  random: Random,
+  config: SimConfig,
+  rates: Rates,
+  session: Session,
+): void {
+  let walk: Walk = { road: startRoad(LANE_COUNT), run: session.run };
+  while (!hasEnded(session)) {
+    walk = planZone(data, geometryOf(session.run), random, { ...walk, run: session.run });
+    playZoneByRates(data, random, config, rates, session, walk);
+    if (!hasEnded(session)) {
+      endZone(data, random, session);
+    }
+  }
+}
+
+// Each zone is planned from its own stream, as the run screen plans it, so how the bot played
+// one zone does not change the next zone's plan.
+function playBySkill(
+  data: SimData,
+  random: Random,
+  config: SimConfig,
+  skill: Skill,
+  session: Session,
+): void {
+  const streams = streamsFrom(random);
+  const bot = newBot(streams.bot, skill);
+  let walk: Walk = { road: startRoad(LANE_COUNT), run: session.run };
+  // A zero step gives each dog its first pull time before the walk moves.
+  let pulls = stepPulls(data, geometryOf(walk.run), streams.pulls, 0, NO_PULLS, walk).pulls;
+  while (!hasEnded(session)) {
+    const spawns = randomStream(streams.spawnSeed, `spawns-${session.run.zoneIndex}`);
+    walk = planZone(data, geometryOf(session.run), spawns, { ...walk, run: session.run });
+    ({ pulls, walk } = playZoneBySkill(data, streams, config, session, bot, { pulls, walk }));
+    if (!hasEnded(session)) {
+      endZone(data, streams.cards, session);
+      walk = { ...walk, run: session.run };
+    }
+  }
+}
+
+// One run on the real rules: each zone planned as the game plans it, items hit, collected or
+// avoided by the player, cards chosen by the policy, fees paid at each zone's end, then an
+// upgrade picked before the next zone. Deterministic for a given random.
 export function simulateRun(data: SimData, random: Random, config: SimConfig): RunResult {
-  const road = screenLayout(SCREEN_CONFIG).road;
-  const view = walkProjection(ROAD_CAMERA, road);
   const session: Session = {
     cardsSeen: 0,
     choices: [],
     firings: [],
+    items: {},
+    movers: {},
     run: newRun(data, config.pack.length, { dogs: config.pack, gear: config.gear }),
     tips: cents(0),
     upgrades: [],
     zones: [],
   };
-  let walk: Walk = { road: startRoad(LANE_COUNT), run: session.run };
-  while (!hasEnded(session)) {
-    const geometry = walkGeometry(LANE_COUNT, packDogs(session.run).length, view, road);
-    walk = planZone(data, geometry, random, { ...walk, run: session.run });
-    playZone(data, random, config, session, walk);
-    if (hasEnded(session)) {
-      break;
-    }
-    // finishZone pays the fees, then expires the zone-long debuffs and next-zone upgrades.
-    const end = finishZone(data, session.run);
-    session.zones.push({
-      fees: end.fees.flatMap(({ amount, dog }) => (dog === null ? [] : [{ amount, dog }])),
-      zoneIndex: session.run.zoneIndex,
-    });
-    session.run = end.run;
-    if (!hasEnded(session)) {
-      pickUpgrade(data, random, session);
-    }
+  const { player } = config;
+  if (player.kind === "rates") {
+    playByRates(data, random, config, player, session);
+  } else {
+    playBySkill(data, random, config, player.skill, session);
   }
   const paidChoices = session.choices.filter((choice) => choice.cost > 0).length;
   const facts = {
@@ -320,7 +580,9 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     earnings: session.run.money,
     finished: session.run.phase.kind === "ended" && session.run.phase.reason === "finished",
     firings: session.firings,
+    items: session.items,
     moneyShare: session.choices.length === 0 ? 0 : paidChoices / session.choices.length,
+    movers: session.movers,
     tips: session.tips,
     upgrades: session.upgrades,
     zones: session.zones,

@@ -1,16 +1,19 @@
-// npm run simulate -- [--runs N] [--seed N] [--policy id,id] [--hit percent,percent] [--out file]
-// Runs the default matrix, prints a table and, with --out, writes the rows as JSON.
+// npm run simulate -- --help
+// Runs a matrix, prints its tables and, with --out, writes the rows as JSON.
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { POLICY_IDS, type PolicyId } from "./policies";
 import {
   DEFAULT_MATRIX,
+  formatKindTable,
   formatTable,
   type Matrix,
   matrixCells,
+  type MatrixPlayer,
   type MatrixRow,
   simulateCell,
 } from "./report";
+import { SKILL_PRESET_IDS, SKILL_PRESETS } from "./skills";
 
 // The parts of Node this script uses. The project's types are the browser's, so Node is
 // reached through globalThis rather than @types/node.
@@ -44,7 +47,40 @@ const threads = nodeProcess.getBuiltinModule("node:worker_threads");
 const DEFAULT_RUNS = 1000;
 const DEFAULT_SEED = 1;
 
+const presetLines = SKILL_PRESET_IDS.map((id) => {
+  const skill = SKILL_PRESETS[id];
+  return (
+    `  ${id.padEnd(8)} reaction ${skill.reactionSeconds}s, look-ahead ${skill.lookAheadSeconds}s, ` +
+    `errors ${skill.errorRate * 100}%, cooldown ${skill.laneChangeCooldown}s`
+  );
+});
+
+const USAGE = [
+  "npm run simulate -- [--skill preset,...] [--hit percent,...] [--policy id,...]",
+  "                    [--runs N] [--seed N] [--out file]",
+  "",
+  "Plays whole runs on the real rules and data, one row per policy, player and pack.",
+  "",
+  "  --skill   steering bots of these skill presets play the real walk loop, with pulls, chases",
+  "            and movers, and their hit rates are measured (default: every preset)",
+  "  --hit     instead or as well, players that hit each obstacle at these fixed rates and",
+  "            collect tips, treats and lucky finds at 70%",
+  `  --policy  card choice policies (default: ${POLICY_IDS.join(",")})`,
+  `  --runs    runs per row (default: ${DEFAULT_RUNS})`,
+  `  --seed    the seed; the same seed gives the same rows (default: ${DEFAULT_SEED})`,
+  "  --out     also write the matrix and rows as JSON to this file",
+  "",
+  "Skill presets:",
+  ...presetLines,
+  "",
+  "Hit, Bump and Lucky are the measured shares of obstacles, minor obstacles (both moving or",
+  "not) and lucky encounters that reached the pack and were hit or collected. Tips is tips",
+  "collected per run, Zones zones finished per run. A second table gives the hit rate of each",
+  "obstacle kind that stands still, then of each mover.",
+].join("\n");
+
 interface Options {
+  readonly help: boolean;
   readonly matrix: Matrix;
   readonly out: string | undefined;
   readonly runs: number;
@@ -77,13 +113,23 @@ function parsePolicies(text: string): PolicyId[] {
   });
 }
 
-function parseHitRates(text: string): number[] {
+function parseHitRates(text: string): MatrixPlayer[] {
   return text.split(",").map((part) => {
     const value = Number(part.replace(/%$/, ""));
     if (part === "" || !(value >= 0 && value <= 100)) {
       throw new Error(`--hit takes percentages from 0 to 100, not ${part}`);
     }
-    return value / 100;
+    return { hitRate: value / 100, kind: "rates" };
+  });
+}
+
+function parseSkills(text: string): MatrixPlayer[] {
+  return text.split(",").map((id) => {
+    const preset = SKILL_PRESET_IDS.find((candidate) => candidate === id);
+    if (preset === undefined) {
+      throw new Error(`--skill takes ${SKILL_PRESET_IDS.join(", ")}, not ${id}`);
+    }
+    return { kind: "skill", preset };
   });
 }
 
@@ -92,6 +138,11 @@ function parseArgs(args: readonly string[]): Options {
   let out: string | undefined;
   let runs = DEFAULT_RUNS;
   let seed = DEFAULT_SEED;
+  let skills: MatrixPlayer[] = [];
+  let hits: MatrixPlayer[] = [];
+  if (args.includes("--help") || args.includes("-h")) {
+    return { help: true, matrix, out, runs, seed };
+  }
   for (let i = 0; i < args.length; i += 2) {
     const flag = args[i];
     const value = args[i + 1];
@@ -100,7 +151,10 @@ function parseArgs(args: readonly string[]): Options {
     }
     switch (flag) {
       case "--hit":
-        matrix = { ...matrix, hitRates: parseHitRates(value) };
+        hits = parseHitRates(value);
+        break;
+      case "--skill":
+        skills = parseSkills(value);
         break;
       case "--out":
         out = value;
@@ -115,10 +169,14 @@ function parseArgs(args: readonly string[]): Options {
         seed = parseWhole(flag, 0, value);
         break;
       default:
-        throw new Error(`Unknown option ${flag}`);
+        throw new Error(`Unknown option ${flag}\n\n${USAGE}`);
     }
   }
-  return { matrix, out, runs, seed };
+  const players = [...skills, ...hits];
+  if (players.length > 0) {
+    matrix = { ...matrix, players };
+  }
+  return { help: false, matrix, out, runs, seed };
 }
 
 function runJob({ cells, matrix, runs, seed }: Job): MatrixRow[] {
@@ -155,11 +213,16 @@ async function simulateInWorkers(options: Options): Promise<MatrixRow[]> {
 
 async function main(): Promise<void> {
   const options = parseArgs(nodeProcess.argv.slice(2));
+  if (options.help) {
+    nodeProcess.stdout.write(`${USAGE}\n`);
+    return;
+  }
   const started = performance.now();
   const rows = await simulateInWorkers(options);
   const seconds = (performance.now() - started) / 1000;
   const { matrix, out, runs, seed } = options;
-  nodeProcess.stdout.write(`${formatTable(rows)}\n`);
+  nodeProcess.stdout.write(`${formatTable(rows)}\n\nHit rate by obstacle kind\n`);
+  nodeProcess.stdout.write(`${formatKindTable(gameData, rows)}\n`);
   nodeProcess.stdout.write(
     `${rows.length} cells x ${runs} runs, seed ${seed}, in ${seconds.toFixed(1)}s\n`,
   );

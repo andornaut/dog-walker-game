@@ -1,0 +1,475 @@
+import type { DogId } from "../data/types";
+import type { LaneDirection } from "../layout/lanes";
+import { inputLockSeconds } from "../rules/dogs";
+import { modifiedStat } from "../rules/modifiers";
+import { read } from "../rules/units";
+import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
+import type { PullEvent, Pulls } from "../runner/pulls";
+import { chance, type Random } from "../runner/random";
+import {
+  itemCategory,
+  itemHeight,
+  type RoadGeometry,
+  steerWalk,
+  type Walk,
+  type WalkData,
+  type WalkItem,
+} from "../runner/walk";
+import {
+  type LaneHazard,
+  type LanePrize,
+  type LanePull,
+  LOCK_MARGIN,
+  planLanes,
+  type PlannedMove,
+} from "./lanePlan";
+import type { Skill } from "./skills";
+
+// The walk as the bot reads it in one zone: speed is the scroll speed in pixels per second.
+export interface BotRoad {
+  readonly data: WalkData;
+  readonly geometry: RoadGeometry;
+  readonly speed: number;
+}
+
+// A steering bot's state. clock is the seconds walked this run, hit stops included and cards
+// not. Moves are at clock times. late holds mistimed lane changes still to come; noticeAt,
+// when set, is when the bot notices its mistake, and until then it does not replan. tellsAt is
+// when each leaning dog's tell started.
+export interface Bot {
+  readonly appearedAt: Map<number, number>;
+  clock: number;
+  readonly late: PlannedMove[];
+  lastInputAt: number;
+  noticeAt: number | null;
+  readonly perceived: Set<number>;
+  readonly perceivedTells: Set<DogId>;
+  plan: PlannedMove[];
+  // The bot's own stream: its errors never shift the game's draws.
+  readonly random: Random;
+  // After a pull, the bot changes lanes no sooner than this clock time.
+  recoversAt: number;
+  replan: boolean;
+  readonly skill: Skill;
+  readonly tellsAt: Map<DogId, number>;
+}
+
+// Times within this are the same moment.
+export const SAME_MOMENT = 1e-9;
+// A mistimed lane change comes up to this late.
+const MISTIME_SECONDS = 0.25;
+// The soonest a mistake is noticed, so a bot with no reaction delay still takes a frame.
+const NOTICE_SECONDS = 1 / 60;
+// Hazards are widened this much at each end, so rounding never turns a planned miss into a
+// hit.
+const MARGIN_SECONDS = 1e-4;
+// How far apart the planner's waiting times are, besides the ends of hazards.
+const GRID_SECONDS = 0.1;
+
+const PRIZE_VALUES = { lucky: 1, tip: 1, treat: 1 } as const;
+
+export function newBot(random: Random, skill: Skill): Bot {
+  return {
+    appearedAt: new Map(),
+    clock: 0,
+    lastInputAt: -Infinity,
+    late: [],
+    noticeAt: null,
+    perceived: new Set(),
+    perceivedTells: new Set(),
+    plan: [],
+    random,
+    recoversAt: -Infinity,
+    replan: true,
+    skill,
+    tellsAt: new Map(),
+  };
+}
+
+// When an item at y, height tall, starts and stops touching the pack, in seconds from now.
+export function contactWindow(
+  band: RoadGeometry["packBand"],
+  speed: number,
+  y: number,
+  height: number,
+): { readonly end: number; readonly start: number } {
+  return { end: (band.bottom - y) / speed, start: (band.top - (y + height)) / speed };
+}
+
+// How often a mover's path is sampled, in road pixels of scroll.
+const MOVER_SAMPLE_SCROLL = 1;
+// How far a mover is followed at most: well past any road length.
+const MOVER_SCROLL_MAX = 10_000;
+
+// A stretch of walking time, from now, over which something overlaps the pack's band in lane.
+export interface LaneContact {
+  readonly from: number;
+  readonly lane: number;
+  readonly to: number;
+}
+
+// A mover's contacts with the pack's band, by its scroll since its cue appeared: they depend
+// on its path, its height and the band alone, so each is worked out once.
+interface ScrollContact {
+  readonly from: number;
+  readonly lane: number;
+  to: number;
+}
+
+const SCROLL_CONTACTS = new WeakMap<object, Map<string, readonly ScrollContact[]>>();
+
+function scrollContacts(
+  geometry: Pick<RoadGeometry, "laneCount" | "packBand" | "roadTop">,
+  height: number,
+  path: NonNullable<WalkItem["mover"]>["path"],
+): readonly ScrollContact[] {
+  const { laneCount, packBand, roadTop } = geometry;
+  const key = `${packBand.top} ${packBand.bottom} ${height}`;
+  let byBand = SCROLL_CONTACTS.get(path);
+  if (byBand === undefined) {
+    byBand = new Map();
+    SCROLL_CONTACTS.set(path, byBand);
+  }
+  const known = byBand.get(key);
+  if (known !== undefined) {
+    return known;
+  }
+  const contacts: ScrollContact[] = [];
+  let touchedBefore = false;
+  for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
+    const place = moverPlace(laneCount, path, since);
+    const y = roadTop - height + place.travel;
+    if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
+      break;
+    }
+    const lane = laneAt(place.lanePosition);
+    const touching = place.moving && y + height > packBand.top && lane >= 0 && lane < laneCount;
+    const last = contacts.at(-1);
+    if (touching && touchedBefore && last?.lane === lane) {
+      last.to = since;
+    } else if (touching) {
+      contacts.push({ from: since, lane, to: since });
+    }
+    touchedBefore = touching;
+  }
+  byBand.set(key, contacts);
+  return contacts;
+}
+
+// The stretches over which a mover, once it moves, overlaps the pack's band, one per lane it
+// is in meanwhile, that start within horizon seconds. Its path is sampled, so each stretch is
+// widened by a sample at each end.
+export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneContact[] {
+  const { mover } = item;
+  if (mover === undefined) {
+    return [];
+  }
+  const contacts: LaneContact[] = [];
+  for (const { from, lane, to } of scrollContacts(road.geometry, item.height, mover.path)) {
+    const start = (from - MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
+    const end = (to + MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
+    if (end > 0 && start < horizon) {
+      contacts.push({ from: start, lane, to: end });
+    }
+  }
+  return contacts;
+}
+
+// The lanes an item covers, as a lane mask.
+export function itemLanes(item: Pick<WalkItem, "lane" | "laneSpan">): number {
+  return ((1 << item.laneSpan) - 1) << item.lane;
+}
+
+// The lane mask within reach lanes of the mask's lanes, on a road laneCount lanes wide.
+export function widenMask(laneCount: number, reach: number, mask: number): number {
+  let widened = mask;
+  for (let step = 0; step < reach; step++) {
+    widened |= (widened << 1) | (widened >> 1);
+  }
+  return widened & ((1 << laneCount) - 1);
+}
+
+export function treatReachOf(data: WalkData, walk: Walk): number {
+  return Math.round(modifiedStat(data.tuning, walk.run.modifiers, "treatReach", 0));
+}
+
+// When an item comes into view: at the far edge of the road, or, with visionSeconds, once it
+// is that close to the pack. A mover shows from its warning cue on.
+function visibleAt(bot: Bot, appeared: number, contactStart: number, mover: boolean): number {
+  const { visionSeconds } = bot.skill;
+  return visionSeconds === undefined || mover
+    ? appeared
+    : Math.max(appeared, bot.clock + contactStart - visionSeconds);
+}
+
+function perceiveAt(bot: Bot, road: BotRoad, item: WalkItem): number {
+  const appeared = bot.appearedAt.get(item.id) ?? bot.clock;
+  const { start } = contactWindow(road.geometry.packBand, road.speed, item.y, item.height);
+  return visibleAt(bot, appeared, start, item.mover !== undefined) + bot.skill.reactionSeconds;
+}
+
+// Records when each item new on the road came into view, from how far the road has scrolled
+// since, and forgets items that have left.
+export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
+  const { items } = walk.road;
+  let oldest = Infinity;
+  for (const item of items) {
+    oldest = Math.min(oldest, item.id);
+    if (!bot.appearedAt.has(item.id)) {
+      const scrolled = item.mover?.since ?? item.y - (road.geometry.roadTop - item.height);
+      bot.appearedAt.set(item.id, bot.clock - scrolled / road.speed);
+    }
+  }
+  for (const id of bot.appearedAt.keys()) {
+    if (id < oldest) {
+      bot.appearedAt.delete(id);
+      bot.perceived.delete(id);
+    }
+  }
+}
+
+// The clock time of the bot's next action: a lane change, noticing a mistake, or perceiving
+// an item, on the road or still to come.
+export function nextBotTime(bot: Bot, road: BotRoad, walk: Walk): number {
+  let next = Math.min(bot.plan[0]?.at ?? Infinity, ...bot.late.map((move) => move.at));
+  if (bot.noticeAt !== null) {
+    next = Math.min(next, bot.noticeAt);
+  }
+  for (const [dog, at] of bot.tellsAt) {
+    if (!bot.perceivedTells.has(dog)) {
+      next = Math.min(next, at + bot.skill.reactionSeconds);
+    }
+  }
+  for (const item of walk.road.items) {
+    if (!bot.perceived.has(item.id)) {
+      next = Math.min(next, perceiveAt(bot, road, item));
+    }
+  }
+  const { data, geometry, speed } = road;
+  const { zoneDistance } = walk.run;
+  for (const spawn of walk.road.pending) {
+    const ahead = (spawn.distance - zoneDistance) / speed;
+    const appeared = bot.clock + ahead;
+    if (appeared + bot.skill.reactionSeconds >= next) {
+      break;
+    }
+    const height = itemHeight(data, geometry, spawn.kind);
+    const y = geometry.roadTop - height - (spawn.distance - zoneDistance);
+    const { start } = contactWindow(geometry.packBand, speed, y, height);
+    const visible = visibleAt(bot, appeared, start, spawn.mover !== undefined);
+    next = Math.min(next, visible + bot.skill.reactionSeconds);
+  }
+  return next;
+}
+
+// What the bot steers around and toward: every item it has perceived that has not yet passed
+// the pack, within its planning horizon.
+function botView(
+  bot: Bot,
+  road: BotRoad,
+  pulls: Pulls,
+  walk: Walk,
+): {
+  readonly hazards: LaneHazard[];
+  readonly prizes: LanePrize[];
+  readonly pulls: LanePull[];
+} {
+  const { data, geometry, speed } = road;
+  const hazards: LaneHazard[] = [];
+  const prizes: LanePrize[] = [];
+  const treatReach = treatReachOf(data, walk);
+  const treatsFull = walk.run.treats >= read(data.tuning, "counts", "treatCarryMax");
+  const horizon = bot.skill.lookAheadSeconds;
+  for (const item of walk.road.items) {
+    if (!bot.perceived.has(item.id)) {
+      continue;
+    }
+    if (item.mover !== undefined) {
+      for (const contact of moverContacts(road, horizon, item)) {
+        hazards.push({ from: contact.from, lanes: 1 << contact.lane, to: contact.to });
+      }
+      continue;
+    }
+    const { end, start } = contactWindow(geometry.packBand, speed, item.y, item.height);
+    if (end <= 0 || start > horizon) {
+      continue;
+    }
+    const lanes = itemLanes(item);
+    const category = itemCategory(data, item.kind);
+    if (category === "minor" || category === "obstacle") {
+      hazards.push({ from: start - MARGIN_SECONDS, lanes, to: end + MARGIN_SECONDS });
+    } else if (category === "treat") {
+      if (!treatsFull) {
+        prizes.push({
+          at: start,
+          lanes: widenMask(geometry.laneCount, treatReach, lanes),
+          value: PRIZE_VALUES.treat,
+        });
+      }
+    } else {
+      prizes.push({ at: start, lanes, value: PRIZE_VALUES[category] });
+    }
+  }
+  const seenPulls = pulls.dogs.flatMap(({ at, dog, lean }): LanePull[] =>
+    lean !== null && bot.perceivedTells.has(dog)
+      ? [
+          {
+            at: at - pulls.clock,
+            direction: lean,
+            lockSeconds: inputLockSeconds(data.tuning, walk.run.modifiers, data.dogs[dog]),
+            reactSeconds: bot.skill.reactionSeconds,
+          },
+        ]
+      : [],
+  );
+  return { hazards, prizes, pulls: seenPulls };
+}
+
+function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
+  const { control } = walk.road;
+  const { motion } = control;
+  const moving = motion.kind === "moving";
+  const readyAt = moving ? motion.duration - motion.elapsed : 0;
+  const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
+  const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
+  const moveSeconds = read(road.data.tuning, "seconds", "laneMove");
+  const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
+  const view = botView(bot, road, pulls, walk);
+  const moves = planLanes(
+    {
+      gridSeconds: GRID_SECONDS,
+      horizon: lookAheadSeconds,
+      laneCount: road.geometry.laneCount,
+      moveSeconds,
+      moveStep: Math.max(moveSeconds, laneChangeCooldown),
+    },
+    {
+      lane: moving ? motion.to : motion.lane,
+      movableAt: Math.max(
+        readyAt,
+        locked,
+        bot.lastInputAt + laneChangeCooldown - bot.clock,
+        bot.recoversAt - bot.clock,
+      ),
+      readyAt,
+    },
+    view.hazards,
+    view.prizes,
+    view.pulls,
+  );
+  bot.plan = moves.map((move) => ({ ...move, at: bot.clock + move.at }));
+  bot.replan = false;
+}
+
+// A lane change that does not take, such as one during a lock, makes the bot replan.
+function steer(bot: Bot, road: BotRoad, direction: LaneDirection, walk: Walk): Walk {
+  const steered = steerWalk(road.data, road.geometry.laneCount, direction, walk);
+  bot.lastInputAt = bot.clock;
+  if (steered.road.control.target === walk.road.control.target) {
+    bot.replan = true;
+  }
+  return steered;
+}
+
+// A planned lane change, unless the bot errs: then it is missed or comes late, the rest of
+// the plan is dropped, and the bot replans once it notices.
+function attempt(bot: Bot, road: BotRoad, direction: LaneDirection, walk: Walk): Walk {
+  const { errorRate, reactionSeconds } = bot.skill;
+  if (!chance(bot.random, errorRate)) {
+    return steer(bot, road, direction, walk);
+  }
+  bot.plan = [];
+  const noticed = Math.max(reactionSeconds, NOTICE_SECONDS);
+  if (chance(bot.random, 0.5)) {
+    bot.noticeAt = bot.clock + noticed;
+  } else {
+    const at = bot.clock + bot.random() * MISTIME_SECONDS;
+    bot.late.push({ at, direction });
+    bot.noticeAt = at + noticed;
+  }
+  return walk;
+}
+
+// A dog's tell starts the wait before the bot sees it. After a pull, the bot drags back, if
+// that is better, once it has reacted to the pull and the lock allows. A pull the bot did not
+// see coming spoils its plan until it has seen the tell; one it saw coming was in its plan.
+export function observePulls(
+  bot: Bot,
+  tells: readonly { readonly dog: DogId }[],
+  pulled: readonly PullEvent[],
+): void {
+  for (const { dog } of tells) {
+    bot.tellsAt.set(dog, bot.clock);
+    bot.perceivedTells.delete(dog);
+  }
+  for (const { dog } of pulled) {
+    bot.recoversAt = Math.max(bot.recoversAt, bot.clock + bot.skill.reactionSeconds);
+    if (bot.perceivedTells.has(dog)) {
+      bot.replan = true;
+    } else {
+      bot.plan = [];
+      const seen = (bot.tellsAt.get(dog) ?? bot.clock) + bot.skill.reactionSeconds;
+      bot.noticeAt = Math.max(bot.noticeAt ?? -Infinity, seen, bot.clock + NOTICE_SECONDS);
+    }
+    bot.tellsAt.delete(dog);
+    bot.perceivedTells.delete(dog);
+  }
+}
+
+// A chaser's pull toward a squirrel is not planned around: the bot reacts to it once it has
+// happened.
+export function observeChase(bot: Bot, pulled: readonly PullEvent[]): void {
+  if (pulled.length === 0) {
+    return;
+  }
+  const { reactionSeconds } = bot.skill;
+  bot.plan = [];
+  bot.recoversAt = Math.max(bot.recoversAt, bot.clock + reactionSeconds);
+  const noticed = bot.clock + Math.max(reactionSeconds, NOTICE_SECONDS);
+  bot.noticeAt = Math.max(bot.noticeAt ?? -Infinity, noticed);
+}
+
+// Everything the bot does at its clock time: perceives the items and tells due, notices a
+// mistake, replans when it has something new, and makes the lane changes due. Nothing
+// during a hit stop, which drops lane changes.
+export function actBot(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): Walk {
+  if (walk.road.hitStop !== null) {
+    return walk;
+  }
+  const due = bot.clock + SAME_MOMENT;
+  let acted = walk;
+  for (const item of acted.road.items) {
+    if (!bot.perceived.has(item.id) && perceiveAt(bot, road, item) <= due) {
+      bot.perceived.add(item.id);
+      bot.replan = true;
+    }
+  }
+  for (const [dog, at] of bot.tellsAt) {
+    if (!bot.perceivedTells.has(dog) && at + bot.skill.reactionSeconds <= due) {
+      bot.perceivedTells.add(dog);
+      bot.replan = true;
+    }
+  }
+  for (;;) {
+    const lateIndex = bot.late.findIndex((move) => move.at <= due);
+    const late = bot.late[lateIndex];
+    if (late !== undefined) {
+      bot.late.splice(lateIndex, 1);
+      acted = steer(bot, road, late.direction, acted);
+      continue;
+    }
+    if (bot.noticeAt !== null && bot.noticeAt <= due) {
+      bot.noticeAt = null;
+      bot.replan = true;
+    }
+    if (bot.noticeAt === null && bot.replan) {
+      replan(bot, road, pulls, acted);
+    }
+    const move = bot.plan[0];
+    if (move === undefined || move.at > due) {
+      return acted;
+    }
+    bot.plan.shift();
+    acted = attempt(bot, road, move.direction, acted);
+  }
+}

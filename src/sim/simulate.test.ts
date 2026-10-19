@@ -11,18 +11,32 @@ import { DEFAULT_RATES, type RunResult, type SimConfig, simulateRun } from "./si
 const STARTERS: PackDogs = ["duchess", "biscuit", "koda"];
 const RISKY: PackDogs = ["zippy", "dash", "snowball"];
 
-function config(overrides: Partial<SimConfig> = {}): SimConfig {
+// A config whose player hits and collects at fixed rates, the rates given with the rest.
+type Overrides = Partial<Omit<SimConfig, "player">> & {
+  readonly hitRate?: number;
+  readonly luckyRate?: number;
+  readonly tipRate?: number;
+  readonly treatRate?: number;
+};
+
+function config(overrides: Overrides = {}): SimConfig {
+  const { hitRate = 0.1, luckyRate, tipRate, treatRate, ...rest } = overrides;
   return {
     gear: null,
-    hitRate: 0.1,
     pack: STARTERS,
+    player: {
+      hitRate,
+      kind: "rates",
+      luckyRate: luckyRate ?? DEFAULT_RATES.luckyRate,
+      tipRate: tipRate ?? DEFAULT_RATES.tipRate,
+      treatRate: treatRate ?? DEFAULT_RATES.treatRate,
+    },
     policy: "heartsUnlessLow",
-    ...DEFAULT_RATES,
-    ...overrides,
+    ...rest,
   };
 }
 
-function runs(count: number, overrides: Partial<SimConfig> = {}): RunResult[] {
+function runs(count: number, overrides: Overrides = {}): RunResult[] {
   return Array.from({ length: count }, (_, seed) =>
     simulateRun(gameData, seededRandom(seed + 1), config(overrides)),
   );
