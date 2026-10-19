@@ -162,7 +162,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 
 ### Feedback
 
-- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (e.g. "SPRAYED!", "SOAKED!", "PICKPOCKETED!") and the caught dogs shaking off
+- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (skunk "SPRAYED!", puddle "SOAKED!", thief "PICKPOCKETED!", squirrel "SQUIRREL!", other dog "NEW FRIEND!") and the caught dogs shaking off
 - **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through) and Spooked (after a thief) are visual only and fade after 10 seconds
 - **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, equipped gear); tap one for its description
 
