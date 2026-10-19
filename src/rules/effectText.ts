@@ -8,6 +8,7 @@ import type {
   LiveTuning,
   Modifier,
   MoneyEffect,
+  NeedId,
   Size,
   Stat,
   Target,
@@ -39,6 +40,15 @@ export const TRAIT_NAMES: { readonly [T in TraitId]: string } = {
   foodDriven: "Food-driven",
 };
 
+// The word a dog's card shows for its need.
+export const NEED_WORDS: { readonly [N in NeedId]: string } = {
+  friendly: "Friendly",
+  nosy: "Nosy",
+  playful: "Playful",
+  regular: "Regular",
+  thirsty: "Thirsty",
+};
+
 const STAT_NAMES: { readonly [S in Stat]: string } = {
   chaserSquirrelPulls: "chaser pulls toward squirrels",
   costPerDog: "card costs per dog",
@@ -46,7 +56,6 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
   inputLock: "lane-input lock after a pull",
   maxHearts: "max ♥",
   obstacleSpawns: "obstacles",
-  pullFrequency: "pulls",
   startHearts: "starting ♥",
   startMoney: "starting money",
   tipSpawns: "tips",
@@ -81,6 +90,8 @@ function perDogText(target: Target | undefined): string {
     case "affected":
     case "all":
       return " per dog";
+    case "need":
+      return ` per ${NEED_WORDS[target.need]} dog`;
     case "randomOne":
     case "unhappiest":
       return "";
@@ -113,6 +124,8 @@ function heartsText(effect: HeartsEffect): string {
         ? `${amount} each`
         : `${amount} each (${exceptions.join(", ")})`;
     }
+    case "need":
+      return `${amount} to ${NEED_WORDS[target.need]} owners`;
     case "randomOne":
       return `${amount} to one random owner`;
     case "temperament":
@@ -165,6 +178,8 @@ function effectPhrase(data: TextData, effect: Effect): string {
   switch (effect.kind) {
     case "debuff":
       return data.debuffs[effect.debuff].name;
+    case "fulfilNeed":
+      return `${NEED_WORDS[effect.need]} needs met`;
     case "hearts":
       return heartsText(effect);
     case "immune":

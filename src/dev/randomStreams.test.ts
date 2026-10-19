@@ -27,7 +27,7 @@ describe("randomStreams", () => {
     take(13, disturbed.spawns);
     take(3, disturbed.cards);
     expect(take(20, disturbed.rolls)).toEqual(take(20, untouched.rolls));
-    expect(take(20, disturbed.pulls)).toEqual(take(20, untouched.pulls));
+    expect(take(20, disturbed.needs)).toEqual(take(20, untouched.needs));
   });
 
   it("gives each stream a sequence of its own", () => {

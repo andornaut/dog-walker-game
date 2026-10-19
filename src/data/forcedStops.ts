@@ -57,6 +57,7 @@ export const FORCED_STOPS = {
         effects: [
           { amount: 1, kind: "hearts", target: { kind: "all" } },
           { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
+          { kind: "fulfilNeed", need: "friendly" },
         ],
         name: "Of course!",
       },

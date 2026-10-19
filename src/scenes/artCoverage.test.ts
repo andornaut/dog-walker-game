@@ -4,7 +4,13 @@ import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
 import { animationKey, animationSpecs } from "../assets/asepriteAnimations";
-import { energyIconKey, statusIconKey, temperamentIconKey, traitIconKey } from "../assets/iconKeys";
+import {
+  energyIconKey,
+  needIconKey,
+  statusIconKey,
+  temperamentIconKey,
+  traitIconKey,
+} from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";
 import {
   CARD_FRAME_KEY,
@@ -15,6 +21,8 @@ import {
   dogPortraitKey,
   dogSpriteKey,
   kebabCase,
+  NEED_ART,
+  needSpotSpriteKey,
   ownerFaceKey,
 } from "../assets/spriteKeys";
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
@@ -26,6 +34,9 @@ import type {
   Energy,
   ForcedStopId,
   GearId,
+  NeedCardId,
+  NeedId,
+  NeedSpotId,
   Temperament,
   TraitId,
   UpgradeId,
@@ -211,11 +222,63 @@ describe("card art", () => {
         stop,
       })),
       { kind: "upgradeOffer", offered: ["bellyRubs", "bigTipper", "raincoats"] },
+      ...(Object.keys(gameData.needCards) as NeedCardId[]).map((card): CardSource => ({
+        affected: [],
+        card,
+        kind: "need",
+      })),
     ];
     const tags = [...new Set(sources.map((source) => cardFrameTag(gameData, source)))];
     expect(tags).toHaveLength(4);
     const missing = [CARD_FRAME_KEY, "card-frame-large"].flatMap((key) => missingTags(key, tags));
     expect(missing).toEqual([]);
+  });
+});
+
+describe("need art", () => {
+  const NEEDS = Object.keys(gameData.needs) as NeedId[];
+
+  it("names an icon for every need", () => {
+    expect(NEEDS.flatMap((need) => missingTags(needIconKey(need), ["normal"]))).toEqual([]);
+  });
+
+  it("tags the pull bubble with idle, show and urgent, and names the blocked mark", () => {
+    expect(missingTags(NEED_ART.bubble, ["idle", "show", "urgent"])).toEqual([]);
+    expect(sprites.has(NEED_ART.pullBlocked)).toBe(true);
+  });
+
+  it("names the pull fail, need met, accident and accident spot effects with their tags", () => {
+    const missing = [
+      ...missingTags(NEED_ART.pullFail, ["play"]),
+      ...missingTags(NEED_ART.needMet, NEEDS),
+      ...missingTags(NEED_ART.accident, ["play"]),
+      ...missingTags(NEED_ART.accidentSpot, ["idle"]),
+    ];
+    expect(missing).toEqual([]);
+  });
+
+  // The hydrant and the other dog reuse their obstacle's art.
+  it("names a road sprite, with its depth steps, for every need spot with its own art", () => {
+    const spots = Object.keys(gameData.needSpots) as NeedSpotId[];
+    const own = spots.map(needSpotSpriteKey).filter((key) => key.startsWith("spot-"));
+    expect(own).toHaveLength(4);
+    const missing = own.flatMap((key) => {
+      return [
+        ...missingTags(key, ["idle"]),
+        ...DEPTH_STEPS.map((step) => depthVariantKey(key, step) ?? "").filter(
+          (variant) => !sprites.has(variant),
+        ),
+      ];
+    });
+    expect(missing).toEqual([]);
+    expect(missingTags(needSpotSpriteKey("stranger"), ["wave"])).toEqual([]);
+  });
+
+  it("names card art for every option of every need card", () => {
+    const cards = Object.values(gameData.needCards);
+    expect(missingImages(cards.flatMap(({ options }) => options.map(({ art }) => art)))).toEqual(
+      [],
+    );
   });
 });
 

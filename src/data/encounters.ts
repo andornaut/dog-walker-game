@@ -54,6 +54,7 @@ export const ENCOUNTERS = {
           effects: [
             { amount: 1, kind: "hearts", target: { kind: "affected" } },
             { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
+            { kind: "fulfilNeed", need: "playful" },
           ],
           name: "Let them sniff",
         },

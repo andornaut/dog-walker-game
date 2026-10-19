@@ -2,7 +2,7 @@ import { type Random, seededRandom } from "../runner/random";
 
 // One seed feeds several named streams, each its own generator, so an extra draw in one
 // stream never shifts the sequence of another.
-export const RANDOM_STREAM_NAMES = ["cards", "pulls", "rolls", "spawns"] as const;
+export const RANDOM_STREAM_NAMES = ["cards", "needs", "rolls", "spawns"] as const;
 export type RandomStreamName = (typeof RANDOM_STREAM_NAMES)[number];
 export type RandomStreams = Readonly<Record<RandomStreamName, Random>>;
 
@@ -27,7 +27,7 @@ export function randomStream(seed: number, name: string): Random {
 export function randomStreams(seed: number): RandomStreams {
   return {
     cards: randomStream(seed, "cards"),
-    pulls: randomStream(seed, "pulls"),
+    needs: randomStream(seed, "needs"),
     rolls: randomStream(seed, "rolls"),
     spawns: randomStream(seed, "spawns"),
   };

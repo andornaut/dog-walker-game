@@ -26,6 +26,7 @@ export function testState(
     immunities: [],
     modifiers: [],
     money: cents(0),
+    needSeconds: {},
     pack: pack as readonly PackSlot[] as Pack,
     phase: { kind: "walking" },
     skipsLeft: 0,

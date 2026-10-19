@@ -1,6 +1,7 @@
 import { type GameObjects, type Input, Scene, type Textures, WEBGL } from "phaser";
 
 import { itemAt } from "../arrays";
+import { traitIconKey } from "../assets/iconKeys";
 import {
   backdropKey,
   dogSpriteKey,
@@ -8,6 +9,8 @@ import {
   forcedStopSpriteKey,
   minorObstacleSpriteKey,
   MOVER_SPRITES,
+  NEED_ART,
+  needSpotSpriteKey,
   roadStartKey,
   roadTileKey,
   SKUNK_CLOUD_KEY,
@@ -98,17 +101,18 @@ import {
 import { hintFor } from "../rules/hints";
 import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
-import { chasePose, stepChase } from "../runner/chase";
 import { holdForFiring } from "../runner/firingStop";
 import { isSteeringLocked } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
 import { isMoverObstacle, type MoverOnRoad, moverPlace } from "../runner/movers";
+import { isNeedSpot, isNeedUrgent, type NeedStep, stepNeeds } from "../runner/needs";
 import {
   gestureAfterPulls,
   NO_PULLS,
   pullPose,
   type Pulls,
   type PullStep,
+  type PullTargetKind,
   stepPulls,
 } from "../runner/pulls";
 import type { Random } from "../runner/random";
@@ -144,6 +148,15 @@ import type { CardSceneData } from "./CardScene";
 import { drawPixelLine, fillRect, shadowTexture } from "./draw";
 import { trotOffRoad } from "./feedbackMoments";
 import { hitLabelOf, playHitMoment } from "./hitMoment";
+import {
+  type DogSignal,
+  dogTop,
+  type IconArt,
+  iconArt,
+  needIcon,
+  NeedSignals,
+  playPullFail,
+} from "./needSignals";
 import { colorFromHex, PALETTE } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import { addPixelText } from "./pixelText";
@@ -243,17 +256,23 @@ const BANNER = { holdMs: 1800, key: "ui-zone-banner", slideMs: 300, width: 248, 
 // down from the far end of the road for a cyclist, and the arrow a sign's width beside it or
 // below it on screen.
 const CUE = { inset: 10, size: 16, top: 20 };
+// The icon of a need spot that shares an obstacle's art floats this high over it, at 1x.
+const SPOT_ICON_LIFT = 40;
+// An accident's spot is left behind on the road until it is this far behind the walker.
+const DECAL_BEHIND = 60;
 
 // One sprite of an item. dx is across the road from the item's centre and footY the flat
 // road row it stands on, both in road pixels. feet "bottom" stands it on its frame's bottom
 // rather than its anchor. A flat sprite lies on the road, under everything else with no
-// shadow.
+// shadow. A lifted sprite floats that many pixels, at its scale, over where it stands, with
+// no shadow.
 interface ItemPart {
   dx: number;
   feet: "anchor" | "bottom";
   flat: boolean;
   footY: (item: WalkItem) => number;
   key: string;
+  lift: number;
   sprite: GameObjects.Sprite;
 }
 
@@ -296,6 +315,10 @@ export class RunScene extends Scene {
   private distanceBeforeZone = 0;
   private dizzy: GameObjects.Sprite | undefined;
   private dogSprites = new Map<DogId, GameObjects.Sprite>();
+  // Where each walking dog stood last, in road pixels: across the road, and ahead of the walker.
+  private dogFeet = new Map<DogId, { distance: number; x: number }>();
+  // Accident spots on the road: where they lie across it, and the road scrolled to their row.
+  private decals: { scroll: number; sprite: GameObjects.Sprite; x: number }[] = [];
   // The tag each dog's sprite last played.
   private dogTags = new Map<DogId, string>();
   // How long the end screen waits for a final firing or payout.
@@ -324,9 +347,10 @@ export class RunScene extends Scene {
   private pendingInputs: PendingInput[] = [];
   // The press driving the walk's gestures.
   private pointers: PointerTrack = idleTrack;
+  private needSignals: NeedSignals | undefined;
   private pulls: Pulls = NO_PULLS;
   private random:
-    { cards: Random; pulls: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
+    { cards: Random; needs: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
   private replay: Replay | undefined;
   // The projected road, drawn a row at a time into pixels, then uploaded to its texture.
   private road: { pixels: Uint32Array; raster: RoadRaster; upload: () => void } | undefined;
@@ -359,7 +383,7 @@ export class RunScene extends Scene {
     this.setup = setup;
     this.random = {
       cards: randomStream(setup.seed, "cards"),
-      pulls: randomStream(setup.seed, "pulls"),
+      needs: randomStream(setup.seed, "needs"),
       quips: randomStream(setup.seed, "quips"),
       rolls: randomStream(setup.seed, "rolls"),
       scenery: randomStream(setup.seed, "scenery"),
@@ -427,6 +451,8 @@ export class RunScene extends Scene {
     this.packPose = "walk";
     this.pendingInputs = [];
     this.pointers = idleTrack;
+    this.dogFeet = new Map();
+    this.decals = [];
     this.pulls = NO_PULLS;
     this.replay = undefined;
     this.runTimeMs = 0;
@@ -529,6 +555,7 @@ export class RunScene extends Scene {
     playTag(this.walker.sprite, walkerSprite, "walk");
     this.dizzy = this.add.sprite(0, 0, "fx-dizzy").setDepth(DEPTH.fx).setVisible(false);
     this.statusOverlays = new StatusOverlays(this);
+    this.needSignals = new NeedSignals(this, DEPTH.fx);
   }
 
   private listen(): void {
@@ -736,18 +763,19 @@ export class RunScene extends Scene {
       this.log({ ...input, timeMs: this.runTimeMs });
     }
     const geometry = this.geometry(walk.run);
-    const pulls = stepPulls(gameData, geometry, random.pulls, STEP_MS / 1000, this.pulls, walk);
+    const pulls = stepPulls(gameData, geometry, STEP_MS / 1000, this.pulls, walk);
     this.reactToPulls(pulls);
-    // A chaser after a squirrel barks and re-anchors a drag as a dog's own pull does.
-    const chased = stepChase(gameData, geometry, STEP_MS / 1000, pulls.walk);
-    this.reactToPulls({ ...chased, pulls: this.pulls });
-    walk = chased.walk;
+    walk = pulls.walk;
+    const moving = walk.road.hitStop === null;
     const step = stepWalk(gameData, this.geometry(walk.run), random.rolls, STEP_MS / 1000, walk);
     this.runTimeMs += STEP_MS;
-    this.walk = step.walk;
+    const spots = step.spots.flatMap(({ kind }) => (isNeedSpot(gameData, kind) ? [kind] : []));
+    const needs = stepNeeds(gameData, random.needs, STEP_MS / 1000, moving, spots, step.walk.run);
+    this.walk = { ...step.walk, run: needs.run };
     this.react(step);
+    this.reactToNeeds(needs);
     this.zoneEndPending ||= step.zoneEnded;
-    this.cardQueue.push(...step.cards);
+    this.cardQueue.push(...step.cards, ...needs.cards);
     this.holdForFiring();
     this.continueWalk();
   }
@@ -817,18 +845,87 @@ export class RunScene extends Scene {
     }
   }
 
-  // A tell barks, and a pull that moved the pack re-anchors the drag. The lean and the bark
-  // pop are drawn with the pack.
+  // A tell barks, a blocked strain that ends without a pull bursts over its dog, and a pull that
+  // moved the pack re-anchors the drag. The strain, the bubble and the bark pop are drawn with the pack.
   private reactToPulls(step: PullStep): void {
     this.pulls = step.pulls;
     if (step.tells.length > 0) {
       soundboardOf(this).play("bark");
       this.hint({ kind: "pull" });
     }
+    for (const dog of step.failed) {
+      const sprite = this.dogSprites.get(dog);
+      if (sprite?.visible === true) {
+        playPullFail(this, dogTop(sprite), DEPTH.fx);
+      }
+    }
     this.pointers = {
       ...this.pointers,
       gesture: gestureAfterPulls(step.pulled, this.pointers.gesture),
     };
+  }
+
+  // A need met bursts at each met dog's feet, with its changes and the owners' lines; one gone
+  // wrong shows its changes, and a Regular dog's accident bursts on the dog and leaves a spot
+  // on the road. Their cards are queued with the walk's.
+  private reactToNeeds(step: NeedStep): void {
+    const still = this.reducedMotion();
+    for (const moment of step.moments) {
+      const { outcome } = moment;
+      if (moment.kind === "met") {
+        soundboardOf(this).play("treat");
+        for (const dog of moment.dogs) {
+          const sprite = this.dogSprites.get(dog);
+          if (sprite?.visible === true) {
+            const feet = { x: sprite.x, y: sprite.y };
+            this.needSignals?.met(feet, moment.need, needIcon(this, moment.need), still);
+          }
+        }
+      } else if (moment.need === "regular") {
+        this.accident(moment.dog);
+      }
+      if (outcome !== null) {
+        this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+        this.sayQuips(outcome.quips);
+        this.afterOutcome(outcome);
+      }
+    }
+  }
+
+  // The accident plays on the dog's own frame, then its spot lies at the dog's feet.
+  private accident(dog: DogId): void {
+    const sprite = this.dogSprites.get(dog);
+    const feet = this.dogFeet.get(dog);
+    const walk = this.walk;
+    if (sprite === undefined || feet === undefined || walk === undefined) {
+      return;
+    }
+    playEffect(this, NEED_ART.accident, "play", sprite, sprite.depth + 1)
+      ?.setOrigin(sprite.originX, sprite.originY)
+      .setScale(sprite.scaleX, sprite.scaleY);
+    if (this.textures.exists(NEED_ART.accidentSpot)) {
+      const decal = addStandingSprite(this, NEED_ART.accidentSpot, 0, 0).setDepth(DEPTH.decal);
+      playTag(decal, NEED_ART.accidentSpot, "idle", this.reducedMotion());
+      const scroll = this.distanceBeforeZone + walk.run.zoneDistance - feet.distance;
+      this.decals.push({ scroll, sprite: decal, x: feet.x });
+    }
+  }
+
+  // Each accident spot lies flat on its row of road, sized by showAtDepth, until it is behind
+  // the walker.
+  private drawDecals(walk: Walk): void {
+    const scroll = this.distanceBeforeZone + walk.run.zoneDistance;
+    this.decals = this.decals.filter((decal) => {
+      const distance = decal.scroll - scroll;
+      if (distance < -DECAL_BEHIND) {
+        decal.sprite.destroy();
+        return false;
+      }
+      const placed = project(PROJECTION, { distance, x: decal.x });
+      showAtDepth(decal.sprite, NEED_ART.accidentSpot, placed.scale);
+      decal.sprite.setPosition(Math.round(placed.x), Math.round(placed.y));
+      return true;
+    });
   }
 
   // Sounds, bursts, labels and hints for what happened in a step.
@@ -1053,7 +1150,7 @@ export class RunScene extends Scene {
     }
     if (source.kind === "forcedStop") {
       this.hint({ kind: "forcedStop" });
-    } else {
+    } else if (source.kind === "encounter") {
       this.hint({ encounter: source.encounter, kind: "encounter" });
       if (gameData.encounters[source.encounter].kind === "lucky") {
         this.hint({ kind: "luckyFind" });
@@ -1074,6 +1171,9 @@ export class RunScene extends Scene {
       view,
       choice,
     );
+    if (outcome.next !== null) {
+      this.cardQueue.unshift(outcome.next);
+    }
     this.log({ choice, kind: "card", timeMs: this.runTimeMs });
     const at = { timeMs: this.runTimeMs, zoneIndex: walk.run.zoneIndex };
     this.statusMarks = startStatuses(gameData, view, at, choice, this.statusMarks);
@@ -1560,18 +1660,22 @@ export class RunScene extends Scene {
       }
       const first = itemAt(this.laneXs, item.lane);
       const laneX = (first + itemAt(this.laneXs, item.lane + item.laneSpan - 1)) / 2;
+      // A need spot, such as the waving stranger, holds its idle frame under reduced motion.
+      const itemTags = still && isNeedSpot(gameData, item.kind) ? ITEM_TAGS.halted : tags;
       for (const part of view.parts) {
         const distance = PROJECTION.footY - part.footY(item);
         const placed = project(PROJECTION, { distance, x: laneX + part.dx });
         const drawn = showAtDepth(part.sprite, part.key, placed.scale, part.feet);
         const x = Math.round(placed.x);
         const y = Math.round(placed.y);
-        part.sprite.setPosition(x, y);
-        const tag = firstTag(this, drawn.key, tags);
+        part.sprite.setPosition(x, y - Math.round(part.lift * placed.scale));
+        const tag = firstTag(this, drawn.key, itemTags);
         if (tag !== undefined) {
           playTag(part.sprite, drawn.key, tag, still);
         }
-        if (part.flat) {
+        if (part.lift > 0) {
+          part.sprite.setDepth(DEPTH.sprite + placed.y + 1);
+        } else if (part.flat) {
           part.sprite.setDepth(DEPTH.decal);
         } else {
           part.sprite.setDepth(DEPTH.sprite + placed.y);
@@ -1666,6 +1770,7 @@ export class RunScene extends Scene {
         flat: false,
         footY: bottom,
         key,
+        lift: 0,
         sprite: addStandingSprite(this, key, 0, 0),
         ...overrides,
       };
@@ -1683,6 +1788,16 @@ export class RunScene extends Scene {
       parts = [part(MOVER_SPRITES[item.kind].key)];
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
+    } else if (isNeedSpot(gameData, item.kind)) {
+      // A spot whose art is missing stands in as a hydrant. The need's icon floats over a spot
+      // that looks like an obstacle, the hydrant and the other dog, and any without its art.
+      const art = needSpotSpriteKey(item.kind);
+      const key = this.textures.exists(art) ? art : "hydrant";
+      const shared = key === "hydrant" || key === encounterSpriteKey("otherDog");
+      const icon = needIcon(this, gameData.needSpots[item.kind].need);
+      parts = shared
+        ? [part(key), part(icon.key, { feet: "bottom", lift: SPOT_ICON_LIFT })]
+        : [part(key)];
     } else if (isMinorObstacle(gameData, item.kind)) {
       parts = [part(minorObstacleSpriteKey(item.kind))];
     } else if (item.kind === "skunk") {
@@ -1744,7 +1859,8 @@ export class RunScene extends Scene {
     const walking = packDogs(walk.run);
     const placements = packPlacements(walking.length);
     const leashColor = colorFromHex(this.zone(walk.run).leashColor);
-    const leashKey = `${walkerX}|${walking.join()}|${leashColor}`;
+    const taut = this.pulls.strain?.dog ?? null;
+    const leashKey = `${walkerX}|${walking.join()}|${leashColor}|${taut}`;
     const redrawLeash = leashKey !== this.drawnLeash;
     if (redrawLeash) {
       this.drawnLeash = leashKey;
@@ -1777,14 +1893,22 @@ export class RunScene extends Scene {
       });
       sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
       shadow(dogSpriteKey(gameData, dog), drawn.depth, x, dogFoot);
+      this.dogFeet.set(dog, { distance: -placement.footDy, x: walkerX + placement.dx });
       if (redrawLeash) {
         const hand = leashHand(placement);
-        drawPixelLine(
-          leash,
-          leashColor,
-          { x: walkerX + hand.dx, y: footY + hand.dy },
-          { x, y: dogFoot - Math.round(COLLAR_HEIGHT * drawn.depth) },
-        );
+        const from = { x: walkerX + hand.dx, y: footY + hand.dy };
+        const to = { x, y: dogFoot - Math.round(COLLAR_HEIGHT * drawn.depth) };
+        drawPixelLine(leash, leashColor, from, to);
+        if (dog === taut) {
+          // A taut leash has a yellow line along its upper-left side.
+          const side =
+            Math.abs(to.y - from.y) >= Math.abs(to.x - from.x) ? { x: -1, y: 0 } : { x: 0, y: -1 };
+          const shift = (point: { x: number; y: number }) => ({
+            x: point.x + side.x,
+            y: point.y + side.y,
+          });
+          drawPixelLine(leash, PALETTE.yellow, shift(from), shift(to));
+        }
       }
     }
     const walker = this.walker;
@@ -1804,6 +1928,57 @@ export class RunScene extends Scene {
     const statuses = this.statuses(walk.run);
     const shown = (dog: DogId) => shownStatus(statuses, this.runTimeMs, dog);
     this.statusOverlays?.draw(this.dogSprites, shown, still);
+    this.drawSignals(walk, walking);
+  }
+
+  // A bubble over each dog that strains or has an urgent need: the need's icon, or what it
+  // strains toward, with the dotted line and arrow to it, and the blocked mark while the
+  // fairness rule holds the pull back.
+  private drawSignals(walk: Walk, walking: readonly DogId[]): void {
+    const { strain } = this.pulls;
+    const signals = walking.flatMap((dog): DogSignal[] => {
+      const sprite = this.dogSprites.get(dog);
+      const straining = strain?.dog === dog ? strain : null;
+      const urgent = isNeedUrgent(gameData, walk.run, dog);
+      if (sprite === undefined || (straining === null && !urgent)) {
+        return [];
+      }
+      return [
+        {
+          blocked: straining?.blocked === true,
+          dog,
+          icon: this.signalIcon(dog, straining?.kind ?? "need"),
+          target: straining === null ? null : this.itemPoint(straining.itemId),
+          top: dogTop(sprite),
+          urgent,
+        },
+      ];
+    });
+    this.needSignals?.draw(signals, this.reducedMotion());
+    this.drawDecals(walk);
+  }
+
+  // The icon of what a dog strains toward: its need's, the treat, or the chaser's.
+  private signalIcon(dog: DogId, kind: PullTargetKind): IconArt {
+    switch (kind) {
+      case "need":
+        return needIcon(this, gameData.dogs[dog].need);
+      case "squirrel":
+        return iconArt(this, traitIconKey("chaser"), "S");
+      case "treat":
+        return iconArt(this, "treat", "T");
+      default:
+        return kind satisfies never;
+    }
+  }
+
+  // The middle of an item's sprite on screen: a mover's body once it moves, else its cue.
+  private itemPoint(id: number): { x: number; y: number } | null {
+    const parts = this.items.get(id)?.parts ?? [];
+    const sprite = parts.map(({ sprite: shown }) => shown).find((shown) => shown.visible);
+    return sprite === undefined
+      ? null
+      : { x: sprite.x, y: Math.round(sprite.y - sprite.displayHeight / 2) };
   }
 
   // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the
@@ -1816,8 +1991,7 @@ export class RunScene extends Scene {
     still: boolean,
     head: { x: number; y: number },
   ): void {
-    const pull =
-      pullPose(gameData, this.pulls, dog) ?? chasePose(this.walk?.road.chase ?? null, dog);
+    const pull = pullPose(gameData, this.pulls, dog);
     const tag = pull?.tag ?? pose;
     const shown = this.dogTags.get(dog);
     if (tag !== shown) {

@@ -8,6 +8,7 @@ export const DOGS = {
     energy: "calm",
     look: "Blue merle, one blue eye, red bandana",
     name: "Archie",
+    need: "playful",
     owner: {
       name: "Ophelia",
       role: "stage actor",
@@ -24,6 +25,7 @@ export const DOGS = {
     energy: "hyper",
     look: "Tricolour, floppy ears, green collar",
     name: "Biscuit",
+    need: "regular",
     owner: {
       name: "Sam",
       role: "barista",
@@ -39,6 +41,7 @@ export const DOGS = {
     energy: "calm",
     look: "White coat, pink bow",
     name: "Duchess",
+    need: "friendly",
     owner: {
       name: "Rosa",
       role: "retired florist",
@@ -54,6 +57,7 @@ export const DOGS = {
     energy: "steady",
     look: "Grey and white, blue eyes, harness",
     name: "Koda",
+    need: "nosy",
     owner: {
       name: "Jesse",
       role: "trail runner",
@@ -69,6 +73,7 @@ export const DOGS = {
     energy: "steady",
     look: "Fawn, black mask, tiny bandana",
     name: "Nugget",
+    need: "thirsty",
     owner: {
       name: "Kevin",
       role: "pet influencer",
@@ -85,6 +90,7 @@ export const DOGS = {
     energy: "calm",
     look: "Golden coat, feathery tail, blue collar",
     name: "Penny",
+    need: "thirsty",
     owner: {
       name: "Dr. Hughes",
       role: "dentist",
@@ -101,6 +107,7 @@ export const DOGS = {
     energy: "steady",
     look: "Apricot, show-clip pom-poms",
     name: "Pierre",
+    need: "nosy",
     owner: {
       name: "Madame Lefevre",
       role: "dog-show judge",
@@ -117,6 +124,7 @@ export const DOGS = {
     energy: "hyper",
     look: "Fluffy white, collar with a bell",
     name: "Snowball",
+    need: "friendly",
     owner: {
       name: "Tiffany",
       role: "wedding planner",
@@ -133,6 +141,7 @@ export const DOGS = {
     energy: "hyper",
     look: "White with tan patches, red collar",
     name: "Zippy",
+    need: "playful",
     owner: {
       name: "Mr. Pruitt",
       role: "retired accountant",

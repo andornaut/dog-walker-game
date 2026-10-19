@@ -4,6 +4,7 @@ import { inputLockSeconds } from "../rules/dogs";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
 import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
+import { needFill, needSpotOf } from "../runner/needs";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
@@ -15,6 +16,7 @@ import {
   type WalkData,
   type WalkItem,
 } from "../runner/walk";
+import { packDogs } from "../state/pack";
 import {
   type LaneHazard,
   type LanePrize,
@@ -67,6 +69,10 @@ const MARGIN_SECONDS = 1e-4;
 const GRID_SECONDS = 0.1;
 
 const PRIZE_VALUES = { lucky: 1, tip: 1, treat: 1 } as const;
+// A need spot is worth NEED_SPOT_VALUE for each dog whose need it meets, and up to
+// NEED_URGENCY_VALUE more as that dog's need fills toward urgent and past it.
+const NEED_SPOT_VALUE = 1;
+const NEED_URGENCY_VALUE = 3;
 
 export function newBot(random: Random, skill: Skill): Bot {
   return {
@@ -306,23 +312,51 @@ function botView(
           value: PRIZE_VALUES.treat,
         });
       }
+    } else if (category === "needSpot") {
+      const value = needSpotValue(data, walk, item);
+      if (value > 0) {
+        prizes.push({ at: start, lanes, value });
+      }
     } else {
       prizes.push({ at: start, lanes, value: PRIZE_VALUES[category] });
     }
   }
-  const seenPulls = pulls.dogs.flatMap(({ at, dog, lean }): LanePull[] =>
-    lean !== null && bot.perceivedTells.has(dog)
+  // A strain seen coming is planned as a pull when its tell runs out within the look-ahead;
+  // one waiting on its target, such as a squirrel that does not move yet, is reacted to once
+  // it pulls.
+  const { strain } = pulls;
+  const seenPulls: LanePull[] =
+    strain !== null &&
+    strain.tellSeconds > 0 &&
+    strain.tellSeconds < horizon &&
+    bot.perceivedTells.has(strain.dog)
       ? [
           {
-            at: at - pulls.clock,
-            direction: lean,
-            lockSeconds: inputLockSeconds(data.tuning, walk.run.modifiers, data.dogs[dog]),
+            at: strain.tellSeconds,
+            direction: strain.direction,
+            lockSeconds: inputLockSeconds(data.tuning, walk.run.modifiers, data.dogs[strain.dog]),
             reactSeconds: bot.skill.reactionSeconds,
           },
         ]
-      : [],
-  );
+      : [];
   return { hazards, prizes, pulls: seenPulls };
+}
+
+// What steering into a need spot is worth to the bot: more for each dog it meets the need of,
+// and more the fuller each need is.
+function needSpotValue(data: WalkData, walk: Walk, item: WalkItem): number {
+  const spot = needSpotOf(data, item.kind);
+  if (spot === null) {
+    return 0;
+  }
+  const { need } = data.needSpots[spot];
+  return packDogs(walk.run)
+    .filter((dog) => data.dogs[dog].need === need)
+    .reduce(
+      (value, dog) =>
+        value + NEED_SPOT_VALUE + NEED_URGENCY_VALUE * Math.min(1.5, needFill(data, walk.run, dog)),
+      0,
+    );
 }
 
 function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
@@ -392,19 +426,19 @@ function attempt(bot: Bot, road: BotRoad, direction: LaneDirection, walk: Walk):
 
 // A dog's tell starts the wait before the bot sees it. After a pull, the bot drags back, if
 // that is better, once it has reacted to the pull and the lock allows. A pull the bot did not
-// see coming spoils its plan until it has seen the tell; one it saw coming was in its plan.
+// see coming spoils its plan until it has seen the tell; one it saw coming was in its plan. A
+// blocked pull moved nothing, so the bot replans without the pull. A tell after a pull, for a
+// target with pulls left, starts the wait again.
 export function observePulls(
   bot: Bot,
   tells: readonly { readonly dog: DogId }[],
   pulled: readonly PullEvent[],
 ): void {
-  for (const { dog } of tells) {
-    bot.tellsAt.set(dog, bot.clock);
-    bot.perceivedTells.delete(dog);
-  }
-  for (const { dog } of pulled) {
-    bot.recoversAt = Math.max(bot.recoversAt, bot.clock + bot.skill.reactionSeconds);
-    if (bot.perceivedTells.has(dog)) {
+  for (const { dog, moved } of pulled) {
+    if (moved) {
+      bot.recoversAt = Math.max(bot.recoversAt, bot.clock + bot.skill.reactionSeconds);
+    }
+    if (bot.perceivedTells.has(dog) || !moved) {
       bot.replan = true;
     } else {
       bot.plan = [];
@@ -414,19 +448,10 @@ export function observePulls(
     bot.tellsAt.delete(dog);
     bot.perceivedTells.delete(dog);
   }
-}
-
-// A chaser's pull toward a squirrel is not planned around: the bot reacts to it once it has
-// happened.
-export function observeChase(bot: Bot, pulled: readonly PullEvent[]): void {
-  if (pulled.length === 0) {
-    return;
+  for (const { dog } of tells) {
+    bot.tellsAt.set(dog, bot.clock);
+    bot.perceivedTells.delete(dog);
   }
-  const { reactionSeconds } = bot.skill;
-  bot.plan = [];
-  bot.recoversAt = Math.max(bot.recoversAt, bot.clock + reactionSeconds);
-  const noticed = bot.clock + Math.max(reactionSeconds, NOTICE_SECONDS);
-  bot.noticeAt = Math.max(bot.noticeAt ?? -Infinity, noticed);
 }
 
 // Everything the bot does at its clock time: perceives the items and tells due, notices a

@@ -20,15 +20,18 @@ import {
   offerUpgrades,
   openCard,
 } from "../rules/choices";
+import { inputLockSeconds } from "../rules/dogs";
 import { affectedDogs, opensCard } from "../rules/encounters";
 import { minorBump } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { addCents, type Cents, cents, read } from "../rules/units";
-import { stepChase } from "../runner/chase";
+import { destinationLane } from "../runner/laneMotion";
 import { hasLeftRoad, isMoverObstacle, type MoverKind, moverPlace } from "../runner/movers";
+import { isNeedSpot, meetNeedAt, type NeedMoment, stepNeeds } from "../runner/needs";
 import { NO_PULLS, type Pulls, stepPulls } from "../runner/pulls";
 import { chance, type Random, seededRandom } from "../runner/random";
 import {
+  blocksLane,
   collect,
   finishZone,
   isMinorObstacle,
@@ -50,7 +53,6 @@ import {
   type BotRoad,
   newBot,
   nextBotTime,
-  observeChase,
   observePulls,
   observeRoad,
 } from "./bot";
@@ -60,7 +62,7 @@ import { nextWalkEvent } from "./walkEvents";
 
 export type SimData = ChoiceData &
   WalkData &
-  Pick<GameData, "achievements" | "dogSlots" | "upgrades">;
+  Pick<GameData, "achievements" | "dogSlots" | "needs" | "upgrades">;
 
 // Who plays the walk. rates: each item spawned is met in road order, and hit or collected by
 // chance, with rates from 0 to 1: hitRate for each obstacle, the others for each pickup or
@@ -85,7 +87,7 @@ export interface SimConfig {
 
 export const DEFAULT_RATES = { luckyRate: 0.7, tipRate: 0.7, treatRate: 0.7 } as const;
 
-export type CardFrom = "forcedStop" | "lucky" | "obstacle";
+export type CardFrom = "forcedStop" | "lucky" | "need" | "obstacle";
 
 // One encounter or forced stop card and the option the policy took.
 export interface ChoiceRecord {
@@ -122,6 +124,20 @@ export interface ItemCount {
 }
 
 export type ItemCounts = Partial<Record<WalkItemKind, ItemCount>>;
+
+// Obstacle hits, minor ones and movers included, and those of them that came while a pull's
+// move, the pulling dog's input lock, AFTER_PULL_REACTION_SECONDS and a lane move back had not
+// yet passed, from something not in the lane the pull moved the pack out of: hits the pull
+// left the player no time to avoid.
+export interface HitCounts {
+  afterPull: number;
+  all: number;
+}
+
+// The reaction time a hit after a pull is measured against, fixed so the measure stays
+// comparable when the tuning changes.
+const AFTER_PULL_REACTION_SECONDS = 0.6;
+
 export type MoverCounts = Partial<Record<MoverKind, ItemCount>>;
 
 export interface RunResult {
@@ -134,6 +150,9 @@ export interface RunResult {
   readonly earnings: Cents;
   readonly finished: boolean;
   readonly firings: readonly FiringRecord[];
+  readonly hits: HitCounts;
+  // Pulls that moved the pack.
+  readonly pullsMoved: number;
   // Items that do not move, by kind, and movers, by mover.
   readonly items: ItemCounts;
   readonly movers: MoverCounts;
@@ -171,9 +190,14 @@ function zoneEvents(walk: Walk): ZoneEvent[] {
 
 // The run state and everything recorded about the run so far.
 interface Session {
+  // The lane the last pull moved the pack out of, and the bot clock until which a hit counts
+  // as coming after it.
+  afterPull: { readonly fromLane: number; readonly until: number } | null;
   cardsSeen: number;
   readonly choices: ChoiceRecord[];
   readonly firings: FiringRecord[];
+  readonly hits: HitCounts;
+  pullsMoved: number;
   readonly items: ItemCounts;
   readonly movers: MoverCounts;
   run: RunState;
@@ -236,6 +260,9 @@ function playCard(
   });
   recordFirings(session, run, outcome);
   session.run = outcome.state;
+  if (outcome.next !== null && outcome.next.kind !== "upgradeOffer") {
+    playCard(data, random, config, session, cardFrom(data, outcome.next), outcome.next);
+  }
 }
 
 // The pack meets an encounter: nothing happens unless it affects a dog, and an instant lucky
@@ -313,6 +340,22 @@ function playZoneByRates(
       if (collected) {
         session.run = collect(data, "treat", session.run).run;
       }
+    } else if (isNeedSpot(data, event.item)) {
+      // Needs do not fill here: a spot is steered into at the lucky rate, and meets the need.
+      const collected = chance(random, rates.luckyRate);
+      countItem(session, collected, { kind: event.item, mover: event.mover });
+      if (collected) {
+        const met = meetNeedAt(data, random, event.item, session.run);
+        session.run = met.run;
+        playNeedOutcomes(
+          data,
+          random,
+          config,
+          session,
+          met.moment === null ? [] : [met.moment],
+          met.card === null ? [] : [met.card],
+        );
+      }
     } else if (isMinorObstacle(data, event.item) || isMoverObstacle(event.item)) {
       // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
       const hit = event.distance >= graceUntil && chance(random, rates.hitRate);
@@ -346,7 +389,7 @@ function playZoneByRates(
 interface Streams {
   readonly bot: Random;
   readonly cards: Random;
-  readonly pulls: Random;
+  readonly needs: Random;
   readonly rolls: Random;
   readonly spawnSeed: number;
 }
@@ -356,10 +399,32 @@ function streamsFrom(random: Random): Streams {
   return {
     bot: seededRandom(seed()),
     cards: seededRandom(seed()),
-    pulls: seededRandom(seed()),
+    needs: seededRandom(seed()),
     rolls: seededRandom(seed()),
     spawnSeed: seed(),
   };
+}
+
+// Needs met or gone wrong: their outcomes' firings are recorded, and their cards are played
+// in order, each followed by any card it opens next.
+function playNeedOutcomes(
+  data: SimData,
+  random: Random,
+  config: SimConfig,
+  session: Session,
+  moments: readonly NeedMoment[],
+  cards: readonly CardSource[],
+): void {
+  for (const { outcome } of moments) {
+    if (outcome !== null) {
+      recordFirings(session, session.run, outcome);
+    }
+  }
+  for (const card of cards) {
+    if (card.kind !== "upgradeOffer" && !hasEnded(session)) {
+      playCard(data, random, config, session, cardFrom(data, card), card);
+    }
+  }
 }
 
 const ROAD = screenLayout(SCREEN_CONFIG).road;
@@ -381,7 +446,14 @@ const MIN_STEP_SECONDS = 1e-6;
 
 // Counts the items that left the road in a step: those that left while still on it touched
 // the pack, and the rest scrolled past it or, for a crosser, ran off its side.
-function countLeaving(session: Session, geometry: RoadGeometry, before: Walk, after: Walk): void {
+function countLeaving(
+  data: SimData,
+  session: Session,
+  geometry: RoadGeometry,
+  pulledFrom: number | null,
+  before: Walk,
+  after: Walk,
+): void {
   if (after.road.items === before.road.items) {
     return;
   }
@@ -391,16 +463,42 @@ function countLeaving(session: Session, geometry: RoadGeometry, before: Walk, af
       continue;
     }
     const { mover } = item;
+    let touched: boolean;
     if (mover === undefined) {
-      countItem(session, item.y + travel < geometry.roadBottom, {
-        kind: item.kind,
-        mover: undefined,
-      });
+      touched = item.y + travel < geometry.roadBottom;
+      countItem(session, touched, { kind: item.kind, mover: undefined });
     } else {
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + travel);
       const y = geometry.roadTop - item.height + place.travel;
-      const left = hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom;
-      countItem(session, !left, { kind: item.kind, mover: mover.path.mover });
+      touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
+      countItem(session, touched, { kind: item.kind, mover: mover.path.mover });
+    }
+    if (touched && blocksLane(data, item.kind)) {
+      const inFromLane =
+        pulledFrom !== null && pulledFrom >= item.lane && pulledFrom < item.lane + item.laneSpan;
+      session.hits.all += 1;
+      session.hits.afterPull += pulledFrom !== null && !inFromLane ? 1 : 0;
+    }
+  }
+}
+
+// Each pull that moved the pack starts the stretch in which a hit counts as coming after it.
+function notePulls(
+  data: SimData,
+  session: Session,
+  clock: number,
+  walk: Walk,
+  pulled: readonly { readonly dog: DogId; readonly moved: boolean }[],
+): void {
+  const move = read(data.tuning, "seconds", "laneMove");
+  for (const { dog, moved } of pulled) {
+    if (moved) {
+      session.pullsMoved += 1;
+      const lock = inputLockSeconds(data.tuning, walk.run.modifiers, data.dogs[dog]);
+      session.afterPull = {
+        fromLane: destinationLane(walk.road.control.motion),
+        until: clock + move + lock + AFTER_PULL_REACTION_SECONDS + move,
+      };
     }
   }
 }
@@ -409,7 +507,7 @@ function cardFrom(data: SimData, source: CardSource): CardFrom {
   if (source.kind === "encounter") {
     return data.encounters[source.encounter].kind === "lucky" ? "lucky" : "obstacle";
   }
-  return "forcedStop";
+  return source.kind === "need" ? "need" : "forcedStop";
 }
 
 // The bot walks the planned zone on the real walk loop, pulls and chases included, until the
@@ -447,22 +545,18 @@ function playZoneBySkill(
         ? nextWalkEvent(road, pulls, walk)
         : Math.min(nextWalkEvent(road, pulls, walk), nextBotTime(bot, road, walk) - bot.clock),
     );
-    const pulled = stepPulls(data, road.geometry, streams.pulls, seconds, pulls, walk);
+    const pulled = stepPulls(data, road.geometry, seconds, pulls, walk);
     pulls = pulled.pulls;
-    // A chase needs a squirrel on the road; without one, stepChase leaves the walk as it is.
-    const chasing =
-      pulled.walk.road.chase !== null ||
-      pulled.walk.road.items.some((item) => item.kind === "squirrel");
-    const chased = chasing
-      ? stepChase(data, road.geometry, seconds, pulled.walk)
-      : { pulled: [], tells: [], walk: pulled.walk };
-    const step = stepWalk(data, road.geometry, streams.rolls, seconds, chased.walk);
+    const step = stepWalk(data, road.geometry, streams.rolls, seconds, pulled.walk);
     bot.clock += seconds;
     observePulls(bot, pulled.tells, pulled.pulled);
-    observeChase(bot, chased.pulled);
-    countLeaving(session, road.geometry, chased.walk, step.walk);
+    notePulls(data, session, bot.clock - seconds, walk, pulled.pulled);
+    const { afterPull } = session;
+    const pulledFrom =
+      afterPull !== null && bot.clock <= afterPull.until ? afterPull.fromLane : null;
+    countLeaving(data, session, road.geometry, pulledFrom, pulled.walk, step.walk);
     for (const { outcome } of step.instants) {
-      recordFirings(session, chased.walk.run, outcome);
+      recordFirings(session, pulled.walk.run, outcome);
     }
     session.tips = step.tips.reduce((sum, tip) => addCents(sum, tip.amount), session.tips);
     session.run = step.walk.run;
@@ -471,7 +565,16 @@ function playZoneBySkill(
         playCard(data, streams.cards, config, session, cardFrom(data, card), card);
       }
     }
-    if (held || step.bumps.length > 0 || step.cards.length > 0) {
+    const moving = !held && step.walk.road.hitStop === null;
+    const spots = step.spots.flatMap(({ kind }) => (isNeedSpot(data, kind) ? [kind] : []));
+    const needs = hasEnded(session)
+      ? null
+      : stepNeeds(data, streams.needs, seconds, moving, spots, session.run);
+    if (needs !== null) {
+      session.run = needs.run;
+      playNeedOutcomes(data, streams.cards, config, session, needs.moments, needs.cards);
+    }
+    if (held || step.bumps.length > 0 || step.cards.length > 0 || (needs?.cards.length ?? 0) > 0) {
       bot.replan = true;
     }
     if (!hasEnded(session)) {
@@ -532,8 +635,7 @@ function playBySkill(
   const streams = streamsFrom(random);
   const bot = newBot(streams.bot, skill);
   let walk: Walk = { road: startRoad(LANE_COUNT), run: session.run };
-  // A zero step gives each dog its first pull time before the walk moves.
-  let pulls = stepPulls(data, geometryOf(walk.run), streams.pulls, 0, NO_PULLS, walk).pulls;
+  let pulls = NO_PULLS;
   while (!hasEnded(session)) {
     const spawns = randomStream(streams.spawnSeed, `spawns-${session.run.zoneIndex}`);
     walk = planZone(data, geometryOf(session.run), spawns, { ...walk, run: session.run });
@@ -550,11 +652,14 @@ function playBySkill(
 // upgrade picked before the next zone. Deterministic for a given random.
 export function simulateRun(data: SimData, random: Random, config: SimConfig): RunResult {
   const session: Session = {
+    afterPull: null,
     cardsSeen: 0,
     choices: [],
     firings: [],
+    hits: { afterPull: 0, all: 0 },
     items: {},
     movers: {},
+    pullsMoved: 0,
     run: newRun(data, config.pack.length, { dogs: config.pack, gear: config.gear }),
     tips: cents(0),
     upgrades: [],
@@ -580,9 +685,11 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     earnings: session.run.money,
     finished: session.run.phase.kind === "ended" && session.run.phase.reason === "finished",
     firings: session.firings,
+    hits: session.hits,
     items: session.items,
     moneyShare: session.choices.length === 0 ? 0 : paidChoices / session.choices.length,
     movers: session.movers,
+    pullsMoved: session.pullsMoved,
     tips: session.tips,
     upgrades: session.upgrades,
     zones: session.zones,

@@ -8,6 +8,7 @@ import { HELP_PAGES } from "./help";
 import { HINTS } from "./hints";
 import { HOME_TEXT } from "./homeText";
 import { MINOR_OBSTACLES } from "./minorObstacles";
+import { NEED_CARDS, NEED_SPOTS, NEEDS } from "./needs";
 import { QUIPS } from "./quips";
 import { RUN_TEXT } from "./runText";
 import { SHOP_GEAR } from "./shop";
@@ -29,6 +30,9 @@ interface ValueExports {
   readonly HINTS: typeof HINTS;
   readonly HOME_TEXT: typeof HOME_TEXT;
   readonly MINOR_OBSTACLES: typeof MINOR_OBSTACLES;
+  readonly NEED_CARDS: typeof NEED_CARDS;
+  readonly NEED_SPOTS: typeof NEED_SPOTS;
+  readonly NEEDS: typeof NEEDS;
   readonly QUIPS: typeof QUIPS;
   readonly RUN_TEXT: typeof RUN_TEXT;
   readonly SHOP_GEAR: typeof SHOP_GEAR;
@@ -51,6 +55,9 @@ function toGameData(values: ValueExports): GameData {
     hints: values.HINTS,
     homeText: values.HOME_TEXT,
     minorObstacles: values.MINOR_OBSTACLES,
+    needCards: values.NEED_CARDS,
+    needSpots: values.NEED_SPOTS,
+    needs: values.NEEDS,
     quips: values.QUIPS,
     runText: values.RUN_TEXT,
     shopGear: values.SHOP_GEAR,
@@ -73,6 +80,9 @@ let values: ValueExports = {
   HINTS,
   HOME_TEXT,
   MINOR_OBSTACLES,
+  NEEDS,
+  NEED_CARDS,
+  NEED_SPOTS,
   QUIPS,
   RUN_TEXT,
   SHOP_GEAR,
@@ -107,6 +117,7 @@ if (import.meta.hot) {
       "./hints.ts",
       "./homeText.ts",
       "./minorObstacles.ts",
+      "./needs.ts",
       "./quips.ts",
       "./runText.ts",
       "./shop.ts",

@@ -4,6 +4,7 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
+import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, UpgradeId } from "../data/types";
@@ -27,6 +28,9 @@ const data = {
   dogs: DOGS,
   encounters: ENCOUNTERS,
   forcedStops: FORCED_STOPS,
+  needCards: NEED_CARDS,
+  needSpots: NEED_SPOTS,
+  needs: NEEDS,
   quips: QUIPS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
@@ -363,5 +367,42 @@ describe("Lucky collar", () => {
       offered: ["bellyRubs", "bigTipper", "raincoats"],
     };
     expect(heartsByDog(choose(state, offer, 0).state)).toEqual({ duchess: 7, pierre: 6 });
+  });
+});
+
+describe("need cards", () => {
+  const need = (card: "accident" | "strangerLoves", affected: DogId[]): CardSource => ({
+    affected,
+    card,
+    kind: "need",
+  });
+
+  it("names the dogs whose need opened the card, and affects only them", () => {
+    const state = testState({ duchess: 3, koda: 3, snowball: 3 });
+    const card = cardFor(data, state, need("strangerLoves", ["duchess", "snowball"]));
+    expect(card.title).toBe("A stranger loves Duchess and Snowball");
+    expect(card.affected).toEqual(["duchess", "snowball"]);
+    const outcome = choose(state, need("strangerLoves", ["duchess", "snowball"]), 0);
+    expect(heartsByDog(outcome.state)).toEqual({ duchess: 4, koda: 3, snowball: 5 });
+    expect(outcome.next).toBeNull();
+  });
+
+  it("opens the grumpy neighbour after an accident's Walk on, for the same dog", () => {
+    const state = testState({ biscuit: 5, koda: 5 }, { money: cents(10_000) });
+    const walkOn = choose(state, need("accident", ["biscuit"]), 1);
+    expect(heartsByDog(walkOn.state)).toEqual({ biscuit: 3, koda: 5 });
+    expect(walkOn.next).toEqual({ affected: ["biscuit"], card: "grumpyNeighbour", kind: "need" });
+    expect(choose(state, need("accident", ["biscuit"]), 0).next).toBeNull();
+  });
+
+  it("meets Playful needs with Let them sniff, and Friendly ones with Of course!", () => {
+    const state = testState(
+      { duchess: 3, koda: 3, zippy: 3 },
+      { money: cents(10_000), needSeconds: { duchess: 30, koda: 30, zippy: 30 } },
+    );
+    const sniffed = choose(state, encounter("otherDog", ["duchess", "koda", "zippy"]), 0);
+    expect(sniffed.state.needSeconds).toEqual({ duchess: 30, koda: 30, zippy: 0 });
+    const petted = choose(state, { kind: "forcedStop", stop: "kidWantsToPet" }, 0);
+    expect(petted.state.needSeconds).toEqual({ duchess: 0, koda: 30, zippy: 30 });
   });
 });

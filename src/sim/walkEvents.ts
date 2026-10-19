@@ -1,6 +1,6 @@
-import { read } from "../rules/units";
 import { occupiedLanes } from "../runner/laneMotion";
-import type { Pulls } from "../runner/pulls";
+import { isNeedSpot, nextNeedMoment } from "../runner/needs";
+import { nextPullMoment, type Pulls } from "../runner/pulls";
 import { laneMask } from "../runner/spawning";
 import { blocksLane, footprintOf, type Walk, zoneLength } from "../runner/walk";
 import {
@@ -19,7 +19,7 @@ const PAST = 1e-6;
 const FRAME_SECONDS = 1 / 60;
 
 // A step that ends just before a pull's moment, then one that crosses it, so the pull applies
-// at its moment: stepPulls applies a pull at the start of the step that reaches it.
+// at its moment: stepPulls pulls in the step that runs its tell out.
 function untilPullMoment(remaining: number): number {
   return remaining > 2 * PAST ? remaining - PAST : remaining + PAST / 10;
 }
@@ -27,8 +27,9 @@ function untilPullMoment(remaining: number): number {
 // Seconds of walking until the walk must next be sampled, between which it changes only by
 // scrolling: the hit stop's end, an item or forced stop starting to touch the pack in a lane
 // it occupies (or, for a treat, can reach), a mover or squirrel coming into view, the pack's
-// lane move ending, a dog's tell or pull, or the zone's end. While an obstacle touches the
-// pack inside the hit grace, the grace's end; while a chaser is after a squirrel, every frame.
+// lane move ending, a dog's tell or pull, something a dog could pull toward coming into view, a
+// dog's need turning urgent or going wrong, or the zone's end. While an obstacle touches the
+// pack inside the hit grace, the grace's end; while a strain waits on its target, every frame.
 export function nextWalkEvent(road: BotRoad, pulls: Pulls, walk: Walk): number {
   const { hitStop } = walk.road;
   if (hitStop !== null) {
@@ -45,16 +46,11 @@ export function nextWalkEvent(road: BotRoad, pulls: Pulls, walk: Walk): number {
   if (control.motion.kind === "moving") {
     next = Math.min(next, control.motion.duration - control.motion.elapsed);
   }
-  if (walk.road.chase?.target != null) {
-    next = Math.min(next, FRAME_SECONDS);
+  const pullAt = nextPullMoment(pulls, FRAME_SECONDS);
+  if (pullAt !== Infinity) {
+    next = Math.min(next, untilPullMoment(pullAt));
   }
-  const tell = read(data.tuning, "seconds", "pullTell");
-  for (const dog of pulls.dogs) {
-    if (dog.lean === null) {
-      next = Math.min(next, untilPullMoment(dog.at - tell - pulls.clock));
-    }
-    next = Math.min(next, untilPullMoment(dog.at - pulls.clock));
-  }
+  next = Math.min(next, nextNeedMoment(data, walk.run) + PAST);
   // What an item touching the pack calls for: the end of the grace, or the next frame.
   const touching = (item: (typeof items)[number]) =>
     blocksLane(data, item.kind) && invulnerableSeconds > 0
@@ -99,8 +95,10 @@ export function nextWalkEvent(road: BotRoad, pulls: Pulls, walk: Walk): number {
     if (appears >= next) {
       break;
     }
-    // A squirrel coming into view can start a chase.
-    if (spawn.mover !== undefined || spawn.kind === "squirrel") {
+    // A squirrel, treat or need spot coming into view can start a strain.
+    const target =
+      spawn.kind === "squirrel" || spawn.kind === "treat" || isNeedSpot(data, spawn.kind);
+    if (spawn.mover !== undefined || target) {
       next = Math.min(next, appears + PAST);
       continue;
     }

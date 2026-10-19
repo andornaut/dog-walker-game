@@ -15,6 +15,7 @@ const FOOTPRINT_INSET = 12;
 const ITEM_HEIGHTS: RoadGeometry["itemHeights"] = {
   forcedStop: 16,
   lucky: 20,
+  needSpot: 20,
   tip: 12,
   treat: 12,
 };

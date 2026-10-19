@@ -4,6 +4,7 @@ import type {
   GameData,
   HeartsEffect,
   MoneyEffect,
+  NeedId,
   Target,
   TreatsEffect,
 } from "../data/types";
@@ -64,6 +65,8 @@ export function targetDogs(
       return pack.filter((id) => context.affected.includes(id));
     case "all":
       return pack;
+    case "need":
+      return pack.filter((id) => data.dogs[id].need === target.need);
     case "randomOne": {
       const picked = pack[Math.floor(context.random() * pack.length)];
       return picked === undefined ? [] : [picked];
@@ -264,6 +267,18 @@ function applyTreats(
 
 const unchanged = (state: RunState): Applied => ({ changes: [], state });
 
+// Every walking dog with the need starts it again from 0.
+export function fulfilNeed(data: Pick<GameData, "dogs">, need: NeedId, state: RunState): RunState {
+  const met = packDogs(state).filter((dog) => data.dogs[dog].need === need);
+  if (met.length === 0) {
+    return state;
+  }
+  return {
+    ...state,
+    needSeconds: { ...state.needSeconds, ...Object.fromEntries(met.map((dog) => [dog, 0])) },
+  };
+}
+
 function applyEffect(
   data: RulesData,
   context: EffectContext,
@@ -279,6 +294,8 @@ function applyEffect(
       const refreshed = held === undefined ? lasting : longerLasting(held, lasting);
       return unchanged({ ...state, debuffs: [...others, { debuff: effect.debuff, ...refreshed }] });
     }
+    case "fulfilNeed":
+      return unchanged(fulfilNeed(data, effect.need, state));
     case "hearts":
       return applyHearts(data, context, effect, state);
     case "immune": {

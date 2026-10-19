@@ -5,6 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
+import { NEED_CARDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
@@ -37,7 +38,7 @@ import {
 } from "./spriteKeys";
 
 const spriteKeys = new Set(manifest.sprites.map(({ key }) => key));
-const data = { dogs: DOGS, encounters: ENCOUNTERS };
+const data = { dogs: DOGS, encounters: ENCOUNTERS, needCards: NEED_CARDS };
 
 describe("kebabCase", () => {
   it("splits camelCase words with hyphens", () => {

@@ -1,6 +1,7 @@
 import type {
   CardOption,
   DogId,
+  Effect,
   EncounterId,
   GameData,
   QuipMoment,
@@ -93,6 +94,8 @@ export interface ChoiceOutcome {
   readonly moneyChanges: readonly MoneyChange[];
   // The total of moneyChanges.
   readonly moneyDelta: Cents;
+  // The card the choice opens next, for the same dogs.
+  readonly next: CardSource | null;
   readonly quips: readonly QuipCue[];
   readonly state: RunState;
   readonly treatsDelta: number;
@@ -136,6 +139,17 @@ function cardContent(
         })),
         title: data.forcedStops[source.stop].name,
       };
+    case "need": {
+      const { name, options } = data.needCards[source.card];
+      const dogs = source.affected.map((dog) => data.dogs[dog].name).join(" and ");
+      return {
+        options: options.map((option, index) => ({
+          option,
+          source: { card: source.card, kind: "needCard", option: index },
+        })),
+        title: name.replace("{dog}", dogs),
+      };
+    }
     case "upgradeOffer":
       return {
         options: source.offered.map((upgrade) => ({
@@ -152,7 +166,9 @@ function cardContent(
 // An encounter affects the dogs it caught; a forced stop or upgrade affects the pack.
 function affectedBy(state: RunState, source: CardSource): DogId[] {
   const pack = packDogs(state);
-  return source.kind === "encounter" ? pack.filter((dog) => source.affected.includes(dog)) : pack;
+  return source.kind === "encounter" || source.kind === "need"
+    ? pack.filter((dog) => source.affected.includes(dog))
+    : pack;
 }
 
 function walkingHearts(state: RunState): Map<DogId, Hearts> {
@@ -203,6 +219,7 @@ function outcomeOf(
     heartChanges: applied.changes.filter(isHearts),
     moneyChanges: [...applied.changes.filter(isMoney), ...firing.changes],
     moneyDelta: cents(next.money - state.money),
+    next: null,
     quips,
     state: next,
     treatsDelta: next.treats - state.treats,
@@ -329,6 +346,7 @@ export function chooseOption(
       heartChanges: [],
       moneyChanges: [],
       moneyDelta: cents(0),
+      next: null,
       quips: [],
       state: skipped,
       treatsDelta: 0,
@@ -350,7 +368,32 @@ export function chooseOption(
     state,
     upgrade,
   );
-  return { ...outcome, state: countChase(content.option, outcome.state) };
+  const { next } = content.option;
+  return {
+    ...outcome,
+    next:
+      next === undefined || outcome.state.phase.kind === "ended"
+        ? null
+        : { affected: view.affected, card: next, kind: "need" },
+    state: countChase(content.option, outcome.state),
+  };
+}
+
+// Applies effects that open no card, such as a need met or gone wrong, to the dogs given,
+// with the same outcome events as a card choice. Throws for an ended run.
+export function applyEffectsNow(
+  data: ChoiceData,
+  random: () => number,
+  state: RunState,
+  source: EffectSource,
+  effects: readonly Effect[],
+  dogs: readonly DogId[],
+): ChoiceOutcome {
+  if (state.phase.kind === "ended") {
+    throw new Error("The run has ended");
+  }
+  const affected = packDogs(state).filter((dog) => dogs.includes(dog));
+  return outcomeOf(data, { affected, random, source }, effects, state, undefined);
 }
 
 // Applies an instant encounter's effects on contact, to the dogs it caught, with the same

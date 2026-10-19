@@ -7,27 +7,21 @@ import {
   catchChance,
   inputLockSeconds,
   maxHearts,
-  pullIntervalSeconds,
+  needUrgentSeconds,
   startHearts,
   zoneFee,
 } from "./dogs";
 import { zoneStats } from "./zones";
 
 describe("dog stats", () => {
-  it("derives start and max hearts, fee, pull interval, input lock and catch chance", () => {
+  it("derives start and max hearts, fee, need urgency, input lock and catch chance", () => {
     const { duchess, penny } = DOGS;
     expect(startHearts(TEST_TUNING, [], duchess)).toBe(6);
     expect(maxHearts(TEST_TUNING, [], penny)).toBe(10);
     expect(zoneFee(TEST_TUNING, [], penny)).toBe(1300);
-    expect(pullIntervalSeconds(TEST_TUNING, [], penny)).toBe(60);
+    expect(needUrgentSeconds(TEST_TUNING, penny)).toBe(100);
     expect(inputLockSeconds(TEST_TUNING, [], penny)).toBe(0.5);
     expect(catchChance(TEST_TUNING, duchess)).toBe(0.25);
-  });
-
-  it("divides the pull interval by a pullFrequency factor", () => {
-    // No content halves pulls now; any 0.5 factor stands in for one that does.
-    const halfAsOften: Modifier = { by: "stinkyTip", operation: "multiply", stat: "pullFrequency" };
-    expect(pullIntervalSeconds(TEST_TUNING, [halfAsOften], DOGS.zippy)).toBe(30);
   });
 
   it("starts an owner no higher than their dog's max", () => {

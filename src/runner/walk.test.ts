@@ -8,6 +8,7 @@ import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
+import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
@@ -32,7 +33,6 @@ import { cents, pixels, read } from "../rules/units";
 import { newRun, type PackDogs } from "../state/runState";
 import { lanesReachedAtEnd } from "../testing/avoidable";
 import { TEST_TUNING } from "../testing/tuning";
-import { chasePose, type ChaseStep, stepChase } from "./chase";
 import { isSteeringLocked } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
@@ -91,6 +91,9 @@ const data = {
   encounters: ENCOUNTERS,
   forcedStops: FORCED_STOPS,
   minorObstacles: MINOR_OBSTACLES,
+  needCards: NEED_CARDS,
+  needSpots: NEED_SPOTS,
+  needs: NEEDS,
   shopGear: SHOP_GEAR,
   tuning,
   upgrades: UPGRADES,
@@ -98,7 +101,7 @@ const data = {
 };
 const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
-  itemHeights: { forcedStop: 16, lucky: 20, tip: 12, treat: 12 },
+  itemHeights: { forcedStop: 16, lucky: 20, needSpot: 20, tip: 12, treat: 12 },
   laneCount: 5,
   packBand: { bottom: 630, top: 554 },
   roadBottom: 640,
@@ -266,7 +269,7 @@ describe("stepWalk", () => {
 
   it("carries every treat of a planned zone that the pack walks into", () => {
     // The pack stands in the lane of the lowest treat in view, ignoring obstacles.
-    let walk = planZone(data, geometry, seededRandom(4), walkWith(["koda"]));
+    let walk = planZone(data, geometry, seededRandom(7), walkWith(["koda"]));
     let carried = 0;
     for (let i = 0; i < 2000; i++) {
       const treat = walk.road.items
@@ -933,131 +936,6 @@ describe("movers", () => {
     };
     // 50px of cue, then 266px of scroll at twice the road's speed: 532px down the road.
     expect(step(walkWith(["koda"], [moverAt("cyclist", cyclist, 316)])).bumps).toHaveLength(1);
-  });
-
-  describe("a chaser's chase of a squirrel", () => {
-    // Entering from the right edge a second after its cue shows, and slow to cross.
-    const squirrel: MoverPath = {
-      direction: -1,
-      enterTravel: 200,
-      lanesPerPixel: 0.001,
-      motion: "cross",
-      mover: "squirrel",
-      warning: 80,
-    };
-    const walkFor = (dogs: PackDogs, modifiers: Walk["run"]["modifiers"] = []): Walk => {
-      const walk = walkWith(dogs, [moverAt("squirrel", squirrel, 0)]);
-      return { ...walk, run: { ...walk.run, modifiers } };
-    };
-    // Each frame chases, then walks, as the run scene steps them.
-    const after = (walk: Walk, seconds: number) => {
-      let walked = walk;
-      const events: ChaseStep[] = [];
-      for (let i = 0; i < seconds * 60; i++) {
-        const chased = stepChase(data, geometry, 1 / 60, walked);
-        events.push(chased);
-        walked = step(chased.walk, 1 / 60).walk;
-      }
-      return { events, walk: walked };
-    };
-
-    it("leans for the tell as the cue shows, then pulls the pack a lane toward it, once", () => {
-      const walk = walkFor(["koda"]);
-      const leaning = after(walk, 0.5);
-      expect(leaning.events[0]?.tells).toEqual([{ direction: 1, dog: "koda" }]);
-      expect(leaning.walk.road.control.target).toBe(2);
-      expect(chasePose(leaning.walk.road.chase, "koda")).toEqual({ direction: 1, tag: "tell" });
-      const pulled = after(walk, 1.2);
-      expect(pulled.walk.road.control.target).toBe(3);
-      expect(pulled.events.flatMap((event) => event.pulled)).toEqual([
-        { direction: 1, dog: "koda", moved: true },
-      ]);
-      expect(chasePose(pulled.walk.road.chase, "koda")).toBeNull();
-      expect(after(walk, 3).walk.road.control.target).toBe(3);
-    });
-
-    it("locks lane input for the chaser's size once the pull's move ends", () => {
-      const { walk } = after(walkFor(["koda"]), 1.5);
-      expect(walk.road.control.target).toBe(3);
-      expect(isSteeringLocked(walk.road.control)).toBe(true);
-    });
-
-    it("stands still unless the walk is walking with no hit stop", () => {
-      const walk = walkFor(["koda"]);
-      const ended = { ...walk, run: { ...walk.run, phase: { kind: "ended", reason: "wentHome" } } };
-      expect(stepChase(data, geometry, 2, ended as Walk).walk).toBe(ended);
-    });
-
-    it("does not pull a pack with no chaser, or with Good leash", () => {
-      expect(after(walkFor(["duchess"]), 1.2).walk.road.control.target).toBe(2);
-      const leash = {
-        by: "goodLeashSquirrelPull",
-        operation: "multiply",
-        source: { kind: "upgrade", upgrade: "goodLeash" },
-        stat: "chaserSquirrelPulls",
-      } as const;
-      expect(after(walkFor(["koda"], [leash]), 1.2).walk.road.control.target).toBe(2);
-    });
-
-    describe("of a static squirrel", () => {
-      const leash = {
-        by: "goodLeashSquirrelPull",
-        operation: "multiply",
-        source: { kind: "upgrade", upgrade: "goodLeash" },
-        stat: "chaserSquirrelPulls",
-      } as const;
-      // A squirrel well up the road, in the given lane.
-      const sitting = (lane: number, id = 0, y = 100): WalkItem => ({
-        ...atPack("squirrel", id, lane),
-        y,
-      });
-      const walkFor = (
-        dogs: PackDogs,
-        items: WalkItem[],
-        modifiers: Walk["run"]["modifiers"] = [],
-      ): Walk => {
-        const walk = walkWith(dogs, items);
-        return { ...walk, run: { ...walk.run, modifiers } };
-      };
-
-      it("leans for the tell, then pulls the pack a lane toward it, once", () => {
-        const walk = walkFor(["koda"], [sitting(0)]);
-        const leaning = after(walk, 0.5);
-        expect(leaning.events[0]?.tells).toEqual([{ direction: -1, dog: "koda" }]);
-        expect(chasePose(leaning.walk.road.chase, "koda")).toEqual({ direction: -1, tag: "tell" });
-        expect(leaning.walk.road.control.target).toBe(2);
-        const chased = after(walk, 3);
-        expect(chased.walk.road.control.target).toBe(1);
-        expect(chased.events.flatMap((event) => event.pulled)).toEqual([
-          { direction: -1, dog: "koda", moved: true },
-        ]);
-        expect(isSteeringLocked(after(walk, 1.5).walk.road.control)).toBe(true);
-      });
-
-      it("pulls once for each squirrel, by the pack's first chaser", () => {
-        const walk = walkFor(["duchess", "koda", "zippy"], [sitting(0, 0), sitting(4, 1, 60)]);
-        const pulls = after(walk, 4).events.flatMap((event) => event.pulled);
-        expect(pulls.map(({ dog }) => dog)).toEqual(["koda", "koda"]);
-        expect(pulls.map(({ direction }) => direction)).toEqual([-1, 1]);
-      });
-
-      it("does not pull with Good leash, with no chaser, or toward a squirrel in the pack's lane", () => {
-        expect(after(walkFor(["koda"], [sitting(0)], [leash]), 3).walk.road.control.target).toBe(2);
-        expect(after(walkFor(["duchess"], [sitting(0)]), 3).walk.road.control.target).toBe(2);
-        const ahead = after(walkFor(["koda"], [sitting(2)]), 1.5);
-        expect(ahead.events.flatMap((event) => [...event.tells, ...event.pulled])).toEqual([]);
-      });
-
-      it("ignores a squirrel the pack has passed", () => {
-        const passed = walkFor(["koda"], [sitting(0, 0, 600)]);
-        expect(after(passed, 1.5).events.flatMap((event) => event.tells)).toEqual([]);
-      });
-
-      it("chases the same way on a replay of the same walk", () => {
-        const walk = walkFor(["koda"], [sitting(0, 0), sitting(3, 1, 40)]);
-        expect(after(walk, 5)).toEqual(after(walk, 5));
-      });
-    });
   });
 
   it("leaves a way past every obstacle and mover of the game's road, one mover on screen", () => {

@@ -180,7 +180,8 @@ export class CardScene extends Scene {
 
   private subtitle(view: CardView): string {
     switch (view.source.kind) {
-      case "encounter": {
+      case "encounter":
+      case "need": {
         const names = view.affected.map((dog) => gameData.dogs[dog].name);
         return names.length === 0 ? "Pick one" : `${names.join(", ")}`;
       }

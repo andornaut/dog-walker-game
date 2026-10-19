@@ -39,7 +39,7 @@ export type Change = HeartChange | MoneyChange;
 
 export type CauseData = Pick<
   GameData,
-  "debuffs" | "encounters" | "forcedStops" | "shopGear" | "upgrades"
+  "debuffs" | "encounters" | "forcedStops" | "needCards" | "needSpots" | "shopGear" | "upgrades"
 >;
 
 export function modifierCauses(
@@ -86,6 +86,12 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
       return data.shopGear[source.gear].name;
     case "instant":
       return data.encounters[source.encounter].name;
+    case "needCard":
+      return data.needCards[source.card].options[source.option]?.name ?? "";
+    case "needGoneWrong":
+      return "need ignored";
+    case "needMet":
+      return data.needSpots[source.spot].name;
     case "upgrade":
       return data.upgrades[source.upgrade].name;
     default:

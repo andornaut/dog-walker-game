@@ -142,11 +142,11 @@ describe("size and energy", () => {
     expect([...locks].sort((a, b) => a - b)).toEqual(locks);
   });
 
-  it("pulls most often for hyper dogs and least for calm ones", () => {
-    const intervals = ENERGIES.map((energy) =>
-      readTable(tuning, "seconds", "pullIntervalByEnergy", energy),
+  it("turns needs urgent soonest for hyper dogs and latest for calm ones", () => {
+    const urgentAfter = ENERGIES.map((energy) =>
+      readTable(tuning, "seconds", "needUrgentByEnergy", energy),
     );
-    expect([...intervals].sort((a, b) => b - a)).toEqual(intervals);
+    expect([...urgentAfter].sort((a, b) => b - a)).toEqual(urgentAfter);
   });
 
   it("keeps every catch chance a probability, with small dogs rolling half as often", () => {
@@ -395,5 +395,53 @@ describe("achievements", () => {
     const sprites = new Set(manifest.sprites.map(({ key }) => key));
     const missing = achievements.map(({ id }) => badgeKey(id)).filter((key) => !sprites.has(key));
     expect(missing).toEqual([]);
+  });
+});
+
+describe("needs", () => {
+  const { needCards, needSpots, needs } = gameData;
+
+  it("gives every dog the need the rulebook names", () => {
+    expect(Object.fromEntries(Object.entries(dogs).map(([id, dog]) => [id, dog.need]))).toEqual({
+      archie: "playful",
+      biscuit: "regular",
+      duchess: "friendly",
+      koda: "nosy",
+      nugget: "thirsty",
+      penny: "thirsty",
+      pierre: "nosy",
+      snowball: "friendly",
+      zippy: "playful",
+    });
+  });
+
+  it("has a spot for every need, weighted above 0 in every zone", () => {
+    for (const zone of world.zones) {
+      const weighted = Object.entries(zone.weights.needSpots)
+        .filter(([, weight]) => weight > 0)
+        .map(([spot]) => needSpots[spot as keyof typeof needSpots].need);
+      expect(new Set(weighted), zone.id).toEqual(new Set(Object.keys(needs)));
+    }
+  });
+
+  it("pays off with a payoff card, and goes wrong with a trouble card or a loss", () => {
+    for (const need of Object.values(needs)) {
+      expect(needCards[need.payoff].kind).toBe("payoff");
+      if (need.goneWrong.kind === "card") {
+        expect(needCards[need.goneWrong.card].kind).toBe("trouble");
+      }
+    }
+    expect(probability(tuning.probability.needPayoffCard)).toBeGreaterThan(0);
+  });
+
+  it("keeps a free option on every need card", () => {
+    for (const card of Object.values(needCards)) {
+      expect(
+        card.options.some(
+          (option) =>
+            moneyCost(gameData, { affected: [] }, testState({ koda: 3 }), option.effects) === 0,
+        ),
+      ).toBe(true);
+    }
   });
 });

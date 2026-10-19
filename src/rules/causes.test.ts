@@ -4,6 +4,7 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
+import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
 import type { Effect } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
@@ -20,6 +21,9 @@ const data = {
   dogs: DOGS,
   encounters: ENCOUNTERS,
   forcedStops: FORCED_STOPS,
+  needCards: NEED_CARDS,
+  needSpots: NEED_SPOTS,
+  needs: NEEDS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   upgrades: UPGRADES,

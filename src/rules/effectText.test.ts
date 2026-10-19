@@ -124,6 +124,19 @@ describe("every card's text", () => {
       encounters,
       forcedStops: options(gameData.forcedStops),
       gear: effects(gameData.shopGear),
+      needCards: options(gameData.needCards),
+      needs: Object.fromEntries(
+        Object.entries(gameData.needs).map(([id, need]) => [
+          id,
+          {
+            goneWrong:
+              need.goneWrong.kind === "card"
+                ? need.goneWrong.card
+                : effectText(gameData, need.goneWrong.effects),
+            met: effectText(gameData, need.met),
+          },
+        ]),
+      ),
       upgrades: effects(gameData.upgrades),
     }).toMatchSnapshot();
   });

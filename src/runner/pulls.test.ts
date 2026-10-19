@@ -1,43 +1,43 @@
 import { describe, expect, it } from "vitest";
 
-import { itemAt } from "../arrays";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
+import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId } from "../data/types";
+import type { Modifier } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
-import { randomStream } from "../dev/randomStreams";
 import { idleGesture, pointerDown, pointerMove } from "../input/gestures";
 import type { LaneDirection } from "../layout/lanes";
-import { clampHearts } from "../rules/units";
-import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { advanceLaneControl, laneControlIn } from "./laneControl";
-import { destinationLane, stillInLane } from "./laneMotion";
+import { isSteeringLocked, laneControlIn } from "./laneControl";
+import { stillInLane } from "./laneMotion";
+import type { MoverPath } from "./movers";
 import {
   gestureAfterPulls,
+  laneBlockedWithin,
   NO_PULLS,
   type PullEvent,
   pullPose,
   type Pulls,
+  type PullStep,
   pullWalk,
   stepPulls,
 } from "./pulls";
-import { type Random, seededRandom } from "./random";
+import { seededRandom } from "./random";
 import {
-  laneMotionConfig,
   planZone,
   type RoadGeometry,
   startRoad,
   steerWalk,
   stepWalk,
   type Walk,
+  type WalkItem,
 } from "./walk";
 
 const data = {
@@ -46,6 +46,9 @@ const data = {
   encounters: ENCOUNTERS,
   forcedStops: FORCED_STOPS,
   minorObstacles: MINOR_OBSTACLES,
+  needCards: NEED_CARDS,
+  needSpots: NEED_SPOTS,
+  needs: NEEDS,
   shopGear: SHOP_GEAR,
   // An 80px/s, 30s zone with spawns sized for it, as in the walk tests.
   tuning: {
@@ -53,19 +56,26 @@ const data = {
     counts: {
       ...TEST_TUNING.counts,
       minorObstaclesFirstZone: 4,
+      needSpotsPerZone: 4,
       obstaclesFirstZone: 6,
       tipsFirstZone: 8,
       treatsPerZone: 2,
     },
     pixels: { ...TEST_TUNING.pixels, roadScrollSpeed: 80, spawnRowSpacing: 160 },
-    seconds: { ...TEST_TUNING.seconds, laneMove: 0.2, pullTell: 1, zoneAtBaseSpeed: 30 },
+    seconds: {
+      ...TEST_TUNING.seconds,
+      laneMove: 0.2,
+      pullReactionWindow: 0.6,
+      pullTell: 1,
+      zoneAtBaseSpeed: 30,
+    },
   },
   upgrades: UPGRADES,
   world: WORLD,
 };
 const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
-  itemHeights: { forcedStop: 16, lucky: 20, tip: 12, treat: 12 },
+  itemHeights: { forcedStop: 16, lucky: 20, needSpot: 20, tip: 12, treat: 12 },
   laneCount: 5,
   packBand: { bottom: 630, top: 554 },
   roadBottom: 640,
@@ -74,258 +84,225 @@ const geometry: RoadGeometry = {
   tallestPackBand: 76,
 };
 const FRAME = 1 / 60;
+const GOOD_LEASH: Modifier & { source: { kind: "upgrade"; upgrade: "goodLeash" } } = {
+  by: "goodLeashSquirrelPull",
+  operation: "multiply",
+  source: { kind: "upgrade", upgrade: "goodLeash" },
+  stat: "chaserSquirrelPulls",
+};
 
-const walkWith = (dogs: PackDogs, lane = 2): Walk => ({
-  road: { ...startRoad(5), control: laneControlIn(stillInLane(lane)) },
+// The pack in the middle lane with items on the road.
+const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
+  road: {
+    ...startRoad(5),
+    control: laneControlIn(stillInLane(2)),
+    items,
+    nextItemId: items.length,
+  },
   run: newRun(data, 3, { dogs, gear: null }),
 });
-// A stream that always draws the same value: below 0.5 picks the left side.
-const fixed =
-  (value: number): Random =>
-  () =>
-    value;
-const pullsAt = (at: number, dog: DogId, clock = 0): Pulls => ({
-  clock,
-  dogs: [{ at, dog, lean: null, pulled: null }],
+// A one-cell item up the road, wholly ahead of the pack.
+const item = (kind: WalkItem["kind"], id: number, lane: number, y = 100): WalkItem => ({
+  height: 12,
+  id,
+  kind,
+  lane,
+  laneSpan: 1,
+  y,
 });
-const step = (pulls: Pulls, walk: Walk, seconds = FRAME, random: Random = fixed(0.25)) =>
-  stepPulls(data, geometry, random, seconds, pulls, walk);
+const urgent = (walk: Walk, seconds = 1000): Walk => ({
+  ...walk,
+  run: { ...walk.run, needSeconds: { biscuit: seconds, koda: seconds } },
+});
 
-describe("stepPulls scheduling", () => {
-  it("schedules each dog's first pull from the stream, a tell and a share of its interval in", () => {
-    // Koda is steady (30s), Biscuit hyper (15s); the draws are 0.5 and 0.25.
-    const draws = [0.5, 0.25];
-    const random = () => draws.shift() ?? 0;
-    const { pulls } = step(NO_PULLS, walkWith(["koda", "biscuit"]), FRAME, random);
-    expect(pulls.dogs.map(({ at, dog }) => [dog, at])).toEqual([
-      ["koda", 1 + 0.5 * 30],
-      ["biscuit", 1 + 0.25 * 15],
-    ]);
-  });
-
-  it("repeats the schedule and the sides for the same seed, and not for another", () => {
-    const play = (seed: number) => {
-      const random = randomStream(seed, "pulls");
-      let pulls = NO_PULLS;
-      let walk = walkWith(["biscuit", "zippy", "snowball"]);
-      const events: PullEvent[] = [];
-      for (let frame = 0; frame < 60 * 40; frame++) {
-        const stepped = step(pulls, walk, FRAME, random);
-        events.push(...stepped.pulled);
-        pulls = stepped.pulls;
-        walk = {
-          ...stepped.walk,
-          road: {
-            ...stepped.walk.road,
-            control: advanceLaneControl(
-              laneMotionConfig(data, 5),
-              FRAME,
-              stepped.walk.road.control,
-            ),
-          },
-        };
-      }
-      return { events, pulls };
-    };
-    const first = play(1);
-    expect(first.events.length).toBeGreaterThanOrEqual(3);
-    expect(play(1)).toEqual(first);
-    expect(play(2).pulls).not.toEqual(first.pulls);
-  });
-
-  // Biscuit is hyper: 15s, varied by up to 25% either way.
-  const pullTimes = (random: Random, seconds: number) => {
-    let pulls = pullsAt(2, "biscuit");
-    const walk = walkWith(["biscuit"]);
-    const times: number[] = [];
-    for (let frame = 0; frame < 60 * seconds; frame++) {
-      const stepped = step(pulls, walk, FRAME, random);
-      if (stepped.pulled.length > 0) {
-        times.push(stepped.pulls.clock);
-      }
-      pulls = stepped.pulls;
-    }
-    return times;
+// Each frame steps the pulls, then the walk, as the run scene does.
+function after(walk: Walk, seconds: number, pulls: Pulls = NO_PULLS) {
+  let walked = walk;
+  let state = pulls;
+  const steps: PullStep[] = [];
+  for (let frame = 0; frame < Math.round(seconds * 60); frame++) {
+    const stepped = stepPulls(data, geometry, FRAME, state, walked);
+    steps.push(stepped);
+    state = stepped.pulls;
+    walked = stepWalk(data, geometry, seededRandom(1), FRAME, stepped.walk).walk;
+  }
+  return {
+    blocked: steps.flatMap((stepped) => stepped.blocked),
+    failed: steps.flatMap((stepped) => stepped.failed),
+    pulled: steps.flatMap((stepped) => stepped.pulled),
+    pulls: state,
+    tells: steps.flatMap((stepped) => stepped.tells),
+    walk: walked,
   };
-  const gaps = (times: number[]) =>
-    times.slice(1).map((time, index) => time - itemAt(times, index));
+}
 
-  it("schedules each next pull one interval later, jittered by the drawn share", () => {
-    expect(gaps(pullTimes(fixed(0), 40))[0]).toBeCloseTo(15 * 0.75, 1);
-    expect(gaps(pullTimes(fixed(0.5), 40))[0]).toBeCloseTo(15, 1);
-    expect(gaps(pullTimes(fixed(0.9999), 50))[0]).toBeCloseTo(15 * 1.25, 1);
-  });
-
-  it("keeps every jittered interval within a quarter of the energy's interval", () => {
-    const intervals = gaps(pullTimes(randomStream(3, "pulls"), 600));
-    expect(intervals.length).toBeGreaterThan(30);
-    intervals.forEach((gap) => {
-      expect(gap).toBeGreaterThanOrEqual(15 * 0.75 - FRAME);
-      expect(gap).toBeLessThanOrEqual(15 * 1.25 + FRAME);
-    });
-    expect(Math.min(...intervals)).toBeLessThan(13);
-    expect(Math.max(...intervals)).toBeGreaterThan(17);
-  });
-
-  it("drops a fired dog's pulls", () => {
-    const walk = walkWith(["koda", "biscuit"]);
-    const fired: Walk = {
-      ...walk,
-      run: {
-        ...walk.run,
-        pack: mapPack(
-          (slot) => (slot.dog === "koda" ? { ...slot, hearts: clampHearts(10, 0) } : slot),
-          walk.run.pack,
-        ),
-      },
-    };
-    const { pulls } = step(step(NO_PULLS, walk).pulls, fired);
-    expect(pulls.dogs.map(({ dog }) => dog)).toEqual(["biscuit"]);
-  });
-});
-
-describe("stepPulls tell window", () => {
-  it("starts the tell pullTell before the pull, leaning to the side it then pulls", () => {
-    const walk = walkWith(["koda"]);
-    const before = step(pullsAt(2, "koda", 0.99 - FRAME), walk);
-    expect(before.tells).toEqual([]);
-    expect(pullPose(data, before.pulls, "koda")).toBeNull();
-
-    const telling = step(before.pulls, walk);
-    expect(telling.tells).toEqual([{ direction: -1, dog: "koda" }]);
-    expect(telling.pulled).toEqual([]);
-    expect(pullPose(data, telling.pulls, "koda")).toEqual({ direction: -1, tag: "tell" });
-
-    const pulled = step(telling.pulls, walk, 1);
-    expect(pulled.tells).toEqual([]);
+describe("what a dog pulls toward", () => {
+  it("strains toward a squirrel for its tell, then pulls the pack a lane toward it, once", () => {
+    const walk = walkWith(["koda"], [item("squirrel", 0, 0)]);
+    const straining = after(walk, 0.5);
+    expect(straining.tells).toEqual([{ direction: -1, dog: "koda", kind: "squirrel" }]);
+    expect(straining.walk.road.control.target).toBe(2);
+    expect(pullPose(data, straining.pulls, "koda")).toEqual({ direction: -1, tag: "tell" });
+    const pulled = after(walk, 1.1);
     expect(pulled.pulled).toEqual([{ direction: -1, dog: "koda", moved: true }]);
     expect(pullPose(data, pulled.pulls, "koda")).toEqual({ direction: -1, tag: "pull" });
-    expect(pullPose(data, step(pulled.pulls, walk, 0.25).pulls, "koda")).toBeNull();
+    expect(isSteeringLocked(after(walk, 1.3).walk.road.control)).toBe(true);
+    expect(after(walk, 3).walk.road.control.target).toBe(1);
   });
 
-  it("keeps the side it leaned to even when the stream would now pick the other", () => {
-    const walk = walkWith(["koda"]);
-    const telling = step(pullsAt(1, "koda", 0), walk, FRAME, fixed(0.75));
-    const pulled = step(telling.pulls, walk, 1, fixed(0.25));
-    expect(pulled.pulled).toEqual([{ direction: 1, dog: "koda", moved: true }]);
+  it("pulls toward a darting squirrel from its cue, once it moves", () => {
+    const darting: MoverPath = {
+      direction: -1,
+      enterTravel: 200,
+      lanesPerPixel: 0.001,
+      motion: "cross",
+      mover: "squirrel",
+      warning: 80,
+    };
+    const walk = walkWith(
+      ["koda"],
+      [{ ...item("squirrel", 0, 4), mover: { path: darting, since: 0 } }],
+    );
+    expect(after(walk, 0.5).tells).toEqual([{ direction: 1, dog: "koda", kind: "squirrel" }]);
+    // The tell runs out at 1s; the squirrel moves from 80px of scroll, at 1s.
+    expect(after(walk, 1.2).walk.road.control.target).toBe(3);
+  });
+
+  it("strains toward a treat only for a food-driven dog", () => {
+    const treat = [item("treat", 0, 4)];
+    expect(after(walkWith(["biscuit"], treat), 0.5).tells).toEqual([
+      { direction: 1, dog: "biscuit", kind: "treat" },
+    ]);
+    expect(after(walkWith(["duchess"], treat), 2).tells).toEqual([]);
+  });
+
+  it("strains toward a spot that meets its need only once the need is urgent", () => {
+    const tree = [item("tree", 0, 0)];
+    expect(after(walkWith(["biscuit"], tree), 2).tells).toEqual([]);
+    expect(after(urgent(walkWith(["biscuit"], tree)), 0.5).tells).toEqual([
+      { direction: -1, dog: "biscuit", kind: "need" },
+    ]);
+    const bowl = [item("waterBowl", 0, 0)];
+    expect(after(urgent(walkWith(["biscuit"], bowl)), 2).tells).toEqual([]);
+  });
+
+  it("never pulls without a target: no random pulls", () => {
+    expect(after(walkWith(["koda", "biscuit", "zippy"]), 30).tells).toEqual([]);
+  });
+
+  it("does not chase with Good leash, with no chaser, or toward a squirrel in the pack's lane", () => {
+    const leashed = walkWith(["koda"], [item("squirrel", 0, 0)]);
+    const withLeash = { ...leashed, run: { ...leashed.run, modifiers: [GOOD_LEASH] } };
+    expect(after(withLeash, 2).tells).toEqual([]);
+    expect(after(walkWith(["duchess"], [item("squirrel", 0, 0)]), 2).tells).toEqual([]);
+    expect(after(walkWith(["koda"], [item("squirrel", 0, 2)]), 2).tells).toEqual([]);
+  });
+
+  it("ignores a target the pack has passed", () => {
+    expect(after(walkWith(["koda"], [item("squirrel", 0, 0, 600)]), 1.5).tells).toEqual([]);
+  });
+
+  it("strains one dog at a time, the first in pack order, each target once", () => {
+    const walk = walkWith(["biscuit", "koda"], [item("treat", 0, 0), item("squirrel", 1, 4, 60)]);
+    const { pulled, tells } = after(walk, 4);
+    expect(tells.map(({ dog }) => dog)).toEqual(["biscuit", "koda"]);
+    expect(pulled.map(({ direction, dog }) => [dog, direction])).toEqual([
+      ["biscuit", -1],
+      ["koda", 1],
+    ]);
   });
 });
 
-describe("stepPulls lane change", () => {
-  it("moves the pack one lane toward the side, then locks lane input for the dog's size", () => {
-    const telling = step(pullsAt(1, "koda"), walkWith(["koda"]));
-    const { walk } = step(telling.pulls, telling.walk, 1);
-    expect(walk.road.control.target).toBe(1);
-    const config = laneMotionConfig(data, 5);
-    const arrived = advanceLaneControl(config, 0.2, walk.road.control);
-    expect(destinationLane(arrived.motion)).toBe(1);
-    expect(arrived.lockSeconds).toBeCloseTo(0.5);
-    expect(steerWalk(data, 5, 1, { ...walk, road: { ...walk.road, control: arrived } })).toEqual({
-      ...walk,
-      road: { ...walk.road, control: arrived },
-    });
+describe("the fairness rule", () => {
+  // At the pull, 1s in, the cone in lane 1 is 60px from the pack: a big dog's pull needs
+  // 0.2 + 0.5 + 0.6 + 0.2 = 1.5s, 120px at 80px/s.
+  const cone = item("cone", 1, 1, 402);
+
+  it("strains without pulling while the lane has an obstacle too close, then pulls once clear", () => {
+    const walk = walkWith(["koda"], [item("squirrel", 0, 0), cone]);
+    const held = after(walk, 2);
+    expect(held.blocked).toEqual([{ direction: -1, dog: "koda", kind: "squirrel" }]);
+    expect(held.pulled).toEqual([]);
+    expect(held.walk.road.control.target).toBe(2);
+    expect(held.pulls.strain?.blocked).toBe(true);
+    expect(pullPose(data, held.pulls, "koda")).toEqual({ direction: -1, tag: "tell" });
+    // The cone passes the pack's band at about 2.85s.
+    const cleared = after(walk, 3.5);
+    expect(cleared.pulled).toEqual([{ direction: -1, dog: "koda", moved: true }]);
+    expect(cleared.failed).toEqual([]);
   });
 
-  it("turns a random side off the road edge inward, for the lean and the pull", () => {
-    const left = walkWith(["koda"], 0);
-    const telling = step(pullsAt(1, "koda"), left);
-    expect(telling.tells).toEqual([{ direction: 1, dog: "koda" }]);
-    const pulled = step(telling.pulls, telling.walk, 1);
-    expect(pulled.pulled).toEqual([{ direction: 1, dog: "koda", moved: true }]);
-    expect(pulled.walk.road.control.target).toBe(1);
-
-    const right = walkWith(["koda"], 4);
-    expect(step(pullsAt(1, "koda"), right, FRAME, fixed(0.75)).tells).toEqual([
-      { direction: -1, dog: "koda" },
-    ]);
+  it("pulls into a lane whose obstacle is far enough away to react to", () => {
+    const far = { ...cone, y: 300 };
+    const walk = walkWith(["zippy"], [item("squirrel", 0, 0), far]);
+    expect(after(walk, 1.1).pulled).toEqual([{ direction: -1, dog: "zippy", moved: true }]);
   });
 
-  it("pulls inward when the pack reached the leaned-to edge during the tell", () => {
-    const telling = step(pullsAt(1, "koda"), walkWith(["koda"], 1));
-    expect(telling.tells).toEqual([{ direction: -1, dog: "koda" }]);
-    const pulled = step(telling.pulls, walkWith(["koda"], 0), 1);
-    expect(pulled.pulled).toEqual([{ direction: 1, dog: "koda", moved: true }]);
-    expect(pulled.walk.road.control.target).toBe(1);
-    expect(pullPose(data, pulled.pulls, "koda")).toEqual({ direction: 1, tag: "pull" });
+  it("ends a blocked strain without a pull once its target passes", () => {
+    const walk = walkWith(["koda"], [item("squirrel", 0, 0, 380), cone]);
+    const passed = after(walk, 2.5);
+    expect(passed.pulled).toEqual([]);
+    expect(passed.failed).toEqual(["koda"]);
+    expect(passed.pulls.strain).toBeNull();
   });
 
-  it("locks nothing for a small dog, or with running shoes", () => {
-    const small = step(
-      step(pullsAt(1, "zippy"), walkWith(["zippy"])).pulls,
-      walkWith(["zippy"]),
-      1,
+  describe("laneBlockedWithin", () => {
+    // Its cue over, entering the road from the left as it is 14px from the pack's band,
+    // crossing 2.5 lanes every 32px.
+    const crosser: MoverPath = {
+      direction: 1,
+      enterTravel: 500,
+      lanesPerPixel: 2.5 / 32,
+      motion: "cross",
+      mover: "ball",
+      warning: 50,
+    };
+    const walk = walkWith(
+      ["koda"],
+      [{ ...item("ball", 0, 0, 0), mover: { path: crosser, since: 50 } }],
     );
-    const config = laneMotionConfig(data, 5);
-    expect(advanceLaneControl(config, 0.2, small.walk.road.control).lockSeconds).toBe(0);
+    const blocked = (lane: number, horizon: number) =>
+      laneBlockedWithin(data, geometry, 80, horizon, lane, walk);
 
-    const shod: Walk = {
-      ...walkWith(["koda"]),
-      run: newRun(data, 3, { dogs: ["koda"], gear: "runningShoes" }),
-    };
-    const pulled = step(step(pullsAt(1, "koda"), shod).pulls, shod, 1);
-    expect(advanceLaneControl(config, 0.2, pulled.walk.road.control).lockSeconds).toBe(0);
-  });
-
-  it("leans a food-driven dog toward the nearest treat ahead, whatever the stream says", () => {
-    const walk = walkWith(["biscuit"]);
-    const treat = (id: number, lane: number, y: number) => ({
-      height: 12,
-      id,
-      kind: "treat" as const,
-      lane,
-      laneSpan: 1,
-      y,
+    it("blocks the lanes a mover sweeps while it overlaps the pack within the horizon", () => {
+      // Over 1s it travels 80px, overlapping the band from 14px on, in lanes 1 to 4.
+      expect([0, 1, 2, 3, 4].map((lane) => blocked(lane, 1))).toEqual([
+        false,
+        true,
+        true,
+        true,
+        true,
+      ]);
     });
-    const withTreats: Walk = {
-      ...walk,
-      // Lane 0 is nearer but already level with the pack; lane 4 is the nearest ahead.
-      road: { ...walk.road, items: [treat(0, 0, 600), treat(1, 4, 300), treat(2, 1, 100)] },
-    };
-    expect(step(pullsAt(1, "biscuit"), withTreats).tells).toEqual([
-      { direction: 1, dog: "biscuit" },
-    ]);
-    expect(step(pullsAt(1, "biscuit"), walk).tells).toEqual([{ direction: -1, dog: "biscuit" }]);
-  });
 
-  it("gives a chaser or fancy dog no treat target", () => {
-    const walk = walkWith(["koda"]);
-    const withTreat: Walk = {
-      ...walk,
-      road: {
-        ...walk.road,
-        items: [{ height: 12, id: 0, kind: "treat", lane: 4, laneSpan: 1, y: 300 }],
-      },
-    };
-    expect(step(pullsAt(1, "koda"), withTreat).tells).toEqual([{ direction: -1, dog: "koda" }]);
+    it("leaves a lane open when the mover reaches the pack only after the horizon", () => {
+      expect([0, 1, 2, 3, 4].map((lane) => blocked(lane, 0.15))).toEqual([
+        false,
+        false,
+        false,
+        false,
+        false,
+      ]);
+    });
   });
 });
 
 describe("stepPulls holds", () => {
-  it("stands the clock still through a hit stop, then tells and pulls after it", () => {
-    const walk = walkWith(["koda"]);
+  it("stands still through a hit stop and once the walk has ended", () => {
+    const walk = walkWith(["koda"], [item("squirrel", 0, 0)]);
     const stopped: Walk = {
       ...walk,
       road: { ...walk.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
     };
-    const pulls = pullsAt(1, "koda", 0.5);
-    const held = step(pulls, stopped, 2);
-    expect(held).toEqual({ pulled: [], pulls, tells: [], walk: stopped });
-
-    const telling = step(pulls, walk);
-    expect(telling.tells).toHaveLength(1);
-    const heldTell = step(telling.pulls, { ...telling.walk, road: stopped.road }, 2);
-    expect(heldTell.pulled).toEqual([]);
-    expect(heldTell.pulls).toBe(telling.pulls);
-  });
-
-  it("does nothing once the walk has ended", () => {
-    const walk = walkWith(["koda"]);
+    const straining = after(walk, 0.5).pulls;
+    const held = stepPulls(data, geometry, 2, straining, stopped);
+    expect(held.pulls).toBe(straining);
+    expect(held.pulled).toEqual([]);
     const ended: Walk = {
       ...walk,
       run: { ...walk.run, phase: { kind: "ended", reason: "wentHome" } },
     };
-    const pulls = pullsAt(0.5, "koda", 0.4);
-    expect(step(pulls, ended, 1)).toEqual({ pulled: [], pulls, tells: [], walk: ended });
+    expect(stepPulls(data, geometry, 2, straining, ended).pulls).toBe(straining);
   });
 });
 
@@ -378,11 +355,10 @@ describe("gestureAfterPulls", () => {
 describe("replay with pulls", () => {
   it("reproduces a run with pulls from the seed and the input log alone", () => {
     const setup = { dev: true, seed: 5, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, seededRandom(5), walkWith(["biscuit", "zippy"]));
+    const start = urgent(planZone(data, geometry, seededRandom(5), walkWith(["biscuit", "koda"])));
     // As RunScene steps: the moves due now, each logged, then the pulls, then the walk.
     const play = (movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
       const rolls = seededRandom(9);
-      const pullStream = randomStream(setup.seed, "pulls");
       let log = startInputLog(setup);
       let walk = start;
       let pulls = NO_PULLS;
@@ -394,7 +370,7 @@ describe("replay with pulls", () => {
           walk = steerWalk(data, 5, direction, walk);
           log = recordInput({ direction, kind: "lane", timeMs }, log);
         }
-        const pullStep = stepPulls(data, geometry, pullStream, FRAME, pulls, walk);
+        const pullStep = stepPulls(data, geometry, FRAME, pulls, walk);
         pulls = pullStep.pulls;
         pulled.push(...pullStep.pulled);
         const stepped = stepWalk(data, geometry, rolls, FRAME, pullStep.walk);
@@ -404,7 +380,7 @@ describe("replay with pulls", () => {
       return { cards, log, pulled, walk };
     };
     const recorded = play((frame) => (frame % 47 === 0 ? [frame % 94 === 0 ? -1 : 1] : []));
-    expect(recorded.pulled.filter((pull) => pull.moved).length).toBeGreaterThanOrEqual(2);
+    expect(recorded.pulled.filter((pull) => pull.moved).length).toBeGreaterThanOrEqual(1);
 
     const events = [...replayInputs(recorded.log)];
     let next = 0;

@@ -4,6 +4,7 @@ import type {
   ForcedStopId,
   GameData,
   MinorObstacleId,
+  NeedSpotId,
   ZoneId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
@@ -18,7 +19,6 @@ import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
-import type { SquirrelChase } from "./chase";
 import { collideWithPack, type PackFootprint, tickInvulnerability, touchesPack } from "./collision";
 import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 import {
@@ -39,6 +39,7 @@ import {
   type MoverObstacleId,
   type MoverSpec,
 } from "./movers";
+import { isNeedSpot } from "./needs";
 import { chance, type Random, randomInt, randomPick } from "./random";
 import { itemsOnRoad, scrollRoadItems } from "./roadItems";
 import {
@@ -59,6 +60,8 @@ export type WalkData = Pick<
   | "encounters"
   | "forcedStops"
   | "minorObstacles"
+  | "needCards"
+  | "needSpots"
   | "shopGear"
   | "tuning"
   | "upgrades"
@@ -66,11 +69,12 @@ export type WalkData = Pick<
 >;
 
 export type PickupKind = "tip" | "treat";
-export type WalkItemKind = EncounterId | MinorObstacleId | MoverObstacleId | PickupKind;
+export type WalkItemKind =
+  EncounterId | MinorObstacleId | MoverObstacleId | NeedSpotId | PickupKind;
 export type WalkItem = MoverItem<WalkItemKind>;
 // What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
-// no card, a lucky encounter, or a pickup.
-export type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
+// no card, a lucky encounter, a spot that meets a need, or a pickup.
+export type ItemCategory = "lucky" | "minor" | "needSpot" | "obstacle" | PickupKind;
 
 // distance is the zone distance at which the stop comes into view at the top of the road.
 export interface ForcedStopAhead {
@@ -86,10 +90,8 @@ export interface ForcedStopOnRoad {
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
-// hitStop is set while an obstacle hit holds the walk still, and chase while a chaser is after
-// a squirrel on the road.
+// hitStop is set while an obstacle hit holds the walk still.
 export interface Road {
-  chase: SquirrelChase | null;
   control: LaneControl;
   forcedStopAhead: ForcedStopAhead | null;
   forcedStopOnRoad: ForcedStopOnRoad | null;
@@ -115,7 +117,7 @@ export interface Walk {
 // view, and sightLength the road in view above the tallest pack.
 export interface RoadGeometry {
   cell: { inset: number; length: number };
-  itemHeights: Readonly<Record<"forcedStop" | "lucky" | PickupKind, number>>;
+  itemHeights: Readonly<Record<"forcedStop" | "lucky" | "needSpot" | PickupKind, number>>;
   laneCount: number;
   packBand: { bottom: number; top: number };
   roadBottom: number;
@@ -139,7 +141,8 @@ export interface MinorBump {
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
 // bumps, cards and instants are in the order the pack met them; tips are the money changes of
-// the tips collected; zoneEnded is set on the step that reaches the end of the zone.
+// the tips collected; spots the need spots steered into, which stepNeeds meets; zoneEnded is
+// set on the step that reaches the end of the zone.
 // encounterHits are the obstacle encounters hit this step. A hit stop holds the step's cards
 // and zone end back to the step it ends on.
 export interface WalkStep {
@@ -148,6 +151,7 @@ export interface WalkStep {
   collected: WalkItem[];
   encounterHits: EncounterCard[];
   instants: InstantFind[];
+  spots: WalkItem[];
   tips: MoneyChange[];
   walk: Walk;
   zoneEnded: boolean;
@@ -167,11 +171,14 @@ export function isMinorObstacle(
 }
 
 export function itemCategory(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   kind: WalkItemKind,
 ): ItemCategory {
   if (kind === "tip" || kind === "treat") {
     return kind;
+  }
+  if (isNeedSpot(data, kind)) {
+    return "needSpot";
   }
   if (isMoverObstacle(kind)) {
     return "minor";
@@ -181,10 +188,10 @@ export function itemCategory(
 
 // The lanes and rows an item covers: an obstacle's shape, or one cell.
 export function footprintOf(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   kind: WalkItemKind,
 ): Footprint {
-  if (kind === "tip" || kind === "treat" || isMoverObstacle(kind)) {
+  if (kind === "tip" || kind === "treat" || isMoverObstacle(kind) || isNeedSpot(data, kind)) {
     return SINGLE_CELL;
   }
   if (isMinorObstacle(data, kind)) {
@@ -196,7 +203,7 @@ export function footprintOf(
 
 // What the pack steers around: obstacles, minor or not.
 export function blocksLane(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   kind: WalkItemKind,
 ): boolean {
   const category = itemCategory(data, kind);
@@ -237,7 +244,6 @@ export function zoneLength(data: Pick<GameData, "tuning">, run: RunState): Pixel
 
 export function startRoad(laneCount: number, speedFactor = 1): Road {
   return {
-    chase: null,
     control: laneControlIn(stillInLane(Math.floor(laneCount / 2))),
     forcedStopAhead: null,
     forcedStopOnRoad: null,
@@ -331,6 +337,20 @@ export function moverSpec(data: Pick<GameData, "tuning">, mover: MoverKind): Mov
   };
 }
 
+// The zone's need spots, drawn by the zone's weights from the spots that meet a need in the
+// pack, so none is wasted on a need nobody has.
+function needSpotsDrawn(data: WalkData, random: Random, run: RunState): NeedSpotId[] {
+  const zone = data.world.zones[run.zoneIndex];
+  const needs = new Set(packDogs(run).map((dog) => data.dogs[dog].need));
+  const entries = (Object.keys(data.needSpots) as NeedSpotId[])
+    .map((spot): [NeedSpotId, number] => [spot, zone?.weights.needSpots[spot] ?? 0])
+    .filter(([spot, weight]) => weight > 0 && needs.has(data.needSpots[spot].need));
+  const count = read(data.tuning, "counts", "needSpotsPerZone");
+  return entries.length === 0
+    ? []
+    : Array.from({ length: count }, () => pickWeighted(random, entries));
+}
+
 // Each obstacle kind is drawn first, weighted, so its shape is known when it is placed; a
 // zone's minor obstacles are drawn evenly from those allowed in it. Rush hour and the like
 // scale both counts. Then each squirrel, other dog and minor obstacle comes as a mover at the
@@ -352,6 +372,7 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
       ? []
       : drawn(scaled("obstacleSpawns", stats.minorObstacles), () => randomPick(random, minors))),
     ...drawn(stats.luckyEncounters, () => randomPick(random, lucky)),
+    ...needSpotsDrawn(data, random, run),
   ];
   const quotas = new Map<WalkItemKind, number>();
   const movers = new Map<MoverKind, number>();
@@ -453,7 +474,7 @@ export function steerWalk(
 
 // An obstacle's hit box is as long as its rows less the inset at each end.
 export function itemHeight(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights">,
   kind: WalkItemKind,
 ): number {
@@ -599,7 +620,8 @@ export function stepWalk(
       kind === "tip" ||
       kind === "treat" ||
       isMinorObstacle(data, kind) ||
-      isMoverObstacle(kind)
+      isMoverObstacle(kind) ||
+      isNeedSpot(data, kind)
     ) {
       return true;
     }
@@ -626,10 +648,13 @@ export function stepWalk(
   const collected: WalkItem[] = [];
   const encounterHits: EncounterCard[] = [];
   const instants: InstantFind[] = [];
+  const spots: WalkItem[] = [];
   const tips: MoneyChange[] = [];
   for (const item of [...hits, ...treatsHit]) {
     const { kind } = item;
-    if (kind === "tip" || kind === "treat") {
+    if (isNeedSpot(data, kind)) {
+      spots.push(item);
+    } else if (kind === "tip" || kind === "treat") {
       const pickup = collect(data, kind, nextRun);
       nextRun = pickup.run;
       if (pickup.tip !== null) {
@@ -687,6 +712,7 @@ export function stepWalk(
     collected,
     encounterHits,
     instants,
+    spots,
     tips,
     walk: {
       road: {
@@ -716,6 +742,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     collected: [],
     encounterHits: [],
     instants: [],
+    spots: [],
     tips: [],
     walk,
     zoneEnded: held.zoneEnded,
@@ -723,8 +750,8 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
 }
 
 // The end of a zone: every dog still walking is paid, each debuff on counts the zone, the
-// effects that lasted the zone expire, then the run moves to the next zone, or ends once the
-// last zone is done.
+// effects that lasted the zone expire, then the run moves to the next zone with every need
+// starting again, or ends once the last zone is done.
 export function finishZone(data: WalkData, run: RunState): ZoneEnd {
   const { changes, state: paid } = payZoneFees(data, countDebuffZones(run));
   const expired = expireAtZoneEnd(run.zoneIndex, paid);
@@ -733,7 +760,7 @@ export function finishZone(data: WalkData, run: RunState): ZoneEnd {
   }
   return {
     fees: changes,
-    run: { ...expired, zoneDistance: pixels(0), zoneIndex: run.zoneIndex + 1 },
+    run: { ...expired, needSeconds: {}, zoneDistance: pixels(0), zoneIndex: run.zoneIndex + 1 },
   };
 }
 

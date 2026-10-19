@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { GameData } from "../data/types";
 import { seededRandom } from "../runner/random";
+import { blocksLane, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
 import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
@@ -30,23 +31,27 @@ function shortZones(data: GameData, share: number): GameData {
   };
 }
 
-// Dogs that never pull, so every hit is the bot's own doing.
+// Dogs that never pull, so every hit is the bot's own doing: none is food-driven or a chaser,
+// and no need turns urgent.
 function withoutPulls(data: GameData): GameData {
   const never = 1e9;
+  const dogs = Object.fromEntries(
+    Object.entries(data.dogs).map(([id, dog]) => [id, { ...dog, trait: "fancy" }]),
+  ) as unknown as GameData["dogs"];
   return {
     ...data,
+    dogs,
     tuning: {
       ...data.tuning,
       seconds: {
         ...data.tuning.seconds,
-        pullIntervalByEnergy: { calm: never, hyper: never, steady: never },
+        needUrgentByEnergy: { calm: never, hyper: never, steady: never },
       },
     },
   };
 }
 
 const SHORT = shortZones(gameData, 0.25);
-// Of the starters, Koda is a chaser, whose pulls toward a squirrel no bot can plan around.
 const NO_CHASER: PackDogs = ["duchess", "biscuit", "snowball"];
 
 function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHASER): RunResult {
@@ -62,7 +67,7 @@ function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHAS
 function obstacleCounts(data: SimData, results: readonly RunResult[]) {
   const counts = results.flatMap((result) => [
     ...Object.entries(result.items)
-      .filter(([kind]) => kind !== "tip" && kind !== "treat" && !isLucky(data, kind))
+      .filter(([kind]) => blocksLane(data, kind as WalkItemKind))
       .map(([, count]) => count),
     ...Object.values(result.movers),
   ]);
@@ -70,12 +75,6 @@ function obstacleCounts(data: SimData, results: readonly RunResult[]) {
     hit: counts.reduce((sum, count) => sum + count.touched, 0),
     met: counts.reduce((sum, count) => sum + count.met, 0),
   };
-}
-
-function isLucky(data: SimData, kind: string): boolean {
-  return (
-    Object.hasOwn(data.encounters, kind) && data.encounters[kind as "photoOp"].kind === "lucky"
-  );
 }
 
 // Each run walks every zone frame by frame in effect, so these take a few hundred
@@ -121,5 +120,17 @@ describe("a steering bot", { timeout: 60_000 }, () => {
 
     expect(counts.met).toBeGreaterThan(100);
     expect(counts.hit).toBe(0);
+  });
+
+  // A pull never moves the pack into an obstacle too close to react to, so an ideal player is
+  // never hit right after one, whatever the pack pulls toward.
+  it("is never hit right after a pull, as an ideal player, with pulls on", () => {
+    const pulling: PackDogs = ["koda", "biscuit", "zippy"];
+    const results = [1, 2, 3].map((seed) => run(SHORT, seed, IDEAL_SKILL, pulling));
+    const hits = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
+    const pulls = results.reduce((sum, result) => sum + result.pullsMoved, 0);
+
+    expect(pulls).toBeGreaterThan(10);
+    expect(hits).toBe(0);
   });
 });

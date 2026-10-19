@@ -15,6 +15,8 @@ export const TUNING = {
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 22,
     minorObstaclesGainPerZone: 4,
+    // Spots that meet a dog's need, drawn from those the pack's needs match.
+    needSpotsPerZone: 6,
     obstaclesFirstZone: 22,
     obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.
@@ -43,6 +45,8 @@ export const TUNING = {
   },
   // Dollars. The game counts money in cents, so $1.50 is exact.
   money: {
+    // A Regular dog's accident, cleaned up with a bag.
+    accidentCleanUp: 5,
     chattyNeighbourTip: 25,
     encounterHigh: 20,
     encounterLow: 10,
@@ -65,6 +69,7 @@ export const TUNING = {
       whistle: 600,
     },
     squirrelChase: 10,
+    strangerTip: 10,
     sweetTalkerCostPerDog: -4,
     thiefLetGo: 20,
     tip: 0.5,
@@ -79,8 +84,6 @@ export const TUNING = {
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
     otherDogChangePerBigDog: -0.25,
     otherDogChangePerSmallDog: 0.25,
-    // Each pull interval varies by up to this share of it, either way.
-    pullIntervalJitter: 0.25,
     runningShoesInputLock: 0,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
@@ -106,6 +109,8 @@ export const TUNING = {
     // By zone: the share of squirrels, other dogs and minor obstacles that come as movers
     // (a darting squirrel, a loose dog, or a ball or cyclist).
     moverShare: { homeStretch: 0.2, park: 0.15, shops: 0.15, street: 0.1 },
+    // Meeting a need at a spot opens its payoff card instead of its plain reward.
+    needPayoffCard: 0.25,
   },
   seconds: {
     // One hop of a bouncing ball, which is only drawn.
@@ -124,8 +129,14 @@ export const TUNING = {
     minorStumble: 0.3,
     // A mover's cue shows this long before it moves.
     moverWarningSeconds: 1,
-    pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
-    // How long a dog leans and barks before it pulls.
+    // An urgent need left this long goes wrong, then starts again.
+    needGoneWrong: 20,
+    // A need turns urgent after this much walking since it was last met or went wrong.
+    needUrgentByEnergy: { calm: 90, hyper: 40, steady: 60 },
+    // A pull never lands the pack where an obstacle reaches it sooner than the pull's lane
+    // move, the dog's input lock, this and a lane move back.
+    pullReactionWindow: 0.6,
+    // How long a dog strains toward its target, with its bubble, before it pulls.
     pullTell: 1,
     // How long Soaked and Spooked show on a dog; they change nothing in the rules.
     statusVisualSeconds: 10,

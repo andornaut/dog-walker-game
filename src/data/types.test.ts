@@ -24,7 +24,7 @@ describe("types", () => {
   it("reads each tuning group in its unit", () => {
     expectTypeOf(read(TUNING, "money", "tip")).toEqualTypeOf<Cents>();
     expectTypeOf(
-      readTable(TUNING, "seconds", "pullIntervalByEnergy", "calm"),
+      readTable(TUNING, "seconds", "needUrgentByEnergy", "calm"),
     ).toEqualTypeOf<Seconds>();
     expectTypeOf(read(TUNING, "counts", "treatCarryMax")).toEqualTypeOf<number>();
   });

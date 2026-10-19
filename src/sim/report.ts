@@ -50,6 +50,8 @@ export interface MatrixCell {
 // obstacle that does not move, minor or not, and moverHitShares of each mover. meanTips counts
 // the tips collected per run.
 export interface MatrixRow {
+  // Of the obstacle hits, minor ones and movers included, those that came right after a pull.
+  readonly afterPullShare: number | null;
   readonly bumpShare: number | null;
   readonly finishedShare: number;
   readonly hitShare: number | null;
@@ -179,7 +181,7 @@ const MOVER_COLUMNS: Readonly<Record<MoverKind, string>> = {
 
 // Every obstacle kind, those that open a card first, then the minor ones.
 export function obstacleKinds(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
 ): WalkItemKind[] {
   const kinds = [
     ...Object.keys(data.encounters),
@@ -197,7 +199,7 @@ function touchedShare(counts: readonly ItemCount[]): number | null {
 }
 
 export function summarizeCell(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   cell: MatrixCell,
   results: readonly RunResult[],
 ): MatrixRow {
@@ -225,7 +227,10 @@ export function summarizeCell(
     (category: string) =>
     ({ kind }: (typeof counted)[number]) =>
       itemCategory(data, kind) === category;
+  const hits = results.reduce((sum, result) => sum + result.hits.all, 0);
+  const afterPull = results.reduce((sum, result) => sum + result.hits.afterPull, 0);
   return {
+    afterPullShare: hits === 0 ? null : afterPull / hits,
     bumpShare: touchedShare(countsOf(inCategory("minor"))),
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
     hitShare: touchedShare(countsOf(inCategory("obstacle"))),
@@ -291,6 +296,7 @@ export const MATRIX_HEADERS = [
   "Pack",
   "Hit",
   "Bump",
+  "Forced",
   "Lucky",
   "Tips",
   "Mean",
@@ -312,6 +318,7 @@ export function rowCells(row: MatrixRow): string[] {
     row.pack,
     measured(row.hitShare),
     measured(row.bumpShare),
+    measured(row.afterPullShare),
     measured(row.luckyShare),
     row.meanTips.toFixed(1),
     dollars(row.meanEarnings),
@@ -354,7 +361,7 @@ export function formatTable(rows: readonly MatrixRow[]): string {
 
 // The measured hit rate of each obstacle kind, one column per kind, then of each mover.
 export function formatKindTable(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
+  data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
   rows: readonly MatrixRow[],
 ): string {
   const kinds = obstacleKinds(data);

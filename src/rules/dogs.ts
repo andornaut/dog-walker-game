@@ -53,14 +53,9 @@ export function zoneFee(tuning: LiveTuning, modifiers: readonly Modifier[], dog:
   return zoneFeeParts(tuning, modifiers, dog).value;
 }
 
-// pullFrequency modifiers scale how often a dog pulls, so they divide the interval.
-export function pullIntervalSeconds(
-  tuning: LiveTuning,
-  modifiers: readonly Modifier[],
-  dog: Dog,
-): Seconds {
-  const frequency = modifiedStat(tuning, modifiers, "pullFrequency", 1);
-  return seconds(readTable(tuning, "seconds", "pullIntervalByEnergy", dog.energy) / frequency);
+// How long the dog walks before its need turns urgent.
+export function needUrgentSeconds(tuning: LiveTuning, dog: Pick<Dog, "energy">): Seconds {
+  return readTable(tuning, "seconds", "needUrgentByEnergy", dog.energy);
 }
 
 export function inputLockSeconds(

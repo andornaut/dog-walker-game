@@ -16,7 +16,7 @@ const STOP: CardSource = { kind: "forcedStop", stop: "stopSign" };
 const NOTHING = { cards: [], zoneEnded: false };
 const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
-  itemHeights: { forcedStop: 16, lucky: 20, tip: 12, treat: 12 },
+  itemHeights: { forcedStop: 16, lucky: 20, needSpot: 20, tip: 12, treat: 12 },
   laneCount: 5,
   packBand: { bottom: 630, top: 554 },
   roadBottom: 640,

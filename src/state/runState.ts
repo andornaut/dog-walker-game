@@ -6,6 +6,9 @@ import type {
   GameData,
   GearId,
   Modifier,
+  NeedCardId,
+  NeedId,
+  NeedSpotId,
   UpgradeId,
 } from "../data/types";
 import { startHearts } from "../rules/dogs";
@@ -37,12 +40,15 @@ export type PackDogs = readonly [DogId] | readonly [DogId, DogId] | readonly [Do
 export type UpgradeOffer = readonly [UpgradeId, UpgradeId, UpgradeId];
 
 // What a list of effects came from: a card option by its index in the source's data, an
-// instant encounter, or gear.
+// instant encounter, gear, a need met at a spot, or a need gone wrong.
 export type EffectSource =
   | { readonly encounter: EncounterId; readonly kind: "encounter"; readonly option: number }
   | { readonly kind: "forcedStop"; readonly option: number; readonly stop: ForcedStopId }
   | { readonly gear: GearId; readonly kind: "gear" }
   | { readonly encounter: EncounterId; readonly kind: "instant" }
+  | { readonly card: NeedCardId; readonly kind: "needCard"; readonly option: number }
+  | { readonly kind: "needGoneWrong"; readonly need: NeedId }
+  | { readonly kind: "needMet"; readonly spot: NeedSpotId }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
 
 export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonly kind: "debuff" };
@@ -57,7 +63,8 @@ export type ActiveDebuff = Lasting & { readonly debuff: DebuffId };
 export type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
 
 // What opened a card. affected is the dogs the encounter affected (caught by an area roll,
-// the chasers for a squirrel, or the whole pack); lucky encounters are encounters too.
+// the chasers for a squirrel, or the whole pack), or the dogs whose need opened it; lucky
+// encounters are encounters too.
 export type CardSource =
   | {
       readonly affected: readonly DogId[];
@@ -65,6 +72,11 @@ export type CardSource =
       readonly kind: "encounter";
     }
   | { readonly kind: "forcedStop"; readonly stop: ForcedStopId }
+  | {
+      readonly affected: readonly DogId[];
+      readonly card: NeedCardId;
+      readonly kind: "need";
+    }
   | { readonly kind: "upgradeOffer"; readonly offered: UpgradeOffer };
 
 export type EndReason = "finished" | "noDogs" | "wentHome";
@@ -94,6 +106,8 @@ export interface RunState {
   readonly immunities: readonly ActiveImmunity[];
   readonly modifiers: readonly ActiveModifier[];
   readonly money: Cents;
+  // Seconds each dog has walked this zone since its need was last met or went wrong.
+  readonly needSeconds: Readonly<Partial<Record<DogId, number>>>;
   readonly pack: Pack;
   readonly phase: Phase;
   readonly skipsLeft: number;
@@ -145,6 +159,7 @@ export function newRun(
     immunities: [],
     modifiers: [],
     money: cents(0),
+    needSeconds: {},
     pack: packWith([]),
     phase: { kind: "walking" },
     skipsLeft: 0,

@@ -1,4 +1,4 @@
-import type { Energy, Temperament, TraitId } from "../data/types";
+import type { Energy, NeedId, Temperament, TraitId } from "../data/types";
 import type { DogStatusId } from "../runner/statuses";
 import { kebabCase } from "./spriteKeys";
 
@@ -18,4 +18,9 @@ export function temperamentIconKey(temperament: Temperament): string {
 // The 16x16 icon a dog's status shows on its doghouse slot.
 export function statusIconKey(status: DogStatusId): string {
   return `icon-${kebabCase(status)}`;
+}
+
+// The 16x16 icon of a need, in its bubble over the dog and on its spots.
+export function needIconKey(need: NeedId): string {
+  return `icon-need-${kebabCase(need)}`;
 }

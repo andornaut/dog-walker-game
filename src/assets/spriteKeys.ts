@@ -6,6 +6,7 @@ import type {
   GameData,
   GearId,
   MinorObstacleId,
+  NeedSpotId,
   Zone,
 } from "../data/types";
 import type { MoverKind } from "../runner/movers";
@@ -25,12 +26,17 @@ export const CARD_FRAME_KEY = "card-frame";
 export type CardFrameTag = "encounter" | "lucky" | "stop" | "upgrade";
 
 // The card frame's colour comes from what opened the card.
-export function cardFrameTag(data: Pick<GameData, "encounters">, source: CardSource): CardFrameTag {
+export function cardFrameTag(
+  data: Pick<GameData, "encounters" | "needCards">,
+  source: CardSource,
+): CardFrameTag {
   switch (source.kind) {
     case "encounter":
       return data.encounters[source.encounter].kind === "lucky" ? "lucky" : "encounter";
     case "forcedStop":
       return "stop";
+    case "need":
+      return data.needCards[source.card].kind === "payoff" ? "lucky" : "encounter";
     default:
       return "upgrade";
   }
@@ -88,6 +94,33 @@ const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>>
 export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
   return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
 }
+
+// Each need spot's road sprite: the hydrant and the other dog reuse their obstacle's art,
+// marked on the road by the need's icon.
+const NEED_SPOT_SPRITES: Readonly<Record<NeedSpotId, string>> = {
+  fireHydrant: "hydrant",
+  lampPost: "spot-lamp-post",
+  playmate: "other-dog",
+  stranger: "spot-stranger",
+  tree: "spot-tree",
+  waterBowl: "spot-water-bowl",
+};
+
+export function needSpotSpriteKey(spot: NeedSpotId): string {
+  return NEED_SPOT_SPRITES[spot];
+}
+
+// The pull and need signals over a dog: the bubble a need or target icon sits in, the mark of
+// a pull blocked by the fairness rule and its burst, a need met, and a Regular dog's accident
+// with the decal it leaves on the road.
+export const NEED_ART = {
+  accident: "fx-accident",
+  accidentSpot: "accident-spot",
+  bubble: "ui-pull-bubble",
+  needMet: "fx-need-met",
+  pullBlocked: "ui-pull-blocked",
+  pullFail: "fx-pull-fail",
+} as const;
 
 // A road sprite's hand-drawn version for a depth step, such as dog-koda@75 for 0.75x, or
 // null at full size.

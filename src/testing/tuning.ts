@@ -38,11 +38,14 @@ export const TEST_TUNING: LiveTuning = {
   probability: {
     catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
     moverShare: { homeStretch: 0, park: 0, shops: 0, street: 0 },
+    needPayoffCard: 0.25,
   },
   seconds: {
     ...TUNING.seconds,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
-    pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
+    needGoneWrong: 20,
+    needUrgentByEnergy: { calm: 100, hyper: 45, steady: 70 },
+    pullReactionWindow: 0.6,
     zoneAtBaseSpeed: 240,
   },
 };

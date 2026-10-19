@@ -4,6 +4,7 @@ import type { DOGS } from "./dogs";
 import type { FORCED_STOPS } from "./forcedStops";
 import type { HINTS } from "./hints";
 import type { MINOR_OBSTACLES } from "./minorObstacles";
+import type { NEED_CARDS, NEED_SPOTS } from "./needs";
 import type { SHOP_GEAR } from "./shop";
 import type { TUNING } from "./tuning";
 import type { UPGRADES } from "./upgrades";
@@ -21,6 +22,7 @@ export type EncounterId =
   | "squirrel"
   | "thief";
 export type Energy = "calm" | "hyper" | "steady";
+export type NeedId = "friendly" | "nosy" | "playful" | "regular" | "thirsty";
 export type Size = "big" | "medium" | "small";
 export type Temperament = "dramatic" | "fussy" | "laidBack";
 export type TraitId = "chaser" | "fancy" | "foodDriven";
@@ -33,6 +35,8 @@ export type ForcedStopId = keyof typeof FORCED_STOPS;
 export type GearId = keyof typeof SHOP_GEAR;
 export type HintId = keyof typeof HINTS;
 export type MinorObstacleId = keyof typeof MINOR_OBSTACLES;
+export type NeedCardId = keyof typeof NEED_CARDS;
+export type NeedSpotId = keyof typeof NEED_SPOTS;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
@@ -63,6 +67,7 @@ export interface Tuning {
     readonly looseDogLanesPerSecond: number;
     readonly minorObstaclesFirstZone: number;
     readonly minorObstaclesGainPerZone: number;
+    readonly needSpotsPerZone: number;
     readonly obstaclesFirstZone: number;
     readonly obstaclesGainPerZone: number;
     readonly packSizeMax: number;
@@ -88,7 +93,6 @@ export interface Tuning {
   readonly multipliers: OpenGroup & {
     readonly cyclistSpeedMultiplier: number;
     readonly heartsByTemperament: Table<Temperament>;
-    readonly pullIntervalJitter: number;
     readonly scrollSpeedGainPerZone: number;
     readonly tipByPackSize: Table<number>;
   };
@@ -96,6 +100,7 @@ export interface Tuning {
   readonly probability: OpenGroup & {
     readonly catchBySize: Table<Size>;
     readonly moverShare: Table<ZoneId>;
+    readonly needPayoffCard: number;
   };
   readonly seconds: OpenGroup & {
     readonly ballBounceSeconds: number;
@@ -105,7 +110,9 @@ export interface Tuning {
     readonly minorHitStopSeconds: number;
     readonly minorStumble: number;
     readonly moverWarningSeconds: number;
-    readonly pullIntervalByEnergy: Table<Energy>;
+    readonly needGoneWrong: number;
+    readonly needUrgentByEnergy: Table<Energy>;
+    readonly pullReactionWindow: number;
     readonly pullTell: number;
     readonly statusVisualSeconds: number;
     readonly zoneAtBaseSpeed: number;
@@ -130,6 +137,7 @@ export type Dog = Unlock & {
   readonly energy: Energy;
   readonly look: string;
   readonly name: string;
+  readonly need: NeedId;
   readonly owner: Owner;
   readonly size: Size;
   readonly trait: TraitId;
@@ -141,6 +149,7 @@ export type Dog = Unlock & {
 export type Target =
   | { readonly kind: "affected" }
   | { readonly kind: "all" }
+  | { readonly kind: "need"; readonly need: NeedId }
   | { readonly kind: "randomOne" }
   | { readonly kind: "temperament"; readonly temperament: Temperament }
   | { readonly kind: "trait"; readonly trait: TraitId }
@@ -165,7 +174,6 @@ export type Stat =
   | "fees"
   | "inputLock"
   | "obstacleSpawns"
-  | "pullFrequency"
   | "tipSpawns"
   | "tipValue"
   | "zoneLength";
@@ -217,6 +225,12 @@ export interface ImmuneEffect {
 
 export type ModifierEffect = Modifier & { readonly kind: "modifier" };
 
+// Meets the need of every dog in the pack that has it, so its urgency starts again from 0.
+export interface FulfilNeedEffect {
+  readonly kind: "fulfilNeed";
+  readonly need: NeedId;
+}
+
 export interface SkipOptionEffect {
   readonly kind: "skipOption";
   readonly usesPerRun: CountKey;
@@ -224,6 +238,7 @@ export interface SkipOptionEffect {
 
 export type Effect =
   | DebuffEffect
+  | FulfilNeedEffect
   | HeartsEffect
   | ImmuneEffect
   | ModifierEffect
@@ -233,18 +248,23 @@ export type Effect =
 
 export type EffectKind = Effect["kind"];
 
-export interface CardOption {
+// Next is the type of a next card's id: the need cards name theirs as strings, as their own
+// ids are not known while they are typed, and GameData checks them.
+export interface CardOption<Next extends string = NeedCardId> {
   // Key of the option's illustration in the art manifest's images.
   readonly art: string;
   // Picking it lets the chasers chase, which counts toward squirrelsChased.
   readonly chase?: true;
   readonly effects: readonly Effect[];
   readonly name: string;
+  // Picking it opens this card next, for the same dogs.
+  readonly next?: Next;
 }
 
 // Cards show two or three options side by side.
-export type CardOptions =
-  readonly [CardOption, CardOption] | readonly [CardOption, CardOption, CardOption];
+export type CardOptions<Next extends string = NeedCardId> =
+  | readonly [CardOption<Next>, CardOption<Next>]
+  | readonly [CardOption<Next>, CardOption<Next>, CardOption<Next>];
 
 export type NonEmptyEffects = readonly [Effect, ...Effect[]];
 
@@ -307,6 +327,33 @@ export interface ForcedStop {
   readonly options: CardOptions;
 }
 
+// A need: name is what the dog needs ("Potty"); a dog's card shows it as the word in
+// src/rules/effectText.ts ("Regular"). Meeting it at a spot applies met to the dogs with the
+// need, unless the payoff card opens instead, at probability.needPayoffCard. Gone wrong, it
+// opens its card or applies its effects to the dog.
+export interface Need {
+  readonly goneWrong:
+    | { readonly card: NeedCardId; readonly kind: "card" }
+    | { readonly effects: NonEmptyEffects; readonly kind: "effects" };
+  readonly met: NonEmptyEffects;
+  readonly name: string;
+  readonly payoff: NeedCardId;
+}
+
+// A spot on the road that meets a need, steered into like a pickup.
+export interface NeedSpot {
+  readonly name: string;
+  readonly need: NeedId;
+}
+
+// A card a need opens: a payoff for meeting it, or trouble when it goes wrong. A {dog} in
+// the name is the names of the dogs it affects.
+export interface NeedCard<Next extends string = NeedCardId> {
+  readonly kind: "payoff" | "trouble";
+  readonly name: string;
+  readonly options: CardOptions<Next>;
+}
+
 export interface Upgrade {
   // Key of the card's illustration in the art manifest's images.
   readonly art: string;
@@ -337,6 +384,12 @@ export interface Debuff {
   readonly name: string;
 }
 
+// How often each kind is drawn in a zone, relative to the others of its group. 0 keeps it out
+// of the zone; each group needs at least one kind above 0.
+export interface ZoneWeights {
+  readonly needSpots: Readonly<Record<NeedSpotId, number>>;
+}
+
 export interface Zone {
   readonly id: string;
   // Hex colours from the art palette. The leash stands out against the zone's road.
@@ -344,6 +397,7 @@ export interface Zone {
   readonly name: string;
   readonly roadColor: string;
   readonly roadShadowColor: string;
+  readonly weights: ZoneWeights;
 }
 
 export interface World {
@@ -484,6 +538,9 @@ export interface GameData {
   readonly hints: Readonly<Record<HintId, Hint>>;
   readonly homeText: HomeText;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
+  readonly needCards: Readonly<Record<NeedCardId, NeedCard>>;
+  readonly needSpots: Readonly<Record<NeedSpotId, NeedSpot>>;
+  readonly needs: Readonly<Record<NeedId, Need>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
   readonly runText: RunText;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
