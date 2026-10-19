@@ -18,6 +18,7 @@ import {
   offerFork,
   offerUpgrades,
   openCard,
+  quirkActorsOf,
 } from "../rules/choices";
 import { currentZone } from "../rules/route";
 import { giveTreat } from "../rules/treats";
@@ -490,6 +491,7 @@ export class RunScene extends Scene {
     const { moments } = world;
     const outcome = chooseOption(gameData, world.random.cards, walk.run, view, choice);
     world.recorder.log({ choice, kind: "card", timeMs: this.runTimeMs });
+    moments.quirkActed(quirkActorsOf(gameData, view, choice));
     const at = { timeMs: this.runTimeMs, zoneIndex: walk.run.zoneIndex };
     this.statusMarks = startStatuses(gameData, view, at, choice, this.statusMarks);
     this.walk = { ...walk, run: outcome.state };

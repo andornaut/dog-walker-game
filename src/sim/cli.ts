@@ -6,6 +6,7 @@ import { isMainThread, parentPort, Worker, workerData } from "node:worker_thread
 
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
+import type { GearId } from "../data/types";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,
@@ -32,9 +33,10 @@ const presetLines = SKILL_PRESET_IDS.map((id) => {
 
 const USAGE = [
   "npm run simulate -- [--skill preset,...] [--hit percent,...] [--policy id,...]",
-  "                    [--route id,...] [--runs N] [--seed N] [--out file]",
+  "                    [--route id,...] [--gear id,...] [--runs N] [--seed N] [--out file]",
   "",
-  "Plays whole runs on the real rules and data, one row per policy, route, player and pack.",
+  "Plays whole runs on the real rules and data, one row per policy, route, player, gear and",
+  "pack.",
   "",
   "  --skill   steering bots of these skill presets play the real walk loop, with pulls, chases",
   "            and movers, and their hit rates are measured (default: every preset)",
@@ -44,7 +46,9 @@ const USAGE = [
   `  --route   the path taken at each fork, of ${ROUTE_POLICY_IDS.join(", ")}: straight is the`,
   "            middle path, left the easiest and right the hardest",
   `            (default: ${DEFAULT_ROUTE_POLICY})`,
-  `  --runs    runs per row (default: ${DEFAULT_RUNS})`,
+  `  --gear    the gear equipped, of none, ${Object.keys(gameData.shopGear).join(", ")}`,
+  "            (default: none)",
+  `  --runs   runs per row (default: ${DEFAULT_RUNS})`,
   `  --seed    the seed; the same seed gives the same rows (default: ${DEFAULT_SEED})`,
   "  --out     also write the matrix and rows as JSON to this file",
   "",
@@ -91,6 +95,17 @@ function parseIds<Id extends string>(flag: string, ids: readonly Id[], text: str
   });
 }
 
+function parseGears(text: string): (GearId | null)[] {
+  const ids = Object.keys(gameData.shopGear) as GearId[];
+  return text.split(",").map((id) => {
+    const gear = id === "none" ? null : ids.find((candidate) => candidate === id);
+    if (gear === undefined) {
+      throw new Error(`--gear takes none, ${ids.join(", ")}, not ${id}`);
+    }
+    return gear;
+  });
+}
+
 function parseHitRates(text: string): MatrixPlayer[] {
   return text.split(",").map((part) => {
     const value = Number(part.replace(/%$/, ""));
@@ -118,6 +133,9 @@ function parseArgs(args: readonly string[]): Options {
       throw new Error(`${flag} needs a value`);
     }
     switch (flag) {
+      case "--gear":
+        matrix = { ...matrix, gears: parseGears(value) };
+        break;
       case "--hit":
         hits = parseHitRates(value);
         break;

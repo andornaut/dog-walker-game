@@ -3,21 +3,33 @@ import { type CardView, type Choice, type ChoiceData, chooseOption } from "../ru
 import { maxHearts } from "../rules/dogs";
 import { faceMood } from "../rules/treats";
 import type { Cents } from "../rules/units";
+import { chance, type Random } from "../runner/random";
 import { heartsOf, packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 
 // heartsUnlessLow: take hearts unless an owner whose meter falls would end at LOW_HEARTS or
 // less, then pay the cheapest affordable money option. alwaysHearts: always a free option.
-// alwaysPay: the cheapest money option whenever one is affordable.
-export type PolicyId = "alwaysHearts" | "alwaysPay" | "heartsUnlessLow";
+// alwaysPay: the cheapest money option whenever one is affordable. mixed: as heartsUnlessLow,
+// but while a free option is safe and a safe money option is affordable, pay at MIXED_PAY_SHARE,
+// drawn from the policy's stream.
+export type PolicyId = "alwaysHearts" | "alwaysPay" | "heartsUnlessLow" | "mixed";
 
-export const POLICY_IDS: readonly PolicyId[] = ["heartsUnlessLow", "alwaysHearts", "alwaysPay"];
+export const POLICY_IDS: readonly PolicyId[] = [
+  "heartsUnlessLow",
+  "alwaysHearts",
+  "alwaysPay",
+  "mixed",
+];
 
 export const POLICY_NAMES: Readonly<Record<PolicyId, string>> = {
   alwaysHearts: "Always take hearts",
   alwaysPay: "Always pay when affordable",
   heartsUnlessLow: "Hearts unless an owner would drop to 1",
+  mixed: "Pay half the time, and when an owner would drop to 1",
 };
+
+// The share of safe choices the mixed policy pays for.
+export const MIXED_PAY_SHARE = 0.5;
 
 // How the bot picks a fork's path: always the middle (straight), always the easiest (left),
 // always the hardest (right), or one at random.
@@ -135,13 +147,30 @@ function heartsUnlessLow(previews: readonly OptionPreview[]): OptionPreview | un
   );
 }
 
-const POLICIES: Readonly<
-  Record<PolicyId, (previews: readonly OptionPreview[]) => OptionPreview | undefined>
-> = { alwaysHearts, alwaysPay, heartsUnlessLow };
+// Draws only when both a safe free option and a safe money option are on the card.
+function mixed(random: Random, previews: readonly OptionPreview[]): OptionPreview | undefined {
+  const free = freePick(previews);
+  const paid = best(previews.filter(isPaid).filter(isSafe), [cheapest, mostHearts]);
+  if (free === undefined || free.endangers || paid === undefined) {
+    return heartsUnlessLow(previews) ?? paid;
+  }
+  return chance(random, MIXED_PAY_SHARE) ? paid : free;
+}
+
+type Policy = (random: Random, previews: readonly OptionPreview[]) => OptionPreview | undefined;
+
+const POLICIES: Readonly<Record<PolicyId, Policy>> = {
+  alwaysHearts: (_, previews) => alwaysHearts(previews),
+  alwaysPay: (_, previews) => alwaysPay(previews),
+  heartsUnlessLow: (_, previews) => heartsUnlessLow(previews),
+  mixed,
+};
 
 // An encounter or forced stop card's choice. Every policy takes poop bags' Skip when offered.
+// Only the mixed policy draws from random.
 export function chooseCardOption(
   data: ChoiceData,
+  random: Random,
   policy: PolicyId,
   state: RunState,
   card: CardView,
@@ -149,7 +178,7 @@ export function chooseCardOption(
   if (card.skip) {
     return "skip";
   }
-  const picked = POLICIES[policy](previewOptions(data, state, card));
+  const picked = POLICIES[policy](random, previewOptions(data, state, card));
   if (picked === undefined) {
     throw new Error(`${card.title} has no option the ${policy} policy can take`);
   }

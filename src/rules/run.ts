@@ -82,8 +82,10 @@ export function payZoneFees(
     const amount = cents(fee.value * zone.fees);
     feesEarned[id] = addCents(feesEarned[id] ?? cents(0), amount);
     money = addCents(money, amount);
+    const { quirk } = data.dogs[id];
     const causes = centsCauses([
       { amount: fee.base, kind: "fee" },
+      ...(fee.quirk === 0 ? [] : [{ amount: fee.quirk, kind: "quirk", quirk } as const]),
       ...modifierCauses(fee.contributions),
       ...(zone.fees === 1
         ? []

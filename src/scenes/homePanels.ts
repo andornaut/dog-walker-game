@@ -137,6 +137,8 @@ function drawCardFrame(
 
 // What a detail card shows in its well: a dog's portrait or a gear item's icon, by key.
 export interface DetailPicture {
+  // A dog's 16x16 quirk icon, drawn beside the portrait under the status where the art has it.
+  readonly badge?: string;
   readonly key: string;
   // Drawn at this whole-number scale: 1 for a 64x64 portrait, 2 for a 32x32 icon.
   readonly scale: number;
@@ -184,7 +186,7 @@ export function drawDetailCard(
     );
   }
   const besideX = well.x + well.size + 10;
-  const beside = (rows: readonly { color: number; value: string }[], top: number) => {
+  const beside = (rows: readonly { color: number; value: string }[], top: number): number => {
     let y = top;
     for (const row of rows) {
       const label = text(scene, content, { x: besideX, y }, row.value, {
@@ -193,13 +195,20 @@ export function drawDetailCard(
       });
       y += Math.ceil(label.height) + LINE_GAP;
     }
+    return y;
   };
   const status = { color: card.locked ? PALETTE.darkRed : PALETTE.forest, value: card.status };
   if (kind === "gear") {
     beside([...card.lines.map((value) => ({ color: PALETTE.plum, value })), status], well.y + 4);
     return rect;
   }
-  beside([{ color: PALETTE.darkBrown, value: card.subtitle }, status], well.y + 4);
+  const belowStatus = beside(
+    [{ color: PALETTE.darkBrown, value: card.subtitle }, status],
+    well.y + 4,
+  );
+  if (picture.badge !== undefined && scene.textures.exists(picture.badge)) {
+    content.add(scene.add.image(besideX, belowStatus, picture.badge).setOrigin(0));
+  }
   let y = well.y + well.size + CARD.pad;
   for (const line of card.lines) {
     const label = text(scene, content, { x: CARD.pad, y }, line, {

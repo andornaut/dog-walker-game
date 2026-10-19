@@ -1,6 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { statusIconKey } from "../assets/iconKeys";
+import { quirkIconKey, statusIconKey } from "../assets/iconKeys";
 import {
   dogFaceKey,
   doghouseTag,
@@ -51,6 +51,7 @@ import { hintFor } from "../rules/hints";
 import { currentZone, walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { type Cents, read } from "../rules/units";
+import { isNervousAlone } from "../runner/needs";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
 import { AchievementToasts } from "./achievementToast";
@@ -76,7 +77,7 @@ import {
 } from "./run/runMoments";
 import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
-import { playTag } from "./sprites";
+import { firstTag, playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
 import { addPanel, artFits } from "./uiKit";
 
@@ -107,6 +108,7 @@ interface SlotView {
   name: GameObjects.BitmapText;
   ownerFace: GameObjects.Sprite;
   ownerName: GameObjects.BitmapText;
+  quirk: GameObjects.Image;
   statuses: GameObjects.Image[];
 }
 
@@ -396,6 +398,10 @@ export class HudScene extends Scene {
       }),
       ownerFace: sprite("treat", DOGHOUSE.ownerFace),
       ownerName: addPixelText(this, owner.x, owner.y, "", { color: PALETTE.plum }),
+      quirk: this.add
+        .image(at(DOGHOUSE.quirk).x, at(DOGHOUSE.quirk).y, "__DEFAULT")
+        .setOrigin(0)
+        .setVisible(false),
       statuses: DOGHOUSE.statuses.map((cell) =>
         this.add.image(at(cell).x, at(cell).y, "__DEFAULT").setOrigin(0).setVisible(false),
       ),
@@ -532,7 +538,7 @@ export class HudScene extends Scene {
     run: RunState,
     slot: PackSlot | null | undefined,
   ): void {
-    const parts = [view.house, view.dogFace, view.ownerFace, ...view.hearts];
+    const parts = [view.house, view.dogFace, view.ownerFace, view.quirk, ...view.hearts];
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
       [view.name, view.count, view.ownerName].forEach((label) => setPixelText(label, ""));
@@ -556,7 +562,9 @@ export class HudScene extends Scene {
     this.fitName(view.name, dog.name, DOGHOUSE.name, view.anchors.name);
     setPixelText(view.fired.setTint(PALETTE.white), fired ? "Fired" : "");
     if (fired) {
-      [view.dogFace, view.ownerFace, ...view.hearts].forEach((part) => part.setVisible(false));
+      [view.dogFace, view.ownerFace, view.quirk, ...view.hearts].forEach((part) =>
+        part.setVisible(false),
+      );
       setPixelText(view.count, "");
       setPixelText(view.ownerName, "");
       return;
@@ -566,8 +574,15 @@ export class HudScene extends Scene {
     const ownerKey = ownerFaceKey(gameData, slot.dog);
     const dogKey = dogFaceKey(gameData, slot.dog);
     playTag(view.ownerFace.setTexture(ownerKey).setVisible(true), ownerKey, mood);
-    playTag(view.dogFace.setTexture(dogKey).setVisible(true), dogKey, mood);
+    // A nervous dog walking alone looks worried, where her face has it.
+    const worried = isNervousAlone(gameData, run, slot.dog)
+      ? firstTag(this, dogKey, ["worried"])
+      : undefined;
+    playTag(view.dogFace.setTexture(dogKey).setVisible(true), dogKey, worried ?? mood);
     this.fitName(view.ownerName, dog.owner.name, DOGHOUSE.ownerName, view.anchors.ownerName);
+    const quirkKey = quirkIconKey(gameData, slot.dog);
+    const quirkArt = this.textures.exists(quirkKey);
+    view.quirk.setTexture(quirkArt ? quirkKey : "__DEFAULT").setVisible(quirkArt);
 
     const max = maxHearts(gameData.tuning, run.modifiers, dog);
     setPixelText(view.count, heartCount(hearts, max));

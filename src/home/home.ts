@@ -249,7 +249,8 @@ export function partingSpeech(
   return wrapWords(maxChars, `${data.dogs[dog].owner.name}: ${line}`);
 }
 
-type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText" | "needs">;
+type InfoData = ShopData &
+  Pick<GameData, "debuffs" | "encounters" | "homeText" | "needs" | "quirks">;
 
 const FOCUS_FIELDS = HOME_TEXT_FIELDS.focus;
 
@@ -262,11 +263,13 @@ function priceInfo(text: HomeText["focus"], bank: Cents, cost: Cents): string {
 }
 
 // A dog in words for the home screen's info line, so its tile's icons never stand alone: size
-// and trait, fee or price, and its owner's temperament.
+// and trait, need word and quirk, fee or price, and its owner's temperament.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
   const text = data.homeText.focus;
-  const { name, owner, size, trait } = data.dogs[dog];
+  const { name, need, owner, quirk, size, trait } = data.dogs[dog];
   const kind = fillLine(FOCUS_FIELDS, text, "kind", {
+    need: data.needs[need].name,
+    quirk: data.quirks[quirk].name,
     size: SIZE_NAMES[size],
     trait: TRAIT_NAMES[trait].toLowerCase(),
   });

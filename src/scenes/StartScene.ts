@@ -2,7 +2,7 @@ import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
-import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
+import { quirkIconKey, temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -1051,7 +1051,11 @@ export class StartScene extends Scene {
         : gearDetail(gameData, save.owned, save.bankCents, this.loadout, target.gear);
     const picture: DetailPicture =
       target.kind === "dog"
-        ? { key: dogPortraitKey(gameData, target.dog), scale: 1 }
+        ? {
+            badge: quirkIconKey(gameData, target.dog),
+            key: dogPortraitKey(gameData, target.dog),
+            scale: 1,
+          }
         : { key: gearIconKey(target.gear), scale: 2 };
     const rect = drawDetailCard(this, layer, this.closePressed(), card, picture, target.kind);
     this.overlay = { ...overlay, rect };

@@ -11,6 +11,7 @@ import { MENU_TEXT } from "./menuText";
 import { MINOR_OBSTACLES } from "./minorObstacles";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "./needs";
 import { QUIPS } from "./quips";
+import { QUIRKS } from "./quirks";
 import { RUN_TEXT } from "./runText";
 import { SHOP_GEAR } from "./shop";
 import { TUNING } from "./tuning";
@@ -37,6 +38,7 @@ function toGameData(values: ValueExports): GameData {
     needSpots: values.NEED_SPOTS,
     needs: values.NEEDS,
     quips: values.QUIPS,
+    quirks: values.QUIRKS,
     runText: values.RUN_TEXT,
     shopGear: values.SHOP_GEAR,
     tuning: values.TUNING,
@@ -63,6 +65,7 @@ const INITIAL_VALUES = {
   NEED_CARDS,
   NEED_SPOTS,
   QUIPS,
+  QUIRKS,
   RUN_TEXT,
   SHOP_GEAR,
   TUNING,
@@ -102,6 +105,7 @@ if (import.meta.hot) {
       "./minorObstacles.ts",
       "./needs.ts",
       "./quips.ts",
+      "./quirks.ts",
       "./runText.ts",
       "./shop.ts",
       "./tuning.ts",

@@ -1,20 +1,23 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { inputLockSeconds } from "../rules/dogs";
-import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
 import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
-import { isNeedUrgent, needFill, needSpotOf } from "../runner/needs";
+import { isNeedUrgent, needFill, needSpotOf, spotMeets } from "../runner/needs";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
+  isPickup,
   itemCategory,
   itemHeight,
+  laneMoveSeconds,
+  pickupReach,
   type RoadGeometry,
   steerWalk,
   type Walk,
   type WalkData,
   type WalkItem,
+  type WalkItemKind,
 } from "../runner/walk";
 import { packDogs } from "../state/pack";
 import {
@@ -195,8 +198,15 @@ export function widenMask(laneCount: number, reach: number, mask: number): numbe
   return widened & ((1 << laneCount) - 1);
 }
 
+// The lane mask from which the pack collects a pickup of kind, or touches anything else.
+export function reachMask(road: BotRoad, walk: Walk, kind: WalkItemKind, occupied: number): number {
+  return isPickup(kind)
+    ? widenMask(road.geometry.laneCount, pickupReach(road.data, walk.run, kind), occupied)
+    : occupied;
+}
+
 export function treatReachOf(data: WalkData, walk: Walk): number {
-  return Math.round(modifiedStat(data.tuning, walk.run.modifiers, "treatReach", 0));
+  return pickupReach(data, walk.run, "treat");
 }
 
 // When an item comes into view: at the far edge of the road, or, with visionSeconds, once it
@@ -318,7 +328,12 @@ function botView(
         prizes.push({ at: start, lanes, value });
       }
     } else {
-      prizes.push({ at: start, lanes, value: PRIZE_VALUES[category] });
+      const reach = category === "tip" ? pickupReach(data, walk.run, "tip") : 0;
+      prizes.push({
+        at: start,
+        lanes: widenMask(geometry.laneCount, reach, lanes),
+        value: PRIZE_VALUES[category],
+      });
     }
   }
   // A strain seen coming is planned as a pull when its tell runs out within the look-ahead;
@@ -349,9 +364,8 @@ function needSpotValue(data: WalkData, walk: Walk, item: WalkItem): number {
   if (spot === null) {
     return 0;
   }
-  const { need } = data.needSpots[spot];
   return packDogs(walk.run)
-    .filter((dog) => data.dogs[dog].need === need && isNeedUrgent(data, walk.run, dog))
+    .filter((dog) => spotMeets(data, spot, dog) && isNeedUrgent(data, walk.run, dog))
     .reduce(
       (value, dog) =>
         value + NEED_SPOT_VALUE + NEED_URGENCY_VALUE * Math.min(1.5, needFill(data, walk.run, dog)),
@@ -366,7 +380,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const readyAt = moving ? motion.duration - motion.elapsed : 0;
   const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
   const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
-  const moveSeconds = read(road.data.tuning, "seconds", "laneMove");
+  const moveSeconds = laneMoveSeconds(road.data, walk.run);
   const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
   const view = botView(bot, road, pulls, walk);
   const moves = planLanes(

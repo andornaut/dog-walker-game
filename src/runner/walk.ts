@@ -6,6 +6,7 @@ import type {
   MinorObstacleId,
   NeedSpotId,
   ObstacleEncounterId,
+  QuirkId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countBump, countDebuffZones } from "../rules/achievements";
@@ -63,6 +64,7 @@ export type WalkData = Pick<
   | "needCards"
   | "needs"
   | "needSpots"
+  | "quirks"
   | "runText"
   | "shopGear"
   | "tuning"
@@ -214,11 +216,33 @@ export function blocksLane(
   return category === "minor" || category === "obstacle";
 }
 
+// Whether a walking dog in the run has the quirk.
+export function packHasQuirk(
+  data: Pick<GameData, "dogs">,
+  run: Pick<RunState, "pack">,
+  quirk: QuirkId,
+): boolean {
+  return packDogs(run).some((dog) => data.dogs[dog].quirk === quirk);
+}
+
+// How long one lane move takes: seconds.laneMove, sledDogLaneSpeed times faster while a sled
+// dog walks.
+export function laneMoveSeconds(
+  data: Pick<GameData, "dogs" | "tuning">,
+  run: Pick<RunState, "pack">,
+): number {
+  const move = read(data.tuning, "seconds", "laneMove");
+  return packHasQuirk(data, run, "sledDog")
+    ? move / read(data.tuning, "multipliers", "sledDogLaneSpeed")
+    : move;
+}
+
 export function laneMotionConfig(
-  data: Pick<GameData, "tuning">,
+  data: Pick<GameData, "dogs" | "tuning">,
   laneCount: number,
+  run: Pick<RunState, "pack">,
 ): LaneMotionConfig {
-  return { laneCount, moveDuration: read(data.tuning, "seconds", "laneMove") };
+  return { laneCount, moveDuration: laneMoveSeconds(data, run) };
 }
 
 // Pixels per second in the run's current zone, read from the live data.
@@ -352,13 +376,23 @@ export function moverSpec(data: Pick<GameData, "tuning">, mover: MoverKind): Mov
   };
 }
 
-// The zone's need spot weights, kept to the spots that meet a need in the pack, so none is
-// wasted on a need nobody has.
-function needSpotWeights(data: WalkData, run: RunState) {
+// The weights the zone's need spots are drawn by: the zone's, for the spots that meet a need
+// in the pack, so none is wasted on a need nobody has. A crowd pleaser in the pack multiplies
+// the stranger spots' weights by crowdPleaserStrangerWeight.
+export function needSpotWeights(
+  data: Pick<GameData, "dogs" | "needSpots" | "tuning" | "world">,
+  run: RunState,
+): [NeedSpotId, number][] {
   const needs = new Set(packDogs(run).map((dog) => data.dogs[dog].need));
-  return positiveWeights(currentZone(data, run).weights.needSpots).filter(([spot]) =>
-    needs.has(data.needSpots[spot].need),
-  );
+  const crowd = packHasQuirk(data, run, "crowdPleaser")
+    ? read(data.tuning, "multipliers", "crowdPleaserStrangerWeight")
+    : 1;
+  return positiveWeights(currentZone(data, run).weights.needSpots)
+    .filter(([spot]) => needs.has(data.needSpots[spot].need))
+    .map(([spot, weight]) => [
+      spot,
+      data.needSpots[spot].stranger === true ? weight * crowd : weight,
+    ]);
 }
 
 // Each obstacle, minor obstacle, lucky find and need spot is drawn first by the zone's
@@ -467,7 +501,7 @@ export function planZone(
 
 // Steering during a hit stop is dropped, not queued.
 export function steerWalk(
-  data: Pick<GameData, "tuning">,
+  data: Pick<GameData, "dogs" | "tuning">,
   laneCount: number,
   direction: LaneDirection,
   walk: Walk,
@@ -475,7 +509,8 @@ export function steerWalk(
   if (walk.road.hitStop !== null) {
     return walk;
   }
-  const control = steerLane(laneMotionConfig(data, laneCount), direction, walk.road.control);
+  const config = laneMotionConfig(data, laneCount, walk.run);
+  const control = steerLane(config, direction, walk.road.control);
   return { ...walk, road: { ...walk.road, control } };
 }
 
@@ -492,6 +527,40 @@ export function itemHeight(
         footprintOf(data, kind).rows,
       )
     : geometry.itemHeights[category];
+}
+
+export function isPickup(kind: WalkItemKind): kind is PickupKind {
+  return kind === "tip" || kind === "treat";
+}
+
+// How many lanes beside the pack's a pickup is collected from: treatReach modifiers, such as
+// Treat magnet, reach for treats, and a scent hound in the pack reaches scentHoundLanes for
+// tips.
+export function pickupReach(
+  data: Pick<GameData, "dogs" | "tuning">,
+  run: Pick<RunState, "modifiers" | "pack">,
+  kind: PickupKind,
+): number {
+  if (kind === "treat") {
+    return Math.round(modifiedStat(data.tuning, run.modifiers, "treatReach", 0));
+  }
+  return packHasQuirk(data, run, "scentHound") ? read(data.tuning, "counts", "scentHoundLanes") : 0;
+}
+
+// The scent hounds walking when the step collected a tip from beside the pack's lanes, which
+// only their reach collects.
+export function sniffersOf(
+  data: Pick<GameData, "dogs">,
+  walk: Walk,
+  collected: readonly WalkItem[],
+): DogId[] {
+  const lanes = occupiedLanes(walk.road.control.motion);
+  const beside = collected.some(
+    (item) =>
+      item.kind === "tip" &&
+      !lanes.some((lane) => lane >= item.lane && lane < item.lane + item.laneSpan),
+  );
+  return beside ? packDogs(walk.run).filter((dog) => data.dogs[dog].quirk === "scentHound") : [];
 }
 
 // Lanes within reach of the pack's, clamped to the road.
@@ -602,7 +671,7 @@ export function stepWalk(
   }
 
   let control = advanceLaneControl(
-    laneMotionConfig(data, geometry.laneCount),
+    laneMotionConfig(data, geometry.laneCount, run),
     stepSeconds,
     road.control,
   );
@@ -641,12 +710,17 @@ export function stepWalk(
     },
     footprint,
     tickInvulnerability(stepSeconds, road.invulnerableSeconds),
-    items.filter((item) => item.kind !== "treat" && !cues.includes(item)),
+    items.filter((item) => !isPickup(item.kind) && !cues.includes(item)),
   );
-  const treatReach = Math.round(modifiedStat(data.tuning, run.modifiers, "treatReach", 0));
-  const treatFootprint = { ...footprint, lanes: widenLanes(geometry.laneCount, treatReach, lanes) };
-  const treats = items.filter((item) => item.kind === "treat");
-  const treatsHit = treats.filter((item) => touchesPack(treatFootprint, item));
+  const reachFootprint = (kind: PickupKind) => ({
+    ...footprint,
+    lanes: widenLanes(geometry.laneCount, pickupReach(data, run, kind), lanes),
+  });
+  const reaches = { tip: reachFootprint("tip"), treat: reachFootprint("treat") };
+  const pickups = items.filter((item) => isPickup(item.kind));
+  const pickupsHit = pickups.filter(
+    (item) => isPickup(item.kind) && touchesPack(reaches[item.kind], item),
+  );
 
   let nextRun: RunState = { ...run, zoneDistance: pixels(zoneDistance) };
   const bumps: MinorBump[] = [];
@@ -657,7 +731,7 @@ export function stepWalk(
   const misses: EncounterId[] = [];
   const spots: WalkItem[] = [];
   const tips: MoneyChange[] = [];
-  for (const item of [...hits, ...treatsHit]) {
+  for (const item of [...hits, ...pickupsHit]) {
     const { kind } = item;
     if (isNeedSpot(data, kind)) {
       spots.push(item);
@@ -732,7 +806,7 @@ export function stepWalk(
         forcedStopOnRoad,
         hitStop,
         invulnerableSeconds,
-        items: [...remaining, ...cues, ...treats.filter((item) => !treatsHit.includes(item))],
+        items: [...remaining, ...cues, ...pickups.filter((item) => !pickupsHit.includes(item))],
         nextItemId,
         pending: due.pending,
       },

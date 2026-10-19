@@ -38,6 +38,14 @@ describe("dog stats", () => {
     };
     expect(inputLockSeconds(TEST_TUNING, [runningShoes], DOGS.koda)).toBe(0);
   });
+
+  it("never locks input after an acrobatic dog's pull, whatever its size", () => {
+    const doubled: Modifier = { by: "rushHourObstacles", operation: "multiply", stat: "inputLock" };
+    const acrobat = { ...DOGS.koda, quirk: "acrobatic" } as const;
+    expect(inputLockSeconds(TEST_TUNING, [], DOGS.koda)).toBe(0.5);
+    expect(inputLockSeconds(TEST_TUNING, [], acrobat)).toBe(0);
+    expect(inputLockSeconds(TEST_TUNING, [doubled], acrobat)).toBe(0);
+  });
 });
 
 describe("zoneStats", () => {

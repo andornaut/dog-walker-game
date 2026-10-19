@@ -7,6 +7,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
 import { NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
+import { QUIRKS } from "../data/quirks";
 import { SHOP_GEAR } from "../data/shop";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
@@ -46,6 +47,7 @@ const data = {
   homeText: HOME_TEXT,
   needs: NEEDS,
   quips: QUIPS,
+  quirks: QUIRKS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   world: WORLD,
@@ -284,9 +286,12 @@ describe("partingSpeech", () => {
 describe("dogInfo and gearInfo", () => {
   it.each<[string, () => string, RegExp]>([
     [
-      "describes an owned dog in words, with its fee",
+      "describes an owned dog in words, with its need, quirk and fee",
       () => dogInfo(data, owned, cents(0), "koda"),
-      /^Koda: big chaser, \$\d+ a zone\. Jesse is laid-back\.$/,
+      new RegExp(
+        `^Koda: big chaser, ${NEEDS[DOGS.koda.need].name}, ${QUIRKS[DOGS.koda.quirk].name}, ` +
+          "\\$\\d+ a zone\\. Jesse is laid-back\\.$",
+      ),
     ],
     [
       "adds a locked dog's price and how much more the bank needs",

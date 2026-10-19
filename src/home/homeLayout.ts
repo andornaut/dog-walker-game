@@ -25,7 +25,7 @@ export const HOME_LAYOUT = {
     width: 300,
   },
   // The dog card's place on screen, and the gear card's height; the gear card is centred.
-  dogCard: { height: 328, width: 300, x: 30, y: 140 },
+  dogCard: { height: 376, width: 300, x: 30, y: 92 },
   dogOrigin: { x: 4, y: 294 },
   // Each dog tile is drawn this far inside its hit area, leaving 2px between the rows.
   dogTileInset: 1,

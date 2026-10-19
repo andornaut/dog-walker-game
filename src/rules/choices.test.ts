@@ -6,6 +6,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
+import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, UpgradeId } from "../data/types";
@@ -35,6 +36,7 @@ const data = {
   needSpots: NEED_SPOTS,
   needs: NEEDS,
   quips: QUIPS,
+  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
@@ -187,14 +189,15 @@ describe("the zone encounters' options", () => {
       "Sniff it all",
       kodaTrio,
       {
-        hearts: { koda: 5, nugget: 5, pierre: 4 },
+        hearts: { koda: 5, nugget: 5, pierre: 3 },
         met: ["koda", "pierre"],
         spent: tips,
-        text: `Nosy needs met, −1 ♥ Pierre, −$${3 * missedTips}`,
+        // Pierre is a show dog and the trash is messy: his heart lost there costs one more.
+        text: `Nosy needs met, −2 ♥ Pierre, −$${3 * missedTips}`,
       },
     ],
     ["trash", "Tidy up", kodaTrio, { hearts: { koda: 5, nugget: 5, pierre: 6 }, spent: tips }],
-    ["trash", "Drag them on", kodaTrio, { hearts: { koda: 4, nugget: 1, pierre: 4 }, spent: 0 }],
+    ["trash", "Drag them on", kodaTrio, { hearts: { koda: 4, nugget: 1, pierre: 3 }, spent: 0 }],
     [
       "cafe",
       "Charm the crowd",
@@ -232,11 +235,11 @@ describe("the zone encounters' options", () => {
 
 describe("applyInstantEncounter", () => {
   it("pays a photo op at once, with a quip from the owners who gained hearts", () => {
-    const state = testState({ koda: 5, nugget: 3 });
-    const outcome = applyInstantEncounter(data, () => 0, state, "photoOp", ["koda", "nugget"]);
+    const state = testState({ koda: 5, snowball: 3 });
+    const outcome = applyInstantEncounter(data, () => 0, state, "photoOp", ["koda", "snowball"]);
     expect(outcome.moneyDelta).toBe(1000);
-    expect(heartsByDog(outcome.state)).toEqual({ koda: 5, nugget: 5 });
-    expect(outcome.quips).toEqual([{ dog: "nugget", moment: "happier" }]);
+    expect(heartsByDog(outcome.state)).toEqual({ koda: 5, snowball: 5 });
+    expect(outcome.quips).toEqual([{ dog: "snowball", moment: "happier" }]);
     expect(outcome.moneyChanges[0]?.causes).toEqual([
       { amount: 1000, kind: "effect", source: { encounter: "photoOp", kind: "instant" } },
     ]);

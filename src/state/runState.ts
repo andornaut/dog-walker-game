@@ -9,6 +9,7 @@ import type {
   NeedCardId,
   NeedId,
   NeedSpotId,
+  QuirkId,
   UpgradeId,
   ZoneId,
 } from "../data/types";
@@ -51,6 +52,7 @@ export type EffectSource =
   | { readonly card: NeedCardId; readonly kind: "needCard"; readonly option: number }
   | { readonly kind: "needGoneWrong"; readonly need: NeedId }
   | { readonly kind: "needMet"; readonly spot: NeedSpotId }
+  | { readonly kind: "quirk"; readonly quirk: QuirkId }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
 
 export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonly kind: "debuff" };
@@ -138,7 +140,7 @@ export interface Loadout {
 // starting hearts and the starting money. Throws for a dog listed twice or more dogs than the
 // player has slots.
 export function newRun(
-  data: Pick<GameData, "debuffs" | "dogs" | "shopGear" | "tuning" | "world">,
+  data: Pick<GameData, "debuffs" | "dogs" | "encounters" | "shopGear" | "tuning" | "world">,
   dogSlots: number,
   loadout: Loadout,
 ): RunState {

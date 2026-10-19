@@ -71,13 +71,13 @@ describe("payZoneFees", () => {
   it("pays every dog still walking its owner's fee, and records it against the dog", () => {
     const { changes, state } = payZoneFees(
       data,
-      testState({ duchess: 5, koda: "fired", pierre: 3 }),
+      testState({ duchess: 5, koda: "fired", zippy: 3 }),
     );
     expect(state.money).toBe(2300);
-    expect(state.feesEarned).toEqual({ duchess: 1000, pierre: 1300 });
+    expect(state.feesEarned).toEqual({ duchess: 1000, zippy: 1300 });
     expect(changes).toEqual([
       { amount: 1000, causes: [{ amount: 1000, kind: "fee" }], dog: "duchess", kind: "money" },
-      { amount: 1300, causes: [{ amount: 1300, kind: "fee" }], dog: "pierre", kind: "money" },
+      { amount: 1300, causes: [{ amount: 1300, kind: "fee" }], dog: "zippy", kind: "money" },
     ]);
   });
 
@@ -121,27 +121,27 @@ describe("fireOwnersAtZero", () => {
   it("takes back every fee the fired dog earned, keeps the rest, and marks the dog fired", () => {
     const twoZones = payZoneFees(
       data,
-      payZoneFees(data, testState({ duchess: 5, pierre: 5 })).state,
+      payZoneFees(data, testState({ duchess: 5, zippy: 5 })).state,
     ).state;
     const withTips = { ...twoZones, money: cents(twoZones.money + 300), zoneIndex: 2 };
     const emptied = {
       ...withTips,
-      pack: testState({ duchess: 1, pierre: 0 }).pack,
+      pack: testState({ duchess: 1, zippy: 0 }).pack,
     };
     const { changes, fired, state } = fireOwnersAtZero(emptied);
-    expect(fired).toEqual(["pierre"]);
+    expect(fired).toEqual(["zippy"]);
     expect(state.money).toBe(2000 + 300);
     expect(state.feesEarned).toEqual({ duchess: 2000 });
     expect(state.pack).toEqual([
       { dog: "duchess", hearts: 1, status: "walking" },
-      { dog: "pierre", status: "fired", zoneIndex: 2 },
+      { dog: "zippy", status: "fired", zoneIndex: 2 },
     ]);
     expect(heartsByDog(state)).toEqual({ duchess: 1 });
     expect(changes).toEqual([
       {
         amount: -2600,
         causes: [{ amount: -2600, kind: "clawback" }],
-        dog: "pierre",
+        dog: "zippy",
         kind: "money",
       },
     ]);

@@ -13,14 +13,16 @@ const owned: Owned = { dogSlots: 1, dogs: ["biscuit", "duchess", "koda"], gear: 
 const noStats = { dogs: {} };
 
 describe("dogDetail", () => {
-  it("gives the breed, traits in words, owner and temperament, fee and stats", () => {
+  it("gives the breed, traits, need and quirk in words, owner and temperament, fee and stats", () => {
     const stats = { dogs: { koda: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
     const card = dogDetail(data, owned, dollars(0), stats, "koda");
-    const { breed, name, owner } = data.dogs.koda;
+    const { breed, name, need, owner, quirk } = data.dogs.koda;
+    const { description, name: quirkName } = data.quirks[quirk];
     expect(card.title).toBe(name);
     expect(card.subtitle).toBe(breed);
     expect(card.lines).toEqual([
       "Big · Chaser · Steady energy",
+      `${data.needs[need].name} · ${quirkName}: ${description}`,
       `Owner ${owner.name}, ${owner.role}`,
       "Laid-back owner",
       expect.stringMatching(/^Fee \$\d+\/zone$/),

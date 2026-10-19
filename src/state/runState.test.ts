@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
+import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
 import type { GearId } from "../data/types";
 import { heartsByDog } from "../testing/runState";
@@ -14,6 +15,7 @@ const gearSource = (gear: GearId) => ({ source: { gear, kind: "gear" } });
 const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
+  encounters: ENCOUNTERS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   world: TEST_WORLD,

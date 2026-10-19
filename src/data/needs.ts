@@ -52,8 +52,8 @@ export const NEEDS = {
 export const NEED_SPOTS = {
   fireHydrant: { name: "Hydrant", need: "regular" },
   lampPost: { name: "Lamp post", need: "nosy" },
-  playmate: { name: "Another dog", need: "playful" },
-  stranger: { name: "A stranger waving", need: "friendly" },
+  playmate: { name: "Another dog", need: "playful", otherDog: true },
+  stranger: { name: "A stranger waving", need: "friendly", stranger: true },
   tree: { name: "Tree", need: "regular" },
   waterBowl: { name: "Water bowl", need: "thirsty" },
 } as const satisfies Record<string, NeedSpot>;

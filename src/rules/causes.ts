@@ -1,4 +1,4 @@
-import type { CardOption, DogId, GameData, Temperament } from "../data/types";
+import type { CardOption, DogId, GameData, QuirkId, Temperament } from "../data/types";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
 import { fillNames } from "../text/lines";
 import { assertNever } from "./assertNever";
@@ -8,15 +8,17 @@ import { type Cents, cents, type Hearts } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
-// base: the effect, tip, fee, clawback, treat or bump. The rest are what changed it: a temperament
-// multiplier, the pack-size tip factor, a modifier, a zone's fee multiplier, or a limit (a meter held within 0 and its
-// max, money held at $0 or more).
+// base: the effect, tip, fee, clawback, treat or bump. The rest are what changed it: a dog's
+// quirk, a temperament multiplier, the pack-size tip factor, a modifier, a zone's fee
+// multiplier, or a limit (a meter held within 0 and its max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
   | { readonly amount: number; readonly kind: "bump" | "clawback" | "fee" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
   | { readonly amount: number; readonly kind: "packSize"; readonly packSize: number }
+  // What a dog's quirk added, such as a show dog's fee.
+  | { readonly amount: number; readonly kind: "quirk"; readonly quirk: QuirkId }
   | { readonly amount: number; readonly kind: "temperament"; readonly temperament: Temperament }
   // A zone's fee multiplier, with the zone's name.
   | { readonly amount: number; readonly kind: "zone"; readonly zone: string };
@@ -48,6 +50,7 @@ export type CauseData = Pick<
   | "forcedStops"
   | "needCards"
   | "needSpots"
+  | "quirks"
   | "runText"
   | "shopGear"
   | "upgrades"
@@ -115,6 +118,8 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
       return "need ignored";
     case "needMet":
       return data.needSpots[source.spot].name;
+    case "quirk":
+      return data.quirks[source.quirk].name;
     case "upgrade":
       return data.upgrades[source.upgrade].name;
     default:
@@ -143,6 +148,8 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       return cause.bound === "max" ? "at max" : firedByText(data, change.dog);
     case "packSize":
       return cause.packSize === 1 ? "solo" : `pack of ${cause.packSize}`;
+    case "quirk":
+      return data.quirks[cause.quirk].name;
     case "temperament":
       return TEMPERAMENT_NAMES[cause.temperament];
     case "zone":

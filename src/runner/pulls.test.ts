@@ -6,9 +6,10 @@ import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
+import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { Modifier } from "../data/types";
+import type { Dog, DogId, Modifier } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
@@ -41,15 +42,23 @@ import {
   type WalkItem,
 } from "./walk";
 
+// The quirks these tests rely on, pinned so a roster edit does not move them: Archie is a
+// medium acrobatic chaser, and Penny a big nervous dog.
+const dogs = {
+  ...DOGS,
+  archie: { ...DOGS.archie, quirk: "acrobatic", size: "medium", trait: "chaser" },
+  penny: { ...DOGS.penny, quirk: "nervous", size: "big" },
+} as const satisfies Record<DogId, Dog>;
 const data = {
   debuffs: DEBUFFS,
-  dogs: DOGS,
+  dogs,
   encounters: ENCOUNTERS,
   forcedStops: FORCED_STOPS,
   minorObstacles: MINOR_OBSTACLES,
   needCards: NEED_CARDS,
   needSpots: NEED_SPOTS,
   needs: NEEDS,
+  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   // An 80px/s, 30s zone with spawns sized for it, as in the walk tests.
@@ -212,6 +221,85 @@ describe("what a dog pulls toward", () => {
       ["biscuit", -1],
       ["koda", 1],
     ]);
+  });
+});
+
+describe("a nervous dog", () => {
+  it("strains toward another dog in view, lunging, then pulls a lane toward it, once", () => {
+    const walk = walkWith(["penny"], [item("otherDog", 0, 0)]);
+    const straining = after(walk, 0.5);
+    expect(straining.tells).toEqual([{ direction: -1, dog: "penny", kind: "otherDog" }]);
+    expect(pullPose(data, straining.pulls, "penny")).toEqual({
+      direction: -1,
+      quirkTag: "lunge",
+      tag: "tell",
+    });
+    const pulled = after(walk, 4);
+    expect(pulled.pulled).toEqual([{ direction: -1, dog: "penny", moved: true }]);
+    expect(pullPose(data, after(walk, 1.1).pulls, "penny")).toEqual({ direction: -1, tag: "pull" });
+  });
+
+  it("takes a playmate spot and a loose dog for other dogs; other dogs ignore them", () => {
+    expect(after(walkWith(["penny"], [item("playmate", 0, 4)]), 0.5).tells).toEqual([
+      { direction: 1, dog: "penny", kind: "otherDog" },
+    ]);
+    const loose: MoverPath = {
+      direction: -1,
+      enterTravel: 200,
+      lanesPerPixel: 0.001,
+      motion: "cross",
+      mover: "looseDog",
+      warning: 80,
+    };
+    const looseDog = { ...item("otherDog", 0, 4), mover: { path: loose, since: 0 } };
+    expect(after(walkWith(["penny"], [looseDog]), 0.5).tells).toEqual([
+      { direction: 1, dog: "penny", kind: "otherDog" },
+    ]);
+    expect(after(walkWith(["koda"], [item("otherDog", 0, 0), looseDog]), 3).tells).toEqual([]);
+  });
+
+  it("strains in pack order with the other strainers, each target once", () => {
+    const walk = walkWith(["koda", "penny"], [item("squirrel", 0, 0), item("otherDog", 1, 4, 60)]);
+    const { pulled, tells } = after(walk, 4);
+    expect(tells.map(({ dog, kind }) => [dog, kind])).toEqual([
+      ["koda", "squirrel"],
+      ["penny", "otherDog"],
+    ]);
+    expect(pulled.map(({ direction, dog }) => [dog, direction])).toEqual([
+      ["koda", -1],
+      ["penny", 1],
+    ]);
+  });
+
+  it("is held by the fairness rule like every pull", () => {
+    // As in the fairness tests below: the cone in lane 1 is too close to react to at 1s.
+    const walk = walkWith(["penny"], [item("otherDog", 0, 0), item("cone", 1, 1, 402)]);
+    const held = after(walk, 2);
+    expect(held.blocked).toEqual([{ direction: -1, dog: "penny", kind: "otherDog" }]);
+    expect(held.pulled).toEqual([]);
+  });
+});
+
+describe("an acrobatic dog", () => {
+  it("leaves no lane-input lock after its pull, whatever its size, and flourishes", () => {
+    const walk = walkWith(["archie"], [item("squirrel", 0, 0)]);
+    const pulled = after(walk, 1.1);
+    expect(pulled.pulled).toEqual([{ direction: -1, dog: "archie", moved: true }]);
+    expect(pullPose(data, pulled.pulls, "archie")).toEqual({
+      direction: -1,
+      quirkTag: "flourish",
+      tag: "pull",
+    });
+    expect(pullWalk(data, 5, "archie", 1, walkWith(["archie"])).walk.road.control).toMatchObject({
+      lockOnArrival: 0,
+    });
+    for (const seconds of [1.2, 1.3, 1.4, 1.6]) {
+      expect(isSteeringLocked(after(walk, seconds).walk.road.control), `${seconds}s`).toBe(false);
+    }
+    // Biscuit, also medium, locks a quarter second.
+    expect(pullWalk(data, 5, "biscuit", 1, walkWith(["biscuit"])).walk.road.control).toMatchObject({
+      lockOnArrival: 0.25,
+    });
   });
 });
 

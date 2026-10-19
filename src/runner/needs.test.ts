@@ -5,24 +5,47 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
+import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
+import type { Dog, DogId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import type { RunState } from "../state/runState";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
-import { isNeedUrgent, meetNeedAt, nextNeedMoment, stepNeeds } from "./needs";
+import {
+  flourishesAt,
+  isNeedUrgent,
+  isNervousAlone,
+  isOtherDog,
+  meetNeedAt,
+  nextNeedMoment,
+  stepNeeds,
+} from "./needs";
+
+// The attributes these tests rely on, pinned so a roster edit does not move them: Biscuit is
+// a hyper Regular, Koda a steady Nosy, Duchess a calm Friendly, Snowball a hyper Friendly with
+// a dramatic owner, and Penny a calm, nervous Friendly with a fussy owner.
+const dogs = {
+  ...DOGS,
+  biscuit: { ...DOGS.biscuit, energy: "hyper", need: "regular" },
+  duchess: { ...DOGS.duchess, energy: "calm", need: "friendly" },
+  koda: { ...DOGS.koda, energy: "steady", need: "nosy" },
+  penny: { ...DOGS.penny, energy: "calm", need: "friendly", quirk: "nervous" },
+  snowball: { ...DOGS.snowball, energy: "hyper", need: "friendly" },
+} as const satisfies Record<DogId, Dog>;
 
 // Urgent after 100s for a calm dog, 70s steady and 45s hyper; wrong 20s after that.
 const data = {
   debuffs: DEBUFFS,
-  dogs: DOGS,
+  dogs,
   encounters: ENCOUNTERS,
   forcedStops: FORCED_STOPS,
   needCards: NEED_CARDS,
   needSpots: NEED_SPOTS,
   needs: NEEDS,
+  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   tuning: {
@@ -135,5 +158,70 @@ describe("meetNeedAt", () => {
       throw new Error("drew");
     };
     expect(meetNeedAt(data, never, "waterBowl", run)).toEqual({ card: null, moment: null, run });
+  });
+});
+
+describe("other dogs", () => {
+  it("are the Other dog encounter and the need spots marked otherDog", () => {
+    expect(
+      ["otherDog", "playmate", "squirrel", "stranger"].map((kind) => isOtherDog(data, kind)),
+    ).toEqual([true, true, false, false]);
+  });
+
+  it("meet nothing for a nervous dog: her need runs on and her owner gains nothing", () => {
+    // Penny and Zippy both Playful here, both urgent.
+    const playful = {
+      ...data,
+      dogs: {
+        ...dogs,
+        penny: { ...dogs.penny, need: "playful" },
+        zippy: { ...dogs.zippy, need: "playful" },
+      },
+    } as const;
+    const run = testState({ penny: 3, zippy: 3 }, { needSeconds: { penny: 150, zippy: 150 } });
+    const met = meetNeedAt(playful, plain, "playmate", run);
+    expect(met.moment).toMatchObject({ dogs: ["zippy"], kind: "met" });
+    expect(met.run.needSeconds).toEqual({ penny: 150, zippy: 0 });
+    expect(heartsByDog(met.run).penny).toBe(3);
+  });
+
+  it("make an acrobatic dog whose need a playmate met flourish", () => {
+    const acrobat = {
+      ...data,
+      dogs: { ...dogs, archie: { ...dogs.archie, quirk: "acrobatic" } },
+    } as const;
+    const met = { kind: "met", need: "playful", outcome: null } as const;
+    expect(flourishesAt(acrobat, { ...met, dogs: ["archie", "zippy"], spot: "playmate" })).toEqual([
+      "archie",
+    ]);
+    expect(flourishesAt(acrobat, { ...met, dogs: ["archie"], spot: "stranger" })).toEqual([]);
+  });
+});
+
+describe("a nervous dog walking alone", () => {
+  // Penny is calm: urgent after 100s, twice as fast alone.
+  it("fills her need nervousAloneUrgency times as fast", () => {
+    const alone = testState({ penny: 4 });
+    expect(isNervousAlone(data, alone, "penny")).toBe(true);
+    expect(stepNeeds(data, plain, 10, true, [], alone).run.needSeconds).toEqual({ penny: 20 });
+    expect(nextNeedMoment(data, alone)).toBe(50);
+  });
+
+  it("is alone once the others are fired, and not while another dog walks", () => {
+    const together = testState({ duchess: 4, penny: 4 });
+    expect(stepNeeds(data, plain, 10, true, [], together).run.needSeconds).toEqual({
+      duchess: 10,
+      penny: 10,
+    });
+    const leftAlone = testState({ duchess: "fired", penny: 4 });
+    expect(isNervousAlone(data, leftAlone, "penny")).toBe(true);
+    expect(stepNeeds(data, plain, 10, true, [], leftAlone).run.needSeconds).toEqual({ penny: 20 });
+  });
+
+  it("is only ever a nervous dog", () => {
+    expect(isNervousAlone(data, testState({ duchess: 4 }), "duchess")).toBe(false);
+    expect(stepNeeds(data, plain, 10, true, [], testState({ duchess: 4 })).run.needSeconds).toEqual(
+      { duchess: 10 },
+    );
   });
 });

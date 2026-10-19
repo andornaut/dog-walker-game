@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
+import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
 import { cents } from "../rules/units";
@@ -13,6 +14,7 @@ import { checkpointOf, runResultOf } from "./runSlices";
 const data = {
   debuffs: DEBUFFS,
   dogs: DOGS,
+  encounters: ENCOUNTERS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   world: WORLD,

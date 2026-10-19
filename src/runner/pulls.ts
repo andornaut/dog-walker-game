@@ -8,10 +8,11 @@ import { packDogs } from "../state/pack";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
 import { laneAt, moverPlace } from "./movers";
-import { isNeedUrgent, needSpotOf } from "./needs";
+import { isNeedUrgent, isOtherDog, needSpotOf, spotMeets } from "./needs";
 import {
   blocksLane,
   laneMotionConfig,
+  laneMoveSeconds,
   type RoadGeometry,
   type Walk,
   type WalkItem,
@@ -19,9 +20,10 @@ import {
 } from "./walk";
 
 // A dog pulls only toward something it wants on the road: a treat for a food-driven dog, a
-// squirrel for the pack's first chaser, or a spot that meets its need once the need is
-// urgent. One dog strains at a time: pullTell seconds with its bubble, an arrow and a line to
-// the target, then the pack lurches one lane toward it. Each target draws its pulls once.
+// squirrel for the pack's first chaser, another dog for a nervous dog, or a spot that meets
+// its need once the need is urgent. One dog strains at a time: pullTell seconds with its
+// bubble, an arrow and a line to the target, then the pack lurches one lane toward it. Each
+// target draws its pulls once.
 
 export type PullData = Pick<
   GameData,
@@ -29,7 +31,7 @@ export type PullData = Pick<
 >;
 export type PullGeometry = Pick<RoadGeometry, "laneCount" | "packBand" | "roadTop">;
 
-export type PullTargetKind = "need" | "squirrel" | "treat";
+export type PullTargetKind = "need" | "otherDog" | "squirrel" | "treat";
 
 // The dog straining toward a target on the road, toward direction, with tellSeconds of its
 // tell to go. pullsLeft is the pulls the target still draws. blocked is set while the lane it
@@ -45,11 +47,12 @@ export interface Strain {
   readonly tellSeconds: number;
 }
 
-// A pull at clock time at.
+// A pull at clock time at, toward a target of kind.
 export interface LastPull {
   readonly at: number;
   readonly direction: LaneDirection;
   readonly dog: DogId;
+  readonly kind: PullTargetKind;
 }
 
 // clock is the seconds the walk has moved; it stands still through hit stops, cards and
@@ -90,10 +93,15 @@ export interface PullStep {
   readonly walk: Walk;
 }
 
+// The pose a quirk shows in place of the tell or pull: a nervous dog's lunge while she strains
+// toward another dog, an acrobatic dog's flourish after any pull.
+export type QuirkPullTag = "flourish" | "lunge";
+
 // What a dog shows: its tell while it strains, then its pull lean for one lane move after a
-// pull.
+// pull, or its quirk's pose where it has one.
 export interface PullPose {
   readonly direction: LaneDirection;
+  readonly quirkTag?: QuirkPullTag;
   readonly tag: "pull" | "tell";
 }
 
@@ -111,7 +119,8 @@ export function pullWalk(
     return { moved: false, walk };
   }
   const lock = inputLockSeconds(data.tuning, run.modifiers, data.dogs[dog]);
-  const control = pullLane(laneMotionConfig(data, laneCount), lock, direction, road.control);
+  const config = laneMotionConfig(data, laneCount, run);
+  const control = pullLane(config, lock, direction, road.control);
   return {
     moved: control.target !== road.control.target,
     walk: { ...walk, road: { ...road, control } },
@@ -166,15 +175,18 @@ function wantOf(
   walk: Walk,
   item: WalkItem,
 ): PullTargetKind | null {
-  const { need, trait } = data.dogs[dog];
+  const { quirk, trait } = data.dogs[dog];
   if (item.kind === "treat") {
     return trait === "foodDriven" ? "treat" : null;
   }
   if (item.kind === "squirrel") {
     return dog === chaser && squirrelPulls(data, walk) >= 1 ? "squirrel" : null;
   }
+  if (quirk === "nervous" && isOtherDog(data, item.kind)) {
+    return "otherDog";
+  }
   const spot = needSpotOf(data, item.kind);
-  return spot !== null && data.needSpots[spot].need === need && isNeedUrgent(data, walk.run, dog)
+  return spot !== null && spotMeets(data, spot, dog) && isNeedUrgent(data, walk.run, dog)
     ? "need"
     : null;
 }
@@ -260,7 +272,7 @@ export function pullHorizon(
   dog: DogId,
   walk: Walk,
 ): number {
-  const move = read(data.tuning, "seconds", "laneMove");
+  const move = laneMoveSeconds(data, walk.run);
   const lock = inputLockSeconds(data.tuning, walk.run.modifiers, data.dogs[dog]);
   return move + lock + read(data.tuning, "seconds", "pullReactionWindow") + move;
 }
@@ -276,11 +288,12 @@ function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, wal
 const NOTHING = { blocked: [], failed: [], pulled: [], tells: [] } as const;
 
 // One step of the pull clock. With no dog straining, the first dog in pack order that wants
-// a target starts its tell. A strain whose target has gone, passed or been reached ends. Once
-// the tell has run, and a darting squirrel moves and is off the pack's lane, the dog pulls one
-// lane toward the target, unless the fairness rule blocks the pull: then it strains on until
-// the lane clears or the strain ends. A target with pulls left starts the tell again. Nothing
-// moves unless the walk is walking with no hit stop.
+// a target starts its tell: a squirrel draws squirrelPulls pulls, anything else one. A strain
+// whose target has gone, passed or been reached ends. Once the tell has run, and a darting
+// squirrel or loose dog moves and is off the pack's lane, the dog pulls one lane toward the
+// target, unless the fairness rule blocks the pull: then it strains on until the lane clears or
+// the strain ends. A target with pulls left starts the tell again. Nothing moves unless the
+// walk is walking with no hit stop.
 export function stepPulls(
   data: PullData,
   geometry: PullGeometry,
@@ -355,7 +368,7 @@ export function stepPulls(
     pulled: [{ direction, dog, moved: pull.moved }],
     pulls: {
       clock,
-      last: { at: clock, direction, dog },
+      last: { at: clock, direction, dog, kind: leaned.kind },
       spent: again === null ? [...spent, leaned.itemId] : spent,
       strain: again,
     },
@@ -364,18 +377,27 @@ export function stepPulls(
   };
 }
 
-// The dog's tell while it strains, then its pull pose for one lane move after a pull.
+// The dog's tell while it strains, then its pull pose for one lane move after a pull. A
+// nervous dog straining toward another dog lunges, and an acrobatic dog flourishes after its
+// pull.
 export function pullPose(
-  data: Pick<GameData, "tuning">,
+  data: Pick<GameData, "dogs" | "tuning">,
   pulls: Pulls,
   dog: DogId,
 ): PullPose | null {
   const { last, strain } = pulls;
+  const { quirk } = data.dogs[dog];
   if (strain?.dog === dog) {
-    return { direction: strain.direction, tag: "tell" };
+    const lunges = quirk === "nervous" && strain.kind === "otherDog";
+    const tell: PullPose = { direction: strain.direction, tag: "tell" };
+    return lunges ? { ...tell, quirkTag: "lunge" } : tell;
   }
   const recent = last !== null && pulls.clock - last.at < read(data.tuning, "seconds", "laneMove");
-  return recent && last.dog === dog ? { direction: last.direction, tag: "pull" } : null;
+  if (!recent || last.dog !== dog) {
+    return null;
+  }
+  const pull: PullPose = { direction: last.direction, tag: "pull" };
+  return quirk === "acrobatic" ? { ...pull, quirkTag: "flourish" } : pull;
 }
 
 // Seconds of walking until the pull clock next acts on its own: the end of a running tell, or

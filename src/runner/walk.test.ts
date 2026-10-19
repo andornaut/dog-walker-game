@@ -9,6 +9,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
+import { QUIRKS } from "../data/quirks";
 import { RUN_TEXT } from "../data/runText";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
@@ -96,6 +97,7 @@ const data = {
   needCards: NEED_CARDS,
   needSpots: NEED_SPOTS,
   needs: NEEDS,
+  quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   tuning,
@@ -520,11 +522,11 @@ describe("stepWalk", () => {
   });
 
   it("applies an instant lucky find at once, with no card", () => {
-    const walk = walkWith(["koda", "nugget"], [atPack("photoOp")]);
+    const walk = walkWith(["koda", "snowball"], [atPack("photoOp")]);
     const { cards, instants, walk: after } = step(walk);
     expect(cards).toEqual([]);
     expect(instants.map(({ encounter }) => encounter)).toEqual(["photoOp"]);
-    expect(instants[0]?.outcome.quips).toEqual([{ dog: "nugget", moment: "happier" }]);
+    expect(instants[0]?.outcome.quips).toEqual([{ dog: "snowball", moment: "happier" }]);
     expect(after.run.money).toBe(walk.run.money + TEST_TUNING.money.photoOpTip * 100);
     expect(after.run.phase).toEqual({ kind: "walking" });
   });

@@ -56,12 +56,29 @@ describe("simulateMatrix", () => {
   it("covers every policy, skill preset and pack of the default matrix", () => {
     const cells = matrixCells(DEFAULT_MATRIX);
 
-    expect(cells).toHaveLength(3 * 3 * 6);
+    expect(cells).toHaveLength(4 * 3 * 8);
     expect(
       new Set(
         cells.map(({ pack, player, policy }) => `${policy} ${JSON.stringify(player)} ${pack.name}`),
       ).size,
     ).toBe(cells.length);
+    expect(new Set(cells.map(({ gear }) => gear))).toEqual(new Set([null]));
+  });
+
+  it("runs each gear as its own cell, after the player and before the pack", () => {
+    const rows = simulateMatrix(gameData, 3, 2, {
+      ...SMALL,
+      gears: [null, "runningShoes"],
+      players: [{ hitRate: 0.06, kind: "rates" }],
+      policies: ["heartsUnlessLow"],
+    });
+
+    expect(rows.map(({ gear, pack }) => [gear, pack])).toEqual([
+      ["none", "Koda"],
+      ["none", "Risky trio"],
+      ["runningShoes", "Koda"],
+      ["runningShoes", "Risky trio"],
+    ]);
   });
 
   it("gives one row per cell, in policy, player, then pack order", () => {

@@ -5,6 +5,7 @@ import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { NEEDS } from "../data/needs";
+import { QUIRKS } from "../data/quirks";
 import { SHOP_GEAR } from "../data/shop";
 import type { CardOption, Effect } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
@@ -12,7 +13,13 @@ import { TEST_TUNING } from "../testing/tuning";
 import { affectText, conditionText, effectText, formatDollars } from "./effectText";
 import { cents } from "./units";
 
-const data = { debuffs: DEBUFFS, encounters: ENCOUNTERS, needs: NEEDS, tuning: TEST_TUNING };
+const data = {
+  debuffs: DEBUFFS,
+  encounters: ENCOUNTERS,
+  needs: NEEDS,
+  quirks: QUIRKS,
+  tuning: TEST_TUNING,
+};
 
 describe("effectText", () => {
   const { puddle, skunk, squirrel } = ENCOUNTERS;
@@ -20,19 +27,28 @@ describe("effectText", () => {
 
   it.each<[string, readonly Effect[], string]>([
     ["money per dog", puddle.resolution.options[1].effects, "−$5 per dog"],
-    ["money once", squirrel.resolution.options[1].effects, "−$10"],
+    [
+      "money once, with a quirk's multiplier",
+      squirrel.resolution.options[1].effects,
+      `−$10 (none with a ${QUIRKS.ratter.name} dog)`,
+    ],
     [
       "hearts each, a trait's own amount",
       puddle.resolution.options[0].effects,
       "−1 ♥ each (−2 Fancy)",
     ],
     ["hearts each", skunk.resolution.options[2].effects, "−2 ♥ each"],
+    [
+      "hearts each, a quirk's own amount by its name in the data",
+      [{ amount: 1, kind: "hearts", quirkAmounts: { nervous: -1 }, target: { kind: "affected" } }],
+      `+1 ♥ each (−1 ${QUIRKS.nervous.name})`,
+    ],
     ["the owners of a trait", iceCreamTruck.options[1].effects, "−1 ♥ to Food-driven owners"],
     ["one random owner", kidWantsToPet.options[1].effects, "−1 ♥ to one random owner"],
     [
       "owners of a temperament",
       ENCOUNTERS.photoOp.resolution.effects,
-      "+$10, +1 ♥ to dramatic owners",
+      `+$10 (×2 with a ${QUIRKS.cameraReady.name} dog), +1 ♥ to dramatic owners`,
     ],
     ["the unhappiest owner", UPGRADES.secondWind.effects, "+2 ♥ to the unhappiest owner"],
     [

@@ -19,10 +19,11 @@ import { amountText, type Change, type MoneyChange } from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
 import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
-import type { NeedStep } from "../../runner/needs";
+import { quirkScaledDogs } from "../../rules/effects";
+import { flourishesAt, type NeedStep } from "../../runner/needs";
 import type { PullStep } from "../../runner/pulls";
 import type { Random } from "../../runner/random";
-import type { EncounterCard, WalkStep } from "../../runner/walk";
+import { type EncounterCard, sniffersOf, type WalkStep } from "../../runner/walk";
 import { walkerFootY } from "../../runner/walkGeometry";
 import {
   type AchievementPreview,
@@ -30,6 +31,7 @@ import {
   previewAchievements,
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
+import { packDogs } from "../../state/pack";
 import type { RunState } from "../../state/runState";
 import { hitLabelOf, playHitMoment } from "../hitMoment";
 import { playCleanMiss, playMinorBump } from "../packFeedback";
@@ -156,6 +158,7 @@ export class RunMoments {
       if (moment.kind === "met") {
         soundboardOf(this.scene).play("treat");
         this.deps.pack.needMet(moment.dogs, moment.need, still);
+        this.deps.pack.quirkActed(flourishesAt(gameData, moment));
       } else {
         this.hint({ kind: "accident" });
         if (moment.need === "regular") {
@@ -181,6 +184,7 @@ export class RunMoments {
       this.hint({ kind: "tip" });
     }
     this.addChanges(step.tips);
+    this.deps.pack.quirkActed(sniffersOf(gameData, step.walk, step.collected));
     for (const item of step.collected) {
       playEffect(this.scene, "fx-sparkle", "play", { x: pack.x, y: pack.y - 24 }, DEPTH.fx);
       if (item.kind === "treat") {
@@ -207,6 +211,9 @@ export class RunMoments {
       this.hint({ kind: "areaEffect" });
     }
     for (const { encounter, outcome } of step.instants) {
+      const { resolution } = gameData.encounters[encounter];
+      const effects = resolution.kind === "instant" ? resolution.effects : [];
+      this.deps.pack.quirkActed(quirkScaledDogs(gameData, effects, packDogs(outcome.state)));
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
       showInstantPopup(this.scene, encounter, this.deps.still());
       this.sayQuips(outcome.quips);
@@ -227,6 +234,11 @@ export class RunMoments {
   }
 
   // Firings and debuffs a choice or find brought about.
+  // The dogs whose quirk a card choice set acting, such as a ratter on a chase.
+  quirkActed(dogs: readonly DogId[]): void {
+    this.deps.pack.quirkActed(dogs);
+  }
+
   afterOutcome(outcome: ChoiceOutcome): void {
     if (outcome.fired.length > 0) {
       soundboardOf(this.scene).play("fired");

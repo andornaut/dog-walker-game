@@ -9,7 +9,15 @@ import { HOME_TEXT_FIELDS } from "./homeText";
 
 type DetailData = Pick<
   GameData,
-  "debuffs" | "dogSlots" | "dogs" | "encounters" | "homeText" | "needs" | "shopGear" | "tuning"
+  | "debuffs"
+  | "dogSlots"
+  | "dogs"
+  | "encounters"
+  | "homeText"
+  | "needs"
+  | "quirks"
+  | "shopGear"
+  | "tuning"
 >;
 
 // What a held dog or gear tile's detail card says: a title, a line under it, rows of
@@ -38,8 +46,8 @@ function priceLine(text: HomeText["detail"], cost: Cents | null, bank: Cents): s
   return fillLine(FIELDS, text, cost > bank ? "priceLocked" : "priceBuy", { price });
 }
 
-// A dog's breed, its traits in words, its owner and their temperament, its fee, and the
-// walks, zones and firings the save has counted for it.
+// A dog's breed, its traits, need and quirk in words, its owner and their temperament, its fee,
+// and the walks, zones and firings the save has counted for it.
 export function dogDetail(
   data: DetailData,
   owned: Owned,
@@ -47,7 +55,7 @@ export function dogDetail(
   stats: Pick<SaveStats, "dogs">,
   dog: DogId,
 ): DetailCard {
-  const { breed, energy, name, owner, size, trait } = data.dogs[dog];
+  const { breed, energy, name, need, owner, quirk, size, trait } = data.dogs[dog];
   const counted = stats.dogs[dog] ?? ZERO_DOG_STATS;
   const fee = dogFeeText(data, dog);
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
@@ -58,6 +66,11 @@ export function dogDetail(
         energy: capitalized(energy),
         size: capitalized(SIZE_NAMES[size]),
         trait: TRAIT_NAMES[trait],
+      }),
+      fillLine(FIELDS, text, "dogQuirk", {
+        description: data.quirks[quirk].description,
+        need: data.needs[need].name,
+        quirk: data.quirks[quirk].name,
       }),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
       fillLine(FIELDS, text, "dogTemperament", {

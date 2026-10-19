@@ -140,7 +140,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1 ♥ each, −$5 per dog, Playful needs met",
+      "text": "+1 ♥ each (−1 Nervous), −$5 per dog, Playful needs met",
       "title": "Other dog"
     },
     {
@@ -296,7 +296,7 @@
         "id": "squirrel",
         "kind": "encounter"
       },
-      "text": "−$5",
+      "text": "−$5 (none with a Ratter dog)",
       "title": "Squirrel"
     },
     {
@@ -904,7 +904,7 @@
       "id": "archie",
       "art": "archie",
       "breed": "Australian Shepherd",
-      "energy": "calm",
+      "energy": "hyper",
       "look": "Red merle, one blue eye, red bandana",
       "name": "Archie",
       "need": "playful",
@@ -914,6 +914,7 @@
         "temperament": "dramatic"
       },
       "price": "lockedDog",
+      "quirk": "acrobatic",
       "size": "medium",
       "trait": "chaser",
       "unlock": "shop",
@@ -944,6 +945,7 @@
         "role": "barista",
         "temperament": "laidBack"
       },
+      "quirk": "scentHound",
       "size": "medium",
       "trait": "foodDriven",
       "unlock": "start",
@@ -974,6 +976,7 @@
         "role": "retired florist",
         "temperament": "laidBack"
       },
+      "quirk": "pampered",
       "size": "small",
       "trait": "fancy",
       "unlock": "start",
@@ -1004,6 +1007,7 @@
         "role": "trail runner",
         "temperament": "laidBack"
       },
+      "quirk": "sledDog",
       "size": "big",
       "trait": "chaser",
       "unlock": "start",
@@ -1035,6 +1039,7 @@
         "temperament": "dramatic"
       },
       "price": "lockedDog",
+      "quirk": "cameraReady",
       "size": "small",
       "trait": "foodDriven",
       "unlock": "shop",
@@ -1059,13 +1064,14 @@
       "energy": "calm",
       "look": "Smooth golden coat, blocky head, otter tail, blue collar",
       "name": "Penny",
-      "need": "thirsty",
+      "need": "friendly",
       "owner": {
         "name": "Dr. Hughes",
         "role": "dentist",
         "temperament": "fussy"
       },
       "price": "lockedDog",
+      "quirk": "nervous",
       "size": "big",
       "trait": "foodDriven",
       "unlock": "shop",
@@ -1097,11 +1103,12 @@
         "temperament": "fussy"
       },
       "price": "lockedDog",
+      "quirk": "showDog",
       "size": "medium",
       "trait": "fancy",
       "unlock": "shop",
       "figures": {
-        "feeCents": 2500,
+        "feeCents": 3000,
         "maxHearts": 8,
         "startHearts": 2,
         "startMood": "upset"
@@ -1118,7 +1125,7 @@
       "id": "snowball",
       "art": "snowball",
       "breed": "Samoyed",
-      "energy": "hyper",
+      "energy": "calm",
       "look": "Fluffy white, collar with a bell",
       "name": "Snowball",
       "need": "friendly",
@@ -1128,6 +1135,7 @@
         "temperament": "dramatic"
       },
       "price": "lockedDog",
+      "quirk": "crowdPleaser",
       "size": "big",
       "trait": "fancy",
       "unlock": "shop",
@@ -1159,6 +1167,7 @@
         "temperament": "fussy"
       },
       "price": "lockedDog",
+      "quirk": "ratter",
       "size": "small",
       "trait": "chaser",
       "unlock": "shop",
@@ -1439,6 +1448,9 @@
               {
                 "amount": 1,
                 "kind": "hearts",
+                "quirkAmounts": {
+                  "nervous": -1
+                },
                 "target": {
                   "kind": "affected"
                 }
@@ -1542,7 +1554,10 @@
           {
             "amount": "photoOpTip",
             "change": "gain",
-            "kind": "money"
+            "kind": "money",
+            "quirkMultipliers": {
+              "cameraReady": "cameraReadyTip"
+            }
           },
           {
             "amount": 1,
@@ -1565,6 +1580,7 @@
       },
       "hitLabel": "SNACK ATTACK!",
       "kind": "obstacle",
+      "messy": true,
       "name": "Picnic raid",
       "resolution": {
         "kind": "card",
@@ -1611,6 +1627,7 @@
       },
       "hitLabel": "SOAKED!",
       "kind": "obstacle",
+      "messy": true,
       "name": "Puddle",
       "resolution": {
         "kind": "card",
@@ -1749,7 +1766,10 @@
               {
                 "amount": "squirrelChase",
                 "change": "lose",
-                "kind": "money"
+                "kind": "money",
+                "quirkMultipliers": {
+                  "ratter": "ratterChaseTips"
+                }
               }
             ],
             "name": "Let them chase"
@@ -1816,6 +1836,7 @@
       },
       "hitLabel": "TRASH DAY!",
       "kind": "obstacle",
+      "messy": true,
       "name": "Trash day",
       "resolution": {
         "kind": "card",
@@ -2520,12 +2541,14 @@
     {
       "id": "playmate",
       "name": "Another dog",
-      "need": "playful"
+      "need": "playful",
+      "otherDog": true
     },
     {
       "id": "stranger",
       "name": "A stranger waving",
-      "need": "friendly"
+      "need": "friendly",
+      "stranger": true
     },
     {
       "id": "tree",
@@ -2679,6 +2702,7 @@
       "packSizeMax": 3,
       "packSizeMin": 1,
       "poopBagsSkipsPerRun": 1,
+      "scentHoundLanes": 1,
       "squirrelDartLanesPerSecond": 4,
       "tipsFirstZone": 52,
       "tipsGainPerZone": 7,
@@ -2697,6 +2721,8 @@
         "medium": 8,
         "small": 6
       },
+      "pamperedTreatHearts": 2,
+      "showDogMessyHearts": 1,
       "startByTemperament": {
         "dramatic": 3,
         "fussy": 2,
@@ -2707,6 +2733,7 @@
     "money": {
       "accidentCleanUp": 5,
       "chattyNeighbourTip": 25,
+      "crowdPleaserTip": 2,
       "encounterHigh": 10,
       "encounterLow": 5,
       "fannyPackStart": 15,
@@ -2730,6 +2757,7 @@
         "runningShoes": 800,
         "whistle": 600
       },
+      "showDogFee": 5,
       "squirrelChase": 5,
       "strangerTip": 10,
       "sweetTalkerCostPerDog": -4,
@@ -2738,6 +2766,8 @@
     },
     "multipliers": {
       "bigTipperTip": 1.5,
+      "cameraReadyTip": 2,
+      "crowdPleaserStrangerWeight": 2,
       "cyclistSpeedMultiplier": 1.6,
       "goodLeashSquirrelPull": 0,
       "heartsByTemperament": {
@@ -2745,14 +2775,17 @@
         "fussy": 1,
         "laidBack": 1
       },
+      "nervousAloneUrgency": 2,
       "otherDogChangePerBigDog": -0.25,
       "otherDogChangePerSmallDog": 0.25,
+      "ratterChaseTips": 0,
       "runningShoesInputLock": 0,
       "rushHourObstacles": 1.5,
       "rushHourTips": 2,
       "scrollSpeedGainPerZone": 0.15,
       "shortcutFees": 0.75,
       "shortcutZoneLength": 0.75,
+      "sledDogLaneSpeed": 1.15,
       "stinkyTip": 0.5,
       "tipByPackSize": {
         "1": 1.2,

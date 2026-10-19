@@ -37,6 +37,7 @@ import {
   collect,
   finishZone,
   isMinorObstacle,
+  laneMoveSeconds,
   planZone,
   type RoadGeometry,
   startRoad,
@@ -212,6 +213,9 @@ interface Session {
   pullsMoved: number;
   readonly items: ItemCounts;
   readonly movers: MoverCounts;
+  // What the card policy draws from, kept apart from the game's and the bot's draws so the
+  // policies that never draw play identical runs.
+  policyRandom: Random;
   run: RunState;
   tips: Cents;
   readonly upgrades: UpgradeId[];
@@ -257,7 +261,7 @@ function playCard(
 ): void {
   const run = openCard(source, session.run);
   const card = cardFor(data, run, source);
-  const choice = chooseCardOption(data, config.policy, run, card);
+  const choice = chooseCardOption(data, session.policyRandom, config.policy, run, card);
   const option = card.options.find(({ index }) => index === choice);
   const outcome = chooseOption(data, random, run, card, choice);
   session.cardsSeen += 1;
@@ -394,26 +398,28 @@ function playZoneByRates(
   }
 }
 
-// The game's own streams, as the run screen keeps them, and the bot's.
+// The game's own streams, as the run screen keeps them, the bot's and the card policy's.
 interface Streams {
   readonly bot: Random;
   readonly cards: Random;
   readonly forks: Random;
   readonly needs: Random;
+  readonly policy: Random;
   readonly rolls: Random;
   readonly spawnSeed: number;
 }
 
+// The policy's seed is drawn last, so adding it left every other stream as it was.
 function streamsFrom(random: Random): Streams {
   const seed = () => Math.floor(random() * 2 ** 32);
-  return {
-    bot: seededRandom(seed()),
-    cards: seededRandom(seed()),
-    forks: seededRandom(seed()),
-    needs: seededRandom(seed()),
-    rolls: seededRandom(seed()),
-    spawnSeed: seed(),
-  };
+  const bot = seededRandom(seed());
+  const cards = seededRandom(seed());
+  const forks = seededRandom(seed());
+  const needs = seededRandom(seed());
+  const rolls = seededRandom(seed());
+  const spawnSeed = seed();
+  const policy = seededRandom(seed());
+  return { bot, cards, forks, needs, policy, rolls, spawnSeed };
 }
 
 // Needs met or gone wrong: their outcomes' firings are recorded, and their cards are played
@@ -501,7 +507,7 @@ function notePulls(
   walk: Walk,
   pulled: readonly { readonly dog: DogId; readonly moved: boolean }[],
 ): void {
-  const move = read(data.tuning, "seconds", "laneMove");
+  const move = laneMoveSeconds(data, walk.run);
   for (const { dog, moved } of pulled) {
     if (moved) {
       session.pullsMoved += 1;
@@ -653,6 +659,7 @@ function playBySkill(
 ): void {
   const streams = streamsFrom(random);
   const bot = newBot(streams.bot, skill);
+  session.policyRandom = streams.policy;
   let walk: Walk = { road: startRoad(LANE_COUNT), run: session.run };
   let pulls = NO_PULLS;
   while (!hasEnded(session)) {
@@ -679,6 +686,8 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     hits: { afterPull: 0, all: 0 },
     items: {},
     movers: {},
+    // A skill player's runs draw from a stream of their own instead.
+    policyRandom: random,
     pullsMoved: 0,
     run: newRun(data, config.pack.length, { dogs: config.pack, gear: config.gear }),
     tips: cents(0),

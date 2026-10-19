@@ -30,6 +30,16 @@ export type EncounterId =
   | "trash";
 export type Energy = "calm" | "hyper" | "steady";
 export type NeedId = "friendly" | "nosy" | "playful" | "regular" | "thirsty";
+export type QuirkId =
+  | "acrobatic"
+  | "cameraReady"
+  | "crowdPleaser"
+  | "nervous"
+  | "pampered"
+  | "ratter"
+  | "scentHound"
+  | "showDog"
+  | "sledDog";
 export type Size = "big" | "medium" | "small";
 export type Temperament = "dramatic" | "fussy" | "laidBack";
 export type TraitId = "chaser" | "fancy" | "foodDriven";
@@ -86,6 +96,7 @@ export interface Tuning {
     readonly obstaclesGainPerZone: number;
     readonly packSizeMax: number;
     readonly packSizeMin: number;
+    readonly scentHoundLanes: number;
     readonly squirrelDartLanesPerSecond: number;
     readonly tipsFirstZone: number;
     readonly tipsGainPerZone: number;
@@ -95,19 +106,26 @@ export interface Tuning {
   };
   readonly hearts: OpenGroup & {
     readonly maxBySize: Table<Size>;
+    readonly pamperedTreatHearts: number;
+    readonly showDogMessyHearts: number;
     readonly startByTemperament: Table<Temperament>;
     readonly treat: number;
   };
   readonly money: OpenGroup & {
+    readonly crowdPleaserTip: number;
     readonly feeByTemperament: Table<Temperament>;
     readonly prices: Table<string> & { readonly lockedDog: number };
     readonly minorBump: number;
+    readonly showDogFee: number;
     readonly tip: number;
   };
   readonly multipliers: OpenGroup & {
+    readonly crowdPleaserStrangerWeight: number;
     readonly cyclistSpeedMultiplier: number;
     readonly heartsByTemperament: Table<Temperament>;
+    readonly nervousAloneUrgency: number;
     readonly scrollSpeedGainPerZone: number;
+    readonly sledDogLaneSpeed: number;
     readonly tipByPackSize: Table<number>;
   };
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
@@ -153,9 +171,16 @@ export type Dog = Unlock & {
   readonly name: string;
   readonly need: NeedId;
   readonly owner: Owner;
+  readonly quirk: QuirkId;
   readonly size: Size;
   readonly trait: TraitId;
 };
+
+// A quirk in words, for the dog's detail card and the card text that names it.
+export interface Quirk {
+  readonly description: string;
+  readonly name: string;
+}
 
 // Which dogs an effect reaches, among the dogs still in the pack. "affected" is the dogs
 // the encounter affected; "randomOne" is one dog drawn at random; "unhappiest" is the dog
@@ -203,17 +228,22 @@ export type Modifier = { readonly duration?: Duration } & (
 export type HeartsDelta = -3 | -2 | -1 | 1 | 2 | 3;
 
 // Without perDog the amount applies once; with it, once per dog the target reaches.
+// quirkMultipliers multiplies the whole amount when a dog with that quirk is among the
+// affected dogs.
 export interface MoneyEffect {
   readonly amount: MoneyKey;
   readonly change: "gain" | "lose";
   readonly kind: "money";
   readonly perDog?: Target;
+  readonly quirkMultipliers?: Readonly<Partial<Record<QuirkId, MultiplierKey>>>;
 }
 
-// Per owner, before the temperament multiplier; traitAmounts replaces amount for those traits.
+// Per owner, before the temperament multiplier; traitAmounts replaces amount for those traits,
+// and quirkAmounts replaces either for those quirks.
 export interface HeartsEffect {
   readonly amount: HeartsDelta;
   readonly kind: "hearts";
+  readonly quirkAmounts?: Readonly<Partial<Record<QuirkId, HeartsDelta>>>;
   readonly target: Target;
   readonly traitAmounts?: Readonly<Partial<Record<TraitId, HeartsDelta>>>;
 }
@@ -310,9 +340,11 @@ export interface Shape {
 // "obstacle": hit by accident, always a card, with hitLabel shown large as it hits; "lucky":
 // a good thing to bump into, a card or instant. A lucky card with a hitLabel shows it as the
 // pack meets it, before its card. Nothing happens when no dog is affected, when the pack is
-// immune, or when noCardWhen holds.
+// immune, or when noCardWhen holds. A messy encounter's card costs a show dog's owner
+// hearts.showDogMessyHearts more wherever it costs them hearts.
 export type Encounter = {
   readonly affects: AffectRule;
+  readonly messy?: true;
   readonly name: string;
   readonly noCardWhen?: Condition;
 } & (
@@ -352,10 +384,15 @@ export interface Need {
   readonly payoff: NeedCardId;
 }
 
-// A spot on the road that meets a need, steered into like a pickup.
+// A spot on the road that meets a need, steered into like a pickup. otherDog marks a spot that
+// is another dog: a nervous dog strains toward it, and it meets nothing for her. stranger marks
+// a spot that is a person, drawn multipliers.crowdPleaserStrangerWeight times as often while a
+// crowd pleaser walks.
 export interface NeedSpot {
   readonly name: string;
   readonly need: NeedId;
+  readonly otherDog?: true;
+  readonly stranger?: true;
 }
 
 // A card a need opens: a payoff for meeting it, or trouble when it goes wrong. A {dog} in
@@ -480,6 +517,7 @@ export interface HomeText {
     readonly dogFee: string;
     readonly dogKind: string;
     readonly dogOwner: string;
+    readonly dogQuirk: string;
     readonly dogStatus: string;
     readonly dogTemperament: string;
     readonly dogTotals: string;
@@ -801,6 +839,7 @@ export interface GameData {
   readonly needSpots: Readonly<Record<NeedSpotId, NeedSpot>>;
   readonly needs: Readonly<Record<NeedId, Need>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
+  readonly quirks: Readonly<Record<QuirkId, Quirk>>;
   readonly runText: RunText;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;

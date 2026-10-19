@@ -145,7 +145,12 @@ export const ENCOUNTERS = {
         {
           art: "card-other-dog-sniff",
           effects: [
-            { amount: 1, kind: "hearts", target: { kind: "affected" } },
+            {
+              amount: 1,
+              kind: "hearts",
+              quirkAmounts: { nervous: -1 },
+              target: { kind: "affected" },
+            },
             { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
             { kind: "fulfilNeed", need: "playful" },
           ],
@@ -194,7 +199,12 @@ export const ENCOUNTERS = {
     resolution: {
       art: "card-photo-op-pose",
       effects: [
-        { amount: "photoOpTip", change: "gain", kind: "money" },
+        {
+          amount: "photoOpTip",
+          change: "gain",
+          kind: "money",
+          quirkMultipliers: { cameraReady: "cameraReadyTip" },
+        },
         { amount: 1, kind: "hearts", target: { kind: "temperament", temperament: "dramatic" } },
       ],
       kind: "instant",
@@ -204,6 +214,7 @@ export const ENCOUNTERS = {
     affects: { kind: "trait", trait: "foodDriven" },
     hitLabel: "SNACK ATTACK!",
     kind: "obstacle",
+    messy: true,
     name: "Picnic raid",
     resolution: {
       kind: "card",
@@ -228,6 +239,7 @@ export const ENCOUNTERS = {
     affects: { kind: "caught" },
     hitLabel: "SOAKED!",
     kind: "obstacle",
+    messy: true,
     name: "Puddle",
     resolution: {
       kind: "card",
@@ -308,7 +320,14 @@ export const ENCOUNTERS = {
         {
           art: "card-squirrel-chase",
           chase: true,
-          effects: [{ amount: "squirrelChase", change: "lose", kind: "money" }],
+          effects: [
+            {
+              amount: "squirrelChase",
+              change: "lose",
+              kind: "money",
+              quirkMultipliers: { ratter: "ratterChaseTips" },
+            },
+          ],
           name: "Let them chase",
         },
       ],
@@ -342,6 +361,7 @@ export const ENCOUNTERS = {
     affects: { kind: "all" },
     hitLabel: "TRASH DAY!",
     kind: "obstacle",
+    messy: true,
     name: "Trash day",
     resolution: {
       kind: "card",

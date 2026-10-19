@@ -88,6 +88,47 @@ describe("roster", () => {
     }
   });
 
+  it("gives every dog the quirk the rulebook names, each once", () => {
+    expect(Object.fromEntries(Object.entries(dogs).map(([id, dog]) => [id, dog.quirk]))).toEqual({
+      archie: "acrobatic",
+      biscuit: "scentHound",
+      duchess: "pampered",
+      koda: "sledDog",
+      nugget: "cameraReady",
+      penny: "nervous",
+      pierre: "showDog",
+      snowball: "crowdPleaser",
+      zippy: "ratter",
+    });
+  });
+
+  it("marks the puddle, trash day and picnic raid messy, and only them", () => {
+    const messy = Object.entries(encounters).flatMap(([id, encounter]) =>
+      encounter.messy === true ? [id] : [],
+    );
+    expect(messy.sort()).toEqual(["picnic", "puddle", "trash"]);
+  });
+
+  it("marks the stranger as the only stranger spot and the playmate as the only other dog", () => {
+    const marked = (key: "otherDog" | "stranger") =>
+      Object.entries(gameData.needSpots).flatMap(([id, spot]) => (spot[key] === true ? [id] : []));
+    expect(marked("stranger")).toEqual(["stranger"]);
+    expect(marked("otherDog")).toEqual(["playmate"]);
+  });
+
+  it("names and describes every quirk", () => {
+    for (const { description, name } of Object.values(gameData.quirks)) {
+      expect(name).not.toBe("");
+      expect(description).not.toBe("");
+    }
+  });
+
+  it("costs a nervous owner a heart when the Other dog sniffs, and gives others one", () => {
+    const { resolution } = encounters.otherDog;
+    const sniff = resolution.kind === "card" ? resolution.options[0].effects[0] : undefined;
+    expect(sniff).toMatchObject({ amount: 1, kind: "hearts", quirkAmounts: { nervous: -1 } });
+  });
+
   it("starts with 3 dogs covering every size and trait, with laid-back owners", () => {
     const starters = dogList.filter((dog) => dog.unlock === "start");
     expect(starters).toHaveLength(3);
@@ -452,7 +493,7 @@ describe("needs", () => {
       duchess: "friendly",
       koda: "nosy",
       nugget: "thirsty",
-      penny: "thirsty",
+      penny: "friendly",
       pierre: "nosy",
       snowball: "friendly",
       zippy: "playful",

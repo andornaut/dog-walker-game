@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
+import { ENCOUNTERS } from "../data/encounters";
 import type { DogId, Effect } from "../data/types";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
@@ -9,7 +10,7 @@ import { TEST_TUNING } from "../testing/tuning";
 import { applyEffects, type EffectContext, moneyCost, resolveEffects, targetDogs } from "./effects";
 import { cents } from "./units";
 
-const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING };
+const data = { debuffs: DEBUFFS, dogs: DOGS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
 const SKUNK_IGNORE: EffectSource = { encounter: "skunk", kind: "encounter", option: 2 };
 const context = (affected: readonly DogId[], random = () => 0): EffectContext => ({
   affected,
@@ -67,6 +68,25 @@ describe("applyEffects: hearts", () => {
   ])("applies %s", (_, affected, effect, slots, expected, modifiers = []) => {
     const state = testState(slots, { modifiers });
     expect(heartsByDog(applyEffects(data, context(affected), [effect], state))).toEqual(expected);
+  });
+
+  it("uses a quirk's own amount for dogs with that quirk, over their trait's", () => {
+    // Duchess, Fancy, made nervous here.
+    const nervous = {
+      ...data,
+      dogs: { ...DOGS, duchess: { ...DOGS.duchess, quirk: "nervous" } },
+    } as const;
+    const sniff: Effect = {
+      amount: 1,
+      kind: "hearts",
+      quirkAmounts: { nervous: -1 },
+      target: { kind: "affected" },
+      traitAmounts: { fancy: 2 },
+    };
+    const state = testState({ duchess: 5, koda: 5 });
+    expect(
+      heartsByDog(applyEffects(nervous, context(["duchess", "koda"]), [sniff], state)),
+    ).toEqual({ duchess: 4, koda: 6 });
   });
 });
 

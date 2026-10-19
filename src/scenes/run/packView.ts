@@ -1,10 +1,10 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
-import { traitIconKey } from "../../assets/iconKeys";
+import { GROWL_ICON_KEY, traitIconKey } from "../../assets/iconKeys";
 import { dogSpriteKey, NEED_ART } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
-import type { DogId, NeedId } from "../../data/types";
+import type { DogId, NeedId, QuirkId } from "../../data/types";
 import {
   COLLAR_HEIGHT,
   leashHand,
@@ -16,7 +16,7 @@ import { project } from "../../layout/projection";
 import { currentZone } from "../../rules/route";
 import { isSteeringLocked } from "../../runner/laneControl";
 import { laneMotionX } from "../../runner/laneMotion";
-import { isNeedUrgent } from "../../runner/needs";
+import { isNeedUrgent, isNervousAlone } from "../../runner/needs";
 import { pullPose, type Pulls, type PullTargetKind } from "../../runner/pulls";
 import type { DogStatusId } from "../../runner/statuses";
 import type { Walk } from "../../runner/walk";
@@ -73,6 +73,10 @@ export class PackView {
   private readonly leaving = new Set<DogId>();
   private readonly needSignals: NeedSignals;
   private pose: "idle" | "walk" = "walk";
+  // Dogs whose quirk pose is due on their next pose, and those whose quirk pose is playing
+  // through.
+  private readonly poseDue = new Set<DogId>();
+  private readonly posing = new Set<DogId>();
   private readonly scene: Scene;
   private readonly statusOverlays: StatusOverlays;
   // Whether the dizzy stars show, for as long as a stumble locks steering.
@@ -117,6 +121,7 @@ export class PackView {
     if (still) {
       return;
     }
+    this.posing.clear();
     const { walker } = this;
     playTagOnce(walker.sprite, walker.key, "stumble", () =>
       playTag(walker.sprite, walker.key, "walk"),
@@ -125,6 +130,11 @@ export class PackView {
       const key = dogSpriteKey(gameData, dog);
       playTagOnce(sprite, key, "react", () => playTag(sprite, key, "walk"));
     }
+  }
+
+  // The dogs whose quirk just acted play its pose on their next frame.
+  quirkActed(dogs: readonly DogId[]): void {
+    dogs.forEach((dog) => this.poseDue.add(dog));
   }
 
   showDizzy(): void {
@@ -216,7 +226,8 @@ export class PackView {
       const drawn = showAtDepth(sprite, dogSpriteKey(gameData, dog), PACK_DEPTH);
       const x = Math.round(placed.x);
       const dogFoot = Math.round(placed.y);
-      this.poseDog(dog, sprite, drawn.key, pose, frame, {
+      const alone = isNervousAlone(gameData, walk.run, dog);
+      this.poseDog(dog, sprite, drawn.key, { alone, pose }, frame, {
         x,
         y: dogFoot - Math.round(spriteMetrics(drawn.key).feetY * drawn.scale),
       });
@@ -273,11 +284,16 @@ export class PackView {
     this.needSignals.draw(signals, frame.still);
   }
 
-  // The icon of what a dog strains toward: its need's, the treat, or the chaser's.
+  // The icon of what a dog strains toward: its need's, the growl at another dog, the treat, or
+  // the chaser's.
   private signalIcon(dog: DogId, kind: PullTargetKind): IconArt {
     switch (kind) {
       case "need":
         return needIcon(this.scene, gameData.dogs[dog].need);
+      case "otherDog":
+        return this.scene.textures.exists(GROWL_ICON_KEY)
+          ? iconArt(this.scene, GROWL_ICON_KEY, "G")
+          : iconArt(this.scene, traitIconKey("chaser"), "G");
       case "squirrel":
         return iconArt(this.scene, traitIconKey("chaser"), "S");
       case "treat":
@@ -289,28 +305,64 @@ export class PackView {
 
   // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the
   // pack's pose; the bark pops over its head as the tell starts. The pack's pose holds still
-  // only while the walk is halted.
+  // only while the walk is halted. A quirk's pose stands in where the dog's art has it: the
+  // nervous lunge for the tell, worried for idle while she walks alone, and a quirk pose
+  // played through once when the quirk acts.
   private poseDog(
     dog: DogId,
     sprite: GameObjects.Sprite,
     key: string,
-    pose: string,
+    { alone, pose }: { alone: boolean; pose: string },
     frame: PackFrame,
     head: { x: number; y: number },
   ): void {
     const { halted, still } = frame;
     const pull = pullPose(gameData, frame.pulls, dog);
-    const tag = pull?.tag ?? pose;
+    if (this.poseDue.delete(dog) || pull?.quirkTag === "flourish") {
+      this.quirkPose(dog, sprite, key, still);
+    }
+    if (this.posing.has(dog)) {
+      return;
+    }
+    const base = pull?.tag ?? pose;
+    const quirkTag = pull?.quirkTag ?? (base === "idle" && alone ? "worried" : base);
+    const tag = firstTag(this.scene, key, [quirkTag]) ?? base;
     const shown = this.dogTags.get(dog);
     if (tag !== shown) {
       playTag(sprite, key, tag, pull === null ? still && halted : still);
       this.dogTags.set(dog, tag);
     }
-    if (tag === "tell" && shown !== "tell") {
+    if (base === "tell" && shown !== tag) {
       // WOOF! in motion; the plain bark with reduced motion or without the word art.
       const word = !still && firstTag(this.scene, "fx-bark-word", ["pop"]) !== undefined;
       playEffect(this.scene, word ? "fx-bark-word" : "fx-bark", "pop", head, DEPTH.fx);
     }
     sprite.setFlipX(pull?.direction === -1);
   }
+
+  // The dog's quirk pose plays through once, then the dog takes its pose again. Without the
+  // art, or with reduced motion, the dog keeps its pose instead.
+  private quirkPose(dog: DogId, sprite: GameObjects.Sprite, key: string, still: boolean): void {
+    const tag = QUIRK_POSES[gameData.dogs[dog].quirk];
+    const art = tag !== undefined && firstTag(this.scene, key, [tag]) !== undefined;
+    if (tag === undefined || !art || this.posing.has(dog) || still) {
+      return;
+    }
+    this.posing.add(dog);
+    this.dogTags.set(dog, tag);
+    playTagOnce(sprite, key, tag, () => {
+      this.posing.delete(dog);
+      this.dogTags.delete(dog);
+    });
+  }
 }
+
+// The road tag a dog plays through once as its quirk acts: an acrobatic dog's pull or
+// playmate, a camera-ready dog's photo op, a ratter's squirrel chase and a scent hound's tip
+// from beside the pack.
+const QUIRK_POSES: Readonly<Partial<Record<QuirkId, string>>> = {
+  acrobatic: "flourish",
+  cameraReady: "pose",
+  ratter: "pounce",
+  scentHound: "sniff",
+};

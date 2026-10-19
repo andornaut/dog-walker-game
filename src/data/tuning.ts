@@ -26,6 +26,8 @@ export const TUNING = {
     packSizeMax: 3,
     packSizeMin: 1,
     poopBagsSkipsPerRun: 1,
+    // A scent hound in the pack picks up tips this many lanes beside the pack.
+    scentHoundLanes: 1,
     squirrelDartLanesPerSecond: 4,
     tipsFirstZone: 52,
     tipsGainPerZone: 7,
@@ -42,6 +44,10 @@ export const TUNING = {
     luckyCollarMax: 1,
     luckyCollarStart: 1,
     maxBySize: { big: 10, medium: 8, small: 6 },
+    // A treat given to a pampered dog's owner, in place of treat.
+    pamperedTreatHearts: 2,
+    // How many more hearts a messy card costs a show dog's owner, wherever it costs them any.
+    showDogMessyHearts: 1,
     startByTemperament: { dramatic: 3, fussy: 2, laidBack: 3 },
     treat: 1,
   },
@@ -50,6 +56,8 @@ export const TUNING = {
     // A Regular dog's accident, cleaned up with a bag.
     accidentCleanUp: 5,
     chattyNeighbourTip: 25,
+    // The tip when a crowd pleaser's need is met.
+    crowdPleaserTip: 2,
     encounterHigh: 10,
     encounterLow: 5,
     fannyPackStart: 15,
@@ -71,6 +79,8 @@ export const TUNING = {
       runningShoes: 800,
       whistle: 600,
     },
+    // Added to a show dog's fee each zone, before fee modifiers.
+    showDogFee: 5,
     squirrelChase: 5,
     strangerTip: 10,
     sweetTalkerCostPerDog: -4,
@@ -81,18 +91,28 @@ export const TUNING = {
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
     bigTipperTip: 1.5,
+    // A photo op's tip while a camera-ready dog walks.
+    cameraReadyTip: 2,
+    // How much more often stranger spots are drawn while a crowd pleaser walks.
+    crowdPleaserStrangerWeight: 2,
     // A cyclist rides down its lane this much faster than the road scrolls; above 1.
     cyclistSpeedMultiplier: 1.6,
     goodLeashSquirrelPull: 0,
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
+    // A nervous dog's need fills this much faster while she is the only dog walking.
+    nervousAloneUrgency: 2,
     otherDogChangePerBigDog: -0.25,
     otherDogChangePerSmallDog: 0.25,
+    // The tips a squirrel chase drops when a ratter joins it.
+    ratterChaseTips: 0,
     runningShoesInputLock: 0,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     scrollSpeedGainPerZone: 0.15,
     shortcutFees: 0.75,
     shortcutZoneLength: 0.75,
+    // How much faster the pack changes lanes while a sled dog walks.
+    sledDogLaneSpeed: 1.15,
     stinkyTip: 0.5,
     // By the number of dogs in the pack.
     tipByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },

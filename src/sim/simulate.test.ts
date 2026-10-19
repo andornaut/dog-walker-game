@@ -120,7 +120,17 @@ describe("simulateRun", { timeout: 15_000 }, () => {
     expect(payable.filter((choice) => choice.cost === 0)).toEqual([]);
   });
 
-  it.each<PolicyId>(["heartsUnlessLow", "alwaysHearts", "alwaysPay"])(
+  it("pays for some payable choices and not others with the mixed policy, the same each seed", () => {
+    const mixed = () => runs(4, { hitRate: 0.2, pack: RISKY, policy: "mixed" });
+    const results = mixed();
+    const payable = results.flatMap((result) => result.choices).filter((choice) => choice.couldPay);
+
+    expect(mixed()).toEqual(results);
+    expect(payable.some((choice) => choice.cost > 0)).toBe(true);
+    expect(payable.some((choice) => choice.cost === 0)).toBe(true);
+  });
+
+  it.each<PolicyId>(["heartsUnlessLow", "alwaysHearts", "alwaysPay", "mixed"])(
     "opens no obstacle cards and no firings from hits at a zero hit rate (%s)",
     (policy) => {
       const results = runs(3, { hitRate: 0, pack: RISKY, policy });

@@ -9,6 +9,7 @@ import type {
   LiveTuning,
   Modifier,
   MoneyEffect,
+  QuirkId,
   Size,
   Stat,
   Target,
@@ -20,7 +21,7 @@ import { assertNever } from "./assertNever";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read, readTable } from "./units";
 
-export type TextData = Pick<GameData, "debuffs" | "encounters" | "needs" | "tuning">;
+export type TextData = Pick<GameData, "debuffs" | "encounters" | "needs" | "quirks" | "tuning">;
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
   big: "big",
@@ -103,22 +104,42 @@ function perDogText(data: Pick<GameData, "needs">, target: Target | undefined): 
   }
 }
 
+// A quirk multiplier in brackets: "×2 with a Camera ready dog", or "none with a Ratter dog"
+// for 0.
+function quirkMultiplierText(
+  data: Pick<GameData, "quirks" | "tuning">,
+  effect: MoneyEffect,
+): string {
+  const parts = Object.entries(effect.quirkMultipliers ?? {}).map(([quirk, key]) => {
+    const factor = read(data.tuning, "multipliers", key);
+    const { name } = data.quirks[quirk as QuirkId];
+    return factor === 0 ? `none with a ${name} dog` : `×${factor} with a ${name} dog`;
+  });
+  return parts.length === 0 ? "" : ` (${parts.join(", ")})`;
+}
+
 function moneyText(data: TextData, effect: MoneyEffect): string {
   const amount = read(data.tuning, "money", effect.amount);
   const signText = effect.change === "gain" ? "+" : MINUS;
-  return `${signText}${formatDollars(amount)}${perDogText(data, effect.perDog)}`;
+  const perDog = perDogText(data, effect.perDog);
+  return `${signText}${formatDollars(amount)}${perDog}${quirkMultiplierText(data, effect)}`;
 }
 
-function heartsText(data: Pick<GameData, "needs">, effect: HeartsEffect): string {
+function heartsText(data: Pick<GameData, "needs" | "quirks">, effect: HeartsEffect): string {
   const amount = `${sign(effect.amount)}${Math.abs(effect.amount)} ♥`;
   const target = effect.target;
+  const exception = (delta: number, name: string) => `${sign(delta)}${Math.abs(delta)} ${name}`;
   switch (target.kind) {
     case "affected":
     case "all": {
-      const exceptions = Object.entries(effect.traitAmounts ?? {}).map(
-        ([trait, traitAmount]) =>
-          `${sign(traitAmount)}${Math.abs(traitAmount)} ${TRAIT_NAMES[trait as TraitId]}`,
-      );
+      const exceptions = [
+        ...Object.entries(effect.traitAmounts ?? {}).map(([trait, delta]) =>
+          exception(delta, TRAIT_NAMES[trait as TraitId]),
+        ),
+        ...Object.entries(effect.quirkAmounts ?? {}).map(([quirk, delta]) =>
+          exception(delta, data.quirks[quirk as QuirkId].name),
+        ),
+      ];
       return exceptions.length === 0
         ? `${amount} each`
         : `${amount} each (${exceptions.join(", ")})`;
@@ -230,6 +251,8 @@ export type CardTextData = TextData & Pick<GameData, "dogs">;
 // money effect's total for the dogs it counts, after modifiers.
 export interface CardTextContext {
   readonly dogs: (target: Target) => readonly DogId[];
+  // The hearts the effect changes one dog's owner by, before the temperament multiplier.
+  readonly hearts: (effect: HeartsEffect, dog: DogId) => number;
   readonly money: (effect: MoneyEffect) => Cents;
 }
 
@@ -247,7 +270,7 @@ function cardHeartsText(
   for (const id of context.dogs(effect.target)) {
     const dog = data.dogs[id];
     const total =
-      (effect.traitAmounts?.[dog.trait] ?? effect.amount) *
+      context.hearts(effect, id) *
       readTable(data.tuning, "multipliers", "heartsByTemperament", dog.owner.temperament);
     groups.set(total, [...(groups.get(total) ?? []), dog.name]);
   }
@@ -269,7 +292,7 @@ function cardPhrase(
     case "hearts":
       return cardHeartsText(data, context, effect);
     case "money": {
-      if (effect.perDog === undefined) {
+      if (effect.perDog === undefined && effect.quirkMultipliers === undefined) {
         return moneyText(data, effect);
       }
       const total = context.money(effect);

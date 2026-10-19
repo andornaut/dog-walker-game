@@ -5,6 +5,7 @@ import type {
   HeartsEffect,
   MoneyEffect,
   NeedId,
+  QuirkId,
   Target,
   TreatsEffect,
 } from "../data/types";
@@ -24,7 +25,7 @@ import { lastingFor, longerLasting } from "./durations";
 import { statParts } from "./modifiers";
 import { type Cents, cents, clampHearts, nonNegativeCents, read, readTable } from "./units";
 
-export type RulesData = Pick<GameData, "debuffs" | "dogs" | "tuning">;
+export type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
 
 export interface EffectContext {
   // The dogs the encounter affected, such as those caught by an area roll.
@@ -107,8 +108,64 @@ interface MoneyParts {
   readonly base: number;
 }
 
-// Per-dog costs include costPerDog modifiers, never below $0 per dog.
+// Whether the effects come from a messy encounter's card.
+function isMessy(data: Pick<GameData, "encounters">, source: EffectSource): boolean {
+  return source.kind === "encounter" && data.encounters[source.encounter].messy === true;
+}
+
+// The first of the effect's quirk multipliers that an affected dog's quirk calls for.
+function quirkFactor(
+  data: RulesData,
+  context: Pick<EffectContext, "affected">,
+  effect: MoneyEffect,
+): { readonly factor: number; readonly quirk: QuirkId } | null {
+  for (const [quirk, key] of Object.entries(effect.quirkMultipliers ?? {})) {
+    if (context.affected.some((dog) => data.dogs[dog].quirk === quirk)) {
+      return { factor: read(data.tuning, "multipliers", key), quirk: quirk as QuirkId };
+    }
+  }
+  return null;
+}
+
+// The dogs among dogs whose quirk scales one of the money effects, such as a camera-ready
+// dog's photo op tip: the dogs whose quirk acts on them.
+export function quirkScaledDogs(
+  data: Pick<GameData, "dogs">,
+  effects: readonly Effect[],
+  dogs: readonly DogId[],
+): DogId[] {
+  return dogs.filter((dog) =>
+    effects.some(
+      (effect) =>
+        effect.kind === "money" && effect.quirkMultipliers?.[data.dogs[dog].quirk] !== undefined,
+    ),
+  );
+}
+
+// A quirk multiplier scales the amount, after any per-dog cost and its floor.
 function moneyParts(
+  data: RulesData,
+  context: Pick<EffectContext, "affected">,
+  state: RunState,
+  effect: MoneyEffect,
+): MoneyParts {
+  const parts = unscaledMoneyParts(data, context, state, effect);
+  const scaling = quirkFactor(data, context, effect);
+  if (scaling === null) {
+    return parts;
+  }
+  const amount = cents(parts.amount * scaling.factor);
+  const sign = effect.change === "gain" ? 1 : -1;
+  const quirk: Cause = {
+    amount: sign * (amount - parts.amount),
+    kind: "quirk",
+    quirk: scaling.quirk,
+  };
+  return { adjustments: [...parts.adjustments, quirk], amount, base: parts.base };
+}
+
+// Per-dog costs include costPerDog modifiers, never below $0 per dog.
+function unscaledMoneyParts(
   data: RulesData,
   context: Pick<EffectContext, "affected">,
   state: RunState,
@@ -162,12 +219,12 @@ export function moneyCost(
   );
 }
 
-// Changes one owner's meter by base, the base cause's amount: the owner's temperament
-// multiplies it, then the meter is held within 0 and the dog's max. No change is reported
-// when the meter does not move.
+// Changes one owner's meter by the sum of causes: the base cause, then any quirk's. The
+// owner's temperament multiplies it, then the meter is held within 0 and the dog's max. No
+// change is reported when the meter does not move.
 export function changeHearts(
   data: Pick<GameData, "dogs" | "tuning">,
-  base: Cause,
+  given: readonly [Cause, ...Cause[]],
   dogId: DogId,
   state: RunState,
 ): { readonly change: HeartChange | null; readonly state: RunState } {
@@ -177,16 +234,17 @@ export function changeHearts(
   }
   const dog = data.dogs[dogId];
   const { temperament } = dog.owner;
+  const total = given.reduce((sum, cause) => sum + cause.amount, 0);
   const multiplied =
-    base.amount * readTable(data.tuning, "multipliers", "heartsByTemperament", temperament);
+    total * readTable(data.tuning, "multipliers", "heartsByTemperament", temperament);
   const unclamped = before + multiplied;
   const after = clampHearts(maxHearts(data.tuning, state.modifiers, dog), unclamped);
   if (after === before) {
     return { change: null, state };
   }
-  const causes: Cause[] = [base];
-  if (multiplied !== base.amount) {
-    causes.push({ amount: multiplied - base.amount, kind: "temperament", temperament });
+  const causes: Cause[] = [...given];
+  if (multiplied !== total) {
+    causes.push({ amount: multiplied - total, kind: "temperament", temperament });
   }
   if (after !== unclamped) {
     causes.push({
@@ -205,6 +263,33 @@ export function changeHearts(
   };
 }
 
+// The causes of a hearts effect's change to one dog's owner, before the temperament
+// multiplier: the effect's amount (a quirk's own, else a trait's, else its own), then a show
+// dog's showDogMessyHearts on a messy card that costs him hearts.
+function heartsCauses(
+  data: RulesData,
+  source: EffectSource,
+  effect: HeartsEffect,
+  dogId: DogId,
+): readonly [Cause, ...Cause[]] {
+  const { quirk, trait } = data.dogs[dogId];
+  const amount = effect.quirkAmounts?.[quirk] ?? effect.traitAmounts?.[trait] ?? effect.amount;
+  const base: Cause = { amount, kind: "effect", source };
+  return amount < 0 && quirk === "showDog" && isMessy(data, source)
+    ? [base, { amount: -read(data.tuning, "hearts", "showDogMessyHearts"), kind: "quirk", quirk }]
+    : [base];
+}
+
+// The hearts a hearts effect changes one dog's owner by, before the temperament multiplier.
+export function heartsAmount(
+  data: RulesData,
+  source: EffectSource,
+  effect: HeartsEffect,
+  dogId: DogId,
+): number {
+  return heartsCauses(data, source, effect, dogId).reduce((sum, cause) => sum + cause.amount, 0);
+}
+
 function applyHearts(
   data: RulesData,
   context: EffectContext,
@@ -214,9 +299,8 @@ function applyHearts(
   const changes: HeartChange[] = [];
   let next = state;
   for (const dogId of targetDogs(data, context, state, effect.target)) {
-    const amount = effect.traitAmounts?.[data.dogs[dogId].trait] ?? effect.amount;
-    const base: Cause = { amount, kind: "effect", source: context.source };
-    const result = changeHearts(data, base, dogId, next);
+    const causes = heartsCauses(data, context.source, effect, dogId);
+    const result = changeHearts(data, causes, dogId, next);
     next = result.state;
     if (result.change !== null) {
       changes.push(result.change);

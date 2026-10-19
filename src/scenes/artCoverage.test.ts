@@ -7,7 +7,9 @@ import { animationKey, animationSpecs } from "../assets/asepriteAnimations";
 import { splitDepthKey, stepSize } from "../assets/depthSteps";
 import {
   energyIconKey,
+  GROWL_ICON_KEY,
   needIconKey,
+  quirkIconKey,
   statusIconKey,
   temperamentIconKey,
   traitIconKey,
@@ -42,6 +44,7 @@ import type {
   NeedCardId,
   NeedId,
   NeedSpotId,
+  QuirkId,
   Temperament,
   TraitId,
   UpgradeId,
@@ -147,6 +150,39 @@ describe("dog art", () => {
   });
 
   it.todo("names owner-<dog> with idle and wave through ownerSpriteKey, once return home lands");
+});
+
+describe("quirk art", () => {
+  // The road and face tags each quirk's dogs play, beyond every dog's own.
+  const ROAD_TAGS: Readonly<Partial<Record<QuirkId, readonly string[]>>> = {
+    acrobatic: ["flourish"],
+    cameraReady: ["pose"],
+    nervous: ["lunge", "worried"],
+    ratter: ["pounce"],
+    scentHound: ["sniff"],
+  };
+  const FACE_TAGS: Readonly<Partial<Record<QuirkId, readonly string[]>>> = {
+    nervous: ["worried"],
+  };
+
+  it("names each quirk's road and face tags for every dog with the quirk", () => {
+    const missing = DOGS.flatMap((dog) => {
+      const { quirk } = gameData.dogs[dog];
+      return [
+        ...missingTags(dogSpriteKey(gameData, dog), ROAD_TAGS[quirk] ?? []),
+        ...missingTags(dogFaceKey(gameData, dog), FACE_TAGS[quirk] ?? []),
+      ];
+    });
+    expect(missing).toEqual([]);
+  });
+
+  it("names the growl a nervous dog's bubble shows", () => {
+    expect(missingTags(GROWL_ICON_KEY, ["normal"])).toEqual([]);
+  });
+
+  it("names a quirk icon for every dog", () => {
+    expect(missingImages(DOGS.map((dog) => quirkIconKey(gameData, dog)))).toEqual([]);
+  });
 });
 
 describe("walker art", () => {

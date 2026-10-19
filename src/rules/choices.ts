@@ -25,7 +25,15 @@ import {
   type HeartChange,
   type MoneyChange,
 } from "./causes";
-import { type EffectContext, moneyAmount, moneyCost, resolveEffects, targetDogs } from "./effects";
+import {
+  type EffectContext,
+  heartsAmount,
+  moneyAmount,
+  moneyCost,
+  quirkScaledDogs,
+  resolveEffects,
+  targetDogs,
+} from "./effects";
 import { cardEffectText, type CardTextContext, sentenceList } from "./effectText";
 import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
@@ -341,11 +349,12 @@ function effectCard(
     source.kind === "encounter" &&
     data.encounters[source.encounter].kind === "obstacle" &&
     state.skipsLeft > 0;
-  const textContext: CardTextContext = {
-    dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
-    money: (effect) => moneyAmount(data, { affected }, state, effect),
-  };
   const views = options.map(({ option, source: effectSource }, index): OptionView => {
+    const textContext: CardTextContext = {
+      dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
+      hearts: (effect, dog) => heartsAmount(data, effectSource, effect, dog),
+      money: (effect) => moneyAmount(data, { affected }, state, effect),
+    };
     const cost = moneyCost(data, { affected }, state, option.effects);
     const preview = outcomeOf(
       data,
@@ -376,6 +385,16 @@ function effectCard(
     source,
     title,
   };
+}
+
+// The affected dogs whose quirk scales the chosen option's money, such as a ratter on a
+// squirrel chase; none for Skip or a fork's path.
+export function quirkActorsOf(data: ChoiceData, view: CardView, choice: Choice): DogId[] {
+  if (choice === "skip" || view.source.kind === "fork") {
+    return [];
+  }
+  const option = cardContent(data, view.source).options[choice]?.option;
+  return option === undefined ? [] : quirkScaledDogs(data, option.effects, view.affected);
 }
 
 // Drops the costliest option, the first one if several tie, keeping the others in order.
