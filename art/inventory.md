@@ -189,13 +189,6 @@ Total: 39 card illustrations, 29 of them in Milestone 6.
 | core     | ~13     | ~45              | 0     |
 | later    | ~1      | ~23              | 0     |
 
-## Settled
-
-- **People are 32×48:** the walker, the other dog's owner and the forced-stop characters stand over a tile and a half, so they read taller than the dogs.
-- **The leash is drawn in code:** a 1px line from hand to collar in a palette colour, so it follows the dogs without art.
-- **Faces are 32×32 for now:** the run screen mock's default. They fill only the top ~75px of each 192px slot, so 48×48 faces or a full-body dog stay an option when the style is refined.
-- **One illustration per option:** each card shows its own outcome. Encounters with two options show two centred cards.
-
 ## Open questions
 
 - **Pack arrangement:** 1 to 3 dogs share one 56px lane ahead of the walker. Side by side does not fit 3×32px, so they need a staggered formation; the art needs to know the offsets.
