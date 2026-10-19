@@ -41,18 +41,23 @@ reads on them.
   progress track, and the plain road below it (to y 450) leaves room for a
   status line.
 
-ui-pet-shop: a 120x104 sprite, tags normal and pressed: the pet shop on the
-yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
-(234,90), its base on the yard's bottom row (193), and its hit area is the
-frame. A board over the parapet, built and coloured as ui-button's go state
-(green face, yellow highlight, forest lip, ink line), carries PET SHOP in the
-sign letters' fills at 1x in ink, as the go label; under it a red and white awning, a
-display window with a food bag and a bone, and a door with a paw on its
-glass; dgreen siding lit on the left, forest on the right, ink outline all
-round, on a grey step. pressed dips as ui-button does: the front sinks 2px
-onto the step, rows 0 and 1 clear and the step 1px shallower, and the board
-loses its lip and highlight to face, as go-pressed. An affordable
-item in the shop takes ui-afford 2px outside the frame (232,88 124x108).
+ui-pet-shop: a 120x108 sprite, tags normal, pressed and glint: the pet shop on
+the yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
+(234,86), its base on the yard's bottom row (193), and its hit area is the
+frame. The PET SHOP board (BOARD, 3,0 114x22 in the frame, 237,86 on screen)
+spans the parapet, its bottom 2 rows over it, built and coloured as ui-button's
+go state (green face, yellow highlight, forest lip, ink line), with PET SHOP in
+the sign letters' shapes at 2x in ink, as the go label. Under it a red and
+white awning, a display window with a food bag and a bone, and a door with a
+paw on its glass; dgreen siding lit on the left, forest on the right, ink
+outline all round, on a grey step. pressed dips as ui-button does: the front
+sinks 2px onto the step, the step 1px shallower, and the board loses its lip
+and highlight to face, as go-pressed. glint is 7 frames at 60ms: a 6px light
+band sweeping up and across the raised board (GLINT_STEPS), then a clean
+frame; the game plays it every few seconds while idle, with a bob of at most
+2px, which keeps the board's top (86) clear of the street sign's plate (bottom
+row 82). An affordable item in the shop takes ui-afford 2px outside the frame
+(232,84 124x112).
 
 ui-loading-track: a 200x8 image, the dotted path the pair walks along, with a
 doghouse at the far end. The game draws it at TRACK_AT (80,357).
@@ -92,8 +97,14 @@ from ui import STATES  # noqa: E402
 W, H = 360, 560
 LOGO_W, LOGO_H = 128, 30
 LOGO_AT = (6, 146)
-PET_SHOP_W, PET_SHOP_H = 120, 104
-PET_SHOP_AT = (234, 90)
+PET_SHOP_W, PET_SHOP_H = 120, 108
+PET_SHOP_AT = (234, 86)
+# The PET SHOP board in the sprite: ui-button's go state 114x22, its bottom 2 rows over the parapet.
+# The building below it starts BOARD_RISE rows down.
+BOARD = (3, 0, 114, 22)
+BOARD_RISE = 4
+# ui-pet-shop's glint: the light band's left edge on the board in each frame, then a clean frame.
+GLINT_STEPS = (-6, 16, 38, 60, 82, 104)
 
 
 def dk(c):
@@ -359,10 +370,70 @@ BONE = ["..cc.......cc..", ".cccc.....cccc.", "ccccccccccccccc", "cccccccccccccc
 DOOR_PAW = [".#.#.", "#...#", ".###.", ".###."]
 
 
-def pet_shop(pressed=False):
-    """The shop front, PET_SHOP_W x PET_SHOP_H. Everything but the step is drawn top rows lower, so
-    pressed sinks the front 2px onto a step 1px shallower, as ui-button's face sinks into its lip."""
+def pet_shop(pressed=False, glint=None):
+    """The shop front, PET_SHOP_W x PET_SHOP_H: the building from BOARD_RISE down, under the board.
+    Everything but the step is drawn t rows lower, so pressed sinks the front 2px onto a step 1px
+    shallower, as ui-button's face sinks into its lip. glint, if given, is the left edge of the light
+    band swept across the board (glint_board)."""
     w, h = PET_SHOP_W, PET_SHOP_H
+    cv = clear(w, h)
+    building(cv, w, h - BOARD_RISE, pressed)
+    board(cv, pressed, glint)
+    return cv
+
+
+def board(cv, pressed, glint):
+    """The PET SHOP board at BOARD: ui-button's go state, a green face with a yellow top highlight on a
+    forest lip 4px deep, in an ink line with its corners cut, and PET SHOP in the sign letters' shapes at
+    2x, filled ink (8.41:1 on green) with no outline or shadow, as the go label. Raised, row 0 is ink,
+    row 1 the highlight, the face runs to row 16, the lip fills rows 17 to 20 and ink row 21; the caps
+    fill rows 4 to 13. Pressed, the lip and highlight give way to face, as go-pressed, and the board
+    rides down with the front: face and letters sink 2px."""
+    bx, by, bw, bh = BOARD
+    t = 2 if pressed else 0
+    face, lip, hi = STATES["go"]
+    cv.fill(bx + 1, by + t, bw - 2, bh, "ink")
+    cv.fill(bx, by + 1 + t, bw, bh - 2, "ink")
+    cv.fill(bx + 1, by + 1 + t, bw - 2, bh - 2, face)
+    if not pressed:
+        cv.fill(bx + 1, by + 1, bw - 2, 1, hi)
+        cv.fill(bx + 1, by + bh - 5, bw - 2, 4, lip)
+    letters, _ = fonts.sign("PET SHOP", 2)
+    caps = [(x, y) for (x, y), c in letters.items() if c not in ("ink", "dred")]
+    x0, y0 = min(x for x, _ in caps), min(y for _, y in caps)
+    lw = max(x for x, _ in caps) + 1 - x0
+    lx = bx + (bw - lw) // 2
+    for x, y in caps:
+        cv.fill(lx + x - x0, by + 4 + t + y - y0, 1, 1, "ink")
+    if glint is not None:
+        glint_board(cv, glint)
+
+
+def glint_board(cv, left):
+    """A light band slanting up to the right across the raised board, 6px wide: yellow edges and a
+    white middle on the face, white on the highlight row, green on the lip. The ink line and the
+    letters stay as they are."""
+    bx, by, bw, bh = BOARD
+    lit = {K[c]: c for c in ("green", "forest", "yellow")}
+    px = cv.img.load()
+    for y in range(by + 1, by + bh - 1):
+        for x in range(bx + 1, bx + bw - 1):
+            d = (x - bx) - left + (y - by) // 2
+            if not 0 <= d < 6:
+                continue
+            c = lit.get("%02x%02x%02x" % px[x, y][:3])
+            if c == "green":
+                cv.fill(x, y, 1, 1, "white" if 0 < d < 5 else "yellow")
+            elif c == "yellow":
+                cv.fill(x, y, 1, 1, "white")
+            elif c == "forest":
+                cv.fill(x, y, 1, 1, "green")
+
+
+def building(cv, w, h, pressed):
+    """The shop below the board, w x h from BOARD_RISE down: walls, parapet, awning, window, door and
+    step."""
+    full = cv
     cv = clear(w, h)
     t = 2 if pressed else 0
     # walls: dgreen siding in an ink line, lit green on the left, forest on the right
@@ -375,24 +446,6 @@ def pet_shop(pressed=False):
     # the parapet trim
     cv.fill(2, 16 + t, w - 4, 4, "ink")
     cv.fill(3, 17 + t, w - 6, 2, "cream")
-    # the board: ui-button's go state, a green face with a yellow top highlight on a forest lip 4px
-    # deep, in an ink line with its corners cut, and PET SHOP in the sign letters' fills at 1x in
-    # ink (8.41:1 on green), as the go label. Pressed, the lip and highlight give way to face, as
-    # go-pressed; the board rides down with the front, so its face and letters sink 2px.
-    letters, _ = fonts.sign("PET SHOP", 1)
-    x0 = min(x for x, _ in letters)
-    bw = fonts.sign_width("PET SHOP", 1) + 14
-    bx = (w - bw) // 2
-    face, lip, hi = STATES["go"]
-    cv.fill(bx + 1, t, bw - 2, 18, "ink")
-    cv.fill(bx, 1 + t, bw, 16, "ink")
-    cv.fill(bx + 1, 1 + t, bw - 2, 16, face)
-    if not pressed:
-        cv.fill(bx + 1, 1, bw - 2, 1, hi)
-        cv.fill(bx + 1, 13, bw - 2, 4, lip)
-    for (x, y), c in letters.items():
-        if c not in ("ink", "dred"):
-            cv.fill(bx + 7 - x0 + x, 4 + t + y, 1, 1, "ink")
     # the awning: red and white stripes 6px wide, shaded along the bottom, over a scalloped ink edge
     top, bot = 24 + t, 36 + t
     cv.fill(2, top - 1, w - 4, bot - top + 2, "ink")
@@ -446,7 +499,7 @@ def pet_shop(pressed=False):
     cv.fill(3, sy + 1, w - 6, h - sy - 2, "lgrey")
     if not pressed:
         cv.fill(3, h - 2, w - 6, 1, "grey")
-    return cv
+    full.img.alpha_composite(cv.img, (0, BOARD_RISE))
 
 
 def image_rows(img):
@@ -945,7 +998,8 @@ def sprite_image(px):
 
 def sprites():
     yield "ui-loading", [("walk", [pair(i) for i in range(4)], 160)]
-    yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000) for tag in ("normal", "pressed")]
+    yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000) for tag in ("normal", "pressed")] + [
+        ("glint", [image_rows(pet_shop(glint=g).img) for g in GLINT_STEPS] + [image_rows(pet_shop().img)], 60)]
 
 
 def ui(cv, key):

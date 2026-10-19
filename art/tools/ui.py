@@ -9,7 +9,8 @@ outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
-ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
+ui-detail-well (68x68); the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
+and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48),
 ui-touch-hint (96x36) and ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
@@ -1088,6 +1089,43 @@ def section(state):
     return g
 
 
+DENIM = 16
+STITCH_DASH, STITCH_GAP = 5, 3
+
+
+def denim():
+    """16x16 seamless tile: the Pocket section's jeans-pocket fill, repeated (TileSprite) over the
+    section's tile area. Blue twill: dslate diagonals rising to the right every 4px, and sparse slate
+    flecks of weft between them. Blue holds apart from the band's navy and the dogs section's wood,
+    and the tiles' ink edges hold on it."""
+    g = Grid(DENIM, DENIM)
+    g.rect(0, 0, DENIM, DENIM, "blue")
+    for y in range(DENIM):
+        for x in range(DENIM):
+            d = (x + y) % 4
+            if d == 0:
+                g.p(x, y, "dslate")
+            elif d == 2 and (x * 7 + y * 3) % 5 == 0:
+                g.p(x, y, "slate")
+    return g
+
+
+def stitch(horizontal):
+    """A seamless run of the Pocket's stitch line, repeated (TileSprite) along it: tan dashes
+    STITCH_DASH long with STITCH_GAP gaps, each on a 1px navy shadow below (ui-stitch-h, 8x2) or to
+    the right (ui-stitch-v, 2x8). Tiled from the line's start, the first dash sits at its start."""
+    n = STITCH_DASH + STITCH_GAP
+    g = Grid(n, 2) if horizontal else Grid(2, n)
+    for i in range(STITCH_DASH):
+        if horizontal:
+            g.p(i, 0, "tan")
+            g.p(i, 1, "navy")
+        else:
+            g.p(0, i, "tan")
+            g.p(1, i, "navy")
+    return g
+
+
 # ---------- run screen: top bar, zone progress, quips, zone banner, touch hint ----------
 
 def well(g, x, y, w, h):
@@ -1344,6 +1382,9 @@ IMAGES = {
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
     "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
     "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
+    "ui-denim": lambda: to_image(denim().outlined(False)),
+    "ui-stitch-h": lambda: to_image(stitch(True).outlined(False)),
+    "ui-stitch-v": lambda: to_image(stitch(False).outlined(False)),
 }
 
 

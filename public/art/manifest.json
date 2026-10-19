@@ -6257,6 +6257,10 @@
       "png": "images/ui-celebrate-burst.png"
     },
     {
+      "key": "ui-denim",
+      "png": "images/ui-denim.png"
+    },
+    {
       "key": "ui-detail-band",
       "png": "images/ui-detail-band.png"
     },
@@ -6307,6 +6311,14 @@
     {
       "key": "ui-quip-tail-up",
       "png": "images/ui-quip-tail-up.png"
+    },
+    {
+      "key": "ui-stitch-h",
+      "png": "images/ui-stitch-h.png"
+    },
+    {
+      "key": "ui-stitch-v",
+      "png": "images/ui-stitch-v.png"
     },
     {
       "key": "ui-strip-well",
