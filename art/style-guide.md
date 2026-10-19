@@ -23,7 +23,7 @@
 | Dog portraits                                             | 64×64                      |
 | Obstacle n lanes wide                                     | (56n−24)×24                |
 
-A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 88×24, hedge and `barrier-3` 144×24, the parked car 44×28 (1 lane by 3 rows of footprint), the two-lane ice cream truck 64×48 and construction 56×32 per lane.
+A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 88×24, hedge and `barrier-3` 144×24, the parked car 44×28 (1 lane by 3 rows of footprint), the two-lane ice cream truck 88×44 (a rear-view van) and construction 56×32 per lane. Ground decals (puddle 88×32, the skunk cloud 88×40) stay low so they read as lying on the road.
 
 ## Palette and outlines
 
@@ -194,19 +194,3 @@ Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the n
 - Soft chiptune: square and triangle waves through gentle low-pass filters, short envelopes, nothing harsh.
 - Hits and pickups under about 0.6s; `sfx-fired`, `sfx-badge` and `sfx-new-best` up to 2s; the walk loop at about 100 BPM.
 - Files: effects under 50kB, music under 1MB, peaks below −1 dBFS after encoding, silence at both ends.
-
-## Pipeline
-
-- `art/tools/<set>.py` draws every asset except the hand-drawn favicons: it writes the sources in `art/<set>/`, exports them and lists them in `public/art/manifest.json`. Run `python3 art/tools/<set>.py build` (or `preview OUT.png`) from the repository root.
-- A build overwrites the `.aseprite` files: change the script, not the sources.
-- Each script's docstring holds its assets' sizes, tags, timings and placement coordinates.
-
-### Naming
-
-- The kebab-case manifest key is the file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`, `public/art/images/<key>.png` or `public/art/fonts/<key>.png` and `.fnt`.
-- A key starts with its kind's prefix, as in `inventory.md` (`dog-`, `fx-`, `ui-`); road objects, moving hazards and `logo` use a plain name.
-- A depth variant appends `@75` or `@50` (`dog-koda@50`).
-
-### Consistency checks
-
-Before an asset goes in the game, check its export against the palette and opacity rule, the frame size in `inventory.md`, and the proportion and outline rules, in the `/art/` gallery on each zone's ground colour.
