@@ -4,7 +4,7 @@
 
 - **Platforms:** web, phone browser first. iOS and Android later by wrapping the web build (Capacitor).
 - **Engine:** Phaser 4 + TypeScript, built with Vite into static files.
-- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `gameplay/game-design.md`.
+- **Repo:** private GitHub repository `andornaut/dog-walker-game`.
 - **Hosting:** Cloudflare Workers static assets, no Worker script.
 - **Deploys:** Cloudflare Workers Builds deploys every push to `main`, independently of GitHub CI, so a commit with red CI still deploys.
 - **Tooling:** follows `andornaut/cloudflare-starter`: Node 24, Vitest, ESLint with the shared house rules, Prettier, markdownlint, husky + lint-staged, Dependabot, and the Test and AI attributions workflows.
@@ -61,10 +61,10 @@
 ## Save data
 
 - **Scope:** one profile per browser, local only, per origin.
-- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, earned achievements with the time each was earned, and the zone checkpoint (with the run's achievement counters), all referenced by data ids. Worlds finished is derived, not stored.
+- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, earned achievements with the time each was earned, and the zone checkpoint (with the run's achievement counters), all referenced by data ids.
 - **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
-- **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one. Version 2 renamed the dogs `dash` to `archie` and `waffles` to `penny`.
+- **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
 - **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter will replace it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
 - **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
 - **Achievements:** `src/rules/achievements.ts` judges each badge's conditions (a closed set of kinds with thresholds in the data) when a run is banked, on a purchase and on launch. Badges earned at run end celebrate on the end screen; those earned on launch or by a purchase celebrate over the home screen.
@@ -84,7 +84,7 @@
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A renamed dog id (`dash`, `waffles`) is warned about and replaced by its new one, in a URL and in a replayed log's setup. A URL with any run parameter (all but `dev`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
+`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A renamed dog id is warned about and replaced by its new one, in a URL and in a replayed log's setup. A URL with any run parameter (all but `dev`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
 
 | Param   | Value                           | Default         |
 | ------- | ------------------------------- | --------------- |
