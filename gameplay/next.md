@@ -8,6 +8,10 @@ The game grows sideways rather than upward. A world is a set of 4 zones with its
 
 ## Other ideas for later
 
+- Zone encounter mixes: each zone weights the existing obstacles and stops differently (Woof Way: puddles and the mail carrier; Bark Park: other dogs and squirrels; Sniff Street Shops: thieves and the ice cream truck; The Long Way Home: everything, busier)
+- Tip streak: each tip collected without a hit raises tip value a little; a hit resets it
+- Owner requests: each owner asks for one small thing per walk (e.g. Rosa: "keep Duchess dry"), shown on the dog's slot; meeting it pays a bonus and a happy quip
+- Walk of the day: each walk rolls one modifier shown before starting (e.g. rainy: more puddles, tips ×1.2; market day: more thieves and tips; quiet Sunday: fewer obstacles and tips)
 - Minigames as an alternative way to resolve encounters
 - Branching paths between zones: the player chooses the route
 - Permanent unlocks as in-run choices: pick a run boost or a permanent unlock, Hades-style
