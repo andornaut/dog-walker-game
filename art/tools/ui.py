@@ -497,10 +497,6 @@ ROOFS = {
 # The ridge and eave trim on a roof whose base alone would sit too close to another dog's.
 TRIMS = {"zippy": "red", "archie": "red", "penny": "blue"}
 
-# CLEANUP (added 2026-10-19): the game still keys Archie and Penny by their old ids; drop these tags
-# once src/data/dogs.ts uses archie and penny.
-OLD_KEYS = {"dash": "archie", "waffles": "penny"}
-
 # The 8x8 emblem on each gable, the dog's accessory: a letter is a colour, "." shows the vent behind.
 EMBLEMS = {
     "duchess": ({"P": "pink", "M": "mauve"}, [  # bow
@@ -1102,8 +1098,7 @@ IMAGES = {
 
 
 def sprites():
-    yield "ui-doghouse", ([(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS]
-                          + [(old, [doghouse(new).outlined(False)], 1000) for old, new in OLD_KEYS.items()])
+    yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS]
     warn = [doghouse_warn(i).outlined(False) for i in (0, 1, 2, 1)]
     yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]

@@ -78,22 +78,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 90 },
     "sourceSize": { "w": 120, "h": 90 },
     "duration": 1000
-   },
-   "ui-doghouse 10.aseprite": {
-    "frame": { "x": 1200, "y": 0, "w": 120, "h": 90 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 90 },
-    "sourceSize": { "w": 120, "h": 90 },
-    "duration": 1000
-   },
-   "ui-doghouse 11.aseprite": {
-    "frame": { "x": 1320, "y": 0, "w": 120, "h": 90 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 90 },
-    "sourceSize": { "w": 120, "h": 90 },
-    "duration": 1000
    }
  },
  "meta": {
@@ -101,7 +85,7 @@
   "version": "1.2.30-x64",
   "image": "ui-doghouse.png",
   "format": "RGBA8888",
-  "size": { "w": 1440, "h": 90 },
+  "size": { "w": 1200, "h": 90 },
   "scale": "1",
   "frameTags": [
    { "name": "duchess", "from": 0, "to": 0, "direction": "forward" },
@@ -113,9 +97,7 @@
    { "name": "snowball", "from": 6, "to": 6, "direction": "forward" },
    { "name": "penny", "from": 7, "to": 7, "direction": "forward" },
    { "name": "koda", "from": 8, "to": 8, "direction": "forward" },
-   { "name": "empty", "from": 9, "to": 9, "direction": "forward" },
-   { "name": "dash", "from": 10, "to": 10, "direction": "forward" },
-   { "name": "waffles", "from": 11, "to": 11, "direction": "forward" }
+   { "name": "empty", "from": 9, "to": 9, "direction": "forward" }
   ]
  }
 }

@@ -356,33 +356,6 @@
       }
     },
     {
-      "key": "dog-dash",
-      "png": "sprites/dog-dash.png",
-      "json": "sprites/dog-dash.json",
-      "anchor": {
-        "feetY": 30,
-        "opaqueWidth": 16
-      }
-    },
-    {
-      "key": "dog-dash@50",
-      "png": "sprites/dog-dash@50.png",
-      "json": "sprites/dog-dash@50.json",
-      "anchor": {
-        "feetY": 15,
-        "opaqueWidth": 9
-      }
-    },
-    {
-      "key": "dog-dash@75",
-      "png": "sprites/dog-dash@75.png",
-      "json": "sprites/dog-dash@75.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 12
-      }
-    },
-    {
       "key": "dog-duchess",
       "png": "sprites/dog-duchess.png",
       "json": "sprites/dog-duchess.json",
@@ -545,33 +518,6 @@
       }
     },
     {
-      "key": "dog-waffles",
-      "png": "sprites/dog-waffles.png",
-      "json": "sprites/dog-waffles.json",
-      "anchor": {
-        "feetY": 31,
-        "opaqueWidth": 20
-      }
-    },
-    {
-      "key": "dog-waffles@50",
-      "png": "sprites/dog-waffles@50.png",
-      "json": "sprites/dog-waffles@50.json",
-      "anchor": {
-        "feetY": 15,
-        "opaqueWidth": 11
-      }
-    },
-    {
-      "key": "dog-waffles@75",
-      "png": "sprites/dog-waffles@75.png",
-      "json": "sprites/dog-waffles@75.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 16
-      }
-    },
-    {
       "key": "dog-zippy",
       "png": "sprites/dog-zippy.png",
       "json": "sprites/dog-zippy.json",
@@ -609,11 +555,6 @@
       "json": "sprites/face-dog-biscuit.json"
     },
     {
-      "key": "face-dog-dash",
-      "png": "sprites/face-dog-dash.png",
-      "json": "sprites/face-dog-dash.json"
-    },
-    {
       "key": "face-dog-duchess",
       "png": "sprites/face-dog-duchess.png",
       "json": "sprites/face-dog-duchess.json"
@@ -644,11 +585,6 @@
       "json": "sprites/face-dog-snowball.json"
     },
     {
-      "key": "face-dog-waffles",
-      "png": "sprites/face-dog-waffles.png",
-      "json": "sprites/face-dog-waffles.json"
-    },
-    {
       "key": "face-dog-zippy",
       "png": "sprites/face-dog-zippy.png",
       "json": "sprites/face-dog-zippy.json"
@@ -662,11 +598,6 @@
       "key": "face-owner-biscuit",
       "png": "sprites/face-owner-biscuit.png",
       "json": "sprites/face-owner-biscuit.json"
-    },
-    {
-      "key": "face-owner-dash",
-      "png": "sprites/face-owner-dash.png",
-      "json": "sprites/face-owner-dash.json"
     },
     {
       "key": "face-owner-duchess",
@@ -697,11 +628,6 @@
       "key": "face-owner-snowball",
       "png": "sprites/face-owner-snowball.png",
       "json": "sprites/face-owner-snowball.json"
-    },
-    {
-      "key": "face-owner-waffles",
-      "png": "sprites/face-owner-waffles.png",
-      "json": "sprites/face-owner-waffles.json"
     },
     {
       "key": "face-owner-zippy",
@@ -1237,15 +1163,6 @@
       }
     },
     {
-      "key": "owner-dash",
-      "png": "sprites/owner-dash.png",
-      "json": "sprites/owner-dash.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 28
-      }
-    },
-    {
       "key": "owner-duchess",
       "png": "sprites/owner-duchess.png",
       "json": "sprites/owner-duchess.json",
@@ -1297,15 +1214,6 @@
       "anchor": {
         "feetY": 45,
         "opaqueWidth": 28
-      }
-    },
-    {
-      "key": "owner-waffles",
-      "png": "sprites/owner-waffles.png",
-      "json": "sprites/owner-waffles.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 26
       }
     },
     {
@@ -2378,10 +2286,6 @@
       "png": "images/portrait-dog-biscuit.png"
     },
     {
-      "key": "portrait-dog-dash",
-      "png": "images/portrait-dog-dash.png"
-    },
-    {
       "key": "portrait-dog-duchess",
       "png": "images/portrait-dog-duchess.png"
     },
@@ -2404,10 +2308,6 @@
     {
       "key": "portrait-dog-snowball",
       "png": "images/portrait-dog-snowball.png"
-    },
-    {
-      "key": "portrait-dog-waffles",
-      "png": "images/portrait-dog-waffles.png"
     },
     {
       "key": "portrait-dog-zippy",
