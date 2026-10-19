@@ -904,7 +904,7 @@ export class StartScene extends Scene {
     } else {
       root.add(frame);
     }
-    const lit = section.state === "complete";
+    const lit = section.state !== "incomplete";
     const y = rect.y + BAND_TEXT.y;
     this.text(
       root,
@@ -925,12 +925,12 @@ export class StartScene extends Scene {
     }
   }
 
-  // The ui-section art drawn in code while it is missing: complete is an ink outline round a
-  // gold frame and a lit amber band over an orange rule; otherwise an ink frame and rule
-  // round a navy band. The tiles' area is left open.
+  // The ui-section art drawn in code while it is missing: complete and neutral are an ink
+  // outline round a gold frame and a lit amber band over an orange rule; incomplete is an ink
+  // frame and rule round a navy band. The tiles' area is left open.
   private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
     const g = this.graphics(root);
-    const lit = state === "complete";
+    const lit = state !== "incomplete";
     const { band, edge } = SECTION_FRAME;
     drawRing(g, PALETTE.ink, rect, 1);
     const inner = { height: rect.height - 2, width: rect.width - 2, x: rect.x + 1, y: rect.y + 1 };
