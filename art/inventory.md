@@ -182,14 +182,14 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 ## UI kit
 
-| Asset      | Key               | Type   | Size      | Priority | Notes                                                                       |
-| ---------- | ----------------- | ------ | --------- | -------- | --------------------------------------------------------------------------- |
-| Pixel font | `font-pixel`      | font   | TBD       | M6       | Needs `$`, `♥`, `+`, `-`, digits, punctuation                               |
-| Button     | `ui-button`       | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                      |
-| Panel      | `ui-panel`        | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                 |
-| Pause icon | `icon-pause`      | image  | 16×16     | core     | Top bar; opens the pause menu                                               |
-| Touch hint | `ui-touch-hint`   | image  | TBD       | later    | First-run "tap left / right"                                                |
-| App icon   | (not in manifest) | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later |
+| Asset       | Key                       | Type   | Size      | Priority | Notes                                                                                                    |
+| ----------- | ------------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
+| Pixel fonts | `font-body`, `font-title` | font   | 8px       | M6       | Tiny5 (body, labels) and Silkscreen (titles, numbers); XML BMFont plus PNG; includes `$` and a drawn `♥` |
+| Button      | `ui-button`               | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                                                   |
+| Panel       | `ui-panel`                | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                                              |
+| Pause icon  | `icon-pause`              | image  | 16×16     | core     | Top bar; opens the pause menu                                                                            |
+| Touch hint  | `ui-touch-hint`           | image  | TBD       | later    | First-run "tap left / right"                                                                             |
+| App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later                              |
 
 ## Counts
 
