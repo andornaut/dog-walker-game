@@ -47,9 +47,9 @@ function placeholderSizes(): Map<string, Size> {
     [gameData.walkers[gameData.defaultWalker].spriteKey, box(32, 48, PALETTE.blue)],
   ]);
   for (const dog of Object.keys(gameData.dogs) as DogId[]) {
-    sizes.set(dogSpriteKey(dog), box(32, 32, PALETTE.slate));
-    sizes.set(dogFaceKey(dog), box(32, 32, PALETTE.slate));
-    sizes.set(ownerFaceKey(dog), box(32, 32, PALETTE.brown));
+    sizes.set(dogSpriteKey(gameData, dog), box(32, 32, PALETTE.slate));
+    sizes.set(dogFaceKey(gameData, dog), box(32, 32, PALETTE.slate));
+    sizes.set(ownerFaceKey(gameData, dog), box(32, 32, PALETTE.brown));
   }
   const tall: readonly EncounterId[] = ["biscuitNeighbour", "photoOp", "thief"];
   for (const encounter of Object.keys(gameData.encounters) as EncounterId[]) {

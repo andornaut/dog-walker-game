@@ -5,6 +5,8 @@ export interface RunSetupLimits<DogId extends string, GearId extends string> {
   readonly dogIds: readonly DogId[];
   readonly gearIds: readonly GearId[];
   readonly maxPackSize: number;
+  // Former dog ids and the id each one is now.
+  readonly renamedDogIds: ReadonlyMap<string, DogId>;
   readonly speed: { readonly max: number; readonly min: number };
   readonly zoneCount: number;
 }
@@ -23,7 +25,10 @@ export interface RunSetup<DogId extends string = string, GearId extends string =
   readonly zone: number;
 }
 
+// A warning is a value ignored; a notice is a value used after a change, such as a renamed
+// dog id replaced by its new one.
 export interface ParsedRunSetup<DogId extends string, GearId extends string> {
+  readonly notices: readonly string[];
   readonly setup: RunSetup<DogId, GearId>;
   readonly warnings: readonly string[];
 }
@@ -56,14 +61,16 @@ function wholeNumber(text: string): number | undefined {
   return DIGITS.test(text) ? Number(text) : undefined;
 }
 
-// Never throws: every unknown or invalid value becomes a warning and is ignored. newSeed is
-// called only when the URL has no valid seed.
+// Never throws: every unknown or invalid value becomes a warning and is ignored, and every
+// renamed dog id becomes a notice and is replaced. newSeed is called only when the URL has no
+// valid seed.
 export function parseRunSetup<DogId extends string, GearId extends string>(
   limits: RunSetupLimits<DogId, GearId>,
   newSeed: () => number,
   search: string,
 ): ParsedRunSetup<DogId, GearId> {
   const params = new URLSearchParams(search);
+  const notices: string[] = [];
   const warnings: string[] = [];
   const values = new Map<ParamName, string>();
   for (const name of new Set(params.keys())) {
@@ -92,7 +99,14 @@ export function parseRunSetup<DogId extends string, GearId extends string>(
       : invalid("seed", value, `an integer from 0 to ${MAX_SEED}`);
   });
   const pack = read("pack", (value) => {
-    const ids = value === "" ? [] : value.split(",");
+    const ids = (value === "" ? [] : value.split(",")).map((id) => {
+      const renamed = limits.renamedDogIds.get(id);
+      if (renamed === undefined) {
+        return id;
+      }
+      notices.push(`Dog "${id}" is now "${renamed}"; used "${renamed}"`);
+      return renamed;
+    });
     const known = ids.filter((id) => includes(limits.dogIds, id));
     if (known.length < ids.length) {
       const unknown = ids.filter((id) => !includes(limits.dogIds, id));
@@ -137,6 +151,7 @@ export function parseRunSetup<DogId extends string, GearId extends string>(
   });
 
   return {
+    notices,
     setup: {
       dev: dev ?? false,
       ...(gear === undefined ? {} : { gear }),

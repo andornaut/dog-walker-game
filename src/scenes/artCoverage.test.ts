@@ -90,12 +90,12 @@ const loadedScene = {
 describe("dog art", () => {
   it("names a road sprite with every pose, pull and hit tag for every dog", () => {
     const tags = ["idle", "walk", "react", ...PULL_TAGS];
-    expect(DOGS.flatMap((dog) => missingTags(dogSpriteKey(dog), tags))).toEqual([]);
+    expect(DOGS.flatMap((dog) => missingTags(dogSpriteKey(gameData, dog), tags))).toEqual([]);
   });
 
   it("names a hand-drawn depth variant at every step for every dog", () => {
     const missing = DOGS.flatMap((dog) =>
-      DEPTH_STEPS.map((step) => depthVariantKey(dogSpriteKey(dog), step) ?? "").filter(
+      DEPTH_STEPS.map((step) => depthVariantKey(dogSpriteKey(gameData, dog), step) ?? "").filter(
         (key) => !sprites.has(key),
       ),
     );
@@ -104,19 +104,19 @@ describe("dog art", () => {
 
   it("names a face with every mood for every dog, and its owner's with fired too", () => {
     const missing = DOGS.flatMap((dog) => [
-      ...missingTags(dogFaceKey(dog), MOODS),
-      ...missingTags(ownerFaceKey(dog), [...MOODS, "fired"]),
+      ...missingTags(dogFaceKey(gameData, dog), MOODS),
+      ...missingTags(ownerFaceKey(gameData, dog), [...MOODS, "fired"]),
     ]);
     expect(MOODS).toEqual(expect.arrayContaining(["happy", "neutral", "upset"]));
     expect(missing).toEqual([]);
   });
 
   it("names a portrait for every dog", () => {
-    expect(missingImages(DOGS.map(dogPortraitKey))).toEqual([]);
+    expect(missingImages(DOGS.map((dog) => dogPortraitKey(gameData, dog)))).toEqual([]);
   });
 
   it("names a doghouse roof for every dog and the empty house", () => {
-    const tags = [...DOGS.map(doghouseTag), doghouseTag(null)];
+    const tags = [...DOGS.map((dog) => doghouseTag(gameData, dog)), doghouseTag(gameData, null)];
     expect(missingTags("ui-doghouse", tags)).toEqual([]);
   });
 

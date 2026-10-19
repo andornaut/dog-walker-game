@@ -5,7 +5,7 @@ import type { RunCounters } from "../rules/achievements";
 import { cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 // The most dogs a run can take.
 export const MAX_RUN_DOGS = 3;

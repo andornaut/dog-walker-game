@@ -136,7 +136,8 @@ export function encodeInputLog(log: InputLog): string {
 }
 
 // Fails, rather than warning, on any setup value the current game data rejects: a replay
-// that starts from a different setup would not reproduce its run.
+// that starts from a different setup would not reproduce its run. A renamed dog id is the
+// same dog, so it is replaced rather than rejected.
 export function decodeInputLog<DogId extends string, GearId extends string>(
   limits: RunSetupLimits<DogId, GearId>,
   json: string,

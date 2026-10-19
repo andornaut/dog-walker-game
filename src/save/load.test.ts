@@ -5,7 +5,7 @@ import { gameData } from "../data";
 import { defined, present } from "../testing/defined";
 import { newPlayerSave, testContext, veteranSave } from "./fixtures";
 import { loadSave, saveContextFrom } from "./load";
-import { type SaveDocument, saveSchema } from "./schema";
+import { SAVE_VERSION, type SaveDocument, saveSchema } from "./schema";
 
 const stored = (document: unknown) => JSON.stringify(document);
 
@@ -163,7 +163,7 @@ describe("loadSave", () => {
       [
         "a loadout of four dogs",
         withChanges((document) => {
-          document.lastLoadout.dogs = ["koda", "biscuit", "duchess", "waffles"];
+          document.lastLoadout.dogs = ["koda", "biscuit", "duchess", "penny"];
         }),
       ],
       [
@@ -203,7 +203,7 @@ describe("loadSave", () => {
 
     it("says why a later version was rejected", () => {
       const raw = withChanges((document) => {
-        untyped(document).version = 2;
+        untyped(document).version = SAVE_VERSION + 1;
       });
       const result = loadSave(testContext, raw);
       expect(result.status === "corrupt" && result.reason).toMatch(/newer than this game/);
@@ -235,23 +235,23 @@ describe("loadSave", () => {
       const save = loaded((document) => {
         document.owned = {
           dogSlots: 2,
-          dogs: ["koda", "ghost", "waffles", "koda"],
+          dogs: ["koda", "ghost", "penny", "koda"],
           gear: ["whistle", "jetpack", "whistle"],
         };
       });
       expect(save.owned).toEqual({
         dogSlots: 2,
-        dogs: ["biscuit", "duchess", "koda", "waffles"],
+        dogs: ["biscuit", "duchess", "koda", "penny"],
         gear: ["whistle"],
       });
     });
 
     it("drops them from the loadout, along with picks the player does not own", () => {
       const save = loaded((document) => {
-        // dash is a known dog that this player has not bought.
-        document.lastLoadout = { dogs: ["ghost", "waffles", "dash"], gear: "luckyCollar" };
+        // archie is a known dog that this player has not bought.
+        document.lastLoadout = { dogs: ["ghost", "penny", "archie"], gear: "luckyCollar" };
       });
-      expect(save.lastLoadout).toEqual({ dogs: ["waffles"], gear: null });
+      expect(save.lastLoadout).toEqual({ dogs: ["penny"], gear: null });
     });
 
     it.each([
@@ -269,9 +269,9 @@ describe("loadSave", () => {
     it("trims the loadout to the clamped slots", () => {
       const save = loaded((document) => {
         document.owned.dogSlots = 0;
-        document.lastLoadout.dogs = ["waffles", "koda"];
+        document.lastLoadout.dogs = ["penny", "koda"];
       });
-      expect(save.lastLoadout.dogs).toEqual(["waffles"]);
+      expect(save.lastLoadout.dogs).toEqual(["penny"]);
     });
 
     it("leaves the loadout empty, keeping owned gear, when no loadout dog is left", () => {

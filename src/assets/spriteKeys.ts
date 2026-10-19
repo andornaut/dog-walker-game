@@ -45,17 +45,18 @@ export function encounterSpriteKey(encounter: EncounterId): string {
   return kebabCase(encounter);
 }
 
-export function dogSpriteKey(dog: DogId): string {
-  return `dog-${kebabCase(dog)}`;
+// Every dog-keyed art key names the dog by its art id, which can differ from its data id.
+export function dogSpriteKey(data: Pick<GameData, "dogs">, dog: DogId): string {
+  return `dog-${data.dogs[dog].art}`;
 }
 
-export function dogFaceKey(dog: DogId): string {
-  return `face-dog-${kebabCase(dog)}`;
+export function dogFaceKey(data: Pick<GameData, "dogs">, dog: DogId): string {
+  return `face-dog-${data.dogs[dog].art}`;
 }
 
 // A dog's 64x64 portrait, for the shop and its detail card.
-export function dogPortraitKey(dog: DogId): string {
-  return `portrait-dog-${kebabCase(dog)}`;
+export function dogPortraitKey(data: Pick<GameData, "dogs">, dog: DogId): string {
+  return `portrait-dog-${data.dogs[dog].art}`;
 }
 
 // An achievement's 32x32 badge, tagged earned and locked.
@@ -69,13 +70,13 @@ export function gearIconKey(gear: GearId): string {
 }
 
 // Owner faces are keyed by their dog.
-export function ownerFaceKey(dog: DogId): string {
-  return `face-owner-${kebabCase(dog)}`;
+export function ownerFaceKey(data: Pick<GameData, "dogs">, dog: DogId): string {
+  return `face-owner-${data.dogs[dog].art}`;
 }
 
 // The doghouse slot's tag: the dog's roof, or the grey empty house of a fired dog.
-export function doghouseTag(dog: DogId | null): string {
-  return dog === null ? "empty" : kebabCase(dog);
+export function doghouseTag(data: Pick<GameData, "dogs">, dog: DogId | null): string {
+  return dog === null ? "empty" : data.dogs[dog].art;
 }
 
 // Minor obstacles whose sprite key is not their id in kebab case.

@@ -1,7 +1,9 @@
 import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { veteranSave } from "./fixtures";
+import { loadSave, saveContextFrom } from "./load";
 import { migrateSave, type Migration, saveMigrations } from "./migrations";
 import { SAVE_VERSION, saveSchema } from "./schema";
 
@@ -33,7 +35,11 @@ const recordingStep = (from: number): Migration => ({
 
 describe("migrateSave", () => {
   it("upgrades a version 0 fixture to a document the current schema accepts", () => {
-    const result = migrateSave([versionZeroToOne], 1, versionZeroSave());
+    const result = migrateSave(
+      [versionZeroToOne, ...saveMigrations],
+      SAVE_VERSION,
+      versionZeroSave(),
+    );
     const parsed = v.safeParse(saveSchema, result.ok ? result.document : null);
     expect(parsed.success).toBe(true);
     expect(parsed.output).toEqual(veteranSave());
@@ -99,5 +105,83 @@ describe("saveMigrations", () => {
     const froms = saveMigrations.map((migration) => migration.from);
     const expected = froms.map((_, index) => SAVE_VERSION - froms.length + index);
     expect(froms).toEqual(expected);
+  });
+});
+
+// A save holding first and second in every field that holds a dog id.
+function saveWithDogs(first: string, second: string, version: number): Record<string, unknown> {
+  const save = veteranSave();
+  return {
+    ...save,
+    checkpoint: {
+      counters: null,
+      dogs: [
+        { fired: false, id: first, zonesFinished: 2 },
+        { fired: true, id: second, zonesFinished: 1 },
+      ],
+      earnedCents: 4_000,
+      zonesFinished: 2,
+    },
+    lastLoadout: { dogs: [first, second], gear: "whistle" },
+    owned: { ...save.owned, dogs: ["biscuit", first, "duchess", "koda", second] },
+    stats: {
+      ...save.stats,
+      bestWalk: { dogs: [first, second], earnedCents: 9_000, zonesFinished: 4 },
+      dogs: {
+        ...save.stats.dogs,
+        [first]: { timesFired: 1, walks: 3, zonesFinished: 7 },
+        [second]: { timesFired: 0, walks: 2, zonesFinished: 8 },
+      },
+      dogsFinishedWith: ["biscuit", first, second],
+      lastWalk: {
+        dogs: [first, "koda", second],
+        earnedCents: 2_500,
+        firings: [
+          { dog: first, zone: 2 },
+          { dog: "koda", zone: 2 },
+        ],
+        outcome: "wentHome",
+        zonesFinished: 2,
+      },
+    },
+    version,
+  };
+}
+
+describe("the version 1 to 2 migration", () => {
+  it("renames dash to archie and waffles to penny in every field that holds a dog id", () => {
+    expect(migrateSave(saveMigrations, 2, saveWithDogs("dash", "waffles", 1))).toEqual({
+      document: saveWithDogs("archie", "penny", 2),
+      ok: true,
+    });
+  });
+
+  it("loads an old save with both dogs owned and their stats kept", () => {
+    const result = loadSave(
+      saveContextFrom(gameData),
+      JSON.stringify(saveWithDogs("dash", "waffles", 1)),
+    );
+    expect(result.status).toBe("loaded");
+    const { checkpoint, lastLoadout, owned, stats } = result.save;
+    expect(owned.dogs).toEqual(expect.arrayContaining(["archie", "penny"]));
+    expect(lastLoadout.dogs).toEqual(["archie", "penny"]);
+    expect(checkpoint?.dogs.map(({ id }) => id)).toEqual(["archie", "penny"]);
+    expect(stats.dogs.archie).toEqual({ timesFired: 1, walks: 3, zonesFinished: 7 });
+    expect(stats.dogs.penny).toEqual({ timesFired: 0, walks: 2, zonesFinished: 8 });
+    expect(stats.dogsFinishedWith).toEqual(["biscuit", "archie", "penny"]);
+    expect(stats.bestWalk?.dogs).toEqual(["archie", "penny"]);
+    expect(stats.lastWalk?.dogs).toEqual(["archie", "koda", "penny"]);
+    expect(stats.lastWalk?.firings).toEqual([
+      { dog: "archie", zone: 2 },
+      { dog: "koda", zone: 2 },
+    ]);
+  });
+
+  it("leaves a field of the wrong shape for the schema to reject", () => {
+    const document = { owned: "dash", stats: { dogs: ["dash"], lastWalk: null }, version: 1 };
+    expect(migrateSave(saveMigrations, 2, document)).toEqual({
+      document: { ...document, version: 2 },
+      ok: true,
+    });
   });
 });

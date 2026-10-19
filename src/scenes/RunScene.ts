@@ -520,7 +520,7 @@ export class RunScene extends Scene {
     this.shadows = [];
     this.dogSprites = new Map(
       loadout.dogs.map((dog) => {
-        const key = dogSpriteKey(dog);
+        const key = dogSpriteKey(gameData, dog);
         const sprite = addStandingSprite(this, key, 0, 0);
         playTag(sprite, key, "walk");
         return [dog, sprite];
@@ -909,7 +909,7 @@ export class RunScene extends Scene {
       );
     }
     for (const [dog, sprite] of this.dogSprites) {
-      const key = dogSpriteKey(dog);
+      const key = dogSpriteKey(gameData, dog);
       playTagOnce(sprite, key, "react", () => playTag(sprite, key, "walk"));
     }
   }
@@ -1749,7 +1749,7 @@ export class RunScene extends Scene {
         distance: -placement.footDy,
         x: walkerX + placement.dx,
       });
-      const drawn = showAtDepth(sprite, dogSpriteKey(dog), PACK_DEPTH);
+      const drawn = showAtDepth(sprite, dogSpriteKey(gameData, dog), PACK_DEPTH);
       const x = Math.round(placed.x);
       const dogFoot = Math.round(placed.y);
       this.poseDog(dog, sprite, drawn.key, pose, still && halted, {
@@ -1757,7 +1757,7 @@ export class RunScene extends Scene {
         y: dogFoot - Math.round(spriteMetrics(drawn.key).feetY * drawn.scale),
       });
       sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
-      shadow(dogSpriteKey(dog), drawn.depth, x, dogFoot);
+      shadow(dogSpriteKey(gameData, dog), drawn.depth, x, dogFoot);
       if (redrawLeash) {
         const hand = leashHand(placement);
         drawPixelLine(

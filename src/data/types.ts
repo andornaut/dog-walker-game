@@ -122,6 +122,9 @@ export interface Owner {
 }
 
 export type Dog = Unlock & {
+  // The name in the dog's art keys: dog-<art> and its depth variants, face-dog-<art>,
+  // portrait-dog-<art>, face-owner-<art>, owner-<art> and the <art> tag of ui-doghouse.
+  readonly art: string;
   readonly breed: string;
   readonly energy: Energy;
   readonly look: string;

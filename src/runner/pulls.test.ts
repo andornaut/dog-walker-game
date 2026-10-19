@@ -331,13 +331,13 @@ describe("stepPulls holds", () => {
 
 describe("pullWalk", () => {
   it("is the lane change any dog-caused pull goes through, dropped during a hit stop", () => {
-    const walk = walkWith(["dash"]);
-    expect(pullWalk(data, 5, "dash", 1, walk).walk.road.control.target).toBe(3);
+    const walk = walkWith(["archie"]);
+    expect(pullWalk(data, 5, "archie", 1, walk).walk.road.control.target).toBe(3);
     const stopped: Walk = {
       ...walk,
       road: { ...walk.road, hitStop: { cards: [], seconds: 1, zoneEnded: false } },
     };
-    expect(pullWalk(data, 5, "dash", 1, stopped)).toEqual({ moved: false, walk: stopped });
+    expect(pullWalk(data, 5, "archie", 1, stopped)).toEqual({ moved: false, walk: stopped });
   });
 });
 

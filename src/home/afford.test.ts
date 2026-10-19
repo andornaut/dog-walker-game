@@ -19,8 +19,8 @@ const walk = (earned: number): LastWalk => ({
 
 describe("isAffordable", () => {
   it("holds for an item for sale at or under the bank", () => {
-    expect(isAffordable(data, owned, dollars(600), { dog: "dash", kind: "dog" })).toBe(true);
-    expect(isAffordable(data, owned, dollars(599), { dog: "dash", kind: "dog" })).toBe(false);
+    expect(isAffordable(data, owned, dollars(600), { dog: "archie", kind: "dog" })).toBe(true);
+    expect(isAffordable(data, owned, dollars(599), { dog: "archie", kind: "dog" })).toBe(false);
     expect(isAffordable(data, owned, dollars(800), { kind: "dogSlot" })).toBe(true);
   });
 

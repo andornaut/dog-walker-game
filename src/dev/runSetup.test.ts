@@ -14,6 +14,7 @@ const limits: RunSetupLimits<"bo" | "koda" | "rex" | "zip", "collar" | "shoes"> 
   dogIds: ["bo", "koda", "rex", "zip"],
   gearIds: ["collar", "shoes"],
   maxPackSize: 3,
+  renamedDogIds: new Map([["dash", "rex"]]),
   speed: { max: 10, min: 0.1 },
   zoneCount: 4,
 };
@@ -23,11 +24,12 @@ const defaults: RunSetup = { dev: false, seed: NEW_SEED, speed: 1, zone: 1 };
 
 describe("parseRunSetup", () => {
   it("uses a new seed and the defaults for an empty query", () => {
-    expect(parse("")).toEqual({ setup: defaults, warnings: [] });
+    expect(parse("")).toEqual({ notices: [], setup: defaults, warnings: [] });
   });
 
   it("reads every parameter, with or without a leading ?", () => {
     const expected = {
+      notices: [],
       setup: {
         dev: true,
         gear: "shoes",
@@ -62,11 +64,15 @@ describe("parseRunSetup", () => {
   });
 
   it("reads gear=none as walking with no gear", () => {
-    expect(parse("gear=none")).toEqual({ setup: { ...defaults, gear: null }, warnings: [] });
+    expect(parse("gear=none")).toEqual({
+      notices: [],
+      setup: { ...defaults, gear: null },
+      warnings: [],
+    });
   });
 
   it("reads dev=0 as off", () => {
-    expect(parse("dev=0")).toEqual({ setup: defaults, warnings: [] });
+    expect(parse("dev=0")).toEqual({ notices: [], setup: defaults, warnings: [] });
   });
 
   it.each([
@@ -99,6 +105,14 @@ describe("parseRunSetup", () => {
     expect(setup).toEqual(defaults);
     expect(warnings).toHaveLength(1);
     expect(warnings[0]).toContain(`Invalid ${name}`);
+  });
+
+  it("replaces a renamed dog id with its new one, with a notice", () => {
+    expect(parse("pack=koda,dash")).toEqual({
+      notices: ['Dog "dash" is now "rex"; used "rex"'],
+      setup: { ...defaults, pack: ["koda", "rex"] },
+      warnings: [],
+    });
   });
 
   it("names the unknown dogs in its warning", () => {
@@ -141,7 +155,7 @@ describe("runSetupToQuery", () => {
     { dev: false, money: 99, pack: ["rex", "bo", "koda"], seed: MAX_SEED, speed: 0.3, zone: 2 },
     { ...defaults, speed: 0.1 + 0.2 },
   ])("round-trips through parseRunSetup: %j", (setup) => {
-    expect(parse(runSetupToQuery(setup))).toEqual({ setup, warnings: [] });
+    expect(parse(runSetupToQuery(setup))).toEqual({ notices: [], setup, warnings: [] });
   });
 });
 

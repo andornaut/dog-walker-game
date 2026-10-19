@@ -198,7 +198,7 @@ export class EndScene extends Scene {
       if (celebrating && !line.fired) {
         addCheeringFace(this, reduced, line.dog, faceX, faceY);
       } else {
-        const key = ownerFaceKey(line.dog);
+        const key = ownerFaceKey(gameData, line.dog);
         const face = this.add.sprite(faceX, faceY, key).setOrigin(0);
         showTag(reduced, face, key, line.fired ? "fired" : "happy");
       }
@@ -256,7 +256,9 @@ export class EndScene extends Scene {
     const dogs = homecomers(walk);
     const owners = dogs.map((dog, i) => {
       const at = itemAt(scene.owners, i);
-      const sprite = addOwnerFigure(this, reduced, dog, { footY: at.y, x: at.x }, ["idle"]);
+      const sprite = addOwnerFigure(this, gameData, reduced, dog, { footY: at.y, x: at.x }, [
+        "idle",
+      ]);
       return { at, dog, sprite };
     });
 
@@ -269,7 +271,7 @@ export class EndScene extends Scene {
     const onPath = (x: number) => x >= scene.path.x && x < scene.path.x + scene.path.width;
     const sprites: { key: string; sprite: GameObjects.Sprite }[] = dogs.map((dog, i) => {
       const at = itemAt(scene.dogs, i);
-      const key = dogSpriteKey(dog);
+      const key = dogSpriteKey(gameData, dog);
       drawShadow(
         shadows,
         onPath(at.x) ? PALETTE.brown : PALETTE.darkGreen,
@@ -317,7 +319,7 @@ export class EndScene extends Scene {
           showTag(reduced, sprite, key, phase === "walking" ? "walk" : "idle");
         }
         for (const { dog, sprite } of owners) {
-          const body = ownerSpriteKey(dog);
+          const body = ownerSpriteKey(gameData, dog);
           const tag = firstTag(this, body, phase === "waving" ? ["wave", "idle"] : ["idle"]);
           if (sprite.texture.key === body && tag !== undefined) {
             showTag(reduced, sprite, body, tag);
@@ -325,7 +327,7 @@ export class EndScene extends Scene {
         }
       }
       for (const { at, dog, sprite } of owners) {
-        const faceOnly = sprite.texture.key !== ownerSpriteKey(dog);
+        const faceOnly = sprite.texture.key !== ownerSpriteKey(gameData, dog);
         sprite.setX(at.x + (faceOnly ? waveOffset(reduced, elapsed) : 0));
       }
     };

@@ -17,13 +17,13 @@ import type { Checkpoint } from "./schema";
 // finished 2 / noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit
 // 0 / 2 / 6.
 
-// After zone 2: koda and duchess walked both zones, waffles was fired in zone 2.
+// After zone 2: koda and duchess walked both zones, penny was fired in zone 2.
 const checkpoint: Checkpoint = {
   counters: quietCounters(),
   dogs: [
     { fired: false, id: "koda", zonesFinished: 2 },
     { fired: false, id: "duchess", zonesFinished: 2 },
-    { fired: true, id: "waffles", zonesFinished: 1 },
+    { fired: true, id: "penny", zonesFinished: 1 },
   ],
   earnedCents: cents(4_250),
   zonesFinished: 2,
@@ -77,16 +77,16 @@ describe("bankCheckpoint", () => {
       biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
       duchess: { timesFired: 0, walks: 1, zonesFinished: 2 },
       koda: { timesFired: 1, walks: 6, zonesFinished: 14 },
-      waffles: { timesFired: 1, walks: 1, zonesFinished: 1 },
+      penny: { timesFired: 1, walks: 1, zonesFinished: 1 },
     });
     expect(banked.stats.timesFired).toBe(2);
   });
 
   it("records the last walk with the zone that just ended", () => {
     expect(banked.stats.lastWalk).toEqual({
-      dogs: ["koda", "duchess", "waffles"],
+      dogs: ["koda", "duchess", "penny"],
       earnedCents: 4_250,
-      firings: [{ dog: "waffles", zone: 2 }],
+      firings: [{ dog: "penny", zone: 2 }],
       outcome: "wentHome",
       zonesFinished: 2,
     });
@@ -173,12 +173,12 @@ describe("achievements at banking", () => {
     const clean = runResult({
       dogs: [
         { fired: false, id: "koda", zonesFinished: 4 },
-        { fired: false, id: "waffles", zonesFinished: 4 },
+        { fired: false, id: "penny", zonesFinished: 4 },
       ],
     });
     const { stats } = recordRunEnd(testAwards, veteranSave(), clean);
     expect(stats.walksWithoutFiring).toBe(3);
-    expect(stats.dogsFinishedWith).toEqual(["biscuit", "koda", "waffles"]);
+    expect(stats.dogsFinishedWith).toEqual(["biscuit", "koda", "penny"]);
   });
 
   it("counts neither a walk with a firing nor one that ended early", () => {
@@ -188,7 +188,7 @@ describe("achievements at banking", () => {
     const home = recordRunEnd(
       testAwards,
       veteranSave(),
-      runResult({ dogs: [{ fired: false, id: "waffles", zonesFinished: 2 }], outcome: "wentHome" }),
+      runResult({ dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome" }),
     ).stats;
     expect(home.walksWithoutFiring).toBe(2);
     expect(home.dogsFinishedWith).toEqual(["biscuit"]);
@@ -198,7 +198,7 @@ describe("achievements at banking", () => {
     const counters = { ...quietCounters(), firstZone: 2 };
     const clean = runResult({
       counters,
-      dogs: [{ fired: false, id: "waffles", zonesFinished: 4 }],
+      dogs: [{ fired: false, id: "penny", zonesFinished: 4 }],
     });
     const save = recordRunEnd(testAwards, newPlayerSave, clean);
     expect(save.stats.walksWithoutFiring).toBe(0);

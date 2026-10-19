@@ -18,6 +18,7 @@ const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
   dogIds: ["bo", "koda"],
   gearIds: ["collar"],
   maxPackSize: 3,
+  renamedDogIds: new Map([["dash", "koda"]]),
   speed: { max: 10, min: 0.1 },
   zoneCount: 4,
 };
@@ -112,6 +113,11 @@ describe("encodeInputLog and decodeInputLog", () => {
   it("still decode a version 2 log, from before heading home was logged", () => {
     const json = encoded({ events: [[100, "t", 1]], version: 2 });
     expect(decodeOk(json).events).toEqual([{ kind: "treat", slot: 1, timeMs: 100 }]);
+  });
+
+  it("decode a renamed dog id in the setup as the dog it is now", () => {
+    const json = encoded({ events: [], setup: "seed=1&pack=bo,dash" });
+    expect(decodeOk(json).setup.pack).toEqual(["bo", "koda"]);
   });
 
   it.each([

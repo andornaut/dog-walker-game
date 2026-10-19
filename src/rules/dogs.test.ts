@@ -15,12 +15,12 @@ import { zoneStats } from "./zones";
 
 describe("dog stats", () => {
   it("derives start and max hearts, fee, pull interval, input lock and catch chance", () => {
-    const { duchess, waffles } = DOGS;
+    const { duchess, penny } = DOGS;
     expect(startHearts(TEST_TUNING, [], duchess)).toBe(6);
-    expect(maxHearts(TEST_TUNING, [], waffles)).toBe(10);
-    expect(zoneFee(TEST_TUNING, [], waffles)).toBe(1300);
-    expect(pullIntervalSeconds(TEST_TUNING, [], waffles)).toBe(60);
-    expect(inputLockSeconds(TEST_TUNING, [], waffles)).toBe(0.5);
+    expect(maxHearts(TEST_TUNING, [], penny)).toBe(10);
+    expect(zoneFee(TEST_TUNING, [], penny)).toBe(1300);
+    expect(pullIntervalSeconds(TEST_TUNING, [], penny)).toBe(60);
+    expect(inputLockSeconds(TEST_TUNING, [], penny)).toBe(0.5);
     expect(catchChance(TEST_TUNING, duchess)).toBe(0.25);
   });
 

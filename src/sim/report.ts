@@ -80,7 +80,7 @@ const PACKS: readonly NamedPack[] = [
   { dogs: ["koda"], name: "Koda" },
   { dogs: ["koda", "biscuit"], name: "Koda + Biscuit" },
   { dogs: ["duchess", "biscuit", "koda"], name: "Starters" },
-  { dogs: ["zippy", "dash", "snowball"], name: "Risky trio" },
+  { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
 ];
 
 export const SKILL_PLAYERS: readonly MatrixPlayer[] = SKILL_PRESET_IDS.map((preset) => ({

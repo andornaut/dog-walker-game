@@ -145,7 +145,7 @@ function zoneName(data: Pick<GameData, "world">, zone: number): string {
   return data.world.zones[zone - 1]?.name ?? data.world.name;
 }
 
-// Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Dash".
+// Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Archie".
 export function dogNames(data: Pick<GameData, "dogs">, dogs: readonly DogId[]): string {
   const names = dogs.map((dog) => data.dogs[dog].name);
   const last = names.pop();

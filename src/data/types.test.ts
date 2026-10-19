@@ -32,13 +32,13 @@ describe("types", () => {
   it("derives content ids from the data", () => {
     expectTypeOf<DogId>().toEqualTypeOf<
       | "biscuit"
-      | "dash"
+      | "archie"
       | "duchess"
       | "koda"
       | "nugget"
       | "pierre"
       | "snowball"
-      | "waffles"
+      | "penny"
       | "zippy"
     >();
     expectTypeOf<WalkerId>().toBeString();

@@ -113,7 +113,9 @@ function playPageUrl(): string {
 }
 
 function runSection(): HTMLElement {
-  const { setup, warnings: urlWarnings } = pageRunSetup();
+  const parsedUrl = pageRunSetup();
+  const { setup } = parsedUrl;
+  const urlWarnings = [...parsedUrl.warnings, ...parsedUrl.notices];
   const limits = runSetupLimitsFor(gameData);
   const initial = formFromSetup(setup);
 

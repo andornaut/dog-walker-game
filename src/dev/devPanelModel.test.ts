@@ -95,7 +95,7 @@ describe("checkRunForm", () => {
   it("warns with the parser's limits", () => {
     const { warnings } = checkRunForm(limits, {
       ...blankForm,
-      pack: ["koda", "duchess", "biscuit", "dash"],
+      pack: ["koda", "duchess", "biscuit", "archie"],
       seed: "4294967296",
       speed: "11",
       zone: "5",
@@ -150,7 +150,7 @@ describe("save edits", () => {
     expect(saveReadoutLines(gameData, addMoney(cents(100_000), veteranSave()))).toEqual([
       "bank $1,123.45",
       "slots 2 of 3",
-      "dogs 4 of 9: biscuit, duchess, koda, waffles",
+      "dogs 4 of 9: biscuit, duchess, koda, penny",
       "gear 2 of 5: fannyPack, whistle",
     ]);
     expect(
@@ -169,6 +169,13 @@ describe("planReplay", () => {
       stored: encodeInputLog(log),
       url: `${PLAY_URL}?seed=99&pack=koda&zone=2`,
     });
+  });
+
+  it("replays a log that names Dash and Waffles with Archie and Penny", () => {
+    const old = '{"version":3,"setup":"seed=5&pack=dash,waffles","events":[]}';
+    const plan = planReplay(limits, PLAY_URL, old);
+    expect(plan.ok && plan.url).toBe(`${PLAY_URL}?seed=5&pack=archie,penny`);
+    expect(plan.ok && plan.stored).toContain('"setup":"seed=5&pack=archie,penny"');
   });
 
   it("reports why a log does not decode", () => {

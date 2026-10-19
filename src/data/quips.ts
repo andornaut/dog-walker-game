@@ -4,17 +4,17 @@ import type { DogId, Quips } from "./types";
 // "happier" and "upset" follow a choice that raised or lowered their hearts; "fired" is at 0;
 // "parting" is when the player picks their dog on the home screen.
 export const QUIPS = {
+  archie: {
+    fired: ["A tragedy in one act. You're fired!", "Exit, pursued by my disapproval!"],
+    happier: ["Bravo! Bravo!", "A standing ovation for you!"],
+    parting: ["Bring him back in one piece, I beg you!", "Mind his bandana. It's vintage."],
+    upset: ["How could you?!", "I need to lie down on a chaise."],
+  },
   biscuit: {
     fired: ["No hard feelings, but you're fired.", "Last call, friend. You're fired."],
     happier: ["Nice! Biscuit's tail says it all.", "That's brewing nicely."],
     parting: ["He'll sniff every hedge. Let him.", "Snacks are in the left pocket."],
     upset: ["Eh, bit of a bitter one.", "Not my favourite blend, man."],
-  },
-  dash: {
-    fired: ["A tragedy in one act. You're fired!", "Exit, pursued by my disapproval!"],
-    happier: ["Bravo! Bravo!", "A standing ovation for you!"],
-    parting: ["Bring him back in one piece, I beg you!", "Mind his bandana. It's vintage."],
-    upset: ["How could you?!", "I need to lie down on a chaise."],
   },
   duchess: {
     fired: ["Time to repot, dear. You're fired.", "Duchess needs a gentler gardener."],
@@ -34,6 +34,12 @@ export const QUIPS = {
     parting: ["Get his good side. The followers are waiting!", "Tag me in everything."],
     upset: ["Not the content I wanted!", "I can't post this!"],
   },
+  penny: {
+    fired: ["That's the end of the appointment. Fired.", "You're fired. And please floss."],
+    happier: ["Very good. A clean result.", "Now that's a smile."],
+    parting: ["No sweets, please. Doctor's orders.", "She's due back by noon."],
+    upset: ["That was careless.", "I'll make a note in her chart."],
+  },
   pierre: {
     fired: ["Disqualified. You are fired.", "Pierre withdraws from your care."],
     happier: ["Acceptable. Barely.", "Seven out of ten."],
@@ -45,12 +51,6 @@ export const QUIPS = {
     happier: ["Picture perfect!", "Everything is going to plan!"],
     parting: ["Not a speck of mud. The whole day depends on it!", "She's the flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],
-  },
-  waffles: {
-    fired: ["That's the end of the appointment. Fired.", "You're fired. And please floss."],
-    happier: ["Very good. A clean result.", "Now that's a smile."],
-    parting: ["No sweets, please. Doctor's orders.", "She's due back by noon."],
-    upset: ["That was careless.", "I'll make a note in her chart."],
   },
   zippy: {
     fired: ["The numbers don't add up. You're fired.", "Your account is closed. Fired."],

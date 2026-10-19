@@ -9,7 +9,7 @@ import type { PolicyId } from "./policies";
 import { DEFAULT_RATES, type RunResult, type SimConfig, simulateRun } from "./simulate";
 
 const STARTERS: PackDogs = ["duchess", "biscuit", "koda"];
-const RISKY: PackDogs = ["zippy", "dash", "snowball"];
+const RISKY: PackDogs = ["zippy", "archie", "snowball"];
 
 // A config whose player hits and collects at fixed rates, the rates given with the rest.
 type Overrides = Partial<Omit<SimConfig, "player">> & {
@@ -155,13 +155,13 @@ describe("simulateRun", { timeout: 15_000 }, () => {
   });
 
   it("ends with no dogs when every owner has fired you", () => {
-    const ended = runs(3, { hitRate: 0.5, pack: ["dash"], policy: "alwaysHearts" }).filter(
+    const ended = runs(3, { hitRate: 0.5, pack: ["archie"], policy: "alwaysHearts" }).filter(
       (result) => !result.finished,
     );
 
     expect(ended.length).toBeGreaterThan(0);
     for (const result of ended) {
-      expect(result.firings.map((firing) => firing.dog)).toEqual(["dash"]);
+      expect(result.firings.map((firing) => firing.dog)).toEqual(["archie"]);
       expect(result.zonesCompleted).toBeLessThan(gameData.world.zones.length);
     }
   });

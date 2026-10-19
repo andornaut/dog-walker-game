@@ -4,7 +4,7 @@ import type { RunCounters } from "../rules/achievements";
 import { cents } from "../rules/units";
 import type { AwardContext } from "./achievements";
 import type { SaveContext } from "./load";
-import type { SaveDocument } from "./schema";
+import { SAVE_VERSION, type SaveDocument } from "./schema";
 
 export const testContext: SaveContext = {
   defaults: {
@@ -16,14 +16,14 @@ export const testContext: SaveContext = {
     achievements: new Set(["bigPayday", "firstSteps", "fullKennel", "squirrel"]),
     debuffs: new Set(["stinky"]),
     dogs: new Set([
+      "archie",
       "biscuit",
-      "dash",
       "duchess",
       "koda",
       "nugget",
+      "penny",
       "pierre",
       "snowball",
-      "waffles",
       "zippy",
     ]),
     gear: new Set(["fannyPack", "luckyCollar", "poopBags", "runningShoes", "whistle"]),
@@ -69,7 +69,7 @@ export const newPlayerSave: SaveDocument = {
     timesFired: 0,
     walksWithoutFiring: 0,
   },
-  version: 1,
+  version: SAVE_VERSION,
   walker: "casey",
 };
 
@@ -80,16 +80,16 @@ export function veteranSave(): SaveDocument {
     bankCents: cents(12_345),
     checkpoint: null,
     helpSeen: true,
-    lastLoadout: { dogs: ["koda", "waffles"], gear: "whistle" },
+    lastLoadout: { dogs: ["koda", "penny"], gear: "whistle" },
     owned: {
       dogSlots: 2,
-      dogs: ["biscuit", "duchess", "koda", "waffles"],
+      dogs: ["biscuit", "duchess", "koda", "penny"],
       gear: ["fannyPack", "whistle"],
     },
     settings: { musicVolume: 0.25, muted: true, reducedMotion: true, sfxVolume: 0.5 },
     shownHints: ["card", "tip"],
     stats: {
-      bestWalk: { dogs: ["koda", "waffles"], earnedCents: cents(9_000), zonesFinished: 4 },
+      bestWalk: { dogs: ["koda", "penny"], earnedCents: cents(9_000), zonesFinished: 4 },
       bestZoneFinished: 4,
       dogs: {
         biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
@@ -109,7 +109,7 @@ export function veteranSave(): SaveDocument {
       timesFired: 1,
       walksWithoutFiring: 2,
     },
-    version: 1,
+    version: SAVE_VERSION,
     walker: "ada",
   };
 }

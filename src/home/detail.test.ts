@@ -30,10 +30,10 @@ describe("dogDetail", () => {
   });
 
   it("counts zeros for a dog never walked, and shows a locked dog's price", () => {
-    const card = dogDetail(data, owned, dollars(100), noStats, "dash");
+    const card = dogDetail(data, owned, dollars(100), noStats, "archie");
     expect(card.lines).toContain("Walks 0 · Zones 0 · Fired 0");
     expect(card.status).toBe("Price $600, locked");
-    expect(dogDetail(data, owned, dollars(600), noStats, "dash").status).toBe(
+    expect(dogDetail(data, owned, dollars(600), noStats, "archie").status).toBe(
       "Price $600, tap to buy",
     );
   });

@@ -10,7 +10,7 @@ const data = { dogSlots: DOG_SLOTS, tuning: TEST_TUNING };
 describe("unlockPrice", () => {
   it("charges nothing for a starter and the price for a shop item", () => {
     expect(unlockPrice(TEST_TUNING, DOGS.koda)).toBe(0);
-    expect(unlockPrice(TEST_TUNING, DOGS.waffles)).toBe(TEST_TUNING.money.prices.lockedDog * 100);
+    expect(unlockPrice(TEST_TUNING, DOGS.penny)).toBe(TEST_TUNING.money.prices.lockedDog * 100);
   });
 });
 

@@ -237,7 +237,7 @@ export class HudFeedback {
   // The owner's fired face at 2x, else a framed box with their name.
   private addFace(dog: DogId, centre: Point): GameObjects.Container {
     const container = this.scene.add.container(centre.x, centre.y).setDepth(DEPTH);
-    const key = ownerFaceKey(dog);
+    const key = ownerFaceKey(gameData, dog);
     const size = FACE.size * FACE.scale;
     if (this.scene.textures.exists(key)) {
       const sprite = this.scene.add.sprite(0, 0, key).setScale(FACE.scale);
@@ -431,7 +431,7 @@ export class HudFeedback {
 
   // The owner's happy face over their window for a moment.
   private smile(dog: DogId, rect: Rect): void {
-    const key = ownerFaceKey(dog);
+    const key = ownerFaceKey(gameData, dog);
     if (!this.scene.anims.exists(animationKey(key, "happy"))) {
       return;
     }
@@ -502,7 +502,7 @@ export class HudFeedback {
         });
       }
     }
-    const face = ownerFaceKey(dog);
+    const face = ownerFaceKey(gameData, dog);
     if (this.scene.anims.exists(animationKey(face, "worried"))) {
       const { x, y } = DOGHOUSE.ownerFace;
       const worried = this.scene.add.sprite(rect.x + x, rect.y + y, face).setOrigin(0);

@@ -901,7 +901,7 @@ export class StartScene extends Scene {
         : gearDetail(gameData, save.owned, save.bankCents, this.loadout, target.gear);
     const picture: DetailPicture =
       target.kind === "dog"
-        ? { key: dogPortraitKey(target.dog), scale: 1 }
+        ? { key: dogPortraitKey(gameData, target.dog), scale: 1 }
         : { key: gearIconKey(target.gear), scale: 2 };
     const rect = drawDetailCard(this, layer, card, picture, target.kind);
     this.overlay = { ...overlay, rect };
@@ -1005,10 +1005,10 @@ export class StartScene extends Scene {
     // Owners first, then the dogs in front of them.
     for (const { at, dog } of waiting) {
       drawShadow(g, PALETTE.darkGreen, at.x, at.footY, 20);
-      root.add(addOwnerFigure(this, reduced, dog, at, ["idle"]));
+      root.add(addOwnerFigure(this, gameData, reduced, dog, at, ["idle"]));
     }
     for (const { at, dog } of waiting.filter(({ withDog }) => withDog)) {
-      const key = dogSpriteKey(dog);
+      const key = dogSpriteKey(gameData, dog);
       const x = at.x + PORCH_DOG_OFFSET.dx;
       const footY = at.footY + PORCH_DOG_OFFSET.footDy;
       drawShadow(g, PALETTE.darkGreen, x, footY, spriteMetrics(key).opaqueWidth);
@@ -1032,7 +1032,7 @@ export class StartScene extends Scene {
       atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
     const dogs = this.loadout.dogs.map((dog, i) => {
       const { dx, footDy } = itemAt(placements, i);
-      return { dog, dx, footY: footY + footDy, key: dogSpriteKey(dog) };
+      return { dog, dx, footY: footY + footDy, key: dogSpriteKey(gameData, dog) };
     });
     for (const { dx, footY: dogFoot, key } of dogs) {
       drawShadow(g, groundColor(x + dx), x + dx, dogFoot, spriteMetrics(key).opaqueWidth);
@@ -1174,8 +1174,8 @@ export class StartScene extends Scene {
         x: x + 3,
         y: y + 8,
       });
-      const face = this.add.sprite(x + 4, y + 9, dogFaceKey(id)).setOrigin(0);
-      showTag(reduced, face, dogFaceKey(id), isOwned ? "happy" : "neutral");
+      const face = this.add.sprite(x + 4, y + 9, dogFaceKey(gameData, id)).setOrigin(0);
+      showTag(reduced, face, dogFaceKey(gameData, id), isOwned ? "happy" : "neutral");
       content.add(face);
       view.face = { object: face, y: y + 9 };
 

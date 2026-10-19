@@ -141,7 +141,7 @@ export function addCheeringFace(
   x: number,
   y: number,
 ): GameObjects.Sprite {
-  const key = ownerFaceKey(dog);
+  const key = ownerFaceKey(gameData, dog);
   const face = scene.add.sprite(x, y, key).setOrigin(0);
   showTag(reduced, face, key, "happy");
   if (!reduced) {

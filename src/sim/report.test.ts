@@ -40,7 +40,7 @@ const SMALL: Matrix = {
   ...DEFAULT_MATRIX,
   packs: [
     { dogs: ["koda"], name: "Koda" },
-    { dogs: ["zippy", "dash", "snowball"], name: "Risky trio" },
+    { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
   ],
   players: [
     { hitRate: 0.06, kind: "rates" },

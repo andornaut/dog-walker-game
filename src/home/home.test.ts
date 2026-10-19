@@ -217,7 +217,7 @@ describe("logbookOf", () => {
   it("shows the best walk, totals and the last walk", () => {
     expect(logbookOf(data, veteranSave().stats)).toEqual({
       best: "$90",
-      bestNote: "4 zones with Koda and Waffles",
+      bestNote: "4 zones with Koda and Penny",
       last: "+$25. Jesse fired you on Bark Park.",
       totals: "Walks 5   Dogs walked 7   Fired 1",
     });

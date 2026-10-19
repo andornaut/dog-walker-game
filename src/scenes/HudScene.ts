@@ -391,7 +391,7 @@ export class HudScene extends Scene {
     const dog = gameData.dogs[slot.dog];
     const fired = slot.status === "fired";
     view.house.setVisible(true);
-    playTag(view.house, "ui-doghouse", doghouseTag(fired ? null : slot.dog));
+    playTag(view.house, "ui-doghouse", doghouseTag(gameData, fired ? null : slot.dog));
     if (!this.textures.exists("ui-doghouse")) {
       fillRect(g, fired ? PALETTE.lightGrey : PALETTE.tan, rect);
     }
@@ -412,8 +412,8 @@ export class HudScene extends Scene {
     }
     const hearts = slot.hearts;
     const mood = faceMood(gameData, hearts);
-    const ownerKey = ownerFaceKey(slot.dog);
-    const dogKey = dogFaceKey(slot.dog);
+    const ownerKey = ownerFaceKey(gameData, slot.dog);
+    const dogKey = dogFaceKey(gameData, slot.dog);
     playTag(view.ownerFace.setTexture(ownerKey).setVisible(true), ownerKey, mood);
     playTag(view.dogFace.setTexture(dogKey).setVisible(true), dogKey, mood);
     this.fitName(view.ownerName, dog.owner.name, DOGHOUSE.ownerName, view.anchors.ownerName);

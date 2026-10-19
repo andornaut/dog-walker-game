@@ -2,7 +2,25 @@ import type { Dog } from "./types";
 
 // The roster. Each size and trait pairs once; each energy and temperament appears three times.
 export const DOGS = {
+  archie: {
+    // CLEANUP (added 2026-10-19): switch to "archie" once art ships the renamed keys
+    art: "dash",
+    breed: "Australian Shepherd",
+    energy: "calm",
+    look: "Blue merle, one blue eye, red bandana",
+    name: "Archie",
+    owner: {
+      name: "Ophelia",
+      role: "stage actor",
+      temperament: "dramatic",
+    },
+    price: "lockedDog",
+    size: "medium",
+    trait: "chaser",
+    unlock: "shop",
+  },
   biscuit: {
+    art: "biscuit",
     breed: "Beagle",
     energy: "hyper",
     look: "Tricolour, floppy ears, green collar",
@@ -16,22 +34,8 @@ export const DOGS = {
     trait: "foodDriven",
     unlock: "start",
   },
-  dash: {
-    breed: "Whippet",
-    energy: "calm",
-    look: "Grey brindle, knit sweater",
-    name: "Dash",
-    owner: {
-      name: "Ophelia",
-      role: "stage actor",
-      temperament: "dramatic",
-    },
-    price: "lockedDog",
-    size: "medium",
-    trait: "chaser",
-    unlock: "shop",
-  },
   duchess: {
+    art: "duchess",
     breed: "Maltese",
     energy: "calm",
     look: "White coat, pink bow",
@@ -46,6 +50,7 @@ export const DOGS = {
     unlock: "start",
   },
   koda: {
+    art: "koda",
     breed: "Husky",
     energy: "steady",
     look: "Grey and white, blue eyes, harness",
@@ -60,6 +65,7 @@ export const DOGS = {
     unlock: "start",
   },
   nugget: {
+    art: "nugget",
     breed: "Pug",
     energy: "steady",
     look: "Fawn, black mask, tiny bandana",
@@ -74,7 +80,25 @@ export const DOGS = {
     trait: "foodDriven",
     unlock: "shop",
   },
+  penny: {
+    // CLEANUP (added 2026-10-19): switch to "penny" once art ships the renamed keys
+    art: "waffles",
+    breed: "Golden retriever",
+    energy: "calm",
+    look: "Golden coat, feathery tail, blue collar",
+    name: "Penny",
+    owner: {
+      name: "Dr. Hughes",
+      role: "dentist",
+      temperament: "fussy",
+    },
+    price: "lockedDog",
+    size: "big",
+    trait: "foodDriven",
+    unlock: "shop",
+  },
   pierre: {
+    art: "pierre",
     breed: "Standard poodle",
     energy: "steady",
     look: "Apricot, show-clip pom-poms",
@@ -90,6 +114,7 @@ export const DOGS = {
     unlock: "shop",
   },
   snowball: {
+    art: "snowball",
     breed: "Samoyed",
     energy: "hyper",
     look: "Fluffy white, collar with a bell",
@@ -104,22 +129,8 @@ export const DOGS = {
     trait: "fancy",
     unlock: "shop",
   },
-  waffles: {
-    breed: "Saint Bernard",
-    energy: "calm",
-    look: "Brown and white, little barrel collar",
-    name: "Waffles",
-    owner: {
-      name: "Dr. Hughes",
-      role: "dentist",
-      temperament: "fussy",
-    },
-    price: "lockedDog",
-    size: "big",
-    trait: "foodDriven",
-    unlock: "shop",
-  },
   zippy: {
+    art: "zippy",
     breed: "Jack Russell",
     energy: "hyper",
     look: "White with tan patches, red collar",

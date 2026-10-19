@@ -37,7 +37,7 @@ import {
 } from "./spriteKeys";
 
 const spriteKeys = new Set(manifest.sprites.map(({ key }) => key));
-const data = { encounters: ENCOUNTERS };
+const data = { dogs: DOGS, encounters: ENCOUNTERS };
 
 describe("kebabCase", () => {
   it("splits camelCase words with hyphens", () => {
@@ -115,7 +115,7 @@ describe("sprite keys", () => {
 
   it("name a road sprite, a face and an owner face in the manifest for every dog", () => {
     for (const dog of Object.keys(DOGS) as DogId[]) {
-      for (const key of [dogSpriteKey(dog), dogFaceKey(dog), ownerFaceKey(dog)]) {
+      for (const key of [dogSpriteKey(data, dog), dogFaceKey(data, dog), ownerFaceKey(data, dog)]) {
         expect(spriteKeys.has(key), key).toBe(true);
       }
     }
@@ -150,8 +150,16 @@ describe("sprite keys", () => {
   it("name a doghouse tag for every dog, and the empty house", () => {
     const sheet = manifest.sprites.find(({ key }) => key === "ui-doghouse");
     expect(sheet).toBeDefined();
-    expect(doghouseTag("koda")).toBe("koda");
-    expect(doghouseTag(null)).toBe("empty");
+    expect(doghouseTag(data, "koda")).toBe("koda");
+    expect(doghouseTag(data, null)).toBe("empty");
+  });
+
+  it("name a dog's art by its art id, not its data id", () => {
+    const renamed = { dogs: { ...DOGS, koda: { ...DOGS.koda, art: "kodiak" } } };
+    expect(dogSpriteKey(renamed, "koda")).toBe("dog-kodiak");
+    expect(dogFaceKey(renamed, "koda")).toBe("face-dog-kodiak");
+    expect(ownerFaceKey(renamed, "koda")).toBe("face-owner-kodiak");
+    expect(doghouseTag(renamed, "koda")).toBe("kodiak");
   });
 });
 

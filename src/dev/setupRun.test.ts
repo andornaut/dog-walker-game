@@ -14,7 +14,7 @@ describe("loadoutFor", () => {
     expect(loadoutFor(fallback, setup)).toEqual(fallback);
   });
 
-  it.each<readonly DogId[]>([["koda"], ["koda", "dash"], ["koda", "dash", "zippy"]])(
+  it.each<readonly DogId[]>([["koda"], ["koda", "archie"], ["koda", "archie", "zippy"]])(
     "takes a pack of %j from the setup",
     (...pack) => {
       expect(loadoutFor(fallback, { ...setup, pack }).dogs).toEqual(pack);
@@ -28,7 +28,7 @@ describe("loadoutFor", () => {
 
   it("keeps the fallback pack for a pack no run can take", () => {
     expect(loadoutFor(fallback, { ...setup, pack: [] }).dogs).toEqual(fallback.dogs);
-    const four: DogId[] = ["koda", "dash", "zippy", "waffles"];
+    const four: DogId[] = ["koda", "archie", "zippy", "penny"];
     expect(loadoutFor(fallback, { ...setup, pack: four }).dogs).toEqual(fallback.dogs);
   });
 });

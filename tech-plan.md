@@ -42,7 +42,7 @@
   - `src/crash/`: the crash screen
   - `src/scenes/`, `src/main.ts`: everything that touches Phaser
 - **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser, and only tests may import `src/testing/`. ESLint enforces both, so all game logic runs in unit tests without a renderer.
-- **Assets:** the art agent exports into `public/art/`. `public/art/manifest.json` lists `sprites` (PNG plus Aseprite hash JSON), `fonts` (XML BMFont), `images` and `sounds`, with paths relative to `public/art/`; Valibot validates it and the sprite JSON at boot. Keys are kebab-case and unique. Animation keys are `<texture>:<tag>`. Sprites anchor on the feet, and a missing key draws a placeholder box. Art rules live in `art/style-guide.md`.
+- **Assets:** the art agent exports into `public/art/`. `public/art/manifest.json` lists `sprites` (PNG plus Aseprite hash JSON), `fonts` (XML BMFont), `images` and `sounds`, with paths relative to `public/art/`; Valibot validates it and the sprite JSON at boot. Keys are kebab-case and unique. Dog-keyed art (`dog-<art>` and its depth variants, `face-dog-<art>`, `portrait-dog-<art>`, `face-owner-<art>`, `owner-<art>` and the `ui-doghouse` tag) names the dog by the `art` id in its data, so a renamed dog keeps its art until the art is renamed. Animation keys are `<texture>:<tag>`. Sprites anchor on the feet, and a missing key draws a placeholder box. Art rules live in `art/style-guide.md`.
 - **Tests:** Vitest over all pure logic; scenes are checked by playing and by headless screenshots.
 - **Simulator:** `src/sim/` plays whole runs on the real rules over a matrix of card policies (hearts unless an owner would drop to 1, always hearts, always pay), players and packs. A player is a steering bot of a skill preset (novice, typical, expert in `src/sim/skills.ts`: reaction delay, look-ahead, error rate, lane-change cooldown), which plays the pure walk loop (`stepWalk` with pulls, chases and movers, no renderer) and plans lane changes over what it has seen; its hit rates are measured. A `--hit` player instead hits each obstacle at a fixed rate, for comparison with older results. The walk is stepped from event to event (a contact, a lane move ending, a tell, a pull, a bot input) instead of every frame. `npm run simulate -- [--skill novice,typical,expert] [--hit 6,10,15] [--policy ...] [--runs 1000] [--seed 1] [--out rows.json]`; `--help` lists the columns. Results are deterministic per seed: the bot's errors draw from their own stream, and each zone's spawns from their own, as in the game. The Badges column counts the achievements a run earns on its own facts. Balance changes are compared before and after at the same seed.
 
@@ -63,7 +63,7 @@
 - **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, earned achievements with the time each was earned, and the zone checkpoint (with the run's achievement counters), all referenced by data ids. Worlds finished is derived, not stored.
 - **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
-- **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
+- **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one. Version 2 renamed the dogs `dash` to `archie` and `waffles` to `penny`.
 - **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter will replace it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
 - **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
 - **Achievements:** `src/rules/achievements.ts` judges each badge's conditions (a closed set of kinds with thresholds in the data) when a run is banked, on a purchase and on launch. Badges earned at run end celebrate on the end screen; those earned on launch or by a purchase celebrate over the home screen.
@@ -83,7 +83,7 @@
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A URL with any run parameter (all but `dev`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
+`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A renamed dog id (`dash`, `waffles`) is warned about and replaced by its new one, in a URL and in a replayed log's setup. A URL with any run parameter (all but `dev`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
 
 | Param   | Value                           | Default         |
 | ------- | ------------------------------- | --------------- |
