@@ -4,8 +4,8 @@ import type { Point } from "./rect";
 
 // The scenery gags in the backdrop band: a cat on a perch, a lawn sprinkler and a ball rolling
 // along a sidewalk. They have no collision and no effect. Positions are band pixels; the cat
-// and sprinkler are placed by the top-left corner of their sprites. The street recedes from
-// the band's bottom edge, and the gags sit on the near lawns either side of it.
+// and sprinkler are placed by the top-left corner of their sprites. The street runs up from
+// the band's bottom edge to a cross street, and the gags sit on the lawns either side of it.
 
 export const GAG_KEYS = { ball: "gag-ball", cat: "gag-cat", sprinkler: "gag-sprinkler" } as const;
 export const GAG_SIZES = {
@@ -18,15 +18,15 @@ export const GAG_SIZES = {
 // sprinkler stands on the near-right lawn, rows 120 to 149.
 export const GAG_Y = { cat: 110, sprinkler: 123 } as const;
 
-// The ball's feet, rolling up a near sidewalk from the band's bottom edge.
+// The ball's feet, rolling up the middle of a sidewalk from the band's bottom edge.
 export interface BallPath {
   readonly from: Point;
   readonly to: Point;
 }
 
 const BALL_PATHS: readonly BallPath[] = [
-  { from: { x: 136, y: 149 }, to: { x: 151, y: 122 } },
-  { from: { x: 304, y: 149 }, to: { x: 289, y: 122 } },
+  { from: { x: 136, y: 149 }, to: { x: 141, y: 122 } },
+  { from: { x: 304, y: 149 }, to: { x: 299, y: 122 } },
 ];
 // The ball's feet, from the top-left of its sprite.
 const BALL_FEET = { x: 7, y: 13 } as const;
