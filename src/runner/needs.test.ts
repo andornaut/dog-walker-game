@@ -79,10 +79,11 @@ describe("urgency", () => {
 
 describe("meetNeedAt", () => {
   it("meets the need of every dog that has it: a heart each, and starts it again", () => {
-    // Duchess and Snowball are Friendly; Snowball's dramatic owner doubles the heart.
+    // Duchess and Snowball are Friendly, and both urgent; Snowball's dramatic owner
+    // doubles the heart.
     const run = testState(
       { duchess: 3, koda: 3, snowball: 3 },
-      { needSeconds: { duchess: 50, koda: 50, snowball: 50 } },
+      { needSeconds: { duchess: 100, koda: 50, snowball: 100 } },
     );
     const met = meetNeedAt(data, plain, "stranger", run);
     expect(met.card).toBeNull();
@@ -96,11 +97,32 @@ describe("meetNeedAt", () => {
   });
 
   it("opens the need's payoff card instead, at the payoff chance", () => {
-    const run = testState({ biscuit: 3 }, { needSeconds: { biscuit: 50 } });
+    const run = testState({ biscuit: 3 }, { needSeconds: { biscuit: 45 } });
     const met = meetNeedAt(data, payoff, "tree", run);
     expect(met.card).toEqual({ affected: ["biscuit"], card: "goodSpot", kind: "need" });
     expect(heartsByDog(met.run)).toEqual({ biscuit: 3 });
     expect(met.run.needSeconds).toEqual({ biscuit: 0 });
+  });
+
+  it("starts a need that is not urgent again, with no heart and no draw", () => {
+    // Duchess is urgent at 100s, Snowball at 45s: only Snowball's owner gains.
+    const never = () => {
+      throw new Error("drew");
+    };
+    const calm = testState({ duchess: 3 }, { needSeconds: { duchess: 50 } });
+    expect(meetNeedAt(data, never, "stranger", calm)).toEqual({
+      card: null,
+      moment: null,
+      run: { ...calm, needSeconds: { duchess: 0 } },
+    });
+    const mixed = testState(
+      { duchess: 3, snowball: 3 },
+      { needSeconds: { duchess: 50, snowball: 45 } },
+    );
+    const met = meetNeedAt(data, plain, "stranger", mixed);
+    expect(heartsByDog(met.run)).toEqual({ duchess: 3, snowball: 5 });
+    expect(met.run.needSeconds).toEqual({ duchess: 0, snowball: 0 });
+    expect(met.moment).toMatchObject({ dogs: ["snowball"], kind: "met" });
   });
 
   it("does nothing, and draws nothing, at a spot no dog needs", () => {

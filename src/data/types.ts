@@ -248,23 +248,21 @@ export type Effect =
 
 export type EffectKind = Effect["kind"];
 
-// Next is the type of a next card's id: the need cards name theirs as strings, as their own
-// ids are not known while they are typed, and GameData checks them.
-export interface CardOption<Next extends string = NeedCardId> {
+export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
   readonly art: string;
+  // What its changes name as their cause, such as "grumpy neighbour"; the option's name when
+  // absent.
+  readonly cause?: string;
   // Picking it lets the chasers chase, which counts toward squirrelsChased.
   readonly chase?: true;
   readonly effects: readonly Effect[];
   readonly name: string;
-  // Picking it opens this card next, for the same dogs.
-  readonly next?: Next;
 }
 
 // Cards show two or three options side by side.
-export type CardOptions<Next extends string = NeedCardId> =
-  | readonly [CardOption<Next>, CardOption<Next>]
-  | readonly [CardOption<Next>, CardOption<Next>, CardOption<Next>];
+export type CardOptions =
+  readonly [CardOption, CardOption] | readonly [CardOption, CardOption, CardOption];
 
 export type NonEmptyEffects = readonly [Effect, ...Effect[]];
 
@@ -348,10 +346,10 @@ export interface NeedSpot {
 
 // A card a need opens: a payoff for meeting it, or trouble when it goes wrong. A {dog} in
 // the name is the names of the dogs it affects.
-export interface NeedCard<Next extends string = NeedCardId> {
+export interface NeedCard {
   readonly kind: "payoff" | "trouble";
   readonly name: string;
-  readonly options: CardOptions<Next>;
+  readonly options: CardOptions;
 }
 
 export interface Upgrade {

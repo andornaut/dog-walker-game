@@ -384,15 +384,17 @@ describe("need cards", () => {
     expect(card.affected).toEqual(["duchess", "snowball"]);
     const outcome = choose(state, need("strangerLoves", ["duchess", "snowball"]), 0);
     expect(heartsByDog(outcome.state)).toEqual({ duchess: 4, koda: 3, snowball: 5 });
-    expect(outcome.next).toBeNull();
   });
 
-  it("opens the grumpy neighbour after an accident's Walk on, for the same dog", () => {
+  it("names the grumpy neighbour as the cause of an accident's Walk on", () => {
     const state = testState({ biscuit: 5, koda: 5 }, { money: cents(10_000) });
+    const card = cardFor(data, state, need("accident", ["biscuit"]));
+    expect(card.options[1]?.breakdown).toEqual([
+      { dog: "biscuit", name: "grumpy neighbour", text: "−2 ♥" },
+    ]);
     const walkOn = choose(state, need("accident", ["biscuit"]), 1);
     expect(heartsByDog(walkOn.state)).toEqual({ biscuit: 3, koda: 5 });
-    expect(walkOn.next).toEqual({ affected: ["biscuit"], card: "grumpyNeighbour", kind: "need" });
-    expect(choose(state, need("accident", ["biscuit"]), 0).next).toBeNull();
+    expect(walkOn.quips).toEqual([{ dog: "biscuit", moment: "upset" }]);
   });
 
   it("meets Playful needs with Let them sniff, and Friendly ones with Of course!", () => {

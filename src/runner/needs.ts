@@ -74,9 +74,9 @@ export interface NeedStep {
   readonly urgent: readonly DogId[];
 }
 
-// The spot meets every walking dog with its need, which starts again from 0. They get the
-// need's met effects, or at probability.needPayoffCard its payoff card instead. A spot no
-// dog needs does nothing and draws nothing.
+// The spot meets every walking dog with its need, which starts again from 0. Those whose need
+// was urgent get the need's met effects, or at probability.needPayoffCard its payoff card
+// instead; the others get nothing more. Without an urgent need to meet, it draws nothing.
 export function meetNeedAt(
   data: NeedData,
   random: Random,
@@ -88,11 +88,16 @@ export function meetNeedAt(
   readonly run: RunState;
 } {
   const { need } = data.needSpots[spot];
-  const dogs = packDogs(run).filter((dog) => data.dogs[dog].need === need);
-  if (dogs.length === 0 || run.phase.kind === "ended") {
+  if (run.phase.kind === "ended") {
     return { card: null, moment: null, run };
   }
+  const dogs = packDogs(run).filter(
+    (dog) => data.dogs[dog].need === need && isNeedUrgent(data, run, dog),
+  );
   const met = fulfilNeed(data, need, run);
+  if (dogs.length === 0) {
+    return { card: null, moment: null, run: met };
+  }
   const { met: effects, payoff } = data.needs[need];
   if (chance(random, read(data.tuning, "probability", "needPayoffCard"))) {
     return {

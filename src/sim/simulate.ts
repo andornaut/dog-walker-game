@@ -260,9 +260,6 @@ function playCard(
   });
   recordFirings(session, run, outcome);
   session.run = outcome.state;
-  if (outcome.next !== null && outcome.next.kind !== "upgradeOffer") {
-    playCard(data, random, config, session, cardFrom(data, outcome.next), outcome.next);
-  }
 }
 
 // The pack meets an encounter: nothing happens unless it affects a dog, and an instant lucky
@@ -406,7 +403,7 @@ function streamsFrom(random: Random): Streams {
 }
 
 // Needs met or gone wrong: their outcomes' firings are recorded, and their cards are played
-// in order, each followed by any card it opens next.
+// in order.
 function playNeedOutcomes(
   data: SimData,
   random: Random,

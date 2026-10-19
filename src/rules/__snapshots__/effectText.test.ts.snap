@@ -45,8 +45,6 @@ exports[`every card's text > matches the snapshot 1`] = `
     "accident: Walk on": "−2 ♥ each",
     "goodSpot: Keep walking": "Nothing",
     "goodSpot: Take your time": "+2 ♥ each, −$10 per dog",
-    "grumpyNeighbour: Apologise": "−$10",
-    "grumpyNeighbour: Ignore them": "−1 ♥ each",
     "peeMail: Keep walking": "Nothing",
     "peeMail: Read it all": "+2 ♥ each, −$10 per dog",
     "playDate: Just a sniff": "+1 ♥ to Playful owners",

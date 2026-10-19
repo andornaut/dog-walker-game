@@ -1,4 +1,4 @@
-import type { DogId, GameData, Temperament } from "../data/types";
+import type { CardOption, DogId, GameData, Temperament } from "../data/types";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
 import { assertNever } from "./assertNever";
 import { formatDollars, TEMPERAMENT_NAMES } from "./effectText";
@@ -72,22 +72,29 @@ export function changeAmount(change: Change): number {
   return change.kind === "hearts" ? change.after - change.before : change.amount;
 }
 
+// A card option names its changes by its cause, or else its name.
+function optionCause(option: CardOption | undefined): string | undefined {
+  return option?.cause ?? option?.name;
+}
+
 function effectSourceName(data: CauseData, source: ModifierSource): string {
   switch (source.kind) {
     case "debuff":
       return data.debuffs[source.debuff].name;
     case "encounter": {
       const { name, resolution } = data.encounters[source.encounter];
-      return resolution.kind === "card" ? (resolution.options[source.option]?.name ?? name) : name;
+      return resolution.kind === "card"
+        ? (optionCause(resolution.options[source.option]) ?? name)
+        : name;
     }
     case "forcedStop":
-      return data.forcedStops[source.stop].options[source.option]?.name ?? "";
+      return optionCause(data.forcedStops[source.stop].options[source.option]) ?? "";
     case "gear":
       return data.shopGear[source.gear].name;
     case "instant":
       return data.encounters[source.encounter].name;
     case "needCard":
-      return data.needCards[source.card].options[source.option]?.name ?? "";
+      return optionCause(data.needCards[source.card].options[source.option]) ?? "";
     case "needGoneWrong":
       return "need ignored";
     case "needMet":

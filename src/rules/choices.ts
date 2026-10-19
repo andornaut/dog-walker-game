@@ -94,8 +94,6 @@ export interface ChoiceOutcome {
   readonly moneyChanges: readonly MoneyChange[];
   // The total of moneyChanges.
   readonly moneyDelta: Cents;
-  // The card the choice opens next, for the same dogs.
-  readonly next: CardSource | null;
   readonly quips: readonly QuipCue[];
   readonly state: RunState;
   readonly treatsDelta: number;
@@ -219,7 +217,6 @@ function outcomeOf(
     heartChanges: applied.changes.filter(isHearts),
     moneyChanges: [...applied.changes.filter(isMoney), ...firing.changes],
     moneyDelta: cents(next.money - state.money),
-    next: null,
     quips,
     state: next,
     treatsDelta: next.treats - state.treats,
@@ -346,7 +343,6 @@ export function chooseOption(
       heartChanges: [],
       moneyChanges: [],
       moneyDelta: cents(0),
-      next: null,
       quips: [],
       state: skipped,
       treatsDelta: 0,
@@ -368,15 +364,7 @@ export function chooseOption(
     state,
     upgrade,
   );
-  const { next } = content.option;
-  return {
-    ...outcome,
-    next:
-      next === undefined || outcome.state.phase.kind === "ended"
-        ? null
-        : { affected: view.affected, card: next, kind: "need" },
-    state: countChase(content.option, outcome.state),
-  };
+  return { ...outcome, state: countChase(content.option, outcome.state) };
 }
 
 // Applies effects that open no card, such as a need met or gone wrong, to the dogs given,

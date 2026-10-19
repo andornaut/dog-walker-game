@@ -4,7 +4,7 @@ import { inputLockSeconds } from "../rules/dogs";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
 import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
-import { needFill, needSpotOf } from "../runner/needs";
+import { isNeedUrgent, needFill, needSpotOf } from "../runner/needs";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
@@ -69,8 +69,8 @@ const MARGIN_SECONDS = 1e-4;
 const GRID_SECONDS = 0.1;
 
 const PRIZE_VALUES = { lucky: 1, tip: 1, treat: 1 } as const;
-// A need spot is worth NEED_SPOT_VALUE for each dog whose need it meets, and up to
-// NEED_URGENCY_VALUE more as that dog's need fills toward urgent and past it.
+// A need spot is worth NEED_SPOT_VALUE for each dog whose urgent need it meets, and up to half
+// of NEED_URGENCY_VALUE more as that need runs on toward going wrong.
 const NEED_SPOT_VALUE = 1;
 const NEED_URGENCY_VALUE = 3;
 
@@ -342,8 +342,8 @@ function botView(
   return { hazards, prizes, pulls: seenPulls };
 }
 
-// What steering into a need spot is worth to the bot: more for each dog it meets the need of,
-// and more the fuller each need is.
+// What steering into a need spot is worth to the bot: only a dog whose need is urgent gains
+// from it, more the longer that need has been urgent.
 function needSpotValue(data: WalkData, walk: Walk, item: WalkItem): number {
   const spot = needSpotOf(data, item.kind);
   if (spot === null) {
@@ -351,7 +351,7 @@ function needSpotValue(data: WalkData, walk: Walk, item: WalkItem): number {
   }
   const { need } = data.needSpots[spot];
   return packDogs(walk.run)
-    .filter((dog) => data.dogs[dog].need === need)
+    .filter((dog) => data.dogs[dog].need === need && isNeedUrgent(data, walk.run, dog))
     .reduce(
       (value, dog) =>
         value + NEED_SPOT_VALUE + NEED_URGENCY_VALUE * Math.min(1.5, needFill(data, walk.run, dog)),

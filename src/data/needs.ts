@@ -71,9 +71,9 @@ export const NEED_CARDS = {
       },
       {
         art: "card-accident-walk-on",
+        cause: "grumpy neighbour",
         effects: [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
         name: "Walk on",
-        next: "grumpyNeighbour",
       },
     ],
   },
@@ -90,22 +90,6 @@ export const NEED_CARDS = {
         name: "Take your time",
       },
       { art: "card-good-spot-keep-walking", effects: [], name: "Keep walking" },
-    ],
-  },
-  grumpyNeighbour: {
-    kind: "trouble",
-    name: "Grumpy neighbour",
-    options: [
-      {
-        art: "card-grumpy-neighbour-apologise",
-        effects: [{ amount: "encounterLow", change: "lose", kind: "money" }],
-        name: "Apologise",
-      },
-      {
-        art: "card-grumpy-neighbour-ignore",
-        effects: [{ amount: -1, kind: "hearts", target: { kind: "all" } }],
-        name: "Ignore them",
-      },
     ],
   },
   peeMail: {
@@ -176,4 +160,4 @@ export const NEED_CARDS = {
       },
     ],
   },
-} as const satisfies Record<string, NeedCard<string>>;
+} as const satisfies Record<string, NeedCard>;

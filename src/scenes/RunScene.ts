@@ -1174,9 +1174,6 @@ export class RunScene extends Scene {
       view,
       choice,
     );
-    if (outcome.next !== null) {
-      this.cardQueue.unshift(outcome.next);
-    }
     this.log({ choice, kind: "card", timeMs: this.runTimeMs });
     const at = { timeMs: this.runTimeMs, zoneIndex: walk.run.zoneIndex };
     this.statusMarks = startStatuses(gameData, view, at, choice, this.statusMarks);
