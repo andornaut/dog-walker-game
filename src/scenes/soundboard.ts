@@ -1,0 +1,179 @@
+import { Core, type Game, type Scene, Sound } from "phaser";
+
+import {
+  admitPlay,
+  advanceMusic,
+  clampVolume,
+  effectiveVolumes,
+  INITIAL_MIX,
+  type Mix,
+  MUSIC_KEY,
+  MUSIC_STOPPED,
+  musicLevel,
+  type MusicState,
+  type RecentPlays,
+  SOUND_KEYS,
+  type SoundCue,
+  startMusic,
+  stopMusic,
+  type Volumes,
+} from "../audio/sound";
+
+// Every concrete sound class (Web Audio, HTML5 audio, no audio) has setVolume; BaseSound does not.
+type AdjustableSound = Sound.BaseSound & { setVolume(value: number): unknown };
+
+const GESTURE_EVENTS = ["pointerdown", "keydown"] as const;
+
+// The game's one sound player, shared by every scene so the music outlives scene changes.
+// A key that did not load is skipped and logged once; no method throws.
+export class Soundboard {
+  private mix: Mix = INITIAL_MIX;
+  private music: MusicState = MUSIC_STOPPED;
+  private musicSound: AdjustableSound | undefined;
+  private recentPlays: RecentPlays = {};
+  private readonly reportedKeys = new Set<string>();
+
+  constructor(private readonly game: Game) {
+    game.events.on(Core.Events.STEP, (_time: number, delta: number) => this.step(delta));
+    game.events.on(Core.Events.HIDDEN, () => this.setHidden(true));
+    game.events.on(Core.Events.VISIBLE, () => this.setHidden(false));
+    this.resumeOnGesture();
+  }
+
+  play(cue: SoundCue): void {
+    this.guard(`play ${cue}`, () => {
+      const key = SOUND_KEYS[cue];
+      const volume = effectiveVolumes(this.mix).sfx;
+      if (volume <= 0 || !this.isLoaded(key)) {
+        return;
+      }
+      const { admitted, recent } = admitPlay(this.recentPlays, cue, this.game.loop.now);
+      this.recentPlays = recent;
+      if (admitted) {
+        this.game.sound.play(key, { volume });
+      }
+    });
+  }
+
+  startMusic(): void {
+    this.guard("start music", () => {
+      this.music = startMusic(this.music);
+      const sound = this.ensureMusicSound();
+      if (sound !== undefined && !sound.isPlaying) {
+        sound.play({ loop: true, volume: 0 });
+      }
+      this.applyMusicVolume();
+    });
+  }
+
+  stopMusic(): void {
+    this.guard("stop music", () => {
+      this.music = stopMusic(this.music);
+      this.applyMusicVolume();
+    });
+  }
+
+  setVolumes(volumes: Volumes): void {
+    const clamped = { music: clampVolume(volumes.music), sfx: clampVolume(volumes.sfx) };
+    this.updateMix({ volumes: clamped });
+  }
+
+  setHidden(hidden: boolean): void {
+    this.updateMix({ hidden });
+  }
+
+  setPaused(paused: boolean): void {
+    this.updateMix({ paused });
+  }
+
+  setCardOpen(cardOpen: boolean): void {
+    this.updateMix({ cardOpen });
+  }
+
+  private updateMix(change: Partial<Mix>): void {
+    this.guard("update the mix", () => {
+      this.mix = { ...this.mix, ...change };
+      this.applyMusicVolume();
+    });
+  }
+
+  private step(deltaMs: number): void {
+    if (this.music.kind !== "fading") {
+      return;
+    }
+    this.guard("fade music", () => {
+      this.music = advanceMusic(this.music, deltaMs);
+      this.applyMusicVolume();
+      if (this.music.kind === "stopped") {
+        this.musicSound?.stop();
+      }
+    });
+  }
+
+  private applyMusicVolume(): void {
+    this.musicSound?.setVolume(effectiveVolumes(this.mix).music * musicLevel(this.music));
+  }
+
+  private ensureMusicSound(): AdjustableSound | undefined {
+    if (this.musicSound === undefined && this.isLoaded(MUSIC_KEY)) {
+      this.musicSound = this.game.sound.add(MUSIC_KEY) as AdjustableSound;
+    }
+    return this.musicSound;
+  }
+
+  private isLoaded(key: string): boolean {
+    if (this.game.cache.audio.exists(key)) {
+      return true;
+    }
+    this.reportOnce(key, `Sound ${key} did not load; playing nothing in its place.`);
+    return false;
+  }
+
+  // Phaser unlocks Web Audio on the first gesture, but a phone can suspend the context again
+  // (an incoming call, a backgrounded tab), so any later gesture resumes it too.
+  private resumeOnGesture(): void {
+    const { sound } = this.game;
+    if (!(sound instanceof Sound.WebAudioSoundManager)) {
+      return;
+    }
+    const resume = () => {
+      if (sound.context.state !== "running") {
+        sound.context.resume().catch((error: unknown) => {
+          this.reportOnce("resume", "The audio context did not resume.", error);
+        });
+      }
+    };
+    for (const type of GESTURE_EVENTS) {
+      window.addEventListener(type, resume, { capture: true, passive: true });
+    }
+  }
+
+  private guard(action: string, run: () => void): void {
+    try {
+      run();
+    } catch (error) {
+      this.reportOnce(action, `Sound failed to ${action}.`, error);
+    }
+  }
+
+  private reportOnce(id: string, message: string, error?: unknown): void {
+    if (this.reportedKeys.has(id)) {
+      return;
+    }
+    this.reportedKeys.add(id);
+    console.warn(message, ...(error === undefined ? [] : [error]));
+  }
+}
+
+const soundboards = new WeakMap<Game, Soundboard>();
+
+// The game's soundboard, made on first use.
+export function soundboardOf(scene: Scene): Soundboard {
+  const existing = soundboards.get(scene.game);
+  if (existing !== undefined) {
+    return existing;
+  }
+  const soundboard = new Soundboard(scene.game);
+  soundboards.set(scene.game, soundboard);
+  return soundboard;
+}

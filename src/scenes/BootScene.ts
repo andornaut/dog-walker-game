@@ -65,12 +65,16 @@ export class BootScene extends Scene {
     } catch (error) {
       console.error("The art manifest is invalid; drawing placeholders instead.", error);
     }
-    const { fonts, sprites } = this.manifest;
+    const { fonts, sounds, sprites } = this.manifest;
     for (const { json, key, png } of sprites) {
       this.load.aseprite(key, assetUrl(ART_URL, png), assetUrl(ART_URL, json));
     }
     for (const { fnt, key, png } of fonts) {
       this.load.bitmapFont(key, assetUrl(ART_URL, png), assetUrl(ART_URL, fnt));
+    }
+    // Phaser loads the first URL whose format this browser plays.
+    for (const { key, m4a, ogg } of sounds) {
+      this.load.audio(key, [assetUrl(ART_URL, ogg), assetUrl(ART_URL, m4a)]);
     }
     this.load.once("complete", () => this.finish());
     this.load.start();
