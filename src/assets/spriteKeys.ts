@@ -132,20 +132,17 @@ export const NEED_ART = {
   pullFail: "fx-pull-fail",
 } as const;
 
-// The zone celebration's art, each with what stands in while it is missing: the banner over
-// it (ui-zone-banner, then a drawn band), the confetti falling over the road, played on a loop
-// (drawn confetti), and the walker-<name> tags: the walker in use cheers (idle), a new walker
-// runs in, then waves (idle).
+// The zone celebration's new art, each piece drawn in code while it is missing: the 148x132
+// starburst behind the walker; the 6x6 confetti bit, a looping tag per colour, falling over the
+// road; the new walker's bubble's tail, pointing up at them; and the walker-<name> tag the
+// walker cheers in, and hops in with (idle while it is missing). fx-confetti bursts as a new
+// walker lands.
 export const ZONE_CELEBRATION_ART = {
-  banner: "ui-celebration-banner",
-  bannerStandIn: "ui-zone-banner",
-  confetti: "fx-celebration-confetti",
-  confettiTag: "play",
-  walkerTags: {
-    cheer: ["cheer", "idle"],
-    joined: ["wave", "idle"],
-    run: ["walk", "idle"],
-  },
+  burst: "ui-celebrate-burst",
+  confettiBit: "fx-confetti-bit",
+  confettiBitTags: ["amber", "cyan", "green", "pink", "white", "yellow"],
+  tailUp: "ui-quip-tail-up",
+  walkerTags: ["cheer", "idle"],
 } as const;
 
 // A road sprite's hand-drawn version for a depth step, such as dog-koda@62 for 0.625x, or

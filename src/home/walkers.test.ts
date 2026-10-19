@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import { newPlayerSave } from "../save/fixtures";
+import { homeLine } from "./homeText";
 import { type ItemTile, itemTileState, type TileState } from "./interaction";
 import { tapWalker, walkerInfo, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
 
@@ -11,6 +12,8 @@ const save = {
   owned: { ...newPlayerSave.owned, walkers: ["casey", "ben"] as WalkerId[] },
   walker: "ben" as const,
 };
+
+const plate = (walker: string) => homeLine(gameData.homeText, "walkerPlate", { walker });
 
 describe("walkerOrder", () => {
   it("lists the starting walker, then the others by the zone that unlocks them", () => {
@@ -22,8 +25,8 @@ describe("walkerTile", () => {
   it.each<[WalkerId, ItemTile, TileState]>([
     ["ben", { kind: "picked" }, "selected"],
     ["casey", { kind: "available" }, "normal"],
-    ["ada", { goal: "Ada", kind: "goal" }, "disabled"],
-    ["trista", { goal: "Trista", kind: "goal" }, "disabled"],
+    ["ada", { goal: plate("Ada"), kind: "goal" }, "disabled"],
+    ["trista", { goal: plate("Trista"), kind: "goal" }, "disabled"],
   ])("shows %s as %o, drawn %s", (walker, tile, state) => {
     expect(walkerTile(gameData, save, walker)).toEqual(tile);
     expect(itemTileState(tile)).toBe(state);

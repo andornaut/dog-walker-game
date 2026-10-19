@@ -6,6 +6,7 @@ import { type Cents, cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
 import { fillLine } from "../text/lines";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
+import { stripIconKey } from "./stateStrip";
 
 // What plays between a zone's fee coins and the upgrade card, after every zone but the last:
 // the walker that zone unlocks for the first time joins, or else the walker in use cheers over
@@ -55,12 +56,27 @@ export function zoneCelebration(
   return { fees: cents(fees), kind: "zoneDone", tips: cents(tips), walker, zone };
 }
 
-export interface CelebrationText {
-  // The tap that moves on, or null when the celebration moves on by itself.
-  readonly button: string | null;
-  readonly lines: readonly string[];
-  readonly title: string;
-}
+// A piece of a line with icons: text, or a name after its icon.
+export type LinePart = { readonly icon: string; readonly text: string } | { readonly text: string };
+
+export type CelebrationText =
+  | {
+      readonly earnings: string;
+      readonly kind: "zoneDone";
+      readonly subtitle: string;
+      readonly title: string;
+    }
+  | {
+      readonly button: string;
+      readonly greeting: string;
+      // The walker's pace and style, each after its icon.
+      readonly info: readonly LinePart[];
+      readonly kind: "newWalker";
+      readonly subtitle: string;
+      readonly title: string;
+    };
+
+const INFO_NAMES = /\{(pace|style)\}/;
 
 export function celebrationText(
   data: Pick<GameData, "runText" | "walkerPaces" | "walkerStyles" | "walkers">,
@@ -68,22 +84,35 @@ export function celebrationText(
 ): CelebrationText {
   const text = data.runText;
   if (celebration.kind === "zoneDone") {
-    const earnings = fillLine(FIELDS.zoneDone, text.zoneDone, "earnings", {
-      fees: dollarText(celebration.fees),
-      tips: dollarText(celebration.tips),
-    });
-    const title = fillLine(FIELDS.zoneDone, text.zoneDone, "title", { zone: celebration.zone });
-    return { button: null, lines: [earnings], title };
+    const words = text.zoneDone;
+    return {
+      earnings: fillLine(FIELDS.zoneDone, words, "earnings", {
+        fees: dollarText(celebration.fees),
+        tips: dollarText(celebration.tips),
+      }),
+      kind: "zoneDone",
+      subtitle: fillLine(FIELDS.zoneDone, words, "subtitle", { zone: celebration.zone }),
+      title: words.title,
+    };
   }
+  const words = text.newWalker;
   const { name, pace, style } = data.walkers[celebration.walker];
-  const greeting = fillLine(FIELDS.card, text.card, "walkerGreeting", { walker: name });
-  const info = fillLine(FIELDS.newWalker, text.newWalker, "info", {
-    pace: data.walkerPaces[pace].name,
-    style: data.walkerStyles[style].name,
-  });
+  const named = {
+    pace: { icon: stripIconKey({ kind: "pace", pace }), text: data.walkerPaces[pace].name },
+    style: { icon: stripIconKey({ kind: "style", style }), text: data.walkerStyles[style].name },
+  };
+  // Split on a capturing pattern, each name sits at an odd index between the text around it.
+  const info = words.info
+    .split(INFO_NAMES)
+    .flatMap((part, i): LinePart[] =>
+      i % 2 === 1 ? [named[part as keyof typeof named]] : part === "" ? [] : [{ text: part }],
+    );
   return {
-    button: text.newWalker.button,
-    lines: [greeting, info],
-    title: fillLine(FIELDS.newWalker, text.newWalker, "title", { walker: name }),
+    button: words.button,
+    greeting: fillLine(FIELDS.card, text.card, "walkerGreeting", { walker: name }),
+    info,
+    kind: "newWalker",
+    subtitle: fillLine(FIELDS.newWalker, words, "subtitle", { walker: name }),
+    title: words.title,
   };
 }

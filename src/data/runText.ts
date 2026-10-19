@@ -33,11 +33,13 @@ export const RUN_TEXT = {
   newWalker: {
     button: "Welcome!",
     info: "{pace} · {style}",
-    title: "{walker} joins you!",
+    subtitle: "{walker} joins you!",
+    title: "New walker!",
   },
   outOfMoney: "you're out of money",
   zoneDone: {
     earnings: "+{fees} fees · +{tips} tips",
-    title: "{zone} done!",
+    subtitle: "{zone}",
+    title: "Zone done!",
   },
 } as const satisfies RunText;

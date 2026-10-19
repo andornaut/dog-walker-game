@@ -723,18 +723,21 @@ export interface RunText {
   readonly hopOver: string;
   readonly lowHearts: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
-  // unlocks them: its title, their pace and style under their greeting, and the button.
+  // unlocks them: its headline (a big title of about 14 characters over a subtitle of about
+  // 28), their pace and style under their greeting, and the button.
   readonly newWalker: {
     readonly button: string;
     readonly info: string;
+    readonly subtitle: string;
     readonly title: string;
   };
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;
-  // The zone celebration after any other zone but the last: its title, and the zone's fees
-  // and tips.
+  // The zone celebration after any other zone but the last: its headline, as newWalker's,
+  // and the zone's fees and tips.
   readonly zoneDone: {
     readonly earnings: string;
+    readonly subtitle: string;
     readonly title: string;
   };
 }

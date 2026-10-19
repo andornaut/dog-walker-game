@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import type { Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
-import { celebrationText, type ZoneCelebration, zoneCelebration } from "./zoneCelebration";
+import { celebrationText, zoneCelebration } from "./zoneCelebration";
 
 function money(kind: "bump" | "fee" | "tip", amount: number): MoneyChange {
   return {
@@ -67,33 +67,44 @@ describe("zoneCelebration", () => {
 
 describe("celebrationText", () => {
   const text = gameData.runText;
-  it.each<{ celebration: ZoneCelebration; expected: ReturnType<typeof celebrationText> }>([
-    {
-      celebration: {
-        fees: cents(24000),
-        kind: "zoneDone",
-        tips: cents(3800),
-        walker: "casey",
-        zone: "Willow Crescent",
-      },
-      expected: {
-        button: null,
-        lines: [text.zoneDone.earnings.replace("{fees}", "$240").replace("{tips}", "$38")],
-        title: text.zoneDone.title.replace("{zone}", "Willow Crescent"),
-      },
-    },
-    {
-      celebration: { kind: "newWalker", walker: "ben" },
-      expected: {
-        button: text.newWalker.button,
-        lines: [
-          text.card.walkerGreeting.replace("{walker}", "Ben"),
-          text.newWalker.info.replace("{pace}", "Slow").replace("{style}", "Hustler"),
-        ],
-        title: text.newWalker.title.replace("{walker}", "Ben"),
-      },
-    },
-  ])("writes $celebration.kind", ({ celebration, expected }) => {
-    expect(celebrationText(gameData, celebration)).toEqual(expected);
+
+  it("heads Zone done with the zone and writes its fees and tips in dollars", () => {
+    const celebration = {
+      fees: cents(24000),
+      kind: "zoneDone",
+      tips: cents(3800),
+      walker: "casey",
+      zone: "Willow Crescent",
+    } as const;
+    expect(celebrationText(gameData, celebration)).toEqual({
+      earnings: text.zoneDone.earnings.replace("{fees}", "$240").replace("{tips}", "$38"),
+      kind: "zoneDone",
+      subtitle: text.zoneDone.subtitle.replace("{zone}", "Willow Crescent"),
+      title: text.zoneDone.title,
+    });
+  });
+
+  it.each<{ pace: string; style: string; walker: WalkerId }>([
+    { pace: "Slow", style: "Hustler", walker: "ben" },
+    { pace: "Fast", style: "Charmer", walker: "ada" },
+  ])("names $walker, with an icon before $pace and $style", ({ pace, style, walker }) => {
+    const shown = celebrationText(gameData, { kind: "newWalker", walker });
+    const name = gameData.walkers[walker].name;
+    expect(shown).toMatchObject({
+      button: text.newWalker.button,
+      greeting: text.card.walkerGreeting.replace("{walker}", name),
+      subtitle: text.newWalker.subtitle.replace("{walker}", name),
+      title: text.newWalker.title,
+    });
+    if (shown.kind !== "newWalker") {
+      throw new Error("a new walker's text");
+    }
+    const filled = text.newWalker.info.replace("{pace}", pace).replace("{style}", style);
+    expect(shown.info.map((part) => part.text).join("")).toBe(filled);
+    const { pace: paceId, style: styleId } = gameData.walkers[walker];
+    expect(shown.info.filter((part) => "icon" in part)).toEqual([
+      { icon: `icon-pace-${paceId}`, text: pace },
+      { icon: `icon-style-${styleId}`, text: style },
+    ]);
   });
 });
