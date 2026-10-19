@@ -10,7 +10,7 @@ by distance with its base on the road line.
 
 cone                32x32   1 lane, a glint runs down its highlight
 bin                 32x32   1 lane, the lid lifts in a breeze
-hydrant             32x32   1 lane, a drip off the side cap
+hydrant             32x32   the Regular dog's need spot (not an obstacle), a drip off the side cap
 bench               88x24   2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
 barrier-2           88x24   2 lanes, a striped rail and plank on short legs; lamps blink (Woof Way,
                             Sniff Street Shops)

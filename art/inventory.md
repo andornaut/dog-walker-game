@@ -47,7 +47,7 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | `tip`, `treat`                   | sprite | 16×16         | `idle`                               | core | Pickups                                                       |
 | `barrier-2`, `barrier-3`         | sprite | 88×24, 144×24 | `idle`                               | core | Minor; Woof Way and Sniff Street Shops                        |
 | `bench`                          | sprite | 88×24         | `idle`                               | core | Minor, 2 lanes                                                |
-| `bin`, `cone`, `hydrant`         | sprite | 32×32         | `idle`                               | core | Minor, 1 lane                                                 |
+| `bin`, `cone`                    | sprite | 32×32         | `idle`                               | core | Minor, 1 lane                                                 |
 | `hedge`                          | sprite | 144×24        | `idle`                               | core | Minor, 3 lanes                                                |
 | `parked-car`                     | sprite | 44×28         | `idle`                               | core | Minor, 1 lane by 3 rows; drawn at the footprint's near edge   |
 | `ball-bounce`                    | sprite | 16×24         | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`      |
@@ -97,6 +97,7 @@ Same tags, frames and durations as the original.
 | `fx-accident`      | sprite | 32×32 | `play`                   | core | A Regular dog's accident, laid on the dog's frame                  |
 | `fx-need-met`      | sprite | 48×48 | `<need>`                 | core | Need fulfilled; bottom-centre on the dog's feet                    |
 | `fx-pull-fail`     | sprite | 16×16 | `play`                   | core | A blocked pull, over the dog's head                                |
+| `hydrant`          | sprite | 32×32 | `idle`                   | core | Regular spot; a drip off the side cap                              |
 | `icon-need-<need>` | sprite | 16×16 | `normal`                 | core | friendly, nosy, playful, regular, thirsty                          |
 | `spot-lamp-post`   | sprite | 32×48 | `idle`                   | core | Nosy spot                                                          |
 | `spot-stranger`    | sprite | 32×48 | `idle`, `wave`           | core | Friendly spot                                                      |
