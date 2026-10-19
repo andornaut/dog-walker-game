@@ -38,6 +38,11 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Remaining for the first build
 
-- **Road readability:** dog-duchess, dog-koda, dog-pierre, dog-snowball, the skunk cloud, walker-ada and walker-ben
+In priority order:
+
+1. **40px sprites on 64px lanes:** every road sprite, road strip, backdrop join, help page and card redrawn for the 320px road; lands with tech's lane code
+2. **Obstacle skin road sprites:** the per-zone looks for Chase, Snatch, Social, Splash, Stink and the minor obstacles, with depth variants
+3. **Elm Avenue roadside props:** houses, fences, trees and yard props beyond the sidewalks, per the roadside mock, with a per-zone placement table for tech
+4. **Skin card illustrations:** `card-<skin key>-<option>` for every skin's encounter options (40 in all); a skin shows its base card art until then, so these can follow the first build
 
 New art follows the rulebook as it changes.
