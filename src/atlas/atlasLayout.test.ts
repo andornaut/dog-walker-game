@@ -21,20 +21,18 @@ function sprite(key: string, count: number, width: number, height: number): Sour
 }
 
 describe("atlasGroupOf", () => {
-  it("puts the loading screen's art in boot", () => {
-    for (const key of Object.values(LOADING_ART)) {
-      expect(atlasGroupOf(key)).toBe("boot");
-    }
-  });
-
-  it("groups by key prefix, with the road as the rest", () => {
-    expect(atlasGroupOf("card-skip")).toBe("cards");
-    expect(atlasGroupOf("help-lanes")).toBe("cards");
-    expect(atlasGroupOf("screen-home")).toBe("ui");
-    expect(atlasGroupOf("icon-lock")).toBe("ui");
-    expect(atlasGroupOf("logo")).toBe("ui");
-    expect(atlasGroupOf("dog-koda")).toBe("run");
-    expect(atlasGroupOf("fx-hit-skunk")).toBe("run");
+  // The loading screen's art is boot; the rest goes by key prefix, with the road as the rest.
+  it.each<[string, string]>([
+    ...Object.values(LOADING_ART).map((key): [string, string] => [key, "boot"]),
+    ["card-skip", "cards"],
+    ["help-lanes", "cards"],
+    ["screen-home", "ui"],
+    ["icon-lock", "ui"],
+    ["logo", "ui"],
+    ["dog-koda", "run"],
+    ["fx-hit-skunk", "run"],
+  ])("puts %s in %s", (key, group) => {
+    expect(atlasGroupOf(key)).toBe(group);
   });
 });
 
@@ -67,17 +65,19 @@ describe("spriteSource", () => {
     });
   });
 
-  it("rejects a trimmed frame, whose offset the atlas would lose", () => {
-    const json = { frames: { "a 0": { ...frame(0, 80), trimmed: true } }, meta: {} };
-    expect(() => spriteSource("dog-koda", "dog-koda.png", json)).toThrow(
-      'dog-koda frame "a 0" is rotated or trimmed',
-    );
-  });
-
-  it("rejects the array export", () => {
-    expect(() => spriteSource("dog-koda", "dog-koda.png", { frames: [], meta: {} })).toThrow(
-      'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
-    );
+  it.each([
+    {
+      error: 'dog-koda frame "a 0" is rotated or trimmed',
+      json: { frames: { "a 0": { ...frame(0, 80), trimmed: true } }, meta: {} },
+      name: "a trimmed frame, whose offset the atlas would lose",
+    },
+    {
+      error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
+      json: { frames: [], meta: {} },
+      name: "the array export",
+    },
+  ])("rejects $name", ({ error, json }) => {
+    expect(() => spriteSource("dog-koda", "dog-koda.png", json)).toThrow(error);
   });
 });
 

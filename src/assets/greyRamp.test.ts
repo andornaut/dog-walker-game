@@ -3,16 +3,13 @@ import { describe, expect, it } from "vitest";
 import { GREY_RAMP, greyFor, remapToGrey } from "./greyRamp";
 
 describe("greyFor", () => {
-  it("keeps a grey of the ramp as it is", () => {
-    for (const grey of GREY_RAMP) {
-      expect(greyFor(grey)).toBe(grey);
-    }
-  });
-
-  it("maps light colours to light greys and dark colours to dark greys", () => {
-    expect(greyFor(0xead4aa)).toBe(0xc0cbdc);
-    expect(greyFor(0x3e2731)).toBe(0x262b44);
-  });
+  // A grey of the ramp stays; light colours go to light greys and dark ones to dark greys.
+  it.each([...GREY_RAMP.map((grey) => [grey, grey]), [0xead4aa, 0xc0cbdc], [0x3e2731, 0x262b44]])(
+    "maps %i to %i",
+    (colour, grey) => {
+      expect(greyFor(colour)).toBe(grey);
+    },
+  );
 });
 
 describe("remapToGrey", () => {

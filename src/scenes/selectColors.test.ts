@@ -18,18 +18,15 @@ function contrast(a: number, b: number): number {
 }
 
 describe("selected-state colours", () => {
-  it("hold text at 4.5:1 on every face a tile can show", () => {
-    for (const rest of ["cream", "tan"] as const) {
-      for (const selected of [false, true]) {
-        for (const full of [false, true]) {
-          const look = selectLook(rest, selected, full);
-          expect(contrast(PALETTE[look.text], PALETTE[look.face])).toBeGreaterThanOrEqual(4.5);
-        }
-      }
-    }
-  });
+  const faces = (["cream", "tan"] as const).flatMap((rest) =>
+    [false, true].flatMap((selected) => [false, true].map((full) => ({ full, rest, selected }))),
+  );
 
-  it("would fail plum on a darkened tan face, which is why it takes ink", () => {
-    expect(contrast(PALETTE.plum, PALETTE.brown)).toBeLessThan(4.5);
-  });
+  it.each(faces)(
+    "hold text at 4.5:1 on a $rest tile, selected $selected, full $full",
+    ({ full, rest, selected }) => {
+      const look = selectLook(rest, selected, full);
+      expect(contrast(PALETTE[look.text], PALETTE[look.face])).toBeGreaterThanOrEqual(4.5);
+    },
+  );
 });

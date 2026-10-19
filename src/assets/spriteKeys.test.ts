@@ -7,8 +7,9 @@ import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { NEED_CARDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, EncounterId, ForcedStopId, GearId, MinorObstacleId } from "../data/types";
+import type { ForcedStopId, GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
+import type { CardSource } from "../state/runState";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,
@@ -19,7 +20,6 @@ import {
   dogFaceKey,
   doghouseTag,
   dogSpriteKey,
-  encounterSpriteKey,
   forcedStopSpriteKey,
   gearIconKey,
   kebabCase,
@@ -39,29 +39,79 @@ import {
 } from "./spriteKeys";
 
 const spriteKeys = new Set(manifest.sprites.map(({ key }) => key));
+const images = new Set(manifest.images.map(({ key }) => key));
 const data = { dogs: DOGS, encounters: ENCOUNTERS, needCards: NEED_CARDS };
+const renamed = { dogs: { ...DOGS, koda: { ...DOGS.koda, art: "kodiak" } } };
+const zone = { art: "woof-way" };
 
-describe("kebabCase", () => {
-  it("splits camelCase words with hyphens", () => {
-    expect(kebabCase("biscuitNeighbour")).toBe("biscuit-neighbour");
-    expect(kebabCase("koda")).toBe("koda");
-  });
-});
-
-describe("depthVariantKey", () => {
-  it("names each step's version by its suffix, and none at full size", () => {
-    expect(depthVariantKey("dog-koda", 0.875)).toBe("dog-koda@88");
-    expect(depthVariantKey("dog-koda", 0.75)).toBe("dog-koda@75");
-    expect(depthVariantKey("dog-koda", 0.625)).toBe("dog-koda@62");
-    expect(depthVariantKey("tip", 0.5)).toBe("tip@50");
-    expect(depthVariantKey("tip", 1)).toBeNull();
+describe("key names", () => {
+  it.each<[string, () => string | null, string | null]>([
+    ["kebabCase splits camelCase words", () => kebabCase("biscuitNeighbour"), "biscuit-neighbour"],
+    ["kebabCase keeps one word", () => kebabCase("koda"), "koda"],
+    ["depthVariantKey at 0.875", () => depthVariantKey("dog-koda", 0.875), "dog-koda@88"],
+    ["depthVariantKey at 0.75", () => depthVariantKey("dog-koda", 0.75), "dog-koda@75"],
+    ["depthVariantKey at 0.625", () => depthVariantKey("dog-koda", 0.625), "dog-koda@62"],
+    ["depthVariantKey at 0.5", () => depthVariantKey("tip", 0.5), "tip@50"],
+    ["depthVariantKey at full size", () => depthVariantKey("tip", 1), null],
+    ["minorObstacleSpriteKey with a digit", () => minorObstacleSpriteKey("barrier3"), "barrier-3"],
+    ["minorObstacleSpriteKey", () => minorObstacleSpriteKey("parkedCar"), "parked-car"],
+    ["the empty doghouse", () => doghouseTag(data, null), "empty"],
+    ["a renamed dog's sprite", () => dogSpriteKey(renamed, "koda"), "dog-kodiak"],
+    ["a renamed dog's face", () => dogFaceKey(renamed, "koda"), "face-dog-kodiak"],
+    ["a renamed dog's owner face", () => ownerFaceKey(renamed, "koda"), "face-owner-kodiak"],
+    ["a renamed dog's doghouse", () => doghouseTag(renamed, "koda"), "kodiak"],
+    ["a zone's backdrop", () => backdropKey(zone), "backdrop-woof-way"],
+    ["a zone's road strip", () => roadTileKey(zone), "road-woof-way"],
+    ["a zone's start strip", () => roadStartKey(zone), "road-woof-way-start"],
+    ["a zone's icon", () => zoneIconKey(zone), "icon-zone-woof-way"],
+    ["a zone's card preview", () => cardZoneKey(zone), "card-zone-woof-way"],
+    ["a route pip before its fork", () => zonePipTag(null, false), "todo"],
+    ["a route pip by its zone", () => zonePipTag({ art: "bark-park" }, false), "bark-park"],
+    ["a walked route pip", () => zonePipTag({ art: "bark-park" }, true), "bark-park-done"],
+  ])("names %s", (_, key, expected) => {
+    expect(key()).toBe(expected);
   });
 
   it("throws for a scale that is not a depth step", () => {
     expect(() => depthVariantKey("tip", 0.63)).toThrow("not a depth step");
   });
 
-  it("names variants the manifest has, each with its own anchor", () => {
+  it.each([
+    [{ affected: [], encounter: "skunk", kind: "encounter" }, "encounter"],
+    [{ affected: [], encounter: "lostWallet", kind: "encounter" }, "lucky"],
+    [{ kind: "forcedStop", stop: "kidWantsToPet" }, "stop"],
+    [{ kind: "upgradeOffer", offered: ["bellyRubs", "bigTipper", "raincoats"] }, "upgrade"],
+    [{ kind: "fork", paths: ["park"] }, "route"],
+  ] as const satisfies readonly (readonly [CardSource, string])[])(
+    "tags a card frame for %o as %s",
+    (source, tag) => {
+      expect(cardFrameTag(data, source)).toBe(tag);
+    },
+  );
+});
+
+describe("standsOnGround", () => {
+  // A mover's cue stands on the road; faces, effects, badges and UI do not.
+  it.each([
+    ["dog-koda", true],
+    ["tip", true],
+    ["walker-ada", true],
+    ["gag-cat", true],
+    ["dog-koda@50", true],
+    [WARNING_KEY, true],
+    [WARNING_ARROW_KEY, true],
+    ["face-dog-koda", false],
+    ["fx-bump", false],
+    ["badge-squirrel", false],
+    ["ui-button", false],
+    ["card-frame", false],
+  ])("%s is %s", (key, expected) => {
+    expect(standsOnGround(key)).toBe(expected);
+  });
+});
+
+describe("the art manifest", () => {
+  it("has a variant with its own anchor for each sampled sprite at 0.75 and 0.5", () => {
     const anchored = new Set(
       manifest.sprites.filter((entry) => "anchor" in entry).map(({ key }) => key),
     );
@@ -71,80 +121,42 @@ describe("depthVariantKey", () => {
       }
     }
   });
-});
 
-describe("standsOnGround", () => {
-  it("measures road and backdrop sprites, not faces, effects, badges or UI", () => {
-    for (const key of ["dog-koda", "tip", "walker-ada", "gag-cat", "dog-koda@50"]) {
-      expect(standsOnGround(key), key).toBe(true);
-    }
-    for (const key of ["face-dog-koda", "fx-bump", "badge-squirrel", "ui-button", "card-frame"]) {
-      expect(standsOnGround(key), key).toBe(false);
-    }
+  it.each<{ keys: () => string[]; name: string; set: Set<string> }>([
+    {
+      keys: () => (Object.keys(SHOP_GEAR) as GearId[]).map(gearIconKey),
+      name: "an icon image for every gear item",
+      set: images,
+    },
+    {
+      keys: () => (Object.keys(FORCED_STOPS) as ForcedStopId[]).map(forcedStopSpriteKey),
+      name: "a sprite for every forced stop",
+      set: spriteKeys,
+    },
+    {
+      keys: () => [
+        ...(Object.keys(MINOR_OBSTACLES) as MinorObstacleId[]).map(minorObstacleSpriteKey),
+        SKUNK_CLOUD_KEY,
+        CARD_FRAME_KEY,
+      ],
+      name: "a sprite for every minor obstacle, the skunk's cloud and the card frame",
+      set: spriteKeys,
+    },
+    {
+      keys: () => WORLD.zones.flatMap((z) => [backdropKey(z), roadTileKey(z), zoneIconKey(z)]),
+      name: "a backdrop, a road strip and an icon for every zone",
+      set: images,
+    },
+    {
+      keys: () => WORLD.zones.map(roadStartKey),
+      name: "a start strip for every zone, since any zone can follow a fork",
+      set: images,
+    },
+  ])("has $name", ({ keys, set }) => {
+    expect(keys().filter((key) => !set.has(key))).toEqual([]);
   });
 
-  it("measures a mover's cue, which stands on the road", () => {
-    expect(standsOnGround(WARNING_KEY)).toBe(true);
-    expect(standsOnGround(WARNING_ARROW_KEY)).toBe(true);
-  });
-});
-
-describe("sprite keys", () => {
-  it("name a sprite in the art manifest for every encounter", () => {
-    for (const id of Object.keys(ENCOUNTERS) as EncounterId[]) {
-      expect(spriteKeys.has(encounterSpriteKey(id)), id).toBe(true);
-    }
-  });
-
-  it("name an icon image in the art manifest for every gear item", () => {
-    const images = new Set(manifest.images.map(({ key }) => key));
-    for (const gear of Object.keys(SHOP_GEAR) as GearId[]) {
-      expect(images.has(gearIconKey(gear)), gear).toBe(true);
-    }
-  });
-
-  it("name a sprite in the art manifest for every forced stop", () => {
-    for (const stop of Object.keys(FORCED_STOPS) as ForcedStopId[]) {
-      expect(spriteKeys.has(forcedStopSpriteKey(stop)), stop).toBe(true);
-    }
-  });
-
-  it("name the card frame, with a tag for every kind of card", () => {
-    expect(spriteKeys.has(CARD_FRAME_KEY)).toBe(true);
-    expect(cardFrameTag(data, { affected: [], encounter: "skunk", kind: "encounter" })).toBe(
-      "encounter",
-    );
-    expect(cardFrameTag(data, { affected: [], encounter: "lostWallet", kind: "encounter" })).toBe(
-      "lucky",
-    );
-    expect(cardFrameTag(data, { kind: "forcedStop", stop: "kidWantsToPet" })).toBe("stop");
-    expect(
-      cardFrameTag(data, {
-        kind: "upgradeOffer",
-        offered: ["bellyRubs", "bigTipper", "raincoats"],
-      }),
-    ).toBe("upgrade");
-    expect(cardFrameTag(data, { kind: "fork", paths: ["park"] })).toBe("route");
-  });
-
-  it("name a road sprite, a face and an owner face in the manifest for every dog", () => {
-    for (const dog of Object.keys(DOGS) as DogId[]) {
-      for (const key of [dogSpriteKey(data, dog), dogFaceKey(data, dog), ownerFaceKey(data, dog)]) {
-        expect(spriteKeys.has(key), key).toBe(true);
-      }
-    }
-  });
-
-  it("name a sprite in the manifest for every minor obstacle and the skunk's cloud", () => {
-    for (const id of Object.keys(MINOR_OBSTACLES) as MinorObstacleId[]) {
-      expect(spriteKeys.has(minorObstacleSpriteKey(id)), id).toBe(true);
-    }
-    expect(minorObstacleSpriteKey("barrier3")).toBe("barrier-3");
-    expect(minorObstacleSpriteKey("parkedCar")).toBe("parked-car");
-    expect(spriteKeys.has(SKUNK_CLOUD_KEY)).toBe(true);
-  });
-
-  it("name a sprite with its moving tag for every mover, and the cue's sign and arrow", () => {
+  it("tags every mover's sprite with its moving tag, and the cue's sign and arrow", () => {
     const sheets = import.meta.glob<unknown>("../../public/art/sprites/*.json", {
       eager: true,
       import: "default",
@@ -161,63 +173,8 @@ describe("sprite keys", () => {
     expect(hasTag(WARNING_ARROW_KEY, WARNING_DOWN_TAG)).toBe(true);
   });
 
-  it("name a doghouse tag for every dog, and the empty house", () => {
-    const sheet = manifest.sprites.find(({ key }) => key === "ui-doghouse");
-    expect(sheet).toBeDefined();
-    expect(doghouseTag(data, "koda")).toBe("koda");
-    expect(doghouseTag(data, null)).toBe("empty");
-  });
-
-  it("name a dog's art by its art id, not its data id", () => {
-    const renamed = { dogs: { ...DOGS, koda: { ...DOGS.koda, art: "kodiak" } } };
-    expect(dogSpriteKey(renamed, "koda")).toBe("dog-kodiak");
-    expect(dogFaceKey(renamed, "koda")).toBe("face-dog-kodiak");
-    expect(ownerFaceKey(renamed, "koda")).toBe("face-owner-kodiak");
-    expect(doghouseTag(renamed, "koda")).toBe("kodiak");
-  });
-});
-
-describe("zone art keys", () => {
-  const images = new Set(manifest.images.map(({ key }) => key));
-
-  it("names each zone's art after its art", () => {
-    const zone = { art: "woof-way" };
-    expect(backdropKey(zone)).toBe("backdrop-woof-way");
-    expect(roadTileKey(zone)).toBe("road-woof-way");
-    expect(roadStartKey(zone)).toBe("road-woof-way-start");
-    expect(zoneIconKey(zone)).toBe("icon-zone-woof-way");
-    expect(cardZoneKey(zone)).toBe("card-zone-woof-way");
-  });
-
   it("gives every zone its own art", () => {
     const ids = WORLD.zones.map(({ art }) => art);
     expect(new Set(ids).size).toBe(ids.length);
-  });
-
-  it("names a backdrop, a road strip and an icon in the manifest for every zone", () => {
-    for (const zone of WORLD.zones) {
-      for (const key of [backdropKey(zone), roadTileKey(zone), zoneIconKey(zone)]) {
-        expect(images.has(key), key).toBe(true);
-      }
-    }
-  });
-
-  it("names a start strip for every zone, since any zone can follow a fork", () => {
-    for (const zone of WORLD.zones) {
-      expect(images.has(roadStartKey(zone)), zone.name).toBe(true);
-    }
-  });
-
-  it("tags a route pip todo before its fork, then by the zone, and -done once walked", () => {
-    const zone = { art: "bark-park" };
-    expect(zonePipTag(null, false)).toBe("todo");
-    expect(zonePipTag(zone, false)).toBe("bark-park");
-    expect(zonePipTag(zone, true)).toBe("bark-park-done");
-  });
-
-  it("names a card preview in the manifest for every zone", () => {
-    for (const zone of WORLD.zones) {
-      expect(images.has(cardZoneKey(zone)), zone.name).toBe(true);
-    }
   });
 });

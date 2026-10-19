@@ -95,33 +95,39 @@ describe("generateArtManifest", () => {
     });
   });
 
-  it("fails on a sprite PNG without its sheet, and a sound in one format", async () => {
-    await expect(generateArtManifest(memoryArt({ "sprites/cone.png": "" }))).rejects.toThrow(
-      "sprites/cone.png has no sprites/cone.json",
-    );
-    await expect(generateArtManifest(memoryArt({ "sounds/sfx-bark.ogg": "" }))).rejects.toThrow(
-      "sounds/sfx-bark.ogg has no sounds/sfx-bark.m4a",
-    );
-  });
-
-  it("fails on a file a folder never holds, and a sidecar naming a missing sound", async () => {
-    await expect(generateArtManifest(memoryArt({ "images/notes.txt": "" }))).rejects.toThrow(
-      "images/notes.txt",
-    );
-    await expect(
-      generateArtManifest(
-        memoryArt({ "manifest.extra.json": '{ "sounds": { "music-walk": { "loop": true } } }' }),
-      ),
-    ).rejects.toThrow('names sound "music-walk"');
-    await expect(
-      generateArtManifest(memoryArt({ "manifest.extra.json": '{ "sound": {} }' })),
-    ).rejects.toThrow("manifest.extra.json");
-  });
-
-  it("fails on a font whose page is not a PNG beside it", async () => {
-    await expect(generateArtManifest(memoryArt({ "fonts/font-body.fnt": FONT }))).rejects.toThrow(
-      "names page font-body.png",
-    );
+  it.each<{ error: string; files: Record<string, string>; name: string }>([
+    {
+      error: "sprites/cone.png has no sprites/cone.json",
+      files: { "sprites/cone.png": "" },
+      name: "a sprite PNG without its sheet",
+    },
+    {
+      error: "sounds/sfx-bark.ogg has no sounds/sfx-bark.m4a",
+      files: { "sounds/sfx-bark.ogg": "" },
+      name: "a sound in one format",
+    },
+    {
+      error: "images/notes.txt",
+      files: { "images/notes.txt": "" },
+      name: "a file a folder never holds",
+    },
+    {
+      error: 'names sound "music-walk"',
+      files: { "manifest.extra.json": '{ "sounds": { "music-walk": { "loop": true } } }' },
+      name: "a sidecar naming a missing sound",
+    },
+    {
+      error: "manifest.extra.json",
+      files: { "manifest.extra.json": '{ "sound": {} }' },
+      name: "a malformed sidecar",
+    },
+    {
+      error: "names page font-body.png",
+      files: { "fonts/font-body.fnt": FONT },
+      name: "a font whose page is not a PNG beside it",
+    },
+  ])("fails on $name", async ({ error, files }) => {
+    await expect(generateArtManifest(memoryArt(files))).rejects.toThrow(error);
   });
 
   it("writes the committed manifest: run npm run art:manifest and commit it", async () => {

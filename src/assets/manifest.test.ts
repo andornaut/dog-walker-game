@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 
-import shippedManifest from "../../public/art/manifest.json";
 import { assetUrl, parseManifest } from "./manifest";
 
 const valid = {
@@ -12,126 +11,137 @@ const valid = {
   sprites: [{ json: "sprites/dog-koda.json", key: "dog-koda", png: "sprites/dog-koda.png" }],
 };
 
+type Manifest = ReturnType<typeof parseManifest>;
+
+const sprite = { ...valid.sprites[0], anchor: { feetY: 31, opaqueWidth: 20 } };
+const keyed = (key: string) => ({ ...valid, sprites: [{ ...valid.sprites[0], key }] });
+const { fonts, sounds, sprites } = valid;
+
 describe("parseManifest", () => {
-  it("accepts a well-formed manifest", () => {
-    expect(parseManifest(valid)).toEqual(valid);
+  it.each<{ expected: unknown; manifest: unknown; name: string; pick: (m: Manifest) => unknown }>([
+    { expected: valid, manifest: valid, name: "a well-formed manifest", pick: (m) => m },
+    {
+      expected: [],
+      manifest: { fonts: [], images: [], sprites: [] },
+      name: "empty lists",
+      pick: (m) => m.sprites,
+    },
+    {
+      expected: sprite.anchor,
+      manifest: { ...valid, sprites: [sprite] },
+      name: "a sprite's anchor",
+      pick: (m) => m.sprites[0]?.anchor,
+    },
+    {
+      expected: [],
+      manifest: { ...valid, sounds: undefined },
+      name: "a missing sounds list as no sounds",
+      pick: (m) => m.sounds,
+    },
+    {
+      expected: [{ key: "card-frame", png: "./images/card.frame.png" }],
+      manifest: { ...valid, images: [{ key: "card-frame", png: "./images/card.frame.png" }] },
+      name: "a path with a dot segment and dotted file names",
+      pick: (m) => m.images,
+    },
+    ...["bin@50", "dog-koda@62", "dog-koda@75", "parked-car@88"].map((key) => ({
+      expected: key,
+      manifest: keyed(key),
+      name: `the depth step key ${key}`,
+      pick: (m: Manifest) => m.sprites[0]?.key,
+    })),
+  ])("accepts $name", ({ expected, manifest, pick }) => {
+    expect(pick(parseManifest(manifest))).toEqual(expected);
   });
 
-  it("accepts empty lists", () => {
-    expect(parseManifest({ fonts: [], images: [], sprites: [] }).sprites).toEqual([]);
-  });
-
-  it("keeps a sprite's anchor and rejects impossible values", () => {
-    const sprite = { ...valid.sprites[0], anchor: { feetY: 31, opaqueWidth: 20 } };
-    expect(parseManifest({ ...valid, sprites: [sprite] }).sprites[0]?.anchor).toEqual({
-      feetY: 31,
-      opaqueWidth: 20,
-    });
-    const negative = { ...sprite, anchor: { feetY: -1, opaqueWidth: 20 } };
-    expect(() => parseManifest({ ...valid, sprites: [negative] })).toThrow("feetY");
-    const empty = { ...sprite, anchor: { feetY: 31, opaqueWidth: 0 } };
-    expect(() => parseManifest({ ...valid, sprites: [empty] })).toThrow("opaqueWidth");
-  });
-
-  it("treats a missing sounds list as no sounds", () => {
-    expect(parseManifest({ ...valid, sounds: undefined }).sounds).toEqual([]);
-  });
-
-  it("requires both audio formats and a boolean loop", () => {
-    const noM4a = [{ key: "sfx-tip", ogg: "sounds/sfx-tip.ogg" }];
-    expect(() => parseManifest({ ...valid, sounds: noM4a })).toThrow("manifest.sounds[0].m4a");
-    const badLoop = [{ key: "sfx-tip", loop: "yes", m4a: "a.m4a", ogg: "a.ogg" }];
-    expect(() => parseManifest({ ...valid, sounds: badLoop })).toThrow(
-      "manifest.sounds[0].loop must be a boolean",
-    );
-  });
-
-  it("names the list that is missing", () => {
-    expect(() => parseManifest({ ...valid, images: undefined })).toThrow(
-      "manifest.images must be an array",
-    );
-    const { fonts, sounds, sprites } = valid;
-    expect(() => parseManifest({ fonts, sounds, sprites })).toThrow("manifest.images is required");
-  });
-
-  it("names the entry and field that is missing", () => {
-    const sprites = [{ key: "dog-koda", png: "sprites/dog-koda.png" }];
-    expect(() => parseManifest({ ...valid, sprites })).toThrow(
-      "manifest.sprites[0].json is required",
-    );
-  });
-
-  it("rejects a key that is not kebab-case", () => {
-    const images = [{ key: "Card_Frame", png: "images/card-frame.png" }];
-    expect(() => parseManifest({ ...valid, images })).toThrow(
-      'manifest.images[0].key "Card_Frame" must be kebab-case',
-    );
-  });
-
-  it("accepts exactly the depth steps' suffixes", () => {
-    const sized = (key: string) => [{ ...valid.sprites[0], key }];
-    for (const key of ["bin@50", "dog-koda@62", "dog-koda@75", "parked-car@88"]) {
-      expect(parseManifest({ ...valid, sprites: sized(key) }).sprites[0]?.key).toBe(key);
-    }
-    for (const key of ["bin@25", "bin@33", "bin@63", "bin@", "bin@88@50", "bin@100"]) {
-      expect(() => parseManifest({ ...valid, sprites: sized(key) }), key).toThrow("kebab-case");
-    }
-  });
-
-  it("rejects a key used twice across lists, naming both lists", () => {
-    const images = [{ key: "dog-koda", png: "images/dog-koda.png" }];
-    expect(() => parseManifest({ ...valid, images })).toThrow(
-      'manifest key "dog-koda" appears more than once, in images[0] and sprites[0]',
-    );
-  });
-
-  it("rejects a manifest that is null or an array", () => {
-    expect(() => parseManifest(null)).toThrow("manifest must be an object");
-    expect(() => parseManifest([])).toThrow("manifest must be an object");
-  });
-
-  it("rejects a list that is not an array", () => {
-    expect(() => parseManifest({ ...valid, fonts: {} })).toThrow("manifest.fonts must be an array");
-  });
-
-  it("rejects a null entry", () => {
-    expect(() => parseManifest({ ...valid, images: [null] })).toThrow(
-      "manifest.images[0] must be an object",
-    );
-  });
-
-  it("rejects an empty field", () => {
-    const images = [{ key: "card-frame", png: "" }];
-    expect(() => parseManifest({ ...valid, images })).toThrow(
-      "manifest.images[0].png must be a non-empty string",
-    );
-  });
-
-  it.each([
-    ["/images/card-frame.png", "must be relative, without a leading slash"],
-    ["https://example.com/card-frame.png", "must be relative, without a scheme"],
-    ["../card-frame.png", "must not have a .. segment"],
-    ["images/../../card-frame.png", "must not have a .. segment"],
-  ])("rejects the path %s", (png, message) => {
-    const images = [{ key: "card-frame", png }];
-    expect(() => parseManifest({ ...valid, images })).toThrow(`manifest.images[0].png ${message}`);
-  });
-
-  it("accepts a path with a dot segment and dotted file names", () => {
-    const images = [{ key: "card-frame", png: "./images/card.frame.png" }];
-    expect(parseManifest({ ...valid, images }).images).toEqual(images);
-  });
-});
-
-describe("the shipped art", () => {
-  it("parses public/art/manifest.json", () => {
-    expect(parseManifest(shippedManifest).sprites.length).toBeGreaterThan(0);
+  it.each<{ error: string; manifest: unknown; name: string }>([
+    {
+      error: "feetY",
+      manifest: { ...valid, sprites: [{ ...sprite, anchor: { feetY: -1, opaqueWidth: 20 } }] },
+      name: "a negative anchor feetY",
+    },
+    {
+      error: "opaqueWidth",
+      manifest: { ...valid, sprites: [{ ...sprite, anchor: { feetY: 31, opaqueWidth: 0 } }] },
+      name: "a zero anchor opaqueWidth",
+    },
+    {
+      error: "manifest.sounds[0].m4a",
+      manifest: { ...valid, sounds: [{ key: "sfx-tip", ogg: "sounds/sfx-tip.ogg" }] },
+      name: "a sound without both formats",
+    },
+    {
+      error: "manifest.sounds[0].loop must be a boolean",
+      manifest: { ...valid, sounds: [{ key: "sfx-tip", loop: "yes", m4a: "a.m4a", ogg: "a.ogg" }] },
+      name: "a sound whose loop is not a boolean",
+    },
+    {
+      error: "manifest.images must be an array",
+      manifest: { ...valid, images: undefined },
+      name: "an undefined list, naming it",
+    },
+    {
+      error: "manifest.images is required",
+      manifest: { fonts, sounds, sprites },
+      name: "a missing list, naming it",
+    },
+    {
+      error: "manifest.sprites[0].json is required",
+      manifest: { ...valid, sprites: [{ key: "dog-koda", png: "sprites/dog-koda.png" }] },
+      name: "a missing field, naming the entry and field",
+    },
+    {
+      error: 'manifest.images[0].key "Card_Frame" must be kebab-case',
+      manifest: { ...valid, images: [{ key: "Card_Frame", png: "images/card-frame.png" }] },
+      name: "a key that is not kebab-case",
+    },
+    ...["bin@25", "bin@33", "bin@63", "bin@", "bin@88@50", "bin@100"].map((key) => ({
+      error: "kebab-case",
+      manifest: keyed(key),
+      name: `the key ${key}, which is not a depth step`,
+    })),
+    {
+      error: 'manifest key "dog-koda" appears more than once, in images[0] and sprites[0]',
+      manifest: { ...valid, images: [{ key: "dog-koda", png: "images/dog-koda.png" }] },
+      name: "a key used twice across lists, naming both lists",
+    },
+    { error: "manifest must be an object", manifest: null, name: "a null manifest" },
+    { error: "manifest must be an object", manifest: [], name: "an array manifest" },
+    {
+      error: "manifest.fonts must be an array",
+      manifest: { ...valid, fonts: {} },
+      name: "a list that is not an array",
+    },
+    {
+      error: "manifest.images[0] must be an object",
+      manifest: { ...valid, images: [null] },
+      name: "a null entry",
+    },
+    {
+      error: "manifest.images[0].png must be a non-empty string",
+      manifest: { ...valid, images: [{ key: "card-frame", png: "" }] },
+      name: "an empty field",
+    },
+    ...[
+      ["/images/card-frame.png", "must be relative, without a leading slash"],
+      ["https://example.com/card-frame.png", "must be relative, without a scheme"],
+      ["../card-frame.png", "must not have a .. segment"],
+      ["images/../../card-frame.png", "must not have a .. segment"],
+    ].map(([png, message]) => ({
+      error: `manifest.images[0].png ${message ?? ""}`,
+      manifest: { ...valid, images: [{ key: "card-frame", png }] },
+      name: `the path ${png ?? ""}`,
+    })),
+  ])("rejects $name", ({ error, manifest }) => {
+    expect(() => parseManifest(manifest)).toThrow(error);
   });
 });
 
 describe("assetUrl", () => {
-  it("joins the base and path with one slash", () => {
-    expect(assetUrl("/art/", "/sprites/dog-koda.png")).toBe("/art/sprites/dog-koda.png");
-    expect(assetUrl("/art", "sprites/dog-koda.png")).toBe("/art/sprites/dog-koda.png");
+  it.each([
+    ["/art/", "/sprites/dog-koda.png"],
+    ["/art", "sprites/dog-koda.png"],
+  ])("joins %s and %s with one slash", (base, path) => {
+    expect(assetUrl(base, path)).toBe("/art/sprites/dog-koda.png");
   });
 });

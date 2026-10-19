@@ -141,10 +141,6 @@ describe("dog art", () => {
     expect(missing).toEqual([]);
   });
 
-  it("names a portrait for every dog", () => {
-    expect(missingImages(DOGS.map((dog) => dogPortraitKey(gameData, dog)))).toEqual([]);
-  });
-
   it("names a doghouse roof for every dog and the empty house", () => {
     const tags = [...DOGS.map((dog) => doghouseTag(gameData, dog)), doghouseTag(gameData, null)];
     expect(missingTags("ui-doghouse", tags)).toEqual([]);
@@ -167,31 +163,43 @@ describe("walker art", () => {
   });
 });
 
+describe("image art", () => {
+  it.each<[string, () => string[]]>([
+    ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
+    [
+      "a strip icon for every debuff, upgrade and gear item",
+      () => [
+        ...(Object.keys(gameData.debuffs) as DebuffId[]).map((debuff) =>
+          stripIconKey({ debuff, kind: "debuff" }),
+        ),
+        ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
+          stripIconKey({ kind: "upgrade", upgrade }),
+        ),
+        ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
+          stripIconKey({ gear, kind: "gear" }),
+        ),
+      ],
+    ],
+    [
+      "an icon for every trait, energy and temperament",
+      () => [
+        ...members<TraitId>({ chaser: true, fancy: true, foodDriven: true }).map(traitIconKey),
+        ...members<Energy>({ calm: true, hyper: true, steady: true }).map(energyIconKey),
+        ...TEMPERAMENTS.map(temperamentIconKey),
+      ],
+    ],
+    ["a help illustration for every help page", () => gameData.help.map(({ art }) => art)],
+    [
+      "card art for every option of every need card",
+      () =>
+        Object.values(gameData.needCards).flatMap(({ options }) => options.map(({ art }) => art)),
+    ],
+  ])("names %s", (_, keys) => {
+    expect(missingImages(keys())).toEqual([]);
+  });
+});
+
 describe("icon art", () => {
-  it("names a strip icon for every debuff, upgrade and gear item", () => {
-    const keys = [
-      ...(Object.keys(gameData.debuffs) as DebuffId[]).map((debuff) =>
-        stripIconKey({ debuff, kind: "debuff" }),
-      ),
-      ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
-        stripIconKey({ kind: "upgrade", upgrade }),
-      ),
-      ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
-        stripIconKey({ gear, kind: "gear" }),
-      ),
-    ];
-    expect(missingImages(keys)).toEqual([]);
-  });
-
-  it("names an icon for every trait, energy and temperament", () => {
-    const keys = [
-      ...members<TraitId>({ chaser: true, fancy: true, foodDriven: true }).map(traitIconKey),
-      ...members<Energy>({ calm: true, hyper: true, steady: true }).map(energyIconKey),
-      ...TEMPERAMENTS.map(temperamentIconKey),
-    ];
-    expect(missingImages(keys)).toEqual([]);
-  });
-
   it("names a slot icon and a looping overlay for every status at every step any overlay has", () => {
     const steps = [1, ...variantSteps(STATUSES.map(statusOverlayKey))];
     expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
@@ -211,10 +219,6 @@ describe("icon art", () => {
     const badges = badgeWall(gameData, { achievements: {} });
     expect(badges).toHaveLength(Object.keys(gameData.achievements).length);
     expect(badges.flatMap(({ art }) => missingTags(art, ["earned", "locked"]))).toEqual([]);
-  });
-
-  it("names a help illustration for every help page", () => {
-    expect(missingImages(gameData.help.map(({ art }) => art))).toEqual([]);
   });
 
   it("tags ui-zone-pips with every route pip, for every zone", () => {
@@ -318,13 +322,6 @@ describe("need art", () => {
     });
     expect(missing).toEqual([]);
     expect(missingTags(needSpotSpriteKey("stranger"), ["wave"])).toEqual([]);
-  });
-
-  it("names card art for every option of every need card", () => {
-    const cards = Object.values(gameData.needCards);
-    expect(missingImages(cards.flatMap(({ options }) => options.map(({ art }) => art)))).toEqual(
-      [],
-    );
   });
 });
 

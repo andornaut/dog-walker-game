@@ -33,63 +33,54 @@ describe("animationSpecs", () => {
     ]);
   });
 
-  it("plays each direction in Aseprite's order", () => {
-    const frameOrder = (direction: string) =>
-      itemAt(animationSpecs("dog", sheet([1, 2, 3], [tag(direction, 0, 2)])), 0).frames.map(
-        ({ duration }) => duration,
-      );
-    expect(frameOrder("forward")).toEqual([1, 2, 3]);
-    expect(frameOrder("reverse")).toEqual([3, 2, 1]);
-    expect(frameOrder("pingpong")).toEqual([1, 2, 3, 2]);
-    expect(frameOrder("pingpong_reverse")).toEqual([3, 2, 1, 2]);
+  it.each([
+    ["forward", [1, 2, 3]],
+    ["reverse", [3, 2, 1]],
+    ["pingpong", [1, 2, 3, 2]],
+    ["pingpong_reverse", [3, 2, 1, 2]],
+  ])("plays %s in Aseprite's order", (direction, order) => {
+    const [spec] = animationSpecs("dog", sheet([1, 2, 3], [tag(direction, 0, 2)]));
+    expect(spec?.frames.map(({ duration }) => duration)).toEqual(order);
   });
 
   it("returns no animations for a sheet without tags", () => {
     expect(animationSpecs("face", sheet([100], undefined))).toEqual([]);
   });
 
-  it("names the tag that points past the last frame", () => {
-    expect(() => animationSpecs("dog-koda", sheet([150], [tag("forward", 0, 4)]))).toThrow(
-      'dog-koda tag "walk" refers to missing frame 1',
-    );
-  });
-
-  it("rejects a tag whose from is after its to", () => {
-    const tags = [tag("forward", 2, 1)];
-    expect(() => animationSpecs("dog-koda", sheet([150, 150, 150], tags))).toThrow(
-      "dog-koda sheet.meta.frameTags[0] from must not be after to",
-    );
-  });
-
-  it("rejects a tag with an unknown direction", () => {
-    expect(() => animationSpecs("dog-koda", sheet([150], [tag("sideways", 0, 0)]))).toThrow(
-      "dog-koda sheet.meta.frameTags[0].direction must be one of",
-    );
-  });
-
-  it("rejects a tag whose frames are not whole numbers", () => {
-    expect(() => animationSpecs("dog-koda", sheet([150, 150], [tag("forward", 0.5, 1)]))).toThrow(
-      "dog-koda sheet.meta.frameTags[0].from must be a whole number",
-    );
-  });
-
-  it("rejects a frame without a positive duration", () => {
-    expect(() => animationSpecs("dog-koda", sheet([0], []))).toThrow(
-      "dog-koda sheet.frames.dog 0.aseprite.duration must be positive",
-    );
-  });
-
-  it("names the texture when meta is missing", () => {
-    expect(() => animationSpecs("dog-koda", { frames: {} })).toThrow(
-      "dog-koda sheet.meta is required",
-    );
-  });
-
-  it("rejects Aseprite's array export", () => {
-    const frames = [{ duration: 150, filename: "dog 0.aseprite" }];
-    expect(() => animationSpecs("dog-koda", { frames, meta: {} })).toThrow(
-      'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
-    );
+  it.each<{ error: string; json: unknown; name: string }>([
+    {
+      error: 'dog-koda tag "walk" refers to missing frame 1',
+      json: sheet([150], [tag("forward", 0, 4)]),
+      name: "a tag that points past the last frame, naming it",
+    },
+    {
+      error: "dog-koda sheet.meta.frameTags[0] from must not be after to",
+      json: sheet([150, 150, 150], [tag("forward", 2, 1)]),
+      name: "a tag whose from is after its to",
+    },
+    {
+      error: "dog-koda sheet.meta.frameTags[0].direction must be one of",
+      json: sheet([150], [tag("sideways", 0, 0)]),
+      name: "a tag with an unknown direction",
+    },
+    {
+      error: "dog-koda sheet.meta.frameTags[0].from must be a whole number",
+      json: sheet([150, 150], [tag("forward", 0.5, 1)]),
+      name: "a tag whose frames are not whole numbers",
+    },
+    {
+      error: "dog-koda sheet.frames.dog 0.aseprite.duration must be positive",
+      json: sheet([0], []),
+      name: "a frame without a positive duration",
+    },
+    { error: "dog-koda sheet.meta is required", json: { frames: {} }, name: "a missing meta" },
+    {
+      error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
+      json: { frames: [{ duration: 150, filename: "dog 0.aseprite" }], meta: {} },
+      name: "Aseprite's array export",
+    },
+  ])("rejects $name", ({ error, json }) => {
+    expect(() => animationSpecs("dog-koda", json)).toThrow(error);
   });
 });
 
