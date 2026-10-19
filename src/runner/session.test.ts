@@ -5,6 +5,7 @@ import { cardFor, openCard } from "../rules/choices";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { type CardSource, newRun } from "../state/runState";
+import { STEP_SECONDS } from "./fixedStep";
 import {
   chooseCard,
   headHomeSession,
@@ -13,7 +14,6 @@ import {
   type SessionEvent,
   type SessionInput,
   startSession,
-  STEP_SECONDS,
   stepSession,
 } from "./session";
 import { type RoadGeometry, startRoad, zoneLength } from "./walk";

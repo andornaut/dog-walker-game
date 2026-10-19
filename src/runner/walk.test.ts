@@ -14,7 +14,16 @@ import { RUN_TEXT } from "../data/runText";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
-import type { EncounterId, LiveTuning, WalkerId, World, Zone, ZoneId } from "../data/types";
+import type {
+  EncounterId,
+  LiveTuning,
+  MinorObstacleId,
+  ObstacleEncounterId,
+  WalkerId,
+  World,
+  Zone,
+  ZoneId,
+} from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { DEFAULT_WALKER, WALKERS } from "../data/walkers";
 import { WORLD } from "../data/world";
@@ -127,6 +136,26 @@ function sharedWorld(world: World, share: number): World {
   const shared = (zone: Zone): Zone => ({ ...zone, moverShare: share });
   return { ...world, zones: [shared(first), ...rest.map(shared)] };
 }
+// The world with every zone's weights changed by reweigh.
+function reweighed(reweigh: (weights: Zone["weights"]) => Zone["weights"]): World {
+  const [first, ...rest] = WORLD.zones;
+  const zoned = (zone: Zone): Zone => ({ ...zone, weights: reweigh(zone.weights) });
+  return { ...WORLD, zones: [zoned(first), ...rest.map(zoned)] };
+}
+// The weights with each of ids weighed one higher.
+function raised<Id extends string>(
+  weights: Readonly<Record<Id, number>>,
+  ids: readonly Id[],
+): Record<Id, number> {
+  const entries = (Object.keys(weights) as Id[]).map((id) => [
+    id,
+    ids.includes(id) ? weights[id] + 1 : weights[id],
+  ]);
+  return Object.fromEntries(entries) as Record<Id, number>;
+}
+const OBSTACLE_IDS = Object.keys(WORLD.zones[0].weights.obstacles) as ObstacleEncounterId[];
+const MINOR_OBSTACLE_IDS = Object.keys(MINOR_OBSTACLES) as MinorObstacleId[];
+const LANES = Array.from({ length: LANE_COUNT }, (_, lane) => lane);
 // The run in zone, walked at position zoneIndex.
 const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState => ({
   ...run,
@@ -138,6 +167,11 @@ const walkwayOf = (tuned: Real, run: RunState) => ({
   laneMoveSeconds: read(TUNING, "seconds", "laneMove"),
   scrollSpeed: walkScrollSpeed(tuned, run),
   zoneLength: zoneLength(tuned, run),
+});
+// The walker whose pace scrolls the road fastest.
+const FASTEST_WALKER = (Object.keys(WALKERS) as WalkerId[]).reduce((fastest, walker) => {
+  const speed = (id: WalkerId) => walkScrollSpeed(REAL, realRun(REAL, id));
+  return speed(walker) > speed(fastest) ? walker : fastest;
 });
 // A standing spawn's span on the game's road.
 const standingSpan = (
@@ -385,18 +419,41 @@ describe("planZone", { timeout: 15_000 }, () => {
     }
   });
 
-  // A one-row spawn's window is its hit box and the tallest pack's band; the rest of a row's
-  // spacing must hold a lane move, or the planner can steer no lane between rows and drops
-  // the spawns that would need one.
-  it("leaves a lane move between rows of the game's road, in every zone, at every pace", () => {
-    const { cell, tallestPackBand } = GAME_ROAD;
-    const gap =
-      read(TUNING, "pixels", "spawnRowSpacing") - (cell.length - 2 * cell.inset) - tallestPackBand;
-    for (const walker of Object.keys(WALKERS) as WalkerId[]) {
-      for (const zone of ZONE_IDS) {
-        const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
-        const laneMove = walkScrollSpeed(REAL, zoned) * read(TUNING, "seconds", "laneMove");
-        expect(gap, `${walker} in ${zone}`).toBeGreaterThanOrEqual(laneMove);
+  // Each obstacle's weight raised on every zone in turn, then every obstacle's and every minor
+  // obstacle's at once, at the fastest pace in the last zone, where the road is fastest.
+  it.each<{ name: string; world: World }>([
+    ...OBSTACLE_IDS.map((id) => ({
+      name: id,
+      world: reweighed((weights) => ({ ...weights, obstacles: raised(weights.obstacles, [id]) })),
+    })),
+    {
+      name: "every obstacle",
+      world: reweighed((weights) => ({
+        ...weights,
+        obstacles: raised(weights.obstacles, OBSTACLE_IDS),
+      })),
+    },
+    {
+      name: "every minor obstacle",
+      world: reweighed((weights) => ({
+        ...weights,
+        minorObstacles: raised(weights.minorObstacles, MINOR_OBSTACLE_IDS),
+      })),
+    },
+  ])("plans a way past every row from any lane with $name weighed higher", ({ world }) => {
+    const tuned = { ...REAL, world };
+    for (const zone of ZONE_IDS) {
+      const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
+      for (const seed of [1, 2, 3]) {
+        const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        });
+        const spans = blockingSpans(tuned, walk.road.pending);
+        for (const start of LANES) {
+          const reached = lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start);
+          expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
+        }
       }
     }
   });

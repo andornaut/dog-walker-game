@@ -29,6 +29,7 @@ import { affectedDogs, opensCard } from "../rules/encounters";
 import { minorBump } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { addCents, type Cents, cents, read } from "../rules/units";
+import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
 import { hasLeftRoad, isMoverObstacle, type MoverKind, moverPlace } from "../runner/movers";
 import { isNeedSpot, meetNeedAt, type NeedMoment } from "../runner/needs";
@@ -41,7 +42,6 @@ import {
   type SessionInput,
   type SessionStep,
   startSession,
-  STEP_SECONDS,
   stepSession,
 } from "../runner/session";
 import {

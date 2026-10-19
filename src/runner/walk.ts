@@ -22,6 +22,7 @@ import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import { collideWithPack, type PackFootprint, tickInvulnerability, touchesPack } from "./collision";
+import { STEP_SECONDS } from "./fixedStep";
 import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 import {
   advanceLaneControl,
@@ -49,6 +50,7 @@ import {
   type Footprint,
   hitLength,
   planSpawns,
+  rowSpacing,
   SINGLE_CELL,
   type SpawnEvent,
   type SpawnQuota,
@@ -502,21 +504,23 @@ export function planZone(
 ): Walk {
   const { road, run } = walk;
   const length = zoneLength(data, run);
-  const spacing = read(data.tuning, "pixels", "spawnRowSpacing");
-  const pending = planSpawns(random, {
+  const plan = {
     cellInset: geometry.cell.inset,
     cellLength: geometry.cell.length,
     laneCount: geometry.laneCount,
     laneMoveSeconds: read(data.tuning, "seconds", "laneMove"),
     minOpenLanes: read(data.tuning, "counts", "openLanesPerRowMin"),
-    minSpacing: spacing,
+    minSpacing: read(data.tuning, "pixels", "spawnRowSpacing"),
     packLength: geometry.tallestPackBand,
     quotas: spawnQuotas(data, random, run),
     roadLength: geometry.roadBottom - geometry.roadTop,
     scrollSpeed: walkScrollSpeed(data, run),
     sightLength: geometry.sightLength,
+    stepSeconds: STEP_SECONDS,
     zoneLength: length,
-  });
+  };
+  const pending = planSpawns(random, plan);
+  const spacing = rowSpacing(plan);
 
   const stops = positiveWeights(currentZone(data, run).weights.forcedStops);
   const unseen = stops.filter(([stop]) => !road.forcedStopsSeen.includes(stop));

@@ -2,11 +2,11 @@ import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { inputLockSeconds } from "../rules/dogs";
 import { read } from "../rules/units";
+import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
 import { isNeedUrgent, needFill, needSpotOf, spotMeets } from "../runner/needs";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
-import { STEP_SECONDS } from "../runner/session";
 import {
   isPickup,
   itemCategory,

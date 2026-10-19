@@ -23,9 +23,9 @@ export interface SpawnQuota<Kind extends string> {
 // Distances are scroll distances in pixels from the start of the zone. A spawn's footprint
 // is cellLength per row, and its hit box is the footprint less cellInset at each end; it
 // overlaps the pack over its hit box's length plus packLength. scrollSpeed (pixels per
-// second) and laneMoveSeconds set how far the pack can steer between rows. sightLength is the
-// road in view above the pack, so the next row shows before the pack has to steer for it, and
-// roadLength the whole road in view.
+// second), laneMoveSeconds and stepSeconds, the walk's step, set how far the pack can steer
+// between rows. sightLength is the road in view above the pack, so the next row shows before
+// the pack has to steer for it, and roadLength the whole road in view.
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -38,6 +38,7 @@ export interface SpawnPlan<Kind extends string> {
   roadLength: number;
   scrollSpeed: number;
   sightLength: number;
+  stepSeconds: number;
   zoneLength: number;
 }
 
@@ -54,8 +55,7 @@ export interface DueSpawns<Kind extends string> {
   pending: readonly SpawnEvent<Kind>[];
 }
 
-// entry is the reach into the first row from anywhere: the zone starts minSpacing clear,
-// and the previous zone ends at least minSpacing clear, so the gap is twice minSpacing.
+// entry is the reach into the first row from any lane: the zone starts a row spacing clear.
 export interface LaneReach {
   betweenRows: number;
   entry: number;
@@ -83,31 +83,54 @@ export function blockingLength(geometry: Geometry, rows: number): number {
   return hitLength(geometry, rows) + geometry.packLength;
 }
 
-// Whole lane moves that fit in a stretch of clear road.
+// A rounding error in counting steps and moves.
+const ROUNDING = 1e-9;
+
+// The scroll a walk step covers.
+function stepLength(plan: SpawnPlan<string>): number {
+  return plan.scrollSpeed * plan.stepSeconds;
+}
+
+// The scroll a lane move covers: it lasts whole walk steps.
+function laneMoveLength(plan: SpawnPlan<string>): number {
+  return Math.ceil(plan.laneMoveSeconds / plan.stepSeconds - ROUNDING) * stepLength(plan);
+}
+
+// Whole lane moves that fit in a stretch of clear road. The pack starts a move only on a walk
+// step, which can come up to a step into the stretch, so the moves need a step to spare.
 function lanesWithin(plan: SpawnPlan<string>, clearDistance: number): number {
-  const { laneCount, laneMoveSeconds, scrollSpeed } = plan;
-  const maxReach = laneCount - 1;
-  if (laneMoveSeconds <= 0) {
+  const maxReach = plan.laneCount - 1;
+  if (plan.laneMoveSeconds <= 0) {
     return maxReach;
   }
-  const moves = Math.floor(clearDistance / (scrollSpeed * laneMoveSeconds));
-  return Math.min(maxReach, moves);
+  const moves = Math.floor((clearDistance - stepLength(plan)) / laneMoveLength(plan) + ROUNDING);
+  return Math.max(0, Math.min(maxReach, moves));
+}
+
+// Rows are minSpacing apart, or, on a road too fast for a lane move between one row's window
+// and the next, the fewest whole pixels apart that fit one with its step to spare.
+export function rowSpacing(plan: SpawnPlan<string>): number {
+  if (plan.laneMoveSeconds <= 0) {
+    return plan.minSpacing;
+  }
+  const oneMove = blockingLength(plan, 1) + stepLength(plan) + laneMoveLength(plan);
+  return Math.max(plan.minSpacing, Math.ceil(oneMove - ROUNDING));
 }
 
 // Every row has a window, the distance over which a one-row spawn on it overlaps the pack,
 // and a gap of clear road before the next row's window, where the pack changes lanes.
 export function laneReach(plan: SpawnPlan<string>): LaneReach {
-  const { minSpacing, sightLength } = plan;
+  const spacing = rowSpacing(plan);
   const window = blockingLength(plan, 1);
-  if (window > minSpacing) {
+  if (window > plan.minSpacing) {
     throw new Error("minSpacing must be at least a row's blocking length, or rows overlap");
   }
-  if (minSpacing > window + sightLength) {
-    throw new Error("minSpacing must keep the next row in sight before the pack steers for it");
+  if (spacing > window + plan.sightLength) {
+    throw new Error("Rows must keep the next row in sight before the pack steers for it");
   }
   return {
-    betweenRows: lanesWithin(plan, minSpacing - window),
-    entry: lanesWithin(plan, 2 * minSpacing - window),
+    betweenRows: lanesWithin(plan, spacing - window),
+    entry: lanesWithin(plan, spacing),
   };
 }
 
@@ -156,23 +179,23 @@ interface Cell {
 }
 
 // Which rows' windows and gaps a lane-blocking spawn rows long, placed on row, overlaps.
-// Rows are minSpacing apart, so the indexes are counted from distances.
-function blockingSpan(plan: SpawnPlan<string>, row: number, rows: number) {
+// Rows are spacing apart, so the indexes are counted from distances.
+function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, rows: number) {
   const window = blockingLength(plan, 1);
   const reach = blockingLength(plan, rows);
-  // Window k (k >= row) starts (k - row) * minSpacing after this row and is overlapped while
+  // Window k (k >= row) starts (k - row) * spacing after this row and is overlapped while
   // that is less than reach; gap k starts window after window k.
-  const lastRow = row + Math.ceil(reach / plan.minSpacing) - 1;
-  const lastGap = row + Math.ceil((reach - window) / plan.minSpacing) - 1;
+  const lastRow = row + Math.ceil(reach / spacing) - 1;
+  const lastGap = row + Math.ceil((reach - window) / spacing) - 1;
   return { lastGap, lastRow };
 }
 
-// Every spawn takes free cells of a lane-by-row grid. Each kind's spawns are spread over
-// equal stretches of the zone, one per stretch, so no kind bunches up; kinds with bigger
-// footprints are placed first. Lane-blocking spawns only take cells that keep every hit
-// avoidable: each row's window and the gap after it keep minOpenLanes open, and from any
-// lane of the previous zone, and from every open lane of each row, an open lane of the next
-// row is within reach without crossing a lane blocked in the gap between them. A spawn more
+// Every spawn takes free cells of a lane-by-row grid, its rows rowSpacing apart. Each kind's
+// spawns are spread over equal stretches of the zone, one per stretch, so no kind bunches up;
+// kinds with bigger footprints are placed first. Lane-blocking spawns only take cells that
+// keep every hit avoidable: each row's window and the gap after it keep minOpenLanes open, and
+// from any lane at the zone's start, and from every open lane of each row, an open lane of the
+// next row is within reach without crossing a lane blocked in the gap between them. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
 // last row. Movers are placed first, by placeMovers; a crosser keeps the row before its own
 // clear as a lead-in, so the pack steers into its row from two rows back. A mover, or an
@@ -185,7 +208,8 @@ export function planSpawns<Kind extends string>(
 ): SpawnEvent<Kind>[] {
   const { laneCount, minOpenLanes } = plan;
   const reach = laneReach(plan);
-  const rows = spawnRowDistances(plan.minSpacing, plan.zoneLength);
+  const spacing = rowSpacing(plan);
+  const rows = spawnRowDistances(spacing, plan.zoneLength);
   // Lane masks per row: lanes taken by a spawn, lanes blocked in the row's window, and lanes
   // blocked in the gap after it.
   const taken = new Int32Array(rows.length);
@@ -212,7 +236,7 @@ export function planSpawns<Kind extends string>(
 
   // Rows a mover keeps clear before its own, so the pack steers from the row before them.
   const leadIns = new Set<number>();
-  const leadInReach = lanesWithin(plan, 2 * plan.minSpacing - blockingLength(plan, 1));
+  const leadInReach = lanesWithin(plan, 2 * spacing - blockingLength(plan, 1));
 
   const crossesFrom = (row: number): boolean => {
     if (row === -1) {
@@ -240,7 +264,7 @@ export function planSpawns<Kind extends string>(
   // Blocks the footprint's lanes, checks every transition it touches, and undoes the block
   // unless keep is set and the checks pass.
   const tryBlock = (cell: Cell, footprint: Footprint, keep: boolean): boolean => {
-    const { lastGap, lastRow } = blockingSpan(plan, cell.row, footprint.rows);
+    const { lastGap, lastRow } = blockingSpan(plan, spacing, cell.row, footprint.rows);
     if (lastRow >= rows.length || lastGap >= rows.length - 1) {
       return false;
     }
@@ -274,7 +298,7 @@ export function planSpawns<Kind extends string>(
   // The last row a spawn's cells take: a lane-blocking spawn takes every row whose window it
   // overlaps.
   const lastRowTaken = (cell: Cell, footprint: Footprint, blocksLane: boolean): number =>
-    blocksLane ? blockingSpan(plan, cell.row, footprint.rows).lastRow : cell.row;
+    blocksLane ? blockingSpan(plan, spacing, cell.row, footprint.rows).lastRow : cell.row;
 
   const fits = (cell: Cell, footprint: Footprint, blocksLane: boolean): boolean => {
     if (cell.lane + footprint.lanes > laneCount) {
@@ -345,7 +369,7 @@ export function planSpawns<Kind extends string>(
     cellLength: plan.cellLength,
     laneCount,
     roadLength: plan.roadLength,
-    rowSpacing: plan.minSpacing,
+    rowSpacing: spacing,
     scrollSpeed: plan.scrollSpeed,
     sightLength: plan.sightLength,
     window: blockingLength(plan, 1),

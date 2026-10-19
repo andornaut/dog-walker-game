@@ -22,6 +22,9 @@ export interface FrameSteps {
   readonly steps: number;
 }
 
+// The game steps at 60 Hz.
+export const STEP_SECONDS = 1 / 60;
+
 export const startStepClock: StepClock = { bankedMs: 0, lastTimeMs: null };
 
 // timeMs is the frame's timestamp. It must come from the frame timestamps and not Phaser's

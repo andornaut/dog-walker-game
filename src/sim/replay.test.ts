@@ -12,8 +12,9 @@ import {
 } from "../dev/inputLog";
 import { runSetupLimitsFor } from "../dev/pageRunSetup";
 import { loadoutFor, withSetupStart } from "../dev/setupRun";
+import { STEP_SECONDS } from "../runner/fixedStep";
 import { screenRoadGeometry } from "../runner/screenGeometry";
-import { chooseCard, runStreams, startSession, STEP_SECONDS, stepSession } from "../runner/session";
+import { chooseCard, runStreams, startSession, stepSession } from "../runner/session";
 import { startRoad } from "../runner/walk";
 import { newRun, type RunState } from "../state/runState";
 import type { PolicyId } from "./policies";

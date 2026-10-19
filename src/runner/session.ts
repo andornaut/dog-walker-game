@@ -113,9 +113,6 @@ export interface SessionStep {
   readonly session: Session;
 }
 
-// The game steps at 60 Hz.
-export const STEP_SECONDS = 1 / 60;
-
 export function runStreams(seed: number): RunStreams {
   return {
     cards: randomStream(seed, "cards"),

@@ -9,8 +9,10 @@ import {
   type Footprint,
   hitLength,
   laneMask,
+  type LaneReach,
   laneReach,
   planSpawns,
+  rowSpacing,
   type SpawnEvent,
   type SpawnPlan,
   spawnRowDistances,
@@ -21,7 +23,7 @@ type Kind = "bench" | "car" | "hedge" | "obstacle" | "skunk" | "tip" | "treat";
 
 // 9 rows at 100..900, 5 lanes. A one-row hit box is 30 - 2 x 5 = 20px; with the 30px pack a
 // row's window is 50px, leaving 50px of clear road between rows: at 100px/s that is 0.5s,
-// time for 5 moves of 0.1s, so the pack can reach any lane from any row.
+// time for a 0.05s step and 4 moves of 0.1s, so the pack can reach any lane from any row.
 const plan: SpawnPlan<Kind> = {
   cellInset: 5,
   cellLength: 30,
@@ -38,11 +40,12 @@ const plan: SpawnPlan<Kind> = {
   roadLength: 1100,
   scrollSpeed: 100,
   sightLength: 1000,
+  stepSeconds: 0.05,
   zoneLength: 1000,
 };
 
-// A 70px window leaves 0.3s between rows, which fits one 0.25s move; the 1.3s into the first
-// row fits five.
+// A 70px window leaves 0.3s between rows, which fits a step and one 0.25s move; the 1s into the
+// first row fits a step and three.
 const tight: SpawnPlan<Kind> = {
   ...plan,
   laneMoveSeconds: 0.25,
@@ -82,7 +85,7 @@ const blocking = (event: SpawnEvent<Kind>) => event.kind !== "tip" && event.kind
 // The lanes no lane-blocking spawn overlaps in each row's window.
 function openLanesByRow(spawnPlan: SpawnPlan<Kind>, events: SpawnEvent<Kind>[]): number[][] {
   const window = blockingLength(spawnPlan, 1);
-  return spawnRowDistances(spawnPlan.minSpacing, spawnPlan.zoneLength).map((distance) => {
+  return spawnRowDistances(rowSpacing(spawnPlan), spawnPlan.zoneLength).map((distance) => {
     const blocked = events.filter(blocking).flatMap((event) => {
       const { lanes, rows } = footprintOf(event.kind);
       const overlaps =
@@ -214,18 +217,6 @@ describe("planSpawns", () => {
       name: "the next row is out of sight before the pack must steer for it",
       unplannable: { ...plan, sightLength: 49 },
     },
-    {
-      // 100px of road into the first row at 100px/s is 1s, less than one 2s move, so every
-      // lane of the first row must stay open, and then of every row after it.
-      error: /obstacle/,
-      name: "no obstacle can be placed without blocking every reachable lane",
-      unplannable: {
-        ...plan,
-        laneMoveSeconds: 2,
-        packLength: 80,
-        quotas: [{ blocksLane: true, count: 1, kind: "obstacle" }],
-      },
-    },
   ])("throws when $name", ({ error, unplannable }) => {
     expect(() => planSpawns(seededRandom(1), unplannable)).toThrow(error);
   });
@@ -324,12 +315,45 @@ describe("planSpawns", () => {
   });
 });
 
-describe("laneReach", () => {
-  it("counts the whole lane moves that fit in the clear road between rows", () => {
-    expect(laneReach(tight)).toEqual({ betweenRows: 1, entry: 4 });
-    expect(laneReach({ ...tight, scrollSpeed: 200 })).toEqual({ betweenRows: 0, entry: 2 });
+describe("laneReach and rowSpacing", () => {
+  // tight's 70px window leaves 30px between rows 100px apart. A move lasts whole 0.05s steps,
+  // and needs a step to spare.
+  it.each<{ name: string; reach: LaneReach; spaced: SpawnPlan<Kind>; spacing: number }>([
+    {
+      name: "a step and a move fit",
+      reach: { betweenRows: 1, entry: 3 },
+      spaced: tight,
+      spacing: 100,
+    },
+    {
+      name: "a 0.26s move lasts six steps, 30px",
+      reach: { betweenRows: 1, entry: 3 },
+      spaced: { ...tight, laneMoveSeconds: 0.26 },
+      spacing: 105,
+    },
+    {
+      name: "at 200px/s a 10px step and a 50px move need 60px",
+      reach: { betweenRows: 1, entry: 2 },
+      spaced: { ...tight, scrollSpeed: 200 },
+      spacing: 130,
+    },
     // Never further than the road is wide.
-    expect(laneReach({ ...plan, laneMoveSeconds: 0 })).toEqual({ betweenRows: 4, entry: 4 });
+    {
+      name: "an instant move reaches every lane",
+      reach: { betweenRows: 4, entry: 4 },
+      spaced: { ...plan, laneMoveSeconds: 0 },
+      spacing: 100,
+    },
+  ])("spaces rows for a lane move between them: $name", ({ reach, spaced, spacing }) => {
+    expect(rowSpacing(spaced)).toBe(spacing);
+    expect(laneReach(spaced)).toEqual(reach);
+  });
+
+  it("plans the spawns on rows that far apart", () => {
+    const fast = { ...tight, quotas: plan.quotas, scrollSpeed: 200 };
+    const distances = planSpawns(seededRandom(1), fast).map(({ distance }) => distance);
+    expect(distances.length).toBeGreaterThan(0);
+    expect(distances.every((distance) => distance % rowSpacing(fast) === 0)).toBe(true);
   });
 });
 

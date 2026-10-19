@@ -18,6 +18,7 @@ import {
   frameSteps,
   holdStepClock,
   startStepClock,
+  STEP_SECONDS,
   type StepClock,
 } from "../runner/fixedStep";
 import { screenRoadGeometry } from "../runner/screenGeometry";
@@ -30,7 +31,6 @@ import {
   type SessionEvent,
   type SessionStep,
   startSession,
-  STEP_SECONDS,
   stepSession,
 } from "../runner/session";
 import { activeStatuses, shownStatus, type StatusMark } from "../runner/statuses";
