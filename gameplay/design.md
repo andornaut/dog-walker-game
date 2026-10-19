@@ -89,7 +89,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **First-time hints:** a one-line hint the first time each thing appears (first puddle, first pull, first treat, first forced stop and so on); the help screen covers the rest
 - **Sound:** short effects (tip, treat, bump, bark, card open, fired), a sound for each encounter hit (spray hiss, splash, coin scatter, squirrel chitter, friendly woof), a badge-earned jingle and a new-best fanfare, and one music loop for the walk
 - **Settings** (from pause and the home screen): sound on or off, music volume, effects volume, reduced motion
-- **Panels:** every page and overlay has one close control at the top right. Tapping the dimmed background outside the Settings panel closes it, and outside the pause menu resumes the walk; only taps outside the panel count
+- **Panels:** every page and overlay has one close control at the top right. Tapping the dimmed background outside the Settings panel closes it, and outside the pause menu resumes the walk; only taps outside the panel count. A tap on the page beside the game (left or right of it on a wide screen) counts as outside too; the nav bar and the dev panel don't
 
 ### Pickups
 
