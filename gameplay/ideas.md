@@ -4,6 +4,14 @@ Undecided and cut ideas; nothing here is a commitment.
 
 Format: `- [status] **Idea**: short description · notes`. Statuses: **floated** (said, not discussed), **exploring** (being discussed), **cut** (decided against, kept with the reason so it isn't argued again).
 
+## Dogs
+
+- [floated] **A quirk for every dog**: Archie and Penny have one; give the other seven one each from their personality, so every dog reads as a character · keep each mild, with any strong downside matched by an upside
+
+## Look and feel
+
+- [floated] **Horizon and sky**: an Outrun-style horizon at the top of the road instead of a cross street, with sky above · art to mock it up first
+
 ## Run and onboarding
 
 - [floated] **Fewer minor cards**: a puddle that catches one dog resolves without a card unless the dog is Fancy or its owner would fire you · decide after the first playtest
