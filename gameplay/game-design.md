@@ -152,10 +152,23 @@ Obstacles hit by accident open a choice card.
 
 **Stinky** (debuff): cuts tip value for the rest of the zone. A second skunk refreshes it; it never stacks.
 
+### More encounters
+
+Zone-specific encounters (they follow the zone's encounter mix):
+
+| Encounter      | Zones                         | Size                  | Who's affected                            | Options                                                                                                                                                         | Hit label         |
+| -------------- | ----------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| Picnic raid    | Bark Park, Paws Promenade     | 2 × 1                 | Food-driven dogs (none: scenery, no card) | Buy a new lunch → −$ per affected dog · Drop it! → −♥ to affected owners                                                                                        | "SNACK ATTACK!"   |
+| Angry goose    | Paws Promenade, Long Way Home | 1 × 1, waddles across | All dogs; a big dog doesn't scare it      | Back off slowly → −$ per dog (missed tips) · Honk back → −♥ each (−♥♥ Chasers)                                                                                  | "HONK!"           |
+| Prize petunias | Snooze Crescent, Woof Way     | 2 × 1                 | All dogs                                  | Replant them → −$ per dog · Nature calls → fulfils Regular, −♥ each                                                                                             | "OOPS, PETUNIAS!" |
+| Trash day      | Woof Way, Long Way Home       | 2 × 1                 | All dogs                                  | Sniff it all → fulfils Nosy, −♥ to Fancy owners, −$ per dog (missed tips) · Tidy up → −$ per dog, +♥ to fussy owners · Drag them on → −♥ each (−♥♥ Food-driven) | "TRASH DAY!"      |
+| Café patio     | Sniff Street Shops            | 2 × 1                 | All dogs                                  | Charm the crowd → fulfils Friendly, −$ per dog (missed tips) · Buy new lattes → −$ per dog, +♥ to fussy owners · Slink away → −♥ each                           | "SPILLED LATTE!"  |
+
 ### Lucky encounters
 
 Good things to bump into on purpose.
 
+- **Lemonade stand** (card; Snooze Crescent, Woof Way): Water, please → fulfils Thirsty, −$ per dog · Say hi → fulfils Friendly, −$ per dog (missed tips) · Maybe later → nothing
 - **Lost wallet** (card): Hand it in → +♥ each (owners are proud) · Finders keepers → +$, −♥ each
 - **Generous neighbour** (no card): a treat for each dog, up to the carry limit
 - **Photo op** (no card): +$ tip, +♥ to dramatic owners
