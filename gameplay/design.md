@@ -252,7 +252,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse, which flashes red and shakes. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "PICKPOCKETED!") and the caught dogs shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds without a card don't stop the walk; the lemonade stand plays its popup during a 1-second stop, then opens its card
-- **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
+- **Low hearts:** an owner at 1 ♥ looks upset, a "1 ♥ left!" chip shows over their doghouse, and the doghouse pulses gently (a static warning rim with reduced motion)
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
 - **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, the Pocket item); tap one for its description
 - **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows; any debuff the pack has ends with a puff

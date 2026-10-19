@@ -52,7 +52,7 @@ export const HINTS = {
     trigger: { kind: "needUrgent" },
   },
   puddle: {
-    text: "Puddles splash some dogs. Fancy owners mind most.",
+    text: "Puddles soak all but small dogs. Fancy owners mind most.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {
@@ -60,7 +60,7 @@ export const HINTS = {
     trigger: { kind: "pull" },
   },
   skunk: {
-    text: "A skunk's cloud catches some dogs, not always all.",
+    text: "A skunk's cloud catches every dog.",
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   spooked: {
