@@ -1055,9 +1055,9 @@
     {
       "id": "penny",
       "art": "penny",
-      "breed": "Golden retriever",
+      "breed": "Golden retriever mix",
       "energy": "calm",
-      "look": "Golden coat, feathery tail, blue collar",
+      "look": "Smooth golden coat, blocky head, otter tail, blue collar",
       "name": "Penny",
       "need": "thirsty",
       "owner": {
@@ -2216,6 +2216,11 @@
       "art": "help-pulls",
       "body": "A bubble and a dotted line over a dog mean a pull. It tugs the pack one lane toward what it wants, never into an obstacle. Drag back any time.",
       "title": "Watch for pulls"
+    },
+    {
+      "art": "help-needs",
+      "body": "Each dog has a need: Friendly, Playful, Nosy, Regular or Thirsty. When it's urgent, a bubble shows and the dog pulls toward its spot. Steer into the spot for a happy owner. Left too long, it goes wrong.",
+      "title": "Needs"
     },
     {
       "art": "help-zones",

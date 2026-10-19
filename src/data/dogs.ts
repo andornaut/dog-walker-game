@@ -86,9 +86,9 @@ export const DOGS = {
   },
   penny: {
     art: "penny",
-    breed: "Golden retriever",
+    breed: "Golden retriever mix",
     energy: "calm",
-    look: "Golden coat, feathery tail, blue collar",
+    look: "Smooth golden coat, blocky head, otter tail, blue collar",
     name: "Penny",
     need: "thirsty",
     owner: {

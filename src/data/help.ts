@@ -46,6 +46,14 @@ export const HELP_PAGES = [
     title: "Watch for pulls",
   },
   {
+    art: "help-needs",
+    body:
+      "Each dog has a need: Friendly, Playful, Nosy, Regular or Thirsty. " +
+      "When it's urgent, a bubble shows and the dog pulls toward its spot. " +
+      "Steer into the spot for a happy owner. Left too long, it goes wrong.",
+    title: "Needs",
+  },
+  {
     art: "help-zones",
     body:
       "Walk 4 zones of Maple Street, picking the next at each fork. " +

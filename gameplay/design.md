@@ -109,17 +109,17 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                                                    |
 | Quirk             | One per dog, from its personality; see Quirks below. Quirks stay mild, and any downside comes with an upside                                                                                                                                                                                                  |
 
-| Dog      | Breed               | Need     | Owner                          | Look                                    |
-| -------- | ------------------- | -------- | ------------------------------ | --------------------------------------- |
-| Duchess  | Maltese             | Friendly | Rosa, retired florist          | White coat, pink bow                    |
-| Nugget   | Pug                 | Thirsty  | Kevin, pet influencer          | Fawn, black mask, tiny bandana          |
-| Zippy    | Jack Russell        | Playful  | Mr. Pruitt, retired accountant | White with tan patches, red collar      |
-| Pierre   | Standard poodle     | Nosy     | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms             |
-| Biscuit  | Beagle              | Regular  | Sam, barista                   | Tricolour, floppy ears, green collar    |
-| Archie   | Australian Shepherd | Playful  | Ophelia, stage actor           | Red merle, one blue eye, red bandana    |
-| Snowball | Samoyed             | Friendly | Tiffany, wedding planner       | Fluffy white, collar with a bell        |
-| Penny    | Golden retriever    | Friendly | Dr. Hughes, dentist            | Golden coat, feathery tail, blue collar |
-| Koda     | Husky               | Nosy     | Jesse, trail runner            | Grey and white, blue eyes, harness      |
+| Dog      | Breed                | Need     | Owner                          | Look                                                     |
+| -------- | -------------------- | -------- | ------------------------------ | -------------------------------------------------------- |
+| Duchess  | Maltese              | Friendly | Rosa, retired florist          | White coat, pink bow                                     |
+| Nugget   | Pug                  | Thirsty  | Kevin, pet influencer          | Fawn, black mask, tiny bandana                           |
+| Zippy    | Jack Russell         | Playful  | Mr. Pruitt, retired accountant | White with tan patches, red collar                       |
+| Pierre   | Standard poodle      | Nosy     | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms                              |
+| Biscuit  | Beagle               | Regular  | Sam, barista                   | Tricolour, floppy ears, green collar                     |
+| Archie   | Australian Shepherd  | Playful  | Ophelia, stage actor           | Red merle, one blue eye, red bandana                     |
+| Snowball | Samoyed              | Friendly | Tiffany, wedding planner       | Fluffy white, collar with a bell                         |
+| Penny    | Golden retriever mix | Friendly | Dr. Hughes, dentist            | Smooth golden coat, blocky head, otter tail, blue collar |
+| Koda     | Husky                | Nosy     | Jesse, trail runner            | Grey and white, blue eyes, harness                       |
 
 Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait and have laid-back owners, for an easier first run. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
