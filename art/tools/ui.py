@@ -502,10 +502,10 @@ def doghouse(roof, eave):
 
 def select_frame(glow):
     """24x24 nine-slice (8px corners): the frame around a selected tile or active control. An ink
-    edge on both sides of a 2px yellow band, so it stands out on any background (ink on tan or
-    cream is 9:1 or more); the band pulses between yellow and white."""
+    edge on both sides of a 2px amber band, so it stands out on any background (ink on tan or
+    cream is 9:1 or more); the band pulses between amber and orange, apart from a selected item's yellow face."""
     g = Grid(24, 24)
-    band = "white" if glow else "yellow"
+    band = "orange" if glow else "amber"
     g.rect(1, 0, 22, 24, "ink")
     g.rect(0, 1, 24, 22, "ink")
     g.rect(1, 1, 22, 22, band)

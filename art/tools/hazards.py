@@ -178,24 +178,22 @@ BALL = {
 
 def ball_bounce(f, s=1):
     """Frame f of the bounce at scale s: squashed on contact (f == 0), stretched on the frames either side
-    of it, round at the top. The ball keeps gag-ball's look: red, two white stripes rolling across, a pink
-    and white glint at the top left."""
+    of it, round at the top. Unlike gag-ball it is white with two red stripes rolling across, so it reads
+    on the dark Woof Way road as well as the light ones."""
     q = BALL[s]
     w, h = q["size"]
     up = q["heights"][f]
     rx, ry = q["squash"] if f == 0 else q["stretch"] if up < max(q["heights"]) - 2 else q["round"]
     g = edged(Grid(w, h))
     cx, cy = w / 2, q["ground"] - up - ry
-    g.ell(cx, cy, rx, ry, "red", "dred", "pink")
+    g.ell(cx, cy, rx, ry, "white", "lgrey")
     sw, gap, step = q["stripes"]
     left = round(cx - rx)
     for x in range(left - 2 * gap, w):
         if (x - left - f * step) % gap < sw:
             for y in range(h):
                 if g.px[y][x]:
-                    g.p(x, y, "lgrey" if g.px[y][x] == K["dred"] else "white")
-    if s > 0.5:
-        g.p(round(cx - rx * 0.5), round(cy - ry * 0.6), "white")
+                    g.p(x, y, "dred" if g.px[y][x] == K["lgrey"] else "red")
     out = g.outlined()
     # the ground shadow: no outline, narrower as the ball rises; at 0.5 a single row
     sw = q["shadow"][f]
