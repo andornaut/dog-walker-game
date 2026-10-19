@@ -31,12 +31,12 @@ export const TUNING = {
   },
   // Dollars. The game counts money in cents, so $1.50 is exact.
   money: {
-    chattyNeighbourTip: 15,
-    encounterHigh: 30,
+    chattyNeighbourTip: 25,
+    encounterHigh: 20,
     encounterLow: 10,
     fannyPackStart: 15,
-    feeByTemperament: { dramatic: 10, fussy: 13, laidBack: 10 },
-    lostWalletKeep: 15,
+    feeByTemperament: { dramatic: 20, fussy: 30, laidBack: 20 },
+    lostWalletKeep: 30,
     missedTips: 10,
     photoOpTip: 10,
     prices: {

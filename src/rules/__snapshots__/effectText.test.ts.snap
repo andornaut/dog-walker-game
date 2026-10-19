@@ -5,7 +5,7 @@ exports[`every card's text > matches the snapshot 1`] = `
   "encounters": {
     "biscuitNeighbour: Politely pass": "Nothing",
     "biscuitNeighbour: Take biscuits": "+1 treat per dog (carry up to 3)",
-    "lostWallet: Keep it": "+$15, −1 ♥ each",
+    "lostWallet: Keep it": "+$30, −1 ♥ each",
     "lostWallet: Return it": "+1 ♥ each",
     "otherDog: Let them sniff": "+1 ♥ each, −$10 per dog",
     "otherDog: Pull away": "−1 ♥ each",
@@ -13,7 +13,7 @@ exports[`every card's text > matches the snapshot 1`] = `
     "photoOp: Wave and walk on": "Nothing",
     "puddle: Go through": "−1 ♥ each (−2 Fancy)",
     "puddle: Towel": "−$10 per dog",
-    "skunk: Grooming": "−$30 per dog",
+    "skunk: Grooming": "−$20 per dog",
     "skunk: Ignore": "−2 ♥ each",
     "skunk: Quick rinse": "−$10 per dog, Stinky",
     "squirrel: Hold tight": "−1 ♥ each",
@@ -22,7 +22,7 @@ exports[`every card's text > matches the snapshot 1`] = `
     "thief: Let it go": "−$20",
   },
   "forcedStops": {
-    "chattyNeighbour: Chat": "+$15, −$10 per dog",
+    "chattyNeighbour: Chat": "+$25, −$10 per dog",
     "chattyNeighbour: Politely move on": "Nothing",
     "constructionDetour: Squeeze past": "−1 ♥ to Fancy owners",
     "constructionDetour: Take the long way": "−$10 per dog",
