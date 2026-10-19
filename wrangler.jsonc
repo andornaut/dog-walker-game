@@ -9,6 +9,7 @@
   "assets": {
     "directory": "./dist",
   },
-  // To serve a custom domain, add:
-  // "routes": [{ "pattern": "game.example.com", "custom_domain": true }]
+  // Served at the custom domain; Cloudflare creates its DNS record and certificate.
+  // workers.dev stays on as the fallback address.
+  "routes": [{ "pattern": "dogwalker.tristamittermayer.com", "custom_domain": true }],
 }
