@@ -1,6 +1,6 @@
 [
   {
-    "title": "Run screen color test",
+    "title": "Color test",
     "path": "run-screen-color-test.html",
     "description": "The 360x640 run screen in Endesga 32: zone colours, UI colours, outline styles, card dimming and lane readability. Sprites are drawn in code as stand-ins."
   }
