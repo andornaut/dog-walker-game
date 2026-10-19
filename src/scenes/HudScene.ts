@@ -1,15 +1,16 @@
 import { Scene } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
+import { insetRect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { addCenteredLabel, addFilledRect, LABEL_TEXT_STYLE } from "./draw";
 import { SCENE_KEYS } from "./sceneKeys";
 
 // Provisional wood palette from the art style guide (Endesga 32).
 const DOG_COLUMN_COLOR = 0x733e39;
-const DOG_SLOT_BORDER = { color: 0x3e2731, width: 2 };
+const DOG_SLOT_BORDER = { color: 0x3e2731, width: 1 };
 const DOG_SLOT_COLOR = 0xead4aa;
-const MONEY_TEXT_COLOR = "#feae34";
+const MONEY_SIGN_COLOR = "#feae34";
 const TOP_BAR_COLOR = 0x3e2731;
 const TOP_BAR_EDGE = { color: 0x733e39, height: 2 };
 const TOP_BAR_TEXT_COLOR = "#ead4aa";
@@ -33,8 +34,14 @@ export class HudScene extends Scene {
     const textY = topBar.y + topBar.height / 2;
     const leftX = topBar.x + TOP_BAR_TEXT_INSET;
     const rightX = topBar.x + topBar.width - TOP_BAR_TEXT_INSET;
+    const dollarSign = this.add
+      .text(leftX, textY, "$", { ...LABEL_TEXT_STYLE, color: MONEY_SIGN_COLOR })
+      .setOrigin(0, 0.5);
     this.add
-      .text(leftX, textY, "$0", { ...LABEL_TEXT_STYLE, color: MONEY_TEXT_COLOR })
+      .text(leftX + dollarSign.width, textY, "0", {
+        ...LABEL_TEXT_STYLE,
+        color: TOP_BAR_TEXT_COLOR,
+      })
       .setOrigin(0, 0.5);
     this.add
       .text(rightX, textY, "Zone 1/4", { ...LABEL_TEXT_STYLE, color: TOP_BAR_TEXT_COLOR })
@@ -42,10 +49,9 @@ export class HudScene extends Scene {
 
     addFilledRect(this, DOG_COLUMN_COLOR, dogColumn);
     dogSlots.forEach((slot, i) => {
-      addFilledRect(this, DOG_SLOT_COLOR, slot).setStrokeStyle(
-        DOG_SLOT_BORDER.width,
-        DOG_SLOT_BORDER.color,
-      );
+      // Border drawn inside the slot, not straddling its edge as a Phaser stroke would.
+      addFilledRect(this, DOG_SLOT_BORDER.color, slot);
+      addFilledRect(this, DOG_SLOT_COLOR, insetRect(DOG_SLOT_BORDER.width, slot));
       addCenteredLabel(this, `Dog ${i + 1}`, slot);
     });
   }
