@@ -6,6 +6,7 @@ Format: `- [status] **Idea**: short description · notes`. Statuses: **floated**
 
 ## Look and feel
 
+- [exploring] **Zoom in about 25%**: bigger dogs, people and obstacles, and a smaller play area relative to them · options: draw at a lower internal resolution (about 288×448, the same art and UI all 25% bigger, layout redone, lanes about 48px), or redraw sprites at 40px with wider lanes at 360×560, or zoom only the road camera (cheap, uneven pixels); affects lane count or width, the look-ahead, obstacle footprints and pacing, so simulate after · mock it up before deciding
 - [exploring] **Horizon and sky**: an Outrun-style horizon at the top of the road instead of a cross street, with sky above · art is mocking it up; decide with the far-road fade
 
 ## Run and onboarding
