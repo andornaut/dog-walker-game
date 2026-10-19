@@ -88,7 +88,9 @@ export interface Tuning {
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
   readonly probability: OpenGroup & { readonly catchBySize: Table<Size> };
   readonly seconds: OpenGroup & {
+    readonly hitStopSeconds: number;
     readonly inputLockBySize: Table<Size>;
+    readonly minorHitStopSeconds: number;
     readonly minorStumble: number;
     readonly pullIntervalByEnergy: Table<Energy>;
     readonly pullTell: number;
@@ -256,16 +258,21 @@ export interface Shape {
   readonly rows: 1 | 2 | 3;
 }
 
-// "obstacle": hit by accident, always a card; "lucky": a good thing to bump into, a card or
-// instant. Nothing happens when no dog is affected, when the pack is immune, or when
-// noCardWhen holds.
+// "obstacle": hit by accident, always a card, with hitLabel shown large as it hits; "lucky":
+// a good thing to bump into, a card or instant. Nothing happens when no dog is affected, when
+// the pack is immune, or when noCardWhen holds.
 export type Encounter = {
   readonly affects: AffectRule;
   readonly name: string;
   readonly noCardWhen?: Condition;
 } & (
   | { readonly kind: "lucky"; readonly resolution: Resolution }
-  | { readonly kind: "obstacle"; readonly resolution: CardResolution; readonly shape: Shape }
+  | {
+      readonly hitLabel: string;
+      readonly kind: "obstacle";
+      readonly resolution: CardResolution;
+      readonly shape: Shape;
+    }
 );
 
 // An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the

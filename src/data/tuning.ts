@@ -99,9 +99,13 @@ export const TUNING = {
   seconds: {
     // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 1,
+    // An obstacle encounter holds the road and the pack still this long before its card.
+    hitStopSeconds: 1,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
     // A minor bump locks lane input this long.
+    // A minor bump holds the road and the pack still this long.
+    minorHitStopSeconds: 0.6,
     minorStumble: 0.5,
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
     // How long a dog leans and barks before it pulls.

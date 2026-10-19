@@ -73,6 +73,7 @@ import { isSteeringLocked } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
 import type { Random } from "../runner/random";
 import {
+  type EncounterCard,
   finishZone,
   headHome,
   isMinorObstacle,
@@ -94,6 +95,7 @@ import { packDogs } from "../state/pack";
 import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
 import type { CardSceneData } from "./CardScene";
 import { drawPixelLine, fillRect, shadowTexture } from "./draw";
+import { hitLabelOf, playHitMoment } from "./hitMoment";
 import { colorFromHex, PALETTE } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import { addPixelText } from "./pixelText";
@@ -714,16 +716,31 @@ export class RunScene extends Scene {
       this.afterOutcome(outcome);
       this.hint({ kind: "luckyFind" });
     }
-    for (const card of step.cards) {
-      if (card.kind === "encounter" && gameData.encounters[card.encounter].kind === "obstacle") {
-        sound.play("bump");
-        playEffect(this, "fx-bump", "play", { x: pack.x, y: pack.y - 20 }, DEPTH.fx);
-        if (card.encounter === "puddle") {
-          playEffect(this, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
-        }
-        this.stumble();
+    for (const hit of step.encounterHits) {
+      sound.play("bump");
+      if (hit.encounter === "puddle") {
+        playEffect(this, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
       }
+      this.stumble();
+      this.playHit(hit, step.walk.road.hitStop?.seconds ?? 0);
     }
+  }
+
+  // The hit moment over the stop, framed by the road and the backdrop band beside it.
+  private playHit(hit: EncounterCard, seconds: number): void {
+    const { backdrop, road } = LAYOUT;
+    const pack = this.packPoint();
+    playHitMoment(this, {
+      caught: hit.affected.flatMap((dog) => this.dogSprites.get(dog) ?? []),
+      centre: { x: pack.x, y: pack.y - 20 },
+      depth: DEPTH.popup,
+      encounter: hit.encounter,
+      field: { ...road, height: road.y + road.height - backdrop.y, y: backdrop.y },
+      label: hitLabelOf(gameData.encounters[hit.encounter]),
+      labelX: road.x + road.width / 2,
+      seconds,
+      still: this.reducedMotion(),
+    });
   }
 
   // The walker stumbles and the dogs hop; reduced motion skips it.

@@ -11,6 +11,8 @@ import { TUNING } from "../data/tuning";
 import type { EncounterId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
+import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
+import type { LaneDirection } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
 import { tipValue } from "../rules/run";
 import { cents, pixels, read } from "../rules/units";
@@ -31,6 +33,7 @@ import {
   planZone,
   type RoadGeometry,
   startRoad,
+  steerWalk,
   stepWalk,
   type Walk,
   type WalkItem,
@@ -54,7 +57,15 @@ const tuning = {
     treatsPerZone: 2,
   },
   pixels: { ...TUNING.pixels, roadScrollSpeed: 80, spawnRowSpacing: 160 },
-  seconds: { ...TEST_TUNING.seconds, collisionGrace: 1, laneMove: 0.18, zoneAtBaseSpeed: 30 },
+  seconds: {
+    ...TEST_TUNING.seconds,
+    collisionGrace: 1,
+    hitStopSeconds: 1,
+    laneMove: 0.18,
+    minorHitStopSeconds: 0.6,
+    minorStumble: 0.5,
+    zoneAtBaseSpeed: 30,
+  },
 };
 const data = {
   debuffs: DEBUFFS,
@@ -240,11 +251,14 @@ describe("stepWalk", () => {
     expect(step(walk).collected).toEqual([]);
   });
 
-  it("opens a card for an obstacle, for the dogs it affects, and starts the grace window", () => {
-    const { cards, walk } = step(walkWith(["koda", "duchess"], [atPack("otherDog")]));
-    expect(cards).toEqual([
-      { affected: ["koda", "duchess"], encounter: "otherDog", kind: "encounter" },
-    ]);
+  it("hits an obstacle, holding its card for the dogs it affects, and starts the grace window", () => {
+    const { cards, encounterHits, walk } = step(
+      walkWith(["koda", "duchess"], [atPack("otherDog")]),
+    );
+    const card = { affected: ["koda", "duchess"], encounter: "otherDog", kind: "encounter" };
+    expect(encounterHits).toEqual([card]);
+    expect(cards).toEqual([]);
+    expect(walk.road.hitStop?.cards).toEqual([card]);
     expect(walk.road.items).toEqual([]);
     expect(walk.road.invulnerableSeconds).toBe(1);
   });
@@ -291,9 +305,11 @@ describe("stepWalk", () => {
     expect(collected.map(({ kind }) => kind)).toEqual(["tip"]);
   });
 
-  it("opens no card for a squirrel when no dog chases", () => {
-    expect(step(walkWith(["duchess"], [atPack("squirrel")])).cards).toEqual([]);
-    expect(step(walkWith(["koda"], [atPack("squirrel")])).cards).toHaveLength(1);
+  it("opens no card for a squirrel when no dog chases, and does not stop", () => {
+    const unchased = step(walkWith(["duchess"], [atPack("squirrel")]));
+    expect(unchased.encounterHits).toEqual([]);
+    expect(unchased.walk.road.hitStop).toBeNull();
+    expect(step(walkWith(["koda"], [atPack("squirrel")])).encounterHits).toHaveLength(1);
   });
 
   it("opens a card for a lucky encounter, even in the grace window", () => {
@@ -344,6 +360,168 @@ describe("stepWalk", () => {
       },
     };
     expect(step(carded).walk).toBe(carded);
+  });
+});
+
+describe("hit stop", () => {
+  const FRAME = 1 / 60;
+  // Steps a frame at a time until the stop lets go, returning how many frames it held.
+  const framesHeld = (walk: Walk) => {
+    let frames = 0;
+    let current = walk;
+    while (current.road.hitStop !== null) {
+      current = step(current, FRAME).walk;
+      frames += 1;
+    }
+    return frames;
+  };
+  // A walk with a spawn due just ahead, so a moving road would bring it into view.
+  const withSpawnAhead = (walk: Walk): Walk => ({
+    ...walk,
+    road: { ...walk.road, pending: [{ distance: 3, kind: "tip", lane: 0 }] },
+  });
+
+  it("holds an obstacle encounter's card for hitStopSeconds of frames, then opens it", () => {
+    const hit = step(walkWith(["koda"], [atPack("otherDog")]), FRAME);
+    expect(hit.walk.road.hitStop?.seconds).toBe(1);
+    expect(framesHeld(hit.walk)).toBe(60);
+
+    let walk = hit.walk;
+    for (let frame = 1; frame < 60; frame++) {
+      const held = step(walk, FRAME);
+      expect(held.cards).toEqual([]);
+      walk = held.walk;
+    }
+    const released = step(walk, FRAME);
+    expect(released.cards).toEqual([
+      { affected: ["koda"], encounter: "otherDog", kind: "encounter" },
+    ]);
+    expect(released.walk.road.hitStop).toBeNull();
+  });
+
+  it("holds the walk for minorHitStopSeconds after a minor bump", () => {
+    const hit = step(walkWith(["koda"], [atPack("cone")]), FRAME);
+    expect(hit.bumps).toHaveLength(1);
+    expect(framesHeld(hit.walk)).toBe(36);
+  });
+
+  it("stops for the longer hit when a minor bump and an encounter meet on one step", () => {
+    // With no grace window, both obstacles touching the pack are hit.
+    const graceless = {
+      ...data,
+      tuning: { ...tuning, seconds: { ...tuning.seconds, collisionGrace: 0 } },
+    };
+    const both = walkWith(["koda"], [atPack("cone"), atPack("otherDog", 1)]);
+    const hit = stepWalk(graceless, geometry, seededRandom(1), FRAME, both);
+    expect(hit.encounterHits).toHaveLength(1);
+    expect(hit.bumps).toHaveLength(1);
+    expect(hit.walk.road.hitStop?.seconds).toBe(1);
+  });
+
+  it("never stops for a lucky find", () => {
+    expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.road.hitStop).toBeNull();
+    expect(step(walkWith(["koda"], [atPack("photoOp")])).walk.road.hitStop).toBeNull();
+  });
+
+  it("advances neither distance, the spawn plan, the road nor the pack during the stop", () => {
+    const hit = step(withSpawnAhead(walkWith(["koda"], [atPack("cone"), atPack("tip", 1, 0)])));
+    let walk = hit.walk;
+    while (walk.road.hitStop !== null) {
+      const held = step(walk, FRAME).walk;
+      expect(held.run).toBe(hit.walk.run);
+      expect(held.road).toEqual({ ...hit.walk.road, hitStop: held.road.hitStop });
+      walk = held;
+    }
+    expect(walk.run.zoneDistance).toBe(hit.walk.run.zoneDistance);
+    expect(walk.road.pending).toHaveLength(1);
+    expect(step(walk, FRAME).walk.run.zoneDistance).toBeGreaterThan(walk.run.zoneDistance);
+  });
+
+  it("keeps the grace window and the stumble lock for after the stop", () => {
+    const hit = step(walkWith(["koda"], [atPack("cone")]), FRAME);
+    const { control, invulnerableSeconds } = hit.walk.road;
+    const after = step(hit.walk, FRAME).walk.road;
+    expect(after.invulnerableSeconds).toBe(invulnerableSeconds);
+    expect(after.control).toBe(control);
+  });
+
+  it("drops steering during the stop rather than queuing it", () => {
+    const hit = step(walkWith(["koda"], [atPack("cone")]), FRAME).walk;
+    const unlocked = {
+      ...hit,
+      road: { ...hit.road, control: { ...hit.road.control, lockSeconds: 0 } },
+    };
+    const steered = steerWalk(data, 5, 1, unlocked);
+    expect(steered).toBe(unlocked);
+    let walk = steered;
+    while (walk.road.hitStop !== null) {
+      walk = step(walk, FRAME).walk;
+    }
+    expect(walk.road.control.target).toBe(2);
+    expect(step(walk, 1).walk.road.control.motion).toEqual(stillInLane(2));
+  });
+
+  it("holds a zone end met on the hit's step until the stop ends", () => {
+    const walk = walkWith(["koda"], [atPack("otherDog")]);
+    const length = zoneLength(data, walk.run);
+    const nearEnd = { ...walk, run: { ...walk.run, zoneDistance: pixels(length - 1) } };
+    const hit = step(nearEnd, FRAME);
+    expect(hit.zoneEnded).toBe(false);
+    let released = step(hit.walk, FRAME);
+    while (released.walk.road.hitStop !== null) {
+      expect(released.zoneEnded).toBe(false);
+      released = step(released.walk, FRAME);
+    }
+    expect(released.zoneEnded).toBe(true);
+    expect(released.cards).toHaveLength(1);
+  });
+
+  it("replays a run with hit stops exactly from its input log", () => {
+    const setup = { dev: true, seed: 5, speed: 1, zone: 1 };
+    const start = planZone(data, geometry, seededRandom(5), walkWith(["koda", "duchess"]));
+    const steps = 60 * 30;
+    // As RunScene steps: the moves due now, each logged at the run time it is applied, then the
+    // walk. A move every 13 frames, alternating sides, runs into obstacles.
+    const play = (movesAt: (frame: number, timeMs: number) => LaneDirection[]) => {
+      const rolls = seededRandom(9);
+      let log = startInputLog(setup);
+      let walk = start;
+      let stops = 0;
+      let movesInStops = 0;
+      const cards: unknown[] = [];
+      for (let frame = 0; frame < steps; frame++) {
+        const timeMs = frame * FRAME * 1000;
+        for (const direction of movesAt(frame, timeMs)) {
+          movesInStops += walk.road.hitStop === null ? 0 : 1;
+          walk = steerWalk(data, 5, direction, walk);
+          log = recordInput({ direction, kind: "lane", timeMs }, log);
+        }
+        const stepped = stepWalk(data, geometry, rolls, FRAME, walk);
+        stops += walk.road.hitStop === null && stepped.walk.road.hitStop !== null ? 1 : 0;
+        cards.push(...stepped.cards);
+        walk = stepped.walk;
+      }
+      return { cards, log, movesInStops, stops, walk };
+    };
+    const recorded = play((frame) =>
+      frame % 13 === 0 ? [Math.floor(frame / 13) % 4 < 2 ? -1 : 1] : [],
+    );
+    expect(recorded.stops).toBeGreaterThan(0);
+    expect(recorded.movesInStops).toBeGreaterThan(0);
+
+    const events = [...replayInputs(recorded.log)];
+    let next = 0;
+    const replayed = play((_, timeMs) => {
+      const due: LaneDirection[] = [];
+      for (let event = events[next]; event?.kind === "lane" && event.timeMs <= timeMs;) {
+        due.push(event.direction);
+        next += 1;
+        event = events[next];
+      }
+      return due;
+    });
+    expect(replayed.walk).toEqual(recorded.walk);
+    expect(replayed.cards).toEqual(recorded.cards);
   });
 });
 

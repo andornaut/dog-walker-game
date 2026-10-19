@@ -43,6 +43,7 @@ export const ENCOUNTERS = {
   },
   otherDog: {
     affects: { kind: "all" },
+    hitLabel: "NEW FRIEND!",
     kind: "obstacle",
     name: "Other dog",
     resolution: {
@@ -80,6 +81,7 @@ export const ENCOUNTERS = {
   },
   puddle: {
     affects: { kind: "caught" },
+    hitLabel: "SOAKED!",
     kind: "obstacle",
     name: "Puddle",
     resolution: {
@@ -110,6 +112,7 @@ export const ENCOUNTERS = {
   },
   skunk: {
     affects: { kind: "caught" },
+    hitLabel: "SPRAYED!",
     kind: "obstacle",
     name: "Skunk",
     resolution: {
@@ -146,6 +149,7 @@ export const ENCOUNTERS = {
   },
   squirrel: {
     affects: { kind: "trait", trait: "chaser" },
+    hitLabel: "SQUIRREL!",
     kind: "obstacle",
     name: "Squirrel",
     resolution: {
@@ -167,6 +171,7 @@ export const ENCOUNTERS = {
   },
   thief: {
     affects: { kind: "all" },
+    hitLabel: "PICKPOCKETED!",
     kind: "obstacle",
     name: "Thief",
     noCardWhen: { kind: "packHasSize", size: "big" },

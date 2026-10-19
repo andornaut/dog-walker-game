@@ -11,6 +11,7 @@ import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import { collideWithPack, type PackFootprint, tickInvulnerability, touchesPack } from "./collision";
+import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 import {
   advanceLaneControl,
   type LaneControl,
@@ -66,11 +67,13 @@ export interface ForcedStopOnRoad {
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
+// hitStop is set while an obstacle hit holds the walk still.
 export interface Road {
   control: LaneControl;
   forcedStopAhead: ForcedStopAhead | null;
   forcedStopOnRoad: ForcedStopOnRoad | null;
   forcedStopsSeen: readonly ForcedStopId[];
+  hitStop: HitStop | null;
   invulnerableSeconds: number;
   items: readonly WalkItem[];
   nextItemId: number;
@@ -110,12 +113,17 @@ export interface MinorBump {
   item: WalkItem;
 }
 
+export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
+
 // bumps, cards and instants are in the order the pack met them; tips are the money changes of
 // the tips collected; zoneEnded is set on the step that reaches the end of the zone.
+// encounterHits are the obstacle encounters hit this step. A hit stop holds the step's cards
+// and zone end back to the step it ends on.
 export interface WalkStep {
   bumps: MinorBump[];
   cards: CardSource[];
   collected: WalkItem[];
+  encounterHits: EncounterCard[];
   instants: InstantFind[];
   tips: MoneyChange[];
   walk: Walk;
@@ -207,6 +215,7 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
     forcedStopAhead: null,
     forcedStopOnRoad: null,
     forcedStopsSeen: [],
+    hitStop: null,
     invulnerableSeconds: 0,
     items: [],
     nextItemId: 0,
@@ -330,12 +339,16 @@ export function planZone(
   };
 }
 
+// Steering during a hit stop is dropped, not queued.
 export function steerWalk(
   data: Pick<GameData, "tuning">,
   laneCount: number,
   direction: LaneDirection,
   walk: Walk,
 ): Walk {
+  if (walk.road.hitStop !== null) {
+    return walk;
+  }
   const control = steerLane(laneMotionConfig(data, laneCount), direction, walk.road.control);
   return { ...walk, road: { ...walk.road, control } };
 }
@@ -393,7 +406,9 @@ export function collect(
 // moves the pack, then collides: pickups are collected into the run, minor obstacles drop
 // tips and lock lane input, obstacles (outside the grace window) and lucky encounters become
 // cards for the dogs they affect or, for an instant lucky find, apply at once, and a forced
-// stop that reaches the pack always becomes a card. Does nothing unless walking.
+// stop that reaches the pack always becomes a card. A minor bump or an obstacle encounter
+// starts a hit stop, and the steps it lasts hold everything still. Does nothing unless
+// walking.
 export function stepWalk(
   data: WalkData,
   geometry: RoadGeometry,
@@ -403,7 +418,13 @@ export function stepWalk(
 ): WalkStep {
   const { road, run } = walk;
   if (run.phase.kind !== "walking") {
-    return { bumps: [], cards: [], collected: [], instants: [], tips: [], walk, zoneEnded: false };
+    return stillStep(NOTHING_HELD, walk);
+  }
+  if (road.hitStop !== null) {
+    const ticked = tickHitStop(stepSeconds, road.hitStop);
+    return "stop" in ticked
+      ? stillStep(NOTHING_HELD, { road: { ...road, hitStop: ticked.stop }, run })
+      : stillStep(ticked.released, { road: { ...road, hitStop: null }, run });
   }
   const length = zoneLength(data, run);
   const zone = advanceZones(
@@ -476,6 +497,7 @@ export function stepWalk(
   const bumps: MinorBump[] = [];
   const cards: CardSource[] = [];
   const collected: WalkItem[] = [];
+  const encounterHits: EncounterCard[] = [];
   const instants: InstantFind[] = [];
   const tips: MoneyChange[] = [];
   for (const item of [...hits, ...treatsHit]) {
@@ -502,7 +524,11 @@ export function stepWalk(
         nextRun = outcome.state;
         instants.push({ encounter: kind, outcome });
       } else {
-        cards.push({ affected, encounter: kind, kind: "encounter" });
+        const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
+        if (data.encounters[kind].kind === "obstacle") {
+          encounterHits.push(card);
+        }
+        cards.push(card);
       }
     }
   }
@@ -514,10 +540,22 @@ export function stepWalk(
     forcedStopOnRoad = null;
   }
 
+  const zoneEnded = zone.completedZones.length > 0;
+  const hitStop = startHitStop(
+    hitStopLength(
+      {
+        encounter: read(data.tuning, "seconds", "hitStopSeconds"),
+        minor: read(data.tuning, "seconds", "minorHitStopSeconds"),
+      },
+      { encounters: encounterHits.length, minors: bumps.length },
+    ),
+    { cards, zoneEnded },
+  );
   return {
     bumps,
-    cards,
+    cards: hitStop === null ? cards : [],
     collected,
+    encounterHits,
     instants,
     tips,
     walk: {
@@ -526,6 +564,7 @@ export function stepWalk(
         control,
         forcedStopAhead,
         forcedStopOnRoad,
+        hitStop,
         invulnerableSeconds,
         items: [...remaining, ...treats.filter((item) => !treatsHit.includes(item))],
         nextItemId,
@@ -533,7 +572,23 @@ export function stepWalk(
       },
       run: nextRun,
     },
-    zoneEnded: zone.completedZones.length > 0,
+    zoneEnded: hitStop === null && zoneEnded,
+  };
+}
+
+const NOTHING_HELD: HeldStep = { cards: [], zoneEnded: false };
+
+// A step in which the walk does not move, giving out only what it held.
+function stillStep(held: HeldStep, walk: Walk): WalkStep {
+  return {
+    bumps: [],
+    cards: [...held.cards],
+    collected: [],
+    encounterHits: [],
+    instants: [],
+    tips: [],
+    walk,
+    zoneEnded: held.zoneEnded,
   };
 }
 
