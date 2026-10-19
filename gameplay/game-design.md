@@ -51,7 +51,7 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and up to one piece of g
 
 ### A run
 
-- 4 zones in a fixed order (e.g. street, park, shops, home stretch), each a fixed distance. Zone 1 takes ~3.8 minutes at base speed, and the speed ramp shortens later zones to ~3.2, ~2.7 and ~2.4 minutes (a full run is ~12 minutes)
+- 4 zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home, each a fixed distance. Zone 1 takes ~3.8 minutes at base speed, and the speed ramp shortens later zones to ~3.2, ~2.7 and ~2.4 minutes (a full run is ~12 minutes)
 - One forced stop per zone
 - After zones 1, 2 and 3: choose 1 of 3 upgrade cards
 - After each zone: every remaining dog pays a share of its fee; a dog fired mid-zone isn't paid for that zone
@@ -66,6 +66,10 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and up to one piece of g
 - Each option's outcome is fixed and shown on the card
 - An option you can't afford is disabled; every encounter keeps at least one free option
 - Slower options cost money (missed tips) instead of time
+- Money costs are per affected dog, except losses that happen to the pack as a whole (a squirrel chase, a thief), which are charged once
+- Money never goes below $0, even after a fee clawback
+- An immunity (Raincoats, Good leash, Whistle) means no card opens at all
+- A card shows at most 3 options. Poop bags' Skip takes the slot of the most expensive option when a card already has 3
 - Choices only: no minigames
 
 ### Pickups (things you _want_ to hit)
@@ -82,7 +86,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Size              | Small · medium · big. No size is a straight upgrade. Pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big). Max happiness: 6 small, 8 medium, 10 big. Who you meet: each small dog attracts more Other dog encounters, each big dog fewer, and any big dog scares thieves away. Small dogs are nimble: they roll half as often for area effects |
 | Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                                                                                                  |
 | Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                                                                                                                                                                                                                               |
-| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $13 instead of $10 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0 and the dog's max; also sets the quip tone                                                                                                                                                                            |
+| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $13 instead of $10 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the dog's max; also sets the quip tone                                                                                                                                      |
 
 | Dog      | Breed           | Owner                          | Look                                  |
 | -------- | --------------- | ------------------------------ | ------------------------------------- |
@@ -145,7 +149,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - Raincoats: puddles can't upset anyone for the rest of the run
 - Treat magnet: treats count from one lane away
 - Steady hands: dogs pull the pack half as often
-- Sweet talker: every $ cost on a card, missed tips included, is $4 less per dog for the rest of the run
+- Sweet talker: every per-dog $ cost on a card, missed tips included, is $4 less per dog for the rest of the run
 
 ### Home screen and progression
 
