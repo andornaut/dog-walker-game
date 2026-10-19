@@ -53,7 +53,7 @@ def icon(name):
     return deco
 
 
-@icon("first-walk")
+@icon("first-steps")
 def _(g):
     paw(g, 13, 17)
     for r in range(5):
@@ -62,7 +62,7 @@ def _(g):
                 g.rect(19 + k * 2, 9 + r * 2, 2, 2, "plum")
 
 
-@icon("full-route")
+@icon("round-trip")
 def _(g):
     g.rect(11, 8, 1, 17, "dbrown")
     for y in range(8, 16, 2):
@@ -70,13 +70,13 @@ def _(g):
             g.rect(x, y, 2, 2, "ink" if (x // 2 + y // 2) % 2 else "white")
 
 
-@icon("pack-of-two")
+@icon("double-leash")
 def _(g):
     paw(g, 12, 15)
     paw(g, 20, 19)
 
 
-@icon("pack-of-three")
+@icon("pack-leader")
 def _(g):
     paw(g, 10, 21, s=0.75)
     paw(g, 16, 15, s=0.75)
@@ -91,7 +91,7 @@ def _(g):
         g.rect(x - 1, y, 3, 1, "blue")
 
 
-@icon("spotless")
+@icon("not-a-scratch")
 def _(g):
     pts = [(16 + math.cos(math.radians(a - 90)) * (7 if i % 2 == 0 else 3),
             16 + math.sin(math.radians(a - 90)) * (7 if i % 2 == 0 else 3)) for i, a in enumerate(range(0, 360, 36))]
@@ -100,7 +100,7 @@ def _(g):
     g.p(14, 12, "white")
 
 
-@icon("no-hard-feelings")
+@icon("five-star-service")
 def _(g):
     for y, row in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
         for x, c in enumerate(row):
@@ -114,7 +114,7 @@ def _(g):
     g.p(18, 15, "plum")
 
 
-@icon("high-earner")
+@icon("big-payday")
 def _(g):
     for cx, cy in ((9, 21), (23, 21)):
         g.ell(cx, cy, 3.5, 3.5, "amber", "orange", "yellow")
@@ -135,7 +135,7 @@ def _(g):
     g.rect(13, 16, 6, 1, "plum")
 
 
-@icon("fully-equipped")
+@icon("kitted-out")
 def _(g):
     """Three of the five gear items: whistle, lucky collar, running shoe."""
     g.ell(11, 11, 4, 3, "lgrey", "grey", "white")
@@ -151,7 +151,7 @@ def _(g):
     g.rect(16, 18, 1, 3, "white")
 
 
-@icon("every-owner-smiles")
+@icon("neighbourhood-favourite")
 def _(g):
     g.ell(16, 16, 7, 7, "yellow", "amber")
     g.rect(13, 13, 1, 2, "plum")
@@ -184,7 +184,7 @@ def _(g):
     g.tri((13, 20), (16, 11), (19, 20), "yellow")
 
 
-@icon("stinky-streak")
+@icon("eau-de-skunk")
 def _(g):
     for cx, cy, r in ((12, 19, 4), (18, 18, 5), (15, 15, 4)):
         g.ell(cx, cy, r, r * 0.85, "green", "dgreen")
@@ -205,11 +205,11 @@ def _(g):
 
 
 BADGES = {
-    "first-walk": "firsts", "full-route": "firsts", "pack-of-two": "firsts", "pack-of-three": "firsts",
-    "clean-paws": "mastery", "spotless": "mastery", "no-hard-feelings": "mastery", "high-earner": "mastery",
-    "full-kennel": "collection", "fully-equipped": "collection", "every-owner-smiles": "collection",
+    "first-steps": "firsts", "round-trip": "firsts", "double-leash": "firsts", "pack-leader": "firsts",
+    "clean-paws": "mastery", "not-a-scratch": "mastery", "five-star-service": "mastery", "big-payday": "mastery",
+    "full-kennel": "collection", "kitted-out": "collection", "neighbourhood-favourite": "collection",
     "top-walker": "collection",
-    "youre-fired": "silly", "stinky-streak": "silly", "squirrel": "silly",
+    "youre-fired": "silly", "eau-de-skunk": "silly", "squirrel": "silly",
 }
 
 

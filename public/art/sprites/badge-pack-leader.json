@@ -1,5 +1,5 @@
 { "frames": {
-   "badge-pack-of-two 0.aseprite": {
+   "badge-pack-leader 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
    },
-   "badge-pack-of-two 1.aseprite": {
+   "badge-pack-leader 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -19,7 +19,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "badge-pack-of-two.png",
+  "image": "badge-pack-leader.png",
   "format": "RGBA8888",
   "size": { "w": 64, "h": 32 },
   "scale": "1",
