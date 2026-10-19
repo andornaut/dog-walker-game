@@ -12,12 +12,12 @@
   style.textContent = `
 .art-nav { background: #181425; border-bottom: 1px solid #3a4466; font: 14px/1.4 "Atkinson Hyperlegible", system-ui, sans-serif; }
 .art-nav ul {
-  list-style: none; margin: 0 auto; max-width: 1240px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: center;
+  list-style: none; margin: 0 auto; max-width: 1240px; display: flex; flex-wrap: wrap; gap: 4px 0; align-items: center;
   padding-block: 10px;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.art-nav li.sep { width: 1px; height: 16px; background: #3a4466; }
+.art-nav li + li::before { content: ""; display: inline-block; width: 1px; height: 14px; margin: 0 12px; vertical-align: -2px; background: #3a4466; }
 .art-nav a { color: #c0cbdc; text-decoration: none; }
 .art-nav a:hover { color: #feae34; }
 .art-nav a[aria-current="page"] { color: #feae34; font-weight: 700; }
@@ -39,18 +39,14 @@
     li.append(a);
     return li;
   };
-  const sep = () =>
-    Object.assign(document.createElement("li"), { className: "sep", ariaHidden: "true" });
 
   const mocksAt = document.createElement("li");
   mocksAt.hidden = true;
   ul.append(
     item("Home", "/"),
     item("Play", "/play/"),
-    sep(),
     item("Gallery", "/art/"),
     mocksAt,
-    sep(),
     item("Inventory", DOCS + "inventory.md"),
     item("Style guide", DOCS + "style-guide.md"),
   );

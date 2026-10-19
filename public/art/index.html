@@ -226,6 +226,7 @@ async function fill(list, hostId, countId, add, noun) {
   $(countId).textContent = String(list.length);
   if (!list.length) { emptyCard(host, `No ${noun} exported yet. Sources go in <code>art/</code>, exports in <code>public/art/</code>, each with an entry in <code>manifest.json</code>.`); return; }
   await Promise.all(list.map(s => add(host, s).catch(err => errorCard(host, s.key, err))));
+  [...host.children].sort((x, y) => (x.dataset.key || "").localeCompare(y.dataset.key || "")).forEach(c => host.append(c));
 }
 
 async function main() {
