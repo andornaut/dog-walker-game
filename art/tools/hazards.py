@@ -10,7 +10,8 @@ ball-bounce         16x24   the gag-ball ball bouncing across lanes; bounce (6 f
 cyclist             32x48   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
                             legs and a 1px sway
 ui-warning          16x16   a yellow warning sign with a bold "!", ink outline; pulse (2 frames, 250ms)
-ui-warning-arrow    16x16   a yellow arrow pointing right, ink outline; pulse (2 frames, 250ms)
+ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms) points right for a
+                            crosser, down-pulse (2 frames, 250ms) points down the lane at the player
 
 The side views face right; the game mirrors squirrel-dash, loose-dog and
 ui-warning-arrow for a crossing to the left. Every road sprite takes the road
@@ -287,8 +288,9 @@ def warning(big):
     return g
 
 
-def warning_arrow(shift):
-    """A yellow arrow pointing right; shift nudges it along on the pulse frame."""
+def warning_arrow(shift, down=False):
+    """A yellow arrow pointing right, or down when down is true; shift nudges it along its direction on
+    the pulse frame. The down arrow is the right one transposed, so its shading lands on the right."""
     g = edged(Grid(16, 16), ink)
     s = shift
     g.rect(1 + s, 6, 6, 4, "yellow")
@@ -298,6 +300,8 @@ def warning_arrow(shift):
         for y in (12, 13):
             if g.px[y][x] == K["yellow"] and not (y + 1 < 16 and g.px[y + 1][x]):
                 g.p(x, y, "amber")
+    if down:
+        g.px = [list(col) for col in zip(*g.px)]
     return g
 
 
@@ -336,7 +340,9 @@ def sprites():
     yield "ball-bounce", [("bounce", [ball_bounce(f) for f in range(6)], 70)]
     yield "cyclist", [("ride", [cyclist(**q).outlined() for q in CYCLIST_RIDE], 90)]
     yield "ui-warning", [("pulse", [warning(False).outlined(), warning(True).outlined()], 250)]
-    yield "ui-warning-arrow", [("pulse", [warning_arrow(0).outlined(), warning_arrow(1).outlined()], 250)]
+    yield "ui-warning-arrow", [("pulse", [warning_arrow(0).outlined(), warning_arrow(1).outlined()], 250),
+                               ("down-pulse", [warning_arrow(0, True).outlined(),
+                                               warning_arrow(1, True).outlined()], 250)]
     for suffix, s in SCALES:
         yield f"squirrel-dash@{suffix}", [("run", [squirrel_dash(**small(s, q, SQUIRREL_OFFSETS)).outlined()
                                                    for q in SQUIRREL_RUN], 80)]

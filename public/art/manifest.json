@@ -900,7 +900,7 @@
       "png": "sprites/parked-car.png",
       "json": "sprites/parked-car.json",
       "anchor": {
-        "feetY": 78,
+        "feetY": 126,
         "opaqueWidth": 40
       }
     },

@@ -11,7 +11,8 @@ bench               88x32   2 lanes, a leaf on the seat stirs
 barrier-2           88x32   2 lanes, lamps blink (Woof Way, Sniff Street Shops)
 barrier-3           144x32  3 lanes, lamps blink
 hedge               144x32  3 lanes, leaves rustle at three spots in turn
-parked-car          40x80   1 lane by 3 rows, from behind and above, nose up the road; hazards blink
+parked-car          40x128  1 lane by 3 rows, a minivan from behind and above, nose up the road; hazards
+                            blink
 
 Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
 frame is one argument to the drawing function, listed in the *_IDLE tuples;
@@ -30,7 +31,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, main, road_sprite  # noqa: E402
+from pixel import Grid, edged, main, road_sprite  # noqa: E402
 
 
 def cone(glint=None):
@@ -159,54 +160,79 @@ def barrier(lanes, f):
 
 
 def parked_car(hazard=False):
-    """A station wagon from behind and above, nose up the road: a glimpse of hood, the roof
-    with rails, the tailgate with its window and lights, the bumper and rear wheels. Its
-    hazard lights, the outer end of each tail light, are lit when hazard is true."""
-    g = Grid(40, 80)
+    """A minivan from behind and above, nose up the road: the long hood beyond the windscreen
+    with the front wheels at its corners, the roof with rails and crossbars between side windows
+    split by door pillars, the tailgate with its window and lights, the bumper and rear wheels.
+    Its hazard lights, the outer end of each tail light, are lit when hazard is true. The rear
+    end sits r rows down, so the roof is long enough for the car to read as long as the three
+    rows it blocks."""
+    g = edged(Grid(40, 128))
+    r = 48
     for x in (2, 33):
-        g.rect(x, 4, 5, 8, "ink")
+        g.rect(x, 7, 5, 14, "ink")
     for x in (3, 32):
-        g.rect(x, 66, 5, 12, "ink")
-    g.rect(8, 70, 24, 4, "ink")
-    g.tri((8, 1), (31, 1), (1, 15), "sky")
-    g.tri((31, 1), (38, 15), (1, 15), "sky")
-    g.rect(1, 15, 38, 55, "sky")
-    for x, y in ((1, 69), (38, 69)):
+        g.rect(x, 66 + r, 5, 12, "ink")
+    g.rect(8, 70 + r, 24, 4, "ink")
+    # hood: tapering to the nose, a crease either side of the bulge
+    g.tri((8, 1), (31, 1), (1, 22), "sky")
+    g.tri((31, 1), (38, 22), (1, 22), "sky")
+    g.rect(1, 22, 38, 48 + r, "sky")
+    for x, y in ((1, 69 + r), (38, 69 + r)):
         g.p(x, y, None)
-    g.tri((8, 1), (1, 15), (3, 15), "cyan")
-    g.rect(1, 15, 2, 39, "cyan")
-    g.tri((31, 1), (38, 15), (35, 15), "blue")
-    g.rect(35, 15, 4, 39, "blue")
-    g.rect(0, 14, 2, 3, "blue")
-    g.rect(38, 14, 2, 3, "blue")
-    g.tri((8, 12), (31, 12), (10, 19), "navy")
-    g.tri((31, 12), (29, 19), (10, 19), "navy")
-    g.rect(12, 13, 4, 1, "slate")
-    g.tri((8, 12), (5, 46), (7, 46), "navy")
-    g.tri((31, 12), (34, 46), (32, 46), "navy")
-    g.rect(7, 19, 26, 26, "sky")
-    g.rect(7, 19, 2, 26, "cyan")
-    g.rect(30, 19, 3, 26, "blue")
+    g.tri((8, 1), (1, 22), (3, 22), "cyan")
+    g.tri((31, 1), (38, 22), (35, 22), "blue")
+    for x0, x1 in ((13, 11), (26, 28)):
+        for y in range(3, 20):
+            g.p(round(x0 + (x1 - x0) * (y - 3) / 16), y, "blue" if x0 > 20 else "cyan")
+    g.rect(13, 1, 14, 1, "cyan")
+    # sides of the body, with door seams
+    g.rect(1, 22, 2, 32 + r, "cyan")
+    g.rect(35, 22, 4, 32 + r, "blue")
+    for y in (52, 76):
+        g.rect(1, y, 2, 1, "sky")
+        g.rect(35, y, 4, 1, "navy")
+    # mirrors at the windscreen's base
+    g.rect(0, 21, 2, 3, "blue")
+    g.rect(38, 21, 2, 3, "blue")
+    # windscreen, and the side windows slanting back to the rear window, split by the pillars
+    g.tri((8, 19), (31, 19), (10, 27), "navy")
+    g.tri((31, 19), (29, 27), (10, 27), "navy")
+    g.rect(12, 20, 4, 1, "slate")
+    g.tri((8, 19), (5, 27), (8, 27), "navy")
+    g.tri((31, 19), (34, 27), (31, 27), "navy")
+    g.rect(5, 27, 2, 18 + r, "navy")
+    g.rect(33, 27, 2, 18 + r, "navy")
+    for y in (50, 74):
+        g.rect(5, y, 2, 2, "sky")
+        g.rect(33, y, 2, 2, "blue")
+    # roof: rails along it, crossbars at either end
+    g.rect(7, 27, 26, 18 + r, "sky")
+    g.rect(7, 27, 2, 18 + r, "cyan")
+    g.rect(30, 27, 3, 18 + r, "blue")
     for x in (10, 29):
-        g.rect(x, 21, 1, 22, "dslate")
-    g.rect(5, 45, 30, 9, "navy")
-    g.tri((9, 53), (13, 46), (17, 46), "slate")
-    g.rect(1, 54, 38, 1, "cyan")
-    g.rect(1, 55, 38, 9, "sky")
-    g.rect(1, 64, 38, 4, "blue")
+        g.rect(x, 29, 1, 14 + r, "dslate")
+    for y in (36, 82):
+        g.rect(10, y, 20, 2, "dslate")
+        g.rect(10, y, 20, 1, "slate")
+    # rear window, tailgate, lights, plate and bumper
+    g.rect(5, 45 + r, 30, 9, "navy")
+    g.tri((9, 53 + r), (13, 46 + r), (17, 46 + r), "slate")
+    g.rect(1, 54 + r, 38, 1, "cyan")
+    g.rect(1, 55 + r, 38, 9, "sky")
+    g.rect(1, 64 + r, 38, 4, "blue")
     for x in (2, 32):
-        g.rect(x, 56, 6, 5, "red")
-        g.rect(x, 56, 6, 1, "pink")
-        g.rect(x, 60, 6, 1, "dred")
+        g.rect(x, 56 + r, 6, 5, "red")
+        g.rect(x, 56 + r, 6, 1, "pink")
+        g.rect(x, 60 + r, 6, 1, "dred")
     if hazard:
         for x in (2, 36):
-            g.rect(x, 56, 2, 4, "amber")
-            g.rect(x, 56, 2, 1, "yellow")
-    g.rect(15, 61, 10, 4, "lgrey")
-    g.rect(17, 62, 6, 1, "grey")
-    g.rect(18, 57, 4, 2, "lgrey")
-    g.rect(1, 67, 38, 4, "dslate")
-    g.rect(1, 67, 38, 1, "slate")
+            g.rect(x, 56 + r, 2, 4, "amber")
+            g.rect(x, 56 + r, 2, 1, "yellow")
+    g.rect(15, 61 + r, 10, 4, "lgrey")
+    g.rect(17, 62 + r, 6, 1, "grey")
+    g.rect(18, 57 + r, 4, 2, "lgrey")
+    g.rect(1, 67 + r, 38, 4, "dslate")
+    g.rect(1, 67 + r, 38, 1, "slate")
     return g
 
 
