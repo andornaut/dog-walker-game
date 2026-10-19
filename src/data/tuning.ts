@@ -106,7 +106,7 @@ export const TUNING = {
     // A minor bump locks lane input this long.
     // A minor bump holds the road and the pack still this long.
     minorHitStopSeconds: 0.6,
-    minorStumble: 0.5,
+    minorStumble: 0.3,
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
     // How long a dog leans and barks before it pulls.
     pullTell: 1,

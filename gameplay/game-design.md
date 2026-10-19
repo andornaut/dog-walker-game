@@ -47,13 +47,13 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 - **Money ($):** the only currency. Earned during the run (tips, per-zone fees), spent in encounters, banked at the end. Tracked in cents, shown in whole dollars. Never goes below $0
 - **Owner happiness (♥):** one meter per dog, shown as the dog's and owner's faces plus the meter, which never relies on colour alone. It starts at a value set by the owner's temperament, and its max is set by the dog's size. At 0 the owner fires you with a quip and the dog leaves
-- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog's slot or the bank (e.g. "−2 ♥, dramatic", "+$1.50 tip, solo"); a card's enlarged view lists the modifiers behind its numbers
+- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog's slot or the bank (e.g. "−2 ♥, dramatic", "+$0.60 tip, solo"); a card's enlarged view lists the modifiers behind its numbers
 
 ### A run
 
 - 4 zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each is the same distance, so later zones take less time as speed rises. A full run takes about 12 minutes
 - One forced stop per zone, and after zones 1 to 3, a choice of 1 of 3 upgrade cards
-- After each zone, every remaining dog pays a share of its fee. A dog fired mid-zone is not paid for that zone
+- After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
 - An owner who fires you takes back every fee their dog earned this run; tips stay
 - The run ends after zone 4 or when no dogs are left. You keep everything earned except fees taken back
 - **Head home:** from the pause menu at any time. Keeps tips and earlier zones' fees; the current zone pays nothing
@@ -61,7 +61,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Choice cards
 
-- Used for encounters, forced stops and upgrades. Up to three across, art-led: an illustration plus a one-line effect; tap to enlarge for details
+- Used for encounters, forced stops and upgrades. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
 - Each option's outcome is fixed and shown on the card. Choices only, no minigames
 - An option you can't afford is disabled; every encounter keeps at least one free option
 - Slower options cost money (missed tips) instead of time
@@ -73,8 +73,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ### Teaching, sound and settings
 
 - **First-time hints:** a one-line hint the first time each thing appears (first puddle, first pull, first treat, first forced stop and so on); the help screen covers the rest
-- **Sound:** a few effects (tip, treat, bump, bark, card open, fired) and one music loop for the walk
-- **Settings** (from pause and the home screen): music volume, effects volume, reduced motion
+- **Sound:** short effects (tip, treat, bump, bark, card open, fired), a sound for each encounter hit (spray hiss, splash, coin scatter, squirrel chitter, friendly woof), a badge-earned jingle and a new-best fanfare, and one music loop for the walk
+- **Settings** (from pause and the home screen): sound on or off, music volume, effects volume, reduced motion
 
 ### Pickups
 
@@ -92,7 +92,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Size              | Small · medium · big. No size is a straight upgrade. Bigger dogs lock lane input longer after a pull (small: not at all) and have a higher max ♥. Each small dog attracts more Other dog encounters and each big dog fewer; any big dog scares thieves away. Small dogs are caught by area effects less often |
 | Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                     |
 | Energy            | Calm · steady · hyper. Sets how often the dog pulls                                                                                                                                                                                                                                                           |
-| Owner temperament | **Laid-back:** starts with more ♥ · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                                                         |
+| Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                                                    |
 
 | Dog      | Breed           | Owner                          | Look                                  |
 | -------- | --------------- | ------------------------------ | ------------------------------------- |
@@ -205,7 +205,7 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 - **Details:** hold any dog or gear item for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's effect. Gear tiles show their names
 - **Start button:** shows the pack, e.g. "Start walk · 2 dogs · $40/zone"; the pack count reads "Pack 1/1"
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after a walk "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
-- **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $480 more for Nugget."; the hint line reads "Tap a dog to walk it. Tap a locked dog or gear to buy it. Hold for details."
+- **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; the hint line reads "Tap a dog to walk it. Tap a locked dog or gear to buy it. Hold for details."
 - **Gear** (5 items, bought once): fanny pack (start the run with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +♥ and has a higher max). Equip up to 1 owned item before each run, or none
 - **Walker picker:** choose Casey, Ada, Ben or Trista. All are free; the choice is cosmetic and saved
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
