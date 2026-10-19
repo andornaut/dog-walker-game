@@ -19,7 +19,7 @@ import {
   STRIP,
   stripLevels,
 } from "./roadRaster";
-import { crossesLine, leafAt } from "./roadside";
+import { crossesLine, darkerGreen, isLawn, mownAt, vergeBase, VERGES } from "./roadside";
 import { screenLayout } from "./screenLayout";
 
 const { road } = screenLayout(SCREEN_CONFIG);
@@ -47,60 +47,134 @@ const pixelAt = (out: Uint32Array, x: number, y: number) =>
   out[(y - road.y) * road.width + (x - road.x)];
 
 describe("the verge beside the road", () => {
-  // Band row 149 is screen row 189: drawn at scroll 0, it is the backdrop's bottom row.
-  const bandRow = roadRaster(projection, { ...road, height: 1, y: 189 });
-  const runs = (zone: ZoneId): [number, number, number][] => {
-    const out = draw(frameOf({ current: look(zone, 0x123456) }), bandRow);
+  // Band row 149 is screen row 189: the backdrop's bottom row, which the verge continues.
+  const bandRow = itemAt(roadRaster(projection, { ...road, height: 1, y: 189 }).rows, 0);
+  const [GREEN, DARK_GREEN, FOREST] = [0x63c74d, 0x3e8948, 0x265c42];
+  const [GREY, LIGHT_GREY] = [0x8b9bb4, 0xc0cbdc];
+  const STRIP_MARK = -1;
+  const runsOf = (colors: number[]) => {
     const result: [number, number, number][] = [];
-    out.forEach((pixel, i) => {
+    colors.forEach((color, i) => {
       const last = result.at(-1);
-      if (last !== undefined && last[2] === pixel) {
+      if (last !== undefined && last[2] === color) {
         last[1] = road.x + i;
       } else {
-        result.push([road.x + i, road.x + i, pixel]);
+        result.push([road.x + i, road.x + i, color]);
       }
     });
     return result;
   };
-  const strip = pixelWord(0x123456);
-  const lawn = pixelWord(0x3e8948);
-  const walk = pixelWord(0xc0cbdc);
-  const curb = pixelWord(0x8b9bb4);
+  const baseRuns = (zone: ZoneId) =>
+    runsOf(
+      Array.from(bandRow.across, (across) =>
+        across < 0 ? STRIP_MARK : vergeBase(VERGES[zone], across, bandRow.scale),
+      ),
+    );
 
-  it("continues Woof Way's and The Long Way Home's lawn, sidewalk and curb", () => {
+  // The runs of each backdrop's row 149 beside the road, without its tufts.
+  it("continues Woof Way's and The Long Way Home's mown lawn, sidewalk and curb", () => {
     for (const zone of ["street", "homeStretch"] as const) {
-      const expected = [
-        [80, 124, lawn],
-        [125, 147, walk],
-        [148, 149, curb],
-        [150, 289, strip],
-        [290, 291, curb],
-        [292, 314, walk],
-        [315, 359, lawn],
-      ];
-      // Fallen leaves may sit on The Long Way Home's lawn, so compare the street's verge only.
-      expect(runs(zone).filter(([, , pixel]) => pixel !== lawn || zone === "street")).toEqual(
-        expected.filter(([, , pixel]) => pixel !== lawn || zone === "street"),
-      );
+      expect(baseRuns(zone)).toEqual([
+        [80, 102, DARK_GREEN],
+        [103, 124, GREEN],
+        [125, 147, LIGHT_GREY],
+        [148, 149, GREY],
+        [150, 289, STRIP_MARK],
+        [290, 291, GREY],
+        [292, 314, LIGHT_GREY],
+        [315, 336, GREEN],
+        [337, 359, DARK_GREEN],
+      ]);
     }
   });
 
-  it("runs Bark Park's grass up to the path", () => {
-    expect(runs("park")).toEqual([
-      [80, 149, lawn],
-      [150, 289, strip],
-      [290, 359, lawn],
+  it("runs Bark Park's unmown grass up to the path", () => {
+    expect(baseRuns("park")).toEqual([
+      [80, 149, GREEN],
+      [150, 289, STRIP_MARK],
+      [290, 359, GREEN],
     ]);
   });
 
   it("paves Sniff Street Shops up to a curb", () => {
-    expect(runs("shops")).toEqual([
-      [80, 147, walk],
-      [148, 149, curb],
-      [150, 289, strip],
-      [290, 291, curb],
-      [292, 359, walk],
+    expect(baseRuns("shops")).toEqual([
+      [80, 147, LIGHT_GREY],
+      [148, 149, GREY],
+      [150, 289, STRIP_MARK],
+      [290, 291, GREY],
+      [292, 359, LIGHT_GREY],
     ]);
+  });
+
+  it("ends a dark mown stripe where it would draw under 4px wide", () => {
+    // The second stripe, 62 wide, from 232 across.
+    expect(mownAt(250, 0.5)).toBe(true);
+    expect(mownAt(250, 0.06)).toBe(false);
+    expect(mownAt(200, 1)).toBe(false);
+  });
+
+  it("darkens the lawn only with tufts, and only the lawn", () => {
+    const out = draw(frameOf({ current: look("street", 0x123456), scroll: 300 }));
+    const words = new Map(
+      [GREEN, DARK_GREEN, FOREST, GREY, LIGHT_GREY].map((rgb) => [pixelWord(rgb), rgb]),
+    );
+    let tufts = 0;
+    raster.rows.forEach((row, y) => {
+      row.across.forEach((across, i) => {
+        if (across < 0) {
+          return;
+        }
+        const color = words.get(out[y * road.width + i] ?? 0);
+        const base = vergeBase(VERGES.street, across, row.scale);
+        if (color !== base) {
+          tufts += 1;
+          expect(isLawn(VERGES.street, across) || color === GREY).toBe(true);
+          expect([darkerGreen(base), GREY]).toContain(color);
+        }
+      });
+    });
+    expect(tufts).toBeGreaterThan(20);
+  });
+
+  it("thins tufts with distance", () => {
+    const tuftShare = (from: number, to: number) => {
+      let lawn = 0;
+      let marked = 0;
+      for (const scroll of [0, 150, 300]) {
+        const out = draw(frameOf({ current: look("street", 0x123456), scroll }));
+        raster.rows.slice(from, to).forEach((row, j) => {
+          row.across.forEach((across, i) => {
+            if (isLawn(VERGES.street, across)) {
+              lawn += 1;
+              const color = out[(from + j) * road.width + i];
+              marked +=
+                color === pixelWord(darkerGreen(vergeBase(VERGES.street, across, row.scale)))
+                  ? 1
+                  : 0;
+            }
+          });
+        });
+      }
+      return marked / Math.max(1, lawn);
+    };
+    expect(tuftShare(0, 40)).toBeLessThan(tuftShare(200, 300));
+  });
+
+  it("lays rough patches on Bark Park's lawn and no stripes", () => {
+    const darkened = [0, 400, 800, 1200].some((scroll) =>
+      draw(frameOf({ current: look("park", 0x123456), scroll })).includes(pixelWord(DARK_GREEN)),
+    );
+    expect(darkened).toBe(true);
+  });
+
+  it("scatters leaves on The Long Way Home only", () => {
+    const tones = [0xd77643, 0xbe4a2f, 0x733e39].map(pixelWord);
+    const leaves = (zone: ZoneId) =>
+      [0, 100, 200].some((scroll) =>
+        draw(frameOf({ current: look(zone, 0x123456), scroll })).some((p) => tones.includes(p)),
+      );
+    expect(leaves("homeStretch")).toBe(true);
+    expect(leaves("street")).toBe(false);
   });
 
   it("draws each seam across the sidewalk on one far row, however the road has scrolled", () => {
@@ -112,13 +186,6 @@ describe("the verge beside the road", () => {
       const first = lines.at(-1) ?? 0;
       expect([...lines].reverse()).toEqual(Array.from(lines, (_, i) => first + i));
     }
-  });
-
-  it("scatters leaves on The Long Way Home only", () => {
-    const leaves = (zone: ZoneId) =>
-      Array.from({ length: 400 }, (_, i) => leafAt(zone, i, i * 3, 1)).filter((c) => c !== null);
-    expect(leaves("homeStretch").length).toBeGreaterThan(0);
-    expect(leaves("street")).toEqual([]);
   });
 });
 
