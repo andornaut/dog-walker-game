@@ -75,8 +75,9 @@ export class MenuFlow {
   // The pause menu, or the Home button's question, over the walk or over the card that holds
   // it. The walk steps only while walking, so the menu stops it without pausing the run
   // scene: sprite animations loop on, while tweens and timers stop, keeping a hit moment in
-  // step with its hit stop. The card under the menu pauses. The HUD keeps running, so the top
-  // bar's buttons work and redraw. Asked while the menu is up, the question replaces it.
+  // step with its hit stop. The card under the menu pauses and hides, so no card shows beside
+  // the menu's panel. The HUD keeps running, so the top bar's buttons work and redraw. Asked
+  // while the menu is up, the question replaces it.
   openPause(mode: PauseSceneData["mode"]): void {
     if (this.host.over()) {
       return;
@@ -97,6 +98,7 @@ export class MenuFlow {
     scene.time.paused = true;
     if (this.cardView !== undefined) {
       scene.scene.pause(SCENE_KEYS.card);
+      scene.scene.setVisible(false, SCENE_KEYS.card);
     }
     scene.scene.launch(SCENE_KEYS.pause, this.pauseData());
   }
@@ -112,6 +114,7 @@ export class MenuFlow {
     scene.tweens.resumeAll();
     scene.time.paused = false;
     if (this.cardView !== undefined) {
+      scene.scene.setVisible(true, SCENE_KEYS.card);
       scene.scene.resume(SCENE_KEYS.card);
     }
   }

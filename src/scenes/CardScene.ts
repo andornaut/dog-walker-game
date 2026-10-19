@@ -223,6 +223,7 @@ export class CardScene extends Scene {
           this.hold = undefined;
           this.enlarged.forEach((part) => part.destroy());
           this.enlarged = [];
+          this.showRow(true);
         }
       },
       onTap: (index) => this.choose(index),
@@ -318,6 +319,8 @@ export class CardScene extends Scene {
     }
     this.pressed = undefined;
     this.drawOutline();
+    // The row's edges would show beside the enlarged card, so it hides until the release.
+    this.showRow(false);
     const { roadView: road } = screenLayout(SCREEN_CONFIG);
     const { x, y } = largeCardRect(road);
     const before = this.children.list.length;
@@ -404,6 +407,12 @@ export class CardScene extends Scene {
       },
     );
     this.enlarged = this.children.list.slice(before);
+  }
+
+  private showRow(visible: boolean): void {
+    this.parts.flat().forEach((part) => {
+      (part as GameObjects.GameObject & { visible: boolean }).visible = visible;
+    });
   }
 
   // ui-fires over the plaque's left rivet, pulsing unless motion is reduced. Returns its
