@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mocks</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png" />
+    <link rel="stylesheet" href="/nav.css" />
+    <script src="/nav.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
+    />
+    <style>
+      /* The open mocks, one card per page listed in index.json. A decided mock is deleted, so the list holds only what is still being decided. */
+      :root {
+        --bg: #13101e;
+        --surface: #1d1a2c;
+        --fg: #dfe4ee;
+        --muted: #8b9bb4;
+        --line: #33304a;
+        --accent: #feae34;
+        --f-display: "Silkscreen", ui-monospace, monospace;
+        --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--f-body);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 0 auto;
+        padding-block: 24px 56px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 24px;
+      }
+      header {
+        display: grid;
+        gap: 8px;
+      }
+      h1 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: clamp(22px, 4vw, 32px);
+        line-height: 1.1;
+        margin: 0;
+      }
+      p {
+        margin: 0;
+      }
+      .lede {
+        color: var(--muted);
+        max-width: 80ch;
+      }
+      .list {
+        display: grid;
+        gap: 12px;
+      }
+      .mock {
+        display: grid;
+        gap: 4px;
+        padding: 14px 16px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        color: inherit;
+        text-decoration: none;
+      }
+      .mock:hover,
+      .mock:focus-visible {
+        border-color: var(--accent);
+      }
+      .mock b {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: 17px;
+        color: var(--accent);
+      }
+      .mock span {
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header>
+        <h1>Mocks</h1>
+        <p class="lede">
+          Proposals still waiting on a decision. Once one is decided, it is built or dropped and its
+          page is deleted.
+        </p>
+      </header>
+      <div class="list" id="list"><p class="lede">Loading...</p></div>
+    </main>
+    <script>
+      (async () => {
+        const list = document.getElementById("list");
+        let mocks = [];
+        try {
+          const r = await fetch("index.json", { cache: "no-cache" });
+          if (r.ok) mocks = await r.json();
+        } catch {
+          /* offline: show the empty state */
+        }
+        if (!mocks.length) {
+          const p = document.createElement("p");
+          p.className = "lede";
+          p.textContent = "No open mocks.";
+          list.replaceChildren(p);
+          return;
+        }
+        list.replaceChildren(
+          ...mocks.map((m) => {
+            const a = document.createElement("a");
+            a.className = "mock";
+            a.href = "/art/mocks/" + m.path;
+            const b = document.createElement("b");
+            b.textContent = m.title;
+            const s = document.createElement("span");
+            s.textContent = m.description || "";
+            a.append(b, s);
+            return a;
+          }),
+        );
+      })();
+    </script>
+  </body>
+</html>

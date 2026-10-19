@@ -10,7 +10,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 ## Scope
 
 - `art/`: the generator scripts in `art/tools/`, the Aseprite sources they write and these docs.
-- `public/art/`: the exported sprites, images, fonts and sounds, `manifest.extra.json`, the `/art/` gallery and the mock pages in `mocks/`. The game build generates `manifest.json` beside them.
+- `public/art/`: the exported sprites, images, fonts and sounds, `manifest.extra.json`, the `/art/` gallery and the mock pages in `mocks/`. `/art/mocks/` lists the open mocks from `mocks/index.json`; a mock is deleted once it is decided. The game build generates `manifest.json` beside them.
 - Also drawn here: the site's icons, `public/og-image.png` and the art on the home page.
 
 ## Method
