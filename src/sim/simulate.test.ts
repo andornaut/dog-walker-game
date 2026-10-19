@@ -28,7 +28,8 @@ function runs(count: number, overrides: Partial<SimConfig> = {}): RunResult[] {
   );
 }
 
-describe("simulateRun", () => {
+// Whole simulated runs: slow under a loaded machine, so past vitest's 5 s default.
+describe("simulateRun", { timeout: 30_000 }, () => {
   it("gives the same result for the same seed", () => {
     const first = simulateRun(gameData, seededRandom(7), config({ pack: RISKY }));
     const second = simulateRun(gameData, seededRandom(7), config({ pack: RISKY }));

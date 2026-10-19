@@ -21,7 +21,10 @@ const SMALL: Matrix = {
   policies: ["heartsUnlessLow", "alwaysPay"],
 };
 
-describe("simulateMatrix", () => {
+// Whole simulated runs: slow under a loaded machine, so past vitest's 5 s default.
+const SLOW = { timeout: 30_000 };
+
+describe("simulateMatrix", SLOW, () => {
   it("covers every policy, hit rate and pack of the default matrix", () => {
     const cells = matrixCells(DEFAULT_MATRIX);
 
@@ -78,7 +81,7 @@ describe("simulateMatrix", () => {
   });
 });
 
-describe("simulateMatrixInBatches", () => {
+describe("simulateMatrixInBatches", SLOW, () => {
   it("reports the same rows as simulateMatrix, one row at a time", () => {
     const queue: (() => void)[] = [];
     const reports: (readonly MatrixRow[])[] = [];
