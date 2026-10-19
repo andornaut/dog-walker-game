@@ -3,18 +3,17 @@ import type { Owned } from "../save/schema";
 import type { HomeLoadout } from "./home";
 import { packCountLine } from "./homeLines";
 
-// The home screen's two framed sections, top to bottom, each a card with a heading band.
-// The Pocket strip under them is optional and has no frame.
-export type SectionId = "dogs" | "walker";
+// The home screen's three framed sections, each a card with a heading band.
+export type SectionId = "dogs" | "pocket" | "walker";
 
-// A section is incomplete until its pick is made, then complete. The Dogs band shows the
-// pack count either way; the Walker band asks for a face until one is picked.
-export type SectionState = "complete" | "incomplete";
+// A section is neutral until its pick is made, then complete. The Dogs band shows the pack
+// count either way; the Walker band asks for a face until one is picked; the Pocket band
+// names the pocketed item, or says how many it holds while it is empty.
+export type SectionState = "complete" | "neutral";
 
 export interface Section {
   readonly heading: string;
-  // The band's right-hand text: what an incomplete section needs, or the choice once
-  // complete.
+  // The band's right-hand text: what a neutral section needs, or the choice once complete.
   readonly note: string;
   readonly state: SectionState;
 }
@@ -22,7 +21,7 @@ export interface Section {
 export type Sections = Readonly<Record<SectionId, Section>>;
 
 export function homeSections(
-  data: Pick<GameData, "homeText" | "tuning" | "walkers">,
+  data: Pick<GameData, "homeText" | "shopGear" | "tuning" | "walkers">,
   owned: Pick<Owned, "dogSlots">,
   choice: { readonly loadout: HomeLoadout; readonly walker: WalkerId | null },
 ): Sections {
@@ -32,16 +31,20 @@ export function homeSections(
     dogs: {
       heading: text.sectionDogs,
       note: packCountLine(data, owned, loadout),
-      state: loadout.dogs.length === 0 ? "incomplete" : "complete",
+      state: loadout.dogs.length === 0 ? "neutral" : "complete",
     },
+    pocket:
+      loadout.gear === null
+        ? { heading: text.pocket.title, note: text.pocket.note, state: "neutral" }
+        : { heading: text.pocket.title, note: data.shopGear[loadout.gear].name, state: "complete" },
     walker:
       walker === null
-        ? { heading: text.sectionWalker, note: text.sectionWalkerPrompt, state: "incomplete" }
+        ? { heading: text.sectionWalker, note: text.sectionWalkerPrompt, state: "neutral" }
         : { heading: text.sectionWalker, note: data.walkers[walker].name, state: "complete" },
   };
 }
 
-// Start walk is ready once no section is incomplete: a walker and a dog are picked.
+// Start walk is ready once a walker and a dog are picked; the Pocket is optional.
 export function startReady(sections: Sections): boolean {
-  return Object.values(sections).every((section) => section.state !== "incomplete");
+  return sections.walker.state === "complete" && sections.dogs.state === "complete";
 }

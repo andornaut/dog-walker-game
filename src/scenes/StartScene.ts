@@ -70,7 +70,6 @@ import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { startWakeLock, stopWakeLock } from "../pwa";
-import { effectClause, effectText } from "../rules/effectText";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -202,7 +201,7 @@ function walkerIds(): WalkerId[] {
   return walkerOrder(gameData);
 }
 
-const SECTION_IDS: readonly SectionId[] = ["walker", "dogs"];
+const SECTION_IDS: readonly SectionId[] = ["walker", "dogs", "pocket"];
 
 function gearIds(): GearId[] {
   return Object.keys(gameData.shopGear) as GearId[];
@@ -253,7 +252,7 @@ function dogFace(hit: Rect): Rect {
   return { ...hit, height: hit.height - DOG_TILE_INSET * 2, y: hit.y + DOG_TILE_INSET };
 }
 
-// The Pocket strip's cells, in shop order; each draws its tile inset inside.
+// The Pocket section's cells, in shop order; each draws its tile inset inside.
 function gearSlots(): Rect[] {
   return gridRects(POCKET.cells, gearIds().length, POCKET.origin);
 }
@@ -342,7 +341,7 @@ const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 
 // The screen before a walk: the bank, the Logbook and best walk at the top bar's left and
 // help, sound and settings at its right; the walker and pack at the gate beside the Pet
-// shop; the Walker and Dogs sections, the Pocket strip and Start walk. Buying happens only in
+// shop; the Walker, Dogs and Pocket sections and Start walk. Buying happens only in
 // the shop: tapping the building opens it, and tapping a locked dog, gear item or the Dogs
 // band's padlock opens it on that item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape closes a card, ? opens help,
@@ -819,7 +818,7 @@ export class StartScene extends Scene {
   }
 
   // A new player's first walk opens help unless it was read from ?, then sets off when it
-  // closes. Before then, a tap shakes the button: the incomplete sections' bands say what is
+  // closes. Before then, a tap shakes the button: the neutral sections' bands say what is
   // missing.
   private startWalk(): void {
     const save = this.save();
@@ -993,7 +992,7 @@ export class StartScene extends Scene {
 
   // A section's ui-section frame and band by its state, with the heading on the band's left
   // and its note on the right: ink on the lit (complete) band, cream and amber on the dark
-  // (incomplete) one. While a dog slot is for sale, the Dogs band's padlock sits right of
+  // (neutral) one. While a dog slot is for sale, the Dogs band's padlock sits right of
   // its note.
   private drawSection(
     root: GameObjects.Container,
@@ -1034,7 +1033,7 @@ export class StartScene extends Scene {
   }
 
   // The ui-section art drawn in code while it is missing: complete is an ink outline round a
-  // gold frame and a lit amber band over an orange rule; incomplete is an ink frame and rule
+  // gold frame and a lit amber band over an orange rule; neutral is an ink frame and rule
   // round a navy band. The tiles' area is left open.
   private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
     const g = this.graphics(root);
@@ -1415,18 +1414,14 @@ export class StartScene extends Scene {
     });
   }
 
-  // The Pocket strip on the wood: its title and note, a tile per gear item in shop order, and
-  // the pocketed item's effect under them. Pocketing an item replaces any other, so the Pocket
-  // is never full.
+  // The Pocket section's tiles, one per gear item in shop order; a hold shows an item's
+  // effect. Pocketing an item replaces any other, so the Pocket is never full.
   private drawPocket(
     root: GameObjects.Container,
     stickered: (item: TileItem) => boolean,
     save: SaveDocument,
   ): void {
     const { owned } = save;
-    const text = gameData.homeText.pocket;
-    this.text(root, POCKET.title.x, POCKET.title.y, text.title, PALETTE.cream, { font: "title" });
-    this.text(root, POCKET.note.x, POCKET.note.y, text.note, PALETTE.cream, { originX: 1 });
     const pocketed = this.loadout.gear;
     const slots = gearSlots();
     gearIds().forEach((id, i) => {
@@ -1467,25 +1462,6 @@ export class StartScene extends Scene {
         }
       }
     });
-    this.drawPocketEffect(root, pocketed);
-  }
-
-  // "Whistle: no Thief cards for the run." for the pocketed item, or the effect alone where
-  // that is too wide; the empty Pocket's line while nothing is in it.
-  private drawPocketEffect(root: GameObjects.Container, pocketed: GearId | null): void {
-    const { effect } = POCKET;
-    const text = gameData.homeText.pocket;
-    const label = this.text(root, effect.x, effect.y, text.empty, PALETTE.cream);
-    if (pocketed === null) {
-      return;
-    }
-    const item = gameData.shopGear[pocketed];
-    const named = fillLine(FIELDS.pocket, text, "item", {
-      effect: effectClause(gameData, item.effects),
-      gear: item.name,
-    });
-    const alone = `${effectText(gameData, item.effects)}.`;
-    fitText(label, effect.maxWidth, [named, alone]);
   }
 
   // The item's 32x32 icon, as a locked item's silhouette or a disabled tile's grey copy, or

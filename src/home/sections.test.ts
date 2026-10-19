@@ -9,42 +9,56 @@ import { homeSections, startReady } from "./sections";
 const data = { ...gameData, tuning: TEST_TUNING };
 const text = data.homeText;
 const owned = { dogSlots: 1 };
-const nothing = { dogs: [], gear: null } as const;
 
 describe("homeSections", () => {
-  it("asks for a walker, and counts an empty pack", () => {
-    const sections = homeSections(data, owned, { loadout: nothing, walker: null });
-    expect(sections.walker).toEqual({
-      heading: text.sectionWalker,
-      note: text.sectionWalkerPrompt,
-      state: "incomplete",
-    });
-    expect(sections.dogs).toEqual({
-      heading: text.sectionDogs,
-      note: homeLine(text, "packCount", { count: "0", max: "1" }),
-      state: "incomplete",
-    });
-  });
-
-  it("names each choice once made: the walker and the pack count", () => {
-    const loadout = { dogs: ["koda"], gear: "whistle" } as const;
-    const sections = homeSections(data, { dogSlots: 2 }, { loadout, walker: "casey" });
-    expect(sections.walker).toMatchObject({ note: "Casey", state: "complete" });
-    expect(sections.dogs).toMatchObject({
-      note: homeLine(text, "packCount", { count: "1", max: "2" }),
-      state: "complete",
-    });
-  });
+  // Nothing chosen is neutral and something chosen is complete, for every section.
+  it.each([
+    {
+      dogs: [],
+      expected: {
+        dogs: { note: homeLine(text, "packCount", { count: "0", max: "2" }), state: "neutral" },
+        pocket: { note: text.pocket.note, state: "neutral" },
+        walker: { note: text.sectionWalkerPrompt, state: "neutral" },
+      },
+      gear: null,
+      walker: null,
+    },
+    {
+      dogs: ["koda"],
+      expected: {
+        dogs: { note: homeLine(text, "packCount", { count: "1", max: "2" }), state: "complete" },
+        pocket: { note: data.shopGear.whistle.name, state: "complete" },
+        walker: { note: "Casey", state: "complete" },
+      },
+      gear: "whistle",
+      walker: "casey",
+    },
+  ] as const)(
+    "walker $walker, $dogs.length dogs, gear $gear",
+    ({ dogs, expected, gear, walker }) => {
+      const loadout = { dogs, gear };
+      const sections = homeSections(data, { dogSlots: 2 }, { loadout, walker });
+      expect(sections).toEqual({
+        dogs: { heading: text.sectionDogs, ...expected.dogs },
+        pocket: { heading: text.pocket.title, ...expected.pocket },
+        walker: { heading: text.sectionWalker, ...expected.walker },
+      });
+    },
+  );
 });
 
 describe("startReady", () => {
   const ready = (walker: WalkerId | null, dogs: readonly DogId[]) =>
     startReady(homeSections(data, owned, { loadout: { dogs, gear: null }, walker }));
 
-  it("needs both a walker and a dog, and never gear", () => {
-    expect(ready(null, [])).toBe(false);
-    expect(ready("casey", [])).toBe(false);
-    expect(ready(null, ["koda"])).toBe(false);
-    expect(ready("casey", ["koda"])).toBe(true);
+  // An empty Pocket never holds the walk back.
+
+  it.each([
+    { dogs: [], expected: false, walker: null },
+    { dogs: [], expected: false, walker: "casey" },
+    { dogs: ["koda"], expected: false, walker: null },
+    { dogs: ["koda"], expected: true, walker: "casey" },
+  ] as const)("walker $walker with $dogs.length dogs: $expected", ({ dogs, expected, walker }) => {
+    expect(ready(walker, dogs)).toBe(expected);
   });
 });

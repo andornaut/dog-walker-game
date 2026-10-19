@@ -72,21 +72,17 @@ export const HOME_LAYOUT = {
     x: 234,
     y: 90,
   },
-  // The Pocket strip on the wood under the Dogs section, with no frame: its title and note,
-  // a row of gear cells, each drawing its tile 1px inside, and the effect line under them.
+  // The Pocket's row of gear cells under its section's band, each drawing its tile 1px inside.
   // In a tile: the icon box and the art in it, the padlock over its top-left corner, and the
   // price plate's caps, centred.
   pocket: {
     box: { dx: 14, dy: 3, size: 34 },
     cells: { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 },
-    effect: { maxWidth: 352, x: 4, y: 499 },
     icon: { dx: 15, dy: 4 },
     lock: { dx: -2, dy: -3 },
-    note: { x: 356, y: 434 },
-    origin: { x: 4, y: 450 },
+    origin: { x: 4, y: 459 },
     priceY: 28,
     tileInset: 1,
-    title: { x: 4, y: 434 },
   },
   porchDogOffset: { dx: -12, footDy: 3 },
   // Before the first walk the starter owners wait in the yard left of the path, behind the
@@ -99,10 +95,11 @@ export const HOME_LAYOUT = {
   },
   // A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
   sectionFrame: { band: 20, edge: 3 },
-  // Under the gate, two framed sections top to bottom (walker, dogs), each a heading band
-  // over its tiles; then the Pocket strip and Start walk.
+  // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a
+  // heading band over its tiles; then Start walk.
   sections: {
     dogs: { height: 160, width: 360, x: 0, y: 270 },
+    pocket: { height: 78, width: 352, x: 4, y: 432 },
     walker: { height: 72, width: 360, x: 0, y: 198 },
   },
   settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: 10 } },

@@ -126,7 +126,7 @@
 In build order:
 
 1. Firing without a fee clawback, and the end screen without its line.
-2. The Pet shop and the Pocket strip on the start screen, with walkers on the shared tile states.
+2. The Pet shop and the Pocket section on the start screen, with walkers on the shared tile states.
 3. 64px lanes and 40px sprites, landing with art's redraw: road camera, formations (the lone dog's band at about 71px), collision sizes, leashes under the walker.
 4. Per-zone obstacle skins: names, road sprites, card art and hit labels from the data.
 5. Roadside props beyond the sidewalks, after the scale change.

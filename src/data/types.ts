@@ -635,16 +635,13 @@ export interface HomeText {
   readonly noticeSoundOff: string;
   readonly noticeSoundOn: string;
   readonly packCount: string;
-  // The Pocket strip under the Dogs section: its title and right-hand note, the line under
-  // the strip with the pocketed item's effect, or what it says while the Pocket is empty.
+  // The Pocket section's heading, and its band's note while nothing is pocketed.
   readonly pocket: {
-    readonly empty: string;
-    readonly item: string;
     readonly note: string;
     readonly title: string;
   };
-  // The section headings, and what a required section with nothing picked asks for on its
-  // band.
+  // The Walker and Dogs section headings, and what the Walker band asks for with nothing
+  // picked.
   readonly sectionDogs: string;
   readonly sectionWalker: string;
   readonly sectionWalkerPrompt: string;

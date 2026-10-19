@@ -48,9 +48,6 @@ export const HOME_TEXT_FIELDS = {
   noticeSoundOff: [],
   noticeSoundOn: [],
   packCount: ["count", "max"],
-  pocket: {
-    item: ["effect", "gear"],
-  },
   sectionDogs: [],
   sectionWalker: [],
   sectionWalkerPrompt: [],

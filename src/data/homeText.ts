@@ -63,8 +63,6 @@ export const HOME_TEXT = {
   noticeSoundOn: "Sound on.",
   packCount: "{count}/{max}",
   pocket: {
-    empty: "Empty. Tap a gear item to pocket it.",
-    item: "{gear}: {effect}.",
     note: "One per walk",
     title: "Pocket",
   },

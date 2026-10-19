@@ -1428,11 +1428,6 @@
           "gapX": 8,
           "gapY": 0
         },
-        "effect": {
-          "maxWidth": 352,
-          "x": 4,
-          "y": 499
-        },
         "icon": {
           "dx": 15,
           "dy": 4
@@ -1441,20 +1436,12 @@
           "dx": -2,
           "dy": -3
         },
-        "note": {
-          "x": 356,
-          "y": 434
-        },
         "origin": {
           "x": 4,
-          "y": 450
+          "y": 459
         },
         "priceY": 28,
-        "tileInset": 1,
-        "title": {
-          "x": 4,
-          "y": 434
-        }
+        "tileInset": 1
       },
       "porchDogOffset": {
         "dx": -12,
@@ -1484,6 +1471,12 @@
           "width": 360,
           "x": 0,
           "y": 270
+        },
+        "pocket": {
+          "height": 78,
+          "width": 352,
+          "x": 4,
+          "y": 432
         },
         "walker": {
           "height": 72,
@@ -1622,31 +1615,31 @@
           "height": 44,
           "width": 64,
           "x": 4,
-          "y": 450
+          "y": 459
         },
         {
           "height": 44,
           "width": 64,
           "x": 76,
-          "y": 450
+          "y": 459
         },
         {
           "height": 44,
           "width": 64,
           "x": 148,
-          "y": 450
+          "y": 459
         },
         {
           "height": 44,
           "width": 64,
           "x": 220,
-          "y": 450
+          "y": 459
         },
         {
           "height": 44,
           "width": 64,
           "x": 292,
-          "y": 450
+          "y": 459
         }
       ],
       "walkerRects": [
