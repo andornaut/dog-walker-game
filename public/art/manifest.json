@@ -1345,6 +1345,11 @@
       "json": "sprites/icon-effects-panel.json"
     },
     {
+      "key": "icon-growl",
+      "png": "sprites/icon-growl.png",
+      "json": "sprites/icon-growl.json"
+    },
+    {
       "key": "icon-motion-panel",
       "png": "sprites/icon-motion-panel.png",
       "json": "sprites/icon-motion-panel.json"

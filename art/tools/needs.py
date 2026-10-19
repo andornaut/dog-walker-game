@@ -12,6 +12,9 @@ icon-need-<need>   16x16  normal (1 frame)  regular (a hydrant on a grass tuft),
                           tennis ball with a bounce), friendly (a waving hand and a small
                           heart), nosy (a dog's nose breathing in scent lines), thirsty (a drop
                           over a red water bowl)
+icon-growl         16x16  normal (1 frame)  a snarling muzzle baring its fangs, nose wrinkled:
+                          the Nervous quirk's strain toward another dog, drawn in ui-pull-bubble
+                          like a need icon
 ui-pull-bubble     32x28  idle (2 frames, 400ms)  the bubble swells 1px up and out and back
                           show (3 frames, 60ms)  pops in: a dot on the tail, an overshoot, the
                           rest pose
@@ -210,6 +213,28 @@ def thirsty():
 
 
 ICONS = {"regular": regular, "playful": playful, "friendly": friendly, "nosy": nosy, "thirsty": thirsty}
+
+
+def growl():
+    """A golden muzzle snarling from the front: the nose over wrinkles slanting in toward it, the lip curled
+    off pink gums, two fangs down and two up around a plum mouth and a red tongue."""
+    g = Icon()
+    bitmap(g, 1, 1, ["....nnnnnn....",
+                     "...nlnnnnnn...",
+                     "..aan#nn#naa..",
+                     ".aaaannnnaaaa.",
+                     "aaoaaaaaaaaoaa",
+                     "aaaoaaaaaaoaaa",
+                     "apppppppppppPa",
+                     "aWWddddddddWWa",
+                     "adWddddddddWda",
+                     "addddrrrrdddda",
+                     "adWdrrrrrrdWda",
+                     "aWWppppppppWWa",
+                     ".aaaaaaaaaaaa."],
+           {"n": "navy", "#": "ink", "l": "slate", "a": "amber", "o": "orange", "p": "pink", "P": "mauve",
+            "W": "white", "d": "plum", "r": "red"})
+    return g
 
 
 # ---------- the pull bubble ----------
@@ -590,6 +615,7 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for need, draw in ICONS.items():
         yield f"icon-need-{need}", [("normal", [draw().outlined()], 1000)]
+    yield "icon-growl", [("normal", [growl().outlined()], 1000)]
     # idle leads, so frame 0 (the manifest anchor) is the rest pose
     yield "ui-pull-bubble", [
         ("idle", [bubble().outlined(False), bubble(grow=1).outlined(False)], 400),

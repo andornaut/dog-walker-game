@@ -473,7 +473,8 @@ def sprites():
             yield f"{key}@{suffix}", tags
     for suffix, s in SCALES:
         for name, (draw, _) in dogs.DOGS.items():
-            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, s), ms) for tag, poses, ms in dogs.ROAD_TAGS]
+            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, s), ms)
+                                           for tag, poses, ms in dogs.road_tags(name)]
 
 
 def originals():

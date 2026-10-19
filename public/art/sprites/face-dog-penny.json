@@ -22,6 +22,14 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
     "sourceSize": { "w": 32, "h": 32 },
     "duration": 1000
+   },
+   "face-dog-penny 3.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 32, "h": 32 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 32 },
+    "sourceSize": { "w": 32, "h": 32 },
+    "duration": 1000
    }
  },
  "meta": {
@@ -29,12 +37,13 @@
   "version": "1.2.30-x64",
   "image": "face-dog-penny.png",
   "format": "RGBA8888",
-  "size": { "w": 96, "h": 32 },
+  "size": { "w": 128, "h": 32 },
   "scale": "1",
   "frameTags": [
    { "name": "happy", "from": 0, "to": 0, "direction": "forward" },
    { "name": "neutral", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "upset", "from": 2, "to": 2, "direction": "forward" }
+   { "name": "upset", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "worried", "from": 3, "to": 3, "direction": "forward" }
   ]
  }
 }

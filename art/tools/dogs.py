@@ -8,7 +8,15 @@ Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
   tell (2, the lean before a pull; the game adds the fx-bark pop), idle (4,
   standing while the walk pauses: a slow tail wag and a twitch of the right ear)
   and shake (4, a quick shake-off after an encounter hit, throwing droplets).
-- face-dog-<name>: the dog column face. Tags: happy, neutral, upset.
+  A dog with a quirk has its quirk's tags after these (QUIRK_TAGS):
+  dog-archie flourish (5 frames, 90ms; Acrobatic: a hop with a twist in the air,
+  played when he pulls or meets a playmate); dog-penny lunge (4, 140ms; Nervous: a
+  stiff-legged strain toward another dog with her hackles up, leaning right like
+  pull, mirrored for left) and worried (2, 500ms; clingy: ears down, glancing back
+  over her shoulder, while she is the only dog on the leash).
+- face-dog-<name>: the dog column face. Tags: happy, neutral, upset, then the
+  quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
+  a wobbly mouth and a sweat bead), while she is the only dog on the leash.
 
 Usage:
   dogs.py preview OUT.png   contact sheet of every frame, scaled up
@@ -66,11 +74,53 @@ ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("
              ("shake", SHAKE, 60)]
 FACE_TAGS = ["happy", "neutral", "upset"]
 
+# Archie's flourish: he crouches, springs up (hop lifts the whole dog, back legs too), twists left then
+# right in the air with his legs tucked and a swoosh trailing the turn (whirl: the side it trails on), and
+# lands.
+FLOURISH = [
+    dict(bob=1, fl=-1, fr=-1, bl=-1, br=-1, ears=1),
+    dict(hop=-2, fl=1, fr=1, bl=1, br=1, tail=1, ears=-1),
+    dict(hop=-4, fl=-2, fr=-2, bl=-2, br=-2, lean=-3, tail=2, whirl=1),
+    dict(hop=-4, fl=-2, fr=-2, bl=-2, br=-2, lean=3, tail=-2, whirl=-1),
+    dict(hop=-1, fl=1, fr=1, ears=1),
+]
+# Penny's lunge: hackles up, she sets her hind legs and stretches forward and right on stiff front legs, her
+# head reaching out ahead of her body, the tail held still; the last frame eases back 1px, so the loop strains.
+LUNGE = [
+    dict(bob=-1, fl=-1, fr=-1, bl=1, br=1, lean=1, ears=1, hackles=1),
+    dict(bob=-1, fl=-2, fr=-2, bl=1, br=1, lean=2, ears=1, hackles=1, reach=-1),
+    dict(bob=-2, fl=-3, fr=-2, bl=1, br=1, lean=3, ears=1, hackles=1, reach=-2),
+    dict(bob=-1, fl=-2, fr=-2, bl=1, br=1, lean=2, ears=1, hackles=1, reach=-1),
+]
+# Penny alone: ears dropped and the tail tucked still, then a glance back over her left shoulder.
+WORRIED = [
+    dict(ears=-1, tuck=1),
+    dict(ears=-1, tuck=1, lean=-1, glance=-1),
+]
+# A quirk's tags go after ROAD_TAGS and its faces after FACE_TAGS, on the dogs that have it.
+QUIRK_TAGS = {"archie": [("flourish", FLOURISH, 90)], "penny": [("lunge", LUNGE, 140), ("worried", WORRIED, 500)]}
+QUIRK_FACES = {"penny": ["worried"]}
+
+
+def road_tags(name):
+    """dog-<name>'s tags: ROAD_TAGS, then its quirk's."""
+    return ROAD_TAGS + QUIRK_TAGS.get(name, [])
+
+
+def face_tags(name):
+    """face-dog-<name>'s tags: FACE_TAGS, then its quirk's."""
+    return FACE_TAGS + QUIRK_FACES.get(name, [])
+
 
 def pose(q):
     """Every pose key with its default. twitch moves the right ear alone (negative is up); spray is how far
-    the shake-off's droplets have flown from the flanks, 0 for none."""
-    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0, spray=0), **q)
+    the shake-off's droplets have flown from the flanks, 0 for none. The quirk keys: hop lifts the whole
+    dog (negative is up); whirl draws a swoosh on the right (positive) or left (negative) flank; hackles
+    raises a ridge of fur along the back; reach moves the head alone (negative is forward); tuck holds the
+    tail in; glance turns the head back over the left (negative) or right shoulder. The small versions round them to whole pixels, so draws read whirl and
+    glance by their sign."""
+    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0, spray=0, hop=0, whirl=0,
+                     hackles=0, reach=0, tuck=0, glance=0), **q)
 
 
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
@@ -372,10 +422,11 @@ EAR = ("dbrown", "plum")
 
 def archie_road(q):
     g, q = edged(Grid()), pose(q)
-    b, ln = q["bob"], q["lean"]
+    hop = q["hop"]
+    b, ln = q["bob"] + hop, q["lean"]
     # white legs with copper points where they meet the coat
-    for x, y, d in ((9 + ln // 2, 17, q["fl"] + b), (21 + ln // 2, 17, q["fr"] + b), (10, 25, q["bl"]),
-                    (19, 25, q["br"])):
+    for x, y, d in ((9 + ln // 2, 17, q["fl"] + b), (21 + ln // 2, 17, q["fr"] + b), (10, 25, q["bl"] + hop),
+                    (19, 25, q["br"] + hop)):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
     # a cinnamon coat torn by liver merle blotches, a fluffy white ruff at the nape. As wide as Biscuit,
@@ -404,6 +455,7 @@ def archie_road(q):
     g.ell(hx, 11.5 + b, 5.5, 5, *COAT)
     merle(g, hx, b, ((-4, 9, 2, 2), (2, 8, 2, 1), (1, 12, 2, 2), (-2, 13, 1, 1)))
     spray(g, q["spray"])
+    whirl(g, q["whirl"], bx, b)
     return g
 
 
@@ -516,17 +568,30 @@ def penny_road(q):
         g.rect(bx + dx, dy + o + b, 2, 1, "orange")
     g.rect(bx - 6, 16 + o + b, 12, 2, "blue")
     g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
-    # a long plumed tail swinging low behind, cream feathering fringing its tip
+    if q["hackles"]:
+        hackles(g, bx, 18 + o + b)
+    # a long plumed tail swinging low behind, cream feathering fringing its tip; tucked, it is held in short
     tx = 16 + q["tail"] * 2
-    g.ell(tx, 27 + b, 3, 3.8, "orange")
-    g.ell(tx, 26.5 + b, 2, 3, "amber", None, "yellow")
-    for dx, dy in ((-2, 29), (-1, 30), (0, 31), (1, 30), (2, 29)):
-        g.p(tx + dx, dy + b, "cream")
+    if q["tuck"]:
+        g.ell(tx, 26 + b, 2.5, 2.5, "orange")
+        g.ell(tx, 25.5 + b, 1.5, 2, "amber", None, "yellow")
+        for dx in (-1, 0, 1):
+            g.p(tx + dx, 28 + b, "cream")
+    else:
+        g.ell(tx, 27 + b, 3, 3.8, "orange")
+        g.ell(tx, 26.5 + b, 2, 3, "amber", None, "yellow")
+        for dx, dy in ((-2, 29), (-1, 30), (0, 31), (1, 30), (2, 29)):
+            g.p(tx + dx, dy + b, "cream")
     # a broad head with drop ears hanging over its sides, darker than the coat
-    hx = 16 + ln
-    g.ell(hx, 8.5 + o + b, 6.5, 6, "amber", "orange", "yellow")
-    g.ell(hx - 6, 11.5 + o + b - q["ears"], 2.2, 4.5, "orange", "ochre")
-    g.ell(hx + 6, 11.5 + o + b - q["ears"] + q["twitch"], 2.2, 4.5, "orange", "ochre")
+    hx, hb = 16 + ln, b + q["reach"]
+    if q["reach"]:
+        # the neck stretched out between the collar and the head
+        g.ell((hx + bx) / 2, 13.5 + o + b + q["reach"] / 2, 5.5, 3 - q["reach"] / 2, "amber", "orange", "yellow")
+    g.ell(hx, 8.5 + o + hb, 6.5, 6, "amber", "orange", "yellow")
+    g.ell(hx - 6, 11.5 + o + hb - q["ears"], 2.2, 4.5, "orange", "ochre")
+    g.ell(hx + 6, 11.5 + o + hb - q["ears"] + q["twitch"], 2.2, 4.5, "orange", "ochre")
+    if q["glance"]:
+        glance(g, hx, 8.5 + o + hb, -1 if q["glance"] < 0 else 1)
     spray(g, q["spray"])
     return g
 
@@ -558,8 +623,9 @@ def penny_face(mood):
 # ---------- shared features ----------
 
 def droop(mood):
-    """How far the ears sag, in pixels: perked when happy, relaxed when neutral, flat when upset."""
-    return {"happy": 0, "neutral": 1, "upset": 3}[mood]
+    """How far the ears sag, in pixels: perked when happy, relaxed when neutral, back when worried, flat when
+    upset."""
+    return {"happy": 0, "neutral": 1, "worried": 2, "upset": 3}[mood]
 
 
 def puff(g, cx, cy, rx, ry, ring=False):
@@ -579,6 +645,41 @@ def merle(g, cx, b, blots):
     for dx, y, w, h in blots:
         g.rect(cx + dx, y + b, w, h, BLOT[0])
         g.p(cx + dx + w, y + b + h - 1, BLOT[1])
+
+
+def whirl(g, side, bx, b):
+    """Archie's flourish: a white swoosh curving down his right (side > 0) or left flank from shoulder to hip,
+    1px clear of the body at bx, trailing the twist; the road outline rings it."""
+    if not side:
+        return
+    for dx, y in ((7, 14), (8, 15), (9, 16), (9, 17), (9, 18), (9, 19), (8, 20)):
+        g.p(bx + (dx if side > 0 else -1 - dx), y + b, "white")
+
+
+# Penny's hackles from the collar down: r rust spine, o ochre fur, y yellow tips lit from the top left.
+HACKLES = ["yoroy", ".ory.", "yoroo", ".oro.", ".yro.", "..r.."]
+
+
+def hackles(g, cx, y):
+    """Penny's raised hackles: a ridge of fur standing up along her spine from the collar, bristling out to
+    a jagged edge, and a tuft standing up past each shoulder."""
+    for j, row in enumerate(HACKLES):
+        for i, c in enumerate(row):
+            if c != ".":
+                g.p(cx - 3 + i, y + j, {"r": "rust", "o": "ochre", "y": "yellow"}[c])
+    for x, side in ((cx - 8, -1), (cx + 7, 1)):
+        g.p(x, y - 1, "ochre")
+        g.p(x + side, y - 2, "ochre")
+
+
+def glance(g, hx, hy, side):
+    """Penny looking back over her left (side < 0) or right shoulder: the side of her muzzle and one eye show
+    past the head's edge."""
+    x = hx + side * 5
+    g.ell(x + side, hy + 3, 2, 1.8, "cream", "tan")
+    g.p(x + side * 2, hy + 2, "ink")
+    g.p(x, hy, "ink")
+    g.p(x - side, hy, "white")
 
 
 def spray(g, d):
@@ -626,10 +727,25 @@ def eyes(g, lx, rx, y, iris=None, mood="happy"):
         g.rect(rx + wide, y - 1, 2, 1, "ink")
         g.p(lx, y + wide, "cyan")
         g.p(lx, y + wide + 1, "sky")
+    elif mood == "worried":
+        # whale eyes: the pupils cut to the left with white beside them, short brows lifted at their inner
+        # ends, and a bead of sweat on the left temple
+        for x in (lx, rx):
+            g.rect(x + wide, y, 1, 2, "white")
+        g.p(lx, y - 2, "ink")
+        g.p(lx + 1, y - 3, "ink")
+        g.p(rx + wide - 1, y - 3, "ink")
+        g.p(rx + wide, y - 2, "ink")
+        g.p(lx - 2, y - 4, "white")
+        g.rect(lx - 3, y - 3, 2, 1, "cyan")
+        g.p(lx - 3, y - 2, "white")
+        g.p(lx - 2, y - 2, "cyan")
+        g.rect(lx - 3, y - 1, 2, 1, "sky")
 
 
 def mouth(g, y, mood):
-    """happy: a wide open grin with the tongue out; neutral: a closed line; upset: a deep frown."""
+    """happy: a wide open grin with the tongue out; neutral: a closed line; worried: a small wobbly line;
+    upset: a deep frown."""
     if mood == "happy":
         g.p(13, y, "ink")
         g.p(18, y, "ink")
@@ -640,6 +756,9 @@ def mouth(g, y, mood):
         g.p(16, y + 3, "mauve")
     elif mood == "neutral":
         g.rect(14, y + 1, 4, 1, "ink")
+    elif mood == "worried":
+        for x, dy in ((14, 1), (15, 0), (16, 1), (17, 0)):
+            g.p(x, y + dy, "ink")
     else:
         g.rect(15, y, 2, 1, "ink")
         g.p(14, y + 1, "ink")
@@ -664,8 +783,8 @@ DOGS = {
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for name, (road, face) in DOGS.items():
-        yield f"dog-{name}", [(tag, [road(q).outlined() for q in poses], ms) for tag, poses, ms in ROAD_TAGS]
-        yield f"face-dog-{name}", [(m, [face(m).outlined()], 1000) for m in FACE_TAGS]
+        yield f"dog-{name}", [(tag, [road(q).outlined() for q in poses], ms) for tag, poses, ms in road_tags(name)]
+        yield f"face-dog-{name}", [(m, [face(m).outlined()], 1000) for m in face_tags(name)]
 
 
 if __name__ == "__main__":
