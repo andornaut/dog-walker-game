@@ -19,6 +19,7 @@ import { addTapBurst } from "./uiKit";
 // icon then its text, at 2x.
 const BUBBLE = { corner: 8, gap: 4, holdMs: 6000, margin: 8, padding: 6, rowGap: 4 };
 const DEPTH = 20;
+const TAB_CORNER = 8;
 
 // The top bar's state strip and the bubble a tap on it opens.
 export class StateStripView {
@@ -29,6 +30,7 @@ export class StateStripView {
   private itemsKey: string | undefined;
   private layout: StripLayout | undefined;
   private readonly scene: Scene;
+  private tab: GameObjects.NineSlice | undefined;
 
   private readonly tappable: () => boolean;
   private readonly well: GameObjects.Graphics;
@@ -53,6 +55,8 @@ export class StateStripView {
     this.layout = stripLayout(SCREEN_CONFIG.width, items.length);
     this.well.clear();
     this.icons.forEach((icon) => icon.destroy());
+    this.tab?.destroy();
+    this.tab = undefined;
     this.hit?.destroy();
     this.hit = undefined;
     const layout = this.layout;
@@ -60,8 +64,17 @@ export class StateStripView {
       this.icons = [];
       return;
     }
-    fillRect(this.well, PALETTE.plum, layout.frame);
-    fillRect(this.well, PALETTE.ink, layout.well);
+    const { tab } = layout;
+    if (this.scene.textures.exists("ui-strip-well")) {
+      const c = TAB_CORNER;
+      this.tab = this.scene.add
+        .nineslice(tab.x, tab.y, "ui-strip-well", undefined, tab.width, tab.height, c, c, c, c)
+        .setOrigin(0)
+        .setDepth(DEPTH);
+    } else {
+      fillRect(this.well, PALETTE.plum, tab);
+      fillRect(this.well, PALETTE.ink, layout.well);
+    }
     this.icons = items.flatMap((item, i) => {
       const key = stripIconKey(item);
       const at = layout.icons[i];
@@ -116,9 +129,9 @@ export class StateStripView {
     const width = 2 * padding + icon + gap + textWidth;
     const height =
       2 * padding + rows.reduce((sum, row) => sum + row, 0) + (rows.length - 1) * rowGap;
-    const right = layout.well.x + layout.well.width;
+    const right = layout.tab.x + layout.tab.width;
     const x = Math.max(margin, right - width);
-    const y = layout.frame.y + layout.frame.height + 4;
+    const y = layout.tab.y + layout.tab.height + 4;
     const parts: GameObjects.GameObject[] = [];
     if (this.scene.textures.exists("ui-hint")) {
       parts.push(

@@ -110,12 +110,12 @@ describe("stripLayout", () => {
     expect(stripLayout(360, 0)).toBeUndefined();
   });
 
-  it("hangs the well under the bar, right-aligned with the zone well, icons 18px apart", () => {
+  it("hangs the tab under the bar, right-aligned with the zone well, icons 18px apart", () => {
     const layout = stripLayout(360, 5);
-    expect(layout?.well).toEqual({ height: 20, width: 92, x: 264, y: 40 });
-    expect(layout?.icons.map((icon) => icon.x)).toEqual([266, 284, 302, 320, 338]);
-    expect(layout?.icons.every((icon) => icon.y === 42)).toBe(true);
-    expect(layout?.frame).toEqual({ height: 22, width: 96, x: 262, y: 40 });
+    expect(layout?.tab).toEqual({ height: 26, width: 99, x: 257, y: 40 });
+    expect(layout?.well).toEqual({ height: 20, width: 92, x: 260, y: 41 });
+    expect(layout?.icons.map((icon) => icon.x)).toEqual([262, 280, 298, 316, 334]);
+    expect(layout?.icons.every((icon) => icon.y === 43)).toBe(true);
   });
 
   it("keeps a tap target at least 44px square inside the screen, clear of the pause button", () => {
@@ -124,7 +124,7 @@ describe("stripLayout", () => {
       const { hit } = layout;
       expect(Math.min(hit.width, hit.height)).toBeGreaterThanOrEqual(STRIP.minHit);
       expect(hit.x + hit.width).toBeLessThanOrEqual(360);
-      expect(hit.x).toBeLessThanOrEqual(layout.frame.x);
+      expect(hit.x).toBeLessThanOrEqual(layout.tab.x);
       expect(hit.x).toBeGreaterThanOrEqual(PAUSE_BUTTON.hit.x + PAUSE_BUTTON.hit.width);
       const last = itemAt(layout.icons, count - 1);
       expect(last.x + STRIP.icon).toBeLessThanOrEqual(hit.x + hit.width);

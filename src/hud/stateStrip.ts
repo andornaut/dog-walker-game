@@ -96,16 +96,25 @@ export function stripItemsKey(items: readonly StripItem[]): string {
   return items.map(stripIconKey).join();
 }
 
-// The strip hangs under the top bar's zone well, right-aligned with it: an ink well with a
-// 2px plum frame, its icons 2px apart. No well has room for five icons beside the zone's
-// name and pips. The whole strip is one tap target, at least 44px square, reaching down
-// over the backdrop; a tap describes every item.
-export const STRIP = { frame: 2, gap: 2, icon: 16, minHit: 44, padding: 2, right: 356, y: 40 };
+// The strip hangs under the top bar's zone well, right-aligned with it: a plum tab
+// (ui-strip-well, stretched to fit) around an ink well, the icons 2px apart and 2px inside
+// it. inset is the tab's rim around the well. No well in the bar has room for five icons
+// beside the zone's name and pips. The whole strip is one tap target, at least 44px square,
+// reaching down over the backdrop; a tap describes every item.
+export const STRIP = {
+  gap: 2,
+  icon: 16,
+  inset: { bottom: 5, left: 3, right: 4, top: 1 },
+  minHit: 44,
+  padding: 2,
+  right: 356,
+  y: 40,
+};
 
 export interface StripLayout {
-  frame: Rect;
   hit: Rect;
   icons: Point[];
+  tab: Rect;
   well: Rect;
 }
 
@@ -113,22 +122,28 @@ export function stripLayout(screenWidth: number, count: number): StripLayout | u
   if (count === 0) {
     return undefined;
   }
-  const { frame, gap, icon, minHit, padding, right, y } = STRIP;
+  const { gap, icon, inset, minHit, padding, right, y } = STRIP;
   const width = count * icon + (count - 1) * gap + 2 * padding;
-  const well = { height: icon + 2 * padding, width, x: right - width, y };
-  const hitX = Math.min(well.x - frame, screenWidth - minHit);
+  const well = {
+    height: icon + 2 * padding,
+    width,
+    x: right - inset.right - width,
+    y: y + inset.top,
+  };
+  const tab = {
+    height: inset.top + well.height + inset.bottom,
+    width: inset.left + well.width + inset.right,
+    x: well.x - inset.left,
+    y,
+  };
+  const hitX = Math.min(tab.x, screenWidth - minHit);
   return {
-    frame: {
-      height: well.height + frame,
-      width: well.width + 2 * frame,
-      x: well.x - frame,
-      y: well.y,
-    },
     hit: { height: minHit, width: screenWidth - hitX, x: hitX, y },
     icons: Array.from({ length: count }, (_, i) => ({
       x: well.x + padding + i * (icon + gap),
       y: well.y + padding,
     })),
+    tab,
     well,
   };
 }
