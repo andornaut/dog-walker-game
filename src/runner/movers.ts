@@ -113,24 +113,24 @@ export function moveMovers<Item extends MoverItem>(
   distance: number,
   items: readonly Item[],
 ): Item[] {
-  return items.flatMap((item) => {
+  const moved: Item[] = [];
+  for (const item of items) {
     if (item.mover === undefined) {
-      return [item];
+      moved.push(item);
+      continue;
     }
     const mover = { ...item.mover, since: item.mover.since + distance };
     const place = moverPlace(road.laneCount, mover.path, mover.since);
-    if (hasLeftRoad(road.laneCount, place)) {
-      return [];
-    }
-    return [
-      {
+    if (!hasLeftRoad(road.laneCount, place)) {
+      moved.push({
         ...item,
         lane: laneAt(place.lanePosition),
         mover,
         y: road.roadTop - item.height + place.travel,
-      },
-    ];
-  });
+      });
+    }
+  }
+  return moved;
 }
 
 // Planning works in road distance. sightLength is how far a row travels down the road before

@@ -862,7 +862,13 @@ export function stepWalk(
         forcedStopOnRoad,
         hitStop,
         invulnerableSeconds,
-        items: [...remaining, ...cues, ...pickups.filter((item) => !pickupsHit.includes(item))],
+        items: [
+          ...remaining,
+          ...cues,
+          ...(pickupsHit.length === 0
+            ? pickups
+            : pickups.filter((item) => !pickupsHit.includes(item))),
+        ],
         nextItemId,
         pending: due.pending,
         tipCredit: thinned.credit,
