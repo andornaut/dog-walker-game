@@ -4,7 +4,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
-import { centredInLane, hudLanes } from "./hudLanes";
+import { centredInLane, hudLanes, stripHintPlace, UP_TAIL } from "./hudLanes";
 import { stripLayout } from "./stateStrip";
 
 const layout = screenLayout(SCREEN_CONFIG);
@@ -82,5 +82,27 @@ describe("centredInLane", () => {
     [180, 400, 0],
   ])("centres on %i a bubble %i wide at x %i", (centerX, width, x) => {
     expect(centredInLane(lane, centerX, width)).toBe(x);
+  });
+});
+
+describe("stripHintPlace", () => {
+  // Strips of one to five icons, under a narrow and a full-width hint.
+  const cases = [1, 3, 5].flatMap((count) =>
+    [120, lanes.hint.width].map((width) => [count, width] as const),
+  );
+
+  it.each(cases)("points up at a strip of %i icons from a hint %i wide", (count, width) => {
+    const strip = stripLayout(SCREEN_CONFIG.width, count);
+    if (strip === undefined) {
+      throw new Error("no strip");
+    }
+    const { bubble, tail } = stripHintPlace(lanes.hint, strip, { height: 40, width });
+    expect(tail.x + UP_TAIL.tipX).toBe(Math.round(strip.well.x + strip.well.width / 2));
+    expect(tail.y).toBeGreaterThan(strip.tab.y + strip.tab.height);
+    expect(bubble.y).toBe(tail.y + UP_TAIL.height - 1);
+    expect(bubble.x).toBeGreaterThanOrEqual(lanes.hint.x);
+    expect(bubble.x + bubble.width).toBe(lanes.hint.x + lanes.hint.width);
+    expect(tail.x).toBeGreaterThanOrEqual(bubble.x + 4);
+    expect(tail.x + UP_TAIL.width).toBeLessThanOrEqual(bubble.x + bubble.width - 4);
   });
 });

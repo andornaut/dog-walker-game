@@ -1,4 +1,4 @@
-import type { Rect } from "../layout/rect";
+import type { Point, Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
 import { TOP_BAR } from "./topBar";
@@ -57,6 +57,30 @@ export function hudLanes(layout: Pick<ScreenLayout, "backdrop" | "dogRow" | "dog
     stripBubble: { ...low, width: backdrop.width - HINT_SIDE - MARGIN, x: HINT_SIDE },
     toast,
   };
+}
+
+// The 8x6 up tail, its tip in column tipX of its top row.
+export const UP_TAIL = { height: 6, key: "ui-quip-tail-up", tipX: 3, width: 8 } as const;
+
+// A hint about the state strip hangs under the strip's tab, right-aligned in lane, the up
+// tail's top row 1px under the tab and its tip under the icons' centre, its bottom row over
+// the bubble's top rim. tail is the tail's top-left corner.
+export function stripHintPlace(
+  lane: Rect,
+  strip: { tab: Rect; well: Rect },
+  size: { height: number; width: number },
+): { bubble: Rect; tail: Point } {
+  const { tab, well } = strip;
+  const tail = {
+    x: Math.round(well.x + well.width / 2) - UP_TAIL.tipX,
+    y: tab.y + tab.height + 1,
+  };
+  const bubble = {
+    ...size,
+    x: lane.x + lane.width - size.width,
+    y: tail.y + UP_TAIL.height - 1,
+  };
+  return { bubble, tail };
 }
 
 // The x of a bubble width wide centred on centerX, kept inside lane.

@@ -21,11 +21,12 @@ import {
   stepHintQueue,
 } from "../hud/hintQueue";
 import { runHintTriggers } from "../hud/hintTriggers";
-import { centredInLane, hudLanes } from "../hud/hudLanes";
+import { centredInLane, hudLanes, stripHintPlace, UP_TAIL } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, wholeDollars, zonePips } from "../hud/hudView";
 import {
   moveStripPress,
   stripItems,
+  stripLayout,
   type StripPress,
   stripTapAllowed,
   stripTapped,
@@ -845,8 +846,9 @@ export class HudScene extends Scene {
   }
 
   // A hint's bubble, centred in the hint lane with its bottom on the lane's, its tail pointing
-  // at the road. The drag hint also shows the touch picture over the road. A hint raised under
-  // a card or a menu draws in that overlay, over its dim.
+  // at the road; the strip's hint hangs under the strip, its tail pointing up at the icons.
+  // The drag hint also shows the touch picture over the road. A hint raised under a card or a
+  // menu draws in that overlay, over its dim.
   private drawHint(scene: Scene, hint: RaisedHint): GameObjects.GameObject[] {
     const { road } = LAYOUT;
     const lane = LANES.hint;
@@ -855,11 +857,21 @@ export class HudScene extends Scene {
     const text = addPixelText(scene, 0, 0, lines.join("\n"), style);
     const width = Math.ceil(text.width) + 2 * HINT.padding;
     const height = Math.ceil(text.height) + 2 * HINT.padding;
-    const x = centredInLane(lane, lane.x + lane.width / 2, width);
-    const y = lane.y + lane.height - height;
+    const run = this.runScene().hudView()?.run;
+    const strip =
+      hint.id === "strip" && run !== undefined
+        ? stripLayout(SCREEN_CONFIG.width, stripItems(gameData, run).length)
+        : undefined;
+    const under = strip === undefined ? undefined : stripHintPlace(lane, strip, { height, width });
+    const x = under?.bubble.x ?? centredInLane(lane, lane.x + lane.width / 2, width);
+    const y = under?.bubble.y ?? lane.y + lane.height - height;
     placePixelText(text, x + HINT.padding, y + HINT.padding);
     const parts: GameObjects.GameObject[] = [addPanel(scene, { height, width, x, y }, "ui-hint")];
-    if (scene.textures.exists("ui-hint-tail")) {
+    if (under !== undefined) {
+      if (scene.textures.exists(UP_TAIL.key)) {
+        parts.push(scene.add.image(under.tail.x, under.tail.y, UP_TAIL.key).setOrigin(0));
+      }
+    } else if (scene.textures.exists("ui-hint-tail")) {
       parts.push(
         scene.add.image(road.x + road.width / 2, y + height - 1, "ui-hint-tail").setOrigin(0.5, 0),
       );
