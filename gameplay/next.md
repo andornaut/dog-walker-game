@@ -10,8 +10,10 @@ The game grows sideways rather than upward. A world is a set of 4 zones with its
 
 - Accounts and cloud saves
 - Art polish beyond a basic pixel pass; sound beyond a few effects and one music loop
+- Bigger sprites, wider lanes: road sprites at 40px (from 32) on 5 lanes of 64px (from 56), keeping the 360×560 screen, with 3.5 s of road in view for a quicker pace; menus, portraits and card art stay. Needs pack re-spacing, every road sprite and depth variant, obstacle widths, the backdrops' bottom rows for a 320px road, then a retune (mock: public/art/mocks/scale.html)
 - Cosmetics: 2 accessories per dog, each made for that dog ($80 each; proposed: Duchess tiara and pearl collar, Nugget sunglasses and gold chain, Zippy racing goggles and sports jersey, Pierre beret and bow tie, Biscuit chef hat and scarf, Archie aviator cap and cape, Snowball flower crown and veil, Penny firefighter hat and raincoat, Koda beanie and trail pack); 6 leash colours ($40 each); 6 home screen decor pieces with fixed spots in the gate scene ($60 to $160)
 - Dog training: two courses per dog you own: Heel (the dog strains twice as long before it pulls, $100) and Good manners (its owner starts with +1 ♥ and has +1 max ♥, $150)
+- Horizon and sky: an Outrun-style horizon at the top of the road instead of a cross street, with sky above, decided with the far-road fade (mock: public/art/mocks/horizon.html)
 - House hub: a home base you decorate and improve with mostly cosmetic unlocks
 - iOS and Android app wrappers
 - Minigames as an alternative way to resolve encounters
