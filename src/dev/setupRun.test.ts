@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import type { DogId, GearId } from "../data/types";
+import type { DogId, GearId, WalkerId } from "../data/types";
 import type { Loadout } from "../state/runState";
 import { testState } from "../testing/runState";
 import type { RunSetup } from "./runSetup";
 import { loadoutFor, withSetupStart } from "./setupRun";
 
 const fallback: Loadout = { dogs: ["biscuit"], gear: "whistle" };
-const setup: RunSetup<DogId, GearId> = { dev: false, seed: 1, speed: 1, zone: 1 };
+const setup: RunSetup<DogId, GearId, WalkerId> = { dev: false, seed: 1, speed: 1, zone: 1 };
 
 describe("loadoutFor", () => {
-  it.each<[string, Partial<RunSetup<DogId, GearId>>, Loadout]>([
+  it.each<[string, Partial<RunSetup<DogId, GearId, WalkerId>>, Loadout]>([
     ["keeps the fallback when the setup overrides nothing", {}, fallback],
     ["takes a pack of one from the setup", { pack: ["koda"] }, { ...fallback, dogs: ["koda"] }],
     [
@@ -20,6 +20,7 @@ describe("loadoutFor", () => {
     ],
     ["takes the setup's gear", { gear: "luckyCollar" }, { ...fallback, gear: "luckyCollar" }],
     ["takes the setup's lack of gear", { gear: null }, { ...fallback, gear: null }],
+    ["takes the setup's walker", { walker: "ada" }, { ...fallback, walker: "ada" }],
     ["keeps the fallback pack for an empty pack", { pack: [] }, fallback],
     [
       "keeps the fallback pack for a pack too big for a run",

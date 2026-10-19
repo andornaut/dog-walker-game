@@ -1,4 +1,4 @@
-import type { DogId, GearId, ZoneId } from "../data/types";
+import type { DogId, GearId, WalkerId, ZoneId } from "../data/types";
 import { defaultRoute } from "../rules/route";
 import { cents } from "../rules/units";
 import type { Loadout, PackDogs, RunState } from "../state/runState";
@@ -15,13 +15,13 @@ function packDogsOf(dogs: readonly DogId[]): PackDogs | undefined {
   return third === undefined ? [first, second] : [first, second, third];
 }
 
-// The setup's pack and gear over a fallback loadout, such as the save's last one, walking
-// with the fallback's walker.
-export function loadoutFor(fallback: Loadout, setup: RunSetup<DogId, GearId>): Loadout {
+// The setup's pack, gear and walker over a fallback loadout, such as the save's last one.
+export function loadoutFor(fallback: Loadout, setup: RunSetup<DogId, GearId, WalkerId>): Loadout {
+  const walker = setup.walker ?? fallback.walker;
   return {
     dogs: (setup.pack === undefined ? undefined : packDogsOf(setup.pack)) ?? fallback.dogs,
     gear: setup.gear === undefined ? fallback.gear : setup.gear,
-    ...(fallback.walker === undefined ? {} : { walker: fallback.walker }),
+    ...(walker === undefined ? {} : { walker }),
   };
 }
 

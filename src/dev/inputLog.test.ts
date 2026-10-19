@@ -21,6 +21,7 @@ const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
   maxPackSize: 3,
   renamedDogIds: new Map([["dash", "koda"]]),
   speed: { max: 10, min: 0.1 },
+  walkerIds: ["ada", "casey"],
   zoneCount: 4,
   zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
 };

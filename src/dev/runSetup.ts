@@ -1,13 +1,18 @@
 // A run's starting conditions, read from the page's URL search params so a link reproduces a
 // run. The known ids and limits come in as parameters, so this module needs no game data.
 
-export interface RunSetupLimits<DogId extends string, GearId extends string> {
+export interface RunSetupLimits<
+  DogId extends string,
+  GearId extends string,
+  WalkerId extends string = string,
+> {
   readonly dogIds: readonly DogId[];
   readonly gearIds: readonly GearId[];
   readonly maxPackSize: number;
   // Former dog ids and the id each one is now.
   readonly renamedDogIds: ReadonlyMap<string, DogId>;
   readonly speed: { readonly max: number; readonly min: number };
+  readonly walkerIds: readonly WalkerId[];
   // The zones a walk visits.
   readonly zoneCount: number;
   readonly zoneIds: readonly string[];
@@ -15,7 +20,11 @@ export interface RunSetupLimits<DogId extends string, GearId extends string> {
 
 // Optional fields are overrides: absent means the run uses its normal value. gear null means
 // the run walks with no gear (gear=none).
-export interface RunSetup<DogId extends string = string, GearId extends string = string> {
+export interface RunSetup<
+  DogId extends string = string,
+  GearId extends string = string,
+  WalkerId extends string = string,
+> {
   readonly dev: boolean;
   readonly gear?: GearId | null;
   readonly money?: number;
@@ -26,15 +35,20 @@ export interface RunSetup<DogId extends string = string, GearId extends string =
   readonly seed: number;
   // Multiplies the road's scroll speed.
   readonly speed: number;
+  readonly walker?: WalkerId;
   // 1-based, as the URL writes it.
   readonly zone: number;
 }
 
 // A warning is a value ignored; a notice is a value used after a change, such as a renamed
 // dog id replaced by its new one.
-export interface ParsedRunSetup<DogId extends string, GearId extends string> {
+export interface ParsedRunSetup<
+  DogId extends string,
+  GearId extends string,
+  WalkerId extends string = string,
+> {
   readonly notices: readonly string[];
-  readonly setup: RunSetup<DogId, GearId>;
+  readonly setup: RunSetup<DogId, GearId, WalkerId>;
   readonly warnings: readonly string[];
 }
 
@@ -44,7 +58,17 @@ export const MAX_SEED = 0xffffffff;
 
 export const NO_GEAR = "none";
 
-const PARAM_NAMES = ["dev", "gear", "money", "pack", "route", "seed", "speed", "zone"] as const;
+const PARAM_NAMES = [
+  "dev",
+  "gear",
+  "money",
+  "pack",
+  "route",
+  "seed",
+  "speed",
+  "walker",
+  "zone",
+] as const;
 type ParamName = (typeof PARAM_NAMES)[number];
 
 const DIGITS = /^\d+$/;
@@ -69,11 +93,11 @@ function wholeNumber(text: string): number | undefined {
 // Never throws: every unknown or invalid value becomes a warning and is ignored, and every
 // renamed dog id becomes a notice and is replaced. newSeed is called only when the URL has no
 // valid seed.
-export function parseRunSetup<DogId extends string, GearId extends string>(
-  limits: RunSetupLimits<DogId, GearId>,
+export function parseRunSetup<DogId extends string, GearId extends string, WalkerId extends string>(
+  limits: RunSetupLimits<DogId, GearId, WalkerId>,
   newSeed: () => number,
   search: string,
-): ParsedRunSetup<DogId, GearId> {
+): ParsedRunSetup<DogId, GearId, WalkerId> {
   const params = new URLSearchParams(search);
   const notices: string[] = [];
   const warnings: string[] = [];
@@ -130,6 +154,9 @@ export function parseRunSetup<DogId extends string, GearId extends string>(
       ? value
       : invalid("gear", value, `a known gear id or "${NO_GEAR}"`);
   });
+  const walker = read("walker", (value) =>
+    includes(limits.walkerIds, value) ? value : invalid("walker", value, "a known walker id"),
+  );
   const zone = read("zone", (value) => {
     const number = wholeNumber(value);
     return number !== undefined && number >= 1 && number <= limits.zoneCount
@@ -176,6 +203,7 @@ export function parseRunSetup<DogId extends string, GearId extends string>(
       ...(route === undefined ? {} : { route }),
       seed: seed ?? newSeed(),
       speed: speed ?? 1,
+      ...(walker === undefined ? {} : { walker }),
       zone: zone ?? 1,
     },
     warnings,
@@ -191,6 +219,9 @@ export function runSetupToQuery(setup: RunSetup): string {
   }
   if (setup.gear !== undefined) {
     parts.push(`gear=${encodeURIComponent(setup.gear ?? NO_GEAR)}`);
+  }
+  if (setup.walker !== undefined) {
+    parts.push(`walker=${encodeURIComponent(setup.walker)}`);
   }
   if (setup.zone !== 1) {
     parts.push(`zone=${setup.zone}`);

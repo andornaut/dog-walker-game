@@ -1,5 +1,5 @@
 import { gameData } from "../data";
-import type { DogId, GameData, GearId } from "../data/types";
+import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { walkLength } from "../rules/route";
 import { type ParsedRunSetup, parseRunSetup, randomSeed, type RunSetupLimits } from "./runSetup";
 
@@ -16,25 +16,26 @@ export const RENAMED_DOG_IDS: ReadonlyMap<string, DogId> = new Map<string, DogId
 ]);
 
 export function runSetupLimitsFor(
-  data: Pick<GameData, "dogs" | "shopGear" | "world">,
-): RunSetupLimits<DogId, GearId> {
+  data: Pick<GameData, "dogs" | "shopGear" | "walkers" | "world">,
+): RunSetupLimits<DogId, GearId, WalkerId> {
   return {
     dogIds: Object.keys(data.dogs) as DogId[],
     gearIds: Object.keys(data.shopGear) as GearId[],
     maxPackSize: MAX_PACK_SIZE,
     renamedDogIds: RENAMED_DOG_IDS,
     speed: SPEED_LIMITS,
+    walkerIds: Object.keys(data.walkers) as WalkerId[],
     zoneCount: walkLength(data),
     zoneIds: data.world.zones.map(({ id }) => id),
   };
 }
 
-let parsed: ParsedRunSetup<DogId, GearId> | undefined;
+let parsed: ParsedRunSetup<DogId, GearId, WalkerId> | undefined;
 
 // The setup in this page's URL, parsed on first use and kept for the page's life, so every
 // scene sees the same random seed when the URL has none. Warnings and notices go to the
 // console.
-export function pageRunSetup(): ParsedRunSetup<DogId, GearId> {
+export function pageRunSetup(): ParsedRunSetup<DogId, GearId, WalkerId> {
   if (parsed === undefined) {
     parsed = parseRunSetup(runSetupLimitsFor(gameData), randomSeed, globalThis.location.search);
     [...parsed.warnings, ...parsed.notices].forEach((warning) =>

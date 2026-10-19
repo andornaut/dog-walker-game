@@ -97,20 +97,21 @@
 
 `/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A renamed dog id is warned about and replaced by its new one, in a URL and in a replayed log's setup. A URL with any run parameter (all but `dev`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
 
-| Param   | Value                           | Default         |
-| ------- | ------------------------------- | --------------- |
-| `seed`  | integer 0 to 4294967295         | random          |
-| `pack`  | 1 to 3 dog ids, comma-separated | saved loadout   |
-| `gear`  | a gear id, or `none`            | saved loadout   |
-| `zone`  | 1 to the walk's length          | 1               |
-| `route` | zone ids walked, from the first | pre-fork route  |
-| `money` | whole cents                     | gear's starting |
-| `speed` | scroll-speed multiplier         | 1               |
-| `dev`   | `1` shows the overlay           | `0`             |
+| Param    | Value                           | Default         |
+| -------- | ------------------------------- | --------------- |
+| `seed`   | integer 0 to 4294967295         | random          |
+| `pack`   | 1 to 3 dog ids, comma-separated | saved loadout   |
+| `gear`   | a gear id, or `none`            | saved loadout   |
+| `walker` | a walker id                     | saved walker    |
+| `zone`   | 1 to the walk's length          | 1               |
+| `route`  | zone ids walked, from the first | pre-fork route  |
+| `money`  | whole cents                     | gear's starting |
+| `speed`  | scroll-speed multiplier         | 1               |
+| `dev`    | `1` shows the overlay           | `0`             |
 
 - `route` lists the zones from the first up to at least `zone`; a later `zone` without it starts on the pre-fork route.
 - One seed feeds independent random streams: `spawns-<zone>`, `cards`, `forks`, `needs`, `quips` and `scenery`, where `<zone>` is the position in the walk. `cards` also draws for an instant find's effects. Area effects draw nothing: each catches by size. Pulls draw nothing: each follows from the road. `needs` draws whether a need met opens its payoff card, so the input log needs nothing for either.
-- Lane moves, treats, card choices (a fork's path among them) and heading home are recorded with their simulation step's time in a versioned input log that replays the run exactly. The log's setup names the pack and gear walked, and a later start's route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
+- Lane moves, treats, card choices (a fork's path among them) and heading home are recorded with their simulation step's time in a versioned input log that replays the run exactly. The log's setup names the pack, gear and walker walked, and a later start's route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run. Its zone clock (`src/dev/zoneClock.ts`) splits the current zone's wall-clock time into road time (simulated, the road moving), held time (hit stops and firings in simulated time, cards and the pause menu in wall-clock time) and lag (the rest: the loop behind real time), beside the road time the whole zone takes, and keeps the last zone's totals.
 - The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, the far-road fade toggle (off by default), run link, replay, and save tools (reset, +$1,000, unlock all).
 

@@ -16,6 +16,7 @@ const limits: RunSetupLimits<"bo" | "koda" | "rex" | "zip", "collar" | "shoes"> 
   maxPackSize: 3,
   renamedDogIds: new Map([["dash", "rex"]]),
   speed: { max: 10, min: 0.1 },
+  walkerIds: ["ada", "casey"],
   zoneCount: 4,
   zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
 };
@@ -31,9 +32,10 @@ describe("parseRunSetup", () => {
     pack: ["koda", "bo"],
     seed: 42,
     speed: 1.5,
+    walker: "ada",
     zone: 3,
   };
-  const query = "seed=42&pack=koda,bo&gear=shoes&zone=3&money=1250&speed=1.5&dev=1";
+  const query = "seed=42&pack=koda,bo&gear=shoes&walker=ada&zone=3&money=1250&speed=1.5&dev=1";
 
   it.each<{ name: string; notices?: string[]; search: string; setup: RunSetup }>([
     { name: "uses a new seed and the defaults for an empty query", search: "", setup: defaults },
@@ -82,6 +84,7 @@ describe("parseRunSetup", () => {
     ["pack", "koda,koda"],
     ["pack", "koda,bo,rex,zip"],
     ["gear", "cape"],
+    ["walker", "bob"],
     ["zone", "0"],
     ["zone", "5"],
     ["zone", "2.5"],
@@ -160,6 +163,7 @@ describe("runSetupToQuery", () => {
     defaults,
     { ...defaults, gear: null },
     { dev: true, gear: "collar", money: 0, pack: ["zip"], seed: 0, speed: 0.1, zone: 4 },
+    { ...defaults, walker: "casey" },
     { dev: false, money: 99, pack: ["rex", "bo", "koda"], seed: MAX_SEED, speed: 0.3, zone: 2 },
     { ...defaults, route: ["street", "pawsPromenade"], zone: 2 },
     { ...defaults, speed: 0.1 + 0.2 },
