@@ -22,64 +22,60 @@ const fetchOf = (pathname: string) => strategyFor(precached, { isNavigation: fal
 const navigationTo = (pathname: string) => strategyFor(precached, { isNavigation: true, pathname });
 
 describe("strategyFor", () => {
-  it("loads the game page from the network first, under either of its paths", () => {
-    expect(navigationTo("/play/")).toBe("network-first");
-    expect(navigationTo("/play/index.html")).toBe("network-first");
+  it.each([
+    { expected: "network-first", name: "the game page", pathname: "/play/" },
+    { expected: "network-first", name: "the game page's other path", pathname: "/play/index.html" },
+    { expected: "network-only", name: "the home page, left to the browser", pathname: "/" },
+    { expected: "network-only", name: "another page, left to the browser", pathname: "/art/" },
+  ])("navigates to $name $expected", ({ expected, pathname }) => {
+    expect(navigationTo(pathname)).toBe(expected);
   });
 
-  it("leaves other pages to the browser", () => {
-    expect(navigationTo("/")).toBe("network-only");
-    expect(navigationTo("/art/")).toBe("network-only");
-  });
-
-  it("revalidates the art manifest and the web app manifest", () => {
-    expect(fetchOf("/art/manifest.json")).toBe("network-first");
-    expect(fetchOf("/manifest.webmanifest")).toBe("network-first");
-  });
-
-  it("serves hashed build output from the cache, precached or not", () => {
-    expect(fetchOf("/assets/play-abc.js")).toBe("cache-first");
-  });
-
-  it("revalidates the site nav's script and stylesheet, though they are precached", () => {
-    expect(fetchOf("/nav.js")).toBe("network-first");
-    expect(fetchOf("/nav.css")).toBe("network-first");
-  });
-
-  it("serves other precached files from the cache", () => {
-    expect(fetchOf("/art/sprites/dog.png")).toBe("cache-first");
-  });
-
-  it("leaves files outside the precache to the browser", () => {
-    expect(fetchOf("/art/mocks/index.json")).toBe("network-only");
-    expect(fetchOf("/sw.js")).toBe("network-only");
+  it.each([
+    { expected: "network-first", name: "the art manifest", pathname: "/art/manifest.json" },
+    { expected: "network-first", name: "the web app manifest", pathname: "/manifest.webmanifest" },
+    {
+      expected: "cache-first",
+      name: "hashed build output, precached or not",
+      pathname: "/assets/play-abc.js",
+    },
+    { expected: "network-first", name: "the precached site nav script", pathname: "/nav.js" },
+    { expected: "network-first", name: "the precached site nav stylesheet", pathname: "/nav.css" },
+    { expected: "cache-first", name: "another precached file", pathname: "/art/sprites/dog.png" },
+    {
+      expected: "network-only",
+      name: "a file outside the precache",
+      pathname: "/art/mocks/index.json",
+    },
+    { expected: "network-only", name: "the service worker", pathname: "/sw.js" },
+  ])("fetches $name $expected", ({ expected, pathname }) => {
+    expect(fetchOf(pathname)).toBe(expected);
   });
 });
 
 describe("precacheFetchOptions", () => {
-  it("lets the HTTP cache answer for hashed build output", () => {
-    expect(precacheFetchOptions("/assets/play-abc.js")).toEqual({ cache: "default" });
-    expect(precacheFetchOptions("/assets/play-abc.css")).toEqual({ cache: "default" });
-  });
-
-  it("has the server revalidate the game page and the manifests", () => {
-    expect(precacheFetchOptions("/play/")).toEqual({ cache: "no-cache" });
-    expect(precacheFetchOptions("/art/manifest.json")).toEqual({ cache: "no-cache" });
-    expect(precacheFetchOptions("/manifest.webmanifest")).toEqual({ cache: "no-cache" });
-  });
-
-  it("has the server revalidate unhashed public files", () => {
-    expect(precacheFetchOptions("/art/sprites/dog.png")).toEqual({ cache: "no-cache" });
-    expect(precacheFetchOptions("/icons/icon-192.png")).toEqual({ cache: "no-cache" });
-    expect(precacheFetchOptions("/nav.js")).toEqual({ cache: "no-cache" });
+  // The HTTP cache answers for hashed build output; the server revalidates the rest.
+  it.each([
+    ["/assets/play-abc.js", "default"],
+    ["/assets/play-abc.css", "default"],
+    ["/play/", "no-cache"],
+    ["/art/manifest.json", "no-cache"],
+    ["/manifest.webmanifest", "no-cache"],
+    ["/art/sprites/dog.png", "no-cache"],
+    ["/icons/icon-192.png", "no-cache"],
+    ["/nav.js", "no-cache"],
+  ])("fetches %s with cache %s", (pathname, cache) => {
+    expect(precacheFetchOptions(pathname)).toEqual({ cache });
   });
 });
 
 describe("cacheKeyFor", () => {
-  it("files /dir/index.html under /dir/", () => {
-    expect(cacheKeyFor("/play/index.html")).toBe("/play/");
-    expect(cacheKeyFor("/play/")).toBe("/play/");
-    expect(cacheKeyFor("/art/sprites/dog.png")).toBe("/art/sprites/dog.png");
+  it.each([
+    ["/play/index.html", "/play/"],
+    ["/play/", "/play/"],
+    ["/art/sprites/dog.png", "/art/sprites/dog.png"],
+  ])("files %s under %s", (pathname, key) => {
+    expect(cacheKeyFor(pathname)).toBe(key);
   });
 });
 
@@ -90,23 +86,15 @@ describe("the sound files", () => {
     version: "v1",
   };
 
-  it("installs with the format the page named and no other", () => {
-    expect(installUrls(manifest, "ogg")).toEqual([
-      "/play/",
-      "/art/sprites/dog.png",
-      "/art/sounds/a.ogg",
-    ]);
-    expect(installUrls(manifest, "m4a")).toEqual([
-      "/play/",
-      "/art/sprites/dog.png",
-      "/art/sounds/a.m4a",
-    ]);
-  });
-
-  it("installs no sounds for a missing or unknown format", () => {
-    expect(installUrls(manifest, null)).toEqual(manifest.urls);
-    expect(installUrls(manifest, "mp3")).toEqual(manifest.urls);
-    expect(installUrls(manifest, "toString")).toEqual(manifest.urls);
+  // The format the page named and no other; no sounds for a missing or unknown format.
+  it.each([
+    ["ogg", ["/art/sounds/a.ogg"]],
+    ["m4a", ["/art/sounds/a.m4a"]],
+    [null, []],
+    ["mp3", []],
+    ["toString", []],
+  ])("installs for the format %s the sounds %j", (format, sounds) => {
+    expect(installUrls(manifest, format)).toEqual([...manifest.urls, ...sounds]);
   });
 
   it("serves either format from the cache, storing one the install left out", () => {

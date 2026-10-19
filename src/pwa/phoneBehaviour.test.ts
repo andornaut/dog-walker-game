@@ -235,14 +235,12 @@ describe("unlockAudioOnFirstGesture", () => {
     expect(context.state).toBe("running");
   });
 
-  it("listens to each gesture kind", () => {
-    for (const type of AUDIO_UNLOCK_EVENTS) {
-      const page = new EventTarget();
-      const context = suspendedContext();
-      unlockAudioOnFirstGesture(page, context);
-      page.dispatchEvent(new Event(type));
-      expect(context.resume).toHaveBeenCalledTimes(1);
-    }
+  it.each(AUDIO_UNLOCK_EVENTS)("resumes on a %s gesture", (type) => {
+    const page = new EventTarget();
+    const context = suspendedContext();
+    unlockAudioOnFirstGesture(page, context);
+    page.dispatchEvent(new Event(type));
+    expect(context.resume).toHaveBeenCalledTimes(1);
   });
 
   it("keeps listening while the browser refuses to resume", async () => {

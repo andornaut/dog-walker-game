@@ -13,15 +13,19 @@ import {
 import { PAGE_RULES, type PageRule } from "./securityPolicy";
 
 describe("cspHash", () => {
-  it("matches the CSP specification's example hash", async () => {
-    expect(await cspHash("alert('Hello, world.');")).toBe(
+  it.each([
+    [
+      "the CSP specification's example",
+      "alert('Hello, world.');",
       "'sha256-qznLcsROx4GACP2dm0UCKCzCG+HiZ1guq6ZZDob/Tng='",
-    );
+    ],
+    ["the empty string", "", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
+  ])("hashes %s", async (_, text, hash) => {
+    expect(await cspHash(text)).toBe(hash);
   });
 
   it("hashes the UTF-8 bytes, so non-ASCII text matches the browser's hash", async () => {
     expect(await cspHash("é")).not.toBe(await cspHash("e"));
-    expect(await cspHash("")).toBe("'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='");
   });
 });
 
@@ -46,43 +50,45 @@ describe("inlineBlocks", () => {
 });
 
 describe("navWithoutStylesheet", () => {
-  it("flags a page that loads nav.js without linking nav.css", () => {
-    expect(navWithoutStylesheet(`<script src="/nav.js" defer></script>`)).toBe(true);
-    expect(
-      navWithoutStylesheet(`<link rel="stylesheet" href="/nav.css" />
-        <script src="/nav.js" defer></script>`),
-    ).toBe(false);
-  });
-
-  it("ignores a page without the nav and a script whose name only ends in nav.js", () => {
-    expect(navWithoutStylesheet(`<script src="/main.js"></script>`)).toBe(false);
-    expect(navWithoutStylesheet(`<script src="/sidenav.js"></script>`)).toBe(false);
+  it.each([
+    ["nav.js without nav.css", `<script src="/nav.js" defer></script>`, true],
+    [
+      "nav.js with nav.css",
+      `<link rel="stylesheet" href="/nav.css" />
+        <script src="/nav.js" defer></script>`,
+      false,
+    ],
+    ["no nav", `<script src="/main.js"></script>`, false],
+    ["a script whose name only ends in nav.js", `<script src="/sidenav.js"></script>`, false],
+  ])("flags a page with %s: %s", (_, html, expected) => {
+    expect(navWithoutStylesheet(html)).toBe(expected);
   });
 });
 
 describe("servedPath", () => {
-  it("serves index.html at its directory and other pages without .html", () => {
-    expect(servedPath("index.html")).toBe("/");
-    expect(servedPath("play/index.html")).toBe("/play/");
-    expect(servedPath("art/mocks/help-screen.html")).toBe("/art/mocks/help-screen");
+  // index.html at its directory, other pages without .html.
+  it.each([
+    ["index.html", "/"],
+    ["play/index.html", "/play/"],
+    ["art/mocks/help-screen.html", "/art/mocks/help-screen"],
+  ])("serves %s at %s", (file, path) => {
+    expect(servedPath(file)).toBe(path);
   });
 });
 
 describe("pathMatches", () => {
-  it("matches a pattern without a splat exactly", () => {
-    expect(pathMatches("/", "/")).toBe(true);
-    expect(pathMatches("/", "/play/")).toBe(false);
-  });
-
-  it("lets a splat match any run of characters, including none", () => {
-    expect(pathMatches("/play/*", "/play/")).toBe(true);
-    expect(pathMatches("/art/*", "/art/mocks/start-screen")).toBe(true);
-    expect(pathMatches("/art/*", "/artwork")).toBe(false);
-  });
-
-  it("treats regular expression characters in a pattern literally", () => {
-    expect(pathMatches("/a.b", "/a.b")).toBe(true);
-    expect(pathMatches("/a.b", "/axb")).toBe(false);
+  // Without a splat a pattern matches exactly; a splat matches any run, including none;
+  // regular expression characters are literal.
+  it.each([
+    ["/", "/", true],
+    ["/", "/play/", false],
+    ["/play/*", "/play/", true],
+    ["/art/*", "/art/mocks/start-screen", true],
+    ["/art/*", "/artwork", false],
+    ["/a.b", "/a.b", true],
+    ["/a.b", "/axb", false],
+  ])("%s matches %s: %s", (pattern, path, expected) => {
+    expect(pathMatches(pattern, path)).toBe(expected);
   });
 });
 

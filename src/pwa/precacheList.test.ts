@@ -14,27 +14,32 @@ import {
 } from "./precacheList";
 
 describe("rootRelativeUrls", () => {
-  it("lists src and href values that start at the site root, once each", () => {
-    const html = `
+  it.each([
+    {
+      expected: [
+        "/art/favicon.png",
+        "/manifest.webmanifest",
+        "/nav.js",
+        "/assets/play-abc.js",
+        "/assets/play-abc.css",
+      ],
+      html: `
       <link rel="icon" href="/art/favicon.png" />
       <link rel="manifest" href="/manifest.webmanifest" />
       <script src="/nav.js" defer></script>
       <script type="module" crossorigin src="/assets/play-abc.js"></script>
       <link rel="stylesheet" crossorigin href="/assets/play-abc.css">
-      <script src="/nav.js"></script>`;
-    expect(rootRelativeUrls(html)).toEqual([
-      "/art/favicon.png",
-      "/manifest.webmanifest",
-      "/nav.js",
-      "/assets/play-abc.js",
-      "/assets/play-abc.css",
-    ]);
-  });
-
-  it("leaves out other origins, relative paths and the bare root", () => {
-    const html = `<a href="/"></a><link href="https://fonts.example/a.css">
-      <script src="//cdn.example/x.js"></script><img src="local.png">`;
-    expect(rootRelativeUrls(html)).toEqual([]);
+      <script src="/nav.js"></script>`,
+      name: "lists src and href values that start at the site root, once each",
+    },
+    {
+      expected: [],
+      html: `<a href="/"></a><link href="https://fonts.example/a.css">
+      <script src="//cdn.example/x.js"></script><img src="local.png">`,
+      name: "leaves out other origins, relative paths and the bare root",
+    },
+  ])("$name", ({ expected, html }) => {
+    expect(rootRelativeUrls(html)).toEqual(expected);
   });
 });
 
@@ -56,31 +61,24 @@ describe("bundleDependencies", () => {
     "assets/shared.js": { imports: ["assets/play.js"], type: "chunk" },
   };
 
-  it("follows static imports, dynamic imports and imported CSS, through cycles", () => {
-    expect(bundleDependencies(bundle, ["assets/play.js"])).toEqual([
-      "assets/lazy.js",
-      "assets/play.css",
-      "assets/play.js",
-      "assets/shared.js",
-    ]);
-  });
-
-  it("leaves out files only another entry loads", () => {
-    expect(bundleDependencies(bundle, ["assets/play.js"])).not.toContain("assets/data.js");
-  });
-
-  it("skips names that are not in the bundle", () => {
-    expect(bundleDependencies(bundle, ["assets/missing.js"])).toEqual([]);
+  it.each([
+    {
+      entry: "assets/play.js",
+      expected: ["assets/lazy.js", "assets/play.css", "assets/play.js", "assets/shared.js"],
+      name: "follows imports, dynamic imports and CSS through cycles, not another entry's files",
+    },
+    { entry: "assets/missing.js", expected: [], name: "skips names that are not in the bundle" },
+  ])("$name", ({ entry, expected }) => {
+    expect(bundleDependencies(bundle, [entry])).toEqual(expected);
   });
 });
 
 describe("resolveRelativePath", () => {
-  it("resolves against the file's directory", () => {
-    expect(resolveRelativePath("/art/sprites/dog.json", "dog.png")).toBe("/art/sprites/dog.png");
-  });
-
-  it("handles . and .. segments", () => {
-    expect(resolveRelativePath("/art/fonts/a.fnt", "../images/./b.png")).toBe("/art/images/b.png");
+  it.each([
+    ["/art/sprites/dog.json", "dog.png", "/art/sprites/dog.png"],
+    ["/art/fonts/a.fnt", "../images/./b.png", "/art/images/b.png"],
+  ])("resolves %s + %s to %s", (from, relative, expected) => {
+    expect(resolveRelativePath(from, relative)).toBe(expected);
   });
 });
 
@@ -158,53 +156,62 @@ describe("atlasUrls", () => {
 });
 
 describe("artSoundUrls", () => {
-  it("lists every sound's file in each format under the art base URL", () => {
-    expect(artSoundUrls("/art", withSounds)).toEqual({
-      m4a: ["/art/sounds/music-walk.m4a", "/art/sounds/sfx-tip.m4a"],
-      ogg: ["/art/sounds/music-walk.ogg", "/art/sounds/sfx-tip.ogg"],
-    });
-  });
-
-  it("lists no files for a manifest without sounds", () => {
-    expect(artSoundUrls("/art", { fonts: [], images: [], sprites: [] })).toEqual({
-      m4a: [],
-      ogg: [],
-    });
+  it.each([
+    {
+      expected: {
+        m4a: ["/art/sounds/music-walk.m4a", "/art/sounds/sfx-tip.m4a"],
+        ogg: ["/art/sounds/music-walk.ogg", "/art/sounds/sfx-tip.ogg"],
+      },
+      manifest: withSounds,
+      name: "every sound's file in each format under the art base URL",
+    },
+    {
+      expected: { m4a: [], ogg: [] },
+      manifest: { fonts: [], images: [], sprites: [] },
+      name: "no files for a manifest without sounds",
+    },
+  ])("lists $name", ({ expected, manifest }) => {
+    expect(artSoundUrls("/art", manifest)).toEqual(expected);
   });
 });
 
 describe("artReferencedUrls", () => {
-  it("reads a BMFont's page images", () => {
-    const fnt =
-      '<font><pages><page id="0" file="body.png"/><page id="1" file="body-2.png"/></pages>';
-    expect(artReferencedUrls("/art/fonts/body.fnt", fnt)).toEqual([
-      "/art/fonts/body.png",
-      "/art/fonts/body-2.png",
-    ]);
-  });
-
-  it("reads an Aseprite sheet's meta.image", () => {
-    const json = JSON.stringify({ frames: {}, meta: { image: "dog-koda.png" } });
-    expect(artReferencedUrls("/art/sprites/dog-koda.json", json)).toEqual([
-      "/art/sprites/dog-koda.png",
-    ]);
-  });
-
-  it("finds nothing in a sheet without meta.image or in an image", () => {
-    expect(artReferencedUrls("/art/sprites/x.json", "{}")).toEqual([]);
-    expect(artReferencedUrls("/art/sprites/x.png", "")).toEqual([]);
+  it.each([
+    {
+      expected: ["/art/fonts/body.png", "/art/fonts/body-2.png"],
+      name: "a BMFont's page images",
+      path: "/art/fonts/body.fnt",
+      text: '<font><pages><page id="0" file="body.png"/><page id="1" file="body-2.png"/></pages>',
+    },
+    {
+      expected: ["/art/sprites/dog-koda.png"],
+      name: "an Aseprite sheet's meta.image",
+      path: "/art/sprites/dog-koda.json",
+      text: JSON.stringify({ frames: {}, meta: { image: "dog-koda.png" } }),
+    },
+    {
+      expected: [],
+      name: "nothing in a sheet without meta.image",
+      path: "/art/sprites/x.json",
+      text: "{}",
+    },
+    { expected: [], name: "nothing in an image", path: "/art/sprites/x.png", text: "" },
+  ])("reads $name", ({ expected, path, text }) => {
+    expect(artReferencedUrls(path, text)).toEqual(expected);
   });
 });
 
 describe("webManifestIconUrls", () => {
-  it("lists root-relative icon sources", () => {
-    const manifest = { icons: [{ src: "/icons/a.png" }, { src: "https://x.example/b.png" }, {}] };
-    expect(webManifestIconUrls(manifest)).toEqual(["/icons/a.png"]);
-  });
-
-  it("finds nothing without an icons list", () => {
-    expect(webManifestIconUrls({})).toEqual([]);
-    expect(webManifestIconUrls(null)).toEqual([]);
+  it.each<{ expected: string[]; manifest: unknown; name: string }>([
+    {
+      expected: ["/icons/a.png"],
+      manifest: { icons: [{ src: "/icons/a.png" }, { src: "https://x.example/b.png" }, {}] },
+      name: "root-relative icon sources",
+    },
+    { expected: [], manifest: {}, name: "nothing without an icons list" },
+    { expected: [], manifest: null, name: "nothing for a null manifest" },
+  ])("lists $name", ({ expected, manifest }) => {
+    expect(webManifestIconUrls(manifest)).toEqual(expected);
   });
 });
 

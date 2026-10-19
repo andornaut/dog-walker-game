@@ -7,21 +7,18 @@ const IPHONE_13_PORTRAIT: Viewport = { coarsePointer: true, height: 844, width: 
 const IPHONE_13_LANDSCAPE: Viewport = { coarsePointer: true, height: 390, width: 844 };
 
 describe("isSidewaysPhone", () => {
-  it("is true for a touch screen in landscape with a short viewport", () => {
-    expect(isSidewaysPhone(IPHONE_13_LANDSCAPE)).toBe(true);
-    expect(isSidewaysPhone({ coarsePointer: true, height: 320, width: 568 })).toBe(true);
-    expect(isSidewaysPhone({ coarsePointer: true, height: 500, width: 900 })).toBe(true);
-  });
-
-  it("is false upright, on a tablet in landscape, and on a desktop", () => {
-    expect(isSidewaysPhone(IPHONE_13_PORTRAIT)).toBe(false);
-    expect(isSidewaysPhone({ coarsePointer: true, height: 820, width: 1180 })).toBe(false);
-    expect(isSidewaysPhone({ coarsePointer: false, height: 400, width: 1280 })).toBe(false);
-    expect(isSidewaysPhone({ coarsePointer: false, height: 800, width: 1280 })).toBe(false);
-  });
-
-  it("is false for a square viewport", () => {
-    expect(isSidewaysPhone({ coarsePointer: true, height: 400, width: 400 })).toBe(false);
+  // Only a touch screen in landscape with a short viewport.
+  it.each<[string, Viewport, boolean]>([
+    ["an iPhone 13 in landscape", IPHONE_13_LANDSCAPE, true],
+    ["a small phone in landscape", { coarsePointer: true, height: 320, width: 568 }, true],
+    ["a large phone in landscape", { coarsePointer: true, height: 500, width: 900 }, true],
+    ["an iPhone 13 upright", IPHONE_13_PORTRAIT, false],
+    ["a tablet in landscape", { coarsePointer: true, height: 820, width: 1180 }, false],
+    ["a short desktop window", { coarsePointer: false, height: 400, width: 1280 }, false],
+    ["a desktop", { coarsePointer: false, height: 800, width: 1280 }, false],
+    ["a square viewport", { coarsePointer: true, height: 400, width: 400 }, false],
+  ])("for %s is %s", (_, viewport, expected) => {
+    expect(isSidewaysPhone(viewport)).toBe(expected);
   });
 });
 

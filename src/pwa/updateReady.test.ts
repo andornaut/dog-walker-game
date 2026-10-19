@@ -52,13 +52,16 @@ class FakeRegistration extends EventTarget implements RegistrationLike {
 const RUNNING_WORKER = {};
 
 describe("showsUpdateNotice", () => {
-  it("shows only for a waiting version, on the home screen, before Reload is pressed", () => {
-    const ready = { ...NO_UPDATE, onHome: true, waiting: true };
-    expect(showsUpdateNotice(ready)).toBe(true);
-    expect(showsUpdateNotice(NO_UPDATE)).toBe(false);
-    expect(showsUpdateNotice({ ...ready, onHome: false })).toBe(false);
-    expect(showsUpdateNotice({ ...ready, waiting: false })).toBe(false);
-    expect(showsUpdateNotice({ ...ready, reloading: true })).toBe(false);
+  // Only for a waiting version, on the home screen, before Reload is pressed.
+  const ready = { ...NO_UPDATE, onHome: true, waiting: true };
+  it.each([
+    { expected: true, name: "a waiting version on the home screen", state: ready },
+    { expected: false, name: "no update", state: NO_UPDATE },
+    { expected: false, name: "away from the home screen", state: { ...ready, onHome: false } },
+    { expected: false, name: "no version waiting", state: { ...ready, waiting: false } },
+    { expected: false, name: "after Reload is pressed", state: { ...ready, reloading: true } },
+  ])("is $expected for $name", ({ expected, state }) => {
+    expect(showsUpdateNotice(state)).toBe(expected);
   });
 });
 
@@ -156,17 +159,19 @@ describe("createUpdatePrompt", () => {
 });
 
 describe("noticePlacement", () => {
-  it("centres the notice on the canvas, its top at game y 48 and at most 260 game px wide", () => {
-    // A 720x1120 canvas letterboxed 20px down: 1 game pixel is 2 page pixels.
-    expect(noticePlacement({ height: 1120, left: 0, top: 20, width: 720 })).toEqual({
-      centreX: 360,
-      maxWidth: 520,
-      top: 116,
-    });
-  });
-
-  it("follows a canvas offset to the side", () => {
-    const placement = noticePlacement({ height: 560, left: 100, top: 0, width: 360 });
-    expect(placement).toEqual({ centreX: 280, maxWidth: 260, top: 48 });
+  // Centred on the canvas, its top at game y 48 and at most 260 game px wide.
+  it.each([
+    {
+      canvas: { height: 1120, left: 0, top: 20, width: 720 },
+      name: "a 2x canvas letterboxed 20px down",
+      placement: { centreX: 360, maxWidth: 520, top: 116 },
+    },
+    {
+      canvas: { height: 560, left: 100, top: 0, width: 360 },
+      name: "a 1x canvas offset to the side",
+      placement: { centreX: 280, maxWidth: 260, top: 48 },
+    },
+  ])("places the notice on $name", ({ canvas, placement }) => {
+    expect(noticePlacement(canvas)).toEqual(placement);
   });
 });
