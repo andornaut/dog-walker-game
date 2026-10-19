@@ -7,11 +7,11 @@ Format: `- [status] **Idea**: short description · notes`
 ## Run and onboarding
 
 - [floated] **Owner loyalty**: each finished walk without a firing raises that owner's loyalty, slowly adding a small permanent bonus (+$1 fee, then a starting heart)
-- [floated] **Scripted first walk**: a one-zone first walk with a guaranteed puddle, squirrel, treat and forced stop, each with a one-line hint
 - [floated] **Fewer minor cards**: a puddle that catches one dog resolves without a card unless the dog is Fancy or its owner would fire you · decide after the first playtest
 
 ## Cut
 
+- [cut] **Scripted first walk**: a one-zone tutorial walk with guaranteed encounters · cut: first-time hints and the help screen teach the rules
 - [cut] **Mud encounter**: a mud obstacle for Fancy dogs · cut: puddles cover it
 - [cut] **Story recap on the end screen**: retell the run's biggest moments · cut: the end screen shows earnings only
 
