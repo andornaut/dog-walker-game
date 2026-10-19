@@ -52,7 +52,7 @@ Rules in the rulebook that the game doesn't have yet:
 Tuning against the targets, with the simulator before and after:
 
 - Difficulty by skill: typical and expert players finish too often, novices too rarely; card policies differ too much (money options are cheap next to a walk's earnings)
-- Road speed 150 px/s and a 4.5 s look-ahead
+- Road speed and look-ahead: now 120 px/s and 5.25 s; the candidate is 150 px/s and 4.5 s
 - Earnings: about $215 a walk, so about 45 walks buy everything (now $300 to $400)
 - Needs: urgency, gone-wrong time, accident cost and need card chance (Regular dogs fail too often)
 - Zones: per-zone density, speed, mover share and weights, so harder paths earn their fees; the six zone encounters' weights
