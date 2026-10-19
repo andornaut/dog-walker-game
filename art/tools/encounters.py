@@ -2,39 +2,41 @@
 """Draw the zone encounters on the road: the picnic, the goose, the prize
 petunias, trash day, the café patio and the lemonade stand. Each is a billboard
 like the minor obstacles (obstacles.py): a front elevation (the goose a side
-view), squat, its base on the last opaque row, 56n-24 px wide for n lanes.
+view), squat, its base on the last opaque row, 64n-24 px wide for n lanes.
 
-picnic              88x32   2 lanes, a gingham blanket, a basket, sandwiches on a plate and a
+picnic              104x40  2 lanes, a gingham blanket, a basket, sandwiches on a plate and a
                             picnicker sitting cross-legged mid-bite; idle (4 frames, 400ms): a bite
                             (the sandwich 1px lower), then a chew (the cheeks puff out 1px)
-goose               32x32   1 lane, a mover: a white goose, wings up, neck stretched, beak open
+goose               40x40   1 lane, a mover: a white goose, wings up, neck stretched, beak open
                             mid-honk; side view facing right, the game mirrors it for left.
                             run (4 frames, 110ms): a waddle, the feet swap and the body bobs 1px on
                             the passing frames, the wings flap 1px; idle (4 frames, 300ms): the honk,
                             the neck thrust 1px forward with the beak wide, then the beak shut
-petunias            88x32   2 lanes, a raised flower bed of petunias with a blue "1st prize" rosette
+petunias            104x40  2 lanes, a raised flower bed of petunias with a blue "1st prize" rosette
                             on a stake, a hedge behind and a scandalised gardener peeking over it;
                             idle (4 frames, 450ms): the flowers sway 1px right, back, left
-trash-bins          88x32   2 lanes, two metal bins on their sides spilling a banana peel, a can,
+trash-bins          104x40  2 lanes, two metal bins on their sides spilling a banana peel, a can,
                             paper and a pizza box, their lid on the ground with a ginger cat sitting on
                             it; idle (4 frames, 300ms): the cat's tail sways, as road.cat's
-cafe-patio          88x40   2 lanes, a striped awning on two poles over two bistro tables and two
+cafe-patio          104x50  2 lanes, a striped awning on two poles over two bistro tables and two
                             cooing patrons, a toppled cup with a foam heart in its spill on the left
                             table and a cup on a saucer on the right; idle (4 frames, 350ms): a steam
                             curl rises off the cup 1px a frame
-lemonade-stand      32x48   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
+lemonade-stand      40x60   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
                             ("LEMON ADE") and on the front ("50c" with a lemon, a drop beside a coin), a pitcher and
                             cups on the counter; idle (4 frames, 400ms): the kid breathes, and the
                             pitcher glints on the third frame
 
-Every encounter also has <key>@<step> for each depth step in minis.STEPS (from
-shared/depth-steps.json), redrawn at floor(size x scale + 0.5) with the original's tags, frames
-and durations (see minis.py): the same drawing on a minis.Mini, its motion kept at whole
-pixels, with a full outline. Small signs letter as scribbles.
+The drawings are in the 32px units of a 32x32 road sprite: the sprites draw them on a minis.Mini
+at BIG (1.25x), a 2-lane one TWO_LANES units wide, so 32 units are 40px and a 2-lane encounter
+is 104px wide. A 1px line stays 1px and motion moves whole pixels. Every encounter also has
+<key>@<step> for each depth step in minis.STEPS (from shared/depth-steps.json), redrawn the same
+way at BIG x the step, floor(size x scale + 0.5), with the original's tags, frames and durations
+and a full outline. Sign letters are 3x5 pixels at 1x or more; smaller, they are scribbles.
 
 All take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark colours,
 so the silhouette holds 3:1 on every road. The drawing functions take new, the grid maker
-(Grid, or mini(s) for a depth variant), so cards can draw them at any size.
+(Grid for the 32-unit size, or mini(s)), so cards can draw them at any size.
 
 Usage:
   encounters.py preview OUT.png   every frame on the road colours
@@ -51,9 +53,14 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
-from minis import STEPS, Mini, paint  # noqa: E402
+from minis import STEPS, Mini, small  # noqa: E402
 from pixel import ROADS, Grid, edged, main  # noqa: E402
 from road import LIT  # noqa: E402
+
+# The drawings are in the 32px units of the old road sprites; the sprites draw them BIG times larger (40px
+# for a 32px unit frame), and a 2-lane one TWO_LANES units wide, so it is 104px (64n-24 for n lanes).
+BIG = 1.25
+TWO_LANES = (64 * 2 - 24) / BIG
 
 # Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Willow Crescent
 # and Riverside Path.
@@ -82,17 +89,10 @@ def lit(g):
 
 
 def borrow(g, draw, x, y, *args, **q):
-    """Draw road's draw(*args, **q) at g's scale and copy its pixels onto g with the top-left corner at
-    (x, y), in full-size pixels."""
+    """Draw road's draw(*args, **q) at g's scale (with minis.small, so its face is minis.face_front at that
+    scale) and copy its pixels onto g with the top-left corner at (x, y), in full-size pixels."""
     s = scale_of(g)
-    full_grid, full_rim = road.Grid, road.rim
-    if s != 1:
-        road.Grid = lambda w=32, h=32: Mini(s, w, h)
-        road.rim = lambda gg, rims: full_rim(getattr(gg, "g", gg), rims)
-    try:
-        src = draw(*args, **q)
-    finally:
-        road.Grid, road.rim = full_grid, full_rim
+    src = small(road, s, draw, *args, **q) if s != 1 else draw(*args, **q)
     dst = getattr(g, "g", g)
     ox, oy = round(x * s), round(y * s)
     for j, row in enumerate(getattr(src, "g", src).px):
@@ -112,23 +112,33 @@ GLYPHS = {
 def letter(g, col, lines, clip=None):
     """lines, each (text, x, y), in GLYPHS 4px a letter, lettered as the logo is: col letters in a 1px
     ink outline on a 1px dred shadow down and right, the lines outlined together. clip (x0, y0, x1, y1)
-    keeps the outline and shadow on the board. On a depth variant the letters are too small to read, so
-    each line is a scribble: a row of ink with a gap between words."""
-    if scale_of(g) != 1:
+    keeps the outline and shadow on the board. The letters are 3x5 pixels at any scale of 1 or more, each
+    line centred where it is in drawing units. Below 1 they are too small to read, so each line is a
+    scribble: a row of ink with a gap between words."""
+    s = scale_of(g)
+    if s < 1:
         for text, x, y in lines:
             for i, ch in enumerate(text):
                 if ch != " ":
                     g.rect(x + 4 * i, y + 1, 4 if i + 1 < len(text) and text[i + 1] != " " else 3, 3, "ink")
         return
-    fill = {(x + 4 * i + k % 3, y + k // 3) for text, x, y in lines for i, ch in enumerate(text)
-            for k, bit in enumerate(GLYPHS.get(ch, "")) if bit == "1"}
+    dst = getattr(g, "g", g)
+
+    def at(v, n):
+        """The pixel where a run of n pixels starts, centred where it is centred in drawing units."""
+        return round((v + n / 2) * s - n / 2)
+
+    fill = {(at(x, 4 * len(text) - 1) + 4 * i + k % 3, at(y, 5) + k // 3) for text, x, y in lines
+            for i, ch in enumerate(text) for k, bit in enumerate(GLYPHS.get(ch, "")) if bit == "1"}
     ring = {(px + dx, py + dy) for px, py in fill for dx in (-1, 0, 1) for dy in (-1, 0, 1)} - fill
     shadow = {(px + 1, py + 1) for px, py in ring} - ring - fill
     x0, y0, x1, y1 = clip or (0, 0, g.w - 1, g.h - 1)
+    x0, y0, x1, y1 = (math.floor(x0 * s + 0.5), math.floor(y0 * s + 0.5), math.floor((x1 + 1) * s + 0.5) - 1,
+                      math.floor((y1 + 1) * s + 0.5) - 1)
     for pts, c in ((shadow, "dred"), (ring, "ink"), (fill, col)):
         for px, py in pts:
             if x0 <= px <= x1 and y0 <= py <= y1:
-                g.p(px, py, c)
+                dst.p(px, py, c)
 
 
 def heart(g, x, y, col, shade):
@@ -148,19 +158,22 @@ def gingham(g, x0, y0, w, h, inset):
     """A red and white check, 4px cells across and 2 rows down; inset(y) trims each row at both ends."""
     for y in range(y0, y0 + h, 2):
         cut = inset(y)
-        for x in range(x0 + cut, x0 + w - cut, 4):
+        for x in range(x0 + cut, math.ceil(x0 + w - cut), 4):
             a, b = (x - x0) // 4 % 2 == 0, (y - y0) // 2 % 2 == 0
             col = "red" if a and b else "pink" if a or b else "white"
             g.rect(x, y, min(4, x0 + w - cut - x), 2, col)
 
 
-def picnic(chew=0, new=Grid):
+def picnic(chew=0, new=Grid, w=88):
     """The picnicker sits cross-legged on the right of the blanket, a sandwich at the mouth with a bite out
-    of it. chew 1 is the bite (the sandwich 1px lower), 2 the chew (the cheeks puffed 1px wider)."""
-    g = edged(new(88, 32))
+    of it. chew 1 is the bite (the sandwich 1px lower), 2 the chew (the cheeks puffed 1px wider). w is the
+    width in drawing units: the plate and apple move left by half of what it is short of 88, the
+    picnicker by all of it."""
+    d = w - 88
+    g = edged(new(w, 32))
     # the blanket: a sliver of its top, wider at the front, then its hem
-    gingham(g, 2, 23, 84, 6, lambda y: (28 - y) // 2 * 2)
-    g.rect(4, 29, 80, 1, "dred")
+    gingham(g, 2, 23, 84 + d, 6, lambda y: (28 - y) // 2 * 2)
+    g.rect(4, 29, 80 + d, 1, "dred")
     # the basket on the left: handle, a napkin and a baguette peeking out, the wicker body
     g.ell(15, 16, 8, 8, "brown")
     g.ell(15, 16, 6, 6, None)
@@ -176,17 +189,18 @@ def picnic(chew=0, new=Grid):
             g.rect(x + (y // 3 % 2) * 2, y, 2, 2, "tan")
     g.rect(22, 18, 4, 8, "rust")
     # sandwiches cut in triangles on a plate
-    g.ell(38, 25.5, 9, 1.5, "white", "lgrey")
-    for x0, x1, apex in ((30, 38, 34), (37, 46, 41.5)):
+    m = d / 2
+    g.ell(38 + m, 25.5, 9, 1.5, "white", "lgrey")
+    for x0, x1, apex in ((30 + m, 38 + m, 34 + m), (37 + m, 46 + m, 41.5 + m)):
         g.tri((x0, 25), (x1, 25), (apex, 18), "tan")
         g.tri((x0 + 1.5, 25), (x1 - 1.5, 25), (apex, 19.5), "cream")
-        g.rect(round(x0 + 2), 22, round(x1 - x0 - 4), 1, "green")
-        g.rect(round(x0 + 2), 23, round(x1 - x0 - 4), 1, "red")
+        g.rect(x0 + 2, 22, round(x1 - x0 - 4), 1, "green")
+        g.rect(x0 + 2, 23, round(x1 - x0 - 4), 1, "red")
     # an apple
-    g.ell(50, 24, 2.5, 2.5, "red", "dred", "pink")
-    g.p(50, 21, "dbrown")
+    g.ell(50 + m, 24, 2.5, 2.5, "red", "dred", "pink")
+    g.p(50 + m, 21, "dbrown")
     # the picnicker: crossed legs, body, arms up to the sandwich, head
-    cx = 66
+    cx = 66 + d
     g.ell(cx, 25.5, 13, 3.5, "blue", "navy", "sky")
     g.rect(cx - 2, 23, 4, 2, "navy")
     g.rect(cx - 15, 25, 4, 3, "white")
@@ -289,12 +303,14 @@ PETUNIA_COLS = (("pink", "mauve"), ("mauve", "purple"), ("white", "lgrey"), ("ho
                 ("purple", "plum"), ("white", "lgrey"), ("mauve", "purple"))
 
 
-def petunias(sway=0, new=Grid):
+def petunias(sway=0, new=Grid, w=88):
     """The gardener peeks over the hedge, wide-eyed under a sun hat, gripping its top; the bed sits in front
-    of it, the rosette on its stake on the left. sway moves the flower heads sideways."""
-    g = edged(new(88, 32))
+    of it, the rosette on its stake on the left. sway moves the flower heads sideways. w is the width in
+    drawing units: the gardener moves left by what it is short of 88, and the hedge and bed end there."""
+    d = w - 88
+    g = edged(new(w, 32))
     # the gardener, behind the hedge
-    cx = 66
+    cx = 66 + d
     g.ell(cx, 10.5, 7, 6.5, "skin1", "skin2")
     g.ell(cx, 3, 10, 1.6, "tan", "brown", "cream")
     g.ell(cx, 3, 4.5, 1.5, "tan", "brown", "cream")
@@ -310,26 +326,26 @@ def petunias(sway=0, new=Grid):
     g.rect(cx - 1, 13, 1, 1, "dbrown")
     g.rect(cx + 1, 13, 1, 1, "dbrown")
     # the hedge, its top a row of clumps, lit green on the upper left
-    g.rect(3, 17, 82, 6, "forest")
-    for i, x in enumerate(range(7, 82, 7)):
+    g.rect(3, 17, 82 + d, 6, "forest")
+    for i, x in enumerate(range(7, round(82 + d), 7)):
         g.ell(x, 17.5 - i % 2, 4.5, 3.5, "dgreen", "forest", "green")
     for x in (cx - 10, cx + 7):
         g.rect(x, 13, 4, 3, "skin1")
         g.rect(x, 13, 4, 1, "skin2")
         g.p(x + 1, 14, "skin2")
     # the bed: the soil, then the front planks
-    g.rect(3, 22, 82, 1, "dbrown")
-    g.rect(2, 23, 84, 7, "brown")
-    g.rect(2, 23, 84, 1, "tan")
-    g.rect(2, 26, 84, 1, "dbrown")
-    for x in (2, 43, 84):
+    g.rect(3, 22, 82 + d, 1, "dbrown")
+    g.rect(2, 23, 84 + d, 7, "brown")
+    g.rect(2, 23, 84 + d, 1, "tan")
+    g.rect(2, 26, 84 + d, 1, "dbrown")
+    for x in (2, 43 + d / 2, 84 + d):
         g.rect(x, 23, 2, 7, "dbrown")
         g.rect(x, 23, 1, 7, "ochre")
     # leaves along the soil, then the flowers on them
-    for i, x in enumerate(range(5, 84, 5)):
+    for i, x in enumerate(range(5, round(84 + d), 5)):
         g.ell(x + 2, 21 - i % 2, 3, 2, "dgreen", "forest", "green")
     s = whole(g, sway)
-    for i, x in enumerate(range(7, 83, 6)):
+    for i, x in enumerate(range(7, round(83 + d), 6)):
         if 12 <= x <= 22:
             continue
         petal, shade = PETUNIA_COLS[i % len(PETUNIA_COLS)]
@@ -366,12 +382,15 @@ def can(g, x, y, w, mouth):
     g.ell(rim_x - mouth * 0.5, y + 6.5, 1.8, 5.5, "ink")
 
 
-def trash_bins(tail=0, new=Grid):
+def trash_bins(tail=0, new=Grid, w=88):
     """Two metal bins on their sides spilling between them; the lid lies in front with road.cat on it.
-    tail is road.cat's tail step, 0 to 3."""
-    g = edged(new(88, 32))
+    tail is road.cat's tail step, 0 to 3. w is the width in drawing units: the right bin and its pizza box
+    move left by what it is short of 88, the lid and the cat by half of it."""
+    d = w - 88
+    m = d / 2
+    g = edged(new(w, 32))
     can(g, 5, 16, 19, 1)
-    can(g, 67, 16, 16, -1)
+    can(g, 67 + d, 16, 16, -1)
     # spilled out of the left bin: crumpled paper, a can, a banana peel
     g.ell(28, 26.5, 3, 2.5, "white", "lgrey")
     g.p(27, 26, "lgrey")
@@ -383,52 +402,24 @@ def trash_bins(tail=0, new=Grid):
     g.rect(31, 28, 3, 1, "yellow")
     g.p(30, 29, "brown")
     # out of the right bin: a pizza box, its lid open behind a slice left in it
-    g.rect(54, 19, 12, 8, "tan")
-    g.rect(54, 19, 12, 1, "cream")
-    g.rect(54, 19, 1, 8, "cream")
-    g.ell(60, 23, 2, 1.5, "ochre")
-    g.rect(53, 27, 14, 2, "tan")
-    g.rect(53, 27, 14, 1, "cream")
-    g.rect(53, 28, 14, 1, "brown")
-    g.tri((55, 27), (64, 27), (59, 24.5), "amber")
-    g.rect(55, 26, 9, 1, "ochre")
-    g.p(58, 26, "red")
-    g.p(61, 25, "red")
+    g.rect(54 + d, 19, 12, 8, "tan")
+    g.rect(54 + d, 19, 12, 1, "cream")
+    g.rect(54 + d, 19, 1, 8, "cream")
+    g.ell(60 + d, 23, 2, 1.5, "ochre")
+    g.rect(53 + d, 27, 14, 2, "tan")
+    g.rect(53 + d, 27, 14, 1, "cream")
+    g.rect(53 + d, 28, 14, 1, "brown")
+    g.tri((55 + d, 27), (64 + d, 27), (59 + d, 24.5), "amber")
+    g.rect(55 + d, 26, 9, 1, "ochre")
+    g.p(58 + d, 26, "red")
+    g.p(61 + d, 25, "red")
     # the lid, then the cat sitting on it
-    g.ell(43, 27.5, 8.5, 2, "grey", "slate", "lgrey")
-    g.rect(41, 25, 4, 1, "slate")
-    if scale_of(g) == 0.5:
-        # scaled, road.cat's ears close up and its face turns to noise
-        paint(g.g, CAT_50, 18, 3)
-        paint(g.g, CAT_TAIL_50, 18 + (0, 0, 1, 0)[tail], 3)
-    else:
-        borrow(g, road.cat, 31, 5, tail)
+    g.ell(43 + m, 27.5, 8.5, 2, "grey", "slate", "lgrey")
+    g.rect(41 + m, 25, 4, 1, "slate")
+    borrow(g, road.cat, 31 + m, 5, tail)
     return lit(g)
 
 
-# road.cat at 0.5x by hand, sitting, then its tail curling up the right side.
-CAT_50 = [".o...o.",
-          ".oo.oo.",
-          ".ooooo.",
-          ".g#o#g.",
-          ".oopoo.",
-          "..ooo..",
-          ".ottoo.",
-          ".occcr.",
-          ".occcr.",
-          ".occcr.",
-          "..c.c.."]
-CAT_TAIL_50 = ["........",
-               "........",
-               "........",
-               ".......r",
-               ".......o",
-               ".......o",
-               "......oo",
-               "......o.",
-               "......o.",
-               "........",
-               "........"]
 # road.cat's tail swing, a loop
 TRASH_IDLE = (0, 1, 2, 1), 300
 
@@ -455,27 +446,31 @@ def patron(g, cx, hair, shirt, shade, skin, skin_shade):
     g.rect(cx, 26, 1, 3, skin_shade)
 
 
-def cafe_patio(steam=0, new=Grid):
+def cafe_patio(steam=0, new=Grid, w=88):
     """The awning hangs from a pole at each end over the two tables; the left patron's cup lies toppled in
     its spill with a foam heart floating in it, the right one's stands on a saucer. steam is the curl's
-    step: it rises 1px a frame over a 4-row wave."""
-    g = edged(new(88, 40))
-    for x in (3, 83):
+    step: it rises 1px a frame over a 4-row wave. w is the width in drawing units: the right pole, patron
+    and table move left by what it is short of 88, and the awning's ten stripes narrow to fit."""
+    d = w - 88
+    g = edged(new(w, 40))
+    for x in (3, 83 + d):
         g.rect(x, 3, 2, 35, "slate")
         g.rect(x, 3, 1, 35, "grey")
     patron(g, 24, ("amber", "orange", "yellow"), "pink", "mauve", "skin1", "skin2")
-    patron(g, 64, ("dbrown", "plum", "brown"), "sky", "blue", "skin2", "brown")
+    patron(g, 64 + d, ("dbrown", "plum", "brown"), "sky", "blue", "skin2", "brown")
     # the awning: green and cream stripes over a scalloped edge
-    for i, x in enumerate(range(4, 84, 8)):
+    sw = (80 + d) / 10
+    for i in range(10):
+        x = 4 + i * sw
         col, shade = ("green", "dgreen") if i % 2 == 0 else ("cream", "tan")
-        g.rect(x, 3, 8, 4, col)
-        g.rect(x, 5, 8, 2, shade)
-        g.ell(x + 4, 7, 4, 2.5, col, shade)
-    g.rect(2, 1, 84, 2, "dgreen")
+        g.rect(x, 3, sw, 4, col)
+        g.rect(x, 5, sw, 2, shade)
+        g.ell(x + sw / 2, 7, sw / 2, 2.5, col, shade)
+    g.rect(2, 1, 84 + d, 2, "dgreen")
     g.rect(2, 3, 2, 4, "dgreen")
-    g.rect(84, 3, 2, 4, "dgreen")
+    g.rect(84 + d, 3, 2, 4, "dgreen")
     # the tables: a white top edge, a grey rim, a slate pedestal on a dslate foot
-    for cx in (24, 64):
+    for cx in (24, 64 + d):
         g.rect(cx - 11, 30, 22, 1, "white")
         g.rect(cx - 11, 31, 22, 1, "lgrey")
         g.rect(cx - 10, 32, 20, 1, "grey")
@@ -493,15 +488,15 @@ def cafe_patio(steam=0, new=Grid):
     g.ell(21.5, 27.5, 6.5, 2.5, "tan", "brown")
     heart(g, 19, 25, "white", "lgrey")
     # right: a cup on its saucer, and its steam curl
-    g.rect(67, 29, 9, 1, "lgrey")
-    g.rect(69, 25, 5, 4, "white")
-    g.rect(73, 25, 1, 4, "lgrey")
-    g.rect(74, 26, 2, 2, "lgrey")
-    g.rect(69, 25, 4, 1, "brown")
+    g.rect(67 + d, 29, 9, 1, "lgrey")
+    g.rect(69 + d, 25, 5, 4, "white")
+    g.rect(73 + d, 25, 1, 4, "lgrey")
+    g.rect(74 + d, 26, 2, 2, "lgrey")
+    g.rect(69 + d, 25, 4, 1, "brown")
     k = int(steam)
     for j in range(5):
         y = 23 - j
-        x = 72 + (0, 1, 0, -1)[(j + k) % 4]
+        x = 72 + d + (0, 1, 0, -1)[(j + k) % 4]
         if (j + k) % 5 != 4:
             g.p(x, y, "white")
     return lit(g)
@@ -553,8 +548,8 @@ def lemonade_stand(bob=0, glint=False, new=Grid):
     g.ell(6, 37.5, 2.5, 2, "yellow", "amber")
     g.p(8, 36, "green")
     letter(g, "yellow", (("50c", 11, 34),))
-    g.ell(6, 43, 1.6, 2, "cyan", "sky")
-    g.p(6, 41, "cyan")
+    g.tri((6, 40.4), (4.4, 43.2), (7.6, 43.2), "cyan")
+    g.ell(6, 43.4, 1.6, 1.8, "cyan", "sky")
     g.ell(14, 43, 2, 2, "amber", "orange", "yellow")
     g.p(14, 43, "orange")
     return lit(g)
@@ -566,26 +561,28 @@ LEMONADE_IDLE = [dict(), dict(bob=-1), dict(glint=True), dict(bob=-1)], 400
 # ---------- build ----------
 
 def sprites():
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite, then its depth variants."""
-    for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
-        new = Grid if s == 1 else mini(s)
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite, then its depth variants. Each is
+    drawn at BIG times its step, the 2-lane ones TWO_LANES wide in drawing units."""
+    for suffix, step in (("", 1), *(("@" + k, v) for k, v in STEPS)):
+        s = BIG * step
+        new = mini(s)
 
         def snapped(q, keys):
-            return {k: (v / s if s != 1 and k in keys and v else v) for k, v in q.items()}
+            return {k: (v / s if k in keys and v else v) for k, v in q.items()}
 
-        def idle(draw, spec, keys=()):
+        def idle(draw, spec, keys=(), **wide):
             args, ms = spec
-            frames = [draw(**snapped(a, keys), new=new) if isinstance(a, dict) else draw(a, new=new)
+            frames = [draw(**snapped(a, keys), new=new, **wide) if isinstance(a, dict) else draw(a, new=new, **wide)
                       for a in args]
             return [("idle", [f.outlined() for f in frames], ms)]
 
-        yield f"picnic{suffix}", idle(picnic, PICNIC_IDLE)
+        yield f"picnic{suffix}", idle(picnic, PICNIC_IDLE, w=TWO_LANES)
         yield f"goose{suffix}", [
             ("run", [goose(**snapped(q, GOOSE_OFFSETS), new=new).outlined() for q in GOOSE_RUN], 110),
             ("idle", [goose(**snapped(q, GOOSE_OFFSETS), new=new).outlined() for q in GOOSE_IDLE], 300)]
-        yield f"petunias{suffix}", idle(petunias, PETUNIAS_IDLE)
-        yield f"trash-bins{suffix}", idle(trash_bins, TRASH_IDLE)
-        yield f"cafe-patio{suffix}", idle(cafe_patio, CAFE_IDLE)
+        yield f"petunias{suffix}", idle(petunias, PETUNIAS_IDLE, w=TWO_LANES)
+        yield f"trash-bins{suffix}", idle(trash_bins, TRASH_IDLE, w=TWO_LANES)
+        yield f"cafe-patio{suffix}", idle(cafe_patio, CAFE_IDLE, w=TWO_LANES)
         yield f"lemonade-stand{suffix}", idle(lemonade_stand, LEMONADE_IDLE, ("bob",))
 
 

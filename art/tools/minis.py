@@ -299,26 +299,9 @@ def wallet(s, glint):
 
 
 def cone(s, glint=None):
-    """obstacles.cone with its two reflective bands cut at the small size; glint is the idle's
-    highlight row, as in obstacles.CONE_IDLE."""
-    g = edged(Mini(s))
-    g.rect(7, 25, 18, 4, "grey")
-    g.rect(7, 25, 18, 1, "lgrey")
-    g.tri((9, 26), (23, 26), (16, 6), "orange")
-    g.tri((16, 26), (23, 26), (16, 6), "rust")
-    mid = scaled(16, s)
-    for y in (12, 19):
-        yy = g._edge(y)
-        for x in range(g.g.w):
-            if g.px[yy][x] in ("f77622", "be4a2f"):
-                g.g.p(x, yy, "white" if x < mid else "lgrey")
-                if s > 0.5:
-                    g.g.p(x, yy + 1, "white" if x < mid else "lgrey")
-    # the highlight stays just left of the centre line, where it is at full size
-    g.g.rect(mid - 1, g._edge(7), 1, g._edge(11) - g._edge(7), "amber")
-    if glint is not None:
-        g.g.p(mid - 1, g._edge(glint), "white")
-    return g
+    """obstacles.cone on a Mini at scale s; it cuts its reflective bands at the drawn size. glint is the
+    idle's highlight row, as in obstacles.CONE_IDLE."""
+    return small(obstacles, s, obstacles.cone, glint)
 
 
 def shrunk(s, draw, **q):

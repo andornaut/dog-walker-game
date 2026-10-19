@@ -48,18 +48,21 @@ fx-accident        40x40  play (6 frames, 100ms)  a "!" pops over the dog, blush
                           dog's own 40x40 frame; the game then leaves accident-spot on the road
 accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground decal with no
                           outline drawn under everything, a fly circling it
-spot-tree          32x48  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
+spot-tree          40x60  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
                           canopy rustles, then a leaf falls
-spot-stranger      32x48  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
+spot-stranger      40x60  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
                           up in a wave, breathing (Friendly)
                           wave (2 frames, 300ms)  the raised hand waves
-spot-lamp-post     32x48  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
+spot-lamp-post     40x60  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
                           crosses the glass (Nosy)
-spot-water-bowl    32x32  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
+spot-water-bowl    40x40  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
                           falls and rings the water (Thirsty)
-spot-<spot>@<step>  every spot redrawn small on a Mini at each depth step in minis.STEPS (from
+                          The spots are drawn in 32px units on a minis.Mini at BIG (1.25x), so a
+                          32x48 drawing is 40x60, its pixel maps stamped pixel for pixel
+spot-<spot>@<step>  every spot redrawn the same way at BIG x each depth step in minis.STEPS (from
                    shared/depth-steps.json), floor(size x scale + 0.5): the same tags, frames and
-                   durations, a full 1px outline, motion kept at 1px; the bowl drops its bone
+                   durations, a full 1px outline, motion kept at 1px; below 1x the bowl drops its
+                   bone
 
 Usage:
   needs.py preview OUT.png   every frame of every piece on the six road colours
@@ -90,8 +93,13 @@ GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 NEEDS = ("regular", "playful", "friendly", "nosy", "thirsty")
 
 
-def bitmap(g, x0, y0, rows, cols):
-    """Stamp rows of characters; each character maps to a colour in cols, '.' is empty."""
+def bitmap(g, x0, y0, rows, cols, big=None):
+    """Stamp rows of characters; each character maps to a colour in cols, '.' is empty. On a minis.Mini
+    above 1x the map is stamped pixel for pixel from (x0, y0) scaled, so it keeps no gaps: big, a map
+    redrawn for that size, if given, else rows."""
+    s = getattr(g, "s", 1)
+    if s > 1:
+        g, x0, y0, rows = g.g, round(x0 * s), round(y0 * s), big or rows
     for y, row in enumerate(rows):
         for x, ch in enumerate(row):
             if ch in cols:
@@ -483,6 +491,8 @@ def tree(rustle=0, leaf=None):
 
 
 TREE_IDLE = ((dict(), dict(rustle=1), dict(), dict(leaf=32)), 450)
+# The stranger's hoodie heart redrawn for the full size, 9x8.
+BIG_HEART = [".111.111.", "122111111", "121111113", "111111113", ".1111113.", "..11113..", "...113...", "....1...."]
 STRANGER_IDLE = (tuple(dict(bob=bb) for bb in road.BREATH), road.BREATH_MS)
 STRANGER_WAVE = ((dict(), dict(wave=1)), 300)
 
@@ -497,7 +507,7 @@ def stranger_top(wave):
         g.rect(9, 32 + b, 14, 2, "dgreen")
         g.rect(14, 21 + b, 4, 2, "dgreen")
         bitmap(g, 12, 25 + b, [".11.11.", "1211111", "1111113", ".11113.", "..113..", "...1..."],
-               {"1": "pink", "2": "white", "3": "mauve"})
+               {"1": "pink", "2": "white", "3": "mauve"}, BIG_HEART)
         g.rect(5, 22 + b, 4, 9, "green")
         g.rect(8, 22 + b, 1, 9, "dgreen")
         g.rect(5, 31 + b, 4, 3, "skin1")
@@ -564,9 +574,10 @@ def lamp_post(glint=False):
     g.p(15, 0, "navy")
     g.p(16, 0, "navy")
     if glint:
-        for y in range(6, 11):
-            g.p(13 - (y - 6) // 3, y, "white")
-            g.p(17, y, "white")
+        # as 1px lines, so they stay unbroken drawn larger
+        g.rect(13, 6, 1, 3, "white")
+        g.rect(12, 9, 1, 2, "white")
+        g.rect(17, 6, 1, 5, "white")
     else:
         g.p(12, 6, "white")
         g.rect(16, 6, 1, 2, "yellow")
@@ -598,9 +609,10 @@ def water_bowl(drip=0):
     g.rect(27, 23, 3, 5, "dred")
     g.rect(13, 22, 16, 1, "pink")
     g.rect(15, 21, 3, 1, "white")
-    # the bone turns to noise when redrawn small, so only the full-size bowl wears it
-    if not hasattr(g, "s"):
-        bitmap(g, 17, 24, ["ww...ww", ".wwwww.", "ww...ww"], {"w": "white"})
+    # the bone turns to noise when redrawn small, so only the bowls at 1x or more wear it
+    if getattr(g, "s", 1) >= 1:
+        bitmap(g, 17, 24, ["ww...ww", ".wwwww.", "ww...ww"], {"w": "white"},
+               ["ww.....ww", ".wwwwwww.", ".wwwwwww.", "ww.....ww"])
     if drip == 0:
         g.p(12, 11, "cyan")
     elif drip == 1:
@@ -623,6 +635,9 @@ def shrunk(module, s, draw, q):
     return small(module, s, lambda: draw(**{k: v / s if k in MOTION else v for k, v in q.items()}))
 
 
+# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is
+# 40x60.
+BIG = 1.25
 # The pose arguments that move a whole part by pixels.
 MOTION = ("rustle", "wave", "bob")
 # Each spot's drawing function, the module whose Grid it draws on, and its tags as (tag, poses, ms).
@@ -654,11 +669,10 @@ def sprites():
     yield "fx-accident", [("play", [accident(i).outlined(False) for i in range(6)], 100)]
     yield "accident-spot", [("idle", [accident_spot(f).outlined(False) for f in (0, 1)], 500)]
     for key, (draw, module, tags) in SPOTS.items():
-        yield key, [(tag, [draw(**q).outlined() for q in poses], ms) for tag, poses, ms in tags]
-        for suffix, s in STEPS:
-            mod = module or sys.modules[__name__]
-            yield f"{key}@{suffix}", [(tag, [shrunk(mod, s, draw, q).outlined() for q in poses], ms)
-                                      for tag, poses, ms in tags]
+        mod = module or sys.modules[__name__]
+        for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
+            yield f"{key}{suffix}", [(tag, [shrunk(mod, BIG * s, draw, q).outlined() for q in poses], ms)
+                                     for tag, poses, ms in tags]
 
 
 if __name__ == "__main__":
