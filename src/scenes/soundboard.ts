@@ -13,8 +13,9 @@ import {
   musicLevel,
   type MusicState,
   type RecentPlays,
-  SOUND_KEYS,
   type SoundCue,
+  soundKeyFor,
+  soundKeysOf,
   startMusic,
   stopMusic,
   type Volumes,
@@ -42,9 +43,14 @@ export class Soundboard {
 
   play(cue: SoundCue): void {
     this.guard(`play ${cue}`, () => {
-      const key = SOUND_KEYS[cue];
       const volume = effectiveVolumes(this.mix).sfx;
-      if (volume <= 0 || !this.isLoaded(key)) {
+      if (volume <= 0) {
+        return;
+      }
+      const key = soundKeyFor((candidate) => this.game.cache.audio.exists(candidate), cue);
+      if (key === undefined) {
+        const keys = soundKeysOf(cue).join(" or ");
+        this.reportOnce(cue, `Sound ${keys} did not load; playing nothing in its place.`);
         return;
       }
       const { admitted, recent } = admitPlay(this.recentPlays, cue, this.game.loop.now);

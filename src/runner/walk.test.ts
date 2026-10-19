@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
+import { ACHIEVEMENTS } from "../data/achievements";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
+import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
@@ -22,6 +24,7 @@ import {
 } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
+import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
 import { giveTreat } from "../rules/treats";
@@ -328,8 +331,63 @@ describe("stepWalk", () => {
     const zoned = { ...walk, run: { ...walk.run, zoneIndex: 1 } };
     expect(step(zoned).walk.run.bumpsByZone).toEqual([0, 1]);
     expect(step(walkWith(["koda"], [atPack("otherDog")])).walk.run.bumpsByZone).toEqual([1]);
-    expect(step(walkWith(["duchess"], [atPack("squirrel")])).walk.run.bumpsByZone).toEqual([1]);
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
+  });
+
+  describe("a hit that opens no card", () => {
+    const nobodyCaught = () => 0.999;
+    const raincoats = (walk: Walk): Walk => ({
+      ...walk,
+      run: { ...walk.run, immunities: [{ encounter: "puddle" }] },
+    });
+    const scenery: [string, Walk, () => number][] = [
+      ["a squirrel with no chaser", walkWith(["duchess"], [atPack("squirrel")]), seededRandom(1)],
+      ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), seededRandom(1)],
+      ["a skunk that catches nobody", walkWith(["duchess"], [atPack("skunk")]), nobodyCaught],
+      [
+        "a puddle Raincoats keep off",
+        raincoats(walkWith(["duchess"], [atPack("puddle")])),
+        () => 0,
+      ],
+    ];
+
+    it.each(scenery)(
+      "is scenery for %s: removed, with no bump, grace or hit stop",
+      (_, walk, random) => {
+        const after = stepWalk(data, geometry, random, 0.01, walk);
+        expect(after.cards).toEqual([]);
+        expect(after.encounterHits).toEqual([]);
+        expect(after.walk.road.items).toEqual([]);
+        expect(after.walk.road.hitStop).toBeNull();
+        expect(after.walk.road.invulnerableSeconds).toBe(0);
+        expect(after.walk.run.bumpsByZone).toEqual([]);
+      },
+    );
+
+    it("opens no grace window, so an obstacle met with it is still hit", () => {
+      const after = step(
+        walkWith(["koda"], [atPack("thief", 0), { ...atPack("otherDog", 1), y: 550 }]),
+      );
+      expect(after.encounterHits.map(({ encounter }) => encounter)).toEqual(["otherDog"]);
+      expect(after.walk.run.bumpsByZone).toEqual([1]);
+    });
+
+    it("leaves a zone clean for Clean Paws, and a walk for Not a Scratch", () => {
+      let walk = walkWith(["duchess"]);
+      for (let zone = 0; zone < data.world.zones.length; zone++) {
+        const met = step({ ...walk, road: { ...walk.road, items: [atPack("squirrel")] } }).walk;
+        walk = { ...met, run: finishZone(data, met.run).run };
+      }
+      const facts = {
+        ...runCountersOf(walk.run),
+        earnedCents: walk.run.money,
+        packSize: 1,
+        zonesFinished: data.world.zones.length,
+      };
+      expect(
+        earnedByRun({ ...data, achievements: ACHIEVEMENTS, dogSlots: DOG_SLOTS }, facts),
+      ).toEqual(expect.arrayContaining(["cleanPaws", "notAScratch"]));
+    });
   });
 
   it("counts no bump for an obstacle ignored in the grace window", () => {
@@ -896,7 +954,7 @@ describe("movers", () => {
       let walked = walk;
       const events: ChaseStep[] = [];
       for (let i = 0; i < seconds * 60; i++) {
-        const chased = stepChase(data, 5, 1 / 60, walked);
+        const chased = stepChase(data, geometry, 1 / 60, walked);
         events.push(chased);
         walked = step(chased.walk, 1 / 60).walk;
       }
@@ -927,7 +985,7 @@ describe("movers", () => {
     it("stands still unless the walk is walking with no hit stop", () => {
       const walk = walkFor(["koda"]);
       const ended = { ...walk, run: { ...walk.run, phase: { kind: "ended", reason: "wentHome" } } };
-      expect(stepChase(data, 5, 2, ended as Walk).walk).toBe(ended);
+      expect(stepChase(data, geometry, 2, ended as Walk).walk).toBe(ended);
     });
 
     it("does not pull a pack with no chaser, or with Good leash", () => {
@@ -939,6 +997,66 @@ describe("movers", () => {
         stat: "chaserSquirrelPulls",
       } as const;
       expect(after(walkFor(["koda"], [leash]), 1.2).walk.road.control.target).toBe(2);
+    });
+
+    describe("of a static squirrel", () => {
+      const leash = {
+        by: "goodLeashSquirrelPull",
+        operation: "multiply",
+        source: { kind: "upgrade", upgrade: "goodLeash" },
+        stat: "chaserSquirrelPulls",
+      } as const;
+      // A squirrel well up the road, in the given lane.
+      const sitting = (lane: number, id = 0, y = 100): WalkItem => ({
+        ...atPack("squirrel", id, lane),
+        y,
+      });
+      const walkFor = (
+        dogs: PackDogs,
+        items: WalkItem[],
+        modifiers: Walk["run"]["modifiers"] = [],
+      ): Walk => {
+        const walk = walkWith(dogs, items);
+        return { ...walk, run: { ...walk.run, modifiers } };
+      };
+
+      it("leans for the tell, then pulls the pack a lane toward it, once", () => {
+        const walk = walkFor(["koda"], [sitting(0)]);
+        const leaning = after(walk, 0.5);
+        expect(leaning.events[0]?.tells).toEqual([{ direction: -1, dog: "koda" }]);
+        expect(chasePose(leaning.walk.road.chase, "koda")).toEqual({ direction: -1, tag: "tell" });
+        expect(leaning.walk.road.control.target).toBe(2);
+        const chased = after(walk, 3);
+        expect(chased.walk.road.control.target).toBe(1);
+        expect(chased.events.flatMap((event) => event.pulled)).toEqual([
+          { direction: -1, dog: "koda", moved: true },
+        ]);
+        expect(isSteeringLocked(after(walk, 1.5).walk.road.control)).toBe(true);
+      });
+
+      it("pulls once for each squirrel, by the pack's first chaser", () => {
+        const walk = walkFor(["duchess", "koda", "zippy"], [sitting(0, 0), sitting(4, 1, 60)]);
+        const pulls = after(walk, 4).events.flatMap((event) => event.pulled);
+        expect(pulls.map(({ dog }) => dog)).toEqual(["koda", "koda"]);
+        expect(pulls.map(({ direction }) => direction)).toEqual([-1, 1]);
+      });
+
+      it("does not pull with Good leash, with no chaser, or toward a squirrel in the pack's lane", () => {
+        expect(after(walkFor(["koda"], [sitting(0)], [leash]), 3).walk.road.control.target).toBe(2);
+        expect(after(walkFor(["duchess"], [sitting(0)]), 3).walk.road.control.target).toBe(2);
+        const ahead = after(walkFor(["koda"], [sitting(2)]), 1.5);
+        expect(ahead.events.flatMap((event) => [...event.tells, ...event.pulled])).toEqual([]);
+      });
+
+      it("ignores a squirrel the pack has passed", () => {
+        const passed = walkFor(["koda"], [sitting(0, 0, 600)]);
+        expect(after(passed, 1.5).events.flatMap((event) => event.tells)).toEqual([]);
+      });
+
+      it("chases the same way on a replay of the same walk", () => {
+        const walk = walkFor(["koda"], [sitting(0, 0), sitting(3, 1, 40)]);
+        expect(after(walk, 5)).toEqual(after(walk, 5));
+      });
     });
   });
 

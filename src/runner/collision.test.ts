@@ -6,8 +6,9 @@ import type { RoadItem } from "./roadItems";
 type Kind = "obstacle" | "tip";
 
 const rules = {
+  graced: (item: RoadItem<Kind>) => item.kind === "obstacle",
   invulnerabilitySeconds: 1,
-  startsInvulnerability: (item: RoadItem<Kind>) => item.kind === "obstacle",
+  startsInvulnerability: () => true,
 };
 const still = { bottom: 560, lanes: [2], top: 520 };
 const midMove = { ...still, lanes: [2, 3] };
@@ -106,6 +107,39 @@ describe("collideWithPack", () => {
     expect(collideWithPack(rules, still, during, [obstacle]).hits).toEqual([]);
     const after = tickInvulnerability(0.1, during);
     expect(collideWithPack(rules, still, after, [obstacle]).hits).toEqual([obstacle]);
+  });
+
+  it("opens no window for a scenery hit, so the next obstacle is hit too", () => {
+    const scenery = item(1, "obstacle", 2, 530);
+    const upper = item(2, "obstacle", 3, 500);
+    const asked: number[] = [];
+    const sceneryRules = {
+      ...rules,
+      startsInvulnerability: ({ id }: RoadItem<Kind>) => {
+        asked.push(id);
+        return id !== scenery.id;
+      },
+    };
+    expect(collideWithPack(sceneryRules, midMove, 0, [upper, scenery])).toEqual({
+      hits: [scenery, upper],
+      invulnerableSeconds: 1,
+      remaining: [],
+    });
+    expect(asked).toEqual([1, 2]);
+    expect(collideWithPack(sceneryRules, still, 0, [scenery]).invulnerableSeconds).toBe(0);
+  });
+
+  it("asks nothing of an obstacle the window ignores", () => {
+    const asked: number[] = [];
+    const asking = {
+      ...rules,
+      startsInvulnerability: ({ id }: RoadItem<Kind>) => {
+        asked.push(id);
+        return true;
+      },
+    };
+    collideWithPack(asking, still, 0.4, [item(1, "obstacle", 2, 530)]);
+    expect(asked).toEqual([]);
   });
 
   it("hits every touching obstacle when the window is zero", () => {

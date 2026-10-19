@@ -127,11 +127,29 @@ describe("applyInstantEncounter", () => {
       "koda",
     ]);
     expect(both.treatsDelta).toBe(2);
-    expect(both.quips).toEqual([]);
     const full = applyInstantEncounter(data, () => 0, { ...state, treats: 3 }, "biscuitNeighbour", [
       "koda",
     ]);
     expect(full.treatsDelta).toBe(0);
+  });
+
+  it("has each owner whose dog the neighbour treated say a happier line, with no hearts moved", () => {
+    const state = testState({ duchess: 5, koda: 5 }, { treats: 0 });
+    const one = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", ["koda"]);
+    expect(one.heartChanges).toEqual([]);
+    expect(one.quips).toEqual([{ dog: "koda", moment: "happier" }]);
+    const both = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", [
+      "duchess",
+      "koda",
+    ]);
+    expect(both.quips).toEqual([
+      { dog: "duchess", moment: "happier" },
+      { dog: "koda", moment: "happier" },
+    ]);
+    const full = applyInstantEncounter(data, () => 0, { ...state, treats: 3 }, "biscuitNeighbour", [
+      "koda",
+    ]);
+    expect(full.quips).toEqual([]);
   });
 
   it("refuses an encounter that opens a card, and an ended run", () => {

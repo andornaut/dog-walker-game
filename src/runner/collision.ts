@@ -7,9 +7,11 @@ export interface PackFootprint {
   top: number;
 }
 
-// startsInvulnerability picks the items, such as obstacles, whose hit opens the window
-// in which they are ignored. Other items, such as pickups, are always collected.
+// graced picks the items, such as obstacles, ignored while the window is open; other items,
+// such as pickups, are always collected. startsInvulnerability is asked once for each graced
+// item hit, in hit order, whether its hit opens the window: a hit that is only scenery does not.
 export interface CollisionRules<Item extends RoadItem> {
+  graced: (item: Item) => boolean;
   invulnerabilitySeconds: number;
   startsInvulnerability: (item: Item) => boolean;
 }
@@ -41,11 +43,13 @@ export function collideWithPack<Item extends RoadItem>(
   const hits: Item[] = [];
   let windowSeconds = invulnerableSeconds;
   for (const item of touching) {
-    if (rules.startsInvulnerability(item)) {
+    if (rules.graced(item)) {
       if (windowSeconds > 0) {
         continue;
       }
-      windowSeconds = rules.invulnerabilitySeconds;
+      if (rules.startsInvulnerability(item)) {
+        windowSeconds = rules.invulnerabilitySeconds;
+      }
     }
     hits.push(item);
   }

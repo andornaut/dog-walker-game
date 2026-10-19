@@ -1,4 +1,11 @@
-import type { EncounterId, ForcedStopId, GameData, MinorObstacleId, ZoneId } from "../data/types";
+import type {
+  DogId,
+  EncounterId,
+  ForcedStopId,
+  GameData,
+  MinorObstacleId,
+  ZoneId,
+} from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countBump, countDebuffZones } from "../rules/achievements";
 import type { MoneyChange } from "../rules/causes";
@@ -497,7 +504,8 @@ export function collect(
 // moves the pack, then collides: pickups are collected into the run, minor obstacles drop
 // tips and lock lane input, obstacles (outside the grace window) and lucky encounters become
 // cards for the dogs they affect or, for an instant lucky find, apply at once, and a forced
-// stop that reaches the pack always becomes a card. A minor bump or an obstacle encounter
+// stop that reaches the pack always becomes a card. An obstacle that opens no card is
+// scenery: it is removed, and nothing else happens. A minor bump or an obstacle encounter
 // starts a hit stop, and the steps it lasts hold everything still. Does nothing unless
 // walking.
 export function stepWalk(
@@ -575,10 +583,33 @@ export function stepWalk(
   const footprint: PackFootprint = { ...geometry.packBand, lanes };
   // A mover is only a cue until it moves, and cannot be hit.
   const cues = items.filter((item) => isWarning(geometry.laneCount, item));
+  // An encounter's dogs are drawn once, as it is hit.
+  const drawn = new Map<number, DogId[]>();
+  const affectedBy = (item: WalkItem, encounter: EncounterId): DogId[] => {
+    const affected = drawn.get(item.id) ?? affectedDogs(data, random, run, encounter);
+    drawn.set(item.id, affected);
+    return affected;
+  };
+  const opens = (item: WalkItem, encounter: EncounterId) =>
+    opensCard(data, affectedBy(item, encounter), run, encounter);
+  // A hit that opens no card is scenery: it counts no bump and starts no grace window.
+  const startsGrace = (item: WalkItem) => {
+    const { kind } = item;
+    if (
+      kind === "tip" ||
+      kind === "treat" ||
+      isMinorObstacle(data, kind) ||
+      isMoverObstacle(kind)
+    ) {
+      return true;
+    }
+    return opens(item, kind);
+  };
   const { hits, invulnerableSeconds, remaining } = collideWithPack(
     {
+      graced: (item: WalkItem) => blocksLane(data, item.kind),
       invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
-      startsInvulnerability: (item: WalkItem) => blocksLane(data, item.kind),
+      startsInvulnerability: startsGrace,
     },
     footprint,
     tickInvulnerability(stepSeconds, road.invulnerableSeconds),
@@ -611,12 +642,12 @@ export function stepWalk(
       control = lockSteering(read(data.tuning, "seconds", "minorStumble"), control);
       bumps.push({ change: bump.change, item });
     } else {
+      if (!opens(item, kind)) {
+        continue;
+      }
+      const affected = affectedBy(item, kind);
       if (data.encounters[kind].kind === "obstacle") {
         nextRun = countBump(nextRun);
-      }
-      const affected = affectedDogs(data, random, nextRun, kind);
-      if (!opensCard(data, affected, nextRun, kind)) {
-        continue;
       }
       if (data.encounters[kind].resolution.kind === "instant") {
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);

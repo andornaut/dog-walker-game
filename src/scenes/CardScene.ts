@@ -173,8 +173,6 @@ export class CardScene extends Scene {
         this.choose(number - 1);
       }
     });
-    // Tapping and holding a card to enlarge it, with the modifiers behind its numbers, is
-    // still to come; a tap chooses.
   }
 
   private subtitle(view: CardView): string {

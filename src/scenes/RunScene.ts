@@ -16,6 +16,7 @@ import {
   WARNING_KEY,
   WARNING_TAG,
 } from "../assets/spriteKeys";
+import { hitCue } from "../audio/sound";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId, EncounterId, HintTrigger, Zone } from "../data/types";
@@ -130,6 +131,12 @@ import {
   zoneLength,
 } from "../runner/walk";
 import { walkerFootY, walkGeometry, walkProjection } from "../runner/walkGeometry";
+import {
+  type AchievementPreview,
+  NOTHING_PREVIEWED,
+  previewAchievements,
+} from "../save/achievementPreview";
+import type { RunResult } from "../save/checkpoint";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { packDogs } from "../state/pack";
 import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
@@ -143,6 +150,7 @@ import { addPixelText } from "./pixelText";
 import {
   checkpointRun,
   currentSettings,
+  earnedIfBanked,
   finishRun,
   isMuted,
   markHintShown,
@@ -194,6 +202,8 @@ export interface QuipBubble {
 export const CHANGE_LABELS_EVENT = "change-labels";
 export const HINT_EVENT = "hint";
 export const QUIPS_EVENT = "quips";
+// AchievementId[] when the walk so far has earned badges, for a toast.
+export const ACHIEVEMENTS_EVENT = "achievements";
 
 // The simulation steps at a fixed rate, so a seed and an input log replay a run exactly.
 const STEP_MS = 1000 / 60;
@@ -282,6 +292,7 @@ const PLACEHOLDERS: readonly [string, number, number][] = [
 // steps at a fixed rate and stops while a card or the pause menu is up.
 export class RunScene extends Scene {
   private accumulatorMs = 0;
+  private achievements: AchievementPreview = NOTHING_PREVIEWED;
   private backdrop: GameObjects.Image | undefined;
   private banner: GameObjects.Container | undefined;
   private cardQueue: CardSource[] = [];
@@ -409,6 +420,7 @@ export class RunScene extends Scene {
 
   private resetState(): void {
     this.accumulatorMs = 0;
+    this.achievements = NOTHING_PREVIEWED;
     this.cardQueue = [];
     this.cardView = undefined;
     this.changes = [];
@@ -729,7 +741,7 @@ export class RunScene extends Scene {
     const pulls = stepPulls(gameData, geometry, random.pulls, STEP_MS / 1000, this.pulls, walk);
     this.reactToPulls(pulls);
     // A chaser after a squirrel barks and re-anchors a drag as a dog's own pull does.
-    const chased = stepChase(gameData, LANE_COUNT, STEP_MS / 1000, pulls.walk);
+    const chased = stepChase(gameData, geometry, STEP_MS / 1000, pulls.walk);
     this.reactToPulls({ ...chased, pulls: this.pulls });
     walk = chased.walk;
     const step = stepWalk(gameData, this.geometry(walk.run), random.rolls, STEP_MS / 1000, walk);
@@ -851,7 +863,7 @@ export class RunScene extends Scene {
       this.hint({ kind: "luckyFind" });
     }
     for (const hit of step.encounterHits) {
-      sound.play("bump");
+      sound.play(hitCue(hit.encounter));
       if (hit.encounter === "puddle") {
         playEffect(this, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
       }
@@ -935,6 +947,17 @@ export class RunScene extends Scene {
     });
   }
 
+  // Badges the walk so far would earn on heading home toast in the HUD; nothing is awarded
+  // until the walk is banked.
+  private previewAchievements(run: RunState): void {
+    const earned = (result: RunResult) => earnedIfBanked(this, result);
+    const preview = previewAchievements(gameData, earned, this.achievements, run);
+    this.achievements = preview.preview;
+    if (preview.earned.length > 0) {
+      this.events.emit(ACHIEVEMENTS_EVENT, preview.earned);
+    }
+  }
+
   // Opens the next queued card, or ends the zone, or keeps walking.
   private continueWalk(): void {
     const walk = this.walk;
@@ -945,6 +968,7 @@ export class RunScene extends Scene {
       this.endWalk();
       return;
     }
+    this.previewAchievements(walk.run);
     const source = this.cardQueue.shift();
     if (source !== undefined) {
       this.showCard(source);

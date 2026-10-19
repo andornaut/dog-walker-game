@@ -135,6 +135,13 @@ export function checkpointRun(scene: Scene, slice: Checkpoint): Promise<void> {
   return session(scene).checkpointRun(slice);
 }
 
+// What banking result now would newly earn, for a mid-run toast: nothing is written, and
+// nothing is earned without an opened profile.
+export function earnedIfBanked(scene: Scene, result: RunResult): AchievementId[] {
+  const opened = scene.registry.get(SESSION_KEY) as ProfileSession | undefined;
+  return opened?.earnedIfBanked(result) ?? [];
+}
+
 // At run end, before EndScene opens. changes is every change the run made, for the end
 // screen's earnings breakdown. The save in memory is updated before this returns.
 export function finishRun(

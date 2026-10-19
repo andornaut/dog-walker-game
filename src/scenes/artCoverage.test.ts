@@ -17,7 +17,7 @@ import {
   kebabCase,
   ownerFaceKey,
 } from "../assets/spriteKeys";
-import { MUSIC_KEY, SOUND_KEYS } from "../audio/sound";
+import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type {
   DebuffId,
@@ -284,5 +284,11 @@ describe("sound art", () => {
     expect(sounds.get(MUSIC_KEY)?.loop).toBe(true);
   });
 
-  it.todo("plays sfx-hit-<encounter> for every obstacle hit, sfx-badge and sfx-new-best as cues");
+  it("has its own hit sound for every obstacle encounter", () => {
+    const obstacles = (Object.keys(gameData.encounters) as EncounterId[]).filter(
+      (id) => gameData.encounters[id].kind === "obstacle",
+    );
+    const missing = obstacles.filter((id) => !sounds.has(soundKeysOf(hitCue(id))[0] ?? ""));
+    expect(missing).toEqual([]);
+  });
 });

@@ -1,12 +1,19 @@
 // Game events, the manifest sound keys they play, and the mixing rules. No Phaser here: the
 // soundboard in src/scenes/ applies these to the sound manager.
 
+import { kebabCase } from "../assets/spriteKeys";
+import type { EncounterId } from "../data/types";
 import { assertNever } from "../rules/assertNever";
 
-export type SoundCue =
+export type BaseCue =
   "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
+// An encounter's hit, played with its own sound.
+export type HitCue = `hit:${EncounterId}`;
+export type SoundCue = BaseCue | HitCue;
 
-export const SOUND_KEYS: Readonly<Record<SoundCue, string>> = {
+const HIT_PREFIX = "hit:";
+
+export const SOUND_KEYS: Readonly<Record<BaseCue, string>> = {
   badge: "sfx-badge",
   bark: "sfx-bark",
   bump: "sfx-bump",
@@ -16,6 +23,26 @@ export const SOUND_KEYS: Readonly<Record<SoundCue, string>> = {
   tip: "sfx-tip",
   treat: "sfx-treat",
 };
+
+export function hitCue(encounter: EncounterId): HitCue {
+  return `${HIT_PREFIX}${encounter}`;
+}
+
+function isHitCue(cue: SoundCue): cue is HitCue {
+  return cue.startsWith(HIT_PREFIX);
+}
+
+// The keys a cue may play, in preference order: an encounter hit's own sound, then the bump.
+export function soundKeysOf(cue: SoundCue): readonly string[] {
+  return isHitCue(cue)
+    ? [`sfx-hit-${kebabCase(cue.slice(HIT_PREFIX.length))}`, SOUND_KEYS.bump]
+    : [SOUND_KEYS[cue]];
+}
+
+// The first of the cue's keys that loaded, or undefined with none.
+export function soundKeyFor(isLoaded: (key: string) => boolean, cue: SoundCue): string | undefined {
+  return soundKeysOf(cue).find(isLoaded);
+}
 
 export const MUSIC_KEY = "music-walk";
 

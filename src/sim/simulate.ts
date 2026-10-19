@@ -176,7 +176,8 @@ function playCard(
 }
 
 // The pack meets an encounter: nothing happens unless it affects a dog, and an instant lucky
-// find applies at once instead of opening a card.
+// find applies at once instead of opening a card. Returns false for a meeting that was only
+// scenery.
 function meet(
   data: SimData,
   random: Random,
@@ -184,18 +185,22 @@ function meet(
   session: Session,
   from: CardFrom,
   encounter: EncounterId,
-): void {
+): boolean {
   const affected = affectedDogs(data, random, session.run, encounter);
   if (!opensCard(data, affected, session.run, encounter)) {
-    return;
+    return false;
   }
   if (data.encounters[encounter].resolution.kind === "instant") {
     const outcome = applyInstantEncounter(data, random, session.run, encounter, affected);
     recordFirings(session, session.run, outcome);
     session.run = outcome.state;
-    return;
+    return true;
+  }
+  if (from === "obstacle") {
+    session.run = countBump(session.run);
   }
   playCard(data, random, config, session, from, { affected, encounter, kind: "encounter" });
+  return true;
 }
 
 function giveTreats(data: SimData, session: Session): void {
@@ -248,10 +253,12 @@ function playZone(
       if (chance(random, config.luckyRate)) {
         meet(data, random, config, session, "lucky", event.item);
       }
-    } else if (event.distance >= graceUntil && chance(random, config.hitRate)) {
+    } else if (
+      event.distance >= graceUntil &&
+      chance(random, config.hitRate) &&
+      meet(data, random, config, session, "obstacle", event.item)
+    ) {
       graceUntil = event.distance + graceDistance;
-      session.run = countBump(session.run);
-      meet(data, random, config, session, "obstacle", event.item);
     }
     if (hasEnded(session)) {
       return;

@@ -5,7 +5,7 @@ import { statusIconKey } from "../assets/iconKeys";
 import { dogFaceKey, doghouseTag, ownerFaceKey, zoneIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { HintId } from "../data/types";
+import type { AchievementId, HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
 import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
 import { stripItems, stripTapAllowed } from "../hud/stateStrip";
@@ -28,12 +28,14 @@ import { faceMood } from "../rules/treats";
 import { type Cents, read } from "../rules/units";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
+import { AchievementToasts } from "./achievementToast";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
 import { isMuted, setMuted } from "./profileStore";
 import {
+  ACHIEVEMENTS_EVENT,
   CHANGE_LABELS_EVENT,
   HINT_EVENT,
   type QuipBubble,
@@ -145,6 +147,9 @@ export class HudScene extends Scene {
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
     const onHint = (hint: { id: HintId; text: string }) => this.queueHint(hint);
     const onQuips = (quips: QuipBubble[]) => quips.forEach((quip) => this.sayQuip(quip));
+    const toasts = new AchievementToasts(this, () => run.reducedMotion());
+    const onAchievements = (ids: AchievementId[]) => toasts.show(ids);
+    run.events.on(ACHIEVEMENTS_EVENT, onAchievements);
     run.events.on(CHANGE_LABELS_EVENT, onLabels);
     run.events.on(HINT_EVENT, onHint);
     run.events.on(QUIPS_EVENT, onQuips);
@@ -152,6 +157,7 @@ export class HudScene extends Scene {
       run.events.off(CHANGE_LABELS_EVENT, onLabels);
       run.events.off(HINT_EVENT, onHint);
       run.events.off(QUIPS_EVENT, onQuips);
+      run.events.off(ACHIEVEMENTS_EVENT, onAchievements);
     });
 
     // A button acts on the press, as the walk's gestures never see it.

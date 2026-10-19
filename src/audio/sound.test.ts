@@ -6,6 +6,7 @@ import {
   CARD_OPEN_MUSIC_DUCK,
   clampVolume,
   effectiveVolumes,
+  hitCue,
   INITIAL_MIX,
   MAX_PLAYS_PER_WINDOW,
   type Mix,
@@ -17,6 +18,8 @@ import {
   PLAY_WINDOW_MS,
   type RecentPlays,
   SOUND_KEYS,
+  soundKeyFor,
+  soundKeysOf,
   startMusic,
   stopMusic,
 } from "./sound";
@@ -46,6 +49,23 @@ describe("SOUND_KEYS", () => {
       treat: "sfx-treat",
     });
     expect(MUSIC_KEY).toBe("music-walk");
+  });
+});
+
+describe("soundKeysOf", () => {
+  it("plays an encounter hit's own sound, falling back to the bump", () => {
+    expect(soundKeysOf(hitCue("otherDog"))).toEqual(["sfx-hit-other-dog", "sfx-bump"]);
+    expect(soundKeysOf(hitCue("skunk"))).toEqual(["sfx-hit-skunk", "sfx-bump"]);
+    expect(soundKeysOf("badge")).toEqual(["sfx-badge"]);
+  });
+
+  it("picks the first key that loaded, or none", () => {
+    const loaded = (keys: string[]) => (key: string) => keys.includes(key);
+    const hit = hitCue("puddle");
+    expect(soundKeyFor(loaded(["sfx-hit-puddle", "sfx-bump"]), hit)).toBe("sfx-hit-puddle");
+    expect(soundKeyFor(loaded(["sfx-bump"]), hit)).toBe("sfx-bump");
+    expect(soundKeyFor(loaded([]), hit)).toBeUndefined();
+    expect(soundKeyFor(loaded([]), "badge")).toBeUndefined();
   });
 });
 

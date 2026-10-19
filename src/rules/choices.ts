@@ -370,11 +370,23 @@ export function applyInstantEncounter(
     throw new Error("The run has ended");
   }
   const affected = packDogs(state).filter((dog) => caught.includes(dog));
-  return outcomeOf(
+  const outcome = outcomeOf(
     data,
     { affected, random, source: { encounter, kind: "instant" } },
     resolution.effects,
     state,
     undefined,
   );
+  if (outcome.treatsDelta <= 0) {
+    return outcome;
+  }
+  // Treats move no meter, so the owners who gained them say a happier line for them.
+  const quipping = outcome.quips.map(({ dog }) => dog);
+  const gained = packDogs(outcome.state).filter(
+    (dog) => affected.includes(dog) && !quipping.includes(dog),
+  );
+  return {
+    ...outcome,
+    quips: [...outcome.quips, ...gained.map((dog): QuipCue => ({ dog, moment: "happier" }))],
+  };
 }

@@ -1,6 +1,7 @@
 import type { AchievementId, HintId } from "../data/types";
 import { type AchievementData, newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
+import { earnedIfBanked } from "./achievementPreview";
 import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
 import {
   bankCheckpoint,
@@ -139,6 +140,11 @@ export class ProfileSession {
       return this.writes;
     }
     return this.update((save) => ({ ...save, shownHints: [...save.shownHints, hint] }));
+  }
+
+  // What banking result now would newly earn, for a mid-run preview; nothing is written.
+  earnedIfBanked(result: RunResult): AchievementId[] {
+    return earnedIfBanked(this.awardContext(), this.document, result);
   }
 
   checkpointRun(slice: Checkpoint): Promise<void> {
