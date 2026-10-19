@@ -276,7 +276,8 @@ export function minorObstacleWeights(
   return positiveWeights(currentZone(data, run).weights.minorObstacles);
 }
 
-// Every zone is the distance the base speed covers in zoneAtBaseSpeed, before upgrades.
+// Every zone is the distance the base speed covers in zoneAtBaseSpeed, before modifiers such as
+// an upgrade or the walker's pace.
 export function zoneLength(data: Pick<GameData, "tuning">, run: RunState): Pixels {
   const base =
     read(data.tuning, "pixels", "roadScrollSpeed") *

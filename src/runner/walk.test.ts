@@ -879,6 +879,19 @@ describe("walkScrollSpeed", () => {
       walkScrollSpeed(data, newRun(data, 1, loadout)) * factor,
     );
   });
+
+  it("takes the same time over a zone with every walker, a faster one covering more road", () => {
+    const zoneSeconds = (walker: WalkerId) => {
+      const run = realRun(REAL, walker);
+      return zoneLength(REAL, run) / walkScrollSpeed(REAL, run);
+    };
+    const walkers = Object.keys(WALKERS) as WalkerId[];
+    for (const walker of walkers) {
+      expect(zoneSeconds(walker), walker).toBeCloseTo(zoneSeconds(DEFAULT_WALKER), 9);
+    }
+    const lengths = new Set(walkers.map((walker) => zoneLength(REAL, realRun(REAL, walker))));
+    expect(lengths.size).toBeGreaterThan(1);
+  });
 });
 
 describe("finishZone", () => {

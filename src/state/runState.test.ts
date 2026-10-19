@@ -41,11 +41,13 @@ describe("newRun", () => {
   it("applies the walker's pace and style, then the gear, for the whole run", () => {
     const state = newRun(data, 3, { dogs: ["koda"], gear: "fannyPack", walker: "ben" });
     expect(state.walker).toBe("ben");
-    expect(state.modifiers.map(({ by, source }) => [by, source])).toEqual([
-      ["slowWalkerSpeed", { kind: "walker", walker: "ben" }],
-      ["slowWalkerFees", { kind: "walker", walker: "ben" }],
-      ["hustlerTip", { kind: "walker", walker: "ben" }],
-      ["fannyPackStart", { gear: "fannyPack", kind: "gear" }],
+    const ben = { kind: "walker", walker: "ben" };
+    expect(state.modifiers.map(({ by, source, stat }) => [stat, by, source])).toEqual([
+      ["scrollSpeed", "slowWalkerSpeed", ben],
+      ["zoneLength", "slowWalkerSpeed", ben],
+      ["fees", "slowWalkerFees", ben],
+      ["tipValue", "hustlerTip", ben],
+      ["startMoney", "fannyPackStart", { gear: "fannyPack", kind: "gear" }],
     ]);
     expect(state.modifiers.every(({ untilZone }) => untilZone === undefined)).toBe(true);
   });

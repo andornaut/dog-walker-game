@@ -1,11 +1,14 @@
 import type { Walker, WalkerTrait } from "./types";
 
-// A walker's pace is the difficulty: a slow walker's road scrolls slower and pays lower fees,
-// a fast walker's faster with higher fees. The art is icon-pace-<id>.
+// A walker's pace is the difficulty: every zone takes the same time with any walker, so the
+// speed factor scales both the road's speed and the zone's length. A fast walker's road
+// passes faster, with less time to react, and pays higher fees; a slow walker's is the
+// reverse. The art is icon-pace-<id>.
 export const WALKER_PACES = {
   fast: {
     effects: [
       { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "scrollSpeed" },
+      { by: "fastWalkerSpeed", kind: "modifier", operation: "multiply", stat: "zoneLength" },
       { by: "fastWalkerFees", kind: "modifier", operation: "multiply", stat: "fees" },
     ],
     name: "Fast",
@@ -13,6 +16,7 @@ export const WALKER_PACES = {
   slow: {
     effects: [
       { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "scrollSpeed" },
+      { by: "slowWalkerSpeed", kind: "modifier", operation: "multiply", stat: "zoneLength" },
       { by: "slowWalkerFees", kind: "modifier", operation: "multiply", stat: "fees" },
     ],
     name: "Slow",

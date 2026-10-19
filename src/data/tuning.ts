@@ -101,7 +101,7 @@ export const TUNING = {
     crowdPleaserStrangerWeight: 2,
     // A cyclist rides down its lane this much faster than the road scrolls; above 1.
     cyclistSpeedMultiplier: 1.6,
-    // A fast walker's fees and road speed.
+    // A fast walker's fees, and the factor on both its road speed and zone length.
     fastWalkerFees: 1.1,
     fastWalkerSpeed: 1.1,
     goodLeashSquirrelPull: 0,
@@ -122,7 +122,7 @@ export const TUNING = {
     shortcutZoneLength: 0.75,
     // How much faster the pack changes lanes while a sled dog walks.
     sledDogLaneSpeed: 1.15,
-    // A slow walker's fees and road speed.
+    // A slow walker's fees, and the factor on both its road speed and zone length.
     slowWalkerFees: 0.9,
     slowWalkerSpeed: 0.9,
     stinkyTip: 0.5,
