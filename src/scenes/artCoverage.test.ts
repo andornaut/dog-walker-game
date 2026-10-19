@@ -243,6 +243,10 @@ describe("icon art", () => {
   it("tags ui-fired-plate with every owner temperament", () => {
     expect(missingTags("ui-fired-plate", TEMPERAMENTS.map(kebabCase))).toEqual([]);
   });
+
+  it("tags ui-fires, the card marker for an option that fires an owner, static and pulse", () => {
+    expect(missingTags("ui-fires", ["static", "pulse"])).toEqual([]);
+  });
 });
 
 describe("card art", () => {

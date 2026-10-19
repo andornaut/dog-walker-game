@@ -60,6 +60,10 @@ const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
 // Holding a card this long enlarges it, with the changes behind its numbers.
 const HOLD_MS = 400;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
+// Marks an option that would fire an owner, over the plaque's left rivet: card-frame
+// pixels, and card-frame-large pixels where it is drawn at 2x.
+const FIRES_KEY = "ui-fires";
+const FIRES_AT = { large: { x: 8, y: 238 }, small: { x: 4, y: 119 } };
 
 interface Entry {
   choice: Choice;
@@ -321,8 +325,12 @@ export class CardScene extends Scene {
     } else {
       fillRect(g, PALETTE.plum, { ...badge, x: x + badge.x, y: y + badge.y });
     }
+    const marker =
+      option !== undefined && option.fires.length > 0
+        ? this.addFiresMarker(x + FIRES_AT.large.x, y + FIRES_AT.large.y, 2, false)
+        : undefined;
     this.centered(
-      x + badge.x + badge.width / 2,
+      this.plaqueCenter(x + badge.x, badge.width, marker),
       y + badge.y + 9,
       this.costText(entry),
       PALETTE.cream,
@@ -331,6 +339,27 @@ export class CardScene extends Scene {
       },
     );
     this.enlarged = this.children.list.slice(before);
+  }
+
+  // ui-fires over the plaque's left rivet, pulsing unless motion is reduced. Returns its
+  // right edge, or undefined while the art is missing, when the text flag stands alone.
+  private addFiresMarker(x: number, y: number, scale: number, grey: boolean): number | undefined {
+    if (!this.textures.exists(FIRES_KEY)) {
+      return undefined;
+    }
+    const still = grey || currentSettings(this).reducedMotion;
+    const frame = tagFrame(this, FIRES_KEY, "static");
+    const key = grey ? greyTextureKey(this, FIRES_KEY) : FIRES_KEY;
+    const marker = this.add.sprite(x, y, key, frame).setOrigin(0).setScale(scale);
+    if (!still) {
+      playTag(marker, FIRES_KEY, "pulse");
+    }
+    return x + marker.displayWidth;
+  }
+
+  // The plaque text's centre: the plaque's, or the part right of the fires marker.
+  private plaqueCenter(left: number, width: number, marker: number | undefined): number {
+    return marker === undefined ? left + width / 2 : (marker + left + width) / 2;
   }
 
   // A path card's plaque shows its zone's fee multiplier instead of a cost.
@@ -476,9 +505,13 @@ export class CardScene extends Scene {
     } else {
       fillRect(g, grey ? PALETTE.navy : PALETTE.plum, badge);
     }
+    const marker =
+      fires.length > 0
+        ? this.addFiresMarker(x + FIRES_AT.small.x, y + FIRES_AT.small.y, 1, grey)
+        : undefined;
     this.badges.push(
       this.centered(
-        badge.x + badge.width / 2,
+        this.plaqueCenter(badge.x, badge.width, marker),
         badge.y + 4,
         this.costText(entry),
         grey ? PALETTE.lightGrey : PALETTE.cream,
