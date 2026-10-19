@@ -1,20 +1,27 @@
-import { exceedsTapDistance } from "../input/gestures";
 import type { Point } from "../layout/rect";
+import { exceedsTapDistance } from "./gestures";
 
-// A press held this long without moving more than slopPx opens the item's detail card
-// instead of tapping it.
-export const HOLD = { holdMs: 400, slopPx: 10 } as const;
+// A press held holdMs without moving more than slopPx holds instead of tapping. A rule with
+// an infinite slopPx holds however far the press moves.
+export interface HoldRule {
+  readonly holdMs: number;
+  readonly slopPx: number;
+}
+
+// The home screen's dog and gear tiles: a hold opens the item's detail card.
+export const HOLD: HoldRule = { holdMs: 400, slopPx: 10 };
 
 // A finger on a holdable item. holding: still a candidate for a hold. held: the hold has
 // fired, so the release does nothing. moved: it left the slop, so it can only tap.
 export interface HoldPress {
+  readonly rule: HoldRule;
   readonly start: Point;
   readonly startedMs: number;
   readonly state: "held" | "holding" | "moved";
 }
 
-export function startHold(start: Point, startedMs: number): HoldPress {
-  return { start, startedMs, state: "holding" };
+export function startHold(rule: HoldRule, start: Point, startedMs: number): HoldPress {
+  return { rule, start, startedMs, state: "holding" };
 }
 
 // A press that moves past the slop stops being a hold.
@@ -22,12 +29,14 @@ export function moveHold(press: HoldPress, to: Point): HoldPress {
   if (press.state !== "holding") {
     return press;
   }
-  return exceedsTapDistance(HOLD.slopPx, press.start, to) ? { ...press, state: "moved" } : press;
+  return exceedsTapDistance(press.rule.slopPx, press.start, to)
+    ? { ...press, state: "moved" }
+    : press;
 }
 
-// Each frame: fire tells the caller to open the card, once, when the hold time is up.
+// Each frame: fire tells the caller to act on the hold, once, when the hold time is up.
 export function tickHold(press: HoldPress, nowMs: number): { fire: boolean; press: HoldPress } {
-  if (press.state === "holding" && nowMs - press.startedMs >= HOLD.holdMs) {
+  if (press.state === "holding" && nowMs - press.startedMs >= press.rule.holdMs) {
     return { fire: true, press: { ...press, state: "held" } };
   }
   return { fire: false, press };
@@ -42,7 +51,7 @@ export function releaseHold(press: HoldPress, nowMs: number): "hold" | "none" | 
     case "moved":
       return "tap";
     case "holding":
-      return nowMs - press.startedMs >= HOLD.holdMs ? "hold" : "tap";
+      return nowMs - press.startedMs >= press.rule.holdMs ? "hold" : "tap";
     default:
       return press.state satisfies never;
   }

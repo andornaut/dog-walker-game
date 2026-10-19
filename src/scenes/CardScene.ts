@@ -1,4 +1,4 @@
-import { type GameObjects, Scene, type Time } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { SKIP_CARD_ART } from "../assets/cardArt";
@@ -14,6 +14,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { DISABLED_COLORS } from "../home/selection";
 import { RUN_TEXT_FIELDS } from "../hud/runText";
+import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
 import { CARD_LAYOUT, cardRowSpec, largeCardRect } from "../layout/cardLayout";
@@ -34,12 +35,12 @@ import { fillLine } from "../text/lines";
 import { addDisplayText, hasDisplayFont } from "./displayText";
 import { addDim, drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
-import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, scalePixelText } from "./pixelText";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
+import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import { tagFrame } from "./uiKit";
 
 export interface CardSceneData {
@@ -59,8 +60,9 @@ const SELECTED_OUTLINE = 2;
 const COST_KEY = "card-cost";
 // A refused pick shakes its card and flashes its cost.
 const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
-// Holding a card this long enlarges it, with the changes behind its numbers.
-const HOLD_MS = 400;
+// Holding a card this long enlarges it, with the changes behind its numbers, however far
+// the finger moves.
+const CARD_HOLD: HoldRule = { holdMs: 400, slopPx: Number.POSITIVE_INFINITY };
 // A card's key number sits this far above its top, under the subtitle.
 const KEY_NUMBER_RISE = 8;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
@@ -100,10 +102,11 @@ export class CardScene extends Scene {
   private onChoose: (choice: Choice) => void = () => undefined;
   private badges: (GameObjects.BitmapText | undefined)[] = [];
   private enlarged: GameObjects.GameObject[] = [];
-  private holdTimer: Time.TimerEvent | undefined;
+  private hold: HoldPress | undefined;
   private outline: GameObjects.Graphics | undefined;
   private parts: GameObjects.GameObject[][] = [];
   private pressed: number | undefined;
+  private presses: TargetPressListener | undefined;
   private refusing = false;
   private view: CardView | undefined;
 
@@ -117,7 +120,7 @@ export class CardScene extends Scene {
     this.view = view;
     this.badges = [];
     this.enlarged = [];
-    this.holdTimer = undefined;
+    this.hold = undefined;
     this.parts = [];
     this.refusing = false;
     const { roadView: road } = screenLayout(SCREEN_CONFIG);
@@ -165,31 +168,24 @@ export class CardScene extends Scene {
     this.outline = this.add.graphics();
 
     // A tap picks a card; holding one enlarges it until the finger lifts, and picks nothing.
-    listenOnePress(this, {
-      down: (pointer) => {
-        const index = rectIndexAt(this.cardRects, pointer.x, pointer.y);
+    this.presses = listenTargetPress<number>(this, {
+      onDown: (pointer, index) => {
+        this.hold =
+          index === undefined
+            ? undefined
+            : startHold(CARD_HOLD, { x: pointer.x, y: pointer.y }, this.time.now);
+      },
+      onPressed: (index) => {
         this.pressed = index;
         this.drawOutline();
-        if (index !== undefined) {
-          this.holdTimer = this.time.delayedCall(HOLD_MS, () => this.enlarge(index));
-        }
-      },
-      up: (pointer, cancelled) => {
-        const index = rectIndexAt(this.cardRects, pointer.x, pointer.y);
-        const pressed = this.pressed;
-        this.pressed = undefined;
-        this.holdTimer?.remove();
-        this.holdTimer = undefined;
-        this.drawOutline();
-        if (this.enlarged.length > 0) {
+        if (index === undefined) {
+          this.hold = undefined;
           this.enlarged.forEach((part) => part.destroy());
           this.enlarged = [];
-          return;
-        }
-        if (!cancelled && index !== undefined && index === pressed) {
-          this.choose(index);
         }
       },
+      onTap: (index) => this.choose(index),
+      targetAt: (x, y) => rectIndexAt(this.cardRects, x, y),
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
@@ -197,6 +193,19 @@ export class CardScene extends Scene {
         this.choose(number - 1);
       }
     });
+  }
+
+  override update(): void {
+    if (this.hold === undefined) {
+      return;
+    }
+    const { fire, press } = tickHold(this.hold, this.time.now);
+    this.hold = press;
+    if (fire && this.pressed !== undefined) {
+      // The hold takes the press, so its release picks nothing.
+      this.presses?.cancel();
+      this.enlarge(this.pressed);
+    }
   }
 
   private subtitle(view: CardView): string {

@@ -3,7 +3,7 @@ import { type GameObjects, Scene } from "phaser";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { MenuText } from "../data/types";
-import { FEEDBACK, settleDelay } from "../home/feedback";
+import { FEEDBACK } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
@@ -34,6 +34,7 @@ import { addPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
+import { listenTargetPress } from "./targetPress";
 import {
   addCloseButton,
   addNineSlice,
@@ -63,6 +64,10 @@ type Row =
   | { icon: string; key: VolumeKey; kind: "slider"; label: SettingsWord };
 
 type Target = { kind: "close" } | { key: SwitchKey; kind: "switch" };
+
+function sameTarget(a: Target, b: Target): boolean {
+  return a.kind === "close" ? b.kind === "close" : b.kind === "switch" && a.key === b.key;
+}
 
 // Four rows, each its own tap target, and the close control.
 const ROWS: readonly Row[] = [
@@ -128,20 +133,31 @@ export class SettingsScene extends Scene {
     this.pressed = undefined;
     this.render();
 
-    let pressedAt = 0;
+    // The close control and the switch rows; a switch dips, then flips.
+    listenTargetPress<Target>(this, {
+      dipMs: (target) => (target.kind === "switch" ? FEEDBACK.pressDipMs : 0),
+      onPressed: (target) => {
+        this.pressed = target;
+        this.render();
+      },
+      onTap: (target) => {
+        if (target.kind === "close") {
+          this.close();
+        } else {
+          this.flip(target.key);
+        }
+      },
+      same: sameTarget,
+      targetAt: (x, y) => this.targetAt(x, y),
+    });
+    // The sliders, dragged from a press on their row; every press bursts where it lands.
     listenOnePress(this, {
       down: (pointer) => {
         const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), pointer.x, pointer.y));
-        if (row?.kind === "slider") {
-          if (!currentSettings(this).muted) {
-            this.dragging = row.key;
-            this.slideTo(pointer.x);
-            // The knob shows pressed while held.
-            this.render();
-          }
-        } else {
-          this.pressed = this.targetAt(pointer.x, pointer.y);
-          pressedAt = this.time.now;
+        if (row?.kind === "slider" && !currentSettings(this).muted) {
+          this.dragging = row.key;
+          this.slideTo(pointer.x);
+          // The knob shows pressed while held.
           this.render();
         }
         addTapBurst(this, pointer.x, pointer.y);
@@ -151,30 +167,16 @@ export class SettingsScene extends Scene {
           this.slideTo(pointer.x);
         }
       },
-      up: (pointer, cancelled) => {
-        if (this.dragging !== undefined) {
-          // A sample at the new level, so the player hears what they picked.
-          if (!cancelled && this.dragging === "sfxVolume") {
-            soundboardOf(this).play("tip");
-          }
-          this.dragging = undefined;
-          this.render();
+      up: (_, cancelled) => {
+        if (this.dragging === undefined) {
           return;
         }
-        const target = cancelled ? undefined : this.targetAt(pointer.x, pointer.y);
-        const pressed = this.pressed;
-        if (target?.kind === "close" && pressed?.kind === "close") {
-          this.close();
-        } else if (
-          target?.kind === "switch" &&
-          pressed?.kind === "switch" &&
-          target.key === pressed.key
-        ) {
-          this.flipAfter(target.key, settleDelay(this.time.now, pressedAt));
-        } else {
-          this.pressed = undefined;
-          this.render();
+        // A sample at the new level, so the player hears what they picked.
+        if (!cancelled && this.dragging === "sfxVolume") {
+          soundboardOf(this).play("tip");
         }
+        this.dragging = undefined;
+        this.render();
       },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
@@ -207,9 +209,7 @@ export class SettingsScene extends Scene {
     } else if (isConfirmKey(key)) {
       this.confirm(focusedRow);
     } else if (isMuteKey(key)) {
-      this.pressed = { key: "muted", kind: "switch" };
-      this.render();
-      this.flipAfter("muted", FEEDBACK.pressDipMs);
+      this.flipAfterDip("muted");
     }
   }
 
@@ -217,9 +217,7 @@ export class SettingsScene extends Scene {
   // focused.
   private confirm(focusedRow: Row | undefined): void {
     if (focusedRow?.kind === "switch") {
-      this.pressed = { key: focusedRow.key, kind: "switch" };
-      this.render();
-      this.flipAfter(focusedRow.key, FEEDBACK.pressDipMs);
+      this.flipAfterDip(focusedRow.key);
     } else if (focusedRow === undefined) {
       this.close();
     }
@@ -238,13 +236,17 @@ export class SettingsScene extends Scene {
     return row?.kind === "switch" ? { key: row.key, kind: "switch" } : undefined;
   }
 
-  // The pressed switch row stays dipped for delayMs, then flips.
-  private flipAfter(key: SwitchKey, delayMs: number): void {
-    this.time.delayedCall(delayMs, () => {
-      this.pressed = undefined;
-      const settings = currentSettings(this);
-      this.change({ ...settings, [key]: !settings[key] });
-    });
+  // A key presses the switch row: it dips, then flips.
+  private flipAfterDip(key: SwitchKey): void {
+    this.pressed = { key, kind: "switch" };
+    this.render();
+    this.time.delayedCall(FEEDBACK.pressDipMs, () => this.flip(key));
+  }
+
+  private flip(key: SwitchKey): void {
+    this.pressed = undefined;
+    const settings = currentSettings(this);
+    this.change({ ...settings, [key]: !settings[key] });
   }
 
   private slideTo(x: number): void {

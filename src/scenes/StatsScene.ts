@@ -4,7 +4,7 @@ import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badgesView";
-import { FEEDBACK, settleDelay } from "../home/feedback";
+import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
@@ -17,12 +17,12 @@ import { PHONE_EVENTS } from "../pwa";
 import { fillLine } from "../text/lines";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { addDim, fillRect } from "./draw";
-import { listenOnePress } from "./onePress";
 import { closeOverlay, onWindowEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
+import { listenTargetPress } from "./targetPress";
 import {
   addCloseButton,
   addPanel,
@@ -40,6 +40,8 @@ export interface StatsSceneData {
 
 type Tab = StatsTab;
 type Target = "close" | { badge: number } | { tab: number };
+// A press while a badge's detail is open dismisses it, wherever it lands.
+type Press = Target | "dismiss";
 
 const TABS = STATS_TABS;
 const TAB_RECTS: readonly Rect[] = statsTabRects();
@@ -67,7 +69,6 @@ export class StatsScene extends Scene {
   private burst = false;
   private detail: number | undefined;
   private pressed: Target | undefined;
-  private pressedAt = 0;
   private resumeKey: SceneKey | undefined;
   private tab: Tab = "runs";
 
@@ -82,38 +83,30 @@ export class StatsScene extends Scene {
     this.tab = data?.tab ?? "runs";
     this.render();
 
-    listenOnePress(this, {
-      down: (pointer) => {
-        this.pressed = this.detail === undefined ? this.targetAt(pointer.x, pointer.y) : undefined;
-        this.pressedAt = this.time.now;
+    // A pressed tab dips, then opens. With a badge's detail open, a tap anywhere closes it.
+    listenTargetPress<Press>(this, {
+      dipMs: (target) => (typeof target === "object" && "tab" in target ? FEEDBACK.pressDipMs : 0),
+      onDown: (pointer) => addTapBurst(this, pointer.x, pointer.y),
+      onPressed: (target) => {
+        this.pressed = target === "dismiss" ? undefined : target;
         this.render();
-        addTapBurst(this, pointer.x, pointer.y);
       },
-      up: (pointer, cancelled) => {
-        if (cancelled) {
-          this.pressed = undefined;
-          this.render();
-          return;
-        }
-        const target = this.targetAt(pointer.x, pointer.y);
-        const pressed = this.pressed;
-        if (this.detail !== undefined) {
+      onTap: (target) => {
+        if (target === "dismiss") {
           this.detail = undefined;
-        } else if (target !== undefined && sameTarget(target, pressed)) {
-          if (target === "close") {
-            this.close();
-            return;
-          }
-          if ("tab" in target) {
-            this.openTab(target.tab, settleDelay(this.time.now, this.pressedAt));
-            return;
-          }
+        } else if (target === "close") {
+          this.close();
+          return;
+        } else if ("tab" in target) {
+          this.tab = TABS[target.tab] ?? this.tab;
+        } else {
           this.detail = target.badge;
           this.burst = true;
         }
-        this.pressed = undefined;
         this.render();
       },
+      same: sameTarget,
+      targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : "dismiss"),
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (this.detail !== undefined) {
@@ -131,9 +124,7 @@ export class StatsScene extends Scene {
           Math.max(0, index + (direction === "left" ? -1 : 1)),
         );
         if (next !== index) {
-          this.pressed = { tab: next };
-          this.render();
-          this.openTab(next, FEEDBACK.pressDipMs);
+          this.openTabAfterDip(next);
         }
       } else if (isPauseKey(event.key) || isConfirmKey(event.key)) {
         this.close();
@@ -154,9 +145,11 @@ export class StatsScene extends Scene {
     return badge === undefined ? undefined : { badge };
   }
 
-  // A pressed tab stays dipped for delayMs, then opens.
-  private openTab(index: number, delayMs: number): void {
-    this.time.delayedCall(delayMs, () => {
+  // A key presses the tab: it dips, then opens.
+  private openTabAfterDip(index: number): void {
+    this.pressed = { tab: index };
+    this.render();
+    this.time.delayedCall(FEEDBACK.pressDipMs, () => {
       this.pressed = undefined;
       this.tab = TABS[index] ?? this.tab;
       this.render();
@@ -372,6 +365,6 @@ export class StatsScene extends Scene {
   }
 }
 
-function sameTarget(a: Target, b: Target | undefined): boolean {
+function sameTarget(a: Press, b: Press | undefined): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
 }

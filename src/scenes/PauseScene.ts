@@ -18,13 +18,13 @@ import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { addDim, fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
-import { listenOnePress } from "./onePress";
 import { openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { SCENE_KEYS } from "./sceneKeys";
 import type { SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
+import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addPanel, type MenuButton, TEXT_SCALE } from "./uiKit";
 
 // menu is the pause menu; homeQuestion asks whether to head home, for the top bar's Home
@@ -111,20 +111,13 @@ export class PauseScene extends Scene {
 
     // A press counts where it began and ended on the same target, so the release that resumes
     // the walk is never the road's.
-    listenOnePress(this, {
-      down: (pointer) => {
-        this.pressed = rectIndexAt(layout.hits, pointer.x, pointer.y);
+    listenTargetPress<number>(this, {
+      onPressed: (target) => {
+        this.pressed = target;
         this.showPressed();
       },
-      up: (pointer, cancelled) => {
-        const target = rectIndexAt(layout.hits, pointer.x, pointer.y);
-        const pressed = this.pressed;
-        this.pressed = undefined;
-        this.showPressed();
-        if (!cancelled && target !== undefined && target === pressed) {
-          this.entries[target]?.press();
-        }
-      },
+      onTap: (target) => this.entries[target]?.press(),
+      targetAt: (x, y) => rectIndexAt(layout.hits, x, y),
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);

@@ -21,7 +21,6 @@ import {
   shakeOffset,
 } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
-import { type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../home/hold";
 import {
   buy,
   dogFeeText,
@@ -62,6 +61,7 @@ import { choiceFull, DISABLED_COLORS, type SelectLook } from "../home/selection"
 import type { StatsTab } from "../home/statsLayout";
 import { homeSticker, sameItem, type Sticker, type TileItem } from "../home/sticker";
 import { downTail } from "../hud/moments";
+import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -416,7 +416,7 @@ export class StartScene extends Scene {
         const kind = this.pressedTarget?.kind;
         this.hold =
           kind === "dog" || kind === "gear"
-            ? startHold({ x: pointer.x, y: pointer.y }, this.time.now)
+            ? startHold(HOLD, { x: pointer.x, y: pointer.y }, this.time.now)
             : undefined;
         this.press =
           this.pressedTarget === undefined

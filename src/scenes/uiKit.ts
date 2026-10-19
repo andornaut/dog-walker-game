@@ -13,10 +13,10 @@ import { type CloseControl, closeControl } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
 import { disabledTextureKey } from "./greyTextures";
-import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, setPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
+import { listenTargetPress } from "./targetPress";
 
 // Text is drawn at 2x so it reads on a phone; 1x is for incidental marks only.
 // Whether key's art is loaded with frames of this size, so art drawn for another layout is
@@ -220,20 +220,10 @@ export function addMenuButton(
 // A screen whose one control is button: it shows pressed while held, and a release over it
 // taps it.
 export function listenButtonTap(scene: Scene, button: MenuButton, onTap: () => void): void {
-  const { rect } = button;
-  let pressed = false;
-  listenOnePress(scene, {
-    down: (pointer) => {
-      pressed = containsPoint(rect, pointer.x, pointer.y);
-      button.setPressed(pressed);
-    },
-    up: (pointer, cancelled) => {
-      button.setPressed(false);
-      if (!cancelled && pressed && containsPoint(rect, pointer.x, pointer.y)) {
-        onTap();
-      }
-      pressed = false;
-    },
+  listenTargetPress<MenuButton>(scene, {
+    onPressed: (target) => button.setPressed(target !== undefined),
+    onTap,
+    targetAt: (x, y) => (containsPoint(button.rect, x, y) ? button : undefined),
   });
 }
 
