@@ -8,6 +8,9 @@ export type { Point } from "../layout/rect";
 
 const { height, width } = SCREEN_CONFIG;
 
+// The smallest tap target, in render pixels: at least 44 CSS px on a phone 360 CSS px wide.
+export const MIN_TAP_SIZE = 44;
+
 // The help screen's geometry at the render resolution. A text position is the top-left of
 // its first line.
 export const HELP_LAYOUT = {
@@ -16,7 +19,9 @@ export const HELP_LAYOUT = {
   buttonLip: 4,
   close: { height: 24, width: 34, x: 318, y: 8 },
   counter: { x: 12, y: 300 },
-  dots: { centerX: width / 2, hitHeight: 20, size: 8, spacing: 14, y: 562 },
+  // A tap target apart, so each dot's target is its own slot, ending where Back's and Next's
+  // targets start.
+  dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: 556 },
   heading: { x: 12, y: 15 },
   illustration: { height: 236, width: 344, x: 8, y: 48 },
   next: { height: 40, width: 110, x: 242, y: 584 },
@@ -25,6 +30,22 @@ export const HELP_LAYOUT = {
   topBar: screenLayout(SCREEN_CONFIG).topBar,
   topBarEdge: 2,
 } as const;
+
+// The art's rect grown about its centre to at least MIN_TAP_SIZE each way, then shifted back
+// onto the screen, so small art keeps a full-size target.
+export function tapRect(art: Rect): Rect {
+  const grow = (start: number, size: number, limit: number) => {
+    const grown = Math.max(size, MIN_TAP_SIZE);
+    const from = start - (grown - size) / 2;
+    return { from: Math.min(Math.max(0, from), limit - grown), grown };
+  };
+  const across = grow(art.x, art.width, width);
+  const down = grow(art.y, art.height, height);
+  return { height: down.grown, width: across.grown, x: across.from, y: down.from };
+}
+
+// The close X's tap target, larger than its art.
+export const CLOSE_HIT_RECT = tapRect(HELP_LAYOUT.close);
 
 // One dot per page, centred as a row.
 export function dotRects(pageCount: number): Rect[] {
@@ -38,28 +59,17 @@ export function dotRects(pageCount: number): Rect[] {
   }));
 }
 
-// Each dot's tap target is its whole slot in the row, taller than the dot itself.
-export function dotHitRect(dot: Rect): Rect {
-  const { hitHeight, size, spacing } = HELP_LAYOUT.dots;
-  return {
-    height: hitHeight,
-    width: spacing,
-    x: dot.x - (spacing - size) / 2,
-    y: dot.y - (hitHeight - size) / 2,
-  };
-}
-
 // The button or dot under a tap, if any.
 export function helpActionAt(pageCount: number, { x, y }: Point): HelpAction | undefined {
-  if (containsPoint(HELP_LAYOUT.close, x, y)) {
+  if (containsPoint(CLOSE_HIT_RECT, x, y)) {
     return { kind: "close" };
   }
-  if (containsPoint(HELP_LAYOUT.back, x, y)) {
+  if (containsPoint(tapRect(HELP_LAYOUT.back), x, y)) {
     return { kind: "previous" };
   }
-  if (containsPoint(HELP_LAYOUT.next, x, y)) {
+  if (containsPoint(tapRect(HELP_LAYOUT.next), x, y)) {
     return { kind: "advance" };
   }
-  const page = rectIndexAt(dotRects(pageCount).map(dotHitRect), x, y);
+  const page = rectIndexAt(dotRects(pageCount).map(tapRect), x, y);
   return page === undefined ? undefined : { kind: "goTo", page };
 }

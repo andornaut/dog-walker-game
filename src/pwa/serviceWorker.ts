@@ -10,6 +10,7 @@ import {
   strategyFor,
 } from "./cachePolicy";
 import type { PrecacheManifest } from "./precacheList";
+import type { SkipWaitingMessage } from "./updateReady";
 
 interface LifecycleEvent extends Event {
   waitUntil(promise: Promise<unknown>): void;
@@ -23,7 +24,9 @@ interface FetchRequestEvent extends LifecycleEvent {
 interface WorkerScope {
   addEventListener(type: "activate" | "install", listener: (event: LifecycleEvent) => void): void;
   addEventListener(type: "fetch", listener: (event: FetchRequestEvent) => void): void;
+  addEventListener(type: "message", listener: (event: MessageEvent) => void): void;
   readonly location: Location;
+  skipWaiting(): Promise<void>;
 }
 
 // Replaced with the precache manifest's JSON when the build writes sw.js.
@@ -79,10 +82,19 @@ const RESPONDERS: Record<
   "network-first": networkFirst,
 };
 
-// No skipWaiting: a new worker waits until every page the old one controls has closed, so a
-// running game never has its cache deleted or its code swapped. It takes over on the next launch.
+const SKIP_WAITING: SkipWaitingMessage = "skip-waiting";
+
+// No skipWaiting on install: a new worker waits until every page the old one controls has closed,
+// so a running game never has its cache deleted or its code swapped. It takes over on the next
+// launch, or when the player presses Reload on the home screen's update notice, which posts
+// SKIP_WAITING and reloads the page once this worker controls it.
 worker.addEventListener("install", (event) => event.waitUntil(precache()));
 worker.addEventListener("activate", (event) => event.waitUntil(deleteStaleCaches()));
+worker.addEventListener("message", (event) => {
+  if (event.data === SKIP_WAITING) {
+    void worker.skipWaiting();
+  }
+});
 
 worker.addEventListener("fetch", (event) => {
   const { request } = event;

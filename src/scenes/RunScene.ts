@@ -451,11 +451,14 @@ export class RunScene extends Scene {
         void checkpointRun(this, checkpointOf(gameData, walk.run));
       }
     };
+    const onSideways = () => this.openPause();
     window.addEventListener(PHONE_EVENTS.backPressed, onBack);
     window.addEventListener(PHONE_EVENTS.appHidden, onHidden);
+    window.addEventListener(PHONE_EVENTS.turnedSideways, onSideways);
     this.events.once("shutdown", () => {
       window.removeEventListener(PHONE_EVENTS.backPressed, onBack);
       window.removeEventListener(PHONE_EVENTS.appHidden, onHidden);
+      window.removeEventListener(PHONE_EVENTS.turnedSideways, onSideways);
       stopWakeLock();
     });
   }

@@ -66,9 +66,12 @@
 ## Phone
 
 - The canvas takes no browser gestures (`touch-action: none`).
-- Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game and every file in the art manifest. HTML and the art manifest are network-first; hashed assets are cache-first. A new version activates on the next launch.
+- Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game and every file in the art manifest. HTML and the art manifest are network-first; hashed assets are cache-first. A new version activates on the next launch, or sooner through the "Update ready" toast, shown on the home screen only, whose Reload posts `skip-waiting` and reloads on `controllerchange`.
 - Security headers: `src/headers/securityHeadersPlugin.ts` writes `_headers` at build time: nosniff, referrer and permissions policies, and a CSP per path (`/`, `/play/*`, `/data/*`, `/art/*`) allowing `'self'` plus hashes of each page's inline blocks. Google Fonts is allowed only on `/` and `/art/*`. `/sw.js` keeps the platform's `max-age=0, must-revalidate`.
-- Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, and `app-hidden` pauses and checkpoints. The run holds a screen wake lock, and the first gesture unlocks audio.
+- Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, `app-hidden` pauses and checkpoints, and `turned-sideways` pauses. The run holds a screen wake lock, and the first gesture unlocks audio.
+- Portrait only: the manifest locks `portrait`, and a phone on its side (coarse pointer, landscape, viewport at most 500 CSS px tall) gets a "Turn your phone upright" notice over the page.
+- Audio resumes from iOS's `interrupted` or `suspended` on each return to the foreground and each gesture (`touchend` on iOS), unless the settings mute it.
+- Help tap targets (close X, page dots, Back, Next) are at least 44×44 render px, larger than their art where needed.
 
 ## Dev tools
 

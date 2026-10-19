@@ -7,12 +7,13 @@ import { SCREEN_CONFIG } from "./data/screen";
 import { DEV_STATE_EVENT, type DevState } from "./dev/devOverlay";
 import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { pageRunSetup } from "./dev/pageRunSetup";
-import { setupPhoneApp } from "./pwa";
+import { setOnHomeScreen, setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
 import { DEV_OVERLAY_SCENE_KEY, DevOverlayScene } from "./scenes/DevOverlayScene";
 import { EndScene } from "./scenes/EndScene";
 import { HelpScene } from "./scenes/HelpScene";
+import { watchHomeScreen } from "./scenes/homeScreen";
 import { HudScene } from "./scenes/HudScene";
 import { PauseScene } from "./scenes/PauseScene";
 import { RunScene } from "./scenes/RunScene";
@@ -86,3 +87,6 @@ mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
 if (pageRunSetup().setup.dev) {
   Object.assign(globalThis, { dogWalkerGame: game });
 }
+
+// The update notice shows on the home screen only.
+watchHomeScreen(game, setOnHomeScreen);

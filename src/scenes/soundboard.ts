@@ -1,5 +1,6 @@
 import { Core, type Game, type Scene, Sound } from "phaser";
 
+import { shouldResumeAudio } from "../audio/resume";
 import {
   admitPlay,
   advanceMusic,
@@ -18,11 +19,10 @@ import {
   stopMusic,
   type Volumes,
 } from "../audio/sound";
+import { AUDIO_UNLOCK_EVENTS, PHONE_EVENTS } from "../pwa";
 
 // Every concrete sound class (Web Audio, HTML5 audio, no audio) has setVolume; BaseSound does not.
 type AdjustableSound = Sound.BaseSound & { setVolume(value: number): unknown };
-
-const GESTURE_EVENTS = ["pointerdown", "keydown"] as const;
 
 // The game's one sound player, shared by every scene so the music outlives scene changes.
 // A key that did not load is skipped and logged once; no method throws.
@@ -37,7 +37,7 @@ export class Soundboard {
     game.events.on(Core.Events.STEP, (_time: number, delta: number) => this.step(delta));
     game.events.on(Core.Events.HIDDEN, () => this.setHidden(true));
     game.events.on(Core.Events.VISIBLE, () => this.setHidden(false));
-    this.resumeOnGesture();
+    this.resumeWhenAllowed();
   }
 
   play(cue: SoundCue): void {
@@ -76,6 +76,7 @@ export class Soundboard {
   setVolumes(volumes: Volumes): void {
     const clamped = { music: clampVolume(volumes.music), sfx: clampVolume(volumes.sfx) };
     this.updateMix({ volumes: clamped });
+    this.resumeAudio();
   }
 
   setHidden(hidden: boolean): void {
@@ -84,6 +85,7 @@ export class Soundboard {
 
   setMuted(muted: boolean): void {
     this.updateMix({ muted });
+    this.resumeAudio();
   }
 
   setPaused(paused: boolean): void {
@@ -133,23 +135,30 @@ export class Soundboard {
     return false;
   }
 
-  // Phaser unlocks Web Audio on the first gesture, but a phone can suspend the context again
-  // (an incoming call, a backgrounded tab), so any later gesture resumes it too.
-  private resumeOnGesture(): void {
+  // Phaser unlocks Web Audio on the first gesture, but a phone can stop the context again (a
+  // call, Siri, switching apps), and iOS can leave it interrupted after Phaser's own resume on
+  // return. So each return to the foreground and each later gesture resume it too. iOS counts
+  // touchend, not touchstart or pointerdown, as a gesture that may start audio.
+  private resumeWhenAllowed(): void {
+    window.addEventListener(PHONE_EVENTS.appVisible, () => this.resumeAudio());
+    for (const type of AUDIO_UNLOCK_EVENTS) {
+      window.addEventListener(type, () => this.resumeAudio(), { capture: true, passive: true });
+    }
+  }
+
+  // Also called on unmute, which is a tap in the settings, so its gesture resumes a context
+  // left stopped while muted.
+  private resumeAudio(): void {
     const { sound } = this.game;
-    if (!(sound instanceof Sound.WebAudioSoundManager)) {
+    if (
+      !(sound instanceof Sound.WebAudioSoundManager) ||
+      !shouldResumeAudio(this.mix, sound.context.state)
+    ) {
       return;
     }
-    const resume = () => {
-      if (sound.context.state !== "running") {
-        sound.context.resume().catch((error: unknown) => {
-          this.reportOnce("resume", "The audio context did not resume.", error);
-        });
-      }
-    };
-    for (const type of GESTURE_EVENTS) {
-      window.addEventListener(type, resume, { capture: true, passive: true });
-    }
+    sound.context.resume().catch((error: unknown) => {
+      this.reportOnce("resume", "The audio context did not resume.", error);
+    });
   }
 
   private guard(action: string, run: () => void): void {

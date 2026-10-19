@@ -69,3 +69,77 @@ body:has(.dev-sheet:not([hidden])) #game {
   white-space: nowrap;
   border: 0;
 }
+
+/* The turn-upright notice covers the whole page, nav bar included, while a phone is on its
+   side. Colours from the game's palette. */
+.turn-upright {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+  background: #181425;
+  color: #ead4aa;
+  font:
+    600 20px/1.3 system-ui,
+    sans-serif;
+  text-align: center;
+}
+
+.turn-upright p {
+  margin: 0;
+}
+
+.turn-upright-phone {
+  width: 48px;
+  height: 80px;
+  fill: #feae34;
+  shape-rendering: crispEdges;
+}
+
+.turn-upright-phone .turn-upright-screen {
+  fill: #3e2731;
+}
+
+/* The update notice: bottom centre, just above the dev bar and the bottom safe area, kept low
+   so it covers as little of the home screen's bottom controls as it can. */
+.update-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--dev-bar-height) + env(safe-area-inset-bottom, 0px) + 4px);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 2px 2px 2px 12px;
+  transform: translateX(-50%);
+  border: 2px solid #e4a672;
+  background: #3e2731;
+  color: #ead4aa;
+  font:
+    600 16px/1.2 system-ui,
+    sans-serif;
+  white-space: nowrap;
+}
+
+.update-toast button {
+  box-sizing: border-box;
+  min-width: 88px;
+  min-height: 44px;
+  border: 0;
+  border-bottom: 4px solid #f77622;
+  background: #feae34;
+  color: #3e2731;
+  font: inherit;
+  cursor: pointer;
+}
+
+.turn-upright[hidden],
+.update-toast[hidden] {
+  display: none;
+}
