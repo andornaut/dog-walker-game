@@ -472,7 +472,7 @@ class Scene(Canvas):
         self.paste(bar.crop((0, 0, cut, 40)), 0, 0)
         self.paste(bar.crop((cut + bar.width - W, 0, bar.width, 40)), cut, 0)
         r = TOP_BAR["wells"]["zone"]["nameRight"] - (LAYOUT["screen"]["width"] - W)  # the zone well's right edge
-        self.paste(frame("tip", "idle"), 8, 13)
+        self.paste(image("icon-money"), 8, 13)
         text(self, "$", 26, 15, "amber", 2); text(self, f"{money:g}", 26 + text_w("$", 2) + 2, 15, "cream", 2)
         self.paste(image("icon-treat"), 100, 13)
         text(self, f"{treats}/{tuning('counts', 'treatCarryMax'):g}", 118, 18, "cream")
