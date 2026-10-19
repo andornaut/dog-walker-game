@@ -2,10 +2,11 @@
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
-icon-logbook, icon-settings, icon-lock, icon-money, icon-stinky; ui-panel, ui-hint
+icon-logbook, icon-settings, icon-lock, icon-money, icon-stinky; icon-dog-slot (32x32, a pack
+slot for sale in the shop: a doghouse with a green plus badge, as the shop's item-<gear> art,
+outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
-baked in with font-title), ui-slot-locked (160x46, the yard sign for the next dog slot;
-the game writes its two lines); the home screen's ui-detail-card (24x24
+baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down (8x6), ui-zone-banner (248x48) and
@@ -47,7 +48,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
-from pixel import DARKER, K, Grid, contrast, build as build_sprites  # noqa: E402
+from pixel import DARKER, K, Grid, contrast, edged, icon_edge, build as build_sprites  # noqa: E402
 
 
 def to_image(px):
@@ -560,21 +561,34 @@ def new_best():
     return im
 
 
-def slot_locked():
-    """160x46: the sign for the next dog slot, in the chrome: a tan header (rows 2 to 20) over a
-    plum line and the cream panel, and a padlock at the bottom right. The game writes, in sign
-    pixels: line 1 ("Slot 2 · $800") in font-title x2, plum (6.49:1 on tan), caps at 5,6, up to
-    150 wide ("SLOT 3 · $1,800" is 150); line 2 ("Save $650 more" darkRed, 5.07:1, or "Tap to buy"
-    forest, 5.39:1, on cream) in font-body x2, caps at 5,27, up to 130 wide, left of the lock at
-    139,24. The posts stay in code."""
-    g = chrome(Grid(160, 46), 0, 0, 160, 46)
-    g.rect(2, 2, 156, 19, "tan")
-    g.rect(157, 2, 1, 19, "brown")
-    g.rect(2, 21, 156, 1, "plum")
-    im = to_image(g.outlined(False))
-    lk = to_image(lock().outlined())
-    im.paste(lk, (139, 24), lk)
-    return im
+def dog_slot():
+    """32x32: a pack slot for sale, for the shop's slot rows on a tan box: a doghouse (a red roof shaded
+    dred under its eaves, tan walls shaded brown on the right, a plum door under a cream bone plaque,
+    a dbrown base) with a green plus badge at the top right. Every fill takes icon_edge's outline, so
+    it holds 3:1 on cream and tan as the item-<gear> art does."""
+    g = edged(Grid(32, 32), icon_edge)
+    for y in range(5, 15):
+        half = y - 5 + 3
+        for x in range(16 - half, 16 + half):
+            g.p(x, y, "dred" if y >= 13 else "pink" if x < 16 - half + 2 and y > 6 else "red")
+    g.rect(14, 4, 4, 1, "red")
+    g.rect(6, 15, 20, 13, "tan")
+    g.rect(24, 15, 2, 13, "brown")
+    g.rect(6, 15, 20, 1, "brown")
+    g.rect(13, 17, 6, 2, "cream")
+    g.rect(12, 20, 8, 8, "plum")
+    g.p(12, 20, "tan")
+    g.p(19, 20, "tan")
+    g.rect(4, 28, 24, 2, "dbrown")
+    # the plus badge, clear of the roof's outline
+    g.rect(23, 2, 7, 7, "green")
+    g.rect(24, 1, 5, 9, "green")
+    g.rect(22, 3, 9, 5, "green")
+    g.rect(28, 7, 2, 1, "forest")
+    g.rect(29, 6, 1, 1, "forest")
+    g.rect(26, 2, 1, 7, "white")
+    g.rect(23, 5, 7, 1, "white")
+    return g
 
 
 # ---------- plates: the hit label, the firing plate and the payout tag ----------
@@ -1163,7 +1177,7 @@ def quip_tail():
 def zone_banner():
     """248x48: a cream board in the chrome on navy ribbon ends, shown over the road between
     zones. The game writes two lines in font-title, plum, centred on x=124: the world and zone
-    number ("MAPLE STREET, ZONE 2") with its caps in rows 11 to 15, and the zone name at x2
+    number ("MAPLEWOOD, ZONE 2") with its caps in rows 11 to 15, and the zone name at x2
     ("BARK PARK", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
     g = Grid(248, 48)
     ribbon = Grid(248, 48)
@@ -1243,11 +1257,11 @@ IMAGES = {
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-money": lambda: to_image(money().outlined()),
     "icon-stinky": lambda: to_image(stinky()),
+    "icon-dog-slot": lambda: to_image(dog_slot().outlined()),
     "ui-panel": lambda: to_image(panel().outlined(False)),
     "ui-hint": lambda: to_image(hint().outlined(False)),
     "ui-hint-tail": lambda: to_image(hint_tail().outlined(False)),
     "ui-new-best": new_best,
-    "ui-slot-locked": slot_locked,
     "ui-top-bar": lambda: to_image(top_bar().outlined(False)),
     "ui-strip-well": lambda: to_image(strip_well().outlined(False)),
     "ui-quip": lambda: to_image(quip().outlined(False)),

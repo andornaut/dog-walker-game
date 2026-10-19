@@ -10,13 +10,13 @@ stands), and works as a header on any other screen.
 screen-<name>: 360x560 backgrounds in Endesga 32, one per screen. Where panels
 and text sit, they are low-contrast dark wood, so the cream and tan UI text
 reads on them.
-- screen-home: morning on Maple Street. The bar strip, then the gate scene
-  (y 40 to 196: street, curb, sidewalk, fence with the open gate, front path,
-  yard sign, mailbox), then the porch deck from y 198 under the walker, dog
-  and gear steps and Start walk. The street sign's board (300,72 54x11) sits
-  at the right edge under the sound toggle, clear of the walker's speech
-  bubble; the game prints "Maple St" on it centred at 327,75. The slot sign
-  (196,140 160x46) covers the right of the yard while a slot is for sale.
+- screen-home: morning on Woof Way, in Maplewood. The bar strip, then the gate
+  scene (y 40 to 196: street, curb, sidewalk, fence with the open gate, front
+  path, yard sign), then the porch deck from y 198 under the walker, dog and
+  gear steps and Start walk. The street sign's board (300,72 54x11, a 52x9
+  forest face) sits at the right edge, clear of the walker's speech bubble;
+  the game prints "Woof Way" on it in font-body, white, centred at 327,75 (39px
+  wide in capitals). The yard's right lot is left for ui-pet-shop.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
@@ -41,6 +41,17 @@ reads on them.
   progress track, and the plain road below it (to y 450) leaves room for a
   status line.
 
+ui-pet-shop: a 120x104 sprite, tags normal and pressed: the pet shop on the
+yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
+(234,90), its base on the yard's bottom row (193), and its hit area is the
+frame. A board over the parapet carries PET SHOP in the sign letters at 1x
+(yellow, ink outline, 1px dred shadow); under it a red and white awning, a
+display window with a food bag and a bone, and a door with a paw on its
+glass; dgreen siding lit on the left, forest on the right, ink outline all
+round, on a grey step. pressed dips as ui-button does: the front sinks 2px
+onto the step, rows 0 and 1 clear and the step 1px shallower. An affordable
+item in the shop takes ui-afford 2px outside the frame (232,88 124x108).
+
 ui-loading-track: a 200x8 image, the dotted path the pair walks along, with a
 doghouse at the far end. The game draws it at TRACK_AT (80,357).
 ui-loading: a 48x32 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
@@ -52,8 +63,11 @@ Usage:
   screens.py preview OUT.png   the logo, the ui-loading frames, then every screen,
                                scaled up, and every screen again with its UI
                                blocked in
+  screens.py shop-preview OUT.png
+                               ui-pet-shop's tags on the yard at 1x and 4x, and
+                               screen-home with it in at 1x and 4x
   screens.py build             write art/screens/*.aseprite, public/art/images/*.png
-                               and public/art/sprites/ui-loading.*
+                               and public/art/sprites/ui-loading.* and ui-pet-shop.*
 
 Run from the repository root, after fonts.py build and the sprite builds. A
 build overwrites the .aseprite sources, so hand edits to them belong in this
@@ -68,12 +82,15 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
+import fonts  # noqa: E402
 import help as hp  # noqa: E402
 from pixel import DARKER, Grid, K, build as build_sprites  # noqa: E402
 
 W, H = 360, 560
 LOGO_W, LOGO_H = 128, 30
 LOGO_AT = (6, 146)
+PET_SHOP_W, PET_SHOP_H = 120, 104
+PET_SHOP_AT = (234, 90)
 
 
 def dk(c):
@@ -228,7 +245,7 @@ def home():
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
-    # Maple Street: asphalt, a dashed centre line, a manhole and a storm drain
+    # Woof Way: asphalt, a dashed centre line, a manhole and a storm drain
     cv.fill(0, 40, W, 52, "dslate")
     for _ in range(260):
         cv.fill(int(r() * W), 40 + int(r() * 52), 1, 1, "slate" if r() < 0.6 else "navy")
@@ -315,13 +332,6 @@ def home():
         cv.fill(px, 172, 3, 22, "dbrown")
         cv.fill(px - 1, 194, 5, 1, "dgreen")
     board(cv, *LOGO_AT)
-    # the mailbox
-    cv.fill(296, 158, 3, 34, "dbrown")
-    cv.fill(294, 192, 7, 1, "dgreen")
-    cv.fill(286, 148, 24, 12, "red")
-    cv.fill(286, 148, 24, 1, "pink")
-    cv.fill(286, 158, 24, 2, "dred")
-    cv.fill(308, 142, 2, 8, "amber")
     # a bush in the corner, a water bowl by the path and a ball on the lawn
     bd.bush(cv, 322, 186, "dgreen")
     cv.fill(222, 189, 10, 4, "slate")
@@ -338,6 +348,102 @@ def home():
     cv.fill(0, 197, W, 1, "brown")
     planks(cv, 0, 198, W, H - 198, 11, seed=3)
     return cv
+
+
+# ---------- ui-pet-shop ----------
+
+BONE = ["..cc.......cc..", ".cccc.....cccc.", "ccccccccccccccc", "ccccccccccccccc", ".cccc.....cccc.", "..cc.......cc.."]
+DOOR_PAW = [".#.#.", "#...#", ".###.", ".###."]
+
+
+def pet_shop(pressed=False):
+    """The shop front, PET_SHOP_W x PET_SHOP_H. Everything but the step is drawn top rows lower, so
+    pressed sinks the front 2px onto a step 1px shallower, as ui-button's face sinks into its lip."""
+    w, h = PET_SHOP_W, PET_SHOP_H
+    cv = clear(w, h)
+    t = 2 if pressed else 0
+    # walls: dgreen siding in an ink line, lit green on the left, forest on the right
+    cv.fill(4, 18 + t, w - 8, h - 18 - t, "ink")
+    cv.fill(5, 19 + t, w - 10, h - 19 - t, "dgreen")
+    cv.fill(5, 19 + t, 2, h - 19 - t, "green")
+    cv.fill(w - 7, 19 + t, 2, h - 19 - t, "forest")
+    for y in range(26 + t, h, 6):
+        cv.fill(7, y, w - 14, 1, "forest")
+    # the parapet trim
+    cv.fill(2, 16 + t, w - 4, 4, "ink")
+    cv.fill(3, 17 + t, w - 6, 2, "cream")
+    # the board: PET SHOP in the sign letters at 1x on a dbrown face, as the yard sign
+    letters, _ = fonts.sign("PET SHOP", 1)
+    x0 = min(x for x, _ in letters)
+    bw = fonts.sign_width("PET SHOP", 1) + 14
+    bx = (w - bw) // 2
+    cv.fill(bx, t, bw, 18, "ink")
+    cv.fill(bx + 1, 1 + t, bw - 2, 16, "dbrown")
+    cv.fill(bx + 1, 1 + t, bw - 2, 1, "brown")
+    cv.fill(bx + 1, 16 + t, bw - 2, 1, "plum")
+    for (x, y), c in letters.items():
+        cv.fill(bx + 7 - x0 + x, 4 + t + y, 1, 1, c)
+    # the awning: red and white stripes 6px wide, shaded along the bottom, over a scalloped ink edge
+    top, bot = 24 + t, 36 + t
+    cv.fill(2, top - 1, w - 4, bot - top + 2, "ink")
+    for x in range(3, w - 3):
+        red = ((x - 3) // 6) % 2 == 0
+        cv.fill(x, top, 1, bot - top - 3, "red" if red else "white")
+        cv.fill(x, bot - 3, 1, 3, "dred" if red else "lgrey")
+        if (x - 3) % 6 in (1, 2, 3, 4):
+            cv.fill(x, bot, 1, 1, "dred" if red else "lgrey")
+            cv.fill(x, bot + 1, 1, 1, "ink")
+        else:
+            cv.fill(x, bot, 1, 1, "ink")
+    # the display window: a cream frame, sky glass with two glints, a blue sill
+    wx, wy, ww, wh = 10, 44 + t, 56, 46
+    cv.fill(wx - 1, wy - 1, ww + 2, wh + 2, "ink")
+    cv.fill(wx, wy, ww, wh, "cream")
+    cv.fill(wx + 2, wy + 2, ww - 4, wh - 4, "sky")
+    cv.fill(wx + 2, wy + wh - 8, ww - 4, 6, "blue")
+    cv.fill(wx + 2, wy + wh - 3, ww - 4, 1, "plum")
+    for i in range(10):
+        cv.fill(wx + 6 + i, wy + 14 - i, 1, 1, "cyan")
+        cv.fill(wx + 10 + i, wy + 18 - i, 1, 1, "white")
+    # a food bag and a bone on the sill
+    cv.fill(wx + 8, wy + 20, 14, 18, "ink")
+    cv.fill(wx + 9, wy + 21, 12, 16, "amber")
+    cv.fill(wx + 9, wy + 21, 12, 2, "yellow")
+    cv.fill(wx + 19, wy + 23, 2, 14, "orange")
+    cv.fill(wx + 11, wy + 26, 7, 6, "red")
+    cv.fill(wx + 13, wy + 28, 3, 2, "white")
+    bone = {(x, y) for y, row in enumerate(BONE) for x, ch in enumerate(row) if ch == "c"}
+    for x, y in {(x + dx, y + dy) for x, y in bone for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0))} - bone:
+        cv.fill(wx + 29 + x, wy + 31 + y, 1, 1, "blue")
+    for x, y in bone:
+        cv.fill(wx + 29 + x, wy + 31 + y, 1, 1, "white" if y < 2 else "lgrey" if y > 3 else "cream")
+    # the door: a cream frame, a navy door with a lit glass pane, a cream paw on it, an amber knob
+    dx, dy, dw = 76, 44 + t, 30
+    cv.fill(dx - 1, dy - 1, dw + 2, h - dy + 1, "ink")
+    cv.fill(dx, dy, dw, h - dy, "cream")
+    cv.fill(dx + 2, dy + 2, dw - 4, h - dy - 2, "navy")
+    cv.fill(dx + 2, dy + 2, 1, h - dy - 2, "dslate")
+    cv.fill(dx + 6, dy + 6, dw - 12, 14, "sky")
+    cv.fill(dx + 6, dy + 6, dw - 12, 1, "cyan")
+    for j, row in enumerate(DOOR_PAW):
+        for i, c in enumerate(row):
+            if c == "#":
+                cv.fill(dx + 13 + i, dy + 11 + j, 1, 1, "cream")
+    cv.fill(dx + dw - 8, dy + 30, 3, 3, "amber")
+    # the step: 4 rows, 3 when pressed
+    sy = h - 3 if pressed else h - 4
+    cv.fill(2, sy, w - 4, h - sy, "ink")
+    cv.fill(3, sy + 1, w - 6, h - sy - 2, "lgrey")
+    if not pressed:
+        cv.fill(3, h - 2, w - 6, 1, "grey")
+    return cv
+
+
+def image_rows(img):
+    """An RGBA image as sprite frame rows: hex colours, None where clear."""
+    px = img.load()
+    return [["%02x%02x%02x" % px[x, y][:3] if px[x, y][3] else None for x in range(img.width)]
+            for y in range(img.height)]
 
 
 # ---------- screen-stats ----------
@@ -829,6 +935,7 @@ def sprite_image(px):
 
 def sprites():
     yield "ui-loading", [("walk", [pair(i) for i in range(4)], 160)]
+    yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000) for tag in ("normal", "pressed")]
 
 
 def ui(cv, key):
@@ -851,11 +958,9 @@ def ui(cv, key):
             panel(x, 10, 20, 20, "tan")
         for x in (8, 332):
             panel(x, 46, 20, 20, "tan")
-        hp.text_c(cv, "MAPLE ST", 327, 75, "white")
+        hp.text_c(cv, "WOOF WAY", 327, 75, "white")
         panel(130, 46, 100, 34, "white")
-        panel(196, 140, 160, 46, "tan")
-        for x in (206, 343):
-            cv.fill(x, 186, 3, 10, "dbrown")
+        cv.paste(pet_shop().img, *PET_SHOP_AT)
         panel(194, 166, 18, 18)
         figure(180, 196, 16, 40, "sky")
         for x, foot in ((180, 150), (154, 182), (206, 184)):
@@ -929,6 +1034,35 @@ def preview(out, scale=2):
     sheet.save(out)
 
 
+def shop_preview(out, scale=4):
+    """ui-pet-shop's tags on the yard at 1x and scale, then screen-home with the building in, at 1x and
+    scale."""
+    tags = [pet_shop(p).img for p in (False, True)]
+    home_cv = home()
+    home_cv.img.paste(logo().img, LOGO_AT, logo().img)
+    home_cv.img.paste(tags[0], PET_SHOP_AT, tags[0])
+    lot = home_cv.img.crop((PET_SHOP_AT[0] - 4, PET_SHOP_AT[1] - 4, PET_SHOP_AT[0] + PET_SHOP_W + 4,
+                            PET_SHOP_AT[1] + PET_SHOP_H + 4))
+    tiles = []
+    for t in tags:
+        bg = home().img.crop((PET_SHOP_AT[0], PET_SHOP_AT[1], PET_SHOP_AT[0] + PET_SHOP_W, PET_SHOP_AT[1] + PET_SHOP_H))
+        bg.paste(t, (0, 0), t)
+        tiles.append(bg)
+    gap = 8
+    top = PET_SHOP_H * (scale + 1) + gap
+    sheet = Image.new("RGB", (max(W * (scale + 1) + gap, (PET_SHOP_W * (scale + 1) + gap) * 2), top + H * scale),
+                      hp.rgb("ink"))
+    x = 0
+    for t in tiles:
+        sheet.paste(t, (x, 0))
+        sheet.paste(t.resize((PET_SHOP_W * scale, PET_SHOP_H * scale), Image.NEAREST), (x + PET_SHOP_W + gap // 2, 0))
+        x += PET_SHOP_W * (scale + 1) + gap
+    sheet.paste(home_cv.img.convert("RGB"), (0, top))
+    sheet.paste(home_cv.img.convert("RGB").resize((W * scale, H * scale), Image.NEAREST), (W + gap, top))
+    sheet.save(out)
+    lot.resize((lot.width * scale, lot.height * scale), Image.NEAREST).save(out.replace(".png", "-lot.png"))
+
+
 def build():
     os.makedirs("art/screens", exist_ok=True)
     os.makedirs("public/art/images", exist_ok=True)
@@ -943,6 +1077,8 @@ def build():
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "preview":
         preview(sys.argv[2])
+    elif len(sys.argv) == 3 and sys.argv[1] == "shop-preview":
+        shop_preview(sys.argv[2])
     elif len(sys.argv) == 2 and sys.argv[1] == "build":
         build()
     else:

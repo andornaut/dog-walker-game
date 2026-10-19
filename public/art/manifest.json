@@ -2716,6 +2716,11 @@
       "json": "sprites/ui-payout-label.json"
     },
     {
+      "key": "ui-pet-shop",
+      "png": "sprites/ui-pet-shop.png",
+      "json": "sprites/ui-pet-shop.json"
+    },
+    {
       "key": "ui-pull-blocked",
       "png": "sprites/ui-pull-blocked.png",
       "json": "sprites/ui-pull-blocked.json"
@@ -3184,6 +3189,10 @@
       "png": "images/icon-close.png"
     },
     {
+      "key": "icon-dog-slot",
+      "png": "images/icon-dog-slot.png"
+    },
+    {
       "key": "icon-energy-calm",
       "png": "images/icon-energy-calm.png"
     },
@@ -3546,10 +3555,6 @@
     {
       "key": "ui-quip-tail-down",
       "png": "images/ui-quip-tail-down.png"
-    },
-    {
-      "key": "ui-slot-locked",
-      "png": "images/ui-slot-locked.png"
     },
     {
       "key": "ui-strip-well",
