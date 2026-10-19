@@ -35,7 +35,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Tap:** moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead
 - **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
-- Taps on the top bar never move the pack. Pause offers Resume, Head home, Help and Settings
+- Taps on the top bar never move the pack. Pause offers Resume, Help, Settings and Head home
 - The walker is at the bottom, the dogs just ahead in the same lane; the pack collides as one unit
 - Spawning always leaves a reachable path, so every hit is avoidable
 - After a hit, the obstacle is removed once its card closes, and obstacles are ignored for a short grace window; pickups still count
@@ -199,7 +199,11 @@ Effects without "now" or "next zone" last the rest of the run.
 
 Everything bought on the home screen is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`tech-plan.md`](../tech-plan.md).
 
-- **Shop:** the home screen is the shop. Tap a locked dog, dog slot or gear item to buy it, at any time you can pay
+- **Shop:** the home screen is the shop. Tap a locked dog, dog slot or gear item to buy it, at any time you can pay. Anything you can afford has a gold outline. The slot sign reads "Slot 2 · $800" with "Save $650 more" or "Tap to buy"
+- **Details:** hold any dog or gear item for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's effect. Gear tiles show their names
+- **Start button:** shows the pack, e.g. "Start walk · 2 dogs · $40/zone"; the pack count reads "Pack 1/1"
+- **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after a walk "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
+- **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $480 more for Nugget."; the hint line reads "Tap a dog to walk it. Tap a locked dog or gear to buy it. Hold for details."
 - **Gear** (5 items, bought once): fanny pack (start the run with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +♥ and has a higher max). Equip up to 1 owned item before each run, or none
 - **Walker picker:** choose Casey, Ada, Ben or Trista. All are free; the choice is cosmetic and saved
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
