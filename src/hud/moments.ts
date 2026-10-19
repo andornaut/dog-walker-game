@@ -86,8 +86,8 @@ export const FIRING_PARTS = {
   face: { x: 60, y: -34 },
   line: { x: 60, y: -72 },
   plate: { height: 28, width: 72, x: 24, y: -2 },
-  // "FIRED!" starts this far into the plate, the top of its capitals this far down.
-  plateText: { x: 8, y: 9 },
+  // "FIRED!" is centred across the plate, the top of its capitals this far down.
+  plateText: { y: 9 },
   pop: { x: -4, y: -98 },
   tail: { x: 60, y: -73 },
 } as const;

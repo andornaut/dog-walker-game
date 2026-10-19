@@ -284,9 +284,10 @@ export class HudFeedback {
     }
     const { plateText } = FIRING_PARTS;
     container.add(
-      addDisplayText(this.scene, plateText.x, plateText.y, gameData.runText.fired, {
+      addDisplayText(this.scene, rect.width / 2, plateText.y, gameData.runText.fired, {
         color: PALETTE.white,
         font: "title",
+        originX: 0.5,
         scale: 2,
       }),
     );
