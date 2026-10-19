@@ -9,8 +9,8 @@ export const HELP_PAGES = [
   {
     art: "help-lanes",
     body:
-      "Tap the left or right side of the road, or swipe. Keys: arrows, A/D or H/L. " +
-      "Each tap moves the pack one lane. Hold to keep moving.",
+      "Drag anywhere: each lane-width you drag moves the pack one lane. " +
+      "A tap moves one lane toward that side. Keys: arrows, A/D or H/L.",
     title: "Switch lanes",
   },
   {
@@ -40,7 +40,7 @@ export const HELP_PAGES = [
     art: "help-pulls",
     body:
       "A dog that leans and barks is about to pull. " +
-      "It tugs the pack one lane. Steer back any time. " +
+      "It tugs the pack one lane. Drag it back any time. " +
       "Food lovers pull toward treats, chasers toward squirrels.",
     title: "Watch for pulls",
   },

@@ -61,6 +61,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 - After each zone: every remaining dog pays a share of its fee; a dog fired mid-zone isn't paid for that zone
 - When an owner fires you, they take back every fee their dog earned this run (tips stay)
 - Ends after zone 4 or when no dogs are left; everything earned is kept, except fees taken back by owners who fired you
+- **End screen:** the run's total with a breakdown (fees, tips, card costs, fees taken back), zones walked and the bank; a new-best ribbon when it beats the best walk; and one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 - Head home: available any time from the pause menu; keeps tips and earlier zones' fees, but the current zone pays nothing
 
 ### Choice cards
