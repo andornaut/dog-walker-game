@@ -4,7 +4,7 @@
 
 A cozy pixel-art lane runner where you walk a pack of dogs through the neighbourhood, and every bump in the road turns into a choice. Built with [Phaser](https://phaser.io/) and TypeScript, and served as static files from [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/).
 
-The game design, v1 plan and tech plan live in [design/](design/README.md).
+Play it at <https://dog-walker-game.andornaut.workers.dev>. The game design, v1 plan and tech plan live in [design/](design/README.md).
 
 ## Requirements
 
@@ -29,7 +29,7 @@ npx wrangler login
 npm run deploy
 ```
 
-The game is then live at `https://dog-walker-game.<account>.workers.dev`. To serve a custom domain instead, add a `routes` entry to `wrangler.jsonc`.
+Deploys go to the Cloudflare account pinned by `account_id` in `wrangler.jsonc`. To serve a custom domain instead, add a `routes` entry to `wrangler.jsonc`.
 
 ## Developing
 
