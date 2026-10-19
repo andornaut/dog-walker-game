@@ -45,17 +45,17 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 Rules in the rulebook that the game doesn't have yet:
 
-1. **Layout:** 360×560 with doghouses along the bottom, the Home button, and the road scrolling to the top of its area
-2. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
-3. **Forks and zones:** the fork card and the 6 zones with their encounter mix, density, speed and fees
-4. **Needs and purposeful pulls:** need words, urgency, need spots, need cards, accidents; pulls only toward a visible target, never into an obstacle
-5. **Zone encounters:** the five zone encounters plus the lemonade stand
+1. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
+2. **Zone encounters:** the five zone encounters plus the lemonade stand
+3. **Start screen:** the uniform layout, with the how-to line in the walker's bubble
 
-Tuning, after each build, with the simulator before and after:
+Tuning against the targets, with the simulator before and after:
 
-- Road speed to 150 px/s once the 560 layout lands
-- Need urgency, gone-wrong time and need card chance; zone encounter weights; per-zone density, speed and mover share
-- Pack size, gear prices and overall earnings against the targets: a bigger pack earns little more than one dog, and only the fanny pack pays for itself
+- Difficulty by skill: typical and expert players finish too often, novices too rarely
+- Road speed 150 px/s and a 4.5 s look-ahead
+- Needs: urgency, gone-wrong time, accident cost and need card chance (Regular dogs fail too often)
+- Zones: per-zone density, speed, mover share and weights, so harder paths earn their fees; zone encounter weights
+- Pack size, gear prices and overall earnings: a bigger pack earns little more than one dog, and only the fanny pack pays for itself
 - Big Payday's threshold, now rarely earned
 
 Decided at the phone playtest:
