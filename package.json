@@ -2,7 +2,7 @@
   "name": "dog-walker-game",
   "version": "0.0.1",
   "description": "A cozy pixel-art lane runner about walking dogs.",
-  "license": "UNLICENSED",
+  "license": "CC-BY-NC-SA-4.0",
   "private": true,
   "type": "module",
   "engines": {

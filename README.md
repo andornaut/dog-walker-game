@@ -1,6 +1,7 @@
 # dog-walker-game
 
 [![Test](https://github.com/andornaut/dog-walker-game/actions/workflows/test.yml/badge.svg)](https://github.com/andornaut/dog-walker-game/actions/workflows/test.yml)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 A cozy pixel-art lane runner where you walk a pack of dogs through the neighbourhood, and every bump in the road turns into a choice. Built with [Phaser](https://phaser.io/) and TypeScript, and served as static files from [Cloudflare Workers](https://developers.cloudflare.com/workers/static-assets/).
 
@@ -80,3 +81,7 @@ npm run deploy
 To serve a custom domain, add a `routes` entry to `wrangler.jsonc`.
 
 The build writes `dist/_headers`, the security headers Cloudflare serves with each static asset, from `src/headers/securityPolicy.ts`, with the hashes of every page's inline blocks.
+
+## License
+
+Everything here (code, art, sound, music and writing) is licensed [CC BY-NC-SA 4.0](./LICENSE): share and remix it with credit to andornaut and a link to this project, for non-commercial use, under the same license. The game's names and logos are not licensed, so a remix must use its own name.
