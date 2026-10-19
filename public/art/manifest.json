@@ -1158,6 +1158,11 @@
       "json": "sprites/fx-confetti.json"
     },
     {
+      "key": "fx-confetti-bit",
+      "png": "sprites/fx-confetti-bit.png",
+      "json": "sprites/fx-confetti-bit.json"
+    },
+    {
       "key": "fx-dizzy",
       "png": "sprites/fx-dizzy.png",
       "json": "sprites/fx-dizzy.json"
@@ -6236,6 +6241,10 @@
       "png": "images/screen-stats.png"
     },
     {
+      "key": "ui-celebrate-burst",
+      "png": "images/ui-celebrate-burst.png"
+    },
+    {
       "key": "ui-detail-band",
       "png": "images/ui-detail-band.png"
     },
@@ -6282,6 +6291,10 @@
     {
       "key": "ui-quip-tail-down",
       "png": "images/ui-quip-tail-down.png"
+    },
+    {
+      "key": "ui-quip-tail-up",
+      "png": "images/ui-quip-tail-up.png"
     },
     {
       "key": "ui-strip-well",

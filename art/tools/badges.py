@@ -9,6 +9,10 @@ face, the face beside it takes a 1px keyline: plum (9.42:1 on cream, 6.49:1 on
 tan), teal for green (eau-de-skunk).
 fx-confetti: 64x64, the burst behind a badge as it is earned (tag play, 10
 frames at 80ms), plum-rimmed so it reads on the Stats wood and the cream end panel.
+fx-confetti-bit: 6x6, one bit of the zone celebration's falling confetti, a tag per colour
+(amber, cyan, green, pink, white, yellow), each 4 frames at 100ms tumbling face on, edge on,
+turning and edge on the other way, in the same plum rim. The game drops them down the dimmed
+road view.
 
 Usage:
   badges.py preview OUT.png   every badge, earned and locked, and the burst, on
@@ -299,11 +303,31 @@ def confetti(step):
     return g
 
 
+# One falling confetti bit's tumble, one shape per frame as cells of its 6x6 frame: face on (3x2), edge on
+# (4x1), turning (a 3-step diagonal), edge on the other way (1x4).
+BIT_TUMBLE = (((1, 2), (2, 2), (3, 2), (1, 3), (2, 3), (3, 3)), ((1, 2), (2, 2), (3, 2), (4, 2)),
+              ((1, 1), (2, 1), (2, 2), (3, 2), (3, 3)), ((2, 1), (2, 2), (2, 3), (2, 4)))
+BIT_COLOURS = ("amber", "cyan", "green", "pink", "white", "yellow")
+
+
+def confetti_bit(col, step):
+    """6x6: one bit of the zone celebration's falling confetti in col, frame step of its tumble, in the
+    effects' 1px plum rim."""
+    g = Grid(6, 6)
+    for x, y in BIT_TUMBLE[step]:
+        g.p(x, y, col)
+    for x, y in {(x + dx, y + dy) for x, y in BIT_TUMBLE[step] for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))}:
+        if not g.px[y][x]:
+            g.p(x, y, "plum")
+    return g
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for name in BADGES:
         yield f"badge-{name}", [("earned", [badge(name).outlined()], 1000), ("locked", [badge(name, True).outlined()], 1000)]
     yield "fx-confetti", [("play", [confetti(i).outlined(False) for i in range(10)], 80)]
+    yield "fx-confetti-bit", [(col, [confetti_bit(col, i).outlined(False) for i in range(4)], 100) for col in BIT_COLOURS]
 
 
 if __name__ == "__main__":

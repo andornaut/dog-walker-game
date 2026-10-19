@@ -17,7 +17,10 @@ walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms),
 as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
 1, 3, 5 and 3px right of it. At rest (idle frame 0) a 40x60 walker's feet (the outline under the
 shoes) are on row 56, and the hands' top rows 16 above them, their outer columns 14 left and 13
-right of the centre column (x 20). A walker who unlocks waves from the sidewalk in a popup stop. What stands on the road
+right of the centre column (x 20). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
+zone celebration: the front view with the hanging arm taken off and both arms raised from the
+shoulders in a V, the hands 1, 3, 4 and 3 design pixels out; a 2px crouch, a hop 2px and 3px up,
+then a 1px landing. Trista's tote stays on her shoulder. What stands on the road
 is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
 front elevation (the ice cream truck a rear one, like obstacles.parked_car),
 with no top surface and its base on the last opaque row.
@@ -315,7 +318,7 @@ def lean(g, k):
 
 
 # ---------- the walkers waving (front view) ----------
-# A walker who unlocks waves from the sidewalk, facing the camera: the same clothes, colours and frame as
+# A walker waving, facing the camera: the same clothes, colours and frame as
 # the back view, feet on the same rows, the left arm (screen right) raised and swinging from the shoulder.
 
 def raised_arm(g, x, w, top, bottom, dx, parts):
@@ -556,6 +559,57 @@ WAVES = {
 # The hand's swing right of the shoulder, one frame each: out, further, back.
 WALKER_WAVE = (1, 3, 4, 3)
 WALKER_WAVE_MS = 150
+
+# ---------- the walkers cheering (front view) ----------
+# The wave drawing with both arms raised: the hanging arm is cleared, then the right arm is raised as the wave
+# raises it and the left as its mirror. CHEER_ARMS gives each walker's hanging arm on the 32x48 design grid as
+# rects (x0, x1, y0, y1: columns x0 to x1 - 1, rows y0 to y1 - 1 before the crouch) and its colours; only those
+# colours are cleared, so what overlaps the arm (Trista's tote) stays.
+CHEER_ARMS = {
+    "walker-casey": (((5, 9, 22, 35),), ("sky", "cyan", "blue", "skin1")),
+    "walker-ben": (((5, 9, 22, 35),), ("green", "dgreen", "dbrown", "plum")),
+    "walker-ada": (((7, 10, 30, 37),), ("brown", "dbrown", "pink", "mauve")),
+    "walker-trista": (((5, 9, 22, 26), (5, 9, 34, 35)), ("dgreen", "forest", "green", "skin1")),
+}
+# One frame each: (crouch in design pixels, the hands' swing out from the shoulders, hop in pixels): crouch,
+# take off, the top of the hop, land.
+WALKER_CHEER = ((2, 1, 0), (0, 3, 2), (0, 4, 3), (1, 3, 0))
+WALKER_CHEER_MS = 120
+
+
+def cheering(key, swing, bob=0):
+    """key's front view (WAVES) with both arms raised swing design pixels out from the shoulders, crouched bob."""
+    global raised_arm
+    rects, cols = CHEER_ARMS[key]
+    hexes = {K[c] for c in cols}
+    lift = raised_arm
+
+    def both(g, x, w, top, bottom, _swing, parts):
+        inner, s = getattr(g, "g", g), getattr(g, "s", 1)
+        for x0, x1, y0, y1 in rects:
+            for yy in range(math.floor((y0 + bob) * s), math.ceil((y1 + bob) * s)):
+                for xx in range(math.floor(x0 * s), math.floor(x1 * s)):
+                    if 0 <= yy < inner.h and inner.px[yy][xx] in hexes:
+                        inner.px[yy][xx] = None
+        lift(g, x, w, top, bottom, swing, parts)
+        # the mirrored arm's thumb goes on the hand's inner (right) side, as a mirror of the raised one's
+        left = 32 - x - w
+        lift(g, left, w, top, bottom, -swing, parts)
+        thumb = left + round(-swing * (bottom - top - 1) / (bottom - top)) - 1
+        g.p(thumb, top + 1, None)
+        g.p(thumb + w + 1, top + 1, parts[0][1])
+
+    raised_arm = both
+    try:
+        return WAVES[key](wave=0, bob=bob)
+    finally:
+        raised_arm = lift
+
+
+def hopped(rows, hop):
+    """A frame's pixel rows moved hop rows up, the feet off the ground."""
+    return rows[hop:] + [[None] * len(rows[0]) for _ in range(hop)]
+
 
 
 # ---------- pickups ----------
@@ -1398,7 +1452,9 @@ def sprites():
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
                     ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
-                    ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS)]
+                    ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS),
+                    ("cheer", [hopped(edged(big(cheering, key, swing, bob=crouch)).outlined(), hop)
+                               for crouch, swing, hop in WALKER_CHEER], WALKER_CHEER_MS)]
     yield "treat", [("idle", frames([big(treat, lift=0), big(treat, lift=-1)]), 400)]
     yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames([big(skunk, sway=0), big(skunk, sway=1)]), 400)]

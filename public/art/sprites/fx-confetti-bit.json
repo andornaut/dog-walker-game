@@ -1,0 +1,211 @@
+{ "frames": {
+   "fx-confetti-bit 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 1.aseprite": {
+    "frame": { "x": 6, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 2.aseprite": {
+    "frame": { "x": 12, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 3.aseprite": {
+    "frame": { "x": 18, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 4.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 5.aseprite": {
+    "frame": { "x": 30, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 6.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 7.aseprite": {
+    "frame": { "x": 42, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 8.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 9.aseprite": {
+    "frame": { "x": 54, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 10.aseprite": {
+    "frame": { "x": 60, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 11.aseprite": {
+    "frame": { "x": 66, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 12.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 13.aseprite": {
+    "frame": { "x": 78, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 14.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 15.aseprite": {
+    "frame": { "x": 90, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 16.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 17.aseprite": {
+    "frame": { "x": 102, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 18.aseprite": {
+    "frame": { "x": 108, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 19.aseprite": {
+    "frame": { "x": 114, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 20.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 21.aseprite": {
+    "frame": { "x": 126, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 22.aseprite": {
+    "frame": { "x": 132, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   },
+   "fx-confetti-bit 23.aseprite": {
+    "frame": { "x": 138, "y": 0, "w": 6, "h": 6 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 6, "h": 6 },
+    "sourceSize": { "w": 6, "h": 6 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "fx-confetti-bit.png",
+  "format": "RGBA8888",
+  "size": { "w": 144, "h": 6 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "amber", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "cyan", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "green", "from": 8, "to": 11, "direction": "forward" },
+   { "name": "pink", "from": 12, "to": 15, "direction": "forward" },
+   { "name": "white", "from": 16, "to": 19, "direction": "forward" },
+   { "name": "yellow", "from": 20, "to": 23, "direction": "forward" }
+  ]
+ }
+}

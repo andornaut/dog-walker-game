@@ -8,15 +8,15 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 ## People and dogs
 
-| Key                   | Type   | Size  | Tags                                             | Pri  | Note                                                                                                                                                                                                  |
-| --------------------- | ------ | ----- | ------------------------------------------------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `walker-<name>`       | sprite | 40×60 | `walk`, `react`, `stumble`, `idle`, `wave`       | core | ada, ben, casey, trista; `wave` faces the camera, for the unlock popup stop on the sidewalk                                                                                                           |
-| `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                                                                                                                                         |
-| `dog-<name>`          | sprite | 40×40 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
-| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse; penny also `worried`                                                                                                                                                                        |
-| `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | core | Keyed by dog                                                                                                                                                                                          |
-| `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                           |
-| `portrait-dog-<name>` | image  | 64×64 |                                                  | core | Dog pick and shop                                                                                                                                                                                     |
+| Key                   | Type   | Size  | Tags                                                | Pri  | Note                                                                                                                                                                                                  |
+| --------------------- | ------ | ----- | --------------------------------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `walker-<name>`       | sprite | 40×60 | `walk`, `react`, `stumble`, `idle`, `wave`, `cheer` | core | ada, ben, casey, trista; `wave` and `cheer` face the camera; `cheer` is the zone celebration's, drawn at 2×                                                                                           |
+| `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                                  | core | Walker picker                                                                                                                                                                                         |
+| `dog-<name>`          | sprite | 40×40 | `walk`, `react`, `pull`, `tell`, `idle`, `shake`    | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
+| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                         | core | Doghouse; penny also `worried`                                                                                                                                                                        |
+| `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`     | core | Keyed by dog                                                                                                                                                                                          |
+| `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                      | core | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                           |
+| `portrait-dog-<name>` | image  | 64×64 |                                                     | core | Dog pick and shop                                                                                                                                                                                     |
 
 ## Road objects
 
@@ -201,6 +201,14 @@ Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside ta
 | `icon-treat`                                                                      | image  | 16×16             |                                        | core | The treat well; the treat pickup's bone at icon size                                      |
 | `ui-zone-pips`                                                                    | sprite | 18×8              | `todo`, `<zone>`, `<zone>-done`        | core | One pip per zone of the route, 3px apart                                                  |
 | `icon-zone-<zone>`                                                                | image  | 16×16             |                                        | core | Every zone                                                                                |
+
+## Zone celebration
+
+| Key                  | Type   | Size    | Tags                                                | Pri  | Note                                                                       |
+| -------------------- | ------ | ------- | --------------------------------------------------- | ---- | -------------------------------------------------------------------------- |
+| `fx-confetti-bit`    | sprite | 6×6     | `amber`, `cyan`, `green`, `pink`, `white`, `yellow` | core | One falling bit, 4 tumble frames per colour; about 60 fall per celebration |
+| `ui-celebrate-burst` | image  | 148×132 |                                                     | core | The starburst behind the cheering walker                                   |
+| `ui-quip-tail-up`    | image  | 8×6     |                                                     | core | Points up at the new walker from the top of their bubble                   |
 
 ## Choice cards and help
 

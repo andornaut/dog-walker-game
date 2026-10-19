@@ -223,6 +223,24 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane faces the player.
 
+### Zone celebration
+
+After zones 1 to 3, over the road view (rows 150 to 465) dimmed as under a card, so the top bar, the backdrop and the doghouse row stay in view. The walker cheers at 2× in front of `ui-celebrate-burst` while `fx-confetti-bit` falls. Two lines head it: the big one in `font-display` drawn at 2× ("NEW WALKER!" or "ZONE DONE!"), the small one under it in `font-display-cream` at 1× ("BEN JOINS YOU!" or the zone's name), both centred on x 180. Text on the bubble and the plate is plum on cream, money forest. Screen pixels; text y is the font line's top.
+
+| Element         | New walker                                                                                                                              | Zone done                                                                                          |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Big line        | Line top 152                                                                                                                            | Line top 192                                                                                       |
+| Small line      | Line top 184                                                                                                                            | Line top 224                                                                                       |
+| Burst           | 106,202                                                                                                                                 | 106,246                                                                                            |
+| Walker          | `cheer` at 2× (80×120) from 140,206, feet line 326; hops in from x 400 (its centre, past the screen's edge) to x 180                    | `cheer` at 2× from 140,250, feet line 370                                                          |
+| Bubble or plate | `ui-quip` 24,332 312×76; `ui-quip-tail-up` at 176,327, its bottom row over the bubble's top rim                                         | `ui-panel` 40,380 280×32                                                                           |
+| Text            | The walker's line in `font-body` 2×, centred, wrapped to 296, line tops 336 and 354                                                     | "+$240 fees · +$38 tips" in `font-body` 2×, centred, line top 387, two spaces each side of the dot |
+| Rule            | Tan dots every 3px on row 375, x 36 to 323                                                                                              |                                                                                                    |
+| Pace and style  | Icons at y 383, words in `font-body` 2× at line top 382: pace icon, 4px, word, 10px, "·", 10px, style icon, 4px, word, centred on x 180 |                                                                                                    |
+| Button          | `ui-button` `go` 48,416 264×44, "WELCOME!" in `font-title` 2×, ink, centred, line top 423                                               | None: it moves on after 2 s or at a tap                                                            |
+
+- Confetti: about 60 `fx-confetti-bit`, each a random colour tag starting on a random frame, falling with a sideways sway from x 6 to 348 down the road view to row 458 over 2 s, under the lines, the burst, the walker and the panels. `fx-confetti` bursts at the walker's middle as the new walker lands. With reduced motion there is no confetti, the walker shows `cheer` frame 0 in place, and nothing hops in.
+
 ## Badges
 
 `badge-<achievement>` medals are 32×32: a ring in the badge's tier colour around a cream face with the goal's icon. `locked` turns the whole badge grey, the icon a two-tone slate silhouette under a small padlock. The tiers, from first to hardest, then the joke tier:
@@ -241,7 +259,8 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 
 - Animation names are Aseprite tag names. New tags go after existing ones so frame indices hold. Motion is in whole pixels.
 - Walkers are seen from behind: `walk` 4, `react` 2, `stumble` 4 and `idle` 2 frames. No gear variants.
-- A walker's `wave` faces the camera, for the popup stop where an unlocked walker waves from the sidewalk: 4 frames at 150ms, looping, feet on the back view's rows, the left arm (screen right) raised and swinging from the shoulder.
+- A walker's `wave` faces the camera: 4 frames at 150ms, looping, feet on the back view's rows, the left arm (screen right) raised and swinging from the shoulder.
+- A walker's `cheer` is the zone celebration's, drawn at 2×: the front view with both arms raised from the shoulders in a V, the thumbs inside, 4 frames at 120ms, looping: a crouch, take-off 2px up, the top of the hop 3px up, then the landing. Trista keeps her tote on her shoulder.
 - Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap, the body bobs on the passing frames, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
 - Every road sprite that stands or waits, depth variants included, loops an `idle` with frame 0 the rest pose. Reduced motion shows frame 0.
 

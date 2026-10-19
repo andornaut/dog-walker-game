@@ -10,7 +10,8 @@ outlined with icon_edge); ui-panel, ui-hint
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
-nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down (8x6), ui-zone-banner (248x48),
+nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
+ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48),
 ui-touch-hint (96x36) and ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
 wood behind the dog slots).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row, drawn as a character file card;
@@ -1185,6 +1186,50 @@ def quip_tail_down():
     return down_tail(5)
 
 
+def quip_tail_up():
+    """8x6, ui-quip-tail-down turned to point up from a bubble's top rim at the speaker above it. Place
+    its bottom row over the bubble's top rim so the cream runs through; the tip is at column 3, row 0."""
+    rows = ["...#....", "..###...", "..####..", ".######.", ".######.", "########"]
+    return chrome_shape(Grid(8, 6), lambda x, y: rows[y][x] == "#", lambda x, y: y > 5 and 1 <= x < 7, line=None)
+
+
+CELEBRATE_BURST = (148, 132)
+
+
+def celebrate_burst():
+    """148x132: the starburst behind the cheering walker in the zone celebration, ui-sticker's look as a
+    round burst: a yellow body (an ellipse with 62x54 half axes) ringed by 18 amber spikes 10px long, in a
+    1px ink outline, with a white glint along the body's upper left. No text goes on it."""
+    import math
+
+    w, h = CELEBRATE_BURST
+    points, spike = 18, 10
+    cx, cy, rx, ry = w / 2, h / 2, w / 2 - 12, h / 2 - 12
+    g = Grid(w, h)
+    for y in range(h):
+        for x in range(w):
+            dx, dy = (x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry
+            r = math.hypot(dx, dy)
+            if r <= 1:
+                g.p(x, y, "yellow")
+                continue
+            t = (math.atan2(dy, dx) / (2 * math.pi) * points + 0.5) % 1
+            if (r - 1) * min(rx, ry) <= spike * (1 - abs(2 * t - 1)):
+                g.p(x, y, "amber")
+    shape = [row[:] for row in g.px]
+    for y in range(h):
+        for x in range(w):
+            if not shape[y][x] and any(0 <= x + dx < w and 0 <= y + dy < h and shape[y + dy][x + dx]
+                                       for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))):
+                g.p(x, y, "ink")
+    for y in range(h):
+        for x in range(w):
+            dx, dy = (x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry
+            if 0.86 <= math.hypot(dx, dy) <= 0.92 and dx + dy < -0.6 and g.px[y][x] == K["yellow"]:
+                g.p(x, y, "white")
+    return g
+
+
 def quip():
     """24x24 nine-slice (8px corners): the owner's speech bubble, the chrome box with corners cut
     3px, rounder than the hint. Text in font-body, plum (9.42:1)."""
@@ -1293,6 +1338,8 @@ IMAGES = {
     "ui-quip": lambda: to_image(quip().outlined(False)),
     "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
     "ui-quip-tail-down": lambda: to_image(quip_tail_down().outlined(False)),
+    "ui-quip-tail-up": lambda: to_image(quip_tail_up().outlined(False)),
+    "ui-celebrate-burst": lambda: to_image(celebrate_burst().outlined(False)),
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
     "ui-touch-hint": lambda: to_image(touch_hint().outlined()),
     "ui-dog-band": lambda: to_image(dog_band().outlined(False)),
