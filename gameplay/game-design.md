@@ -29,7 +29,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 - Web, phone browser first. Touch and keyboard; mouse is not planned
 - Portrait, ¾ top-down view, 5 lanes
-- Layout: a shorter screen (360×560). From the top: the status bar (money, treat count, zone progress, sound, a Home button and pause); a backdrop band showing the current zone, where scenery gags play; the road across the full width, scrolling all the way to the top of its area; and a row of doghouses along the bottom, one per dog slot. Cards cover the paused, dimmed road; the status bar and doghouses stay visible
+- Layout: a shorter screen (360×560). From the top: the status bar (money, treat count, zone progress, a Home button and pause; mute is in Settings and on the M key); a backdrop band showing the current zone, where scenery gags play; the road across the full width, scrolling all the way to the top of its area; and a row of doghouses along the bottom, one per dog slot. Cards cover the paused, dimmed road; the status bar and doghouses stay visible
 - **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees." with Head home and Keep walking
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead. Whether the far end fades into the backdrop band is decided after seeing it. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
@@ -52,8 +52,20 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### A run
 
-- 4 zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each is the same distance, so later zones take less time as speed rises. A full run takes about 12 minutes
-- One forced stop per zone, and after zones 1 to 3, a choice of 1 of 3 upgrade cards
+- A walk is 4 zones of Maple Street, starting on Woof Way. Each zone is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
+- One forced stop per zone. After zones 1 to 3: pick 1 of 3 upgrade cards, then choose the next zone at a fork
+- **Forks:** the road meets a cross street and a fork card offers three paths (left, straight, right), each leading to a zone you haven't walked this run, sorted easiest on the left to hardest on the right. Each path card shows the zone's name, difficulty and fee multiplier
+- **Zones** (6, each walk visits 4 with no repeats):
+
+| Zone               | Difficulty  | Fees  | Encounter mix                                                             |
+| ------------------ | ----------- | ----- | ------------------------------------------------------------------------- |
+| Snooze Crescent    | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
+| Bark Park          | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists          |
+| Woof Way           | Normal      | ×1    | Puddles, the mail carrier, cones; movers rare. Always the first zone      |
+| Sniff Street Shops | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers             |
+| Paws Promenade     | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds    |
+| The Long Way Home  | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
+
 - After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
 - An owner who fires you takes back every fee their dog earned this run; tips stay
 - The run ends after zone 4 or when no dogs are left. You keep everything earned except fees taken back
@@ -224,7 +236,7 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 | Group      | Badge                   | Goal                                | Line                          |
 | ---------- | ----------------------- | ----------------------------------- | ----------------------------- |
 | Firsts     | First Steps             | Finish your first zone              | Every walk starts somewhere.  |
-| Firsts     | Round Trip              | Finish all 4 zones of Maple Street  | Home before the streetlights. |
+| Firsts     | Round Trip              | Finish all 4 zones of a walk        | Home before the streetlights. |
 | Firsts     | Double Leash            | Walk 2 dogs at once                 | Twice the tails.              |
 | Firsts     | Pack Leader             | Walk 3 dogs at once                 | Twelve paws, one plan.        |
 | Mastery    | Clean Paws              | Finish a zone without a bump        | Not a speck on them.          |
@@ -250,4 +262,4 @@ Each milestone builds on the last; placeholder art is fine until Milestone 6.
 5. **Dogs and home screen:** 9-dog roster (3 unlocked, 6 bought), dog slots (1 to start, 2 bought), pack picks, bank, shop, gear and loadout, gate scene, walker picker, owner parting lines, logbook, Stats page and achievements, settings, save
 6. **Pixel pass and phone playtest:** sprites for the 4 walkers, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 3 scenery gags, 2 pickups, achievement badges and celebration, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; sound effects and one music loop; accessibility basics; test on real phones
 
-**Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
+**Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
