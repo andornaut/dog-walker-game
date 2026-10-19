@@ -1,7 +1,6 @@
 import { zonePipTag } from "../assets/spriteKeys";
 import type { DogId, GameData, ZoneId } from "../data/types";
 import { type CauseData, causeLabel, type Change, changeAmount } from "../rules/causes";
-import type { ChoiceOutcome } from "../rules/choices";
 import { zoneById } from "../rules/route";
 import type { Cents } from "../rules/units";
 
@@ -20,14 +19,6 @@ export function changeLabels(data: CauseData, changes: readonly Change[]): Chang
     target: change.kind === "hearts" ? { dog: change.dog, kind: "dog" } : { kind: "bank" },
     text: causeLabel(data, change),
   }));
-}
-
-// The labels for a choice or an instant encounter: its heart changes, then its money changes.
-export function outcomeLabels(
-  data: CauseData,
-  outcome: Pick<ChoiceOutcome, "heartChanges" | "moneyChanges">,
-): ChangeLabel[] {
-  return changeLabels(data, [...outcome.heartChanges, ...outcome.moneyChanges]);
 }
 
 // Money is counted in cents and shown in whole dollars.

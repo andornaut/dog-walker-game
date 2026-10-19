@@ -1,11 +1,5 @@
 import { type Random, seededRandom } from "../runner/random";
 
-// One seed feeds several named streams, each its own generator, so an extra draw in one
-// stream never shifts the sequence of another.
-export const RANDOM_STREAM_NAMES = ["cards", "needs", "rolls", "spawns"] as const;
-export type RandomStreamName = (typeof RANDOM_STREAM_NAMES)[number];
-export type RandomStreams = Readonly<Record<RandomStreamName, Random>>;
-
 // FNV-1a over the name, starting from the seed mixed into the offset basis, then the murmur3
 // finalizer to spread nearby inputs. Every step is a bijection on 32 bits, so for one name,
 // different seeds always give different stream seeds.
@@ -19,16 +13,9 @@ export function streamSeed(seed: number, name: string): number {
   return (hash ^ (hash >>> 16)) >>> 0;
 }
 
-// Any name works, so a caller can split a stream further, such as one per zone.
+// One seed feeds several named streams, each its own generator, so an extra draw in one
+// stream never shifts the sequence of another. Any name works, so a caller can split a
+// stream further, such as one per zone.
 export function randomStream(seed: number, name: string): Random {
   return seededRandom(streamSeed(seed, name));
-}
-
-export function randomStreams(seed: number): RandomStreams {
-  return {
-    cards: randomStream(seed, "cards"),
-    needs: randomStream(seed, "needs"),
-    rolls: randomStream(seed, "rolls"),
-    spawns: randomStream(seed, "spawns"),
-  };
 }

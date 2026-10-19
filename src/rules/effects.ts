@@ -162,15 +162,6 @@ export function moneyCost(
   );
 }
 
-export function canAfford(
-  data: RulesData,
-  context: Pick<EffectContext, "affected">,
-  state: RunState,
-  effects: readonly Effect[],
-): boolean {
-  return moneyCost(data, context, state, effects) <= state.money;
-}
-
 // Changes one owner's meter by base, the base cause's amount: the owner's temperament
 // multiplies it, then the meter is held within 0 and the dog's max. No change is reported
 // when the meter does not move.

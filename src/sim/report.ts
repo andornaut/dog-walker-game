@@ -93,11 +93,6 @@ export const SKILL_PLAYERS: readonly MatrixPlayer[] = SKILL_PRESET_IDS.map((pres
   preset,
 }));
 
-export const HIT_RATE_PLAYERS: readonly MatrixPlayer[] = [0.06, 0.1, 0.15].map((hitRate) => ({
-  hitRate,
-  kind: "rates",
-}));
-
 export const DEFAULT_MATRIX: Matrix = {
   gear: null,
   packs: PACKS,

@@ -6,14 +6,7 @@ import type { DogId, Effect } from "../data/types";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import {
-  applyEffects,
-  canAfford,
-  type EffectContext,
-  moneyCost,
-  resolveEffects,
-  targetDogs,
-} from "./effects";
+import { applyEffects, type EffectContext, moneyCost, resolveEffects, targetDogs } from "./effects";
 import { cents } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING };
@@ -214,14 +207,6 @@ describe("moneyCost and applyEffects: money", () => {
     ["nothing for a gain", [], gain, testState({ duchess: 5, koda: 5 }), 0],
   ])("charges %s", (_, affected, effect, state, cost) => {
     expect(moneyCost(data, context(affected), state, [effect])).toBe(cost);
-  });
-
-  it("allows an option only when the player has its cost", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { money: cents(999) });
-    expect(canAfford(data, context(["duchess", "koda"]), state, [towel])).toBe(false);
-    expect(
-      canAfford(data, context(["duchess", "koda"]), { ...state, money: cents(1000) }, [towel]),
-    ).toBe(true);
   });
 
   it("adds gains and subtracts costs, never going below $0", () => {

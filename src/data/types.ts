@@ -260,8 +260,6 @@ export type Effect =
   | SkipOptionEffect
   | TreatsEffect;
 
-export type EffectKind = Effect["kind"];
-
 export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
   readonly art: string;
@@ -757,8 +755,6 @@ export type AchievementCondition =
   | { readonly count: Threshold; readonly kind: "gearOwned" }
   | { readonly count: Threshold; readonly kind: "zonesFinished" }
   | { readonly dollars: number; readonly kind: "earnings" };
-
-export type AchievementConditionKind = AchievementCondition["kind"];
 
 // A badge on the Stats page's wall, earned once every condition holds. Celebration only: it
 // changes nothing in play. The badge art is badge-<id in kebab case>.

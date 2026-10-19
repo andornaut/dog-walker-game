@@ -27,10 +27,6 @@ export function addCents(a: Cents, b: Cents): Cents {
   return (a + b) as Cents;
 }
 
-export function scaleCents(factor: Multiplier, amount: Cents): Cents {
-  return cents(amount * factor);
-}
-
 export function nonNegativeCents(amount: Cents): Cents {
   return Math.max(0, amount) as Cents;
 }

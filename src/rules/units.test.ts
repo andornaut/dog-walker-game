@@ -1,19 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { TEST_TUNING } from "../testing/tuning";
-import { clampHearts, dollarsToCents, probability, read, readTable, scaleCents } from "./units";
+import { clampHearts, dollarsToCents, probability, read, readTable } from "./units";
 
 describe("units", () => {
   it("reads dollars from the tuning as integer cents", () => {
     expect(read(TEST_TUNING, "money", "tip")).toBe(100);
     expect(readTable(TEST_TUNING, "money", "feeByTemperament", "fussy")).toBe(1300);
     expect(dollarsToCents(1.5)).toBe(150);
-  });
-
-  it("rounds a scaled amount to whole cents", () => {
-    expect(scaleCents(read(TEST_TUNING, "multipliers", "bigTipperTip"), dollarsToCents(0.33))).toBe(
-      50,
-    );
   });
 
   it("holds hearts within 0 and the max", () => {

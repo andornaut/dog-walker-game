@@ -19,8 +19,8 @@ import {
   dogInfo,
   dogNames,
   dollarText,
-  emptyLoadout,
   gearInfo,
+  type HomeLoadout,
   type HomeTap,
   lastWalkLine,
   logbookOf,
@@ -34,6 +34,8 @@ import {
   tapGear,
   wrapWords,
 } from "./home";
+
+const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
 
 const data = {
   debuffs: DEBUFFS,

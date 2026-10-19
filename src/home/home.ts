@@ -27,8 +27,6 @@ export type HomeTap =
   | { readonly kind: "full" }
   | { readonly kind: "loadout"; readonly loadout: HomeLoadout };
 
-export const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
-
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
 
 // Money is counted in cents and shown in whole dollars, with thousands separated.

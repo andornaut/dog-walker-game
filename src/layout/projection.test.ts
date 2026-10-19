@@ -7,7 +7,6 @@ import { PACK_DEPTH } from "./packFormation";
 import {
   columnSpan,
   distanceAtY,
-  farEdgeAt,
   lineColumn,
   project,
   roadCameraFor,
@@ -57,7 +56,6 @@ describe("roadProjection", () => {
     const speed = TUNING.pixels.roadScrollSpeed;
     const seconds = TUNING.seconds.lookAheadSeconds;
     expect(projection.visibleDistance / speed).toBeCloseTo(seconds, 6);
-    expect(farEdgeAt(projection, 1000)).toBeCloseTo(1000 + seconds * speed, 6);
   });
 
   it("keeps the vanishing row at -164 and the join's columns whatever the speed", () => {

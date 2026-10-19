@@ -2,44 +2,40 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { cents, clampHearts } from "../rules/units";
-import { changeLabels, heartRows, outcomeLabels, pipLook, wholeDollars, zonePips } from "./hudView";
+import { changeLabels, heartRows, pipLook, wholeDollars, zonePips } from "./hudView";
 
 describe("changeLabels", () => {
   const skunkIgnore = { encounter: "skunk", kind: "encounter", option: 2 } as const;
 
   it("labels each heart change at its dog and money at the bank, with their causes", () => {
-    const labels = outcomeLabels(gameData, {
-      heartChanges: [
-        {
-          after: clampHearts(10, 3),
-          before: clampHearts(10, 5),
-          causes: [
-            { amount: -1, kind: "effect", source: skunkIgnore },
-            { amount: -1, kind: "temperament", temperament: "dramatic" },
-          ],
-          dog: "nugget",
-          kind: "hearts",
-        },
-        {
-          after: clampHearts(10, 6),
-          before: clampHearts(10, 5),
-          causes: [{ amount: 1, kind: "treat" }],
-          dog: "koda",
-          kind: "hearts",
-        },
-      ],
-      moneyChanges: [
-        {
-          amount: cents(150),
-          causes: [
-            { amount: 100, kind: "tip" },
-            { amount: 50, kind: "packSize", packSize: 1 },
-          ],
-          dog: null,
-          kind: "money",
-        },
-      ],
-    });
+    const labels = changeLabels(gameData, [
+      {
+        after: clampHearts(10, 3),
+        before: clampHearts(10, 5),
+        causes: [
+          { amount: -1, kind: "effect", source: skunkIgnore },
+          { amount: -1, kind: "temperament", temperament: "dramatic" },
+        ],
+        dog: "nugget",
+        kind: "hearts",
+      },
+      {
+        after: clampHearts(10, 6),
+        before: clampHearts(10, 5),
+        causes: [{ amount: 1, kind: "treat" }],
+        dog: "koda",
+        kind: "hearts",
+      },
+      {
+        amount: cents(150),
+        causes: [
+          { amount: 100, kind: "tip" },
+          { amount: 50, kind: "packSize", packSize: 1 },
+        ],
+        dog: null,
+        kind: "money",
+      },
+    ]);
     expect(labels).toEqual([
       { gain: false, target: { dog: "nugget", kind: "dog" }, text: "−2 ♥, dramatic" },
       { gain: true, target: { dog: "koda", kind: "dog" }, text: "+1 ♥ treat" },

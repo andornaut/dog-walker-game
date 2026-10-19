@@ -113,12 +113,6 @@ export function roadXAt(
   return projection.centerX + (screenX - projection.centerX) / scale;
 }
 
-// The road distance, from the start of the walk, at the far edge of the road in view, when
-// the walk has scrolled scroll pixels.
-export function farEdgeAt(projection: Pick<RoadProjection, "visibleDistance">, scroll: number) {
-  return scroll + projection.visibleDistance;
-}
-
 // Screen rows are sampled at their centres.
 export function rowScale(projection: Pick<Camera, "footY" | "horizonY">, row: number): number {
   return scaleAtY(projection, row + 0.5);
