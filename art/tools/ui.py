@@ -431,17 +431,26 @@ def chevron(g, x, cy, left, col, sh):
 
 
 def touch_hint():
-    """96x36: a finger tapping between two pairs of arrows, for the first-run lane hint. The
-    game writes "tap left / right" in font-body under it."""
+    """96x36: a fingertip pressed on a two-way track, with fading touch marks either side and
+    speed lines, for the first-run lane hint. The game writes "drag to switch lanes" in font-body
+    under it."""
     g = Grid(96, 36)
-    chevron(g, 8, 19, True, "orange", "rust")
-    chevron(g, 16, 19, True, "amber", "orange")
-    chevron(g, 87, 19, False, "orange", "rust")
-    chevron(g, 79, 19, False, "amber", "orange")
-    # tap lines around the fingertip
-    for x, y in ((40, 4), (41, 5), (48, 0), (48, 1), (56, 4), (55, 5)):
-        g.p(x, y, "white")
-    # pointing hand: index finger up, the other fingers curled to the right, thumb on the left
+    # the track: a line between two arrowheads
+    g.rect(9, 5, 78, 2, "amber")
+    g.rect(9, 6, 78, 1, "orange")
+    for i in range(5):
+        g.rect(4 + i, 6 - i, 1, 1 + 2 * i, "orange")
+        g.rect(91 - i, 6 - i, 1, 1 + 2 * i, "orange")
+    # where the fingertip was a moment ago, fading out either side
+    for cx, col in ((26, "lgrey"), (70, "lgrey"), (36, "white"), (60, "white")):
+        g.ell(cx, 6, 3, 3, col)
+        g.ell(cx, 6, 1.6, 1.6, None)
+    g.ell(48, 6, 4, 4, "yellow", "amber")
+    # speed lines beside the hand
+    for y, dx in ((16, 0), (20, 3), (24, 0)):
+        g.rect(28 - dx, y, 8, 1, "white")
+        g.rect(62 + dx, y, 8, 1, "white")
+    # pointing hand: index finger up to the contact point, the other fingers curled to the right
     g.rect(46, 6, 5, 13, "skin1")
     g.rect(47, 5, 3, 1, "skin1")
     g.rect(47, 6, 3, 2, "cream")

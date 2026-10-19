@@ -222,7 +222,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Button      | `ui-button`               | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                                                   |
 | Panel       | `ui-panel`                | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                                              |
 | Pause icon  | `icon-pause`              | image  | 16×16     | core     | Top bar; opens the pause menu                                                                            |
-| Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | Finger and arrows; the game writes "tap left / right" under it                                           |
+| Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | A fingertip on a two-way track with fading touch marks; the game writes "drag to switch lanes" under it  |
 | App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later                              |
 
 ## Counts
