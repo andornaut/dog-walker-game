@@ -148,6 +148,11 @@ export function standsOnGround(key: string): boolean {
   return GROUND_UI_KEYS.has(key) || !UNMEASURED_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
+// A 1x road sprite's frame side: dogs, obstacles and encounters are this square, the walker
+// and the tall encounters this wide and half again as tall, and tips, treats and puddles this
+// wide and half as tall.
+export const ROAD_SPRITE_SIZE = 40;
+
 // The skunk stands on its spray cloud, which is its hit box.
 export const SKUNK_CLOUD_KEY = "skunk-cloud";
 

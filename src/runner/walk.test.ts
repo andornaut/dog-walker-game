@@ -149,6 +149,30 @@ const standingSpan = (
   laneSpan: footprintOf(tuned, kind).lanes,
   length: itemHeight(tuned, GAME_ROAD, kind) + GAME_ROAD.tallestPackBand,
 });
+// A pixel-long span for each pixel of scroll a mover overlaps the pack in a lane of the game's
+// road.
+function moverSpans(tuned: Real, distance: number, mover: MoverPath): BlockingSpan[] {
+  const sight = GAME_ROAD.sightLength;
+  const window = itemHeight(tuned, GAME_ROAD, "squirrel") + GAME_ROAD.tallestPackBand;
+  return Array.from({ length: Math.ceil(2 * ROAD_LENGTH) }, (_, since) => {
+    const place = moverPlace(LANE_COUNT, mover, since);
+    const lane = Math.floor(place.lanePosition + 0.5);
+    const overlaps = place.travel >= sight && place.travel < sight + window;
+    return place.moving && overlaps && lane >= 0 && lane < LANE_COUNT
+      ? [{ distance: distance + since - sight, lane, laneSpan: 1, length: 1 }]
+      : [];
+  }).flat();
+}
+// Every lane-blocking spawn's spans on the game's road: a standing one's, or a mover's as it
+// passes the pack.
+const blockingSpans = (tuned: Real, pending: Walk["road"]["pending"]): BlockingSpan[] =>
+  pending
+    .filter((event) => blocksLane(tuned, event.kind))
+    .flatMap((event) =>
+      event.mover === undefined
+        ? [standingSpan(tuned, event)]
+        : moverSpans(tuned, event.distance, event.mover),
+    );
 // The scroll over which a mover is on the game's road: from its cue until it has left the road
 // or passed the bottom.
 function onScreen(distance: number, mover: MoverPath): readonly [number, number] {
@@ -341,9 +365,7 @@ describe("planZone", { timeout: 15_000 }, () => {
             road: startRoad(LANE_COUNT),
             run: zoned,
           });
-          const spans = walk.road.pending
-            .filter((event) => ["minor", "obstacle"].includes(itemCategory(base, event.kind)))
-            .map((event) => standingSpan(base, event));
+          const spans = blockingSpans(base, walk.road.pending);
           for (const start of [0, 2, 4]) {
             expect(lanesReachedAtEnd(walkwayOf(base, zoned), spans, start)).not.toEqual([]);
           }
@@ -1207,18 +1229,6 @@ describe("movers", { timeout: 15_000 }, () => {
   it("leaves a way past every obstacle and mover of the game's road, one mover on screen", () => {
     const tuned = { ...REAL, world: sharedWorld(WORLD, 0.5) };
     const run = realRun(tuned);
-    const sight = GAME_ROAD.sightLength;
-    const window = itemHeight(tuned, GAME_ROAD, "squirrel") + GAME_ROAD.tallestPackBand;
-    // A pixel-long span for each pixel of scroll a mover overlaps the pack in a lane.
-    const moverSpans = (distance: number, mover: MoverPath) =>
-      Array.from({ length: Math.ceil(2 * ROAD_LENGTH) }, (_, since) => {
-        const place = moverPlace(LANE_COUNT, mover, since);
-        const lane = Math.floor(place.lanePosition + 0.5);
-        const overlaps = place.travel >= sight && place.travel < sight + window;
-        return place.moving && overlaps && lane >= 0 && lane < LANE_COUNT
-          ? [{ distance: distance + since - sight, lane, laneSpan: 1, length: 1 }]
-          : [];
-      }).flat();
     for (const zoned of ZONE_IDS.map((zone) => inZone(run, zone, WORLD.walkLength - 1))) {
       for (const seed of [1, 2, 3]) {
         const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
@@ -1226,11 +1236,7 @@ describe("movers", { timeout: 15_000 }, () => {
           run: zoned,
         });
         const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
-        const spans = blocking.flatMap((event) =>
-          event.mover === undefined
-            ? [standingSpan(tuned, event)]
-            : moverSpans(event.distance, event.mover),
-        );
+        const spans = blockingSpans(tuned, blocking);
         for (const start of [0, 2, 4]) {
           expect(lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start)).not.toEqual([]);
         }

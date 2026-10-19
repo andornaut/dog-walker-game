@@ -2,7 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
 import { GROWL_ICON_KEY, traitIconKey } from "../../assets/iconKeys";
-import { dogSpriteKey, NEED_ART } from "../../assets/spriteKeys";
+import { dogSpriteKey, NEED_ART, ROAD_SPRITE_SIZE } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import type { DogId, NeedId, QuirkId } from "../../data/types";
 import {
@@ -44,6 +44,10 @@ import {
 } from "../sprites";
 import { StatusOverlays } from "../statusDraw";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+
+// The dizzy stars' centre over the walker's feet: 5px over the head of the 1.5-sprite-tall
+// walker.
+const DIZZY_LIFT = ROAD_SPRITE_SIZE * 1.5 + 5;
 
 // What the pack is drawn with each frame besides the walk.
 export interface PackFrame {
@@ -253,7 +257,7 @@ export class PackView {
     }
     shadow(walker.key, 1, walkerX, footY);
     this.stumbling &&= isSteeringLocked(walk.road.control);
-    this.dizzy.setVisible(this.stumbling).setPosition(walkerX, footY - 52);
+    this.dizzy.setVisible(this.stumbling).setPosition(walkerX, footY - DIZZY_LIFT);
     playTag(this.dizzy, "fx-dizzy", "loop", still);
     this.statusOverlays.draw(this.dogSprites, frame.statusOf, still);
     this.drawSignals(walk, walking, frame);

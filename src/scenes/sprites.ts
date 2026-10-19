@@ -3,7 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import type { SpriteAnchor } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
-import { depthVariantKey, standsOnGround } from "../assets/spriteKeys";
+import { depthVariantKey, ROAD_SPRITE_SIZE, standsOnGround } from "../assets/spriteKeys";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { opaqueBoundsOfRgba, type PixelBounds } from "../layout/pixelShapes";
 import { SCALE_STEPS, type ScaleStep } from "../layout/projection";
@@ -138,7 +138,15 @@ export function firstTag(scene: Scene, key: string, tags: readonly string[]): st
 }
 
 export function spriteMetrics(key: string): SpriteMetrics {
-  return measured.get(key) ?? { feetY: 32, frameHeight: 32, frameWidth: 32, opaqueWidth: 24 };
+  const side = ROAD_SPRITE_SIZE;
+  return (
+    measured.get(key) ?? {
+      feetY: side,
+      frameHeight: side,
+      frameWidth: side,
+      opaqueWidth: side * 0.75,
+    }
+  );
 }
 
 // A coloured box standing in for a sprite the art has not delivered or that failed to

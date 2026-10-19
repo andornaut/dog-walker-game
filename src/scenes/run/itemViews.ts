@@ -6,6 +6,7 @@ import {
   minorObstacleSpriteKey,
   MOVER_SPRITES,
   needSpotSpriteKey,
+  ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
   WARNING_ARROW_KEY,
   WARNING_KEY,
@@ -34,11 +35,11 @@ import { drawMover, moverBodyKey } from "./moverView";
 import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its hit box.
-const PLACEHOLDER_HEIGHT = 32;
+const PLACEHOLDER_HEIGHT = ROAD_SPRITE_SIZE;
 // The icon of a need spot that shares an obstacle's art floats this high over it, at 1x.
-const SPOT_ICON_LIFT = 40;
+const SPOT_ICON_LIFT = 50;
 // Road pixels the skunk stands behind its cloud's near edge, so it reads as inside the spray.
-const SKUNK_IN_CLOUD = 8;
+const SKUNK_IN_CLOUD = 10;
 
 // One sprite of an item. dx is across the road from the item's centre and footY the flat
 // road row it stands on, both in road pixels. feet "bottom" stands it on its frame's bottom
@@ -199,7 +200,7 @@ export class ItemViews {
         part(encounterArt("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
       ];
     } else if (item.kind === "otherDog" && has(otherDogOwner())) {
-      parts = [part(encounterArt(item.kind), { dx: -8 }), part(otherDogOwner(), { dx: 10 })];
+      parts = [part(encounterArt(item.kind), { dx: -10 }), part(otherDogOwner(), { dx: 13 })];
     } else {
       parts = [part(encounterArt(item.kind), item.kind === "puddle" ? flat : {})];
     }

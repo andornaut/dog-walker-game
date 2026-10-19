@@ -2,7 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { needIconKey } from "../assets/iconKeys";
-import { NEED_ART } from "../assets/spriteKeys";
+import { NEED_ART, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { DogId, NeedId } from "../data/types";
 import { PALETTE } from "./palette";
@@ -167,9 +167,10 @@ export class NeedSignals {
       playEffect(scene, NEED_ART.needMet, need, feet, depth)?.setOrigin(0.5, 1);
       return;
     }
-    const frame = scene.add.image(feet.x, feet.y - 32, bubbleKey(scene)).setOrigin(0.5, 1);
+    const over = feet.y - ROAD_SPRITE_SIZE;
+    const frame = scene.add.image(feet.x, over, bubbleKey(scene)).setOrigin(0.5, 1);
     const shown = scene.add
-      .image(feet.x, feet.y - 32 - BUBBLE.height + BUBBLE.icon.y, icon.key, icon.frame)
+      .image(feet.x, over - BUBBLE.height + BUBBLE.icon.y, icon.key, icon.frame)
       .setOrigin(0.5, 0)
       .setDisplaySize(ICON_SIZE, ICON_SIZE);
     scene.tweens.add({

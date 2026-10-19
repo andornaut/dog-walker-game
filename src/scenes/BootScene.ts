@@ -3,7 +3,13 @@ import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 import { itemAt } from "../arrays";
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
 import { type AssetManifest, assetUrl, parseManifest, type SpriteAsset } from "../assets/manifest";
-import { dogFaceKey, dogSpriteKey, encounterSpriteKey, ownerFaceKey } from "../assets/spriteKeys";
+import {
+  dogFaceKey,
+  dogSpriteKey,
+  encounterSpriteKey,
+  ownerFaceKey,
+  ROAD_SPRITE_SIZE,
+} from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { DogId, EncounterId } from "../data/types";
 import { devRunLoadout, namesRunSetup } from "../dev/devStart";
@@ -48,21 +54,24 @@ const box = (width: number, height: number, color: number): Size => ({ color, he
 
 // Every sprite the scenes draw, with the box drawn in its place if it is missing.
 function placeholderSizes(): Map<string, Size> {
+  const side = ROAD_SPRITE_SIZE;
+  const short = side / 2;
+  const tallest = side * 1.5;
   const sizes = new Map<string, Size>([
-    ["tip", box(16, 16, PALETTE.amber)],
-    ["treat", box(16, 16, PALETTE.tan)],
-    [gameData.walkers[gameData.defaultWalker].spriteKey, box(32, 48, PALETTE.blue)],
+    ["tip", box(short, short, PALETTE.amber)],
+    ["treat", box(short, short, PALETTE.tan)],
+    [gameData.walkers[gameData.defaultWalker].spriteKey, box(side, tallest, PALETTE.blue)],
   ]);
   for (const dog of Object.keys(gameData.dogs) as DogId[]) {
-    sizes.set(dogSpriteKey(gameData, dog), box(32, 32, PALETTE.slate));
+    sizes.set(dogSpriteKey(gameData, dog), box(side, side, PALETTE.slate));
     sizes.set(dogFaceKey(gameData, dog), box(32, 32, PALETTE.slate));
     sizes.set(ownerFaceKey(gameData, dog), box(32, 32, PALETTE.brown));
   }
   const tall: readonly EncounterId[] = ["biscuitNeighbour", "lemonade", "photoOp", "thief"];
   for (const encounter of Object.keys(gameData.encounters) as EncounterId[]) {
-    const height = encounter === "puddle" ? 16 : tall.includes(encounter) ? 48 : 32;
+    const height = encounter === "puddle" ? short : tall.includes(encounter) ? tallest : side;
     const color = gameData.encounters[encounter].kind === "lucky" ? PALETTE.green : PALETTE.mauve;
-    sizes.set(encounterSpriteKey(encounter), box(32, height, color));
+    sizes.set(encounterSpriteKey(encounter), box(side, height, color));
   }
   return sizes;
 }

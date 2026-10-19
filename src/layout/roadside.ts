@@ -1,12 +1,13 @@
+import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 
 // What lies beside the projected road, as art/tools/backdrops.py paints it below the
 // backdrops' streets, so the verge under the band continues the band's bottom row. across is
-// how far from the road's centre line a pixel is, in road pixels (the road is across < ROAD_HALF);
-// x is the same measure signed, negative on the left. z is a road distance from the start of
-// the walk, so seams, dots, tufts, leaves and rough patches scroll with the road; mown stripes
-// run along the street and stay put. span is how much road a screen row covers, and scale the
-// row's ground scale.
+// how far from the road's centre line a pixel is, in road pixels (the road is across <
+// ROAD_HALF); x is the same measure signed, negative on the left. z is a road distance from
+// the start of the walk, so seams, dots, tufts, leaves and rough patches scroll with the
+// road; mown stripes run along the street and stay put. span is how much road a screen row
+// covers, and scale the row's ground scale.
 
 // Endesga 32 colours.
 const GREEN = 0x63c74d;
@@ -27,7 +28,7 @@ const YELLOW = 0xfee761;
 const ORANGE = 0xf77622;
 
 // Verge distances count out from the road's edge, so they move with the road's width.
-const ROAD_HALF = 140;
+const ROAD_HALF = SCREEN_CONFIG.roadWidth / 2;
 const CURB = ROAD_HALF + 4;
 const WALK = ROAD_HALF + 48;
 const SEAM_EVERY = 32;
@@ -263,7 +264,7 @@ export interface VergeMark {
 
 // Marks per road pixel of verge, and the share of a screen row's pixels that start one: tufts
 // as on the backdrop's bottom row, thicker toward the walker; leaves sparser.
-const MARK_FIELD = { from: ROAD_HALF + 6, to: 300 } as const;
+const MARK_FIELD = { from: ROAD_HALF + 6, to: ROAD_HALF + 160 } as const;
 const MARK_DENSITY = { leaf: 0.016, tuft: 0.08 } as const;
 const MARK_RATE = { leaf: { max: 0.012, rate: 0.004 }, tuft: { max: 0.06, rate: 0.03 } } as const;
 
@@ -355,7 +356,8 @@ export const ROUGH_PATCH_REACH = 150;
 const PATCHES_PER_BLOCK = 10;
 
 // The rough patches whose middles fall in road block b: 30 to 90 across and 50 to 150 along,
-// 170 to 900 from the centre line on either side, as the backdrops place them.
+// their middles 30 to 760 out from the road's edge on either side, as the backdrops place
+// them.
 export function roughPatches(block: number): RoughPatch[] {
   return Array.from({ length: PATCHES_PER_BLOCK }, (_, i) => {
     const side = noise(block, 3 * i) < 0.5 ? -1 : 1;

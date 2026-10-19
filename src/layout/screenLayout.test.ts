@@ -9,7 +9,7 @@ const config = {
   dogSlotCount: 3,
   height: 560,
   roadIntoBand: 24,
-  roadWidth: 280,
+  roadWidth: 320,
   topBarHeight: 40,
   width: 360,
 };
@@ -41,7 +41,7 @@ describe("screenLayout", () => {
     [
       "the road's lanes centred in the drawn road",
       layout.road,
-      { height: 320, width: 280, x: 40, y: 150 },
+      { height: 320, width: 320, x: 20, y: 150 },
     ],
     ["the doghouse row along the bottom", layout.dogRow, { height: 90, width: 360, x: 0, y: 470 }],
     [
@@ -57,9 +57,9 @@ describe("screenLayout", () => {
     expect(actual).toEqual(expected);
   });
 
-  it("splits the game's road into 56px lanes", () => {
+  it("splits the game's road into 64px lanes", () => {
     const { road } = screenLayout(SCREEN_CONFIG);
-    expect(road.width / LANE_COUNT).toBe(56);
+    expect(road.width / LANE_COUNT).toBe(64);
   });
 
   it("fits the game's screen in 360x560, every part touching the next", () => {

@@ -1,3 +1,4 @@
+import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { distanceAtY, type RoadProjection, roadXAt, rowScale } from "./projection";
 import type { Rect } from "./rect";
@@ -92,7 +93,7 @@ export interface RoadFrame {
   readonly zoneStart: number;
 }
 
-export const STRIP = { height: 64, width: 280 } as const;
+export const STRIP = { height: 64, width: SCREEN_CONFIG.roadWidth } as const;
 // A start strip's far rows are its zone's road; the rest, a cross street, then the previous
 // zone's road below it.
 export const START_STRIP_ZONE_ROWS = 20;

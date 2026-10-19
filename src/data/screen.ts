@@ -10,7 +10,7 @@ export const SCREEN_CONFIG: ScreenConfig = {
   dogSlotCount: 3,
   height: 560,
   roadIntoBand: 24,
-  roadWidth: 280,
+  roadWidth: 320,
   topBarHeight: 40,
   width: 360,
 };

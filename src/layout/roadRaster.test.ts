@@ -35,6 +35,8 @@ import {
 import { screenLayout } from "./screenLayout";
 
 const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
+// Verge distances, across, count out from the road's edge.
+const ROAD_HALF = SCREEN_CONFIG.roadWidth / 2;
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
 const raster = roadRaster(projection, view);
 
@@ -78,6 +80,27 @@ describe("the verge beside the road", () => {
     });
     return result;
   };
+  // The runs either side of the strip, given outward from the road's edge as [columns,
+  // colour], the last running to the screen's edge.
+  const mirrored = (outward: readonly [number, number][]): [number, number, number][] => {
+    const last = view.x + view.width - 1;
+    const left: [number, number, number][] = [];
+    const right: [number, number, number][] = [];
+    let leftEdge = view.x + bandRow.roadStart;
+    let rightEdge = view.x + bandRow.roadEnd - 1;
+    for (const [width, color] of outward) {
+      left.unshift([Math.max(view.x, leftEdge - width), leftEdge - 1, color]);
+      right.push([rightEdge + 1, Math.min(last, rightEdge + width), color]);
+      leftEdge -= width;
+      rightEdge += width;
+    }
+    const strip: [number, number, number] = [
+      view.x + bandRow.roadStart,
+      view.x + bandRow.roadEnd - 1,
+      STRIP_MARK,
+    ];
+    return [...left, strip, ...right];
+  };
   const baseRuns = (zone: ZoneId) =>
     runsOf(
       Array.from(bandRow.across, (across) =>
@@ -85,21 +108,14 @@ describe("the verge beside the road", () => {
       ),
     );
 
-  const MOWN_LAWN: [number, number, number][] = [
-    [0, 14, DARK_GREEN],
-    [15, 32, GREEN],
-    [33, 63, DARK_GREEN],
-    [64, 85, GREEN],
-    [86, 107, LIGHT_GREY],
-    [108, 109, GREY],
-    [110, 249, STRIP_MARK],
-    [250, 251, GREY],
-    [252, 273, LIGHT_GREY],
-    [274, 295, GREEN],
-    [296, 326, DARK_GREEN],
-    [327, 344, GREEN],
-    [345, 359, DARK_GREEN],
-  ];
+  const MOWN_LAWN = mirrored([
+    [2, GREY],
+    [22, LIGHT_GREY],
+    [22, GREEN],
+    [31, DARK_GREEN],
+    [18, GREEN],
+    [Number.POSITIVE_INFINITY, DARK_GREEN],
+  ]);
 
   // The runs of each backdrop's row 109 beside the road, without its tufts.
   it.each<{ name: string; runs: [number, number, number][]; zone: ZoneId }>([
@@ -111,30 +127,19 @@ describe("the verge beside the road", () => {
     },
     {
       name: "park's unmown grass up to the path",
-      runs: [
-        [0, 109, GREEN],
-        [110, 249, STRIP_MARK],
-        [250, 359, GREEN],
-      ],
+      runs: mirrored([[Number.POSITIVE_INFINITY, GREEN]]),
       zone: "park",
     },
     {
       name: "shops' paving, edging, planter and white curb",
-      runs: [
-        [0, 98, CREAM],
-        [99, 99, TAN],
-        [100, 100, BROWN],
-        [101, 106, GREEN],
-        [107, 107, BROWN],
-        [108, 109, WHITE],
-        [110, 249, STRIP_MARK],
-        [250, 251, WHITE],
-        [252, 252, BROWN],
-        [253, 258, GREEN],
-        [259, 259, BROWN],
-        [260, 260, TAN],
-        [261, 359, CREAM],
-      ],
+      runs: mirrored([
+        [2, WHITE],
+        [1, BROWN],
+        [6, GREEN],
+        [1, BROWN],
+        [1, TAN],
+        [Number.POSITIVE_INFINITY, CREAM],
+      ]),
       zone: "shops",
     },
   ])("continues $name", ({ runs, zone }) => {
@@ -342,7 +347,7 @@ describe("drawRoad", () => {
     ] as const) {
       const label = pixelAt(out, x, y) ?? 0;
       expect((label - 1) % STRIP.width).toBe(
-        Math.floor(140 + (x + 0.5 - 180) / rowScale(projection, y)),
+        Math.floor(STRIP.width / 2 + (x + 0.5 - projection.centerX) / rowScale(projection, y)),
       );
     }
     expect(itemAt(raster.rows, raster.rows.length - 1).level).toBe(0);
@@ -351,7 +356,9 @@ describe("drawRoad", () => {
   it("moves the road toward the pack as the walk scrolls", () => {
     const strips = { strip: stripLevels(labelled), zone: "park" as const };
     const row = (scroll: number) =>
-      Math.floor(((pixelAt(draw(frameOf({ current: strips, scroll })), 180, 400) ?? 1) - 1) / 280);
+      Math.floor(
+        ((pixelAt(draw(frameOf({ current: strips, scroll })), 180, 400) ?? 1) - 1) / STRIP.width,
+      );
     expect((row(0) - row(10) + STRIP.height) % STRIP.height).toBe(10);
   });
 
@@ -409,10 +416,12 @@ describe("drawRoad", () => {
   });
 
   it("puts the previous zone's verge beside the start strip's cross street", () => {
-    // street's curb runs to 144 across; park has none, so its lawn starts at the road.
+    // street's curb runs 4 past the road's edge; park has none, so its lawn starts at the road.
     const y = 400;
     const row = itemAt(raster.rows, y - view.y);
-    const curbX = Array.from(row.across).findIndex((across) => across >= 140 && across < 144);
+    const curbX = Array.from(row.across).findIndex(
+      (across) => across >= ROAD_HALF && across < ROAD_HALF + 4,
+    );
     expect(curbX).toBeGreaterThanOrEqual(0);
     const previous = look("street", 0x111111);
     const start = look("park", 0x222222);

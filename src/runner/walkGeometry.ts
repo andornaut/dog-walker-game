@@ -7,17 +7,17 @@ import type { RoadGeometry } from "./walk";
 const WALKER_FEET_ABOVE_ROAD_BOTTOM = 6;
 
 // An obstacle's hit box is its footprint less this much at each end, so an n-lane, m-row
-// obstacle is drawn and hit 56n-24 by 56m-24 on 56px lanes.
+// obstacle is drawn and hit 64n-24 by 64m-24 on 64px lanes.
 const FOOTPRINT_INSET = 12;
 
 // Collision heights in screen pixels of what is not an obstacle: the part of each sprite that
 // bumps into the pack.
 const ITEM_HEIGHTS: RoadGeometry["itemHeights"] = {
-  forcedStop: 16,
-  lucky: 20,
-  needSpot: 20,
-  tip: 12,
-  treat: 12,
+  forcedStop: 20,
+  lucky: 25,
+  needSpot: 25,
+  tip: 15,
+  treat: 15,
 };
 
 export function walkerFootY(road: Rect): number {
