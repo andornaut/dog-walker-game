@@ -101,9 +101,12 @@ describe("gearRows and dogRows", () => {
     expect(rows.find(({ id }) => id === "gear:fannyPack")?.price).toBeNull();
   });
 
-  it("list only the dogs the shop sells", () => {
-    const sold = (Object.keys(data.dogs) as DogId[]).filter((dog) => !starters.includes(dog));
-    expect(dogRows(data, owned).map(({ id }) => id)).toEqual(sold.map((dog) => `dog:${dog}`));
+  it("list only the dogs still for sale: a bought one leaves the list", () => {
+    const [bought, ...rest] = (Object.keys(data.dogs) as DogId[]).filter(
+      (dog) => !starters.includes(dog),
+    );
+    const rows = dogRows(data, { ...owned, dogs: [...starters, bought ?? "koda"] });
+    expect(rows.map(({ id }) => id)).toEqual(rest.map((dog) => `dog:${dog}`));
   });
 });
 

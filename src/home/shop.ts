@@ -43,14 +43,14 @@ export function shopAffordable(data: ShopData, owned: Owned, bank: Cents): boole
   return purchases(data).some((purchase) => isAffordable(data, owned, bank, purchase));
 }
 
-// Every gear item in shop order, owned ones in place.
+// Every gear item in shop order, owned ones in place, each with its effect in a few words.
 export function gearRows(data: ShopData, owned: Owned): ShopRow[] {
   return (Object.keys(data.shopGear) as GearId[]).map((gear) => {
     const purchase: Purchase = { gear, kind: "gear" };
     return {
       blocked: null,
       id: `gear:${gear}`,
-      line: "",
+      line: data.shopGear[gear].short,
       name: data.shopGear[gear].name,
       price: purchasePrice(data, owned, purchase),
       purchase,
@@ -80,11 +80,10 @@ export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// The dogs the shop sells, every dog not owned from the start, in data order with owned
-// ones in place.
+// The dogs still for sale, in data order: a bought dog leaves the list.
 export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
   const sold = (Object.keys(data.dogs) as DogId[]).filter(
-    (dog) => data.dogs[dog].unlock === "shop",
+    (dog) => data.dogs[dog].unlock === "shop" && !owned.dogs.includes(dog),
   );
   return sold.map((dog) => {
     const purchase: Purchase = { dog, kind: "dog" };

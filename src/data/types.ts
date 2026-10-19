@@ -420,6 +420,8 @@ export interface Gear {
   readonly effects: NonEmptyEffects;
   readonly name: string;
   readonly price: PriceKey;
+  // Its effect in a few words, on its shop row.
+  readonly short: string;
 }
 
 // The dog slots in order. A run takes at most one dog per owned slot.
@@ -547,8 +549,6 @@ export interface HomeText {
   // The street sign on the gate art.
   readonly gateSign: string;
   readonly gearBought: string;
-  // The Locked tile state's label, on a walker, dog or gear tile not owned yet.
-  readonly locked: string;
   // The logbook card and the lines it shares with the Stats page: the best walk, the last
   // walk by how it ended, the totals, and what it says before any walk.
   readonly logbook: {
@@ -586,7 +586,6 @@ export interface HomeText {
   // The section headings, and what a required section with nothing picked asks for on its
   // band.
   readonly sectionDogs: string;
-  readonly sectionDogsPrompt: string;
   readonly sectionWalker: string;
   readonly sectionWalkerPrompt: string;
   // The Pet shop page: its title, its tabs, the headings over its lists and their notes, a
@@ -594,6 +593,7 @@ export interface HomeText {
   // owned row.
   readonly shop: {
     readonly dogs: string;
+    readonly dogsAllOwned: string;
     readonly gearNote: string;
     readonly owned: string;
     readonly slotFirst: string;

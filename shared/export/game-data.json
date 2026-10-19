@@ -2159,6 +2159,7 @@
       ],
       "name": "Fanny pack",
       "price": "fannyPack",
+      "short": "Start with extra cash",
       "iconKey": "item-fanny-pack"
     },
     {
@@ -2179,6 +2180,7 @@
       ],
       "name": "Lucky collar",
       "price": "luckyCollar",
+      "short": "+1 ♥ for every owner",
       "iconKey": "item-lucky-collar"
     },
     {
@@ -2191,6 +2193,7 @@
       ],
       "name": "Poop bags",
       "price": "poopBags",
+      "short": "One free Skip a walk",
       "iconKey": "item-poop-bags"
     },
     {
@@ -2205,6 +2208,7 @@
       ],
       "name": "Running shoes",
       "price": "runningShoes",
+      "short": "No stumble after a pull",
       "iconKey": "item-running-shoes"
     },
     {
@@ -2218,6 +2222,7 @@
       ],
       "name": "Whistle",
       "price": "whistle",
+      "short": "Thieves flee",
       "iconKey": "item-whistle"
     }
   ],

@@ -1799,11 +1799,6 @@
         }
       },
       "gear": {
-        "effect": {
-          "lineHeight": 16,
-          "nameY": 422,
-          "y": 442
-        },
         "headingY": 118,
         "rows": {
           "height": 44,

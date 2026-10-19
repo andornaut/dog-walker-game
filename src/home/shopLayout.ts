@@ -19,9 +19,8 @@ export const SHOP_LAYOUT = {
     slotHeadingY: 118,
     slotRows: { height: 42, pitch: 48, y: 134 },
   },
-  // The Gear tab: its heading and rows, then the chosen item's name and effect.
+  // The Gear tab: its heading and rows.
   gear: {
-    effect: { lineHeight: 16, nameY: 422, y: 442 },
     headingY: 118,
     rows: { height: 44, pitch: 54, y: 136 },
   },

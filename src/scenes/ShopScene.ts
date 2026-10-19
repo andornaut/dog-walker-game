@@ -465,10 +465,10 @@ export class ShopScene extends Scene {
     }
   }
 
-  // Every gear item with its price or Owned, then the framed (or first) item's effect.
+  // Every gear item with its effect in a few words and its price or Owned.
   private drawGear(root: GameObjects.Container, save: SaveDocument): void {
     const text = gameData.homeText;
-    const { effect, headingY, rows: spec } = LAYOUT.gear;
+    const { headingY, rows: spec } = LAYOUT.gear;
     this.heading(root, headingY, text.shop.tabs.gear, text.shop.gearNote);
     const rows = gearRows(gameData, save.owned);
     const rects = rowRects(spec, rows.length);
@@ -478,26 +478,10 @@ export class ShopScene extends Scene {
         this.drawRow(root, save, { rect, row }, gearIconKey(row.purchase.gear));
       }
     });
-    const chosen = rows.find(({ id }) => id === this.focusId) ?? rows[0];
-    if (chosen?.purchase.kind !== "gear") {
-      return;
-    }
-    const card = gearDetail(
-      gameData,
-      save.owned,
-      save.bankCents,
-      save.lastLoadout,
-      chosen.purchase.gear,
-    );
-    this.text(root, { x: LAYOUT.headingX, y: effect.nameY }, card.title, { font: "title" });
-    let y = effect.y;
-    for (const line of [...card.lines, card.status]) {
-      const label = this.text(root, { x: LAYOUT.headingX, y }, line, { maxWidth: ROW.width });
-      y += Math.ceil(label.height) + effect.lineHeight - 10;
-    }
   }
 
-  // The dog slots past the first with how many are owned, then the dogs the shop sells.
+  // The dog slots past the first with how many are owned, then the dogs still for sale, or a
+  // line saying every dog is owned.
   private drawDogs(root: GameObjects.Container, save: SaveDocument): void {
     const text = gameData.homeText;
     const { dogHeadingY, dogRows: dogSpec, slotHeadingY, slotRows: slotSpec } = LAYOUT.dogs;
@@ -515,6 +499,11 @@ export class ShopScene extends Scene {
     });
     this.heading(root, dogHeadingY, text.shop.dogs);
     const dogs = dogRows(gameData, save.owned);
+    if (dogs.length === 0) {
+      this.text(root, { x: LAYOUT.headingX, y: dogSpec.y + 4 }, text.shop.dogsAllOwned, {
+        color: PALETTE.darkBrown,
+      });
+    }
     rowRects(dogSpec, dogs.length).forEach((rect, i) => {
       const row = dogs[i];
       if (row?.purchase.kind === "dog") {

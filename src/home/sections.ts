@@ -7,7 +7,8 @@ import { packCountLine } from "./homeLines";
 // The Pocket strip under them is optional and has no frame.
 export type SectionId = "dogs" | "walker";
 
-// A section is incomplete until its pick is made, then complete.
+// A section is incomplete until its pick is made, then complete. The Dogs band shows the
+// pack count either way; the Walker band asks for a face until one is picked.
 export type SectionState = "complete" | "incomplete";
 
 export interface Section {
@@ -28,14 +29,11 @@ export function homeSections(
   const text = data.homeText;
   const { loadout, walker } = choice;
   return {
-    dogs:
-      loadout.dogs.length === 0
-        ? { heading: text.sectionDogs, note: text.sectionDogsPrompt, state: "incomplete" }
-        : {
-            heading: text.sectionDogs,
-            note: packCountLine(data, owned, loadout),
-            state: "complete",
-          },
+    dogs: {
+      heading: text.sectionDogs,
+      note: packCountLine(data, owned, loadout),
+      state: loadout.dogs.length === 0 ? "incomplete" : "complete",
+    },
     walker:
       walker === null
         ? { heading: text.sectionWalker, note: text.sectionWalkerPrompt, state: "incomplete" }

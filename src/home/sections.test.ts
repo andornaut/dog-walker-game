@@ -12,7 +12,7 @@ const owned = { dogSlots: 1 };
 const nothing = { dogs: [], gear: null } as const;
 
 describe("homeSections", () => {
-  it("asks for what each section lacks", () => {
+  it("asks for a walker, and counts an empty pack", () => {
     const sections = homeSections(data, owned, { loadout: nothing, walker: null });
     expect(sections.walker).toEqual({
       heading: text.sectionWalker,
@@ -21,7 +21,7 @@ describe("homeSections", () => {
     });
     expect(sections.dogs).toEqual({
       heading: text.sectionDogs,
-      note: text.sectionDogsPrompt,
+      note: homeLine(text, "packCount", { count: "0", max: "1" }),
       state: "incomplete",
     });
   });

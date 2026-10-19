@@ -32,7 +32,6 @@ export const HOME_TEXT_FIELDS = {
   },
   gateSign: [],
   gearBought: ["gear"],
-  locked: [],
   logbook: {
     best: ["best", "note"],
     bestNote: ["dogs", "zones"],
@@ -53,7 +52,6 @@ export const HOME_TEXT_FIELDS = {
     item: ["effect", "gear"],
   },
   sectionDogs: [],
-  sectionDogsPrompt: [],
   sectionWalker: [],
   sectionWalkerPrompt: [],
   shop: {

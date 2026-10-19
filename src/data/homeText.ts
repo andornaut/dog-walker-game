@@ -40,7 +40,6 @@ export const HOME_TEXT = {
   },
   gateSign: "Elm Avenue",
   gearBought: "{gear} is yours. Pocket it for a walk.",
-  locked: "Locked",
   logbook: {
     badges: "Badges",
     best: "Best {best}, {note}",
@@ -69,11 +68,11 @@ export const HOME_TEXT = {
     title: "Pocket",
   },
   sectionDogs: "Pick your dogs",
-  sectionDogsPrompt: "Add a dog",
   sectionWalker: "Pick a walker",
   sectionWalkerPrompt: "Tap a face",
   shop: {
     dogs: "Dogs",
+    dogsAllOwned: "Every dog is yours.",
     gearNote: "Yours to keep",
     owned: "Owned",
     slotFirst: "Buy slot {slot} first",
