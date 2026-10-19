@@ -52,7 +52,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ## Progression & goals
 
-- Banked money buys permanent unlocks: permanent, gameplay-altering loadout gear now (cosmetics later); upgrade cards are the run-only boosts; later, more dog slots, better leashes and more.
+- Banked money buys permanent unlocks: new dogs and gameplay-altering loadout gear now (cosmetics later); upgrade cards are the run-only boosts; later, more dog slots, better leashes and more.
 
 ## Controls
 

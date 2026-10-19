@@ -50,12 +50,12 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
-| Attribute         | Values                                                                                                                                                         |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Size              | Small · medium · big. Sets the fee and pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big)                        |
-| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them      |
-| Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                   |
-| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, fee +50% · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double; also sets the quip tone |
+| Attribute         | Values                                                                                                                                                                           |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Size              | Small · medium · big. Sets the fee and pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big)                                          |
+| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                        |
+| Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                     |
+| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, fee +50% · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0–8; also sets the quip tone |
 
 | Dog      | Breed           | Size   | Trait       | Energy | Owner     | Start    |
 | -------- | --------------- | ------ | ----------- | ------ | --------- | -------- |
