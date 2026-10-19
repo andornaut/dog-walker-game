@@ -100,18 +100,18 @@ describe("cardFor", () => {
 
   it("gives each option its art and a breakdown of every change it would make", () => {
     const state = testState({ koda: 5, nugget: 5 }, { money: cents(5000) });
-    const card = cardFor(data, state, encounter("otherDog", ["koda", "nugget"]));
-    expect(card.options.map(({ art }) => art)).toEqual([
-      "card-other-dog-sniff",
-      "card-other-dog-pull-away",
-    ]);
-    expect(card.options[1]?.breakdown).toEqual([
-      { dog: "koda", name: "Pull away", text: "−1 ♥" },
-      { dog: "nugget", name: "Pull away", text: "−1 ♥" },
+    const card = cardFor(data, state, encounter("thief", ["koda", "nugget"]));
+    const { resolution } = ENCOUNTERS.thief;
+    const options = resolution.kind === "card" ? resolution.options : [];
+    expect(card.options.map(({ art }) => art)).toEqual(options.map(({ art }) => art));
+    const [chase, letGo] = options;
+    expect(card.options[0]?.breakdown).toEqual([
+      { dog: "koda", name: chase?.name, text: "−1 ♥" },
+      { dog: "nugget", name: chase?.name, text: "−1 ♥" },
       { dog: "nugget", name: "dramatic", text: "−1 ♥" },
     ]);
-    expect(card.options[0]?.breakdown.filter(({ dog }) => dog === null)).toEqual([
-      { dog: null, name: "Let them sniff", text: "−$10" },
+    expect(card.options[1]?.breakdown.filter(({ dog }) => dog === null)).toEqual([
+      { dog: null, name: letGo?.name, text: `−$${TEST_TUNING.money.thiefLetGo}` },
     ]);
   });
 
