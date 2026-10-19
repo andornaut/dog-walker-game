@@ -7,12 +7,7 @@ import { guardBackNavigation } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
 import { serviceWorkerUrl } from "./serviceWorkerUrl";
-import {
-  createUpdatePrompt,
-  noticePlacement,
-  type UpdatePrompt,
-  watchForWaitingWorker,
-} from "./updateReady";
+import { createUpdateFlow, noticePlacement, type UpdateFlow } from "./updateReady";
 import { relayVisibilityEvents } from "./visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
@@ -53,19 +48,27 @@ export function browserSoundFormat(): SoundFormat | undefined {
 
 let orientation: OrientationRelay | undefined;
 let screenWakeLock: ScreenWakeLock | undefined;
-let updatePrompt: UpdatePrompt | undefined;
+let updateFlow: UpdateFlow | undefined;
+
+// How long a fresh load holds the boot for a newer version to be checked for and installed, so
+// it reloads into that version before the game draws. A slower install switches once it lands,
+// or, after the player has interacted, offers the notice on the home screen.
+const BOOT_WAIT_MS = 4000;
+// Input that counts as the player interacting, after which the page never reloads on its own.
+const INTERACTION_EVENTS = ["keydown", "pointerdown"] as const;
 
 // The production build only: the dev server has no sw.js, and a worker would serve stale
-// modules over hot reloads.
-function registerServiceWorker(): void {
+// modules over hot reloads. Resolves once the game may boot.
+function registerServiceWorker(): Promise<void> {
   if (!import.meta.env.PROD || !("serviceWorker" in navigator)) {
-    return;
+    return Promise.resolve();
   }
   const container = navigator.serviceWorker;
   const notice = document.getElementById(UPDATE_READY_ID);
   const placeNotice = notice === null ? () => undefined : placeNoticeOverGame(notice);
-  const prompt = createUpdatePrompt(
+  const flow = createUpdateFlow(
     container,
+    () => navigator.onLine,
     () => location.reload(),
     (visible) => {
       if (notice !== null) {
@@ -74,18 +77,20 @@ function registerServiceWorker(): void {
       }
     },
   );
-  updatePrompt = prompt;
-  notice?.querySelector("button")?.addEventListener("click", () => prompt.accept());
-  window.addEventListener("load", () => {
-    container
-      .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })
-      .then((registration) => {
-        watchForWaitingWorker(container, (worker) => prompt.setWaiting(worker), registration);
-      })
-      .catch((error: unknown) => {
-        console.warn("Service worker registration failed; the game will not work offline.", error);
-      });
-  });
+  updateFlow = flow;
+  notice?.querySelector("button")?.addEventListener("click", () => flow.accept());
+  for (const type of INTERACTION_EVENTS) {
+    window.addEventListener(type, () => flow.noteInteraction(), { capture: true, passive: true });
+  }
+  setTimeout(() => flow.endBootWait(), BOOT_WAIT_MS);
+  container
+    .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })
+    .then((registration) => flow.watch(registration))
+    .catch((error: unknown) => {
+      console.warn("Service worker registration failed; the game will not work offline.", error);
+      flow.noRegistration();
+    });
+  return flow.bootable;
 }
 
 function readViewport(): Viewport {
@@ -110,8 +115,10 @@ function showTurnUprightNotice(): void {
   });
 }
 
-export function setupPhoneApp(): void {
-  registerServiceWorker();
+// Resolves once the game may boot: at once, or after a fresh load has checked for a newer
+// version (it never resolves for a page that reloads into one first).
+export function setupPhoneApp(): Promise<void> {
+  const bootable = registerServiceWorker();
   relayVisibilityEvents(window, document);
   showTurnUprightNotice();
   orientation = relayOrientationEvents(readViewport, window);
@@ -121,6 +128,7 @@ export function setupPhoneApp(): void {
   // Held whenever the game is visible until the scenes take over with stopWakeLock and
   // startWakeLock (for example, letting the screen sleep on a menu).
   screenWakeLock.start();
+  return bootable;
 }
 
 // Whether the phone is on its side now, with the turn-upright notice over the game.
@@ -140,5 +148,10 @@ export function stopWakeLock(): void {
 
 // Whether the home screen is in front, the only place the update notice shows.
 export function setOnHomeScreen(onHome: boolean): void {
-  updatePrompt?.setOnHome(onHome);
+  updateFlow?.setOnHome(onHome);
+}
+
+// A walk started, which counts as the player interacting even with no input (a dev walk URL).
+export function noteWalkStarted(): void {
+  updateFlow?.noteInteraction();
 }

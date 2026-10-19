@@ -96,8 +96,8 @@ const SKIP_WAITING: SkipWaitingMessage = "skip-waiting";
 
 // No skipWaiting on install: a new worker waits until every page the old one controls has closed,
 // so a running game never has its cache deleted or its code swapped. It takes over on the next
-// launch, or when the player presses Reload on the home screen's update notice, which posts
-// SKIP_WAITING and reloads the page once this worker controls it.
+// launch, or when the page posts SKIP_WAITING and reloads once this worker controls it: at once on
+// a load the player has not interacted with, otherwise from Reload on the home screen's notice.
 worker.addEventListener("install", (event) => event.waitUntil(precache()));
 worker.addEventListener("activate", (event) => event.waitUntil(deleteStaleCaches()));
 worker.addEventListener("message", (event) => {
