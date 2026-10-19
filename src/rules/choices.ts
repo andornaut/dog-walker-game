@@ -536,24 +536,15 @@ export function applyInstantEncounter(
   if (resolution.kind !== "instant") {
     throw new Error(`${name} opens a card: use chooseOption`);
   }
-  if (state.phase.kind === "ended") {
-    throw new Error("The run has ended");
-  }
-  const affected = packDogs(state).filter((dog) => caught.includes(dog));
-  const outcome = outcomeOf(
-    data,
-    { affected, random, source: { encounter, kind: "instant" } },
-    resolution.effects,
-    state,
-    undefined,
-  );
+  const source = { encounter, kind: "instant" } as const;
+  const outcome = applyEffectsNow(data, random, state, source, resolution.effects, caught);
   if (outcome.treatsDelta <= 0) {
     return outcome;
   }
   // Treats move no meter, so the owners who gained them say a happier line for them.
   const quipping = outcome.quips.map(({ dog }) => dog);
   const gained = packDogs(outcome.state).filter(
-    (dog) => affected.includes(dog) && !quipping.includes(dog),
+    (dog) => caught.includes(dog) && !quipping.includes(dog),
   );
   return {
     ...outcome,
