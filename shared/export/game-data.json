@@ -681,7 +681,7 @@
       "frame": "route",
       "id": "snoozeCrescent",
       "index": null,
-      "name": "Snooze Crescent",
+      "name": "Willow Crescent",
       "source": {
         "id": "snoozeCrescent",
         "kind": "fork"
@@ -694,7 +694,7 @@
       "frame": "route",
       "id": "park",
       "index": null,
-      "name": "Bark Park",
+      "name": "Fairview Park",
       "source": {
         "id": "park",
         "kind": "fork"
@@ -707,7 +707,7 @@
       "frame": "route",
       "id": "street",
       "index": null,
-      "name": "Woof Way",
+      "name": "Elm Avenue",
       "source": {
         "id": "street",
         "kind": "fork"
@@ -720,7 +720,7 @@
       "frame": "route",
       "id": "shops",
       "index": null,
-      "name": "Sniff Street Shops",
+      "name": "Main Street",
       "source": {
         "id": "shops",
         "kind": "fork"
@@ -733,7 +733,7 @@
       "frame": "route",
       "id": "pawsPromenade",
       "index": null,
-      "name": "Paws Promenade",
+      "name": "Riverside Path",
       "source": {
         "id": "pawsPromenade",
         "kind": "fork"
@@ -3013,7 +3013,7 @@
       "id": "snoozeCrescent",
       "leashColor": "#3e2731",
       "moverShare": 0.1,
-      "name": "Snooze Crescent",
+      "name": "Willow Crescent",
       "roadColor": "#8b9bb4",
       "roadShadowColor": "#5a6988",
       "speed": 1,
@@ -3083,7 +3083,7 @@
       "id": "park",
       "leashColor": "#a22633",
       "moverShare": 0.15,
-      "name": "Bark Park",
+      "name": "Fairview Park",
       "roadColor": "#e4a672",
       "roadShadowColor": "#b86f50",
       "speed": 1,
@@ -3153,7 +3153,7 @@
       "id": "street",
       "leashColor": "#f6757a",
       "moverShare": 0.1,
-      "name": "Woof Way",
+      "name": "Elm Avenue",
       "roadColor": "#3a4466",
       "roadShadowColor": "#262b44",
       "speed": 1,
@@ -3223,7 +3223,7 @@
       "id": "shops",
       "leashColor": "#a22633",
       "moverShare": 0.15,
-      "name": "Sniff Street Shops",
+      "name": "Main Street",
       "roadColor": "#c0cbdc",
       "roadShadowColor": "#8b9bb4",
       "speed": 1,
@@ -3293,7 +3293,7 @@
       "id": "pawsPromenade",
       "leashColor": "#a22633",
       "moverShare": 0.15,
-      "name": "Paws Promenade",
+      "name": "Riverside Path",
       "roadColor": "#ead4aa",
       "roadShadowColor": "#e4a672",
       "speed": 1,

@@ -37,7 +37,7 @@ export const HOME_TEXT = {
     priceShort: "{price}: need {amount} more.",
     temper: "{owner} is {temperament}.",
   },
-  gateSign: "Woof Way",
+  gateSign: "Elm Avenue",
   gearBought: "{gear} is yours. Pocket it for a walk.",
   locked: "Locked",
   logbook: {

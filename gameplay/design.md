@@ -17,7 +17,7 @@ A cozy pixel-art lane runner where you walk a pack of dogs through the neighbour
 ## Core loop
 
 - **Before a run:** pick your dogs (one per owned dog slot) and put up to one owned gear item in your Pocket.
-- **During a run:** walk 4 of the 6 zones, starting on Woof Way. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop.
+- **During a run:** walk 4 of the 6 zones, starting on Elm Avenue. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop.
 - **Between zones:** pick 1 of 3 upgrade cards, then pick the next zone at a fork.
 - **After a run:** bank your earnings and spend them at the Pet shop: dogs, dog slots and gear.
 
@@ -52,19 +52,19 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### A run
 
-- A walk is 4 zones of Maplewood, starting on Woof Way. Each zone is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
+- A walk is 4 zones of Maplewood, starting on Elm Avenue. Each zone is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
 - One forced stop per zone. After zones 1 to 3: pick 1 of 3 upgrade cards, then choose the next zone at a fork
 - **Forks:** the road meets a cross street and a fork card offers three paths (left, straight, right), each leading to a zone you haven't walked this run, sorted easiest on the left to hardest on the right. Each path card shows the zone's name, difficulty and fee multiplier
 - **Zones** (6, each walk visits 4 with no repeats):
 
-| Zone               | Difficulty  | Fees  | Encounter mix                                                             |
-| ------------------ | ----------- | ----- | ------------------------------------------------------------------------- |
-| Snooze Crescent    | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
-| Bark Park          | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists          |
-| Woof Way           | Normal      | ×1    | Puddles, the mail carrier, cones; movers rare. Always the first zone      |
-| Sniff Street Shops | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers             |
-| Paws Promenade     | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds    |
-| The Long Way Home  | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
+| Zone              | Difficulty  | Fees  | Encounter mix                                                             |
+| ----------------- | ----------- | ----- | ------------------------------------------------------------------------- |
+| Willow Crescent   | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
+| Fairview Park     | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists          |
+| Elm Avenue        | Normal      | ×1    | Puddles, the mail carrier, cones; movers rare. Always the first zone      |
+| Main Street       | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers             |
+| Riverside Path    | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds    |
+| The Long Way Home | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
 
 - After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
 - An owner who fires you takes back every fee their dog earned this run; tips stay
@@ -176,17 +176,17 @@ Each appears only in its zones:
 
 | Encounter      | Zones                         | Size                  | Who's affected                            | Options                                                                                                                                                         | Hit label         |
 | -------------- | ----------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Angry goose    | Paws Promenade, Long Way Home | 1 × 1, waddles across | All dogs; a big dog doesn't scare it      | Back off slowly → −$ per dog (missed tips) · Honk back → −♥ each (−♥♥ Chasers)                                                                                  | "HONK!"           |
-| Cafe patio     | Sniff Street Shops            | 2 × 1                 | All dogs                                  | Charm the crowd → fulfils Friendly, −$ per dog (missed tips) · Buy new lattes → −$ per dog, +♥ to fussy owners · Slink away → −♥ each                           | "SPILLED LATTE!"  |
-| Picnic raid    | Bark Park, Paws Promenade     | 2 × 1                 | Food-driven dogs (none: scenery, no card) | Buy a new lunch → −$ per affected dog · Drop it! → −♥ to affected owners                                                                                        | "SNACK ATTACK!"   |
-| Prize petunias | Snooze Crescent, Woof Way     | 2 × 1                 | All dogs                                  | Replant them → −$ per dog · Nature calls → fulfils Regular, −♥ each                                                                                             | "OOPS, PETUNIAS!" |
-| Trash day      | Woof Way, Long Way Home       | 2 × 1                 | All dogs                                  | Sniff it all → fulfils Nosy, −♥ to Fancy owners, −$ per dog (missed tips) · Tidy up → −$ per dog, +♥ to fussy owners · Drag them on → −♥ each (−♥♥ Food-driven) | "TRASH DAY!"      |
+| Angry goose    | Riverside Path, Long Way Home | 1 × 1, waddles across | All dogs; a big dog doesn't scare it      | Back off slowly → −$ per dog (missed tips) · Honk back → −♥ each (−♥♥ Chasers)                                                                                  | "HONK!"           |
+| Cafe patio     | Main Street                   | 2 × 1                 | All dogs                                  | Charm the crowd → fulfils Friendly, −$ per dog (missed tips) · Buy new lattes → −$ per dog, +♥ to fussy owners · Slink away → −♥ each                           | "SPILLED LATTE!"  |
+| Picnic raid    | Fairview Park, Riverside Path | 2 × 1                 | Food-driven dogs (none: scenery, no card) | Buy a new lunch → −$ per affected dog · Drop it! → −♥ to affected owners                                                                                        | "SNACK ATTACK!"   |
+| Prize petunias | Willow Crescent, Elm Avenue   | 2 × 1                 | All dogs                                  | Replant them → −$ per dog · Nature calls → fulfils Regular, −♥ each                                                                                             | "OOPS, PETUNIAS!" |
+| Trash day      | Elm Avenue, Long Way Home     | 2 × 1                 | All dogs                                  | Sniff it all → fulfils Nosy, −♥ to Fancy owners, −$ per dog (missed tips) · Tidy up → −$ per dog, +♥ to fussy owners · Drag them on → −♥ each (−♥♥ Food-driven) | "TRASH DAY!"      |
 
 ### Lucky encounters
 
 Good things to bump into on purpose.
 
-- **Lemonade stand** (card; Snooze Crescent, Woof Way): Water, please → fulfils Thirsty, −$ per dog · Say hi → fulfils Friendly, −$ per dog (missed tips) · Maybe later → nothing
+- **Lemonade stand** (card; Willow Crescent, Elm Avenue): Water, please → fulfils Thirsty, −$ per dog · Say hi → fulfils Friendly, −$ per dog (missed tips) · Maybe later → nothing
 - **Lost wallet** (card): Hand it in → +♥ each (owners are proud) · Finders keepers → +$, −♥ each
 - **Generous neighbour** (no card): a treat for each dog, up to the carry limit
 - **Photo op** (no card): +$ tip, +♥ to dramatic owners
@@ -201,16 +201,16 @@ About half of the obstacles are minor: they open no card. Bumping one drops $2 i
 
 Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part counts as one hit; the whole obstacle is removed and the grace window starts.
 
-| Obstacle                                               | Kind      | Size (lanes × rows) |
-| ------------------------------------------------------ | --------- | ------------------- |
-| Skunk (with its spray cloud)                           | Encounter | 2 × 2               |
-| Puddle                                                 | Encounter | 2 × 1               |
-| Squirrel, other dog, thief                             | Encounter | 1 × 1               |
-| Cone, bin                                              | Minor     | 1 × 1               |
-| Parked car                                             | Minor     | 1 × 3               |
-| Bench                                                  | Minor     | 2 × 1               |
-| Hedge                                                  | Minor     | 3 × 1               |
-| Construction barrier (Woof Way and Sniff Street Shops) | Minor     | 2 or 3 × 1          |
+| Obstacle                                          | Kind      | Size (lanes × rows) |
+| ------------------------------------------------- | --------- | ------------------- |
+| Skunk (with its spray cloud)                      | Encounter | 2 × 2               |
+| Puddle                                            | Encounter | 2 × 1               |
+| Squirrel, other dog, thief                        | Encounter | 1 × 1               |
+| Cone, bin                                         | Minor     | 1 × 1               |
+| Parked car                                        | Minor     | 1 × 3               |
+| Bench                                             | Minor     | 2 × 1               |
+| Hedge                                             | Minor     | 3 × 1               |
+| Construction barrier (Elm Avenue and Main Street) | Minor     | 2 or 3 × 1          |
 
 ### Moving hazards
 
@@ -292,7 +292,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the run-only b
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
 - **Gear and Pocket** (5 items, bought once at the Pet shop): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). The Pocket section is a strip of all 5 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. One line below the strip gives the pocketed item's effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
 - **Walker picker:** choose from the walkers you've unlocked (see Walkers). The choice is saved, and the saved walker counts as picked, so a first visit needs only a dog. Locked walkers use the Locked tile state with their goal ("Finish zone 1"); a newly unlocked walker shows the walker's line "New walker!"
-- **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Woof Way under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
+- **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Elm Avenue under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone). Each dog's roster card shows its walks, zones finished and times fired
