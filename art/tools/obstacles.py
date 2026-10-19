@@ -24,7 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, main  # noqa: E402
+from pixel import Grid, main, road_sprite  # noqa: E402
 
 
 def cone():
@@ -189,4 +189,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/obstacles", __doc__, grounds=("5a6988", "c0cbdc"))
+    main(sys.argv, sprites, "art/obstacles", __doc__, grounds=("5a6988", "c0cbdc"), anchored=road_sprite)

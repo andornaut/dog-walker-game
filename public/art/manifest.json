@@ -78,27 +78,47 @@
     {
       "key": "barrier-2",
       "png": "sprites/barrier-2.png",
-      "json": "sprites/barrier-2.json"
+      "json": "sprites/barrier-2.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 88
+      }
     },
     {
       "key": "barrier-3",
       "png": "sprites/barrier-3.png",
-      "json": "sprites/barrier-3.json"
+      "json": "sprites/barrier-3.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 144
+      }
     },
     {
       "key": "bench",
       "png": "sprites/bench.png",
-      "json": "sprites/bench.json"
+      "json": "sprites/bench.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 86
+      }
     },
     {
       "key": "bin",
       "png": "sprites/bin.png",
-      "json": "sprites/bin.json"
+      "json": "sprites/bin.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "biscuit-neighbour",
       "png": "sprites/biscuit-neighbour.png",
-      "json": "sprites/biscuit-neighbour.json"
+      "json": "sprites/biscuit-neighbour.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 24
+      }
     },
     {
       "key": "card-frame",
@@ -113,62 +133,110 @@
     {
       "key": "chatty-neighbour",
       "png": "sprites/chatty-neighbour.png",
-      "json": "sprites/chatty-neighbour.json"
+      "json": "sprites/chatty-neighbour.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 26
+      }
     },
     {
       "key": "cone",
       "png": "sprites/cone.png",
-      "json": "sprites/cone.json"
+      "json": "sprites/cone.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 18
+      }
     },
     {
       "key": "construction",
       "png": "sprites/construction.png",
-      "json": "sprites/construction.json"
+      "json": "sprites/construction.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 54
+      }
     },
     {
       "key": "dog-biscuit",
       "png": "sprites/dog-biscuit.png",
-      "json": "sprites/dog-biscuit.json"
+      "json": "sprites/dog-biscuit.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "dog-dash",
       "png": "sprites/dog-dash.png",
-      "json": "sprites/dog-dash.json"
+      "json": "sprites/dog-dash.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 14
+      }
     },
     {
       "key": "dog-duchess",
       "png": "sprites/dog-duchess.png",
-      "json": "sprites/dog-duchess.json"
+      "json": "sprites/dog-duchess.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 16
+      }
     },
     {
       "key": "dog-koda",
       "png": "sprites/dog-koda.png",
-      "json": "sprites/dog-koda.json"
+      "json": "sprites/dog-koda.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "dog-nugget",
       "png": "sprites/dog-nugget.png",
-      "json": "sprites/dog-nugget.json"
+      "json": "sprites/dog-nugget.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 14
+      }
     },
     {
       "key": "dog-pierre",
       "png": "sprites/dog-pierre.png",
-      "json": "sprites/dog-pierre.json"
+      "json": "sprites/dog-pierre.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "dog-snowball",
       "png": "sprites/dog-snowball.png",
-      "json": "sprites/dog-snowball.json"
+      "json": "sprites/dog-snowball.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "dog-waffles",
       "png": "sprites/dog-waffles.png",
-      "json": "sprites/dog-waffles.json"
+      "json": "sprites/dog-waffles.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 22
+      }
     },
     {
       "key": "dog-zippy",
       "png": "sprites/dog-zippy.png",
-      "json": "sprites/dog-zippy.json"
+      "json": "sprites/dog-zippy.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 14
+      }
     },
     {
       "key": "face-dog-biscuit",
@@ -338,32 +406,56 @@
     {
       "key": "gag-ball",
       "png": "sprites/gag-ball.png",
-      "json": "sprites/gag-ball.json"
+      "json": "sprites/gag-ball.json",
+      "anchor": {
+        "feetY": 12,
+        "opaqueWidth": 12
+      }
     },
     {
       "key": "gag-cat",
       "png": "sprites/gag-cat.png",
-      "json": "sprites/gag-cat.json"
+      "json": "sprites/gag-cat.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 15
+      }
     },
     {
       "key": "gag-sprinkler",
       "png": "sprites/gag-sprinkler.png",
-      "json": "sprites/gag-sprinkler.json"
+      "json": "sprites/gag-sprinkler.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 29
+      }
     },
     {
       "key": "hedge",
       "png": "sprites/hedge.png",
-      "json": "sprites/hedge.json"
+      "json": "sprites/hedge.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 144
+      }
     },
     {
       "key": "hydrant",
       "png": "sprites/hydrant.png",
-      "json": "sprites/hydrant.json"
+      "json": "sprites/hydrant.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 24
+      }
     },
     {
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
-      "json": "sprites/ice-cream-truck.json"
+      "json": "sprites/ice-cream-truck.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 58
+      }
     },
     {
       "key": "icon-music",
@@ -378,77 +470,137 @@
     {
       "key": "kid",
       "png": "sprites/kid.png",
-      "json": "sprites/kid.json"
+      "json": "sprites/kid.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "lost-wallet",
       "png": "sprites/lost-wallet.png",
-      "json": "sprites/lost-wallet.json"
+      "json": "sprites/lost-wallet.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 12
+      }
     },
     {
       "key": "mail-carrier",
       "png": "sprites/mail-carrier.png",
-      "json": "sprites/mail-carrier.json"
+      "json": "sprites/mail-carrier.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 26
+      }
     },
     {
       "key": "other-dog",
       "png": "sprites/other-dog.png",
-      "json": "sprites/other-dog.json"
+      "json": "sprites/other-dog.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 18
+      }
     },
     {
       "key": "other-dog-owner",
       "png": "sprites/other-dog-owner.png",
-      "json": "sprites/other-dog-owner.json"
+      "json": "sprites/other-dog-owner.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 25
+      }
     },
     {
       "key": "parked-car",
       "png": "sprites/parked-car.png",
-      "json": "sprites/parked-car.json"
+      "json": "sprites/parked-car.json",
+      "anchor": {
+        "feetY": 78,
+        "opaqueWidth": 40
+      }
     },
     {
       "key": "photo-op",
       "png": "sprites/photo-op.png",
-      "json": "sprites/photo-op.json"
+      "json": "sprites/photo-op.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 28
+      }
     },
     {
       "key": "puddle",
       "png": "sprites/puddle.png",
-      "json": "sprites/puddle.json"
+      "json": "sprites/puddle.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 84
+      }
     },
     {
       "key": "skunk",
       "png": "sprites/skunk.png",
-      "json": "sprites/skunk.json"
+      "json": "sprites/skunk.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 16
+      }
     },
     {
       "key": "skunk-cloud",
       "png": "sprites/skunk-cloud.png",
-      "json": "sprites/skunk-cloud.json"
+      "json": "sprites/skunk-cloud.json",
+      "anchor": {
+        "feetY": 86,
+        "opaqueWidth": 87
+      }
     },
     {
       "key": "squirrel",
       "png": "sprites/squirrel.png",
-      "json": "sprites/squirrel.json"
+      "json": "sprites/squirrel.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 18
+      }
     },
     {
       "key": "stop-sign",
       "png": "sprites/stop-sign.png",
-      "json": "sprites/stop-sign.json"
+      "json": "sprites/stop-sign.json",
+      "anchor": {
+        "feetY": 47,
+        "opaqueWidth": 18
+      }
     },
     {
       "key": "thief",
       "png": "sprites/thief.png",
-      "json": "sprites/thief.json"
+      "json": "sprites/thief.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 27
+      }
     },
     {
       "key": "tip",
       "png": "sprites/tip.png",
-      "json": "sprites/tip.json"
+      "json": "sprites/tip.json",
+      "anchor": {
+        "feetY": 13,
+        "opaqueWidth": 12
+      }
     },
     {
       "key": "treat",
       "png": "sprites/treat.png",
-      "json": "sprites/treat.json"
+      "json": "sprites/treat.json",
+      "anchor": {
+        "feetY": 10,
+        "opaqueWidth": 14
+      }
     },
     {
       "key": "ui-button",
@@ -493,22 +645,38 @@
     {
       "key": "walker-ada",
       "png": "sprites/walker-ada.png",
-      "json": "sprites/walker-ada.json"
+      "json": "sprites/walker-ada.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 20
+      }
     },
     {
       "key": "walker-ben",
       "png": "sprites/walker-ben.png",
-      "json": "sprites/walker-ben.json"
+      "json": "sprites/walker-ben.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 24
+      }
     },
     {
       "key": "walker-casey",
       "png": "sprites/walker-casey.png",
-      "json": "sprites/walker-casey.json"
+      "json": "sprites/walker-casey.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 24
+      }
     },
     {
       "key": "walker-trista",
       "png": "sprites/walker-trista.png",
-      "json": "sprites/walker-trista.json"
+      "json": "sprites/walker-trista.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 28
+      }
     }
   ],
   "fonts": [
