@@ -1,0 +1,30 @@
+{ "frames": {
+   "stink-garbage-truck@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 28, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
+    "sourceSize": { "w": 28, "h": 23 },
+    "duration": 400
+   },
+   "stink-garbage-truck@50 1.aseprite": {
+    "frame": { "x": 28, "y": 0, "w": 28, "h": 23 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
+    "sourceSize": { "w": 28, "h": 23 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "stink-garbage-truck@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 56, "h": 23 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

@@ -3411,6 +3411,186 @@
       }
     },
     {
+      "key": "splash-milkshake",
+      "png": "sprites/splash-milkshake.png",
+      "json": "sprites/splash-milkshake.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "splash-milkshake@50",
+      "png": "sprites/splash-milkshake@50.png",
+      "json": "sprites/splash-milkshake@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "splash-milkshake@62",
+      "png": "sprites/splash-milkshake@62.png",
+      "json": "sprites/splash-milkshake@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "splash-milkshake@75",
+      "png": "sprites/splash-milkshake@75.png",
+      "json": "sprites/splash-milkshake@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "splash-milkshake@88",
+      "png": "sprites/splash-milkshake@88.png",
+      "json": "sprites/splash-milkshake@88.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "splash-mud",
+      "png": "sprites/splash-mud.png",
+      "json": "sprites/splash-mud.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 100
+      }
+    },
+    {
+      "key": "splash-mud@50",
+      "png": "sprites/splash-mud@50.png",
+      "json": "sprites/splash-mud@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "splash-mud@62",
+      "png": "sprites/splash-mud@62.png",
+      "json": "sprites/splash-mud@62.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "splash-mud@75",
+      "png": "sprites/splash-mud@75.png",
+      "json": "sprites/splash-mud@75.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "splash-mud@88",
+      "png": "sprites/splash-mud@88.png",
+      "json": "sprites/splash-mud@88.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 87
+      }
+    },
+    {
+      "key": "splash-shore",
+      "png": "sprites/splash-shore.png",
+      "json": "sprites/splash-shore.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 98
+      }
+    },
+    {
+      "key": "splash-shore@50",
+      "png": "sprites/splash-shore@50.png",
+      "json": "sprites/splash-shore@50.json",
+      "anchor": {
+        "feetY": 16,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "splash-shore@62",
+      "png": "sprites/splash-shore@62.png",
+      "json": "sprites/splash-shore@62.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 61
+      }
+    },
+    {
+      "key": "splash-shore@75",
+      "png": "sprites/splash-shore@75.png",
+      "json": "sprites/splash-shore@75.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "splash-shore@88",
+      "png": "sprites/splash-shore@88.png",
+      "json": "sprites/splash-shore@88.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "splash-sprinkler",
+      "png": "sprites/splash-sprinkler.png",
+      "json": "sprites/splash-sprinkler.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 99
+      }
+    },
+    {
+      "key": "splash-sprinkler@50",
+      "png": "sprites/splash-sprinkler@50.png",
+      "json": "sprites/splash-sprinkler@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "splash-sprinkler@62",
+      "png": "sprites/splash-sprinkler@62.png",
+      "json": "sprites/splash-sprinkler@62.json",
+      "anchor": {
+        "feetY": 22,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "splash-sprinkler@75",
+      "png": "sprites/splash-sprinkler@75.png",
+      "json": "sprites/splash-sprinkler@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 74
+      }
+    },
+    {
+      "key": "splash-sprinkler@88",
+      "png": "sprites/splash-sprinkler@88.png",
+      "json": "sprites/splash-sprinkler@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 87
+      }
+    },
+    {
       "key": "spot-lamp-post",
       "png": "sprites/spot-lamp-post.png",
       "json": "sprites/spot-lamp-post.json",
@@ -3678,6 +3858,231 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "stink-compost",
+      "png": "sprites/stink-compost.png",
+      "json": "sprites/stink-compost.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "stink-compost@50",
+      "png": "sprites/stink-compost@50.png",
+      "json": "sprites/stink-compost@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "stink-compost@62",
+      "png": "sprites/stink-compost@62.png",
+      "json": "sprites/stink-compost@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "stink-compost@75",
+      "png": "sprites/stink-compost@75.png",
+      "json": "sprites/stink-compost@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "stink-compost@88",
+      "png": "sprites/stink-compost@88.png",
+      "json": "sprites/stink-compost@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "stink-fish-crate",
+      "png": "sprites/stink-fish-crate.png",
+      "json": "sprites/stink-fish-crate.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "stink-fish-crate-cloud",
+      "png": "sprites/stink-fish-crate-cloud.png",
+      "json": "sprites/stink-fish-crate-cloud.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 101
+      }
+    },
+    {
+      "key": "stink-fish-crate-cloud@50",
+      "png": "sprites/stink-fish-crate-cloud@50.png",
+      "json": "sprites/stink-fish-crate-cloud@50.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "stink-fish-crate-cloud@62",
+      "png": "sprites/stink-fish-crate-cloud@62.png",
+      "json": "sprites/stink-fish-crate-cloud@62.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 62
+      }
+    },
+    {
+      "key": "stink-fish-crate-cloud@75",
+      "png": "sprites/stink-fish-crate-cloud@75.png",
+      "json": "sprites/stink-fish-crate-cloud@75.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 75
+      }
+    },
+    {
+      "key": "stink-fish-crate-cloud@88",
+      "png": "sprites/stink-fish-crate-cloud@88.png",
+      "json": "sprites/stink-fish-crate-cloud@88.json",
+      "anchor": {
+        "feetY": 43,
+        "opaqueWidth": 88
+      }
+    },
+    {
+      "key": "stink-fish-crate@50",
+      "png": "sprites/stink-fish-crate@50.png",
+      "json": "sprites/stink-fish-crate@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "stink-fish-crate@62",
+      "png": "sprites/stink-fish-crate@62.png",
+      "json": "sprites/stink-fish-crate@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "stink-fish-crate@75",
+      "png": "sprites/stink-fish-crate@75.png",
+      "json": "sprites/stink-fish-crate@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "stink-fish-crate@88",
+      "png": "sprites/stink-fish-crate@88.png",
+      "json": "sprites/stink-fish-crate@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "stink-garbage-truck",
+      "png": "sprites/stink-garbage-truck.png",
+      "json": "sprites/stink-garbage-truck.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 50
+      }
+    },
+    {
+      "key": "stink-garbage-truck@50",
+      "png": "sprites/stink-garbage-truck@50.png",
+      "json": "sprites/stink-garbage-truck@50.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "stink-garbage-truck@62",
+      "png": "sprites/stink-garbage-truck@62.png",
+      "json": "sprites/stink-garbage-truck@62.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "stink-garbage-truck@75",
+      "png": "sprites/stink-garbage-truck@75.png",
+      "json": "sprites/stink-garbage-truck@75.json",
+      "anchor": {
+        "feetY": 31,
+        "opaqueWidth": 38
+      }
+    },
+    {
+      "key": "stink-garbage-truck@88",
+      "png": "sprites/stink-garbage-truck@88.png",
+      "json": "sprites/stink-garbage-truck@88.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 45
+      }
+    },
+    {
+      "key": "stink-seaweed",
+      "png": "sprites/stink-seaweed.png",
+      "json": "sprites/stink-seaweed.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 36
+      }
+    },
+    {
+      "key": "stink-seaweed@50",
+      "png": "sprites/stink-seaweed@50.png",
+      "json": "sprites/stink-seaweed@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "stink-seaweed@62",
+      "png": "sprites/stink-seaweed@62.png",
+      "json": "sprites/stink-seaweed@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "stink-seaweed@75",
+      "png": "sprites/stink-seaweed@75.png",
+      "json": "sprites/stink-seaweed@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "stink-seaweed@88",
+      "png": "sprites/stink-seaweed@88.png",
+      "json": "sprites/stink-seaweed@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 31
       }
     },
     {

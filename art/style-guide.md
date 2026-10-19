@@ -32,6 +32,8 @@ Encounter skins (`chase-`, `snatch-`, `social-` keys) are a zone's look for the 
 
 Each zone's minor obstacle skins (`minor-*`) keep their base kind's frame, footprint, anchor line, `idle` and depth steps: 1×1 skins 40×40 as the cone, 2×1 104×30 as the bench, 3×1 168×30 as the hedge, 1×3 56×35 at the footprint's near edge as the parked car. They show objects only, never a person or a live animal, so they read as something to bump rather than an encounter or a pickup, and no large fill takes their zone's road colour (Willow Crescent grey, Fairview Park tan, Main Street pink, Riverside Path cream).
 
+A zone skin of an area encounter keeps its base's frame, tags, timings and anchor (`art/tools/skins_areas.py`). Splash skins (`splash-<skin>`) are 104×40 ground decals like the puddle: no outline, a 1px rim inside in the decal's darkest colour, and water sky in a blue rim with cyan and white so it holds on grey and cream. Stink skins (`stink-<skin>`) stand in the haze as the skunk does, in `skunk-cloud`, except on Main Street: its road is pink and its shadow mauve, so the fish crate stands in `stink-fish-crate-cloud`, the same haze one step down the ramp (purple fill, plum dither and wisps). A fly over a stink source is a 2×1 ink body under a white and light grey wing, drawn after the outline.
+
 ## Palette and outlines
 
 - [Endesga 32](https://lospec.com/palette-list/endesga-32) only, each pixel opaque or fully transparent. Colour names are the `K` names in `art/tools/pixel.py`.

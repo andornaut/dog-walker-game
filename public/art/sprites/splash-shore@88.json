@@ -1,0 +1,30 @@
+{ "frames": {
+   "splash-shore@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 91, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 35 },
+    "sourceSize": { "w": 91, "h": 35 },
+    "duration": 500
+   },
+   "splash-shore@88 1.aseprite": {
+    "frame": { "x": 91, "y": 0, "w": 91, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 91, "h": 35 },
+    "sourceSize": { "w": 91, "h": 35 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "splash-shore@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 182, "h": 35 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}
