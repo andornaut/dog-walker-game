@@ -12,14 +12,15 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 ## Screen budget
 
-| Region      | Size (px)       | Notes                                      |
-| ----------- | --------------- | ------------------------------------------ |
-| Canvas      | 360×640         | Portrait, nearest-neighbour scaling        |
-| Top bar     | 360×40          | Money, zone progress                       |
-| Dog column  | 80×600          | 3 slots of ~72×192, 4px padding            |
-| Road        | 280×600 at x=80 | 5 lanes of 56px                            |
-| Choice card | ~83×140         | Up to 3 across the road, 8px gaps, centred |
-| Tile        | 32×32           | Road tiles, dogs, obstacles; ~12px margins |
+| Region      | Size (px)         | Notes                                      |
+| ----------- | ----------------- | ------------------------------------------ |
+| Canvas      | 360×640           | Portrait, nearest-neighbour scaling        |
+| Top bar     | 360×40            | Money, zone progress                       |
+| Backdrop    | 360×150 at y=40   | The zone's neighbourhood; scenery gags     |
+| Dog column  | 80×450 at y=190   | 3 slots of ~72×146, 4px padding            |
+| Road        | 280×450 at 80,190 | 5 lanes of 56px                            |
+| Choice card | ~83×140           | Up to 3 across the road, 8px gaps, centred |
+| Tile        | 32×32             | Road tiles, dogs, obstacles; ~12px margins |
 
 ## Characters (road)
 
@@ -95,6 +96,11 @@ Good things to bump into; each opens a choice card.
 Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
 ## Road and scenery (per zone)
+
+| Asset          | Key                                    | Type   | Size    | Priority | Notes                                                                                                        |
+| -------------- | -------------------------------------- | ------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------ |
+| Zone backdrops | `backdrop-<zone>`                      | image  | 360×150 | core     | woof-way, bark-park, sniff-street-shops, the-long-way-home; the bottom rows are the curb that meets the road |
+| Scenery gags   | `gag-cat`, `gag-sprinkler`, `gag-ball` | sprite | TBD     | core     | Animated, in the backdrop band; no card, no collision                                                        |
 
 Four zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each zone needs a road that tiles vertically across the 280px road width, plus a few non-colliding scenery props at the road edges.
 

@@ -305,6 +305,22 @@
   ],
   "images": [
     {
+      "key": "backdrop-bark-park",
+      "png": "images/backdrop-bark-park.png"
+    },
+    {
+      "key": "backdrop-sniff-street-shops",
+      "png": "images/backdrop-sniff-street-shops.png"
+    },
+    {
+      "key": "backdrop-the-long-way-home",
+      "png": "images/backdrop-the-long-way-home.png"
+    },
+    {
+      "key": "backdrop-woof-way",
+      "png": "images/backdrop-woof-way.png"
+    },
+    {
       "key": "card-belly-rubs",
       "png": "images/card-belly-rubs.png"
     },
