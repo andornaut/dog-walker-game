@@ -1,5 +1,6 @@
 // The site navigation bar: Home, Play, Data, the art gallery, each mock listed in
-// /art/mocks/index.json, and the art docs. A page loads it with
+// /art/mocks/index.json, and the repository on GitHub. Every link is a page on this site or the
+// root of an external site, never a page inside one. A page loads it with
 // <link rel="stylesheet" href="/nav.css"> and <script src="/nav.js" defer></script> in its head
 // and adds nothing else. The page links the stylesheet, rather than this script injecting it, so
 // the bar's style blocks the first paint and the CSP's 'self' covers it. On /play/ the bar is one
@@ -8,7 +9,7 @@
 // link leaves the app and the game takes the full height.
 (() => {
   "use strict";
-  const DOCS = "https://github.com/andornaut/dog-walker-game/blob/main/art/";
+  const REPO = "https://github.com/andornaut/dog-walker-game";
   // Cloudflare serves /x.html as /x and /dir/index.html as /dir/, so compare without either.
   const norm = (path) => path.replace(/(index)?\.html$/, "").replace(/\/$/, "");
   const here = norm(location.pathname);
@@ -37,8 +38,7 @@
     item("Data", "/data/"),
     item("Gallery", "/art/"),
     mocksAt,
-    item("Inventory", DOCS + "inventory.md"),
-    item("Style guide", DOCS + "style-guide.md"),
+    item("GitHub", REPO),
   );
 
   const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)");
