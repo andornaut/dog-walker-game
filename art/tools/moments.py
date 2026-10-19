@@ -3,13 +3,13 @@
 pop, the fee payout's flying coin and amount plate, and the treat's landing pop.
 Effects carry the 1px plum rim, so they hold on the light roads and the cream
 doghouse while their fills carry the dark brown column and the plum top bar.
-Plates keep a cream band inside a plum rim, so they read on the column and on
-every road.
+Plates are ui.py's chrome: a cream band inside ink and plum lines, so they read
+on the column and on every road.
 
 ui-fired-plate  24x24  laid-back, fussy, dramatic (1 frame each)  nine-slice, 8px
                        corners: a stamp-like plate in the owner's temperament colour
                        (blue, purple, dred) inside a cream band, with a white stamp line
-                       5px in. Stretched to 72x28 for "FIRED!" in white font-title at
+                       6px in. Stretched to 72x28 for "FIRED!" in white font-title at
                        2x, centred: caps in rows 9 to 18, ink from x=10 to 61
 fx-fired-pop    64x64  play (6 frames, 70ms)  drawn at 2x (128x128) centred on the 2x
                        owner face, so its pixels match the face's: an amber impact star, then
@@ -63,26 +63,10 @@ TEMPERAMENTS = {"laid-back": ("blue", "sky", "navy"), "fussy": ("purple", "mauve
 
 
 def fired_plate(face, lit, shade):
-    """24x24 nine-slice, 8px corners; rows and columns 8 to 15 are uniform, so a stretch keeps
-    them crisp. A plum rim, a cream band (tan on the shaded sides) that carries the dark column,
-    then the face, bevelled, with a white stamp line 5px in around the text."""
-    g = Grid(24, 24)
-    rounded(g, 0, 0, 24, 24, "plum", 3)
-    rounded(g, 1, 1, 22, 22, "cream", 2)
-    g.rect(3, 21, 18, 1, "tan")
-    g.rect(21, 3, 1, 18, "tan")
-    g.p(20, 20, "tan")
-    rounded(g, 3, 3, 18, 18, shade, 1)
-    g.rect(3, 4, 17, 16, face)
-    g.rect(4, 3, 16, 17, face)
-    g.rect(4, 3, 16, 1, lit)
-    g.rect(3, 4, 1, 16, lit)
-    # the stamp line, its corners cut so it reads as a stamp's rounded border
-    g.rect(6, 5, 12, 1, "white")
-    g.rect(6, 18, 12, 1, "white")
-    g.rect(5, 6, 1, 12, "white")
-    g.rect(18, 6, 1, 12, "white")
-    return g
+    """24x24 nine-slice, 8px corners: ui.py's chrome plate with a stamp line (fired_plate)."""
+    import ui
+
+    return ui.fired_plate(face, lit, shade)
 
 
 def door(g, x, y, swing, jolt=0):
@@ -195,27 +179,10 @@ def coin_fly(step):
 
 
 def payout_label():
-    """24x16 three-slice, 8px caps; columns 8 to 15 are uniform. A cream price tag with a plum
-    rim and a tan lip, its left cap a point stepping in 1px every 2 rows with a punched hole.
-    Forest text holds 5.39:1 on the cream."""
-    g = Grid(24, 16)
-    for j in range(16):
-        left = (int(abs(j - 7.5)) + 1) // 2
-        right = 21 if j in (0, 15) else 22 if j in (1, 14) else 23
-        if j in (0, 15):
-            g.rect(left, j, right - left + 1, 1, "plum")
-            continue
-        g.p(left, j, "plum")
-        g.p(right, j, "plum")
-        g.rect(left + 1, j, right - left - 1, 1, "tan" if j == 14 else "cream")
-        if 2 <= j < 14:
-            g.p(right - 1, j, "tan")
-    # the punched hole: clear, in a plum ring
-    g.rect(3, 6, 4, 4, "plum")
-    g.rect(4, 7, 2, 2, None)
-    for x, y in ((3, 6), (6, 6), (3, 9), (6, 9)):
-        g.p(x, y, "cream")
-    return g
+    """24x16 three-slice, 8px caps: ui.py's chrome price tag (payout_label)."""
+    import ui
+
+    return ui.payout_label()
 
 
 # ---------- treat given ----------

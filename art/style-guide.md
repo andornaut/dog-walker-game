@@ -48,44 +48,66 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 
 Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
-| Pair                       | Ratio | Use                                                    |
-| -------------------------- | ----- | ------------------------------------------------------ |
-| plum on cream              | 9.42  | Body text on cream, quips                              |
-| plum on tan                | 6.49  | Body text on tan                                       |
-| plum on amber              | 7.35  | Text on amber: forced-stop band, step number           |
-| plum on yellow             | 10.92 | Text on a selected face                                |
-| darkBrown on cream         | 5.85  | Secondary text, empty heart outline                    |
-| forest on cream            | 5.39  | Money gained, affordable prices, Stinky status         |
-| darkRed on cream           | 5.07  | Money lost, unaffordable prices, full heart            |
-| ink on brown               | 4.65  | Text on a darkened tile                                |
-| cream on darkBrown         | 5.85  | Text on the column or wood                             |
-| amber on darkBrown         | 4.57  | Warnings, "You're fired!"                              |
-| yellow on darkBrown        | 6.79  | Floating gain on the column                            |
-| white on darkBrown         | 8.48  | Floating loss on the column, filled page dot           |
-| tan on darkBrown           | 4.04  | Empty slot dashed border, hollow page dots             |
-| white on forest            | 7.80  | Labels on chips and buttons                            |
-| white on rust              | 4.99  | Trait chip "Food"                                      |
-| white on darkRed, blue     | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`           |
-| slate on ink               | 3.27  | Unpicked tile frame                                    |
-| amber on navy              | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`          |
-| `ui-zone-pips` on ink      | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked   |
-| `ui-difficulty` on cream   | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim |
-| white over the dimmed road | 4.5+  | Card subtitle                                          |
-| tan on the dimmed road     | 3.0+  | 1px rim around the pause panel                         |
+| Pair                           | Ratio | Use                                                                                             |
+| ------------------------------ | ----- | ----------------------------------------------------------------------------------------------- |
+| plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, callouts, the zone banner, `normal` tiles and buttons |
+| plum on tan                    | 6.49  | Body text on tan                                                                                |
+| plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                                    |
+| plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                  |
+| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                             |
+| forest on cream                | 5.39  | Money gained, affordable prices, Stinky status, `ui-payout-label`                               |
+| darkRed on cream               | 5.07  | Money lost, unaffordable prices, full heart, ♥ in help callouts                                 |
+| cream on darkBrown             | 5.85  | Text on the column or wood                                                                      |
+| amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                       |
+| yellow on darkBrown            | 6.79  | Floating gain on the column                                                                     |
+| white on darkBrown             | 8.48  | Floating loss on the column, filled page dot                                                    |
+| tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                      |
+| white on forest                | 7.80  | Labels on chips                                                                                 |
+| ink on green                   | 8.41  | `ui-button` `go` label                                                                          |
+| white on rust                  | 4.99  | Trait chip "Food"                                                                               |
+| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                    |
+| white on navy                  | 13.89 | `ui-detail-band` title                                                                          |
+| ink on yellow                  | 14.43 | `ui-sticker` `new`                                                                              |
+| ink on cyan                    | 11.98 | `ui-sticker` `price`                                                                            |
+| navy on grey                   | 4.93  | Price on a `disabled` tile                                                                      |
+| darkSlate on grey              | 3.39  | Labels on `disabled` tiles and buttons (inactive, exempt)                                       |
+| grey on darkBrown              | 3.01  | `disabled` tile face on the wood                                                                |
+| amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                   |
+| `ui-zone-pips` on ink          | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked                                            |
+| `ui-difficulty` on cream       | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim                                          |
+| white over the dimmed road     | 4.5+  | Card subtitle                                                                                   |
+| tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                                  |
 
 ## UI
 
-- Wood: a plum and dbrown frame, cream paper slots and tan face panels.
-- Full-screen backgrounds put low-contrast dark wood (dbrown with plum seams) under UI and scenery elsewhere.
-- `ui-button`: `normal` (amber) for the primary action, `secondary` (tan) for the others, `go` (green face, ink label) for Start walk only, `go-disabled` (sunk dslate face, slate label) for Start walk before a walker and a dog are picked. `ui-section` frames each start screen section: `incomplete` (ink frame, navy band, cream heading, amber prompt), `complete` (amber border and band, ink text), `neutral` (as incomplete, no prompt) for optional gear with nothing equipped. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Home, pause, help and sound sit on `ui-icon-button`.
+- One chrome for every panel, bubble, plate, tile and card frame: a cream face in a 1px ink outer line and a 1px plum inner line, with a tan lip along its bottom and right (`chrome` in `art/tools/ui.py`). Corners are cut 1px (panels, cards), 2px (hints, detail cards) or 3px (quips). A coloured plate (`ui-hit-label`, `ui-fired-plate`) puts its face 4px in, inside a 2px cream band. Tails are cream in an ink line, laid over their bubble's ink row. No plain white boxes.
+- Wood is background only: full-screen backgrounds (dbrown with plum seams), the top bar and the doghouses. Navy bands (`ui-section`, `ui-detail-band`) head sections and cards; the zone banner's ribbon ends are navy.
+- `ui-section` frames each start screen section: `incomplete` (ink frame, navy band, cream heading, amber prompt), `complete` (amber border and band, ink text), `neutral` (as incomplete, no prompt) for optional gear with nothing equipped. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Home, pause, help and sound sit on `ui-icon-button`.
+- `ui-sticker` (56×28) is a starburst in an ink outline: `new` (yellow body, amber spikes) on a dog or gear tile that just became affordable, `price` (cyan body, sky spikes) for the next locked item's price, `pop` (4 frames, 70ms, ending on the `new` look) for a badge-earned moment. At most one sticker per screen (`new` wins over `price`), never on the run screen's road or over a choice card. On a tile, its right edge sits 2px right of the tile's (kept 2px inside the screen) and its bottom 4px below the tile's, over the price line, which the tile then leaves out. The word is in `font-title` at 1×, ink, centred on x 28 with its caps in rows 12 to 16, up to 36px wide: "NEW!" or the price as the game formats it. Write the word after `pop` ends; with reduced motion show the last frame.
 - Fonts: `font-body` (Tiny5, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
 - Display lettering: the yard sign logo's letters (yellow fill, 1px ink outline, solid dred shadow) for big words only, never body text: zone names on `ui-zone-banner`, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title and hit labels, in `font-display` (yellow) or `font-display-cream` (cream), 10px capitals with the colours baked in, drawn untinted. In-art signs (shop boards, the park gate, the lemonade stand) use the same letters and outline at 1x with a 1px shadow.
+
+### Interaction states
+
+Every tile, button, card, tab and switch row is in one of four states, drawn the same way everywhere. `ui-tile` (insets 4) draws the first three for walker, dog and gear tiles; `ui-button` (insets 3, 3, 3, 5) draws all four.
+
+| State    | When                                                                                     | Look                                                                                       | Label                                                |
+| -------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| normal   | Available, not chosen; a locked item the bank covers, with `ui-afford` 2px outside it    | Cream face, ink and plum lines, tan lip (`ui-tile` `normal`, `ui-button` `normal`)         | plum (9.42:1)                                        |
+| selected | Picked, equipped, toggled on, the open tab or page                                       | Gold: ink line, amber band, orange line, yellow face (`ui-tile` `selected`)                | plum (10.92:1)                                       |
+| disabled | Cannot be chosen: locked and not affordable, the pack full, gear equipped, not available | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt); a price in navy (4.93:1) |
+| primary  | The one call to action on a screen: Start walk, Resume, Got it, Nice!                    | Raised green face on a forest lip (`ui-button` `go`)                                       | ink (8.41:1)                                         |
+
+- Art inside a disabled tile (faces, icons, the padlock) draws from its grey copy (`greyTextureKey`, as a disabled card) one ramp step darker (`remapDarker`), on a slate box; a normal tile's box is tan, a selected one's amber.
+- A disabled primary (Start walk before a walker and a dog are picked) is `go-disabled`, which matches `disabled`.
+- `secondary` and `secondary-pressed` match `normal` and `pressed`: every button that is not the screen's primary is `normal`.
+- Cards follow the same states: a disabled card is redrawn in the grey ramp, the selected one is outlined in amber. A switch row's state is its switch; the row itself is normal or disabled.
 
 ### Feedback and selected state
 
 - A press shows at once, before any selected state: the item dips 2px (a button into its lip) and `fx-tap` bursts under the finger.
-- Anything picked, equipped, toggled on or active (tile, walker, switch row, tab, current page) shows all four cues: `ui-select` 3px outside it; a yellow face where unselected faces stay cream or tan; a 2px lift onto a shadow; a `ui-check` badge (pick order or tick) at its top-left.
-- When a choice is full (pack full, gear equipped), unselected items darken one ramp step.
+- Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (`ui-tile` `selected` on tiles; on other controls a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge (pick order or tick) at its top-left.
+- When a choice is full (pack full, gear equipped), the unselected items are disabled.
 - A picked item's face hops; a picked dog hops onto the gate path in `fx-dust`.
 - An affordable item takes `ui-afford` 2px outside it, unless selected.
 - An unaffordable locked item shakes when tapped. The ready Start walk button bobs.

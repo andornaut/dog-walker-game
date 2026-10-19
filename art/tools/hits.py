@@ -35,7 +35,7 @@ ui-hit-flash-green, -sky, -amber, -orange, -pink, -white
                           4x4 ordered dither to clear by x=15; tiles vertically, the
                           game mirrors it for the right edge
 ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners: a dred
-                          (normal) or blue (lucky) plate in a yellow band with corner spikes,
+                          (normal) or blue (lucky) plate in ui.py's chrome (a cream band),
                           stretched to 176x32 for every label; white font-title text at 2x,
                           centred, its line top 3px below the plate's top so the 10px caps sit
                           in rows 11 to 20
@@ -775,24 +775,10 @@ PLATES = {"normal": ("dred", "red", "plum"), "lucky": ("blue", "sky", "navy")}
 
 
 def label_plate(face="dred", lit="red", shade="plum"):
-    """24x24 nine-slice, 8px corners. The middle rows and columns are uniform, so a stretch keeps
-    them crisp. White text sits on the face (7.34:1 on dred, 8.48:1 on blue) from 6px in; the yellow
-    band carries Woof Way and the plum rim the light roads. A spike pokes out of each corner."""
-    g = Grid(24, 24)
-    for (x0, y0), (sx, sy) in (((1, 1), (1, 1)), ((22, 1), (-1, 1)), ((1, 22), (1, -1)), ((22, 22), (-1, -1))):
-        g.tri((x0 + 0.5 * sx, y0 + 0.5 * sy), (x0 + 7 * sx, y0 + 3.5 * sy), (x0 + 3.5 * sx, y0 + 7 * sy),
-              "yellow")
-    g.rect(3, 3, 18, 18, "yellow")
-    g.rect(3, 19, 18, 2, "amber")
-    g.rect(19, 5, 2, 14, "amber")
-    g.rect(5, 5, 14, 14, face)
-    g.rect(5, 5, 14, 1, lit)
-    g.rect(5, 5, 1, 14, lit)
-    g.rect(5, 18, 14, 1, shade)
-    g.rect(18, 6, 1, 13, shade)
-    rim(g)
-    g.rect(3, 22, 18, 1, "plum")
-    return g
+    """24x24 nine-slice, 8px corners: ui.py's chrome plate (hit_label)."""
+    import ui
+
+    return ui.hit_label(face, lit, shade)
 
 
 # ---------- dog status overlays ----------

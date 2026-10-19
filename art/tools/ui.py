@@ -22,7 +22,10 @@ ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags fi
 empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
 icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo,
-and <zone> and <zone>-done for each zone in ZONE_COLOURS).
+and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile (24x24 nine-slice, 4px
+on every side; tags normal, selected, disabled), ui-sticker (56x28; tags new, price, pop).
+Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py,
+moments.py, help.py and cards.py draw their plates, callouts and frames with it.
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -52,6 +55,70 @@ def to_image(px):
             if c:
                 im.putpixel((x, y), tuple(int(c[i:i + 2], 16) for i in (0, 2, 4)) + (255,))
     return im
+
+
+# ---------- the chrome: one frame for every panel, bubble, plate and card frame ----------
+
+def chrome_shape(g, inside, open_edge=None, face="cream", lip="tan", line="plum"):
+    """Frame the shape inside(x, y) on g in the UI chrome: a 1px ink outer line, a 1px inner line
+    (plum; None leaves it out, for shapes too small to hold it), the face, and the lip (tan on
+    cream) along the face's bottom row and right column. open_edge(x, y) is true for points off
+    the grid that continue the shape, so a tail laid over a bubble's rim stays open on that side.
+    Ink holds 3:1 on the light roads, the cream face on navy, ink and dark wood; text sits on
+    the face."""
+    def solid(x, y):
+        if 0 <= x < g.w and 0 <= y < g.h:
+            return inside(x, y)
+        return bool(open_edge and open_edge(x, y))
+
+    sides = ((0, -1), (0, 1), (-1, 0), (1, 0))
+    ring = {}
+    for y in range(g.h):
+        for x in range(g.w):
+            if inside(x, y):
+                ring[x, y] = 0 if any(not solid(x + dx, y + dy) for dx, dy in sides) else None
+    for (x, y), d in ring.items():
+        if line and d is None and any(ring.get((x + dx, y + dy)) == 0 for dx, dy in sides):
+            ring[x, y] = 1
+    for (x, y), d in ring.items():
+        if d == 0:
+            g.p(x, y, "ink")
+        elif d == 1:
+            g.p(x, y, line)
+        else:
+            framed = [ring.get((x + dx, y + dy), -1) for dx, dy in ((0, 1), (1, 0))]
+            g.p(x, y, lip if any(v is not None and v >= 0 for v in framed) else face)
+    return g
+
+
+def rounded_inside(x0, y0, w, h, r):
+    """A box with each corner cut on a diagonal r pixels long, as an inside(x, y) test."""
+    def inside(x, y):
+        i, j = x - x0, y - y0
+        if not (0 <= i < w and 0 <= j < h):
+            return False
+        return min(i, w - 1 - i) + min(j, h - 1 - j) >= r
+    return inside
+
+
+def chrome(g, x, y, w, h, r=1, face="cream", lip="tan", line="plum"):
+    """A chrome box (chrome_shape) at x, y, w x h, its corners cut r pixels."""
+    return chrome_shape(g, rounded_inside(x, y, w, h, r), face=face, lip=lip, line=line)
+
+
+def plate(face, lit, shade, w=24, h=24):
+    """A coloured plate in the chrome: the frame and a cream band 2px wide (the lip on its bottom
+    and right), then the face from 4px in, lit along its top and left and shaded along its bottom
+    and right. Rows and columns 8 to w - 9 are uniform, so a nine-slice with 8px corners keeps them
+    crisp. White text on the face: 7.34:1 on dred, 8.48:1 on blue, 8.86:1 on purple."""
+    g = Grid(w, h)
+    chrome(g, 0, 0, w, h)
+    g.rect(4, 4, w - 8, h - 8, face)
+    g.rect(4, 4, w - 8, 1, lit)
+    g.rect(4, 4, 1, h - 8, lit)
+    g.rect(4, h - 5, w - 8, 1, shade)
+    g.rect(w - 5, 5, 1, h - 9, shade)
+    return g
 
 
 # ---------- icons ----------
@@ -295,46 +362,66 @@ def heart(full):
 # ---------- nine-slices and badges ----------
 
 def panel():
-    g = Grid(24, 24)
-    g.rect(1, 0, 22, 24, "plum")
-    g.rect(0, 1, 24, 22, "plum")
-    g.rect(2, 2, 20, 20, "cream")
-    g.rect(2, 21, 20, 1, "tan")
-    g.rect(21, 2, 1, 20, "tan")
-    g.p(3, 3, "white")
-    return g
+    """24x24 nine-slice (4px corners): the chrome box (chrome) with its corners cut 1px."""
+    return chrome(Grid(24, 24), 0, 0, 24, 24)
+
+
+# The interaction states shared by tiles and buttons: each state's face, its lip and a button
+# face's top highlight. normal is the chrome's cream, selected the gold of ui-section's complete
+# state, go the one primary action on a screen, disabled a flat grey with no lip.
+STATES = {"normal": ("cream", "tan", "white"), "selected": ("yellow", "amber", None),
+          "go": ("green", "forest", "yellow"), "disabled": ("grey", None, None)}
 
 
 def button(state):
-    """secondary is a tan face on a brown lip for the actions beside the amber primary (Help,
-    Settings, Head home beside Resume). go is a green face on a forest lip for Start walk, the one
-    button on the home screen that must not blend with the amber and yellow tiles. Labels are
-    plum: 7.35:1 on amber, 6.49:1 on tan; ink on green, 8.41:1. go-disabled is Start walk while
-    the pack is empty.
-    Every row below 2 and above 19 is plain face, so the plate stretches to any height with
-    slices of 3 at the top and sides and 5 at the bottom (or 6 all round). Pressed, the
-    highlight sits on the face's top edge (row 2), inside the top slice."""
+    """24x24 nine-slice, 3px top and sides and a 5px bottom: a face in a 1px ink line on its lip,
+    in one of the interaction states (STATES). normal and pressed are the cream standard button,
+    plum label (9.42:1); go and go-pressed the primary action, one per screen, ink label on green
+    (8.41:1); disabled and go-disabled are the same flat grey face sunk to the pressed depth with
+    no lip or highlight, dslate label (3.39:1; inactive, so exempt). secondary and
+    secondary-pressed are copies of normal and pressed, kept so frame numbers hold.
+    Raised, row 0 is ink, row 1 the highlight, the face runs to row 18, the lip fills rows 19 to
+    22 and ink row 23. Sunk, rows 0 and 1 are clear, row 2 is ink and the face fills rows 3 to
+    22, 2px lower, so every row from 3 to 18 is plain face and the plate stretches cleanly."""
+    kind = {"normal": "normal", "pressed": "normal", "secondary": "normal", "secondary-pressed": "normal",
+            "go": "go", "go-pressed": "go", "disabled": "disabled", "go-disabled": "disabled"}[state]
+    face, lip, hi = STATES[kind]
+    sunk = state.endswith("pressed") or kind == "disabled"
+    top = 2 if sunk else 0
     g = Grid(24, 24)
-    if state == "go-disabled":
-        # Start walk before the pack is ready: sunk flat to the pressed depth with no lip or
-        # highlight, a dslate face in a 1px ink rim, so it does not read as tappable. The face
-        # is rows 3 to 22; the label is slate (inactive, exempt from contrast).
-        g.rect(1, 2, 22, 22, "ink")
-        g.rect(0, 3, 24, 20, "ink")
-        g.rect(1, 3, 22, 20, "dslate")
+    g.rect(1, top, 22, 24 - top, "ink")
+    g.rect(0, top + 1, 24, 22 - top, "ink")
+    g.rect(1, top + 1, 22, 22 - top, face)
+    if not sunk:
+        g.rect(1, 19, 22, 4, lip)
+        g.rect(1, 1, 22, 1, hi)
+    return g
+
+
+TILE = 24
+
+
+def tile(state):
+    """24x24 nine-slice, 4px on every side: a pickable tile (walker, dog or gear) in one of the
+    interaction states. normal is the chrome: ink and plum lines, cream face, a tan lip 2px deep
+    at the bottom and 1px at the right. selected is the gold of ui-section's complete state: an
+    ink line, a 1px amber band and an orange line round a yellow face on a 1px amber lip.
+    disabled (locked and not affordable, the pack full, not available) is flat: an ink line, a
+    slate line and a grey face with no lip. Content sits from 3px in."""
+    face, lip, _ = STATES[state]
+    g = Grid(TILE, TILE)
+    if state == "selected":
+        g.rect(1, 0, TILE - 2, TILE, "ink")
+        g.rect(0, 1, TILE, TILE - 2, "ink")
+        g.rect(1, 1, TILE - 2, TILE - 2, "amber")
+        g.rect(2, 2, TILE - 4, TILE - 4, "orange")
+        g.rect(3, 3, TILE - 6, TILE - 6, face)
+        g.rect(3, TILE - 4, TILE - 6, 1, lip)
+        g.rect(TILE - 4, 3, 1, TILE - 6, lip)
         return g
-    face, lip, hi = {"normal": ("amber", "orange", "yellow"), "pressed": ("amber", None, "yellow"),
-                     "disabled": ("slate", "dslate", "grey"), "secondary": ("tan", "brown", "cream"),
-                     "secondary-pressed": ("tan", None, "cream"),
-                     "go": ("green", "forest", "yellow"), "go-pressed": ("green", None, "yellow")}[state]
-    pressed = state.endswith("pressed")
-    top = 2 if pressed else 0
+    chrome(g, 0, 0, TILE, TILE, face=face, lip=lip or face, line="slate" if lip is None else "plum")
     if lip:
-        g.rect(1, 20, 22, 4, lip)
-        g.rect(0, 20, 24, 3, lip)
-    g.rect(1, top, 22, 20, face)
-    g.rect(0, top + 1, 24, 18, face)
-    g.rect(2, top if pressed else top + 1, 20, 1, hi)
+        g.rect(2, TILE - 4, TILE - 4, 1, lip)
     return g
 
 
@@ -424,17 +511,25 @@ def slider_knob(state):
 
 
 def hint():
-    g = Grid(24, 24)
-    g.rect(1, 0, 22, 23, "white")
-    g.rect(0, 1, 24, 21, "white")
-    g.rect(1, 22, 22, 1, "lgrey")
-    return g
+    """24x24 nine-slice (8px corners): the first-run hint, the chrome box with corners cut 2px, so
+    it reads apart from the rounder quip bubble. Text in font-body, plum (9.42:1)."""
+    return chrome(Grid(24, 24), 0, 0, 24, 24, 2)
+
+
+def down_tail(tip):
+    """8x6, a tail pointing down from a bubble's bottom rim to its tip column: cream in an ink
+    line, the lip down its right side. Its top row lies over the rim's ink row, open there, so
+    the cream meets the bubble's plum line."""
+    rows = {4: ["########", ".######.", ".######.", "..####..", "..####..", "...##..."],
+            5: ["########", ".#######", "..######", "...#####", "....###.", ".....#.."]}[tip]
+    g = Grid(8, 6)
+    return chrome_shape(g, lambda x, y: rows[y][x] == "#", lambda x, y: y < 0 and 1 <= x < 7, line=None)
 
 
 def hint_tail():
-    g = Grid(8, 6)
-    g.tri((0, 0), (8, 0), (2, 6), "white")
-    return g
+    """8x6, centred under the hint bubble with its top row over the bubble's bottom rim; the tip
+    is at columns 3 and 4."""
+    return down_tail(4)
 
 
 def new_best():
@@ -463,30 +558,105 @@ def new_best():
 
 
 def slot_locked():
-    """160x46: the yard sign for the next dog slot, a plum-rimmed board with a tan header plank
-    over a cream panel and a padlock at the bottom right. The game writes, in sign pixels: line 1
-    ("Slot 2 · $800") in font-title x2, plum (6.49:1 on tan), caps at 5,6, up to 150 wide
-    ("SLOT 3 · $1,800" is 150); line 2 ("Save $650 more" darkRed, 5.07:1, or "Tap to buy"
-    forest, 5.39:1, on cream) in font-body x2, caps at 5,27, up to 130 wide, left of the lock
-    at 139,24. The posts stay in code."""
-    g = Grid(160, 46)
-    g.rect(1, 0, 158, 46, "plum")
-    g.rect(0, 1, 160, 44, "plum")
-    g.rect(1, 1, 158, 20, "tan")
-    g.rect(1, 1, 158, 1, "cream")
-    g.rect(1, 21, 158, 1, "brown")
-    g.rect(1, 22, 158, 22, "cream")
-    g.rect(1, 43, 158, 1, "tan")
-    g.rect(158, 2, 1, 19, "brown")
-    g.rect(158, 22, 1, 21, "tan")
-    # nail heads at the header plank's ends
-    for x in (2, 156):
-        g.p(x, 3, "dbrown")
-        g.p(x, 18, "dbrown")
+    """160x46: the sign for the next dog slot, in the chrome: a tan header (rows 2 to 20) over a
+    plum line and the cream panel, and a padlock at the bottom right. The game writes, in sign
+    pixels: line 1 ("Slot 2 · $800") in font-title x2, plum (6.49:1 on tan), caps at 5,6, up to
+    150 wide ("SLOT 3 · $1,800" is 150); line 2 ("Save $650 more" darkRed, 5.07:1, or "Tap to buy"
+    forest, 5.39:1, on cream) in font-body x2, caps at 5,27, up to 130 wide, left of the lock at
+    139,24. The posts stay in code."""
+    g = chrome(Grid(160, 46), 0, 0, 160, 46)
+    g.rect(2, 2, 156, 19, "tan")
+    g.rect(157, 2, 1, 19, "brown")
+    g.rect(2, 21, 156, 1, "plum")
     im = to_image(g.outlined(False))
     lk = to_image(lock().outlined())
     im.paste(lk, (139, 24), lk)
     return im
+
+
+# ---------- plates: the hit label, the firing plate and the payout tag ----------
+
+def hit_label(face="dred", lit="red", shade="plum"):
+    """ui-hit-label's 24x24 nine-slice, 8px corners: a plate (dred for normal, blue for lucky)
+    stretched to 176x32. White text holds 7.34:1 on dred and 8.48:1 on blue; the cream band
+    carries Woof Way and the ink line the light roads."""
+    return plate(face, lit, shade)
+
+
+def fired_plate(face, lit, shade):
+    """ui-fired-plate's 24x24 nine-slice, 8px corners: a plate in the owner's temperament colour
+    (blue, purple, dred) with a white stamp line 2px inside the face, its corners cut so it reads
+    as a stamp's rounded border. Stretched to 72x28, the line runs 6px in."""
+    g = plate(face, lit, shade)
+    g.rect(7, 6, 10, 1, "white")
+    g.rect(7, 17, 10, 1, "white")
+    g.rect(6, 7, 1, 10, "white")
+    g.rect(17, 7, 1, 10, "white")
+    return g
+
+
+def payout_label():
+    """ui-payout-label's 24x16 three-slice, 8px caps; columns 8 to 15 are uniform. A cream price
+    tag in the chrome, its left cap a point stepping in 1px every 2 rows with a punched hole in a
+    plum ring. Forest text holds 5.39:1 on the cream, caps in rows 3 to 12."""
+    def inside(x, y):
+        left = (int(abs(y - 7.5)) + 1) // 2
+        right = 21 if y in (0, 15) else 22 if y in (1, 14) else 23
+        return left <= x <= right
+
+    g = chrome_shape(Grid(24, 16), inside)
+    g.rect(4, 6, 4, 4, "plum")
+    g.rect(5, 7, 2, 2, None)
+    for x, y in ((4, 6), (7, 6), (4, 9), (7, 9)):
+        g.p(x, y, "cream")
+    return g
+
+
+# ---------- stickers ----------
+
+STICKER_W, STICKER_H = 56, 28
+# Each look's body and spike colours: new for a tile that just became affordable, price for the
+# next locked tile's price. Ink text holds 14.43:1 on yellow and 11.98:1 on cyan.
+STICKERS = {"new": ("yellow", "amber"), "price": ("cyan", "sky")}
+
+
+def sticker(body, spikes, scale=1.0, turn=0.0):
+    """56x28: a starburst sticker, a squared oval body (a superellipse, 20x7 half axes) ringed by
+    14 spikes 5px long, spaced evenly round its edge, in an ink outline. The game writes one short
+    word on the body in font-title, ink, centred on x 28 with its caps in rows 12 to 16, up to
+    36px wide. scale and turn (a fraction of a spike) draw the pop's frames."""
+    import math
+
+    a, b, n, spike = 20 * scale, 7 * scale, 14, 5 * scale
+    cx, cy = STICKER_W / 2, STICKER_H / 2
+    # the edge's arc length at each parametric angle, so the spikes fall evenly round it
+    steps = 720
+    edge = [(math.copysign(a * abs(math.cos(t)) ** 0.5, math.cos(t)),
+             math.copysign(b * abs(math.sin(t)) ** 0.5, math.sin(t)))
+            for t in (2 * math.pi * i / steps for i in range(steps + 1))]
+    arc = [0.0]
+    for (x0, y0), (x1, y1) in zip(edge, edge[1:]):
+        arc.append(arc[-1] + math.hypot(x1 - x0, y1 - y0))
+    g = Grid(STICKER_W, STICKER_H)
+    for y in range(STICKER_H):
+        for x in range(STICKER_W):
+            dx, dy = x + 0.5 - cx, y + 0.5 - cy
+            r = ((abs(dx) / a) ** 4 + (abs(dy) / b) ** 4) ** 0.25
+            if r <= 1:
+                g.p(x, y, body)
+                continue
+            phi = math.atan2(math.copysign((abs(dy) / b) ** 2, dy), math.copysign((abs(dx) / a) ** 2, dx))
+            t = (arc[round(phi % (2 * math.pi) / (2 * math.pi) * steps)] / arc[-1] * n + turn) % 1
+            beyond = math.hypot(dx, dy) * (1 - 1 / r)
+            if beyond <= spike * (1 - abs(2 * t - 1)):
+                g.p(x, y, spikes)
+    fill = [row[:] for row in g.px]
+    for y in range(STICKER_H):
+        for x in range(STICKER_W):
+            if not fill[y][x] and any(0 <= x + dx < STICKER_W and 0 <= y + dy < STICKER_H and fill[y + dy][x + dx]
+                                      for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))):
+                g.p(x, y, "ink")
+    return g
 
 
 # ---------- the doghouse: one dog slot in the dog column ----------
@@ -766,56 +936,33 @@ def afford_frame(glint):
 
 
 def detail_card():
-    """24x24 nine-slice (8px corners): the hold-to-open detail card. A dark wood frame 3px wide
-    with brass rivets, between a 1px tan rim outside (4.04:1 on the dark wood) and a plum
-    keyline around the cream paper, so it reads apart from ui-panel's plain plum rim. The
-    paper starts 6px in."""
-    g = Grid(24, 24)
-    g.rect(1, 0, 22, 24, "plum")
-    g.rect(0, 1, 24, 22, "plum")
-    g.rect(1, 1, 22, 22, "tan")
-    g.rect(2, 2, 20, 20, "dbrown")
-    g.rect(5, 5, 14, 14, "plum")
-    g.rect(6, 6, 12, 12, "cream")
-    g.rect(6, 17, 12, 1, "tan")
-    g.rect(17, 6, 1, 12, "tan")
-    g.p(7, 7, "white")
-    for x, y in ((2, 2), (20, 2), (2, 20), (20, 20)):
-        g.rect(x, y, 2, 2, "amber")
-        g.p(x, y, "yellow")
-        g.p(x + 1, y + 1, "orange")
-    return g
+    """24x24 nine-slice (8px corners): the hold-to-open detail card, the chrome box with corners
+    cut 2px; the paper starts 2px in."""
+    return chrome(Grid(24, 24), 0, 0, 24, 24, 2)
 
 
 def detail_band():
-    """24x22 three-slice (8px caps; the middle 8 columns tile): the title band across the top
-    of the detail card's paper, forest with a dgreen highlight, a teal shade and a plum line
-    under it, pinned at both ends with brass pins. The game writes the name in font-title x2,
-    white (7.80:1), caps 6px below the band's top."""
+    """24x22 three-slice (8px caps; the middle 8 columns tile): the title band across the top of
+    the detail card's paper, navy over an ink line like ui-section's heading band, in a 1px ink
+    edge with its corners cut. The game writes the name in font-title x2, white (13.89:1), caps
+    6px below the band's top."""
     g = Grid(24, 22)
-    g.rect(0, 0, 24, 21, "forest")
-    g.rect(0, 0, 24, 1, "dgreen")
-    g.rect(0, 19, 24, 2, "teal")
-    g.rect(0, 21, 24, 1, "plum")
-    for x in (2, 20):
-        g.rect(x, 9, 2, 2, "amber")
-        g.p(x, 9, "yellow")
-        g.p(x + 1, 10, "orange")
+    g.rect(1, 0, 22, 22, "ink")
+    g.rect(0, 1, 24, 20, "ink")
+    g.rect(1, 1, 22, 19, "navy")
+    g.rect(1, 1, 22, 1, "dslate")
     return g
 
 
 def detail_well():
     """68x68: the recessed window on the detail card for a 64x64 portrait (portrait-dog-<name>,
-    an owner face or a 32x32 gear icon at 2x), drawn at 2,2. A plum rim (9.42:1 on the cream
-    paper), a dark brown lip on the top and left where the recess is in shadow and brown on the
-    lit bottom and right, around sky, which every portrait reads on (tan loses Pierre), with a
-    blue shadow line under the top and left lips."""
+    an owner face or a 32x32 gear icon at 2x), drawn at 2,2. The chrome's ink and plum lines
+    around sky, which every portrait reads on, with a blue shadow line under the top and left
+    edges where the recess is in shadow."""
     g = Grid(68, 68)
-    g.rect(1, 0, 66, 68, "plum")
-    g.rect(0, 1, 68, 66, "plum")
-    g.rect(1, 1, 66, 66, "brown")
-    g.rect(1, 1, 66, 1, "dbrown")
-    g.rect(1, 1, 1, 66, "dbrown")
+    g.rect(1, 0, 66, 68, "ink")
+    g.rect(0, 1, 68, 66, "ink")
+    g.rect(1, 1, 66, 66, "plum")
     g.rect(2, 2, 64, 64, "sky")
     g.rect(2, 2, 64, 1, "blue")
     g.rect(2, 2, 1, 64, "blue")
@@ -946,66 +1093,46 @@ def zone_pip(zone=None, done=False):
 def quip_tail_down():
     """8x6, ui-quip-tail turned to point down from a bubble above the doghouse row. Place its top row
     over the bubble's bottom rim so the cream runs through; the tip is at column 5, row 5."""
-    left = quip_tail()
-    g = Grid(8, 6)
-    for y in range(6):
-        for x in range(8):
-            g.px[y][x] = left.px[x][5 - y]
-    return g
+    return down_tail(5)
 
 
 def quip():
-    """24x24 nine-slice (8px corners): the owner's speech bubble, cream paper with a round
-    plum rim, so it reads apart from the white hint bubble. Text in font-body, plum."""
-    g = Grid(24, 24)
-    g.rect(3, 0, 18, 24, "plum")
-    g.rect(1, 1, 22, 22, "plum")
-    g.rect(0, 3, 24, 18, "plum")
-    g.rect(3, 1, 18, 22, "cream")
-    g.rect(2, 2, 20, 20, "cream")
-    g.rect(1, 3, 22, 18, "cream")
-    g.rect(3, 22, 18, 1, "tan")
-    g.rect(22, 3, 1, 18, "tan")
-    g.p(21, 21, "tan")
-    g.p(3, 2, "white")
-    return g
+    """24x24 nine-slice (8px corners): the owner's speech bubble, the chrome box with corners cut
+    3px, rounder than the hint. Text in font-body, plum (9.42:1)."""
+    return chrome(Grid(24, 24), 0, 0, 24, 24, 3)
 
 
 def quip_tail():
-    """6x8, pointing left at the owner's window in the dog column. Place its right column over
-    the bubble's left rim so the cream runs through."""
+    """6x8, pointing left at the owner's window in the dog column: cream in an ink line. Place its
+    right column over the bubble's left rim so the cream meets the bubble's plum line."""
+    rows = ["....##", "...###", "..####", ".#####", "######", ".#####", "...###", ".....#"]
     g = Grid(6, 8)
-    for y, row in enumerate([".....P", "....PC", "...PCC", "..PCCC", ".PCCCC", "PCCCCC", ".PPTTC", "...PPP"]):
-        for x, c in enumerate(row):
-            g.p(x, y, {"P": "plum", "C": "cream", "T": "tan"}.get(c))
-    return g
+    return chrome_shape(g, lambda x, y: rows[y][x] == "#", lambda x, y: x > 5 and 1 <= y < 7, line=None)
 
 
 def zone_banner():
-    """248x48: a cream board in a plum frame on outlined brown wood ribbon ends, shown over the
-    road between zones. The game writes two lines in font-title, plum, centred on x=124: the
-    world and zone number ("MAPLE STREET, ZONE 2") with its caps in rows 11 to 15, and the zone
-    name at x2 ("BARK PARK", up to 192px wide) with its caps in rows 27 to 36, under the
-    dotted divider."""
+    """248x48: a cream board in the chrome on navy ribbon ends, shown over the road between
+    zones. The game writes two lines in font-title, plum, centred on x=124: the world and zone
+    number ("MAPLE STREET, ZONE 2") with its caps in rows 11 to 15, and the zone name at x2
+    ("BARK PARK", up to 192px wide) with its caps in rows 27 to 36, under the dotted divider."""
     g = Grid(248, 48)
-    for x0 in (1, 221):
-        g.rect(x0, 13, 26, 28, "brown")
-        g.rect(x0, 19, 26, 1, "dbrown")
-        g.rect(x0, 34, 26, 1, "dbrown")
-    g.tri((0, 12), (0, 42), (9, 27), None)
-    g.tri((248, 12), (248, 42), (239, 27), None)
-    g.px = g.outlined()
-    g.rect(15, 0, 218, 48, "plum")
-    g.rect(13, 1, 222, 46, "plum")
-    g.rect(12, 3, 224, 42, "plum")
-    g.rect(15, 3, 218, 42, "cream")
-    g.rect(14, 4, 220, 40, "cream")
-    g.rect(15, 44, 218, 1, "tan")
-    g.rect(233, 4, 1, 40, "tan")
+    ribbon = Grid(248, 48)
+    for x0 in (0, 220):
+        ribbon.rect(x0, 12, 28, 30, "ink")
+        ribbon.rect(x0 + 1, 13, 26, 28, "navy")
+        ribbon.rect(x0 + 1, 13, 26, 1, "dslate")
+        ribbon.rect(x0 + 1, 40, 26, 1, "ink")
+    ribbon.tri((0, 12), (0, 42), (10, 27), None)
+    ribbon.tri((248, 12), (248, 42), (238, 27), None)
+    for y in range(48):
+        for x in range(248):
+            c = ribbon.px[y][x]
+            if c and any(not (0 <= x + dx < 248) or not ribbon.px[y][x + dx] for dx in (-1, 1)):
+                c = K["ink"]
+            g.px[y][x] = c
+    chrome(g, 12, 0, 224, 48, 3)
     for x in range(28, 220, 3):
         g.p(x, 21, "tan")
-    for x, y in ((17, 6), (230, 6), (17, 41), (230, 41)):
-        g.p(x, y, "white" if y < 10 else "tan")
     return g
 
 
@@ -1095,6 +1222,7 @@ def sprites():
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
+    yield "ui-tile", [(s, [tile(s).outlined(False)], 1000) for s in ("normal", "selected", "disabled")]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000)
                         for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed", "go", "go-pressed",
                                   "go-disabled")]
@@ -1111,6 +1239,10 @@ def sprites():
     yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [
         (zone + suffix, [zone_pip(zone, bool(suffix)).outlined(False)], 1000)
         for zone in ZONE_COLOURS for suffix in ("", "-done")]
+    pop = [sticker(*STICKERS["new"], scale, turn).outlined(False)
+           for scale, turn in ((0.45, 0.5), (0.85, 0.25), (1.06, 0), (1, 0))]
+    yield "ui-sticker", [(t, [sticker(*cols).outlined(False)], 1000) for t, cols in STICKERS.items()] + [
+        ("pop", pop, 70)]
 
 
 def preview(out, scale=3, width=380):

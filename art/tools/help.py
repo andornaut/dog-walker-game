@@ -28,8 +28,8 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import DARKER, K  # noqa: E402
-from ui import ZONE_COLOURS  # noqa: E402
+from pixel import DARKER, K, Grid  # noqa: E402
+from ui import ZONE_COLOURS, chrome, to_image  # noqa: E402
 
 W, H = 344, 236
 HEX = {k: tuple(int(v[i:i + 2], 16) for i in (0, 2, 4)) for k, v in K.items()}
@@ -393,10 +393,12 @@ class Scene(Canvas):
             self.fill(cx + d * (i - 4), cy + 8 - i, 3, 1, col)
 
     def bubble(self, x, y, w, lines, col="plum"):
-        h = len(lines) * 8 + 6
-        self.fill(x + 1, y, w - 2, h, "white"); self.fill(x, y + 1, w, h - 2, "white"); self.fill(x + 1, y + h, w - 2, 1, "lgrey")
+        """A callout in ui.py's chrome, w wide, one 8px row per line: plum text on cream (9.42:1),
+        $ in forest (5.39:1) and ♥ in dred (5.07:1)."""
+        h = len(lines) * 8 + 7
+        self.paste(to_image(chrome(Grid(w, h), 0, 0, w, h).px), x, y)
         for i, ln in enumerate(lines):
-            text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"♥": "red", "$": "forest"})
+            text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"♥": "dred", "$": "forest"})
 
     def heart(self, x, y, col, hi=None):
         for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):

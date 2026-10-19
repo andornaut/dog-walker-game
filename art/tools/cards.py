@@ -47,7 +47,7 @@ import needs  # noqa: E402
 import people  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
-from ui import to_image  # noqa: E402
+from ui import chrome, to_image  # noqa: E402
 from pixel import Grid, build as build_sprites  # noqa: E402
 
 CW, CH = 83, 140
@@ -61,26 +61,22 @@ BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amb
 # ---------- the frame ----------
 
 def card_frame(kind):
-    g = Grid(CW, CH)
+    """ui.py's chrome around the card: the ink and plum lines, the cream face with its tan lip,
+    the band in the card type's colour over its shade line, a recessed art window (an ink line
+    over its top in shadow, plum on the other sides) and the badge socket."""
+    g = chrome(Grid(CW, CH), 0, 0, CW, CH)
     band, band_sh = BANDS[kind]
-    g.rect(1, 0, CW - 2, CH, "plum")
-    g.rect(0, 1, CW, CH - 2, "plum")
-    g.rect(2, 2, CW - 4, CH - 4, "cream")
-    g.rect(2, CH - 3, CW - 4, 1, "tan")
     g.rect(2, 2, CW - 4, 11, band)
     g.rect(2, 12, CW - 4, 1, band_sh)
     # recessed art window
-    g.rect(4, 15, AW + 2, AH + 2, "brown")
-    g.rect(4, 15, AW + 2, 1, "dbrown")
+    g.rect(4, 15, AW + 2, AH + 2, "plum")
+    g.rect(4, 15, AW + 2, 1, "ink")
     g.rect(5, 16, AW, AH, "tan")
     # divider between the effect text and the badge
     for x in range(8, CW - 8, 3):
         g.p(x, 118, "tan")
     g.rect(6, 121, 71, 13, "plum")
-    g.rect(6, 121, 71, 1, "dbrown")
-    # corner studs
-    for x, y in ((3, 3), (CW - 4, 3), (3, CH - 4), (CW - 4, CH - 4)):
-        g.p(x, y, "white" if y < 10 else "tan")
+    g.rect(6, 121, 71, 1, "ink")
     return g
 
 
@@ -89,27 +85,24 @@ LW, LH = 2 * CW, 2 * CH
 
 def card_frame_large(kind):
     """The tap-to-enlarge card: the card-frame layout at twice the size with 1px detail, so the
-    illustration shows at 2x and the body has room for the modifiers behind the numbers."""
+    illustration shows at 2x and the body has room for the modifiers behind the numbers. The
+    chrome's lines and lip are 2px."""
     g = Grid(LW, LH)
     band, band_sh = BANDS[kind]
-    g.rect(2, 0, LW - 4, LH, "plum")
-    g.rect(1, 1, LW - 2, LH - 2, "plum")
-    g.rect(0, 2, LW, LH - 4, "plum")
-    g.rect(3, 3, LW - 6, LH - 6, "dbrown")
-    g.rect(4, 4, LW - 8, LH - 8, "cream")
-    g.rect(4, LH - 6, LW - 8, 2, "tan")
+    small = chrome(Grid(CW, CH), 0, 0, CW, CH).px
+    for y in range(LH):
+        for x in range(LW):
+            g.px[y][x] = small[y // 2][x // 2]
     g.rect(4, 4, LW - 8, 21, band)
     g.rect(4, 23, LW - 8, 2, band_sh)
     # recessed art window, the illustration at 2x
-    g.rect(8, 30, 2 * AW + 4, 2 * AH + 4, "brown")
-    g.rect(8, 30, 2 * AW + 4, 2, "dbrown")
+    g.rect(8, 30, 2 * AW + 4, 2 * AH + 4, "plum")
+    g.rect(8, 30, 2 * AW + 4, 2, "ink")
     g.rect(10, 32, 2 * AW, 2 * AH, "tan")
     for x in range(16, LW - 16, 6):
         g.rect(x, 236, 3, 1, "tan")
     g.rect(12, 242, 142, 26, "plum")
-    g.rect(12, 242, 142, 2, "dbrown")
-    for x, y in ((6, 6), (LW - 8, 6), (6, LH - 8), (LW - 8, LH - 8)):
-        g.rect(x, y, 2, 2, "white" if y < 20 else "tan")
+    g.rect(12, 242, 142, 2, "ink")
     return g
 
 
