@@ -978,11 +978,6 @@
       "json": "sprites/fx-coin-fly.json"
     },
     {
-      "key": "fx-coins",
-      "png": "sprites/fx-coins.png",
-      "json": "sprites/fx-coins.json"
-    },
-    {
       "key": "fx-confetti",
       "png": "sprites/fx-confetti.png",
       "json": "sprites/fx-confetti.json"
@@ -1001,11 +996,6 @@
       "key": "fx-fired-pop",
       "png": "sprites/fx-fired-pop.png",
       "json": "sprites/fx-fired-pop.json"
-    },
-    {
-      "key": "fx-heart",
-      "png": "sprites/fx-heart.png",
-      "json": "sprites/fx-heart.json"
     },
     {
       "key": "fx-heart-gain",

@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
 """Draw the road effects for collisions and pickups, and the new-best burst on
-the end screen. fx-bump, fx-dizzy, fx-coins and fx-sparkle are warm light that
+the end screen. fx-bump, fx-dizzy and fx-sparkle are warm light that
 holds 3:1 on Woof Way but fades into the three light roads, so each carries a
 1px plum rim (4.4:1 or more on those). fx-splash has no outline.
-fx-heart is a token, like fx-bark, so it keeps its ramp outline over the
-doghouse roofs. fx-new-best carries the plum rim too, for the cream panel and
+fx-new-best carries the plum rim too, for the cream panel and
 the sunset sky of screen-end.
 
 fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
 fx-dizzy    32x16  loop (4 frames)  stars circling over the pack while it stumbles
-fx-coins    32x32  play (6 frames)  two coins knocked loose ($2 dropped on a minor bump)
 fx-splash   32x32  play (5 frames)  water thrown up by a puddle
 fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
-fx-heart    16x16  up (5 frames)    a heart floating up from a dog slot (+1 heart)
-                   down (5 frames)  a heart cracking and falling apart (-1 heart)
 fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behind
                                     the ui-new-best ribbon (centred on it)
 fx-bark-word 32x16 pop (4 frames, 60, 60, 140, 140ms)  WOOF! in the comic lettering, popping
@@ -157,26 +153,6 @@ def dizzy(step):
     return g
 
 
-def coins(step):
-    """Each coin is rimmed on its own, so the right one stays apart where they overlap."""
-    g = Grid(32, 32)
-    for side in (-1, 1):
-        t = step + (0 if side < 0 else 0.5)
-        x = 16 + side * (2 + t * 1.7)
-        y = 18 - t * 4.2 + t * t * 0.75
-        rx = (2.5, 1.5, 0.6, 1.5)[int(t) % 4]
-        c = Grid(32, 32)
-        c.ell(x, y, rx + 0.5, 3, "amber", "orange", "yellow")
-        if step < 2:
-            c.p(x, y - 1, "white")
-        rim(c)
-        for yy, row in enumerate(c.px):
-            for xx, col in enumerate(row):
-                if col:
-                    g.px[yy][xx] = col
-    return g
-
-
 def splash(step):
     g = Grid(32, 32)
     if step < 2:
@@ -204,8 +180,6 @@ def sparkle(step):
 
 HEART = [".111.111.", "122111111", "121111113", "111111113", ".1111113.", "..11113..", "...113...", "....1...."]
 SMALL = [".11.11.", "1211111", "1111113", ".11113.", "..113..", "...1..."]
-# The crack's column in each row of HEART; the left half keeps what is left of it.
-CRACK = [4, 4, 5, 4, 3, 4, 4, 4]
 
 
 def stamp(g, rows, x0, y0, cols=("red", "pink", "dred"), keep=None):
@@ -213,38 +187,6 @@ def stamp(g, rows, x0, y0, cols=("red", "pink", "dred"), keep=None):
         for x, ch in enumerate(row):
             if ch != "." and (keep is None or keep(x, y)):
                 g.p(x0 + x, y0 + y, cols["123".index(ch)])
-
-
-def heart_up(step):
-    """Pops in small at the slot, grows and rises, then shrinks to a pink glint at the top."""
-    g = Grid(16, 16)
-    if step == 0:
-        stamp(g, SMALL, 5, 9)
-    elif step < 4:
-        stamp(g, HEART, 4, (7, 4, 2)[step - 1])
-        if step == 1:
-            for x, y in ((2, 9), (13, 8), (3, 4)):
-                g.p(x, y, "white")
-    else:
-        stamp(g, SMALL, 5, 1, ("pink", "white", "red"))
-    return g
-
-
-def heart_down(step):
-    """Cracks down the middle, then the halves split and drop, darkening as they fall."""
-    g = Grid(16, 16)
-    if step == 0:
-        stamp(g, HEART, 4, 1)
-    elif step == 1:
-        stamp(g, HEART, 4, 1)
-        for y, x in enumerate(CRACK):
-            g.p(4 + x, 1 + y, "plum")
-    else:
-        spread, drop = (1, 2, 2)[step - 2], (1, 3, 5)[step - 2]
-        cols = ("red", "pink", "dred") if step < 4 else ("dred", "red", "plum")
-        stamp(g, HEART, 4 - spread, 1 + drop, cols, lambda x, y: x < CRACK[y])
-        stamp(g, HEART, 4 + spread, 1 + drop + 1, cols, lambda x, y: x > CRACK[y])
-    return g
 
 
 # fx-new-best is centred on the 72x20 ui-new-best ribbon, whose top-left sits at RIBBON in the frame.
@@ -304,11 +246,8 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
     yield "fx-dizzy", [("loop", [rim(dizzy(i)).outlined(False) for i in range(4)], 110)]
-    yield "fx-coins", [("play", [coins(i).outlined(False) for i in range(6)], 80)]
     yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(5)], 70)]
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
-    yield "fx-heart", [("up", [heart_up(i).outlined() for i in range(5)], 90),
-                       ("down", [heart_down(i).outlined() for i in range(5)], 90)]
     yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]
     yield "fx-bark-word", [("pop", [bark_word(i).outlined(False) for i in range(4)], [60, 60, 140, 140])]
 
