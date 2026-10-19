@@ -16,7 +16,7 @@ export const QUIRKS = {
     name: "Crowd pleaser",
   },
   nervous: {
-    description: "Lunges at other dogs. Clingy when walked alone.",
+    description: "Lunges at other dogs. Clingy once the others are fired.",
     name: "Nervous",
   },
   pampered: {

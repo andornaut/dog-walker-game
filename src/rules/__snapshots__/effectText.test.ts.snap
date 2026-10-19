@@ -63,7 +63,7 @@ exports[`every card's text > matches the snapshot 1`] = `
     "peeMail: Keep walking": "Nothing",
     "peeMail: Read it all": "+2 ♥ each, −$5 per dog",
     "playDate: Just a sniff": "+1 ♥ to Playful owners",
-    "playDate: Let them play": "+1 ♥ each, −$5 per dog",
+    "playDate: Let them play": "+1 ♥ each (none for Nervous), −$5 per dog",
     "strangerLoves: Keep walking": "Nothing",
     "strangerLoves: Let them fuss": "+1 ♥ each, +$10",
     "waterStop: A long drink": "+2 ♥ each, −$5 per dog",

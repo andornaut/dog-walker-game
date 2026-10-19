@@ -114,7 +114,12 @@ export const NEED_CARDS = {
       {
         art: "card-play-date-play",
         effects: [
-          { amount: 1, kind: "hearts", target: { kind: "all" } },
+          {
+            amount: 1,
+            kind: "hearts",
+            quirkAmounts: { nervous: 0 },
+            target: { kind: "all" },
+          },
           { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
         ],
         name: "Let them play",

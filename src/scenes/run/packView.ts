@@ -306,7 +306,7 @@ export class PackView {
   // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the
   // pack's pose; the bark pops over its head as the tell starts. The pack's pose holds still
   // only while the walk is halted. A quirk's pose stands in where the dog's art has it: the
-  // nervous lunge for the tell, worried for idle while she walks alone, and a quirk pose
+  // nervous lunge for the tell, worried for idle once firings leave her alone, and a quirk pose
   // played through once when the quirk acts.
   private poseDog(
     dog: DogId,

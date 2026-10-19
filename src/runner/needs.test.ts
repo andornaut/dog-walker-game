@@ -198,30 +198,28 @@ describe("other dogs", () => {
   });
 });
 
-describe("a nervous dog walking alone", () => {
-  // Penny is calm: urgent after 100s, twice as fast alone.
-  it("fills her need nervousAloneUrgency times as fast", () => {
-    const alone = testState({ penny: 4 });
-    expect(isNervousAlone(data, alone, "penny")).toBe(true);
-    expect(stepNeeds(data, plain, 10, true, [], alone).run.needSeconds).toEqual({ penny: 20 });
-    expect(nextNeedMoment(data, alone)).toBe(50);
+describe("a nervous dog left alone", () => {
+  // Penny is calm: urgent after 100s, nervousAloneUrgency (2) times as fast when clingy.
+  it.each<[string, Parameters<typeof testState>[0], DogId, boolean, number]>([
+    ["left alone after the others were fired", { duchess: "fired", penny: 4 }, "penny", true, 20],
+    [
+      "left alone after both others were fired",
+      { duchess: "fired", koda: "fired", penny: 4 },
+      "penny",
+      true,
+      20,
+    ],
+    ["walked alone from the start", { penny: 4 }, "penny", false, 10],
+    ["walking with another dog", { duchess: 4, penny: 4 }, "penny", false, 10],
+    ["not nervous, though left alone", { duchess: 4, koda: "fired" }, "duchess", false, 10],
+  ])("is clingy only when %s", (_, slots, dog, clingy, filled) => {
+    const run = testState(slots);
+    expect(isNervousAlone(data, run, dog)).toBe(clingy);
+    expect(stepNeeds(data, plain, 10, true, [], run).run.needSeconds[dog]).toBe(filled);
   });
 
-  it("is alone once the others are fired, and not while another dog walks", () => {
-    const together = testState({ duchess: 4, penny: 4 });
-    expect(stepNeeds(data, plain, 10, true, [], together).run.needSeconds).toEqual({
-      duchess: 10,
-      penny: 10,
-    });
-    const leftAlone = testState({ duchess: "fired", penny: 4 });
-    expect(isNervousAlone(data, leftAlone, "penny")).toBe(true);
-    expect(stepNeeds(data, plain, 10, true, [], leftAlone).run.needSeconds).toEqual({ penny: 20 });
-  });
-
-  it("is only ever a nervous dog", () => {
-    expect(isNervousAlone(data, testState({ duchess: 4 }), "duchess")).toBe(false);
-    expect(stepNeeds(data, plain, 10, true, [], testState({ duchess: 4 })).run.needSeconds).toEqual(
-      { duchess: 10 },
-    );
+  it("brings the next need moment forward while clingy", () => {
+    expect(nextNeedMoment(data, testState({ duchess: "fired", penny: 4 }))).toBe(50);
+    expect(nextNeedMoment(data, testState({ penny: 4 }))).toBe(100);
   });
 });

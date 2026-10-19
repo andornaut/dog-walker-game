@@ -608,7 +608,7 @@
         "id": "playDate",
         "kind": "need"
       },
-      "text": "+1 ♥ each, −$5 per dog",
+      "text": "+1 ♥ each (none for Nervous), −$5 per dog",
       "title": "Play date!"
     },
     {
@@ -2424,6 +2424,9 @@
             {
               "amount": 1,
               "kind": "hearts",
+              "quirkAmounts": {
+                "nervous": 0
+              },
               "target": {
                 "kind": "all"
               }

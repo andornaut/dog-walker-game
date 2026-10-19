@@ -86,7 +86,7 @@ const PACKS: readonly NamedPack[] = [
   { dogs: ["duchess"], name: "Duchess" },
   { dogs: ["biscuit"], name: "Biscuit" },
   { dogs: ["koda"], name: "Koda" },
-  // Nervous, walked alone.
+  // Nervous, walked alone, so never clingy: that takes firings.
   { dogs: ["penny"], name: "Penny" },
   { dogs: ["koda", "biscuit"], name: "Koda + Biscuit" },
   // Camera ready and show dog, the quirks no other pack walks.

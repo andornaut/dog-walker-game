@@ -99,7 +99,7 @@ export const TUNING = {
     cyclistSpeedMultiplier: 1.6,
     goodLeashSquirrelPull: 0,
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
-    // A nervous dog's need fills this much faster while she is the only dog walking.
+    // A nervous dog's need fills this much faster once firings leave her the only dog walking.
     nervousAloneUrgency: 2,
     otherDogChangePerBigDog: -0.25,
     otherDogChangePerSmallDog: 0.25,

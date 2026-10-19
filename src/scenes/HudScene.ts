@@ -574,7 +574,7 @@ export class HudScene extends Scene {
     const ownerKey = ownerFaceKey(gameData, slot.dog);
     const dogKey = dogFaceKey(gameData, slot.dog);
     playTag(view.ownerFace.setTexture(ownerKey).setVisible(true), ownerKey, mood);
-    // A nervous dog walking alone looks worried, where her face has it.
+    // A nervous dog left alone by firings looks worried, where her face has it.
     const worried = isNervousAlone(gameData, run, slot.dog)
       ? firstTag(this, dogKey, ["worried"])
       : undefined;

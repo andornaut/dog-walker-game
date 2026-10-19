@@ -7,8 +7,8 @@ import type { CardSource, RunState } from "../state/runState";
 import { chance, type Random } from "./random";
 
 // Each dog's need fills while the walk moves: urgent after its energy's needUrgentByEnergy
-// seconds, gone wrong needGoneWrong seconds later, when it starts again. A nervous dog walking
-// alone fills nervousAloneUrgency times as fast. Steering into a spot meets the need of every
+// seconds, gone wrong needGoneWrong seconds later, when it starts again. A nervous dog left
+// alone by firings fills nervousAloneUrgency times as fast. Steering into a spot meets the need of every
 // dog that has it, except a nervous dog's at a spot that is another dog.
 
 export type NeedData = ChoiceData & Pick<GameData, "needs" | "needSpots">;
@@ -42,14 +42,20 @@ export function spotMeets(
   return need === spotNeed && !(quirk === "nervous" && otherDog === true);
 }
 
-// Whether the dog is nervous and the only dog walking: walked alone, or the others fired.
+// Whether the dog is nervous and left the only dog walking because the others were fired. A
+// walk that set out with her alone does not count: its pack has only her slot.
 export function isNervousAlone(
   data: Pick<GameData, "dogs">,
   run: Pick<RunState, "pack">,
   dog: DogId,
 ): boolean {
   const walking = packDogs(run);
-  return data.dogs[dog].quirk === "nervous" && walking.length === 1 && walking.includes(dog);
+  return (
+    data.dogs[dog].quirk === "nervous" &&
+    run.pack.length >= 2 &&
+    walking.length === 1 &&
+    walking.includes(dog)
+  );
 }
 
 // How many seconds the dog's need fills per second walked.
