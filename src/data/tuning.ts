@@ -116,9 +116,9 @@ export const TUNING = {
     hitStopSeconds: 1,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
-    // A minor bump locks lane input this long.
     // A minor bump holds the road and the pack still this long.
     minorHitStopSeconds: 0.6,
+    // Then lane input stays locked this long.
     minorStumble: 0.3,
     // A mover's cue shows this long before it moves.
     moverWarningSeconds: 1,

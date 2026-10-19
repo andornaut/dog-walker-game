@@ -34,11 +34,11 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead
 - **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
-- While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
-- Taps on the top bar never move the pack. Pause offers Resume, Help, Settings and Head home
+- While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; each other press queues one more lane, and a pull waits for the current move to finish
+- Taps on the top bar never move the pack. It holds the money, the treat count, the sound button and pause. Pause offers Resume, Help, Settings and Head home
 - The walker is at the bottom, the dogs just ahead in the same lane; the pack collides as one unit
 - Spawning always leaves a reachable path, so every hit is avoidable
-- After a hit, the obstacle is removed once its card closes, and obstacles are ignored for a short grace window; pickups still count
+- A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count. A hit that opens no card (a squirrel with no Chaser, a thief that flees, a skunk or puddle that catches nobody) is scenery: no bump and no grace window
 - Scroll speed and obstacle density rise gently each zone
 - **Pulls:** each dog pulls the pack one lane now and then, at an interval set by its energy: toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel), otherwise to a random side (inward at the road edge). The interval varies a little each time so pulls aren't predictable. Shortly before a pull the dog leans toward that side and barks. When the pull's lane move finishes, lane input locks for a time set by the dog's size. During a drag, a pull re-anchors the drag at the pack's new lane, so getting back takes another drag
 - **Area effects** (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have a dog caught; small dogs are caught less often. The card shows which dogs were caught, so its outcomes are fixed. If no dog is caught, no card opens
@@ -165,7 +165,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
 - **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (skunk "SPRAYED!", puddle "SOAKED!", thief "PICKPOCKETED!", squirrel "SQUIRREL!", other dog "NEW FRIEND!") and the caught dogs shaking off
 - **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through) and Spooked (after a thief) are visual only and fade after 10 seconds
-- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays during the hit stop
+- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows
@@ -212,7 +212,7 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 - **Start button:** shows the pack, e.g. "Start walk · 2 dogs · $40/zone"; the pack count reads "Pack 1/1"
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after a walk "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
 - **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; the hint line reads "Tap a dog to walk it. Tap a locked dog or gear to buy it. Hold for details."
-- **Gear** (5 items, bought once): fanny pack (start the run with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +♥ and has a higher max). Equip up to 1 owned item before each run, or none
+- **Gear** (5 items, bought once): fanny pack (start the run with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +♥ and has a higher max). Equip up to 1 owned item before each run, or none
 - **Walker picker:** choose Casey, Ada, Ben or Trista. All are free; the choice is cosmetic and saved
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
