@@ -70,7 +70,8 @@ export function sentenceList(names: readonly string[]): string {
   return head.length === 0 ? last : `${head.join(", ")} and ${last}`;
 }
 
-function sign(value: number): string {
+// The sign an amount is shown with: "−" or "+".
+export function sign(value: number): string {
   return value < 0 ? MINUS : "+";
 }
 
