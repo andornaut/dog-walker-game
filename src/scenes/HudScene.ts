@@ -389,8 +389,8 @@ export class HudScene extends Scene {
     if (view === undefined) {
       return;
     }
-    this.feedback?.update();
     const pause = run.runPause();
+    this.feedback?.update(view.run, pause);
     const items = stripItems(gameData, view.run);
     this.strip?.show(items);
     this.stepHints(delta, walkCovered(pause), runHintTriggers(gameData, view.run, items.length));

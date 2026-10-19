@@ -30,6 +30,7 @@ import {
   type TreatCue,
   trotOffX,
 } from "../hud/moments";
+import type { RunPause } from "../hud/topBar";
 import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { type Cents, cents } from "../rules/units";
@@ -101,13 +102,9 @@ export class HudFeedback {
     });
   }
 
-  update(): void {
-    const view = this.run.hudView();
-    if (view === undefined) {
-      return;
-    }
-    this.holdWhilePaused(this.run.runPause().menu !== "closed");
-    this.showLowHearts(view.run);
+  update(run: RunState, pause: RunPause): void {
+    this.holdWhilePaused(pause.menu !== "closed");
+    this.showLowHearts(run);
   }
 
   // The money the counter shows: the run's, less the fees still flying to it.
