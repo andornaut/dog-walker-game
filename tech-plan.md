@@ -47,7 +47,7 @@ Player state that outlives a run. Local only: no accounts, no cloud saves.
 
 - **Profiles:** one per browser.
 - **Contents:** bank (integer cents), owned gear, unlocked dogs, last loadout, stats and settings, referenced by data ids (`koda`, `luckyCollar`).
-- **Stats** (`gameplay/v1-plan.md`, Meta progression):
+- **Stats** (`gameplay/game-design.md`, Home screen and progression):
   - Overall: runs by outcome (finished, headed home, out of dogs), best run and lifetime earnings, total firings and firings per owner, best zone reached, and times each world was finished.
   - Per dog: walks, zones finished, times fired.
   - A run banked from a zone checkpoint counts as headed home.
