@@ -63,14 +63,14 @@ import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
-import { containsPoint, type Rect } from "../layout/rect";
+import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { drawFocusRing, drawPixelLine, drawShadow, fillRect } from "./draw";
+import { drawFocusRing, drawPixelLine, drawRing, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import {
@@ -106,7 +106,6 @@ import {
   addNineSlice,
   addSelectTile,
   cogIcon,
-  drawRing,
   type IconButton,
   imageIcon,
   type SelectTile,
@@ -973,8 +972,7 @@ export class StartScene extends Scene {
     const lit = state === "complete";
     const { band, edge } = SECTION_FRAME;
     drawRing(g, PALETTE.ink, rect, 1);
-    const inner = { height: rect.height - 2, width: rect.width - 2, x: rect.x + 1, y: rect.y + 1 };
-    drawRing(g, lit ? PALETTE.amber : PALETTE.ink, inner, edge - 1);
+    drawRing(g, lit ? PALETTE.amber : PALETTE.ink, insetRect(1, rect), edge - 1);
     const width = rect.width - edge * 2;
     fillRect(g, lit ? PALETTE.amber : PALETTE.navy, {
       height: band,

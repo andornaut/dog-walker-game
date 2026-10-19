@@ -44,7 +44,7 @@ import {
   type TopBarPress,
   walkCovered,
 } from "../hud/topBar";
-import type { Rect } from "../layout/rect";
+import { insetRect, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
 import { hintFor } from "../rules/hints";
@@ -54,7 +54,7 @@ import { type Cents, read } from "../rules/units";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
 import { AchievementToasts } from "./achievementToast";
-import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
+import { drawDashedRect, drawFramedRect, drawHeart, drawRing, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { listenOnePress } from "./onePress";
 import { colorFromHex, PALETTE } from "./palette";
@@ -489,23 +489,14 @@ export class HudScene extends Scene {
     if (g === undefined) {
       return;
     }
-    const edge = 2;
-    fillRect(g, PALETTE.amber, { ...rect, height: edge });
-    fillRect(g, PALETTE.amber, { ...rect, height: edge, y: rect.y + rect.height - edge });
-    fillRect(g, PALETTE.amber, { ...rect, width: edge });
-    fillRect(g, PALETTE.amber, { ...rect, width: edge, x: rect.x + rect.width - edge });
+    drawRing(g, PALETTE.amber, rect, 2);
   }
 
   // The house drawn while its art is missing: a roof band over a tan front, grey when fired.
   private drawHouse(g: GameObjects.Graphics, rect: Rect, fired: boolean): void {
-    const border = 1;
     fillRect(g, PALETTE.plum, rect);
-    const inner = {
-      height: rect.height - 2 * border,
-      width: rect.width - 2 * border,
-      x: rect.x + border,
-      y: rect.y + border,
-    };
+    const border = 1;
+    const inner = insetRect(border, rect);
     fillRect(g, fired ? PALETTE.lightGrey : PALETTE.tan, inner);
     fillRect(g, fired ? PALETTE.grey : PALETTE.brown, {
       ...inner,

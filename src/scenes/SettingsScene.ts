@@ -20,7 +20,7 @@ import {
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { closeFace } from "../layout/closeControl";
-import { containsPoint, type Rect } from "../layout/rect";
+import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import type { Settings } from "../save/schema";
 import { fillLine } from "../text/lines";
@@ -425,12 +425,7 @@ export class SettingsScene extends Scene {
   private drawSliderFallback(track: Rect, steps: number, active: boolean): void {
     const g = this.add.graphics();
     fillRect(g, active ? PALETTE.plum : PALETTE.grey, track);
-    const inner = {
-      height: track.height - 2,
-      width: track.width - 2,
-      x: track.x + 1,
-      y: track.y + 1,
-    };
+    const inner = insetRect(1, track);
     fillRect(g, active ? PALETTE.tan : PALETTE.lightGrey, inner);
     fillRect(g, active ? PALETTE.forest : PALETTE.grey, {
       ...inner,

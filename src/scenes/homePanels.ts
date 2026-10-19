@@ -1,20 +1,18 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard } from "../home/detail";
-import { loopFrame } from "../home/feedback";
 import type { Logbook } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import type { SlotSign } from "../home/homeLines";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
-import type { Rect } from "../layout/rect";
+import { insetRect, type Rect } from "../layout/rect";
 import { fillLine } from "../text/lines";
-import { drawFramedRect, fillRect } from "./draw";
+import { drawFramedRect, drawRing, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
-import { addCloseButton, addNineSlice, TEXT_SCALE } from "./uiKit";
+import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, TEXT_SCALE } from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on what the player can
 // afford, the slot sign, and the detail card and logbook that open over the
@@ -39,15 +37,6 @@ function text(
   return label;
 }
 
-// A ring of the given thickness just inside rect.
-function drawRing(g: GameObjects.Graphics, color: number, rect: Rect, thickness: number): void {
-  const { height, width, x, y } = rect;
-  fillRect(g, color, { height: thickness, width, x, y });
-  fillRect(g, color, { height: thickness, width, x, y: y + height - thickness });
-  fillRect(g, color, { height, width: thickness, x, y });
-  fillRect(g, color, { height, width: thickness, x: x + width - thickness, y });
-}
-
 // ui-afford sits this far outside an affordable item.
 const AFFORD_OUTSET = 2;
 
@@ -60,47 +49,11 @@ export function addAffordFrame(
   rect: Rect,
   reducedMotion: boolean,
 ): void {
-  const outer = {
-    height: rect.height + AFFORD_OUTSET * 2,
-    width: rect.width + AFFORD_OUTSET * 2,
-    x: rect.x - AFFORD_OUTSET,
-    y: rect.y - AFFORD_OUTSET,
-  };
-  const frames = scene.anims.get(animationKey("ui-afford", "glint"))?.frames ?? [];
-  const slices = frames.flatMap((_, i) => {
-    const slice = addNineSlice(scene, "ui-afford", outer, "glint", i);
-    return slice === undefined ? [] : [slice];
-  });
-  const first = slices[0];
-  if (first === undefined) {
-    const g = scene.add.graphics();
+  const outer = selectOuter(rect, AFFORD_OUTSET);
+  addLoopingFrame(scene, parent, { key: "ui-afford", outer, tag: "glint" }, reducedMotion, (g) => {
     drawRing(g, PALETTE.plum, outer, 1);
-    drawRing(
-      g,
-      PALETTE.amber,
-      {
-        ...outer,
-        height: outer.height - 2,
-        width: outer.width - 2,
-        x: outer.x + 1,
-        y: outer.y + 1,
-      },
-      1,
-    );
-    parent.add(g);
-    return;
-  }
-  parent.add(slices);
-  const durations = frames.map((frame) => frame.duration);
-  const show = () => {
-    const shown = loopFrame(reducedMotion, durations, scene.time.now);
-    slices.forEach((slice, i) => slice.setVisible(i === shown));
-  };
-  show();
-  if (!reducedMotion && slices.length > 1) {
-    scene.events.on("update", show);
-    first.once("destroy", () => scene.events.off("update", show));
-  }
+    drawRing(g, PALETTE.amber, insetRect(1, outer), 1);
+  });
 }
 
 // The slot sign's text, in sign pixels: line 1 in font-title over the header plank, line 2

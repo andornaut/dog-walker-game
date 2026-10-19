@@ -35,7 +35,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
 import { addDisplayText } from "./displayText";
-import { drawFramedRect, fillRect } from "./draw";
+import { drawFramedRect, drawRing } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
 import type { RunScene } from "./RunScene";
@@ -486,11 +486,7 @@ export class HudFeedback {
       warning.parts.push(rim);
     } else {
       const rim = this.scene.add.graphics();
-      const { width } = RIM;
-      fillRect(rim, PALETTE.red, { ...rect, height: width });
-      fillRect(rim, PALETTE.red, { ...rect, height: width, y: rect.y + rect.height - width });
-      fillRect(rim, PALETTE.red, { ...rect, width });
-      fillRect(rim, PALETTE.red, { ...rect, width, x: rect.x + rect.width - width });
+      drawRing(rim, PALETTE.red, rect, RIM.width);
       const sign = this.scene.add.sprite(rect.x + rect.width - 18, rect.y + 2, "ui-warning");
       playTag(sign.setOrigin(0), "ui-warning", "pulse", still);
       warning.parts.push(rim, sign);

@@ -18,7 +18,7 @@ import { keyNumbersShown } from "../input/keyNumbers";
 import { CARD_LAYOUT, cardRowSpec, largeCardRect } from "../layout/cardLayout";
 import { cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
-import type { Rect } from "../layout/rect";
+import { insetRect, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import {
   type CardView,
@@ -31,7 +31,7 @@ import { formatDollars } from "../rules/effectText";
 import type { CardSource } from "../state/runState";
 import { fillLine } from "../text/lines";
 import { addDisplayText, hasDisplayFont } from "./displayText";
-import { fillRect } from "./draw";
+import { drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
@@ -556,25 +556,6 @@ export class CardScene extends Scene {
     if (rect === undefined) {
       return;
     }
-    const w = SELECTED_OUTLINE;
-    fillRect(outline, PALETTE.amber, {
-      height: w,
-      width: rect.width + 2 * w,
-      x: rect.x - w,
-      y: rect.y - w,
-    });
-    fillRect(outline, PALETTE.amber, {
-      height: w,
-      width: rect.width + 2 * w,
-      x: rect.x - w,
-      y: rect.y + rect.height,
-    });
-    fillRect(outline, PALETTE.amber, { height: rect.height, width: w, x: rect.x - w, y: rect.y });
-    fillRect(outline, PALETTE.amber, {
-      height: rect.height,
-      width: w,
-      x: rect.x + rect.width,
-      y: rect.y,
-    });
+    drawRing(outline, PALETTE.amber, insetRect(-SELECTED_OUTLINE, rect), SELECTED_OUTLINE);
   }
 }

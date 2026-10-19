@@ -4,8 +4,8 @@ import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { type RestFace, type SelectLook, selectLook } from "../home/selection";
 import { type CloseControl, closeControl } from "../layout/closeControl";
-import type { Rect } from "../layout/rect";
-import { drawFramedRect, fillRect } from "./draw";
+import { insetRect, type Rect } from "../layout/rect";
+import { drawFramedRect, drawRing, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, setPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
@@ -39,7 +39,7 @@ const SLICES = {
   // A three-slice: 4px caps and a middle that stretches.
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
 } as const;
-type SliceKey = keyof typeof SLICES;
+export type SliceKey = keyof typeof SLICES;
 
 // The texture frame an Aseprite tag shows at index, from the animation BootScene made for it.
 export function tagFrame(
@@ -294,67 +294,34 @@ export const SELECT_OUTSET = 3;
 const BADGE_OFFSET = { x: -6, y: -7 } as const;
 
 export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
-  return {
-    height: rect.height + outset * 2,
-    width: rect.width + outset * 2,
-    x: rect.x - outset,
-    y: rect.y - outset,
-  };
+  return insetRect(-outset, rect);
 }
 
-// A ring of the given thickness just inside rect's edge.
-export function drawRing(
-  g: GameObjects.Graphics,
-  color: number,
-  rect: Rect,
-  thickness: number,
-): void {
-  const { height, width, x, y } = rect;
-  fillRect(g, color, { height: thickness, width, x, y });
-  fillRect(g, color, { height: thickness, width, x, y: y + height - thickness });
-  fillRect(g, color, { height, width: thickness, x, y });
-  fillRect(g, color, { height, width: thickness, x: x + width - thickness, y });
-}
-
-function inset(rect: Rect, by: number): Rect {
-  return {
-    height: rect.height - by * 2,
-    width: rect.width - by * 2,
-    x: rect.x + by,
-    y: rect.y + by,
-  };
-}
-
-// The ui-select frame around rect at outset, playing its pulse tag, or holding its first
-// frame with reduced motion. Each frame is its own nine-slice, shown one at a time from the
-// scene's update. While the art is missing it is drawn as the art draws it, without the
-// pulse: an ink line, a 2px amber band, and at the default outset an ink line on the edge.
-export function addSelectFrame(
+// A looping outline nine-slice over outer, one nine-slice per frame of key's tag, shown one
+// at a time from the scene's update, or holding its first frame with reduced motion. While
+// the art is missing, drawFallback draws it instead.
+export function addLoopingFrame(
   scene: Scene,
   parent: GameObjects.Container,
-  rect: Rect,
+  frame: { key: SliceKey; outer: Rect; tag: string },
   reducedMotion: boolean,
-  outset = SELECT_OUTSET,
+  drawFallback: (g: GameObjects.Graphics) => void,
 ): void {
-  const outer = selectOuter(rect, outset);
-  const frames = scene.anims.get(animationKey("ui-select", "pulse"))?.frames ?? [];
+  const { key, outer, tag } = frame;
+  const frames = scene.anims.get(animationKey(key, tag))?.frames ?? [];
   const slices = frames.flatMap((_, i) => {
-    const slice = addNineSlice(scene, "ui-select", outer, "pulse", i);
+    const slice = addNineSlice(scene, key, outer, tag, i);
     return slice === undefined ? [] : [slice];
   });
   const first = slices[0];
   if (first === undefined) {
     const g = scene.add.graphics();
-    drawRing(g, PALETTE.ink, outer, 1);
-    drawRing(g, PALETTE.amber, inset(outer, 1), 2);
-    if (outset >= SELECT_OUTSET) {
-      drawRing(g, PALETTE.ink, rect, 1);
-    }
+    drawFallback(g);
     parent.add(g);
     return;
   }
   parent.add(slices);
-  const durations = frames.map((frame) => frame.duration);
+  const durations = frames.map(({ duration }) => duration);
   const show = () => {
     const shown = loopFrame(reducedMotion, durations, scene.time.now);
     slices.forEach((slice, i) => slice.setVisible(i === shown));
@@ -364,6 +331,26 @@ export function addSelectFrame(
     scene.events.on("update", show);
     first.once("destroy", () => scene.events.off("update", show));
   }
+}
+
+// The ui-select frame around rect at outset, playing its pulse tag. While the art is missing
+// it is drawn as the art draws it, without the pulse: an ink line, a 2px amber band, and at
+// the default outset an ink line on the edge.
+export function addSelectFrame(
+  scene: Scene,
+  parent: GameObjects.Container,
+  rect: Rect,
+  reducedMotion: boolean,
+  outset = SELECT_OUTSET,
+): void {
+  const outer = selectOuter(rect, outset);
+  addLoopingFrame(scene, parent, { key: "ui-select", outer, tag: "pulse" }, reducedMotion, (g) => {
+    drawRing(g, PALETTE.ink, outer, 1);
+    drawRing(g, PALETTE.amber, insetRect(1, outer), 2);
+    if (outset >= SELECT_OUTSET) {
+      drawRing(g, PALETTE.ink, rect, 1);
+    }
+  });
 }
 
 // The ui-check badge at rect's top-left corner: tag is the pick order or "tick". While the

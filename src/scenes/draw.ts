@@ -12,13 +12,23 @@ export function fillRect(graphics: GameObjects.Graphics, color: number, rect: Re
   graphics.fillStyle(color).fillRect(rect.x, rect.y, rect.width, rect.height);
 }
 
+// A ring of the given thickness just inside rect's edge.
+export function drawRing(
+  g: GameObjects.Graphics,
+  color: number,
+  rect: Rect,
+  thickness: number,
+): void {
+  const { height, width, x, y } = rect;
+  fillRect(g, color, { height: thickness, width, x, y });
+  fillRect(g, color, { height: thickness, width, x, y: y + height - thickness });
+  fillRect(g, color, { height, width: thickness, x, y });
+  fillRect(g, color, { height, width: thickness, x: x + width - thickness, y });
+}
+
 // The keyboard's focus ring: a 2px cyan frame outset pixels outside rect.
 export function drawFocusRing(graphics: GameObjects.Graphics, outset: number, rect: Rect): void {
-  const ring = insetRect(-outset, rect);
-  fillRect(graphics, PALETTE.cyan, { ...ring, height: 2 });
-  fillRect(graphics, PALETTE.cyan, { ...ring, height: 2, y: ring.y + ring.height - 2 });
-  fillRect(graphics, PALETTE.cyan, { ...ring, width: 2 });
-  fillRect(graphics, PALETTE.cyan, { ...ring, width: 2, x: ring.x + ring.width - 2 });
+  drawRing(graphics, PALETTE.cyan, insetRect(-outset, rect), 2);
 }
 
 // A solid pixel ellipse under a sprite, centred on its x about a pixel above its feet.
@@ -124,10 +134,5 @@ export function drawFramedRect(
   rect: Rect,
 ): void {
   fillRect(graphics, colors.border, rect);
-  fillRect(graphics, colors.fill, {
-    height: rect.height - 2,
-    width: rect.width - 2,
-    x: rect.x + 1,
-    y: rect.y + 1,
-  });
+  fillRect(graphics, colors.fill, insetRect(1, rect));
 }
