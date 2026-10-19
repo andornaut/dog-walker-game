@@ -53,12 +53,9 @@ Rules in the rulebook that the game doesn't have yet:
 
 Tuning against the targets, with the simulator before and after:
 
-- Difficulty by skill: typical and expert players finish too often, novices too rarely; card policies differ too much (money options are cheap next to a walk's earnings)
-- Road speed and look-ahead: now 120 px/s and 5.25 s; the candidate is 150 px/s and 4.5 s
-- Earnings: about $215 a walk, so about 45 walks buy everything (now $300 to $400)
-- Needs: urgency, gone-wrong time, accident cost and need card chance (Regular dogs fail too often)
-- Zones: per-zone density, speed, mover share and weights, so harder paths earn their fees; the six zone encounters' weights
-- Pack size and gear prices: a bigger pack earns little more than one dog, and only the fanny pack pays for itself (the simulator can't vary gear yet)
+- Firing: walks with a firing run too rare (novice 46%, typical 12%, expert 2%), and card policies differ too much, because every heart-costing card has a money way out; re-measure with the mixed policy
+- Gear: each item within the window; running shoes and the whistle measured on a pack with no big dog
+- Quirks and walkers: re-baseline once both are in the simulator; walkers against the walker spread
 - Big Payday's threshold, now rarely earned
 
 Decided at the phone playtest:

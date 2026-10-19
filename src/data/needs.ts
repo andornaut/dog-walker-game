@@ -72,7 +72,7 @@ export const NEED_CARDS = {
       {
         art: "card-accident-walk-on",
         cause: "grumpy neighbour",
-        effects: [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
+        effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
         name: "Walk on",
       },
     ],

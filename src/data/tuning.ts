@@ -19,7 +19,7 @@ export const TUNING = {
     minorObstaclesGainPerZone: 4,
     // Spots that meet a dog's need, drawn from those the pack's needs match.
     needSpotsPerZone: 6,
-    obstaclesFirstZone: 22,
+    obstaclesFirstZone: 18,
     obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
@@ -42,7 +42,7 @@ export const TUNING = {
     luckyCollarMax: 1,
     luckyCollarStart: 1,
     maxBySize: { big: 10, medium: 8, small: 6 },
-    startByTemperament: { dramatic: 4, fussy: 3, laidBack: 4 },
+    startByTemperament: { dramatic: 3, fussy: 2, laidBack: 3 },
     treat: 1,
   },
   // Dollars. The game counts money in cents, so $1.50 is exact.
@@ -50,15 +50,15 @@ export const TUNING = {
     // A Regular dog's accident, cleaned up with a bag.
     accidentCleanUp: 5,
     chattyNeighbourTip: 25,
-    encounterHigh: 20,
-    encounterLow: 10,
+    encounterHigh: 10,
+    encounterLow: 5,
     fannyPackStart: 15,
-    feeByTemperament: { dramatic: 20, fussy: 30, laidBack: 20 },
+    feeByTemperament: { dramatic: 20, fussy: 25, laidBack: 20 },
     lemonadeCup: 3,
     lostWalletKeep: 30,
     // The tips the pack drops on a minor obstacle, once for the pack.
     minorBump: 2,
-    missedTips: 10,
+    missedTips: 5,
     photoOpTip: 10,
     prices: {
       // The second and third dog slots; every player starts with one.
@@ -71,11 +71,11 @@ export const TUNING = {
       runningShoes: 800,
       whistle: 600,
     },
-    squirrelChase: 10,
+    squirrelChase: 5,
     strangerTip: 10,
     sweetTalkerCostPerDog: -4,
-    thiefLetGo: 20,
-    tip: 0.5,
+    thiefLetGo: 10,
+    tip: 0.25,
   },
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
@@ -99,7 +99,7 @@ export const TUNING = {
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {
-    roadScrollSpeed: 120,
+    roadScrollSpeed: 150,
     // Road distance between rows of spawns; a row is all spawns at one distance.
     spawnRowSpacing: 160,
     // A press that drifts further than this is no longer a tap.
@@ -128,7 +128,7 @@ export const TUNING = {
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
     // Road in view ahead of the walker at the base scroll speed. Read once at load.
-    lookAheadSeconds: 5.25,
+    lookAheadSeconds: 4.5,
     // A minor bump holds the road and the pack still this long.
     minorHitStopSeconds: 0.6,
     // Then lane input stays locked this long.
@@ -138,7 +138,7 @@ export const TUNING = {
     // An urgent need left this long goes wrong, then starts again.
     needGoneWrong: 20,
     // A need turns urgent after this much walking since it was last met or went wrong.
-    needUrgentByEnergy: { calm: 90, hyper: 40, steady: 60 },
+    needUrgentByEnergy: { calm: 90, hyper: 50, steady: 60 },
     // A pull never lands the pack where an obstacle reaches it sooner than the pull's lane
     // move, the dog's input lock, this and a lane move back.
     pullReactionWindow: 0.6,

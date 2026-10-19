@@ -1,13 +1,13 @@
 {
   "camera": {
     "horizonY": -164,
-    "ratio": 0.9968253968253968,
+    "ratio": 0.9303703703703704,
     "centerX": 180,
     "farY": 150,
-    "focal": 630,
+    "focal": 675,
     "footY": 464,
-    "secondsInView": 5.25,
-    "visibleDistance": 630
+    "secondsInView": 4.5,
+    "visibleDistance": 675
   },
   "depthSteps": [
     {
@@ -252,7 +252,7 @@
   "join": [
     {
       "bandRow": 86,
-      "distance": 731.9277108433735,
+      "distance": 784.2082616179002,
       "laneCenters": [
         128,
         154,
@@ -275,7 +275,7 @@
     },
     {
       "bandRow": 87,
-      "distance": 727.2555746140652,
+      "distance": 779.2024013722128,
       "laneCenters": [
         128,
         154,
@@ -298,7 +298,7 @@
     },
     {
       "bandRow": 88,
-      "distance": 722.6153846153848,
+      "distance": 774.2307692307693,
       "laneCenters": [
         127,
         153,
@@ -321,7 +321,7 @@
     },
     {
       "bandRow": 89,
-      "distance": 718.0068143100511,
+      "distance": 769.2930153321977,
       "laneCenters": [
         127,
         153,
@@ -344,7 +344,7 @@
     },
     {
       "bandRow": 90,
-      "distance": 713.4295415959255,
+      "distance": 764.3887945670629,
       "laneCenters": [
         127,
         153,
@@ -367,7 +367,7 @@
     },
     {
       "bandRow": 91,
-      "distance": 708.8832487309646,
+      "distance": 759.5177664974619,
       "laneCenters": [
         127,
         153,
@@ -390,7 +390,7 @@
     },
     {
       "bandRow": 92,
-      "distance": 704.3676222596964,
+      "distance": 754.6795952782463,
       "laneCenters": [
         127,
         153,
@@ -413,7 +413,7 @@
     },
     {
       "bandRow": 93,
-      "distance": 699.8823529411766,
+      "distance": 749.873949579832,
       "laneCenters": [
         126,
         153,
@@ -436,7 +436,7 @@
     },
     {
       "bandRow": 94,
-      "distance": 695.427135678392,
+      "distance": 745.1005025125628,
       "laneCenters": [
         126,
         153,
@@ -459,7 +459,7 @@
     },
     {
       "bandRow": 95,
-      "distance": 691.0016694490819,
+      "distance": 740.3589315525878,
       "laneCenters": [
         126,
         153,
@@ -482,7 +482,7 @@
     },
     {
       "bandRow": 96,
-      "distance": 686.6056572379368,
+      "distance": 735.648918469218,
       "laneCenters": [
         126,
         153,
@@ -505,7 +505,7 @@
     },
     {
       "bandRow": 97,
-      "distance": 682.2388059701493,
+      "distance": 730.9701492537315,
       "laneCenters": [
         126,
         153,
@@ -528,7 +528,7 @@
     },
     {
       "bandRow": 98,
-      "distance": 677.9008264462811,
+      "distance": 726.3223140495868,
       "laneCenters": [
         126,
         153,
@@ -551,7 +551,7 @@
     },
     {
       "bandRow": 99,
-      "distance": 673.5914332784184,
+      "distance": 721.7051070840198,
       "laneCenters": [
         125,
         152,
@@ -574,7 +574,7 @@
     },
     {
       "bandRow": 100,
-      "distance": 669.3103448275863,
+      "distance": 717.1182266009853,
       "laneCenters": [
         125,
         152,
@@ -597,7 +597,7 @@
     },
     {
       "bandRow": 101,
-      "distance": 665.0572831423897,
+      "distance": 712.5613747954174,
       "laneCenters": [
         125,
         152,
@@ -620,7 +620,7 @@
     },
     {
       "bandRow": 102,
-      "distance": 660.8319738988582,
+      "distance": 708.0342577487766,
       "laneCenters": [
         125,
         152,
@@ -643,7 +643,7 @@
     },
     {
       "bandRow": 103,
-      "distance": 656.6341463414635,
+      "distance": 703.5365853658536,
       "laneCenters": [
         125,
         152,
@@ -666,7 +666,7 @@
     },
     {
       "bandRow": 104,
-      "distance": 652.4635332252838,
+      "distance": 699.068071312804,
       "laneCenters": [
         124,
         152,
@@ -689,7 +689,7 @@
     },
     {
       "bandRow": 105,
-      "distance": 648.3198707592892,
+      "distance": 694.6284329563814,
       "laneCenters": [
         124,
         152,
@@ -712,7 +712,7 @@
     },
     {
       "bandRow": 106,
-      "distance": 644.2028985507247,
+      "distance": 690.217391304348,
       "laneCenters": [
         124,
         152,
@@ -735,7 +735,7 @@
     },
     {
       "bandRow": 107,
-      "distance": 640.1123595505619,
+      "distance": 685.8346709470306,
       "laneCenters": [
         124,
         152,
@@ -758,7 +758,7 @@
     },
     {
       "bandRow": 108,
-      "distance": 636.048,
+      "distance": 681.48,
       "laneCenters": [
         124,
         152,
@@ -781,7 +781,7 @@
     },
     {
       "bandRow": 109,
-      "distance": 632.0095693779906,
+      "distance": 677.1531100478469,
       "laneCenters": [
         124,
         152,

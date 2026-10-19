@@ -10,7 +10,7 @@
         "id": "cafe",
         "kind": "encounter"
       },
-      "text": "Friendly needs met, −$10 per dog",
+      "text": "Friendly needs met, −$5 per dog",
       "title": "Cafe patio"
     },
     {
@@ -23,7 +23,7 @@
         "id": "cafe",
         "kind": "encounter"
       },
-      "text": "−$10 per dog, +1 ♥ to fussy owners",
+      "text": "−$5 per dog, +1 ♥ to fussy owners",
       "title": "Cafe patio"
     },
     {
@@ -49,7 +49,7 @@
         "id": "goose",
         "kind": "encounter"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Angry goose"
     },
     {
@@ -88,7 +88,7 @@
         "id": "lemonade",
         "kind": "encounter"
       },
-      "text": "Friendly needs met, −$10 per dog",
+      "text": "Friendly needs met, −$5 per dog",
       "title": "Lemonade stand"
     },
     {
@@ -140,7 +140,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "+1 ♥ each, −$10 per dog, Playful needs met",
+      "text": "+1 ♥ each, −$5 per dog, Playful needs met",
       "title": "Other dog"
     },
     {
@@ -166,7 +166,7 @@
         "id": "petunias",
         "kind": "encounter"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Prize petunias"
     },
     {
@@ -192,7 +192,7 @@
         "id": "picnic",
         "kind": "encounter"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Picnic raid"
     },
     {
@@ -231,7 +231,7 @@
         "id": "puddle",
         "kind": "encounter"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Puddle"
     },
     {
@@ -244,7 +244,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "−$20 per dog",
+      "text": "−$10 per dog",
       "title": "Skunk"
     },
     {
@@ -257,7 +257,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "−$10 per dog, Stinky",
+      "text": "−$5 per dog, Stinky",
       "title": "Skunk"
     },
     {
@@ -296,7 +296,7 @@
         "id": "squirrel",
         "kind": "encounter"
       },
-      "text": "−$10",
+      "text": "−$5",
       "title": "Squirrel"
     },
     {
@@ -322,7 +322,7 @@
         "id": "thief",
         "kind": "encounter"
       },
-      "text": "−$20",
+      "text": "−$10",
       "title": "Thief"
     },
     {
@@ -335,7 +335,7 @@
         "id": "trash",
         "kind": "encounter"
       },
-      "text": "Nosy needs met, −1 ♥ to Fancy owners, −$10 per dog",
+      "text": "Nosy needs met, −1 ♥ to Fancy owners, −$5 per dog",
       "title": "Trash day"
     },
     {
@@ -348,7 +348,7 @@
         "id": "trash",
         "kind": "encounter"
       },
-      "text": "−$10 per dog, +1 ♥ to fussy owners",
+      "text": "−$5 per dog, +1 ♥ to fussy owners",
       "title": "Trash day"
     },
     {
@@ -374,7 +374,7 @@
         "id": "chattyNeighbour",
         "kind": "forcedStop"
       },
-      "text": "+$25, −$10 per dog",
+      "text": "+$25, −$5 per dog",
       "title": "Chatty neighbour"
     },
     {
@@ -400,7 +400,7 @@
         "id": "constructionDetour",
         "kind": "forcedStop"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Construction detour"
     },
     {
@@ -426,7 +426,7 @@
         "id": "iceCreamTruck",
         "kind": "forcedStop"
       },
-      "text": "−$10 per dog, +1 ♥ each",
+      "text": "−$5 per dog, +1 ♥ each",
       "title": "Ice cream truck"
     },
     {
@@ -452,7 +452,7 @@
         "id": "kidWantsToPet",
         "kind": "forcedStop"
       },
-      "text": "+1 ♥ each, −$10 per dog, Friendly needs met",
+      "text": "+1 ♥ each, −$5 per dog, Friendly needs met",
       "title": "Can I pet them?"
     },
     {
@@ -491,7 +491,7 @@
         "id": "mailCarrier",
         "kind": "forcedStop"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Mail carrier"
     },
     {
@@ -504,7 +504,7 @@
         "id": "stopSign",
         "kind": "forcedStop"
       },
-      "text": "−$10 per dog",
+      "text": "−$5 per dog",
       "title": "Stop sign"
     },
     {
@@ -543,7 +543,7 @@
         "id": "accident",
         "kind": "need"
       },
-      "text": "−2 ♥ each",
+      "text": "−1 ♥ each",
       "title": "Accident!"
     },
     {
@@ -556,7 +556,7 @@
         "id": "goodSpot",
         "kind": "need"
       },
-      "text": "+2 ♥ each, −$10 per dog",
+      "text": "+2 ♥ each, −$5 per dog",
       "title": "The perfect spot"
     },
     {
@@ -582,7 +582,7 @@
         "id": "peeMail",
         "kind": "need"
       },
-      "text": "+2 ♥ each, −$10 per dog",
+      "text": "+2 ♥ each, −$5 per dog",
       "title": "Pee-mail for {dog}"
     },
     {
@@ -608,7 +608,7 @@
         "id": "playDate",
         "kind": "need"
       },
-      "text": "+1 ♥ each, −$10 per dog",
+      "text": "+1 ♥ each, −$5 per dog",
       "title": "Play date!"
     },
     {
@@ -660,7 +660,7 @@
         "id": "waterStop",
         "kind": "need"
       },
-      "text": "+2 ♥ each, −$10 per dog",
+      "text": "+2 ♥ each, −$5 per dog",
       "title": "Water stop"
     },
     {
@@ -920,7 +920,7 @@
       "figures": {
         "feeCents": 2000,
         "maxHearts": 8,
-        "startHearts": 4,
+        "startHearts": 3,
         "startMood": "neutral"
       },
       "keys": {
@@ -950,7 +950,7 @@
       "figures": {
         "feeCents": 2000,
         "maxHearts": 8,
-        "startHearts": 4,
+        "startHearts": 3,
         "startMood": "neutral"
       },
       "keys": {
@@ -980,7 +980,7 @@
       "figures": {
         "feeCents": 2000,
         "maxHearts": 6,
-        "startHearts": 4,
+        "startHearts": 3,
         "startMood": "neutral"
       },
       "keys": {
@@ -1010,7 +1010,7 @@
       "figures": {
         "feeCents": 2000,
         "maxHearts": 10,
-        "startHearts": 4,
+        "startHearts": 3,
         "startMood": "neutral"
       },
       "keys": {
@@ -1041,7 +1041,7 @@
       "figures": {
         "feeCents": 2000,
         "maxHearts": 6,
-        "startHearts": 4,
+        "startHearts": 3,
         "startMood": "neutral"
       },
       "keys": {
@@ -1070,10 +1070,10 @@
       "trait": "foodDriven",
       "unlock": "shop",
       "figures": {
-        "feeCents": 3000,
+        "feeCents": 2500,
         "maxHearts": 10,
-        "startHearts": 3,
-        "startMood": "neutral"
+        "startHearts": 2,
+        "startMood": "upset"
       },
       "keys": {
         "doghouseTag": "penny",
@@ -1101,10 +1101,10 @@
       "trait": "fancy",
       "unlock": "shop",
       "figures": {
-        "feeCents": 3000,
+        "feeCents": 2500,
         "maxHearts": 8,
-        "startHearts": 3,
-        "startMood": "neutral"
+        "startHearts": 2,
+        "startMood": "upset"
       },
       "keys": {
         "doghouseTag": "pierre",
@@ -1134,7 +1134,7 @@
       "figures": {
         "feeCents": 2000,
         "maxHearts": 10,
-        "startHearts": 4,
+        "startHearts": 3,
         "startMood": "neutral"
       },
       "keys": {
@@ -1163,10 +1163,10 @@
       "trait": "chaser",
       "unlock": "shop",
       "figures": {
-        "feeCents": 3000,
+        "feeCents": 2500,
         "maxHearts": 6,
-        "startHearts": 3,
-        "startMood": "neutral"
+        "startHearts": 2,
+        "startMood": "upset"
       },
       "keys": {
         "doghouseTag": "zippy",
@@ -2315,7 +2315,7 @@
           "cause": "grumpy neighbour",
           "effects": [
             {
-              "amount": -2,
+              "amount": -1,
               "kind": "hearts",
               "target": {
                 "kind": "affected"
@@ -2673,7 +2673,7 @@
       "minorObstaclesFirstZone": 22,
       "minorObstaclesGainPerZone": 4,
       "needSpotsPerZone": 6,
-      "obstaclesFirstZone": 22,
+      "obstaclesFirstZone": 18,
       "obstaclesGainPerZone": 4,
       "openLanesPerRowMin": 2,
       "packSizeMax": 3,
@@ -2698,27 +2698,27 @@
         "small": 6
       },
       "startByTemperament": {
-        "dramatic": 4,
-        "fussy": 3,
-        "laidBack": 4
+        "dramatic": 3,
+        "fussy": 2,
+        "laidBack": 3
       },
       "treat": 1
     },
     "money": {
       "accidentCleanUp": 5,
       "chattyNeighbourTip": 25,
-      "encounterHigh": 20,
-      "encounterLow": 10,
+      "encounterHigh": 10,
+      "encounterLow": 5,
       "fannyPackStart": 15,
       "feeByTemperament": {
         "dramatic": 20,
-        "fussy": 30,
+        "fussy": 25,
         "laidBack": 20
       },
       "lemonadeCup": 3,
       "lostWalletKeep": 30,
       "minorBump": 2,
-      "missedTips": 10,
+      "missedTips": 5,
       "photoOpTip": 10,
       "prices": {
         "dogSlot2": 800,
@@ -2730,11 +2730,11 @@
         "runningShoes": 800,
         "whistle": 600
       },
-      "squirrelChase": 10,
+      "squirrelChase": 5,
       "strangerTip": 10,
       "sweetTalkerCostPerDog": -4,
-      "thiefLetGo": 20,
-      "tip": 0.5
+      "thiefLetGo": 10,
+      "tip": 0.25
     },
     "multipliers": {
       "bigTipperTip": 1.5,
@@ -2761,7 +2761,7 @@
       }
     },
     "pixels": {
-      "roadScrollSpeed": 120,
+      "roadScrollSpeed": 150,
       "spawnRowSpacing": 160,
       "tapMaxDistance": 10
     },
@@ -2785,14 +2785,14 @@
         "small": 0
       },
       "laneMove": 0.18,
-      "lookAheadSeconds": 5.25,
+      "lookAheadSeconds": 4.5,
       "minorHitStopSeconds": 0.6,
       "minorStumble": 0.3,
       "moverWarningSeconds": 1,
       "needGoneWrong": 20,
       "needUrgentByEnergy": {
         "calm": 90,
-        "hyper": 40,
+        "hyper": 50,
         "steady": 60
       },
       "pullReactionWindow": 0.6,
