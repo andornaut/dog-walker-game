@@ -61,7 +61,7 @@ Tuning against the targets, after one re-baseline on the shared step loop with e
 - Big Payday's threshold, now rarely earned
 - Firing: walks with a firing run too rare (typical 12%, expert 2%) and card policies differ too much; measure with the mixed policy
 - Gear: each item within the window; running shoes and the whistle on a pack with no big dog
-- Quirks: Nugget with Pierre below the two-dog window
+- Quirks: Nugget with Pepe below the two-dog window
 - Walkers: the walker spread at typical and novice skill
 
 Decided at the phone playtest, after the tuning pass:

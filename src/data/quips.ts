@@ -44,9 +44,9 @@ export const QUIPS = {
     upset: ["Oh dear, oh dear.", "Was that safe? Was she scared?"],
   },
   pierre: {
-    fired: ["Disqualified. You are fired.", "Pierre withdraws from your care."],
+    fired: ["Disqualified. You are fired.", "Pepe withdraws from your care."],
     happier: ["Acceptable. Barely.", "Seven out of ten."],
-    parting: ["No puddles. I will check his paws.", "Pierre walks on the left. Always."],
+    parting: ["No puddles. I will check his paws.", "Pepe walks on the left. Always."],
     upset: ["Points deducted.", "That would never pass inspection."],
   },
   snowball: {

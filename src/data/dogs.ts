@@ -111,8 +111,8 @@ export const DOGS = {
     art: "pierre",
     breed: "Standard poodle",
     energy: "steady",
-    look: "Apricot, show-clip pom-poms",
-    name: "Pierre",
+    look: "Black coat, a white stripe from head to tail tip, show-clip pom-poms",
+    name: "Pepe",
     need: "nosy",
     owner: {
       name: "Madame Lefevre",
