@@ -126,7 +126,7 @@ class Art(hp.Scene):
         super().__init__(AW, AH)
 
     def ground(self, zone, x0=100):
-        self.shade = hp.DARKER[hp.K[hp.ZONES[zone]]]
+        _, self.shade, self.leash_col = hp.ZONES[zone]
         tile = hp.TILES[zone].crop((x0, 0, x0 + AW, 64))
         self.img.paste(tile, (0, -4))
 
@@ -173,7 +173,25 @@ class Art(hp.Scene):
         self.paste(hp.frame(key, mood), x, y)
 
     def leash(self, x0, y0, x1, y1):
-        self.line(x0, y0, x1, y1, "dred")
+        self.line(x0, y0, x1, y1, self.leash_col)
+
+    def arrow(self, x, y, d, col="green"):
+        """A 9x9 arrow, up (d=-1) or down (d=1): upgrade art shows a change by direction, not a
+        number, so it never goes stale against tuning.ts."""
+        self.paste(pixmap(ARROW if d < 0 else ARROW[::-1], {"a": col}), x, y)
+
+
+def pixmap(rows, colours):
+    """A small drawn sprite from a character map, with the coloured outline (pixel.Grid)."""
+    g = Grid(max(map(len, rows)) + 2, len(rows) + 2)
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in colours:
+                g.p(x + 1, y + 1, colours[ch])
+    return to_image(g.outlined())
+
+
+ARROW = ["...a...", "..aaa..", ".aaaaa.", "aaaaaaa", "..aaa..", "..aaa..", "..aaa.."]
 
 
 # ---------- encounters ----------
@@ -251,7 +269,7 @@ def puddle_through():
 
 def puddle_towel():
     a = Art()
-    a.ground("home")
+    a.ground("homeStretch")
     a.put("dog-duchess", "walk", 37, 48)
     a.fill(26, 26, 22, 9, "pink")
     for x in range(26, 48, 4):
@@ -304,7 +322,7 @@ def thief_let_go():
 
 def wallet_return():
     a = Art()
-    a.ground("home")
+    a.ground("homeStretch")
     a.paste(hp.frame("lost-wallet", "idle", 1), 30, 22)
     a.hearts([(14, 8), (52, 10), (24, 40), (48, 38)])
     return a
@@ -312,7 +330,7 @@ def wallet_return():
 
 def wallet_keep():
     a = Art()
-    a.ground("home")
+    a.ground("homeStretch")
     a.paste(hp.frame("lost-wallet", "idle", 1), 12, 24)
     a.coins([(28, 30), (34, 22), (40, 32)])
     a.face("face-owner-zippy", "upset", 41, 12)
@@ -376,10 +394,11 @@ def stop_dart():
 def chatty_chat():
     a = Art()
     a.grass()
-    a.put("chatty-neighbour", "wave", 54, 54)
-    a.put("walker-casey", "walk", 22, 56, 1)
-    a.bubble(28, 4, 22, ["..."])
-    a.coins([(6, 6)])
+    a.put("chatty-neighbour", "wave", 57, 54)
+    a.put("walker-casey", "walk", 21, 56, 1)
+    a.bubble(30, 2, 22, ["..."])
+    # the tip, edge-on as it is handed over in the gap between them
+    a.coins([(31, 24)], 1)
     return a
 
 
@@ -412,15 +431,18 @@ def kid_decline():
     return a
 
 
+# A pup cup: a scoop (f, highlight h) on a striped paper cup that narrows to its base.
+CUP = ["..fff..", ".fhfff.", "fffffff", "WWWWWWW", ".RWRWR.", ".RWRWR.", "..WWW.."]
+
+
 def truck_cups():
     a = Art()
     a.ground("shops")
-    a.paste(hp.frame("ice-cream-truck", "idle"), 26, 2)
+    a.paste(hp.frame("ice-cream-truck", "idle"), 32, -4)
     a.put("dog-biscuit", "react", 14, 52)
-    for x in (34, 44, 54):
-        a.fill(x, 46, 6, 6, "white")
-        a.fill(x, 51, 6, 1, "lgrey")
-        a.fill(x + 1, 43, 4, 3, "pink")
+    for x, (f, h) in zip((34, 47, 60), (("pink", "white"), ("cream", "white"), ("brown", "tan"))):
+        a.shadow(x + 4, 55, 9)
+        a.paste(pixmap(CUP, {"f": f, "h": h, "W": "white", "R": "red"}), x, 45)
     a.hearts([(4, 4)])
     return a
 
@@ -460,7 +482,7 @@ def detour_squeeze():
 
 def mail_hold():
     a = Art()
-    a.ground("home")
+    a.ground("homeStretch")
     a.put("mail-carrier", "walk", 58, 54)
     a.put("dog-koda", "react", 36, 32)
     a.put("walker-casey", "walk", 14, 56)
@@ -471,7 +493,7 @@ def mail_hold():
 
 def mail_wait():
     a = Art()
-    a.ground("home")
+    a.ground("homeStretch")
     a.put("mail-carrier", "walk", 56, 54, 1)
     a.put("dog-koda", "walk", 36, 34, 1)
     a.put("walker-casey", "walk", 16, 56, 1)
@@ -490,15 +512,33 @@ def disc(a, cx, cy, r, col, edge=None):
                 a.fill(cx + dx, cy + dy, 1, 1, edge if edge and d > (r - 1) * (r - 1) else col)
 
 
+# Casey's hand from above, fingers to the left with a gap between each (the outline draws the
+# creases), the thumb on top, then a white cuff and a sky sleeve that runs off the edge.
+HAND = [
+    ".......sss",
+    "......sssss",
+    ".......sssssssssWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "..ssssssssssssssWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    ".ddddddddssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    ".........ssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "sssssssssssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    "dddddddddssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    ".........ssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    ".ssssssssssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    ".ddddddddssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
+    ".........ssssssdwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "...ssssssssssssdwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "...ddddddssssssdwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    ".........dddddddwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
+]
+
+
 def belly_rubs():
     a = Art()
     a.grass()
-    a.face("face-dog-biscuit", "happy", 22, 14)
-    a.fill(40, 30, 10, 5, "skin2")
-    a.fill(48, 28, 4, 4, "skin2")
-    for x in (41, 44, 47):
-        a.fill(x, 29, 1, 1, "brown")
-    a.hearts([(6, 4), (58, 6), (8, 40), (60, 40), (34, 4)])
+    a.face("face-dog-biscuit", "happy", 12, 10)
+    a.paste(pixmap(HAND, {"s": "skin1", "d": "skin2", "W": "white", "w": "lgrey", "B": "sky", "b": "blue"}), 30, 28)
+    a.hearts([(2, 4), (2, 30), (50, 4), (64, 10), (56, 18)])
     return a
 
 
@@ -509,7 +549,7 @@ def good_leash():
     a.put("dog-koda", "walk", 36, 40, 1)
     a.put("walker-casey", "walk", 14, 56)
     for d in (0, 1):
-        a.line(22 + d, 42, 36 + d, 26, "dred")
+        a.line(22 + d, 42, 36 + d, 26, a.leash_col)
     a.fill(34, 25, 3, 3, "amber")
     # tick: the chaser ignores the squirrel
     for i, (x, y) in enumerate(((52, 44), (53, 45), (54, 46), (55, 45), (56, 44), (57, 43), (58, 42), (59, 41))):
@@ -522,9 +562,9 @@ def big_tipper():
     a.ground("shops")
     for k, (x, y) in enumerate(((8, 38), (14, 34), (20, 38), (11, 30), (17, 26), (26, 36), (23, 30))):
         a.paste(hp.frame("tip", "idle", k), x, y)
-    hp.text(a, "+50%", 38, 20, "yellow", 2)
-    hp.text(a, "+50%", 39, 21, "orange", 2)
-    hp.text(a, "+50%", 38, 20, "yellow", 2)
+    a.paste(hp.frame("tip", "idle"), 44, 26)
+    a.sparkle(42, 24, "white")
+    a.arrow(56, 14, -1)
     return a
 
 
@@ -535,7 +575,9 @@ def shortcut():
         a.fill(x, y, 3, 2, "amber")
     a.chevron(56, 8, 1, "amber")
     a.put("walker-casey", "walk", 16, 56, 1)
-    a.bubble(44, 36, 28, ["-25%"], "dred")
+    # the trade-off: a shorter zone, and fewer fees
+    a.paste(hp.frame("tip", "idle"), 44, 38)
+    a.arrow(60, 40, 1, "red")
     return a
 
 
@@ -546,7 +588,7 @@ def rush_hour():
     a.put("skunk", "idle", 62, 54)
     a.put("squirrel", "idle", 36, 52)
     a.coins([(8, 4), (22, 10), (40, 4), (50, 16), (30, 22), (14, 22)])
-    hp.text(a, "X2", 58, 4, "yellow", 2)
+    a.arrow(62, 2, -1)
     return a
 
 
@@ -592,7 +634,7 @@ def second_wind():
         a.fill(x0 + 12, y - 2, 1, 1, "white")
     a.heart(56, 14, "red", "pink")
     a.heart(56, 26, "red", "pink")
-    hp.text(a, "+2", 58, 38, "white")
+    a.arrow(55, 36, -1, "white")
     return a
 
 
@@ -600,7 +642,10 @@ def sweet_talker():
     a = Art()
     a.grass()
     a.face("face-owner-pierre", "happy", 6, 14)
-    a.bubble(42, 8, 30, ["$$", "-$4"], "dgreen")
+    # cheaper per dog: the cost in the bubble, and a down arrow beside it
+    a.bubble(40, 8, 32, [""])
+    hp.text(a, "$$", 45, 12, "forest")
+    a.arrow(57, 11, 1)
     a.heart(50, 38, "red", "pink")
     a.heart(60, 44, "red", "pink")
     return a

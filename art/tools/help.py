@@ -3,7 +3,9 @@
 
 help-<page>: 344x236 images in Endesga 32, one per page of the in-game "How to
 walk" screen (see public/art/mocks/help-screen.html, which animates the same
-scenes). Built from public/art/sprites/, so build the sprites first.
+scenes). Built from public/art/sprites/ and the road strips and card
+illustrations in public/art/images/, so build those first (roads.py, cards.py).
+Names and numbers come from src/data/ at build time, so the pages follow the data.
 
 Usage:
   help.py preview OUT.png   all six images side by side, scaled up
@@ -16,6 +18,7 @@ hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -106,66 +109,102 @@ def text_c(cv, s, mid, y, col, sc=1, acc=None):
     text(cv, s, round(mid - text_w(s, sc) / 2), y, col, sc, acc)
 
 
-# ---------- road tiles (280x64), as in the mocks ----------
-
-ZONES = {"street": "dslate", "park": "tan", "shops": "lgrey", "home": "skin2"}
-NAMES = {"street": "WOOF WAY", "park": "BARK PARK", "shops": "SNIFF STREET SHOPS", "home": "THE LONG WAY HOME"}
-
-
-def road_tile(zone):
-    cv = Canvas(280, 64)
-    s = (len(zone) * 97 + 13) & 0xFFFFFFFF
-
-    def r():
-        nonlocal s
-        s = (s * 1664525 + 1013904223) & 0xFFFFFFFF
-        return s / 4294967296
-
-    f = cv.fill
-
-    def speck(n, col):
-        for _ in range(n):
-            f(int(r() * 280), int(r() * 64), 1, 1, col)
-
-    lanes = [k * 56 - 1 for k in range(1, 5)]
-    if zone == "street":
-        f(0, 0, 280, 64, "dslate"); speck(110, "slate"); speck(70, "navy")
-        f(0, 0, 3, 64, "grey"); f(277, 0, 3, 64, "grey")
-        for y in range(0, 64, 16):
-            f(0, y, 3, 1, "slate"); f(277, y, 3, 1, "slate")
-        for x in lanes:
-            f(x, 8, 2, 12, "lgrey"); f(x, 40, 2, 12, "lgrey")
-    elif zone == "park":
-        f(0, 0, 280, 64, "tan"); speck(90, "brown"); speck(40, "cream")
-        f(0, 0, 7, 64, "green"); f(273, 0, 7, 64, "green")
-        for y in range(2, 64, 6):
-            d = 0 if y % 4 else 1
-            f(5 + d, y, 1, 2, "dgreen"); f(2, y + 3, 1, 2, "dgreen"); f(274 - d, y, 1, 2, "dgreen"); f(277, y + 3, 1, 2, "dgreen")
-        for x in lanes:
-            for y in range(4, 64, 16):
-                f(x, y, 2, 6, "brown")
-    elif zone == "shops":
-        f(0, 0, 280, 64, "lgrey"); speck(40, "white")
-        for x in range(27, 280, 28):
-            f(x, 0, 1, 64, "grey")
-        f(0, 0, 280, 1, "grey"); f(0, 32, 280, 1, "grey")
-        for x in lanes:
-            f(x, 0, 2, 64, "slate")
-    else:
-        f(0, 0, 280, 64, "skin2")
-        for row in range(8):
-            y, off = row * 8, 7 if row % 2 else 0
-            f(0, y + 7, 280, 1, "brown")
-            for x in range(off, 280 + 14, 14):
-                f(x - 1, y, 1, 7, "brown")
-                if r() < 0.3:
-                    f(x, y, 13, 1, "skin1")
-        for x in lanes:
-            f(x, 6, 2, 10, "cream"); f(x, 38, 2, 10, "cream")
-    return cv.img
+def wrap(s, width, sc=1):
+    """Split s into lines no wider than width, breaking between words."""
+    lines = [""]
+    for word in s.split():
+        trial = f"{lines[-1]} {word}".strip()
+        if lines[-1] and text_w(trial, sc) > width:
+            lines.append(word)
+        else:
+            lines[-1] = trial
+    return lines
 
 
-TILES = {z: road_tile(z) for z in ZONES}
+# ---------- game data, read from src/data/ at build time ----------
+
+def data(name):
+    return open(f"src/data/{name}.ts").read()
+
+
+def ts_block(src, key):
+    """The source between the braces of the first `key: {` in src: enough parsing for the plain
+    object literals in src/data/, so names and numbers are never copied into this file."""
+    i = re.search(rf"\b{key}: \{{", src).end()
+    depth = 1
+    for j in range(i, len(src)):
+        depth += {"{": 1, "}": -1}.get(src[j], 0)
+        if depth == 0:
+            return src[i:j]
+    raise ValueError(f"{key} is not closed")
+
+
+def ts_value(src, key):
+    """The first `key: "text"` or `key: number` in src."""
+    v = re.search(rf"(?<![\w.]){key}: (\"[^\"]*\"|-?[\d.]+)", src).group(1)
+    return v.strip('"') if v.startswith('"') else float(v)
+
+
+def tuning(*path):
+    src = data("tuning")
+    for key in path[:-1]:
+        src = ts_block(src, key)
+    return ts_value(src, path[-1])
+
+
+def dollars(v):
+    """As the game's formatDollars: "$20", or "$0.60" with cents."""
+    v = abs(v)
+    return f"${v:g}" if v == int(v) else f"${v:.2f}"
+
+
+def dog(key):
+    """A dog in dogs.ts: (name, owner name, max hearts, starting hearts)."""
+    block = ts_block(data("dogs"), key)
+    owner = ts_block(block, "owner")
+    max_h = tuning("hearts", "maxBySize", ts_value(block, "size"))
+    start = tuning("hearts", "startByTemperament", ts_value(owner, "temperament"))
+    return ts_value(block, "name").upper(), ts_value(owner, "name").upper(), int(max_h), int(start)
+
+
+MONEY = r'amount: "(\w+)",\s*change: "(gain|lose)"'
+HEARTS = r'amount: (-?\d+),\s*kind: "hearts"'
+DEBUFF = r'debuff: "(\w+)"'
+
+
+def card_options(encounter):
+    """An encounter's card options in encounters.ts, left to right: (name, art key, effect text,
+    cost for one dog in dollars). The effect text follows the game's effectText, in capitals."""
+    out = []
+    for chunk in ts_block(data("encounters"), encounter).split("art: ")[1:]:
+        effects, cost = [], 0
+        for m in sorted((m for p in (MONEY, HEARTS, DEBUFF) for m in re.finditer(p, chunk)), key=lambda m: m.start()):
+            if m.re.pattern == MONEY:
+                v = tuning("money", m.group(1))
+                cost += v if m.group(2) == "lose" else 0
+                per_dog = " PER DOG" if "perDog" in chunk[m.end():].split("}")[0] else ""
+                effects.append(("-" if m.group(2) == "lose" else "+") + dollars(v) + per_dog)
+            elif m.re.pattern == HEARTS:
+                n = int(m.group(1))
+                effects.append(f"{'-' if n < 0 else '+'}{abs(n)}♥ EACH")
+            else:
+                effects.append(ts_value(ts_block(data("debuffs"), m.group(1)), "name").upper())
+        out.append((ts_value(chunk, "name").upper(), chunk.split('"')[1], ", ".join(effects), cost))
+    return out
+
+
+def world():
+    """The route in world.ts: its name and {zone id: (name, road shadow, leash colour)}, in order."""
+    zones = re.findall(r'id: "(\w+)",\s*leashColor: "#(\w+)",\s*name: "([^"]+)",\s*roadColor: "#\w+",\s*'
+                       r'roadShadowColor: "#(\w+)"', data("world"))
+    return ts_value(data("world"), "name").upper(), {z: (name, shadow, leash) for z, leash, name, shadow in zones}
+
+
+# ---------- road strips: the exported road-<zone> images (roads.py) ----------
+
+WORLD, ZONES = world()
+TILES = {z: Image.open(f"public/art/images/road-{name.lower().replace(' ', '-')}.png").convert("RGB")
+         for z, (name, _, _) in ZONES.items()}
 
 
 # ---------- exported sprites ----------
@@ -176,8 +215,8 @@ SHEETS = {}
 def frame(key, tag, i=0):
     if key not in SHEETS:
         img = Image.open(f"public/art/sprites/{key}.png").convert("RGBA")
-        data = json.load(open(f"public/art/sprites/{key}.json"))
-        SHEETS[key] = (img, [f["frame"] for f in data["frames"].values()], {t["name"]: t for t in data["meta"]["frameTags"]})
+        meta = json.load(open(f"public/art/sprites/{key}.json"))
+        SHEETS[key] = (img, [f["frame"] for f in meta["frames"].values()], {t["name"]: t for t in meta["meta"]["frameTags"]})
     img, frames, tags = SHEETS[key]
     t = tags[tag]
     f = frames[t["from"] + i % (t["to"] - t["from"] + 1)]
@@ -185,10 +224,10 @@ def frame(key, tag, i=0):
 
 
 class Scene(Canvas):
-    shade = "navy"
+    shade, leash_col = "navy", "dred"
 
     def road(self, zone):
-        self.shade = DARKER[K[ZONES[zone]]]
+        _, self.shade, self.leash_col = ZONES[zone]
         for y in range(0, H, 64):
             self.img.paste(TILES[zone], (32, y))
         self.fill(0, 0, 32, H, "green"); self.fill(312, 0, 32, H, "green")
@@ -218,7 +257,7 @@ class Scene(Canvas):
             self.feet(k, tag, cx + dx, foot)
         for k, dx, foot, _ in items:
             if k != "walker-casey":
-                self.line(cx - 9 if dx < 0 else cx + 8, base - 14, cx + dx, foot - 15, "dred")
+                self.line(cx - 9 if dx < 0 else cx + 8, base - 14, cx + dx, foot - 15, self.leash_col)
 
     def chevron(self, cx, cy, d, col):
         for i in range(8):
@@ -229,7 +268,7 @@ class Scene(Canvas):
         h = len(lines) * 8 + 6
         self.fill(x + 1, y, w - 2, h, "white"); self.fill(x, y + 1, w, h - 2, "white"); self.fill(x + 1, y + h, w - 2, 1, "lgrey")
         for i, ln in enumerate(lines):
-            text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"♥": "red", "$": "dgreen"})
+            text_c(self, ln, x + w / 2, y + 4 + i * 8, col, 1, {"♥": "red", "$": "forest"})
 
     def heart(self, x, y, col, hi=None):
         for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
@@ -239,14 +278,18 @@ class Scene(Canvas):
         if hi:
             self.fill(x + 1, y + 1, 1, 1, hi)
 
-    def mini_card(self, x, y, title, cost, art):
-        self.fill(x + 1, y, 62, 92, "plum"); self.fill(x, y + 1, 64, 90, "plum")
-        self.fill(x + 2, y + 2, 60, 88, "cream"); self.fill(x + 2, y + 2, 60, 10, "red")
-        text_c(self, title, x + 32, y + 4, "white")
-        self.fill(x + 5, y + 15, 54, 44, "brown")
-        art(x + 6, y + 16)
-        self.fill(x + 6, y + 74, 52, 11, "plum")
-        text_c(self, cost, x + 32, y + 77, "cream", 1, {"♥": "red", "$": "amber"})
+    def card(self, x, y, label, art, effect, cost):
+        """A choice card as CardScene draws it: the exported encounter card-frame with its white band
+        label, the option's illustration, the effect text in the body (2x where it fits) and the
+        cost on the card-cost plaque."""
+        self.paste(frame("card-frame", "encounter"), x, y)
+        self.paste(Image.open(f"public/art/images/{art}.png").convert("RGBA"), x + 5, y + 16)
+        self.paste(Image.open("public/art/images/card-cost.png").convert("RGBA"), x + 6, y + 121)
+        text_c(self, label, x + 42, y + 5, "white")
+        sc = 2 if len(wrap(effect, 71, 2)) * 12 <= 42 else 1
+        for i, ln in enumerate(wrap(effect, 71, sc)):
+            text_c(self, ln, x + 42, y + 78 + i * 6 * sc, "plum", sc, {"♥": "dred"})
+        text_c(self, cost, x + 42, y + 125, "cream")
 
 
 def lane(n):
@@ -268,10 +311,12 @@ def pickups():
     for ln, y, key in ((2, 20, "tip"), (2, 50, "tip"), (2, 80, "tip"), (1, 140, "treat"), (3, 110, "treat")):
         c.feet(key, "idle", lane(ln), y + 16)
     c.pack(lane(2), H - 8, ("dog-biscuit",))
-    c.bubble(200, 168, 70, ["+$1"])
+    # one tip for a solo dog, in whole cents as the game counts it
+    solo = round(tuning("money", "tip") * tuning("multipliers", "tipByPackSize", "1") * 100) / 100
+    c.bubble(200, 168, 70, ["+" + dollars(solo)])
     c.fill(6, 6, 74, 22, "plum"); c.fill(7, 7, 72, 20, "cream")
     c.paste(frame("treat", "idle"), 9, 9)
-    text(c, "TREATS 2/3", 28, 14, "plum")
+    text(c, f"TREATS 2/{tuning('counts', 'treatCarryMax'):g}", 28, 14, "plum")
     return c
 
 
@@ -281,49 +326,37 @@ def cards():
     c.feet("skunk", "idle", lane(2), 120)
     c.pack(lane(2), H - 8, ("dog-koda",), "react")
     c.dim(0, 0, W, H)
-    text_c(c, "SKUNK!", 172, 18, "white", 2)
-
-    def groom(x, y):
-        c.fill(x, y, 52, 42, "lgrey"); c.paste(frame("dog-biscuit", "walk"), x + 10, y + 6)
-        for bx, by in ((6, 8), (40, 10), (34, 30)):
-            c.fill(x + bx, y + by, 3, 3, "white")
-
-    def rinse(x, y):
-        c.fill(x, y, 52, 42, "green"); c.paste(frame("dog-biscuit", "walk", 1), x + 10, y + 6)
-        for k in range(6):
-            c.fill(x + 4 + k * 3, y + 4 + k * 2, 1, 2, "cyan")
-
-    def ignore(x, y):
-        c.fill(x, y, 52, 42, "tan"); c.paste(frame("skunk", "idle"), x + 10, y + 6)
-
-    c.mini_card(66, 50, "GROOM", "-$15 EACH", groom)
-    c.mini_card(140, 50, "RINSE", "-$5 EACH", rinse)
-    c.mini_card(214, 50, "IGNORE", "-2♥ EACH", ignore)
-    c.fill(214, 144, 64, 2, "amber")
-    text_c(c, "FREE", 246, 150, "amber")
+    text_c(c, ts_value(ts_block(data("encounters"), "skunk"), "name").upper() + "!", 172, 8, "white", 2)
+    # the skunk card as one dog would see it: each cost is per dog, and a hearts-only option is free
+    opts = card_options("skunk")
+    x0 = (W - len(opts) * 89 + 6) // 2
+    for i, (name, art, effect, cost) in enumerate(opts):
+        c.card(x0 + i * 89, 28, name, art, effect, "-" + dollars(cost) if cost else "FREE")
     return c
 
 
 def owners():
     c = Scene()
     c.fill(0, 0, W, H, "dbrown")
+    name, owner, max_h, start = dog("koda")
     sx, sy = 20, 20
     c.fill(sx, sy, 140, 96, "plum"); c.fill(sx + 1, sy + 1, 138, 94, "cream"); c.fill(sx + 4, sy + 4, 66, 34, "tan")
     c.paste(frame("face-owner-koda", "happy"), sx + 5, sy + 5)
     c.paste(frame("face-dog-koda", "happy"), sx + 37, sy + 5)
-    text(c, "KODA", sx + 76, sy + 8, "plum"); text(c, "JESSE", sx + 76, sy + 18, "dbrown")
-    for j in range(10):
-        c.heart(sx + 6 + j * 9, sy + 46, "red" if j < 5 else "tan", "pink" if j < 5 else None)
-    text(c, "5♥ OF 10", sx + 6, sy + 60, "plum", 1, {"♥": "red"})
-    c.bubble(sx + 6, sy + 72, 128, ["TAP TO GIVE A TREAT: +1♥"])
+    text(c, name, sx + 76, sy + 8, "plum"); text(c, owner, sx + 76, sy + 18, "dbrown")
+    for j in range(max_h):
+        c.paste(frame("ui-heart", "full" if j < start else "empty"), sx + 6 + j * 9, sy + 46)
+    text(c, f"{start}♥ OF {max_h}", sx + 6, sy + 60, "plum", 1, {"♥": "dred"})
+    c.bubble(sx + 6, sy + 72, 128, [f"TAP TO GIVE A TREAT: +{tuning('hearts', 'treat'):g}♥"])
+    name, _, max_h, _ = dog("nugget")
     fx, fy = 186, 20
     c.fill(fx, fy, 140, 96, "plum"); c.fill(fx + 1, fy + 1, 138, 94, "tan"); c.fill(fx + 4, fy + 4, 34, 34, "brown")
     c.paste(frame("face-owner-nugget", "fired"), fx + 5, fy + 5)
-    c.bubble(fx + 42, fy + 8, 92, ["YOU'RE FIRED!"], "red")
-    for j in range(8):
-        c.heart(fx + 6 + j * 9, fy + 46, "brown")
-    text(c, "0♥: NUGGET GOES HOME", fx + 6, fy + 60, "plum", 1, {"♥": "red"})
-    text(c, "FEES TAKEN BACK", fx + 6, fy + 72, "dred")
+    c.bubble(fx + 42, fy + 8, 92, ["YOU'RE FIRED!"], "dred")
+    for j in range(max_h):
+        c.paste(frame("ui-heart", "empty"), fx + 6 + j * 9, fy + 46)
+    text(c, f"0♥: {name} GOES HOME", fx + 6, fy + 60, "plum", 1, {"♥": "dred"})
+    text(c, "FEES TAKEN BACK", fx + 6, fy + 72, "plum")
     for i, m in enumerate(("happy", "neutral", "upset")):
         x = 92 + i * 56
         c.fill(x - 2, 138, 36, 36, "tan")
@@ -350,18 +383,20 @@ def pulls():
 def zones():
     c = Scene()
     c.fill(0, 0, W, H, "dbrown")
-    text_c(c, "MAPLE STREET", 172, 8, "amber", 2)
-    for i, z in enumerate(ZONES):
+    text_c(c, WORLD, 172, 8, "amber", 2)
+    for i, (z, (name, _, _)) in enumerate(ZONES.items()):
         x, y = 8 + i * 84, 44
         tile = TILES[z].crop((100, 0, 176, 64))
         c.img.paste(tile, (x, y)); c.img.paste(tile, (x, y + 64))
         c.fill(x, y + 120, 76, 12, "dbrown")
         c.fill(x, y, 76, 1, "plum"); c.fill(x, y + 119, 76, 1, "plum")
-        text_c(c, NAMES[z], x + 38, y - 12, "cream")
+        text_c(c, name.upper(), x + 38, y - 12, "cream")
+        # the zone number on a plum chip, so it holds contrast on every road (white on plum, 13.6:1)
+        c.fill(x + 31, y + 46, 15, 23, "plum"); c.fill(x + 30, y + 47, 17, 21, "plum")
         text_c(c, str(i + 1), x + 38, y + 50, "white", 3)
         c.paste(frame("tip", "idle"), x + 30, y + 124)
         text_c(c, "+FEES", x + 38, y + 144, "amber")
-    text_c(c, "UPGRADE CARD BETWEEN ZONES", 172, 214, "green")
+    text_c(c, "UPGRADE CARD BETWEEN ZONES", 172, 214, "yellow")
     return c
 
 
