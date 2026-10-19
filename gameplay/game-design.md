@@ -246,7 +246,7 @@ Effects without "now" or "next zone" last the rest of the run.
 
 ### Home screen and progression
 
-Everything bought on the home screen is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`tech-plan.md`](../tech-plan.md).
+Everything bought on the home screen is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
 
 - **Layout, top to bottom:** the top bar (bank, best walk and walk count, the Logbook button, settings); the gate scene; then three steps in order: 1. choose your walker, 2. choose your dogs, 3. choose gear (optional); then the Start walk button at the bottom. Nothing else sits between the steps, so the screen reads as choose this, choose that, start your walk
 - **Shop:** the home screen is the shop. Tap a locked dog, dog slot or gear item to buy it, at any time you can pay. Anything you can afford has a gold outline. The slot sign reads "Slot 2 · $800" with "Save $650 more" or "Tap to buy"
