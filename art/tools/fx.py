@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""Draw the road effects for collisions and pickups. No outlines: effects sit
-over sprites and read as light, not as objects. fx-heart is the exception: it
-is a token, like fx-bark, so it keeps its outline over the doghouse roofs.
+"""Draw the road effects for collisions and pickups. fx-bump, fx-dizzy, fx-coins
+and fx-sparkle are warm light that holds 3:1 on Woof Way but fades into the
+three light roads, so each carries a 1px plum rim (4.4:1 or more on those).
+fx-splash and fx-stinky have no outline. fx-heart is a token, like fx-bark, so
+it keeps its ramp outline over the doghouse roofs.
 
 fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
 fx-dizzy    32x16  loop (4 frames)  stars circling over the pack while it stumbles
@@ -27,6 +29,17 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import Grid, main  # noqa: E402
+
+
+def rim(g, col="plum"):
+    """Ring the shape with a 1px outline in one colour, in place: plum holds 6.5:1 on Bark Park,
+    8.3:1 on the shops and 4.4:1 on The Long Way Home, and the fill inside it carries Woof Way."""
+    edge = [(x, y) for y in range(g.h) for x in range(g.w) if not g.px[y][x] and any(
+        0 <= x + dx < g.w and 0 <= y + dy < g.h and g.px[y + dy][x + dx]
+        for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))]
+    for x, y in edge:
+        g.p(x, y, col)
+    return g
 
 
 def star4(g, cx, cy, r, col, core="white"):
@@ -83,15 +96,22 @@ def dizzy(step):
 
 
 def coins(step):
+    """Each coin is rimmed on its own, so the right one stays apart where they overlap."""
     g = Grid(32, 32)
     for side in (-1, 1):
         t = step + (0 if side < 0 else 0.5)
-        x = 16 + side * (2 + t * 2.2)
+        x = 16 + side * (2 + t * 1.7)
         y = 18 - t * 4.2 + t * t * 0.75
         rx = (2.5, 1.5, 0.6, 1.5)[int(t) % 4]
-        g.ell(x, y, rx + 0.5, 3, "amber", "orange", "yellow")
+        c = Grid(32, 32)
+        c.ell(x, y, rx + 0.5, 3, "amber", "orange", "yellow")
         if step < 2:
-            g.p(x, y - 1, "white")
+            c.p(x, y - 1, "white")
+        rim(c)
+        for yy, row in enumerate(c.px):
+            for xx, col in enumerate(row):
+                if col:
+                    g.px[yy][xx] = col
     return g
 
 
@@ -181,15 +201,15 @@ def heart_down(step):
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    yield "fx-bump", [("play", [bump(i).outlined(False) for i in range(5)], 60)]
-    yield "fx-dizzy", [("loop", [dizzy(i).outlined(False) for i in range(4)], 110)]
+    yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
+    yield "fx-dizzy", [("loop", [rim(dizzy(i)).outlined(False) for i in range(4)], 110)]
     yield "fx-coins", [("play", [coins(i).outlined(False) for i in range(6)], 80)]
-    yield "fx-splash", [("play", [splash(i).outlined(False) for i in range(5)], 70)]
+    yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(5)], 70)]
     yield "fx-stinky", [("loop", [stinky(i).outlined(False) for i in range(4)], 180)]
-    yield "fx-sparkle", [("play", [sparkle(i).outlined(False) for i in range(4)], 60)]
+    yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-heart", [("up", [heart_up(i).outlined() for i in range(5)], 90),
                        ("down", [heart_down(i).outlined() for i in range(5)], 90)]
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/fx", __doc__, grounds=("3a4466", "c0cbdc"))
+    main(sys.argv, sprites, "art/fx", __doc__, grounds=("3a4466", "e4a672", "c0cbdc", "c28569"))

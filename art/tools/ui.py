@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
-Images (16x16 icons unless noted): icon-pause, icon-help, icon-close, icon-lock,
+Images (16x16 icons unless noted): icon-pause, icon-play, icon-help, icon-close, icon-lock,
 icon-money, icon-stinky; ui-panel, ui-hint (24x24 nine-slices, 8px corners),
 ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title),
 ui-slot-locked (112x50, a locked pack slot; the game writes the price); the run
@@ -48,23 +48,40 @@ def to_image(px):
 
 
 # ---------- icons ----------
+# icon-pause, icon-help, icon-close, icon-sound and icon-music sit on ui-icon-button's navy
+# face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1, amber 7.5:1, orange
+# 5.0:1 and pink 5.1:1.
 
 def pause():
+    """Amber bars, so the run control stands apart from the cream sound toggle beside it."""
     g = Grid(16, 16)
-    g.rect(4, 3, 3, 10, "cream")
-    g.rect(9, 3, 3, 10, "cream")
-    g.rect(6, 3, 1, 10, "tan")
-    g.rect(11, 3, 1, 10, "tan")
+    g.rect(4, 3, 3, 10, "amber")
+    g.rect(9, 3, 3, 10, "amber")
+    g.rect(6, 3, 1, 10, "orange")
+    g.rect(11, 3, 1, 10, "orange")
+    return g
+
+
+def play():
+    """The pause button's face while paused: an amber triangle as tall as the pause bars, its
+    lower edge orange, 1px right of centre so it looks centred."""
+    g = Grid(16, 16)
+    for j in range(10):
+        w = round(min(j, 9 - j) * 1.6) + 2
+        g.rect(5, 3 + j, w, 1, "amber")
+        if j >= 5:
+            g.p(4 + w, 3 + j, "orange")
     return g
 
 
 def help_icon():
+    """A bold question mark, 2px strokes with a tan right edge like the pause bars."""
     g = Grid(16, 16)
-    g.ell(8, 8, 6.5, 6.5, "cream", "tan")
-    for x, y in ((6, 4), (7, 4), (8, 4), (9, 5), (9, 6), (8, 7), (7, 8), (7, 9)):
-        g.p(x, y, "plum")
-    g.p(6, 5, "plum")
-    g.p(7, 11, "plum")
+    for y, row in enumerate(["..cccc..", ".cccccct", "cct..cct", "tt...cct", "....ccct", "...ccct.",
+                             "...cct..", "...cct..", "........", "...cct..", "...cct.."]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(4 + x, 2 + y, "cream" if ch == "c" else "tan")
     return g
 
 
@@ -106,22 +123,28 @@ def stinky():
     return g
 
 
+def mute_x(g, y):
+    """The pink X that marks a muted icon, 5x5 in 2px strokes from (10, y)."""
+    for i in range(4):
+        g.rect(10 + i, y + i, 2, 2, "pink")
+        g.rect(13 - i, y + i, 2, 2, "pink")
+
+
 def speaker(on, note=False):
-    """The speaker states differ by shape: two sound waves for on, an X in their place for
-    off. The music note keeps its slash. The speaker has no outline, which would fill the gaps
-    between the waves: it is drawn for ui-icon-button's navy face, cream at 9.6:1 and the pink X
-    at 5.1:1."""
+    """The states differ by shape: the speaker has two sound waves for on and an X in their
+    place for off; the music note (an eighth note, its flag curling right) is bare for on and
+    has the same X below its flag for off. Neither has an outline, which would fill the gaps
+    between the waves."""
     g = Grid(16, 16)
     if note:
-        g.rect(5, 3, 2, 9, "cream")
-        g.rect(5, 3, 7, 2, "cream")
-        g.rect(10, 3, 2, 7, "cream")
-        g.ell(4.5, 12, 2.5, 2, "cream", "tan")
-        g.ell(9.5, 10, 2.5, 2, "cream", "tan")
+        g.ell(4.5, 12, 3.5, 2.6, "cream", "tan")
+        g.rect(7, 2, 1, 10, "cream")
+        g.rect(8, 2, 1, 9, "tan")
+        for x, y in ((9, 2), (10, 2), (9, 3), (10, 3), (11, 3), (10, 4), (11, 4), (12, 4), (11, 5), (12, 5),
+                     (12, 6), (12, 7), (11, 7)):
+            g.p(x, y, "cream")
         if not on:
-            for i in range(12):
-                g.p(2 + i, 2 + i, "red")
-                g.p(3 + i, 2 + i, "red")
+            mute_x(g, 9)
         return g
     g.rect(1, 5, 4, 6, "cream")
     for i in range(4):
@@ -134,9 +157,7 @@ def speaker(on, note=False):
         g.rect(11, 6, 1, 4, "cream")
         g.rect(14, 5, 1, 6, "cream")
     else:
-        for i in range(4):
-            g.rect(10 + i, 5 + i, 2, 2, "pink")
-            g.rect(13 - i, 5 + i, 2, 2, "pink")
+        mute_x(g, 5)
     return g
 
 
@@ -333,19 +354,19 @@ def doghouse(roof, eave):
 # ---------- selection and feedback ----------
 
 def select_frame(glow):
-    """24x24 nine-slice (8px corners): a thick amber frame for a selected tile, pulsing between two frames."""
+    """24x24 nine-slice (8px corners): the frame around a selected tile or active control. An ink
+    edge on both sides of a 2px yellow band, so it stands out on any background (ink on tan or
+    cream is 9:1 or more); the band pulses between yellow and white."""
     g = Grid(24, 24)
-    outer, inner = ("yellow", "white") if glow else ("amber", "yellow")
-    g.rect(1, 0, 22, 3, outer)
-    g.rect(1, 21, 22, 3, outer)
-    g.rect(0, 1, 3, 22, outer)
-    g.rect(21, 1, 3, 22, outer)
-    g.rect(3, 3, 18, 1, inner)
-    g.rect(3, 20, 18, 1, inner)
-    g.rect(3, 3, 1, 18, inner)
-    g.rect(20, 3, 1, 18, inner)
+    band = "white" if glow else "yellow"
+    g.rect(1, 0, 22, 24, "ink")
+    g.rect(0, 1, 24, 22, "ink")
+    g.rect(1, 1, 22, 22, band)
+    g.rect(2, 1, 20, 22, band)
+    g.rect(3, 3, 18, 18, "ink")
+    g.rect(4, 4, 16, 16, None)
     for x, y in ((1, 1), (22, 1), (1, 22), (22, 22)):
-        g.p(x, y, "white" if glow else "yellow")
+        g.p(x, y, "ink")
     return g
 
 
@@ -537,9 +558,10 @@ def touch_hint():
 
 
 IMAGES = {
-    "icon-pause": lambda: to_image(pause().outlined()),
-    "icon-help": lambda: to_image(help_icon().outlined()),
-    "icon-close": lambda: to_image(close().outlined()),
+    "icon-pause": lambda: to_image(pause().outlined(False)),
+    "icon-play": lambda: to_image(play().outlined(False)),
+    "icon-help": lambda: to_image(help_icon().outlined(False)),
+    "icon-close": lambda: to_image(close().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-money": lambda: to_image(money().outlined()),
     "icon-stinky": lambda: to_image(stinky().outlined()),
@@ -567,7 +589,8 @@ def sprites():
     yield "ui-icon-button", [(s, [icon_button(s).outlined(False)], 1000) for s in ("normal", "pressed")]
     yield "ui-switch", [("on", [switch(True).outlined(False)], 1000), ("off", [switch(False).outlined(False)], 1000)]
     yield "icon-sound", [("on", [speaker(True).outlined(False)], 1000), ("off", [speaker(False).outlined(False)], 1000)]
-    yield "icon-music", [("on", [speaker(True, True).outlined()], 1000), ("off", [speaker(False, True).outlined()], 1000)]
+    yield "icon-music", [("on", [speaker(True, True).outlined(False)], 1000),
+                         ("off", [speaker(False, True).outlined(False)], 1000)]
     yield "ui-zone-pips", [(s, [zone_pip(s).outlined(False)], 1000) for s in ("done", "current", "todo")]
 
 

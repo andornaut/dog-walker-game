@@ -52,23 +52,23 @@ The colours scene code uses for text and marks on the wood UI. Names are the cod
 
 ### HudScene
 
-| Usage                             | Was                | Use                                                         | Ratio |
-| --------------------------------- | ------------------ | ----------------------------------------------------------- | ----- |
-| Pause button on the bar           | navy on plum       | `icon-pause` (amber) on `ui-top-bar`                        | 7.35  |
-| Zone pips, done vs to do          | green vs brown     | `ui-zone-pips`: `done` is ticked, `todo` an empty dark well | 6.37  |
-| Current pip                       | amber vs brown     | amber fill in the `current` pip's ink well                  | 7.35  |
-| Full heart on cream               | red on cream       | darkRed on cream                                            | 5.07  |
-| Empty heart on cream              | tan on cream       | a hollow heart outlined in darkBrown                        | 5.85  |
-| Full vs empty heart               | red vs tan         | told apart by fill (full vs hollow), not colour             | n/a   |
-| Floating gain on a cream slot     | green on cream     | forest on cream                                             | 5.39  |
-| Floating loss on a cream slot     | red on cream       | darkRed on cream                                            | 5.07  |
-| Floating gain on the column       | green on darkBrown | yellow on darkBrown                                         | 6.79  |
-| Floating loss on the column       | red on darkBrown   | white on darkBrown (the − sign and ♥ carry the meaning)     | 8.48  |
-| "You're fired!"                   | red on darkBrown   | amber on darkBrown                                          | 4.57  |
-| "Empty" label, fired owner name   | plum on darkBrown  | cream on darkBrown                                          | 5.85  |
-| Empty or fired slot dashed border | plum on darkBrown  | tan on darkBrown                                            | 4.04  |
-| Trait chip "Food"                 | white on orange    | white on rust                                               | 4.99  |
-| Stinky status                     | darkGreen on cream | forest on cream                                             | 5.39  |
+| Usage                             | Was                | Use                                                                              | Ratio |
+| --------------------------------- | ------------------ | -------------------------------------------------------------------------------- | ----- |
+| Pause button on the bar           | navy on plum       | `icon-pause` (amber) on the `ui-icon-button` navy face; `icon-play` while paused | 7.49  |
+| Zone pips, done vs to do          | green vs brown     | `ui-zone-pips`: `done` is ticked, `todo` an empty dark well                      | 6.37  |
+| Current pip                       | amber vs brown     | amber fill in the `current` pip's ink well                                       | 7.35  |
+| Full heart on cream               | red on cream       | darkRed on cream                                                                 | 5.07  |
+| Empty heart on cream              | tan on cream       | a hollow heart outlined in darkBrown                                             | 5.85  |
+| Full vs empty heart               | red vs tan         | told apart by fill (full vs hollow), not colour                                  | n/a   |
+| Floating gain on a cream slot     | green on cream     | forest on cream                                                                  | 5.39  |
+| Floating loss on a cream slot     | red on cream       | darkRed on cream                                                                 | 5.07  |
+| Floating gain on the column       | green on darkBrown | yellow on darkBrown                                                              | 6.79  |
+| Floating loss on the column       | red on darkBrown   | white on darkBrown (the − sign and ♥ carry the meaning)                          | 8.48  |
+| "You're fired!"                   | red on darkBrown   | amber on darkBrown                                                               | 4.57  |
+| "Empty" label, fired owner name   | plum on darkBrown  | cream on darkBrown                                                               | 5.85  |
+| Empty or fired slot dashed border | plum on darkBrown  | tan on darkBrown                                                                 | 4.04  |
+| Trait chip "Food"                 | white on orange    | white on rust                                                                    | 4.99  |
+| Stinky status                     | darkGreen on cream | forest on cream                                                                  | 5.39  |
 
 ### StartScene
 

@@ -37,10 +37,22 @@ def grey(c):
     return min(GREYS, key=lambda g: abs(lum(g) - lum(c)))
 
 
-def paw(g, cx, cy, col="dbrown", s=1.0):
-    g.ell(cx, cy + 1.5 * s, 2.6 * s, 2.2 * s, col)
-    for dx, dy in ((-2.6, -1.4), (-0.9, -2.8), (0.9, -2.8), (2.6, -1.4)):
-        g.ell(cx + dx * s, cy + dy * s, 0.9 * s + 0.3, 0.9 * s + 0.3, col)
+# A pad under four toes, each toe apart from the others and the pad by a 1px gap, so the print
+# reads as a paw and not as arcs. PAW is 11x10; SMALL_PAW (9x9) is for three to a badge.
+PAW = ["...xx.xx...", "..xxx.xxx..", "..xxx.xxx..", "xx.......xx", "xxx.....xxx", "xxx.xxx.xxx",
+       "...xxxxx...", "..xxxxxxx..", "..xxxxxxx..", "...xx.xx..."]
+SMALL_PAW = ["..xx.xx..", "..xx.xx..", ".........", "xx.....xx", "xx.xxx.xx", "..xxxxx..", ".xxxxxxx.",
+             ".xxxxxxx.", "..xx.xx.."]
+
+
+def paw(g, cx, cy, col="dbrown", small=False):
+    """A paw print centred on (cx, cy)."""
+    rows = SMALL_PAW if small else PAW
+    x0, y0 = cx - len(rows[0]) // 2, cy - len(rows) // 2
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch == "x":
+                g.p(x0 + x, y0 + y, col)
 
 
 ICONS = {}
@@ -55,7 +67,7 @@ def icon(name):
 
 @icon("first-steps")
 def _(g):
-    paw(g, 13, 17)
+    paw(g, 12, 16)
     for r in range(5):
         for k in range(3):
             if "010110010010111"[r * 3 + k] == "1":
@@ -72,20 +84,20 @@ def _(g):
 
 @icon("double-leash")
 def _(g):
-    paw(g, 12, 15)
-    paw(g, 20, 19)
+    paw(g, 11, 18, small=True)
+    paw(g, 20, 11, small=True)
 
 
 @icon("pack-leader")
 def _(g):
-    paw(g, 10, 21, s=0.75)
-    paw(g, 16, 15, s=0.75)
-    paw(g, 22, 9, s=0.75)
+    paw(g, 16, 10, small=True)
+    paw(g, 11, 20, small=True)
+    paw(g, 21, 20, small=True)
 
 
 @icon("clean-paws")
 def _(g):
-    paw(g, 15, 17, "sky")
+    paw(g, 16, 16, "sky")
     for x, y in ((9, 9), (22, 10), (22, 21)):
         g.rect(x, y - 1, 1, 3, "blue")
         g.rect(x - 1, y, 3, 1, "blue")

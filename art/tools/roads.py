@@ -277,15 +277,16 @@ def strip(zone, y0=0, y1=H):
 # ---------- the crossings between zones ----------
 
 def crosswalk(g):
-    """Woof Way to Bark Park: zebra stripes, then the kerb where the park path starts."""
-    g.rect(0, 18, W, 3, "lgrey")
-    g.rect(0, 18, W, 1, "white")
-    g.rect(0, 20, W, 1, "grey")
-    g.rect(0, 21, W, 1, "navy")
+    """Woof Way to Bark Park: zebra stripes, then the kerb where the park path starts. Every
+    band across the road is 2 rows: the kerb's lit top, its face and its shadow, each step
+    3.4:1 or less."""
+    g.rect(0, 18, W, 2, "lgrey")
+    g.rect(0, 20, W, 2, "slate")
+    g.rect(0, 22, W, 2, "navy")
     for x in range(8, W - 8, 12):
-        g.rect(x, 23, 7, 14, "white")
-        g.rect(x + 6, 23, 1, 14, "lgrey")
-        g.rect(x, 36, 7, 1, "lgrey")
+        g.rect(x, 24, 7, 14, "white")
+        g.rect(x + 6, 24, 1, 14, "lgrey")
+        g.rect(x, 36, 7, 2, "lgrey")
     # dirt kicked onto the kerb's top edge
     rnd = random.Random("road-bark-park-start")
     for _ in range(30):
@@ -293,12 +294,12 @@ def crosswalk(g):
 
 
 def threshold(g):
-    """Bark Park to the shops: a granite sill, with dirt tracked onto the first slabs."""
-    g.rect(0, 32, W, 4, "grey")
-    g.rect(0, 32, W, 1, "lgrey")
-    g.rect(0, 35, W, 1, "slate")
+    """Bark Park to the shops: a granite sill (a 2-row lit top over a 2-row face), with dirt
+    tracked onto the first slabs."""
+    g.rect(0, 32, W, 2, "lgrey")
+    g.rect(0, 34, W, 2, "grey")
     for x in range(0, W, 20):
-        g.rect(x, 33, 1, 2, "slate")
+        g.rect(x, 34, 1, 2, "slate")
     rnd = random.Random("road-sniff-street-shops-start")
     for _ in range(90):
         y = 31 - int(rnd.random() ** 2 * 14)
@@ -313,13 +314,14 @@ def threshold(g):
 
 
 def soldier_band(g):
-    """The shops to The Long Way Home: a soldier course of brick, leaves blown onto the slabs."""
+    """The shops to The Long Way Home: a soldier course of brick, leaves blown onto the slabs.
+    Its lit tops, base and shadow are 2 rows each."""
     g.rect(0, 24, W, 8, "brown")
     for x in range(0, W, 4):
         g.rect(x + 3, 24, 1, 8, "dbrown")
-        g.rect(x, 24, 3, 1, "tan")
-    g.rect(0, 31, W, 1, "dbrown")
-    g.rect(0, 32, W, 1, "slate")
+        g.rect(x, 24, 3, 2, "tan")
+    g.rect(0, 30, W, 2, "dbrown")
+    g.rect(0, 32, W, 2, "grey")
     leaves(g, random.Random("road-the-long-way-home-start"), 8, 10, W - 10, 34, 54)
 
 

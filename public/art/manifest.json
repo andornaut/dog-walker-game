@@ -1226,6 +1226,10 @@
       "png": "images/icon-pause.png"
     },
     {
+      "key": "icon-play",
+      "png": "images/icon-play.png"
+    },
+    {
       "key": "icon-stinky",
       "png": "images/icon-stinky.png"
     },
