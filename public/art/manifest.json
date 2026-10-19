@@ -950,6 +950,11 @@
       "json": "sprites/ui-icon-button.json"
     },
     {
+      "key": "ui-loading",
+      "png": "sprites/ui-loading.png",
+      "json": "sprites/ui-loading.json"
+    },
+    {
       "key": "ui-select",
       "png": "sprites/ui-select.png",
       "json": "sprites/ui-select.json"
@@ -1457,6 +1462,10 @@
       "png": "images/screen-home.png"
     },
     {
+      "key": "screen-loading",
+      "png": "images/screen-loading.png"
+    },
+    {
       "key": "screen-stats",
       "png": "images/screen-stats.png"
     },
@@ -1467,6 +1476,10 @@
     {
       "key": "ui-hint-tail",
       "png": "images/ui-hint-tail.png"
+    },
+    {
+      "key": "ui-loading-track",
+      "png": "images/ui-loading-track.png"
     },
     {
       "key": "ui-new-best",

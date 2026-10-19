@@ -6,7 +6,7 @@
 
 Both are SIL Open Font License fonts; the font files and licenses are in
 art/fonts/. Glyphs are white on transparent so the game tints them. Printable
-ASCII plus a drawn heart for ♥ (U+2665), which neither font has.
+ASCII, the middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has.
 
 Usage:
   fonts.py preview OUT.png   a sample of both fonts, scaled up
@@ -27,7 +27,7 @@ FONTS = {
     "font-body": ("Tiny5", "art/fonts/tiny5/Tiny5.ttf", 8),
     "font-title": ("Silkscreen", "art/fonts/silkscreen/Silkscreen-Regular.ttf", 8),
 }
-CHARS = [chr(c) for c in range(32, 127)] + ["♥"]
+CHARS = [chr(c) for c in range(32, 127)] + ["·", "♥"]
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 ATLAS_W = 128
 

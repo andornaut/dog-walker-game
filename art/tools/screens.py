@@ -19,12 +19,25 @@ reads on them.
 - screen-end: sunset on The Long Way Home. A tall sky behind the summary
   panel (24,140 to 336,440), then the zone's houses with lit windows, the
   yards, the sidewalk and the brick road.
+- screen-loading: Woof Way at night, shown while the game loads. The logo is
+  drawn in, centred at 116,92; a starry sky above the houses and street lamps;
+  the sidewalk at y 430 to 445 carries the progress track, and the plain road
+  below it (to y 530) leaves room for a status line.
+
+ui-loading-track: a 200x8 image, the dotted path the pair walks along, with a
+doghouse at the far end. The game draws it at TRACK_AT (80,437).
+ui-loading: a 48x32 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
+on, walking right on a pink leash. The game draws it at PAIR_AT (76,412) plus
+round(148 * progress) to the right, so Casey's heels start on the first dot and
+Biscuit's nose ends at the doghouse.
 
 Usage:
-  screens.py preview OUT.png   the logo, then every screen, scaled up; home and
-                               end are shown again with their UI blocked in
-  screens.py build             write art/screens/*.aseprite and
-                               public/art/images/*.png, and list them in the manifest
+  screens.py preview OUT.png   the logo, the ui-loading frames, then every screen,
+                               scaled up; home, end and loading are shown again
+                               with their UI blocked in
+  screens.py build             write art/screens/*.aseprite, public/art/images/*.png
+                               and public/art/sprites/ui-loading.*, and list them
+                               in the manifest
 
 Run from the repository root, after fonts.py build and the sprite builds. A
 build overwrites the .aseprite sources, so hand edits to them belong in this
@@ -42,7 +55,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
 import help as hp  # noqa: E402
-from pixel import DARKER, K  # noqa: E402
+from pixel import DARKER, Grid, K, build as build_sprites  # noqa: E402
 
 W, H = 360, 640
 LOGO_W, LOGO_H = 128, 30
@@ -130,15 +143,22 @@ def wordmark(s):
     return pts
 
 
+def board(cv, x, y):
+    """The yard sign's board, LOGO_W x LOGO_H: a plum rim with rounded corners, a light trim (cream top,
+    tan sides) so it keeps its edge on dark wood and night sky, a dark-stained dbrown face, and a brown lip."""
+    cv.fill(x + 1, y, LOGO_W - 2, LOGO_H, "plum")
+    cv.fill(x, y + 1, LOGO_W, LOGO_H - 2, "plum")
+    cv.fill(x + 1, y + 1, LOGO_W - 2, 25, "tan")
+    cv.fill(x + 1, y + 1, LOGO_W - 2, 1, "cream")
+    cv.fill(x + 2, y + 2, LOGO_W - 4, 24, "dbrown")
+    cv.fill(x + 1, y + 26, LOGO_W - 2, 2, "brown")
+
+
 def logo():
     cv = clear(LOGO_W, LOGO_H)
-    # the board: plum frame with rounded corners, tan face, a cream top edge and a brown lip
-    cv.fill(1, 0, LOGO_W - 2, LOGO_H, "plum")
-    cv.fill(0, 1, LOGO_W, LOGO_H - 2, "plum")
-    cv.fill(2, 2, LOGO_W - 4, 24, "tan")
-    cv.fill(2, 2, LOGO_W - 4, 1, "cream")
-    cv.fill(2, 26, LOGO_W - 4, 2, "brown")
-    # the word at 2x: amber face with a yellow top, orange lower half, a 1px dbrown drop and a plum outline
+    board(cv, 0, 0)
+    # the word at 2x: amber face with a yellow top and an orange foot (4.6, 6.8 and 3.1:1 on the dbrown
+    # face), extruded 1px in rust and outlined in plum
     word = {(2 * x + i, 2 * y + j) for x, y in wordmark("DOG WALKER") for i in (0, 1) for j in (0, 1)}
     wx = max(x for x, _ in word) + 1
     ox, oy = (LOGO_W - wx) // 2, 5
@@ -149,24 +169,28 @@ def logo():
             if (x + dx, y + dy) not in body:
                 cv.fill(ox + x + dx, oy + y + dy, 1, 1, "plum")
     for x, y in drop:
-        cv.fill(ox + x, oy + y, 1, 1, "dbrown")
+        cv.fill(ox + x, oy + y, 1, 1, "rust")
     for x, y in word:
-        cv.fill(ox + x, oy + y, 1, 1, "yellow" if y < 2 else "amber" if y < 6 else "orange")
-    # the leash: a handle loop under the D, a slack line under the word, a clip and a paw print at the end
-    cv.fill(ox, 20, 5, 1, "dred")
-    cv.fill(ox - 1, 21, 1, 3, "dred")
-    cv.fill(ox, 24, 5, 1, "dred")
-    cv.fill(ox + 5, 21, 1, 3, "dred")
+        cv.fill(ox + x, oy + y, 1, 1, "yellow" if y < 2 else "amber" if y < 7 else "orange")
+    # a little plum grain on the face, clear of the word and the leash
+    for x, y, n in ((4, 3, 6), (118, 3, 5), (30, 25, 6), (86, 25, 5)):
+        cv.fill(x, y, n, 1, "plum")
+    # the leash in pink (3.1:1 on the face): a handle loop under the D, a slack line under the word, a clip
+    # and a cream paw print at the end
+    cv.fill(ox, 20, 5, 1, "pink")
+    cv.fill(ox - 1, 21, 1, 3, "pink")
+    cv.fill(ox, 24, 5, 1, "pink")
+    cv.fill(ox + 5, 21, 1, 3, "pink")
     a, b = ox + 6, ox + wx - 12
     for x in range(a, b):
         t = (2 * x - a - b) / (b - a)
-        cv.fill(x, 21 + round(2.4 * (1 - t * t)), 1, 1, "dred")
+        cv.fill(x, 21 + round(2.4 * (1 - t * t)), 1, 1, "pink")
     cv.fill(ox + wx - 12, 21, 3, 3, "lgrey")
     cv.fill(ox + wx - 11, 22, 1, 1, "grey")
     for j, row in enumerate(PAW):
         for i, c in enumerate(row):
             if c == "#":
-                cv.fill(ox + wx - 6 + i, 20 + j, 1, 1, "dbrown")
+                cv.fill(ox + wx - 6 + i, 20 + j, 1, 1, "cream")
     return cv
 
 
@@ -264,9 +288,7 @@ def home():
     for px in (16, 120):
         cv.fill(px, 172, 3, 22, "dbrown")
         cv.fill(px - 1, 194, 5, 1, "dgreen")
-    cv.fill(LOGO_AT[0], LOGO_AT[1], LOGO_W, LOGO_H, "plum")
-    cv.fill(LOGO_AT[0] + 2, LOGO_AT[1] + 2, LOGO_W - 4, 24, "tan")
-    cv.fill(LOGO_AT[0] + 2, LOGO_AT[1] + 26, LOGO_W - 4, 2, "brown")
+    board(cv, *LOGO_AT)
     # the mailbox
     cv.fill(296, 158, 3, 34, "dbrown")
     cv.fill(294, 192, 7, 1, "dgreen")
@@ -472,9 +494,166 @@ def end():
         strip.fill(x + 1, y - 1, 1, 1, "rust")
     cv.paste(strip.img, 0, 440)
     # the brick road home
-    road = hp.road_tile("home")
+    road = hp.TILES["homeStretch"]
     cv.img.paste(road, (0, 590))
     cv.img.paste(road, (280, 590))
+    return cv
+
+
+# ---------- screen-loading, ui-loading-track, ui-loading ----------
+
+STREET = 300  # top of the night street strip on screen-loading
+LOADING_LOGO_AT = ((W - LOGO_W) // 2, 92)
+TRACK_W, TRACK_H = 200, 8
+TRACK_AT = (80, 437)
+PAIR_W, PAIR_H = 48, 32
+PAIR_FEET = 29  # the row the pair's feet stand on, in its frame
+# Where the game draws ui-loading (origin top left) at progress 0, and how far right it walks by 1: Casey's
+# heels start on the first dot and Biscuit's nose ends at the doghouse door. Its feet stand on the dots' row.
+PAIR_AT = (TRACK_AT[0] - 4, TRACK_AT[1] + 4 - PAIR_FEET)
+PAIR_TRAVEL = 148
+
+
+def after_dark(img, steps=2):
+    """A transparent strip drawn in daylight, turned to night: every colour steps ramp steps darker, the
+    window glass lit yellow and the white mullions beside it amber."""
+    px = img.load()
+    w, h = img.size
+    out = img.copy()
+    po = out.load()
+    cyan, white = hp.rgb("cyan"), hp.rgb("white")
+    for y in range(h):
+        for x in range(w):
+            c = px[x, y]
+            if c[3] == 0:
+                continue
+            if c[:3] == cyan:
+                po[x, y] = hp.rgb("yellow") + (255,)
+            elif c[:3] == white and any(0 <= x + dx < w and 0 <= y + dy < h and px[x + dx, y + dy][:3] == cyan
+                                        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1))):
+                po[x, y] = hp.rgb("amber") + (255,)
+            else:
+                d = "%02x%02x%02x" % c[:3]
+                for _ in range(steps):
+                    d = dk(d)
+                po[x, y] = hp.rgb(d) + (255,)
+    return out
+
+
+def loading():
+    cv = hp.Canvas(W, H)
+    r = rand(13)
+    # the night sky: navy over a dslate band behind the roofs, stepped where they meet, with streaks of cloud
+    cv.fill(0, 0, W, STREET + 104, "dslate")
+    cv.fill(0, 0, W, STREET + 20, "navy")
+    for i in range(0, W, 5):
+        cv.fill(i, STREET + 20 + (i // 5) % 2, 5, 1, "navy")
+    for x, y, w in ((22, 196, 70), (238, 160, 84), (150, 268, 60)):
+        cv.fill(x, y, w, 2, "dslate")
+        cv.fill(x + 6, y - 2, w - 18, 2, "dslate")
+    # stars: single specks, and a few brighter crosses
+    for _ in range(90):
+        x, y = int(r() * W), int(r() * (STREET + 10))
+        cv.fill(x, y, 1, 1, "lgrey" if r() < 0.7 else "slate")
+    for x, y in ((40, 40), (176, 30), (64, 150), (330, 132), (210, 230), (20, 270)):
+        cv.fill(x - 1, y, 3, 1, "lgrey")
+        cv.fill(x, y - 1, 1, 3, "lgrey")
+        cv.fill(x, y, 1, 1, "white")
+    # a crescent moon, top right
+    for dy in range(-10, 11):
+        for dx in range(-10, 11):
+            if dx * dx + dy * dy <= 100 and (dx + 5) ** 2 + (dy - 3) ** 2 > 64:
+                cv.fill(300 + dx, 48 + dy, 1, 1, "cream")
+    # Woof Way after dark, drawn by day and then taken two ramp steps down: trees, houses with front paths,
+    # fences and the sidewalk the pair walks along
+    strip = clear(W, 150)
+    for cx, top, rad in ((10, 44, 16), (180, 40, 16), (356, 50, 14)):
+        bd.tree(strip, cx, top, "dgreen", "forest", r=rad)
+    doors = []
+    for x, w, wall, roof, door, top in ((30, 66, "white", "sky", "red", 38), (112, 52, "pink", "red", "dgreen", 50),
+                                        (204, 70, "cream", "green", "blue", 34),
+                                        (290, 54, "lgrey", "mauve", "red", 48)):
+        bd.house(strip, x, w, wall, roof, door, top=top)
+        doors.append(x + w // 2 - 5)
+    bd.ground(strip)
+    # the sidewalk a step darker than ground() draws it, so by night it is Woof Way's dslate road colour,
+    # where the pink leash holds 3.5:1 and the track's cream dots 6.6:1
+    strip.fill(0, 130, W, 15, "grey")
+    for x in range(0, W, 24):
+        strip.fill(x, 130, 1, 15, "slate")
+    strip.fill(0, 145, W, 3, "lgrey")
+    strip.fill(0, 148, W, 2, "grey")
+    for dx in doors:
+        strip.fill(dx, 104, 10, 26, "tan")
+        strip.fill(dx, 112, 10, 1, "brown")
+        strip.fill(dx, 121, 10, 1, "brown")
+    edges = [0] + [e for dx in doors for e in (dx - 4, dx + 16)] + [W]
+    for x0, x1 in zip(edges[::2], edges[1::2]):
+        bd.fence(strip, 104, x0, x1)
+    lit, glow = after_dark(strip.img), after_dark(strip.img, 1)
+    # two street lamps, each leaving a pool one ramp step lighter on the lawn and the sidewalk, clear of the track
+    for lx in (34, 326):
+        for y in range(116, 150):
+            for x in range(lx - 30, lx + 31):
+                if 0 <= x < W and ((x - lx) / 30) ** 2 + ((y - 137) / 13) ** 2 <= 1:
+                    lit.putpixel((x, y), glow.getpixel((x, y)))
+    cv.paste(lit, 0, STREET)
+    for lx in (34, 326):
+        cv.fill(lx - 1, STREET + 46, 3, 88, "slate")
+        cv.fill(lx - 1, STREET + 46, 1, 88, "grey")
+        cv.fill(lx - 3, STREET + 132, 7, 2, "navy")
+        cv.fill(lx - 5, STREET + 38, 11, 2, "navy")
+        cv.fill(lx - 4, STREET + 40, 9, 5, "yellow")
+        cv.fill(lx - 4, STREET + 44, 9, 1, "amber")
+        cv.fill(lx - 2, STREET + 41, 2, 2, "cream")
+        cv.fill(lx - 3, STREET + 45, 7, 1, "navy")
+    # porch lights by the doors
+    for dx in doors:
+        cv.fill(dx - 3, STREET + 88, 2, 2, "yellow")
+    # the street, navy: specks and a dashed centre line, then the near curb, sidewalk and a hedge along the
+    # bottom. The road between the curb and y 530 has no markings, so a status line can sit there.
+    cv.fill(0, STREET + 150, W, 140, "navy")
+    for _ in range(320):
+        cv.fill(int(r() * W), STREET + 150 + int(r() * 140), 1, 1, "dslate" if r() < 0.6 else "ink")
+    for x in range(4, W, 28):
+        cv.fill(x, 540, 14, 2, "slate")
+    cv.fill(0, 590, W, 4, "dslate")
+    cv.fill(0, 590, W, 1, "slate")
+    cv.fill(0, 594, W, 18, "dslate")
+    for x in range(12, W, 24):
+        cv.fill(x, 594, 1, 18, "navy")
+    cv.fill(0, 612, W, 28, "forest")
+    for x in range(-6, W, 22):
+        bd.bush(cv, x, 628 - (x // 22) % 2, "teal")
+    cv.paste(logo().img, *LOADING_LOGO_AT)
+    return cv
+
+
+# The track's doghouse at the far end: a red roof and tan walls in a plum rim, and an ink door.
+DOGHOUSE = [
+    "...pppp...",
+    "..pRRRRp..",
+    ".pRRRRRRp.",
+    "pRRRRRRRRp",
+    ".pttkkttp.",
+    ".pttkkttp.",
+    ".pttkkttp.",
+    ".pppppppp.",
+]
+
+
+def loading_track():
+    """The dotted path the pair walks along: cream dots in plum rings every 6px, and a doghouse, home, at the end."""
+    cv = clear(TRACK_W, TRACK_H)
+    for x in range(0, 184, 6):
+        cv.fill(x, 3, 4, 2, "plum")
+        cv.fill(x + 1, 2, 2, 4, "plum")
+        cv.fill(x + 1, 3, 2, 2, "cream")
+    cols = {"p": "plum", "R": "red", "t": "tan", "k": "ink"}
+    for j, row in enumerate(DOGHOUSE):
+        for i, c in enumerate(row):
+            if c in cols:
+                cv.fill(TRACK_W - 10 + i, j, 1, 1, cols[c])
     return cv
 
 
@@ -483,7 +662,104 @@ SCREENS = {
     "screen-home": home,
     "screen-stats": stats,
     "screen-end": end,
+    "screen-loading": loading,
+    "ui-loading-track": loading_track,
 }
+
+
+# Casey from the side, walking right: orange cap, dbrown hair, a face with one eye, and the blue hoodie
+# (sky, lit cyan, shaded blue) with the near arm reaching forward to hold the leash. The legs are drawn per frame.
+CASEY = [
+    "...aaaaa......",
+    "..ayyaaaa.....",
+    ".aaaaaaaao....",
+    ".ooooooooooo..",
+    ".hhhsssss.....",
+    ".hhhssskss....",
+    ".hhhsssssss...",
+    "..hhsssssm....",
+    "...msss.......",
+    "..bcccccb.....",
+    ".bcCCccccc....",
+    ".bcCcccbccc...",
+    ".bccccccbbcc..",
+    ".bcccccc..css.",
+    ".bbccccb......",
+    "..nnnnnn......",
+]
+# Biscuit from the side, trotting right: tricolour (ochre, a navy saddle, white chest and muzzle), a long
+# rust ear, the green collar and a white-tipped tail. The legs are drawn per frame.
+BISCUIT = [
+    "...................",
+    "e...........eeee...",
+    ".e.........eeeeew..",
+    ".e........reeekeww.",
+    ".e.nnnnnnnrreeewwwk",
+    ".eennnnnnnrrreewww.",
+    ".eeennnnnngrrrww...",
+    "..eeeeeeeegrrw.....",
+    "..eeeeeeeeewww.....",
+    "..eeeeeeewwww......",
+]
+PAIR_COLS = dict(a="amber", y="yellow", o="orange", h="dbrown", s="skin1", m="skin2", k="ink", b="blue", c="sky",
+                 C="cyan", n="navy", e="ochre", r="rust", w="white", g="green")
+
+
+def stamp(g, rows, x, y, cols=PAIR_COLS):
+    for j, row in enumerate(rows):
+        for i, c in enumerate(row):
+            if c in cols:
+                g.p(x + i, y + j, cols[c])
+
+
+def pair(step):
+    """48x32, one frame of the walk: Casey and Biscuit side on, the leash slack between them. The far legs
+    are a shade darker. On the passing frames (1 and 3) the legs pass under the body and Casey bobs up 1px."""
+    g = Grid(PAIR_W, PAIR_H)
+    bob = step % 2
+    # Casey: hips at row 22, shoes on row PAIR_FEET
+    wx, wy = 4, PAIR_FEET - 23 - bob
+    # on a passing frame the leg swinging through lifts its foot 1px, its shin a pixel back
+    stride, swing = (3, 0, -3, 0)[step], (None, 0, None, 1)[step]
+    for i, (hip, sway, trouser, shoe) in enumerate(((3, -stride, "navy", "lgrey"), (5, stride, "dslate", "white"))):
+        up = 1 if swing == i else 0
+        n = 6 + bob - up
+        for k in range(n):
+            g.rect(wx + hip + round(sway * k / (n - 1)) - (up if k > 2 else 0), wy + 16 + k, 2, 1, trouser)
+        g.rect(wx + hip + sway - up, PAIR_FEET - up, 3, 1, shoe)
+    stamp(g, CASEY, wx, wy)
+    # Biscuit: diagonal leg pairs swap, legs from row 10 of the body to PAIR_FEET, and the tail tip wags
+    dx, dy = 27, PAIR_FEET - 12
+    reach = (1, 0, -1, 0)[step]
+    for hip, sway, col in ((2, reach, "lgrey"), (11, -reach, "lgrey"), (4, -reach, "white"), (13, reach, "white")):
+        for k in range(3):
+            g.rect(dx + hip + round(sway * k / 2), dy + 10 + k, 2, 1, col)
+    stamp(g, BISCUIT, dx, dy)
+    g.p(dx + 1 + (0, 1, 0, -1)[step], dy, "white")
+    px = g.outlined()
+    # the leash, after the outline so it stays 1px: pink (3.5:1 on the night street), sagging from the hand
+    # to the collar
+    a, b = (wx + 13, wy + 13), (dx + 10, dy + 6)
+    for x in range(a[0], b[0] + 1):
+        t = (x - a[0]) / (b[0] - a[0])
+        y = round(a[1] + (b[1] - a[1]) * t + (2 + bob) * 4 * t * (1 - t))
+        if g.px[y][x] is None:
+            px[y][x] = K["pink"]
+    return px
+
+
+def sprite_image(px):
+    """A sprite frame (rows of hex colours or None) as an RGBA image, for the preview."""
+    img = Image.new("RGBA", (len(px[0]), len(px)), (0, 0, 0, 0))
+    for y, row in enumerate(px):
+        for x, c in enumerate(row):
+            if c:
+                img.putpixel((x, y), hp.rgb(c) + (255,))
+    return img
+
+
+def sprites():
+    yield "ui-loading", [("walk", [pair(i) for i in range(4)], 160)]
 
 
 def ui(cv, key):
@@ -513,19 +789,30 @@ def ui(cv, key):
         panel(24, 140, 312, 300)
         cv.fill(48, 388, 264, 36, "orange")
         cv.fill(48, 384, 264, 36, "amber")
+    elif key == "screen-loading":
+        cv.paste(loading_track().img, *TRACK_AT)
+        cv.paste(sprite_image(pair(0)), PAIR_AT[0] + round(PAIR_TRAVEL * 0.4), PAIR_AT[1])
+        hp.text_c(cv, "LOADING 40%", 180, 470, "cream")
 
 
 def preview(out, scale=2):
-    keys = [k for k in SCREENS if k != "logo"]
-    shots = [(k, False) for k in keys] + [("screen-home", True), ("screen-end", True)]
+    keys = [k for k in SCREENS if k.startswith("screen-")]
+    shots = [(k, False) for k in keys] + [("screen-home", True), ("screen-end", True), ("screen-loading", True)]
     gap = 8
     top = LOGO_H * 3 + gap
     sheet = Image.new("RGB", ((W + gap) * len(shots) * scale, (top + H) * scale), hp.rgb("ink"))
-    lg = logo().img
-    for i, ground in enumerate(("green", "dbrown", "amber")):
-        bg = Image.new("RGBA", lg.size, hp.rgb(ground) + (255,))
-        bg.alpha_composite(lg)
-        sheet.paste(bg.resize((LOGO_W * 3 * scale, LOGO_H * 3 * scale), Image.NEAREST), (i * (LOGO_W * 3 + gap) * scale, 0))
+    x = 0
+    for ground in ("green", "dbrown", "amber", "navy"):
+        bg = Image.new("RGBA", (LOGO_W, LOGO_H), hp.rgb(ground) + (255,))
+        bg.alpha_composite(logo().img)
+        sheet.paste(bg.resize((LOGO_W * 3 * scale, LOGO_H * 3 * scale), Image.NEAREST), (x * scale, 0))
+        x += LOGO_W * 3 + gap
+    # the ui-loading frames, on the night sidewalk
+    for i in range(4):
+        bg = Image.new("RGBA", (PAIR_W, PAIR_H), hp.rgb("grey") + (255,))
+        bg.alpha_composite(sprite_image(pair(i)))
+        sheet.paste(bg.resize((PAIR_W * 3 * scale, PAIR_H * 3 * scale), Image.NEAREST), (x * scale, 0))
+        x += PAIR_W * 3 + gap
     for i, (key, blocked) in enumerate(shots):
         cv = SCREENS[key]()
         if blocked:
@@ -550,6 +837,7 @@ def build():
     with open(path, "w") as f:
         json.dump(manifest, f, indent=2)
         f.write("\n")
+    build_sprites(list(sprites()), "art/screens")
     print("built", ", ".join(SCREENS))
 
 

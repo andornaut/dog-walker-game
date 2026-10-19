@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
     />
     <style>
-      /* Project home: a live road scene beside the title and Play, the numbers, the pillars, the cast, a playable skunk card, the road events, the collectibles and the work-in-progress links. Colours are Endesga 32. */
+      /* Project home: the title and a centred Play over a live road scene, the numbers, the pillars, how to walk, the cast, a playable skunk card, the road events, the collectibles and the work-in-progress links. Colours are Endesga 32. */
       :root {
         --bg: #181425;
         --surface: #262b44;
@@ -48,16 +48,19 @@
         display: grid;
         gap: 48px;
       }
+      /* Title, pitch and a large Play button, centred, with the road scene below. */
       .hero {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
-        gap: 32px;
-        align-items: center;
+        justify-items: center;
+        gap: 28px;
+        text-align: center;
       }
       .hero-text {
         display: grid;
+        justify-items: center;
         gap: 20px;
         min-width: 0;
+        width: 100%;
       }
       h1 {
         font-family: var(--f-display);
@@ -71,23 +74,32 @@
         margin: 0;
         color: var(--muted);
         font-size: 18px;
-        max-width: 40ch;
+        max-width: 46ch;
       }
       .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px 20px;
-        align-items: center;
+        display: grid;
+        justify-items: center;
+        gap: 12px;
+        width: 100%;
       }
       .play {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        max-width: 320px;
         font-family: var(--f-display);
-        font-size: 24px;
+        font-size: 30px;
+        text-align: center;
         text-decoration: none;
         color: var(--accent-ink);
         background: var(--accent);
-        padding: 10px 26px;
+        padding: 14px 26px;
         border-radius: 4px;
-        box-shadow: 0 4px 0 var(--accent-deep);
+        box-shadow: 0 5px 0 var(--accent-deep);
+      }
+      .how {
+        color: var(--accent);
+        font-size: 15px;
       }
       .play:hover {
         background: #fee761;
@@ -123,14 +135,6 @@
         .scene {
           width: 560px;
           height: 480px;
-        }
-      }
-      @media (max-width: 640px) {
-        .hero {
-          grid-template-columns: minmax(0, 1fr);
-        }
-        .scene {
-          justify-self: center;
         }
       }
       h2 {
@@ -212,6 +216,17 @@
         display: block;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
+      }
+      .how-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+        gap: 12px;
+      }
+      .how-grid img {
+        width: 100%;
+        height: auto;
+        border-radius: 6px;
+        border: 1px solid var(--line);
       }
       /* The cast: the walkers' faces beside a compact grid of all nine dogs. */
       .cast {
@@ -503,7 +518,13 @@
           </p>
           <div class="actions">
             <a class="play" href="/play/">Play</a>
-            <span class="keys"><kbd>←</kbd> <kbd>→</kbd> to switch lanes, or tap either side</span>
+            <span class="keys"
+              >Drag to steer, or tap a side. Keys: <kbd>←</kbd> <kbd>→</kbd>, <kbd>A</kbd>/<kbd
+                >D</kbd
+              >
+              or <kbd>H</kbd>/<kbd>L</kbd>.</span
+            >
+            <a class="how" href="#h-how">How to walk</a>
           </div>
         </div>
         <canvas
@@ -552,12 +573,60 @@
           </div>
           <div>
             <b>Every bump is a story</b>
-            <p>Hit a skunk or a puddle and pick a card: pay up or upset the owners.</p>
+            <p>Hit a skunk or a puddle and pick a card: pay up, or upset the owners.</p>
           </div>
           <div>
             <b>Charming chaos</b>
             <p>Cute dogs, dramatic owners and a silly neighbourhood.</p>
           </div>
+        </div>
+      </section>
+
+      <section aria-labelledby="h-how">
+        <h2 id="h-how">How to walk</h2>
+        <div class="how-grid">
+          <img
+            class="px"
+            src="/art/images/help-lanes.png"
+            width="344"
+            height="236"
+            alt="Drag anywhere to move the pack one lane per lane-width"
+          />
+          <img
+            class="px"
+            src="/art/images/help-pickups.png"
+            width="344"
+            height="236"
+            alt="Collect tips and treats along the road; the top bar shows money, treats and the zone"
+          />
+          <img
+            class="px"
+            src="/art/images/help-cards.png"
+            width="344"
+            height="236"
+            alt="A skunk opens a card with three choices: pay for a groom, pay for a rinse, or lose hearts"
+          />
+          <img
+            class="px"
+            src="/art/images/help-owners.png"
+            width="344"
+            height="236"
+            alt="Each owner's hearts show on their dog's doghouse; at zero hearts the owner fires you"
+          />
+          <img
+            class="px"
+            src="/art/images/help-pulls.png"
+            width="344"
+            height="236"
+            alt="A dog leans and barks before it pulls the pack toward a lane"
+          />
+          <img
+            class="px"
+            src="/art/images/help-zones.png"
+            width="344"
+            height="236"
+            alt="Walk four zones of Maple Street, earning fees per zone, and pause to head home"
+          />
         </div>
       </section>
 
