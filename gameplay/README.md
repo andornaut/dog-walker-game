@@ -4,11 +4,11 @@ The design of the game, how it's tuned and tested, and what's left for the first
 
 ## Docs
 
-| Doc                                | What it holds                               | Changes when                     |
-| ---------------------------------- | ------------------------------------------- | -------------------------------- |
-| [`game-design.md`](game-design.md) | The rulebook: rules and content             | A design decision lands          |
-| [`next.md`](next.md)               | Everything set aside for later, unscheduled | Something is set aside for later |
-| [`ideas.md`](ideas.md)             | Undecided and cut ideas                     | Every design session             |
+| Doc                      | What it holds                               | Changes when                     |
+| ------------------------ | ------------------------------------------- | -------------------------------- |
+| [`design.md`](design.md) | The rulebook: rules and content             | A design decision lands          |
+| [`next.md`](next.md)     | Everything set aside for later, unscheduled | Something is set aside for later |
+| [`ideas.md`](ideas.md)   | Undecided and cut ideas                     | Every design session             |
 
 Docs state the current rule only; git keeps the history. An idea stays in `ideas.md` until agreed, then moves to the doc it belongs in.
 
