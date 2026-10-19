@@ -3,14 +3,21 @@
 them with ffmpeg. Soft chiptune: square and triangle waves through gentle
 low-pass filters, short envelopes, and every note fading to silence in its slot.
 
-sfx-tip     0.35s  coin chime: a square B5 hopping up to a ringing E6
-sfx-treat   0.40s  bubbly triangle arpeggio up C6 E6 G6 C7
-sfx-bump    0.30s  cushioned thud: a falling triangle with a puff of low noise
-sfx-bark    0.18s  one "wuf": a falling square with a triangle body
-sfx-card    0.44s  paper swish, then a triangle chime G5 D6
-sfx-fired   1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
-music-walk  28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
-                   triangle walking bass, thin square arpeggio, soft kick and tick
+sfx-tip            0.35s  coin chime: a square B5 hopping up to a ringing E6
+sfx-treat          0.40s  bubbly triangle arpeggio up C6 E6 G6 C7
+sfx-bump           0.30s  cushioned thud: a falling triangle with a puff of low noise
+sfx-bark           0.18s  one "wuf": a falling square with a triangle body
+sfx-card           0.44s  paper swish, then a triangle chime G5 D6
+sfx-fired          1.80s  sad "wah wah wah waaah" down G4 F#4 F4 E4, muted square
+sfx-hit-skunk      0.50s  spray hiss: pink noise stepping down three bands over a falling "pfff"
+sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising triangle bubbles
+sfx-hit-thief      0.60s  coin scatter: seven fading triangle pings between F#6 and E7
+sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 3kHz, three then four
+sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
+sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sparkle A7 F#7 D7 A7
+sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
+music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
+                          triangle walking bass, thin square arpeggio, soft kick and tick
 
 Each sound ships as mono 44.1kHz Ogg Vorbis plus AAC (.m4a), since iOS Safari
 cannot play Ogg.
@@ -139,6 +146,77 @@ EFFECTS = {
         ("triangle", 0.32, "F#3", 0.33, dict(vol=0.6, attack=0.03, release=0.5, shape="h")),
         ("triangle", 0.32, "F3", 0.66, dict(vol=0.6, attack=0.03, release=0.5, shape="h")),
         ("triangle", 0.81, ("E3", "D#3"), 0.99, dict(vol=0.6, attack=0.03, release=0.6, shape="h")),
+    ],
+    # Each band of hiss is lower than the last, so the spray falls without a swept filter.
+    "sfx-hit-skunk": [
+        ("pinknoise", 0.22, None, 0, dict(vol=0.8, low=5000, high=2400, attack=0.02, release=0.5, shape="h")),
+        ("pinknoise", 0.25, None, 0.12, dict(vol=0.8, low=3200, high=1200, attack=0.04, release=0.6, shape="h")),
+        ("pinknoise", 0.3, None, 0.2, dict(vol=0.8, low=1800, high=500, attack=0.05, release=0.7, shape="h",
+                                           fx=("tremolo", "18", "60"))),
+        ("square", 0.42, (900, 220), 0.06, dict(vol=0.12, duty=25, low=1400, attack=0.03, release=0.7)),
+    ],
+    "sfx-hit-puddle": [
+        ("pinknoise", 0.3, None, 0, dict(vol=0.9, low=3000, high=250, attack=0.004, release=0.85)),
+        ("triangle", 0.3, (130, 60), 0, dict(vol=0.5, attack=0.004, release=0.8)),
+        ("triangle", 0.05, (420, 900), 0.12, dict(vol=0.6, attack=0.003, release=0.6)),
+        ("triangle", 0.05, (560, 1200), 0.19, dict(vol=0.5, attack=0.003, release=0.6)),
+        ("triangle", 0.05, (360, 780), 0.26, dict(vol=0.5, attack=0.003, release=0.6)),
+        ("triangle", 0.05, (640, 1350), 0.34, dict(vol=0.4, attack=0.003, release=0.6)),
+        ("triangle", 0.06, (480, 1000), 0.44, dict(vol=0.3, attack=0.003, release=0.6)),
+    ],
+    # Coins bounce apart: uneven gaps and pitches, each ping quieter than the last.
+    "sfx-hit-thief": [
+        ("triangle", 0.12, "B6", 0, dict(release=0.9)),
+        ("triangle", 0.12, "E7", 0.06, dict(vol=0.95, release=0.9)),
+        ("triangle", 0.12, "G#6", 0.13, dict(vol=0.9, release=0.9)),
+        ("triangle", 0.12, "D7", 0.19, dict(vol=0.85, release=0.9)),
+        ("triangle", 0.12, "F#6", 0.28, dict(vol=0.75, release=0.9)),
+        ("triangle", 0.12, "C#7", 0.36, dict(vol=0.65, release=0.9)),
+        ("triangle", 0.12, "A6", 0.48, dict(vol=0.55, release=0.9)),
+        ("square", 0.08, "B5", 0, dict(vol=0.3, duty=25, low=4000, release=0.9)),
+        ("square", 0.08, "E6", 0.06, dict(vol=0.25, duty=25, low=4000, release=0.9)),
+    ],
+    "sfx-hit-squirrel": [
+        ("square", 0.03, (3200, 2100), 0.01, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.6)),
+        ("square", 0.03, (3400, 2200), 0.055, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.6)),
+        ("square", 0.03, (3000, 2000), 0.1, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.6)),
+        ("square", 0.03, (3300, 2200), 0.2, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.6)),
+        ("square", 0.03, (3500, 2300), 0.245, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.6)),
+        ("square", 0.03, (3200, 2100), 0.29, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.6)),
+        ("square", 0.065, (3600, 2000), 0.335, dict(vol=0.6, duty=25, low=4500, attack=0.002, release=0.7)),
+        ("pinknoise", 0.38, None, 0.01, dict(vol=0.25, low=6000, high=2500, attack=0.002, release=0.3,
+                                             fx=("tremolo", "22", "100"))),
+    ],
+    "sfx-hit-other-dog": [
+        ("triangle", 0.18, (240, 120), 0.01, dict(attack=0.02, release=0.7, shape="h")),
+        ("square", 0.18, (240, 120), 0.01, dict(vol=0.35, low=700, attack=0.02, release=0.7, shape="h")),
+        ("pinknoise", 0.08, None, 0.01, dict(vol=0.15, low=1200, high=200, attack=0.01, release=0.8)),
+        ("square", 0.18, (700, 1400), 0.22, dict(vol=0.4, duty=35, low=2500, attack=0.01, release=0.6)),
+        ("triangle", 0.18, (350, 700), 0.22, dict(vol=0.6, attack=0.01, release=0.6)),
+    ],
+    "sfx-badge": [
+        ("square", 0.08, "D6", 0, dict(vol=0.5, duty=25, low=4000, release=0.4)),
+        ("square", 0.08, "F#6", 0.08, dict(vol=0.5, duty=25, low=4000, release=0.4)),
+        ("square", 0.08, "A6", 0.16, dict(vol=0.5, duty=25, low=4000, release=0.4)),
+        ("square", 0.5, "D7", 0.24, dict(vol=0.45, duty=25, low=4000, release=0.9, fx=("tremolo", "9", "30"))),
+        ("triangle", 0.5, "D5", 0.24, dict(vol=0.7, release=0.9)),
+        ("triangle", 0.06, "A7", 0.5, dict(vol=0.35, attack=0.002, release=0.8)),
+        ("triangle", 0.06, "F#7", 0.58, dict(vol=0.3, attack=0.002, release=0.8)),
+        ("triangle", 0.06, "D7", 0.66, dict(vol=0.25, attack=0.002, release=0.8)),
+        ("triangle", 0.26, "A7", 0.74, dict(vol=0.2, attack=0.002, release=0.9)),
+    ],
+    "sfx-new-best": [
+        ("square", 0.1, "G4", 0, dict(vol=0.5, low=2200, attack=0.008, release=0.4)),
+        ("square", 0.1, "C5", 0.11, dict(vol=0.5, low=2200, attack=0.008, release=0.4)),
+        ("square", 0.1, "E5", 0.22, dict(vol=0.5, low=2200, attack=0.008, release=0.4)),
+        ("square", 0.35, "G5", 0.33, dict(vol=0.5, low=2200, attack=0.008, release=0.5)),
+        ("square", 0.12, "E5", 0.7, dict(vol=0.5, low=2200, attack=0.008, release=0.4)),
+        ("square", 0.66, "G5", 0.84, dict(vol=0.5, low=2200, attack=0.008, release=0.8, fx=("tremolo", "6", "25"))),
+        ("square", 0.66, "E5", 0.84, dict(vol=0.3, duty=25, low=1800, attack=0.008, release=0.8)),
+        ("triangle", 0.33, "C4", 0, dict(vol=0.8, release=0.6)),
+        ("triangle", 0.35, "E4", 0.33, dict(vol=0.8, release=0.6)),
+        ("triangle", 0.12, "G3", 0.7, dict(vol=0.8, release=0.5)),
+        ("triangle", 0.66, "C4", 0.84, dict(vol=0.8, release=0.8)),
     ],
 }
 

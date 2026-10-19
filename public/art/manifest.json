@@ -1764,6 +1764,11 @@
       "loop": true
     },
     {
+      "key": "sfx-badge",
+      "ogg": "sounds/sfx-badge.ogg",
+      "m4a": "sounds/sfx-badge.m4a"
+    },
+    {
       "key": "sfx-bark",
       "ogg": "sounds/sfx-bark.ogg",
       "m4a": "sounds/sfx-bark.m4a"
@@ -1782,6 +1787,36 @@
       "key": "sfx-fired",
       "ogg": "sounds/sfx-fired.ogg",
       "m4a": "sounds/sfx-fired.m4a"
+    },
+    {
+      "key": "sfx-hit-other-dog",
+      "ogg": "sounds/sfx-hit-other-dog.ogg",
+      "m4a": "sounds/sfx-hit-other-dog.m4a"
+    },
+    {
+      "key": "sfx-hit-puddle",
+      "ogg": "sounds/sfx-hit-puddle.ogg",
+      "m4a": "sounds/sfx-hit-puddle.m4a"
+    },
+    {
+      "key": "sfx-hit-skunk",
+      "ogg": "sounds/sfx-hit-skunk.ogg",
+      "m4a": "sounds/sfx-hit-skunk.m4a"
+    },
+    {
+      "key": "sfx-hit-squirrel",
+      "ogg": "sounds/sfx-hit-squirrel.ogg",
+      "m4a": "sounds/sfx-hit-squirrel.m4a"
+    },
+    {
+      "key": "sfx-hit-thief",
+      "ogg": "sounds/sfx-hit-thief.ogg",
+      "m4a": "sounds/sfx-hit-thief.m4a"
+    },
+    {
+      "key": "sfx-new-best",
+      "ogg": "sounds/sfx-new-best.ogg",
+      "m4a": "sounds/sfx-new-best.m4a"
     },
     {
       "key": "sfx-tip",

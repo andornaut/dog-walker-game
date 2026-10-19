@@ -268,12 +268,19 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 Ogg Vorbis plus AAC `.m4a`, mono 44.1kHz, listed under `sounds` in the manifest; `loop` marks the music.
 
-| Asset      | Key          | Type  | Length | Loop | Priority | Notes                                      |
-| ---------- | ------------ | ----- | ------ | ---- | -------- | ------------------------------------------ |
-| Tip        | `sfx-tip`    | sound | 0.35s  | no   | M6       | Coin chime when a tip is collected         |
-| Treat      | `sfx-treat`  | sound | 0.40s  | no   | M6       | Rising arpeggio when a treat is collected  |
-| Bump       | `sfx-bump`   | sound | 0.30s  | no   | M6       | Soft thud on any collision                 |
-| Bark       | `sfx-bark`   | sound | 0.18s  | no   | M6       | One "wuf" with the pull tell and `fx-bark` |
-| Card open  | `sfx-card`   | sound | 0.44s  | no   | M6       | Swish and chime as choice cards open       |
-| Fired      | `sfx-fired`  | sound | 1.80s  | no   | M6       | Sad descending phrase when a dog is fired  |
-| Walk music | `music-walk` | sound | 28.77s | yes  | M6       | 12 bars at about 100 BPM, loops seamlessly |
+| Asset         | Key                 | Type  | Length | Loop | Priority | Notes                                       |
+| ------------- | ------------------- | ----- | ------ | ---- | -------- | ------------------------------------------- |
+| Tip           | `sfx-tip`           | sound | 0.35s  | no   | M6       | Coin chime when a tip is collected          |
+| Treat         | `sfx-treat`         | sound | 0.40s  | no   | M6       | Rising arpeggio when a treat is collected   |
+| Bump          | `sfx-bump`          | sound | 0.30s  | no   | M6       | Soft thud on any collision                  |
+| Bark          | `sfx-bark`          | sound | 0.18s  | no   | M6       | One "wuf" with the pull tell and `fx-bark`  |
+| Card open     | `sfx-card`          | sound | 0.44s  | no   | M6       | Swish and chime as choice cards open        |
+| Fired         | `sfx-fired`         | sound | 1.80s  | no   | M6       | Sad descending phrase when a dog is fired   |
+| Skunk hit     | `sfx-hit-skunk`     | sound | 0.50s  | no   | core     | Spray hiss with the skunk hit moment        |
+| Puddle hit    | `sfx-hit-puddle`    | sound | 0.50s  | no   | core     | Splash with the puddle hit moment           |
+| Thief hit     | `sfx-hit-thief`     | sound | 0.60s  | no   | core     | Coin scatter with the thief hit moment      |
+| Squirrel hit  | `sfx-hit-squirrel`  | sound | 0.40s  | no   | core     | Chitter with the squirrel hit moment        |
+| Other dog hit | `sfx-hit-other-dog` | sound | 0.40s  | no   | core     | Friendly woof with the other dog hit moment |
+| Badge         | `sfx-badge`         | sound | 1.00s  | no   | core     | Jingle when an achievement badge is earned  |
+| New best      | `sfx-new-best`      | sound | 1.50s  | no   | core     | Fanfare when a walk sets a new best         |
+| Walk music    | `music-walk`        | sound | 28.77s | yes  | M6       | 12 bars at about 100 BPM, loops seamlessly  |

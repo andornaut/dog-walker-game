@@ -55,7 +55,7 @@ b { font-weight: 700; }
 <main class="wrap">
   <header>
     <h1>Menus</h1>
-    <p>A proposal for the screens around a walk: the pause menu and settings over the dimmed road, the end screen at sunset, and the Stats page with the badge wall. Everything is drawn from the exported art and the two BMFonts. Bank, logbook and badges are sample data; quips are the owners' real lines.</p>
+    <p>A proposal for the screens around a walk: the pause menu and settings over the dimmed road, the end screen at sunset, the Stats page with its Runs, Dogs and Badges tabs, and the badge celebration over the home screen. The end screen, Stats page and celebration follow the game's layout, with every text at 2x. Everything is drawn from the exported art and the two BMFonts. Bank, logbook, dog stats and badges are sample data; quips are the owners' real lines.</p>
   </header>
   <div class="layout">
     <section class="stage" aria-label="Menus mock">
@@ -67,6 +67,7 @@ b { font-weight: 700; }
       <section class="box" aria-label="Sample data">
         <h2>Sample data</h2>
         <fieldset><legend>End screen</legend><div class="seg" id="ends"></div></fieldset>
+        <fieldset><legend>Home celebration</legend><div class="seg" id="celebs"></div></fieldset>
         <fieldset><legend>Zoom</legend><div class="seg" id="zooms"></div></fieldset>
       </section>
       <section class="box" aria-label="What is on the screens">
@@ -74,9 +75,10 @@ b { font-weight: 700; }
         <ul>
           <li><b>Pause:</b> the run frozen under the menu, the road dimmed one ramp step twice. A <code>ui-panel</code> with a 1px tan rim holds Resume, Help, Settings and Head home (<code>ui-button</code>), and Head home's note sits plum on a tan plate. The bar's pause button stays pressed while the menu is open.</li>
           <li><b>Settings:</b> Sound (mute all) with <code>ui-switch</code>, Music and Effects volume sliders, and Reduced motion. Every row is 44 tall and the whole row is the tap target. Muted, the sliders go inactive and read "Muted". Effects plays <code>sfx-tip</code> when you let go. The bar's sound button and the Sound row share one state.</li>
-          <li><b>End screen:</b> on <code>screen-end</code>, the <code>logo</code> in the sky, the run's breakdown, zones walked as <code>ui-zone-pips</code>, the bank, the <code>ui-new-best</code> ribbon pinned over the panel, and one closing line per owner in a <code>ui-quip</code> bubble: a happier line from owners still walking, the fired line (and <code>fired</code> face) from those who fired you.</li>
-          <li><b>Stats page:</b> on <code>screen-stats</code>, the logbook numbers in a panel, then the badge wall in two columns, filled down in group order (firsts and mastery left, collection and silly right). Each badge shows its name, goal and line from the rulebook's Achievements table. Earned badges are in colour with an amber name; locked ones are greyed with a padlock and a cream name. Tap an earned badge for <code>fx-confetti</code> behind it; a locked one shakes.</li>
-          <li><b>Feedback:</b> every tap sparkles (<code>fx-tap</code>) and pressed buttons sink into their lip. With reduced motion (the system setting, or the toggle here), the shakes and hops are skipped and the confetti shows one still frame.</li>
+          <li><b>End screen:</b> on <code>screen-end</code>, the <code>logo</code> in the sky, the run's breakdown and total, zones walked as <code>ui-zone-pips</code>, the bank, and one closing line per owner in a <code>ui-quip</code> bubble: a happier line from owners still walking, the fired line (and <code>fired</code> face) from those who fired you. A new best drops the <code>ui-new-best</code> ribbon in, with <code>fx-new-best</code> bursting behind the panel. Badges the walk earned pop into a panel under it, each over <code>fx-confetti</code>, while the owners still walking hop. <b>Back home</b> is the primary <code>ui-button</code>.</li>
+          <li><b>Stats page:</b> on <code>screen-stats</code>, three tabs: the open one in the selected state (<code>ui-select</code>, yellow face, lifted onto a shadow, <code>ui-check</code> tick), the others tan. <b>Runs</b> holds the overall figures, runs by outcome and the logbook; <b>Dogs</b> each dog's face with its walks, zones and firings. <b>Badges</b> is the wall on the wood, in two columns filled down in group order: each badge with its name (amber earned, cream locked) and goal (lightGrey), or its short goal where the full one does not fit. Tap a badge for its detail over the dimmed page: the badge at 2x, name, Earned or Locked, goal and line; an earned one bursts <code>fx-confetti</code>. Any tap closes it.</li>
+          <li><b>Home celebration:</b> badges earned on launch or by a purchase, over the dimmed <code>screen-home</code>: the same badges panel, the bought dog's owner cheering under it, and a <b>Nice!</b> button.</li>
+          <li><b>Feedback:</b> every tap sparkles (<code>fx-tap</code>) and pressed buttons sink into their lip. With reduced motion (the system setting, or the toggle here), the ribbon, pops and hops are skipped and each burst shows one still frame.</li>
         </ul>
       </section>
       <section class="box" aria-label="Layout for the scenes">
@@ -84,8 +86,10 @@ b { font-weight: 700; }
         <ul>
           <li><b>Pause:</b> panel 104,285 232x260 (centred on the road, 80,190 280x450). Title at y 301 (font-title 2x). Buttons x 120 w 200 h 40 at y 325, 373, 421, 469; hit areas 2px taller each way. Note plate 120,513 200x18.</li>
           <li><b>Settings:</b> panel 96,277 248x276. Rows x 104 w 232 h 44 at y 315, 359, 403, 447. Switch at 292,row+14. Slider track 112,row+24 216x10, knob 10x16, value right-aligned at 328. Back 120,499 200x40.</li>
-          <li><b>End:</b> panel 24,140 312x300 (the sky in <code>screen-end</code>). Logo 116,52. Ribbon 144,130. Breakdown labels x 40, values right at 196, rows y 182 to 218, total at 232. Zones and bank at x 212. Quip rows y 258, 298, 338: face well 36,row+1, bubble 80,row 244x36, tail 75,row+14. Button 48,384 264x40.</li>
-          <li><b>Stats:</b> close button 332,10 (hit 316,0 44x44). Logbook panel 8,138 344x96, rows every 12 from y 162. Badge list: 2 columns at x 8 and 184 (each 168 wide, the tap target), 8 rows 46 tall from y 256. Badge at col,row+2; text column at col+36, 132 wide: name (font-title) at row+3, then goal and line (font-body) every 10 under it. Confetti at col-16,row-14.</li>
+          <li><b>End:</b> panel 24,140 312x312 (the sky in <code>screen-end</code>). Logo 116,52. Ribbon 144,130, dropping 12px in over 360ms; <code>fx-new-best</code> at 132,116, behind the panel. Title at y 158. Breakdown labels x 40, amounts right at 196, rows every 16 from y 182, then a tan rule and the Total row (font-title). Zones walked 212,182, pips 212+21i,200, count right at 320. Bank 212,222, <code>icon-money</code> 212,240, amount 232,242. Quip rows y 318, 362, 406: well 36,row+1, bubble 80,row 244x40, tail 75,row+16, name 86,row+5, line 86,row+22. Badges panel 8,458 344x118. Back home 48,584 264x44.</li>
+          <li><b>Stats:</b> title 12,12. Close button 332,10 (hit 316,0 44x44). Tabs 112x44 at x 4, 124, 244, y 136. Runs and Dogs: panel 8,188 344x444, labels x 16, values right at 344, rows every 17; dog rows every 34 from y 228: face 16,row-8, name 54,row+3, columns right at 236, 290, 344, tan rule at row+24. Badges: heading at y 192; 2 columns at x 8 and 184 (each 168 wide, the tap target), 8 rows of 52 from y 212; badge at col,row+2; text from col+36,row+4, 132 wide, 3 lines of 16. Detail 24,220 312x268: badge 2x centred on 180,268 over <code>fx-confetti</code> at 2x, name y 312, state y 332, goal and line from 40,356.</li>
+          <li><b>Badges panel:</b> heading at +10; the badges centred at +50 across the width less 8, split evenly; names under each from +72 every 16, hidden over 3 badges. Each pops in 140ms after the one before, over 320ms.</li>
+          <li><b>Home celebration:</b> the badges panel 344 wide at x 8, 118 tall plus 44 when owners cheer (faces at +122, every 44, centred), centred on the screen with Nice! (x 48, 264x44) 12 under it.</li>
         </ul>
       </section>
       <section class="box" aria-label="Art gaps">
@@ -93,6 +97,8 @@ b { font-weight: 700; }
         <ul>
           <li><b>Slider:</b> no <code>ui-slider</code> track and knob; the volume sliders are drawn in code here.</li>
           <li><b>Secondary button:</b> <code>ui-button</code> has one amber face, so Resume can't stand out from Help, Settings and Head home. A tan <code>secondary</code> tag would match the scene's current colours.</li>
+          <li><b>Detail confetti:</b> <code>fx-confetti</code> is 64x64, so at 1x it sits wholly behind the 2x badge in the badge detail. The mock draws it at 2x; a larger burst would keep the specks 1px.</li>
+          <li><b>Selected tab:</b> the <code>ui-select</code> band is the same yellow as the selected face, so on a tab the two merge into one wide yellow tile and the frame reads only by its ink lines.</li>
           <li><b>Icons on cream:</b> <code>icon-sound</code> and <code>icon-music</code> are drawn for the navy button face, so the Settings rows carry no icons. Effects and reduced motion have no icon at all.</li>
         </ul>
       </section>
@@ -113,7 +119,7 @@ ctx.imageSmoothingEnabled = false;
 const fill = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
 
 // ---------- Data (owners and quips from src/data, achievements from gameplay/game-design.md; the rest is sample) ----------
-const OWNER = { koda: "Jesse", duchess: "Rosa", nugget: "Kevin", biscuit: "Sam", dash: "Ophelia" };
+const OWNER = { koda: "Jesse", duchess: "Rosa", nugget: "Kevin", biscuit: "Sam", dash: "Ophelia", pierre: "Madame Lefevre", snowball: "Tiffany", waffles: "Dr. Hughes", zippy: "Mr. Pruitt" };
 const QUIP = {
   koda: { happy: "That's a personal best!", fired: "No worries, but you're fired." },
   duchess: { happy: "She's in full bloom!", fired: "Time to repot, dear. You're fired." },
@@ -129,16 +135,31 @@ const RUN = {
     { dog: "nugget", name: "Nugget", hearts: 2, max: 6, mood: "upset" },
   ],
 };
+// badges: the ones the walk earned, celebrated under the panel.
 const ENDS = {
   done: { label: "Walk done", title: "Walk done!", best: true, zones: 4, current: -1, fees: 180, tips: 86, cards: 22, back: 30, bank: 599,
-    owners: [["koda", "happy"], ["duchess", "happy"], ["nugget", "fired"]] },
+    owners: [["koda", "happy"], ["duchess", "happy"], ["nugget", "fired"]], badges: ["round-trip", "pack-leader"] },
   home: { label: "Headed home", title: "Headed home", best: false, zones: 2, current: 2, fees: 60, tips: 31, cards: 8, back: 0, bank: 468,
-    owners: [["koda", "happy"], ["duchess", "happy"], ["nugget", "happy"]] },
+    owners: [["koda", "happy"], ["duchess", "happy"], ["nugget", "happy"]], badges: ["first-steps", "double-leash", "clean-paws", "eau-de-skunk"] },
   nodogs: { label: "Out of dogs", title: "Out of dogs", best: false, zones: 1, current: 1, fees: 25, tips: 19, cards: 12, back: 25, bank: 392,
-    owners: [["biscuit", "fired"], ["dash", "fired"]] },
+    owners: [["biscuit", "fired"], ["dash", "fired"]], badges: [] },
 };
-const LOG = { runs: 14, finished: 9, home: 3, nodogs: 2, fired: 3, best: 260, lifetime: 1482, topFirer: "nugget", topCount: 2 };
-// The Achievements table: key, name, goal and line, in its group order (firsts, mastery, collection, silly).
+// Badges earned away from a run's end: by a purchase (the bought dog's owner cheers) or on launch (no one does).
+const CELEBS = {
+  buy: { label: "Bought a dog", badges: ["full-kennel", "top-walker"], owners: ["zippy"] },
+  launch: { label: "On launch", badges: ["five-star-service"], owners: [] },
+};
+// The Runs tab: overall figures, runs by outcome and the logbook, as the game words them.
+const OVERALL = [["Runs played", "14"], ["Best run", "$260", true], ["Lifetime earnings", "$1,482", true], ["Times fired", "3 (most: Kevin)"], ["Best zone completed", "4"], ["Maple Street finished", "9"]];
+const OUTCOMES = [["Finished", "9"], ["Headed home", "3"], ["Out of dogs", "2"]];
+const LOGBOOK = ["Best $260, 4 zones with Koda, Duchess and Nugget.", "Last +$214. Kevin fired you on Sniff Street Shops.", "Walks 14   Dogs walked 41   Fired 3"];
+// The Dogs tab: each dog in roster order with its walks, zones finished and firings.
+const DOG_STATS = [
+  ["biscuit", "Biscuit", 5, 11, 1], ["dash", "Dash", 3, 6, 0], ["duchess", "Duchess", 9, 21, 0],
+  ["koda", "Koda", 12, 30, 0], ["nugget", "Nugget", 8, 15, 2], ["pierre", "Pierre", 2, 5, 0],
+  ["snowball", "Snowball", 1, 2, 0], ["waffles", "Waffles", 1, 3, 0], ["zippy", "Zippy", 0, 0, 0],
+];
+// The Achievements table: key, name, goal, line and the short goal where it has one, in its group order (firsts, mastery, collection, silly).
 const BADGES = [
   ["first-steps", "First Steps", "Finish your first zone", "Every walk starts somewhere."],
   ["round-trip", "Round Trip", "Finish all 4 zones of Maple Street", "Home before the streetlights."],
@@ -150,24 +171,28 @@ const BADGES = [
   ["big-payday", "Big Payday", "Earn $500 in one walk", "Treats are on you."],
   ["full-kennel", "Full Kennel", "Own all 9 dogs", "Every leash is spoken for."],
   ["kitted-out", "Kitted Out", "Own all 5 gear items", "A pocket for everything."],
-  ["neighbourhood-favourite", "Neighbourhood Favourite", "Finish a walk with every dog", "Everyone's met you now."],
+  ["neighbourhood-favourite", "Neighbourhood Favourite", "Finish a walk with every dog", "Everyone's met you now.", "All 9 dogs finish"],
   ["top-walker", "Top Walker", "Own every dog and all 3 dog slots", "Maple Street's finest."],
   ["youre-fired", "You're Fired!", "Get fired 10 times", "They always come back."],
   ["eau-de-skunk", "Eau de Skunk", "Be Stinky in 3 zones of one walk", "You can smell this badge."],
   ["squirrel", "Squirrel!", "Let a chaser chase 5 squirrels", "So close. Every time."],
 ];
+const BADGE_NAME = Object.fromEntries(BADGES.map(([id, name]) => [id, name]));
 const EARNED = new Set(["first-steps", "round-trip", "double-leash", "pack-leader", "clean-paws", "eau-de-skunk", "squirrel"]);
 const money = n => "$" + n.toLocaleString("en-US");
+const signed = n => (n < 0 ? "-" : "+") + money(Math.abs(n));
 
 // ---------- State ----------
-const SCREENS = { pause: "Pause menu", settings: "Settings", end: "End screen", stats: "Stats page" };
-const S = { screen: "pause", end: "done", zoom: 0, paused: true, sound: true, music: 70, effects: 80, reduced: matchMedia("(prefers-reduced-motion: reduce)").matches };
+const SCREENS = { pause: "Pause menu", settings: "Settings", end: "End screen", stats: "Stats page", celebrate: "Home celebration" };
+const TAB_NAMES = { runs: "Runs", dogs: "Dogs", badges: "Badges" };
+// detail: the badge open over the wall, not kept across reloads.
+const S = { screen: "pause", end: "done", celeb: "buy", tab: "badges", detail: null, zoom: 0, paused: true, sound: true, music: 70, effects: 80, reduced: matchMedia("(prefers-reduced-motion: reduce)").matches };
 try { Object.assign(S, JSON.parse(localStorage.getItem("dwg-menus-screen") || "{}")); } catch (e) { /* storage unavailable */ }
-const save = () => { try { const { screen, end, zoom, sound, music, effects, reduced } = S; localStorage.setItem("dwg-menus-screen", JSON.stringify({ screen, end, zoom, sound, music, effects, reduced })); } catch (e) { /* storage unavailable */ } };
+const save = () => { try { const { screen, end, celeb, tab, zoom, sound, music, effects, reduced } = S; localStorage.setItem("dwg-menus-screen", JSON.stringify({ screen, end, celeb, tab, zoom, sound, music, effects, reduced })); } catch (e) { /* storage unavailable */ } };
 
 // ---------- Art: sprites, the screen images and both BMFonts from the manifest ----------
 const ART = {}, IMG = {}, FONT = {}, SND = {};
-const IMAGES = ["ui-panel", "ui-new-best", "ui-quip", "ui-quip-tail", "ui-top-bar", "icon-pause", "icon-close", "icon-money", "screen-end", "screen-stats", "backdrop-bark-park", "road-bark-park", "logo"];
+const IMAGES = ["ui-panel", "ui-new-best", "ui-quip", "ui-quip-tail", "ui-top-bar", "icon-pause", "icon-close", "icon-money", "screen-end", "screen-stats", "screen-home", "backdrop-bark-park", "road-bark-park", "logo"];
 async function loadArt() {
   const m = await (await fetch("/art/manifest.json", { cache: "no-cache" })).json();
   const image = async src => { const img = new Image(); img.src = "/art/" + src; await img.decode(); return img; };
@@ -194,10 +219,15 @@ function frameOf(key, tag, i) {
   const t = a.tags[tag];
   return { img: a.img, f: a.frames[t.from + (i % (t.to - t.from + 1))] };
 }
-function art(key, tag, i, x, y) {
+function art(key, tag, i, x, y, sc = 1) {
   const s = frameOf(key, tag, i); if (!s) return false;
-  ctx.drawImage(s.img, s.f.x, s.f.y, s.f.w, s.f.h, Math.round(x), Math.round(y), s.f.w, s.f.h);
+  ctx.drawImage(s.img, s.f.x, s.f.y, s.f.w, s.f.h, Math.round(x), Math.round(y), Math.round(s.f.w * sc), Math.round(s.f.h * sc));
   return true;
+}
+// Centred on cx,cy, as the game places badges and bursts.
+function artMid(key, tag, i, cx, cy, sc = 1) {
+  const s = frameOf(key, tag, i); if (!s) return false;
+  return art(key, tag, i, cx - Math.round(s.f.w * sc / 2), cy - Math.round(s.f.h * sc / 2), sc);
 }
 function pic(key, x, y) { const img = IMG[key]; if (!img) return false; ctx.drawImage(img, Math.round(x), Math.round(y)); return true; }
 // Nine-slice: corners of c px stay, edges and centre stretch.
@@ -212,7 +242,7 @@ function nine(src, x, y, w, h, c) {
   return true;
 }
 const nineImg = (key, x, y, w, h, c = 8) => nine(IMG[key] && { img: IMG[key], f: { x: 0, y: 0, w: IMG[key].width, h: IMG[key].height } }, x, y, w, h, c);
-const nineArt = (key, tag, x, y, w, h, c) => nine(frameOf(key, tag, 0), x, y, w, h, c);
+const nineArt = (key, tag, x, y, w, h, c, i = 0) => nine(frameOf(key, tag, i), x, y, w, h, c);
 
 // ---------- Text: font-body (Tiny5, mixed case) and font-title (Silkscreen, capitals) ----------
 // y is the top of the capitals, as in src/scenes/pixelText.ts. Without the fonts, the mocks' 3x5 glyphs stand in.
@@ -255,15 +285,31 @@ function wrap(role, s, maxW, sc = 1) {
   return out;
 }
 
-// ---------- Feedback: press dips, tap sparkles, shakes, confetti ----------
+// ---------- Feedback: press dips, tap sparkles, bursts, pops, cheering ----------
 // Motion uses the real clock; with reduced motion the highlights stay and the movement is skipped.
-const FX = { press: null, pressUntil: 0, shakes: {}, pops: {}, taps: [], confetti: null };
+// shown: when the current screen opened, so its ribbon, bursts and pops play from there.
+const FX = { press: null, pressUntil: 0, taps: [], confetti: null, shown: 0 };
 const clock = () => performance.now();
 const since = t0 => clock() - (t0 ?? -1e9);
 const motion = v => (S.reduced ? 0 : v);
 const pressed = id => FX.press === id && clock() < FX.pressUntil;
-const shake = id => motion(since(FX.shakes[id]) < 320 ? Math.round(Math.sin(since(FX.shakes[id]) / 25) * 3) : 0);
-const hop = id => motion(since(FX.pops[id]) < 360 ? -Math.round(Math.sin(since(FX.pops[id]) / 360 * Math.PI) * 4) : 0);
+// Phaser's Back.easeOut, for the ribbon's drop and the badges' pop.
+const backOut = t => { const c = 1.70158; return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2; };
+const ease = (age, ms) => (S.reduced ? 1 : backOut(Math.max(0, Math.min(1, age / ms))));
+// A one-shot burst's play tag centred on cx,cy, age ms in, at sc; with reduced motion it holds one still frame.
+const BURSTS = { "fx-confetti": { ms: 80, still: 4 }, "fx-new-best": { ms: 70, still: 3 } };
+function burst(key, age, cx, cy, sc = 1) {
+  const t = ART[key]?.tags.play; if (!t) return;
+  const { ms, still } = BURSTS[key];
+  if (S.reduced) artMid(key, "play", still, cx, cy, sc);
+  else if (age >= 0 && age < (t.to - t.from + 1) * ms) artMid(key, "play", Math.floor(age / ms), cx, cy, sc);
+}
+// A cheering owner hops 4px every 1020ms: up over 180ms, held 60, down over 180.
+function cheer(t0) {
+  const t = since(t0) % 1020, up = 180, hold = 60;
+  const k = t < up ? Math.sin(t / up * Math.PI / 2) : t < up + hold ? 1 : t < 2 * up + hold ? Math.cos((t - up - hold) / up * Math.PI / 2) : 0;
+  return motion(-Math.round(k * 4));
+}
 function playSound(key, volume) {
   const s = SND[key]; if (!s || !S.sound) return;
   try {
@@ -298,7 +344,7 @@ const grow = (r, d) => ({ x: r.x, y: r.y - d, w: r.w, h: r.h + 2 * d });
 // ---------- Run screen under the pause menu ----------
 const ROAD = { x: 80, y: 190, w: 280, h: 450 };
 const SOUND_HIT = { x: 124, y: 0, w: 44, h: 44 }, PAUSE_HIT = { x: 168, y: 0, w: 44, h: 44 };
-// Darkening maps each palette colour two ramp steps down, so the dimmed road stays on the palette.
+// Darkening maps each palette colour two ramp steps down, so the dimmed road (and the screen under the badge detail and the home celebration) stays on the palette.
 const DIM = new Map(D.PAL.map(h => [parseInt(h, 16), parseInt(D.dark(D.dark("#" + h)).slice(1), 16)]));
 function dim(r) {
   const im = ctx.getImageData(r.x, r.y, r.w, r.h), d = im.data;
@@ -417,99 +463,192 @@ function setSlider(key, px) {
   S[key] = Math.round(Math.max(0, Math.min(1, v)) * 20) * 5;
 }
 
+// ---------- Badges just earned: the end screen's panel and the home celebration ----------
+// Side by side across the panel, each popping in over fx-confetti; named while at most 3 share it.
+function badgeCelebration(r, ids, t0) {
+  panel(r, false);
+  const mid = r.x + r.w / 2, cy = r.y + 50, slot = (r.w - 8) / Math.max(1, ids.length);
+  sayC("title", ids.length === 1 ? "Badge earned!" : `${ids.length} badges earned!`, mid, r.y + 10, K.plum, 2);
+  const slots = ids.map((id, i) => ({ id, cx: Math.round(r.x + 4 + slot * (i + 0.5)), age: since(t0) - i * 140 }));
+  for (const s of slots) burst("fx-confetti", s.age, s.cx, cy);
+  for (const s of slots) {
+    const k = ease(s.age, 320);
+    if (k > 0 && !artMid("badge-" + s.id, "earned", 0, s.cx, cy, k)) fill(s.cx - 16, cy - 16, 32, 32, K.amber);
+    if (ids.length <= 3) wrap("body", BADGE_NAME[s.id], Math.floor(slot) - 4, 2).forEach((l, n) => sayC("body", l, s.cx, cy + 22 + n * 16, K.plum, 2));
+  }
+}
+
 // ---------- End screen ----------
-const END = { x: 24, y: 140, w: 312, h: 300 };
-const HOME_BUTTON = { x: 48, y: 384, w: 264, h: 40 };
+const END = { x: 24, y: 140, w: 312, h: 312 };
+const RIBBON = { x: 144, y: 130 };
+const NEW_BADGES = { x: 8, y: 458, w: 344, h: 118 };
+const HOME_BUTTON = { x: 48, y: 584, w: 264, h: 44 };
 function endScreen() {
-  const e = ENDS[S.end];
+  const e = ENDS[S.end], age = since(FX.shown), celebrating = e.badges.length > 0;
   if (!pic("screen-end", 0, 0)) fill(0, 0, 360, 640, K.orange);
   pic("logo", 116, 52);
+  // fx-new-best's 96x48 frame sits 12 left of and 14 above the ribbon, behind the panel
+  if (e.best) burst("fx-new-best", age, RIBBON.x - 12 + 48, RIBBON.y - 14 + 24);
   panel(END, false);
-  if (e.best) pic("ui-new-best", 144, 130 + motion(Math.floor(clock() / 600) % 2 ? -1 : 0));
   sayC("title", e.title, 180, 158, K.plum, 2);
-  // breakdown: money gained forest, lost darkRed, both on cream
-  const rows = [["Fees", e.fees], ["Tips", e.tips], ["Card costs", -e.cards], ["Fees taken back", -e.back]];
-  rows.forEach(([label, n], i) => {
-    const y = 182 + i * 12;
-    say("body", label, 40, y, K.plum);
-    sayR("title", (n < 0 ? "-" : "+") + money(Math.abs(n)), 196, y, n < 0 ? K.dred : K.forest);
-  });
-  fill(40, 228, 156, 1, K.tan);
-  const total = e.fees + e.tips - e.cards - e.back;
-  say("title", "Total", 40, 234, K.plum);
-  sayR("title", "+" + money(total), 196, 232, K.forest, 2);
-  say("body", "Zones walked", 212, 182, K.plum);
+  if (e.best) {
+    const k = ease(age, 360);
+    ctx.globalAlpha = S.reduced ? 1 : Math.min(1, age / 360);
+    pic("ui-new-best", RIBBON.x, RIBBON.y - Math.round(12 * (1 - k)));
+    ctx.globalAlpha = 1;
+  }
+  // breakdown: fees, tips and card costs always, fees taken back when there were some; gained forest, lost darkRed
+  const rows = [["Fees", e.fees], ["Tips", e.tips], ["Card costs", -e.cards], ...(e.back ? [["Fees taken back", -e.back]] : [])];
+  let y = 182;
+  for (const [label, n] of rows) {
+    say("body", label, 40, y, K.plum, 2);
+    sayR("body", signed(n), 196, y, n < 0 ? K.dred : n > 0 ? K.forest : K.plum, 2);
+    y += 16;
+  }
+  fill(40, y + 2, 156, 1, K.tan);
+  say("title", "Total", 40, y + 8, K.plum, 2);
+  sayR("title", signed(e.fees + e.tips - e.cards - e.back), 196, y + 8, K.forest, 2);
+  say("body", "Zones walked", 212, 182, K.plum, 2);
   for (let z = 0; z < 4; z++) {
     const x = 212 + z * 21, tag = z < e.zones ? "done" : z === e.current ? "current" : "todo";
-    art("ui-zone-pips", tag, 0, x, 194);
-    if (tag === "current") fill(x + 2, 196, 14, 4, K.amber);
+    art("ui-zone-pips", tag, 0, x, 200);
+    if (tag === "current") fill(x + 2, 202, 14, 4, K.amber);
   }
-  sayR("title", `${e.zones}/4`, 320, 195, K.plum);
-  say("body", "Bank", 212, 212, K.plum);
-  pic("icon-money", 212, 224);
-  say("title", money(e.bank), 232, 227, K.plum, 2);
-  fill(36, 250, 288, 1, K.tan);
-  // one closing line per owner
+  sayR("body", `${e.zones}/4`, 320, 200, K.plum, 2);
+  say("body", "Bank", 212, 222, K.plum, 2);
+  pic("icon-money", 212, 240);
+  say("title", money(e.bank), 232, 242, K.plum, 2);
+  fill(36, 310, 288, 1, K.tan);
+  // one closing line per owner; while badges are celebrated, owners still walking cheer
   e.owners.forEach(([dog, mood], i) => {
-    const y = 258 + i * 40;
-    fill(36, y + 1, 34, 34, K.tan);
-    art("face-owner-" + dog, mood, 0, 37, y + 2);
-    if (!nineImg("ui-quip", 80, y, 244, 36)) { fill(80, y, 244, 36, K.plum); fill(81, y + 1, 242, 34, K.cream); }
-    pic("ui-quip-tail", 75, y + 14);
-    say("title", OWNER[dog], 88, y + 8, K.plum);
-    if (mood === "fired") say("body", "fired you", 88 + textW("title", OWNER[dog]) + 5, y + 8, K.dred);
-    say("body", QUIP[dog][mood], 88, y + 21, K.plum);
+    const row = 318 + i * 44, fired = mood === "fired";
+    fill(36, row + 1, 34, 34, K.tan);
+    art("face-owner-" + dog, mood, 0, 37, row + 2 + (celebrating && !fired ? cheer(FX.shown) : 0));
+    if (!nineImg("ui-quip", 80, row, 244, 40)) { fill(80, row, 244, 40, K.plum); fill(81, row + 1, 242, 38, K.cream); }
+    pic("ui-quip-tail", 75, row + 16);
+    const name = OWNER[dog], long = name + " fired you";
+    say("title", fired && textW("title", long, 2) <= 232 ? long : name, 86, row + 5, fired ? K.dred : K.plum, 2);
+    say("body", QUIP[dog][fired ? "fired" : "happy"], 86, row + 22, K.plum, 2);
   });
+  if (celebrating) badgeCelebration(NEW_BADGES, e.badges, FX.shown);
   button(HOME_BUTTON, "Back home", "home");
+}
+
+// ---------- Home celebration ----------
+// Badges earned on launch or by a purchase, over the dimmed home screen; Nice! returns to it.
+function celebrationLayout() {
+  const c = CELEBS[S.celeb], h = 118 + (c.owners.length ? 44 : 0), top = Math.round((640 - h - 12 - 44) / 2);
+  return { c, panel: { x: 8, y: top, w: 344, h }, nice: { x: 48, y: top + h + 12, w: 264, h: 44 } };
+}
+function celebrateScreen() {
+  const { c, panel: r, nice } = celebrationLayout();
+  if (!pic("screen-home", 0, 0)) fill(0, 0, 360, 640, K.dbrown);
+  dim({ x: 0, y: 0, w: 360, h: 640 });
+  badgeCelebration(r, c.badges, FX.shown);
+  const left = 180 - ((c.owners.length - 1) * 44 + 32) / 2;
+  c.owners.forEach((dog, i) => art("face-owner-" + dog, "happy", 0, Math.round(left + i * 44), r.y + 122 + cheer(FX.shown)));
+  button(nice, "Nice!", "nice");
 }
 
 // ---------- Stats page ----------
 const CLOSE = { x: 332, y: 10 }, CLOSE_HIT = { x: 316, y: 0, w: 44, h: 44 };
-const LOGBOOK = { x: 8, y: 138, w: 344, h: 96 };
-// Two columns of eight rows, filled down: firsts and mastery on the left, collection and silly on the right.
-const GRID = { x: 8, y: 256, col: 176, w: 168, row: 46, text: 132 };
-const cells = BADGES.map(([id, name, goal, quote], i) => ({
-  id, name, goal, quote, earned: EARNED.has(id),
+const TABS = Object.entries(TAB_NAMES).map(([key, label], i) => ({ key, label, r: { x: 4 + i * 120, y: 136, w: 112, h: 44 } }));
+const STATS_PANEL = { x: 8, y: 188, w: 344, h: 444 };
+// Two columns of eight rows, filled down: firsts and mastery on the left, collection and silly right.
+const GRID = { x: 8, y: 212, col: 176, w: 168, row: 52, text: 132, lines: 3 };
+const cells = BADGES.map(([id, name, goal, quote, short], i) => ({
+  id, name, goal, quote, short: short || goal, earned: EARNED.has(id),
   x: GRID.x + Math.floor(i / 8) * GRID.col, top: GRID.y + (i % 8) * GRID.row,
 }));
+const DETAIL = { x: 24, y: 220, w: 312, h: 268 };
 function statsPage() {
   if (!pic("screen-stats", 0, 0)) fill(0, 0, 360, 640, K.dbrown);
   say("title", "Stats", 12, 12, K.cream, 2);
   iconButton(CLOSE.x, CLOSE.y, pressed("close"), (x, y) => pic("icon-close", x, y));
-  // logbook numbers
-  panel(LOGBOOK, false);
-  say("title", "Logbook", 18, 148, K.plum);
-  [["Runs played", LOG.runs], ["Finished", LOG.finished], ["Headed home", LOG.home], ["Out of dogs", LOG.nodogs], ["Times fired", LOG.fired]].forEach(([label, n], i) => {
-    say("body", label, 18, 162 + i * 12, K.plum);
-    sayR("title", String(n), 168, 162 + i * 12, K.plum);
-  });
-  fill(176, 148, 1, 74, K.tan);
-  [["Best run", LOG.best], ["Lifetime earnings", LOG.lifetime]].forEach(([label, n], i) => {
-    say("body", label, 184, 162 + i * 12, K.plum);
-    sayR("title", money(n), 342, 162 + i * 12, K.forest);
-  });
-  fill(184, 187, 34, 34, K.tan);
-  art("face-owner-" + LOG.topFirer, "fired", 0, 185, 188);
-  say("body", "Fired you most", 224, 194, K.plum);
-  say("title", OWNER[LOG.topFirer], 224, 206, K.plum);
-  say("body", `${LOG.topCount} of ${LOG.fired} firings`, 228 + textW("title", OWNER[LOG.topFirer]), 206, K.dbrown);
-  // badge wall: earned in colour with an amber name, locked grey with a padlock; each shows its name, goal and line
-  say("title", "Badges", 12, 244, K.cream);
-  sayR("body", `${EARNED.size}/15 earned`, 348, 245, K.cream);
-  const c = FX.confetti;
-  for (const b of cells) {
-    const age = c && c.id === b.id ? since(c.t0) : Infinity;
-    if (age < 540 && !S.reduced) art("fx-confetti", "play", Math.floor(age / 90), b.x - 16, b.top - 14);
-    else if (age < 600 && S.reduced) art("fx-confetti", "play", 2, b.x - 16, b.top - 14);
-    const id = "badge-" + b.id;
-    if (!art(id, b.earned ? "earned" : "locked", 0, b.x + shake(id), b.top + 2 + hop(id))) fill(b.x, b.top + 2, 32, 32, b.earned ? K.amber : K.grey);
-    const name = wrap("title", b.name, GRID.text);
-    name.forEach((l, i) => say("title", l, b.x + 36, b.top + 3 + i * 10, b.earned ? K.amber : K.cream));
-    badgeLines(b).forEach((l, i) => say("body", l, b.x + 36, b.top + 5 + name.length * 10 + i * 10, K.cream));
-  }
+  TABS.forEach(tab);
+  if (S.tab === "runs") statsRuns();
+  else if (S.tab === "dogs") statsDogs();
+  else statsBadges();
 }
-// The goal, then the line in quotes, wrapped to the text column.
-const badgeLines = b => [...wrap("body", b.goal, GRID.text), ...wrap("body", `"${b.quote}"`, GRID.text)];
+// The open tab in the selected state: lifted 2px onto a plum shadow, yellow face in an ink edge,
+// ui-select 3px outside it and a ui-check tick. The rest take the full choice's tan face in a slate edge.
+function tab(t) {
+  const on = S.tab === t.key, { x, w, h } = t.r, y = t.r.y + (on ? -2 : 0) + (pressed("tab-" + t.key) ? 2 : 0);
+  if (on) fill(x - 1, t.r.y + h + 1, w + 4, 2, K.plum);
+  fill(x, y, w, h, on ? K.ink : K.slate);
+  fill(x + 1, y + 1, w - 2, h - 2, on ? K.yellow : K.tan);
+  if (on) {
+    if (!nineArt("ui-select", "pulse", x - 3, y - 3, w + 6, h + 6, 8, S.reduced ? 0 : Math.floor(clock() / 450) % 2)) {
+      fill(x - 3, y - 3, w + 6, 1, K.ink); fill(x - 3, y + h + 2, w + 6, 1, K.ink);
+      fill(x - 3, y - 3, 1, h + 6, K.ink); fill(x + w + 2, y - 3, 1, h + 6, K.ink);
+    }
+    if (!art("ui-check", "tick", 0, x - 6, y - 7)) fill(x - 4, y - 5, 12, 12, K.green);
+  }
+  sayC("title", t.label, x + w / 2, y + 15, K.plum, 2);
+}
+// Labels darkBrown, values plum, money forest; rows every 17.
+function statsRows(y, rows) {
+  rows.forEach(([label, v, cash], i) => {
+    say("body", label, 16, y + i * 17, K.dbrown, 2);
+    sayR("body", v, 344, y + i * 17, cash ? K.forest : K.plum, 2);
+  });
+  return y + rows.length * 17;
+}
+function statsRuns() {
+  panel(STATS_PANEL, false);
+  let y = 198;
+  say("title", "Overall", 16, y, K.plum, 2);
+  y = statsRows(y + 20, OVERALL) + 6;
+  say("title", "Runs", 16, y, K.plum, 2);
+  y = statsRows(y + 20, OUTCOMES) + 6;
+  say("title", "Logbook", 16, y, K.plum, 2);
+  LOGBOOK.flatMap(s => wrap("body", s, 328, 2)).forEach((l, i) => say("body", l, 16, y + 20 + i * 16, K.dbrown, 2));
+}
+function statsDogs() {
+  panel(STATS_PANEL, false);
+  say("title", "Dog", 16, 198, K.plum, 2);
+  ["Walks", "Zones", "Fired"].forEach((h, n) => sayR("body", h, [236, 290, 344][n], 198, K.plum, 2));
+  DOG_STATS.forEach(([dog, name, ...values], i) => {
+    const y = 228 + i * 34;
+    if (!art("face-dog-" + dog, "happy", 0, 16, y - 8)) fill(16, y - 8, 32, 32, K.tan);
+    say("body", name, 54, y + 3, K.plum, 2);
+    values.forEach((v, n) => sayR("title", String(v), [236, 290, 344][n], y + 3, K.plum, 2));
+    fill(12, y + 24, 336, 1, K.tan);
+  });
+}
+// The wall on the wood: earned in colour with an amber name, locked grey with a cream name; the goal
+// in lightGrey, or the short goal where the full one does not fit the three lines.
+function statsBadges() {
+  say("title", "Badges", 12, 192, K.cream, 2);
+  sayR("body", `${EARNED.size}/15 earned`, 348, 192, K.cream, 2);
+  for (const b of cells) {
+    if (!art("badge-" + b.id, b.earned ? "earned" : "locked", 0, b.x, b.top + 2)) fill(b.x, b.top + 2, 32, 32, b.earned ? K.amber : K.grey);
+    const name = wrap("body", b.name, GRID.text, 2), full = wrap("body", b.goal, GRID.text, 2);
+    const goal = (name.length + full.length <= GRID.lines ? full : wrap("body", b.short, GRID.text, 2)).slice(0, GRID.lines - name.length);
+    name.forEach((l, i) => say("body", l, b.x + 36, b.top + 4 + i * 16, b.earned ? K.amber : K.cream, 2));
+    goal.forEach((l, i) => say("body", l, b.x + 36, b.top + 4 + (name.length + i) * 16, K.lgrey, 2));
+  }
+  const open = cells.find(b => b.id === S.detail);
+  if (open) badgeDetail(open);
+}
+// The tapped badge at 2x over the dimmed page, with its name, state, goal and line; an earned one bursts confetti,
+// also at 2x: the 64x64 burst at 1x sits wholly behind the 2x badge.
+function badgeDetail(b) {
+  dim({ x: 0, y: 0, w: 360, h: 640 });
+  panel(DETAIL, false);
+  const cx = DETAIL.x + DETAIL.w / 2, cy = DETAIL.y + 48;
+  if (b.earned) burst("fx-confetti", since(FX.confetti?.t0), cx, cy, 2);
+  if (!artMid("badge-" + b.id, b.earned ? "earned" : "locked", 0, cx, cy, 2)) fill(cx - 32, cy - 32, 64, 64, b.earned ? K.amber : K.grey);
+  let y = cy + 44;
+  sayC("title", b.name, cx, y, K.plum, 2);
+  y += 20;
+  sayC("body", b.earned ? "Earned" : "Locked", cx, y, b.earned ? K.forest : K.dbrown, 2);
+  y += 24;
+  const goal = wrap("body", b.goal, DETAIL.w - 32, 2);
+  goal.forEach((l, i) => say("body", l, DETAIL.x + 16, y + i * 16, K.plum, 2));
+  y += goal.length * 16 + 8;
+  wrap("body", `"${b.quote}"`, DETAIL.w - 32, 2).forEach((l, i) => say("body", l, DETAIL.x + 16, y + i * 16, K.dbrown, 2));
+}
 
 // ---------- Render ----------
 function render() {
@@ -520,6 +659,7 @@ function render() {
       if (S.screen === "pause") pauseMenu(); else settings();
     }
   } else if (S.screen === "end") endScreen();
+  else if (S.screen === "celebrate") celebrateScreen();
   else statsPage();
   FX.taps = FX.taps.filter(f => since(f.t0) < 240);
   for (const f of FX.taps) art("fx-tap", "play", Math.floor(since(f.t0) / 60), Math.round(f.x) - 8, Math.round(f.y) - 8);
@@ -530,6 +670,7 @@ const point = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - 
 let drag = null;
 function go(screen) {
   S.screen = screen; if (screen === "pause" || screen === "settings") S.paused = true;
+  S.detail = null; FX.shown = clock();
   save(); sync();
 }
 cv.addEventListener("pointerdown", e => {
@@ -556,11 +697,17 @@ cv.addEventListener("pointerdown", e => {
     drag = row.key; cv.setPointerCapture(e.pointerId); setSlider(drag, px);
   } else if (S.screen === "end") {
     if (inside(px, py, HOME_BUTTON)) press("home");
+  } else if (S.screen === "celebrate") {
+    if (inside(px, py, celebrationLayout().nice)) { press("nice"); setTimeout(() => { FX.shown = clock(); }, 140); }
   } else {
+    // any tap closes the badge detail
+    if (S.detail) { S.detail = null; return; }
     if (inside(px, py, CLOSE_HIT)) { press("close"); return; }
+    const t = TABS.find(t => inside(px, py, t.r));
+    if (t) { press("tab-" + t.key); setTimeout(() => { S.tab = t.key; save(); }, 140); return; }
+    if (S.tab !== "badges") return;
     const b = cells.find(b => inside(px, py, { x: b.x, y: b.top, w: GRID.w, h: GRID.row }));
-    if (!b) return;
-    if (b.earned) { FX.confetti = { id: b.id, t0: clock() }; FX.pops["badge-" + b.id] = clock(); } else FX.shakes["badge-" + b.id] = clock();
+    if (b) { S.detail = b.id; FX.confetti = { id: b.id, t0: clock() }; }
   }
 });
 cv.addEventListener("pointermove", e => { if (drag) setSlider(drag, point(e)[0]); });
@@ -569,7 +716,7 @@ cv.addEventListener("pointerup", endDrag);
 cv.addEventListener("pointercancel", endDrag);
 cv.addEventListener("keydown", e => {
   if (e.key !== "Escape" && e.key !== "p") return;
-  if (S.screen === "settings") go("pause"); else if (S.screen === "pause") { S.paused = !S.paused; sync(); }
+  if (S.screen === "settings") go("pause"); else if (S.screen === "pause") { S.paused = !S.paused; sync(); } else if (S.screen === "stats") S.detail = null;
   e.preventDefault();
 });
 
@@ -578,8 +725,9 @@ const HINTS = {
   pause: "Tap Settings or Head home. Resume walks on; tap the pause button to stop again. The speaker mutes all sound.",
   run: "Walking. Tap the pause button in the top bar to open the menu again.",
   settings: "Tap a row to toggle it, or drag a slider. Back returns to the pause menu.",
-  end: "Switch the sample result beside the screen. Head home in the pause menu leads here too.",
-  stats: "Tap an earned badge for confetti. A locked badge shakes.",
+  end: "Switch the sample result beside the screen; pick it again to replay the ribbon and badges. Head home in the pause menu leads here too.",
+  stats: "Tap a tab. On Badges, tap a badge for its detail (an earned one bursts confetti); any tap or Escape closes it.",
+  celebrate: "Badges earned on launch or by a purchase. Switch the sample beside the screen; Nice! replays it.",
 };
 function segButtons(host, items, current, pick) {
   host.replaceChildren(...Object.entries(items).map(([k, label]) => {
@@ -592,16 +740,19 @@ function segButtons(host, items, current, pick) {
 }
 const syncScreens = segButtons(document.getElementById("screens"), SCREENS, () => S.screen, go);
 const syncEnds = segButtons(document.getElementById("ends"), Object.fromEntries(Object.entries(ENDS).map(([k, e]) => [k, e.label])), () => S.end, k => { S.end = k; go("end"); });
+const syncCelebs = segButtons(document.getElementById("celebs"), Object.fromEntries(Object.entries(CELEBS).map(([k, c]) => [k, c.label])), () => S.celeb, k => { S.celeb = k; go("celebrate"); });
 const syncZoom = segButtons(document.getElementById("zooms"), { 1: "1×", 2: "2×" }, () => S.zoom, z => { S.zoom = Number(z); applyZoom(); save(); sync(); });
 function sync() {
-  syncScreens(); syncEnds(); syncZoom();
+  syncScreens(); syncEnds(); syncCelebs(); syncZoom();
   document.getElementById("hint").textContent = HINTS[S.screen === "pause" && !S.paused ? "run" : S.screen];
   cv.setAttribute("aria-label", `Menus mock: ${SCREENS[S.screen]}. ${HINTS[S.screen]}`);
 }
 function applyZoom() { cv.style.width = 360 * S.zoom + "px"; cv.style.height = 640 * S.zoom + "px"; }
 if (!SCREENS[S.screen]) S.screen = "pause";
 if (!ENDS[S.end]) S.end = "done";
-S.paused = true;
+if (!CELEBS[S.celeb]) S.celeb = "buy";
+if (!TAB_NAMES[S.tab]) S.tab = "badges";
+S.paused = true; S.detail = null;
 if (!S.zoom) S.zoom = Math.max(1, Math.min(2, Math.floor((cv.parentElement.clientWidth || 360) / 360)));
 applyZoom();
 sync();
@@ -611,7 +762,7 @@ function frame(now) {
   if (!S.paused && !S.reduced) runT += Math.min(50, now - last);
   last = now; render(); requestAnimationFrame(frame);
 }
-loadArt().catch(() => { /* placeholders only */ }).then(() => requestAnimationFrame(frame));
+loadArt().catch(() => { /* placeholders only */ }).then(() => { FX.shown = clock(); requestAnimationFrame(frame); });
 })();
 </script>
 </body>
