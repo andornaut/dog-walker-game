@@ -1,21 +1,55 @@
 import { describe, expect, it } from "vitest";
 
+import { defined } from "../testing/defined";
 import { seededRandom } from "./random";
-import { planSpawns, type SpawnPlan, spawnRowDistances, takeDueSpawns } from "./spawning";
+import {
+  everyLaneReaches,
+  laneReach,
+  planSpawns,
+  type SpawnEvent,
+  type SpawnPlan,
+  spawnRowDistances,
+  takeDueSpawns,
+} from "./spawning";
 
 type Kind = "obstacle" | "tip" | "treat";
 
-// 9 rows at 100..900, 5 lanes.
+// 9 rows at 100..900, 5 lanes. 50px of clear road between rows at 100px/s is 0.5s,
+// time for 5 moves of 0.1s, so the pack can reach any lane from any row.
 const plan: SpawnPlan<Kind> = {
+  blockingLength: 50,
   laneCount: 5,
+  laneMoveSeconds: 0.1,
   minSpacing: 100,
   quotas: [
     { blocksLane: true, count: 6, kind: "obstacle" },
     { blocksLane: false, count: 9, kind: "tip" },
     { blocksLane: false, count: 3, kind: "treat" },
   ],
+  scrollSpeed: 100,
   zoneLength: 1000,
 };
+
+// 0.3s between rows fits one 0.25s move; the 1.3s into the first row fits five.
+const tight: SpawnPlan<Kind> = {
+  ...plan,
+  blockingLength: 70,
+  laneMoveSeconds: 0.25,
+  quotas: [
+    { blocksLane: true, count: 27, kind: "obstacle" },
+    { blocksLane: false, count: 9, kind: "tip" },
+  ],
+};
+
+// The lanes no obstacle takes, row by row.
+function openLanesByRow(events: SpawnEvent<Kind>[]): number[][] {
+  return spawnRowDistances(100, 1000).map((distance) => {
+    const blocked = events
+      .filter((event) => event.distance === distance && event.kind === "obstacle")
+      .map((event) => event.lane);
+    return [0, 1, 2, 3, 4].filter((lane) => !blocked.includes(lane));
+  });
+}
 
 const seeds = Array.from({ length: 50 }, (_, i) => i + 1);
 const countOf = (kind: Kind, events: { kind: Kind }[]) =>
@@ -94,12 +128,69 @@ describe("planSpawns", () => {
     expect(() => planSpawns(seededRandom(1), tooMany)).toThrow(/obstacle/);
   });
 
+  it("leaves an open lane within one move of every open lane on the row before", () => {
+    for (const seed of seeds) {
+      const open = openLanesByRow(planSpawns(seededRandom(seed), tight));
+      open.slice(1).forEach((lanes, i) => {
+        for (const from of defined(open[i])) {
+          expect(lanes.some((lane) => Math.abs(lane - from) <= 1)).toBe(true);
+        }
+      });
+    }
+  });
+
+  it("still places every obstacle when the reach is tight", () => {
+    for (const seed of seeds) {
+      expect(countOf("obstacle", planSpawns(seededRandom(seed), tight))).toBe(27);
+    }
+  });
+
+  it("throws when the rows are too close for the pack to pass between them", () => {
+    expect(() => planSpawns(seededRandom(1), { ...plan, blockingLength: 101 })).toThrow(
+      /minSpacing/,
+    );
+  });
+
+  it("throws when no obstacle can be placed without blocking every reachable lane", () => {
+    // 100px of road into the first row at 100px/s is 1s, less than one 2s move, so every
+    // lane of the first row must stay open, and then of every row after it.
+    const unreachable: SpawnPlan<Kind> = {
+      ...plan,
+      blockingLength: 100,
+      laneMoveSeconds: 2,
+      quotas: [{ blocksLane: true, count: 1, kind: "obstacle" }],
+    };
+    expect(() => planSpawns(seededRandom(1), unreachable)).toThrow(/obstacle/);
+  });
+
   it("spreads each kind over the zone, one per equal stretch of rows", () => {
     // 3 treats over 9 rows: one in rows 100-300, one in 400-600, one in 700-900.
     for (const seed of seeds) {
       const treats = planSpawns(seededRandom(seed), plan).filter((e) => e.kind === "treat");
       expect(treats.map(({ distance }) => Math.floor((distance - 100) / 300))).toEqual([0, 1, 2]);
     }
+  });
+});
+
+describe("laneReach", () => {
+  it("counts the whole lane moves that fit in the clear road between rows", () => {
+    expect(laneReach(tight)).toEqual({ betweenRows: 1, entry: 4 });
+    expect(laneReach({ ...tight, scrollSpeed: 200 })).toEqual({ betweenRows: 0, entry: 2 });
+  });
+
+  it("never reaches further than the road is wide", () => {
+    expect(laneReach({ ...plan, laneMoveSeconds: 0 })).toEqual({ betweenRows: 4, entry: 4 });
+  });
+});
+
+describe("everyLaneReaches", () => {
+  it("is true when every lane has a target within reach", () => {
+    expect(everyLaneReaches(1, [0, 2], [1])).toBe(true);
+  });
+
+  it("is false when one lane has no target within reach", () => {
+    expect(everyLaneReaches(1, [0, 4], [1])).toBe(false);
+    expect(everyLaneReaches(4, [0], [])).toBe(false);
   });
 });
 

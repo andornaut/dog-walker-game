@@ -6,6 +6,11 @@ export interface Rect {
   y: number;
 }
 
+// The left and top edges are inside the rect, the right and bottom edges outside.
+export function containsPoint(rect: Rect, x: number, y: number): boolean {
+  return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
+}
+
 // The rect shrunk by the same amount on every side.
 export function insetRect(amount: number, rect: Rect): Rect {
   return {

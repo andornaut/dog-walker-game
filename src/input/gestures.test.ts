@@ -159,6 +159,32 @@ describe("swipes", () => {
   });
 });
 
+describe("the top bar", () => {
+  it("pauses on a tap anywhere across it, without moving", () => {
+    expect(all(tap(40, 20))).toEqual([{ kind: "pause" }]);
+    expect(all(tap(300, 5))).toEqual([{ kind: "pause" }]);
+  });
+
+  it("pauses once on release however long it is held, and never holds to move", () => {
+    const steps: Step[] = [
+      ["down", 300, 20, 0],
+      ["tick", 2000],
+      ["up", 300, 20, 2100],
+    ];
+    expect(play(steps)).toEqual([[], [], [{ kind: "pause" }]]);
+  });
+
+  it("still moves one lane for a swipe that starts on it", () => {
+    expect(
+      all([
+        ["down", 200, 20, 0],
+        ["move", 250, 25, 30],
+        ["up", 250, 25, 40],
+      ]),
+    ).toEqual([right]);
+  });
+});
+
 describe("holds", () => {
   it("moves after the hold delay, then again at each repeat interval", () => {
     const steps: Step[] = [

@@ -19,3 +19,19 @@ export function cardNumberForKey(cardCount: number, key: string): number | undef
   const cardNumber = Number(key);
   return cardNumber >= 1 && cardNumber <= cardCount ? cardNumber : undefined;
 }
+
+// During a walk, the digit keys 1..slotCount give that dog slot a treat. Zero-based.
+export function dogSlotForKey(slotCount: number, key: string): number | undefined {
+  const slotNumber = cardNumberForKey(slotCount, key);
+  return slotNumber === undefined ? undefined : slotNumber - 1;
+}
+
+// Escape or P opens the pause menu, and closes it again.
+export function isPauseKey(key: string): boolean {
+  return key === "Escape" || key.toLowerCase() === "p";
+}
+
+// Enter or Space presses the screen's main button.
+export function isConfirmKey(key: string): boolean {
+  return key === "Enter" || key === " ";
+}

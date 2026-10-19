@@ -34,7 +34,7 @@ export const TEST_TUNING: LiveTuning = {
     stinkyTip: 0.5,
     tipByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },
   },
-  pixels: { roadScrollSpeed: 80 },
+  pixels: { ...TUNING.pixels, roadScrollSpeed: 80 },
   probability: { catchBySize: { big: 0.5, medium: 0.5, small: 0.25 } },
   seconds: {
     ...TUNING.seconds,

@@ -1,5 +1,5 @@
 import type { LaneDirection } from "../layout/lanes";
-import type { Rect } from "../layout/rect";
+import { containsPoint } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 
 // A pointer position in screen pixels, at a time in milliseconds on one clock.
@@ -19,11 +19,11 @@ export interface GestureConfig {
 
 export interface GestureContext {
   config: GestureConfig;
-  layout: Pick<ScreenLayout, "dogColumn" | "dogSlots" | "road">;
+  layout: Pick<ScreenLayout, "dogColumn" | "dogSlots" | "road" | "topBar">;
 }
 
 export type GestureAction =
-  { direction: LaneDirection; kind: "move" } | { kind: "treat"; slot: number };
+  { direction: LaneDirection; kind: "move" } | { kind: "pause" } | { kind: "treat"; slot: number };
 
 // pressed: still within the tap distance, so a tap, hold or swipe.
 // dragging: past the tap distance, so only a swipe.
@@ -43,8 +43,10 @@ export interface GestureResult {
 
 export const idleGesture: GestureState = { kind: "idle" };
 
-const contains = (rect: Rect, x: number, y: number) =>
-  x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
+// The top bar and the dog column are buttons: a press there never holds to move.
+function startsOnButton(layout: GestureContext["layout"], { x, y }: PointerSample): boolean {
+  return containsPoint(layout.topBar, x, y) || containsPoint(layout.dogColumn, x, y);
+}
 
 // The column is split into equal bands, so the padding around a slot still counts as it.
 function dogSlotAt(layout: GestureContext["layout"], y: number): number {
@@ -86,7 +88,7 @@ export function advanceGesture(
   if (current.kind === "pressed") {
     const { start } = current;
     const holdAtMs = start.timeMs + config.holdDelayMs;
-    if (nowMs < holdAtMs || contains(layout.dogColumn, start.x, start.y)) {
+    if (nowMs < holdAtMs || startsOnButton(layout, start)) {
       return { actions: [], state };
     }
     current = { direction: tapDirection(layout, start.x), kind: "holding", nextRepeatMs: holdAtMs };
@@ -136,6 +138,16 @@ export function pointerMove(
   return advanced;
 }
 
+function tapAction(layout: GestureContext["layout"], { x, y }: PointerSample): GestureAction {
+  if (containsPoint(layout.topBar, x, y)) {
+    return { kind: "pause" };
+  }
+  if (containsPoint(layout.dogColumn, x, y)) {
+    return { kind: "treat", slot: dogSlotAt(layout, y) };
+  }
+  return move(tapDirection(layout, x));
+}
+
 // A tap acts on release, once it can no longer turn into a swipe or a hold.
 export function pointerUp(
   context: GestureContext,
@@ -147,9 +159,5 @@ export function pointerUp(
   if (moved.state.kind !== "pressed") {
     return { actions: moved.actions, state: idleGesture };
   }
-  const { start } = moved.state;
-  const tap: GestureAction = contains(layout.dogColumn, start.x, start.y)
-    ? { kind: "treat", slot: dogSlotAt(layout, start.y) }
-    : move(tapDirection(layout, start.x));
-  return { actions: [...moved.actions, tap], state: idleGesture };
+  return { actions: [...moved.actions, tapAction(layout, moved.state.start)], state: idleGesture };
 }

@@ -3,7 +3,7 @@ import type { Scene } from "phaser";
 import { assetUrl, parseManifest } from "../assets/manifest";
 
 const ART_BASE_URL = `${import.meta.env.BASE_URL}art`;
-const MANIFEST_CACHE_KEY = "art-manifest";
+export const MANIFEST_CACHE_KEY = "art-manifest";
 
 // Call from preload. The manifest loads first and its images join the same load, so create
 // runs once they are in. An image that fails to load leaves its key missing, which a scene

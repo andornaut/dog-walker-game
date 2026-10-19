@@ -32,8 +32,8 @@ function startMove(config: LaneMotionConfig, direction: LaneDirection, lane: num
   return { duration: config.moveDuration, elapsed: 0, from: lane, kind: "moving", to };
 }
 
-// While moving, the request is queued one deep: a later request replaces an earlier one.
-export function requestLaneMove(
+// While moving, the move is queued one deep: a later request replaces an earlier one.
+export function queueLaneMove(
   config: LaneMotionConfig,
   direction: LaneDirection,
   motion: LaneMotion,
@@ -42,6 +42,32 @@ export function requestLaneMove(
     return startMove(config, direction, motion.lane);
   }
   return { ...motion, queued: direction };
+}
+
+export function isReverseMove(direction: LaneDirection, motion: LaneMotion): boolean {
+  return motion.kind === "moving" && Math.sign(motion.to - motion.from) === -direction;
+}
+
+// The player's press. One against the current move turns the pack around at once, from
+// where it is, and drops any queued move. Any other press queues like queueLaneMove.
+export function requestLaneMove(
+  config: LaneMotionConfig,
+  direction: LaneDirection,
+  motion: LaneMotion,
+): LaneMotion {
+  if (motion.kind === "still" || !isReverseMove(direction, motion)) {
+    return queueLaneMove(config, direction, motion);
+  }
+  if (motion.elapsed <= 0) {
+    return stillInLane(motion.from);
+  }
+  return {
+    duration: motion.duration,
+    elapsed: motion.duration - motion.elapsed,
+    from: motion.to,
+    kind: "moving",
+    to: motion.from,
+  };
 }
 
 // Time left over after arriving carries into the queued move, so the result does not

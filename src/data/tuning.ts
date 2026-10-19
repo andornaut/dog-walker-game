@@ -23,6 +23,9 @@ export const TUNING = {
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
   hearts: {
+    // A face looks happy at this many hearts or more, and upset below faceNeutralFrom.
+    faceHappyFrom: 6,
+    faceNeutralFrom: 3,
     luckyCollarMax: 1,
     luckyCollarStart: 1,
     maxBySize: { big: 10, medium: 8, small: 6 },
@@ -40,6 +43,9 @@ export const TUNING = {
     missedTips: 10,
     photoOpTip: 10,
     prices: {
+      // The second and third dog slots; every player starts with one.
+      dogSlot2: 800,
+      dogSlot3: 1800,
       fannyPack: 400,
       lockedDog: 600,
       luckyCollar: 1000,
@@ -71,9 +77,15 @@ export const TUNING = {
     // By the number of dogs in the pack.
     tipByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },
   },
-  // Pixels per second.
+  // Screen pixels at the 360x640 render size, or pixels per second for a speed.
   pixels: {
     roadScrollSpeed: 80,
+    // Road distance between rows of spawns; a row is all spawns at one distance.
+    spawnRowSpacing: 160,
+    // A horizontal drag this long is a swipe.
+    swipeMinDistance: 32,
+    // A press that drifts further than this is no longer a tap.
+    tapMaxDistance: 10,
   },
   // Chances from 0 to 1.
   probability: {
@@ -81,8 +93,13 @@ export const TUNING = {
     catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
   },
   seconds: {
+    // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 1,
+    // A held finger starts repeating lane moves after holdDelay, then every holdRepeat.
+    holdDelay: 0.3,
+    holdRepeat: 0.15,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
+    laneMove: 0.18,
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
     // How long a dog leans and barks before it pulls.
     pullTell: 1,

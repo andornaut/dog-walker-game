@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   advanceLaneMotion,
   destinationLane,
+  isReverseMove,
   type LaneMotion,
   laneMotionX,
   occupiedLanes,
+  queueLaneMove,
   requestLaneMove,
   stillInLane,
 } from "./laneMotion";
@@ -44,9 +46,52 @@ describe("requestLaneMove", () => {
     expect(queued).toEqual({ ...moving(2, 3, 0.1), queued: 1 });
   });
 
-  it("keeps only the latest queued request", () => {
-    const first = requestLaneMove(config, 1, moving(2, 3));
-    expect(requestLaneMove(config, -1, first)).toEqual({ ...moving(2, 3), queued: -1 });
+  it("replaces an earlier queued move with the latest press", () => {
+    const queued = { ...moving(2, 3, 0.05), queued: -1 as const };
+    expect(requestLaneMove(config, 1, queued)).toEqual({ ...moving(2, 3, 0.05), queued: 1 });
+  });
+
+  it("turns the pack around at once on a press against the current move", () => {
+    const turned = requestLaneMove(config, -1, moving(2, 3, 0.05));
+    expect(turned).toMatchObject({ from: 3, kind: "moving", to: 2 });
+    expect((turned as Moving).elapsed).toBeCloseTo(0.15);
+    expect(requestLaneMove(config, 1, moving(2, 1, 0.12))).toMatchObject({ from: 1, to: 2 });
+  });
+
+  it("keeps the pack where it is when it turns around", () => {
+    const before = moving(2, 3, 0.05);
+    const after = requestLaneMove(config, -1, before);
+    expect(laneMotionX(laneXs, after)).toBeCloseTo(laneMotionX(laneXs, before));
+  });
+
+  it("drops the queued move when it turns around", () => {
+    const queued = { ...moving(2, 3, 0.1), queued: 1 as const };
+    expect(requestLaneMove(config, -1, queued)).toEqual(moving(3, 2, 0.1));
+  });
+
+  it("is back still in the lane it came from when turned around before moving at all", () => {
+    expect(requestLaneMove(config, -1, moving(2, 3, 0))).toEqual(stillInLane(2));
+  });
+});
+
+describe("queueLaneMove", () => {
+  it("starts a move from still, like a press", () => {
+    expect(queueLaneMove(config, 1, stillInLane(2))).toEqual(moving(2, 3));
+  });
+
+  it("queues a move against the current one instead of turning around", () => {
+    expect(queueLaneMove(config, -1, moving(2, 3, 0.05))).toEqual({
+      ...moving(2, 3, 0.05),
+      queued: -1,
+    });
+  });
+});
+
+describe("isReverseMove", () => {
+  it("is true only for a direction against a move in progress", () => {
+    expect(isReverseMove(-1, moving(2, 3))).toBe(true);
+    expect(isReverseMove(1, moving(2, 3))).toBe(false);
+    expect(isReverseMove(-1, stillInLane(2))).toBe(false);
   });
 });
 

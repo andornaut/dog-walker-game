@@ -1,34 +1,95 @@
 import type { GameObjects, Scene } from "phaser";
 
+import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../layout/pixelShapes";
 import type { Rect } from "../layout/rect";
-
-export const LABEL_TEXT_STYLE = { color: "#1d1d1d", fontFamily: "monospace", fontSize: "14px" };
-
-// Stands in for the pixel font until a BMFont is chosen. The mock's 3x5 glyphs advance 4px
-// per character at 1x and 8px at 2x; a monospace face at these sizes comes closest.
-export const PIXEL_FONT = { fontFamily: "monospace", fontSizeByScale: { 1: 7, 2: 13 } } as const;
-export type PixelTextScale = keyof typeof PIXEL_FONT.fontSizeByScale;
-
-export function addPixelText(
-  scene: Scene,
-  scale: PixelTextScale,
-  color: string,
-  position: { x: number; y: number },
-  text: string,
-): GameObjects.Text {
-  return scene.add.text(position.x, position.y, text, {
-    color,
-    fontFamily: PIXEL_FONT.fontFamily,
-    fontSize: `${PIXEL_FONT.fontSizeByScale[scale]}px`,
-  });
-}
 
 export function addFilledRect(scene: Scene, color: number, rect: Rect): GameObjects.Rectangle {
   return scene.add.rectangle(rect.x, rect.y, rect.width, rect.height, color).setOrigin(0);
 }
 
-export function addCenteredLabel(scene: Scene, text: string, rect: Rect): GameObjects.Text {
-  return scene.add
-    .text(rect.x + rect.width / 2, rect.y + rect.height / 2, text, LABEL_TEXT_STYLE)
-    .setOrigin(0.5);
+export function fillRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
+  graphics.fillStyle(color).fillRect(rect.x, rect.y, rect.width, rect.height);
+}
+
+// A solid pixel ellipse under a sprite, centred on its x about a pixel above its feet.
+export function drawShadow(
+  graphics: GameObjects.Graphics,
+  color: number,
+  x: number,
+  footY: number,
+  spriteWidth: number,
+): void {
+  graphics.fillStyle(color);
+  for (const span of pixelEllipseSpans(
+    Math.round(x),
+    Math.round(footY) - 1,
+    shadowRadiusX(spriteWidth),
+    2.5,
+  )) {
+    graphics.fillRect(span.x, span.y, span.width, 1);
+  }
+}
+
+// A 1px line with no smoothing, so it stays on the palette.
+export function drawPixelLine(
+  graphics: GameObjects.Graphics,
+  color: number,
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+): void {
+  graphics.fillStyle(color);
+  for (const [x, y] of pixelLinePoints(from.x, from.y, to.x, to.y)) {
+    graphics.fillRect(x, y, 1, 1);
+  }
+}
+
+const HEART_ROWS = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."];
+
+// A 7x6 heart, with an optional highlight pixel.
+export function drawHeart(
+  graphics: GameObjects.Graphics,
+  x: number,
+  y: number,
+  color: number,
+  highlight?: number,
+): void {
+  graphics.fillStyle(color);
+  HEART_ROWS.forEach((row, dy) => {
+    [...row].forEach((cell, dx) => {
+      if (cell === "1") {
+        graphics.fillRect(x + dx, y + dy, 1, 1);
+      }
+    });
+  });
+  if (highlight !== undefined) {
+    graphics.fillStyle(highlight).fillRect(x + 1, y + 1, 1, 1);
+  }
+}
+
+// A 1px border of 2-on, 2-off dashes, for an empty slot.
+export function drawDashedRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
+  graphics.fillStyle(color);
+  const right = rect.x + rect.width - 1;
+  const bottom = rect.y + rect.height - 1;
+  for (let i = 0; i < rect.width; i += 4) {
+    graphics.fillRect(rect.x + i, rect.y, 2, 1).fillRect(rect.x + i, bottom, 2, 1);
+  }
+  for (let i = 0; i < rect.height; i += 4) {
+    graphics.fillRect(rect.x, rect.y + i, 1, 2).fillRect(right, rect.y + i, 1, 2);
+  }
+}
+
+// A box with a 1px border drawn inside it, not straddling its edge as a Phaser stroke would.
+export function drawFramedRect(
+  graphics: GameObjects.Graphics,
+  colors: { border: number; fill: number },
+  rect: Rect,
+): void {
+  fillRect(graphics, colors.border, rect);
+  fillRect(graphics, colors.fill, {
+    height: rect.height - 2,
+    width: rect.width - 2,
+    x: rect.x + 1,
+    y: rect.y + 1,
+  });
 }

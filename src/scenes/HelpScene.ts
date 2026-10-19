@@ -6,8 +6,9 @@ import { helpActionForKey, helpActionForPointer } from "../help/helpInput";
 import { dotRects, HELP_LAYOUT, type Point } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { insetRect, type Rect } from "../layout/rect";
-import { addFilledRect, addPixelText, type PixelTextScale } from "./draw";
-import { loadManifestImages } from "./manifestImages";
+import { addFilledRect } from "./draw";
+import { colorFromHex } from "./palette";
+import { addPixelText } from "./pixelText";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 
 // Emitted on game.events when the help closes, by any route.
@@ -46,10 +47,6 @@ export class HelpScene extends Scene {
 
   constructor() {
     super(SCENE_KEYS.help);
-  }
-
-  preload(): void {
-    loadManifestImages(this);
   }
 
   create(data?: HelpSceneData): void {
@@ -117,7 +114,11 @@ export class HelpScene extends Scene {
       height: layout.topBarEdge,
       y: layout.topBar.y + layout.topBar.height - layout.topBarEdge,
     });
-    addPixelText(this, 2, TEXT_COLOR, layout.heading, "HOW TO WALK");
+    addPixelText(this, layout.heading.x, layout.heading.y, "How to walk", {
+      color: colorFromHex(TEXT_COLOR),
+      font: "title",
+      scale: 2,
+    });
     addFilledRect(this, CLOSE_COLORS.border, layout.close);
     addFilledRect(this, CLOSE_COLORS.face, insetRect(1, layout.close));
     this.addCenteredText(2, CLOSE_COLORS.label, layout.close, "X");
@@ -125,9 +126,16 @@ export class HelpScene extends Scene {
     addFilledRect(this, FRAME_COLOR, insetRect(-1, layout.illustration));
     this.drawIllustration(page.art, layout.illustration);
 
-    addPixelText(this, 1, COUNTER_COLOR, layout.counter, `${this.page + 1}/${pages.length}`);
-    addPixelText(this, 2, TITLE_COLOR, layout.title, page.title.toUpperCase());
-    this.drawBody(page.body.toUpperCase());
+    addPixelText(this, layout.counter.x, layout.counter.y, `${this.page + 1}/${pages.length}`, {
+      color: colorFromHex(COUNTER_COLOR),
+      font: "title",
+    });
+    addPixelText(this, layout.title.x, layout.title.y, page.title, {
+      color: colorFromHex(TITLE_COLOR),
+      font: "title",
+      scale: 2,
+    });
+    this.drawBody(page.body);
 
     dotRects(pages.length).forEach((dot, i) => {
       addFilledRect(this, i === this.page ? DOT_CURRENT_COLOR : DOT_COLOR, dot);
@@ -148,15 +156,16 @@ export class HelpScene extends Scene {
     this.addCenteredText(1, PLACEHOLDER_COLORS.label, frame, key.toUpperCase());
   }
 
-  // Wrapped by Phaser, then drawn a line at a time so the line pitch is exact.
+  // Wrapped by Phaser at the body's width, with the line pitch set to the layout's.
   private drawBody(body: string): void {
     const { lineHeight, width, x, y } = HELP_LAYOUT.body;
-    const measure = addPixelText(this, 2, TEXT_COLOR, { x, y }, "").setWordWrapWidth(width);
-    const lines = measure.getWrappedText(body);
-    measure.destroy();
-    lines.forEach((line, i) => {
-      addPixelText(this, 2, TEXT_COLOR, { x, y: y + i * lineHeight }, line);
+    const scale = 2;
+    const text = addPixelText(this, x, y, body, {
+      color: colorFromHex(TEXT_COLOR),
+      maxWidth: width,
+      scale,
     });
+    text.setLineSpacing(lineHeight / scale - text.fontData.lineHeight);
   }
 
   private drawButton(colors: ButtonColors, rect: Rect, label: string): void {
@@ -167,8 +176,13 @@ export class HelpScene extends Scene {
     this.addCenteredText(2, colors.label, face, label);
   }
 
-  private addCenteredText(scale: PixelTextScale, color: string, rect: Rect, text: string): void {
-    const center = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
-    addPixelText(this, scale, color, center, text).setOrigin(0.5);
+  private addCenteredText(scale: number, color: string, rect: Rect, text: string): void {
+    addPixelText(this, rect.x + rect.width / 2, rect.y + rect.height / 2, text, {
+      color: colorFromHex(color),
+      font: "title",
+      originX: 0.5,
+      originY: 0.5,
+      scale,
+    });
   }
 }
