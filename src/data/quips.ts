@@ -13,7 +13,7 @@ export const QUIPS = {
   dash: {
     fired: ["A tragedy in one act. You're fired!", "Exit, pursued by my disapproval!"],
     happier: ["Bravo! Bravo!", "A standing ovation for you!"],
-    parting: ["Bring her back in one piece, I beg you!", "Mind her sweater. It's vintage."],
+    parting: ["Bring him back in one piece, I beg you!", "Mind his bandana. It's vintage."],
     upset: ["How could you?!", "I need to lie down on a chaise."],
   },
   duchess: {
@@ -49,8 +49,8 @@ export const QUIPS = {
   waffles: {
     fired: ["That's the end of the appointment. Fired.", "You're fired. And please floss."],
     happier: ["Very good. A clean result.", "Now that's a smile."],
-    parting: ["No sweets, please. Doctor's orders.", "He's due back by noon."],
-    upset: ["That was careless.", "I'll make a note in his chart."],
+    parting: ["No sweets, please. Doctor's orders.", "She's due back by noon."],
+    upset: ["That was careless.", "I'll make a note in her chart."],
   },
   zippy: {
     fired: ["The numbers don't add up. You're fired.", "Your account is closed. Fired."],
