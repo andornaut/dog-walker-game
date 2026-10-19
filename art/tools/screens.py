@@ -245,7 +245,7 @@ def home():
     # the bar strip the game draws its bar over
     cv.fill(0, 0, W, 38, "plum")
     cv.fill(0, 38, W, 2, "dbrown")
-    # Woof Way: asphalt, a dashed centre line, a manhole and a storm drain
+    # Woof Way, Maplewood's street past the gate: asphalt, a dashed centre line, a manhole and a storm drain
     cv.fill(0, 40, W, 52, "dslate")
     for _ in range(260):
         cv.fill(int(r() * W), 40 + int(r() * 52), 1, 1, "slate" if r() < 0.6 else "navy")
