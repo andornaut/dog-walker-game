@@ -466,4 +466,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "compare":
         compare(sys.argv[2])
     else:
-        main(sys.argv, sprites, "art/minis", __doc__, grounds=("3a4466", "c0cbdc"))
+        main(sys.argv, sprites, "art/minis", __doc__, grounds=("3a4466", "c0cbdc"), originals=originals)

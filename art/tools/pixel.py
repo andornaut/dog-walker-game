@@ -2,6 +2,8 @@
 and the step that turns frames into an Aseprite source and a PNG + JSON export.
 Run the art scripts from the repository root."""
 
+import json
+import math
 import os
 import subprocess
 import tempfile
@@ -231,8 +233,94 @@ def _lua(tags, out):
                       durations="{" + ",".join(durations) + "}", tags="\n".join(tag_lines), out=out)
 
 
-def build(sprites, src_dir):
-    """Write src_dir/<key>.aseprite for every sprite and export it to public/art/sprites/."""
+def depth_scales():
+    """{suffix: scale} for every depth step below full size in shared/depth-steps.json, the table the game
+    reads: {"@88": 0.875, ...}."""
+    with open(os.path.join(os.path.dirname(__file__), "..", "..", "shared", "depth-steps.json")) as f:
+        return {q["suffix"]: q["scale"] for q in json.load(f)["steps"] if q["scale"] < 1}
+
+
+def opaque_rows(frames):
+    """The first and last row with an opaque pixel in any of frames, or None when all are blank."""
+    rows = [y for f in frames for y, row in enumerate(f) if any(row)]
+    return (min(rows), max(rows)) if rows else None
+
+
+def _exported(key):
+    """public/art/sprites/<key>'s frame 0 as rows of colours (None where clear), or None if it is not
+    exported."""
+    from PIL import Image
+
+    path = f"public/art/sprites/{key}"
+    if not os.path.exists(path + ".json"):
+        return None
+    with open(path + ".json") as f:
+        r = next(iter(json.load(f)["frames"].values()))["frame"]
+    img = Image.open(path + ".png").convert("RGBA")
+    return [[("%02x%02x%02x" % px[:3]) if px[3] else None
+             for px in (img.getpixel((r["x"] + x, r["y"] + y)) for x in range(r["w"]))] for y in range(r["h"])]
+
+
+def shifted(tags, dy):
+    """tags with every frame moved dy rows down (up when negative) in its frame."""
+    def move(f):
+        blank = [[None] * len(f[0]) for _ in range(abs(dy))]
+        return blank + f[:len(f) - dy] if dy > 0 else f[-dy:] + blank if dy < 0 else f
+
+    return [(tag, [move(f) for f in fs], ms) for tag, fs, ms in tags]
+
+
+def seated(key, tags, full_feet, scale):
+    """A depth variant's tags moved so frame 0's last opaque row, the feet row the game measures, is the
+    full size's at the step's scale, floor(feet x scale + 0.5), or the frame's bottom row when that is past
+    it. Every frame moves together, and never so far that it clips an opaque pixel."""
+    frames = [f for _, fs, _ in tags for f in fs]
+    h = len(frames[0])
+    feet = (opaque_rows([frames[0]]) or (0, h - 1))[1]
+    dy = min(math.floor(full_feet * scale + 0.5), h - 1) - feet
+    top, bottom = opaque_rows(frames)
+    if dy and not 0 <= top + dy <= bottom + dy <= h - 1:
+        print(f"{key}: cannot move {dy} rows to its feet row without clipping")
+        return tags
+    return shifted(tags, dy)
+
+
+def _unanchored():
+    """The keys public/art/manifest.json lists without an anchor: the game does not stand them on the
+    ground (overlays, icons and the like), so they keep their place in their frame."""
+    try:
+        with open("public/art/manifest.json") as f:
+            return {s["key"] for s in json.load(f)["sprites"] if "anchor" not in s}
+    except FileNotFoundError:
+        return set()
+
+
+def depth_settled(sprites, originals=None):
+    """sprites with each depth variant (<key>@<step>) of a ground sprite seated on its feet row (see
+    seated). The full-size sprite is the one in sprites, else in originals ({key: tags}), else the one
+    already exported."""
+    sprites = list(sprites)
+    full = {**(originals or {}), **dict(sprites)}
+    scales = depth_scales()
+    unanchored = _unanchored()
+    out = []
+    for key, tags in sprites:
+        base, at, suffix = key.partition("@")
+        if at and f"@{suffix}" in scales and base not in unanchored:
+            frame0 = full[base][0][1][0] if base in full else _exported(base)
+            if frame0 is None:
+                print(f"{key}: no full-size {base} to seat it by")
+            else:
+                feet = (opaque_rows([frame0]) or (0, len(frame0) - 1))[1]
+                tags = seated(key, tags, feet, scales[f"@{suffix}"])
+        out.append((key, tags))
+    return out
+
+
+def build(sprites, src_dir, originals=None):
+    """Write src_dir/<key>.aseprite for every sprite and export it to public/art/sprites/, each depth
+    variant settled by depth_settled."""
+    sprites = depth_settled(sprites, originals)
     os.makedirs(src_dir, exist_ok=True)
     os.makedirs("public/art/sprites", exist_ok=True)
     built = []
@@ -249,12 +337,14 @@ def build(sprites, src_dir):
     print("built", ", ".join(built))
 
 
-def main(argv, sprites, src_dir, doc, grounds=("3a4466", "c0cbdc", "c28569")):
+def main(argv, sprites, src_dir, doc, grounds=("3a4466", "c0cbdc", "c28569"), originals=None):
+    """originals, if given, returns {key: tags} of the full-size sprites whose depth variants sprites draws
+    but not their full size (see depth_settled)."""
     import sys
 
     if len(argv) == 3 and argv[1] == "preview":
-        preview(list(sprites()), argv[2], grounds)
+        preview(depth_settled(sprites(), originals and originals()), argv[2], grounds)
     elif len(argv) == 2 and argv[1] == "build":
-        build(list(sprites()), src_dir)
+        build(list(sprites()), src_dir, originals and originals())
     else:
         sys.exit(doc)

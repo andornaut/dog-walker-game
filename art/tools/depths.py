@@ -39,7 +39,7 @@ import minis  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
 from minis import SCALES, STEPS, small, snap  # noqa: E402
-from pixel import build, preview  # noqa: E402
+from pixel import build, depth_settled, preview  # noqa: E402
 
 # The steps hazards.py leaves to this file: it builds SCALES itself.
 BETWEEN = tuple(q for q in STEPS if q not in SCALES)
@@ -180,10 +180,10 @@ def compare(out_dir, scale=4, gap=4):
 if __name__ == "__main__":
     argv = sys.argv
     if len(argv) == 3 and argv[1] == "preview":
-        preview(list(sprites()), argv[2], GROUNDS)
+        preview(depth_settled(sprites(), originals()), argv[2], GROUNDS)
     elif len(argv) == 3 and argv[1] == "compare":
         compare(argv[2])
     elif len(argv) == 2 and argv[1] == "build":
-        build(checked(sprites()), "art/depths")
+        build(checked(sprites()), "art/depths", originals())
     else:
         sys.exit(__doc__)
