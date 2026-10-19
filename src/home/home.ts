@@ -3,6 +3,7 @@ import { zoneFee } from "../rules/dogs";
 import { formatDollars } from "../rules/effectText";
 import { addCents, type Cents, cents, dollarsToCents, read } from "../rules/units";
 import type { EndReason, PackDogs, RunState } from "../state/runState";
+import type { PresetWalkerId } from "./walkers";
 
 // The home screen's logbook: the best walk, totals, and the last walk as one line.
 export interface Logbook {
@@ -16,13 +17,14 @@ export interface Logbook {
 }
 
 // What the player keeps between walks. logbook is null before the first walk; dogSlots is
-// how many dogs a pack may hold.
+// how many dogs a pack may hold; walker is the one drawn at the gate and on the road.
 export interface HomeProfile {
   readonly bank: Cents;
   readonly dogSlots: number;
   readonly logbook: Logbook | null;
   readonly ownedDogs: readonly DogId[];
   readonly ownedGear: readonly GearId[];
+  readonly walker: PresetWalkerId;
 }
 
 // The pack being picked, in the order picked, and the gear to take.

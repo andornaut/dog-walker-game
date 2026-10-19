@@ -59,6 +59,8 @@ import { addStandingSprite, playTag, spriteMetrics } from "./sprites";
 
 export interface RunSceneData {
   loadout: Loadout;
+  // The chosen walker's sprite key.
+  walkerSprite: string;
 }
 
 // What the HUD draws: the run, the dogs the open card affects, and how far through the zone.
@@ -139,8 +141,8 @@ export class RunScene extends Scene {
         return [dog, sprite];
       }),
     );
-    this.walker = addStandingSprite(this, "walker", 0, 0);
-    playTag(this.walker, "walker", "walk");
+    this.walker = addStandingSprite(this, data.walkerSprite, 0, 0);
+    playTag(this.walker, data.walkerSprite, "walk");
 
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     this.input.on("pointerdown", (pointer: Input.Pointer) => this.onPointer("down", pointer));
@@ -557,7 +559,7 @@ export class RunScene extends Scene {
       );
     }
     this.walker?.setPosition(walkerX, footY).setDepth(DEPTH.sprite + footY);
-    shadow("walker", walkerX, footY);
+    shadow(this.walker?.texture.key ?? "walker", walkerX, footY);
     // A pull will play the dog's "tell" tag, mirrored for the left, with fx-bark over its
     // head, and steer through pullLane; dogs do not pull yet.
   }

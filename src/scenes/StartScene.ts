@@ -16,6 +16,7 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
+import { PRESET_WALKERS, type PresetWalkerId, walkerSpriteKey } from "../home/walkers";
 import { wholeDollars } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -27,7 +28,7 @@ import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
-import { homeProfile, lastLoadout, setLastLoadout } from "./profileStore";
+import { homeProfile, lastLoadout, setHomeProfile, setLastLoadout } from "./profileStore";
 import type { RunSceneData } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag, spriteMetrics } from "./sprites";
@@ -44,7 +45,8 @@ const GATE_SPOTS: readonly PackPlacement[] = [
 ];
 const DOG_TILES = { cellHeight: 50, cellWidth: 112, columns: 3, gapX: 4, gapY: 4 };
 const GEAR_SLOTS = { cellHeight: 58, cellWidth: 64, columns: 5, gapX: 6, gapY: 0 };
-const START_BUTTON: Rect = { height: 40, width: 344, x: 8, y: 540 };
+const START_BUTTON: Rect = { height: 36, width: 344, x: 8, y: 540 };
+const WALKER_TILES = { cellHeight: 34, cellWidth: 34, columns: 4, gapX: 4, gapY: 0 };
 const HELP_BUTTON: Rect = { height: 14, width: 14, x: 8, y: 46 };
 const SLOT_BUTTON: Rect = { height: 11, width: 112, x: 124, y: 199 };
 const GEAR_BADGE: Rect = { height: 18, width: 18, x: 194, y: 166 };
@@ -66,7 +68,8 @@ type Target =
   | { gear: GearId; kind: "gear" }
   | { kind: "help" }
   | { kind: "slot"; slot: number }
-  | { kind: "start" };
+  | { kind: "start" }
+  | { kind: "walker"; walker: PresetWalkerId };
 
 // The roster in rows by size, each row in trait order, as the mock lays it out.
 function rosterOrder(): DogId[] {
@@ -129,6 +132,10 @@ export class StartScene extends Scene {
     return gridRects(DOG_TILES, rosterOrder().length, { x: 8, y: 212 });
   }
 
+  private walkerTiles(): Rect[] {
+    return gridRects(WALKER_TILES, Object.keys(PRESET_WALKERS).length, { x: 70, y: 603 });
+  }
+
   private gearSlots(): Rect[] {
     return gridRects(GEAR_SLOTS, Object.keys(gameData.shopGear).length, { x: 8, y: 388 });
   }
@@ -141,6 +148,13 @@ export class StartScene extends Scene {
     const slot = rectIndexAt(this.gearSlots(), x, y);
     if (slot !== undefined) {
       return { gear: itemAt(Object.keys(gameData.shopGear) as GearId[], slot), kind: "gear" };
+    }
+    const walker = rectIndexAt(this.walkerTiles(), x, y);
+    if (walker !== undefined) {
+      return {
+        kind: "walker",
+        walker: itemAt(Object.keys(PRESET_WALKERS) as PresetWalkerId[], walker),
+      };
     }
     if (containsPoint(START_BUTTON, x, y)) {
       return { kind: "start" };
@@ -173,6 +187,10 @@ export class StartScene extends Scene {
       case "help":
         openHelp(this, SCENE_KEYS.start);
         return;
+      case "walker":
+        setHomeProfile(this, { ...homeProfile(this), walker: target.walker });
+        this.render();
+        return;
       case "slot":
         this.notice = this.purchaseNotice({ kind: "dogSlot", slot: target.slot });
         this.render();
@@ -183,7 +201,11 @@ export class StartScene extends Scene {
           return;
         }
         setLastLoadout(this, this.loadout);
-        const data: RunSceneData = { loadout: { dogs, gear: this.loadout.gear } };
+        const walkerSprite = walkerSpriteKey(
+          (key) => this.textures.exists(key),
+          homeProfile(this).walker,
+        );
+        const data: RunSceneData = { loadout: { dogs, gear: this.loadout.gear }, walkerSprite };
         this.scene.start(SCENE_KEYS.run, data);
         return;
       }
@@ -307,6 +329,7 @@ export class StartScene extends Scene {
     this.drawGear(g, profile);
     this.drawLogbook(g, profile);
     this.drawStartButton(g);
+    this.drawWalkerPicker(g);
   }
 
   private drawTopBar(g: GameObjects.Graphics, profile: HomeProfile): void {
@@ -330,6 +353,7 @@ export class StartScene extends Scene {
 
   private drawPackAtGate(g: GameObjects.Graphics): void {
     const { footY, x } = WALKER_AT_GATE;
+    const walkerKey = walkerSpriteKey((key) => this.textures.exists(key), homeProfile(this).walker);
     const placements = GATE_SPOTS.slice(0, this.loadout.dogs.length);
     const groundColor = (atX: number) =>
       atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
@@ -340,14 +364,14 @@ export class StartScene extends Scene {
     for (const { dx, footY: dogFoot, key } of dogs) {
       drawShadow(g, groundColor(x + dx), x + dx, dogFoot, spriteMetrics(key).opaqueWidth);
     }
-    drawShadow(g, groundColor(x), x, footY, spriteMetrics("walker").opaqueWidth);
+    drawShadow(g, groundColor(x), x, footY, spriteMetrics(walkerKey).opaqueWidth);
     for (const { dx, footY: dogFoot, key } of dogs) {
       const sprite = addStandingSprite(this, key, x + dx, dogFoot);
       playTag(sprite, key, "walk");
       this.drawn.push(sprite);
     }
-    const walker = addStandingSprite(this, "walker", x, footY);
-    playTag(walker, "walker", "walk");
+    const walker = addStandingSprite(this, walkerKey, x, footY);
+    playTag(walker, walkerKey, "walk");
     this.drawn.push(walker);
 
     const leash = this.add.graphics();
@@ -525,6 +549,27 @@ export class StartScene extends Scene {
     this.textCentered(x + 16 * scale, y + 11 * scale, initials, PALETTE.cream, { font: "title" });
   }
 
+  // One portrait per preset walker; the chosen one is framed in amber and named.
+  private drawWalkerPicker(g: GameObjects.Graphics): void {
+    const chosen = homeProfile(this).walker;
+    const tiles = this.walkerTiles();
+    this.text(8, 616, "Walker", PALETTE.cream, { font: "title" });
+    (Object.keys(PRESET_WALKERS) as PresetWalkerId[]).forEach((id, i) => {
+      const rect = itemAt(tiles, i);
+      const walker = PRESET_WALKERS[id];
+      fillRect(g, id === chosen ? PALETTE.amber : PALETTE.plum, rect);
+      fillRect(g, PALETTE.tan, { height: 32, width: 32, x: rect.x + 1, y: rect.y + 1 });
+      if (this.textures.exists(walker.portraitKey)) {
+        this.drawn.push(this.add.image(rect.x + 1, rect.y + 1, walker.portraitKey).setOrigin(0));
+      } else {
+        this.textCentered(rect.x + 17, rect.y + 13, walker.name.charAt(0), PALETTE.plum, {
+          font: "title",
+        });
+      }
+    });
+    this.text(232, 616, PRESET_WALKERS[chosen].name, PALETTE.amber, { font: "title" });
+  }
+
   private drawLogbook(g: GameObjects.Graphics, profile: HomeProfile): void {
     const top = 462;
     fillRect(g, PALETTE.plum, { height: 70, width: 344, x: 8, y: top });
@@ -582,7 +627,7 @@ export class StartScene extends Scene {
     const fee = formatDollars(packFeePerZone(gameData, this.loadout));
     this.textCentered(
       180,
-      588,
+      582,
       ready
         ? `Pack fee ${fee} per zone. ${zones} zones on ${gameData.world.name}`
         : `Pick 1 to ${packCapacity(gameData, homeProfile(this))} dogs`,
@@ -590,7 +635,7 @@ export class StartScene extends Scene {
     );
     this.textCentered(
       180,
-      600,
+      592,
       this.notice === "" ? "Tap a locked dog or gear to buy it" : this.notice,
       this.notice === "" ? PALETTE.tan : PALETTE.amber,
     );
