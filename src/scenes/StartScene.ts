@@ -2,7 +2,7 @@ import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
-import { quirkIconKey, temperamentIconKey, traitIconKey } from "../assets/iconKeys";
+import { MONEY_ICON_KEY, quirkIconKey, temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -40,7 +40,7 @@ import {
   tapGear,
   wrapWords,
 } from "../home/home";
-import { HOME_LAYOUT } from "../home/homeLayout";
+import { HOME_LAYOUT, sectionFill } from "../home/homeLayout";
 import { bubbleSpeech, type HomeAction, type WalkerLine, walkerLineKey } from "../home/homeLines";
 import { HOME_TEXT_FIELDS as FIELDS, homeLine } from "../home/homeText";
 import {
@@ -166,6 +166,7 @@ const LOGBOOK_ICON = HOME_LAYOUT.logbook.icon;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
 const POCKET_LINING = HOME_LAYOUT.pocketLining;
+const SECTION_FILL_KEYS = HOME_LAYOUT.sectionFillKeys;
 const POCKET = HOME_LAYOUT.pocket;
 const LOGO = { ...HOME_LAYOUT.logo, key: "logo" };
 const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
@@ -983,7 +984,7 @@ export class StartScene extends Scene {
     for (const id of SECTION_IDS) {
       this.drawSection(root, SECTION_RECTS[id], sections[id]);
     }
-    this.drawPocketLining(root);
+    this.drawSectionFills(root);
     this.drawWalkerPicker(root, save);
     // The sticker covers its tile's price line, which the tile then leaves out.
     const sticker = this.textures.exists(STICKER.key)
@@ -1004,12 +1005,17 @@ export class StartScene extends Scene {
     return homeSections(gameData, save.owned, { loadout: this.loadout, walker: save.walker });
   }
 
-  // The Pocket's denim fill and tan stitch over its frame, under the gear tiles. Each piece is
-  // a TileSprite with its tile origin at its own top-left; a missing texture leaves the frame bare.
-  private drawPocketLining(root: GameObjects.Container): void {
-    const { denim, stitchBottom, stitchLeft, stitchRight, stitchTop } = POCKET_LINING;
+  // Each section's fill over its tile area, then the Pocket's tan stitch, under the tiles. Each
+  // piece is a TileSprite with its tile origin at its own top-left; a missing texture leaves
+  // the frame bare.
+  private drawSectionFills(root: GameObjects.Container): void {
+    const { stitchBottom, stitchLeft, stitchRight, stitchTop } = POCKET_LINING;
+    const fills = SECTION_IDS.map((id): [string, Rect] => [
+      SECTION_FILL_KEYS[id],
+      sectionFill(SECTION_RECTS[id]),
+    ]);
     const pieces: readonly [string, Rect][] = [
-      ["ui-denim", denim],
+      ...fills,
       ["ui-stitch-v", stitchLeft],
       ["ui-stitch-v", stitchRight],
       ["ui-stitch-h", stitchTop],
@@ -1165,32 +1171,44 @@ export class StartScene extends Scene {
   ): void {
     fillRect(g, PALETTE.plum, { height: TOP_BAR.height, width: SCREEN.width, x: 0, y: 0 });
     fillRect(g, PALETTE.darkBrown, {
-      height: 2,
+      height: TOP_BAR.rule,
       width: SCREEN.width,
       x: 0,
-      y: TOP_BAR.height - 2,
+      y: TOP_BAR.height - TOP_BAR.rule,
     });
-    root.add(this.add.sprite(6, 12, "tip").setOrigin(0));
-    const dollar = this.text(root, 24, 14, "$", PALETTE.amber, { font: "title" });
-    this.text(root, 24 + dollar.width + 2, 14, dollarText(save.bankCents).slice(1), PALETTE.cream, {
-      font: "title",
-    });
+    const { coin, textY } = TOP_BAR;
+    root.add(
+      this.textures.exists(MONEY_ICON_KEY)
+        ? this.add.image(coin.x, coin.y, MONEY_ICON_KEY).setOrigin(0)
+        : this.add.sprite(coin.x, coin.y, "tip").setOrigin(0),
+    );
+    const dollar = this.text(root, 24, textY.bank, "$", PALETTE.amber, { font: "title" });
+    this.text(
+      root,
+      24 + dollar.width + 2,
+      textY.bank,
+      dollarText(save.bankCents).slice(1),
+      PALETTE.cream,
+      {
+        font: "title",
+      },
+    );
     // The best walk and walk count after the Logbook button, inside its hit area.
     const { bestWalk } = save.stats;
     const walks = walksPlayed(save.stats);
     const left = HOME_LAYOUT.logbook.textX;
     const words = gameData.homeText.topBar;
     if (bestWalk === null) {
-      this.text(root, left, 14, words.noWalks, PALETTE.cream);
+      this.text(root, left, textY.noWalks, words.noWalks, PALETTE.cream);
     } else {
       const best = fillLine(FIELDS.topBar, words, "best", {
         amount: dollarText(bestWalk.earnedCents),
       });
-      this.text(root, left, 5, best, PALETTE.cream);
+      this.text(root, left, textY.best, best, PALETTE.cream);
       const count = fillLine(FIELDS.topBar, words, walks === 1 ? "walkOne" : "walkMany", {
         count: String(walks),
       });
-      this.text(root, left, 22, count, PALETTE.cream);
+      this.text(root, left, textY.walks, count, PALETTE.cream);
     }
     this.iconButton(root, "logbook", LOGBOOK_ICON, (x, y) => {
       const icon = imageIcon(this, "icon-logbook", x, y);

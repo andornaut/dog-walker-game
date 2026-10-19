@@ -9,14 +9,34 @@ import type { SectionId } from "./sections";
 const GAP = 8;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
+// The top bar's content lies above its 2px bottom rule; every control is centred on the
+// middle row of that area. A 16px icon is centred on its rows 7 and 8 (art centre at its
+// y + 8), and text is placed by its capitals, TOP_BAR_CAPS tall, two lines TOP_BAR_LINE_GAP
+// apart.
+const TOP_BAR_HEIGHT = 40;
+const TOP_BAR_RULE = 2;
+const TOP_BAR_MID = (TOP_BAR_HEIGHT - TOP_BAR_RULE) / 2;
+const TOP_BAR_ICON = 16;
+const TOP_BAR_CAPS = 10;
+const TOP_BAR_LINE_GAP = 6;
+const TOP_BAR_ICON_Y = TOP_BAR_MID - TOP_BAR_ICON / 2;
+const TOP_BAR_ONE_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS / 2;
+const TOP_BAR_FIRST_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS - TOP_BAR_LINE_GAP / 2;
+
 const POCKET_SECTION: Rect = { height: 78, width: 352, x: 4, y: 432 };
+
+// A section's tile area inside its frame, under the band: the rect its fill's TileSprite covers.
+export function sectionFill(section: Rect): Rect {
+  const { height, width, x, y } = section;
+  return { height: height - 27, width: width - 6, x: x + 3, y: y + 24 };
+}
 
 // The Pocket's lining inside its section frame, each piece a TileSprite whose tile origin is
 // its own top-left: the denim fill under the band, then the tan stitch 2px inside the fill's
 // edge on the left, right, top and bottom.
 export function pocketLining(section: Rect) {
   const { height, width, x, y } = section;
-  const fill = { height: height - 27, width: width - 6, x: x + 3, y: y + 24 };
+  const fill = sectionFill(section);
   const stitchInset = 2;
   const stitchThickness = 2;
   const stitchTop = fill.y + 1;
@@ -66,18 +86,18 @@ export const HOME_LAYOUT = {
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
   gearCardHeight: 150,
   // The top bar's controls at its right end: help, sound, then settings.
-  help: { hit: { height: 44, width: 44, x: 228, y: 0 }, icon: { x: 240, y: 10 } },
+  help: { hit: { height: 44, width: 44, x: 228, y: 0 }, icon: { x: 240, y: TOP_BAR_ICON_Y } },
   // The Logbook button at the bar's left, after the bank; its hit area takes in the best walk
   // and walk count beside it.
   logbook: {
     hit: { height: 44, width: 134, x: 92, y: 0 },
-    icon: { x: 104, y: 10 },
+    icon: { x: 104, y: TOP_BAR_ICON_Y },
     textX: 130,
   },
   // The logbook card's Stats and Badges buttons, side by side across its padded width.
   logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
-  mute: { hit: { height: 44, width: 44, x: 272, y: 0 }, icon: { x: 284, y: 10 } },
+  mute: { hit: { height: 44, width: 44, x: 272, y: 0 }, icon: { x: 284, y: TOP_BAR_ICON_Y } },
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -110,6 +130,8 @@ export const HOME_LAYOUT = {
     duchess: { footY: 148, x: 150 },
     koda: { footY: 145, x: 92 },
   },
+  // The seamless image each section's fill tiles, drawn over its tile area.
+  sectionFillKeys: { dogs: "ui-plaid", pocket: "ui-denim", walker: "ui-cork" },
   // A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
   sectionFrame: { band: 20, edge: 3 },
   // Under the gate, three framed sections top to bottom (walker, dogs, pocket), each a
@@ -119,7 +141,7 @@ export const HOME_LAYOUT = {
     pocket: POCKET_SECTION,
     walker: { height: 72, width: 352, x: 4, y: 196 },
   },
-  settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: 10 } },
+  settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: TOP_BAR_ICON_Y } },
   startButton: { height: 44, width: 352, x: 4, y: 514 },
   // Start walk's label caps: on the raised face when ready, on the sunk face when not.
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
@@ -128,7 +150,21 @@ export const HOME_LAYOUT = {
   streetSign: { x: 327, y: 75 },
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
-  topBar: { height: 40 },
+  topBar: {
+    caps: TOP_BAR_CAPS,
+    // The coin at the left, the bank text after it, and the Logbook's text lines.
+    coin: { x: 6, y: TOP_BAR_ICON_Y },
+    height: TOP_BAR_HEIGHT,
+    iconSize: TOP_BAR_ICON,
+    mid: TOP_BAR_MID,
+    rule: TOP_BAR_RULE,
+    textY: {
+      bank: TOP_BAR_ONE_LINE_Y,
+      best: TOP_BAR_FIRST_LINE_Y,
+      noWalks: TOP_BAR_ONE_LINE_Y,
+      walks: TOP_BAR_FIRST_LINE_Y + TOP_BAR_CAPS + TOP_BAR_LINE_GAP,
+    },
+  },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: 14, y: 221 },
   // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
@@ -149,6 +185,7 @@ export const HOME_LAYOUT = {
   petShop: Rect & { board: Rect };
   pocket: { readonly [key: string]: unknown; cells: GridSpec };
   porchSpots: Readonly<Partial<Record<DogId, { footY: number; x: number }>>>;
+  sectionFillKeys: Readonly<Record<SectionId, string>>;
   sections: Readonly<Record<SectionId, Rect>>;
   walkerTiles: GridSpec;
 };

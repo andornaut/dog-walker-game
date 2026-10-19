@@ -55,6 +55,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { badgeWall } from "../home/badgesView";
+import { HOME_LAYOUT } from "../home/homeLayout";
 import { pipLook, zonePips } from "../hud/hudView";
 import { stripIconKey } from "../hud/stateStrip";
 import { SCALE_STEPS } from "../layout/projection";
@@ -265,7 +266,10 @@ describe("image art", () => {
         ...TEMPERAMENTS.map(temperamentIconKey),
       ],
     ],
-    ["the Pocket's denim and stitch", () => ["ui-denim", "ui-stitch-h", "ui-stitch-v"]],
+    [
+      "every section's fill and the Pocket's stitch",
+      () => [...Object.values(HOME_LAYOUT.sectionFillKeys), "ui-stitch-h", "ui-stitch-v"],
+    ],
     ["a help illustration for every help page", () => gameData.help.map(({ art }) => art)],
     [
       "card art for every option of every need card",

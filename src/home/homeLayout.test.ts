@@ -5,7 +5,7 @@ import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
 import { FEEDBACK } from "./feedback";
-import { HOME_LAYOUT, pocketLining } from "./homeLayout";
+import { HOME_LAYOUT, pocketLining, sectionFill } from "./homeLayout";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
   HOME_LAYOUT;
@@ -126,5 +126,46 @@ describe("Pet shop", () => {
     expect(shop.y - FEEDBACK.shopBobSteps.length).toBeGreaterThan(0);
     expect(Math.min(...FEEDBACK.shopBobSteps)).toBeGreaterThanOrEqual(-2);
     expect(streetSign.y).toBeLessThan(shop.y);
+  });
+});
+
+describe("section fills", () => {
+  it.each(Object.entries(sections))("%s fill covers its tile area under the band", (_, rect) => {
+    const fill = sectionFill(rect);
+    const { band, edge } = sectionFrame;
+    expect(fill.x).toBe(rect.x + edge);
+    expect(fill.x + fill.width).toBe(rect.x + rect.width - edge);
+    expect(fill.y).toBeGreaterThan(rect.y + edge + band);
+    expect(fill.y + fill.height).toBe(rect.y + rect.height - edge);
+  });
+
+  it("gives each section its own image", () => {
+    const keys = Object.values(HOME_LAYOUT.sectionFillKeys);
+    expect(new Set(keys).size).toBe(Object.keys(sections).length);
+    expect(Object.keys(HOME_LAYOUT.sectionFillKeys).sort()).toEqual(Object.keys(sections).sort());
+  });
+});
+
+describe("top bar", () => {
+  const { help, logbook, mute, settings, topBar } = HOME_LAYOUT;
+  const { caps, iconSize, mid, textY } = topBar;
+  const iconCentre = (icon: { y: number }) => icon.y + iconSize / 2;
+  const capsCentre = (y: number) => y + caps / 2;
+
+  it("puts the middle row at the middle of the area above its rule", () => {
+    expect(mid).toBe((topBar.height - topBar.rule) / 2);
+  });
+
+  it.each([
+    ["the coin", iconCentre(topBar.coin)],
+    ["the bank text", capsCentre(textY.bank)],
+    ["the logbook icon", iconCentre(logbook.icon)],
+    ["the logbook's two text lines", (textY.best + textY.walks + caps) / 2],
+    ["the logbook's single line", capsCentre(textY.noWalks)],
+    ["the help button", iconCentre(help.icon)],
+    ["the sound button", iconCentre(mute.icon)],
+    ["the settings button", iconCentre(settings.icon)],
+  ])("centres %s on the bar's middle row", (_, centre) => {
+    expect(centre).toBe(mid);
   });
 });

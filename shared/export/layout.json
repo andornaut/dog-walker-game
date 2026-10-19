@@ -1434,7 +1434,7 @@
         },
         "icon": {
           "x": 240,
-          "y": 10
+          "y": 11
         }
       },
       "logbook": {
@@ -1446,7 +1446,7 @@
         },
         "icon": {
           "x": 104,
-          "y": 10
+          "y": 11
         },
         "textX": 130
       },
@@ -1468,7 +1468,7 @@
         },
         "icon": {
           "x": 284,
-          "y": 10
+          "y": 11
         }
       },
       "path": {
@@ -1565,6 +1565,11 @@
           "x": 92
         }
       },
+      "sectionFillKeys": {
+        "dogs": "ui-plaid",
+        "pocket": "ui-denim",
+        "walker": "ui-cork"
+      },
       "sectionFrame": {
         "band": 20,
         "edge": 3
@@ -1598,7 +1603,7 @@
         },
         "icon": {
           "x": 328,
-          "y": 10
+          "y": 11
         }
       },
       "startButton": {
@@ -1618,7 +1623,21 @@
       },
       "tileSelectOutset": 1,
       "topBar": {
-        "height": 40
+        "caps": 10,
+        "coin": {
+          "x": 6,
+          "y": 11
+        },
+        "height": 40,
+        "iconSize": 16,
+        "mid": 19,
+        "rule": 2,
+        "textY": {
+          "bank": 14,
+          "best": 6,
+          "noWalks": 14,
+          "walks": 22
+        }
       },
       "walkerAtGate": {
         "footY": 196,
