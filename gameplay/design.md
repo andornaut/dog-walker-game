@@ -239,7 +239,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 
 ### Feedback
 
-- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through) and Spooked (after a thief) are visual only and fade after 10 seconds
+- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) and Spooked (after a thief) are visual only and fade after 10 seconds
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
