@@ -164,6 +164,32 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
+    skins: {
+      park: {
+        art: "social-frisbee-dog",
+        cardArtPrefix: "card-social-frisbee-dog",
+        hitLabel: "CATCH!",
+        name: "Frisbee dog",
+      },
+      pawsPromenade: {
+        art: "social-jogger-dog",
+        cardArtPrefix: "card-social-jogger-dog",
+        hitLabel: "NEW FRIEND!",
+        name: "Jogger's dog",
+      },
+      shops: {
+        art: "social-handbag-dog",
+        cardArtPrefix: "card-social-handbag-dog",
+        hitLabel: "YIP YIP!",
+        name: "Dog in a handbag",
+      },
+      snoozeCrescent: {
+        art: "social-gate-dog",
+        cardArtPrefix: "card-social-gate-dog",
+        hitLabel: "NEW FRIEND!",
+        name: "Dog at a gate",
+      },
+    },
   },
   petunias: {
     affects: { kind: "all" },
@@ -266,6 +292,34 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 1 },
+    skins: {
+      park: {
+        art: "splash-mud",
+        cardArtPrefix: "card-splash-mud",
+        hitLabel: "MUDDY!",
+        name: "Mud patch",
+        statusArt: "fx-status-soaked-mud",
+      },
+      pawsPromenade: {
+        art: "splash-shore",
+        cardArtPrefix: "card-splash-shore",
+        hitLabel: "SOAKED!",
+        name: "Splashy shore",
+      },
+      shops: {
+        art: "splash-milkshake",
+        cardArtPrefix: "card-splash-milkshake",
+        hitLabel: "STICKY!",
+        name: "Spilled milkshake",
+        statusArt: "fx-status-soaked-milkshake",
+      },
+      snoozeCrescent: {
+        art: "splash-sprinkler",
+        cardArtPrefix: "card-splash-sprinkler",
+        hitLabel: "SPRINKLED!",
+        name: "Lawn sprinkler",
+      },
+    },
   },
   skunk: {
     affects: { catches: ["big", "medium", "small"], kind: "caught" },
@@ -303,6 +357,33 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 2, rows: 2 },
+    skins: {
+      homeStretch: {
+        art: "stink-garbage-truck",
+        cardArtPrefix: "card-stink-garbage-truck",
+        hitLabel: "PEE-YEW!",
+        name: "Garbage truck",
+      },
+      pawsPromenade: {
+        art: "stink-seaweed",
+        cardArtPrefix: "card-stink-seaweed",
+        hitLabel: "PEE-YEW!",
+        name: "Seaweed heap",
+      },
+      shops: {
+        art: "stink-fish-crate",
+        cardArtPrefix: "card-stink-fish-crate",
+        cloudArt: "stink-fish-crate-cloud",
+        hitLabel: "FISHY!",
+        name: "Fish crate",
+      },
+      snoozeCrescent: {
+        art: "stink-compost",
+        cardArtPrefix: "card-stink-compost",
+        hitLabel: "PEE-YEW!",
+        name: "Compost heap",
+      },
+    },
   },
   squirrel: {
     affects: { kind: "trait", trait: "chaser" },
@@ -333,6 +414,32 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
+    skins: {
+      homeStretch: {
+        art: "chase-rabbit",
+        cardArtPrefix: "card-chase-rabbit",
+        hitLabel: "BOING!",
+        name: "Rabbit",
+      },
+      pawsPromenade: {
+        art: "chase-ducklings",
+        cardArtPrefix: "card-chase-ducklings",
+        hitLabel: "QUACK!",
+        name: "Ducklings",
+      },
+      shops: {
+        art: "chase-pigeons",
+        cardArtPrefix: "card-chase-pigeons",
+        hitLabel: "COO COO!",
+        name: "Pigeon flock",
+      },
+      snoozeCrescent: {
+        art: "chase-cat",
+        cardArtPrefix: "card-chase-cat",
+        hitLabel: "HISS!",
+        name: "Cat on a lawn",
+      },
+    },
   },
   thief: {
     affects: { kind: "all" },
@@ -356,6 +463,32 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
+    skins: {
+      homeStretch: {
+        art: "snatch-raccoon",
+        cardArtPrefix: "card-snatch-raccoon",
+        hitLabel: "SNATCHED!",
+        name: "Raccoon",
+      },
+      park: {
+        art: "snatch-seagull",
+        cardArtPrefix: "card-snatch-seagull",
+        hitLabel: "SNATCHED!",
+        name: "Seagull",
+      },
+      pawsPromenade: {
+        art: "snatch-seagull",
+        cardArtPrefix: "card-snatch-seagull",
+        hitLabel: "SNATCHED!",
+        name: "Seagull",
+      },
+      snoozeCrescent: {
+        art: "snatch-raccoon",
+        cardArtPrefix: "card-snatch-raccoon",
+        hitLabel: "SNATCHED!",
+        name: "Raccoon",
+      },
+    },
   },
   trash: {
     affects: { kind: "all" },
