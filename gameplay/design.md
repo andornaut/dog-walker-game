@@ -274,8 +274,8 @@ One per zone, drawn at random with no repeats in a run.
 
 After each of zones 1 to 3, once the fee coins have flown to the bank and before the upgrade card, a short celebration plays over the paused road. After zone 4 the end screen takes its place.
 
-- **Zone done:** the walker you're walking with cheers, under "Willow Crescent done!", with the zone's fees and tips ("+$240 fees · +$38 tips"). It moves on by itself after 2 seconds, or at a tap
-- **New walker:** the first time you finish zone 1, 2 or 3, the walker it unlocks runs in to join, under "Ben joins you!", with their line ("Nice pack! Mind if I walk with you sometime?") and their pace and style ("Slow · Hustler"). It waits for a tap on "Welcome!" (key 1). This replaces the Zone done version for that zone
+- **Zone done:** the walker you're walking with cheers, under a big "Zone done!" and the zone's name below it, with the zone's fees and tips ("+$240 fees · +$38 tips"). It moves on by itself after 2 seconds, or at a tap
+- **New walker:** the first time you finish zone 1, 2 or 3, the walker it unlocks runs in to join, under a big "New walker!" and "Ben joins you!" below it, with their line ("Nice pack! Mind if I walk with you sometime?") and their pace and style ("Slow · Hustler"). It waits for a tap on "Welcome!" (key 1). This replaces the Zone done version for that zone
 - Confetti plays in both; with reduced motion it doesn't
 
 ### Upgrade cards
