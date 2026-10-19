@@ -5,11 +5,6 @@
     "description": "Elm Avenue's lawns beyond the sidewalks with OutRun-style roadside billboards (houses behind picket fences and hedges, mailboxes, trees, lamp posts, a gnome, a bike, a washing line) that scale with depth and scroll with the road, beside today's bare verge, with the 18 new sprites and their sizes."
   },
   {
-    "title": "Sprite scale",
-    "path": "scale.html",
-    "description": "Elm Avenue at today's scale beside 40px dogs, a 40x60 walker and 64px lanes on the same 360x560 screen, and the bigger scale with 3.5 s of road in view instead of 5.25 s, with the camera numbers for each."
-  },
-  {
     "title": "Start screen shop",
     "path": "start-shop.html",
     "description": "The start screen with help, sound and settings top right, the Pocket strip (every gear item as a tile, one brought per walk) in place of the Gear section, and a Pet shop building in the gate scene for gear, dogs and slots, with the shop page, the strip's geometry and the locked tile states."
