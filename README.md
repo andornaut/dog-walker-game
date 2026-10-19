@@ -40,7 +40,7 @@ npm run check
 # Prettier check, ESLint and markdownlint
 npm run lint
 
-# Rewrite files with Prettier
+# Rewrite files with Prettier and apply ESLint fixes
 npm run format
 
 # Run the unit tests
