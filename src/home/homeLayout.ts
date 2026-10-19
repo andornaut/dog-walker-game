@@ -116,7 +116,7 @@ export const HOME_LAYOUT = {
   walkerOrigin: { x: 4, y: 223 },
   // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
   // icon right of the box, and a locked walker's padlock over the tile's top-left corner and
-  // its goal plate's caps, centred. The tiles stop short of the Dogs padlock's hit area.
+  // its name plate's caps, centred. The tiles stop short of the Dogs padlock's hit area.
   walkerTile: {
     box: { dx: 3, dy: 4, size: 34 },
     face: { dx: 4, dy: 5 },

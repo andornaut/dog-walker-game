@@ -19,7 +19,7 @@ export function walkerOrder(data: Pick<GameData, "walkers">): WalkerId[] {
 }
 
 // A walker's tile on the home screen: the walker in use is picked, another owned one is
-// available, and one not owned shows the zone a walk must finish to unlock it. Picking a
+// available, and one not owned shows its name on a plate; a tap on it says the goal. Picking a
 // walker replaces the one in use, so the choice is never full.
 export function walkerTile(
   data: WalkerText,
@@ -30,7 +30,9 @@ export function walkerTile(
   return itemTile({
     bank: cents(0),
     capacity: 1,
-    goal: owned ? null : homeLine(data.homeText, "walkerGoal", { zone: goalZone(data, walker) }),
+    goal: owned
+      ? null
+      : homeLine(data.homeText, "walkerPlate", { walker: data.walkers[walker].name }),
     picked: save.walker === walker,
     pickedCount: 1,
     price: null,

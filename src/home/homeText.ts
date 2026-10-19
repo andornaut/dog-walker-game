@@ -64,9 +64,9 @@ export const HOME_TEXT_FIELDS = {
     walkOne: ["count"],
   },
   unsaved: [],
-  walkerGoal: ["zone"],
   walkerInfo: ["pace", "style", "walker"],
   walkerLocked: ["walker", "zone"],
+  walkerPlate: ["walker"],
   zoneFee: ["fee"],
 } as const satisfies Record<LineKey, readonly string[]> & FieldTable;
 

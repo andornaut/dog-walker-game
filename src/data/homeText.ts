@@ -90,8 +90,8 @@ export const HOME_TEXT = {
     walkOne: "{count} walk",
   },
   unsaved: "Progress won't be saved.",
-  walkerGoal: "{walker}",
   walkerInfo: "{walker}: {pace}, {style}.",
   walkerLocked: "Finish zone {zone} to unlock {walker}.",
+  walkerPlate: "{walker}",
   zoneFee: "{fee}/zone",
 } as const satisfies HomeText;

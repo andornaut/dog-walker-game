@@ -1497,7 +1497,7 @@ export class StartScene extends Scene {
   // One tile per walker, in the shared tile states: the saved one is picked, and picking
   // another replaces it, so the walker choice is never full. An owned walker shows its
   // portrait with its pace icon over its style icon; a locked one its silhouette, the
-  // padlock and its goal plate.
+  // padlock and its name plate.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();

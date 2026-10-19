@@ -22,8 +22,8 @@ describe("walkerTile", () => {
   it.each<[WalkerId, ItemTile, TileState]>([
     ["ben", { kind: "picked" }, "selected"],
     ["casey", { kind: "available" }, "normal"],
-    ["ada", { goal: "Zone 2", kind: "goal" }, "disabled"],
-    ["trista", { goal: "Zone 3", kind: "goal" }, "disabled"],
+    ["ada", { goal: "Ada", kind: "goal" }, "disabled"],
+    ["trista", { goal: "Trista", kind: "goal" }, "disabled"],
   ])("shows %s as %o, drawn %s", (walker, tile, state) => {
     expect(walkerTile(gameData, save, walker)).toEqual(tile);
     expect(itemTileState(tile)).toBe(state);
