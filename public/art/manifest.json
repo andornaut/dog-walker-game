@@ -2636,6 +2636,11 @@
       "json": "sprites/ui-fired-plate.json"
     },
     {
+      "key": "ui-fires",
+      "png": "sprites/ui-fires.png",
+      "json": "sprites/ui-fires.json"
+    },
+    {
       "key": "ui-heart",
       "png": "sprites/ui-heart.png",
       "json": "sprites/ui-heart.json"
@@ -3113,6 +3118,10 @@
     {
       "key": "help-lanes",
       "png": "images/help-lanes.png"
+    },
+    {
+      "key": "help-needs",
+      "png": "images/help-needs.png"
     },
     {
       "key": "help-owners",

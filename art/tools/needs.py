@@ -27,6 +27,15 @@ ui-pull-bubble     32x28  idle (2 frames, 400ms)  the bubble swells 1px up and o
                           bubble swells up and sideways only, so the icon and tip never move
 ui-pull-blocked    10x10  normal (1 frame)  a red badge with a white X in a white ring and the
                           plum rim; at 21,1 on the bubble's frame, over its top-right corner
+ui-fires           16x16  static (1 frame)  a broken heart: the firing moment's heart split down a
+                          zigzag crack, its halves 1px apart, in an ink outline and a white rim,
+                          so it reads on every card band (dred, blue, amber, forest, purple), the
+                          cream card and the plum cost plaque
+                          pulse (2 frames, 400ms)  frame 0 is static; the right half drops 1px
+                          Marks a card option that would fire an owner. The game draws it with its
+                          top-left at 4,119 on card-frame (8,238 at 2x on card-frame-large): over
+                          the cost plaque's left rivet, centred on the plaque's rows, clear of a
+                          cost up to 40px wide centred between the rivets
 fx-pull-fail       16x16  play (4 frames, 90ms)  a disappointed puff: a little cloud huffs out,
                           spreads and sags as it sinks, and breaks into two puffs. Bottom-centre
                           on the dog's centre column, 6px below its top opaque row (as fx-status)
@@ -299,6 +308,24 @@ def blocked():
         g.p(3 + i, 3 + i, "white")
         g.p(6 - i, 3 + i, "white")
     return g
+
+
+# The broken heart, 11x10, and the crack's column in each row: the left half keeps the columns before it,
+# the right half those after it.
+BROKEN = ["..11...11..", ".1211.1111.", "12211111113", "12111111113", "11111111113",
+          ".111111113.", "..1111113..", "...11113...", "....113....", ".....1....."]
+BROKEN_CRACK = [5, 5, 4, 5, 6, 5, 4, 5, 5, 5]
+
+
+def fires(drop=0):
+    """16x16: the halves of the broken heart, the right one 1px further right and drop pixels lower, each
+    outlined in ink (9.71:1 on amber, 12.44:1 on cream) inside a white rim (7.34:1 or more on dred, blue,
+    forest, purple and plum). The crack between the halves fills with the ink outline."""
+    g = Grid(16, 16)
+    stamp(g, BROKEN, 2, 3, keep=lambda x, y: x < BROKEN_CRACK[y])
+    stamp(g, BROKEN, 3, 3 + drop, keep=lambda x, y: x > BROKEN_CRACK[y])
+    rim(g, "ink")
+    return rim(g, "white")
 
 
 def pull_fail(step):
@@ -624,6 +651,8 @@ def sprites():
                     ticks(bubble(ring="amber"), 1).outlined(False), ticks(bubble(1, "amber"), 0).outlined(False)],
          120)]
     yield "ui-pull-blocked", [("normal", [blocked().outlined(False)], 1000)]
+    yield "ui-fires", [("static", [fires().outlined(False)], 1000),
+                       ("pulse", [fires().outlined(False), fires(1).outlined(False)], 400)]
     yield "fx-pull-fail", [("play", [pull_fail(i).outlined(False) for i in range(4)], 90)]
     yield "fx-need-met", [(need, [need_met(need, i).outlined(False) for i in range(6)], 70) for need in NEEDS]
     yield "fx-accident", [("play", [accident(i).outlined(False) for i in range(6)], 100)]

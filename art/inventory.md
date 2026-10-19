@@ -101,6 +101,7 @@ Same tags, frames and durations as the original.
 | `spot-stranger`    | sprite | 32×48 | `idle`, `wave`           | core | Friendly spot                                                      |
 | `spot-tree`        | sprite | 32×48 | `idle`                   | core | Regular spot                                                       |
 | `spot-water-bowl`  | sprite | 32×32 | `idle`                   | core | Thirsty spot                                                       |
+| `ui-fires`         | sprite | 16×16 | `static`, `pulse`        | core | Card option that fires an owner; over the cost plaque's left rivet |
 | `ui-pull-blocked`  | sprite | 10×10 | `normal`                 | core | Over the bubble's top-right corner when a pull is blocked          |
 | `ui-pull-bubble`   | sprite | 32×28 | `idle`, `show`, `urgent` | core | Over a dog with an urgent need; the game draws the need icon in it |
 
@@ -150,7 +151,7 @@ Same tags, frames and durations as the original.
 | `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | core | One per upgrade (9), and Poop bags' Skip                                               |
 | `card-<need card>-<option>`   | image  | 75×56   |                                                  | core | accident, good-spot, pee-mail, play-date, stranger-loves, water-stop; two options each |
 | `card-zone-<zone>`            | image  | 75×56   |                                                  | core | A fork's path card: the zone's road to a cross street, its backdrop scenery beyond     |
-| `help-<page>`                 | image  | 344×236 |                                                  | core | lanes, pickups, cards, owners, pulls, zones                                            |
+| `help-<page>`                 | image  | 344×236 |                                                  | core | lanes, pickups, cards, owners, pulls, zones, needs                                     |
 
 Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). The generous neighbour and photo op open no card: `card-biscuit-neighbour-take` and `card-photo-op-pose` are their popup art. `card-accident-walk-on` shows the grumpy neighbour.
 

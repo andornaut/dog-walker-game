@@ -644,6 +644,54 @@ def pulls():
     return c
 
 
+def needs():
+    c = Scene()
+    c.road("snoozeCrescent")
+    # Koda's need is Nosy, met at a lamp post
+    need = DOGS["koda"]["need"]
+    cx = lane(2)
+    post = c.stand("spot-lamp-post", "idle", lane(3), 145)
+    kx, ky, ks = c.pack(cx, ("dog-koda", "dog-duchess"), "pull")["dog-koda"]
+    # Koda's urgent bubble as NeedSignals places it: the tail's tip a row above the dog's top
+    # opaque row, centred on its centre column, the need's icon at 8,6
+    dog_sprite = depth_frame("dog-koda", "pull", ks)
+    top = round(ky) - dog_sprite.height + dog_sprite.getbbox()[1]
+    bx, by = round(kx) - 16, top - 28
+    c.paste(frame("ui-pull-bubble", "urgent"), bx, by)
+    c.paste(frame(f"icon-need-{need}", "normal"), bx + 8, by + 6)
+    # the pull line as NeedSignals draws it: from the bubble's centre to the spot's middle, 2x2
+    # yellow dots in a plum rim every 7px from outside the bubble, then a 7x7 yellow arrowhead
+    # in a 9x9 plum one
+    sx, sy, ss = post
+    lamp = depth_frame("spot-lamp-post", "idle", ss)
+    x0, y0, x1, y1 = bx + 16, by + 14, round(sx), round(sy - lamp.height / 2)
+    length = math.hypot(x1 - x0, y1 - y0)
+    ux, uy = (x1 - x0) / length, (y1 - y0) / length
+    at = 16
+    while at < length - 7:
+        x, y = round(x0 + ux * at) - 1, round(y0 + uy * at) - 1
+        c.fill(x - 1, y - 1, 4, 4, "plum")
+        c.fill(x, y, 2, 2, "yellow")
+        at += 7
+    for size, col, inset in ((9, "plum", 0), (7, "yellow", 1)):
+        tip = (x1 - ux * inset, y1 - uy * inset)
+        base = (tip[0] - ux * size, tip[1] - uy * size)
+        pts = [(round(tip[0]), round(tip[1])), (round(base[0] - uy * size / 2), round(base[1] + ux * size / 2)),
+               (round(base[0] + uy * size / 2), round(base[1] - ux * size / 2))]
+        for y in range(min(p[1] for p in pts), max(p[1] for p in pts) + 1):
+            for x in range(min(p[0] for p in pts), max(p[0] for p in pts) + 1):
+                d = [(pts[(i + 1) % 3][0] - pts[i][0]) * (y + 0.5 - pts[i][1])
+                     - (pts[(i + 1) % 3][1] - pts[i][1]) * (x + 0.5 - pts[i][0]) for i in range(3)]
+                if all(v >= 0 for v in d) or all(v <= 0 for v in d):
+                    c.fill(x, y, 1, 1, col)
+    # what steering in gets: the owner's happy face and the hearts the need gives when met
+    met = next(e["amount"] for e in by_id(GAME["needs"])[need]["met"] if e["kind"] == "hearts")
+    c.fill(W - 44, 8, 36, 36, "tan")
+    c.paste(frame("face-owner-koda", "happy"), W - 42, 10)
+    c.bubble(W - 82, 16, 30, [f"+{met}♥"])
+    return c
+
+
 def zones():
     c = Scene()
     # the fork at the end of the first zone: the road paused and dimmed under the fork's card,
@@ -670,7 +718,8 @@ def zones():
     return c
 
 
-PAGES = {"lanes": lanes, "pickups": pickups, "cards": cards, "owners": owners, "pulls": pulls, "zones": zones}
+PAGES = {"lanes": lanes, "pickups": pickups, "cards": cards, "owners": owners, "pulls": pulls, "zones": zones,
+         "needs": needs}
 
 
 def build():
