@@ -6,13 +6,11 @@ import shippedManifest from "../../public/art/manifest.json";
 import { itemAt } from "../arrays";
 import { DEPTH_STEPS, splitDepthKey, stepSize } from "../assets/depthSteps";
 import { parseManifest } from "../assets/manifest";
-import { depthVariantKey, dogSpriteKey, MOVER_SPRITES, standsOnGround } from "../assets/spriteKeys";
+import { depthVariantKey, dogSpriteKey, standsOnGround } from "../assets/spriteKeys";
 import { decodePng } from "../atlas/atlasBuild";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId, ZoneId } from "../data/types";
-import { encounterLook } from "../rules/skins";
-import { isMoverObstacle, MOVER_CONTACTS, type MoverKind } from "../runner/movers";
+import type { DogId } from "../data/types";
 import { dogDepthStep, statusOverlayLift } from "../runner/statuses";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
@@ -110,21 +108,7 @@ const approach = Array.from({ length: Math.ceil(projection.visibleDistance) + 12
   scaleAt(projection, projection.visibleDistance - i),
 );
 // Shipped road sprites, small and large, flat and standing.
-// Every mover's body: its own sprite, and each zone's skin of the encounter it is.
-const MOVER_KEYS = [
-  ...new Set(
-    (Object.keys(MOVER_SPRITES) as MoverKind[]).flatMap((mover) => {
-      const contact = MOVER_CONTACTS[mover];
-      const skins = isMoverObstacle(contact)
-        ? []
-        : gameData.world.zones.map(({ id }) => encounterLook(gameData, id as ZoneId, contact).art);
-      return [MOVER_SPRITES[mover].key, ...skins];
-    }),
-  ),
-].filter((key) => sprites.has(key));
-const STANDING = [
-  ...new Set(["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge", ...MOVER_KEYS]),
-];
+const STANDING = ["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge"];
 const KEYS = [...STANDING, "skunk-cloud", "puddle"];
 // Every shipped road sprite with a depth variant.
 const STEPPED = [
@@ -267,24 +251,30 @@ describe("depthDraw", () => {
     },
   );
 
-  it("stands each step on its own feet line, which stays put as the steps change", () => {
-    const jumps = new Set<string>();
-    for (const arts of stepSets(STANDING)) {
-      let last: { feetToTop: number; key: string } | undefined;
-      for (const projected of approach) {
-        const drawn = depthDraw(arts, projected);
-        const art = arts.find((step) => step.key === drawn.key);
-        expect(drawn.originY).toBe((art?.feetY ?? 0) / (art?.height ?? 1));
-        const feetToTop = drawn.originY * (art?.height ?? 0) * drawn.scale;
-        if (last !== undefined && last.key !== drawn.key) {
-          if (Math.abs(feetToTop - last.feetToTop) >= 1.5) {
-            const from = last.feetToTop.toFixed(1);
-            jumps.add(`${last.key} ${from} to ${drawn.key} ${feetToTop.toFixed(1)}`);
+  it.each([
+    { name: "the sizing cases", sets: stepSets(STANDING) },
+    { name: "every shipped sprite with depth variants", sets: STEPPED.map(artsOf) },
+  ])(
+    "stands each step on its own feet line, which stays put as the steps change: $name",
+    ({ sets }) => {
+      const jumps = new Set<string>();
+      for (const arts of sets) {
+        let last: { feetToTop: number; key: string } | undefined;
+        for (const projected of approach) {
+          const drawn = depthDraw(arts, projected);
+          const art = arts.find((step) => step.key === drawn.key);
+          expect(drawn.originY).toBe((art?.feetY ?? 0) / (art?.height ?? 1));
+          const feetToTop = drawn.originY * (art?.height ?? 0) * drawn.scale;
+          if (last !== undefined && last.key !== drawn.key) {
+            if (Math.abs(feetToTop - last.feetToTop) >= 1.5) {
+              const from = last.feetToTop.toFixed(1);
+              jumps.add(`${last.key} ${from} to ${drawn.key} ${feetToTop.toFixed(1)}`);
+            }
           }
+          last = { feetToTop, key: drawn.key };
         }
-        last = { feetToTop, key: drawn.key };
       }
-    }
-    expect([...jumps]).toEqual([]);
-  });
+      expect([...jumps]).toEqual([]);
+    },
+  );
 });
