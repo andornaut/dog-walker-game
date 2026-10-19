@@ -92,3 +92,8 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · Lucky collar gives every owner +1 starting ♥, since starting happiness now varies by temperament
 - 2026-10-18 · Design · Keyboard lane changes also accept H/L, alongside arrows and A/D
 - 2026-10-18 · Art · UI colours are wood (dark brown frame, cream slots) and the run screen mock's other defaults stand, provisionally, until the style is refined
+- 2026-10-18 · Design · Size is never a straight upgrade and no longer sets the fee: every dog pays $20 per zone and fussy owners $25; replaces size-based fees and fussy +50%
+- 2026-10-18 · Design · Size offsets pull strength: max happiness is 6 small, 8 medium, 10 big; small dogs attract more Other dog encounters, big dogs fewer; replaces the 2026-10-18 cap of 8 for every owner
+- 2026-10-18 · Design · New Thief encounter: chase them off (−1 ♥ each) or let it go (−$); any big dog in the pack scares the thief away with no card
+- 2026-10-18 · Design · Owners: Rosa (Duchess), Kevin (Nugget), Mr. Pruitt (Zippy), Madame Lefevre (Pierre), Sam (Biscuit), Ophelia (Dash), Tiffany (Snowball), Dr. Hughes (Waffles), Jesse (Koda); each dog has a fixed look (coat and one accessory)
+- 2026-10-18 · Design · Every locked dog costs $150

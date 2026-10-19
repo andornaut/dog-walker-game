@@ -22,7 +22,7 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 ### Resources
 
 - **Money ($):** earned during the run (tips, per-zone fees); spent in encounters (costs are per affected dog); banked at the end
-- **Owner happiness (♥):** one meter per dog, starts at 4–6 depending on the owner's temperament, max 8. Shown as the dog's and owner's faces plus the meter. At 0 the owner fires you (with a quip) and the dog leaves
+- **Owner happiness (♥):** one meter per dog, starts at 4–6 depending on the owner's temperament; max 6, 8 or 10 depending on the dog's size. Shown as the dog's and owner's faces plus the meter. At 0 the owner fires you (with a quip) and the dog leaves
 
 ### A run
 
@@ -50,37 +50,38 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
-| Attribute         | Values                                                                                                                                                                           |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Size              | Small · medium · big. Sets the fee and pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big)                                          |
-| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                        |
-| Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                     |
-| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, fee +50% · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0–8; also sets the quip tone |
+| Attribute         | Values                                                                                                                                                                                                                                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Size              | Small · medium · big. No size is a straight upgrade. Pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big). Max happiness: 6 small, 8 medium, 10 big. Who you meet: each small dog attracts more Other dog encounters, each big dog fewer, and any big dog scares thieves away |
+| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                                 |
+| Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                                                                                                                                                              |
+| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $25 instead of $20 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0 and the dog's max; also sets the quip tone                                                                                                           |
 
-| Dog      | Breed           | Size   | Trait       | Energy | Owner     | Start    |
-| -------- | --------------- | ------ | ----------- | ------ | --------- | -------- |
-| Duchess  | Maltese         | Small  | Fancy       | Calm   | Laid-back | Unlocked |
-| Nugget   | Pug             | Small  | Food-driven | Steady | Dramatic  | Shop     |
-| Zippy    | Jack Russell    | Small  | Chaser      | Hyper  | Fussy     | Shop     |
-| Pierre   | Standard poodle | Medium | Fancy       | Steady | Fussy     | Shop     |
-| Biscuit  | Beagle          | Medium | Food-driven | Hyper  | Laid-back | Unlocked |
-| Dash     | Whippet         | Medium | Chaser      | Calm   | Dramatic  | Shop     |
-| Snowball | Samoyed         | Big    | Fancy       | Hyper  | Dramatic  | Shop     |
-| Waffles  | Saint Bernard   | Big    | Food-driven | Calm   | Fussy     | Shop     |
-| Koda     | Husky           | Big    | Chaser      | Steady | Laid-back | Unlocked |
+| Dog      | Breed           | Size   | Trait       | Energy | Owner                                  | Look                                  | Start    |
+| -------- | --------------- | ------ | ----------- | ------ | -------------------------------------- | ------------------------------------- | -------- |
+| Duchess  | Maltese         | Small  | Fancy       | Calm   | Rosa, retired florist (laid-back)      | White coat, pink bow                  | Unlocked |
+| Nugget   | Pug             | Small  | Food-driven | Steady | Kevin, pet influencer (dramatic)       | Fawn, black mask, tiny bandana        | Shop     |
+| Zippy    | Jack Russell    | Small  | Chaser      | Hyper  | Mr. Pruitt, retired accountant (fussy) | White with tan patches, red collar    | Shop     |
+| Pierre   | Standard poodle | Medium | Fancy       | Steady | Madame Lefevre, dog-show judge (fussy) | Apricot, show-clip pom-poms           | Shop     |
+| Biscuit  | Beagle          | Medium | Food-driven | Hyper  | Sam, barista (laid-back)               | Tricolour, floppy ears, green collar  | Unlocked |
+| Dash     | Whippet         | Medium | Chaser      | Calm   | Ophelia, stage actor (dramatic)        | Grey brindle, knit sweater            | Shop     |
+| Snowball | Samoyed         | Big    | Fancy       | Hyper  | Tiffany, wedding planner (dramatic)    | Fluffy white, collar with a bell      | Shop     |
+| Waffles  | Saint Bernard   | Big    | Food-driven | Calm   | Dr. Hughes, dentist (fussy)            | Brown and white, little barrel collar | Shop     |
+| Koda     | Husky           | Big    | Chaser      | Steady | Jesse, trail runner (laid-back)        | Grey and white, blue eyes, harness    | Unlocked |
 
-Each size and trait pairs once, and each energy and temperament appears three times. The three starters cover every size and trait, with laid-back owners for an easier first run. Owner names are TBD.
+Each size and trait pairs once, and each energy and temperament appears three times. The three starters cover every size and trait, with laid-back owners for an easier first run.
 
 More dogs means more pay and a longer-lasting run, but more owners to keep happy, more pulls and more area-effect rolls. After every card choice, the affected owner reacts with a quip. The walker is one fixed character.
 
 ### Encounters (things you hit by accident → choice card)
 
-| Encounter | Who's affected                            | Options                                                                        |
-| --------- | ----------------------------------------- | ------------------------------------------------------------------------------ |
-| Skunk     | All dogs                                  | Pay $$$ for grooming · Pay $ for a quick rinse → _Stinky_ · Ignore → −2 ♥ each |
-| Squirrel  | Chasers (none: harmless scenery, no card) | Hold tight → −1 ♥ · Let them chase → lose $ (dropped tips)                     |
-| Puddle    | All; Fancy dogs worse                     | Go through → −1 ♥ (−2 Fancy) · Pay $ for a towel                               |
-| Other dog | All dogs                                  | Let them sniff → +1 ♥ each, −$ per dog (missed tips) · Pull away → −1 ♥ each   |
+| Encounter | Who's affected                                    | Options                                                                        |
+| --------- | ------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Skunk     | All dogs                                          | Pay $$$ for grooming · Pay $ for a quick rinse → _Stinky_ · Ignore → −2 ♥ each |
+| Squirrel  | Chasers (none: harmless scenery, no card)         | Hold tight → −1 ♥ · Let them chase → lose $ (dropped tips)                     |
+| Puddle    | All; Fancy dogs worse                             | Go through → −1 ♥ (−2 Fancy) · Pay $ for a towel                               |
+| Other dog | All dogs                                          | Let them sniff → +1 ♥ each, −$ per dog (missed tips) · Pull away → −1 ♥ each   |
+| Thief     | All dogs (none if any big dog: it flees, no card) | Chase them off → −1 ♥ each (dogs worked up) · Let it go → −$ (stolen tips)     |
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card and have no effect.
 
@@ -121,26 +122,28 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 
 ## Starting numbers
 
-Placeholders sized for ~3-minute zones. A full run is estimated at ~$175 with 2 dogs and ~$260 with 3.
+Placeholders sized for ~3-minute zones. A full run is estimated at ~$215 with 2 dogs and ~$260 with 3.
 
-| What                         | Value                                                                       |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| Scroll speed                 | +10% per zone (zone 4 at 1.3× base)                                         |
-| Obstacles per zone           | 18 in zone 1, +3 per later zone                                             |
-| Tips per zone                | 24 in zone 1, +3 per later zone                                             |
-| Treats per zone              | 4 (carry up to 3)                                                           |
-| Owner happiness              | Start 6 laid-back · 4 fussy · 5 dramatic; max 8; treat +1                   |
-| Fee per zone survived        | Small $10 · medium $20 · big $30; fussy owners +50%                         |
-| Pull interval (energy)       | About every 60s calm · 30s steady · 15s hyper                               |
-| Input lock after a pull      | Small 0s · medium 0.25s · big 0.5s                                          |
-| Tip                          | $2 (Big tipper $3, Stinky $1)                                               |
-| Encounter costs              | $ = $5, $$$ = $15, per affected dog                                         |
-| Squirrel: let them chase     | −$10                                                                        |
-| Missed tips (slower options) | $5 per dog                                                                  |
-| Chatty neighbour tip         | +$15                                                                        |
-| Shortcut                     | Next zone 25% shorter, its fees −25%                                        |
-| Rush hour                    | Next zone tips ×2, obstacles ×1.5                                           |
-| Shop                         | Fanny pack $100 · poop bags $175 · Lucky collar $250 · each locked dog $150 |
+| What                         | Value                                                                               |
+| ---------------------------- | ----------------------------------------------------------------------------------- |
+| Scroll speed                 | +10% per zone (zone 4 at 1.3× base)                                                 |
+| Obstacles per zone           | 18 in zone 1, +3 per later zone                                                     |
+| Tips per zone                | 24 in zone 1, +3 per later zone                                                     |
+| Treats per zone              | 4 (carry up to 3)                                                                   |
+| Owner happiness              | Start 6 laid-back · 4 fussy · 5 dramatic; max 6 small · 8 medium · 10 big; treat +1 |
+| Fee per zone survived        | $20; fussy owners $25                                                               |
+| Other dog spawns             | +25% per small dog, −25% per big dog                                                |
+| Thief: let it go             | −$10                                                                                |
+| Pull interval (energy)       | About every 60s calm · 30s steady · 15s hyper                                       |
+| Input lock after a pull      | Small 0s · medium 0.25s · big 0.5s                                                  |
+| Tip                          | $2 (Big tipper $3, Stinky $1)                                                       |
+| Encounter costs              | $ = $5, $$$ = $15, per affected dog                                                 |
+| Squirrel: let them chase     | −$10                                                                                |
+| Missed tips (slower options) | $5 per dog                                                                          |
+| Chatty neighbour tip         | +$15                                                                                |
+| Shortcut                     | Next zone 25% shorter, its fees −25%                                                |
+| Rush hour                    | Next zone tips ×2, obstacles ×1.5                                                   |
+| Shop                         | Fanny pack $100 · poop bags $175 · Lucky collar $250 · each locked dog $150         |
 
 ## Explicitly out of v1
 
@@ -153,7 +156,7 @@ Minigames · branching paths between zones · unlockable dog slots · special do
 3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, Stinky, owner quips, dogs leave at 0 ♥
 4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
 5. **Dogs & meta:** 9-dog roster (3 unlocked, 6 in the shop) with 1–3 picks, bank, shop, loadout, save
-6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 4 encounters, 2 pickups, card frames, card illustrations for the 4 encounters and 6 forced stops; test on real phones
+6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 5 encounters, 2 pickups, card frames, card illustrations for the 5 encounters and 6 forced stops; test on real phones
 
 **Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
 

@@ -49,3 +49,9 @@ Format:
 - Covered: dog attributes, roster size, unlocks, temperament and size effects
 - Decided: four attributes (size, trait, energy, owner temperament); 9 named dogs; 3 starters, 6 bought in the shop; temperament trades happiness for pay; size sets pull strength; Lucky collar becomes +1 starting ♥
 - Open threads / next time: owner names and personalities; dog prices and pull numbers are placeholders; which encounters are area effects
+
+## 2026-10-18 · Design · Dog roster follow-up
+
+- Covered: owner names, dog looks, size balance, fees, dog prices, a thief encounter
+- Decided: owner names and roles; a coat and one accessory per dog; size is never a straight upgrade (pull strength vs max happiness and who you meet); flat $20 fee, fussy $25; Thief encounter scared off by big dogs; $150 per locked dog; pull numbers stay placeholders until playtests
+- Open threads / next time: which encounters are area effects and how cards show who was caught
