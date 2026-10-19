@@ -9,7 +9,7 @@ export const ENCOUNTERS = {
   biscuitNeighbour: {
     affects: { kind: "all" },
     kind: "lucky",
-    name: "Biscuit neighbour",
+    name: "Generous neighbour",
     resolution: {
       art: "card-biscuit-neighbour-take",
       effects: [
@@ -28,7 +28,7 @@ export const ENCOUNTERS = {
         {
           art: "card-lost-wallet-return",
           effects: [{ amount: 1, kind: "hearts", target: { kind: "affected" } }],
-          name: "Return it",
+          name: "Hand it in",
         },
         {
           art: "card-lost-wallet-keep",
@@ -36,7 +36,7 @@ export const ENCOUNTERS = {
             { amount: "lostWalletKeep", change: "gain", kind: "money" },
             { amount: -1, kind: "hearts", target: { kind: "affected" } },
           ],
-          name: "Keep it",
+          name: "Finders keepers",
         },
       ],
     },
@@ -94,14 +94,14 @@ export const ENCOUNTERS = {
               traitAmounts: { fancy: -2 },
             },
           ],
-          name: "Go through",
+          name: "Splash through",
         },
         {
           art: "card-puddle-towel",
           effects: [
             { amount: "encounterLow", change: "lose", kind: "money", perDog: { kind: "affected" } },
           ],
-          name: "Towel",
+          name: "Towel off",
         },
       ],
     },

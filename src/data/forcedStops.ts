@@ -11,9 +11,9 @@ export const FORCED_STOPS = {
           { amount: "chattyNeighbourTip", change: "gain", kind: "money" },
           { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
         ],
-        name: "Chat",
+        name: "Have a chat",
       },
-      { art: "card-chatty-neighbour-move-on", effects: [], name: "Politely move on" },
+      { art: "card-chatty-neighbour-move-on", effects: [], name: "Wave and go" },
     ],
   },
   constructionDetour: {
@@ -40,17 +40,17 @@ export const FORCED_STOPS = {
           { amount: "encounterLow", change: "lose", kind: "money", perDog: { kind: "all" } },
           { amount: 1, kind: "hearts", target: { kind: "all" } },
         ],
-        name: "Buy pup cups",
+        name: "Pup cups!",
       },
       {
         art: "card-ice-cream-truck-walk-past",
         effects: [{ amount: -1, kind: "hearts", target: { kind: "trait", trait: "foodDriven" } }],
-        name: "Walk past",
+        name: "Not today",
       },
     ],
   },
   kidWantsToPet: {
-    name: "Kid wants to pet them",
+    name: "Can I pet them?",
     options: [
       {
         art: "card-kid-wants-to-pet-pet",
@@ -58,12 +58,12 @@ export const FORCED_STOPS = {
           { amount: 1, kind: "hearts", target: { kind: "all" } },
           { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
         ],
-        name: "Let them pet",
+        name: "Of course!",
       },
       {
         art: "card-kid-wants-to-pet-decline",
         effects: [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],
-        name: "Politely decline",
+        name: "Sorry, not now",
       },
     ],
   },
@@ -88,7 +88,7 @@ export const FORCED_STOPS = {
       {
         art: "card-stop-sign-wait",
         effects: [{ amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } }],
-        name: "Wait patiently",
+        name: "Wait your turn",
       },
       {
         art: "card-stop-sign-dart",

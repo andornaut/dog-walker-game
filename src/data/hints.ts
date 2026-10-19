@@ -4,27 +4,27 @@ import type { Hint } from "./types";
 
 export const HINTS = {
   card: {
-    text: "Every card shows its outcome. One option is always free.",
+    text: "Every card shows what happens. One choice is always free.",
     trigger: { kind: "card" },
   },
   firedOwner: {
-    text: "An owner at 0 hearts fires you and takes back their dog's fees.",
+    text: "At 0♥ an owner fires you and takes back their dog's fees.",
     trigger: { kind: "firedOwner" },
   },
   forcedStop: {
-    text: "Every zone has one stop you can't dodge.",
+    text: "Each zone has one stop you can't dodge.",
     trigger: { kind: "forcedStop" },
   },
   luckyFind: {
-    text: "Some bumps are lucky. Run into them on purpose!",
+    text: "Some bumps are lucky. Aim for them!",
     trigger: { kind: "luckyFind" },
   },
   puddle: {
-    text: "Puddles splash some dogs. Fancy owners mind it most.",
+    text: "Puddles splash some dogs. Fancy owners mind most.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {
-    text: "A dog that leans and barks is about to pull. Steer back.",
+    text: "A lean and a bark mean a pull is coming. Drag back.",
     trigger: { kind: "pull" },
   },
   stinky: {
@@ -32,7 +32,7 @@ export const HINTS = {
     trigger: { debuff: "stinky", kind: "debuff" },
   },
   tip: {
-    text: "Tips are money. A smaller pack earns bigger tips.",
+    text: "Tips are money. Smaller packs get a little extra.",
     trigger: { kind: "tip" },
   },
   treat: {

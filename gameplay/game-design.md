@@ -112,13 +112,13 @@ Each size and trait pairs once, and each energy and temperament appears three ti
 
 Obstacles hit by accident open a choice card.
 
-| Encounter | Who's affected                                         | Options                                                                       |
-| --------- | ------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| Skunk     | Area effect: dogs caught by the roll                   | Pay $$$ for grooming · Pay $ for a quick rinse → _Stinky_ · Ignore → −♥♥ each |
-| Squirrel  | Chasers (none: harmless scenery, no card)              | Hold tight → −♥ · Let them chase → −$ (dropped tips)                          |
-| Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Go through → −♥ (more for Fancy) · Pay $ for a towel                          |
-| Other dog | All dogs                                               | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each      |
-| Thief     | All dogs (none if any big dog: it flees, no card)      | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)      |
+| Encounter | Who's affected                                         | Options                                                                    |
+| --------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Skunk     | Area effect: dogs caught by the roll                   | Full groom → −$$$ · Quick rinse → −$, _Stinky_ · Hold your nose → −♥♥ each |
+| Squirrel  | Chasers (none: harmless scenery, no card)              | Hold tight → −♥ · Let them chase → −$ (dropped tips)                       |
+| Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                      |
+| Other dog | All dogs                                               | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each   |
+| Thief     | All dogs (none if any big dog: it flees, no card)      | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)   |
 
 **Stinky** (debuff): cuts tip value for the rest of the zone. A second skunk refreshes it; it never stacks.
 
@@ -126,8 +126,8 @@ Obstacles hit by accident open a choice card.
 
 Good things to bump into on purpose.
 
-- **Lost wallet** (card): Return it → +♥ each (owners are proud) · Keep it → +$, −♥ each
-- **Biscuit neighbour** (no card): a treat for each dog, up to the carry limit
+- **Lost wallet** (card): Hand it in → +♥ each (owners are proud) · Finders keepers → +$, −♥ each
+- **Generous neighbour** (no card): a treat for each dog, up to the carry limit
 - **Photo op** (no card): +$ tip, +♥ to dramatic owners
 
 A lucky find with no card pays out on contact, with a short popup and a quip from the owners who gained.
@@ -157,12 +157,12 @@ Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the ba
 
 One per zone, drawn at random with no repeats in a run.
 
-- Stop sign: wait patiently → −$ per dog (missed tips) · dart across → −♥ each
-- Chatty neighbour: chat → +$ tip, −$ per dog (missed tips) · politely move on → nothing
-- Kid wants to pet them: let them pet → +♥ each, −$ per dog (missed tips) · politely decline → −♥ to one random owner
-- Ice cream truck: buy pup cups → −$ per dog, +♥ each · walk past → −♥ to Food-driven owners
-- Construction detour: take the long way → −$ per dog (missed tips) · squeeze past → −♥ to Fancy owners (dust)
-- Mail carrier: hold them back → −♥ each (barking) · wait it out → −$ per dog (missed tips)
+- Stop sign: Wait your turn → −$ per dog (missed tips) · Dart across → −♥ each
+- Chatty neighbour: Have a chat → +$ tip, −$ per dog (missed tips) · Wave and go → nothing
+- Can I pet them? (a kid): Of course! → +♥ each, −$ per dog (missed tips) · Sorry, not now → −♥ to one random owner
+- Ice cream truck: Pup cups! → −$ per dog, +♥ each · Not today → −♥ to Food-driven owners
+- Construction detour: Take the long way → −$ per dog (missed tips) · Squeeze past → −♥ to Fancy owners (dust)
+- Mail carrier: Hold them back → −♥ each (barking) · Wait it out → −$ per dog (missed tips)
 
 ### Upgrade cards
 
@@ -191,11 +191,25 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a home screen panel): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone); times each world was finished. Each dog's roster card shows its walks, zones finished and times fired
-- **Achievements:** a badge wall on the Stats page, earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; there is no other reward. The 15:
-  - Firsts: First Walk (finish zone 1), Full Route (finish all 4 zones), Pack of Two (walk 2 dogs), Pack of Three (walk 3 dogs)
-  - Mastery: Clean Paws (finish a zone without a hit), Spotless (finish a run without a hit), No Hard Feelings (finish 10 runs with no firings), High Earner (earn $500 in one run)
-  - Collection: Full Kennel (own all 9 dogs), Fully Equipped (own all 5 gear items), Every Owner Smiles (finish a run with each dog), Top Walker (own every dog and slot)
-  - Silly: You're Fired! (get fired 10 times), Stinky Streak (be Stinky in 3 zones of one run), Squirrel! (let a chaser chase 5 squirrels)
+- **Achievements:** a badge wall on the Stats page, earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; there is no other reward. Each badge shows its name, goal and one line:
+
+| Group      | Badge                   | Goal                                | Line                          |
+| ---------- | ----------------------- | ----------------------------------- | ----------------------------- |
+| Firsts     | First Steps             | Finish your first zone              | Every walk starts somewhere.  |
+| Firsts     | Round Trip              | Finish all 4 zones of Maple Street  | Home before the streetlights. |
+| Firsts     | Double Leash            | Walk 2 dogs at once                 | Twice the tails.              |
+| Firsts     | Pack Leader             | Walk 3 dogs at once                 | Twelve paws, one plan.        |
+| Mastery    | Clean Paws              | Finish a zone without a bump        | Not a speck on them.          |
+| Mastery    | Not a Scratch           | Finish a walk without a bump        | Spotless, start to finish.    |
+| Mastery    | Five-Star Service       | Finish 10 walks without being fired | The reviews are in.           |
+| Mastery    | Big Payday              | Earn $500 in one walk               | Treats are on you.            |
+| Collection | Full Kennel             | Own all 9 dogs                      | Every leash is spoken for.    |
+| Collection | Kitted Out              | Own all 5 gear items                | A pocket for everything.      |
+| Collection | Neighbourhood Favourite | Finish a walk with every dog        | Everyone's met you now.       |
+| Collection | Top Walker              | Own every dog and all 3 dog slots   | Maple Street's finest.        |
+| Silly      | You're Fired!           | Get fired 10 times                  | They always come back.        |
+| Silly      | Eau de Skunk            | Be Stinky in 3 zones of one walk    | You can smell this badge.     |
+| Silly      | Squirrel!               | Let a chaser chase 5 squirrels      | So close. Every time.         |
 
 ## Milestones
 
