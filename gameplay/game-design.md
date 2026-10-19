@@ -30,7 +30,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Web, phone browser first. Touch and keyboard; mouse is not planned
 - Portrait, ¾ top-down view, 5 lanes
 - Layout: a top status bar (money, zone progress, pause); a backdrop band showing the current zone, where scenery gags play; a fixed-width dog column on the left with one slot per dog; and the road filling the rest. Cards cover the paused, dimmed road; the status bar and dog column stay visible. Sizes are in [`art/style-guide.md`](../art/style-guide.md)
-- The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance, so more road is visible ahead. Lanes, distances and collisions are unchanged by it
+- The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead, and the far end fades into the backdrop band. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead
 - **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
