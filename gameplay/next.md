@@ -4,7 +4,7 @@ Everything set aside for later. Nothing here is scheduled or ordered.
 
 ## Worlds
 
-The game grows sideways rather than upward. A world is a set of 4 zones with its own theme, obstacles and mechanics (e.g. fantasy, the future, the past, dinosaurs). Maple Street is the first world. Finishing a full run in a world shows the next one on the home screen; buying access lets you walk it. Stats track the times each world was finished.
+The game grows sideways rather than upward. A world is a set of 4 zones with its own theme, obstacles and mechanics (e.g. fantasy, the future, the past, dinosaurs). Maplewood is the first world. Finishing a full run in a world shows the next one on the home screen; buying access lets you walk it. Stats track the times each world was finished.
 
 ## Other ideas for later
 

@@ -56,7 +56,7 @@ export const HELP_PAGES = [
   {
     art: "help-zones",
     body:
-      "Walk 4 zones of Maple Street, picking the next at each fork. " +
+      "Walk 4 zones of Maplewood, picking the next at each fork. " +
       "Every dog pays its fee after each zone. " +
       "Between zones, pick an upgrade card. Head home any time from the pause menu.",
     title: "Four zones",

@@ -1,6 +1,6 @@
 # Game Design
 
-The rulebook for the first complete game, set in one world, Maple Street. What's left to build and tune is in [`README.md`](README.md), what comes later is in [`next.md`](next.md), and undecided ideas are in [`ideas.md`](ideas.md).
+The rulebook for the first complete game, set in one world, Maplewood. What's left to build and tune is in [`README.md`](README.md), what comes later is in [`next.md`](next.md), and undecided ideas are in [`ideas.md`](ideas.md).
 
 [`src/data/`](../src/data/) holds every number and all content, and the [data page](https://dog-walker-game.andornaut.workers.dev/data/) shows them with the generated card text. This doc states the rules and gives numbers only where the data has none. In the rules below, `$` and `♥` give the direction and rough size of a change (`$$$` and `♥♥` are bigger); the amounts are in the data.
 
@@ -16,10 +16,10 @@ A cozy pixel-art lane runner where you walk a pack of dogs through the neighbour
 
 ## Core loop
 
-- **Before a run:** pick your dogs (one per owned dog slot) and up to one piece of gear.
+- **Before a run:** pick your dogs (one per owned dog slot) and put up to one owned gear item in your Pocket.
 - **During a run:** walk 4 of the 6 zones, starting on Woof Way. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop.
 - **Between zones:** pick 1 of 3 upgrade cards, then pick the next zone at a fork.
-- **After a run:** bank your earnings and spend them on the home screen: dogs, dog slots and gear.
+- **After a run:** bank your earnings and spend them at the Pet shop: dogs, dog slots and gear.
 
 Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run structure, loadout, meta progression), Vampire Survivors (choices along the way), Slay the Spire (choices as cards).
 
@@ -52,7 +52,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### A run
 
-- A walk is 4 zones of Maple Street, starting on Woof Way. Each zone is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
+- A walk is 4 zones of Maplewood, starting on Woof Way. Each zone is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
 - One forced stop per zone. After zones 1 to 3: pick 1 of 3 upgrade cards, then choose the next zone at a fork
 - **Forks:** the road meets a cross street and a fork card offers three paths (left, straight, right), each leading to a zone you haven't walked this run, sorted easiest on the left to hardest on the right. Each path card shows the zone's name, difficulty and fee multiplier
 - **Zones** (6, each walk visits 4 with no repeats):
@@ -232,7 +232,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds without a card don't stop the walk; the lemonade stand plays its popup during a 1-second stop, then opens its card
 - **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
-- **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, equipped gear); tap one for its description
+- **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, the Pocket item); tap one for its description
 - **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band; they open no card and have no effect.
@@ -266,17 +266,18 @@ Effects without "now" or "next zone" last the rest of the run.
 
 ### Home screen and progression
 
-Everything bought on the home screen is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
+Everything bought at the Pet shop is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
 
-- **Layout, top to bottom:** the top bar (bank, best walk and walk count, the Logbook button, settings); the gate scene; then three framed sections in order: Walker, Dogs, Gear (optional); then the Start walk button at the bottom. A section's frame lights up once it's complete; until then its band prompts ("Tap a face", "Add a dog"). Nothing else sits between the sections, so the screen reads as choose this, choose that, start your walk
-- **Shop:** the home screen is the shop. Tap a locked dog, dog slot or gear item to buy it, at any time you can pay. Anything you can afford has a gold outline. The slot sign reads "Slot 2 · $800" with "Save $650 more" or "Tap to buy"
-- **Details:** hold any dog or gear item for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's name and effect
+- **Layout, top to bottom:** the top bar (bank, best walk and walk count on the left; every control at the top right: Logbook, help, sound, settings); the gate scene; then three framed sections in order: Walker, Dogs, Pocket (optional); then the Start walk button at the bottom. A section's frame lights up once it's complete; until then its band prompts ("Tap a face", "Add a dog"). Nothing else sits between the sections, so the screen reads as choose this, choose that, start your walk
+- **Pet shop:** a building in the gate scene; tap it to open the shop, which sells everything you buy: gear, dogs and dog slots. Tap an item to buy it, at any time you can pay. Anything you can afford has a gold outline, and so does the building while anything in it is affordable. Tapping a locked dog or dog slot on the home screen opens the shop at that item. A dog unlocked another way shows its goal instead of a price. The slot sign reads "Slot 2 · $800" with "Save $650 more" or "Tap to buy"
+- **Tile states** (dogs and Pocket gear alike): Locked (not owned): a grey silhouette with a padlock and a price or goal plate; Available (owned, not picked): full colour in a plain frame; Picked: full colour in a gold frame with a check; Pack full (owned, not picked, while every slot is filled): greyed in colour, and a tap shows "The pack is full. Tap a picked dog to take it out."
+- **Details:** hold any dog or gear item, on the home screen or in the shop, for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's name and effect
 - **Start button:** the only button below the sections, reading "Start walk" in every state, and not ready until a dog is picked. The Dogs band shows the pack count, "Pack 1/1"; each dog tile shows its fee
-- **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after each of the first 3 walks "Tap to pick or buy. Hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
+- **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after each of the first 3 walks "Tap to pick or buy. Hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the pet shop."; picking a dog shows that owner's parting line
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
-- **Gear** (5 items, bought once): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). Equip up to 1 owned item before each run, or none
+- **Gear and Pocket** (5 items, bought once at the Pet shop): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). The Pocket section is a strip of all 5 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. One line below the strip gives the pocketed item's effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
 - **Walker picker:** choose Ada, Ben, Casey or Trista. All are free; the choice is cosmetic and saved, and the saved walker counts as picked, so a first visit needs only a dog
-- **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
+- **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Woof Way under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone). Each dog's roster card shows its walks, zones finished and times fired
@@ -295,7 +296,7 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 | Collection | Full Kennel             | Own all 9 dogs                      | Every leash is spoken for.    |
 | Collection | Kitted Out              | Own all 5 gear items                | A pocket for everything.      |
 | Collection | Neighbourhood Favourite | Finish a walk with every dog        | Everyone's met you now.       |
-| Collection | Top Walker              | Own every dog and all 3 dog slots   | Maple Street's finest.        |
+| Collection | Top Walker              | Own every dog and all 3 dog slots   | Maplewood's finest.           |
 | Silly      | You're Fired!           | Get fired 10 times                  | They always come back.        |
 | Silly      | Eau de Skunk            | Be Stinky in 3 zones of one walk    | You can smell this badge.     |
 | Silly      | Squirrel!               | Let a chaser chase 5 squirrels      | So close. Every time.         |

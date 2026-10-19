@@ -1,6 +1,7 @@
 import type { Gear } from "./types";
 
-// Permanent gear, bought once and kept. Take up to counts.loadoutMax on a run.
+// Permanent gear, bought once at the Pet shop and kept. Up to counts.loadoutMax goes in the
+// Pocket for a walk.
 // Locked dogs are sold too: those with unlock "shop" in dogs.ts, at their price.
 export const SHOP_GEAR = {
   fannyPack: {

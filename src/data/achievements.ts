@@ -82,7 +82,7 @@ export const ACHIEVEMENTS = [
     shortGoal: "All 9 dogs finish",
   },
   {
-    badgeLine: "Maple Street's finest.",
+    badgeLine: "Maplewood's finest.",
     conditions: [
       { count: "all", kind: "dogsOwned" },
       { count: "all", kind: "dogSlotsOwned" },

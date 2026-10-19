@@ -4,7 +4,7 @@ import type { World } from "./types";
 // not yet walked. Zones are listed from easiest to hardest, and each is the same distance.
 export const WORLD = {
   firstZone: "street",
-  name: "Maple Street",
+  name: "Maplewood",
   walkLength: 4,
   zones: [
     {
