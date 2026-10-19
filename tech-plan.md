@@ -16,7 +16,8 @@
 
 ## Architecture
 
-- **Rendering:** 360×640 internal, portrait, scaled with Phaser `Scale.FIT` and `pixelArt`. Every game UI element is drawn in the canvas; HTML is only the page shell and the dev panel.
+- **Rendering:** 360×640 internal, portrait, scaled with Phaser `Scale.FIT` and `pixelArt`. Every game UI element is drawn in the canvas; HTML is only the page shell, the dev panel and the crash screen.
+- **Crash screen:** `src/crash/` shows it once, on the first uncaught error or unhandled rejection, and ignores extension, cross-origin (`Script error.`) and ResizeObserver-loop errors. Phaser does not catch errors in its step, so they reach `window` and stop its loop. It pauses the game, writes nothing (the next launch banks the last zone checkpoint) and offers Reload; with `dev=1` it adds the message, stack and a Copy button.
 - **Screen layout:** top bar 360×40, backdrop band 360×150 (the zone's neighbourhood and scenery gags, never part of a lane), dog column 80×450 with 3 slots, and road 280×450 split into 5 lanes. A fired dog's slot empties, so the road never changes width.
 - **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
 - **Text:** bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x; text that doesn't fit is shortened, wrapped, or moved to the enlarged card.
@@ -33,6 +34,7 @@
   - `src/save/`: persistence
   - `src/sim/`: the run simulator
   - `src/pwa/`, `src/dev/`: phone app and dev tools
+  - `src/crash/`: the crash screen
   - `src/scenes/`, `src/main.ts`: everything that touches Phaser
 - **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser, and only tests may import `src/testing/`. ESLint enforces both, so all game logic runs in unit tests without a renderer.
 - **Assets:** the art agent exports into `public/art/`. `public/art/manifest.json` lists `sprites` (PNG plus Aseprite hash JSON), `fonts` (XML BMFont), `images` and `sounds`, with paths relative to `public/art/`; Valibot validates it and the sprite JSON at boot. Keys are kebab-case and unique. Animation keys are `<texture>:<tag>`. Sprites anchor on the feet, and a missing key draws a placeholder box. Art rules live in `art/style-guide.md`.

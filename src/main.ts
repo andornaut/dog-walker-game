@@ -2,6 +2,7 @@ import "./main.css";
 
 import { AUTO, Game, GameObjects, Scale } from "phaser";
 
+import { installCrashScreen } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
 import { DEV_STATE_EVENT, type DevState } from "./dev/devOverlay";
 import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
@@ -18,6 +19,16 @@ import { RunScene } from "./scenes/RunScene";
 import { SettingsScene } from "./scenes/SettingsScene";
 import { StartScene } from "./scenes/StartScene";
 import { StatsScene } from "./scenes/StatsScene";
+
+// Installed first, to catch errors while the game boots. A crash before game is assigned
+// throws in onCrash, which the crash screen logs and ignores.
+installCrashScreen({
+  dev: pageRunSetup().setup.dev,
+  onCrash: () => {
+    game.pause();
+    game.sound.pauseAll();
+  },
+});
 
 setupPhoneApp();
 
