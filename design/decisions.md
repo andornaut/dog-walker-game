@@ -54,3 +54,5 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Art · All UI is pixel art at the base resolution with a pixel font
 - 2026-10-18 · Tech · All run UI (road, top bar, dog column, choice cards) is drawn in the Phaser canvas; HTML is only the page shell: one pixel scale and one input system
 - 2026-10-18 · Tech · Run screen as three Phaser scenes (RunScene, HudScene, CardScene); game state is plain TypeScript with no Phaser dependency, so rules are unit-testable
+- 2026-10-18 · Art · Tile size is 32×32 for road tiles, dogs and obstacles; lanes are 56px wide
+- 2026-10-18 · Art · Aseprite sources go in art/; exported PNG sheets plus Aseprite JSON go in public/assets/; the pixel font is a BMFont (.fnt plus .png)
