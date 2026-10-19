@@ -674,14 +674,34 @@
       }
     },
     {
+      "key": "icon-effects-panel",
+      "png": "sprites/icon-effects-panel.png",
+      "json": "sprites/icon-effects-panel.json"
+    },
+    {
+      "key": "icon-motion-panel",
+      "png": "sprites/icon-motion-panel.png",
+      "json": "sprites/icon-motion-panel.json"
+    },
+    {
       "key": "icon-music",
       "png": "sprites/icon-music.png",
       "json": "sprites/icon-music.json"
     },
     {
+      "key": "icon-music-panel",
+      "png": "sprites/icon-music-panel.png",
+      "json": "sprites/icon-music-panel.json"
+    },
+    {
       "key": "icon-sound",
       "png": "sprites/icon-sound.png",
       "json": "sprites/icon-sound.json"
+    },
+    {
+      "key": "icon-sound-panel",
+      "png": "sprites/icon-sound-panel.png",
+      "json": "sprites/icon-sound-panel.json"
     },
     {
       "key": "kid",
@@ -928,6 +948,16 @@
       "key": "ui-select",
       "png": "sprites/ui-select.png",
       "json": "sprites/ui-select.json"
+    },
+    {
+      "key": "ui-slider",
+      "png": "sprites/ui-slider.png",
+      "json": "sprites/ui-slider.json"
+    },
+    {
+      "key": "ui-slider-knob",
+      "png": "sprites/ui-slider-knob.png",
+      "json": "sprites/ui-slider-knob.json"
     },
     {
       "key": "ui-switch",

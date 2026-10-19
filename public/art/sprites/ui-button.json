@@ -22,6 +22,22 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
     "duration": 1000
+   },
+   "ui-button 3.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 1000
+   },
+   "ui-button 4.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 1000
    }
  },
  "meta": {
@@ -29,12 +45,14 @@
   "version": "1.2.30-x64",
   "image": "ui-button.png",
   "format": "RGBA8888",
-  "size": { "w": 72, "h": 24 },
+  "size": { "w": 120, "h": 24 },
   "scale": "1",
   "frameTags": [
    { "name": "normal", "from": 0, "to": 0, "direction": "forward" },
    { "name": "pressed", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "disabled", "from": 2, "to": 2, "direction": "forward" }
+   { "name": "disabled", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "secondary", "from": 3, "to": 3, "direction": "forward" },
+   { "name": "secondary-pressed", "from": 4, "to": 4, "direction": "forward" }
   ]
  }
 }

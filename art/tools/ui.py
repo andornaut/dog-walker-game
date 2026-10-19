@@ -11,10 +11,13 @@ Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-check (16x16; tags 1, 2, 3,
 tick), fx-tap and fx-dust (16x16; tag play),
 ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
-corners; tags normal, pressed, disabled), ui-icon-button (20x20, the face under a
-16x16 icon such as pause, help or sound; tags normal, pressed), ui-switch (32x16;
-tags on, off), icon-sound and icon-music (tags on, off), ui-zone-pips (18x8; tags
-done, current, todo).
+corners; tags normal, pressed, disabled, secondary, secondary-pressed), ui-icon-button
+(20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
+ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
+empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
+disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
+icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags done,
+current, todo).
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -50,7 +53,12 @@ def to_image(px):
 # ---------- icons ----------
 # icon-pause, icon-help, icon-close, icon-sound and icon-music sit on ui-icon-button's navy
 # face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1, amber 7.5:1, orange
-# 5.0:1 and pink 5.1:1.
+# 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream: dbrown holds
+# 5.85:1 there, plum 9.42:1 and dred 5.07:1.
+
+# The speaker, note and effects inks: face, shade on the lower-right edges, and the mute X.
+NAVY_FACE = ("cream", "tan", "pink")
+CREAM_PANEL = ("dbrown", "plum", "dred")
 
 def pause():
     """Amber bars, so the run control stands apart from the cream sound toggle beside it."""
@@ -123,41 +131,82 @@ def stinky():
     return g
 
 
-def mute_x(g, y):
-    """The pink X that marks a muted icon, 5x5 in 2px strokes from (10, y)."""
+def mute_x(g, y, col="pink"):
+    """The X that marks a muted icon, 5x5 in 2px strokes from (10, y)."""
     for i in range(4):
-        g.rect(10 + i, y + i, 2, 2, "pink")
-        g.rect(13 - i, y + i, 2, 2, "pink")
+        g.rect(10 + i, y + i, 2, 2, col)
+        g.rect(13 - i, y + i, 2, 2, col)
 
 
-def speaker(on, note=False):
+def speaker(ink, on, note=False):
     """The states differ by shape: the speaker has two sound waves for on and an X in their
     place for off; the music note (an eighth note, its flag curling right) is bare for on and
     has the same X below its flag for off. Neither has an outline, which would fill the gaps
-    between the waves."""
+    between the waves. ink is NAVY_FACE or CREAM_PANEL."""
+    face, shade, x_col = ink
     g = Grid(16, 16)
     if note:
-        g.ell(4.5, 12, 3.5, 2.6, "cream", "tan")
-        g.rect(7, 2, 1, 10, "cream")
-        g.rect(8, 2, 1, 9, "tan")
+        g.ell(4.5, 12, 3.5, 2.6, face, shade)
+        g.rect(7, 2, 1, 10, face)
+        g.rect(8, 2, 1, 9, shade)
         for x, y in ((9, 2), (10, 2), (9, 3), (10, 3), (11, 3), (10, 4), (11, 4), (12, 4), (11, 5), (12, 5),
                      (12, 6), (12, 7), (11, 7)):
-            g.p(x, y, "cream")
+            g.p(x, y, face)
         if not on:
-            mute_x(g, 9)
+            mute_x(g, 9, x_col)
         return g
-    g.rect(1, 5, 4, 6, "cream")
+    g.rect(1, 5, 4, 6, face)
     for i in range(4):
-        g.rect(5 + i, 4 - i, 1, 8 + 2 * i, "cream")
-    g.rect(1, 10, 4, 1, "tan")
-    g.rect(8, 1, 1, 14, "tan")
+        g.rect(5 + i, 4 - i, 1, 8 + 2 * i, face)
+    g.rect(1, 10, 4, 1, shade)
+    g.rect(8, 1, 1, 14, shade)
     if on:
         for x, y in ((10, 5), (10, 10), (12, 3), (13, 4), (13, 11), (12, 12)):
-            g.p(x, y, "cream")
-        g.rect(11, 6, 1, 4, "cream")
-        g.rect(14, 5, 1, 6, "cream")
+            g.p(x, y, face)
+        g.rect(11, 6, 1, 4, face)
+        g.rect(14, 5, 1, 6, face)
     else:
-        mute_x(g, 5)
+        mute_x(g, 5, x_col)
+    return g
+
+
+def effects(ink, on):
+    """The Settings Effects row: a four-point sparkle with two small ones in the waves' place
+    for on, and the speaker's X there instead for off."""
+    face, shade, x_col = ink
+    g = Grid(16, 16)
+    for y, row in enumerate(["....f....", "....f....", "...ffs...", "...ffs...", "..fffss..", "fffffffss",
+                             "..fffss..", "...fss...", "...fss...", "....s....", "....s...."]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, 3 + y, face if ch == "f" else shade)
+    if on:
+        g.rect(12, 2, 1, 5, face)
+        g.rect(10, 4, 5, 1, face)
+        g.p(13, 4, shade)
+        g.rect(13, 9, 1, 3, face)
+        g.rect(12, 10, 3, 1, face)
+        g.p(10, 13, face)
+    else:
+        mute_x(g, 5, x_col)
+    return g
+
+
+def motion(ink, on):
+    """The Settings Reduced motion row: a ball. on, it flies with three speed lines trailing
+    it; off, it rests on a still ground line with no speed lines. The Reduced motion switch
+    shows off while it is on."""
+    face, shade, _ = ink
+    g = Grid(16, 16)
+    cy = 7.5 if on else 10.5
+    g.ell(11.5, cy, 3.6, 3.6, face, shade)
+    if on:
+        g.rect(3, 4, 4, 1, face)
+        g.rect(0, 7, 7, 1, face)
+        g.rect(2, 10, 5, 1, face)
+    else:
+        g.rect(1, 14, 15, 1, face)
+        g.rect(1, 15, 15, 1, shade)
     return g
 
 
@@ -196,10 +245,13 @@ def panel():
 
 
 def button(state):
+    """secondary is a tan face on a brown lip for the actions beside the amber primary (Help,
+    Settings, Head home beside Resume). Labels are plum: 7.35:1 on amber, 6.49:1 on tan."""
     face, lip, hi = {"normal": ("amber", "orange", "yellow"), "pressed": ("amber", None, "yellow"),
-                     "disabled": ("slate", "dslate", "grey")}[state]
+                     "disabled": ("slate", "dslate", "grey"), "secondary": ("tan", "brown", "cream"),
+                     "secondary-pressed": ("tan", None, "cream")}[state]
     g = Grid(24, 24)
-    top = 2 if state == "pressed" else 0
+    top = 2 if state.endswith("pressed") else 0
     if lip:
         g.rect(1, 20, 22, 4, lip)
         g.rect(0, 20, 24, 3, lip)
@@ -249,6 +301,48 @@ def switch(on):
         for i in range(5):
             g.rect(19 + i, 5 + i, 1, 2, "white")
             g.rect(23 - i, 5 + i, 1, 2, "white")
+    return g
+
+
+def slider_track(filled, on=True):
+    """24x10 three-slice (4px caps; the middle 16 columns tile) for the Settings volume track on
+    cream. filled is a solid forest bar in a plum rim the full 10px tall; empty is a hollow plum
+    groove 6px tall in rows 2 to 7, so the level reads by height and fill as well as colour. The
+    plum rim holds 9.42:1 on cream and forest 5.39:1. Muted (on false), both keep their shapes
+    in slate and grey."""
+    rim, face, hi, sh, inner = ("plum", "forest", "dgreen", "teal", "tan") if on else \
+        ("slate", "grey", "lgrey", "slate", "lgrey")
+    g = Grid(24, 10)
+    if filled:
+        g.rect(1, 0, 22, 10, rim)
+        g.rect(0, 1, 24, 8, rim)
+        g.rect(1, 1, 22, 8, face)
+        g.rect(1, 1, 22, 1, hi)
+        g.rect(1, 8, 22, 1, sh)
+    else:
+        g.rect(1, 2, 22, 6, rim)
+        g.rect(0, 3, 24, 4, rim)
+        g.rect(1, 3, 22, 4, "cream")
+        g.rect(1, 3, 22, 1, inner)
+    return g
+
+
+def slider_knob(state):
+    """10x16, drawn 3px above the track so it overhangs it 3px each way. A cream face in a plum
+    rim on a tan lip; dragged, the face sinks 2px into its lip and turns yellow, the active-state
+    face. Disabled while sound is muted."""
+    rim, face, sh, grip = {"normal": ("plum", "cream", "tan", "brown"),
+                           "pressed": ("plum", "yellow", "amber", "orange"),
+                           "disabled": ("slate", "lgrey", "grey", "grey")}[state]
+    top = 2 if state == "pressed" else 0
+    g = Grid(10, 16)
+    g.rect(1, top, 8, 16 - top, rim)
+    g.rect(0, top + 1, 10, 14 - top, rim)
+    g.rect(1, top + 1, 8, 14 - top, sh)
+    g.rect(1, top + 1, 7, 12, face)
+    g.rect(3, top + 4, 1, 6, grip)
+    g.rect(6, top + 4, 1, 6, grip)
+    g.p(2, top + 2, "white")
     return g
 
 
@@ -585,12 +679,18 @@ def sprites():
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
-    yield "ui-button", [(s, [button(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
+    yield "ui-button", [(s, [button(s).outlined(False)], 1000)
+                        for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed")]
     yield "ui-icon-button", [(s, [icon_button(s).outlined(False)], 1000) for s in ("normal", "pressed")]
     yield "ui-switch", [("on", [switch(True).outlined(False)], 1000), ("off", [switch(False).outlined(False)], 1000)]
-    yield "icon-sound", [("on", [speaker(True).outlined(False)], 1000), ("off", [speaker(False).outlined(False)], 1000)]
-    yield "icon-music", [("on", [speaker(True, True).outlined(False)], 1000),
-                         ("off", [speaker(False, True).outlined(False)], 1000)]
+    yield "ui-slider", [(t, [slider_track(t.startswith("filled"), not t.endswith("disabled")).outlined(False)], 1000)
+                        for t in ("filled", "empty", "filled-disabled", "empty-disabled")]
+    yield "ui-slider-knob", [(s, [slider_knob(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
+    for suffix, ink in (("", NAVY_FACE), ("-panel", CREAM_PANEL)):
+        yield f"icon-sound{suffix}", [(t, [speaker(ink, t == "on").outlined(False)], 1000) for t in ("on", "off")]
+        yield f"icon-music{suffix}", [(t, [speaker(ink, t == "on", True).outlined(False)], 1000) for t in ("on", "off")]
+    yield "icon-effects-panel", [(t, [effects(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
+    yield "icon-motion-panel", [(t, [motion(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "ui-zone-pips", [(s, [zone_pip(s).outlined(False)], 1000) for s in ("done", "current", "todo")]
 
 
