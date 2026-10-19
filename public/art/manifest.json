@@ -191,6 +191,21 @@
       "json": "sprites/fx-tap.json"
     },
     {
+      "key": "gag-ball",
+      "png": "sprites/gag-ball.png",
+      "json": "sprites/gag-ball.json"
+    },
+    {
+      "key": "gag-cat",
+      "png": "sprites/gag-cat.png",
+      "json": "sprites/gag-cat.json"
+    },
+    {
+      "key": "gag-sprinkler",
+      "png": "sprites/gag-sprinkler.png",
+      "json": "sprites/gag-sprinkler.json"
+    },
+    {
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json"

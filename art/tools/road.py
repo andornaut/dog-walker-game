@@ -604,6 +604,78 @@ def mail_top(g, b):
     g.p(19, 13 + b, "white")
 
 
+# ---------- scenery gags (front view, in the backdrop band) ----------
+
+def cat(tail=0, blink=False, alert=False):
+    """A ginger cat sitting on a fence post; the game places its paws on the fence's top rail."""
+    g = Grid(24, 24)
+    tx = (0, 1, 2, 1)[tail]
+    # tail curling up the right side
+    g.rect(17 + tx, 10, 2, 8, "ochre")
+    g.rect(16 + tx, 9, 3, 2, "ochre")
+    g.p(17 + tx, 8, "rust")
+    # body and front paws
+    g.ell(12, 17.5, 6, 5.5, "ochre", "rust", "tan")
+    g.ell(12, 18.5, 3, 3.5, "cream")
+    g.rect(9, 22, 2, 1, "cream")
+    g.rect(13, 22, 2, 1, "cream")
+    # head and ears
+    hy = 9 if alert else 10
+    g.tri((6.5, hy - 1), (7.5, hy - 6 - (1 if alert else 0)), (10.5, hy - 3), "ochre")
+    g.tri((17.5, hy - 1), (16.5, hy - 6 - (1 if alert else 0)), (13.5, hy - 3), "ochre")
+    g.p(8, hy - 3, "pink")
+    g.p(15, hy - 3, "pink")
+    g.ell(12, hy + 1, 5.5, 4.5, "ochre", "rust", "tan")
+    for x in (9, 14):
+        if blink:
+            g.rect(x, hy + 1, 2, 1, "plum")
+        else:
+            g.rect(x, hy, 2, 2, "green")
+            g.p(x + (1 if x < 12 else 0), hy, "ink")
+    g.p(12, hy + 3, "pink")
+    g.rect(10, hy + 2, 1, 1, "cream")
+    g.rect(13, hy + 2, 1, 1, "cream")
+    if alert:
+        g.rect(19, 2, 1, 3, "white")
+        g.p(19, 6, "white")
+    return g
+
+
+def sprinkler(step):
+    """A lawn sprinkler sweeping a fan of water across the grass."""
+    g = Grid(32, 24)
+    g.rect(14, 18, 4, 4, "grey")
+    g.rect(13, 21, 6, 2, "slate")
+    g.rect(15, 15, 2, 4, "lgrey")
+    g.rect(0, 22, 13, 1, "dgreen")
+    import math
+    angle = (-60, -25, 25, 60)[step]
+    for k in range(12):
+        a = math.radians(angle - 90)
+        r = 2 + k * 1.3
+        x = 16 + math.cos(a) * r
+        y = 15 + math.sin(a) * r + (k * k) * 0.06
+        g.p(x, y, "cyan" if k % 3 else "white")
+        g.p(x + 1, y + 1, "sky")
+    for i in range(4):
+        g.p(6 + i * 7 + step, 20 - (i + step) % 3, "cyan")
+    return g
+
+
+def ball(step):
+    """A red and white ball; the game rolls it along the sidewalk."""
+    g = Grid(14, 14)
+    g.ell(7, 7, 5.5, 5.5, "red", "dred", "pink")
+    for k in range(2):
+        x = 2 + (k * 5 + step * 2) % 10
+        for xx in (x, x + 1):
+            for yy in range(2, 12):
+                if g.px[yy][xx]:
+                    g.p(xx, yy, "white" if g.px[yy][xx] != g.px[0][0] else None)
+    g.p(5, 4, "white")
+    return g
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def frames(gs, outline=True):
@@ -634,6 +706,10 @@ def sprites():
                        ("flash", [person(tourist_top(True), legs="skin2", shoes="sky").outlined(),
                                   person(tourist_top(False), legs="skin2", shoes="sky").outlined()], 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
+    yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2, blink=True), cat(3)]), 260),
+                      ("react", frames([cat(1, alert=True), cat(2, alert=True)]), 200)]
+    yield "gag-sprinkler", [("spray", frames(sprinkler(i) for i in range(4)), 140)]
+    yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
     yield "stop-sign", [("idle", frames([stop_sign()]), 1000)]
     yield "chatty-neighbour", [("wave", [person(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350)]
     yield "kid", [("wave", frames([kid(False), kid(True)]), 300), ("sad", frames([kid(False, "sad")]), 1000)]

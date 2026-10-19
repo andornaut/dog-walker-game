@@ -97,10 +97,10 @@ Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
 ## Road and scenery (per zone)
 
-| Asset          | Key                                    | Type   | Size    | Priority | Notes                                                                                                        |
-| -------------- | -------------------------------------- | ------ | ------- | -------- | ------------------------------------------------------------------------------------------------------------ |
-| Zone backdrops | `backdrop-<zone>`                      | image  | 360×150 | core     | woof-way, bark-park, sniff-street-shops, the-long-way-home; the bottom rows are the curb that meets the road |
-| Scenery gags   | `gag-cat`, `gag-sprinkler`, `gag-ball` | sprite | TBD     | core     | Animated, in the backdrop band; no card, no collision                                                        |
+| Asset          | Key                                    | Type   | Size                | Priority | Notes                                                                                                                                                                           |
+| -------------- | -------------------------------------- | ------ | ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Zone backdrops | `backdrop-<zone>`                      | image  | 360×150             | core     | woof-way, bark-park, sniff-street-shops, the-long-way-home; the bottom rows are the curb that meets the road                                                                    |
+| Scenery gags   | `gag-cat`, `gag-sprinkler`, `gag-ball` | sprite | 24×24, 32×24, 14×14 | core     | In the backdrop band, no card, no collision: a cat on a fence (`idle` tail swish and blink, `react` ears up), a sprinkler (`spray`), a ball rolling along the sidewalk (`roll`) |
 
 Four zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each zone needs a road that tiles vertically across the 280px road width, plus a few non-colliding scenery props at the road edges.
 
