@@ -6,7 +6,7 @@ export const DOGS = {
     art: "archie",
     breed: "Australian Shepherd",
     energy: "calm",
-    look: "Blue merle, one blue eye, red bandana",
+    look: "Red merle, one blue eye, red bandana",
     name: "Archie",
     need: "playful",
     owner: {

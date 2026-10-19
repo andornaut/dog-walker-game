@@ -113,7 +113,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Zippy    | Jack Russell        | Playful  | Mr. Pruitt, retired accountant | White with tan patches, red collar      |
 | Pierre   | Standard poodle     | Nosy     | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms             |
 | Biscuit  | Beagle              | Regular  | Sam, barista                   | Tricolour, floppy ears, green collar    |
-| Archie   | Australian Shepherd | Playful  | Ophelia, stage actor           | Blue merle, one blue eye, red bandana   |
+| Archie   | Australian Shepherd | Playful  | Ophelia, stage actor           | Red merle, one blue eye, red bandana    |
 | Snowball | Samoyed             | Friendly | Tiffany, wedding planner       | Fluffy white, collar with a bell        |
 | Penny    | Golden retriever    | Thirsty  | Dr. Hughes, dentist            | Golden coat, feathery tail, blue collar |
 | Koda     | Husky               | Nosy     | Jesse, trail runner            | Grey and white, blue eyes, harness      |
