@@ -5,12 +5,13 @@ import type { DogId, EncounterId } from "../data/types";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { cardFor } from "./choices";
-import { cents } from "./units";
+import { cents, dollarsToCents } from "./units";
 
 // Koda is a laid-back chaser, Duchess a laid-back fancy dog, Nugget a dramatic food-driven
 // one, so trait amounts and the dramatic doubling both show.
 const PACK: readonly DogId[] = ["koda", "duchess", "nugget"];
 const state = testState({ duchess: 5, koda: 5, nugget: 5 }, { money: cents(10_000) });
+const { encounterHigh, encounterLow, thiefLetGo } = gameData.tuning.money;
 
 const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => ({
   affected,
@@ -53,14 +54,14 @@ describe("a card's text for the dogs it catches", () => {
       affected: ["koda", "duchess"],
       id: "skunk",
       label: "Full groom",
-      text: "−$40",
+      text: `−$${encounterHigh * 2}`,
       why: "totals a per-dog cost for the dogs caught",
     },
     {
       affected: ["koda"],
       id: "thief",
       label: "Let it go",
-      text: "−$20",
+      text: `−$${thiefLetGo}`,
       why: "keeps a cost charged once for the pack",
     },
   ] as const)("$why", ({ affected, id, label, text }) => {
@@ -68,13 +69,13 @@ describe("a card's text for the dogs it catches", () => {
   });
 
   it.each([
-    { affected: ["koda"], cost: 2000, id: "skunk", label: "Full groom" },
-    { affected: PACK, cost: 6000, id: "skunk", label: "Full groom" },
-    { affected: PACK, cost: 3000, id: "puddle", label: "Towel off" },
+    { affected: ["koda"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
+    { affected: PACK, dollars: encounterHigh * 3, id: "skunk", label: "Full groom" },
+    { affected: PACK, dollars: encounterLow * 3, id: "puddle", label: "Towel off" },
   ] as const)("agrees with the cost plaque: $label for $affected.length", (row) => {
     const view = option(encounter(row.id, row.affected), row.label);
-    expect(view.cost).toBe(row.cost);
-    expect(view.text).toBe(`−$${row.cost / 100}`);
+    expect(view.cost).toBe(dollarsToCents(row.dollars));
+    expect(view.text).toBe(`−$${row.dollars}`);
   });
 
   it("matches the snapshot for the whole pack caught", () => {

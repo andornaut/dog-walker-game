@@ -495,12 +495,13 @@ describe("need cards", () => {
 
   it("names the grumpy neighbour as the cause of an accident's Walk on", () => {
     const state = testState({ biscuit: 5, koda: 5 }, { money: cents(10_000) });
+    const { amount } = NEED_CARDS.accident.options[1].effects[0];
     const card = cardFor(data, state, need("accident", ["biscuit"]));
     expect(card.options[1]?.breakdown).toEqual([
-      { dog: "biscuit", name: "grumpy neighbour", text: "−2 ♥" },
+      { dog: "biscuit", name: "grumpy neighbour", text: `−${-amount} ♥` },
     ]);
     const walkOn = choose(state, need("accident", ["biscuit"]), 1);
-    expect(heartsByDog(walkOn.state)).toEqual({ biscuit: 3, koda: 5 });
+    expect(heartsByDog(walkOn.state)).toEqual({ biscuit: 5 + amount, koda: 5 });
     expect(walkOn.quips).toEqual([{ dog: "biscuit", moment: "upset" }]);
   });
 
