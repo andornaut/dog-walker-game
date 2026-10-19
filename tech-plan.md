@@ -2,107 +2,90 @@
 
 ## Platform and delivery
 
-- **Platforms:** web first; iOS and Android later by wrapping the web build (Capacitor).
-- **Engine:** Phaser 4 + TypeScript, built with Vite. The build is static files, and the workflow is terminal-driven and AI-assisted.
-- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `gameplay/game-design.md`, not in a GitHub Projects board.
-- **Hosting:** Cloudflare Workers static assets (no Worker script), free and unmetered.
-- **Deploys:** Cloudflare Workers Builds deploys every push to `main`. It runs independently of GitHub CI, so a commit with red CI still deploys.
-- **Tooling:** follows `andornaut/cloudflare-starter`: Node 24, Vitest, ESLint with the shared house rules, Prettier, markdownlint (pinned in `package.json`), husky + lint-staged pre-commit, Dependabot, and the Test and AI attributions workflows.
-- **Type checking:** `strict`, plus `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes` and `noFallthroughCasesInSwitch`.
+- **Platforms:** web, phone browser first. iOS and Android later by wrapping the web build (Capacitor).
+- **Engine:** Phaser 4 + TypeScript, built with Vite into static files.
+- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `gameplay/game-design.md`.
+- **Hosting:** Cloudflare Workers static assets, no Worker script.
+- **Deploys:** Cloudflare Workers Builds deploys every push to `main`, independently of GitHub CI, so a commit with red CI still deploys.
+- **Tooling:** follows `andornaut/cloudflare-starter`: Node 24, Vitest, ESLint with the shared house rules, Prettier, markdownlint, husky + lint-staged, Dependabot, and the Test and AI attributions workflows.
+- **Type checking:** `strict`, `noUncheckedIndexedAccess`, `noImplicitOverride`, `exactOptionalPropertyTypes` and `noFallthroughCasesInSwitch`.
 
 ## Site
 
-- `/` is a static home page, `/play/` is the game (`play/index.html`, built from `src/`), `/data/` shows every game data table, and `/art/` is the art gallery, copied as-is from `public/art/`.
-- The HTML pages are Vite build inputs. `public/` is copied as-is.
+`/` is a static home page, `/play/` the game, `/data/` every game data table plus simulated runs, and `/art/` the art gallery (copied from `public/art/`). The HTML pages are Vite build inputs.
 
 ## Architecture
 
-- **Render resolution:** 360×640 internal (portrait 9:16), scaled with `pixelArt` (no smoothing).
-- **All UI in the canvas:** the road, top bar, dog column, cards and menus are Phaser scenes drawn at one pixel scale with a pixel font. HTML is only the page shell. While cards are up, lane input is not listened for.
-- **Text:** the bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x (about 10.8 CSS px capitals on a 390px-wide phone); 1x is only for incidental marks. Text that can't fit at 2x is shortened, wrapped, or moved to the tap-to-enlarge card.
-- **Input:** keyboard (arrows, A/D or H/L, one lane per press). Touch is a relative drag: each lane-width of horizontal travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar is pause. A pull re-anchors the drag at the pack's new lane. The gesture state machine is pure (`src/input/gestures.ts`).
-- **Accessibility:** reduced motion (a setting, defaulting to `prefers-reduced-motion`) keeps every highlight and state change and drops decorative motion: idle loops hold frame 0, labels fade in place, and nothing shakes or hops. Road scrolling and the lane slide stay. Hearts show a count ("n/max") as well as icons, and affordability shows as text or a lock, not colour alone. Tap targets are at least 48 CSS px with 8 px between them. Text meets 4.5:1 contrast and essential icons 3:1.
-- **Sound:** `src/audio/` maps game cues to manifest keys, mixes music and effects volumes from settings, ducks music while a card is open, mutes while paused or hidden, and rate-limits repeated effects. `src/scenes/soundboard.ts` is the one Phaser wrapper. Each sound ships as Ogg plus AAC for iOS Safari.
-- **Screen layout:**
-  - A top bar for status (money, zone progress) and pause, separate from the road so it never hides obstacles scrolling in from the top.
-  - A fixed-width dog column on the left with 3 slots. A fired dog's slot empties, so the road never changes width.
-  - The road fills the rest, split into 5 lanes.
-- **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` dims the road, shows 2 or 3 cards, and reports the chosen option to `RunScene`.
+- **Rendering:** 360×640 internal, portrait, scaled with Phaser `Scale.FIT` and `pixelArt`. Every game UI element is drawn in the canvas; HTML is only the page shell and the dev panel.
+- **Screen layout:** top bar 360×40, backdrop band 360×150 (the zone's neighbourhood and scenery gags, never part of a lane), dog column 80×450 with 3 slots, and road 280×450 split into 5 lanes. A fired dog's slot empties, so the road never changes width.
+- **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
+- **Text:** bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x; text that doesn't fit is shortened, wrapped, or moved to the enlarged card.
+- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull re-anchors the drag.
+- **Accessibility:** reduced motion (a setting, defaulting to `prefers-reduced-motion`) drops decorative motion but keeps every highlight and state change, the road scroll and the lane slide. No state relies on colour alone. Tap targets are at least 48 CSS px with 8 px between them. Text meets 4.5:1 contrast and essential icons 3:1.
+- **Sound:** `src/audio/` maps cues to manifest keys and mixes music and effects volumes from settings, ducking music under cards and muting while paused or hidden. `src/scenes/soundboard.ts` is the Phaser wrapper. Each sound ships as Ogg plus AAC.
 - **Source layout:**
-  - `src/data/`: game content and tuning (see Game data).
-  - `src/rules/` and `src/state/`: run state and pure rule functions.
-  - `src/runner/`: lane motion, pulls and input locks, zones by distance, spawn planning, road items and collisions.
-  - `src/input/`: keyboard bindings and the touch gesture state machine.
-  - `src/layout/`: screen geometry.
-  - `src/assets/`: manifest parsing and Aseprite animation specs.
-  - `src/save/`: persistence (see Save data).
-  - `src/scenes/` and `src/main.ts`: everything that touches Phaser.
-- **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser or a scene. ESLint's `no-restricted-imports` enforces it, so all game logic runs in unit tests without a renderer.
-- **Assets:** the art agent exports into `public/art/`, served at `/art/`. `public/art/manifest.json` lists every asset with paths relative to `public/art/`: `sprites` (key, png, json: PNG sheets with Aseprite hash JSON and frameTags), `fonts` (key, png, fnt: XML BMFont, which `load.bitmapFont` requires) and `images` (key, png). Keys are kebab-case and unique. Animation keys are `<texture>:<tag>`, because tag names repeat across sprites and Phaser animation keys are global. Sprites anchor on the feet. A missing key falls back to a placeholder box. Art rules live in `art/style-guide.md`.
-- **Tests:** Vitest unit tests over all pure logic. Scenes are checked by playing and by headless screenshots.
-- **Simulator:** `src/sim/` plays bot policies (hearts unless an owner would drop to 1, always hearts, always pay) on the real rules and data over a matrix of packs and obstacle hit rates. `npm run simulate -- --runs 1000 --seed 1 [--policy ...] [--hit ...] [--out rows.json]` prints a table; results are deterministic per seed. `/data/` shows a smaller live matrix. Balance changes are checked with it before and after, at the same seed.
+  - `src/data/`: content and tuning
+  - `src/rules/`, `src/state/`: run state and pure rules
+  - `src/runner/`: lane motion, pulls, zones, spawn planning, collisions
+  - `src/input/`: keys and the touch gesture state machine
+  - `src/layout/`: screen geometry
+  - `src/assets/`: manifest and Aseprite parsing
+  - `src/save/`: persistence
+  - `src/sim/`: the run simulator
+  - `src/pwa/`, `src/dev/`: phone app and dev tools
+  - `src/scenes/`, `src/main.ts`: everything that touches Phaser
+- **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser, and only tests may import `src/testing/`. ESLint enforces both, so all game logic runs in unit tests without a renderer.
+- **Assets:** the art agent exports into `public/art/`. `public/art/manifest.json` lists `sprites` (PNG plus Aseprite hash JSON), `fonts` (XML BMFont), `images` and `sounds`, with paths relative to `public/art/`; Valibot validates it and the sprite JSON at boot. Keys are kebab-case and unique. Animation keys are `<texture>:<tag>`. Sprites anchor on the feet, and a missing key draws a placeholder box. Art rules live in `art/style-guide.md`.
+- **Tests:** Vitest over all pure logic; scenes are checked by playing and by headless screenshots.
+- **Simulator:** bot policies (hearts unless an owner would drop to 1, always hearts, always pay) play the real rules over a matrix of packs and obstacle hit rates. `npm run simulate -- --runs 1000 --seed 1 [--policy ...] [--hit ...] [--out rows.json]`. Results are deterministic per seed. Balance changes are compared before and after at the same seed.
 
 ## Game data
 
-- **Format:** typed TypeScript modules in `src/data/` (dogs, quips, encounters, forced stops, lucky encounters, upgrades, shop, debuffs, zones, walkers, hints, help, tuning). Content is `as const satisfies Type`. Tuning uses plain `satisfies`, so its values stay `number` for live tuning.
-- **Ownership:** the gameplay agent edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and all tests.
-- **Effects:** card options are lists of effects from a closed set of kinds. Effects name tuning numbers by key instead of copying them, so every number lives once in `tuning.ts`. A new card built from existing kinds is a data change; a new kind is code in `src/rules/` plus a test.
-- **Card text:** generated from the effects and tuning, with a snapshot test.
-- **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are distinct branded types in the rules. Value files hold plain numbers, branded when read. Hearts deltas in effects are -3 to 3.
-- **Integrity:** `src/data/data.test.ts` checks the rulebook's invariants (each encounter keeps a free option, the stop pool covers every zone, start hearts at most max, and so on) plus type-level tests that invalid data fails to compile.
+- **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.
+- **Ownership:** gameplay edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and the tests.
+- **Effects:** card options are lists of effects from a closed set of kinds, naming tuning numbers by key, so every number lives once in `tuning.ts`. A new kind is code in `src/rules/` plus a test.
+- **Card text:** generated from the effects and tuning, covered by a snapshot test.
+- **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are branded types in the rules; value files hold plain numbers. Hearts deltas are -3 to 3.
+- **Integrity:** `src/data/data.test.ts` checks the rulebook's invariants, and type-level tests show invalid data fails to compile.
 - **Live tuning:** editing a value file under the dev server updates the running game through Vite HMR. Scenes and rules read tuning at the time of use.
-- **Choices:** `cardFor` builds a card from an encounter, stop or upgrade offer and the run state (generated text, affected dogs, options disabled with a reason when unaffordable). `chooseOption` applies the chosen option and returns the new run state and the outcome events the scenes animate.
+- **Choices:** `cardFor` builds a card (text, affected dogs, options disabled when unaffordable); `chooseOption` applies a choice and returns the new run state plus the outcome events the scenes animate.
 
 ## Save data
 
-Player state that outlives a run. Local only: no accounts, no cloud saves.
+- **Scope:** one profile per browser, local only, per origin.
+- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, and the zone checkpoint, all referenced by data ids. Firings per owner and worlds finished are derived, not stored.
+- **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
+- **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
+- **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
+- **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter replaces it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
+- **Writes:** on a purchase, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
 
-- **Profiles:** one per browser.
-- **Contents:** bank (integer cents), owned gear, unlocked dogs, dog slots owned, chosen walker, last loadout, stats, logbook, shown first-time hints, settings (reduced motion, music and sound volume), and the zone checkpoint, all referenced by data ids (`koda`, `luckyCollar`).
-- **Stats** (`gameplay/game-design.md`, Home screen and progression):
-  - Overall: runs by outcome (finished, headed home, out of dogs), best run and lifetime earnings, total firings, and best zone completed (heading home mid-zone counts only the zones before it). Firings per owner equal the per-dog counts, since each dog has one owner, and worlds finished equal runs finished while there is one world.
-  - Logbook: the best walk (amount, zones, dogs) and the last walk (the same plus its outcome).
-  - Per dog: walks, zones finished, times fired.
-  - A run banked from a zone checkpoint counts as headed home.
-- **Format:** one JSON document under one key (`dog-walker-game:save`) with a `version` field. Every write replaces the whole document.
-- **Validation:** a Valibot schema parses every load, and the types come from the schema. Ids the data no longer has are dropped. A save that fails validation is kept under a backup key, and the game starts fresh.
-- **Migrations:** an ordered list of pure functions from each save version to the next, each tested against a fixture save. Renaming a dog or gear id needs one.
-- **Storage interface:** async. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter replaces it in the mobile app, where iOS can evict web view storage. If storage is unavailable or throws (private browsing, quota), the game stays playable and says progress won't be saved.
-- **When it writes:** on a shop purchase, at run end, and after each zone. The zone checkpoint records the run's earnings so far. On the next launch an unfinished run is banked as if the player had headed home.
-- **Scope:** saves are per origin. Moving to a custom domain starts players from zero unless saves are exported or migrated.
+## Phone
 
-## Porting notes
-
-Things to watch so mobile stays easy: touch controls, screen sizes and aspect ratios, performance, audio unlock on mobile browsers, offline play.
-
-- The page disables browser touch gestures (`touch-action: none`) and pinch zoom, so taps and drags reach the game.
-- Scaling: Phaser `Scale.FIT`, the largest 9:16 view that fits the window. The scale is fractional, so pixel sizes are uneven, and phones taller than 9:16 get letterbox bars.
-- Installable web app: `/manifest.webmanifest` (start URL `/play/`, fullscreen with a standalone fallback, portrait) and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`. It precaches the game page, its assets and every file in `public/art/manifest.json`. The HTML and the art manifest are network-first with a cache fallback, and hashed assets are cache-first. A new version activates on the next launch, never mid-run.
-- Phone events on `window` (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` (Android back) maps to pause, and `app-hidden` pauses the run and checkpoints the save. The run holds a screen wake lock. The first gesture unlocks audio.
+- The canvas takes no browser gestures (`touch-action: none`).
+- Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game and every file in the art manifest. HTML and the art manifest are network-first; hashed assets are cache-first. A new version activates on the next launch.
+- Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, and `app-hidden` pauses and checkpoints. The run holds a screen wake lock, and the first gesture unlocks audio.
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL (`src/dev/`). Invalid values are warned about and ignored, and parsing never throws.
+`/play/` reads a run setup from the URL. Invalid values are warned about and ignored.
 
-| Param   | Value                              | Default                      |
-| ------- | ---------------------------------- | ---------------------------- |
-| `seed`  | integer 0 to 4294967295            | random, shown in the overlay |
-| `pack`  | 1 to 3 dog ids, comma-separated    | saved loadout                |
-| `gear`  | a gear id, or `none`               | saved loadout                |
-| `zone`  | 1 to 4                             | 1                            |
-| `money` | whole cents                        | the gear's starting money    |
-| `speed` | scroll-speed multiplier, 0.1 to 10 | 1                            |
-| `dev`   | `1` shows the overlay at load      | `0`                          |
+| Param   | Value                           | Default         |
+| ------- | ------------------------------- | --------------- |
+| `seed`  | integer 0 to 4294967295         | random          |
+| `pack`  | 1 to 3 dog ids, comma-separated | saved loadout   |
+| `gear`  | a gear id, or `none`            | saved loadout   |
+| `zone`  | 1 to 4                          | 1               |
+| `money` | whole cents                     | gear's starting |
+| `speed` | scroll-speed multiplier         | 1               |
+| `dev`   | `1` shows the overlay           | `0`             |
 
-- One seed feeds independent random streams (spawns per zone, rolls, pulls, cards), so a draw in one never shifts another.
-- Lane moves and card choices are recorded with their simulation time in a versioned input log, and replaying it reproduces the run exactly.
-- The dev overlay (backquote toggles it) shows the seed, zone, distance, speed, money, hearts and FPS. C copies a link that reproduces the run.
-- The dev panel (`src/dev/devPanel.ts`) is plain HTML under the canvas: a one-line bar that opens a sheet with a run-setup form validated with the URL parser's limits, the overlay toggle, the run link, replay, and save tools (reset, +$1,000, unlock all) that write the save and reload. It is visible in every build.
-- Session keys (`sessionStorage`), each an input log as `encodeInputLog` writes it:
-  - `dog-walker-game:dev-replay`: written by the panel's Replay before it loads `/play/` with the log's setup. RunScene is to read it at run start, play its events, and remove it. Not wired yet.
-  - `dog-walker-game:dev-last-log`: RunScene is to write the finished run's log here at run end; the panel downloads it. Not written yet.
+- One seed feeds independent random streams (spawns per zone, rolls, pulls, cards).
+- Lane moves and card choices are recorded with their simulation time in a versioned input log that replays the run exactly. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
+- The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run.
+- The dev panel is a collapsible HTML bar under the canvas with the run-setup form, overlay toggle, run link, replay, and save tools (reset, +$1,000, unlock all).
 
 ## Open questions
 
-- Playtesting builds on phones early
+- Playtesting on phones
 - Monetization and app-store needs
