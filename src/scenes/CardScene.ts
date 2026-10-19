@@ -19,7 +19,13 @@ import { cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { type CardView, type Choice, MAX_CARD_OPTIONS, type OptionView } from "../rules/choices";
+import {
+  type CardView,
+  type Choice,
+  firesText,
+  MAX_CARD_OPTIONS,
+  type OptionView,
+} from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
 import type { CardSource } from "../state/runState";
 import { fillLine } from "../text/lines";
@@ -275,14 +281,35 @@ export class CardScene extends Scene {
         : option.breakdown.length === 0
           ? [option.text]
           : option.breakdown.map(({ dog, name, text }) =>
-              dog === null ? `${text} ${name}` : `${gameData.dogs[dog].name}: ${text} ${name}`,
+              [dog === null ? "" : `${gameData.dogs[dog].name}:`, text, name]
+                .filter((part) => part !== "")
+                .join(" "),
             );
-    const body = addPixelText(this, x + LARGE.body.x, y + LARGE.body.y, lines.join("\n"), {
+    // An option that would fire an owner says so first, in dark red.
+    let bodyY = y + LARGE.body.y;
+    let bodyHeight: number = LARGE.body.height;
+    if (option !== undefined && option.fires.length > 0) {
+      const warning = addPixelText(
+        this,
+        x + LARGE.body.x,
+        bodyY,
+        firesText(gameData, option.fires),
+        {
+          color: PALETTE.darkRed,
+          font: "title",
+          maxWidth: LARGE.body.width,
+        },
+      );
+      const used = Math.ceil(warning.height) + 4;
+      bodyY += used;
+      bodyHeight -= used;
+    }
+    const body = addPixelText(this, x + LARGE.body.x, bodyY, lines.join("\n"), {
       color: PALETTE.plum,
       maxWidth: LARGE.body.width / 2,
       scale: 2,
     });
-    if (body.height > LARGE.body.height) {
+    if (body.height > bodyHeight) {
       body.setScale(1).setMaxWidth(LARGE.body.width);
     }
     const badge = LARGE.badge;
@@ -414,6 +441,20 @@ export class CardScene extends Scene {
       }
     }
 
+    // An option that would fire an owner says so at the foot of its effect, in dark red.
+    const fires = entry.option?.fires ?? [];
+    let effectHeight: number = EFFECT.height;
+    if (fires.length > 0) {
+      const warning = this.centered(
+        x + EFFECT.x + EFFECT.width / 2,
+        y + EFFECT.y + EFFECT.height,
+        firesText(gameData, fires),
+        grey ? PALETTE.slate : PALETTE.darkRed,
+        { maxWidth: EFFECT.width },
+      ).setOrigin(0.5, 1);
+      effectHeight -= Math.ceil(warning.height) + 2;
+    }
+
     // The effect at 2x where it fits the card, else at 1x; holding the card shows it larger.
     const text = path?.difficultyName ?? entry.option?.text ?? gameData.runText.card.skipEffect;
     const effect = this.centered(
@@ -424,7 +465,7 @@ export class CardScene extends Scene {
       { maxWidth: EFFECT.width / 2, scale: 2 },
     );
     // A word too long to wrap, such as a difficulty, is wider than its wrap width.
-    if (effect.height > EFFECT.height || effect.width > EFFECT.width) {
+    if (effect.height > effectHeight || effect.width > EFFECT.width) {
       effect.setScale(1).setMaxWidth(EFFECT.width);
     }
 

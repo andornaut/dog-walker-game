@@ -5,6 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
+import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import { UPGRADES } from "../data/upgrades";
 import type { RunState } from "../state/runState";
@@ -22,6 +23,7 @@ const data = {
   needCards: NEED_CARDS,
   needSpots: NEED_SPOTS,
   needs: NEEDS,
+  runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   tuning: {
     ...TEST_TUNING,

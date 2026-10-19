@@ -72,6 +72,13 @@ const DURATION_TEXT: { readonly [D in Duration]: string } = {
 
 const MINUS = "−";
 
+// Names joined for a sentence: "Jesse", "Jesse and Rosa", "Jesse, Rosa and Kim".
+export function sentenceList(names: readonly string[]): string {
+  const head = names.slice(0, -1);
+  const last = names.at(-1) ?? "";
+  return head.length === 0 ? last : `${head.join(", ")} and ${last}`;
+}
+
 function sign(value: number): string {
   return value < 0 ? MINUS : "+";
 }

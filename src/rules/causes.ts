@@ -1,5 +1,6 @@
 import type { CardOption, DogId, GameData, Temperament } from "../data/types";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
+import { fillNames } from "../text/lines";
 import { assertNever } from "./assertNever";
 import { formatDollars, TEMPERAMENT_NAMES } from "./effectText";
 import type { Contribution } from "./modifiers";
@@ -41,8 +42,21 @@ export type Change = HeartChange | MoneyChange;
 
 export type CauseData = Pick<
   GameData,
-  "debuffs" | "encounters" | "forcedStops" | "needCards" | "needSpots" | "shopGear" | "upgrades"
+  | "debuffs"
+  | "dogs"
+  | "encounters"
+  | "forcedStops"
+  | "needCards"
+  | "needSpots"
+  | "runText"
+  | "shopGear"
+  | "upgrades"
 >;
+
+// "Jesse fires you": the dog's owner, whose meter reached 0.
+export function firedByText(data: Pick<GameData, "dogs" | "runText">, dog: DogId): string {
+  return fillNames(data.runText.firedBy, { owner: data.dogs[dog].owner.name });
+}
 
 export function modifierCauses(
   contributions: readonly Contribution<ActiveModifier>[],
@@ -125,7 +139,8 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       if (change.kind === "money") {
         return "at $0";
       }
-      return cause.bound === "max" ? "at max" : "at 0 ♥";
+      // A meter held at 0 means its owner fires you.
+      return cause.bound === "max" ? "at max" : firedByText(data, change.dog);
     case "packSize":
       return cause.packSize === 1 ? "solo" : `pack of ${cause.packSize}`;
     case "temperament":

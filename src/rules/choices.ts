@@ -12,6 +12,7 @@ import type {
 } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState, UpgradeOffer } from "../state/runState";
+import { fillNames } from "../text/lines";
 import { countChase } from "./achievements";
 import { assertNever } from "./assertNever";
 import {
@@ -19,11 +20,12 @@ import {
   type CauseData,
   causeName,
   type Change,
+  firedByText,
   type HeartChange,
   type MoneyChange,
 } from "./causes";
 import { type EffectContext, moneyCost, resolveEffects } from "./effects";
-import { effectText } from "./effectText";
+import { effectText, sentenceList } from "./effectText";
 import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { type Cents, cents, type Hearts } from "./units";
@@ -47,7 +49,7 @@ export type OptionAvailability =
 
 // One line of an option's enlarged view: one cause of one change the option would make,
 // such as the base cost or a modifier. dog is the owner whose meter changes, or null for the
-// money.
+// money. text is the amount, empty on the line saying an owner fires you.
 export interface BreakdownLine {
   readonly dog: DogId | null;
   readonly name: string;
@@ -62,6 +64,8 @@ export interface OptionView {
   // owner is shown for the first owner in the pack.
   readonly breakdown: readonly BreakdownLine[];
   readonly cost: Cents;
+  // The dogs whose owners would fire you, as breakdown shows them.
+  readonly fires: readonly DogId[];
   // The option's position in the source's data; pass it to chooseOption.
   readonly index: number;
   readonly label: string;
@@ -244,15 +248,43 @@ function outcomeOf(
   };
 }
 
-// The changes an option would make, cause by cause.
-function breakdownOf(data: ChoiceData, changes: readonly Change[]): BreakdownLine[] {
+function causeLines(data: ChoiceData, changes: readonly Change[]): BreakdownLine[] {
   return changes.flatMap((change) =>
-    change.causes.map((cause) => ({
-      dog: change.dog,
-      name: causeName(data, change, cause),
-      text: amountText(change.kind, cause.amount),
-    })),
+    change.causes.flatMap((cause) =>
+      // A meter held at 0 is said by the firing line instead.
+      change.kind === "hearts" && cause.kind === "limit" && cause.bound === "min"
+        ? []
+        : [
+            {
+              dog: change.dog,
+              name: causeName(data, change, cause),
+              text: amountText(change.kind, cause.amount),
+            },
+          ],
+    ),
   );
+}
+
+// The changes an option would make, cause by cause: the hearts, a line for each owner who
+// would fire you, then the money.
+function breakdownOf(
+  data: ChoiceData,
+  outcome: Pick<ChoiceOutcome, "fired" | "heartChanges" | "moneyChanges">,
+): BreakdownLine[] {
+  return [
+    ...causeLines(data, outcome.heartChanges),
+    ...outcome.fired.map((dog) => ({ dog, name: firedByText(data, dog), text: "" })),
+    ...causeLines(data, outcome.moneyChanges),
+  ];
+}
+
+// "Fires Jesse": the owners an option would fire, by their dogs.
+export function firesText(
+  data: Pick<GameData, "dogs" | "runText">,
+  dogs: readonly DogId[],
+): string {
+  const owners = sentenceList(dogs.map((dog) => data.dogs[dog].owner.name));
+  return fillNames(data.runText.card.fires, { owners });
 }
 
 // A fork's card: one free path card per path, left to right, each naming its zone, with the
@@ -268,6 +300,7 @@ export function forkCard(
       availability: { enabled: true },
       breakdown: [],
       cost: cents(0),
+      fires: [],
       index,
       label: zone.name,
       path: {
@@ -318,8 +351,9 @@ function effectCard(
       art: option.art,
       availability:
         cost <= state.money ? { enabled: true } : { enabled: false, reason: "not enough money" },
-      breakdown: breakdownOf(data, [...preview.heartChanges, ...preview.moneyChanges]),
+      breakdown: breakdownOf(data, preview),
       cost,
+      fires: preview.fired,
       index,
       label: option.name,
       text: effectText(data, option.effects),

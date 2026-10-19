@@ -63,6 +63,7 @@ export type WalkData = Pick<
   | "minorObstacles"
   | "needCards"
   | "needSpots"
+  | "runText"
   | "shopGear"
   | "tuning"
   | "upgrades"

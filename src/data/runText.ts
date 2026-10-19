@@ -4,6 +4,7 @@ import type { RunText } from "./types";
 // each line may use.
 export const RUN_TEXT = {
   card: {
+    fires: "Fires {owners}",
     forkSubtitle: "Pick the next zone",
     forkTitle: "Which way?",
     free: "Free",
@@ -17,6 +18,7 @@ export const RUN_TEXT = {
     upgradeTitle: "Pick an upgrade",
   },
   fired: "FIRED!",
+  firedBy: "{owner} fires you",
   homeQuestion: {
     body: "You keep tips and earlier zones' fees. This zone pays nothing.",
     headHome: "Head home",
