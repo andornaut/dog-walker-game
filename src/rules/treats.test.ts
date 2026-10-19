@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
+import type { DogId } from "../data/types";
+import type { RunState } from "../state/runState";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { faceMood, giveTreat } from "./treats";
@@ -27,20 +29,17 @@ describe("giveTreat", () => {
     ]);
   });
 
-  it("does nothing without a treat", () => {
-    const before = testState({ koda: 4 }, { treats: 0 });
-    expect(giveTreat(data, "koda", before)).toEqual({ change: null, state: before });
-  });
-
-  it("keeps the treat when the owner is already at their max", () => {
-    const before = testState({ duchess: 6 }, { treats: 1 });
-    expect(giveTreat(data, "duchess", before)).toEqual({ change: null, state: before });
-  });
-
-  it("does nothing for a dog that is not walking", () => {
-    const before = testState({ duchess: 3, koda: "fired" }, { treats: 1 });
-    expect(giveTreat(data, "koda", before)).toEqual({ change: null, state: before });
-    expect(giveTreat(data, "biscuit", before)).toEqual({ change: null, state: before });
+  it.each<[string, DogId, RunState]>([
+    ["without a treat", "koda", testState({ koda: 4 }, { treats: 0 })],
+    [
+      "keeping the treat, for an owner at their max",
+      "duchess",
+      testState({ duchess: 6 }, { treats: 1 }),
+    ],
+    ["for a fired owner's dog", "koda", testState({ duchess: 3, koda: "fired" }, { treats: 1 })],
+    ["for a dog not in the pack", "biscuit", testState({ duchess: 3 }, { treats: 1 })],
+  ])("does nothing %s", (_, dog, before) => {
+    expect(giveTreat(data, dog, before)).toEqual({ change: null, state: before });
   });
 });
 

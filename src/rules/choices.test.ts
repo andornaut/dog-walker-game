@@ -141,88 +141,87 @@ describe("the zone encounters' options", () => {
     };
   };
 
-  it("lets the goose be backed away from for missed tips, or honked at, worst for chasers", () => {
-    // Koda is a laid-back chaser, Nugget a dramatic food-driven dog, Pierre a fussy fancy one.
-    const pack: DogId[] = ["koda", "nugget", "pierre"];
-    expect(pick("goose", pack, "Back off slowly")).toMatchObject({
-      hearts: { koda: 5, nugget: 5, pierre: 5 },
-      spent: 3 * missedTips * 100,
-    });
-    const honk = pick("goose", pack, "Honk back");
-    expect(honk).toMatchObject({ hearts: { koda: 3, nugget: 3, pierre: 4 }, spent: 0 });
-    expect(honk.text).toBe("−1 ♥ each (−2 Chaser)");
-  });
+  // Koda is a laid-back chaser, Nugget a dramatic food-driven dog, Pierre a fussy fancy one,
+  // Biscuit Regular and Duchess Friendly.
+  const kodaTrio: DogId[] = ["koda", "nugget", "pierre"];
+  const biscuitTrio: DogId[] = ["biscuit", "koda", "nugget"];
+  const duchessTrio: DogId[] = ["duchess", "nugget", "pierre"];
+  const tips = 3 * missedTips * 100;
+  const low = encounterLow * 100;
 
-  it("charges a picnic only for the food-driven dogs it affects", () => {
-    const pack: DogId[] = ["koda", "nugget", "pierre"];
-    expect(pick("picnic", pack, "Buy a new lunch", ["nugget"]).spent).toBe(encounterLow * 100);
-    expect(pick("picnic", pack, "Drop it!", ["nugget"])).toMatchObject({
-      hearts: { koda: 5, nugget: 3, pierre: 5 },
-      spent: 0,
-    });
-  });
-
-  it("replants the petunias per dog, or lets a Regular dog go there for −♥ each", () => {
-    const pack: DogId[] = ["biscuit", "koda", "nugget"];
-    expect(pick("petunias", pack, "Replant them").spent).toBe(3 * encounterLow * 100);
-    expect(pick("petunias", pack, "Nature calls")).toMatchObject({
-      hearts: { biscuit: 4, koda: 4, nugget: 3 },
-      met: ["biscuit"],
-      spent: 0,
-    });
-  });
-
-  it("meets Nosy at the trash for −♥ to fancy owners, tidies up for fussy ones, or drags on", () => {
-    const pack: DogId[] = ["koda", "nugget", "pierre"];
-    const sniff = pick("trash", pack, "Sniff it all");
-    expect(sniff).toMatchObject({
-      hearts: { koda: 5, nugget: 5, pierre: 4 },
-      met: ["koda", "pierre"],
-      spent: 3 * missedTips * 100,
-    });
-    expect(sniff.text).toBe(`Nosy needs met, −1 ♥ to Fancy owners, −$${missedTips} per dog`);
-    expect(pick("trash", pack, "Tidy up")).toMatchObject({
-      hearts: { koda: 5, nugget: 5, pierre: 6 },
-      spent: 3 * missedTips * 100,
-    });
-    expect(pick("trash", pack, "Drag them on")).toMatchObject({
-      hearts: { koda: 4, nugget: 1, pierre: 4 },
-      spent: 0,
-    });
-  });
-
-  it("meets Friendly at the cafe for missed tips, buys lattes for fussy owners, or slinks away", () => {
-    const pack: DogId[] = ["duchess", "nugget", "pierre"];
-    expect(pick("cafe", pack, "Charm the crowd")).toMatchObject({
-      hearts: { duchess: 5, nugget: 5, pierre: 5 },
-      met: ["duchess"],
-      spent: 3 * missedTips * 100,
-    });
-    expect(pick("cafe", pack, "Buy new lattes")).toMatchObject({
-      hearts: { duchess: 5, nugget: 5, pierre: 6 },
-      spent: 3 * encounterLow * 100,
-    });
-    expect(pick("cafe", pack, "Slink away")).toMatchObject({
-      hearts: { duchess: 4, nugget: 3, pierre: 4 },
-      spent: 0,
-    });
-  });
-
-  it("sells lemonade per dog for Thirsty, says hi for Friendly, or does nothing", () => {
-    const pack: DogId[] = ["duchess", "nugget", "pierre"];
-    const water = pick("lemonade", pack, "Water, please");
-    expect(water).toMatchObject({ met: ["nugget"], spent: 3 * lemonadeCup * 100 });
-    expect(water.text).toBe(`Thirsty needs met, −$${lemonadeCup} per dog`);
-    expect(pick("lemonade", pack, "Say hi")).toMatchObject({
-      met: ["duchess"],
-      spent: 3 * missedTips * 100,
-    });
-    expect(pick("lemonade", pack, "Maybe later")).toEqual({
-      hearts: { duchess: 5, nugget: 5, pierre: 5 },
-      met: [],
-      spent: 0,
-      text: "Nothing",
-    });
+  it.each<[EncounterId, string, DogId[], Partial<ReturnType<typeof pick>>, DogId[]?]>([
+    [
+      "goose",
+      "Back off slowly",
+      kodaTrio,
+      { hearts: { koda: 5, nugget: 5, pierre: 5 }, spent: tips },
+    ],
+    [
+      "goose",
+      "Honk back",
+      kodaTrio,
+      { hearts: { koda: 3, nugget: 3, pierre: 4 }, spent: 0, text: "−1 ♥ each (−2 Chaser)" },
+    ],
+    ["picnic", "Buy a new lunch", kodaTrio, { spent: low }, ["nugget"]],
+    [
+      "picnic",
+      "Drop it!",
+      kodaTrio,
+      { hearts: { koda: 5, nugget: 3, pierre: 5 }, spent: 0 },
+      ["nugget"],
+    ],
+    ["petunias", "Replant them", biscuitTrio, { spent: 3 * low }],
+    [
+      "petunias",
+      "Nature calls",
+      biscuitTrio,
+      { hearts: { biscuit: 4, koda: 4, nugget: 3 }, met: ["biscuit"], spent: 0 },
+    ],
+    [
+      "trash",
+      "Sniff it all",
+      kodaTrio,
+      {
+        hearts: { koda: 5, nugget: 5, pierre: 4 },
+        met: ["koda", "pierre"],
+        spent: tips,
+        text: `Nosy needs met, −1 ♥ to Fancy owners, −$${missedTips} per dog`,
+      },
+    ],
+    ["trash", "Tidy up", kodaTrio, { hearts: { koda: 5, nugget: 5, pierre: 6 }, spent: tips }],
+    ["trash", "Drag them on", kodaTrio, { hearts: { koda: 4, nugget: 1, pierre: 4 }, spent: 0 }],
+    [
+      "cafe",
+      "Charm the crowd",
+      duchessTrio,
+      { hearts: { duchess: 5, nugget: 5, pierre: 5 }, met: ["duchess"], spent: tips },
+    ],
+    [
+      "cafe",
+      "Buy new lattes",
+      duchessTrio,
+      { hearts: { duchess: 5, nugget: 5, pierre: 6 }, spent: 3 * low },
+    ],
+    ["cafe", "Slink away", duchessTrio, { hearts: { duchess: 4, nugget: 3, pierre: 4 }, spent: 0 }],
+    [
+      "lemonade",
+      "Water, please",
+      duchessTrio,
+      {
+        met: ["nugget"],
+        spent: 3 * lemonadeCup * 100,
+        text: `Thirsty needs met, −$${lemonadeCup} per dog`,
+      },
+    ],
+    ["lemonade", "Say hi", duchessTrio, { met: ["duchess"], spent: tips }],
+    [
+      "lemonade",
+      "Maybe later",
+      duchessTrio,
+      { hearts: { duchess: 5, nugget: 5, pierre: 5 }, met: [], spent: 0, text: "Nothing" },
+    ],
+  ])("%s: %s", (id, option, pack, expected, affected) => {
+    expect(pick(id, pack, option, affected)).toMatchObject(expected);
   });
 });
 
@@ -239,37 +238,21 @@ describe("applyInstantEncounter", () => {
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
-  it("gives the biscuit neighbour's treats per caught dog, up to the carry limit", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { treats: 0 });
-    const both = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", [
-      "duchess",
-      "koda",
-    ]);
-    expect(both.treatsDelta).toBe(2);
-    const full = applyInstantEncounter(data, () => 0, { ...state, treats: 3 }, "biscuitNeighbour", [
-      "koda",
-    ]);
-    expect(full.treatsDelta).toBe(0);
-  });
-
-  it("has each owner whose dog the neighbour treated say a happier line, with no hearts moved", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { treats: 0 });
-    const one = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", ["koda"]);
-    expect(one.heartChanges).toEqual([]);
-    expect(one.quips).toEqual([{ dog: "koda", moment: "happier" }]);
-    const both = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", [
-      "duchess",
-      "koda",
-    ]);
-    expect(both.quips).toEqual([
-      { dog: "duchess", moment: "happier" },
-      { dog: "koda", moment: "happier" },
-    ]);
-    const full = applyInstantEncounter(data, () => 0, { ...state, treats: 3 }, "biscuitNeighbour", [
-      "koda",
-    ]);
-    expect(full.quips).toEqual([]);
-  });
+  // The carry limit is 3 treats.
+  it.each<[string, number, DogId[], number, DogId[]]>([
+    ["one dog", 0, ["koda"], 1, ["koda"]],
+    ["two dogs", 0, ["duchess", "koda"], 2, ["duchess", "koda"]],
+    ["a full treat bag", 3, ["koda"], 0, []],
+  ])(
+    "gives the biscuit neighbour's treats per caught dog, a happier line and no hearts: %s",
+    (_, treats, affected, treatsDelta, quips) => {
+      const state = testState({ duchess: 5, koda: 5 }, { treats });
+      const outcome = applyInstantEncounter(data, () => 0, state, "biscuitNeighbour", affected);
+      expect(outcome.treatsDelta).toBe(treatsDelta);
+      expect(outcome.heartChanges).toEqual([]);
+      expect(outcome.quips).toEqual(quips.map((dog) => ({ dog, moment: "happier" })));
+    },
+  );
 
   it("refuses an encounter that opens a card, and an ended run", () => {
     const state = testState({ koda: 5 });
@@ -460,16 +443,20 @@ describe("Second wind", () => {
     offered: ["secondWind", "bigTipper", "raincoats"],
   };
 
-  it("gives +2 hearts to the unhappiest owner only, doubled for a dramatic owner", () => {
-    const outcome = choose(testState({ duchess: 4, koda: 2, pierre: 3 }), offer, 0);
-    expect(heartsByDog(outcome.state)).toEqual({ duchess: 4, koda: 4, pierre: 3 });
-    const dramatic = choose(testState({ koda: 5, nugget: 1 }), offer, 0);
-    expect(heartsByDog(dramatic.state)).toEqual({ koda: 5, nugget: 5 });
-  });
-
-  it("breaks a tie by pack order", () => {
-    const outcome = choose(testState({ duchess: 3, koda: 2, pierre: 2 }), offer, 0);
-    expect(heartsByDog(outcome.state)).toEqual({ duchess: 3, koda: 4, pierre: 2 });
+  it.each<[string, Parameters<typeof testState>[0], Parameters<typeof testState>[0]]>([
+    [
+      "+2 hearts to the unhappiest owner only",
+      { duchess: 4, koda: 2, pierre: 3 },
+      { duchess: 4, koda: 4, pierre: 3 },
+    ],
+    ["+4 hearts to a dramatic unhappiest owner", { koda: 5, nugget: 1 }, { koda: 5, nugget: 5 }],
+    [
+      "the first in pack order on a tie",
+      { duchess: 3, koda: 2, pierre: 2 },
+      { duchess: 3, koda: 4, pierre: 2 },
+    ],
+  ])("gives %s", (_, before, after) => {
+    expect(heartsByDog(choose(testState(before), offer, 0).state)).toEqual(after);
   });
 });
 

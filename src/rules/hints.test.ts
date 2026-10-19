@@ -1,22 +1,19 @@
 import { describe, expect, it } from "vitest";
 
 import { HINTS } from "../data/hints";
+import type { HintId } from "../data/types";
 import { hintFor } from "./hints";
 
 const data = { hints: HINTS };
 
 describe("hintFor", () => {
-  it("returns the hint whose trigger matches the event", () => {
-    expect(hintFor(data, [], { kind: "tip" })).toEqual({ id: "tip", text: HINTS.tip.text });
-    expect(hintFor(data, [], { encounter: "puddle", kind: "encounter" })?.id).toBe("puddle");
-    expect(hintFor(data, [], { debuff: "stinky", kind: "debuff" })?.id).toBe("stinky");
-  });
-
-  it("returns nothing for a hint already shown", () => {
-    expect(hintFor(data, ["tip"], { kind: "tip" })).toBeNull();
-  });
-
-  it("returns nothing for an event no hint waits for", () => {
-    expect(hintFor(data, [], { encounter: "thief", kind: "encounter" })).toBeNull();
+  it.each<[string, HintId[], Parameters<typeof hintFor>[2], HintId | null]>([
+    ["the hint for a matching event", [], { kind: "tip" }, "tip"],
+    ["the hint for a matching encounter", [], { encounter: "puddle", kind: "encounter" }, "puddle"],
+    ["the hint for a matching debuff", [], { debuff: "stinky", kind: "debuff" }, "stinky"],
+    ["nothing for a hint already shown", ["tip"], { kind: "tip" }, null],
+    ["nothing for an event no hint waits for", [], { encounter: "thief", kind: "encounter" }, null],
+  ])("returns %s", (_, shown, event, id) => {
+    expect(hintFor(data, shown, event)).toEqual(id === null ? null : { id, text: HINTS[id].text });
   });
 });

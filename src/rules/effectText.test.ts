@@ -14,70 +14,57 @@ import { cents } from "./units";
 const data = { debuffs: DEBUFFS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
 
 describe("effectText", () => {
-  it("writes money per dog or once, from the tuning", () => {
-    expect(effectText(data, ENCOUNTERS.puddle.resolution.options[1].effects)).toBe("−$5 per dog");
-    expect(effectText(data, ENCOUNTERS.squirrel.resolution.options[1].effects)).toBe("−$10");
-  });
+  const { puddle, skunk, squirrel } = ENCOUNTERS;
+  const { iceCreamTruck, kidWantsToPet } = FORCED_STOPS;
 
-  it("writes hearts each, with a trait's own amount in brackets", () => {
-    expect(effectText(data, ENCOUNTERS.puddle.resolution.options[0].effects)).toBe(
+  it.each<[string, readonly Effect[], string]>([
+    ["money per dog", puddle.resolution.options[1].effects, "−$5 per dog"],
+    ["money once", squirrel.resolution.options[1].effects, "−$10"],
+    [
+      "hearts each, a trait's own amount",
+      puddle.resolution.options[0].effects,
       "−1 ♥ each (−2 Fancy)",
-    );
-    expect(effectText(data, ENCOUNTERS.skunk.resolution.options[2].effects)).toBe("−2 ♥ each");
-  });
-
-  it("names the owners a targeted change reaches", () => {
-    expect(effectText(data, FORCED_STOPS.iceCreamTruck.options[1].effects)).toBe(
-      "−1 ♥ to Food-driven owners",
-    );
-    expect(effectText(data, FORCED_STOPS.kidWantsToPet.options[1].effects)).toBe(
-      "−1 ♥ to one random owner",
-    );
-    expect(effectText(data, ENCOUNTERS.photoOp.resolution.effects)).toBe(
+    ],
+    ["hearts each", skunk.resolution.options[2].effects, "−2 ♥ each"],
+    ["the owners of a trait", iceCreamTruck.options[1].effects, "−1 ♥ to Food-driven owners"],
+    ["one random owner", kidWantsToPet.options[1].effects, "−1 ♥ to one random owner"],
+    [
+      "owners of a temperament",
+      ENCOUNTERS.photoOp.resolution.effects,
       "+$10, +1 ♥ to dramatic owners",
-    );
-  });
-
-  it("joins several effects and names a debuff", () => {
-    expect(effectText(data, ENCOUNTERS.skunk.resolution.options[1].effects)).toBe(
+    ],
+    ["the unhappiest owner", UPGRADES.secondWind.effects, "+2 ♥ to the unhappiest owner"],
+    [
+      "several effects, naming a debuff",
+      skunk.resolution.options[1].effects,
       "−$5 per dog, Stinky",
-    );
-  });
-
-  it("writes treats with the carry limit", () => {
-    expect(effectText(data, ENCOUNTERS.biscuitNeighbour.resolution.effects)).toBe(
+    ],
+    [
+      "treats with the carry limit",
+      ENCOUNTERS.biscuitNeighbour.resolution.effects,
       "+1 treat per dog (carry up to 3)",
-    );
-  });
-
-  it("writes modifiers as percentages, removals and additions with their duration", () => {
-    expect(effectText(data, UPGRADES.bigTipper.effects)).toBe("Tip value +50% for the run");
-    expect(effectText(data, SHOP_GEAR.runningShoes.effects)).toBe(
-      "No lane-input lock after a pull",
-    );
-    expect(effectText(data, SHOP_GEAR.fannyPack.effects)).toBe("Starting money +$15");
-    expect(effectText(data, UPGRADES.sweetTalker.effects)).toBe(
+    ],
+    ["a multiplier as a percentage", UPGRADES.bigTipper.effects, "Tip value +50% for the run"],
+    ["a removal", SHOP_GEAR.runningShoes.effects, "No lane-input lock after a pull"],
+    ["an addition", SHOP_GEAR.fannyPack.effects, "Starting money +$15"],
+    [
+      "a per-dog cost change with its duration",
+      UPGRADES.sweetTalker.effects,
       "Card costs per dog −$2 for the run",
-    );
-  });
-
-  it("names the unhappiest owner as the target", () => {
-    expect(effectText(data, UPGRADES.secondWind.effects)).toBe("+2 ♥ to the unhappiest owner");
-  });
-
-  it("writes an immunity as the cards it stops", () => {
-    expect(effectText(data, SHOP_GEAR.whistle.effects)).toBe("No Thief cards for the run");
-  });
-
-  it("writes an option with no effects as nothing", () => {
-    expect(effectText(data, [])).toBe("Nothing");
+    ],
+    ["an immunity as the cards it stops", SHOP_GEAR.whistle.effects, "No Thief cards for the run"],
+    ["no effects as nothing", [], "Nothing"],
+  ])("writes %s", (_, effects, text) => {
+    expect(effectText(data, effects)).toBe(text);
   });
 });
 
 describe("formatDollars", () => {
-  it("shows whole dollars without cents and other amounts to the cent", () => {
-    expect(formatDollars(cents(500))).toBe("$5");
-    expect(formatDollars(cents(150))).toBe("$1.50");
+  it.each([
+    [500, "$5"],
+    [150, "$1.50"],
+  ])("shows %i cents as %s", (amount, text) => {
+    expect(formatDollars(cents(amount))).toBe(text);
   });
 });
 

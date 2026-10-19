@@ -6,8 +6,9 @@ import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
-import type { Effect } from "../data/types";
+import type { DogId, Effect } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
+import type { EffectSource, RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { causeLabel, type Change, changeAmount } from "./causes";
@@ -38,104 +39,100 @@ function only(changes: readonly Change[]): Change {
   return change;
 }
 
-const label = (changes: readonly Change[]) => causeLabel(data, only(changes));
+// The one change the effect makes to the state.
+const resolved = (
+  effect: Effect,
+  state: RunState,
+  affected: readonly DogId[] = [],
+  source: EffectSource = skunkIgnore,
+) => only(resolveEffects(data, { affected, random: () => 0, source }, [effect], state).changes);
+
+const firing = (money: number) =>
+  only(
+    fireOwnersAtZero(
+      testState({ pierre: 0 }, { feesEarned: { pierre: cents(1300) }, money: cents(money) }),
+    ).changes,
+  );
+
+const sweetTalker = activeModifier(
+  { kind: "upgrade", upgrade: "sweetTalker" },
+  { by: "sweetTalkerCostPerDog", operation: "add", stat: "costPerDog" },
+);
+const towel: Effect = {
+  amount: "encounterLow",
+  change: "lose",
+  kind: "money",
+  perDog: { kind: "affected" },
+};
+const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
+const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
+const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
+const stinkyTip = (slots: Parameters<typeof testState>[0]) =>
+  tipValue(data, testState(slots, { debuffs: [{ debuff: "stinky" }] }));
 
 describe("causeLabel", () => {
-  it("names a dramatic owner's doubling, without naming the card option just picked", () => {
-    const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
-    const { changes } = resolveEffects(
-      data,
-      { affected: ["nugget"], random: () => 0, source: skunkIgnore },
-      [loseOne],
-      testState({ nugget: 5 }),
-    );
-    expect(label(changes)).toBe("−2 ♥, dramatic");
-  });
-
-  it("names the max when a gain is cut short there", () => {
-    const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
-    const { changes } = resolveEffects(
-      data,
-      { affected: [], random: () => 0, source: { kind: "upgrade", upgrade: "bellyRubs" } },
-      [gainOne],
-      testState({ nugget: 5 }),
-    );
-    expect(label(changes)).toBe("+1 ♥, dramatic, at max");
-  });
-
-  it("names the tip and a solo walk's tip factor", () => {
-    expect(causeLabel(data, tipValue(data, testState({ koda: 5 })))).toBe("+$1.50 tip, solo");
-  });
-
-  it("names Stinky on a halved tip", () => {
-    const tip = tipValue(
-      data,
-      testState({ duchess: 5, koda: 5, nugget: 5 }, { debuffs: [{ debuff: "stinky" }] }),
-    );
-    expect(causeLabel(data, tip)).toBe("+$0.50 tip, Stinky");
-  });
-
-  it("names Sweet talker on a per-dog cost", () => {
-    const sweetTalker = activeModifier(
-      { kind: "upgrade", upgrade: "sweetTalker" },
-      { by: "sweetTalkerCostPerDog", operation: "add", stat: "costPerDog" },
-    );
-    const towel: Effect = {
-      amount: "encounterLow",
-      change: "lose",
-      kind: "money",
-      perDog: { kind: "affected" },
-    };
-    const state = testState(
-      { duchess: 5, koda: 5 },
-      { modifiers: [sweetTalker], money: cents(5000) },
-    );
-    const { changes } = resolveEffects(
-      data,
-      { affected: ["duchess", "koda"], random: () => 0, source: skunkIgnore },
-      [towel],
-      state,
-    );
-    expect(label(changes)).toBe("−$6, Sweet talker");
-  });
-
-  it("names a clawback, and the $0 floor when the fees were already spent", () => {
-    const fired = (money: number) =>
-      fireOwnersAtZero(
-        testState({ pierre: 0 }, { feesEarned: { pierre: cents(1300) }, money: cents(money) }),
-      ).changes;
-    expect(label(fired(5000))).toBe("−$13 fees taken back");
-    expect(label(fired(500))).toBe("−$5 fees taken back, at $0");
-  });
-
-  it("names a treat and an instant encounter as the base", () => {
-    const treat = giveTreat(data, "koda", testState({ koda: 3 }, { treats: 1 })).change;
-    expect(treat === null ? null : causeLabel(data, treat)).toBe("+1 ♥ treat");
-    const photoOp: Effect = { amount: "photoOpTip", change: "gain", kind: "money" };
-    const { changes } = resolveEffects(
-      data,
-      { affected: [], random: () => 0, source: { encounter: "photoOp", kind: "instant" } },
-      [photoOp],
-      testState({ koda: 5 }),
-    );
-    expect(label(changes)).toBe("+$10 Photo op");
+  it.each<[string, () => Change | null, string]>([
+    [
+      "a dramatic owner's doubling, without the card option just picked",
+      () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
+      "−2 ♥, dramatic",
+    ],
+    [
+      "the max when a gain is cut short there",
+      () =>
+        resolved(gainOne, testState({ nugget: 5 }), [], { kind: "upgrade", upgrade: "bellyRubs" }),
+      "+1 ♥, dramatic, at max",
+    ],
+    [
+      "the tip and a solo walk's tip factor",
+      () => tipValue(data, testState({ koda: 5 })),
+      "+$1.50 tip, solo",
+    ],
+    [
+      "Stinky on a halved tip",
+      () => stinkyTip({ duchess: 5, koda: 5, nugget: 5 }),
+      "+$0.50 tip, Stinky",
+    ],
+    [
+      "Sweet talker on a per-dog cost",
+      () =>
+        resolved(
+          towel,
+          testState({ duchess: 5, koda: 5 }, { modifiers: [sweetTalker], money: cents(5000) }),
+          ["duchess", "koda"],
+        ),
+      "−$6, Sweet talker",
+    ],
+    ["a clawback", () => firing(5000), "−$13 fees taken back"],
+    ["a clawback held at the $0 floor", () => firing(500), "−$5 fees taken back, at $0"],
+    [
+      "a treat as the base",
+      () => giveTreat(data, "koda", testState({ koda: 3 }, { treats: 1 })).change,
+      "+1 ♥ treat",
+    ],
+    [
+      "an instant encounter as the base",
+      () =>
+        resolved(
+          { amount: "photoOpTip", change: "gain", kind: "money" },
+          testState({ koda: 5 }),
+          [],
+          { encounter: "photoOp", kind: "instant" },
+        ),
+      "+$10 Photo op",
+    ],
+  ])("names %s", (_, change, text) => {
+    const made = change();
+    expect(made === null ? null : causeLabel(data, made)).toBe(text);
   });
 });
 
 describe("change causes", () => {
-  it("add up to the change", () => {
-    const tip = tipValue(data, testState({ koda: 5 }, { debuffs: [{ debuff: "stinky" }] }));
-    const sum = (change: Change) => change.causes.reduce((total, { amount }) => total + amount, 0);
-    expect(sum(tip)).toBe(changeAmount(tip));
-    const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
-    const hearts = only(
-      resolveEffects(
-        data,
-        { affected: [], random: () => 0, source: skunkIgnore },
-        [gainTwo],
-        testState({ nugget: 4 }),
-      ).changes,
-    );
-    expect(sum(hearts)).toBe(changeAmount(hearts));
+  it.each<[string, () => Change]>([
+    ["a tip with a pack-size factor and Stinky", () => stinkyTip({ koda: 5 })],
+    ["hearts doubled and capped", () => resolved(gainTwo, testState({ nugget: 4 }))],
+  ])("add up to the change: %s", (_, change) => {
+    const made = change();
+    expect(made.causes.reduce((total, { amount }) => total + amount, 0)).toBe(changeAmount(made));
   });
 });

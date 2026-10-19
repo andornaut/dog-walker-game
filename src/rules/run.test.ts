@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import type { ZoneId } from "../data/types";
+import type { RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
@@ -20,21 +21,30 @@ const shortcut = activeModifier(
 );
 
 describe("tipValue", () => {
-  it("pays more per tip the smaller the pack", () => {
-    expect(tipValue(data, testState({ koda: 5 })).amount).toBe(150);
-    expect(tipValue(data, testState({ duchess: 5, koda: 5 })).amount).toBe(125);
-    expect(tipValue(data, testState({ duchess: 5, koda: 5, nugget: 5 })).amount).toBe(100);
-  });
+  const three = { duchess: 5, koda: 5, nugget: 5 };
 
-  it("counts only the dogs still walking", () => {
-    const pack = testState({ duchess: "fired", koda: 5, nugget: "fired" });
-    expect(tipValue(data, pack).amount).toBe(150);
-  });
-
-  it("applies Big tipper and Stinky on top of the pack-size factor", () => {
-    const pack = { duchess: 5, koda: 5, nugget: 5 };
-    expect(tipValue(data, testState(pack, { modifiers: [bigTipper] })).amount).toBe(150);
-    expect(tipValue(data, testState(pack, { debuffs: [{ debuff: "stinky" }] })).amount).toBe(50);
+  it.each<[string, RunState, number]>([
+    ["a solo walk the most", testState({ koda: 5 }), 150],
+    ["a pair less", testState({ duchess: 5, koda: 5 }), 125],
+    ["a pack of three the least", testState(three), 100],
+    [
+      "a solo walk after two firings",
+      testState({ duchess: "fired", koda: 5, nugget: "fired" }),
+      150,
+    ],
+    [
+      "Big tipper on top of the pack-size factor",
+      testState(three, { modifiers: [bigTipper] }),
+      150,
+    ],
+    [
+      "Stinky on top of the pack-size factor",
+      testState(three, { debuffs: [{ debuff: "stinky" }] }),
+      50,
+    ],
+    ["nothing with no dogs left", testState({ koda: "fired" }), 0],
+  ])("pays %s", (_, state, amount) => {
+    expect(tipValue(data, state).amount).toBe(amount);
   });
 
   it("gives the tip, the pack-size factor and each modifier as causes", () => {
@@ -54,10 +64,6 @@ describe("tipValue", () => {
   it("leaves out the pack-size factor for a pack it does not change", () => {
     const tip = tipValue(data, testState({ duchess: 5, koda: 5, nugget: 5 }));
     expect(tip.causes).toEqual([{ amount: 100, kind: "tip" }]);
-  });
-
-  it("pays nothing with no dogs left", () => {
-    expect(tipValue(data, testState({ koda: "fired" })).amount).toBe(0);
   });
 });
 

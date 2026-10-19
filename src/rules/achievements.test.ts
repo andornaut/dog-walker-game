@@ -30,9 +30,6 @@ const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
 const holdsForRun = (condition: AchievementCondition, run: Partial<RunFacts>) =>
   conditionHolds(gameData, newPlayerSave, facts(run), condition);
 
-const holdsForSave = (condition: AchievementCondition, save: SaveDocument) =>
-  conditionHolds(gameData, save, null, condition);
-
 const ALL_DOGS = Object.keys(gameData.dogs) as (keyof typeof gameData.dogs)[];
 const ALL_GEAR = Object.keys(gameData.shopGear) as (keyof typeof gameData.shopGear)[];
 
@@ -44,127 +41,105 @@ function withOwned(owned: Partial<SaveDocument["owned"]>): SaveDocument {
   return { ...newPlayerSave, owned: { ...newPlayerSave.owned, ...owned } };
 }
 
+type Count = number | "all";
+const zonesFinished = (count: Count) => ({ count, kind: "zonesFinished" }) as const;
+const cleanZones = (count: Count) => ({ count, kind: "cleanZones" }) as const;
+const packOf2 = { count: 2, kind: "packSize" } as const;
+const payday = { dollars: 500, kind: "earnings" } as const;
+const stinky3 = { count: 3, debuff: "stinky", kind: "debuffZones" } as const;
+const bumped = (bumpsByZone: number[], finished: number) => ({
+  bumpsByZone,
+  zonesFinished: finished,
+});
+const fromZone3 = { firstZone: 2, zonesFinished: 4 };
+const homeInZone4 = { firstZone: 3, zonesFinished: 3 };
+const minorBump = [...countBump(testState({ koda: 5 })).bumpsByZone];
+
 describe("run conditions", () => {
-  it("zonesFinished: at least the count, or every zone of the world for all", () => {
-    const first = { count: 1, kind: "zonesFinished" } as const;
-    expect(holdsForRun(first, { zonesFinished: 0 })).toBe(false);
-    expect(holdsForRun(first, { zonesFinished: 1 })).toBe(true);
-    const all = { count: "all", kind: "zonesFinished" } as const;
-    expect(holdsForRun(all, { zonesFinished: 3 })).toBe(false);
-    expect(holdsForRun(all, { zonesFinished: 4 })).toBe(true);
-  });
-
-  it("cleanZones: counts only finished zones with no bump", () => {
-    const one = { count: 1, kind: "cleanZones" } as const;
-    expect(holdsForRun(one, { bumpsByZone: [2, 0], zonesFinished: 2 })).toBe(true);
-    expect(holdsForRun(one, { bumpsByZone: [2], zonesFinished: 1 })).toBe(false);
-    // The zone in progress when the run ended never counts, bumped or not.
-    expect(holdsForRun(one, { bumpsByZone: [1], zonesFinished: 1 })).toBe(false);
-    expect(holdsForRun(one, { zonesFinished: 0 })).toBe(false);
-  });
-
-  it("cleanZones all: every zone of the world finished without a bump", () => {
-    const all = { count: "all", kind: "cleanZones" } as const;
-    expect(holdsForRun(all, { zonesFinished: 4 })).toBe(true);
-    expect(holdsForRun(all, { bumpsByZone: [0, 0, 0, 1], zonesFinished: 4 })).toBe(false);
-    expect(holdsForRun(all, { zonesFinished: 3 })).toBe(false);
-  });
-
-  it("cleanZones: a minor obstacle bump spoils the zone", () => {
-    const bumped = countBump(testState({ koda: 5 }));
-    const clean = { count: 1, kind: "cleanZones" } as const;
-    expect(holdsForRun(clean, { bumpsByZone: [...bumped.bumpsByZone], zonesFinished: 1 })).toBe(
-      false,
-    );
-  });
-
-  it("counts nothing toward zones a dev start skipped: they are neither finished nor clean", () => {
-    const fromZone3 = { firstZone: 2, zonesFinished: 4 };
-    expect(holdsForRun({ count: 2, kind: "zonesFinished" }, fromZone3)).toBe(true);
-    expect(holdsForRun({ count: 3, kind: "zonesFinished" }, fromZone3)).toBe(false);
-    expect(holdsForRun({ count: "all", kind: "zonesFinished" }, fromZone3)).toBe(false);
-    expect(holdsForRun({ count: 2, kind: "cleanZones" }, fromZone3)).toBe(true);
-    expect(holdsForRun({ count: "all", kind: "cleanZones" }, fromZone3)).toBe(false);
-    const headedHomeInZone4 = { firstZone: 3, zonesFinished: 3 };
-    expect(holdsForRun({ count: 1, kind: "zonesFinished" }, headedHomeInZone4)).toBe(false);
-    expect(holdsForRun({ count: 1, kind: "cleanZones" }, headedHomeInZone4)).toBe(false);
-  });
-
-  it("packSize: the dogs that set out, fired or not", () => {
-    const two = { count: 2, kind: "packSize" } as const;
-    expect(holdsForRun(two, { packSize: 1 })).toBe(false);
-    expect(holdsForRun(two, { packSize: 3 })).toBe(true);
-  });
-
-  it("earnings: at least the dollars, in what the run banked", () => {
-    const payday = { dollars: 500, kind: "earnings" } as const;
-    expect(holdsForRun(payday, { earnedCents: cents(49_999) })).toBe(false);
-    expect(holdsForRun(payday, { earnedCents: cents(50_000) })).toBe(true);
-  });
-
-  it("debuffZones: zones of one run that ended with the debuff on", () => {
-    const stinky = { count: 3, debuff: "stinky", kind: "debuffZones" } as const;
-    expect(holdsForRun(stinky, { debuffZones: { stinky: 2 } })).toBe(false);
-    expect(holdsForRun(stinky, { debuffZones: { stinky: 3 } })).toBe(true);
-  });
-
-  it("never holds without a run, as for a purchase", () => {
-    const save = veteranSave();
-    expect(holdsForSave({ count: 1, kind: "zonesFinished" }, save)).toBe(false);
-    expect(holdsForSave({ count: 1, kind: "packSize" }, save)).toBe(false);
+  // A dev start from zone 3 skipped zones 1 and 2: they count as neither finished nor clean.
+  it.each<[string, AchievementCondition, Partial<RunFacts>, boolean]>([
+    ["zonesFinished below the count", zonesFinished(1), { zonesFinished: 0 }, false],
+    ["zonesFinished at the count", zonesFinished(1), { zonesFinished: 1 }, true],
+    ["zonesFinished all, a zone short", zonesFinished("all"), { zonesFinished: 3 }, false],
+    ["zonesFinished all, every zone", zonesFinished("all"), { zonesFinished: 4 }, true],
+    ["cleanZones, a finished zone clean", cleanZones(1), bumped([2, 0], 2), true],
+    ["cleanZones, the finished zone bumped", cleanZones(1), bumped([2], 1), false],
+    ["cleanZones, never the zone in progress", cleanZones(1), bumped([1], 1), false],
+    ["cleanZones, no zone finished", cleanZones(1), { zonesFinished: 0 }, false],
+    ["cleanZones, spoilt by a minor bump", cleanZones(1), bumped(minorBump, 1), false],
+    ["cleanZones all, no bump", cleanZones("all"), { zonesFinished: 4 }, true],
+    ["cleanZones all, a bump in the last zone", cleanZones("all"), bumped([0, 0, 0, 1], 4), false],
+    ["cleanZones all, a zone short", cleanZones("all"), { zonesFinished: 3 }, false],
+    ["dev start from zone 3, zonesFinished 2", zonesFinished(2), fromZone3, true],
+    ["dev start from zone 3, zonesFinished 3", zonesFinished(3), fromZone3, false],
+    ["dev start from zone 3, zonesFinished all", zonesFinished("all"), fromZone3, false],
+    ["dev start from zone 3, cleanZones 2", cleanZones(2), fromZone3, true],
+    ["dev start from zone 3, cleanZones all", cleanZones("all"), fromZone3, false],
+    ["dev start home in zone 4, zonesFinished", zonesFinished(1), homeInZone4, false],
+    ["dev start home in zone 4, cleanZones", cleanZones(1), homeInZone4, false],
+    ["packSize, fewer dogs set out", packOf2, { packSize: 1 }, false],
+    ["packSize, more dogs set out, fired or not", packOf2, { packSize: 3 }, true],
+    ["earnings a cent short", payday, { earnedCents: cents(49_999) }, false],
+    ["earnings at the dollars", payday, { earnedCents: cents(50_000) }, true],
+    ["debuffZones below the count", stinky3, { debuffZones: { stinky: 2 } }, false],
+    ["debuffZones at the count", stinky3, { debuffZones: { stinky: 3 } }, true],
+  ])("%s", (_, condition, run, holds) => {
+    expect(holdsForRun(condition, run)).toBe(holds);
   });
 });
 
 describe("profile conditions", () => {
-  it("dogsOwned: the count, or every dog in the data for all", () => {
-    expect(holdsForSave({ count: 3, kind: "dogsOwned" }, newPlayerSave)).toBe(true);
-    expect(holdsForSave({ count: "all", kind: "dogsOwned" }, newPlayerSave)).toBe(false);
-    expect(holdsForSave({ count: "all", kind: "dogsOwned" }, withOwned({ dogs: ALL_DOGS }))).toBe(
+  const all = (kind: "dogSlotsOwned" | "dogsFinishedWith" | "dogsOwned" | "gearOwned") =>
+    ({ count: "all", kind }) as const;
+  const count = (kind: "squirrelsChased" | "timesFired" | "walksWithoutFiring", n: number) =>
+    ({ count: n, kind }) as const;
+  const veteran = veteranSave();
+
+  it.each<[string, AchievementCondition, SaveDocument | null, boolean]>([
+    ["a run condition, without a run", zonesFinished(1), veteran, false],
+    ["packSize, without a run", { count: 1, kind: "packSize" }, veteran, false],
+    ["dogsOwned at the count", { count: 3, kind: "dogsOwned" }, newPlayerSave, true],
+    ["dogsOwned all, the starters", all("dogsOwned"), newPlayerSave, false],
+    ["dogsOwned all, every dog", all("dogsOwned"), withOwned({ dogs: ALL_DOGS }), true],
+    ["gearOwned all, one missing", all("gearOwned"), withOwned({ gear: ALL_GEAR.slice(1) }), false],
+    ["gearOwned all, every item", all("gearOwned"), withOwned({ gear: ALL_GEAR }), true],
+    ["dogSlotsOwned all, one missing", all("dogSlotsOwned"), withOwned({ dogSlots: 2 }), false],
+    ["dogSlotsOwned all, every slot", all("dogSlotsOwned"), withOwned({ dogSlots: 3 }), true],
+    [
+      "walksWithoutFiring below the count",
+      count("walksWithoutFiring", 10),
+      withStats({ walksWithoutFiring: 9 }),
+      false,
+    ],
+    [
+      "walksWithoutFiring at the count",
+      count("walksWithoutFiring", 10),
+      withStats({ walksWithoutFiring: 10 }),
       true,
-    );
-  });
-
-  it("gearOwned: every gear item for all", () => {
-    const all = { count: "all", kind: "gearOwned" } as const;
-    expect(holdsForSave(all, withOwned({ gear: ALL_GEAR.slice(1) }))).toBe(false);
-    expect(holdsForSave(all, withOwned({ gear: ALL_GEAR }))).toBe(true);
-  });
-
-  it("dogSlotsOwned: every dog slot for all", () => {
-    const all = { count: "all", kind: "dogSlotsOwned" } as const;
-    expect(holdsForSave(all, withOwned({ dogSlots: 2 }))).toBe(false);
-    expect(holdsForSave(all, withOwned({ dogSlots: 3 }))).toBe(true);
-  });
-
-  it("walksWithoutFiring, timesFired and squirrelsChased: at least the count", () => {
-    expect(
-      holdsForSave({ count: 10, kind: "walksWithoutFiring" }, withStats({ walksWithoutFiring: 9 })),
-    ).toBe(false);
-    expect(
-      holdsForSave(
-        { count: 10, kind: "walksWithoutFiring" },
-        withStats({ walksWithoutFiring: 10 }),
-      ),
-    ).toBe(true);
-    expect(holdsForSave({ count: 10, kind: "timesFired" }, withStats({ timesFired: 10 }))).toBe(
+    ],
+    ["timesFired at the count", count("timesFired", 10), withStats({ timesFired: 10 }), true],
+    [
+      "squirrelsChased below",
+      count("squirrelsChased", 5),
+      withStats({ squirrelsChased: 4 }),
+      false,
+    ],
+    ["squirrelsChased at", count("squirrelsChased", 5), withStats({ squirrelsChased: 5 }), true],
+    [
+      "dogsFinishedWith all, one missing",
+      all("dogsFinishedWith"),
+      withStats({ dogsFinishedWith: ALL_DOGS.slice(1) }),
+      false,
+    ],
+    [
+      "dogsFinishedWith all, across walks",
+      all("dogsFinishedWith"),
+      withStats({ dogsFinishedWith: ALL_DOGS }),
       true,
-    );
-    expect(
-      holdsForSave({ count: 5, kind: "squirrelsChased" }, withStats({ squirrelsChased: 4 })),
-    ).toBe(false);
-    expect(
-      holdsForSave({ count: 5, kind: "squirrelsChased" }, withStats({ squirrelsChased: 5 })),
-    ).toBe(true);
-  });
-
-  it("dogsFinishedWith: every dog for all, counted across walks", () => {
-    const all = { count: "all", kind: "dogsFinishedWith" } as const;
-    expect(holdsForSave(all, withStats({ dogsFinishedWith: ALL_DOGS.slice(1) }))).toBe(false);
-    expect(holdsForSave(all, withStats({ dogsFinishedWith: ALL_DOGS }))).toBe(true);
-  });
-
-  it("never holds without a save, as for the simulator's runs", () => {
-    expect(conditionHolds(gameData, null, facts(), { count: 0, kind: "timesFired" })).toBe(false);
+    ],
+    ["anything without a save, as for the simulator", count("timesFired", 0), null, false],
+  ])("%s", (_, condition, save, holds) => {
+    expect(conditionHolds(gameData, save, null, condition)).toBe(holds);
   });
 });
 
