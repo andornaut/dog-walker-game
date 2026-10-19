@@ -90,7 +90,13 @@ describe("scaleAt", () => {
 describe("depthDraw", () => {
   it("draws the full-size art at 1, and never upscales it past the walker's feet", () => {
     const arts = artsOf("tip");
-    expect(depthDraw(arts, 1)).toEqual({ depth: 1, key: "tip", originY: 13 / 16, scale: 1 });
+    const full = itemAt(arts, 0);
+    expect(depthDraw(arts, 1)).toEqual({
+      depth: 1,
+      key: "tip",
+      originY: full.feetY / full.height,
+      scale: 1,
+    });
     expect(depthDraw(arts, 1.07)).toEqual(depthDraw(arts, 1));
   });
 
@@ -108,6 +114,14 @@ describe("depthDraw", () => {
   // A 32-wide cone with only @75 and @50, whatever steps the shipped cone has.
   const cone32 = syntheticArts("cone", 32, [0.75, 0.5]);
   const everyCone = withEveryStep(artsOf("cone"));
+  // The scale the shipped cone's step is drawn at for a projected scale: the 1x's side at
+  // that scale, to the nearest pixel, over the step's side.
+  const side = (art: DepthArt) => Math.max(art.width, art.height);
+  const coneScale = (projected: number, step: number) =>
+    stepSize(side(itemAt(everyCone, 0)), projected) /
+    side(
+      everyCone.find((art) => art.key === depthVariantKey("cone", step)) ?? itemAt(everyCone, 0),
+    );
   it.each([
     { arts: artsOf("cone"), key: "cone@75", name: "a hand-drawn step", projected: 0.75, scale: 1 },
     { arts: artsOf("cone"), key: "cone@50", name: "a hand-drawn step", projected: 0.5, scale: 1 },
@@ -139,14 +153,14 @@ describe("depthDraw", () => {
       key: "cone@88",
       name: "the in-between step, downscaled",
       projected: 0.8,
-      scale: 26 / 28,
+      scale: coneScale(0.8, 0.875),
     },
     {
       arts: everyCone,
       key: "cone@62",
       name: "the in-between step, downscaled",
       projected: 0.6,
-      scale: 19 / 20,
+      scale: coneScale(0.6, 0.625),
     },
   ])("draws $name at $projected as $key", ({ arts, key, projected, scale }) => {
     expect(depthDraw(arts, projected)).toMatchObject({ key, scale });
