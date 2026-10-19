@@ -151,6 +151,21 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Hedge                                                  | Minor     | 3 × 1               |
 | Construction barrier (Woof Way and Sniff Street Shops) | Minor     | 2 or 3 × 1          |
 
+### Moving hazards
+
+Some things cross the road or come down it. Each gives about 1 second of warning (a cue at the lane edge) before it moves, at most one mover is on screen at a time, and the reachable-path rule accounts for its movement.
+
+- **Squirrel** darts across lanes: contact opens the squirrel encounter, and Chasers pull toward it while it's on screen
+- **Loose dog** crosses lanes: contact opens the Other dog encounter
+- **Ball** bounces across lanes: a minor obstacle
+- **Cyclist** rides down one lane toward you, faster than the road: a minor obstacle
+
+### Feedback
+
+- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (e.g. "SPRAYED!", "SOAKED!", "PICKPOCKETED!") and the caught dogs shaking off
+- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through) and Spooked (after a thief) are visual only and fade after 10 seconds
+- **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, equipped gear); tap one for its description
+
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band; they open no card and have no effect.
 
 ### Forced stops
