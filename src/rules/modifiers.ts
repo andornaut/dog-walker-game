@@ -70,7 +70,19 @@ export function modifiedStat(
   stat: Stat,
   base: number,
 ): number {
-  return statParts(tuning, modifiers, stat, base).value;
+  // statParts' value, in the same order of operations, without building its parts.
+  let value = base;
+  for (const modifier of modifiers) {
+    if (modifier.stat === stat && modifier.operation === "add") {
+      value = value + modifierValue(tuning, modifier);
+    }
+  }
+  for (const modifier of modifiers) {
+    if (modifier.stat === stat && modifier.operation === "multiply") {
+      value = value * modifierValue(tuning, modifier);
+    }
+  }
+  return value;
 }
 
 // The modifiers among a card's or a gear item's effects.

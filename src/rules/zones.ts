@@ -21,8 +21,7 @@ export function zoneStats(
   zone: Pick<Zone, "density" | "speed">,
   zoneIndex: number,
 ): ZoneStats {
-  const speedFactor =
-    (1 + read(tuning, "multipliers", "scrollSpeedGainPerZone") * zoneIndex) * zone.speed;
+  const speedFactor = zoneSpeedFactor(tuning, zone, zoneIndex);
   const { density } = zone;
   return {
     duration: seconds(read(tuning, "seconds", "zoneAtBaseSpeed") / speedFactor),
@@ -41,7 +40,7 @@ export function zoneStats(
       tuning.counts.obstaclesGainPerZone,
       density.obstacles,
     ),
-    scrollSpeed: pixels(read(tuning, "pixels", "roadScrollSpeed") * speedFactor),
+    scrollSpeed: zoneScrollSpeed(tuning, zone, zoneIndex),
     tips: zoneCount(
       zoneIndex,
       tuning.counts.tipsFirstZone,
@@ -50,6 +49,21 @@ export function zoneStats(
     ),
     treats: read(tuning, "counts", "treatsPerZone"),
   };
+}
+
+// zoneStats' scrollSpeed alone.
+export function zoneScrollSpeed(
+  tuning: LiveTuning,
+  zone: Pick<Zone, "speed">,
+  zoneIndex: number,
+): Pixels {
+  return pixels(
+    read(tuning, "pixels", "roadScrollSpeed") * zoneSpeedFactor(tuning, zone, zoneIndex),
+  );
+}
+
+function zoneSpeedFactor(tuning: LiveTuning, zone: Pick<Zone, "speed">, zoneIndex: number): number {
+  return (1 + read(tuning, "multipliers", "scrollSpeedGainPerZone") * zoneIndex) * zone.speed;
 }
 
 function zoneCount(zoneIndex: number, first: number, gain: number, density: number): number {

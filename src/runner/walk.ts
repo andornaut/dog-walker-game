@@ -18,7 +18,7 @@ import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import { debuffModifiers, minorBump, packModifiers, payZoneFees, tipValue } from "../rules/run";
 import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
-import { zoneStats } from "../rules/zones";
+import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import {
@@ -279,7 +279,7 @@ export function laneMotionConfig(
 // Pixels per second in the run's current zone, read from the live data, after the run's
 // modifiers, such as the walker's pace.
 export function walkScrollSpeed(data: Pick<GameData, "tuning" | "world">, run: RunState): Pixels {
-  const base = zoneStats(data.tuning, currentZone(data, run), run.zoneIndex).scrollSpeed;
+  const base = zoneScrollSpeed(data.tuning, currentZone(data, run), run.zoneIndex);
   return pixels(modifiedStat(data.tuning, run.modifiers, "scrollSpeed", base));
 }
 
@@ -652,6 +652,9 @@ export function collect(
 // such as half while Stinky. Other tipSpawns modifiers set the zone's tip count when it is
 // planned.
 function tipSpawnsShare(data: WalkData, run: RunState): number {
+  if (run.debuffs.length === 0) {
+    return 1;
+  }
   return modifiedStat(data.tuning, debuffModifiers(data, run), "tipSpawns", 1);
 }
 
