@@ -8,7 +8,6 @@ export const RUN_TEXT_FIELDS = {
     forkFees: ["fees"],
     need: ["amount"],
     quirkNoLoss: ["quirk"],
-    walkerGreeting: ["walker"],
   },
   firedBy: ["owner"],
   newWalker: {

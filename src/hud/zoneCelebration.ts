@@ -132,7 +132,7 @@ export function celebrationText(
   const info = lineParts(words.info, named);
   return {
     button: words.button,
-    greeting: fillLine(FIELDS.card, text.card, "walkerGreeting", { walker: name }),
+    greeting: text.card.walkerGreeting,
     info,
     kind: "newWalker",
     subtitle: fillLine(FIELDS.newWalker, words, "subtitle", { walker: name }),
