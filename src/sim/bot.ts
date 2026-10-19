@@ -6,6 +6,7 @@ import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
 import { isNeedUrgent, needFill, needSpotOf, spotMeets } from "../runner/needs";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
+import { STEP_SECONDS } from "../runner/session";
 import {
   isPickup,
   itemCategory,
@@ -64,9 +65,9 @@ export const SAME_MOMENT = 1e-9;
 const MISTIME_SECONDS = 0.25;
 // The soonest a mistake is noticed, so a bot with no reaction delay still takes a frame.
 const NOTICE_SECONDS = 1 / 60;
-// Hazards are widened this much at each end, so rounding never turns a planned miss into a
-// hit.
-const MARGIN_SECONDS = 1e-4;
+// Hazards are widened a walk step at each end: a lane change starts on the first step at or
+// after it is due, so a planned miss never turns into a hit.
+const MARGIN_SECONDS = STEP_SECONDS;
 // How far apart the planner's waiting times are, besides the ends of hazards.
 const GRID_SECONDS = 0.1;
 
@@ -338,6 +339,12 @@ function needSpotValue(data: WalkData, walk: Walk, item: WalkItem): number {
     );
 }
 
+// The walk steps' length a lane change lasts: it ends on the first step at or after its
+// duration.
+function wholeSteps(seconds: number): number {
+  return Math.ceil(seconds / STEP_SECONDS - SAME_MOMENT) * STEP_SECONDS;
+}
+
 function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const { control } = walk.road;
   const { motion } = control;
@@ -345,7 +352,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const readyAt = moving ? motion.duration - motion.elapsed : 0;
   const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
   const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
-  const moveSeconds = laneMoveSeconds(road.data, walk.run);
+  const moveSeconds = wholeSteps(laneMoveSeconds(road.data, walk.run));
   const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
   const view = botView(bot, road, pulls, walk);
   const moves = planLanes(
