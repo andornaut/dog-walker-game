@@ -51,7 +51,7 @@ export interface ZoneGags {
 
 // Every backdrop has a perch along its near-left lawn: a picket fence, a park rail or a
 // planter's ledge. The shops zone is paved, so it has no sprinkler.
-const NEAR_LEFT_PERCH: Span = { x0: 0, x1: 82 };
+const NEAR_LEFT_PERCH: Span = { x0: 0, x1: 72 };
 const NEAR_RIGHT_LAWN = 338;
 
 export const ZONE_GAGS: Readonly<Record<ZoneId, ZoneGags>> = {

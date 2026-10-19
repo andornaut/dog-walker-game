@@ -20,18 +20,18 @@ describe("ZONE_GAGS", () => {
     }
   });
 
-  it("perches a cat along every zone's near-left lawn, from x 0 to 82", () => {
+  it("perches a cat along every zone's near-left lawn, from x 0 to 72", () => {
     for (const zone of WORLD.zones) {
-      expect(ZONE_GAGS[zone.id].perches).toEqual([{ x0: 0, x1: 82 }]);
+      expect(ZONE_GAGS[zone.id].perches).toEqual([{ x0: 0, x1: 72 }]);
     }
     // The cat's paws, on its frame's bottom row, rest on the rail's row 94.
     expect(GAG_Y.cat + GAG_SIZES.cat.height - 1).toBe(94);
   });
 
-  it("stands a sprinkler on the near-right lawn, x 274 to 359, rows 86 to 109, except at the shops", () => {
+  it("stands a sprinkler on the near-right lawn, x 284 to 359, rows 86 to 109, except at the shops", () => {
     for (const zone of ["street", "park", "homeStretch"] as const) {
       for (const x of ZONE_GAGS[zone].sprinklers) {
-        expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(274);
+        expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(284);
         expect(x + GAG_SIZES.sprinkler.width / 2).toBeLessThanOrEqual(360);
       }
     }
