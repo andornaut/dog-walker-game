@@ -1,3 +1,4 @@
+import { itemAt } from "../arrays";
 import { type Random, randomPick } from "./random";
 
 // blocksLane marks kinds the pack must steer around, such as obstacles.
@@ -56,11 +57,11 @@ export function planSpawns<Kind extends string>(
   const freeCells = (blocksLane: boolean, firstRow: number, endRow: number): Cell[] => {
     const cells: Cell[] = [];
     for (let row = firstRow; row < endRow; row++) {
-      if (blocksLane && blockedCounts[row] >= laneCount - 1) {
+      if (blocksLane && itemAt(blockedCounts, row) >= laneCount - 1) {
         continue;
       }
       for (let lane = 0; lane < laneCount; lane++) {
-        if (!taken[row].has(lane)) {
+        if (!itemAt(taken, row).has(lane)) {
           cells.push({ lane, row });
         }
       }
@@ -80,11 +81,11 @@ export function planSpawns<Kind extends string>(
         throw new Error(`No room left in the zone to spawn ${kind}`);
       }
       const { lane, row } = randomPick(random, cells);
-      taken[row].add(lane);
+      itemAt(taken, row).add(lane);
       if (blocksLane) {
-        blockedCounts[row] += 1;
+        blockedCounts[row] = itemAt(blockedCounts, row) + 1;
       }
-      events.push({ distance: rows[row], kind, lane });
+      events.push({ distance: itemAt(rows, row), kind, lane });
     }
   }
   return events.sort((a, b) => a.distance - b.distance || a.lane - b.lane);

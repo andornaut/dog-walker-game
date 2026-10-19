@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { defined } from "../testing/defined";
 import type { Rect } from "./rect";
 import { screenLayout } from "./screenLayout";
 
@@ -32,9 +33,9 @@ describe("screenLayout", () => {
       expect(right(slot)).toBeLessThanOrEqual(right(dogColumn));
       expect(slot.y).toBeGreaterThanOrEqual(dogColumn.y);
       expect(bottom(slot)).toBeLessThanOrEqual(bottom(dogColumn));
-      expect(slot.height).toBe(dogSlots[0].height);
+      expect(slot.height).toBe(defined(dogSlots[0]).height);
       if (i > 0) {
-        expect(slot.y).toBeGreaterThanOrEqual(bottom(dogSlots[i - 1]));
+        expect(slot.y).toBeGreaterThanOrEqual(bottom(defined(dogSlots[i - 1])));
       }
     });
   });

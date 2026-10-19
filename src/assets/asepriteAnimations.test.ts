@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { defined } from "../testing/defined";
 import { animationKey, animationSpecs, type AsepriteSheet } from "./asepriteAnimations";
 
 function sheet(durations: number[], frameTags: AsepriteSheet["meta"]["frameTags"]): AsepriteSheet {
   return {
     frames: Object.fromEntries(durations.map((duration, i) => [`dog ${i}.aseprite`, { duration }])),
-    meta: { frameTags },
+    meta: frameTags === undefined ? {} : { frameTags },
   };
 }
 
@@ -22,7 +23,7 @@ describe("animationSpecs", () => {
       ),
     );
     expect(specs.map(({ key }) => key)).toEqual(["dog-koda:walk", "dog-koda:react"]);
-    expect(specs[1].frames).toEqual([
+    expect(defined(specs[1]).frames).toEqual([
       { duration: 120, frame: "dog 2.aseprite" },
       { duration: 120, frame: "dog 3.aseprite" },
     ]);
@@ -41,7 +42,7 @@ describe("animationSpecs", () => {
       animationSpecs(
         "dog",
         sheet([1, 2, 3], [{ direction, from: 0, name: "t", to: 2 }]),
-      )[0].frames.map(({ duration }) => duration);
+      )[0]?.frames.map(({ duration }) => duration);
     expect(frameOrder("reverse")).toEqual([3, 2, 1]);
     expect(frameOrder("pingpong")).toEqual([1, 2, 3, 2]);
   });

@@ -1,3 +1,5 @@
+import { itemAt } from "../arrays";
+
 // length is a scroll distance in pixels; speedMultiplier scales the route's base speed.
 export interface ZoneSpec {
   length: number;
@@ -36,12 +38,12 @@ export function zoneScrollSpeed(route: ZoneRoute, progress: ZoneProgress): numbe
   if (progress.finished) {
     return 0;
   }
-  return route.baseSpeed * route.zones[progress.zoneIndex].speedMultiplier;
+  return route.baseSpeed * itemAt(route.zones, progress.zoneIndex).speedMultiplier;
 }
 
 // How far through the current zone, from 0 to 1.
 export function zoneFraction(route: ZoneRoute, progress: ZoneProgress): number {
-  const { length } = route.zones[progress.zoneIndex];
+  const { length } = itemAt(route.zones, progress.zoneIndex);
   return length > 0 ? Math.min(1, progress.zoneDistance / length) : 1;
 }
 
@@ -57,7 +59,7 @@ export function advanceZones(
   let { distance, finished, zoneDistance, zoneIndex } = progress;
   let secondsLeft = stepSeconds;
   while (!finished && secondsLeft > 0) {
-    const zone = zones[zoneIndex];
+    const zone = itemAt(zones, zoneIndex);
     const speed = route.baseSpeed * zone.speedMultiplier;
     const distanceLeft = zone.length - zoneDistance;
     const travel = speed * secondsLeft;

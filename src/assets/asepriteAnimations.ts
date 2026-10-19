@@ -46,10 +46,11 @@ export function animationSpecs(textureKey: string, sheet: AsepriteSheet): Animat
   return (sheet.meta.frameTags ?? []).map((tag) => ({
     frames: frameIndexes(tag).map((index) => {
       const frame = frameNames[index];
-      if (frame === undefined) {
+      const frameData = frame === undefined ? undefined : sheet.frames[frame];
+      if (frame === undefined || frameData === undefined) {
         throw new Error(`${textureKey} tag "${tag.name}" refers to missing frame ${index}`);
       }
-      return { duration: sheet.frames[frame].duration, frame };
+      return { duration: frameData.duration, frame };
     }),
     key: animationKey(textureKey, tag.name),
   }));

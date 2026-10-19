@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Game Data</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png" />
+    <script src="/nav.js" defer></script>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #181425;
+        --fg: #ead4aa;
+        --muted: #8b9bb4;
+        --rule: #3a4466;
+        --accent: #feae34;
+      }
+
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font:
+          14px/1.45 system-ui,
+          sans-serif;
+      }
+
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+
+      h1 {
+        margin: 0 0 4px;
+        font-size: 22px;
+      }
+
+      h2 {
+        margin: 28px 0 8px;
+        font-size: 17px;
+        color: var(--accent);
+      }
+
+      p {
+        margin: 0 0 8px;
+        color: var(--muted);
+      }
+
+      .scroll {
+        overflow-x: auto;
+      }
+
+      table {
+        border-collapse: collapse;
+        min-width: 100%;
+      }
+
+      th,
+      td {
+        padding: 4px 10px 4px 0;
+        border-bottom: 1px solid var(--rule);
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        color: var(--muted);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+
+      td.number {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="data"></main>
+    <script type="module" src="/src/dataPage/main.ts"></script>
+  </body>
+</html>

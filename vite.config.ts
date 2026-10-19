@@ -2,11 +2,13 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   build: {
-    // The home page at / and the game at /play/. public/ is copied as-is.
+    // The home page at /, the game at /play/ and the game data tables at /data/.
+    // public/ is copied as-is.
     rolldownOptions: {
       input: {
         main: "index.html",
         play: "play/index.html",
+        data: "data/index.html",
       },
     },
     // Phaser alone is about 1.4 MB minified, so the 500 kB default always warns.

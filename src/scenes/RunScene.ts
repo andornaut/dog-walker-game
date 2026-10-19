@@ -1,10 +1,11 @@
 import { type GameObjects, Scene } from "phaser";
 
+import { gameData } from "../data";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
-import { ROAD_SCROLL_SPEED } from "../data/tuning";
 import { laneDirectionForKey } from "../input/keyBindings";
 import { laneCenterXs, laneDividerXs, moveLane } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
+import { read } from "../rules/units";
 import type { CardSceneData } from "./CardScene";
 import { addFilledRect } from "./draw";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -89,8 +90,10 @@ export class RunScene extends Scene {
     this.scene.launch(SCENE_KEYS.card, data);
   }
 
-  update(_time: number, delta: number): void {
-    this.scrollOffset = (this.scrollOffset + (ROAD_SCROLL_SPEED * delta) / 1000) % DASH_SPACING;
+  override update(_time: number, delta: number): void {
+    // Read every frame, so a live tuning edit takes effect at once.
+    const speed = read(gameData.tuning, "pixels", "roadScrollSpeed");
+    this.scrollOffset = (this.scrollOffset + (speed * delta) / 1000) % DASH_SPACING;
     for (const { rect, row } of this.dashes) {
       rect.setY(this.roadTop - DASH_SPACING + row * DASH_SPACING + this.scrollOffset);
     }

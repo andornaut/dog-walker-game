@@ -1,3 +1,5 @@
+import { itemAt } from "../arrays";
+
 // A source of floats in [0, 1). Everything random takes one, so a seed reproduces a run.
 export type Random = () => number;
 
@@ -21,7 +23,7 @@ export function randomPick<T>(random: Random, items: readonly T[]): T {
   if (items.length === 0) {
     throw new Error("randomPick needs at least one item");
   }
-  return items[randomInt(random, 0, items.length)];
+  return itemAt(items, randomInt(random, 0, items.length));
 }
 
 // True with the given probability: never at 0, always at 1.

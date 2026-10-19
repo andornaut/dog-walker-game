@@ -1,3 +1,4 @@
+import { itemAt } from "../arrays";
 import { type LaneDirection, moveLane } from "../layout/lanes";
 
 // moveDuration is in seconds, the time one lane change takes.
@@ -77,8 +78,9 @@ export function destinationLane(motion: LaneMotion): number {
 // Linear between the two lane centres.
 export function laneMotionX(laneXs: readonly number[], motion: LaneMotion): number {
   if (motion.kind === "still") {
-    return laneXs[motion.lane];
+    return itemAt(laneXs, motion.lane);
   }
   const progress = Math.min(1, motion.elapsed / motion.duration);
-  return laneXs[motion.from] + (laneXs[motion.to] - laneXs[motion.from]) * progress;
+  const fromX = itemAt(laneXs, motion.from);
+  return fromX + (itemAt(laneXs, motion.to) - fromX) * progress;
 }

@@ -1,0 +1,207 @@
+import { describe, expect, it } from "vitest";
+
+import { DOGS } from "../data/dogs";
+import type { DogId, Effect } from "../data/types";
+import { heartsByDog, testState } from "../testing/runState";
+import { TEST_TUNING } from "../testing/tuning";
+import { applyEffects, canAfford, type EffectContext, moneyCost, targetDogs } from "./effects";
+import { cents } from "./units";
+
+const data = { dogs: DOGS, tuning: TEST_TUNING };
+const context = (affected: readonly DogId[], random = () => 0): EffectContext => ({
+  affected,
+  random,
+});
+
+describe("applyEffects: hearts", () => {
+  const loseTwo: Effect = { amount: -2, kind: "hearts", target: { kind: "affected" } };
+  const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
+  const apply = (
+    affected: readonly DogId[],
+    effect: Effect,
+    slots: Parameters<typeof testState>[0],
+  ) => heartsByDog(applyEffects(data, context(affected), [effect], testState(slots)));
+
+  it("never takes an owner below 0", () => {
+    expect(apply(["duchess"], loseTwo, { duchess: 1 })).toEqual({ duchess: 0 });
+  });
+
+  it("never takes an owner above their dog's max, which depends on its size", () => {
+    expect(apply([], gainOne, { duchess: 6, koda: 9, pierre: 8 })).toEqual({
+      duchess: 6,
+      koda: 10,
+      pierre: 8,
+    });
+  });
+
+  it("counts every gain and loss double for a dramatic owner, still within 0 and the max", () => {
+    expect(apply(["nugget"], loseTwo, { nugget: 5 })).toEqual({ nugget: 1 });
+    expect(apply(["nugget"], loseTwo, { nugget: 3 })).toEqual({ nugget: 0 });
+    expect(apply([], gainOne, { nugget: 3 })).toEqual({ nugget: 5 });
+    expect(apply([], gainOne, { nugget: 5 })).toEqual({ nugget: 6 });
+  });
+
+  it("reaches only the affected dogs", () => {
+    expect(apply(["koda"], loseTwo, { duchess: 5, koda: 5 })).toEqual({ duchess: 5, koda: 3 });
+  });
+
+  it("uses a trait's own amount for dogs with that trait", () => {
+    const puddle: Effect = {
+      amount: -1,
+      kind: "hearts",
+      target: { kind: "affected" },
+      traitAmounts: { fancy: -2 },
+    };
+    expect(apply(["duchess", "koda"], puddle, { duchess: 5, koda: 5 })).toEqual({
+      duchess: 3,
+      koda: 4,
+    });
+  });
+
+  it("caps hearts at the max raised by a maxHearts modifier", () => {
+    const start = testState(
+      { duchess: 6 },
+      { modifiers: [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }] },
+    );
+    expect(heartsByDog(applyEffects(data, context([]), [gainOne], start))).toEqual({ duchess: 7 });
+  });
+});
+
+describe("targetDogs", () => {
+  const pack = testState({ duchess: 3, nugget: 3, pierre: "fired" });
+
+  it("leaves out a dog whose owner has fired you", () => {
+    expect(targetDogs(data, context([]), pack, { kind: "all" })).toEqual(["duchess", "nugget"]);
+    expect(targetDogs(data, context(["pierre"]), pack, { kind: "affected" })).toEqual([]);
+  });
+
+  it("picks dogs by trait or by owner temperament", () => {
+    expect(targetDogs(data, context([]), pack, { kind: "trait", trait: "fancy" })).toEqual([
+      "duchess",
+    ]);
+    expect(
+      targetDogs(data, context([]), pack, { kind: "temperament", temperament: "dramatic" }),
+    ).toEqual(["nugget"]);
+  });
+
+  it("draws one random dog from the pack", () => {
+    expect(
+      targetDogs(
+        data,
+        context([], () => 0),
+        pack,
+        { kind: "randomOne" },
+      ),
+    ).toEqual(["duchess"]);
+    expect(
+      targetDogs(
+        data,
+        context([], () => 0.99),
+        pack,
+        { kind: "randomOne" },
+      ),
+    ).toEqual(["nugget"]);
+  });
+});
+
+describe("moneyCost and applyEffects: money", () => {
+  const towel: Effect = {
+    amount: "encounterLow",
+    change: "lose",
+    kind: "money",
+    perDog: { kind: "affected" },
+  };
+  const chase: Effect = { amount: "squirrelChase", change: "lose", kind: "money" };
+  const sweetTalker = {
+    by: "sweetTalkerCostPerDog",
+    operation: "add",
+    stat: "costPerDog",
+  } as const;
+
+  it("charges a per-dog cost once per affected dog", () => {
+    const state = testState({ duchess: 5, koda: 5, nugget: 5 });
+    expect(moneyCost(data, context(["duchess", "koda"]), state, [towel])).toBe(1000);
+  });
+
+  it("charges a flat cost once, whatever the pack", () => {
+    const state = testState({ duchess: 5, koda: 5 });
+    expect(moneyCost(data, context(["duchess", "koda"]), state, [chase])).toBe(1000);
+  });
+
+  it("takes a costPerDog modifier off each dog's share, never below $0 a dog", () => {
+    const once = testState({ duchess: 5, koda: 5 }, { modifiers: [sweetTalker] });
+    expect(moneyCost(data, context(["duchess", "koda"]), once, [towel])).toBe(600);
+    const thrice = testState(
+      { duchess: 5 },
+      { modifiers: [sweetTalker, sweetTalker, sweetTalker] },
+    );
+    expect(moneyCost(data, context(["duchess"]), thrice, [towel])).toBe(0);
+  });
+
+  it("leaves a flat cost unchanged by a costPerDog modifier", () => {
+    const state = testState({ duchess: 5 }, { modifiers: [sweetTalker] });
+    expect(moneyCost(data, context(["duchess"]), state, [chase])).toBe(1000);
+  });
+
+  it("allows an option only when the player has its cost", () => {
+    const state = testState({ duchess: 5, koda: 5 }, { money: cents(999) });
+    expect(canAfford(data, context(["duchess", "koda"]), state, [towel])).toBe(false);
+    expect(canAfford(data, context(["duchess"]), state, [towel])).toBe(true);
+  });
+
+  it("adds gains and subtracts costs, never going below $0", () => {
+    const gain: Effect = {
+      amount: "missedTips",
+      change: "gain",
+      kind: "money",
+      perDog: { kind: "all" },
+    };
+    const start = testState({ duchess: 5, koda: 5 }, { money: cents(700) });
+    expect(applyEffects(data, context([]), [gain], start).money).toBe(1700);
+    expect(applyEffects(data, context([]), [chase], start).money).toBe(0);
+  });
+});
+
+describe("applyEffects: other kinds", () => {
+  it("refreshes a debuff the pack already has instead of stacking it", () => {
+    const stinky: Effect = { debuff: "stinky", kind: "debuff" };
+    const state = applyEffects(data, context([]), [stinky, stinky], testState({ koda: 5 }));
+    expect(state.debuffs).toEqual(["stinky"]);
+  });
+
+  it("records an immunity once", () => {
+    const raincoats: Effect = { duration: "run", encounter: "puddle", kind: "immune" };
+    const state = applyEffects(data, context([]), [raincoats, raincoats], testState({ koda: 5 }));
+    expect(state.immunities).toEqual(["puddle"]);
+  });
+
+  it("keeps a modifier for the rules that read its stat", () => {
+    const bigTipper: Effect = {
+      by: "bigTipperTip",
+      duration: "run",
+      kind: "modifier",
+      operation: "multiply",
+      stat: "tipValue",
+    };
+    const state = applyEffects(data, context([]), [bigTipper], testState({ koda: 5 }));
+    expect(state.modifiers).toEqual([bigTipper]);
+  });
+
+  it("adds skips, and treats up to the carry limit", () => {
+    const skip: Effect = { kind: "skipOption", usesPerRun: "poopBagsSkipsPerRun" };
+    const biscuits: Effect = {
+      amount: "biscuitNeighbourTreatsPerDog",
+      kind: "treats",
+      perDog: { kind: "all" },
+    };
+    const start = testState({ duchess: 5, koda: 5 }, { treats: 2 });
+    const state = applyEffects(data, context([]), [skip, biscuits], start);
+    expect(state.skipsLeft).toBe(TEST_TUNING.counts.poopBagsSkipsPerRun);
+    expect(state.treats).toBe(3);
+  });
+
+  it("applies nothing for an option with no effects", () => {
+    const start = testState({ koda: 5 });
+    expect(applyEffects(data, context([]), [], start)).toBe(start);
+  });
+});
