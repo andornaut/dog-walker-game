@@ -92,12 +92,12 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
 Every tile, button, card, tab and switch row is in one of four states, drawn the same way everywhere. `ui-tile` (insets 4) draws the first three for walker, dog and gear tiles; `ui-button` (insets 3, 3, 3, 5) draws all four.
 
-| State    | When                                                                                     | Look                                                                                       | Label                                                |
-| -------- | ---------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| normal   | Available, not chosen; a locked item the bank covers, with `ui-afford` 2px outside it    | Cream face, ink and plum lines, tan lip (`ui-tile` `normal`, `ui-button` `normal`)         | plum (9.42:1)                                        |
-| selected | Picked, equipped, toggled on, the open tab or page                                       | Gold: ink line, amber band, orange line, yellow face (`ui-tile` `selected`)                | plum (10.92:1)                                       |
-| disabled | Cannot be chosen: locked and not affordable, the pack full, gear equipped, not available | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt); a price in navy (4.93:1) |
-| primary  | The one call to action on a screen: Start walk, Resume, Got it, Nice!                    | Raised green face on a forest lip (`ui-button` `go`)                                       | ink (8.41:1)                                         |
+| State    | When                                                                                  | Look                                                                                       | Label                                                |
+| -------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| normal   | Available, not chosen; a locked item the bank covers, with `ui-afford` 2px outside it | Cream face, ink and plum lines, tan lip (`ui-tile` `normal`, `ui-button` `normal`)         | plum (9.42:1)                                        |
+| selected | Picked, equipped, toggled on, the open tab or page                                    | Gold: ink line, amber band, orange line, yellow face (`ui-tile` `selected`)                | plum (10.92:1)                                       |
+| disabled | Cannot be chosen: locked and not affordable, the pack full, not available             | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt); a price in navy (4.93:1) |
+| primary  | The one call to action on a screen: Start walk, Resume, Got it, Nice!                 | Raised green face on a forest lip (`ui-button` `go`)                                       | ink (8.41:1)                                         |
 
 - Art inside a disabled tile (faces, icons, the padlock) draws from its grey copy (`greyTextureKey`, as a disabled card) one ramp step darker (`remapDarker`), on a slate box; a normal tile's box is tan, a selected one's amber.
 - A disabled primary (Start walk before a walker and a dog are picked) is `go-disabled`, which matches `disabled`.
@@ -108,7 +108,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 - A press shows at once, before any selected state: the item dips 2px (a button into its lip) and `fx-tap` bursts under the finger.
 - Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (`ui-tile` `selected` on tiles; on other controls a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge (pick order or tick) at its top-left.
-- When a choice is full (pack full, gear equipped), the unselected items are disabled.
+- When a multi-pick choice is full (the pack), the unselected items are disabled. A single-pick choice (gear) keeps the others normal, since tapping one swaps it in.
 - A picked item's face hops; a picked dog hops onto the gate path in `fx-dust`.
 - An affordable item takes `ui-afford` 2px outside it, unless selected.
 - An unaffordable locked item shakes when tapped. The ready Start walk button bobs.

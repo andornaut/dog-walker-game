@@ -1,35 +1,5 @@
 [
   {
-    "title": "Color test",
-    "path": "run-screen-color-test.html",
-    "description": "The 360x640 run screen in Endesga 32: zone colours, UI colours, outline styles, card dimming and lane readability. Sprites are drawn in code as stand-ins."
-  },
-  {
-    "title": "Start screen",
-    "path": "start-screen.html",
-    "description": "A proposal for the screen before a walk: bank and best walk, the walker and pack at the gate on Maple Street, the dog picker, gear, logbook and Start walk. Interactive, with sample data."
-  },
-  {
-    "title": "Help screen",
-    "path": "help-screen.html",
-    "description": "A proposal for the in-game How to walk screen: six pages, each with an illustration from the real sprites and a few lines drafted from the rulebook."
-  },
-  {
-    "title": "Menus",
-    "path": "menus-screen.html",
-    "description": "The pause menu and settings over the dimmed road, the end screen at sunset and the Stats page with the badge wall, drawn from the exported UI kit and BMFonts. Interactive, with sample data."
-  },
-  {
-    "title": "Run screen",
-    "path": "run-screen.html",
-    "description": "The new run screen with the real art: top bar and state strip, zone backdrop, doghouse column and the pseudo-3D road with the pack, pickups, obstacles, moving hazards and every hit moment. Interactive, with sample data."
-  },
-  {
-    "title": "80s style",
-    "path": "style-80s.html",
-    "description": "The start screen with a flat toy-box sign logo and bold step bands beside the live screen, then three 80s box-art directions side by side: logo, home screen, UI kit and site hero."
-  },
-  {
     "title": "Horizon",
     "path": "horizon.html",
     "description": "An OutRun-style horizon in place of the backdrop's cross street: the road bends away past its far edge to a vanishing point under a low skyline, for Woof Way and Paws Promenade, each beside the current run screen. The camera is unchanged."
