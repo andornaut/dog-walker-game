@@ -44,7 +44,7 @@ describe("an area effect", () => {
       },
     }) as const;
 
-  // Duchess is small, Koda big and Pierre medium.
+  // Duchess is small, Koda big and Pepe medium.
   it.each<[Size[], DogId[], DogId[]]>([
     [["big"], ["koda"], ["duchess", "pierre"]],
     [["big", "medium"], ["koda", "pierre"], ["duchess"]],

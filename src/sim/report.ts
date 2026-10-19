@@ -1,4 +1,5 @@
 import { itemAt } from "../arrays";
+import { DOGS } from "../data/dogs";
 import type { GameData, GearId, WalkerId } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
@@ -88,15 +89,21 @@ export interface MatrixRow {
   readonly walker: WalkerId;
 }
 
+// A pack named by its dogs' names in the data. The name also keys the pack's seeds, so
+// renaming a dog moves its packs' rows.
+function namedByDogs(dogs: PackDogs): NamedPack {
+  return { dogs, name: dogs.map((dog) => DOGS[dog].name).join(" + ") };
+}
+
 const PACKS: readonly NamedPack[] = [
-  { dogs: ["duchess"], name: "Duchess" },
-  { dogs: ["biscuit"], name: "Biscuit" },
-  { dogs: ["koda"], name: "Koda" },
+  namedByDogs(["duchess"]),
+  namedByDogs(["biscuit"]),
+  namedByDogs(["koda"]),
   // Nervous, walked alone, so never clingy: that takes firings.
-  { dogs: ["penny"], name: "Penny" },
-  { dogs: ["koda", "biscuit"], name: "Koda + Biscuit" },
+  namedByDogs(["penny"]),
+  namedByDogs(["koda", "biscuit"]),
   // Camera ready and show dog, the quirks no other pack walks.
-  { dogs: ["nugget", "pierre"], name: "Nugget + Pierre" },
+  namedByDogs(["nugget", "pierre"]),
   { dogs: ["duchess", "biscuit", "koda"], name: "Starters" },
   { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
 ];
