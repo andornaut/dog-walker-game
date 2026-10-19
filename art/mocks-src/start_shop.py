@@ -2,22 +2,23 @@
 """Mock: the start screen with a pet shop and a one-item pocket.
 
 Draws 360x560 frames in Endesga 32 from the exported art: the approved uniform start screen
-(public/art/mocks/start-80s/start-uniform-*.png) supplies the gate scene and the walker section;
+(start-uniform-partial.png and start-uniform-ready.png, deleted with the decided mocks and read
+from a directory given on the command line) supplies the gate scene and the walker section;
 everything else is composited here from screen-home, the UI kit nine-slices, faces, icons and the
-BMFonts. The controls (help, sound, settings) move to the top bar's right end, the gear section
-becomes a one-slot Pocket row, and everything for sale moves to a shop page:
-
-  A  a Pet shop building in the gate scene's right yard, tapped to open the shop
-  B  the same screen with a SHOP button in the top bar instead of the building
-
-plus the shop page (Gear tab: the pocket picker and gear for sale; Dogs tab: pack slots and dogs)
-and a strip of the tile states for dogs and pocket gear.
+BMFonts. The controls (help, sound, settings) move to the top bar's right end, the Gear section
+becomes an inline Pocket strip (every gear item as a small tile, one brought per walk), and
+everything for sale is in a Pet shop building in the gate scene's right yard, which opens the
+shop page (Gear tab: gear with prices or OWNED; Dogs tab: pack slots and dogs). Also a strip of
+the tile states for dogs and pocket gear.
 
 New pieces drawn only here: the pet shop building, the locked silhouettes, the price and goal
-plates, the slot icon and the pocket row.
+plates and the slot icon.
 
 Usage:
-  start_shop.py build    write public/art/mocks/start-shop/*.png
+  start_shop.py build DIR    write public/art/mocks/start-shop/*.png, with the uniform frames in DIR
+
+Extract the uniform frames first, for each of partial and ready:
+  git show 5115f45:public/art/mocks/start-80s/start-uniform-partial.png > DIR/start-uniform-partial.png
 
 Run from the repository root. Mock tooling only: nothing here is game art.
 """
@@ -35,7 +36,7 @@ from pixel import DARKER, K  # noqa: E402
 
 OUT = "public/art/mocks/start-shop"
 ART = "public/art"
-UNIFORM = "public/art/mocks/start-80s"
+UNIFORM = None  # the directory holding the uniform frames, from the command line
 GAME = json.load(open("shared/export/game-data.json"))
 DOGS = {d["id"]: d for d in GAME["dogs"]}
 PRICES = GAME["tuning"]["money"]["prices"]
@@ -376,27 +377,24 @@ def slot_icon():
 
 GATE_Y, GATE_H = 40, 156
 BUTTONS = {"help": (240, 10), "sound": (284, 10), "settings": (328, 10)}
-DOG_SECTION = (0, 270, 360, 176)
-DOG_CELL = (112, 48)
-POCKET = (4, 452, 352, 44)
-START = (4, 508, 352, 44)
+# The dog section as live (cells 112x44, no row gap, tiles inset 1), ending at row 431.
+DOG_SECTION = (0, 270, 360, 161)
+DOG_CELL = (112, 44)
+# The pocket strip, rows 433 to 512: the label line's caps at 434, five 64x44 cells 8 apart from
+# x 4 on row 450 (tiles inset 1, so 62x42 at 451), the effect line's caps at 499.
+POCKET_LABEL_Y = 434
+POCKET_CELLS = (4, 450, 64, 44, 8)
+POCKET_LINE_Y = 499
+START = (4, 514, 352, 44)
 SHOP = (234, 90, 120, 104)
-SHOP_BUTTON = (166, 6, 58, 28)
 
 
-def top_bar(cv, bank, best, variant, shop_new=False):
+def top_bar(cv, bank, best):
     cv.paste(image("screen-home").crop((0, 0, W, 40)), (0, 0))
     put(cv, image("icon-money"), 8, 12)
     title(cv, dollars(bank), 28, 15, "cream")
     icon_button(cv, 104, 10, "icon-logbook")
-    if variant == "A":
-        body(cv, best, 130, 15, "cream")
-    else:
-        x, y, w, h = SHOP_BUTTON
-        put(cv, kit("ui-button", w, h, "normal"), x, y)
-        title(cv, "SHOP", x + w // 2, y + 8, "plum", "centre")
-        if shop_new:
-            afford(cv, x, y, w, h - 2)
+    body(cv, best, 130, 15, "cream")
     icon_button(cv, *BUTTONS["help"], "icon-help")
     icon_button(cv, *BUTTONS["sound"], "icon-sound", "on")
     icon_button(cv, *BUTTONS["settings"], "icon-settings")
@@ -413,7 +411,7 @@ def bubble(cv, lines, cx=180, top=46):
         body(cv, s, cx, top + 7 + 20 * i, "plum", "centre")
 
 
-def gate(cv, base, variant, line, shop_new, pocket):
+def gate(cv, base, line, shop_new, pocket):
     home = image("screen-home")
     cv.paste(base.crop((0, GATE_Y, W, 270)), (0, GATE_Y))
     # clear the old help and sound buttons, the bubble and the slot sign back to screen-home
@@ -422,11 +420,10 @@ def gate(cv, base, variant, line, shop_new, pocket):
     # the tree and owners the bubble area cut are in screen-home or below it; redraw the porch row
     cv.paste(base.crop((60, 94, 240, 126)), (60, 94))
     body(cv, "Maple St", 327, 75, "white", "centre", sc=1)
-    if variant == "A":
-        x, y, w, h = SHOP
-        put(cv, pet_shop(), x, y)
-        if shop_new:
-            afford(cv, x, y, w, h)
+    x, y, w, h = SHOP
+    put(cv, pet_shop(), x, y)
+    if shop_new:
+        afford(cv, x, y, w, h)
     if pocket:
         # the pocket item as a badge beside the walker (gearBadge, 194,166 18x18)
         fill(cv, 194, 166, 18, 18, "ink")
@@ -439,9 +436,9 @@ def kebab(s):
     return "".join("-" + c.lower() if c.isupper() else c for c in s)
 
 
-def dog_tile(cv, x, y, dog, state, bank=0, afford_outline=False, goal=None, pick=None):
-    """A 110x46 dog tile: available, picked, full (the pack is full), locked."""
-    w, h = 110, 46
+def dog_tile(cv, x, y, dog, state, bank=0, goal=None, pick=None):
+    """A 110x42 dog tile: available, picked, full (the pack is full), locked."""
+    w, h = 110, 42
     d = DOGS[dog]
     face = frame(f"face-dog-{dog}", "happy" if state in ("available", "picked") else "neutral")
     if state == "picked":
@@ -455,31 +452,29 @@ def dog_tile(cv, x, y, dog, state, bank=0, afford_outline=False, goal=None, pick
     else:
         put(cv, kit("ui-tile", w, h, "disabled"), x, y)
         box, ink = "slate", "dslate"
-    fill(cv, x + 3, y + 5, 34, 34, box)
+    fill(cv, x + 3, y + 4, 34, 34, box)
     if state == "locked":
-        put(cv, silhouette(face), x + 4, y + 6)
+        put(cv, silhouette(face), x + 4, y + 5)
     elif state == "full":
-        put(cv, greyed(face), x + 4, y + 6)
+        put(cv, greyed(face), x + 4, y + 5)
     else:
-        put(cv, face, x + 4, y + 6)
-    body(cv, d["name"], x + 41, y + 5, ink)
+        put(cv, face, x + 4, y + 5)
+    body(cv, d["name"], x + 41, y + 4, ink)
     fee = FEES[d["owner"]["temperament"]]
     if state == "locked":
         lock(cv, x - 2, y - 3)
         if goal:
-            chip(cv, goal, x + 41, y + 28, "plum")
+            chip(cv, goal, x + 41, y + 25, "plum")
         else:
             price = PRICES["lockedDog"]
-            chip(cv, dollars(price), x + 41, y + 28, "forest" if price <= bank else "dred")
-        if afford_outline:
-            afford(cv, x, y, w, h)
+            chip(cv, dollars(price), x + 41, y + 25, "forest" if price <= bank else "dred")
         return
     icons = [f"icon-trait-{kebab(d['trait'])}", f"icon-owner-{kebab(d['owner']['temperament'])}"]
     for n, key in enumerate(icons):
         im = image(key)
-        put(cv, greyed(im) if state == "full" else im, x + 40 + n * 18, y + 22)
-    body(cv, f"${fee}", x + 77, y + 24, "navy" if state == "full" else "forest")
-    body(cv, "/zone", x + 78, y + 37, "navy" if state == "full" else "dbrown", sc=1)
+        put(cv, greyed(im) if state == "full" else im, x + 40 + n * 18, y + 19)
+    body(cv, f"${fee}", x + 77, y + 21, "navy" if state == "full" else "forest")
+    body(cv, "/zone", x + 78, y + 34, "navy" if state == "full" else "dbrown", sc=1)
     if state == "picked":
         check(cv, x - 4, y - 4, pick or "1")
 
@@ -493,7 +488,8 @@ def dog_section(cv, picked, owned, bank, capacity=1, more_slots=True):
     if more_slots:
         lock(cv, right - 16, y + 4)
         right -= 20
-    title(cv, f"PACK {len(picked)}/{capacity}" if done else "ADD A DOG", right, y + 8, "ink" if done else "amber", "right")
+    # the count alone beside the padlock: picked over owned slots
+    title(cv, f"{len(picked)}/{capacity}", right, y + 8, "ink" if done else "amber", "right")
     full = len(picked) >= capacity
     cw, ch = DOG_CELL
     for i, dog in enumerate(ROSTER):
@@ -510,29 +506,22 @@ def dog_section(cv, picked, owned, bank, capacity=1, more_slots=True):
         dog_tile(cv, tx, ty, dog, state, bank, pick=str(picked.index(dog) + 1) if dog in picked else None)
 
 
-def pocket_row(cv, item):
-    x, y, w, h = POCKET
-    put(cv, kit("ui-button", w, h, "normal"), x, y)
-    bx, by = x + 5, y + 4
-    if item:
-        fill(cv, bx, by, 34, 34, "tan")
-        put(cv, image(GEAR_ART[item]), bx + 1, by + 1)
-        body(cv, f"Pocket: {GEAR_NAME[item]}", x + 46, y + 7, "plum")
-        body(cv, GEAR_LINE[item], x + 46, y + 24, "dbrown")
-    else:
-        for i in range(0, 34, 4):  # dashed empty slot
-            fill(cv, bx + i, by, 2, 1, "brown")
-            fill(cv, bx + i, by + 33, 2, 1, "brown")
-            fill(cv, bx, by + i, 1, 2, "brown")
-            fill(cv, bx + 33, by + i, 1, 2, "brown")
-        body(cv, "+", bx + 17, by + 12, "brown", "centre")
-        body(cv, "Pocket: empty", x + 46, y + 7, "plum")
-        body(cv, "Bring one gear item", x + 46, y + 24, "dbrown")
-    # chevron: opens the shop's Gear tab
-    cx, cy = x + w - 16, y + h // 2 - 3
-    for i in range(5):
-        fill(cv, cx + i, cy - 4 + i, 2, 1, "plum")
-        fill(cv, cx + i, cy + 4 - i, 2, 1, "plum")
+def pocket_line(item):
+    if item is None:
+        return "Empty: tap an item to bring it"
+    line = f"{GEAR_NAME[item]}: {GEAR_ABOUT[item]}"
+    return line if BODY.width(line, 2) <= 352 else f"{GEAR_NAME[item]}: {GEAR_LINE[item].lower()}"
+
+
+def pocket_strip(cv, owned, item, bank):
+    """The label line, every gear item as a tile in shop order, and the pocketed item's effect."""
+    title(cv, "POCKET", 4, POCKET_LABEL_Y, "cream")
+    body(cv, "One per walk", 356, POCKET_LABEL_Y, "cream", "right")
+    x0, y0, cw, ch, gap = POCKET_CELLS
+    for i, gear in enumerate(GEAR):
+        state = "picked" if gear == item else "available" if gear in owned else "locked"
+        gear_tile(cv, x0 + i * (cw + gap) + 1, y0 + 1, gear, state, bank)
+    body(cv, pocket_line(item), 4, POCKET_LINE_Y, "cream")
 
 
 def start_button(cv, ready):
@@ -541,7 +530,7 @@ def start_button(cv, ready):
     title(cv, "START WALK", x + w // 2, y + (12 if ready else 15), "ink" if ready else "dslate", "centre", sc=3)
 
 
-def start_screen(variant, state):
+def start_screen(state):
     cv = image("screen-home").copy()
     if state == "empty":
         base = Image.open(f"{UNIFORM}/start-uniform-partial.png").convert("RGBA")
@@ -550,14 +539,11 @@ def start_screen(variant, state):
         base = Image.open(f"{UNIFORM}/start-uniform-ready.png").convert("RGBA")
         bank, best, owned_gear, pocket, picked = 560, "Best $340", ["fannyPack", "whistle"], "whistle", ["duchess"]
     affordable = any(PRICES[g] <= bank for g in GEAR if g not in owned_gear) or PRICES["lockedDog"] <= bank
-    where = "the pet shop" if variant == "A" else "the shop"
-    line = [f"Something new at {where}."] if affordable else ["Back already? Who's next?"]
-    if state == "empty":
-        line = [f"Something new at {where}."]
-    gate(cv, base, variant, [line[0]] if BODY.width(line[0], 2) < 280 else line, affordable, pocket)
-    top_bar(cv, bank, best, variant, affordable)
+    line = "Something new at the pet shop." if affordable or state == "empty" else "Back already? Who's next?"
+    gate(cv, base, [line], affordable, pocket)
+    top_bar(cv, bank, best)
     dog_section(cv, picked, ["duchess", "biscuit", "koda"], bank)
-    pocket_row(cv, pocket)
+    pocket_strip(cv, owned_gear, pocket, bank)
     start_button(cv, bool(picked))
     return cv
 
@@ -573,7 +559,7 @@ def shop_frame(cv, bank, tab):
     wood = home.crop((0, 200, W, 560))
     cv.paste(wood, (0, 40))
     cv.paste(wood.crop((0, 0, W, 200)), (0, 400))
-    top_bar(cv, bank, "Best $340", "A")
+    top_bar(cv, bank, "Best $340")
     x, y, w, h = PANEL
     put(cv, kit("ui-detail-card", w, h), x, y)
     put(cv, kit("ui-detail-band", w - 12, 22), x + 6, y + 6)
@@ -596,9 +582,9 @@ def heading(cv, text, y, right=None):
         body(cv, right, x + w - 12, y, "dbrown", "right")
 
 
-def gear_tile(cv, x, y, item, state, bank=0, afford_outline=False, goal=None):
-    """A 60x50 pocket tile: the item's art over its price plate while locked."""
-    w, h = 60, 50
+def gear_tile(cv, x, y, item, state, bank=0):
+    """A 62x42 pocket tile: the item's art in its box, under its price plate while locked."""
+    w, h = 62, 42
     art = image(GEAR_ART[item])
     if state == "picked":
         fill(cv, x, y + 2, w, h, "plum")
@@ -611,23 +597,18 @@ def gear_tile(cv, x, y, item, state, bank=0, afford_outline=False, goal=None):
     else:
         put(cv, kit("ui-tile", w, h, "disabled"), x, y)
         box = "slate"
-    fill(cv, x + 12, y + 4, 36, 36, box)
+    fill(cv, x + 14, y + 3, 34, 34, box)
     if state == "locked":
-        put(cv, silhouette(art), x + 14, y + 6)
+        put(cv, silhouette(art), x + 15, y + 4)
         lock(cv, x - 2, y - 3)
-        if goal:
-            chip(cv, goal, x + w // 2 - (BODY.width(goal, 2) + 6) // 2, y + 36, "plum")
-        else:
-            price = PRICES[item]
-            text = dollars(price)
-            cw = BODY.width(text, 2) + 6
-            chip(cv, text, x + (w - cw) // 2, y + 36, "forest" if price <= bank else "dred")
-        if afford_outline:
-            afford(cv, x, y, w, h)
+        price = PRICES[item]
+        text = dollars(price)
+        cw = BODY.width(text, 2) + 6
+        chip(cv, text, x + (w - cw) // 2, y + 28, "forest" if price <= bank else "dred")
     else:
-        put(cv, greyed(art) if state == "full" else art, x + 14, y + 6)
+        put(cv, greyed(art) if state == "full" else art, x + 15, y + 4)
         if state == "picked":
-            check(cv, x - 4, y - 4, "tick")
+            check(cv, x - 3, y - 3, "tick")
 
 
 def row(cv, y, art, name, line, price=None, bank=0, owned=False, locked=None, icons=None, h=44, focus=False):
@@ -660,26 +641,21 @@ def row(cv, y, art, name, line, price=None, bank=0, owned=False, locked=None, ic
     else:
         chip(cv, dollars(price), x + w - 6, mid - 7, "forest" if price <= bank else "dred", "right")
         if focus:
-            # the item tapped on the start screen: the shop opens on its row, framed by ui-select
+            # the locked item tapped on the start screen: the shop opens on its row, framed by ui-select
             put(cv, kit("ui-select", w + 6, h + 6, "pulse"), x - 3, y - 3)
         elif price <= bank:
             afford(cv, x, y, w, h)
 
 
-def shop_gear(bank=760, owned=("fannyPack", "whistle"), pocket="whistle"):
+def shop_gear(bank=760, owned=("fannyPack", "whistle"), tapped="luckyCollar"):
     cv = Image.new("RGBA", (W, H), rgb("ink"))
     shop_frame(cv, bank, "gear")
-    heading(cv, "POCKET", 126, "One per walk")
-    for i, item in enumerate(GEAR):
-        state = "picked" if item == pocket else "available" if item in owned else "locked"
-        gear_tile(cv, PANEL[0] + 12 + i * 67, 144, item, state, bank, afford_outline=state == "locked" and PRICES[item] <= bank)
-    body(cv, f"{GEAR_NAME[pocket]}: thieves flee even", PANEL[0] + 12, 206, "plum")
-    body(cv, "without a big dog. Tap again to empty.", PANEL[0] + 12, 224, "plum")
-    heading(cv, "FOR SALE", 252)
-    y = 270
-    for item in sorted(GEAR, key=lambda g: g in owned):
-        row(cv, y, image(GEAR_ART[item]), GEAR_NAME[item], GEAR_LINE[item], PRICES[item], bank, owned=item in owned)
-        y += 54
+    heading(cv, "GEAR", 118, "Yours to keep")
+    y = 134
+    for item in GEAR:
+        row(cv, y, image(GEAR_ART[item]), GEAR_NAME[item], GEAR_LINE[item], PRICES[item], bank, owned=item in owned,
+            focus=item == tapped)
+        y += 52
     return cv
 
 
@@ -710,10 +686,9 @@ STRIP = [
     ("full", "Pack full", None),
     ("locked", "Locked", 560),
     ("locked", "Locked, can", 760),
-    ("locked-shop", "Affordable,", 760),
     ("goal", "Locked by", None),
 ]
-STRIP_SUB = {"Locked, can": "afford", "Affordable,": "in the shop", "Locked by": "a goal", "Pack full": "(can't now)",
+STRIP_SUB = {"Locked, can": "afford", "Locked by": "a goal", "Pack full": "(can't now)",
              "Locked": "(can't afford)"}
 
 
@@ -731,27 +706,24 @@ def strip():
         body(cv, label, 8, y + 10, "cream")
         if label in STRIP_SUB:
             body(cv, STRIP_SUB[label], 8, y + 28, "tan")
-        dstate = {"locked-shop": "locked", "goal": "locked"}.get(state, state)
-        dog_tile(cv, 124, y + 2, "nugget" if dstate == "locked" else "biscuit", dstate, bank or 0,
-                 afford_outline=state == "locked-shop", goal="10 walks" if state == "goal" else None)
+        dstate = "locked" if state == "goal" else state
+        dog_tile(cv, 124, y + 4, "nugget" if dstate == "locked" else "biscuit", dstate, bank or 0,
+                 goal="10 walks" if state == "goal" else None)
         if state == "full":
             body(cv, "Swaps:", 256, y + 10, "tan")
             body(cv, "never full", 256, y + 28, "tan")
         elif state == "goal":
             body(cv, "Dogs only", 256, y + 10, "tan")
         else:
-            gear_tile(cv, 260, y, "poopBags" if dstate == "locked" else "whistle", dstate, bank or 0,
-                      afford_outline=state == "locked-shop", goal="5 runs" if state == "goal" else None)
+            gear_tile(cv, 260, y + 4, "poopBags" if dstate == "locked" else "whistle", dstate, bank or 0)
     return cv
 
 
 def build():
     os.makedirs(OUT, exist_ok=True)
     out = {
-        "a-empty": start_screen("A", "empty"),
-        "a-item": start_screen("A", "item"),
-        "b-empty": start_screen("B", "empty"),
-        "b-item": start_screen("B", "item"),
+        "start-empty": start_screen("empty"),
+        "start-item": start_screen("item"),
         "shop-gear": shop_gear(),
         "shop-dogs": shop_dogs(),
         "states": strip(),
@@ -762,7 +734,8 @@ def build():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) == 2 and sys.argv[1] == "build":
+    if len(sys.argv) == 3 and sys.argv[1] == "build":
+        UNIFORM = sys.argv[2]
         build()
     else:
         sys.exit(__doc__)

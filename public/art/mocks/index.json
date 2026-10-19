@@ -17,6 +17,6 @@
   {
     "title": "Start screen shop",
     "path": "start-shop.html",
-    "description": "The start screen with help, sound and settings top right, a one-item Pocket in place of the Gear section, and a pet shop for gear, dogs and slots: a shop building in the gate scene or a SHOP button, the shop page, and the locked tile states."
+    "description": "The start screen with help, sound and settings top right, the Pocket strip (every gear item as a tile, one brought per walk) in place of the Gear section, and a Pet shop building in the gate scene for gear, dogs and slots, with the shop page, the strip's geometry and the locked tile states."
   }
 ]
