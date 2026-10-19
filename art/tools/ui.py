@@ -10,8 +10,8 @@ baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down (8x6), ui-zone-banner (248x48),
-ui-touch-hint (96x36) and ui-dog-band (360x94, drawn at (0, 466): the striped divider and the
-ink band behind the dog slots).
+ui-touch-hint (96x36) and ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
+wood behind the dog slots).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row, drawn as a character file card;
 a tag per dog key and `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn
 over the card and under the game's faces, hearts and text, while the game shakes the whole slot
@@ -722,9 +722,12 @@ EMBLEMS = {
 STATUS_SPOTS = ((78, 62), (98, 62))
 
 # One card in the slot row: three sit side by side, 120px apart. The card covers x 1 to 118 and rows
-# 2 to 89; rows 0 and 1 are left for ui-dog-band's divider.
+# 2 to 89; rows 0 and 1 show ui-dog-band's wood.
 HOUSE_W, HOUSE_H = 120, 90
 CARD = (1, 2, 118, 88)
+# The card stock and its lip: a colour on no zone's road, curb, sidewalk or verge, so the cards
+# never read as part of the road. Plum text holds 7.35:1 on amber.
+CARD_FACE, CARD_LIP = "amber", "orange"
 
 
 def name_plate(g, face):
@@ -737,8 +740,8 @@ def name_plate(g, face):
 
 def doghouse(dog):
     """120x90, one of three slots in a row: a character file card (x 1 to 118, rows 2 to 89) in the
-    UI chrome, with a 1px gap down each side and rows 0 and 1 clear for ui-dog-band's divider. The
-    game draws, in slot pixels: the dog's name centred at (60, 6) in font-title on the cream name
+    UI chrome on amber stock, with a 1px gap down each side and rows 0 and 1 clear, so
+    ui-dog-band's wood frames it. The game draws, in slot pixels: the dog's name centred at (60, 6) in font-title on the amber name
     plate (x 6 to 113, rows 5 to 16) in the blue header (rows 3 to 20), the dog face at (6, 24) in
     the left photo (backed in the dog's colour), the owner face at (42, 24) in the right photo
     (backed in sky), hearts from (78, 26) in rows of five, 8px across (7px hearts with a 1px gap)
@@ -747,14 +750,14 @@ def doghouse(dog):
     16x16 status icons at (78, 62) and (98, 62) in dashed boxes, the owner's name at (6, 62) in
     font-body on the ID line (ruled on row 71, x 4 to 75) and the quirk icon (16x16) at (6, 72).
     The dog's emblem sits in a badge ringed in its colour (x 24 to 35, rows 76 to 87), and its
-    colour runs along the foot stripe (x 38 to 115, rows 82 to 85). The empty card (a fired dog's)
-    is grey: a slate header, a white name plate, a dark dog photo, and only a dred plate built as
+    colour runs along the foot stripe (x 38 to 115, rows 82 to 85) under a plum rule on row 81.
+    The empty card (a fired dog's) is grey: a slate header, a white name plate, a dark dog photo, and only a dred plate built as
     ui-fired-plate (x 40 to 79, rows 68 to 84, the face x 44 to 75, rows 72 to 80) for FIRED in
     font-title, white (7.34:1), centred on x 60 with its caps in rows 74 to 78."""
     base, shade, dark = DOG_COLOURS[dog]
     empty = dog == "empty"
     face, lip, header, header_sh, plate_face = (
-        ("lgrey", "grey", "slate", "dslate", "white") if empty else ("cream", "tan", "blue", "navy", "cream"))
+        ("lgrey", "grey", "slate", "dslate", "white") if empty else (CARD_FACE, CARD_LIP, "blue", "navy", CARD_FACE))
     g = Grid(HOUSE_W, HOUSE_H)
     chrome(g, *CARD, r=1, face=face, lip=lip)
     # the header band, shaded along its foot, filled by the name plate
@@ -802,7 +805,9 @@ def doghouse(dog):
         for x, c in enumerate(row):
             if c != ".":
                 g.p(26 + x, 78 + y, colours[c])
-    # the foot stripe in the dog's colour, shaded along its foot, with a tick every 12px
+    # the foot stripe in the dog's colour under a plum rule, so a gold or orange stripe still reads
+    # on the amber face, shaded along its foot, with a tick every 12px
+    g.rect(38, 81, 78, 1, "plum")
     g.rect(38, 82, 78, 4, base)
     g.rect(38, 85, 78, 1, shade)
     for x in range(40, 116, 12):
@@ -827,7 +832,7 @@ def depth(solid, x, y, r):
 def doghouse_warn(step):
     """120x90, drawn over ui-doghouse: a 2px warning rim inside the card's outline, for an owner at
     one heart. Steps 0 to 2 run dim to bright; the outer pixel (orange, amber) carries the contrast
-    on the ink band, the inner one (red or orange) the warning colour."""
+    on the plum wood, the inner one (red or orange) the warning colour."""
     outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
     solid = card_solid()
     g = Grid(HOUSE_W, HOUSE_H)
@@ -848,7 +853,7 @@ def doghouse_warn(step):
 PANELS = ((5, 4, 111, 15), (4, 22, 36, 36), (40, 22, 36, 36), (76, 22, 42, 34), (4, 59, 72, 12), (6, 72, 16, 16),
           (77, 61, 18, 18), (97, 61, 18, 18), (24, 76, 12, 12))
 # The card's lines the flash keeps as seams: the inner line, the header's shade and the lip.
-SEAMS = ("plum", "navy", "tan")
+SEAMS = ("plum", "navy", CARD_LIP)
 # Each heart-loss frame: the flash's fill and seam colours, or the rim's outer and inner colours.
 HEART_LOSS = (("flash", "red", "dred"), ("flash", "dred", "red"), ("rim", "red", "pink"), ("rim", "red", None))
 
@@ -887,27 +892,32 @@ def doghouse_heart_loss(step):
     return g
 
 
-# ---------- the dog band: the toy box's bottom band behind the dog column ----------
+# ---------- the dog band: the wood behind the dog column ----------
+
+def wood(g, top, h):
+    """Plum wood across g from row top, h rows, as the top bar's: h short dbrown grain lines at
+    scattered rows and columns."""
+    g.rect(0, top, g.w, h, "plum")
+    for i in range(h):
+        g.rect((i * 53) % (g.w - 8), top + 4 + (i * 11) % (h - 9), 4 + (i % 4) * 3, 1, "dbrown")
+
 
 BAND_W, BAND_H = 360, 94
-# The divider's rows from the band's top: an ink line, three rows of stripes and the dred shadow.
-DIVIDER = ("ink", "stripes", "stripes", "stripes", "dred")
+# The divider's rows from the band's top: the top bar's bottom trim turned over, so the bar and
+# the band frame the road alike, each with its ink line against the road.
+DIVIDER = ("ink", "dbrown", "brown")
 
 
 def dog_band():
-    """360x94, drawn at (0, 466) under the dog slots: a striped divider on rows 0 to 4 (screen rows
-    466 to 470), lettered like the yard sign logo (an ink line, three rows of yellow and amber
-    stripes slanting 45 degrees, 4px wide, then a solid dred shadow row), on the road's last free
-    rows under the walker's feet and the cards' clear top rows; then the ink band from row 5 to the
-    screen's foot, behind the cards and an owned empty slot's dashed outline."""
+    """360x94, drawn at (0, 466) under the dog slots: plum wood, as the top bar's, with the bar's
+    bottom trim turned over along its top (an ink line on row 0, screen row 466, against the road,
+    then a dbrown and a brown row), on the road's last free rows under the walker's feet and the
+    cards' clear top rows. The wood shows between the cards and behind an owned empty slot's
+    dashed outline."""
     g = Grid(BAND_W, BAND_H)
-    g.rect(0, 0, BAND_W, BAND_H, "ink")
-    for y, kind in enumerate(DIVIDER):
-        for x in range(BAND_W):
-            if kind == "stripes":
-                g.p(x, y, "yellow" if (x + y) // 4 % 2 else "amber")
-            else:
-                g.p(x, y, kind)
+    wood(g, 0, BAND_H)
+    for y, c in enumerate(DIVIDER):
+        g.rect(0, y, BAND_W, 1, c)
     return g
 
 
@@ -1101,10 +1111,8 @@ def top_bar():
     ui-icon-buttons: Home at 130,10 and pause at 174,10. The state strip (ui-strip-well) hangs
     under the zone well, right aligned at 356."""
     g = Grid(360, 40)
-    g.rect(0, 0, 360, 40, "plum")
+    wood(g, 0, 40)
     g.rect(0, 1, 360, 1, "dbrown")
-    for i in range(40):
-        g.rect((i * 53) % 352, 4 + (i * 11) % 31, 4 + (i % 4) * 3, 1, "dbrown")
     g.rect(0, 37, 360, 1, "brown")
     g.rect(0, 38, 360, 1, "dbrown")
     g.rect(0, 39, 360, 1, "ink")
