@@ -15,11 +15,12 @@ import { keyNumbersShown } from "../input/keyNumbers";
 import { PHONE_EVENTS } from "../pwa";
 import { addConfetti } from "./badges";
 import { addDisplayText } from "./displayText";
-import { addDim, fillRect } from "./draw";
+import { fillRect } from "./draw";
 import { closeOverlay, listenOutsideTap, onWindowEvent, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, setPixelText, wrapPixelText } from "./pixelText";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
+import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { firstTag, playTag } from "./sprites";
@@ -61,7 +62,7 @@ export class ZoneCelebrationScene extends Scene {
   create(data: ZoneCelebrationSceneData): void {
     this.done = false;
     const reduced = currentSettings(this).reducedMotion;
-    addDim(this, LAYOUT.dim);
+    addRampDim(this, LAYOUT.dim);
     if (!reduced) {
       this.dropConfetti();
     }
