@@ -51,14 +51,14 @@
 
 ## Game data
 
-- **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.
-- **Ownership:** gameplay edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and the tests.
-- **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline. A new kind is code in `src/rules/` plus a test.
 - **Card text:** generated from the effects and tuning, covered by a snapshot test.
-- **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are branded types in the rules; value files hold plain numbers. Hearts deltas are -3 to 3.
+- **Choices:** `cardFor` builds a card (text, affected dogs, options disabled when unaffordable); `chooseOption` applies a choice and returns the new run state plus the outcome events the scenes animate.
+- **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline. A new kind is code in `src/rules/` plus a test.
+- **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.
 - **Integrity:** `src/data/data.test.ts` checks the rulebook's invariants, and type-level tests show invalid data fails to compile.
 - **Live tuning:** editing a value file under the dev server updates the running game through Vite HMR. Scenes and rules read tuning at the time of use.
-- **Choices:** `cardFor` builds a card (text, affected dogs, options disabled when unaffordable); `chooseOption` applies a choice and returns the new run state plus the outcome events the scenes animate.
+- **Ownership:** gameplay edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and the tests.
+- **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are branded types in the rules; value files hold plain numbers. Hearts deltas are -3 to 3.
 
 ## Save data
 
@@ -74,15 +74,15 @@
 
 ## Phone
 
-- The canvas takes no browser gestures (`touch-action: none`).
-- Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game, the atlas pages and atlas manifest, and every other file in the art manifest (fonts, and sounds in one format only). Boot makes about 30 requests: the page, its scripts, the two manifests, four atlas pages, four font files and a file per sound. HTML, the art manifest and the site nav's `nav.js` and `nav.css` are network-first; hashed assets, precached files and sound files are cache-first. A new version activates on the next launch, or sooner through the "Update ready" toast, shown on the home screen only, whose Reload posts `skip-waiting` and reloads on `controllerchange`.
-- Sound format: each sound ships as Ogg and AAC (`.m4a`). The page picks the first the browser plays, Ogg before AAC (`src/audio/soundFormat.ts`, asking `canPlayType` the same types Phaser checks). BootScene loads only that file, and the page registers `/sw.js?sound=<format>` so the worker precaches only that format; a worker has no `canPlayType` of its own. A sound the install did not store is cached on its first fetch.
-- Installed app: on `/play/` in `fullscreen` or `standalone` display mode, or with iOS's `navigator.standalone`, `public/nav.js` leaves the nav bar out (and follows a display-mode change), so no link leaves the app and the game takes the full height under the top safe-area inset.
-- Security headers: `src/headers/securityHeadersPlugin.ts` writes `_headers` at build time: nosniff, referrer and permissions policies, and a CSP per path (`/`, `/play/*`, `/data/*`, `/art/*`) allowing `'self'` plus hashes of each page's inline blocks. No script injects a `<style>`, so no hash depends on a script's text: the site nav's CSS is `public/nav.css`, which each page links beside `public/nav.js`. Google Fonts is allowed only on `/` and `/art/*`. `/sw.js` keeps the platform's `max-age=0, must-revalidate`.
-- Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, `app-hidden` pauses and checkpoints, and `turned-sideways` pauses. The run holds a screen wake lock, and the first gesture unlocks audio.
-- Portrait only: the manifest locks `portrait`, and a phone on its side (coarse pointer, landscape, viewport at most 500 CSS px tall) gets a "Turn your phone upright" notice over the page.
 - Audio resumes from iOS's `interrupted` or `suspended` on each return to the foreground and each gesture (`touchend` on iOS), unless the settings mute it.
 - Help tap targets (close X, page dots, Back, Next) are at least 44×44 render px, larger than their art where needed.
+- Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game, the atlas pages and atlas manifest, and every other file in the art manifest (fonts, and sounds in one format only). Boot makes about 30 requests: the page, its scripts, the two manifests, four atlas pages, four font files and a file per sound. HTML, the art manifest and the site nav's `nav.js` and `nav.css` are network-first; hashed assets, precached files and sound files are cache-first. A new version activates on the next launch, or sooner through the "Update ready" toast, shown on the home screen only, whose Reload posts `skip-waiting` and reloads on `controllerchange`.
+- Installed app: on `/play/` in `fullscreen` or `standalone` display mode, or with iOS's `navigator.standalone`, `public/nav.js` leaves the nav bar out (and follows a display-mode change), so no link leaves the app and the game takes the full height under the top safe-area inset.
+- Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, `app-hidden` pauses and checkpoints, and `turned-sideways` pauses. The run holds a screen wake lock, and the first gesture unlocks audio.
+- Portrait only: the manifest locks `portrait`, and a phone on its side (coarse pointer, landscape, viewport at most 500 CSS px tall) gets a "Turn your phone upright" notice over the page.
+- Security headers: `src/headers/securityHeadersPlugin.ts` writes `_headers` at build time: nosniff, referrer and permissions policies, and a CSP per path (`/`, `/play/*`, `/data/*`, `/art/*`) allowing `'self'` plus hashes of each page's inline blocks. No script injects a `<style>`, so no hash depends on a script's text: the site nav's CSS is `public/nav.css`, which each page links beside `public/nav.js`. Google Fonts is allowed only on `/` and `/art/*`. `/sw.js` keeps the platform's `max-age=0, must-revalidate`.
+- Sound format: each sound ships as Ogg and AAC (`.m4a`). The page picks the first the browser plays, Ogg before AAC (`src/audio/soundFormat.ts`, asking `canPlayType` the same types Phaser checks). BootScene loads only that file, and the page registers `/sw.js?sound=<format>` so the worker precaches only that format; a worker has no `canPlayType` of its own. A sound the install did not store is cached on its first fetch.
+- The canvas takes no browser gestures (`touch-action: none`).
 
 ## Dev tools
 
