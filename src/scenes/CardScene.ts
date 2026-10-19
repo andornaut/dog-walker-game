@@ -18,7 +18,7 @@ import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hol
 import { cardNumberForKey } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
 import { CARD_LAYOUT, cardRowSpec, largeCardHeight, largeCardRect } from "../layout/cardLayout";
-import { cardRowRects } from "../layout/cardRow";
+import { cardHeader, cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
 import { insetRect, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -43,7 +43,7 @@ import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
-import { tagFrame } from "./uiKit";
+import { addNineSlice, tagFrame } from "./uiKit";
 
 export interface CardSceneData {
   // Called with the option's data index, or "skip"; the run decides what happens next.
@@ -67,8 +67,6 @@ const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
 // Holding a card this long enlarges it, with the changes behind its numbers, however far
 // the finger moves.
 const CARD_HOLD: HoldRule = { holdMs: 400, slopPx: Number.POSITIVE_INFINITY };
-// A card's key number sits this far above its top, under the subtitle.
-const KEY_NUMBER_RISE = 8;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 // The enlarged card's body keeps this many rows clear under its text.
 const LARGE_BODY_GAP = 4;
@@ -174,19 +172,22 @@ export class CardScene extends Scene {
       ...(view.skip ? [{ choice: "skip" as const, enabled: true }] : []),
     ];
     this.cardRects = cardRowRects(CARD_ROW, this.entries.length, road);
-    const top = itemAt(this.cardRects, 0).y;
+    const keys = keyNumbersShown();
+    const header = cardHeader(keys, this.cardRects);
     const centerX = road.x + road.width / 2;
     const title = { font: "title", scale: 2 } as const;
     if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
       snapCentre(
-        addDisplayText(this, centerX, top - 38, view.title, { color: PALETTE.white }),
+        addDisplayText(this, centerX, header.titleTop, view.title, { color: PALETTE.white }),
         centerX,
       );
     } else {
-      this.centered(centerX + 1, top - 37, view.title, PALETTE.ink, title);
-      this.centered(centerX, top - 38, view.title, PALETTE.white, title);
+      this.centered(centerX + 1, header.titleTop + 1, view.title, PALETTE.ink, title);
+      this.centered(centerX, header.titleTop, view.title, PALETTE.white, title);
     }
-    this.centered(centerX, top - 18, this.subtitle(view), PALETTE.white);
+    // The subtitle and key numbers sit on a dark band over the dimmed road.
+    addNineSlice(this, "ui-strip-well", header.band);
+    this.centered(centerX, header.subtitleTop, this.subtitle(view), PALETTE.white);
 
     const tag = cardFrameTag(gameData, view.source);
     const bandFont = this.bandFont();
@@ -195,16 +196,10 @@ export class CardScene extends Scene {
       const rect = itemAt(this.cardRects, i);
       this.drawCard(view, tag, bandFont, entry, rect);
       // Once a key has been pressed, each card shows the number key that picks it, above it.
-      if (keyNumbersShown()) {
-        this.centered(
-          rect.x + rect.width / 2,
-          rect.y - KEY_NUMBER_RISE,
-          String(i + 1),
-          PALETTE.amber,
-          {
-            font: "title",
-          },
-        );
+      if (keys) {
+        this.centered(rect.x + rect.width / 2, header.keyTop, String(i + 1), PALETTE.amber, {
+          font: "title",
+        });
       }
       this.parts[i] = this.children.list.slice(before);
     });
