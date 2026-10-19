@@ -43,16 +43,17 @@ export function drawShadow(
 const SHADOW_RADIUS_Y = 2.5;
 
 // The shadow drawShadow draws, made once per colour, drawn sprite width and depth scale as a
-// texture: scale flattens it as the sprite shrinks with distance. anchor is the texture
-// pixel to place a pixel above the sprite's feet, at its x.
+// texture: scale flattens it as the sprite shrinks with distance. Radii are kept to half
+// pixels, so a sprite scaled continuously reuses a few textures. anchor is the texture pixel
+// to place a pixel above the sprite's feet, at its x.
 export function shadowTexture(
   scene: Scene,
   color: number,
   spriteWidth: number,
   scale = 1,
 ): { anchor: { x: number; y: number }; key: string } {
-  const radiusX = shadowRadiusX(spriteWidth);
-  const radiusY = Math.max(1, SHADOW_RADIUS_Y * scale);
+  const radiusX = Math.round(shadowRadiusX(spriteWidth) * 2) / 2;
+  const radiusY = Math.max(1, Math.round(SHADOW_RADIUS_Y * scale * 2) / 2);
   const anchor = { x: Math.ceil(radiusX) + 1, y: Math.ceil(radiusY) + 1 };
   const key = `shadow-${color.toString(16)}-${radiusX}-${radiusY}`;
   if (!scene.textures.exists(key)) {

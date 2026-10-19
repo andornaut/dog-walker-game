@@ -19,7 +19,7 @@ import {
 import { hitCue } from "../audio/sound";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId, EncounterId, HintTrigger, Zone } from "../data/types";
+import type { DogId, EncounterId, HintTrigger, MinorObstacleId, Zone } from "../data/types";
 import { DEV_ROAD_FADE_KEY, DEV_STATE_EVENT, type DevState } from "../dev/devOverlay";
 import { DEV_LAST_LOG_KEY, DEV_REPLAY_KEY } from "../dev/devPanelModel";
 import {
@@ -61,7 +61,7 @@ import {
 import { dogSlotForKey, laneDirectionForKey } from "../input/keyBindings";
 import { laneCenterXs, type LaneDirection } from "../layout/lanes";
 import { COLLAR_HEIGHT, leashHand, packPlacements } from "../layout/packFormation";
-import { project, type ScaleStep, snapScale } from "../layout/projection";
+import { project } from "../layout/projection";
 import {
   drawRoad,
   type PixelImage,
@@ -163,14 +163,12 @@ import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import {
   addStandingSprite,
-  type DepthLook,
-  depthLook,
   ensurePlaceholder,
   firstTag,
   playEffect,
   playTag,
   playTagOnce,
-  showDepthLook,
+  showAtDepth,
   spriteMetrics,
 } from "./sprites";
 import { StatusOverlays } from "./statusDraw";
@@ -231,6 +229,10 @@ const DEPTH = {
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 // Every road sprite, the road and its verge are drawn through this one projection.
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
+// The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
+// ahead of the walker (projected 0.92 to 0.94), so they never change size, and following the
+// projection there would drop two or three pixel rows from every dog.
+const PACK_DEPTH = 1;
 const ROAD_TEXTURE = "road-projected";
 // An instant lucky find's art pops up over the road, then floats up and fades.
 const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };
@@ -243,7 +245,7 @@ const CUE = { inset: 10, size: 16, top: 20 };
 // One sprite of an item. dx is across the road from the item's centre and footY the flat
 // road row it stands on, both in road pixels. feet "bottom" stands it on its frame's bottom
 // rather than its anchor. A flat sprite lies on the road, under everything else with no
-// shadow, foreshortened like the road.
+// shadow.
 interface ItemPart {
   dx: number;
   feet: "anchor" | "bottom";
@@ -257,7 +259,8 @@ interface ItemView {
   parts: ItemPart[];
 }
 
-type Shadow = (look: DepthLook, x: number, footY: number, step: ScaleStep) => void;
+// A shadow under a sprite drawn from key's art steps at depth, its drawn size over its 1x.
+type Shadow = (key: string, depth: number, x: number, footY: number) => void;
 
 // The inputs a simulation step applies, waiting for it. Only a replay heads home at a step:
 // played live, the pause menu ends the walk at once.
@@ -275,18 +278,8 @@ interface Replay {
   next: number;
 }
 
-// Placeholder sizes for road art that may be missing: a box the size of what it stands for.
-const PLACEHOLDERS: readonly [string, number, number][] = [
-  ["barrier-2", 88, 32],
-  ["barrier-3", 144, 32],
-  ["bench", 88, 32],
-  ["bin", 32, 32],
-  ["cone", 32, 32],
-  ["hedge", 144, 32],
-  ["hydrant", 32, 32],
-  ["parked-car", 40, 128],
-  [SKUNK_CLOUD_KEY, 88, 88],
-];
+// Road art that may be missing is drawn as a box this tall, as wide as its hit box.
+const PLACEHOLDER_HEIGHT = 32;
 
 // The walk: backdrop, road, walker, pack and everything spawned on the road. The simulation
 // steps at a fixed rate and stops while a card or the pause menu is up.
@@ -359,9 +352,7 @@ export class RunScene extends Scene {
     const layout = LAYOUT;
     this.laneXs = laneCenterXs(LANE_COUNT, layout.road);
     this.resetState();
-    PLACEHOLDERS.forEach(([key, width, height]) =>
-      ensurePlaceholder(this, key, { color: PALETTE.slate, height, width }),
-    );
+    this.ensureRoadPlaceholders();
 
     const setup = this.startSetup();
     this.setup = setup;
@@ -445,6 +436,23 @@ export class RunScene extends Scene {
     this.stumbling = false;
     this.zoneEndPending = false;
     this.zoneShown = -1;
+  }
+
+  // A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape
+  // in the data.
+  private ensureRoadPlaceholders(): void {
+    const { cell } = walkGeometry(LANE_COUNT, 1, PROJECTION, LAYOUT.road);
+    const add = (key: string, lanes: number) =>
+      ensurePlaceholder(this, key, {
+        color: PALETTE.slate,
+        height: PLACEHOLDER_HEIGHT,
+        width: lanes * cell.length - 2 * cell.inset,
+      });
+    for (const [id, obstacle] of Object.entries(gameData.minorObstacles)) {
+      add(minorObstacleSpriteKey(id as MinorObstacleId), obstacle.shape.lanes);
+    }
+    const skunk = gameData.encounters.skunk;
+    add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
   }
 
   // A replay log waiting in the session starts the run from its setup and drives its inputs;
@@ -1319,25 +1327,19 @@ export class RunScene extends Scene {
     this.paintRoad(walk, zone);
 
     this.shadowsUsed = 0;
-    const shadow: Shadow = (look, x, footY, step) =>
-      this.placeShadow(shadowColor, look, x, footY, step);
+    const shadow: Shadow = (key, depth, x, footY) =>
+      this.placeShadow(shadowColor, key, depth, x, footY);
     this.drawItems(walk, halted, shadow);
     this.drawForcedStop(walk, halted, shadow);
     this.drawPack(walk, halted, shadow, graphics.leash);
     this.shadows.slice(this.shadowsUsed).forEach((image) => image.setVisible(false));
   }
 
-  // A shadow under a sprite, centred on its x a pixel above its feet, from the pool. It
-  // shrinks with the sprite's depth step.
-  private placeShadow(
-    color: number,
-    look: DepthLook,
-    x: number,
-    footY: number,
-    step: ScaleStep,
-  ): void {
-    const width = spriteMetrics(look.key).opaqueWidth * look.scale;
-    const { anchor, key: texture } = shadowTexture(this, color, width, step);
+  // A shadow under a sprite, centred on its x a pixel above its feet, from the pool. It is
+  // sized from the sprite's 1x art at its depth, whichever art step draws it.
+  private placeShadow(color: number, key: string, depth: number, x: number, footY: number): void {
+    const width = spriteMetrics(key).opaqueWidth * depth;
+    const { anchor, key: texture } = shadowTexture(this, color, width, depth);
     let image = this.shadows[this.shadowsUsed];
     if (image === undefined) {
       image = this.add.image(0, 0, texture).setOrigin(0).setDepth(DEPTH.shadow);
@@ -1523,8 +1525,8 @@ export class RunScene extends Scene {
     return { height, pixels: new Uint32Array(data.buffer), width };
   }
 
-  // Each item's sprites stand on the road through the projection, at the depth step of where
-  // they stand, using a hand-drawn variant for the step when the art has one.
+  // Each item's sprites stand on the road through the projection, sized for where they stand
+  // by showAtDepth.
   private drawItems(walk: Walk, halted: boolean, shadow: Shadow): void {
     const seen = new Set<number>();
     const still = this.reducedMotion();
@@ -1542,25 +1544,19 @@ export class RunScene extends Scene {
       for (const part of view.parts) {
         const distance = PROJECTION.footY - part.footY(item);
         const placed = project(PROJECTION, { distance, x: laneX + part.dx });
-        const step = snapScale(placed.scale);
-        const look = depthLook(this, part.key, step);
-        showDepthLook(part.sprite, look, part.feet);
+        const drawn = showAtDepth(part.sprite, part.key, placed.scale, part.feet);
         const x = Math.round(placed.x);
         const y = Math.round(placed.y);
         part.sprite.setPosition(x, y);
-        const tag = firstTag(this, look.key, tags);
+        const tag = firstTag(this, drawn.key, tags);
         if (tag !== undefined) {
-          playTag(part.sprite, look.key, tag, still);
+          playTag(part.sprite, drawn.key, tag, still);
         }
         if (part.flat) {
-          // Foreshortened like the road it lies on: as long on screen as its rows of road.
-          const length = spriteMetrics(part.key).frameHeight;
-          const far = project(PROJECTION, { distance: distance + length, x: laneX }).y;
-          const scaleY = (placed.y - far) / spriteMetrics(look.key).frameHeight;
-          part.sprite.setScale(look.scale, scaleY).setDepth(DEPTH.decal);
+          part.sprite.setDepth(DEPTH.decal);
         } else {
           part.sprite.setDepth(DEPTH.sprite + placed.y);
-          shadow(look, x, y, step);
+          shadow(part.key, drawn.depth, x, y);
         }
       }
     }
@@ -1572,7 +1568,7 @@ export class RunScene extends Scene {
     }
   }
 
-  // A mover stands on the road through the projection once it moves, at its depth step, a
+  // A mover stands on the road through the projection once it moves, sized by showAtDepth, a
   // crosser mirrored when it runs left. Until then only its cue shows, at 1x: a sign at the
   // road's edge on its row with the arrow pointing across, or a cyclist's sign at the top of
   // its lane with the arrow pointing down. The ball carries its own shadow.
@@ -1594,20 +1590,18 @@ export class RunScene extends Scene {
       body.sprite.setVisible(place.moving);
       if (place.moving) {
         const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
-        const step = snapScale(placed.scale);
         const { key, tag } = MOVER_SPRITES[path.mover];
-        const look = depthLook(this, key, step);
-        showDepthLook(body.sprite, look);
+        const drawn = showAtDepth(body.sprite, key, placed.scale);
         const x = Math.round(placed.x);
         const y = Math.round(placed.y);
         body.sprite
           .setPosition(x, y)
           .setDepth(DEPTH.sprite + placed.y)
           .setFlipX(leftward);
-        playTag(body.sprite, look.key, tag, still);
+        playTag(body.sprite, drawn.key, tag, still);
         const cycle = body.sprite.anims.currentAnim?.duration;
         if (path.mover !== "ball") {
-          shadow(look, x, y, step);
+          shadow(key, drawn.depth, x, y);
         } else if (cycle !== undefined) {
           const bounce = read(gameData.tuning, "seconds", "ballBounceSeconds");
           body.sprite.anims.timeScale = cycle / (bounce * 1000);
@@ -1640,9 +1634,9 @@ export class RunScene extends Scene {
     }
   }
 
-  // Each item stands at the bottom of its hit box, and a lucky find on its frame's bottom. A
-  // puddle lies flat under the rest, a skunk stands in the middle of its spray cloud, which
-  // lies flat too, and a parked car stands at the near end of its footprint, past its hit box.
+  // Each item stands once at the near edge of its hit box, however many rows it covers, and a
+  // lucky find on its frame's bottom. A puddle lies flat under the rest, and a skunk stands in
+  // the middle of its spray cloud, which lies flat too.
   private addItemView(item: WalkItem): ItemView {
     const bottom = (shown: WalkItem) => shown.y + shown.height;
     const lucky = itemCategory(gameData, item.kind) === "lucky";
@@ -1661,7 +1655,7 @@ export class RunScene extends Scene {
       }
       return made;
     };
-    const flat = { feet: "bottom", flat: true } as const;
+    const flat = { flat: true } as const;
     let parts: ItemPart[];
     if (item.mover !== undefined) {
       const body = MOVER_SPRITES[item.mover.path.mover].key;
@@ -1671,9 +1665,7 @@ export class RunScene extends Scene {
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (isMinorObstacle(gameData, item.kind)) {
-      const inset = this.walk === undefined ? 0 : this.geometry(this.walk.run).cell.inset;
-      const footY = item.kind === "parkedCar" ? (shown: WalkItem) => bottom(shown) + inset : bottom;
-      parts = [part(minorObstacleSpriteKey(item.kind), { footY })];
+      parts = [part(minorObstacleSpriteKey(item.kind))];
     } else if (item.kind === "skunk") {
       parts = [
         part(SKUNK_CLOUD_KEY, flat),
@@ -1713,17 +1705,15 @@ export class RunScene extends Scene {
     const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
     this.stopSprites.sprites.forEach((sprite, i) => {
       const placed = project(PROJECTION, { distance, x: itemAt(xs, i) });
-      const step = snapScale(placed.scale);
-      const look = depthLook(this, key, step);
-      showDepthLook(sprite, look);
-      const tag = firstTag(this, look.key, tags);
+      const drawn = showAtDepth(sprite, key, placed.scale);
+      const tag = firstTag(this, drawn.key, tags);
       if (tag !== undefined) {
-        playTag(sprite, look.key, tag, still);
+        playTag(sprite, drawn.key, tag, still);
       }
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       sprite.setPosition(x, y).setDepth(DEPTH.sprite + placed.y);
-      shadow(look, x, y, step);
+      shadow(key, drawn.depth, x, y);
     });
   }
 
@@ -1759,24 +1749,22 @@ export class RunScene extends Scene {
         distance: -placement.footDy,
         x: walkerX + placement.dx,
       });
-      const step = snapScale(placed.scale);
-      const look = depthLook(this, dogSpriteKey(dog), step);
-      showDepthLook(sprite, look);
+      const drawn = showAtDepth(sprite, dogSpriteKey(dog), PACK_DEPTH);
       const x = Math.round(placed.x);
       const dogFoot = Math.round(placed.y);
-      this.poseDog(dog, sprite, look.key, pose, still && halted, {
+      this.poseDog(dog, sprite, drawn.key, pose, still && halted, {
         x,
-        y: dogFoot - Math.round(spriteMetrics(look.key).feetY * look.scale),
+        y: dogFoot - Math.round(spriteMetrics(drawn.key).feetY * drawn.scale),
       });
       sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
-      shadow(look, x, dogFoot, step);
+      shadow(dogSpriteKey(dog), drawn.depth, x, dogFoot);
       if (redrawLeash) {
         const hand = leashHand(placement);
         drawPixelLine(
           leash,
           leashColor,
           { x: walkerX + hand.dx, y: footY + hand.dy },
-          { x, y: dogFoot - Math.round(COLLAR_HEIGHT * step) },
+          { x, y: dogFoot - Math.round(COLLAR_HEIGHT * drawn.depth) },
         );
       }
     }
@@ -1786,7 +1774,7 @@ export class RunScene extends Scene {
       if (posed) {
         playTag(walker.sprite, walker.key, pose, still && halted);
       }
-      shadow({ key: walker.key, scale: 1 }, walkerX, footY, 1);
+      shadow(walker.key, 1, walkerX, footY);
     }
     // Dizzy stars circle the walker's head for as long as a stumble locks steering.
     this.stumbling &&= isSteeringLocked(walk.road.control);

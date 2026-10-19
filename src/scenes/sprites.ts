@@ -3,14 +3,16 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import type { SpriteAnchor } from "../assets/manifest";
 import { depthVariantKey, standsOnGround } from "../assets/spriteKeys";
+import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { opaqueBoundsOfRgba, type PixelBounds } from "../layout/pixelShapes";
-import type { ScaleStep } from "../layout/projection";
+import { SCALE_STEPS, type ScaleStep } from "../layout/projection";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
 // opaqueWidth how wide its drawn pixels are; both from its first frame.
 export interface SpriteMetrics {
   feetY: number;
   frameHeight: number;
+  frameWidth: number;
   opaqueWidth: number;
 }
 
@@ -44,7 +46,7 @@ export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | 
   const frame = texture.get(texture.getFrameNames()[0] ?? "__BASE");
   const { height, width } = frame;
   if (anchor !== undefined) {
-    measured.set(key, { ...anchor, frameHeight: height });
+    measured.set(key, { ...anchor, frameHeight: height, frameWidth: width });
     return;
   }
   if (!standsOnGround(key)) {
@@ -54,6 +56,7 @@ export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | 
   measured.set(key, {
     feetY: bounds?.bottom ?? height,
     frameHeight: height,
+    frameWidth: width,
     opaqueWidth: bounds === undefined ? width : bounds.right - bounds.left,
   });
 }
@@ -69,8 +72,8 @@ export function spriteTopY(scene: Scene, key: string): number {
   return top;
 }
 
-// How a road sprite shows at a depth step: its hand-drawn variant when one is loaded, else
-// the sprite scaled at runtime.
+// How an overlay shows at a depth step: its hand-drawn variant when one is loaded, else the
+// sprite scaled at runtime.
 export interface DepthLook {
   key: string;
   scale: number;
@@ -83,23 +86,42 @@ export function depthLook(scene: Scene, key: string, step: ScaleStep): DepthLook
     : { key, scale: step };
 }
 
-// Switches a standing sprite to a depth look, on its feet line or, with feet "bottom", its
-// frame's bottom. A changed texture carries on the same tag from the same frame.
-export function showDepthLook(
+const depthArts = new Map<string, DepthArt[]>();
+
+// A road sprite's loaded art steps, 1x first, read once.
+function depthArtsOf(scene: Scene, key: string): DepthArt[] {
+  let arts = depthArts.get(key);
+  if (arts === undefined) {
+    arts = SCALE_STEPS.map((step) => depthVariantKey(key, step) ?? key)
+      .filter((art) => art === key || scene.textures.exists(art))
+      .map((art) => {
+        const { feetY, frameHeight, frameWidth } = spriteMetrics(art);
+        return { feetY, height: frameHeight, key: art, width: frameWidth };
+      });
+    depthArts.set(key, arts);
+  }
+  return arts;
+}
+
+// Shows a road sprite at its projected scale by depthDraw, the one rule for every road
+// sprite: on its art's feet line or, with feet "bottom", its frame's bottom. A changed
+// texture carries on the same tag from the same frame.
+export function showAtDepth(
   sprite: GameObjects.Sprite,
-  look: DepthLook,
+  key: string,
+  projected: number,
   feet: "anchor" | "bottom" = "anchor",
-): void {
-  if (sprite.texture.key !== look.key) {
+): DepthDraw {
+  const drawn = depthDraw(depthArtsOf(sprite.scene, key), projected);
+  if (sprite.texture.key !== drawn.key) {
     const current = sprite.anims.currentAnim;
     const frame = sprite.anims.currentFrame;
     const startFrame = current !== null && frame !== null ? current.frames.indexOf(frame) : 0;
     const tag = current?.key.slice(current.key.indexOf(":") + 1);
     const paused = sprite.anims.isPaused;
-    sprite.setTexture(look.key);
-    const { feetY, frameHeight } = spriteMetrics(look.key);
-    sprite.setOrigin(0.5, feet === "bottom" ? 1 : feetY / frameHeight);
-    const next = tag === undefined ? undefined : animationKey(look.key, tag);
+    sprite.setTexture(drawn.key);
+    sprite.setOrigin(0.5, feet === "bottom" ? 1 : drawn.originY);
+    const next = tag === undefined ? undefined : animationKey(drawn.key, tag);
     if (next !== undefined && sprite.scene.anims.exists(next)) {
       sprite.play({ key: next, startFrame: Math.max(0, startFrame) });
       if (paused) {
@@ -107,7 +129,8 @@ export function showDepthLook(
       }
     }
   }
-  sprite.setScale(look.scale);
+  sprite.setScale(drawn.scale);
+  return drawn;
 }
 
 // The first of tags the sprite has an animation for.
@@ -116,7 +139,7 @@ export function firstTag(scene: Scene, key: string, tags: readonly string[]): st
 }
 
 export function spriteMetrics(key: string): SpriteMetrics {
-  return measured.get(key) ?? { feetY: 32, frameHeight: 32, opaqueWidth: 24 };
+  return measured.get(key) ?? { feetY: 32, frameHeight: 32, frameWidth: 32, opaqueWidth: 24 };
 }
 
 // A coloured box standing in for a sprite the art has not delivered or that failed to
@@ -134,7 +157,12 @@ export function ensurePlaceholder(
   graphics.fillStyle(color).fillRect(2, 2, width - 4, height - 2);
   graphics.generateTexture(key, width, height);
   graphics.destroy();
-  measured.set(key, { feetY: height, frameHeight: height, opaqueWidth: width - 4 });
+  measured.set(key, {
+    feetY: height,
+    frameHeight: height,
+    frameWidth: width,
+    opaqueWidth: width - 4,
+  });
 }
 
 // A sprite placed by the middle of its feet.
