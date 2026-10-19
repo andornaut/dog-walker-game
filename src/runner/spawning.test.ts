@@ -8,6 +8,7 @@ import {
   everyLaneReaches,
   type Footprint,
   hitLength,
+  laneMask,
   laneReach,
   planSpawns,
   type SpawnEvent,
@@ -206,6 +207,21 @@ describe("planSpawns", () => {
     expect(() => planSpawns(seededRandom(1), tooMany)).toThrow(/obstacle/);
   });
 
+  it("skips an obstacle bigger than one cell that has no room left, the same way every time", () => {
+    const tooBig: SpawnPlan<Kind> = {
+      ...plan,
+      quotas: [
+        { blocksLane: true, count: 40, footprint: { lanes: 3, rows: 1 }, kind: "obstacle" },
+        { blocksLane: false, count: 9, kind: "tip" },
+      ],
+    };
+    const events = planSpawns(seededRandom(1), tooBig);
+    expect(countOf("obstacle", events)).toBeGreaterThan(0);
+    expect(countOf("obstacle", events)).toBeLessThan(40);
+    expect(countOf("tip", events)).toBe(9);
+    expect(planSpawns(seededRandom(1), tooBig)).toEqual(events);
+  });
+
   it("leaves an open lane within one move of every open lane on the row before", () => {
     for (const seed of seeds) {
       const open = openLanesByRow(tight, planSpawns(seededRandom(seed), tight));
@@ -303,19 +319,32 @@ describe("laneReach", () => {
   });
 });
 
+describe("laneMask", () => {
+  it("sets bit n for lane n", () => {
+    expect(laneMask([0, 2, 4])).toBe(0b10101);
+    expect(laneMask([])).toBe(0);
+  });
+});
+
 describe("everyLaneReaches", () => {
+  const notLane1 = ~laneMask([1]);
+
   it("is true when every lane has a target within reach", () => {
-    expect(everyLaneReaches(1, [0, 2], [1])).toBe(true);
+    expect(everyLaneReaches(1, laneMask([0, 2]), laneMask([1]))).toBe(true);
   });
 
   it("is false when one lane has no target within reach", () => {
-    expect(everyLaneReaches(1, [0, 4], [1])).toBe(false);
-    expect(everyLaneReaches(4, [0], [])).toBe(false);
+    expect(everyLaneReaches(1, laneMask([0, 4]), laneMask([1]))).toBe(false);
+    expect(everyLaneReaches(4, laneMask([0]), 0)).toBe(false);
+  });
+
+  it("is true when there are no lanes to reach from", () => {
+    expect(everyLaneReaches(0, 0, 0)).toBe(true);
   });
 
   it("is false when the only way crosses a lane that is not clear", () => {
-    expect(everyLaneReaches(2, [0], [2], (lane) => lane !== 1)).toBe(false);
-    expect(everyLaneReaches(2, [0], [0, 2], (lane) => lane !== 1)).toBe(true);
+    expect(everyLaneReaches(2, laneMask([0]), laneMask([2]), notLane1)).toBe(false);
+    expect(everyLaneReaches(2, laneMask([0]), laneMask([0, 2]), notLane1)).toBe(true);
   });
 });
 

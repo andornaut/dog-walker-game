@@ -106,28 +106,44 @@ export function laneReach(plan: SpawnPlan<string>): LaneReach {
   };
 }
 
-// True when every lane in from has a lane in to no more than reach lanes away, with every
-// lane on the way, both ends included, clear.
-export function everyLaneReaches(
-  reach: number,
-  from: readonly number[],
-  to: readonly number[],
-  clear: (lane: number) => boolean = () => true,
-): boolean {
-  const pathClear = (a: number, b: number) => {
-    for (let lane = Math.min(a, b); lane <= Math.max(a, b); lane++) {
-      if (!clear(lane)) {
-        return false;
-      }
-    }
-    return true;
-  };
-  return from.every((lane) =>
-    to.some((target) => Math.abs(target - lane) <= reach && pathClear(lane, target)),
-  );
+// A set of lanes as a bit mask: bit n set means lane n is in it.
+export function laneMask(lanes: readonly number[]): number {
+  return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
 }
 
-const allLanes = (laneCount: number) => Array.from({ length: laneCount }, (_, lane) => lane);
+// The mask of count lanes from first on.
+function laneRun(first: number, count: number): number {
+  return ((1 << count) - 1) << first;
+}
+
+function laneTotal(mask: number): number {
+  let count = 0;
+  for (let rest = mask; rest !== 0; rest &= rest - 1) {
+    count += 1;
+  }
+  return count;
+}
+
+// True when every lane in from has a lane in to no more than reach lanes away, with every
+// lane on the way, both ends included, in clear. All are lane masks.
+export function everyLaneReaches(reach: number, from: number, to: number, clear = -1): boolean {
+  for (let lane = 0; from >>> lane !== 0; lane++) {
+    if ((from & (1 << lane)) === 0) {
+      continue;
+    }
+    let reached = false;
+    for (let target = Math.max(0, lane - reach); target <= lane + reach && !reached; target++) {
+      if ((to & (1 << target)) !== 0) {
+        const path = laneRun(Math.min(lane, target), Math.abs(target - lane) + 1);
+        reached = (clear & path) === path;
+      }
+    }
+    if (!reached) {
+      return false;
+    }
+  }
+  return true;
+}
 
 interface Cell {
   lane: number;
@@ -153,7 +169,9 @@ function blockingSpan(plan: SpawnPlan<string>, row: number, rows: number) {
 // lane of the previous zone, and from every open lane of each row, an open lane of the next
 // row is within reach without crossing a lane blocked in the gap between them. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
-// last row. A plan that cannot fit its quotas that way is a data error and throws.
+// last row. An obstacle bigger than one cell that the earlier draws left no room for is
+// skipped, which uses no random draw. A plan that cannot fit its one-cell spawns that way is
+// a data error and throws.
 export function planSpawns<Kind extends string>(
   random: Random,
   plan: SpawnPlan<Kind>,
@@ -161,13 +179,15 @@ export function planSpawns<Kind extends string>(
   const { laneCount, minOpenLanes } = plan;
   const reach = laneReach(plan);
   const rows = spawnRowDistances(plan.minSpacing, plan.zoneLength);
-  const taken = rows.map(() => new Set<number>());
-  const blocked = rows.map(() => new Set<number>());
-  const gapBlocked = rows.map(() => new Set<number>());
+  // Lane masks per row: lanes taken by a spawn, lanes blocked in the row's window, and lanes
+  // blocked in the gap after it.
+  const taken = new Int32Array(rows.length);
+  const blocked = new Int32Array(rows.length);
+  const gapBlocked = new Int32Array(rows.length);
   const events: SpawnEvent<Kind>[] = [];
-  const lanes = allLanes(laneCount);
+  const lanes = laneRun(0, laneCount);
 
-  const openLanes = (row: number) => lanes.filter((lane) => !itemAt(blocked, row).has(lane));
+  const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
 
   const crossesFrom = (row: number): boolean => {
     if (row === -1) {
@@ -176,12 +196,11 @@ export function planSpawns<Kind extends string>(
     if (row === rows.length - 1) {
       return true;
     }
-    const gap = itemAt(gapBlocked, row);
     return everyLaneReaches(
       reach.betweenRows,
       openLanes(row),
       openLanes(row + 1),
-      (lane) => !gap.has(lane),
+      ~(gapBlocked[row] ?? 0),
     );
   };
 
@@ -192,56 +211,49 @@ export function planSpawns<Kind extends string>(
     if (lastRow >= rows.length || lastGap >= rows.length - 1) {
       return false;
     }
-    const covered = Array.from({ length: footprint.lanes }, (_, i) => cell.lane + i);
-    const added: [Set<number>, number][] = [];
-    const block = (set: Set<number>) => {
-      for (const lane of covered) {
-        if (!set.has(lane)) {
-          set.add(lane);
-          added.push([set, lane]);
-        }
-      }
-    };
+    const covered = laneRun(cell.lane, footprint.lanes);
+    const blockedBefore = blocked.slice(cell.row, lastRow + 1);
+    const gapBefore = gapBlocked.slice(cell.row, Math.max(cell.row, lastGap + 1));
     for (let row = cell.row; row <= lastRow; row++) {
-      block(itemAt(blocked, row));
+      blocked[row] = (blocked[row] ?? 0) | covered;
     }
     for (let row = cell.row; row <= lastGap; row++) {
-      block(itemAt(gapBlocked, row));
+      gapBlocked[row] = (gapBlocked[row] ?? 0) | covered;
     }
     let ok = true;
     for (let row = cell.row; ok && row <= lastRow; row++) {
-      ok = laneCount - itemAt(blocked, row).size >= minOpenLanes;
+      ok = laneCount - laneTotal(blocked[row] ?? 0) >= minOpenLanes;
     }
     for (let row = cell.row; ok && row <= lastGap; row++) {
-      ok = laneCount - itemAt(gapBlocked, row).size >= minOpenLanes;
+      ok = laneCount - laneTotal(gapBlocked[row] ?? 0) >= minOpenLanes;
     }
     for (let row = cell.row - 1; ok && row <= lastRow; row++) {
       ok = crossesFrom(row);
     }
     if (!ok || !keep) {
-      added.forEach(([set, lane]) => set.delete(lane));
+      blocked.set(blockedBefore, cell.row);
+      gapBlocked.set(gapBefore, cell.row);
     }
     return ok;
   };
 
-  // The rows a spawn's cells take: a lane-blocking spawn every row whose window it overlaps.
-  const rowsTaken = (cell: Cell, footprint: Footprint, blocksLane: boolean): number[] => {
-    const last = blocksLane ? blockingSpan(plan, cell.row, footprint.rows).lastRow : cell.row;
-    return Array.from({ length: last - cell.row + 1 }, (_, i) => cell.row + i);
-  };
+  // The last row a spawn's cells take: a lane-blocking spawn takes every row whose window it
+  // overlaps.
+  const lastRowTaken = (cell: Cell, footprint: Footprint, blocksLane: boolean): number =>
+    blocksLane ? blockingSpan(plan, cell.row, footprint.rows).lastRow : cell.row;
 
   const fits = (cell: Cell, footprint: Footprint, blocksLane: boolean): boolean => {
     if (cell.lane + footprint.lanes > laneCount) {
       return false;
     }
-    for (const row of rowsTaken(cell, footprint, blocksLane)) {
-      if (row >= rows.length) {
+    const last = lastRowTaken(cell, footprint, blocksLane);
+    if (last >= rows.length) {
+      return false;
+    }
+    const covered = laneRun(cell.lane, footprint.lanes);
+    for (let row = cell.row; row <= last; row++) {
+      if (((taken[row] ?? 0) & covered) !== 0) {
         return false;
-      }
-      for (let lane = cell.lane; lane < cell.lane + footprint.lanes; lane++) {
-        if (itemAt(taken, row).has(lane)) {
-          return false;
-        }
       }
     }
     return !blocksLane || tryBlock(cell, footprint, false);
@@ -280,14 +292,16 @@ export function planSpawns<Kind extends string>(
         Math.floor(((i + 1) * rows.length) / quota.count),
       );
       const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
+      if (cells.length === 0 && area(quota) > 1) {
+        continue;
+      }
       if (cells.length === 0) {
         throw new Error(`No room left in the zone to spawn ${quota.kind}`);
       }
       const cell = randomPick(random, cells);
-      for (const row of rowsTaken(cell, footprint, quota.blocksLane)) {
-        for (let lane = cell.lane; lane < cell.lane + footprint.lanes; lane++) {
-          itemAt(taken, row).add(lane);
-        }
+      const covered = laneRun(cell.lane, footprint.lanes);
+      for (let row = cell.row; row <= lastRowTaken(cell, footprint, quota.blocksLane); row++) {
+        taken[row] = (taken[row] ?? 0) | covered;
       }
       if (quota.blocksLane) {
         tryBlock(cell, footprint, true);

@@ -31,6 +31,17 @@ function runs(count: number, overrides: Partial<SimConfig> = {}): RunResult[] {
 // Every run plans each zone with the spawn planner, tens of milliseconds a zone, and the first
 // run in a worker also pays the warm-up: enough to pass 5 s on an oversubscribed machine.
 describe("simulateRun", { timeout: 15_000 }, () => {
+  it("plays a run whose zone has no room left for a hedge, skipping the hedge", () => {
+    const run = () =>
+      simulateRun(
+        gameData,
+        seededRandom(114000343),
+        config({ luckyRate: 0.7, pack: ["koda", "biscuit"], tipRate: 0.7, treatRate: 0.7 }),
+      );
+    expect(run).not.toThrow();
+    expect(run()).toEqual(run());
+  });
+
   it("gives the same result for the same seed", () => {
     const risky = config({ hitRate: 0.25, pack: RISKY });
     const first = simulateRun(gameData, seededRandom(7), risky);
