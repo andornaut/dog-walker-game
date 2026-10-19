@@ -42,7 +42,8 @@ export interface AssetManifest {
   sprites: SpriteAsset[];
 }
 
-const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+// Kebab-case, with an optional @75 or @50 suffix for a sprite's hand-drawn smaller version.
+const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*(@(75|50))?$/;
 const URL_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const LIST_NAMES = ["fonts", "images", "sounds", "sprites"] as const;
 

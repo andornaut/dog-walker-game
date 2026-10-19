@@ -68,6 +68,16 @@ describe("parseManifest", () => {
     );
   });
 
+  it("accepts only the @75 and @50 size suffixes", () => {
+    const sized = (key: string) => [{ ...valid.sprites[0], key }];
+    expect(parseManifest({ ...valid, sprites: sized("bin@50") }).sprites[0]?.key).toBe("bin@50");
+    expect(parseManifest({ ...valid, sprites: sized("dog-koda@75") }).sprites[0]?.key).toBe(
+      "dog-koda@75",
+    );
+    expect(() => parseManifest({ ...valid, sprites: sized("bin@25") })).toThrow("kebab-case");
+    expect(() => parseManifest({ ...valid, sprites: sized("bin@") })).toThrow("kebab-case");
+  });
+
   it("rejects a key used twice across lists, naming both lists", () => {
     const images = [{ key: "dog-koda", png: "images/dog-koda.png" }];
     expect(() => parseManifest({ ...valid, images })).toThrow(
