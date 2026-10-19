@@ -118,7 +118,9 @@ def stinky(step):
             x = x0 + round(math.sin(phase) * 1.6)
             fade = (y + step * 3 + i * 5) % 22
             if fade > 3:
-                g.p(x, y, "green" if fade > 12 else "dgreen")
+                # green reads on the dark street, its teal edge on the light roads
+                g.p(x, y, "green")
+                g.p(x + 1, y, "teal")
     return g
 
 

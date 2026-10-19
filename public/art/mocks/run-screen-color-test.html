@@ -223,10 +223,13 @@ function drawRoad(fr) {
   for (const it of items) if (!it.decal) shadow(it.cx, it.foot, it.img.width, shade);
   for (const it of items) sprite(it.img, it.cx, it.foot);
   const hands = [[cx - 9, 622], [cx + 8, 622]];
-  pack.forEach((p, i) => { const h = hands[p.dx < 0 ? 0 : 1]; line(h[0], h[1], cx + p.collar[0], p.collar[1], K.dred); });
+  // The leash colour holds 3:1 on each zone's road (style guide, Leash).
+  const leash = { street: K.pink, park: K.dred, shops: K.dred, home: K.plum }[S.zone];
+  pack.forEach((p, i) => { const h = hands[p.dx < 0 ? 0 : 1]; line(h[0], h[1], cx + p.collar[0], p.collar[1], leash); });
   if (S.stinky) {
     for (const [ox, top] of [[-16, 548], [0, 540], [16, 548]]) {
-      for (let k = 0; k < 8; k++) fill(cx + ox + (((k + fr * 2) % 4) < 2 ? 0 : 1), top + k, 1, 1, k % 3 === 2 ? K.dgreen : K.green);
+      // Green reads on the dark street and its teal edge on the light roads.
+      for (let k = 0; k < 8; k++) { const x = cx + ox + (((k + fr * 2) % 4) < 2 ? 0 : 1); fill(x, top + k, 1, 1, K.green); fill(x + 1, top + k, 1, 1, K.teal); }
     }
   }
   ctx.restore();
@@ -257,7 +260,7 @@ function drawColumn(ch) {
       for (let k = 0; k < 192; k++) if ((k >> 1) % 2 === 0) { fill(x, y + k, 1, 1, ch.slotEdge); fill(x + 71, y + k, 1, 1, ch.slotEdge); }
       fill(x + 6, y + 8, 60, 20, K.white); fill(x + 5, y + 9, 62, 18, K.white);
       fill(x + 12, y + 28, 3, 2, K.white); fill(x + 12, y + 30, 1, 2, K.white);
-      textC(ctx, "YOU'RE", x + 36, y + 11, K.plum); textC(ctx, "FIRED!", x + 36, y + 19, K.red);
+      textC(ctx, "YOU'RE", x + 36, y + 11, K.plum); textC(ctx, "FIRED!", x + 36, y + 19, K.dred);
       textC(ctx, "EMPTY", x + 36, y + 92, ch.slotEdge);
       return;
     }
@@ -266,7 +269,7 @@ function drawColumn(ch) {
     ctx.drawImage(SPR.ownerFace[i][mood(d.hp)], x + 4, y + 4);
     ctx.drawImage(SPR.dogFace[i], x + 36, y + 4);
     text(ctx, d.name, x + 4, y + 42, ch.slotText);
-    text(ctx, d.fee, x + 68 - textW(d.fee), y + 42, ch.slotText, 1, { $: K.orange });
+    text(ctx, d.fee, x + 68 - textW(d.fee), y + 42, ch.slotText, 1, { $: K.dred });
     const tw = textW(d.trait) + 4;
     fill(x + 4, y + 51, tw, 9, d.traitC); text(ctx, d.trait, x + 6, y + 53, K.white);
     if (S.stinky) ctx.drawImage(SPR.stink, x + 56, y + 51);
@@ -313,7 +316,7 @@ function cardArt(kind, x, y, w, h, fr) {
     fill(x, y, w, h, K.sky);
     for (let k = 0; k < 5; k++) ctx.drawImage(SPR.tip[0], x + 10, y + 36 - k * 5);
     for (let k = 0; k < 3; k++) ctx.drawImage(SPR.tip[0], x + 22, y + 36 - k * 5);
-    text(ctx, "+50%", x + 38, y + 22, K.yellow, 2);
+    text(ctx, "+50%", x + 38, y + 22, K.white, 2);
   }
 }
 
@@ -328,16 +331,16 @@ function drawCard(x, y, c, fr) {
   ctx.restore();
   c.lines.forEach((l, i) => textC(ctx, l, x + 42.5, y + 82 + i * 8, K.plum));
   fill(x + 7, y + 121, 71, 13, K.plum);
-  textC(ctx, c.badge, x + 42.5, y + 125, K.cream, 1, { "♥": K.red, $: K.amber });
+  textC(ctx, c.badge, x + 42.5, y + 125, K.cream, 1, { "♥": K.pink, $: K.amber });
 }
 
 function drawCards(fr) {
   const dogs = S.fired ? 2 : 3, money = 42;
   const enc = S.screen === "encounter";
   const cards = enc ? [
-    { title: "GROOMING", band: K.red, art: "groom", lines: ["A FULL GROOM.", "NO LINGERING", "SMELL."], badge: "-$15 EACH", cost: 15 * dogs },
-    { title: "QUICK RINSE", band: K.red, art: "rinse", lines: ["CHEAP, BUT", "YOU STAY STINKY:", "TIPS HALVED."], badge: "-$5 EACH", cost: 5 * dogs },
-    { title: "IGNORE IT", band: K.red, art: "ignore", lines: ["KEEP WALKING.", "EVERY OWNER", "NOTICES."], badge: "-2♥ EACH", cost: 0 },
+    { title: "GROOMING", band: K.dred, art: "groom", lines: ["A FULL GROOM.", "NO LINGERING", "SMELL."], badge: "-$15 EACH", cost: 15 * dogs },
+    { title: "QUICK RINSE", band: K.dred, art: "rinse", lines: ["CHEAP, BUT", "YOU STAY STINKY:", "TIPS HALVED."], badge: "-$5 EACH", cost: 5 * dogs },
+    { title: "IGNORE IT", band: K.dred, art: "ignore", lines: ["KEEP WALKING.", "EVERY OWNER", "NOTICES."], badge: "-2♥ EACH", cost: 0 },
   ] : [
     { title: "BELLY RUBS", band: K.dgreen, art: "rubs", lines: ["EVERY OWNER", "GAINS 1♥ NOW."], badge: "+1♥ ALL", cost: 0 },
     { title: "GOOD LEASH", band: K.dgreen, art: "leash", lines: ["SQUIRRELS CAN'T", "UPSET CHASERS."], badge: "THIS RUN", cost: 0 },

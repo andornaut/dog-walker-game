@@ -155,9 +155,9 @@ def bark_park_ground(g):
 def bark_park_lines(g):
     for x in DIVIDERS:
         for y in range(4, H, 16):
-            g.rect(x, y, 2, 7, "brown")
-            g.rect(x, y, 2, 1, "cream")
-            g.rect(x, y + 7, 2, 1, "dbrown")
+            # dbrown holds 4:1 on the tan path; plum caps the bottom
+            g.rect(x, y, 2, 7, "dbrown")
+            g.rect(x, y + 7, 2, 1, "plum")
 
 
 # ---------- Sniff Street Shops: staggered paving slabs, sett lane lines, drains ----------
@@ -247,10 +247,11 @@ def leaves(g, rnd, n, x0, x1, y0=0, y1=H):
 def home_lines(g):
     for x in DIVIDERS:
         for y in (4, 36):
-            g.rect(x, y, 2, 14, "cream")
-            g.rect(x - 1, y, 1, 14, "dbrown")
-            g.rect(x + 2, y, 1, 15, "dbrown")
-            g.rect(x, y + 14, 2, 1, "dbrown")
+            # white (3:1 on the brick) outlined in plum (4.4:1)
+            g.rect(x, y, 2, 14, "white")
+            g.rect(x - 1, y, 1, 14, "plum")
+            g.rect(x + 2, y, 1, 15, "plum")
+            g.rect(x, y + 14, 2, 1, "plum")
 
 
 ZONES = {

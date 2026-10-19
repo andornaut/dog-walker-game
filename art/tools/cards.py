@@ -43,7 +43,8 @@ from pixel import Grid, build as build_sprites  # noqa: E402
 
 CW, CH = 83, 140
 AW, AH = 75, 56
-BANDS = {"encounter": ("red", "dred"), "lucky": ("sky", "blue"), "stop": ("amber", "orange"), "upgrade": ("dgreen", "forest")}
+# Band colours hold white labels at 7:1 or more; the amber stop band takes plum labels (7.35:1).
+BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amber", "orange"), "upgrade": ("forest", "teal")}
 
 
 # ---------- the frame ----------
