@@ -23,7 +23,7 @@ export const TUNING = {
     tipsGainPerZone: 8,
     treatCarryMax: 3,
     treatMagnetReachLanes: 1,
-    treatsPerZone: 5,
+    treatsPerZone: 3,
     upgradeChoiceCount: 3,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
@@ -34,7 +34,7 @@ export const TUNING = {
     luckyCollarMax: 1,
     luckyCollarStart: 1,
     maxBySize: { big: 10, medium: 8, small: 6 },
-    startByTemperament: { dramatic: 5, fussy: 4, laidBack: 5 },
+    startByTemperament: { dramatic: 4, fussy: 3, laidBack: 4 },
     treat: 1,
   },
   // Dollars. The game counts money in cents, so $1.50 is exact.
