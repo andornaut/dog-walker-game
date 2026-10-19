@@ -133,6 +133,16 @@ function moneyParts(
   };
 }
 
+// A money effect's total for the dogs it counts, after modifiers, unsigned.
+export function moneyAmount(
+  data: RulesData,
+  context: Pick<EffectContext, "affected">,
+  state: RunState,
+  effect: MoneyEffect,
+): Cents {
+  return moneyParts(data, context, state, effect).amount;
+}
+
 // What an option's effects would take from the player. An option costing more than the
 // player has is disabled.
 export function moneyCost(

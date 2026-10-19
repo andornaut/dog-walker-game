@@ -1,6 +1,7 @@
 import type {
   AffectRule,
   Condition,
+  DogId,
   Duration,
   Effect,
   GameData,
@@ -210,12 +211,98 @@ function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
-// The one-line effect a card shows, built from its effects and the live tuning.
+function phrasesText(phrases: readonly string[]): string {
+  return phrases.length === 0 ? "Nothing" : capitalize(phrases.join(", "));
+}
+
+// The one-line effect an item shows, built from its effects and the live tuning, for no
+// dogs in particular: "−1 ♥ each (−2 Fancy)".
 export function effectText(data: TextData, effects: readonly Effect[]): string {
-  if (effects.length === 0) {
-    return "Nothing";
+  return phrasesText(effects.map((effect) => effectPhrase(data, effect)));
+}
+
+export type CardTextData = TextData & Pick<GameData, "dogs">;
+
+// What a card's text knows of the walk: the dogs a target reaches, in pack order, and a
+// money effect's total for the dogs it counts, after modifiers.
+export interface CardTextContext {
+  readonly dogs: (target: Target) => readonly DogId[];
+  readonly money: (effect: MoneyEffect) => Cents;
+}
+
+// Each dog's total, its owner's temperament included, with the dogs on the same total
+// grouped: "−2 ♥ Duchess, −1 ♥ Koda and Biscuit".
+function cardHeartsText(
+  data: CardTextData,
+  context: CardTextContext,
+  effect: HeartsEffect,
+): string | undefined {
+  if (effect.target.kind === "randomOne") {
+    return heartsText(effect);
   }
-  return capitalize(effects.map((effect) => effectPhrase(data, effect)).join(", "));
+  const groups = new Map<number, string[]>();
+  for (const id of context.dogs(effect.target)) {
+    const dog = data.dogs[id];
+    const total =
+      (effect.traitAmounts?.[dog.trait] ?? effect.amount) *
+      readTable(data.tuning, "multipliers", "heartsByTemperament", dog.owner.temperament);
+    groups.set(total, [...(groups.get(total) ?? []), dog.name]);
+  }
+  if (groups.size === 0) {
+    return undefined;
+  }
+  return [...groups]
+    .map(([total, names]) => `${sign(total)}${Math.abs(total)} ♥ ${sentenceList(names)}`)
+    .join(", ");
+}
+
+// A phrase for the dogs a card catches, or undefined when the effect reaches none of them.
+function cardPhrase(
+  data: CardTextData,
+  context: CardTextContext,
+  effect: Effect,
+): string | undefined {
+  switch (effect.kind) {
+    case "hearts":
+      return cardHeartsText(data, context, effect);
+    case "money": {
+      if (effect.perDog === undefined) {
+        return moneyText(data.tuning, effect);
+      }
+      const total = context.money(effect);
+      return total === 0
+        ? undefined
+        : `${effect.change === "gain" ? "+" : MINUS}${formatDollars(total)}`;
+    }
+    case "treats": {
+      if (effect.perDog === undefined) {
+        return treatsText(data.tuning, effect);
+      }
+      const count = read(data.tuning, "counts", effect.amount) * context.dogs(effect.perDog).length;
+      const carryMax = read(data.tuning, "counts", "treatCarryMax");
+      return count === 0
+        ? undefined
+        : `+${count} ${count === 1 ? "treat" : "treats"} (carry up to ${carryMax})`;
+    }
+    default:
+      return effectPhrase(data, effect);
+  }
+}
+
+// The one-line effect a card shows for the dogs it catches: each dog's heart total by name,
+// and money and treats totalled for those dogs, so the text agrees with the cost plaque.
+// An effect that reaches none of them is left out.
+export function cardEffectText(
+  data: CardTextData,
+  context: CardTextContext,
+  effects: readonly Effect[],
+): string {
+  return phrasesText(
+    effects.flatMap((effect) => {
+      const phrase = cardPhrase(data, context, effect);
+      return phrase === undefined ? [] : [phrase];
+    }),
+  );
 }
 
 export function conditionText(condition: Condition): string {

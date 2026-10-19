@@ -24,8 +24,8 @@ import {
   type HeartChange,
   type MoneyChange,
 } from "./causes";
-import { type EffectContext, moneyCost, resolveEffects } from "./effects";
-import { effectText, sentenceList } from "./effectText";
+import { type EffectContext, moneyAmount, moneyCost, resolveEffects, targetDogs } from "./effects";
+import { cardEffectText, type CardTextContext, sentenceList } from "./effectText";
 import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { type Cents, cents, type Hearts } from "./units";
@@ -338,6 +338,10 @@ function effectCard(
     source.kind === "encounter" &&
     data.encounters[source.encounter].kind === "obstacle" &&
     state.skipsLeft > 0;
+  const textContext: CardTextContext = {
+    dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
+    money: (effect) => moneyAmount(data, { affected }, state, effect),
+  };
   const views = options.map(({ option, source: effectSource }, index): OptionView => {
     const cost = moneyCost(data, { affected }, state, option.effects);
     const preview = outcomeOf(
@@ -356,7 +360,7 @@ function effectCard(
       fires: preview.fired,
       index,
       label: option.name,
-      text: effectText(data, option.effects),
+      text: cardEffectText(data, textContext, option.effects),
     };
   });
   return {

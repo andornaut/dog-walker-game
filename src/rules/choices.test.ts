@@ -161,7 +161,11 @@ describe("the zone encounters' options", () => {
       "goose",
       "Honk back",
       kodaTrio,
-      { hearts: { koda: 3, nugget: 3, pierre: 4 }, spent: 0, text: "−1 ♥ each (−2 Chaser)" },
+      {
+        hearts: { koda: 3, nugget: 3, pierre: 4 },
+        spent: 0,
+        text: "−2 ♥ Koda and Nugget, −1 ♥ Pierre",
+      },
     ],
     ["picnic", "Buy a new lunch", kodaTrio, { spent: low }, ["nugget"]],
     [
@@ -186,7 +190,7 @@ describe("the zone encounters' options", () => {
         hearts: { koda: 5, nugget: 5, pierre: 4 },
         met: ["koda", "pierre"],
         spent: tips,
-        text: `Nosy needs met, −1 ♥ to Fancy owners, −$${missedTips} per dog`,
+        text: `Nosy needs met, −1 ♥ Pierre, −$${3 * missedTips}`,
       },
     ],
     ["trash", "Tidy up", kodaTrio, { hearts: { koda: 5, nugget: 5, pierre: 6 }, spent: tips }],
@@ -211,7 +215,7 @@ describe("the zone encounters' options", () => {
       {
         met: ["nugget"],
         spent: 3 * lemonadeCup * 100,
-        text: `Thirsty needs met, −$${lemonadeCup} per dog`,
+        text: `Thirsty needs met, −$${3 * lemonadeCup}`,
       },
     ],
     ["lemonade", "Say hi", duchessTrio, { met: ["duchess"], spent: tips }],
