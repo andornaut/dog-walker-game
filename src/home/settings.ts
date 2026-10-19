@@ -10,10 +10,26 @@ export function volumeSteps(volume: number): number {
   return Math.min(VOLUME_STEPS, Math.max(0, Math.round(volume * VOLUME_STEPS)));
 }
 
-// One step up (+1) or down (-1), snapped to a step and held within 0 and 1.
-export function stepVolume(key: VolumeKey, direction: -1 | 1, settings: Settings): Settings {
-  const steps = Math.min(VOLUME_STEPS, Math.max(0, volumeSteps(settings[key]) + direction));
-  return { ...settings, [key]: steps / VOLUME_STEPS };
+// A volume slider's track, in screen pixels, and the width of the knob that slides along it.
+export interface SliderTrack {
+  knobWidth: number;
+  width: number;
+  x: number;
+}
+
+// The step a finger at x picks: the knob's centre follows the finger, held to the track.
+export function volumeStepAt(track: SliderTrack, x: number): number {
+  const fraction = (x - track.x - track.knobWidth / 2) / (track.width - track.knobWidth);
+  return Math.round(Math.min(1, Math.max(0, fraction)) * VOLUME_STEPS);
+}
+
+// The knob's left edge at a step.
+export function knobX(track: SliderTrack, steps: number): number {
+  return track.x + Math.round(((track.width - track.knobWidth) * steps) / VOLUME_STEPS);
+}
+
+export function setVolumeSteps(key: VolumeKey, steps: number, settings: Settings): Settings {
+  return { ...settings, [key]: Math.min(VOLUME_STEPS, Math.max(0, steps)) / VOLUME_STEPS };
 }
 
 // The soundboard's volumes from the saved settings.

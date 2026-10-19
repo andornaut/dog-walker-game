@@ -1,4 +1,4 @@
-import { type GameObjects, type Input, Scene } from "phaser";
+import { type GameObjects, type Input, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
@@ -12,7 +12,7 @@ import {
   FEEDBACK,
   hopOffset,
   pressDip,
-  pulseFrame,
+  settleDelay,
   shakeOffset,
 } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
@@ -33,6 +33,7 @@ import {
   tapGear,
   wrapWords,
 } from "../home/home";
+import { choiceFull, type SelectLook } from "../home/selection";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
@@ -63,12 +64,13 @@ import { addStandingSprite, spriteMetrics } from "./sprites";
 import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
-  addNineSlice,
-  addTagImage,
+  addSelectTile,
   cogIcon,
   fitText,
   type IconButton,
   imageIcon,
+  type SelectTile,
+  type SelectTileOptions,
   showTag,
   soundIcon,
   tagFrame,
@@ -110,8 +112,7 @@ const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 538 };
 const WALKER_TILES = { cellHeight: 44, cellWidth: 44, columns: 4, gapX: GAP, gapY: 0 };
 const WALKER_ORIGIN = { x: 84, y: 590 };
 const GEAR_BADGE: Rect = { height: 18, width: 18, x: 194, y: 166 };
-// ui-select overhangs a picked tile by this much on each side; the keyboard ring sits outside it.
-const SELECT_OUTSET = 3;
+// The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
 const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
 const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
@@ -211,7 +212,7 @@ function focusRows(): Focusable[][] {
 }
 
 // A tile that reacts to taps: its container moves for the dip, lift and shake, its face hops,
-// its badge pops, and its selection frame pulses.
+// and its badge pops.
 interface TileView {
   badge?: { image: GameObjects.Image; y: number };
   container: GameObjects.Container;
@@ -219,7 +220,6 @@ interface TileView {
   // An icon button shows its pressed face rather than dipping.
   iconButton?: IconButton;
   lift: number;
-  pulse?: readonly GameObjects.NineSlice[];
   // The pop timer that raises the whole tile for a moment, for the gear badge at the gate.
   rise?: string;
 }
@@ -244,6 +244,8 @@ export class StartScene extends Scene {
   private info: Target | undefined;
   private loadout: HomeLoadout = { dogs: [], gear: null };
   private notice = "";
+  // Taps waiting for their dip to finish before they act.
+  private pending = new Set<Time.TimerEvent>();
   private pops = new Map<string, number>();
   private press: { held: boolean; id: string; startedMs: number } | undefined;
   private pressedTarget: Target | undefined;
@@ -266,6 +268,7 @@ export class StartScene extends Scene {
     this.focus = null;
     this.info = undefined;
     this.notice = "";
+    this.pending = new Set();
     this.pops = new Map();
     this.press = undefined;
     this.pressedTarget = undefined;
@@ -298,16 +301,24 @@ export class StartScene extends Scene {
         this.press.held = false;
       }
       if (target !== undefined && pressed !== undefined && targetId(target) === targetId(pressed)) {
-        this.act(target);
+        this.actAfterDip(target);
       }
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     // Settings can change reduced motion or mute, so the screen is drawn again.
     const onSettingsClosed = () => this.render();
     this.game.events.on(SETTINGS_CLOSED_EVENT, onSettingsClosed);
-    this.events.once("shutdown", () =>
-      this.game.events.off(SETTINGS_CLOSED_EVENT, onSettingsClosed),
-    );
+    // A tap made while another tap's act opened help, settings or stats over this screen is
+    // dropped, so it cannot act once the screen resumes.
+    const dropPending = () => {
+      this.pending.forEach((timer) => timer.remove());
+      this.pending.clear();
+    };
+    this.events.on("pause", dropPending);
+    this.events.once("shutdown", () => {
+      this.game.events.off(SETTINGS_CLOSED_EVENT, onSettingsClosed);
+      this.events.off("pause", dropPending);
+    });
   }
 
   private onKey(key: string): void {
@@ -330,7 +341,7 @@ export class StartScene extends Scene {
         this.focus === null ? undefined : focusRows()[this.focus.row]?.[this.focus.column];
       const target = focused?.target ?? { kind: "start" };
       this.press = { held: false, id: targetId(target), startedMs: this.time.now };
-      this.act(target);
+      this.actAfterDip(target);
       return;
     }
     if (key === "?") {
@@ -381,6 +392,21 @@ export class StartScene extends Scene {
       return partingSpeech(gameData, Math.random, SPEECH_CHARS, added).slice(0, SPEECH_LINES);
     }
     return next.dogs.length < this.loadout.dogs.length ? null : this.speech;
+  }
+
+  // A tap's result, such as the selected state, shows once its press has dipped.
+  private actAfterDip(target: Target): void {
+    const press = this.press;
+    const delay = press === undefined ? 0 : settleDelay(this.time.now, press.startedMs);
+    if (delay === 0) {
+      this.act(target);
+      return;
+    }
+    const timer = this.time.delayedCall(delay, () => {
+      this.pending.delete(timer);
+      this.act(target);
+    });
+    this.pending.add(timer);
   }
 
   private act(target: Target): void {
@@ -545,7 +571,6 @@ export class StartScene extends Scene {
     const pressed = this.press;
     const dip = (id: string) =>
       pressed?.id === id ? pressDip(pressed.held, now, pressed.startedMs) : 0;
-    const pulse = pulseFrame(reduced, now);
     for (const [id, view] of this.views) {
       const rise =
         view.rise === undefined ? 0 : badgePopOffset(reduced, now, this.pops.get(view.rise));
@@ -556,7 +581,6 @@ export class StartScene extends Scene {
       );
       view.face?.object.setY(view.face.y + hopOffset(reduced, now, this.pops.get(id)));
       view.badge?.image.setY(view.badge.y + badgePopOffset(reduced, now, this.pops.get(id)));
-      view.pulse?.forEach((frame, i) => frame.setVisible(i === pulse));
     }
     if (this.startButton !== undefined) {
       const down = dip("start") > 0 && this.loadout.dogs.length > 0;
@@ -642,8 +666,8 @@ export class StartScene extends Scene {
     this.drawTopBar(root, g, save);
     this.drawPackAtGate(root, g, save);
     this.drawSlotSign(root, save);
-    this.drawDogTiles(root, g, save);
-    this.drawGear(root, g, save);
+    this.drawDogTiles(root, save);
+    this.drawGear(root, save);
     this.drawInfo(root, save);
     this.drawLogbook(root, g, save);
     this.drawStartButton(root);
@@ -660,44 +684,21 @@ export class StartScene extends Scene {
     return view;
   }
 
-  // The pulsing ui-select frame around rect, both frames made and one shown at a time; an
-  // amber border while the art is missing.
-  private selectFrame(view: TileView, rect: Rect): void {
-    const outer = {
-      height: rect.height + SELECT_OUTSET * 2,
-      width: rect.width + SELECT_OUTSET * 2,
-      x: rect.x - SELECT_OUTSET,
-      y: rect.y - SELECT_OUTSET,
-    };
-    const frames = [0, 1].flatMap((index) => {
-      const slice = addNineSlice(this, "ui-select", outer, "pulse", index);
-      return slice === undefined ? [] : [slice];
-    });
-    if (frames.length === 0) {
-      const g = this.graphics(view.container);
-      fillRect(g, PALETTE.amber, { ...outer, height: SELECT_OUTSET });
-      fillRect(g, PALETTE.amber, { ...outer, height: SELECT_OUTSET, y: rect.y + rect.height });
-      return;
+  // A tile in the selected-state style, registered for its feedback.
+  private selectTile(
+    root: GameObjects.Container,
+    id: string,
+    rect: Rect,
+    options: Omit<SelectTileOptions, "reducedMotion">,
+  ): { content: GameObjects.Container; look: SelectLook; view: TileView } {
+    const reducedMotion = currentSettings(this).reducedMotion;
+    const tile: SelectTile = addSelectTile(this, root, rect, { ...options, reducedMotion });
+    const view: TileView = { container: tile.container, lift: tile.lift };
+    if (tile.badge !== undefined) {
+      view.badge = { image: tile.badge, y: tile.badge.y };
     }
-    view.container.add(frames);
-    view.pulse = frames;
-  }
-
-  // The green pick badge: the pack order, or a tick for gear.
-  private pickBadge(view: TileView, tag: string, x: number, y: number): void {
-    const image = addTagImage(this, "ui-check", tag, x, y);
-    if (image === undefined) {
-      const g = this.graphics(view.container);
-      fillRect(g, PALETTE.green, { height: 12, width: 12, x: x + 2, y: y + 2 });
-      this.text(view.container, x + 8, y + 4, tag === "tick" ? "+" : tag, PALETTE.white, {
-        font: "title",
-        originX: 0.5,
-        scale: 1,
-      });
-      return;
-    }
-    view.container.add(image);
-    view.badge = { image, y };
+    this.views.set(id, view);
+    return { content: tile.content, look: tile.look, view };
   }
 
   // A ui-icon-button at the art's spot; its face sinks when pressed instead of the whole
@@ -860,35 +861,6 @@ export class StartScene extends Scene {
     }
   }
 
-  // A tile that lifts onto a shadow when picked.
-  private tileBase(
-    root: GameObjects.Container,
-    shadow: GameObjects.Graphics,
-    id: string,
-    rect: Rect,
-    picked: boolean,
-    fill: number,
-  ): TileView {
-    if (picked) {
-      fillRect(shadow, PALETTE.plum, {
-        height: 3,
-        width: rect.width - 2,
-        x: rect.x + 2,
-        y: rect.y + rect.height - 1,
-      });
-    }
-    const view = this.tileView(root, id, picked ? -FEEDBACK.liftPx : 0);
-    const g = this.graphics(view.container);
-    fillRect(g, picked ? PALETTE.plum : PALETTE.slate, rect);
-    fillRect(g, fill, {
-      height: rect.height - 2,
-      width: rect.width - 2,
-      x: rect.x + 1,
-      y: rect.y + 1,
-    });
-    return view;
-  }
-
   // A locked item's price on a cream chip: forest when the bank covers it, darkRed (and a
   // padlock beside it) when not. originX places it by its left (0) or centre (0.5).
   private priceBadge(
@@ -909,11 +881,7 @@ export class StartScene extends Scene {
     });
   }
 
-  private drawDogTiles(
-    root: GameObjects.Container,
-    g: GameObjects.Graphics,
-    save: SaveDocument,
-  ): void {
+  private drawDogTiles(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
@@ -928,6 +896,7 @@ export class StartScene extends Scene {
       PALETTE.cream,
       { originX: 1 },
     );
+    const full = choiceFull(picked, capacity);
     const tiles = dogTiles();
     rosterOrder().forEach((id, i) => {
       const rect = itemAt(tiles, i);
@@ -935,79 +904,76 @@ export class StartScene extends Scene {
       const dog = gameData.dogs[id];
       const isOwned = owned.dogs.includes(id);
       const order = this.loadout.dogs.indexOf(id);
-      const view = this.tileBase(
-        root,
-        g,
-        `dog:${id}`,
-        rect,
-        order >= 0,
-        order >= 0 ? PALETTE.white : isOwned ? PALETTE.cream : PALETTE.tan,
-      );
-      const parent = view.container;
-      const box = order >= 0 ? PALETTE.yellow : isOwned ? PALETTE.tan : PALETTE.brown;
-      fillRect(this.graphics(parent), box, { height: 34, width: 34, x: x + 3, y: y + 8 });
+      const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
+        badge: String(order + 1),
+        edge: true,
+        full,
+        rest: isOwned ? "cream" : "tan",
+        selected: order >= 0,
+      });
+      const ink = PALETTE[look.text];
+      fillRect(this.graphics(content), PALETTE[look.box], {
+        height: 34,
+        width: 34,
+        x: x + 3,
+        y: y + 8,
+      });
       const face = this.add.sprite(x + 4, y + 9, dogFaceKey(id)).setOrigin(0);
       showTag(reduced, face, dogFaceKey(id), isOwned ? "happy" : "neutral");
-      parent.add(face);
+      content.add(face);
       view.face = { object: face, y: y + 9 };
 
-      this.text(parent, x + 41, y + 4, dog.name, PALETTE.plum);
+      this.text(content, x + 41, y + 4, dog.name, ink);
       // The trait and the owner's temperament as icons; the info line says them in words.
       [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
         if (this.textures.exists(key)) {
-          parent.add(this.add.image(x + 40 + n * 18, y + 17, key).setOrigin(0));
+          content.add(this.add.image(x + 40 + n * 18, y + 17, key).setOrigin(0));
         }
       });
       const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
       if (price === null) {
         const zoneFee = dollarText(packFeePerZone(gameData, { dogs: [id], gear: null }));
-        this.text(parent, x + 41, y + 37, `${zoneFee}/zone`, PALETTE.plum);
+        this.text(content, x + 41, y + 37, `${zoneFee}/zone`, ink);
       } else {
-        this.priceBadge(parent, x + 44, y + 37, price, 0);
+        this.priceBadge(content, x + 44, y + 37, price, 0);
         if (price > save.bankCents) {
-          this.addLock(parent, x + width - 19, y + 31);
+          this.addLock(content, x + width - 19, y + 31);
         }
-      }
-      if (order >= 0) {
-        this.selectFrame(view, rect);
-        this.pickBadge(view, String(order + 1), x - 6, y - 7);
       }
     });
   }
 
-  private drawGear(root: GameObjects.Container, g: GameObjects.Graphics, save: SaveDocument): void {
+  private drawGear(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;
     const slots = gearSlots();
+    const full = choiceFull(this.loadout.gear === null ? 0 : 1, 1);
     gearIds().forEach((id, i) => {
       const rect = itemAt(slots, i);
       const { width, x, y } = rect;
-      const equipped = this.loadout.gear === id;
       const isOwned = owned.gear.includes(id);
-      const view = this.tileBase(
-        root,
-        g,
-        `gear:${id}`,
-        rect,
-        equipped,
-        equipped ? PALETTE.white : isOwned ? PALETTE.cream : PALETTE.tan,
-      );
-      const parent = view.container;
-      const box = equipped ? PALETTE.yellow : isOwned ? PALETTE.tan : PALETTE.brown;
-      fillRect(this.graphics(parent), box, { height: 34, width: 34, x: x + 15, y: y + 3 });
-      const icon = this.addGearIcon(parent, id, x + 16, y + 4, 1);
+      const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
+        badge: "tick",
+        edge: true,
+        full,
+        rest: isOwned ? "cream" : "tan",
+        selected: this.loadout.gear === id,
+      });
+      fillRect(this.graphics(content), PALETTE[look.box], {
+        height: 34,
+        width: 34,
+        x: x + 15,
+        y: y + 3,
+      });
+      const icon = this.addGearIcon(content, id, x + 16, y + 4, 1);
       if (icon !== undefined) {
         view.face = { object: icon, y: y + 4 };
       }
       const price = purchasePrice(gameData, owned, { gear: id, kind: "gear" });
       if (price !== null) {
-        this.priceBadge(parent, x + width / 2, y + 40, price, 0.5);
+        this.priceBadge(content, x + width / 2, y + 40, price, 0.5);
         if (price > save.bankCents) {
-          this.addLock(parent, x + 44, y + 20);
+          this.addLock(content, x + 44, y + 20);
         }
-      }
-      if (equipped) {
-        this.selectFrame(view, rect);
-        this.pickBadge(view, "tick", x + width - 14, y - 7);
       }
     });
   }
@@ -1071,7 +1037,8 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // One portrait per preset walker; the chosen one takes the pulsing selection frame.
+  // One portrait per preset walker; the chosen one is selected, so the others are always
+  // a full choice's darker step.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const chosen = save.walker;
     const reduced = currentSettings(this).reducedMotion;
@@ -1079,14 +1046,12 @@ export class StartScene extends Scene {
     this.text(root, 4, WALKER_ORIGIN.y + 16, "Walker", PALETTE.cream, { font: "title" });
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
-      const view = this.tileView(root, `walker:${id}`, 0);
-      const g = this.graphics(view.container);
-      fillRect(g, id === chosen ? PALETTE.plum : PALETTE.slate, rect);
-      fillRect(g, id === chosen ? PALETTE.yellow : PALETTE.tan, {
-        height: rect.height - 2,
-        width: rect.width - 2,
-        x: rect.x + 1,
-        y: rect.y + 1,
+      const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
+        badge: "tick",
+        edge: true,
+        full: choiceFull(1, 1),
+        rest: "tan",
+        selected: id === chosen,
       });
       const portrait = gameData.walkers[id].portraitKey;
       const faceX = rect.x + (rect.width - 32) / 2;
@@ -1094,17 +1059,14 @@ export class StartScene extends Scene {
       if (this.textures.exists(portrait)) {
         const face = this.add.sprite(faceX, faceY, portrait).setOrigin(0);
         showTag(reduced, face, portrait, id === chosen ? "happy" : "neutral");
-        view.container.add(face);
+        content.add(face);
         view.face = { object: face, y: faceY };
       } else {
         const initial = gameData.walkers[id].name.charAt(0);
-        this.text(view.container, rect.x + 22, rect.y + 16, initial, PALETTE.plum, {
+        this.text(content, rect.x + 22, rect.y + 16, initial, PALETTE[look.text], {
           font: "title",
           originX: 0.5,
         });
-      }
-      if (id === chosen) {
-        this.selectFrame(view, rect);
       }
     });
     const last = itemAt(tiles, tiles.length - 1);

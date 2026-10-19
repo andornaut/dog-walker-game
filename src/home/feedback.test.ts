@@ -6,8 +6,9 @@ import {
   effectFrame,
   FEEDBACK,
   hopOffset,
+  loopFrame,
   pressDip,
-  pulseFrame,
+  settleDelay,
   shakeOffset,
 } from "./feedback";
 
@@ -52,11 +53,31 @@ describe("pressDip", () => {
   });
 });
 
-describe("pulseFrame", () => {
-  it("alternates frames, and holds the first with reduced motion", () => {
-    expect(pulseFrame(false, 0)).toBe(0);
-    expect(pulseFrame(false, FEEDBACK.pulseFrameMs)).toBe(1);
-    expect(pulseFrame(true, FEEDBACK.pulseFrameMs)).toBe(0);
+describe("settleDelay", () => {
+  it("holds a quick tap's result until the dip is over", () => {
+    expect(settleDelay(1050, 1000)).toBe(FEEDBACK.pressDipMs - 50);
+    expect(settleDelay(1000, 1000)).toBe(FEEDBACK.pressDipMs);
+  });
+
+  it("shows a long press's result on release", () => {
+    expect(settleDelay(1000 + FEEDBACK.pressDipMs, 1000)).toBe(0);
+    expect(settleDelay(5000, 1000)).toBe(0);
+  });
+});
+
+describe("loopFrame", () => {
+  it("steps through the frames by their durations and loops", () => {
+    const durations = [450, 150, 300];
+    expect(loopFrame(false, durations, 0)).toBe(0);
+    expect(loopFrame(false, durations, 449)).toBe(0);
+    expect(loopFrame(false, durations, 450)).toBe(1);
+    expect(loopFrame(false, durations, 600)).toBe(2);
+    expect(loopFrame(false, durations, 900)).toBe(0);
+  });
+
+  it("holds the first frame with reduced motion or no frames", () => {
+    expect(loopFrame(true, [450, 450], 450)).toBe(0);
+    expect(loopFrame(false, [], 450)).toBe(0);
   });
 });
 

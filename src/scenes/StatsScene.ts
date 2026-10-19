@@ -3,8 +3,10 @@ import { type Input, Scene } from "phaser";
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { FEEDBACK, settleDelay } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { logbookOf, wrapWords } from "../home/home";
+import { choiceFull } from "../home/selection";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
@@ -13,9 +15,16 @@ import { PHONE_EVENTS } from "../pwa";
 import { drawDashedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
-import { profileSave } from "./profileStore";
+import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
-import { addMenuButton, addPanel, TEXT_SCALE } from "./uiKit";
+import {
+  addMenuButton,
+  addPanel,
+  addSelectTile,
+  addTapBurst,
+  clearScene,
+  TEXT_SCALE,
+} from "./uiKit";
 
 export interface StatsSceneData {
   resume?: SceneKey;
@@ -50,6 +59,7 @@ const LOG_CHARS = 46;
 // in a later build and is an empty section for now.
 export class StatsScene extends Scene {
   private pressed: "done" | number | undefined;
+  private pressedAt = 0;
   private resumeKey: SceneKey | undefined;
   private tab: Tab = "runs";
 
@@ -67,19 +77,22 @@ export class StatsScene extends Scene {
       containsPoint(DONE_BUTTON, x, y) ? "done" : rectIndexAt(TAB_RECTS, x, y);
     this.input.on("pointerdown", (pointer: Input.Pointer) => {
       this.pressed = targetAt(pointer.x, pointer.y);
+      this.pressedAt = this.time.now;
       this.render();
+      addTapBurst(this, pointer.x, pointer.y);
     });
     this.input.on("pointerup", (pointer: Input.Pointer) => {
       const target = targetAt(pointer.x, pointer.y);
       const pressed = this.pressed;
-      this.pressed = undefined;
       if (target === "done" && pressed === "done") {
         this.close();
         return;
       }
       if (typeof target === "number" && target === pressed) {
-        this.tab = TABS[target]?.tab ?? this.tab;
+        this.openTab(target, settleDelay(this.time.now, this.pressedAt));
+        return;
       }
+      this.pressed = undefined;
       this.render();
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
@@ -90,8 +103,11 @@ export class StatsScene extends Scene {
           TABS.length - 1,
           Math.max(0, index + (direction === "left" ? -1 : 1)),
         );
-        this.tab = TABS[next]?.tab ?? this.tab;
-        this.render();
+        if (next !== index) {
+          this.pressed = next;
+          this.render();
+          this.openTab(next, FEEDBACK.pressDipMs);
+        }
       } else if (isPauseKey(event.key) || isConfirmKey(event.key)) {
         this.close();
       }
@@ -101,6 +117,15 @@ export class StatsScene extends Scene {
     this.events.once("shutdown", () =>
       window.removeEventListener(PHONE_EVENTS.backPressed, onBack),
     );
+  }
+
+  // A pressed tab stays dipped for delayMs, then opens.
+  private openTab(index: number, delayMs: number): void {
+    this.time.delayedCall(delayMs, () => {
+      this.pressed = undefined;
+      this.tab = TABS[index]?.tab ?? this.tab;
+      this.render();
+    });
   }
 
   private close(): void {
@@ -133,7 +158,7 @@ export class StatsScene extends Scene {
   }
 
   private render(): void {
-    this.children.removeAll(true);
+    clearScene(this);
     if (this.textures.exists("screen-stats")) {
       this.add.image(0, 0, "screen-stats").setOrigin(0);
     } else {
@@ -144,22 +169,34 @@ export class StatsScene extends Scene {
         y: 0,
       });
     }
-    // The open tab is sunk and underlined, so it never relies on colour.
+    // The open tab is selected, so the others always take the full choice's darker step.
+    const tabs = this.add.container(0, 0);
+    const { reducedMotion } = currentSettings(this);
     TABS.forEach(({ label, tab }, i) => {
       const rect = TAB_RECTS[i];
       if (rect === undefined) {
         return;
       }
-      const open = tab === this.tab;
-      addMenuButton(this, rect, label).setState(open || this.pressed === i ? "pressed" : "normal");
-      if (open) {
-        fillRect(this.add.graphics(), PALETTE.cream, {
-          height: 3,
-          width: rect.width - 16,
-          x: rect.x + 8,
-          y: rect.y + rect.height + 2,
-        });
+      const tile = addSelectTile(this, tabs, rect, {
+        badge: "tick",
+        edge: true,
+        full: choiceFull(1, 1),
+        reducedMotion,
+        rest: "cream",
+        selected: tab === this.tab,
+      });
+      if (this.pressed === i) {
+        tile.container.y += FEEDBACK.pressDipPx;
       }
+      tile.content.add(
+        addPixelText(this, rect.x + rect.width / 2, rect.y + rect.height / 2, label, {
+          color: PALETTE[tile.look.text],
+          font: "title",
+          originX: 0.5,
+          originY: 0.5,
+          scale: TEXT_SCALE,
+        }),
+      );
     });
     addPanel(this, PANEL);
     switch (this.tab) {

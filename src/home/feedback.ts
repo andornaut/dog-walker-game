@@ -2,6 +2,7 @@
 // in pixels and animation frames, each a function of how long ago its effect started. With
 // reduced motion every movement is 0 and the pulse holds its first frame; the press dip,
 // the picked lift and the tap sparkle stay, as in the mock, since they show the tap landed.
+// A tap shows in order: the dip and the sparkle at once, then the result once the dip is over.
 
 export const FEEDBACK = {
   // A picked tile's or the badge's rise, and the badge's pop on pick.
@@ -19,7 +20,6 @@ export const FEEDBACK = {
   liftPx: 2,
   pressDipMs: 140,
   pressDipPx: 2,
-  pulseFrameMs: 450,
   shakeMs: 320,
   shakePx: 3,
   // fx-tap frames where the finger lands.
@@ -73,9 +73,31 @@ export function pressDip(held: boolean, nowMs: number, startedMs: number | undef
   return held || age(nowMs, startedMs) < FEEDBACK.pressDipMs ? FEEDBACK.pressDipPx : 0;
 }
 
-// The ui-select frame to show: 0 or 1, alternating.
-export function pulseFrame(reducedMotion: boolean, nowMs: number): number {
-  return reducedMotion ? 0 : Math.floor(nowMs / FEEDBACK.pulseFrameMs) % 2;
+// How long after nowMs a press's result waits so its dip shows first: the rest of the dip
+// that started at startedMs, or 0 once it is over.
+export function settleDelay(nowMs: number, startedMs: number): number {
+  return Math.max(0, startedMs + FEEDBACK.pressDipMs - nowMs);
+}
+
+// The frame a looping tag, such as ui-select's pulse, shows at nowMs given each frame's
+// duration; the first frame with reduced motion.
+export function loopFrame(
+  reducedMotion: boolean,
+  durationsMs: readonly number[],
+  nowMs: number,
+): number {
+  const total = durationsMs.reduce((sum, ms) => sum + ms, 0);
+  if (reducedMotion || total <= 0) {
+    return 0;
+  }
+  let into = nowMs % total;
+  for (const [i, ms] of durationsMs.entries()) {
+    if (into < ms) {
+      return i;
+    }
+    into -= ms;
+  }
+  return 0;
 }
 
 // The ready Start walk button's rise: -1 on alternate beats, 0 while pressed or not ready.

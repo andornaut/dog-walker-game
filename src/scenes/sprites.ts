@@ -111,10 +111,11 @@ export function playEffect(
   tag: string,
   point: { x: number; y: number },
   depth: number,
-): void {
+): GameObjects.Sprite | undefined {
   if (!scene.textures.exists(key) || !scene.anims.exists(animationKey(key, tag))) {
-    return;
+    return undefined;
   }
   const sprite = scene.add.sprite(Math.round(point.x), Math.round(point.y), key).setDepth(depth);
   playTagOnce(sprite, key, tag, () => sprite.destroy());
+  return sprite;
 }

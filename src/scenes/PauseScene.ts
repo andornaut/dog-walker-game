@@ -75,7 +75,12 @@ export class PauseScene extends Scene {
       scale: TEXT_SCALE,
     });
     this.buttons = this.entries.map((entry, i) =>
-      addMenuButton(this, itemAt(layout.buttons, i), entry.label),
+      addMenuButton(
+        this,
+        itemAt(layout.buttons, i),
+        entry.label,
+        entry.press === onResume ? "primary" : "secondary",
+      ),
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
     addPixelText(this, center, layout.notePlate.y + 6, "Keeps tips and earlier zones' fees", {

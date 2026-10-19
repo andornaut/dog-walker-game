@@ -1,23 +1,47 @@
 import { describe, expect, it } from "vitest";
 
 import { DEFAULT_SETTINGS } from "../save/schema";
-import { soundVolumes, stepVolume, volumeSteps } from "./settings";
+import {
+  knobX,
+  setVolumeSteps,
+  type SliderTrack,
+  soundVolumes,
+  volumeStepAt,
+  volumeSteps,
+} from "./settings";
 
-describe("stepVolume", () => {
-  it("moves one volume by a tenth and leaves the rest alone", () => {
-    const louder = stepVolume("musicVolume", 1, { ...DEFAULT_SETTINGS, musicVolume: 0.6 });
-    expect(louder).toEqual({ ...DEFAULT_SETTINGS, musicVolume: 0.7 });
+const TRACK: SliderTrack = { knobWidth: 10, width: 216, x: 112 };
+
+describe("volumeStepAt", () => {
+  it("puts the knob's centre under the finger", () => {
+    expect(volumeStepAt(TRACK, 112 + 5)).toBe(0);
+    expect(volumeStepAt(TRACK, 112 + 5 + 103)).toBe(5);
+    expect(volumeStepAt(TRACK, 112 + 216 - 5)).toBe(10);
   });
 
-  it("holds within 0 and 1", () => {
-    expect(stepVolume("sfxVolume", 1, { ...DEFAULT_SETTINGS, sfxVolume: 1 }).sfxVolume).toBe(1);
-    expect(stepVolume("sfxVolume", -1, { ...DEFAULT_SETTINGS, sfxVolume: 0 }).sfxVolume).toBe(0);
+  it("holds to the ends past either end of the track", () => {
+    expect(volumeStepAt(TRACK, 0)).toBe(0);
+    expect(volumeStepAt(TRACK, 400)).toBe(10);
+  });
+});
+
+describe("knobX", () => {
+  it("runs the knob from the track's left edge to its right edge", () => {
+    expect(knobX(TRACK, 0)).toBe(112);
+    expect(knobX(TRACK, 10)).toBe(112 + 216 - 10);
   });
 
-  it("snaps an off-step volume to the nearest step first", () => {
-    expect(
-      stepVolume("musicVolume", -1, { ...DEFAULT_SETTINGS, musicVolume: 0.33 }).musicVolume,
-    ).toBe(0.2);
+  it("is where volumeStepAt reads the same step back", () => {
+    for (let steps = 0; steps <= 10; steps++) {
+      expect(volumeStepAt(TRACK, knobX(TRACK, steps) + TRACK.knobWidth / 2)).toBe(steps);
+    }
+  });
+});
+
+describe("setVolumeSteps", () => {
+  it("sets one volume in tenths, held within 0 and 1", () => {
+    expect(setVolumeSteps("musicVolume", 3, DEFAULT_SETTINGS).musicVolume).toBe(0.3);
+    expect(setVolumeSteps("sfxVolume", 12, DEFAULT_SETTINGS).sfxVolume).toBe(1);
   });
 });
 

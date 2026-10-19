@@ -21,10 +21,29 @@
 .art-nav li + li::before { content: ""; display: inline-block; width: 1px; height: 14px; margin: 0 12px; vertical-align: -2px; background: #3a4466; }
 .art-nav a { color: #c0cbdc; text-decoration: none; }
 .art-nav a:hover { color: #feae34; }
-.art-nav a[aria-current="page"] { color: #feae34; font-weight: 700; }
+/* The current page in the game's selected state: a yellow face with plum text, the ui-select
+   frame (ink, a pulsing yellow and white band, ink) 3px outside its ink edge, lifted 2px onto
+   a plum shadow, and the ui-check tick at its top-left corner. */
+.art-nav a[aria-current="page"] {
+  position: relative; top: -2px; padding: 1px 6px 1px 10px;
+  color: #3e2731; background: #fee761; border: 1px solid #181425; font-weight: 700;
+  box-shadow: 0 0 0 2px #fee761, 0 0 0 3px #181425, 0 2px 0 3px #3e2731;
+  animation: art-nav-pulse 900ms steps(1) infinite;
+}
+.art-nav a[aria-current="page"]::before {
+  content: ""; position: absolute; left: -7px; top: -8px; width: 16px; height: 16px;
+  background: url("/art/sprites/ui-check.png") -48px 0 / 64px 16px; image-rendering: pixelated;
+}
+@keyframes art-nav-pulse {
+  50% { box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #181425, 0 2px 0 3px #3e2731; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .art-nav a[aria-current="page"] { animation: none; }
+}
 .art-nav a:focus-visible { outline: 2px solid #feae34; outline-offset: 2px; }
 .art-nav.slim { font-size: 13px; line-height: 1; touch-action: pan-x; }
-.art-nav.slim ul { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-block: 7px; white-space: nowrap; }
+/* The extra top padding holds the current page's lift, frame and badge inside the scroller. */
+.art-nav.slim ul { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-block: 11px 7px; white-space: nowrap; }
 .art-nav.slim ul::-webkit-scrollbar { display: none; }
 .art-nav.slim li + li::before { height: 12px; margin: 0 10px; vertical-align: -1px; }
 .art-nav.slim a:focus-visible { outline-offset: -2px; }`;
