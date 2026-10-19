@@ -1,0 +1,22 @@
+{ "frames": {
+   "roadside-laundry.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 135, "h": 80 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 135, "h": 80 },
+    "sourceSize": { "w": 135, "h": 80 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-laundry.png",
+  "format": "RGBA8888",
+  "size": { "w": 135, "h": 80 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 0, "direction": "forward" }
+  ]
+ }
+}

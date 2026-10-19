@@ -160,6 +160,27 @@ Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn
 | `gag-sprinkler`     | sprite | 32×24   | `spray`         | core |                                                                                             |
 | `gag-ball`          | sprite | 14×14   | `roll`          | core | Rolls along the sidewalk                                                                    |
 
+### Roadside props
+
+Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside table. Each has `@88`, `@75`, `@62` and `@50` variants with the same tag and timing; one tag, `idle`.
+
+| Key                                                     | Type   | Size    | `@75`, `@50`  | Pri  | Note                                      |
+| ------------------------------------------------------- | ------ | ------- | ------------- | ---- | ----------------------------------------- |
+| `roadside-bike`                                         | sprite | 60×40   | 45×30, 30×20  | core | A kid's red bike, side on                 |
+| `roadside-fence`                                        | sprite | 125×35  | 94×26, 63×18  | core | White pickets                             |
+| `roadside-fence-cat`                                    | sprite | 125×50  | 94×38, 63×25  | core | The fence with a plum cat on top          |
+| `roadside-flowers`                                      | sprite | 75×25   | 56×19, 38×13  | core | A flower border, no box                   |
+| `roadside-gnome`                                        | sprite | 25×35   | 19×26, 13×18  | core | Blue hat, red coat                        |
+| `roadside-hedge`                                        | sprite | 110×40  | 83×30, 55×20  | core | Bumped top, white flowers                 |
+| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 120×110 | 90×83, 60×55  | core | Tan and pink                              |
+| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 140×100 | 105×75, 70×50 | core | Sky and tan                               |
+| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 110×130 | 83×98, 55×65  | core | Cream and light grey                      |
+| `roadside-lamp-post`                                    | sprite | 30×125  | 23×94, 15×63  | core | White globe, forest post, a flower basket |
+| `roadside-laundry`                                      | sprite | 135×80  | 101×60, 68×40 | core | A washing line on two T posts             |
+| `roadside-mailbox`                                      | sprite | 30×40   | 23×30, 15×20  | core | Blue, a yellow flag                       |
+| `roadside-sprinkler`                                    | sprite | 65×35   | 49×26, 33×18  | core | `idle` 2 frames of 200ms: the spray runs  |
+| `roadside-tree`, `roadside-tree-blossom`                | sprite | 95×130  | 71×98, 48×65  | core | Green and pink blossom                    |
+
 ## Doghouse row and top bar
 
 | Key                                          | Type   | Size              | Tags                                   | Pri  | Note                                                                                      |

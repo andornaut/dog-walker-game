@@ -1,0 +1,30 @@
+{ "frames": {
+   "roadside-sprinkler@75 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 49, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 26 },
+    "sourceSize": { "w": 49, "h": 26 },
+    "duration": 200
+   },
+   "roadside-sprinkler@75 1.aseprite": {
+    "frame": { "x": 49, "y": 0, "w": 49, "h": 26 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 49, "h": 26 },
+    "sourceSize": { "w": 49, "h": 26 },
+    "duration": 200
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "roadside-sprinkler@75.png",
+  "format": "RGBA8888",
+  "size": { "w": 98, "h": 26 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}
