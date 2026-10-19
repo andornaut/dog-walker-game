@@ -10,11 +10,13 @@ import type {
   NeedId,
   NeedSpotId,
   UpgradeId,
+  ZoneId,
 } from "../data/types";
 import { startHearts } from "../rules/dogs";
 import type { Lasting } from "../rules/durations";
 import { applyEffects } from "../rules/effects";
 import { modifiedStat } from "../rules/modifiers";
+import { firstZoneId } from "../rules/route";
 import { type Cents, cents, type Hearts, type Pixels, pixels } from "../rules/units";
 import { packFor } from "./pack";
 
@@ -64,7 +66,7 @@ export type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
 
 // What opened a card. affected is the dogs the encounter affected (caught by an area roll,
 // the chasers for a squirrel, or the whole pack), or the dogs whose need opened it; lucky
-// encounters are encounters too.
+// encounters are encounters too. A fork's paths are the zones it leads to, left to right.
 export type CardSource =
   | {
       readonly affected: readonly DogId[];
@@ -72,6 +74,7 @@ export type CardSource =
       readonly kind: "encounter";
     }
   | { readonly kind: "forcedStop"; readonly stop: ForcedStopId }
+  | { readonly kind: "fork"; readonly paths: readonly ZoneId[] }
   | {
       readonly affected: readonly DogId[];
       readonly card: NeedCardId;
@@ -110,6 +113,9 @@ export interface RunState {
   readonly needSeconds: Readonly<Partial<Record<DogId, number>>>;
   readonly pack: Pack;
   readonly phase: Phase;
+  // The zones walked and the zone being walked, in order: zoneIndex is a position in it.
+  // Between a zone's end and the fork after it, it has no entry at zoneIndex yet.
+  readonly route: readonly ZoneId[];
   readonly skipsLeft: number;
   // Squirrel cards on which the chasers were let chase.
   readonly squirrelChases: number;
@@ -119,6 +125,7 @@ export interface RunState {
   readonly upgradesPicked: readonly UpgradeId[];
   // Distance travelled into the current zone.
   readonly zoneDistance: Pixels;
+  // The current zone's position in the walk, counting from 0.
   readonly zoneIndex: number;
 }
 
@@ -127,10 +134,11 @@ export interface Loadout {
   readonly gear: GearId | null;
 }
 
-// A run's opening state: the gear applied, then each owner's starting hearts and the
-// starting money. Throws for a dog listed twice or more dogs than the player has slots.
+// A run's opening state, in the world's first zone: the gear applied, then each owner's
+// starting hearts and the starting money. Throws for a dog listed twice or more dogs than the
+// player has slots.
 export function newRun(
-  data: Pick<GameData, "debuffs" | "dogs" | "shopGear" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "shopGear" | "tuning" | "world">,
   dogSlots: number,
   loadout: Loadout,
 ): RunState {
@@ -162,6 +170,7 @@ export function newRun(
     needSeconds: {},
     pack: packWith([]),
     phase: { kind: "walking" },
+    route: [firstZoneId(data)],
     skipsLeft: 0,
     squirrelChases: 0,
     treats: 0,

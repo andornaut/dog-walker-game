@@ -21,6 +21,7 @@ const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
   renamedDogIds: new Map([["dash", "koda"]]),
   speed: { max: 10, min: 0.1 },
   zoneCount: 4,
+  zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
 };
 const setup: RunSetup<"bo" | "koda", "collar"> = {
   dev: false,

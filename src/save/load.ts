@@ -8,6 +8,7 @@ import type {
   GearId,
   HintId,
   WalkerId,
+  ZoneId,
 } from "../data/types";
 import { startingDogSlots } from "../rules/shop";
 import { migrateSave, saveMigrations } from "./migrations";
@@ -32,6 +33,7 @@ export interface KnownIds {
   gear: ReadonlySet<GearId>;
   hints: ReadonlySet<HintId>;
   walkers: ReadonlySet<WalkerId>;
+  zones: ReadonlySet<ZoneId>;
 }
 
 export interface SaveContext {
@@ -59,6 +61,7 @@ export type SaveData = Pick<
   | "hints"
   | "shopGear"
   | "walkers"
+  | "world"
 >;
 
 // A new player has the starting dog slots, owns the dogs marked "start" and walks with the
@@ -78,6 +81,7 @@ export function saveContextFrom(data: SaveData): SaveContext {
       gear: new Set(keysOf(data.shopGear)),
       hints: new Set(keysOf(data.hints)),
       walkers: new Set(keysOf(data.walkers)),
+      zones: new Set(data.world.zones.map(({ id }) => id as ZoneId)),
     },
   };
 }
@@ -164,6 +168,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
             dogs: checkpoint.dogs.flatMap(({ id, ...dog }) =>
               isKnown(known.dogs, id) ? [{ ...dog, id }] : [],
             ),
+            route: keepKnown(known.zones, checkpoint.route),
           },
     lastLoadout,
     owned,
@@ -186,6 +191,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
               firings: stats.lastWalk.firings.flatMap(({ dog, zone }) =>
                 isKnown(known.dogs, dog) ? [{ dog, zone }] : [],
               ),
+              route: keepKnown(known.zones, stats.lastWalk.route),
             },
     },
     walker: isKnown(known.walkers, save.walker) ? save.walker : defaults.walker,

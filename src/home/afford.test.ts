@@ -14,6 +14,7 @@ const walk = (earned: number): LastWalk => ({
   earnedCents: dollars(earned),
   firings: [],
   outcome: "finished",
+  route: ["street", "park", "shops", "homeStretch"],
   zonesFinished: 4,
 });
 

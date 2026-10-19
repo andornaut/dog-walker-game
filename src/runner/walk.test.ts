@@ -12,7 +12,7 @@ import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
-import type { EncounterId, LiveTuning } from "../data/types";
+import type { EncounterId, LiveTuning, World, Zone, ZoneId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import {
@@ -30,9 +30,10 @@ import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices
 import { tipValue } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { cents, pixels, read } from "../rules/units";
-import { newRun, type PackDogs } from "../state/runState";
+import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { lanesReachedAtEnd } from "../testing/avoidable";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WORLD } from "../testing/world";
 import { isSteeringLocked } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
@@ -44,8 +45,8 @@ import {
   headHome,
   itemCategory,
   itemHeight,
+  minorObstacleWeights,
   moverFor,
-  moverShare,
   obstacleWeights,
   pickWeighted,
   planZone,
@@ -97,8 +98,23 @@ const data = {
   shopGear: SHOP_GEAR,
   tuning,
   upgrades: UPGRADES,
-  world: WORLD,
+  world: TEST_WORLD,
 };
+// The real world, as the integrity tests read it.
+const REAL = { ...data, tuning: TUNING, world: WORLD };
+const ZONE_IDS = WORLD.zones.map(({ id }) => id);
+// The world with every zone at this mover share.
+function sharedWorld(world: World, share: number): World {
+  const [first, ...rest] = world.zones;
+  const shared = (zone: Zone): Zone => ({ ...zone, moverShare: share });
+  return { ...world, zones: [shared(first), ...rest.map(shared)] };
+}
+// The run in zone, walked at position zoneIndex.
+const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState => ({
+  ...run,
+  route: Array.from({ length: zoneIndex + 1 }, () => zone),
+  zoneIndex,
+});
 const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
   itemHeights: { forcedStop: 16, lucky: 20, needSpot: 20, tip: 12, treat: 12 },
@@ -149,7 +165,7 @@ describe("planZone", { timeout: 15_000 }, () => {
   });
 
   it("fits the tuned spawns into every zone of the game's road, so none is dropped", () => {
-    const tuned = { ...data, tuning: TUNING };
+    const tuned = REAL;
     const layoutRoad = screenLayout(SCREEN_CONFIG).road;
     const gameRoad = walkGeometry(
       LANE_COUNT,
@@ -158,37 +174,60 @@ describe("planZone", { timeout: 15_000 }, () => {
       layoutRoad,
     );
     const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
-    for (let zoneIndex = 0; zoneIndex < WORLD.zones.length; zoneIndex++) {
-      for (const seed of [1, 2, 3]) {
-        const walk = { road: startRoad(LANE_COUNT), run: { ...run, zoneIndex } };
-        expect(() => planZone(tuned, gameRoad, seededRandom(seed), walk)).not.toThrow();
-      }
-    }
-  });
-
-  it("draws construction barriers only in the zones that allow them", () => {
-    for (const zoneIndex of [0, 1, 2, 3]) {
-      const walk = walkWith(["koda"]);
-      const zoned = { ...walk, run: { ...walk.run, zoneIndex } };
-      for (const seed of [1, 2, 3, 4, 5, 6]) {
-        const kinds = planZone(data, geometry, seededRandom(seed), zoned).road.pending.map(
-          (event) => event.kind,
-        );
-        const barriers = kinds.filter((kind) => kind === "barrier2" || kind === "barrier3");
-        if (zoneIndex === 1 || zoneIndex === 3) {
-          expect(barriers).toEqual([]);
+    for (const zone of ZONE_IDS) {
+      for (const zoneIndex of [0, WORLD.walkLength - 1]) {
+        for (const seed of [1, 2, 3]) {
+          const walk = { road: startRoad(LANE_COUNT), run: inZone(run, zone, zoneIndex) };
+          expect(() => planZone(tuned, gameRoad, seededRandom(seed), walk)).not.toThrow();
         }
       }
     }
   });
 
-  it("leaves a way past every obstacle of the game's road, from any lane, up to zone 4's speed", () => {
-    const tuned = { ...data, tuning: TUNING };
+  it("draws only the minor obstacles the current zone weighs above 0", () => {
+    const walk = walkWith(["koda"]);
+    const real = { ...data, world: WORLD };
+    for (const zone of ZONE_IDS) {
+      const run = inZone(walk.run, zone, 0);
+      const allowed = minorObstacleWeights(real, run).map(([kind]) => kind as string);
+      for (const seed of [1, 2, 3]) {
+        const kinds = planZone(real, geometry, seededRandom(seed), { ...walk, run })
+          .road.pending.filter((event) => event.mover === undefined)
+          .map((event) => event.kind as string)
+          .filter((kind) => itemCategory(real, kind as WalkItem["kind"]) === "minor");
+        expect(
+          kinds.filter((kind) => !allowed.includes(kind)),
+          zone,
+        ).toEqual([]);
+      }
+    }
+  });
+
+  it("weighs the obstacles by the zone the route is in", () => {
+    const { run } = walkWith(["koda"]);
+    const zones: [Zone, ...Zone[]] = [
+      {
+        ...TEST_WORLD.zones[0],
+        weights: {
+          ...TEST_WORLD.zones[0].weights,
+          obstacles: { otherDog: 0, puddle: 2, skunk: 0, squirrel: 0, thief: 0 },
+        },
+      },
+      ...TEST_WORLD.zones.slice(1),
+    ];
+    const weighed = { ...data, world: { ...TEST_WORLD, zones } };
+    const first = inZone(run, zones[0].id as ZoneId, 0);
+    expect(obstacleWeights(weighed, first)).toEqual([["puddle", 2]]);
+    const other = inZone(run, zones[1]?.id as ZoneId, 0);
+    expect(obstacleWeights(weighed, other).map(([id]) => id)).toContain("thief");
+  });
+
+  it("leaves a way past every obstacle of the game's road, from any lane, in every zone", () => {
+    const tuned = REAL;
     const road = screenLayout(SCREEN_CONFIG).road;
     const gameRoad = walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
     const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
-    for (const zoneIndex of [0, 3]) {
-      const zoned = { ...run, zoneIndex };
+    for (const zoned of ZONE_IDS.map((zone) => inZone(run, zone, WORLD.walkLength - 1))) {
       for (const seed of [1, 2, 3]) {
         const walk = planZone(tuned, gameRoad, seededRandom(seed), {
           road: startRoad(LANE_COUNT),
@@ -215,15 +254,16 @@ describe("planZone", { timeout: 15_000 }, () => {
     }
   });
 
-  it("shows each row of the game's road in time to cross the whole road for it, up to zone 4", () => {
-    const tuned = { ...data, tuning: TUNING };
+  it("shows each row of the game's road in time to cross the whole road for it, in every zone", () => {
+    const tuned = REAL;
     const road = screenLayout(SCREEN_CONFIG).road;
     const gameRoad = walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
     const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
     const crossing = (LANE_COUNT - 1) * read(TUNING, "seconds", "laneMove");
-    for (const zoneIndex of [0, 3]) {
-      const lookAhead = gameRoad.sightLength / walkScrollSpeed(tuned, { ...run, zoneIndex });
-      expect(lookAhead).toBeGreaterThan(crossing + 1);
+    for (const zone of ZONE_IDS) {
+      const zoned = inZone(run, zone, WORLD.walkLength - 1);
+      const lookAhead = gameRoad.sightLength / walkScrollSpeed(tuned, zoned);
+      expect(lookAhead, zone).toBeGreaterThan(crossing + 1);
     }
   });
 
@@ -377,7 +417,7 @@ describe("stepWalk", () => {
 
     it("leaves a zone clean for Clean Paws, and a walk for Not a Scratch", () => {
       let walk = walkWith(["duchess"]);
-      for (let zone = 0; zone < data.world.zones.length; zone++) {
+      for (let zone = 0; zone < data.world.walkLength; zone++) {
         const met = step({ ...walk, road: { ...walk.road, items: [atPack("squirrel")] } }).walk;
         walk = { ...met, run: finishZone(data, met.run).run };
       }
@@ -385,7 +425,7 @@ describe("stepWalk", () => {
         ...runCountersOf(walk.run),
         earnedCents: walk.run.money,
         packSize: 1,
-        zonesFinished: data.world.zones.length,
+        zonesFinished: data.world.walkLength,
       };
       expect(
         earnedByRun({ ...data, achievements: ACHIEVEMENTS, dogSlots: DOG_SLOTS }, facts),
@@ -767,7 +807,7 @@ describe("finishZone", () => {
 
   it("ends the run, finished, after the last zone", () => {
     const { run } = walkWith(["koda"]);
-    const last = finishZone(data, { ...run, zoneIndex: WORLD.zones.length - 1 }).run;
+    const last = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 }).run;
     expect(last.phase).toEqual({ kind: "ended", reason: "finished" });
   });
 });
@@ -818,13 +858,8 @@ describe("pickWeighted", () => {
 describe("movers", () => {
   const withShare = (base: LiveTuning, share: number) => ({
     ...data,
-    tuning: {
-      ...base,
-      probability: {
-        ...base.probability,
-        moverShare: { homeStretch: share, park: share, shops: share, street: share },
-      },
-    },
+    tuning: base,
+    world: sharedWorld(TEST_WORLD, share),
   });
   // A crosser 2.5 lanes in from the left edge 32px of scroll after its cue's 50px, its hit
   // box then just inside the pack's band.
@@ -877,10 +912,19 @@ describe("movers", () => {
     expect(draws).toBe(0);
   });
 
-  it("reads each zone's mover share", () => {
-    const tuned = withShare(tuning, 0.25);
-    expect([0, 1, 2, 3].map((zone) => moverShare(tuned, zone))).toEqual([0.25, 0.25, 0.25, 0.25]);
-    expect(moverShare(tuned, 4)).toBe(0);
+  it("plans movers at the mover share of the zone the route is in", () => {
+    const long = { ...tuning, seconds: { ...tuning.seconds, zoneAtBaseSpeed: 120 } };
+    const [first, ...rest] = TEST_WORLD.zones;
+    const world: World = { ...TEST_WORLD, zones: [{ ...first, moverShare: 1 }, ...rest] };
+    const shared = { ...data, tuning: long, world };
+    const walk = walkWith(["koda"]);
+    const moversIn = (zone: ZoneId) =>
+      planZone(shared, geometry, seededRandom(3), {
+        ...walk,
+        run: inZone(walk.run, zone, 0),
+      }).road.pending.filter((event) => event.mover !== undefined).length;
+    expect(moversIn(first.id as ZoneId)).toBeGreaterThan(0);
+    expect(moversIn(rest[0]?.id as ZoneId)).toBe(0);
   });
 
   it("plans no movers at a share of 0", () => {
@@ -939,7 +983,7 @@ describe("movers", () => {
   });
 
   it("leaves a way past every obstacle and mover of the game's road, one mover on screen", () => {
-    const tuned = withShare(TUNING, 0.5);
+    const tuned = { ...REAL, world: sharedWorld(WORLD, 0.5) };
     const road = screenLayout(SCREEN_CONFIG).road;
     const gameRoad = walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
     const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
@@ -967,8 +1011,7 @@ describe("movers", () => {
       }
       return [distance, distance + since] as const;
     };
-    for (const zoneIndex of [0, 3]) {
-      const zoned = { ...run, zoneIndex };
+    for (const zoned of ZONE_IDS.map((zone) => inZone(run, zone, WORLD.walkLength - 1))) {
       for (const seed of [1, 2, 3]) {
         const walk = planZone(tuned, gameRoad, seededRandom(seed), {
           road: startRoad(LANE_COUNT),

@@ -1,11 +1,14 @@
+import { cardZoneKey } from "../assets/spriteKeys";
 import type {
   CardOption,
+  Difficulty,
   DogId,
   Effect,
   EncounterId,
   GameData,
   QuipMoment,
   UpgradeId,
+  ZoneId,
 } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState, UpgradeOffer } from "../state/runState";
@@ -21,10 +24,20 @@ import {
 } from "./causes";
 import { type EffectContext, moneyCost, resolveEffects } from "./effects";
 import { effectText } from "./effectText";
+import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { type Cents, cents, type Hearts } from "./units";
 
-export type ChoiceData = CauseData & Pick<GameData, "dogs" | "tuning">;
+export type ChoiceData = CauseData & Pick<GameData, "dogs" | "tuning" | "world">;
+
+// A fork's path: the zone it leads to and what a path card shows of it.
+export interface PathView {
+  readonly difficulty: Difficulty;
+  readonly difficultyName: string;
+  readonly fees: number;
+  readonly side: PathSide;
+  readonly zone: ZoneId;
+}
 
 export type OptionAvailability =
   { readonly enabled: false; readonly reason: "not enough money" } | { readonly enabled: true };
@@ -49,6 +62,8 @@ export interface OptionView {
   // The option's position in the source's data; pass it to chooseOption.
   readonly index: number;
   readonly label: string;
+  // Set on a fork's path cards only.
+  readonly path?: PathView;
   readonly text: string;
 }
 
@@ -116,9 +131,11 @@ function encounterOptions(
   return resolution.options;
 }
 
+type EffectCardSource = Exclude<CardSource, { readonly kind: "fork" }>;
+
 function cardContent(
   data: ChoiceData,
-  source: CardSource,
+  source: EffectCardSource,
 ): { readonly options: readonly SourcedOption[]; readonly title: string } {
   switch (source.kind) {
     case "encounter":
@@ -234,10 +251,43 @@ function breakdownOf(data: ChoiceData, changes: readonly Change[]): BreakdownLin
   );
 }
 
+export const FORK_TITLE = "Which way?";
+
+// A fork's card: one free path card per path, left to right, each naming its zone, with the
+// zone's difficulty and fee multiplier.
+function forkCard(
+  data: ChoiceData,
+  source: Extract<CardSource, { readonly kind: "fork" }>,
+): CardView {
+  const options = source.paths.map((id, index): OptionView => {
+    const zone = zoneById(data, id);
+    return {
+      art: cardZoneKey(zone),
+      availability: { enabled: true },
+      breakdown: [],
+      cost: cents(0),
+      index,
+      label: zone.name,
+      path: {
+        difficulty: zone.difficulty,
+        difficultyName: zone.difficultyName,
+        fees: zone.fees,
+        side: pathSide(index, source.paths.length),
+        zone: id,
+      },
+      text: `${zone.difficultyName}. Fees ×${zone.fees}.`,
+    };
+  });
+  return { affected: [], options, skip: false, source, title: FORK_TITLE };
+}
+
 // The card for a source, with each option's text, cost, breakdown and whether the player can
 // pick it. An option with no cost is always enabled, so every card keeps its free option.
 // Throws for an instant encounter, which opens no card.
 export function cardFor(data: ChoiceData, state: RunState, source: CardSource): CardView {
+  if (source.kind === "fork") {
+    return forkCard(data, source);
+  }
   const { options, title } = cardContent(data, source);
   const affected = affectedBy(state, source);
   const skip =
@@ -315,9 +365,40 @@ export function offerUpgrades(
   return [first, second, third];
 }
 
+// The fork after the run's current zone: its paths are up to three zones not yet walked,
+// drawn at random, easiest on the left.
+export function offerFork(
+  data: Pick<GameData, "world">,
+  random: () => number,
+  state: RunState,
+): Extract<CardSource, { readonly kind: "fork" }> {
+  return { kind: "fork", paths: forkPaths(data, random, state.route) };
+}
+
+// Taking a fork's path adds its zone to the route, as the next zone walked.
+function takePath(
+  source: Extract<CardSource, { readonly kind: "fork" }>,
+  state: RunState,
+  choice: Choice,
+): ChoiceOutcome {
+  const zone = choice === "skip" ? undefined : source.paths[choice];
+  if (zone === undefined) {
+    throw new RangeError(`Path ${choice} is not on the fork`);
+  }
+  return {
+    fired: [],
+    heartChanges: [],
+    moneyChanges: [],
+    moneyDelta: cents(0),
+    quips: [],
+    state: { ...state, phase: { kind: "walking" }, route: [...state.route, zone] },
+    treatsDelta: 0,
+  };
+}
+
 // Applies the chosen option. Owners at 0 hearts fire you and take back their dog's fees;
-// with no dogs left the run ends. An option that lets the chasers chase counts a chase.
-// Throws for a disabled option or an ended run.
+// with no dogs left the run ends. An option that lets the chasers chase counts a chase. A
+// fork's path sets the next zone. Throws for a disabled option or an ended run.
 export function chooseOption(
   data: ChoiceData,
   random: () => number,
@@ -327,6 +408,9 @@ export function chooseOption(
 ): ChoiceOutcome {
   if (state.phase.kind === "ended") {
     throw new Error("The run has ended");
+  }
+  if (card.source.kind === "fork") {
+    return takePath(card.source, state, choice);
   }
   const view = cardFor(data, state, card.source);
   if (choice === "skip") {

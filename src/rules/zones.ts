@@ -1,4 +1,4 @@
-import type { LiveTuning } from "../data/types";
+import type { LiveTuning, Zone } from "../data/types";
 import { type Pixels, pixels, read, type Seconds, seconds } from "./units";
 
 export interface ZoneStats {
@@ -13,21 +13,36 @@ export interface ZoneStats {
   readonly treats: number;
 }
 
-// zoneIndex counts from 0 for the first zone. Every zone is the same distance, so a faster
-// zone takes less time.
-export function zoneStats(tuning: LiveTuning, zoneIndex: number): ZoneStats {
-  const speedFactor = 1 + read(tuning, "multipliers", "scrollSpeedGainPerZone") * zoneIndex;
-  const counts = (first: number, gain: number) => first + gain * zoneIndex;
+// A zone walked at position zoneIndex, counting from 0. Speed and counts rise with the
+// position, then the zone's own speed and density multiply them. Every zone is the same
+// distance, so a faster zone takes less time.
+export function zoneStats(
+  tuning: LiveTuning,
+  zone: Pick<Zone, "density" | "speed">,
+  zoneIndex: number,
+): ZoneStats {
+  const speedFactor =
+    (1 + read(tuning, "multipliers", "scrollSpeedGainPerZone") * zoneIndex) * zone.speed;
+  const counts = (first: number, gain: number, density: number) =>
+    Math.round((first + gain * zoneIndex) * density);
+  const { density } = zone;
   return {
     duration: seconds(read(tuning, "seconds", "zoneAtBaseSpeed") / speedFactor),
-    luckyEncounters: read(tuning, "counts", "luckyEncountersPerZone"),
+    luckyEncounters: Math.round(
+      read(tuning, "counts", "luckyEncountersPerZone") * density.luckyFinds,
+    ),
     minorObstacles: counts(
       tuning.counts.minorObstaclesFirstZone,
       tuning.counts.minorObstaclesGainPerZone,
+      density.obstacles,
     ),
-    obstacles: counts(tuning.counts.obstaclesFirstZone, tuning.counts.obstaclesGainPerZone),
+    obstacles: counts(
+      tuning.counts.obstaclesFirstZone,
+      tuning.counts.obstaclesGainPerZone,
+      density.obstacles,
+    ),
     scrollSpeed: pixels(read(tuning, "pixels", "roadScrollSpeed") * speedFactor),
-    tips: counts(tuning.counts.tipsFirstZone, tuning.counts.tipsGainPerZone),
+    tips: counts(tuning.counts.tipsFirstZone, tuning.counts.tipsGainPerZone, density.tips),
     treats: read(tuning, "counts", "treatsPerZone"),
   };
 }

@@ -90,6 +90,9 @@ export interface RoadFrame {
 }
 
 export const STRIP = { height: 64, width: 280 } as const;
+// A start strip's far rows are its zone's road; the rest, a cross street, then the previous
+// zone's road below it.
+export const START_STRIP_ZONE_ROWS = 20;
 // Rough patches are drawn in the lawn's darker green, from blocks of road PATCH_BLOCK long
 // whose patches reach PATCH_REACH either side.
 const PATCH_BLOCK = ROUGH_PATCH_BLOCK;
@@ -367,10 +370,10 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
           ? frame.transition.start
           : frame.transition.previous;
     const stripRow = (((STRIP.height - 1 - along) % STRIP.height) + STRIP.height) % STRIP.height;
-    // The start strip has the previous zone in its near half: the verge beside it is that
-    // zone's too.
+    // Below its own zone's rows, the start strip is a cross street that follows the previous
+    // zone: the verge beside it is the previous zone's.
     const vergeZone =
-      look === frame.transition?.start && stripRow >= STRIP.height / 2
+      look === frame.transition?.start && stripRow >= START_STRIP_ZONE_ROWS
         ? frame.transition.previous.zone
         : look.zone;
     const verge = VERGES[vergeZone];

@@ -19,6 +19,30 @@ export const POLICY_NAMES: Readonly<Record<PolicyId, string>> = {
   heartsUnlessLow: "Hearts unless an owner would drop to 1",
 };
 
+// How the bot picks a fork's path: always the middle (straight), always the easiest (left),
+// always the hardest (right), or one at random.
+export type RoutePolicyId = "left" | "random" | "right" | "straight";
+
+export const ROUTE_POLICY_IDS: readonly RoutePolicyId[] = ["straight", "left", "right", "random"];
+
+// The policy the simulator uses unless told otherwise.
+export const DEFAULT_ROUTE_POLICY: RoutePolicyId = "straight";
+
+// The index of the path the route policy takes among pathCount paths, easiest first. With an
+// even count, straight is the easier of the two middle paths.
+export function choosePath(random: () => number, policy: RoutePolicyId, pathCount: number): number {
+  switch (policy) {
+    case "left":
+      return 0;
+    case "right":
+      return pathCount - 1;
+    case "straight":
+      return Math.floor((pathCount - 1) / 2);
+    default:
+      return Math.floor(random() * pathCount);
+  }
+}
+
 // An owner left at this many hearts or fewer is one bad card from firing you.
 export const LOW_HEARTS = 1;
 

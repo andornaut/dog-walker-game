@@ -13,7 +13,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Home before the streetlights.",
     conditions: [{ count: "all", kind: "zonesFinished" }],
-    goal: "Finish all 4 zones of Maple Street",
+    goal: "Finish all 4 zones of a walk",
     id: "roundTrip",
     name: "Round Trip",
   },

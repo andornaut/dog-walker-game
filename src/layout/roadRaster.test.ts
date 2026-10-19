@@ -16,6 +16,7 @@ import {
   roadRaster,
   shrinkRows,
   solidStrip,
+  START_STRIP_ZONE_ROWS,
   STRIP,
   stripLevels,
 } from "./roadRaster";
@@ -275,6 +276,26 @@ describe("drawRoad", () => {
     expect(at(30, 469)).toBe(pixelWord(0x111111));
     expect(at(200, 150)).toBe(pixelWord(0x333333));
     expect(at(900, 469)).toBe(pixelWord(0x333333));
+  });
+
+  it("puts the previous zone's verge beside the start strip's cross street", () => {
+    // Woof Way's curb runs to 144 across; Bark Park has none, so its lawn starts at the road.
+    const y = 400;
+    const row = itemAt(raster.rows, y - view.y);
+    const curbX = Array.from(row.across).findIndex((across) => across >= 140 && across < 144);
+    expect(curbX).toBeGreaterThanOrEqual(0);
+    const previous = look("street", 0x111111);
+    const start = look("park", 0x222222);
+    // A strip row counts down from the start strip's far end, so along = 63 - stripRow.
+    const vergeAt = (stripRow: number) => {
+      const zoneStart = 5000;
+      const along = STRIP.height - 1 - stripRow;
+      const scroll = zoneStart + raster.visibleDistance + along + 0.5 - row.distance;
+      const frame = frameOf({ current: start, scroll, transition: { previous, start }, zoneStart });
+      return draw(frame)[(y - view.y) * view.width + curbX];
+    };
+    expect(vergeAt(START_STRIP_ZONE_ROWS - 1)).not.toBe(pixelWord(0x8b9bb4));
+    expect(vergeAt(START_STRIP_ZONE_ROWS)).toBe(pixelWord(0x8b9bb4));
   });
 
   it("dithers the far rows into the band only when the fade is on", () => {

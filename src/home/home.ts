@@ -1,4 +1,4 @@
-import type { DogId, GameData, GearId } from "../data/types";
+import type { DogId, GameData, GearId, ZoneId } from "../data/types";
 import { quipLine } from "../rules/choices";
 import { zoneFee } from "../rules/dogs";
 import { effectText, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
@@ -141,8 +141,11 @@ export function packFeePerZone(
   );
 }
 
-function zoneName(data: Pick<GameData, "world">, zone: number): string {
-  return data.world.zones[zone - 1]?.name ?? data.world.name;
+// The name of the walk's zone at position zone, counting from 1, or the world's name for a
+// position the walk never picked a zone for.
+function zoneName(data: Pick<GameData, "world">, route: readonly ZoneId[], zone: number): string {
+  const id = route[zone - 1];
+  return data.world.zones.find((candidate) => candidate.id === id)?.name ?? data.world.name;
 }
 
 // Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Archie".
@@ -160,12 +163,12 @@ export function lastWalkLine(data: Pick<GameData, "dogs" | "world">, walk: LastW
   const earned = `+${dollarText(walk.earnedCents)}.`;
   const firing = walk.firings.at(-1);
   if (firing !== undefined) {
-    return `${earned} ${data.dogs[firing.dog].owner.name} fired you on ${zoneName(data, firing.zone)}.`;
+    return `${earned} ${data.dogs[firing.dog].owner.name} fired you on ${zoneName(data, walk.route, firing.zone)}.`;
   }
   if (walk.outcome === "finished") {
-    return `${earned} Walked all of ${data.world.name}.`;
+    return `${earned} Walked ${walk.zonesFinished} zones of ${data.world.name}.`;
   }
-  return `${earned} Headed home from ${zoneName(data, walk.zonesFinished + 1)}.`;
+  return `${earned} Headed home from ${zoneName(data, walk.route, walk.zonesFinished + 1)}.`;
 }
 
 // The home screen's logbook: the best walk, totals, and the last walk; null before any walk.

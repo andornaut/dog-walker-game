@@ -1,6 +1,7 @@
 import type { ACHIEVEMENTS } from "./achievements";
 import type { DEBUFFS } from "./debuffs";
 import type { DOGS } from "./dogs";
+import type { ENCOUNTERS } from "./encounters";
 import type { FORCED_STOPS } from "./forcedStops";
 import type { HINTS } from "./hints";
 import type { MINOR_OBSTACLES } from "./minorObstacles";
@@ -40,6 +41,12 @@ export type NeedSpotId = keyof typeof NEED_SPOTS;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
+
+type EncounterOfKind<Kind extends Encounter["kind"]> = {
+  [Id in EncounterId]: (typeof ENCOUNTERS)[Id]["kind"] extends Kind ? Id : never;
+}[EncounterId];
+export type LuckyEncounterId = EncounterOfKind<"lucky">;
+export type ObstacleEncounterId = EncounterOfKind<"obstacle">;
 
 // The tuning as the game reads it: every value is a number, so a live edit type-checks.
 export type LiveTuning = typeof TUNING;
@@ -99,7 +106,6 @@ export interface Tuning {
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
   readonly probability: OpenGroup & {
     readonly catchBySize: Table<Size>;
-    readonly moverShare: Table<ZoneId>;
     readonly needPayoffCard: number;
   };
   readonly seconds: OpenGroup & {
@@ -313,11 +319,11 @@ export type Encounter = {
 );
 
 // An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
-// pack, and locks lane input for seconds.minorStumble. zones limits it to those zones.
+// pack, and locks lane input for seconds.minorStumble. Each zone's weights set how often it
+// appears there.
 export interface MinorObstacle {
   readonly name: string;
   readonly shape: Shape;
-  readonly zones?: readonly ZoneId[];
 }
 
 export interface ForcedStop {
@@ -382,25 +388,55 @@ export interface Debuff {
   readonly name: string;
 }
 
+// Paws out of 5 on a fork's path card.
+export type Difficulty = 1 | 2 | 3 | 4 | 5;
+
 // How often each kind is drawn in a zone, relative to the others of its group. 0 keeps it out
 // of the zone; each group needs at least one kind above 0.
 export interface ZoneWeights {
+  readonly forcedStops: Readonly<Record<ForcedStopId, number>>;
+  readonly luckyFinds: Readonly<Record<LuckyEncounterId, number>>;
+  readonly minorObstacles: Readonly<Record<MinorObstacleId, number>>;
   readonly needSpots: Readonly<Record<NeedSpotId, number>>;
+  readonly obstacles: Readonly<Record<ObstacleEncounterId, number>>;
 }
 
 export interface Zone {
+  // The zone's name in its art keys, such as backdrop-<art>.
+  readonly art: string;
+  // Multiply the zone's counts, on top of the per-zone gains in counts: obstacles (minor ones
+  // too), tips and lucky finds.
+  readonly density: {
+    readonly luckyFinds: number;
+    readonly obstacles: number;
+    readonly tips: number;
+  };
+  readonly difficulty: Difficulty;
+  // The difficulty in words, as a path card shows it.
+  readonly difficultyName: string;
+  // Multiplies every dog's fee for the zone.
+  readonly fees: number;
   readonly id: string;
   // Hex colours from the art palette. The leash stands out against the zone's road.
   readonly leashColor: string;
+  // The share of the zone's squirrels, other dogs and minor obstacles that come as movers (a
+  // darting squirrel, a loose dog, or a ball or cyclist), from 0 to 1.
+  readonly moverShare: number;
   readonly name: string;
   readonly roadColor: string;
   readonly roadShadowColor: string;
+  // Multiplies the scroll speed, on top of multipliers.scrollSpeedGainPerZone.
+  readonly speed: number;
   readonly weights: ZoneWeights;
 }
 
 export interface World {
+  // The id of the zone every walk starts in.
+  readonly firstZone: string;
   readonly name: string;
-  // Walked in this order.
+  // How many zones a walk visits, none twice.
+  readonly walkLength: number;
+  // From easiest to hardest: a fork's paths keep this order, left to right.
   readonly zones: readonly [Zone, ...Zone[]];
 }
 
@@ -487,7 +523,7 @@ export interface Hint {
 export type Threshold = number | "all";
 
 // What earns an achievement. Run conditions are judged on one run as it is banked: zones it
-// finished (all: every zone of the world), zones it finished without a bump, dogs it set out
+// finished (all: every zone of a walk), zones it finished without a bump, dogs it set out
 // with, dollars it banked, and zones it finished with the debuff on. Profile conditions are
 // judged on the save after a run or a purchase: dogs, gear and dog slots owned (all: every
 // one in the data), finished walks with no owner firing you, times fired, distinct dogs that

@@ -6,6 +6,7 @@ import { SKIP_CARD_ART } from "../assets/cardArt";
 import {
   CARD_FRAME_KEY,
   cardFrameTag,
+  DIFFICULTY_KEY,
   encounterSpriteKey,
   forcedStopSpriteKey,
 } from "../assets/spriteKeys";
@@ -27,6 +28,7 @@ import { addPixelText, type FontRole } from "./pixelText";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
+import { tagFrame } from "./uiKit";
 
 export interface CardSceneData {
   // Called with the option's data index, or "skip"; the run decides what happens next.
@@ -81,10 +83,13 @@ function sourceSpriteKey(source: CardSource): string | undefined {
   }
 }
 
-// The option's illustration, or the Skip card's.
+// The option's illustration, or the Skip card's. A path card's is its zone's preview.
 function illustrationKey(option: OptionView | undefined): string {
   return option === undefined ? SKIP_CARD_ART : option.art;
 }
+
+// Under a fork's title, over its path cards.
+const FORK_SUBTITLE = "Pick the next zone";
 
 // Up to three cards over the dimmed road. The top bar and doghouses stay in view, and
 // the HUD marks the dogs the card affects. A disabled option is drawn in greys.
@@ -189,6 +194,8 @@ export class CardScene extends Scene {
         const names = view.affected.map((dog) => gameData.dogs[dog].name);
         return names.length === 0 ? "A stop on the way" : names.join(", ");
       }
+      case "fork":
+        return FORK_SUBTITLE;
       default:
         return "Pick one for the rest of the walk";
     }
@@ -313,8 +320,12 @@ export class CardScene extends Scene {
     this.enlarged = this.children.list.slice(before);
   }
 
+  // A path card's plaque shows its zone's fee multiplier instead of a cost.
   private costText(entry: Entry): string {
     const option = entry.option;
+    if (option?.path !== undefined) {
+      return `×${option.path.fees}`;
+    }
     if (option === undefined || option.cost === 0) {
       return "Free";
     }
@@ -403,16 +414,30 @@ export class CardScene extends Scene {
       }
     }
 
+    // A path card shows its zone's difficulty as paws, then in words.
+    const path = entry.option?.path;
+    let effectY = y + EFFECT.y;
+    if (path !== undefined) {
+      const paws = tagFrame(this, DIFFICULTY_KEY, String(path.difficulty));
+      if (paws !== undefined) {
+        const image = this.add.image(x + CARD.width / 2, effectY, DIFFICULTY_KEY, paws);
+        image.setOrigin(0.5, 0);
+        effectY += image.height + 4;
+      }
+    }
+
     // The effect at 2x where it fits the card, else at 1x; holding the card shows it larger.
-    const text = entry.option?.text ?? "Poop bags: walk on, nothing happens.";
+    const text =
+      path?.difficultyName ?? entry.option?.text ?? "Poop bags: walk on, nothing happens.";
     const effect = this.centered(
       x + EFFECT.x + EFFECT.width / 2,
-      y + EFFECT.y,
+      effectY,
       text,
       grey ? PALETTE.slate : PALETTE.plum,
       { maxWidth: EFFECT.width / 2, scale: 2 },
     );
-    if (effect.height > EFFECT.height) {
+    // A word too long to wrap, such as a difficulty, is wider than its wrap width.
+    if (effect.height > EFFECT.height || effect.width > EFFECT.width) {
       effect.setScale(1).setMaxWidth(EFFECT.width);
     }
 

@@ -10,6 +10,7 @@ import { UPGRADES } from "../data/upgrades";
 import type { RunState } from "../state/runState";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WORLD } from "../testing/world";
 import { isNeedUrgent, meetNeedAt, nextNeedMoment, stepNeeds } from "./needs";
 
 // Urgent after 100s for a calm dog, 70s steady and 45s hyper; wrong 20s after that.
@@ -32,6 +33,7 @@ const data = {
     },
   },
   upgrades: UPGRADES,
+  world: TEST_WORLD,
 };
 // A draw above the payoff chance meets the need plainly; one below opens its card.
 const plain = () => 0.9;

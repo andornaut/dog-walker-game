@@ -25,7 +25,7 @@ import {
 
 export type PullData = Pick<
   GameData,
-  "dogs" | "encounters" | "minorObstacles" | "needSpots" | "tuning"
+  "dogs" | "encounters" | "minorObstacles" | "needSpots" | "tuning" | "world"
 >;
 export type PullGeometry = Pick<RoadGeometry, "laneCount" | "packBand" | "roadTop">;
 

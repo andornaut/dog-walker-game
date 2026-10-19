@@ -8,7 +8,9 @@ export interface RunSetupLimits<DogId extends string, GearId extends string> {
   // Former dog ids and the id each one is now.
   readonly renamedDogIds: ReadonlyMap<string, DogId>;
   readonly speed: { readonly max: number; readonly min: number };
+  // The zones a walk visits.
   readonly zoneCount: number;
+  readonly zoneIds: readonly string[];
 }
 
 // Optional fields are overrides: absent means the run uses its normal value. gear null means
@@ -18,6 +20,9 @@ export interface RunSetup<DogId extends string = string, GearId extends string =
   readonly gear?: GearId | null;
   readonly money?: number;
   readonly pack?: readonly DogId[];
+  // The zones walked from the first up to the starting zone, by id; at least zone of them.
+  // Without it, a later start walked the pre-fork route.
+  readonly route?: readonly string[];
   readonly seed: number;
   // Multiplies the road's scroll speed.
   readonly speed: number;
@@ -39,7 +44,7 @@ export const MAX_SEED = 0xffffffff;
 
 export const NO_GEAR = "none";
 
-const PARAM_NAMES = ["dev", "gear", "money", "pack", "seed", "speed", "zone"] as const;
+const PARAM_NAMES = ["dev", "gear", "money", "pack", "route", "seed", "speed", "zone"] as const;
 type ParamName = (typeof PARAM_NAMES)[number];
 
 const DIGITS = /^\d+$/;
@@ -149,6 +154,17 @@ export function parseRunSetup<DogId extends string, GearId extends string>(
     }
     return value === "0" ? false : invalid("dev", value, "1 or 0");
   });
+  const startZone = zone ?? 1;
+  const route = read("route", (value) => {
+    const ids = value === "" ? [] : value.split(",");
+    const expected = `${startZone} to ${limits.zoneCount} different zone ids`;
+    if (ids.some((id) => !includes(limits.zoneIds, id))) {
+      return invalid("route", value, `known zone ids, not ${ids.join(", ")}`);
+    }
+    return ids.length < startZone || ids.length > limits.zoneCount || new Set(ids).size < ids.length
+      ? invalid("route", value, expected)
+      : ids;
+  });
 
   return {
     notices,
@@ -157,6 +173,7 @@ export function parseRunSetup<DogId extends string, GearId extends string>(
       ...(gear === undefined ? {} : { gear }),
       ...(money === undefined ? {} : { money }),
       ...(pack === undefined ? {} : { pack }),
+      ...(route === undefined ? {} : { route }),
       seed: seed ?? newSeed(),
       speed: speed ?? 1,
       zone: zone ?? 1,
@@ -177,6 +194,9 @@ export function runSetupToQuery(setup: RunSetup): string {
   }
   if (setup.zone !== 1) {
     parts.push(`zone=${setup.zone}`);
+  }
+  if (setup.route !== undefined) {
+    parts.push(`route=${setup.route.map(encodeURIComponent).join(",")}`);
   }
   if (setup.money !== undefined) {
     parts.push(`money=${setup.money}`);

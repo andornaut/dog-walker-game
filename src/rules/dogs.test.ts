@@ -41,9 +41,11 @@ describe("dog stats", () => {
 });
 
 describe("zoneStats", () => {
+  const plain = { density: { luckyFinds: 1, obstacles: 1, tips: 1 }, speed: 1 };
+
   it("raises the speed per zone, so the same distance takes less time", () => {
-    const first = zoneStats(TEST_TUNING, 0);
-    const fourth = zoneStats(TEST_TUNING, 3);
+    const first = zoneStats(TEST_TUNING, plain, 0);
+    const fourth = zoneStats(TEST_TUNING, plain, 3);
     expect(first.scrollSpeed).toBe(80);
     expect(fourth.scrollSpeed).toBeCloseTo(80 * 1.6);
     expect(first.duration).toBe(240);
@@ -52,9 +54,22 @@ describe("zoneStats", () => {
 
   it("adds obstacles and tips per later zone", () => {
     const { counts } = TEST_TUNING;
-    expect(zoneStats(TEST_TUNING, 2).obstacles).toBe(
+    expect(zoneStats(TEST_TUNING, plain, 2).obstacles).toBe(
       counts.obstaclesFirstZone + 2 * counts.obstaclesGainPerZone,
     );
-    expect(zoneStats(TEST_TUNING, 2).tips).toBe(counts.tipsFirstZone + 2 * counts.tipsGainPerZone);
+    expect(zoneStats(TEST_TUNING, plain, 2).tips).toBe(
+      counts.tipsFirstZone + 2 * counts.tipsGainPerZone,
+    );
+  });
+
+  it("multiplies the speed and the counts by the zone's own, rounding the counts", () => {
+    const { counts } = TEST_TUNING;
+    const busy = { density: { luckyFinds: 2, obstacles: 0.5, tips: 1.5 }, speed: 1.25 };
+    const stats = zoneStats(TEST_TUNING, busy, 0);
+    expect(stats.scrollSpeed).toBe(80 * 1.25);
+    expect(stats.duration).toBe(240 / 1.25);
+    expect(stats.obstacles).toBe(Math.round(counts.obstaclesFirstZone * 0.5));
+    expect(stats.tips).toBe(Math.round(counts.tipsFirstZone * 1.5));
+    expect(stats.luckyEncounters).toBe(counts.luckyEncountersPerZone * 2);
   });
 });

@@ -23,6 +23,7 @@ const midRun: RunState = {
   ...start,
   money: cents(4_250),
   pack: [defined(start.pack[0]), { dog: "duchess", status: "fired", zoneIndex: 1 }],
+  route: ["street", "pawsPromenade", "park"],
   zoneIndex: 2,
 };
 
@@ -35,6 +36,7 @@ describe("checkpointOf", () => {
         { fired: true, id: "duchess", zonesFinished: 1 },
       ],
       earnedCents: 4_250,
+      route: ["street", "pawsPromenade", "park"],
       zonesFinished: 2,
     });
   });
@@ -71,6 +73,7 @@ describe("runResultOf", () => {
       ],
       earnedCents: 4_250,
       outcome: "finished",
+      route: ["street", "pawsPromenade", "park"],
       zone: 4,
     });
   });

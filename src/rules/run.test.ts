@@ -2,12 +2,14 @@ import { describe, expect, it } from "vitest";
 
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
+import type { ZoneId } from "../data/types";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WORLD } from "../testing/world";
 import { fireOwnersAtZero, payZoneFees, tipValue } from "./run";
 import { cents } from "./units";
 
-const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING };
+const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING, world: TEST_WORLD };
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
   { by: "bigTipperTip", operation: "multiply", stat: "tipValue" },
@@ -70,6 +72,29 @@ describe("payZoneFees", () => {
     expect(changes).toEqual([
       { amount: 1000, causes: [{ amount: 1000, kind: "fee" }], dog: "duchess", kind: "money" },
       { amount: 1300, causes: [{ amount: 1300, kind: "fee" }], dog: "pierre", kind: "money" },
+    ]);
+  });
+
+  it("multiplies the fee by the zone's fee multiplier, and names the zone as a cause", () => {
+    const [first, ...rest] = TEST_WORLD.zones;
+    const world = {
+      ...TEST_WORLD,
+      zones: [{ ...first, fees: 1.5 }, ...rest] as typeof TEST_WORLD.zones,
+    };
+    const run = testState({ duchess: 5 }, { route: [first.id as ZoneId] });
+    const { changes, state } = payZoneFees({ ...data, world }, run);
+    expect(state.money).toBe(1500);
+    expect(state.feesEarned).toEqual({ duchess: 1500 });
+    expect(changes).toEqual([
+      {
+        amount: 1500,
+        causes: [
+          { amount: 1000, kind: "fee" },
+          { amount: 500, kind: "zone", zone: first.name },
+        ],
+        dog: "duchess",
+        kind: "money",
+      },
     ]);
   });
 

@@ -186,6 +186,7 @@ describe("lastWalkLine", () => {
     earnedCents: cents(6_400),
     firings: [],
     outcome: "wentHome",
+    route: ["street", "park"],
     zonesFinished: 1,
   };
 
@@ -202,9 +203,15 @@ describe("lastWalkLine", () => {
     expect(lastWalkLine(data, fired)).toBe("+$64. Jesse fired you on Woof Way.");
   });
 
-  it("says a finished walk walked the whole world", () => {
+  it("names a zone the walk never picked as the world", () => {
+    expect(lastWalkLine(data, { ...walk, route: ["street"] })).toBe(
+      "+$64. Headed home from Maple Street.",
+    );
+  });
+
+  it("counts the zones a finished walk walked", () => {
     expect(lastWalkLine(data, { ...walk, outcome: "finished", zonesFinished: 4 })).toBe(
-      "+$64. Walked all of Maple Street.",
+      "+$64. Walked 4 zones of Maple Street.",
     );
   });
 });

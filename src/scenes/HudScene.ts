@@ -1,13 +1,18 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../arrays";
 import { statusIconKey } from "../assets/iconKeys";
-import { dogFaceKey, doghouseTag, ownerFaceKey, zoneIconKey } from "../assets/spriteKeys";
+import {
+  dogFaceKey,
+  doghouseTag,
+  ownerFaceKey,
+  ZONE_PIPS_KEY,
+  zoneIconKey,
+} from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
-import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
+import { type ChangeLabel, pipLook, wholeDollars, zonePips } from "../hud/hudView";
 import { bubbleX, downTail } from "../hud/moments";
 import {
   moveStripPress,
@@ -32,6 +37,7 @@ import {
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
+import { currentZone, walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { type Cents, read } from "../rules/units";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
@@ -40,7 +46,7 @@ import { AchievementToasts } from "./achievementToast";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { listenOnePress } from "./onePress";
-import { PALETTE } from "./palette";
+import { colorFromHex, PALETTE } from "./palette";
 import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
 import { isMuted, setMuted } from "./profileStore";
 import {
@@ -64,7 +70,7 @@ const PIP = {
   gap: 3,
   height: 8,
   width: 18,
-  x: ZONE_WELL.right + 3 - gameData.world.zones.length * 21,
+  x: ZONE_WELL.right + 3 - walkLength(gameData) * 21,
   y: TOP_BAR.zone.y + 17,
 };
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -167,8 +173,8 @@ export class HudScene extends Scene {
       font: "title",
       originX: 1,
     });
-    this.pips = gameData.world.zones.map((_, i) =>
-      this.add.sprite(PIP.x + i * (PIP.width + PIP.gap), PIP.y, "ui-zone-pips").setOrigin(0),
+    this.pips = Array.from({ length: walkLength(gameData) }, (_, i) =>
+      this.add.sprite(PIP.x + i * (PIP.width + PIP.gap), PIP.y, ZONE_PIPS_KEY).setOrigin(0),
     );
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
@@ -370,6 +376,7 @@ export class HudScene extends Scene {
       money: this.shownMoney(view.run.money),
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
+      route: view.run.route,
       statuses: statusesKey(view.statuses),
       treats: view.run.treats,
       zone: view.run.zoneIndex,
@@ -402,8 +409,7 @@ export class HudScene extends Scene {
         `${run.treats}/${read(gameData.tuning, "counts", "treatCarryMax")}`,
       );
     }
-    const zones = gameData.world.zones;
-    const zone = itemAt(zones, Math.min(run.zoneIndex, zones.length - 1));
+    const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);
       const icon = zoneIconKey(zone);
@@ -411,18 +417,25 @@ export class HudScene extends Scene {
       this.zoneIcon?.setVisible(this.textures.exists(icon));
       this.zoneIcon?.setX(ZONE_WELL.right - Math.ceil(this.zoneLabel.width) - 3);
     }
-    zonePips(zones.length, run.zoneIndex, view.zoneFraction).forEach(({ fill, state }, i) => {
+    const pips = zonePips(walkLength(gameData), run.route, run.zoneIndex, view.zoneFraction);
+    pips.forEach((zonePip, i) => {
       const x = PIP.x + i * (PIP.width + PIP.gap);
       const pip = this.pips[i];
-      if (pip !== undefined && this.textures.exists("ui-zone-pips")) {
-        playTag(pip, "ui-zone-pips", state);
+      const { tag, wellColor } = pipLook(gameData, zonePip);
+      if (pip !== undefined && this.textures.exists(ZONE_PIPS_KEY)) {
+        playTag(pip, ZONE_PIPS_KEY, tag);
       } else {
-        fillRect(g, state === "done" ? PALETTE.green : PALETTE.brown, { ...PIP, x });
+        fillRect(g, zonePip.state === "done" ? PALETTE.green : PALETTE.brown, { ...PIP, x });
       }
-      // The current pip's ink well fills with amber as the zone goes by.
-      if (state === "current") {
-        const width = Math.round(fill * (PIP.width - 4));
-        fillRect(g, PALETTE.amber, { height: PIP.height - 4, width, x: x + 2, y: PIP.y + 2 });
+      // The current pip's well, inside its 1px rim, fills as the zone goes by.
+      if (zonePip.state === "current" && wellColor !== null) {
+        const width = Math.round(zonePip.fill * (PIP.width - 2));
+        fillRect(g, colorFromHex(wellColor), {
+          height: PIP.height - 2,
+          width,
+          x: x + 1,
+          y: PIP.y + 1,
+        });
       }
     });
 

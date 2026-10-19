@@ -23,7 +23,7 @@ export function forcedStopSpriteKey(stop: ForcedStopId): string {
 }
 
 export const CARD_FRAME_KEY = "card-frame";
-export type CardFrameTag = "encounter" | "lucky" | "stop" | "upgrade";
+export type CardFrameTag = "encounter" | "lucky" | "route" | "stop" | "upgrade";
 
 // The card frame's colour comes from what opened the card.
 export function cardFrameTag(
@@ -35,6 +35,8 @@ export function cardFrameTag(
       return data.encounters[source.encounter].kind === "lucky" ? "lucky" : "encounter";
     case "forcedStop":
       return "stop";
+    case "fork":
+      return "route";
     case "need":
       return data.needCards[source.card].kind === "payoff" ? "lucky" : "encounter";
     default:
@@ -139,31 +141,46 @@ export function standsOnGround(key: string): boolean {
 // The skunk stands on its spray cloud, which is its hit box.
 export const SKUNK_CLOUD_KEY = "skunk-cloud";
 
-// Zone art is keyed by the zone's name in kebab case: "The Long Way Home" is the-long-way-home.
-export function zoneArtName(zone: Pick<Zone, "name">): string {
-  return zone.name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-|-$/g, "");
-}
+// Zone art is keyed by the zone's art: backdrop-woof-way, road-woof-way and so on.
+type ZoneArt = Pick<Zone, "art">;
 
 // The 360x150 neighbourhood behind the zone.
-export function backdropKey(zone: Pick<Zone, "name">): string {
-  return `backdrop-${zoneArtName(zone)}`;
+export function backdropKey(zone: ZoneArt): string {
+  return `backdrop-${zone.art}`;
 }
 
 // The zone's 280x64 road strip, which tiles vertically.
-export function roadTileKey(zone: Pick<Zone, "name">): string {
-  return `road-${zoneArtName(zone)}`;
+export function roadTileKey(zone: ZoneArt): string {
+  return `road-${zone.art}`;
 }
 
-// The 280x64 strip joining the previous zone's road to this one's, scrolled in once.
-export function roadStartKey(zone: Pick<Zone, "name">): string {
-  return `road-${zoneArtName(zone)}-start`;
+// The 280x64 strip scrolled in once at the zone's start: a cross-street crossing in its
+// bottom rows, which follows any zone's road, and the zone's own strip above it.
+export function roadStartKey(zone: ZoneArt): string {
+  return `road-${zone.art}-start`;
 }
 
-export function zoneIconKey(zone: Pick<Zone, "name">): string {
-  return `icon-zone-${zoneArtName(zone)}`;
+export function zoneIconKey(zone: ZoneArt): string {
+  return `icon-zone-${zone.art}`;
+}
+
+// The 75x56 preview of the zone on a fork's path card.
+export function cardZoneKey(zone: ZoneArt): string {
+  return `card-zone-${zone.art}`;
+}
+
+// The paws under the zone name on a path card, tagged 1 to 5 by difficulty.
+export const DIFFICULTY_KEY = "ui-difficulty";
+
+export const ZONE_PIPS_KEY = "ui-zone-pips";
+
+// A route pip's tag: todo for a zone not yet picked, else the zone's art, filled in the
+// zone's colour, with -done once the zone is finished.
+export function zonePipTag(zone: ZoneArt | null, done: boolean): string {
+  if (zone === null) {
+    return "todo";
+  }
+  return done ? `${zone.art}-done` : zone.art;
 }
 
 // Each mover's road sprite and the tag it plays while moving. Crossers face right.

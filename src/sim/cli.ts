@@ -2,7 +2,13 @@
 // Runs a matrix, prints its tables and, with --out, writes the rows as JSON.
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
-import { POLICY_IDS, type PolicyId } from "./policies";
+import {
+  DEFAULT_ROUTE_POLICY,
+  POLICY_IDS,
+  type PolicyId,
+  ROUTE_POLICY_IDS,
+  type RoutePolicyId,
+} from "./policies";
 import {
   DEFAULT_MATRIX,
   formatKindTable,
@@ -57,15 +63,18 @@ const presetLines = SKILL_PRESET_IDS.map((id) => {
 
 const USAGE = [
   "npm run simulate -- [--skill preset,...] [--hit percent,...] [--policy id,...]",
-  "                    [--runs N] [--seed N] [--out file]",
+  "                    [--route id,...] [--runs N] [--seed N] [--out file]",
   "",
-  "Plays whole runs on the real rules and data, one row per policy, player and pack.",
+  "Plays whole runs on the real rules and data, one row per policy, route, player and pack.",
   "",
   "  --skill   steering bots of these skill presets play the real walk loop, with pulls, chases",
   "            and movers, and their hit rates are measured (default: every preset)",
   "  --hit     instead or as well, players that hit each obstacle at these fixed rates and",
   "            collect tips, treats and lucky finds at 70%",
   `  --policy  card choice policies (default: ${POLICY_IDS.join(",")})`,
+  `  --route   the path taken at each fork, of ${ROUTE_POLICY_IDS.join(", ")}: straight is the`,
+  "            middle path, left the easiest and right the hardest",
+  `            (default: ${DEFAULT_ROUTE_POLICY})`,
   `  --runs    runs per row (default: ${DEFAULT_RUNS})`,
   `  --seed    the seed; the same seed gives the same rows (default: ${DEFAULT_SEED})`,
   "  --out     also write the matrix and rows as JSON to this file",
@@ -110,6 +119,16 @@ function parsePolicies(text: string): PolicyId[] {
       throw new Error(`--policy takes ${POLICY_IDS.join(", ")}, not ${id}`);
     }
     return policy;
+  });
+}
+
+function parseRoutes(text: string): RoutePolicyId[] {
+  return text.split(",").map((id) => {
+    const route = ROUTE_POLICY_IDS.find((candidate) => candidate === id);
+    if (route === undefined) {
+      throw new Error(`--route takes ${ROUTE_POLICY_IDS.join(", ")}, not ${id}`);
+    }
+    return route;
   });
 }
 
@@ -161,6 +180,9 @@ function parseArgs(args: readonly string[]): Options {
         break;
       case "--policy":
         matrix = { ...matrix, policies: parsePolicies(value) };
+        break;
+      case "--route":
+        matrix = { ...matrix, routes: parseRoutes(value) };
         break;
       case "--runs":
         runs = parseWhole(flag, 1, value);

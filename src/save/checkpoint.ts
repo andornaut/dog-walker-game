@@ -1,4 +1,4 @@
-import type { DogId } from "../data/types";
+import type { DogId, ZoneId } from "../data/types";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
 import { addCents, type Cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
@@ -13,6 +13,8 @@ export interface RunResult {
   dogs: DogRun[];
   earnedCents: Cents;
   outcome: EndReason;
+  // The zones the run walked, in order, the one it ended in included.
+  route: ZoneId[];
   zone: number;
 }
 
@@ -34,6 +36,7 @@ interface BankedRun {
   dogs: DogRun[];
   earnedCents: Cents;
   outcome: EndReason;
+  route: ZoneId[];
   zonesFinished: number;
 }
 
@@ -62,6 +65,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
     earnedCents,
     firings: firedBy,
     outcome,
+    route: run.route,
     zonesFinished,
   };
   // A walk counts as finished for the totals only when a dev start skipped no zone.
@@ -114,6 +118,7 @@ export function bankCheckpoint(context: AwardContext, save: SaveDocument): SaveD
       dogs: checkpoint.dogs,
       earnedCents: checkpoint.earnedCents,
       outcome: "wentHome",
+      route: checkpoint.route,
       zonesFinished: checkpoint.zonesFinished,
     },
     save,
@@ -133,6 +138,7 @@ export function recordRunEnd(
       dogs: result.dogs,
       earnedCents: result.earnedCents,
       outcome: result.outcome,
+      route: result.route,
       zonesFinished: zonesFinishedBy(result),
     },
     save,

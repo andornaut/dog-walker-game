@@ -13,6 +13,7 @@ const GREEN = 0x63c74d;
 const DARK_GREEN = 0x3e8948;
 const FOREST = 0x265c42;
 const GREY = 0x8b9bb4;
+const SLATE = 0x5a6988;
 const LIGHT_GREY = 0xc0cbdc;
 const OCHRE = 0xd77643;
 const RUST = 0xbe4a2f;
@@ -35,6 +36,8 @@ const MOWN_MIN_PX = 4;
 const BAND_SCALE = 0.5;
 
 export interface Verge {
+  // A curb that would match the road's grey is darker, so the road's edge still reads.
+  readonly curbColor: number;
   // Where the curb ends and the sidewalk or paving ends, across; the lawn lies beyond.
   readonly curbTo: number;
   readonly walkTo: number;
@@ -45,10 +48,25 @@ export interface Verge {
 }
 
 export const VERGES: Readonly<Record<ZoneId, Verge>> = {
-  homeStretch: { curbTo: CURB, lawn: "mown", leaves: true, walkTo: WALK },
-  park: { curbTo: ROAD_HALF, lawn: "rough", leaves: false, walkTo: ROAD_HALF },
-  shops: { curbTo: CURB, lawn: "none", leaves: false, walkTo: Number.POSITIVE_INFINITY },
-  street: { curbTo: CURB, lawn: "mown", leaves: false, walkTo: WALK },
+  homeStretch: { curbColor: GREY, curbTo: CURB, lawn: "mown", leaves: true, walkTo: WALK },
+  park: { curbColor: GREY, curbTo: ROAD_HALF, lawn: "rough", leaves: false, walkTo: ROAD_HALF },
+  // A riverside path: paving straight off the road, no curb, then rough lawn.
+  pawsPromenade: {
+    curbColor: GREY,
+    curbTo: ROAD_HALF,
+    lawn: "rough",
+    leaves: false,
+    walkTo: WALK,
+  },
+  shops: {
+    curbColor: GREY,
+    curbTo: CURB,
+    lawn: "none",
+    leaves: false,
+    walkTo: Number.POSITIVE_INFINITY,
+  },
+  snoozeCrescent: { curbColor: SLATE, curbTo: CURB, lawn: "mown", leaves: false, walkTo: WALK },
+  street: { curbColor: GREY, curbTo: CURB, lawn: "mown", leaves: false, walkTo: WALK },
 };
 
 // Whether a line every period along the road falls on this row: exactly one row shows each
@@ -83,7 +101,7 @@ export function mownAt(across: number, scale: number): boolean {
 // The verge's colour at across on a row of this scale, before seams, patches and marks.
 export function vergeBase(verge: Verge, across: number, scale: number): number {
   if (across < verge.curbTo) {
-    return GREY;
+    return verge.curbColor;
   }
   if (across < verge.walkTo) {
     return LIGHT_GREY;

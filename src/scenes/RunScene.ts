@@ -93,12 +93,14 @@ import {
   type Choice,
   type ChoiceOutcome,
   chooseOption,
+  offerFork,
   offerUpgrades,
   openCard,
   type QuipCue,
   quipLine,
 } from "../rules/choices";
 import { hintFor } from "../rules/hints";
+import { currentZone, walkLength, zoneAt } from "../rules/route";
 import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
 import { holdForFiring } from "../runner/firingStop";
@@ -353,7 +355,15 @@ export class RunScene extends Scene {
   private needSignals: NeedSignals | undefined;
   private pulls: Pulls = NO_PULLS;
   private random:
-    { cards: Random; needs: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
+    | {
+        cards: Random;
+        forks: Random;
+        needs: Random;
+        quips: Random;
+        rolls: Random;
+        scenery: Random;
+      }
+    | undefined;
   private replay: Replay | undefined;
   // The projected road, drawn a row at a time into pixels, then uploaded to its texture.
   private road: { pixels: Uint32Array; raster: RoadRaster; upload: () => void } | undefined;
@@ -386,19 +396,22 @@ export class RunScene extends Scene {
     this.setup = setup;
     this.random = {
       cards: randomStream(setup.seed, "cards"),
+      forks: randomStream(setup.seed, "forks"),
       needs: randomStream(setup.seed, "needs"),
       quips: randomStream(setup.seed, "quips"),
       rolls: randomStream(setup.seed, "rolls"),
       scenery: randomStream(setup.seed, "scenery"),
     };
     const picked = this.pickedLoadout(setup);
-    // The log names the pack and gear walked, so its replay does not read the saved loadout.
+    const run = withSetupStart(setup, newRun(gameData, picked.dogSlots, picked.loadout));
+    // The log names the pack and gear walked and a later start's route, so its replay does
+    // not read the saved loadout. Each fork's path is a card choice in its events.
     this.inputLog = startInputLog({
       ...setup,
       gear: picked.loadout.gear,
       pack: picked.loadout.dogs,
+      ...(setup.zone === 1 ? {} : { route: run.route }),
     });
-    const run = withSetupStart(setup, newRun(gameData, picked.dogSlots, picked.loadout));
     this.walk = this.planned({ road: startRoad(LANE_COUNT, setup.speed), run });
 
     this.settings = currentSettings(this);
@@ -1087,8 +1100,8 @@ export class RunScene extends Scene {
     }
   }
 
-  // Pays the zone's fees, saves a checkpoint, then offers the upgrades before the next zone
-  // is planned.
+  // Pays the zone's fees, saves a checkpoint, then offers the upgrades and the fork before
+  // the next zone is planned.
   private endZone(): void {
     const walk = this.walk;
     if (walk === undefined) {
@@ -1101,10 +1114,13 @@ export class RunScene extends Scene {
       this.distanceBeforeZone += zoneLength(gameData, walk.run);
       void checkpointRun(this, checkpointOf(gameData, run));
       this.needsZonePlan = true;
-      this.cardQueue.push({
-        kind: "upgradeOffer",
-        offered: offerUpgrades(gameData, this.random?.cards ?? Math.random, run),
-      });
+      this.cardQueue.push(
+        {
+          kind: "upgradeOffer",
+          offered: offerUpgrades(gameData, this.random?.cards ?? Math.random, run),
+        },
+        offerFork(gameData, this.random?.forks ?? Math.random, run),
+      );
     }
     this.continueWalk();
   }
@@ -1119,7 +1135,7 @@ export class RunScene extends Scene {
         : [{ amount: fee.amount, dog: fee.dog, text: amountText("money", fee.amount) }],
     );
     this.events.emit(PAYOUT_EVENT, cues);
-    if (run.zoneIndex >= gameData.world.zones.length - 1) {
+    if (run.zoneIndex >= walkLength(gameData) - 1) {
       this.endMoments.payoutMs = payoutMs(payoutFlights(cues, run.pack, this.reducedMotion()));
     }
   }
@@ -1148,7 +1164,7 @@ export class RunScene extends Scene {
   }
 
   private cardHints(source: CardSource): void {
-    if (source.kind === "upgradeOffer") {
+    if (source.kind === "upgradeOffer" || source.kind === "fork") {
       return;
     }
     if (source.kind === "forcedStop") {
@@ -1420,8 +1436,7 @@ export class RunScene extends Scene {
   }
 
   private zone(run: RunState): Zone {
-    const zones = gameData.world.zones;
-    return itemAt(zones, Math.min(run.zoneIndex, zones.length - 1));
+    return currentZone(gameData, run);
   }
 
   // While a card or the pause menu holds the walk, the road's sprites stand still.
@@ -1570,7 +1585,10 @@ export class RunScene extends Scene {
       return;
     }
     this.drawnRoad = drawn;
-    const previous = gameData.world.zones[walk.run.zoneIndex - 1];
+    const previous =
+      walk.run.zoneIndex === 0
+        ? undefined
+        : zoneAt(gameData, walk.run.route, walk.run.zoneIndex - 1);
     const startKey = roadStartKey(zone);
     const transition =
       previous !== undefined &&

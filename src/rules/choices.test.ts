@@ -12,11 +12,14 @@ import { UPGRADES } from "../data/upgrades";
 import { type CardSource, newRun, type RunState, type UpgradeOffer } from "../state/runState";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WORLD } from "../testing/world";
 import {
   applyInstantEncounter,
   cardFor,
   type Choice,
   chooseOption,
+  FORK_TITLE,
+  offerFork,
   offerUpgrades,
   openCard,
   quipLine,
@@ -35,6 +38,7 @@ const data = {
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   upgrades: UPGRADES,
+  world: TEST_WORLD,
 };
 
 const encounter = (id: EncounterId, affected: DogId[]): CardSource => ({
@@ -406,5 +410,65 @@ describe("need cards", () => {
     expect(sniffed.state.needSeconds).toEqual({ duchess: 30, koda: 30, zippy: 0 });
     const petted = choose(state, { kind: "forcedStop", stop: "kidWantsToPet" }, 0);
     expect(petted.state.needSeconds).toEqual({ duchess: 0, koda: 30, zippy: 30 });
+  });
+});
+
+describe("a fork", () => {
+  const source: CardSource = { kind: "fork", paths: ["snoozeCrescent", "shops", "homeStretch"] };
+  const afterZone = testState({ koda: 4 }, { route: ["street"], zoneIndex: 1 });
+
+  it("shows a free path card per path with its zone, difficulty and fee multiplier", () => {
+    const card = cardFor(data, openCard(source, afterZone), source);
+    expect(card.title).toBe(FORK_TITLE);
+    expect(card.affected).toEqual([]);
+    expect(card.skip).toBe(false);
+    expect(
+      card.options.map(({ availability, cost, label, path }) => ({
+        availability,
+        cost,
+        label,
+        path,
+      })),
+    ).toEqual(
+      ["snoozeCrescent", "shops", "homeStretch"].map((id, index) => {
+        const zone = TEST_WORLD.zones.find((candidate) => candidate.id === id);
+        return {
+          availability: { enabled: true },
+          cost: 0,
+          label: zone?.name,
+          path: {
+            difficulty: zone?.difficulty,
+            difficultyName: zone?.difficultyName,
+            fees: zone?.fees,
+            side: ["left", "straight", "right"][index],
+            zone: id,
+          },
+        };
+      }),
+    );
+    expect(card.options[0]?.art).toBe("card-zone-snooze-crescent");
+  });
+
+  it("adds the chosen path's zone to the route and walks on", () => {
+    const opened = openCard(source, afterZone);
+    const outcome = chooseOption(data, () => 0, opened, cardFor(data, opened, source), 2);
+    expect(outcome.state.route).toEqual(["street", "homeStretch"]);
+    expect(outcome.state.phase).toEqual({ kind: "walking" });
+    expect(outcome.moneyDelta).toBe(0);
+  });
+
+  it("refuses a path the fork does not have", () => {
+    const opened = openCard(source, afterZone);
+    const card = cardFor(data, opened, source);
+    expect(() => chooseOption(data, () => 0, opened, card, 3)).toThrow(RangeError);
+    expect(() => chooseOption(data, () => 0, opened, card, "skip")).toThrow(RangeError);
+  });
+
+  it("offers only zones the route has not walked", () => {
+    const walked = testState({ koda: 4 }, { route: ["street", "park", "shops"], zoneIndex: 3 });
+    expect(offerFork(data, () => 0, walked)).toEqual({
+      kind: "fork",
+      paths: ["snoozeCrescent", "pawsPromenade", "homeStretch"],
+    });
   });
 });

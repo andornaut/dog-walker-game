@@ -5,7 +5,7 @@ import type {
   GameData,
   MinorObstacleId,
   NeedSpotId,
-  ZoneId,
+  ObstacleEncounterId,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countBump, countDebuffZones } from "../rules/achievements";
@@ -14,8 +14,9 @@ import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd } from "../rules/durations";
 import { affectedDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
+import { currentZone, walkLength } from "../rules/route";
 import { minorBump, payZoneFees, tipValue } from "../rules/run";
-import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
+import { addCents, type Pixels, pixels, read } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
@@ -217,21 +218,24 @@ export function laneMotionConfig(
   return { laneCount, moveDuration: read(data.tuning, "seconds", "laneMove") };
 }
 
-// Pixels per second in the run's current zone, read from the live tuning.
-export function walkScrollSpeed(data: Pick<GameData, "tuning">, run: RunState): Pixels {
-  return zoneStats(data.tuning, run.zoneIndex).scrollSpeed;
+// Pixels per second in the run's current zone, read from the live data.
+export function walkScrollSpeed(data: Pick<GameData, "tuning" | "world">, run: RunState): Pixels {
+  return zoneStats(data.tuning, currentZone(data, run), run.zoneIndex).scrollSpeed;
 }
 
-// The minor obstacles that may appear in the run's current zone.
-export function minorObstaclesIn(
-  data: Pick<GameData, "minorObstacles" | "world">,
-  zoneIndex: number,
-): MinorObstacleId[] {
-  const zone = data.world.zones[zoneIndex]?.id;
-  return (Object.keys(data.minorObstacles) as MinorObstacleId[]).filter((id) => {
-    const { zones } = data.minorObstacles[id] as { zones?: readonly string[] };
-    return zones === undefined || (zone !== undefined && zones.includes(zone));
-  });
+// The entries of a zone's weights above 0, in the data's order.
+function positiveWeights<Id extends string>(weights: Readonly<Record<Id, number>>): [Id, number][] {
+  return (Object.keys(weights) as Id[])
+    .map((id): [Id, number] => [id, weights[id]])
+    .filter(([, weight]) => weight > 0);
+}
+
+// The minor obstacles that may appear in the run's current zone, with their weights.
+export function minorObstacleWeights(
+  data: Pick<GameData, "world">,
+  run: Pick<RunState, "route" | "zoneIndex">,
+): [MinorObstacleId, number][] {
+  return positiveWeights(currentZone(data, run).weights.minorObstacles);
 }
 
 // Every zone is the distance the base speed covers in zoneAtBaseSpeed, before upgrades.
@@ -257,21 +261,23 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
   };
 }
 
-// The chance weights of the obstacles: each small dog draws other dogs more often and
-// each big dog less.
+// The chance weights of the obstacles: the current zone's, where each small dog draws other
+// dogs more often and each big dog less.
 export function obstacleWeights(
-  data: Pick<GameData, "dogs" | "encounters" | "tuning">,
+  data: Pick<GameData, "dogs" | "tuning" | "world">,
   run: RunState,
-): [EncounterId, number][] {
+): [ObstacleEncounterId, number][] {
   const sizes = packDogs(run).map((dog) => data.dogs[dog].size);
   const count = (size: string) => sizes.filter((candidate) => candidate === size).length;
   const otherDog =
     1 +
     count("small") * read(data.tuning, "multipliers", "otherDogChangePerSmallDog") +
     count("big") * read(data.tuning, "multipliers", "otherDogChangePerBigDog");
-  return (Object.keys(data.encounters) as EncounterId[])
-    .filter((id) => data.encounters[id].kind === "obstacle")
-    .map((id): [EncounterId, number] => [id, id === "otherDog" ? Math.max(0, otherDog) : 1]);
+  const { obstacles } = currentZone(data, run).weights;
+  return positiveWeights({
+    ...obstacles,
+    otherDog: obstacles.otherDog * Math.max(0, otherDog),
+  });
 }
 
 export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, number])[]): T {
@@ -288,14 +294,6 @@ export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, 
     throw new Error("pickWeighted needs at least one entry");
   }
   return last[0];
-}
-
-// The share of the zone's squirrels, other dogs and minor obstacles that come as movers.
-export function moverShare(data: Pick<GameData, "tuning" | "world">, zoneIndex: number): number {
-  const zone = data.world.zones[zoneIndex];
-  return zone === undefined
-    ? 0
-    : readTable(data.tuning, "probability", "moverShare", zone.id as ZoneId);
 }
 
 // The mover a drawn spawn comes as, at a chance of share: a squirrel darts, an other dog runs
@@ -340,44 +338,40 @@ export function moverSpec(data: Pick<GameData, "tuning">, mover: MoverKind): Mov
 // The zone's need spots, drawn by the zone's weights from the spots that meet a need in the
 // pack, so none is wasted on a need nobody has.
 function needSpotsDrawn(data: WalkData, random: Random, run: RunState): NeedSpotId[] {
-  const zone = data.world.zones[run.zoneIndex];
   const needs = new Set(packDogs(run).map((dog) => data.dogs[dog].need));
-  const entries = (Object.keys(data.needSpots) as NeedSpotId[])
-    .map((spot): [NeedSpotId, number] => [spot, zone?.weights.needSpots[spot] ?? 0])
-    .filter(([spot, weight]) => weight > 0 && needs.has(data.needSpots[spot].need));
+  const entries = positiveWeights(currentZone(data, run).weights.needSpots).filter(([spot]) =>
+    needs.has(data.needSpots[spot].need),
+  );
   const count = read(data.tuning, "counts", "needSpotsPerZone");
   return entries.length === 0
     ? []
     : Array.from({ length: count }, () => pickWeighted(random, entries));
 }
 
-// Each obstacle kind is drawn first, weighted, so its shape is known when it is placed; a
-// zone's minor obstacles are drawn evenly from those allowed in it. Rush hour and the like
-// scale both counts. Then each squirrel, other dog and minor obstacle comes as a mover at the
-// zone's mover share.
+// Each obstacle, minor obstacle, lucky find and need spot is drawn first by the zone's
+// weights, so its shape is known when it is placed. Rush hour and the like scale both obstacle
+// counts. Then each squirrel, other dog and minor obstacle comes as a mover at the zone's mover
+// share.
 function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
-  const stats = zoneStats(data.tuning, run.zoneIndex);
+  const zone = currentZone(data, run);
+  const stats = zoneStats(data.tuning, zone, run.zoneIndex);
   const scaled = (stat: "obstacleSpawns" | "tipSpawns", base: number) =>
     Math.round(modifiedStat(data.tuning, run.modifiers, stat, base));
-  const weights = obstacleWeights(data, run);
-  const minors = minorObstaclesIn(data, run.zoneIndex);
-  const lucky = (Object.keys(data.encounters) as EncounterId[]).filter(
-    (id) => data.encounters[id].kind === "lucky",
-  );
-  const drawn = <Kind extends WalkItemKind>(count: number, draw: () => Kind) =>
-    Array.from({ length: count }, draw);
+  const drawn = <Kind extends WalkItemKind>(
+    count: number,
+    weights: readonly (readonly [Kind, number])[],
+  ) =>
+    weights.length === 0 ? [] : Array.from({ length: count }, () => pickWeighted(random, weights));
   const kinds: WalkItemKind[] = [
-    ...drawn(scaled("obstacleSpawns", stats.obstacles), () => pickWeighted(random, weights)),
-    ...(minors.length === 0
-      ? []
-      : drawn(scaled("obstacleSpawns", stats.minorObstacles), () => randomPick(random, minors))),
-    ...drawn(stats.luckyEncounters, () => randomPick(random, lucky)),
+    ...drawn(scaled("obstacleSpawns", stats.obstacles), obstacleWeights(data, run)),
+    ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),
+    ...drawn(stats.luckyEncounters, positiveWeights(zone.weights.luckyFinds)),
     ...needSpotsDrawn(data, random, run),
   ];
   const quotas = new Map<WalkItemKind, number>();
   const movers = new Map<MoverKind, number>();
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
-  const share = moverShare(data, run.zoneIndex);
+  const share = zone.moverShare;
   for (const kind of kinds) {
     const mover = share > 0 ? moverFor(data, random, share, kind) : null;
     if (mover === null) {
@@ -405,7 +399,8 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
 }
 
 // Plans the run's current zone: its spawns, each obstacle and lucky encounter drawn, and
-// its forced stop, drawn from those not yet met this run and placed midway between two
+// its forced stop, drawn by the zone's weights from those not yet met this run (from all of
+// them once every one has been met) and placed midway between two
 // rows in the middle third of the zone.
 export function planZone(
   data: WalkData,
@@ -440,9 +435,9 @@ export function planZone(
     zoneLength: length,
   });
 
-  const stops = Object.keys(data.forcedStops) as ForcedStopId[];
-  const unseen = stops.filter((stop) => !road.forcedStopsSeen.includes(stop));
-  const stop = randomPick(random, unseen.length > 0 ? unseen : stops);
+  const stops = positiveWeights(currentZone(data, run).weights.forcedStops);
+  const unseen = stops.filter(([stop]) => !road.forcedStopsSeen.includes(stop));
+  const stop = pickWeighted(random, unseen.length > 0 ? unseen : stops);
   // Rows are at spacing x 1..rows; the stop goes after row `after`, before the next row.
   const rows = Math.max(2, Math.floor(length / spacing) - 1);
   const first = Math.floor(rows / 3);
@@ -749,13 +744,14 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
   };
 }
 
-// The end of a zone: every dog still walking is paid, each debuff on counts the zone, the
-// effects that lasted the zone expire, then the run moves to the next zone with every need
-// starting again, or ends once the last zone is done.
+// The end of a zone: every dog still walking is paid at the zone's fee multiplier, each debuff
+// on counts the zone, the effects that lasted the zone expire, then the run moves to the next
+// position, whose zone the fork picks, with every need starting again, or ends once the walk's
+// last zone is done.
 export function finishZone(data: WalkData, run: RunState): ZoneEnd {
   const { changes, state: paid } = payZoneFees(data, countDebuffZones(run));
   const expired = expireAtZoneEnd(run.zoneIndex, paid);
-  if (run.zoneIndex >= data.world.zones.length - 1) {
+  if (run.zoneIndex >= walkLength(data) - 1) {
     return { fees: changes, run: { ...expired, phase: { kind: "ended", reason: "finished" } } };
   }
   return {

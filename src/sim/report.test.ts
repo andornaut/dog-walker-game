@@ -30,6 +30,7 @@ vi.mock("./simulate", async (importOriginal) => {
     moneyShare: 0,
     movers: { ball: { met: 2, touched: 1 } },
     pullsMoved: 0,
+    route: [],
     tips: cents(0),
     upgrades: [],
     zones: [],

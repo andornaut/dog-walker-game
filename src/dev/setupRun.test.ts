@@ -36,12 +36,22 @@ describe("loadoutFor", () => {
 describe("withSetupStart", () => {
   const state = testState({ koda: 3 });
 
-  it("keeps the run's money and moves it to the setup's zone", () => {
+  it("keeps the run's money and moves it to the setup's zone, on the pre-fork route", () => {
     expect(withSetupStart({ ...setup, zone: 3 }, state)).toEqual({
       ...state,
       firstZone: 2,
+      route: ["street", "park", "shops"],
       zoneIndex: 2,
     });
+  });
+
+  it("keeps the run's own route from the first zone", () => {
+    expect(withSetupStart(setup, state).route).toEqual(state.route);
+  });
+
+  it("walks the setup's route up to its zone", () => {
+    const route = ["street", "pawsPromenade", "snoozeCrescent", "park"];
+    expect(withSetupStart({ ...setup, route, zone: 3 }, state).route).toEqual(route.slice(0, 3));
   });
 
   it("replaces the run's money with the setup's", () => {

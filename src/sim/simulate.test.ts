@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
 import { zoneFee } from "../rules/dogs";
+import { zoneAt } from "../rules/route";
+import { cents } from "../rules/units";
 import { seededRandom } from "../runner/random";
 import type { PackDogs } from "../state/runState";
 import type { PolicyId } from "./policies";
@@ -32,6 +34,7 @@ function config(overrides: Overrides = {}): SimConfig {
       treatRate: treatRate ?? DEFAULT_RATES.treatRate,
     },
     policy: "heartsUnlessLow",
+    route: "straight",
     ...rest,
   };
 }
@@ -70,10 +73,32 @@ describe("simulateRun", { timeout: 15_000 }, () => {
     const [result] = runs(1, { hitRate: 0, policy: "alwaysPay" });
 
     expect(result?.finished).toBe(true);
-    expect(result?.zonesCompleted).toBe(gameData.world.zones.length);
+    expect(result?.zonesCompleted).toBe(gameData.world.walkLength);
     expect(result?.choices.filter((choice) => choice.from === "forcedStop")).toHaveLength(
-      gameData.world.zones.length,
+      gameData.world.walkLength,
     );
+  });
+
+  it("walks 4 different zones from Woof Way, taking the route policy's path at each fork", () => {
+    const order = gameData.world.zones.map(({ id }) => id);
+    const routeOf = (route: SimConfig["route"]) =>
+      runs(3, { hitRate: 0, policy: "alwaysPay", route }).map((result) => result.route);
+    for (const route of [...routeOf("left"), ...routeOf("right"), ...routeOf("random")]) {
+      expect(route).toHaveLength(gameData.world.walkLength);
+      expect(route[0]).toBe("street");
+      expect(new Set(route).size).toBe(route.length);
+    }
+    // A fork offers 3 of the 5 zones left after Woof Way: the easiest offered is one of the 3
+    // easiest left, and the hardest one of the 3 hardest.
+    const firstPick = (route: SimConfig["route"]) =>
+      routeOf(route).map((walked) => order.indexOf(walked[1] ?? "street"));
+    const after = order.filter((zone) => zone !== "street").map((zone) => order.indexOf(zone));
+    for (const pick of firstPick("left")) {
+      expect(after.slice(0, 3)).toContain(pick);
+    }
+    for (const pick of firstPick("right")) {
+      expect(after.slice(-3)).toContain(pick);
+    }
   });
 
   it("never pays money with the alwaysHearts policy", () => {
@@ -123,8 +148,9 @@ describe("simulateRun", { timeout: 15_000 }, () => {
 
         expect(zone.fees.map((fee) => fee.dog)).toEqual(walking);
         if (!result.upgrades.includes("shortcut")) {
+          const { fees } = zoneAt(gameData, result.route, zone.zoneIndex);
           expect(zone.fees.map((fee) => fee.amount)).toEqual(
-            walking.map((dog) => zoneFee(gameData.tuning, [], gameData.dogs[dog])),
+            walking.map((dog) => cents(zoneFee(gameData.tuning, [], gameData.dogs[dog]) * fees)),
           );
         }
       }

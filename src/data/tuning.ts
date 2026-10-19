@@ -106,9 +106,6 @@ export const TUNING = {
   probability: {
     // Each dog rolls once when the pack hits a skunk or puddle.
     catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
-    // By zone: the share of squirrels, other dogs and minor obstacles that come as movers
-    // (a darting squirrel, a loose dog, or a ball or cyclist).
-    moverShare: { homeStretch: 0.2, park: 0.15, shops: 0.15, street: 0.1 },
     // Meeting a need at a spot opens its payoff card instead of its plain reward.
     needPayoffCard: 0.25,
   },

@@ -7,6 +7,7 @@ import type {
   GameData,
   GearId,
   UpgradeId,
+  ZoneId,
 } from "../data/types";
 import { randomStream } from "../dev/randomStreams";
 import { screenLayout } from "../layout/screenLayout";
@@ -17,6 +18,7 @@ import {
   type ChoiceData,
   type ChoiceOutcome,
   chooseOption,
+  offerFork,
   offerUpgrades,
   openCard,
 } from "../rules/choices";
@@ -56,7 +58,14 @@ import {
   observePulls,
   observeRoad,
 } from "./bot";
-import { chooseCardOption, chooseUpgrade, type PolicyId, treatTarget } from "./policies";
+import {
+  chooseCardOption,
+  choosePath,
+  chooseUpgrade,
+  type PolicyId,
+  type RoutePolicyId,
+  treatTarget,
+} from "./policies";
 import type { Skill } from "./skills";
 import { nextWalkEvent } from "./walkEvents";
 
@@ -83,6 +92,7 @@ export interface SimConfig {
   readonly pack: PackDogs;
   readonly player: SimPlayer;
   readonly policy: PolicyId;
+  readonly route: RoutePolicyId;
 }
 
 export const DEFAULT_RATES = { luckyRate: 0.7, tipRate: 0.7, treatRate: 0.7 } as const;
@@ -158,6 +168,8 @@ export interface RunResult {
   readonly movers: MoverCounts;
   // The share of choices that cost money, 0 with no choices.
   readonly moneyShare: number;
+  // The zones walked, in order.
+  readonly route: readonly ZoneId[];
   readonly tips: Cents;
   readonly upgrades: readonly UpgradeId[];
   readonly zones: readonly ZoneRecord[];
@@ -386,6 +398,7 @@ function playZoneByRates(
 interface Streams {
   readonly bot: Random;
   readonly cards: Random;
+  readonly forks: Random;
   readonly needs: Random;
   readonly rolls: Random;
   readonly spawnSeed: number;
@@ -396,6 +409,7 @@ function streamsFrom(random: Random): Streams {
   return {
     bot: seededRandom(seed()),
     cards: seededRandom(seed()),
+    forks: seededRandom(seed()),
     needs: seededRandom(seed()),
     rolls: seededRandom(seed()),
     spawnSeed: seed(),
@@ -589,8 +603,15 @@ function hasEnded(session: Session): boolean {
   return session.run.phase.kind === "ended";
 }
 
-// Pays the zone's fees, then picks an upgrade unless that was the last zone.
-function endZone(data: SimData, random: Random, session: Session): void {
+// Pays the zone's fees, then, unless that was the last zone, picks an upgrade and takes the
+// route policy's path at the fork, drawn from forks.
+function endZone(
+  data: SimData,
+  random: Random,
+  forks: Random,
+  config: SimConfig,
+  session: Session,
+): void {
   // finishZone pays the fees, then expires the zone-long debuffs and next-zone upgrades.
   const end = finishZone(data, session.run);
   session.zones.push({
@@ -600,6 +621,7 @@ function endZone(data: SimData, random: Random, session: Session): void {
   session.run = end.run;
   if (!hasEnded(session)) {
     pickUpgrade(data, random, session);
+    takeFork(data, forks, config.route, session);
   }
 }
 
@@ -615,7 +637,7 @@ function playByRates(
     walk = planZone(data, geometryOf(session.run), random, { ...walk, run: session.run });
     playZoneByRates(data, random, config, rates, session, walk);
     if (!hasEnded(session)) {
-      endZone(data, random, session);
+      endZone(data, random, random, config, session);
     }
   }
 }
@@ -638,7 +660,7 @@ function playBySkill(
     walk = planZone(data, geometryOf(session.run), spawns, { ...walk, run: session.run });
     ({ pulls, walk } = playZoneBySkill(data, streams, config, session, bot, { pulls, walk }));
     if (!hasEnded(session)) {
-      endZone(data, streams.cards, session);
+      endZone(data, streams.cards, streams.forks, config, session);
       walk = { ...walk, run: session.run };
     }
   }
@@ -646,7 +668,8 @@ function playBySkill(
 
 // One run on the real rules: each zone planned as the game plans it, items hit, collected or
 // avoided by the player, cards chosen by the policy, fees paid at each zone's end, then an
-// upgrade picked before the next zone. Deterministic for a given random.
+// upgrade picked and the route policy's path taken at the fork before the next zone.
+// Deterministic for a given random.
 export function simulateRun(data: SimData, random: Random, config: SimConfig): RunResult {
   const session: Session = {
     afterPull: null,
@@ -687,6 +710,7 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     moneyShare: session.choices.length === 0 ? 0 : paidChoices / session.choices.length,
     movers: session.movers,
     pullsMoved: session.pullsMoved,
+    route: session.run.route,
     tips: session.tips,
     upgrades: session.upgrades,
     zones: session.zones,
@@ -706,5 +730,14 @@ function pickUpgrade(data: SimData, random: Random, session: Session): void {
   if (picked !== undefined) {
     session.upgrades.push(picked);
   }
+  session.run = chooseOption(data, random, run, card, choice).state;
+}
+
+// The fork after a zone: the route policy picks the path, which sets the next zone.
+function takeFork(data: SimData, random: Random, policy: RoutePolicyId, session: Session): void {
+  const source = offerFork(data, random, session.run);
+  const run = openCard(source, session.run);
+  const card = cardFor(data, run, source);
+  const choice = choosePath(random, policy, source.paths.length);
   session.run = chooseOption(data, random, run, card, choice).state;
 }

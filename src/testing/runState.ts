@@ -29,6 +29,7 @@ export function testState(
     needSeconds: {},
     pack: pack as readonly PackSlot[] as Pack,
     phase: { kind: "walking" },
+    route: ["street"],
     skipsLeft: 0,
     squirrelChases: 0,
     treats: 0,

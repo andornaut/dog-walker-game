@@ -9,6 +9,7 @@ import type {
 import type { SaveDocument } from "../save/schema";
 import type { RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
+import { walkLength } from "./route";
 import { type Cents, dollarsToCents } from "./units";
 
 export type AchievementData = Pick<
@@ -101,7 +102,7 @@ export function conditionHolds(
   facts: RunFacts | null,
   condition: AchievementCondition,
 ): boolean {
-  const zones = data.world.zones.length;
+  const zones = walkLength(data);
   const dogs = Object.keys(data.dogs).length;
   switch (condition.kind) {
     case "cleanZones":

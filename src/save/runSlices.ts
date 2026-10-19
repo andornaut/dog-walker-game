@@ -1,5 +1,6 @@
 import type { GameData } from "../data/types";
 import { runCountersOf } from "../rules/achievements";
+import { walkLength } from "../rules/route";
 import type { RunState } from "../state/runState";
 import type { RunResult } from "./checkpoint";
 import type { Checkpoint, DogRun } from "./schema";
@@ -8,7 +9,7 @@ type RunSliceData = Pick<GameData, "world">;
 
 function zonesDone(data: RunSliceData, run: RunState): number {
   return run.phase.kind === "ended" && run.phase.reason === "finished"
-    ? data.world.zones.length
+    ? walkLength(data)
     : run.zoneIndex;
 }
 
@@ -23,12 +24,13 @@ function dogRuns(data: RunSliceData, run: RunState): DogRun[] {
 }
 
 // The run so far, for the save after a zone's fees are paid (finishZone has moved zoneIndex on
-// to the next zone).
+// to the next zone, whose fork is not yet taken).
 export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {
     counters: runCountersOf(run),
     dogs: dogRuns(data, run),
     earnedCents: run.money,
+    route: [...run.route],
     zonesFinished: Math.max(1, zonesDone(data, run)),
   };
 }
@@ -41,6 +43,7 @@ export function runResultOf(data: RunSliceData, run: RunState): RunResult {
     dogs: dogRuns(data, run),
     earnedCents: run.money,
     outcome,
-    zone: outcome === "finished" ? data.world.zones.length : run.zoneIndex + 1,
+    route: [...run.route],
+    zone: outcome === "finished" ? walkLength(data) : run.zoneIndex + 1,
   };
 }

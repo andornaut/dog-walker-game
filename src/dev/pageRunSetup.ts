@@ -1,5 +1,6 @@
 import { gameData } from "../data";
 import type { DogId, GameData, GearId } from "../data/types";
+import { walkLength } from "../rules/route";
 import { type ParsedRunSetup, parseRunSetup, randomSeed, type RunSetupLimits } from "./runSetup";
 
 // The most dogs a pack holds, as PackDogs allows.
@@ -23,7 +24,8 @@ export function runSetupLimitsFor(
     maxPackSize: MAX_PACK_SIZE,
     renamedDogIds: RENAMED_DOG_IDS,
     speed: SPEED_LIMITS,
-    zoneCount: data.world.zones.length,
+    zoneCount: walkLength(data),
+    zoneIds: data.world.zones.map(({ id }) => id),
   };
 }
 

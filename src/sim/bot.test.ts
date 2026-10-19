@@ -60,6 +60,7 @@ function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHAS
     pack,
     player: { kind: "skill", skill },
     policy: "heartsUnlessLow",
+    route: "straight",
   });
 }
 

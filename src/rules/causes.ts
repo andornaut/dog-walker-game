@@ -8,7 +8,7 @@ import { type Cents, cents, type Hearts } from "./units";
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
 // base: the effect, tip, fee, clawback, treat or bump. The rest are what changed it: a temperament
-// multiplier, the pack-size tip factor, a modifier, or a limit (a meter held within 0 and its
+// multiplier, the pack-size tip factor, a modifier, a zone's fee multiplier, or a limit (a meter held within 0 and its
 // max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
@@ -16,7 +16,9 @@ export type Cause =
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
   | { readonly amount: number; readonly kind: "packSize"; readonly packSize: number }
-  | { readonly amount: number; readonly kind: "temperament"; readonly temperament: Temperament };
+  | { readonly amount: number; readonly kind: "temperament"; readonly temperament: Temperament }
+  // A zone's fee multiplier, with the zone's name.
+  | { readonly amount: number; readonly kind: "zone"; readonly zone: string };
 
 // A change to one owner's meter.
 export interface HeartChange {
@@ -128,6 +130,8 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       return cause.packSize === 1 ? "solo" : `pack of ${cause.packSize}`;
     case "temperament":
       return TEMPERAMENT_NAMES[cause.temperament];
+    case "zone":
+      return cause.zone;
     default:
       return assertNever(cause);
   }

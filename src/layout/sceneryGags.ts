@@ -57,7 +57,10 @@ const NEAR_RIGHT_LAWN = 338;
 export const ZONE_GAGS: Readonly<Record<ZoneId, ZoneGags>> = {
   homeStretch: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
   park: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
+  // The cat sits on the riverside railing, which takes the perch's rows.
+  pawsPromenade: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
   shops: { perches: [NEAR_LEFT_PERCH], sprinklers: [] },
+  snoozeCrescent: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
   street: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
 };
 

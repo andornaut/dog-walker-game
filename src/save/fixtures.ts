@@ -29,6 +29,7 @@ export const testContext: SaveContext = {
     gear: new Set(["fannyPack", "luckyCollar", "poopBags", "runningShoes", "whistle"]),
     hints: new Set(["card", "puddle", "tip"]),
     walkers: new Set(["ada", "ben", "casey", "trista"]),
+    zones: new Set(["homeStretch", "park", "pawsPromenade", "shops", "snoozeCrescent", "street"]),
   },
 };
 
@@ -101,6 +102,7 @@ export function veteranSave(): SaveDocument {
         earnedCents: cents(2_500),
         firings: [{ dog: "koda", zone: 2 }],
         outcome: "wentHome",
+        route: ["street", "park"],
         zonesFinished: 2,
       },
       lifetimeCents: cents(30_000),

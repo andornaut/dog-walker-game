@@ -71,7 +71,7 @@ export function earningsBreakdown(changes: readonly Change[], earned: Cents): Ea
 
 export type ZonePip = "current" | "done" | "todo";
 
-// One pip per zone of the world: done for each zone finished, current for the zone a run that
+// One pip per zone of a walk: done for each zone finished, current for the zone a run that
 // ended early stopped in, todo for the rest.
 export function zonePips(
   zoneCount: number,

@@ -15,6 +15,7 @@ import type {
   CardOption,
   DogId,
   Effect,
+  EncounterId,
   Energy,
   Modifier,
   QuipMoment,
@@ -232,12 +233,12 @@ describe("cards", () => {
     }
   });
 
-  it("has a forced stop for every zone, with none repeated", () => {
-    expect(Object.keys(forcedStops).length).toBeGreaterThanOrEqual(world.zones.length);
+  it("has a forced stop for every zone of a walk, with none repeated", () => {
+    expect(Object.keys(forcedStops).length).toBeGreaterThanOrEqual(world.walkLength);
   });
 
   it("has enough upgrades for every pick when picked cards leave the pool", () => {
-    const picks = world.zones.length - 1;
+    const picks = world.walkLength - 1;
     const removedBeforeLastPick = picks - 1;
     expect(Object.keys(upgrades).length - removedBeforeLastPick).toBeGreaterThanOrEqual(
       tuning.counts.upgradeChoiceCount,
@@ -266,12 +267,61 @@ describe("cards", () => {
 });
 
 describe("run, world and walkers", () => {
-  it("has 4 zones with palette road colours", () => {
-    expect(world.zones).toHaveLength(4);
+  it("has 6 zones with palette road colours", () => {
+    expect(world.zones).toHaveLength(6);
     for (const zone of world.zones) {
       expect(zone.roadColor).toMatch(/^#[0-9a-f]{6}$/);
       expect(zone.leashColor).toMatch(/^#[0-9a-f]{6}$/);
       expect(zone.roadShadowColor).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+
+  it("walks 4 zones, starting on Woof Way, with three unwalked zones left at every fork", () => {
+    expect(world.walkLength).toBe(4);
+    expect(world.zones.find(({ id }) => id === world.firstZone)?.name).toBe("Woof Way");
+    expect(world.zones.length - (world.walkLength - 1)).toBeGreaterThanOrEqual(3);
+  });
+
+  it("lists the zones from easiest to hardest, each with a difficulty in words", () => {
+    const ranks = world.zones.map(({ difficulty }) => difficulty);
+    expect([...ranks].sort((a, b) => a - b)).toEqual(ranks);
+    for (const zone of world.zones) {
+      expect(zone.difficultyName, zone.name).not.toBe("");
+    }
+  });
+
+  it("gives every zone positive multipliers, a mover share from 0 to 1 and a kind to draw", () => {
+    for (const zone of world.zones) {
+      const { density, fees, moverShare, speed, weights } = zone;
+      for (const value of [fees, speed, density.luckyFinds, density.obstacles, density.tips]) {
+        expect(value, zone.name).toBeGreaterThan(0);
+      }
+      expect(moverShare, zone.name).toBeGreaterThanOrEqual(0);
+      expect(moverShare, zone.name).toBeLessThanOrEqual(1);
+      for (const group of Object.values(weights) as Readonly<Record<string, number>>[]) {
+        const values = Object.values(group);
+        expect(
+          values.every((weight) => weight >= 0),
+          zone.name,
+        ).toBe(true);
+        expect(
+          values.some((weight) => weight > 0),
+          zone.name,
+        ).toBe(true);
+      }
+    }
+  });
+
+  it("weighs every obstacle and lucky find in every zone, each of its own kind", () => {
+    for (const { name, weights } of world.zones) {
+      for (const id of Object.keys(weights.obstacles)) {
+        expect(encounters[id as EncounterId].kind, name).toBe("obstacle");
+      }
+      for (const id of Object.keys(weights.luckyFinds)) {
+        expect(encounters[id as EncounterId].kind, name).toBe("lucky");
+      }
+      const kinds = [...Object.keys(weights.obstacles), ...Object.keys(weights.luckyFinds)];
+      expect(kinds.sort(), name).toEqual(Object.keys(encounters).sort());
     }
   });
 

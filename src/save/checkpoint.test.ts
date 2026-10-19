@@ -26,6 +26,7 @@ const checkpoint: Checkpoint = {
     { fired: true, id: "penny", zonesFinished: 1 },
   ],
   earnedCents: cents(4_250),
+  route: ["street", "snoozeCrescent"],
   zonesFinished: 2,
 };
 
@@ -37,6 +38,7 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   ],
   earnedCents: cents(6_000),
   outcome: "finished",
+  route: ["street", "park", "pawsPromenade", "homeStretch"],
   zone: 4,
   ...changes,
 });
@@ -88,6 +90,7 @@ describe("bankCheckpoint", () => {
       earnedCents: 4_250,
       firings: [{ dog: "penny", zone: 2 }],
       outcome: "wentHome",
+      route: ["street", "snoozeCrescent"],
       zonesFinished: 2,
     });
   });
@@ -134,6 +137,7 @@ describe("recordRunEnd", () => {
       earnedCents: 100,
       firings: [{ dog: "biscuit", zone: 2 }],
       outcome: "finished",
+      route: ["street", "park", "pawsPromenade", "homeStretch"],
       zonesFinished: 1,
     });
     const high = recordRunEnd(testAwards, veteranSave(), runResult({ earnedCents: cents(9_999) }));

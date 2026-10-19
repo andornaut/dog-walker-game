@@ -11,6 +11,7 @@ import type {
   QuipMoment,
   Unlock,
   WalkerId,
+  Zone,
 } from "../data/types";
 import { achievementConditionText } from "../rules/achievements";
 import {
@@ -31,6 +32,7 @@ import {
   TRAIT_NAMES,
 } from "../rules/effectText";
 import { modifiersOf } from "../rules/modifiers";
+import { firstZoneId, walkLength, zoneById } from "../rules/route";
 import { price, unlockPrice } from "../rules/shop";
 import { zoneStats } from "../rules/zones";
 import { POLICY_NAMES } from "../sim/policies";
@@ -287,21 +289,49 @@ function debuffsSection(data: GameData): Section {
   };
 }
 
+// The kinds a zone's weights keep out of it.
+function neverIn(zone: Zone): string {
+  const groups = Object.values(zone.weights) as Readonly<Record<string, number>>[];
+  const never = groups.flatMap((weights) => Object.keys(weights).filter((id) => weights[id] === 0));
+  return never.length === 0 ? "-" : never.join(", ");
+}
+
 function zonesSection(data: GameData): Section {
   return {
-    headers: ["Zone", "Road", "Minutes", "Speed (px/s)", "Obstacles", "Tips", "Treats", "Lucky"],
-    note: `World: ${data.world.name}. Minutes and speed are at base speed, before upgrades.`,
-    rows: data.world.zones.map((zone, i) => {
-      const stats = zoneStats(data.tuning, i);
+    headers: [
+      "Zone",
+      "Difficulty",
+      "Fees",
+      "Speed",
+      "Movers",
+      "Minutes",
+      "Speed (px/s)",
+      "Obstacles",
+      "Tips",
+      "Treats",
+      "Lucky",
+      "Never here",
+    ],
+    note:
+      `World: ${data.world.name}. A walk is ${walkLength(data)} zones, starting in ` +
+      `${zoneById(data, firstZoneId(data)).name}; the rest are picked at forks, easiest ` +
+      "first in this table. Minutes, speed and counts are for the zone walked second, at " +
+      "base speed and before upgrades.",
+    rows: data.world.zones.map((zone) => {
+      const stats = zoneStats(data.tuning, zone, 1);
       return [
         zone.name,
-        zone.roadColor,
+        `${zone.difficultyName} (${zone.difficulty})`,
+        `×${zone.fees}`,
+        `×${zone.speed}`,
+        `${Math.round(zone.moverShare * 100)}%`,
         Math.round((stats.duration / 60) * 10) / 10,
         Math.round(stats.scrollSpeed),
         stats.obstacles,
         stats.tips,
         stats.treats,
         stats.luckyEncounters,
+        neverIn(zone),
       ];
     }),
     title: "Zones",
@@ -380,6 +410,7 @@ function simulatedSection(rows: readonly MatrixRow[]): Section {
       "per run; Paid is the share of card choices that cost money; Badges is the achievements",
       "a run earns on its own, per run.",
       `${policies.map((id) => `${id}: ${POLICY_NAMES[id]}`).join(". ")}.`,
+      "Route is the path the bot takes at each fork: straight is the middle one.",
       ...(rows.length < total ? [`Simulating: ${rows.length} of ${total} rows.`] : []),
     ].join(" "),
     rows: rows.map(rowCells),

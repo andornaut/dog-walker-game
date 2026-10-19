@@ -1,7 +1,8 @@
 import * as v from "valibot";
 
-import type { AchievementId, DogId, GearId, HintId, WalkerId } from "../data/types";
+import type { AchievementId, DogId, GearId, HintId, WalkerId, ZoneId } from "../data/types";
 import type { RunCounters } from "../rules/achievements";
+import { PRE_FORK_ROUTE } from "../rules/route";
 import { cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
@@ -46,12 +47,16 @@ const runCountersSchema = v.object({
   squirrelChases: count,
 });
 
+// The zones a run walked, in order, by id. A save from before forks walked the pre-fork route.
+const routeSchema = v.optional(ids, () => [...PRE_FORK_ROUTE]);
+
 // A run in progress, saved after each zone. zonesFinished is the zone that just ended.
 // counters is null in a checkpoint saved before achievements: its run earns no run badges.
 export const checkpointSchema = v.object({
   counters: v.optional(v.nullable(runCountersSchema), null),
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,
+  route: routeSchema,
   zonesFinished: zoneNumber,
 });
 
@@ -78,6 +83,7 @@ const lastWalkSchema = v.object({
   earnedCents: cents,
   firings: v.array(firingSchema),
   outcome: v.picklist(END_REASONS),
+  route: routeSchema,
   zonesFinished: count,
 });
 
@@ -147,10 +153,11 @@ export interface DogRun extends Omit<v.InferOutput<typeof dogRunSchema>, "id"> {
 
 export interface Checkpoint extends Omit<
   v.InferOutput<typeof checkpointSchema>,
-  "counters" | "dogs"
+  "counters" | "dogs" | "route"
 > {
   counters: RunCounters | null;
   dogs: DogRun[];
+  route: ZoneId[];
 }
 
 export interface Loadout {
@@ -175,6 +182,7 @@ export interface Firing extends Omit<v.InferOutput<typeof firingSchema>, "dog"> 
 export interface LastWalk extends Walk {
   firings: Firing[];
   outcome: EndReason;
+  route: ZoneId[];
 }
 
 export interface SaveStats extends Omit<

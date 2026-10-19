@@ -5,9 +5,16 @@ import { DOGS } from "../data/dogs";
 import { SHOP_GEAR } from "../data/shop";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WORLD } from "../testing/world";
 import { newRun } from "./runState";
 
-const data = { debuffs: DEBUFFS, dogs: DOGS, shopGear: SHOP_GEAR, tuning: TEST_TUNING };
+const data = {
+  debuffs: DEBUFFS,
+  dogs: DOGS,
+  shopGear: SHOP_GEAR,
+  tuning: TEST_TUNING,
+  world: TEST_WORLD,
+};
 
 describe("newRun", () => {
   it("starts each owner at their temperament's hearts, walking, with no money", () => {

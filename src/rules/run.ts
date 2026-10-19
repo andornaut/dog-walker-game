@@ -4,6 +4,7 @@ import type { ActiveModifier, RunState } from "../state/runState";
 import { type Cause, centsCauses, modifierCauses, type MoneyChange } from "./causes";
 import { zoneFeeParts } from "./dogs";
 import { statParts } from "./modifiers";
+import { currentZone } from "./route";
 import { addCents, cents, nonNegativeCents, read, readTable } from "./units";
 
 // What one tip pickup pays now, with its causes: smaller packs tip more, then upgrades and
@@ -67,19 +68,28 @@ export interface Payments {
   readonly state: RunState;
 }
 
-// At the end of a zone, every dog still walking pays its fee, one change per dog.
-export function payZoneFees(data: Pick<GameData, "dogs" | "tuning">, state: RunState): Payments {
+// At the end of a zone, every dog still walking pays its fee times the zone's fee multiplier,
+// one change per dog.
+export function payZoneFees(
+  data: Pick<GameData, "dogs" | "tuning" | "world">,
+  state: RunState,
+): Payments {
   const feesEarned = { ...state.feesEarned };
   let money = state.money;
+  const zone = currentZone(data, state);
   const changes = packDogs(state).map((id): MoneyChange => {
     const fee = zoneFeeParts(data.tuning, state.modifiers, data.dogs[id]);
-    feesEarned[id] = addCents(feesEarned[id] ?? cents(0), fee.value);
-    money = addCents(money, fee.value);
+    const amount = cents(fee.value * zone.fees);
+    feesEarned[id] = addCents(feesEarned[id] ?? cents(0), amount);
+    money = addCents(money, amount);
     const causes = centsCauses([
       { amount: fee.base, kind: "fee" },
       ...modifierCauses(fee.contributions),
+      ...(zone.fees === 1
+        ? []
+        : [{ amount: fee.value * (zone.fees - 1), kind: "zone", zone: zone.name } as const]),
     ]);
-    return { amount: fee.value, causes, dog: id, kind: "money" };
+    return { amount, causes, dog: id, kind: "money" };
   });
   return { changes, state: { ...state, feesEarned, money } };
 }

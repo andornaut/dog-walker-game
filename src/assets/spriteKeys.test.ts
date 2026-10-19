@@ -14,6 +14,7 @@ import {
   backdropKey,
   CARD_FRAME_KEY,
   cardFrameTag,
+  cardZoneKey,
   depthVariantKey,
   dogFaceKey,
   doghouseTag,
@@ -33,8 +34,8 @@ import {
   WARNING_DOWN_TAG,
   WARNING_KEY,
   WARNING_TAG,
-  zoneArtName,
   zoneIconKey,
+  zonePipTag,
 } from "./spriteKeys";
 
 const spriteKeys = new Set(manifest.sprites.map(({ key }) => key));
@@ -112,6 +113,7 @@ describe("sprite keys", () => {
         offered: ["bellyRubs", "bigTipper", "raincoats"],
       }),
     ).toBe("upgrade");
+    expect(cardFrameTag(data, { kind: "fork", paths: ["park"] })).toBe("route");
   });
 
   it("name a road sprite, a face and an owner face in the manifest for every dog", () => {
@@ -167,9 +169,18 @@ describe("sprite keys", () => {
 describe("zone art keys", () => {
   const images = new Set(manifest.images.map(({ key }) => key));
 
-  it("names each zone's art after its name", () => {
-    expect(zoneArtName({ name: "The Long Way Home" })).toBe("the-long-way-home");
-    expect(backdropKey({ name: "Woof Way" })).toBe("backdrop-woof-way");
+  it("names each zone's art after its art", () => {
+    const zone = { art: "woof-way" };
+    expect(backdropKey(zone)).toBe("backdrop-woof-way");
+    expect(roadTileKey(zone)).toBe("road-woof-way");
+    expect(roadStartKey(zone)).toBe("road-woof-way-start");
+    expect(zoneIconKey(zone)).toBe("icon-zone-woof-way");
+    expect(cardZoneKey(zone)).toBe("card-zone-woof-way");
+  });
+
+  it("gives every zone its own art", () => {
+    const ids = WORLD.zones.map(({ art }) => art);
+    expect(new Set(ids).size).toBe(ids.length);
   });
 
   it("names a backdrop, a road strip and an icon in the manifest for every zone", () => {
@@ -180,9 +191,22 @@ describe("zone art keys", () => {
     }
   });
 
-  it("names a start strip for every zone after the first", () => {
-    for (const zone of WORLD.zones.slice(1)) {
+  it("names a start strip for every zone, since any zone can follow a fork", () => {
+    for (const zone of WORLD.zones) {
       expect(images.has(roadStartKey(zone)), zone.name).toBe(true);
+    }
+  });
+
+  it("tags a route pip todo before its fork, then by the zone, and -done once walked", () => {
+    const zone = { art: "bark-park" };
+    expect(zonePipTag(null, false)).toBe("todo");
+    expect(zonePipTag(zone, false)).toBe("bark-park");
+    expect(zonePipTag(zone, true)).toBe("bark-park-done");
+  });
+
+  it("names a card preview in the manifest for every zone", () => {
+    for (const zone of WORLD.zones) {
+      expect(images.has(cardZoneKey(zone)), zone.name).toBe(true);
     }
   });
 });

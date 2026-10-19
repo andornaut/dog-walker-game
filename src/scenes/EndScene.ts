@@ -1,7 +1,7 @@
 import { type GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
-import { dogSpriteKey, ownerFaceKey } from "../assets/spriteKeys";
+import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
@@ -13,10 +13,12 @@ import {
   walkUpOffset,
   waveOffset,
 } from "../home/returnHome";
+import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
 import { containsPoint, type Rect } from "../layout/rect";
 import { stopWakeLock } from "../pwa";
+import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 import type { EndReason } from "../state/runState";
@@ -177,9 +179,14 @@ export class EndScene extends Scene {
     title(BREAKDOWN.amountRight, y + 8, signed(walk.earnedCents), PALETTE.forest, 1);
 
     text(SIDE.x, BREAKDOWN.top, "Zones walked", PALETTE.plum);
-    zonePips(gameData.world.zones.length, walk).forEach((pip, i) => {
+    zonePips(walkLength(gameData), walk).forEach((pip, i) => {
       const x = SIDE.x + i * SIDE.pipPitch;
-      if (addTagImage(this, "ui-zone-pips", pip, x, SIDE.pipsY) === undefined) {
+      const { tag } = pipLook(gameData, {
+        fill: 0,
+        state: pip,
+        zone: walk.route[i] ?? null,
+      });
+      if (addTagImage(this, ZONE_PIPS_KEY, tag, x, SIDE.pipsY) === undefined) {
         fillRect(g, pip === "todo" ? PALETTE.grey : PALETTE.forest, {
           height: 8,
           width: 18,
@@ -188,7 +195,7 @@ export class EndScene extends Scene {
         });
       }
     });
-    const zones = `${walk.zonesFinished}/${gameData.world.zones.length}`;
+    const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
     text(SIDE.x, SIDE.bankY, "Bank", PALETTE.plum);
     if (this.textures.exists("icon-money")) {

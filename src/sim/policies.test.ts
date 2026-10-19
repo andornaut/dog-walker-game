@@ -5,7 +5,13 @@ import { cardFor } from "../rules/choices";
 import { cents } from "../rules/units";
 import type { CardSource, RunState, UpgradeOffer } from "../state/runState";
 import { testState } from "../testing/runState";
-import { chooseCardOption, chooseUpgrade, type PolicyId, treatTarget } from "./policies";
+import {
+  chooseCardOption,
+  choosePath,
+  chooseUpgrade,
+  type PolicyId,
+  treatTarget,
+} from "./policies";
 
 const SKUNK: CardSource = { affected: ["duchess"], encounter: "skunk", kind: "encounter" };
 const RINSE = 1;
@@ -72,6 +78,23 @@ describe("chooseUpgrade", () => {
 
   it("takes a tips upgrade otherwise", () => {
     expect(choose(testState({ biscuit: 6, duchess: 4 }))).toBe(2);
+  });
+});
+
+describe("choosePath", () => {
+  it("goes straight down the middle, left to the easiest or right to the hardest", () => {
+    const never = () => {
+      throw new Error("A fixed route policy draws nothing");
+    };
+    expect(choosePath(never, "straight", 3)).toBe(1);
+    expect(choosePath(never, "left", 3)).toBe(0);
+    expect(choosePath(never, "right", 3)).toBe(2);
+    expect(choosePath(never, "straight", 2)).toBe(0);
+    expect(choosePath(never, "straight", 1)).toBe(0);
+  });
+
+  it("draws the random path from its random", () => {
+    expect([0, 0.4, 0.99].map((roll) => choosePath(() => roll, "random", 3))).toEqual([0, 1, 2]);
   });
 });
 

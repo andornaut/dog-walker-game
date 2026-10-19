@@ -17,6 +17,7 @@ const limits: RunSetupLimits<"bo" | "koda" | "rex" | "zip", "collar" | "shoes"> 
   renamedDogIds: new Map([["dash", "rex"]]),
   speed: { max: 10, min: 0.1 },
   zoneCount: 4,
+  zoneIds: ["street", "park", "shops", "homeStretch", "pawsPromenade"],
 };
 const NEW_SEED = 777;
 const parse = (search: string) => parseRunSetup(limits, () => NEW_SEED, search);
@@ -139,6 +140,27 @@ describe("parseRunSetup", () => {
   });
 });
 
+describe("the route parameter", () => {
+  it("reads the zones walked up to the starting zone", () => {
+    expect(parse("route=street,park,shops&zone=2").setup.route).toEqual([
+      "street",
+      "park",
+      "shops",
+    ]);
+  });
+
+  it.each([
+    ["route=street,bogus", "known zone ids"],
+    ["route=street,street", "different zone ids"],
+    ["route=street&zone=3", "3 to 4 different zone ids"],
+    ["route=street,park,shops,homeStretch,pawsPromenade", "1 to 4 different zone ids"],
+  ])("ignores %s with a warning", (search, expected) => {
+    const { setup, warnings } = parse(search);
+    expect(setup.route).toBeUndefined();
+    expect(warnings.join()).toContain(expected);
+  });
+});
+
 describe("runSetupToQuery", () => {
   it("writes only the seed for a default setup", () => {
     expect(runSetupToQuery(defaults)).toBe(`seed=${NEW_SEED}`);
@@ -153,6 +175,7 @@ describe("runSetupToQuery", () => {
     { ...defaults, gear: null },
     { dev: true, gear: "collar", money: 0, pack: ["zip"], seed: 0, speed: 0.1, zone: 4 },
     { dev: false, money: 99, pack: ["rex", "bo", "koda"], seed: MAX_SEED, speed: 0.3, zone: 2 },
+    { ...defaults, route: ["street", "pawsPromenade"], zone: 2 },
     { ...defaults, speed: 0.1 + 0.2 },
   ])("round-trips through parseRunSetup: %j", (setup) => {
     expect(parse(runSetupToQuery(setup))).toEqual({ notices: [], setup, warnings: [] });

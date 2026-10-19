@@ -62,7 +62,7 @@ describe("loadSave", () => {
     expect(save.stats.dogsFinishedWith).toEqual(["koda"]);
   });
 
-  it("loads a pending checkpoint", () => {
+  it("loads a pending checkpoint from before forks, on the pre-fork route", () => {
     const checkpoint = {
       dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
       earnedCents: 4_250,
@@ -71,7 +71,48 @@ describe("loadSave", () => {
     const save = loaded((document) => {
       document.checkpoint = checkpoint;
     });
-    expect(save.checkpoint).toEqual({ ...checkpoint, counters: null });
+    expect(save.checkpoint).toEqual({
+      ...checkpoint,
+      counters: null,
+      route: ["street", "park", "shops", "homeStretch"],
+    });
+  });
+
+  it("loads a version 1 save's checkpoint on the pre-fork route", () => {
+    const raw = withChanges((document) => {
+      untyped(document).version = 1;
+      document.checkpoint = {
+        dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
+        earnedCents: 500,
+        zonesFinished: 1,
+      };
+    });
+    const { save, status } = loadSave(testContext, raw);
+    expect(status).toBe("loaded");
+    expect(save.checkpoint?.route).toEqual(["street", "park", "shops", "homeStretch"]);
+  });
+
+  it("loads a checkpoint's route, dropping zones the game no longer has", () => {
+    const save = loaded((document) => {
+      document.checkpoint = {
+        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+        earnedCents: 4_250,
+        route: ["street", "oldZone", "pawsPromenade"],
+        zonesFinished: 2,
+      };
+    });
+    expect(save.checkpoint?.route).toEqual(["street", "pawsPromenade"]);
+  });
+
+  it("loads a last walk from before forks on the pre-fork route, and keeps a later one's", () => {
+    const before = loaded((document) => {
+      const { lastWalk } = document.stats;
+      if (lastWalk !== null) {
+        delete lastWalk.route;
+      }
+    });
+    expect(before.stats.lastWalk?.route).toEqual(["street", "park", "shops", "homeStretch"]);
+    expect(loaded(() => undefined).stats.lastWalk?.route).toEqual(["street", "park"]);
   });
 
   it("loads a checkpoint's run counters", () => {
@@ -339,6 +380,7 @@ describe("loadSave", () => {
         counters: null,
         dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
         earnedCents: 900,
+        route: ["street", "park", "shops", "homeStretch"],
         zonesFinished: 2,
       });
     });
@@ -362,6 +404,7 @@ describe("saveContextFrom", () => {
     expect([...context.known.gear]).toEqual(Object.keys(gameData.shopGear));
     expect([...context.known.hints]).toEqual(Object.keys(gameData.hints));
     expect([...context.known.walkers]).toEqual(Object.keys(gameData.walkers));
+    expect([...context.known.zones]).toEqual(gameData.world.zones.map(({ id }) => id));
   });
 
   it("starts a new player with one dog slot, the starter dogs and the default walker", () => {

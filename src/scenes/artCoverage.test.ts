@@ -16,6 +16,7 @@ import {
   CARD_FRAME_KEY,
   cardFrameTag,
   depthVariantKey,
+  DIFFICULTY_KEY,
   dogFaceKey,
   doghouseTag,
   dogPortraitKey,
@@ -24,6 +25,7 @@ import {
   NEED_ART,
   needSpotSpriteKey,
   ownerFaceKey,
+  ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
@@ -40,15 +42,19 @@ import type {
   Temperament,
   TraitId,
   UpgradeId,
+  ZoneId,
 } from "../data/types";
 import { badgeWall } from "../home/badgesView";
-import { zonePips } from "../hud/hudView";
+import { pipLook, zonePips } from "../hud/hudView";
 import { stripIconKey } from "../hud/stateStrip";
 import { SCALE_STEPS } from "../layout/projection";
+import { cardFor } from "../rules/choices";
+import { walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
+import { testState } from "../testing/runState";
 import { hitBurstKey, hitFlashKey } from "./hitMoment";
 
 const manifest = parseManifest(shippedManifest);
@@ -196,12 +202,23 @@ describe("icon art", () => {
     expect(missingImages(gameData.help.map(({ art }) => art))).toEqual([]);
   });
 
-  it("tags ui-zone-pips with every state a pip can be in", () => {
-    const zones = gameData.world.zones.length;
-    const states = Array.from({ length: zones }, (_, index) =>
-      zonePips(zones, index, 0.5).map(({ state }) => state),
-    ).flat();
-    expect(missingTags("ui-zone-pips", [...new Set(states)])).toEqual([]);
+  it("tags ui-zone-pips with every route pip, for every zone", () => {
+    const length = walkLength(gameData);
+    const tags = gameData.world.zones.flatMap((zone) => {
+      const route = Array.from({ length }, () => zone.id as ZoneId);
+      return Array.from({ length }, (_, index) =>
+        zonePips(length, route.slice(0, index + 1), index, 0.5).map(
+          (pip) => pipLook(gameData, pip).tag,
+        ),
+      ).flat();
+    });
+    expect(tags).toEqual(expect.arrayContaining(["todo", "woof-way", "woof-way-done"]));
+    expect(missingTags(ZONE_PIPS_KEY, [...new Set(tags)])).toEqual([]);
+  });
+
+  it("tags ui-difficulty with the paws of every zone's difficulty", () => {
+    const tags = gameData.world.zones.map(({ difficulty }) => String(difficulty));
+    expect(missingTags(DIFFICULTY_KEY, ["1", "2", "3", "4", "5", ...tags])).toEqual([]);
   });
 
   it("tags ui-fired-plate with every owner temperament", () => {
@@ -227,11 +244,23 @@ describe("card art", () => {
         card,
         kind: "need",
       })),
+      { kind: "fork", paths: ["park"] },
     ];
     const tags = [...new Set(sources.map((source) => cardFrameTag(gameData, source)))];
-    expect(tags).toHaveLength(4);
+    expect(tags).toHaveLength(5);
     const missing = [CARD_FRAME_KEY, "card-frame-large"].flatMap((key) => missingTags(key, tags));
     expect(missing).toEqual([]);
+  });
+
+  it("names a card preview for every zone, as a fork's path card shows it", () => {
+    const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
+    const arts = [zones.slice(0, 3), zones.slice(3)].flatMap((paths) =>
+      cardFor(gameData, testState({ koda: 4 }), { kind: "fork", paths }).options.map(
+        ({ art }) => art,
+      ),
+    );
+    expect(arts).toHaveLength(zones.length);
+    expect(missingImages(arts)).toEqual([]);
   });
 });
 

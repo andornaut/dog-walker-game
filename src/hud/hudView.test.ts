@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { cents, clampHearts } from "../rules/units";
-import { changeLabels, heartRows, outcomeLabels, wholeDollars, zonePips } from "./hudView";
+import { changeLabels, heartRows, outcomeLabels, pipLook, wholeDollars, zonePips } from "./hudView";
 
 describe("changeLabels", () => {
   const skunkIgnore = { encounter: "skunk", kind: "encounter", option: 2 } as const;
@@ -85,17 +85,37 @@ describe("heartRows", () => {
 });
 
 describe("zonePips", () => {
-  it("marks earlier zones done, the current one part filled, and later ones to do", () => {
-    expect(zonePips(4, 1, 0.25)).toEqual([
-      { fill: 1, state: "done" },
-      { fill: 0.25, state: "current" },
-      { fill: 0, state: "todo" },
-      { fill: 0, state: "todo" },
+  it("shows the route walked, the current zone part filled, and unknown forks ahead", () => {
+    expect(zonePips(4, ["street", "pawsPromenade"], 1, 0.25)).toEqual([
+      { fill: 1, state: "done", zone: "street" },
+      { fill: 0.25, state: "current", zone: "pawsPromenade" },
+      { fill: 0, state: "todo", zone: null },
+      { fill: 0, state: "todo", zone: null },
+    ]);
+  });
+
+  it("shows the position after a zone as unknown until its fork is taken", () => {
+    expect(zonePips(4, ["street"], 1, 0)).toEqual([
+      { fill: 1, state: "done", zone: "street" },
+      { fill: 0, state: "todo", zone: null },
+      { fill: 0, state: "todo", zone: null },
+      { fill: 0, state: "todo", zone: null },
     ]);
   });
 
   it("keeps the fill between 0 and 1", () => {
-    expect(zonePips(1, 0, 1.4)[0]?.fill).toBe(1);
-    expect(zonePips(1, 0, -1)[0]?.fill).toBe(0);
+    expect(zonePips(1, ["street"], 0, 1.4)[0]?.fill).toBe(1);
+    expect(zonePips(1, ["street"], 0, -1)[0]?.fill).toBe(0);
+  });
+});
+
+describe("pipLook", () => {
+  it("tags each pip by its zone, and fills the current one in the zone's road colour", () => {
+    const pips = zonePips(3, ["street", "park"], 1, 0.5).map((pip) => pipLook(gameData, pip));
+    expect(pips).toEqual([
+      { tag: "woof-way-done", wellColor: "#3a4466" },
+      { tag: "bark-park", wellColor: "#e4a672" },
+      { tag: "todo", wellColor: null },
+    ]);
   });
 });

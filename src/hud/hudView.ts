@@ -1,6 +1,8 @@
-import type { DogId } from "../data/types";
+import { zonePipTag } from "../assets/spriteKeys";
+import type { DogId, GameData, ZoneId } from "../data/types";
 import { type CauseData, causeLabel, type Change, changeAmount } from "../rules/causes";
 import type { ChoiceOutcome } from "../rules/choices";
+import { zoneById } from "../rules/route";
 import type { Cents } from "../rules/units";
 
 // A floating label naming a change, over the dog's slot or the bank.
@@ -47,19 +49,42 @@ export function heartRows(perRow: number, hearts: number, max: number): boolean[
 
 export type PipState = "current" | "done" | "todo";
 
-// One pip per zone of the route; fill is how far through it the walk is, from 0 to 1.
+// One pip per zone of the walk; fill is how far through it the walk is, from 0 to 1. zone is
+// the zone the route has at the pip's position, or null for a fork not yet taken.
+export interface ZonePip {
+  readonly fill: number;
+  readonly state: PipState;
+  readonly zone: ZoneId | null;
+}
+
+// What a pip draws: its ui-zone-pips tag, and the colour its well fills with as the current
+// zone goes by, the zone's road colour. A pip with no zone yet has no well colour.
+export interface PipLook {
+  readonly tag: string;
+  readonly wellColor: string | null;
+}
+
+export function pipLook(data: Pick<GameData, "world">, pip: ZonePip): PipLook {
+  const zone = pip.state === "todo" || pip.zone === null ? null : zoneById(data, pip.zone);
+  return { tag: zonePipTag(zone, pip.state === "done"), wellColor: zone?.roadColor ?? null };
+}
+
+// The walk's pips: the zones walked, the current one part filled, then one unknown pip per
+// fork still ahead.
 export function zonePips(
-  zoneCount: number,
+  walkLength: number,
+  route: readonly ZoneId[],
   zoneIndex: number,
   zoneFraction: number,
-): { fill: number; state: PipState }[] {
-  return Array.from({ length: zoneCount }, (_, i) => {
+): ZonePip[] {
+  return Array.from({ length: walkLength }, (_, i): ZonePip => {
+    const zone = route[i] ?? null;
     if (i < zoneIndex) {
-      return { fill: 1, state: "done" };
+      return { fill: 1, state: "done", zone };
     }
-    if (i > zoneIndex) {
-      return { fill: 0, state: "todo" };
+    if (i > zoneIndex || zone === null) {
+      return { fill: 0, state: "todo", zone };
     }
-    return { fill: Math.min(1, Math.max(0, zoneFraction)), state: "current" };
+    return { fill: Math.min(1, Math.max(0, zoneFraction)), state: "current", zone };
   });
 }
