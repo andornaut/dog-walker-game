@@ -101,8 +101,8 @@ export class MenuFlow {
   // it. The walk steps only while walking, so the menu stops it without pausing the run
   // scene: sprite animations loop on, while tweens and timers stop, keeping a hit moment in
   // step with its hit stop. The card under the menu pauses and hides, so no card shows beside
-  // the menu's panel; a zone celebration under it pauses. The HUD keeps running, so the top bar's buttons work and redraw. Asked
-  // while the menu is up, the question replaces it.
+  // the menu's panel; a zone celebration under it pauses. The HUD keeps running, so the top
+  // bar's buttons work and redraw. Asked while the menu is up, the question replaces it.
   openPause(mode: PauseSceneData["mode"]): void {
     if (this.host.over()) {
       return;
