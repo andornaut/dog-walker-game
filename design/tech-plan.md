@@ -28,12 +28,22 @@
 
 ## Architecture
 
-- **Render resolution:** 180×320 internal (portrait 9:16), scaled to fit with `pixelArt` (no smoothing). Provisional until the art style guide settles base resolution and tile size.
-- **Scenes:** one placeholder `RunScene` for Milestone 1. The rest is TBD.
-- **Tests:** Vitest unit tests over pure game logic (e.g. lane geometry). Scenes are checked by playing.
+- **Render resolution:** 360×640 internal (portrait 9:16), scaled with `pixelArt` (no smoothing). The code still renders the Milestone 1 placeholder at 180×320.
+- **All UI in the canvas:** the road, top bar, dog column and choice cards are Phaser scenes drawn at the same pixel scale with a pixel font. HTML is only the page shell. One scale and one input system: while cards are up, lane taps are not listened for.
+- **Screen layout:**
+  - A top bar for status (money, zone progress), separate from the road so it never hides obstacles scrolling in from the top.
+  - A fixed-width dog column on the left with 3 slots. A fired dog's slot empties, so the road never changes width mid-run.
+  - The road fills the rest.
+- **Scenes:**
+  - `RunScene`: road, walker, pack and spawns. Paused during encounters, which stops its scrolling, timers and tweens.
+  - `HudScene`: top bar and dog column, on top for the whole run. It stays visible during encounters, so money and owner happiness are in view while choosing, and it can highlight the dogs a card affects.
+  - `CardScene`: launched on an encounter. It dims the road, shows three cards over it, and resumes `RunScene` after a choice.
+- **Game state:** plain TypeScript with no Phaser dependency (money, owner happiness, pack, zone progress), plus pure functions for encounter rules. Scenes only render it. Tuning numbers live in one data file.
+- **Tests:** Vitest unit tests over pure game logic (lane geometry, game state, encounter rules). Scenes are checked by playing.
 
 ## Porting notes
 
 Running list of things to watch so mobile stays easy: touch controls, screen sizes/aspect ratios, performance, audio unlock on mobile browsers, offline play.
 
 - The page disables browser touch gestures (`touch-action: none`) and pinch zoom, so taps and swipes reach the game.
+- Phones taller than 9:16 are common. Open: fix the width and let the height grow, so the extra height shows more road instead of letterbox bars.

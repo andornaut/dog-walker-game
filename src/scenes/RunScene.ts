@@ -1,27 +1,71 @@
-import { Scene } from "phaser";
+import { type GameObjects, Scene } from "phaser";
 
-import { HEIGHT, LANE_COUNT, WIDTH } from "../config";
+import { HEIGHT, LANE_COUNT, SCREEN } from "../config";
 import { laneCenters } from "../lanes";
+import { screenLayout } from "../layout";
+import { addBox } from "./shapes";
 
-const LANE_COLORS = [0x8d8d8d, 0x9e9e9e];
+const DASH_COLOR = 0xe0e0e0;
+const DASH_LENGTH = 16;
+const DASH_SPACING = 40;
+const DASH_WIDTH = 2;
 const PACK_COLOR = 0xc97c5d;
+const ROAD_COLOR = 0x8d8d8d;
+// Pixels per second. Placeholder until the runner core sets the base speed.
+const SCROLL_SPEED = 80;
 const WALKER_COLOR = 0x3d5a80;
 
-// Milestone 1 placeholder: coloured boxes for the lanes, the walker and the pack.
+interface Dash {
+  rect: GameObjects.Rectangle;
+  row: number;
+}
+
+// The road, the walker and the pack. Paused while choice cards are up.
 export class RunScene extends Scene {
+  private dashes: Dash[] = [];
+  private scroll = 0;
+
   constructor() {
     super("run");
   }
 
   create(): void {
-    const centers = laneCenters(LANE_COUNT, WIDTH);
-    const laneWidth = WIDTH / LANE_COUNT;
-    centers.forEach((x, i) => {
-      this.add.rectangle(x, HEIGHT / 2, laneWidth, HEIGHT, LANE_COLORS[i % LANE_COLORS.length]);
-    });
+    const { road } = screenLayout(SCREEN);
+    addBox(this, ROAD_COLOR, road);
 
-    const middle = centers[Math.floor(LANE_COUNT / 2)];
-    this.add.rectangle(middle, HEIGHT - 24, 16, 24, WALKER_COLOR);
-    this.add.rectangle(middle, HEIGHT - 52, 14, 12, PACK_COLOR);
+    // Dashed lines between lanes, scrolled in update() so a pause is visible.
+    // Rows start one spacing above the road, where the top bar covers them.
+    const laneWidth = road.width / LANE_COUNT;
+    const rows = Math.ceil(road.height / DASH_SPACING) + 1;
+    this.dashes = [];
+    for (let lane = 1; lane < LANE_COUNT; lane++) {
+      for (let row = 0; row < rows; row++) {
+        const x = road.x + lane * laneWidth;
+        const rect = this.add
+          .rectangle(x, 0, DASH_WIDTH, DASH_LENGTH, DASH_COLOR)
+          .setOrigin(0.5, 0);
+        this.dashes.push({ rect, row });
+      }
+    }
+
+    const middle = laneCenters(LANE_COUNT, road)[Math.floor(LANE_COUNT / 2)];
+    this.add.rectangle(middle, HEIGHT - 40, 24, 32, WALKER_COLOR);
+    this.add.rectangle(middle, HEIGHT - 80, 32, 16, PACK_COLOR);
+
+    this.scene.launch("hud");
+
+    // Opens placeholder cards until collisions do (Milestone 3).
+    this.input.keyboard?.on("keydown-E", () => {
+      this.scene.pause();
+      this.scene.launch("card");
+    });
+  }
+
+  update(_time: number, delta: number): void {
+    const { road } = screenLayout(SCREEN);
+    this.scroll = (this.scroll + (SCROLL_SPEED * delta) / 1000) % DASH_SPACING;
+    for (const { rect, row } of this.dashes) {
+      rect.setY(road.y - DASH_SPACING + row * DASH_SPACING + this.scroll);
+    }
   }
 }
