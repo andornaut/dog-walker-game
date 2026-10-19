@@ -9,7 +9,7 @@ outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
-ui-detail-well (68x68); the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
+ui-detail-well (68x68); the walker section's ui-cork (16x16 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
 and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48),
@@ -1110,6 +1110,42 @@ def denim():
     return g
 
 
+def cork():
+    """16x16 seamless tile: the walker section's corkboard, repeated (TileSprite) over its tile area,
+    where the walkers' cards are pinned. Brown with scattered ochre and dbrown granules; the cream
+    tiles' ink edges hold on it, and it holds apart from the Pocket's blue and the dogs' plaid."""
+    g = Grid(DENIM, DENIM)
+    g.rect(0, 0, DENIM, DENIM, "brown")
+    for y in range(DENIM):
+        for x in range(DENIM):
+            h = (x * 37 + y * 91 + x * y * 13) % 23
+            if h in (0, 7):
+                g.p(x, y, "dbrown")
+            elif h in (3, 15):
+                g.p(x, y, "ochre")
+    return g
+
+
+def plaid():
+    """16x16 seamless tile: the dogs section's dog-blanket tartan, repeated (TileSprite) over its tile
+    area. A dred ground crossed by a 6px plum band each way, woven where a band crosses the ground
+    (alternate pixels), solid where the bands cross, and a 1px tan thread each way, dashed as weave."""
+    g = Grid(DENIM, DENIM)
+    for y in range(DENIM):
+        for x in range(DENIM):
+            bx, by = x < 6, y < 6
+            if bx and by:
+                c = "plum"
+            elif bx or by:
+                c = "plum" if (x + y) % 2 else "dred"
+            else:
+                c = "dred"
+            if (x == 11 and y % 2 == 0) or (y == 11 and x % 2 == 1):
+                c = "tan"
+            g.p(x, y, c)
+    return g
+
+
 def stitch(horizontal):
     """A seamless run of the Pocket's stitch line, repeated (TileSprite) along it: tan dashes
     STITCH_DASH long with STITCH_GAP gaps, each on a 1px navy shadow below (ui-stitch-h, 8x2) or to
@@ -1382,7 +1418,9 @@ IMAGES = {
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
     "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
     "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
+    "ui-cork": lambda: to_image(cork().outlined(False)),
     "ui-denim": lambda: to_image(denim().outlined(False)),
+    "ui-plaid": lambda: to_image(plaid().outlined(False)),
     "ui-stitch-h": lambda: to_image(stitch(True).outlined(False)),
     "ui-stitch-v": lambda: to_image(stitch(False).outlined(False)),
 }

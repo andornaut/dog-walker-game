@@ -6257,6 +6257,10 @@
       "png": "images/ui-celebrate-burst.png"
     },
     {
+      "key": "ui-cork",
+      "png": "images/ui-cork.png"
+    },
+    {
       "key": "ui-denim",
       "png": "images/ui-denim.png"
     },
@@ -6295,6 +6299,10 @@
     {
       "key": "ui-panel",
       "png": "images/ui-panel.png"
+    },
+    {
+      "key": "ui-plaid",
+      "png": "images/ui-plaid.png"
     },
     {
       "key": "ui-quip",
