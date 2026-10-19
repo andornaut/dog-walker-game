@@ -1,5 +1,9 @@
 /* The game page's layout: the nav bar, the game and the dev panel stacked in one screen. */
 
+:root {
+  --dev-bar-height: 24px;
+}
+
 html,
 body {
   margin: 0;
@@ -32,11 +36,23 @@ body {
   margin: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
 }
 
-/* The dev panel's bar, under the game: its height comes out of #game's, and it takes
-   the bottom safe-area inset. src/dev/devPanel.css styles its contents. */
+/* The dev panel, under the game: only its bar's height comes out of #game's, and it takes
+   the bottom safe-area inset. The open sheet overflows below the screen, so opening it
+   never resizes the game. src/dev/devPanel.css styles its contents. */
 #dev-panel {
   flex: none;
+  height: var(--dev-bar-height);
   padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* With the sheet open, body scrolls down to it. Drags on the game still steer. */
+body:has(.dev-sheet:not([hidden])) {
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+body:has(.dev-sheet:not([hidden])) #game {
+  touch-action: none;
 }
 
 /* Read by screen readers, not shown: the game's controls, which the canvas cannot expose. */

@@ -480,7 +480,12 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       save.refresh();
     }
   };
-  bar.addEventListener("click", () => setOpen(sheet.hidden !== false));
+  bar.addEventListener("click", () => {
+    setOpen(sheet.hidden !== false);
+    if (!sheet.hidden) {
+      sheet.scrollIntoView({ block: "nearest" });
+    }
+  });
   // Phaser listens for keys on window, so keys typed here would move lanes or toggle the
   // overlay without this.
   sheet.addEventListener("keydown", (event) => {

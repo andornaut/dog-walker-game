@@ -19,7 +19,7 @@
 .dev-bar {
   display: block;
   width: 100%;
-  height: 24px;
+  height: var(--dev-bar-height);
   padding: 0 max(12px, env(safe-area-inset-left, 0px));
   border: 0;
   border-top: 1px solid var(--dev-line);
@@ -35,24 +35,15 @@
   color: var(--dev-accent);
 }
 
-/* Fixed over the page rather than in the flex layout, so opening it never resizes the game. */
+/* Below the bar, past the bottom of the screen; src/main.css scrolls the page to it. */
 .dev-sheet {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 10;
-  max-height: 75vh;
-  max-height: 75dvh;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   box-sizing: border-box;
   padding: 0 max(16px, env(safe-area-inset-right, 0px))
     calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   border-top: 2px solid var(--dev-accent);
   background: var(--dev-bg);
-  box-shadow: 0 -8px 24px #000a;
-  /* The page turns these off for the game; the sheet scrolls and its text can be selected. */
+  /* The page turns these off for the game; the sheet scrolls the page and its text can be
+     selected. */
   touch-action: pan-y;
   -webkit-user-select: text;
   user-select: text;
