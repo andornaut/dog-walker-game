@@ -797,6 +797,34 @@
       "png": "images/item-whistle.png"
     },
     {
+      "key": "road-bark-park",
+      "png": "images/road-bark-park.png"
+    },
+    {
+      "key": "road-bark-park-start",
+      "png": "images/road-bark-park-start.png"
+    },
+    {
+      "key": "road-sniff-street-shops",
+      "png": "images/road-sniff-street-shops.png"
+    },
+    {
+      "key": "road-sniff-street-shops-start",
+      "png": "images/road-sniff-street-shops-start.png"
+    },
+    {
+      "key": "road-the-long-way-home",
+      "png": "images/road-the-long-way-home.png"
+    },
+    {
+      "key": "road-the-long-way-home-start",
+      "png": "images/road-the-long-way-home-start.png"
+    },
+    {
+      "key": "road-woof-way",
+      "png": "images/road-woof-way.png"
+    },
+    {
       "key": "ui-hint",
       "png": "images/ui-hint.png"
     },
