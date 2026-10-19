@@ -30,6 +30,7 @@ import {
   heartsAmount,
   moneyAmount,
   moneyCost,
+  quirkFactor,
   quirkScaledDogs,
   resolveEffects,
   targetDogs,
@@ -354,6 +355,7 @@ function effectCard(
       dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
       hearts: (effect, dog) => heartsAmount(data, effectSource, effect, dog),
       money: (effect) => moneyAmount(data, { affected }, state, effect),
+      moneyQuirk: (effect) => quirkFactor(data, { affected }, effect)?.quirk ?? null,
     };
     const cost = moneyCost(data, { affected }, state, option.effects);
     const preview = outcomeOf(

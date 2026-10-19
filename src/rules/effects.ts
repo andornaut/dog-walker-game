@@ -114,8 +114,8 @@ function isMessy(data: Pick<GameData, "encounters">, source: EffectSource): bool
 }
 
 // The first of the effect's quirk multipliers that an affected dog's quirk calls for.
-function quirkFactor(
-  data: RulesData,
+export function quirkFactor(
+  data: Pick<GameData, "dogs" | "tuning">,
   context: Pick<EffectContext, "affected">,
   effect: MoneyEffect,
 ): { readonly factor: number; readonly quirk: QuirkId } | null {

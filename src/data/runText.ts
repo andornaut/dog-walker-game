@@ -11,6 +11,7 @@ export const RUN_TEXT = {
     free: "Free",
     need: "Need {amount}",
     pickOne: "Pick one",
+    quirkNoLoss: "No tips lost ({quirk})",
     skip: "Skip",
     skipEffect: "Poop bags: walk on, nothing happens.",
     skipHeld: "Walk on: nothing happens.",

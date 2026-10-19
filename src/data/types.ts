@@ -239,11 +239,11 @@ export interface MoneyEffect {
 }
 
 // Per owner, before the temperament multiplier; traitAmounts replaces amount for those traits,
-// and quirkAmounts replaces either for those quirks.
+// and quirkAmounts replaces either for those quirks, where 0 changes nothing.
 export interface HeartsEffect {
   readonly amount: HeartsDelta;
   readonly kind: "hearts";
-  readonly quirkAmounts?: Readonly<Partial<Record<QuirkId, HeartsDelta>>>;
+  readonly quirkAmounts?: Readonly<Partial<Record<QuirkId, HeartsDelta | 0>>>;
   readonly target: Target;
   readonly traitAmounts?: Readonly<Partial<Record<TraitId, HeartsDelta>>>;
 }
@@ -622,6 +622,8 @@ export interface RunText {
     readonly free: string;
     readonly need: string;
     readonly pickOne: string;
+    // A money loss a quirk cancels, in place of the amount, such as a ratter's chase.
+    readonly quirkNoLoss: string;
     readonly skip: string;
     // The Skip card's effect on its face, and in its body when held.
     readonly skipEffect: string;

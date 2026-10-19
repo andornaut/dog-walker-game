@@ -17,6 +17,7 @@ import type {
   TraitId,
   TreatsEffect,
 } from "../data/types";
+import { fillNames } from "../text/lines";
 import { assertNever } from "./assertNever";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read, readTable } from "./units";
@@ -128,7 +129,8 @@ function moneyText(data: TextData, effect: MoneyEffect): string {
 function heartsText(data: Pick<GameData, "needs" | "quirks">, effect: HeartsEffect): string {
   const amount = `${sign(effect.amount)}${Math.abs(effect.amount)} ♥`;
   const target = effect.target;
-  const exception = (delta: number, name: string) => `${sign(delta)}${Math.abs(delta)} ${name}`;
+  const exception = (delta: number, name: string) =>
+    delta === 0 ? `none for ${name}` : `${sign(delta)}${Math.abs(delta)} ${name}`;
   switch (target.kind) {
     case "affected":
     case "all": {
@@ -245,7 +247,7 @@ export function namedEffectText(data: TextData, name: string, effects: readonly 
   return `${name}: ${effectClause(data, effects)}.`;
 }
 
-export type CardTextData = TextData & Pick<GameData, "dogs">;
+export type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 
 // What a card's text knows of the walk: the dogs a target reaches, in pack order, and a
 // money effect's total for the dogs it counts, after modifiers.
@@ -254,6 +256,8 @@ export interface CardTextContext {
   // The hearts the effect changes one dog's owner by, before the temperament multiplier.
   readonly hearts: (effect: HeartsEffect, dog: DogId) => number;
   readonly money: (effect: MoneyEffect) => Cents;
+  // The quirk whose multiplier scales the money effect for these dogs, if any.
+  readonly moneyQuirk: (effect: MoneyEffect) => QuirkId | null;
 }
 
 // Each dog's total, its owner's temperament included, with the dogs on the same total
@@ -272,7 +276,9 @@ function cardHeartsText(
     const total =
       context.hearts(effect, id) *
       readTable(data.tuning, "multipliers", "heartsByTemperament", dog.owner.temperament);
-    groups.set(total, [...(groups.get(total) ?? []), dog.name]);
+    if (total !== 0) {
+      groups.set(total, [...(groups.get(total) ?? []), dog.name]);
+    }
   }
   if (groups.size === 0) {
     return undefined;
@@ -296,6 +302,10 @@ function cardPhrase(
         return moneyText(data, effect);
       }
       const total = context.money(effect);
+      const quirk = context.moneyQuirk(effect);
+      if (total === 0 && effect.change === "lose" && quirk !== null) {
+        return fillNames(data.runText.card.quirkNoLoss, { quirk: data.quirks[quirk].name });
+      }
       return total === 0
         ? undefined
         : `${effect.change === "gain" ? "+" : MINUS}${formatDollars(total)}`;

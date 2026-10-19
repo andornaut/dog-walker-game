@@ -17,9 +17,9 @@ import {
 } from "../../hud/moments";
 import { amountText, type Change, type MoneyChange } from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
+import { quirkScaledDogs } from "../../rules/effects";
 import { hintFor } from "../../rules/hints";
 import { walkLength } from "../../rules/route";
-import { quirkScaledDogs } from "../../rules/effects";
 import { flourishesAt, type NeedStep } from "../../runner/needs";
 import type { PullStep } from "../../runner/pulls";
 import type { Random } from "../../runner/random";

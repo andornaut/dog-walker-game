@@ -5,7 +5,7 @@ import { gameData } from "../data";
 import type { Dog, DogId, QuirkId } from "../data/types";
 import { applyInstantEncounter, cardFor, chooseOption, quirkActorsOf } from "../rules/choices";
 import { zoneFeeParts } from "../rules/dogs";
-import { quirkScaledDogs } from "../rules/effects";
+import { applyEffects, quirkScaledDogs } from "../rules/effects";
 import { payZoneFees } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { cents, read } from "../rules/units";
@@ -196,13 +196,41 @@ describe("a ratter", () => {
     const card = cardFor(data, state, source);
     const option = card.options[1];
     const outcome = chooseOption(data, () => 0, state, card, 1);
-    return { cost: option?.cost, delta: outcome.moneyDelta };
+    return { cost: option?.cost, delta: outcome.moneyDelta, text: option?.text };
   };
 
-  it("drops no tips on a squirrel chase he joins", () => {
+  it("drops no tips on a squirrel chase he joins, and the card says why", () => {
     const ratter = withQuirks({ koda: "nervous", zippy: "ratter" });
-    expect(chase(ratter, ["koda", "zippy"])).toEqual({ cost: 0, delta: 0 });
-    expect(chase(ratter, ["koda"])).toEqual({ cost: 1000, delta: -1000 });
+    const noLoss = ratter.runText.card.quirkNoLoss.replace("{quirk}", ratter.quirks.ratter.name);
+    expect(chase(ratter, ["koda", "zippy"])).toEqual({ cost: 0, delta: 0, text: noLoss });
+    expect(chase(ratter, ["koda"])).toEqual({ cost: 1000, delta: -1000, text: "−$10" });
+  });
+});
+
+describe("a quirk's own hearts amount", () => {
+  // As gameplay gives Let them play: a playmate does nothing for a nervous dog.
+  const play = (quirk: QuirkId) => {
+    const data = withQuirks({ duchess: quirk });
+    const effect = {
+      amount: 1,
+      kind: "hearts",
+      quirkAmounts: { nervous: 0 },
+      target: { kind: "all" },
+    } as const;
+    const state = testState({ duchess: 3, koda: 3 });
+    const applied = applyEffects(
+      data,
+      { affected: [], random: () => 0, source: SOURCE },
+      [effect],
+      state,
+    );
+    return heartsByDog(applied);
+  };
+  const SOURCE = { card: "playDate", kind: "needCard", option: 0 } as const;
+
+  it("replaces the effect's amount, so 0 leaves a nervous dog's owner as they were", () => {
+    expect(play("nervous")).toEqual({ duchess: 3, koda: 4 });
+    expect(play("pampered")).toEqual({ duchess: 4, koda: 4 });
   });
 });
 
