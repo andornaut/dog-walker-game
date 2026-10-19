@@ -6,7 +6,7 @@ import type { Rect } from "../layout/rect";
 import { hitLabel } from "../rules/encounters";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
-import { playEffect } from "./sprites";
+import { firstTag, playEffect } from "./sprites";
 import { tagFrame } from "./uiKit";
 
 // An encounter hit's moment, played over the hit stop before its card: a burst over the pack,
@@ -48,7 +48,8 @@ const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   trash: "green",
 };
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
-const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play" };
+// A moving burst plays its word tag (the sound word on the impact star) when the art has one.
+const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play", wordTag: "play-word" };
 const PLATE = { corner: 8, height: 32, key: "ui-hit-label", width: 176 };
 // The label's line starts this far below the plate's top; font-title's capitals start 4px
 // into the line.
@@ -100,7 +101,8 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
 
 function playBurst(scene: Scene, moment: HitMoment, key: string, totalMs: number): void {
   if (!moment.still) {
-    playEffect(scene, key, BURST.tag, moment.centre, moment.depth);
+    const tag = firstTag(scene, key, [BURST.wordTag, BURST.tag]) ?? BURST.tag;
+    playEffect(scene, key, tag, moment.centre, moment.depth);
     return;
   }
   const frame = tagFrame(scene, key, BURST.tag);

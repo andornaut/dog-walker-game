@@ -2053,7 +2053,9 @@ export class RunScene extends Scene {
       this.dogTags.set(dog, tag);
     }
     if (tag === "tell" && shown !== "tell") {
-      playEffect(this, "fx-bark", "pop", head, DEPTH.fx);
+      // WOOF! in motion; the plain bark with reduced motion or without the word art.
+      const word = !this.reducedMotion() && firstTag(this, "fx-bark-word", ["pop"]) !== undefined;
+      playEffect(this, word ? "fx-bark-word" : "fx-bark", "pop", head, DEPTH.fx);
     }
     sprite.setFlipX(pull?.direction === -1);
   }
