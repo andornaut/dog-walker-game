@@ -248,6 +248,8 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 
 Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`: `<key>@88`, `@75`, `@62` and `@50` (dogs `@75` and `@50` only), each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite at its projected size from the smallest of its steps at least that size, scaled down nearest-neighbour, so it never swaps to a smaller step as it approaches.
 
+`art/tools/pixel.py` settles every variant as it builds. A ground sprite's variant stands with frame 0's last opaque row on floor(full-size feet row × scale + 0.5), or the frame's bottom row when that is past it. A variant's art fits the next larger step drawn at the variant's larger side plus 1px, rounded down, so the sprite only grows as it approaches: the frame keeps the size rule and the art drops the rows or columns that change it least. The 30-row two- and three-lane obstacles fill 22, 18 and 14 rows at `@75`, `@62` and `@50`.
+
 ## Road strips
 
 - 320×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
