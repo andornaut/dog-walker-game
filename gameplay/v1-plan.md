@@ -127,7 +127,11 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - Home screen has a simple shop that sells the 6 locked dogs and 5 loadout items: fanny pack (start with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +1 ♥ and has +1 max ♥)
 - Shop items are permanent, gameplay-altering gear: bought once and kept. Upgrade cards are the run-only boosts (the Hades split between keepsakes and boons)
 - Pick up to 1 owned item before each run (none is allowed, e.g. on a first run)
-- Progress (bank, owned items) is saved between sessions. Where it is stored (e.g. browser storage) is a tech proposal; see [`tech-plan.md`](../tech-plan.md)
+- Stats persist across runs:
+  - Overall, on a Stats page from the home screen: runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone reached and times each world was finished
+  - Per dog, on its roster card: walks, zones finished, times fired
+  - The end screen flags a new best
+- Progress (bank, owned items, stats) is saved between sessions. Where it is stored (e.g. browser storage) is a tech proposal; see [`tech-plan.md`](../tech-plan.md)
 
 ## Starting numbers
 
