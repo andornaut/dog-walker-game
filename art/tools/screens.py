@@ -23,6 +23,8 @@ reads on them.
   behind the panel's top edge. The lawn from y 124 gives the waving owners
   room either side, feet on y 128. Then a tall sky behind the panel, the
   zone's houses with lit windows, the yards, the sidewalk and the brick road.
+  The houses, trees and fences stay within x 8 to 352, so beside the badges
+  panel (8,458 344x118) the margins show only sky, lawn and sidewalk.
 - screen-loading: Woof Way at night, shown while the game loads. The logo is
   drawn in, centred at 116,92; a starry sky above the houses and street lamps;
   the sidewalk at y 430 to 445 carries the progress track, and the plain road
@@ -365,7 +367,7 @@ def stats():
     cv.fill(0, 627, W, 13, "plum")
     cv.fill(0, 639, W, 1, "ink")
     # the window onto Woof Way at night
-    view = night(bd.woof_way().img).crop((100, 18, 260, 112))
+    view = night(bd.woof_way().img).crop((100, 14, 260, 108))
     wx, wy, ww, wh = 100, 24, 160, 94
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
     cv.fill(wx - 5, wy - 5, ww + 10, wh + 10, "tan")
@@ -501,9 +503,9 @@ def end():
     cv.fill(167, 128, 1, 12, "dgreen")
     cv.fill(192, 128, 1, 12, "dgreen")
     # the rest of the street, far off: amber rooftops and trees against the low sun
-    for x, w, h, kind in ((0, 30, 22, "roof"), (28, 20, 30, "tree"), (50, 40, 18, "roof"), (92, 24, 28, "tree"),
+    for x, w, h, kind in ((8, 22, 22, "roof"), (28, 20, 30, "tree"), (50, 40, 18, "roof"), (92, 24, 28, "tree"),
                           (118, 36, 20, "roof"), (156, 20, 28, "tree"), (178, 44, 16, "roof"), (224, 24, 32, "tree"),
-                          (250, 38, 22, "roof"), (290, 22, 26, "tree"), (314, 46, 18, "roof")):
+                          (250, 38, 22, "roof"), (290, 22, 26, "tree"), (314, 38, 18, "roof")):
         top = 520 - h
         cv.fill(x, top, w, h + 30, "amber")
         if kind == "roof":
@@ -514,9 +516,10 @@ def end():
                 for dx in range(-w // 2, w // 2 + 1):
                     if dx * dx + dy * dy <= (w // 2) ** 2:
                         cv.fill(x + w // 2 + dx, top + dy, 1, 1, "amber")
-    # The Long Way Home, in the zone backdrop's palette: trees, houses with lit windows, yards and the sidewalk
+    # The Long Way Home, in the zone backdrop's palette: trees, houses with lit windows, yards and the sidewalk.
+    # Everything standing is kept within x 8 to 352, so the badges panel never cuts it into slivers.
     strip = clear(W, 150)
-    for cx, top in ((20, 44), (182, 40), (346, 46)):
+    for cx, top in ((30, 44), (182, 40), (330, 46)):
         bd.tree(strip, cx, top, "orange", "rust", r=20)
     for x, w, wall, roof, door in ((44, 70, "white", "dred", "dgreen"), (210, 80, "skin1", "navy", "red")):
         bd.house(strip, x, w, wall, roof, door, top=36)
@@ -528,7 +531,7 @@ def end():
             strip.fill(wx + 1, 69, 10, 8, "yellow")
             strip.fill(wx + 6, 69, 1, 8, "amber")
             strip.fill(wx + 1, 73, 10, 1, "amber")
-    for x, w, wall, roof, door in ((124, 50, "tan", "brown", "dred"), (300, 50, "cream", "purple", "blue")):
+    for x, w, wall, roof, door in ((124, 50, "tan", "brown", "dred"), (298, 50, "cream", "purple", "blue")):
         bd.house(strip, x, w, wall, roof, door, top=48)
         for wx in (x + 6, x + w - 18):
             strip.fill(wx + 1, 81, 10, 8, "yellow")
@@ -536,9 +539,9 @@ def end():
     bd.ground(strip)
     bd.flowers(strip, 48, 110, 110, ("orange", "yellow", "red"))
     bd.flowers(strip, 214, 286, 112, ("orange", "yellow", "red"))
-    bd.fence(strip, 104, 0, 40)
+    bd.fence(strip, 104, 8, 40)
     bd.fence(strip, 104, 120, 176)
-    bd.fence(strip, 104, 294, W)
+    bd.fence(strip, 104, 294, 352)
     for x, y in ((20, 120), (100, 116), (176, 122), (260, 118), (330, 122)):
         strip.fill(x, y, 3, 2, "orange")
         strip.fill(x + 1, y - 1, 1, 1, "rust")
@@ -838,6 +841,7 @@ def ui(cv, key):
     elif key == "screen-end":
         cv.paste(logo().img, 116, 52)
         panel(24, 140, 312, 312)
+        panel(8, 458, 344, 118)
         cv.fill(48, 588, 264, 40, "orange")
         cv.fill(48, 584, 264, 40, "amber")
     elif key == "screen-loading":

@@ -1,34 +1,34 @@
 { "frames": {
    "hedge 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 144, "h": 32 },
+    "frame": { "x": 0, "y": 0, "w": 144, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 32 },
-    "sourceSize": { "w": 144, "h": 32 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 24 },
+    "sourceSize": { "w": 144, "h": 24 },
     "duration": 350
    },
    "hedge 1.aseprite": {
-    "frame": { "x": 144, "y": 0, "w": 144, "h": 32 },
+    "frame": { "x": 144, "y": 0, "w": 144, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 32 },
-    "sourceSize": { "w": 144, "h": 32 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 24 },
+    "sourceSize": { "w": 144, "h": 24 },
     "duration": 350
    },
    "hedge 2.aseprite": {
-    "frame": { "x": 288, "y": 0, "w": 144, "h": 32 },
+    "frame": { "x": 288, "y": 0, "w": 144, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 32 },
-    "sourceSize": { "w": 144, "h": 32 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 24 },
+    "sourceSize": { "w": 144, "h": 24 },
     "duration": 350
    },
    "hedge 3.aseprite": {
-    "frame": { "x": 432, "y": 0, "w": 144, "h": 32 },
+    "frame": { "x": 432, "y": 0, "w": 144, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 32 },
-    "sourceSize": { "w": 144, "h": 32 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 144, "h": 24 },
+    "sourceSize": { "w": 144, "h": 24 },
     "duration": 350
    }
  },
@@ -37,7 +37,7 @@
   "version": "1.2.30-x64",
   "image": "hedge.png",
   "format": "RGBA8888",
-  "size": { "w": 576, "h": 32 },
+  "size": { "w": 576, "h": 24 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 3, "direction": "forward" }

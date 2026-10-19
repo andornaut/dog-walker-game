@@ -4,7 +4,9 @@
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, silly pink), each with an icon for its goal. Tags:
 earned (in colour) and locked (grey, the icon as a two-tone slate silhouette,
-a small padlock).
+a small padlock). Where an icon's edge holds under 3:1 against the cream and tan
+face, the face beside it takes a 1px keyline: plum (9.42:1 on cream, 6.49:1 on
+tan), teal for green (eau-de-skunk).
 fx-confetti: 64x64, the burst behind a badge as it is earned (tag play, 10
 frames at 80ms), plum-rimmed so it reads on the Stats wood and the cream end panel.
 
@@ -24,11 +26,13 @@ import random
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, main  # noqa: E402
+from pixel import K, Grid, contrast, main  # noqa: E402
 
 RIMS = {"firsts": ("ochre", "rust", "tan"), "mastery": ("lgrey", "grey", "white"),
         "collection": ("amber", "orange", "yellow"), "silly": ("pink", "mauve", "white")}
 GREYS = ["ffffff", "c0cbdc", "8b9bb4", "5a6988", "3a4466", "262b44", "181425"]
+# The icon keyline's colour where it is not plum, after the effects' rims.
+KEYLINES = {"eau-de-skunk": "teal"}
 
 
 def lum(c):
@@ -100,7 +104,7 @@ def _(g):
 
 @icon("clean-paws")
 def _(g):
-    paw(g, 16, 16, "sky")
+    paw(g, 16, 16, "blue")
     for x, y in ((9, 9), (22, 10), (22, 21)):
         g.rect(x, y - 1, 1, 3, "blue")
         g.rect(x - 1, y, 3, 1, "blue")
@@ -205,7 +209,7 @@ def _(g):
         g.ell(cx, cy, r, r * 0.85, "green", "dgreen")
     for x in (10, 16, 22):
         for k in range(5):
-            g.p(x + (k % 2), 6 + k, "dgreen")
+            g.p(x + (k % 2), 6 + k, "forest")
 
 
 @icon("squirrel")
@@ -235,15 +239,26 @@ def badge(name, locked=False):
     for a in range(0, 360, 30):
         g.p(16 + math.cos(math.radians(a)) * 13, 16 + math.sin(math.radians(a)) * 13, rim_sh)
     g.ell(16, 16, 11, 11, "cream", "tan")
-    face = [row[:] for row in g.px]
-    ICONS[name](g)
+    disc = Grid(32, 32)
+    disc.ell(16, 16, 11, 11, "cream")
+    art = Grid(32, 32)
+    ICONS[name](art)
+    icon_px = {(x, y) for y in range(32) for x in range(32) if art.px[y][x]}
+    # the keyline: every face pixel beside an icon pixel that holds under 3:1 against it
+    keyline = {(x, y) for y in range(32) for x in range(32) if disc.px[y][x] and (x, y) not in icon_px and any(
+        (x + dx, y + dy) in icon_px and contrast(art.px[y + dy][x + dx], g.px[y][x]) < 3
+        for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))}
+    for x, y in icon_px:
+        g.px[y][x] = art.px[y][x]
+    for x, y in keyline:
+        g.p(x, y, KEYLINES.get(name, "plum"))
     if locked:
         # The icon becomes a two-tone silhouette (dark lines stay darker) so its goal still reads on the grey face.
         for y in range(32):
             for x in range(32):
                 c = g.px[y][x]
                 if c:
-                    g.px[y][x] = grey(c) if c == face[y][x] else K["dslate"] if lum(c) < 90 else K["slate"]
+                    g.px[y][x] = (K["dslate"] if lum(c) < 90 else K["slate"]) if (x, y) in icon_px | keyline else grey(c)
         g.rect(20, 22, 8, 7, "amber")
         g.rect(20, 22, 8, 1, "yellow")
         g.rect(21, 18, 1, 4, "grey")

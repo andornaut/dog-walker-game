@@ -7,10 +7,12 @@ icon-trait-<trait>          fancy (a pink bow), food-driven (a bone), chaser (a 
 icon-energy-<energy>        calm (a sleepy moon), steady (a paw print), hyper (a lightning bolt)
 icon-owner-<temperament>    laid-back (sunglasses and a grin), fussy (a frown and a cross mark),
                             dramatic (a wail and a tear)
-icon-zone-<zone>            woof-way (a house), bark-park (a tree), sniff-street-shops
-                            (a shopfront), the-long-way-home (a sunset over a path)
+icon-zone-<zone>            snooze-crescent (a crescent moon over a roof), bark-park (a tree),
+                            woof-way (a house), sniff-street-shops (a shopfront),
+                            paws-promenade (a railing over a wave), the-long-way-home (a
+                            sunset over a path)
 icon-soaked, icon-spooked   dog statuses beside icon-stinky (ui.py), on cream: water drops; a
-                            wide-eyed dog face with a sweat drop
+                            wide-eyed, floppy-eared dog face with fright lines and a sweat drop
 icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a hand under a heart),
                             big-tipper (coins and an up arrow), good-leash (a leash), raincoats
                             (a yellow raincoat), rush-hour (an alarm clock), second-wind (two
@@ -19,10 +21,16 @@ icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a han
 icon-gear-<gear>            state strip, on ink: the shop's item art (icons.py) at 16x16
 The upgrade and gear ids are the data ids in kebab case. icon-stinky also reads on ink.
 
+Sprite: ui-difficulty (55x10; tags 1 to 5), a zone's difficulty under its name on a fork's path
+card: that many filled paws out of five, 11px apart. A filled paw is amber, a hollow one a tan
+rim around an empty pad, both outlined in plum, so they differ by shape on cream and on the
+card's plum frame.
+
 Usage:
-  glyphs.py preview OUT.png   every icon on the UI's paper, panel, wood and ink colours, scaled up
-  glyphs.py build             write art/glyphs/*.aseprite and public/art/images/*.png,
-                              and list them in the manifest's "images"
+  glyphs.py preview OUT.png   every icon on the UI's paper, panel, wood and ink colours, then
+                              ui-difficulty's tags, scaled up
+  glyphs.py build             write art/glyphs/*.aseprite, export to public/art/images/ and
+                              public/art/sprites/, and list them in the manifest
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -36,7 +44,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid  # noqa: E402
+from pixel import DARKER, K, Grid, build as build_sprites  # noqa: E402
 from ui import to_image  # noqa: E402
 
 
@@ -219,6 +227,37 @@ def the_long_way_home():
     return g
 
 
+def snooze_crescent():
+    g = Grid(16, 16)
+    g.ell(11, 5, 4.5, 4.5, "yellow")
+    g.ell(13.5, 3.5, 3.6, 3.6, None)
+    g.p(2, 2, "white")
+    g.p(14, 9, "white")
+    g.tri((0.5, 11.5), (6, 5.5), (11.5, 11.5), "purple")
+    g.rect(1, 11, 10, 1, "plum")
+    g.rect(2, 12, 8, 3, "lgrey")
+    g.rect(9, 12, 1, 3, "grey")
+    g.rect(4, 12, 3, 2, "amber")
+    g.p(4, 12, "yellow")
+    return g
+
+
+def paws_promenade():
+    g = Grid(16, 16)
+    g.rect(0, 1, 16, 2, "ochre")
+    g.rect(0, 1, 16, 1, "tan")
+    g.rect(0, 5, 16, 1, "ochre")
+    for x in (2, 12):
+        g.rect(x, 3, 2, 5, "brown")
+    g.rect(0, 7, 16, 2, "brown")
+    g.rect(0, 7, 16, 1, "tan")
+    g.rect(0, 10, 16, 6, "sky")
+    bitmap(g, 0, 10, ["..cc......cc....", ".c..c....c..c...", "c....cccc....ccc"], {"c": "cyan"})
+    g.rect(0, 15, 16, 1, "blue")
+    g.p(6, 13, "white")
+    return g
+
+
 # ---------- dog statuses, on the doghouse's cream heart board beside icon-stinky ----------
 # Like icon-stinky, each reads on cream by its outline (navy, blue, dbrown and plum hold 5.8:1
 # or more there) and differs from the others by shape: drops, a scared face, stink lines.
@@ -243,19 +282,25 @@ def soaked():
 
 
 def spooked():
-    """A dog's face gone wide-eyed, ears flat and a wobbly mouth, with a sweat drop."""
+    """A dog's face gone wide-eyed, long ears hanging, with fright lines and a sweat drop as in
+    fx-status-spooked (hits.py): the white lines rimmed in plum, the cyan drop in navy, so both
+    hold on cream and ink."""
     g = Grid(16, 16)
-    g.ell(8, 9, 5, 5, "tan")
-    for s in (-1, 1):
-        g.ell(8 + s * 5, 8.5, 1.6, 3.6, "brown")
-    g.ell(8, 10.8, 2.6, 1.8, "cream")
+    g.edge = lambda c: K["plum"] if c == K["white"] else K["navy"] if c in (K["cyan"], K["sky"]) else DARKER[DARKER[c]]
+    g.ell(8, 9.5, 5, 4.8, "tan", "brown")
+    for cx in (3, 13):
+        g.ell(cx, 10, 1.6, 4.2, "brown")
+    g.ell(8, 12.5, 3, 2, "cream")
     for x in (5, 9):
-        g.rect(x, 6, 2, 3, "white")
-    g.p(6, 7, "ink")
-    g.p(9, 7, "ink")
-    g.rect(7, 9, 2, 1, "ink")
-    bitmap(g, 6, 11, ["1.1.", ".1.1"], {"1": "plum"})
-    bitmap(g, 12, 0, [".c.", ".c.", "ccs", "css", ".s."], {"c": "cyan", "s": "sky"})
+        g.rect(x, 7, 3, 3, "white")
+        g.p(x + 1, 8, "ink")
+    g.rect(7, 11, 3, 1, "ink")
+    g.p(8, 12, "ink")
+    g.p(8, 13, "plum")
+    # fright lines fanning out over the head's top left
+    for x, y in ((0, 5), (1, 5), (1, 1), (2, 2), (5, 0), (5, 1)):
+        g.p(x, y, "white")
+    bitmap(g, 12, 0, [".c.", "cwc", "cws", ".s."], {"c": "cyan", "w": "white", "s": "sky"})
     return g
 
 
@@ -455,9 +500,11 @@ IMAGES = {
     "icon-owner-laid-back": laid_back,
     "icon-owner-fussy": fussy,
     "icon-owner-dramatic": dramatic,
-    "icon-zone-woof-way": woof_way,
+    "icon-zone-snooze-crescent": snooze_crescent,
     "icon-zone-bark-park": bark_park,
+    "icon-zone-woof-way": woof_way,
     "icon-zone-sniff-street-shops": sniff_street_shops,
+    "icon-zone-paws-promenade": paws_promenade,
     "icon-zone-the-long-way-home": the_long_way_home,
     "icon-soaked": soaked,
     "icon-spooked": spooked,
@@ -478,19 +525,65 @@ IMAGES = {
 }
 
 
+# ---------- the difficulty marker on a fork's path card ----------
+
+PAW_PRINT = ("..ff.ff..", "..ff.ff..", "ff.....ff", "ff.....ff", "...fff...", "..fffff..", ".fffffff.",
+             "..fffff..")
+
+
+def paw(g, x0, filled):
+    """One 11x10 paw at x0, outlined in plum by hand so a hollow pad's middle stays empty: filled
+    is amber, shaded orange along the pad's foot; hollow keeps only a tan rim."""
+    cells = {(x, y) for y, row in enumerate(PAW_PRINT) for x, ch in enumerate(row) if ch == "f"}
+    sides = ((0, -1), (0, 1), (-1, 0), (1, 0))
+    for x, y in cells:
+        for dx, dy in sides:
+            if (x + dx, y + dy) not in cells:
+                g.p(x0 + 1 + x + dx, 1 + y + dy, "plum")
+    for x, y in cells:
+        rim = any((x + dx, y + dy) not in cells for dx, dy in sides)
+        if filled:
+            g.p(x0 + 1 + x, 1 + y, "orange" if y == 7 else "amber")
+        elif rim:
+            g.p(x0 + 1 + x, 1 + y, "tan")
+
+
+def difficulty(n):
+    """55x10: n filled paws, then hollow ones, out of five. Amber holds 7.4:1 on the frame's
+    plum and tan 6.5:1; the plum outline holds 9.4:1 on cream."""
+    g = Grid(55, 10)
+    for i in range(5):
+        paw(g, i * 11, i < n)
+    return g
+
+
+def sprites():
+    yield "ui-difficulty", [(str(n), [difficulty(n).outlined(False)], 1000) for n in range(1, 6)]
+
+
 def image(draw):
     return to_image(draw().outlined())
 
 
 def preview(out, scale=6):
     grounds = [(234, 212, 170), (228, 166, 114), (115, 62, 57), (58, 68, 102), (24, 20, 37)]
-    sheet = Image.new("RGB", (20 * len(IMAGES) * scale, 20 * len(grounds) * scale), (62, 39, 49))
+    marks = [to_image(f) for _, tags in sprites() for _, fs, _ in tags for f in fs]
+    width = max(20 * len(IMAGES), 60 * len(marks))
+    sheet = Image.new("RGB", (width * scale, (20 + 14) * len(grounds) * scale), (62, 39, 49))
     for i, draw in enumerate(IMAGES.values()):
         im = image(draw)
         for j, ground in enumerate(grounds):
             tile = Image.new("RGB", (16, 16), ground)
             tile.paste(im, (0, 0), im)
             sheet.paste(tile.resize((16 * scale, 16 * scale), Image.NEAREST), (i * 20 * scale, j * 20 * scale))
+    # ui-difficulty, one row per ground
+    for i, im in enumerate(marks):
+        for j, ground in enumerate(grounds):
+            tile = Image.new("RGB", (im.width + 2, im.height + 2), ground)
+            tile.paste(im, (1, 1), im)
+            y = 20 * len(grounds) + j * 14
+            sheet.paste(tile.resize((tile.width * scale, tile.height * scale), Image.NEAREST),
+                        (i * 60 * scale, y * scale))
     sheet.save(out)
 
 
@@ -501,6 +594,7 @@ def build():
         png = f"public/art/images/{key}.png"
         image(draw).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/glyphs/{key}.aseprite"], check=True)
+    build_sprites(list(sprites()), "art/glyphs")
     path = "public/art/manifest.json"
     manifest = json.load(open(path))
     entries = {i["key"]: i for i in manifest.get("images", [])}

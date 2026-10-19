@@ -42,8 +42,9 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
     """Eyes, brows and mouth. wide marks the dramatic owners, whose faces go further. brow is the brows'
     colour (feat unless given). whites sets a white beside each pupil, so the eyes read on dark skin.
     Happy closes the eyes into smiling arcs under arched brows; neutral is open eyes under flat brows;
-    upset lifts the brows in the middle and breaks a sweat; fired narrows the eyes under brows pinched down;
-    worried opens the eyes wide under brows lifted high, with a wobbly mouth and a big sweat bead."""
+    upset slants the brows down to the middle over a frown, angry and sad; fired narrows the eyes under brows
+    pinched down hard; worried lifts the brows' inner ends over eyes gone wide, white either side of the
+    pupil, with a small wobbly mouth and a big sweat bead."""
     brow = brow or feat
     for x in (12, 19):
         if mood == "happy":
@@ -56,9 +57,9 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
                 g.rect(x - 1, 18, 1, 1, "white")
             g.rect(x, 18, 1, 1, "ink")
         elif mood == "worried":
-            # wide eyes: a white beside a pupil one row taller than neutral's, glancing aside
-            g.rect(x - 1, 16, 1, 3, "white")
-            g.rect(x, 16, 1, 3, "ink")
+            # wide eyes: a 3x3 white with the pupil low in its middle
+            g.rect(x - 1, 16, 3, 3, "white")
+            g.rect(x, 17, 1, 2, "ink")
         else:
             if whites:
                 g.rect(x - 1, 17, 1, 2, "white")
@@ -68,10 +69,10 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
     brows = {
         "happy": ((11, 14), (12, 13), (13, 14), (18, 14), (19, 13), (20, 14)),
         "neutral": ((11, 15), (12, 15), (13, 15), (18, 15), (19, 15), (20, 15)),
-        "upset": ((11, 15), (12, 14), (13, 13), (18, 13), (19, 14), (20, 15)),
+        "upset": ((11, 14), (12, 14), (13, 15), (18, 15), (19, 14), (20, 14)),
         "fired": ((11, 13), (12, 14), (13, 15), (18, 15), (19, 14), (20, 13)),
-        # lifted clear of the eyes and tilted up to the middle, with a gap above each eye
-        "worried": ((10, 14), (11, 14), (12, 13), (13, 12), (18, 12), (19, 13), (20, 14), (21, 14)),
+        # the inner ends lifted, so the brows tilt up to the middle
+        "worried": ((10, 15), (11, 15), (12, 14), (13, 13), (18, 13), (19, 14), (20, 15), (21, 15)),
     }[mood]
     for x, y in brows:
         g.p(x, y, brow)
@@ -97,15 +98,13 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         g.rect(14, 22, 4, 1, feat)
         g.p(13, 23, feat)
         g.p(18, 23, feat)
-        # a bead of sweat at the temple, and a tear on the dramatic owners
-        g.p(22, 13, "cyan")
-        g.rect(22, 14, 1, 2, "sky")
+        # a tear on the dramatic owners
         if wide:
             g.p(10, 19, "cyan")
             g.p(10, 20, "sky")
     elif mood == "worried":
-        # a wobbly mouth waving between two rows in 2px steps, and a big bead of sweat on the left temple
-        for x, y in ((12, 23), (13, 22), (14, 22), (15, 23), (16, 23), (17, 22), (18, 22), (19, 23)):
+        # a small wobbly mouth, and a big bead of sweat on the left temple
+        for x, y in ((14, 23), (15, 22), (16, 23), (17, 22)):
             g.p(x, y, feat)
         g.p(9, 12, "white")
         g.rect(8, 13, 2, 1, "cyan")

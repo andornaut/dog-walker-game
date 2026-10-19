@@ -3,8 +3,9 @@
 warning cue shown at the lane edge about a second before one enters.
 
 squirrel-dash       32x32   side view facing right, run (4 frames, 80ms): a bounding gallop, tail streaming
-loose-dog           32x32   the corgi from other-dog in side view facing right, no owner, a broken leash
-                            trailing; run (4 frames, 100ms)
+loose-dog           32x32   the corgi from other-dog in side view facing right, no owner; run (4 frames,
+                            100ms): a gallop, gathered, reaching, airborne and landing, the broken leash
+                            trailing up off the back, frayed, a 1px wave travelling down it
 ball-bounce         16x24   the gag-ball ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
                             contact, with its own ground shadow (the game draws none)
 cyclist             32x48   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
@@ -19,8 +20,9 @@ outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
 roads and its fill carries Woof Way. The warning cues are outlined in ink.
 
 Depth variants, redrawn at their own size with a full outline (see minis.py):
-squirrel-dash@75, loose-dog@75 (24x24), squirrel-dash@50, loose-dog@50 (16x16) and
-ball-bounce@75, ball-bounce@50 (12x18, 8x12). The cyclist's features are 2px or wider, so it scales at runtime.
+squirrel-dash@75, loose-dog@75 (24x24), squirrel-dash@50, loose-dog@50 (16x16),
+ball-bounce@75, ball-bounce@50 (12x18, 8x12) and cyclist@75, cyclist@50 (24x36, 16x24),
+the cyclist drawn by hand at each size so its face and the turning crank stay readable.
 
 Usage:
   hazards.py preview OUT.png   every frame on the four road colours
@@ -96,53 +98,55 @@ def squirrel_dash(dy=0, st=0, front=(18, 26), hind=(13, 26), tail=(0, 0), new=Gr
 
 # ---------- loose-dog: the other dog's corgi, side view, facing right ----------
 
-# A corgi's short-legged gallop, one dict per frame: body bob, the near front and hind paws' offsets
-# (dx, dy; negative dy lifts the paw), the leash end's sway and the stub tail's flick. The far legs
-# take the next frame's paws, a beat behind the near ones.
+# A corgi's gallop, one dict per frame, read like SQUIRREL_RUN: body lift, the near front and hind paws'
+# top-left pixels, and the broken leash's wave, a 1px offset for each of its three trailing points. The
+# wave travels down the leash 1px a frame. The far legs follow the near ones 2px further forward.
 CORGI_RUN = [
-    dict(bob=0, front=(2, 0), hind=(-2, 0), leash=0, tail=0),      # stretched out, all four paws down
-    dict(bob=-1, front=(2, -2), hind=(-2, -2), leash=1, tail=-1),  # flight
-    dict(bob=0, front=(-1, 0), hind=(1, 0), leash=2, tail=0),      # gathered, legs under
-    dict(bob=-1, front=(1, -2), hind=(-1, 0), leash=1, tail=1),    # hind pushing off, front reaching
+    dict(bob=0, front=(16, 27), hind=(9, 27), leash=(0, 1, 0)),      # gathered: all four paws under
+    dict(bob=-1, front=(23, 25), hind=(3, 27), leash=(1, 0, -1)),    # hind push off, front reaching
+    dict(bob=-2, front=(25, 23), hind=(1, 24), leash=(0, -1, 0)),    # airborne, stretched out
+    dict(bob=-1, front=(20, 27), hind=(6, 25), leash=(-1, 0, 1)),    # front paws land, hind swing in
 ]
 
 
 def limb(g, x0, y0, x1, y1, w, c):
-    """A leg w pixels wide from (x0, y0) down to (x1, y1), one row at a time."""
-    n = max(1, round(y1 - y0))
+    """A leg w pixels wide and 2 tall per step, from the shoulder or hip (x0, y0) to the paw (x1, y1)."""
+    n = max(1, round(max(abs(x1 - x0), abs(y1 - y0))))
     for k in range(n + 1):
-        g.rect(round(x0 + (x1 - x0) * k / n), y0 + k, w, 1, c)
+        g.rect(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n), w, 2, c)
 
 
-def corgi_side(bob=0, front=(0, 0), hind=(0, 0), leash=0, tail=0, far=None, new=Grid):
-    """far holds the far legs' front and hind paws; new makes the grid, as for squirrel_dash."""
+def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
+    """new makes the grid, as for squirrel_dash. The dog sits 1px lower than bob says, so the ear tips keep
+    their outline in flight."""
     g = edged(new())
-    b = bob
-    far = far or dict(front=front, hind=hind)
-    # far legs: a shade darker, a beat behind the near ones
-    for x, (dx, dy) in ((10, far["hind"]), (21, far["front"])):
-        limb(g, x, 22 + b, x + dx, 26 + dy, 2, "rust")
-        g.rect(x + dx, 26 + dy, 2, 2, "lgrey")
-    # the broken leash: from the collar, back over the shoulders and streaming behind, frayed at the end
-    pts = [(20, 13), (16, 10), (11, 10), (6, 11 + leash), (2, 12 + leash)]
+    b = bob + 1
+    # far legs: a shade darker, 2px further forward than the near ones
+    for (x, y), (px, py) in (((10, 21 + b), hind), ((20, 21 + b), front)):
+        limb(g, x, y, px + 3, py - 1, 2, "rust")
+        g.rect(px + 3, py, 2, 2, "lgrey")
+    # the broken leash: up off the collar and trailing well clear of the back, waving, frayed at the end
+    w1, w2, w3 = leash
+    pts = [(19, 13), (15, 7), (10, 5 + w1), (6, 4 + w2), (3, 5 + w3)]
     for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
-        n = max(abs(x1 - x0), abs(y1 - y0))
-        for k in range(n + 1):
+        n = max(abs(x1 - x0), abs(y1 - y0), 1)
+        for k in range(round(n) + 1):
             g.p(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n + b), "red")
-    g.p(1, 11 + leash + b, "red")
-    g.p(1, 13 + leash + b, "red")
+    ex, ey = pts[-1]
+    g.p(ex - 1, ey - 1 + b, "red")
+    g.p(ex - 1, ey + 1 + b, "red")
     # stub tail: a fluffy tuft at the rump
-    g.ell(4.5, 16 + b + tail, 2.5, 2, "ochre", "rust", "tan")
+    g.ell(4.5, 16 + b, 2.5, 2, "ochre", "rust", "tan")
     # body: long and low, white underneath
     g.ell(14, 19 + b, 9.5, 5, "ochre", "rust", "tan")
     g.ell(15, 22 + b, 7, 2, "white", "lgrey")
     # chest ruff
     g.ell(21, 19 + b, 3, 3.5, "white", "lgrey")
     # near legs: short, ochre with white socks
-    for x, (dx, dy) in ((7, hind), (18, front)):
-        limb(g, x, 22 + b, x + dx, 26 + dy, 3, "ochre")
-        g.rect(x + dx, 26 + dy, 3, 2, "white")
-        g.p(x + dx + 2, 27 + dy, "lgrey")
+    for (x, y), (px, py) in (((7, 21 + b), hind), ((18, 21 + b), front)):
+        limb(g, x, y, px, py - 1, 3, "ochre")
+        g.rect(px, py, 3, 2, "white")
+        g.p(px + 2, py + 1, "lgrey")
     # head: fox face, big upright ears with pink insides, white blaze and muzzle
     g.tri((19.5, 9 + b), (20.5, 2 + b), (24, 7.5 + b), "ochre")
     g.tri((24, 8 + b), (26.5, 2 + b), (28, 9 + b), "ochre")
@@ -269,6 +273,146 @@ def cyclist(lf=36, rf=41, sway=0):
     return edged(lean(g, sway)) if sway else g
 
 
+# The cyclist at 0.75x and 0.5x, drawn at size: scaled, the face goes and the pedals barely move. Per frame,
+# as CYCLIST_RIDE: the left and right foot rows, the sway of everything above the handlebar, and the row of
+# the tread mark rolling down the tyre. A foot coming forward is drawn wider and white, one going back
+# narrower and lgrey, so the four beats read as a turning crank.
+CYCLIST_SMALL = {
+    0.75: [dict(lf=26, rf=31, sway=-1, tread=26), dict(lf=29, rf=28, sway=0, tread=28),
+           dict(lf=31, rf=26, sway=1, tread=30), dict(lf=28, rf=29, sway=0, tread=32)],
+    0.5: [dict(lf=17, rf=21, sway=-1, tread=17), dict(lf=20, rf=18, sway=0, tread=19),
+          dict(lf=21, rf=17, sway=1, tread=21), dict(lf=18, rf=20, sway=0, tread=17)],
+}
+
+
+def sway_rows(g, k, bottom):
+    """Shift rows above bottom k pixels sideways: the rider leans over the bars, which stay put."""
+    if k:
+        for y in range(bottom):
+            row = g.px[y]
+            g.px[y] = [row[x - k] if 0 <= x - k < g.w else None for x in range(g.w)]
+
+
+def cyclist_75(lf, rf, sway, tread):
+    """cyclist at 24x36: a vented cyan helmet over a visor, a face with 2px eyes and a smile, the lime
+    jersey with its white band, and a 4px tyre between the legs, lit grey on its left as road.LIT has it."""
+    g = edged(Grid(24, 36))
+    # tyre, mudguard and fork; the tread mark rolls down the tyre
+    g.rect(11, 25, 2, 10, "ink")
+    g.rect(10, 26, 4, 8, "ink")
+    g.rect(10, 26, 1, 8, "grey")
+    g.p(12, tread, "slate")
+    g.p(12, tread + 1, "slate")
+    g.rect(10, 24, 4, 1, "lgrey")
+    g.rect(11, 22, 2, 2, "sky")
+    g.p(12, 22, "blue")
+    g.p(12, 23, "blue")
+    # legs: shorts, shins, then the feet on the pedals
+    for x, foot, fwd in ((7, lf, lf > rf), (15, rf, rf > lf)):
+        g.rect(x, 22, 3, 2, "navy")
+        g.p(x + 2, 22, "ink")
+        g.p(x + 2, 23, "ink")
+        g.rect(x, 24, 2, foot - 24, "skin1")
+        g.rect(x + 1, 24, 1, foot - 24, "skin2")
+        fx = x - 1 if x < 12 else x
+        if fwd:
+            g.rect(fx, foot, 3, 1, "white")
+            g.rect(fx, foot + 1, 3, 1, "lgrey")
+        else:
+            g.rect(fx + (1 if x < 12 else 0), foot, 2, 2, "lgrey")
+        g.rect(x if x < 12 else x, foot + 2, 2, 1, "grey")
+    # handlebar and grips, which do not sway
+    g.rect(4, 20, 16, 1, "lgrey")
+    g.rect(4, 21, 16, 1, "grey")
+    g.rect(2, 20, 3, 2, "ink")
+    g.rect(19, 20, 3, 2, "ink")
+    # jersey, arms and hands
+    g.rect(6, 15, 12, 5, "green")
+    g.rect(15, 15, 3, 5, "dgreen")
+    g.rect(6, 17, 12, 2, "white")
+    g.rect(15, 17, 3, 2, "lgrey")
+    g.p(6, 15, None)
+    g.p(17, 15, None)
+    for x in (3, 18):
+        g.rect(x, 15, 3, 3, "green" if x < 12 else "dgreen")
+        g.rect(x, 18, 3, 2, "skin1")
+        g.p(x + 2, 19, "skin2")
+    # face: eyes with a glint, a smile, the chin narrower
+    g.rect(6, 8, 12, 6, "skin1")
+    g.rect(7, 14, 10, 1, "skin1")
+    g.rect(16, 8, 2, 6, "skin2")
+    g.p(16, 14, "skin2")
+    for x in (8, 14):
+        g.rect(x, 9, 2, 2, "ink")
+        g.p(x, 9, "white")
+    g.p(10, 12, "dbrown")
+    g.p(13, 12, "dbrown")
+    g.rect(11, 13, 2, 1, "dbrown")
+    # helmet: a cyan dome, three vents, a sky right side, the dark visor under the brim
+    g.rect(8, 1, 8, 1, "cyan")
+    g.rect(6, 2, 12, 1, "cyan")
+    g.rect(5, 3, 14, 4, "cyan")
+    g.rect(16, 3, 3, 4, "sky")
+    g.rect(15, 2, 3, 1, "sky")
+    g.rect(7, 2, 2, 1, "white")
+    g.p(6, 3, "white")
+    for x, w in ((9, 1), (11, 2), (14, 1)):
+        g.rect(x, 3, w, 2, "navy")
+    g.rect(6, 7, 12, 1, "ink")
+    sway_rows(g, sway, 20)
+    return g
+
+
+def cyclist_50(lf, rf, sway, tread):
+    """cyclist at 16x24: helmet, visor, 1px eyes and mouth, jersey band, a 2px tyre between the legs."""
+    g = edged(Grid(16, 24))
+    g.rect(7, 17, 2, 6, "ink")
+    g.rect(7, 17, 1, 5, "grey")
+    g.p(8, tread, "slate")
+    g.rect(7, 16, 2, 1, "lgrey")
+    g.p(7, 15, "sky")
+    g.p(8, 15, "blue")
+    for x, foot, fwd in ((4, lf, lf > rf), (10, rf, rf > lf)):
+        g.rect(x, 15, 2, 1, "navy")
+        g.p(x + 1, 15, "ink")
+        g.rect(x, 16, 2, foot - 16, "skin1")
+        g.rect(x + 1, 16, 1, foot - 16, "skin2")
+        fx = x - 1 if x < 8 else x
+        if fwd:
+            g.rect(fx, foot, 3, 1, "white")
+        else:
+            g.rect(x, foot, 2, 1, "lgrey")
+        g.p(x + 1 if x < 8 else x, foot + 1, "grey")
+    g.rect(3, 14, 10, 1, "lgrey")
+    g.rect(1, 14, 3, 1, "ink")
+    g.rect(12, 14, 3, 1, "ink")
+    g.rect(4, 10, 8, 4, "green")
+    g.rect(10, 10, 2, 4, "dgreen")
+    g.rect(4, 12, 8, 1, "white")
+    g.rect(10, 12, 2, 1, "lgrey")
+    for x in (2, 12):
+        g.rect(x, 10, 2, 3, "green" if x < 8 else "dgreen")
+        g.rect(x, 13, 2, 1, "skin1")
+    g.rect(4, 6, 8, 3, "skin1")
+    g.rect(5, 9, 6, 1, "skin1")
+    g.rect(11, 6, 1, 3, "skin2")
+    g.p(10, 9, "skin2")
+    g.p(6, 7, "ink")
+    g.p(9, 7, "ink")
+    g.rect(7, 8, 2, 1, "dbrown")
+    g.rect(5, 1, 6, 1, "cyan")
+    g.rect(4, 2, 8, 1, "cyan")
+    g.rect(3, 3, 10, 2, "cyan")
+    g.rect(11, 2, 2, 3, "sky")
+    g.p(5, 1, "white")
+    g.p(4, 2, "white")
+    g.p(6, 2, "navy")
+    g.p(9, 2, "navy")
+    g.rect(4, 5, 8, 1, "ink")
+    sway_rows(g, sway, 14)
+    return g
+
+
 # ---------- the warning cue (UI, ink outlined) ----------
 
 def ink(c):
@@ -321,19 +465,13 @@ def small(s, q, offsets):
 
 # the squirrel's tail sway is left unsnapped: snapped, it would push the plume out of the 16px frame
 SQUIRREL_OFFSETS = ("dy",)
-CORGI_OFFSETS = ("bob", "front", "hind", "leash", "tail")
+CORGI_OFFSETS = ("bob", "leash")
 
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def corgi_frames(s=None):
-        out = []
-        for i, q in enumerate(CORGI_RUN):
-            far = CORGI_RUN[(i + 1) % 4]
-            if s:
-                q, far = small(s, q, CORGI_OFFSETS), small(s, far, CORGI_OFFSETS)
-            out.append(corgi_side(**dict(q, far=far)).outlined())
-        return out
+        return [corgi_side(**(small(s, q, CORGI_OFFSETS) if s else q)).outlined() for q in CORGI_RUN]
 
     yield "squirrel-dash", [("run", [squirrel_dash(**q).outlined() for q in SQUIRREL_RUN], 80)]
     yield "loose-dog", [("run", corgi_frames(), 100)]
@@ -348,6 +486,8 @@ def sprites():
                                                    for q in SQUIRREL_RUN], 80)]
         yield f"loose-dog@{suffix}", [("run", corgi_frames(s), 100)]
         yield f"ball-bounce@{suffix}", [("bounce", [ball_bounce(f, s) for f in range(6)], 70)]
+        draw = cyclist_75 if s == 0.75 else cyclist_50
+        yield f"cyclist@{suffix}", [("ride", [draw(**q).outlined() for q in CYCLIST_SMALL[s]], 90)]
 
 
 if __name__ == "__main__":

@@ -4,10 +4,11 @@
 road-<zone>        280x64 images, one per zone. They tile vertically with no
                    seam: every pattern repeats in 64 rows (or a divisor of it)
                    and anything drawn near the top or bottom edge wraps.
-road-<zone>-start  280x64 images for the three later zones. The bottom rows are
-                   the previous zone's strip and the top rows this zone's, with
-                   a crossing between them, so the road reads up the screen as
-                   previous strip, start strip, this zone's strip.
+road-<zone>-start  280x64 images, one per zone. Rows 20 to 63 are a neutral cross
+                   street in the backdrops' asphalt (CROSSING) and rows 0 to 19
+                   this zone's strip, so a start strip follows any zone at a
+                   fork: the road reads up the screen as the previous zone's
+                   strip, the start strip, then this zone's strip.
 
 Each strip keeps its zone's road colour (src/data/world.ts) as the base, so the
 game's shadows (one ramp step darker) still match. The four lane dividers sit
@@ -16,8 +17,8 @@ readable at speed; the outer 3 to 7 px of each side is a curb or verge that
 stays clear of the 12px sprite margin.
 
 Usage:
-  roads.py preview OUT.png   each zone's road scrolling up: two strips of the
-                             previous zone, the start strip, then three of this zone
+  roads.py preview OUT.png   each zone's road scrolling up: two strips of the zone
+                             before it in ZONES, the start strip, then three of this zone
   roads.py build             write art/roads/*.aseprite and public/art/images/*.png,
                              and list them in the manifest's "images"
 
@@ -257,14 +258,14 @@ def home_ground(g):
     leaves(g, rnd, 6, 10, W - 10)
 
 
-def leaves(g, rnd, n, x0, x1, y0=0, y1=H):
-    """n leaves spaced apart, clear of the lane dividers."""
+def leaves(g, rnd, n, x0, x1, y0=0, y1=H, tones=LEAVES):
+    """n leaves spaced apart, clear of the lane dividers, each in one of tones."""
     for x, y in scatter(rnd, n, x0, x1, 18, y0, y1, lambda x, y: (x + 7) % 56 >= 9):
-        tones = dict(zip("fsv", rnd.choice(LEAVES)))
+        tone = dict(zip("fsv", rnd.choice(tones)))
         for j, row in enumerate(rnd.choice(LEAF_SHAPES)):
             for k, ch in enumerate(row):
                 if ch != ".":
-                    wp(g, x + k, y + j, tones[ch])
+                    wp(g, x + k, y + j, tone[ch])
 
 
 def home_lines(g):
@@ -277,10 +278,117 @@ def home_lines(g):
             g.rect(x, y + 14, 2, 1, "plum")
 
 
+# ---------- Snooze Crescent: worn pale asphalt, concrete gutters, a few chalk doodles ----------
+
+# chalk doodles: a crescent moon and a "Zz". Every stroke across the road is 2 rows tall, so
+# the projection keeps it
+MOON = ("..yy", ".yyy", "yyy.", "yy..", "yy..", "yy..", "yy..", "yyy.", ".yyy", "..yy")
+BIG_Z = ("zzzzzz", "zzzzzz", "...zz.", "..zz..", ".zz...", "zz....", "zzzzzz", "zzzzzz")
+SMALL_Z = ("zzzz", "zzzz", ".zz.", "zz..", "zzzz", "zzzz")
+
+
+def stamp(g, x0, y0, rows, col):
+    """Draw every non-'.' character of rows in col, wrapping top to bottom."""
+    for j, row in enumerate(rows):
+        for k, ch in enumerate(row):
+            if ch != ".":
+                wp(g, x0 + k, y0 + j, col)
+
+
+def snooze_ground(g):
+    rnd = random.Random("road-snooze-crescent")
+    g.rect(0, 0, W, H, "grey")
+    # sparse 2px grit, as on Woof Way but paler
+    for x, y in scatter(rnd, 60, 6, W - 7, 7):
+        col = rnd.choice(("slate", "slate", "dslate", "lgrey", "lgrey"))
+        if rnd.random() < 0.7:
+            wrect(g, x, y, 1, 2, col)
+        else:
+            wrect(g, x, y, 2, 1, col)
+    # sealed cracks running along the road, kept inside lanes
+    for x, y, steps in ((38, 12, 10), (196, 50, 14), (250, 30, 8)):
+        for _ in range(steps):
+            wp(g, x, y, "dslate")
+            if rnd.random() < 0.25:
+                x += rnd.choice((-1, 1))
+                wp(g, x, y, "dslate")
+            y -= 1
+    stamp(g, 22, 6, MOON, "yellow")
+    for x, y, col in ((182, 36, "white"), (72, 54, "lgrey")):
+        stamp(g, x, y, BIG_Z, col)
+        stamp(g, x + 8, y + 2, SMALL_Z, col)
+    # a little leaf litter from the street trees, green so it reads apart from The Long Way Home
+    leaves(g, rnd, 4, 10, W - 10, tones=(("green", "dgreen", "forest"),))
+    # pale concrete gutters, with 2-row expansion joints every 16 rows
+    for x0, edge in ((0, 3), (W - 3, W - 4)):
+        g.rect(x0, 0, 3, H, "lgrey")
+        g.rect(edge, 0, 1, H, "slate")
+        for y in range(0, H, 16):
+            g.rect(x0, y, 3, 2, "grey")
+    g.rect(0, 0, 1, H, "white")
+    g.rect(W - 1, 0, 1, H, "grey")
+
+
+def snooze_lines(g):
+    rnd = random.Random("road-snooze-crescent-lines")
+    for x in DIVIDERS:
+        for y in (10, 42):
+            # faded white (2.8:1 on the grey) with a slate edge, chipped where the paint wore
+            g.rect(x, y, 2, 12, "white")
+            g.rect(x + 2, y + 1, 1, 12, "slate")
+            for _ in range(2):
+                g.p(x + rnd.randrange(2), y + rnd.randrange(1, 11), "lgrey")
+
+
+# ---------- Paws Promenade: a pale boardwalk, boards along the road, timber edges ----------
+
+def paws_ground(g):
+    rnd = random.Random("road-paws-promenade")
+    g.rect(0, 0, W, H, "cream")
+    # boards 13px wide with 1px seams at x = 14k-1, so the lane dividers fall on seams; a few
+    # newer boards, never two side by side (a white board reads as a line along the road)
+    boards = range(0, W, 14)
+    tinted = False
+    for x0 in boards:
+        tinted = not tinted and rnd.random() < 0.1
+        if tinted:
+            g.rect(x0, 0, 13, H, "skin1")
+        # grain runs along the board, 5 to 11 rows long
+        for _ in range(rnd.randrange(1, 3)):
+            wrect(g, x0 + rnd.randrange(1, 12), rnd.randrange(H), 1, rnd.randrange(5, 12), "tan")
+    for x0 in boards[1:]:
+        g.rect(x0 - 1, 0, 1, H, "tan")
+    # each board ends once in the strip: a 2-row butt joint (low contrast, so it does not
+    # blink) with a nail either side, at uneven rows
+    for x0 in boards:
+        y = rnd.randrange(H)
+        wrect(g, x0, y, 13, 2, "tan")
+        wp(g, x0 + 3, y - 2, "grey")
+        wp(g, x0 + 9, y + 3, "grey")
+    # a few knots, spaced apart
+    for x, y in scatter(rnd, 7, 8, W - 8, 20, ok=lambda x, y: x % 14 < 11):
+        wrect(g, x, y, 2, 2, "tan")
+        wp(g, x + 1, y + 1, "brown")
+    # edge beams along both sides, meeting the paving verge with no curb
+    for x0, outer in ((0, 0), (W - 4, W - 1)):
+        g.rect(x0, 0, 4, H, "tan")
+        g.rect(outer, 0, 1, H, "brown")
+
+
+def paws_lines(g):
+    for x in DIVIDERS:
+        for y in (6, 38):
+            # dbrown (5.9:1 on the boards), 20 rows in 32: a longer rhythm than Bark Park's
+            g.rect(x, y, 2, 20, "dbrown")
+
+
+# easiest to hardest, as the fork cards sort them
 ZONES = {
-    "woof-way": (woof_way_ground, woof_way_lines),
+    "snooze-crescent": (snooze_ground, snooze_lines),
     "bark-park": (bark_park_ground, bark_park_lines),
+    "woof-way": (woof_way_ground, woof_way_lines),
     "sniff-street-shops": (shops_ground, shops_lines),
+    "paws-promenade": (paws_ground, paws_lines),
     "the-long-way-home": (home_ground, home_lines),
 }
 
@@ -293,69 +401,42 @@ def strip(zone, y0=0, y1=H):
     return g
 
 
-# ---------- the crossings between zones ----------
+# ---------- the cross street every start strip begins with ----------
 
-def crosswalk(g):
-    """Woof Way to Bark Park: zebra stripes, then the kerb where the park path starts. Every
-    band across the road is 2 rows: the kerb's lit top, its face and its shadow, each step
-    3.4:1 or less."""
-    g.rect(0, 18, W, 2, "lgrey")
-    g.rect(0, 20, W, 2, "slate")
-    g.rect(0, 22, W, 2, "navy")
+# Strip rows of the cross street, first and past-last: the zone's own strip is above it and
+# the game draws the previous zone's strip below it.
+CROSSING = (20, 64)
+
+
+def crossing(g):
+    """A neutral cross street in the backdrops' asphalt, so a start strip follows any zone. Up
+    the road: the near kerb's top (rows 60 to 63) and rounded edge (58, 59), the asphalt with a
+    zebra crossing (35 to 48), then the far kerb's shadow (24, 25), face (22, 23) and lit top
+    (20, 21). Every band across the road is 2 rows, each step 3.4:1 or less."""
+    y0, y1 = CROSSING
+    rnd = random.Random("road-crossing")
+    g.rect(0, y0, W, y1 - y0, "dslate")
+    for x, y in scatter(rnd, 30, 0, W, 7, 27, 56):
+        g.rect(x, y, 1, 2, rnd.choice(("slate", "navy", "navy")))
     for x in range(8, W - 8, 12):
-        g.rect(x, 24, 7, 14, "white")
-        g.rect(x + 6, 24, 1, 14, "lgrey")
-        g.rect(x, 36, 7, 2, "lgrey")
-    # dirt kicked onto the kerb's top edge
-    rnd = random.Random("road-bark-park-start")
-    for _ in range(30):
-        g.p(rnd.randrange(8, W - 8), 17 - rnd.randrange(3), "brown")
-
-
-def threshold(g):
-    """Bark Park to the shops: a granite sill (a 2-row lit top over a 2-row face), with dirt
-    tracked onto the first slabs."""
-    g.rect(0, 32, W, 2, "lgrey")
-    g.rect(0, 34, W, 2, "grey")
-    for x in range(0, W, 20):
-        g.rect(x, 34, 1, 2, "slate")
-    rnd = random.Random("road-sniff-street-shops-start")
-    for _ in range(90):
-        y = 31 - int(rnd.random() ** 2 * 14)
-        x = rnd.randrange(6, W - 6)
-        if (x + 2) % 56 > 3:
-            g.p(x, y, rnd.choice(("tan", "tan", "brown")))
-    # the verges end in a clump of grass on the sill
-    for x0 in (0, W - 9):
-        g.rect(x0, 36, 9, 2, "green")
-        g.rect(x0 + 2, 35, 5, 1, "green")
-        g.rect(x0 + 1, 37, 7, 1, "dgreen")
-
-
-def soldier_band(g):
-    """The shops to The Long Way Home: a soldier course of brick, leaves blown onto the slabs.
-    Its lit tops, base and shadow are 2 rows each."""
-    g.rect(0, 24, W, 8, "brown")
-    for x in range(0, W, 4):
-        g.rect(x + 3, 24, 1, 8, "dbrown")
-        g.rect(x, 24, 3, 2, "tan")
-    g.rect(0, 30, W, 2, "dbrown")
-    g.rect(0, 32, W, 2, "grey")
-    leaves(g, random.Random("road-the-long-way-home-start"), 5, 10, W - 10, 34, 54)
-
-
-# key: (previous zone, this zone, last row of this zone, crossing)
-STARTS = {
-    "bark-park": ("woof-way", 18, crosswalk),
-    "sniff-street-shops": ("bark-park", 32, threshold),
-    "the-long-way-home": ("sniff-street-shops", 24, soldier_band),
-}
+        g.rect(x, 35, 7, 14, "white")
+        g.rect(x + 6, 35, 1, 14, "lgrey")
+        g.rect(x, 47, 7, 2, "lgrey")
+    g.rect(0, 20, W, 2, "lgrey")
+    g.rect(0, 22, W, 2, "slate")
+    g.rect(0, 24, W, 2, "navy")
+    g.rect(0, 58, W, 2, "grey")
+    g.rect(0, 60, W, 4, "lgrey")
+    # kerbstone joints at uneven spacing, along the road
+    x = rnd.randrange(10, 30)
+    while x < W:
+        g.rect(x, 60, 1, 4, "grey")
+        g.rect(x + rnd.randrange(-6, 7), 20, 1, 4, "grey")
+        x += rnd.randrange(22, 38)
 
 
 def start(zone):
-    prev, split, crossing = STARTS[zone]
-    g = strip(zone, 0, split)
-    g.px[split:] = strip(prev).px[split:]
+    g = strip(zone, 0, CROSSING[0])
     crossing(g)
     return g
 
@@ -364,7 +445,7 @@ def images():
     """Yield (key, Grid) for every image."""
     for zone in ZONES:
         yield f"road-{zone}", strip(zone)
-    for zone in STARTS:
+    for zone in ZONES:
         yield f"road-{zone}-start", start(zone)
 
 
@@ -393,10 +474,8 @@ def preview(out, scale=2, gap=8):
     col_h = 6 * H
     sheet = Image.new("RGB", ((W + gap) * len(zones) * scale, col_h * scale), (24, 20, 37))
     for i, zone in enumerate(zones):
-        prev = STARTS[zone][0] if zone in STARTS else zone
-        mid = f"road-{zone}-start" if zone in STARTS else f"road-{zone}"
         # bottom to top, the order the road scrolls into view
-        column = [f"road-{prev}"] * 2 + [mid] + [f"road-{zone}"] * 3
+        column = [f"road-{zones[i - 1]}"] * 2 + [f"road-{zone}-start"] + [f"road-{zone}"] * 3
         for j, key in enumerate(column):
             y = col_h - (j + 1) * H
             tile = to_image(tiles[key]).resize((W * scale, H * scale), Image.NEAREST)

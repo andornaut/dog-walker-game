@@ -131,25 +131,29 @@ def walker_girl(lf=0, rf=0, bob=0, arms=0):
     g.rect(15, 36 + b, 2, 4, "blue")
     g.rect(7, 20 + b, 2, 3, "brown")
     g.rect(23, 20 + b, 2, 3, "brown")
-    # black hair: a rounded crown, then long ringlets hanging straight down the back, their ends
-    # bunched into bumps along the sides and the hem
+    # black hair: a rounded crown, then long curls hanging straight down the back, bunched into bumps of
+    # uneven size along the sides and the hem
     g.ell(16, 18.5 + b, 8, 7.5, "navy", "ink", "dslate")
     g.rect(9, 20 + b, 14, 10, "navy")
     g.rect(21, 20 + b, 2, 10, "ink")
-    for y in (21.5, 25, 28.5):
-        g.ell(8.8, y + b, 1.5, 1.8, "navy")
-        g.ell(23.2, y + b, 1.5, 1.8, "ink")
-    for x in (10.5, 14, 17.5, 21):
-        g.ell(x, 30.5 + b, 1.8, 1.5, "navy" if x < 20 else "ink")
-    # four ringlets of stacked curls, each lit purple and mauve on its upper left and dark on its lower right
-    for col, x in enumerate((10, 13, 16, 19)):
-        for y in range(20 + col % 2, 31, 3):
-            lit = col < 3
-            g.p(x, y + b, "mauve" if lit else "purple")
-            g.p(x + 1, y + b, "purple")
-            g.p(x, y + 1 + b, "purple" if lit else "dslate")
-            g.p(x + 1, y + 2 + b, "ink")
-            g.p(x + 2, y + 1 + b, "ink")
+    for x, y, rx, ry in ((8.7, 20.5, 1.4, 1.5), (8.4, 24.2, 1.8, 2.1), (8.8, 28.6, 1.4, 1.3)):
+        g.ell(x, y + b, rx, ry, "navy")
+    for x, y, rx, ry in ((23.3, 22, 1.6, 1.9), (23.2, 26.6, 1.3, 1.4), (23.4, 29.3, 1.6, 1.5)):
+        g.ell(x, y + b, rx, ry, "ink")
+    for x, y, rx, ry in ((10.2, 30.6, 1.6, 1.4), (13.4, 31, 2, 1.6), (16.6, 30.4, 1.3, 1.3), (19.4, 30.8, 1.9, 1.5),
+                         (21.9, 30.2, 1.2, 1.2)):
+        g.ell(x, y + b, rx, ry, "navy" if x < 20 else "ink")
+    # curls scattered over the back in clusters of 2 and 3 pixels, lit mauve and purple on the upper left, a
+    # dark hollow at the heart of the big ones; those on the shaded right take purple and dslate instead
+    for x, y, size in CURLS:
+        lit, mid = ("mauve", "purple") if x < 18 else ("purple", "dslate")
+        if size == 3:
+            for dx, dy, c in ((1, 0, lit), (2, 0, mid), (0, 1, lit), (1, 1, "ink"), (2, 1, mid), (0, 2, mid),
+                              (1, 2, mid), (2, 2, "ink")):
+                g.p(x + dx, y + dy + b, c)
+        else:
+            for dx, dy, c in ((0, 0, lit), (1, 0, mid), (0, 1, mid), (1, 1, "ink")):
+                g.p(x + dx, y + dy + b, c)
     g.ell(16, 12 + b, 2.5, 1.5, "pink", "mauve")
     # a light rim along the edges facing the light keeps her dark hair and skin off the dark road
     return rim(g, dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"),
@@ -230,6 +234,11 @@ def walker_teacher(lf=0, rf=0, bob=0, arms=0):
     g.rect(20, 11 + b, 1, 4, "dbrown")
     # a light rim along the edges facing the light keeps her hair, cardigan and skirt off the dark road
     return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
+
+
+# Ada's curls as (x, y, size): placed by hand, unevenly, so they read as curls rather than a pattern.
+CURLS = ((11, 19, 3), (15, 18, 2), (18, 20, 3), (9, 22, 2), (13, 22, 3), (21, 22, 2), (16, 24, 2), (10, 25, 3),
+         (19, 25, 3), (14, 26, 2), (12, 28, 2), (16, 28, 3), (20, 29, 2), (9, 29, 2))
 
 
 WALKERS = {
@@ -389,16 +398,24 @@ def puddle(f, w=88, h=32):
     return g
 
 
+# The spray cloud's puffs as (centre x, centre y, radius across) in the 88x88 frame. The cloud hugs the ground:
+# each puff is CLOUD_SQUASH as tall as it is wide, and together they fill the frame's width but only its
+# bottom 64 rows or so. A swollen puff still stops a pixel short of the frame's edge, so no lobe is clipped flat.
+CLOUD_PUFFS = [(44, 55, 30), (24, 44, 17), (64, 42, 18), (22, 68, 18), (64, 70, 18), (44, 33, 12), (44, 77, 12),
+               (12, 55, 10), (76, 55, 10)]
+CLOUD_SQUASH = 0.73
+# Where each stink wisp starts, trailing 6 rows down.
+CLOUD_WISPS = ((20, 39), (60, 36), (66, 66), (26, 66))
+
+
 def skunk_cloud(step):
-    """88x88 spray cloud drawn under the skunk: puffs with a solid rim and a 2x2-dithered
-    fill, so the road shows through. The puffs swell in turn. The rim is two pixels: teal outside,
+    """88x88 spray cloud drawn under the skunk, low and wide on the road: puffs with a solid rim and a
+    2x2-dithered fill, so the road shows through. The puffs swell in turn. The rim is two pixels: teal outside,
     which holds 3:1 on the light roads, and green inside it, which holds on Woof Way."""
     g = Grid(88, 88)
-    puffs = [(44, 44, 30), (24, 28, 17), (64, 26, 18), (22, 62, 18), (64, 64, 18), (44, 14, 13), (44, 74, 13),
-             (12, 44, 11), (76, 44, 11)]
-    puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(puffs)]
-    dist = [[min(((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2) ** 0.5 / r for cx, cy, r in puffs) for x in range(88)]
-            for y in range(88)]
+    puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(CLOUD_PUFFS)]
+    dist = [[min(((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / CLOUD_SQUASH) ** 2) ** 0.5 / r for cx, cy, r in puffs)
+             for x in range(88)] for y in range(88)]
 
     def inside(x, y):
         return 0 <= x < 88 and 0 <= y < 88 and dist[y][x] <= 1
@@ -418,28 +435,31 @@ def skunk_cloud(step):
                 g.p(x, y, "green")
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
                 g.p(x, y, "green" if (x + y) % 8 else "dgreen")
-    for x0, y0 in ((20, 22), (60, 18), (66, 58), (26, 58)):
+    for x0, y0 in CLOUD_WISPS:
         for k in range(6):
             g.p(x0 + (k + step) % 3 - 1, y0 + k, "dgreen")
     return g
 
 
-def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
+def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
     """The other dog trotting toward the player. Each leg offset moves a paw along the road, positive
-    toward the player: the hind paws peek out beside the rump, the front paws beside the jaw. The road
-    outline, and a tan rim on the fur facing the light."""
+    toward the player: the hind paws peek out beside the rump, the front paws beside the jaw. tail moves
+    the fluffy tail peeking over the rump sideways; twitch moves the right ear alone (negative is up). The
+    road outline, and a tan rim on the fur facing the light."""
     g = edged(Grid())
     g.rect(10, 4 + bl, 2, 4, "ochre")
     g.rect(20, 4 + br, 2, 4, "rust")
     g.rect(10, 26 + fl, 2, 3, "white")
     g.rect(20, 26 + fr, 2, 3, "lgrey")
     b = bob
+    g.ell(16 + tail, 4 + b, 1.6, 2.2, "ochre", "rust", "tan")
     g.ell(16, 13 + b, 6.5, 8, "ochre", "rust", "tan")
     g.ell(16, 17 + b, 4, 4, "white", "lgrey")
+    t = twitch
     g.tri((10, 24 + b), (8.5, 14.5 + b), (14, 19 + b), "ochre")
-    g.tri((22, 24 + b), (23.5, 14.5 + b), (18, 19 + b), "ochre")
+    g.tri((22, 24 + b + t), (23.5, 14.5 + b + t), (18, 19 + b + t), "ochre")
     g.tri((10.5, 21.5 + b), (9.5, 16.5 + b), (12.5, 19.5 + b), "pink")
-    g.tri((21.5, 21.5 + b), (22.5, 16.5 + b), (19.5, 19.5 + b), "pink")
+    g.tri((21.5, 21.5 + b + t), (22.5, 16.5 + b + t), (19.5, 19.5 + b + t), "pink")
     g.ell(16, 23.5 + b, 6, 5, "ochre", "rust", "tan")
     g.ell(16, 25.5 + b, 3.5, 2.5, "white", "lgrey")
     g.rect(15, 18 + b, 2, 4, "white")
@@ -455,6 +475,9 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
 # The other dog's trot, as dogs.WALK has it: diagonal pairs swap on beats 0 and 2 and the body bobs up
 # on the passing beats. Each beat lasts half the old two-frame step, so the dog keeps its pace.
 CORGI_WALK = [dict(fl=1, fr=-1, bl=-1, br=1), dict(bob=-1), dict(fl=-1, fr=1, bl=1, br=-1), dict(bob=-1)]
+# Standing while its walker chats: the dogs' idle, the tail at -1, 0, +1, 0 and the right ear 1px higher on the
+# last frame.
+CORGI_IDLE = [dict(tail=-1), dict(), dict(tail=1), dict(twitch=-1)]
 
 
 def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0):
@@ -625,19 +648,25 @@ def tourist_top(flash):
 
 
 def wallet(glint):
-    """The lost wallet, with the road outline and the lit rim."""
+    """The lost wallet, with the road outline. Its dark leather takes a light rim so it holds on Woof Way: the
+    flap's top edge catches the light in tan, the left edge skin2, and brown runs down the right and along
+    the bottom."""
     g = edged(Grid(16, 16))
     g.rect(5, 4, 7, 4, "green")
     g.rect(5, 4, 7, 1, "dgreen")
     g.rect(8, 5, 2, 2, "dgreen")
     g.rect(3, 6, 10, 7, "dbrown")
-    g.rect(3, 6, 10, 1, "brown")
+    g.rect(3, 6, 10, 1, "tan")
     g.rect(3, 9, 10, 1, "plum")
     g.rect(11, 9, 2, 2, "amber")
     if glint:
         for x, y in ((13, 2), (12, 3), (14, 3), (13, 4), (13, 3)):
             g.p(x, y, "white")
-    return rim(g, LIT)
+    return rim(g, WALLET_RIM)
+
+
+# The wallet's rim: road.LIT, with a dimmer brown down the leather's shaded sides.
+WALLET_RIM = dict(LIT, dbrown=("skin2", "brown"), plum=("skin2", "brown"))
 
 
 def bark(big):
@@ -773,62 +802,79 @@ def kid(wave=False, mood="happy", bob=0):
 
 
 def ice_cream_truck(f):
-    """The ice cream truck, with the road outline and the lit rim."""
+    """The ice cream truck parked ahead, seen from behind as a billboard: wide and low, with a sliver of roof,
+    the open serving hatch at the back under a striped awning, two cones on the counter, tail lights, a bumper
+    and the wheels, and the cone sign on the roof. f swaps the blinking lights and the music note. The road
+    outline and the lit rim."""
     g = edged(Grid(64, 48))
-    g.rect(6, 12, 52, 30, "white")
-    g.rect(6, 12, 52, 2, "lgrey")
-    g.rect(54, 12, 4, 30, "lgrey")
-    g.rect(6, 30, 52, 4, "pink")
-    g.rect(6, 33, 52, 1, "mauve")
-    g.rect(12, 16, 40, 10, "cyan")
-    g.rect(12, 16, 40, 1, "sky")
-    g.rect(31, 16, 2, 10, "lgrey")
-    g.rect(4, 38, 56, 4, "lgrey")
-    g.rect(4, 41, 56, 1, "grey")
+    g.rect(6, 14, 52, 2, "lgrey")
+    g.rect(4, 16, 56, 22, "white")
+    g.rect(56, 16, 4, 22, "lgrey")
+    # the serving hatch: a striped awning, the window and a counter with two cones on it
+    g.rect(9, 18, 46, 2, "white")
+    for x in range(9, 55, 8):
+        g.rect(x, 18, 4, 2, "pink")
+        g.rect(x, 20, 4, 1, "mauve")
+    g.rect(11, 21, 42, 7, "cyan")
+    g.rect(11, 21, 42, 1, "sky")
+    for x in (18, 43):
+        g.rect(x, 24, 3, 2, "pink")
+        g.p(x, 24, "white")
+        g.rect(x + 1, 26, 1, 2, "tan")
+    g.rect(9, 28, 46, 2, "tan")
+    g.rect(9, 29, 46, 1, "brown")
+    g.rect(4, 31, 56, 3, "pink")
+    g.rect(4, 33, 56, 1, "mauve")
+    g.rect(5, 31, 3, 3, "red")
+    g.rect(56, 31, 3, 3, "dred")
+    g.rect(9, 35, 4, 2, "yellow" if f else "amber")
+    g.rect(51, 35, 4, 2, "amber" if f else "yellow")
+    g.rect(28, 35, 8, 3, "cream")
+    g.rect(2, 38, 60, 4, "lgrey")
+    g.rect(2, 41, 60, 1, "grey")
     for x in (8, 46):
         g.rect(x, 42, 10, 4, "ink")
         g.rect(x + 2, 42, 6, 2, "dslate")
-    g.rect(10, 35, 4, 2, "yellow" if f else "amber")
-    g.rect(50, 35, 4, 2, "yellow" if f else "amber")
-    # cone on the roof
-    g.tri((29, 9), (35, 9), (32, 2 + 8), "tan")
-    g.ell(32, 5, 4, 3.5, "pink", "mauve", "white")
-    g.rect(29, 9, 6, 3, "tan")
-    g.p(30, 10, "brown")
-    g.p(33, 10, "brown")
+    # cone sign on the roof
+    g.tri((28.5, 10), (35.5, 10), (32, 16.5), "tan")
+    g.ell(32, 7.5, 3.5, 3, "pink", "mauve", "white")
+    g.p(31, 11, "brown")
+    g.p(33, 11, "brown")
+    g.p(32, 13, "brown")
     if f:
-        g.rect(46, 2, 1, 5, "plum")
-        g.rect(46, 2, 3, 1, "plum")
-        g.rect(44, 6, 2, 2, "plum")
+        g.rect(46, 6, 1, 5, "plum")
+        g.rect(46, 6, 3, 1, "plum")
+        g.rect(44, 10, 2, 2, "plum")
     else:
-        g.rect(16, 3, 1, 5, "plum")
-        g.rect(14, 7, 2, 2, "plum")
+        g.rect(16, 7, 1, 5, "plum")
+        g.rect(14, 11, 2, 2, "plum")
     return rim(g, LIT)
 
 
 def construction(f):
-    """f swaps which lamp is lit. Striped like obstacles.barrier so the stripes hold steady at depth: the
-    board's stripes are 8px orange every 16px, leaning right in 2-row stairs that start on even columns
-    and stop at the board's ends, and its bottom stair is the shaded lower edge. The lower rail's squares
-    and the posts are 4px wide on even columns. The road outline and the lit rim."""
+    """f swaps which lamp is lit. A squat front elevation standing on the road line: the board, the lower rail
+    right under it on short legs, the lamps and the detour sign. Striped like obstacles.barrier so the stripes
+    hold steady at depth: the board's stripes are 8px orange every 16px, leaning right in 2-row stairs that
+    start on even columns and stop at the board's ends, and its bottom stair is the shaded lower edge. The
+    lower rail's squares and the posts are 4px wide on even columns. The road outline and the lit rim."""
     g = edged(Grid(56, 32))
     for x in (6, 46):
-        g.rect(x, 12, 4, 18, "grey")
-        g.rect(x + 2, 12, 2, 18, "slate")
+        g.rect(x, 16, 4, 14, "grey")
+        g.rect(x + 2, 16, 2, 14, "slate")
     for k, (base, stripe) in enumerate((("white", "orange"),) * 3 + (("lgrey", "rust"),)):
-        y = 12 + 2 * k
+        y = 16 + 2 * k
         g.rect(3, y, 50, 2, base)
         for x in range(10 - 2 * k - 16, 53, 16):
             g.rect(max(x, 3), y, min(x + 8, 53) - max(x, 3), 2, stripe)
-    g.rect(3, 22, 50, 4, "white")
+    g.rect(3, 24, 50, 4, "white")
     for x in range(4, 52, 8):
-        g.rect(x, 22, 4, 4, "orange")
-    g.ell(7.5, 8, 2.5, 2.5, "amber" if f else "orange", "orange", "yellow" if f else None)
-    g.ell(47.5, 8, 2.5, 2.5, "orange" if f else "amber", "orange", None if f else "yellow")
-    g.rect(20, 3, 16, 8, "amber")
-    g.rect(20, 3, 16, 1, "orange")
-    g.rect(23, 6, 10, 2, "plum")
-    g.tri((21, 7), (25, 4), (25, 10), "plum")
+        g.rect(x, 24, 4, 4, "orange")
+    g.ell(7.5, 12, 2.5, 2.5, "amber" if f else "orange", "orange", "yellow" if f else None)
+    g.ell(47.5, 12, 2.5, 2.5, "orange" if f else "amber", "orange", None if f else "yellow")
+    g.rect(20, 7, 16, 8, "amber")
+    g.rect(20, 7, 16, 1, "orange")
+    g.rect(23, 10, 10, 2, "plum")
+    g.tri((21, 11), (25, 8), (25, 14), "plum")
     return rim(g, LIT)
 
 
@@ -963,7 +1009,8 @@ def sprites():
                        ("run", frames(squirrel_run(k) for k in (False, True)), 120)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
     yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
-    yield "other-dog", [("walk", frames(corgi(**q) for q in CORGI_WALK), 100)]
+    yield "other-dog", [("walk", frames(corgi(**q) for q in CORGI_WALK), 100),
+                        ("idle", frames(corgi(**q) for q in CORGI_IDLE), 300)]
     yield "other-dog-owner", [("walk", [dressed(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
                                         dressed(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200),
                               ("idle", [dressed(dog_owner_top, shoes="dbrown", bob=bb).outlined() for bb in BREATH],

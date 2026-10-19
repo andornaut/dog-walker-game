@@ -516,58 +516,97 @@ def disc(a, cx, cy, r, col, edge=None):
                 a.fill(cx + dx, cy + dy, 1, 1, edge if edge and d > (r - 1) * (r - 1) else col)
 
 
+def limb(g, pts, col, w=2):
+    """A leg w pixels thick along the joints pts."""
+    for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
+        n = max(abs(x1 - x0), abs(y1 - y0), 1)
+        for k in range(n + 1):
+            g.rect(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n), w, w, col)
+
+
+# A paw seen from below, 5x5: three toe beans over the main pad, all pink on the white sock.
+PAW = ["pwpwp", "wwwww", "wpppw", "wpppw", ".www."]
+
+
+def paw(g, x, y, col="white"):
+    for j, row in enumerate(PAW):
+        for i, ch in enumerate(row):
+            if ch != ".":
+                g.p(x + i, y + j, "pink" if ch == "p" else col)
+
+
 def rolled_over():
     """Biscuit rolled onto its back: the body lies along the grass with the navy saddle down
-    and the white belly up, four white legs in the air with curled paws, the white-tipped tail
-    wagging at the left, and the head at the right turned to the viewer, eyes shut in bliss and
-    tongue out, its ears flopped on the grass. 46x34 with its outline; the collar's lower end
-    is at 33,27."""
-    g = Grid(46, 34)
-    # tail, wagging up from the rump, white tipped
-    for i, (x, y) in enumerate(((7, 19), (6, 18), (5, 16), (5, 15), (5, 14))):
+    and the white belly up, pink at its middle. The legs fold: the hind pair splay out at the
+    knee with the soles up, the front pair flop at the wrist, each white paw showing its pink
+    pads; the far leg of each pair is shaded. The tail wags along the grass at the left, the
+    head at the right faces the viewer, eyes shut in happy arcs and mouth open in a grin with
+    the tongue out, ears flopped on the grass. 50x36 with its outline; the collar's lower end
+    is at 33,28."""
+    g = Grid(50, 36)
+    # tail, along the grass from the rump, white tipped
+    for i, (x, y) in enumerate(((8, 25), (6, 25), (4, 24), (3, 23), (2, 22))):
         g.rect(x, y, 2, 2, "white" if i > 2 else "ochre")
-    # legs in the air: hind pair at the left, front pair at the right, the far leg of each
-    # pair shaded; each paw curls forward
-    for x, top, sh in ((10, 7, "lgrey"), (16, 5, "white"), (23, 5, "lgrey"), (29, 7, "white")):
-        g.rect(x, top, 2, 13 - top, sh)
-        g.rect(x, top - 1, 3, 2, sh)
-        g.p(x + 1, top - 1, "pink")
+    # far legs first, shaded: a hind leg splayed at the knee and a front leg flopped at the wrist
+    limb(g, [(16, 17), (14, 11), (16, 7)], "rust")
+    paw(g, 15, 2, "lgrey")
+    limb(g, [(25, 16), (23, 11), (26, 10)], "rust")
+    paw(g, 25, 6, "lgrey")
     # the body, back down
-    g.ell(20, 19, 13, 6.5, "ochre", "rust")
-    g.ell(20, 24.5, 11, 2, "navy")
-    g.ell(20.5, 15.5, 9, 3, "white", "lgrey")
-    g.p(17, 15, "pink")
-    g.p(22, 15, "pink")
+    g.ell(21, 22, 13, 6.5, "ochre", "rust")
+    g.ell(21, 27.5, 11, 2, "navy")
+    g.ell(21.5, 18.5, 9, 3.2, "white", "lgrey")
+    g.rect(19, 18, 4, 2, "pink")
+    g.rect(20, 17, 2, 1, "pink")
+    # near legs: the hind thigh out to the left, the shin back up to the sole; the front leg up
+    # from the chest, the forearm flopped toward the head
+    limb(g, [(11, 19), (7, 13), (8, 8)], "ochre")
+    limb(g, [(8, 10), (8, 8)], "white")
+    paw(g, 6, 3)
+    limb(g, [(29, 16), (29, 11), (32, 11)], "ochre")
+    limb(g, [(31, 11), (32, 11)], "white")
+    paw(g, 32, 8)
     # ears flopped on the grass either side of the head
-    g.ell(32, 25, 3, 5, "rust", "dbrown")
-    g.ell(42, 25, 3, 5, "rust", "dbrown")
+    g.ell(34, 26, 3, 5, "rust", "dbrown")
+    g.ell(44, 26, 3, 5, "rust", "dbrown")
     # the head, facing the viewer
-    g.ell(37, 19, 7, 6.5, "ochre", "rust", "tan")
-    g.rect(36, 13, 2, 6, "white")
-    g.ell(37, 22.5, 3.6, 2.6, "white", "lgrey")
-    g.rect(36, 21, 3, 1, "ink")
-    # eyes shut, happy arcs
-    for x in (32, 39):
-        g.p(x, 19, "ink")
-        g.rect(x + 1, 18, 2, 1, "ink")
-        g.p(x + 3, 19, "ink")
-    # tongue lolling out of the side of the mouth
-    g.rect(38, 24, 2, 4, "pink")
-    g.p(38, 24, "red")
+    g.ell(39, 20, 7, 6.5, "ochre", "rust", "tan")
+    g.rect(38, 14, 2, 6, "white")
+    g.ell(39, 23.5, 3.6, 2.6, "white", "lgrey")
+    g.rect(38, 21, 3, 1, "ink")
+    # eyes shut in happy arcs, curving up
+    for x in (34, 41):
+        g.p(x, 20, "ink")
+        g.rect(x + 1, 19, 2, 1, "ink")
+        g.p(x + 3, 20, "ink")
+    # a wide open grin under the nose, the tongue hanging from it
+    g.p(36, 23, "ink")
+    g.rect(37, 24, 5, 1, "ink")
+    g.p(42, 23, "ink")
+    g.rect(38, 25, 3, 3, "pink")
+    g.p(39, 25, "red")
     # collar between the head and the chest
-    g.rect(30, 14, 2, 12, "green")
-    g.rect(31, 14, 1, 12, "dgreen")
-    g.p(31, 25, "amber")
+    g.rect(31, 15, 2, 12, "green")
+    g.rect(32, 15, 1, 12, "dgreen")
+    g.p(32, 26, "amber")
     return to_image(g.outlined())
+
+
+def kick(a, x, y, d):
+    """A 1px motion arc beside a kicking paw, bowed away from it (d=1 right, -1 left)."""
+    for dy, dx in ((0, 0), (1, 1), (2, 1), (3, 0)):
+        a.fill(x + dx * d, y + dy, 1, 1, "white")
 
 
 def belly_rubs():
     a = Art()
     a.grass()
-    a.paste(rolled_over(), 14, 12)
+    a.paste(rolled_over(), 12, 10)
+    # kicking paws and a wriggling back, drawn as motion arcs
+    kick(a, 15, 13, -1); kick(a, 51, 18, 1); kick(a, 11, 30, -1)
     # the leash runs from the collar off the bottom edge
-    a.lead(45, 38, 52)
-    a.hearts([(6, 8), (20, 4), (50, 2), (64, 10), (4, 40)])
+    a.lead(44, 38, 52)
+    a.hearts([(4, 4), (26, 2), (54, 4), (66, 18), (4, 44)])
     return a
 
 

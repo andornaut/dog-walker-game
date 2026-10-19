@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
-Images (16x16 icons unless noted): icon-pause, icon-play, icon-help, icon-close,
+Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-lock, icon-money, icon-stinky; ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title), ui-slot-locked (160x46, the yard sign for the next dog slot;
@@ -10,8 +10,8 @@ nine-slices, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-zone-banner (248x48) and
 ui-touch-hint (96x36).
-Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
-ui-doghouse-warn (72x146, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
+Sprites: ui-doghouse (120x90, one of three dog slots in a row; a tag per dog key and `empty`),
+ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check and ui-step-number (16x16; tags 1, 2, 3, tick),
 fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
@@ -20,8 +20,8 @@ secondary, secondary-pressed), ui-icon-button (20x20, the face under a 16x16 ico
 ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
 empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
-icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags done,
-current, todo).
+icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo, current, done,
+and <zone> and <zone>-done for each zone in ZONE_COLOURS).
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -41,7 +41,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
-from pixel import Grid, build as build_sprites  # noqa: E402
+from pixel import DARKER, K, Grid, contrast, build as build_sprites  # noqa: E402
 
 
 def to_image(px):
@@ -55,9 +55,9 @@ def to_image(px):
 
 
 # ---------- icons ----------
-# icon-pause, icon-help, icon-close, icon-sound and icon-music sit on ui-icon-button's navy
-# face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1, amber 7.5:1, orange
-# 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream: dbrown holds
+# icon-pause, icon-play, icon-home, icon-help, icon-close, icon-sound and icon-music sit on
+# ui-icon-button's navy face, so they have no outline: cream holds 9.6:1 there, tan 6.6:1,
+# amber 7.5:1, orange 5.0:1 and pink 5.1:1. The -panel icons sit on the Settings panel's cream: dbrown holds
 # 5.85:1 there, plum 9.42:1 and dred 5.07:1.
 
 # The speaker, note and effects inks: face, shade on the lower-right edges, and the mute X.
@@ -65,7 +65,8 @@ NAVY_FACE = ("cream", "tan", "pink")
 CREAM_PANEL = ("dbrown", "plum", "dred")
 
 def pause():
-    """Amber bars, so the run control stands apart from the cream sound toggle beside it."""
+    """Amber bars, like the Home glyph beside it on the run bar, so the run controls stand apart
+    from the cream help and sound glyphs."""
     g = Grid(16, 16)
     g.rect(4, 3, 3, 10, "amber")
     g.rect(9, 3, 3, 10, "amber")
@@ -83,6 +84,19 @@ def play():
         g.rect(5, 3 + j, w, 1, "amber")
         if j >= 5:
             g.p(4 + w, 3 + j, "orange")
+    return g
+
+
+def home_icon():
+    """The run bar's Home button, beside pause: a house as tall as the pause bars, amber with
+    orange on its lower-right edges like them, a chimney on the right slope and a doorway the
+    navy face shows through."""
+    g = Grid(16, 16)
+    for y, row in enumerate([".....aa.ao..", "....aaaaao..", "...aaaaaao..", "..aaaaaaao..", ".aaaaaaaaao.",
+                             "aaaaaaaaaaao", "..aaaaaaao..", "..aaa..aao..", "..aaa..aao..", "..ooo..ooo.."]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(2 + x, 3 + y, "amber" if ch == "a" else "orange")
     return g
 
 
@@ -125,14 +139,25 @@ def money():
     return g
 
 
+# The stink lines' sideways offset down a line, as in fx-status-stinky (hits.py).
+STINK_WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
+
+
 def stinky():
+    """Three stink lines waving in step out of a small cloud puff, after fx-status-stinky: green
+    with a teal right side and no outline, so the teal carries the lines on cream (8.25:1) and the
+    green on the top bar's ink (8.41:1). The puff takes the usual forest outline (5.39:1 on cream).
+    Returns frame pixels."""
     g = Grid(16, 16)
-    g.ell(5, 10, 3.5, 3.5, "green", "dgreen")
-    g.ell(10, 8.5, 4.5, 4, "green", "dgreen", "yellow")
-    g.ell(10, 11, 4, 2.5, "green", "dgreen")
-    for x, y in ((3, 2), (4, 3), (3, 4), (8, 1), (9, 2), (8, 3), (13, 2), (14, 3), (13, 4)):
-        g.p(x, y, "dgreen")
-    return g
+    for cx, cy, rx, ry in ((4, 12.5, 3, 2.3), (12, 12.5, 3, 2.3), (8, 11, 3.5, 3)):
+        g.ell(cx, cy, rx, ry, "green", "dgreen")
+    g.rect(4, 14, 8, 1, "dgreen")
+    px = g.outlined()
+    for x0, top in ((2, 1), (7, 0), (12, 1)):
+        for y in range(top, 9):
+            x = x0 + STINK_WAVE[(y + 6) % 8]
+            px[y][x], px[y][x + 1] = K["green"], K["teal"]
+    return px
 
 
 def mute_x(g, y, col="pink"):
@@ -491,114 +516,138 @@ EMBLEMS = {
         "O......O", "RO....OR", ".RO..OR.", "..LLLG..", "..L..G..", "..LGGG..", "...OO...", "...OR..."]),
 }
 
-# The status icon spots on the wall beside the window, top-left corners of 16x16 icons, each under a peg.
-STATUS_SPOTS = ((46, 78), (46, 96))
+# The status icon spots on the wall under the hearts board, top-left corners of 16x16 icons, each under a peg.
+STATUS_SPOTS = ((78, 62), (98, 62))
+
+# One house in the slot row: three sit side by side, 120px apart.
+HOUSE_W, HOUSE_H = 120, 90
 
 
 def roof_width(y):
-    """Half the roof's width on row y: the gable slopes out 3px a row to the full 72px by row 8."""
-    return min(36, 12 + 3 * y)
+    """Half the roof's width on row y: the gable slopes out 3px a row from the ridge to the full
+    118px by row 3, leaving a notch and a 2px gap between neighbouring roofs."""
+    return min(59, 50 + 3 * y)
 
 
 def doghouse(dog):
-    """72x146. The game draws, in slot pixels: the dog's name centred at (36, 16) in font-title on
-    the roof's name plate (56px wide, cream from row 14 to 25), the dog face at (20, 36), the n/max
-    count centred at (36, 70) in font-title on the doormat (cream, 34px wide), the owner face at
-    (8, 78), up to two 16x16 status icons at (46, 78) and (46, 96), the owner's name at (9, 118)
-    in font-body, and hearts from (9, 127) in rows of six, 9px across and 8px down. The roof is
-    rows 0 to 31: the ridge, the gable with the dog's emblem in a 12x12 vent, shingle courses
-    around the name plate, and a dark eave."""
+    """120x90, one of three slots in a row. A 1px gap down each side keeps neighbouring houses
+    apart. The game draws, in slot pixels: the dog's name centred at (60, 6) in font-title on the
+    roof's name plate (cream, x 20 to 99, rows 4 to 15), the dog face at (6, 24) in the door, the
+    owner face at (42, 24) in the window, hearts from (78, 26) in rows of five, 8px across and 8px
+    down, on the cream hearts board (x 77 to 117, rows 23 to 53), the n/max count centred at
+    (98, 46) in font-title on the same board, up to two 16x16 status icons at (78, 62) and
+    (98, 62) under pegs, and the owner's name at (6, 62) in font-body on the cream name strip
+    (x 4 to 75, rows 60 to 70). The roof is rows 0 to 20: the ridge, the dog's emblem in a 12x12
+    vent at the left gable, shingle courses around the name plate, and a dark eave. The empty
+    house (a fired dog's) is grey, its door dark, and has only a white plate for FIRED, centred at
+    (60, 74)."""
     base, shade, dark = ROOFS[dog]
     empty = dog == "empty"
-    g = Grid(72, 146)
-    # walls, planks and the shadow under the eave
-    g.rect(3, 30, 66, 116, "lgrey" if empty else "tan")
-    for y in range(40, 146, 8):
-        g.rect(3, y, 66, 1, "grey" if empty else "brown")
-    g.rect(3, 30, 2, 116, "grey" if empty else "brown")
-    g.rect(67, 30, 2, 116, "slate" if empty else "dbrown")
-    g.rect(5, 32, 62, 1, "grey" if empty else "dbrown")
+    wall, plank, lit, unlit, paper, paper_sh, rim = (
+        ("lgrey", "grey", "grey", "slate", "white", "lgrey", "slate") if empty else
+        ("tan", "brown", "brown", "dbrown", "cream", "tan", "dbrown"))
+    g = Grid(HOUSE_W, HOUSE_H)
+    # walls in a plum outline, planks, corner posts, the shadow under the eave and the footing
+    g.rect(1, 19, 118, 71, "slate" if empty else "plum")
+    g.rect(2, 19, 116, 70, wall)
+    for y in range(29, 86, 8):
+        g.rect(2, y, 116, 1, plank)
+    g.rect(2, 19, 2, 70, lit)
+    g.rect(116, 19, 2, 70, unlit)
+    g.rect(2, 21, 116, 1, unlit)
+    g.rect(2, 85, 116, 4, unlit)
+    g.rect(2, 85, 116, 1, plank)
     # roof: shingle courses every 4 rows, joints staggered by half a shingle
-    for y in range(32):
+    for y in range(19):
         w = roof_width(y)
-        g.rect(36 - w, y, 2 * w, 1, base)
+        g.rect(60 - w, y, 2 * w, 1, base)
         if y % 4 == 1 and y > 1:
-            g.rect(36 - w, y, 2 * w, 1, shade)
+            g.rect(60 - w, y, 2 * w, 1, shade)
         elif y % 4 in (2, 3) and y > 4:
-            for x in range(4 * (y // 4 % 2), 72, 8):
+            for x in range(4 * (y // 4 % 2), HOUSE_W, 8):
                 g.p(x, y, shade)
     if dog == "nugget":
-        for y in (3, 7, 11, 15, 19, 23, 27):
-            for x in range(2 + 4 * (y // 4 % 2), 72, 8):
-                if abs(x + 0.5 - 36) < roof_width(y) - 2:
+        for y in (3, 7, 11, 15):
+            for x in range(6 + 4 * (y // 4 % 2), HOUSE_W, 8):
+                if abs(x + 0.5 - 60) < roof_width(y) - 2:
                     g.p(x, y, "white")
     if dog == "dash":
-        for y, c in ((6, "cream"), (7, "dgreen"), (28, "cream"), (29, "dgreen")):
+        for y, c in ((2, "cream"), (3, "dgreen"), (16, "cream"), (17, "dgreen")):
             w = roof_width(y)
-            g.rect(36 - w, y, 2 * w, 1, c)
+            g.rect(60 - w, y, 2 * w, 1, c)
     # ridge and gable edges, then the eave
-    g.rect(24, 0, 24, 1, dark)
-    for y in range(9):
+    g.rect(10, 0, 100, 1, dark)
+    for y in range(4):
         w = roof_width(y)
-        g.rect(36 - w, y, 3, 1, dark)
-        g.rect(33 + w, y, 3, 1, dark)
-    g.rect(0, 8, 1, 22, dark)
-    g.rect(71, 8, 1, 22, dark)
-    g.rect(0, 30, 72, 2, dark)
+        g.rect(60 - w, y, 3, 1, dark)
+        g.rect(57 + w, y, 3, 1, dark)
+    g.rect(1, 3, 1, 16, dark)
+    g.rect(118, 3, 1, 16, dark)
+    g.rect(1, 19, 118, 2, dark)
     if dog == "zippy":
-        g.rect(27, 1, 18, 1, "red")
-        g.rect(0, 30, 72, 1, "red")
+        g.rect(13, 1, 94, 1, "red")
+        g.rect(1, 19, 118, 1, "red")
     # the gable vent and its emblem
     ring = "lgrey" if empty else "cream"
-    g.rect(30, 2, 12, 10, ring)
-    g.rect(31, 1, 10, 12, ring)
-    g.rect(31, 2, 10, 10, dark)
+    g.rect(5, 5, 12, 10, ring)
+    g.rect(6, 4, 10, 12, ring)
+    g.rect(6, 5, 10, 10, dark)
     if dog in EMBLEMS:
         colours, rows = EMBLEMS[dog]
         for y, row in enumerate(rows):
             for x, c in enumerate(row):
                 if c != ".":
-                    g.p(32 + x, 3 + y, colours[c])
+                    g.p(7 + x, 6 + y, colours[c])
     # the name plate
-    g.rect(7, 13, 58, 15, dark)
-    g.rect(8, 14, 56, 12, "cream")
-    g.rect(8, 26, 56, 1, "tan")
-    # arched doorway, the sill and the doormat for the count
-    g.rect(18, 35, 36, 33, "ink" if empty else "plum")
-    g.rect(21, 33, 30, 1, "ink" if empty else "plum")
-    g.rect(19, 34, 34, 1, "ink" if empty else "plum")
-    g.rect(16, 68, 40, 1, "grey" if empty else "dbrown")
-    g.rect(19, 69, 34, 6, "white" if empty else "cream")
-    g.rect(19, 69, 1, 6, "lgrey" if empty else "tan")
-    g.rect(52, 69, 1, 6, "lgrey" if empty else "tan")
-    g.rect(19, 75, 34, 1, "grey" if empty else "brown")
-    # owner window
-    g.rect(6, 76, 36, 36, "white" if empty else "cream")
-    g.rect(8, 78, 32, 32, "lgrey" if empty else "sky")
-    g.rect(8, 78, 32, 1, "grey" if empty else "blue")
+    g.rect(19, 3, 82, 15, dark)
+    g.rect(20, 4, 80, 12, "cream")
+    g.rect(20, 16, 80, 1, "tan")
+    # arched doorway on its sill
+    door = "ink" if empty else "plum"
+    g.rect(5, 24, 34, 34, door)
+    g.rect(6, 23, 32, 1, door)
+    g.rect(8, 22, 28, 1, door)
+    g.rect(3, 58, 38, 1, unlit)
+    # owner window and its sill
+    g.rect(40, 22, 36, 36, paper)
+    g.rect(42, 24, 32, 32, "lgrey" if empty else "sky")
+    g.rect(42, 24, 32, 1, "grey" if empty else "blue")
+    g.rect(39, 58, 38, 1, unlit)
+    if empty:
+        # the plate for FIRED, where a dog's house has its name strip, board and pegs
+        g.rect(42, 71, 36, 13, rim)
+        g.rect(43, 72, 34, 11, paper)
+        g.rect(43, 82, 34, 1, paper_sh)
+        return g
+    # hearts board, its right edge on the house's, dotted under the hearts
+    g.rect(76, 22, 43, 34, rim)
+    g.rect(77, 23, 41, 31, paper)
+    g.rect(77, 53, 41, 1, paper_sh)
+    for x in range(79, 116, 2):
+        g.p(x, 43, paper_sh)
     # pegs for the status icons
     for x, y in STATUS_SPOTS:
-        g.rect(x + 7, y - 2, 2, 2, "slate" if empty else "dbrown")
-    # hearts board
-    g.rect(5, 115, 62, 28, "grey" if empty else "dbrown")
-    g.rect(6, 116, 60, 26, "white" if empty else "cream")
-    g.rect(6, 141, 60, 1, "lgrey" if empty else "tan")
+        g.rect(x + 7, y - 2, 2, 2, rim)
+    # the owner's name strip
+    g.rect(3, 59, 74, 13, rim)
+    g.rect(4, 60, 72, 11, paper)
+    g.rect(4, 70, 72, 1, paper_sh)
     return g
 
 
 def doghouse_warn(step):
-    """72x146, drawn over ui-doghouse: a 2px warning rim inside the house's outline, for an owner at
+    """120x90, drawn over ui-doghouse: a 2px warning rim inside the house's outline, for an owner at
     one heart. Steps 0 to 2 run dim to bright; the outer pixel (orange 3.06:1, amber 4.57:1 on
     the dbrown column) carries the contrast, the inner one (red or orange) the warning colour."""
     outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
     house = doghouse("empty").px
-    g = Grid(72, 146)
+    g = Grid(HOUSE_W, HOUSE_H)
 
     def solid(x, y):
-        return 0 <= x < 72 and 0 <= y < 146 and house[y][x] is not None
+        return 0 <= x < HOUSE_W and 0 <= y < HOUSE_H and house[y][x] is not None
 
-    for y in range(146):
-        for x in range(72):
+    for y in range(HOUSE_H):
+        for x in range(HOUSE_W):
             if not solid(x, y):
                 continue
             near = [all(solid(x + dx, y + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1))
@@ -678,8 +727,10 @@ def afford_frame(glint):
     differs from ui-select (ink, a 2px pulsing yellow band, ink, 3px out, square corners) by
     its thin line, its round studs and its deeper gold, and it does not pulse. Amber holds
     4.57:1 on the dark wood, the plum keyline 6.37:1 on the yard's grass and the studs' plum
-    rims 6.49:1 on tan tiles. The glint frame flashes the top-left stud white with two rays
-    along the line, all inside the corner slice so the stretched edges stay plain."""
+    rims 6.49:1 on tan tiles. glint runs a flash along the line over two frames: 1 lights the
+    top-left stud with rays heading right and down the line, 2 lights the top-right and
+    bottom-left studs as the rays arrive, all inside the corner slices so the stretched edges
+    stay plain."""
     g = Grid(24, 24)
     g.rect(1, 0, 22, 24, "plum")
     g.rect(0, 1, 24, 22, "plum")
@@ -690,11 +741,14 @@ def afford_frame(glint):
             for x, ch in enumerate(row):
                 if ch != ".":
                     g.p(ox + x, oy + y, {"P": "plum", "Y": "yellow", "A": "amber", "O": "orange"}[ch])
-    if glint:
-        for x, y in ((2, 2), (3, 1), (1, 3), (2, 1), (1, 2), (3, 2), (2, 3)):
-            g.p(x, y, "white")
-        g.p(7, 1, "white")
-        g.p(1, 7, "white")
+    # the coin's lit top-left, with the line's pixels either side of the stud
+    shine = ((2, 2), (3, 1), (1, 3), (2, 1), (1, 2), (3, 2), (2, 3))
+    studs, rays = {1: (((0, 0),), ((7, 1), (1, 7))), 2: (((17, 0), (0, 17)), ((16, 1), (1, 16)))}.get(glint, ((), ()))
+    for ox, oy in studs:
+        for x, y in shine:
+            g.p(ox + x, oy + y, "white")
+    for x, y in rays:
+        g.p(x, y, "white")
     return g
 
 
@@ -819,10 +873,11 @@ def strip_well():
 
 def top_bar():
     """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
-    money 4,8 94x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 100,8
-    42x26 (treat at 104,13, count at 122,18, up to three digits), and zone 194,5 162x29 (the
-    zone name right aligned at 352,10, ui-zone-pips from 271,22). Between the treats and zone
-    wells sit two ui-icon-buttons: the sound toggle at 146,10 and pause at 170,10."""
+    money 4,8 88x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 96,8 32x26
+    (treat at 100,13, the count at 118,18), and zone 212,5 144x29 (the zone name right aligned
+    at 352,10, ui-zone-pips from 271,22). Between the treats and zone wells sit two
+    ui-icon-buttons: Home at 130,10 and pause at 174,10. The state strip (ui-strip-well) hangs
+    under the zone well, right aligned at 356."""
     g = Grid(360, 40)
     g.rect(0, 0, 360, 40, "plum")
     g.rect(0, 1, 360, 1, "dbrown")
@@ -831,28 +886,68 @@ def top_bar():
     g.rect(0, 37, 360, 1, "brown")
     g.rect(0, 38, 360, 1, "dbrown")
     g.rect(0, 39, 360, 1, "ink")
-    well(g, 4, 8, 94, 26)
-    well(g, 100, 8, 42, 26)
-    well(g, 194, 5, 162, 29)
+    well(g, 4, 8, 88, 26)
+    well(g, 96, 8, 32, 26)
+    well(g, 212, 5, 144, 29)
     return g
 
 
-def zone_pip(state):
-    """18x8, one per zone, 3px apart. The game fills the current pip's 16x6 well at 1,1 from
-    the left in amber as the zone goes by. A done pip carries a tick, so progress never
-    relies on colour alone."""
-    rim, hi, inner = {"done": ("dgreen", "green", "green"), "current": ("orange", "amber", "ink"),
-                      "todo": ("dbrown", "dbrown", "ink")}[state]
+# Each zone's colour on its pip: its road colour, which the zone's road shadow (one ramp step
+# down) dims.
+ZONE_COLOURS = {
+    "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "lgrey", "the-long-way-home": "skin2",
+    "snooze-crescent": "grey", "paws-promenade": "cream",
+}
+# One ramp step up: the inverse of DARKER, for rims that must lighten to hold 3:1 on ink.
+LIGHTER = {v: k for k, v in DARKER.items() if k != v}
+
+
+def pip_rim(fill):
+    """A chosen pip's rim: the zone colour, stepped up its ramp until it holds 3:1 on the ink well."""
+    c = K[fill]
+    while contrast(c, "ink") < 3:
+        c = LIGHTER[c]
+    return c
+
+
+def zone_pip(zone=None, done=False, state=None):
+    """18x8, one per zone of the chosen route, 3px apart. todo (no zone) is a dashed dbrown rim
+    around the bare well: not yet chosen. <zone> is chosen: a rim in the zone's colour (pip_rim) around a 16x6
+    well at 1,1 in the zone's road shadow. The game fills the current pip's well from the left in
+    the zone's colour (ZONE_COLOURS) as the zone goes by. <zone>-done is the full colour with a
+    tick (white, or plum where white falls under 3:1), so progress never relies on colour alone.
+    state "current" or "done" is the zone-free pip (orange rim, ink well filled amber; green with a
+    tick) for a screen that does not know the zone."""
     g = Grid(18, 8)
-    g.rect(1, 0, 16, 8, rim)
-    g.rect(0, 1, 18, 6, rim)
-    g.rect(1, 0, 16, 1, hi)
-    g.rect(1, 1, 16, 6, inner)
-    if state == "done":
-        g.rect(1, 1, 16, 1, "yellow")
+    if state:
+        rim, hi, inner = {"done": ("dgreen", "green", "green"), "current": ("orange", "amber", "ink")}[state]
+        g.rect(1, 0, 16, 8, rim)
+        g.rect(0, 1, 18, 6, rim)
+        g.rect(1, 0, 16, 1, hi)
+        g.rect(1, 1, 16, 6, inner)
+        if state == "done":
+            g.rect(1, 1, 16, 1, "yellow")
+            for x, y in ((6, 4), (7, 5), (8, 4), (9, 3), (10, 2), (11, 1)):
+                g.p(x, y, "white")
+            g.p(7, 6, "dgreen")
+        return g
+    if zone is None:
+        for x in range(1, 17, 3):
+            g.rect(x, 0, 2, 1, "dbrown")
+            g.rect(x, 7, 2, 1, "dbrown")
+        g.rect(0, 2, 1, 4, "dbrown")
+        g.rect(17, 2, 1, 4, "dbrown")
+        g.rect(1, 1, 16, 6, "ink")
+        return g
+    fill = ZONE_COLOURS[zone]
+    g.rect(1, 0, 16, 8, pip_rim(fill))
+    g.rect(0, 1, 18, 6, pip_rim(fill))
+    g.rect(1, 1, 16, 6, fill if done else DARKER[K[fill]])
+    if done:
+        tick = "white" if contrast(fill, "white") >= 3 else "plum"
         for x, y in ((6, 4), (7, 5), (8, 4), (9, 3), (10, 2), (11, 1)):
-            g.p(x, y, "white")
-        g.p(7, 6, "dgreen")
+            g.p(x, y, tick)
+        g.p(7, 6, DARKER[K[fill]])
     return g
 
 
@@ -960,13 +1055,14 @@ def touch_hint():
 IMAGES = {
     "icon-pause": lambda: to_image(pause().outlined(False)),
     "icon-play": lambda: to_image(play().outlined(False)),
+    "icon-home": lambda: to_image(home_icon().outlined(False)),
     "icon-help": lambda: to_image(help_icon().outlined(False)),
     "icon-close": lambda: to_image(close().outlined(False)),
     "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-money": lambda: to_image(money().outlined()),
-    "icon-stinky": lambda: to_image(stinky().outlined()),
+    "icon-stinky": lambda: to_image(stinky()),
     "ui-panel": lambda: to_image(panel().outlined(False)),
     "ui-hint": lambda: to_image(hint().outlined(False)),
     "ui-hint-tail": lambda: to_image(hint_tail().outlined(False)),
@@ -991,8 +1087,7 @@ def sprites():
     yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
-    rest, glint = afford_frame(False).outlined(False), afford_frame(True).outlined(False)
-    yield "ui-afford", [("glint", [rest, rest, rest, glint], 400)]
+    yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
     yield "ui-step-number", [(lb, [step_number(lb).outlined(False)], 1000) for lb in ("1", "2", "3", "tick")]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
@@ -1009,7 +1104,10 @@ def sprites():
         yield f"icon-music{suffix}", [(t, [speaker(ink, t == "on", True).outlined(False)], 1000) for t in ("on", "off")]
     yield "icon-effects-panel", [(t, [effects(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
     yield "icon-motion-panel", [(t, [motion(CREAM_PANEL, t == "on").outlined(False)], 1000) for t in ("on", "off")]
-    yield "ui-zone-pips", [(s, [zone_pip(s).outlined(False)], 1000) for s in ("done", "current", "todo")]
+    yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [
+        (state, [zone_pip(state=state).outlined(False)], 1000) for state in ("current", "done")] + [
+        (zone + suffix, [zone_pip(zone, bool(suffix)).outlined(False)], 1000)
+        for zone in ZONE_COLOURS for suffix in ("", "-done")]
 
 
 def preview(out, scale=3, width=380):

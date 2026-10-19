@@ -368,29 +368,30 @@ def pierre_face(mood):
 def dash_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    g.rect(10 + ln // 2, 16 + q["fl"] + b, 2, 5, "grey")
-    g.rect(20 + ln // 2, 16 + q["fr"] + b, 2, 5, "grey")
+    g.rect(9 + ln // 2, 16 + q["fl"] + b, 2, 5, "grey")
+    g.rect(21 + ln // 2, 16 + q["fr"] + b, 2, 5, "grey")
     g.rect(11, 24 + q["bl"], 2, 5, "grey")
     g.rect(19, 24 + q["br"], 2, 5, "grey")
-    # grey brindle: slate streaks over a grey coat, which shows past the sweater at the flanks and hips
+    # grey brindle: slate streaks over a grey coat, which shows past the sweater at the flanks and hips. A
+    # long, deep chest and a long head make it a medium dog, wider and longer than the small three
     bx = 16 + ln // 2
-    g.ell(bx, 21 + b, 5, 6, "grey", None, "lgrey")
-    for dx, dy in ((-3, 24), (-2, 25), (1, 24), (2, 25), (-1, 26), (3, 18), (-4, 21)):
+    g.ell(bx, 21 + b, 6, 6.5, "grey", None, "lgrey")
+    for dx, dy in ((-3, 24), (-2, 25), (1, 25), (2, 26), (-1, 26), (4, 18), (-5, 21), (-4, 22), (5, 23)):
         g.p(bx + dx, dy + b, "slate")
-    g.ell(bx, 20 + b, 4, 4.5, "dgreen", "forest", "green")
-    g.rect(bx - 3, 18 + b, 6, 1, "cream")
-    g.rect(bx - 3, 21 + b, 6, 1, "cream")
+    g.ell(bx, 20 + b, 4.5, 5, "dgreen", "forest", "green")
+    g.rect(bx - 4, 18 + b, 8, 1, "cream")
+    g.rect(bx - 4, 21 + b, 8, 1, "cream")
     tx = 16 + q["tail"]
     g.rect(tx, 26 + b, 1, 3, "grey")
     g.p(tx + 1, 29 + b, "grey")
     hx = 16 + ln
-    g.ell(hx, 11.5 + b, 3.5, 4.5, "grey", None, "lgrey")
-    for dx, dy in ((-2, 10), (-1, 11), (1, 9), (2, 10), (0, 13), (1, 14)):
+    g.ell(hx, 10.5 + b, 4, 5, "grey", None, "lgrey")
+    for dx, dy in ((-2, 9), (-1, 10), (1, 8), (2, 9), (0, 12), (1, 13)):
         g.p(hx + dx, dy + b, "slate")
     # rose ears folded back, the fold in slate
     for side, t in ((-1, 0), (1, q["twitch"])):
-        g.ell(hx + 3.5 * side, 9.5 + b - q["ears"] + t, 1.5, 1.5, "grey")
-        g.p(hx + 3 * side, 10 + b - q["ears"] + t, "slate")
+        g.ell(hx + 4 * side, 8.5 + b - q["ears"] + t, 1.5, 1.5, "grey")
+        g.p(hx + 3.5 * side, 9 + b - q["ears"] + t, "slate")
     spray(g, q["spray"])
     return g
 

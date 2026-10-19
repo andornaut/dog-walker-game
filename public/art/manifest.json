@@ -107,7 +107,7 @@
       "png": "sprites/barrier-2.png",
       "json": "sprites/barrier-2.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 23,
         "opaqueWidth": 88
       }
     },
@@ -116,7 +116,7 @@
       "png": "sprites/barrier-3.png",
       "json": "sprites/barrier-3.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 23,
         "opaqueWidth": 144
       }
     },
@@ -125,8 +125,26 @@
       "png": "sprites/bench.png",
       "json": "sprites/bench.json",
       "anchor": {
-        "feetY": 29,
+        "feetY": 23,
         "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "bench@50",
+      "png": "sprites/bench@50.png",
+      "json": "sprites/bench@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "bench@75",
+      "png": "sprites/bench@75.png",
+      "json": "sprites/bench@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 65
       }
     },
     {
@@ -190,7 +208,7 @@
       "json": "sprites/cone.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 18
+        "opaqueWidth": 20
       }
     },
     {
@@ -199,7 +217,7 @@
       "json": "sprites/cone@50.json",
       "anchor": {
         "feetY": 15,
-        "opaqueWidth": 10
+        "opaqueWidth": 11
       }
     },
     {
@@ -208,7 +226,7 @@
       "json": "sprites/cone@75.json",
       "anchor": {
         "feetY": 22,
-        "opaqueWidth": 14
+        "opaqueWidth": 16
       }
     },
     {
@@ -227,6 +245,24 @@
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "cyclist@50",
+      "png": "sprites/cyclist@50.png",
+      "json": "sprites/cyclist@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "cyclist@75",
+      "png": "sprites/cyclist@75.png",
+      "json": "sprites/cyclist@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
       }
     },
     {
@@ -262,7 +298,7 @@
       "json": "sprites/dog-dash.json",
       "anchor": {
         "feetY": 30,
-        "opaqueWidth": 14
+        "opaqueWidth": 16
       }
     },
     {
@@ -271,7 +307,7 @@
       "json": "sprites/dog-dash@50.json",
       "anchor": {
         "feetY": 15,
-        "opaqueWidth": 8
+        "opaqueWidth": 9
       }
     },
     {
@@ -280,7 +316,7 @@
       "json": "sprites/dog-dash@75.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 11
+        "opaqueWidth": 12
       }
     },
     {
@@ -759,7 +795,7 @@
       "png": "sprites/hedge.png",
       "json": "sprites/hedge.json",
       "anchor": {
-        "feetY": 30,
+        "feetY": 23,
         "opaqueWidth": 144
       }
     },
@@ -796,7 +832,7 @@
       "json": "sprites/ice-cream-truck.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 58
+        "opaqueWidth": 62
       }
     },
     {
@@ -843,8 +879,8 @@
       "png": "sprites/loose-dog.png",
       "json": "sprites/loose-dog.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 31
+        "feetY": 29,
+        "opaqueWidth": 30
       }
     },
     {
@@ -852,7 +888,7 @@
       "png": "sprites/loose-dog@50.png",
       "json": "sprites/loose-dog@50.json",
       "anchor": {
-        "feetY": 14,
+        "feetY": 15,
         "opaqueWidth": 16
       }
     },
@@ -861,7 +897,7 @@
       "png": "sprites/loose-dog@75.png",
       "json": "sprites/loose-dog@75.json",
       "anchor": {
-        "feetY": 21,
+        "feetY": 22,
         "opaqueWidth": 24
       }
     },
@@ -872,6 +908,24 @@
       "anchor": {
         "feetY": 13,
         "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "lost-wallet@50",
+      "png": "sprites/lost-wallet@50.png",
+      "json": "sprites/lost-wallet@50.json",
+      "anchor": {
+        "feetY": 7,
+        "opaqueWidth": 7
+      }
+    },
+    {
+      "key": "lost-wallet@75",
+      "png": "sprites/lost-wallet@75.png",
+      "json": "sprites/lost-wallet@75.json",
+      "anchor": {
+        "feetY": 10,
+        "opaqueWidth": 10
       }
     },
     {
@@ -996,8 +1050,8 @@
       "png": "sprites/parked-car.png",
       "json": "sprites/parked-car.json",
       "anchor": {
-        "feetY": 126,
-        "opaqueWidth": 40
+        "feetY": 27,
+        "opaqueWidth": 42
       }
     },
     {
@@ -1032,8 +1086,8 @@
       "png": "sprites/skunk-cloud.png",
       "json": "sprites/skunk-cloud.json",
       "anchor": {
-        "feetY": 86,
-        "opaqueWidth": 87
+        "feetY": 85,
+        "opaqueWidth": 85
       }
     },
     {
@@ -1041,8 +1095,8 @@
       "png": "sprites/skunk-cloud@50.png",
       "json": "sprites/skunk-cloud@50.json",
       "anchor": {
-        "feetY": 42,
-        "opaqueWidth": 43
+        "feetY": 41,
+        "opaqueWidth": 41
       }
     },
     {
@@ -1194,6 +1248,11 @@
       "key": "ui-check",
       "png": "sprites/ui-check.png",
       "json": "sprites/ui-check.json"
+    },
+    {
+      "key": "ui-difficulty",
+      "png": "sprites/ui-difficulty.png",
+      "json": "sprites/ui-difficulty.json"
     },
     {
       "key": "ui-doghouse",
@@ -1363,8 +1422,16 @@
       "png": "images/backdrop-bark-park.png"
     },
     {
+      "key": "backdrop-paws-promenade",
+      "png": "images/backdrop-paws-promenade.png"
+    },
+    {
       "key": "backdrop-sniff-street-shops",
       "png": "images/backdrop-sniff-street-shops.png"
+    },
+    {
+      "key": "backdrop-snooze-crescent",
+      "png": "images/backdrop-snooze-crescent.png"
     },
     {
       "key": "backdrop-the-long-way-home",
@@ -1591,6 +1658,10 @@
       "png": "images/icon-help.png"
     },
     {
+      "key": "icon-home",
+      "png": "images/icon-home.png"
+    },
+    {
       "key": "icon-lock",
       "png": "images/icon-lock.png"
     },
@@ -1691,8 +1762,16 @@
       "png": "images/icon-zone-bark-park.png"
     },
     {
+      "key": "icon-zone-paws-promenade",
+      "png": "images/icon-zone-paws-promenade.png"
+    },
+    {
       "key": "icon-zone-sniff-street-shops",
       "png": "images/icon-zone-sniff-street-shops.png"
+    },
+    {
+      "key": "icon-zone-snooze-crescent",
+      "png": "images/icon-zone-snooze-crescent.png"
     },
     {
       "key": "icon-zone-the-long-way-home",
@@ -1771,12 +1850,28 @@
       "png": "images/road-bark-park-start.png"
     },
     {
+      "key": "road-paws-promenade",
+      "png": "images/road-paws-promenade.png"
+    },
+    {
+      "key": "road-paws-promenade-start",
+      "png": "images/road-paws-promenade-start.png"
+    },
+    {
       "key": "road-sniff-street-shops",
       "png": "images/road-sniff-street-shops.png"
     },
     {
       "key": "road-sniff-street-shops-start",
       "png": "images/road-sniff-street-shops-start.png"
+    },
+    {
+      "key": "road-snooze-crescent",
+      "png": "images/road-snooze-crescent.png"
+    },
+    {
+      "key": "road-snooze-crescent-start",
+      "png": "images/road-snooze-crescent-start.png"
     },
     {
       "key": "road-the-long-way-home",
@@ -1789,6 +1884,10 @@
     {
       "key": "road-woof-way",
       "png": "images/road-woof-way.png"
+    },
+    {
+      "key": "road-woof-way-start",
+      "png": "images/road-woof-way-start.png"
     },
     {
       "key": "screen-end",
