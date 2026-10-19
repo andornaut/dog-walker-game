@@ -92,6 +92,7 @@ import {
   drawSlotSign,
 } from "./homePanels";
 import { listenOnePress } from "./onePress";
+import { openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
@@ -697,8 +698,7 @@ export class StartScene extends Scene {
         return;
       case "settings": {
         const data: SettingsSceneData = { resume: SCENE_KEYS.start };
-        this.scene.pause();
-        this.scene.launch(SCENE_KEYS.settings, data);
+        openOverlay(this, SCENE_KEYS.settings, data);
         return;
       }
       case "stats": {
@@ -706,8 +706,7 @@ export class StartScene extends Scene {
           resume: SCENE_KEYS.start,
           ...(target.tab === undefined ? {} : { tab: target.tab }),
         };
-        this.scene.pause();
-        this.scene.launch(SCENE_KEYS.stats, data);
+        openOverlay(this, SCENE_KEYS.stats, data);
         return;
       }
       case "start":
@@ -777,8 +776,7 @@ export class StartScene extends Scene {
       owners: [...new Set([...owners, ...this.loadout.dogs])],
       resume: SCENE_KEYS.start,
     };
-    this.scene.pause();
-    this.scene.launch(SCENE_KEYS.celebration, data);
+    openOverlay(this, SCENE_KEYS.celebration, data);
   }
 
   private purchaseName(purchase: Purchase): string {
