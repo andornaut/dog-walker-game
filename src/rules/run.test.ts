@@ -68,13 +68,12 @@ describe("tipValue", () => {
 });
 
 describe("payZoneFees", () => {
-  it("pays every dog still walking its owner's fee, and records it against the dog", () => {
+  it("pays every dog still walking its owner's fee, one change per dog", () => {
     const { changes, state } = payZoneFees(
       data,
       testState({ duchess: 5, koda: "fired", zippy: 3 }),
     );
     expect(state.money).toBe(2300);
-    expect(state.feesEarned).toEqual({ duchess: 1000, zippy: 1300 });
     expect(changes).toEqual([
       { amount: 1000, causes: [{ amount: 1000, kind: "fee" }], dog: "duchess", kind: "money" },
       { amount: 1300, causes: [{ amount: 1300, kind: "fee" }], dog: "zippy", kind: "money" },
@@ -90,7 +89,6 @@ describe("payZoneFees", () => {
     const run = testState({ duchess: 5 }, { route: [first.id as ZoneId] });
     const { changes, state } = payZoneFees({ ...data, world }, run);
     expect(state.money).toBe(1500);
-    expect(state.feesEarned).toEqual({ duchess: 1500 });
     expect(changes).toEqual([
       {
         amount: 1500,
@@ -118,7 +116,7 @@ describe("payZoneFees", () => {
 });
 
 describe("fireOwnersAtZero", () => {
-  it("takes back every fee the fired dog earned, keeps the rest, and marks the dog fired", () => {
+  it("marks the dog fired and keeps every earlier zone's fee and every tip", () => {
     const twoZones = payZoneFees(
       data,
       payZoneFees(data, testState({ duchess: 5, zippy: 5 })).state,
@@ -128,35 +126,19 @@ describe("fireOwnersAtZero", () => {
       ...withTips,
       pack: testState({ duchess: 1, zippy: 0 }).pack,
     };
-    const { changes, fired, state } = fireOwnersAtZero(emptied);
+    const { fired, state } = fireOwnersAtZero(emptied);
     expect(fired).toEqual(["zippy"]);
-    expect(state.money).toBe(2000 + 300);
-    expect(state.feesEarned).toEqual({ duchess: 2000 });
+    expect(state.money).toBe(withTips.money);
     expect(state.pack).toEqual([
       { dog: "duchess", hearts: 1, status: "walking" },
       { dog: "zippy", status: "fired", zoneIndex: 2 },
     ]);
     expect(heartsByDog(state)).toEqual({ duchess: 1 });
-    expect(changes).toEqual([
-      {
-        amount: -2600,
-        causes: [{ amount: -2600, kind: "clawback" }],
-        dog: "zippy",
-        kind: "money",
-      },
-    ]);
   });
 
-  it("never takes money below $0 when the fees were already spent", () => {
-    const state = testState(
-      { pierre: 0 },
-      { feesEarned: { pierre: cents(1300) }, money: cents(500) },
-    );
-    const firing = fireOwnersAtZero(state);
-    expect(firing.state.money).toBe(0);
-    expect(firing.changes[0]?.causes).toEqual([
-      { amount: -1300, kind: "clawback" },
-      { amount: 800, bound: "min", kind: "limit" },
-    ]);
+  it("leaves the fired dog unpaid at the end of the zone it was fired in", () => {
+    const { state } = fireOwnersAtZero(testState({ duchess: 5, zippy: 0 }));
+    const { changes } = payZoneFees(data, state);
+    expect(changes.map((change) => change.dog)).toEqual(["duchess"]);
   });
 });

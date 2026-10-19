@@ -38,16 +38,15 @@ describe("earningsBreakdown", () => {
     ]);
   });
 
-  it("adds lucky finds, fees taken back and starting money only when the run had some", () => {
-    const changes = [fee(1_000), card(500), money(-1_000, { amount: -1_000, kind: "clawback" })];
+  it("adds lucky finds and starting money only when the run had some", () => {
+    const changes = [fee(1_000), card(500)];
     expect(
-      earningsBreakdown(gameData, changes, cents(1_500)).map(({ amount, kind }) => [kind, amount]),
+      earningsBreakdown(gameData, changes, cents(2_500)).map(({ amount, kind }) => [kind, amount]),
     ).toEqual([
       ["fees", 1_000],
       ["tips", 0],
       ["luckyFinds", 500],
       ["cardCosts", 0],
-      ["clawbacks", -1_000],
       ["start", 1_000],
     ]);
   });

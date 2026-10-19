@@ -15,7 +15,7 @@ import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
 import { resolveEffects } from "./effects";
-import { fireOwnersAtZero, tipValue } from "./run";
+import { tipValue } from "./run";
 import { giveTreat } from "./treats";
 import { cents } from "./units";
 
@@ -50,13 +50,6 @@ const resolved = (
   affected: readonly DogId[] = [],
   source: EffectSource = skunkIgnore,
 ) => only(resolveEffects(data, { affected, random: () => 0, source }, [effect], state).changes);
-
-const firing = (money: number) =>
-  only(
-    fireOwnersAtZero(
-      testState({ pierre: 0 }, { feesEarned: { pierre: cents(1300) }, money: cents(money) }),
-    ).changes,
-  );
 
 const sweetTalker = activeModifier(
   { kind: "upgrade", upgrade: "sweetTalker" },
@@ -112,12 +105,15 @@ describe("causeLabel and causeNames", () => {
       "−$6, Sweet talker",
       ["Sweet talker"],
     ],
-    ["a clawback", () => firing(5000), "−$13 fees taken back", ["fees taken back"]],
     [
-      "a clawback held at the $0 floor",
-      () => firing(500),
-      "−$5 fees taken back, you're out of money",
-      ["fees taken back", "you're out of money"],
+      "a cost held at the $0 floor",
+      () =>
+        resolved(towel, testState({ duchess: 5, koda: 5 }, { money: cents(500) }), [
+          "duchess",
+          "koda",
+        ]),
+      "−$5, you're out of money",
+      ["you're out of money"],
     ],
     [
       "a treat as the base",

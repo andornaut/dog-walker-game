@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { DogId } from "../data/types";
 import { zoneFee } from "../rules/dogs";
 import { zoneAt } from "../rules/route";
 import { cents } from "../rules/units";
@@ -164,29 +163,6 @@ describe("simulateRun", { timeout: 15_000 }, () => {
           );
         }
       }
-    }
-  });
-
-  // alwaysHearts never spends money, so the money always covers a fired owner's fees.
-  it("takes back the fees a fired owner's dog earned", () => {
-    const results = runs(4, { hitRate: 0.25, pack: RISKY, policy: "alwaysHearts" });
-    const feesBefore = (result: RunResult, dog: DogId, zoneIndex: number) =>
-      result.zones
-        .filter((zone) => zone.zoneIndex < zoneIndex)
-        .flatMap((zone) => zone.fees)
-        .filter((fee) => fee.dog === dog)
-        .reduce((sum, fee) => sum + fee.amount, 0);
-    const firings = results.flatMap((result) =>
-      result.firings.map((firing) => ({
-        ...firing,
-        paid: feesBefore(result, firing.dog, firing.zoneIndex),
-      })),
-    );
-
-    expect(firings.filter((firing) => firing.paid > 0).length).toBeGreaterThan(0);
-    for (const firing of firings) {
-      expect(firing.feesEarned).toBe(firing.paid);
-      expect(firing.clawback).toBe(firing.paid);
     }
   });
 

@@ -74,13 +74,11 @@ export function payZoneFees(
   data: Pick<GameData, "dogs" | "tuning" | "world">,
   state: RunState,
 ): Payments {
-  const feesEarned = { ...state.feesEarned };
   let money = state.money;
   const zone = currentZone(data, state);
   const changes = packDogs(state).map((id): MoneyChange => {
     const fee = zoneFeeParts(data.tuning, state.modifiers, data.dogs[id]);
     const amount = cents(fee.value * zone.fees);
-    feesEarned[id] = addCents(feesEarned[id] ?? cents(0), amount);
     money = addCents(money, amount);
     const { quirk } = data.dogs[id];
     const causes = centsCauses([
@@ -93,39 +91,20 @@ export function payZoneFees(
     ]);
     return { amount, causes, dog: id, kind: "money" };
   });
-  return { changes, state: { ...state, feesEarned, money } };
+  return { changes, state: { ...state, money } };
 }
 
 export interface Firing {
-  // One clawback per fired owner whose fees took money back.
-  readonly changes: readonly MoneyChange[];
   readonly fired: readonly DogId[];
   readonly state: RunState;
 }
 
-// Every owner at 0 hearts fires you: their dog leaves, and they take back every fee it
-// earned this run. Tips stay, and money never goes below $0.
+// Every owner at 0 hearts fires you and their dog leaves. Money doesn't change: the zone they
+// fire you in pays nothing for their dog, and earlier zones' fees and all tips stay.
 export function fireOwnersAtZero(state: RunState): Firing {
   const fired = state.pack.flatMap((slot) =>
     slot.status === "walking" && slot.hearts === 0 ? [slot.dog] : [],
   );
-  const feesEarned = { ...state.feesEarned };
-  let money = state.money;
-  const changes: MoneyChange[] = [];
-  for (const dog of fired) {
-    const clawback = -(feesEarned[dog] ?? 0);
-    const after = nonNegativeCents(cents(money + clawback));
-    const delta = after - money;
-    if (delta !== 0) {
-      const causes: Cause[] = [{ amount: clawback, kind: "clawback" }];
-      if (delta !== clawback) {
-        causes.push({ amount: delta - clawback, bound: "min", kind: "limit" });
-      }
-      changes.push({ amount: cents(delta), causes, dog, kind: "money" });
-    }
-    money = after;
-    delete feesEarned[dog];
-  }
   const pack = mapPack(
     (slot) =>
       fired.includes(slot.dog)
@@ -133,5 +112,5 @@ export function fireOwnersAtZero(state: RunState): Firing {
         : slot,
     state.pack,
   );
-  return { changes, fired, state: { ...state, feesEarned, money, pack } };
+  return { fired, state: { ...state, pack } };
 }

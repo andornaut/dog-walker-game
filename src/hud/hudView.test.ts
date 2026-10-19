@@ -63,19 +63,19 @@ describe("changeLabels", () => {
 
   it("has no labels without changes, and marks a loss at the bank as no gain", () => {
     expect(changeLabels(gameData, [])).toEqual([]);
-    const clawback = {
+    const bump = {
       amount: cents(-1000),
-      causes: [{ amount: -1000, kind: "clawback" }],
-      dog: "pierre",
+      causes: [{ amount: -1000, kind: "bump" }],
+      dog: null,
       kind: "money",
     } as const;
-    expect(changeLabels(gameData, [clawback])).toEqual([
+    expect(changeLabels(gameData, [bump])).toEqual([
       {
         amount: -1000,
-        cause: "fees taken back",
+        cause: "bump",
         gain: false,
         target: { kind: "bank" },
-        text: "−$10 fees taken back",
+        text: "−$10 bump",
       },
     ]);
   });

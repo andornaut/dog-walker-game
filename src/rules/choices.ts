@@ -124,7 +124,7 @@ export interface ChoiceOutcome {
   readonly fired: readonly DogId[];
   // One per owner per effect that moved their meter, in order.
   readonly heartChanges: readonly HeartChange[];
-  // One per money effect that moved the money, then one per clawback by an owner who fired you.
+  // One per money effect that moved the money, in order.
   readonly moneyChanges: readonly MoneyChange[];
   // The total of moneyChanges.
   readonly moneyDelta: Cents;
@@ -214,8 +214,7 @@ function walkingHearts(state: RunState): Map<DogId, Hearts> {
   );
 }
 
-// Applies effects, then owners at 0 hearts fire you and take back their dog's fees; with no
-// dogs left the run ends.
+// Applies effects, then owners at 0 hearts fire you; with no dogs left the run ends.
 function outcomeOf(
   data: ChoiceData,
   context: EffectContext,
@@ -252,7 +251,7 @@ function outcomeOf(
   return {
     fired: firing.fired,
     heartChanges: applied.changes.filter(isHearts),
-    moneyChanges: [...applied.changes.filter(isMoney), ...firing.changes],
+    moneyChanges: applied.changes.filter(isMoney),
     moneyDelta: cents(next.money - state.money),
     quips,
     state: next,
@@ -472,9 +471,9 @@ function takePath(
   };
 }
 
-// Applies the chosen option. Owners at 0 hearts fire you and take back their dog's fees;
-// with no dogs left the run ends. An option that lets the chasers chase counts a chase. A
-// fork's path sets the next zone. Throws for a disabled option or an ended run.
+// Applies the chosen option. Owners at 0 hearts fire you; with no dogs left the run ends. An
+// option that lets the chasers chase counts a chase. A fork's path sets the next zone.
+// Throws for a disabled option or an ended run.
 export function chooseOption(
   data: ChoiceData,
   random: () => number,

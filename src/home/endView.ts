@@ -4,7 +4,7 @@ import { quipLine } from "../rules/choices";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 
-export type EarningsKind = "cardCosts" | "clawbacks" | "fees" | "luckyFinds" | "start" | "tips";
+export type EarningsKind = "cardCosts" | "fees" | "luckyFinds" | "start" | "tips";
 
 export interface EarningsLine {
   readonly amount: Cents;
@@ -14,22 +14,13 @@ export interface EarningsLine {
 
 // Fees, tips and card costs always show; the rest only when the run had some.
 const ALWAYS_SHOWN: ReadonlySet<EarningsKind> = new Set(["cardCosts", "fees", "tips"]);
-const ORDER: readonly EarningsKind[] = [
-  "fees",
-  "tips",
-  "luckyFinds",
-  "cardCosts",
-  "clawbacks",
-  "start",
-];
+const ORDER: readonly EarningsKind[] = ["fees", "tips", "luckyFinds", "cardCosts", "start"];
 
-// A money change counts under its base cause: a fee, tip or clawback, or a card or lucky find's
-// effect, as a cost or a gain.
+// A money change counts under its base cause: a fee or tip, or a card or lucky find's effect,
+// as a cost or a gain.
 function kindOf(change: MoneyChange): EarningsKind {
   const base = change.causes[0];
   switch (base?.kind) {
-    case "clawback":
-      return "clawbacks";
     case "fee":
       return "fees";
     case "tip":

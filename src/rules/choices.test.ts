@@ -337,22 +337,13 @@ describe("chooseOption", () => {
     );
   });
 
-  it("fires an owner at 0 hearts, who takes back their dog's fees", () => {
-    const state = testState(
-      { duchess: 5, pierre: 2 },
-      {
-        feesEarned: { duchess: cents(2000), pierre: cents(2600) },
-        money: cents(5000),
-        zoneIndex: 2,
-      },
-    );
+  it("fires an owner at 0 hearts, and the money stays", () => {
+    const state = testState({ duchess: 5, pierre: 2 }, { money: cents(5000), zoneIndex: 2 });
     const outcome = choose(state, encounter("skunk", ["pierre"]), 2);
     expect(outcome.fired).toEqual(["pierre"]);
-    expect(outcome.state.money).toBe(5000 - 2600);
-    expect(outcome.moneyDelta).toBe(-2600);
-    expect(outcome.moneyChanges.map(({ amount, dog }) => ({ amount, dog }))).toEqual([
-      { amount: -2600, dog: "pierre" },
-    ]);
+    expect(outcome.state.money).toBe(state.money);
+    expect(outcome.moneyDelta).toBe(0);
+    expect(outcome.moneyChanges).toEqual([]);
     expect(outcome.state.pack[1]).toEqual({ dog: "pierre", status: "fired", zoneIndex: 2 });
     expect(outcome.quips).toEqual([{ dog: "pierre", moment: "fired" }]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });

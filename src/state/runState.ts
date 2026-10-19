@@ -102,8 +102,6 @@ export interface RunState {
   readonly debuffZones: Readonly<Partial<Record<DebuffId, number>>>;
   // Each debuff at most once: applying one the pack has refreshes it.
   readonly debuffs: readonly ActiveDebuff[];
-  // Fees each dog has paid this run, which its owner takes back on firing you.
-  readonly feesEarned: Readonly<Partial<Record<DogId, Cents>>>;
   // The zone index the run began in. A dev start skips the zones before it, which count
   // toward no achievement.
   readonly firstZone: number;
@@ -163,7 +161,6 @@ export function newRun(
     bumpsByZone: [],
     debuffZones: {},
     debuffs: [],
-    feesEarned: {},
     firstZone: 0,
     gear: loadout.gear,
     immunities: [],

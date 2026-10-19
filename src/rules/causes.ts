@@ -8,12 +8,12 @@ import { type Cents, cents, type Hearts } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
-// base: the effect, tip, fee, clawback, treat or bump. The rest are what changed it: a dog's
+// base: the effect, tip, fee, treat or bump. The rest are what changed it: a dog's
 // quirk, a temperament multiplier, the pack-size tip factor, a modifier, a zone's fee
 // multiplier, or a limit (a meter held within 0 and its max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
-  | { readonly amount: number; readonly kind: "bump" | "clawback" | "fee" | "tip" | "treat" }
+  | { readonly amount: number; readonly kind: "bump" | "fee" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
   | { readonly amount: number; readonly kind: "packSize"; readonly packSize: number }
@@ -32,7 +32,7 @@ export interface HeartChange {
   readonly kind: "hearts";
 }
 
-// A change to the money. dog is the dog a fee or clawback belongs to, or null.
+// A change to the money. dog is the dog a fee belongs to, or null.
 export interface MoneyChange {
   readonly amount: Cents;
   readonly causes: readonly Cause[];
@@ -130,8 +130,6 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
 // A readable name for one cause of a change, such as "dramatic", "solo" or "Big tipper".
 export function causeName(data: CauseData, change: Change, cause: Cause): string {
   switch (cause.kind) {
-    case "clawback":
-      return "fees taken back";
     case "effect":
     case "modifier":
       return effectSourceName(data, cause.source);

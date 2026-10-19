@@ -20,7 +20,6 @@ export function testState(
     bumpsByZone: [],
     debuffZones: {},
     debuffs: [],
-    feesEarned: {},
     firstZone: 0,
     gear: null,
     immunities: [],

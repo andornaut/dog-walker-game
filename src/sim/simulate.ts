@@ -113,11 +113,7 @@ export interface ChoiceRecord {
 }
 
 export interface FiringRecord {
-  // What the owner took back: their dog's fees, cut short if money ran out.
-  readonly clawback: Cents;
   readonly dog: DogId;
-  // The fees the dog had paid this run when its owner fired you.
-  readonly feesEarned: Cents;
   readonly zoneIndex: number;
 }
 
@@ -239,15 +235,7 @@ function countItem(
 
 function recordFirings(session: Session, before: RunState, outcome: ChoiceOutcome): void {
   for (const dog of outcome.fired) {
-    const taken = outcome.moneyChanges
-      .filter((change) => change.dog === dog)
-      .reduce((sum, change) => sum - change.amount, 0);
-    session.firings.push({
-      clawback: cents(taken),
-      dog,
-      feesEarned: before.feesEarned[dog] ?? cents(0),
-      zoneIndex: before.zoneIndex,
-    });
+    session.firings.push({ dog, zoneIndex: before.zoneIndex });
   }
 }
 

@@ -663,7 +663,6 @@ export interface MenuText {
     // The breakdown's lines, by what the money came from.
     readonly earnings: {
       readonly cardCosts: string;
-      readonly clawbacks: string;
       readonly fees: string;
       readonly luckyFinds: string;
       readonly start: string;

@@ -13,7 +13,6 @@ export const MENU_TEXT = {
     bank: "Bank",
     earnings: {
       cardCosts: "Card costs",
-      clawbacks: "Fees taken back",
       fees: "Fees",
       luckyFinds: "Lucky finds",
       start: "Starting money",
