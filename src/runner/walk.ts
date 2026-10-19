@@ -351,17 +351,13 @@ export function moverSpec(data: Pick<GameData, "tuning">, mover: MoverKind): Mov
   };
 }
 
-// The zone's need spots, drawn by the zone's weights from the spots that meet a need in the
-// pack, so none is wasted on a need nobody has.
-function needSpotsDrawn(data: WalkData, random: Random, run: RunState): NeedSpotId[] {
+// The zone's need spot weights, kept to the spots that meet a need in the pack, so none is
+// wasted on a need nobody has.
+function needSpotWeights(data: WalkData, run: RunState) {
   const needs = new Set(packDogs(run).map((dog) => data.dogs[dog].need));
-  const entries = positiveWeights(currentZone(data, run).weights.needSpots).filter(([spot]) =>
+  return positiveWeights(currentZone(data, run).weights.needSpots).filter(([spot]) =>
     needs.has(data.needSpots[spot].need),
   );
-  const count = read(data.tuning, "counts", "needSpotsPerZone");
-  return entries.length === 0
-    ? []
-    : Array.from({ length: count }, () => pickWeighted(random, entries));
 }
 
 // Each obstacle, minor obstacle, lucky find and need spot is drawn first by the zone's
@@ -382,7 +378,7 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
     ...drawn(scaled("obstacleSpawns", stats.obstacles), obstacleWeights(data, run)),
     ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),
     ...drawn(stats.luckyEncounters, positiveWeights(zone.weights.luckyFinds)),
-    ...needSpotsDrawn(data, random, run),
+    ...drawn(read(data.tuning, "counts", "needSpotsPerZone"), needSpotWeights(data, run)),
   ];
   const quotas = new Map<WalkItemKind, number>();
   const movers = new Map<MoverKind, number>();
