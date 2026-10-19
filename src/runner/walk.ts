@@ -40,18 +40,20 @@ import {
 } from "./laneControl";
 import { type LaneMotionConfig, occupiedLanes, stillInLane } from "./laneMotion";
 import {
+  hasLeftRoad,
   isMoverObstacle,
   isWarning,
+  laneAt,
   moveMovers,
   MOVER_CONTACTS,
   type MoverItem,
   type MoverKind,
   type MoverObstacleId,
+  moverPlace,
   type MoverSpec,
 } from "./movers";
 import { isNeedSpot } from "./needs";
 import { chance, type Random, randomInt, randomPick } from "./random";
-import { itemsOnRoad, scrollRoadItems } from "./roadItems";
 import {
   type Footprint,
   hitLength,
@@ -801,10 +803,12 @@ export function stepWalk(
       y: geometry.roadTop - height + (zoneDistance - event.distance),
     };
   });
-  const items = itemsOnRoad(geometry.roadBottom, [
-    ...moveMovers(geometry, travel, scrollRoadItems(travel, road.items)),
-    ...moveMovers(geometry, 0, arrived),
-  ]);
+  const { cues, pickups, solid } = scrolledItems(
+    geometry,
+    travel,
+    road.items,
+    moveMovers(geometry, 0, arrived),
+  );
 
   let forcedStopAhead = road.forcedStopAhead;
   let forcedStopOnRoad =
@@ -829,9 +833,6 @@ export function stepWalk(
   );
   const lanes = occupiedLanes(control.motion);
   const footprint: PackFootprint = { ...geometry.packBand, lanes };
-  // A mover is only a cue until it moves, and cannot be hit.
-  const cues = items.filter((item) => isWarning(geometry.laneCount, item));
-  const solid = items.filter((item) => !isPickup(item.kind) && !cues.includes(item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
   // With nothing touching the pack, nothing is hit and the window only ticks.
   const { hits, invulnerableSeconds, remaining } = solid.some((item) =>
@@ -839,7 +840,6 @@ export function stepWalk(
   )
     ? collideWithPack(collisionRules(data, run), footprint, invulnerable, solid)
     : { hits: [], invulnerableSeconds: invulnerable, remaining: solid };
-  const pickups = items.filter((item) => isPickup(item.kind));
   const pickupsHit =
     pickups.length === 0 ? [] : pickupsReached(data, geometry, run, footprint, pickups);
 
@@ -944,6 +944,61 @@ export function stepWalk(
     },
     zoneEnded: hitStop === null && zoneEnded,
   };
+}
+
+interface SortedItems {
+  readonly cues: WalkItem[];
+  readonly pickups: WalkItem[];
+  readonly solid: WalkItem[];
+}
+
+// The road's items, in order, after the road scrolls travel, then the items arriving: each
+// moved down by travel, each mover moved on by it, and the crossers that have left the road
+// and whatever has scrolled wholly past its bottom dropped. They are sorted into the movers
+// that are still only a cue, which cannot be hit, the pickups, and the solid items, which can.
+function scrolledItems(
+  geometry: RoadGeometry,
+  travel: number,
+  items: readonly WalkItem[],
+  arrived: readonly WalkItem[],
+): SortedItems {
+  const { laneCount, roadBottom, roadTop } = geometry;
+  const sorted: SortedItems = { cues: [], pickups: [], solid: [] };
+  for (const item of items) {
+    const { mover } = item;
+    if (mover === undefined) {
+      const y = item.y + travel;
+      if (y < roadBottom) {
+        sortItem(laneCount, sorted, { ...item, y });
+      }
+      continue;
+    }
+    const since = mover.since + travel;
+    const place = moverPlace(laneCount, mover.path, since);
+    const y = roadTop - item.height + place.travel;
+    if (!hasLeftRoad(laneCount, place) && y < roadBottom) {
+      const lane = laneAt(place.lanePosition);
+      sortItem(laneCount, sorted, { ...item, lane, mover: { ...mover, since }, y });
+    }
+  }
+  for (const item of arrived) {
+    if (item.y < roadBottom) {
+      sortItem(laneCount, sorted, item);
+    }
+  }
+  return sorted;
+}
+
+function sortItem(laneCount: number, sorted: SortedItems, item: WalkItem): void {
+  const cue = isWarning(laneCount, item);
+  if (cue) {
+    sorted.cues.push(item);
+  }
+  if (isPickup(item.kind)) {
+    sorted.pickups.push(item);
+  } else if (!cue) {
+    sorted.solid.push(item);
+  }
 }
 
 function opensFor(data: WalkData, run: RunState, encounter: EncounterId): boolean {
