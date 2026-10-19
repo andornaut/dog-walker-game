@@ -2,7 +2,7 @@
   {
     "title": "Roadside",
     "path": "roadside.html",
-    "description": "Elm Avenue's lawns beyond the sidewalks with OutRun-style roadside billboards (houses behind picket fences and hedges, mailboxes, trees, lamp posts, a gnome, a bike, a washing line) that scale with depth and scroll with the road, beside today's bare verge, with the 18 new sprites and their sizes."
+    "description": "Elm Avenue with the shipped roadside-* sprites (houses behind picket fences and hedges, mailboxes, trees, lamp posts, yard props) on the 320px road's camera at three scroll positions and dimmed, beside today's bare verge, with every prop at every depth step."
   },
   {
     "title": "Start screen shop",

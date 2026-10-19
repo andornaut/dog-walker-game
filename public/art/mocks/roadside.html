@@ -15,7 +15,7 @@
       href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
     />
     <style>
-      /* Elm Avenue with roadside scenery on the lawns beyond the sidewalks, beside today's bare verge, at 1x and 2x. The PNGs are 360x560 in Endesga 32, scaled with no smoothing. */
+      /* Elm Avenue with the shipped roadside-* sprites on the lawns beyond the sidewalks, beside today's bare verge. The PNGs are 360x560 in Endesga 32, scaled with no smoothing. */
       :root {
         --bg: #13101e;
         --surface: #1d1a2c;
@@ -111,11 +111,8 @@
       .x1 {
         width: 360px;
       }
-      .x2 {
-        width: 720px;
-      }
       .sheet {
-        width: 1474px;
+        width: 1899px;
       }
       .scroll {
         overflow-x: auto;
@@ -124,22 +121,6 @@
       .scroll img {
         max-width: none;
       }
-      table {
-        border-collapse: collapse;
-        font-size: 14px;
-      }
-      th,
-      td {
-        border-bottom: 1px solid var(--line);
-        padding: 6px 14px 6px 0;
-        text-align: left;
-        vertical-align: top;
-        white-space: nowrap;
-      }
-      th {
-        color: var(--muted);
-        font-weight: 400;
-      }
     </style>
   </head>
   <body>
@@ -147,31 +128,17 @@
       <header>
         <h1>Roadside</h1>
         <p class="lede">
-          Elm Avenue's lawns beyond the sidewalks carry OutRun-style roadside billboards:
-          front-facing houses behind picket fences or hedges, mailboxes, street trees, lamp posts
-          and yard clutter (a gnome, a kid's bike, flower beds, a sprinkler, a washing line, the
-          plum cat on a fence). Today those lawns are bare stripes, so the street reads as a road
-          through a field; the houses make it the suburb the backdrop shows at the T-junction.
-        </p>
-        <p class="lede">
-          Every prop's inner edge is at least 192 road px from the centre line (the sidewalk ends
-          at 188), so on screen no prop crosses a sidewalk or a lane. Props scale with depth
-          from the far edge (0.5) toward the pack and leave the screen's sides at about 0.9.
-          They draw under the backdrop band, rising from behind its bottom edge as the road's
-          objects do, so the T-junction, its approach rows and the gag spots are unchanged. The
-          top bar, backdrop, doghouses, road objects and pack are today's.
-        </p>
-        <p class="lede">
-          Placement: a slot every 112 road px on each side, lots and gaps alternating, the right
-          side one slot behind the left, so a house on one side faces a tree, lamp post or
-          washing line on the other, and each side passes a house every 224 px (1.9 s at 120
-          px/s). Six lots and five gaps cycle with a different stride per side. About 21 props
-          are in view at once.
+          Elm Avenue with the shipped <code>roadside-*</code> sprites on the 320px road's camera:
+          houses behind picket fences and hedges, mailboxes, street trees, lamp posts and yard
+          clutter, placed by the table in <code>art/tools/roadside.py</code> and the style guide's
+          Roadside section. Each prop is drawn from its exported depth step, back to front with the
+          road objects, under the backdrop band and the doghouses. With 20px of verge at the pack,
+          props rise from behind the band at the screen's sides and leave them at about 0.85 scale.
         </p>
       </header>
 
       <section>
-        <h2>1x</h2>
+        <h2>Run screen</h2>
         <div class="pair">
           <figure>
             <img
@@ -185,7 +152,7 @@
             <img
               class="x1"
               src="roadside/woof-way-roadside-1.png"
-              alt="Elm Avenue with houses, fences, trees and yard props on both lawns"
+              alt="Elm Avenue with houses, fences, trees and yard props at the screen's sides"
             />
             <figcaption><b>Roadside</b>, scroll 0</figcaption>
           </figure>
@@ -193,55 +160,23 @@
             <img
               class="x1"
               src="roadside/woof-way-roadside-2.png"
-              alt="The same street 120 road px further on"
+              alt="The same street 150 road px further on"
             />
-            <figcaption><b>Roadside</b>, 120 px on (1 s)</figcaption>
+            <figcaption><b>Roadside</b>, 150 px on (1 s)</figcaption>
           </figure>
           <figure>
             <img
               class="x1"
               src="roadside/woof-way-roadside-3.png"
-              alt="The same street 240 road px further on"
+              alt="The same street 300 road px further on"
             />
-            <figcaption><b>Roadside</b>, 240 px on (2 s)</figcaption>
+            <figcaption><b>Roadside</b>, 300 px on (2 s)</figcaption>
           </figure>
-        </div>
-      </section>
-
-      <section>
-        <h2>2x</h2>
-        <div class="pair">
-          <figure class="scroll">
-            <img class="x2" src="roadside/woof-way-today.png" alt="" />
-            <figcaption>Today</figcaption>
-          </figure>
-          <figure class="scroll">
-            <img class="x2" src="roadside/woof-way-roadside-1.png" alt="" />
-            <figcaption><b>Roadside</b>, scroll 0</figcaption>
-          </figure>
-          <figure class="scroll">
-            <img class="x2" src="roadside/woof-way-roadside-2.png" alt="" />
-            <figcaption><b>Roadside</b>, 120 px on</figcaption>
-          </figure>
-          <figure class="scroll">
-            <img class="x2" src="roadside/woof-way-roadside-3.png" alt="" />
-            <figcaption><b>Roadside</b>, 240 px on</figcaption>
-          </figure>
-        </div>
-      </section>
-
-      <section>
-        <h2>Dimmed</h2>
-        <p class="lede">
-          The first frame with the road view two ramp steps darker, as under the pause menu: the
-          houses and trees keep their shapes, and the lanes stay the brightest part of the road.
-        </p>
-        <div class="pair">
           <figure>
             <img
               class="x1"
               src="roadside/woof-way-roadside-dimmed.png"
-              alt="The roadside frame with the road view dimmed two ramp steps"
+              alt="The first roadside frame with the road view dimmed two ramp steps"
             />
             <figcaption><b>Roadside</b>, dimmed</figcaption>
           </figure>
@@ -249,11 +184,11 @@
       </section>
 
       <section>
-        <h2>New sprites</h2>
+        <h2>Sprites</h2>
         <p class="lede">
-          18 keys from 14 drawings, each redrawn at every depth step (rows top to bottom: 1,
-          0.875, 0.75, 0.625, 0.5) with road_edge outlines. In play a prop shows at 0.5 to about
-          0.9 before it leaves the screen, so the small steps carry most of the look.
+          18 keys at full size and @88, @75, @62 and @50 (rows top to bottom); the last column is
+          the sprinkler's second frame. In play a prop shows at 0.5 to about 0.85, so the small
+          steps carry most of the look.
         </p>
         <figure class="scroll">
           <img
@@ -262,106 +197,6 @@
             alt="Every roadside prop at each of the five depth steps on Elm Avenue's lawn"
           />
         </figure>
-        <div class="scroll">
-          <table>
-            <thead>
-              <tr>
-                <th>Sprite</th>
-                <th>1x</th>
-                <th>@50</th>
-                <th>Placement</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>roadside-bike</td>
-                <td>46&times;30</td>
-                <td>23&times;15</td>
-                <td>Lot extra, in front of the fence</td>
-              </tr>
-              <tr>
-                <td>roadside-fence, roadside-fence-cat</td>
-                <td>102&times;24, 102&times;36</td>
-                <td>51&times;12, 51&times;18</td>
-                <td>Lot front, 26 px nearer than the house, inner edge at across 210</td>
-              </tr>
-              <tr>
-                <td>roadside-flowers</td>
-                <td>58&times;18</td>
-                <td>29&times;9</td>
-                <td>Lot extra, in front of the fence</td>
-              </tr>
-              <tr>
-                <td>roadside-gnome</td>
-                <td>18&times;28</td>
-                <td>9&times;14</td>
-                <td>Lot extra, peeking over the fence</td>
-              </tr>
-              <tr>
-                <td>roadside-hedge</td>
-                <td>86&times;32</td>
-                <td>43&times;16</td>
-                <td>Lot front, in place of the fence</td>
-              </tr>
-              <tr>
-                <td>roadside-house-cottage (tan, pink)</td>
-                <td>98&times;86</td>
-                <td>49&times;43</td>
-                <td>Lot, inner edge at across 206</td>
-              </tr>
-              <tr>
-                <td>roadside-house-porch (sky, tan)</td>
-                <td>112&times;80</td>
-                <td>56&times;40</td>
-                <td>Lot, inner edge at across 206</td>
-              </tr>
-              <tr>
-                <td>roadside-house-tall (cream, grey)</td>
-                <td>88&times;104</td>
-                <td>44&times;52</td>
-                <td>Lot, inner edge at across 206</td>
-              </tr>
-              <tr>
-                <td>roadside-lamp</td>
-                <td>22&times;98</td>
-                <td>11&times;49</td>
-                <td>Gap, across 204</td>
-              </tr>
-              <tr>
-                <td>roadside-laundry</td>
-                <td>106&times;64</td>
-                <td>53&times;32</td>
-                <td>Gap, across 262</td>
-              </tr>
-              <tr>
-                <td>roadside-mailbox</td>
-                <td>20&times;32</td>
-                <td>10&times;16</td>
-                <td>Lot, across 208, at the gate</td>
-              </tr>
-              <tr>
-                <td>roadside-sprinkler</td>
-                <td>52&times;28</td>
-                <td>26&times;14</td>
-                <td>Lot extra, behind the fence (a 2-frame spray in game)</td>
-              </tr>
-              <tr>
-                <td>roadside-tree, roadside-tree-blossom</td>
-                <td>74&times;114</td>
-                <td>37&times;57</td>
-                <td>Gap, across 230 to 256</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p class="lede">
-          What the game would need: these sprites with their @88, @75, @62 and @50 variants; a
-          per-zone roadside table (lots, gaps, slot spacing and across offsets, as above); and
-          from tech, code that spawns the props from that table as the road scrolls, projects
-          each at its across and depth step with the road camera, draws them back to front with
-          the road objects (under the backdrop band and the doghouses, a ground shadow under the
-          free-standing ones) and drops them once they leave the screen's sides.
-        </p>
       </section>
     </main>
   </body>
