@@ -1,14 +1,12 @@
 // npm run simulate -- --help
 // Runs a matrix, prints its tables and, with --out, writes the rows as JSON.
+import { writeFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
+import { isMainThread, parentPort, Worker, workerData } from "node:worker_threads";
+
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
-import {
-  DEFAULT_ROUTE_POLICY,
-  POLICY_IDS,
-  type PolicyId,
-  ROUTE_POLICY_IDS,
-  type RoutePolicyId,
-} from "./policies";
+import { DEFAULT_ROUTE_POLICY, POLICY_IDS, ROUTE_POLICY_IDS } from "./policies";
 import {
   DEFAULT_MATRIX,
   formatKindTable,
@@ -20,35 +18,6 @@ import {
   simulateCell,
 } from "./report";
 import { SKILL_PRESET_IDS, SKILL_PRESETS } from "./skills";
-
-// The parts of Node this script uses. The project's types are the browser's, so Node is
-// reached through globalThis rather than @types/node.
-interface WorkerThread {
-  once(event: "error", listener: (error: Error) => void): void;
-  once(event: "message", listener: (message: unknown) => void): void;
-}
-
-interface NodeModules {
-  "node:fs": { writeFileSync(path: string, data: string): void };
-  "node:os": { availableParallelism(): number };
-  "node:worker_threads": {
-    readonly isMainThread: boolean;
-    readonly parentPort: { postMessage(message: unknown): void } | null;
-    readonly Worker: new (url: URL, options: { readonly workerData: unknown }) => WorkerThread;
-    readonly workerData: unknown;
-  };
-}
-
-interface NodeProcess {
-  readonly argv: readonly string[];
-  exitCode?: number;
-  getBuiltinModule<Id extends keyof NodeModules>(id: Id): NodeModules[Id];
-  readonly stderr: { write(text: string): boolean };
-  readonly stdout: { write(text: string): boolean };
-}
-
-const nodeProcess = (globalThis as unknown as { readonly process: NodeProcess }).process;
-const threads = nodeProcess.getBuiltinModule("node:worker_threads");
 
 const DEFAULT_RUNS = 1000;
 const DEFAULT_SEED = 1;
@@ -112,23 +81,13 @@ function parseWhole(flag: string, min: number, text: string): number {
   return value;
 }
 
-function parsePolicies(text: string): PolicyId[] {
+function parseIds<Id extends string>(flag: string, ids: readonly Id[], text: string): Id[] {
   return text.split(",").map((id) => {
-    const policy = POLICY_IDS.find((candidate) => candidate === id);
-    if (policy === undefined) {
-      throw new Error(`--policy takes ${POLICY_IDS.join(", ")}, not ${id}`);
+    const found = ids.find((candidate) => candidate === id);
+    if (found === undefined) {
+      throw new Error(`${flag} takes ${ids.join(", ")}, not ${id}`);
     }
-    return policy;
-  });
-}
-
-function parseRoutes(text: string): RoutePolicyId[] {
-  return text.split(",").map((id) => {
-    const route = ROUTE_POLICY_IDS.find((candidate) => candidate === id);
-    if (route === undefined) {
-      throw new Error(`--route takes ${ROUTE_POLICY_IDS.join(", ")}, not ${id}`);
-    }
-    return route;
+    return found;
   });
 }
 
@@ -139,16 +98,6 @@ function parseHitRates(text: string): MatrixPlayer[] {
       throw new Error(`--hit takes percentages from 0 to 100, not ${part}`);
     }
     return { hitRate: value / 100, kind: "rates" };
-  });
-}
-
-function parseSkills(text: string): MatrixPlayer[] {
-  return text.split(",").map((id) => {
-    const preset = SKILL_PRESET_IDS.find((candidate) => candidate === id);
-    if (preset === undefined) {
-      throw new Error(`--skill takes ${SKILL_PRESET_IDS.join(", ")}, not ${id}`);
-    }
-    return { kind: "skill", preset };
   });
 }
 
@@ -173,16 +122,19 @@ function parseArgs(args: readonly string[]): Options {
         hits = parseHitRates(value);
         break;
       case "--skill":
-        skills = parseSkills(value);
+        skills = parseIds(flag, SKILL_PRESET_IDS, value).map((preset): MatrixPlayer => ({
+          kind: "skill",
+          preset,
+        }));
         break;
       case "--out":
         out = value;
         break;
       case "--policy":
-        matrix = { ...matrix, policies: parsePolicies(value) };
+        matrix = { ...matrix, policies: parseIds(flag, POLICY_IDS, value) };
         break;
       case "--route":
-        matrix = { ...matrix, routes: parseRoutes(value) };
+        matrix = { ...matrix, routes: parseIds(flag, ROUTE_POLICY_IDS, value) };
         break;
       case "--runs":
         runs = parseWhole(flag, 1, value);
@@ -208,8 +160,8 @@ function runJob({ cells, matrix, runs, seed }: Job): MatrixRow[] {
 
 function runInWorker(job: Job): Promise<MatrixRow[]> {
   return new Promise((resolve, reject) => {
-    const worker = new threads.Worker(new URL(import.meta.url), { workerData: job });
-    worker.once("message", (rows) => resolve(rows as MatrixRow[]));
+    const worker = new Worker(new URL(import.meta.url), { workerData: job });
+    worker.once("message", (rows: unknown) => resolve(rows as MatrixRow[]));
     worker.once("error", reject);
   });
 }
@@ -218,7 +170,7 @@ function runInWorker(job: Job): Promise<MatrixRow[]> {
 // cell alone, so the rows are the same however the cells are dealt.
 async function simulateInWorkers(options: Options): Promise<MatrixRow[]> {
   const count = matrixCells(options.matrix).length;
-  const workers = Math.min(count, nodeProcess.getBuiltinModule("node:os").availableParallelism());
+  const workers = Math.min(count, availableParallelism());
   const jobs = Array.from({ length: workers }, (_, worker) => ({
     cells: Array.from({ length: count }, (_, cell) => cell).filter(
       (cell) => cell % workers === worker,
@@ -234,34 +186,32 @@ async function simulateInWorkers(options: Options): Promise<MatrixRow[]> {
 }
 
 async function main(): Promise<void> {
-  const options = parseArgs(nodeProcess.argv.slice(2));
+  const options = parseArgs(process.argv.slice(2));
   if (options.help) {
-    nodeProcess.stdout.write(`${USAGE}\n`);
+    process.stdout.write(`${USAGE}\n`);
     return;
   }
   const started = performance.now();
   const rows = await simulateInWorkers(options);
   const seconds = (performance.now() - started) / 1000;
   const { matrix, out, runs, seed } = options;
-  nodeProcess.stdout.write(`${formatTable(rows)}\n\nHit rate by obstacle kind\n`);
-  nodeProcess.stdout.write(`${formatKindTable(gameData, rows)}\n`);
-  nodeProcess.stdout.write(
+  process.stdout.write(`${formatTable(rows)}\n\nHit rate by obstacle kind\n`);
+  process.stdout.write(`${formatKindTable(gameData, rows)}\n`);
+  process.stdout.write(
     `${rows.length} cells x ${runs} runs, seed ${seed}, in ${seconds.toFixed(1)}s\n`,
   );
   if (out !== undefined) {
     const json = { matrix, rows, runsPerCell: runs, seed };
-    nodeProcess
-      .getBuiltinModule("node:fs")
-      .writeFileSync(out, `${JSON.stringify(json, null, 2)}\n`);
-    nodeProcess.stdout.write(`Wrote ${out}\n`);
+    writeFileSync(out, `${JSON.stringify(json, null, 2)}\n`);
+    process.stdout.write(`Wrote ${out}\n`);
   }
 }
 
-if (threads.isMainThread) {
+if (isMainThread) {
   main().catch((error: unknown) => {
-    nodeProcess.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
-    nodeProcess.exitCode = 1;
+    process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`);
+    process.exitCode = 1;
   });
 } else {
-  threads.parentPort?.postMessage(runJob(threads.workerData as Job));
+  parentPort?.postMessage(runJob(workerData as Job));
 }
