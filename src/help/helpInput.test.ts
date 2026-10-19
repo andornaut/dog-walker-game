@@ -1,65 +1,72 @@
 import { describe, expect, it } from "vitest";
 
+import type { Point } from "../layout/rect";
 import { helpActionForKey, helpActionForPointer } from "./helpInput";
+import type { HelpAction } from "./helpPaging";
+
+const advance: HelpAction = { kind: "advance" };
+const close: HelpAction = { kind: "close" };
+const next: HelpAction = { kind: "next" };
+const previous: HelpAction = { kind: "previous" };
 
 describe("helpActionForKey", () => {
-  it("turns pages with the lane keys", () => {
-    for (const key of ["ArrowLeft", "h", "A"]) {
-      expect(helpActionForKey(false, key)).toEqual({ kind: "previous" });
-    }
-    for (const key of ["ArrowRight", "l", "D"]) {
-      expect(helpActionForKey(false, key)).toEqual({ kind: "next" });
-    }
-  });
-
-  it("presses Next with Enter and Space, and closes with Escape", () => {
-    expect(helpActionForKey(false, "Enter")).toEqual({ kind: "advance" });
-    expect(helpActionForKey(false, " ")).toEqual({ kind: "advance" });
-    expect(helpActionForKey(false, "Escape")).toEqual({ kind: "close" });
-  });
-
-  it("ignores a held Enter, Space or Escape, so a held key cannot close the help", () => {
-    for (const key of ["Enter", " ", "Escape"]) {
-      expect(helpActionForKey(true, key)).toBeUndefined();
-    }
-  });
-
-  it("keeps turning pages while a lane key is held", () => {
-    expect(helpActionForKey(true, "ArrowRight")).toEqual({ kind: "next" });
-    expect(helpActionForKey(true, "ArrowLeft")).toEqual({ kind: "previous" });
-  });
-
-  it("ignores other keys", () => {
-    for (const key of ["ArrowUp", "e", "?", "1"]) {
-      expect(helpActionForKey(false, key)).toBeUndefined();
+  it.each<[string, boolean, Record<string, HelpAction | undefined>]>([
+    [
+      "turns pages with the lane keys, presses Next with Enter and Space, closes with Escape, and ignores other keys",
+      false,
+      {
+        " ": advance,
+        "1": undefined,
+        "?": undefined,
+        A: previous,
+        ArrowLeft: previous,
+        ArrowRight: next,
+        ArrowUp: undefined,
+        D: next,
+        Enter: advance,
+        Escape: close,
+        e: undefined,
+        h: previous,
+        l: next,
+      },
+    ],
+    [
+      "keeps turning pages on a held lane key, but ignores a held Enter, Space or Escape",
+      true,
+      {
+        " ": undefined,
+        ArrowLeft: previous,
+        ArrowRight: next,
+        Enter: undefined,
+        Escape: undefined,
+      },
+    ],
+  ])("%s", (_name, repeat, expected) => {
+    for (const [key, action] of Object.entries(expected)) {
+      expect(helpActionForKey(repeat, key), JSON.stringify(key)).toEqual(action);
     }
   });
 });
 
 describe("helpActionForPointer", () => {
-  it("brings in the next page on a swipe left and the previous on a swipe right", () => {
-    expect(helpActionForPointer(6, { x: 250, y: 400 }, { x: 200, y: 410 })).toEqual({
-      kind: "next",
-    });
-    expect(helpActionForPointer(6, { x: 100, y: 400 }, { x: 160, y: 400 })).toEqual({
-      kind: "previous",
-    });
-  });
-
-  it("turns a page on a swipe that starts on a button, without pressing it", () => {
-    expect(helpActionForPointer(6, { x: 300, y: 520 }, { x: 350, y: 520 })).toEqual({
-      kind: "previous",
-    });
-  });
-
-  it("acts on the button where a tap started", () => {
-    expect(helpActionForPointer(6, { x: 300, y: 520 }, { x: 304, y: 523 })).toEqual({
-      kind: "advance",
-    });
-  });
-
-  it("ignores a drag that is neither a tap nor a horizontal swipe", () => {
-    expect(helpActionForPointer(6, { x: 300, y: 520 }, { x: 320, y: 520 })).toBeUndefined();
-    expect(helpActionForPointer(6, { x: 180, y: 300 }, { x: 190, y: 400 })).toBeUndefined();
+  it.each<[string, Point, Point, HelpAction | undefined]>([
+    ["brings in the next page on a swipe left", { x: 250, y: 400 }, { x: 200, y: 410 }, next],
+    [
+      "brings in the previous page on a swipe right",
+      { x: 100, y: 400 },
+      { x: 160, y: 400 },
+      previous,
+    ],
+    [
+      "turns a page on a swipe that starts on a button, without pressing it",
+      { x: 300, y: 520 },
+      { x: 350, y: 520 },
+      previous,
+    ],
+    ["acts on the button where a tap started", { x: 300, y: 520 }, { x: 304, y: 523 }, advance],
+    ["ignores a drag too short to swipe", { x: 300, y: 520 }, { x: 320, y: 520 }, undefined],
+    ["ignores a vertical drag", { x: 180, y: 300 }, { x: 190, y: 400 }, undefined],
+  ])("%s", (_name, from, to, expected) => {
+    expect(helpActionForPointer(6, from, to)).toEqual(expected);
   });
 });

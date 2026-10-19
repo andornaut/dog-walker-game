@@ -11,13 +11,12 @@ const owned = { dogSlots: 1 };
 const nothing = { dogs: [], gear: null } as const;
 
 describe("walkerPicked", () => {
-  it("waits for a new player to tap a face", () => {
-    expect(walkerPicked(0, false)).toBe(false);
-    expect(walkerPicked(0, true)).toBe(true);
-  });
-
-  it("counts the saved walker as picked once the player has walked", () => {
-    expect(walkerPicked(1, false)).toBe(true);
+  it.each([
+    ["waits for a new player to tap a face", 0, false, false],
+    ["takes a new player's tapped face", 0, true, true],
+    ["counts the saved walker as picked once the player has walked", 1, false, true],
+  ])("%s", (_name, walks, tapped, expected) => {
+    expect(walkerPicked(walks, tapped)).toBe(expected);
   });
 });
 

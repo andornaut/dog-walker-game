@@ -1,57 +1,66 @@
 import { describe, expect, it } from "vitest";
 
-import { applyHelpAction, clampPage, helpButtons } from "./helpPaging";
+import {
+  applyHelpAction,
+  clampPage,
+  type HelpAction,
+  helpButtons,
+  type HelpOutcome,
+} from "./helpPaging";
 
 const PAGES = 6;
 const LAST = PAGES - 1;
+const show = (page: number): HelpOutcome => ({ kind: "show", page });
+const close: HelpOutcome = { kind: "close" };
 
 describe("applyHelpAction", () => {
-  it("turns one page with next and previous", () => {
-    expect(applyHelpAction(PAGES, { kind: "next" }, 2)).toEqual({ kind: "show", page: 3 });
-    expect(applyHelpAction(PAGES, { kind: "previous" }, 2)).toEqual({ kind: "show", page: 1 });
-  });
-
-  it("holds next at the last page and previous at the first, never closing", () => {
-    expect(applyHelpAction(PAGES, { kind: "next" }, LAST)).toEqual({ kind: "show", page: LAST });
-    expect(applyHelpAction(PAGES, { kind: "previous" }, 0)).toEqual({ kind: "show", page: 0 });
-  });
-
-  it("advances like next until the last page, where it closes", () => {
-    expect(applyHelpAction(PAGES, { kind: "advance" }, 0)).toEqual({ kind: "show", page: 1 });
-    expect(applyHelpAction(PAGES, { kind: "advance" }, LAST)).toEqual({ kind: "close" });
-  });
-
-  it("jumps to a page, held in range", () => {
-    expect(applyHelpAction(PAGES, { kind: "goTo", page: 4 }, 0)).toEqual({ kind: "show", page: 4 });
-    expect(applyHelpAction(PAGES, { kind: "goTo", page: 9 }, 0)).toEqual({
-      kind: "show",
-      page: LAST,
-    });
-  });
-
-  it("closes from any page", () => {
-    expect(applyHelpAction(PAGES, { kind: "close" }, 3)).toEqual({ kind: "close" });
-  });
-
-  it("treats a page past a shrunken page count as the new last page", () => {
-    expect(applyHelpAction(3, { kind: "advance" }, 5)).toEqual({ kind: "close" });
-    expect(applyHelpAction(3, { kind: "previous" }, 5)).toEqual({ kind: "show", page: 1 });
+  it.each<[string, number, HelpAction, number, HelpOutcome]>([
+    ["turns one page with next", PAGES, { kind: "next" }, 2, show(3)],
+    ["turns one page with previous", PAGES, { kind: "previous" }, 2, show(1)],
+    ["holds next at the last page, never closing", PAGES, { kind: "next" }, LAST, show(LAST)],
+    ["holds previous at the first page", PAGES, { kind: "previous" }, 0, show(0)],
+    ["advances like next until the last page", PAGES, { kind: "advance" }, 0, show(1)],
+    ["closes on advance from the last page", PAGES, { kind: "advance" }, LAST, close],
+    ["jumps to a page", PAGES, { kind: "goTo", page: 4 }, 0, show(4)],
+    ["jumps to a page held in range", PAGES, { kind: "goTo", page: 9 }, 0, show(LAST)],
+    ["closes from any page", PAGES, { kind: "close" }, 3, close],
+    ["closes on advance past a shrunken page count", 3, { kind: "advance" }, 5, close],
+    [
+      "turns back from the new last page past a shrunken page count",
+      3,
+      { kind: "previous" },
+      5,
+      show(1),
+    ],
+  ])("%s", (_name, pages, action, page, expected) => {
+    expect(applyHelpAction(pages, action, page)).toEqual(expected);
   });
 });
 
 describe("helpButtons", () => {
-  it("disables Back on the first page only", () => {
-    expect(helpButtons(PAGES, 0).backEnabled).toBe(false);
-    expect(helpButtons(PAGES, 1).backEnabled).toBe(true);
-  });
-
-  it("labels Next GOT IT on the last page only", () => {
-    expect(helpButtons(PAGES, LAST - 1).nextLabel).toBe("NEXT");
-    expect(helpButtons(PAGES, LAST).nextLabel).toBe("GOT IT");
-  });
-
-  it("treats a page past a shrunken page count as the new last page", () => {
-    expect(helpButtons(3, 5)).toEqual({ backEnabled: true, nextLabel: "GOT IT" });
+  it.each<[string, number, number, ReturnType<typeof helpButtons>]>([
+    ["disables Back on the first page", PAGES, 0, { backEnabled: false, nextLabel: "NEXT" }],
+    ["enables Back past the first page", PAGES, 1, { backEnabled: true, nextLabel: "NEXT" }],
+    [
+      "labels Next NEXT before the last page",
+      PAGES,
+      LAST - 1,
+      { backEnabled: true, nextLabel: "NEXT" },
+    ],
+    [
+      "labels Next GOT IT on the last page",
+      PAGES,
+      LAST,
+      { backEnabled: true, nextLabel: "GOT IT" },
+    ],
+    [
+      "treats a page past a shrunken page count as the new last page",
+      3,
+      5,
+      { backEnabled: true, nextLabel: "GOT IT" },
+    ],
+  ])("%s", (_name, pages, page, expected) => {
+    expect(helpButtons(pages, page)).toEqual(expected);
   });
 });
 

@@ -58,23 +58,24 @@ describe("earningsBreakdown", () => {
 });
 
 describe("zonePips", () => {
-  it("marks every zone done for a finished walk", () => {
-    expect(zonePips(4, { outcome: "finished", zonesFinished: 4 })).toEqual([
-      "done",
-      "done",
-      "done",
-      "done",
-    ]);
-  });
-
-  it("marks the zone an early end stopped in as current", () => {
-    expect(zonePips(4, { outcome: "wentHome", zonesFinished: 2 })).toEqual([
-      "done",
-      "done",
-      "current",
-      "todo",
-    ]);
-    expect(zonePips(4, { outcome: "noDogs", zonesFinished: 0 })[0]).toBe("current");
+  it.each<[string, Parameters<typeof zonePips>[1], ReturnType<typeof zonePips>]>([
+    [
+      "marks every zone done for a finished walk",
+      { outcome: "finished", zonesFinished: 4 },
+      ["done", "done", "done", "done"],
+    ],
+    [
+      "marks the zone an early end stopped in as current",
+      { outcome: "wentHome", zonesFinished: 2 },
+      ["done", "done", "current", "todo"],
+    ],
+    [
+      "marks the first zone current when every owner fired you in it",
+      { outcome: "noDogs", zonesFinished: 0 },
+      ["current", "todo", "todo", "todo"],
+    ],
+  ])("%s", (_name, walk, expected) => {
+    expect(zonePips(4, walk)).toEqual(expected);
   });
 });
 

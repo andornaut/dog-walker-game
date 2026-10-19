@@ -10,6 +10,7 @@ import {
   MIN_TAP_SIZE,
   tapRect,
 } from "./helpLayout";
+import type { HelpAction } from "./helpPaging";
 
 const overlaps = (a: Rect, b: Rect) =>
   a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
@@ -32,27 +33,29 @@ describe("dotRects", () => {
 });
 
 describe("tapRect", () => {
-  it("grows small art about its centre to the minimum", () => {
-    expect(tapRect({ height: 8, width: 8, x: 44, y: 478 })).toEqual({
-      height: 44,
-      width: 44,
-      x: 26,
-      y: 460,
-    });
-  });
-
-  it("keeps a side already larger than the minimum", () => {
-    expect(tapRect(HELP_LAYOUT.back)).toEqual({ height: 44, width: 110, x: 8, y: 502 });
-  });
-
-  it("shifts a target that would leave the screen back onto it", () => {
-    expect(CLOSE_HIT_RECT).toEqual({ height: 44, width: 44, x: 313, y: 0 });
-    expect(tapRect({ height: 4, width: 4, x: 358, y: 558 })).toEqual({
-      height: 44,
-      width: 44,
-      x: 316,
-      y: 516,
-    });
+  it.each<[string, Rect, Rect]>([
+    [
+      "grows small art about its centre to the minimum",
+      { height: 8, width: 8, x: 44, y: 478 },
+      { height: 44, width: 44, x: 26, y: 460 },
+    ],
+    [
+      "keeps a side already larger than the minimum",
+      HELP_LAYOUT.back,
+      { height: 44, width: 110, x: 8, y: 502 },
+    ],
+    [
+      "shifts a target that would leave the top of the screen back onto it",
+      HELP_LAYOUT.close,
+      { height: 44, width: 44, x: 313, y: 0 },
+    ],
+    [
+      "shifts a target that would leave the bottom right of the screen back onto it",
+      { height: 4, width: 4, x: 358, y: 558 },
+      { height: 44, width: 44, x: 316, y: 516 },
+    ],
+  ])("%s", (_name, art, expected) => {
+    expect(tapRect(art)).toEqual(expected);
   });
 });
 
@@ -81,28 +84,25 @@ describe("help tap targets", () => {
 });
 
 describe("helpActionAt", () => {
-  it("maps the close X, Back and Next by their whole targets", () => {
-    expect(helpActionAt(7, { x: 330, y: 20 })).toEqual({ kind: "close" });
-    expect(helpActionAt(7, { x: 313, y: 0 })).toEqual({ kind: "close" });
-    expect(helpActionAt(7, { x: 356, y: 43 })).toEqual({ kind: "close" });
-    expect(helpActionAt(7, { x: 20, y: 520 })).toEqual({ kind: "previous" });
-    expect(helpActionAt(7, { x: 20, y: 502 })).toEqual({ kind: "previous" });
-    expect(helpActionAt(7, { x: 300, y: 520 })).toEqual({ kind: "advance" });
-  });
-
-  it("jumps to the page of the dot slot under the tap", () => {
-    expect(helpActionAt(7, { x: 48, y: 482 })).toEqual({ kind: "goTo", page: 0 });
-    expect(helpActionAt(7, { x: 26, y: 458 })).toEqual({ kind: "goTo", page: 0 });
-    expect(helpActionAt(7, { x: 70, y: 501 })).toEqual({ kind: "goTo", page: 1 });
-    expect(helpActionAt(7, { x: 333, y: 482 })).toEqual({ kind: "goTo", page: 6 });
-  });
-
-  it("ignores taps outside every target", () => {
-    expect(helpActionAt(7, { x: 180, y: 200 })).toBeUndefined();
-    expect(helpActionAt(7, { x: 312, y: 20 })).toBeUndefined();
-    expect(helpActionAt(7, { x: 330, y: 44 })).toBeUndefined();
-    expect(helpActionAt(7, { x: 180, y: 520 })).toBeUndefined();
-    expect(helpActionAt(7, { x: 180, y: 457 })).toBeUndefined();
-    expect(helpActionAt(7, { x: 25, y: 482 })).toBeUndefined();
+  // Taps at the edges of each target and just outside them.
+  it.each<[number, number, HelpAction | undefined]>([
+    [330, 20, { kind: "close" }],
+    [313, 0, { kind: "close" }],
+    [356, 43, { kind: "close" }],
+    [20, 520, { kind: "previous" }],
+    [20, 502, { kind: "previous" }],
+    [300, 520, { kind: "advance" }],
+    [48, 482, { kind: "goTo", page: 0 }],
+    [26, 458, { kind: "goTo", page: 0 }],
+    [70, 501, { kind: "goTo", page: 1 }],
+    [333, 482, { kind: "goTo", page: 6 }],
+    [180, 200, undefined],
+    [312, 20, undefined],
+    [330, 44, undefined],
+    [180, 520, undefined],
+    [180, 457, undefined],
+    [25, 482, undefined],
+  ])("maps a tap at (%i, %i) to %j", (x, y, expected) => {
+    expect(helpActionAt(7, { x, y })).toEqual(expected);
   });
 });

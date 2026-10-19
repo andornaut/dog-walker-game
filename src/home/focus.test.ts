@@ -6,25 +6,30 @@ import { focusDirectionForKey, moveFocus } from "./focus";
 const rows = [3, 3, 3, 5, 1, 4];
 
 describe("moveFocus", () => {
-  it("focuses the first item on the first press", () => {
-    expect(moveFocus(rows, "right", null)).toEqual({ column: 0, row: 0 });
-  });
+  type Move = Parameters<typeof moveFocus>;
 
-  it("moves along a row and stops at its ends", () => {
-    expect(moveFocus(rows, "right", { column: 1, row: 0 })).toEqual({ column: 2, row: 0 });
-    expect(moveFocus(rows, "right", { column: 2, row: 0 })).toEqual({ column: 2, row: 0 });
-    expect(moveFocus(rows, "left", { column: 0, row: 3 })).toEqual({ column: 0, row: 3 });
-  });
-
-  it("keeps its place across rows of different lengths", () => {
-    expect(moveFocus(rows, "down", { column: 2, row: 2 })).toEqual({ column: 4, row: 3 });
-    expect(moveFocus(rows, "down", { column: 2, row: 3 })).toEqual({ column: 0, row: 4 });
-    expect(moveFocus(rows, "up", { column: 4, row: 3 })).toEqual({ column: 2, row: 2 });
-  });
-
-  it("stops at the first and last rows", () => {
-    expect(moveFocus(rows, "up", { column: 1, row: 0 })).toEqual({ column: 1, row: 0 });
-    expect(moveFocus(rows, "down", { column: 3, row: 5 })).toEqual({ column: 3, row: 5 });
+  it.each<[string, Move[1], Move[2], ReturnType<typeof moveFocus>]>([
+    ["focuses the first item on the first press", "right", null, { column: 0, row: 0 }],
+    ["moves along a row", "right", { column: 1, row: 0 }, { column: 2, row: 0 }],
+    ["stops at a row's right end", "right", { column: 2, row: 0 }, { column: 2, row: 0 }],
+    ["stops at a row's left end", "left", { column: 0, row: 3 }, { column: 0, row: 3 }],
+    [
+      "keeps its place down into a longer row",
+      "down",
+      { column: 2, row: 2 },
+      { column: 4, row: 3 },
+    ],
+    [
+      "keeps its place down into a shorter row",
+      "down",
+      { column: 2, row: 3 },
+      { column: 0, row: 4 },
+    ],
+    ["keeps its place up into a shorter row", "up", { column: 4, row: 3 }, { column: 2, row: 2 }],
+    ["stops at the first row", "up", { column: 1, row: 0 }, { column: 1, row: 0 }],
+    ["stops at the last row", "down", { column: 3, row: 5 }, { column: 3, row: 5 }],
+  ])("%s", (_name, direction, from, expected) => {
+    expect(moveFocus(rows, direction, from)).toEqual(expected);
   });
 });
 

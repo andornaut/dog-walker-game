@@ -27,12 +27,9 @@ describe("shakeOffset", () => {
 });
 
 describe("hopOffset", () => {
-  it("rises up to the hop height and lands", () => {
+  it("rises up to the hop height and lands, except with reduced motion", () => {
     expect(hopOffset(false, 1000 + FEEDBACK.hopMs / 4, 1000)).toBe(-FEEDBACK.hopPx);
     expect(hopOffset(false, 1000 + FEEDBACK.hopMs, 1000)).toBe(0);
-  });
-
-  it("is still with reduced motion", () => {
     expect(hopOffset(true, 1000 + FEEDBACK.hopMs / 4, 1000)).toBe(0);
   });
 });
@@ -54,14 +51,13 @@ describe("pressDip", () => {
 });
 
 describe("settleDelay", () => {
-  it("holds a quick tap's result until the dip is over", () => {
-    expect(settleDelay(1050, 1000)).toBe(FEEDBACK.pressDipMs - 50);
-    expect(settleDelay(1000, 1000)).toBe(FEEDBACK.pressDipMs);
-  });
-
-  it("shows a long press's result on release", () => {
-    expect(settleDelay(1000 + FEEDBACK.pressDipMs, 1000)).toBe(0);
-    expect(settleDelay(5000, 1000)).toBe(0);
+  it.each([
+    ["holds a tap released at once until the dip is over", 1000, FEEDBACK.pressDipMs],
+    ["holds a quick tap for the rest of the dip", 1050, FEEDBACK.pressDipMs - 50],
+    ["shows a press held for the dip on release", 1000 + FEEDBACK.pressDipMs, 0],
+    ["shows a long press's result on release", 5000, 0],
+  ])("%s", (_name, releasedMs, expected) => {
+    expect(settleDelay(releasedMs, 1000)).toBe(expected);
   });
 });
 

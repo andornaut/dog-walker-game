@@ -1,20 +1,28 @@
 import { describe, expect, it } from "vitest";
 
+import type { DogId } from "../data/types";
+import type { LastWalk } from "../save/schema";
 import { homecomers, RETURN_HOME, returnPhase, walkUpOffset, waveOffset } from "./returnHome";
 
 const WAVING_MS = RETURN_HOME.waveMs * RETURN_HOME.waves;
 
 describe("homecomers", () => {
-  it("brings home the dogs still walking, in pack order, without the fired ones", () => {
-    const walk = {
-      dogs: ["koda" as const, "nugget" as const, "biscuit" as const],
-      firings: [{ dog: "nugget" as const, zone: 2 }],
-    };
-    expect(homecomers(walk)).toEqual(["koda", "biscuit"]);
-  });
-
-  it("brings nobody home when every owner fired you", () => {
-    expect(homecomers({ dogs: ["koda"], firings: [{ dog: "koda", zone: 1 }] })).toEqual([]);
+  it.each<{ expected: DogId[]; name: string; walk: Pick<LastWalk, "dogs" | "firings"> }>([
+    {
+      expected: ["koda", "biscuit"],
+      name: "brings home the dogs still walking, in pack order, without the fired ones",
+      walk: {
+        dogs: ["koda", "nugget", "biscuit"],
+        firings: [{ dog: "nugget", zone: 2 }],
+      },
+    },
+    {
+      expected: [],
+      name: "brings nobody home when every owner fired you",
+      walk: { dogs: ["koda"], firings: [{ dog: "koda", zone: 1 }] },
+    },
+  ])("$name", ({ expected, walk }) => {
+    expect(homecomers(walk)).toEqual(expected);
   });
 });
 
@@ -32,35 +40,27 @@ describe("walkUpOffset", () => {
   });
 });
 
-describe("returnPhase", () => {
-  it("walks the pack up, then has the owners wave, then everyone stands", () => {
-    expect(returnPhase(false, RETURN_HOME.walkMs - 1)).toBe("walking");
-    expect(returnPhase(false, RETURN_HOME.walkMs)).toBe("waving");
-    expect(returnPhase(false, RETURN_HOME.walkMs + WAVING_MS - 1)).toBe("waving");
-    expect(returnPhase(false, RETURN_HOME.walkMs + WAVING_MS)).toBe("home");
-  });
-
-  it("holds the owners' wave pose from the start with reduced motion", () => {
-    expect(returnPhase(true, 0)).toBe("waving");
-    expect(returnPhase(true, RETURN_HOME.walkMs + WAVING_MS)).toBe("waving");
-  });
-});
-
-describe("waveOffset", () => {
+describe("returnPhase and waveOffset", () => {
   const start = RETURN_HOME.walkMs;
   const quarter = RETURN_HOME.waveMs / 4;
+  const { wavePx } = RETURN_HOME;
 
-  it("holds the owners still until the pack arrives", () => {
-    expect(waveOffset(false, start - quarter)).toBe(0);
-  });
-
-  it("sways the owners to each side while they wave, then stops", () => {
-    expect(waveOffset(false, start + quarter)).toBe(RETURN_HOME.wavePx);
-    expect(waveOffset(false, start + 3 * quarter)).toBe(-RETURN_HOME.wavePx);
-    expect(waveOffset(false, start + WAVING_MS + quarter)).toBe(0);
-  });
-
-  it("never sways with reduced motion", () => {
-    expect(waveOffset(true, start + quarter)).toBe(0);
+  it.each<[string, boolean, number, ReturnType<typeof returnPhase>, number]>([
+    ["walks the pack up, the owners still", false, start - quarter, "walking", 0],
+    ["walks the pack up to the last moment", false, start - 1, "walking", 0],
+    ["has the owners wave once the pack arrives", false, start, "waving", 0],
+    ["sways the owners one way", false, start + quarter, "waving", wavePx],
+    ["sways the owners the other way", false, start + 3 * quarter, "waving", -wavePx],
+    ["waves to the last moment", false, start + WAVING_MS - 1, "waving", 0],
+    ["has everyone stand after the waves", false, start + WAVING_MS, "home", 0],
+    ["stops swaying after the waves", false, start + WAVING_MS + quarter, "home", 0],
+    ["holds the wave pose from the start with reduced motion", true, 0, "waving", 0],
+    ["never sways with reduced motion", true, start + quarter, "waving", 0],
+    ["holds the wave pose to the end with reduced motion", true, start + WAVING_MS, "waving", 0],
+  ])("%s", (_name, reducedMotion, ms, phase, offset) => {
+    expect({
+      offset: waveOffset(reducedMotion, ms),
+      phase: returnPhase(reducedMotion, ms),
+    }).toEqual({ offset, phase });
   });
 });

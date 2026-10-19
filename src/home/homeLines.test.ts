@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { DogId } from "../data/types";
 import { cents } from "../rules/units";
+import type { LastWalk } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import type { Purchase } from "./home";
+import type { HomeLoadout } from "./home";
 import {
   bubbleSpeech,
   type HomeAction,
@@ -11,6 +13,7 @@ import {
   messageLine,
   packCountLine,
   slotSignLines,
+  type WalkerLine,
   walkerLineKey,
 } from "./homeLines";
 
@@ -21,47 +24,39 @@ const firing = { dog: "koda", zone: 2 } as const;
 
 describe("walkerLineKey", () => {
   const later = HOW_TO_WALKS + 1;
+  const fired = { firings: [firing] };
+  const kept = { firings: [] };
 
-  it("greets a player who has never walked, whatever else holds", () => {
-    expect(walkerLineKey(null, true, 0)).toBe("firstVisit");
-  });
-
-  it("puts a firing on the last walk ahead of something new to buy", () => {
-    expect(walkerLineKey({ firings: [firing] }, true, 1)).toBe("afterFiring");
-  });
-
-  it("puts something new to buy ahead of the welcome back and the how-to", () => {
-    expect(walkerLineKey({ firings: [] }, true, 1)).toBe("newAffordable");
-    expect(walkerLineKey({ firings: [] }, false, later)).toBe("afterWalk");
-  });
-
-  it("says how to use the screen after each of the first walks, then welcomes back", () => {
-    expect(walkerLineKey({ firings: [] }, false, 1)).toBe("howTo");
-    expect(walkerLineKey({ firings: [] }, false, HOW_TO_WALKS)).toBe("howTo");
-    expect(walkerLineKey({ firings: [] }, false, later)).toBe("afterWalk");
-    expect(walkerLineKey({ firings: [firing] }, false, 1)).toBe("afterFiring");
+  it.each<[string, Pick<LastWalk, "firings"> | null, boolean, number, WalkerLine]>([
+    ["greets a player who has never walked, whatever else holds", null, true, 0, "firstVisit"],
+    ["puts a firing ahead of something new to buy", fired, true, 1, "afterFiring"],
+    ["puts a firing ahead of the how-to", fired, false, 1, "afterFiring"],
+    ["puts something new to buy ahead of the how-to", kept, true, 1, "newAffordable"],
+    ["says how to use the screen after the first walk", kept, false, 1, "howTo"],
+    ["says how to use the screen up to the last how-to walk", kept, false, HOW_TO_WALKS, "howTo"],
+    ["welcomes back after the how-to walks", kept, false, later, "afterWalk"],
+  ])("%s", (_name, lastWalk, newAffordable, walks, expected) => {
+    expect(walkerLineKey(lastWalk, newAffordable, walks)).toBe(expected);
   });
 });
 
 describe("slotSignLines", () => {
-  it("names the next slot and price, and how much more to save", () => {
-    expect(slotSignLines(data, { dogSlots: 1 }, dollars(150))).toEqual({
-      short: true,
-      sign: "Slot 2 · $800",
-      status: "Save $650 more",
-    });
-  });
-
-  it("says tap to buy once the bank covers it", () => {
-    expect(slotSignLines(data, { dogSlots: 2 }, dollars(1800))).toEqual({
-      short: false,
-      sign: "Slot 3 · $1,800",
-      status: "Tap to buy",
-    });
-  });
-
-  it("is gone once every slot is owned", () => {
-    expect(slotSignLines(data, { dogSlots: 3 }, dollars(0))).toBeNull();
+  it.each([
+    {
+      bank: 150,
+      expected: { short: true, sign: "Slot 2 · $800", status: "Save $650 more" },
+      name: "names the next slot and price, and how much more to save",
+      slots: 1,
+    },
+    {
+      bank: 1800,
+      expected: { short: false, sign: "Slot 3 · $1,800", status: "Tap to buy" },
+      name: "says tap to buy once the bank covers it",
+      slots: 2,
+    },
+    { bank: 0, expected: null, name: "is gone once every slot is owned", slots: 3 },
+  ])("$name", ({ bank, expected, slots }) => {
+    expect(slotSignLines(data, { dogSlots: slots }, dollars(bank))).toEqual(expected);
   });
 });
 
@@ -72,66 +67,86 @@ describe("packCountLine", () => {
 });
 
 describe("messageLine", () => {
-  it("says a focused item in words, and nothing after an action that leaves no message", () => {
-    const focused: HomeAction = { kind: "focus", text: "Koda: big chaser." };
-    expect(messageLine(text, focused)).toBe("Koda: big chaser.");
-    expect(messageLine(text, { kind: "none" })).toBeNull();
-  });
+  const lines = { ...text, gearBought: "Got {gear}.", slotBought: "{slot} open." };
 
-  it("announces a bought dog, gear item or slot, and how much more an unaffordable item needs", () => {
-    const bought = (purchase: Purchase, name: string): HomeAction => ({
-      kind: "bought",
-      name,
-      purchase,
-    });
-    const lines = { ...text, gearBought: "Got {gear}.", slotBought: "{slot} open." };
-    expect(messageLine(text, bought({ dog: "nugget", kind: "dog" }, "Nugget"))).toBe(
+  it.each<[string, HomeAction, string | null]>([
+    [
+      "says a focused item in words",
+      { kind: "focus", text: "Koda: big chaser." },
+      "Koda: big chaser.",
+    ],
+    ["says nothing after an action that leaves no message", { kind: "none" }, null],
+    [
+      "announces a bought dog",
+      { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
       "Nugget joins your clients!",
-    );
-    expect(messageLine(lines, bought({ gear: "whistle", kind: "gear" }, "Whistle"))).toBe(
+    ],
+    [
+      "announces bought gear",
+      { kind: "bought", name: "Whistle", purchase: { gear: "whistle", kind: "gear" } },
       "Got Whistle.",
-    );
-    expect(messageLine(lines, bought({ kind: "dogSlot" }, "Dog slot 2"))).toBe("Dog slot 2 open.");
-    expect(messageLine(text, { amount: dollars(480), kind: "cantAfford", name: "Nugget" })).toBe(
+    ],
+    [
+      "announces a bought slot",
+      { kind: "bought", name: "Dog slot 2", purchase: { kind: "dogSlot" } },
+      "Dog slot 2 open.",
+    ],
+    [
+      "says how much more an unaffordable item needs",
+      { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
       "Save $480 more for Nugget.",
-    );
+    ],
+  ])("%s", (_name, action, expected) => {
+    expect(messageLine(lines, action)).toBe(expected);
   });
 });
 
 describe("bubbleSpeech", () => {
-  const quips = new Map([
+  const quips = new Map<DogId, string>([
     ["koda", "Jesse: He already did 10K."],
     ["biscuit", "Sam: Snacks are in the left pocket."],
-  ] as const);
+    ["nugget", "Ava: Tag me in everything."],
+  ]);
   const none: HomeAction = { kind: "none" };
 
-  it("lets the owner of the latest pick still in the pack speak", () => {
-    const state = { action: none, loadout: { dogs: ["koda", "biscuit"] as const, gear: null } };
-    expect(bubbleSpeech(text, "afterWalk", state, quips)).toEqual([
-      "Sam: Snacks are in the left pocket.",
-    ]);
-  });
-
-  it("returns to the walker's line once the speakers leave the pack", () => {
-    const state = { action: none, loadout: { dogs: [], gear: null } };
-    expect(bubbleSpeech(text, "howTo", state, quips)).toEqual([text.bubble.howTo]);
-  });
-
-  it("announces a just-bought dog, then lets its owner speak though the dog is not picked", () => {
-    const nugget = new Map([["nugget", "Ava: Tag me in everything."]] as const);
-    const action: HomeAction = {
-      kind: "bought",
-      name: "Nugget",
-      purchase: { dog: "nugget", kind: "dog" },
-    };
-    expect(
-      bubbleSpeech(text, "firstVisit", { action, loadout: { dogs: [], gear: null } }, nugget),
-    ).toEqual(["Nugget joins your clients!", "Ava: Tag me in everything."]);
-  });
-
-  it("puts the last action's message ahead of a picked dog's owner", () => {
-    const action: HomeAction = { amount: dollars(480), kind: "cantAfford", name: "Nugget" };
-    const state = { action, loadout: { dogs: ["koda"] as const, gear: null } };
-    expect(bubbleSpeech(text, "afterWalk", state, quips)).toEqual(["Save $480 more for Nugget."]);
+  it.each<{
+    action: HomeAction;
+    dogs: HomeLoadout["dogs"];
+    expected: string[];
+    line: WalkerLine;
+    name: string;
+  }>([
+    {
+      action: none,
+      dogs: ["koda", "biscuit"],
+      expected: ["Sam: Snacks are in the left pocket."],
+      line: "afterWalk",
+      name: "lets the owner of the latest pick still in the pack speak",
+    },
+    {
+      action: none,
+      dogs: [],
+      expected: [text.bubble.howTo],
+      line: "howTo",
+      name: "returns to the walker's line once the speakers leave the pack",
+    },
+    {
+      action: { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
+      dogs: [],
+      expected: ["Nugget joins your clients!", "Ava: Tag me in everything."],
+      line: "firstVisit",
+      name: "announces a just-bought dog, then lets its owner speak though the dog is not picked",
+    },
+    {
+      action: { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
+      dogs: ["koda"],
+      expected: ["Save $480 more for Nugget."],
+      line: "afterWalk",
+      name: "puts the last action's message ahead of a picked dog's owner",
+    },
+  ])("$name", ({ action, dogs, expected, line }) => {
+    expect(bubbleSpeech(text, line, { action, loadout: { dogs, gear: null } }, quips)).toEqual(
+      expected,
+    );
   });
 });

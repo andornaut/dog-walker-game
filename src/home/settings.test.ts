@@ -15,29 +15,21 @@ import {
 
 const TRACK: SliderTrack = { knobWidth: 10, width: 216, x: 112 };
 
-describe("volumeStepAt", () => {
-  it("puts the knob's centre under the finger", () => {
-    expect(volumeStepAt(TRACK, 112 + 5)).toBe(0);
-    expect(volumeStepAt(TRACK, 112 + 5 + 103)).toBe(10);
-    expect(volumeStepAt(TRACK, 112 + 216 - 5)).toBe(20);
-  });
-
-  it("holds to the ends past either end of the track", () => {
-    expect(volumeStepAt(TRACK, 0)).toBe(0);
-    expect(volumeStepAt(TRACK, 400)).toBe(20);
-  });
-});
-
-describe("knobX", () => {
+describe("knobX and volumeStepAt", () => {
   it("runs the knob from the track's left edge to its right edge", () => {
     expect(knobX(TRACK, 0)).toBe(112);
     expect(knobX(TRACK, 20)).toBe(112 + 216 - 10);
   });
 
-  it("is where volumeStepAt reads the same step back", () => {
+  it("reads each step back with the knob's centre under the finger", () => {
     for (let steps = 0; steps <= 20; steps++) {
       expect(volumeStepAt(TRACK, knobX(TRACK, steps) + TRACK.knobWidth / 2)).toBe(steps);
     }
+  });
+
+  it("holds to the ends past either end of the track", () => {
+    expect(volumeStepAt(TRACK, 0)).toBe(0);
+    expect(volumeStepAt(TRACK, 400)).toBe(20);
   });
 });
 
@@ -66,28 +58,18 @@ describe("volumePercent", () => {
 });
 
 describe("volumeStepForKey", () => {
-  it("steps down with Left, A and H, and up with Right, D and L, in either case", () => {
-    for (const key of ["ArrowLeft", "a", "A", "h", "H"]) {
-      expect(volumeStepForKey(key, 12)).toBe(11);
+  it.each<[string, string[], number, number | undefined]>([
+    ["steps down, in either case", ["ArrowLeft", "a", "A", "h", "H"], 12, 11],
+    ["steps up, in either case", ["ArrowRight", "d", "D", "l", "L"], 12, 13],
+    ["stops at 0", ["ArrowLeft"], 0, 0],
+    ["stops at the top", ["ArrowRight"], 20, 20],
+    ["goes to 0", ["Home"], 12, 0],
+    ["goes to 100%", ["End"], 12, 20],
+    ["ignores the key", ["ArrowUp", "Enter"], 12, undefined],
+  ])("%s on %j from step %i", (_name, keys, from, expected) => {
+    for (const key of keys) {
+      expect(volumeStepForKey(key, from), key).toBe(expected);
     }
-    for (const key of ["ArrowRight", "d", "D", "l", "L"]) {
-      expect(volumeStepForKey(key, 12)).toBe(13);
-    }
-  });
-
-  it("stops at 0 and the top", () => {
-    expect(volumeStepForKey("ArrowLeft", 0)).toBe(0);
-    expect(volumeStepForKey("ArrowRight", 20)).toBe(20);
-  });
-
-  it("goes to 0 with Home and to 100% with End", () => {
-    expect(volumeStepForKey("Home", 12)).toBe(0);
-    expect(volumeStepForKey("End", 12)).toBe(20);
-  });
-
-  it("ignores every other key", () => {
-    expect(volumeStepForKey("ArrowUp", 12)).toBeUndefined();
-    expect(volumeStepForKey("Enter", 12)).toBeUndefined();
   });
 });
 

@@ -13,6 +13,7 @@ import type { LastWalk, Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import {
   buy,
+  type BuyResult,
   dogInfo,
   dogNames,
   dollarText,
@@ -25,6 +26,7 @@ import {
   packFeePerZone,
   packOf,
   partingSpeech,
+  type Purchase,
   purchasePrice,
   tapDog,
   tapGear,
@@ -46,7 +48,6 @@ const owned: Owned = {
   dogs: ["biscuit", "duchess", "koda"],
   gear: ["fannyPack"],
 };
-const loadoutOf = (tap: HomeTap) => (tap.kind === "loadout" ? tap.loadout : undefined);
 const dollars = (amount: number) => cents(amount * 100);
 
 describe("dollarText", () => {
@@ -57,30 +58,45 @@ describe("dollarText", () => {
   });
 });
 
-describe("tapDog", () => {
-  it("adds an owned dog to the pack, in the order picked", () => {
-    const one = loadoutOf(tapDog(data, owned, "koda", emptyLoadout));
-    expect(loadoutOf(tapDog(data, owned, "duchess", one ?? emptyLoadout))?.dogs).toEqual([
-      "koda",
-      "duchess",
-    ]);
-  });
-
-  it("takes a picked dog back out of the pack", () => {
-    const loadout = { dogs: ["koda", "duchess"] as const, gear: null };
-    expect(loadoutOf(tapDog(data, owned, "koda", loadout))?.dogs).toEqual(["duchess"]);
-  });
-
-  it("refuses a dog past the slots owned", () => {
-    const full = { dogs: ["koda"] as const, gear: null };
-    expect(tapDog(data, { ...owned, dogSlots: 1 }, "duchess", full)).toEqual({ kind: "full" });
-  });
-
-  it("asks to buy a dog not owned yet, without touching the pack", () => {
-    expect(tapDog(data, owned, "nugget", emptyLoadout)).toEqual({
-      kind: "buy",
-      purchase: { dog: "nugget", kind: "dog" },
-    });
+describe("tapDog and tapGear", () => {
+  it.each<{ expected: HomeTap; name: string; tap: () => HomeTap }>([
+    {
+      expected: { kind: "loadout", loadout: { dogs: ["koda", "duchess"], gear: null } },
+      name: "adds an owned dog to the pack, in the order picked",
+      tap: () => tapDog(data, owned, "duchess", { dogs: ["koda"], gear: null }),
+    },
+    {
+      expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
+      name: "takes a picked dog back out of the pack",
+      tap: () => tapDog(data, owned, "koda", { dogs: ["koda", "duchess"], gear: null }),
+    },
+    {
+      expected: { kind: "full" },
+      name: "refuses a dog past the slots owned",
+      tap: () => tapDog(data, { ...owned, dogSlots: 1 }, "duchess", { dogs: ["koda"], gear: null }),
+    },
+    {
+      expected: { kind: "buy", purchase: { dog: "nugget", kind: "dog" } },
+      name: "asks to buy a dog not owned yet, without touching the pack",
+      tap: () => tapDog(data, owned, "nugget", emptyLoadout),
+    },
+    {
+      expected: { kind: "loadout", loadout: { dogs: [], gear: "fannyPack" } },
+      name: "equips owned gear",
+      tap: () => tapGear(owned, "fannyPack", emptyLoadout),
+    },
+    {
+      expected: { kind: "loadout", loadout: { dogs: [], gear: null } },
+      name: "unequips gear on a second tap",
+      tap: () => tapGear(owned, "fannyPack", { dogs: [], gear: "fannyPack" }),
+    },
+    {
+      expected: { kind: "buy", purchase: { gear: "whistle", kind: "gear" } },
+      name: "asks to buy gear not owned yet",
+      tap: () => tapGear(owned, "whistle", emptyLoadout),
+    },
+  ])("$name", ({ expected, tap }) => {
+    expect(tap()).toEqual(expected);
   });
 });
 
@@ -91,71 +107,76 @@ describe("packCapacity", () => {
   });
 });
 
-describe("tapGear", () => {
-  it("equips owned gear, and unequips it on a second tap", () => {
-    const on = loadoutOf(tapGear(owned, "fannyPack", emptyLoadout));
-    expect(on?.gear).toBe("fannyPack");
-    expect(loadoutOf(tapGear(owned, "fannyPack", on ?? emptyLoadout))?.gear).toBeNull();
-  });
-
-  it("asks to buy gear not owned yet", () => {
-    expect(tapGear(owned, "whistle", emptyLoadout)).toEqual({
-      kind: "buy",
-      purchase: { gear: "whistle", kind: "gear" },
-    });
-  });
-});
-
 describe("purchasePrice", () => {
-  it("prices a locked dog, gear and the next dog slot from the tuning", () => {
-    expect(purchasePrice(data, owned, { dog: "nugget", kind: "dog" })).toBe(dollars(600));
-    expect(purchasePrice(data, owned, { gear: "whistle", kind: "gear" })).toBe(dollars(600));
-    expect(purchasePrice(data, { ...owned, dogSlots: 1 }, { kind: "dogSlot" })).toBe(dollars(800));
-    expect(purchasePrice(data, { ...owned, dogSlots: 2 }, { kind: "dogSlot" })).toBe(dollars(1800));
-  });
-
-  it("sells nothing already owned, and no slot past the last", () => {
-    expect(purchasePrice(data, owned, { dog: "koda", kind: "dog" })).toBeNull();
-    expect(purchasePrice(data, owned, { gear: "fannyPack", kind: "gear" })).toBeNull();
-    expect(purchasePrice(data, owned, { kind: "dogSlot" })).toBeNull();
+  it.each<[string, Owned, Purchase, number | null]>([
+    ["a locked dog", owned, { dog: "nugget", kind: "dog" }, dollars(600)],
+    ["locked gear", owned, { gear: "whistle", kind: "gear" }, dollars(600)],
+    ["the second dog slot", { ...owned, dogSlots: 1 }, { kind: "dogSlot" }, dollars(800)],
+    ["the third dog slot", { ...owned, dogSlots: 2 }, { kind: "dogSlot" }, dollars(1800)],
+    ["an owned dog as not for sale", owned, { dog: "koda", kind: "dog" }, null],
+    ["owned gear as not for sale", owned, { gear: "fannyPack", kind: "gear" }, null],
+    ["no slot past the last", owned, { kind: "dogSlot" }, null],
+  ])("prices %s", (_name, ownedNow, purchase, expected) => {
+    expect(purchasePrice(data, ownedNow, purchase)).toBe(expected);
   });
 });
 
 describe("buy", () => {
-  const rich = { ...newPlayerSave, bankCents: dollars(2_000) };
+  const start = newPlayerSave.owned;
+  const outcome = (result: BuyResult) =>
+    result.kind === "bought"
+      ? { bankCents: result.save.bankCents, owned: result.save.owned }
+      : result;
 
-  it("takes the price from the bank and adds a dog", () => {
-    const result = buy(data, { dog: "nugget", kind: "dog" }, rich);
-    expect(result.kind).toBe("bought");
-    if (result.kind === "bought") {
-      expect(result.save.bankCents).toBe(dollars(1_400));
-      expect(result.save.owned.dogs).toEqual(["biscuit", "duchess", "koda", "nugget"]);
-    }
-  });
-
-  it("adds gear and dog slots", () => {
-    const gear = buy(data, { gear: "whistle", kind: "gear" }, rich);
-    expect(gear.kind === "bought" && gear.save.owned.gear).toEqual(["whistle"]);
-    const slot = buy(data, { kind: "dogSlot" }, rich);
-    expect(slot.kind === "bought" && slot.save.owned.dogSlots).toBe(2);
-    expect(slot.kind === "bought" && slot.save.bankCents).toBe(dollars(1_200));
-  });
-
-  it("refuses what the bank cannot cover, and what is not for sale", () => {
-    expect(buy(data, { kind: "dogSlot" }, newPlayerSave)).toEqual({
-      kind: "refused",
-      reason: "cantAfford",
-    });
-    expect(buy(data, { dog: "koda", kind: "dog" }, rich)).toEqual({
-      kind: "refused",
-      reason: "notForSale",
-    });
-  });
-
-  it("buys with exactly the price in the bank", () => {
-    const exact = { ...newPlayerSave, bankCents: dollars(800) };
-    const result = buy(data, { kind: "dogSlot" }, exact);
-    expect(result.kind === "bought" && result.save.bankCents).toBe(0);
+  it.each<{
+    bank: number;
+    expected: ReturnType<typeof outcome>;
+    name: string;
+    purchase: Purchase;
+  }>([
+    {
+      bank: 2_000,
+      expected: {
+        bankCents: dollars(1_400),
+        owned: { ...start, dogs: ["biscuit", "duchess", "koda", "nugget"] },
+      },
+      name: "takes the price from the bank and adds a dog",
+      purchase: { dog: "nugget", kind: "dog" },
+    },
+    {
+      bank: 2_000,
+      expected: { bankCents: dollars(1_400), owned: { ...start, gear: ["whistle"] } },
+      name: "adds gear",
+      purchase: { gear: "whistle", kind: "gear" },
+    },
+    {
+      bank: 2_000,
+      expected: { bankCents: dollars(1_200), owned: { ...start, dogSlots: 2 } },
+      name: "adds a dog slot",
+      purchase: { kind: "dogSlot" },
+    },
+    {
+      bank: 800,
+      expected: { bankCents: cents(0), owned: { ...start, dogSlots: 2 } },
+      name: "buys with exactly the price in the bank",
+      purchase: { kind: "dogSlot" },
+    },
+    {
+      bank: 799,
+      expected: { kind: "refused", reason: "cantAfford" },
+      name: "refuses what the bank cannot cover",
+      purchase: { kind: "dogSlot" },
+    },
+    {
+      bank: 2_000,
+      expected: { kind: "refused", reason: "notForSale" },
+      name: "refuses what is not for sale",
+      purchase: { dog: "koda", kind: "dog" },
+    },
+  ])("$name", ({ bank, expected, purchase }) => {
+    expect(outcome(buy(data, purchase, { ...newPlayerSave, bankCents: dollars(bank) }))).toEqual(
+      expected,
+    );
   });
 });
 
@@ -190,29 +211,29 @@ describe("lastWalkLine", () => {
     zonesFinished: 1,
   };
 
-  it("names the zone the walk headed home from", () => {
-    expect(lastWalkLine(data, walk)).toBe("+$64. Headed home from Bark Park.");
-  });
-
-  it("names the owner who fired you and where", () => {
-    const fired = {
-      ...walk,
-      firings: [{ dog: "koda" as const, zone: 1 }],
-      outcome: "noDogs" as const,
-    };
-    expect(lastWalkLine(data, fired)).toBe("+$64. Jesse fired you on Woof Way.");
-  });
-
-  it("names a zone the walk never picked as the world", () => {
-    expect(lastWalkLine(data, { ...walk, route: ["street"] })).toBe(
-      "+$64. Headed home from Maple Street.",
-    );
-  });
-
-  it("counts the zones a finished walk walked", () => {
-    expect(lastWalkLine(data, { ...walk, outcome: "finished", zonesFinished: 4 })).toBe(
-      "+$64. Walked 4 zones of Maple Street.",
-    );
+  it.each<{ changes: Partial<LastWalk>; expected: string; name: string }>([
+    {
+      changes: {},
+      expected: "+$64. Headed home from Bark Park.",
+      name: "names the zone the walk headed home from",
+    },
+    {
+      changes: { firings: [{ dog: "koda", zone: 1 }], outcome: "noDogs" },
+      expected: "+$64. Jesse fired you on Woof Way.",
+      name: "names the owner who fired you and where",
+    },
+    {
+      changes: { route: ["street"] },
+      expected: "+$64. Headed home from Maple Street.",
+      name: "names a zone the walk never picked as the world",
+    },
+    {
+      changes: { outcome: "finished", zonesFinished: 4 },
+      expected: "+$64. Walked 4 zones of Maple Street.",
+      name: "counts the zones a finished walk walked",
+    },
+  ])("$name", ({ changes, expected }) => {
+    expect(lastWalkLine(data, { ...walk, ...changes })).toBe(expected);
   });
 });
 
@@ -232,16 +253,21 @@ describe("logbookOf", () => {
 });
 
 describe("wrapWords", () => {
-  it("breaks between words, keeping each line within the width", () => {
-    expect(wrapWords(12, "He already did 10K. He's fine.")).toEqual([
-      "He already",
-      "did 10K.",
-      "He's fine.",
-    ]);
-  });
-
-  it("gives a word longer than the width a line of its own", () => {
-    expect(wrapWords(4, "a supercalifragilistic b")).toEqual(["a", "supercalifragilistic", "b"]);
+  it.each<[string, number, string, string[]]>([
+    [
+      "breaks between words, keeping each line within the width",
+      12,
+      "He already did 10K. He's fine.",
+      ["He already", "did 10K.", "He's fine."],
+    ],
+    [
+      "gives a word longer than the width a line of its own",
+      4,
+      "a supercalifragilistic b",
+      ["a", "supercalifragilistic", "b"],
+    ],
+  ])("%s", (_name, width, text, expected) => {
+    expect(wrapWords(width, text)).toEqual(expected);
   });
 });
 
@@ -254,22 +280,34 @@ describe("partingSpeech", () => {
   });
 });
 
-describe("dogInfo", () => {
-  it("describes an owned dog in words, with its fee", () => {
-    expect(dogInfo(data, owned, cents(0), "koda")).toMatch(
+describe("dogInfo and gearInfo", () => {
+  it.each<[string, () => string, RegExp]>([
+    [
+      "describes an owned dog in words, with its fee",
+      () => dogInfo(data, owned, cents(0), "koda"),
       /^Koda: big chaser, \$\d+ a zone\. Jesse is laid-back\.$/,
-    );
-  });
-
-  it("adds the price of a locked dog, and how much more the bank needs", () => {
-    expect(dogInfo(data, owned, dollars(100), "nugget")).toMatch(/\$600: need \$500 more\.$/);
-    expect(dogInfo(data, owned, dollars(600), "nugget")).toMatch(/\$600: tap to buy\.$/);
-  });
-});
-
-describe("gearInfo", () => {
-  it("says what gear does, with the price while locked", () => {
-    expect(gearInfo(data, owned, cents(0), "fannyPack")).toMatch(/^Fanny pack: .+\.$/);
-    expect(gearInfo(data, owned, cents(0), "whistle")).toMatch(/\$600: need \$600 more\.$/);
+    ],
+    [
+      "adds a locked dog's price and how much more the bank needs",
+      () => dogInfo(data, owned, dollars(100), "nugget"),
+      /\$600: need \$500 more\.$/,
+    ],
+    [
+      "offers a locked dog the bank can cover",
+      () => dogInfo(data, owned, dollars(600), "nugget"),
+      /\$600: tap to buy\.$/,
+    ],
+    [
+      "says what owned gear does",
+      () => gearInfo(data, owned, cents(0), "fannyPack"),
+      /^Fanny pack: .+\.$/,
+    ],
+    [
+      "adds locked gear's price",
+      () => gearInfo(data, owned, cents(0), "whistle"),
+      /\$600: need \$600 more\.$/,
+    ],
+  ])("%s", (_name, line, pattern) => {
+    expect(line()).toMatch(pattern);
   });
 });
