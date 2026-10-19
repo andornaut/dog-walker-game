@@ -28,7 +28,7 @@ describe("devOverlayLines", () => {
 
   it("adds money and each dog's hearts when a run is supplied", () => {
     const run = {
-      money: 1205,
+      money: cents(1205),
       pack: [
         { dog: "koda", hearts: 3, status: "walking" },
         { dog: "bo", status: "fired" },

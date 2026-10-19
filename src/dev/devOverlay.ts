@@ -1,3 +1,5 @@
+import { formatDollars } from "../rules/effectText";
+import type { Cents } from "../rules/units";
 import type { RunSetup } from "./runSetup";
 import { lagMs, type ZoneClock, type ZoneClocks } from "./zoneClock";
 
@@ -12,7 +14,7 @@ export const DEV_ROAD_FADE_KEY = "dev-road-fade";
 
 // The slice of a run the overlay shows. RunState fits it as it is.
 export interface DevRunView {
-  readonly money: number;
+  readonly money: Cents;
   readonly pack: readonly (
     | { readonly dog: string; readonly hearts: number; readonly status: "walking" }
     | { readonly dog: string; readonly status: "fired" }
@@ -29,11 +31,6 @@ export interface DevState {
   readonly zoneDistance: number;
   // 0-based, as RunState counts it.
   readonly zoneIndex: number;
-}
-
-function moneyText(amountCents: number): string {
-  const sign = amountCents < 0 ? "-" : "";
-  return `${sign}$${(Math.abs(amountCents) / 100).toFixed(2)}`;
 }
 
 function secondsText(ms: number): string {
@@ -75,7 +72,7 @@ export function devOverlayLines(
       lines.push(...clockLines(expectedRoadMs, clocks.current, clocks.last));
     }
     if (state.run !== undefined) {
-      lines.push(`money ${moneyText(state.run.money)}`);
+      lines.push(`money ${formatDollars(state.run.money)}`);
       for (const slot of state.run.pack) {
         lines.push(`${slot.dog} ${slot.status === "walking" ? `${slot.hearts}hp` : "fired"}`);
       }
