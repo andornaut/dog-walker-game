@@ -246,17 +246,58 @@ export function packHasQuirk(
   return packDogs(run).some((dog) => data.dogs[dog].quirk === quirk);
 }
 
+// The last lane move time, scroll speed and zone length worked out, with the data groups and
+// run fields they were worked out from. A walk asks for the same ones every step until its
+// pack, zone or modifiers or the data change; data and run states are never changed in place.
+let lastLaneMove:
+  | (Pick<GameData, "debuffs" | "dogs" | "tuning"> &
+      Pick<RunState, "pack"> & {
+        readonly runDebuffs: RunState["debuffs"];
+        readonly runModifiers: RunState["modifiers"];
+        readonly seconds: number;
+      })
+  | null = null;
+let lastScrollSpeed:
+  | (Pick<GameData, "tuning" | "world"> &
+      Pick<RunState, "modifiers" | "route" | "zoneIndex"> & { readonly speed: Pixels })
+  | null = null;
+let lastZoneLength:
+  (Pick<GameData, "tuning"> & Pick<RunState, "modifiers"> & { readonly length: Pixels }) | null =
+  null;
+
 // How long one lane move takes: seconds.laneMove, sledDogLaneSpeed times faster while a sled
 // dog walks, then the laneMove modifiers, such as Spooked's.
 export function laneMoveSeconds(
   data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
   run: Pick<RunState, "debuffs" | "modifiers" | "pack">,
 ): number {
+  const last = lastLaneMove;
+  if (
+    last !== null &&
+    last.tuning === data.tuning &&
+    last.debuffs === data.debuffs &&
+    last.dogs === data.dogs &&
+    last.pack === run.pack &&
+    last.runDebuffs === run.debuffs &&
+    last.runModifiers === run.modifiers
+  ) {
+    return last.seconds;
+  }
   const move = read(data.tuning, "seconds", "laneMove");
   const base = packHasQuirk(data, run, "sledDog")
     ? move / read(data.tuning, "multipliers", "sledDogLaneSpeed")
     : move;
-  return modifiedStat(data.tuning, packModifiers(data, run), "laneMove", base);
+  const seconds = modifiedStat(data.tuning, packModifiers(data, run), "laneMove", base);
+  lastLaneMove = {
+    debuffs: data.debuffs,
+    dogs: data.dogs,
+    pack: run.pack,
+    runDebuffs: run.debuffs,
+    runModifiers: run.modifiers,
+    seconds,
+    tuning: data.tuning,
+  };
+  return seconds;
 }
 
 // How long lane input stays locked once a lane change the player made arrives, such as
@@ -279,8 +320,28 @@ export function laneMotionConfig(
 // Pixels per second in the run's current zone, read from the live data, after the run's
 // modifiers, such as the walker's pace.
 export function walkScrollSpeed(data: Pick<GameData, "tuning" | "world">, run: RunState): Pixels {
+  const last = lastScrollSpeed;
+  if (
+    last !== null &&
+    last.tuning === data.tuning &&
+    last.world === data.world &&
+    last.route === run.route &&
+    last.zoneIndex === run.zoneIndex &&
+    last.modifiers === run.modifiers
+  ) {
+    return last.speed;
+  }
   const base = zoneScrollSpeed(data.tuning, currentZone(data, run), run.zoneIndex);
-  return pixels(modifiedStat(data.tuning, run.modifiers, "scrollSpeed", base));
+  const speed = pixels(modifiedStat(data.tuning, run.modifiers, "scrollSpeed", base));
+  lastScrollSpeed = {
+    modifiers: run.modifiers,
+    route: run.route,
+    speed,
+    tuning: data.tuning,
+    world: data.world,
+    zoneIndex: run.zoneIndex,
+  };
+  return speed;
 }
 
 // The entries of a zone's weights above 0, in the data's order.
@@ -301,10 +362,16 @@ export function minorObstacleWeights(
 // Every zone is the distance the base speed covers in zoneAtBaseSpeed, before modifiers such as
 // an upgrade or the walker's pace.
 export function zoneLength(data: Pick<GameData, "tuning">, run: RunState): Pixels {
+  const last = lastZoneLength;
+  if (last !== null && last.tuning === data.tuning && last.modifiers === run.modifiers) {
+    return last.length;
+  }
   const base =
     read(data.tuning, "pixels", "roadScrollSpeed") *
     read(data.tuning, "seconds", "zoneAtBaseSpeed");
-  return pixels(modifiedStat(data.tuning, run.modifiers, "zoneLength", base));
+  const length = pixels(modifiedStat(data.tuning, run.modifiers, "zoneLength", base));
+  lastZoneLength = { length, modifiers: run.modifiers, tuning: data.tuning };
+  return length;
 }
 
 export function startRoad(laneCount: number, speedFactor = 1): Road {
