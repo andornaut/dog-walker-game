@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Horizon</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png" />
+    <link rel="stylesheet" href="/nav.css" />
+    <script src="/nav.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
+    />
+    <style>
+      /* Each zone's run screen as the game draws it now beside the horizon version, at 1x and 2x. The PNGs are 360x560 in Endesga 32, scaled with no smoothing. */
+      :root {
+        --bg: #13101e;
+        --surface: #1d1a2c;
+        --fg: #dfe4ee;
+        --muted: #8b9bb4;
+        --line: #33304a;
+        --accent: #feae34;
+        --stage: #0c0a14;
+        --f-display: "Silkscreen", ui-monospace, monospace;
+        --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--f-body);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1560px;
+        margin: 0 auto;
+        padding-block: 24px 56px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 32px;
+      }
+      header {
+        display: grid;
+        gap: 8px;
+      }
+      h1 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: clamp(22px, 4vw, 32px);
+        line-height: 1.1;
+        margin: 0;
+      }
+      h2 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: 18px;
+        margin: 0;
+        letter-spacing: 0.04em;
+      }
+      p {
+        margin: 0;
+      }
+      .lede {
+        color: var(--muted);
+        max-width: 80ch;
+      }
+      section {
+        display: grid;
+        gap: 14px;
+      }
+      .pair {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      figure {
+        margin: 0;
+        background: var(--stage);
+        border-radius: 6px;
+        padding: 12px;
+        display: grid;
+        gap: 8px;
+        justify-items: center;
+        min-width: 0;
+        max-width: 100%;
+      }
+      figcaption {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      figcaption b {
+        color: var(--accent);
+        font-weight: 700;
+      }
+      img {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+      .x1 {
+        width: 360px;
+      }
+      .x2 {
+        width: 720px;
+      }
+      .scroll {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+      .scroll img {
+        max-width: none;
+      }
+      ul {
+        margin: 0;
+        padding-left: 18px;
+        display: grid;
+        gap: 6px;
+        max-width: 90ch;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header>
+        <h1>Horizon</h1>
+        <p class="lede">
+          An OutRun-style horizon in place of the backdrop's cross street. The road runs on to a
+          vanishing point, with the zone's neighbourhood as a low skyline along the horizon under
+          the sky. The camera is the game's: everything from the road's far edge (row 150) down is
+          the same in both versions, and only the backdrop band above it changes. The top bar, pack,
+          road objects and doghouses are the real exports.
+        </p>
+      </header>
+
+      <section>
+        <h2>How it fits the camera</h2>
+        <ul>
+          <li>
+            The camera's true vanishing point is on row -164, above the screen. A flat road
+            continued into the band would still be 120px wide at its top, so the ground bends away
+            past the far edge instead. From row 150 up to the horizon row, the road's scale falls
+            from 0.5 to 0 along a curve whose slope matches the camera's at row 150. The edges leave
+            the far edge without a kink and meet at the vanishing point.
+          </li>
+          <li>
+            The horizon sits on row 96 (band row 56) on Woof Way and row 100 on Paws Promenade. That
+            leaves about 55 rows of sky and skyline above the horizon and 50 rows of road bending
+            away below it.
+          </li>
+          <li>
+            The lane lines, curbs, sidewalks and mown stripes converge on the vanishing point. Far
+            rows sample the strip shrunk 8 to 64 times, as the game's strip levels do, so the dashes
+            merge into the road colour before they shimmer. The last 6 rows dither the road and
+            sidewalk into the lawn, as the game's far-road fade does.
+          </li>
+          <li>
+            The near-left perch and the near-right lawn stay where the backdrops have them, so the
+            cat and sprinkler gags keep their spots.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Woof Way</h2>
+        <p class="lede">
+          Hazy hills behind a water tower and a church steeple. In front of them are the grey
+          rooftops of the next streets, then a row of little houses and round trees on a hedge line.
+          The hedge opens where the street runs on, under a house at its end.
+        </p>
+        <div class="pair">
+          <figure>
+            <img
+              class="x1"
+              src="horizon/woof-way-current.png"
+              alt="Woof Way run screen as it is now, with houses across a cross street"
+            />
+            <figcaption>Now, 1x</figcaption>
+          </figure>
+          <figure>
+            <img
+              class="x1"
+              src="horizon/woof-way-horizon.png"
+              alt="Woof Way run screen with the road running to a horizon under a suburban skyline"
+            />
+            <figcaption><b>Horizon</b>, 1x</figcaption>
+          </figure>
+        </div>
+        <div class="pair">
+          <figure class="scroll">
+            <img class="x2" src="horizon/woof-way-current.png" alt="" />
+            <figcaption>Now, 2x</figcaption>
+          </figure>
+          <figure class="scroll">
+            <img class="x2" src="horizon/woof-way-horizon.png" alt="" />
+            <figcaption><b>Horizon</b>, 2x</figcaption>
+          </figure>
+        </div>
+      </section>
+
+      <section>
+        <h2>Paws Promenade</h2>
+        <p class="lede">
+          The river runs across the horizon, so the boardwalk ends at the water. On the far bank are
+          a hazy old town with a clock tower, a treeline, a footbridge on stone piers, a rowboat and
+          ducks.
+        </p>
+        <div class="pair">
+          <figure>
+            <img
+              class="x1"
+              src="horizon/paws-promenade-current.png"
+              alt="Paws Promenade run screen as it is now, with the river behind a cross path"
+            />
+            <figcaption>Now, 1x</figcaption>
+          </figure>
+          <figure>
+            <img
+              class="x1"
+              src="horizon/paws-promenade-horizon.png"
+              alt="Paws Promenade run screen with the boardwalk running to the river on the horizon"
+            />
+            <figcaption><b>Horizon</b>, 1x</figcaption>
+          </figure>
+        </div>
+        <div class="pair">
+          <figure class="scroll">
+            <img class="x2" src="horizon/paws-promenade-current.png" alt="" />
+            <figcaption>Now, 2x</figcaption>
+          </figure>
+          <figure class="scroll">
+            <img class="x2" src="horizon/paws-promenade-horizon.png" alt="" />
+            <figcaption><b>Horizon</b>, 2x</figcaption>
+          </figure>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
