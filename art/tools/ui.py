@@ -5,15 +5,15 @@ Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, 
 icon-logbook, icon-settings, icon-lock, icon-money, icon-stinky; ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title), ui-slot-locked (160x46, the yard sign for the next dog slot;
-the game writes its two lines); the home screen's ui-detail-card and ui-step (24x24
-nine-slices, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
+the game writes its two lines); the home screen's ui-detail-card (24x24
+nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down (8x6), ui-zone-banner (248x48) and
 ui-touch-hint (96x36).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row; a tag per dog key and `empty`),
 ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
-8px corners; tag glint), ui-check and ui-step-number (16x16; tags 1, 2, 3, tick),
+8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
 ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags incomplete, complete,
 neutral), fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
 (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
@@ -823,42 +823,6 @@ def detail_well():
     return g
 
 
-def step_plate():
-    """24x24 nine-slice (8px corners): the heading plate for the home screen's numbered steps
-    (Walker, Dogs, Gear), a tan board in a plum rim on a brown lip, set on the dark wood. The
-    game lays ui-step-number at 4,4 and writes the label in font-title x2, plum (6.49:1 on tan),
-    caps at 26,7; a note such as "(optional)" follows in font-body x2, plum. Width is the
-    label's plus 34; height 24."""
-    g = Grid(24, 24)
-    g.rect(1, 0, 22, 24, "plum")
-    g.rect(0, 1, 24, 22, "plum")
-    g.rect(1, 1, 22, 21, "tan")
-    g.rect(1, 1, 22, 1, "cream")
-    g.rect(1, 20, 22, 2, "brown")
-    g.rect(22, 2, 1, 18, "brown")
-    return g
-
-
-def step_number(label):
-    """16x16: the step's number on a round amber badge in a plum rim, plum digits (7.35:1), or a
-    white tick on forest (7.80:1) once the step is done, so done reads by shape as well."""
-    done = label == "tick"
-    g = Grid(16, 16)
-    g.ell(8, 8, 7.5, 7.5, "plum")
-    g.ell(8, 8, 6.5, 6.5, "forest" if done else "amber", "teal" if done else "orange",
-          "dgreen" if done else "yellow")
-    if done:
-        for x, y in ((4, 8), (5, 9), (6, 10), (7, 9), (8, 8), (9, 7), (10, 6), (11, 5)):
-            g.rect(x, y, 2, 2, "white")
-    else:
-        bits = {"1": "010110010010111", "2": "110001010100111", "3": "110001010001110"}[label]
-        for r in range(5):
-            for k in range(3):
-                if bits[r * 3 + k] == "1":
-                    g.rect(5 + k * 2, 3 + r * 2, 2, 2, "plum")
-    return g
-
-
 SECTION_W, SECTION_H = 24, 32
 SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
 
@@ -1117,7 +1081,6 @@ IMAGES = {
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
     "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
     "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
-    "ui-step": lambda: to_image(step_plate().outlined(False)),
 }
 
 
@@ -1128,7 +1091,6 @@ def sprites():
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
-    yield "ui-step-number", [(lb, [step_number(lb).outlined(False)], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in ("incomplete", "complete", "neutral")]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]

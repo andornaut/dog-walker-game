@@ -2749,11 +2749,6 @@
       "json": "sprites/ui-slider-knob.json"
     },
     {
-      "key": "ui-step-number",
-      "png": "sprites/ui-step-number.png",
-      "json": "sprites/ui-step-number.json"
-    },
-    {
       "key": "ui-switch",
       "png": "sprites/ui-switch.png",
       "json": "sprites/ui-switch.json"
@@ -3498,10 +3493,6 @@
     {
       "key": "ui-slot-locked",
       "png": "images/ui-slot-locked.png"
-    },
-    {
-      "key": "ui-step",
-      "png": "images/ui-step.png"
     },
     {
       "key": "ui-strip-well",
