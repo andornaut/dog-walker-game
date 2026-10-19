@@ -1,9 +1,16 @@
-import type { GameObjects, Scene } from "phaser";
+import type { GameObjects, Scene, Tweens } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
-import { FEEDBACK, heartLabelAt, heartPopFrame, heartPopText } from "../hud/feedback";
+import {
+  FEEDBACK,
+  heartLabelAt,
+  heartPopBlocked,
+  heartPopCovers,
+  heartPopFrame,
+  heartPopText,
+} from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import { arcControl, curvePoint } from "../hud/moments";
 import type { Point, Rect } from "../layout/rect";
@@ -33,9 +40,19 @@ export interface HeartPop {
   slot: number;
 }
 
-// landed shows a change's label on its band; quipTop is the top of the quip lane, which the
-// pop's number keeps above.
+// A pop on screen: what it covers on its way, its parts, its flight once under way, and its
+// landing.
+interface ActivePop {
+  covers: Rect[];
+  land: () => void;
+  parts: GameObjects.GameObject[];
+  tween: Tweens.Tween | undefined;
+}
+
+// clearOf is what pops keep clear of; landed shows a change's label on its band; quipTop is the
+// top of the quip lane, which the pop's number keeps above.
 interface HeartHooks {
+  clearOf: () => readonly Rect[];
   landed: (label: ChangeLabel, lane: Rect) => void;
   quipTop: number;
   still: () => boolean;
@@ -51,6 +68,7 @@ interface Shake {
 // shows; a lost heart flashes its doghouse red and shakes it as it lands. Reduced motion keeps
 // the pop and the flash, and drops the flight and the shake.
 export class HeartFeedback {
+  private readonly active = new Set<ActivePop>();
   private readonly hooks: HeartHooks;
   private readonly scene: Scene;
   private readonly shakes = new Map<number, Shake>();
@@ -68,6 +86,20 @@ export class HeartFeedback {
     }
   }
 
+  // Lands at once every pop whose way crosses what must stay clear, such as a firing moment
+  // that has just opened.
+  clearWay(): void {
+    const clearOf = this.hooks.clearOf();
+    for (const active of [...this.active]) {
+      if (heartPopBlocked(clearOf, active.covers)) {
+        active.tween?.remove();
+        active.parts.forEach((part) => part.destroy());
+        this.finish(active);
+      }
+    }
+  }
+
+  // A pop whose way crosses what must stay clear lands at once, with no pop or flight.
   private show(pop: HeartPop): void {
     const loss = pop.label.amount < 0;
     const art = loss ? FEEDBACK_ART.heartLoss : FEEDBACK_ART.heartGain;
@@ -77,21 +109,41 @@ export class HeartFeedback {
       this.land(loss, pop);
       return;
     }
-    const heart = this.scene.add.sprite(centre.x, centre.y, art.key).setDepth(DEPTH);
+    const to = { x: pop.lane.x + Math.round(pop.lane.width / 2), y: pop.lane.y };
     const number = this.addNumber(pop.label, frame);
+    const covers = heartPopCovers({ chip: number.rect, frame, to }, FEEDBACK.heart.peak);
+    if (heartPopBlocked(this.hooks.clearOf(), covers)) {
+      number.chip.destroy();
+      this.land(loss, pop);
+      return;
+    }
+    const heart = this.scene.add.sprite(centre.x, centre.y, art.key).setDepth(DEPTH);
+    const active: ActivePop = {
+      covers,
+      land: () => this.land(loss, pop),
+      parts: [heart, number.chip],
+      tween: undefined,
+    };
+    this.active.add(active);
     playTagOnce(heart, art.key, art.pop, () => {
-      number.destroy();
+      number.chip.destroy();
       if (this.hooks.still()) {
         heart.destroy();
-        this.land(loss, pop);
+        this.finish(active);
         return;
       }
-      this.fly(heart, art, centre, pop, () => this.land(loss, pop));
+      active.tween = this.fly(heart, art, { from: centre, to }, () => this.finish(active));
     });
   }
 
-  // The pop's number in font-title at 1x on a cream chip, beside the heart.
-  private addNumber(label: ChangeLabel, frame: Point): GameObjects.Container {
+  private finish(active: ActivePop): void {
+    this.active.delete(active);
+    active.land();
+  }
+
+  // The pop's number in font-title at 1x on a cream chip, beside the heart, and the chip's
+  // rect on screen.
+  private addNumber(label: ChangeLabel, frame: Point): { chip: GameObjects.Container; rect: Rect } {
     const text = addPixelText(this.scene, 0, 0, heartPopText(label.amount), {
       color: label.amount < 0 ? PALETTE.darkRed : PALETTE.forest,
       font: "title",
@@ -101,27 +153,29 @@ export class HeartFeedback {
     const at = heartLabelAt({ bottom, screenWidth: SCREEN_CONFIG.width }, frame, width);
     text.setPosition(CHIP_PAD, CHIP_PAD + text.y);
     const box = this.scene.add.graphics();
-    drawFramedRect(
-      box,
-      { border: PALETTE.plum, fill: PALETTE.cream },
-      { height: 5 + 2 * CHIP_PAD, width: width + 2 * CHIP_PAD, x: 0, y: 0 },
-    );
-    return this.scene.add.container(at.x - CHIP_PAD, at.y - CHIP_PAD, [box, text]).setDepth(DEPTH);
+    const rect = {
+      height: 5 + 2 * CHIP_PAD,
+      width: width + 2 * CHIP_PAD,
+      x: at.x - CHIP_PAD,
+      y: at.y - CHIP_PAD,
+    };
+    drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { ...rect, x: 0, y: 0 });
+    const chip = this.scene.add.container(rect.x, rect.y, [box, text]).setDepth(DEPTH);
+    return { chip, rect };
   }
 
   // The fly tag's small heart, from the pop's centre down into the doghouse's bottom band.
   private fly(
     heart: GameObjects.Sprite,
     art: { fly: string; key: string },
-    from: Point,
-    pop: HeartPop,
+    path: { from: Point; to: Point },
     done: () => void,
-  ): void {
+  ): Tweens.Tween {
     heart.play(animationKey(art.key, art.fly));
-    const to = { x: pop.lane.x + Math.round(pop.lane.width / 2), y: pop.lane.y };
+    const { from, to } = path;
     const control = arcControl(from, to, FEEDBACK.heart.peak);
     const progress = { t: 0 };
-    this.scene.tweens.add({
+    return this.scene.tweens.add({
       duration: FEEDBACK.heart.flyMs,
       ease: "Sine.easeIn",
       onComplete: () => {
@@ -154,7 +208,9 @@ export class HeartFeedback {
     }
     const { house } = pop;
     const flash = this.scene.add.sprite(house.x, house.y, key).setOrigin(0).setDepth(house.depth);
-    this.scene.children.moveAbove(flash, house);
+    // Straight over the house in the draw order, under the labels and chips added since it.
+    const { children } = this.scene;
+    children.moveTo(flash, children.getIndex(house) + 1);
     const parts = [...pop.parts, flash];
     const still = this.hooks.still();
     const shake = still ? undefined : this.startShake(pop.slot, parts);

@@ -244,8 +244,12 @@ export class HudScene extends Scene {
     });
 
     const run = this.runScene();
-    this.feedback = new HudFeedback(this, run, (labels) => this.floatLabels(labels));
+    this.feedback = new HudFeedback(this, run, {
+      firingShown: () => this.hearts?.clearWay(),
+      floatLabels: (labels) => this.floatLabels(labels),
+    });
     this.hearts = new HeartFeedback(this, {
+      clearOf: () => this.feedback?.firingRects() ?? [],
       landed: (label, lane) => this.showHeartLabel(label, lane),
       quipTop: LANES.quip.y,
       still: () => run.reducedMotion(),

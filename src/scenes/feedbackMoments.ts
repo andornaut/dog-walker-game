@@ -52,7 +52,7 @@ const DEPTH = 50;
 const FACE = { fadeMs: 150, popMs: 160, scale: 2, size: 32 };
 const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
 const PLATE = { corner: 8, dropIn: 8, dropMs: 120, key: "ui-fired-plate" };
-const LINE = { fadeMs: 400, maxWidth: 200, padding: 6 };
+const LINE = { maxWidth: 200, padding: 6 };
 // Each fired line's bubble takes its own depth pair over the moments, panel then text, so two
 // lines up at once never interleave. The tail is 8px wide.
 const LINE_DEPTH = DEPTH + 2;
@@ -68,9 +68,15 @@ const RIM = { minAlpha: 0.35, pulseMs: 600, width: 2 };
 
 interface FiredLine {
   at: Point;
-  holdMs: number;
   tail: Point;
   text: string;
+}
+
+// The callbacks the HUD gives the moments: floatLabels shows change labels, and firingShown
+// runs once a firing moment is on screen.
+export interface HudFeedbackHooks {
+  firingShown: () => void;
+  floatLabels: (labels: ChangeLabel[]) => void;
 }
 
 interface SlotWarning {
@@ -84,14 +90,23 @@ interface SlotWarning {
 // the HUD keeps running under it.
 export class HudFeedback {
   private inFlight = 0;
+  // The firing moments' faces and plates on screen.
+  private firingParts = new Set<Rect>();
   // Fired lines' bubbles on screen, and lines waiting for room beside them.
-  private lines: { depth: number; rect: Rect }[] = [];
+  // Each bubble's cover takes in its tail.
+  private lines: {
+    cover: Rect;
+    depth: number;
+    line: FiredLine;
+    parts: GameObjects.GameObject[];
+    rect: Rect;
+  }[] = [];
   private linesWaiting: FiredLine[] = [];
   private low: DogId[] = [];
   private lowShown = "";
   private moneyTick: MoneyTick | undefined;
   private paused = false;
-  private readonly floatLabels: (labels: ChangeLabel[]) => void;
+  private readonly hooks: HudFeedbackHooks;
   private readonly run: RunScene;
   private readonly scene: Scene;
   private readonly timers = new Set<Time.TimerEvent>();
@@ -101,8 +116,8 @@ export class HudFeedback {
     pulse: undefined,
   }));
 
-  constructor(scene: Scene, run: RunScene, floatLabels: (labels: ChangeLabel[]) => void) {
-    this.floatLabels = floatLabels;
+  constructor(scene: Scene, run: RunScene, hooks: HudFeedbackHooks) {
+    this.hooks = hooks;
     this.run = run;
     this.scene = scene;
     const onFiring = (cue: FiringCue) => this.playFiring(cue);
@@ -121,6 +136,11 @@ export class HudFeedback {
   update(run: RunState, pause: RunPause): void {
     this.holdWhilePaused(pause.menu !== "closed");
     this.showLowHearts(run);
+  }
+
+  // What heart pops keep clear of: the firing moments' faces, plates and fired lines on screen.
+  firingRects(): Rect[] {
+    return [...this.firingParts, ...this.lines.map(({ cover }) => cover)];
   }
 
   // The money the counter shows: the run's, less the fees still flying to it, counted to
@@ -200,8 +220,8 @@ export class HudFeedback {
 
   // The owner's fired face pops up at 2x over the doghouse in front of the pop, the plate
   // drops in in their temperament's colour, and their fired line shows in a bubble pointing
-  // at the face. The face, pop and plate are gone just before the hold ends; the line stays
-  // up as long as a quip. Reduced motion keeps the pop and sets the rest in place.
+  // at the face. The face, pop, plate and line are gone just before the hold ends, and heart
+  // pops in their way land at once. Reduced motion keeps the pop and sets the rest in place.
   private playFiring(cue: FiringCue): void {
     const rect = this.slotOf(cue.dog);
     if (rect === undefined) {
@@ -234,11 +254,43 @@ export class HudFeedback {
         y: layout.plate.y,
       });
     }
+    const half = (FACE.size * FACE.scale) / 2;
+    const covered = [
+      { height: 2 * half, width: 2 * half, x: layout.face.x - half, y: layout.face.y - half },
+      layout.plate,
+    ];
+    covered.forEach((part) => this.firingParts.add(part));
     const shown = pop === undefined ? [face, plate] : [pop, face, plate];
-    this.fadeOut(shown, Math.max(0, showMs - FACE.fadeMs), Math.min(showMs, FACE.fadeMs));
-    const holdMs = Math.max(showMs, MOMENTS.firingLineMs);
-    this.linesWaiting.push({ at: layout.line, holdMs, tail: layout.tail, text: cue.line });
+    const fadeDelay = Math.max(0, showMs - FACE.fadeMs);
+    const fadeMs = Math.min(showMs, FACE.fadeMs);
+    this.fadeOut(shown, fadeDelay, fadeMs);
+    const line = { at: layout.line, tail: layout.tail, text: cue.line };
+    this.linesWaiting.push(line);
     this.showWaitingLines();
+    this.after(fadeDelay, () => {
+      covered.forEach((part) => this.firingParts.delete(part));
+      this.closeLine(line, fadeMs);
+    });
+    this.hooks.firingShown();
+  }
+
+  // Fades a fired line out over ms if it is up, else drops it from the waiting lines.
+  private closeLine(line: FiredLine, ms: number): void {
+    this.linesWaiting = this.linesWaiting.filter((waiting) => waiting !== line);
+    const entry = this.lines.find((shown) => shown.line === line);
+    if (entry === undefined) {
+      return;
+    }
+    this.tween({
+      alpha: 0,
+      duration: ms,
+      onComplete: () => {
+        entry.parts.forEach((part) => part.destroy());
+        this.lines = this.lines.filter((shown) => shown !== entry);
+        this.showWaitingLines();
+      },
+      targets: entry.parts,
+    });
   }
 
   // Opens each waiting fired line that has room beside the bubbles up, in turn; the rest wait
@@ -319,7 +371,7 @@ export class HudFeedback {
   }
 
   // The owner's fired line in a quip bubble over the face, kept on screen and clear of the
-  // other fired lines, its tail pointing down at the face. It holds for holdMs, then fades.
+  // other fired lines, its tail pointing down at the face, until its firing's hold ends.
   // False, drawing nothing, while there is no room for it.
   private addLine(line: FiredLine): boolean {
     const label = addPixelText(this.scene, 0, 0, line.text, {
@@ -343,8 +395,6 @@ export class HudFeedback {
     while (this.lines.some((shown) => shown.depth === depth)) {
       depth += 2;
     }
-    const entry = { depth, rect };
-    this.lines.push(entry);
     placePixelText(label, x + LINE.padding, y + LINE.padding);
     const parts: GameObjects.GameObject[] = [addPanel(this.scene, rect, "ui-quip").setDepth(depth)];
     if (downArt !== undefined) {
@@ -356,17 +406,9 @@ export class HudFeedback {
       );
     }
     parts.push(label.setDepth(depth + 1));
-    this.tween({
-      alpha: 0,
-      delay: line.holdMs,
-      duration: LINE.fadeMs,
-      onComplete: () => {
-        parts.forEach((part) => part.destroy());
-        this.lines = this.lines.filter((shown) => shown !== entry);
-        this.showWaitingLines();
-      },
-      targets: parts,
-    });
+    const tailBottom = line.tail.y + (downArt?.height ?? 0);
+    const cover = { ...rect, height: Math.max(rect.height, tailBottom - y) };
+    this.lines.push({ cover, depth, line, parts, rect });
     return true;
   }
 
@@ -445,7 +487,7 @@ export class HudFeedback {
   private playTreat(cue: TreatCue): void {
     const rect = this.slotOf(cue.dog);
     if (rect === undefined) {
-      this.floatLabels(cue.labels);
+      this.hooks.floatLabels(cue.labels);
       return;
     }
     const half = FACE.size / 2;
@@ -454,7 +496,7 @@ export class HudFeedback {
       const key = this.scene.textures.exists(TREAT_POP.key) ? TREAT_POP.key : TREAT_POP.fallback;
       playEffect(this.scene, key, TREAT_POP.tag, to, DEPTH);
       this.smile(cue.dog, rect);
-      this.floatLabels(cue.labels);
+      this.hooks.floatLabels(cue.labels);
     };
     if (this.run.reducedMotion()) {
       land();

@@ -1,4 +1,4 @@
-import type { Point } from "../layout/rect";
+import { type Point, type Rect, rectsOverlap } from "../layout/rect";
 import { type Cents, cents } from "../rules/units";
 
 // The heart change, hop and minor bump moments' timings, in ms, and offsets, in pixels.
@@ -21,6 +21,23 @@ const MINUS = "−";
 // The number on a heart change's pop: "−1", "+2".
 export function heartPopText(amount: number): string {
   return `${amount < 0 ? MINUS : "+"}${Math.abs(amount)}`;
+}
+
+// What a heart pop covers on its way: its 32x32 frame, its number's chip, and the box its heart
+// flies through to land at to, its doghouse band's top centre (the arc peaks peak pixels
+// above the frame's centre).
+export function heartPopCovers(pop: { chip: Rect; frame: Point; to: Point }, peak: number): Rect[] {
+  const { chip, frame, to } = pop;
+  const left = Math.min(frame.x, to.x);
+  const top = Math.min(frame.y, to.y, frame.y + 16 - peak);
+  const right = Math.max(frame.x + 32, to.x + 1);
+  const bottom = Math.max(frame.y + 32, to.y + 1);
+  return [chip, { height: bottom - top, width: right - left, x: left, y: top }];
+}
+
+// Whether a heart pop covering covers would cross any rect in clearOf.
+export function heartPopBlocked(clearOf: readonly Rect[], covers: readonly Rect[]): boolean {
+  return covers.some((cover) => clearOf.some((rect) => rectsOverlap(cover, rect)));
 }
 
 // A label centred on centreX with the bottom of its line at lineBottom.

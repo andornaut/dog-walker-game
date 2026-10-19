@@ -31,11 +31,9 @@ export interface TreatCue {
 }
 
 export const MOMENTS = {
-  // The firing moment's face and plate are gone this long before its stop ends, so a held
-  // card opens on a clear screen.
+  // The firing moment's face, plate and line are gone this long before its stop ends, so a
+  // held card opens on a clear screen.
   firingEndMarginMs: 100,
-  // The fired line stays up at least as long as an owner's quip.
-  firingLineMs: 2600,
   // The one-off cue when an owner drops to lowHearts.
   lowCueMs: 1500,
   lowHearts: 1,

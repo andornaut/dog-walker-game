@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
 import {
+  FEEDBACK,
   heartLabelAt,
+  heartPopBlocked,
+  heartPopCovers,
   heartPopFrame,
   heartPopText,
   type MoneyTick,
@@ -41,6 +44,25 @@ describe("heartLabelAt", () => {
     ["raises it out of the lane below", 100, 470, { x: 115, y: 455 }],
   ])("%s", (_, x, top, at) => {
     expect(heartLabelAt(bounds, heartPopFrame({ x, y: top }), 20)).toEqual(at);
+  });
+});
+
+describe("heartPopBlocked", () => {
+  // A pop over a dog at (180, 400) whose heart flies down to its band's top at (180, 534), and a
+  // fired line's bubble and face over the middle doghouse.
+  const frame = heartPopFrame({ x: 180, y: 400 });
+  const chip = { height: 9, width: 14, x: frame.x + 29, y: frame.y + 12 };
+  const covers = heartPopCovers({ chip, frame, to: { x: 180, y: 534 } }, FEEDBACK.heart.peak);
+
+  it.each([
+    ["nothing on screen", [], false],
+    ["a bubble over its frame", [{ height: 40, width: 120, x: 120, y: 350 }], true],
+    ["a face on its flight down", [{ height: 64, width: 64, x: 148, y: 470 }], true],
+    ["a bubble over its chip alone", [{ height: 4, width: 4, x: chip.x + 2, y: chip.y + 2 }], true],
+    ["a face in the next doghouse", [{ height: 64, width: 64, x: 268, y: 470 }], false],
+    ["a bubble above the arc's peak", [{ height: 20, width: 120, x: 120, y: 300 }], false],
+  ])("with %s: %s", (_, clearOf, blocked) => {
+    expect(heartPopBlocked(clearOf, covers)).toBe(blocked);
   });
 });
 

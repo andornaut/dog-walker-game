@@ -17,6 +17,11 @@ export function containsPoint(rect: Rect, x: number, y: number): boolean {
   return x >= rect.x && x < rect.x + rect.width && y >= rect.y && y < rect.y + rect.height;
 }
 
+// Whether two rects share any pixel.
+export function rectsOverlap(a: Rect, b: Rect): boolean {
+  return a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
+}
+
 // The rect shrunk by the same amount on every side.
 export function insetRect(amount: number, rect: Rect): Rect {
   return {
