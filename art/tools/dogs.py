@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Draw the dogs in code and build their Aseprite sources and exports.
 
-Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
+Each dog gets two sprites in Endesga 32 with coloured outlines:
 
-- dog-<name>: the road sprite, seen from above and behind. Tags: walk (4
+- dog-<name>: the road sprite, 40x40 (ROAD_SIZE), seen from above and behind. Its drawing
+  functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.25),
+  which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
+  or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
   frames), react (2), pull (2, leaning right; the game mirrors it for left),
   tell (2, the lean before a pull; the game adds the fx-bark pop), idle (4,
   standing while the walk pauses: a slow tail wag and a twitch of the right ear)
@@ -18,7 +21,7 @@ Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
   the nose); dog-nugget pose (3, 220ms; Camera ready: sits square, cocks his head and
   a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a crouch, a spring, a
   stretched leap over motion streaks and a landing on the front paws).
-- face-dog-<name>: the dog column face. Tags: happy, neutral, upset, then the
+- face-dog-<name>: the dog column face, 32x32 at 1x. Tags: happy, neutral, upset, then the
   quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
   a wobbly mouth and a sweat bead), while she is the only dog on the leash.
 
@@ -31,11 +34,18 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
+import math
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, Grid, edged, main  # noqa: E402
+
+# The road sprites are drawn on a 32-unit design grid and rasterized at ROAD_SIZE, ROAD_SCALE times bigger, on
+# a minis.Mini that keeps 1px lines and single pixels 1px; their depth variants rasterize at ROAD_SCALE x the
+# step. Faces stay 32x32 at 1x.
+ROAD_SIZE = 40
+ROAD_SCALE = ROAD_SIZE / 32
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
 # and the body bobs up on the passing beats 1 and 3.
@@ -439,7 +449,7 @@ def pierre_road(q):
     hx = 16 + ln
     puff(g, hx - 5, 14.5 + b - q["ears"], 2, 3.5, ring=True)
     puff(g, hx + 5, 14.5 + b - q["ears"] + q["twitch"], 2, 3.5, ring=True)
-    puff(g, hx, 10 + b, 4, 3.8, ring=True)
+    puff(g, hx, 10.5 + b, 4, 3.8, ring=True)
     g.rect(hx, 5 + b, 2, 3, "purple")
     g.rect(hx + 3, 5 + b, 2, 3, "purple")
     g.p(hx + 2, 6 + b, "mauve")
@@ -729,24 +739,60 @@ def whirl(g, side, bx, b):
     1px clear of the body at bx, trailing the twist; the road outline rings it."""
     if not side:
         return
-    for dx, y in ((7, 14), (8, 15), (9, 16), (9, 17), (9, 18), (9, 19), (8, 20)):
-        g.p(bx + (dx if side > 0 else -1 - dx), y + b, "white")
+    trail(g, [(bx + (dx if side > 0 else -1 - dx), y + b)
+              for dx, y in ((7, 14), (8, 15), (9, 16), (9, 17), (9, 18), (9, 19), (8, 20))], "white")
 
 
-# Penny's hackles from the collar down: r rust spine, o orange fur, y yellow tips lit from the top left.
+# Penny's hackles from the collar down: r rust spine, o orange fur, y yellow tips lit from the top left. The
+# second map is the road size's own, in its pixels, its spine on column 3.
 HACKLES = ["yoroy", ".ory.", "yoroo", ".oro.", ".yro.", "..r.."]
+HACKLES_BIG = ["y.yro.o", "yyoroo.", ".yoroo.", "yyorooo", ".yoro..", "..yro..", "..oro..", "...r..."]
+HACKLE_INK = {"r": "rust", "o": "orange", "y": "yellow"}
+
+
+def scale_of(g):
+    """The scale g draws the design grid at: a minis.Mini's s, 1 for a plain Grid."""
+    return getattr(g, "s", 1)
+
+
+def trail(g, pts, c):
+    """A 1px trail of pixels at the design points pts, in order. Drawn bigger, a step between two touching
+    points can open a 1px gap; the gap is filled so the trail stays unbroken and 1px wide."""
+    s = scale_of(g)
+    if s <= 1:
+        for x, y in pts:
+            g.p(x, y, c)
+        return
+    last = None
+    for x, y in pts:
+        here = (math.floor((x + 0.5) * s), math.floor((y + 0.5) * s))
+        if last and max(abs(x - last[0][0]), abs(y - last[0][1])) <= 1:
+            (ax, ay), (bx, by) = last[1], here
+            n = max(abs(bx - ax), abs(by - ay))
+            for t in range(1, n):
+                g.g.p(ax + round((bx - ax) * t / n), ay + round((by - ay) * t / n), c)
+        g.g.p(*here, c)
+        last = ((x, y), here)
 
 
 def hackles(g, cx, y):
     """Penny's raised hackles: a ridge of fur standing up along her spine from the collar, bristling out to
-    a jagged edge, and a tuft standing up past each shoulder."""
-    for j, row in enumerate(HACKLES):
-        for i, c in enumerate(row):
-            if c != ".":
-                g.p(cx - 3 + i, y + j, {"r": "rust", "o": "orange", "y": "yellow"}[c])
+    a jagged edge, and a tuft standing up past each shoulder. Drawn bigger, the ridge is HACKLES_BIG in
+    the grid's own pixels."""
+    s = scale_of(g)
+    if s > 1:
+        x0, y0 = math.floor((cx - 1 + 0.5) * s) - 3, math.floor((y + 0.5) * s)
+        for j, row in enumerate(HACKLES_BIG):
+            for i, c in enumerate(row):
+                if c != ".":
+                    g.g.p(x0 + i, y0 + j, HACKLE_INK[c])
+    else:
+        for j, row in enumerate(HACKLES):
+            for i, c in enumerate(row):
+                if c != ".":
+                    g.p(cx - 3 + i, y + j, HACKLE_INK[c])
     for x, side in ((cx - 8, -1), (cx + 7, 1)):
-        g.p(x, y - 1, "orange")
-        g.p(x + side, y - 2, "orange")
+        trail(g, ((x, y - 1), (x + side, y - 2)), "orange")
 
 
 def glance(g, hx, hy, side):
@@ -765,8 +811,7 @@ def scent(g, hx, y, side):
     if not side:
         return
     x = hx + (-5 if side < 0 else 2)
-    for dx, dy in ((1, 1), (0, 0), (1, -1), (2, -2), (0, -4)):
-        g.p(x + dx, y + dy, "white")
+    trail(g, [(x + dx, y + dy) for dx, dy in ((1, 1), (0, 0), (1, -1), (2, -2), (0, -4))], "white")
 
 
 def sparkle(g, cx, cy, size):
@@ -914,8 +959,12 @@ DOGS = {
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
+    import minis
+
+    here = sys.modules[__name__]
     for name, (road, face) in DOGS.items():
-        yield f"dog-{name}", [(tag, [road(q).outlined() for q in poses], ms) for tag, poses, ms in road_tags(name)]
+        yield f"dog-{name}", [(tag, minis.dog_frames(road, poses, ROAD_SCALE, here), ms)
+                              for tag, poses, ms in road_tags(name)]
         yield f"face-dog-{name}", [(m, [face(m).outlined()], 1000) for m in face_tags(name)]
 
 

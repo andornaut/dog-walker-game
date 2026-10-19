@@ -3,7 +3,7 @@
 ## Direction
 
 - Pixel art: simple, cute, a little retro, refined. Mood: casual, cozy, low-stress.
-- Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings at 32×32. Small dogs sit well inside the frame; big dogs fill it. A dog's coat and accessory read on both its road sprite and its face.
+- Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings on its 40×40 road sprite and 32×32 face. Small dogs sit well inside the frame; big dogs fill it. A dog's coat and accessory read on both its road sprite and its face.
 - Everything, UI included, is pixel art at the 360×560 base resolution, scaled up with no smoothing.
 
 ## Layout and sizes
@@ -17,13 +17,14 @@
 
 | Sprite                                                    | Frame                      |
 | --------------------------------------------------------- | -------------------------- |
-| Road tiles, dogs, animals, dog and owner faces            | 32×32                      |
+| Dogs on the road                                          | 40×40                      |
+| Road tiles, animals, dog and owner faces                  | 32×32                      |
 | People: walkers, owners, forced-stop and lucky characters | 32×48 (kids drawn shorter) |
 | Pickups, small effects, icons                             | 16×16                      |
 | Dog portraits                                             | 64×64                      |
 | Obstacle n lanes wide                                     | (56n−24)×24                |
 
-A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 88×24, hedge and `barrier-3` 144×24, the parked car 44×28 (1 lane by 3 rows of footprint), the two-lane ice cream truck 88×44 (a rear-view van) and construction 56×32 per lane. Ground decals (puddle 88×32, the skunk cloud 88×40) stay low so they read as lying on the road.
+A dog's road sprite is drawn on a 32-unit design grid and rasterized at 1.25× (its depth variants at 1.25× the step): every shape scales, while 1px lines and single pixels stay 1px, and a dog's feet keep to the frame's bottom rows. A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 88×24, hedge and `barrier-3` 144×24, the parked car 44×28 (1 lane by 3 rows of footprint), the two-lane ice cream truck 88×44 (a rear-view van) and construction 56×32 per lane. Ground decals (puddle 88×32, the skunk cloud 88×40) stay low so they read as lying on the road.
 
 ## Palette and outlines
 

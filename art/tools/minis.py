@@ -15,7 +15,8 @@ or the feature is a hand-drawn pixel map instead.
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
 lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog and
 skunk-cloud (no outline). At @75 and @50 only (SCALES): dog-<name> for every
-dog, since the pack is drawn at full size.
+dog, since the pack is drawn at full size; a dog's design grid is drawn at
+dogs.ROAD_SCALE times the step, so its frame is 30x30 at @75 and 20x20 at @50.
 
 Usage:
   minis.py preview OUT.png   every small frame on the street colours
@@ -90,9 +91,25 @@ class Mini:
         if (x, y) not in self.keep:
             self.g.p(x, y, c)
 
+    def _hug(self, a, b, cells):
+        """Drawn bigger (s above 1), a 1px line whose full-size pixel spans output pixels a to b - 1 keeps to
+        one of them: the last when what it is drawn over ends just past b - 1 and carries on before a (a
+        seam along a shape's lower or right edge), else the first. cells are (x, None) for a row or (None, y)
+        for a column."""
+        px, h, w = self.g.px, self.g.h, self.g.w
+
+        def at(cell, v):
+            x, y = (cell[0], v) if cell[1] is None else (v, cell[1])
+            return px[y][x] if 0 <= x < w and 0 <= y < h else None
+
+        before = sum(at(c, a - 1) == at(c, a) for c in cells)
+        after = sum(at(c, b) == at(c, b - 1) for c in cells)
+        return b - 1 if after < before else a
+
     def rect(self, x, y, w, h, c):
         """A rect too thin to cover a pixel's edge-to-edge span takes the pixel at its centre. A 1px line
-        (a seam or a shaded edge) does not paint over a shape that shrank to 1px either."""
+        (a seam or a shaded edge) does not paint over a shape that shrank to 1px either, and drawn bigger it
+        stays 1px wide (see _hug)."""
         x0, y0, x1, y1 = self._edge(x), self._edge(y), self._edge(x + w), self._edge(y + h)
         if x1 <= x0:
             x0 = math.floor((x + w / 2) * self.s)
@@ -101,6 +118,12 @@ class Mini:
             y0 = math.floor((y + h / 2) * self.s)
             y1 = y0 + 1
         line, shrunk = w == 1 or h == 1, (w > 1 and x1 - x0 == 1) or (h > 1 and y1 - y0 == 1)
+        if self.s > 1 and h == 1 and y1 - y0 > 1:
+            y0 = self._hug(y0, y1, [(xx, None) for xx in range(x0, x1)])
+            y1 = y0 + 1
+        if self.s > 1 and w == 1 and x1 - x0 > 1:
+            x0 = self._hug(x0, x1, [(None, yy) for yy in range(y0, y1)])
+            x1 = x0 + 1
         for yy in range(y0, y1):
             for xx in range(x0, x1):
                 if line and (xx, yy) in self.keep:
@@ -188,11 +211,13 @@ def snap(q, s, up=False):
     return out
 
 
-def dog_frames(draw, poses, s):
-    """dogs' draw(q) at scale s for each pose in a tag. Where two poses round to the same frame (a 2px lean
-    and a 3px one are both 1px at 0.5x), the bigger of the two rounds up instead, so the tag still moves."""
+def dog_frames(draw, poses, s, module=dogs):
+    """module's draw(q) at scale s of the design grid for each pose in a tag: dogs.ROAD_SCALE for the full
+    size, times the step for a depth variant. Where two poses round to the same frame (a 2px lean and a 3px
+    one are both 1px at the smallest step), the bigger of the two rounds up instead, so the tag still
+    moves."""
     def frame(q, up=False):
-        return small(dogs, s, draw, snap(dogs.pose(q), s, up)).outlined()
+        return small(module, s, draw, snap(module.pose(q), s, up)).outlined()
 
     frames = [frame(q) for q in poses]
     for i in range(1, len(frames)):
@@ -469,7 +494,7 @@ def sprites():
             yield f"{key}@{suffix}", tags
     for suffix, s in SCALES:
         for name, (draw, _) in dogs.DOGS.items():
-            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, s), ms)
+            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, dogs.ROAD_SCALE * s), ms)
                                            for tag, poses, ms in dogs.road_tags(name)]
 
 

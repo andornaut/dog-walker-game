@@ -12,7 +12,7 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | --------------------- | ------ | ----- | ------------------------------------------------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`, `wave`       | core | ada, ben, casey, trista; `wave` faces the camera, for the unlock popup stop on the sidewalk                                                                                                           |
 | `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                                                                                                                                         |
-| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
+| `dog-<name>`          | sprite | 40×40 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
 | `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse                                                                                                                                                                                              |
 | `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | core | Keyed by dog                                                                                                                                                                                          |
 | `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                           |
@@ -60,16 +60,17 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 Same tags, frames and durations as the original.
 
-| Key                                                                                                       | Size `@75`, `@50` | Pri  |
-| --------------------------------------------------------------------------------------------------------- | ----------------- | ---- |
-| `ball-bounce`                                                                                             | 12×18, 8×12       | core |
-| `bench`                                                                                                   | 66×18, 44×12      | core |
-| `bin`, `cone`, `dog-<name>`, `goose`, `hydrant`, `loose-dog`, `skunk`, `spot-water-bowl`, `squirrel-dash` | 24×24, 16×16      | core |
-| `cafe-patio`, `skunk-cloud`                                                                               | 66×30, 44×20      | core |
-| `cyclist`, `lemonade-stand`, `spot-lamp-post`, `spot-stranger`, `spot-tree`                               | 24×36, 16×24      | core |
-| `fx-status-<status>`, `lost-wallet`, `tip`, `treat`                                                       | 12×12, 8×8        | core |
-| `other-dog`, `squirrel` (`@50` only)                                                                      | 16×16             | core |
-| `petunias`, `picnic`, `trash-bins`                                                                        | 66×24, 44×16      | core |
+| Key                                                                                         | Size `@75`, `@50` | Pri  |
+| ------------------------------------------------------------------------------------------- | ----------------- | ---- |
+| `ball-bounce`                                                                               | 12×18, 8×12       | core |
+| `bench`                                                                                     | 66×18, 44×12      | core |
+| `bin`, `cone`, `goose`, `hydrant`, `loose-dog`, `skunk`, `spot-water-bowl`, `squirrel-dash` | 24×24, 16×16      | core |
+| `cafe-patio`, `skunk-cloud`                                                                 | 66×30, 44×20      | core |
+| `cyclist`, `lemonade-stand`, `spot-lamp-post`, `spot-stranger`, `spot-tree`                 | 24×36, 16×24      | core |
+| `dog-<name>`                                                                                | 30×30, 20×20      | core |
+| `fx-status-<status>`, `lost-wallet`, `tip`, `treat`                                         | 12×12, 8×8        | core |
+| `other-dog`, `squirrel` (`@50` only)                                                        | 16×16             | core |
+| `petunias`, `picnic`, `trash-bins`                                                          | 66×24, 44×16      | core |
 
 ## Effects
 
@@ -96,7 +97,7 @@ Same tags, frames and durations as the original.
 | Key                | Type   | Size  | Tags                     | Pri  | Note                                                               |
 | ------------------ | ------ | ----- | ------------------------ | ---- | ------------------------------------------------------------------ |
 | `accident-spot`    | sprite | 16×16 | `idle`                   | core | Ground decal left by `fx-accident`, drawn under everything         |
-| `fx-accident`      | sprite | 32×32 | `play`                   | core | A Regular dog's accident, laid on the dog's frame                  |
+| `fx-accident`      | sprite | 40×40 | `play`                   | core | A Regular dog's accident, laid on the dog's frame                  |
 | `fx-need-met`      | sprite | 48×48 | `<need>`                 | core | Need fulfilled; bottom-centre on the dog's feet                    |
 | `fx-pull-fail`     | sprite | 16×16 | `play`                   | core | A blocked pull, over the dog's head                                |
 | `hydrant`          | sprite | 32×32 | `idle`                   | core | Regular spot; a drip off the side cap                              |
