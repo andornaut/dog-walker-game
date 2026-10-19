@@ -70,7 +70,7 @@
 ## Save data
 
 - **Scope:** one profile per browser, local only, per origin.
-- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, earned achievements with the time each was earned, and the zone checkpoint (with the run's achievement counters and route), all referenced by data ids. A checkpoint or last walk saved before forks has no route and loads with the pre-fork route (Woof Way, Bark Park, Sniff Street Shops, The Long Way Home).
+- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/design.md`, Home screen and progression), shown hints, settings, earned achievements with the time each was earned, and the zone checkpoint (with the run's achievement counters and route), all referenced by data ids. A checkpoint or last walk saved before forks has no route and loads with the pre-fork route (Woof Way, Bark Park, Sniff Street Shops, The Long Way Home).
 - **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
 - **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
