@@ -164,11 +164,12 @@ def gingham(g, x0, y0, w, h, inset):
             g.rect(x, y, min(4, x0 + w - cut - x), 2, col)
 
 
-def picnic(chew=0, new=Grid, w=88):
+def picnic(chew=0, new=Grid, w=88, crown=0):
     """The picnicker sits cross-legged on the right of the blanket, a sandwich at the mouth with a bite out
     of it. chew 1 is the bite (the sandwich 1px lower), 2 the chew (the cheeks puffed 1px wider). w is the
     width in drawing units: the plate and apple move left by half of what it is short of 88, the
-    picnicker by all of it."""
+    picnicker by all of it. crown lowers the top of the head and hair by that many units, their bottoms
+    kept (see PICNIC_CROWN)."""
     d = w - 88
     g = edged(new(w, 32))
     # the blanket: a sliver of its top, wider at the front, then its hem
@@ -209,11 +210,11 @@ def picnic(chew=0, new=Grid, w=88):
     g.rect(cx + 4, 16, 3, 8, "purple")
     g.rect(cx - 7, 16, 1, 7, "pink")
     puff = 1 if chew == 2 else 0
-    g.ell(cx, 9, 8, 8, "skin1", "skin2")
+    g.ell(cx, 9 + crown / 2, 8, 8 - crown / 2, "skin1", "skin2")
     if puff:
         g.rect(cx - 9, 10, 1, 3, "skin1")
         g.rect(cx + 8, 10, 1, 3, "skin2")
-    g.ell(cx, 5.5, 8.5, 4.5, "dbrown", "plum", "brown")
+    g.ell(cx, 5.5 + crown / 2, 8.5, 4.5 - crown / 2, "dbrown", "plum", "brown")
     g.rect(cx - 8, 5, 2, 6, "dbrown")
     g.rect(cx + 7, 5, 2, 6, "plum")
     g.rect(cx - 5, 8, 2, 2, "ink")
@@ -241,6 +242,10 @@ def picnic(chew=0, new=Grid, w=88):
 
 
 PICNIC_IDLE = (0, 0, 1, 2), 400
+# The head's crown, lowered in units at the steps where the hem rounds a row below the feet row
+# (floor(full feet x scale + 0.5)) while the head already touches the frame's top, so the variant can rise
+# onto its feet row without clipping.
+PICNIC_CROWN = {"@88": 1, "@62": 1}
 
 
 # ---------- goose ----------
@@ -576,7 +581,7 @@ def sprites():
                       for a in args]
             return [("idle", [f.outlined() for f in frames], ms)]
 
-        yield f"picnic{suffix}", idle(picnic, PICNIC_IDLE, w=TWO_LANES)
+        yield f"picnic{suffix}", idle(picnic, PICNIC_IDLE, w=TWO_LANES, crown=PICNIC_CROWN.get(suffix, 0))
         yield f"goose{suffix}", [
             ("run", [goose(**snapped(q, GOOSE_OFFSETS), new=new).outlined() for q in GOOSE_RUN], 110),
             ("idle", [goose(**snapped(q, GOOSE_OFFSETS), new=new).outlined() for q in GOOSE_IDLE], 300)]
