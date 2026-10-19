@@ -83,6 +83,14 @@ import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
 import { isSteeringLocked } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
+import {
+  gestureAfterPulls,
+  NO_PULLS,
+  pullPose,
+  type Pulls,
+  type PullStep,
+  stepPulls,
+} from "../runner/pulls";
 import type { Random } from "../runner/random";
 import {
   type EncounterCard,
@@ -257,6 +265,8 @@ export class RunScene extends Scene {
   private distanceBeforeZone = 0;
   private dizzy: GameObjects.Sprite | undefined;
   private dogSprites = new Map<DogId, GameObjects.Sprite>();
+  // The tag each dog's sprite last played.
+  private dogTags = new Map<DogId, string>();
   private gags: Gags | undefined;
   private gesture: GestureState = idleGesture;
   private graphics?: {
@@ -278,7 +288,9 @@ export class RunScene extends Scene {
   private packPose: "idle" | "walk" = "walk";
   private pendingInputs: PendingInput[] = [];
   private pointerId: number | undefined;
-  private random: { cards: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
+  private pulls: Pulls = NO_PULLS;
+  private random:
+    { cards: Random; pulls: Random; quips: Random; rolls: Random; scenery: Random } | undefined;
   private replay: Replay | undefined;
   // The projected road, drawn a row at a time into pixels, then uploaded to its texture.
   private road: { pixels: Uint32Array; raster: RoadRaster; upload: () => void } | undefined;
@@ -312,6 +324,7 @@ export class RunScene extends Scene {
     this.setup = setup;
     this.random = {
       cards: randomStream(setup.seed, "cards"),
+      pulls: randomStream(setup.seed, "pulls"),
       quips: randomStream(setup.seed, "quips"),
       rolls: randomStream(setup.seed, "rolls"),
       scenery: randomStream(setup.seed, "scenery"),
@@ -368,6 +381,7 @@ export class RunScene extends Scene {
     this.cardView = undefined;
     this.changes = [];
     this.distanceBeforeZone = 0;
+    this.dogTags = new Map();
     this.gesture = idleGesture;
     this.items = new Map();
     this.buttonPointerId = undefined;
@@ -376,6 +390,7 @@ export class RunScene extends Scene {
     this.packPose = "walk";
     this.pendingInputs = [];
     this.pointerId = undefined;
+    this.pulls = NO_PULLS;
     this.replay = undefined;
     this.runTimeMs = 0;
     this.stopSprites = { key: "", sprites: [] };
@@ -654,7 +669,7 @@ export class RunScene extends Scene {
     );
   }
 
-  // One fixed step: the inputs due now, then the walk.
+  // One fixed step: the inputs due now, the pulls, then the walk.
   private simulate(): void {
     let walk = this.walk;
     const random = this.random;
@@ -672,6 +687,10 @@ export class RunScene extends Scene {
           : this.treated(input.slot, walk);
       this.log({ ...input, timeMs: this.runTimeMs });
     }
+    const geometry = this.geometry(walk.run);
+    const pulls = stepPulls(gameData, geometry, random.pulls, STEP_MS / 1000, this.pulls, walk);
+    this.reactToPulls(pulls);
+    walk = pulls.walk;
     const step = stepWalk(gameData, this.geometry(walk.run), random.rolls, STEP_MS / 1000, walk);
     this.runTimeMs += STEP_MS;
     this.walk = step.walk;
@@ -719,6 +738,17 @@ export class RunScene extends Scene {
     if (this.inputLog !== undefined) {
       this.inputLog = recordInput(event, this.inputLog);
     }
+  }
+
+  // A tell barks, and a pull that moved the pack re-anchors the drag. The lean and the bark
+  // pop are drawn with the pack.
+  private reactToPulls(step: PullStep): void {
+    this.pulls = step.pulls;
+    if (step.tells.length > 0) {
+      soundboardOf(this).play("bark");
+      this.hint({ kind: "pull" });
+    }
+    this.gesture = gestureAfterPulls(step.pulled, this.gesture);
   }
 
   // Sounds, bursts, labels and hints for what happened in a step.
@@ -1487,11 +1517,12 @@ export class RunScene extends Scene {
       const step = snapScale(placed.scale);
       const look = depthLook(this, dogSpriteKey(dog), step);
       showDepthLook(sprite, look);
-      if (posed) {
-        playTag(sprite, look.key, pose, still && halted);
-      }
       const x = Math.round(placed.x);
       const dogFoot = Math.round(placed.y);
+      this.poseDog(dog, sprite, look.key, pose, still && halted, {
+        x,
+        y: dogFoot - Math.round(spriteMetrics(look.key).feetY * look.scale),
+      });
       sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
       shadow(look, x, dogFoot, step);
       if (redrawLeash) {
@@ -1524,8 +1555,29 @@ export class RunScene extends Scene {
       this.stinky.setVisible(stinky).setPosition(walkerX, footY - 70);
       playTag(this.stinky, "fx-stinky", "loop", still);
     }
-    // A pull will play the dog's "tell" tag, mirrored for the left, with fx-bark over its
-    // head, and steer through pullLane; dogs do not pull yet.
+  }
+
+  // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the
+  // pack's pose; the bark pops over its head as the tell starts.
+  private poseDog(
+    dog: DogId,
+    sprite: GameObjects.Sprite,
+    key: string,
+    pose: string,
+    still: boolean,
+    head: { x: number; y: number },
+  ): void {
+    const pull = pullPose(gameData, this.pulls, dog);
+    const tag = pull?.tag ?? pose;
+    const shown = this.dogTags.get(dog);
+    if (tag !== shown) {
+      playTag(sprite, key, tag, pull === null ? still : this.reducedMotion());
+      this.dogTags.set(dog, tag);
+    }
+    if (tag === "tell" && shown !== "tell") {
+      playEffect(this, "fx-bark", "pop", head, DEPTH.fx);
+    }
+    sprite.setFlipX(pull?.direction === -1);
   }
 }
 

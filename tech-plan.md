@@ -22,13 +22,13 @@
 - **Pseudo-3D road:** game logic keeps the flat road (lane x, distance ahead of the walker in road pixels, scale 1 at the pack); only drawing goes through `src/layout/projection.ts` (`ROAD_CAMERA` in `src/data/screen.ts`). The road and verge are drawn row by row into one canvas texture (`src/layout/roadRaster.ts`), with 2x and 4x shrunk strips for rows that cover more than 2 strip rows. Sprites snap to 1, 0.75 or 0.5 scale and use a manifest's `<key>@75` or `<key>@50` when loaded. Spawns come into view at the far edge of the projected road, about 630 road pixels ahead.
 - **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
 - **Text:** bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x; text that doesn't fit is shortened, wrapped, or moved to the enlarged card.
-- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull will re-anchor the drag once pulls are wired.
+- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull that moves the pack re-anchors the drag at the pointer, so getting back takes another lane-width of drag.
 - **Accessibility:** reduced motion (a setting, defaulting to `prefers-reduced-motion`) drops decorative motion but keeps every highlight and state change, the road scroll and the lane slide. No state relies on colour alone. Tap targets are at least 48 CSS px with 8 px between them. Text meets 4.5:1 contrast and essential icons 3:1.
 - **Sound:** `src/audio/` maps cues to manifest keys and mixes music and effects volumes from settings, ducking music under cards and muting while paused or hidden. `src/scenes/soundboard.ts` is the Phaser wrapper. Each sound ships as Ogg plus AAC.
 - **Source layout:**
   - `src/data/`: content and tuning
   - `src/rules/`, `src/state/`: run state and pure rules
-  - `src/runner/`: lane motion, zones, spawn planning, collisions, the hit stop
+  - `src/runner/`: lane motion, zones, spawn planning, collisions, the hit stop, pulls
   - `src/input/`: keys and the touch gesture state machine
   - `src/home/`, `src/hud/`, `src/help/`: view models for the home, settings, stats and end screens, the top bar and pause menu, and the help screen
   - `src/text/`: the pixel font
@@ -92,7 +92,7 @@
 | `speed` | scroll-speed multiplier         | 1               |
 | `dev`   | `1` shows the overlay           | `0`             |
 
-- One seed feeds independent random streams: `spawns-<zone>`, `rolls`, `cards`, `quips` and `scenery`.
+- One seed feeds independent random streams: `spawns-<zone>`, `rolls`, `cards`, `pulls`, `quips` and `scenery`. Pulls draw each dog's first pull time and each pull's side from `pulls`, so the input log needs nothing for them.
 - Lane moves, treats, card choices and heading home are recorded with their simulation step's time in a versioned input log that replays the run exactly. The log's setup names the pack and gear walked, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run.
 - The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, the far-road fade toggle (off by default), run link, replay, and save tools (reset, +$1,000, unlock all).
