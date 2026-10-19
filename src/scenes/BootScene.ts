@@ -18,7 +18,14 @@ import {
 } from "../layout/loadingScreen";
 import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { addFilledRect } from "./draw";
-import { loadManifest, MANIFEST_CACHE_KEY, queueManifestImages } from "./manifestImages";
+import { onLoadProgress } from "./loadProgress";
+import {
+  addAtlasTextures,
+  atlasPageBytes,
+  loadManifest,
+  MANIFEST_CACHE_KEY,
+  queueManifestArt,
+} from "./manifestArt";
 import { PALETTE } from "./palette";
 import { registerFallbackPixelFont } from "./pixelText";
 import {
@@ -96,15 +103,11 @@ export class BootScene extends Scene {
       }
       this.setWalkerMotion(currentSettings(this).reducedMotion);
     });
+    addAtlasTextures(this);
     this.showLoadingScreen();
 
-    const { fonts, images, sounds, sprites } = this.manifest;
-    queueManifestImages(this, images);
-    for (const { json, key, png } of sprites) {
-      if (!this.textures.exists(key)) {
-        this.load.aseprite(key, assetUrl(ART_URL, png), assetUrl(ART_URL, json));
-      }
-    }
+    const { fonts, sounds } = this.manifest;
+    queueManifestArt(this, this.manifest);
     for (const { fnt, key, png } of fonts) {
       this.load.bitmapFont(key, assetUrl(ART_URL, png), assetUrl(ART_URL, fnt));
     }
@@ -117,23 +120,19 @@ export class BootScene extends Scene {
     } else if (sounds.length > 0) {
       console.warn("This browser plays neither Ogg nor AAC, so the game is silent.");
     }
-    this.load.on("progress", (value: number) => this.showProgress(bootProgress("network", value)));
+    onLoadProgress(this, atlasPageBytes(this), (fraction) =>
+      this.showProgress(bootProgress("network", fraction)),
+    );
     this.load.once("complete", () =>
       this.processAssets(() => void profileOpened.then(() => this.startFirstScene())),
     );
     this.load.start();
   }
 
-  // The loading screen's three files, from their manifest entries, ahead of everything else.
+  // The loading screen's art, its atlas page or its own three files, ahead of everything else.
   private queueLoadingArt(manifest: AssetManifest): void {
-    queueManifestImages(
-      this,
-      manifest.images.filter(({ key }) => key === LOADING_ART.screen || key === LOADING_ART.track),
-    );
-    const walker = manifest.sprites.find(({ key }) => key === LOADING_ART.walker);
-    if (walker !== undefined) {
-      this.load.aseprite(walker.key, assetUrl(ART_URL, walker.png), assetUrl(ART_URL, walker.json));
-    }
+    const loadingKeys: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
+    queueManifestArt(this, manifest, (key) => loadingKeys.has(key));
   }
 
   // Each missing piece of art is drawn plain: the track in plum and an amber bar along it.
@@ -173,7 +172,7 @@ export class BootScene extends Scene {
   // Runs each step in turn, yielding to the next frame once a frame's budget is spent, then
   // calls done.
   private processAssets(done: () => void): void {
-    const steps: (() => void)[] = [];
+    const steps: (() => void)[] = [() => addAtlasTextures(this)];
     for (const sprite of this.manifest.sprites) {
       if (sprite.key !== LOADING_ART.walker) {
         steps.push(() => this.registerSprite(sprite));

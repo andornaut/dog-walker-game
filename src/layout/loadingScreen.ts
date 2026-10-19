@@ -31,6 +31,23 @@ export function bootProgress(phase: BootPhase, fraction: number): number {
   return from + (to - from) * clamp01(fraction);
 }
 
+// A file's weight on the bar before its size is known: about a sound effect's size.
+export const UNKNOWN_FILE_BYTES = 16_000;
+
+// A loading file's size in bytes, and the fraction of it that has arrived.
+export interface FileProgress {
+  bytes: number;
+  fraction: number;
+}
+
+// How far through the network phase boot is, with each file weighed by its size, so a few
+// large atlas pages move the bar as steadily as many small files. No files is done.
+export function byteFraction(files: readonly FileProgress[]): number {
+  const total = files.reduce((sum, { bytes }) => sum + bytes, 0);
+  const arrived = files.reduce((sum, { bytes, fraction }) => sum + bytes * clamp01(fraction), 0);
+  return total <= 0 ? 1 : clamp01(arrived / total);
+}
+
 // How far through a phase of total steps boot is after done of them. A phase with no
 // steps is already done.
 export function stepFraction(total: number, done: number): number {

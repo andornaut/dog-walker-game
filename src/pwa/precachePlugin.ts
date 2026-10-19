@@ -1,10 +1,13 @@
 import type { Plugin } from "vite";
 
+import { assetUrl } from "../assets/manifest";
+import { ATLAS_MANIFEST_PATH } from "../atlas/atlasManifest";
 import { ART_BASE_URL, ART_MANIFEST_URL, cacheKeyFor } from "./cachePolicy";
 import {
   artManifestUrls,
   artReferencedUrls,
   artSoundUrls,
+  atlasUrls,
   bundleDependencies,
   type BundleFile,
   precacheFingerprint,
@@ -30,9 +33,10 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 }
 
 // Builds the service worker to /sw.js with the game page's precache list written into it: the
-// page, the build output it loads, the public files it links, the web app manifest's icons, and
-// every file /art/manifest.json lists along with the images those files load. Sounds are listed
-// apart, by format, for the worker to precache the one format the page plays.
+// page, the build output it loads, the public files it links, the web app manifest's icons, the
+// atlas manifest and pages atlasPlugin writes, and every file /art/manifest.json lists that is
+// not in an atlas, along with the images those files load. Sounds are listed apart, by format,
+// for the worker to precache the one format the page plays.
 export function precachePlugin({
   pageHtmlFile,
   serviceWorkerSource,
@@ -84,6 +88,19 @@ export function precachePlugin({
           contents.set(url, bundleBytes(url) ?? new Uint8Array());
         }
 
+        const atlasJson = bundleBytes(assetUrl(ART_BASE_URL, ATLAS_MANIFEST_PATH));
+        const atlas =
+          atlasJson === undefined
+            ? { keys: new Set<string>(), urls: [] }
+            : atlasUrls(ART_BASE_URL, JSON.parse(decoder.decode(atlasJson)));
+        for (const url of atlas.urls) {
+          const bytes = bundleBytes(url);
+          if (bytes === undefined) {
+            this.error(`precache: ${url} is in the atlas manifest but not in the build output`);
+          }
+          contents.set(url, bytes);
+        }
+
         const publicUrls = [
           ...pageUrls.filter((url) => !(url.slice(1) in bundle)),
           ART_MANIFEST_URL,
@@ -103,7 +120,7 @@ export function precachePlugin({
           contents.set(url, bytes);
           if (url === ART_MANIFEST_URL) {
             const artManifest: unknown = JSON.parse(decoder.decode(bytes));
-            publicUrls.push(...artManifestUrls(ART_BASE_URL, artManifest));
+            publicUrls.push(...artManifestUrls(ART_BASE_URL, artManifest, atlas.keys));
             soundUrls = artSoundUrls(ART_BASE_URL, artManifest);
           } else if (url.endsWith(".webmanifest")) {
             publicUrls.push(...webManifestIconUrls(JSON.parse(decoder.decode(bytes))));

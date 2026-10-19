@@ -1,5 +1,6 @@
 import { defineConfig } from "vitest/config";
 
+import { atlasPlugin } from "./src/atlas/atlasPlugin";
 import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
 import { precachePlugin } from "./src/pwa/precachePlugin";
 
@@ -18,9 +19,11 @@ export default defineConfig({
     // Set just above it so that growth in game code still warns.
     chunkSizeWarningLimit: 1600,
   },
+  // atlasPlugin packs the art's images and sprites into /art/atlas/ and /art/atlas-manifest.json.
   // precachePlugin writes /sw.js, the service worker that precaches the game for offline play.
   // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
   plugins: [
+    atlasPlugin(),
     precachePlugin({
       pageHtmlFile: "play/index.html",
       serviceWorkerSource: "src/pwa/serviceWorker.ts",

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { bootProgress, loadingBarWidth, loadingWalkerAt, stepFraction } from "./loadingScreen";
+import {
+  bootProgress,
+  byteFraction,
+  loadingBarWidth,
+  loadingWalkerAt,
+  stepFraction,
+} from "./loadingScreen";
 
 describe("bootProgress", () => {
   it("fills the first 0.9 over the network load", () => {
@@ -19,6 +25,26 @@ describe("bootProgress", () => {
     expect(bootProgress("network", -1)).toBe(0);
     expect(bootProgress("network", 2)).toBeCloseTo(0.9);
     expect(bootProgress("processing", 2)).toBe(1);
+  });
+});
+
+describe("byteFraction", () => {
+  it("weighs each file by its size", () => {
+    const files = [
+      { bytes: 300_000, fraction: 0.5 },
+      { bytes: 10_000, fraction: 1 },
+      { bytes: 90_000, fraction: 0 },
+    ];
+    expect(byteFraction(files)).toBeCloseTo(160_000 / 400_000);
+  });
+
+  it("holds each file's fraction to 0 to 1", () => {
+    expect(byteFraction([{ bytes: 100, fraction: 2 }])).toBe(1);
+    expect(byteFraction([{ bytes: 100, fraction: -1 }])).toBe(0);
+  });
+
+  it("treats a load with no bytes as done", () => {
+    expect(byteFraction([])).toBe(1);
   });
 });
 

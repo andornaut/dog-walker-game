@@ -1,4 +1,5 @@
 import { assetUrl, parseManifest } from "../assets/manifest";
+import { ATLAS_MANIFEST_PATH, parseAtlasManifest } from "../atlas/atlasManifest";
 import type { SoundFormat } from "../audio/soundFormat";
 import { isHashedAssetUrl } from "./cachePolicy";
 
@@ -67,13 +68,19 @@ export function resolveRelativePath(basePath: string, relativePath: string): str
   return segments.join("/");
 }
 
-// Every file /art/manifest.json lists except the sounds, as URLs under artBaseUrl.
-export function artManifestUrls(artBaseUrl: string, manifestJson: unknown): string[] {
+// Every file /art/manifest.json lists except the sounds, as URLs under artBaseUrl, and except
+// the files of the images and sprites in atlased, which load from their atlas page instead.
+export function artManifestUrls(
+  artBaseUrl: string,
+  manifestJson: unknown,
+  atlased: ReadonlySet<string> = new Set(),
+): string[] {
   const { fonts, images, sprites } = parseManifest(manifestJson);
+  const own = ({ key }: { key: string }) => !atlased.has(key);
   const paths = [
     ...fonts.flatMap(({ fnt, png }) => [png, fnt]),
-    ...images.map(({ png }) => png),
-    ...sprites.flatMap(({ json, png }) => [png, json]),
+    ...images.filter(own).map(({ png }) => png),
+    ...sprites.filter(own).flatMap(({ json, png }) => [png, json]),
   ];
   return [...new Set(paths.map((path) => assetUrl(artBaseUrl, path)))];
 }
@@ -88,6 +95,20 @@ export function artSoundUrls(
     ...new Set(sounds.map((sound) => assetUrl(artBaseUrl, sound[format]))),
   ];
   return { m4a: urls("m4a"), ogg: urls("ogg") };
+}
+
+// The atlas manifest's URL and its pages' URLs, under artBaseUrl, and the keys it covers.
+export function atlasUrls(
+  artBaseUrl: string,
+  atlasJson: unknown,
+): { keys: Set<string>; urls: string[] } {
+  const { pages, textures } = parseAtlasManifest(atlasJson);
+  return {
+    keys: new Set(textures.map(({ key }) => key)),
+    urls: [ATLAS_MANIFEST_PATH, ...pages.map(({ png }) => png)].map((path) =>
+      assetUrl(artBaseUrl, path),
+    ),
+  };
 }
 
 const FONT_PAGE_FILE = /<page\b[^>]*\bfile="([^"]+)"/g;

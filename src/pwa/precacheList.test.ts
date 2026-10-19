@@ -4,6 +4,7 @@ import {
   artManifestUrls,
   artReferencedUrls,
   artSoundUrls,
+  atlasUrls,
   bundleDependencies,
   type BundleFile,
   precacheFingerprint,
@@ -109,12 +110,50 @@ describe("artManifestUrls", () => {
     ]);
   });
 
+  it("leaves out the files of atlased images and sprites", () => {
+    const manifest = {
+      fonts: [],
+      images: [
+        { key: "card-skip", png: "images/card-skip.png" },
+        { key: "logo", png: "images/logo.png" },
+      ],
+      sprites: [{ json: "sprites/dog.json", key: "dog-koda", png: "sprites/dog.png" }],
+    };
+    expect(artManifestUrls("/art", manifest, new Set(["card-skip", "dog-koda"]))).toEqual([
+      "/art/images/logo.png",
+    ]);
+  });
+
   it("leaves out the sounds, which the worker stores in one format", () => {
     expect(artManifestUrls("/art", withSounds)).toEqual([]);
   });
 
   it("rejects a malformed manifest, as the game does", () => {
     expect(() => artManifestUrls("/art", { fonts: [], images: [] })).toThrow("manifest.sprites");
+  });
+});
+
+describe("atlasUrls", () => {
+  it("lists the atlas manifest and its pages, and the keys it covers", () => {
+    const frame = { h: 8, name: "__BASE", w: 8, x: 1, y: 1 };
+    const atlas = {
+      pages: [
+        { bytes: 10, group: "boot", height: 16, png: "atlas/boot-0.png", width: 16 },
+        { bytes: 20, group: "ui", height: 16, png: "atlas/ui-0.png", width: 16 },
+      ],
+      textures: [
+        { frames: [frame], key: "screen-loading", page: 0 },
+        { frames: [frame], key: "logo", page: 1 },
+      ],
+    };
+    expect(atlasUrls("/art", atlas)).toEqual({
+      keys: new Set(["screen-loading", "logo"]),
+      urls: ["/art/atlas-manifest.json", "/art/atlas/boot-0.png", "/art/atlas/ui-0.png"],
+    });
+  });
+
+  it("rejects a malformed atlas manifest", () => {
+    expect(() => atlasUrls("/art", { pages: [] })).toThrow("atlas manifest.textures");
   });
 });
 

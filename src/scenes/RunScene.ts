@@ -1503,16 +1503,17 @@ export class RunScene extends Scene {
     return row;
   }
 
-  // A loaded image's pixels, read once through a canvas.
+  // A loaded image's pixels, read once through a canvas from its frame, which in a build is a
+  // rect of an atlas page.
   private imagePixels(key: string): PixelImage | null {
     if (!this.textures.exists(key)) {
       return null;
     }
-    const source = this.textures.get(key).getSourceImage();
-    if (!(source instanceof HTMLImageElement || source instanceof HTMLCanvasElement)) {
+    const { cutHeight: height, cutWidth: width, cutX, cutY, source } = this.textures.getFrame(key);
+    const { image } = source;
+    if (!(image instanceof HTMLImageElement || image instanceof HTMLCanvasElement)) {
       return null;
     }
-    const { height, width } = source;
     const canvas = document.createElement("canvas");
     canvas.width = width;
     canvas.height = height;
@@ -1520,7 +1521,7 @@ export class RunScene extends Scene {
     if (context === null) {
       return null;
     }
-    context.drawImage(source, 0, 0);
+    context.drawImage(image, cutX, cutY, width, height, 0, 0, width, height);
     const { data } = context.getImageData(0, 0, width, height);
     return { height, pixels: new Uint32Array(data.buffer), width };
   }
