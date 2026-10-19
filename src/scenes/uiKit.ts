@@ -285,7 +285,7 @@ function inset(rect: Rect, by: number): Rect {
 // The ui-select frame around rect, playing its pulse tag, or holding its first frame with
 // reduced motion. Each frame is its own nine-slice, shown one at a time from the scene's
 // update. While the art is missing it is drawn as the art draws it, without the pulse: an
-// ink line either side of a 2px yellow band.
+// ink line either side of a 2px amber band.
 export function addSelectFrame(
   scene: Scene,
   parent: GameObjects.Container,
@@ -302,7 +302,7 @@ export function addSelectFrame(
   if (first === undefined) {
     const g = scene.add.graphics();
     drawRing(g, PALETTE.ink, outer, 1);
-    drawRing(g, PALETTE.yellow, inset(outer, 1), 2);
+    drawRing(g, PALETTE.amber, inset(outer, 1), 2);
     drawRing(g, PALETTE.ink, rect, 1);
     parent.add(g);
     return;

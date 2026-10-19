@@ -22,12 +22,12 @@
 .art-nav a { color: #c0cbdc; text-decoration: none; }
 .art-nav a:hover { color: #feae34; }
 /* The current page in the game's selected state: a yellow face with plum text, the ui-select
-   frame (ink, a pulsing yellow and white band, ink) 3px outside its ink edge, lifted 2px onto
+   frame (ink, a pulsing amber and orange band, ink) 3px outside its ink edge, lifted 2px onto
    a plum shadow, and the ui-check tick at its top-left corner. */
 .art-nav a[aria-current="page"] {
   position: relative; top: -2px; padding: 1px 6px 1px 10px;
   color: #3e2731; background: #fee761; border: 1px solid #181425; font-weight: 700;
-  box-shadow: 0 0 0 2px #fee761, 0 0 0 3px #181425, 0 2px 0 3px #3e2731;
+  box-shadow: 0 0 0 2px #feae34, 0 0 0 3px #181425, 0 2px 0 3px #3e2731;
   animation: art-nav-pulse 900ms steps(1) infinite;
 }
 .art-nav a[aria-current="page"]::before {
@@ -35,7 +35,7 @@
   background: url("/art/sprites/ui-check.png") -48px 0 / 64px 16px; image-rendering: pixelated;
 }
 @keyframes art-nav-pulse {
-  50% { box-shadow: 0 0 0 2px #ffffff, 0 0 0 3px #181425, 0 2px 0 3px #3e2731; }
+  50% { box-shadow: 0 0 0 2px #f77622, 0 0 0 3px #181425, 0 2px 0 3px #3e2731; }
 }
 @media (prefers-reduced-motion: reduce) {
   .art-nav a[aria-current="page"] { animation: none; }
