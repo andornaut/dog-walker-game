@@ -39,7 +39,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, Grid, edged, main  # noqa: E402
+from pixel import K, Grid, edged, main, road_edge  # noqa: E402
 
 # The road sprites are drawn on a 32-unit design grid and rasterized at ROAD_SIZE, ROAD_SCALE times bigger, on
 # a minis.Mini that keeps 1px lines and single pixels 1px; their depth variants rasterize at ROAD_SCALE x the
@@ -433,10 +433,14 @@ SHAVED = ("slate", "dslate", "grey")
 STRIPE = ("white", "lgrey")
 
 
-def pierre_road(q):
-    import road
+def pierre_edge(c):
+    """Pierre's outline: grey round the black coat, which has no fill that holds against Elm Avenue's road,
+    and the road outline round everything else."""
+    return K["grey"] if c in {K[n] for n in CURL + SHAVED} else road_edge(c)
 
-    g, q = edged(Grid()), pose(q)
+
+def pierre_road(q):
+    g, q = edged(Grid(), pierre_edge), pose(q)
     b, ln = q["bob"], q["lean"]
     # shaved legs, each with a pom-pom bracelet at the paw
     for x, d in ((10 + ln // 2, q["fl"]), (22 + ln // 2, q["fr"])):
@@ -472,8 +476,6 @@ def pierre_road(q):
     g.p(hx + 2, 6 + b, "purple")
     g.p(hx, 5 + b, "pink")
     despeckle(g, CURL + SHAVED)
-    # the lit rim on the black coat's edges facing the light, and not on the show bow
-    road.rim(g, {c: (road.LIT[c][0], None) for c in CURL + SHAVED if c in road.LIT})
     spray(g, q["spray"])
     return g
 
