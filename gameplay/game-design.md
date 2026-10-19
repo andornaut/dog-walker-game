@@ -216,7 +216,7 @@ Prices not yet in the data:
 | --------- | --------------------------- |
 | Dog slots | Slot 2 $800 · slot 3 $1,800 |
 
-A simulated full run with the starters, hitting about 1 obstacle in 10 and paying money only when an owner is close to firing you, nets about $185 with 1 dog, $220 with 2 and $250 with 3; a careless player (1 in 7) nets about $155 to $195. A pack of the riskier dogs (fussy and dramatic owners) earns about $210 but is fired about once a run. Buying every slot, dog and gear item costs about $9,700, about 45 runs.
+A rough simulated full run with the starters, hitting about 1 obstacle in 10 and paying money only when an owner is close to firing you, nets about $175 with 1 dog, $210 with 2 and $235 with 3; a careless player (1 in 7) nets about $140 to $185. A pack of the riskier dogs (fussy and dramatic owners) earns about $215 but is fired about once a run. The run simulator built on the real rules replaces these estimates when it lands. Buying every slot, dog and gear item costs about $9,700, about 45 runs.
 
 ## Milestones
 
