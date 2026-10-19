@@ -30,9 +30,16 @@ export function cardRowSpec(maxCount: number): CardRowSpec {
   };
 }
 
-// The enlarged card's rect, centred on the road on whole pixels.
-export function largeCardRect(road: Rect): Rect {
-  const { height, width } = CARD_LAYOUT.large;
+// The enlarged card's height for body content contentHeight tall: its body's rows, which
+// card-frame-large draws alike, shrink to the content, and never grow past the frame's.
+export function largeCardHeight(contentHeight: number): number {
+  const { body, height } = CARD_LAYOUT.large;
+  return height - Math.max(0, body.height - Math.ceil(contentHeight));
+}
+
+// The enlarged card's rect, height tall, centred on the road on whole pixels.
+export function largeCardRect(road: Rect, height: number = CARD_LAYOUT.large.height): Rect {
+  const { width } = CARD_LAYOUT.large;
   return {
     height,
     width,

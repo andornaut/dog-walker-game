@@ -17,7 +17,7 @@ import { RUN_TEXT_FIELDS } from "../hud/runText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
-import { CARD_LAYOUT, cardRowSpec, largeCardRect } from "../layout/cardLayout";
+import { CARD_LAYOUT, cardRowSpec, largeCardHeight, largeCardRect } from "../layout/cardLayout";
 import { cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
 import { insetRect, type Rect } from "../layout/rect";
@@ -70,6 +70,8 @@ const CARD_HOLD: HoldRule = { holdMs: 400, slopPx: Number.POSITIVE_INFINITY };
 // A card's key number sits this far above its top, under the subtitle.
 const KEY_NUMBER_RISE = 8;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
+// The enlarged card's body keeps this many rows clear under its text.
+const LARGE_BODY_GAP = 4;
 // Marks an option that would fire an owner, over the plaque's left rivet: card-frame
 // pixels, and card-frame-large pixels where it is drawn at 2x.
 const FIRES_KEY = "ui-fires";
@@ -310,7 +312,7 @@ export class CardScene extends Scene {
   }
 
   // The card at twice the size over the road, its illustration at 2x and, in its body, every
-  // change it would make, cause by cause.
+  // change it would make, cause by cause. The body's rows shrink to what it says.
   private enlarge(index: number): void {
     const entry = this.entries[index];
     const view = this.view;
@@ -321,20 +323,34 @@ export class CardScene extends Scene {
     this.drawOutline();
     // The row's edges would show beside the enlarged card, so it hides until the release.
     this.showRow(false);
+    const option = entry.option;
+    const measured = this.addLargeBody(option, 0, 0);
+    measured.parts.forEach((part) => part.destroy());
+    const height = largeCardHeight(measured.height + LARGE_BODY_GAP);
+    // The rows under the body move up by what it gave up.
+    const shift = height - LARGE.height;
     const { roadView: road } = screenLayout(SCREEN_CONFIG);
-    const { x, y } = largeCardRect(road);
+    const { x, y } = largeCardRect(road, height);
     const before = this.children.list.length;
     const tag = cardFrameTag(gameData, view.source);
     const g = this.add.graphics();
     if (this.textures.exists(LARGE.key)) {
+      // The frame's top down to the body's end, then its foot, over the body's last rows.
       const frameName = tagFrame(this, LARGE.key, tag);
-      this.add.sprite(x, y, LARGE.key, frameName).setOrigin(0);
+      const foot = LARGE.height - (LARGE.body.y + LARGE.body.height);
+      this.add
+        .sprite(x, y, LARGE.key, frameName)
+        .setOrigin(0)
+        .setCrop(0, 0, LARGE.width, height - foot);
+      this.add
+        .sprite(x, y + shift, LARGE.key, frameName)
+        .setOrigin(0)
+        .setCrop(0, LARGE.height - foot, LARGE.width, foot);
     } else {
-      const card = { height: LARGE.height, width: LARGE.width, x, y };
+      const card = { height, width: LARGE.width, x, y };
       fillRect(g, PALETTE.plum, card);
       fillRect(g, PALETTE.cream, insetRect(4, card));
     }
-    const option = entry.option;
     const label = bandLabel(entry);
     this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, this.bandColor(tag), {
       font: fontHasGlyphs(this, "title", label) ? "title" : "body",
@@ -347,6 +363,37 @@ export class CardScene extends Scene {
         .setScale(2)
         .setCrop(0, 0, ART.width, ART.height);
     }
+    this.addLargeBody(option, x + LARGE.body.x, y + LARGE.body.y);
+    const badge = { ...LARGE.badge, x: x + LARGE.badge.x, y: y + LARGE.badge.y + shift };
+    if (this.textures.exists(COST_KEY)) {
+      this.add.image(badge.x, badge.y, COST_KEY).setOrigin(0).setScale(2);
+    } else {
+      fillRect(g, PALETTE.cream, badge);
+    }
+    const marker =
+      option !== undefined && option.fires.length > 0
+        ? this.addFiresMarker(x + FIRES_AT.large.x, y + FIRES_AT.large.y + shift, 2, false)
+        : undefined;
+    this.centered(
+      this.plaqueCenter(badge.x, badge.width, marker),
+      badge.y + 9,
+      this.costText(entry),
+      PALETTE.plum,
+      {
+        font: "title",
+      },
+    );
+    this.enlarged = this.children.list.slice(before);
+  }
+
+  // The enlarged card's body from (x, top): an option that would fire an owner says so first,
+  // in dark red, then each change it makes, at 2x where it fits the frame's body and else at
+  // 1x. Returns its parts and the height they take.
+  private addLargeBody(
+    option: OptionView | undefined,
+    x: number,
+    top: number,
+  ): { height: number; parts: GameObjects.BitmapText[] } {
     const lines =
       option === undefined
         ? [gameData.runText.card.skipHeld]
@@ -357,56 +404,27 @@ export class CardScene extends Scene {
                 .filter((part) => part !== "")
                 .join(" "),
             );
-    // An option that would fire an owner says so first, in dark red.
-    let bodyY = y + LARGE.body.y;
-    let bodyHeight: number = LARGE.body.height;
+    const parts: GameObjects.BitmapText[] = [];
+    let used = 0;
     if (option !== undefined && option.fires.length > 0) {
-      const warning = addPixelText(
-        this,
-        x + LARGE.body.x,
-        bodyY,
-        firesText(gameData, option.fires),
-        {
-          color: PALETTE.darkRed,
-          font: "title",
-          maxWidth: LARGE.body.width,
-        },
-      );
-      const used = Math.ceil(warning.height) + 4;
-      bodyY += used;
-      bodyHeight -= used;
+      const warning = addPixelText(this, x, top, firesText(gameData, option.fires), {
+        color: PALETTE.darkRed,
+        font: "title",
+        maxWidth: LARGE.body.width,
+      });
+      parts.push(warning);
+      used = Math.ceil(warning.height) + 4;
     }
-    const body = addPixelText(this, x + LARGE.body.x, bodyY, lines.join("\n"), {
+    const body = addPixelText(this, x, top + used, lines.join("\n"), {
       color: PALETTE.plum,
       maxWidth: LARGE.body.width,
       scale: 2,
     });
-    if (body.height > bodyHeight) {
-      scalePixelText(body, 1, x + LARGE.body.x, bodyY);
+    if (body.height > LARGE.body.height - used) {
+      scalePixelText(body, 1, x, top + used);
     }
-    const badge = LARGE.badge;
-    if (this.textures.exists(COST_KEY)) {
-      this.add
-        .image(x + badge.x, y + badge.y, COST_KEY)
-        .setOrigin(0)
-        .setScale(2);
-    } else {
-      fillRect(g, PALETTE.cream, { ...badge, x: x + badge.x, y: y + badge.y });
-    }
-    const marker =
-      option !== undefined && option.fires.length > 0
-        ? this.addFiresMarker(x + FIRES_AT.large.x, y + FIRES_AT.large.y, 2, false)
-        : undefined;
-    this.centered(
-      this.plaqueCenter(x + badge.x, badge.width, marker),
-      y + badge.y + 9,
-      this.costText(entry),
-      PALETTE.plum,
-      {
-        font: "title",
-      },
-    );
-    this.enlarged = this.children.list.slice(before);
+    parts.push(body);
+    return { height: used + Math.ceil(body.height), parts };
   }
 
   private showRow(visible: boolean): void {
