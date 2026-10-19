@@ -124,6 +124,11 @@
 
 In build order:
 
-1. Forks and six zones: the fork card, per-zone weights and multipliers, the route in run state, saves and the input log, and route-aware zone pips.
-2. The shared depth-step table (`@88`, `@62`) and `npm run check:art`.
-3. Art tooling: `npm run export:data` (game data and layout JSON), a manifest generated from the files on disk, and a depth preview script.
+1. The shared step loop: one pure walk session used by the run scene and the simulator, in the game's order (needs before cards, the firing hold) with named random streams, so a simulator seed replays as a real walk.
+2. Firing without a fee clawback, and the end screen without its line.
+3. The Pet shop and the Pocket strip on the start screen, with walkers on the shared tile states.
+4. 64px lanes and 40px sprites, landing with art's redraw: road camera, formations (the lone dog's band at about 71px), collision sizes, leashes under the walker.
+5. Per-zone obstacle skins: names, road sprites, card art and hit labels from the data.
+6. Roadside props beyond the sidewalks, after the scale change.
+7. The architecture refactors: the import cycles broken, layer lint rules, a typed run-to-HUD port and explicit run-start data.
+8. The data page's pills as filters, kept in the URL.
