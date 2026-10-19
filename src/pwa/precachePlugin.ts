@@ -1,6 +1,6 @@
 import type { Plugin } from "vite";
 
-import { cacheKeyFor } from "./cachePolicy";
+import { ART_BASE_URL, ART_MANIFEST_URL, cacheKeyFor } from "./cachePolicy";
 import {
   artManifestUrls,
   artReferencedUrls,
@@ -12,8 +12,6 @@ import {
   webManifestIconUrls,
 } from "./precacheList";
 
-const ART_BASE_URL = "/art";
-const ART_MANIFEST_URL = `${ART_BASE_URL}/manifest.json`;
 const SERVICE_WORKER_FILE_NAME = "sw.js";
 // The identifier serviceWorker.ts declares and the build replaces with the precache manifest.
 const MANIFEST_PLACEHOLDER = "DOG_WALKER_PRECACHE_MANIFEST";
@@ -77,7 +75,7 @@ export function precachePlugin({
         const pageUrls = rootRelativeUrls(decoder.decode(pageHtml));
         const bundleUrls = bundleDependencies(
           bundle as Readonly<Record<string, BundleFile>>,
-          pageUrls.map((url) => url.slice(1)).filter((fileName) => fileName in bundle),
+          pageUrls.map((url) => url.slice(1)),
         ).map((fileName) => `/${fileName}`);
         const contents = new Map<string, Uint8Array>([[cacheKeyFor(`/${pageHtmlFile}`), pageHtml]]);
         for (const url of bundleUrls) {
@@ -88,8 +86,8 @@ export function precachePlugin({
           ...pageUrls.filter((url) => !(url.slice(1) in bundle)),
           ART_MANIFEST_URL,
         ];
-        while (publicUrls.length > 0) {
-          const url = publicUrls.shift() ?? "";
+        // The loop also visits the URLs pushed onto publicUrls while it runs.
+        for (const url of publicUrls) {
           if (contents.has(url)) {
             continue;
           }

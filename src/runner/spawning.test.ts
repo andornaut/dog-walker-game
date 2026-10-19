@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defined } from "../testing/defined";
+import { itemAt } from "../arrays";
 import { seededRandom } from "./random";
 import {
   everyLaneReaches,
@@ -63,6 +63,7 @@ describe("spawnRowDistances", () => {
 
   it("has no rows in a zone too short for one", () => {
     expect(spawnRowDistances(100, 150)).toEqual([]);
+    expect(spawnRowDistances(100, 50)).toEqual([]);
   });
 
   it("rejects a spacing that is not positive", () => {
@@ -132,7 +133,7 @@ describe("planSpawns", () => {
     for (const seed of seeds) {
       const open = openLanesByRow(planSpawns(seededRandom(seed), tight));
       open.slice(1).forEach((lanes, i) => {
-        for (const from of defined(open[i])) {
+        for (const from of itemAt(open, i)) {
           expect(lanes.some((lane) => Math.abs(lane - from) <= 1)).toBe(true);
         }
       });

@@ -1,4 +1,4 @@
-import { parseManifest } from "../assets/manifest";
+import { assetUrl, parseManifest } from "../assets/manifest";
 import { isHashedAssetUrl } from "./cachePolicy";
 
 // The service worker's precache: every URL the game needs to boot offline, and a version that
@@ -22,8 +22,8 @@ const ROOT_RELATIVE_ATTRIBUTE = /\s(?:href|src)="(\/[^"/][^"]*)"/g;
 // Root-relative src and href values in a built HTML page, in document order without repeats.
 // Protocol-relative URLs (//host/...) are another origin and are left out.
 export function rootRelativeUrls(html: string): string[] {
-  const urls = [...html.matchAll(ROOT_RELATIVE_ATTRIBUTE)].map((match) => match[1] ?? "");
-  return [...new Set(urls.filter((url) => url !== ""))];
+  const urls = Array.from(html.matchAll(ROOT_RELATIVE_ATTRIBUTE), (match) => match[1] ?? "");
+  return [...new Set(urls)];
 }
 
 // Every bundle file the given entry files load, directly or through imports, including the
@@ -72,7 +72,7 @@ export function artManifestUrls(artBaseUrl: string, manifestJson: unknown): stri
     ...images.map(({ png }) => png),
     ...sprites.flatMap(({ json, png }) => [png, json]),
   ];
-  return [...new Set(paths.map((path) => `${artBaseUrl}/${path}`))];
+  return [...new Set(paths.map((path) => assetUrl(artBaseUrl, path)))];
 }
 
 const FONT_PAGE_FILE = /<page\b[^>]*\bfile="([^"]+)"/g;

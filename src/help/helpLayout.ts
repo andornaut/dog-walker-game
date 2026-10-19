@@ -1,26 +1,28 @@
-import type { Rect } from "../layout/rect";
+import { SCREEN_CONFIG } from "../data/screen";
+import { rectIndexAt } from "../layout/grid";
+import { containsPoint, type Point, type Rect } from "../layout/rect";
+import { screenLayout } from "../layout/screenLayout";
 import type { HelpAction } from "./helpPaging";
 
-export interface Point {
-  readonly x: number;
-  readonly y: number;
-}
+export type { Point } from "../layout/rect";
 
-// The help screen's geometry at the 360x640 render resolution. A text position is the
-// top-left of its first line.
+const { height, width } = SCREEN_CONFIG;
+
+// The help screen's geometry at the render resolution. A text position is the top-left of
+// its first line.
 export const HELP_LAYOUT = {
   back: { height: 40, width: 110, x: 8, y: 584 },
   body: { lineHeight: 15, width: 336, x: 12, y: 340 },
   buttonLip: 4,
   close: { height: 24, width: 34, x: 318, y: 8 },
   counter: { x: 12, y: 300 },
-  dots: { centerX: 180, hitHeight: 20, size: 8, spacing: 14, y: 562 },
+  dots: { centerX: width / 2, hitHeight: 20, size: 8, spacing: 14, y: 562 },
   heading: { x: 12, y: 15 },
   illustration: { height: 236, width: 344, x: 8, y: 48 },
   next: { height: 40, width: 110, x: 242, y: 584 },
-  screen: { height: 640, width: 360, x: 0, y: 0 },
+  screen: { height, width, x: 0, y: 0 },
   title: { x: 12, y: 314 },
-  topBar: { height: 40, width: 360, x: 0, y: 0 },
+  topBar: screenLayout(SCREEN_CONFIG).topBar,
   topBarEdge: 2,
 } as const;
 
@@ -47,23 +49,17 @@ export function dotHitRect(dot: Rect): Rect {
   };
 }
 
-export const rectContains = (rect: Rect, point: Point): boolean =>
-  point.x >= rect.x &&
-  point.x < rect.x + rect.width &&
-  point.y >= rect.y &&
-  point.y < rect.y + rect.height;
-
 // The button or dot under a tap, if any.
-export function helpActionAt(pageCount: number, point: Point): HelpAction | undefined {
-  if (rectContains(HELP_LAYOUT.close, point)) {
+export function helpActionAt(pageCount: number, { x, y }: Point): HelpAction | undefined {
+  if (containsPoint(HELP_LAYOUT.close, x, y)) {
     return { kind: "close" };
   }
-  if (rectContains(HELP_LAYOUT.back, point)) {
+  if (containsPoint(HELP_LAYOUT.back, x, y)) {
     return { kind: "previous" };
   }
-  if (rectContains(HELP_LAYOUT.next, point)) {
+  if (containsPoint(HELP_LAYOUT.next, x, y)) {
     return { kind: "advance" };
   }
-  const page = dotRects(pageCount).findIndex((dot) => rectContains(dotHitRect(dot), point));
-  return page === -1 ? undefined : { kind: "goTo", page };
+  const page = rectIndexAt(dotRects(pageCount).map(dotHitRect), x, y);
+  return page === undefined ? undefined : { kind: "goTo", page };
 }

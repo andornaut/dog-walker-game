@@ -5,3 +5,8 @@ export function itemAt<T>(items: readonly T[], index: number): T {
   }
   return items[index] as T;
 }
+
+// The nearest index in range for an array of length items, which must be at least 1.
+export function clampIndex(length: number, index: number): number {
+  return Math.min(length - 1, Math.max(0, index));
+}

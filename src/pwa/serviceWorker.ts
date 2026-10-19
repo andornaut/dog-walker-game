@@ -44,14 +44,18 @@ async function deleteStaleCaches(): Promise<void> {
   await Promise.all(stale.map((name) => caches.delete(name)));
 }
 
+async function fetchAndStore(cache: Cache, key: string, request: Request): Promise<Response> {
+  const response = await fetch(request);
+  if (response.ok) {
+    await cache.put(key, response.clone());
+  }
+  return response;
+}
+
 async function networkFirst(request: Request, key: string): Promise<Response> {
   const cache = await caches.open(cacheName);
   try {
-    const response = await fetch(request);
-    if (response.ok) {
-      await cache.put(key, response.clone());
-    }
-    return response;
+    return await fetchAndStore(cache, key, request);
   } catch (error) {
     const cached = await cache.match(key);
     if (cached === undefined) {
@@ -64,14 +68,7 @@ async function networkFirst(request: Request, key: string): Promise<Response> {
 async function cacheFirst(request: Request, key: string): Promise<Response> {
   const cache = await caches.open(cacheName);
   const cached = await cache.match(key);
-  if (cached !== undefined) {
-    return cached;
-  }
-  const response = await fetch(request);
-  if (response.ok) {
-    await cache.put(key, response.clone());
-  }
-  return response;
+  return cached ?? fetchAndStore(cache, key, request);
 }
 
 const RESPONDERS: Record<

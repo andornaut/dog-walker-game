@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defined } from "../testing/defined";
+import { itemAt } from "../arrays";
 import { cardRowRects } from "./cardRow";
 import type { Rect } from "./rect";
 
@@ -13,14 +13,14 @@ const right = (rect: Rect) => rect.x + rect.width;
 describe("cardRowRects", () => {
   it("fills the width with a full row, the same gap at both edges and between cards", () => {
     const cards = cardRowRects(spec, 3, area);
-    expect(defined(cards[0]).x).toBeCloseTo(area.x + 8);
-    expect(defined(cards[1]).x - right(defined(cards[0]))).toBeCloseTo(8);
-    expect(defined(cards[2]).x - right(defined(cards[1]))).toBeCloseTo(8);
-    expect(right(area) - right(defined(cards[2]))).toBeCloseTo(8);
+    expect(itemAt(cards, 0).x).toBeCloseTo(area.x + 8);
+    expect(itemAt(cards, 1).x - right(itemAt(cards, 0))).toBeCloseTo(8);
+    expect(itemAt(cards, 2).x - right(itemAt(cards, 1))).toBeCloseTo(8);
+    expect(right(area) - right(itemAt(cards, 2))).toBeCloseTo(8);
   });
 
   it("keeps the full-row card size for a shorter row", () => {
-    const full = defined(cardRowRects(spec, 3, area)[0]);
+    const full = itemAt(cardRowRects(spec, 3, area), 0);
     for (const card of cardRowRects(spec, 2, area)) {
       expect(card.width).toBeCloseTo(full.width);
     }
@@ -28,12 +28,12 @@ describe("cardRowRects", () => {
 
   it("centres a shorter row horizontally", () => {
     const cards = cardRowRects(spec, 2, area);
-    expect(defined(cards[1]).x - right(defined(cards[0]))).toBeCloseTo(8);
-    expect(defined(cards[0]).x - area.x).toBeCloseTo(right(area) - right(defined(cards[1])));
+    expect(itemAt(cards, 1).x - right(itemAt(cards, 0))).toBeCloseTo(8);
+    expect(itemAt(cards, 0).x - area.x).toBeCloseTo(right(area) - right(itemAt(cards, 1)));
   });
 
   it("centres the cards vertically in the area", () => {
-    const card = defined(cardRowRects(spec, 3, area)[0]);
+    const card = itemAt(cardRowRects(spec, 3, area), 0);
     expect(card.height).toBe(140);
     expect(card.y - area.y).toBe(bottom(area) - bottom(card));
   });

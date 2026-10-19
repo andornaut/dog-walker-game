@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { itemAt } from "../arrays";
 import { defined } from "../testing/defined";
 import {
-  GLYPH_HEIGHT,
   glyphAdvance,
   normalizePixelText,
   PIXEL_GLYPHS,
@@ -11,10 +11,10 @@ import {
 } from "./pixelFont";
 
 describe("PIXEL_GLYPHS", () => {
-  it("gives every glyph exactly one bit per pixel of its box", () => {
+  it("gives every glyph one bit per pixel of a box of whole columns", () => {
     for (const { bits, char, width } of PIXEL_GLYPHS) {
       expect(bits, char).toMatch(/^[01]+$/);
-      expect(bits.length, char).toBe(width * GLYPH_HEIGHT);
+      expect(Number.isInteger(width), char).toBe(true);
     }
   });
 
@@ -55,7 +55,7 @@ describe("pixelFontAtlas", () => {
 
   it("places glyphs left to right with a clear column between each pair", () => {
     atlas.glyphs.slice(1).forEach((glyph, i) => {
-      const previous = defined(atlas.glyphs[i]);
+      const previous = itemAt(atlas.glyphs, i);
       expect(glyph.x).toBe(previous.x + previous.width + 1);
     });
     const last = defined(atlas.glyphs.at(-1));

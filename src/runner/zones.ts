@@ -33,18 +33,18 @@ export const runStart: ZoneProgress = {
   zoneIndex: 0,
 };
 
+const zoneSpeed = (route: ZoneRoute, zoneIndex: number): number =>
+  route.baseSpeed * itemAt(route.zones, zoneIndex).speedMultiplier;
+
 // Pixels per second in the current zone, and 0 once the run has finished.
 export function zoneScrollSpeed(route: ZoneRoute, progress: ZoneProgress): number {
-  if (progress.finished) {
-    return 0;
-  }
-  return route.baseSpeed * itemAt(route.zones, progress.zoneIndex).speedMultiplier;
+  return progress.finished ? 0 : zoneSpeed(route, progress.zoneIndex);
 }
 
-// How far through the current zone, from 0 to 1.
+// How far through the current zone, from 0 to 1. advanceZones keeps zoneDistance within
+// the zone's length.
 export function zoneFraction(route: ZoneRoute, progress: ZoneProgress): number {
-  const { length } = itemAt(route.zones, progress.zoneIndex);
-  return length > 0 ? Math.min(1, progress.zoneDistance / length) : 1;
+  return progress.zoneDistance / itemAt(route.zones, progress.zoneIndex).length;
 }
 
 // Time left in the step after a zone ends is spent at the next zone's speed. The run
@@ -60,7 +60,7 @@ export function advanceZones(
   let secondsLeft = stepSeconds;
   while (!finished && secondsLeft > 0) {
     const zone = itemAt(zones, zoneIndex);
-    const speed = route.baseSpeed * zone.speedMultiplier;
+    const speed = zoneSpeed(route, zoneIndex);
     const distanceLeft = zone.length - zoneDistance;
     const travel = speed * secondsLeft;
     if (travel < distanceLeft) {

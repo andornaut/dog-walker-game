@@ -1,4 +1,4 @@
-import { containsPoint, type Rect } from "./rect";
+import { containsPoint, type Point, type Rect } from "./rect";
 
 export interface GridSpec {
   cellHeight: number;
@@ -9,7 +9,7 @@ export interface GridSpec {
 }
 
 // count cells filled row by row from the top-left corner.
-export function gridRects(spec: GridSpec, count: number, origin: { x: number; y: number }): Rect[] {
+export function gridRects(spec: GridSpec, count: number, origin: Point): Rect[] {
   const { cellHeight, cellWidth, columns, gapX, gapY } = spec;
   return Array.from({ length: count }, (_, i) => ({
     height: cellHeight,

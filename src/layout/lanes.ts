@@ -1,3 +1,4 @@
+import { clampIndex } from "../arrays";
 import type { Rect } from "./rect";
 
 export type LaneDirection = -1 | 1;
@@ -16,5 +17,5 @@ export function laneDividerXs(laneCount: number, road: Rect): number[] {
 
 // Held at the edge lanes rather than leaving the road.
 export function moveLane(laneCount: number, direction: LaneDirection, lane: number): number {
-  return Math.min(laneCount - 1, Math.max(0, lane + direction));
+  return clampIndex(laneCount, lane + direction);
 }

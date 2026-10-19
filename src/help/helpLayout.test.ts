@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defined } from "../testing/defined";
+import { itemAt } from "../arrays";
 import { dotHitRect, dotRects, helpActionAt } from "./helpLayout";
 
 describe("dotRects", () => {
@@ -8,13 +8,13 @@ describe("dotRects", () => {
     const dots = dotRects(6);
     expect(dots.map((dot) => dot.x)).toEqual([141, 155, 169, 183, 197, 211]);
     expect(dots.every((dot) => dot.y === 562 && dot.width === 8 && dot.height === 8)).toBe(true);
-    const first = defined(dots[0]);
-    const last = defined(dots[5]);
+    const first = itemAt(dots, 0);
+    const last = itemAt(dots, 5);
     expect(first.x - 180).toBe(180 - (last.x + last.width));
   });
 
   it("gives each dot a 14x20 tap target around it", () => {
-    expect(dotHitRect(defined(dotRects(6)[0]))).toEqual({ height: 20, width: 14, x: 138, y: 556 });
+    expect(dotHitRect(itemAt(dotRects(6), 0))).toEqual({ height: 20, width: 14, x: 138, y: 556 });
   });
 });
 

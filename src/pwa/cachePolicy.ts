@@ -5,8 +5,11 @@
 // network-only: anything else, left to the browser.
 export type FetchStrategy = "cache-first" | "network-first" | "network-only";
 
+export const ART_BASE_URL = "/art";
+export const ART_MANIFEST_URL = `${ART_BASE_URL}/manifest.json`;
+
 export const ALWAYS_REVALIDATED_URLS: ReadonlySet<string> = new Set([
-  "/art/manifest.json",
+  ART_MANIFEST_URL,
   "/manifest.webmanifest",
 ]);
 

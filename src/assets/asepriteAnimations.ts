@@ -42,15 +42,15 @@ function frameIndexes(tag: AsepriteTag): number[] {
 // Frame names are the keys of the exported frames object, in export order, which is
 // how Phaser's Aseprite loader names the texture's frames.
 export function animationSpecs(textureKey: string, sheet: AsepriteSheet): AnimationSpec[] {
-  const frameNames = Object.keys(sheet.frames);
+  const frames = Object.entries(sheet.frames);
   return (sheet.meta.frameTags ?? []).map((tag) => ({
     frames: frameIndexes(tag).map((index) => {
-      const frame = frameNames[index];
-      const frameData = frame === undefined ? undefined : sheet.frames[frame];
-      if (frame === undefined || frameData === undefined) {
+      const entry = frames[index];
+      if (entry === undefined) {
         throw new Error(`${textureKey} tag "${tag.name}" refers to missing frame ${index}`);
       }
-      return { duration: frameData.duration, frame };
+      const [frame, { duration }] = entry;
+      return { duration, frame };
     }),
     key: animationKey(textureKey, tag.name),
   }));

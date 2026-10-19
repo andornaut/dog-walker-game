@@ -1,12 +1,10 @@
 import type { LaneDirection } from "../layout/lanes";
-import { containsPoint } from "../layout/rect";
+import { containsPoint, type Point } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 
 // A pointer position in screen pixels, at a time in milliseconds on one clock.
-export interface PointerSample {
+export interface PointerSample extends Point {
   timeMs: number;
-  x: number;
-  y: number;
 }
 
 // Distances in screen pixels, times in milliseconds.
@@ -49,10 +47,10 @@ function startsOnButton(layout: GestureContext["layout"], { x, y }: PointerSampl
 }
 
 // The column is split into equal bands, so the padding around a slot still counts as it.
+// y is inside the column, so the band is a valid slot.
 function dogSlotAt(layout: GestureContext["layout"], y: number): number {
   const { dogColumn, dogSlots } = layout;
-  const band = Math.floor(((y - dogColumn.y) * dogSlots.length) / dogColumn.height);
-  return Math.min(dogSlots.length - 1, Math.max(0, band));
+  return Math.floor(((y - dogColumn.y) * dogSlots.length) / dogColumn.height);
 }
 
 // Split at the road's centre, so both halves of the road are the same width.
@@ -65,8 +63,8 @@ const move = (direction: LaneDirection): GestureAction => ({ direction, kind: "m
 // The direction of a mostly horizontal drag that has passed the minimum distance.
 export function swipeDirection(
   minDistance: number,
-  start: Pick<PointerSample, "x" | "y">,
-  end: Pick<PointerSample, "x" | "y">,
+  start: Point,
+  end: Point,
 ): LaneDirection | undefined {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
@@ -74,6 +72,11 @@ export function swipeDirection(
     return undefined;
   }
   return dx < 0 ? -1 : 1;
+}
+
+// Past the distance a tap may move before it stops being a tap.
+export function exceedsTapDistance(maxDistance: number, start: Point, end: Point): boolean {
+  return Math.hypot(end.x - start.x, end.y - start.y) > maxDistance;
 }
 
 // Emits every hold move due by nowMs. The scene calls this each frame; the pointer
@@ -130,9 +133,10 @@ export function pointerMove(
   if (swipe !== undefined) {
     return { actions: [...advanced.actions, move(swipe)], state: { kind: "spent" } };
   }
-  const dx = point.x - current.start.x;
-  const dy = point.y - current.start.y;
-  if (current.kind === "pressed" && Math.hypot(dx, dy) > config.tapMaxDistance) {
+  if (
+    current.kind === "pressed" &&
+    exceedsTapDistance(config.tapMaxDistance, current.start, point)
+  ) {
     return { actions: advanced.actions, state: { kind: "dragging", start: current.start } };
   }
   return advanced;

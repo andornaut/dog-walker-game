@@ -60,7 +60,6 @@ export const GLYPH_HEIGHT = 5;
 // The distance from one line's top to the next.
 export const LINE_HEIGHT = 8;
 const SPACE_WIDTH = 3;
-const WIDE_GLYPHS: Readonly<Record<string, number>> = { "♥": 5 };
 
 // Typographic marks drawn as their plain ASCII equivalents, which every font here has.
 const PLAIN_EQUIVALENTS: Readonly<Record<string, string>> = {
@@ -90,7 +89,7 @@ export interface Glyph {
 export const PIXEL_GLYPHS: readonly Glyph[] = Object.entries(GLYPHS).map(([char, bits]) => ({
   bits,
   char,
-  width: WIDE_GLYPHS[char] ?? 3,
+  width: bits.length / GLYPH_HEIGHT,
 }));
 
 const GLYPH_WIDTHS = new Map(PIXEL_GLYPHS.map(({ char, width }) => [char, width]));

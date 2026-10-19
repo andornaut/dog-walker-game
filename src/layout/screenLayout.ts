@@ -1,4 +1,4 @@
-import type { Rect } from "./rect";
+import { insetRect, type Rect } from "./rect";
 
 export interface ScreenConfig {
   dogColumnWidth: number;
@@ -22,12 +22,14 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
   const { dogColumnWidth, dogSlotCount, dogSlotPadding, height, topBarHeight, width } = config;
   const bodyHeight = height - topBarHeight;
   const slotHeight = bodyHeight / dogSlotCount;
-  const dogSlots = Array.from({ length: dogSlotCount }, (_, i) => ({
-    height: slotHeight - 2 * dogSlotPadding,
-    width: dogColumnWidth - 2 * dogSlotPadding,
-    x: dogSlotPadding,
-    y: topBarHeight + i * slotHeight + dogSlotPadding,
-  }));
+  const dogSlots = Array.from({ length: dogSlotCount }, (_, i) =>
+    insetRect(dogSlotPadding, {
+      height: slotHeight,
+      width: dogColumnWidth,
+      x: 0,
+      y: topBarHeight + i * slotHeight,
+    }),
+  );
   return {
     dogColumn: { height: bodyHeight, width: dogColumnWidth, x: 0, y: topBarHeight },
     dogSlots,

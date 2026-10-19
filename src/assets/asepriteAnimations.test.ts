@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defined } from "../testing/defined";
+import { itemAt } from "../arrays";
 import { animationKey, animationSpecs, type AsepriteSheet } from "./asepriteAnimations";
 
 function sheet(durations: number[], frameTags: AsepriteSheet["meta"]["frameTags"]): AsepriteSheet {
@@ -23,7 +23,7 @@ describe("animationSpecs", () => {
       ),
     );
     expect(specs.map(({ key }) => key)).toEqual(["dog-koda:walk", "dog-koda:react"]);
-    expect(defined(specs[1]).frames).toEqual([
+    expect(itemAt(specs, 1).frames).toEqual([
       { duration: 120, frame: "dog 2.aseprite" },
       { duration: 120, frame: "dog 3.aseprite" },
     ]);

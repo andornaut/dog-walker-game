@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defined } from "../testing/defined";
+import { itemAt } from "../arrays";
 import { laneCenterXs, laneDividerXs, moveLane } from "./lanes";
 
 const road = { height: 600, width: 280, x: 80, y: 40 };
@@ -35,7 +35,7 @@ describe("laneDividerXs", () => {
   it("puts each divider halfway between the centres of the lanes beside it", () => {
     const centers = laneCenterXs(5, road);
     laneDividerXs(5, road).forEach((x, i) => {
-      expect(x).toBeCloseTo((defined(centers[i]) + defined(centers[i + 1])) / 2);
+      expect(x).toBeCloseTo((itemAt(centers, i) + itemAt(centers, i + 1)) / 2);
     });
   });
 });

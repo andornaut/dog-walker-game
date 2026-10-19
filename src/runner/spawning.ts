@@ -50,7 +50,8 @@ export function spawnRowDistances(minSpacing: number, zoneLength: number): numbe
   if (minSpacing <= 0) {
     throw new Error("minSpacing must be positive");
   }
-  const count = Math.max(0, Math.floor(zoneLength / minSpacing) - 1);
+  // A zone shorter than minSpacing gives a negative length, which Array.from reads as 0.
+  const count = Math.floor(zoneLength / minSpacing) - 1;
   return Array.from({ length: count }, (_, i) => (i + 1) * minSpacing);
 }
 

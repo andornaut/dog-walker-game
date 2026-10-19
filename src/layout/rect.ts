@@ -1,3 +1,9 @@
+// A position in screen pixels.
+export interface Point {
+  readonly x: number;
+  readonly y: number;
+}
+
 // Placed by its top-left corner, in screen pixels.
 export interface Rect {
   height: number;

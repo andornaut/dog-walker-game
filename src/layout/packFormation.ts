@@ -1,4 +1,4 @@
-import { itemAt } from "../arrays";
+import { clampIndex, itemAt } from "../arrays";
 
 // Where a dog walks, relative to the walker's feet: dx across, footDy up the screen
 // (negative). Dogs walk just ahead of the walker in the same lane, staggered because three
@@ -32,8 +32,7 @@ const DOG_BODY_HEIGHT = 22;
 const WALKER_FEET_CLEARANCE = 4;
 
 export function packPlacements(dogCount: number): readonly PackPlacement[] {
-  const size = Math.min(FORMATIONS.length, Math.max(1, dogCount));
-  return itemAt(FORMATIONS, size - 1);
+  return itemAt(FORMATIONS, clampIndex(FORMATIONS.length, dogCount - 1));
 }
 
 // A dog on the left of the walker is held in the left hand.

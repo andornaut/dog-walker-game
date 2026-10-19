@@ -1,3 +1,4 @@
+import { clampIndex } from "../arrays";
 import { assertNever } from "../rules/assertNever";
 
 // "next" and "previous" turn one page and hold at the first and last pages, so a held
@@ -20,7 +21,7 @@ export interface HelpButtons {
 
 // Kept in range, so a page count that shrinks under a live edit still shows a page.
 export function clampPage(pageCount: number, page: number): number {
-  return Math.min(pageCount - 1, Math.max(0, page));
+  return clampIndex(pageCount, page);
 }
 
 export function applyHelpAction(pageCount: number, action: HelpAction, page: number): HelpOutcome {

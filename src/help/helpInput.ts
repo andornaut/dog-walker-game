@@ -1,6 +1,7 @@
-import { type GestureConfig, swipeDirection } from "../input/gestures";
-import { laneDirectionForKey } from "../input/keyBindings";
-import { helpActionAt, type Point } from "./helpLayout";
+import { exceedsTapDistance, type GestureConfig, swipeDirection } from "../input/gestures";
+import { isConfirmKey, laneDirectionForKey } from "../input/keyBindings";
+import type { Point } from "../layout/rect";
+import { helpActionAt } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
 
 export const HELP_GESTURES: Pick<GestureConfig, "swipeMinDistance" | "tapMaxDistance"> = {
@@ -13,7 +14,7 @@ export function helpActionForKey(key: string): HelpAction | undefined {
   if (key === "Escape") {
     return { kind: "close" };
   }
-  if (key === "Enter" || key === " ") {
+  if (isConfirmKey(key)) {
     return { kind: "advance" };
   }
   const direction = laneDirectionForKey(key);
@@ -34,7 +35,7 @@ export function helpActionForPointer(
   if (swipe !== undefined) {
     return swipe === -1 ? { kind: "next" } : { kind: "previous" };
   }
-  if (Math.hypot(end.x - start.x, end.y - start.y) > HELP_GESTURES.tapMaxDistance) {
+  if (exceedsTapDistance(HELP_GESTURES.tapMaxDistance, start, end)) {
     return undefined;
   }
   return helpActionAt(pageCount, start);
