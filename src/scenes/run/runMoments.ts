@@ -19,11 +19,18 @@ import { amountText, type Change, type MoneyChange } from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
 import { quirkScaledDogs } from "../../rules/effects";
 import { hintFor } from "../../rules/hints";
-import { walkLength } from "../../rules/route";
+import { currentZoneId, walkLength } from "../../rules/route";
+import { encounterLook, minorObstacleLook } from "../../rules/skins";
 import { flourishesAt, type NeedStep } from "../../runner/needs";
 import type { PullStep } from "../../runner/pulls";
 import type { Random } from "../../runner/random";
-import { type EncounterCard, sniffersOf, type WalkStep } from "../../runner/walk";
+import {
+  type EncounterCard,
+  isMinorObstacle,
+  sniffersOf,
+  type WalkItemKind,
+  type WalkStep,
+} from "../../runner/walk";
 import { walkerFootY } from "../../runner/walkGeometry";
 import {
   type AchievementPreview,
@@ -33,7 +40,7 @@ import {
 import type { RunResult } from "../../save/checkpoint";
 import { packDogs } from "../../state/pack";
 import type { RunState } from "../../state/runState";
-import { hitLabelOf, playHitMoment } from "../hitMoment";
+import { hitLabelOf, playHitMoment, playMinorHitLabel } from "../hitMoment";
 import { playHops, playHopSplash, playMinorBump } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { SCENE_KEYS } from "../sceneKeys";
@@ -203,6 +210,7 @@ export class RunMoments {
       );
       this.deps.pack.stumble(this.deps.still());
       this.deps.pack.showDizzy();
+      this.playBumpLabel(bump.item.kind, step, pack);
       this.hint({ kind: "minorBump" });
     }
     // An area effect that caught no dog splashes at the pack's feet with its HOP!, and opens
@@ -236,7 +244,7 @@ export class RunMoments {
       if (kind === "obstacle") {
         this.deps.pack.stumble(this.deps.still());
       }
-      this.playHit(hit, pack, step.walk.road.hitStop?.seconds ?? 0);
+      this.playHit(hit, step, pack);
     }
   }
 
@@ -307,9 +315,11 @@ export class RunMoments {
     }
   }
 
-  // The hit moment over the stop, framed by the road and the backdrop band beside it.
-  private playHit(hit: EncounterCard, pack: { x: number; y: number }, seconds: number): void {
+  // The hit moment over the stop, framed by the road and the backdrop band beside it, labelled
+  // with the encounter's look in the zone.
+  private playHit(hit: EncounterCard, step: WalkStep, pack: { x: number; y: number }): void {
     const { backdrop, road, roadView } = LAYOUT;
+    const look = encounterLook(gameData, currentZoneId(gameData, step.walk.run), hit.encounter);
     playHitMoment(this.scene, {
       caught: this.deps.pack.sprites(hit.affected),
       centre: { x: pack.x, y: pack.y - 20 },
@@ -317,9 +327,31 @@ export class RunMoments {
       encounter: hit.encounter,
       field: { ...roadView, height: roadView.y + roadView.height - backdrop.y, y: backdrop.y },
       kind: gameData.encounters[hit.encounter].kind,
-      label: hitLabelOf(gameData.encounters[hit.encounter]),
+      label: hitLabelOf(look),
       labelX: road.x + road.width / 2,
-      seconds,
+      seconds: step.walk.road.hitStop?.seconds ?? 0,
+      still: this.deps.still(),
+    });
+  }
+
+  // A minor obstacle's hit label in its look for the zone, over the stop; none shows while it
+  // has none.
+  private playBumpLabel(kind: WalkItemKind, step: WalkStep, pack: { x: number; y: number }): void {
+    if (!isMinorObstacle(gameData, kind)) {
+      return;
+    }
+    const zone = currentZoneId(gameData, step.walk.run);
+    const label = minorObstacleLook(gameData, zone, kind).hitLabel;
+    if (label === null) {
+      return;
+    }
+    const { road } = LAYOUT;
+    playMinorHitLabel(this.scene, {
+      centre: { x: pack.x, y: pack.y - 20 },
+      depth: DEPTH.popup,
+      label,
+      labelX: road.x + road.width / 2,
+      seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
     });
   }

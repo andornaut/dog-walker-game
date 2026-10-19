@@ -342,16 +342,34 @@ export interface Shape {
   readonly rows: 1 | 2 | 3;
 }
 
+// An obstacle's look in one zone, in place of its base look: the name (an encounter's card
+// title), the road sprite's art key, the hit label, and the prefix replacing card-<kebab id>
+// in each card option's illustration key. A missing hitLabel or cardArtPrefix falls back to
+// the base's, and an art or illustration key not yet in the manifest to the base art. A skin
+// never changes what the obstacle does.
+export interface Skin {
+  readonly art: string;
+  readonly cardArtPrefix?: string;
+  readonly hitLabel?: string;
+  readonly name: string;
+}
+
+// Skins by zone id. The keys are strings, not ZoneId: ZoneId comes from the world's data, whose
+// type names the obstacles, so typing their skins by it would be circular. The data tests check
+// each key is a zone's id.
+export type Skins = Readonly<Partial<Record<string, Skin>>>;
+
 // "obstacle": hit by accident, always a card, with hitLabel shown large as it hits; "lucky":
 // a good thing to bump into, a card or instant. A lucky card with a hitLabel shows it as the
 // pack meets it, before its card. Nothing happens when no dog is affected, when the pack is
 // immune, or when noCardWhen holds. A messy encounter's card costs a show dog's owner
-// hearts.showDogMessyHearts more wherever it costs them hearts.
+// hearts.showDogMessyHearts more wherever it costs them hearts. skins are its looks by zone.
 export type Encounter = {
   readonly affects: AffectRule;
   readonly messy?: true;
   readonly name: string;
   readonly noCardWhen?: Condition;
+  readonly skins?: Skins;
 } & (
   | { readonly hitLabel?: string; readonly kind: "lucky"; readonly resolution: CardResolution }
   | { readonly kind: "lucky"; readonly resolution: InstantResolution }
@@ -364,11 +382,14 @@ export type Encounter = {
 );
 
 // An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
-// pack, and locks lane input for seconds.minorStumble. Each zone's weights set how often it
-// appears there.
+// pack, and locks lane input for seconds.minorStumble, showing hitLabel when it has one. Each
+// zone's weights set how often it appears there, and skins are its looks by zone: the
+// obstacles of one shape share one skin per zone.
 export interface MinorObstacle {
+  readonly hitLabel?: string;
   readonly name: string;
   readonly shape: Shape;
+  readonly skins?: Skins;
 }
 
 export interface ForcedStop {

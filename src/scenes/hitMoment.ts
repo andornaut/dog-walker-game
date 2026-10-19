@@ -3,7 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import type { Rect } from "../layout/rect";
-import { hitLabel } from "../rules/encounters";
+import type { Look } from "../rules/skins";
 import { addDisplayText } from "./displayText";
 import { PALETTE } from "./palette";
 import { firstTag, playEffect } from "./sprites";
@@ -62,9 +62,10 @@ const SHAKE = { angle: 12, delayMs: 120, swingMs: 60, swings: 4 };
 // The moment ends this long before the stop, so nothing is left on screen under the card.
 const END_MARGIN_MS = 100;
 
-// The encounter's own label, or its name for an encounter with none.
-export function hitLabelOf(encounter: Encounter): string {
-  return hitLabel(encounter) ?? encounter.name.toUpperCase();
+// The encounter's label in its look for the zone, or its name there for an encounter with
+// none.
+export function hitLabelOf(look: Look): string {
+  return look.hitLabel ?? look.name.toUpperCase();
 }
 
 // The art of a hit moment: an obstacle's burst is fx-hit-<encounter> with an edge flash in its
@@ -106,6 +107,16 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
   if (!moment.still && moment.kind === "obstacle") {
     shakeOff(scene, moment.caught);
   }
+}
+
+// A minor obstacle's hit label, on the normal plate over the bump's stop, as an encounter
+// hit's label shows.
+export function playMinorHitLabel(
+  scene: Scene,
+  moment: Pick<HitMoment, "centre" | "depth" | "label" | "labelX" | "seconds" | "still">,
+): void {
+  const totalMs = Math.max(0, moment.seconds * 1000 - END_MARGIN_MS);
+  showLabel(scene, moment, "normal", totalMs);
 }
 
 function playBurst(scene: Scene, moment: HitMoment, key: string, totalMs: number): void {
@@ -155,7 +166,12 @@ function playFlash(scene: Scene, moment: HitMoment, key: string): void {
 }
 
 // The plate sits centred on labelX, its bottom a gap above the burst.
-function showLabel(scene: Scene, moment: HitMoment, plate: string, totalMs: number): void {
+function showLabel(
+  scene: Scene,
+  moment: Pick<HitMoment, "centre" | "depth" | "label" | "labelX" | "still">,
+  plate: string,
+  totalMs: number,
+): void {
   const top = Math.round(moment.centre.y - BURST.size / 2 - BURST.gap - PLATE.height);
   const left = Math.round(moment.labelX - PLATE.width / 2);
   const label = scene.add.container(left, top).setDepth(moment.depth + 2);

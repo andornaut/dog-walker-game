@@ -20,7 +20,7 @@ import {
   openCard,
   quirkActorsOf,
 } from "../rules/choices";
-import { currentZone } from "../rules/route";
+import { currentZone, currentZoneId } from "../rules/route";
 import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
 import { holdForFiring } from "../runner/firingStop";
@@ -480,7 +480,7 @@ export class RunScene extends Scene {
       this.choose(view, replayed);
       return;
     }
-    world.menus.showCard(view, (choice) => this.choose(view, choice));
+    world.menus.showCard(currentZoneId(gameData, run), view, (choice) => this.choose(view, choice));
   }
 
   private choose(view: CardView, choice: Choice): void {

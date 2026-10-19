@@ -1,3 +1,5 @@
+import type { Scene } from "phaser";
+
 import { itemAt } from "../../arrays";
 import {
   MOVER_SPRITES,
@@ -8,10 +10,18 @@ import {
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
+import type { ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
+import { encounterLook } from "../../rules/skins";
 import { read } from "../../rules/units";
-import { type MoverOnRoad, moverPlace } from "../../runner/movers";
-import { playTag, showAtDepth } from "../sprites";
+import {
+  isMoverObstacle,
+  MOVER_CONTACTS,
+  type MoverKind,
+  type MoverOnRoad,
+  moverPlace,
+} from "../../runner/movers";
+import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemView } from "./itemViews";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
@@ -19,6 +29,20 @@ import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 // down from the far end of the road for a cyclist, and the arrow a sign's width beside it or
 // below it on screen.
 const CUE = { inset: 10, size: 16, top: 20 };
+
+// A mover's body sprite: for a mover that opens an encounter, the encounter's skin in the zone
+// when its art plays the mover's tag, else the mover's own sprite.
+export function moverBodyKey(scene: Scene, zone: ZoneId, mover: MoverKind): string {
+  const sprite = MOVER_SPRITES[mover];
+  const contact = MOVER_CONTACTS[mover];
+  if (isMoverObstacle(contact)) {
+    return sprite.key;
+  }
+  const look = encounterLook(gameData, zone, contact);
+  const skinned =
+    look.art !== look.baseArt && firstTag(scene, look.art, [sprite.tag]) !== undefined;
+  return skinned ? look.art : sprite.key;
+}
 
 // A mover stands on the road through the projection once it moves, sized by showAtDepth, a
 // crosser mirrored when it runs left. Until then only its cue shows, at 1x: a sign at the
@@ -47,7 +71,7 @@ export function drawMover(
     body.sprite.setVisible(shown);
     if (shown) {
       const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
-      const { key } = sprite;
+      const { key } = body;
       const tag = idle !== undefined && (halted || !place.moving) ? idle : sprite.tag;
       const drawn = showAtDepth(body.sprite, key, placed.scale);
       const x = Math.round(placed.x);

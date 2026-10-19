@@ -7,6 +7,7 @@ import { maxHearts } from "../rules/dogs";
 import { moneyCost } from "../rules/effects";
 import { modifiedStat, modifiersOf } from "../rules/modifiers";
 import { unlockPrice } from "../rules/shop";
+import { baseCardArtPrefix } from "../rules/skins";
 import { probability, read, readTable } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import { testState } from "../testing/runState";
@@ -16,6 +17,7 @@ import type {
   CardOption,
   DogId,
   Effect,
+  Encounter,
   EncounterId,
   Energy,
   Modifier,
@@ -303,6 +305,60 @@ describe("cards", () => {
       expect(art).toMatch(KEBAB_CASE);
     }
     expect(new Set(arts).size).toBe(arts.length);
+  });
+});
+
+describe("obstacle skins", () => {
+  const zoneIds = world.zones.map(({ id }) => id);
+  const minorObstacles = Object.entries(gameData.minorObstacles);
+  const skinned = [...Object.entries(encounters), ...minorObstacles].flatMap(([id, { skins }]) =>
+    Object.entries(skins ?? {}).map(([zone, skin]) => ({ id, skin, zone })),
+  );
+
+  it("keys every skin by a zone's id, with a name and a kebab-case art key", () => {
+    expect(skinned.filter(({ zone }) => !zoneIds.includes(zone))).toEqual([]);
+    for (const { id, skin } of skinned) {
+      expect(skin?.name, id).not.toBe("");
+      expect(skin?.art, id).toMatch(KEBAB_CASE);
+      expect(skin?.cardArtPrefix ?? "card-x", id).toMatch(/^card-[a-z0-9]+(-[a-z0-9]+)*$/);
+    }
+  });
+
+  it("skins only the five obstacle kinds and the minor obstacles but the barrier", () => {
+    const kinds = [...Object.entries(encounters), ...minorObstacles].flatMap(([id, { skins }]) =>
+      skins === undefined ? [] : [id],
+    );
+    const allowed = [
+      ...["bench", "bin", "cone", "hedge", "parkedCar"],
+      ...["otherDog", "puddle", "skunk", "squirrel", "thief"],
+    ];
+    expect(kinds.filter((id) => !allowed.includes(id))).toEqual([]);
+  });
+
+  it("gives the minor obstacles of one shape one skin in each zone", () => {
+    for (const zone of zoneIds) {
+      const byShape = new Map<string, unknown>();
+      for (const [id, { shape, skins }] of minorObstacles) {
+        const skin = skins?.[zone];
+        const key = `${shape.lanes}x${shape.rows}`;
+        if (skin !== undefined) {
+          expect(skin, `${id} in ${zone}`).toEqual(byShape.get(key) ?? skin);
+          byShape.set(key, skin);
+        }
+      }
+    }
+  });
+
+  it("names every card encounter's illustrations card-<kebab id>-<option>, for a skin's prefix", () => {
+    const misnamed = (Object.entries(encounters) as [EncounterId, Encounter][]).flatMap(
+      ([id, { resolution }]) =>
+        resolution.kind === "card"
+          ? resolution.options
+              .map(({ art }) => art)
+              .filter((art) => !art.startsWith(`${baseCardArtPrefix(id)}-`))
+          : [],
+    );
+    expect(misnamed).toEqual([]);
   });
 });
 

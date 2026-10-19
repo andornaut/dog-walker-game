@@ -1,5 +1,6 @@
 import type { Scene } from "phaser";
 
+import type { ZoneId } from "../../data/types";
 import type { RunPause } from "../../hud/topBar";
 import type { CardView, Choice } from "../../rules/choices";
 import type { CardSceneData } from "../CardScene";
@@ -44,11 +45,11 @@ export class MenuFlow {
     this.cardView = view;
   }
 
-  showCard(view: CardView, onChoose: (choice: Choice) => void): void {
+  showCard(zone: ZoneId, view: CardView, onChoose: (choice: Choice) => void): void {
     const sound = soundboardOf(this.scene);
     sound.play("cardOpen");
     sound.setCardOpen(true);
-    const data: CardSceneData = { onChoose, view };
+    const data: CardSceneData = { onChoose, view, zone };
     this.scene.scene.launch(SCENE_KEYS.card, data);
   }
 

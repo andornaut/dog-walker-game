@@ -40,13 +40,21 @@ export function firstZoneId(data: RouteData): ZoneId {
 // The zone at a route position. Between a zone's end and the fork after it, the position has
 // no zone yet, so it is the last zone walked.
 export function zoneAt(data: RouteData, route: readonly ZoneId[], zoneIndex: number): Zone {
-  const id = route[Math.min(zoneIndex, route.length - 1)] ?? firstZoneId(data);
-  return zoneById(data, id);
+  return zoneById(data, zoneIdAt(data, route, zoneIndex));
+}
+
+function zoneIdAt(data: RouteData, route: readonly ZoneId[], zoneIndex: number): ZoneId {
+  return route[Math.min(zoneIndex, route.length - 1)] ?? firstZoneId(data);
 }
 
 // The zone the run is in.
 export function currentZone(data: RouteData, run: Pick<RunState, "route" | "zoneIndex">): Zone {
   return zoneAt(data, run.route, run.zoneIndex);
+}
+
+// The id of the zone the run is in.
+export function currentZoneId(data: RouteData, run: Pick<RunState, "route" | "zoneIndex">): ZoneId {
+  return zoneIdAt(data, run.route, run.zoneIndex);
 }
 
 // The zones not yet walked this run, in world order: easiest first.

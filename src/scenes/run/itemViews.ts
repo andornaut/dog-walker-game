@@ -12,8 +12,10 @@ import {
 } from "../../assets/spriteKeys";
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
-import type { HintTrigger, MinorObstacleId } from "../../data/types";
+import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
+import { currentZoneId } from "../../rules/route";
+import { encounterLook, minorObstacleLook, skinnedArt } from "../../rules/skins";
 import { isMoverObstacle } from "../../runner/movers";
 import { isNeedSpot } from "../../runner/needs";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
@@ -21,7 +23,7 @@ import { walkGeometry } from "../../runner/walkGeometry";
 import { needIcon } from "../needSignals";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
-import { drawMover } from "./moverView";
+import { drawMover, moverBodyKey } from "./moverView";
 import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, roadGeometry, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its hit box.
@@ -85,9 +87,10 @@ export class ItemViews {
     const seen = new Set<number>();
     const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
     const { roadTop } = roadGeometry(walk.run);
+    const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
       seen.add(item.id);
-      const view = this.views.get(item.id) ?? this.addView(item);
+      const view = this.views.get(item.id) ?? this.addView(zone, item);
       if (item.mover !== undefined) {
         drawMover(item.mover, view, item.y + item.height, roadTop, halted, still, shadow);
         continue;
@@ -136,9 +139,12 @@ export class ItemViews {
 
   // Each item stands once at the near edge of its hit box, however many rows it covers, and a
   // lucky find on its frame's bottom. A puddle lies flat under the rest, and a skunk stands just
-  // inside the front of its spray cloud, which lies flat too.
-  private addView(item: WalkItem): ItemView {
+  // inside the front of its spray cloud, which lies flat too. An obstacle wears its skin for the
+  // zone, the other dog's owner standing beside only its base look.
+  private addView(zone: ZoneId, item: WalkItem): ItemView {
     const { scene } = this;
+    const has = (key: string) => scene.textures.exists(key);
+    const encounterArt = (id: EncounterId) => skinnedArt(has, encounterLook(gameData, zone, id));
     const bottom = (shown: WalkItem) => shown.y + shown.height;
     const lucky = itemCategory(gameData, item.kind) === "lucky";
     const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
@@ -160,7 +166,7 @@ export class ItemViews {
     const flat = { flat: true } as const;
     let parts: ItemPart[];
     if (item.mover !== undefined) {
-      const body = MOVER_SPRITES[item.mover.path.mover].key;
+      const body = moverBodyKey(scene, zone, item.mover.path.mover);
       parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY)];
     } else if (isMoverObstacle(item.kind)) {
       parts = [part(MOVER_SPRITES[item.kind].key)];
@@ -178,19 +184,23 @@ export class ItemViews {
         ? [part(key), part(icon.key, { feet: "bottom", lift: SPOT_ICON_LIFT })]
         : [part(key)];
     } else if (isMinorObstacle(gameData, item.kind)) {
-      parts = [part(minorObstacleSpriteKey(item.kind))];
+      parts = [part(skinnedArt(has, minorObstacleLook(gameData, zone, item.kind)))];
     } else if (item.kind === "skunk") {
       parts = [
         part(SKUNK_CLOUD_KEY, flat),
-        part(encounterSpriteKey("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
+        part(encounterArt("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
       ];
-    } else if (item.kind === "otherDog" && scene.textures.exists("other-dog-owner")) {
+    } else if (
+      item.kind === "otherDog" &&
+      encounterArt(item.kind) === encounterSpriteKey(item.kind) &&
+      has("other-dog-owner")
+    ) {
       parts = [
         part(encounterSpriteKey(item.kind), { dx: -8 }),
         part("other-dog-owner", { dx: 10 }),
       ];
     } else {
-      parts = [part(encounterSpriteKey(item.kind), item.kind === "puddle" ? flat : {})];
+      parts = [part(encounterArt(item.kind), item.kind === "puddle" ? flat : {})];
     }
     const view = { parts };
     this.views.set(item.id, view);

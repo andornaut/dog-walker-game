@@ -26,6 +26,7 @@ import {
   dogSpriteKey,
   encounterSpriteKey,
   kebabCase,
+  minorObstacleSpriteKey,
   MOVER_SPRITES,
   NEED_ART,
   needSpotSpriteKey,
@@ -41,6 +42,7 @@ import type {
   Energy,
   ForcedStopId,
   GearId,
+  MinorObstacleId,
   NeedCardId,
   NeedId,
   NeedSpotId,
@@ -57,7 +59,9 @@ import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
 import { walkLength } from "../rules/route";
+import { baseCardArtPrefix } from "../rules/skins";
 import { faceMood } from "../rules/treats";
+import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
 import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
@@ -88,6 +92,14 @@ function missingTags(key: string, tags: readonly string[]): string[] {
   return tags.filter((tag) => !have.has(animationKey(key, tag))).map((tag) => `${key}:${tag}`);
 }
 
+// Every tag the sprite plays.
+function tagsOf(key: string): string[] {
+  const sheet = sheetOf(key);
+  return sheet === undefined
+    ? []
+    : animationSpecs(key, sheet).map((spec) => spec.key.slice(key.length + 1));
+}
+
 function missingImages(keys: readonly string[]): string[] {
   return keys.filter((key) => !images.has(key));
 }
@@ -99,6 +111,7 @@ function members<K extends string>(record: Readonly<Record<K, true>>): K[] {
 
 const DOGS = Object.keys(gameData.dogs) as DogId[];
 const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
+const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
 const STATUSES = members<DogStatusId>({ soaked: true, spooked: true, stinky: true });
 const TEMPERAMENTS = members<Temperament>({ dramatic: true, fussy: true, laidBack: true });
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
@@ -312,6 +325,22 @@ describe("card art", () => {
     expect(missing).toEqual([]);
   });
 
+  it("names every option's illustration for a skin's card prefix once any of them is listed", () => {
+    const missing = ENCOUNTERS.flatMap((id) => {
+      const { resolution, skins } = gameData.encounters[id];
+      const arts = resolution.kind === "card" ? resolution.options.map(({ art }) => art) : [];
+      return Object.values(skins ?? {}).flatMap((skin) => {
+        const prefix = skin?.cardArtPrefix;
+        if (prefix === undefined) {
+          return [];
+        }
+        const keys = arts.map((art) => prefix + art.slice(baseCardArtPrefix(id).length));
+        return keys.some((key) => images.has(key)) ? missingImages(keys) : [];
+      });
+    });
+    expect(missing).toEqual([]);
+  });
+
   it("names a card preview for every zone, as a fork's path card shows it", () => {
     const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
     const arts = [zones.slice(0, 3), zones.slice(3)].flatMap((paths) =>
@@ -419,6 +448,38 @@ describe("road object art", () => {
     const missing = keys.flatMap((key) =>
       steps.map((step) => depthVariantKey(key, step) ?? key).filter((key) => !sprites.has(key)),
     );
+    expect(missing).toEqual([]);
+  });
+
+  // A skin may name art not drawn yet, which falls back to the base; once drawn, it must do
+  // all its base does. A kind that also comes as a mover runs as its skin's sprite too.
+  it("draws every listed skin's sprite with its base's tags and any mover's, at each base step", () => {
+    const moverTags = (id: string) =>
+      (Object.keys(MOVER_CONTACTS) as MoverKind[])
+        .filter((mover) => MOVER_CONTACTS[mover] === id)
+        .map((mover) => MOVER_SPRITES[mover].tag);
+    const skins = [
+      ...ENCOUNTERS.map((id) => ({
+        base: encounterSpriteKey(id),
+        id,
+        skins: gameData.encounters[id].skins,
+      })),
+      ...MINOR_OBSTACLES.map((id) => ({
+        base: minorObstacleSpriteKey(id),
+        id,
+        skins: gameData.minorObstacles[id].skins,
+      })),
+    ].flatMap(({ base, id, skins: byZone }) =>
+      Object.values(byZone ?? {}).flatMap((skin) =>
+        skin === undefined || !sprites.has(skin.art) ? [] : [{ art: skin.art, base, id }],
+      ),
+    );
+    const missing = skins.flatMap(({ art, base, id }) => {
+      const tags = [...new Set([...tagsOf(base), ...moverTags(id)])];
+      return [1, ...variantSteps([base])].flatMap((step) =>
+        missingTags(depthVariantKey(art, step) ?? art, tags),
+      );
+    });
     expect(missing).toEqual([]);
   });
 
