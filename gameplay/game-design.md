@@ -4,7 +4,7 @@ The game as currently planned: rules, content, starting numbers and milestones. 
 
 ## Pitch
 
-_Draft from the 2026-10-18 session, not yet polished:_ a cozy pixel-art lane runner where you walk a pack of dogs through the neighbourhood, and every bump in the road turns into a choice.
+_Draft, not yet polished:_ a cozy pixel-art lane runner where you walk a pack of dogs through the neighbourhood, and every bump in the road turns into a choice.
 
 Theme: you're a dog walker trying to make money.
 

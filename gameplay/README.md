@@ -7,18 +7,16 @@ A pixel-art game (simple, retro, cute) about being a dog walker. Mostly vibe cod
 | Doc              | What it holds                                                                           | Changes when                     |
 | ---------------- | --------------------------------------------------------------------------------------- | -------------------------------- |
 | `README.md`      | This file: how we work                                                                  | Rarely                           |
-| `decisions.md`   | Dated log of every decision, both tracks                                                | A decision is made or reversed   |
 | `game-design.md` | The game as currently planned: rules, content, starting numbers, milestones (canonical) | A design decision lands          |
 | `next.md`        | Everything set aside for later, unscheduled                                             | Something is set aside for later |
-| `ideas.md`       | Brainstorm parking lot: everything floated, kept or not                                 | Every design session             |
-| `session-log.md` | One short entry per session                                                             | End of every session             |
+| `ideas.md`       | Undecided and cut ideas, and open questions                                             | Every design session             |
 
 Owned by other roles:
 
 - [`art/style-guide.md`](../art/style-guide.md) (art): visual rules: resolution, palette, sprites, mood
 - [`tech-plan.md`](../tech-plan.md) (tech): stack, architecture, porting plan, open tech questions
 
-**Promotion rule:** ideas stay in `ideas.md` until agreed in a session. Only then do they move into `game-design.md` (the current plan) or `next.md` (later), `art/style-guide.md` or `tech-plan.md` and get a line in `decisions.md`.
+**Promotion rule:** ideas stay in `ideas.md` until agreed in a session. Then they move into `game-design.md` (the current plan) or `next.md` (later), `art/style-guide.md` or `tech-plan.md`, and leave `ideas.md`. Docs state the current rule only; git keeps the history.
 
 ## Two kinds of sessions
 
@@ -32,12 +30,12 @@ Art can come up in either; it lands in `art/style-guide.md`.
 
 1. **Start:** say "design session" or "tech session" (plus a topic if there is one). Claude reads the relevant docs.
 2. **During:** talk freely. Several people may be talking at once (voice). Authorship is not recorded.
-3. **End:** say "wrap up". Claude proposes (a) new/changed entries for `ideas.md`, (b) any decisions to promote, (c) a `session-log.md` entry, and only writes them after we confirm.
+3. **End:** say "wrap up". Claude proposes the changes to `ideas.md` and the other docs, and only writes them after we confirm.
 
 ## Idea statuses (used in ideas.md)
 
 - **[floated]:** said out loud, not discussed
 - **[exploring]:** we're actively kicking it around
-- **[agreed]:** promoted to `game-design.md`
-- **[next]:** good, but for later; described in `next.md`
 - **[cut]:** decided against (kept so we don't re-argue it; note why)
+
+An agreed idea moves to `game-design.md`, and one set aside for later moves to `next.md`; neither stays in `ideas.md`.

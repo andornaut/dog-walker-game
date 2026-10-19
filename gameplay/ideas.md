@@ -1,78 +1,21 @@
-# Ideas Parking Lot
+# Ideas
 
-Everything that gets floated: good, silly, half-formed. Nothing here is a commitment. Statuses: [floated] · [exploring] · [agreed] · [next] · [cut] (see `README.md`).
+Undecided and cut ideas. Nothing here is a commitment. Statuses: [floated] · [exploring] · [cut] (see [`README.md`](README.md)). An agreed idea moves to [`game-design.md`](game-design.md); one set aside for later moves to [`next.md`](next.md).
 
-Format: `- [status] **Idea**: short description (date) · notes`
-
-Group by topic; add new topic headings as they come up.
-
-## Core gameplay
-
-- [agreed] **Lane runner**: 5 lanes; street scrolls toward you, calmer than Bowling Ballers (2026-10-18)
-- [agreed] **Collisions trigger choices**: no instant fail; every hit opens a choice card (2026-10-18)
-- [agreed] **Roguelite runs of 4 zones**: Hades-style (2026-10-18)
-- [agreed] **Pay to fix problems**: e.g. skunk: pay a lot for grooming, or less and take a debuff (2026-10-18)
-- [agreed] **Lose-lose choices**: sometimes every option costs something (2026-10-18) · upgrade cards with a gain and a cost are trade-off cards, not lose-lose
-- [agreed] **Forced stops**: one per zone, e.g. stop sign, neighbour waves you down to chat (2026-10-18)
-- [agreed] **Upgrade cards between zones**: pick 1 of 3 (2026-10-18)
-- [agreed] **Stinky / smell-cloud debuff**: lingering penalty from a cheap skunk fix (2026-10-18) · the plan uses "tips halved"
-- [agreed] **Pickups you want to hit**: treats, tips; borrowed from Bowling Ballers' hit-things twist (2026-10-18)
-- [cut] **Mud encounter**: Fancy's trait mentioned mud, but there is no mud encounter (2026-10-18) · cut: puddles cover it; the plan keeps 4 encounters
-- [next] **Minigames**: as an alternative way to resolve encounters (2026-10-18)
-- [next] **Branching paths between zones**: player chooses the route (2026-10-18)
-- [next] **Permanent unlocks as in-run choices**: Hades-style: pick a run boost or a permanent unlock (2026-10-18)
-
-## Dogs & characters
-
-- [agreed] **Choose your dogs**: each with pros, cons, pay rate and look (2026-10-18)
-- [agreed] **1–3 dogs in one lane**: the pack moves as one unit (2026-10-18)
-- [agreed] **Owner happiness meter**: one per dog, shown with dog and owner faces; at zero the dog leaves (2026-10-18)
-- [agreed] **Encounters hit by trait**: e.g. squirrel upsets the chaser (2026-10-18)
-- [agreed] **Owner quips**: random reactions to events: "You're fired!", crying about their little dog Poopy (2026-10-18) · agreed: the affected owner quips after every card choice and when firing you; each owner's personality sets the tone
-- [agreed] **Dogs pull you vs. you pull them**: could vary with unlocks or choices (2026-10-18) · agreed: dogs pull the pack one lane (trait targets and random wander), more often with more dogs; Steady hands halves it
-- [next] **Unlockable dog slots**: start with 1, unlock 2 and 3 via progression and better leashes (2026-10-18)
-- [next] **Special dogs found mid-walk**: later levels, only if you have 2 or fewer dogs; once found, they join the pre-run roster (2026-10-18)
-- [agreed] **Named dogs and owners**: fixed characters with personalities (2026-10-18) · agreed: 9 named dogs, each a combination of size, trait, energy and owner temperament, so players can have favourites
-- [agreed] **Walker customization**: pick or dress the walker; (2026-10-18) · in the plan (2026-10-19) as a few preset walkers
-- [next] **Your own dog**: end-game unlock (2026-10-18)
-
-## World & setting
-
-- [agreed] **One neighbourhood, fixed route** (2026-10-18)
-- [agreed] **Scenery gags**: a cat on a fence, a sprinkler, a ball rolling past; no card, no effect (2026-10-18)
-- [next] **Worlds**: unlockable sets of 4 zones with their own themes, obstacles and mechanics: fantasy, the future, the past, dinosaurs (2026-10-19) · the current plan has Maple Street only; finish a world, then buy the next
-- [next] **Biomes**: inner city, beach, forest, etc. (2026-10-18) · folded into Worlds
-- [next] **Time of day**: dawn, midday, dusk, night (2026-10-18)
-- [next] **Weather**: variants with pros and cons, some mostly cosmetic (2026-10-18)
-- [next] **Off-leash dog park**: zone unlocked by an upgrade (2026-10-18)
-
-## Progression, economy & goals
-
-- [agreed] **Money as the only currency**: earned in-run, banked, buys unlocks (2026-10-18)
-- [agreed] **Paid per zone survived** (2026-10-18)
-- [agreed] **Pre-run loadout**: fanny packs and other gear from permanent unlocks (2026-10-18)
-- [agreed] **Head home**: end a walk early from the pause menu; the current zone pays nothing (2026-10-18)
-- [cut] **Story recap on the end screen**: retell the run's biggest moments (2026-10-18) · cut: the end screen shows earnings only
-- [agreed] **Gentle failure**: a fired dog leaves with a funny quip; keep what you've earned (2026-10-18) · refined 2026-10-19: the firing owner takes back their dog's fees for the run
-- [agreed] **Dog training**: level up a dog you own, e.g. calmer energy or a smaller pull lock (2026-10-19) · in the plan (2026-10-19); options to design
-- [agreed] **Walker kit**: permanent always-on walker upgrades, e.g. a bigger treat pouch (2026-10-19) · in the plan (2026-10-19); items to design
-- [agreed] **Cosmetic permanent unlocks**: permanent purchases that change looks only (2026-10-18) · in the plan (2026-10-19); items to design
-- [next] **House hub**: Hades-style home base you decorate and improve with mostly cosmetic unlocks; long-term progression (2026-10-18)
+Format: `- [status] **Idea**: short description · notes`
 
 ## Home screen
 
-- [agreed] **Shop in place**: tap a locked dog or gear item on the start screen to buy it; no separate shop screen (2026-10-19)
-- [agreed] **Logbook**: best walk ($, zones, which dogs), totals (walks, dogs walked, times fired), and the last walk as one line ("Kevin fired you in the park") (2026-10-19) · agreed: the logbook is the home screen summary; the Stats page holds the full stats behind it
-- [agreed] **Best walk and walk count in the top bar** next to the bank (2026-10-19)
-- [floated] **Owner parting line**: picking a dog shows its owner's quip in their temperament (e.g. Jesse: "He already did 10K. He's fine.") (2026-10-19)
-- [floated] **Gate scene**: the walker and the picked pack stand on the front path, heading out to Maple Street, with a "Dog Walker" yard sign (2026-10-19)
+- [floated] **Owner parting line**: picking a dog shows its owner's quip in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
+- [floated] **Gate scene**: the walker and the picked pack stand on the front path, heading out to Maple Street, with a "Dog Walker" yard sign
 
-## Art & feel
+## Cut
 
-- [agreed] **Cozy, low-stress mood**: playable for long periods (2026-10-18)
-- [agreed] **Refined pixel art, ¾ top-down, portrait** (2026-10-18)
-- [agreed] **Slay the Spire–style choice cards**: three across, art-led (2026-10-18)
+- [cut] **Mud encounter**: a mud obstacle for Fancy dogs · cut: puddles cover it
+- [cut] **Story recap on the end screen**: retell the run's biggest moments · cut: the end screen shows earnings only
 
-## Wild / maybe-someday
+## Open questions
 
-Nothing yet.
+- Content to design: dog training options, walker kit items, cosmetic unlocks, the preset walkers' looks, and their prices
+- Check in playtests: whether 1, 2 and 3 dogs earn about the same; whether a 12-minute run feels right; shop prices against real earnings
+- Replace the Starting numbers table in `game-design.md` with a link once the data lives in `src/data/`
