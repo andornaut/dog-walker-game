@@ -3282,7 +3282,7 @@
       "art": "snooze-crescent",
       "density": {
         "luckyFinds": 1,
-        "obstacles": 1,
+        "obstacles": 0.8,
         "tips": 1
       },
       "difficulty": 1,
@@ -3290,7 +3290,7 @@
       "fees": 0.7,
       "id": "snoozeCrescent",
       "leashColor": "#3e2731",
-      "moverShare": 0.1,
+      "moverShare": 0,
       "name": "Willow Crescent",
       "roadColor": "#8b9bb4",
       "roadShadowColor": "#5a6988",
@@ -3300,8 +3300,8 @@
           "chattyNeighbour": 1,
           "constructionDetour": 1,
           "iceCreamTruck": 1,
-          "kidWantsToPet": 1,
-          "mailCarrier": 1,
+          "kidWantsToPet": 2,
+          "mailCarrier": 2,
           "stopSign": 1
         },
         "luckyFinds": {
@@ -3336,7 +3336,7 @@
           "puddle": 1,
           "skunk": 1,
           "squirrel": 1,
-          "thief": 1,
+          "thief": 0,
           "trash": 0
         }
       },
@@ -3351,7 +3351,7 @@
     {
       "art": "bark-park",
       "density": {
-        "luckyFinds": 1,
+        "luckyFinds": 1.25,
         "obstacles": 1,
         "tips": 1
       },
@@ -3400,13 +3400,13 @@
         "obstacles": {
           "cafe": 0,
           "goose": 0,
-          "otherDog": 1,
+          "otherDog": 2,
           "petunias": 0,
           "picnic": 1,
           "puddle": 1,
           "skunk": 1,
-          "squirrel": 1,
-          "thief": 1,
+          "squirrel": 2,
+          "thief": 0,
           "trash": 0
         }
       },
@@ -3430,7 +3430,7 @@
       "fees": 1,
       "id": "street",
       "leashColor": "#f6757a",
-      "moverShare": 0.1,
+      "moverShare": 0.05,
       "name": "Elm Avenue",
       "roadColor": "#3a4466",
       "roadShadowColor": "#262b44",
@@ -3441,7 +3441,7 @@
           "constructionDetour": 1,
           "iceCreamTruck": 1,
           "kidWantsToPet": 1,
-          "mailCarrier": 1,
+          "mailCarrier": 2,
           "stopSign": 1
         },
         "luckyFinds": {
@@ -3455,7 +3455,7 @@
           "barrier3": 1,
           "bench": 1,
           "bin": 1,
-          "cone": 1,
+          "cone": 2,
           "hedge": 1,
           "parkedCar": 1
         },
@@ -3473,7 +3473,7 @@
           "otherDog": 1,
           "petunias": 1,
           "picnic": 0,
-          "puddle": 1,
+          "puddle": 2,
           "skunk": 1,
           "squirrel": 1,
           "thief": 1,
@@ -3493,14 +3493,14 @@
       "density": {
         "luckyFinds": 1,
         "obstacles": 1,
-        "tips": 1
+        "tips": 1.2
       },
       "difficulty": 4,
       "difficultyName": "Busy",
       "fees": 1.25,
       "id": "shops",
       "leashColor": "#3e2731",
-      "moverShare": 0.15,
+      "moverShare": 0.25,
       "name": "Main Street",
       "roadColor": "#f6757a",
       "roadShadowColor": "#b55088",
@@ -3509,7 +3509,7 @@
         "forcedStops": {
           "chattyNeighbour": 1,
           "constructionDetour": 1,
-          "iceCreamTruck": 1,
+          "iceCreamTruck": 2,
           "kidWantsToPet": 1,
           "mailCarrier": 1,
           "stopSign": 1
@@ -3523,7 +3523,7 @@
         "minorObstacles": {
           "barrier2": 1,
           "barrier3": 1,
-          "bench": 1,
+          "bench": 2,
           "bin": 1,
           "cone": 1,
           "hedge": 1,
@@ -3561,7 +3561,7 @@
     {
       "art": "paws-promenade",
       "density": {
-        "luckyFinds": 1,
+        "luckyFinds": 1.25,
         "obstacles": 1,
         "tips": 1
       },
@@ -3610,10 +3610,10 @@
         "obstacles": {
           "cafe": 0,
           "goose": 1,
-          "otherDog": 1,
+          "otherDog": 2,
           "petunias": 0,
           "picnic": 1,
-          "puddle": 1,
+          "puddle": 2,
           "skunk": 1,
           "squirrel": 1,
           "thief": 1,
@@ -3632,7 +3632,7 @@
       "art": "the-long-way-home",
       "density": {
         "luckyFinds": 1,
-        "obstacles": 1,
+        "obstacles": 1.2,
         "tips": 1
       },
       "difficulty": 5,
@@ -3640,11 +3640,11 @@
       "fees": 1.5,
       "id": "homeStretch",
       "leashColor": "#3e2731",
-      "moverShare": 0.2,
+      "moverShare": 0.3,
       "name": "The Long Way Home",
       "roadColor": "#c28569",
       "roadShadowColor": "#b86f50",
-      "speed": 1,
+      "speed": 1.1,
       "weights": {
         "forcedStops": {
           "chattyNeighbour": 1,
