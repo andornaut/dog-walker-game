@@ -161,7 +161,13 @@ export class HudScene extends Scene {
     this.quips = [];
     this.quipShowing = false;
     const g = this.add.graphics();
-    fillRect(g, PALETTE.darkBrown, dogRow);
+    // The band under the doghouses ends on the screen's bottom row, its top rows (the divider)
+    // over the road's last rows.
+    if (this.textures.exists("ui-dog-band")) {
+      this.add.image(dogRow.x, dogRow.y + dogRow.height, "ui-dog-band").setOrigin(0, 1);
+    } else {
+      fillRect(g, PALETTE.darkBrown, dogRow);
+    }
     if (this.textures.exists("ui-top-bar")) {
       this.add.image(topBar.x, topBar.y, "ui-top-bar").setOrigin(0);
     } else {
@@ -507,13 +513,14 @@ export class HudScene extends Scene {
     });
   }
 
-  // The amber frame round a doghouse whose dog the open card affects, over the house art.
+  // The amber frame round a doghouse whose dog the open card affects, over the house art: round
+  // the file card, which leaves the slot's top 2 rows to the band.
   private drawAffectedFrame(rect: Rect): void {
     const g = this.frames;
     if (g === undefined) {
       return;
     }
-    drawRing(g, PALETTE.amber, rect, 2);
+    drawRing(g, PALETTE.amber, { ...rect, height: rect.height - 2, y: rect.y + 2 }, 2);
   }
 
   // The house drawn while its art is missing: a roof band over a tan front, grey when fired.
@@ -528,9 +535,9 @@ export class HudScene extends Scene {
     });
   }
 
-  // A doghouse roofed in the dog's colour: the dog in the door, the owner in the window, the
-  // hearts and their count on the board. A fired dog's house is grey and empty. An owned slot
-  // with no dog is a dashed "Empty" outline, and a slot not bought (null) is not drawn.
+  // A dog's file card: the dog's and owner's faces in their photos, the hearts and their count
+  // in the hearts box. A fired dog's card is the empty one. An owned slot with no dog
+  // is a dashed "Empty" outline on the band, and a slot not bought (null) shows the band alone.
   private drawSlot(
     g: GameObjects.Graphics,
     rect: Rect,
