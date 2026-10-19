@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { applyHelpAction, helpButtons } from "./helpPaging";
+import { applyHelpAction, clampPage, helpButtons } from "./helpPaging";
 
 const PAGES = 6;
 const LAST = PAGES - 1;
@@ -52,5 +52,13 @@ describe("helpButtons", () => {
 
   it("shows GOT IT and no Back for a single page", () => {
     expect(helpButtons(1, 0)).toEqual({ backEnabled: false, nextLabel: "GOT IT" });
+  });
+});
+
+describe("clampPage", () => {
+  it("throws without a page to show", () => {
+    expect(() => clampPage(0, 0)).toThrow(RangeError);
+    expect(() => applyHelpAction(0, { kind: "next" }, 0)).toThrow("at least one page");
+    expect(() => helpButtons(-1, 0)).toThrow("at least one page");
   });
 });

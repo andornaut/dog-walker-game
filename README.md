@@ -56,4 +56,4 @@ npm run preview
 npm run clean
 ```
 
-Check, lint, test, and build are what CI runs, over the whole repository rather than the lines a change touched.
+CI runs check, lint, test and build, over the whole repository rather than the lines a change touched, and the AI attributions scan.

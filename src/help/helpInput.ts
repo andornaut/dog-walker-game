@@ -10,12 +10,14 @@ export const HELP_GESTURES = {
 };
 
 // The lane keys turn pages: arrows, A/D and H/L. Enter and Space press Next; Escape closes.
-export function helpActionForKey(key: string): HelpAction | undefined {
+// A key's auto-repeat turns pages but never presses Next or closes, so a held Enter cannot
+// run through the pages and out of the help.
+export function helpActionForKey(repeat: boolean, key: string): HelpAction | undefined {
   if (key === "Escape") {
-    return { kind: "close" };
+    return repeat ? undefined : { kind: "close" };
   }
   if (isConfirmKey(key)) {
-    return { kind: "advance" };
+    return repeat ? undefined : { kind: "advance" };
   }
   const direction = laneDirectionForKey(key);
   if (direction === undefined) {

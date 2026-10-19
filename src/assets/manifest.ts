@@ -1,3 +1,7 @@
+import * as v from "valibot";
+
+import { issuePath, record } from "./jsonSchema";
+
 export interface SpriteAsset {
   json: string;
   key: string;
@@ -32,55 +36,75 @@ export interface AssetManifest {
 }
 
 const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const URL_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
+const LIST_NAMES = ["fonts", "images", "sounds", "sprites"] as const;
 
-function requireEntries<T>(fields: (keyof T & string)[], listName: string, value: unknown): T[] {
-  if (!Array.isArray(value)) {
-    throw new Error(`manifest.${listName} must be an array`);
-  }
-  return value.map((entry: unknown, index) => {
-    for (const field of fields) {
-      const fieldValue = (entry as Record<string, unknown> | null)?.[field];
-      if (typeof fieldValue !== "string" || fieldValue === "") {
-        throw new Error(`manifest.${listName}[${index}].${field} must be a non-empty string`);
-      }
-    }
-    return entry as T;
-  });
+function list<T extends v.GenericSchema>(entry: T) {
+  return v.array(entry, "must be an array");
 }
 
-function requireSounds(value: unknown): SoundAsset[] {
-  // The list is optional so a manifest exported before sounds existed still loads.
-  const sounds = requireEntries<SoundAsset>(["key", "ogg", "m4a"], "sounds", value ?? []);
-  sounds.forEach((sound, index) => {
-    if (sound.loop !== undefined && typeof sound.loop !== "boolean") {
-      throw new Error(`manifest.sounds[${index}].loop must be a boolean`);
+const text = v.pipe(
+  v.string("must be a non-empty string"),
+  v.nonEmpty("must be a non-empty string"),
+);
+
+const keyField = v.pipe(
+  text,
+  v.regex(KEBAB_CASE, (issue) => `"${issue.input}" must be kebab-case`),
+);
+
+const pathField = v.pipe(
+  text,
+  v.check((value) => !value.startsWith("/"), "must be relative, without a leading slash"),
+  v.check((value) => !URL_SCHEME.test(value), "must be relative, without a scheme"),
+  v.check((value) => !value.split("/").includes(".."), "must not have a .. segment"),
+);
+
+const manifestSchema = v.pipe(
+  record({
+    fonts: list(record({ fnt: pathField, key: keyField, png: pathField })),
+    images: list(record({ key: keyField, png: pathField })),
+    // Optional so a manifest exported before sounds existed still loads.
+    sounds: v.optional(
+      list(
+        record({
+          key: keyField,
+          loop: v.exactOptional(v.boolean("must be a boolean")),
+          m4a: pathField,
+          ogg: pathField,
+        }),
+      ),
+      [],
+    ),
+    sprites: list(record({ json: pathField, key: keyField, png: pathField })),
+  }),
+  v.rawCheck(({ addIssue, dataset }) => {
+    if (!dataset.typed) {
+      return;
     }
-  });
-  return sounds;
-}
+    const seen = new Map<string, string>();
+    for (const listName of LIST_NAMES) {
+      dataset.value[listName].forEach((entry, index) => {
+        const at = `${listName}[${index}]`;
+        const first = seen.get(entry.key);
+        if (first === undefined) {
+          seen.set(entry.key, at);
+        } else {
+          addIssue({ message: `key "${entry.key}" appears more than once, in ${first} and ${at}` });
+        }
+      });
+    }
+  }),
+);
 
 // Throws naming the offending entry, so a bad export fails at boot rather than as a missing texture.
 export function parseManifest(value: unknown): AssetManifest {
-  const record = (value ?? {}) as Record<string, unknown>;
-  const manifest: AssetManifest = {
-    fonts: requireEntries<FontAsset>(["key", "png", "fnt"], "fonts", record.fonts),
-    images: requireEntries<ImageAsset>(["key", "png"], "images", record.images),
-    sounds: requireSounds(record.sounds),
-    sprites: requireEntries<SpriteAsset>(["key", "png", "json"], "sprites", record.sprites),
-  };
-
-  const seen = new Set<string>();
-  const entries = [...manifest.fonts, ...manifest.images, ...manifest.sounds, ...manifest.sprites];
-  for (const { key } of entries) {
-    if (!KEBAB_CASE.test(key)) {
-      throw new Error(`manifest key "${key}" must be kebab-case`);
-    }
-    if (seen.has(key)) {
-      throw new Error(`manifest key "${key}" appears more than once`);
-    }
-    seen.add(key);
+  const result = v.safeParse(manifestSchema, value, { abortPipeEarly: true });
+  if (!result.success) {
+    const [issue] = result.issues;
+    throw new Error(`manifest${issuePath(issue)} ${issue.message}`);
   }
-  return manifest;
+  return result.output;
 }
 
 export function assetUrl(baseUrl: string, path: string): string {

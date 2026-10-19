@@ -56,7 +56,7 @@ export class HelpScene extends Scene {
     this.draw();
 
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      const action = helpActionForKey(event.key);
+      const action = helpActionForKey(event.repeat, event.key);
       if (action !== undefined) {
         this.act(action);
       }

@@ -8,10 +8,11 @@ updates:
       default-days: 7
     ignore:
       # WORKAROUND: typescript-eslint's peer range caps typescript at <6.1.0, so
-      # 7 fails npm ci. Remove this ignore once it supports TypeScript 7:
+      # a 6.1 minor or a 7 major fails npm ci. Remove this ignore once the peer
+      # range admits them:
       # https://github.com/typescript-eslint/typescript-eslint/issues/10940
       - dependency-name: "typescript"
-        update-types: ["version-update:semver-major"]
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:

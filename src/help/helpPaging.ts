@@ -21,6 +21,9 @@ export interface HelpButtons {
 
 // Kept in range, so a page count that shrinks under a live edit still shows a page.
 export function clampPage(pageCount: number, page: number): number {
+  if (pageCount < 1) {
+    throw new RangeError(`Help needs at least one page, got ${pageCount}`);
+  }
   return clampIndex(pageCount, page);
 }
 

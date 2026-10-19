@@ -98,6 +98,19 @@ describe("artManifestUrls", () => {
     ]);
   });
 
+  it("lists both audio files of every sound", () => {
+    const manifest = {
+      fonts: [],
+      images: [],
+      sounds: [{ key: "sfx-tip", m4a: "sounds/sfx-tip.m4a", ogg: "sounds/sfx-tip.ogg" }],
+      sprites: [],
+    };
+    expect(artManifestUrls("/art", manifest)).toEqual([
+      "/art/sounds/sfx-tip.ogg",
+      "/art/sounds/sfx-tip.m4a",
+    ]);
+  });
+
   it("rejects a malformed manifest, as the game does", () => {
     expect(() => artManifestUrls("/art", { fonts: [], images: [] })).toThrow("manifest.sprites");
   });

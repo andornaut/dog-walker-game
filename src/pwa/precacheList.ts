@@ -66,10 +66,11 @@ export function resolveRelativePath(basePath: string, relativePath: string): str
 
 // Every file /art/manifest.json lists, as URLs under artBaseUrl.
 export function artManifestUrls(artBaseUrl: string, manifestJson: unknown): string[] {
-  const { fonts, images, sprites } = parseManifest(manifestJson);
+  const { fonts, images, sounds, sprites } = parseManifest(manifestJson);
   const paths = [
     ...fonts.flatMap(({ fnt, png }) => [png, fnt]),
     ...images.map(({ png }) => png),
+    ...sounds.flatMap(({ m4a, ogg }) => [ogg, m4a]),
     ...sprites.flatMap(({ json, png }) => [png, json]),
   ];
   return [...new Set(paths.map((path) => assetUrl(artBaseUrl, path)))];

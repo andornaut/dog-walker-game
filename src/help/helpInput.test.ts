@@ -5,22 +5,33 @@ import { helpActionForKey, helpActionForPointer } from "./helpInput";
 describe("helpActionForKey", () => {
   it("turns pages with the lane keys", () => {
     for (const key of ["ArrowLeft", "h", "A"]) {
-      expect(helpActionForKey(key)).toEqual({ kind: "previous" });
+      expect(helpActionForKey(false, key)).toEqual({ kind: "previous" });
     }
     for (const key of ["ArrowRight", "l", "D"]) {
-      expect(helpActionForKey(key)).toEqual({ kind: "next" });
+      expect(helpActionForKey(false, key)).toEqual({ kind: "next" });
     }
   });
 
   it("presses Next with Enter and Space, and closes with Escape", () => {
-    expect(helpActionForKey("Enter")).toEqual({ kind: "advance" });
-    expect(helpActionForKey(" ")).toEqual({ kind: "advance" });
-    expect(helpActionForKey("Escape")).toEqual({ kind: "close" });
+    expect(helpActionForKey(false, "Enter")).toEqual({ kind: "advance" });
+    expect(helpActionForKey(false, " ")).toEqual({ kind: "advance" });
+    expect(helpActionForKey(false, "Escape")).toEqual({ kind: "close" });
+  });
+
+  it("ignores a held Enter, Space or Escape, so a held key cannot close the help", () => {
+    for (const key of ["Enter", " ", "Escape"]) {
+      expect(helpActionForKey(true, key)).toBeUndefined();
+    }
+  });
+
+  it("keeps turning pages while a lane key is held", () => {
+    expect(helpActionForKey(true, "ArrowRight")).toEqual({ kind: "next" });
+    expect(helpActionForKey(true, "ArrowLeft")).toEqual({ kind: "previous" });
   });
 
   it("ignores other keys", () => {
     for (const key of ["ArrowUp", "e", "?", "1"]) {
-      expect(helpActionForKey(key)).toBeUndefined();
+      expect(helpActionForKey(false, key)).toBeUndefined();
     }
   });
 });
