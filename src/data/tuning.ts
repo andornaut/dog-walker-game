@@ -91,7 +91,7 @@ export const TUNING = {
     // By the number of dogs in the pack.
     tipByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },
   },
-  // Screen pixels at the 360x640 render size, or pixels per second for a speed.
+  // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {
     roadScrollSpeed: 120,
     // Road distance between rows of spawns; a row is all spawns at one distance.

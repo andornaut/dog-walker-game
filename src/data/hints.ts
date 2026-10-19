@@ -56,7 +56,7 @@ export const HINTS = {
     trigger: { kind: "tip" },
   },
   treat: {
-    text: "Tap a dog's slot to give its owner a treat.",
+    text: "Tap a doghouse to give its owner a treat.",
     trigger: { kind: "treat" },
   },
 } as const satisfies Record<string, Hint>;

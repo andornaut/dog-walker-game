@@ -14,7 +14,7 @@ export const HOME_TEXT = {
   dogBought: "{dog} joins your clients!",
   dogCantAfford: "Save {amount} more for {dog}.",
   gearBought: "{gear} is in your bag.",
-  hint: "Tap a dog to walk it. Tap a locked dog or gear to buy it. Hold for details.",
+  hint: "Tap to pick or buy. Hold for details.",
   packCount: "Pack {count}/{max}",
   packDogsMany: "{count} dogs",
   packDogsOne: "{count} dog",

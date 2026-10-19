@@ -17,8 +17,8 @@ A cozy pixel-art lane runner where you walk a pack of dogs through the neighbour
 ## Core loop
 
 - **Before a run:** pick your dogs (one per owned dog slot) and up to one piece of gear.
-- **During a run:** walk 4 zones. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop.
-- **Between zones:** pick 1 of 3 upgrade cards.
+- **During a run:** walk 4 of the 6 zones, starting on Woof Way. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop.
+- **Between zones:** pick 1 of 3 upgrade cards, then pick the next zone at a fork.
 - **After a run:** bank your earnings and spend them on the home screen: dogs, dog slots and gear.
 
 Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run structure, loadout, meta progression), Vampire Survivors (choices along the way), Slay the Spire (choices as cards).
@@ -33,7 +33,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees." with Head home and Keep walking. Head home (here or in the pause menu) keeps tips and earlier zones' fees; the current zone pays nothing
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
-- **Tap:** moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead
+- **Tap:** moves one lane toward the tapped half of the road. A tap on a doghouse gives that dog's owner a treat instead
 - **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; each other press queues one more lane, and a pull waits for the current move to finish
 - Taps on the top bar never move the pack. Pause offers Resume, Help, Settings and Head home
@@ -90,7 +90,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Pickups
 
-- **Treat:** carried, up to a limit; tap a dog's slot to give its owner +♥
+- **Treat:** carried, up to a limit; tap a dog's doghouse to give its owner +♥
 - **Tip:** +$. Smaller packs earn bigger tips: passers-by tip more for a calm walk
 
 ### Dogs
@@ -250,10 +250,10 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 
 - **Layout, top to bottom:** the top bar (bank, best walk and walk count, the Logbook button, settings); the gate scene; then three steps in order: 1. choose your walker, 2. choose your dogs, 3. choose gear (optional); then the Start walk button at the bottom. Nothing else sits between the steps, so the screen reads as choose this, choose that, start your walk
 - **Shop:** the home screen is the shop. Tap a locked dog, dog slot or gear item to buy it, at any time you can pay. Anything you can afford has a gold outline. The slot sign reads "Slot 2 · $800" with "Save $650 more" or "Tap to buy"
-- **Details:** hold any dog or gear item for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's effect. Gear tiles show their names
+- **Details:** hold any dog or gear item for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's name and effect
 - **Start button:** shows the pack, e.g. "Start walk · 2 dogs · $40/zone"; the pack count reads "Pack 1/1"
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after a walk "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
-- **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; the hint line reads "Tap a dog to walk it. Tap a locked dog or gear to buy it. Hold for details."
+- **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; the hint line reads "Tap to pick or buy. Hold for details." The message line fits about 48 characters, and the walker's bubble 2 lines of about 30
 - **Gear** (5 items, bought once): fanny pack (start the run with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +♥ and has a higher max). Equip up to 1 owned item before each run, or none
 - **Walker picker:** choose Casey, Ada, Ben or Trista. All are free; the choice is cosmetic and saved
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
