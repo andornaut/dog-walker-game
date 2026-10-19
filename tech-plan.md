@@ -27,6 +27,7 @@
 
 ## Architecture
 
+- **Site:** `/` is a static home page (owned by art), `/play/` is the game (`play/index.html`, built from `src/`), and `/art/` is the art gallery, copied as-is from `public/art/`. Both HTML pages are Vite build inputs.
 - **Render resolution:** 360×640 internal (portrait 9:16), scaled with `pixelArt` (no smoothing).
 - **All UI in the canvas:** the road, top bar, dog column and choice cards are Phaser scenes drawn at the same pixel scale with a pixel font. HTML is only the page shell. One scale and one input system: while cards are up, lane taps are not listened for.
 - **Screen layout:**
