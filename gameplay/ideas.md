@@ -1,6 +1,6 @@
 # Ideas
 
-Undecided and cut ideas. Nothing here is a commitment. Statuses: [floated] · [exploring] · [cut] (see [`README.md`](README.md)). An agreed idea moves to [`game-design.md`](game-design.md); one set aside for later moves to [`next.md`](next.md).
+Undecided and cut ideas; nothing here is a commitment. Statuses and how ideas move out are in [`README.md`](README.md).
 
 Format: `- [status] **Idea**: short description · notes`
 
@@ -10,9 +10,9 @@ Format: `- [status] **Idea**: short description · notes`
 
 ## Cut
 
-- [cut] **Scripted first walk**: a one-zone tutorial walk with guaranteed encounters · cut: first-time hints and the help screen teach the rules
-- [cut] **Mud encounter**: a mud obstacle for Fancy dogs · cut: puddles cover it
-- [cut] **Story recap on the end screen**: retell the run's biggest moments · cut: the end screen shows earnings only
+- [cut] **Scripted first walk**: a one-zone tutorial walk with guaranteed encounters · first-time hints and the help screen teach the rules
+- [cut] **Mud encounter**: a mud obstacle for Fancy dogs · puddles cover it
+- [cut] **Story recap on the end screen**: retell the run's biggest moments · the end screen shows earnings only
 
 ## Open questions
 
