@@ -680,18 +680,19 @@ def sticker(body, spikes, scale=1.0, turn=0.0):
 # ---------- the doghouse: one dog slot in the dog column, drawn as a character file card ----------
 
 # Each dog's colour: base, shade and dark, from the dog's accessory. It backs the dog's photo, rings
-# its emblem badge and runs along the card's foot stripe. Snowball's is his collar's blue, not its
-# sky, which backs every owner's photo.
+# its emblem badge and runs along the card's foot stripe. No two dogs share a base, and a base is
+# never a zone's road colour. Snowball's is his collar's blue, not its sky, which backs every
+# owner's photo; Archie's is rust, for his red merle coat.
 DOG_COLOURS = {
     "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
     "pierre": ("purple", "plum", "ink"), "biscuit": ("green", "dgreen", "forest"),
-    "archie": ("skin2", "brown", "dbrown"), "snowball": ("blue", "navy", "ink"),
+    "archie": ("rust", "dbrown", "plum"), "snowball": ("blue", "navy", "ink"),
     "penny": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
     "empty": ("slate", "dslate", "navy"),
 }
 
 # The foot stripe's ticks for a dog whose colour alone would sit too close to another dog's: Zippy's
-# red collar on his dred, Archie's red bandana on his merle, Penny's blue collar on her gold and
+# red collar on his dred, Archie's red bandana on his rust, Penny's blue collar on her gold and
 # Snowball's sky collar on his blue.
 TRIMS = {"zippy": "red", "archie": "red", "penny": "blue", "snowball": "sky"}
 
