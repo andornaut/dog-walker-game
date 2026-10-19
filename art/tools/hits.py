@@ -30,7 +30,7 @@ fx-hit-cafe        64x64  play (8 frames, 70ms)  a latte splash, the cup flippin
                    plays play-word, and play with reduced motion
 fx-lemonade        64x64  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
                                                   lemonade popping up, lemon slices, twinkles
-ui-hit-flash-green, -sky, -amber, -orange, -pink, -white
+ui-hit-flash-green, -sky, -amber, -mauve, -orange, -pink, -white
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
                           4x4 ordered dither to clear by x=15; tiles vertically, the
                           game mirrors it for the right edge
@@ -749,7 +749,8 @@ def lemonade_pop(step):
 # ---------- edge flash ----------
 
 FLASH = {"green": ("green", "teal"), "sky": ("cyan", "navy"), "amber": ("amber", "plum"),
-         "orange": ("orange", "plum"), "pink": ("pink", "plum"), "white": ("white", "plum")}
+         "mauve": ("mauve", "plum"), "orange": ("orange", "plum"), "pink": ("pink", "plum"),
+         "white": ("white", "plum")}
 
 
 def flash(colour, step):

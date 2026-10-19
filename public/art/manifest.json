@@ -2681,6 +2681,11 @@
       "json": "sprites/ui-hit-flash-green.json"
     },
     {
+      "key": "ui-hit-flash-mauve",
+      "png": "sprites/ui-hit-flash-mauve.png",
+      "json": "sprites/ui-hit-flash-mauve.json"
+    },
+    {
       "key": "ui-hit-flash-orange",
       "png": "sprites/ui-hit-flash-orange.png",
       "json": "sprites/ui-hit-flash-orange.json"
