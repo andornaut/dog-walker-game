@@ -2,7 +2,7 @@ import type { ZoneId } from "../data/types";
 
 // What lies beside the projected road, as art/tools/backdrops.py paints it below the
 // backdrops' streets, so the verge under the band continues the band's bottom row. across is
-// how far from the road's centre line a pixel is, in road pixels (the road is across < 140);
+// how far from the road's centre line a pixel is, in road pixels (the road is across < ROAD_HALF);
 // x is the same measure signed, negative on the left. z is a road distance from the start of
 // the walk, so seams, dots, tufts, leaves and rough patches scroll with the road; mown stripes
 // run along the street and stay put. span is how much road a screen row covers, and scale the
@@ -26,9 +26,10 @@ const RED = 0xe43b44;
 const YELLOW = 0xfee761;
 const ORANGE = 0xf77622;
 
+// Verge distances count out from the road's edge, so they move with the road's width.
 const ROAD_HALF = 140;
-const CURB = 144;
-const WALK = 188;
+const CURB = ROAD_HALF + 4;
+const WALK = ROAD_HALF + 48;
 const SEAM_EVERY = 32;
 // A row covering more road than SEAM_MAX_SPAN draws no seams, as they would run together.
 const SEAM_MAX_SPAN = 16;
@@ -120,17 +121,17 @@ export const VERGES: Readonly<Record<ZoneId, Verge>> = {
     seamColor: TAN,
     seamEvery: SEAM_EVERY,
     strips: [
-      { color: BROWN, dots: [], to: 146 },
+      { color: BROWN, dots: [], to: ROAD_HALF + 6 },
       {
         color: GREEN,
         dots: [
           { colors: [DARK_GREEN], share: 0.35 },
           { colors: [RED, YELLOW, WHITE, ORANGE], share: 0.1 },
         ],
-        to: 158,
+        to: ROAD_HALF + 18,
       },
-      { color: BROWN, dots: [], to: 160 },
-      { color: TAN, dots: [], to: 162 },
+      { color: BROWN, dots: [], to: ROAD_HALF + 20 },
+      { color: TAN, dots: [], to: ROAD_HALF + 22 },
     ],
     walkColor: CREAM,
     walkDots: [{ colors: [TAN], share: 0.02 }],
