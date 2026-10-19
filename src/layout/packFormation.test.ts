@@ -9,21 +9,13 @@ import {
 } from "./packFormation";
 
 describe("packPlacements", () => {
-  it("places one dog per pack member, all ahead of the walker", () => {
-    for (const count of [1, 2, 3]) {
-      const placements = packPlacements(count);
-      expect(placements).toHaveLength(count);
-      for (const { footDy } of placements) {
-        expect(footDy).toBeLessThan(0);
-      }
-    }
-  });
-
-  it("keeps every dog's 32px sprite within its 56px lane, centred on the walker", () => {
-    for (const count of [1, 2, 3]) {
-      for (const { dx } of packPlacements(count)) {
-        expect(Math.abs(dx) + 16).toBeLessThanOrEqual(56 / 2 + 2);
-      }
+  // One dog per pack member, all ahead of the walker, each 32px sprite within its 56px lane.
+  it.each([1, 2, 3])("places a pack of %d ahead of the walker, within the lane", (count) => {
+    const placements = packPlacements(count);
+    expect(placements).toHaveLength(count);
+    for (const { dx, footDy } of placements) {
+      expect(footDy).toBeLessThan(0);
+      expect(Math.abs(dx) + 16).toBeLessThanOrEqual(56 / 2 + 2);
     }
   });
 
@@ -32,9 +24,11 @@ describe("packPlacements", () => {
     expect(new Set(spots).size).toBe(3);
   });
 
-  it("clamps an out-of-range count to the nearest formation", () => {
-    expect(packPlacements(0)).toEqual(packPlacements(1));
-    expect(packPlacements(5)).toEqual(packPlacements(3));
+  it.each([
+    [0, 1],
+    [5, 3],
+  ])("clamps a count of %d to the formation for %d", (count, nearest) => {
+    expect(packPlacements(count)).toEqual(packPlacements(nearest));
   });
 });
 

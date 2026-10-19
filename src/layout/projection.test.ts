@@ -76,11 +76,8 @@ describe("roadProjection", () => {
     }
   });
 
-  it("puts the far edge of the road in view at scale 0.5", () => {
+  it("puts the far edge of the road in view at scale 0.5 on the band's bottom edge", () => {
     expect(scaleAt(projection, projection.visibleDistance)).toBeCloseTo(0.5);
-  });
-
-  it("puts the far edge of the road in view on the band's bottom edge", () => {
     expect(screenYAt(projection, projection.visibleDistance)).toBeCloseTo(road.y);
   });
 
@@ -92,10 +89,8 @@ describe("roadProjection", () => {
 });
 
 describe("inverses", () => {
-  it("distanceAtY undoes screenYAt", () => {
-    for (const distance of [-6, 0, 100, 400, 700]) {
-      expect(distanceAtY(projection, screenYAt(projection, distance))).toBeCloseTo(distance);
-    }
+  it.each([-6, 0, 100, 400, 700])("distanceAtY undoes screenYAt at %d", (distance) => {
+    expect(distanceAtY(projection, screenYAt(projection, distance))).toBeCloseTo(distance);
   });
 
   it("roadXAt undoes project's x", () => {
@@ -105,17 +100,20 @@ describe("inverses", () => {
 });
 
 describe("snapScale", () => {
-  it("snaps to the nearest depth step by ratio", () => {
-    expect(snapScale(1.01)).toBe(1);
-    expect(snapScale(0.94)).toBe(1);
-    expect(snapScale(0.93)).toBe(0.875);
-    expect(snapScale(0.82)).toBe(0.875);
-    expect(snapScale(0.8)).toBe(0.75);
-    expect(snapScale(0.69)).toBe(0.75);
-    expect(snapScale(0.68)).toBe(0.625);
-    expect(snapScale(0.56)).toBe(0.625);
-    expect(snapScale(0.55)).toBe(0.5);
-    expect(snapScale(0.3)).toBe(0.5);
+  // The nearest depth step by ratio, each pair either side of a boundary.
+  it.each([
+    [1.01, 1],
+    [0.94, 1],
+    [0.93, 0.875],
+    [0.82, 0.875],
+    [0.8, 0.75],
+    [0.69, 0.75],
+    [0.68, 0.625],
+    [0.56, 0.625],
+    [0.55, 0.5],
+    [0.3, 0.5],
+  ])("snaps %d to %d", (scale, step) => {
+    expect(snapScale(scale)).toBe(step);
   });
 
   it("draws the pack at 1 and the far edge at 0.5", () => {

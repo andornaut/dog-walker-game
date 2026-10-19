@@ -105,30 +105,51 @@ describe("depthDraw", () => {
     expect(statusOverlayLift(1)).toBe(6);
   });
 
-  it("draws each hand-drawn step at its own size", () => {
-    const arts = artsOf("cone");
-    expect(depthDraw(arts, 0.75)).toMatchObject({ key: "cone@75", scale: 1 });
-    expect(depthDraw(arts, 0.5)).toMatchObject({ key: "cone@50", scale: 1 });
-  });
-
-  it("downscales the smallest step at least as big as the sprite is drawn", () => {
-    // A 32-wide sprite with only @75 and @50, whatever steps the shipped cone has.
-    const arts = syntheticArts("cone", 32, [0.75, 0.5]);
-    expect(depthDraw(arts, 0.8)).toMatchObject({ key: "cone", scale: 26 / 32 });
-    expect(depthDraw(arts, 0.7)).toMatchObject({ key: "cone@75", scale: 22 / 24 });
-    // A sprite with no @75 draws its 1x from just above 0.5.
-    expect(depthDraw(syntheticArts("cloud", 88, [0.5]), 0.6)).toMatchObject({
+  // A 32-wide cone with only @75 and @50, whatever steps the shipped cone has.
+  const cone32 = syntheticArts("cone", 32, [0.75, 0.5]);
+  const everyCone = withEveryStep(artsOf("cone"));
+  it.each([
+    { arts: artsOf("cone"), key: "cone@75", name: "a hand-drawn step", projected: 0.75, scale: 1 },
+    { arts: artsOf("cone"), key: "cone@50", name: "a hand-drawn step", projected: 0.5, scale: 1 },
+    {
+      arts: cone32,
+      key: "cone",
+      name: "the next step up, downscaled",
+      projected: 0.8,
+      scale: 26 / 32,
+    },
+    {
+      arts: cone32,
+      key: "cone@75",
+      name: "the next step up, downscaled",
+      projected: 0.7,
+      scale: 22 / 24,
+    },
+    {
+      arts: syntheticArts("cloud", 88, [0.5]),
       key: "cloud",
+      name: "the 1x from just above 0.5 without a @75",
+      projected: 0.6,
       scale: 53 / 88,
-    });
-  });
-
-  it("draws the in-between @88 and @62 steps when it has them", () => {
-    const arts = withEveryStep(artsOf("cone"));
-    expect(depthDraw(arts, 0.875)).toMatchObject({ key: "cone@88", scale: 1 });
-    expect(depthDraw(arts, 0.625)).toMatchObject({ key: "cone@62", scale: 1 });
-    expect(depthDraw(arts, 0.8)).toMatchObject({ key: "cone@88", scale: 26 / 28 });
-    expect(depthDraw(arts, 0.6)).toMatchObject({ key: "cone@62", scale: 19 / 20 });
+    },
+    { arts: everyCone, key: "cone@88", name: "the in-between step", projected: 0.875, scale: 1 },
+    { arts: everyCone, key: "cone@62", name: "the in-between step", projected: 0.625, scale: 1 },
+    {
+      arts: everyCone,
+      key: "cone@88",
+      name: "the in-between step, downscaled",
+      projected: 0.8,
+      scale: 26 / 28,
+    },
+    {
+      arts: everyCone,
+      key: "cone@62",
+      name: "the in-between step, downscaled",
+      projected: 0.6,
+      scale: 19 / 20,
+    },
+  ])("draws $name at $projected as $key", ({ arts, key, projected, scale }) => {
+    expect(depthDraw(arts, projected)).toMatchObject({ key, scale });
   });
 
   it("follows the projection to the nearest pixel, as it approaches only growing", () => {

@@ -13,12 +13,12 @@ const pixelsOf = (spans: PixelSpan[]) =>
   spans.flatMap(({ width, x, y }) => Array.from({ length: width }, (_, i) => `${x + i},${y}`));
 
 describe("shadowRadiusX", () => {
-  it("is 2 pixels short of half the sprite's width", () => {
-    expect(shadowRadiusX(20)).toBe(8);
-  });
-
-  it("is at least 3", () => {
-    expect(shadowRadiusX(6)).toBe(3);
+  // 2 pixels short of half the sprite's width, and at least 3.
+  it.each([
+    [8, 20],
+    [3, 6],
+  ])("is %d for a sprite %d wide", (radius, width) => {
+    expect(shadowRadiusX(width)).toBe(radius);
   });
 });
 

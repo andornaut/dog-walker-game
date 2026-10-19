@@ -15,36 +15,46 @@ const config = {
 };
 
 describe("screenLayout", () => {
-  it("spans the top bar across the full width", () => {
-    expect(screenLayout(config).topBar).toEqual({ height: 40, width: 360, x: 0, y: 0 });
-  });
-
-  it("puts the backdrop band under the top bar, across the full width", () => {
-    expect(screenLayout(config).backdrop).toEqual({ height: 110, width: 360, x: 0, y: 40 });
-  });
-
-  it("draws the road across the full width from the band down to the doghouses", () => {
-    expect(screenLayout(config).roadView).toEqual({ height: 320, width: 360, x: 0, y: 150 });
-  });
-
-  it("runs the road's approach up the band's bottom 24 rows, band rows 86 to 109", () => {
-    const { approach, rasterView } = screenLayout(config);
-    expect(approach).toEqual({ height: 24, width: 360, x: 0, y: 126 });
-    expect(rasterView).toEqual({ height: 344, width: 360, x: 0, y: 126 });
-  });
-
-  it("centres the road's lanes in the drawn road", () => {
-    expect(screenLayout(config).road).toEqual({ height: 320, width: 280, x: 40, y: 150 });
-  });
-
-  it("puts a row of 120x90 doghouse slots along the bottom", () => {
-    const { dogRow, dogSlots } = screenLayout(config);
-    expect(dogRow).toEqual({ height: 90, width: 360, x: 0, y: 470 });
-    expect(dogSlots).toEqual([
-      { height: 90, width: 120, x: 0, y: 470 },
-      { height: 90, width: 120, x: 120, y: 470 },
-      { height: 90, width: 120, x: 240, y: 470 },
-    ]);
+  const layout = screenLayout(config);
+  it.each([
+    ["the top bar across the full width", layout.topBar, { height: 40, width: 360, x: 0, y: 0 }],
+    [
+      "the backdrop band under the top bar, across the full width",
+      layout.backdrop,
+      { height: 110, width: 360, x: 0, y: 40 },
+    ],
+    [
+      "the drawn road across the full width from the band down to the doghouses",
+      layout.roadView,
+      { height: 320, width: 360, x: 0, y: 150 },
+    ],
+    [
+      "the road's approach up the band's bottom 24 rows, band rows 86 to 109",
+      layout.approach,
+      { height: 24, width: 360, x: 0, y: 126 },
+    ],
+    [
+      "the raster view from the approach down",
+      layout.rasterView,
+      { height: 344, width: 360, x: 0, y: 126 },
+    ],
+    [
+      "the road's lanes centred in the drawn road",
+      layout.road,
+      { height: 320, width: 280, x: 40, y: 150 },
+    ],
+    ["the doghouse row along the bottom", layout.dogRow, { height: 90, width: 360, x: 0, y: 470 }],
+    [
+      "three 120x90 doghouse slots in the row",
+      layout.dogSlots,
+      [
+        { height: 90, width: 120, x: 0, y: 470 },
+        { height: 90, width: 120, x: 120, y: 470 },
+        { height: 90, width: 120, x: 240, y: 470 },
+      ],
+    ],
+  ])("places %s", (_, actual, expected) => {
+    expect(actual).toEqual(expected);
   });
 
   it("splits the game's road into 56px lanes", () => {

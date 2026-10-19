@@ -72,51 +72,65 @@ describe("the verge beside the road", () => {
       ),
     );
 
+  const MOWN_LAWN: [number, number, number][] = [
+    [0, 14, DARK_GREEN],
+    [15, 32, GREEN],
+    [33, 63, DARK_GREEN],
+    [64, 85, GREEN],
+    [86, 107, LIGHT_GREY],
+    [108, 109, GREY],
+    [110, 249, STRIP_MARK],
+    [250, 251, GREY],
+    [252, 273, LIGHT_GREY],
+    [274, 295, GREEN],
+    [296, 326, DARK_GREEN],
+    [327, 344, GREEN],
+    [345, 359, DARK_GREEN],
+  ];
+
   // The runs of each backdrop's row 109 beside the road, without its tufts.
-  it("continues Woof Way's and The Long Way Home's mown lawn, sidewalk and curb", () => {
-    for (const zone of ["street", "homeStretch"] as const) {
-      expect(baseRuns(zone)).toEqual([
-        [0, 14, DARK_GREEN],
-        [15, 32, GREEN],
-        [33, 63, DARK_GREEN],
-        [64, 85, GREEN],
-        [86, 107, LIGHT_GREY],
+  it.each<{ name: string; runs: [number, number, number][]; zone: ZoneId }>([
+    { name: "Woof Way's mown lawn, sidewalk and curb", runs: MOWN_LAWN, zone: "street" },
+    {
+      name: "The Long Way Home's mown lawn, sidewalk and curb",
+      runs: MOWN_LAWN,
+      zone: "homeStretch",
+    },
+    {
+      name: "Bark Park's unmown grass up to the path",
+      runs: [
+        [0, 109, GREEN],
+        [110, 249, STRIP_MARK],
+        [250, 359, GREEN],
+      ],
+      zone: "park",
+    },
+    {
+      name: "Sniff Street Shops' paving up to a curb",
+      runs: [
+        [0, 107, LIGHT_GREY],
         [108, 109, GREY],
         [110, 249, STRIP_MARK],
         [250, 251, GREY],
-        [252, 273, LIGHT_GREY],
-        [274, 295, GREEN],
-        [296, 326, DARK_GREEN],
-        [327, 344, GREEN],
-        [345, 359, DARK_GREEN],
-      ]);
-    }
+        [252, 359, LIGHT_GREY],
+      ],
+      zone: "shops",
+    },
+  ])("continues $name", ({ runs, zone }) => {
+    expect(baseRuns(zone)).toEqual(runs);
   });
 
-  it("runs Bark Park's unmown grass up to the path", () => {
-    expect(baseRuns("park")).toEqual([
-      [0, 109, GREEN],
-      [110, 249, STRIP_MARK],
-      [250, 359, GREEN],
-    ]);
-  });
-
-  it("paves Sniff Street Shops up to a curb", () => {
-    expect(baseRuns("shops")).toEqual([
-      [0, 107, LIGHT_GREY],
-      [108, 109, GREY],
-      [110, 249, STRIP_MARK],
-      [250, 251, GREY],
-      [252, 359, LIGHT_GREY],
-    ]);
-  });
-
-  it("ends a dark mown stripe where it would draw under 4px wide", () => {
-    // The second stripe, 62 wide, from 232 across.
-    expect(mownAt(250, 0.5)).toBe(true);
-    expect(mownAt(250, 0.06)).toBe(false);
-    expect(mownAt(200, 1)).toBe(false);
-  });
+  // The second stripe, 62 wide, from 232 across.
+  it.each([
+    [250, 0.5, true],
+    [250, 0.06, false],
+    [200, 1, false],
+  ])(
+    "mownAt(%d, %d) is %s: a dark stripe ends where it would draw under 4px wide",
+    (across, scale, mown) => {
+      expect(mownAt(across, scale)).toBe(mown);
+    },
+  );
 
   it("darkens the lawn only with tufts, and only the lawn", () => {
     const out = draw(frameOf({ current: look("street", 0x123456), scroll: 300 }));

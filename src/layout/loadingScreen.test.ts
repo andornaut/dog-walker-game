@@ -9,74 +9,75 @@ import {
 } from "./loadingScreen";
 
 describe("bootProgress", () => {
-  it("fills the first 0.9 over the network load", () => {
-    expect(bootProgress("network", 0)).toBe(0);
-    expect(bootProgress("network", 0.5)).toBeCloseTo(0.45);
-    expect(bootProgress("network", 1)).toBeCloseTo(0.9);
-  });
-
-  it("fills the rest while the assets are processed", () => {
-    expect(bootProgress("processing", 0)).toBeCloseTo(0.9);
-    expect(bootProgress("processing", 0.5)).toBeCloseTo(0.95);
-    expect(bootProgress("processing", 1)).toBe(1);
-  });
-
-  it("holds a fraction outside 0 to 1 to its phase", () => {
-    expect(bootProgress("network", -1)).toBe(0);
-    expect(bootProgress("network", 2)).toBeCloseTo(0.9);
-    expect(bootProgress("processing", 2)).toBe(1);
+  // The first 0.9 over the network load, the rest while the assets are processed, and a
+  // fraction outside 0 to 1 held to its phase.
+  it.each([
+    ["network", 0, 0],
+    ["network", 0.5, 0.45],
+    ["network", 1, 0.9],
+    ["processing", 0, 0.9],
+    ["processing", 0.5, 0.95],
+    ["processing", 1, 1],
+    ["network", -1, 0],
+    ["network", 2, 0.9],
+    ["processing", 2, 1],
+  ] as const)("fills %s at %d to %d", (phase, fraction, expected) => {
+    expect(bootProgress(phase, fraction)).toBeCloseTo(expected);
   });
 });
 
 describe("byteFraction", () => {
-  it("weighs each file by its size", () => {
-    const files = [
-      { bytes: 300_000, fraction: 0.5 },
-      { bytes: 10_000, fraction: 1 },
-      { bytes: 90_000, fraction: 0 },
-    ];
-    expect(byteFraction(files)).toBeCloseTo(160_000 / 400_000);
-  });
-
-  it("holds each file's fraction to 0 to 1", () => {
-    expect(byteFraction([{ bytes: 100, fraction: 2 }])).toBe(1);
-    expect(byteFraction([{ bytes: 100, fraction: -1 }])).toBe(0);
-  });
-
-  it("treats a load with no bytes as done", () => {
-    expect(byteFraction([])).toBe(1);
+  // Each file weighed by its size, its fraction held to 0 to 1; no bytes is done.
+  it.each([
+    {
+      expected: 160_000 / 400_000,
+      files: [
+        { bytes: 300_000, fraction: 0.5 },
+        { bytes: 10_000, fraction: 1 },
+        { bytes: 90_000, fraction: 0 },
+      ],
+      name: "three files of different sizes",
+    },
+    { expected: 1, files: [{ bytes: 100, fraction: 2 }], name: "a fraction over 1" },
+    { expected: 0, files: [{ bytes: 100, fraction: -1 }], name: "a fraction under 0" },
+    { expected: 1, files: [], name: "no bytes" },
+  ])("is $expected for $name", ({ expected, files }) => {
+    expect(byteFraction(files)).toBeCloseTo(expected);
   });
 });
 
 describe("stepFraction", () => {
-  it("counts the steps done", () => {
-    expect(stepFraction(4, 0)).toBe(0);
-    expect(stepFraction(4, 1)).toBe(0.25);
-    expect(stepFraction(4, 4)).toBe(1);
-  });
-
-  it("treats a phase with no steps as done", () => {
-    expect(stepFraction(0, 0)).toBe(1);
+  // The share of steps done, and a phase with no steps is done.
+  it.each([
+    [4, 0, 0],
+    [4, 1, 0.25],
+    [4, 4, 1],
+    [0, 0, 1],
+  ])("of %d steps with %d done is %d", (steps, done, expected) => {
+    expect(stepFraction(steps, done)).toBe(expected);
   });
 });
 
 describe("loadingWalkerAt", () => {
-  it("walks from the track's first dot to the doghouse", () => {
-    expect(loadingWalkerAt(0)).toEqual({ x: 76, y: 332 });
-    expect(loadingWalkerAt(0.4)).toEqual({ x: 76 + 59, y: 332 });
-    expect(loadingWalkerAt(1)).toEqual({ x: 76 + 148, y: 332 });
-  });
-
-  it("stays on the track past either end", () => {
-    expect(loadingWalkerAt(-0.5).x).toBe(76);
-    expect(loadingWalkerAt(1.5).x).toBe(224);
+  // From the track's first dot to the doghouse, staying on the track past either end.
+  it.each([
+    [0, 76],
+    [0.4, 76 + 59],
+    [1, 76 + 148],
+    [-0.5, 76],
+    [1.5, 224],
+  ])("walks at %d to x %d", (fraction, x) => {
+    expect(loadingWalkerAt(fraction)).toEqual({ x, y: 332 });
   });
 });
 
 describe("loadingBarWidth", () => {
-  it("fills the 200px track in whole pixels", () => {
-    expect(loadingBarWidth(0)).toBe(0);
-    expect(loadingBarWidth(0.333)).toBe(67);
-    expect(loadingBarWidth(1)).toBe(200);
+  // The 200px track in whole pixels.
+  it.each([
+    [0, 0],
+    [0.333, 67],
+    [1, 200],
+  ])("fills %d as %dpx", (fraction, width) => {
+    expect(loadingBarWidth(fraction)).toBe(width);
   });
 });

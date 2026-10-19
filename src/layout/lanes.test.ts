@@ -1,18 +1,18 @@
 import { describe, expect, it } from "vitest";
 
-import { laneCenterXs, laneDividerXs, moveLane } from "./lanes";
+import { laneCenterXs, type LaneDirection, laneDividerXs, moveLane } from "./lanes";
 
 const road = { height: 600, width: 280, x: 80, y: 40 };
 
 describe("moveLane", () => {
-  it("moves one lane left or right", () => {
-    expect(moveLane(5, -1, 2)).toBe(1);
-    expect(moveLane(5, 1, 2)).toBe(3);
-  });
-
-  it("stays in the edge lane when moving off the road", () => {
-    expect(moveLane(5, -1, 0)).toBe(0);
-    expect(moveLane(5, 1, 4)).toBe(4);
+  // One lane left or right, staying in the edge lane when moving off the road.
+  it.each<[number, LaneDirection, number]>([
+    [2, -1, 1],
+    [2, 1, 3],
+    [0, -1, 0],
+    [4, 1, 4],
+  ])("moves from lane %d by %d to lane %d", (lane, direction, expected) => {
+    expect(moveLane(5, direction, lane)).toBe(expected);
   });
 });
 

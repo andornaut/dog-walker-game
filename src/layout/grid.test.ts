@@ -25,12 +25,11 @@ describe("gridRects", () => {
 describe("rectIndexAt", () => {
   const rects = gridRects(spec, 9, { x: 8, y: 212 });
 
-  it("finds the cell under a point", () => {
-    expect(rectIndexAt(rects, 130, 270)).toBe(4);
-  });
-
-  it("finds nothing in the gap between cells or outside the grid", () => {
-    expect(rectIndexAt(rects, 121, 220)).toBeUndefined();
-    expect(rectIndexAt(rects, 4, 220)).toBeUndefined();
+  it.each([
+    ["a cell", 130, 270, 4],
+    ["the gap between cells", 121, 220, undefined],
+    ["outside the grid", 4, 220, undefined],
+  ])("finds under a point in %s (%d, %d): %s", (_, x, y, expected) => {
+    expect(rectIndexAt(rects, x, y)).toBe(expected);
   });
 });

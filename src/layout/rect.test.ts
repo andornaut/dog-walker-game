@@ -5,15 +5,14 @@ import { containsPoint, insetRect } from "./rect";
 describe("containsPoint", () => {
   const rect = { height: 20, width: 10, x: 5, y: 40 };
 
-  it("holds points on its left and top edges and inside", () => {
-    expect(containsPoint(rect, 5, 40)).toBe(true);
-    expect(containsPoint(rect, 14, 59)).toBe(true);
-  });
-
-  it("does not hold points on its right and bottom edges or outside", () => {
-    expect(containsPoint(rect, 15, 50)).toBe(false);
-    expect(containsPoint(rect, 10, 60)).toBe(false);
-    expect(containsPoint(rect, 4, 50)).toBe(false);
+  it.each([
+    ["the top-left corner", 5, 40, true],
+    ["the last pixel inside", 14, 59, true],
+    ["the right edge", 15, 50, false],
+    ["the bottom edge", 10, 60, false],
+    ["outside", 4, 50, false],
+  ])("holds a point on %s (%d, %d): %s", (_, x, y, expected) => {
+    expect(containsPoint(rect, x, y)).toBe(expected);
   });
 });
 
