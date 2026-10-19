@@ -94,6 +94,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 400
+   },
+   "walker-casey 12.aseprite": {
+    "frame": { "x": 384, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 150
+   },
+   "walker-casey 13.aseprite": {
+    "frame": { "x": 416, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 150
+   },
+   "walker-casey 14.aseprite": {
+    "frame": { "x": 448, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 150
+   },
+   "walker-casey 15.aseprite": {
+    "frame": { "x": 480, "y": 0, "w": 32, "h": 48 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "sourceSize": { "w": 32, "h": 48 },
+    "duration": 150
    }
  },
  "meta": {
@@ -101,13 +133,14 @@
   "version": "1.2.30-x64",
   "image": "walker-casey.png",
   "format": "RGBA8888",
-  "size": { "w": 384, "h": 48 },
+  "size": { "w": 512, "h": 48 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
    { "name": "react", "from": 4, "to": 5, "direction": "forward" },
    { "name": "stumble", "from": 6, "to": 9, "direction": "forward" },
-   { "name": "idle", "from": 10, "to": 11, "direction": "forward" }
+   { "name": "idle", "from": 10, "to": 11, "direction": "forward" },
+   { "name": "wave", "from": 12, "to": 15, "direction": "forward" }
   ]
  }
 }

@@ -3257,6 +3257,14 @@
       "png": "images/icon-owner-laid-back.png"
     },
     {
+      "key": "icon-pace-fast",
+      "png": "images/icon-pace-fast.png"
+    },
+    {
+      "key": "icon-pace-slow",
+      "png": "images/icon-pace-slow.png"
+    },
+    {
       "key": "icon-pause",
       "png": "images/icon-pause.png"
     },
@@ -3315,6 +3323,14 @@
     {
       "key": "icon-stinky",
       "png": "images/icon-stinky.png"
+    },
+    {
+      "key": "icon-style-charm",
+      "png": "images/icon-style-charm.png"
+    },
+    {
+      "key": "icon-style-hustle",
+      "png": "images/icon-style-hustle.png"
     },
     {
       "key": "icon-trait-chaser",

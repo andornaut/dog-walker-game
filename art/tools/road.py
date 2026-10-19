@@ -5,7 +5,12 @@ People are 32x48, animals 32x32, pickups and small effects 16x16 (the ice cream
 truck is 88x44, two lanes, the construction barrier 56x32, one lane, and the skunk's
 stink haze 88x40, a ground decal), all chibi and
 in Endesga 32 with coloured outlines. The walker is seen from behind, like the
-dogs; everything coming down the road faces the player. What stands on the road
+dogs, except in wave; everything coming down the road faces the player.
+
+walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
+400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
+as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
+1, 3, 4 and 3px right of it. A walker who unlocks waves from the sidewalk in a popup stop. What stands on the road
 is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
 front elevation (the ice cream truck a rear one, like obstacles.parked_car),
 with no top surface and its base on the last opaque row.
@@ -268,6 +273,224 @@ def lean(g, k):
             if g.px[y][x] and 0 <= x + dx < g.w:
                 out.px[y][x + dx] = g.px[y][x]
     return out
+
+
+# ---------- the walkers waving (front view) ----------
+# A walker who unlocks waves from the sidewalk, facing the camera: the same clothes, colours and frame as
+# the back view, feet on the same rows, the left arm (screen right) raised and swinging from the shoulder.
+
+def raised_arm(g, x, w, top, bottom, dx, parts):
+    """An arm raised from the shoulder (its bottom row) to the hand (its top row), tilted so the hand sits dx
+    pixels right of the shoulder; every row shifts in proportion, so it pivots at the shoulder. parts are
+    (rows, fill, shade) from the hand down, the last running to the shoulder; shade takes the right column."""
+    y = top
+    for i, (rows, fill, shade) in enumerate(parts):
+        end = bottom + 1 if i == len(parts) - 1 else y + rows
+        for yy in range(y, end):
+            s = round(dx * (bottom - yy) / (bottom - top))
+            g.rect(x + s, yy, w, 1, fill)
+            g.p(x + s + w - 1, yy, shade)
+        y = end
+    # the thumb, so the hand reads as an open palm
+    g.p(x + round(dx * (bottom - top - 1) / (bottom - top)) - 1, top + 1, parts[0][1])
+
+
+def front_eyes(g, cx, y):
+    """Eyes for dark skin: a white beside each ink pupil, so they hold on the face."""
+    for x in (cx - 5, cx + 3):
+        g.rect(x, y, 1, 2, "white")
+        g.rect(x + 1, y, 1, 2, "ink")
+
+
+def casey_front(wave=0, bob=0):
+    """Casey facing the camera: the amber cap's orange brim over the eyes, sky hoodie with a blue kangaroo
+    pocket and white drawstrings, jeans, white sneakers."""
+    g = Grid(32, 48)
+    b = bob
+    for x in (11, 17):
+        g.rect(x, 33 + b, 4, 10 - b, "blue")
+        g.rect(x + 3, 33 + b, 1, 10 - b, "navy")
+        g.rect(x, 43, 4, 2, "white")
+        g.rect(x, 44, 4, 1, "lgrey")
+    g.rect(5, 22 + b, 4, 10, "sky")
+    g.rect(5, 22 + b, 1, 10, "cyan")
+    g.rect(8, 22 + b, 1, 10, "blue")
+    g.rect(5, 32 + b, 4, 3, "skin1")
+    g.rect(9, 21 + b, 14, 13, "sky")
+    g.rect(20, 21 + b, 3, 13, "blue")
+    g.rect(9, 21 + b, 1, 12, "cyan")
+    g.p(9, 21 + b, None)
+    g.p(22, 21 + b, None)
+    g.rect(9, 33 + b, 14, 1, "blue")
+    g.rect(11, 27 + b, 10, 5, "blue")
+    g.rect(12, 28 + b, 8, 4, "sky")
+    g.rect(14, 22 + b, 1, 4, "white")
+    g.rect(17, 22 + b, 1, 4, "white")
+    g.ell(16, 21.5 + b, 6, 2, "blue")
+    g.rect(14, 19 + b, 4, 3, "skin2")
+    raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "skin1", "skin2"), (0, "sky", "blue")))
+    # head: hair at the sides under the cap, ears, face, then the cap with its brim towards the camera
+    g.ell(16, 11 + b, 8.5, 6, "dbrown", "plum", "brown")
+    g.rect(7, 13 + b, 2, 3, "skin1")
+    g.rect(23, 13 + b, 2, 3, "skin1")
+    g.ell(16, 14 + b, 7.5, 6.5, "skin1", "skin2")
+    g.ell(16, 8 + b, 8.5, 5, "amber", "orange", "yellow")
+    g.rect(7, 10 + b, 18, 2, "orange")
+    g.rect(7, 11 + b, 18, 1, "rust")
+    g.p(16, 6 + b, "yellow")
+    face_front(g, 16, 14 + b)
+    g.p(10, 17 + b, "pink")
+    g.p(22, 17 + b, "pink")
+    return g
+
+
+def ada_front(wave=0, bob=0):
+    """Ada facing the camera, 4px shorter than the adults: long black curls framing her face and falling past
+    her shoulders, a pink clip, pink tee, teal shorts."""
+    g = Grid(32, 48)
+    b = bob
+    for x in (12, 17):
+        g.rect(x, 40 + b, 3, 3 - b, "brown")
+        g.rect(x, 43, 3, 1, "white")
+        g.rect(x, 44, 3, 2, "lgrey")
+        g.rect(x, 45, 3, 1, "pink")
+    # the curls behind her shoulders, then the tee and shorts over them
+    g.ell(16, 18.5 + b, 8.5, 8, "navy", "ink", "dslate")
+    g.rect(8, 19 + b, 16, 11, "navy")
+    g.rect(21, 19 + b, 3, 11, "ink")
+    for x, y, rx, ry, c in ((8.4, 23, 1.6, 2, "navy"), (8.6, 28, 1.4, 1.6, "navy"), (23.6, 23.5, 1.4, 1.8, "ink"),
+                            (23.4, 28.4, 1.5, 1.5, "ink")):
+        g.ell(x, y + b, rx, ry, c)
+    g.rect(7, 30 + b, 3, 7, "brown")
+    g.rect(7, 30 + b, 3, 3, "pink")
+    g.rect(10, 29 + b, 12, 8, "pink")
+    g.rect(19, 29 + b, 3, 8, "mauve")
+    g.rect(14, 29 + b, 4, 1, "mauve")
+    g.rect(10, 36 + b, 12, 4, "sky")
+    g.rect(19, 36 + b, 3, 4, "blue")
+    g.rect(15, 38 + b, 2, 2, "blue")
+    g.rect(14, 26 + b, 4, 3, "dbrown")
+    raised_arm(g, 22, 3, 16 + b, 31 + b, wave, ((3, "brown", "dbrown"), (9, "brown", "dbrown"), (0, "pink", "mauve")))
+    # her face, then the curls over her forehead, lit dslate on the left
+    g.ell(16, 20.5 + b, 6.5, 6.5, "brown")
+    g.rect(10, 18 + b, 1, 4, "navy")
+    g.rect(22, 18 + b, 1, 4, "ink")
+    g.ell(16, 14.5 + b, 7.5, 3.5, "navy", "ink", "dslate")
+    for x, y in ((11, 16), (14, 17), (18, 17), (21, 16)):
+        g.p(x, y + b, "navy")
+    g.rect(11, 12 + b, 3, 1, "dslate")
+    g.ell(21, 13 + b, 2, 1.5, "pink", "mauve")
+    face_front(g, 16, 20 + b, lips="dbrown")
+    return rim(g, dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"),
+                       brown=("skin2", None), blue=("sky", None)))
+
+
+def ben_front(wave=0, bob=0):
+    """Ben facing the camera: bald, the chin-strap beard along his jaw and under his chin, a smile, green tee,
+    navy track pants with a grey stripe, white sneakers."""
+    g = Grid(32, 48)
+    b = bob
+    for x in (11, 17):
+        g.rect(x, 33 + b, 4, 10 - b, "navy")
+        g.rect(x + (0 if x < 16 else 3), 33 + b, 1, 10 - b, "grey")
+        g.rect(x, 43, 4, 2, "white")
+        g.rect(x, 44, 4, 1, "lgrey")
+        g.rect(x + 1, 43, 2, 1, "red")
+    g.rect(5, 22 + b, 4, 4, "green")
+    g.rect(8, 22 + b, 1, 4, "dgreen")
+    g.rect(5, 26 + b, 4, 6, "dbrown")
+    g.rect(8, 26 + b, 1, 6, "plum")
+    g.rect(5, 32 + b, 4, 3, "dbrown")
+    g.rect(9, 21 + b, 14, 13, "green")
+    g.rect(20, 21 + b, 3, 13, "dgreen")
+    g.p(9, 21 + b, None)
+    g.p(22, 21 + b, None)
+    g.rect(13, 19 + b, 6, 3, "plum")
+    g.rect(13, 21 + b, 6, 1, "dgreen")
+    raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "dbrown", "plum"), (8, "dbrown", "plum"), (0, "green", "dgreen")))
+    g.rect(8, 12 + b, 2, 3, "dbrown")
+    g.rect(22, 12 + b, 2, 3, "plum")
+    g.blob(16, 12 + b, 7, 9, "dbrown", "plum", power=2.15)
+    g.rect(11, 7 + b, 3, 1, "brown")
+    g.p(11, 8 + b, "brown")
+    # the beard runs down the jaw and round under the chin, leaving the upper lip bare
+    g.rect(9, 14 + b, 1, 4, "ink")
+    g.rect(22, 14 + b, 1, 4, "ink")
+    g.ell(16, 18.5 + b, 6, 2.5, "ink")
+    g.rect(13, 16 + b, 6, 1, "dbrown")
+    front_eyes(g, 16, 12 + b)
+    g.rect(14, 17 + b, 4, 1, "cream")
+    g.p(13, 16 + b, "cream")
+    g.p(18, 16 + b, "cream")
+    return rim(g, dict(navy=("grey", "grey"), dgreen=("green", None), dbrown=("skin2", "brown"),
+                       plum=("skin2", "brown"), ink=("grey", "slate")))
+
+
+def trista_front(wave=0, bob=0):
+    """Trista facing the camera: a dirty blonde bob framing her face with a side-swept fringe, round glasses, a
+    green cardigan open over a white blouse, navy skirt, tights, brown flats, her apple tote on her right
+    shoulder (screen left)."""
+    g = Grid(32, 48)
+    b = bob
+    for x in (11, 17):
+        g.rect(x + 1, 37 + b, 3, 6 - b, "dslate")
+        g.rect(x, 43, 4, 2, "dbrown")
+    g.rect(5, 22 + b, 4, 10, "dgreen")
+    g.rect(8, 22 + b, 1, 10, "forest")
+    g.rect(5, 22 + b, 1, 10, "green")
+    g.rect(5, 32 + b, 4, 3, "skin1")
+    g.rect(9, 21 + b, 14, 11, "dgreen")
+    g.rect(20, 21 + b, 3, 11, "forest")
+    g.rect(9, 21 + b, 1, 10, "green")
+    g.p(9, 21 + b, None)
+    g.p(22, 21 + b, None)
+    g.rect(14, 21 + b, 4, 10, "white")
+    g.rect(17, 22 + b, 1, 9, "lgrey")
+    g.tri((12, 21 + b), (16, 21 + b), (14.5, 24.5 + b), "white")
+    g.tri((16, 21 + b), (20, 21 + b), (17.5, 24.5 + b), "white")
+    for y in (25, 28):
+        g.p(13, y + b, "amber")
+    g.rect(9, 31 + b, 14, 7, "navy")
+    g.rect(20, 31 + b, 3, 7, "ink")
+    g.rect(9, 31 + b, 14, 1, "dslate")
+    # the canvas tote hangs off her shoulder by a strap, the apple facing out
+    g.rect(7, 21 + b, 1, 5, "brown")
+    g.rect(2, 26 + b, 7, 8, "cream")
+    g.rect(7, 26 + b, 2, 8, "tan")
+    g.rect(4, 28 + b, 3, 3, "red")
+    g.p(5, 27 + b, "dgreen")
+    raised_arm(g, 23, 4, 9 + b, 23 + b, wave, ((3, "skin1", "skin2"), (0, "dgreen", "forest")))
+    # the bob: hair behind and beside the face to the shoulders, flicking out, then the face and fringe
+    g.ell(16, 12.5 + b, 9, 9, "brown", "dbrown", "tan")
+    g.rect(7, 12 + b, 18, 7, "brown")
+    g.rect(22, 12 + b, 3, 7, "dbrown")
+    g.p(6, 19 + b, "brown")
+    g.p(25, 19 + b, "dbrown")
+    g.rect(7, 19 + b, 2, 1, "brown")
+    g.rect(23, 19 + b, 2, 1, "dbrown")
+    g.ell(16, 14.5 + b, 6.5, 6.5, "skin1", "skin2")
+    g.rect(14, 19 + b, 4, 2, "skin2")
+    g.ell(17, 8.5 + b, 8, 3.5, "brown", "dbrown", "tan")
+    g.tri((8, 8 + b), (19, 9 + b), (9, 13.5 + b), "brown")
+    for x, y, h in ((11, 6, 3), (15, 5, 3), (19, 6, 2)):
+        g.rect(x, y + b, 1, h, "amber")
+    face_front(g, 16, 14 + b)
+    for cx in (11.5, 19.5):
+        for dx, dy in ((-2, 0), (-2, 1), (1, 0), (1, 1), (-1, -1), (0, -1), (-1, 2), (0, 2)):
+            g.p(cx + dx + 0.5, 14 + dy + b, "dbrown")
+    g.rect(14, 14 + b, 4, 1, "dbrown")
+    return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
+
+
+WAVES = {
+    "walker-casey": casey_front,
+    "walker-ada": ada_front,
+    "walker-ben": ben_front,
+    "walker-trista": trista_front,
+}
+# The hand's swing right of the shoulder, one frame each: out, further, back.
+WALKER_WAVE = (1, 3, 4, 3)
+WALKER_WAVE_MS = 150
 
 
 # ---------- pickups ----------
@@ -1054,7 +1277,8 @@ def sprites():
         yield key, [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
-                    ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS)]
+                    ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
+                    ("wave", frames(edged(WAVES[key](w)) for w in WALKER_WAVE), WALKER_WAVE_MS)]
     yield "treat", [("idle", frames([treat(0), treat(-1)]), 400)]
     yield "tip", [("idle", frames(tip(rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames([skunk(0), skunk(1)]), 400)]

@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Draw the info icons shown beside a dog in the pack picker, the shop and the zone banner, the
-dog status icons on the doghouse heart board, and the run top bar's state strip icons.
+"""Draw the info icons shown beside a dog in the pack picker, the shop and the zone banner, a walker's
+pace and style icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
 
 16x16 images in Endesga 32 with coloured outlines, on transparency:
 icon-trait-<trait>          fancy (a pink bow), food-driven (a bone), chaser (a squirrel)
+icon-pace-<pace>            a walker's pace, on walker tiles and the detail card: slow (a snail), fast
+                            (a hare bounding, with speed lines)
+icon-style-<style>          a walker's style beside the pace: charm (a red rose with a twinkle),
+                            hustle (a green money bag with a yellow $)
 icon-quirk-<dog>            each dog's quirk, beside its trait, outlined to hold 3:1 on cream and
                             tan: archie Acrobatic (a red arrow looping a flip around a paw),
                             biscuit Scent hound (a beagle in profile sniffing scent lines from a
@@ -111,6 +115,70 @@ def chaser():
     g.rect(4, 5, 1, 2, "ink")
     g.p(2, 7, "plum")
     g.rect(4, 14, 2, 1, "rust")
+    return g
+
+
+# ---------- walkers: pace and style, on walker tiles and the detail card ----------
+# Animals and objects with no bow, bone, squirrel, moon, paw or bolt, so they never read as a dog's trait or
+# energy: slow and fast are a snail and a hare, charm a rose and hustle a money bag.
+
+def pace_slow():
+    """A snail creeping right: an amber shell coiled in orange over a yellow foot, its eye stalk up."""
+    g = Grid(16, 16)
+    g.rect(1, 12, 14, 2, "yellow")
+    g.rect(1, 13, 14, 1, "amber")
+    g.ell(13, 10.5, 2, 2.5, "yellow", "amber")
+    g.rect(13, 5, 1, 4, "yellow")
+    g.rect(13, 4, 2, 2, "yellow")
+    g.p(14, 4, "ink")
+    g.ell(6, 7.5, 5, 5, "amber", "orange", "yellow")
+    bitmap(g, 3, 4, ["..ooo..", ".o...o.", "o..o..o", "o.o.o.o", "o..o..o", ".o....o"], {"o": "rust"})
+    g.p(14, 10, "ink")
+    return g
+
+
+def pace_fast():
+    """A hare at full stretch, bounding right: ears laid back, forelegs reaching, hind legs kicked out behind,
+    with speed lines streaming off its back."""
+    g = Grid(16, 16)
+    bitmap(g, 0, 1, ["........ww......",
+                     ".......wppw.....",
+                     ".sss.....wppw...",
+                     "...........wwww.",
+                     "........wwwwwww.",
+                     ".ss..wwwwwwwwkw.",
+                     "...wwwwwwwwwwwp.",
+                     "..wwwwwwwwwwwwl.",
+                     "..wwwwwwwwwwll..",
+                     "...lwwwwwwlll...",
+                     "..ll.......lwww.",
+                     ".ll..........ww."],
+           {"w": "white", "l": "lgrey", "p": "pink", "k": "ink", "s": "sky"})
+    return g
+
+
+def style_charm():
+    """A red rose on a green stem with a leaf, and a twinkle beside the bloom."""
+    g = Grid(16, 16)
+    g.rect(7, 8, 2, 7, "dgreen")
+    g.rect(7, 8, 1, 7, "green")
+    g.ell(4.5, 11.5, 2.5, 1.5, "green", "dgreen")
+    g.ell(7.5, 5, 4.5, 4, "red", "dred", "pink")
+    bitmap(g, 5, 3, ["..d..", ".d.d.", "d.d.d", ".dd.."], {"d": "dred"})
+    star4(g, 13, 3, 2, "yellow")
+    g.p(15, 3, None)
+    return g
+
+
+def style_hustle():
+    """A money bag: a green sack tied at the neck with an amber cord, a yellow $ on its front."""
+    g = Grid(16, 16)
+    g.ell(8, 10.5, 6, 5, "green", "dgreen")
+    g.rect(6, 3, 4, 3, "green")
+    g.tri((4.5, 1), (8, 4.5), (6.5, 1), "green")
+    g.tri((11.5, 1), (8, 4.5), (9.5, 1), "dgreen")
+    g.rect(5, 5, 6, 1, "amber")
+    bitmap(g, 6, 7, [".y.", "yyy", "y..", "yyy", "..y", "yyy", ".y."], {"y": "yellow"})
     return g
 
 
@@ -673,6 +741,10 @@ IMAGES = {
     "icon-trait-fancy": fancy,
     "icon-trait-food-driven": food_driven,
     "icon-trait-chaser": chaser,
+    "icon-pace-slow": pace_slow,
+    "icon-pace-fast": pace_fast,
+    "icon-style-charm": style_charm,
+    "icon-style-hustle": style_hustle,
     "icon-quirk-archie": acrobatic,
     "icon-quirk-biscuit": scent_hound,
     "icon-quirk-duchess": pampered,
