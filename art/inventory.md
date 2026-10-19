@@ -8,15 +8,15 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 ## People and dogs
 
-| Key                   | Type   | Size  | Tags                                             | Pri  | Note                                                                              |
-| --------------------- | ------ | ----- | ------------------------------------------------ | ---- | --------------------------------------------------------------------------------- |
-| `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | core | ada, ben, casey, trista                                                           |
-| `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                     |
-| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny |
-| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse                                                                          |
-| `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | core | Keyed by dog                                                                      |
-| `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                       |
-| `portrait-dog-<name>` | image  | 64×64 |                                                  | core | Dog pick and shop                                                                 |
+| Key                   | Type   | Size  | Tags                                             | Pri  | Note                                                                                                                                                                                                  |
+| --------------------- | ------ | ----- | ------------------------------------------------ | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | core | ada, ben, casey, trista                                                                                                                                                                               |
+| `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                                                                                                                                         |
+| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
+| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse                                                                                                                                                                                              |
+| `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | core | Keyed by dog                                                                                                                                                                                          |
+| `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                           |
+| `portrait-dog-<name>` | image  | 64×64 |                                                  | core | Dog pick and shop                                                                                                                                                                                     |
 
 ## Road objects
 
@@ -167,6 +167,7 @@ Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). T
 | `badge-<achievement>`                                         | sprite | 32×32                                      | `earned`, `locked`    | core  | 15; achievement name in kebab case                                                       |
 | `fx-confetti`                                                 | sprite | 64×64                                      | `play`                | core  | Behind a badge as it is earned                                                           |
 | `icon-trait-<trait>`                                          | image  | 16×16                                      |                       | core  | chaser, fancy, food-driven                                                               |
+| `icon-quirk-<dog>`                                            | image  | 16×16                                      |                       | core  | One per dog, by dog id (9)                                                               |
 | `icon-energy-<energy>`                                        | image  | 16×16                                      |                       | core  | calm, steady, hyper                                                                      |
 | `icon-owner-<temperament>`                                    | image  | 16×16                                      |                       | core  | laid-back, fussy, dramatic                                                               |
 | `item-<gear>`                                                 | image  | 32×32                                      |                       | core  | One per gear id (5)                                                                      |

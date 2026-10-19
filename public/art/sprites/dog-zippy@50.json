@@ -142,6 +142,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
     "sourceSize": { "w": 16, "h": 16 },
     "duration": 60
+   },
+   "dog-zippy@50 18.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 90
+   },
+   "dog-zippy@50 19.aseprite": {
+    "frame": { "x": 304, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 90
+   },
+   "dog-zippy@50 20.aseprite": {
+    "frame": { "x": 320, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 90
+   },
+   "dog-zippy@50 21.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 16, "h": 16 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 16, "h": 16 },
+    "sourceSize": { "w": 16, "h": 16 },
+    "duration": 90
    }
  },
  "meta": {
@@ -149,7 +181,7 @@
   "version": "1.2.30-x64",
   "image": "dog-zippy@50.png",
   "format": "RGBA8888",
-  "size": { "w": 288, "h": 16 },
+  "size": { "w": 352, "h": 16 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
@@ -157,7 +189,8 @@
    { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
    { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
    { "name": "idle", "from": 10, "to": 13, "direction": "forward" },
-   { "name": "shake", "from": 14, "to": 17, "direction": "forward" }
+   { "name": "shake", "from": 14, "to": 17, "direction": "forward" },
+   { "name": "pounce", "from": 18, "to": 21, "direction": "forward" }
   ]
  }
 }

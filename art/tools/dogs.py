@@ -13,7 +13,11 @@ Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
   played when he pulls or meets a playmate); dog-penny lunge (4, 140ms; Nervous: a
   stiff-legged strain toward another dog with her hackles up, leaning right like
   pull, mirrored for left) and worried (2, 500ms; clingy: ears down, glancing back
-  over her shoulder, while she is the only dog on the leash).
+  over her shoulder, while she is the only dog on the leash); dog-biscuit sniff (3,
+  180ms; Scent hound: nose down, tail flagged up and wagging, a puff of scent beside
+  the nose); dog-nugget pose (3, 220ms; Camera ready: sits square, cocks his head and
+  a sparkle glints over it); dog-zippy pounce (4, 90ms; Ratter: a crouch, a spring, a
+  stretched leap over motion streaks and a landing on the front paws).
 - face-dog-<name>: the dog column face. Tags: happy, neutral, upset, then the
   quirk's faces (QUIRK_FACES): face-dog-penny worried (ears back, whale eyes,
   a wobbly mouth and a sweat bead), while she is the only dog on the leash.
@@ -97,8 +101,30 @@ WORRIED = [
     dict(ears=-1, tuck=1),
     dict(ears=-1, tuck=1, lean=-1, glance=-1),
 ]
+# Biscuit's sniff: nose down to the road and the tail flagged up, wagging, as a puff of scent rises on
+# one side of the nose, then the other.
+SNIFF = [
+    dict(nose=2, perk=1, tail=-2),
+    dict(nose=2, perk=1, tail=1, scent=-1),
+    dict(nose=2, perk=1, tail=2, scent=1),
+]
+# Nugget's pose: he sits square for the camera, cocks his head, and a sparkle glints over it.
+POSE = [
+    dict(sit=1),
+    dict(sit=1, tilt=-1, glint=1),
+    dict(sit=1, tilt=-1, glint=2),
+]
+# Zippy's pounce: a crouch with the tail going, a spring off the hind legs, a stretched leap with the
+# front paws reaching and motion streaks under him, and a landing on the front paws.
+POUNCE = [
+    dict(bob=1, fl=-1, fr=-1, tail=1, ears=1),
+    dict(hop=-2, reach=-1, fl=-2, fr=-2, bl=1, br=1, tail=-1, ears=1),
+    dict(hop=-4, reach=-2, fl=-3, fr=-3, bl=1, br=1, ears=1, streak=1),
+    dict(hop=-1, reach=-1, fl=-2, fr=-2, bob=1),
+]
 # A quirk's tags go after ROAD_TAGS and its faces after FACE_TAGS, on the dogs that have it.
-QUIRK_TAGS = {"archie": [("flourish", FLOURISH, 90)], "penny": [("lunge", LUNGE, 140), ("worried", WORRIED, 500)]}
+QUIRK_TAGS = {"archie": [("flourish", FLOURISH, 90)], "penny": [("lunge", LUNGE, 140), ("worried", WORRIED, 500)],
+              "biscuit": [("sniff", SNIFF, 180)], "nugget": [("pose", POSE, 220)], "zippy": [("pounce", POUNCE, 90)]}
 QUIRK_FACES = {"penny": ["worried"]}
 
 
@@ -117,10 +143,15 @@ def pose(q):
     the shake-off's droplets have flown from the flanks, 0 for none. The quirk keys: hop lifts the whole
     dog (negative is up); whirl draws a swoosh on the right (positive) or left (negative) flank; hackles
     raises a ridge of fur along the back; reach moves the head alone (negative is forward); tuck holds the
-    tail in; glance turns the head back over the left (negative) or right shoulder. The small versions round them to whole pixels, so draws read whirl and
-    glance by their sign."""
+    tail in; glance turns the head back over the left (negative) or right shoulder; nose lowers the nose
+    to the road (the head dips forward and shortens); perk flags the tail up; scent puffs scent beside the
+    nose, left (negative) or right; sit sets the hindquarters down; tilt cocks the head left (negative) or
+    right; glint is a sparkle's size over the head; streak draws motion lines under a leap. The small
+    versions round them to whole pixels, so draws read whirl, glance, scent, sit, tilt and streak by their
+    sign."""
     return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0, spray=0, hop=0, whirl=0,
-                     hackles=0, reach=0, tuck=0, glance=0), **q)
+                     hackles=0, reach=0, tuck=0, glance=0, nose=0, perk=0, scent=0, sit=0, tilt=0, glint=0,
+                     streak=0), **q)
 
 
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
@@ -200,18 +231,22 @@ def biscuit_road(q):
     g.ell(bx, 21.5 + b, 5, 4.5, "navy", "ink", "dslate")
     g.ell(bx - 5, 23.5 + b, 1.8, 2.5, "ochre")
     g.ell(bx + 5, 23.5 + b, 1.8, 2.5, "ochre", "rust")
-    # tail held up, white tip
-    tx = 16 + q["tail"]
-    g.rect(tx - 1, 26 + b, 2, 3, "navy")
-    g.rect(tx - 1, 29 + b, 2, 1, "white")
+    # tail held up, white tip; flagged, it stands 1px longer
+    tx, pk = 16 + q["tail"], 1 if q["perk"] else 0
+    g.rect(tx - 1, 26 + b, 2, 3 + pk, "navy")
+    g.rect(tx - 1, 29 + b + pk, 2, 1, "white")
     g.ell(bx, 16 + b, 4.5, 1.5, "ink")
     g.rect(bx - 5, 16 + b, 10, 2, "green")
     g.rect(bx - 5, 17 + b, 10, 1, "dgreen")
-    # a round head no wider than the body, the long ears hanging from its sides past the collar
-    hx = 16 + ln
-    g.ell(hx, 11 + b, 5.5, 5, "ochre", None, "tan")
+    # a round head no wider than the body, the long ears hanging from its sides past the collar; nose down,
+    # the head dips below the shoulders and foreshortens, the ears left hanging long beside it
+    hx, n = 16 + ln, q["nose"]
+    if n:
+        g.ell(hx, 14 + b, 4, 2.5, "ochre")
+    g.ell(hx, 11 + b - n / 2, 5.5 - n / 4, 5 - n * 0.75, "ochre", None, "tan")
     g.ell(hx - 5, 13 + b - q["ears"], 2, 4.5, "rust", "dbrown")
     g.ell(hx + 5, 13 + b - q["ears"] + q["twitch"], 2, 4.5, "rust", "dbrown")
+    scent(g, hx, 5 + b - n, q["scent"])
     spray(g, q["spray"])
     return g
 
@@ -280,20 +315,29 @@ def nugget_road(q):
     b, ln = q["bob"], q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 2, "skin2")
     g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 2, "skin2")
-    g.rect(12, 27 + q["bl"], 2, 2, "skin2")
-    g.rect(18, 27 + q["br"], 2, 2, "skin2")
     bx = 16 + ln // 2
-    g.ell(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    if q["sit"]:
+        # sitting square: the rump settles into a rounder, wider seat, the hind feet set out at its sides
+        g.rect(bx - 7, 27, 2, 2, "skin2")
+        g.rect(bx + 5, 27, 2, 2, "skin2")
+        g.ell(bx, 24 + b, 6, 4.5, "skin1", "skin2", "cream")
+    else:
+        g.rect(12, 27 + q["bl"], 2, 2, "skin2")
+        g.rect(18, 27 + q["br"], 2, 2, "skin2")
+        g.ell(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
     tx = 16 + q["tail"]
     g.ell(tx, 26 + b, 2, 1.6, "skin1", "skin2")
     g.p(tx, 26 + b, "skin2")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.rect(bx - 1, 19 + b, 2, 2, "dred")
-    hx = 16 + ln
+    # the head; cocked, it shifts 1px to that side, the ear on that side dropping and the other lifting
+    tl = (q["tilt"] > 0) - (q["tilt"] < 0)
+    hx = 16 + ln + tl
     g.ell(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
-    g.ell(hx - 4.5, 12 + b - q["ears"], 1.8, 1.5, "navy")
-    g.ell(hx + 4.5, 12 + b - q["ears"] + q["twitch"], 1.8, 1.5, "navy")
+    g.ell(hx - 4.5, 12 + b - q["ears"] - tl, 1.8, 1.5, "navy")
+    g.ell(hx + 4.5, 12 + b - q["ears"] + q["twitch"] + tl, 1.8, 1.5, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
+    sparkle(g, hx + 9, 6 + b, q["glint"])
     spray(g, q["spray"])
     return g
 
@@ -320,25 +364,32 @@ def nugget_face(mood):
 
 def zippy_road(q):
     g, q = edged(Grid()), pose(q)
-    b, ln = q["bob"], q["lean"]
+    hop = q["hop"]
+    b, ln = q["bob"] + hop, q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 3, "white")
     g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 3, "white")
-    g.rect(12, 26 + q["bl"], 2, 3, "white")
-    g.rect(18, 26 + q["br"], 2, 3, "white")
+    g.rect(12, 26 + q["bl"] + hop, 2, 3, "white")
+    g.rect(18, 26 + q["br"] + hop, 2, 3, "white")
     bx = 16 + ln // 2
     g.ell(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
     g.ell(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
     tx = 16 + q["tail"]
     g.rect(tx - 1, 27 + b, 2, 2, "white")
     g.p(tx, 28 + b, "ochre")
+    # reaching, the head stretches forward of the collar on a white neck
+    hx, hb = 16 + ln, b + q["reach"]
+    if q["reach"]:
+        g.ell(hx, 18 + b + q["reach"] / 2, 3.5, 2 - q["reach"] / 2, "white", "lgrey")
     g.rect(bx - 4, 19 + b, 8, 1, "red")
-    hx = 16 + ln
-    g.ell(hx, 15 + b, 5, 4.5, "white", "lgrey")
-    g.ell(hx + 2, 14 + b, 2.5, 2, "ochre")
+    g.ell(hx, 15 + hb, 5, 4.5, "white", "lgrey")
+    g.ell(hx + 2, 14 + hb, 2.5, 2, "ochre")
     e = q["ears"]
-    g.tri((hx - 5, 14 + b), (hx - 4, 10 + b + e), (hx - 1.5, 12.5 + b), "ochre")
+    g.tri((hx - 5, 14 + hb), (hx - 4, 10 + hb + e), (hx - 1.5, 12.5 + hb), "ochre")
     t = q["twitch"]
-    g.tri((hx + 5, 14 + b + t), (hx + 4, 10 + b + e + t), (hx + 1.5, 12.5 + b + t), "ochre")
+    g.tri((hx + 5, 14 + hb + t), (hx + 4, 10 + hb + e + t), (hx + 1.5, 12.5 + hb + t), "ochre")
+    if q["streak"]:
+        for x in (8, 23):
+            g.rect(x, 25 + hop, 1, 4, "white")
     spray(g, q["spray"])
     return g
 
@@ -680,6 +731,27 @@ def glance(g, hx, hy, side):
     g.p(x + side * 2, hy + 2, "ink")
     g.p(x, hy, "ink")
     g.p(x - side, hy, "white")
+
+
+def scent(g, hx, y, side):
+    """A sniff of scent: a white puff curling up beside the nose on the left (side < 0) or right, held
+    clear of the head; the road outline rings it."""
+    if not side:
+        return
+    x = hx + (-5 if side < 0 else 2)
+    for dx, dy in ((1, 1), (0, 0), (1, -1), (2, -2), (0, -4)):
+        g.p(x + dx, y + dy, "white")
+
+
+def sparkle(g, cx, cy, size):
+    """Nugget's camera-ready glint: a yellow plus with a white core, arms 1px long at size 1 and 2px at
+    size 2, drawn as lines so the small versions keep its shape."""
+    if not size:
+        return
+    r = 1 if size < 1.5 else 2
+    g.rect(cx - r, cy, 2 * r + 1, 1, "yellow")
+    g.rect(cx, cy - r, 1, 2 * r + 1, "yellow")
+    g.p(cx, cy, "white")
 
 
 def spray(g, d):

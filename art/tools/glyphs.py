@@ -4,6 +4,15 @@ dog status icons on the doghouse heart board, and the run top bar's state strip 
 
 16x16 images in Endesga 32 with coloured outlines, on transparency:
 icon-trait-<trait>          fancy (a pink bow), food-driven (a bone), chaser (a squirrel)
+icon-quirk-<dog>            each dog's quirk, beside its trait, outlined to hold 3:1 on cream and
+                            tan: archie Acrobatic (a red arrow looping a flip around a paw),
+                            biscuit Scent hound (a beagle in profile sniffing scent lines from a
+                            tip one lane over), duchess Pampered (a treat bone under two hearts),
+                            koda Sled dog (a sled racing right over speed lines), nugget Camera
+                            ready (a camera with a flash star), penny Nervous (a golden dog on stiff
+                            legs, hackles up, trembling), pierre Show dog (a purple prize rosette),
+                            snowball Crowd pleaser (a crowd of three under a heart), zippy Ratter
+                            (a white foreleg stamping on a squirrel's tail)
 icon-energy-<energy>        calm (a sleepy moon), steady (a paw print), hyper (a lightning bolt)
 icon-owner-<temperament>    laid-back (sunglasses and a grin), fussy (a frown and a cross mark),
                             dramatic (a wail and a tear)
@@ -36,6 +45,7 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
+import math
 import os
 import subprocess
 import sys
@@ -44,6 +54,8 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import DARKER, K, Grid, build as build_sprites  # noqa: E402
+from fx import star4  # noqa: E402
+from needs import SCENT, Icon  # noqa: E402
 from ui import to_image  # noqa: E402
 
 
@@ -98,6 +110,160 @@ def chaser():
     g.rect(4, 5, 1, 2, "ink")
     g.p(2, 7, "plum")
     g.rect(4, 14, 2, 1, "rust")
+    return g
+
+
+# ---------- quirks: one per dog, beside its trait ----------
+# On Icon (needs.py), so outlines run down the ramp until they hold 3:1 on cream and tan, and
+# 1px marks go on after the outline.
+
+def acrobatic():
+    """Archie: a red arrow looping a full flip around a paw print."""
+    g = Icon()
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - 7.5, y + 0.5 - 8.5
+            a = math.degrees(math.atan2(dy, dx))
+            if 5 <= math.hypot(dx, dy) <= 6.8 and not -5 < a < 80:
+                g.p(x, y, "pink" if dx < -1 and dy < -1 and math.hypot(dx, dy) < 5.8 else "red")
+    bitmap(g, 10, 8, ["1111111", ".11112.", "..112..", "...2..."], {"1": "red", "2": "dred"})
+    bitmap(g, 5, 6, ["1.1.1", ".....", ".222.", ".222."], {"1": "skin2", "2": "brown"})
+    return g
+
+
+def scent_hound():
+    """Biscuit: a beagle's head in profile, long ear down, sniffing scent lines that reach sideways from a
+    tip one lane over."""
+    g = Icon()
+    bitmap(g, 6, 1, ["....oooo..",
+                     "...oooooo.",
+                     "..oooeooo.",
+                     ".kkwwoorrr",
+                     ".kkwwworrr",
+                     "..wwwwrrrr",
+                     "...www.rrr",
+                     "......grr.",
+                     ".....ggg..",
+                     "........r."],
+           {"o": "ochre", "w": "white", "r": "rust", "e": "ink", "k": "ink", "g": "green"})
+    g.ell(3, 12.5, 3, 3, "amber", "orange", "yellow")
+    g.rect(3, 11, 1, 3, "orange")
+    for x0, y0 in ((0, 3), (1, 7)):
+        for dx, dy in SCENT:
+            g.marks.append((x0 + dx, y0 + dy, "purple"))
+    return g
+
+
+def pampered():
+    """Duchess: a treat bone under two hearts."""
+    g = Icon()
+    heart(g, 1, 1)
+    heart(g, 8, 3)
+    g.rect(4, 12, 8, 2, "cream")
+    for cx, cy in ((3.5, 11.5), (3.5, 13.5), (12.5, 11.5), (12.5, 13.5)):
+        g.ell(cx, cy, 1.6, 1.6, "cream", "tan")
+    g.rect(4, 13, 8, 1, "tan")
+    g.p(4, 12, "white")
+    return g
+
+
+def sled_dog():
+    """Koda: a dog sled racing right, its driver's handlebar at the back, the runner curling up at the
+    front, speed lines trailing behind."""
+    g = Icon()
+    g.rect(4, 3, 1, 6, "brown")
+    g.rect(4, 3, 3, 1, "brown")
+    g.rect(4, 8, 9, 2, "brown")
+    g.rect(4, 8, 9, 1, "ochre")
+    for x in (5, 8, 11):
+        g.rect(x, 10, 1, 2, "dbrown")
+    g.rect(3, 12, 10, 1, "lgrey")
+    bitmap(g, 12, 7, ["..11", "...1", "...1", "...1", "..1.", "11.."], {"1": "lgrey"})
+    for x, y, w in ((0, 5, 3), (0, 9, 3), (0, 12, 2)):
+        g.rect(x, y, w, 1, "sky")
+    return g
+
+
+def camera_ready():
+    """Nugget: a camera with a flash star at its top right."""
+    g = Icon()
+    g.rect(1, 6, 13, 8, "slate")
+    g.rect(1, 6, 13, 1, "grey")
+    g.rect(3, 4, 4, 2, "slate")
+    g.ell(7.5, 10, 3.3, 3.3, "lgrey", "grey", "white")
+    g.ell(7.5, 10, 1.9, 1.9, "sky", "blue", "cyan")
+    g.p(11, 8, "red")
+    star4(g, 12, 3, 2, "yellow")
+    return g
+
+
+def nervous():
+    """Penny: a golden dog in profile on stiff legs, hackles bristling along her back, ear flat, tail
+    tucked, trembling."""
+    g = Icon()
+    for x in (3, 5, 9, 11):
+        g.rect(x, 11, 1, 4, "amber")
+    g.ell(7.5, 9.5, 5, 2.8, "amber", "orange", "yellow")
+    g.ell(12.5, 6.5, 3, 2.6, "amber", "orange", "yellow")
+    g.rect(14, 7, 2, 2, "amber")
+    g.p(15, 7, "ink")
+    g.ell(11.5, 7.5, 1.2, 2.2, "orange")
+    g.p(13, 6, "ink")
+    g.p(14, 5, "white")
+    for x in (3, 5, 7, 9):
+        g.tri((x - 1, 7.5), (x + 0.5, 4.5), (x + 1.5, 7.5), "ochre")
+    g.rect(2, 10, 2, 2, "orange")
+    g.p(4, 12, "orange")
+    for x, y in ((0, 5), (1, 6), (0, 7), (0, 10), (1, 11), (0, 12)):
+        g.marks.append((x, y, "purple"))
+    return g
+
+
+def show_dog():
+    """Pierre: a purple prize rosette with a gold centre and two ribbon tails."""
+    g = Icon()
+    for x0, slant in ((4, -1), (9, 1)):
+        g.tri((x0, 9), (x0 + 3, 9), (x0 + 1.5 + slant * 2, 15.5), "purple")
+    g.ell(8, 6.5, 6.5, 6.5, "mauve")
+    for i in range(12):
+        a = math.radians(i * 30)
+        g.p(8 + 6.2 * math.cos(a) - 0.5, 6.5 + 6.2 * math.sin(a) - 0.5, None)
+    g.ell(8, 6.5, 4.2, 4.2, "purple")
+    g.ell(8, 6.5, 2.6, 2.6, "amber", "orange", "yellow")
+    return g
+
+
+def crowd_pleaser():
+    """Snowball: a crowd of three under a heart."""
+    g = Icon()
+    for cx, cy, r, skin, hair, shirt in ((2.5, 9, 2.3, "skin1", "dbrown", "sky"),
+                                        (13.5, 9, 2.3, "brown", "plum", "red"),
+                                        (8, 10.5, 2.7, "skin2", "amber", "green")):
+        g.ell(cx, cy + 5, r + 0.6, 2.6, shirt)
+        g.ell(cx, cy, r, r, skin)
+        for y in range(16):
+            for x in range(16):
+                if y + 0.5 < cy - r * 0.35 and math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= r:
+                    g.p(x, y, hair)
+        g.p(cx - 1.5, cy, "ink")
+        g.p(cx + 0.5, cy, "ink")
+    heart(g, 5, 0)
+    return g
+
+
+def ratter():
+    """Zippy: a white foreleg stamping down on a squirrel's bushy tail, pinning it."""
+    g = Icon()
+    g.ell(5, 6, 4.5, 5.5, "ochre", "rust", "tan")
+    g.ell(5.5, 6.5, 2, 3.5, "tan")
+    g.ell(3.5, 2, 2, 1.6, "ochre")
+    g.ell(8.5, 12, 4.5, 2.6, "ochre", "rust")
+    g.ell(14.5, 14, 1.6, 1.6, "ochre", "rust")
+    g.rect(11, 3, 4, 7, "white")
+    g.rect(14, 3, 1, 7, "lgrey")
+    g.ell(12, 11.5, 3.5, 2.5, "white", "lgrey")
+    for x in (11, 13):
+        g.rect(x, 12, 1, 2, "grey")
     return g
 
 
@@ -493,6 +659,15 @@ IMAGES = {
     "icon-trait-fancy": fancy,
     "icon-trait-food-driven": food_driven,
     "icon-trait-chaser": chaser,
+    "icon-quirk-archie": acrobatic,
+    "icon-quirk-biscuit": scent_hound,
+    "icon-quirk-duchess": pampered,
+    "icon-quirk-koda": sled_dog,
+    "icon-quirk-nugget": camera_ready,
+    "icon-quirk-penny": nervous,
+    "icon-quirk-pierre": show_dog,
+    "icon-quirk-snowball": crowd_pleaser,
+    "icon-quirk-zippy": ratter,
     "icon-energy-calm": calm,
     "icon-energy-steady": steady,
     "icon-energy-hyper": hyper,
