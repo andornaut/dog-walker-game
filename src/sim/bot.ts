@@ -9,7 +9,6 @@ import { chance, type Random } from "../runner/random";
 import {
   isPickup,
   itemCategory,
-  itemHeight,
   laneMoveSeconds,
   pickupReach,
   type RoadGeometry,
@@ -244,40 +243,6 @@ export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
   }
 }
 
-// The clock time of the bot's next action: a lane change, noticing a mistake, or perceiving
-// an item, on the road or still to come.
-export function nextBotTime(bot: Bot, road: BotRoad, walk: Walk): number {
-  let next = Math.min(bot.plan[0]?.at ?? Infinity, ...bot.late.map((move) => move.at));
-  if (bot.noticeAt !== null) {
-    next = Math.min(next, bot.noticeAt);
-  }
-  for (const [dog, at] of bot.tellsAt) {
-    if (!bot.perceivedTells.has(dog)) {
-      next = Math.min(next, at + bot.skill.reactionSeconds);
-    }
-  }
-  for (const item of walk.road.items) {
-    if (!bot.perceived.has(item.id)) {
-      next = Math.min(next, perceiveAt(bot, road, item));
-    }
-  }
-  const { data, geometry, speed } = road;
-  const { zoneDistance } = walk.run;
-  for (const spawn of walk.road.pending) {
-    const ahead = (spawn.distance - zoneDistance) / speed;
-    const appeared = bot.clock + ahead;
-    if (appeared + bot.skill.reactionSeconds >= next) {
-      break;
-    }
-    const height = itemHeight(data, geometry, spawn.kind);
-    const y = geometry.roadTop - height - (spawn.distance - zoneDistance);
-    const { start } = contactWindow(geometry.packBand, speed, y, height);
-    const visible = visibleAt(bot, appeared, start, spawn.mover !== undefined);
-    next = Math.min(next, visible + bot.skill.reactionSeconds);
-  }
-  return next;
-}
-
 // What the bot steers around and toward: every item it has perceived that has not yet passed
 // the pack, within its planning horizon.
 function botView(
@@ -410,8 +375,15 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
 }
 
 // A lane change that does not take, such as one during a lock, makes the bot replan.
-function steer(bot: Bot, road: BotRoad, direction: LaneDirection, walk: Walk): Walk {
+function steer(
+  bot: Bot,
+  road: BotRoad,
+  lanes: LaneDirection[],
+  direction: LaneDirection,
+  walk: Walk,
+): Walk {
   const steered = steerWalk(road.data, road.geometry.laneCount, direction, walk);
+  lanes.push(direction);
   bot.lastInputAt = bot.clock;
   if (steered.road.control.target === walk.road.control.target) {
     bot.replan = true;
@@ -421,10 +393,16 @@ function steer(bot: Bot, road: BotRoad, direction: LaneDirection, walk: Walk): W
 
 // A planned lane change, unless the bot errs: then it is missed or comes late, the rest of
 // the plan is dropped, and the bot replans once it notices.
-function attempt(bot: Bot, road: BotRoad, direction: LaneDirection, walk: Walk): Walk {
+function attempt(
+  bot: Bot,
+  road: BotRoad,
+  lanes: LaneDirection[],
+  direction: LaneDirection,
+  walk: Walk,
+): Walk {
   const { errorRate, reactionSeconds } = bot.skill;
   if (!chance(bot.random, errorRate)) {
-    return steer(bot, road, direction, walk);
+    return steer(bot, road, lanes, direction, walk);
   }
   bot.plan = [];
   const noticed = Math.max(reactionSeconds, NOTICE_SECONDS);
@@ -469,11 +447,18 @@ export function observePulls(
 }
 
 // Everything the bot does at its clock time: perceives the items and tells due, notices a
-// mistake, replans when it has something new, and makes the lane changes due. Nothing
-// during a hit stop, which drops lane changes.
-export function actBot(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): Walk {
+// mistake, replans when it has something new, and makes the lane changes due: the lane moves
+// it makes, in order, and the walk they steer. Nothing during a hit stop, which drops lane
+// changes.
+export function actBot(
+  bot: Bot,
+  road: BotRoad,
+  pulls: Pulls,
+  walk: Walk,
+): { readonly lanes: readonly LaneDirection[]; readonly walk: Walk } {
+  const lanes: LaneDirection[] = [];
   if (walk.road.hitStop !== null) {
-    return walk;
+    return { lanes, walk };
   }
   const due = bot.clock + SAME_MOMENT;
   let acted = walk;
@@ -494,7 +479,7 @@ export function actBot(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): Walk 
     const late = bot.late[lateIndex];
     if (late !== undefined) {
       bot.late.splice(lateIndex, 1);
-      acted = steer(bot, road, late.direction, acted);
+      acted = steer(bot, road, lanes, late.direction, acted);
       continue;
     }
     if (bot.noticeAt !== null && bot.noticeAt <= due) {
@@ -506,9 +491,9 @@ export function actBot(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): Walk 
     }
     const move = bot.plan[0];
     if (move === undefined || move.at > due) {
-      return acted;
+      return { lanes, walk: acted };
     }
     bot.plan.shift();
-    acted = attempt(bot, road, move.direction, acted);
+    acted = attempt(bot, road, lanes, move.direction, acted);
   }
 }

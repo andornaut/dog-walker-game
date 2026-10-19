@@ -3,9 +3,10 @@ import type { GameObjects, Scene } from "phaser";
 import { itemAt } from "../../arrays";
 import { forcedStopSpriteKey } from "../../assets/spriteKeys";
 import { project } from "../../layout/projection";
+import { screenRoadGeometry } from "../../runner/screenGeometry";
 import type { Walk } from "../../runner/walk";
 import { addStandingSprite, firstTag, playTag, showAtDepth } from "../sprites";
-import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, roadGeometry, type Shadow } from "./stage";
+import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A forced stop's figure stands in the middle of the road; a construction barrier is
 // repeated across every lane.
@@ -32,7 +33,8 @@ export class ForcedStopView {
       this.key = key;
       this.sprites = xs.map(() => addStandingSprite(this.scene, key, 0, 0));
     }
-    const distance = PROJECTION.footY - (onRoad.y + roadGeometry(walk.run).itemHeights.forcedStop);
+    const distance =
+      PROJECTION.footY - (onRoad.y + screenRoadGeometry(walk.run).itemHeights.forcedStop);
     const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
     this.sprites.forEach((sprite, i) => {
       const placed = project(PROJECTION, { distance, x: itemAt(xs, i) });

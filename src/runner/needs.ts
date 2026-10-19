@@ -97,17 +97,6 @@ export function isNeedUrgent(
   return needFill(data, run, dog) >= 1;
 }
 
-// Seconds of walking until the next dog's need turns urgent or goes wrong.
-export function nextNeedMoment(data: Pick<GameData, "dogs" | "tuning">, run: RunState): number {
-  const wrong = read(data.tuning, "seconds", "needGoneWrong");
-  return packDogs(run).reduce((next, dog) => {
-    const walked = run.needSeconds[dog] ?? 0;
-    const urgent = needUrgentSeconds(data.tuning, data.dogs[dog]);
-    const moment = walked < urgent ? urgent - walked : urgent + wrong - walked;
-    return Math.min(next, moment / needFillRate(data, run, dog));
-  }, Infinity);
-}
-
 // A need met at a spot, or gone wrong. outcome is what applied at once: null when a card opened
 // instead, unless a crowd pleaser's tip came with it.
 export type NeedMoment =

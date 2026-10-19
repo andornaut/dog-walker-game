@@ -12,16 +12,11 @@ import {
   type PointerTrack,
   trackPointer,
 } from "../../input/pointerTracking";
-import type { LaneDirection } from "../../layout/lanes";
 import { read } from "../../rules/units";
 import { gestureAfterPulls, type PullStep } from "../../runner/pulls";
+import type { SessionInput } from "../../runner/session";
 import type { Walk } from "../../runner/walk";
 import { LAYOUT } from "./stage";
-
-// The inputs a simulation step applies, waiting for it. Only a replay heads home at a step:
-// played live, the pause menu ends the walk at once.
-export type PendingInput =
-  { direction: LaneDirection; kind: "lane" } | { kind: "home" } | { kind: "treat"; slot: number };
 
 // What the walk's input reads of the run, and the pause it opens.
 export interface RunInputHost {
@@ -36,7 +31,7 @@ export interface RunInputHost {
 // the next simulation step.
 export class RunInput {
   private readonly host: RunInputHost;
-  private pending: PendingInput[] = [];
+  private pending: SessionInput[] = [];
   private pointers: PointerTrack = idleTrack;
   private readonly scene: Scene;
 
@@ -55,7 +50,7 @@ export class RunInput {
   }
 
   // The lane moves and treats queued since the last step.
-  takePending(): PendingInput[] {
+  takePending(): SessionInput[] {
     const inputs = this.pending;
     this.pending = [];
     return inputs;

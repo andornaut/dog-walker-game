@@ -400,16 +400,6 @@ export function pullPose(
   return quirk === "acrobatic" ? { ...pull, quirkTag: "flourish" } : pull;
 }
 
-// Seconds of walking until the pull clock next acts on its own: the end of a running tell, or
-// the next frame while a strain waits on its target.
-export function nextPullMoment(pulls: Pulls, frameSeconds: number): number {
-  const { strain } = pulls;
-  if (strain === null) {
-    return Infinity;
-  }
-  return strain.tellSeconds > 0 ? strain.tellSeconds : frameSeconds;
-}
-
 // A pull that moved the pack re-anchors a drag at the pointer, so getting back takes another
 // lane-width of drag.
 export function gestureAfterPulls(

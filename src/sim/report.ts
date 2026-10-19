@@ -2,7 +2,6 @@ import { itemAt } from "../arrays";
 import type { GameData, GearId, WalkerId } from "../data/types";
 import { DEFAULT_WALKER } from "../data/walkers";
 import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
-import { seededRandom } from "../runner/random";
 import { ALWAYS_MOVERS, itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
@@ -172,7 +171,7 @@ export function simulateCellRun(
   cell: MatrixCell,
   run: number,
 ): RunResult {
-  return simulateRun(data, seededRandom(hashSeed(`${seed}:${cell.pack.name}:${run}`)), {
+  return simulateRun(data, hashSeed(`${seed}:${cell.pack.name}:${run}`), {
     gear: cell.gear,
     pack: cell.pack.dogs,
     player: simPlayer(matrix, cell.player),

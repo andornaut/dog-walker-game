@@ -2,11 +2,16 @@ import type { DogId } from "../data/types";
 import type { Hearts } from "../rules/units";
 import type { Pack, PackDogs, PackSlot, RunState } from "./runState";
 
-// Dogs still walking with at least one heart, in pack order.
+// Dogs still walking with at least one heart, in pack order. A loop, as the walk asks for it
+// several times a step.
 export function packDogs(state: Pick<RunState, "pack">): DogId[] {
-  return state.pack.flatMap((slot) =>
-    slot.status === "walking" && slot.hearts > 0 ? [slot.dog] : [],
-  );
+  const dogs: DogId[] = [];
+  for (const slot of state.pack) {
+    if (slot.status === "walking" && slot.hearts > 0) {
+      dogs.push(slot.dog);
+    }
+  }
+  return dogs;
 }
 
 export function heartsOf(state: Pick<RunState, "pack">, dog: DogId): Hearts | undefined {

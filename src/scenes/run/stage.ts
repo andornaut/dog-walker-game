@@ -4,10 +4,8 @@ import { laneCenterXs } from "../../layout/lanes";
 import { screenLayout } from "../../layout/screenLayout";
 import { read } from "../../rules/units";
 import { laneMotionX } from "../../runner/laneMotion";
-import type { RoadGeometry, Walk } from "../../runner/walk";
-import { walkerFootY, walkGeometry, walkProjection } from "../../runner/walkGeometry";
-import { packDogs } from "../../state/pack";
-import type { RunState } from "../../state/runState";
+import type { Walk } from "../../runner/walk";
+import { walkerFootY, walkProjection } from "../../runner/walkGeometry";
 
 // The walk's fixed screen geometry and draw order, shared by the run scene's views.
 
@@ -42,10 +40,6 @@ export const ITEM_TAGS = {
 
 // A shadow under a sprite drawn from key's art steps at depth, its drawn size over its 1x.
 export type Shadow = (key: string, depth: number, x: number, footY: number) => void;
-
-export function roadGeometry(run: RunState): RoadGeometry {
-  return walkGeometry(LANE_COUNT, packDogs(run).length, PROJECTION, LAYOUT.road);
-}
 
 // The pack's centre at the leading dog's feet, in screen pixels.
 export function packPoint(walk: Walk | undefined): { x: number; y: number } {

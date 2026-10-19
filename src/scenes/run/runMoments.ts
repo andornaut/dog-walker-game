@@ -96,8 +96,6 @@ export class RunMoments {
   private readonly deps: RunMomentsDeps;
   // How long the end screen waits for a final firing or payout.
   private endMoments = { firingSeconds: 0, payoutMs: 0 };
-  // Owners who fired you since the walk last stepped, whose moment holds the walk.
-  private firedNow: DogId[] = [];
   private readonly scene: Scene;
 
   constructor(scene: Scene, deps: RunMomentsDeps) {
@@ -112,12 +110,6 @@ export class RunMoments {
   // Every change the walk made, in order, for banking the run.
   banked(): readonly Change[] {
     return this.changes;
-  }
-
-  takeFired(): DogId[] {
-    const fired = this.firedNow;
-    this.firedNow = [];
-    return fired;
   }
 
   // How long the end screen still waits for a final firing or payout; once asked, it waits
@@ -257,7 +249,6 @@ export class RunMoments {
   afterOutcome(outcome: ChoiceOutcome): void {
     if (outcome.fired.length > 0) {
       soundboardOf(this.scene).play("fired");
-      this.firedNow.push(...outcome.fired);
       outcome.fired.forEach((dog) =>
         this.deps.pack.trotOff(dog, firingSeconds(), this.deps.still()),
       );

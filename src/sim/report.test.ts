@@ -13,29 +13,40 @@ import {
 } from "./report";
 
 // These tests cover how report.ts seeds, orders, batches and summarizes runs, not the runs
-// themselves (simulate.test.ts does). A real run costs tens of milliseconds, so a stand-in
-// replaces it: like the real one, it draws only from its random, so a seed fixes its result.
+// themselves (simulate.test.ts does). A real run costs over a hundred milliseconds, so a stand-in
+// replaces it: like the real one, it draws only from its seed, so a seed fixes its result.
 vi.mock("./simulate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./simulate")>();
   const { cents } = await import("../rules/units");
-  const simulateRun: typeof actual.simulateRun = (_data, random, config) => ({
-    badges: [],
-    cardsSeen: Math.floor(random() * 10),
-    choices: [],
-    earnings: cents(random() * 10_000),
-    finished: random() >= (config.player.kind === "rates" ? config.player.hitRate : 0.1),
-    firings: [],
-    hits: { afterPull: 1, all: 4 },
-    items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
-    moneyShare: 0,
-    movers: { ball: { met: 2, touched: 1 } },
-    pullsMoved: 0,
-    route: [],
-    tips: cents(0),
-    upgrades: [],
-    zones: [],
-    zonesCompleted: 0,
-  });
+  const { newRun } = await import("../state/runState");
+  const { seededRandom } = await import("../runner/random");
+  const simulateRun: typeof actual.simulateRun = (data, seed, config) => {
+    const random = seededRandom(seed);
+    return {
+      badges: [],
+      cardsSeen: Math.floor(random() * 10),
+      choices: [],
+      earnings: cents(random() * 10_000),
+      finished: random() >= (config.player.kind === "rates" ? config.player.hitRate : 0.1),
+      firings: [],
+      hits: { afterPull: 1, all: 4 },
+      inputs: [],
+      items: { cone: { met: 4, touched: 1 }, tip: { met: 10, touched: 6 } },
+      moneyShare: 0,
+      movers: { ball: { met: 2, touched: 1 } },
+      pullsMoved: 0,
+      route: [],
+      run: newRun(data, config.pack.length, {
+        dogs: config.pack,
+        gear: config.gear,
+        walker: config.walker,
+      }),
+      tips: cents(0),
+      upgrades: [],
+      zones: [],
+      zonesCompleted: 0,
+    };
+  };
   return { ...actual, simulateRun };
 });
 

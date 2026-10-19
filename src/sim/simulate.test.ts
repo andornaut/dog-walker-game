@@ -6,7 +6,6 @@ import { modifiersOf } from "../rules/modifiers";
 import { zoneAt } from "../rules/route";
 import { cents } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
-import { seededRandom } from "../runner/random";
 import type { PackDogs } from "../state/runState";
 import type { PolicyId } from "./policies";
 import { DEFAULT_RATES, type RunResult, type SimConfig, simulateRun } from "./simulate";
@@ -43,7 +42,7 @@ function config(overrides: Overrides = {}): SimConfig {
 
 function runs(count: number, overrides: Overrides = {}): RunResult[] {
   return Array.from({ length: count }, (_, seed) =>
-    simulateRun(gameData, seededRandom(seed + 1), config(overrides)),
+    simulateRun(gameData, seed + 1, config(overrides)),
   );
 }
 
@@ -54,7 +53,7 @@ describe("simulateRun", { timeout: 15_000 }, () => {
     const run = () =>
       simulateRun(
         gameData,
-        seededRandom(114000343),
+        114000343,
         config({ luckyRate: 0.7, pack: ["koda", "biscuit"], tipRate: 0.7, treatRate: 0.7 }),
       );
     expect(run).not.toThrow();
@@ -63,9 +62,9 @@ describe("simulateRun", { timeout: 15_000 }, () => {
 
   it("gives the same result for the same seed", () => {
     const risky = config({ hitRate: 0.25, pack: RISKY });
-    const first = simulateRun(gameData, seededRandom(7), risky);
-    const second = simulateRun(gameData, seededRandom(7), risky);
-    const other = simulateRun(gameData, seededRandom(8), risky);
+    const first = simulateRun(gameData, 7, risky);
+    const second = simulateRun(gameData, 7, risky);
+    const other = simulateRun(gameData, 8, risky);
 
     expect(second).toEqual(first);
     expect(other).not.toEqual(first);

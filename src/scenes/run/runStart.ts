@@ -1,30 +1,21 @@
 import type { Scene } from "phaser";
 
 import type { DogId } from "../../data/types";
-import { randomStream } from "../../dev/randomStreams";
 import type { RunSetup } from "../../dev/runSetup";
 import { loadoutFor } from "../../dev/setupRun";
-import type { Random } from "../../runner/random";
+import { type Random, randomStream } from "../../runner/random";
 import type { Loadout } from "../../state/runState";
 import { profileSave, runLoadout, walkerSpriteKey } from "../profileStore";
 
-// The run's independent random streams, each from the setup's seed.
+// The streams only the run's views draw from, each named from the setup's seed beside the
+// session's own (runStreams).
 export interface RunRandom {
-  cards: Random;
-  forks: Random;
-  needs: Random;
   quips: Random;
   scenery: Random;
 }
 
 export function runRandom(seed: number): RunRandom {
-  return {
-    cards: randomStream(seed, "cards"),
-    forks: randomStream(seed, "forks"),
-    needs: randomStream(seed, "needs"),
-    quips: randomStream(seed, "quips"),
-    scenery: randomStream(seed, "scenery"),
-  };
+  return { quips: randomStream(seed, "quips"), scenery: randomStream(seed, "scenery") };
 }
 
 // The saved pick with the setup's pack, gear and walker over it; a setup pack walks without a

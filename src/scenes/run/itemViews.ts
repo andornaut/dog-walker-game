@@ -24,13 +24,14 @@ import {
 } from "../../rules/skins";
 import { isMoverObstacle } from "../../runner/movers";
 import { isNeedSpot } from "../../runner/needs";
+import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
 import { needIcon } from "../needSignals";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
 import { drawMover, moverBodyKey } from "./moverView";
-import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, roadGeometry, type Shadow } from "./stage";
+import { DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its hit box.
 const PLACEHOLDER_HEIGHT = 32;
@@ -92,7 +93,7 @@ export class ItemViews {
   draw(walk: Walk, halted: boolean, still: boolean, shadow: Shadow): void {
     const seen = new Set<number>();
     const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
-    const { roadTop } = roadGeometry(walk.run);
+    const { roadTop } = screenRoadGeometry(walk.run);
     const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
       seen.add(item.id);

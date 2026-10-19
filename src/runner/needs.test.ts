@@ -21,7 +21,6 @@ import {
   isNervousAlone,
   isOtherDog,
   meetNeedAt,
-  nextNeedMoment,
   stepNeeds,
 } from "./needs";
 
@@ -79,7 +78,6 @@ describe("urgency", () => {
     expect(urgent).toEqual(["biscuit"]);
     expect(isNeedUrgent(data, run, "biscuit")).toBe(true);
     expect(isNeedUrgent(data, run, "koda")).toBe(false);
-    expect(nextNeedMoment(data, run)).toBe(5);
   });
 
   it("stands still while the walk does not move", () => {
@@ -218,10 +216,5 @@ describe("a nervous dog left alone", () => {
     const run = testState(slots);
     expect(isNervousAlone(data, run, dog)).toBe(clingy);
     expect(stepNeeds(data, plain, 10, true, [], run).run.needSeconds[dog]).toBe(filled);
-  });
-
-  it("brings the next need moment forward while clingy", () => {
-    expect(nextNeedMoment(data, testState({ duchess: "fired", penny: 4 }))).toBe(50);
-    expect(nextNeedMoment(data, testState({ penny: 4 }))).toBe(100);
   });
 });

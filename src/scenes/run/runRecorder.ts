@@ -18,8 +18,8 @@ import {
 import { pageRunSetup, runSetupLimitsFor } from "../../dev/pageRunSetup";
 import type { RunSetup } from "../../dev/runSetup";
 import { expectedRoadMs, type ZoneClocks } from "../../dev/zoneClock";
+import type { SessionInput } from "../../runner/session";
 import { type Walk, walkScrollSpeed, zoneLength } from "../../runner/walk";
-import type { PendingInput } from "./runInput";
 
 // The run's dev hooks: the input log it records, the replay that drives it, and the state the
 // dev overlay shows.
@@ -52,7 +52,7 @@ export class RunRecorder {
   }
 
   // The replayed step inputs due by timeMs, or undefined when the run is played live.
-  due(timeMs: number): PendingInput[] | undefined {
+  due(timeMs: number): SessionInput[] | undefined {
     const replay = this.replay;
     if (replay === undefined) {
       return undefined;

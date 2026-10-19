@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { GameData } from "../data/types";
-import { seededRandom } from "../runner/random";
 import { blocksLane, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
@@ -55,7 +54,7 @@ const SHORT = shortZones(gameData, 0.25);
 const NO_CHASER: PackDogs = ["duchess", "biscuit", "snowball"];
 
 function run(data: SimData, seed: number, skill: Skill, pack: PackDogs = NO_CHASER): RunResult {
-  return simulateRun(data, seededRandom(seed), {
+  return simulateRun(data, seed, {
     gear: null,
     pack,
     player: { kind: "skill", skill },
@@ -79,7 +78,7 @@ function obstacleCounts(data: SimData, results: readonly RunResult[]) {
   };
 }
 
-// Each run walks every zone frame by frame in effect, so these take a few hundred
+// Each run walks every zone frame by frame, so these take a few hundred
 // milliseconds a run on a loaded machine.
 describe("a steering bot", { timeout: 60_000 }, () => {
   it("plays the same run for the same seed, and another for another seed", () => {
@@ -104,9 +103,15 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     expect(expert.hit / expert.met).toBeLessThan(novice.hit / novice.met);
   });
 
-  it("hits nothing on a sparse road with no reaction delay and no errors", () => {
+  // A bot that plans over only part of the road can still box itself in.
+  it("hits nothing on a sparse road with no reaction delay, no errors and a full look-ahead", () => {
     const sparse = withoutPulls(shortZones(gameData, 0.1));
-    const sharp: Skill = { ...SKILL_PRESETS.typical, errorRate: 0, reactionSeconds: 0 };
+    const sharp: Skill = {
+      ...SKILL_PRESETS.typical,
+      errorRate: 0,
+      lookAheadSeconds: Infinity,
+      reactionSeconds: 0,
+    };
     const counts = obstacleCounts(sparse, [run(sparse, 5, sharp)]);
 
     expect(counts.met).toBeGreaterThan(0);

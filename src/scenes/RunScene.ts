@@ -3,27 +3,15 @@ import { Scene } from "phaser";
 import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
 import type { DogId } from "../data/types";
-import { randomStream } from "../dev/randomStreams";
 import type { RunSetup } from "../dev/runSetup";
 import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
 import { cardHintTriggers } from "../hud/hintTriggers";
 import type { RunPause } from "../hud/topBar";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
-import {
-  cardFor,
-  type CardView,
-  type Choice,
-  chooseOption,
-  offerFork,
-  offerUpgrades,
-  openCard,
-  quirkActorsOf,
-} from "../rules/choices";
+import { type CardView, type Choice, quirkActorsOf } from "../rules/choices";
 import { currentZone, currentZoneId } from "../rules/route";
-import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
-import { holdForFiring } from "../runner/firingStop";
 import {
   type FixedStepLimits,
   frameSteps,
@@ -31,21 +19,23 @@ import {
   startStepClock,
   type StepClock,
 } from "../runner/fixedStep";
-import { isNeedSpot, stepNeeds } from "../runner/needs";
-import { NO_PULLS, type Pulls, stepPulls } from "../runner/pulls";
-import { activeStatuses, shownStatus, startStatuses, type StatusMark } from "../runner/statuses";
+import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
-  finishZone,
-  headHome,
-  planZone,
-  startRoad,
-  steerWalk,
-  stepWalk,
-  type Walk,
-  zoneLength,
-} from "../runner/walk";
+  chooseCard,
+  headHomeSession,
+  type RunStreams,
+  runStreams,
+  type Session,
+  type SessionEvent,
+  type SessionStep,
+  startSession,
+  STEP_SECONDS,
+  stepSession,
+} from "../runner/session";
+import { activeStatuses, shownStatus, type StatusMark } from "../runner/statuses";
+import { startRoad, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
-import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
+import { type Loadout, newRun, type RunState } from "../state/runState";
 import { colorFromHex } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import {
@@ -69,7 +59,7 @@ import { RunMoments, showHint } from "./run/runMoments";
 import { emitDevState, RunRecorder } from "./run/runRecorder";
 import { pickedLoadout, type RunRandom, runRandom } from "./run/runStart";
 import { ShadowPool } from "./run/shadowPool";
-import { firingSeconds, LAYOUT, packPoint, roadGeometry } from "./run/stage";
+import { LAYOUT, packPoint } from "./run/stage";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 
@@ -92,7 +82,7 @@ export interface RunHudView {
 // Steps of 1/60 s. A frame catches up at most a second of steps (60), which covers a frame held
 // up by garbage collection or a slow device; a longer stall drops the rest rather than jumping
 // the walk ahead.
-const STEP_MS = 1000 / 60;
+const STEP_MS = STEP_SECONDS * 1000;
 const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 
 // One run's views, input, menus and dev hooks, made as it starts.
@@ -111,24 +101,19 @@ interface RunWorld {
   shadows: ShadowPool;
   spots: AccidentSpots;
   stop: ForcedStopView;
+  streams: RunStreams;
 }
 
-// The walk: backdrop, road, walker, pack and everything spawned on the road. The simulation
-// steps at a fixed rate and stops while a card or the pause menu is up.
+// The walk: backdrop, road, walker, pack and everything spawned on the road. The session steps
+// at a fixed rate and stops while a card or the pause menu is up; the scene draws it, feeds it
+// input and plays its events.
 export class RunScene extends Scene {
-  private cardQueue: CardSource[] = [];
-  private distanceBeforeZone = 0;
-  private needsZonePlan = false;
-  private pulls: Pulls = NO_PULLS;
   private readonly roadArt = new RoadArt(this);
-  private runTimeMs = 0;
+  private session: Session | undefined;
   private settings: Settings | undefined;
-  private statusMarks: readonly StatusMark[] = [];
   private stepClock: StepClock = startStepClock;
-  private walk: Walk | undefined;
   private world: RunWorld | undefined;
   private zoneClocks: ZoneClocks = startZoneClocks(0);
-  private zoneEndPending = false;
 
   constructor() {
     super(SCENE_KEYS.run);
@@ -140,7 +125,6 @@ export class RunScene extends Scene {
 
     const recorder = new RunRecorder();
     const setup = recorder.setup();
-    const random = runRandom(setup.seed);
     const picked = pickedLoadout(this, setup);
     const run = withSetupStart(setup, newRun(gameData, picked.dogSlots, picked.loadout));
     // The log names the pack, gear and walker walked and a later start's route, so its replay
@@ -152,7 +136,9 @@ export class RunScene extends Scene {
       walker: run.walker,
       ...(setup.zone === 1 ? {} : { route: run.route }),
     });
-    this.walk = planned(setup, { road: startRoad(LANE_COUNT, setup.speed), run });
+    const streams = runStreams(setup.seed);
+    const road = startRoad(LANE_COUNT, setup.speed);
+    this.session = startSession(gameData, streams, screenRoadGeometry, { road, run });
 
     this.settings = currentSettings(this);
     const sound = soundboardOf(this);
@@ -162,7 +148,10 @@ export class RunScene extends Scene {
       this.applyVolumes();
     });
 
-    this.world = this.createWorld(recorder, random, setup, picked);
+    this.world = this.createWorld(
+      { random: runRandom(setup.seed), recorder, setup, streams },
+      picked,
+    );
     this.world.input.listen();
     this.listen();
 
@@ -171,7 +160,7 @@ export class RunScene extends Scene {
     sound.setCardOpen(false);
     sound.startMusic();
     startWakeLock();
-    this.world.banner.show(this.walk.run, this.reducedMotion());
+    this.world.banner.show(this.session.walk.run, this.reducedMotion());
     // The first hints wait for the zone banner to leave: how to steer, then the Home button.
     this.time.delayedCall(zoneBannerMs(this.reducedMotion()), () => {
       if (this.sys.game.device.input.touch) {
@@ -196,55 +185,46 @@ export class RunScene extends Scene {
   }
 
   private resetState(): void {
-    this.cardQueue = [];
-    this.distanceBeforeZone = 0;
-    this.needsZonePlan = false;
-    this.pulls = NO_PULLS;
-    this.runTimeMs = 0;
-    this.statusMarks = [];
+    this.session = undefined;
     this.stepClock = startStepClock;
     this.world = undefined;
     this.zoneClocks = startZoneClocks(0);
-    this.zoneEndPending = false;
   }
 
   // The views are made in draw order: the backdrop, the road, then the pack.
   private createWorld(
-    recorder: RunRecorder,
-    random: RunRandom,
-    setup: RunSetup,
+    run: Pick<RunWorld, "random" | "recorder" | "setup" | "streams">,
     picked: { loadout: Loadout; walkerSprite: string },
   ): RunWorld {
+    const { random, recorder } = run;
     const backdrop = new BackdropView(this, random.scenery);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const pack = new PackView(this, picked.loadout.dogs, picked.walkerSprite);
     const spots = new AccidentSpots(this);
     const still = () => this.reducedMotion();
     return {
+      ...run,
       backdrop,
       banner: new ZoneBanner(this),
       input: new RunInput(this, {
         openPause: () => this.openPause(),
         replaying: () => recorder.replaying(),
         runPause: () => this.runPause(),
-        walk: () => this.walk,
+        walk: () => this.session?.walk,
       }),
       items: new ItemViews(this, (event) => showHint(this, event)),
       menus: new MenuFlow(this, {
         dropPress: () => this.world?.input.dropPress(),
         headHome: () => {
-          if (this.walk !== undefined) {
-            this.headHome(this.walk);
+          if (this.session !== undefined) {
+            this.apply(headHomeSession(this.session));
           }
         },
-        over: () => this.walk === undefined || this.walk.run.phase.kind === "ended",
+        over: () => this.session === undefined || this.session.walk.run.phase.kind === "ended",
       }),
       moments: new RunMoments(this, { pack, quips: random.quips, spots, still }),
       pack,
-      random,
-      recorder,
       road,
-      setup,
       shadows: new ShadowPool(this),
       spots,
       stop: new ForcedStopView(this),
@@ -255,7 +235,7 @@ export class RunScene extends Scene {
     const onBack = () => this.openPause();
     const onHidden = () => {
       this.openPause();
-      const walk = this.walk;
+      const walk = this.session?.walk;
       if (walk !== undefined && walk.run.phase.kind !== "ended") {
         void checkpointRun(this, checkpointOf(gameData, walk.run));
       }
@@ -276,21 +256,17 @@ export class RunScene extends Scene {
   }
 
   hudView(): RunHudView | undefined {
-    if (this.walk === undefined) {
+    const session = this.session;
+    if (session === undefined) {
       return undefined;
     }
-    const { run } = this.walk;
+    const { run } = session.walk;
     return {
       affected: this.world?.menus.card()?.affected ?? [],
       run,
-      statuses: this.statuses(run),
+      statuses: statusesOf(session),
       zoneFraction: run.zoneDistance / zoneLength(gameData, run),
     };
-  }
-
-  private statuses(run: RunState): StatusMark[] {
-    const seconds = read(gameData.tuning, "seconds", "statusVisualSeconds");
-    return activeStatuses(seconds, run, this.runTimeMs, this.statusMarks);
   }
 
   // The dog's centre column and top opaque row on the road, while it is shown there.
@@ -304,8 +280,8 @@ export class RunScene extends Scene {
   }
 
   override update(time: number): void {
-    const walk = this.walk;
-    if (walk === undefined) {
+    const session = this.session;
+    if (session === undefined) {
       return;
     }
     const frame = frameSteps(STEPPING, time, this.stepClock);
@@ -314,7 +290,7 @@ export class RunScene extends Scene {
     let roadMs = 0;
     let stoppedMs = 0;
     for (let step = 0; step < frame.steps && this.walking(); step++) {
-      if (this.walk?.road.hitStop == null) {
+      if (this.session?.walk.road.hitStop == null) {
         roadMs += STEP_MS;
       } else {
         stoppedMs += STEP_MS;
@@ -322,197 +298,141 @@ export class RunScene extends Scene {
       this.simulate();
     }
     const { frameMs } = frame;
-    const zoneIndex = walk.run.zoneIndex;
+    const zoneIndex = session.walk.run.zoneIndex;
     const clockFrame = { frameMs, halted, roadMs, stoppedMs, zoneIndex };
     this.zoneClocks = tickZoneClocks(clockFrame, this.zoneClocks);
     if (!this.walking()) {
       this.stepClock = holdStepClock(this.stepClock);
     }
     this.draw();
-    emitDevState(this.game, this.world?.setup, this.zoneClocks, this.walk);
+    emitDevState(this.game, this.world?.setup, this.zoneClocks, this.session?.walk);
   }
 
   private walking(): boolean {
-    const walk = this.walk;
+    const session = this.session;
     return (
-      walk !== undefined &&
-      walk.run.phase.kind === "walking" &&
-      this.world?.menus.paused() === false &&
-      this.world.menus.card() === undefined
+      session !== undefined &&
+      session.card === null &&
+      session.walk.run.phase.kind === "walking" &&
+      this.world?.menus.paused() === false
     );
   }
 
-  // One fixed step: the inputs due now, the pulls, then the walk.
+  // One fixed step with the inputs due now: replayed, or queued by the player.
   private simulate(): void {
-    let walk = this.walk;
+    const session = this.session;
     const world = this.world;
-    if (walk === undefined || world === undefined) {
+    if (session === undefined || world === undefined) {
       return;
     }
-    const { input, moments, random, recorder } = world;
-    for (const due of recorder.due(this.runTimeMs) ?? input.takePending()) {
-      if (due.kind === "home") {
-        this.headHome(walk);
-        return;
-      }
-      walk =
-        due.kind === "lane"
-          ? steerWalk(gameData, LANE_COUNT, due.direction, walk)
-          : this.treated(due.slot, walk);
-      recorder.log({ ...due, timeMs: this.runTimeMs });
-    }
-    const pulls = stepPulls(gameData, roadGeometry(walk.run), STEP_MS / 1000, this.pulls, walk);
-    this.pulls = pulls.pulls;
-    moments.pulled(pulls);
-    input.afterPulls(pulls.pulled);
-    walk = pulls.walk;
-    const moving = walk.road.hitStop === null;
-    const step = stepWalk(gameData, roadGeometry(walk.run), random.cards, STEP_MS / 1000, walk);
-    this.runTimeMs += STEP_MS;
-    const spots = step.spots.flatMap(({ kind }) => (isNeedSpot(gameData, kind) ? [kind] : []));
-    const needs = stepNeeds(gameData, random.needs, STEP_MS / 1000, moving, spots, step.walk.run);
-    this.walk = { ...step.walk, run: needs.run };
-    moments.walked(step, packPoint(this.walk));
-    moments.needs(needs, this.distanceBeforeZone + this.walk.run.zoneDistance);
-    this.zoneEndPending ||= step.zoneEnded;
-    this.cardQueue.push(...step.cards, ...needs.cards);
-    this.holdForFiring();
-    this.continueWalk();
-  }
-
-  // An owner who just fired you holds the walk while their moment plays, as a hit stop does:
-  // the queued cards and the zone end wait for it.
-  private holdForFiring(): void {
-    const walk = this.walk;
-    const fired = this.world?.moments.takeFired() ?? [];
-    if (walk === undefined || walk.run.phase.kind === "ended") {
-      return;
-    }
-    const hold = holdForFiring(
-      firingSeconds(),
-      fired,
-      { cards: this.cardQueue, zoneEnded: this.zoneEndPending },
-      walk.road.hitStop,
+    const inputs = world.recorder.due(session.timeMs) ?? world.input.takePending();
+    this.apply(
+      stepSession(gameData, world.streams, screenRoadGeometry, STEP_SECONDS, inputs, session),
     );
-    this.cardQueue = [...hold.queued.cards];
-    this.zoneEndPending = hold.queued.zoneEnded;
-    this.walk = { ...walk, road: { ...walk.road, hitStop: hold.stop } };
   }
 
-  // A treat from the doghouses, for the dog in slot; an empty slot takes none.
-  private treated(slot: number, walk: Walk): Walk {
-    const dog = walk.run.pack[slot]?.dog;
-    if (dog === undefined) {
-      return walk;
+  // Takes the session's next state and plays its events, then ends the walk, or previews the
+  // badges earned so far and shows the card it opened.
+  private apply(step: SessionStep): void {
+    this.session = step.session;
+    let opened: CardView | undefined;
+    for (const event of step.events) {
+      if (event.kind === "cardOpened") {
+        opened = event.view;
+      } else {
+        this.react(event);
+      }
     }
-    const { change, state: run } = giveTreat(gameData, dog, walk.run);
-    if (change !== null) {
-      this.world?.moments.treatGiven(dog, change);
-    }
-    return { ...walk, run };
-  }
-
-  // Opens the next queued card, or ends the zone, or keeps walking.
-  private continueWalk(): void {
-    const walk = this.walk;
-    if (walk === undefined) {
-      return;
-    }
-    if (walk.run.phase.kind === "ended") {
+    const { run } = step.session.walk;
+    if (run.phase.kind === "ended") {
       this.endWalk();
       return;
     }
-    this.world?.moments.previewAchievements(walk.run);
-    const source = this.cardQueue.shift();
-    if (source !== undefined) {
-      this.showCard(source);
-      return;
-    }
-    if (this.zoneEndPending) {
-      this.zoneEndPending = false;
-      this.endZone();
-      return;
-    }
-    if (this.needsZonePlan) {
-      this.needsZonePlan = false;
-      this.walk = planned(this.world?.setup, walk);
-      this.world?.banner.show(this.walk.run, this.reducedMotion());
+    this.world?.moments.previewAchievements(run);
+    if (opened !== undefined) {
+      this.showCard(opened, run);
     }
   }
 
-  // Pays the zone's fees, saves a checkpoint, then offers the upgrades and the fork before
-  // the next zone is planned.
-  private endZone(): void {
-    const walk = this.walk;
+  // An event's sounds, bursts, hints and labels, and the input log.
+  private react(event: Exclude<SessionEvent, { kind: "cardOpened" }>): void {
     const world = this.world;
-    if (walk === undefined || world === undefined) {
+    if (world === undefined) {
       return;
     }
-    const { fees, run } = finishZone(gameData, walk.run);
-    world.moments.payOut(fees, walk.run);
-    this.walk = { ...walk, run };
-    if (run.phase.kind !== "ended") {
-      this.distanceBeforeZone += zoneLength(gameData, walk.run);
-      void checkpointRun(this, checkpointOf(gameData, run));
-      this.needsZonePlan = true;
-      this.cardQueue.push(
-        { kind: "upgradeOffer", offered: offerUpgrades(gameData, world.random.cards, run) },
-        offerFork(gameData, world.random.forks, run),
-      );
+    const { input, moments, recorder } = world;
+    switch (event.kind) {
+      case "chosen": {
+        const { choice, outcome, timeMs, view } = event;
+        recorder.log({ choice, kind: "card", timeMs });
+        moments.quirkActed(quirkActorsOf(gameData, view, choice));
+        world.menus.closeCard();
+        moments.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
+        moments.sayQuips(outcome.quips);
+        moments.afterOutcome(outcome);
+        return;
+      }
+      case "input":
+        recorder.log({ ...event.input, timeMs: event.timeMs });
+        return;
+      case "needs":
+        moments.needs(event.step, event.distance);
+        return;
+      case "pulled":
+        moments.pulled(event.step);
+        input.afterPulls(event.step.pulled);
+        return;
+      case "treat":
+        moments.treatGiven(event.dog, event.change);
+        return;
+      case "walked":
+        moments.walked(event.step, packPoint(event.step.walk));
+        return;
+      case "zoneEnded":
+        // A checkpoint saves the walk between zones.
+        moments.payOut(event.fees, event.before);
+        if (event.after.phase.kind !== "ended") {
+          void checkpointRun(this, checkpointOf(gameData, event.after));
+        }
+        return;
+      case "zonePlanned":
+        if (this.session !== undefined) {
+          world.banner.show(this.session.walk.run, this.reducedMotion());
+        }
     }
-    this.continueWalk();
   }
 
-  private showCard(source: CardSource): void {
-    const walk = this.walk;
+  private showCard(view: CardView, run: RunState): void {
     const world = this.world;
-    if (walk === undefined || world === undefined) {
+    if (world === undefined) {
       return;
     }
-    const run = openCard(source, walk.run);
-    const view = cardFor(gameData, run, source);
-    this.walk = { ...walk, run };
     world.menus.holdForCard(view);
     world.input.dropPress();
-    cardHintTriggers(gameData, source).forEach((trigger) => showHint(this, trigger));
+    cardHintTriggers(gameData, view.source).forEach((trigger) => showHint(this, trigger));
     const replayed = world.recorder.cardChoice();
     if (replayed !== undefined) {
-      this.choose(view, replayed);
+      this.choose(replayed);
       return;
     }
-    world.menus.showCard(currentZoneId(gameData, run), view, (choice) => this.choose(view, choice));
+    const zone = currentZoneId(gameData, run);
+    world.menus.showCard(zone, view, (choice) => this.choose(choice));
   }
 
-  private choose(view: CardView, choice: Choice): void {
-    const walk = this.walk;
+  private choose(choice: Choice): void {
+    const session = this.session;
     const world = this.world;
-    if (walk === undefined || world === undefined) {
+    if (session === undefined || world === undefined) {
       return;
     }
-    const { moments } = world;
-    const outcome = chooseOption(gameData, world.random.cards, walk.run, view, choice);
-    world.recorder.log({ choice, kind: "card", timeMs: this.runTimeMs });
-    moments.quirkActed(quirkActorsOf(gameData, view, choice));
-    const at = {
-      timeMs: this.runTimeMs,
-      zone: currentZoneId(gameData, walk.run),
-      zoneIndex: walk.run.zoneIndex,
-    };
-    this.statusMarks = startStatuses(gameData, view, at, choice, this.statusMarks);
-    this.walk = { ...walk, run: outcome.state };
-    world.menus.closeCard();
-    moments.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
-    moments.sayQuips(outcome.quips);
-    moments.afterOutcome(outcome);
-    this.holdForFiring();
-    this.continueWalk();
+    this.apply(chooseCard(gameData, world.streams, screenRoadGeometry, choice, session));
   }
 
   // What holds the walk still, for the HUD's top bar and for lane moves and treats.
   runPause(): RunPause {
     return {
       card: this.world?.menus.card() !== undefined,
-      hitStop: this.walk?.road.hitStop != null,
+      hitStop: this.session?.walk.road.hitStop != null,
       menu: this.world?.menus.menuState() ?? "closed",
     };
   }
@@ -525,17 +445,10 @@ export class RunScene extends Scene {
     this.world?.menus.closePause();
   }
 
-  // Logged at the run time of the step it comes before, which is where a replay applies it.
-  private headHome(walk: Walk): void {
-    this.world?.recorder.log({ kind: "home", timeMs: this.runTimeMs });
-    this.walk = { ...walk, run: headHome(walk.run) };
-    this.endWalk();
-  }
-
   // Saves the walk and its input log, then shows the end screen, once a final firing or
   // payout has played.
   private endWalk(): void {
-    const walk = this.walk;
+    const walk = this.session?.walk;
     const world = this.world;
     if (walk === undefined || world === undefined) {
       return;
@@ -545,7 +458,7 @@ export class RunScene extends Scene {
       this.time.delayedCall(delayMs, () => this.endWalk());
       return;
     }
-    this.walk = undefined;
+    this.session = undefined;
     const sound = soundboardOf(this);
     sound.stopMusic();
     sound.setCardOpen(false);
@@ -566,34 +479,35 @@ export class RunScene extends Scene {
 
   // While a card or the pause menu holds the walk, the road's sprites stand still.
   private draw(): void {
-    const walk = this.walk;
+    const session = this.session;
     const world = this.world;
-    if (walk === undefined || world === undefined) {
+    if (session === undefined || world === undefined) {
       return;
     }
+    const { distanceBeforeZone, pulls, timeMs, walk } = session;
     const zone = currentZone(gameData, walk.run);
     const halted = !this.walking();
     const still = this.reducedMotion();
     world.backdrop.draw(walk, zone, packPoint(walk).x, still);
-    world.road.draw(walk, zone, this.distanceBeforeZone);
+    world.road.draw(walk, zone, distanceBeforeZone);
     const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
     world.items.draw(walk, halted, still, shadow);
     world.stop.draw(walk, halted, still, shadow);
-    const statuses = this.statuses(walk.run);
+    const statuses = statusesOf(session);
     world.pack.draw(walk, {
       halted,
       itemPoint: (id) => world.items.point(id),
-      pulls: this.pulls,
+      pulls,
       shadow,
-      statusOf: (dog) => shownStatus(statuses, this.runTimeMs, dog),
+      statusOf: (dog) => shownStatus(statuses, timeMs, dog),
       still,
     });
-    world.spots.draw(this.distanceBeforeZone + walk.run.zoneDistance);
+    world.spots.draw(distanceBeforeZone + walk.run.zoneDistance);
     world.shadows.hideUnused();
   }
 }
 
-function planned(setup: RunSetup | undefined, walk: Walk): Walk {
-  const spawns = randomStream(setup?.seed ?? 0, `spawns-${walk.run.zoneIndex}`);
-  return planZone(gameData, roadGeometry(walk.run), spawns, walk);
+function statusesOf(session: Session): StatusMark[] {
+  const seconds = read(gameData.tuning, "seconds", "statusVisualSeconds");
+  return activeStatuses(seconds, session.walk.run, session.timeMs, session.statusMarks);
 }
