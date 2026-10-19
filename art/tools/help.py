@@ -6,6 +6,8 @@ walk" screen (see public/art/mocks/help-screen.html, which animates the same
 scenes). Built from public/art/sprites/ and the road strips, card illustrations
 and UI images in public/art/images/, so build those first (roads.py, cards.py, ui.py).
 Names and numbers come from src/data/ at build time, so the pages follow the data.
+The road pages show the run screen's bottom rows in the game's projection,
+each sprite at its depth step.
 
 Usage:
   help.py preview OUT.png   all six images side by side, scaled up
@@ -17,6 +19,7 @@ hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
 import json
+import math
 import os
 import re
 import subprocess
@@ -26,6 +29,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import DARKER, K  # noqa: E402
+from ui import ZONE_COLOURS  # noqa: E402
 
 W, H = 344, 236
 HEX = {k: tuple(int(v[i:i + 2], 16) for i in (0, 2, 4)) for k, v in K.items()}
@@ -80,7 +84,7 @@ G.update({"0": "111101101101111", "1": "010110010010111", "2": "110001010100111"
           "8": "111101111101111", "9": "111101111001110", "$": "011110111011110", "+": "000010111010000",
           "-": "000000111000000", "/": "001001010100100", ":": "000010000010000", ".": "000000000000010",
           "!": "010010010000010", "?": "110001010000010", "'": "010010000000000", ",": "000000000010100",
-          "%": "101001010100101"})
+          "%": "101001010100101", "×": "000101010101000"})
 HEART5 = "0101011111111110111000100"
 
 
@@ -200,18 +204,116 @@ def card_options(encounter):
     return out
 
 
+def ts_items(src, key):
+    """The source of each object literal in the array after the first `key: [` in src."""
+    i, out, depth = re.search(rf"\b{key}: \[", src).end(), [], 0
+    for j in range(i, len(src)):
+        if src[j] == "{":
+            depth += 1
+            start = j + 1 if depth == 1 else start
+        elif src[j] == "}":
+            depth -= 1
+            if depth == 0:
+                out.append(src[start:j])
+        elif src[j] == "]" and depth == 0:
+            return out
+    raise ValueError(f"{key} is not closed")
+
+
+def ts_opt(src, key, default=None):
+    """ts_value, or default where src has no such key."""
+    return ts_value(src, key) if re.search(rf"(?<![\w.]){key}: ", src) else default
+
+
 def world():
-    """The route in world.ts: its name and {zone id: (name, road shadow, leash colour)}, in order."""
-    zones = re.findall(r'id: "(\w+)",\s*leashColor: "#(\w+)",\s*name: "([^"]+)",\s*roadColor: "#\w+",\s*'
-                       r'roadShadowColor: "#(\w+)"', data("world"))
-    return ts_value(data("world"), "name").upper(), {z: (name, shadow, leash) for z, leash, name, shadow in zones}
+    """The world in world.ts: its name, first zone, walk length and {zone id: zone} in its order.
+    Each zone has its name, art key (artId, else the name in kebab case), road shadow and leash
+    colours, and the difficulty (1 to 5), difficulty name and fee multiplier a fork's path card
+    shows, None where world.ts has none."""
+    src, zones = data("world"), {}
+    for block in ts_items(src, "zones"):
+        name = ts_value(block, "name")
+        zones[ts_value(block, "id")] = dict(
+            name=name, art=ts_opt(block, "artId", re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")),
+            shadow=ts_value(block, "roadShadowColor").lstrip("#"), leash=ts_value(block, "leashColor").lstrip("#"),
+            difficulty=ts_opt(block, "difficulty"), difficulty_name=ts_opt(block, "difficultyName"),
+            fees=ts_opt(block, "fees"))
+    head = src[:src.index("zones: [")]
+    return (ts_value(src, "name").upper(), ts_opt(head, "firstZone", next(iter(zones))),
+            int(ts_opt(head, "walkLength", len(zones))), zones)
 
 
 # ---------- road strips: the exported road-<zone> images (roads.py) ----------
 
-WORLD, ZONES = world()
-TILES = {z: Image.open(f"public/art/images/road-{name.lower().replace(' ', '-')}.png").convert("RGB")
-         for z, (name, _, _) in ZONES.items()}
+WORLD, FIRST_ZONE, WALK_LENGTH, ZONES = world()
+TILES = {z: Image.open(f"public/art/images/road-{zone['art']}.png").convert("RGB") for z, zone in ZONES.items()}
+
+# ---------- the projected road, as src/layout/projection.ts draws it ----------
+# A point d road pixels ahead of the walker's feet draws at scale s = F / (F + d), on screen
+# row YH + KS s. The page shows the run screen's bottom H rows, centred on the road: image
+# column x is screen column x + OX, image row y screen row y + TOP, so the feet (screen row
+# FOOT) land on row H - 8.
+
+# RATIO follows the game's camera at the base scroll speed: 5.25 s of road in view.
+YH, FOOT, RATIO = -164, 464, 0.797
+KS = FOOT - YH
+F = KS / RATIO
+CX = 180                        # the road's centre on screen, verges either side out to 0 and 360
+OX, TOP = CX - W // 2, FOOT - (H - 8)
+STRIP_X = CX - 140              # the road strip's left edge on screen, 280 wide
+# The verge beside the road, as src/layout/roadside.ts: across is the distance from the road's
+# centre line in road pixels; the curb to curbTo, the sidewalk or paving to walkTo, then lawn.
+CURB, WALK = 144, 188
+VERGES = {"street": (CURB, WALK, "mown"), "park": (140, 140, "rough"), "shops": (CURB, 10 ** 6, "none"),
+          "homeStretch": (CURB, WALK, "mown")}
+MOWN = (44, 62, 36, 70, 50, 58, 40, 66)   # stripe widths out from the sidewalk, light then dark
+SEAM_PERIOD, SEAM_MAX_SPAN = 32, 16
+STEPS = (1, 0.75, 0.5)
+# The pack, as src/layout/packFormation.ts: each dog's (dx across, distance ahead of the feet) by
+# pack size, the first dog leading; the walker's hands (left dx, right dx, height above the
+# feet) and the collar's height above a dog's feet.
+FORMATIONS = {1: [(0, 44)], 2: [(-12, 48), (12, 44)], 3: [(0, 58), (-14, 42), (14, 40)]}
+HANDS = (-11, 10, 13)
+COLLAR = 14
+
+
+def noise(x, y):
+    """A fixed pseudo-random value in [0, 1) per pair of integers, as roadside.ts's noise."""
+    h = (x * 374761393 + y * 668265263) & 0xFFFFFFFF
+    h = ((h ^ (h >> 13)) * 1274126177) & 0xFFFFFFFF
+    return ((h ^ (h >> 16)) & 0xFFFF) / 65536
+
+
+def distance_at(y):
+    """The road distance drawn on screen row y's centre, and the row's ground scale."""
+    s = (y + 0.5 - YH) / KS
+    return F / s - F, s
+
+
+def snap(s):
+    """The depth step nearest a scale, judged by ratio, as the game's snapScale."""
+    return min(STEPS, key=lambda t: abs(math.log(s / t)))
+
+
+def verge(zone, across, s, z, span):
+    """The colour beside the road at across, on a row of scale s covering span road pixels from
+    z: the curb, the sidewalk with a seam every SEAM_PERIOD, then the lawn, mown in stripes
+    (none narrower than 4px on screen) or rough, with sparse tufts."""
+    curb_to, walk_to, lawn = VERGES[zone]
+    if across < curb_to:
+        return "grey"
+    if across < walk_to:
+        seam = span < SEAM_MAX_SPAN and z // SEAM_PERIOD != (z - max(span, 1)) // SEAM_PERIOD
+        return "grey" if seam else "lgrey"
+    col, rest, i = "green", across - walk_to, 0
+    while lawn == "mown" and rest < 300 and rest >= MOWN[i % len(MOWN)]:
+        rest -= MOWN[i % len(MOWN)]
+        i += 1
+    if lawn == "mown" and rest < 300 and i % 2 and MOWN[i % len(MOWN)] * s >= 4:
+        col = "dgreen"
+    if noise(int(across), int(z) // 2) < 0.03:
+        col = "forest" if col == "dgreen" else "dgreen"
+    return col
 
 
 # ---------- exported sprites ----------
@@ -219,15 +321,33 @@ TILES = {z: Image.open(f"public/art/images/road-{name.lower().replace(' ', '-')}
 SHEETS = {}
 
 
-def frame(key, tag, i=0):
+def sheet(key):
+    """An exported sprite: its sheet, each frame's rectangle and {tag name: tag}."""
     if key not in SHEETS:
         img = Image.open(f"public/art/sprites/{key}.png").convert("RGBA")
         meta = json.load(open(f"public/art/sprites/{key}.json"))
         SHEETS[key] = (img, [f["frame"] for f in meta["frames"].values()], {t["name"]: t for t in meta["meta"]["frameTags"]})
-    img, frames, tags = SHEETS[key]
+    return SHEETS[key]
+
+
+def frame(key, tag, i=0):
+    img, frames, tags = sheet(key)
     t = tags[tag]
     f = frames[t["from"] + i % (t["to"] - t["from"] + 1)]
     return img.crop((f["x"], f["y"], f["x"] + f["w"], f["y"] + f["h"]))
+
+
+def depth_frame(key, tag, s, i=0):
+    """A frame at the depth step for scale s: the redrawn key@75 or key@50 where it exists,
+    else the sprite scaled nearest-neighbour, as the game does."""
+    step = snap(s)
+    if step == 1:
+        return frame(key, tag, i)
+    variant = f"{key}@{round(step * 100)}"
+    if os.path.exists(f"public/art/sprites/{variant}.json"):
+        return frame(variant, tag, i)
+    f = frame(key, tag, i)
+    return f.resize((round(f.width * step), round(f.height * step)), Image.NEAREST)
 
 
 def image(key):
@@ -238,13 +358,43 @@ class Scene(Canvas):
     shade, leash_col = "navy", "dred"
 
     def road(self, zone):
-        _, self.shade, self.leash_col = ZONES[zone]
-        for y in range(0, H, 64):
-            self.img.paste(TILES[zone], (32, y))
-        self.fill(0, 0, 32, H, "green"); self.fill(312, 0, 32, H, "green")
-        for i in range(24):
-            self.fill(4 + (i * 13) % 24, (i * 37) % H, 1, 2, "dgreen")
-            self.fill(316 + (i * 7) % 24, (i * 23) % H, 1, 2, "dgreen")
+        """The zone's road in projection: each image row samples one row of the road-<zone>
+        strip at its distance, counting strip rows down the road as the game does, and the
+        verge beside it."""
+        self.shade, self.leash_col = ZONES[zone]["shadow"], ZONES[zone]["leash"]
+        tile, px = TILES[zone].load(), self.img.load()
+        for y in range(H):
+            z, s = distance_at(y + TOP)
+            span = z - distance_at(y + TOP + 1)[0]
+            row = (63 - math.floor(z)) % 64
+            for x in range(W):
+                rx = CX + (x + OX + 0.5 - CX) / s
+                if STRIP_X <= rx < STRIP_X + 280:
+                    px[x, y] = tile[math.floor(rx - STRIP_X), row]
+                else:
+                    px[x, y] = rgb(verge(zone, abs(rx - CX), s, z, span))
+
+    def at(self, x, d):
+        """Where the road point at image column x (on the flat road at the feet) d road pixels
+        ahead draws: its image column, row and scale."""
+        s = F / (F + d)
+        return W / 2 + (x - W / 2) * s, YH + KS * s - TOP, s
+
+    def stand(self, key, tag, x, d, i=0, flip=False, shadow=True):
+        """A road sprite standing at road point x, d at its depth step, on its shadow."""
+        sx, sy, s = self.at(x, d)
+        sprite = depth_frame(key, tag, s, i)
+        if shadow:
+            self.shadow(round(sx), round(sy), sprite.width)
+        self.paste(sprite, sx - sprite.width / 2, round(sy) - sprite.height, flip)
+        return sx, sy, s
+
+    def cue(self, x, d, direction=1):
+        """A mover's warning at road point x, d: ui-warning standing there and ui-warning-arrow
+        a sign's width beside it, pointing the way the mover will cross."""
+        sx, sy, _ = self.at(x, d)
+        self.paste(frame("ui-warning", "pulse"), round(sx) - 8, round(sy) - 16)
+        self.paste(frame("ui-warning-arrow", "pulse"), round(sx) - 8 + 16 * direction, round(sy) - 16, direction < 0)
 
     def shadow(self, cx, foot, w):
         rx = max(3, w / 2 - 2)
@@ -260,15 +410,20 @@ class Scene(Canvas):
             self.shadow(cx, foot, s.width)
         self.paste(s, cx - s.width / 2, foot - s.height, flip)
 
-    def pack(self, cx, base, dogs=("dog-koda", "dog-biscuit", "dog-duchess"), lead_tag="walk"):
-        spots = [(0, -40), (-13, -28), (13, -26)]
-        items = [(k, dx, base + dy, lead_tag if i == 0 else "walk") for i, (k, (dx, dy)) in enumerate(zip(dogs, spots))]
-        items.append(("walker-casey", 0, base, "walk"))
-        for k, dx, foot, tag in sorted(items, key=lambda it: it[2]):
-            self.feet(k, tag, cx + dx, foot)
-        for k, dx, foot, _ in items:
+    def pack(self, cx, dogs=("dog-koda", "dog-biscuit", "dog-duchess"), lead_tag="walk"):
+        """The walker at the feet in lane centre cx and the dogs ahead of her in the game's
+        formation, far ones first, with a leash from her hand to each collar. Returns where each
+        stands: image column, row and scale."""
+        items = [(k, dx, d, lead_tag if i == 0 else "walk") for i, (k, (dx, d)) in enumerate(zip(dogs, FORMATIONS[len(dogs)]))]
+        items.append(("walker-casey", 0, 0, "walk"))
+        placed = {k: self.stand(k, tag, cx + dx, d) for k, dx, d, tag in sorted(items, key=lambda it: -it[2])}
+        base = round(self.at(cx, 0)[1])
+        for k, dx, _, _ in items:
             if k != "walker-casey":
-                self.line(cx - 9 if dx < 0 else cx + 8, base - 14, cx + dx, foot - 15, self.leash_col)
+                x, y, s = placed[k]
+                hand = HANDS[0] if dx < 0 else HANDS[1]
+                self.line(cx + hand, base - HANDS[2], round(x), round(y - COLLAR * s), self.leash_col)
+        return placed
 
     def chevron(self, cx, cy, d, col):
         for i in range(8):
@@ -307,27 +462,44 @@ class Scene(Canvas):
         self.paste(frame("ui-icon-button", "normal"), x, y)
         self.paste(icon, x + 2, y + 1)
 
-    def top_bar(self, zone, money, treats, fill):
+    def top_bar(self, route, money, treats, fill=None):
         """ui-top-bar as HudScene fills it, in screen pixels less 16 columns cut from the empty
         left end of the zone well, so it fits the image's width: the money, the treat count, the
-        sound and pause buttons, and the zone with its pips, the current one fill done."""
+        Home and pause buttons, and the zone with a pip per zone of the walk: the zones walked
+        (route, the last of them current) done, the current one filled fill of the way in its
+        colour (done where fill is None), the ones ahead not yet chosen."""
         bar, cut = image("ui-top-bar"), 200
         self.paste(bar.crop((0, 0, cut, 40)), 0, 0)
         self.paste(bar.crop((cut + bar.width - W, 0, bar.width, 40)), cut, 0)
         r = W - 8  # the zone well's right edge, 352 on screen
         self.paste(frame("tip", "idle"), 8, 13)
         text(self, "$", 26, 15, "amber", 2); text(self, f"{money:g}", 26 + text_w("$", 2) + 2, 15, "cream", 2)
-        self.paste(frame("treat", "idle"), 104, 13)
-        text(self, f"{treats}/{tuning('counts', 'treatCarryMax'):g}", 122, 18, "cream")
-        self.button(146, 10, frame("icon-sound", "on")); self.button(170, 10, image("icon-pause"))
-        name, index = ZONES[zone][0].upper(), list(ZONES).index(zone)
+        self.paste(frame("treat", "idle"), 100, 13)
+        text(self, f"{treats}/{tuning('counts', 'treatCarryMax'):g}", 118, 18, "cream")
+        self.button(130, 10, image("icon-home")); self.button(174, 10, image("icon-pause"))
+        zone = ZONES[route[-1]]
+        name = zone["name"].upper()
         text(self, name, r - text_w(name), 10, "cream")
-        self.paste(image(f"icon-zone-{ZONES[zone][0].lower().replace(' ', '-')}"), r - text_w(name) - 19, 4)
-        for i in range(len(ZONES)):
+        self.paste(image(f"icon-zone-{zone['art']}"), r - text_w(name) - 19, 4)
+        for i in range(WALK_LENGTH):
             x = r - 81 + i * 21
-            self.paste(frame("ui-zone-pips", "done" if i < index else "current" if i == index else "todo"), x, 22)
-            if i == index:
-                self.fill(x + 2, 24, round(fill * 14), 4, "amber")
+            art = ZONES[route[i]]["art"] if i < len(route) else None
+            current = i == len(route) - 1 and fill is not None
+            self.paste(frame("ui-zone-pips", "todo" if art is None else art if current else f"{art}-done"), x, 22)
+            if current:
+                self.fill(x + 1, 23, round(fill * 16), 6, ZONE_COLOURS[art])
+
+    def nine(self, img, x, y, w, h, c=8):
+        """A nine-slice image stretched to w x h at x, y: corners c square kept, edges and middle
+        stretched nearest-neighbour."""
+        iw, ih = img.size
+        xs, ys = ((0, c, iw - c, iw), (0, c, w - c, w)), ((0, c, ih - c, ih), (0, c, h - c, h))
+        for i in range(3):
+            for j in range(3):
+                src = img.crop((xs[0][i], ys[0][j], xs[0][i + 1], ys[0][j + 1]))
+                size = (xs[1][i + 1] - xs[1][i], ys[1][j + 1] - ys[1][j])
+                if size[0] > 0 and size[1] > 0:
+                    self.paste(src.resize(size, Image.NEAREST), x + xs[1][i], y + ys[1][j])
 
     def drag(self, x0, x1, y):
         """ui-touch-hint's drag, laid out for one drag: the fingertip pressed at x1 on the two-way
@@ -354,23 +526,54 @@ class Scene(Canvas):
         self.paste(hint.crop((39, 10, 59, 35)), x - 9, y + 4)
 
     def doghouse(self, x, y, key, hearts):
-        """A dog-column slot as HudScene draws it (DOGHOUSE in src/hud/doghouse.ts): the house
-        roofed in the dog's colour, its name on the roof plate, the dog in the door, the owner in
-        the window, and the hearts in rows of six on the board with their count. At 0 hearts the
-        owner has fired you: the house is the grey empty one and reads FIRED."""
+        """A 120x90 dog slot as ui-doghouse lays it out (see its docstring in ui.py), in slot
+        pixels: the house roofed in the dog's colour, the name centred at 60 on the roof's name
+        plate (rows 4 to 15, at 2x where it fits the plate's 80px), the dog in the door at (6, 24),
+        the owner in the window at (42, 24), the hearts from (78, 26) in rows of five 8px apart
+        on the board with the n/max count centred at (98, 46) under them, the status pegs at
+        (78, 62) and (98, 62) left empty, and the owner's name at x 6 on the name strip (rows 60
+        to 70). At 0 hearts the owner has fired you: the house is the grey empty one with FIRED
+        centred on its plate (rows 72 to 82)."""
         name, owner, max_h, _ = dog(key)
         self.paste(frame("ui-doghouse", key if hearts else "empty"), x, y)
-        text_c(self, name, x + 36, y + 12, "plum")
+        if text_w(name, 2) <= 76:
+            text_c(self, name, x + 60, y + 5, "plum", 2)
+        else:
+            text_c(self, name, x + 60, y + 8, "plum")
         if not hearts:
-            text_c(self, "FIRED", x + 36, y + 128, "dred")
+            text_c(self, "FIRED", x + 60, y + 75, "dred")
             return
         m = mood(hearts)
-        self.paste(frame(f"face-dog-{key}", m), x + 20, y + 36)
-        self.paste(frame(f"face-owner-{key}", m), x + 8, y + 78)
-        text_c(self, f"{hearts}/{max_h}", x + 56, y + 92, "dred")
-        text(self, owner, x + 9, y + 118, "plum")
+        self.paste(frame(f"face-dog-{key}", m), x + 6, y + 24)
+        self.paste(frame(f"face-owner-{key}", m), x + 42, y + 24)
         for j in range(max_h):
-            self.paste(frame("ui-heart", "full" if j < hearts else "empty"), x + 9 + j % 6 * 9, y + 127 + j // 6 * 8)
+            self.paste(frame("ui-heart", "full" if j < hearts else "empty"), x + 78 + j % 5 * 8, y + 26 + j // 5 * 8)
+        text_c(self, f"{hearts}/{max_h}", x + 98, y + 46, "dred")
+        text(self, owner, x + 6, y + 63, "plum")
+
+    def path_card(self, x, y, zone):
+        """A fork's path card as CardScene draws it: the route card-frame (the upgrade one until
+        cards.py draws it), the zone's name in the band, its card-zone preview in the art window
+        (until that is drawn, a crop of its road strip under its zone icon), and in the body
+        the ui-difficulty paws, the difficulty name and the fee multiplier, where world.ts has
+        them. Taking a path costs nothing."""
+        z = ZONES[zone]
+        self.paste(frame("card-frame", "route" if "route" in sheet("card-frame")[2] else "upgrade"), x, y)
+        if os.path.exists(f"public/art/images/card-zone-{z['art']}.png"):
+            self.paste(image(f"card-zone-{z['art']}"), x + 5, y + 16)
+        else:
+            self.img.paste(TILES[zone].crop((102, 4, 177, 60)), (x + 5, y + 16))
+            self.fill(x + 32, y + 34, 20, 20, "plum")
+            self.paste(image(f"icon-zone-{z['art']}"), x + 34, y + 36)
+        self.paste(image("card-cost"), x + 6, y + 121)
+        text_c(self, z["name"].upper(), x + 42, y + 5, "white")
+        if z["difficulty"] is not None:
+            self.paste(frame("ui-difficulty", str(int(z["difficulty"]))), x + 14, y + 79)
+        if z["difficulty_name"] is not None:
+            text_c(self, z["difficulty_name"].upper(), x + 42, y + 94, "plum")
+        if z["fees"] is not None:
+            text_c(self, f"FEES ×{z['fees']:g}", x + 42, y + 104, "plum")
+        text_c(self, "FREE", x + 42, y + 125, "cream")
 
 
 def lane(n):
@@ -387,30 +590,34 @@ def lanes():
     for x in range(lane(2), lane(3) - 30, 4):
         c.fill(x, 212, 2, 2, "amber")
     c.chevron(lane(3) - 26, 213, 1, "amber")
-    c.pack(lane(3), H - 8)
+    # a squirrel about to dash across ahead: its warning at the road's left edge, the arrow
+    # pointing the way it will run, and the squirrel waiting on the verge
+    c.cue(42, 195)
+    c.stand("squirrel-dash", "run", 10, 195)
+    c.pack(lane(3))
     return c
 
 
 def pickups():
     c = Scene()
     c.road("park")
-    for ln, y, key in ((2, 50, "tip"), (2, 80, "tip"), (2, 110, "tip"), (1, 150, "treat"), (3, 124, "treat")):
-        c.feet(key, "idle", lane(ln), y + 16)
-    c.pack(lane(2), H - 8, ("dog-biscuit",))
+    for ln, d, key in ((2, 274, "tip"), (2, 215, "tip"), (2, 158, "tip"), (1, 106, "treat"), (3, 182, "treat")):
+        c.stand(key, "idle", lane(ln), d)
+    c.pack(lane(2), ("dog-biscuit",))
     # one tip for a solo dog, in whole cents as the game counts it
     solo = round(tuning("money", "tip") * tuning("multipliers", "tipByPackSize", "1") * 100) / 100
     c.bubble(200, 168, 70, ["+" + dollars(solo)])
     # the bar after the first zone has paid the dog's fee, with two treats carried
     owner = ts_block(ts_block(data("dogs"), "biscuit"), "owner")
-    c.top_bar("park", tuning("money", "feeByTemperament", ts_value(owner, "temperament")), 2, 0.4)
+    c.top_bar([FIRST_ZONE, "park"], tuning("money", "feeByTemperament", ts_value(owner, "temperament")), 2, 0.4)
     return c
 
 
 def cards():
     c = Scene()
     c.road("street")
-    c.feet("skunk", "idle", lane(2), 120)
-    c.pack(lane(2), H - 8, ("dog-koda",), "react")
+    c.stand("skunk", "idle", lane(2), 192)
+    c.pack(lane(2), ("dog-koda",), "react")
     c.dim(0, 0, W, H)
     text_c(c, ts_value(ts_block(data("encounters"), "skunk"), "name").upper() + "!", 172, 8, "white", 2)
     # the skunk card as one dog would see it: each cost is per dog, and a hearts-only option is free
@@ -424,64 +631,75 @@ def cards():
 def owners():
     c = Scene()
     c.fill(0, 0, W, H, "dbrown")
-    # Koda's house at its starting hearts, a fingertip tapping it to give a treat
+    # Koda's house at its starting hearts, a fingertip tapping the wall under the board to give
+    # a treat, clear of the faces, hearts and names
     _, _, _, start = dog("koda")
-    c.doghouse(10, 18, "koda", start)
-    c.finger(75, 152)
-    c.bubble(10, 190, 128, [f"TAP TO GIVE A TREAT: +{tuning('hearts', 'treat'):g}♥"])
-    # the faces between: what each owner's mood looks like
-    text_c(c, "WATCH THEIR FACES", 136, 18, "amber")
+    c.doghouse(8, 8, "koda", start)
+    c.finger(108, 82)
+    c.bubble(8, 116, 120, [f"TAP TO GIVE A TREAT: +{tuning('hearts', 'treat'):g}♥"])
+    # the owner's faces as the hearts go: what each mood looks like
+    text_c(c, "WATCH THEIR FACES", 86, 154, "amber")
     for i, m in enumerate(("happy", "neutral", "upset")):
-        y = 32 + i * 44
-        c.fill(98, y, 36, 36, "tan")
-        c.paste(frame("face-owner-duchess", m), 100, y + 2)
-        text(c, m.upper(), 138, y + 16, "cream")
-    # Nugget's house at 0 hearts, its owner firing you beside it
+        x = 18 + i * 50
+        c.fill(x, 164, 36, 36, "tan")
+        c.paste(frame("face-owner-koda", m), x + 2, 166)
+        text_c(c, m.upper(), x + 18, 204, "cream")
+    # Nugget's house at 0 hearts, and the firing moment under it: the owner's fired face in
+    # fx-fired-pop's storm with the cracked heart, and the FIRED! plate in the owner's
+    # temperament (ui-fired-plate stretched to 72x28, the text's caps in rows 9 to 18)
     name, _, _, _ = dog("nugget")
-    c.doghouse(192, 18, "nugget", 0)
-    c.bubble(270, 18, 66, ["YOU'RE FIRED!"], "dred")
-    c.fill(285, 40, 36, 36, "tan")
-    c.paste(frame("face-owner-nugget", "fired"), 287, 42)
-    text(c, f"0♥: {name} GOES HOME", 192, 178, "cream", 1, {"♥": "white"})
-    text(c, "FEES TAKEN BACK", 192, 190, "cream")
+    temperament = ts_value(ts_block(ts_block(data("dogs"), "nugget"), "owner"), "temperament")
+    c.doghouse(216, 8, "nugget", 0)
+    c.paste(frame("fx-fired-pop", "play", 3), 244, 104)
+    c.paste(frame("face-owner-nugget", "fired"), 260, 120)
+    c.nine(frame("ui-fired-plate", re.sub(r"([A-Z])", r"-\1", temperament).lower()), 240, 158, 72, 28)
+    text_c(c, "FIRED!", 276, 167, "white", 2)
+    text_c(c, f"0♥: {name} GOES HOME", 276, 196, "cream", 1, {"♥": "white"})
+    text_c(c, "FEES TAKEN BACK", 276, 206, "cream")
     return c
 
 
 def pulls():
     c = Scene()
     c.road("shops")
-    c.feet("squirrel", "idle", lane(3), 70)
+    c.stand("squirrel", "idle", lane(3), 290)
     cx = lane(2)
-    c.pack(cx, H - 8, ("dog-koda", "dog-duchess"), "tell")
-    c.paste(frame("fx-bark", "pop", 1), cx + 10, H - 92)
-    for x in range(cx + 20, lane(3) - 8, 4):
-        c.fill(x, 150, 2, 2, "amber")
-    c.chevron(lane(3) - 6, 151, 1, "amber")
+    kx, ky, _ = c.pack(cx, ("dog-koda", "dog-duchess"), "tell")["dog-koda"]
+    # the bark over the leaning dog's head, and the way it is about to pull
+    kx, ky = round(kx), round(ky)
+    bark = frame("fx-bark", "pop", 1)
+    c.paste(bark, kx - bark.width // 2, ky - 34 - bark.height)
+    for x in range(kx + bark.width // 2 + 4, lane(3) - 8, 4):
+        c.fill(x, ky - 42, 2, 2, "amber")
+    c.chevron(lane(3) - 6, ky - 41, 1, "amber")
     text_c(c, "LEAN AND BARK", 172, 12, "plum")
     return c
 
 
 def zones():
     c = Scene()
-    c.fill(0, 0, W, H, "dbrown")
-    text_c(c, WORLD, 172, 6, "amber", 2)
-    for i, (z, (name, _, _)) in enumerate(ZONES.items()):
-        x, y = 8 + i * 84, 36
-        tile = TILES[z].crop((100, 0, 176, 64))
-        c.img.paste(tile, (x, y)); c.img.paste(tile.crop((0, 0, 76, 40)), (x, y + 64))
-        c.fill(x, y, 76, 1, "plum"); c.fill(x, y + 103, 76, 1, "plum")
-        text_c(c, name.upper(), x + 38, y - 12, "cream")
-        # the zone number on a plum chip, so it holds contrast on every road (white on plum, 13.6:1)
-        c.fill(x + 31, y + 40, 15, 23, "plum"); c.fill(x + 30, y + 41, 17, 21, "plum")
-        text_c(c, str(i + 1), x + 38, y + 44, "white", 3)
-        c.paste(frame("tip", "idle"), x + 30, y + 108)
-        text_c(c, "+FEES", x + 38, y + 128, "amber")
-    text_c(c, "UPGRADE CARD BETWEEN ZONES", 172, 182, "yellow")
+    # the fork at the end of the first zone: the road paused and dimmed under the fork's card,
+    # the top bar's route with the first zone done and the rest not yet chosen
+    c.road(FIRST_ZONE)
+    c.dim(0, 0, W, H)
+    owner = ts_block(ts_block(data("dogs"), "koda"), "owner")
+    c.top_bar([FIRST_ZONE], tuning("money", "feeByTemperament", ts_value(owner, "temperament")), 2)
+    text_c(c, "START", W - 8 - 81 + 9, 42, "amber")
+    # CardScene's fork title, white on an ink shadow
+    text_c(c, "WHICH WAY?", 173, 46, "ink", 2); text_c(c, "WHICH WAY?", 172, 45, "white", 2)
+    # three of the zones not yet walked, easiest on the left, as forkPaths sorts them; the
+    # middle one picked
+    left = [z for z in ZONES if z != FIRST_ZONE]
+    paths = [left[0], left[len(left) // 2], left[-1]]
+    for i, z in enumerate(paths):
+        c.path_card(39 + i * 91, 61, z)
+    c.nine(frame("ui-select", "pulse"), 126, 57, 91, 148)
+    text_c(c, "BETWEEN ZONES: UPGRADE CARD, THEN A FORK", 172, 208, "yellow")
     # head home from the pause menu; while paused, the same button shows play and resumes
-    c.button(52, 202, image("icon-pause"))
-    text(c, "PAUSE: HEAD HOME", 76, 210, "cream")
-    c.button(204, 202, image("icon-play"))
-    text(c, "RESUME", 228, 210, "cream")
+    c.button(52, 215, image("icon-pause"))
+    text(c, "PAUSE: HEAD HOME", 76, 223, "cream")
+    c.button(204, 215, image("icon-play"))
+    text(c, "RESUME", 228, 223, "cream")
     return c
 
 
