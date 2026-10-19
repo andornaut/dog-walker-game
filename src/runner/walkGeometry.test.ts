@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, ROAD_LOOK_AHEAD_SECONDS, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import { screenLayout } from "../layout/screenLayout";
 import { walkerFootY, walkGeometry, walkProjection } from "./walkGeometry";
@@ -23,7 +23,7 @@ describe("walkGeometry", () => {
     const gameRoad = screenLayout(SCREEN_CONFIG).road;
     const projection = walkProjection(ROAD_CAMERA, gameRoad);
     const geometry = walkGeometry(5, 3, projection, gameRoad);
-    const lookAhead = ROAD_LOOK_AHEAD_SECONDS * TUNING.pixels.roadScrollSpeed;
+    const lookAhead = TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed;
     expect(walkerFootY(gameRoad) - geometry.roadTop).toBeCloseTo(lookAhead, 6);
     expect(geometry.sightLength).toBeGreaterThan(500);
   });
