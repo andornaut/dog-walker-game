@@ -24,6 +24,8 @@ function withChanges(change: (document: StoredInput) => void): string {
 const loaded = (change: (document: StoredInput) => void): SaveDocument =>
   loadSave(testContext, withChanges(change)).save;
 
+const PRE_FORK_ROUTE = ["street", "park", "shops", "homeStretch"];
+
 describe("loadSave", () => {
   it("gives a new player the free dogs, the default walker and no loadout", () => {
     expect(loadSave(testContext, null)).toEqual({ save: newPlayerSave, status: "new" });
@@ -36,112 +38,232 @@ describe("loadSave", () => {
     });
   });
 
-  it("loads a save from before achievements, with none earned and every counter at 0", () => {
-    const document = untyped(veteranSave() as StoredInput);
-    delete document.achievements;
-    const stats = { ...(document.stats as Record<string, unknown>) };
-    delete stats.dogsFinishedWith;
-    delete stats.squirrelsChased;
-    delete stats.walksWithoutFiring;
-    const result = loadSave(testContext, stored({ ...document, stats }));
-    expect(result.status).toBe("loaded");
-    expect(result.save.achievements).toEqual({});
-    expect(result.save.stats).toMatchObject({
-      dogsFinishedWith: [],
-      squirrelsChased: 0,
-      walksWithoutFiring: 0,
-    });
-  });
-
-  it("drops achievements and finished-with dogs the game no longer has", () => {
-    const save = loaded((document) => {
-      document.achievements = { firstSteps: 5, retiredBadge: 6 };
-      document.stats.dogsFinishedWith = ["koda", "ghost"];
-    });
-    expect(save.achievements).toEqual({ firstSteps: 5 });
-    expect(save.stats.dogsFinishedWith).toEqual(["koda"]);
-  });
-
-  it("loads a pending checkpoint from before forks, on the pre-fork route", () => {
-    const checkpoint = {
-      dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-      earnedCents: 4_250,
-      zonesFinished: 2,
-    };
-    const save = loaded((document) => {
-      document.checkpoint = checkpoint;
-    });
-    expect(save.checkpoint).toEqual({
-      ...checkpoint,
-      counters: null,
-      route: ["street", "park", "shops", "homeStretch"],
-    });
-  });
-
-  it("loads a version 1 save's checkpoint on the pre-fork route", () => {
-    const raw = withChanges((document) => {
-      untyped(document).version = 1;
-      document.checkpoint = {
-        dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
-        earnedCents: 500,
-        zonesFinished: 1,
-      };
-    });
-    const { save, status } = loadSave(testContext, raw);
+  // Each row changes the stored veteran save, then reads part of what loads.
+  it.each<[string, (document: StoredInput) => void, (save: SaveDocument) => unknown, unknown]>([
+    [
+      "a save from before achievements, with none earned and every counter at 0",
+      (document) => {
+        delete untyped(document).achievements;
+        const stats = document.stats as unknown as Record<string, unknown>;
+        delete stats.dogsFinishedWith;
+        delete stats.squirrelsChased;
+        delete stats.walksWithoutFiring;
+      },
+      ({ achievements, stats }) => [
+        achievements,
+        stats.dogsFinishedWith,
+        stats.squirrelsChased,
+        stats.walksWithoutFiring,
+      ],
+      [{}, [], 0, 0],
+    ],
+    [
+      "a save from before the mute setting, unmuted",
+      (document) => {
+        delete (document.settings as Partial<typeof document.settings>).muted;
+      },
+      (save) => save.settings.muted,
+      false,
+    ],
+    [
+      "a pending checkpoint from before forks, on the pre-fork route",
+      (document) => {
+        document.checkpoint = {
+          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+          earnedCents: 4_250,
+          zonesFinished: 2,
+        };
+      },
+      (save) => save.checkpoint,
+      {
+        counters: null,
+        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+        earnedCents: 4_250,
+        route: PRE_FORK_ROUTE,
+        zonesFinished: 2,
+      },
+    ],
+    [
+      "a version 1 save's checkpoint on the pre-fork route",
+      (document) => {
+        untyped(document).version = 1;
+        document.checkpoint = {
+          dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
+          earnedCents: 500,
+          zonesFinished: 1,
+        };
+      },
+      (save) => save.checkpoint?.route,
+      PRE_FORK_ROUTE,
+    ],
+    [
+      "a checkpoint's route, dropping zones the game no longer has",
+      (document) => {
+        document.checkpoint = {
+          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+          earnedCents: 4_250,
+          route: ["street", "oldZone", "pawsPromenade"],
+          zonesFinished: 2,
+        };
+      },
+      (save) => save.checkpoint?.route,
+      ["street", "pawsPromenade"],
+    ],
+    [
+      "a checkpoint's run counters, from the first zone when saved before firstZone",
+      (document) => {
+        document.checkpoint = {
+          counters: { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, squirrelChases: 2 },
+          dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+          earnedCents: 4_250,
+          zonesFinished: 2,
+        };
+      },
+      (save) => save.checkpoint?.counters,
+      { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, firstZone: 0, squirrelChases: 2 },
+    ],
+    [
+      "a last walk from before forks on the pre-fork route",
+      (document) => {
+        delete present(document.stats.lastWalk).route;
+      },
+      (save) => save.stats.lastWalk?.route,
+      PRE_FORK_ROUTE,
+    ],
+    [
+      "an empty loadout, as a new player has before picking a dog",
+      (document) => {
+        document.lastLoadout = { dogs: [], gear: null };
+      },
+      (save) => save.lastLoadout,
+      { dogs: [], gear: null },
+    ],
+    [
+      "without fields the schema does not know",
+      (document) => {
+        untyped(document).extra = true;
+        untyped(document).settings = { ...document.settings, language: "fr" };
+      },
+      (save) => save,
+      veteranSave(),
+    ],
+    [
+      "without achievements and finished-with dogs the game no longer has",
+      (document) => {
+        document.achievements = { firstSteps: 5, retiredBadge: 6 };
+        document.stats.dogsFinishedWith = ["koda", "ghost"];
+      },
+      (save) => [save.achievements, save.stats.dogsFinishedWith],
+      [{ firstSteps: 5 }, ["koda"]],
+    ],
+    [
+      "without unknown or duplicate owned ids",
+      (document) => {
+        document.owned = {
+          dogSlots: 2,
+          dogs: ["koda", "ghost", "penny", "koda"],
+          gear: ["whistle", "jetpack", "whistle"],
+        };
+      },
+      (save) => save.owned,
+      { dogSlots: 2, dogs: ["biscuit", "duchess", "koda", "penny"], gear: ["whistle"] },
+    ],
+    [
+      // archie is a known dog that this player has not bought.
+      "without unknown or unowned loadout picks",
+      (document) => {
+        document.lastLoadout = { dogs: ["ghost", "penny", "archie"], gear: "luckyCollar" };
+      },
+      (save) => save.lastLoadout,
+      { dogs: ["penny"], gear: null },
+    ],
+    [
+      "with the loadout trimmed to the clamped slots",
+      (document) => {
+        document.owned.dogSlots = 0;
+        document.lastLoadout.dogs = ["penny", "koda"];
+      },
+      (save) => save.lastLoadout.dogs,
+      ["penny"],
+    ],
+    [
+      "with an empty loadout keeping owned gear when no loadout dog is left",
+      (document) => {
+        document.lastLoadout = { dogs: ["ghost"], gear: "whistle" };
+      },
+      (save) => save.lastLoadout,
+      { dogs: [], gear: "whistle" },
+    ],
+    [
+      "with an unknown walker swapped for the default",
+      (document) => {
+        document.walker = "retiredWalker";
+      },
+      (save) => save.walker,
+      "casey",
+    ],
+    [
+      "without stats for unknown dogs, keeping the total firings",
+      (document) => {
+        document.stats.dogs.ghost = { timesFired: 2, walks: 3, zonesFinished: 4 };
+        document.stats.timesFired = 3;
+      },
+      (save) => [Object.keys(save.stats.dogs).sort(), save.stats.timesFired],
+      [["biscuit", "koda"], 3],
+    ],
+    [
+      "without unknown dogs in the logbook's walks, keeping the walks",
+      (document) => {
+        present(document.stats.bestWalk).dogs = ["ghost", "koda"];
+        present(document.stats.lastWalk).dogs = ["ghost"];
+      },
+      (save) => [save.stats.bestWalk?.dogs, save.stats.lastWalk],
+      [["koda"], { ...veteranSave().stats.lastWalk, dogs: [] }],
+    ],
+    [
+      "without unknown dogs in the last walk's firings",
+      (document) => {
+        present(document.stats.lastWalk).firings = [
+          { dog: "ghost", zone: 1 },
+          { dog: "koda", zone: 2 },
+        ];
+      },
+      (save) => save.stats.lastWalk?.firings,
+      [{ dog: "koda", zone: 2 }],
+    ],
+    [
+      "without unknown dogs in a checkpoint, keeping its earnings",
+      (document) => {
+        document.checkpoint = {
+          dogs: [
+            { fired: true, id: "ghost", zonesFinished: 1 },
+            { fired: false, id: "koda", zonesFinished: 2 },
+          ],
+          earnedCents: 900,
+          zonesFinished: 2,
+        };
+      },
+      (save) => save.checkpoint,
+      {
+        counters: null,
+        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+        earnedCents: 900,
+        route: PRE_FORK_ROUTE,
+        zonesFinished: 2,
+      },
+    ],
+    [
+      "without unknown or duplicate hints shown",
+      (document) => {
+        document.shownHints = ["tip", "retiredHint", "tip", "puddle"];
+      },
+      (save) => save.shownHints,
+      ["tip", "puddle"],
+    ],
+  ])("loads %s", (_, change, read, expected) => {
+    const { save, status } = loadSave(testContext, withChanges(change));
     expect(status).toBe("loaded");
-    expect(save.checkpoint?.route).toEqual(["street", "park", "shops", "homeStretch"]);
-  });
-
-  it("loads a checkpoint's route, dropping zones the game no longer has", () => {
-    const save = loaded((document) => {
-      document.checkpoint = {
-        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-        earnedCents: 4_250,
-        route: ["street", "oldZone", "pawsPromenade"],
-        zonesFinished: 2,
-      };
-    });
-    expect(save.checkpoint?.route).toEqual(["street", "pawsPromenade"]);
-  });
-
-  it("loads a last walk from before forks on the pre-fork route, and keeps a later one's", () => {
-    const before = loaded((document) => {
-      const { lastWalk } = document.stats;
-      if (lastWalk !== null) {
-        delete lastWalk.route;
-      }
-    });
-    expect(before.stats.lastWalk?.route).toEqual(["street", "park", "shops", "homeStretch"]);
-    expect(loaded(() => undefined).stats.lastWalk?.route).toEqual(["street", "park"]);
-  });
-
-  it("loads a checkpoint's run counters", () => {
-    const counters = { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, squirrelChases: 2 };
-    const save = loaded((document) => {
-      document.checkpoint = {
-        counters,
-        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-        earnedCents: 4_250,
-        zonesFinished: 2,
-      };
-    });
-    // A checkpoint saved before firstZone walked from the first zone.
-    expect(save.checkpoint?.counters).toEqual({ ...counters, firstZone: 0 });
-  });
-
-  it("strips fields the schema does not know", () => {
-    const save = loaded((document) => {
-      untyped(document).extra = true;
-      untyped(document).settings = { ...document.settings, language: "fr" };
-    });
-    expect(save).toEqual(veteranSave());
-  });
-
-  it("loads an empty loadout, as a new player has before picking a dog", () => {
-    const save = loaded((document) => {
-      document.lastLoadout = { dogs: [], gear: null };
-    });
-    expect(save.lastLoadout).toEqual({ dogs: [], gear: null });
+    expect(read(save)).toEqual(expected);
   });
 
   describe("a save it cannot use", () => {
@@ -265,36 +387,9 @@ describe("loadSave", () => {
       });
       expect([save.settings.musicVolume, save.settings.sfxVolume]).toEqual([clamped, clamped]);
     });
-
-    it("keeps reduced motion as stored", () => {
-      expect(loaded(() => {}).settings.reducedMotion).toBe(true);
-    });
   });
 
-  describe("unknown ids", () => {
-    it("drops them from everything owned, and removes duplicates", () => {
-      const save = loaded((document) => {
-        document.owned = {
-          dogSlots: 2,
-          dogs: ["koda", "ghost", "penny", "koda"],
-          gear: ["whistle", "jetpack", "whistle"],
-        };
-      });
-      expect(save.owned).toEqual({
-        dogSlots: 2,
-        dogs: ["biscuit", "duchess", "koda", "penny"],
-        gear: ["whistle"],
-      });
-    });
-
-    it("drops them from the loadout, along with picks the player does not own", () => {
-      const save = loaded((document) => {
-        // archie is a known dog that this player has not bought.
-        document.lastLoadout = { dogs: ["ghost", "penny", "archie"], gear: "luckyCollar" };
-      });
-      expect(save.lastLoadout).toEqual({ dogs: ["penny"], gear: null });
-    });
-
+  describe("dog slots", () => {
     it.each([
       [-2, 1],
       [0, 1],
@@ -305,91 +400,6 @@ describe("loadSave", () => {
         document.owned.dogSlots = storedSlots;
       });
       expect(save.owned.dogSlots).toBe(clamped);
-    });
-
-    it("trims the loadout to the clamped slots", () => {
-      const save = loaded((document) => {
-        document.owned.dogSlots = 0;
-        document.lastLoadout.dogs = ["penny", "koda"];
-      });
-      expect(save.lastLoadout.dogs).toEqual(["penny"]);
-    });
-
-    it("leaves the loadout empty, keeping owned gear, when no loadout dog is left", () => {
-      const save = loaded((document) => {
-        document.lastLoadout = { dogs: ["ghost"], gear: "whistle" };
-      });
-      expect(save.lastLoadout).toEqual({ dogs: [], gear: "whistle" });
-    });
-
-    it("keeps a known walker and swaps an unknown one for the default", () => {
-      expect(loaded(() => {}).walker).toBe("ada");
-      const save = loaded((document) => {
-        document.walker = "retiredWalker";
-      });
-      expect(save.walker).toBe("casey");
-    });
-
-    it("drops stats for unknown dogs and keeps the total firings", () => {
-      const save = loaded((document) => {
-        document.stats.dogs.ghost = { timesFired: 2, walks: 3, zonesFinished: 4 };
-        document.stats.timesFired = 3;
-      });
-      expect(Object.keys(save.stats.dogs).sort()).toEqual(["biscuit", "koda"]);
-      expect(save.stats.timesFired).toBe(3);
-    });
-
-    it("drops unknown dogs from the logbook's walks and keeps the walks", () => {
-      const save = loaded((document) => {
-        present(document.stats.bestWalk).dogs = ["ghost", "koda"];
-        present(document.stats.lastWalk).dogs = ["ghost"];
-      });
-      expect(save.stats.bestWalk?.dogs).toEqual(["koda"]);
-      expect(save.stats.lastWalk).toEqual({ ...veteranSave().stats.lastWalk, dogs: [] });
-    });
-
-    it("loads a save from before the mute setting as unmuted", () => {
-      const save = loaded((document) => {
-        delete (document.settings as Partial<typeof document.settings>).muted;
-      });
-      expect(save.settings.muted).toBe(false);
-    });
-
-    it("drops unknown dogs from the last walk's firings", () => {
-      const save = loaded((document) => {
-        present(document.stats.lastWalk).firings = [
-          { dog: "ghost", zone: 1 },
-          { dog: "koda", zone: 2 },
-        ];
-      });
-      expect(save.stats.lastWalk?.firings).toEqual([{ dog: "koda", zone: 2 }]);
-    });
-
-    it("drops them from a checkpoint and keeps its earnings", () => {
-      const save = loaded((document) => {
-        document.checkpoint = {
-          dogs: [
-            { fired: true, id: "ghost", zonesFinished: 1 },
-            { fired: false, id: "koda", zonesFinished: 2 },
-          ],
-          earnedCents: 900,
-          zonesFinished: 2,
-        };
-      });
-      expect(save.checkpoint).toEqual({
-        counters: null,
-        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
-        earnedCents: 900,
-        route: ["street", "park", "shops", "homeStretch"],
-        zonesFinished: 2,
-      });
-    });
-
-    it("drops unknown hints from those shown, and duplicates", () => {
-      const save = loaded((document) => {
-        document.shownHints = ["tip", "retiredHint", "tip", "puddle"];
-      });
-      expect(save.shownHints).toEqual(["tip", "puddle"]);
     });
   });
 });

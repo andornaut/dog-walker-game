@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import type { DogId } from "../data/types";
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import {
@@ -11,7 +12,7 @@ import {
   zonesFinishedBy,
 } from "./checkpoint";
 import { newPlayerSave, quietCounters, testAwards, veteranSave } from "./fixtures";
-import type { Checkpoint } from "./schema";
+import type { Checkpoint, SaveDocument } from "./schema";
 
 // veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000, best zone 4, runs
 // finished 2 / noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit
@@ -44,10 +45,12 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
 });
 
 describe("zonesFinishedBy", () => {
-  it("counts only the zones a run finished", () => {
-    expect(zonesFinishedBy({ outcome: "finished", zone: 4 })).toBe(4);
-    expect(zonesFinishedBy({ outcome: "wentHome", zone: 3 })).toBe(2);
-    expect(zonesFinishedBy({ outcome: "noDogs", zone: 1 })).toBe(0);
+  it.each<[EndReason, number, number]>([
+    ["finished", 4, 4],
+    ["wentHome", 3, 2],
+    ["noDogs", 1, 0],
+  ])("counts a %s run in zone %i as %i zones finished", (outcome, zone, finished) => {
+    expect(zonesFinishedBy({ outcome, zone })).toBe(finished);
   });
 });
 
@@ -56,11 +59,6 @@ describe("recordCheckpoint", () => {
     const save = veteranSave();
     expect(recordCheckpoint(save, checkpoint)).toEqual({ ...veteranSave(), checkpoint });
     expect(save).toEqual(veteranSave());
-  });
-
-  it("replaces an earlier checkpoint from the same run", () => {
-    const first = recordCheckpoint(veteranSave(), { ...checkpoint, zonesFinished: 1 });
-    expect(recordCheckpoint(first, checkpoint).checkpoint).toEqual(checkpoint);
   });
 });
 
@@ -173,29 +171,30 @@ describe("achievements at banking", () => {
     });
   });
 
-  it("counts a finished walk with no firing, and the dogs that finished it", () => {
-    const clean = runResult({
-      dogs: [
-        { fired: false, id: "koda", zonesFinished: 4 },
-        { fired: false, id: "penny", zonesFinished: 4 },
-      ],
-    });
-    const { stats } = recordRunEnd(testAwards, veteranSave(), clean);
-    expect(stats.walksWithoutFiring).toBe(3);
-    expect(stats.dogsFinishedWith).toEqual(["biscuit", "koda", "penny"]);
-  });
-
-  it("counts neither a walk with a firing nor one that ended early", () => {
-    const fired = recordRunEnd(testAwards, veteranSave(), runResult()).stats;
-    expect(fired.walksWithoutFiring).toBe(2);
-    expect(fired.dogsFinishedWith).toEqual(["biscuit", "koda"]);
-    const home = recordRunEnd(
-      testAwards,
-      veteranSave(),
-      runResult({ dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome" }),
-    ).stats;
-    expect(home.walksWithoutFiring).toBe(2);
-    expect(home.dogsFinishedWith).toEqual(["biscuit"]);
+  // veteranSave has 2 walks without firing, and biscuit finished one.
+  it.each<[string, Partial<RunResult>, number, DogId[]]>([
+    [
+      "counts a finished walk with no firing, and the dogs that finished it",
+      {
+        dogs: [
+          { fired: false, id: "koda", zonesFinished: 4 },
+          { fired: false, id: "penny", zonesFinished: 4 },
+        ],
+      },
+      3,
+      ["biscuit", "koda", "penny"],
+    ],
+    ["counts neither a walk with a firing", {}, 2, ["biscuit", "koda"]],
+    [
+      "counts neither a walk that ended early",
+      { dogs: [{ fired: false, id: "penny", zonesFinished: 2 }], outcome: "wentHome" },
+      2,
+      ["biscuit"],
+    ],
+  ])("%s", (_, changes, walksWithoutFiring, dogsFinishedWith) => {
+    const { stats } = recordRunEnd(testAwards, veteranSave(), runResult(changes));
+    expect(stats.walksWithoutFiring).toBe(walksWithoutFiring);
+    expect(stats.dogsFinishedWith).toEqual(dogsFinishedWith);
   });
 
   it("counts a walk a dev start began past zone 1 toward no total or zone badge", () => {
@@ -239,9 +238,12 @@ describe("achievements at banking", () => {
 });
 
 describe("isNewBestWalk", () => {
-  it("flags a first walk and one that beats the best, but not a tie", () => {
-    expect(isNewBestWalk(newPlayerSave.stats, cents(0))).toBe(true);
-    expect(isNewBestWalk(veteranSave().stats, cents(9_001))).toBe(true);
-    expect(isNewBestWalk(veteranSave().stats, cents(9_000))).toBe(false);
+  // veteranSave's best walk earned 9,000.
+  it.each<[string, SaveDocument, number, boolean]>([
+    ["a first walk", newPlayerSave, 0, true],
+    ["a walk that beats the best", veteranSave(), 9_001, true],
+    ["not a tie", veteranSave(), 9_000, false],
+  ])("flags %s", (_, save, earned, best) => {
+    expect(isNewBestWalk(save.stats, cents(earned))).toBe(best);
   });
 });

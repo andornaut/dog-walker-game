@@ -45,27 +45,37 @@ describe("migrateSave", () => {
     expect(parsed.output).toEqual(veteranSave());
   });
 
-  it("runs every step in version order, whatever order the registry lists them in", () => {
-    const shuffled = [recordingStep(2), recordingStep(0), recordingStep(1)];
-    expect(migrateSave(shuffled, 3, { steps: [], version: 0 })).toEqual({
-      document: { steps: [0, 1, 2], version: 3 },
-      ok: true,
-    });
-  });
-
-  it("starts from the document's own version", () => {
-    const registry = [recordingStep(0), recordingStep(1), recordingStep(2)];
-    expect(migrateSave(registry, 3, { steps: [], version: 2 })).toEqual({
-      document: { steps: [2], version: 3 },
-      ok: true,
-    });
-  });
-
-  it("leaves a document at the target version as it is", () => {
-    expect(migrateSave([recordingStep(0)], 1, { steps: [], version: 1 })).toEqual({
-      document: { steps: [], version: 1 },
-      ok: true,
-    });
+  it.each<[string, Migration[], number, Record<string, unknown>, ReturnType<typeof migrateSave>]>([
+    [
+      "runs every step in version order, whatever order the registry lists them in",
+      [recordingStep(2), recordingStep(0), recordingStep(1)],
+      3,
+      { steps: [], version: 0 },
+      { document: { steps: [0, 1, 2], version: 3 }, ok: true },
+    ],
+    [
+      "starts from the document's own version",
+      [recordingStep(0), recordingStep(1), recordingStep(2)],
+      3,
+      { steps: [], version: 2 },
+      { document: { steps: [2], version: 3 }, ok: true },
+    ],
+    [
+      "leaves a document at the target version as it is",
+      [recordingStep(0)],
+      1,
+      { steps: [], version: 1 },
+      { document: { steps: [], version: 1 }, ok: true },
+    ],
+    [
+      "rejects a document when a step is missing",
+      [recordingStep(0), recordingStep(2)],
+      3,
+      { steps: [], version: 0 },
+      { ok: false, reason: "no migration from version 1" },
+    ],
+  ])("%s", (_, registry, target, document, expected) => {
+    expect(migrateSave(registry, target, document)).toEqual(expected);
   });
 
   it("rejects a document from a later version without running any step", () => {
@@ -80,12 +90,6 @@ describe("migrateSave", () => {
     const result = migrateSave([spy], 1, { version: 2 });
     expect(result).toEqual({ ok: false, reason: expect.stringMatching(/version 2, newer/) });
     expect(ran).toEqual([]);
-  });
-
-  it("rejects a document when a step is missing", () => {
-    expect(migrateSave([recordingStep(0), recordingStep(2)], 3, { steps: [], version: 0 })).toEqual(
-      { ok: false, reason: "no migration from version 1" },
-    );
   });
 
   it.each([

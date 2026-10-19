@@ -78,12 +78,10 @@ describe("runResultOf", () => {
     });
   });
 
-  it("ends a run that headed home in the zone it was in", () => {
-    const home = { ...midRun, phase: { kind: "ended", reason: "wentHome" } as const };
-    expect(runResultOf(data, home)).toMatchObject({ outcome: "wentHome", zone: 3 });
-  });
-
-  it("counts a run that has not ended as heading home", () => {
-    expect(runResultOf(data, midRun).outcome).toBe("wentHome");
+  it.each<[string, RunState]>([
+    ["a run that headed home", { ...midRun, phase: { kind: "ended", reason: "wentHome" } }],
+    ["a run that has not ended", midRun],
+  ])("ends %s as heading home, in the zone it was in", (_, run) => {
+    expect(runResultOf(data, run)).toMatchObject({ outcome: "wentHome", zone: 3 });
   });
 });

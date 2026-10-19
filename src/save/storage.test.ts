@@ -57,13 +57,6 @@ describe("saveStore", () => {
     });
   });
 
-  it("starts a new player when nothing is stored", async () => {
-    expect(await saveStore(memoryStorage()).load(testContext)).toEqual({
-      save: newPlayerSave,
-      status: "new",
-    });
-  });
-
   it("backs up a corrupt save and starts fresh", async () => {
     const entries = new Map([[SAVE_KEY, "{not json"]]);
     const result = await saveStore(memoryStorage(entries)).load(testContext);
@@ -133,14 +126,6 @@ describe("saveStore", () => {
 });
 
 describe("browserStorage", () => {
-  it("reads and writes through the Storage-like object", async () => {
-    const entries = new Map<string, string>();
-    const store = saveStore(browserStorage(fakeLocalStorage(entries)));
-    await store.save(veteranSave());
-    expect(entries.get(SAVE_KEY)).toBe(JSON.stringify(veteranSave()));
-    expect((await store.load(testContext)).save).toEqual(veteranSave());
-  });
-
   it("turns a throwing setItem into an unavailable save", async () => {
     const full: StorageLike = {
       getItem: () => null,
@@ -163,10 +148,11 @@ describe("lazyStorage", () => {
     expect((await saveStore(browserStorage(blocked)).load(testContext)).status).toBe("unavailable");
   });
 
-  it("reads and writes through the storage it looks up", async () => {
+  it("reads and writes through the Storage-like object it looks up", async () => {
     const entries = new Map<string, string>();
     const store = saveStore(browserStorage(lazyStorage(() => fakeLocalStorage(entries))));
     await store.save(veteranSave());
     expect(entries.get(SAVE_KEY)).toBe(JSON.stringify(veteranSave()));
+    expect((await store.load(testContext)).save).toEqual(veteranSave());
   });
 });
