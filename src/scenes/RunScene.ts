@@ -8,6 +8,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { read } from "../rules/units";
 import type { CardSceneData } from "./CardScene";
 import { addFilledRect } from "./draw";
+import type { HelpSceneData } from "./HelpScene";
 import { SCENE_KEYS } from "./sceneKeys";
 
 const DASH_COLOR = 0xe0e0e0;
@@ -75,6 +76,19 @@ export class RunScene extends Scene {
     // Placeholder until collisions open cards (Milestone 3): E for three options, W for two.
     this.input.keyboard?.on("keydown-E", () => this.openCards(3));
     this.input.keyboard?.on("keydown-W", () => this.openCards(2));
+
+    // Placeholder until the start screen and pause menu open help: ? opens it over the run.
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      if (event.key === "?") {
+        this.openHelp();
+      }
+    });
+  }
+
+  private openHelp(): void {
+    const data: HelpSceneData = { resume: SCENE_KEYS.run };
+    this.scene.pause();
+    this.scene.launch(SCENE_KEYS.help, data);
   }
 
   private moveToLane(lane: number): void {

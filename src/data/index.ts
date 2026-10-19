@@ -2,6 +2,7 @@ import { DEBUFFS } from "./debuffs";
 import { DOGS } from "./dogs";
 import { ENCOUNTERS } from "./encounters";
 import { FORCED_STOPS } from "./forcedStops";
+import { HELP_PAGES } from "./help";
 import { QUIPS } from "./quips";
 import { SHOP_GEAR } from "./shop";
 import { TUNING } from "./tuning";
@@ -15,6 +16,7 @@ interface ValueExports {
   readonly DOGS: typeof DOGS;
   readonly ENCOUNTERS: typeof ENCOUNTERS;
   readonly FORCED_STOPS: typeof FORCED_STOPS;
+  readonly HELP_PAGES: typeof HELP_PAGES;
   readonly QUIPS: typeof QUIPS;
   readonly SHOP_GEAR: typeof SHOP_GEAR;
   readonly TUNING: typeof TUNING;
@@ -29,6 +31,7 @@ function toGameData(values: ValueExports): GameData {
     dogs: values.DOGS,
     encounters: values.ENCOUNTERS,
     forcedStops: values.FORCED_STOPS,
+    help: values.HELP_PAGES,
     quips: values.QUIPS,
     shopGear: values.SHOP_GEAR,
     tuning: values.TUNING,
@@ -43,6 +46,7 @@ let values: ValueExports = {
   DOGS,
   ENCOUNTERS,
   FORCED_STOPS,
+  HELP_PAGES,
   QUIPS,
   SHOP_GEAR,
   TUNING,
@@ -70,6 +74,7 @@ if (import.meta.hot) {
       "./dogs.ts",
       "./encounters.ts",
       "./forcedStops.ts",
+      "./help.ts",
       "./quips.ts",
       "./shop.ts",
       "./tuning.ts",

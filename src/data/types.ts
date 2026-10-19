@@ -272,6 +272,14 @@ export interface World {
   readonly zones: readonly [Zone, ...Zone[]];
 }
 
+// One page of the "How to walk" help screen, shown in list order.
+export interface HelpPage {
+  // Key of the page's illustration in the art manifest's images.
+  readonly art: string;
+  readonly body: string;
+  readonly title: string;
+}
+
 export type QuipMoment = "fired" | "happier" | "upset";
 export type Quips = Readonly<Record<QuipMoment, readonly string[]>>;
 
@@ -280,6 +288,7 @@ export interface GameData {
   readonly dogs: Readonly<Record<DogId, Dog>>;
   readonly encounters: Readonly<Record<EncounterId, Encounter>>;
   readonly forcedStops: Readonly<Record<ForcedStopId, ForcedStop>>;
+  readonly help: readonly [HelpPage, ...HelpPage[]];
   readonly quips: Readonly<Record<Temperament, Quips>>;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;

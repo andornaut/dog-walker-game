@@ -10,7 +10,7 @@ import { SCREEN_CONFIG } from "./screen";
 import type { CardOption, DogId, Energy, Modifier, Size, Temperament, TraitId } from "./types";
 
 // Invariants the rulebook states about the content and numbers, checked on the real data.
-const { dogs, encounters, forcedStops, quips, shopGear, tuning, upgrades, walkers, world } =
+const { dogs, encounters, forcedStops, help, quips, shopGear, tuning, upgrades, walkers, world } =
   gameData;
 const dogList = Object.values(dogs);
 const SIZES: readonly Size[] = ["small", "medium", "big"];
@@ -229,5 +229,17 @@ describe("run, world and walkers", () => {
         expect(lines.length).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("help", () => {
+  it("gives every page a title, a body and its own illustration key in manifest form", () => {
+    for (const page of help) {
+      expect(page.title).not.toBe("");
+      expect(page.body).not.toBe("");
+      expect(page.art).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+    }
+    expect(new Set(help.map((page) => page.art)).size).toBe(help.length);
+    expect(new Set(help.map((page) => page.title)).size).toBe(help.length);
   });
 });

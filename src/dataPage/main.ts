@@ -226,6 +226,15 @@ function zonesSection(data: GameData): Section {
   };
 }
 
+function helpSection(data: GameData): Section {
+  return {
+    headers: ["Page", "Title", "Body", "Art"],
+    note: "The How to walk screen, in page order. Art is a manifest image key.",
+    rows: data.help.map((page, i) => [i + 1, page.title, page.body, page.art]),
+    title: "Help",
+  };
+}
+
 // One row per number, nested tables flattened to group.table.row.
 function tuningSection(data: GameData): Section {
   const rows: Cell[][] = [];
@@ -263,6 +272,7 @@ function render(): void {
     walkersSection,
     debuffsSection,
     zonesSection,
+    helpSection,
     tuningSection,
   ].map((section) => renderSection(section(data)));
   root.replaceChildren(

@@ -60,6 +60,20 @@ function tapDirection(layout: GestureContext["layout"], x: number): LaneDirectio
 
 const move = (direction: LaneDirection): GestureAction => ({ direction, kind: "move" });
 
+// The direction of a mostly horizontal drag that has passed the minimum distance.
+export function swipeDirection(
+  minDistance: number,
+  start: Pick<PointerSample, "x" | "y">,
+  end: Pick<PointerSample, "x" | "y">,
+): LaneDirection | undefined {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  if (Math.abs(dx) < minDistance || Math.abs(dx) < Math.abs(dy)) {
+    return undefined;
+  }
+  return dx < 0 ? -1 : 1;
+}
+
 // Emits every hold move due by nowMs. The scene calls this each frame; the pointer
 // handlers call it first, so a late frame does not reorder a hold and a release.
 export function advanceGesture(
@@ -110,11 +124,12 @@ export function pointerMove(
   if (current.kind !== "pressed" && current.kind !== "dragging") {
     return advanced;
   }
+  const swipe = swipeDirection(config.swipeMinDistance, current.start, point);
+  if (swipe !== undefined) {
+    return { actions: [...advanced.actions, move(swipe)], state: { kind: "spent" } };
+  }
   const dx = point.x - current.start.x;
   const dy = point.y - current.start.y;
-  if (Math.abs(dx) >= config.swipeMinDistance && Math.abs(dx) >= Math.abs(dy)) {
-    return { actions: [...advanced.actions, move(dx < 0 ? -1 : 1)], state: { kind: "spent" } };
-  }
   if (current.kind === "pressed" && Math.hypot(dx, dy) > config.tapMaxDistance) {
     return { actions: advanced.actions, state: { kind: "dragging", start: current.start } };
   }
