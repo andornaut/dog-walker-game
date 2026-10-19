@@ -797,6 +797,42 @@
       "png": "images/item-whistle.png"
     },
     {
+      "key": "portrait-dog-biscuit",
+      "png": "images/portrait-dog-biscuit.png"
+    },
+    {
+      "key": "portrait-dog-dash",
+      "png": "images/portrait-dog-dash.png"
+    },
+    {
+      "key": "portrait-dog-duchess",
+      "png": "images/portrait-dog-duchess.png"
+    },
+    {
+      "key": "portrait-dog-koda",
+      "png": "images/portrait-dog-koda.png"
+    },
+    {
+      "key": "portrait-dog-nugget",
+      "png": "images/portrait-dog-nugget.png"
+    },
+    {
+      "key": "portrait-dog-pierre",
+      "png": "images/portrait-dog-pierre.png"
+    },
+    {
+      "key": "portrait-dog-snowball",
+      "png": "images/portrait-dog-snowball.png"
+    },
+    {
+      "key": "portrait-dog-waffles",
+      "png": "images/portrait-dog-waffles.png"
+    },
+    {
+      "key": "portrait-dog-zippy",
+      "png": "images/portrait-dog-zippy.png"
+    },
+    {
       "key": "road-bark-park",
       "png": "images/road-bark-park.png"
     },
