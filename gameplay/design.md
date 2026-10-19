@@ -264,19 +264,34 @@ Run-only boosts offered between zones, from a pool of 9. Each offer draws 3 at r
 
 Effects without "now" or "next zone" last the rest of the run.
 
+### Walkers
+
+Four walkers, on two axes. Pace is the difficulty: a slow walker's road scrolls slower and pays lower fees, a fast walker's faster with higher fees, the same trade as a harder fork. Charm or hustle is the play style: a charmer's owners start with +♥ but tips are smaller; a hustler's tips are bigger. You start with Casey, the easiest; the others unlock the first time you finish zones 1, 2 and 3, so most players have all four within a few walks.
+
+| Walker | Pace | Style   | Effects                                     | Unlock        |
+| ------ | ---- | ------- | ------------------------------------------- | ------------- |
+| Casey  | Slow | Charmer | Speed ×0.9, fees ×0.9; +♥ start, tips ×0.85 | Start         |
+| Ben    | Slow | Hustler | Speed ×0.9, fees ×0.9; tips ×1.2            | Finish zone 1 |
+| Ada    | Fast | Charmer | Speed ×1.1, fees ×1.1; +♥ start, tips ×0.85 | Finish zone 2 |
+| Trista | Fast | Hustler | Speed ×1.1, fees ×1.1; tips ×1.2            | Finish zone 3 |
+
+- **Greeting:** the first time you finish an unlocking zone, the next walker waves from the sidewalk in a 1-second popup stop, like the lemonade stand ("Nice pack! Mind if I walk with you sometime?"), then the zone ends as usual
+- A walker's effects stack with the Pocket item and upgrade cards, and the state strip shows them
+- The numbers are first guesses; tuning sets them against the walker spread in [`README.md`](README.md)
+
 ### Home screen and progression
 
 Everything bought at the Pet shop is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
 
 - **Layout, top to bottom:** the top bar (bank, best walk and walk count on the left; every control at the top right: Logbook, help, sound, settings); the gate scene; then three framed sections in order: Walker, Dogs, Pocket (optional); then the Start walk button at the bottom. A section's frame lights up once it's complete; until then its band prompts ("Tap a face", "Add a dog"). Nothing else sits between the sections, so the screen reads as choose this, choose that, start your walk
 - **Pet shop:** a building in the gate scene, its sign the same green as Start walk (tappable entry points share one colour); tap it to open the shop, which sells everything you buy: gear, dogs and dog slots. Tap an item to buy it, at any time you can pay. Anything you can afford has a gold outline, and so does the building while anything in it is affordable. Tapping a locked dog or dog slot on the home screen opens the shop at that item. A dog unlocked another way shows its goal instead of a price. The slot sign reads "Slot 2 · $800" with "Save $650 more" or "Tap to buy"
-- **Tile states** (dogs and Pocket gear alike): Locked (not owned): a grey silhouette with a padlock and a price or goal plate; Available (owned, not picked): full colour in a plain frame; Picked: full colour in a gold frame with a check; Pack full (owned, not picked, while every slot is filled): greyed in colour, and a tap shows "The pack is full. Tap a picked dog to take it out."
+- **Tile states** (walkers, dogs and Pocket gear alike): Locked (not owned): a grey silhouette with a padlock and a price or goal plate; Available (owned, not picked): full colour in a plain frame; Picked: full colour in a gold frame with a check; Pack full (owned, not picked, while every slot is filled): greyed in colour, and a tap shows "The pack is full. Tap a picked dog to take it out."
 - **Details:** hold any dog or gear item, on the home screen or in the shop, for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's name and effect
 - **Start button:** the only button below the sections, reading "Start walk" in every state, and not ready until a dog is picked. The Dogs band shows the pack count with no label, "1/2"; each dog tile shows its fee
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after each of the first 3 walks "Tap to pick or buy. Hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the pet shop."; picking a dog shows that owner's parting line
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
 - **Gear and Pocket** (5 items, bought once at the Pet shop): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). The Pocket section is a strip of all 5 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. One line below the strip gives the pocketed item's effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
-- **Walker picker:** choose Ada, Ben, Casey or Trista. All are free; the choice is cosmetic and saved, and the saved walker counts as picked, so a first visit needs only a dog
+- **Walker picker:** choose from the walkers you've unlocked (see Walkers). The choice is saved, and the saved walker counts as picked, so a first visit needs only a dog. Locked walkers use the Locked tile state with their goal ("Finish zone 1"); a newly unlocked walker shows the walker's line "New walker!"
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Woof Way under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank

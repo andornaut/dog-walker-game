@@ -34,6 +34,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 | Expert  | 90 to 98%      | 5 to 15%            |
 
 - **Play-style window:** for a given player, every pack, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
+- **Walker spread:** walkers are the difficulty slider, so they sit outside the play-style window: the easiest finishes about 10 points more often than the hardest, and the hardest earns about 20% more. The skill targets are for the median walker; the window applies within each walker
 - **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most
 - **Trade-offs:** a strong downside always comes with a matching upside (a riskier dog pays a higher fee), and the net stays in the window
 - **Cards:** about 8 cards a walk, one a minute; trim minor cards (such as a puddle that catches one dog) if walks run over
@@ -47,7 +48,8 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 Rules in the rulebook that the game doesn't have yet:
 
 1. **Dog quirks:** one per dog (the Quirks table), with the roster changes (Archie hyper, Snowball calm, Penny Friendly)
-2. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
+2. **Walkers:** pace and style effects, unlocks on first finishing zones 1 to 3, and the sidewalk greeting (the Walkers section)
+3. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
 
 Tuning against the targets, with the simulator before and after:
 
