@@ -18,7 +18,7 @@ Each folder's README is its plan, with what's left for the first build:
 
 Requires Node 24 (`.nvmrc`).
 
-The site's HTML pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`). `shared/` holds the files art's tools and the game both read.
+The site's built pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`): Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery and mock pages under `public/art/`, which load no TypeScript. `shared/` holds the files art's tools and the game both read.
 
 ```bash
 npm install
