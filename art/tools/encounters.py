@@ -23,7 +23,7 @@ cafe-patio          88x40   2 lanes, a striped awning on two poles over two bist
                             table and a cup on a saucer on the right; idle (4 frames, 350ms): a steam
                             curl rises off the cup 1px a frame
 lemonade-stand      32x48   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
-                            ("LEMON ADE") and on the front ("50c" with a lemon, "25c" with a drop), a pitcher and
+                            ("LEMON ADE") and on the front ("50c" with a lemon, a drop beside a coin), a pitcher and
                             cups on the counter; idle (4 frames, 400ms): the kid breathes, and the
                             pitcher glints on the third frame
 
@@ -537,7 +537,8 @@ def lemonade_stand(bob=0, glint=False, new=Grid):
         g.rect(x, 27, 4, 4, "white")
         g.rect(x, 27, 4, 1, "red")
         g.rect(x + 3, 28, 1, 3, "lgrey")
-    # the box: cardboard, its flaps, "50c" with a lemon, and "25c" with a drop for the dogs' water
+    # the box: cardboard, its flaps, "50c" with a lemon, and a drop beside a coin for the dogs' water (no
+    # number, so the sign never disagrees with the tuned price)
     g.rect(0, 46, 32, 2, None)
     g.rect(2, 33, 28, 13, "tan")
     g.rect(2, 33, 28, 1, "cream")
@@ -548,7 +549,8 @@ def lemonade_stand(bob=0, glint=False, new=Grid):
     letter(g, "50c", 11, 35, "red")
     g.ell(6, 43, 1.6, 2, "cyan", "sky")
     g.p(6, 41, "cyan")
-    letter(g, "25c", 11, 41, "blue")
+    g.ell(14, 43, 2, 2, "amber", "orange", "yellow")
+    g.p(14, 43, "orange")
     return lit(g)
 
 
