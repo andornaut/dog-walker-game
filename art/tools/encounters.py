@@ -27,9 +27,10 @@ lemonade-stand      32x48   1 lane, lucky: a cardboard stand, road.kid behind it
                             cups on the counter; idle (4 frames, 400ms): the kid breathes, and the
                             pitcher glints on the third frame
 
-Every encounter also has <key>@75 and <key>@50, redrawn at round(size x scale) with the
-original's tags, frames and durations (see minis.py): the same drawing on a minis.Mini, its
-motion kept at whole pixels, with a full outline. Small signs letter as scribbles.
+Every encounter also has <key>@<step> for each depth step in minis.STEPS (from
+shared/depth-steps.json), redrawn at floor(size x scale + 0.5) with the original's tags, frames
+and durations (see minis.py): the same drawing on a minis.Mini, its motion kept at whole
+pixels, with a full outline. Small signs letter as scribbles.
 
 All take the road outline rule (pixel.road_edge) and road.LIT's rim on their dark colours,
 so the silhouette holds 3:1 on every road. The drawing functions take new, the grid maker
@@ -50,7 +51,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
-from minis import SCALES, Mini, paint  # noqa: E402
+from minis import STEPS, Mini, paint  # noqa: E402
 from pixel import ROADS, Grid, edged, main, road_sprite  # noqa: E402
 from road import LIT  # noqa: E402
 
@@ -558,7 +559,7 @@ LEMONADE_IDLE = [dict(), dict(bob=-1), dict(glint=True), dict(bob=-1)], 400
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite, then its depth variants."""
-    for suffix, s in (("", 1), *(("@" + k, v) for k, v in SCALES)):
+    for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
         new = Grid if s == 1 else mini(s)
 
         def snapped(q, keys):

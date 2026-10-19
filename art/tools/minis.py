@@ -1,32 +1,21 @@
 #!/usr/bin/env python3
 """Draw the small versions of road sprites that the pseudo-3D road shows at
-0.75x and 0.5x. A plain nearest-neighbour downscale keeps every other pixel
-(0.5x) or drops every fourth (0.75x), so it loses half the 1px outline, makes
-legs blink and freezes 1px bobs. These are redrawn at the small size instead:
-the same drawing functions run on a grid that scales every rect, ellipse and
-triangle before it rasterizes, then the small sprite gets its own full outline.
-Faces are drawn at the small size (small() swaps in face_front, squirrel()
-squirrel_head). Where that still loses a feature (the treat's knobs, the
-wallet's clasp and glint, the skunk's face), the sprite or the feature is a
-hand-drawn pixel map instead.
+each depth step below full size: STEPS, read from shared/depth-steps.json, the
+table the game reads (0.875x, 0.75x, 0.625x and 0.5x). A plain nearest-
+neighbour downscale drops rows and columns, so it loses up to half the 1px
+outline, makes legs blink and freezes 1px bobs. These are redrawn at the small
+size instead: the same drawing functions run on a grid that scales every rect,
+ellipse and triangle before it rasterizes, then the small sprite gets its own
+full outline. Faces are drawn at the small size (small() swaps in face_front,
+squirrel() squirrel_head). Where that still loses a feature (the treat's knobs,
+the wallet's clasp and glint at 0.75x and 0.5x, the skunk's face), the sprite
+or the feature is a hand-drawn pixel map instead.
 
-<key>@75 and <key>@50 keep the original's tags, frame counts and durations,
-and their frames are floor(original size x scale + 0.5):
-
-tip@75, treat@75, lost-wallet@75                  12x12
-tip@50, treat@50, lost-wallet@50                  8x8
-cone@75, bin@75, hydrant@75                       24x24
-cone@50, bin@50, hydrant@50                       16x16
-bench@75                                          66x18
-bench@50                                          44x12
-dog-<name>@75 (every dog), skunk@75, squirrel@75,
-other-dog@75                                      24x24
-dog-<name>@50, skunk@50, squirrel@50, other-dog@50 16x16
-skunk-cloud@75 (no outline)                       66x30
-skunk-cloud@50 (no outline)                       44x20
-
-variants(s) draws the same set at any scale; depths.py uses it for the steps
-between these.
+<key>@<step> keeps the original's tags, frame counts and durations, and its
+frame is floor(original size x scale + 0.5). At every step: tip, treat,
+lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog and
+skunk-cloud (no outline). At @75 and @50 only (SCALES): dog-<name> for every
+dog, since the pack is drawn at full size.
 
 Usage:
   minis.py preview OUT.png   every small frame on the street colours
@@ -39,6 +28,7 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
+import json
 import math
 import os
 import sys
@@ -49,7 +39,24 @@ import obstacles  # noqa: E402
 import road  # noqa: E402
 from pixel import K, Grid, edged, main, road_sprite  # noqa: E402
 
-SCALES = (("75", 0.75), ("50", 0.5))
+
+
+def depth_steps():
+    """(suffix, scale) for every depth step below full size in shared/depth-steps.json, the table the game
+    reads, the suffix without its @: ("88", 0.875) and so on."""
+    root = os.path.join(os.path.dirname(__file__), "..", "..")
+    path = os.path.join(root, "shared", "depth-steps.json")
+    # CLEANUP (added 2026-10-19): drop this fallback once the table's move from data/ to shared/ is on main.
+    if not os.path.exists(path):
+        path = os.path.join(root, "data", "depth-steps.json")
+    with open(path) as f:
+        steps = json.load(f)["steps"]
+    return tuple((q["suffix"].lstrip("@"), q["scale"]) for q in steps if q["scale"] < 1)
+
+
+STEPS = depth_steps()
+# The steps the hand-drawn maps here and in hazards.py are drawn for.
+SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))
 
 
 def scaled(v, s):
@@ -449,8 +456,6 @@ def variants(s):
     frames, ms = obstacles.BENCH_IDLE
     yield "bench", [("idle", [small(obstacles, s, obstacles.bench, (a[0] / s, a[1] / s) if a else a).outlined()
                               for a in frames], ms)]
-    for name, (draw, _) in dogs.DOGS.items():
-        yield f"dog-{name}", [(tag, dog_frames(draw, poses, s), ms) for tag, poses, ms in dogs.ROAD_TAGS]
     yield "skunk", [("idle", [skunk(s, v).outlined() for v in (0, 1)], 400)]
     yield "squirrel", [("idle", [squirrel(s, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
                        ("run", [squirrel(s, road.squirrel_run, k).outlined() for k in (False, True)], 120)]
@@ -461,10 +466,14 @@ def variants(s):
 
 
 def sprites():
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    for suffix, s in SCALES:
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite: variants at every step, and the
+    dogs at SCALES only. The dogs are the pack, which the game draws at full size."""
+    for suffix, s in STEPS:
         for key, tags in variants(s):
             yield f"{key}@{suffix}", tags
+    for suffix, s in SCALES:
+        for name, (draw, _) in dogs.DOGS.items():
+            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, s), ms) for tag, poses, ms in dogs.ROAD_TAGS]
 
 
 def originals():
@@ -495,7 +504,7 @@ def compare(out, grounds=("3a4466", "c0cbdc"), scale=4, gap=4):
         frames = [f for _, fs, _ in full[key] for f in fs]
         for ground in grounds:
             lines.append(([frames], ground))
-            for suffix, s in SCALES:
+            for suffix, s in STEPS:
                 if f"{key}@{suffix}" in minis:
                     lines.append(([[nearest(f, s) for f in frames],
                                    [f for _, fs, _ in minis[f"{key}@{suffix}"] for f in fs]], ground))

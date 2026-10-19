@@ -1,0 +1,46 @@
+{ "frames": {
+   "cafe-patio@62 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 55, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 55, "h": 25 },
+    "sourceSize": { "w": 55, "h": 25 },
+    "duration": 350
+   },
+   "cafe-patio@62 1.aseprite": {
+    "frame": { "x": 55, "y": 0, "w": 55, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 55, "h": 25 },
+    "sourceSize": { "w": 55, "h": 25 },
+    "duration": 350
+   },
+   "cafe-patio@62 2.aseprite": {
+    "frame": { "x": 110, "y": 0, "w": 55, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 55, "h": 25 },
+    "sourceSize": { "w": 55, "h": 25 },
+    "duration": 350
+   },
+   "cafe-patio@62 3.aseprite": {
+    "frame": { "x": 165, "y": 0, "w": 55, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 55, "h": 25 },
+    "sourceSize": { "w": 55, "h": 25 },
+    "duration": 350
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "cafe-patio@62.png",
+  "format": "RGBA8888",
+  "size": { "w": 220, "h": 25 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 """Draw the depth variants of road sprites that the other art scripts leave
-out: @75 and @50 for the road sprites that have none, and the steps in BETWEEN
-(between @75 and full size) for every road sprite. Each runs the sprite's own
-drawing function on a minis.Mini, so it follows any redraw of the full-size
-sprite and gets its own full outline at the small size (see minis.py).
+out: every depth step (minis.STEPS, from shared/depth-steps.json) for the road
+sprites that have no variants elsewhere, and the steps in BETWEEN (those
+without hazards.py's hand-drawn art) for hazards.py's squirrel-dash, loose-dog,
+ball-bounce and cyclist. Each runs the sprite's own drawing function on a
+minis.Mini, so it follows any redraw of the full-size sprite and gets its own
+full outline at the small size (see minis.py).
 
-@75 and @50 here:
-other-dog-owner, thief, biscuit-neighbour, chatty-neighbour, kid, mail-carrier,
-photo-op, stop-sign                         24x36, 16x24
-ice-cream-truck                             66x33, 44x22
-construction                                42x24, 28x16
-puddle (no outline), barrier-2              66x24 and 66x18, 44x16 and 44x12
-hedge, barrier-3                            108x18, 72x12
-parked-car                                  33x21, 22x14
-
-The steps in BETWEEN, for every road sprite: the ones above, minis.variants,
-the hazards (squirrel-dash, loose-dog, ball-bounce, cyclist) and the need
-spots. Walkers are the pack, always drawn at 1x, and have none.
+At every step here: other-dog-owner, thief, biscuit-neighbour, chatty-neighbour,
+kid, mail-carrier, photo-op, stop-sign, ice-cream-truck, construction, puddle
+(no outline), hedge, barrier-2, barrier-3 and parked-car. Walkers are the
+pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). Offsets that move a part by pixels (a
@@ -27,9 +21,8 @@ Usage:
   depths.py compare DIR       DIR/<key>.png per sprite: each frame at 1x, then per
                               step nearest-neighbour beside the variant, on the
                               six road colours
-  depths.py build             write the @75 and @50 variants to art/depths/*.aseprite,
-                              export to public/art/sprites/ and list them in the manifest
-  depths.py build-between     the same for the steps in BETWEEN
+  depths.py build             write every variant to art/depths/*.aseprite, export
+                              to public/art/sprites/ and list them in the manifest
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -40,18 +33,15 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-import dogs  # noqa: E402
 import hazards  # noqa: E402
 import minis  # noqa: E402
-import needs  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from minis import SCALES, scaled, small, snap  # noqa: E402
+from minis import SCALES, STEPS, scaled, small, snap  # noqa: E402
 from pixel import K, build, preview, road_sprite  # noqa: E402
 
-# The steps between @75 and full size, as (suffix, scale), such as ("88", 0.875). Empty until the game's step
-# table lists them, since the manifest rejects any other suffix than @75 and @50.
-BETWEEN = ()
+# The steps hazards.py has no hand-drawn art for.
+BETWEEN = tuple(q for q in STEPS if q not in SCALES)
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 # The pose arguments of road.person that move a part by pixels.
 POSE = ("lf", "rf", "bob")
@@ -161,19 +151,14 @@ def cyclist(s, lf, rf, sway):
     return g
 
 
-def borrowed(s):
-    """Yield (key, tags) at scale s for the road sprites whose @75 and @50 another file draws: minis.variants,
-    the hazards and the need spots. The dogs are the pack, which stays at 1x, so they have none."""
-    yield from ((key, tags) for key, tags in minis.variants(s) if not key.startswith("dog-"))
+def hazard(s):
+    """Yield (key, tags) at scale s for hazards.py's sprites, whose @75 and @50 it draws itself."""
     yield "squirrel-dash", [("run", [hazards.squirrel_dash(**hazards.small(s, q, hazards.SQUIRREL_OFFSETS)).outlined()
                                      for q in hazards.SQUIRREL_RUN], 80)]
     yield "loose-dog", [("run", [hazards.corgi_side(**hazards.small(s, q, hazards.CORGI_OFFSETS)).outlined()
                                  for q in hazards.CORGI_RUN], 100)]
     yield "ball-bounce", [("bounce", [hazards.ball_bounce(f, s) for f in range(6)], 70)]
     yield "cyclist", [("ride", [cyclist(s, **q).outlined() for q in hazards.CYCLIST_RIDE], 90)]
-    for key, (draw, module, tags) in needs.SPOTS.items():
-        yield key, [(tag, [needs.shrunk(module or needs, s, draw, q).outlined() for q in poses], ms)
-                    for tag, poses, ms in tags]
 
 
 def steps(scales, *sources):
@@ -185,15 +170,15 @@ def steps(scales, *sources):
 
 
 def sprites():
-    """Every variant: this file's own at every step, then the borrowed ones at the steps between."""
-    yield from steps(SCALES + BETWEEN, own)
-    yield from steps(BETWEEN, borrowed)
+    """Every variant: this file's own at every step, then the hazards at the steps in BETWEEN."""
+    yield from steps(STEPS, own)
+    yield from steps(BETWEEN, hazard)
 
 
 def originals():
     """Every full-size road sprite, by key."""
     out = {}
-    for module in (road, obstacles, dogs, hazards, needs):
+    for module in (road, obstacles, hazards):
         out.update(module.sprites())
     return out
 
@@ -215,13 +200,13 @@ def compare(out_dir, scale=4, gap=4):
     then per step a line of nearest-neighbour beside the variant."""
     from PIL import Image
 
-    full = originals()
+    full = {**originals(), **minis.originals()}
     ours = {**dict(minis.sprites()), **dict(sprites())}
     variants = {**full, **ours}
     for key in dict.fromkeys(k.split("@")[0] for k in ours):
         frames = [f for _, fs, _ in full[key] for f in fs]
         found = [(s, [f for _, fs, _ in variants[f"{key}@{x}"] for f in fs])
-                 for x, s in sorted(SCALES + BETWEEN, key=lambda q: -q[1]) if f"{key}@{x}" in variants]
+                 for x, s in STEPS if f"{key}@{x}" in variants]
         lines = [[frames]] + [[[minis.nearest(f, s) for f in frames], small_frames] for s, small_frames in found]
         width = max(sum(sum(len(f[0]) + gap for f in block) + 2 * gap for block in line) for line in lines)
         band = sum(len(line[0][0]) + gap for line in lines)
@@ -250,8 +235,6 @@ if __name__ == "__main__":
     elif len(argv) == 3 and argv[1] == "compare":
         compare(argv[2])
     elif len(argv) == 2 and argv[1] == "build":
-        build(checked(steps(SCALES, own)), "art/depths", anchored=road_sprite)
-    elif len(argv) == 2 and argv[1] == "build-between":
-        build(checked(steps(BETWEEN, own, borrowed)), "art/depths", anchored=road_sprite)
+        build(checked(sprites()), "art/depths", anchored=road_sprite)
     else:
         sys.exit(__doc__)

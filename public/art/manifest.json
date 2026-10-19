@@ -103,11 +103,29 @@
       }
     },
     {
+      "key": "ball-bounce@62",
+      "png": "sprites/ball-bounce@62.png",
+      "json": "sprites/ball-bounce@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 10
+      }
+    },
+    {
       "key": "ball-bounce@75",
       "png": "sprites/ball-bounce@75.png",
       "json": "sprites/ball-bounce@75.json",
       "anchor": {
         "feetY": 17,
+        "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "ball-bounce@88",
+      "png": "sprites/ball-bounce@88.png",
+      "json": "sprites/ball-bounce@88.json",
+      "anchor": {
+        "feetY": 20,
         "opaqueWidth": 12
       }
     },
@@ -130,12 +148,30 @@
       }
     },
     {
+      "key": "barrier-2@62",
+      "png": "sprites/barrier-2@62.png",
+      "json": "sprites/barrier-2@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "barrier-2@75",
       "png": "sprites/barrier-2@75.png",
       "json": "sprites/barrier-2@75.json",
       "anchor": {
         "feetY": 17,
         "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "barrier-2@88",
+      "png": "sprites/barrier-2@88.png",
+      "json": "sprites/barrier-2@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 77
       }
     },
     {
@@ -157,12 +193,30 @@
       }
     },
     {
+      "key": "barrier-3@62",
+      "png": "sprites/barrier-3@62.png",
+      "json": "sprites/barrier-3@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 90
+      }
+    },
+    {
       "key": "barrier-3@75",
       "png": "sprites/barrier-3@75.png",
       "json": "sprites/barrier-3@75.json",
       "anchor": {
         "feetY": 17,
         "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "barrier-3@88",
+      "png": "sprites/barrier-3@88.png",
+      "json": "sprites/barrier-3@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 126
       }
     },
     {
@@ -184,12 +238,30 @@
       }
     },
     {
+      "key": "bench@62",
+      "png": "sprites/bench@62.png",
+      "json": "sprites/bench@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "bench@75",
       "png": "sprites/bench@75.png",
       "json": "sprites/bench@75.json",
       "anchor": {
         "feetY": 17,
         "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "bench@88",
+      "png": "sprites/bench@88.png",
+      "json": "sprites/bench@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 75
       }
     },
     {
@@ -211,12 +283,30 @@
       }
     },
     {
+      "key": "bin@62",
+      "png": "sprites/bin@62.png",
+      "json": "sprites/bin@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "bin@75",
       "png": "sprites/bin@75.png",
       "json": "sprites/bin@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "bin@88",
+      "png": "sprites/bin@88.png",
+      "json": "sprites/bin@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 18
       }
     },
     {
@@ -238,12 +328,30 @@
       }
     },
     {
+      "key": "biscuit-neighbour@62",
+      "png": "sprites/biscuit-neighbour@62.png",
+      "json": "sprites/biscuit-neighbour@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "biscuit-neighbour@75",
       "png": "sprites/biscuit-neighbour@75.png",
       "json": "sprites/biscuit-neighbour@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "biscuit-neighbour@88",
+      "png": "sprites/biscuit-neighbour@88.png",
+      "json": "sprites/biscuit-neighbour@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 22
       }
     },
     {
@@ -265,12 +373,30 @@
       }
     },
     {
+      "key": "cafe-patio@62",
+      "png": "sprites/cafe-patio@62.png",
+      "json": "sprites/cafe-patio@62.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "cafe-patio@75",
       "png": "sprites/cafe-patio@75.png",
       "json": "sprites/cafe-patio@75.json",
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "cafe-patio@88",
+      "png": "sprites/cafe-patio@88.png",
+      "json": "sprites/cafe-patio@88.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 75
       }
     },
     {
@@ -302,12 +428,30 @@
       }
     },
     {
+      "key": "chatty-neighbour@62",
+      "png": "sprites/chatty-neighbour@62.png",
+      "json": "sprites/chatty-neighbour@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "chatty-neighbour@75",
       "png": "sprites/chatty-neighbour@75.png",
       "json": "sprites/chatty-neighbour@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "chatty-neighbour@88",
+      "png": "sprites/chatty-neighbour@88.png",
+      "json": "sprites/chatty-neighbour@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 22
       }
     },
     {
@@ -329,12 +473,30 @@
       }
     },
     {
+      "key": "cone@62",
+      "png": "sprites/cone@62.png",
+      "json": "sprites/cone@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "cone@75",
       "png": "sprites/cone@75.png",
       "json": "sprites/cone@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "cone@88",
+      "png": "sprites/cone@88.png",
+      "json": "sprites/cone@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 18
       }
     },
     {
@@ -356,12 +518,30 @@
       }
     },
     {
+      "key": "construction@62",
+      "png": "sprites/construction@62.png",
+      "json": "sprites/construction@62.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 34
+      }
+    },
+    {
       "key": "construction@75",
       "png": "sprites/construction@75.png",
       "json": "sprites/construction@75.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "construction@88",
+      "png": "sprites/construction@88.png",
+      "json": "sprites/construction@88.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 47
       }
     },
     {
@@ -383,12 +563,30 @@
       }
     },
     {
+      "key": "cyclist@62",
+      "png": "sprites/cyclist@62.png",
+      "json": "sprites/cyclist@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "cyclist@75",
       "png": "sprites/cyclist@75.png",
       "json": "sprites/cyclist@75.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "cyclist@88",
+      "png": "sprites/cyclist@88.png",
+      "json": "sprites/cyclist@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 24
       }
     },
     {
@@ -980,12 +1178,30 @@
       }
     },
     {
+      "key": "goose@62",
+      "png": "sprites/goose@62.png",
+      "json": "sprites/goose@62.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "goose@75",
       "png": "sprites/goose@75.png",
       "json": "sprites/goose@75.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "goose@88",
+      "png": "sprites/goose@88.png",
+      "json": "sprites/goose@88.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 25
       }
     },
     {
@@ -1007,12 +1223,30 @@
       }
     },
     {
+      "key": "hedge@62",
+      "png": "sprites/hedge@62.png",
+      "json": "sprites/hedge@62.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 90
+      }
+    },
+    {
       "key": "hedge@75",
       "png": "sprites/hedge@75.png",
       "json": "sprites/hedge@75.json",
       "anchor": {
         "feetY": 17,
         "opaqueWidth": 108
+      }
+    },
+    {
+      "key": "hedge@88",
+      "png": "sprites/hedge@88.png",
+      "json": "sprites/hedge@88.json",
+      "anchor": {
+        "feetY": 20,
+        "opaqueWidth": 126
       }
     },
     {
@@ -1034,12 +1268,30 @@
       }
     },
     {
+      "key": "hydrant@62",
+      "png": "sprites/hydrant@62.png",
+      "json": "sprites/hydrant@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 16
+      }
+    },
+    {
       "key": "hydrant@75",
       "png": "sprites/hydrant@75.png",
       "json": "sprites/hydrant@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "hydrant@88",
+      "png": "sprites/hydrant@88.png",
+      "json": "sprites/hydrant@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 22
       }
     },
     {
@@ -1061,12 +1313,30 @@
       }
     },
     {
+      "key": "ice-cream-truck@62",
+      "png": "sprites/ice-cream-truck@62.png",
+      "json": "sprites/ice-cream-truck@62.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "ice-cream-truck@75",
       "png": "sprites/ice-cream-truck@75.png",
       "json": "sprites/ice-cream-truck@75.json",
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "ice-cream-truck@88",
+      "png": "sprites/ice-cream-truck@88.png",
+      "json": "sprites/ice-cream-truck@88.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 75
       }
     },
     {
@@ -1163,12 +1433,30 @@
       }
     },
     {
+      "key": "kid@62",
+      "png": "sprites/kid@62.png",
+      "json": "sprites/kid@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "kid@75",
       "png": "sprites/kid@75.png",
       "json": "sprites/kid@75.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "kid@88",
+      "png": "sprites/kid@88.png",
+      "json": "sprites/kid@88.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 18
       }
     },
     {
@@ -1190,12 +1478,30 @@
       }
     },
     {
+      "key": "lemonade-stand@62",
+      "png": "sprites/lemonade-stand@62.png",
+      "json": "sprites/lemonade-stand@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "lemonade-stand@75",
       "png": "sprites/lemonade-stand@75.png",
       "json": "sprites/lemonade-stand@75.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "lemonade-stand@88",
+      "png": "sprites/lemonade-stand@88.png",
+      "json": "sprites/lemonade-stand@88.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1217,12 +1523,30 @@
       }
     },
     {
+      "key": "loose-dog@62",
+      "png": "sprites/loose-dog@62.png",
+      "json": "sprites/loose-dog@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "loose-dog@75",
       "png": "sprites/loose-dog@75.png",
       "json": "sprites/loose-dog@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "loose-dog@88",
+      "png": "sprites/loose-dog@88.png",
+      "json": "sprites/loose-dog@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1244,11 +1568,29 @@
       }
     },
     {
+      "key": "lost-wallet@62",
+      "png": "sprites/lost-wallet@62.png",
+      "json": "sprites/lost-wallet@62.json",
+      "anchor": {
+        "feetY": 8,
+        "opaqueWidth": 8
+      }
+    },
+    {
       "key": "lost-wallet@75",
       "png": "sprites/lost-wallet@75.png",
       "json": "sprites/lost-wallet@75.json",
       "anchor": {
         "feetY": 10,
+        "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "lost-wallet@88",
+      "png": "sprites/lost-wallet@88.png",
+      "json": "sprites/lost-wallet@88.json",
+      "anchor": {
+        "feetY": 11,
         "opaqueWidth": 10
       }
     },
@@ -1271,12 +1613,30 @@
       }
     },
     {
+      "key": "mail-carrier@62",
+      "png": "sprites/mail-carrier@62.png",
+      "json": "sprites/mail-carrier@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 17
+      }
+    },
+    {
       "key": "mail-carrier@75",
       "png": "sprites/mail-carrier@75.png",
       "json": "sprites/mail-carrier@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "mail-carrier@88",
+      "png": "sprites/mail-carrier@88.png",
+      "json": "sprites/mail-carrier@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1307,12 +1667,30 @@
       }
     },
     {
+      "key": "other-dog-owner@62",
+      "png": "sprites/other-dog-owner@62.png",
+      "json": "sprites/other-dog-owner@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 17
+      }
+    },
+    {
       "key": "other-dog-owner@75",
       "png": "sprites/other-dog-owner@75.png",
       "json": "sprites/other-dog-owner@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "other-dog-owner@88",
+      "png": "sprites/other-dog-owner@88.png",
+      "json": "sprites/other-dog-owner@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1325,12 +1703,30 @@
       }
     },
     {
+      "key": "other-dog@62",
+      "png": "sprites/other-dog@62.png",
+      "json": "sprites/other-dog@62.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 15
+      }
+    },
+    {
       "key": "other-dog@75",
       "png": "sprites/other-dog@75.png",
       "json": "sprites/other-dog@75.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "other-dog@88",
+      "png": "sprites/other-dog@88.png",
+      "json": "sprites/other-dog@88.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 20
       }
     },
     {
@@ -1433,12 +1829,30 @@
       }
     },
     {
+      "key": "parked-car@62",
+      "png": "sprites/parked-car@62.png",
+      "json": "sprites/parked-car@62.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "parked-car@75",
       "png": "sprites/parked-car@75.png",
       "json": "sprites/parked-car@75.json",
       "anchor": {
         "feetY": 20,
         "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "parked-car@88",
+      "png": "sprites/parked-car@88.png",
+      "json": "sprites/parked-car@88.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 37
       }
     },
     {
@@ -1460,12 +1874,30 @@
       }
     },
     {
+      "key": "petunias@62",
+      "png": "sprites/petunias@62.png",
+      "json": "sprites/petunias@62.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "petunias@75",
       "png": "sprites/petunias@75.png",
       "json": "sprites/petunias@75.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "petunias@88",
+      "png": "sprites/petunias@88.png",
+      "json": "sprites/petunias@88.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 75
       }
     },
     {
@@ -1487,12 +1919,30 @@
       }
     },
     {
+      "key": "photo-op@62",
+      "png": "sprites/photo-op@62.png",
+      "json": "sprites/photo-op@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "photo-op@75",
       "png": "sprites/photo-op@75.png",
       "json": "sprites/photo-op@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "photo-op@88",
+      "png": "sprites/photo-op@88.png",
+      "json": "sprites/photo-op@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1514,12 +1964,30 @@
       }
     },
     {
+      "key": "picnic@62",
+      "png": "sprites/picnic@62.png",
+      "json": "sprites/picnic@62.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 55
+      }
+    },
+    {
       "key": "picnic@75",
       "png": "sprites/picnic@75.png",
       "json": "sprites/picnic@75.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 65
+      }
+    },
+    {
+      "key": "picnic@88",
+      "png": "sprites/picnic@88.png",
+      "json": "sprites/picnic@88.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 75
       }
     },
     {
@@ -1541,12 +2009,30 @@
       }
     },
     {
+      "key": "puddle@62",
+      "png": "sprites/puddle@62.png",
+      "json": "sprites/puddle@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 53
+      }
+    },
+    {
       "key": "puddle@75",
       "png": "sprites/puddle@75.png",
       "json": "sprites/puddle@75.json",
       "anchor": {
         "feetY": 21,
         "opaqueWidth": 64
+      }
+    },
+    {
+      "key": "puddle@88",
+      "png": "sprites/puddle@88.png",
+      "json": "sprites/puddle@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 73
       }
     },
     {
@@ -1577,12 +2063,30 @@
       }
     },
     {
+      "key": "skunk-cloud@62",
+      "png": "sprites/skunk-cloud@62.png",
+      "json": "sprites/skunk-cloud@62.json",
+      "anchor": {
+        "feetY": 24,
+        "opaqueWidth": 52
+      }
+    },
+    {
       "key": "skunk-cloud@75",
       "png": "sprites/skunk-cloud@75.png",
       "json": "sprites/skunk-cloud@75.json",
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 63
+      }
+    },
+    {
+      "key": "skunk-cloud@88",
+      "png": "sprites/skunk-cloud@88.png",
+      "json": "sprites/skunk-cloud@88.json",
+      "anchor": {
+        "feetY": 34,
+        "opaqueWidth": 74
       }
     },
     {
@@ -1595,12 +2099,30 @@
       }
     },
     {
+      "key": "skunk@62",
+      "png": "sprites/skunk@62.png",
+      "json": "sprites/skunk@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 15
+      }
+    },
+    {
       "key": "skunk@75",
       "png": "sprites/skunk@75.png",
       "json": "sprites/skunk@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "skunk@88",
+      "png": "sprites/skunk@88.png",
+      "json": "sprites/skunk@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 20
       }
     },
     {
@@ -1622,12 +2144,30 @@
       }
     },
     {
+      "key": "spot-lamp-post@62",
+      "png": "sprites/spot-lamp-post@62.png",
+      "json": "sprites/spot-lamp-post@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 12
+      }
+    },
+    {
       "key": "spot-lamp-post@75",
       "png": "sprites/spot-lamp-post@75.png",
       "json": "sprites/spot-lamp-post@75.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "spot-lamp-post@88",
+      "png": "sprites/spot-lamp-post@88.png",
+      "json": "sprites/spot-lamp-post@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 16
       }
     },
     {
@@ -1649,12 +2189,30 @@
       }
     },
     {
+      "key": "spot-stranger@62",
+      "png": "sprites/spot-stranger@62.png",
+      "json": "sprites/spot-stranger@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 17
+      }
+    },
+    {
       "key": "spot-stranger@75",
       "png": "sprites/spot-stranger@75.png",
       "json": "sprites/spot-stranger@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "spot-stranger@88",
+      "png": "sprites/spot-stranger@88.png",
+      "json": "sprites/spot-stranger@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1676,12 +2234,30 @@
       }
     },
     {
+      "key": "spot-tree@62",
+      "png": "sprites/spot-tree@62.png",
+      "json": "sprites/spot-tree@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "spot-tree@75",
       "png": "sprites/spot-tree@75.png",
       "json": "sprites/spot-tree@75.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "spot-tree@88",
+      "png": "sprites/spot-tree@88.png",
+      "json": "sprites/spot-tree@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 28
       }
     },
     {
@@ -1703,12 +2279,30 @@
       }
     },
     {
+      "key": "spot-water-bowl@62",
+      "png": "sprites/spot-water-bowl@62.png",
+      "json": "sprites/spot-water-bowl@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "spot-water-bowl@75",
       "png": "sprites/spot-water-bowl@75.png",
       "json": "sprites/spot-water-bowl@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "spot-water-bowl@88",
+      "png": "sprites/spot-water-bowl@88.png",
+      "json": "sprites/spot-water-bowl@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1739,12 +2333,30 @@
       }
     },
     {
+      "key": "squirrel-dash@62",
+      "png": "sprites/squirrel-dash@62.png",
+      "json": "sprites/squirrel-dash@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "squirrel-dash@75",
       "png": "sprites/squirrel-dash@75.png",
       "json": "sprites/squirrel-dash@75.json",
       "anchor": {
         "feetY": 21,
         "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "squirrel-dash@88",
+      "png": "sprites/squirrel-dash@88.png",
+      "json": "sprites/squirrel-dash@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1757,12 +2369,30 @@
       }
     },
     {
+      "key": "squirrel@62",
+      "png": "sprites/squirrel@62.png",
+      "json": "sprites/squirrel@62.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 13
+      }
+    },
+    {
       "key": "squirrel@75",
       "png": "sprites/squirrel@75.png",
       "json": "sprites/squirrel@75.json",
       "anchor": {
         "feetY": 22,
         "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "squirrel@88",
+      "png": "sprites/squirrel@88.png",
+      "json": "sprites/squirrel@88.json",
+      "anchor": {
+        "feetY": 25,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1784,12 +2414,30 @@
       }
     },
     {
+      "key": "stop-sign@62",
+      "png": "sprites/stop-sign@62.png",
+      "json": "sprites/stop-sign@62.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 14
+      }
+    },
+    {
       "key": "stop-sign@75",
       "png": "sprites/stop-sign@75.png",
       "json": "sprites/stop-sign@75.json",
       "anchor": {
         "feetY": 35,
         "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "stop-sign@88",
+      "png": "sprites/stop-sign@88.png",
+      "json": "sprites/stop-sign@88.json",
+      "anchor": {
+        "feetY": 41,
+        "opaqueWidth": 18
       }
     },
     {
@@ -1811,12 +2459,30 @@
       }
     },
     {
+      "key": "thief@62",
+      "png": "sprites/thief@62.png",
+      "json": "sprites/thief@62.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 18
+      }
+    },
+    {
       "key": "thief@75",
       "png": "sprites/thief@75.png",
       "json": "sprites/thief@75.json",
       "anchor": {
         "feetY": 34,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "thief@88",
+      "png": "sprites/thief@88.png",
+      "json": "sprites/thief@88.json",
+      "anchor": {
+        "feetY": 39,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1838,12 +2504,30 @@
       }
     },
     {
+      "key": "tip@62",
+      "png": "sprites/tip@62.png",
+      "json": "sprites/tip@62.json",
+      "anchor": {
+        "feetY": 8,
+        "opaqueWidth": 8
+      }
+    },
+    {
       "key": "tip@75",
       "png": "sprites/tip@75.png",
       "json": "sprites/tip@75.json",
       "anchor": {
         "feetY": 10,
         "opaqueWidth": 10
+      }
+    },
+    {
+      "key": "tip@88",
+      "png": "sprites/tip@88.png",
+      "json": "sprites/tip@88.json",
+      "anchor": {
+        "feetY": 12,
+        "opaqueWidth": 12
       }
     },
     {
@@ -1865,12 +2549,30 @@
       }
     },
     {
+      "key": "trash-bins@62",
+      "png": "sprites/trash-bins@62.png",
+      "json": "sprites/trash-bins@62.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 53
+      }
+    },
+    {
       "key": "trash-bins@75",
       "png": "sprites/trash-bins@75.png",
       "json": "sprites/trash-bins@75.json",
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 64
+      }
+    },
+    {
+      "key": "trash-bins@88",
+      "png": "sprites/trash-bins@88.png",
+      "json": "sprites/trash-bins@88.json",
+      "anchor": {
+        "feetY": 26,
+        "opaqueWidth": 75
       }
     },
     {
@@ -1892,12 +2594,30 @@
       }
     },
     {
+      "key": "treat@62",
+      "png": "sprites/treat@62.png",
+      "json": "sprites/treat@62.json",
+      "anchor": {
+        "feetY": 6,
+        "opaqueWidth": 10
+      }
+    },
+    {
       "key": "treat@75",
       "png": "sprites/treat@75.png",
       "json": "sprites/treat@75.json",
       "anchor": {
         "feetY": 8,
         "opaqueWidth": 12
+      }
+    },
+    {
+      "key": "treat@88",
+      "png": "sprites/treat@88.png",
+      "json": "sprites/treat@88.json",
+      "anchor": {
+        "feetY": 9,
+        "opaqueWidth": 14
       }
     },
     {

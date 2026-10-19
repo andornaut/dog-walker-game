@@ -45,9 +45,9 @@ spot-lamp-post     32x48  idle (2 frames, 500ms)  a street lamp with an amber la
                           crosses the glass (Nosy)
 spot-water-bowl    32x32  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
                           falls and rings the water (Thirsty)
-spot-<spot>@75, @50  every spot redrawn small on a Mini (24x36 and 16x24, the bowl 24x24 and 16x16):
-                   the same tags, frames and durations, a full 1px outline, motion kept at 1px;
-                   the bowl drops its bone
+spot-<spot>@<step>  every spot redrawn small on a Mini at each depth step in minis.STEPS (from
+                   shared/depth-steps.json), floor(size x scale + 0.5): the same tags, frames and
+                   durations, a full 1px outline, motion kept at 1px; the bowl drops its bone
 
 Usage:
   needs.py preview OUT.png   every frame of every piece on the six road colours
@@ -67,7 +67,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import HEART, SMALL, burst, rim, stamp, star4  # noqa: E402
 from hits import layer, piece  # noqa: E402
-from minis import SCALES, small  # noqa: E402
+from minis import STEPS, small  # noqa: E402
 from moments import rounded  # noqa: E402
 from pixel import DARKER, K, Grid, contrast, edged, main, road_sprite  # noqa: E402
 import road  # noqa: E402
@@ -604,7 +604,7 @@ def sprites():
     yield "accident-spot", [("idle", [accident_spot(f).outlined(False) for f in (0, 1)], 500)]
     for key, (draw, module, tags) in SPOTS.items():
         yield key, [(tag, [draw(**q).outlined() for q in poses], ms) for tag, poses, ms in tags]
-        for suffix, s in SCALES:
+        for suffix, s in STEPS:
             mod = module or sys.modules[__name__]
             yield f"{key}@{suffix}", [(tag, [shrunk(mod, s, draw, q).outlined() for q in poses], ms)
                                       for tag, poses, ms in tags]

@@ -1,0 +1,30 @@
+{ "frames": {
+   "barrier-2@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 77, "h": 21 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 21 },
+    "sourceSize": { "w": 77, "h": 21 },
+    "duration": 500
+   },
+   "barrier-2@88 1.aseprite": {
+    "frame": { "x": 77, "y": 0, "w": 77, "h": 21 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 77, "h": 21 },
+    "sourceSize": { "w": 77, "h": 21 },
+    "duration": 500
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "barrier-2@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 154, "h": 21 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

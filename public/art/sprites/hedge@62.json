@@ -1,0 +1,46 @@
+{ "frames": {
+   "hedge@62 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 90, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 90, "h": 15 },
+    "sourceSize": { "w": 90, "h": 15 },
+    "duration": 350
+   },
+   "hedge@62 1.aseprite": {
+    "frame": { "x": 90, "y": 0, "w": 90, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 90, "h": 15 },
+    "sourceSize": { "w": 90, "h": 15 },
+    "duration": 350
+   },
+   "hedge@62 2.aseprite": {
+    "frame": { "x": 180, "y": 0, "w": 90, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 90, "h": 15 },
+    "sourceSize": { "w": 90, "h": 15 },
+    "duration": 350
+   },
+   "hedge@62 3.aseprite": {
+    "frame": { "x": 270, "y": 0, "w": 90, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 90, "h": 15 },
+    "sourceSize": { "w": 90, "h": 15 },
+    "duration": 350
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "hedge@62.png",
+  "format": "RGBA8888",
+  "size": { "w": 360, "h": 15 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}

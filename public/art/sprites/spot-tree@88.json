@@ -1,0 +1,46 @@
+{ "frames": {
+   "spot-tree@88 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "sourceSize": { "w": 28, "h": 42 },
+    "duration": 450
+   },
+   "spot-tree@88 1.aseprite": {
+    "frame": { "x": 28, "y": 0, "w": 28, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "sourceSize": { "w": 28, "h": 42 },
+    "duration": 450
+   },
+   "spot-tree@88 2.aseprite": {
+    "frame": { "x": 56, "y": 0, "w": 28, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "sourceSize": { "w": 28, "h": 42 },
+    "duration": 450
+   },
+   "spot-tree@88 3.aseprite": {
+    "frame": { "x": 84, "y": 0, "w": 28, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "sourceSize": { "w": 28, "h": 42 },
+    "duration": 450
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "spot-tree@88.png",
+  "format": "RGBA8888",
+  "size": { "w": 112, "h": 42 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "idle", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}
