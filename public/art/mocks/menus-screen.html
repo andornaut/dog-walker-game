@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menus</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png">
+<script src="/nav.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: screen switcher over the 360x640 canvas on a dark stage at an integer zoom, with sample data and notes beside it. */
+:root {
+  --bg: #13101e; --surface: #1d1a2c; --raise: #2a2740; --fg: #dfe4ee; --muted: #8b9bb4; --line: #33304a;
+  --accent: #feae34; --accent-ink: #181425; --stage: #0c0a14;
+  --f-display: "Silkscreen", ui-monospace, monospace;
+  --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 1240px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px;
+}
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(22px, 4vw, 32px); line-height: 1.1; margin: 0; }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.stage { background: var(--stage); border-radius: 6px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.stage > .seg { justify-content: center; }
+.stage-scroll { overflow-x: auto; display: flex; justify-content: center; }
+canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: none; cursor: pointer; }
+.hint { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
+.panel { display: grid; gap: 16px; min-width: 0; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.box h2 { font-family: var(--f-display); font-weight: 400; font-size: 14px; letter-spacing: 0.06em; margin: 0; text-transform: uppercase; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 4px; border: 0; background: var(--raise); color: var(--fg); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+legend { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; padding: 0; margin-bottom: 6px; }
+fieldset { border: 0; margin: 0; padding: 0; }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+code { font-size: 13px; color: var(--accent); }
+b { font-weight: 700; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Menus</h1>
+    <p>A proposal for the screens around a walk: the pause menu and settings over the dimmed road, the end screen at sunset, and the Stats page with the badge wall. Everything is drawn from the exported art and the two BMFonts. Bank, logbook and badges are sample data; quips are the owners' real lines.</p>
+  </header>
+  <div class="layout">
+    <section class="stage" aria-label="Menus mock">
+      <div class="seg" id="screens" role="group" aria-label="Screen"></div>
+      <div class="stage-scroll"><canvas id="screen" width="360" height="640" tabindex="0" aria-label="Menus mock"></canvas></div>
+      <p class="hint" id="hint"></p>
+    </section>
+    <aside class="panel">
+      <section class="box" aria-label="Sample data">
+        <h2>Sample data</h2>
+        <fieldset><legend>End screen</legend><div class="seg" id="ends"></div></fieldset>
+        <fieldset><legend>Zoom</legend><div class="seg" id="zooms"></div></fieldset>
+      </section>
+      <section class="box" aria-label="What is on the screens">
+        <h2>What's on it</h2>
+        <ul>
+          <li><b>Pause:</b> the run frozen under the menu, the road dimmed one ramp step twice. A <code>ui-panel</code> with a 1px tan rim holds Resume, Help, Settings and Head home (<code>ui-button</code>), and Head home's note sits plum on a tan plate. The bar's pause button stays pressed while the menu is open.</li>
+          <li><b>Settings:</b> Sound (mute all) with <code>ui-switch</code>, Music and Effects volume sliders, and Reduced motion. Every row is 44 tall and the whole row is the tap target. Muted, the sliders go inactive and read "Muted". Effects plays <code>sfx-tip</code> when you let go. The bar's sound button and the Sound row share one state.</li>
+          <li><b>End screen:</b> on <code>screen-end</code>, the <code>logo</code> in the sky, the run's breakdown, zones walked as <code>ui-zone-pips</code>, the bank, the <code>ui-new-best</code> ribbon pinned over the panel, and one closing line per owner in a <code>ui-quip</code> bubble: a happier line from owners still walking, the fired line (and <code>fired</code> face) from those who fired you.</li>
+          <li><b>Stats page:</b> on <code>screen-stats</code>, the logbook numbers in a panel, then the badge wall in two columns, filled down in group order (firsts and mastery left, collection and silly right). Each badge shows its name, goal and line from the rulebook's Achievements table. Earned badges are in colour with an amber name; locked ones are greyed with a padlock and a cream name. Tap an earned badge for <code>fx-confetti</code> behind it; a locked one shakes.</li>
+          <li><b>Feedback:</b> every tap sparkles (<code>fx-tap</code>) and pressed buttons sink into their lip. With reduced motion (the system setting, or the toggle here), the shakes and hops are skipped and the confetti shows one still frame.</li>
+        </ul>
+      </section>
+      <section class="box" aria-label="Layout for the scenes">
+        <h2>Layout</h2>
+        <ul>
+          <li><b>Pause:</b> panel 104,285 232x260 (centred on the road, 80,190 280x450). Title at y 301 (font-title 2x). Buttons x 120 w 200 h 40 at y 325, 373, 421, 469; hit areas 2px taller each way. Note plate 120,513 200x18.</li>
+          <li><b>Settings:</b> panel 96,277 248x276. Rows x 104 w 232 h 44 at y 315, 359, 403, 447. Switch at 292,row+14. Slider track 112,row+24 216x10, knob 10x16, value right-aligned at 328. Back 120,499 200x40.</li>
+          <li><b>End:</b> panel 24,140 312x300 (the sky in <code>screen-end</code>). Logo 116,52. Ribbon 144,130. Breakdown labels x 40, values right at 196, rows y 182 to 218, total at 232. Zones and bank at x 212. Quip rows y 258, 298, 338: face well 36,row+1, bubble 80,row 244x36, tail 75,row+14. Button 48,384 264x40.</li>
+          <li><b>Stats:</b> close button 332,10 (hit 316,0 44x44). Logbook panel 8,138 344x96, rows every 12 from y 162. Badge list: 2 columns at x 8 and 184 (each 168 wide, the tap target), 8 rows 46 tall from y 256. Badge at col,row+2; text column at col+36, 132 wide: name (font-title) at row+3, then goal and line (font-body) every 10 under it. Confetti at col-16,row-14.</li>
+        </ul>
+      </section>
+      <section class="box" aria-label="Art gaps">
+        <h2>Art gaps</h2>
+        <ul>
+          <li><b>Slider:</b> no <code>ui-slider</code> track and knob; the volume sliders are drawn in code here.</li>
+          <li><b>Secondary button:</b> <code>ui-button</code> has one amber face, so Resume can't stand out from Help, Settings and Head home. A tan <code>secondary</code> tag would match the scene's current colours.</li>
+          <li><b>Icons on cream:</b> <code>icon-sound</code> and <code>icon-music</code> are drawn for the navy button face, so the Settings rows carry no icons. Effects and reduced motion have no icon at all.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="/art/mocks/placeholder-sprites.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.DWGPlaceholder;
+const { K } = D;
+const cv = document.getElementById("screen");
+// The pause menu reads the road back every frame to dim it.
+const ctx = cv.getContext("2d", { willReadFrequently: true });
+ctx.imageSmoothingEnabled = false;
+const fill = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
+
+// ---------- Data (owners and quips from src/data, achievements from gameplay/game-design.md; the rest is sample) ----------
+const OWNER = { koda: "Jesse", duchess: "Rosa", nugget: "Kevin", biscuit: "Sam", dash: "Ophelia" };
+const QUIP = {
+  koda: { happy: "That's a personal best!", fired: "No worries, but you're fired." },
+  duchess: { happy: "She's in full bloom!", fired: "Time to repot, dear. You're fired." },
+  nugget: { happy: "Nugget is trending!", fired: "You're unfollowed. And fired!" },
+  biscuit: { happy: "Nice! Biscuit's tail says it all.", fired: "No hard feelings, but you're fired." },
+  dash: { happy: "Bravo! Bravo!", fired: "A tragedy in one act. You're fired!" },
+};
+const RUN = {
+  bank: 86, treats: 2, zone: "Bark Park", zoneIndex: 1,
+  pack: [
+    { dog: "koda", name: "Koda", hearts: 7, max: 10, mood: "happy" },
+    { dog: "duchess", name: "Duchess", hearts: 4, max: 6, mood: "neutral" },
+    { dog: "nugget", name: "Nugget", hearts: 2, max: 6, mood: "upset" },
+  ],
+};
+const ENDS = {
+  done: { label: "Walk done", title: "Walk done!", best: true, zones: 4, current: -1, fees: 180, tips: 86, cards: 22, back: 30, bank: 599,
+    owners: [["koda", "happy"], ["duchess", "happy"], ["nugget", "fired"]] },
+  home: { label: "Headed home", title: "Headed home", best: false, zones: 2, current: 2, fees: 60, tips: 31, cards: 8, back: 0, bank: 468,
+    owners: [["koda", "happy"], ["duchess", "happy"], ["nugget", "happy"]] },
+  nodogs: { label: "Out of dogs", title: "Out of dogs", best: false, zones: 1, current: 1, fees: 25, tips: 19, cards: 12, back: 25, bank: 392,
+    owners: [["biscuit", "fired"], ["dash", "fired"]] },
+};
+const LOG = { runs: 14, finished: 9, home: 3, nodogs: 2, fired: 3, best: 260, lifetime: 1482, topFirer: "nugget", topCount: 2 };
+// The Achievements table: key, name, goal and line, in its group order (firsts, mastery, collection, silly).
+const BADGES = [
+  ["first-steps", "First Steps", "Finish your first zone", "Every walk starts somewhere."],
+  ["round-trip", "Round Trip", "Finish all 4 zones of Maple Street", "Home before the streetlights."],
+  ["double-leash", "Double Leash", "Walk 2 dogs at once", "Twice the tails."],
+  ["pack-leader", "Pack Leader", "Walk 3 dogs at once", "Twelve paws, one plan."],
+  ["clean-paws", "Clean Paws", "Finish a zone without a bump", "Not a speck on them."],
+  ["not-a-scratch", "Not a Scratch", "Finish a walk without a bump", "Spotless, start to finish."],
+  ["five-star-service", "Five-Star Service", "Finish 10 walks without being fired", "The reviews are in."],
+  ["big-payday", "Big Payday", "Earn $500 in one walk", "Treats are on you."],
+  ["full-kennel", "Full Kennel", "Own all 9 dogs", "Every leash is spoken for."],
+  ["kitted-out", "Kitted Out", "Own all 5 gear items", "A pocket for everything."],
+  ["neighbourhood-favourite", "Neighbourhood Favourite", "Finish a walk with every dog", "Everyone's met you now."],
+  ["top-walker", "Top Walker", "Own every dog and all 3 dog slots", "Maple Street's finest."],
+  ["youre-fired", "You're Fired!", "Get fired 10 times", "They always come back."],
+  ["eau-de-skunk", "Eau de Skunk", "Be Stinky in 3 zones of one walk", "You can smell this badge."],
+  ["squirrel", "Squirrel!", "Let a chaser chase 5 squirrels", "So close. Every time."],
+];
+const EARNED = new Set(["first-steps", "round-trip", "double-leash", "pack-leader", "clean-paws", "eau-de-skunk", "squirrel"]);
+const money = n => "$" + n.toLocaleString("en-US");
+
+// ---------- State ----------
+const SCREENS = { pause: "Pause menu", settings: "Settings", end: "End screen", stats: "Stats page" };
+const S = { screen: "pause", end: "done", zoom: 0, paused: true, sound: true, music: 70, effects: 80, reduced: matchMedia("(prefers-reduced-motion: reduce)").matches };
+try { Object.assign(S, JSON.parse(localStorage.getItem("dwg-menus-screen") || "{}")); } catch (e) { /* storage unavailable */ }
+const save = () => { try { const { screen, end, zoom, sound, music, effects, reduced } = S; localStorage.setItem("dwg-menus-screen", JSON.stringify({ screen, end, zoom, sound, music, effects, reduced })); } catch (e) { /* storage unavailable */ } };
+
+// ---------- Art: sprites, the screen images and both BMFonts from the manifest ----------
+const ART = {}, IMG = {}, FONT = {}, SND = {};
+const IMAGES = ["ui-panel", "ui-new-best", "ui-quip", "ui-quip-tail", "ui-top-bar", "icon-pause", "icon-close", "icon-money", "screen-end", "screen-stats", "backdrop-bark-park", "road-bark-park", "logo"];
+async function loadArt() {
+  const m = await (await fetch("/art/manifest.json", { cache: "no-cache" })).json();
+  const image = async src => { const img = new Image(); img.src = "/art/" + src; await img.decode(); return img; };
+  const jobs = [
+    ...(m.sprites || []).map(async s => {
+      const [img, data] = await Promise.all([image(s.png), fetch("/art/" + s.json, { cache: "no-cache" }).then(r => r.json())]);
+      ART[s.key] = { img, frames: Object.values(data.frames).map(f => f.frame), tags: Object.fromEntries(data.meta.frameTags.map(t => [t.name, t])) };
+    }),
+    ...(m.images || []).filter(s => IMAGES.includes(s.key)).map(async s => { IMG[s.key] = await image(s.png); }),
+    // XML BMFont: white glyphs, tinted per colour below.
+    ...(m.fonts || []).map(async s => {
+      const [img, xml] = await Promise.all([image(s.png), fetch("/art/" + s.fnt, { cache: "no-cache" }).then(r => r.text())]);
+      const doc = new DOMParser().parseFromString(xml, "application/xml");
+      const num = (n, a) => Number(n.getAttribute(a)) || 0;
+      const chars = new Map([...doc.querySelectorAll("char")].map(c => [num(c, "id"), { x: num(c, "x"), y: num(c, "y"), w: num(c, "width"), h: num(c, "height"), ox: num(c, "xoffset"), oy: num(c, "yoffset"), adv: num(c, "xadvance") }]));
+      FONT[s.key === "font-title" ? "title" : "body"] = { img, chars, tints: {} };
+    }),
+  ];
+  for (const s of m.sounds || []) SND[s.key] = s;
+  await Promise.all(jobs.map(j => j.catch(() => { /* that asset falls back */ })));
+}
+function frameOf(key, tag, i) {
+  const a = ART[key]; if (!a || !a.tags[tag]) return null;
+  const t = a.tags[tag];
+  return { img: a.img, f: a.frames[t.from + (i % (t.to - t.from + 1))] };
+}
+function art(key, tag, i, x, y) {
+  const s = frameOf(key, tag, i); if (!s) return false;
+  ctx.drawImage(s.img, s.f.x, s.f.y, s.f.w, s.f.h, Math.round(x), Math.round(y), s.f.w, s.f.h);
+  return true;
+}
+function pic(key, x, y) { const img = IMG[key]; if (!img) return false; ctx.drawImage(img, Math.round(x), Math.round(y)); return true; }
+// Nine-slice: corners of c px stay, edges and centre stretch.
+function nine(src, x, y, w, h, c) {
+  if (!src) return false;
+  const { img, f } = src;
+  const sx = [f.x, f.x + c, f.x + f.w - c], sw = [c, f.w - 2 * c, c];
+  const sy = [f.y, f.y + c, f.y + f.h - c], sh = [c, f.h - 2 * c, c];
+  const dx = [x, x + c, x + w - c], dw = [c, w - 2 * c, c];
+  const dy = [y, y + c, y + h - c], dh = [c, h - 2 * c, c];
+  for (let r = 0; r < 3; r++) for (let q = 0; q < 3; q++) ctx.drawImage(img, sx[q], sy[r], sw[q], sh[r], dx[q], dy[r], dw[q], dh[r]);
+  return true;
+}
+const nineImg = (key, x, y, w, h, c = 8) => nine(IMG[key] && { img: IMG[key], f: { x: 0, y: 0, w: IMG[key].width, h: IMG[key].height } }, x, y, w, h, c);
+const nineArt = (key, tag, x, y, w, h, c) => nine(frameOf(key, tag, 0), x, y, w, h, c);
+
+// ---------- Text: font-body (Tiny5, mixed case) and font-title (Silkscreen, capitals) ----------
+// y is the top of the capitals, as in src/scenes/pixelText.ts. Without the fonts, the mocks' 3x5 glyphs stand in.
+const CAP_TOP = { body: 2, title: 4 };
+function tint(f, col) {
+  if (!f.tints[col]) {
+    const c = document.createElement("canvas"); c.width = f.img.width; c.height = f.img.height;
+    const g = c.getContext("2d"); g.drawImage(f.img, 0, 0);
+    g.globalCompositeOperation = "source-in"; g.fillStyle = col; g.fillRect(0, 0, c.width, c.height);
+    f.tints[col] = c;
+  }
+  return f.tints[col];
+}
+const shown = (role, s) => (role === "title" || !FONT[role] ? s.toUpperCase() : s);
+function textW(role, s, sc = 1) {
+  const f = FONT[role]; if (!f) return D.textW(shown(role, s), sc);
+  let w = 0; for (const ch of shown(role, s)) w += f.chars.get(ch.codePointAt(0))?.adv ?? 0;
+  return Math.max(0, w - 1) * sc;
+}
+function say(role, s, x, y, col, sc = 1, acc = {}) {
+  const f = FONT[role];
+  if (!f) { D.text(ctx, shown(role, s), Math.round(x), Math.round(y), col, sc, acc); return; }
+  let cx = Math.round(x); const top = Math.round(y) - CAP_TOP[role] * sc;
+  for (const ch of shown(role, s)) {
+    const g = f.chars.get(ch.codePointAt(0)); if (!g) continue;
+    if (g.w) ctx.drawImage(tint(f, acc[ch] || col), g.x, g.y, g.w, g.h, cx + g.ox * sc, top + g.oy * sc, g.w * sc, g.h * sc);
+    cx += g.adv * sc;
+  }
+}
+const sayC = (role, s, mid, y, col, sc = 1, acc) => say(role, s, Math.round(mid - textW(role, s, sc) / 2), y, col, sc, acc);
+const sayR = (role, s, right, y, col, sc = 1, acc) => say(role, s, right - textW(role, s, sc), y, col, sc, acc);
+// Greedy word wrap at a width in screen pixels.
+function wrap(role, s, maxW, sc = 1) {
+  const out = []; let cur = "";
+  for (const word of s.split(" ")) {
+    const next = cur ? cur + " " + word : word;
+    if (textW(role, next, sc) > maxW && cur) { out.push(cur); cur = word; } else cur = next;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+// ---------- Feedback: press dips, tap sparkles, shakes, confetti ----------
+// Motion uses the real clock; with reduced motion the highlights stay and the movement is skipped.
+const FX = { press: null, pressUntil: 0, shakes: {}, pops: {}, taps: [], confetti: null };
+const clock = () => performance.now();
+const since = t0 => clock() - (t0 ?? -1e9);
+const motion = v => (S.reduced ? 0 : v);
+const pressed = id => FX.press === id && clock() < FX.pressUntil;
+const shake = id => motion(since(FX.shakes[id]) < 320 ? Math.round(Math.sin(since(FX.shakes[id]) / 25) * 3) : 0);
+const hop = id => motion(since(FX.pops[id]) < 360 ? -Math.round(Math.sin(since(FX.pops[id]) / 360 * Math.PI) * 4) : 0);
+function playSound(key, volume) {
+  const s = SND[key]; if (!s || !S.sound) return;
+  try {
+    const a = new Audio("/art/" + (new Audio().canPlayType("audio/ogg") ? s.ogg : s.m4a));
+    a.volume = volume; a.play().catch(() => { /* autoplay refused */ });
+  } catch (e) { /* audio unavailable */ }
+}
+
+// ---------- Shared pieces ----------
+// ui-button: 6px corners, the face sinks 2px into its lip while pressed.
+function button(r, label, id, on = true) {
+  const down = on && pressed(id);
+  if (!nineArt("ui-button", on ? (down ? "pressed" : "normal") : "disabled", r.x, r.y, r.w, r.h, 6)) {
+    if (!down) fill(r.x, r.y + 4, r.w, r.h - 4, on ? K.orange : K.dslate);
+    fill(r.x, r.y + (down ? 2 : 0), r.w, r.h - 4, on ? K.amber : K.slate);
+  }
+  sayC("title", label, r.x + r.w / 2, r.y + Math.round((r.h - 14) / 2) + (down ? 2 : 0), on ? K.plum : K.lgrey, 2);
+}
+// ui-panel on cream; rim adds the 1px tan edge it needs on the dimmed road.
+function panel(r, rim) {
+  if (rim) { fill(r.x, r.y - 1, r.w, r.h + 2, K.tan); fill(r.x - 1, r.y, r.w + 2, r.h, K.tan); }
+  if (!nineImg("ui-panel", r.x, r.y, r.w, r.h)) { fill(r.x, r.y, r.w, r.h, K.plum); fill(r.x + 2, r.y + 2, r.w - 4, r.h - 4, K.cream); }
+}
+// ui-icon-button carries a 16x16 icon at +2,+1, or +2,+3 pressed.
+function iconButton(x, y, down, draw) {
+  if (!art("ui-icon-button", down ? "pressed" : "normal", 0, x, y)) { fill(x, y + (down ? 2 : 0), 20, 18, K.navy); }
+  draw(x + 2, y + (down ? 3 : 1));
+}
+const inside = (px, py, r) => px >= r.x && px < r.x + r.w && py >= r.y && py < r.y + r.h;
+const grow = (r, d) => ({ x: r.x, y: r.y - d, w: r.w, h: r.h + 2 * d });
+
+// ---------- Run screen under the pause menu ----------
+const ROAD = { x: 80, y: 190, w: 280, h: 450 };
+const SOUND_HIT = { x: 124, y: 0, w: 44, h: 44 }, PAUSE_HIT = { x: 168, y: 0, w: 44, h: 44 };
+// Darkening maps each palette colour two ramp steps down, so the dimmed road stays on the palette.
+const DIM = new Map(D.PAL.map(h => [parseInt(h, 16), parseInt(D.dark(D.dark("#" + h)).slice(1), 16)]));
+function dim(r) {
+  const im = ctx.getImageData(r.x, r.y, r.w, r.h), d = im.data;
+  for (let i = 0; i < d.length; i += 4) {
+    const m = DIM.get(d[i] << 16 | d[i + 1] << 8 | d[i + 2]);
+    if (m !== undefined) { d[i] = m >> 16; d[i + 1] = (m >> 8) & 255; d[i + 2] = m & 255; }
+  }
+  ctx.putImageData(im, r.x, r.y);
+}
+function feet(key, tag, i, cx, foot) {
+  const s = frameOf(key, tag, i); if (!s) return;
+  const rx = s.f.w / 2 - 3;
+  for (let y = -2; y <= 2; y++) for (let x = -rx; x <= rx; x++) if ((x / rx) ** 2 + (y / 2.5) ** 2 <= 1) fill(Math.floor(cx + x), foot - 1 + y, 1, 1, K.brown);
+  art(key, tag, i, cx - s.f.w / 2, foot - s.f.h);
+}
+function line(x0, y0, x1, y1, col) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+  for (let i = 0; i <= n; i++) fill(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), 1, 1, col);
+}
+let runT = 0;
+function runScreen() {
+  // road and pack (Bark Park: brown shadows, dred leash)
+  ctx.save(); ctx.beginPath(); ctx.rect(ROAD.x, ROAD.y, ROAD.w, ROAD.h); ctx.clip();
+  const off = Math.floor(runT * 0.05) % 64;
+  for (let y = ROAD.y - 64 + off; y < 640; y += 64) if (!pic("road-bark-park", ROAD.x, y)) fill(ROAD.x, y, ROAD.w, 64, K.tan);
+  const fr = Math.floor(runT / 160), cx = 220, base = 630;
+  const spots = [[0, -40], [-13, -28], [13, -26]];
+  const items = RUN.pack.map((p, i) => ({ key: "dog-" + p.dog, dx: spots[i][0], foot: base + spots[i][1] }));
+  items.push({ key: "walker-casey", dx: 0, foot: base });
+  items.sort((a, b) => a.foot - b.foot).forEach(it => feet(it.key, "walk", fr, cx + it.dx, it.foot));
+  items.filter(it => it.key !== "walker-casey").forEach(it => line(it.dx < 0 ? cx - 9 : cx + 8, base - 14, cx + it.dx, it.foot - 15, K.dred));
+  ctx.restore();
+  if (!pic("backdrop-bark-park", 0, 40)) fill(0, 40, 360, 150, K.green);
+  // dog column: a doghouse per dog; contents at the slot offsets art/tools/ui.py documents
+  fill(0, 190, 80, 450, K.dbrown);
+  RUN.pack.forEach((p, i) => {
+    const x = 4, y = 194 + i * 150;
+    art("ui-doghouse", p.dog, 0, x, y);
+    sayC("title", p.name, x + 36, y + 11, K.plum);
+    art("face-dog-" + p.dog, p.mood, 0, x + 20, y + 36);
+    art("face-owner-" + p.dog, p.mood, 0, x + 8, y + 78);
+    sayC("title", `${p.hearts}/${p.max}`, x + 56, y + 90, K.plum);
+    say("body", OWNER[p.dog], x + 9, y + 118, K.plum);
+    for (let h = 0; h < p.max; h++) art("ui-heart", h < p.hearts ? "full" : "empty", 0, x + 9 + (h % 6) * 9, y + 127 + Math.floor(h / 6) * 8);
+  });
+  // top bar
+  if (!pic("ui-top-bar", 0, 0)) fill(0, 0, 360, 40, K.plum);
+  pic("icon-money", 8, 13);
+  say("title", money(RUN.bank), 26, 15, K.cream, 2);
+  art("treat", "idle", 0, 104, 13);
+  say("title", String(RUN.treats), 122, 18, K.cream);
+  iconButton(146, 10, pressed("sound"), (x, y) => art("icon-sound", S.sound ? "on" : "off", 0, x, y));
+  iconButton(170, 10, S.paused, (x, y) => pic("icon-pause", x, y));
+  sayR("title", RUN.zone, 352, 10, K.cream);
+  for (let z = 0; z < 4; z++) {
+    const x = 271 + z * 21, tag = z < RUN.zoneIndex ? "done" : z === RUN.zoneIndex ? "current" : "todo";
+    art("ui-zone-pips", tag, 0, x, 22);
+    if (tag === "current") fill(x + 2, 24, 14, 4, K.amber);
+  }
+}
+
+// ---------- Pause menu ----------
+const PAUSE = { x: 104, y: 285, w: 232, h: 260 };
+const PAUSE_BUTTONS = ["Resume", "Help", "Settings", "Head home"].map((label, i) => ({ label, id: "p-" + i, r: { x: 120, y: 325 + i * 48, w: 200, h: 40 } }));
+const NOTE = { x: 120, y: 513, w: 200, h: 18 };
+function pauseMenu() {
+  panel(PAUSE, true);
+  sayC("title", "Paused", 220, 301, K.plum, 2);
+  for (const b of PAUSE_BUTTONS) button(b.r, b.label, b.id);
+  fill(NOTE.x, NOTE.y, NOTE.w, NOTE.h, K.tan);
+  sayC("body", "Keeps tips and earlier zones' fees", 220, NOTE.y + 6, K.plum);
+}
+
+// ---------- Settings ----------
+const SET = { x: 96, y: 277, w: 248, h: 276 };
+const ROWS = [
+  { key: "sound", label: "Sound", note: "Mutes music and effects" },
+  { key: "music", label: "Music", slider: true },
+  { key: "effects", label: "Effects", slider: true },
+  { key: "reduced", label: "Reduced motion", note: "Skips shakes, hops and bobs" },
+].map((row, i) => ({ ...row, r: { x: 104, y: 315 + i * 44, w: 232, h: 44 } }));
+const BACK = { x: 120, y: 499, w: 200, h: 40 };
+const TRACK = { dx: 8, dy: 24, w: 216, h: 10, knob: 10 };
+function settings() {
+  panel(SET, true);
+  sayC("title", "Settings", 220, 293, K.plum, 2);
+  ROWS.forEach((row, i) => {
+    const { x, y } = row.r;
+    if (i) fill(x + 4, y, row.r.w - 8, 1, K.tan);
+    if (row.slider) slider(row);
+    else {
+      say("title", row.label, x + 8, y + 12, K.plum);
+      say("body", row.note, x + 8, y + 26, K.dbrown);
+      const on = S[row.key];
+      if (!art("ui-switch", on ? "on" : "off", 0, x + 188, y + 14)) { fill(x + 188, y + 14, 32, 16, on ? K.forest : K.slate); }
+    }
+  });
+  button(BACK, "Back", "back");
+}
+// Drawn in code: no slider art yet. Muted, the slider is inactive.
+function slider(row) {
+  const on = S.sound, v = S[row.key], x = row.r.x + TRACK.dx, y = row.r.y + TRACK.dy, w = TRACK.w;
+  say("title", row.label, x, row.r.y + 9, on ? K.plum : K.slate);
+  sayR("title", on ? v + "%" : "Muted", x + w, row.r.y + 9, on ? K.plum : K.slate);
+  fill(x, y, w, TRACK.h, on ? K.plum : K.grey);
+  fill(x + 1, y + 1, w - 2, TRACK.h - 2, on ? K.tan : K.lgrey);
+  fill(x + 1, y + 1, Math.round((w - 2) * v / 100), TRACK.h - 2, on ? K.forest : K.grey);
+  const kx = x + Math.round((w - TRACK.knob) * v / 100);
+  fill(kx, y - 3, TRACK.knob, 16, on ? K.plum : K.grey);
+  fill(kx + 1, y - 2, TRACK.knob - 2, 14, on ? K.cream : K.lgrey);
+  fill(kx + 1, y + 10, TRACK.knob - 2, 2, on ? K.tan : K.grey);
+  fill(kx + 4, y + 1, 2, 7, on ? K.tan : K.grey);
+}
+function setSlider(key, px) {
+  const v = (px - (104 + TRACK.dx) - TRACK.knob / 2) / (TRACK.w - TRACK.knob);
+  S[key] = Math.round(Math.max(0, Math.min(1, v)) * 20) * 5;
+}
+
+// ---------- End screen ----------
+const END = { x: 24, y: 140, w: 312, h: 300 };
+const HOME_BUTTON = { x: 48, y: 384, w: 264, h: 40 };
+function endScreen() {
+  const e = ENDS[S.end];
+  if (!pic("screen-end", 0, 0)) fill(0, 0, 360, 640, K.orange);
+  pic("logo", 116, 52);
+  panel(END, false);
+  if (e.best) pic("ui-new-best", 144, 130 + motion(Math.floor(clock() / 600) % 2 ? -1 : 0));
+  sayC("title", e.title, 180, 158, K.plum, 2);
+  // breakdown: money gained forest, lost darkRed, both on cream
+  const rows = [["Fees", e.fees], ["Tips", e.tips], ["Card costs", -e.cards], ["Fees taken back", -e.back]];
+  rows.forEach(([label, n], i) => {
+    const y = 182 + i * 12;
+    say("body", label, 40, y, K.plum);
+    sayR("title", (n < 0 ? "-" : "+") + money(Math.abs(n)), 196, y, n < 0 ? K.dred : K.forest);
+  });
+  fill(40, 228, 156, 1, K.tan);
+  const total = e.fees + e.tips - e.cards - e.back;
+  say("title", "Total", 40, 234, K.plum);
+  sayR("title", "+" + money(total), 196, 232, K.forest, 2);
+  say("body", "Zones walked", 212, 182, K.plum);
+  for (let z = 0; z < 4; z++) {
+    const x = 212 + z * 21, tag = z < e.zones ? "done" : z === e.current ? "current" : "todo";
+    art("ui-zone-pips", tag, 0, x, 194);
+    if (tag === "current") fill(x + 2, 196, 14, 4, K.amber);
+  }
+  sayR("title", `${e.zones}/4`, 320, 195, K.plum);
+  say("body", "Bank", 212, 212, K.plum);
+  pic("icon-money", 212, 224);
+  say("title", money(e.bank), 232, 227, K.plum, 2);
+  fill(36, 250, 288, 1, K.tan);
+  // one closing line per owner
+  e.owners.forEach(([dog, mood], i) => {
+    const y = 258 + i * 40;
+    fill(36, y + 1, 34, 34, K.tan);
+    art("face-owner-" + dog, mood, 0, 37, y + 2);
+    if (!nineImg("ui-quip", 80, y, 244, 36)) { fill(80, y, 244, 36, K.plum); fill(81, y + 1, 242, 34, K.cream); }
+    pic("ui-quip-tail", 75, y + 14);
+    say("title", OWNER[dog], 88, y + 8, K.plum);
+    if (mood === "fired") say("body", "fired you", 88 + textW("title", OWNER[dog]) + 5, y + 8, K.dred);
+    say("body", QUIP[dog][mood], 88, y + 21, K.plum);
+  });
+  button(HOME_BUTTON, "Back home", "home");
+}
+
+// ---------- Stats page ----------
+const CLOSE = { x: 332, y: 10 }, CLOSE_HIT = { x: 316, y: 0, w: 44, h: 44 };
+const LOGBOOK = { x: 8, y: 138, w: 344, h: 96 };
+// Two columns of eight rows, filled down: firsts and mastery on the left, collection and silly on the right.
+const GRID = { x: 8, y: 256, col: 176, w: 168, row: 46, text: 132 };
+const cells = BADGES.map(([id, name, goal, quote], i) => ({
+  id, name, goal, quote, earned: EARNED.has(id),
+  x: GRID.x + Math.floor(i / 8) * GRID.col, top: GRID.y + (i % 8) * GRID.row,
+}));
+function statsPage() {
+  if (!pic("screen-stats", 0, 0)) fill(0, 0, 360, 640, K.dbrown);
+  say("title", "Stats", 12, 12, K.cream, 2);
+  iconButton(CLOSE.x, CLOSE.y, pressed("close"), (x, y) => pic("icon-close", x, y));
+  // logbook numbers
+  panel(LOGBOOK, false);
+  say("title", "Logbook", 18, 148, K.plum);
+  [["Runs played", LOG.runs], ["Finished", LOG.finished], ["Headed home", LOG.home], ["Out of dogs", LOG.nodogs], ["Times fired", LOG.fired]].forEach(([label, n], i) => {
+    say("body", label, 18, 162 + i * 12, K.plum);
+    sayR("title", String(n), 168, 162 + i * 12, K.plum);
+  });
+  fill(176, 148, 1, 74, K.tan);
+  [["Best run", LOG.best], ["Lifetime earnings", LOG.lifetime]].forEach(([label, n], i) => {
+    say("body", label, 184, 162 + i * 12, K.plum);
+    sayR("title", money(n), 342, 162 + i * 12, K.forest);
+  });
+  fill(184, 187, 34, 34, K.tan);
+  art("face-owner-" + LOG.topFirer, "fired", 0, 185, 188);
+  say("body", "Fired you most", 224, 194, K.plum);
+  say("title", OWNER[LOG.topFirer], 224, 206, K.plum);
+  say("body", `${LOG.topCount} of ${LOG.fired} firings`, 228 + textW("title", OWNER[LOG.topFirer]), 206, K.dbrown);
+  // badge wall: earned in colour with an amber name, locked grey with a padlock; each shows its name, goal and line
+  say("title", "Badges", 12, 244, K.cream);
+  sayR("body", `${EARNED.size}/15 earned`, 348, 245, K.cream);
+  const c = FX.confetti;
+  for (const b of cells) {
+    const age = c && c.id === b.id ? since(c.t0) : Infinity;
+    if (age < 540 && !S.reduced) art("fx-confetti", "play", Math.floor(age / 90), b.x - 16, b.top - 14);
+    else if (age < 600 && S.reduced) art("fx-confetti", "play", 2, b.x - 16, b.top - 14);
+    const id = "badge-" + b.id;
+    if (!art(id, b.earned ? "earned" : "locked", 0, b.x + shake(id), b.top + 2 + hop(id))) fill(b.x, b.top + 2, 32, 32, b.earned ? K.amber : K.grey);
+    const name = wrap("title", b.name, GRID.text);
+    name.forEach((l, i) => say("title", l, b.x + 36, b.top + 3 + i * 10, b.earned ? K.amber : K.cream));
+    badgeLines(b).forEach((l, i) => say("body", l, b.x + 36, b.top + 5 + name.length * 10 + i * 10, K.cream));
+  }
+}
+// The goal, then the line in quotes, wrapped to the text column.
+const badgeLines = b => [...wrap("body", b.goal, GRID.text), ...wrap("body", `"${b.quote}"`, GRID.text)];
+
+// ---------- Render ----------
+function render() {
+  if (S.screen === "pause" || S.screen === "settings") {
+    runScreen();
+    if (S.paused) {
+      dim(ROAD);
+      if (S.screen === "pause") pauseMenu(); else settings();
+    }
+  } else if (S.screen === "end") endScreen();
+  else statsPage();
+  FX.taps = FX.taps.filter(f => since(f.t0) < 240);
+  for (const f of FX.taps) art("fx-tap", "play", Math.floor(since(f.t0) / 60), Math.round(f.x) - 8, Math.round(f.y) - 8);
+}
+
+// ---------- Input ----------
+const point = e => { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * 360 / r.width, (e.clientY - r.top) * 640 / r.height]; };
+let drag = null;
+function go(screen) {
+  S.screen = screen; if (screen === "pause" || screen === "settings") S.paused = true;
+  save(); sync();
+}
+cv.addEventListener("pointerdown", e => {
+  const [px, py] = point(e);
+  const press = id => { FX.press = id; FX.pressUntil = clock() + 140; };
+  FX.taps.push({ x: px, y: py, t0: clock() });
+  if (S.screen === "pause" || S.screen === "settings") {
+    if (inside(px, py, SOUND_HIT)) { press("sound"); S.sound = !S.sound; save(); return; }
+    if (inside(px, py, PAUSE_HIT)) { S.paused = !S.paused; if (S.paused) S.screen = "pause"; save(); sync(); return; }
+    if (!S.paused) return;
+  }
+  if (S.screen === "pause") {
+    const b = PAUSE_BUTTONS.find(b => inside(px, py, grow(b.r, 2)));
+    if (!b) return;
+    press(b.id);
+    if (b.label === "Resume") setTimeout(() => { S.paused = false; sync(); }, 140);
+    if (b.label === "Settings") setTimeout(() => go("settings"), 140);
+    if (b.label === "Head home") setTimeout(() => { S.end = "home"; go("end"); }, 140);
+  } else if (S.screen === "settings") {
+    if (inside(px, py, grow(BACK, 2))) { press("back"); setTimeout(() => go("pause"), 140); return; }
+    const row = ROWS.find(r => inside(px, py, r.r)); if (!row) return;
+    if (!row.slider) { S[row.key] = !S[row.key]; save(); return; }
+    if (!S.sound) return;
+    drag = row.key; cv.setPointerCapture(e.pointerId); setSlider(drag, px);
+  } else if (S.screen === "end") {
+    if (inside(px, py, HOME_BUTTON)) press("home");
+  } else {
+    if (inside(px, py, CLOSE_HIT)) { press("close"); return; }
+    const b = cells.find(b => inside(px, py, { x: b.x, y: b.top, w: GRID.w, h: GRID.row }));
+    if (!b) return;
+    if (b.earned) { FX.confetti = { id: b.id, t0: clock() }; FX.pops["badge-" + b.id] = clock(); } else FX.shakes["badge-" + b.id] = clock();
+  }
+});
+cv.addEventListener("pointermove", e => { if (drag) setSlider(drag, point(e)[0]); });
+const endDrag = () => { if (drag === "effects") playSound("sfx-tip", S.effects / 100); if (drag) save(); drag = null; };
+cv.addEventListener("pointerup", endDrag);
+cv.addEventListener("pointercancel", endDrag);
+cv.addEventListener("keydown", e => {
+  if (e.key !== "Escape" && e.key !== "p") return;
+  if (S.screen === "settings") go("pause"); else if (S.screen === "pause") { S.paused = !S.paused; sync(); }
+  e.preventDefault();
+});
+
+// ---------- Controls ----------
+const HINTS = {
+  pause: "Tap Settings or Head home. Resume walks on; tap the pause button to stop again. The speaker mutes all sound.",
+  run: "Walking. Tap the pause button in the top bar to open the menu again.",
+  settings: "Tap a row to toggle it, or drag a slider. Back returns to the pause menu.",
+  end: "Switch the sample result beside the screen. Head home in the pause menu leads here too.",
+  stats: "Tap an earned badge for confetti. A locked badge shakes.",
+};
+function segButtons(host, items, current, pick) {
+  host.replaceChildren(...Object.entries(items).map(([k, label]) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.textContent = label; b.dataset.key = k;
+    b.addEventListener("click", () => pick(k));
+    return b;
+  }));
+  return () => [...host.children].forEach(b => b.setAttribute("aria-pressed", String(b.dataset.key === String(current()))));
+}
+const syncScreens = segButtons(document.getElementById("screens"), SCREENS, () => S.screen, go);
+const syncEnds = segButtons(document.getElementById("ends"), Object.fromEntries(Object.entries(ENDS).map(([k, e]) => [k, e.label])), () => S.end, k => { S.end = k; go("end"); });
+const syncZoom = segButtons(document.getElementById("zooms"), { 1: "1×", 2: "2×" }, () => S.zoom, z => { S.zoom = Number(z); applyZoom(); save(); sync(); });
+function sync() {
+  syncScreens(); syncEnds(); syncZoom();
+  document.getElementById("hint").textContent = HINTS[S.screen === "pause" && !S.paused ? "run" : S.screen];
+  cv.setAttribute("aria-label", `Menus mock: ${SCREENS[S.screen]}. ${HINTS[S.screen]}`);
+}
+function applyZoom() { cv.style.width = 360 * S.zoom + "px"; cv.style.height = 640 * S.zoom + "px"; }
+if (!SCREENS[S.screen]) S.screen = "pause";
+if (!ENDS[S.end]) S.end = "done";
+S.paused = true;
+if (!S.zoom) S.zoom = Math.max(1, Math.min(2, Math.floor((cv.parentElement.clientWidth || 360) / 360)));
+applyZoom();
+sync();
+
+let last = performance.now();
+function frame(now) {
+  if (!S.paused && !S.reduced) runT += Math.min(50, now - last);
+  last = now; render(); requestAnimationFrame(frame);
+}
+loadArt().catch(() => { /* placeholders only */ }).then(() => requestAnimationFrame(frame));
+})();
+</script>
+</body>
+</html>

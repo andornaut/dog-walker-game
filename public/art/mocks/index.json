@@ -13,5 +13,10 @@
     "title": "Help screen",
     "path": "help-screen.html",
     "description": "A proposal for the in-game How to walk screen: six pages, each with an illustration from the real sprites and a few lines drafted from the rulebook."
+  },
+  {
+    "title": "Menus",
+    "path": "menus-screen.html",
+    "description": "The pause menu and settings over the dimmed road, the end screen at sunset and the Stats page with the badge wall, drawn from the exported UI kit and BMFonts. Interactive, with sample data."
   }
 ]
