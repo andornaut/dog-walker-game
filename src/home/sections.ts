@@ -21,12 +21,6 @@ export interface Section {
 
 export type Sections = Readonly<Record<SectionId, Section>>;
 
-// The walker counts as picked once the player has walked, or has tapped a face this visit:
-// the save always holds a walker, so a new player's default is not yet a choice.
-export function walkerPicked(walks: number, tappedThisVisit: boolean): boolean {
-  return walks > 0 || tappedThisVisit;
-}
-
 export function homeSections(
   data: Pick<GameData, "homeText" | "shopGear" | "tuning" | "walkers">,
   owned: Pick<Owned, "dogSlots">,

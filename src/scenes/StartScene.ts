@@ -56,7 +56,6 @@ import {
   type Sections,
   type SectionState,
   startReady,
-  walkerPicked,
 } from "../home/sections";
 import { choiceFull, type SelectLook } from "../home/selection";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
@@ -331,8 +330,6 @@ export class StartScene extends Scene {
     | undefined;
   private views = new Map<string, TileView>();
   private walkerLine: WalkerLine = "firstVisit";
-  // Whether a walker face was tapped this visit, which picks the walker for a new player.
-  private walkerTapped = false;
 
   constructor() {
     super(SCENE_KEYS.start);
@@ -352,7 +349,6 @@ export class StartScene extends Scene {
     this.quips = new Map();
     this.shakes = new Map();
     this.views = new Map();
-    this.walkerTapped = false;
     const { bankCents, lastLoadout, owned, stats } = profileSave(this);
     this.loadout = { dogs: [...lastLoadout.dogs], gear: lastLoadout.gear };
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
@@ -640,7 +636,6 @@ export class StartScene extends Scene {
         return;
       case "walker":
         this.pops.set(id, now);
-        this.walkerTapped = true;
         this.action = { kind: "none" };
         void updateProfile(this, (save) => ({ ...save, walker: target.walker }));
         this.render();
@@ -919,13 +914,10 @@ export class StartScene extends Scene {
     this.drawOverlay(save);
   }
 
-  // Each section's state and band text. The walker counts only once picked: see walkerPicked.
+  // Each section's state and band text. The saved walker counts as picked, so a first visit
+  // needs only a dog.
   private sections(save: SaveDocument): Sections {
-    const picked = walkerPicked(walksPlayed(save.stats), this.walkerTapped);
-    return homeSections(gameData, save.owned, {
-      loadout: this.loadout,
-      walker: picked ? save.walker : null,
-    });
+    return homeSections(gameData, save.owned, { loadout: this.loadout, walker: save.walker });
   }
 
   // A section's ui-section frame and band by its state, with the heading on the band's left
@@ -1396,17 +1388,17 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // One portrait per preset walker. Once picked, the chosen one is selected and the others
-  // are a full choice's darker step; before then none is.
+  // One portrait per preset walker: the saved one is selected and the others are a full
+  // choice's darker step.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
-    const chosen = walkerPicked(walksPlayed(save.stats), this.walkerTapped) ? save.walker : null;
+    const chosen = save.walker;
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
         edge: true,
-        full: choiceFull(chosen === null ? 0 : 1, 1),
+        full: choiceFull(1, 1),
         rest: "tan",
         selected: id === chosen,
       });

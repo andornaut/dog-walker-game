@@ -3,22 +3,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
 import { TEST_TUNING } from "../testing/tuning";
-import { homeSections, startReady, walkerPicked } from "./sections";
+import { homeSections, startReady } from "./sections";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const text = data.homeText;
 const owned = { dogSlots: 1 };
 const nothing = { dogs: [], gear: null } as const;
-
-describe("walkerPicked", () => {
-  it.each([
-    ["waits for a new player to tap a face", 0, false, false],
-    ["takes a new player's tapped face", 0, true, true],
-    ["counts the saved walker as picked once the player has walked", 1, false, true],
-  ])("%s", (_name, walks, tapped, expected) => {
-    expect(walkerPicked(walks, tapped)).toBe(expected);
-  });
-});
 
 describe("homeSections", () => {
   it("asks for what each required section lacks, and leaves gear neutral", () => {
