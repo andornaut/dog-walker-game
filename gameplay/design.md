@@ -205,7 +205,7 @@ About half of the obstacles are minor: they open no card. Bumping one drops $8 i
 
 ### Obstacle sizes
 
-Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part counts as one hit; the whole obstacle is removed and the grace window starts.
+Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of it on screen counts as one hit; the whole obstacle is removed and the grace window starts. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans.
 
 | Obstacle                                                                        | Kind      | Size (lanes × rows) |
 | ------------------------------------------------------------------------------- | --------- | ------------------- |
