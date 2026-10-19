@@ -34,7 +34,7 @@ export const HELP_PAGES = [
     art: "help-owners",
     body:
       "Each owner has a happiness meter: ♥. Bumps and choices raise or lower it. " +
-      "At 0♥ the owner fires you, takes back that dog's fees, and the dog goes home.",
+      "At 0♥ the owner fires you and the dog goes home. That zone pays nothing for them; earlier fees stay yours.",
     title: "Keep owners happy",
   },
   {

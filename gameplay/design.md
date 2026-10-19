@@ -67,9 +67,9 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 | The Long Way Home | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
 
 - After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
-- An owner who fires you takes back every fee their dog earned this run; tips stay
-- The run ends after zone 4 or when no dogs are left. You keep everything earned except fees taken back
-- **End screen:** the run's total with a breakdown (fees, tips, card costs, fees taken back), zones walked and the bank; a new-best ribbon when it beats the best walk; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
+- An owner who fires you doesn't pay their dog's fee for the zone you're in, and pays no more after it; fees from earlier zones and all tips stay
+- The run ends after zone 4 or when no dogs are left. You keep everything earned
+- **End screen:** the run's total with a breakdown (fees, tips, card costs), zones walked and the bank; a new-best ribbon when it beats the best walk; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
 

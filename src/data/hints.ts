@@ -20,7 +20,7 @@ export const HINTS = {
     trigger: { kind: "drag" },
   },
   firedOwner: {
-    text: "At 0♥ an owner fires you and takes back their fees.",
+    text: "At 0♥ an owner fires you. Their fees from earlier zones stay yours.",
     trigger: { kind: "firedOwner" },
   },
   forcedStop: {
