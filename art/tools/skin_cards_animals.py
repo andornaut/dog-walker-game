@@ -46,7 +46,8 @@ import help as hp  # noqa: E402
 # {base kind: [(option suffix, the base card's composition)]}
 OPTIONS = {
     "squirrel": [("hold", cards.squirrel_hold), ("chase", cards.squirrel_chase)],
-    "thief": [("chase", cards.thief_chase), ("let-go", cards.thief_let_go)],
+    "thief": [("chase", cards.thief_chase), ("let-go", cards.thief_let_go),
+              ("let-them-run", cards.thief_let_them_run)],
     "other-dog": [("sniff", cards.other_dog_sniff), ("pull-away", cards.other_dog_pull_away)],
 }
 # {skin key: (base kind, the zone id its cards stand in)}

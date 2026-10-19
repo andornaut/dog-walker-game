@@ -5653,12 +5653,20 @@
       "png": "images/card-snatch-raccoon-let-go.png"
     },
     {
+      "key": "card-snatch-raccoon-let-them-run",
+      "png": "images/card-snatch-raccoon-let-them-run.png"
+    },
+    {
       "key": "card-snatch-seagull-chase",
       "png": "images/card-snatch-seagull-chase.png"
     },
     {
       "key": "card-snatch-seagull-let-go",
       "png": "images/card-snatch-seagull-let-go.png"
+    },
+    {
+      "key": "card-snatch-seagull-let-them-run",
+      "png": "images/card-snatch-seagull-let-them-run.png"
     },
     {
       "key": "card-social-frisbee-dog-pull-away",
@@ -5807,6 +5815,10 @@
     {
       "key": "card-thief-let-go",
       "png": "images/card-thief-let-go.png"
+    },
+    {
+      "key": "card-thief-let-them-run",
+      "png": "images/card-thief-let-them-run.png"
     },
     {
       "key": "card-trash-drag-on",

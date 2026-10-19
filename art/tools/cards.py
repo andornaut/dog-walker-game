@@ -331,6 +331,15 @@ def thief_let_go(zone="street", key="thief"):
     return a
 
 
+def thief_let_them_run(zone="street", key="thief"):
+    a = Art()
+    a.ground(zone)
+    a.put(key, "flee", 54, 59, 1)
+    a.put("dog-koda", "react", 22, 58)
+    a.paste(hp.frame("fx-status-spooked", "loop", 0), 14, 10)
+    return a
+
+
 # ---------- zone encounters ----------
 # The encounter drawings from encounters.py at 1x, the 2-lane ones cropped by the card's edges.
 
@@ -1560,6 +1569,7 @@ ILLUSTRATIONS = {
     "card-other-dog-pull-away": other_dog_pull_away,
     "card-thief-chase": thief_chase,
     "card-thief-let-go": thief_let_go,
+    "card-thief-let-them-run": thief_let_them_run,
     "card-picnic-buy-lunch": picnic_buy_lunch,
     "card-picnic-drop-it": picnic_drop_it,
     "card-goose-back-off": goose_back_off,
