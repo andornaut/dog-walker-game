@@ -9,8 +9,6 @@ export const MENU_TEXT_FIELDS = {
   stats: {
     badgeLine: ["line"],
     earnedCount: ["earned", "total"],
-    logBest: ["best", "note"],
-    logLast: ["last"],
     timesFiredBy: ["count", "owner"],
   },
 } as const satisfies FieldTable;

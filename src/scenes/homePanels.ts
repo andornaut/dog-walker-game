@@ -261,16 +261,41 @@ export function drawDetailCard(
 }
 
 export interface LogbookPanel {
+  // The Badges button, in screen pixels.
+  readonly badges: Rect;
   readonly panel: Rect;
   // The Stats button, in screen pixels.
   readonly stats: Rect;
 }
 
-const STATS_BUTTON = HOME_LAYOUT.statsButton;
+const LOGBOOK_BUTTON = HOME_LAYOUT.logbookButton;
 const FIELDS = HOME_TEXT_FIELDS.logbook;
 
-// The logbook over the screen, as a card: the best walk, totals and the last walk, and a
-// Stats button.
+// A secondary ui-button with its label, in the card's content.
+function addCardButton(
+  scene: Scene,
+  content: GameObjects.Container,
+  button: Rect,
+  label: string,
+): void {
+  const slice = addNineSlice(scene, "ui-button", button, "secondary");
+  if (slice !== undefined) {
+    content.add(slice);
+  } else {
+    const g = scene.add.graphics();
+    fillRect(g, PALETTE.brown, button);
+    fillRect(g, PALETTE.tan, { ...button, height: button.height - 4 });
+    content.add(g);
+  }
+  text(scene, content, { x: button.x + button.width / 2, y: button.y + 15 }, label, {
+    color: PALETTE.plum,
+    font: "title",
+    originX: 0.5,
+  });
+}
+
+// The logbook over the screen, as a card: the best walk, totals and the last walk, then
+// Stats and Badges buttons, Badges opening Stats on its badge wall.
 export function drawLogbookPanel(
   scene: Scene,
   parent: GameObjects.Container,
@@ -296,7 +321,10 @@ export function drawLogbookPanel(
     });
     y += Math.ceil(label.height) + LINE_GAP;
   }
-  const button = { ...STATS_BUTTON, x: (CARD.width - STATS_BUTTON.width) / 2, y: y + LINE_GAP };
+  const { gap, height: buttonHeight, width: buttonWidth } = LOGBOOK_BUTTON;
+  const left = (CARD.width - buttonWidth * 2 - gap) / 2;
+  const button = { height: buttonHeight, width: buttonWidth, x: left, y: y + LINE_GAP };
+  const badges = { ...button, x: left + buttonWidth + gap };
   const height = button.y + button.height + CARD.pad;
   const rect = {
     height,
@@ -305,19 +333,8 @@ export function drawLogbookPanel(
     y: Math.round((SCREEN.height - height) / 2),
   };
   drawCardFrame(scene, parent, closePressed, rect, words.title, content);
-  const slice = addNineSlice(scene, "ui-button", button, "secondary");
-  if (slice !== undefined) {
-    content.add(slice);
-  } else {
-    const g = scene.add.graphics();
-    fillRect(g, PALETTE.brown, button);
-    fillRect(g, PALETTE.tan, { ...button, height: button.height - 4 });
-    content.add(g);
-  }
-  text(scene, content, { x: button.x + button.width / 2, y: button.y + 15 }, words.stats, {
-    color: PALETTE.plum,
-    font: "title",
-    originX: 0.5,
-  });
-  return { panel: rect, stats: { ...button, x: rect.x + button.x, y: rect.y + button.y } };
+  addCardButton(scene, content, button, words.stats);
+  addCardButton(scene, content, badges, words.badges);
+  const onScreen = (r: Rect) => ({ ...r, x: rect.x + r.x, y: rect.y + r.y });
+  return { badges: onScreen(badges), panel: rect, stats: onScreen(button) };
 }

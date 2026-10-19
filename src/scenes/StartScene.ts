@@ -58,6 +58,7 @@ import {
   startReady,
 } from "../home/sections";
 import { choiceFull, type SelectLook } from "../home/selection";
+import type { StatsTab } from "../home/statsLayout";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -180,7 +181,7 @@ type Target =
   | { kind: "settings" }
   | { kind: "slot" }
   | { kind: "start" }
-  | { kind: "stats" }
+  | { kind: "stats"; tab?: StatsTab }
   | { kind: "walker"; walker: WalkerId };
 
 // One key per tappable thing, for its feedback timers.
@@ -265,7 +266,12 @@ type Overlay =
       rect: Rect | undefined;
       target: { dog: DogId; kind: "dog" } | { gear: GearId; kind: "gear" };
     }
-  | { kind: "logbook"; rect: Rect | undefined; stats: Rect | undefined };
+  | {
+      badges: Rect | undefined;
+      kind: "logbook";
+      rect: Rect | undefined;
+      stats: Rect | undefined;
+    };
 
 // A tile that reacts to taps: its container moves for the dip, lift and shake, its face hops,
 // and its badge pops.
@@ -551,6 +557,11 @@ export class StartScene extends Scene {
       this.act({ kind: "stats" });
       return;
     }
+    if (overlay.kind === "logbook" && within(overlay.badges)) {
+      this.closeOverlay();
+      this.act({ kind: "stats", tab: "badges" });
+      return;
+    }
     const outside = (px: number, py: number) =>
       overlay.rect === undefined || !containsPoint(overlay.rect, px, py);
     if (outside(down.x, down.y) && outside(x, y)) {
@@ -652,7 +663,7 @@ export class StartScene extends Scene {
         openHelp(this, SCENE_KEYS.start);
         return;
       case "logbook":
-        this.overlay = { kind: "logbook", rect: undefined, stats: undefined };
+        this.overlay = { badges: undefined, kind: "logbook", rect: undefined, stats: undefined };
         this.render();
         return;
       case "settings": {
@@ -662,7 +673,10 @@ export class StartScene extends Scene {
         return;
       }
       case "stats": {
-        const data: StatsSceneData = { resume: SCENE_KEYS.start };
+        const data: StatsSceneData = {
+          resume: SCENE_KEYS.start,
+          ...(target.tab === undefined ? {} : { tab: target.tab }),
+        };
         this.scene.pause();
         this.scene.launch(SCENE_KEYS.stats, data);
         return;
@@ -995,7 +1009,7 @@ export class StartScene extends Scene {
     if (overlay.kind === "logbook") {
       const log = logbookOf(gameData, save.stats);
       const panel = drawLogbookPanel(this, layer, this.closePressed(), log);
-      this.overlay = { ...overlay, rect: panel.panel, stats: panel.stats };
+      this.overlay = { ...overlay, badges: panel.badges, rect: panel.panel, stats: panel.stats };
       return;
     }
     const { target } = overlay;

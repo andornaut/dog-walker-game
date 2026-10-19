@@ -514,6 +514,8 @@ export interface HomeText {
   // The logbook card and the lines it shares with the Stats page: the best walk, the last
   // walk by how it ended, the totals, and what it says before any walk.
   readonly logbook: {
+    // The button that opens Stats on its badge wall.
+    readonly badges: string;
     readonly best: string;
     readonly bestNote: string;
     readonly empty: string;
@@ -665,11 +667,7 @@ export interface MenuText {
       readonly zones: string;
     };
     readonly earnedCount: string;
-    // The Runs tab's logbook block.
-    readonly logBest: string;
-    readonly logEmpty: string;
-    readonly logLast: string;
-    // Runs by how they ended.
+    // Walks by how they ended.
     readonly outcomes: {
       readonly finished: string;
       readonly noDogs: string;
@@ -683,7 +681,6 @@ export interface MenuText {
       readonly timesFired: string;
     };
     readonly sections: {
-      readonly logbook: string;
       readonly overall: string;
       readonly runs: string;
     };

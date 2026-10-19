@@ -1363,6 +1363,11 @@
           "y": 10
         }
       },
+      "logbookButton": {
+        "gap": 12,
+        "height": 44,
+        "width": 132
+      },
       "logo": {
         "x": 6,
         "y": 146
@@ -1453,10 +1458,6 @@
         "notReadyY": 15,
         "readyY": 12,
         "scale": 3
-      },
-      "statsButton": {
-        "height": 44,
-        "width": 140
       },
       "streetSign": {
         "x": 327,

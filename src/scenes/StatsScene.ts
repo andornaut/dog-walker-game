@@ -6,7 +6,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badgesView";
 import { FEEDBACK, settleDelay } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
-import { logbookOf, wrapWords } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { choiceFull } from "../home/selection";
 import { STATS_LAYOUT, STATS_TABS, type StatsTab, statsTabRects } from "../home/statsLayout";
@@ -32,8 +31,10 @@ import {
   TEXT_SCALE,
 } from "./uiKit";
 
+// tab is the tab to open on, the first by default.
 export interface StatsSceneData {
   resume?: SceneKey;
+  tab?: StatsTab;
 }
 
 type Tab = StatsTab;
@@ -48,7 +49,6 @@ const RIGHT = STATS_LAYOUT.rows.right;
 const PITCH = STATS_LAYOUT.rows.pitch;
 const DOG_ROW = STATS_LAYOUT.dogRow;
 const DOG_COLUMNS = STATS_LAYOUT.dogColumns;
-const LOG_CHARS = 46;
 const WALL = STATS_LAYOUT.wall;
 const WALL_TEXT = STATS_LAYOUT.wallText;
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
@@ -60,9 +60,9 @@ const DETAIL_BADGE_SCALE = 2;
 const DIM_ALPHA = 0.6;
 const FIELDS = MENU_TEXT_FIELDS.stats;
 
-// The Stats page behind the logbook, in three tabs: overall figures, runs by outcome and the
-// logbook; each dog's walks, zones and firings; and the badge wall, where tapping a badge
-// opens its name, goal and line.
+// The Stats page behind the logbook, in three tabs: overall figures and walks by outcome;
+// each dog's walks, zones and firings; and the badge wall, where tapping a badge opens its
+// name, goal and line.
 export class StatsScene extends Scene {
   private burst = false;
   private detail: number | undefined;
@@ -79,7 +79,7 @@ export class StatsScene extends Scene {
     this.resumeKey = data?.resume;
     this.pressed = undefined;
     this.detail = undefined;
-    this.tab = "runs";
+    this.tab = data?.tab ?? "runs";
     this.render();
 
     listenOnePress(this, {
@@ -265,22 +265,7 @@ export class StatsScene extends Scene {
     this.text(LEFT, y, words.sections.overall, { font: "title" });
     y = this.rows(y + 20, overall) + 6;
     this.text(LEFT, y, words.sections.runs, { font: "title" });
-    y = this.rows(y + 20, outcomes) + 6;
-    this.text(LEFT, y, words.sections.logbook, { font: "title" });
-    y += 20;
-    const log = logbookOf(gameData, stats);
-    const lines =
-      log === null
-        ? [words.logEmpty]
-        : [
-            ...wrapWords(
-              LOG_CHARS,
-              fillLine(FIELDS, words, "logBest", { best: log.best, note: log.bestNote }),
-            ),
-            ...wrapWords(LOG_CHARS, fillLine(FIELDS, words, "logLast", { last: log.last })),
-            log.totals,
-          ];
-    lines.forEach((line, i) => this.text(LEFT, y + i * 16, line, { color: PALETTE.darkBrown }));
+    this.rows(y + 20, outcomes);
   }
 
   private drawDogs(): void {

@@ -40,6 +40,7 @@ export const HOME_TEXT = {
   gateSign: "Maple St",
   gearBought: "{gear} is in your bag.",
   logbook: {
+    badges: "Badges",
     best: "Best {best}, {note}",
     bestNote: "{zones} with {dogs}",
     empty: "No walks yet.",

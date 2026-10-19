@@ -47,6 +47,8 @@ export const HOME_LAYOUT = {
   gearSlots: { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 },
   help: { hit: { height: 44, width: 44, x: 0, y: 40 }, icon: { x: 8, y: 46 } },
   logbook: { hit: { height: 44, width: 44, x: 204, y: 0 }, icon: { x: 216, y: 10 } },
+  // The logbook card's Stats and Badges buttons, side by side across its padded width.
+  logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
   mute: { hit: { height: 44, width: 44, x: 316, y: 40 }, icon: { x: 332, y: 46 } },
   path: { width: 32, x: 164 },
@@ -73,8 +75,6 @@ export const HOME_LAYOUT = {
   startButton: { height: 44, width: 352, x: 4, y: 514 },
   // Start walk's label caps: on the raised face when ready, on the sunk face when not.
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
-  // The logbook card's Stats button.
-  statsButton: { height: 44, width: 140 },
   // The street name's centre and caps top on screen-home's street sign, clear of the walker's
   // speech bubble.
   streetSign: { x: 327, y: 75 },

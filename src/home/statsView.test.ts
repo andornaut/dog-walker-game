@@ -7,27 +7,28 @@ import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { dogRows, overallRows } from "./statsView";
 
 const data = { dogs: DOGS, menuText: MENU_TEXT, world: WORLD };
+const words = MENU_TEXT.stats;
 
 describe("overallRows", () => {
   it("shows the overall figures and runs by outcome", () => {
     const { outcomes, overall } = overallRows(data, veteranSave().stats);
     expect(overall).toEqual([
-      { label: "Runs played", value: "5" },
-      { label: "Best run", value: "$90" },
-      { label: "Lifetime earnings", value: "$300" },
-      { label: "Times fired", value: "1 (most: Jesse)" },
-      { label: "Best zone completed", value: "4" },
+      { label: words.overall.runsPlayed, value: "5" },
+      { label: words.overall.bestRun, value: "$90" },
+      { label: words.overall.lifetime, value: "$300" },
+      { label: words.overall.timesFired, value: "1 (most: Jesse)" },
+      { label: words.overall.bestZone, value: "4" },
     ]);
     expect(outcomes).toEqual([
-      { label: "Finished", value: "2" },
-      { label: "Headed home", value: "2" },
-      { label: "Out of dogs", value: "1" },
+      { label: words.outcomes.finished, value: "2" },
+      { label: words.outcomes.wentHome, value: "2" },
+      { label: words.outcomes.noDogs, value: "1" },
     ]);
   });
 
   it("names no owner before anyone has fired you", () => {
     const { overall } = overallRows(data, newPlayerSave.stats);
-    expect(overall).toContainEqual({ label: "Times fired", value: "0" });
+    expect(overall).toContainEqual({ label: words.overall.timesFired, value: "0" });
   });
 });
 
