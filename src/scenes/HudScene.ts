@@ -513,14 +513,14 @@ export class HudScene extends Scene {
     });
   }
 
-  // The amber frame round a doghouse whose dog the open card affects, over the house art: round
+  // The white frame round a doghouse whose dog the open card affects, over the house art: round
   // the file card, which leaves the slot's top 2 rows to the band.
   private drawAffectedFrame(rect: Rect): void {
     const g = this.frames;
     if (g === undefined) {
       return;
     }
-    drawRing(g, PALETTE.amber, { ...rect, height: rect.height - 2, y: rect.y + 2 }, 2);
+    drawRing(g, PALETTE.white, { ...rect, height: rect.height - 2, y: rect.y + 2 }, 2);
   }
 
   // The house drawn while its art is missing: a roof band over a tan front, grey when fired.
