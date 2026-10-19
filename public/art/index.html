@@ -6,6 +6,7 @@
 <title>Dog Walker Art</title>
 <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png">
+<script src="/art/nav.js" defer></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap">
@@ -36,7 +37,6 @@ a { color: var(--accent); }
   display: grid; gap: 28px;
 }
 header { display: grid; gap: 8px; }
-.crumbs { font-size: 13px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 6px 14px; }
 h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 5vw, 40px); line-height: 1.05; margin: 0; letter-spacing: 0.02em; }
 header p { margin: 0; color: var(--muted); max-width: 70ch; }
 .counts { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--f-mono); font-size: 12px; }
@@ -84,7 +84,6 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 <body>
 <main class="wrap">
   <header>
-    <nav class="crumbs" aria-label="Site"><a href="/">Home</a><a href="/play/">Play</a><a href="https://github.com/andornaut/dog-walker-game/blob/main/art/inventory.md">Inventory</a><a href="https://github.com/andornaut/dog-walker-game/blob/main/art/style-guide.md">Style guide</a></nav>
     <h1>Dog Walker Art</h1>
     <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it. Sprites play their Aseprite animations. Mocks are design tests, not game assets.</p>
     <div class="counts" id="counts"></div>
