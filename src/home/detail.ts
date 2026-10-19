@@ -13,9 +13,11 @@ type DetailData = Pick<
 >;
 
 // What a held dog or gear tile's detail card says: a title, a line under it, rows of
-// text, and a status row (the fee or price, owned or equipped).
+// text, and a status row (the fee or price, owned or equipped). locked is true while the
+// item costs more than the bank holds.
 export interface DetailCard {
   readonly lines: readonly string[];
+  readonly locked: boolean;
   readonly status: string;
   readonly subtitle: string;
   readonly title: string;
@@ -68,6 +70,7 @@ export function dogDetail(
         zones: String(counted.zonesFinished),
       }),
     ],
+    locked: cost !== null && cost > bank,
     status: priceLine(text, cost, bank) ?? text.dogStatus,
     subtitle: breed,
     title: name,
@@ -88,6 +91,7 @@ export function gearDetail(
   const status = loadout.gear === gear ? text.gearEquipped : text.gearOwned;
   return {
     lines: [`${capitalized(effectText(data, item.effects))}.`],
+    locked: cost !== null && cost > bank,
     status: priceLine(text, cost, bank) ?? status,
     subtitle: text.gearSubtitle,
     title: item.name,

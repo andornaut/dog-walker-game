@@ -27,4 +27,5 @@ export const RUN_TEXT = {
     title: "Head home?",
   },
   lowHearts: "1 ♥ left!",
+  outOfMoney: "you're out of money",
 } as const satisfies RunText;

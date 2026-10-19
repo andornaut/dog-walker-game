@@ -88,12 +88,12 @@ describe("causeLabel", () => {
     [
       "the tip and a solo walk's tip factor",
       () => tipValue(data, testState({ koda: 5 })),
-      "+$1.50 tip, solo",
+      "+$2 tip, solo",
     ],
     [
       "Stinky on a halved tip",
       () => stinkyTip({ duchess: 5, koda: 5, nugget: 5 }),
-      "+$0.50 tip, Stinky",
+      "+$1 tip, Stinky",
     ],
     [
       "Sweet talker on a per-dog cost",
@@ -106,7 +106,11 @@ describe("causeLabel", () => {
       "−$6, Sweet talker",
     ],
     ["a clawback", () => firing(5000), "−$13 fees taken back"],
-    ["a clawback held at the $0 floor", () => firing(500), "−$5 fees taken back, at $0"],
+    [
+      "a clawback held at the $0 floor",
+      () => firing(500),
+      "−$5 fees taken back, you're out of money",
+    ],
     [
       "a treat as the base",
       () => giveTreat(data, "koda", testState({ koda: 3 }, { treats: 1 })).change,

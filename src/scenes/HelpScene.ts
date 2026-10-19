@@ -143,10 +143,6 @@ export class HelpScene extends Scene {
     addFilledRect(this, PALETTE.plum, insetRect(-1, layout.illustration));
     this.drawIllustration(page.art, layout.illustration);
 
-    addPixelText(this, layout.counter.x, layout.counter.y, `${this.page + 1}/${pages.length}`, {
-      color: PALETTE.cream,
-      font: "title",
-    });
     addPixelText(this, layout.title.x, layout.title.y, page.title, {
       color: PALETTE.amber,
       font: "title",

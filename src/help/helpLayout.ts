@@ -17,7 +17,6 @@ export const MIN_TAP_SIZE = 44;
 export const HELP_LAYOUT = {
   body: { lineHeight: 15, width: 336, x: 12, y: 334 },
   close: closeControl({ height, width, x: 0, y: 0 }),
-  counter: { x: 12, y: 296 },
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.
   dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },

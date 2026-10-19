@@ -12,6 +12,7 @@ import {
   pauseMenuLayout,
 } from "../hud/pauseMenu";
 import { cardNumberForKey } from "../input/keyBindings";
+import { withKeyNumber } from "../input/keyNumbers";
 import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -98,7 +99,7 @@ export class PauseScene extends Scene {
       addMenuButton(
         this,
         itemAt(layout.buttons, i),
-        entry.label,
+        withKeyNumber(i + 1, entry.label),
         i === 0 ? "primary" : "secondary",
       ),
     );

@@ -14,6 +14,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { RUN_TEXT_FIELDS } from "../hud/runText";
 import { cardNumberForKey } from "../input/keyBindings";
+import { keyNumbersShown } from "../input/keyNumbers";
 import { CARD_LAYOUT, cardRowSpec, largeCardRect } from "../layout/cardLayout";
 import { cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
@@ -59,6 +60,8 @@ const COST_KEY = "card-cost";
 const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
 // Holding a card this long enlarges it, with the changes behind its numbers.
 const HOLD_MS = 400;
+// A card's key number sits this far above its top, under the subtitle.
+const KEY_NUMBER_RISE = 8;
 const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 // Marks an option that would fire an owner, over the plaque's left rivet: card-frame
 // pixels, and card-frame-large pixels where it is drawn at 2x.
@@ -140,7 +143,20 @@ export class CardScene extends Scene {
     const tag = cardFrameTag(gameData, view.source);
     this.entries.forEach((entry, i) => {
       const before = this.children.list.length;
-      this.drawCard(view, tag, entry, itemAt(this.cardRects, i));
+      const rect = itemAt(this.cardRects, i);
+      this.drawCard(view, tag, entry, rect);
+      // Once a key has been pressed, each card shows the number key that picks it, above it.
+      if (keyNumbersShown()) {
+        this.centered(
+          rect.x + rect.width / 2,
+          rect.y - KEY_NUMBER_RISE,
+          String(i + 1),
+          PALETTE.amber,
+          {
+            font: "title",
+          },
+        );
+      }
       this.parts[i] = this.children.list.slice(before);
     });
     this.outline = this.add.graphics();

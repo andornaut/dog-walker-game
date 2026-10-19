@@ -43,7 +43,7 @@ describe("changeLabels", () => {
     expect(labels).toEqual([
       { gain: false, target: { dog: "nugget", kind: "dog" }, text: "−2 ♥, dramatic" },
       { gain: true, target: { dog: "koda", kind: "dog" }, text: "+1 ♥ treat" },
-      { gain: true, target: { kind: "bank" }, text: "+$1.50 tip, solo" },
+      { gain: true, target: { kind: "bank" }, text: "+$2 tip, solo" },
     ]);
   });
 

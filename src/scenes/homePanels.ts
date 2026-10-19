@@ -243,7 +243,7 @@ export function drawDetailCard(
       y += Math.ceil(label.height) + LINE_GAP;
     }
   };
-  const status = { color: PALETTE.forest, value: card.status };
+  const status = { color: card.locked ? PALETTE.darkRed : PALETTE.forest, value: card.status };
   if (kind === "gear") {
     beside([...card.lines.map((value) => ({ color: PALETTE.plum, value })), status], well.y + 4);
     return rect;

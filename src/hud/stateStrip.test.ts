@@ -59,17 +59,17 @@ describe("stripText", () => {
     [
       "an upgrade's name and effect as its card does",
       { kind: "upgrade", upgrade: "bigTipper" },
-      "Big tipper: Tip value +50% for the run.",
+      "Big tipper: tip value +50% for the run.",
     ],
     [
       "gear's name and effect as its home line does",
       { gear: "fannyPack", kind: "gear" },
-      "Fanny pack: Starting money +$15.",
+      "Fanny pack: starting money +$15.",
     ],
     [
       "a debuff's modifiers for its duration",
       { debuff: "stinky", kind: "debuff" },
-      "Stinky: Tip value −50% for the rest of the zone.",
+      "Stinky: tip value −50% for the rest of the zone.",
     ],
   ])("writes %s", (_name, item, expected) => {
     expect(stripText(data, item)).toBe(expected);

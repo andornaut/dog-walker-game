@@ -13,6 +13,7 @@ import {
 } from "./dev/devOverlay";
 import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { pageRunSetup } from "./dev/pageRunSetup";
+import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
 import { setOnHomeScreen, setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
@@ -95,6 +96,9 @@ const game = new Game({
 });
 
 mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
+
+// Captured before the scenes see it, so the key that opens a menu already shows its numbers.
+window.addEventListener("keydown", noteKeyPress, { capture: true });
 
 // Phaser gives a new touch only a free pointer, so a touch whose end the browser never
 // delivered would hold its pointer and every later touch would be dropped. A touchstart lists

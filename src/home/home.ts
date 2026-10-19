@@ -1,7 +1,7 @@
 import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
 import { quipLine } from "../rules/choices";
 import { zoneFee } from "../rules/dogs";
-import { effectText, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
+import { effectClause, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { addCents, type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
@@ -299,7 +299,7 @@ export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): 
 export function gearInfo(data: InfoData, owned: Owned, bank: Cents, gear: GearId): string {
   const text = data.homeText.focus;
   const item = data.shopGear[gear];
-  const fields = { effect: effectText(data, item.effects), gear: item.name };
+  const fields = { effect: effectClause(data, item.effects), gear: item.name };
   const cost = purchasePrice(data, owned, { gear, kind: "gear" });
   return cost === null
     ? fillLine(FOCUS_FIELDS, text, "gear", fields)

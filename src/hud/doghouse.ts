@@ -26,6 +26,17 @@ export const DOGHOUSE = {
   ],
 } as const;
 
+// What a doghouse slot shows: its dog, "Empty" for a slot the player owns but filled with
+// no dog, or nothing for a slot the player has not bought.
+export type SlotShown = "dog" | "empty" | "hidden";
+
+export function slotShown(ownedSlots: number, index: number, hasDog: boolean): SlotShown {
+  if (hasDog) {
+    return "dog";
+  }
+  return index < ownedSlots ? "empty" : "hidden";
+}
+
 export interface HeartCell extends Point {
   full: boolean;
 }

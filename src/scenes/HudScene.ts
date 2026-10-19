@@ -11,7 +11,7 @@ import {
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, HintTrigger } from "../data/types";
-import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
+import { DOGHOUSE, doghouseHearts, fittingScale, heartCount, slotShown } from "../hud/doghouse";
 import {
   dismissHint,
   EMPTY_HINT_QUEUE,
@@ -65,7 +65,7 @@ import {
   setPixelText,
   wrapPixelText,
 } from "./pixelText";
-import { isMuted, markHintShown, setMuted, shownHints } from "./profileStore";
+import { isMuted, markHintShown, profileSave, setMuted, shownHints } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,
   CHANGE_LABELS_EVENT,
@@ -468,11 +468,13 @@ export class HudScene extends Scene {
 
     const { dogSlots } = LAYOUT;
     this.frames?.clear();
+    const ownedSlots = profileSave(this).owned.dogSlots;
     dogSlots.forEach((rect, i) => {
       const slot = this.slots[i];
       if (slot !== undefined) {
         const packSlot = run.pack[i];
-        this.drawSlot(g, rect, slot, run, packSlot);
+        const shown = slotShown(ownedSlots, i, packSlot !== undefined);
+        this.drawSlot(g, rect, slot, run, shown === "hidden" ? null : packSlot);
         this.showStatuses(slot, packSlot, view.statuses);
         if (packSlot?.status === "walking" && view.affected.includes(packSlot.dog)) {
           this.drawAffectedFrame(rect);
@@ -512,18 +514,23 @@ export class HudScene extends Scene {
   }
 
   // A doghouse roofed in the dog's colour: the dog in the door, the owner in the window, the
-  // hearts and their count on the board. A fired dog's house is grey and empty.
+  // hearts and their count on the board. A fired dog's house is grey and empty. An owned slot
+  // with no dog is a dashed "Empty" outline, and a slot not bought (null) is not drawn.
   private drawSlot(
     g: GameObjects.Graphics,
     rect: Rect,
     view: SlotView,
     run: RunState,
-    slot: PackSlot | undefined,
+    slot: PackSlot | null | undefined,
   ): void {
     const parts = [view.house, view.dogFace, view.ownerFace, ...view.hearts];
-    if (slot === undefined) {
+    if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
       [view.name, view.count, view.ownerName].forEach((label) => setPixelText(label, ""));
+      if (slot === null) {
+        setPixelText(view.fired, "");
+        return;
+      }
       drawDashedRect(g, PALETTE.tan, rect);
       setPixelText(view.fired.setTint(PALETTE.cream), "Empty");
       return;

@@ -2,7 +2,7 @@ import { kebabCase } from "../assets/spriteKeys";
 import type { DebuffId, GameData, GearId, UpgradeId } from "../data/types";
 import { exceedsTapDistance } from "../input/gestures";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
-import { effectText, type TextData } from "../rules/effectText";
+import { namedEffectText, type TextData } from "../rules/effectText";
 import type { RunState } from "../state/runState";
 import type { RunPause } from "./topBar";
 
@@ -72,15 +72,15 @@ export function stripText(
         duration,
         kind: "modifier" as const,
       }));
-      return `${name}: ${effectText(data, effects)}.`;
+      return namedEffectText(data, name, effects);
     }
     case "gear": {
       const { effects, name } = data.shopGear[item.gear];
-      return `${name}: ${effectText(data, effects)}.`;
+      return namedEffectText(data, name, effects);
     }
     case "upgrade": {
       const { effects, name } = data.upgrades[item.upgrade];
-      return `${name}: ${effectText(data, effects)}.`;
+      return namedEffectText(data, name, effects);
     }
     default:
       return item satisfies never;

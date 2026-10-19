@@ -594,6 +594,8 @@ export interface RunText {
     readonly title: string;
   };
   readonly lowHearts: string;
+  // Names a loss cut short because the money ran out.
+  readonly outOfMoney: string;
 }
 
 // The text of the menus and pages over the game: Settings, Stats, Help, the End screen, the

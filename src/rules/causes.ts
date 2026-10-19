@@ -2,7 +2,7 @@ import type { CardOption, DogId, GameData, Temperament } from "../data/types";
 import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
 import { fillNames } from "../text/lines";
 import { assertNever } from "./assertNever";
-import { formatDollars, TEMPERAMENT_NAMES } from "./effectText";
+import { TEMPERAMENT_NAMES } from "./effectText";
 import type { Contribution } from "./modifiers";
 import { type Cents, cents, type Hearts } from "./units";
 
@@ -137,7 +137,7 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       return cause.kind;
     case "limit":
       if (change.kind === "money") {
-        return "at $0";
+        return data.runText.outOfMoney;
       }
       // A meter held at 0 means its owner fires you.
       return cause.bound === "max" ? "at max" : firedByText(data, change.dog);
@@ -154,12 +154,16 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
 
 const MINUS = "−";
 
-// A signed amount in the change's unit, such as "−2 ♥" or "+$1.50".
+// Money in whole dollars, as the top bar shows it: rounded, and at least $1 so a change
+// never reads "$0".
+function wholeDollarText(amount: number): string {
+  return `$${Math.max(1, Math.round(Math.abs(amount) / 100))}`;
+}
+
+// A signed amount in the change's unit, such as "−2 ♥" or "+$2".
 export function amountText(kind: Change["kind"], amount: number): string {
   const sign = amount < 0 ? MINUS : "+";
-  return kind === "hearts"
-    ? `${sign}${Math.abs(amount)} ♥`
-    : `${sign}${formatDollars(cents(amount))}`;
+  return kind === "hearts" ? `${sign}${Math.abs(amount)} ♥` : `${sign}${wholeDollarText(amount)}`;
 }
 
 // A card choice's own effects need no name: the player just picked them.
@@ -173,7 +177,7 @@ function namesBase(cause: Cause): boolean {
 
 // The short floating label for a change: its amount, then its base unless the player just
 // picked it on a card, then everything that changed it, as "−2 ♥, dramatic" or
-// "+$1.50 tip, solo".
+// "+$2 tip, solo".
 export function causeLabel(data: CauseData, change: Change): string {
   const amount = amountText(change.kind, changeAmount(change));
   const [base, ...rest] = change.causes;

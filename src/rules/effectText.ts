@@ -211,6 +211,18 @@ export function effectText(data: TextData, effects: readonly Effect[]): string {
   return phrasesText(effects.map((effect) => effectPhrase(data, effect)));
 }
 
+// The effect as it follows a name and a colon, lower case: "tip value +50% for the run".
+export function effectClause(data: TextData, effects: readonly Effect[]): string {
+  const text = effectText(data, effects);
+  return text.charAt(0).toLowerCase() + text.slice(1);
+}
+
+// A named item and its effect, lower case after the colon: "Big tipper: tip value +50% for
+// the run."
+export function namedEffectText(data: TextData, name: string, effects: readonly Effect[]): string {
+  return `${name}: ${effectClause(data, effects)}.`;
+}
+
 export type CardTextData = TextData & Pick<GameData, "dogs">;
 
 // What a card's text knows of the walk: the dogs a target reaches, in pack order, and a
