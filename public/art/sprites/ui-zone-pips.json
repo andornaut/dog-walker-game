@@ -1,0 +1,40 @@
+{ "frames": {
+   "ui-zone-pips 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 18, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
+    "sourceSize": { "w": 18, "h": 8 },
+    "duration": 1000
+   },
+   "ui-zone-pips 1.aseprite": {
+    "frame": { "x": 18, "y": 0, "w": 18, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
+    "sourceSize": { "w": 18, "h": 8 },
+    "duration": 1000
+   },
+   "ui-zone-pips 2.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 18, "h": 8 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 18, "h": 8 },
+    "sourceSize": { "w": 18, "h": 8 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-zone-pips.png",
+  "format": "RGBA8888",
+  "size": { "w": 54, "h": 8 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "done", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "current", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "todo", "from": 2, "to": 2, "direction": "forward" }
+  ]
+ }
+}

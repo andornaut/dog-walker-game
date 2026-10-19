@@ -106,6 +106,11 @@
       "json": "sprites/card-frame.json"
     },
     {
+      "key": "card-frame-large",
+      "png": "sprites/card-frame-large.png",
+      "json": "sprites/card-frame-large.json"
+    },
+    {
       "key": "chatty-neighbour",
       "png": "sprites/chatty-neighbour.png",
       "json": "sprites/chatty-neighbour.json"
@@ -471,6 +476,11 @@
       "json": "sprites/ui-select.json"
     },
     {
+      "key": "ui-zone-pips",
+      "png": "sprites/ui-zone-pips.png",
+      "json": "sprites/ui-zone-pips.json"
+    },
+    {
       "key": "walker-ada",
       "png": "sprites/walker-ada.png",
       "json": "sprites/walker-ada.json"
@@ -551,6 +561,10 @@
     {
       "key": "card-construction-detour-squeeze",
       "png": "images/card-construction-detour-squeeze.png"
+    },
+    {
+      "key": "card-cost",
+      "png": "images/card-cost.png"
     },
     {
       "key": "card-good-leash",
@@ -877,8 +891,28 @@
       "png": "images/ui-panel.png"
     },
     {
+      "key": "ui-quip",
+      "png": "images/ui-quip.png"
+    },
+    {
+      "key": "ui-quip-tail",
+      "png": "images/ui-quip-tail.png"
+    },
+    {
       "key": "ui-slot-locked",
       "png": "images/ui-slot-locked.png"
+    },
+    {
+      "key": "ui-top-bar",
+      "png": "images/ui-top-bar.png"
+    },
+    {
+      "key": "ui-touch-hint",
+      "png": "images/ui-touch-hint.png"
+    },
+    {
+      "key": "ui-zone-banner",
+      "png": "images/ui-zone-banner.png"
     }
   ]
 }

@@ -4,12 +4,15 @@
 Images (16x16 icons unless noted): icon-pause, icon-help, icon-close, icon-lock,
 icon-money, icon-stinky; ui-panel, ui-hint (24x24 nine-slices, 8px corners),
 ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title),
-ui-slot-locked (112x50, a locked pack slot; the game writes the price).
+ui-slot-locked (112x50, a locked pack slot; the game writes the price); the run
+screen's ui-top-bar (360x40), ui-quip (24x24 nine-slice, 8px corners), ui-quip-tail
+(6x8), ui-zone-banner (248x48) and ui-touch-hint (96x36).
 Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-check (16x16; tags 1, 2, 3,
 tick), fx-tap and fx-dust (16x16; tag play),
 ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
-corners; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off).
+corners; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off),
+ui-zone-pips (18x8; tags done, current, todo).
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -316,6 +319,147 @@ def dust(step):
     return g
 
 
+# ---------- run screen: top bar, zone progress, quips, zone banner, touch hint ----------
+
+def well(g, x, y, w, h):
+    """A recessed ink slot in the wood: clipped corners and a dark brown lip below and to the right."""
+    g.rect(x + 1, y, w - 2, h, "ink")
+    g.rect(x, y + 1, w, h - 2, "ink")
+    g.rect(x + 1, y + h - 1, w - 2, 1, "dbrown")
+    g.rect(x + w - 1, y + 1, 1, h - 2, "dbrown")
+
+
+def top_bar():
+    """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
+    money 4,8 94x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 100,8
+    58x26 (treat at 104,13, count at 122,18), and zone 200,5 156x29 (the zone name right
+    aligned at 352,10, ui-zone-pips from 271,22). The pause button sits at 170,10 between
+    the treats and zone wells."""
+    g = Grid(360, 40)
+    g.rect(0, 0, 360, 40, "plum")
+    g.rect(0, 1, 360, 1, "dbrown")
+    for i in range(40):
+        g.rect((i * 53) % 352, 4 + (i * 11) % 31, 4 + (i % 4) * 3, 1, "dbrown")
+    g.rect(0, 37, 360, 1, "brown")
+    g.rect(0, 38, 360, 1, "dbrown")
+    g.rect(0, 39, 360, 1, "ink")
+    well(g, 4, 8, 94, 26)
+    well(g, 100, 8, 58, 26)
+    well(g, 200, 5, 156, 29)
+    return g
+
+
+def zone_pip(state):
+    """18x8, one per zone, 3px apart. The game fills the current pip's 16x6 well at 1,1 from
+    the left in amber as the zone goes by. A done pip carries a tick, so progress never
+    relies on colour alone."""
+    rim, hi, inner = {"done": ("dgreen", "green", "green"), "current": ("orange", "amber", "ink"),
+                      "todo": ("dbrown", "dbrown", "ink")}[state]
+    g = Grid(18, 8)
+    g.rect(1, 0, 16, 8, rim)
+    g.rect(0, 1, 18, 6, rim)
+    g.rect(1, 0, 16, 1, hi)
+    g.rect(1, 1, 16, 6, inner)
+    if state == "done":
+        g.rect(1, 1, 16, 1, "yellow")
+        for x, y in ((6, 4), (7, 5), (8, 4), (9, 3), (10, 2), (11, 1)):
+            g.p(x, y, "white")
+        g.p(7, 6, "dgreen")
+    return g
+
+
+def quip():
+    """24x24 nine-slice (8px corners): the owner's speech bubble, cream paper with a round
+    plum rim, so it reads apart from the white hint bubble. Text in font-body, plum."""
+    g = Grid(24, 24)
+    g.rect(3, 0, 18, 24, "plum")
+    g.rect(1, 1, 22, 22, "plum")
+    g.rect(0, 3, 24, 18, "plum")
+    g.rect(3, 1, 18, 22, "cream")
+    g.rect(2, 2, 20, 20, "cream")
+    g.rect(1, 3, 22, 18, "cream")
+    g.rect(3, 22, 18, 1, "tan")
+    g.rect(22, 3, 1, 18, "tan")
+    g.p(21, 21, "tan")
+    g.p(3, 2, "white")
+    return g
+
+
+def quip_tail():
+    """6x8, pointing left at the owner's window in the dog column. Place its right column over
+    the bubble's left rim so the cream runs through."""
+    g = Grid(6, 8)
+    for y, row in enumerate([".....P", "....PC", "...PCC", "..PCCC", ".PCCCC", "PCCCCC", ".PPTTC", "...PPP"]):
+        for x, c in enumerate(row):
+            g.p(x, y, {"P": "plum", "C": "cream", "T": "tan"}.get(c))
+    return g
+
+
+def zone_banner():
+    """248x48: a cream board in a plum frame on outlined brown wood ribbon ends, shown over the
+    road between zones. The game writes two lines in font-title, plum, centred on x=124: the
+    world and zone number ("MAPLE STREET, ZONE 2") with its caps in rows 11 to 15, and the zone
+    name at x2 ("BARK PARK", up to 192px wide) with its caps in rows 27 to 36, under the
+    dotted divider."""
+    g = Grid(248, 48)
+    for x0 in (1, 221):
+        g.rect(x0, 13, 26, 28, "brown")
+        g.rect(x0, 19, 26, 1, "dbrown")
+        g.rect(x0, 34, 26, 1, "dbrown")
+    g.tri((0, 12), (0, 42), (9, 27), None)
+    g.tri((248, 12), (248, 42), (239, 27), None)
+    g.px = g.outlined()
+    g.rect(15, 0, 218, 48, "plum")
+    g.rect(13, 1, 222, 46, "plum")
+    g.rect(12, 3, 224, 42, "plum")
+    g.rect(15, 3, 218, 42, "cream")
+    g.rect(14, 4, 220, 40, "cream")
+    g.rect(15, 44, 218, 1, "tan")
+    g.rect(233, 4, 1, 40, "tan")
+    for x in range(28, 220, 3):
+        g.p(x, 21, "tan")
+    for x, y in ((17, 6), (230, 6), (17, 41), (230, 41)):
+        g.p(x, y, "white" if y < 10 else "tan")
+    return g
+
+
+def chevron(g, x, cy, left, col, sh):
+    """A 3px-thick arrowhead 13px tall with its tip at x, shaded below the middle."""
+    for d in range(-6, 7):
+        px = x + abs(d) if left else x - abs(d) - 2
+        g.rect(px, cy + d, 3, 1, sh if d > 0 else col)
+
+
+def touch_hint():
+    """96x36: a finger tapping between two pairs of arrows, for the first-run lane hint. The
+    game writes "tap left / right" in font-body under it."""
+    g = Grid(96, 36)
+    chevron(g, 8, 19, True, "orange", "rust")
+    chevron(g, 16, 19, True, "amber", "orange")
+    chevron(g, 87, 19, False, "orange", "rust")
+    chevron(g, 79, 19, False, "amber", "orange")
+    # tap lines around the fingertip
+    for x, y in ((40, 4), (41, 5), (48, 0), (48, 1), (56, 4), (55, 5)):
+        g.p(x, y, "white")
+    # pointing hand: index finger up, the other fingers curled to the right, thumb on the left
+    g.rect(46, 6, 5, 13, "skin1")
+    g.rect(47, 5, 3, 1, "skin1")
+    g.rect(47, 6, 3, 2, "cream")
+    g.rect(42, 16, 15, 12, "skin1")
+    g.rect(43, 15, 13, 1, "skin1")
+    for y in (16, 20, 24):
+        g.rect(51, y + 3, 6, 1, "skin2")
+    g.rect(40, 18, 3, 6, "skin1")
+    g.rect(40, 23, 3, 1, "skin2")
+    g.rect(50, 7, 1, 11, "skin2")
+    g.rect(56, 16, 1, 12, "skin2")
+    g.rect(43, 27, 13, 1, "skin2")
+    g.rect(43, 28, 13, 6, "white")
+    g.rect(43, 33, 13, 1, "lgrey")
+    g.rect(55, 28, 1, 6, "lgrey")
+    return g
+
+
 IMAGES = {
     "icon-pause": lambda: to_image(pause().outlined()),
     "icon-help": lambda: to_image(help_icon().outlined()),
@@ -328,6 +472,11 @@ IMAGES = {
     "ui-hint-tail": lambda: to_image(hint_tail().outlined(False)),
     "ui-new-best": new_best,
     "ui-slot-locked": slot_locked,
+    "ui-top-bar": lambda: to_image(top_bar().outlined(False)),
+    "ui-quip": lambda: to_image(quip().outlined(False)),
+    "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
+    "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
+    "ui-touch-hint": lambda: to_image(touch_hint().outlined()),
 }
 
 
@@ -341,19 +490,30 @@ def sprites():
     yield "ui-button", [(s, [button(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
     yield "icon-sound", [("on", [speaker(True).outlined()], 1000), ("off", [speaker(False).outlined()], 1000)]
     yield "icon-music", [("on", [speaker(True, True).outlined()], 1000), ("off", [speaker(False, True).outlined()], 1000)]
+    yield "ui-zone-pips", [(s, [zone_pip(s).outlined(False)], 1000) for s in ("done", "current", "todo")]
 
 
-def preview(out, scale=4):
+def preview(out, scale=3, width=380):
+    """Every piece in rows that wrap at width, so the 360px top bar gets a row of its own."""
     pieces = [draw() for draw in IMAGES.values()]
     for _, tags in sprites():
         pieces += [to_image(f) for _, fs, _ in tags for f in fs]
-    width = sum(p.width + 6 for p in pieces)
-    height = max(p.height for p in pieces)
-    sheet = Image.new("RGB", (width, height), (115, 62, 57))
-    x = 0
+    rows, row = [], []
     for p in pieces:
-        sheet.paste(p, (x, 0), p)
-        x += p.width + 6
+        if row and sum(q.width + 6 for q in row) + p.width > width:
+            rows.append(row)
+            row = []
+        row.append(p)
+    rows.append(row)
+    height = sum(max(p.height for p in r) + 6 for r in rows)
+    sheet = Image.new("RGB", (width, height), (115, 62, 57))
+    y = 0
+    for r in rows:
+        x = 0
+        for p in r:
+            sheet.paste(p, (x, y), p)
+            x += p.width + 6
+        y += max(p.height for p in r) + 6
     sheet.resize((width * scale, height * scale), Image.NEAREST).save(out)
 
 

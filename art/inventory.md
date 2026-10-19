@@ -132,33 +132,34 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Dog column
 
-| Asset            | Key                 | Type   | Size      | Priority | Notes                                                                                                                                                                                                              |
-| ---------------- | ------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Doghouse slot    | `ui-doghouse`       | sprite | 72×146    | core     | One per dog slot: a doghouse with the dog's colour roof (a tag per dog, plus `empty` for a fired dog); the dog peeks from the door, the owner sits in the window, hearts on the board. Layout in `art/tools/ui.py` |
-| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                                                                                                                                         |
-| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                                                                                                                              |
-| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows; a number beside the hearts so the meter doesn't rely on colour                                               |
-| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing                                                                                                                                                                   |
-| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                                                                                                                                                                                       |
+| Asset            | Key                 | Type   | Size             | Priority | Notes                                                                                                                                                                                                              |
+| ---------------- | ------------------- | ------ | ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Doghouse slot    | `ui-doghouse`       | sprite | 72×146           | core     | One per dog slot: a doghouse with the dog's colour roof (a tag per dog, plus `empty` for a fired dog); the dog peeks from the door, the owner sits in the window, hearts on the board. Layout in `art/tools/ui.py` |
+| Dog faces        | `face-dog-<name>`   | sprite | 32×32            | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                                                                                                                                         |
+| Owner faces      | `face-owner-<name>` | sprite | 32×32            | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                                                                                                                              |
+| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD)        | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows; a number beside the hearts so the meter doesn't rely on colour                                               |
+| Quip bubble      | `ui-quip`           | image  | 24×24 nine-slice | core     | Cream bubble with a round plum rim, 8px corners; `ui-quip-tail` (6×8) points left at the owner                                                                                                                     |
+| Quip tail        | `ui-quip-tail`      | image  | 6×8              | core     | Points left at the owner's window; its right column covers the bubble's left rim                                                                                                                                   |
+| Stinky badge     | `icon-stinky`       | image  | 16×16            | core     | Shown while the debuff lasts                                                                                                                                                                                       |
 
 ## Top bar
 
 | Asset          | Key                | Type   | Size   | Priority | Notes                                                                                      |
 | -------------- | ------------------ | ------ | ------ | -------- | ------------------------------------------------------------------------------------------ |
-| Bar background | `ui-top-bar`       | image  | 360×40 | core     |                                                                                            |
+| Bar background | `ui-top-bar`       | image  | 360×40 | core     | Plum wood with ink wells for money, treats and zone; layout in `art/tools/ui.py`           |
 | Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                                                       |
-| Zone progress  | `ui-zone-pips`     | sprite | TBD    | core     | 4 segments; frames `done`, `current`, `todo`                                               |
+| Zone progress  | `ui-zone-pips`     | sprite | 18×8   | core     | 4 pips 3px apart; frames `done` (ticked), `current` (the game fills it amber), `todo`      |
 | Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home; drawn by `art/tools/glyphs.py` |
 
 ## Choice cards
 
 Each card is a frame plus an illustration plus text drawn in the pixel font. The illustration is 75×56 at (5, 16) inside the 83×140 frame; `art/tools/cards.py` documents the rest of the layout.
 
-| Asset          | Key                | Type   | Size   | Priority | Notes                                                                                                                                                             |
-| -------------- | ------------------ | ------ | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Card frame     | `card-frame`       | sprite | 83×140 | M6       | Tags `encounter`, `lucky`, `stop`, `upgrade` (band colour); the game greys out disabled cards with the palette's grey ramp and outlines the selected one in amber |
-| Enlarged frame | `card-frame-large` | sprite | TBD    | core     | Tap-to-enlarge view; same frames                                                                                                                                  |
-| Cost badge     | `card-cost`        | image  | TBD    | core     | Holds `$`, `$$$` or the ♥ change                                                                                                                                  |
+| Asset          | Key                | Type   | Size    | Priority | Notes                                                                                                                                                             |
+| -------------- | ------------------ | ------ | ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Card frame     | `card-frame`       | sprite | 83×140  | M6       | Tags `encounter`, `lucky`, `stop`, `upgrade` (band colour); the game greys out disabled cards with the palette's grey ramp and outlines the selected one in amber |
+| Enlarged frame | `card-frame-large` | sprite | 166×280 | core     | Tap-to-enlarge view: the `card-frame` layout at 2× with 1px detail, illustration at 2×; same tags                                                                 |
+| Cost badge     | `card-cost`        | image  | 71×13   | core     | Plaque over the frame's badge (at 2× on the large frame); the game writes the cost between the rivets                                                             |
 
 Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. All 39 are drawn. Forced-stop keys use the stop's data key (`card-kid-wants-to-pet-pet`), upgrades their id (`card-second-wind`), and Poop bags' Skip option is `card-skip`. Biscuit neighbour and photo op pay out at once without a card, so `card-biscuit-neighbour-take` and `card-photo-op-pose` serve as their popup art.
 
@@ -210,7 +211,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Selection frame      | `ui-select`                | sprite | 24×24 nine-slice | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                                                                         |
 | Pick badge           | `ui-check`                 | sprite | 16×16            | core     | Green badge on a picked tile: tags `1`, `2`, `3` (pack order) and `tick`                                                               |
 | Tap and dust effects | `fx-tap`, `fx-dust`        | sprite | 16×16            | core     | A sparkle where a tap lands; a puff when the walker or a dog hops                                                                      |
-| Zone banner          | `ui-zone-banner`           | image  | TBD              | core     | "Maple Street, zone 2: Bark Park" between zones                                                                                        |
+| Zone banner          | `ui-zone-banner`           | image  | 248×48           | core     | Board and ribbon ends with no text; the game writes both lines in font-title                                                           |
 | End screen           | `screen-end`               | image  | 360×640          | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                                                                    |
 
 ## UI kit
@@ -221,7 +222,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Button      | `ui-button`               | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                                                   |
 | Panel       | `ui-panel`                | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                                              |
 | Pause icon  | `icon-pause`              | image  | 16×16     | core     | Top bar; opens the pause menu                                                                            |
-| Touch hint  | `ui-touch-hint`           | image  | TBD       | later    | First-run "tap left / right"                                                                             |
+| Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | Finger and arrows; the game writes "tap left / right" under it                                           |
 | App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later                              |
 
 ## Counts

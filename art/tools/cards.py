@@ -6,15 +6,23 @@
   body and the cost in the badge. Layout, in card pixels:
     band 2..12 (title), art window 4,15 to 79,72 (illustration at 5,16, 75x56),
     body 6..77 x 76..118, badge 6,121, 71x13.
+- card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
+  view: the same layout doubled with 1px detail. Band 4..22 (title in font-title
+  x2, caps from row 9), art window 8,30, 154x116 (illustration at 2x at 10,32),
+  body 12..154 x 152..234, badge 12,242, 142x26.
+- card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
+  large frame); the game writes the cost between its rivets.
 - card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
   illustrations, one per option, composed from the exported sprites. Build
   the sprites first.
 
 Usage:
-  cards.py preview OUT.png   the frame and every illustration, scaled up
-  cards.py build             write art/cards/*.aseprite, the frame to
-                             public/art/sprites/ and the illustrations to
-                             public/art/images/, and list them in the manifest
+  cards.py preview OUT.png   every illustration in a card, then the enlarged
+                             frames, scaled up
+  cards.py build             write art/cards/*.aseprite, the frames to
+                             public/art/sprites/ and the illustrations and cost
+                             plaque to public/art/images/, and list them in the
+                             manifest
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -61,6 +69,52 @@ def card_frame(kind):
     # corner studs
     for x, y in ((3, 3), (CW - 4, 3), (3, CH - 4), (CW - 4, CH - 4)):
         g.p(x, y, "white" if y < 10 else "tan")
+    return g
+
+
+LW, LH = 2 * CW, 2 * CH
+
+
+def card_frame_large(kind):
+    """The tap-to-enlarge card: the card-frame layout at twice the size with 1px detail, so the
+    illustration shows at 2x and the body has room for the modifiers behind the numbers."""
+    g = Grid(LW, LH)
+    band, band_sh = BANDS[kind]
+    g.rect(2, 0, LW - 4, LH, "plum")
+    g.rect(1, 1, LW - 2, LH - 2, "plum")
+    g.rect(0, 2, LW, LH - 4, "plum")
+    g.rect(3, 3, LW - 6, LH - 6, "dbrown")
+    g.rect(4, 4, LW - 8, LH - 8, "cream")
+    g.rect(4, LH - 6, LW - 8, 2, "tan")
+    g.rect(4, 4, LW - 8, 21, band)
+    g.rect(4, 23, LW - 8, 2, band_sh)
+    # recessed art window, the illustration at 2x
+    g.rect(8, 30, 2 * AW + 4, 2 * AH + 4, "brown")
+    g.rect(8, 30, 2 * AW + 4, 2, "dbrown")
+    g.rect(10, 32, 2 * AW, 2 * AH, "tan")
+    for x in range(16, LW - 16, 6):
+        g.rect(x, 236, 3, 1, "tan")
+    g.rect(12, 242, 142, 26, "plum")
+    g.rect(12, 242, 142, 2, "dbrown")
+    for x, y in ((6, 6), (LW - 8, 6), (6, LH - 8), (LW - 8, LH - 8)):
+        g.rect(x, y, 2, 2, "white" if y < 20 else "tan")
+    return g
+
+
+def card_cost():
+    """71x13: the cost plaque, laid over the frame's badge socket at 6,121 (12,242 at 2x on the
+    large frame). Rounded ends, a dark brown bevel on top and brass rivets at both ends; the
+    game writes the cost ($, $$$, the heart change, Free or Need $...) centred in font-title,
+    cream, in the 63px between the rivets."""
+    g = Grid(71, 13)
+    g.rect(1, 0, 69, 13, "plum")
+    g.rect(0, 1, 71, 11, "plum")
+    g.rect(2, 1, 67, 1, "dbrown")
+    g.rect(2, 11, 67, 1, "ink")
+    for x in (2, 67):
+        g.rect(x, 5, 2, 2, "amber")
+        g.p(x, 5, "yellow")
+        g.p(x + 1, 6, "orange")
     return g
 
 
@@ -627,29 +681,38 @@ ILLUSTRATIONS = {
 
 def frame_sprite():
     yield "card-frame", [(kind, [card_frame(kind).outlined(False)], 1000) for kind in BANDS]
+    yield "card-frame-large", [(kind, [card_frame_large(kind).outlined(False)], 1000) for kind in BANDS]
 
 
-def mock_card(kind, key):
-    """A whole card as the game will show it, for previews."""
-    im = Image.new("RGB", (CW, CH), hp.rgb("dbrown"))
-    px = card_frame(kind).px
-    for y, row in enumerate(px):
-        for x, c in enumerate(row):
-            if c:
-                im.putpixel((x, y), hp.rgb(c))
-    im.paste(ILLUSTRATIONS[key]().img, (5, 16))
-    return im
+def mock_card(kind, key, large=False):
+    """A whole card as the game will show it, cost plaque included, for previews."""
+    scale = 2 if large else 1
+    im = to_image((card_frame_large if large else card_frame)(kind).px)
+    cost = to_image(card_cost().px)
+    im.paste(cost.resize((cost.width * scale, cost.height * scale), Image.NEAREST), (6 * scale, 121 * scale))
+    art = ILLUSTRATIONS[key]().img
+    im.paste(art.resize((AW * scale, AH * scale), Image.NEAREST), (5 * scale, 16 * scale))
+    bg = Image.new("RGB", im.size, hp.rgb("dbrown"))
+    bg.paste(im, (0, 0), im)
+    return bg
 
 
 def preview(out, scale=3):
+    """Every illustration in a normal card, then one enlarged card per card type."""
     keys = list(ILLUSTRATIONS)
     kinds = ["encounter"] * 11 + ["lucky"] * 6 + ["stop"] * 12 + ["upgrade"] * 9 + ["encounter"]
     cols = 10
     rows = (len(keys) + cols - 1) // cols
-    sheet = Image.new("RGB", ((CW + 6) * cols * scale, (CH + 6) * rows * scale), hp.rgb("ink"))
+    big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-return"),
+           ("stop", "card-kid-wants-to-pet-pet"), ("upgrade", "card-belly-rubs")]
+    width = max((CW + 6) * cols, (LW + 6) * len(big))
+    sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), hp.rgb("ink"))
     for i, (key, kind) in enumerate(zip(keys, kinds)):
         card = mock_card(kind, key).resize((CW * scale, CH * scale), Image.NEAREST)
         sheet.paste(card, ((i % cols) * (CW + 6) * scale, (i // cols) * (CH + 6) * scale))
+    for i, (kind, key) in enumerate(big):
+        card = mock_card(kind, key, True).resize((LW * scale, LH * scale), Image.NEAREST)
+        sheet.paste(card, (i * (LW + 6) * scale, (CH + 6) * rows * scale))
     sheet.save(out)
 
 
@@ -660,16 +723,19 @@ def build():
         png = f"public/art/images/{key}.png"
         draw().img.save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/cards/{key}.aseprite"], check=True)
+    to_image(card_cost().outlined(False)).save("public/art/images/card-cost.png")
+    subprocess.run(["aseprite", "-b", "public/art/images/card-cost.png", "--save-as", "art/cards/card-cost.aseprite"],
+                   check=True)
     path = "public/art/manifest.json"
     manifest = json.load(open(path))
     entries = {i["key"]: i for i in manifest.get("images", [])}
-    for key in ILLUSTRATIONS:
+    for key in [*ILLUSTRATIONS, "card-cost"]:
         entries[key] = {"key": key, "png": f"images/{key}.png"}
     manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
     with open(path, "w") as f:
         json.dump(manifest, f, indent=2)
         f.write("\n")
-    print("built", ", ".join(ILLUSTRATIONS))
+    print("built", ", ".join([*ILLUSTRATIONS, "card-cost"]))
 
 
 if __name__ == "__main__":
