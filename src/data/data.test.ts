@@ -373,6 +373,8 @@ describe("hints", () => {
     const triggers = hintList.map(({ trigger }) => JSON.stringify(trigger));
     expect(new Set(triggers).size).toBe(hintList.length);
     expect(hintList.map(({ trigger }) => trigger.kind).sort()).toEqual([
+      "accident",
+      "areaEffect",
       "card",
       "debuff",
       "drag",
@@ -381,12 +383,17 @@ describe("hints", () => {
       "encounter",
       "firedOwner",
       "forcedStop",
+      "fork",
+      "homeButton",
       "luckyFind",
       "minorBump",
-      "pause",
+      "needSpot",
+      "needUrgent",
       "pull",
+      "strip",
       "tip",
       "treat",
+      "upgrade",
     ]);
     for (const { text } of hintList) {
       expect(text).not.toBe("");

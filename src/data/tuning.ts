@@ -119,6 +119,10 @@ export const TUNING = {
     collisionGrace: 1,
     // An owner who fires you holds the walk still this long while their moment plays.
     firingHoldSeconds: 2,
+    // A first-time hint still waiting this long after its trigger is dropped unshown, to show
+    // the next time it triggers. Time under a card or the pause menu does not count for a hint
+    // raised while walking.
+    hintStaleSeconds: 5,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },

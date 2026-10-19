@@ -253,9 +253,9 @@ describe("loadSave", () => {
       },
     ],
     [
-      "without unknown or duplicate hints shown",
+      "without unknown, removed (pause) or duplicate hints shown",
       (document) => {
-        document.shownHints = ["tip", "retiredHint", "tip", "puddle"];
+        document.shownHints = ["tip", "retiredHint", "pause", "tip", "puddle"];
       },
       (save) => save.shownHints,
       ["tip", "puddle"],

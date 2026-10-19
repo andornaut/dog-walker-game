@@ -700,16 +700,23 @@ export type HintTrigger =
   | { readonly encounter: EncounterId; readonly kind: "encounter" }
   | {
       readonly kind:
+        | "accident"
+        | "areaEffect"
         | "card"
         | "drag"
         | "firedOwner"
         | "forcedStop"
+        | "fork"
+        | "homeButton"
         | "luckyFind"
         | "minorBump"
-        | "pause"
+        | "needSpot"
+        | "needUrgent"
         | "pull"
+        | "strip"
         | "tip"
-        | "treat";
+        | "treat"
+        | "upgrade";
     };
 
 // A one-line hint shown the first time its trigger happens.

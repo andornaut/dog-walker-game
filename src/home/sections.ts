@@ -7,7 +7,8 @@ import { packCountLine } from "./homeLines";
 export type SectionId = "dogs" | "gear" | "walker";
 
 // A required section is incomplete until its pick is made, then complete. Gear is optional,
-// so with nothing equipped it is neutral, never incomplete.
+// so it is never incomplete: it lights as complete once the required picks are made or an item
+// is equipped, and stays neutral (dark, with no prompt) before then.
 export type SectionState = "complete" | "incomplete" | "neutral";
 
 export interface Section {
@@ -33,6 +34,7 @@ export function homeSections(
 ): Sections {
   const text = data.homeText;
   const { loadout, walker } = choice;
+  const required = walker !== null && loadout.dogs.length > 0;
   return {
     dogs:
       loadout.dogs.length === 0
@@ -42,14 +44,11 @@ export function homeSections(
             note: packCountLine(data, owned, loadout),
             state: "complete",
           },
-    gear:
-      loadout.gear === null
-        ? { heading: text.sectionGear, note: "", state: "neutral" }
-        : {
-            heading: text.sectionGear,
-            note: data.shopGear[loadout.gear].name,
-            state: "complete",
-          },
+    gear: {
+      heading: text.sectionGear,
+      note: loadout.gear === null ? "" : data.shopGear[loadout.gear].name,
+      state: required || loadout.gear !== null ? "complete" : "neutral",
+    },
     walker:
       walker === null
         ? { heading: text.sectionWalker, note: text.sectionWalkerPrompt, state: "incomplete" }

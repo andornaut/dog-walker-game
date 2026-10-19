@@ -40,6 +40,7 @@ import { randomStream } from "../dev/randomStreams";
 import type { RunSetup } from "../dev/runSetup";
 import { loadoutFor, withSetupStart } from "../dev/setupRun";
 import { expectedRoadMs, startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
+import { cardHintTriggers } from "../hud/hintTriggers";
 import { type ChangeLabel, changeLabels } from "../hud/hudView";
 import {
   endScreenDelayMs,
@@ -176,7 +177,6 @@ import {
   earnedIfBanked,
   finishRun,
   isMuted,
-  markHintShown,
   onSettingsChanged,
   runLoadout,
   type Settings,
@@ -438,9 +438,15 @@ export class RunScene extends Scene {
     sound.startMusic();
     startWakeLock();
     this.showZoneBanner();
-    if (this.sys.game.device.input.touch) {
-      this.hint({ kind: "drag" });
-    }
+    // The first hints wait for the zone banner to leave: how to steer, then the Home button.
+    const still = this.reducedMotion();
+    const bannerMs = (still ? 0 : BANNER.slideMs) + BANNER.holdMs + BANNER.slideMs;
+    this.time.delayedCall(bannerMs, () => {
+      if (this.sys.game.device.input.touch) {
+        this.hint({ kind: "drag" });
+      }
+      this.hint({ kind: "homeButton" });
+    });
     this.draw();
     // A phone already on its side, as when a walk starts from the page's URL, gets no
     // turned-sideways event, so the walk opens paused under the turn-upright notice.
@@ -728,13 +734,12 @@ export class RunScene extends Scene {
     }
   }
 
-  // Shows the first-time hint for event, once per player.
+  // Raises the first-time hint for event until it has shown once: the HUD queues it and marks
+  // it shown when it starts.
   private hint(event: HintTrigger): void {
     const hint = hintFor(gameData, [...shownHints(this)], event);
     if (hint !== null) {
-      markHintShown(this, hint.id);
-      // A hint raised as the run starts waits a frame for the HUD it launches. The HUD keeps
-      // running while this scene is paused, so the pause menu's hint shows over the menu.
+      // A hint raised as the run starts waits a frame for the HUD it launches.
       if (this.scene.isActive(SCENE_KEYS.hud)) {
         this.events.emit(HINT_EVENT, hint);
       } else {
@@ -919,8 +924,11 @@ export class RunScene extends Scene {
             this.needSignals?.met(feet, moment.need, needIcon(this, moment.need), still);
           }
         }
-      } else if (moment.need === "regular") {
-        this.accident(moment.dog);
+      } else {
+        this.hint({ kind: "accident" });
+        if (moment.need === "regular") {
+          this.accident(moment.dog);
+        }
       }
       if (outcome !== null) {
         this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
@@ -1061,7 +1069,6 @@ export class RunScene extends Scene {
   private afterOutcome(outcome: ChoiceOutcome): void {
     if (outcome.fired.length > 0) {
       soundboardOf(this).play("fired");
-      this.hint({ kind: "firedOwner" });
       this.firedNow.push(...outcome.fired);
       outcome.fired.forEach((dog) => this.trotOff(dog));
       if (outcome.state.phase.kind === "ended") {
@@ -1176,7 +1183,7 @@ export class RunScene extends Scene {
     this.walk = { ...walk, run };
     this.cardView = view;
     this.dropPress();
-    this.cardHints(source);
+    cardHintTriggers(gameData, run, source).forEach((trigger) => this.hint(trigger));
     const replayed = this.replayedChoice();
     if (replayed !== undefined) {
       this.choose(view, replayed);
@@ -1187,21 +1194,6 @@ export class RunScene extends Scene {
     sound.setCardOpen(true);
     const data: CardSceneData = { onChoose: (choice) => this.choose(view, choice), view };
     this.scene.launch(SCENE_KEYS.card, data);
-  }
-
-  private cardHints(source: CardSource): void {
-    if (source.kind === "upgradeOffer" || source.kind === "fork") {
-      return;
-    }
-    if (source.kind === "forcedStop") {
-      this.hint({ kind: "forcedStop" });
-    } else if (source.kind === "encounter") {
-      this.hint({ encounter: source.encounter, kind: "encounter" });
-      if (gameData.encounters[source.encounter].kind === "lucky") {
-        this.hint({ kind: "luckyFind" });
-      }
-    }
-    this.hint({ kind: "card" });
   }
 
   private choose(view: CardView, choice: Choice): void {
@@ -1367,7 +1359,6 @@ export class RunScene extends Scene {
     this.pauseOpen = true;
     this.pauseMode = mode;
     this.dropPress();
-    this.hint({ kind: "pause" });
     soundboardOf(this).setPaused(true);
     this.tweens.pauseAll();
     this.time.paused = true;
@@ -1844,6 +1835,7 @@ export class RunScene extends Scene {
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (isNeedSpot(gameData, item.kind)) {
+      this.hint({ kind: "needSpot" });
       // A spot whose art is missing stands in as a hydrant. The need's icon floats over a spot
       // that looks like an obstacle, the hydrant and the other dog, and any without its art.
       const art = needSpotSpriteKey(item.kind);

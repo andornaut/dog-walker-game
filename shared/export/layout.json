@@ -203,6 +203,52 @@
       }
     }
   },
+  "hudLanes": {
+    "heartLabels": [
+      {
+        "height": 24,
+        "width": 116,
+        "x": 2,
+        "y": 534
+      },
+      {
+        "height": 24,
+        "width": 116,
+        "x": 122,
+        "y": 534
+      },
+      {
+        "height": 24,
+        "width": 116,
+        "x": 242,
+        "y": 534
+      }
+    ],
+    "hint": {
+      "height": 58,
+      "y": 88,
+      "width": 344,
+      "x": 8
+    },
+    "quip": {
+      "height": 24,
+      "width": 360,
+      "x": 0,
+      "y": 470
+    },
+    "stripBubble": {
+      "height": 58,
+      "y": 88,
+      "width": 348,
+      "x": 8
+    },
+    "toast": {
+      "height": 44,
+      "width": 240,
+      "x": 4,
+      "y": 42
+    }
+  },
   "join": [
     {
       "bandRow": 86,
@@ -1411,6 +1457,10 @@
       "statsButton": {
         "height": 44,
         "width": 140
+      },
+      "streetSign": {
+        "x": 327,
+        "y": 75
       },
       "tileSelectOutset": 1,
       "topBar": {

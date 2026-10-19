@@ -3,6 +3,14 @@ import type { Hint } from "./types";
 // First-time hints: one line each, shown the first time its trigger happens and never again.
 
 export const HINTS = {
+  accident: {
+    text: "Left too long, a need goes wrong.",
+    trigger: { kind: "accident" },
+  },
+  areaEffect: {
+    text: "Clouds and puddles catch some dogs, not always all.",
+    trigger: { kind: "areaEffect" },
+  },
   card: {
     text: "Every card shows what happens. Hold one for details.",
     trigger: { kind: "card" },
@@ -19,6 +27,14 @@ export const HINTS = {
     text: "Each zone has one stop you can't dodge.",
     trigger: { kind: "forcedStop" },
   },
+  fork: {
+    text: "Pick the next zone. Right is harder, and pays more.",
+    trigger: { kind: "fork" },
+  },
+  homeButton: {
+    text: "Home ends the walk. You keep earlier zones' fees.",
+    trigger: { kind: "homeButton" },
+  },
   luckyFind: {
     text: "Some bumps are lucky. Aim for them!",
     trigger: { kind: "luckyFind" },
@@ -27,9 +43,13 @@ export const HINTS = {
     text: "Cones and bins cost a few tips and a stumble. No card.",
     trigger: { kind: "minorBump" },
   },
-  pause: {
-    text: "Head home here: you keep tips and earlier zones' fees.",
-    trigger: { kind: "pause" },
+  needSpot: {
+    text: "Spots meet needs. Urgent ones cheer the owner.",
+    trigger: { kind: "needSpot" },
+  },
+  needUrgent: {
+    text: "A bubble means a need. Steer into its spot.",
+    trigger: { kind: "needUrgent" },
   },
   puddle: {
     text: "Puddles splash some dogs. Fancy owners mind most.",
@@ -51,6 +71,10 @@ export const HINTS = {
     text: "Stinky: tips are halved until the zone ends.",
     trigger: { debuff: "stinky", kind: "debuff" },
   },
+  strip: {
+    text: "Tap an icon to see what it does.",
+    trigger: { kind: "strip" },
+  },
   tip: {
     text: "Tips are money. Smaller packs get a little extra.",
     trigger: { kind: "tip" },
@@ -58,5 +82,9 @@ export const HINTS = {
   treat: {
     text: "Tap a doghouse to give its owner a treat.",
     trigger: { kind: "treat" },
+  },
+  upgrade: {
+    text: "Pick one. Each card says how long it lasts.",
+    trigger: { kind: "upgrade" },
   },
 } as const satisfies Record<string, Hint>;

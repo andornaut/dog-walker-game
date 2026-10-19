@@ -6,6 +6,7 @@ import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
+import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, isAffordable, newlyAffordable } from "../home/afford";
 import { dogDetail, gearDetail } from "../home/detail";
 import {
@@ -757,8 +758,9 @@ export class StartScene extends Scene {
     }
   }
 
-  // A new player's first walk opens help once, then sets off when it closes. Before then, a
-  // tap shakes the button: the incomplete sections' bands say what is missing.
+  // A new player's first walk opens help unless it was read from ?, then sets off when it
+  // closes. Before then, a tap shakes the button: the incomplete sections' bands say what is
+  // missing.
   private startWalk(): void {
     const save = this.save();
     const dogs = packOf(this.loadout);
@@ -774,11 +776,10 @@ export class StartScene extends Scene {
       startWakeLock();
       this.scene.start(SCENE_KEYS.run, data);
     };
-    if (save.helpSeen) {
+    if (!startWalkOpensHelp(save)) {
       go();
       return;
     }
-    void updateProfile(this, (current) => ({ ...current, helpSeen: true }));
     this.game.events.once(HELP_CLOSED_EVENT, go);
     openHelp(this, SCENE_KEYS.start);
   }
@@ -885,7 +886,11 @@ export class StartScene extends Scene {
     if (this.textures.exists(LOGO.key)) {
       this.add.image(LOGO.x, LOGO.y, LOGO.key).setOrigin(0);
     }
-    addPixelText(this, 291, 59, gameData.homeText.gateSign, { color: PALETTE.white, originX: 0.5 });
+    const sign = HOME_LAYOUT.streetSign;
+    addPixelText(this, sign.x, sign.y, gameData.homeText.gateSign, {
+      color: PALETTE.white,
+      originX: 0.5,
+    });
   }
 
   private render(): void {
@@ -924,7 +929,8 @@ export class StartScene extends Scene {
   }
 
   // A section's ui-section frame and band by its state, with the heading on the band's left
-  // and its note on the right: ink on the lit band, cream and amber on the dark one.
+  // and its note on the right: ink on the lit (complete) band, cream and amber on the dark
+  // (incomplete or neutral) one.
   private drawSection(root: GameObjects.Container, rect: Rect, section: Section): void {
     const frame = addNineSlice(this, "ui-section", rect, section.state);
     if (frame === undefined) {
@@ -932,7 +938,7 @@ export class StartScene extends Scene {
     } else {
       root.add(frame);
     }
-    const lit = section.state !== "incomplete";
+    const lit = section.state === "complete";
     const y = rect.y + BAND_TEXT.y;
     this.text(
       root,
@@ -953,12 +959,12 @@ export class StartScene extends Scene {
     }
   }
 
-  // The ui-section art drawn in code while it is missing: complete and neutral are an ink
-  // outline round a gold frame and a lit amber band over an orange rule; incomplete is an ink
-  // frame and rule round a navy band. The tiles' area is left open.
+  // The ui-section art drawn in code while it is missing: complete is an ink outline round a
+  // gold frame and a lit amber band over an orange rule; incomplete and neutral are an ink frame
+  // and rule round a navy band. The tiles' area is left open.
   private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
     const g = this.graphics(root);
-    const lit = state !== "incomplete";
+    const lit = state === "complete";
     const { band, edge } = SECTION_FRAME;
     drawRing(g, PALETTE.ink, rect, 1);
     const inner = { height: rect.height - 2, width: rect.width - 2, x: rect.x + 1, y: rect.y + 1 };

@@ -5,11 +5,13 @@ import { gameData } from "../data";
 import { helpActionForKey, helpActionForPointer } from "../help/helpInput";
 import { dotRects, HELP_LAYOUT, helpActionAt, type Point } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
+import { closeHelp } from "../help/helpSeen";
 import { insetRect, type Rect } from "../layout/rect";
 import { addFilledRect } from "./draw";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
+import { updateProfile } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { addCloseButton, addMenuButton, TEXT_SCALE } from "./uiKit";
 
@@ -110,6 +112,7 @@ export class HelpScene extends Scene {
     if (this.resumeKey !== undefined) {
       this.scene.resume(this.resumeKey);
     }
+    void updateProfile(this, closeHelp);
     this.game.events.emit(HELP_CLOSED_EVENT);
     this.scene.stop();
   }

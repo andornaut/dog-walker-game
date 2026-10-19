@@ -10,10 +10,19 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import type { AchievementId, HintId } from "../data/types";
+import type { AchievementId, HintTrigger } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
+import {
+  dismissHint,
+  EMPTY_HINT_QUEUE,
+  hintAlpha,
+  type HintQueue,
+  type RaisedHint,
+  stepHintQueue,
+} from "../hud/hintQueue";
+import { runHintTriggers } from "../hud/hintTriggers";
+import { centredInLane, hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, wholeDollars, zonePips } from "../hud/hudView";
-import { bubbleX, downTail } from "../hud/moments";
 import {
   moveStripPress,
   stripItems,
@@ -33,10 +42,12 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
+  walkCovered,
 } from "../hud/topBar";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
+import { hintFor } from "../rules/hints";
 import { currentZone, walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import { type Cents, read } from "../rules/units";
@@ -47,8 +58,14 @@ import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { listenOnePress } from "./onePress";
 import { colorFromHex, PALETTE } from "./palette";
-import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
-import { isMuted, setMuted } from "./profileStore";
+import {
+  addPixelText,
+  placePixelText,
+  scalePixelText,
+  setPixelText,
+  wrapPixelText,
+} from "./pixelText";
+import { isMuted, markHintShown, setMuted, shownHints } from "./profileStore";
 import {
   ACHIEVEMENTS_EVENT,
   CHANGE_LABELS_EVENT,
@@ -74,16 +91,11 @@ const PIP = {
   y: TOP_BAR.zone.y + 17,
 };
 const LAYOUT = screenLayout(SCREEN_CONFIG);
-const LABEL = { ms: 1100, rise: 18 };
-// First-time hints sit at the foot of the backdrop band, just above the road.
-const HINT = {
-  bottom: LAYOUT.backdrop.y + LAYOUT.backdrop.height - 4,
-  holdMs: 4500,
-  margin: 8,
-  padding: 6,
-};
-// An owner's quip floats over their doghouse, its tail pointing down at the owner's face.
-const QUIP = { gap: 6, holdMs: 2600, maxWidth: 200, padding: 6 };
+const LANES = hudLanes(LAYOUT);
+const LABEL = { height: 20, ms: 1100, rise: 18 };
+const HINT = { fadeMs: 400, holdMs: 4500, padding: 6 };
+// An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x.
+const QUIP = { holdMs: 2600, padding: 4 };
 const NINE_SLICE_CORNER = 8;
 
 interface SlotView {
@@ -108,12 +120,17 @@ export class HudScene extends Scene {
   private drawn: Record<string, unknown> = {};
   private dynamic: GameObjects.Graphics | undefined;
   private feedback: HudFeedback | undefined;
-  private hintQueue: { id: HintId; text: string }[] = [];
-  private hintShowing = false;
+  // The affected doghouses' frames, over the house art.
+  private frames: GameObjects.Graphics | undefined;
+  private hints: HintQueue = EMPTY_HINT_QUEUE;
+  private hintParts: GameObjects.GameObject[] = [];
+  private hintRaised: RaisedHint[] = [];
   private money: GameObjects.BitmapText | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
   private pips: GameObjects.Sprite[] = [];
+  private quips: { quip: QuipBubble; raisedMs: number }[] = [];
+  private quipShowing = false;
   private slots: SlotView[] = [];
   private strip: StateStripView | undefined;
   private treats: GameObjects.BitmapText | undefined;
@@ -127,8 +144,11 @@ export class HudScene extends Scene {
   create(): void {
     const { dogRow, dogSlots, topBar } = LAYOUT;
     this.drawn = {};
-    this.hintQueue = [];
-    this.hintShowing = false;
+    this.hints = EMPTY_HINT_QUEUE;
+    this.hintParts = [];
+    this.hintRaised = [];
+    this.quips = [];
+    this.quipShowing = false;
     const g = this.add.graphics();
     fillRect(g, PALETTE.darkBrown, dogRow);
     if (this.textures.exists("ui-top-bar")) {
@@ -178,16 +198,21 @@ export class HudScene extends Scene {
     );
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
-    this.strip = new StateStripView(this, () =>
-      stripTapAllowed((this.scene.get(SCENE_KEYS.run) as RunScene).runPause()),
-    );
+    this.frames = this.add.graphics();
+    // Opening the strip's bubble closes the hint, and a hint opening closes the bubble.
+    this.strip = new StateStripView(this, LANES.stripBubble, {
+      onOpen: () => {
+        this.hints = dismissHint(this.hints);
+      },
+      tappable: () => stripTapAllowed((this.scene.get(SCENE_KEYS.run) as RunScene).runPause()),
+    });
 
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     this.feedback = new HudFeedback(this, run, (labels) => this.floatLabels(labels));
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
-    const onHint = (hint: { id: HintId; text: string }) => this.queueHint(hint);
-    const onQuips = (quips: QuipBubble[]) => quips.forEach((quip) => this.sayQuip(quip));
-    const toasts = new AchievementToasts(this, () => run.reducedMotion());
+    const onHint = (hint: RaisedHint) => this.hintRaised.push(hint);
+    const onQuips = (quips: QuipBubble[]) => this.queueQuips(quips);
+    const toasts = new AchievementToasts(this, LANES.toast, () => run.reducedMotion());
     const onAchievements = (ids: AchievementId[]) => toasts.show(ids);
     run.events.on(ACHIEVEMENTS_EVENT, onAchievements);
     run.events.on(CHANGE_LABELS_EVENT, onLabels);
@@ -359,7 +384,7 @@ export class HudScene extends Scene {
     };
   }
 
-  override update(): void {
+  override update(_time: number, delta: number): void {
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     const view = run.hudView();
     if (view === undefined) {
@@ -367,7 +392,9 @@ export class HudScene extends Scene {
     }
     this.feedback?.update();
     const pause = run.runPause();
-    this.strip?.show(stripItems(gameData, view.run));
+    const items = stripItems(gameData, view.run);
+    this.strip?.show(items);
+    this.stepHints(delta, walkCovered(pause), runHintTriggers(gameData, view.run, items.length));
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
       affected: view.affected.join(),
@@ -440,15 +467,31 @@ export class HudScene extends Scene {
     });
 
     const { dogSlots } = LAYOUT;
+    this.frames?.clear();
     dogSlots.forEach((rect, i) => {
       const slot = this.slots[i];
       if (slot !== undefined) {
         const packSlot = run.pack[i];
-        const highlighted = packSlot !== undefined && view.affected.includes(packSlot.dog);
-        this.drawSlot(g, rect, slot, run, highlighted, packSlot);
+        this.drawSlot(g, rect, slot, run, packSlot);
         this.showStatuses(slot, packSlot, view.statuses);
+        if (packSlot?.status === "walking" && view.affected.includes(packSlot.dog)) {
+          this.drawAffectedFrame(rect);
+        }
       }
     });
+  }
+
+  // The amber frame round a doghouse whose dog the open card affects, over the house art.
+  private drawAffectedFrame(rect: Rect): void {
+    const g = this.frames;
+    if (g === undefined) {
+      return;
+    }
+    const edge = 2;
+    fillRect(g, PALETTE.amber, { ...rect, height: edge });
+    fillRect(g, PALETTE.amber, { ...rect, height: edge, y: rect.y + rect.height - edge });
+    fillRect(g, PALETTE.amber, { ...rect, width: edge });
+    fillRect(g, PALETTE.amber, { ...rect, width: edge, x: rect.x + rect.width - edge });
   }
 
   // The house drawn while its art is missing: a roof band over a tan front, grey when fired.
@@ -475,7 +518,6 @@ export class HudScene extends Scene {
     rect: Rect,
     view: SlotView,
     run: RunState,
-    highlighted: boolean,
     slot: PackSlot | undefined,
   ): void {
     const parts = [view.house, view.dogFace, view.ownerFace, ...view.hearts];
@@ -502,13 +544,6 @@ export class HudScene extends Scene {
       setPixelText(view.count, "");
       setPixelText(view.ownerName, "");
       return;
-    }
-    if (highlighted) {
-      const frame = rect;
-      fillRect(g, PALETTE.amber, { ...frame, height: 2 });
-      fillRect(g, PALETTE.amber, { ...frame, height: 2, y: frame.y + frame.height - 2 });
-      fillRect(g, PALETTE.amber, { ...frame, width: 2 });
-      fillRect(g, PALETTE.amber, { ...frame, width: 2, x: frame.x + frame.width - 2 });
     }
     const hearts = slot.hearts;
     const mood = faceMood(gameData, hearts);
@@ -563,25 +598,35 @@ export class HudScene extends Scene {
     scalePixelText(label, scale, at.x, at.y);
   }
 
-  // Each change floats up from where it happened and fades out; with reduced motion it fades
-  // in place. A heart change also shows a heart rising or breaking beside its label.
+  // Each change shows in its lane and fades out: a money change floats up from under the bank,
+  // or fades in place with reduced motion; a heart change fades in place on its doghouse's
+  // bottom band, with a heart rising or breaking on the hearts board. A dog's later labels in
+  // the same batch follow its first, one at a time.
   private floatLabels(labels: ChangeLabel[]): void {
     const { dogSlots, topBar } = LAYOUT;
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     const view = run.hudView();
     const still = run.reducedMotion();
-    labels.forEach((label, i) => {
-      let x = 6;
-      let y = topBar.y + topBar.height + 2;
-      if (label.target.kind === "dog") {
-        const dog = label.target.dog;
-        const index = view?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
-        const rect = dogSlots[index];
-        if (rect === undefined) {
-          return;
-        }
-        x = rect.x + 2;
-        y = rect.y - 22 - (labels.length - 1) * 22;
+    const perDog = new Map<string, number>();
+    let bankRow = 0;
+    labels.forEach((label) => {
+      if (label.target.kind === "bank") {
+        const y = topBar.y + topBar.height + 2 + bankRow * (LABEL.height + 2);
+        bankRow += 1;
+        this.showLabel(label, { scale: 2, x: 6, y }, still ? 0 : LABEL.rise, 0);
+        return;
+      }
+      const dog = label.target.dog;
+      const index = view?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
+      const rect = dogSlots[index];
+      const lane = LANES.heartLabels[index];
+      if (rect === undefined || lane === undefined) {
+        return;
+      }
+      const order = perDog.get(dog) ?? 0;
+      perDog.set(dog, order + 1);
+      const at = { scale: 2, x: lane.x, y: lane.y + (lane.height - LABEL.height) / 2 };
+      this.time.delayedCall(order * LABEL.ms, () => {
         playEffect(
           this,
           "fx-heart",
@@ -589,60 +634,105 @@ export class HudScene extends Scene {
           { x: rect.x + DOGHOUSE.hearts.x + 20, y: rect.y + DOGHOUSE.hearts.y },
           10,
         );
+        this.showLabel(label, at, 0, lane.width);
+      });
+    });
+  }
+
+  // A change on a cream chip, so gains in forest and losses in dark red read over anything. A
+  // label too wide for room at 2x is set at 1x; room 0 is no limit.
+  private showLabel(
+    label: ChangeLabel,
+    at: { scale: number; x: number; y: number },
+    rise: number,
+    room: number,
+  ): void {
+    const text = addPixelText(this, at.x + 2, at.y + 4, label.text, {
+      color: label.gain ? PALETTE.forest : PALETTE.darkRed,
+      scale: at.scale,
+    });
+    if (room > 0 && text.width + 4 > room) {
+      scalePixelText(text, 1, at.x + 2, at.y + 7);
+    }
+    const chip = this.add.graphics();
+    drawFramedRect(
+      chip,
+      { border: PALETTE.plum, fill: PALETTE.cream },
+      { height: LABEL.height, width: Math.ceil(text.width) + 4, x: at.x, y: at.y },
+    );
+    text.setDepth(1);
+    const parts = [chip, text];
+    this.tweens.add({
+      alpha: 0,
+      duration: LABEL.ms,
+      ease: "Sine.easeIn",
+      onComplete: () => parts.forEach((part) => part.destroy()),
+      targets: parts,
+      y: `-=${rise}`,
+    });
+  }
+
+  // Steps the hint queue (see hintQueue.ts) a frame: hints RunScene raised and those the run's
+  // state raises join it, a card or the pause menu holds it, and the strip's open bubble keeps
+  // a new hint from starting. A hint is marked shown when it starts.
+  private stepHints(delta: number, held: boolean, triggers: readonly HintTrigger[]): void {
+    const shown = triggers.length === 0 ? [] : [...shownHints(this)];
+    for (const trigger of triggers) {
+      const hint = hintFor(gameData, shown, trigger);
+      if (hint !== null) {
+        this.hintRaised.push(hint);
       }
-      // On a cream chip, so gains in forest and losses in dark red read over any road.
-      const text = addPixelText(this, x + 2, y + i * 22 + 2, label.text, {
-        color: label.gain ? PALETTE.forest : PALETTE.darkRed,
-        scale: 2,
-      });
-      const chip = this.add.graphics();
-      drawFramedRect(
-        chip,
-        { border: PALETTE.plum, fill: PALETTE.cream },
-        { height: 20, width: Math.ceil(text.width) + 4, x, y: y + i * 22 - 2 },
-      );
-      text.setDepth(1);
-      const parts = [chip, text];
-      this.tweens.add({
-        alpha: 0,
-        duration: LABEL.ms,
-        ease: "Sine.easeIn",
-        onComplete: () => parts.forEach((part) => part.destroy()),
-        targets: parts,
-        y: still ? "+=0" : `-=${LABEL.rise}`,
-      });
-    });
-  }
-
-  private queueHint(hint: { id: HintId; text: string }): void {
-    this.hintQueue.push(hint);
-    if (!this.hintShowing) {
-      this.showNextHint();
+    }
+    const before = this.hints.shown;
+    const timing = {
+      fadeMs: HINT.fadeMs,
+      holdMs: HINT.holdMs,
+      staleMs: read(gameData.tuning, "seconds", "hintStaleSeconds") * 1000,
+    };
+    const tick = {
+      blocked: this.strip?.isOpen() ?? false,
+      dtMs: delta,
+      held,
+      raised: this.hintRaised,
+    };
+    this.hints = stepHintQueue(timing, tick, this.hints);
+    this.hintRaised = [];
+    const now = this.hints.shown;
+    if (now?.id !== before?.id || (now !== null && this.hintParts.length === 0)) {
+      this.hintParts.forEach((part) => part.destroy());
+      this.hintParts = [];
+      if (now !== null) {
+        markHintShown(this, now.id);
+        this.strip?.closeBubble();
+        this.hintParts = this.drawHint(now);
+      }
+    }
+    if (now === null && this.hintParts.length > 0) {
+      this.hintParts.forEach((part) => part.destroy());
+      this.hintParts = [];
+    }
+    if (now !== null) {
+      const alpha = hintAlpha(timing, now);
+      for (const part of this.hintParts) {
+        (part as GameObjects.GameObject & { alpha: number }).alpha = alpha;
+      }
     }
   }
 
-  // One hint at a time, in a bubble at the foot of the backdrop with its tail pointing at the
-  // road. The drag hint also shows the touch picture over the road.
-  private showNextHint(): void {
-    const hint = this.hintQueue.shift();
-    if (hint === undefined) {
-      this.hintShowing = false;
-      return;
-    }
-    this.hintShowing = true;
+  // A hint's bubble, centred in the hint lane with its bottom on the lane's, its tail pointing
+  // at the road. The drag hint also shows the touch picture over the road.
+  private drawHint(hint: RaisedHint): GameObjects.GameObject[] {
     const { road } = LAYOUT;
-    const room = SCREEN_CONFIG.width - 2 * HINT.margin - 2 * HINT.padding;
-    const text = addPixelText(this, 0, 0, hint.text, {
-      color: PALETTE.plum,
-      maxWidth: room / 2,
-      scale: 2,
-    });
+    const lane = LANES.hint;
+    const style = { color: PALETTE.plum, scale: 2 };
+    const lines = wrapPixelText(this, style, lane.width - 2 * HINT.padding, hint.text);
+    const text = addPixelText(this, 0, 0, lines.join("\n"), style);
     const width = Math.ceil(text.width) + 2 * HINT.padding;
     const height = Math.ceil(text.height) + 2 * HINT.padding;
-    const x = Math.round((SCREEN_CONFIG.width - width) / 2);
-    const y = HINT.bottom - height;
+    const x = centredInLane(lane, lane.x + lane.width / 2, width);
+    const y = lane.y + lane.height - height;
     placePixelText(text, x + HINT.padding, y + HINT.padding);
-    const parts: (GameObjects.BitmapText | GameObjects.Image | GameObjects.NineSlice)[] = [];
+    const parts: GameObjects.GameObject[] = [];
     if (this.textures.exists("ui-hint")) {
       const corner = NINE_SLICE_CORNER;
       parts.push(
@@ -653,8 +743,7 @@ export class HudScene extends Scene {
     } else {
       const box = this.add.graphics();
       drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
-      parts.push(text);
-      box.setDepth(-1);
+      parts.push(box);
     }
     if (this.textures.exists("ui-hint-tail")) {
       parts.push(
@@ -668,40 +757,59 @@ export class HudScene extends Scene {
     }
     text.setDepth(1);
     parts.push(text);
-    this.tweens.add({
-      alpha: 0,
-      delay: HINT.holdMs,
-      duration: 400,
-      onComplete: () => {
-        parts.forEach((part) => part.destroy());
-        this.showNextHint();
-      },
-      targets: parts,
-    });
+    return parts;
   }
 
-  // An owner's line in a bubble over their doghouse, the tail pointing down at their face.
-  private sayQuip(quip: QuipBubble): void {
+  // Owners' lines share the quip lane, so they take turns; one that has waited a whole quip's
+  // time is dropped.
+  private queueQuips(quips: readonly QuipBubble[]): void {
+    const now = this.time.now;
+    this.quips.push(...quips.map((quip) => ({ quip, raisedMs: now })));
+    if (!this.quipShowing) {
+      this.sayNextQuip();
+    }
+  }
+
+  private sayNextQuip(): void {
+    const now = this.time.now;
+    this.quips = this.quips.filter(({ raisedMs }) => now - raisedMs <= QUIP.holdMs);
+    const next = this.quips.shift();
+    this.quipShowing = next !== undefined && this.sayQuip(next.quip);
+    if (next !== undefined && !this.quipShowing) {
+      this.sayNextQuip();
+    }
+  }
+
+  // An owner's line in a bubble over the doghouses' roofs, centred over the owner's face and
+  // leaving every face uncovered: at 2x on one line, else at 1x. False when the dog has no slot.
+  private sayQuip(quip: QuipBubble): boolean {
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     const index = run.hudView()?.run.pack.findIndex((slot) => slot.dog === quip.dog) ?? -1;
     const rect = LAYOUT.dogSlots[index];
     if (rect === undefined) {
-      return;
+      return false;
     }
-    const text = addPixelText(this, 0, 0, quip.text, {
-      color: PALETTE.plum,
-      maxWidth: (QUIP.maxWidth - 2 * QUIP.padding) / 2,
-      scale: 2,
-    });
+    const lane = LANES.quip;
+    const room = lane.width - 2 * QUIP.padding;
+    const text = addPixelText(this, 0, 0, quip.text, { color: PALETTE.plum, scale: 2 });
+    if (text.width > room) {
+      text.destroy();
+      const small = { color: PALETTE.plum };
+      const lines = wrapPixelText(this, small, room, quip.text);
+      return this.placeQuip(addPixelText(this, 0, 0, lines.join("\n"), small), rect);
+    }
+    return this.placeQuip(text, rect);
+  }
+
+  private placeQuip(text: GameObjects.BitmapText, rect: Rect): true {
+    const lane = LANES.quip;
     const width = Math.ceil(text.width) + 2 * QUIP.padding;
-    const height = Math.ceil(text.height) + 2 * QUIP.padding;
+    const height = lane.height;
     const faceX = rect.x + DOGHOUSE.ownerFace.x + 16;
-    const x = bubbleX(SCREEN_CONFIG.width, faceX, width);
-    const y = rect.y - QUIP.gap - height;
-    placePixelText(text, x + QUIP.padding, y + QUIP.padding);
-    const parts: (
-      GameObjects.BitmapText | GameObjects.Graphics | GameObjects.Image | GameObjects.NineSlice
-    )[] = [];
+    const x = centredInLane(lane, faceX, width);
+    const y = lane.y;
+    placePixelText(text, x + QUIP.padding, y + Math.round((height - text.height) / 2));
+    const parts: GameObjects.GameObject[] = [];
     if (this.textures.exists("ui-quip")) {
       const corner = NINE_SLICE_CORNER;
       parts.push(
@@ -714,18 +822,18 @@ export class HudScene extends Scene {
       drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
       parts.push(box);
     }
-    const tail = downTail((key) => this.textures.exists(key));
-    if (tail !== undefined) {
-      parts.push(this.add.image(faceX - tail.tipX, y + height - 1, tail.key).setOrigin(0));
-    }
     text.setDepth(1);
     parts.push(text);
     this.tweens.add({
       alpha: 0,
       delay: QUIP.holdMs,
       duration: 400,
-      onComplete: () => parts.forEach((part) => part.destroy()),
+      onComplete: () => {
+        parts.forEach((part) => part.destroy());
+        this.sayNextQuip();
+      },
       targets: parts,
     });
+    return true;
   }
 }

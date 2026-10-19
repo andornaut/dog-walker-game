@@ -75,6 +75,9 @@ export const HOME_LAYOUT = {
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
   // The logbook card's Stats button.
   statsButton: { height: 44, width: 140 },
+  // The street name's centre and caps top on screen-home's street sign, clear of the walker's
+  // speech bubble.
+  streetSign: { x: 327, y: 75 },
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
   topBar: { height: 40 },

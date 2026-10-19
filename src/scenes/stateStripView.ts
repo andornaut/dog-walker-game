@@ -11,15 +11,15 @@ import {
   stripLayout,
   stripText,
 } from "../hud/stateStrip";
-import type { Point } from "../layout/rect";
+import type { Point, Rect } from "../layout/rect";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
 import { addTapBurst } from "./uiKit";
 
-// The description bubble hangs under the strip, right-aligned with it: one row per item, its
-// icon then its text, at 2x.
-const BUBBLE = { corner: 8, gap: 4, holdMs: 6000, margin: 8, padding: 6, rowGap: 4 };
+// The description bubble sits in its lane, right-aligned with the strip and growing down as far
+// as its rows need: one row per item, its icon then its text, at 2x.
+const BUBBLE = { corner: 8, gap: 4, holdMs: 6000, padding: 6, rowGap: 4 };
 const DEPTH = 20;
 const TAB_CORNER = 8;
 
@@ -30,18 +30,21 @@ export class StateStripView {
   private items: readonly StripItem[] = [];
   private itemsKey: string | undefined;
   private layout: StripLayout | undefined;
-  private readonly scene: Scene;
   private tab: GameObjects.NineSlice | undefined;
-
-  private readonly tappable: () => boolean;
   private readonly well: GameObjects.Graphics;
 
-  // tappable says whether a press on the strip is the strip's, which it is unless a screen
-  // covers the bar.
-  constructor(scene: Scene, tappable: () => boolean) {
-    this.scene = scene;
-    this.tappable = tappable;
+  // lane is where the bubble opens. tappable says whether a press on the strip is the strip's,
+  // which it is unless a screen covers the bar; onOpen runs as the bubble opens.
+  constructor(
+    private readonly scene: Scene,
+    private readonly lane: Rect,
+    private readonly hooks: { onOpen: () => void; tappable: () => boolean },
+  ) {
     this.well = scene.add.graphics().setDepth(DEPTH);
+  }
+
+  isOpen(): boolean {
+    return this.bubble.length > 0;
   }
 
   // Draws the items when they change, closing the bubble, whose text would no longer match.
@@ -92,7 +95,7 @@ export class StateStripView {
 
   // A tap on the strip, at point, opens or closes the bubble.
   tap(point: Point): void {
-    if (this.tappable()) {
+    if (this.hooks.tappable()) {
       addTapBurst(this.scene, point.x, point.y);
       this.toggleBubble();
     }
@@ -106,7 +109,7 @@ export class StateStripView {
     }
   }
 
-  private closeBubble(): void {
+  closeBubble(): void {
     this.bubble.forEach((part) => part.destroy());
     this.bubble = [];
   }
@@ -116,9 +119,10 @@ export class StateStripView {
     if (layout === undefined) {
       return;
     }
-    const { corner, gap, margin, padding, rowGap } = BUBBLE;
+    const { corner, gap, padding, rowGap } = BUBBLE;
+    const { lane } = this;
     const icon = 16;
-    const room = SCREEN_CONFIG.width - 2 * margin - 2 * padding - icon - gap;
+    const room = lane.width - 2 * padding - icon - gap;
     const texts = this.items.map((item) =>
       addPixelText(this.scene, 0, 0, stripText(gameData, item), {
         color: PALETTE.plum,
@@ -131,9 +135,9 @@ export class StateStripView {
     const width = 2 * padding + icon + gap + textWidth;
     const height =
       2 * padding + rows.reduce((sum, row) => sum + row, 0) + (rows.length - 1) * rowGap;
-    const right = layout.tab.x + layout.tab.width;
-    const x = Math.max(margin, right - width);
-    const y = layout.tab.y + layout.tab.height + 4;
+    const right = Math.min(lane.x + lane.width, layout.tab.x + layout.tab.width);
+    const x = Math.max(lane.x, right - width);
+    const y = lane.y;
     const parts: GameObjects.GameObject[] = [];
     if (this.scene.textures.exists("ui-hint")) {
       parts.push(
@@ -165,6 +169,7 @@ export class StateStripView {
       rowY += (rows[i] ?? icon) + rowGap;
     });
     this.bubble = parts;
+    this.hooks.onOpen();
     this.scene.time.delayedCall(BUBBLE.holdMs, () => {
       if (this.bubble === parts) {
         this.closeBubble();
