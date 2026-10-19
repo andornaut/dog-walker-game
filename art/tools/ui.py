@@ -1117,7 +1117,7 @@ def top_bar():
 # Each zone's colour on its pip: its road colour, which the zone's road shadow (one ramp step
 # down) dims.
 ZONE_COLOURS = {
-    "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "lgrey", "the-long-way-home": "skin2",
+    "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "pink", "the-long-way-home": "skin2",
     "snooze-crescent": "grey", "paws-promenade": "cream",
 }
 # One ramp step up: the inverse of DARKER, for rims that must lighten to hold 3:1 on ink.
