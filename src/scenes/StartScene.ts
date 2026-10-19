@@ -561,7 +561,7 @@ export class StartScene extends Scene {
   }
 
   // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
-  // locked walker's goal, as a tap says it.
+  // walker's pace and style or goal, as a tap says them.
   private focusAction(target: Target | undefined): HomeAction {
     const { bankCents, owned } = this.save();
     if (target?.kind === "dog") {
@@ -571,8 +571,7 @@ export class StartScene extends Scene {
       return { kind: "focus", text: gearInfo(gameData, owned, bankCents, target.gear) };
     }
     if (target?.kind === "walker") {
-      const tap = tapWalker(gameData, owned, target.walker);
-      return tap.kind === "locked" ? { kind: "focus", text: tap.text } : { kind: "none" };
+      return { kind: "focus", text: tapWalker(gameData, owned, target.walker).text };
     }
     return { kind: "none" };
   }
@@ -737,7 +736,8 @@ export class StartScene extends Scene {
         this.openShop({});
         return;
       case "walker": {
-        // A locked walker shakes and says its goal; nothing else changes.
+        // A locked walker shakes and says its goal; nothing else changes. An owned one is
+        // picked and says its pace and style.
         const tap = tapWalker(gameData, this.save().owned, target.walker);
         if (tap.kind === "locked") {
           this.shakes.set(id, now);
@@ -746,7 +746,7 @@ export class StartScene extends Scene {
           return;
         }
         this.pops.set(id, now);
-        this.action = { kind: "none" };
+        this.action = { kind: "notice", text: tap.text };
         void updateProfile(this, (save) => ({ ...save, walker: target.walker }));
         this.render();
         return;

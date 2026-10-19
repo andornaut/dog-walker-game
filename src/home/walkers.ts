@@ -5,7 +5,7 @@ import type { Owned, SaveDocument } from "../save/schema";
 import { homeLine } from "./homeText";
 import { type ItemTile, itemTile } from "./interaction";
 
-type WalkerText = Pick<GameData, "homeText" | "walkers">;
+type WalkerText = Pick<GameData, "homeText" | "walkerPaces" | "walkerStyles" | "walkers">;
 
 function goalZone(data: Pick<GameData, "walkers">, walker: WalkerId): string {
   return String(walkerGoal(data.walkers[walker]));
@@ -37,9 +37,21 @@ export function walkerTile(
   });
 }
 
-// A tap on a walker's tile picks an owned walker, or says what unlocks one not owned.
+// An owned walker in words, as a pick or keyboard focus says it: "Ben: slow, hustler."
+export function walkerInfo(data: WalkerText, walker: WalkerId): string {
+  const { name, pace, style } = data.walkers[walker];
+  return homeLine(data.homeText, "walkerInfo", {
+    pace: data.walkerPaces[pace].name.toLowerCase(),
+    style: data.walkerStyles[style].name.toLowerCase(),
+    walker: name,
+  });
+}
+
+// A tap on a walker's tile picks an owned walker, saying its pace and style, or says what
+// unlocks one not owned.
 export type WalkerTap =
-  { readonly kind: "pick" } | { readonly kind: "locked"; readonly text: string };
+  | { readonly kind: "pick"; readonly text: string }
+  | { readonly kind: "locked"; readonly text: string };
 
 export function tapWalker(
   data: WalkerText,
@@ -47,7 +59,7 @@ export function tapWalker(
   walker: WalkerId,
 ): WalkerTap {
   if (owned.walkers.includes(walker)) {
-    return { kind: "pick" };
+    return { kind: "pick", text: walkerInfo(data, walker) };
   }
   const text = homeLine(data.homeText, "walkerLocked", {
     walker: data.walkers[walker].name,

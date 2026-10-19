@@ -662,6 +662,8 @@ export interface HomeText {
   // A locked walker's goal plate on its tile, and what the walker's bubble says when it is
   // tapped.
   readonly walkerGoal: string;
+  // What the bubble says for an owned walker picked or focused: its pace and style.
+  readonly walkerInfo: string;
   readonly walkerLocked: string;
   // A dog's fee on its tile and its shop row.
   readonly zoneFee: string;

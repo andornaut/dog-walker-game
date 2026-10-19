@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import type { WalkerId } from "../data/types";
 import { newPlayerSave } from "../save/fixtures";
 import { type ItemTile, itemTileState, type TileState } from "./interaction";
-import { tapWalker, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
+import { tapWalker, walkerInfo, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
 
 const save = {
   ...newPlayerSave,
@@ -30,10 +30,21 @@ describe("walkerTile", () => {
   });
 });
 
+describe("walkerInfo", () => {
+  it.each<[WalkerId, string]>([
+    ["ada", "Ada: fast, charmer."],
+    ["ben", "Ben: slow, hustler."],
+    ["casey", "Casey: slow, charmer."],
+    ["trista", "Trista: fast, hustler."],
+  ])("writes %s's pace and style", (walker, expected) => {
+    expect(walkerInfo(gameData, walker)).toBe(expected);
+  });
+});
+
 describe("tapWalker", () => {
   it.each<[WalkerId, WalkerTap]>([
-    ["ben", { kind: "pick" }],
-    ["casey", { kind: "pick" }],
+    ["ben", { kind: "pick", text: "Ben: slow, hustler." }],
+    ["casey", { kind: "pick", text: "Casey: slow, charmer." }],
     ["ada", { kind: "locked", text: "Finish zone 2 to unlock Ada." }],
     ["trista", { kind: "locked", text: "Finish zone 3 to unlock Trista." }],
   ])("on %s gives %o", (walker, tap) => {
