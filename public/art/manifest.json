@@ -1093,6 +1093,36 @@
       "json": "sprites/fx-status-soaked.json"
     },
     {
+      "key": "fx-status-soaked-milkshake",
+      "png": "sprites/fx-status-soaked-milkshake.png",
+      "json": "sprites/fx-status-soaked-milkshake.json"
+    },
+    {
+      "key": "fx-status-soaked-milkshake@50",
+      "png": "sprites/fx-status-soaked-milkshake@50.png",
+      "json": "sprites/fx-status-soaked-milkshake@50.json"
+    },
+    {
+      "key": "fx-status-soaked-milkshake@75",
+      "png": "sprites/fx-status-soaked-milkshake@75.png",
+      "json": "sprites/fx-status-soaked-milkshake@75.json"
+    },
+    {
+      "key": "fx-status-soaked-mud",
+      "png": "sprites/fx-status-soaked-mud.png",
+      "json": "sprites/fx-status-soaked-mud.json"
+    },
+    {
+      "key": "fx-status-soaked-mud@50",
+      "png": "sprites/fx-status-soaked-mud@50.png",
+      "json": "sprites/fx-status-soaked-mud@50.json"
+    },
+    {
+      "key": "fx-status-soaked-mud@75",
+      "png": "sprites/fx-status-soaked-mud@75.png",
+      "json": "sprites/fx-status-soaked-mud@75.json"
+    },
+    {
       "key": "fx-status-soaked@50",
       "png": "sprites/fx-status-soaked@50.png",
       "json": "sprites/fx-status-soaked@50.json"

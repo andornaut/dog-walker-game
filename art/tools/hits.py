@@ -41,6 +41,8 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           in rows 11 to 20
 fx-status-stinky   16x16  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
 fx-status-soaked   16x16  loop (4 frames, 150ms) drips falling off
+fx-status-soaked-mud, fx-status-soaked-milkshake  the same drips after the mud and milkshake
+                   Splash skins: brown mud spots, cream milkshake drips, each plum-rimmed
 fx-status-spooked  16x16  loop (4 frames, 150ms) sweat drop popping, surprise lines
                    each status also has @75 (12x12) and @50 (8x8), same tags and timing;
                    bottom-centre on the dog's centre column, 6px (4px at @75, 3px at
@@ -812,9 +814,16 @@ def status_stinky(size, step):
 DRIP = {16: (".c.", "cwc", "ccs", ".s."), 12: ("c.", "ws", "s."), 8: ("c", "s")}
 
 
-def status_soaked(size, step):
+# The drip colours per Splash skin: body, glint, underside, rim.
+SOAKS = {"": ("cyan", "white", "sky", "navy"), "-mud": ("brown", "tan", "dbrown", "plum"),
+         "-milkshake": ("cream", "white", "skin1", "plum")}
+
+
+def status_soaked(size, step, look=""):
     """Drops form at the top and fall a whole number of pixels a frame, wrapping after 4 frames.
-    Cyan with a sky underside and a white glint, navy rim."""
+    Water is cyan with a sky underside and a white glint in a navy rim; mud and milkshake take
+    their own colours in a plum rim."""
+    body, glint, under, edge = SOAKS[look]
     g = Grid(size, size)
     drops = {16: ((1, 0), (6, 2), (12, 1)), 12: ((1, 0), (5, 2), (9, 1)), 8: ((1, 0), (5, 2))}[size]
     fall, y0 = {16: (3, 1), 12: (2, 1), 8: (1, 1)}[size]
@@ -823,13 +832,13 @@ def status_soaked(size, step):
         k = (step + ph) % 4
         y = y0 + k * fall
         if k == 0 and size > 8:
-            g.p(x + len(shape[0]) // 2, y + 1, "cyan")
+            g.p(x + len(shape[0]) // 2, y + 1, body)
             continue
         for j, row in enumerate(shape):
             for i, ch in enumerate(row):
                 if ch != ".":
-                    g.p(x + i, y + j, {"c": "cyan", "w": "white", "s": "sky"}[ch])
-    return rim(g, "navy")
+                    g.p(x + i, y + j, {"c": body, "w": glint, "s": under}[ch])
+    return rim(g, edge)
 
 
 SWEAT = {16: (".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."), 12: (".c.", "cwc", "cws", ".s."),
@@ -908,7 +917,8 @@ def sprites():
         yield f"ui-hit-flash-{colour}", [("play", [flash(colour, i).outlined(False) for i in range(4)], 70)]
     yield "ui-hit-label", [(tag, [label_plate(*cols).outlined(False)], 1000) for tag, cols in PLATES.items()]
     yield from sizes("fx-status-stinky", status_stinky, 180)
-    yield from sizes("fx-status-soaked", status_soaked, 150)
+    for look in SOAKS:
+        yield from sizes(f"fx-status-soaked{look}", lambda size, step, look=look: status_soaked(size, step, look), 150)
     yield from sizes("fx-status-spooked", status_spooked, 150)
 
 

@@ -87,7 +87,7 @@ Same tags, frames and durations as the original.
 | `fx-lemonade`           | sprite | 64×64            | `play`                  | core | Lucky hit at the lemonade stand                                                                                        |
 | `fx-sparkle`            | sprite | 16×16            | `play`                  | core | Pickup collected                                                                                                       |
 | `fx-splash`             | sprite | 32×32            | `play`                  | core | Puddle                                                                                                                 |
-| `fx-status-<status>`    | sprite | 16×16            | `loop`                  | core | soaked, spooked, stinky; over a dog's head                                                                             |
+| `fx-status-<status>`    | sprite | 16×16            | `loop`                  | core | soaked, soaked-mud, soaked-milkshake, spooked, stinky; over a dog's head                                               |
 | `ui-hit-flash-<colour>` | sprite | 16×64            | `play`                  | core | amber, green, mauve, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right |
 | `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky`       | core | Stretched to 176×32; `lucky` for lucky encounters                                                                      |
 
