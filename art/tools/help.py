@@ -615,16 +615,15 @@ def owners():
         text_c(c, m.upper(), x + 18, 204, "cream")
     # Nugget's card at 0 hearts, and the firing moment under it: the owner's fired face in
     # fx-fired-pop's storm with the cracked heart, and the FIRED! plate in the owner's
-    # temperament (ui-fired-plate stretched to 72x28, the text's caps in rows 9 to 18)
+    # temperament (ui-fired-plate stretched to 84x28, the text's caps in rows 9 to 18)
     name, _, _, _ = dog("nugget")
     temperament = DOGS["nugget"]["owner"]["temperament"]
     c.doghouse(216, 8, "nugget", 0)
     c.paste(frame("fx-fired-pop", "play", 3), 244, 104)
     c.paste(frame("face-owner-nugget", "fired"), 260, 120)
-    c.nine(frame("ui-fired-plate", re.sub(r"([A-Z])", r"-\1", temperament).lower()), 240, 158, 72, 28)
+    c.nine(frame("ui-fired-plate", re.sub(r"([A-Z])", r"-\1", temperament).lower()), 234, 158, 84, 28)
     text_c(c, "FIRED!", 276, 167, "white", 2)
-    text_c(c, f"0♥: {name} GOES HOME", 276, 196, "cream", 1, {"♥": "white"})
-    text_c(c, "FEES TAKEN BACK", 276, 206, "cream")
+    text_c(c, f"0♥: {name} GOES HOME", 276, 200, "cream", 1, {"♥": "white"})
     return c
 
 
