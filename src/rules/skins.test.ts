@@ -12,6 +12,7 @@ import {
   minorObstacleLook,
   skinnedArt,
   skinnedCardArt,
+  skinnedOwnerArt,
 } from "./skins";
 
 const [skinnedZone, plainZone] = gameData.world.zones.map(({ id }) => id as ZoneId);
@@ -98,7 +99,7 @@ describe("encounterLook and minorObstacleLook", () => {
   });
 });
 
-describe("skinnedArt and skinnedCardArt", () => {
+describe("skinnedArt, skinnedCardArt and skinnedOwnerArt", () => {
   const cat = encounterLook(data, skinnedZone, "squirrel");
   const plain = encounterLook(data, plainZone, "squirrel");
   const [hold] = squirrel.resolution.options;
@@ -123,6 +124,16 @@ describe("skinnedArt and skinnedCardArt", () => {
       "keeps the option's own illustration with no skin",
       () => skinnedCardArt(all, plain, hold.art),
       hold.art,
+    ],
+    [
+      "stands the skin's own owner beside it once the manifest has it",
+      () => skinnedOwnerArt(all, cat),
+      `${CAT.art}-owner`,
+    ],
+    [
+      "stands the base's owner beside a skin whose owner is missing",
+      () => skinnedOwnerArt((key) => key === CAT.art, cat),
+      `${cat.baseArt}-owner`,
     ],
   ])("%s", (_, key, expected) => {
     expect(key()).toBe(expected);

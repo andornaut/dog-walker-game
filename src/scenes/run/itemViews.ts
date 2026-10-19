@@ -15,7 +15,7 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
 import { currentZoneId } from "../../rules/route";
-import { encounterLook, minorObstacleLook, skinnedArt } from "../../rules/skins";
+import { encounterLook, minorObstacleLook, skinnedArt, skinnedOwnerArt } from "../../rules/skins";
 import { isMoverObstacle } from "../../runner/movers";
 import { isNeedSpot } from "../../runner/needs";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
@@ -140,11 +140,12 @@ export class ItemViews {
   // Each item stands once at the near edge of its hit box, however many rows it covers, and a
   // lucky find on its frame's bottom. A puddle lies flat under the rest, and a skunk stands just
   // inside the front of its spray cloud, which lies flat too. An obstacle wears its skin for the
-  // zone, the other dog's owner standing beside only its base look.
+  // zone, and the other dog's owner stands beside it in the skin's owner art.
   private addView(zone: ZoneId, item: WalkItem): ItemView {
     const { scene } = this;
     const has = (key: string) => scene.textures.exists(key);
     const encounterArt = (id: EncounterId) => skinnedArt(has, encounterLook(gameData, zone, id));
+    const otherDogOwner = () => skinnedOwnerArt(has, encounterLook(gameData, zone, "otherDog"));
     const bottom = (shown: WalkItem) => shown.y + shown.height;
     const lucky = itemCategory(gameData, item.kind) === "lucky";
     const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
@@ -190,15 +191,8 @@ export class ItemViews {
         part(SKUNK_CLOUD_KEY, flat),
         part(encounterArt("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
       ];
-    } else if (
-      item.kind === "otherDog" &&
-      encounterArt(item.kind) === encounterSpriteKey(item.kind) &&
-      has("other-dog-owner")
-    ) {
-      parts = [
-        part(encounterSpriteKey(item.kind), { dx: -8 }),
-        part("other-dog-owner", { dx: 10 }),
-      ];
+    } else if (item.kind === "otherDog" && has(otherDogOwner())) {
+      parts = [part(encounterArt(item.kind), { dx: -8 }), part(otherDogOwner(), { dx: 10 })];
     } else {
       parts = [part(encounterArt(item.kind), item.kind === "puddle" ? flat : {})];
     }

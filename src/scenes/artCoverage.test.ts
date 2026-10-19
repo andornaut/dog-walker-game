@@ -452,34 +452,42 @@ describe("road object art", () => {
   });
 
   // A skin may name art not drawn yet, which falls back to the base; once drawn, it must do
-  // all its base does. A kind that also comes as a mover runs as its skin's sprite too.
-  it("draws every listed skin's sprite with its base's tags and any mover's, at each base step", () => {
+  // all its base does, and stand with its own owner where its base has one (<art>-owner). A
+  // kind that also comes as a mover (the squirrel, the loose other dog) moves as its skin, so
+  // the skin plays the mover's tags too.
+  it("draws every listed skin's sprite, and owner, with its base's and mover's tags at each base step", () => {
     const moverTags = (id: string) =>
-      (Object.keys(MOVER_CONTACTS) as MoverKind[])
-        .filter((mover) => MOVER_CONTACTS[mover] === id)
-        .map((mover) => MOVER_SPRITES[mover].tag);
-    const skins = [
+      Object.entries(MOVER_CONTACTS).flatMap(([mover, contact]) =>
+        contact === id ? [MOVER_SPRITES[mover as MoverKind].tag] : [],
+      );
+    const pairs = [
       ...ENCOUNTERS.map((id) => ({
         base: encounterSpriteKey(id),
-        id,
+        id: id as string,
         skins: gameData.encounters[id].skins,
       })),
       ...MINOR_OBSTACLES.map((id) => ({
         base: minorObstacleSpriteKey(id),
-        id,
+        id: id as string,
         skins: gameData.minorObstacles[id].skins,
       })),
-    ].flatMap(({ base, id, skins: byZone }) =>
-      Object.values(byZone ?? {}).flatMap((skin) =>
-        skin === undefined || !sprites.has(skin.art) ? [] : [{ art: skin.art, base, id }],
+    ].flatMap(({ base, id, skins }) =>
+      Object.values(skins ?? {}).flatMap((skin) => {
+        if (skin === undefined || !sprites.has(skin.art)) {
+          return [];
+        }
+        const tags = [...new Set([...tagsOf(base), ...moverTags(id)])];
+        const owner = sprites.has(`${base}-owner`)
+          ? [{ art: `${skin.art}-owner`, base: `${base}-owner`, tags: tagsOf(`${base}-owner`) }]
+          : [];
+        return [{ art: skin.art, base, tags }, ...owner];
+      }),
+    );
+    const missing = pairs.flatMap(({ art, base, tags }) =>
+      [1, ...variantSteps([base])].flatMap((step) =>
+        missingTags(depthVariantKey(art, step) ?? art, tags),
       ),
     );
-    const missing = skins.flatMap(({ art, base, id }) => {
-      const tags = [...new Set([...tagsOf(base), ...moverTags(id)])];
-      return [1, ...variantSteps([base])].flatMap((step) =>
-        missingTags(depthVariantKey(art, step) ?? art, tags),
-      );
-    });
     expect(missing).toEqual([]);
   });
 

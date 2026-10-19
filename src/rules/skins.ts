@@ -80,6 +80,13 @@ export function skinnedArt(has: HasArt, look: Look): string {
   return has(look.art) ? look.art : look.baseArt;
 }
 
+// The figure standing beside the drawn road sprite, such as the other dog's owner: the drawn
+// art's <art>-owner, or the base art's while the skin's owner is missing.
+export function skinnedOwnerArt(has: HasArt, look: Look): string {
+  const owner = `${skinnedArt(has, look)}-owner`;
+  return has(owner) ? owner : `${look.baseArt}-owner`;
+}
+
 // A card option's illustration under the look: the option's key with the skin's prefix in
 // place of the base prefix, or the option's own key while that illustration is missing.
 export function skinnedCardArt(has: HasArt, look: Look, optionArt: string): string {

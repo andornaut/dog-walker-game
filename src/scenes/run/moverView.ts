@@ -21,7 +21,7 @@ import {
   type MoverOnRoad,
   moverPlace,
 } from "../../runner/movers";
-import { firstTag, playTag, showAtDepth } from "../sprites";
+import { playTag, showAtDepth } from "../sprites";
 import type { ItemView } from "./itemViews";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
@@ -31,24 +31,23 @@ import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 const CUE = { inset: 10, size: 16, top: 20 };
 
 // A mover's body sprite: for a mover that opens an encounter, the encounter's skin in the zone
-// when its art plays the mover's tag, else the mover's own sprite.
+// once its art is loaded, else the mover's own sprite.
 export function moverBodyKey(scene: Scene, zone: ZoneId, mover: MoverKind): string {
-  const sprite = MOVER_SPRITES[mover];
+  const { key } = MOVER_SPRITES[mover];
   const contact = MOVER_CONTACTS[mover];
   if (isMoverObstacle(contact)) {
-    return sprite.key;
+    return key;
   }
   const look = encounterLook(gameData, zone, contact);
-  const skinned =
-    look.art !== look.baseArt && firstTag(scene, look.art, [sprite.tag]) !== undefined;
-  return skinned ? look.art : sprite.key;
+  return look.art !== look.baseArt && scene.textures.exists(look.art) ? look.art : key;
 }
 
 // A mover stands on the road through the projection once it moves, sized by showAtDepth, a
 // crosser mirrored when it runs left. Until then only its cue shows, at 1x: a sign at the
 // road's edge on its row with the arrow pointing across, or a cyclist's sign at the top of
 // its lane with the arrow pointing down. The ball carries its own shadow. A mover with an idle
-// tag, the goose, also stands at the edge during its cue, playing it then and while halted.
+// tag, the goose, also stands at the edge during its cue, playing it then and while halted. A
+// mover in an encounter's skin plays the mover's tags on the skin's sprite.
 export function drawMover(
   mover: MoverOnRoad,
   view: ItemView,
