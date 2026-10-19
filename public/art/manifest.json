@@ -306,6 +306,11 @@
       "json": "sprites/fx-dust.json"
     },
     {
+      "key": "fx-heart",
+      "png": "sprites/fx-heart.png",
+      "json": "sprites/fx-heart.json"
+    },
+    {
       "key": "fx-sparkle",
       "png": "sprites/fx-sparkle.png",
       "json": "sprites/fx-sparkle.json"
@@ -700,6 +705,18 @@
       "png": "images/icon-close.png"
     },
     {
+      "key": "icon-energy-calm",
+      "png": "images/icon-energy-calm.png"
+    },
+    {
+      "key": "icon-energy-hyper",
+      "png": "images/icon-energy-hyper.png"
+    },
+    {
+      "key": "icon-energy-steady",
+      "png": "images/icon-energy-steady.png"
+    },
+    {
       "key": "icon-help",
       "png": "images/icon-help.png"
     },
@@ -712,12 +729,52 @@
       "png": "images/icon-money.png"
     },
     {
+      "key": "icon-owner-dramatic",
+      "png": "images/icon-owner-dramatic.png"
+    },
+    {
+      "key": "icon-owner-fussy",
+      "png": "images/icon-owner-fussy.png"
+    },
+    {
+      "key": "icon-owner-laid-back",
+      "png": "images/icon-owner-laid-back.png"
+    },
+    {
       "key": "icon-pause",
       "png": "images/icon-pause.png"
     },
     {
       "key": "icon-stinky",
       "png": "images/icon-stinky.png"
+    },
+    {
+      "key": "icon-trait-chaser",
+      "png": "images/icon-trait-chaser.png"
+    },
+    {
+      "key": "icon-trait-fancy",
+      "png": "images/icon-trait-fancy.png"
+    },
+    {
+      "key": "icon-trait-food-driven",
+      "png": "images/icon-trait-food-driven.png"
+    },
+    {
+      "key": "icon-zone-bark-park",
+      "png": "images/icon-zone-bark-park.png"
+    },
+    {
+      "key": "icon-zone-sniff-street-shops",
+      "png": "images/icon-zone-sniff-street-shops.png"
+    },
+    {
+      "key": "icon-zone-the-long-way-home",
+      "png": "images/icon-zone-the-long-way-home.png"
+    },
+    {
+      "key": "icon-zone-woof-way",
+      "png": "images/icon-zone-woof-way.png"
     },
     {
       "key": "item-fanny-pack",

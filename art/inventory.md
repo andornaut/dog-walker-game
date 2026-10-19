@@ -101,15 +101,15 @@ Good things to bump into; each opens a choice card.
 
 ## Effects
 
-| Asset           | Key          | Type   | Size  | Animations   | Priority | Notes                                                             |
-| --------------- | ------------ | ------ | ----- | ------------ | -------- | ----------------------------------------------------------------- |
-| Collision burst | `fx-bump`    | sprite | 32×32 | `play`       | core     | Impact star where the pack hits anything; plays as the card opens |
-| Dizzy stars     | `fx-dizzy`   | sprite | 32×16 | `loop`       | core     | Circle over the walker while a minor bump locks lane input        |
-| Dropped tips    | `fx-coins`   | sprite | 32×32 | `play`       | core     | Two coins knocked loose on a minor bump, with the cause label     |
-| Puddle splash   | `fx-splash`  | sprite | 32×32 | `play`       | core     | Water thrown up when the pack runs through a puddle               |
-| Pickup sparkle  | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected                                           |
-| Bark pop        | `fx-bark`    | sprite | 16×16 | `pop`        | core     | Over a dog during the pull tell, with the dog's `tell` lean       |
-| Heart up/down   | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot                                            |
+| Asset           | Key          | Type   | Size  | Animations   | Priority | Notes                                                                                                                 |
+| --------------- | ------------ | ------ | ----- | ------------ | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| Collision burst | `fx-bump`    | sprite | 32×32 | `play`       | core     | Impact star where the pack hits anything; plays as the card opens                                                     |
+| Dizzy stars     | `fx-dizzy`   | sprite | 32×16 | `loop`       | core     | Circle over the walker while a minor bump locks lane input                                                            |
+| Dropped tips    | `fx-coins`   | sprite | 32×32 | `play`       | core     | Two coins knocked loose on a minor bump, with the cause label                                                         |
+| Puddle splash   | `fx-splash`  | sprite | 32×32 | `play`       | core     | Water thrown up when the pack runs through a puddle                                                                   |
+| Pickup sparkle  | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected                                                                                               |
+| Bark pop        | `fx-bark`    | sprite | 16×16 | `pop`        | core     | Over a dog during the pull tell, with the dog's `tell` lean                                                           |
+| Heart up/down   | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot. `up` pops in and rises; `down` cracks and the halves fall. Outlined, unlike the other effects |
 
 Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
@@ -143,12 +143,12 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Top bar
 
-| Asset          | Key                | Type   | Size   | Priority | Notes                                                      |
-| -------------- | ------------------ | ------ | ------ | -------- | ---------------------------------------------------------- |
-| Bar background | `ui-top-bar`       | image  | 360×40 | core     |                                                            |
-| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                       |
-| Zone progress  | `ui-zone-pips`     | sprite | TBD    | core     | 4 segments; frames `done`, `current`, `todo`               |
-| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home |
+| Asset          | Key                | Type   | Size   | Priority | Notes                                                                                      |
+| -------------- | ------------------ | ------ | ------ | -------- | ------------------------------------------------------------------------------------------ |
+| Bar background | `ui-top-bar`       | image  | 360×40 | core     |                                                                                            |
+| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                                                       |
+| Zone progress  | `ui-zone-pips`     | sprite | TBD    | core     | 4 segments; frames `done`, `current`, `todo`                                               |
+| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home; drawn by `art/tools/glyphs.py` |
 
 ## Choice cards
 
@@ -198,9 +198,9 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Title / home         | `screen-home`              | image  | 360×640          | core     | Background; bank total and buttons on top                                                                                              |
 | Logo                 | `logo`                     | image  | TBD              | later    |                                                                                                                                        |
 | Dog portraits        | `portrait-dog-<name>`      | image  | TBD              | core     | 9 dogs; larger art for dog pick and the shop                                                                                           |
-| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser                                                                                                             |
-| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper                                                                                                                    |
-| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic                                                                                                             |
+| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser; drawn by `art/tools/glyphs.py`                                                                             |
+| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper; drawn by `art/tools/glyphs.py`                                                                                    |
+| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic; drawn by `art/tools/glyphs.py`                                                                             |
 | Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py`                                             |
 | Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price                                                        |
 | Stats page           | `screen-stats`             | image  | 360×640          | core     | Behind the logbook; panel background for the full stats                                                                                |

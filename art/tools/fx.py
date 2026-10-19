@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Draw the road effects for collisions and pickups. No outlines: effects sit
-over sprites and read as light, not as objects.
+over sprites and read as light, not as objects. fx-heart is the exception: it
+is a token, like fx-bark, so it keeps its outline over the doghouse roofs.
 
 fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
 fx-dizzy    32x16  loop (4 frames)  stars circling over the pack while it stumbles
@@ -8,6 +9,8 @@ fx-coins    32x32  play (6 frames)  two coins knocked loose ($2 dropped on a min
 fx-splash   32x32  play (5 frames)  water thrown up by a puddle
 fx-stinky   32x32  loop (4 frames)  green stink lines over the pack while Stinky lasts
 fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
+fx-heart    16x16  up (5 frames)    a heart floating up from a dog slot (+1 heart)
+                   down (5 frames)  a heart cracking and falling apart (-1 heart)
 
 Usage:
   fx.py preview OUT.png   every frame of every effect on the street colours
@@ -129,6 +132,51 @@ def sparkle(step):
     return g
 
 
+HEART = [".111.111.", "122111111", "121111113", "111111113", ".1111113.", "..11113..", "...113...", "....1...."]
+SMALL = [".11.11.", "1211111", "1111113", ".11113.", "..113..", "...1..."]
+# The crack's column in each row of HEART; the left half keeps what is left of it.
+CRACK = [4, 4, 5, 4, 3, 4, 4, 4]
+
+
+def stamp(g, rows, x0, y0, cols=("red", "pink", "dred"), keep=None):
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != "." and (keep is None or keep(x, y)):
+                g.p(x0 + x, y0 + y, cols["123".index(ch)])
+
+
+def heart_up(step):
+    """Pops in small at the slot, grows and rises, then shrinks to a pink glint at the top."""
+    g = Grid(16, 16)
+    if step == 0:
+        stamp(g, SMALL, 5, 9)
+    elif step < 4:
+        stamp(g, HEART, 4, (7, 4, 2)[step - 1])
+        if step == 1:
+            for x, y in ((2, 9), (13, 8), (3, 4)):
+                g.p(x, y, "white")
+    else:
+        stamp(g, SMALL, 5, 1, ("pink", "white", "red"))
+    return g
+
+
+def heart_down(step):
+    """Cracks down the middle, then the halves split and drop, darkening as they fall."""
+    g = Grid(16, 16)
+    if step == 0:
+        stamp(g, HEART, 4, 1)
+    elif step == 1:
+        stamp(g, HEART, 4, 1)
+        for y, x in enumerate(CRACK):
+            g.p(4 + x, 1 + y, "plum")
+    else:
+        spread, drop = (1, 2, 2)[step - 2], (1, 3, 5)[step - 2]
+        cols = ("red", "pink", "dred") if step < 4 else ("dred", "red", "plum")
+        stamp(g, HEART, 4 - spread, 1 + drop, cols, lambda x, y: x < CRACK[y])
+        stamp(g, HEART, 4 + spread, 1 + drop + 1, cols, lambda x, y: x > CRACK[y])
+    return g
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-bump", [("play", [bump(i).outlined(False) for i in range(5)], 60)]
@@ -137,6 +185,8 @@ def sprites():
     yield "fx-splash", [("play", [splash(i).outlined(False) for i in range(5)], 70)]
     yield "fx-stinky", [("loop", [stinky(i).outlined(False) for i in range(4)], 180)]
     yield "fx-sparkle", [("play", [sparkle(i).outlined(False) for i in range(4)], 60)]
+    yield "fx-heart", [("up", [heart_up(i).outlined() for i in range(5)], 90),
+                       ("down", [heart_down(i).outlined() for i in range(5)], 90)]
 
 
 if __name__ == "__main__":
