@@ -811,6 +811,10 @@
       "png": "images/item-whistle.png"
     },
     {
+      "key": "logo",
+      "png": "images/logo.png"
+    },
+    {
       "key": "portrait-dog-biscuit",
       "png": "images/portrait-dog-biscuit.png"
     },
@@ -875,6 +879,18 @@
       "png": "images/road-woof-way.png"
     },
     {
+      "key": "screen-end",
+      "png": "images/screen-end.png"
+    },
+    {
+      "key": "screen-home",
+      "png": "images/screen-home.png"
+    },
+    {
+      "key": "screen-stats",
+      "png": "images/screen-stats.png"
+    },
+    {
       "key": "ui-hint",
       "png": "images/ui-hint.png"
     },
@@ -913,6 +929,44 @@
     {
       "key": "ui-zone-banner",
       "png": "images/ui-zone-banner.png"
+    }
+  ],
+  "sounds": [
+    {
+      "key": "music-walk",
+      "ogg": "sounds/music-walk.ogg",
+      "m4a": "sounds/music-walk.m4a",
+      "loop": true
+    },
+    {
+      "key": "sfx-bark",
+      "ogg": "sounds/sfx-bark.ogg",
+      "m4a": "sounds/sfx-bark.m4a"
+    },
+    {
+      "key": "sfx-bump",
+      "ogg": "sounds/sfx-bump.ogg",
+      "m4a": "sounds/sfx-bump.m4a"
+    },
+    {
+      "key": "sfx-card",
+      "ogg": "sounds/sfx-card.ogg",
+      "m4a": "sounds/sfx-card.m4a"
+    },
+    {
+      "key": "sfx-fired",
+      "ogg": "sounds/sfx-fired.ogg",
+      "m4a": "sounds/sfx-fired.m4a"
+    },
+    {
+      "key": "sfx-tip",
+      "ogg": "sounds/sfx-tip.ogg",
+      "m4a": "sounds/sfx-tip.m4a"
+    },
+    {
+      "key": "sfx-treat",
+      "ogg": "sounds/sfx-treat.ogg",
+      "m4a": "sounds/sfx-treat.m4a"
     }
   ]
 }

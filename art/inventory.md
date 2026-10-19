@@ -194,25 +194,25 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 ## Screens outside the run
 
-| Asset                | Key                        | Type   | Size             | Priority | Notes                                                                                                                                  |
-| -------------------- | -------------------------- | ------ | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| Title / home         | `screen-home`              | image  | 360×640          | core     | Background; bank total and buttons on top                                                                                              |
-| Logo                 | `logo`                     | image  | TBD              | later    |                                                                                                                                        |
-| Dog portraits        | `portrait-dog-<name>`      | image  | 64×64            | core     | 9 dogs; larger art for dog pick and the shop. Three-quarter front view, sitting, head and shoulders; drawn by `art/tools/portraits.py` |
-| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser; drawn by `art/tools/glyphs.py`                                                                             |
-| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper; drawn by `art/tools/glyphs.py`                                                                                    |
-| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic; drawn by `art/tools/glyphs.py`                                                                             |
-| Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py`                                             |
-| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price                                                        |
-| Stats page           | `screen-stats`             | image  | 360×640          | core     | Behind the logbook; panel background for the full stats                                                                                |
-| Achievement badges   | `badge-<achievement>`      | sprite | 32×32            | core     | 15 medals, rim by category (firsts bronze, mastery silver, collection gold, silly pink); tags `earned`, `locked` (grey with a padlock) |
-| Badge celebration    | `fx-confetti`              | sprite | 64×64            | core     | Burst behind a badge as it is earned (tag `play`); the owners cheer with their `happy` faces                                           |
-| Hint bubble          | `ui-hint`                  | image  | 9-slice          | core     | First-time hints: a one-line bubble the first time each thing appears                                                                  |
-| Selection frame      | `ui-select`                | sprite | 24×24 nine-slice | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                                                                         |
-| Pick badge           | `ui-check`                 | sprite | 16×16            | core     | Green badge on a picked tile: tags `1`, `2`, `3` (pack order) and `tick`                                                               |
-| Tap and dust effects | `fx-tap`, `fx-dust`        | sprite | 16×16            | core     | A sparkle where a tap lands; a puff when the walker or a dog hops                                                                      |
-| Zone banner          | `ui-zone-banner`           | image  | 248×48           | core     | Board and ribbon ends with no text; the game writes both lines in font-title                                                           |
-| End screen           | `screen-end`               | image  | 360×640          | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                                                                    |
+| Asset                | Key                        | Type   | Size             | Priority | Notes                                                                                                                                                                                 |
+| -------------------- | -------------------------- | ------ | ---------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title / home         | `screen-home`              | image  | 360×640          | core     | Morning on Maple Street: the gate scene in the start screen's layout (y 40 to 196), then a dark porch deck under the panels; the game prints the street name on the blank sign        |
+| Logo                 | `logo`                     | image  | 128×30           | later    | The yard sign's board on the home screen, at 6,146 left of the gate path; "DOG WALKER" in Silkscreen at 2× with the leash and a paw print; also a header for other screens            |
+| Dog portraits        | `portrait-dog-<name>`      | image  | 64×64            | core     | 9 dogs; larger art for dog pick and the shop. Three-quarter front view, sitting, head and shoulders; drawn by `art/tools/portraits.py`                                                |
+| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser; drawn by `art/tools/glyphs.py`                                                                                                                            |
+| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper; drawn by `art/tools/glyphs.py`                                                                                                                                   |
+| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic; drawn by `art/tools/glyphs.py`                                                                                                                            |
+| Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py`                                                                                            |
+| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price                                                                                                       |
+| Stats page           | `screen-stats`             | image  | 360×640          | core     | Evening den: a window onto Woof Way at night, a dog photo and leash hooks above y 130, dark panelling below for the stats and the badge wall                                          |
+| Achievement badges   | `badge-<achievement>`      | sprite | 32×32            | core     | 15 medals, rim by category (firsts bronze, mastery silver, collection gold, silly pink); tags `earned`, `locked` (grey with a padlock)                                                |
+| Badge celebration    | `fx-confetti`              | sprite | 64×64            | core     | Burst behind a badge as it is earned (tag `play`); the owners cheer with their `happy` faces                                                                                          |
+| Hint bubble          | `ui-hint`                  | image  | 9-slice          | core     | First-time hints: a one-line bubble the first time each thing appears                                                                                                                 |
+| Selection frame      | `ui-select`                | sprite | 24×24 nine-slice | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                                                                                                                        |
+| Pick badge           | `ui-check`                 | sprite | 16×16            | core     | Green badge on a picked tile: tags `1`, `2`, `3` (pack order) and `tick`                                                                                                              |
+| Tap and dust effects | `fx-tap`, `fx-dust`        | sprite | 16×16            | core     | A sparkle where a tap lands; a puff when the walker or a dog hops                                                                                                                     |
+| Zone banner          | `ui-zone-banner`           | image  | 248×48           | core     | Board and ribbon ends with no text; the game writes both lines in font-title                                                                                                          |
+| End screen           | `screen-end`               | image  | 360×640          | core     | Sunset on The Long Way Home: a flat sky behind the summary panel (24,140 to 336,440), the zone's houses, yards, sidewalk and brick road below y 440; new-best ribbon is `ui-new-best` |
 
 ## UI kit
 
@@ -225,13 +225,27 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | A fingertip on a two-way track with fading touch marks; the game writes "drag to switch lanes" under it  |
 | App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later                              |
 
+## Sounds
+
+Ogg Vorbis plus AAC `.m4a`, mono 44.1kHz, listed under `sounds` in the manifest; `loop` marks the music.
+
+| Asset      | Key          | Type  | Length | Loop | Priority | Notes                                      |
+| ---------- | ------------ | ----- | ------ | ---- | -------- | ------------------------------------------ |
+| Tip        | `sfx-tip`    | sound | 0.35s  | no   | M6       | Coin chime when a tip is collected         |
+| Treat      | `sfx-treat`  | sound | 0.40s  | no   | M6       | Rising arpeggio when a treat is collected  |
+| Bump       | `sfx-bump`   | sound | 0.30s  | no   | M6       | Soft thud on any collision                 |
+| Bark       | `sfx-bark`   | sound | 0.18s  | no   | M6       | One "wuf" with the pull tell and `fx-bark` |
+| Card open  | `sfx-card`   | sound | 0.44s  | no   | M6       | Swish and chime as choice cards open       |
+| Fired      | `sfx-fired`  | sound | 1.80s  | no   | M6       | Sad descending phrase when a dog is fired  |
+| Walk music | `music-walk` | sound | 28.77s | yes  | M6       | 12 bars at about 100 BPM, loops seamlessly |
+
 ## Counts
 
-| Priority | Sprites | Images           | Fonts |
-| -------- | ------- | ---------------- | ----- |
-| M6       | ~41     | 29 (card illus.) | 1     |
-| core     | ~13     | ~45              | 0     |
-| later    | ~1      | ~23              | 0     |
+| Priority | Sprites | Images           | Fonts | Sounds |
+| -------- | ------- | ---------------- | ----- | ------ |
+| M6       | ~41     | 29 (card illus.) | 1     | 7      |
+| core     | ~13     | ~45              | 0     | 0      |
+| later    | ~1      | ~23              | 0     | 0      |
 
 ## Open questions
 
