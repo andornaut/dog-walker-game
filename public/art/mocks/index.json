@@ -1,10 +1,5 @@
 [
   {
-    "title": "Horizon",
-    "path": "horizon.html",
-    "description": "An OutRun-style horizon in place of the backdrop's cross street: the road bends away past its far edge to a vanishing point under a low skyline, for Elm Avenue and Riverside Path, each beside the current run screen. The camera is unchanged."
-  },
-  {
     "title": "Roadside",
     "path": "roadside.html",
     "description": "Elm Avenue's lawns beyond the sidewalks with OutRun-style roadside billboards (houses behind picket fences and hedges, mailboxes, trees, lamp posts, a gnome, a bike, a washing line) that scale with depth and scroll with the road, beside today's bare verge, with the 18 new sprites and their sizes."
