@@ -4,7 +4,8 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
-import type { GearId, WalkerId } from "../data/types";
+import type { DogId, GearId, WalkerId } from "../data/types";
+import { temperamentStart } from "../testing/dogs";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -21,14 +22,15 @@ const data = {
   world: TEST_WORLD,
 };
 
+// Each dog's owner at their temperament's starting hearts.
+const startsOf = (dogs: readonly DogId[]) =>
+  Object.fromEntries(dogs.map((dog) => [dog, temperamentStart(data, dog)]));
+
 describe("newRun", () => {
   it("starts each owner at their temperament's hearts, walking, with no money", () => {
-    const state = newRun(data, 3, {
-      dogs: ["duchess", "nugget", "pierre"],
-      gear: null,
-      walker: "casey",
-    });
-    expect(heartsByDog(state)).toEqual({ duchess: 6, nugget: 5, pierre: 4 });
+    const dogs = ["duchess", "nugget", "pierre"] as const;
+    const state = newRun(data, 3, { dogs, gear: null, walker: "casey" });
+    expect(heartsByDog(state)).toEqual(startsOf(dogs));
     expect(state.money).toBe(0);
     expect(state.phase).toEqual({ kind: "walking" });
     expect(state.zoneIndex).toBe(0);
@@ -76,7 +78,7 @@ describe("newRun", () => {
   it("takes no more dogs than the player owns slots", () => {
     const pair = { dogs: ["duchess", "koda"], gear: null, walker: "casey" } as const;
     expect(() => newRun(data, 1, pair)).toThrow("needs that many dog slots");
-    expect(heartsByDog(newRun(data, 2, pair))).toEqual({ duchess: 6, koda: 6 });
+    expect(heartsByDog(newRun(data, 2, pair))).toEqual(startsOf(pair.dogs));
     expect(newRun(data, 1, { dogs: ["koda"], gear: null, walker: "casey" }).pack).toHaveLength(1);
   });
 

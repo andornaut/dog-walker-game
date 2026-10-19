@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import type { Modifier } from "../data/types";
+import { temperamentStart } from "../testing/dogs";
 import { TEST_TUNING } from "../testing/tuning";
 import { inputLockSeconds, maxHearts, needUrgentSeconds, startHearts, zoneFee } from "./dogs";
 import { zoneStats } from "./zones";
@@ -9,7 +10,8 @@ import { zoneStats } from "./zones";
 describe("dog stats", () => {
   it("derives start and max hearts, fee, need urgency and input lock", () => {
     const { duchess, penny } = DOGS;
-    expect(startHearts(TEST_TUNING, [], duchess)).toBe(6);
+    const start = temperamentStart({ dogs: DOGS, tuning: TEST_TUNING }, "duchess");
+    expect(startHearts(TEST_TUNING, [], duchess)).toBe(start);
     expect(maxHearts(TEST_TUNING, [], penny)).toBe(10);
     expect(zoneFee(TEST_TUNING, [], penny)).toBe(1300);
     expect(needUrgentSeconds(TEST_TUNING, penny)).toBe(100);
@@ -17,9 +19,17 @@ describe("dog stats", () => {
   });
 
   it("starts an owner no higher than their dog's max", () => {
-    // Duchess starts at her max, so a raised start without a raised max is clamped.
+    // Duchess with a laid-back owner starts at her max, so a raised start without a raised max
+    // is clamped.
+    const duchess = {
+      ...DOGS.duchess,
+      owner: { ...DOGS.duchess.owner, temperament: "laidBack" as const },
+    };
     const raisedStart: Modifier = { by: "luckyCollarStart", operation: "add", stat: "startHearts" };
-    expect(startHearts(TEST_TUNING, [raisedStart], DOGS.duchess)).toBe(6);
+    expect(startHearts(TEST_TUNING, [], duchess)).toBe(maxHearts(TEST_TUNING, [], duchess));
+    expect(startHearts(TEST_TUNING, [raisedStart], duchess)).toBe(
+      maxHearts(TEST_TUNING, [], duchess),
+    );
   });
 
   it("removes the input lock with running shoes", () => {

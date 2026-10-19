@@ -11,6 +11,7 @@ import { SHOP_GEAR } from "../data/shop";
 import type { Dog, DogId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import type { RunState } from "../state/runState";
+import { heartsAfter } from "../testing/dogs";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -25,8 +26,8 @@ import {
 } from "./needs";
 
 // The attributes these tests rely on, pinned so a roster edit does not move them: Biscuit is
-// a hyper Regular, Koda a steady Nosy, Duchess a calm Friendly, Snowball a hyper Friendly with
-// a dramatic owner, and Penny a calm, nervous Friendly with a fussy owner.
+// a hyper Regular, Koda a steady Nosy, Duchess a calm Friendly, Snowball a hyper Friendly,
+// and Penny a calm, nervous Friendly. Owners' temperaments are read from the data.
 const dogs = {
   ...DOGS,
   biscuit: { ...DOGS.biscuit, energy: "hyper", need: "regular" },
@@ -86,11 +87,11 @@ describe("urgency", () => {
   });
 
   it("costs the owner a heart when a need goes wrong, and starts it again", () => {
-    // Koda is Nosy; his laid-back owner loses 1.
+    // Koda is Nosy; his owner loses a heart, scaled by their temperament.
     const run = testState({ koda: 5 }, { needSeconds: { koda: 89.5 } });
     const step = stepNeeds(data, plain, 1, true, [], run);
     expect(step.moments).toMatchObject([{ dog: "koda", kind: "goneWrong", need: "nosy" }]);
-    expect(heartsByDog(step.run)).toEqual({ koda: 4 });
+    expect(heartsByDog(step.run)).toEqual({ koda: heartsAfter(data, "koda", 5, -1) });
     expect(step.run.needSeconds).toEqual({ koda: 0 });
     expect(step.cards).toEqual([]);
   });
@@ -106,15 +107,19 @@ describe("urgency", () => {
 
 describe("meetNeedAt", () => {
   it("meets the need of every dog that has it: a heart each, and starts it again", () => {
-    // Duchess and Snowball are Friendly, and both urgent; Snowball's dramatic owner
-    // doubles the heart.
+    // Duchess and Snowball are Friendly, and both urgent; each owner's temperament scales
+    // the heart.
     const run = testState(
       { duchess: 3, koda: 3, snowball: 3 },
       { needSeconds: { duchess: 100, koda: 50, snowball: 100 } },
     );
     const met = meetNeedAt(data, plain, "stranger", run);
     expect(met.card).toBeNull();
-    expect(heartsByDog(met.run)).toEqual({ duchess: 4, koda: 3, snowball: 5 });
+    expect(heartsByDog(met.run)).toEqual({
+      duchess: heartsAfter(data, "duchess", 3, 1),
+      koda: 3,
+      snowball: heartsAfter(data, "snowball", 3, 1),
+    });
     expect(met.run.needSeconds).toEqual({ duchess: 0, koda: 50, snowball: 0 });
     expect(met.moment).toMatchObject({
       dogs: ["duchess", "snowball"],
@@ -147,7 +152,10 @@ describe("meetNeedAt", () => {
       { needSeconds: { duchess: 50, snowball: 45 } },
     );
     const met = meetNeedAt(data, plain, "stranger", mixed);
-    expect(heartsByDog(met.run)).toEqual({ duchess: 3, snowball: 5 });
+    expect(heartsByDog(met.run)).toEqual({
+      duchess: 3,
+      snowball: heartsAfter(data, "snowball", 3, 1),
+    });
     expect(met.run.needSeconds).toEqual({ duchess: 0, snowball: 0 });
     expect(met.moment).toMatchObject({ dogs: ["snowball"], kind: "met" });
   });

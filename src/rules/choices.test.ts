@@ -12,6 +12,7 @@ import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { type CardSource, newRun, type RunState, type UpgradeOffer } from "../state/runState";
+import { heartsAfter, temperamentStart } from "../testing/dogs";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -146,7 +147,7 @@ describe("the zone encounters' options", () => {
     };
   };
 
-  // Koda is a laid-back chaser, Nugget a dramatic food-driven dog, Pierre a fussy fancy one,
+  // Koda is a laid-back chaser, Nugget a dramatic food-driven dog, Pepe a fussy fancy one,
   // Biscuit Regular and Duchess Friendly.
   const kodaTrio: DogId[] = ["koda", "nugget", "pierre"];
   const biscuitTrio: DogId[] = ["biscuit", "koda", "nugget"];
@@ -168,7 +169,7 @@ describe("the zone encounters' options", () => {
       {
         hearts: { koda: 3, nugget: 3, pierre: 4 },
         spent: 0,
-        text: "−2 ♥ Koda and Nugget, −1 ♥ Pierre",
+        text: `−2 ♥ ${DOGS.koda.name} and ${DOGS.nugget.name}, −1 ♥ ${DOGS.pierre.name}`,
       },
     ],
     ["picnic", "Buy a new lunch", kodaTrio, { spent: low }, ["nugget"]],
@@ -194,8 +195,8 @@ describe("the zone encounters' options", () => {
         hearts: { koda: 5, nugget: 5, pierre: 3 },
         met: ["koda", "pierre"],
         spent: tips,
-        // Pierre is a show dog and the trash is messy: his heart lost there costs one more.
-        text: `Nosy needs met, −2 ♥ Pierre, −$${3 * missedTips}`,
+        // Pepe is a show dog and the trash is messy: his heart lost there costs one more.
+        text: `Nosy needs met, −2 ♥ ${DOGS.pierre.name}, −$${3 * missedTips}`,
       },
     ],
     ["trash", "Tidy up", kodaTrio, { hearts: { koda: 5, nugget: 5, pierre: 6 }, spent: tips }],
@@ -212,7 +213,15 @@ describe("the zone encounters' options", () => {
       duchessTrio,
       { hearts: { duchess: 5, nugget: 5, pierre: 6 }, spent: 3 * low },
     ],
-    ["cafe", "Slink away", duchessTrio, { hearts: { duchess: 4, nugget: 3, pierre: 4 }, spent: 0 }],
+    [
+      "cafe",
+      "Slink away",
+      duchessTrio,
+      {
+        hearts: Object.fromEntries(duchessTrio.map((dog) => [dog, heartsAfter(data, dog, 5, -1)])),
+        spent: 0,
+      },
+    ],
     [
       "lemonade",
       "Water, please",
@@ -470,12 +479,21 @@ describe("Lucky collar", () => {
       gear: "luckyCollar",
       walker: "casey",
     });
-    expect(heartsByDog(state)).toEqual({ duchess: 7, pierre: 5 });
+    const { luckyCollarMax, luckyCollarStart } = TEST_TUNING.hearts;
+    const collared = (dog: DogId) => temperamentStart(data, dog) + luckyCollarStart;
+    expect(heartsByDog(state)).toEqual({
+      duchess: collared("duchess"),
+      pierre: collared("pierre"),
+    });
     const offer: CardSource = {
       kind: "upgradeOffer",
       offered: ["bellyRubs", "bigTipper", "raincoats"],
     };
-    expect(heartsByDog(choose(state, offer, 0).state)).toEqual({ duchess: 7, pierre: 6 });
+    // Belly rubs lifts Duchess to her raised max.
+    expect(heartsByDog(choose(state, offer, 0).state)).toEqual({
+      duchess: TEST_TUNING.hearts.maxBySize[DOGS.duchess.size] + luckyCollarMax,
+      pierre: heartsAfter(data, "pierre", collared("pierre"), 1),
+    });
   });
 });
 
@@ -489,10 +507,14 @@ describe("need cards", () => {
   it("names the dogs whose need opened the card, and affects only them", () => {
     const state = testState({ duchess: 3, koda: 3, snowball: 3 });
     const card = cardFor(data, state, need("strangerLoves", ["duchess", "snowball"]));
-    expect(card.title).toBe("A stranger loves Duchess and Snowball");
+    expect(card.title).toBe(`A stranger loves ${DOGS.duchess.name} and ${DOGS.snowball.name}`);
     expect(card.affected).toEqual(["duchess", "snowball"]);
     const outcome = choose(state, need("strangerLoves", ["duchess", "snowball"]), 0);
-    expect(heartsByDog(outcome.state)).toEqual({ duchess: 4, koda: 3, snowball: 5 });
+    expect(heartsByDog(outcome.state)).toEqual({
+      duchess: heartsAfter(data, "duchess", 3, 1),
+      koda: 3,
+      snowball: heartsAfter(data, "snowball", 3, 1),
+    });
   });
 
   it("names the grumpy neighbour as the cause of an accident's Walk on", () => {

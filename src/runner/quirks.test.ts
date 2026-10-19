@@ -10,6 +10,7 @@ import { payZoneFees } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { cents, read } from "../rules/units";
 import type { CardSource, RunState } from "../state/runState";
+import { heartsAfter } from "../testing/dogs";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
@@ -229,8 +230,9 @@ describe("a quirk's own hearts amount", () => {
   const SOURCE = { card: "playDate", kind: "needCard", option: 0 } as const;
 
   it("replaces the effect's amount, so 0 leaves a nervous dog's owner as they were", () => {
-    expect(play("nervous")).toEqual({ duchess: 3, koda: 4 });
-    expect(play("pampered")).toEqual({ duchess: 4, koda: 4 });
+    const koda = heartsAfter(base, "koda", 3, 1);
+    expect(play("nervous")).toEqual({ duchess: 3, koda });
+    expect(play("pampered")).toEqual({ duchess: heartsAfter(base, "duchess", 3, 1), koda });
   });
 });
 

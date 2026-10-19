@@ -132,12 +132,11 @@ describe("roster", () => {
     expect(sniff).toMatchObject({ amount: 1, kind: "hearts", quirkAmounts: { nervous: -1 } });
   });
 
-  it("starts with 3 dogs covering every size and trait, with laid-back owners", () => {
+  it("starts with 3 dogs covering every size and trait", () => {
     const starters = dogList.filter((dog) => dog.unlock === "start");
     expect(starters).toHaveLength(3);
     expect(new Set(starters.map((dog) => dog.size)).size).toBe(SIZES.length);
     expect(new Set(starters.map((dog) => dog.trait)).size).toBe(TRAITS.length);
-    expect(starters.every((dog) => dog.owner.temperament === "laidBack")).toBe(true);
   });
 
   it("gives every dog and owner a distinct name", () => {

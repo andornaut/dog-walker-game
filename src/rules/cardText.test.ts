@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, EncounterId } from "../data/types";
 import type { CardSource } from "../state/runState";
+import { heartsFactor } from "../testing/dogs";
 import { testState } from "../testing/runState";
 import { cardFor } from "./choices";
 import { cents, dollarsToCents } from "./units";
 
-// Koda is a laid-back chaser, Duchess a laid-back fancy dog, Nugget a dramatic food-driven
-// one, so trait amounts and the dramatic doubling both show.
+// Koda is a chaser, Duchess a fancy dog and Nugget a food-driven one, so trait amounts show;
+// their owners' temperaments come from the data, and the pack mixes them, so the dramatic
+// doubling shows too.
 const PACK: readonly DogId[] = ["koda", "duchess", "nugget"];
 const state = testState({ duchess: 5, koda: 5, nugget: 5 }, { money: cents(10_000) });
 const { encounterHigh, encounterLow, thiefLetGo } = gameData.tuning.money;
@@ -18,6 +20,13 @@ const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => (
   encounter: id,
   kind: "encounter",
 });
+
+// One dog's part of a card's text: a base change in hearts, scaled by their owner's
+// temperament, and the dog's name.
+function heartsText(dog: DogId, amount: number): string {
+  const total = amount * heartsFactor(gameData, dog);
+  return `${total < 0 ? "−" : "+"}${Math.abs(total)} ♥ ${gameData.dogs[dog].name}`;
+}
 
 function option(source: CardSource, label: string) {
   const found = cardFor(gameData, state, source).options.find((view) => view.label === label);
@@ -33,22 +42,22 @@ describe("a card's text for the dogs it catches", () => {
       affected: ["koda"],
       id: "puddle",
       label: "Splash through",
-      text: "−1 ♥ Koda",
+      text: heartsText("koda", -1),
       why: "drops a trait amount no dog caught has",
     },
     {
       affected: ["duchess", "koda"],
       id: "puddle",
       label: "Splash through",
-      text: "−2 ♥ Duchess, −1 ♥ Koda",
+      text: `${heartsText("duchess", -2)}, ${heartsText("koda", -1)}`,
       why: "names each dog's total",
     },
     {
       affected: ["nugget"],
       id: "skunk",
       label: "Hold your nose",
-      text: "−4 ♥ Nugget",
-      why: "includes a dramatic owner's doubling",
+      text: heartsText("nugget", -2),
+      why: "includes the owner's temperament",
     },
     {
       affected: ["koda", "duchess"],
@@ -80,6 +89,9 @@ describe("a card's text for the dogs it catches", () => {
   });
 
   it("matches the snapshot for the whole pack caught", () => {
+    const temperaments = new Set(PACK.map((dog) => gameData.dogs[dog].owner.temperament));
+    expect(temperaments).toContain("dramatic");
+    expect(temperaments.size).toBeGreaterThan(1);
     const encounters = Object.fromEntries(
       Object.entries(gameData.encounters).flatMap(([id, { resolution }]) =>
         resolution.kind === "instant"

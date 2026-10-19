@@ -5,6 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import type { DogId, Effect } from "../data/types";
 import type { ActiveModifier, EffectSource, RunState } from "../state/runState";
+import { heartsAfter } from "../testing/dogs";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { applyEffects, type EffectContext, moneyCost, resolveEffects, targetDogs } from "./effects";
@@ -55,7 +56,8 @@ describe("applyEffects: hearts", () => {
       ["duchess", "koda"],
       puddle,
       { duchess: 5, koda: 5 },
-      { duchess: 3, koda: 4 },
+      // Duchess is Fancy and Koda is not.
+      { duchess: heartsAfter(data, "duchess", 5, -2), koda: heartsAfter(data, "koda", 5, -1) },
     ],
     [
       "the max raised by a maxHearts modifier",
@@ -86,7 +88,10 @@ describe("applyEffects: hearts", () => {
     const state = testState({ duchess: 5, koda: 5 });
     expect(
       heartsByDog(applyEffects(nervous, context(["duchess", "koda"]), [sniff], state)),
-    ).toEqual({ duchess: 4, koda: 6 });
+    ).toEqual({
+      duchess: heartsAfter(data, "duchess", 5, -1),
+      koda: heartsAfter(data, "koda", 5, 1),
+    });
   });
 });
 
@@ -159,7 +164,11 @@ describe("targetDogs", () => {
       { affected: ["pierre"] },
     ],
     ["by trait", { kind: "trait", trait: "fancy" }, ["duchess"]],
-    ["by owner temperament", { kind: "temperament", temperament: "dramatic" }, ["nugget"]],
+    [
+      "by owner temperament",
+      { kind: "temperament", temperament: "dramatic" },
+      (["duchess", "nugget"] as const).filter((dog) => DOGS[dog].owner.temperament === "dramatic"),
+    ],
     ["one random dog, low draw", randomOne, ["duchess"]],
     ["one random dog, high draw", randomOne, ["nugget"], { random: 0.99 }],
     ["the unhappiest owner", unhappiest, ["nugget"], { state: lowestLast }],
