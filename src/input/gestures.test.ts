@@ -142,6 +142,45 @@ describe("drags", () => {
   });
 });
 
+describe("drag symmetry", () => {
+  // Road centre is x 220; one lane-width is 56px.
+  const anchors = [150, 290];
+  const cases: [number, number][] = [
+    [0.9, 0],
+    [1.0, 1],
+    [1.9, 1],
+    [2.0, 2],
+    [3.0, 3],
+  ];
+
+  it.each(anchors)("steps the same number of lanes left and right from x %i", (anchorX) => {
+    for (const [widths, lanes] of cases) {
+      const drag = (sign: number) =>
+        all([
+          ["down", anchorX, 300],
+          ["move", anchorX + sign * widths * 56, 300],
+          ["up", anchorX + sign * widths * 56, 300],
+        ]);
+      expect(drag(1)).toEqual(Array<GestureAction>(lanes).fill(right));
+      expect(drag(-1)).toEqual(Array<GestureAction>(lanes).fill(left));
+    }
+  });
+
+  // Positions from a headless 390px-wide touch drag of exactly 56px each way: float32 touch
+  // coordinates put the anchor 1e-5px low, so the left drag reads as 55.99999px.
+  it("steps a whole lane-width either way despite float error in the pointer position", () => {
+    const anchorX = 289.99999060997595;
+    const drag = (x: number) =>
+      all([
+        ["down", anchorX, 300],
+        ["move", x, 300],
+        ["up", x, 300],
+      ]);
+    expect(drag(234)).toEqual([left]);
+    expect(drag(346.00000939002405)).toEqual([right]);
+  });
+});
+
 describe("taps", () => {
   it("moves one lane toward the half of the road that was tapped", () => {
     expect(all(tap(150, 300))).toEqual([left]);

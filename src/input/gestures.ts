@@ -66,10 +66,16 @@ export function exceedsTapDistance(maxDistance: number, start: Point, end: Point
   return Math.hypot(end.x - start.x, end.y - start.y) > maxDistance;
 }
 
+// Browser touch coordinates are float32 and then scaled to the game, so travel of exactly a
+// lane-width can read about 1e-5px short of it. Travel within this many lanes of a whole
+// lane-width counts as reaching it.
+const LANE_TOLERANCE = 1e-4;
+
 // Whole lane-widths from the anchor, rounded toward zero so both directions step at the
 // same distance.
 function laneOffset({ config, layout }: GestureContext, anchorX: number, x: number): number {
-  return Math.trunc(((x - anchorX) * config.laneCount) / layout.road.width);
+  const lanes = ((x - anchorX) * config.laneCount) / layout.road.width;
+  return Math.trunc(lanes + Math.sign(lanes) * LANE_TOLERANCE);
 }
 
 // One move per lane boundary crossed; the sign is the direction.

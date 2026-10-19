@@ -85,6 +85,21 @@ describe("steerLane", () => {
   });
 });
 
+describe("steering symmetry", () => {
+  const steerTimes = (direction: 1 | -1, times: number, from: LaneControl) => {
+    let control = from;
+    for (let i = 0; i < times; i++) {
+      control = advance(0.02, steerLane(config, direction, control));
+    }
+    return advance(1, control).motion;
+  };
+
+  it.each([1, 2, 3])("ends %i steers left or right as many lanes over", (times) => {
+    expect(steerTimes(1, times, still(1))).toEqual(stillInLane(1 + times));
+    expect(steerTimes(-1, times, still(3))).toEqual(stillInLane(3 - times));
+  });
+});
+
 describe("lockSteering", () => {
   it("drops steps until the lock runs out", () => {
     const locked = lockSteering(0.5, still(2));
