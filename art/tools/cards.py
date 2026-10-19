@@ -29,6 +29,8 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import help as hp  # noqa: E402
+import road  # noqa: E402
+from ui import to_image  # noqa: E402
 from pixel import Grid, build as build_sprites  # noqa: E402
 
 CW, CH = 83, 140
@@ -178,10 +180,15 @@ def squirrel_chase():
     return a
 
 
+def small_puddle(f=0):
+    """Cards show a 32x16 puddle; the road's is two lanes wide."""
+    return to_image(road.puddle(f, 32, 16).outlined(False))
+
+
 def puddle_through():
     a = Art()
     a.ground("street")
-    a.paste(hp.frame("puddle", "idle"), 22, 30)
+    a.paste(small_puddle(), 22, 30)
     a.put("dog-duchess", "react", 38, 44, shadow=False)
     a.drops([(26, 26), (30, 22), (48, 24), (52, 28), (44, 20)])
     return a
@@ -496,7 +503,7 @@ def shortcut():
 def rush_hour():
     a = Art()
     a.ground("street")
-    a.paste(hp.frame("puddle", "idle"), 2, 38)
+    a.paste(small_puddle(), 2, 38)
     a.put("skunk", "idle", 62, 54)
     a.put("squirrel", "idle", 36, 52)
     a.coins([(8, 4), (22, 10), (40, 4), (50, 16), (30, 22), (14, 22)])
@@ -507,7 +514,7 @@ def rush_hour():
 def raincoats():
     a = Art()
     a.ground("street")
-    a.paste(hp.frame("puddle", "idle", 1), 22, 36)
+    a.paste(small_puddle(1), 22, 36)
     a.put("dog-duchess", "walk", 37, 46, shadow=False)
     a.fill(31, 34, 13, 8, "amber")
     a.fill(31, 34, 13, 1, "yellow")

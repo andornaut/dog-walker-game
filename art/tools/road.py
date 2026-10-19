@@ -268,14 +268,43 @@ def squirrel(tail=0, shift=0):
     return g
 
 
-def puddle(f):
-    g = Grid(32, 16)
-    g.ell(16, 8, 14, 6, "blue")
-    g.ell(16, 8.5, 13, 5, "sky")
+def puddle(f, w=88, h=32):
+    """The road's 2-lane puddle; cards draw a 32x16 one. Wide puddles get a second lobe."""
+    g = Grid(w, h)
+    lobes = [(w / 2, h / 2, w / 2 - 2, h / 2 - 2)]
+    if w > 40:
+        lobes = [(w * 0.36, h * 0.52, w * 0.34, h / 2 - 3), (w * 0.66, h * 0.46, w * 0.32, h / 2 - 4)]
+    for cx, cy, rx, ry in lobes:
+        g.ell(cx, cy, rx, ry, "blue")
+    for cx, cy, rx, ry in lobes:
+        g.ell(cx, cy + 0.5, rx - 1, ry - 1, "sky")
     s = 1 if f else 0
-    g.rect(9 + s, 5, 4, 1, "cyan")
-    g.rect(19 - s, 9, 5, 1, "cyan")
-    g.rect(13 + s, 11, 2, 1, "cyan")
+    for fx, fy, fw in ((0.28, 0.31, 0.125), (0.59, 0.56, 0.16), (0.41, 0.69, 0.06), (0.75, 0.3, 0.1)):
+        if w > 40 or fx < 0.7:
+            g.rect(round(fx * w) + (s if fx < 0.5 else -s), round(fy * h), max(2, round(fw * w)), 1, "cyan")
+    return g
+
+
+def skunk_cloud(step):
+    """88x88 spray cloud drawn under the skunk: puffs with a solid rim and a 2x2-dithered
+    fill, so the road shows through. The puffs swell in turn."""
+    g = Grid(88, 88)
+    puffs = [(44, 44, 30), (24, 28, 17), (64, 26, 18), (22, 62, 18), (64, 64, 18), (44, 14, 13), (44, 74, 13),
+             (12, 44, 11), (76, 44, 11)]
+    puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(puffs)]
+    for y in range(88):
+        for x in range(88):
+            d = min(((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2) ** 0.5 / r for cx, cy, r in puffs)
+            if d > 1:
+                continue
+            rim = d > 1 - 1.6 / 14
+            if rim:
+                g.p(x, y, "green" if y < 44 else "dgreen")
+            elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
+                g.p(x, y, "green" if (x + y) % 8 else "dgreen")
+    for x0, y0 in ((20, 22), (60, 18), (66, 58), (26, 58)):
+        for k in range(6):
+            g.p(x0 + (k + step) % 3 - 1, y0 + k, "dgreen")
     return g
 
 
@@ -705,6 +734,7 @@ def sprites():
     yield "squirrel", [("idle", frames([squirrel(0), squirrel(1)]), 300),
                        ("run", frames([squirrel(0, -1), squirrel(-1, 1)]), 120)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
+    yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
     yield "other-dog", [("walk", frames([corgi(-1), corgi(1)]), 200)]
     yield "other-dog-owner", [("walk", [person(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
                                         person(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200)]
