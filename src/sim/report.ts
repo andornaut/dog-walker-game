@@ -1,5 +1,6 @@
 import { itemAt } from "../arrays";
-import type { GameData, GearId } from "../data/types";
+import type { GameData, GearId, WalkerId } from "../data/types";
+import { DEFAULT_WALKER } from "../data/walkers";
 import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
 import { seededRandom } from "../runner/random";
 import { ALWAYS_MOVERS, itemCategory, type WalkItemKind } from "../runner/walk";
@@ -26,8 +27,9 @@ export type MatrixPlayer =
   | { readonly hitRate: number; readonly kind: "rates" }
   | { readonly kind: "skill"; readonly preset: SkillPresetId };
 
-// Every combination of policy, route policy, player, gear and pack is one cell. Rates are chances
-// from 0 to 1, for players with a fixed hit rate. A null gear is a walk with none equipped.
+// Every combination of policy, route policy, player, gear, pack and walker is one cell. Rates
+// are chances from 0 to 1, for players with a fixed hit rate. A null gear is a walk with none
+// equipped.
 export interface Matrix {
   readonly gears: readonly (GearId | null)[];
   readonly luckyRate: number;
@@ -37,6 +39,7 @@ export interface Matrix {
   readonly routes: readonly RoutePolicyId[];
   readonly tipRate: number;
   readonly treatRate: number;
+  readonly walkers: readonly WalkerId[];
 }
 
 export interface MatrixCell {
@@ -45,6 +48,7 @@ export interface MatrixCell {
   readonly player: MatrixPlayer;
   readonly policy: PolicyId;
   readonly route: RoutePolicyId;
+  readonly walker: WalkerId;
 }
 
 // Earnings are in cents. Shares are from 0 to 1, of the items that reached the pack, and null
@@ -80,6 +84,7 @@ export interface MatrixRow {
   readonly policy: PolicyId;
   readonly route: RoutePolicyId;
   readonly runs: number;
+  readonly walker: WalkerId;
 }
 
 const PACKS: readonly NamedPack[] = [
@@ -106,6 +111,7 @@ export const DEFAULT_MATRIX: Matrix = {
   players: SKILL_PLAYERS,
   policies: POLICY_IDS,
   routes: [DEFAULT_ROUTE_POLICY],
+  walkers: [DEFAULT_WALKER],
   ...DEFAULT_RATES,
 };
 
@@ -122,7 +128,9 @@ export function matrixCells(matrix: Matrix): MatrixCell[] {
     matrix.routes.flatMap((route) =>
       matrix.players.flatMap((player) =>
         matrix.gears.flatMap((gear) =>
-          matrix.packs.map((pack) => ({ gear, pack, player, policy, route })),
+          matrix.packs.flatMap((pack) =>
+            matrix.walkers.map((walker) => ({ gear, pack, player, policy, route, walker })),
+          ),
         ),
       ),
     ),
@@ -155,8 +163,8 @@ function simPlayer(matrix: Matrix, player: MatrixPlayer): SimPlayer {
 }
 
 // Run number run of a cell. It is seeded by the seed, the pack and the run number alone, so
-// every policy, route policy, player and gear meets the same first zone plan and their rows differ
-// by the choices and the play, not by the draw.
+// every policy, route policy, player, gear and walker meets the same first zone plan and their
+// rows differ by the choices and the play, not by the draw.
 export function simulateCellRun(
   data: SimData,
   seed: number,
@@ -170,6 +178,7 @@ export function simulateCellRun(
     player: simPlayer(matrix, cell.player),
     policy: cell.policy,
     route: cell.route,
+    walker: cell.walker,
   });
 }
 
@@ -282,6 +291,7 @@ export function summarizeCell(
     policy: cell.policy,
     route: cell.route,
     runs: results.length,
+    walker: cell.walker,
   };
 }
 
@@ -316,6 +326,7 @@ export const MATRIX_HEADERS = [
   "Player",
   "Gear",
   "Pack",
+  "Walker",
   "Hit",
   "Bump",
   "Forced",
@@ -340,6 +351,7 @@ export function rowCells(row: MatrixRow): string[] {
     row.player,
     row.gear,
     row.pack,
+    row.walker,
     measured(row.hitShare),
     measured(row.bumpShare),
     measured(row.afterPullShare),
@@ -358,13 +370,13 @@ export function rowCells(row: MatrixRow): string[] {
   ];
 }
 
-// A fixed-width text table: the first five columns left-aligned, the rest right-aligned.
+// A fixed-width text table: the first six columns left-aligned, the rest right-aligned.
 function textTable(headers: readonly string[], rows: readonly (readonly string[])[]): string {
   const lines = [headers, ...rows];
   const widths = headers.map((_, column) =>
     Math.max(...lines.map((line) => itemAt(line, column).length)),
   );
-  const leftAligned = 5;
+  const leftAligned = 6;
   return lines
     .map((line) =>
       line
@@ -396,6 +408,7 @@ export function formatKindTable(
       "Player",
       "Gear",
       "Pack",
+      "Walker",
       ...kinds,
       ...MOVER_KINDS.map((mover) => MOVER_COLUMNS[mover]),
     ],
@@ -405,6 +418,7 @@ export function formatKindTable(
       row.player,
       row.gear,
       row.pack,
+      row.walker,
       ...kinds.map((kind) => measured(row.kindHitShares[kind] ?? null)),
       ...MOVER_KINDS.map((mover) => measured(row.moverHitShares[mover] ?? null)),
     ]),

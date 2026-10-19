@@ -33,6 +33,7 @@ import {
 import { modifiersOf } from "../rules/modifiers";
 import { firstZoneId, walkLength, zoneById } from "../rules/route";
 import { price, unlockPrice } from "../rules/shop";
+import { walkerEffects } from "../rules/walkers";
 import { zoneStats } from "../rules/zones";
 import { POLICY_NAMES } from "../sim/policies";
 import {
@@ -264,12 +265,22 @@ function dogSlotsSection(data: GameData): Section {
 
 function walkersSection(data: GameData): Section {
   return {
-    headers: ["Walker", "Sprite", "Portrait", "Price"],
-    note: "A new player starts with the default walker.",
+    headers: ["Walker", "Pace", "Style", "Effect", "Unlock", "Sprite", "Portrait"],
+    note:
+      "A new player starts with the default walker. The others unlock the first time a walk " +
+      "finishes their zone.",
     rows: (Object.keys(data.walkers) as WalkerId[]).map((id) => {
       const walker = data.walkers[id];
       const name = id === data.defaultWalker ? `${walker.name} (default)` : walker.name;
-      return [name, walker.spriteKey, walker.portraitKey, priceText(data, walker)];
+      return [
+        name,
+        data.walkerPaces[walker.pace].name,
+        data.walkerStyles[walker.style].name,
+        effectText(data, walkerEffects(data, id)),
+        walker.unlock === "start" ? "Start" : `Finish zone ${walker.zone}`,
+        walker.spriteKey,
+        walker.portraitKey,
+      ];
     }),
     title: "Walkers",
   };

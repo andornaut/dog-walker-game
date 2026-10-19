@@ -1,9 +1,25 @@
 import { TUNING } from "../data/tuning";
 import type { LiveTuning } from "../data/types";
 
-// The live tuning with the values rule tests assert on pinned, so a tuning edit does not
-// break a rules test. Integrity tests read the real tuning instead.
-export const TEST_TUNING: LiveTuning = {
+// tuning with every walker's pace and style changing nothing, so a test that is not about
+// walkers walks with any of them alike.
+export function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
+  return {
+    ...tuning,
+    hearts: { ...tuning.hearts, charmerStart: 0 },
+    multipliers: {
+      ...tuning.multipliers,
+      charmerTip: 1,
+      fastWalkerFees: 1,
+      fastWalkerSpeed: 1,
+      hustlerTip: 1,
+      slowWalkerFees: 1,
+      slowWalkerSpeed: 1,
+    },
+  };
+}
+
+const PINNED_TUNING: LiveTuning = {
   ...TUNING,
   counts: {
     ...TUNING.counts,
@@ -63,3 +79,7 @@ export const TEST_TUNING: LiveTuning = {
     zoneAtBaseSpeed: 240,
   },
 };
+
+// The live tuning with the values rule tests assert on pinned, and neutral walkers, so a
+// tuning edit does not break a rules test. Integrity tests read the real tuning instead.
+export const TEST_TUNING: LiveTuning = withNeutralWalkers(PINNED_TUNING);

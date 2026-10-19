@@ -6,7 +6,7 @@ import { PRE_FORK_ROUTE } from "../rules/route";
 import { cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 // The most dogs a run can take.
 export const MAX_RUN_DOGS = 3;
@@ -124,6 +124,8 @@ export const saveSchema = v.object({
     dogSlots,
     dogs: ids,
     gear: ids,
+    // The walkers unlocked, each once.
+    walkers: ids,
   }),
   settings: v.object({
     musicVolume: volume,
@@ -136,7 +138,7 @@ export const saveSchema = v.object({
   shownHints: ids,
   stats: statsSchema,
   version: v.literal(SAVE_VERSION),
-  // The walker in use.
+  // The walker in use, one of owned.walkers.
   walker: contentId,
 });
 
@@ -169,6 +171,7 @@ export interface Owned {
   dogSlots: number;
   dogs: DogId[];
   gear: GearId[];
+  walkers: WalkerId[];
 }
 
 export interface Walk extends Omit<v.InferOutput<typeof walkSchema>, "dogs"> {
@@ -209,11 +212,12 @@ export interface SaveDocument extends Omit<
   walker: WalkerId;
 }
 
-// What a new player starts with. The free dogs stay owned on every load, and walker replaces
-// an unknown walker.
+// What a new player starts with. The free dogs and walkers stay owned on every load, and
+// walker replaces a walker not owned.
 export interface SaveDefaults {
   dogSlots: number;
   freeDogs: readonly DogId[];
+  freeWalkers: readonly WalkerId[];
   walker: WalkerId;
 }
 
@@ -239,6 +243,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       dogSlots: defaults.dogSlots,
       dogs: [...defaults.freeDogs],
       gear: [],
+      walkers: [...defaults.freeWalkers],
     },
     settings: { ...DEFAULT_SETTINGS },
     shownHints: [],

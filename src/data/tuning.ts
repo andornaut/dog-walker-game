@@ -38,6 +38,8 @@ export const TUNING = {
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
   hearts: {
+    // A charmer walker's owners each start with this many more.
+    charmerStart: 1,
     // A face looks happy at this many hearts or more, and upset below faceNeutralFrom.
     faceHappyFrom: 6,
     faceNeutralFrom: 3,
@@ -93,12 +95,19 @@ export const TUNING = {
     bigTipperTip: 1.5,
     // A photo op's tip while a camera-ready dog walks.
     cameraReadyTip: 2,
+    // A charmer walker's tip value.
+    charmerTip: 0.85,
     // How much more often stranger spots are drawn while a crowd pleaser walks.
     crowdPleaserStrangerWeight: 2,
     // A cyclist rides down its lane this much faster than the road scrolls; above 1.
     cyclistSpeedMultiplier: 1.6,
+    // A fast walker's fees and road speed.
+    fastWalkerFees: 1.1,
+    fastWalkerSpeed: 1.1,
     goodLeashSquirrelPull: 0,
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
+    // A hustler walker's tip value.
+    hustlerTip: 1.2,
     // A nervous dog's need fills this much faster once firings leave her the only dog walking.
     nervousAloneUrgency: 2,
     otherDogChangePerBigDog: -0.25,
@@ -113,6 +122,9 @@ export const TUNING = {
     shortcutZoneLength: 0.75,
     // How much faster the pack changes lanes while a sled dog walks.
     sledDogLaneSpeed: 1.15,
+    // A slow walker's fees and road speed.
+    slowWalkerFees: 0.9,
+    slowWalkerSpeed: 0.9,
     stinkyTip: 0.5,
     // By the number of dogs in the pack.
     tipByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },

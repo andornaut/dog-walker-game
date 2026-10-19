@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import manifest from "../../public/art/manifest.json";
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
-import type { DebuffId, GearId, UpgradeId } from "../data/types";
+import type { DebuffId, GearId, UpgradeId, WalkerId } from "../data/types";
 import { defined } from "../testing/defined";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -11,6 +11,7 @@ import {
   moveStripPress,
   onStrip,
   STRIP,
+  stripIconFallback,
   stripIconKey,
   type StripItem,
   stripItems,
@@ -18,13 +19,28 @@ import {
   stripTapAllowed,
   stripTapped,
   stripText,
+  walkerStripItems,
 } from "./stateStrip";
 import { PAUSE_BUTTON, type RunPause } from "./topBar";
 
 const data = { ...gameData, tuning: TEST_TUNING };
+// Walkers that change what they do, for their text.
+const walkerData = {
+  ...data,
+  tuning: {
+    ...TEST_TUNING,
+    hearts: { ...TEST_TUNING.hearts, charmerStart: 1 },
+    multipliers: {
+      ...TEST_TUNING.multipliers,
+      charmerTip: 0.85,
+      slowWalkerFees: 0.9,
+      slowWalkerSpeed: 0.9,
+    },
+  },
+};
 
 describe("stripItems", () => {
-  it("lists the debuffs, then the upgrades in effect in pick order, then the gear", () => {
+  it("lists the debuffs, then the upgrades in effect in pick order, the gear, then the walker's pace and style", () => {
     const run = testState(
       { koda: 5 },
       {
@@ -38,6 +54,7 @@ describe("stripItems", () => {
           ),
         ],
         upgradesPicked: ["raincoats", "bellyRubs", "bigTipper"],
+        walker: "trista",
       },
     );
     expect(stripItems(data, run)).toEqual([
@@ -45,12 +62,35 @@ describe("stripItems", () => {
       { kind: "upgrade", upgrade: "raincoats" },
       { kind: "upgrade", upgrade: "bigTipper" },
       { gear: "whistle", kind: "gear" },
+      { kind: "pace", pace: "fast" },
+      { kind: "style", style: "hustle" },
     ]);
   });
 
   it("drops an upgrade once its effects expire, and never shows a boost given at once", () => {
     const run = testState({ koda: 5 }, { upgradesPicked: ["shortcut", "secondWind"] });
-    expect(stripItems(data, run)).toEqual([]);
+    expect(stripItems(data, run)).toEqual(walkerStripItems(data, run.walker));
+  });
+});
+
+describe("walkerStripItems", () => {
+  it.each<[WalkerId, StripItem[]]>([
+    [
+      "ada",
+      [
+        { kind: "pace", pace: "fast" },
+        { kind: "style", style: "charm" },
+      ],
+    ],
+    [
+      "ben",
+      [
+        { kind: "pace", pace: "slow" },
+        { kind: "style", style: "hustle" },
+      ],
+    ],
+  ])("gives %s's pace, then style", (walker, expected) => {
+    expect(walkerStripItems(data, walker)).toEqual(expected);
   });
 });
 
@@ -71,8 +111,27 @@ describe("stripText", () => {
       { debuff: "stinky", kind: "debuff" },
       "Stinky: tip value −50% for the rest of the zone.",
     ],
+    [
+      "a walker's pace and its effects",
+      { kind: "pace", pace: "slow" },
+      "Slow: road speed −10%, fees −10%.",
+    ],
+    [
+      "a walker's style and its effects",
+      { kind: "style", style: "charm" },
+      "Charmer: starting ♥ +1, tip value −15%.",
+    ],
   ])("writes %s", (_name, item, expected) => {
-    expect(stripText(data, item)).toBe(expected);
+    expect(stripText(walkerData, item)).toBe(expected);
+  });
+});
+
+describe("stripIconFallback", () => {
+  it.each<[StripItem, string]>([
+    [{ gear: "fannyPack", kind: "gear" }, "F"],
+    [{ kind: "style", style: "hustle" }, "H"],
+  ])("shows %o as the first letter of its name", (item, expected) => {
+    expect(stripIconFallback(data, item)).toBe(expected);
   });
 });
 

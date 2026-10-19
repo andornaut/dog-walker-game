@@ -4,6 +4,8 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
   onStrip,
+  STRIP,
+  stripIconFallback,
   stripIconKey,
   type StripItem,
   stripItemsKey,
@@ -25,7 +27,7 @@ const DEPTH = 20;
 // The top bar's state strip and the bubble a tap on it opens.
 export class StateStripView {
   private bubble: GameObjects.GameObject[] = [];
-  private icons: GameObjects.Image[] = [];
+  private icons: (GameObjects.BitmapText | GameObjects.Image)[] = [];
   private items: readonly StripItem[] = [];
   private itemsKey: string | undefined;
   private layout: StripLayout | undefined;
@@ -72,13 +74,30 @@ export class StateStripView {
       fillRect(this.well, PALETTE.ink, layout.well);
     }
     this.icons = items.flatMap((item, i) => {
-      const key = stripIconKey(item);
       const at = layout.icons[i];
-      if (at === undefined || !this.scene.textures.exists(key)) {
-        return [];
-      }
-      return [this.scene.add.image(at.x, at.y, key).setOrigin(0).setDepth(DEPTH)];
+      return at === undefined ? [] : [this.addIcon(item, at, DEPTH, PALETTE.cream)];
     });
+  }
+
+  // The item's icon at its top-left corner, or its fallback letter in color while the art is
+  // missing.
+  private addIcon(
+    item: StripItem,
+    at: Point,
+    depth: number,
+    color: number,
+  ): GameObjects.BitmapText | GameObjects.Image {
+    const key = stripIconKey(item);
+    if (this.scene.textures.exists(key)) {
+      return this.scene.add.image(at.x, at.y, key).setOrigin(0).setDepth(depth);
+    }
+    const half = STRIP.icon / 2;
+    const letter = stripIconFallback(gameData, item);
+    return addPixelText(this.scene, at.x + half, at.y + half, letter, {
+      color,
+      originX: 0.5,
+      originY: 0.5,
+    }).setDepth(depth);
   }
 
   // Whether a press at point lands on the strip. The HUD reads presses at the scene, not
@@ -138,14 +157,8 @@ export class StateStripView {
     let rowY = y + padding;
     texts.forEach((text, i) => {
       const item = this.items[i];
-      const key = item === undefined ? "" : stripIconKey(item);
-      if (this.scene.textures.exists(key)) {
-        parts.push(
-          this.scene.add
-            .image(x + padding, rowY, key)
-            .setOrigin(0)
-            .setDepth(DEPTH + 1),
-        );
+      if (item !== undefined) {
+        parts.push(this.addIcon(item, { x: x + padding, y: rowY }, DEPTH + 1, PALETTE.plum));
       }
       placePixelText(text, x + padding + icon + gap, rowY + 2);
       text.setDepth(DEPTH + 1);

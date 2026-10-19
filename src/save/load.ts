@@ -63,16 +63,25 @@ export type SaveData = Pick<
   | "world"
 >;
 
-// A new player has the starting dog slots, owns the dogs marked "start" and walks with the
-// default walker.
+// A new player has the starting dog slots, owns the dogs and walkers marked "start" and walks
+// with the default walker.
 export function saveContextFrom(data: SaveData): SaveContext {
   const dogs = keysOf(data.dogs);
   const freeDogs = dogs.filter((id) => data.dogs[id].unlock === "start");
   if (freeDogs.length === 0) {
     throw new Error("The game data needs a starter dog");
   }
+  const freeWalkers = keysOf(data.walkers).filter((id) => data.walkers[id].unlock === "start");
+  if (!freeWalkers.includes(data.defaultWalker)) {
+    throw new Error("The default walker needs to walk from the start");
+  }
   return {
-    defaults: { dogSlots: startingDogSlots(data), freeDogs, walker: data.defaultWalker },
+    defaults: {
+      dogSlots: startingDogSlots(data),
+      freeDogs,
+      freeWalkers,
+      walker: data.defaultWalker,
+    },
     known: {
       achievements: new Set(data.achievements.map(({ id }) => id)),
       debuffs: new Set(keysOf(data.debuffs)),
@@ -120,7 +129,7 @@ function clamp(min: number, max: number, value: number): number {
 }
 
 // Drops ids the game no longer has, and loadout picks the player does not own. The free dogs
-// are always owned, and an unknown walker becomes the default. Dog slots are clamped to 1 to
+// and walkers are always owned, and a walker not owned becomes the default. Dog slots are clamped to 1 to
 // MAX_RUN_DOGS and volumes to 0 to 1. A
 // loadout keeps at most one dog per slot, and may be empty.
 export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
@@ -129,6 +138,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
     dogSlots: clamp(1, MAX_RUN_DOGS, save.owned.dogSlots),
     dogs: keepKnown(known.dogs, [...defaults.freeDogs, ...save.owned.dogs]),
     gear: keepKnown(known.gear, save.owned.gear),
+    walkers: keepKnown(known.walkers, [...defaults.freeWalkers, ...save.owned.walkers]),
   };
   const { gear } = save.lastLoadout;
   const lastLoadout = {
@@ -181,7 +191,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
     },
-    walker: isKnown(known.walkers, save.walker) ? save.walker : defaults.walker,
+    walker: isKnown(new Set(owned.walkers), save.walker) ? save.walker : defaults.walker,
   };
 }
 

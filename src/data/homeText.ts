@@ -10,6 +10,7 @@ export const HOME_TEXT = {
     firstVisit: "Morning! Who's walking today? Tap to pick, hold for details.",
     howTo: "Tap to pick, hold for details.",
     newAffordable: "Something new at the pet shop.",
+    newWalker: "New walker!",
   },
   detail: {
     dogFee: "Fee {fee}/zone",

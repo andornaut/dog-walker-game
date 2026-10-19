@@ -163,10 +163,16 @@ describe("loadSave", () => {
           dogSlots: 2,
           dogs: ["koda", "ghost", "penny", "koda"],
           gear: ["whistle", "jetpack", "whistle"],
+          walkers: ["ben", "ghost", "ben"],
         };
       },
       (save) => save.owned,
-      { dogSlots: 2, dogs: ["biscuit", "duchess", "koda", "penny"], gear: ["whistle"] },
+      {
+        dogSlots: 2,
+        dogs: ["biscuit", "duchess", "koda", "penny"],
+        gear: ["whistle"],
+        walkers: ["casey", "ben"],
+      },
     ],
     [
       // archie is a known dog that this player has not bought.
@@ -198,6 +204,15 @@ describe("loadSave", () => {
       "with an unknown walker swapped for the default",
       (document) => {
         document.walker = "retiredWalker";
+      },
+      (save) => save.walker,
+      "casey",
+    ],
+    [
+      "with a walker not unlocked swapped for the default",
+      (document) => {
+        document.owned.walkers = ["casey", "ben"];
+        document.walker = "trista";
       },
       (save) => save.walker,
       "casey",
@@ -417,10 +432,11 @@ describe("saveContextFrom", () => {
     expect([...context.known.zones]).toEqual(gameData.world.zones.map(({ id }) => id));
   });
 
-  it("starts a new player with one dog slot, the starter dogs and the default walker", () => {
+  it("starts a new player with one dog slot, the starter dogs and walkers, and the default walker", () => {
     expect(context.defaults).toEqual({
       dogSlots: 1,
       freeDogs: ["biscuit", "duchess", "koda"],
+      freeWalkers: ["casey"],
       walker: gameData.defaultWalker,
     });
   });
@@ -433,5 +449,10 @@ describe("saveContextFrom", () => {
       ]),
     ) as typeof gameData.dogs;
     expect(() => saveContextFrom({ ...gameData, dogs })).toThrow("needs a starter dog");
+  });
+
+  it("refuses game data whose default walker does not walk from the start", () => {
+    const walkers = { ...gameData.walkers, casey: { ...gameData.walkers.ben, name: "Casey" } };
+    expect(() => saveContextFrom({ ...gameData, walkers })).toThrow("default walker");
   });
 });

@@ -56,6 +56,7 @@ const owned: Owned = {
   dogSlots: 3,
   dogs: ["biscuit", "duchess", "koda"],
   gear: ["fannyPack"],
+  walkers: ["casey"],
 };
 const dollars = (amount: number) => cents(amount * 100);
 

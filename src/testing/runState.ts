@@ -3,7 +3,7 @@ import { cents, clampHearts, pixels } from "../rules/units";
 import type { ActiveModifier, ModifierSource, Pack, PackSlot, RunState } from "../state/runState";
 
 // A run state for tests: one pack slot per entry, walking at the given hearts or fired
-// in zone 0, and everything else empty.
+// in zone 0, the default walker without its effects, and everything else empty.
 export function testState(
   slots: Readonly<Partial<Record<DogId, number | "fired">>>,
   overrides: Partial<RunState> = {},
@@ -33,6 +33,7 @@ export function testState(
     squirrelChases: 0,
     treats: 0,
     upgradesPicked: [],
+    walker: "casey",
     zoneDistance: pixels(0),
     zoneIndex: 0,
     ...overrides,

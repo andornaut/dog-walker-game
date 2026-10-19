@@ -1,6 +1,6 @@
 // The dev panel's logic, free of the DOM: its run form, its save edits and the session keys
 // it shares with RunScene.
-import type { DogId, GameData, GearId } from "../data/types";
+import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { addCents, type Cents } from "../rules/units";
 import { MAX_RUN_DOGS, type SaveDocument } from "../save/schema";
 import { decodeInputLog, encodeInputLog } from "./inputLog";
@@ -121,9 +121,9 @@ function withAll<Id extends string>(all: readonly Id[], owned: readonly Id[]): I
   return [...owned, ...all.filter((id) => !owned.includes(id))];
 }
 
-// Every dog, every gear item and every dog slot a run can use.
+// Every dog, gear item, dog slot and walker a run can use.
 export function unlockAll(
-  data: Pick<GameData, "dogSlots" | "dogs" | "shopGear">,
+  data: Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "walkers">,
   save: SaveDocument,
 ): SaveDocument {
   const { owned } = save;
@@ -133,6 +133,7 @@ export function unlockAll(
       dogSlots: Math.min(MAX_RUN_DOGS, data.dogSlots.length),
       dogs: withAll(Object.keys(data.dogs) as DogId[], owned.dogs),
       gear: withAll(Object.keys(data.shopGear) as GearId[], owned.gear),
+      walkers: withAll(Object.keys(data.walkers) as WalkerId[], owned.walkers),
     },
   };
 }

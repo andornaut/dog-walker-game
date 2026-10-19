@@ -49,6 +49,7 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
   inputLock: "lane-input lock after a pull",
   maxHearts: "max ♥",
   obstacleSpawns: "obstacles",
+  scrollSpeed: "road speed",
   startHearts: "starting ♥",
   startMoney: "starting money",
   tipSpawns: "tips",

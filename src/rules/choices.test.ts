@@ -14,6 +14,7 @@ import { UPGRADES } from "../data/upgrades";
 import { type CardSource, newRun, type RunState, type UpgradeOffer } from "../state/runState";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
 import {
   applyInstantEncounter,
@@ -39,6 +40,7 @@ const data = {
   quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
+  ...TEST_WALKER_DATA,
   tuning: TEST_TUNING,
   upgrades: UPGRADES,
   world: TEST_WORLD,

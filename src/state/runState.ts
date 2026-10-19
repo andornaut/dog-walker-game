@@ -1,6 +1,7 @@
 import type {
   DebuffId,
   DogId,
+  Effect,
   EncounterId,
   ForcedStopId,
   GameData,
@@ -11,6 +12,7 @@ import type {
   NeedSpotId,
   QuirkId,
   UpgradeId,
+  WalkerId,
   ZoneId,
 } from "../data/types";
 import { startHearts } from "../rules/dogs";
@@ -19,6 +21,7 @@ import { applyEffects } from "../rules/effects";
 import { modifiedStat } from "../rules/modifiers";
 import { firstZoneId } from "../rules/route";
 import { type Cents, cents, type Hearts, type Pixels, pixels } from "../rules/units";
+import { walkerEffects } from "../rules/walkers";
 import { packFor } from "./pack";
 
 // A run in progress. Plain JSON throughout: arrays for sets, records for maps, numbers for
@@ -43,7 +46,7 @@ export type PackDogs = readonly [DogId] | readonly [DogId, DogId] | readonly [Do
 export type UpgradeOffer = readonly [UpgradeId, UpgradeId, UpgradeId];
 
 // What a list of effects came from: a card option by its index in the source's data, an
-// instant encounter, gear, a need met at a spot, or a need gone wrong.
+// instant encounter, gear, a need met at a spot, a need gone wrong, or the walker.
 export type EffectSource =
   | { readonly encounter: EncounterId; readonly kind: "encounter"; readonly option: number }
   | { readonly kind: "forcedStop"; readonly option: number; readonly stop: ForcedStopId }
@@ -53,7 +56,8 @@ export type EffectSource =
   | { readonly kind: "needGoneWrong"; readonly need: NeedId }
   | { readonly kind: "needMet"; readonly spot: NeedSpotId }
   | { readonly kind: "quirk"; readonly quirk: QuirkId }
-  | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
+  | { readonly kind: "upgrade"; readonly upgrade: UpgradeId }
+  | { readonly kind: "walker"; readonly walker: WalkerId };
 
 export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonly kind: "debuff" };
 
@@ -123,22 +127,39 @@ export interface RunState {
   readonly treats: number;
   // Picked upgrades leave the pool for the rest of the run.
   readonly upgradesPicked: readonly UpgradeId[];
+  readonly walker: WalkerId;
   // Distance travelled into the current zone.
   readonly zoneDistance: Pixels;
   // The current zone's position in the walk, counting from 0.
   readonly zoneIndex: number;
 }
 
+// With no walker, the run walks with the default walker.
+// CLEANUP (added 2026-10-19): make walker required once RunScene and StartScene build every
+// Loadout with one.
 export interface Loadout {
   readonly dogs: PackDogs;
   readonly gear: GearId | null;
+  readonly walker?: WalkerId;
 }
 
-// A run's opening state, in the world's first zone: the gear applied, then each owner's
-// starting hearts and the starting money. Throws for a dog listed twice or more dogs than the
-// player has slots.
+// A run's opening state, in the world's first zone: the walker's effects and the gear's
+// applied, then each owner's starting hearts and the starting money. Throws for a dog listed
+// twice or more dogs than the player has slots.
 export function newRun(
-  data: Pick<GameData, "debuffs" | "dogs" | "encounters" | "shopGear" | "tuning" | "world">,
+  data: Pick<
+    GameData,
+    | "debuffs"
+    | "defaultWalker"
+    | "dogs"
+    | "encounters"
+    | "shopGear"
+    | "tuning"
+    | "walkerPaces"
+    | "walkerStyles"
+    | "walkers"
+    | "world"
+  >,
   dogSlots: number,
   loadout: Loadout,
 ): RunState {
@@ -157,6 +178,7 @@ export function newRun(
       }),
       loadout.dogs,
     );
+  const walker = loadout.walker ?? data.defaultWalker;
   const empty: RunState = {
     bumpsByZone: [],
     debuffZones: {},
@@ -174,19 +196,22 @@ export function newRun(
     squirrelChases: 0,
     treats: 0,
     upgradesPicked: [],
+    walker,
     zoneDistance: pixels(0),
     zoneIndex: 0,
   };
-  if (loadout.gear === null) {
-    return empty;
-  }
-  // Gear never targets a random dog, so the draw is never used.
-  const geared = applyEffects(
-    data,
-    { affected: [], random: () => 0, source: { gear: loadout.gear, kind: "gear" } },
-    data.shopGear[loadout.gear].effects,
-    empty,
-  );
+  // Neither walkers nor gear target a random dog, so the draw is never used.
+  const applyFrom = (source: EffectSource, effects: readonly Effect[], state: RunState) =>
+    applyEffects(data, { affected: [], random: () => 0, source }, effects, state);
+  const walked = applyFrom({ kind: "walker", walker }, walkerEffects(data, walker), empty);
+  const geared =
+    loadout.gear === null
+      ? walked
+      : applyFrom(
+          { gear: loadout.gear, kind: "gear" },
+          data.shopGear[loadout.gear].effects,
+          walked,
+        );
   return {
     ...geared,
     money: cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", 0)),

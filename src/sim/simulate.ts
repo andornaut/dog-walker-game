@@ -7,6 +7,7 @@ import type {
   GameData,
   GearId,
   UpgradeId,
+  WalkerId,
   ZoneId,
 } from "../data/types";
 import { randomStream } from "../dev/randomStreams";
@@ -72,7 +73,17 @@ import { nextWalkEvent } from "./walkEvents";
 
 export type SimData = ChoiceData &
   WalkData &
-  Pick<GameData, "achievements" | "dogSlots" | "needs" | "runText" | "upgrades">;
+  Pick<
+    GameData,
+    | "achievements"
+    | "defaultWalker"
+    | "dogSlots"
+    | "needs"
+    | "runText"
+    | "upgrades"
+    | "walkerPaces"
+    | "walkerStyles"
+  >;
 
 // Who plays the walk. rates: each item spawned is met in road order, and hit or collected by
 // chance, with rates from 0 to 1: hitRate for each obstacle, the others for each pickup or
@@ -94,6 +105,7 @@ export interface SimConfig {
   readonly player: SimPlayer;
   readonly policy: PolicyId;
   readonly route: RoutePolicyId;
+  readonly walker: WalkerId;
 }
 
 export const DEFAULT_RATES = { luckyRate: 0.7, tipRate: 0.7, treatRate: 0.7 } as const;
@@ -675,7 +687,11 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     // A skill player's runs draw from a stream of their own instead.
     policyRandom: random,
     pullsMoved: 0,
-    run: newRun(data, config.pack.length, { dogs: config.pack, gear: config.gear }),
+    run: newRun(data, config.pack.length, {
+      dogs: config.pack,
+      gear: config.gear,
+      walker: config.walker,
+    }),
     tips: cents(0),
     upgrades: [],
     zones: [],

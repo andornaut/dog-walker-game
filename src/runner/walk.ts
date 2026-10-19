@@ -69,6 +69,7 @@ export type WalkData = Pick<
   | "shopGear"
   | "tuning"
   | "upgrades"
+  | "walkers"
   | "world"
 >;
 
@@ -253,9 +254,11 @@ export function laneMotionConfig(
   return { laneCount, moveDuration: laneMoveSeconds(data, run) };
 }
 
-// Pixels per second in the run's current zone, read from the live data.
+// Pixels per second in the run's current zone, read from the live data, after the run's
+// modifiers, such as the walker's pace.
 export function walkScrollSpeed(data: Pick<GameData, "tuning" | "world">, run: RunState): Pixels {
-  return zoneStats(data.tuning, currentZone(data, run), run.zoneIndex).scrollSpeed;
+  const base = zoneStats(data.tuning, currentZone(data, run), run.zoneIndex).scrollSpeed;
+  return pixels(modifiedStat(data.tuning, run.modifiers, "scrollSpeed", base));
 }
 
 // The entries of a zone's weights above 0, in the data's order.

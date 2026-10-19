@@ -189,7 +189,7 @@ export function runLoadout(scene: Scene): RunLoadout {
   }
   return {
     dogSlots: Math.max(owned.dogSlots, dogs.length),
-    loadout: { dogs, gear: override === null ? lastLoadout.gear : override.gear },
+    loadout: { dogs, gear: override === null ? lastLoadout.gear : override.gear, walker },
     walker,
     walkerSprite: walkerSpriteKey(scene, walker),
   };

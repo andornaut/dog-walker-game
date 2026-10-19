@@ -8,7 +8,12 @@ import { homeSticker, type Sticker } from "./sticker";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
-const owned: Owned = { dogSlots: 1, dogs: ["biscuit", "duchess", "koda"], gear: [] };
+const owned: Owned = {
+  dogSlots: 1,
+  dogs: ["biscuit", "duchess", "koda"],
+  gear: [],
+  walkers: ["casey"],
+};
 
 // Under the test tuning the fanny pack is $400, the whistle and every locked dog $600, poop
 // bags $700 and the lucky collar $1,000.

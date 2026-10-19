@@ -1,5 +1,13 @@
 import { kebabCase } from "../assets/spriteKeys";
-import type { DebuffId, GameData, GearId, UpgradeId } from "../data/types";
+import type {
+  DebuffId,
+  GameData,
+  GearId,
+  UpgradeId,
+  WalkerId,
+  WalkerPace,
+  WalkerStyle,
+} from "../data/types";
 import { exceedsTapDistance } from "../input/gestures";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
 import { namedEffectText, type TextData } from "../rules/effectText";
@@ -10,11 +18,13 @@ import type { RunPause } from "./topBar";
 export type StripItem =
   | { readonly debuff: DebuffId; readonly kind: "debuff" }
   | { readonly gear: GearId; readonly kind: "gear" }
-  | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
+  | { readonly kind: "upgrade"; readonly upgrade: UpgradeId }
+  | { readonly kind: "pace"; readonly pace: WalkerPace }
+  | { readonly kind: "style"; readonly style: WalkerStyle };
 
 export type StripRun = Pick<
   RunState,
-  "debuffs" | "gear" | "immunities" | "modifiers" | "upgradesPicked"
+  "debuffs" | "gear" | "immunities" | "modifiers" | "upgradesPicked" | "walker"
 >;
 
 // A picked upgrade is in effect while one of its lasting effects is: a modifier it added, or an
@@ -34,18 +44,33 @@ function inEffect(data: Pick<GameData, "upgrades">, run: StripRun, upgrade: Upgr
   });
 }
 
-// The debuffs on the pack, the upgrades in effect in the order they were picked, then the gear.
-export function stripItems(data: Pick<GameData, "upgrades">, run: StripRun): StripItem[] {
+// A walker's pace and style, as the strip and the walker's home-screen tile show them.
+export function walkerStripItems(data: Pick<GameData, "walkers">, walker: WalkerId): StripItem[] {
+  const { pace, style } = data.walkers[walker];
+  return [
+    { kind: "pace", pace },
+    { kind: "style", style },
+  ];
+}
+
+// The debuffs on the pack, the upgrades in effect in the order they were picked, the gear, then
+// the walker's pace and style.
+export function stripItems(
+  data: Pick<GameData, "upgrades" | "walkers">,
+  run: StripRun,
+): StripItem[] {
   return [
     ...run.debuffs.map(({ debuff }): StripItem => ({ debuff, kind: "debuff" })),
     ...run.upgradesPicked
       .filter((upgrade) => inEffect(data, run, upgrade))
       .map((upgrade): StripItem => ({ kind: "upgrade", upgrade })),
     ...(run.gear === null ? [] : [{ gear: run.gear, kind: "gear" } as const]),
+    ...walkerStripItems(data, run.walker),
   ];
 }
 
-// The 16x16 icon each item shows: icon-stinky, icon-upgrade-<id>, icon-gear-<id>.
+// The 16x16 icon each item shows: icon-stinky, icon-upgrade-<id>, icon-gear-<id>,
+// icon-pace-<id>, icon-style-<id>.
 export function stripIconKey(item: StripItem): string {
   switch (item.kind) {
     case "debuff":
@@ -54,6 +79,10 @@ export function stripIconKey(item: StripItem): string {
       return `icon-gear-${kebabCase(item.gear)}`;
     case "upgrade":
       return `icon-upgrade-${kebabCase(item.upgrade)}`;
+    case "pace":
+      return `icon-pace-${kebabCase(item.pace)}`;
+    case "style":
+      return `icon-style-${kebabCase(item.style)}`;
     default:
       return item satisfies never;
   }
@@ -61,7 +90,7 @@ export function stripIconKey(item: StripItem): string {
 
 // An item's name and effect, as its upgrade card and the gear's home-screen line write them.
 export function stripText(
-  data: TextData & Pick<GameData, "shopGear" | "upgrades">,
+  data: TextData & Pick<GameData, "shopGear" | "upgrades" | "walkerPaces" | "walkerStyles">,
   item: StripItem,
 ): string {
   switch (item.kind) {
@@ -82,6 +111,42 @@ export function stripText(
       const { effects, name } = data.upgrades[item.upgrade];
       return namedEffectText(data, name, effects);
     }
+    case "pace": {
+      const { effects, name } = data.walkerPaces[item.pace];
+      return namedEffectText(data, name, effects);
+    }
+    case "style": {
+      const { effects, name } = data.walkerStyles[item.style];
+      return namedEffectText(data, name, effects);
+    }
+    default:
+      return item satisfies never;
+  }
+}
+
+// What an item's icon slot shows while its icon art is missing: its name's first letter.
+export function stripIconFallback(
+  data: Pick<GameData, "debuffs" | "shopGear" | "upgrades" | "walkerPaces" | "walkerStyles">,
+  item: StripItem,
+): string {
+  return stripName(data, item).slice(0, 1);
+}
+
+function stripName(
+  data: Pick<GameData, "debuffs" | "shopGear" | "upgrades" | "walkerPaces" | "walkerStyles">,
+  item: StripItem,
+): string {
+  switch (item.kind) {
+    case "debuff":
+      return data.debuffs[item.debuff].name;
+    case "gear":
+      return data.shopGear[item.gear].name;
+    case "pace":
+      return data.walkerPaces[item.pace].name;
+    case "style":
+      return data.walkerStyles[item.style].name;
+    case "upgrade":
+      return data.upgrades[item.upgrade].name;
     default:
       return item satisfies never;
   }

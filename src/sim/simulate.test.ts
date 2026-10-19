@@ -2,8 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { zoneFee } from "../rules/dogs";
+import { modifiersOf } from "../rules/modifiers";
 import { zoneAt } from "../rules/route";
 import { cents } from "../rules/units";
+import { walkerEffects } from "../rules/walkers";
 import { seededRandom } from "../runner/random";
 import type { PackDogs } from "../state/runState";
 import type { PolicyId } from "./policies";
@@ -34,6 +36,7 @@ function config(overrides: Overrides = {}): SimConfig {
     },
     policy: "heartsUnlessLow",
     route: "straight",
+    walker: "casey",
     ...rest,
   };
 }
@@ -144,6 +147,7 @@ describe("simulateRun", { timeout: 15_000 }, () => {
   );
 
   it("pays each zone's fee for every dog still walking at its end", () => {
+    const casey = modifiersOf(walkerEffects(gameData, "casey"));
     const results = runs(4, { hitRate: 0.25, pack: RISKY, policy: "alwaysHearts" });
     const fired = results.flatMap((result) => result.firings);
 
@@ -159,7 +163,7 @@ describe("simulateRun", { timeout: 15_000 }, () => {
         if (!result.upgrades.includes("shortcut")) {
           const { fees } = zoneAt(gameData, result.route, zone.zoneIndex);
           expect(zone.fees.map((fee) => fee.amount)).toEqual(
-            walking.map((dog) => cents(zoneFee(gameData.tuning, [], gameData.dogs[dog]) * fees)),
+            walking.map((dog) => cents(zoneFee(gameData.tuning, casey, gameData.dogs[dog]) * fees)),
           );
         }
       }

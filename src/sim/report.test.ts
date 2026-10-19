@@ -81,6 +81,23 @@ describe("simulateMatrix", () => {
     ]);
   });
 
+  it("gives a row per walker after each pack, the walker named in its own column", () => {
+    const walkers = {
+      ...SMALL,
+      packs: SMALL.packs.slice(0, 1),
+      walkers: ["casey", "trista"] as const,
+    };
+    const rows = simulateMatrix(gameData, 3, 2, { ...walkers, players: SMALL.players.slice(0, 1) });
+
+    expect(rows.map(({ pack, policy, walker }) => [policy, pack, walker])).toEqual([
+      ["heartsUnlessLow", "Koda", "casey"],
+      ["heartsUnlessLow", "Koda", "trista"],
+      ["alwaysPay", "Koda", "casey"],
+      ["alwaysPay", "Koda", "trista"],
+    ]);
+    expect(formatTable(rows).split("\n")[0]).toMatch(/Pack +Walker/);
+  });
+
   it("gives one row per cell, in policy, player, then pack order", () => {
     const rows = simulateMatrix(gameData, 3, 4, SMALL);
 

@@ -17,6 +17,7 @@ import { idleGesture, pointerDown, pointerMove } from "../input/gestures";
 import type { LaneDirection } from "../layout/lanes";
 import { newRun, type PackDogs } from "../state/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WALKER_DATA } from "../testing/walkers";
 import { isSteeringLocked, laneControlIn } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import type { MoverPath } from "./movers";
@@ -61,6 +62,7 @@ const data = {
   quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
+  ...TEST_WALKER_DATA,
   // An 80px/s, 30s zone with spawns sized for it, as in the walk tests.
   tuning: {
     ...TEST_TUNING,

@@ -8,6 +8,7 @@ import { moneyCost } from "../rules/effects";
 import { modifiedStat, modifiersOf } from "../rules/modifiers";
 import { unlockPrice } from "../rules/shop";
 import { probability, read, readTable } from "../rules/units";
+import { walkerGoal } from "../rules/walkers";
 import { testState } from "../testing/runState";
 import { gameData } from ".";
 import { SCREEN_CONFIG } from "./screen";
@@ -392,13 +393,20 @@ describe("run, world and walkers", () => {
     expect(new Set(prices).size).toBe(prices.length);
   });
 
-  it("has 4 free walkers with their own sprites and portraits, the default among them", () => {
+  it("has 4 walkers with their own sprites and portraits, one for each pace and style", () => {
     const list = Object.values(walkers);
     expect(list).toHaveLength(4);
-    expect(list.every((walker) => walker.unlock === "start")).toBe(true);
     expect(new Set(list.map((walker) => walker.spriteKey)).size).toBe(list.length);
     expect(new Set(list.map((walker) => walker.portraitKey)).size).toBe(list.length);
-    expect(Object.keys(walkers)).toContain(defaultWalker);
+    expect(new Set(list.map(({ pace, style }) => `${pace} ${style}`)).size).toBe(list.length);
+  });
+
+  it("starts with the default walker alone, and unlocks the others at zones of the walk, one each", () => {
+    const goals = Object.values(walkers).map(walkerGoal);
+    expect(walkers[defaultWalker].unlock).toBe("start");
+    expect(goals.filter((goal) => goal === 0)).toHaveLength(1);
+    expect(new Set(goals).size).toBe(goals.length);
+    expect(goals.every((goal) => goal <= world.walkLength)).toBe(true);
   });
 
   it("gives every owner two distinct lines for every moment", () => {

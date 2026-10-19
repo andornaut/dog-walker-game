@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import type { DogId } from "../data/types";
+import type { DogId, WalkerId } from "../data/types";
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import {
@@ -109,6 +109,16 @@ describe("recordRunEnd", () => {
   it.each(outcomes)("counts a %s run under its own outcome only", (outcome, runs) => {
     expect(recordRunEnd(testAwards, veteranSave(), runResult({ outcome })).stats.runs).toEqual(
       runs,
+    );
+  });
+
+  it.each<[string, Partial<RunResult>, WalkerId[]]>([
+    ["no walker for heading home in zone 1", { outcome: "wentHome", zone: 1 }, ["casey"]],
+    ["Ben for heading home in zone 2", { outcome: "wentHome", zone: 2 }, ["casey", "ben"]],
+    ["every walker for a finished walk", {}, ["casey", "ada", "ben", "trista"]],
+  ])("unlocks %s", (_, changes, walkers) => {
+    expect(recordRunEnd(testAwards, newPlayerSave, runResult(changes)).owned.walkers).toEqual(
+      walkers,
     );
   });
 

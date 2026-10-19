@@ -10,6 +10,7 @@ export const testContext: SaveContext = {
   defaults: {
     dogSlots: 1,
     freeDogs: ["biscuit", "duchess", "koda"],
+    freeWalkers: ["casey"],
     walker: "casey",
   },
   known: {
@@ -55,6 +56,7 @@ export const newPlayerSave: SaveDocument = {
     dogSlots: 1,
     dogs: ["biscuit", "duchess", "koda"],
     gear: [],
+    walkers: ["casey"],
   },
   settings: { musicVolume: 0.6, muted: false, reducedMotion: false, sfxVolume: 0.8 },
   shownHints: [],
@@ -86,6 +88,7 @@ export function veteranSave(): SaveDocument {
       dogSlots: 2,
       dogs: ["biscuit", "duchess", "koda", "penny"],
       gear: ["fannyPack", "whistle"],
+      walkers: ["casey", "ada", "ben", "trista"],
     },
     settings: { musicVolume: 0.25, muted: true, reducedMotion: true, sfxVolume: 0.5 },
     shownHints: ["card", "tip"],

@@ -9,6 +9,7 @@ import { cents } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WALKER_DATA } from "../testing/walkers";
 import { checkpointOf, runResultOf } from "./runSlices";
 
 const data = {
@@ -16,6 +17,7 @@ const data = {
   dogs: DOGS,
   encounters: ENCOUNTERS,
   shopGear: SHOP_GEAR,
+  ...TEST_WALKER_DATA,
   tuning: TEST_TUNING,
   world: WORLD,
 };

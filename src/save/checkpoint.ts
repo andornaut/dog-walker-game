@@ -1,6 +1,7 @@
 import type { DogId, ZoneId } from "../data/types";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
 import { addCents, type Cents } from "../rules/units";
+import { newWalkers } from "../rules/walkers";
 import type { EndReason } from "../state/runState";
 import { awardAchievements, type AwardContext } from "./achievements";
 import type { Checkpoint, DogRun, DogStats, LastWalk, SaveDocument, SaveStats } from "./schema";
@@ -37,8 +38,9 @@ type BankedRun = Pick<
   outcome: EndReason;
 };
 
-// Banks the earnings, counts the outcome and updates every stat and the logbook. Clears the
-// checkpoint, since the run it belonged to is now banked. Then awards what the run earned.
+// Banks the earnings, counts the outcome and updates every stat and the logbook. Unlocks the
+// walkers whose goal the best zones finished now meets. Clears the checkpoint, since the run
+// it belonged to is now banked. Then awards what the run earned.
 function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): SaveDocument {
   const { stats } = save;
   const dogs: Partial<Record<DogId, DogStats>> = { ...stats.dogs };
@@ -69,16 +71,22 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
   const finished =
     outcome === "finished" && (run.counters === null || walkedFromTheStart(run.counters));
   const stayed = run.dogs.flatMap(({ fired, id }) => (fired ? [] : [id]));
+  const bestZoneFinished = Math.max(stats.bestZoneFinished, zonesFinished);
+  const { owned } = save;
   const banked: SaveDocument = {
     ...save,
     bankCents: addCents(save.bankCents, earnedCents),
     checkpoint: null,
+    owned: {
+      ...owned,
+      walkers: [...owned.walkers, ...newWalkers(context.data, owned.walkers, bestZoneFinished)],
+    },
     stats: {
       ...stats,
       bestWalk: isNewBestWalk(stats, earnedCents)
         ? { dogs: walkDogs, earnedCents, zonesFinished }
         : stats.bestWalk,
-      bestZoneFinished: Math.max(stats.bestZoneFinished, zonesFinished),
+      bestZoneFinished,
       dogs,
       dogsFinishedWith: finished
         ? [...new Set([...stats.dogsFinishedWith, ...stayed])]

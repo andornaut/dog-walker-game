@@ -54,6 +54,7 @@ export type CauseData = Pick<
   | "runText"
   | "shopGear"
   | "upgrades"
+  | "walkers"
 >;
 
 // "Jesse fires you": the dog's owner, whose meter reached 0.
@@ -122,6 +123,8 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
       return data.quirks[source.quirk].name;
     case "upgrade":
       return data.upgrades[source.upgrade].name;
+    case "walker":
+      return data.walkers[source.walker].name;
     default:
       return assertNever(source);
   }

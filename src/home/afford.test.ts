@@ -9,7 +9,12 @@ import type { Purchase } from "./home";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
-const owned: Owned = { dogSlots: 1, dogs: ["biscuit", "duchess", "koda"], gear: [] };
+const owned: Owned = {
+  dogSlots: 1,
+  dogs: ["biscuit", "duchess", "koda"],
+  gear: [],
+  walkers: ["casey"],
+};
 const walk = (earned: number): LastWalk => ({
   dogs: ["koda"],
   earnedCents: dollars(earned),

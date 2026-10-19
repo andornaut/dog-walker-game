@@ -9,7 +9,7 @@ import type { NEED_CARDS, NEED_SPOTS } from "./needs";
 import type { SHOP_GEAR } from "./shop";
 import type { TUNING } from "./tuning";
 import type { UPGRADES } from "./upgrades";
-import type { WALKERS } from "./walkers";
+import type { WALKER_PACES, WALKER_STYLES, WALKERS } from "./walkers";
 import type { WORLD } from "./world";
 
 // The rule vocabulary: adding a value means new rules code, not only data.
@@ -56,6 +56,8 @@ export type NeedCardId = keyof typeof NEED_CARDS;
 export type NeedSpotId = keyof typeof NEED_SPOTS;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
+export type WalkerPace = keyof typeof WALKER_PACES;
+export type WalkerStyle = keyof typeof WALKER_STYLES;
 export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 
 type EncounterOfKind<Kind extends Encounter["kind"]> = {
@@ -212,6 +214,8 @@ export type Stat =
   | "fees"
   | "inputLock"
   | "obstacleSpawns"
+  // The road's speed, which the spawns and movers are planned for.
+  | "scrollSpeed"
   | "tipSpawns"
   | "tipValue"
   | "zoneLength";
@@ -427,9 +431,23 @@ export interface Gear {
 // The dog slots in order. A run takes at most one dog per owned slot.
 export type DogSlot = Unlock;
 
-// A walker the player can pick. spriteKey and portraitKey are keys into the art manifest.
-export type Walker = Unlock & {
+// "start": walks from the first run; "finishZone": unlocked the first time any walk finishes
+// its zone-th zone, counting from 1.
+export type WalkerUnlock =
+  { readonly unlock: "finishZone"; readonly zone: number } | { readonly unlock: "start" };
+
+// A walker's pace or style. Its effects last every run the walker walks, as gear's do.
+export interface WalkerTrait {
+  readonly effects: NonEmptyEffects;
   readonly name: string;
+}
+
+// A walker the player can pick, walking with the effects of its pace and style. spriteKey and
+// portraitKey are keys into the art manifest.
+export type Walker = WalkerUnlock & {
+  readonly name: string;
+  readonly pace: WalkerPace;
+  readonly style: WalkerStyle;
   readonly portraitKey: string;
   readonly spriteKey: string;
 };
@@ -512,6 +530,8 @@ export interface HomeText {
     // Said in place of afterWalk after each of the player's first few walks.
     readonly howTo: string;
     readonly newAffordable: string;
+    // After a walk that unlocked a walker.
+    readonly newWalker: string;
   };
   // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
   // status, and the price status of anything not owned yet.
@@ -644,6 +664,9 @@ export interface RunText {
     // An upgrade card's plaque, by how long it lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeTitle: string;
+    // What a newly unlocked walker says at the greeting stop, the first time a walk finishes
+    // the zone that unlocks them.
+    readonly walkerGreeting: string;
   };
   readonly fired: string;
   readonly firedBy: string;
@@ -857,6 +880,8 @@ export interface GameData {
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;
   readonly upgrades: Readonly<Record<UpgradeId, Upgrade>>;
+  readonly walkerPaces: Readonly<Record<WalkerPace, WalkerTrait>>;
+  readonly walkerStyles: Readonly<Record<WalkerStyle, WalkerTrait>>;
   readonly walkers: Readonly<Record<WalkerId, Walker>>;
   readonly world: World;
 }

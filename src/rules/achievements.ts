@@ -14,7 +14,7 @@ import { type Cents, dollarsToCents } from "./units";
 
 export type AchievementData = Pick<
   GameData,
-  "achievements" | "debuffs" | "dogSlots" | "dogs" | "shopGear" | "world"
+  "achievements" | "debuffs" | "dogSlots" | "dogs" | "shopGear" | "walkers" | "world"
 >;
 
 // The counters a run keeps for its achievements, copied out of the run state for the save.

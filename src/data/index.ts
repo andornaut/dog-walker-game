@@ -17,7 +17,7 @@ import { SHOP_GEAR } from "./shop";
 import { TUNING } from "./tuning";
 import type { GameData } from "./types";
 import { UPGRADES } from "./upgrades";
-import { DEFAULT_WALKER, WALKERS } from "./walkers";
+import { DEFAULT_WALKER, WALKER_PACES, WALKER_STYLES, WALKERS } from "./walkers";
 import { WORLD } from "./world";
 
 function toGameData(values: ValueExports): GameData {
@@ -43,6 +43,8 @@ function toGameData(values: ValueExports): GameData {
     shopGear: values.SHOP_GEAR,
     tuning: values.TUNING,
     upgrades: values.UPGRADES,
+    walkerPaces: values.WALKER_PACES,
+    walkerStyles: values.WALKER_STYLES,
     walkers: values.WALKERS,
     world: values.WORLD,
   };
@@ -71,6 +73,8 @@ const INITIAL_VALUES = {
   TUNING,
   UPGRADES,
   WALKERS,
+  WALKER_PACES,
+  WALKER_STYLES,
   WORLD,
 } as const;
 type ValueExports = typeof INITIAL_VALUES;

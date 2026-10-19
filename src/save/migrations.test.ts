@@ -189,3 +189,40 @@ describe("the version 1 to 2 migration", () => {
     });
   });
 });
+
+// A version 2 save walking with walker, its best walk bestZoneFinished zones long.
+function versionTwoSave(walker: string, bestZoneFinished: number): Record<string, unknown> {
+  const { owned, stats, ...save } = veteranSave();
+  const { dogSlots, dogs, gear } = owned;
+  return {
+    ...save,
+    owned: { dogSlots, dogs, gear },
+    stats: { ...stats, bestZoneFinished },
+    version: 2,
+    walker,
+  };
+}
+
+describe("the version 2 to 3 migration", () => {
+  it.each<[string, string, number, string[]]>([
+    ["keeps the walker in use unlocked", "trista", 0, ["casey", "trista"]],
+    ["unlocks the walkers the best walk already earned", "casey", 2, ["casey", "ada", "ben"]],
+    ["lists each walker once", "ben", 1, ["casey", "ben"]],
+  ])("%s", (_, walker, best, walkers) => {
+    const result = loadSave(
+      saveContextFrom(gameData),
+      JSON.stringify(versionTwoSave(walker, best)),
+    );
+    expect(result.status).toBe("loaded");
+    expect(result.save.owned.walkers).toEqual(walkers);
+    expect(result.save.walker).toBe(walker);
+  });
+
+  it("leaves an owned field of the wrong shape for the schema to reject", () => {
+    const document = { owned: "casey", version: 2, walker: "casey" };
+    expect(migrateSave(saveMigrations, 3, document)).toEqual({
+      document: { ...document, version: 3 },
+      ok: true,
+    });
+  });
+});

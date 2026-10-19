@@ -62,6 +62,29 @@ function renameDogIds(
   );
 }
 
+// The zones one walk had to finish to unlock each walker when version 3 added unlocks, the
+// starting walker first, as a load lists the walkers owned.
+const VERSION_3_WALKER_GOALS: readonly (readonly [walker: string, zones: number])[] = [
+  ["casey", 0],
+  ["ada", 2],
+  ["ben", 1],
+  ["trista", 3],
+];
+
+// Version 2 let every walker walk: a version 3 save owns the walker in use, and each walker
+// whose goal the best zones finished already met.
+function unlockWalkers(document: Record<string, unknown>): Record<string, unknown> {
+  const { stats, walker } = document;
+  const best = isRecord(stats) ? stats.bestZoneFinished : undefined;
+  const walkers = VERSION_3_WALKER_GOALS.flatMap(([id, zones]) =>
+    id === walker || (typeof best === "number" && zones <= best) ? [id] : [],
+  );
+  return updateFields(
+    [["owned", (owned) => (isRecord(owned) ? { ...owned, walkers } : owned)]],
+    document,
+  );
+}
+
 // One entry per version step, in order. A renamed dog or gear id needs one. Each step keeps
 // its own copy of what it renames, so a later rename adds a step rather than editing this one.
 export const saveMigrations: readonly Migration[] = [
@@ -76,6 +99,7 @@ export const saveMigrations: readonly Migration[] = [
         document,
       ),
   },
+  { from: 2, migrate: unlockWalkers },
 ];
 
 // Runs each migration from the document's version up to targetVersion, in order. A

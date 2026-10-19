@@ -13,6 +13,7 @@ import { UPGRADES } from "../data/upgrades";
 import type { EffectSource, RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
+import { TEST_WALKER_DATA } from "../testing/walkers";
 import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
 import { resolveEffects } from "./effects";
 import { tipValue } from "./run";
@@ -30,6 +31,7 @@ const data = {
   quirks: QUIRKS,
   runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
+  ...TEST_WALKER_DATA,
   tuning: TEST_TUNING,
   upgrades: UPGRADES,
 };
@@ -54,6 +56,10 @@ const resolved = (
 const sweetTalker = activeModifier(
   { kind: "upgrade", upgrade: "sweetTalker" },
   { by: "sweetTalkerCostPerDog", operation: "add", stat: "costPerDog" },
+);
+const bensTip = activeModifier(
+  { kind: "walker", walker: "ben" },
+  { by: "hustlerTip", operation: "multiply", stat: "tipValue" },
 );
 const towel: Effect = {
   amount: "encounterLow",
@@ -93,6 +99,22 @@ describe("causeLabel and causeNames", () => {
       () => stinkyTip({ duchess: 5, koda: 5, nugget: 5 }),
       "+$1 tip, Stinky",
       ["tip", "Stinky"],
+    ],
+    [
+      "the walker who raised a tip",
+      () =>
+        tipValue(
+          {
+            ...data,
+            tuning: {
+              ...TEST_TUNING,
+              multipliers: { ...TEST_TUNING.multipliers, hustlerTip: 3 },
+            },
+          },
+          testState({ duchess: 5, koda: 5, nugget: 5 }, { modifiers: [bensTip] }),
+        ),
+      "+$3 tip, Ben",
+      ["tip", "Ben"],
     ],
     [
       "Sweet talker on a per-dog cost",

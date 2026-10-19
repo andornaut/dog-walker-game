@@ -2729,6 +2729,7 @@
       "upgradeChoiceCount": 3
     },
     "hearts": {
+      "charmerStart": 1,
       "faceHappyFrom": 6,
       "faceNeutralFrom": 3,
       "luckyCollarMax": 1,
@@ -2784,14 +2785,18 @@
     "multipliers": {
       "bigTipperTip": 1.5,
       "cameraReadyTip": 2,
+      "charmerTip": 0.85,
       "crowdPleaserStrangerWeight": 2,
       "cyclistSpeedMultiplier": 1.6,
+      "fastWalkerFees": 1.1,
+      "fastWalkerSpeed": 1.1,
       "goodLeashSquirrelPull": 0,
       "heartsByTemperament": {
         "dramatic": 2,
         "fussy": 1,
         "laidBack": 1
       },
+      "hustlerTip": 1.2,
       "nervousAloneUrgency": 2,
       "otherDogChangePerBigDog": -0.25,
       "otherDogChangePerSmallDog": 0.25,
@@ -2803,6 +2808,8 @@
       "shortcutFees": 0.75,
       "shortcutZoneLength": 0.75,
       "sledDogLaneSpeed": 1.15,
+      "slowWalkerFees": 0.9,
+      "slowWalkerSpeed": 0.9,
       "stinkyTip": 0.5,
       "tipByPackSize": {
         "1": 1.2,
@@ -3013,30 +3020,41 @@
     {
       "id": "ada",
       "name": "Ada",
+      "pace": "fast",
       "portraitKey": "face-walker-ada",
       "spriteKey": "walker-ada",
-      "unlock": "start"
+      "style": "charm",
+      "unlock": "finishZone",
+      "zone": 2
     },
     {
       "id": "ben",
       "name": "Ben",
+      "pace": "slow",
       "portraitKey": "face-walker-ben",
       "spriteKey": "walker-ben",
-      "unlock": "start"
+      "style": "hustle",
+      "unlock": "finishZone",
+      "zone": 1
     },
     {
       "id": "casey",
       "name": "Casey",
+      "pace": "slow",
       "portraitKey": "face-walker-casey",
       "spriteKey": "walker-casey",
+      "style": "charm",
       "unlock": "start"
     },
     {
       "id": "trista",
       "name": "Trista",
+      "pace": "fast",
       "portraitKey": "face-walker-trista",
       "spriteKey": "walker-trista",
-      "unlock": "start"
+      "style": "hustle",
+      "unlock": "finishZone",
+      "zone": 3
     }
   ],
   "world": {
