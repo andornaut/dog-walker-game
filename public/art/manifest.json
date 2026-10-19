@@ -11,6 +11,16 @@
       "json": "sprites/card-frame.json"
     },
     {
+      "key": "chatty-neighbour",
+      "png": "sprites/chatty-neighbour.png",
+      "json": "sprites/chatty-neighbour.json"
+    },
+    {
+      "key": "construction",
+      "png": "sprites/construction.png",
+      "json": "sprites/construction.json"
+    },
+    {
       "key": "dog-biscuit",
       "png": "sprites/dog-biscuit.png",
       "json": "sprites/dog-biscuit.json"
@@ -151,9 +161,24 @@
       "json": "sprites/fx-bark.json"
     },
     {
+      "key": "ice-cream-truck",
+      "png": "sprites/ice-cream-truck.png",
+      "json": "sprites/ice-cream-truck.json"
+    },
+    {
+      "key": "kid",
+      "png": "sprites/kid.png",
+      "json": "sprites/kid.json"
+    },
+    {
       "key": "lost-wallet",
       "png": "sprites/lost-wallet.png",
       "json": "sprites/lost-wallet.json"
+    },
+    {
+      "key": "mail-carrier",
+      "png": "sprites/mail-carrier.png",
+      "json": "sprites/mail-carrier.json"
     },
     {
       "key": "other-dog",
@@ -184,6 +209,11 @@
       "key": "squirrel",
       "png": "sprites/squirrel.png",
       "json": "sprites/squirrel.json"
+    },
+    {
+      "key": "stop-sign",
+      "png": "sprites/stop-sign.png",
+      "json": "sprites/stop-sign.json"
     },
     {
       "key": "thief",
@@ -217,12 +247,52 @@
       "png": "images/card-biscuit-neighbour-take.png"
     },
     {
+      "key": "card-chatty-neighbour-chat",
+      "png": "images/card-chatty-neighbour-chat.png"
+    },
+    {
+      "key": "card-chatty-neighbour-move-on",
+      "png": "images/card-chatty-neighbour-move-on.png"
+    },
+    {
+      "key": "card-construction-detour-long-way",
+      "png": "images/card-construction-detour-long-way.png"
+    },
+    {
+      "key": "card-construction-detour-squeeze",
+      "png": "images/card-construction-detour-squeeze.png"
+    },
+    {
+      "key": "card-ice-cream-truck-pup-cups",
+      "png": "images/card-ice-cream-truck-pup-cups.png"
+    },
+    {
+      "key": "card-ice-cream-truck-walk-past",
+      "png": "images/card-ice-cream-truck-walk-past.png"
+    },
+    {
+      "key": "card-kid-wants-to-pet-decline",
+      "png": "images/card-kid-wants-to-pet-decline.png"
+    },
+    {
+      "key": "card-kid-wants-to-pet-pet",
+      "png": "images/card-kid-wants-to-pet-pet.png"
+    },
+    {
       "key": "card-lost-wallet-keep",
       "png": "images/card-lost-wallet-keep.png"
     },
     {
       "key": "card-lost-wallet-return",
       "png": "images/card-lost-wallet-return.png"
+    },
+    {
+      "key": "card-mail-carrier-hold",
+      "png": "images/card-mail-carrier-hold.png"
+    },
+    {
+      "key": "card-mail-carrier-wait",
+      "png": "images/card-mail-carrier-wait.png"
     },
     {
       "key": "card-other-dog-pull-away",
@@ -267,6 +337,14 @@
     {
       "key": "card-squirrel-hold",
       "png": "images/card-squirrel-hold.png"
+    },
+    {
+      "key": "card-stop-sign-dart",
+      "png": "images/card-stop-sign-dart.png"
+    },
+    {
+      "key": "card-stop-sign-wait",
+      "png": "images/card-stop-sign-wait.png"
     },
     {
       "key": "card-thief-chase",

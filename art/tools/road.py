@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
-People are 32x48, animals 32x32, pickups and small effects 16x16, all chibi and
+People are 32x48, animals 32x32, pickups and small effects 16x16 (the ice cream
+truck is 64x48 and the construction barrier 56x32, one lane), all chibi and
 in Endesga 32 with coloured outlines. The walker is seen from behind, like the
 dogs; everything coming down the road faces the player.
 
@@ -338,6 +339,165 @@ def dog_owner_top(g, b):
     g.p(22, 16 + b, "pink")
 
 
+# ---------- forced stops ----------
+
+def stop_sign():
+    g = Grid(32, 48)
+    g.rect(15, 22, 3, 24, "grey")
+    g.rect(17, 22, 1, 24, "slate")
+    g.rect(13, 45, 7, 2, "slate")
+    # octagon
+    g.rect(10, 4, 12, 20, "red")
+    g.rect(8, 6, 16, 16, "red")
+    g.rect(9, 5, 14, 18, "red")
+    g.rect(10, 22, 12, 1, "dred")
+    g.rect(23, 7, 1, 14, "dred")
+    for i, ch in enumerate(("S", "T", "O", "P")):
+        x = 8 + i * 4
+        bits = {"S": "011100010001110", "T": "111010010010010", "O": "010101101101010", "P": "110101110100100"}[ch]
+        for r in range(5):
+            for k in range(3):
+                if bits[r * 3 + k] == "1":
+                    g.p(x + k, 11 + r, "white")
+    return g
+
+
+def chatty_top(wave):
+    def top(g, b):
+        g.rect(9, 21 + b, 14, 13, "cream")
+        g.rect(11, 21 + b, 10, 12, "dgreen")
+        g.rect(19, 21 + b, 2, 12, "forest")
+        g.rect(5, 22 + b, 4, 9, "cream")
+        g.rect(5, 31 + b, 4, 3, "skin2")
+        if wave:
+            g.rect(23, 12 + b, 4, 10, "cream")
+            g.rect(23, 9 + b, 4, 3, "skin2")
+        else:
+            g.rect(23, 22 + b, 4, 8, "cream")
+            g.rect(24, 28 + b, 5, 5, "white")
+            g.rect(25, 29 + b, 3, 1, "brown")
+        g.ell(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")
+        g.ell(16, 7 + b, 7, 3.5, "lgrey", "grey", "white")
+        g.rect(8, 9 + b, 2, 5, "lgrey")
+        g.rect(22, 9 + b, 2, 5, "lgrey")
+        face_front(g, 16, 13 + b)
+        g.rect(13, 16 + b, 6, 1, "lgrey")
+        g.p(12, 17 + b, "lgrey")
+        g.p(19, 17 + b, "lgrey")
+    return top
+
+
+def kid(wave=False, mood="happy"):
+    g = Grid(32, 48)
+    for x in (12, 17):
+        g.rect(x, 38, 3, 6, "skin1")
+        g.rect(x, 44, 3, 2, "red")
+    g.rect(10, 28, 12, 10, "yellow")
+    g.rect(19, 28, 3, 10, "amber")
+    g.rect(10, 35, 12, 3, "sky")
+    g.rect(7, 29, 3, 6, "yellow")
+    g.rect(7, 35, 3, 2, "skin1")
+    if wave:
+        g.rect(22, 20, 3, 8, "yellow")
+        g.rect(22, 18, 3, 2, "skin1")
+    else:
+        g.rect(22, 29, 3, 6, "yellow")
+        g.rect(22, 35, 3, 2, "skin1")
+    g.ell(16, 20.5, 7.5, 7.5, "skin1", "skin2")
+    g.ell(16, 15.5, 8, 4, "red", "dred", "pink")
+    g.rect(16, 17, 9, 2, "red")
+    g.rect(8, 18, 2, 4, "ochre")
+    g.rect(22, 18, 2, 4, "ochre")
+    face_front(g, 16, 21, mood if mood != "sad" else "neutral")
+    if mood == "sad":
+        g.rect(15, 26, 2, 1, "dbrown")
+        g.p(14, 27, "dbrown")
+        g.p(17, 27, "dbrown")
+        g.p(10, 23, "cyan")
+    return g
+
+
+def ice_cream_truck(f):
+    g = Grid(64, 48)
+    g.rect(6, 12, 52, 30, "white")
+    g.rect(6, 12, 52, 2, "lgrey")
+    g.rect(54, 12, 4, 30, "lgrey")
+    g.rect(6, 30, 52, 4, "pink")
+    g.rect(6, 33, 52, 1, "mauve")
+    g.rect(12, 16, 40, 10, "cyan")
+    g.rect(12, 16, 40, 1, "sky")
+    g.rect(31, 16, 2, 10, "lgrey")
+    g.rect(4, 38, 56, 4, "lgrey")
+    g.rect(4, 41, 56, 1, "grey")
+    for x in (8, 46):
+        g.rect(x, 42, 10, 4, "ink")
+        g.rect(x + 2, 42, 6, 2, "dslate")
+    g.rect(10, 35, 4, 2, "yellow" if f else "amber")
+    g.rect(50, 35, 4, 2, "yellow" if f else "amber")
+    # cone on the roof
+    g.tri((29, 9), (35, 9), (32, 2 + 8), "tan")
+    g.ell(32, 5, 4, 3.5, "pink", "mauve", "white")
+    g.rect(29, 9, 6, 3, "tan")
+    g.p(30, 10, "brown")
+    g.p(33, 10, "brown")
+    if f:
+        g.rect(46, 2, 1, 5, "plum")
+        g.rect(46, 2, 3, 1, "plum")
+        g.rect(44, 6, 2, 2, "plum")
+    else:
+        g.rect(16, 3, 1, 5, "plum")
+        g.rect(14, 7, 2, 2, "plum")
+    return g
+
+
+def construction(f):
+    g = Grid(56, 32)
+    for x in (6, 46):
+        g.rect(x, 12, 3, 18, "grey")
+        g.rect(x + 2, 12, 1, 18, "slate")
+    g.rect(3, 12, 50, 8, "white")
+    for x in range(3, 53, 8):
+        g.tri((x, 20), (x + 4, 12), (x + 8, 12), "orange")
+        g.tri((x, 20), (x + 4, 20), (x + 8, 12), "orange")
+    g.rect(3, 19, 50, 1, "rust")
+    g.rect(3, 22, 50, 4, "white")
+    for x in range(3, 53, 8):
+        g.rect(x, 22, 4, 4, "orange")
+    g.ell(7.5, 8, 2.5, 2.5, "amber" if f else "orange", "orange", "yellow" if f else None)
+    g.ell(47.5, 8, 2.5, 2.5, "orange" if f else "amber", "orange", None if f else "yellow")
+    g.rect(20, 3, 16, 8, "amber")
+    g.rect(20, 3, 16, 1, "orange")
+    g.rect(23, 6, 10, 2, "plum")
+    g.tri((21, 7), (25, 4), (25, 10), "plum")
+    return g
+
+
+def mail_top(g, b):
+    g.rect(9, 21 + b, 14, 12, "blue")
+    g.rect(20, 21 + b, 3, 12, "navy")
+    g.rect(15, 21 + b, 2, 12, "sky")
+    g.rect(5, 22 + b, 4, 9, "blue")
+    g.rect(5, 31 + b, 4, 3, "dbrown")
+    g.rect(23, 22 + b, 4, 9, "blue")
+    g.rect(23, 31 + b, 4, 3, "dbrown")
+    g.rect(9, 33 + b, 14, 3, "navy")
+    # mailbag on a strap
+    g.ell(24, 30 + b, 5, 4.5, "brown", "dbrown", "tan")
+    g.rect(22, 27 + b, 4, 3, "white")
+    g.rect(10, 22 + b, 2, 1, "dbrown")
+    g.rect(12, 23 + b, 2, 1, "dbrown")
+    g.rect(14, 24 + b, 2, 1, "dbrown")
+    g.rect(16, 25 + b, 2, 1, "dbrown")
+    g.rect(18, 26 + b, 2, 1, "dbrown")
+    g.ell(16, 12.5 + b, 8, 8, "dbrown", "plum")
+    g.ell(16, 7 + b, 8.5, 3.5, "blue", "navy", "sky")
+    g.rect(8, 9 + b, 17, 2, "navy")
+    g.rect(15, 5 + b, 2, 2, "amber")
+    face_front(g, 16, 13 + b, eyes="ink")
+    g.p(11, 13 + b, "white")
+    g.p(19, 13 + b, "white")
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def frames(gs, outline=True):
@@ -365,6 +525,13 @@ def sprites():
                        ("flash", [person(tourist_top(True), legs="skin2", shoes="sky").outlined(),
                                   person(tourist_top(False), legs="skin2", shoes="sky").outlined()], 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
+    yield "stop-sign", [("idle", frames([stop_sign()]), 1000)]
+    yield "chatty-neighbour", [("wave", [person(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350)]
+    yield "kid", [("wave", frames([kid(False), kid(True)]), 300), ("sad", frames([kid(False, "sad")]), 1000)]
+    yield "ice-cream-truck", [("idle", frames([ice_cream_truck(0), ice_cream_truck(1)]), 400)]
+    yield "construction", [("idle", frames([construction(0), construction(1)]), 500)]
+    yield "mail-carrier", [("walk", [person(mail_top, legs="navy", shoes="ink", lf=-2).outlined(),
+                                     person(mail_top, legs="navy", shoes="ink", rf=-2).outlined()], 200)]
 
 
 if __name__ == "__main__":

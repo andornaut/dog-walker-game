@@ -291,6 +291,148 @@ def photo_wave():
     return a
 
 
+# ---------- forced stops ----------
+
+def clock(a, x, y):
+    for dx in range(-4, 5):
+        for dy in range(-4, 5):
+            d = dx * dx + dy * dy
+            if d <= 16:
+                a.fill(x + dx, y + dy, 1, 1, "white" if d < 12 else "plum")
+    a.fill(x, y - 3, 1, 4, "plum")
+    a.fill(x, y, 3, 1, "plum")
+
+
+def stop_wait():
+    a = Art()
+    a.ground("street")
+    a.put("stop-sign", "idle", 58, 52, shadow=False)
+    a.put("dog-biscuit", "walk", 40, 40, 1)
+    a.put("walker", "walk", 20, 56, 1)
+    a.leash(28, 42, 40, 26)
+    clock(a, 10, 10)
+    return a
+
+
+def stop_dart():
+    a = Art()
+    a.ground("street")
+    a.put("stop-sign", "idle", 62, 52, shadow=False)
+    a.put("dog-koda", "pull", 42, 32, 1)
+    a.put("walker", "react", 20, 54)
+    a.leash(28, 40, 42, 18)
+    for y in (24, 30, 36):
+        a.fill(6, y, 8, 1, "lgrey")
+    return a
+
+
+def chatty_chat():
+    a = Art()
+    a.grass()
+    a.put("chatty-neighbour", "wave", 54, 54)
+    a.put("walker", "walk", 22, 56, 1)
+    a.bubble(28, 4, 22, ["..."])
+    a.coins([(6, 6)])
+    return a
+
+
+def chatty_move_on():
+    a = Art()
+    a.grass()
+    a.put("chatty-neighbour", "wave", 58, 54, 1)
+    a.put("dog-biscuit", "walk", 36, 34, 2)
+    a.put("walker", "walk", 16, 54, 2)
+    a.leash(24, 40, 36, 20)
+    return a
+
+
+def kid_pet():
+    a = Art()
+    a.grass()
+    a.put("kid", "wave", 52, 54)
+    a.put("dog-duchess", "react", 30, 50)
+    a.hearts([(18, 6), (36, 10)])
+    return a
+
+
+def kid_decline():
+    a = Art()
+    a.grass()
+    a.put("kid", "sad", 56, 54)
+    a.put("dog-duchess", "walk", 34, 38, 1)
+    a.put("walker", "walk", 14, 56, 1)
+    a.leash(22, 42, 34, 26)
+    return a
+
+
+def truck_cups():
+    a = Art()
+    a.ground("shops")
+    a.paste(hp.frame("ice-cream-truck", "idle"), 26, 2)
+    a.put("dog-biscuit", "react", 14, 52)
+    for x in (34, 44, 54):
+        a.fill(x, 46, 6, 6, "white")
+        a.fill(x, 51, 6, 1, "lgrey")
+        a.fill(x + 1, 43, 4, 3, "pink")
+    a.hearts([(4, 4)])
+    return a
+
+
+def truck_walk_past():
+    a = Art()
+    a.ground("shops")
+    a.paste(hp.frame("ice-cream-truck", "idle", 1), 30, 2)
+    a.put("dog-biscuit", "pull", 18, 36, flip=False)
+    a.put("walker", "walk", 14, 56)
+    a.leash(18, 42, 18, 22)
+    a.fill(30, 30, 2, 5, "red")
+    a.fill(30, 36, 2, 2, "red")
+    return a
+
+
+def detour_long_way():
+    a = Art()
+    a.ground("street")
+    a.paste(hp.frame("construction", "idle"), 10, 4)
+    for x, y in ((8, 52), (6, 46), (4, 40), (4, 34), (6, 28), (10, 24), (66, 52), (70, 46), (72, 40), (72, 34), (70, 28), (66, 24)):
+        a.fill(x, y, 2, 2, "amber")
+    a.put("walker", "walk", 38, 56, 2)
+    return a
+
+
+def detour_squeeze():
+    a = Art()
+    a.ground("street")
+    a.paste(hp.frame("construction", "idle", 1), 10, 4)
+    a.put("dog-duchess", "walk", 37, 46, 3)
+    for x, y in ((24, 30), (48, 28), (28, 40), (50, 40), (40, 26)):
+        a.fill(x, y, 4, 3, "lgrey")
+        a.fill(x + 1, y - 1, 2, 1, "grey")
+    return a
+
+
+def mail_hold():
+    a = Art()
+    a.ground("home")
+    a.put("mail-carrier", "walk", 58, 54)
+    a.put("dog-koda", "react", 36, 32)
+    a.put("walker", "walk", 14, 56)
+    a.leash(22, 42, 36, 18)
+    a.paste(hp.frame("fx-bark", "pop", 1), 42, 0)
+    return a
+
+
+def mail_wait():
+    a = Art()
+    a.ground("home")
+    a.put("mail-carrier", "walk", 56, 54, 1)
+    a.put("dog-koda", "walk", 36, 34, 1)
+    a.put("walker", "walk", 16, 56, 1)
+    a.leash(24, 42, 36, 20)
+    clock(a, 8, 10)
+    return a
+
+
 ILLUSTRATIONS = {
     "card-skunk-grooming": skunk_grooming,
     "card-skunk-rinse": skunk_rinse,
@@ -309,6 +451,18 @@ ILLUSTRATIONS = {
     "card-biscuit-neighbour-pass": neighbour_pass,
     "card-photo-op-pose": photo_pose,
     "card-photo-op-wave": photo_wave,
+    "card-stop-sign-wait": stop_wait,
+    "card-stop-sign-dart": stop_dart,
+    "card-chatty-neighbour-chat": chatty_chat,
+    "card-chatty-neighbour-move-on": chatty_move_on,
+    "card-kid-wants-to-pet-pet": kid_pet,
+    "card-kid-wants-to-pet-decline": kid_decline,
+    "card-ice-cream-truck-pup-cups": truck_cups,
+    "card-ice-cream-truck-walk-past": truck_walk_past,
+    "card-construction-detour-long-way": detour_long_way,
+    "card-construction-detour-squeeze": detour_squeeze,
+    "card-mail-carrier-hold": mail_hold,
+    "card-mail-carrier-wait": mail_wait,
 }
 
 
@@ -330,8 +484,8 @@ def mock_card(kind, key):
 
 def preview(out, scale=3):
     keys = list(ILLUSTRATIONS)
-    kinds = ["encounter"] * 11 + ["lucky"] * 6
-    cols = 9
+    kinds = ["encounter"] * 11 + ["lucky"] * 6 + ["stop"] * 12
+    cols = 10
     rows = (len(keys) + cols - 1) // cols
     sheet = Image.new("RGB", ((CW + 6) * cols * scale, (CH + 6) * rows * scale), hp.rgb("ink"))
     for i, (key, kind) in enumerate(zip(keys, kinds)):

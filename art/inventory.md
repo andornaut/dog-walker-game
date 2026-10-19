@@ -52,18 +52,18 @@ Starters come first: they are the dogs every new player sees.
 
 ## Obstacles and forced stops (road)
 
-| Asset            | Key                | Type   | Size  | Animations       | Priority | Notes                                                       |
-| ---------------- | ------------------ | ------ | ----- | ---------------- | -------- | ----------------------------------------------------------- |
-| Skunk            | `skunk`            | sprite | 32×32 | `idle`           | M6       |                                                             |
-| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack              |
-| Puddle           | `puddle`           | sprite | 32×16 | `idle` (shimmer) | M6       | Ground decal: no outline, no shadow, drawn under everything |
-| Thief            | `thief`            | sprite | 32×48 | `walk`, `flee`   | M6       | Pickpocket; flees from a pack with a big dog, with no card  |
-| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | core     | Forced stop; may span the full road                         |
-| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | core     | Forced stop                                                 |
-| Kid              | `kid`              | sprite | 32×48 | `wave`           | core     | Forced stop: wants to pet the dogs                          |
-| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | core     | Forced stop; wider than a lane                              |
-| Construction     | `construction`     | sprite | TBD   | none             | core     | Forced stop: detour barrier across the road                 |
-| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | core     | Forced stop                                                 |
+| Asset            | Key                | Type   | Size  | Animations           | Priority | Notes                                                                 |
+| ---------------- | ------------------ | ------ | ----- | -------------------- | -------- | --------------------------------------------------------------------- |
+| Skunk            | `skunk`            | sprite | 32×32 | `idle`               | M6       |                                                                       |
+| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`        | M6       | Harmless scenery when no chaser is in the pack                        |
+| Puddle           | `puddle`           | sprite | 32×16 | `idle` (shimmer)     | M6       | Ground decal: no outline, no shadow, drawn under everything           |
+| Thief            | `thief`            | sprite | 32×48 | `walk`, `flee`       | M6       | Pickpocket; flees from a pack with a big dog, with no card            |
+| Stop sign        | `stop-sign`        | sprite | 32×48 | `idle`               | M6       | Forced stop                                                           |
+| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`               | M6       | Forced stop; holds a coffee mug                                       |
+| Kid              | `kid`              | sprite | 32×48 | `wave`, `sad`        | M6       | Forced stop: wants to pet the dogs; shorter than the adults           |
+| Ice cream truck  | `ice-cream-truck`  | sprite | 64×48 | `idle`               | M6       | Forced stop; two lanes wide                                           |
+| Construction     | `construction`     | sprite | 56×32 | `idle` (lamps blink) | M6       | Forced stop: one lane of barrier; the game repeats it across the road |
+| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`               | M6       | Forced stop                                                           |
 
 ## Lucky encounters (road)
 
@@ -135,7 +135,7 @@ Each card is a frame plus an illustration plus text drawn in the pixel font. The
 | Enlarged frame | `card-frame-large` | sprite | TBD    | core     | Tap-to-enlarge view; same frames                                                                                                                                  |
 | Cost badge     | `card-cost`        | image  | TBD    | core     | Holds `$`, `$$$` or the ♥ change                                                                                                                                  |
 
-Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. Done: the 5 encounters and 3 lucky encounters.
+Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. Done: the 5 encounters, 3 lucky encounters and 6 forced stops. Forced-stop keys use the stop's data key, e.g. `card-kid-wants-to-pet-pet`.
 
 | Encounter         | Options                                                                                                      | Count | Priority |
 | ----------------- | ------------------------------------------------------------------------------------------------------------ | ----- | -------- |
