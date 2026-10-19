@@ -4,7 +4,7 @@ Every art asset v1 needs, derived from `../gameplay/v1-plan.md` and the run scre
 
 Priority:
 
-- **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 4 encounters, 2 pickups, card frames, card illustrations for the 4 encounters and 6 forced stops)
+- **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 5 encounters, 2 pickups, card frames, card illustrations for the 5 encounters and 6 forced stops)
 - **v1:** needed before v1 ships, outside the Milestone 6 list
 - **later:** nice to have; placeholders are acceptable for v1
 
@@ -33,35 +33,36 @@ Dogs are listed in their own section below. Each of the 9 dogs is a named charac
 
 ## Dogs
 
-Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react` and `pull`. Owner faces show the owner's temperament: laid-back, fussy or dramatic.
+Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react` and `pull`. Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
 
-| Dog               | Breed           | Size   | Road sprite    | Face                | Owner face            | Owner     | Priority |
-| ----------------- | --------------- | ------ | -------------- | ------------------- | --------------------- | --------- | -------- |
-| Duchess (starter) | Maltese         | Small  | `dog-duchess`  | `face-dog-duchess`  | `face-owner-duchess`  | Laid-back | M6       |
-| Biscuit (starter) | Beagle          | Medium | `dog-biscuit`  | `face-dog-biscuit`  | `face-owner-biscuit`  | Laid-back | M6       |
-| Koda (starter)    | Husky           | Big    | `dog-koda`     | `face-dog-koda`     | `face-owner-koda`     | Laid-back | M6       |
-| Nugget            | Pug             | Small  | `dog-nugget`   | `face-dog-nugget`   | `face-owner-nugget`   | Dramatic  | M6       |
-| Zippy             | Jack Russell    | Small  | `dog-zippy`    | `face-dog-zippy`    | `face-owner-zippy`    | Fussy     | M6       |
-| Pierre            | Standard poodle | Medium | `dog-pierre`   | `face-dog-pierre`   | `face-owner-pierre`   | Fussy     | M6       |
-| Dash              | Whippet         | Medium | `dog-dash`     | `face-dog-dash`     | `face-owner-dash`     | Dramatic  | M6       |
-| Snowball          | Samoyed         | Big    | `dog-snowball` | `face-dog-snowball` | `face-owner-snowball` | Dramatic  | M6       |
-| Waffles           | Saint Bernard   | Big    | `dog-waffles`  | `face-dog-waffles`  | `face-owner-waffles`  | Fussy     | M6       |
+| Dog               | Breed           | Size   | Look                                  | Owner                                  | Road sprite    | Face                | Owner face            | Priority |
+| ----------------- | --------------- | ------ | ------------------------------------- | -------------------------------------- | -------------- | ------------------- | --------------------- | -------- |
+| Duchess (starter) | Maltese         | Small  | White coat, pink bow                  | Rosa, retired florist (laid-back)      | `dog-duchess`  | `face-dog-duchess`  | `face-owner-duchess`  | M6       |
+| Biscuit (starter) | Beagle          | Medium | Tricolour, floppy ears, green collar  | Sam, barista (laid-back)               | `dog-biscuit`  | `face-dog-biscuit`  | `face-owner-biscuit`  | M6       |
+| Koda (starter)    | Husky           | Big    | Grey and white, blue eyes, harness    | Jesse, trail runner (laid-back)        | `dog-koda`     | `face-dog-koda`     | `face-owner-koda`     | M6       |
+| Nugget            | Pug             | Small  | Fawn, black mask, tiny bandana        | Kevin, pet influencer (dramatic)       | `dog-nugget`   | `face-dog-nugget`   | `face-owner-nugget`   | M6       |
+| Zippy             | Jack Russell    | Small  | White with tan patches, red collar    | Mr. Pruitt, retired accountant (fussy) | `dog-zippy`    | `face-dog-zippy`    | `face-owner-zippy`    | M6       |
+| Pierre            | Standard poodle | Medium | Apricot, show-clip pom-poms           | Madame Lefevre, dog-show judge (fussy) | `dog-pierre`   | `face-dog-pierre`   | `face-owner-pierre`   | M6       |
+| Dash              | Whippet         | Medium | Grey brindle, knit sweater            | Ophelia, stage actor (dramatic)        | `dog-dash`     | `face-dog-dash`     | `face-owner-dash`     | M6       |
+| Snowball          | Samoyed         | Big    | Fluffy white, collar with a bell      | Tiffany, wedding planner (dramatic)    | `dog-snowball` | `face-dog-snowball` | `face-owner-snowball` | M6       |
+| Waffles           | Saint Bernard   | Big    | Brown and white, little barrel collar | Dr. Hughes, dentist (fussy)            | `dog-waffles`  | `face-dog-waffles`  | `face-owner-waffles`  | M6       |
 
 Starters come first: they are the dogs every new player sees.
 
 ## Obstacles and forced stops (road)
 
-| Asset            | Key                | Type   | Size  | Animations       | Priority | Notes                                          |
-| ---------------- | ------------------ | ------ | ----- | ---------------- | -------- | ---------------------------------------------- |
-| Skunk            | `skunk`            | sprite | 32×32 | `idle`           | M6       |                                                |
-| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack |
-| Puddle           | `puddle`           | sprite | 32×32 | `idle` (shimmer) | M6       | Flat on the road; no shadow                    |
-| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | v1       | Forced stop; may span the full road            |
-| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | v1       | Forced stop                                    |
-| Kid              | `kid`              | sprite | 32×48 | `wave`           | v1       | Forced stop: wants to pet the dogs             |
-| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | v1       | Forced stop; wider than a lane                 |
-| Construction     | `construction`     | sprite | TBD   | none             | v1       | Forced stop: detour barrier across the road    |
-| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | v1       | Forced stop                                    |
+| Asset            | Key                | Type   | Size  | Animations       | Priority | Notes                                                      |
+| ---------------- | ------------------ | ------ | ----- | ---------------- | -------- | ---------------------------------------------------------- |
+| Skunk            | `skunk`            | sprite | 32×32 | `idle`           | M6       |                                                            |
+| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack             |
+| Puddle           | `puddle`           | sprite | 32×32 | `idle` (shimmer) | M6       | Flat on the road; no shadow                                |
+| Thief            | `thief`            | sprite | 32×48 | `walk`, `flee`   | M6       | Pickpocket; flees from a pack with a big dog, with no card |
+| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | v1       | Forced stop; may span the full road                        |
+| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | v1       | Forced stop                                                |
+| Kid              | `kid`              | sprite | 32×48 | `wave`           | v1       | Forced stop: wants to pet the dogs                         |
+| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | v1       | Forced stop; wider than a lane                             |
+| Construction     | `construction`     | sprite | TBD   | none             | v1       | Forced stop: detour barrier across the road                |
+| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | v1       | Forced stop                                                |
 
 ## Pickups (road)
 
@@ -130,6 +131,7 @@ Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An en
 | Squirrel         | hold tight, let them chase                                                                                   | 2     | M6       |
 | Puddle           | go through, towel                                                                                            | 2     | M6       |
 | Other dog        | let them sniff, pull away                                                                                    | 2     | M6       |
+| Thief            | chase them off, let it go                                                                                    | 2     | M6       |
 | Stop sign        | wait, dart across                                                                                            | 2     | M6       |
 | Kid              | let them pet, decline                                                                                        | 2     | M6       |
 | Ice cream truck  | buy pup cups, walk past                                                                                      | 2     | M6       |
@@ -139,7 +141,7 @@ Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An en
 | Poop bags        | skip                                                                                                         | 1     | v1       |
 | Upgrades         | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, steady hands, sweet talker | 9     | v1       |
 
-Total: 31 card illustrations, 21 of them in Milestone 6.
+Total: 33 card illustrations, 23 of them in Milestone 6.
 
 ## Screens outside the run
 
@@ -170,7 +172,7 @@ Total: 31 card illustrations, 21 of them in Milestone 6.
 
 | Priority | Sprites | Images           | Fonts |
 | -------- | ------- | ---------------- | ----- |
-| M6       | ~36     | 21 (card illus.) | 1     |
+| M6       | ~37     | 23 (card illus.) | 1     |
 | v1       | ~13     | ~45              | 0     |
 | later    | ~1      | ~23              | 0     |
 
