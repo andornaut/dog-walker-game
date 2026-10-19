@@ -8,7 +8,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
 import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
-import { bubbleX, DOWN_TAIL } from "../hud/moments";
+import { bubbleX, downTail } from "../hud/moments";
 import {
   moveStripPress,
   stripItems,
@@ -701,9 +701,9 @@ export class HudScene extends Scene {
       drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
       parts.push(box);
     }
-    if (this.textures.exists(DOWN_TAIL.key)) {
-      const tailX = faceX - DOWN_TAIL.width / 2;
-      parts.push(this.add.image(tailX, y + height - 1, DOWN_TAIL.key).setOrigin(0));
+    const tail = downTail((key) => this.textures.exists(key));
+    if (tail !== undefined) {
+      parts.push(this.add.image(faceX - tail.tipX, y + height - 1, tail.key).setOrigin(0));
     }
     text.setDepth(1);
     parts.push(text);

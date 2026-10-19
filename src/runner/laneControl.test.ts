@@ -75,6 +75,14 @@ describe("steerLane", () => {
     expect(advance(0.05, control).motion).toEqual(stillInLane(2));
   });
 
+  it("heads on past the lane it started from when turning around before setting off", () => {
+    let control = steerLane(config, 1, still(1));
+    control = pullLane(config, 0.5, -1, control);
+    control = steerLane(config, -1, control);
+    expect(control.target).toBe(0);
+    expect(advance(1, control).motion).toEqual(stillInLane(0));
+  });
+
   it("holds the target at the road's edges", () => {
     expect(steerLane(config, 1, still(4)).target).toBe(4);
     let control = still(1);

@@ -335,17 +335,25 @@ describe("trackPointer fuzz", () => {
   }
 
   it("keeps a press tracked only while its gesture is under way, and the lane on the road", () => {
+    // Checked plainly and reported once: an expect per step makes this the slowest test here.
+    const broken: string[] = [];
     for (let seed = 1; seed <= 300; seed += 1) {
       const random = seededRandom(seed);
       const world = newWorld(random);
       for (let i = 0; i < 80; i += 1) {
         randomStep(world, random);
-        expect(world.track.press === undefined).toBe(world.track.gesture.kind === "idle");
-        expect(world.control.target).toBeGreaterThanOrEqual(0);
-        expect(world.control.target).toBeLessThan(LANES);
-        expect(world.control.lockSeconds).toBeGreaterThanOrEqual(0);
+        const { control, track } = world;
+        if (
+          (track.press === undefined) !== (track.gesture.kind === "idle") ||
+          control.target < 0 ||
+          control.target >= LANES ||
+          control.lockSeconds < 0
+        ) {
+          broken.push(`seed ${seed} step ${i}`);
+        }
       }
     }
+    expect(broken).toEqual([]);
   });
 
   it("settles every lane change and lock once input stops", () => {

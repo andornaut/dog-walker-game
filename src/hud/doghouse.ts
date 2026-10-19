@@ -7,8 +7,9 @@ export const DOGHOUSE = {
   dogFace: { x: 6, y: 24 },
   fired: { x: 60, y: 74 },
   heartCount: { x: 98, y: 46 },
-  // Rows of five 8px hearts: from x 76 the fifth ends on the house's right edge.
-  hearts: { perRow: 5, pitchX: 9, pitchY: 8, x: 76, y: 26 },
+  // Rows of five hearts, 7px opaque in 8px frames, on the hearts board (x 77 to 117, rows 23
+  // to 53): from x 78, 8px apart, they keep a 1px gap and the fifth ends at x 116.
+  hearts: { perRow: 5, pitchX: 8, pitchY: 8, x: 78, y: 26 },
   // The roof's name plate and the owner's name under the faces, for fitting names: the
   // scales each may take, largest first.
   name: { scales: [2, 1], width: 108, x: 60, y: 6 },

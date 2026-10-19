@@ -41,7 +41,9 @@ const directionTo = (from: number, to: number): LaneDirection => (to < from ? -1
 const reverse = (direction: LaneDirection): LaneDirection => (direction === 1 ? -1 : 1);
 
 // Still, the pack sets off toward target. Moving away from it, the pack turns around at once
-// from where it is; otherwise it carries on and heads on from the lane it reaches.
+// from where it is; otherwise it carries on and heads on from the lane it reaches. A move
+// turned around before it set off leaves the pack still in its first lane, so it sets off
+// again from there: arrivals are what head on, and a still pack has none.
 function headFor(config: LaneMotionConfig, target: number, motion: LaneMotion): LaneMotion {
   if (motion.kind === "still") {
     return motion.lane === target
@@ -49,9 +51,11 @@ function headFor(config: LaneMotionConfig, target: number, motion: LaneMotion): 
       : queueLaneMove(config, directionTo(motion.lane, target), motion);
   }
   const heading = directionTo(motion.from, motion.to);
-  return (target - motion.to) * heading < 0
-    ? requestLaneMove(config, reverse(heading), motion)
-    : motion;
+  if ((target - motion.to) * heading >= 0) {
+    return motion;
+  }
+  const turned = requestLaneMove(config, reverse(heading), motion);
+  return turned.kind === "still" ? headFor(config, target, turned) : turned;
 }
 
 // The player's lane change moves the target one lane, held on the road, and is ignored while

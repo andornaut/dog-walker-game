@@ -32,14 +32,28 @@ function artsOf(key: string): DepthArt[] {
     });
 }
 
+// A made-up sprite's art steps: its 1x, then each smaller step drawn to scale.
+function syntheticArts(key: string, width: number, steps: readonly number[]): DepthArt[] {
+  return [1, ...steps].map((step) => ({
+    feetY: Math.round(width * 0.75 * step),
+    height: Math.round(width * 0.8 * step),
+    key: step === 1 ? key : `${key}@${step * 100}`,
+    width: Math.round(width * step),
+  }));
+}
+
 const projection = walkProjection(ROAD_CAMERA, screenLayout(SCREEN_CONFIG).road);
 // The road's projected scales, far edge to just past the walker's feet, a road pixel apart.
 const approach = Array.from({ length: Math.ceil(projection.visibleDistance) + 12 }, (_, i) =>
   scaleAt(projection, projection.visibleDistance - i),
 );
-// Sprites with both steps, one step and none, small and large.
+// Shipped road sprites, small and large, flat and standing.
 const STANDING = ["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge"];
 const KEYS = [...STANDING, "skunk-cloud", "puddle"];
+// Every set of steps a sprite may have, whichever sprites ship with them.
+const STEP_SETS = [[], [0.75], [0.5], [0.75, 0.5]].flatMap((steps) =>
+  [16, 88].map((width) => syntheticArts(`w${width}`, width, steps)),
+);
 
 describe("scaleAt", () => {
   it("only grows as a point approaches the walker's feet", () => {
@@ -67,22 +81,21 @@ describe("depthDraw", () => {
     expect(depthDraw(arts, 0.8)).toMatchObject({ key: "cone", scale: 26 / 32 });
     expect(depthDraw(arts, 0.7)).toMatchObject({ key: "cone@75", scale: 22 / 24 });
     // A sprite with no @75 draws its 1x from just above 0.5.
-    expect(depthDraw(artsOf("skunk-cloud"), 0.6)).toMatchObject({
-      key: "skunk-cloud",
+    expect(depthDraw(syntheticArts("cloud", 88, [0.5]), 0.6)).toMatchObject({
+      key: "cloud",
       scale: 53 / 88,
     });
   });
 
   it("follows the projection to the nearest pixel, as it approaches only growing", () => {
-    for (const key of KEYS) {
-      const arts = artsOf(key);
+    for (const arts of [...KEYS.map(artsOf), ...STEP_SETS]) {
       const full = itemAt(arts, 0);
       let last: { height: number; key: string; width: number } | undefined;
       for (const projected of approach) {
         const drawn = depthDraw(arts, projected);
         const art = arts.find((step) => step.key === drawn.key);
         if (art === undefined) {
-          throw new Error(`${drawn.key} is not one of ${key}'s steps`);
+          throw new Error(`${drawn.key} is not one of ${full.key}'s steps`);
         }
         const shown = {
           height: art.height * drawn.scale,

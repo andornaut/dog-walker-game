@@ -12,7 +12,7 @@ import {
   bowRightControl,
   bubbleX,
   curvePoint,
-  DOWN_TAIL,
+  downTail,
   FIRING_EVENT,
   FIRING_PARTS,
   type FiringCue,
@@ -319,10 +319,11 @@ export class HudFeedback {
       drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
       parts.push(box);
     }
-    if (this.scene.textures.exists(DOWN_TAIL.key)) {
+    const downArt = downTail((key) => this.scene.textures.exists(key));
+    if (downArt !== undefined) {
       parts.push(
         this.scene.add
-          .image(tail.x, tail.y, DOWN_TAIL.key)
+          .image(tail.x - downArt.tipX, tail.y, downArt.key)
           .setOrigin(0)
           .setDepth(DEPTH + 1),
       );

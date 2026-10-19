@@ -49,8 +49,24 @@ export const MOMENTS = {
 // The top bar's money and treat icons' centres, where coins land and treats leave from.
 export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 }, treats: { x: 103, y: 21 } } as const;
 
-// The 8x6 tail under a bubble, pointing down at who is speaking.
-export const DOWN_TAIL = { height: 6, key: "ui-hint-tail", width: 8 } as const;
+// An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the
+// bubble's bottom rim, and tipX is the column it points from.
+export interface DownTail {
+  readonly height: number;
+  readonly key: string;
+  readonly tipX: number;
+}
+
+// The quip's own down tail, else the hint's, centred as before it had one.
+export const DOWN_TAILS: readonly DownTail[] = [
+  { height: 6, key: "ui-quip-tail-down", tipX: 5 },
+  { height: 6, key: "ui-hint-tail", tipX: 4 },
+];
+
+// The first down tail whose art is loaded, if any.
+export function downTail(exists: (key: string) => boolean): DownTail | undefined {
+  return DOWN_TAILS.find(({ key }) => exists(key));
+}
 
 // The left edge of a bubble width wide centred on centreX, kept 2px inside the screen.
 export function bubbleX(screenWidth: number, centreX: number, width: number): number {
@@ -65,7 +81,7 @@ export function firingShowMs(seconds: number): number {
 // The firing moment's parts, from the slot's top-left corner, rising over the road above
 // the doghouse: the owner's face at 2x centred on face, the 64x64 pop drawn at 2x from pop,
 // the plate on the roof, and the fired line's bubble centred over line, its bottom edge on
-// it, with the 8x6 tail under it pointing down at the face from tail.
+// it, with the 8x6 tail's top row at tail.y over the bubble's rim, its tip at tail.x.
 export const FIRING_PARTS = {
   face: { x: 60, y: -34 },
   line: { x: 60, y: -72 },
@@ -73,7 +89,7 @@ export const FIRING_PARTS = {
   // "FIRED!" starts this far into the plate, the top of its capitals this far down.
   plateText: { x: 8, y: 9 },
   pop: { x: -4, y: -98 },
-  tail: { x: 56, y: -73 },
+  tail: { x: 60, y: -73 },
 } as const;
 
 // The firing moment's parts on screen for the dog in slot.

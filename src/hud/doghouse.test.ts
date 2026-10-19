@@ -6,6 +6,10 @@ import { screenLayout } from "../layout/screenLayout";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "./doghouse";
 
 const HEART = { height: 7, width: 8 };
+// ui-heart's opaque width within its 8px frame.
+const HEART_OPAQUE = 7;
+// The cream board the hearts sit on, inclusive pixel bounds in ui-doghouse.
+const HEARTS_BOARD = { bottom: 53, left: 77, right: 117, top: 23 };
 const FACE = 32;
 const STATUS = 16;
 const overlaps = (a: Rect, b: Rect) =>
@@ -29,18 +33,25 @@ describe("DOGHOUSE", () => {
 });
 
 describe("doghouseHearts", () => {
-  it("lays hearts from (76, 26) in rows of five, 9px across and 8px down", () => {
+  it("lays hearts from (78, 26) in rows of five, 8px across and 8px down", () => {
     const cells = doghouseHearts(7, 10);
     expect(cells).toHaveLength(10);
-    expect(cells[0]).toEqual({ full: true, x: 76, y: 26 });
-    expect(cells[4]).toEqual({ full: true, x: 112, y: 26 });
-    expect(cells[5]).toEqual({ full: true, x: 76, y: 34 });
+    expect(cells[0]).toEqual({ full: true, x: 78, y: 26 });
+    expect(cells[4]).toEqual({ full: true, x: 110, y: 26 });
+    expect(cells[5]).toEqual({ full: true, x: 78, y: 34 });
     expect(cells[7]).toEqual({ full: false, x: 94, y: 34 });
   });
 
-  it("keeps eleven hearts, a big dog with the Lucky collar, on the house above the statuses", () => {
+  it("leaves a 1px gap between the opaque hearts", () => {
+    expect(DOGHOUSE.hearts.pitchX - HEART_OPAQUE).toBe(1);
+  });
+
+  it("keeps eleven hearts, a big dog with the Lucky collar, on the hearts board above the statuses", () => {
     for (const cell of doghouseHearts(0, 11)) {
-      expect(cell.x + HEART.width).toBeLessThanOrEqual(DOGHOUSE.size.width);
+      expect(cell.x).toBeGreaterThanOrEqual(HEARTS_BOARD.left);
+      expect(cell.x + HEART_OPAQUE - 1).toBeLessThanOrEqual(HEARTS_BOARD.right);
+      expect(cell.y).toBeGreaterThanOrEqual(HEARTS_BOARD.top);
+      expect(cell.y + HEART.height - 1).toBeLessThanOrEqual(HEARTS_BOARD.bottom);
       for (const status of DOGHOUSE.statuses) {
         expect(cell.y + HEART.height).toBeLessThanOrEqual(status.y);
       }

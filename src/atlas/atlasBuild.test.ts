@@ -19,22 +19,43 @@ interface Sheet {
   meta: { frameTags?: unknown[] };
 }
 
-function pixelsOf(image: RgbaImage, x: number, y: number, width: number, height: number) {
-  const rows: number[][] = [];
-  for (let row = y; row < y + height; row++) {
-    const start = (row * image.width + x) * 4;
-    rows.push([...image.data.subarray(start, start + width * 4)]);
+// Whether the width x height rect at (ax, ay) in a holds the same bytes as the one at (bx, by)
+// in b. Byte compares keep the check over every frame cheap; a deep equal of pixel arrays does not.
+function sameRect(
+  a: RgbaImage,
+  ax: number,
+  ay: number,
+  b: RgbaImage,
+  bx: number,
+  by: number,
+  width: number,
+  height: number,
+): boolean {
+  const rowBytes = width * 4;
+  for (let row = 0; row < height; row++) {
+    const aStart = ((ay + row) * a.width + ax) * 4;
+    const bStart = ((by + row) * b.width + bx) * 4;
+    const aRow = a.data.subarray(aStart, aStart + rowBytes);
+    const bRow = b.data.subarray(bStart, bStart + rowBytes);
+    if (aRow.length !== rowBytes || Buffer.compare(aRow, bRow) !== 0) {
+      return false;
+    }
   }
-  return rows;
+  return true;
 }
 
 describe("the shipped art's atlases", () => {
   let build: AtlasBuild;
+  let pages: RgbaImage[];
   // Each key's source PNG, decoded, and each sprite's Aseprite sheet.
   const sources = new Map<string, RgbaImage>();
   const sheets = new Map<string, Sheet>();
+  // Packing every page is the slow part, so it runs once, with room to spare on a loaded machine.
   beforeAll(async () => {
     build = await buildAtlases(readArt);
+    pages = build.manifest.pages.map(({ png }) =>
+      decodePng(build.pngs.get(png) ?? new Uint8Array()),
+    );
     const decoder = new TextDecoder();
     await Promise.all([
       ...[...manifest.images, ...manifest.sprites].map(async ({ key, png }) => {
@@ -44,7 +65,7 @@ describe("the shipped art's atlases", () => {
         sheets.set(key, JSON.parse(decoder.decode(await readArt(json))) as Sheet);
       }),
     ]);
-  });
+  }, 60_000);
 
   it("packs every image and sprite with no warnings, on pages that fit a phone GPU", () => {
     expect(build.warnings).toEqual([]);
@@ -75,17 +96,17 @@ describe("the shipped art's atlases", () => {
   });
 
   it("copies each image and frame pixel for pixel", () => {
-    const pages = build.manifest.pages.map(({ png }) =>
-      decodePng(build.pngs.get(png) ?? new Uint8Array()),
-    );
+    const differing: string[] = [];
     for (const { frames, key, page } of build.manifest.textures) {
       const source = sources.get(key);
       const atlas = pages[page];
       for (const { h, name, w, x, y } of frames) {
         const from = sheets.get(key)?.frames[name]?.frame ?? { x: 0, y: 0 };
-        const expected = source && pixelsOf(source, from.x, from.y, w, h);
-        expect(atlas && pixelsOf(atlas, x, y, w, h), `${key} ${name}`).toEqual(expected);
+        if (!source || !atlas || !sameRect(atlas, x, y, source, from.x, from.y, w, h)) {
+          differing.push(`${key} ${name}`);
+        }
       }
     }
+    expect(differing).toEqual([]);
   });
 });

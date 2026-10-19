@@ -7,6 +7,8 @@ import {
   bowRightControl,
   bubbleX,
   curvePoint,
+  DOWN_TAILS,
+  downTail,
   endScreenDelayMs,
   firingLayout,
   firingShowMs,
@@ -46,7 +48,7 @@ describe("firingLayout", () => {
       line: { x: 180, y: 398 },
       plate: { height: 28, width: 72, x: 144, y: 468 },
       pop: { x: 116, y: 372 },
-      tail: { x: 176, y: 397 },
+      tail: { x: 180, y: 397 },
     });
   });
 
@@ -57,9 +59,19 @@ describe("firingLayout", () => {
 
   it("points the line's tail down at the top of the 2x face, under the bubble", () => {
     const { face, line, tail } = firingLayout({ x: 0, y: 470 });
-    expect(tail.x + 4).toBe(face.x);
+    expect(tail.x).toBe(face.x);
     expect(tail.y).toBe(line.y - 1);
-    expect(tail.y + 6).toBeLessThanOrEqual(face.y - 32);
+    for (const { height } of DOWN_TAILS) {
+      expect(tail.y + height).toBeLessThanOrEqual(face.y - 32);
+    }
+  });
+});
+
+describe("downTail", () => {
+  it("takes the quip's down tail, tip at column 5, and the hint's while it is missing", () => {
+    expect(downTail(() => true)).toMatchObject({ key: "ui-quip-tail-down", tipX: 5 });
+    expect(downTail((key) => key === "ui-hint-tail")).toMatchObject({ key: "ui-hint-tail" });
+    expect(downTail(() => false)).toBeUndefined();
   });
 });
 
