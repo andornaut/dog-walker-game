@@ -55,7 +55,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 | plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                                                             |
 | plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                           |
 | darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                      |
-| forest on cream                | 5.39  | Money gained, affordable prices, Stinky status, `ui-payout-label`                                                        |
+| forest on cream                | 5.39  | Money gained, affordable prices, `ui-payout-label`                                                                       |
 | darkRed on cream               | 5.07  | Money lost, unaffordable prices, full heart, ♥ in help callouts                                                          |
 | cream on darkBrown             | 5.85  | Text on the column or wood                                                                                               |
 | amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                                                |
