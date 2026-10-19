@@ -2,7 +2,7 @@
 
 Every art asset the game needs. Keys are the `public/art/manifest.json` keys. Type is the manifest list: `sprite` (PNG plus Aseprite JSON, tags from frameTags), `image` (PNG), `font` (BMFont) or `sound`.
 
-Priority: **M6** is in the Milestone 6 pixel pass, **core** is needed before the game ships, **later** accepts a placeholder.
+Priority: **core** is needed for the first build, **later** accepts a placeholder.
 
 `<zone>` is a zone id: snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade or the-long-way-home.
 
@@ -10,11 +10,11 @@ Priority: **M6** is in the Milestone 6 pixel pass, **core** is needed before the
 
 | Key                   | Type   | Size  | Tags                                             | Pri  | Note                                                                              |
 | --------------------- | ------ | ----- | ------------------------------------------------ | ---- | --------------------------------------------------------------------------------- |
-| `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | M6   | casey, ada, ben, trista                                                           |
+| `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | core | casey, ada, ben, trista                                                           |
 | `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                     |
-| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | M6   | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny |
-| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | M6   | Doghouse                                                                          |
-| `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | M6   | Keyed by dog                                                                      |
+| `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny |
+| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse                                                                          |
+| `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | core | Keyed by dog                                                                      |
 | `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                       |
 | `portrait-dog-<name>` | image  | 64×64 |                                                  | core | Dog pick and shop                                                                 |
 
@@ -22,23 +22,23 @@ Priority: **M6** is in the Milestone 6 pixel pass, **core** is needed before the
 
 | Key                              | Type   | Size          | Tags                                 | Pri  | Note                                                           |
 | -------------------------------- | ------ | ------------- | ------------------------------------ | ---- | -------------------------------------------------------------- |
-| `skunk`                          | sprite | 32×32         | `idle`                               | M6   | Centred on `skunk-cloud`                                       |
-| `skunk-cloud`                    | sprite | 88×88         | `loop`                               | M6   | 2×2 lanes and rows; dithered haze under the skunk; the hit box |
-| `squirrel`                       | sprite | 32×32         | `idle`, `run`                        | M6   |                                                                |
-| `puddle`                         | sprite | 88×32         | `idle`                               | M6   | 2 lanes; ground decal drawn under everything                   |
-| `thief`                          | sprite | 32×48         | `walk`, `flee`, `idle`               | M6   |                                                                |
-| `other-dog`                      | sprite | 32×32         | `walk`                               | M6   | A corgi                                                        |
-| `other-dog-owner`                | sprite | 32×48         | `walk`, `idle`                       | M6   | Walks behind `other-dog`                                       |
-| `stop-sign`                      | sprite | 32×48         | `idle`                               | M6   | Forced stop                                                    |
-| `chatty-neighbour`               | sprite | 32×48         | `wave`, `idle`                       | M6   | Forced stop; coffee mug                                        |
-| `kid`                            | sprite | 32×48         | `wave`, `sad`, `idle`                | M6   | Forced stop                                                    |
-| `ice-cream-truck`                | sprite | 64×48         | `idle`                               | M6   | Forced stop; 2 lanes                                           |
-| `construction`                   | sprite | 56×32         | `idle`                               | M6   | Forced stop; one lane, repeated across the road                |
-| `mail-carrier`                   | sprite | 32×48         | `walk`, `idle`                       | M6   | Forced stop                                                    |
-| `lost-wallet`                    | sprite | 16×16         | `idle`                               | M6   | Lucky                                                          |
-| `biscuit-neighbour`              | sprite | 32×48         | `wave`, `idle`                       | M6   | Lucky; holds a biscuit jar                                     |
-| `photo-op`                       | sprite | 32×48         | `idle`, `flash`                      | M6   | Lucky; tourist with a camera                                   |
-| `treat`, `tip`                   | sprite | 16×16         | `idle`                               | M6   | Pickups                                                        |
+| `skunk`                          | sprite | 32×32         | `idle`                               | core | Centred on `skunk-cloud`                                       |
+| `skunk-cloud`                    | sprite | 88×88         | `loop`                               | core | 2×2 lanes and rows; dithered haze under the skunk; the hit box |
+| `squirrel`                       | sprite | 32×32         | `idle`, `run`                        | core |                                                                |
+| `puddle`                         | sprite | 88×32         | `idle`                               | core | 2 lanes; ground decal drawn under everything                   |
+| `thief`                          | sprite | 32×48         | `walk`, `flee`, `idle`               | core |                                                                |
+| `other-dog`                      | sprite | 32×32         | `walk`                               | core | A corgi                                                        |
+| `other-dog-owner`                | sprite | 32×48         | `walk`, `idle`                       | core | Walks behind `other-dog`                                       |
+| `stop-sign`                      | sprite | 32×48         | `idle`                               | core | Forced stop                                                    |
+| `chatty-neighbour`               | sprite | 32×48         | `wave`, `idle`                       | core | Forced stop; coffee mug                                        |
+| `kid`                            | sprite | 32×48         | `wave`, `sad`, `idle`                | core | Forced stop                                                    |
+| `ice-cream-truck`                | sprite | 64×48         | `idle`                               | core | Forced stop; 2 lanes                                           |
+| `construction`                   | sprite | 56×32         | `idle`                               | core | Forced stop; one lane, repeated across the road                |
+| `mail-carrier`                   | sprite | 32×48         | `walk`, `idle`                       | core | Forced stop                                                    |
+| `lost-wallet`                    | sprite | 16×16         | `idle`                               | core | Lucky                                                          |
+| `biscuit-neighbour`              | sprite | 32×48         | `wave`, `idle`                       | core | Lucky; holds a biscuit jar                                     |
+| `photo-op`                       | sprite | 32×48         | `idle`, `flash`                      | core | Lucky; tourist with a camera                                   |
+| `treat`, `tip`                   | sprite | 16×16         | `idle`                               | core | Pickups                                                        |
 | `cone`, `bin`, `hydrant`         | sprite | 32×32         | `idle`                               | core | Minor, 1 lane                                                  |
 | `bench`                          | sprite | 88×24         | `idle`                               | core | Minor, 2 lanes                                                 |
 | `hedge`                          | sprite | 144×24        | `idle`                               | core | Minor, 3 lanes                                                 |
@@ -85,46 +85,46 @@ Same tags, frames and durations as the original.
 
 ## Road and backdrop
 
-| Key                 | Type   | Size    | Tags            | Pri   | Note                                                                                        |
-| ------------------- | ------ | ------- | --------------- | ----- | ------------------------------------------------------------------------------------------- |
-| `road-<zone>`       | image  | 280×64  |                 | core  | snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade, the-long-way-home |
-| `road-<zone>-start` | image  | 280×64  |                 | later | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19               |
-| `backdrop-<zone>`   | image  | 360×110 |                 | core  | Every zone; screen rows 40 to 149                                                           |
-| `gag-cat`           | sprite | 24×24   | `idle`, `react` | core  | On a fence                                                                                  |
-| `gag-sprinkler`     | sprite | 32×24   | `spray`         | core  |                                                                                             |
-| `gag-ball`          | sprite | 14×14   | `roll`          | core  | Rolls along the sidewalk                                                                    |
+| Key                 | Type   | Size    | Tags            | Pri  | Note                                                                                        |
+| ------------------- | ------ | ------- | --------------- | ---- | ------------------------------------------------------------------------------------------- |
+| `road-<zone>`       | image  | 280×64  |                 | core | snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade, the-long-way-home |
+| `road-<zone>-start` | image  | 280×64  |                 | core | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19               |
+| `backdrop-<zone>`   | image  | 360×110 |                 | core | Every zone; screen rows 40 to 149                                                           |
+| `gag-cat`           | sprite | 24×24   | `idle`, `react` | core | On a fence                                                                                  |
+| `gag-sprinkler`     | sprite | 32×24   | `spray`         | core |                                                                                             |
+| `gag-ball`          | sprite | 14×14   | `roll`          | core | Rolls along the sidewalk                                                                    |
 
 ## Doghouse row and top bar
 
-| Key                                          | Type   | Size              | Tags                                               | Pri   | Note                                                                                                      |
-| -------------------------------------------- | ------ | ----------------- | -------------------------------------------------- | ----- | --------------------------------------------------------------------------------------------------------- |
-| `ui-doghouse`                                | sprite | 120×90            | one per dog key, `empty`                           | core  | One per slot, three in a row                                                                              |
-| `ui-doghouse-warn`                           | sprite | 120×90            | `pulse`, `static`                                  | core  | Overlay at 1 ♥                                                                                            |
-| `ui-heart`                                   | sprite | 8×7               | `full`, `empty`                                    | M6    | Full is darkRed, empty a hollow darkBrown outline                                                         |
-| `ui-fired-plate`                             | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic`                   | core  | Stretched to 72×28                                                                                        |
-| `fx-fired-pop`                               | sprite | 64×64             | `play`                                             | core  | Drawn at 2× behind the fired face                                                                         |
-| `fx-coin-fly`                                | sprite | 12×12             | `spin`                                             | core  | Fee payout                                                                                                |
-| `ui-payout-label`                            | sprite | 24×16 three-slice | `normal`                                           | core  | Stretched to 60×16                                                                                        |
-| `fx-treat-pop`                               | sprite | 24×24             | `play`                                             | core  | Where a given treat lands                                                                                 |
-| `ui-quip`                                    | image  | 24×24 nine-slice  |                                                    | core  |                                                                                                           |
-| `ui-quip-tail`                               | image  | 6×8               |                                                    | core  | Points left at the owner; covers the bubble's left rim                                                    |
-| `icon-stinky`, `icon-soaked`, `icon-spooked` | image  | 16×16             |                                                    | core  | Doghouse status icons                                                                                     |
-| `ui-top-bar`                                 | image  | 360×40            |                                                    | core  |                                                                                                           |
-| `ui-strip-well`                              | image  | 24×24 nine-slice  |                                                    | core  | State strip tab under the zone well, right-aligned at x 356                                               |
-| `icon-upgrade-<upgrade>`                     | image  | 16×16             |                                                    | core  | State strip; one per upgrade id (9)                                                                       |
-| `icon-gear-<gear>`                           | image  | 16×16             |                                                    | core  | State strip; one per gear id (5)                                                                          |
-| `icon-money`                                 | image  | 16×16             |                                                    | core  | Also cards, shop and end screen                                                                           |
-| `ui-zone-pips`                               | sprite | 18×8              | `todo`, `current`, `done`, `<zone>`, `<zone>-done` | core  | One pip per zone of the route, 3px apart; `current` and `done` are zone-free, kept until the HUD switches |
-| `icon-zone-<zone>`                           | image  | 16×16             |                                                    | later | Every zone                                                                                                |
+| Key                                          | Type   | Size              | Tags                                               | Pri  | Note                                                                                                      |
+| -------------------------------------------- | ------ | ----------------- | -------------------------------------------------- | ---- | --------------------------------------------------------------------------------------------------------- |
+| `ui-doghouse`                                | sprite | 120×90            | one per dog key, `empty`                           | core | One per slot, three in a row                                                                              |
+| `ui-doghouse-warn`                           | sprite | 120×90            | `pulse`, `static`                                  | core | Overlay at 1 ♥                                                                                            |
+| `ui-heart`                                   | sprite | 8×7               | `full`, `empty`                                    | core | Full is darkRed, empty a hollow darkBrown outline                                                         |
+| `ui-fired-plate`                             | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic`                   | core | Stretched to 72×28                                                                                        |
+| `fx-fired-pop`                               | sprite | 64×64             | `play`                                             | core | Drawn at 2× behind the fired face                                                                         |
+| `fx-coin-fly`                                | sprite | 12×12             | `spin`                                             | core | Fee payout                                                                                                |
+| `ui-payout-label`                            | sprite | 24×16 three-slice | `normal`                                           | core | Stretched to 60×16                                                                                        |
+| `fx-treat-pop`                               | sprite | 24×24             | `play`                                             | core | Where a given treat lands                                                                                 |
+| `ui-quip`                                    | image  | 24×24 nine-slice  |                                                    | core |                                                                                                           |
+| `ui-quip-tail`                               | image  | 6×8               |                                                    | core | Points left at the owner; covers the bubble's left rim                                                    |
+| `icon-stinky`, `icon-soaked`, `icon-spooked` | image  | 16×16             |                                                    | core | Doghouse status icons                                                                                     |
+| `ui-top-bar`                                 | image  | 360×40            |                                                    | core |                                                                                                           |
+| `ui-strip-well`                              | image  | 24×24 nine-slice  |                                                    | core | State strip tab under the zone well, right-aligned at x 356                                               |
+| `icon-upgrade-<upgrade>`                     | image  | 16×16             |                                                    | core | State strip; one per upgrade id (9)                                                                       |
+| `icon-gear-<gear>`                           | image  | 16×16             |                                                    | core | State strip; one per gear id (5)                                                                          |
+| `icon-money`                                 | image  | 16×16             |                                                    | core | Also cards, shop and end screen                                                                           |
+| `ui-zone-pips`                               | sprite | 18×8              | `todo`, `current`, `done`, `<zone>`, `<zone>-done` | core | One pip per zone of the route, 3px apart; `current` and `done` are zone-free, kept until the HUD switches |
+| `icon-zone-<zone>`                           | image  | 16×16             |                                                    | core | Every zone                                                                                                |
 
 ## Choice cards and help
 
 | Key                           | Type   | Size    | Tags                                    | Pri  | Note                                                                     |
 | ----------------------------- | ------ | ------- | --------------------------------------- | ---- | ------------------------------------------------------------------------ |
-| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade` | M6   |                                                                          |
+| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade` | core |                                                                          |
 | `card-frame-large`            | sprite | 166×280 | as `card-frame`                         | core | Tap-to-enlarge view                                                      |
 | `card-cost`                   | image  | 71×13   |                                         | core | Cost plaque, at 2× on the large frame                                    |
-| `card-<encounter>-<option>`   | image  | 75×56   |                                         | M6   | One per option of the encounters, lucky encounters and forced stops (27) |
+| `card-<encounter>-<option>`   | image  | 75×56   |                                         | core | One per option of the encounters, lucky encounters and forced stops (27) |
 | `card-<upgrade>`, `card-skip` | image  | 75×56   |                                         | core | One per upgrade (9), and Poop bags' Skip                                 |
 | `help-<page>`                 | image  | 344×236 |                                         | core | lanes, pickups, cards, owners, pulls, zones                              |
 
@@ -155,14 +155,14 @@ Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). T
 | `ui-hint`                                                     | image  | 24×24 nine-slice                           |                       | core  | First-time hint bubble                                                                   |
 | `ui-hint-tail`                                                | image  | 8×6                                        |                       | core  |                                                                                          |
 | `ui-zone-banner`                                              | image  | 248×48                                     |                       | core  | The game writes both lines                                                               |
-| `ui-difficulty`                                               | sprite | 55×10                                      | `1` to `5`            | later | Under a zone's name on a fork's path card: that many filled paws out of five, 11px apart |
+| `ui-difficulty`                                               | sprite | 55×10                                      | `1` to `5`            | core  | Under a zone's name on a fork's path card: that many filled paws out of five, 11px apart |
 | `fx-tap`, `fx-dust`                                           | sprite | 16×16                                      | `play`                | core  |                                                                                          |
 
 ## UI kit
 
 | Key                                                                                                             | Type   | Size              | Tags                                                                                  | Pri   | Note                                         |
 | --------------------------------------------------------------------------------------------------------------- | ------ | ----------------- | ------------------------------------------------------------------------------------- | ----- | -------------------------------------------- |
-| `font-body`, `font-title`                                                                                       | font   | 8px               |                                                                                       | M6    | Includes `$` and a drawn `♥`                 |
+| `font-body`, `font-title`                                                                                       | font   | 8px               |                                                                                       | core  | Includes `$` and a drawn `♥`                 |
 | `ui-button`                                                                                                     | sprite | 24×24 nine-slice  | `normal`, `pressed`, `disabled`, `secondary`, `secondary-pressed`, `go`, `go-pressed` | core  |                                              |
 | `ui-icon-button`                                                                                                | sprite | 20×20             | `normal`, `pressed`                                                                   | core  | Icon at +2,+1 (+2,+3 pressed)                |
 | `ui-panel`                                                                                                      | image  | 24×24 nine-slice  |                                                                                       | core  |                                              |
@@ -179,5 +179,5 @@ Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). T
 
 | Key                                                                                   | Pri  |
 | ------------------------------------------------------------------------------------- | ---- |
-| `sfx-tip`, `sfx-treat`, `sfx-bump`, `sfx-bark`, `sfx-card`, `sfx-fired`, `music-walk` | M6   |
+| `sfx-tip`, `sfx-treat`, `sfx-bump`, `sfx-bark`, `sfx-card`, `sfx-fired`, `music-walk` | core |
 | `sfx-hit-<encounter>`, `sfx-badge`, `sfx-new-best`                                    | core |
