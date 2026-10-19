@@ -4,8 +4,8 @@ import type { ZoneId } from "../data/types";
 // backdrops' streets, so the verge under the band continues the band's bottom row. across is
 // how far from the road's centre line a pixel is, in road pixels (the road is across < 140);
 // x is the same measure signed, negative on the left. z is a road distance from the start of
-// the walk, so seams, tufts, leaves and rough patches scroll with the road; mown stripes run
-// along the street and stay put. span is how much road a screen row covers, and scale the
+// the walk, so seams, dots, tufts, leaves and rough patches scroll with the road; mown stripes
+// run along the street and stay put. span is how much road a screen row covers, and scale the
 // row's ground scale.
 
 // Endesga 32 colours.
@@ -18,6 +18,13 @@ const LIGHT_GREY = 0xc0cbdc;
 const OCHRE = 0xd77643;
 const RUST = 0xbe4a2f;
 const DARK_BROWN = 0x733e39;
+const BROWN = 0xb86f50;
+const TAN = 0xe4a672;
+const CREAM = 0xead4aa;
+const WHITE = 0xffffff;
+const RED = 0xe43b44;
+const YELLOW = 0xfee761;
+const ORANGE = 0xf77622;
 
 const ROAD_HALF = 140;
 const CURB = 144;
@@ -35,39 +42,146 @@ const MOWN_MIN_PX = 4;
 // The ground scale on the backdrop's bottom row, where the art's mark rates are set.
 const BAND_SCALE = 0.5;
 
+// Dots of other colours scattered over a band of the verge: share is the part of the band's
+// pixels they cover, which its colours split equally.
+export interface VergeDots {
+  readonly colors: readonly number[];
+  readonly share: number;
+}
+
+// A band of one colour, with its dots, running out to its to, across.
+export interface VergeStrip {
+  readonly color: number;
+  readonly dots: readonly VergeDots[];
+  readonly to: number;
+}
+
+// Outward from the road: the curb, the strips, the sidewalk or paving, then the lawn.
 export interface Verge {
   // A curb that would match the road's grey is darker, so the road's edge still reads.
   readonly curbColor: number;
   // Where the curb ends and the sidewalk or paving ends, across; the lawn lies beyond.
   readonly curbTo: number;
-  readonly walkTo: number;
   // Fallen leaves on the sidewalks and lawns.
   readonly leaves: boolean;
   // Mown stripes on the front lawns, or an unmown lawn with rough patches.
   readonly lawn: "mown" | "rough" | "none";
+  // The line across the sidewalk or paving every SEAM_PERIOD.
+  readonly seamColor: number;
+  // The bands between the curb and the sidewalk or paving, outward.
+  readonly strips: readonly VergeStrip[];
+  readonly walkColor: number;
+  readonly walkDots: readonly VergeDots[];
+  readonly walkTo: number;
 }
 
+// A grey sidewalk with grey seams, straight off the curb.
+const SIDEWALK = { seamColor: GREY, strips: [], walkColor: LIGHT_GREY, walkDots: [] } as const;
+
 export const VERGES: Readonly<Record<ZoneId, Verge>> = {
-  homeStretch: { curbColor: GREY, curbTo: CURB, lawn: "mown", leaves: true, walkTo: WALK },
-  park: { curbColor: GREY, curbTo: ROAD_HALF, lawn: "rough", leaves: false, walkTo: ROAD_HALF },
+  homeStretch: {
+    ...SIDEWALK,
+    curbColor: GREY,
+    curbTo: CURB,
+    lawn: "mown",
+    leaves: true,
+    walkTo: WALK,
+  },
+  park: {
+    ...SIDEWALK,
+    curbColor: GREY,
+    curbTo: ROAD_HALF,
+    lawn: "rough",
+    leaves: false,
+    walkTo: ROAD_HALF,
+  },
   // A riverside path: paving straight off the road, no curb, then rough lawn.
   pawsPromenade: {
+    ...SIDEWALK,
     curbColor: GREY,
     curbTo: ROAD_HALF,
     lawn: "rough",
     leaves: false,
     walkTo: WALK,
   },
+  // A white curb, a planter of greens and flowers edged in brown, a tan edging, then cream
+  // paving with tan seams and specks out to the screen's edges.
   shops: {
-    curbColor: GREY,
+    curbColor: WHITE,
     curbTo: CURB,
     lawn: "none",
     leaves: false,
+    seamColor: TAN,
+    strips: [
+      { color: BROWN, dots: [], to: 146 },
+      {
+        color: GREEN,
+        dots: [
+          { colors: [DARK_GREEN], share: 0.35 },
+          { colors: [RED, YELLOW, WHITE, ORANGE], share: 0.1 },
+        ],
+        to: 158,
+      },
+      { color: BROWN, dots: [], to: 160 },
+      { color: TAN, dots: [], to: 162 },
+    ],
+    walkColor: CREAM,
+    walkDots: [{ colors: [TAN], share: 0.02 }],
     walkTo: Number.POSITIVE_INFINITY,
   },
-  snoozeCrescent: { curbColor: SLATE, curbTo: CURB, lawn: "mown", leaves: false, walkTo: WALK },
-  street: { curbColor: GREY, curbTo: CURB, lawn: "mown", leaves: false, walkTo: WALK },
+  snoozeCrescent: {
+    ...SIDEWALK,
+    curbColor: SLATE,
+    curbTo: CURB,
+    lawn: "mown",
+    leaves: false,
+    walkTo: WALK,
+  },
+  street: {
+    ...SIDEWALK,
+    curbColor: GREY,
+    curbTo: CURB,
+    lawn: "mown",
+    leaves: false,
+    walkTo: WALK,
+  },
 };
+
+// Where the sidewalk or paving starts, across: past the curb and the strips.
+export function walkFrom(verge: Verge): number {
+  return verge.strips.at(-1)?.to ?? verge.curbTo;
+}
+
+// A band of the verge that carries dots, from and to across.
+export interface DottedBand {
+  readonly dots: readonly VergeDots[];
+  readonly from: number;
+  readonly to: number;
+}
+
+// The verge's strips and its sidewalk or paving that carry dots, outward.
+export function dottedBands(verge: Verge): DottedBand[] {
+  const strips = verge.strips.map((strip, i) => ({
+    dots: strip.dots,
+    from: verge.strips[i - 1]?.to ?? verge.curbTo,
+    to: strip.to,
+  }));
+  const walk = { dots: verge.walkDots, from: walkFrom(verge), to: verge.walkTo };
+  return [...strips, walk].filter((band) => band.dots.length > 0 && band.to > band.from);
+}
+
+// The dot colour a noise value in [0, 1) picks, or null for none: each dot takes its share of
+// the range in turn, its colours equal parts of that share.
+export function dotColor(dots: readonly VergeDots[], value: number): number | null {
+  let rest = value;
+  for (const { colors, share } of dots) {
+    if (rest < share) {
+      return colors[Math.floor((rest / share) * colors.length)] ?? null;
+    }
+    rest -= share;
+  }
+  return null;
+}
 
 // Whether a line every period along the road falls on this row: exactly one row shows each
 // line, however much road the row covers, so a line never blinks as the road scrolls.
@@ -79,8 +193,6 @@ export function crossesLine(period: number, z: number, span: number): boolean {
 export function seamRow(z: number, span: number): boolean {
   return span < SEAM_MAX_SPAN && crossesLine(SEAM_PERIOD, z, span);
 }
-
-export const SEAM_COLOR = GREY;
 
 // Whether the front lawn at across falls in a dark mown stripe, on a row of this scale.
 export function mownAt(across: number, scale: number): boolean {
@@ -98,13 +210,18 @@ export function mownAt(across: number, scale: number): boolean {
   return i % 2 === 1 && width * scale >= MOWN_MIN_PX;
 }
 
-// The verge's colour at across on a row of this scale, before seams, patches and marks.
+// The verge's colour at across on a row of this scale, before seams, dots, patches and marks.
 export function vergeBase(verge: Verge, across: number, scale: number): number {
   if (across < verge.curbTo) {
     return verge.curbColor;
   }
+  for (const strip of verge.strips) {
+    if (across < strip.to) {
+      return strip.color;
+    }
+  }
   if (across < verge.walkTo) {
-    return LIGHT_GREY;
+    return verge.walkColor;
   }
   return verge.lawn === "mown" && mownAt(across, scale) ? DARK_GREEN : GREEN;
 }

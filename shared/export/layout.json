@@ -1879,6 +1879,10 @@
   },
   "verges": {
     "homeStretch": {
+      "seamColor": 9149364,
+      "strips": [],
+      "walkColor": 12635100,
+      "walkDots": [],
       "curbColor": 9149364,
       "curbTo": 144,
       "lawn": "mown",
@@ -1886,6 +1890,10 @@
       "walkTo": 188
     },
     "park": {
+      "seamColor": 9149364,
+      "strips": [],
+      "walkColor": 12635100,
+      "walkDots": [],
       "curbColor": 9149364,
       "curbTo": 140,
       "lawn": "rough",
@@ -1893,6 +1901,10 @@
       "walkTo": 140
     },
     "pawsPromenade": {
+      "seamColor": 9149364,
+      "strips": [],
+      "walkColor": 12635100,
+      "walkDots": [],
       "curbColor": 9149364,
       "curbTo": 140,
       "lawn": "rough",
@@ -1900,13 +1912,65 @@
       "walkTo": 188
     },
     "shops": {
-      "curbColor": 9149364,
+      "curbColor": 16777215,
       "curbTo": 144,
       "lawn": "none",
       "leaves": false,
+      "seamColor": 14984818,
+      "strips": [
+        {
+          "color": 12087120,
+          "dots": [],
+          "to": 146
+        },
+        {
+          "color": 6539085,
+          "dots": [
+            {
+              "colors": [
+                4098376
+              ],
+              "share": 0.35
+            },
+            {
+              "colors": [
+                14957380,
+                16705377,
+                16777215,
+                16217634
+              ],
+              "share": 0.1
+            }
+          ],
+          "to": 158
+        },
+        {
+          "color": 12087120,
+          "dots": [],
+          "to": 160
+        },
+        {
+          "color": 14984818,
+          "dots": [],
+          "to": 162
+        }
+      ],
+      "walkColor": 15389866,
+      "walkDots": [
+        {
+          "colors": [
+            14984818
+          ],
+          "share": 0.02
+        }
+      ],
       "walkTo": null
     },
     "snoozeCrescent": {
+      "seamColor": 9149364,
+      "strips": [],
+      "walkColor": 12635100,
+      "walkDots": [],
       "curbColor": 5925256,
       "curbTo": 144,
       "lawn": "mown",
@@ -1914,6 +1978,10 @@
       "walkTo": 188
     },
     "street": {
+      "seamColor": 9149364,
+      "strips": [],
+      "walkColor": 12635100,
+      "walkDots": [],
       "curbColor": 9149364,
       "curbTo": 144,
       "lawn": "mown",

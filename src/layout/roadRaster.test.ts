@@ -20,7 +20,18 @@ import {
   STRIP,
   stripLevels,
 } from "./roadRaster";
-import { crossesLine, darkerGreen, isLawn, mownAt, vergeBase, VERGES } from "./roadside";
+import {
+  crossesLine,
+  darkerGreen,
+  dotColor,
+  dottedBands,
+  isLawn,
+  mownAt,
+  seamRow,
+  vergeBase,
+  VERGES,
+  walkFrom,
+} from "./roadside";
 import { screenLayout } from "./screenLayout";
 
 const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
@@ -52,6 +63,8 @@ describe("the verge beside the road", () => {
   const bandRow = itemAt(roadRaster(projection, { ...view, height: 1, y: 149 }).rows, 0);
   const [GREEN, DARK_GREEN, FOREST] = [0x63c74d, 0x3e8948, 0x265c42];
   const [GREY, LIGHT_GREY] = [0x8b9bb4, 0xc0cbdc];
+  const [BROWN, CREAM, TAN, WHITE] = [0xb86f50, 0xead4aa, 0xe4a672, 0xffffff];
+  const FLOWERS = [0xe43b44, 0xfee761, 0xffffff, 0xf77622];
   const STRIP_MARK = -1;
   const runsOf = (colors: number[]) => {
     const result: [number, number, number][] = [];
@@ -106,13 +119,21 @@ describe("the verge beside the road", () => {
       zone: "park",
     },
     {
-      name: "shops' paving up to a curb",
+      name: "shops' paving, edging, planter and white curb",
       runs: [
-        [0, 107, LIGHT_GREY],
-        [108, 109, GREY],
+        [0, 98, CREAM],
+        [99, 99, TAN],
+        [100, 100, BROWN],
+        [101, 106, GREEN],
+        [107, 107, BROWN],
+        [108, 109, WHITE],
         [110, 249, STRIP_MARK],
-        [250, 251, GREY],
-        [252, 359, LIGHT_GREY],
+        [250, 251, WHITE],
+        [252, 252, BROWN],
+        [253, 258, GREEN],
+        [259, 259, BROWN],
+        [260, 260, TAN],
+        [261, 359, CREAM],
       ],
       zone: "shops",
     },
@@ -195,6 +216,98 @@ describe("the verge beside the road", () => {
       );
     expect(leaves("homeStretch")).toBe(true);
     expect(leaves("street")).toBe(false);
+  });
+
+  const PLANTER_DOTS = itemAt(VERGES.shops.strips, 1).dots;
+  it.each<[number, number | null]>([
+    [0, DARK_GREEN],
+    [0.349, DARK_GREEN],
+    [0.35, 0xe43b44],
+    [0.38, 0xfee761],
+    [0.41, 0xffffff],
+    [0.449, 0xf77622],
+    [0.45, null],
+    [0.99, null],
+  ])("dotColor picks %d's dot in the planter: %d", (value, color) => {
+    expect(dotColor(PLANTER_DOTS, value)).toBe(color);
+  });
+
+  it.each<[ZoneId, number, [number, number][]]>([
+    [
+      "shops",
+      162,
+      [
+        [146, 158],
+        [162, Number.POSITIVE_INFINITY],
+      ],
+    ],
+    ["street", 144, []],
+  ])("lays %s's paving from %d across, with dots on its bands %j", (zone, from, bands) => {
+    expect(walkFrom(VERGES[zone])).toBe(from);
+    expect(dottedBands(VERGES[zone]).map((band) => [band.from, band.to])).toEqual(bands);
+  });
+
+  // The shops verge's dots over the rows below the approach, at a few scrolls: the share of a
+  // band's pixels in the given colours, leaving out the paving's seam rows.
+  const shopsFrames = [0, 150, 300].map((scroll) => ({
+    out: draw(frameOf({ current: look("shops", 0x123456), scroll })),
+    scroll,
+  }));
+  it.each([
+    { colors: [DARK_GREEN], from: 146, name: "dark green", share: 0.35, to: 158 },
+    { colors: FLOWERS, from: 146, name: "flowers", share: 0.1, to: 158 },
+    { colors: [TAN], from: 162, name: "tan specks", share: 0.02, to: Number.POSITIVE_INFINITY },
+  ])("dots the shops verge with $name on about $share of a band", (dot) => {
+    const words = dot.colors.map(pixelWord);
+    const seen = new Set<number>();
+    let band = 0;
+    let dotted = 0;
+    for (const { out, scroll } of shopsFrames) {
+      raster.rows.forEach((row, y) => {
+        if (y < raster.approachRows || seamRow(scroll + row.distance, row.span)) {
+          return;
+        }
+        row.across.forEach((across, i) => {
+          if (across >= dot.from && across < dot.to) {
+            band += 1;
+            const word = out[y * view.width + i] ?? 0;
+            if (words.includes(word)) {
+              dotted += 1;
+              seen.add(word);
+            }
+          }
+        });
+      });
+    }
+    expect(Math.abs(dotted / band - dot.share)).toBeLessThan(dot.share / 4);
+    expect(seen.size).toBe(words.length);
+  });
+
+  it("ties each dot to its road pixel, so the dots scroll with the road", () => {
+    const colors = new Map<string, number>();
+    let repeats = 0;
+    let conflicts = 0;
+    for (const scroll of [0, 0.4, 3, 17, 40]) {
+      const out = draw(frameOf({ current: look("shops", 0x123456), scroll }));
+      raster.rows.forEach((row, y) => {
+        if (y < raster.approachRows) {
+          return;
+        }
+        const seed = Math.floor(scroll + row.distance) >> row.level;
+        row.across.forEach((across, i) => {
+          if (across >= 146 && across < 158) {
+            const key = `${row.level}:${row.roadX[i] ?? 0}:${seed}`;
+            const word = out[y * view.width + i] ?? 0;
+            const before = colors.get(key);
+            repeats += before === undefined ? 0 : 1;
+            conflicts += before === undefined || before === word ? 0 : 1;
+            colors.set(key, word);
+          }
+        });
+      });
+    }
+    expect(conflicts).toBe(0);
+    expect(repeats).toBeGreaterThan(1000);
   });
 
   it("draws each seam across the sidewalk on one far row, however the road has scrolled", () => {

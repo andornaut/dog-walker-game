@@ -3,22 +3,25 @@ import { distanceAtY, type RoadProjection, roadXAt, rowScale } from "./projectio
 import type { Rect } from "./rect";
 import {
   darkerGreen,
+  dotColor,
+  dottedBands,
   LEAF_PIXELS,
   markFits,
   markFrom,
   markLimit,
   marksOnRow,
+  noise,
   ROUGH_PATCH_BLOCK,
   ROUGH_PATCH_REACH,
   type RoughPatch,
   roughPatches,
   type RowMarks,
-  SEAM_COLOR,
   seamRow,
   type Verge,
   vergeBase,
   type VergeMark,
   VERGES,
+  walkFrom,
 } from "./roadside";
 
 // The projected road drawn a screen row at a time into a pixel buffer: every row samples one
@@ -241,10 +244,49 @@ function wordOf(rgb: number): number {
 const GREENS = [0x63c74d, 0x3e8948];
 const darkerWords = new Map(GREENS.map((rgb) => [wordOf(rgb), wordOf(darkerGreen(rgb))]));
 const PATCH_WORD = wordOf(PATCH_COLOR);
-const SEAM_WORD = wordOf(SEAM_COLOR);
 const LEAF_WORDS = LEAF_PIXELS.map((rows) =>
   rows.map((cells) => cells.map(({ color, dx }) => ({ dx, word: wordOf(color) }))),
 );
+
+// What each zone's verge draws per frame, looked up once a row: where its sidewalk or paving
+// starts, its seam word, and its dotted bands, each with the colour word every noise byte
+// picks (0 for none).
+interface VergePlan {
+  readonly dots: readonly {
+    readonly from: number;
+    readonly to: number;
+    readonly words: Uint32Array;
+  }[];
+  readonly seamWord: number;
+  readonly walkFrom: number;
+}
+
+const NOISE_STEPS = 256;
+
+function vergePlan(verge: Verge): VergePlan {
+  return {
+    dots: dottedBands(verge).map(({ dots, from, to }) => ({
+      from,
+      to,
+      words: Uint32Array.from({ length: NOISE_STEPS }, (_, n) => {
+        const rgb = dotColor(dots, (n + 0.5) / NOISE_STEPS);
+        return rgb === null ? 0 : wordOf(rgb);
+      }),
+    })),
+    seamWord: wordOf(verge.seamColor),
+    walkFrom: walkFrom(verge),
+  };
+}
+
+const plans = new Map<Verge, VergePlan>();
+function planOf(verge: Verge): VergePlan {
+  let plan = plans.get(verge);
+  if (plan === undefined) {
+    plan = vergePlan(verge);
+    plans.set(verge, plan);
+  }
+  return plan;
+}
 
 // Where the verge reaches threshold across on each side of a row's road: the first column
 // nearer than it on the left, and the first as far or farther on the right.
@@ -402,11 +444,24 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
       return;
     }
 
-    if (verge.walkTo > verge.curbTo && seamRow(z, row.span)) {
-      const [curbLeft, curbRight] = splitAt(row, verge.curbTo);
+    const plan = planOf(verge);
+    if (plan.dots.length > 0) {
+      // Noise rows step down with the strip's level, so the dots scroll with the road rather
+      // than reshuffle on rows that cover more road than they show.
+      const seed = Math.floor(z) >> row.level;
+      for (const { from, to, words } of plan.dots) {
+        const [fromLeft, fromRight] = splitAt(row, from);
+        const [toLeft, toRight] = splitAt(row, to);
+        drawDots(out, offset, roadX, seed, words, toLeft, fromLeft);
+        drawDots(out, offset, roadX, seed, words, fromRight, toRight);
+      }
+    }
+
+    if (verge.walkTo > plan.walkFrom && seamRow(z, row.span)) {
+      const [innerLeft, innerRight] = splitAt(row, plan.walkFrom);
       const [walkLeft, walkRight] = splitAt(row, verge.walkTo);
-      out.fill(SEAM_WORD, offset + walkLeft, offset + curbLeft);
-      out.fill(SEAM_WORD, offset + curbRight, offset + walkRight);
+      out.fill(plan.seamWord, offset + walkLeft, offset + innerLeft);
+      out.fill(plan.seamWord, offset + innerRight, offset + walkRight);
     }
 
     if (verge.lawn === "rough") {
@@ -452,6 +507,25 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     [carried, next] = [next, carried];
     fadeRow(frame.fade, view.x, y, offset, out);
   });
+}
+
+// A dotted band's columns from to to (excluded) on a row: each pixel's noise, seeded on its
+// road x and the row's noise row, picks its dot word, if any.
+function drawDots(
+  out: Uint32Array,
+  offset: number,
+  roadX: Int16Array,
+  seed: number,
+  words: Uint32Array,
+  from: number,
+  to: number,
+): void {
+  for (let i = from; i < to; i++) {
+    const word = words[(noise(roadX[i] ?? 0, seed) * NOISE_STEPS) | 0] ?? 0;
+    if (word !== 0) {
+      out[offset + i] = word;
+    }
+  }
 }
 
 // The far rows' drawn pixels dithered into the band's bottom row, when the fade is on.
