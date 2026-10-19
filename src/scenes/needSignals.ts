@@ -87,10 +87,7 @@ function letterIcon(scene: Scene, key: string, letter: string, color: number): s
 
 // A need's icon: the art's, or its word's first letter in a circle.
 export function needIcon(scene: Scene, need: NeedId): IconArt {
-  const key = needIconKey(need);
-  return scene.textures.exists(key)
-    ? { frame: firstFrame(scene, key), key }
-    : { key: letterIcon(scene, `${key}-drawn`, gameData.needs[need].name.charAt(0), PALETTE.blue) };
+  return iconArt(scene, needIconKey(need), gameData.needs[need].name.charAt(0));
 }
 
 // Any icon key: the art's first frame, or a letter for it.
