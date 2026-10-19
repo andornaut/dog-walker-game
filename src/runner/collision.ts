@@ -23,10 +23,21 @@ export interface CollisionResult<Item extends RoadItem> {
   remaining: Item[];
 }
 
-// Touching any part of an item counts.
+// An item is drawn standing on the near edge of its hit box, y + height, so it is level with
+// the pack from when it stands below the band's top until it stands below the band's bottom.
+// Past that it is drawn in front of the walker, having passed the pack, however long it is.
+export function levelWithPack(
+  pack: Pick<PackFootprint, "bottom" | "top">,
+  item: Pick<RoadItem, "height" | "y">,
+): boolean {
+  const standsAt = item.y + item.height;
+  return standsAt > pack.top && standsAt <= pack.bottom;
+}
+
+// Touching any of an item's lanes while it is level with the pack counts.
 export function touchesPack(pack: PackFootprint, item: RoadItem): boolean {
   const inLane = pack.lanes.some((lane) => lane >= item.lane && lane < item.lane + item.laneSpan);
-  return inLane && item.y < pack.bottom && item.y + item.height > pack.top;
+  return inLane && levelWithPack(pack, item);
 }
 
 // Items nearest the bottom are hit first, so of two obstacles touching at once only the

@@ -10,7 +10,7 @@ const rules = {
   invulnerabilitySeconds: 1,
   startsInvulnerability: () => true,
 };
-const still = { bottom: 560, lanes: [2], top: 520 };
+const still = { bottom: 600, lanes: [2], top: 520 };
 const midMove = { ...still, lanes: [2, 3] };
 
 const item = (id: number, kind: Kind, lane: number, y: number, laneSpan = 1): RoadItem<Kind> => ({
@@ -23,11 +23,14 @@ const item = (id: number, kind: Kind, lane: number, y: number, laneSpan = 1): Ro
 });
 
 describe("touchesPack", () => {
-  it("touches an item in an occupied lane that overlaps the band, not one that only meets its edge", () => {
-    expect(touchesPack(still, item(1, "tip", 2, 500))).toBe(true);
-    expect(touchesPack(still, item(1, "tip", 2, 559))).toBe(true);
-    expect(touchesPack(still, item(1, "tip", 2, 488))).toBe(false);
-    expect(touchesPack(still, item(1, "tip", 2, 560))).toBe(false);
+  // The item stands on its near edge, y + 32.
+  it.each([
+    { touches: false, where: "on the band's top", y: 488 },
+    { touches: true, where: "just below the band's top", y: 489 },
+    { touches: true, where: "on the band's bottom", y: 568 },
+    { touches: false, where: "below the band's bottom, though its far edge is level", y: 569 },
+  ])("touches an item in an occupied lane standing $where: $touches", ({ touches, y }) => {
+    expect(touchesPack(still, item(1, "tip", 2, y))).toBe(touches);
   });
 
   it("touches an item spanning several lanes in any of them", () => {

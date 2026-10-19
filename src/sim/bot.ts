@@ -2,6 +2,7 @@ import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { inputLockSeconds } from "../rules/dogs";
 import { read } from "../rules/units";
+import { levelWithPack } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, laneAt, moverPlace } from "../runner/movers";
 import { isNeedUrgent, needFill, needSpotOf, spotMeets } from "../runner/needs";
@@ -103,7 +104,8 @@ export function contactWindow(
   y: number,
   height: number,
 ): { readonly end: number; readonly start: number } {
-  return { end: (band.bottom - y) / speed, start: (band.top - (y + height)) / speed };
+  const standsAt = y + height;
+  return { end: (band.bottom - standsAt) / speed, start: (band.top - standsAt) / speed };
 }
 
 // How often a mover's path is sampled, in road pixels of scroll.
@@ -149,11 +151,12 @@ function scrollContacts(
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
     const y = roadTop - height + place.travel;
-    if (hasLeftRoad(laneCount, place) || y >= packBand.bottom) {
+    if (hasLeftRoad(laneCount, place) || y + height > packBand.bottom) {
       break;
     }
     const lane = laneAt(place.lanePosition);
-    const touching = place.moving && y + height > packBand.top && lane >= 0 && lane < laneCount;
+    const touching =
+      place.moving && levelWithPack(packBand, { height, y }) && lane >= 0 && lane < laneCount;
     const last = contacts.at(-1);
     if (touching && touchedBefore && last?.lane === lane) {
       last.to = since;

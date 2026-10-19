@@ -24,6 +24,7 @@ import type { CardSource, RunState } from "../state/runState";
 import {
   collideWithPack,
   type CollisionRules,
+  levelWithPack,
   type PackFootprint,
   tickInvulnerability,
   touchesPack,
@@ -1030,7 +1031,7 @@ function pickupsReached(
   pickups: readonly WalkItem[],
 ): WalkItem[] {
   // Reach widens the lanes only: with no pickup level with the pack, none is reached.
-  if (!pickups.some((item) => item.y < footprint.bottom && item.y + item.height > footprint.top)) {
+  if (!pickups.some((item) => levelWithPack(footprint, item))) {
     return [];
   }
   const reaches = {
