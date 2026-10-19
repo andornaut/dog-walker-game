@@ -1,6 +1,7 @@
 // The site navigation bar: Home, Play, Data, the art gallery, each mock listed in
 // /art/mocks/index.json, and the art docs. A page loads it with
-// <script src="/nav.js" defer></script> and adds nothing else.
+// <script src="/nav.js" defer></script> and adds nothing else. On /play/ the bar is one slim
+// row that scrolls sideways, so the game keeps the height.
 (() => {
   "use strict";
   const DOCS = "https://github.com/andornaut/dog-walker-game/blob/main/art/";
@@ -21,11 +22,16 @@
 .art-nav a { color: #c0cbdc; text-decoration: none; }
 .art-nav a:hover { color: #feae34; }
 .art-nav a[aria-current="page"] { color: #feae34; font-weight: 700; }
-.art-nav a:focus-visible { outline: 2px solid #feae34; outline-offset: 2px; }`;
+.art-nav a:focus-visible { outline: 2px solid #feae34; outline-offset: 2px; }
+.art-nav.slim { font-size: 13px; line-height: 1; touch-action: pan-x; }
+.art-nav.slim ul { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-block: 7px; white-space: nowrap; }
+.art-nav.slim ul::-webkit-scrollbar { display: none; }
+.art-nav.slim li + li::before { height: 12px; margin: 0 10px; vertical-align: -1px; }
+.art-nav.slim a:focus-visible { outline-offset: -2px; }`;
   document.head.append(style);
 
   const nav = document.createElement("nav");
-  nav.className = "art-nav";
+  nav.className = here === "/play" ? "art-nav slim" : "art-nav";
   nav.setAttribute("aria-label", "Site");
   const ul = document.createElement("ul");
   nav.append(ul);
