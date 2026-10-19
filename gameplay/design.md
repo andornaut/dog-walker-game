@@ -161,15 +161,20 @@ Every dog has one need, shown by name on its detail card:
 
 Obstacles hit by accident open a choice card.
 
-| Encounter | Who's affected                                          | Options                                                                    |
-| --------- | ------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Other dog | All dogs                                                | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each   |
-| Puddle    | Area effect: every dog but small ones; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                      |
-| Skunk     | Area effect: every dog                                  | Full groom → −$$$ · Quick rinse → −$, _Stinky_ · Hold your nose → −♥♥ each |
-| Squirrel  | Chasers (none: harmless scenery, no card)               | Hold tight → −♥ · Let them chase → −$ (dropped tips)                       |
-| Thief     | All dogs (none if any big dog: it flees, no card)       | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)   |
+| Encounter | Who's affected                                          | Options                                                                                             |
+| --------- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| Other dog | All dogs                                                | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → _Tangled_                          |
+| Puddle    | Area effect: every dog but small ones; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                                               |
+| Skunk     | Area effect: every dog                                  | Full groom → −$$$ · Quick rinse → −$, _Stinky_ · Hold your nose → −♥♥ each                          |
+| Squirrel  | Chasers (none: harmless scenery, no card)               | Hold tight → −♥ · Let them chase → −$ (dropped tips)                                                |
+| Thief     | All dogs (none if any big dog: it flees, no card)       | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips) · Let them run → _Spooked_ |
 
-**Stinky** (debuff): halves the tips that appear for the rest of the zone. A second skunk refreshes it; it never stacks.
+**Debuffs** are a cheap option's hidden price: mild, short, shown as an icon in the state strip and on the dogs, and gone by the zone's end. Applying one the pack already has refreshes it; none stacks. A treat to any dog clears every debuff.
+
+- **Spooked:** lane changes take 25% longer, for 10 seconds
+- **Stinky:** half as many tips appear until the zone ends
+- **Tangled:** after each lane change, the next waits 0.3 seconds, for 10 seconds
+- **Tuckered out:** every dog's need turns urgent 1.5× as fast until the zone ends
 
 ### Zone encounters
 
@@ -240,7 +245,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 
 ### Feedback
 
-- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (half as many tips). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) and Spooked (after a thief) are visual only and fade after 10 seconds
+- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (half as many tips). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) is visual only and fades after 10 seconds. Debuffs show their own icon and look until they end
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
@@ -250,7 +255,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
 - **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, the Pocket item); tap one for its description
-- **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows
+- **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows; any debuff the pack has ends with a puff
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band; they open no card and have no effect.
 
@@ -260,7 +265,7 @@ One per zone, drawn at random with no repeats in a run.
 
 - Can I pet them? (a kid): Of course! → +♥ each, −$ per dog (missed tips) · Sorry, not now → −♥ to one random owner
 - Chatty neighbour: Have a chat → +$ tip, −$ per dog (missed tips) · Wave and go → nothing
-- Construction detour: Take the long way → −$ per dog (missed tips) · Squeeze past → −♥ to Fancy owners (dust)
+- Construction detour: Take the long way → −$ per dog (fewer missed tips), _Tuckered out_ · Squeeze past → −♥ to Fancy owners (dust)
 - Ice cream truck: Pup cups! → −$ per dog, +♥ each · Not today → −♥ to Food-driven owners
 - Mail carrier: Hold them back → −♥ each (barking) · Wait it out → −$ per dog (missed tips)
 - Stop sign: Wait your turn → −$ per dog (missed tips) · Dart across → −♥ each
