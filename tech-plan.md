@@ -6,7 +6,7 @@
 - Port to iOS and Android later
 - Mostly vibe coded (AI-assisted)
 - **Engine:** Phaser 4 + TypeScript, built with Vite. Web-native, AI tools write it well, fully terminal-driven, and the build is static files. Mobile later by wrapping the web build (e.g. Capacitor).
-- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `v1-plan.md`, not in a GitHub Projects board.
+- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `gameplay/v1-plan.md`, not in a GitHub Projects board.
 - **Hosting:** Cloudflare Workers static assets (no Worker script), free and unmetered.
 - **Deploys:** Cloudflare Workers Builds deploys every push to `main`. It runs independently of GitHub CI, so a commit with red CI still deploys.
 - **Tooling:** copied from `andornaut/cloudflare-starter`: Node 24, Vitest, ESLint with the shared house rules, Prettier, markdownlint, husky + lint-staged pre-commit, Dependabot, and the Test and AI attributions workflows.
@@ -22,13 +22,12 @@
 
 - Project structure & conventions beyond the Milestone 1 scaffold
 - Save data: proposed browser `localStorage` for v1 (bank and owned items); local only, no accounts
-- Asset pipeline tooling (AI generation → cleanup → sprite sheets); the art-side rules live in `art-style-guide.md`
 - Testing / playtesting builds on phones early
 - Monetization & app-store needs (later)
 
 ## Architecture
 
-- **Render resolution:** 360×640 internal (portrait 9:16), scaled with `pixelArt` (no smoothing). The code still renders the Milestone 1 placeholder at 180×320.
+- **Render resolution:** 360×640 internal (portrait 9:16), scaled with `pixelArt` (no smoothing).
 - **All UI in the canvas:** the road, top bar, dog column and choice cards are Phaser scenes drawn at the same pixel scale with a pixel font. HTML is only the page shell. One scale and one input system: while cards are up, lane taps are not listened for.
 - **Screen layout:**
   - A top bar for status (money, zone progress), separate from the road so it never hides obstacles scrolling in from the top.
@@ -39,6 +38,7 @@
   - `HudScene`: top bar and dog column, on top for the whole run. It stays visible during encounters, so money and owner happiness are in view while choosing, and it can highlight the dogs a card affects.
   - `CardScene`: launched on an encounter. It dims the road, shows three cards over it, and resumes `RunScene` after a choice.
 - **Game state:** plain TypeScript with no Phaser dependency (money, owner happiness, pack, zone progress), plus pure functions for encounter rules. Scenes only render it. Tuning numbers live in one data file.
+- **Assets:** the art agent exports into `public/art/`, which Vite serves at `/art/` and copies into `dist/`. `public/art/manifest.json` lists every asset with paths relative to `public/art/`: `sprites` (key, png, json: PNG sheets with Aseprite hash JSON and frameTags, loaded with `load.aseprite` and `anims.createFromAseprite`), `fonts` (key, png, fnt: BMFont, drawn with `bitmapText`) and `images` (key, png). Keys are kebab-case and unique. A scene draws a placeholder box for any key that has not landed yet. Sprite and road tile size is 32×32. Art-side rules live in `art/style-guide.md`.
 - **Tests:** Vitest unit tests over pure game logic (lane geometry, game state, encounter rules). Scenes are checked by playing.
 
 ## Porting notes
