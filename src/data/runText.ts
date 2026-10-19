@@ -18,7 +18,7 @@ export const RUN_TEXT = {
     stopSubtitle: "A stop on the way",
     upgradeDuration: { nextZone: "Next zone", now: "Now", run: "Whole walk" },
     upgradeTitle: "Pick an upgrade",
-    walkerGreeting: "{walker}: Nice pack! Mind if I walk with you sometime?",
+    walkerGreeting: "Nice pack! Mind if I walk with you sometime?",
   },
   fired: "FIRED!",
   firedBy: "{owner} fires you",
