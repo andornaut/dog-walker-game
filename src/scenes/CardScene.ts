@@ -37,7 +37,7 @@ import { addDisplayText, hasDisplayFont } from "./displayText";
 import { drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole, scalePixelText } from "./pixelText";
+import { addPixelText, fontHasGlyphs, type FontRole, scalePixelText } from "./pixelText";
 import { currentSettings } from "./profileStore";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -75,16 +75,21 @@ const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 const FIRES_KEY = "ui-fires";
 const FIRES_AT = { large: { x: 8, y: 238 }, small: { x: 4, y: 119 } };
 
-// Centres a label drawn from its left edge (origin x 0) on x, its left edge on a whole pixel:
-// a centre origin on an odd width puts it half a pixel off, which breaks thin glyphs such as ×.
-function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.BitmapText {
-  return label.setX(Math.round(x - label.width / 2));
-}
-
 interface Entry {
   choice: Choice;
   enabled: boolean;
   option?: OptionView;
+}
+
+// The label on a card's band: its option's, or Skip.
+function bandLabel(entry: Entry): string {
+  return entry.option?.label ?? gameData.runText.card.skip;
+}
+
+// Centres a label drawn from its left edge (origin x 0) on x, its left edge on a whole pixel:
+// a centre origin on an odd width puts it half a pixel off, which breaks thin glyphs such as ×.
+function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.BitmapText {
+  return label.setX(Math.round(x - label.width / 2));
 }
 
 // The look of the encounter that opened the card in the zone, or null for any other card.
@@ -182,10 +187,11 @@ export class CardScene extends Scene {
     this.centered(centerX, top - 18, this.subtitle(view), PALETTE.white);
 
     const tag = cardFrameTag(gameData, view.source);
+    const bandFont = this.bandFont();
     this.entries.forEach((entry, i) => {
       const before = this.children.list.length;
       const rect = itemAt(this.cardRects, i);
-      this.drawCard(view, tag, entry, rect);
+      this.drawCard(view, tag, bandFont, entry, rect);
       // Once a key has been pressed, each card shows the number key that picks it, above it.
       if (keyNumbersShown()) {
         this.centered(
@@ -326,9 +332,9 @@ export class CardScene extends Scene {
       fillRect(g, PALETTE.cream, insetRect(4, card));
     }
     const option = entry.option;
-    const label = option?.label ?? gameData.runText.card.skip;
+    const label = bandLabel(entry);
     this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, this.bandColor(tag), {
-      font: "title",
+      font: fontHasGlyphs(this, "title", label) ? "title" : "body",
     });
     const art = illustrationKey(this.hasArt, this.zone, view.source, option);
     if (this.textures.exists(art)) {
@@ -457,7 +463,28 @@ export class CardScene extends Scene {
     return snapCentre(addPixelText(this, x, y, text, { align: "center", color, ...style }), x);
   }
 
-  private drawCard(view: CardView, tag: string, entry: Entry, rect: Rect): void {
+  // The row's band labels share one font: the title font where it has every glyph of every
+  // label and each fits its band, else the narrower body font.
+  private bandFont(): FontRole {
+    const fits = (label: string) => {
+      if (!fontHasGlyphs(this, "title", label)) {
+        return false;
+      }
+      const probe = addPixelText(this, 0, 0, label, { color: PALETTE.white, font: "title" });
+      const width = probe.width;
+      probe.destroy();
+      return width <= CARD.width - 6;
+    };
+    return this.entries.map(bandLabel).every(fits) ? "title" : "body";
+  }
+
+  private drawCard(
+    view: CardView,
+    tag: string,
+    bandFont: FontRole,
+    entry: Entry,
+    rect: Rect,
+  ): void {
     const { x, y } = rect;
     const grey = tileState({ ...PLAIN_ITEM, available: entry.enabled }) === "disabled";
     const g = this.add.graphics();
@@ -476,15 +503,9 @@ export class CardScene extends Scene {
       });
     }
 
-    // The band's label is in the title font, or the narrower body font if it would not fit.
-    const label = entry.option?.label ?? gameData.runText.card.skip;
-    const bandX = x + CARD.width / 2;
-    const bandColor = this.bandColor(tag);
-    const bandLabel = this.centered(bandX, y + BAND.y + 3, label, bandColor, { font: "title" });
-    if (bandLabel.width > CARD.width - 6) {
-      bandLabel.destroy();
-      this.centered(bandX, y + BAND.y + 3, label, bandColor);
-    }
+    this.centered(x + CARD.width / 2, y + BAND.y + 3, bandLabel(entry), this.bandColor(tag), {
+      font: bandFont,
+    });
 
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
     const illustration = illustrationKey(this.hasArt, this.zone, view.source, entry.option);

@@ -83,6 +83,20 @@ function fontKey(scene: Scene, role: FontRole): string {
   return scene.cache.bitmapFont.exists(key) ? key : FALLBACK_FONT_KEY;
 }
 
+// Whether the role's font has a glyph for every character of text, spaces aside. The fallback
+// font stands in for a missing font and draws its own capitals.
+export function fontHasGlyphs(scene: Scene, role: FontRole, text: string): boolean {
+  const key = fontKey(scene, role);
+  if (key === FALLBACK_FONT_KEY) {
+    return true;
+  }
+  const font = scene.cache.bitmapFont.get(key) as { data: { chars: Record<number, unknown> } };
+  // Phaser keys a font's glyphs by character code.
+  return [...textFor(key, role, text)].every(
+    (char) => char === " " || font.data.chars[char.codePointAt(0) ?? 0] !== undefined,
+  );
+}
+
 // The text in the characters the font has: the title font and the fallback are capitals.
 function textFor(key: string, role: FontRole, text: string): string {
   if (key === FALLBACK_FONT_KEY) {
