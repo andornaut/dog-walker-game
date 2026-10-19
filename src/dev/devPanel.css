@@ -1,0 +1,243 @@
+#dev-panel {
+  --dev-bg: #181425;
+  --dev-text: #ead4aa;
+  --dev-accent: #feae34;
+  --dev-line: #3a4466;
+  --dev-field: #262b44;
+  --dev-warn: #f6757a;
+
+  background: var(--dev-bg);
+  color: var(--dev-text);
+  font:
+    13px/1.4 system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+.dev-bar {
+  display: block;
+  width: 100%;
+  height: 24px;
+  padding: 0 max(12px, env(safe-area-inset-left, 0px));
+  border: 0;
+  border-top: 1px solid var(--dev-line);
+  background: var(--dev-bg);
+  color: var(--dev-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dev-bar:hover,
+.dev-bar:focus-visible {
+  color: var(--dev-accent);
+}
+
+/* Fixed over the page rather than in the flex layout, so opening it never resizes the game. */
+.dev-sheet {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  max-height: 75vh;
+  max-height: 75dvh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-sizing: border-box;
+  padding: 0 max(16px, env(safe-area-inset-right, 0px))
+    calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+  border-top: 2px solid var(--dev-accent);
+  background: var(--dev-bg);
+  box-shadow: 0 -8px 24px #000a;
+  /* The page turns these off for the game; the sheet scrolls and its text can be selected. */
+  touch-action: pan-y;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.dev-sheet[hidden] {
+  display: none;
+}
+
+.dev-sheet > * {
+  max-width: 560px;
+  margin-inline: auto;
+}
+
+.dev-header {
+  position: sticky;
+  top: 0;
+  /* Above the faded controls, whose opacity puts them in their own stacking contexts. */
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--dev-line);
+  background: var(--dev-bg);
+}
+
+.dev-header strong {
+  color: var(--dev-accent);
+  font-size: 15px;
+}
+
+.dev-sheet h2 {
+  margin: 16px 0 8px;
+  color: var(--dev-accent);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.dev-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 6px 0;
+}
+
+.dev-row > span:first-child {
+  flex: none;
+  width: 64px;
+}
+
+.dev-row > .dev-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 16px keeps iOS from zooming the page when a field takes focus. */
+.dev-field {
+  box-sizing: border-box;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 1px solid var(--dev-line);
+  border-radius: 4px;
+  background: var(--dev-field);
+  color: var(--dev-text);
+  font: inherit;
+  font-size: 16px;
+}
+
+.dev-field:focus {
+  border-color: var(--dev-accent);
+  outline: none;
+}
+
+input.dev-field[readonly] {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.dev-log {
+  width: 100%;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  resize: vertical;
+}
+
+.dev-pack {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px 8px;
+  margin: 8px 0;
+  padding: 6px 8px 8px;
+  border: 1px solid var(--dev-line);
+  border-radius: 4px;
+}
+
+.dev-pack legend {
+  padding: 0 4px;
+}
+
+.dev-pack label,
+.dev-check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+}
+
+.dev-pack label:has(input:disabled) {
+  opacity: 0.5;
+}
+
+.dev-sheet input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--dev-accent);
+}
+
+.dev-button {
+  min-height: 36px;
+  padding: 6px 12px;
+  border: 1px solid var(--dev-accent);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dev-accent);
+  font: inherit;
+  cursor: pointer;
+}
+
+.dev-button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.dev-primary {
+  width: 100%;
+  margin-top: 4px;
+  background: var(--dev-accent);
+  color: var(--dev-bg);
+  font-weight: 700;
+}
+
+.dev-danger {
+  border-color: var(--dev-warn);
+  color: var(--dev-warn);
+}
+
+.dev-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.dev-warnings {
+  margin: 6px 0;
+  padding-left: 18px;
+  color: var(--dev-warn);
+}
+
+.dev-warnings:empty {
+  display: none;
+}
+
+.dev-note {
+  margin: 6px 0;
+}
+
+.dev-note:empty {
+  display: none;
+}
+
+.dev-note code {
+  overflow-wrap: anywhere;
+  color: var(--dev-accent);
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+}
+
+.dev-readout {
+  margin: 0 0 8px;
+  padding: 8px;
+  border: 1px solid var(--dev-line);
+  border-radius: 4px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+}

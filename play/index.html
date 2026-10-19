@@ -47,13 +47,20 @@
       #game {
         flex: 1;
         min-height: 0;
-        margin: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
-          env(safe-area-inset-left, 0px);
+        margin: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
+      }
+
+      /* The dev panel's bar, under the game: its height comes out of #game's, and it takes
+         the bottom safe-area inset. src/dev/devPanel.css styles its contents. */
+      #dev-panel {
+        flex: none;
+        padding-bottom: env(safe-area-inset-bottom, 0px);
       }
     </style>
   </head>
   <body>
     <div id="game"></div>
+    <div id="dev-panel"></div>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

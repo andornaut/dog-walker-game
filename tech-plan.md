@@ -92,6 +92,10 @@ Things to watch so mobile stays easy: touch controls, screen sizes and aspect ra
 - One seed feeds independent random streams (spawns per zone, rolls, pulls, cards), so a draw in one never shifts another.
 - Lane moves and card choices are recorded with their simulation time in a versioned input log, and replaying it reproduces the run exactly.
 - The dev overlay (backquote toggles it) shows the seed, zone, distance, speed, money, hearts and FPS. C copies a link that reproduces the run.
+- The dev panel (`src/dev/devPanel.ts`) is plain HTML under the canvas: a one-line bar that opens a sheet with a run-setup form validated with the URL parser's limits, the overlay toggle, the run link, replay, and save tools (reset, +$1,000, unlock all) that write the save and reload. It is visible in every build.
+- Session keys (`sessionStorage`), each an input log as `encodeInputLog` writes it:
+  - `dog-walker-game:dev-replay`: written by the panel's Replay before it loads `/play/` with the log's setup. RunScene is to read it at run start, play its events, and remove it. Not wired yet.
+  - `dog-walker-game:dev-last-log`: RunScene is to write the finished run's log here at run end; the panel downloads it. Not written yet.
 
 ## Open questions
 
