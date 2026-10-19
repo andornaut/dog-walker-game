@@ -35,6 +35,8 @@ export const CELEBRATION_LAYOUT = {
   },
   // A new walker's centre hops in from fromX, and fx-confetti bursts at burstY as they land.
   runIn: { burstY: 266, durationMs: 600, fromX: 400 },
+  // The big line is font-display at this scale; the small line is font-display-cream at 1x.
+  titleScale: 2,
   walkerScale: 2,
   zoneDone: {
     burst: { x: 106, y: 246 },

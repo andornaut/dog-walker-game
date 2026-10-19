@@ -111,7 +111,9 @@ export class ZoneCelebrationScene extends Scene {
   private addHeadline(version: Version, text: CelebrationText): void {
     const { centerX } = LAYOUT;
     const title = { color: PALETTE.yellow, font: "title", originX: 0.5 } as const;
-    atLineTop(addDisplayText(this, centerX, 0, text.title, { ...title, scale: 2 }), version.titleY);
+    // addDisplayText draws the display font at 1x, so the title is scaled after.
+    const big = addDisplayText(this, centerX, 0, text.title, title).setScale(LAYOUT.titleScale);
+    atLineTop(big, version.titleY);
     const subtitle = { ...title, color: PALETTE.cream, variant: "cream" } as const;
     atLineTop(addDisplayText(this, centerX, 0, text.subtitle, subtitle), version.subtitleY);
   }
