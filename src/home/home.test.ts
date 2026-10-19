@@ -5,6 +5,7 @@ import { DOGS } from "../data/dogs";
 import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
 import { HOME_TEXT } from "../data/homeText";
+import { NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
@@ -40,6 +41,7 @@ const data = {
   dogs: DOGS,
   encounters: ENCOUNTERS,
   homeText: HOME_TEXT,
+  needs: NEEDS,
   quips: QUIPS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,

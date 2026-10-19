@@ -9,7 +9,7 @@ import { HOME_TEXT_FIELDS } from "./homeText";
 
 type DetailData = Pick<
   GameData,
-  "debuffs" | "dogSlots" | "dogs" | "encounters" | "homeText" | "shopGear" | "tuning"
+  "debuffs" | "dogSlots" | "dogs" | "encounters" | "homeText" | "needs" | "shopGear" | "tuning"
 >;
 
 // What a held dog or gear tile's detail card says: a title, a line under it, rows of

@@ -341,10 +341,10 @@ export interface ForcedStop {
   readonly options: CardOptions;
 }
 
-// A need: name is what the dog needs ("Potty"); a dog's card shows it as the word in
-// src/rules/effectText.ts ("Regular"). Meeting it at a spot applies met to the dogs with the
-// need, unless the payoff card opens instead, at probability.needPayoffCard. Gone wrong, it
-// opens its card or applies its effects to the dog.
+// A need: name is its one player-facing word ("Regular"), on a dog's card and in card text.
+// Meeting it at a spot applies met to the dogs with the need, unless the payoff card opens
+// instead, at probability.needPayoffCard. Gone wrong, it opens its card or applies its
+// effects to the dog.
 export interface Need {
   readonly goneWrong:
     | { readonly card: NeedCardId; readonly kind: "card" }

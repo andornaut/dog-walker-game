@@ -30,7 +30,7 @@ import { forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
 import { type Cents, cents, type Hearts } from "./units";
 
-export type ChoiceData = CauseData & Pick<GameData, "dogs" | "tuning" | "world">;
+export type ChoiceData = CauseData & Pick<GameData, "dogs" | "needs" | "tuning" | "world">;
 
 // What a card's view needs: ChoiceData, and the titles of the cards whose data names none.
 export type CardData = ChoiceData & Pick<GameData, "runText">;

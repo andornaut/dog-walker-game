@@ -261,7 +261,7 @@ export function partingSpeech(
   return wrapWords(maxChars, `${data.dogs[dog].owner.name}: ${line}`);
 }
 
-type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText">;
+type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText" | "needs">;
 
 const FOCUS_FIELDS = HOME_TEXT_FIELDS.focus;
 

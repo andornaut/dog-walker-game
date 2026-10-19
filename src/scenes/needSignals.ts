@@ -3,8 +3,8 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { needIconKey } from "../assets/iconKeys";
 import { NEED_ART } from "../assets/spriteKeys";
+import { gameData } from "../data";
 import type { DogId, NeedId } from "../data/types";
-import { NEED_WORDS } from "../rules/effectText";
 import { PALETTE } from "./palette";
 import { playEffect, playTag, playTagOnce, spriteTopY } from "./sprites";
 
@@ -90,7 +90,7 @@ export function needIcon(scene: Scene, need: NeedId): IconArt {
   const key = needIconKey(need);
   return scene.textures.exists(key)
     ? { frame: firstFrame(scene, key), key }
-    : { key: letterIcon(scene, `${key}-drawn`, NEED_WORDS[need].charAt(0), PALETTE.blue) };
+    : { key: letterIcon(scene, `${key}-drawn`, gameData.needs[need].name.charAt(0), PALETTE.blue) };
 }
 
 // Any icon key: the art's first frame, or a letter for it.

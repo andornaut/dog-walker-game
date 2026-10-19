@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
+import { NEEDS } from "../data/needs";
 import { SHOP_GEAR } from "../data/shop";
 import type { CardOption, Effect } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
@@ -11,7 +12,7 @@ import { TEST_TUNING } from "../testing/tuning";
 import { affectText, conditionText, effectText, formatDollars } from "./effectText";
 import { cents } from "./units";
 
-const data = { debuffs: DEBUFFS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
+const data = { debuffs: DEBUFFS, encounters: ENCOUNTERS, needs: NEEDS, tuning: TEST_TUNING };
 
 describe("effectText", () => {
   const { puddle, skunk, squirrel } = ENCOUNTERS;

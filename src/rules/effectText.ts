@@ -9,7 +9,6 @@ import type {
   LiveTuning,
   Modifier,
   MoneyEffect,
-  NeedId,
   Size,
   Stat,
   Target,
@@ -21,7 +20,7 @@ import { assertNever } from "./assertNever";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read, readTable } from "./units";
 
-export type TextData = Pick<GameData, "debuffs" | "encounters" | "tuning">;
+export type TextData = Pick<GameData, "debuffs" | "encounters" | "needs" | "tuning">;
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
   big: "big",
@@ -39,15 +38,6 @@ export const TRAIT_NAMES: { readonly [T in TraitId]: string } = {
   chaser: "Chaser",
   fancy: "Fancy",
   foodDriven: "Food-driven",
-};
-
-// The word a dog's card shows for its need.
-export const NEED_WORDS: { readonly [N in NeedId]: string } = {
-  friendly: "Friendly",
-  nosy: "Nosy",
-  playful: "Playful",
-  regular: "Regular",
-  thirsty: "Thirsty",
 };
 
 const STAT_NAMES: { readonly [S in Stat]: string } = {
@@ -90,7 +80,7 @@ export function formatDollars(amount: Cents): string {
   return `$${Number.isInteger(dollars) ? dollars : dollars.toFixed(2)}`;
 }
 
-function perDogText(target: Target | undefined): string {
+function perDogText(data: Pick<GameData, "needs">, target: Target | undefined): string {
   if (target === undefined) {
     return "";
   }
@@ -99,7 +89,7 @@ function perDogText(target: Target | undefined): string {
     case "all":
       return " per dog";
     case "need":
-      return ` per ${NEED_WORDS[target.need]} dog`;
+      return ` per ${data.needs[target.need].name} dog`;
     case "randomOne":
     case "unhappiest":
       return "";
@@ -112,13 +102,13 @@ function perDogText(target: Target | undefined): string {
   }
 }
 
-function moneyText(tuning: LiveTuning, effect: MoneyEffect): string {
-  const amount = read(tuning, "money", effect.amount);
+function moneyText(data: TextData, effect: MoneyEffect): string {
+  const amount = read(data.tuning, "money", effect.amount);
   const signText = effect.change === "gain" ? "+" : MINUS;
-  return `${signText}${formatDollars(amount)}${perDogText(effect.perDog)}`;
+  return `${signText}${formatDollars(amount)}${perDogText(data, effect.perDog)}`;
 }
 
-function heartsText(effect: HeartsEffect): string {
+function heartsText(data: Pick<GameData, "needs">, effect: HeartsEffect): string {
   const amount = `${sign(effect.amount)}${Math.abs(effect.amount)} ♥`;
   const target = effect.target;
   switch (target.kind) {
@@ -133,7 +123,7 @@ function heartsText(effect: HeartsEffect): string {
         : `${amount} each (${exceptions.join(", ")})`;
     }
     case "need":
-      return `${amount} to ${NEED_WORDS[target.need]} owners`;
+      return `${amount} to ${data.needs[target.need].name} owners`;
     case "randomOne":
       return `${amount} to one random owner`;
     case "temperament":
@@ -147,11 +137,11 @@ function heartsText(effect: HeartsEffect): string {
   }
 }
 
-function treatsText(tuning: LiveTuning, effect: TreatsEffect): string {
-  const amount = read(tuning, "counts", effect.amount);
+function treatsText(data: TextData, effect: TreatsEffect): string {
+  const amount = read(data.tuning, "counts", effect.amount);
   const noun = amount === 1 ? "treat" : "treats";
-  const carryMax = read(tuning, "counts", "treatCarryMax");
-  return `+${amount} ${noun}${perDogText(effect.perDog)} (carry up to ${carryMax})`;
+  const carryMax = read(data.tuning, "counts", "treatCarryMax");
+  return `+${amount} ${noun}${perDogText(data, effect.perDog)} (carry up to ${carryMax})`;
 }
 
 function addedText(modifier: Modifier, value: number): string {
@@ -187,21 +177,21 @@ function effectPhrase(data: TextData, effect: Effect): string {
     case "debuff":
       return data.debuffs[effect.debuff].name;
     case "fulfilNeed":
-      return `${NEED_WORDS[effect.need]} needs met`;
+      return `${data.needs[effect.need].name} needs met`;
     case "hearts":
-      return heartsText(effect);
+      return heartsText(data, effect);
     case "immune":
       return `no ${data.encounters[effect.encounter].name} cards ${DURATION_TEXT[effect.duration]}`;
     case "modifier":
       return modifierText(data.tuning, effect);
     case "money":
-      return moneyText(data.tuning, effect);
+      return moneyText(data, effect);
     case "skipOption": {
       const uses = read(data.tuning, "counts", effect.usesPerRun);
       return `a free Skip option on ${uses} encounter ${uses === 1 ? "card" : "cards"} per run`;
     }
     case "treats":
-      return treatsText(data.tuning, effect);
+      return treatsText(data, effect);
     default:
       return assertNever(effect);
   }
@@ -238,7 +228,7 @@ function cardHeartsText(
   effect: HeartsEffect,
 ): string | undefined {
   if (effect.target.kind === "randomOne") {
-    return heartsText(effect);
+    return heartsText(data, effect);
   }
   const groups = new Map<number, string[]>();
   for (const id of context.dogs(effect.target)) {
@@ -267,7 +257,7 @@ function cardPhrase(
       return cardHeartsText(data, context, effect);
     case "money": {
       if (effect.perDog === undefined) {
-        return moneyText(data.tuning, effect);
+        return moneyText(data, effect);
       }
       const total = context.money(effect);
       return total === 0
@@ -276,7 +266,7 @@ function cardPhrase(
     }
     case "treats": {
       if (effect.perDog === undefined) {
-        return treatsText(data.tuning, effect);
+        return treatsText(data, effect);
       }
       const count = read(data.tuning, "counts", effect.amount) * context.dogs(effect.perDog).length;
       const carryMax = read(data.tuning, "counts", "treatCarryMax");
