@@ -1,7 +1,7 @@
 import type { Hint } from "./types";
 
 // First-time hints: one line each, shown the first time its trigger happens and never again.
-// Placeholder text.
+
 export const HINTS = {
   card: {
     text: "Every card shows its outcome. One option is always free.",
