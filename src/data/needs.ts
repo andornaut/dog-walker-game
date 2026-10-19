@@ -18,7 +18,7 @@ export const NEEDS = {
       kind: "effects",
     },
     met: [{ amount: 1, kind: "hearts", target: { kind: "affected" } }],
-    name: "Sniffy",
+    name: "Nosy",
     payoff: "peeMail",
   },
   playful: {
@@ -33,7 +33,7 @@ export const NEEDS = {
   regular: {
     goneWrong: { card: "accident", kind: "card" },
     met: [{ amount: 1, kind: "hearts", target: { kind: "affected" } }],
-    name: "Potty",
+    name: "Regular",
     payoff: "goodSpot",
   },
   thirsty: {

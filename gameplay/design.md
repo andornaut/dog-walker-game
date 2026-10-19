@@ -141,15 +141,15 @@ A dog's detail card names its quirk and what it does.
 
 ### Needs
 
-Every dog has one need, shown as a word on its card:
+Every dog has one need, shown by name on its detail card:
 
-| Need     | Word     | Fulfilled by        |
-| -------- | -------- | ------------------- |
-| Friendly | Friendly | A stranger waving   |
-| Playful  | Playful  | Another dog         |
-| Potty    | Regular  | A hydrant or a tree |
-| Sniffy   | Nosy     | A lamp post         |
-| Thirsty  | Thirsty  | A water bowl        |
+| Need     | Fulfilled by        |
+| -------- | ------------------- |
+| Friendly | A stranger waving   |
+| Nosy     | A lamp post         |
+| Playful  | Another dog         |
+| Regular  | A hydrant or a tree |
+| Thirsty  | A water bowl        |
 
 - **Need spots** appear on the road like pickups, drawn only for needs in the pack (Playful's spot is a friendly playmate dog, not the Other dog encounter). Steering the pack into one resets the matching dogs' needs; dogs whose need was urgent also get +♥ for their owners, a big need bubble and a happy owner. About 1 in 4 fulfilments opens a small card instead, e.g. "A stranger loves Duchess" (Let them fuss: +♥ and a tip · Keep walking) or "Play date!" (Let them play: +♥ each, −$ per dog in missed tips · Just a sniff: +♥ to the playful dog's owner)
 - **Urgency:** a need fills up during a zone, faster for higher energy, and resets at each zone end. When it's urgent, a bubble with the need's icon shows over the dog, and it pulls toward the nearest matching spot. One dog strains at a time, and each spot draws one pull

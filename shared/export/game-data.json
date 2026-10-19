@@ -2592,7 +2592,7 @@
           }
         }
       ],
-      "name": "Sniffy",
+      "name": "Nosy",
       "payoff": "peeMail"
     },
     {
@@ -2636,7 +2636,7 @@
           }
         }
       ],
-      "name": "Potty",
+      "name": "Regular",
       "payoff": "goodSpot"
     },
     {
