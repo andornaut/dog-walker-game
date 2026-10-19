@@ -125,7 +125,7 @@ export const ENCOUNTERS = {
               perDog: { kind: "affected" },
             },
           ],
-          name: "Grooming",
+          name: "Full groom",
         },
         {
           art: "card-skunk-rinse",
@@ -138,7 +138,7 @@ export const ENCOUNTERS = {
         {
           art: "card-skunk-ignore",
           effects: [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
-          name: "Ignore",
+          name: "Hold your nose",
         },
       ],
     },

@@ -298,15 +298,11 @@ describe("skip option", () => {
   it("takes the costliest option's place on a card that already shows three", () => {
     const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags" });
     const skunk = encounter("skunk", ["koda"]);
-    const labels = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.label);
-    expect(labels(newRun(data, 1, { dogs: ["koda"], gear: null }))).toEqual([
-      "Grooming",
-      "Quick rinse",
-      "Ignore",
-    ]);
-    expect(labels(withBags)).toEqual(["Quick rinse", "Ignore"]);
+    const indexes = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.index);
+    // Skunk's options in data order: grooming (the costliest), quick rinse, then the free one.
+    expect(indexes(newRun(data, 1, { dogs: ["koda"], gear: null }))).toEqual([0, 1, 2]);
+    expect(indexes(withBags)).toEqual([1, 2]);
     expect(() => choose(withBags, skunk, 0)).toThrow("not on the Skunk card");
-    expect(cardFor(data, withBags, skunk).options.map((o) => o.index)).toEqual([1, 2]);
   });
 
   it("is added beside the options of a card with fewer than three", () => {
