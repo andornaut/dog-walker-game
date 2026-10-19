@@ -7,10 +7,9 @@ import { dotRects, HELP_LAYOUT, helpActionAt, type Point } from "../help/helpLay
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { closeHelp } from "../help/helpSeen";
 import { insetRect, type Rect } from "../layout/rect";
-import { PHONE_EVENTS } from "../pwa";
 import { addFilledRect } from "./draw";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, onWindowEvent } from "./overlay";
+import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { updateProfile } from "./profileStore";
@@ -89,7 +88,7 @@ export class HelpScene extends Scene {
         }
       },
     });
-    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
+    listenDismiss(this, [HELP_LAYOUT.screen], () => this.close());
   }
 
   private showPressed(pressed: Pressed | undefined): void {

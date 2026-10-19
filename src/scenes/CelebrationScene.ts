@@ -5,10 +5,9 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import type { Rect } from "../layout/rect";
-import { PHONE_EVENTS } from "../pwa";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { DIM_ALPHA } from "./draw";
-import { closeOverlay, onWindowEvent } from "./overlay";
+import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -68,6 +67,7 @@ export class CelebrationScene extends Scene {
         close();
       }
     });
-    onWindowEvent(this, PHONE_EVENTS.backPressed, close);
+    // The dim around the panel and Nice! closes, as Nice! does.
+    listenDismiss(this, [panel, buttonRect], close);
   }
 }

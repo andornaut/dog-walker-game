@@ -23,12 +23,11 @@ import {
 import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { closeFace } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
-import { PHONE_EVENTS } from "../pwa";
 import type { Settings } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { drawFocusRing, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, listenOutsideTap, onWindowEvent } from "./overlay";
+import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
@@ -181,10 +180,8 @@ export class SettingsScene extends Scene {
     });
     // The screen around the panel and its 1px rim closes, as the close control does.
     const { close, panel } = this.layout;
-    const covered = [insetRect(-1, panel), close.hit];
-    listenOutsideTap(this, { covered, dim: SCREEN }, () => this.close());
+    listenDismiss(this, [insetRect(-1, panel), close.hit], () => this.close());
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
-    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
   }
 
   private onKey(key: string): void {

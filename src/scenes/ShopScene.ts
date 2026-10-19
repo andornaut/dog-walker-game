@@ -26,7 +26,6 @@ import { rowRects, SHOP_LAYOUT, shopTabFace, shopTabRects } from "../home/shopLa
 import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Rect } from "../layout/rect";
-import { PHONE_EVENTS } from "../pwa";
 import { cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
@@ -35,7 +34,7 @@ import { drawFramedRect, fillRect } from "./draw";
 import { silhouetteTextureKey } from "./greyTextures";
 import { addAffordFrame, type DetailPicture, drawDetailCard } from "./homePanels";
 import { addLock, addPlate, drawDogSlotFallback, SHOP_ART } from "./itemArt";
-import { closeOverlay, onWindowEvent, openOverlay, type OverlayData } from "./overlay";
+import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
@@ -158,7 +157,8 @@ export class ShopScene extends Scene {
       }
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
-    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
+    // The top bar and the margins around the card close the shop, card and all.
+    listenDismiss(this, [PANEL], () => this.close());
   }
 
   private save(): SaveDocument {

@@ -117,7 +117,7 @@ export class PauseScene extends Scene {
     // The dimmed band and road around the panel resume, as Resume and Keep walking do. The top
     // bar and doghouses are not dimmed and keep their own taps.
     const covered = [insetRect(-1, panel), ...layout.hits];
-    listenOutsideTap(this, { covered, dim: walkView }, onResume);
+    listenOutsideTap(this, () => ({ covered, dim: walkView }), onResume);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
       if (number !== undefined) {

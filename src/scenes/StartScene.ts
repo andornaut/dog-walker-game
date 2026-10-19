@@ -65,6 +65,7 @@ import { downTail } from "../hud/moments";
 import { STRIP, stripIconFallback, stripIconKey, walkerStripItems } from "../hud/stateStrip";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
+import { screenArea } from "../input/outsideTap";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
@@ -96,7 +97,7 @@ import {
   SHOP_ART,
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
-import { openOverlay } from "./overlay";
+import { listenOutsideTap, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
@@ -484,6 +485,15 @@ export class StartScene extends Scene {
         }
       },
     });
+    // A tap outside an open panel, on the screen or the page beside the game, closes it.
+    listenOutsideTap(
+      this,
+      () => {
+        const rect = this.overlay?.rect;
+        return rect === undefined ? undefined : screenArea(SCREEN, [rect]);
+      },
+      () => this.closeOverlay(),
+    );
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     // Badges earned on launch: a scene can pause itself only once it is running.
     this.time.delayedCall(0, () => this.celebrate([]));
@@ -600,8 +610,8 @@ export class StartScene extends Scene {
     );
   }
 
-  // A tap while a panel is open: on its close control or outside it, it closes the panel; on
-  // the logbook's Stats button it opens Stats; elsewhere inside it does nothing.
+  // A tap while a panel is open: on its close control it closes the panel; on the logbook's
+  // Stats button it opens Stats. A tap outside it is listenOutsideTap's.
   private releaseOnOverlay(down: { x: number; y: number }, x: number, y: number): void {
     const overlay = this.overlay;
     if (overlay === undefined) {
@@ -621,12 +631,6 @@ export class StartScene extends Scene {
     if (overlay.kind === "logbook" && within(overlay.badges)) {
       this.closeOverlay();
       this.act({ kind: "stats", tab: "badges" });
-      return;
-    }
-    const outside = (px: number, py: number) =>
-      overlay.rect === undefined || !containsPoint(overlay.rect, px, py);
-    if (outside(down.x, down.y) && outside(x, y)) {
-      this.closeOverlay();
     }
   }
 

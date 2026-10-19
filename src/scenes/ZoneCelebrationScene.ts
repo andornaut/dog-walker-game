@@ -12,19 +12,17 @@ import {
 } from "../hud/zoneCelebration";
 import { cardNumberForKey, isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
-import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { addConfetti } from "./badges";
 import { addDisplayText } from "./displayText";
 import { addDim, fillRect } from "./draw";
-import { closeOverlay, onWindowEvent, type OverlayData } from "./overlay";
+import { closeOverlay, listenOutsideTap, onWindowEvent, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, setPixelText, wrapPixelText } from "./pixelText";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { firstTag, playTag } from "./sprites";
-import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addPanel, listenButtonTap, TEXT_SCALE } from "./uiKit";
 
 export interface ZoneCelebrationSceneData extends OverlayData {
@@ -95,12 +93,9 @@ export class ZoneCelebrationScene extends Scene {
     if (text.kind === "zoneDone") {
       this.addPlate(text);
       this.time.delayedCall(ZONE_DONE_MS, finish);
-      const dim: Rect = LAYOUT.dim;
-      listenTargetPress<Rect>(this, {
-        onPressed: () => undefined,
-        onTap: finish,
-        targetAt: (x, y) => (containsPoint(dim, x, y) ? dim : undefined),
-      });
+      // A tap on the dim, or on the page beside the game, moves on.
+      const area = { covered: [], dim: LAYOUT.dim };
+      listenOutsideTap(this, () => area, finish);
       return;
     }
     this.addBubble(text);

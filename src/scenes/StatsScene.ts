@@ -13,11 +13,10 @@ import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
 import { containsPoint, type Rect } from "../layout/rect";
-import { PHONE_EVENTS } from "../pwa";
 import { fillLine } from "../text/lines";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { addDim, fillRect } from "./draw";
-import { closeOverlay, onWindowEvent } from "./overlay";
+import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
@@ -130,7 +129,7 @@ export class StatsScene extends Scene {
         this.close();
       }
     });
-    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
+    listenDismiss(this, [SCREEN], () => this.close());
   }
 
   private targetAt(x: number, y: number): Target | undefined {
