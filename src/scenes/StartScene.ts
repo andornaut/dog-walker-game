@@ -3,7 +3,7 @@ import { type GameObjects, type Input, Scene } from "phaser";
 import { itemAt } from "../arrays";
 import { dogFaceKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import type { DogId, GearId, Size, Temperament, TraitId } from "../data/types";
+import type { DogId, GearId, Size, Temperament, TraitId, WalkerId } from "../data/types";
 import {
   dogSlotPrice,
   type HomeLoadout,
@@ -12,16 +12,11 @@ import {
   packCapacity,
   packFeePerZone,
   packOf,
+  partingSpeech,
   type Purchase,
   tapDog,
   tapGear,
 } from "../home/home";
-import {
-  PRESET_WALKERS,
-  type PresetWalkerId,
-  walkerPortraitKey,
-  walkerSpriteKey,
-} from "../home/walkers";
 import { wholeDollars } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -68,13 +63,21 @@ const TEMPERAMENT_LABELS: Readonly<Record<Temperament, string>> = {
   laidBack: "LAID-BACK",
 };
 
+// The widest line the speech bubble holds, in characters.
+const SPEECH_CHARS = 26;
+
+// The walkers in data order, as the picker shows them.
+function walkerIds(): WalkerId[] {
+  return Object.keys(gameData.walkers) as WalkerId[];
+}
+
 type Target =
   | { dog: DogId; kind: "dog" }
   | { gear: GearId; kind: "gear" }
   | { kind: "help" }
   | { kind: "slot"; slot: number }
   | { kind: "start" }
-  | { kind: "walker"; walker: PresetWalkerId };
+  | { kind: "walker"; walker: WalkerId };
 
 // The roster in rows by size, each row in trait order, as the mock lays it out.
 function rosterOrder(): DogId[] {
@@ -92,6 +95,9 @@ export class StartScene extends Scene {
   private drawn: GameObjects.GameObject[] = [];
   private loadout: HomeLoadout = { dogs: [], gear: null };
   private notice = "";
+  // The speech bubble's lines while the pack has dogs: the parting line of the owner whose
+  // dog was picked last, or null for the walker's own line.
+  private speech: string[] | null = null;
   private pressed: Target | undefined;
 
   constructor() {
@@ -101,6 +107,7 @@ export class StartScene extends Scene {
   create(): void {
     this.drawn = [];
     this.notice = "";
+    this.speech = null;
     const profile = homeProfile(this);
     const remembered = lastLoadout(this);
     this.loadout = {
@@ -138,7 +145,22 @@ export class StartScene extends Scene {
   }
 
   private walkerTiles(): Rect[] {
-    return gridRects(WALKER_TILES, Object.keys(PRESET_WALKERS).length, { x: 70, y: 603 });
+    return gridRects(WALKER_TILES, walkerIds().length, { x: 70, y: 603 });
+  }
+
+  // A newly picked dog's owner says a parting line; it stays until that dog leaves the pack.
+  private speechAfter(next: HomeLoadout): string[] | null {
+    const added = next.dogs.find((dog) => !this.loadout.dogs.includes(dog));
+    if (added !== undefined) {
+      return partingSpeech(gameData, Math.random, SPEECH_CHARS, added);
+    }
+    return next.dogs.length < this.loadout.dogs.length ? null : this.speech;
+  }
+
+  // The walker's road sprite, or the default walker's while its own is not loaded.
+  private walkerSprite(walker: WalkerId): string {
+    const own = gameData.walkers[walker].spriteKey;
+    return this.textures.exists(own) ? own : gameData.walkers[gameData.defaultWalker].spriteKey;
   }
 
   private gearSlots(): Rect[] {
@@ -158,7 +180,7 @@ export class StartScene extends Scene {
     if (walker !== undefined) {
       return {
         kind: "walker",
-        walker: itemAt(Object.keys(PRESET_WALKERS) as PresetWalkerId[], walker),
+        walker: itemAt(walkerIds(), walker),
       };
     }
     if (containsPoint(START_BUTTON, x, y)) {
@@ -183,6 +205,7 @@ export class StartScene extends Scene {
         if (tap.kind === "buy") {
           this.notice = this.purchaseNotice(tap.purchase);
         } else {
+          this.speech = this.speechAfter(tap.loadout);
           this.loadout = tap.loadout;
           this.notice = "";
         }
@@ -206,10 +229,7 @@ export class StartScene extends Scene {
           return;
         }
         setLastLoadout(this, this.loadout);
-        const walkerSprite = walkerSpriteKey(
-          (key) => this.textures.exists(key),
-          homeProfile(this).walker,
-        );
+        const walkerSprite = this.walkerSprite(homeProfile(this).walker);
         const data: RunSceneData = { loadout: { dogs, gear: this.loadout.gear }, walkerSprite };
         this.scene.start(SCENE_KEYS.run, data);
         return;
@@ -358,7 +378,7 @@ export class StartScene extends Scene {
 
   private drawPackAtGate(g: GameObjects.Graphics): void {
     const { footY, x } = WALKER_AT_GATE;
-    const walkerKey = walkerSpriteKey((key) => this.textures.exists(key), homeProfile(this).walker);
+    const walkerKey = this.walkerSprite(homeProfile(this).walker);
     const placements = GATE_SPOTS.slice(0, this.loadout.dogs.length);
     const groundColor = (atX: number) =>
       atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
@@ -394,7 +414,7 @@ export class StartScene extends Scene {
     const lines =
       this.loadout.dogs.length === 0
         ? ["Morning! Who are we", "walking today?"]
-        : ["Ready when you are."];
+        : (this.speech ?? ["Ready when you are."]);
     const top = 46;
     const labels = lines.map((line, i) =>
       this.textCentered(x, top + 4 + i * 8, line, PALETTE.plum),
@@ -559,9 +579,9 @@ export class StartScene extends Scene {
     const chosen = homeProfile(this).walker;
     const tiles = this.walkerTiles();
     this.text(8, 616, "Walker", PALETTE.cream, { font: "title" });
-    (Object.keys(PRESET_WALKERS) as PresetWalkerId[]).forEach((id, i) => {
+    walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
-      const portrait = walkerPortraitKey(id);
+      const portrait = gameData.walkers[id].portraitKey;
       fillRect(g, id === chosen ? PALETTE.amber : PALETTE.plum, rect);
       fillRect(g, PALETTE.tan, { height: 32, width: 32, x: rect.x + 1, y: rect.y + 1 });
       if (this.textures.exists(portrait)) {
@@ -569,11 +589,11 @@ export class StartScene extends Scene {
         playTag(face, portrait, id === chosen ? "happy" : "neutral");
         this.drawn.push(face);
       } else {
-        const initial = PRESET_WALKERS[id].name.charAt(0);
+        const initial = gameData.walkers[id].name.charAt(0);
         this.textCentered(rect.x + 17, rect.y + 13, initial, PALETTE.plum, { font: "title" });
       }
     });
-    this.text(232, 616, PRESET_WALKERS[chosen].name, PALETTE.amber, { font: "title" });
+    this.text(232, 616, gameData.walkers[chosen].name, PALETTE.amber, { font: "title" });
   }
 
   private drawLogbook(g: GameObjects.Graphics, profile: HomeProfile): void {

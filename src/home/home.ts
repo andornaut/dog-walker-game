@@ -1,9 +1,9 @@
-import type { DogId, GameData, GearId } from "../data/types";
+import type { DogId, GameData, GearId, WalkerId } from "../data/types";
+import { quipLine } from "../rules/choices";
 import { zoneFee } from "../rules/dogs";
 import { formatDollars } from "../rules/effectText";
 import { addCents, type Cents, cents, dollarsToCents, read } from "../rules/units";
 import type { EndReason, PackDogs, RunState } from "../state/runState";
-import type { PresetWalkerId } from "./walkers";
 
 // The home screen's logbook: the best walk, totals, and the last walk as one line.
 export interface Logbook {
@@ -24,7 +24,7 @@ export interface HomeProfile {
   readonly logbook: Logbook | null;
   readonly ownedDogs: readonly DogId[];
   readonly ownedGear: readonly GearId[];
-  readonly walker: PresetWalkerId;
+  readonly walker: WalkerId;
 }
 
 // The pack being picked, in the order picked, and the gear to take.
@@ -163,6 +163,33 @@ export function lastWalkLine(data: Pick<GameData, "dogs" | "world">, result: Wal
   }
   const zone = data.world.zones[result.zonesFinished]?.name ?? data.world.name;
   return `${earned} Headed home from ${zone}.`;
+}
+
+// Splits text into lines of at most maxChars, breaking between words; a longer word gets a
+// line of its own.
+export function wrapWords(maxChars: number, text: string): string[] {
+  const lines: string[] = [];
+  for (const word of text.split(/\s+/).filter((part) => part !== "")) {
+    const last = lines.at(-1);
+    if (last !== undefined && last.length + 1 + word.length <= maxChars) {
+      lines[lines.length - 1] = `${last} ${word}`;
+    } else {
+      lines.push(word);
+    }
+  }
+  return lines;
+}
+
+// What a dog's owner says when the player picks it: their name, then one of their parting
+// lines, wrapped to the speech bubble.
+export function partingSpeech(
+  data: Pick<GameData, "dogs" | "quips">,
+  random: () => number,
+  maxChars: number,
+  dog: DogId,
+): string[] {
+  const line = quipLine(data, random, { dog, moment: "parting" });
+  return [`${data.dogs[dog].owner.name}:`, ...wrapWords(maxChars, line)];
 }
 
 // Banks a finished walk and records it in the logbook. Held in memory until saves land.

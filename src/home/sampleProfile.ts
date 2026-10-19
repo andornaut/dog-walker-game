@@ -1,12 +1,11 @@
 import type { DogId, GameData } from "../data/types";
 import { cents } from "../rules/units";
 import type { HomeProfile } from "./home";
-import { DEFAULT_WALKER } from "./walkers";
 
 // The profile the home screen starts from until saves land: the starter dogs, a second dog
 // slot so a playtest can walk two dogs, no gear, and a few walks in the logbook so the
 // panel has something to show.
-export function sampleProfile(data: Pick<GameData, "dogs">): HomeProfile {
+export function sampleProfile(data: Pick<GameData, "defaultWalker" | "dogs">): HomeProfile {
   const starters = (Object.keys(data.dogs) as DogId[]).filter(
     (dog) => data.dogs[dog].unlock === "start",
   );
@@ -24,6 +23,6 @@ export function sampleProfile(data: Pick<GameData, "dogs">): HomeProfile {
     },
     ownedDogs: starters,
     ownedGear: [],
-    walker: DEFAULT_WALKER,
+    walker: data.defaultWalker,
   };
 }

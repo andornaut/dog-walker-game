@@ -1,5 +1,7 @@
 import type { EncounterId, ForcedStopId, GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import type { MoneyChange } from "../rules/causes";
+import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { affectedDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { payZoneFees, tipValue } from "../rules/run";
@@ -17,7 +19,7 @@ import { advanceZones } from "./zones";
 
 export type WalkData = Pick<
   GameData,
-  "debuffs" | "dogs" | "encounters" | "forcedStops" | "tuning" | "world"
+  "debuffs" | "dogs" | "encounters" | "forcedStops" | "shopGear" | "tuning" | "upgrades" | "world"
 >;
 
 export type PickupKind = "tip" | "treat";
@@ -67,13 +69,27 @@ export interface RoadGeometry {
   tallestPackBand: number;
 }
 
-// cards are in the order the pack met them; zoneEnded is set on the step that reaches the
-// end of the zone.
+// A lucky encounter that applied on contact, with no card.
+export interface InstantFind {
+  encounter: EncounterId;
+  outcome: ChoiceOutcome;
+}
+
+// cards and instants are in the order the pack met them; tips are the money changes of the
+// tips collected; zoneEnded is set on the step that reaches the end of the zone.
 export interface WalkStep {
   cards: CardSource[];
   collected: WalkItem[];
+  instants: InstantFind[];
+  tips: MoneyChange[];
   walk: Walk;
   zoneEnded: boolean;
+}
+
+// A zone's end: the fee each dog was paid, and the run after it.
+export interface ZoneEnd {
+  fees: readonly MoneyChange[];
+  run: RunState;
 }
 
 export function itemCategory(data: Pick<GameData, "encounters">, kind: WalkItemKind): ItemCategory {
@@ -246,21 +262,31 @@ function widenLanes(laneCount: number, reach: number, lanes: readonly number[]):
   return [...widened];
 }
 
-// A tip pays what tips are worth now; a treat is carried, up to the carry limit.
-function collect(data: WalkData, kind: PickupKind, run: RunState): RunState {
+// A tip pays what tips are worth now, with its causes; a treat is carried, up to the carry
+// limit.
+function collect(
+  data: WalkData,
+  kind: PickupKind,
+  run: RunState,
+): { readonly run: RunState; readonly tip: MoneyChange | null } {
   if (kind === "tip") {
-    return { ...run, money: addCents(run.money, tipValue(data, run)) };
+    const tip = tipValue(data, run);
+    return { run: { ...run, money: addCents(run.money, tip.amount) }, tip };
   }
   return {
-    ...run,
-    treats: Math.min(read(data.tuning, "counts", "treatCarryMax"), run.treats + 1),
+    run: {
+      ...run,
+      treats: Math.min(read(data.tuning, "counts", "treatCarryMax"), run.treats + 1),
+    },
+    tip: null,
   };
 }
 
 // One frame of walking. Scrolls the road at the zone's speed, brings spawns into view,
 // moves the pack, then collides: pickups are collected into the run, obstacles (outside
-// the grace window) and lucky encounters become cards for the dogs they affect, and a
-// forced stop that reaches the pack always becomes a card. Does nothing unless walking.
+// the grace window) and lucky encounters become cards for the dogs they affect or, for an
+// instant lucky find, apply at once, and a forced stop that reaches the pack always becomes
+// a card. Does nothing unless walking.
 export function stepWalk(
   data: WalkData,
   geometry: RoadGeometry,
@@ -270,7 +296,7 @@ export function stepWalk(
 ): WalkStep {
   const { road, run } = walk;
   if (run.phase.kind !== "walking") {
-    return { cards: [], collected: [], walk, zoneEnded: false };
+    return { cards: [], collected: [], instants: [], tips: [], walk, zoneEnded: false };
   }
   const length = zoneLength(data, run);
   const zone = advanceZones(
@@ -339,13 +365,26 @@ export function stepWalk(
   let nextRun: RunState = { ...run, zoneDistance: pixels(zoneDistance) };
   const cards: CardSource[] = [];
   const collected: WalkItem[] = [];
+  const instants: InstantFind[] = [];
+  const tips: MoneyChange[] = [];
   for (const item of [...hits, ...treatsHit]) {
     if (item.kind === "tip" || item.kind === "treat") {
-      nextRun = collect(data, item.kind, nextRun);
+      const pickup = collect(data, item.kind, nextRun);
+      nextRun = pickup.run;
+      if (pickup.tip !== null) {
+        tips.push(pickup.tip);
+      }
       collected.push(item);
     } else {
       const affected = affectedDogs(data, random, nextRun, item.kind);
-      if (opensCard(data, affected, nextRun, item.kind)) {
+      if (!opensCard(data, affected, nextRun, item.kind)) {
+        continue;
+      }
+      if (data.encounters[item.kind].resolution.kind === "instant") {
+        const outcome = applyInstantEncounter(data, random, nextRun, item.kind, affected);
+        nextRun = outcome.state;
+        instants.push({ encounter: item.kind, outcome });
+      } else {
         cards.push({ affected, encounter: item.kind, kind: "encounter" });
       }
     }
@@ -361,6 +400,8 @@ export function stepWalk(
   return {
     cards,
     collected,
+    instants,
+    tips,
     walk: {
       road: {
         ...road,
@@ -380,12 +421,15 @@ export function stepWalk(
 
 // The end of a zone: every dog still walking is paid, then the run moves to the next zone,
 // or ends once the last zone is done.
-export function finishZone(data: WalkData, run: RunState): RunState {
-  const paid = payZoneFees(data, run);
+export function finishZone(data: WalkData, run: RunState): ZoneEnd {
+  const { changes, state: paid } = payZoneFees(data, run);
   if (run.zoneIndex >= data.world.zones.length - 1) {
-    return { ...paid, phase: { kind: "ended", reason: "finished" } };
+    return { fees: changes, run: { ...paid, phase: { kind: "ended", reason: "finished" } } };
   }
-  return { ...paid, zoneDistance: pixels(0), zoneIndex: run.zoneIndex + 1 };
+  return {
+    fees: changes,
+    run: { ...paid, zoneDistance: pixels(0), zoneIndex: run.zoneIndex + 1 },
+  };
 }
 
 // Heading home keeps what was earned, but the current zone pays nothing.

@@ -1,15 +1,8 @@
 import type { DogId, GameData } from "../data/types";
-import { heartsOf, mapPack, packDogs } from "../state/pack";
+import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
-import {
-  type Cause,
-  centsCauses,
-  type HeartChange,
-  modifierCauses,
-  type MoneyChange,
-} from "./causes";
+import { type Cause, centsCauses, modifierCauses, type MoneyChange } from "./causes";
 import { zoneFeeParts } from "./dogs";
-import { changeHearts, type RulesData } from "./effects";
 import { statParts } from "./modifiers";
 import { addCents, cents, nonNegativeCents, read, readTable } from "./units";
 
@@ -105,22 +98,4 @@ export function fireOwnersAtZero(state: RunState): Firing {
     state.pack,
   );
   return { changes, fired, state: { ...state, feesEarned, money, pack } };
-}
-
-// Gives one carried treat to a walking dog's owner: hearts.treat, multiplied by temperament
-// and held within the dog's max like any change. Throws with no treat carried or for a dog
-// not walking.
-export function giveTreat(
-  data: RulesData,
-  dog: DogId,
-  state: RunState,
-): { readonly change: HeartChange | null; readonly state: RunState } {
-  if (state.treats < 1) {
-    throw new Error("No treat to give");
-  }
-  if (heartsOf(state, dog) === undefined) {
-    throw new Error(`${dog} is not walking`);
-  }
-  const base: Cause = { amount: read(data.tuning, "hearts", "treat"), kind: "treat" };
-  return changeHearts(data, base, dog, { ...state, treats: state.treats - 1 });
 }

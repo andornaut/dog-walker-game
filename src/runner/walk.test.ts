@@ -8,6 +8,7 @@ import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type { EncounterId } from "../data/types";
+import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import { screenLayout } from "../layout/screenLayout";
 import { tipValue } from "../rules/run";
@@ -53,6 +54,7 @@ const data = {
   forcedStops: FORCED_STOPS,
   shopGear: SHOP_GEAR,
   tuning,
+  upgrades: UPGRADES,
   world: WORLD,
 };
 const geometry: RoadGeometry = {
@@ -66,7 +68,7 @@ const geometry: RoadGeometry = {
 
 const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
   road: { ...startRoad(5), items, nextItemId: items.length },
-  run: newRun(data, { dogs, gear: null }),
+  run: newRun(data, 3, { dogs, gear: null }),
 });
 // An item in the middle lane, its bottom just inside the pack's band.
 const atPack = (kind: WalkItem["kind"], id = 0, lane = 2): WalkItem => ({
@@ -101,7 +103,7 @@ describe("planZone", () => {
   it("fits the tuned spawns into every zone of the game's road, so none is dropped", () => {
     const tuned = { ...data, tuning: TUNING };
     const gameRoad = walkGeometry(LANE_COUNT, 3, screenLayout(SCREEN_CONFIG).road);
-    const run = newRun(tuned, { dogs: ["duchess", "biscuit", "koda"], gear: null });
+    const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
     for (let zoneIndex = 0; zoneIndex < WORLD.zones.length; zoneIndex++) {
       for (const seed of [1, 2, 3, 4, 5]) {
         const walk = { road: startRoad(LANE_COUNT), run: { ...run, zoneIndex } };
@@ -136,9 +138,10 @@ describe("stepWalk", () => {
 
   it("collects a tip the pack walks into, worth what tips pay now", () => {
     const walk = walkWith(["koda"], [atPack("tip")]);
-    const { collected, walk: after } = step(walk);
+    const { collected, tips, walk: after } = step(walk);
     expect(collected.map(({ kind }) => kind)).toEqual(["tip"]);
-    expect(after.run.money).toBe(tipValue(data, walk.run));
+    expect(after.run.money).toBe(tipValue(data, walk.run).amount);
+    expect(tips).toEqual([tipValue(data, walk.run)]);
     expect(after.road.items).toEqual([]);
   });
 
@@ -184,6 +187,16 @@ describe("stepWalk", () => {
     ]);
   });
 
+  it("applies an instant lucky find at once, with no card", () => {
+    const walk = walkWith(["koda", "nugget"], [atPack("photoOp")]);
+    const { cards, instants, walk: after } = step(walk);
+    expect(cards).toEqual([]);
+    expect(instants.map(({ encounter }) => encounter)).toEqual(["photoOp"]);
+    expect(instants[0]?.outcome.quips).toEqual([{ dog: "nugget", moment: "happier" }]);
+    expect(after.run.money).toBe(walk.run.money + TEST_TUNING.money.photoOpTip * 100);
+    expect(after.run.phase).toEqual({ kind: "walking" });
+  });
+
   it("opens the forced stop's card when it reaches the pack, in any lane", () => {
     const walk = walkWith(["koda"]);
     const stopped: Walk = {
@@ -220,8 +233,12 @@ describe("stepWalk", () => {
 describe("finishZone", () => {
   it("pays every walking dog's fee and moves on to the next zone", () => {
     const { run } = walkWith(["koda", "duchess"]);
-    const next = finishZone(data, { ...run, zoneDistance: zoneLength(data, run) });
+    const { fees, run: next } = finishZone(data, { ...run, zoneDistance: zoneLength(data, run) });
     expect(next.money).toBe(2000);
+    expect(fees.map(({ amount, dog }) => ({ amount, dog }))).toEqual([
+      { amount: 1000, dog: "koda" },
+      { amount: 1000, dog: "duchess" },
+    ]);
     expect(next.zoneIndex).toBe(1);
     expect(next.zoneDistance).toBe(0);
     expect(next.phase).toEqual({ kind: "walking" });
@@ -229,7 +246,7 @@ describe("finishZone", () => {
 
   it("ends the run, finished, after the last zone", () => {
     const { run } = walkWith(["koda"]);
-    const last = finishZone(data, { ...run, zoneIndex: WORLD.zones.length - 1 });
+    const last = finishZone(data, { ...run, zoneIndex: WORLD.zones.length - 1 }).run;
     expect(last.phase).toEqual({ kind: "ended", reason: "finished" });
   });
 });

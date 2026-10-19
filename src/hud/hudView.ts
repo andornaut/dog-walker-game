@@ -1,6 +1,6 @@
 import type { DogId } from "../data/types";
+import { type CauseData, causeLabel, type Change, changeAmount } from "../rules/causes";
 import type { ChoiceOutcome } from "../rules/choices";
-import { formatDollars } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 
 // A floating label naming a change, over the dog's slot or the bank.
@@ -10,29 +10,22 @@ export interface ChangeLabel {
   text: string;
 }
 
-const signed = (value: number, text: string) => `${value < 0 ? "−" : "+"}${text}`;
-
-// One label per heart change and one for the money. Plain amounts for now; each label
-// gains its cause ("−2 ♥, dramatic") when the outcome events carry causes.
-export function changeLabels(
-  outcome: Pick<ChoiceOutcome, "heartChanges" | "moneyDelta">,
-): ChangeLabel[] {
-  const hearts = outcome.heartChanges.map(({ after, before, dog }): ChangeLabel => ({
-    gain: after > before,
-    target: { dog, kind: "dog" },
-    text: signed(after - before, `${Math.abs(after - before)} ♥`),
+// One label per change, naming its causes ("−2 ♥, dramatic", "+$1.50 tip, solo"): a heart
+// change over its dog's slot, a money change over the bank.
+export function changeLabels(data: CauseData, changes: readonly Change[]): ChangeLabel[] {
+  return changes.map((change): ChangeLabel => ({
+    gain: changeAmount(change) > 0,
+    target: change.kind === "hearts" ? { dog: change.dog, kind: "dog" } : { kind: "bank" },
+    text: causeLabel(data, change),
   }));
-  const money: ChangeLabel[] =
-    outcome.moneyDelta === 0
-      ? []
-      : [
-          {
-            gain: outcome.moneyDelta > 0,
-            target: { kind: "bank" },
-            text: signed(outcome.moneyDelta, formatDollars(outcome.moneyDelta)),
-          },
-        ];
-  return [...hearts, ...money];
+}
+
+// The labels for a choice or an instant encounter: its heart changes, then its money changes.
+export function outcomeLabels(
+  data: CauseData,
+  outcome: Pick<ChoiceOutcome, "heartChanges" | "moneyChanges">,
+): ChangeLabel[] {
+  return changeLabels(data, [...outcome.heartChanges, ...outcome.moneyChanges]);
 }
 
 // Money is counted in cents and shown in whole dollars.

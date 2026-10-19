@@ -4,7 +4,7 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { fireOwnersAtZero, giveTreat, payZoneFees, tipValue } from "./run";
+import { fireOwnersAtZero, payZoneFees, tipValue } from "./run";
 import { cents } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING };
@@ -127,23 +127,5 @@ describe("fireOwnersAtZero", () => {
       { amount: -1300, kind: "clawback" },
       { amount: 800, bound: "min", kind: "limit" },
     ]);
-  });
-});
-
-describe("giveTreat", () => {
-  it("spends a treat for +1 heart, doubled for a dramatic owner", () => {
-    const { change, state } = giveTreat(data, "nugget", testState({ nugget: 2 }, { treats: 2 }));
-    expect(state.treats).toBe(1);
-    expect(heartsByDog(state)).toEqual({ nugget: 4 });
-    expect(change?.causes).toEqual([
-      { amount: 1, kind: "treat" },
-      { amount: 1, kind: "temperament", temperament: "dramatic" },
-    ]);
-  });
-
-  it("throws with no treat carried or for a fired dog", () => {
-    expect(() => giveTreat(data, "koda", testState({ koda: 5 }))).toThrow("No treat");
-    const fired = testState({ duchess: 5, koda: "fired" }, { treats: 1 });
-    expect(() => giveTreat(data, "koda", fired)).toThrow("not walking");
   });
 });

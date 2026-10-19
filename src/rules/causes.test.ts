@@ -11,7 +11,8 @@ import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { causeLabel, type Change, changeAmount } from "./causes";
 import { resolveEffects } from "./effects";
-import { fireOwnersAtZero, giveTreat, tipValue } from "./run";
+import { fireOwnersAtZero, tipValue } from "./run";
+import { giveTreat } from "./treats";
 import { cents } from "./units";
 
 const data = {

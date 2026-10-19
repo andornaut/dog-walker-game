@@ -13,30 +13,34 @@ const data = { dogs: DOGS, tuning };
 
 describe("giveTreat", () => {
   it("raises the dog's owner by one heart and uses up a treat", () => {
-    const state = giveTreat(data, "koda", testState({ duchess: 3, koda: 4 }, { treats: 2 }));
+    const { state } = giveTreat(data, "koda", testState({ duchess: 3, koda: 4 }, { treats: 2 }));
     expect(heartsByDog(state)).toEqual({ duchess: 3, koda: 5 });
     expect(state.treats).toBe(1);
   });
 
   it("counts double for a dramatic owner", () => {
-    const state = giveTreat(data, "nugget", testState({ nugget: 2 }, { treats: 1 }));
+    const { change, state } = giveTreat(data, "nugget", testState({ nugget: 2 }, { treats: 1 }));
     expect(heartsByDog(state)).toEqual({ nugget: 4 });
+    expect(change?.causes).toEqual([
+      { amount: 1, kind: "treat" },
+      { amount: 1, kind: "temperament", temperament: "dramatic" },
+    ]);
   });
 
   it("does nothing without a treat", () => {
     const before = testState({ koda: 4 }, { treats: 0 });
-    expect(giveTreat(data, "koda", before)).toBe(before);
+    expect(giveTreat(data, "koda", before)).toEqual({ change: null, state: before });
   });
 
   it("keeps the treat when the owner is already at their max", () => {
     const before = testState({ duchess: 6 }, { treats: 1 });
-    expect(giveTreat(data, "duchess", before)).toBe(before);
+    expect(giveTreat(data, "duchess", before)).toEqual({ change: null, state: before });
   });
 
   it("does nothing for a dog that is not walking", () => {
     const before = testState({ duchess: 3, koda: "fired" }, { treats: 1 });
-    expect(giveTreat(data, "koda", before)).toBe(before);
-    expect(giveTreat(data, "biscuit", before)).toBe(before);
+    expect(giveTreat(data, "koda", before)).toEqual({ change: null, state: before });
+    expect(giveTreat(data, "biscuit", before)).toEqual({ change: null, state: before });
   });
 });
 

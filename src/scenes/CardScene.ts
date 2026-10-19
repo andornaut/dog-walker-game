@@ -2,7 +2,7 @@ import { type GameObjects, type Input, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
-import { cardArtCandidates, SKIP_CARD_ART } from "../assets/cardArt";
+import { SKIP_CARD_ART } from "../assets/cardArt";
 import {
   CARD_FRAME_KEY,
   cardFrameTag,
@@ -60,22 +60,9 @@ function sourceSpriteKey(source: CardSource): string | undefined {
   }
 }
 
-// The option's illustration: the key it names, or for now one found by its label.
-function illustrationKey(
-  scene: Scene,
-  source: CardSource,
-  option: OptionView | undefined,
-): string | undefined {
-  if (option === undefined) {
-    return SKIP_CARD_ART;
-  }
-  const art = (option as { art?: unknown }).art;
-  if (typeof art === "string") {
-    return art;
-  }
-  return cardArtCandidates(source, option.label, option.index).find((key) =>
-    scene.textures.exists(key),
-  );
+// The option's illustration, or the Skip card's.
+function illustrationKey(option: OptionView | undefined): string {
+  return option === undefined ? SKIP_CARD_ART : option.art;
 }
 
 // Up to three cards over the dimmed road. The top bar and dog column stay in view, and
@@ -213,8 +200,8 @@ export class CardScene extends Scene {
     }
 
     const art = { ...ART, x: x + ART.x, y: y + ART.y };
-    const illustration = illustrationKey(this, view.source, entry.option);
-    if (illustration !== undefined && this.textures.exists(illustration)) {
+    const illustration = illustrationKey(entry.option);
+    if (this.textures.exists(illustration)) {
       const key = grey ? greyTextureKey(this, illustration) : illustration;
       this.add.image(art.x, art.y, key).setOrigin(0).setCrop(0, 0, art.width, art.height);
     } else {

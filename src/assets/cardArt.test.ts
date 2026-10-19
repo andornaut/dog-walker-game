@@ -1,37 +1,24 @@
 import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
-import { cardArtCandidates } from "./cardArt";
+import { gameData } from "../data";
+import { SKIP_CARD_ART } from "./cardArt";
 
 const images = new Set(manifest.images.map(({ key }) => key));
 
-describe("cardArtCandidates", () => {
-  it("tries the whole label first, then shorter runs of its words", () => {
-    expect(
-      cardArtCandidates({ affected: [], encounter: "otherDog", kind: "encounter" }, "Pull away", 1),
-    ).toEqual(["card-other-dog-pull-away", "card-other-dog-pull", "card-other-dog-away"]);
-  });
-
-  it("finds a drawn illustration for an encounter and a forced stop option", () => {
-    const rinse = cardArtCandidates(
-      { affected: [], encounter: "skunk", kind: "encounter" },
-      "Quick rinse",
-      1,
-    );
-    expect(rinse.some((key) => images.has(key))).toBe(true);
-    const moveOn = cardArtCandidates(
-      { kind: "forcedStop", stop: "chattyNeighbour" },
-      "Politely move on",
-      1,
-    );
-    expect(moveOn.some((key) => images.has(key))).toBe(true);
-  });
-
-  it("names an upgrade's illustration by the offered upgrade", () => {
-    const source = {
-      kind: "upgradeOffer",
-      offered: ["bellyRubs", "bigTipper", "raincoats"],
-    } as const;
-    expect(cardArtCandidates(source, "Big tipper", 1)).toEqual(["card-big-tipper"]);
+describe("card art", () => {
+  it("finds every card option's, upgrade's, instant popup's and the Skip card's art", () => {
+    const { encounters, forcedStops, upgrades } = gameData;
+    const keys = [
+      SKIP_CARD_ART,
+      ...Object.values(encounters).flatMap(({ resolution }) =>
+        resolution.kind === "instant"
+          ? [resolution.art]
+          : resolution.options.map((option) => option.art),
+      ),
+      ...Object.values(forcedStops).flatMap((stop) => stop.options.map((option) => option.art)),
+      ...Object.values(upgrades).map((upgrade) => upgrade.art),
+    ];
+    expect(keys.filter((key) => !images.has(key))).toEqual([]);
   });
 });

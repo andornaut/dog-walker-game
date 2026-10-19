@@ -4,10 +4,9 @@ import { itemAt } from "../arrays";
 import { dogSpriteKey, encounterSpriteKey, forcedStopSpriteKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
-import { recordWalk, walkResult } from "../home/home";
-import { DEFAULT_WALKER, walkerSpriteKeyOf } from "../home/walkers";
-import { type ChangeLabel, changeLabels } from "../hud/hudView";
+import type { DogId, EncounterId } from "../data/types";
+import { recordWalk, walkResult, wrapWords } from "../home/home";
+import { type ChangeLabel, changeLabels, outcomeLabels } from "../hud/hudView";
 import {
   advanceGesture,
   type GestureAction,
@@ -26,12 +25,14 @@ import {
   cardFor,
   type CardView,
   type Choice,
+  type ChoiceOutcome,
   chooseOption,
   offerUpgrades,
   openCard,
+  quipLine,
 } from "../rules/choices";
 import { giveTreat } from "../rules/treats";
-import { cents, read } from "../rules/units";
+import { read } from "../rules/units";
 import { laneMotionX } from "../runner/laneMotion";
 import { type Random, seededRandom } from "../runner/random";
 import {
@@ -54,6 +55,7 @@ import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import type { EndSceneData } from "./EndScene";
 import { colorFromHex, LANE_MARK_COLORS, PALETTE } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
+import { addPixelText } from "./pixelText";
 import { homeProfile, setHomeProfile } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag, spriteMetrics } from "./sprites";
@@ -77,7 +79,9 @@ export const CHANGE_LABELS_EVENT = "change-labels";
 const DASH = { length: 12, spacing: 32, width: 2 };
 const LONGEST_STEP_SECONDS = 0.1;
 const ITEM_TAGS = ["idle", "walk", "wave"];
-const DEPTH = { decal: 1, leash: 2000, road: 0, shadow: 2, sprite: 10 };
+const DEPTH = { decal: 1, leash: 2000, popup: 3000, road: 0, shadow: 2, sprite: 10 };
+// An instant lucky find's popup: its art over the road, then the owners' quips, fading out.
+const POPUP = { artY: 150, fadeMs: 1800, quipChars: 40, rise: 16 };
 
 interface ItemView {
   footY: (item: WalkItem) => number;
@@ -123,7 +127,7 @@ export class RunScene extends Scene {
     this.gesture = idleGesture;
     this.pointerId = undefined;
 
-    const run = newRun(gameData, data.loadout);
+    const run = newRun(gameData, homeProfile(this).dogSlots, data.loadout);
     this.walk = planZone(gameData, this.geometry(run), this.random, {
       road: startRoad(LANE_COUNT),
       run,
@@ -240,20 +244,8 @@ export class RunScene extends Scene {
         if (slot === undefined) {
           return;
         }
-        const run = giveTreat(gameData, slot.dog, walk.run);
-        const before = walk.run.pack[action.slot];
-        const after = run.pack[action.slot];
-        if (before?.status === "walking" && after?.status === "walking") {
-          this.emitLabels(
-            changeLabels({
-              heartChanges:
-                before.hearts === after.hearts
-                  ? []
-                  : [{ after: after.hearts, before: before.hearts, dog: slot.dog }],
-              moneyDelta: cents(0),
-            }),
-          );
-        }
+        const { change, state: run } = giveTreat(gameData, slot.dog, walk.run);
+        this.emitLabels(changeLabels(gameData, change === null ? [] : [change]));
         this.walk = { ...walk, run };
         return;
       }
@@ -284,9 +276,10 @@ export class RunScene extends Scene {
     const seconds = Math.min(LONGEST_STEP_SECONDS, delta / 1000);
     const step = stepWalk(gameData, this.geometry(walk.run), this.random, seconds, walk);
     this.walk = step.walk;
-    const moneyDelta = step.walk.run.money - walk.run.money;
-    if (moneyDelta !== 0) {
-      this.emitLabels(changeLabels({ heartChanges: [], moneyDelta: cents(moneyDelta) }));
+    this.emitLabels(changeLabels(gameData, step.tips));
+    for (const { encounter, outcome } of step.instants) {
+      this.emitLabels(outcomeLabels(gameData, outcome));
+      this.showInstantPopup(encounter, outcome);
     }
     this.zoneEndPending ||= step.zoneEnded;
     this.cardQueue.push(...step.cards);
@@ -329,10 +322,8 @@ export class RunScene extends Scene {
     if (walk === undefined) {
       return;
     }
-    const run = finishZone(gameData, walk.run);
-    this.emitLabels(
-      changeLabels({ heartChanges: [], moneyDelta: cents(run.money - walk.run.money) }),
-    );
+    const { fees, run } = finishZone(gameData, walk.run);
+    this.emitLabels(changeLabels(gameData, fees));
     this.walk = { ...walk, run };
     if (run.phase.kind !== "ended") {
       this.needsZonePlan = true;
@@ -369,8 +360,45 @@ export class RunScene extends Scene {
     this.walk = { ...walk, run: outcome.state };
     this.cardView = undefined;
     this.scene.stop(SCENE_KEYS.card);
-    this.emitLabels(changeLabels(outcome));
+    this.emitLabels(outcomeLabels(gameData, outcome));
     this.continueWalk();
+  }
+
+  // An instant lucky find opens no card: its art pops up over the road with a quip from
+  // each owner who gained, then floats up and fades while the walk goes on.
+  private showInstantPopup(encounter: EncounterId, outcome: ChoiceOutcome): void {
+    const { resolution } = gameData.encounters[encounter];
+    if (resolution.kind !== "instant") {
+      return;
+    }
+    const { road } = screenLayout(SCREEN_CONFIG);
+    const centerX = road.x + road.width / 2;
+    const parts: (GameObjects.BitmapText | GameObjects.Image)[] = [];
+    let y = road.y + POPUP.artY;
+    if (this.textures.exists(resolution.art)) {
+      const art = this.add.image(centerX, y, resolution.art).setOrigin(0.5, 0);
+      y += art.height + 4;
+      parts.push(art);
+    }
+    for (const cue of outcome.quips) {
+      const owner = gameData.dogs[cue.dog].owner.name;
+      const line = `${owner}: ${quipLine(gameData, this.random, cue)}`;
+      for (const text of wrapWords(POPUP.quipChars, line)) {
+        parts.push(addPixelText(this, centerX, y, text, { color: PALETTE.white, originX: 0.5 }));
+        y += 9;
+      }
+    }
+    for (const part of parts) {
+      part.setDepth(DEPTH.popup);
+      this.tweens.add({
+        alpha: 0,
+        duration: POPUP.fadeMs,
+        ease: "Sine.easeIn",
+        onComplete: () => part.destroy(),
+        targets: part,
+        y: `-=${POPUP.rise}`,
+      });
+    }
   }
 
   private openPause(): void {
@@ -560,7 +588,8 @@ export class RunScene extends Scene {
       );
     }
     this.walker?.setPosition(walkerX, footY).setDepth(DEPTH.sprite + footY);
-    shadow(this.walker?.texture.key ?? walkerSpriteKeyOf(DEFAULT_WALKER), walkerX, footY);
+    const defaultSprite = gameData.walkers[gameData.defaultWalker].spriteKey;
+    shadow(this.walker?.texture.key ?? defaultSprite, walkerX, footY);
     // A pull will play the dog's "tell" tag, mirrored for the left, with fx-bark over its
     // head, and steer through pullLane; dogs do not pull yet.
   }

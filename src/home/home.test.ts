@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
+import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
 import { cents } from "../rules/units";
@@ -17,14 +18,23 @@ import {
   packCapacity,
   packFeePerZone,
   packOf,
+  partingSpeech,
   recordWalk,
   tapDog,
   tapGear,
   walkResult,
+  wrapWords,
 } from "./home";
 import { sampleProfile } from "./sampleProfile";
 
-const data = { dogs: DOGS, shopGear: SHOP_GEAR, tuning: TEST_TUNING, world: WORLD };
+const data = {
+  defaultWalker: "casey",
+  dogs: DOGS,
+  quips: QUIPS,
+  shopGear: SHOP_GEAR,
+  tuning: TEST_TUNING,
+  world: WORLD,
+} as const;
 const profile: HomeProfile = {
   ...sampleProfile(data),
   logbook: null,
@@ -126,7 +136,7 @@ describe("packFeePerZone", () => {
 
 describe("walkResult", () => {
   it("counts every zone for a finished walk and only those passed when heading home", () => {
-    const run = newRun(data, { dogs: ["koda"], gear: null });
+    const run = newRun(data, 3, { dogs: ["koda"], gear: null });
     const finished = { ...run, phase: { kind: "ended", reason: "finished" } as const };
     expect(walkResult(data, finished).zonesFinished).toBe(4);
     const home = { ...run, phase: { kind: "ended", reason: "wentHome" } as const, zoneIndex: 2 };
@@ -134,7 +144,7 @@ describe("walkResult", () => {
   });
 
   it("lists the owners who fired you", () => {
-    const run = newRun(data, { dogs: ["koda", "duchess"], gear: null });
+    const run = newRun(data, 3, { dogs: ["koda", "duchess"], gear: null });
     const fired: RunState = {
       ...run,
       pack: [defined(run.pack[0]), { dog: "duchess", status: "fired", zoneIndex: 1 }],
@@ -189,5 +199,26 @@ describe("recordWalk", () => {
     expect(twice.logbook?.bestWalk).toBe(5_000);
     expect(twice.logbook?.walks).toBe(2);
     expect(twice.logbook?.lastWalk).toMatch(/^\+\$10\./);
+  });
+});
+
+describe("wrapWords", () => {
+  it("breaks between words, keeping each line within the width", () => {
+    expect(wrapWords(12, "He already did 10K. He's fine.")).toEqual([
+      "He already",
+      "did 10K.",
+      "He's fine.",
+    ]);
+  });
+
+  it("gives a word longer than the width a line of its own", () => {
+    expect(wrapWords(4, "a supercalifragilistic b")).toEqual(["a", "supercalifragilistic", "b"]);
+  });
+});
+
+describe("partingSpeech", () => {
+  it("names the owner, then one of their parting lines", () => {
+    expect(partingSpeech(data, () => 0, 40, "koda")).toEqual(["Jesse:", QUIPS.koda.parting[0]]);
+    expect(partingSpeech(data, () => 0.99, 40, "koda")).toEqual(["Jesse:", QUIPS.koda.parting[1]]);
   });
 });
