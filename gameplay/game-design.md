@@ -36,7 +36,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 - Portrait orientation, ¾ top-down view
 - 5 lanes. Keyboard: ←/→, A/D or H/L. Touch: tap the left/right half of the road, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
-- The top bar holds the pause button (head home lives in pause); taps on it never move the pack
+- The top bar holds the pause button; taps on it never move the pack. Pause offers Resume, Head home, Help and Settings
 - Spawning always leaves a path you can reach in time, so every hit is avoidable
 - A hit obstacle is removed after its card, then ~1s in which obstacles are ignored; pickups still count
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
@@ -78,6 +78,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 - **First-time hints:** a one-line hint the first time each thing appears (first puddle, first pull, first treat, first forced stop and so on); the help screen covers the rest
 - **Sound:** a few effects (tip, treat, bump, bark, card open, fired) and one music loop for the walk
 - **Accessibility:** reduced motion, hearts that don't rely on colour, adjustable volume
+- **Settings** (from pause and the home screen): music volume, effects volume, reduced motion
 - Web only, phone browser first
 
 ### Pickups (things you _want_ to hit)
@@ -152,7 +153,7 @@ Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card a
 
 ### Upgrade cards (between zones; pool of 9)
 
-Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the rest of the run:
+Run-only boosts, plus two trade-off cards. Each offer draws 3 cards at random from the remaining pool, with at most one trade-off card. A picked card leaves the pool for the rest of the run:
 
 - Belly rubs: +1 ♥ to every owner now
 - Good leash: squirrels can't upset your chasers, and chasers don't pull toward them
@@ -175,7 +176,12 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - Upgrade cards are the run-only boosts; everything bought on the home screen is permanent (the Hades split between boons and keepsakes)
 - **Logbook** (a home screen panel, saved): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone) and times each world was finished. Per-dog stats (walks, zones finished, times fired) show on each dog's roster card. The end screen flags a new best
-- Progress (bank, owned items, stats) is saved between sessions; see [`tech-plan.md`](../tech-plan.md)
+- **Achievements:** a badge wall on the Stats page, with earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; there is no other reward. The 15:
+  - Firsts: First Walk (finish zone 1), Full Route (finish all 4 zones), Pack of Two (walk 2 dogs), Pack of Three (walk 3 dogs)
+  - Mastery: Clean Paws (finish a zone without a hit), Spotless (finish a run without a hit), No Hard Feelings (finish 10 runs with no firings), High Earner (earn $500 in one run)
+  - Collection: Full Kennel (own all 9 dogs), Fully Equipped (own all 5 gear items), Every Owner Smiles (finish a run with each dog), Top Walker (own every dog and slot)
+  - Silly: You're Fired! (get fired 10 times), Stinky Streak (be Stinky in 3 zones of one run), Squirrel! (let a chaser chase 5 squirrels)
+- Progress (bank, owned items, stats, achievements) is saved between sessions; see [`tech-plan.md`](../tech-plan.md)
 
 ## Numbers
 
@@ -197,8 +203,8 @@ The milestones build the core loop first; placeholder art is fine until Mileston
 2. **Runner core:** 5 lanes, scrolling, spawning, collisions, keyboard + touch
 3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, lucky encounters, Stinky, owner quips, dogs leave at 0 ♥
 4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, pause and head home, end screen with earnings, first-time hints
-5. **Dogs & home screen:** 9-dog roster (3 unlocked, 6 bought), dog slots (1 to start, 2 bought), pack picks, bank, shop in place, gear and loadout, gate scene, owner parting lines, logbook and Stats page, save
-6. **Pixel pass & phone playtest:** sprites for the 4 walkers, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; sound effects and one music loop; accessibility basics; test on real phones
+5. **Dogs & home screen:** 9-dog roster (3 unlocked, 6 bought), dog slots (1 to start, 2 bought), pack picks, bank, shop in place, gear and loadout, gate scene, walker picker, owner parting lines, logbook, Stats page and achievements, settings, save
+6. **Pixel pass & phone playtest:** sprites for the 4 walkers, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 3 scenery gags, 2 pickups, achievement badges and celebration, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; sound effects and one music loop; accessibility basics; test on real phones
 
 **Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
 
