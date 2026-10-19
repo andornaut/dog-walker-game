@@ -1,0 +1,47 @@
+{ "frames": {
+   "social-frisbee-dog-owner@62 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "sourceSize": { "w": 25, "h": 38 },
+    "duration": 200
+   },
+   "social-frisbee-dog-owner@62 1.aseprite": {
+    "frame": { "x": 25, "y": 0, "w": 25, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "sourceSize": { "w": 25, "h": 38 },
+    "duration": 200
+   },
+   "social-frisbee-dog-owner@62 2.aseprite": {
+    "frame": { "x": 50, "y": 0, "w": 25, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "sourceSize": { "w": 25, "h": 38 },
+    "duration": 400
+   },
+   "social-frisbee-dog-owner@62 3.aseprite": {
+    "frame": { "x": 75, "y": 0, "w": 25, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 38 },
+    "sourceSize": { "w": 25, "h": 38 },
+    "duration": 400
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "social-frisbee-dog-owner@62.png",
+  "format": "RGBA8888",
+  "size": { "w": 100, "h": 38 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "walk", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "idle", "from": 2, "to": 3, "direction": "forward" }
+  ]
+ }
+}

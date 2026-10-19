@@ -410,6 +410,186 @@
       "json": "sprites/card-frame-large.json"
     },
     {
+      "key": "chase-cat",
+      "png": "sprites/chase-cat.png",
+      "json": "sprites/chase-cat.json",
+      "anchor": {
+        "feetY": 37,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "chase-cat@50",
+      "png": "sprites/chase-cat@50.png",
+      "json": "sprites/chase-cat@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "chase-cat@62",
+      "png": "sprites/chase-cat@62.png",
+      "json": "sprites/chase-cat@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "chase-cat@75",
+      "png": "sprites/chase-cat@75.png",
+      "json": "sprites/chase-cat@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "chase-cat@88",
+      "png": "sprites/chase-cat@88.png",
+      "json": "sprites/chase-cat@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "chase-ducklings",
+      "png": "sprites/chase-ducklings.png",
+      "json": "sprites/chase-ducklings.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "chase-ducklings@50",
+      "png": "sprites/chase-ducklings@50.png",
+      "json": "sprites/chase-ducklings@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "chase-ducklings@62",
+      "png": "sprites/chase-ducklings@62.png",
+      "json": "sprites/chase-ducklings@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "chase-ducklings@75",
+      "png": "sprites/chase-ducklings@75.png",
+      "json": "sprites/chase-ducklings@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "chase-ducklings@88",
+      "png": "sprites/chase-ducklings@88.png",
+      "json": "sprites/chase-ducklings@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "chase-pigeons",
+      "png": "sprites/chase-pigeons.png",
+      "json": "sprites/chase-pigeons.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "chase-pigeons@50",
+      "png": "sprites/chase-pigeons@50.png",
+      "json": "sprites/chase-pigeons@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "chase-pigeons@62",
+      "png": "sprites/chase-pigeons@62.png",
+      "json": "sprites/chase-pigeons@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "chase-pigeons@75",
+      "png": "sprites/chase-pigeons@75.png",
+      "json": "sprites/chase-pigeons@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "chase-pigeons@88",
+      "png": "sprites/chase-pigeons@88.png",
+      "json": "sprites/chase-pigeons@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "chase-rabbit",
+      "png": "sprites/chase-rabbit.png",
+      "json": "sprites/chase-rabbit.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "chase-rabbit@50",
+      "png": "sprites/chase-rabbit@50.png",
+      "json": "sprites/chase-rabbit@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 13
+      }
+    },
+    {
+      "key": "chase-rabbit@62",
+      "png": "sprites/chase-rabbit@62.png",
+      "json": "sprites/chase-rabbit@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "chase-rabbit@75",
+      "png": "sprites/chase-rabbit@75.png",
+      "json": "sprites/chase-rabbit@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "chase-rabbit@88",
+      "png": "sprites/chase-rabbit@88.png",
+      "json": "sprites/chase-rabbit@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 20
+      }
+    },
+    {
       "key": "chatty-neighbour",
       "png": "sprites/chatty-neighbour.png",
       "json": "sprites/chatty-neighbour.json",
@@ -2148,6 +2328,456 @@
       "anchor": {
         "feetY": 32,
         "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "snatch-raccoon",
+      "png": "sprites/snatch-raccoon.png",
+      "json": "sprites/snatch-raccoon.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "snatch-raccoon@50",
+      "png": "sprites/snatch-raccoon@50.png",
+      "json": "sprites/snatch-raccoon@50.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "snatch-raccoon@62",
+      "png": "sprites/snatch-raccoon@62.png",
+      "json": "sprites/snatch-raccoon@62.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "snatch-raccoon@75",
+      "png": "sprites/snatch-raccoon@75.png",
+      "json": "sprites/snatch-raccoon@75.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "snatch-raccoon@88",
+      "png": "sprites/snatch-raccoon@88.png",
+      "json": "sprites/snatch-raccoon@88.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "snatch-seagull",
+      "png": "sprites/snatch-seagull.png",
+      "json": "sprites/snatch-seagull.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "snatch-seagull@50",
+      "png": "sprites/snatch-seagull@50.png",
+      "json": "sprites/snatch-seagull@50.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "snatch-seagull@62",
+      "png": "sprites/snatch-seagull@62.png",
+      "json": "sprites/snatch-seagull@62.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "snatch-seagull@75",
+      "png": "sprites/snatch-seagull@75.png",
+      "json": "sprites/snatch-seagull@75.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "snatch-seagull@88",
+      "png": "sprites/snatch-seagull@88.png",
+      "json": "sprites/snatch-seagull@88.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "social-frisbee-dog",
+      "png": "sprites/social-frisbee-dog.png",
+      "json": "sprites/social-frisbee-dog.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "social-frisbee-dog-owner",
+      "png": "sprites/social-frisbee-dog-owner.png",
+      "json": "sprites/social-frisbee-dog-owner.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "social-frisbee-dog-owner@50",
+      "png": "sprites/social-frisbee-dog-owner@50.png",
+      "json": "sprites/social-frisbee-dog-owner@50.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "social-frisbee-dog-owner@62",
+      "png": "sprites/social-frisbee-dog-owner@62.png",
+      "json": "sprites/social-frisbee-dog-owner@62.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "social-frisbee-dog-owner@75",
+      "png": "sprites/social-frisbee-dog-owner@75.png",
+      "json": "sprites/social-frisbee-dog-owner@75.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "social-frisbee-dog-owner@88",
+      "png": "sprites/social-frisbee-dog-owner@88.png",
+      "json": "sprites/social-frisbee-dog-owner@88.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "social-frisbee-dog@50",
+      "png": "sprites/social-frisbee-dog@50.png",
+      "json": "sprites/social-frisbee-dog@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 15
+      }
+    },
+    {
+      "key": "social-frisbee-dog@62",
+      "png": "sprites/social-frisbee-dog@62.png",
+      "json": "sprites/social-frisbee-dog@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "social-frisbee-dog@75",
+      "png": "sprites/social-frisbee-dog@75.png",
+      "json": "sprites/social-frisbee-dog@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "social-frisbee-dog@88",
+      "png": "sprites/social-frisbee-dog@88.png",
+      "json": "sprites/social-frisbee-dog@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "social-gate-dog",
+      "png": "sprites/social-gate-dog.png",
+      "json": "sprites/social-gate-dog.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "social-gate-dog-owner",
+      "png": "sprites/social-gate-dog-owner.png",
+      "json": "sprites/social-gate-dog-owner.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "social-gate-dog-owner@50",
+      "png": "sprites/social-gate-dog-owner@50.png",
+      "json": "sprites/social-gate-dog-owner@50.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "social-gate-dog-owner@62",
+      "png": "sprites/social-gate-dog-owner@62.png",
+      "json": "sprites/social-gate-dog-owner@62.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "social-gate-dog-owner@75",
+      "png": "sprites/social-gate-dog-owner@75.png",
+      "json": "sprites/social-gate-dog-owner@75.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "social-gate-dog-owner@88",
+      "png": "sprites/social-gate-dog-owner@88.png",
+      "json": "sprites/social-gate-dog-owner@88.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "social-gate-dog@50",
+      "png": "sprites/social-gate-dog@50.png",
+      "json": "sprites/social-gate-dog@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "social-gate-dog@62",
+      "png": "sprites/social-gate-dog@62.png",
+      "json": "sprites/social-gate-dog@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 23
+      }
+    },
+    {
+      "key": "social-gate-dog@75",
+      "png": "sprites/social-gate-dog@75.png",
+      "json": "sprites/social-gate-dog@75.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "social-gate-dog@88",
+      "png": "sprites/social-gate-dog@88.png",
+      "json": "sprites/social-gate-dog@88.json",
+      "anchor": {
+        "feetY": 33,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "social-handbag-dog",
+      "png": "sprites/social-handbag-dog.png",
+      "json": "sprites/social-handbag-dog.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "social-handbag-dog-owner",
+      "png": "sprites/social-handbag-dog-owner.png",
+      "json": "sprites/social-handbag-dog-owner.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 32
+      }
+    },
+    {
+      "key": "social-handbag-dog-owner@50",
+      "png": "sprites/social-handbag-dog-owner@50.png",
+      "json": "sprites/social-handbag-dog-owner@50.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "social-handbag-dog-owner@62",
+      "png": "sprites/social-handbag-dog-owner@62.png",
+      "json": "sprites/social-handbag-dog-owner@62.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "social-handbag-dog-owner@75",
+      "png": "sprites/social-handbag-dog-owner@75.png",
+      "json": "sprites/social-handbag-dog-owner@75.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "social-handbag-dog-owner@88",
+      "png": "sprites/social-handbag-dog-owner@88.png",
+      "json": "sprites/social-handbag-dog-owner@88.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "social-handbag-dog@50",
+      "png": "sprites/social-handbag-dog@50.png",
+      "json": "sprites/social-handbag-dog@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "social-handbag-dog@62",
+      "png": "sprites/social-handbag-dog@62.png",
+      "json": "sprites/social-handbag-dog@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "social-handbag-dog@75",
+      "png": "sprites/social-handbag-dog@75.png",
+      "json": "sprites/social-handbag-dog@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "social-handbag-dog@88",
+      "png": "sprites/social-handbag-dog@88.png",
+      "json": "sprites/social-handbag-dog@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "social-jogger-dog",
+      "png": "sprites/social-jogger-dog.png",
+      "json": "sprites/social-jogger-dog.json",
+      "anchor": {
+        "feetY": 36,
+        "opaqueWidth": 27
+      }
+    },
+    {
+      "key": "social-jogger-dog-owner",
+      "png": "sprites/social-jogger-dog-owner.png",
+      "json": "sprites/social-jogger-dog-owner.json",
+      "anchor": {
+        "feetY": 56,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "social-jogger-dog-owner@50",
+      "png": "sprites/social-jogger-dog-owner@50.png",
+      "json": "sprites/social-jogger-dog-owner@50.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "social-jogger-dog-owner@62",
+      "png": "sprites/social-jogger-dog-owner@62.png",
+      "json": "sprites/social-jogger-dog-owner@62.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 19
+      }
+    },
+    {
+      "key": "social-jogger-dog-owner@75",
+      "png": "sprites/social-jogger-dog-owner@75.png",
+      "json": "sprites/social-jogger-dog-owner@75.json",
+      "anchor": {
+        "feetY": 42,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "social-jogger-dog-owner@88",
+      "png": "sprites/social-jogger-dog-owner@88.png",
+      "json": "sprites/social-jogger-dog-owner@88.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "social-jogger-dog@50",
+      "png": "sprites/social-jogger-dog@50.png",
+      "json": "sprites/social-jogger-dog@50.json",
+      "anchor": {
+        "feetY": 18,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "social-jogger-dog@62",
+      "png": "sprites/social-jogger-dog@62.png",
+      "json": "sprites/social-jogger-dog@62.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 17
+      }
+    },
+    {
+      "key": "social-jogger-dog@75",
+      "png": "sprites/social-jogger-dog@75.png",
+      "json": "sprites/social-jogger-dog@75.json",
+      "anchor": {
+        "feetY": 27,
+        "opaqueWidth": 21
+      }
+    },
+    {
+      "key": "social-jogger-dog@88",
+      "png": "sprites/social-jogger-dog@88.png",
+      "json": "sprites/social-jogger-dog@88.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 24
       }
     },
     {
