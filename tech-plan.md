@@ -39,8 +39,8 @@
 
 ## Game data
 
-- **Format:** typed TypeScript modules in `src/data/` (dogs, quips, encounters, forced stops, lucky encounters, upgrades, shop, debuffs, zones, walkers, tuning). Content is `as const satisfies Type`. Tuning uses plain `satisfies`, so its values stay `number` for live tuning.
-- **Ownership:** the gameplay agent edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `src/rules/` and all tests.
+- **Format:** typed TypeScript modules in `src/data/` (dogs, quips, encounters, forced stops, lucky encounters, upgrades, shop, debuffs, zones, walkers, hints, help, tuning). Content is `as const satisfies Type`. Tuning uses plain `satisfies`, so its values stay `number` for live tuning.
+- **Ownership:** the gameplay agent edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and all tests.
 - **Effects:** card options are lists of effects from a closed set of kinds. Effects name tuning numbers by key instead of copying them, so every number lives once in `tuning.ts`. A new card built from existing kinds is a data change; a new kind is code in `src/rules/` plus a test.
 - **Card text:** generated from the effects and tuning, with a snapshot test.
 - **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are distinct branded types in the rules. Value files hold plain numbers, branded when read. Hearts deltas in effects are -3 to 3.
@@ -53,9 +53,10 @@
 Player state that outlives a run. Local only: no accounts, no cloud saves.
 
 - **Profiles:** one per browser.
-- **Contents:** bank (integer cents), owned gear, unlocked dogs, chosen walker, last loadout, stats, settings, and the zone checkpoint, all referenced by data ids (`koda`, `luckyCollar`).
+- **Contents:** bank (integer cents), owned gear, unlocked dogs, dog slots owned, chosen walker, last loadout, stats, logbook, shown first-time hints, settings (reduced motion, music and sound volume), and the zone checkpoint, all referenced by data ids (`koda`, `luckyCollar`).
 - **Stats** (`gameplay/game-design.md`, Home screen and progression):
-  - Overall: runs by outcome (finished, headed home, out of dogs), best run and lifetime earnings, total firings and firings per owner, best zone reached, and times each world was finished.
+  - Overall: runs by outcome (finished, headed home, out of dogs), best run and lifetime earnings, total firings, and best zone completed (heading home mid-zone counts only the zones before it). Firings per owner equal the per-dog counts, since each dog has one owner, and worlds finished equal runs finished while there is one world.
+  - Logbook: the best walk (amount, zones, dogs) and the last walk (the same plus its outcome).
   - Per dog: walks, zones finished, times fired.
   - A run banked from a zone checkpoint counts as headed home.
 - **Format:** one JSON document under one key (`dog-walker-game:save`) with a `version` field. Every write replaces the whole document.
