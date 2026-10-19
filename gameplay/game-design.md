@@ -62,7 +62,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 
 ### Choice cards
 
-- Three across, art-led: illustration plus a one-line effect; tap to enlarge for details
+- Up to three across, art-led: illustration plus a one-line effect; tap to enlarge for details
 - Used for encounters, forced stops and upgrades
 - Each option's outcome is fixed and shown on the card
 - An option you can't afford is disabled; every encounter keeps at least one free option
@@ -112,7 +112,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 
 Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait, with laid-back owners for an easier first run. Each dog's size, trait, energy, owner temperament and unlock live in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
-More dogs means more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more area-effect rolls. After every card choice, the affected owner reacts with a quip. Each owner has 2 lines for each event: happier, upset, fired, and the parting line. The walker is one fixed character.
+More dogs means more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more area-effect rolls. After every card choice, the affected owner reacts with a quip. Each owner has 2 lines for each event: happier, upset, fired, and the parting line. You pick your walker from 4, all free: Casey, Ada, Ben and Trista; the choice is cosmetic and saved.
 
 ### Encounters (things you hit by accident → choice card)
 
@@ -169,7 +169,8 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - Money earned in a run is banked
 - The home screen is also the shop: tap a locked dog, dog slot or gear item to buy it; there is no separate shop screen
 - **Gear** (5 items, permanent, bought once): fanny pack (start with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +1 ♥ and has +1 max ♥). Pick up to 1 owned item before each run (none is allowed, e.g. on a first run). Equipped gear shows as a badge beside the walker
-- **Gate scene:** the home screen shows the walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign; equipped gear shows as a badge
+- **Walker picker:** choose Casey, Ada, Ben or Trista; all are free
+- **Gate scene:** the home screen shows the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign; equipped gear shows as a badge
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - Upgrade cards are the run-only boosts; everything bought on the home screen is permanent (the Hades split between boons and keepsakes)
 - **Logbook** (a home screen panel, saved): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
@@ -178,7 +179,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 
 ## Numbers
 
-[`src/data/`](../src/data/) holds every number and roster stat, and the [data page](https://dog-walker-game.andornaut.workers.dev/data/) shows them all with the generated card text. Numbers in the rules above are examples; the data files win. Edit values in `tuning.ts`, `dogs.ts`, `encounters.ts`, `forcedStops.ts`, `upgrades.ts`, `shop.ts`, `debuffs.ts`, `quips.ts`, `walkers.ts` and `world.ts`.
+[`src/data/`](../src/data/) holds every number and roster stat, and the [data page](https://dog-walker-game.andornaut.workers.dev/data/) shows them all with the generated card text. Numbers in the rules above are examples; the data files win. Edit values in `tuning.ts`, `dogs.ts`, `encounters.ts`, `forcedStops.ts`, `upgrades.ts`, `shop.ts`, `debuffs.ts`, `quips.ts`, `help.ts`, `walkers.ts` and `world.ts`.
 
 Prices not yet in the data:
 
@@ -197,7 +198,7 @@ The milestones build the core loop first; placeholder art is fine until Mileston
 3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, lucky encounters, Stinky, owner quips, dogs leave at 0 ♥
 4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, pause and head home, end screen with earnings, first-time hints
 5. **Dogs & home screen:** 9-dog roster (3 unlocked, 6 bought), dog slots (1 to start, 2 bought), pack picks, bank, shop in place, gear and loadout, gate scene, owner parting lines, logbook and Stats page, save
-6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; sound effects and one music loop; accessibility basics; test on real phones
+6. **Pixel pass & phone playtest:** sprites for the 4 walkers, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; sound effects and one music loop; accessibility basics; test on real phones
 
 **Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
 
