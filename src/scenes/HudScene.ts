@@ -56,6 +56,7 @@ import type { PackSlot, RunState } from "../state/runState";
 import { AchievementToasts } from "./achievementToast";
 import { drawDashedRect, drawFramedRect, drawHeart, drawRing, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
+import { HeartFeedback, heartPops } from "./heartFeedback";
 import { listenOnePress } from "./onePress";
 import { colorFromHex, PALETTE } from "./palette";
 import {
@@ -76,7 +77,7 @@ import {
   type RunScene,
 } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
-import { playEffect, playTag } from "./sprites";
+import { playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
 import { addPanel, artFits } from "./uiKit";
 
@@ -110,6 +111,15 @@ interface SlotView {
   statuses: GameObjects.Image[];
 }
 
+// A slot's parts that shake with it.
+function slotParts(view: SlotView | undefined): GameObjects.Components.Transform[] {
+  if (view === undefined) {
+    return [];
+  }
+  const { count, dogFace, fired, hearts, house, name, ownerFace, ownerName, statuses } = view;
+  return [house, dogFace, ownerFace, name, ownerName, count, fired, ...hearts, ...statuses];
+}
+
 // The top bar and doghouses, drawn over the road for the whole walk and kept in view while
 // cards are up. It reads the run from RunScene every frame and redraws what changed, and
 // shows the run's change labels, first-time hints and owners' quips. It keeps running while
@@ -124,6 +134,7 @@ export class HudScene extends Scene {
   private hints: HintQueue = EMPTY_HINT_QUEUE;
   private hintParts: GameObjects.GameObject[] = [];
   private hintRaised: RaisedHint[] = [];
+  private hearts: HeartFeedback | undefined;
   private money: GameObjects.BitmapText | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
@@ -208,6 +219,11 @@ export class HudScene extends Scene {
 
     const run = this.runScene();
     this.feedback = new HudFeedback(this, run, (labels) => this.floatLabels(labels));
+    this.hearts = new HeartFeedback(this, {
+      landed: (label, lane) => this.showHeartLabel(label, lane),
+      quipTop: LANES.quip.y,
+      still: () => run.reducedMotion(),
+    });
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
     const onHint = (hint: RaisedHint) => this.hintRaised.push(hint);
     const onQuips = (quips: QuipBubble[]) => this.queueQuips(quips);
@@ -600,44 +616,32 @@ export class HudScene extends Scene {
   }
 
   // Each change shows in its lane and fades out: a money change floats up from under the bank,
-  // or fades in place with reduced motion; a heart change fades in place on its doghouse's
-  // bottom band, with a heart rising or breaking on the hearts board. A dog's later labels in
-  // the same batch follow its first, one at a time.
+  // or fades in place with reduced motion; a heart change pops over its dog and flies into its
+  // doghouse (heartFeedback.ts), and its label then fades in place on the doghouse's bottom
+  // band.
   private floatLabels(labels: ChangeLabel[]): void {
-    const { dogSlots, topBar } = LAYOUT;
+    const { topBar } = LAYOUT;
     const run = this.runScene();
-    const view = run.hudView();
     const still = run.reducedMotion();
-    const perDog = new Map<string, number>();
     let bankRow = 0;
     labels.forEach((label) => {
       if (label.target.kind === "bank") {
         const y = topBar.y + topBar.height + 2 + bankRow * (LABEL.height + 2);
         bankRow += 1;
         this.showLabel(label, { scale: 2, x: 6, y }, still ? 0 : LABEL.rise, 0);
-        return;
       }
-      const dog = label.target.dog;
-      const index = view?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
-      const rect = dogSlots[index];
-      const lane = LANES.heartLabels[index];
-      if (rect === undefined || lane === undefined) {
-        return;
-      }
-      const order = perDog.get(dog) ?? 0;
-      perDog.set(dog, order + 1);
-      const at = { scale: 2, x: lane.x, y: lane.y + (lane.height - LABEL.height) / 2 };
-      this.time.delayedCall(order * LABEL.ms, () => {
-        playEffect(
-          this,
-          "fx-heart",
-          label.gain ? "up" : "down",
-          { x: rect.x + DOGHOUSE.hearts.x + 20, y: rect.y + DOGHOUSE.hearts.y },
-          10,
-        );
-        this.showLabel(label, at, 0, lane.width);
-      });
     });
+    const pops = heartPops({ lanes: LANES.heartLabels, run }, labels, (slot) => {
+      const view = this.slots[slot];
+      return view === undefined ? undefined : { house: view.house, parts: slotParts(view) };
+    });
+    pops.forEach((pop) => this.hearts?.play(pop));
+  }
+
+  // A heart change's label on its doghouse's bottom band, once its heart has landed.
+  private showHeartLabel(label: ChangeLabel, lane: Rect): void {
+    const at = { scale: 2, x: lane.x, y: lane.y + (lane.height - LABEL.height) / 2 };
+    this.showLabel(label, at, 0, lane.width);
   }
 
   // A change on a cream chip, so gains in forest and losses in dark red read over anything. A

@@ -419,28 +419,48 @@ describe("stepWalk", () => {
       ...walk,
       run: { ...walk.run, immunities: [{ encounter: "puddle" }] },
     });
-    const scenery: [string, Walk, () => number][] = [
-      ["a squirrel with no chaser", walkWith(["duchess"], [atPack("squirrel")]), seededRandom(1)],
-      ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), seededRandom(1)],
-      ["a skunk that catches nobody", walkWith(["duchess"], [atPack("skunk")]), nobodyCaught],
+    // Each with the area effects it reports as caught no dog.
+    const scenery: [string, Walk, () => number, string[]][] = [
+      [
+        "a squirrel with no chaser",
+        walkWith(["duchess"], [atPack("squirrel")]),
+        seededRandom(1),
+        [],
+      ],
+      ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), seededRandom(1), []],
+      [
+        "a skunk that catches nobody",
+        walkWith(["duchess"], [atPack("skunk")]),
+        nobodyCaught,
+        ["skunk"],
+      ],
+      [
+        "a puddle that catches nobody",
+        walkWith(["duchess", "koda"], [atPack("puddle")]),
+        nobodyCaught,
+        ["puddle"],
+      ],
       [
         "a picnic with no food-driven dog",
         walkWith(["duchess", "koda"], [atPack("picnic", 0, 2, 2)]),
         seededRandom(1),
+        [],
       ],
       [
         "a puddle Raincoats keep off",
         raincoats(walkWith(["duchess"], [atPack("puddle")])),
         () => 0,
+        [],
       ],
     ];
 
     it.each(scenery)(
       "is scenery for %s: removed, with no bump, grace or hit stop",
-      (_, walk, random) => {
+      (_, walk, random, misses) => {
         const after = stepWalk(data, geometry, random, 0.01, walk);
         expect(after.cards).toEqual([]);
         expect(after.encounterHits).toEqual([]);
+        expect(after.misses).toEqual(misses);
         expect(after.walk.road.items).toEqual([]);
         expect(after.walk.road.hitStop).toBeNull();
         expect(after.walk.road.invulnerableSeconds).toBe(0);

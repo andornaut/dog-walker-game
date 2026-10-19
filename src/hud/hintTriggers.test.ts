@@ -27,7 +27,7 @@ describe("cardHintTriggers", () => {
     [
       "a puddle catching some dogs",
       { affected: ["koda"], encounter: "puddle", kind: "encounter" },
-      [{ encounter: "puddle", kind: "encounter" }, { kind: "areaEffect" }, { kind: "card" }],
+      [{ encounter: "puddle", kind: "encounter" }, { kind: "card" }],
     ],
     [
       "a skunk catching every dog",
@@ -45,13 +45,7 @@ describe("cardHintTriggers", () => {
       [{ encounter: "lemonade", kind: "encounter" }, { kind: "luckyFind" }, { kind: "card" }],
     ],
   ])("for %s", (_, source, triggers) => {
-    expect(cardHintTriggers(data, PACK, source)).toEqual(triggers);
-  });
-
-  it("counts only walking dogs for an area effect", () => {
-    const run = testState({ duchess: "fired", koda: 5 });
-    const source = { affected: ["koda"], encounter: "puddle", kind: "encounter" } as const;
-    expect(cardHintTriggers(data, run, source)).not.toContainEqual({ kind: "areaEffect" });
+    expect(cardHintTriggers(data, source)).toEqual(triggers);
   });
 });
 

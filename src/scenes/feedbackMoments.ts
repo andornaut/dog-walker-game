@@ -6,6 +6,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { DOGHOUSE } from "../hud/doghouse";
+import { type MoneyTick, retarget, tickShown } from "../hud/feedback";
 import type { ChangeLabel } from "../hud/hudView";
 import {
   arcControl,
@@ -74,6 +75,7 @@ export class HudFeedback {
   private inFlight = 0;
   private low: DogId[] = [];
   private lowShown = "";
+  private moneyTick: MoneyTick | undefined;
   private paused = false;
   private readonly floatLabels: (labels: ChangeLabel[]) => void;
   private readonly run: RunScene;
@@ -107,9 +109,13 @@ export class HudFeedback {
     this.showLowHearts(run);
   }
 
-  // The money the counter shows: the run's, less the fees still flying to it.
+  // The money the counter shows: the run's, less the fees still flying to it, counted to
+  // rather than jumped to, except with reduced motion.
   shownMoney(money: Cents): Cents {
-    return cents(Math.max(0, money - this.inFlight));
+    const target = cents(Math.max(0, money - this.inFlight));
+    const now = this.scene.time.now;
+    this.moneyTick = retarget(!this.run.reducedMotion(), now, target, this.moneyTick);
+    return tickShown(now, this.moneyTick);
   }
 
   private holdWhilePaused(paused: boolean): void {

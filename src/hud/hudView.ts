@@ -1,11 +1,14 @@
 import { zonePipTag } from "../assets/spriteKeys";
 import type { DogId, GameData, ZoneId } from "../data/types";
-import { type CauseData, causeLabel, type Change, changeAmount } from "../rules/causes";
+import { type CauseData, causeLabel, causeNames, type Change, changeAmount } from "../rules/causes";
 import { zoneById } from "../rules/route";
 import type { Cents } from "../rules/units";
 
-// A floating label naming a change, over the dog's slot or the bank.
+// A floating label naming a change, over the dog's slot or the bank. amount is the change in
+// hearts or cents, and cause its causes' names without the amount.
 export interface ChangeLabel {
+  amount: number;
+  cause: string;
   gain: boolean;
   target: { dog: DogId; kind: "dog" } | { kind: "bank" };
   text: string;
@@ -15,6 +18,8 @@ export interface ChangeLabel {
 // change over its dog's slot, a money change over the bank.
 export function changeLabels(data: CauseData, changes: readonly Change[]): ChangeLabel[] {
   return changes.map((change): ChangeLabel => ({
+    amount: changeAmount(change),
+    cause: causeNames(data, change).join(", "),
     gain: changeAmount(change) > 0,
     target: change.kind === "hearts" ? { dog: change.dog, kind: "dog" } : { kind: "bank" },
     text: causeLabel(data, change),

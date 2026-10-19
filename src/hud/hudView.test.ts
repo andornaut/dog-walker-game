@@ -37,9 +37,27 @@ describe("changeLabels", () => {
       },
     ]);
     expect(labels).toEqual([
-      { gain: false, target: { dog: "nugget", kind: "dog" }, text: "−2 ♥, dramatic" },
-      { gain: true, target: { dog: "koda", kind: "dog" }, text: "+1 ♥ treat" },
-      { gain: true, target: { kind: "bank" }, text: "+$2 tip, solo" },
+      {
+        amount: -2,
+        cause: "dramatic",
+        gain: false,
+        target: { dog: "nugget", kind: "dog" },
+        text: "−2 ♥, dramatic",
+      },
+      {
+        amount: 1,
+        cause: "treat",
+        gain: true,
+        target: { dog: "koda", kind: "dog" },
+        text: "+1 ♥ treat",
+      },
+      {
+        amount: 150,
+        cause: "tip, solo",
+        gain: true,
+        target: { kind: "bank" },
+        text: "+$2 tip, solo",
+      },
     ]);
   });
 
@@ -52,7 +70,13 @@ describe("changeLabels", () => {
       kind: "money",
     } as const;
     expect(changeLabels(gameData, [clawback])).toEqual([
-      { gain: false, target: { kind: "bank" }, text: "−$10 fees taken back" },
+      {
+        amount: -1000,
+        cause: "fees taken back",
+        gain: false,
+        target: { kind: "bank" },
+        text: "−$10 fees taken back",
+      },
     ]);
   });
 });

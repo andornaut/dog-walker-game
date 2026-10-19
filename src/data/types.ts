@@ -583,6 +583,8 @@ export interface RunText {
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeTitle: string;
   };
+  // Shown at the pack when a skunk or puddle catches no dog.
+  readonly closeOne: string;
   readonly fired: string;
   readonly firedBy: string;
   readonly homeQuestion: {

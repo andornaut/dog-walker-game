@@ -12,7 +12,7 @@ import { UPGRADES } from "../data/upgrades";
 import type { EffectSource, RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { causeLabel, type Change, changeAmount } from "./causes";
+import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
 import { resolveEffects } from "./effects";
 import { fireOwnersAtZero, tipValue } from "./run";
 import { giveTreat } from "./treats";
@@ -72,28 +72,32 @@ const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
 const stinkyTip = (slots: Parameters<typeof testState>[0]) =>
   tipValue(data, testState(slots, { debuffs: [{ debuff: "stinky" }] }));
 
-describe("causeLabel", () => {
-  it.each<[string, () => Change | null, string]>([
+describe("causeLabel and causeNames", () => {
+  it.each<[string, () => Change | null, string, string[]]>([
     [
       "a dramatic owner's doubling, without the card option just picked",
       () => resolved(loseOne, testState({ nugget: 5 }), ["nugget"]),
       "−2 ♥, dramatic",
+      ["dramatic"],
     ],
     [
       "the max when a gain is cut short there",
       () =>
         resolved(gainOne, testState({ nugget: 5 }), [], { kind: "upgrade", upgrade: "bellyRubs" }),
       "+1 ♥, dramatic, at max",
+      ["dramatic", "at max"],
     ],
     [
       "the tip and a solo walk's tip factor",
       () => tipValue(data, testState({ koda: 5 })),
       "+$2 tip, solo",
+      ["tip", "solo"],
     ],
     [
       "Stinky on a halved tip",
       () => stinkyTip({ duchess: 5, koda: 5, nugget: 5 }),
       "+$1 tip, Stinky",
+      ["tip", "Stinky"],
     ],
     [
       "Sweet talker on a per-dog cost",
@@ -104,17 +108,20 @@ describe("causeLabel", () => {
           ["duchess", "koda"],
         ),
       "−$6, Sweet talker",
+      ["Sweet talker"],
     ],
-    ["a clawback", () => firing(5000), "−$13 fees taken back"],
+    ["a clawback", () => firing(5000), "−$13 fees taken back", ["fees taken back"]],
     [
       "a clawback held at the $0 floor",
       () => firing(500),
       "−$5 fees taken back, you're out of money",
+      ["fees taken back", "you're out of money"],
     ],
     [
       "a treat as the base",
       () => giveTreat(data, "koda", testState({ koda: 3 }, { treats: 1 })).change,
       "+1 ♥ treat",
+      ["treat"],
     ],
     [
       "an instant encounter as the base",
@@ -126,10 +133,12 @@ describe("causeLabel", () => {
           { encounter: "photoOp", kind: "instant" },
         ),
       "+$10 Photo op",
+      ["Photo op"],
     ],
-  ])("names %s", (_, change, text) => {
+  ])("names %s", (_, change, text, names) => {
     const made = change();
     expect(made === null ? null : causeLabel(data, made)).toBe(text);
+    expect(made === null ? null : causeNames(data, made)).toEqual(names);
   });
 });
 

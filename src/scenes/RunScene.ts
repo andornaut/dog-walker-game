@@ -169,6 +169,7 @@ import {
   NeedSignals,
   playPullFail,
 } from "./needSignals";
+import { playCleanMiss, playMinorBump } from "./packFeedback";
 import { colorFromHex, PALETTE } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import { addPixelText } from "./pixelText";
@@ -993,12 +994,21 @@ export class RunScene extends Scene {
     }
     for (const bump of step.bumps) {
       sound.play("bump");
-      this.addChanges(bump.change === null ? [] : [bump.change]);
-      playEffect(this, "fx-bump", "play", { x: pack.x, y: pack.y - 20 }, DEPTH.fx);
-      playEffect(this, "fx-coins", "play", { x: pack.x, y: pack.y - 36 }, DEPTH.fx);
+      this.changes.push(...(bump.change === null ? [] : [bump.change]));
+      const contact = { x: pack.x, y: pack.y - 20 };
+      playMinorBump(
+        this,
+        { contact, depth: DEPTH.fx, still: this.reducedMotion() },
+        { amount: bump.change?.amount ?? null, walker: this.walker?.sprite },
+      );
       this.stumble();
       this.stumbling = true;
       this.hint({ kind: "minorBump" });
+    }
+    for (const encounter of step.misses) {
+      const miss = { feetY: walkerFootY(LAYOUT.road), x: pack.x };
+      playCleanMiss(this, { ...miss, depth: DEPTH.fx, still: this.reducedMotion() }, encounter);
+      this.hint({ kind: "areaEffect" });
     }
     for (const { encounter, outcome } of step.instants) {
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
@@ -1053,6 +1063,12 @@ export class RunScene extends Scene {
       const key = dogSpriteKey(gameData, dog);
       playTagOnce(sprite, key, "react", () => playTag(sprite, key, "walk"));
     }
+  }
+
+  // The dog's centre column and top opaque row on the road, while it is shown there.
+  dogPoint(dog: DogId): { x: number; y: number } | undefined {
+    const sprite = this.dogSprites.get(dog);
+    return sprite?.visible === true ? dogTop(sprite) : undefined;
   }
 
   // The pack's centre at the leading dog's feet, in screen pixels.
@@ -1184,7 +1200,7 @@ export class RunScene extends Scene {
     this.walk = { ...walk, run };
     this.cardView = view;
     this.dropPress();
-    cardHintTriggers(gameData, run, source).forEach((trigger) => this.hint(trigger));
+    cardHintTriggers(gameData, source).forEach((trigger) => this.hint(trigger));
     const replayed = this.replayedChoice();
     if (replayed !== undefined) {
       this.choose(view, replayed);

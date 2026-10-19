@@ -146,14 +146,15 @@ export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 // the tips collected; spots the need spots steered into, which stepNeeds meets; zoneEnded is
 // set on the step that reaches the end of the zone.
 // encounterHits are the encounters met this step that play a hit moment: obstacles, and lucky
-// cards with a hit label. A hit stop holds the step's cards and zone end back to the step it
-// ends on.
+// cards with a hit label. misses are the area effects (skunk, puddle) the pack touched that
+// caught no dog. A hit stop holds the step's cards and zone end back to the step it ends on.
 export interface WalkStep {
   bumps: MinorBump[];
   cards: CardSource[];
   collected: WalkItem[];
   encounterHits: EncounterCard[];
   instants: InstantFind[];
+  misses: EncounterId[];
   spots: WalkItem[];
   tips: MoneyChange[];
   walk: Walk;
@@ -653,6 +654,7 @@ export function stepWalk(
   const collected: WalkItem[] = [];
   const encounterHits: EncounterCard[] = [];
   const instants: InstantFind[] = [];
+  const misses: EncounterId[] = [];
   const spots: WalkItem[] = [];
   const tips: MoneyChange[] = [];
   for (const item of [...hits, ...treatsHit]) {
@@ -673,6 +675,9 @@ export function stepWalk(
       bumps.push({ change: bump.change, item });
     } else {
       if (!opens(item, kind)) {
+        if (cleanMiss(data, affectedBy(item, kind), nextRun, kind)) {
+          misses.push(kind);
+        }
         continue;
       }
       const affected = affectedBy(item, kind);
@@ -716,6 +721,7 @@ export function stepWalk(
     collected,
     encounterHits,
     instants,
+    misses,
     spots,
     tips,
     walk: {
@@ -736,6 +742,20 @@ export function stepWalk(
   };
 }
 
+// An area effect the pack touched that caught no dog, where no immunity kept it off.
+function cleanMiss(
+  data: Pick<GameData, "encounters">,
+  affected: readonly DogId[],
+  run: RunState,
+  encounter: EncounterId,
+): boolean {
+  return (
+    data.encounters[encounter].affects.kind === "caught" &&
+    affected.length === 0 &&
+    !run.immunities.some((immunity) => immunity.encounter === encounter)
+  );
+}
+
 const NOTHING_HELD: HeldStep = { cards: [], zoneEnded: false };
 
 // A step in which the walk does not move, giving out only what it held.
@@ -746,6 +766,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     collected: [],
     encounterHits: [],
     instants: [],
+    misses: [],
     spots: [],
     tips: [],
     walk,
