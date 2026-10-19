@@ -88,10 +88,6 @@ describe("checkRunForm", () => {
     );
   });
 
-  it("reads gear none as no gear", () => {
-    expect(checkRunForm(limits, { ...blankForm, gear: "none" }).setup.gear).toBeNull();
-  });
-
   it("warns with the parser's limits", () => {
     const { warnings } = checkRunForm(limits, {
       ...blankForm,

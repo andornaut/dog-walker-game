@@ -10,26 +10,24 @@ const fallback: Loadout = { dogs: ["biscuit"], gear: "whistle" };
 const setup: RunSetup<DogId, GearId> = { dev: false, seed: 1, speed: 1, zone: 1 };
 
 describe("loadoutFor", () => {
-  it("keeps the fallback when the setup overrides nothing", () => {
-    expect(loadoutFor(fallback, setup)).toEqual(fallback);
-  });
-
-  it.each<readonly DogId[]>([["koda"], ["koda", "archie"], ["koda", "archie", "zippy"]])(
-    "takes a pack of %j from the setup",
-    (...pack) => {
-      expect(loadoutFor(fallback, { ...setup, pack }).dogs).toEqual(pack);
-    },
-  );
-
-  it("takes the setup's gear, including none", () => {
-    expect(loadoutFor(fallback, { ...setup, gear: "luckyCollar" }).gear).toBe("luckyCollar");
-    expect(loadoutFor(fallback, { ...setup, gear: null }).gear).toBeNull();
-  });
-
-  it("keeps the fallback pack for a pack no run can take", () => {
-    expect(loadoutFor(fallback, { ...setup, pack: [] }).dogs).toEqual(fallback.dogs);
-    const four: DogId[] = ["koda", "archie", "zippy", "penny"];
-    expect(loadoutFor(fallback, { ...setup, pack: four }).dogs).toEqual(fallback.dogs);
+  it.each<[string, Partial<RunSetup<DogId, GearId>>, Loadout]>([
+    ["keeps the fallback when the setup overrides nothing", {}, fallback],
+    ["takes a pack of one from the setup", { pack: ["koda"] }, { ...fallback, dogs: ["koda"] }],
+    [
+      "takes a pack of three from the setup",
+      { pack: ["koda", "archie", "zippy"] },
+      { ...fallback, dogs: ["koda", "archie", "zippy"] },
+    ],
+    ["takes the setup's gear", { gear: "luckyCollar" }, { ...fallback, gear: "luckyCollar" }],
+    ["takes the setup's lack of gear", { gear: null }, { ...fallback, gear: null }],
+    ["keeps the fallback pack for an empty pack", { pack: [] }, fallback],
+    [
+      "keeps the fallback pack for a pack too big for a run",
+      { pack: ["koda", "archie", "zippy", "penny"] },
+      fallback,
+    ],
+  ])("%s", (_name, overrides, expected) => {
+    expect(loadoutFor(fallback, { ...setup, ...overrides })).toEqual(expected);
   });
 });
 

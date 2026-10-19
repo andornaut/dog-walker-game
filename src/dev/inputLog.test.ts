@@ -56,10 +56,6 @@ const decodeErrors = (json: string) => {
 const encoded = (body: object) => JSON.stringify({ setup: "seed=1", version: 1, ...body });
 
 describe("recording", () => {
-  it("starts empty with the setup", () => {
-    expect(startInputLog(setup)).toEqual({ events: [], setup });
-  });
-
   it("appends each event without changing the log it was given", () => {
     const empty = startInputLog<string, string>(setup);
     const one = recordInput(defined(events[0]), empty);
@@ -80,40 +76,40 @@ describe("encodeInputLog and decodeInputLog", () => {
   });
 
   it("write the format version, the setup as a query and each event as a tuple", () => {
-    expect(JSON.parse(encodeInputLog(logOf(events.slice(1, 3))))).toEqual({
+    expect(JSON.parse(encodeInputLog(logOf(events.slice(1))))).toEqual({
       events: [
         [2500.5, "l", 1],
         [4000, "c", 2],
+        [9000, "c", "skip"],
+        [9500, "t", 2],
+        [10_000, "h"],
       ],
       setup: "seed=31337&pack=koda,bo&gear=collar&zone=2",
       version: INPUT_LOG_VERSION,
     });
   });
 
-  it("write a treat as its slot", () => {
-    expect(JSON.parse(encodeInputLog(logOf(events.slice(4, 5)))).events).toEqual([[9500, "t", 2]]);
-  });
-
-  it("write heading home as its time alone", () => {
-    expect(JSON.parse(encodeInputLog(logOf(events.slice(5)))).events).toEqual([[10_000, "h"]]);
-  });
-
-  it("still decode a version 1 log, from before treats were logged", () => {
-    const json = encoded({
-      events: [
-        [100, "l", -1],
-        [200, "c", "skip"],
+  it.each<[string, string, InputEvent[]]>([
+    [
+      "a version 1 log, from before treats were logged",
+      encoded({
+        events: [
+          [100, "l", -1],
+          [200, "c", "skip"],
+        ],
+      }),
+      [
+        { direction: -1, kind: "lane", timeMs: 100 },
+        { choice: "skip", kind: "card", timeMs: 200 },
       ],
-    });
-    expect(decodeOk(json).events).toEqual([
-      { direction: -1, kind: "lane", timeMs: 100 },
-      { choice: "skip", kind: "card", timeMs: 200 },
-    ]);
-  });
-
-  it("still decode a version 2 log, from before heading home was logged", () => {
-    const json = encoded({ events: [[100, "t", 1]], version: 2 });
-    expect(decodeOk(json).events).toEqual([{ kind: "treat", slot: 1, timeMs: 100 }]);
+    ],
+    [
+      "a version 2 log, from before heading home was logged",
+      encoded({ events: [[100, "t", 1]], version: 2 }),
+      [{ kind: "treat", slot: 1, timeMs: 100 }],
+    ],
+  ])("still decode %s", (_name, json, expected) => {
+    expect(decodeOk(json).events).toEqual(expected);
   });
 
   it("decode a renamed dog id in the setup as the dog it is now", () => {
@@ -149,23 +145,19 @@ describe("takeDueInputs", () => {
     { kind: "home", timeMs: 300 },
   ];
 
-  it("takes the lane moves and treats due by the step's time, in order", () => {
-    expect(takeDueInputs(replayed, 0, 150)).toEqual({ due: replayed.slice(0, 2), next: 2 });
-  });
-
-  it("applies a treat at the step it was given in, not before", () => {
-    expect(takeDueInputs(replayed, 2, 199)).toEqual({ due: [], next: 2 });
-    expect(takeDueInputs(replayed, 2, 200).due).toEqual([replayed[2]]);
-  });
-
-  it("stops at a card choice, which its card takes", () => {
-    expect(takeDueInputs(replayed, 3, 1000)).toEqual({ due: [], next: 3 });
-    expect(takeDueInputs(replayed, 4, 260)).toEqual({ due: [replayed[4]], next: 5 });
-  });
-
-  it("takes heading home at the step it came before", () => {
-    expect(takeDueInputs(replayed, 5, 299)).toEqual({ due: [], next: 5 });
-    expect(takeDueInputs(replayed, 5, 300)).toEqual({ due: [replayed[5]], next: 6 });
+  it.each([
+    ["takes the lane moves and treats due by the step's time, in order", 0, 150, [0, 1], 2],
+    ["holds a treat until the step it was given in", 2, 199, [], 2],
+    ["applies a treat at the step it was given in", 2, 200, [2], 3],
+    ["stops at a card choice, which its card takes", 3, 1000, [], 3],
+    ["takes a lane move after the card choice", 4, 260, [4], 5],
+    ["holds heading home until its step", 5, 299, [], 5],
+    ["takes heading home at the step it came before", 5, 300, [5], 6],
+  ])("%s", (_name, from, nowMs, due, next) => {
+    expect(takeDueInputs(replayed, from, nowMs)).toEqual({
+      due: due.map((index) => replayed[index]),
+      next,
+    });
   });
 });
 

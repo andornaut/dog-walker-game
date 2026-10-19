@@ -1,42 +1,46 @@
 import { describe, expect, it } from "vitest";
 
+import type { DogId, GearId } from "../data/types";
+import type { HomeLoadout } from "../home/home";
+import type { Loadout } from "../state/runState";
 import { devRunLoadout, namesRunSetup } from "./devStart";
+import type { RunSetup } from "./runSetup";
 
-const setup = { dev: false, seed: 1, speed: 1, zone: 1 };
+const setup: RunSetup<DogId, GearId> = { dev: false, seed: 1, speed: 1, zone: 1 };
 
 describe("namesRunSetup", () => {
-  it("is true for a URL with any run parameter", () => {
-    expect(namesRunSetup("?seed=123&pack=koda,duchess&zone=1&dev=1")).toBe(true);
-    expect(namesRunSetup("?speed=2")).toBe(true);
-    expect(namesRunSetup("?gear=none")).toBe(true);
-  });
-
-  it("is false without one, even with the overlay on", () => {
-    expect(namesRunSetup("")).toBe(false);
-    expect(namesRunSetup("?dev=1")).toBe(false);
+  it.each([
+    ["?seed=123&pack=koda,duchess&zone=1&dev=1", true],
+    ["?speed=2", true],
+    ["?gear=none", true],
+    ["", false],
+    ["?dev=1", false],
+  ])("reads %j as naming a run setup: %s", (search, expected) => {
+    expect(namesRunSetup(search)).toBe(expected);
   });
 });
 
 describe("devRunLoadout", () => {
-  it("takes the link's pack and gear over the saved loadout", () => {
-    const saved = { dogs: ["biscuit" as const], gear: null };
-    expect(
-      devRunLoadout(saved, "koda", { ...setup, gear: "whistle", pack: ["koda", "duchess"] }),
-    ).toEqual({
-      dogs: ["koda", "duchess"],
-      gear: "whistle",
-    });
-  });
-
-  it("keeps the saved loadout for what the link leaves out", () => {
-    const saved = { dogs: ["biscuit" as const], gear: "fannyPack" as const };
-    expect(devRunLoadout(saved, "koda", setup)).toEqual({ dogs: ["biscuit"], gear: "fannyPack" });
-  });
-
-  it("walks the first owned dog when nothing was picked yet", () => {
-    expect(devRunLoadout({ dogs: [], gear: null }, "koda", setup)).toEqual({
-      dogs: ["koda"],
-      gear: null,
-    });
+  it.each<[string, HomeLoadout, Partial<RunSetup<DogId, GearId>>, Loadout]>([
+    [
+      "takes the link's pack and gear over the saved loadout",
+      { dogs: ["biscuit"], gear: null },
+      { gear: "whistle", pack: ["koda", "duchess"] },
+      { dogs: ["koda", "duchess"], gear: "whistle" },
+    ],
+    [
+      "keeps the saved loadout for what the link leaves out",
+      { dogs: ["biscuit"], gear: "fannyPack" },
+      {},
+      { dogs: ["biscuit"], gear: "fannyPack" },
+    ],
+    [
+      "walks the first owned dog when nothing was picked yet",
+      { dogs: [], gear: null },
+      {},
+      { dogs: ["koda"], gear: null },
+    ],
+  ])("%s", (_name, saved, overrides, expected) => {
+    expect(devRunLoadout(saved, "koda", { ...setup, ...overrides })).toEqual(expected);
   });
 });
