@@ -37,5 +37,3 @@ Art can come up in either; it lands in `art/style-guide.md`.
 - **[floated]:** said out loud, not discussed
 - **[exploring]:** we're actively kicking it around
 - **[cut]:** decided against (kept so we don't re-argue it; note why)
-
-An agreed idea moves to `game-design.md`, and one set aside for later moves to `next.md`; neither stays in `ideas.md`.

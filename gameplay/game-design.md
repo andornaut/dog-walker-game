@@ -25,7 +25,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ## The game in one paragraph
 
-Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, then walk a fixed route of 4 zones through Maple Street, the first world. The street scrolls toward you at a relaxed pace; switch between 5 lanes to dodge trouble and grab treats and tips. Hitting an obstacle opens a choice card, and which owners it upsets depends on the dogs' traits. Each zone has one forced stop. After zones 1–3, pick 1 of 3 upgrade cards. Each dog pays a share of its fee for every zone it survives; if an owner's happiness hits zero, they fire you and the dog leaves. The run ends when you finish zone 4 or run out of dogs, and you keep what you've earned. Banked money buys gear and new dogs for future walks.
+Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and up to one piece of gear, then walk a fixed route of 4 zones through Maple Street, the first world. The street scrolls toward you at a relaxed pace; switch between 5 lanes to dodge trouble, grab treats and tips, and bump into the occasional lucky find. Hitting an obstacle opens a choice card, and which owners it upsets depends on the dogs' traits. Each zone has one forced stop. After zones 1–3, pick 1 of 3 upgrade cards. Each dog pays a share of its fee for every zone it survives; if an owner's happiness hits zero, they fire you and the dog leaves. The run ends when you finish zone 4 or run out of dogs, and you keep what you've earned, minus the fees of any owner who fired you. Banked money buys new dogs, gear, training, walker kit and cosmetics.
 
 ## Rules
 
@@ -34,7 +34,7 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 - Designed touch-first: keyboard (web) and touch (mobile); mouse is not planned
 - Layout: a top status bar (money, zone progress), a fixed-width dog column on the left with one slot per dog, and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in [`art/style-guide.md`](../art/style-guide.md)
 - Portrait orientation, ¾ top-down view
-- 5 lanes. Keyboard: ←/→, A/D or H/L. Touch: tap the left/right half of the screen, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
+- 5 lanes. Keyboard: ←/→, A/D or H/L. Touch: tap the left/right half of the road, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
 - The top bar holds the pause button (head home lives in pause); taps on it never move the pack
 - Spawning always leaves a path you can reach in time, so every hit is avoidable
@@ -84,19 +84,19 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                                                                                                                                                                                                                               |
 | Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $13 instead of $10 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0 and the dog's max; also sets the quip tone                                                                                                                                                                            |
 
-| Dog      | Breed           | Size   | Trait       | Energy | Owner                                  | Look                                  | Start    |
-| -------- | --------------- | ------ | ----------- | ------ | -------------------------------------- | ------------------------------------- | -------- |
-| Duchess  | Maltese         | Small  | Fancy       | Calm   | Rosa, retired florist (laid-back)      | White coat, pink bow                  | Unlocked |
-| Nugget   | Pug             | Small  | Food-driven | Steady | Kevin, pet influencer (dramatic)       | Fawn, black mask, tiny bandana        | Shop     |
-| Zippy    | Jack Russell    | Small  | Chaser      | Hyper  | Mr. Pruitt, retired accountant (fussy) | White with tan patches, red collar    | Shop     |
-| Pierre   | Standard poodle | Medium | Fancy       | Steady | Madame Lefevre, dog-show judge (fussy) | Apricot, show-clip pom-poms           | Shop     |
-| Biscuit  | Beagle          | Medium | Food-driven | Hyper  | Sam, barista (laid-back)               | Tricolour, floppy ears, green collar  | Unlocked |
-| Dash     | Whippet         | Medium | Chaser      | Calm   | Ophelia, stage actor (dramatic)        | Grey brindle, knit sweater            | Shop     |
-| Snowball | Samoyed         | Big    | Fancy       | Hyper  | Tiffany, wedding planner (dramatic)    | Fluffy white, collar with a bell      | Shop     |
-| Waffles  | Saint Bernard   | Big    | Food-driven | Calm   | Dr. Hughes, dentist (fussy)            | Brown and white, little barrel collar | Shop     |
-| Koda     | Husky           | Big    | Chaser      | Steady | Jesse, trail runner (laid-back)        | Grey and white, blue eyes, harness    | Unlocked |
+| Dog      | Breed           | Owner                          | Look                                  |
+| -------- | --------------- | ------------------------------ | ------------------------------------- |
+| Duchess  | Maltese         | Rosa, retired florist          | White coat, pink bow                  |
+| Nugget   | Pug             | Kevin, pet influencer          | Fawn, black mask, tiny bandana        |
+| Zippy    | Jack Russell    | Mr. Pruitt, retired accountant | White with tan patches, red collar    |
+| Pierre   | Standard poodle | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms           |
+| Biscuit  | Beagle          | Sam, barista                   | Tricolour, floppy ears, green collar  |
+| Dash     | Whippet         | Ophelia, stage actor           | Grey brindle, knit sweater            |
+| Snowball | Samoyed         | Tiffany, wedding planner       | Fluffy white, collar with a bell      |
+| Waffles  | Saint Bernard   | Dr. Hughes, dentist            | Brown and white, little barrel collar |
+| Koda     | Husky           | Jesse, trail runner            | Grey and white, blue eyes, harness    |
 
-Each size and trait pairs once, and each energy and temperament appears three times. The three starters cover every size and trait, with laid-back owners for an easier first run.
+Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait, with laid-back owners for an easier first run. Each dog's size, trait, energy, owner temperament and unlock live in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
 More dogs means more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more area-effect rolls. After every card choice, the affected owner reacts with a quip. The walker is one fixed character.
 
@@ -145,50 +145,37 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - Raincoats: puddles can't upset anyone for the rest of the run
 - Treat magnet: treats count from one lane away
 - Steady hands: dogs pull the pack half as often
-- Sweet talker: every $ cost on a card, missed tips included, is $2 less per dog for the rest of the run
+- Sweet talker: every $ cost on a card, missed tips included, is $4 less per dog for the rest of the run
 
 ### Home screen and progression
 
 - Money earned in a run is banked
 - The home screen is also the shop: tap a locked dog or gear item to buy it; there is no separate shop screen
 - **Gear** (5 items, permanent, bought once): fanny pack (start with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +1 ♥ and has +1 max ♥). Pick up to 1 owned item before each run (none is allowed, e.g. on a first run). Equipped gear shows as a badge beside the walker
-- **Dog training:** level up a dog you own, e.g. calmer energy or a smaller pull lock. Options and prices to design
-- **Walker kit:** permanent, always-on walker upgrades, e.g. a bigger treat pouch or faster lane changes. Items and prices to design
-- **Cosmetic unlocks:** looks-only purchases. Items and prices to design
-- **Walker customization:** pick from a few preset walkers (3 to 4 sprites); gear still shows as a badge. Looks to design
+- **Dog training:** two courses per dog you own: Heel (the dog pulls half as often) and Good manners (its owner starts with +1 ♥ and has +1 max ♥)
+- **Walker kit** (permanent, always on): Quick feet (lane changes 20% faster); Treat belt (carry 4 treats instead of 3); Business cards (fees +10%); Firm grip (input lock after a pull halved)
+- **Cosmetic unlocks** (looks only): 2 extra accessories per dog (collar, bow, bandana and so on); 6 leash colours; 6 home screen decor pieces (e.g. yard sign, house paint, flower bed, bird bath, bench, porch light)
+- **Walker customization:** pick from 3 to 4 preset walkers; one is free and the rest are cosmetic purchases. Gear still shows as a badge
+- **Gate scene:** the home screen shows the walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign; equipped gear and home screen decor show here
+- **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - Upgrade cards are the run-only boosts; everything bought on the home screen is permanent (the Hades split between boons and keepsakes)
 - **Logbook** (a home screen panel): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone reached and times each world was finished. Per-dog stats (walks, zones finished, times fired) show on each dog's roster card. The end screen flags a new best
 - Progress (bank, owned items, stats) is saved between sessions; see [`tech-plan.md`](../tech-plan.md)
 
-## Starting numbers
+## Numbers
 
-Placeholders sized for a ~12-minute run (zone 1 ~3.8 minutes at base speed). Once the tech session has these as typed data in `src/data/`, that becomes the source of truth for numbers and roster stats, and this table is replaced by a link to it. A full run is estimated at ~$110 with 1 dog, ~$95 with 2 and ~$75 with 3, before clawbacks and lucky encounters; buying every dog and gear item ($1,775) takes ~18 runs, before training, walker kit and cosmetics.
+[`src/data/`](../src/data/) holds every number and roster stat, and the [data page](https://dog-walker-game.andornaut.workers.dev/data/) shows them all with the generated card text. Numbers in the rules above are examples; the data files win. Edit values in `tuning.ts`, `dogs.ts`, `encounters.ts`, `forcedStops.ts`, `upgrades.ts`, `shop.ts`, `debuffs.ts`, `quips.ts`, `walkers.ts` and `world.ts`.
 
-| What                         | Value                                                                                                                        |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Scroll speed                 | +20% per zone (zone 4 at 1.6× base)                                                                                          |
-| Obstacles per zone           | 23 in zone 1, +4 per later zone                                                                                              |
-| Tips per zone                | 30 in zone 1, +4 per later zone                                                                                              |
-| Treats per zone              | 5 (carry up to 3)                                                                                                            |
-| Lucky encounters per zone    | 2                                                                                                                            |
-| Owner happiness              | Start 6 laid-back · 4 fussy · 5 dramatic; max 6 small · 8 medium · 10 big; treat +1; Lucky collar +1 start and +1 max        |
-| Fee per zone survived        | $10; fussy owners $13                                                                                                        |
-| Other dog spawns             | +25% per small dog, −25% per big dog                                                                                         |
-| Thief: let it go             | −$10                                                                                                                         |
-| Area-effect roll             | 50% per dog; small dogs 25%                                                                                                  |
-| Pull interval (energy)       | About every 60s calm · 30s steady · 15s hyper                                                                                |
-| Input lock after a pull      | Small 0s · medium 0.25s · big 0.5s                                                                                           |
-| Pull tell                    | ~1s lean and bark before a pull                                                                                              |
-| Tip                          | $1 (Big tipper $1.50, Stinky $0.50); ×1.5 with 1 dog, ×1.25 with 2, ×1 with 3                                                |
-| Encounter costs              | $ = $5, $$$ = $15, per affected dog                                                                                          |
-| Squirrel: let them chase     | −$10                                                                                                                         |
-| Missed tips (slower options) | $5 per dog                                                                                                                   |
-| Chatty neighbour tip         | +$15                                                                                                                         |
-| Lucky encounters             | Lost wallet kept +$15 · photo op +$10                                                                                        |
-| Shortcut                     | Next zone 25% shorter, its fees −25%                                                                                         |
-| Rush hour                    | Next zone tips ×2, obstacles ×1.5                                                                                            |
-| Shop                         | Each locked dog $150 · fanny pack $100 (start +$15) · whistle $150 · poop bags $175 · running shoes $200 · Lucky collar $250 |
+Prices not yet in the data:
+
+| What       | Price                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------ |
+| Training   | Heel $150 · Good manners $250, per dog                                                                 |
+| Walker kit | Quick feet $300 · Treat belt $300 · Business cards $400 · Firm grip $400                               |
+| Cosmetics  | Extra walkers $200 each · dog accessories $80 each · leash colours $40 each · decor pieces $60 to $160 |
+
+If every card is paid in money, a full run nets about $70 with 1 dog, $20 with 2 and a loss with 3, before clawbacks and lucky encounters; paying in hearts keeps more. Buying everything on the home screen costs about $11,500.
 
 ## Milestones
 
