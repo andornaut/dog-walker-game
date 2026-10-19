@@ -4,7 +4,7 @@ import type { Hint } from "./types";
 
 export const HINTS = {
   card: {
-    text: "Every card shows what happens. One choice is always free.",
+    text: "Every card shows what happens. Hold one for details.",
     trigger: { kind: "card" },
   },
   drag: {
@@ -12,7 +12,7 @@ export const HINTS = {
     trigger: { kind: "drag" },
   },
   firedOwner: {
-    text: "At 0♥ an owner fires you and takes back their dog's fees.",
+    text: "At 0♥ an owner fires you and takes back their fees.",
     trigger: { kind: "firedOwner" },
   },
   forcedStop: {
@@ -36,7 +36,7 @@ export const HINTS = {
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {
-    text: "A lean and a bark mean a pull is coming. Drag back.",
+    text: "A bubble and a dotted line mean a pull. Drag back.",
     trigger: { kind: "pull" },
   },
   skunk: {

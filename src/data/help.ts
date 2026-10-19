@@ -25,7 +25,7 @@ export const HELP_PAGES = [
     body:
       "Hit a skunk, puddle or thief and the walk pauses. " +
       "Pick a card: pay up, or upset the owners. " +
-      "Every card shows its outcome. One is always free. " +
+      "Every card shows its outcome; hold one for details. One is always free. " +
       "Cones and bins just cost a few tips. " +
       "Some bumps are lucky, like a lost wallet.",
     title: "Bumps become cards",
@@ -40,9 +40,9 @@ export const HELP_PAGES = [
   {
     art: "help-pulls",
     body:
-      "A dog that leans and barks is about to pull. " +
-      "It tugs the pack one lane. Drag it back any time. " +
-      "Food lovers pull toward treats, chasers toward squirrels.",
+      "A bubble and a dotted line over a dog mean a pull. " +
+      "It tugs the pack one lane toward what it wants, never into an obstacle. " +
+      "Drag back any time.",
     title: "Watch for pulls",
   },
   {

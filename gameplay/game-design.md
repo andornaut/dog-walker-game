@@ -30,7 +30,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Web, phone browser first. Touch and keyboard; mouse is not planned
 - Portrait, ¾ top-down view, 5 lanes
 - Layout: a shorter screen (360×560). From the top: the status bar (money, treat count, zone progress, a Home button and pause; mute is in Settings and on the M key); a backdrop band showing the current zone, where scenery gags play; the road across the full width, scrolling all the way to the top of its area; and a row of doghouses along the bottom, one per dog slot. Cards cover the paused, dimmed road; the status bar and doghouses stay visible
-- **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees." with Head home and Keep walking. Head home (here or in the pause menu) keeps tips and earlier zones' fees; the current zone pays nothing
+- **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees. This zone pays nothing." with Keep walking (the default, key 1) and Head home. Head home (here or in the pause menu) keeps tips and earlier zones' fees; the current zone pays nothing
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A tap on a doghouse gives that dog's owner a treat instead
@@ -74,7 +74,9 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ### Choice cards
 
 - Used for encounters, forced stops and upgrades. Up to three across, art-led: an illustration plus a one-line effect; hold to enlarge for details
-- Each option's outcome is fixed and shown on the card. Choices only, no minigames
+- Each option's outcome is fixed and shown on the card, in totals for the dogs it affects ("−2 ♥ Duchess", not "−1 ♥ each"). Choices only, no minigames
+- An option that would fire an owner says so ("Fires Jesse")
+- Upgrade cards show how long they last (Now, Next zone, Whole walk) where other cards show a price; a fork's path card shows "Fees ×1.25"
 - An option you can't afford is disabled; every encounter keeps at least one free option
 - Slower options cost money (missed tips) instead of time
 - Money costs are per affected dog, except losses to the pack as a whole (a squirrel chase, a thief), which are charged once
@@ -272,11 +274,11 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after each of the first 3 walks "Tap to pick or buy. Hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
 - **Gear** (5 items, bought once): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). Equip up to 1 owned item before each run, or none
-- **Walker picker:** choose Ada, Ben, Casey or Trista. All are free; the choice is cosmetic and saved
+- **Walker picker:** choose Ada, Ben, Casey or Trista. All are free; the choice is cosmetic and saved, and the saved walker counts as picked, so a first visit needs only a dog
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
-- **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone). Each dog's roster card shows its walks, zones finished and times fired
+- **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone). Each dog's roster card shows its walks, zones finished and times fired
 - **Achievements:** a badge wall on the Stats page, earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; there is no other reward. Each badge shows its name, goal and one line:
 
 | Group      | Badge                   | Goal                                | Line                          |
