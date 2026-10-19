@@ -16,9 +16,13 @@ reads on them.
 - screen-stats: evening indoors. A panelled den wall with a window onto Woof
   Way at night, a framed dog photo and the leash hooks, above an open wall for
   the stats and the badge wall.
-- screen-end: sunset on The Long Way Home. A tall sky behind the summary
-  panel (24,140 to 336,440), then the zone's houses with lit windows, the
-  yards, the sidewalk and the brick road.
+- screen-end: sunset on The Long Way Home. Between the logo (116,52) and the
+  summary panel (24,140 to 336,452), the front of the house the pack comes
+  home to: its gable peeks over the logo, the front door (171,98 18x26) opens
+  onto a step (164,124 32x4), and a flagstone path (168,128 24x12) runs down
+  behind the panel's top edge. The lawn from y 124 gives the waving owners
+  room either side, feet on y 128. Then a tall sky behind the panel, the
+  zone's houses with lit windows, the yards, the sidewalk and the brick road.
 - screen-loading: Woof Way at night, shown while the game loads. The logo is
   drawn in, centred at 116,92; a starry sky above the houses and street lamps;
   the sidewalk at y 430 to 445 carries the progress track, and the plain road
@@ -450,6 +454,52 @@ def end():
         cv.fill(bx, by, 2, 1, "plum")
         cv.fill(bx + 2, by + 1, 1, 1, "plum")
         cv.fill(bx + 3, by, 2, 1, "plum")
+    # the house the pack comes home to, between the logo and the panel. Its dred gable peeks over the logo,
+    # which hangs on the front like a sign; the sun to the right stays clear.
+    for i in range(30):
+        half = round(4 + i * 58 / 29)
+        cv.fill(180 - half, 30 + i, 2 * half, 1, "dred")
+        cv.fill(180 - half, 30 + i, 2, 1, "red")
+    cv.fill(116, 59, 128, 2, "plum")
+    cv.fill(124, 61, 112, 63, "cream")
+    cv.fill(233, 61, 3, 63, "tan")
+    for y in range(66, 122, 6):
+        cv.fill(124, y, 109, 1, "tan")
+    # two lit windows with white sills
+    for wx in (132, 208):
+        cv.fill(wx, 86, 20, 16, "plum")
+        cv.fill(wx + 1, 87, 18, 14, "yellow")
+        cv.fill(wx + 10, 87, 1, 14, "amber")
+        cv.fill(wx + 1, 93, 18, 1, "amber")
+        cv.fill(wx - 1, 102, 22, 2, "white")
+    # the front door in a white frame, a porch light beside it, and the step
+    cv.fill(169, 96, 22, 28, "white")
+    cv.fill(171, 98, 18, 26, "dgreen")
+    for py in (101, 112):
+        cv.fill(173, py, 6, 8, "forest")
+        cv.fill(181, py, 6, 8, "forest")
+    cv.fill(186, 110, 2, 2, "amber")
+    cv.fill(194, 100, 4, 2, "plum")
+    cv.fill(195, 102, 2, 3, "yellow")
+    # the lawn, flower beds along the wall and a hedge on each side
+    cv.fill(0, 124, W, 16, "green")
+    for i in range(30):
+        cv.fill((i * 41) % W, 126 + (i * 7) % 13, 1, 2, "dgreen")
+    for x0, x1 in ((124, 164), (196, 236)):
+        cv.fill(x0, 120, x1 - x0, 4, "dbrown")
+        cv.fill(x0, 120, x1 - x0, 1, "plum")
+        bd.flowers(cv, x0 + 2, x1 - 2, 118, ("orange", "yellow", "red", "pink"))
+    for x in list(range(-4, 112, 22)) + list(range(246, W, 22)):
+        bd.bush(cv, x, 121, "dgreen")
+    cv.fill(164, 124, 32, 4, "lgrey")
+    cv.fill(164, 127, 32, 1, "grey")
+    # the front path: tan flagstones from the step down behind the panel
+    cv.fill(168, 128, 24, 12, "tan")
+    cv.fill(168, 134, 24, 1, "brown")
+    cv.fill(178, 128, 1, 6, "brown")
+    cv.fill(184, 135, 1, 5, "brown")
+    cv.fill(167, 128, 1, 12, "dgreen")
+    cv.fill(192, 128, 1, 12, "dgreen")
     # the rest of the street, far off: amber rooftops and trees against the low sun
     for x, w, h, kind in ((0, 30, 22, "roof"), (28, 20, 30, "tree"), (50, 40, 18, "roof"), (92, 24, 28, "tree"),
                           (118, 36, 20, "roof"), (156, 20, 28, "tree"), (178, 44, 16, "roof"), (224, 24, 32, "tree"),
@@ -786,9 +836,10 @@ def ui(cv, key):
         for i in range(4):
             panel(70 + i * 38, 603, 34, 34, "tan")
     elif key == "screen-end":
-        panel(24, 140, 312, 300)
-        cv.fill(48, 388, 264, 36, "orange")
-        cv.fill(48, 384, 264, 36, "amber")
+        cv.paste(logo().img, 116, 52)
+        panel(24, 140, 312, 312)
+        cv.fill(48, 588, 264, 40, "orange")
+        cv.fill(48, 584, 264, 40, "amber")
     elif key == "screen-loading":
         cv.paste(loading_track().img, *TRACK_AT)
         cv.paste(sprite_image(pair(0)), PAIR_AT[0] + round(PAIR_TRAVEL * 0.4), PAIR_AT[1])

@@ -911,6 +911,87 @@
       }
     },
     {
+      "key": "owner-biscuit",
+      "png": "sprites/owner-biscuit.png",
+      "json": "sprites/owner-biscuit.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "owner-dash",
+      "png": "sprites/owner-dash.png",
+      "json": "sprites/owner-dash.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "owner-duchess",
+      "png": "sprites/owner-duchess.png",
+      "json": "sprites/owner-duchess.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "owner-koda",
+      "png": "sprites/owner-koda.png",
+      "json": "sprites/owner-koda.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 24
+      }
+    },
+    {
+      "key": "owner-nugget",
+      "png": "sprites/owner-nugget.png",
+      "json": "sprites/owner-nugget.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "owner-pierre",
+      "png": "sprites/owner-pierre.png",
+      "json": "sprites/owner-pierre.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 25
+      }
+    },
+    {
+      "key": "owner-snowball",
+      "png": "sprites/owner-snowball.png",
+      "json": "sprites/owner-snowball.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "owner-waffles",
+      "png": "sprites/owner-waffles.png",
+      "json": "sprites/owner-waffles.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "owner-zippy",
+      "png": "sprites/owner-zippy.png",
+      "json": "sprites/owner-zippy.json",
+      "anchor": {
+        "feetY": 45,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "parked-car",
       "png": "sprites/parked-car.png",
       "json": "sprites/parked-car.json",
