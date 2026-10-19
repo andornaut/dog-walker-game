@@ -3,8 +3,8 @@
 
 help-<page>: 344x236 images in Endesga 32, one per page of the in-game "How to
 walk" screen (see public/art/mocks/help-screen.html, which animates the same
-scenes). Built from public/art/sprites/ and the road strips and card
-illustrations in public/art/images/, so build those first (roads.py, cards.py).
+scenes). Built from public/art/sprites/ and the road strips, card illustrations
+and UI images in public/art/images/, so build those first (roads.py, cards.py, ui.py).
 Names and numbers come from src/data/ at build time, so the pages follow the data.
 
 Usage:
@@ -167,6 +167,13 @@ def dog(key):
     return ts_value(block, "name").upper(), ts_value(owner, "name").upper(), int(max_h), int(start)
 
 
+def mood(hearts):
+    """The owner's face at this many hearts, as the game's faceMood."""
+    if hearts >= tuning("hearts", "faceHappyFrom"):
+        return "happy"
+    return "neutral" if hearts >= tuning("hearts", "faceNeutralFrom") else "upset"
+
+
 MONEY = r'amount: "(\w+)",\s*change: "(gain|lose)"'
 HEARTS = r'amount: (-?\d+),\s*kind: "hearts"'
 DEBUFF = r'debuff: "(\w+)"'
@@ -221,6 +228,10 @@ def frame(key, tag, i=0):
     t = tags[tag]
     f = frames[t["from"] + i % (t["to"] - t["from"] + 1)]
     return img.crop((f["x"], f["y"], f["x"] + f["w"], f["y"] + f["h"]))
+
+
+def image(key):
+    return Image.open(f"public/art/images/{key}.png").convert("RGBA")
 
 
 class Scene(Canvas):
@@ -283,13 +294,83 @@ class Scene(Canvas):
         label, the option's illustration, the effect text in the body (2x where it fits) and the
         cost on the card-cost plaque."""
         self.paste(frame("card-frame", "encounter"), x, y)
-        self.paste(Image.open(f"public/art/images/{art}.png").convert("RGBA"), x + 5, y + 16)
-        self.paste(Image.open("public/art/images/card-cost.png").convert("RGBA"), x + 6, y + 121)
+        self.paste(image(art), x + 5, y + 16)
+        self.paste(image("card-cost"), x + 6, y + 121)
         text_c(self, label, x + 42, y + 5, "white")
         sc = 2 if len(wrap(effect, 71, 2)) * 12 <= 42 else 1
         for i, ln in enumerate(wrap(effect, 71, sc)):
             text_c(self, ln, x + 42, y + 78 + i * 6 * sc, "plum", sc, {"♥": "dred"})
         text_c(self, cost, x + 42, y + 125, "cream")
+
+    def button(self, x, y, icon):
+        """A ui-icon-button face with its 16x16 icon, as the top bar places them."""
+        self.paste(frame("ui-icon-button", "normal"), x, y)
+        self.paste(icon, x + 2, y + 1)
+
+    def top_bar(self, zone, money, treats, fill):
+        """ui-top-bar as HudScene fills it, in screen pixels less 16 columns cut from the empty
+        left end of the zone well, so it fits the image's width: the money, the treat count, the
+        sound and pause buttons, and the zone with its pips, the current one fill done."""
+        bar, cut = image("ui-top-bar"), 200
+        self.paste(bar.crop((0, 0, cut, 40)), 0, 0)
+        self.paste(bar.crop((cut + bar.width - W, 0, bar.width, 40)), cut, 0)
+        r = W - 8  # the zone well's right edge, 352 on screen
+        self.paste(frame("tip", "idle"), 8, 13)
+        text(self, "$", 26, 15, "amber", 2); text(self, f"{money:g}", 26 + text_w("$", 2) + 2, 15, "cream", 2)
+        self.paste(frame("treat", "idle"), 104, 13)
+        text(self, f"{treats}/{tuning('counts', 'treatCarryMax'):g}", 122, 18, "cream")
+        self.button(146, 10, frame("icon-sound", "on")); self.button(170, 10, image("icon-pause"))
+        name, index = ZONES[zone][0].upper(), list(ZONES).index(zone)
+        text(self, name, r - text_w(name), 10, "cream")
+        self.paste(image(f"icon-zone-{ZONES[zone][0].lower().replace(' ', '-')}"), r - text_w(name) - 19, 4)
+        for i in range(len(ZONES)):
+            x = r - 81 + i * 21
+            self.paste(frame("ui-zone-pips", "done" if i < index else "current" if i == index else "todo"), x, 22)
+            if i == index:
+                self.fill(x + 2, 24, round(fill * 14), 4, "amber")
+
+    def drag(self, x0, x1, y):
+        """ui-touch-hint's drag, laid out for one drag: the fingertip pressed at x1 on the two-way
+        track, the hand below it, and the touch marks it left fading back to x0, where it began.
+        Pieces are cropped from the 96x36 export, whose fingertip glow is centred at 48,6."""
+        hint = image("ui-touch-hint")
+        ox, oy = x1 - 48, y - 6
+        # the track: the hint's arrowheads (its outer 22 columns) either side of the drag, joined
+        # by its plain middle column
+        for x in range(x0 - 4, x1 + 4):
+            self.paste(hint.crop((22, 0, 23, 12)), x, oy)
+        self.paste(hint.crop((0, 0, 22, 12)), x0 - 26, oy); self.paste(hint.crop((74, 0, 96, 12)), x1 + 4, oy)
+        # the faint mark where the drag began, the brighter one halfway, the speed lines trailing
+        self.paste(hint.crop((23, 2, 29, 10)), x0 - 3, oy + 2)
+        self.paste(hint.crop((33, 2, 39, 10)), (x0 + x1) // 2 - 3, oy + 2)
+        self.paste(hint.crop((24, 15, 37, 26)), ox + 24, oy + 15)
+        self.finger(x1, y)
+
+    def finger(self, x, y):
+        """ui-touch-hint's fingertip pressed at x, y: its glow, then the hand below, both cropped
+        clear of the track."""
+        hint = image("ui-touch-hint")
+        self.paste(hint.crop((44, 1, 52, 10)), x - 4, y - 5)
+        self.paste(hint.crop((39, 10, 59, 35)), x - 9, y + 4)
+
+    def doghouse(self, x, y, key, hearts):
+        """A dog-column slot as HudScene draws it (DOGHOUSE in src/hud/doghouse.ts): the house
+        roofed in the dog's colour, its name on the roof plate, the dog in the door, the owner in
+        the window, and the hearts in rows of six on the board with their count. At 0 hearts the
+        owner has fired you: the house is the grey empty one and reads FIRED."""
+        name, owner, max_h, _ = dog(key)
+        self.paste(frame("ui-doghouse", key if hearts else "empty"), x, y)
+        text_c(self, name, x + 36, y + 12, "plum")
+        if not hearts:
+            text_c(self, "FIRED", x + 36, y + 128, "dred")
+            return
+        m = mood(hearts)
+        self.paste(frame(f"face-dog-{key}", m), x + 20, y + 36)
+        self.paste(frame(f"face-owner-{key}", m), x + 8, y + 78)
+        text_c(self, f"{hearts}/{max_h}", x + 56, y + 92, "dred")
+        text(self, owner, x + 9, y + 118, "plum")
+        for j in range(max_h):
+            self.paste(frame("ui-heart", "full" if j < hearts else "empty"), x + 9 + j % 6 * 9, y + 127 + j // 6 * 8)
 
 
 def lane(n):
@@ -299,24 +380,29 @@ def lane(n):
 def lanes():
     c = Scene()
     c.road("street")
-    c.pack(lane(2), H - 8)
-    c.chevron(60, 70, -1, "white"); c.chevron(284, 70, 1, "white")
-    text_c(c, "TAP", 60, 86, "white"); text_c(c, "TAP", 284, 86, "white")
+    # a thumb dragged one lane-width to the right, well clear of the walker, moves the pack from
+    # lane 2 to lane 3: the drag is counted from where it began, not where the pack is
+    c.bubble(88, 16, 112, ["DRAG ANYWHERE:", "ONE LANE-WIDTH, ONE LANE"])
+    c.drag(lane(1), lane(2), 66)
+    for x in range(lane(2), lane(3) - 30, 4):
+        c.fill(x, 212, 2, 2, "amber")
+    c.chevron(lane(3) - 26, 213, 1, "amber")
+    c.pack(lane(3), H - 8)
     return c
 
 
 def pickups():
     c = Scene()
     c.road("park")
-    for ln, y, key in ((2, 20, "tip"), (2, 50, "tip"), (2, 80, "tip"), (1, 140, "treat"), (3, 110, "treat")):
+    for ln, y, key in ((2, 50, "tip"), (2, 80, "tip"), (2, 110, "tip"), (1, 150, "treat"), (3, 124, "treat")):
         c.feet(key, "idle", lane(ln), y + 16)
     c.pack(lane(2), H - 8, ("dog-biscuit",))
     # one tip for a solo dog, in whole cents as the game counts it
     solo = round(tuning("money", "tip") * tuning("multipliers", "tipByPackSize", "1") * 100) / 100
     c.bubble(200, 168, 70, ["+" + dollars(solo)])
-    c.fill(6, 6, 74, 22, "plum"); c.fill(7, 7, 72, 20, "cream")
-    c.paste(frame("treat", "idle"), 9, 9)
-    text(c, f"TREATS 2/{tuning('counts', 'treatCarryMax'):g}", 28, 14, "plum")
+    # the bar after the first zone has paid the dog's fee, with two treats carried
+    owner = ts_block(ts_block(data("dogs"), "biscuit"), "owner")
+    c.top_bar("park", tuning("money", "feeByTemperament", ts_value(owner, "temperament")), 2, 0.4)
     return c
 
 
@@ -338,31 +424,26 @@ def cards():
 def owners():
     c = Scene()
     c.fill(0, 0, W, H, "dbrown")
-    name, owner, max_h, start = dog("koda")
-    sx, sy = 20, 20
-    c.fill(sx, sy, 140, 96, "plum"); c.fill(sx + 1, sy + 1, 138, 94, "cream"); c.fill(sx + 4, sy + 4, 66, 34, "tan")
-    c.paste(frame("face-owner-koda", "happy"), sx + 5, sy + 5)
-    c.paste(frame("face-dog-koda", "happy"), sx + 37, sy + 5)
-    text(c, name, sx + 76, sy + 8, "plum"); text(c, owner, sx + 76, sy + 18, "dbrown")
-    for j in range(max_h):
-        c.paste(frame("ui-heart", "full" if j < start else "empty"), sx + 6 + j * 9, sy + 46)
-    text(c, f"{start}♥ OF {max_h}", sx + 6, sy + 60, "plum", 1, {"♥": "dred"})
-    c.bubble(sx + 6, sy + 72, 128, [f"TAP TO GIVE A TREAT: +{tuning('hearts', 'treat'):g}♥"])
-    name, _, max_h, _ = dog("nugget")
-    fx, fy = 186, 20
-    c.fill(fx, fy, 140, 96, "plum"); c.fill(fx + 1, fy + 1, 138, 94, "tan"); c.fill(fx + 4, fy + 4, 34, 34, "brown")
-    c.paste(frame("face-owner-nugget", "fired"), fx + 5, fy + 5)
-    c.bubble(fx + 42, fy + 8, 92, ["YOU'RE FIRED!"], "dred")
-    for j in range(max_h):
-        c.paste(frame("ui-heart", "empty"), fx + 6 + j * 9, fy + 46)
-    text(c, f"0♥: {name} GOES HOME", fx + 6, fy + 60, "plum", 1, {"♥": "dred"})
-    text(c, "FEES TAKEN BACK", fx + 6, fy + 72, "plum")
+    # Koda's house at its starting hearts, a fingertip tapping it to give a treat
+    _, _, _, start = dog("koda")
+    c.doghouse(10, 18, "koda", start)
+    c.finger(75, 152)
+    c.bubble(10, 190, 128, [f"TAP TO GIVE A TREAT: +{tuning('hearts', 'treat'):g}♥"])
+    # the faces between: what each owner's mood looks like
+    text_c(c, "WATCH THEIR FACES", 136, 18, "amber")
     for i, m in enumerate(("happy", "neutral", "upset")):
-        x = 92 + i * 56
-        c.fill(x - 2, 138, 36, 36, "tan")
-        c.paste(frame("face-owner-duchess", m), x - 1, 139)
-        text_c(c, m.upper(), x + 16, 180, "cream")
-    text_c(c, "WATCH THEIR FACES", 172, 206, "amber")
+        y = 32 + i * 44
+        c.fill(98, y, 36, 36, "tan")
+        c.paste(frame("face-owner-duchess", m), 100, y + 2)
+        text(c, m.upper(), 138, y + 16, "cream")
+    # Nugget's house at 0 hearts, its owner firing you beside it
+    name, _, _, _ = dog("nugget")
+    c.doghouse(192, 18, "nugget", 0)
+    c.bubble(270, 18, 66, ["YOU'RE FIRED!"], "dred")
+    c.fill(285, 40, 36, 36, "tan")
+    c.paste(frame("face-owner-nugget", "fired"), 287, 42)
+    text(c, f"0♥: {name} GOES HOME", 192, 178, "cream", 1, {"♥": "white"})
+    text(c, "FEES TAKEN BACK", 192, 190, "cream")
     return c
 
 
@@ -383,20 +464,24 @@ def pulls():
 def zones():
     c = Scene()
     c.fill(0, 0, W, H, "dbrown")
-    text_c(c, WORLD, 172, 8, "amber", 2)
+    text_c(c, WORLD, 172, 6, "amber", 2)
     for i, (z, (name, _, _)) in enumerate(ZONES.items()):
-        x, y = 8 + i * 84, 44
+        x, y = 8 + i * 84, 36
         tile = TILES[z].crop((100, 0, 176, 64))
-        c.img.paste(tile, (x, y)); c.img.paste(tile, (x, y + 64))
-        c.fill(x, y + 120, 76, 12, "dbrown")
-        c.fill(x, y, 76, 1, "plum"); c.fill(x, y + 119, 76, 1, "plum")
+        c.img.paste(tile, (x, y)); c.img.paste(tile.crop((0, 0, 76, 40)), (x, y + 64))
+        c.fill(x, y, 76, 1, "plum"); c.fill(x, y + 103, 76, 1, "plum")
         text_c(c, name.upper(), x + 38, y - 12, "cream")
         # the zone number on a plum chip, so it holds contrast on every road (white on plum, 13.6:1)
-        c.fill(x + 31, y + 46, 15, 23, "plum"); c.fill(x + 30, y + 47, 17, 21, "plum")
-        text_c(c, str(i + 1), x + 38, y + 50, "white", 3)
-        c.paste(frame("tip", "idle"), x + 30, y + 124)
-        text_c(c, "+FEES", x + 38, y + 144, "amber")
-    text_c(c, "UPGRADE CARD BETWEEN ZONES", 172, 214, "yellow")
+        c.fill(x + 31, y + 40, 15, 23, "plum"); c.fill(x + 30, y + 41, 17, 21, "plum")
+        text_c(c, str(i + 1), x + 38, y + 44, "white", 3)
+        c.paste(frame("tip", "idle"), x + 30, y + 108)
+        text_c(c, "+FEES", x + 38, y + 128, "amber")
+    text_c(c, "UPGRADE CARD BETWEEN ZONES", 172, 182, "yellow")
+    # head home from the pause menu; while paused, the same button shows play and resumes
+    c.button(52, 202, image("icon-pause"))
+    text(c, "PAUSE: HEAD HOME", 76, 210, "cream")
+    c.button(204, 202, image("icon-play"))
+    text(c, "RESUME", 228, 210, "cream")
     return c
 
 
