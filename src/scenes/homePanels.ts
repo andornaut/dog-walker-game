@@ -5,7 +5,6 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard } from "../home/detail";
 import type { Logbook } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
-import type { SlotSign } from "../home/homeLines";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
 import { insetRect, type Rect } from "../layout/rect";
 import { fillLine } from "../text/lines";
@@ -15,8 +14,8 @@ import { addPixelText, type FontRole } from "./pixelText";
 import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, TEXT_SCALE } from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on what the player can
-// afford, the slot sign, and the detail card and logbook that open over the
-// screen. Positions inside a piece are the art's, from the style guide.
+// afford, and the detail card and logbook that open over the screen. Positions inside a
+// piece are the art's, from the style guide.
 
 const SCREEN = SCREEN_CONFIG;
 
@@ -53,36 +52,6 @@ export function addAffordFrame(
   addLoopingFrame(scene, parent, { key: "ui-afford", outer, tag: "glint" }, reducedMotion, (g) => {
     drawRing(g, PALETTE.plum, outer, 1);
     drawRing(g, PALETTE.amber, insetRect(1, outer), 1);
-  });
-}
-
-// The slot sign's text, in sign pixels: line 1 in font-title over the header plank, line 2
-// in font-body on the panel below it, left of the padlock.
-const SIGN_TEXT = { line1: { x: 5, y: 6 }, line2: { x: 5, y: 27 } };
-
-// The slot sign's board, ui-slot-locked, or a tan plank over a cream panel in a plum rim
-// while the art is missing, with its two lines.
-export function drawSlotSign(
-  scene: Scene,
-  parent: GameObjects.Container,
-  rect: Rect,
-  sign: SlotSign,
-): void {
-  if (scene.textures.exists("ui-slot-locked")) {
-    parent.add(scene.add.image(rect.x, rect.y, "ui-slot-locked").setOrigin(0));
-  } else {
-    const g = scene.add.graphics();
-    drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.cream }, rect);
-    fillRect(g, PALETTE.tan, { height: 20, width: rect.width - 2, x: rect.x + 1, y: rect.y + 1 });
-    parent.add(g);
-  }
-  const { line1, line2 } = SIGN_TEXT;
-  text(scene, parent, { x: rect.x + line1.x, y: rect.y + line1.y }, sign.sign, {
-    color: PALETTE.plum,
-    font: "title",
-  });
-  text(scene, parent, { x: rect.x + line2.x, y: rect.y + line2.y }, sign.status, {
-    color: sign.short ? PALETTE.darkRed : PALETTE.forest,
   });
 }
 

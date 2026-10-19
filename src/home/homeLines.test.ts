@@ -12,7 +12,6 @@ import {
   HOW_TO_WALKS,
   messageLine,
   packCountLine,
-  slotSignLines,
   type WalkerLine,
   walkerLineKey,
 } from "./homeLines";
@@ -38,26 +37,6 @@ describe("walkerLineKey", () => {
     ["welcomes back after the how-to walks", kept, false, later, "afterWalk"],
   ])("%s", (_name, lastWalk, newAffordable, walks, expected) => {
     expect(walkerLineKey(lastWalk, newAffordable, walks)).toBe(expected);
-  });
-});
-
-describe("slotSignLines", () => {
-  it.each([
-    {
-      bank: 150,
-      expected: { short: true, sign: "Slot 2 · $800", status: "Save $650 more" },
-      name: "names the next slot and price, and how much more to save",
-      slots: 1,
-    },
-    {
-      bank: 1800,
-      expected: { short: false, sign: "Slot 3 · $1,800", status: "Tap to buy" },
-      name: "says tap to buy once the bank covers it",
-      slots: 2,
-    },
-    { bank: 0, expected: null, name: "is gone once every slot is owned", slots: 3 },
-  ])("$name", ({ bank, expected, slots }) => {
-    expect(slotSignLines(data, { dogSlots: slots }, dollars(bank))).toEqual(expected);
   });
 });
 

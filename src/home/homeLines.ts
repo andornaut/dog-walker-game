@@ -1,6 +1,5 @@
 import type { DogId, GameData, HomeText } from "../data/types";
-import { nextDogSlot } from "../rules/shop";
-import { type Cents, cents } from "../rules/units";
+import type { Cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
 import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
 import { homeLine } from "./homeText";
@@ -30,36 +29,7 @@ export function walkerLineKey(
   return walks <= HOW_TO_WALKS ? "howTo" : "afterWalk";
 }
 
-// The slot sign: the next slot and its price, then how much more to save (short) or that it
-// can be bought. Null once every slot is owned.
-export interface SlotSign {
-  readonly sign: string;
-  readonly short: boolean;
-  readonly status: string;
-}
-
-export function slotSignLines(
-  data: Pick<GameData, "dogSlots" | "homeText" | "tuning">,
-  owned: Pick<Owned, "dogSlots">,
-  bank: Cents,
-): SlotSign | null {
-  const slot = nextDogSlot(data, owned.dogSlots);
-  if (slot === null) {
-    return null;
-  }
-  const text = data.homeText;
-  const sign = homeLine(text, "slotSign", {
-    price: dollarText(slot.price),
-    slot: String(slot.slot),
-  });
-  const short = slot.price > bank;
-  const status = short
-    ? homeLine(text, "slotSave", { amount: dollarText(cents(slot.price - bank)) })
-    : homeLine(text, "slotBuy", {});
-  return { short, sign, status };
-}
-
-// "Pack 1/2": the dogs picked and the pack's capacity.
+// The Dogs band's pack count: the dogs picked and the pack's capacity.
 export function packCountLine(
   data: Pick<GameData, "homeText" | "tuning">,
   owned: Pick<Owned, "dogSlots">,

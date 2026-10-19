@@ -2,6 +2,8 @@ import type { Scene } from "phaser";
 
 import { remapDarker } from "../assets/darkRamp";
 import { remapToGrey } from "../assets/greyRamp";
+import { remapToSilhouette } from "../assets/silhouette";
+import { PALETTE } from "./palette";
 
 // A copy of a texture with remap applied to its pixels, made once and kept under
 // key-suffix, with the same frames. Returns the original key when the copy cannot be made.
@@ -47,6 +49,16 @@ function remappedTextureKey(
 // Every colour moved to the grey ramp, as a disabled card draws.
 export function greyTextureKey(scene: Scene, key: string): string {
   return remappedTextureKey(scene, "grey", remapToGrey, key);
+}
+
+// A flat navy copy, as a locked item's art draws.
+export function silhouetteTextureKey(scene: Scene, key: string): string {
+  return remappedTextureKey(
+    scene,
+    "silhouette",
+    (pixels) => remapToSilhouette(PALETTE.navy, pixels),
+    key,
+  );
 }
 
 // The grey copy one ramp step darker, as art inside a disabled tile draws.

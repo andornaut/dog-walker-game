@@ -5,6 +5,7 @@ import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { settingsLayout } from "../home/settings";
+import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { DOGHOUSE } from "../hud/doghouse";
 import { hudLanes } from "../hud/hudLanes";
@@ -126,10 +127,10 @@ export function layoutExport(
           Object.keys(data.dogs).length,
           HOME_LAYOUT.dogOrigin,
         ),
-        gearRects: gridRects(
-          HOME_LAYOUT.gearSlots,
+        pocketRects: gridRects(
+          HOME_LAYOUT.pocket.cells,
           Object.keys(data.shopGear).length,
-          HOME_LAYOUT.gearOrigin,
+          HOME_LAYOUT.pocket.origin,
         ),
         walkerRects: gridRects(
           HOME_LAYOUT.walkerTiles,
@@ -143,6 +144,7 @@ export function layoutExport(
         ...pauseMenuLayout(roadView, PAUSE_MENU_ITEMS.length),
       },
       settings: settingsLayout(SCREEN_CONFIG),
+      shop: { ...SHOP_LAYOUT, tabRects: shopTabRects() },
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },
     screen: { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width },

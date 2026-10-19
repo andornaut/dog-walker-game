@@ -1,8 +1,8 @@
 import type { HomeText } from "./types";
 
 // The home screen's text. A {name} is filled in by the game, and src/home/homeText.ts lists
-// the names each line may use. {slot} is a slot number in slotSign and dogSlotName, and the
-// slot's name ("Dog slot 2") in slotBought.
+// the names each line may use. {slot} is a slot number in dogSlotName and shop.slotFirst,
+// and the slot's name ("Dog slot 2") in slotBought.
 export const HOME_TEXT = {
   bubble: {
     afterFiring: "Rough walk. They'll come around.",
@@ -64,19 +64,26 @@ export const HOME_TEXT = {
   packCount: "{count}/{max}",
   pocket: {
     empty: "Empty. Tap a gear item to pocket it.",
+    item: "{gear}: {effect}.",
+    note: "One per walk",
+    title: "Pocket",
   },
   sectionDogs: "Pick your dogs",
   sectionDogsPrompt: "Add a dog",
-  sectionGear: "Pocket (optional)",
   sectionWalker: "Pick a walker",
   sectionWalkerPrompt: "Tap a face",
   shop: {
+    dogs: "Dogs",
+    gearNote: "Yours to keep",
+    owned: "Owned",
+    slotFirst: "Buy slot {slot} first",
+    slotLine: "Walk {count} dogs at once",
+    slots: "Pack slots",
+    slotsOwned: "{owned} of {max} owned",
+    tabs: { dogs: "Dogs", gear: "Gear" },
     title: "Pet shop",
   },
   slotBought: "{slot} is open. Room for one more dog!",
-  slotBuy: "Tap to buy",
-  slotSave: "Save {amount} more",
-  slotSign: "Slot {slot} · {price}",
   startWalk: "Start walk",
   topBar: {
     best: "Best {amount}",
@@ -85,4 +92,5 @@ export const HOME_TEXT = {
     walkOne: "{count} walk",
   },
   unsaved: "Progress won't be saved.",
+  zoneFee: "{fee}/zone",
 } as const satisfies HomeText;

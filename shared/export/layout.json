@@ -1328,40 +1328,30 @@
         "y": 166
       },
       "gearCardHeight": 150,
-      "gearOrigin": {
-        "x": 4,
-        "y": 456
-      },
-      "gearSlots": {
-        "cellHeight": 44,
-        "cellWidth": 64,
-        "columns": 5,
-        "gapX": 8,
-        "gapY": 0
-      },
       "help": {
         "hit": {
           "height": 44,
           "width": 44,
-          "x": 0,
-          "y": 40
+          "x": 228,
+          "y": 0
         },
         "icon": {
-          "x": 8,
-          "y": 46
+          "x": 240,
+          "y": 10
         }
       },
       "logbook": {
         "hit": {
           "height": 44,
-          "width": 44,
-          "x": 204,
+          "width": 134,
+          "x": 92,
           "y": 0
         },
         "icon": {
-          "x": 216,
+          "x": 104,
           "y": 10
-        }
+        },
+        "textX": 130
       },
       "logbookButton": {
         "gap": 12,
@@ -1376,17 +1366,83 @@
         "hit": {
           "height": 44,
           "width": 44,
-          "x": 316,
-          "y": 40
+          "x": 272,
+          "y": 0
         },
         "icon": {
-          "x": 332,
-          "y": 46
+          "x": 284,
+          "y": 10
         }
+      },
+      "packLock": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 316,
+          "y": 250
+        },
+        "icon": {
+          "dx": -16,
+          "y": 274
+        },
+        "noteShift": 20
       },
       "path": {
         "width": 32,
         "x": 164
+      },
+      "petShop": {
+        "board": {
+          "height": 19,
+          "width": 61,
+          "x": 263,
+          "y": 90
+        },
+        "height": 104,
+        "width": 120,
+        "x": 234,
+        "y": 90
+      },
+      "pocket": {
+        "box": {
+          "dx": 14,
+          "dy": 3,
+          "size": 34
+        },
+        "cells": {
+          "cellHeight": 44,
+          "cellWidth": 64,
+          "columns": 5,
+          "gapX": 8,
+          "gapY": 0
+        },
+        "effect": {
+          "maxWidth": 352,
+          "x": 4,
+          "y": 499
+        },
+        "icon": {
+          "dx": 15,
+          "dy": 4
+        },
+        "lock": {
+          "dx": -2,
+          "dy": -3
+        },
+        "note": {
+          "x": 356,
+          "y": 434
+        },
+        "origin": {
+          "x": 4,
+          "y": 450
+        },
+        "priceY": 28,
+        "tileInset": 1,
+        "title": {
+          "x": 4,
+          "y": 434
+        }
       },
       "porchDogOffset": {
         "dx": -12,
@@ -1417,12 +1473,6 @@
           "x": 0,
           "y": 270
         },
-        "gear": {
-          "height": 73,
-          "width": 360,
-          "x": 0,
-          "y": 430
-        },
         "walker": {
           "height": 72,
           "width": 360,
@@ -1434,19 +1484,13 @@
         "hit": {
           "height": 44,
           "width": 44,
-          "x": 256,
+          "x": 316,
           "y": 0
         },
         "icon": {
-          "x": 268,
+          "x": 328,
           "y": 10
         }
-      },
-      "slotSign": {
-        "height": 46,
-        "width": 160,
-        "x": 196,
-        "y": 140
       },
       "startButton": {
         "height": 44,
@@ -1538,36 +1582,36 @@
           "y": 382
         }
       ],
-      "gearRects": [
+      "pocketRects": [
         {
           "height": 44,
           "width": 64,
           "x": 4,
-          "y": 456
+          "y": 450
         },
         {
           "height": 44,
           "width": 64,
           "x": 76,
-          "y": 456
+          "y": 450
         },
         {
           "height": 44,
           "width": 64,
           "x": 148,
-          "y": 456
+          "y": 450
         },
         {
           "height": 44,
           "width": 64,
           "x": 220,
-          "y": 456
+          "y": 450
         },
         {
           "height": 44,
           "width": 64,
           "x": 292,
-          "y": 456
+          "y": 450
         }
       ],
       "walkerRects": [
@@ -1722,6 +1766,99 @@
         "width": 216,
         "x": 72
       }
+    },
+    "shop": {
+      "band": {
+        "height": 22,
+        "inset": 6,
+        "titleX": 16,
+        "titleY": 6
+      },
+      "close": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 312,
+          "y": 44
+        },
+        "x": 328,
+        "y": 54
+      },
+      "dogs": {
+        "dogHeadingY": 236,
+        "dogRows": {
+          "height": 42,
+          "pitch": 48,
+          "y": 252
+        },
+        "slotHeadingY": 118,
+        "slotRows": {
+          "height": 42,
+          "pitch": 48,
+          "y": 134
+        }
+      },
+      "gear": {
+        "effect": {
+          "lineHeight": 16,
+          "nameY": 422,
+          "y": 442
+        },
+        "headingY": 118,
+        "rows": {
+          "height": 44,
+          "pitch": 54,
+          "y": 136
+        }
+      },
+      "headingRight": 344,
+      "headingX": 16,
+      "message": {
+        "y": 540
+      },
+      "panel": {
+        "height": 512,
+        "width": 352,
+        "x": 4,
+        "y": 44
+      },
+      "row": {
+        "art": 2,
+        "box": {
+          "dx": 4,
+          "size": 36
+        },
+        "feeDx": 83,
+        "iconDx": 45,
+        "iconPitch": 18,
+        "plateInset": 6,
+        "textDx": 46,
+        "width": 328,
+        "x": 16
+      },
+      "tab": {
+        "drawHeight": 28,
+        "drawY": 80,
+        "gap": 8,
+        "height": 44,
+        "width": 162,
+        "x": 14,
+        "y": 72
+      },
+      "tabRects": [
+        {
+          "height": 44,
+          "width": 162,
+          "x": 14,
+          "y": 72
+        },
+        {
+          "height": 44,
+          "width": 162,
+          "x": 184,
+          "y": 72
+        }
+      ]
     },
     "stats": {
       "close": {

@@ -28,6 +28,7 @@ import { PauseScene } from "./scenes/PauseScene";
 import { RunScene } from "./scenes/RunScene";
 import { SCENE_KEYS } from "./scenes/sceneKeys";
 import { SettingsScene } from "./scenes/SettingsScene";
+import { ShopScene } from "./scenes/ShopScene";
 import { StartScene } from "./scenes/StartScene";
 import { StatsScene } from "./scenes/StatsScene";
 
@@ -100,6 +101,7 @@ function bootGame(): Game {
       EndScene,
       HelpScene,
       SettingsScene,
+      ShopScene,
       StatsScene,
       CelebrationScene,
       DevOverlayScene,

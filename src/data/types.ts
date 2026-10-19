@@ -575,25 +575,35 @@ export interface HomeText {
   readonly noticeSoundOff: string;
   readonly noticeSoundOn: string;
   readonly packCount: string;
-  // The Pocket strip: what it says with no gear in it.
+  // The Pocket strip under the Dogs section: its title and right-hand note, the line under
+  // the strip with the pocketed item's effect, or what it says while the Pocket is empty.
   readonly pocket: {
     readonly empty: string;
+    readonly item: string;
+    readonly note: string;
+    readonly title: string;
   };
   // The section headings, and what a required section with nothing picked asks for on its
   // band.
   readonly sectionDogs: string;
   readonly sectionDogsPrompt: string;
-  readonly sectionGear: string;
   readonly sectionWalker: string;
   readonly sectionWalkerPrompt: string;
-  // The Pet shop building's sign.
+  // The Pet shop page: its title, its tabs, the headings over its lists and their notes, a
+  // dog slot row's line, the line of a slot that needs the one before it, and the word on an
+  // owned row.
   readonly shop: {
+    readonly dogs: string;
+    readonly gearNote: string;
+    readonly owned: string;
+    readonly slotFirst: string;
+    readonly slotLine: string;
+    readonly slots: string;
+    readonly slotsOwned: string;
+    readonly tabs: { readonly dogs: string; readonly gear: string };
     readonly title: string;
   };
   readonly slotBought: string;
-  readonly slotBuy: string;
-  readonly slotSave: string;
-  readonly slotSign: string;
   readonly startWalk: string;
   // The top bar's best walk and walk count, or what it says before any walk.
   readonly topBar: {
@@ -604,6 +614,8 @@ export interface HomeText {
   };
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
+  // A dog's fee on its tile and its shop row.
+  readonly zoneFee: string;
 }
 
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data

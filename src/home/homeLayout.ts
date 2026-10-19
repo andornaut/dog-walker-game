@@ -41,17 +41,53 @@ export const HOME_LAYOUT = {
   ],
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
   gearCardHeight: 150,
-  // A gear tile holds its icon with its price tag over the icon's foot while locked; its name
-  // is on its detail card.
-  gearOrigin: { x: 4, y: 456 },
-  gearSlots: { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 },
-  help: { hit: { height: 44, width: 44, x: 0, y: 40 }, icon: { x: 8, y: 46 } },
-  logbook: { hit: { height: 44, width: 44, x: 204, y: 0 }, icon: { x: 216, y: 10 } },
+  // The top bar's controls at its right end: help, sound, then settings.
+  help: { hit: { height: 44, width: 44, x: 228, y: 0 }, icon: { x: 240, y: 10 } },
+  // The Logbook button at the bar's left, after the bank; its hit area takes in the best walk
+  // and walk count beside it.
+  logbook: {
+    hit: { height: 44, width: 134, x: 92, y: 0 },
+    icon: { x: 104, y: 10 },
+    textX: 130,
+  },
   // The logbook card's Stats and Badges buttons, side by side across its padded width.
   logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
-  mute: { hit: { height: 44, width: 44, x: 316, y: 40 }, icon: { x: 332, y: 46 } },
+  mute: { hit: { height: 44, width: 44, x: 272, y: 0 }, icon: { x: 284, y: 10 } },
+  // The padlock on the Dogs band while a dog slot is for sale, left of the pack count, which
+  // moves left to make room; it opens the shop on the next slot. Its hit area reaches up
+  // into the walker section's empty right end.
+  packLock: {
+    hit: { height: 44, width: 44, x: 316, y: 250 },
+    icon: { dx: -16, y: 274 },
+    noteShift: 20,
+  },
   path: { width: 32, x: 164 },
+  // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
+  // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
+  petShop: {
+    board: { height: 19, width: 61, x: 263, y: 90 },
+    height: 104,
+    width: 120,
+    x: 234,
+    y: 90,
+  },
+  // The Pocket strip on the wood under the Dogs section, with no frame: its title and note,
+  // a row of gear cells, each drawing its tile 1px inside, and the effect line under them.
+  // In a tile: the icon box and the art in it, the padlock over its top-left corner, and the
+  // price plate's caps, centred.
+  pocket: {
+    box: { dx: 14, dy: 3, size: 34 },
+    cells: { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 },
+    effect: { maxWidth: 352, x: 4, y: 499 },
+    icon: { dx: 15, dy: 4 },
+    lock: { dx: -2, dy: -3 },
+    note: { x: 356, y: 434 },
+    origin: { x: 4, y: 450 },
+    priceY: 28,
+    tileInset: 1,
+    title: { x: 4, y: 434 },
+  },
   porchDogOffset: { dx: -12, footDy: 3 },
   // Before the first walk the starter owners wait in the yard left of the path, behind the
   // yard sign, each with their dog at their feet. Feet positions, by dog; a starter dog with
@@ -63,15 +99,13 @@ export const HOME_LAYOUT = {
   },
   // A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
   sectionFrame: { band: 20, edge: 3 },
-  // Under the gate, three framed sections top to bottom (walker, dogs, gear), each a heading
-  // band over its tiles; then Start walk.
+  // Under the gate, two framed sections top to bottom (walker, dogs), each a heading band
+  // over its tiles; then the Pocket strip and Start walk.
   sections: {
     dogs: { height: 160, width: 360, x: 0, y: 270 },
-    gear: { height: 73, width: 360, x: 0, y: 430 },
     walker: { height: 72, width: 360, x: 0, y: 198 },
   },
-  settings: { hit: { height: 44, width: 44, x: 256, y: 0 }, icon: { x: 268, y: 10 } },
-  slotSign: { height: 46, width: 160, x: 196, y: 140 },
+  settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: 10 } },
   startButton: { height: 44, width: 352, x: 4, y: 514 },
   // Start walk's label caps: on the raised face when ready, on the sunk face when not.
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
@@ -87,7 +121,8 @@ export const HOME_LAYOUT = {
 } as const satisfies Readonly<Record<string, unknown>> & {
   dogTiles: GridSpec;
   gateSpots: readonly PackPlacement[];
-  gearSlots: GridSpec;
+  petShop: Rect & { board: Rect };
+  pocket: { readonly [key: string]: unknown; cells: GridSpec };
   porchSpots: Readonly<Partial<Record<DogId, { footY: number; x: number }>>>;
   sections: Readonly<Record<SectionId, Rect>>;
   walkerTiles: GridSpec;

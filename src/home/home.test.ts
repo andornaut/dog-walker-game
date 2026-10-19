@@ -82,26 +82,35 @@ describe("tapDog and tapGear", () => {
     {
       expected: { kind: "full" },
       name: "refuses a dog past the slots owned",
+      tap: () =>
+        tapDog(data, { ...owned, dogSlots: 2 }, "biscuit", {
+          dogs: ["koda", "duchess"],
+          gear: null,
+        }),
+    },
+    {
+      expected: { kind: "loadout", loadout: { dogs: ["duchess"], gear: null } },
+      name: "swaps the dog of a full one-slot pack",
       tap: () => tapDog(data, { ...owned, dogSlots: 1 }, "duchess", { dogs: ["koda"], gear: null }),
     },
     {
-      expected: { kind: "buy", purchase: { dog: "nugget", kind: "dog" } },
-      name: "asks to buy a dog not owned yet, without touching the pack",
+      expected: { kind: "shop", purchase: { dog: "nugget", kind: "dog" } },
+      name: "opens the shop on a dog not owned yet, without touching the pack",
       tap: () => tapDog(data, owned, "nugget", emptyLoadout),
     },
     {
       expected: { kind: "loadout", loadout: { dogs: [], gear: "fannyPack" } },
-      name: "equips owned gear",
+      name: "pockets owned gear",
       tap: () => tapGear(owned, "fannyPack", emptyLoadout),
     },
     {
       expected: { kind: "loadout", loadout: { dogs: [], gear: null } },
-      name: "unequips gear on a second tap",
+      name: "empties the Pocket on a second tap",
       tap: () => tapGear(owned, "fannyPack", { dogs: [], gear: "fannyPack" }),
     },
     {
-      expected: { kind: "buy", purchase: { gear: "whistle", kind: "gear" } },
-      name: "asks to buy gear not owned yet",
+      expected: { kind: "shop", purchase: { gear: "whistle", kind: "gear" } },
+      name: "opens the shop on gear not owned yet",
       tap: () => tapGear(owned, "whistle", emptyLoadout),
     },
   ])("$name", ({ expected, tap }) => {

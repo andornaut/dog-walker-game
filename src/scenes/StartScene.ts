@@ -8,7 +8,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
 import { startWalkOpensHelp } from "../help/helpSeen";
-import { bankAtLastVisit, isAffordable, newlyAffordable } from "../home/afford";
+import { bankAtLastVisit, newlyAffordable } from "../home/afford";
 import { dogDetail, gearDetail } from "../home/detail";
 import {
   badgePopOffset,
@@ -22,7 +22,6 @@ import {
 } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
-  buy,
   dogFeeText,
   dogInfo,
   dollarText,
@@ -39,15 +38,15 @@ import {
   wrapWords,
 } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
-import {
-  bubbleSpeech,
-  type HomeAction,
-  slotSignLines,
-  type WalkerLine,
-  walkerLineKey,
-} from "../home/homeLines";
+import { bubbleSpeech, type HomeAction, type WalkerLine, walkerLineKey } from "../home/homeLines";
 import { HOME_TEXT_FIELDS as FIELDS, homeLine } from "../home/homeText";
-import { buttonState, PLAIN_ITEM, type TileState, tileState } from "../home/interaction";
+import {
+  buttonState,
+  type ItemTile,
+  itemTile,
+  itemTileState,
+  type TileState,
+} from "../home/interaction";
 import { porchOwners } from "../home/porch";
 import {
   homeSections,
@@ -57,7 +56,8 @@ import {
   type SectionState,
   startReady,
 } from "../home/sections";
-import { choiceFull, DISABLED_COLORS, type SelectLook } from "../home/selection";
+import { DISABLED_COLORS, type SelectLook } from "../home/selection";
+import { shopAffordable, type ShopTab } from "../home/shop";
 import type { StatsTab } from "../home/statsLayout";
 import { homeSticker, sameItem, type Sticker, type TileItem } from "../home/sticker";
 import { downTail } from "../hud/moments";
@@ -68,6 +68,7 @@ import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { startWakeLock, stopWakeLock } from "../pwa";
+import { effectClause, effectText } from "../rules/effectText";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
@@ -84,13 +85,15 @@ import {
 } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
+import { addAffordFrame, type DetailPicture, drawDetailCard, drawLogbookPanel } from "./homePanels";
 import {
-  addAffordFrame,
-  type DetailPicture,
-  drawDetailCard,
-  drawLogbookPanel,
-  drawSlotSign,
-} from "./homePanels";
+  addLock,
+  addPlate,
+  drawPetShopFallback,
+  itemArtKey,
+  lockedPlateColors,
+  SHOP_ART,
+} from "./itemArt";
 import { listenOnePress } from "./onePress";
 import { openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
@@ -100,7 +103,6 @@ import {
   currentSettings,
   isMuted,
   profileSave,
-  purchaseInProfile,
   setMuted,
   setRunOverride,
   storageState,
@@ -111,12 +113,19 @@ import {
 import type { RunSceneData } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
+import {
+  SHOP_CHANGED_EVENT,
+  SHOP_CLOSED_EVENT,
+  type ShopClosed,
+  type ShopSceneData,
+} from "./ShopScene";
 import { addStandingSprite, spriteMetrics } from "./sprites";
 import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
   addNineSlice,
   addSelectTile,
+  addTagImage,
   addTileSprite,
   cogIcon,
   drawDisabledButton,
@@ -150,7 +159,10 @@ const SETTINGS_BUTTON: Rect = HOME_LAYOUT.settings.hit;
 const SETTINGS_ICON = HOME_LAYOUT.settings.icon;
 const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
 const LOGBOOK_ICON = HOME_LAYOUT.logbook.icon;
-const SLOT_SIGN: Rect = HOME_LAYOUT.slotSign;
+const PET_SHOP: Rect = HOME_LAYOUT.petShop;
+const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
+const PACK_LOCK = HOME_LAYOUT.packLock;
+const POCKET = HOME_LAYOUT.pocket;
 const LOGO = { ...HOME_LAYOUT.logo, key: "logo" };
 const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
 const SECTION_FRAME = HOME_LAYOUT.sectionFrame;
@@ -160,8 +172,6 @@ const WALKER_ORIGIN = HOME_LAYOUT.walkerOrigin;
 const DOG_TILES = HOME_LAYOUT.dogTiles;
 const DOG_ORIGIN = HOME_LAYOUT.dogOrigin;
 const DOG_TILE_INSET = HOME_LAYOUT.dogTileInset;
-const GEAR_SLOTS = HOME_LAYOUT.gearSlots;
-const GEAR_ORIGIN = HOME_LAYOUT.gearOrigin;
 const TILE_SELECT_OUTSET = HOME_LAYOUT.tileSelectOutset;
 const START_BUTTON: Rect = HOME_LAYOUT.startButton;
 const START_LABEL = HOME_LAYOUT.startLabel;
@@ -190,7 +200,7 @@ function walkerIds(): WalkerId[] {
   return Object.keys(gameData.walkers) as WalkerId[];
 }
 
-const SECTION_IDS: readonly SectionId[] = ["walker", "dogs", "gear"];
+const SECTION_IDS: readonly SectionId[] = ["walker", "dogs"];
 
 function gearIds(): GearId[] {
   return Object.keys(gameData.shopGear) as GearId[];
@@ -202,8 +212,9 @@ type Target =
   | { kind: "help" }
   | { kind: "logbook" }
   | { kind: "mute" }
+  | { kind: "packLock" }
+  | { kind: "petShop" }
   | { kind: "settings" }
-  | { kind: "slot" }
   | { kind: "start" }
   | { kind: "stats"; tab?: StatsTab }
   | { kind: "walker"; walker: WalkerId };
@@ -240,8 +251,13 @@ function dogFace(hit: Rect): Rect {
   return { ...hit, height: hit.height - DOG_TILE_INSET * 2, y: hit.y + DOG_TILE_INSET };
 }
 
+// The Pocket strip's cells, in shop order; each draws its tile inset inside.
 function gearSlots(): Rect[] {
-  return gridRects(GEAR_SLOTS, gearIds().length, GEAR_ORIGIN);
+  return gridRects(POCKET.cells, gearIds().length, POCKET.origin);
+}
+
+function pocketTile(cell: Rect): Rect {
+  return insetRect(POCKET.tileInset, cell);
 }
 
 function walkerTiles(): Rect[] {
@@ -253,11 +269,12 @@ interface Focusable {
   target: Target;
 }
 
-// The keyboard's rows, top to bottom as the screen shows them: the walkers, the dog rows,
-// gear and Start walk.
+// The keyboard's rows, top to bottom as the screen shows them: the Pet shop, the walkers,
+// the dog rows, the Pocket and Start walk.
 function focusRows(): Focusable[][] {
   const walkers = walkerTiles();
   const rows: Focusable[][] = [
+    [{ rect: PET_SHOP, target: { kind: "petShop" } }],
     walkerIds().map((walker, i): Focusable => ({
       rect: itemAt(walkers, i),
       target: { kind: "walker", walker },
@@ -274,7 +291,7 @@ function focusRows(): Focusable[][] {
   const slots = gearSlots();
   rows.push(
     gearIds().map((gear, i): Focusable => ({
-      rect: itemAt(slots, i),
+      rect: pocketTile(itemAt(slots, i)),
       target: { gear, kind: "gear" },
     })),
   );
@@ -321,12 +338,13 @@ interface Burst {
 // when something new became affordable.
 const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 
-// The screen before a walk: bank, best walk and the Logbook in the top bar, the walker and
-// pack at the gate, then three sections (walker, dogs, gear) and Start walk. It is also the
-// shop: tapping a locked dog, gear item or dog slot buys it when the bank covers it, and
-// shakes it when not; holding a dog or gear tile opens its detail card. The arrow keys move
-// a focus ring, Enter or Space picks, Escape closes a card, ? opens help, S settings, L the
-// logbook and M mutes.
+// The screen before a walk: the bank, the Logbook and best walk at the top bar's left and
+// help, sound and settings at its right; the walker and pack at the gate beside the Pet
+// shop; the Walker and Dogs sections, the Pocket strip and Start walk. Buying happens only in
+// the shop: tapping the building opens it, and tapping a locked dog, gear item or the Dogs
+// band's padlock opens it on that item. Holding a dog or gear tile opens its detail card.
+// The arrow keys move a focus ring, Enter or Space picks, Escape closes a card, ? opens help,
+// S settings, L the logbook and M mutes.
 export class StartScene extends Scene {
   // The last action, for the message line and the bubble.
   private action: HomeAction = { kind: "none" };
@@ -471,6 +489,12 @@ export class StartScene extends Scene {
     // Settings can change reduced motion or mute, so the screen is drawn again.
     const onSettingsClosed = () => this.render();
     this.game.events.on(SETTINGS_CLOSED_EVENT, onSettingsClosed);
+    // The shop draws under the top bar, so the bank there follows each purchase; on close
+    // the walker says the shop's last purchase or refusal.
+    const onShopChanged = () => this.render();
+    const onShopClosed = (closed: ShopClosed) => this.shopClosed(closed);
+    this.game.events.on(SHOP_CHANGED_EVENT, onShopChanged);
+    this.game.events.on(SHOP_CLOSED_EVENT, onShopClosed);
     // A tap made while another tap's act opened help, settings or stats over this screen is
     // dropped, so it cannot act once the screen resumes.
     const dropPending = () => {
@@ -480,6 +504,8 @@ export class StartScene extends Scene {
     this.events.on("pause", dropPending);
     this.events.once("shutdown", () => {
       this.game.events.off(SETTINGS_CLOSED_EVENT, onSettingsClosed);
+      this.game.events.off(SHOP_CHANGED_EVENT, onShopChanged);
+      this.game.events.off(SHOP_CLOSED_EVENT, onShopClosed);
       this.events.off("pause", dropPending);
     });
   }
@@ -618,13 +644,38 @@ export class StartScene extends Scene {
       [MUTE_BUTTON, { kind: "mute" }],
       [SETTINGS_BUTTON, { kind: "settings" }],
       [LOGBOOK_BUTTON, { kind: "logbook" }],
+      [PET_SHOP, { kind: "petShop" }],
     ];
     const hit = fixed.find(([rect]) => containsPoint(rect, x, y));
     if (hit !== undefined) {
       return hit[1];
     }
-    const forSale = nextDogSlot(gameData, this.save().owned.dogSlots) !== null;
-    return forSale && containsPoint(SLOT_SIGN, x, y) ? { kind: "slot" } : undefined;
+    return this.slotForSale() && containsPoint(PACK_LOCK.hit, x, y)
+      ? { kind: "packLock" }
+      : undefined;
+  }
+
+  // Whether a dog slot is for sale: the Dogs band then carries the padlock.
+  private slotForSale(): boolean {
+    return nextDogSlot(gameData, this.save().owned.dogSlots) !== null;
+  }
+
+  // The shop over everything below the top bar, on a tab or framing the item tapped.
+  private openShop(open: { focus?: Purchase; tab?: ShopTab }): void {
+    const data: ShopSceneData = { ...open, resume: SCENE_KEYS.start };
+    openOverlay(this, SCENE_KEYS.shop, data);
+  }
+
+  // The shop's last purchase or refusal goes in the walker's bubble, a bought dog's owner
+  // saying a parting line.
+  private shopClosed(closed: ShopClosed): void {
+    const { action } = closed;
+    if (action.kind === "bought" && action.purchase.kind === "dog") {
+      this.pops.set(`dog:${action.purchase.dog}`, this.time.now);
+      this.drawQuip(action.purchase.dog);
+    }
+    this.action = action;
+    this.render();
   }
 
   // A dog's owner says a parting line when it is picked or bought; it is drawn once a visit.
@@ -658,8 +709,8 @@ export class StartScene extends Scene {
           target.kind === "dog"
             ? tapDog(gameData, owned, target.dog, this.loadout)
             : tapGear(owned, target.gear, this.loadout);
-        if (tap.kind === "buy") {
-          this.purchase(id, tap.purchase);
+        if (tap.kind === "shop") {
+          this.openShop({ focus: tap.purchase });
         } else if (tap.kind === "full") {
           this.shakes.set(id, now);
           this.action = {
@@ -672,8 +723,11 @@ export class StartScene extends Scene {
         }
         return;
       }
-      case "slot":
-        this.purchase(id, { kind: "dogSlot" });
+      case "packLock":
+        this.openShop({ focus: { kind: "dogSlot" } });
+        return;
+      case "petShop":
+        this.openShop({});
         return;
       case "walker":
         this.pops.set(id, now);
@@ -734,38 +788,8 @@ export class StartScene extends Scene {
     this.render();
   }
 
-  // Buys the item when the bank covers it, equipping bought gear as the mock does; shakes it
-  // when not.
-  private purchase(id: string, purchase: Purchase): void {
-    const now = this.time.now;
-    const save = this.save();
-    const result = buy(gameData, purchase, save);
-    const name = this.purchaseName(purchase);
-    if (result.kind === "refused") {
-      this.shakes.set(id, now);
-      const cost = purchasePrice(gameData, save.owned, purchase);
-      this.action =
-        cost === null
-          ? { kind: "none" }
-          : { amount: cents(cost - save.bankCents), kind: "cantAfford", name };
-      this.render();
-      return;
-    }
-    this.pops.set(id, now);
-    void purchaseInProfile(this, () => result.save);
-    if (purchase.kind === "gear") {
-      this.setLoadout({ ...this.loadout, gear: purchase.gear });
-    }
-    if (purchase.kind === "dog") {
-      this.drawQuip(purchase.dog);
-    }
-    this.action = { kind: "bought", name, purchase };
-    this.render();
-    this.celebrate(purchase.kind === "dog" ? [purchase.dog] : []);
-  }
-
-  // Badges earned on launch or by a purchase burst in over the home screen, with the owners
-  // of the dogs just bought or picked cheering.
+  // Badges earned on launch burst in over the home screen, with the owners of the dogs
+  // picked cheering.
   private celebrate(owners: readonly DogId[]): void {
     const achievements = takeCelebrations(this);
     if (achievements.length === 0) {
@@ -777,21 +801,6 @@ export class StartScene extends Scene {
       resume: SCENE_KEYS.start,
     };
     openOverlay(this, SCENE_KEYS.celebration, data);
-  }
-
-  private purchaseName(purchase: Purchase): string {
-    switch (purchase.kind) {
-      case "dog":
-        return gameData.dogs[purchase.dog].name;
-      case "dogSlot":
-        return homeLine(gameData.homeText, "dogSlotName", {
-          slot: String(this.save().owned.dogSlots + 1),
-        });
-      case "gear":
-        return gameData.shopGear[purchase.gear].name;
-      default:
-        return purchase satisfies never;
-    }
   }
 
   // A new player's first walk opens help unless it was read from ?, then sets off when it
@@ -941,11 +950,11 @@ export class StartScene extends Scene {
     this.registry.set(LAST_VISIT_BANK_KEY, save.bankCents);
     const g = this.graphics(root);
     this.drawTopBar(root, g, save);
+    this.drawPetShop(root, save);
     this.drawPackAtGate(root, g, save);
-    this.drawSlotSign(root, save);
     const sections = this.sections(save);
     for (const id of SECTION_IDS) {
-      this.drawSection(root, SECTION_RECTS[id], sections[id]);
+      this.drawSection(root, SECTION_RECTS[id], sections[id], id === "dogs" && this.slotForSale());
     }
     this.drawWalkerPicker(root, save);
     // The sticker covers its tile's price line, which the tile then leaves out.
@@ -954,7 +963,7 @@ export class StartScene extends Scene {
       : null;
     const stickered = (item: TileItem) => sticker !== null && sameItem(sticker.item, item);
     this.drawDogTiles(root, stickered, save);
-    this.drawGear(root, stickered, save);
+    this.drawPocket(root, stickered, save);
     this.drawSticker(root, sticker);
     this.drawStartButton(root, startReady(sections));
     this.drawFocus(root);
@@ -969,8 +978,14 @@ export class StartScene extends Scene {
 
   // A section's ui-section frame and band by its state, with the heading on the band's left
   // and its note on the right: ink on the lit (complete) band, cream and amber on the dark
-  // (incomplete or neutral) one.
-  private drawSection(root: GameObjects.Container, rect: Rect, section: Section): void {
+  // (incomplete) one. While a dog slot is for sale, the Dogs band's padlock sits right of
+  // its note.
+  private drawSection(
+    root: GameObjects.Container,
+    rect: Rect,
+    section: Section,
+    locked: boolean,
+  ): void {
     const frame = addNineSlice(this, "ui-section", rect, section.state);
     if (frame === undefined) {
       this.drawSectionFrame(root, rect, section.state);
@@ -989,8 +1004,13 @@ export class StartScene extends Scene {
         font: "title",
       },
     );
+    let right = rect.x + rect.width - BAND_TEXT.inset;
+    if (locked) {
+      const view = this.tileView(root, "packLock");
+      addLock(this, view.container, right + PACK_LOCK.icon.dx, PACK_LOCK.icon.y);
+      right -= PACK_LOCK.noteShift;
+    }
     if (section.note !== "") {
-      const right = rect.x + rect.width - BAND_TEXT.inset;
       this.text(root, right, y, section.note, lit ? PALETTE.ink : PALETTE.amber, {
         font: "title",
         originX: 1,
@@ -999,8 +1019,8 @@ export class StartScene extends Scene {
   }
 
   // The ui-section art drawn in code while it is missing: complete is an ink outline round a
-  // gold frame and a lit amber band over an orange rule; incomplete and neutral are an ink frame
-  // and rule round a navy band. The tiles' area is left open.
+  // gold frame and a lit amber band over an orange rule; incomplete is an ink frame and rule
+  // round a navy band. The tiles' area is left open.
   private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
     const g = this.graphics(root);
     const lit = state === "complete";
@@ -1020,11 +1040,6 @@ export class StartScene extends Scene {
       x: rect.x + edge,
       y: rect.y + edge + band,
     });
-  }
-
-  // Whether the bank covers a locked item: it then wears the gold outline.
-  private affordable(save: SaveDocument, purchase: Purchase): boolean {
-    return isAffordable(gameData, save.owned, save.bankCents, purchase);
   }
 
   // The detail card or logbook over everything else, recording its rect for taps.
@@ -1120,25 +1135,22 @@ export class StartScene extends Scene {
     this.text(root, 24 + dollar.width + 2, 14, dollarText(save.bankCents).slice(1), PALETTE.cream, {
       font: "title",
     });
+    // The best walk and walk count after the Logbook button, inside its hit area.
     const { bestWalk } = save.stats;
     const walks = walksPlayed(save.stats);
-    const right = LOGBOOK_BUTTON.x - GAP;
+    const left = HOME_LAYOUT.logbook.textX;
     const words = gameData.homeText.topBar;
     if (bestWalk === null) {
-      this.text(root, right, 14, words.noWalks, PALETTE.cream, { originX: 1 });
+      this.text(root, left, 14, words.noWalks, PALETTE.cream);
     } else {
       const best = fillLine(FIELDS.topBar, words, "best", {
         amount: dollarText(bestWalk.earnedCents),
       });
-      this.text(root, right, 5, best, PALETTE.cream, {
-        originX: 1,
-      });
+      this.text(root, left, 5, best, PALETTE.cream);
       const count = fillLine(FIELDS.topBar, words, walks === 1 ? "walkOne" : "walkMany", {
         count: String(walks),
       });
-      this.text(root, right, 22, count, PALETTE.cream, {
-        originX: 1,
-      });
+      this.text(root, left, 22, count, PALETTE.cream);
     }
     this.iconButton(root, "logbook", LOGBOOK_ICON, (x, y) => {
       const icon = imageIcon(this, "icon-logbook", x, y);
@@ -1150,7 +1162,6 @@ export class StartScene extends Scene {
       const icon = imageIcon(this, "icon-settings", x, y);
       return icon.length > 0 ? icon : cogIcon(this, x, y);
     });
-    // Help and sound sit in the gate scene's top corners, where the art places them.
     this.iconButton(root, "help", HELP_ICON, (x, y) => imageIcon(this, "icon-help", x, y));
     this.iconButton(root, "mute", MUTE_ICON, (x, y) => soundIcon(this, !isMuted(this), x, y));
   }
@@ -1245,7 +1256,12 @@ export class StartScene extends Scene {
     );
     const width = Math.ceil(Math.max(...labels.map((label) => label.width))) + 10;
     const height = lines.length * SPEECH_LINE_HEIGHT + 6;
-    const rect = { height, width, x: Math.round(x - width / 2), y: top };
+    // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.
+    const board = PET_SHOP_BOARD;
+    const centred = Math.round(x - width / 2);
+    const clear = top + height < board.y ? centred : Math.min(centred, board.x - 2 - width);
+    const rect = { height, width, x: Math.max(GAP / 2, clear), y: top };
+    labels.forEach((label) => label.setX(label.x + rect.x - centred));
     const quip = addNineSlice(this, "ui-quip", rect);
     if (quip === undefined) {
       drawFramedRect(this.graphics(bubble), { border: PALETTE.plum, fill: PALETTE.cream }, rect);
@@ -1268,55 +1284,45 @@ export class StartScene extends Scene {
     }
   }
 
-  // The next dog slot for sale, on a sign in the yard; gone once every slot is owned.
-  private drawSlotSign(root: GameObjects.Container, save: SaveDocument): void {
-    const lines = slotSignLines(gameData, save.owned, save.bankCents);
-    if (lines === null) {
-      return;
-    }
-    const { height, width, x, y } = SLOT_SIGN;
-    const view = this.tileView(root, "slot");
-    const g = this.graphics(view.container);
-    const postHeight = GATE.y + GATE.height - y - height;
-    fillRect(g, PALETTE.darkBrown, { height: postHeight, width: 3, x: x + 10, y: y + height });
-    fillRect(g, PALETTE.darkBrown, {
-      height: postHeight,
-      width: 3,
-      x: x + width - 13,
-      y: y + height,
+  // The Pet shop on the yard's right lot: ui-pet-shop, its front sinking while pressed, with
+  // the gold outline while anything inside is affordable. Drawn in code while the art is
+  // missing, when the whole building dips instead.
+  private drawPetShop(root: GameObjects.Container, save: SaveDocument): void {
+    const view = this.tileView(root, "petShop");
+    const faces = (["normal", "pressed"] as const).flatMap((tag) => {
+      const image = addTagImage(this, SHOP_ART.petShop, tag, PET_SHOP.x, PET_SHOP.y);
+      return image === undefined ? [] : [image];
     });
-    drawSlotSign(this, view.container, SLOT_SIGN, lines);
-    if (this.affordable(save, { kind: "dogSlot" })) {
-      addAffordFrame(this, view.container, SLOT_SIGN, currentSettings(this).reducedMotion);
+    const [normal, pressed] = faces;
+    if (normal !== undefined && pressed !== undefined) {
+      view.container.add(faces);
+      view.iconButton = {
+        setPressed: (down) => {
+          normal.setVisible(!down);
+          pressed.setVisible(down);
+        },
+      };
+      view.iconButton.setPressed(false);
+    } else {
+      drawPetShopFallback(this, view.container, PET_SHOP, gameData.homeText.shop.title);
+    }
+    if (shopAffordable(gameData, save.owned, save.bankCents)) {
+      addAffordFrame(this, view.container, PET_SHOP, currentSettings(this).reducedMotion);
     }
   }
 
-  private addLock(parent: GameObjects.Container, state: TileState, x: number, y: number): void {
-    if (this.textures.exists("icon-lock")) {
-      parent.add(this.add.image(x, y, tileTextureKey(this, state, "icon-lock")).setOrigin(0));
-    }
-  }
-
-  // A locked item's price on a chip of the tile's face, forest while the bank covers it and
-  // navy on a disabled tile (with a padlock beside it) when not. originX places it by its
-  // left (0) or centre (0.5).
-  private priceBadge(
+  // A locked item's price (or goal) plate: green while the bank covers it, dark red when not.
+  // originX places it by its left (0) or centre (0.5).
+  private lockedPlate(
     parent: GameObjects.Container,
-    look: SelectLook,
-    at: { x: number; y: number },
-    price: Cents,
-    originX: number,
+    tile: ItemTile,
+    at: { capY: number; originX: number; x: number },
   ): void {
-    const { x, y } = at;
-    const badge = this.graphics(parent);
-    const color = PALETTE[look.price];
-    const label = this.text(parent, x, y, dollarText(price), color, { originX });
-    fillRect(badge, PALETTE[look.face], {
-      height: 14,
-      width: Math.ceil(label.width) + 6,
-      x: Math.round(x - originX * label.width) - 3,
-      y: y - 2,
-    });
+    const text =
+      tile.kind === "locked" ? dollarText(tile.price) : tile.kind === "goal" ? tile.goal : null;
+    if (text !== null) {
+      addPlate(this, parent, at, text, lockedPlateColors(tile));
+    }
   }
 
   private drawDogTiles(
@@ -1327,21 +1333,20 @@ export class StartScene extends Scene {
     const { owned } = save;
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
-    const full = choiceFull(this.loadout.dogs.length, capacity);
     const tiles = dogTiles();
     rosterOrder().forEach((id, i) => {
       const rect = dogFace(itemAt(tiles, i));
-      const { width, x, y } = rect;
+      const { x, y } = rect;
       const dog = gameData.dogs[id];
-      const isOwned = owned.dogs.includes(id);
-      const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
-      const state = tileState({
-        ...PLAIN_ITEM,
+      const tile = itemTile({
         bank: save.bankCents,
-        full,
+        capacity,
+        goal: null,
         picked: this.loadout.dogs.includes(id),
-        price,
+        pickedCount: this.loadout.dogs.length,
+        price: purchasePrice(gameData, owned, { dog: id, kind: "dog" }),
       });
+      const state = itemTileState(tile);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
         // A picked dog's badge is its place in the pick order.
         badge: String(this.loadout.dogs.indexOf(id) + 1),
@@ -1357,12 +1362,32 @@ export class StartScene extends Scene {
         y: y + 4,
       });
       const faceKey = dogFaceKey(gameData, id);
-      const faceTag = isOwned ? "happy" : "neutral";
-      const face = addTileSprite(this, state, reduced, faceKey, faceTag, { x: x + 4, y: y + 5 });
+      const locked = tile.kind === "locked" || tile.kind === "goal";
+      const faceTag = locked ? "neutral" : "happy";
+      const faceAt = { x: x + 4, y: y + 5 };
+      const face = locked
+        ? this.add
+            .sprite(
+              faceAt.x,
+              faceAt.y,
+              itemArtKey(this, tile, faceKey),
+              tagFrame(this, faceKey, faceTag),
+            )
+            .setOrigin(0)
+        : addTileSprite(this, state, reduced, faceKey, faceTag, faceAt);
       content.add(face);
       view.face = { object: face, y: y + 5 };
 
       this.text(content, x + 41, y + 2, dog.name, ink);
+      if (locked) {
+        // A locked dog shows its padlock and its price or goal plate in place of its icons
+        // and fee.
+        addLock(this, content, x - 2, y - 3);
+        if (!stickered({ dog: id, kind: "dog" })) {
+          this.lockedPlate(content, tile, { capY: y + 28, originX: 0, x: x + 41 });
+        }
+        return;
+      }
       // The trait and the owner's temperament as icons; the info line says them in words.
       [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
         if (this.textures.exists(key)) {
@@ -1370,86 +1395,89 @@ export class StartScene extends Scene {
           content.add(this.add.image(x + 40 + n * 18, y + 13, iconKey).setOrigin(0));
         }
       });
-      if (price === null) {
-        const zoneFee = dogFeeText(gameData, id);
-        this.text(content, x + 41, y + 29, `${zoneFee}/zone`, ink);
-      } else {
-        if (!stickered({ dog: id, kind: "dog" })) {
-          this.priceBadge(content, look, { x: x + 44, y: y + 28 }, price, 0);
-        }
-        if (price > save.bankCents) {
-          this.addLock(content, state, x + width - 19, y + 24);
-        }
-      }
-      this.affordFrame(view, rect, look, save, { dog: id, kind: "dog" });
+      const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData, id) });
+      this.text(content, x + 41, y + 29, fee, ink);
     });
   }
 
-  // The gold outline on a normal item the bank covers.
-  private affordFrame(
-    view: TileView,
-    rect: Rect,
-    look: SelectLook,
-    save: SaveDocument,
-    purchase: Purchase,
-  ): void {
-    if (look.state === "normal" && this.affordable(save, purchase)) {
-      addAffordFrame(this, view.container, rect, currentSettings(this).reducedMotion);
-    }
-  }
-
-  // Equipping a gear item replaces any other, so the gear choice is never full.
-  private drawGear(
+  // The Pocket strip on the wood: its title and note, a tile per gear item in shop order, and
+  // the pocketed item's effect under them. Pocketing an item replaces any other, so the Pocket
+  // is never full.
+  private drawPocket(
     root: GameObjects.Container,
     stickered: (item: TileItem) => boolean,
     save: SaveDocument,
   ): void {
     const { owned } = save;
-    const equipped = this.loadout.gear;
+    const text = gameData.homeText.pocket;
+    this.text(root, POCKET.title.x, POCKET.title.y, text.title, PALETTE.cream, { font: "title" });
+    this.text(root, POCKET.note.x, POCKET.note.y, text.note, PALETTE.cream, { originX: 1 });
+    const pocketed = this.loadout.gear;
     const slots = gearSlots();
     gearIds().forEach((id, i) => {
-      const rect = itemAt(slots, i);
+      const rect = pocketTile(itemAt(slots, i));
       const { width, x, y } = rect;
-      const price = purchasePrice(gameData, owned, { gear: id, kind: "gear" });
-      const state = tileState({
-        ...PLAIN_ITEM,
+      const tile = itemTile({
         bank: save.bankCents,
-        picked: equipped === id,
-        price,
+        capacity: 1,
+        goal: null,
+        picked: pocketed === id,
+        pickedCount: pocketed === null ? 0 : 1,
+        price: purchasePrice(gameData, owned, { gear: id, kind: "gear" }),
       });
+      const state = itemTileState(tile);
       const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
         badge: "tick",
         edge: true,
         state,
         tile: true,
       });
+      const { box, icon: iconAt, lock } = POCKET;
       fillRect(this.graphics(content), PALETTE[look.box], {
-        height: 34,
-        width: 34,
-        x: x + 15,
-        y: y + 2,
+        height: box.size,
+        width: box.size,
+        x: x + box.dx,
+        y: y + box.dy,
       });
-      const icon = this.addGearIcon(content, state, id, { x: x + 16, y: y + 3 }, 1);
+      const at = { x: x + iconAt.dx, y: y + iconAt.dy };
+      const icon = this.addGearIcon(content, tile, id, at, 1);
       if (icon !== undefined) {
-        view.face = { object: icon, y: y + 3 };
+        view.face = { object: icon, y: at.y };
       }
-      // A locked item's price tag hangs over the foot of its icon.
-      if (price !== null) {
+      if (tile.kind === "locked" || tile.kind === "goal") {
+        addLock(this, content, x + lock.dx, y + lock.dy);
         if (!stickered({ gear: id, kind: "gear" })) {
-          this.priceBadge(content, look, { x: x + width / 2, y: y + 28 }, price, 0.5);
-        }
-        if (price > save.bankCents) {
-          this.addLock(content, state, x + width - 18, y + 2);
+          const plateAt = { capY: y + POCKET.priceY, originX: 0.5, x: x + width / 2 };
+          this.lockedPlate(content, tile, plateAt);
         }
       }
-      this.affordFrame(view, rect, look, save, { gear: id, kind: "gear" });
     });
+    this.drawPocketEffect(root, pocketed);
   }
 
-  // The item's 32x32 icon, or its initials until the icon is in the manifest.
+  // "Whistle: no Thief cards for the run." for the pocketed item, or the effect alone where
+  // that is too wide; the empty Pocket's line while nothing is in it.
+  private drawPocketEffect(root: GameObjects.Container, pocketed: GearId | null): void {
+    const { effect } = POCKET;
+    const text = gameData.homeText.pocket;
+    const label = this.text(root, effect.x, effect.y, text.empty, PALETTE.cream);
+    if (pocketed === null) {
+      return;
+    }
+    const item = gameData.shopGear[pocketed];
+    const named = fillLine(FIELDS.pocket, text, "item", {
+      effect: effectClause(gameData, item.effects),
+      gear: item.name,
+    });
+    const alone = `${effectText(gameData, item.effects)}.`;
+    fitText(label, effect.maxWidth, [named, alone]);
+  }
+
+  // The item's 32x32 icon, as a locked item's silhouette or a disabled tile's grey copy, or
+  // its initials until the icon is in the manifest.
   private addGearIcon(
     parent: GameObjects.Container,
-    state: TileState,
+    tile: ItemTile | TileState,
     gear: GearId,
     at: { x: number; y: number },
     scale: number,
@@ -1457,10 +1485,9 @@ export class StartScene extends Scene {
     const { x, y } = at;
     const key = gearIconKey(gear);
     if (this.textures.exists(key)) {
-      const icon = this.add
-        .image(x, y, tileTextureKey(this, state, key))
-        .setOrigin(0)
-        .setScale(scale);
+      const shown =
+        typeof tile === "string" ? tileTextureKey(this, tile, key) : itemArtKey(this, tile, key);
+      const icon = this.add.image(x, y, shown).setOrigin(0).setScale(scale);
       parent.add(icon);
       return icon;
     }
@@ -1476,15 +1503,25 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // One portrait per preset walker: the saved one is selected, and picking another replaces
-  // it, so the others stay normal.
+  // One portrait per preset walker, in the shared tile states: the saved one is picked, and
+  // picking another replaces it, so the walker choice is never full. Every walker unlocks
+  // from the start in today's data, so none shows a goal yet.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const chosen = save.walker;
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
-      const state = tileState({ ...PLAIN_ITEM, picked: id === chosen });
+      const state = itemTileState(
+        itemTile({
+          bank: save.bankCents,
+          capacity: 1,
+          goal: null,
+          picked: id === chosen,
+          pickedCount: 1,
+          price: null,
+        }),
+      );
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
         badge: "tick",
         edge: true,
@@ -1521,7 +1558,7 @@ export class StartScene extends Scene {
     const rect =
       item.kind === "dog"
         ? dogFace(itemAt(dogTiles(), rosterOrder().indexOf(item.dog)))
-        : itemAt(gearSlots(), gearIds().indexOf(item.gear));
+        : pocketTile(itemAt(gearSlots(), gearIds().indexOf(item.gear)));
     const right = Math.min(rect.x + rect.width + 2, SCREEN.width - 2);
     const x = right - STICKER.width;
     const y = rect.y + rect.height + 4 - STICKER.height;

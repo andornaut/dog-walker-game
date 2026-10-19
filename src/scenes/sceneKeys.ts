@@ -8,6 +8,7 @@ export const SCENE_KEYS = {
   pause: "pause",
   run: "run",
   settings: "settings",
+  shop: "shop",
   start: "start",
   stats: "stats",
 } as const;

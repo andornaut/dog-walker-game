@@ -21,12 +21,12 @@ export type Purchase =
   | { readonly kind: "dogSlot" }
   | { readonly gear: GearId; readonly kind: "gear" };
 
-// A tap on the home screen changes the loadout, asks to buy a locked item, or is refused
-// because the pack is full.
+// A tap on the home screen changes the loadout, opens the shop on a locked item, or is
+// refused because the pack is full.
 export type HomeTap =
-  | { readonly kind: "buy"; readonly purchase: Purchase }
   | { readonly kind: "full" }
-  | { readonly kind: "loadout"; readonly loadout: HomeLoadout };
+  | { readonly kind: "loadout"; readonly loadout: HomeLoadout }
+  | { readonly kind: "shop"; readonly purchase: Purchase };
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
 
@@ -43,8 +43,8 @@ export function packCapacity(
   return Math.min(owned.dogSlots, read(data.tuning, "counts", "packSizeMax"));
 }
 
-// An owned dog joins the pack, or leaves it if already picked; a full pack refuses it. A dog
-// not owned yet is a purchase.
+// An owned dog joins the pack, or leaves it if already picked. A full one-slot pack swaps
+// its dog for this one; a fuller pack refuses it. A dog not owned yet opens the shop on it.
 export function tapDog(
   data: Pick<GameData, "tuning">,
   owned: Owned,
@@ -52,7 +52,7 @@ export function tapDog(
   loadout: HomeLoadout,
 ): HomeTap {
   if (!owned.dogs.includes(dog)) {
-    return { kind: "buy", purchase: { dog, kind: "dog" } };
+    return { kind: "shop", purchase: { dog, kind: "dog" } };
   }
   if (loadout.dogs.includes(dog)) {
     return {
@@ -60,17 +60,20 @@ export function tapDog(
       loadout: { ...loadout, dogs: loadout.dogs.filter((id) => id !== dog) },
     };
   }
-  if (loadout.dogs.length >= packCapacity(data, owned)) {
-    return { kind: "full" };
+  const capacity = packCapacity(data, owned);
+  if (loadout.dogs.length < capacity) {
+    return { kind: "loadout", loadout: { ...loadout, dogs: [...loadout.dogs, dog] } };
   }
-  return { kind: "loadout", loadout: { ...loadout, dogs: [...loadout.dogs, dog] } };
+  return capacity === 1
+    ? { kind: "loadout", loadout: { ...loadout, dogs: [dog] } }
+    : { kind: "full" };
 }
 
-// Owned gear is equipped, replacing any other, or unequipped if already on. Gear not owned
-// yet is a purchase.
+// Owned gear goes in the Pocket, replacing any other, or comes out if already in it. Gear
+// not owned yet opens the shop on it.
 export function tapGear(owned: Owned, gear: GearId, loadout: HomeLoadout): HomeTap {
   if (!owned.gear.includes(gear)) {
-    return { kind: "buy", purchase: { gear, kind: "gear" } };
+    return { kind: "shop", purchase: { gear, kind: "gear" } };
   }
   return { kind: "loadout", loadout: { ...loadout, gear: loadout.gear === gear ? null : gear } };
 }

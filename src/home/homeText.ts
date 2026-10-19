@@ -49,15 +49,19 @@ export const HOME_TEXT_FIELDS = {
   noticeSoundOff: [],
   noticeSoundOn: [],
   packCount: ["count", "max"],
+  pocket: {
+    item: ["effect", "gear"],
+  },
   sectionDogs: [],
   sectionDogsPrompt: [],
-  sectionGear: [],
   sectionWalker: [],
   sectionWalkerPrompt: [],
+  shop: {
+    slotFirst: ["slot"],
+    slotLine: ["count"],
+    slotsOwned: ["max", "owned"],
+  },
   slotBought: ["slot"],
-  slotBuy: [],
-  slotSave: ["amount"],
-  slotSign: ["price", "slot"],
   startWalk: [],
   topBar: {
     best: ["amount"],
@@ -65,6 +69,7 @@ export const HOME_TEXT_FIELDS = {
     walkOne: ["count"],
   },
   unsaved: [],
+  zoneFee: ["fee"],
 } as const satisfies Record<LineKey, readonly string[]> & FieldTable;
 
 type Fields<K extends LineKey> = Record<(typeof HOME_TEXT_FIELDS)[K][number], string>;

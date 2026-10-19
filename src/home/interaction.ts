@@ -46,6 +46,56 @@ export function tileState(input: Omit<InteractionInput, "primary">): TileState {
   return full ? "disabled" : "normal";
 }
 
+// How a dog or Pocket gear tile on the home screen shows itself. available: owned, unpicked,
+// with room. picked: in the pack or the Pocket. packFull: owned and unpicked while every slot
+// of a pack of 2 or more is filled; with 1 slot, or in the Pocket, a tap swaps the choice
+// instead. locked: not owned, with its price, green when the bank covers it. goal: not owned
+// and unlocked by a goal rather than a price.
+export type ItemTile =
+  | { readonly kind: "available" }
+  | { readonly kind: "goal"; readonly goal: string }
+  | { readonly affordable: boolean; readonly kind: "locked"; readonly price: Cents }
+  | { readonly kind: "packFull" }
+  | { readonly kind: "picked" };
+
+export interface ItemTileInput {
+  readonly bank: Cents;
+  // How many the choice holds: the pack's slots, or 1 for the Pocket.
+  readonly capacity: number;
+  // The goal that unlocks it, or null for one sold or owned.
+  readonly goal: string | null;
+  readonly picked: boolean;
+  readonly pickedCount: number;
+  // Its unlock price, or null once owned.
+  readonly price: Cents | null;
+}
+
+export function itemTile(input: ItemTileInput): ItemTile {
+  const { bank, capacity, goal, picked, pickedCount, price } = input;
+  if (goal !== null) {
+    return { goal, kind: "goal" };
+  }
+  if (price !== null) {
+    return { affordable: price <= bank, kind: "locked", price };
+  }
+  if (picked) {
+    return { kind: "picked" };
+  }
+  return capacity > 1 && pickedCount >= capacity ? { kind: "packFull" } : { kind: "available" };
+}
+
+// The ui-tile state an item tile draws: every tile that cannot be picked now is disabled.
+export function itemTileState(tile: ItemTile): TileState {
+  switch (tile.kind) {
+    case "available":
+      return "normal";
+    case "picked":
+      return "selected";
+    default:
+      return "disabled";
+  }
+}
+
 export function buttonState(input: Pick<InteractionInput, "available" | "primary">): ButtonState {
   if (!input.available) {
     return "disabled";
