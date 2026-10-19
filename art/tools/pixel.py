@@ -27,7 +27,7 @@ DARKER = dict(p.split(":") for p in (
     "b55088:68386c f6757a:b55088 e8b796:c28569 c28569:b86f50"
 ).split())
 # The road colours: Elm Avenue (dark), then Fairview Park, Main Street and The Long Way Home (light).
-ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
+ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
 
 
 def contrast(a, b):
