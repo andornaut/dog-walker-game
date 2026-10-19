@@ -203,10 +203,10 @@ export class HudScene extends Scene {
       onOpen: () => {
         this.hints = dismissHint(this.hints);
       },
-      tappable: () => stripTapAllowed((this.scene.get(SCENE_KEYS.run) as RunScene).runPause()),
+      tappable: () => stripTapAllowed(this.runScene().runPause()),
     });
 
-    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const run = this.runScene();
     this.feedback = new HudFeedback(this, run, (labels) => this.floatLabels(labels));
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
     const onHint = (hint: RaisedHint) => this.hintRaised.push(hint);
@@ -259,8 +259,12 @@ export class HudScene extends Scene {
     });
   }
 
+  private runScene(): RunScene {
+    return this.scene.get(SCENE_KEYS.run) as RunScene;
+  }
+
   private press(via: "key" | "tap", button: TopBarPress): void {
-    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const run = this.runScene();
     switch (topBarAction(run.runPause(), via, button)) {
       case "confirmHome":
         run.openPause("homeQuestion");
@@ -384,7 +388,7 @@ export class HudScene extends Scene {
   }
 
   override update(_time: number, delta: number): void {
-    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const run = this.runScene();
     const view = run.hudView();
     if (view === undefined) {
       return;
@@ -601,7 +605,7 @@ export class HudScene extends Scene {
   // the same batch follow its first, one at a time.
   private floatLabels(labels: ChangeLabel[]): void {
     const { dogSlots, topBar } = LAYOUT;
-    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const run = this.runScene();
     const view = run.hudView();
     const still = run.reducedMotion();
     const perDog = new Map<string, number>();
@@ -768,7 +772,7 @@ export class HudScene extends Scene {
   // An owner's line in a bubble over the doghouses' roofs, centred over the owner's face and
   // leaving every face uncovered: at 2x on one line, else at 1x. False when the dog has no slot.
   private sayQuip(quip: QuipBubble): boolean {
-    const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    const run = this.runScene();
     const index = run.hudView()?.run.pack.findIndex((slot) => slot.dog === quip.dog) ?? -1;
     const rect = LAYOUT.dogSlots[index];
     if (rect === undefined) {
