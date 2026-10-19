@@ -125,19 +125,19 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 | Doghouse slot    | `ui-doghouse`       | sprite | 72×146           | core     | One per dog slot: a doghouse with the dog's colour roof (a tag per dog, plus `empty` for a fired dog); the dog peeks from the door, the owner sits in the window, hearts on the board. Layout in `art/tools/ui.py` |
 | Dog faces        | `face-dog-<name>`   | sprite | 32×32            | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                                                                                                                                         |
 | Owner faces      | `face-owner-<name>` | sprite | 32×32            | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                                                                                                                              |
-| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD)        | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows; a number beside the hearts so the meter doesn't rely on colour                                               |
+| Happiness hearts | `ui-heart`          | sprite | 8×7              | M6       | Frames `full` (dark red) and `empty` (hollow dark brown outline), so they differ by fill; with the "n/max" count beside them                                                                                       |
 | Quip bubble      | `ui-quip`           | image  | 24×24 nine-slice | core     | Cream bubble with a round plum rim, 8px corners; `ui-quip-tail` (6×8) points left at the owner                                                                                                                     |
 | Quip tail        | `ui-quip-tail`      | image  | 6×8              | core     | Points left at the owner's window; its right column covers the bubble's left rim                                                                                                                                   |
 | Stinky badge     | `icon-stinky`       | image  | 16×16            | core     | Shown while the debuff lasts                                                                                                                                                                                       |
 
 ## Top bar
 
-| Asset          | Key                | Type   | Size   | Priority | Notes                                                                                      |
-| -------------- | ------------------ | ------ | ------ | -------- | ------------------------------------------------------------------------------------------ |
-| Bar background | `ui-top-bar`       | image  | 360×40 | core     | Plum wood with ink wells for money, treats and zone; layout in `art/tools/ui.py`           |
-| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                                                       |
-| Zone progress  | `ui-zone-pips`     | sprite | 18×8   | core     | 4 pips 3px apart; frames `done` (ticked), `current` (the game fills it amber), `todo`      |
-| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home; drawn by `art/tools/glyphs.py` |
+| Asset          | Key                | Type   | Size   | Priority | Notes                                                                                                                                         |
+| -------------- | ------------------ | ------ | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bar background | `ui-top-bar`       | image  | 360×40 | core     | Plum wood with ink wells: money 4,8 94×26; treats 100,8 42×26; zone 194,5 162×29. Sound toggle at 146,10 and pause at 170,10 sit between them |
+| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                                                                                                          |
+| Zone progress  | `ui-zone-pips`     | sprite | 18×8   | core     | 4 pips 3px apart; frames `done` (ticked), `current` (the game fills it amber), `todo`                                                         |
+| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home; drawn by `art/tools/glyphs.py`                                                    |
 
 ## Choice cards
 
@@ -204,14 +204,17 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 ## UI kit
 
-| Asset       | Key                       | Type   | Size      | Priority | Notes                                                                                                    |
-| ----------- | ------------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------- |
-| Pixel fonts | `font-body`, `font-title` | font   | 8px       | M6       | Tiny5 (body, labels) and Silkscreen (titles, numbers); XML BMFont plus PNG; includes `$` and a drawn `♥` |
-| Button      | `ui-button`               | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                                                   |
-| Panel       | `ui-panel`                | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                                              |
-| Pause icon  | `icon-pause`              | image  | 16×16     | core     | Top bar; opens the pause menu                                                                            |
-| Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | A fingertip on a two-way track with fading touch marks; the game writes "drag to switch lanes" under it  |
-| App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | `public/art/favicon.png` at 32 and 16, plus home-screen sizes                                            |
+| Asset       | Key                       | Type   | Size      | Priority | Notes                                                                                                                                       |
+| ----------- | ------------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Pixel fonts | `font-body`, `font-title` | font   | 8px       | M6       | Tiny5 (body, labels) and Silkscreen (titles, numbers); XML BMFont plus PNG; includes `$` and a drawn `♥`                                    |
+| Button      | `ui-button`               | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                                                                                      |
+| Icon button | `ui-icon-button`          | sprite | 20×20     | core     | Navy face, tan rim, brown lip; tags `normal`, `pressed` (face sinks 2px). Carries a 16×16 icon at +2,+1 (+2,+3 pressed): sound, pause, help |
+| Sound icon  | `icon-sound`              | sprite | 16×16     | core     | Tags `on` (speaker with two waves) and `off` (speaker with a pink X); no outline, for the navy button face                                  |
+| Switch      | `ui-switch`               | sprite | 32×16     | core     | Settings on/off: `on` knob right, white tick on forest; `off` knob left, white cross on slate                                               |
+| Panel       | `ui-panel`                | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                                                                                 |
+| Pause icon  | `icon-pause`              | image  | 16×16     | core     | Top bar; opens the pause menu                                                                                                               |
+| Touch hint  | `ui-touch-hint`           | image  | 96×36     | later    | A fingertip on a two-way track with fading touch marks; the game writes "drag to switch lanes" under it                                     |
+| App icon    | (not in manifest)         | PNG    | 16 to 512 | later    | `public/art/favicon.png` at 32 and 16, plus home-screen sizes                                                                               |
 
 ## Sounds
 

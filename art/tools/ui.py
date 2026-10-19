@@ -11,8 +11,10 @@ Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-check (16x16; tags 1, 2, 3,
 tick), fx-tap and fx-dust (16x16; tag play),
 ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
-corners; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off),
-ui-zone-pips (18x8; tags done, current, todo).
+corners; tags normal, pressed, disabled), ui-icon-button (20x20, the face under a
+16x16 icon such as pause, help or sound; tags normal, pressed), ui-switch (32x16;
+tags on, off), icon-sound and icon-music (tags on, off), ui-zone-pips (18x8; tags
+done, current, todo).
 
 Usage:
   ui.py preview OUT.png   every piece, scaled up
@@ -105,6 +107,10 @@ def stinky():
 
 
 def speaker(on, note=False):
+    """The speaker states differ by shape: two sound waves for on, an X in their place for
+    off. The music note keeps its slash. The speaker has no outline, which would fill the gaps
+    between the waves: it is drawn for ui-icon-button's navy face, cream at 9.6:1 and the pink X
+    at 5.1:1."""
     g = Grid(16, 16)
     if note:
         g.rect(5, 3, 2, 9, "cream")
@@ -112,28 +118,46 @@ def speaker(on, note=False):
         g.rect(10, 3, 2, 7, "cream")
         g.ell(4.5, 12, 2.5, 2, "cream", "tan")
         g.ell(9.5, 10, 2.5, 2, "cream", "tan")
+        if not on:
+            for i in range(12):
+                g.p(2 + i, 2 + i, "red")
+                g.p(3 + i, 2 + i, "red")
+        return g
+    g.rect(1, 5, 4, 6, "cream")
+    for i in range(4):
+        g.rect(5 + i, 4 - i, 1, 8 + 2 * i, "cream")
+    g.rect(1, 10, 4, 1, "tan")
+    g.rect(8, 1, 1, 14, "tan")
+    if on:
+        for x, y in ((10, 5), (10, 10), (12, 3), (13, 4), (13, 11), (12, 12)):
+            g.p(x, y, "cream")
+        g.rect(11, 6, 1, 4, "cream")
+        g.rect(14, 5, 1, 6, "cream")
     else:
-        g.rect(2, 6, 3, 4, "cream")
-        g.tri((4, 6), (9, 1), (9, 15), "cream")
-        g.tri((4, 10), (9, 1), (9, 15), "cream")
-        if on:
-            g.rect(11, 6, 1, 4, "cream")
-            g.rect(13, 4, 1, 8, "cream")
-    if not on:
-        for i in range(12):
-            g.p(2 + i, 2 + i, "red")
-            g.p(3 + i, 2 + i, "red")
+        for i in range(4):
+            g.rect(10 + i, 5 + i, 2, 2, "pink")
+            g.rect(13 - i, 5 + i, 2, 2, "pink")
     return g
 
 
 def heart(full):
+    """8x7: a full heart is filled dark red; an empty one is a dark brown outline, so the two
+    differ by fill as well as colour (5:1 or more on the cream and tan slots)."""
     g = Grid(8, 7)
-    for y, row in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
+    rows = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
+    for y, row in enumerate(rows):
         for x, c in enumerate(row):
-            if c == "1":
-                g.p(x, y, "red" if full else "tan")
+            if c != "1":
+                continue
+            inside = all(0 <= y + dy < len(rows) and 0 <= x + dx < len(row) and rows[y + dy][x + dx] == "1"
+                         for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
+            if full:
+                g.p(x, y, "dred")
+            elif not inside:
+                g.p(x, y, "dbrown")
     if full:
-        g.p(1, 1, "pink")
+        g.p(1, 1, "red")
+        g.p(2, 1, "pink")
     return g
 
 
@@ -161,6 +185,49 @@ def button(state):
     g.rect(1, top, 22, 20, face)
     g.rect(0, top + 1, 24, 18, face)
     g.rect(2, top + 1, 20, 1, hi)
+    return g
+
+
+def icon_button(state):
+    """20x20, for a 16x16 icon at (2, 1), or (2, 3) when pressed: a navy face in a tan rim on a
+    brown lip, so the rim holds 6.5:1 on the plum bar and 4.5:1 on the home street. Pressed, the
+    face sinks 2px into its lip."""
+    top = 2 if state == "pressed" else 0
+    g = Grid(20, 20)
+    if not top:
+        g.rect(1, 16, 18, 4, "brown")
+        g.rect(0, 16, 20, 3, "brown")
+    g.rect(1, top, 18, 18, "tan")
+    g.rect(0, top + 1, 20, 16, "tan")
+    g.rect(1, top + 1, 18, 16, "navy")
+    g.rect(1, top + 1, 18, 1, "dslate")
+    g.p(18, top + 1, "navy")
+    return g
+
+
+def switch(on):
+    """32x16, for the Settings panel's cream: a plum-rimmed track with the cream knob at the
+    right and a white tick on forest when on, at the left with a white cross on slate when off,
+    so the state reads by knob side and glyph as well as colour."""
+    track, sh = ("forest", "teal") if on else ("slate", "dslate")
+    g = Grid(32, 16)
+    for dy in range(16):
+        inset = round(8 - (64 - (dy - 7.5) ** 2) ** 0.5) if abs(dy - 7.5) < 8 else 8
+        g.rect(inset, dy, 32 - 2 * inset, 1, "plum")
+        if 0 < dy < 15:
+            inner = round(8 - (49 - (dy - 7.5) ** 2) ** 0.5) if abs(dy - 7.5) < 7 else 8
+            g.rect(inner + 1, dy, 30 - 2 * inner, 1, sh if dy == 1 else track)
+    kx = 23.5 if on else 8.5
+    g.ell(kx, 8, 6, 6, "plum")
+    g.ell(kx, 8, 5, 5, "cream", "tan")
+    g.p(int(kx) - 2, 5, "white")
+    if on:
+        for x, y in ((4, 8), (5, 9), (6, 10), (7, 9), (8, 8), (9, 7), (10, 6), (11, 5)):
+            g.rect(x, y, 1, 2, "white")
+    else:
+        for i in range(5):
+            g.rect(19 + i, 5 + i, 1, 2, "white")
+            g.rect(23 - i, 5 + i, 1, 2, "white")
     return g
 
 
@@ -332,9 +399,9 @@ def well(g, x, y, w, h):
 def top_bar():
     """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
     money 4,8 94x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 100,8
-    58x26 (treat at 104,13, count at 122,18), and zone 200,5 156x29 (the zone name right
-    aligned at 352,10, ui-zone-pips from 271,22). The pause button sits at 170,10 between
-    the treats and zone wells."""
+    42x26 (treat at 104,13, count at 122,18, up to three digits), and zone 194,5 162x29 (the
+    zone name right aligned at 352,10, ui-zone-pips from 271,22). Between the treats and zone
+    wells sit two ui-icon-buttons: the sound toggle at 146,10 and pause at 170,10."""
     g = Grid(360, 40)
     g.rect(0, 0, 360, 40, "plum")
     g.rect(0, 1, 360, 1, "dbrown")
@@ -344,8 +411,8 @@ def top_bar():
     g.rect(0, 38, 360, 1, "dbrown")
     g.rect(0, 39, 360, 1, "ink")
     well(g, 4, 8, 94, 26)
-    well(g, 100, 8, 58, 26)
-    well(g, 200, 5, 156, 29)
+    well(g, 100, 8, 42, 26)
+    well(g, 194, 5, 162, 29)
     return g
 
 
@@ -497,7 +564,9 @@ def sprites():
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
-    yield "icon-sound", [("on", [speaker(True).outlined()], 1000), ("off", [speaker(False).outlined()], 1000)]
+    yield "ui-icon-button", [(s, [icon_button(s).outlined(False)], 1000) for s in ("normal", "pressed")]
+    yield "ui-switch", [("on", [switch(True).outlined(False)], 1000), ("off", [switch(False).outlined(False)], 1000)]
+    yield "icon-sound", [("on", [speaker(True).outlined(False)], 1000), ("off", [speaker(False).outlined(False)], 1000)]
     yield "icon-music", [("on", [speaker(True, True).outlined()], 1000), ("off", [speaker(False, True).outlined()], 1000)]
     yield "ui-zone-pips", [(s, [zone_pip(s).outlined(False)], 1000) for s in ("done", "current", "todo")]
 

@@ -223,11 +223,12 @@ def home():
         cv.fill(x, y, 1, 1, "yellow")
     # the street sign on the corner (the game prints the name on the board in white, which
     # holds 7.8:1 on forest green)
-    cv.fill(326, 62, 2, 54, "slate")
-    cv.fill(326, 62, 1, 54, "grey")
-    cv.fill(300, 56, 54, 11, "teal")
-    cv.fill(301, 57, 52, 9, "forest")
-    cv.fill(324, 114, 6, 2, "dslate")
+    # (it sits 36px in from the right so the sound toggle fits in the corner above it)
+    cv.fill(290, 62, 2, 54, "slate")
+    cv.fill(290, 62, 1, 54, "grey")
+    cv.fill(264, 56, 54, 11, "teal")
+    cv.fill(265, 57, 52, 9, "forest")
+    cv.fill(288, 114, 6, 2, "dslate")
     # the front yard
     cv.fill(0, 126, W, 70, "green")
     for i in range(46):
