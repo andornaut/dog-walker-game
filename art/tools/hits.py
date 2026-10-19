@@ -2,12 +2,12 @@
 """Draw the encounter hit moments: a burst over the pack per encounter, the
 screen-edge flash in the encounter's colour, the plate behind the big label,
 and the per-dog status overlays. Bursts carry a 1px rim (plum, navy for water,
-teal for the skunk's green) so they hold 3:1 on the three light roads while
+teal for green) so they hold 3:1 on the three light roads while
 their fills carry Woof Way. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
 encounters.py.
 
-fx-hit-skunk       64x64  play (8 frames, 70ms)  lumpy green gas cloud that thins to a dither, wisps
+fx-hit-skunk       64x64  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
 fx-hit-puddle      64x64  play (7 frames, 70ms)  splash crown and flying drops
 fx-hit-thief       64x64  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
@@ -39,7 +39,7 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           stretched to 176x32 for every label; white font-title text at 2x,
                           centred, its line top 3px below the plate's top so the 10px caps sit
                           in rows 11 to 20
-fx-status-stinky   16x16  loop (4 frames, 180ms) green stink lines, teal-rimmed, rising over a dog's head
+fx-status-stinky   16x16  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
 fx-status-soaked   16x16  loop (4 frames, 150ms) drips falling off
 fx-status-spooked  16x16  loop (4 frames, 150ms) sweat drop popping, surprise lines
                    each status also has @75 (12x12) and @50 (8x8), same tags and timing;
@@ -97,12 +97,14 @@ def impact(g, outer, cx=32, cy=32, r=16):
 
 def hit_skunk(step):
     """The cloud swells in seven lobes, each with a scalloped rim of smaller puffs, then the lobes drift
-    apart, shrink and thin to a dither as the gas clears, trailing dithered wisps. Stink squiggles rise
-    out of it, green with a teal side, so they read over the cloud and on every road."""
+    apart, shrink and thin to a dither as the gas clears, trailing dithered wisps. Mauve, as skunk-cloud and
+    fx-status-stinky: the puffs mauve, shaded purple on their lower right and lit pink on their upper left, so
+    the pink carries Woof Way and the plum rim the light roads. Stink squiggles rise out of it, pink with a
+    plum side, so they read over the cloud and on every road."""
     g = Grid(64, 64)
     if step == 0:
-        impact(g, "green")
-        return rim(g, "teal")
+        impact(g, "mauve")
+        return rim(g, "plum")
     d = (0, 6, 10, 13, 16, 19, 22, 25)[step]
     r = (0, 7, 9, 10, 9, 7, 5, 3)[step]
     core = (0, 9, 12, 13, 10, 5, 0, 0)[step]
@@ -119,8 +121,8 @@ def hit_skunk(step):
                 puffs.append((cx + math.cos(b) * rk * 1.1, cy + math.sin(b) * rk * 1.1, rk * (0.45 if j % 2 else 0.55)))
     puffs += [(cx, cy, rk) for cx, cy, rk, _ in lobes] + ([(32, 33, core)] if core else [])
     for cx, cy, pr in puffs:
-        g.ell(cx, cy, pr, pr, "green")
-    # a dgreen seam along the lower right of the core and every other lobe, where it lies inside the cloud,
+        g.ell(cx, cy, pr, pr, "mauve")
+    # a purple seam along the lower right of the core and every other lobe, where it lies inside the cloud,
     # so the puffs in front read over the ones behind
     mass = [row[:] for row in g.px]
     front = [(cx, cy, rk) for k, (cx, cy, rk, _) in enumerate(lobes) if k % 2 == 0] + ([(32, 33, core)] if core else [])
@@ -128,26 +130,29 @@ def hit_skunk(step):
         for deg in range(0, 100, 4):
             x, y = round(cx + math.cos(math.radians(deg)) * (pr - 0.5)), round(cy + math.sin(math.radians(deg)) * (pr - 0.5))
             if 2 <= x < 62 and 2 <= y < 62 and all(mass[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)):
-                g.p(x, y, "dgreen")
-    # shade the lower-right edge of every puff, so the lumps read and overlapping lobes read as one mass
+                g.p(x, y, "purple")
+    # shade the lower-right edge of every puff, so the lumps read and overlapping lobes read as one mass, and
+    # light the mass's upper-left edge pink
     lit = [row[:] for row in g.px]
     for y in range(62):
         for x in range(62):
             if lit[y][x] and not (lit[y + 1][x + 1] and lit[y + 2][x + 2]):
-                g.p(x, y, "dgreen")
+                g.p(x, y, "purple")
+            elif lit[y][x] and (x == 0 or y == 0 or not lit[y - 1][x] or not lit[y][x - 1]):
+                g.p(x, y, "pink")
     if 1 <= step < 4:
-        g.ell(32 - core * 0.35, 33 - core * 0.4, core * 0.3, core * 0.2, "yellow")
-        g.ell(32 - core * 0.3, 33 - core * 0.3, core * 0.3, core * 0.2, "green")
-    rim(g, "teal")
+        g.ell(32 - core * 0.35, 33 - core * 0.4, core * 0.3, core * 0.2, "pink")
+        g.ell(32 - core * 0.3, 33 - core * 0.3, core * 0.3, core * 0.2, "mauve")
+    rim(g, "plum")
     if step >= 5:
-        # clearing: the inside thins to a checker dither, the solid rim and the green just inside it stay
+        # clearing: the inside thins to a checker dither, the solid rim and the edge just inside it stay
         solid = [row[:] for row in g.px]
         for y in range(2, 62):
             for x in range(2, 62):
                 if all(solid[y + dy][x + dx] for dx in (-2, 0, 2) for dy in (-2, 0, 2)) and (x + y + step) % 2:
                     g.p(x, y, None)
     if step >= 2:
-        # wisps curling off the cloud, dithered: alternate pixels green and teal, so they hold on every road,
+        # wisps curling off the cloud, dithered: alternate pixels pink and plum, so they hold on every road,
         # with a second strand on alternate pixels at the base
         t = step - 2
         for j, (deg, curl) in enumerate(((200, 1), (330, -1), (60, 1), (140, -1), (265, 1))):
@@ -160,7 +165,7 @@ def hit_skunk(step):
                 for k, (dx, dy) in enumerate(((0, 0), (1, 1)) if i < 3 else ((0, 0),)):
                     xx, yy = x + dx, y + dy
                     if 1 <= xx < 63 and 1 <= yy < 63 and not g.px[yy][xx] and (k == 0 or i % 2):
-                        g.p(xx, yy, "green" if (i + k) % 2 == 0 else "teal")
+                        g.p(xx, yy, "pink" if (i + k) % 2 == 0 else "plum")
     if step >= 1:
         # five rising S-lines: 2px a frame up over an 8px wave, the outer ones leaning out
         rise = (0, 0, 4, 8, 12, 15, 18, 20)[step]
@@ -170,8 +175,8 @@ def hit_skunk(step):
                 y = y0 - rise - t
                 x = x0 + lean * (rise + t) * 0.4 + WAVE[(t + j * 3 + step * 2) % 8]
                 if 1 <= y < 63:
-                    g.p(round(x), y, "green")
-                    g.p(round(x) + 1, y, "teal")
+                    g.p(round(x), y, "pink")
+                    g.p(round(x) + 1, y, "plum")
     return g
 
 
@@ -786,8 +791,9 @@ def label_plate(face="dred", lit="red", shade="plum"):
 
 
 def status_stinky(size, step):
-    """Wavy lines rising 2px a frame over an 8px wave, so 4 frames loop with no seam. Green, each whole
-    squiggle rimmed in teal, so the green carries Woof Way and the teal the light roads. The lines sit
+    """Wavy lines rising 2px a frame over an 8px wave, so 4 frames loop with no seam. Pink, each whole
+    squiggle rimmed in plum, so the pink carries Woof Way and the plum the light roads: the skunk's mauve
+    family, as skunk-cloud and fx-hit-skunk. The lines sit
     1px in from every edge, so the rim closes round them, and wave in step (the middle one a row ahead),
     so neighbouring rims never close the gap between them."""
     g = Grid(size, size)
@@ -798,8 +804,8 @@ def status_stinky(size, step):
             k = (y + 2 * step + ph) % 8
             if k == 7 or (size == 8 and k == 3):
                 continue
-            g.p(x0 + WAVE[k], y, "green")
-    return rim(g, "teal")
+            g.p(x0 + WAVE[k], y, "pink")
+    return rim(g, "plum")
 
 
 DRIP = {16: (".c.", "cwc", "ccs", ".s."), 12: ("c.", "ws", "s."), 8: ("c", "s")}

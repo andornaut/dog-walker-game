@@ -399,13 +399,13 @@ def skunk(s, sway):
 def skunk_cloud(s, step):
     """road.skunk_cloud redrawn at its own size. The full-size fill is a dither on every other row, which
     nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim
-    keeps both of its pixels, teal outside for the light roads and green inside it for Woof Way; the stink
+    keeps both of its pixels, plum outside for the light roads and pink inside it for Woof Way; the stink
     wisps scale with it, and a swelling puff still grows by a whole pixel. A puff near the frame's top or
     sides is trimmed so that, swollen, it still stops a pixel short of them; the frame's last row cuts the
     haze level, as at full size."""
     w, h = scaled(road.CLOUD_W, s), scaled(road.CLOUD_H, s)
     g = Grid(w, h)
-    k = road.CLOUD_SQUASH
+    k, ink = road.CLOUD_SQUASH, road.CLOUD_INK
     puffs = []
     for i, (cx, cy, r) in enumerate(road.CLOUD_PUFFS):
         cx, cy = cx * s, cy * s
@@ -427,14 +427,14 @@ def skunk_cloud(s, step):
             if not inside(x, y):
                 continue
             if (x, y) in outer:
-                g.p(x, y, "teal")
+                g.p(x, y, ink["outer"])
             elif beside(x, y, lambda a, b: (a, b) in outer):
-                g.p(x, y, "green")
+                g.p(x, y, ink["inner"])
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
-                g.p(x, y, "green" if (x + y) % 8 else "dgreen")
+                g.p(x, y, ink["fill"] if (x + y) % 8 else ink["dark"])
     for x0, y0 in road.CLOUD_WISPS:
         for j in range(scaled(6, s)):
-            g.p(x0 * s + (j + step) % 3 - 1, y0 * s + j, "dgreen")
+            g.p(x0 * s + (j + step) % 3 - 1, y0 * s + j, ink["wisp"])
     return g
 
 

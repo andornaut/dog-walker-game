@@ -147,17 +147,11 @@ def walker_girl(lf=0, rf=0, bob=0, arms=0):
     for x, y, rx, ry in ((10.2, 30.6, 1.6, 1.4), (13.4, 31, 2, 1.6), (16.6, 30.4, 1.3, 1.3), (19.4, 30.8, 1.9, 1.5),
                          (21.9, 30.2, 1.2, 1.2)):
         g.ell(x, y + b, rx, ry, "navy" if x < 20 else "ink")
-    # curls scattered over the back in clusters of 2 and 3 pixels, lit mauve and purple on the upper left, a
-    # dark hollow at the heart of the big ones; those on the shaded right take purple and dslate instead
-    for x, y, size in CURLS:
-        lit, mid = ("mauve", "purple") if x < 18 else ("purple", "dslate")
-        if size == 3:
-            for dx, dy, c in ((1, 0, lit), (2, 0, mid), (0, 1, lit), (1, 1, "ink"), (2, 1, mid), (0, 2, mid),
-                              (1, 2, mid), (2, 2, "ink")):
-                g.p(x + dx, y + dy + b, c)
-        else:
-            for dx, dy, c in ((0, 0, lit), (1, 0, mid), (0, 1, mid), (1, 1, "ink")):
-                g.p(x + dx, y + dy + b, c)
+    # the curls as a few unbroken wavy locks down the back, dslate on the lit side and navy in the shade, so
+    # the hair holds one mass at road scale with no single-pixel texture
+    for x0, y0, length, c in CURL_LOCKS:
+        for k in range(length):
+            g.p(x0 + CURL_WAVE[k % len(CURL_WAVE)], y0 + k + b, c)
     g.ell(16, 12 + b, 2.5, 1.5, "pink", "mauve")
     # a light rim along the edges facing the light keeps her dark hair and skin off the dark road
     return rim(g, dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"),
@@ -165,7 +159,8 @@ def walker_girl(lf=0, rf=0, bob=0, arms=0):
 
 
 def walker_man(lf=0, rf=0, bob=0, arms=0):
-    """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): black tee, track pants, sneakers."""
+    """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): green tee, navy track pants,
+    sneakers. The tee's green is a hue no road has, so he reads on all six."""
     g = Grid(32, 48)
     b = bob
     for x, f in ((11, lf), (17, rf)):
@@ -176,15 +171,14 @@ def walker_man(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 44 + f, 4, 1, "lgrey")
         g.rect(x + 1, 43 + f, 2, 1, "red")
     for x, d in ((5, -arms), (23, arms)):
-        g.rect(x, 22 + b + d, 4, 4, "navy")
+        g.rect(x, 22 + b + d, 4, 4, "green")
+        g.rect(x + 3, 22 + b + d, 1, 4, "dgreen")
         g.rect(x, 26 + b + d, 4, 6, "dbrown")
         g.rect(x + 3, 26 + b + d, 1, 6, "plum")
         g.rect(x, 32 + b + d, 4, 3, "dbrown")
-    # the black tee: slate catches the light down the left side and across the shoulders
-    g.rect(9, 21 + b, 14, 13, "navy")
-    g.rect(20, 21 + b, 3, 13, "ink")
-    g.rect(10, 22 + b, 1, 11, "slate")
-    g.rect(11, 22 + b, 8, 1, "slate")
+    # the green tee, shaded dgreen down its right side
+    g.rect(9, 21 + b, 14, 13, "green")
+    g.rect(20, 21 + b, 3, 13, "dgreen")
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
     g.rect(13, 19 + b, 6, 3, "dbrown")
@@ -195,8 +189,8 @@ def walker_man(lf=0, rf=0, bob=0, arms=0):
     g.rect(11, 7 + b, 3, 1, "brown")
     g.p(11, 8 + b, "brown")
     # a light rim along the edges facing the light, a dimmer one opposite, so he holds on the dark road
-    return rim(g, dict(navy=("grey", "grey"), ink=("grey", "grey"), slate=("lgrey", "grey"),
-                       dbrown=("skin2", "brown"), plum=("skin2", "brown")))
+    return rim(g, dict(navy=("grey", "grey"), dgreen=("green", None), dbrown=("skin2", "brown"),
+                       plum=("skin2", "brown")))
 
 
 def walker_teacher(lf=0, rf=0, bob=0, arms=0):
@@ -240,9 +234,10 @@ def walker_teacher(lf=0, rf=0, bob=0, arms=0):
     return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
 
 
-# Ada's curls as (x, y, size): placed by hand, unevenly, so they read as curls rather than a pattern.
-CURLS = ((11, 19, 3), (15, 18, 2), (18, 20, 3), (9, 22, 2), (13, 22, 3), (21, 22, 2), (16, 24, 2), (10, 25, 3),
-         (19, 25, 3), (14, 26, 2), (12, 28, 2), (16, 28, 3), (20, 29, 2), (9, 29, 2))
+# Ada's curly locks as (x, top row, rows, colour), each a 1px line swinging along CURL_WAVE as it falls, two
+# rows at a time, so every pixel of a lock touches the next.
+CURL_LOCKS = ((11, 20, 10, "dslate"), (15, 19, 10, "dslate"), (19, 21, 8, "ink"))
+CURL_WAVE = (0, 0, 1, 1, 0, 0, -1, -1)
 
 
 WALKERS = {
@@ -428,12 +423,15 @@ CLOUD_SQUASH = 0.42
 CLOUD_W, CLOUD_H = 88, 40
 # Where each stink wisp starts, trailing 6 rows down.
 CLOUD_WISPS = ((22, 25), (62, 22), (72, 30), (14, 31), (42, 17))
+# The haze's colours: the outer and inner rim, the dithered fill and its darker pixels, and the wisps.
+CLOUD_INK = dict(outer="plum", inner="pink", fill="mauve", dark="purple", wisp="purple")
 
 
 def skunk_cloud(step):
     """88x40 stink haze drawn under the skunk, low and wide on the road: puffs with a solid rim and a 2x2-dithered
-    fill, so the road shows through. The puffs swell in turn; the base stays on the last row. The rim is two
-    pixels: teal outside, which holds 3:1 on the light roads, and green inside it, which holds on Woof Way."""
+    mauve fill, so the road shows through. The puffs swell in turn; the base stays on the last row. The rim is
+    two pixels: plum outside, which holds 3:1 on the light roads, and pink inside it, which holds on Woof Way.
+    Mauve keeps it apart from the green hedges, and matches fx-hit-skunk and fx-status-stinky."""
     w, h = CLOUD_W, CLOUD_H
     g = Grid(w, h)
     puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(CLOUD_PUFFS)]
@@ -453,14 +451,14 @@ def skunk_cloud(step):
             if not inside(x, y):
                 continue
             if (x, y) in outer:
-                g.p(x, y, "teal")
+                g.p(x, y, CLOUD_INK["outer"])
             elif beside(x, y, lambda a, b: (a, b) in outer):
-                g.p(x, y, "green")
+                g.p(x, y, CLOUD_INK["inner"])
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
-                g.p(x, y, "green" if (x + y) % 8 else "dgreen")
+                g.p(x, y, CLOUD_INK["fill"] if (x + y) % 8 else CLOUD_INK["dark"])
     for x0, y0 in CLOUD_WISPS:
         for k in range(6):
-            g.p(x0 + (k + step) % 3 - 1, y0 + k, "dgreen")
+            g.p(x0 + (k + step) % 3 - 1, y0 + k, CLOUD_INK["wisp"])
     return g
 
 

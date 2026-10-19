@@ -315,14 +315,12 @@ def walker_girl(mood):
 
 
 def walker_man(mood):
-    """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; black tee."""
+    """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; green tee."""
     g = face()
-    # the black tee rimmed in dslate across the shoulders, lit on the left, with a slate collar, so it holds
-    # apart from the beard and the ink line
-    g.rect(8, 27, 16, 1, "dslate")
-    g.rect(6, 28, 20, 3, "navy")
-    g.rect(6, 28, 3, 1, "dslate")
-    g.rect(21, 28, 5, 3, "ink")
+    # the green tee, shaded dgreen on the right, with a dgreen collar, as on his road sprite
+    g.rect(8, 27, 16, 1, "green")
+    g.rect(6, 28, 20, 3, "green")
+    g.rect(21, 28, 5, 3, "dgreen")
     g.rect(13, 24, 6, 4, "plum")
     g.cel(8.5, 16, 1.2, 1.8, "dbrown", "plum")
     g.cel(23.5, 16, 1.2, 1.8, "dbrown", "plum")
@@ -333,9 +331,9 @@ def walker_man(mood):
     g.rect(22, 17, 1, 5, "ink")
     g.ell(16, 22.5, 6, 2.5, "ink")
     g.rect(13, 20, 6, 2, "dbrown")
-    g.rect(12, 26, 8, 1, "slate")
-    g.rect(11, 27, 1, 1, "slate")
-    g.rect(20, 27, 1, 1, "slate")
+    g.rect(12, 26, 8, 1, "dgreen")
+    g.rect(11, 27, 1, 1, "dgreen")
+    g.rect(20, 27, 1, 1, "dgreen")
     expression(g, mood, feat="cream", blush="rust", brow="ink", whites=True)
     return g
 

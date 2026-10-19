@@ -35,7 +35,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, edged, main  # noqa: E402
+from pixel import K, Grid, edged, main  # noqa: E402
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
 # and the body bobs up on the passing beats 1 and 3.
@@ -161,13 +161,13 @@ def koda_road(q):
     # o shifts the body down so the big head has headroom to hop and lean
     b, ln, o = q["bob"], q["lean"], 2
     # legs: white, front pair beside the shoulders, back pair under the hips
-    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "lgrey")
-    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "lgrey")
-    g.rect(9, 26 + q["bl"], 3, 4, "lgrey")
-    g.rect(20, 26 + q["br"], 3, 4, "lgrey")
+    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
+    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
+    g.rect(9, 26 + q["bl"], 3, 4, "white")
+    g.rect(20, 26 + q["br"], 3, 4, "white")
     # body: white flanks, grey saddle, harness
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 7.5, 6, "lgrey", "grey", "white")
+    g.ell(bx, 20.5 + o + b, 7.5, 6, "white", "lgrey")
     g.ell(bx, 19.5 + o + b, 5, 5, "slate", "dslate", "grey")
     g.rect(bx - 6, 16 + o + b, 12, 2, "orange")
     g.rect(bx - 6, 17 + o + b, 12, 1, "rust")
@@ -176,8 +176,8 @@ def koda_road(q):
     g.ell(bx, 15 + o + b, 5, 1.5, "dslate")
     # curled tail over the hips
     tx = 16 + q["tail"]
-    g.ell(tx, 28 + b, 3.5, 2, "lgrey", "grey", "white")
-    g.p(tx, 28 + b, "grey")
+    g.ell(tx, 28 + b, 3.5, 2, "white", "lgrey")
+    g.p(tx, 28 + b, "lgrey")
     # big head with white cheeks and upright ears
     hx = 16 + ln
     e = q["ears"]
@@ -186,8 +186,9 @@ def koda_road(q):
     g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "slate")
     g.tri((hx + 7, 7 + o + b + t), (hx + 6, tip + t), (hx + 2, 4.5 + o + b + t), "slate")
     g.ell(hx, 9.5 + o + b, 8, 6, "slate", "dslate", "grey")
-    g.ell(hx - 6.5, 12 + o + b, 2, 2.2, "lgrey")
-    g.ell(hx + 6.5, 12 + o + b, 2, 2.2, "lgrey", "grey")
+    g.ell(hx - 6.5, 12 + o + b, 2, 2.2, "white")
+    g.ell(hx + 6.5, 12 + o + b, 2, 2.2, "white", "lgrey")
+    underside(g)
     spray(g, q["spray"])
     return g
 
@@ -289,6 +290,7 @@ def duchess_road(q):
     g.ell(hx + 4.5, 18 + b - q["ears"] + q["twitch"], 2.2, 4, "lgrey")
     g.ell(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
     bow(g, hx, 10 + b)
+    underside(g)
     spray(g, q["spray"])
     return g
 
@@ -442,6 +444,7 @@ def pierre_road(q):
     g.rect(hx + 3, 5 + b, 2, 3, "purple")
     g.p(hx + 2, 6 + b, "mauve")
     g.p(hx, 5 + b, "mauve")
+    despeckle(g, ("skin1", "skin2", "cream", "brown"))
     spray(g, q["spray"])
     return g
 
@@ -577,6 +580,7 @@ def snowball_road(q):
     g.ell(hx, 9.5 + o + b, 8, 6, "white", "lgrey")
     g.ell(hx - 7, 12 + o + b, 2, 2.2, "white")
     g.ell(hx + 7, 12 + o + b, 2, 2.2, "lgrey")
+    underside(g)
     spray(g, q["spray"])
     return g
 
@@ -703,13 +707,12 @@ def droop(mood):
 
 
 def puff(g, cx, cy, rx, ry, ring=False):
-    """A clipped poodle pom-pom: apricot with a cream highlight and a cream curl on the shade. ring
-    sets it apart from the puffs it is drawn over with a 1px skin2 ring."""
+    """A clipped poodle pom-pom: apricot, shaded skin2 on its lower right, with a cream highlight only on a
+    puff big enough to hold one as a shape, so the coat carries no single-pixel texture. ring sets it apart
+    from the puffs it is drawn over with a 1px skin2 ring."""
     if ring:
         g.ell(cx, cy, rx + 1, ry + 1, "skin2")
-    g.ell(cx, cy, rx, ry, "skin1", "skin2", "cream")
-    if rx >= 2 and ry >= 2:
-        g.p(cx + rx * 0.4, cy + ry * 0.3, "cream")
+    g.ell(cx, cy, rx, ry, "skin1", "skin2", "cream" if min(rx, ry) >= 3 else None)
 
 
 
@@ -785,6 +788,40 @@ def spray(g, d):
     for x, y, c in ((7, 14, "cyan"), (6, 20, "white"), (25, 12, "cyan"), (25, 18, "white"), (24, 23, "cyan")):
         side = -1 if x < 16 else 1
         g.p(x + side * d, y - d / 2, c)
+
+
+# A white or light grey coat's underside, one ramp step darker: white to lgrey, lgrey to grey.
+UNDERSIDE = {"ffffff": "c0cbdc", "c0cbdc": "8b9bb4"}
+
+
+def underside(g):
+    """Darken a white or grey coat's lower-right silhouette one ramp step: every coat pixel with open road
+    below it or to its right. The coat keeps its colour, and its shade sits a step darker than Sniff Street
+    Shops' light grey, so a white dog keeps its mass on the light roads. Works on the grid a small version
+    draws to as well."""
+    px = getattr(g, "g", g).px
+    h, w = len(px), len(px[0])
+    edge = [(x, y) for y in range(h) for x in range(w) if px[y][x] in UNDERSIDE and (
+        y + 1 >= h or x + 1 >= w or not px[y + 1][x] or not px[y][x + 1])]
+    for x, y in edge:
+        px[y][x] = UNDERSIDE[px[y][x]]
+
+
+def despeckle(g, colours):
+    """Fill every lone pixel of the given coat colours, one that none of its four opaque neighbours shares,
+    with its neighbours' most common colour, so overlapping puffs leave no single-pixel texture to shimmer at
+    road scale. Works on the grid a small version draws to as well."""
+    px = getattr(g, "g", g).px
+    h, w = len(px), len(px[0])
+    coat = {K[c] for c in colours}
+    lone = []
+    for y in range(1, h - 1):
+        for x in range(1, w - 1):
+            nb = [px[y - 1][x], px[y + 1][x], px[y][x - 1], px[y][x + 1]]
+            if px[y][x] in coat and all(nb) and px[y][x] not in nb:
+                lone.append((x, y, max(nb, key=nb.count)))
+    for x, y, c in lone:
+        px[y][x] = c
 
 
 def bow(g, cx, y, big=False, colours=("pink", "mauve")):
