@@ -25,7 +25,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ## The game in one paragraph
 
-Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and up to one piece of gear, then walk a fixed route of 4 zones through Maple Street, the first world. The street scrolls toward you at a relaxed pace; switch between 5 lanes to dodge trouble, grab treats and tips, and bump into the occasional lucky find. Hitting an obstacle opens a choice card, and which owners it upsets depends on the dogs' traits. Each zone has one forced stop. After zones 1–3, pick 1 of 3 upgrade cards. Each dog pays a share of its fee for every zone it survives; if an owner's happiness hits zero, they fire you and the dog leaves. The run ends when you finish zone 4 or run out of dogs, and you keep what you've earned, minus the fees of any owner who fired you. Banked money buys new dogs, gear, training, walker kit and cosmetics.
+Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to start; up to 3 slots and 9 dogs) and up to one piece of gear, then walk a fixed route of 4 zones through Maple Street, the first world. The street scrolls toward you at a relaxed pace; switch between 5 lanes to dodge trouble, grab treats and tips, and bump into the occasional lucky find. Hitting an obstacle opens a choice card, and which owners it upsets depends on the dogs' traits. Each zone has one forced stop. After zones 1–3, pick 1 of 3 upgrade cards. Each dog pays a share of its fee for every zone it survives; if an owner's happiness hits zero, they fire you and the dog leaves. The run ends when you finish zone 4 or run out of dogs, and you keep what you've earned, minus the fees of any owner who fired you. Banked money buys new dogs, gear, training, walker kit and cosmetics.
 
 ## Rules
 
@@ -77,7 +77,9 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and up to one piece of g
 - Treat: carried (up to 3); tap a dog's slot in the dog column to give its owner +1 ♥
 - Tip: +$. Smaller packs earn bigger tips: passers-by tip more for a calm walk
 
-### Dogs (roster of 9, pick 1–3)
+### Dogs (roster of 9, one per dog slot)
+
+You start with 1 dog slot and buy slots 2 and 3 on the home screen, at any time you can pay. Walking more dogs is the main progression.
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
@@ -154,7 +156,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 ### Home screen and progression
 
 - Money earned in a run is banked
-- The home screen is also the shop: tap a locked dog or gear item to buy it; there is no separate shop screen
+- The home screen is also the shop: tap a locked dog, dog slot or gear item to buy it; there is no separate shop screen
 - **Gear** (5 items, permanent, bought once): fanny pack (start with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +1 ♥ and has +1 max ♥). Pick up to 1 owned item before each run (none is allowed, e.g. on a first run). Equipped gear shows as a badge beside the walker
 - **Dog training:** two courses per dog you own: Heel (the dog pulls half as often) and Good manners (its owner starts with +1 ♥ and has +1 max ♥)
 - **Walker kit** (permanent, always on): Quick feet (lane changes 20% faster); Treat belt (carry 4 treats instead of 3); Business cards (fees +10%); Firm grip (input lock after a pull halved)
@@ -175,6 +177,7 @@ Prices not yet in the data:
 
 | What       | Price                                                                                                  |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
+| Dog slots  | Slot 2 $400 · slot 3 $900                                                                              |
 | Training   | Heel $150 · Good manners $250, per dog                                                                 |
 | Walker kit | Quick feet $300 · Treat belt $300 · Business cards $400 · Firm grip $400                               |
 | Cosmetics  | Extra walkers $200 each · dog accessories $80 each · leash colours $40 each · decor pieces $60 to $160 |
@@ -189,7 +192,7 @@ The milestones build the core loop first; placeholder art is fine until Mileston
 2. **Runner core:** 5 lanes, scrolling, spawning, collisions, keyboard + touch
 3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, lucky encounters, Stinky, owner quips, dogs leave at 0 ♥
 4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
-5. **Dogs & home screen:** 9-dog roster (3 unlocked, 6 bought) with 1–3 picks, bank, shop in place, gear and loadout, dog training, walker kit, cosmetic unlocks, walker customization, logbook and stats, save
+5. **Dogs & home screen:** 9-dog roster (3 unlocked, 6 bought), dog slots (1 to start, 2 bought), pack picks, bank, shop in place, gear and loadout, dog training, walker kit, cosmetic unlocks, walker customization, logbook and stats, save
 6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; test on real phones
 
 **Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.

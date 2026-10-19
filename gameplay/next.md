@@ -11,7 +11,6 @@ The game grows sideways rather than upward. A world is a set of 4 zones with its
 - Minigames as an alternative way to resolve encounters
 - Branching paths between zones: the player chooses the route
 - Permanent unlocks as in-run choices: pick a run boost or a permanent unlock, Hades-style
-- Unlockable dog slots: start with 1, unlock 2 and 3 via progression and better leashes
 - Special dogs found mid-walk, only with 2 or fewer dogs; once found, they join the roster
 - Your own dog: an end-game unlock
 - Time of day: dawn, midday, dusk, night
