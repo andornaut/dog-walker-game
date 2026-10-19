@@ -26,7 +26,7 @@ export const TUNING = {
     luckyCollarMax: 1,
     luckyCollarStart: 1,
     maxBySize: { big: 10, medium: 8, small: 6 },
-    startByTemperament: { dramatic: 5, fussy: 4, laidBack: 6 },
+    startByTemperament: { dramatic: 5, fussy: 4, laidBack: 5 },
     treat: 1,
   },
   // Dollars. The game counts money in cents, so $1.50 is exact.
