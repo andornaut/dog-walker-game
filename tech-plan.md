@@ -21,19 +21,23 @@
 - **Screen layout:** top bar 360×40, backdrop band 360×150 (the zone's neighbourhood and scenery gags, never part of a lane), dog column 80×450 with 3 slots, and road 280×450 split into 5 lanes. A fired dog's slot empties, so the road never changes width.
 - **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
 - **Text:** bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x; text that doesn't fit is shortened, wrapped, or moved to the enlarged card.
-- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull re-anchors the drag.
+- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull will re-anchor the drag once pulls are wired.
 - **Accessibility:** reduced motion (a setting, defaulting to `prefers-reduced-motion`) drops decorative motion but keeps every highlight and state change, the road scroll and the lane slide. No state relies on colour alone. Tap targets are at least 48 CSS px with 8 px between them. Text meets 4.5:1 contrast and essential icons 3:1.
 - **Sound:** `src/audio/` maps cues to manifest keys and mixes music and effects volumes from settings, ducking music under cards and muting while paused or hidden. `src/scenes/soundboard.ts` is the Phaser wrapper. Each sound ships as Ogg plus AAC.
 - **Source layout:**
   - `src/data/`: content and tuning
   - `src/rules/`, `src/state/`: run state and pure rules
-  - `src/runner/`: lane motion, pulls, zones, spawn planning, collisions
+  - `src/runner/`: lane motion, zones, spawn planning, collisions, the hit stop
   - `src/input/`: keys and the touch gesture state machine
+  - `src/home/`, `src/hud/`, `src/help/`: view models for the home, settings, stats and end screens, the top bar and pause menu, and the help screen
+  - `src/text/`: the pixel font
   - `src/layout/`: screen geometry
   - `src/assets/`: manifest and Aseprite parsing
   - `src/save/`: persistence
   - `src/sim/`: the run simulator
   - `src/pwa/`, `src/dev/`: phone app and dev tools
+  - `src/dataPage/`: the `/data/` page
+  - `src/headers/`: the build-time security headers
   - `src/crash/`: the crash screen
   - `src/scenes/`, `src/main.ts`: everything that touches Phaser
 - **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser, and only tests may import `src/testing/`. ESLint enforces both, so all game logic runs in unit tests without a renderer.
@@ -45,7 +49,7 @@
 
 - **Format:** typed TypeScript modules in `src/data/`. Content is `as const satisfies Type`. Tuning uses plain `satisfies` so its values stay `number` for live tuning.
 - **Ownership:** gameplay edits values and content in the value files. Tech owns `types.ts`, `index.ts`, `screen.ts`, `src/rules/` and the tests.
-- **Effects:** card options are lists of effects from a closed set of kinds, naming tuning numbers by key, so every number lives once in `tuning.ts`. A new kind is code in `src/rules/` plus a test.
+- **Effects:** card options are lists of effects from a closed set of kinds, naming money amounts and modifiers by their `tuning.ts` key. Hearts deltas are written inline. A new kind is code in `src/rules/` plus a test.
 - **Card text:** generated from the effects and tuning, covered by a snapshot test.
 - **Units:** money (integer cents), hearts, seconds, probability, pixels and multipliers are branded types in the rules; value files hold plain numbers. Hearts deltas are -3 to 3.
 - **Integrity:** `src/data/data.test.ts` checks the rulebook's invariants, and type-level tests show invalid data fails to compile.
@@ -55,11 +59,11 @@
 ## Save data
 
 - **Scope:** one profile per browser, local only, per origin.
-- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, and the zone checkpoint, all referenced by data ids. Firings per owner and worlds finished are derived, not stored.
+- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, and the zone checkpoint, all referenced by data ids. Worlds finished is derived, not stored.
 - **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
 - **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
-- **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter replaces it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
+- **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter will replace it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
 - **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
 - **Scenes:** `src/scenes/profileStore.ts` holds the loaded save for every scene and is the only way scenes read or change it.
 
@@ -87,8 +91,8 @@
 | `speed` | scroll-speed multiplier         | 1               |
 | `dev`   | `1` shows the overlay           | `0`             |
 
-- One seed feeds independent random streams (spawns per zone, rolls, pulls, cards).
-- Lane moves and card choices are recorded with their simulation time in a versioned input log that replays the run exactly. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
+- One seed feeds independent random streams: `spawns-<zone>`, `rolls`, `cards`, `quips` and `scenery`.
+- Lane moves and card choices are recorded with their simulation time in a versioned input log. Treats are not logged yet, so a run with treats does not replay exactly. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run.
 - The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, run link, replay, and save tools (reset, +$1,000, unlock all).
 
