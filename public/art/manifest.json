@@ -156,6 +156,11 @@
       "json": "sprites/other-dog.json"
     },
     {
+      "key": "other-dog-owner",
+      "png": "sprites/other-dog-owner.png",
+      "json": "sprites/other-dog-owner.json"
+    },
+    {
       "key": "photo-op",
       "png": "sprites/photo-op.png",
       "json": "sprites/photo-op.json"

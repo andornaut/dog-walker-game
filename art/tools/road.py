@@ -316,6 +316,28 @@ def bark(big):
     return g
 
 
+def dog_owner_top(g, b):
+    """The other dog's walker: yellow raincoat, brown bob, leash hand held out low."""
+    g.rect(9, 21 + b, 14, 13, "amber")
+    g.rect(20, 21 + b, 3, 13, "orange")
+    g.rect(9, 21 + b, 1, 12, "yellow")
+    g.rect(15, 22 + b, 1, 11, "orange")
+    g.p(13, 25 + b, "orange")
+    g.p(13, 29 + b, "orange")
+    g.rect(5, 22 + b, 4, 9, "amber")
+    g.rect(5, 31 + b, 4, 3, "skin1")
+    g.rect(23, 22 + b, 4, 8, "amber")
+    g.rect(24, 30 + b, 4, 3, "skin1")
+    g.ell(16, 12.5 + b, 8, 8, "skin1", "skin2")
+    g.ell(16, 8.5 + b, 9, 5, "dbrown", "plum", "brown")
+    g.rect(7, 9 + b, 3, 9, "dbrown")
+    g.rect(22, 9 + b, 3, 9, "dbrown")
+    g.rect(10, 9 + b, 12, 2, "dbrown")
+    face_front(g, 16, 13 + b)
+    g.p(10, 16 + b, "pink")
+    g.p(22, 16 + b, "pink")
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def frames(gs, outline=True):
@@ -330,6 +352,8 @@ def sprites():
                        ("run", frames([squirrel(0, -1), squirrel(-1, 1)]), 120)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
     yield "other-dog", [("walk", frames([corgi(-1), corgi(1)]), 200)]
+    yield "other-dog-owner", [("walk", [person(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
+                                        person(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200)]
     yield "thief", [("walk", [person(thief_top(False), lf=-2).outlined(), person(thief_top(False), rf=-2).outlined()], 200),
                     ("flee", [person(thief_top(True), lf=-3, bob=-1).outlined(),
                               person(thief_top(True), rf=-3, bob=-1).outlined()], 110)]

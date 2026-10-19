@@ -28,7 +28,8 @@ Dogs are listed in their own section below. Each of the 9 dogs is a named charac
 | Asset             | Key                            | Type   | Size  | Animations      | Priority | Notes                                                                                          |
 | ----------------- | ------------------------------ | ------ | ----- | --------------- | -------- | ---------------------------------------------------------------------------------------------- |
 | Walker            | `walker`, then `walker-<name>` | sprite | 32×48 | `walk`, `react` | M6       | 3 to 4 presets the player picks from; seen from behind; the first (cap and hoodie) is `walker` |
-| Other dog + owner | `other-dog`                    | sprite | 32×32 | `walk`          | M6       | Encounter obstacle; with a 32×48 owner alongside                                               |
+| Other dog         | `other-dog`                    | sprite | 32×32 | `walk`          | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                         |
+| Other dog's owner | `other-dog-owner`              | sprite | 32×48 | `walk`          | M6       | Walks behind the other dog; the game draws the leash                                           |
 | Stinky effect     | `fx-stinky`                    | sprite | 32×32 | `loop`          | core     | Green stink lines over the pack while Stinky lasts                                             |
 
 ## Dogs
