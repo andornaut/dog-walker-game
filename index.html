@@ -14,7 +14,7 @@
       href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
     />
     <style>
-      /* Project home: the title and a centred Play over a live road scene, the numbers, the pillars, how to walk, the cast, a playable skunk card, the road events, the collectibles and the work-in-progress links. Colours are Endesga 32. */
+      /* Project home: the title and a centred Play over a live road scene, the numbers, the pillars, the cast, a playable skunk card, the road events, the collectibles and the work-in-progress links. Colours are Endesga 32. */
       :root {
         --bg: #181425;
         --surface: #262b44;
@@ -97,10 +97,6 @@
         border-radius: 4px;
         box-shadow: 0 5px 0 var(--accent-deep);
       }
-      .how {
-        color: var(--accent);
-        font-size: 15px;
-      }
       .play:hover {
         background: #fee761;
       }
@@ -121,21 +117,17 @@
         padding: 0 5px;
         color: var(--fg);
       }
+      /* The run screen below its status bar, 360x600, drawn at 1x. */
       .scene {
         display: block;
-        width: 280px;
-        height: 240px;
+        width: min(360px, 100%);
+        height: auto;
+        aspect-ratio: 360 / 600;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
         border-radius: 4px;
         outline: 4px solid var(--surface);
         background: #3a4466;
-      }
-      @media (min-width: 960px) {
-        .scene {
-          width: 560px;
-          height: 480px;
-        }
       }
       h2 {
         font-family: var(--f-display);
@@ -216,17 +208,6 @@
         display: block;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
-      }
-      .how-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
-        gap: 12px;
-      }
-      .how-grid img {
-        width: 100%;
-        height: auto;
-        border-radius: 6px;
-        border: 1px solid var(--line);
       }
       /* The cast: the walkers' faces beside a compact grid of all nine dogs. */
       .cast {
@@ -524,14 +505,13 @@
               >
               or <kbd>H</kbd>/<kbd>L</kbd>.</span
             >
-            <a class="how" href="#h-how">How to walk</a>
           </div>
         </div>
         <canvas
           class="scene"
           id="scene"
-          width="280"
-          height="240"
+          width="360"
+          height="600"
           role="img"
           aria-label="A dog walker and three dogs walking up a street, switching lanes to collect tips"
         ></canvas>
@@ -579,54 +559,6 @@
             <b>Charming chaos</b>
             <p>Cute dogs, dramatic owners and a silly neighbourhood.</p>
           </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="h-how">
-        <h2 id="h-how">How to walk</h2>
-        <div class="how-grid">
-          <img
-            class="px"
-            src="/art/images/help-lanes.png"
-            width="344"
-            height="236"
-            alt="Drag anywhere to move the pack one lane per lane-width"
-          />
-          <img
-            class="px"
-            src="/art/images/help-pickups.png"
-            width="344"
-            height="236"
-            alt="Collect tips and treats along the road; the top bar shows money, treats and the zone"
-          />
-          <img
-            class="px"
-            src="/art/images/help-cards.png"
-            width="344"
-            height="236"
-            alt="A skunk opens a card with three choices: pay for a groom, pay for a rinse, or lose hearts"
-          />
-          <img
-            class="px"
-            src="/art/images/help-owners.png"
-            width="344"
-            height="236"
-            alt="Each owner's hearts show on their dog's doghouse; at zero hearts the owner fires you"
-          />
-          <img
-            class="px"
-            src="/art/images/help-pulls.png"
-            width="344"
-            height="236"
-            alt="A dog leans and barks before it pulls the pack toward a lane"
-          />
-          <img
-            class="px"
-            src="/art/images/help-zones.png"
-            width="344"
-            height="236"
-            alt="Walk four zones of Maple Street, earning fees per zone, and pause to head home"
-          />
         </div>
       </section>
 
@@ -1171,7 +1103,8 @@
 
     <script>
       // Every canvas.px with data-sprite shows one tag of an exported sprite sheet, animated at
-      // its Aseprite frame durations. data-locked draws it as a silhouette.
+      // its Aseprite frame durations. data-locked draws it as a silhouette. #scene is the
+      // hero's road scene.
       (() => {
         const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
         const img = (src) =>
@@ -1199,16 +1132,22 @@
           ));
         const live = [];
 
-        function paint(s, now) {
-          const t = s.sh.tags[s.c.dataset.tag];
-          if (!t) return;
+        // The frame of a tag at time now; with reduced motion, the tag's first frame.
+        function frameAt(sh, tag, now) {
+          const t = sh.tags[tag];
+          if (!t) return null;
           let i = t.from;
           if (t.to > t.from && !reduced) {
-            const total = s.sh.frames.slice(t.from, t.to + 1).reduce((n, f) => n + f.duration, 0);
+            const total = sh.frames.slice(t.from, t.to + 1).reduce((n, f) => n + f.duration, 0);
             let m = now % total;
-            while (m >= s.sh.frames[i].duration) m -= s.sh.frames[i++].duration;
+            while (m >= sh.frames[i].duration) m -= sh.frames[i++].duration;
           }
-          const f = s.sh.frames[i].frame;
+          return sh.frames[i].frame;
+        }
+
+        function paint(s, now) {
+          const f = frameAt(s.sh, s.c.dataset.tag, now);
+          if (!f) return;
           const x = s.c.getContext("2d");
           x.clearRect(0, 0, f.w, f.h);
           x.drawImage(s.sh.im, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
@@ -1292,153 +1231,457 @@
             outcome.innerHTML = text;
           }),
         );
-      })();
-    </script>
-    <script src="/art/mocks/placeholder-sprites.js"></script>
-    <script>
-      (() => {
-        const D = window.DWGPlaceholder;
-        if (!D) return;
-        // Exported sprite sheets: frames sit side by side in tag order.
-        const SHEETS = {
-          "dog-koda": [32, 32, 4],
-          "dog-biscuit": [32, 32, 4],
-          "dog-duchess": [32, 32, 4],
-          "walker-casey": [32, 48, 4],
-          tip: [16, 16, 4],
-          treat: [16, 16, 2],
-          squirrel: [32, 32, 2],
-          puddle: [88, 32, 2],
-          cone: [32, 32, 1],
-          hydrant: [32, 32, 1],
-        };
-        const img = (src) =>
-          new Promise((ok) => {
-            const i = new Image();
-            i.onload = () => ok(i);
-            i.onerror = () => ok(null);
-            i.src = src;
-          });
-        const art = {};
-        const loaded = Promise.all(
-          Object.keys(SHEETS).map(async (k) => (art[k] = await img(`/art/sprites/${k}.png`))),
-        );
+        // The hero's road scene, as the run screen draws it below the status bar: the zone's
+        // backdrop band on top, and below it the road strip projected row by row with camera B,
+        // its lanes converging into the band's road. The pack walks up it through all four
+        // zones, steering for tips and around obstacles, and a squirrel dashes across now and then.
+        async function roadScene(cv) {
+          const ctx = cv.getContext("2d");
+          const W = 360,
+            H = 600,
+            BAND = 150,
+            CX = 220;
+          // Camera B: a point z road px ahead of the feet draws at scale s = F / (F + z) on row
+          // YH + KS s. The game's rows less its 40px status bar, so the feet are on row 594.
+          const YH = -300,
+            KS = 894,
+            F = KS / 1.4;
+          const scaleAt = (z) => F / (F + z);
+          const rowAt = (z) => YH + KS * scaleAt(z);
+          const FOOT = Math.round(rowAt(0));
+          // The nearest depth step of 1, 0.75 and 0.5, on a log scale.
+          const step = (s) => (s > 0.866 ? 1 : s > 0.612 ? 0.75 : 0.5);
+          // Half the road, its curb and its sidewalk; the lane centres, from the road's centre.
+          const ROAD = 140,
+            CURB = 144,
+            WALK = 188;
+          const LANES = [-112, -56, 0, 56, 112];
+          const SPEED = 120;
+          const ZONE_LEN = 64 * 36,
+            LOOP = ZONE_LEN * 4;
+          const ZONES = [
+            { key: "woof-way", name: "WOOF WAY", leash: "#f6757a", verge: "street" },
+            { key: "bark-park", name: "BARK PARK", leash: "#a22633", verge: "park" },
+            {
+              key: "sniff-street-shops",
+              name: "SNIFF STREET SHOPS",
+              leash: "#a22633",
+              verge: "shops",
+            },
+            {
+              key: "the-long-way-home",
+              name: "THE LONG WAY HOME",
+              leash: "#3e2731",
+              verge: "leafy",
+            },
+          ];
+          const PACK = [
+            { key: "dog-koda", dx: 0, z: 58, phase: 0 },
+            { key: "dog-biscuit", dx: -14, z: 42, phase: 110 },
+            { key: "dog-duchess", dx: 14, z: 40, phase: 230 },
+          ];
+          const HANDS = { y: 13, left: -11, right: 10 };
+          const COLLAR = 14;
+          const KEYS = [
+            "walker-casey",
+            ...PACK.map((p) => p.key),
+            "tip",
+            "treat",
+            "cone",
+            "hydrant",
+            "puddle",
+            "squirrel-dash",
+            "ui-warning",
+            "ui-warning-arrow",
+          ];
 
-        // A 5-lane street, 280 wide like the game's road, cycling through the four zones.
-        const cv = document.getElementById("scene");
-        const ctx = cv.getContext("2d");
-        const W = 280,
-          H = 240,
-          LOOP = 400;
-        const tiles = D.ZONE_ORDER.map((z) => D.roadTile(z));
-        const items = [
-          { k: "tip", lane: 1, y: 30 },
-          { k: "tip", lane: 1, y: 60 },
-          { k: "squirrel", lane: 4, y: 110 },
-          { k: "treat", lane: 3, y: 170 },
-          { k: "tip", lane: 0, y: 240 },
-          { k: "tip", lane: 2, y: 300 },
-          { k: "cone", lane: 4, y: 200 },
-          { k: "puddle", lane: 2, y: 360, span: 2 },
-          { k: "hydrant", lane: 0, y: 140 },
-          { k: "tip", lane: 4, y: 420 },
-        ];
-        const pack = [
-          { k: "dog-koda", dx: 0, foot: H - 56 },
-          { k: "dog-biscuit", dx: -13, foot: H - 44 },
-          { k: "dog-duchess", dx: 13, foot: H - 42 },
-        ];
-        const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        let scroll = 0,
-          t = 0,
-          lane = 2,
-          laneX = lane * 56 + 28,
-          nextTurn = 1800,
-          last = performance.now();
-        const fill = (x, y, w, h, col) => {
-          ctx.fillStyle = col;
-          ctx.fillRect(x, y, w, h);
-        };
-        function put(k, i, cx, foot) {
-          const [w, h, n] = SHEETS[k];
-          if (!art[k]) return;
-          ctx.drawImage(
-            art[k],
-            (i % n) * w,
-            0,
-            w,
-            h,
-            Math.round(cx - w / 2),
-            Math.round(foot - h),
-            w,
-            h,
+          // Pixels as little-endian RGBA words; each colour one step down its Endesga 32 ramp.
+          const u = (hex) =>
+            (0xff000000 | ((hex & 0xff) << 16) | (hex & 0xff00) | (hex >> 16)) >>> 0;
+          const DARK = new Map(
+            "be4a2f:733e39 d77643:be4a2f ead4aa:e4a672 e4a672:b86f50 b86f50:733e39 733e39:3e2731 3e2731:181425 a22633:3e2731 e43b44:a22633 f77622:be4a2f feae34:f77622 fee761:feae34 63c74d:3e8948 3e8948:265c42 265c42:193c3e 193c3e:181425 124e89:262b44 0099db:124e89 2ce8f5:0099db ffffff:c0cbdc c0cbdc:8b9bb4 8b9bb4:5a6988 5a6988:3a4466 3a4466:262b44 262b44:181425 181425:181425 ff0044:a22633 68386c:3e2731 b55088:68386c f6757a:b55088 e8b796:c28569 c28569:b86f50"
+              .split(" ")
+              .map((p) => p.split(":").map((h) => u(parseInt(h, 16)))),
           );
-        }
-        function shadow(cx, foot, w, col) {
-          const rx = Math.max(3, w / 2 - 2);
-          for (let y = -3; y <= 3; y++)
-            for (let x = -rx - 1; x <= rx + 1; x++) {
-              const dx = (x + 0.5) / rx,
-                dy = (y + 0.5) / 2.5;
-              if (dx * dx + dy * dy <= 1)
-                fill(Math.floor(cx + x), Math.floor(foot - 1 + y), 1, 1, col);
+          const C = {
+            green: u(0x63c74d),
+            dgreen: u(0x3e8948),
+            lgrey: u(0xc0cbdc),
+            grey: u(0x8b9bb4),
+            orange: u(0xf77622),
+            rust: u(0xbe4a2f),
+          };
+
+          const pixels = async (src) => {
+            const im = await img(src);
+            if (!im) return null;
+            const c = document.createElement("canvas");
+            c.width = im.width;
+            c.height = im.height;
+            const x = c.getContext("2d");
+            x.drawImage(im, 0, 0);
+            return new Uint32Array(x.getImageData(0, 0, im.width, im.height).data.buffer);
+          };
+          const [manifest, title] = await Promise.all([
+            fetch("/art/manifest.json")
+              .then((r) => (r.ok ? r.json() : null))
+              .catch(() => null),
+            font("font-title"),
+          ]);
+          if (!manifest) return;
+          const anchors = Object.fromEntries(manifest.sprites.map((e) => [e.key, e.anchor]));
+          const names = KEYS.flatMap((k) => [k, `${k}@75`, `${k}@50`].filter((n) => n in anchors));
+          const art = {};
+          const loads = [
+            ...names.map(async (n) => (art[n] = await sheet(n))),
+            ...ZONES.map(async (z) => {
+              [z.backdrop, z.road, z.start] = await Promise.all([
+                img(`/art/images/backdrop-${z.key}.png`),
+                pixels(`/art/images/road-${z.key}.png`),
+                pixels(`/art/images/road-${z.key}-start.png`),
+              ]);
+            }),
+          ];
+          await Promise.all(loads);
+          if (KEYS.some((k) => !art[k]) || ZONES.some((z) => !z.backdrop || !z.road)) return;
+          for (const z of ZONES) z.label = title && label(title, z.name);
+
+          // Each ground row's scale, distance ahead and the length of road it covers.
+          const rows = [];
+          for (let y = BAND; y < H; y++) {
+            const s = (y + 0.5 - YH) / KS;
+            const z = F / s - F;
+            rows.push({ s, z, span: z - (F / ((y + 1.5 - YH) / KS) - F) });
+          }
+          const Z_BAND = rows[0].z;
+          const mod = (a, n) => ((a % n) + n) % n;
+          const zoneAt = (p) => ZONES[Math.floor(mod(p, LOOP) / ZONE_LEN)];
+          const hashed = (x, y, n) => mod(x * 7919 + y * 104729 + x * y * 31, n) === 0;
+          const crosses = (z, span, period) =>
+            Math.floor(z / period) !== Math.floor((z - Math.max(span, 1)) / period);
+
+          // The verge beside the road, as the backdrops paint it: a curb, a sidewalk seamed
+          // every 32, then a lawn mown in stripes; the park is all lawn, the shops all paving.
+          function verge(kind, a, xi, zi, seam, stripe) {
+            if (kind === "leafy" && hashed(xi, zi, 37)) return (xi + zi) % 3 ? C.orange : C.rust;
+            if (kind !== "park") {
+              if (a < CURB) return C.grey;
+              if (kind === "shops") return seam || hashed(xi, zi, 29) ? C.grey : C.lgrey;
+              if (a < WALK) return seam ? C.grey : C.lgrey;
             }
-        }
-        function line(x0, y0, x1, y1, col) {
-          const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-          for (let i = 0; i <= n; i++)
-            fill(
-              Math.round(x0 + ((x1 - x0) * i) / n),
-              Math.round(y0 + ((y1 - y0) * i) / n),
-              1,
-              1,
-              col,
-            );
-        }
-        function draw() {
-          const zi = Math.floor(scroll / (64 * 12)) % 4;
-          const zone = D.ZONES[D.ZONE_ORDER[zi]];
-          const shade = D.dark(zone.base);
-          const fr = Math.floor(t / 150);
-          const off = Math.floor(scroll) % 64;
-          for (let y = -64 + off; y < H; y += 64) ctx.drawImage(tiles[zi], 0, y);
-          const list = items.map((o) => ({
-            k: o.k,
-            cx: o.lane * 56 + (o.span ? 28 * o.span : 28),
-            foot: ((o.y + Math.floor(scroll)) % LOOP) - 40,
-            decal: o.k === "puddle",
-          }));
-          const cx = Math.round(laneX);
-          for (const p of pack) list.push({ k: p.k, cx: cx + p.dx, foot: p.foot });
-          list.push({ k: "walker-casey", cx, foot: H - 3 });
-          list.sort((a, b) => (b.decal ? 1 : 0) - (a.decal ? 1 : 0) || a.foot - b.foot);
-          for (const it of list) if (!it.decal) shadow(it.cx, it.foot, SHEETS[it.k][0], shade);
-          for (const it of list) put(it.k, fr, it.cx, it.foot);
-          for (const p of pack) {
-            const hand = p.dx < 0 ? cx - 9 : cx + 8;
-            line(hand, H - 17, cx + p.dx, p.foot - 15, D.K.dred);
+            const c = stripe ? C.dgreen : C.green;
+            return hashed(xi, zi, 23) ? DARK.get(c) : c;
           }
-          D.textC(ctx, zone.name, W / 2 + 1, 9, D.K.ink);
-          D.textC(ctx, zone.name, W / 2, 8, D.K.white);
-        }
-        function frame(now) {
-          const dt = Math.max(0, Math.min(50, now - last));
-          last = now;
-          scroll += dt * 0.04;
-          t += dt;
-          nextTurn -= dt;
-          if (nextTurn <= 0) {
-            lane = Math.max(0, Math.min(4, lane + (Math.random() < 0.5 ? -1 : 1)));
-            nextTurn = 1600 + Math.random() * 1800;
+
+          const ground = ctx.createImageData(W, H - BAND);
+          const px = new Uint32Array(ground.data.buffer);
+          function paintGround(scroll) {
+            rows.forEach(({ s, z, span }, r) => {
+              const p = mod(scroll + z, LOOP);
+              const zi = Math.floor(p);
+              const zone = ZONES[Math.floor(p / ZONE_LEN)];
+              // A zone's first 64 rows of road are its transition strip, where it has one.
+              const strip = p % ZONE_LEN < 64 && zone.start ? zone.start : zone.road;
+              const sr = (63 - (zi % 64)) * 280;
+              const seam = span < 16 && crosses(p, span, 32);
+              const stripe = p % 64 >= 32;
+              for (let x = 0, i = r * W; x < W; x++, i++) {
+                const X = (x + 0.5 - CX) / s;
+                const a = Math.abs(X);
+                px[i] =
+                  a < ROAD
+                    ? strip[sr + Math.floor(X + ROAD)]
+                    : verge(zone.verge, a, Math.floor(X), zi, seam, stripe);
+              }
+            });
           }
-          laneX += (lane * 56 + 28 - laneX) * Math.min(1, dt / 90);
+          // The game's shadow: the ground under it one ramp step darker.
+          function shadow(cx, foot, rx, sc) {
+            const ry = Math.max(1, 2.5 * sc);
+            for (let j = -Math.floor(ry); j <= 0; j++) {
+              const y = foot - 1 + j + Math.floor(ry / 2) - BAND;
+              if (y < 0 || y >= H - BAND) continue;
+              const half = Math.round(rx * Math.sqrt(Math.max(0, 1 - (j / ry) ** 2)));
+              for (let x = Math.max(0, cx - half); x < Math.min(W, cx + half); x++)
+                px[y * W + x] = DARK.get(px[y * W + x]) ?? px[y * W + x];
+            }
+          }
+          // A sheet at a depth step: its redrawn @75 or @50 where the manifest has one,
+          // otherwise the full-size sheet scaled at draw time.
+          function variant(key, q) {
+            const n = q === 1 ? key : `${key}@${q * 100}`;
+            return art[n]
+              ? { sh: art[n], a: anchors[n], k: 1 }
+              : { sh: art[key], a: anchors[key], k: q };
+          }
+          function put(key, tag, x, foot, q, now, flip) {
+            const v = variant(key, q);
+            const f = frameAt(v.sh, tag, now);
+            const w = Math.round(f.w * v.k),
+              h = Math.round(f.h * v.k);
+            const left = Math.round(x - w / 2),
+              top = Math.round(foot - (v.a.feetY + 1) * v.k);
+            if (flip) {
+              ctx.save();
+              ctx.translate(left + w, top);
+              ctx.scale(-1, 1);
+              ctx.drawImage(v.sh.im, f.x, f.y, f.w, f.h, 0, 0, w, h);
+              ctx.restore();
+            } else ctx.drawImage(v.sh.im, f.x, f.y, f.w, f.h, left, top, w, h);
+            return { w: v.a.opaqueWidth * v.k };
+          }
+          function line(x0, y0, x1, y1) {
+            const dx = Math.abs(x1 - x0),
+              dy = -Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1,
+              sy = y0 < y1 ? 1 : -1;
+            let err = dx + dy;
+            for (;;) {
+              ctx.fillRect(x0, y0, 1, 1);
+              if (x0 === x1 && y0 === y1) break;
+              const e2 = 2 * err;
+              if (e2 >= dy) {
+                err += dy;
+                x0 += sx;
+              }
+              if (e2 <= dx) {
+                err += dx;
+                y0 += sy;
+              }
+            }
+          }
+
+          // The road's items, one loop of all four zones, placed from a fixed seed.
+          let seed = 7;
+          const rnd = () => {
+            seed = (seed + 0x6d2b79f5) | 0;
+            let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+          };
+          const items = [];
+          for (let p = 220; p < LOOP - 120; p += 150 + Math.floor(rnd() * 3) * 20) {
+            const r = rnd(),
+              lane = Math.floor(rnd() * 5);
+            if (r < 0.42)
+              for (let i = 0; i < 3; i++) items.push({ key: "tip", lanes: [lane], p: p + i * 36 });
+            else if (r < 0.52) items.push({ key: "treat", lanes: [lane], p });
+            else if (r < 0.72) items.push({ key: "cone", lanes: [lane], p, block: true });
+            else if (r < 0.88) items.push({ key: "hydrant", lanes: [lane], p, block: true });
+            else {
+              const l = Math.min(lane, 3);
+              items.push({ key: "puddle", lanes: [l, l + 1], p, block: true, decal: true });
+            }
+          }
+          const laneX = (lanes) => (LANES[lanes[0]] + LANES[lanes[lanes.length - 1]]) / 2;
+
+          let scroll = 0,
+            now = 0,
+            lane = 2,
+            from = 2,
+            moved = 1,
+            think = 0,
+            hazard = null,
+            nextHazard = 6000;
+          const walkerX = () => LANES[from] + (LANES[lane] - LANES[from]) * Math.min(1, moved);
+          // The items ahead and just behind the feet, with their loop, so a taken tip returns
+          // on the next loop.
+          const onRoad = () =>
+            items.flatMap((it) => {
+              let z = mod(it.p - scroll, LOOP);
+              if (z > LOOP - 80) z -= LOOP;
+              const loop = Math.floor((scroll + z) / LOOP);
+              return z < Z_BAND + 60 && it.taken !== loop ? [{ it, z, loop }] : [];
+            });
+
+          // A demo driver: one lane at a time toward the cheapest lane nearby, clear of
+          // obstacles and with tips in it.
+          function steer(ahead) {
+            let best = lane,
+              bestCost = Infinity;
+            for (let t = 0; t < 5; t++) {
+              let cost = Math.abs(t - lane) * 2 + Math.random();
+              const lo = Math.min(lane, t),
+                hi = Math.max(lane, t);
+              for (const { it, z } of ahead) {
+                if (it.block && z > -6 && z < 260) {
+                  if (it.lanes.includes(t)) cost += 100;
+                  if (it.lanes.some((l) => l > lo && l < hi)) cost += 30;
+                } else if (!it.block && z > 0 && z < 300 && it.lanes.includes(t)) cost -= 3;
+              }
+              if (cost < bestCost) {
+                bestCost = cost;
+                best = t;
+              }
+            }
+            if (best !== lane) {
+              from = lane;
+              lane += Math.sign(best - lane);
+              moved = 0;
+            }
+          }
+
+          function update(dt) {
+            now += dt;
+            scroll += (SPEED * dt) / 1000;
+            moved += dt / 180;
+            const ahead = onRoad();
+            const at = Math.round((walkerX() + 112) / 56);
+            for (const { it, z, loop } of ahead)
+              if (!it.block && z >= 0 && z <= 60 && it.lanes.includes(at)) it.taken = loop;
+            think -= dt;
+            if (think <= 0 && moved >= 1) {
+              think = 200;
+              steer(ahead);
+            }
+            // A squirrel crossing: a warning at the road edge it enters from, about a
+            // second before it dashes across, ahead of the pack.
+            nextHazard -= dt;
+            if (!hazard && nextHazard <= 0) {
+              hazard = { p: scroll + 560, dir: Math.random() < 0.5 ? -1 : 1, t: 0 };
+              nextHazard = 9000 + Math.random() * 7000;
+            }
+            if (hazard && (hazard.t += dt) > 2800) hazard = null;
+          }
+
+          function draw() {
+            paintGround(scroll);
+            const zone = zoneAt(scroll + Z_BAND);
+            const wx = walkerX();
+            // Billboards, scaled by depth step and drawn from the farthest in, decals first.
+            const list = onRoad().map(({ it, z }) => ({
+              key: it.key,
+              tag: "idle",
+              X: laneX(it.lanes),
+              z,
+              decal: it.decal,
+            }));
+            const dogs = PACK.map((d) => ({ ...d, tag: "walk", X: wx + d.dx, dog: true }));
+            list.push(...dogs, { key: "walker-casey", tag: "walk", X: wx, z: 0, phase: 0 });
+            let sign = null;
+            if (hazard) {
+              const z = hazard.p - scroll;
+              if (hazard.t < 1000) sign = { z, dir: hazard.dir };
+              else {
+                const X = -hazard.dir * (WALK + 16) + (hazard.dir * 240 * (hazard.t - 1000)) / 1000;
+                list.push({ key: "squirrel-dash", tag: "run", X, z, flip: hazard.dir < 0 });
+              }
+            }
+            for (const o of list) {
+              o.s = scaleAt(o.z);
+              o.q = step(o.s);
+              o.x = Math.round(CX + o.X * o.s);
+              o.foot = Math.round(rowAt(o.z));
+            }
+            list.sort((a, b) => (b.decal ? 1 : 0) - (a.decal ? 1 : 0) || b.z - a.z);
+            for (const o of list)
+              if (!o.decal) {
+                const a = variant(o.key, o.q);
+                shadow(o.x, o.foot, Math.max(3, (a.a.opaqueWidth * a.k) / 2 - 2), o.q);
+              }
+            ctx.putImageData(ground, 0, BAND);
+            for (const o of list) {
+              o.dog && (o.collar = o.foot - Math.round(COLLAR * o.q));
+              put(o.key, o.tag, o.x, o.foot, o.q, now + (o.phase ?? 0), o.flip);
+            }
+            // Leashes from the walker's hands to each collar, in the zone's leash colour.
+            ctx.fillStyle = zoneAt(scroll).leash;
+            const hx = Math.round(CX + wx);
+            for (const d of dogs)
+              line(hx + (d.dx < 0 ? HANDS.left : HANDS.right), FOOT - HANDS.y, d.x, d.collar);
+            if (sign) {
+              const s = scaleAt(sign.z);
+              const x = Math.round(CX - sign.dir * (ROAD - 14) * s);
+              const foot = Math.round(rowAt(sign.z));
+              put("ui-warning", "pulse", x, foot, 1, now);
+              put("ui-warning-arrow", "pulse", x + sign.dir * 16, foot, 1, now, sign.dir < 0);
+            }
+            // The band over the road's far end, so things come out from behind it.
+            ctx.drawImage(zone.backdrop, 0, 0);
+            if (zone.label) ctx.drawImage(zone.label, Math.round((W - zone.label.width) / 2), 3);
+          }
+
+          ctx.imageSmoothingEnabled = false;
           draw();
-          requestAnimationFrame(frame);
+          if (reduced) return;
+          let visible = true;
+          new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(cv);
+          let last = performance.now();
+          const tick = (t) => {
+            const dt = Math.max(0, Math.min(50, t - last));
+            last = t;
+            if (visible) {
+              update(dt);
+              draw();
+            }
+            requestAnimationFrame(tick);
+          };
+          requestAnimationFrame(tick);
         }
-        loaded.then(() => {
-          draw();
-          if (!reduced) requestAnimationFrame(frame);
-        });
+
+        // A bitmap font from its .png and BMFont .fnt.
+        async function font(key) {
+          const [im, fnt] = await Promise.all([
+            img(`/art/fonts/${key}.png`),
+            fetch(`/art/fonts/${key}.fnt`)
+              .then((r) => (r.ok ? r.text() : null))
+              .catch(() => null),
+          ]);
+          if (!im || !fnt) return null;
+          const doc = new DOMParser().parseFromString(fnt, "application/xml");
+          const chars = {};
+          for (const c of doc.querySelectorAll("char")) {
+            const n = (a) => Number(c.getAttribute(a));
+            chars[n("id")] = {
+              x: n("x"),
+              y: n("y"),
+              w: n("width"),
+              h: n("height"),
+              ox: n("xoffset"),
+              oy: n("yoffset"),
+              adv: n("xadvance"),
+            };
+          }
+          const common = doc.querySelector("common");
+          return { im, chars, line: Number(common?.getAttribute("lineHeight")) || 12 };
+        }
+        // White text with a 1px ink outline, so it reads on any sky.
+        function label(f, text) {
+          const glyphs = [...text].map((ch) => f.chars[ch.codePointAt(0)]).filter(Boolean);
+          const w = glyphs.reduce((n, g) => n + g.adv, 0) + 2;
+          const white = document.createElement("canvas");
+          white.width = w;
+          white.height = f.line + 2;
+          const wx = white.getContext("2d");
+          let pen = 1;
+          for (const g of glyphs) {
+            if (g.w) wx.drawImage(f.im, g.x, g.y, g.w, g.h, pen + g.ox, 1 + g.oy, g.w, g.h);
+            pen += g.adv;
+          }
+          const out = document.createElement("canvas");
+          out.width = white.width;
+          out.height = white.height;
+          const o = out.getContext("2d");
+          for (const [dx, dy] of [
+            [-1, 0],
+            [1, 0],
+            [0, -1],
+            [0, 1],
+            [-1, -1],
+            [1, -1],
+            [-1, 1],
+            [1, 1],
+          ])
+            o.drawImage(white, dx, dy);
+          o.globalCompositeOperation = "source-in";
+          o.fillStyle = "#181425";
+          o.fillRect(0, 0, out.width, out.height);
+          o.globalCompositeOperation = "source-over";
+          o.drawImage(white, 0, 0);
+          return out;
+        }
+
+        roadScene(document.getElementById("scene"));
       })();
     </script>
   </body>
