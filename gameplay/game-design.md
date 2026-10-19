@@ -88,7 +88,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Size              | Small · medium · big. No size is a straight upgrade. Pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big). Max happiness: 6 small, 8 medium, 10 big. Who you meet: each small dog attracts more Other dog encounters, each big dog fewer, and any big dog scares thieves away. Small dogs are nimble: they roll half as often for area effects |
 | Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                                                                                                  |
 | Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                                                                                                                                                                                                                               |
-| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $13 instead of $10 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the dog's max; also sets the quip tone                                                                                                                                      |
+| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $30 instead of $20 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the dog's max; also sets the quip tone                                                                                                                                      |
 
 | Dog      | Breed           | Owner                          | Look                                  |
 | -------- | --------------- | ------------------------------ | ------------------------------------- |
@@ -159,7 +159,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - The home screen is also the shop: tap a locked dog, dog slot or gear item to buy it; there is no separate shop screen
 - **Gear** (5 items, permanent, bought once): fanny pack (start with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +1 ♥ and has +1 max ♥). Pick up to 1 owned item before each run (none is allowed, e.g. on a first run). Equipped gear shows as a badge beside the walker
 - **Dog training:** two courses per dog you own: Heel (the dog pulls half as often) and Good manners (its owner starts with +1 ♥ and has +1 max ♥)
-- **Walker kit** (permanent, always on): Quick feet (lane changes 20% faster); Treat belt (carry 4 treats instead of 3); Business cards (fees +10%); Firm grip (input lock after a pull halved)
+- **Walker kit** (permanent, always on): Quick feet (lane changes 20% faster); Treat belt (carry 4 treats instead of 3); Business cards (+$3 fee per dog per zone); Firm grip (input lock after a pull halved)
 - **Cosmetic unlocks** (looks only): 2 extra accessories per dog (collar, bow, bandana and so on); 6 leash colours; 6 home screen decor pieces (e.g. yard sign, house paint, flower bed, bird bath, bench, porch light)
 - **Walker customization:** pick from 3 to 4 preset walkers; one is free and the rest are cosmetic purchases. Gear still shows as a badge
 - **Gate scene:** the home screen shows the walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign; equipped gear and home screen decor show here
@@ -178,11 +178,11 @@ Prices not yet in the data:
 | What       | Price                                                                                                  |
 | ---------- | ------------------------------------------------------------------------------------------------------ |
 | Dog slots  | Slot 2 $400 · slot 3 $900                                                                              |
-| Training   | Heel $150 · Good manners $250, per dog                                                                 |
+| Training   | Heel $100 · Good manners $150, per dog                                                                 |
 | Walker kit | Quick feet $300 · Treat belt $300 · Business cards $400 · Firm grip $400                               |
 | Cosmetics  | Extra walkers $200 each · dog accessories $80 each · leash colours $40 each · decor pieces $60 to $160 |
 
-If every card is paid in money, a full run nets about $70 with 1 dog, $20 with 2 and a loss with 3, before clawbacks and lucky encounters; paying in hearts keeps more. Buying everything on the home screen costs about $11,500.
+A simulated full run with the starters, hitting about 1 obstacle in 10 and paying money only when an owner is close to firing you, nets about $185 with 1 dog, $220 with 2 and $250 with 3; a careless player (1 in 7) nets about $155 to $195. A pack of the riskier dogs (fussy and dramatic owners) earns about $210 but is fired about once a run. Buying every slot, dog, gear item, training course and kit item costs about $8,500 (about 40 runs); cosmetics add about $2,900.
 
 ## Milestones
 
