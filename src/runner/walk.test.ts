@@ -318,6 +318,21 @@ describe("stepWalk", () => {
     expect(after.road.items.map(({ kind }) => kind)).toEqual(["otherDog"]);
   });
 
+  it("counts a minor bump and an obstacle hit as bumps in the zone, but not a lucky find", () => {
+    const walk = walkWith(["koda"], [atPack("cone")]);
+    const zoned = { ...walk, run: { ...walk.run, zoneIndex: 1 } };
+    expect(step(zoned).walk.run.bumpsByZone).toEqual([0, 1]);
+    expect(step(walkWith(["koda"], [atPack("otherDog")])).walk.run.bumpsByZone).toEqual([1]);
+    expect(step(walkWith(["duchess"], [atPack("squirrel")])).walk.run.bumpsByZone).toEqual([1]);
+    expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
+  });
+
+  it("counts no bump for an obstacle ignored in the grace window", () => {
+    const walk = walkWith(["koda"], [atPack("cone")]);
+    const graced = { ...walk, road: { ...walk.road, invulnerableSeconds: 0.5 } };
+    expect(step(graced).walk.run.bumpsByZone).toEqual([]);
+  });
+
   it("drops no more tips than the pack has", () => {
     const walk = walkWith(["koda"], [atPack("bin")]);
     const { bumps, walk: after } = step({ ...walk, run: { ...walk.run, money: cents(50) } });
@@ -671,6 +686,17 @@ describe("finishZone", () => {
     const { run: next } = finishZone(data, withEffects);
     expect(next.debuffs).toEqual([]);
     expect(next.immunities).toEqual([{ encounter: "puddle" }]);
+  });
+
+  it("counts the zone for each debuff on as it ends", () => {
+    const { run } = walkWith(["koda"]);
+    const stinky = {
+      ...run,
+      debuffZones: { stinky: 1 },
+      debuffs: [{ debuff: "stinky" as const, untilZone: 0 }],
+    };
+    expect(finishZone(data, stinky).run.debuffZones).toEqual({ stinky: 2 });
+    expect(finishZone(data, run).run.debuffZones).toEqual({});
   });
 
   it("ends the run, finished, after the last zone", () => {

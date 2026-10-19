@@ -1,0 +1,115 @@
+import type { Achievement } from "./types";
+
+// The badge wall, in the order the Stats page shows it: firsts, mastery, collection, silly.
+// Each is earned once every condition holds; the wall shows the goal under a locked badge.
+export const ACHIEVEMENTS = [
+  {
+    badgeLine: "Every walk starts somewhere.",
+    conditions: [{ count: 1, kind: "zonesFinished" }],
+    goal: "Finish your first zone",
+    id: "firstSteps",
+    name: "First Steps",
+  },
+  {
+    badgeLine: "Home before the streetlights.",
+    conditions: [{ count: "all", kind: "zonesFinished" }],
+    goal: "Finish all 4 zones of Maple Street",
+    id: "roundTrip",
+    name: "Round Trip",
+  },
+  {
+    badgeLine: "Twice the tails.",
+    conditions: [{ count: 2, kind: "packSize" }],
+    goal: "Walk 2 dogs at once",
+    id: "doubleLeash",
+    name: "Double Leash",
+  },
+  {
+    badgeLine: "Twelve paws, one plan.",
+    conditions: [{ count: 3, kind: "packSize" }],
+    goal: "Walk 3 dogs at once",
+    id: "packLeader",
+    name: "Pack Leader",
+  },
+  {
+    badgeLine: "Not a speck on them.",
+    conditions: [{ count: 1, kind: "cleanZones" }],
+    goal: "Finish a zone without a bump",
+    id: "cleanPaws",
+    name: "Clean Paws",
+  },
+  {
+    badgeLine: "Spotless, start to finish.",
+    conditions: [{ count: "all", kind: "cleanZones" }],
+    goal: "Finish a walk without a bump",
+    id: "notAScratch",
+    name: "Not a Scratch",
+  },
+  {
+    badgeLine: "The reviews are in.",
+    conditions: [{ count: 10, kind: "walksWithoutFiring" }],
+    goal: "Finish 10 walks without being fired",
+    id: "fiveStarService",
+    name: "Five-Star Service",
+  },
+  {
+    badgeLine: "Treats are on you.",
+    conditions: [{ dollars: 500, kind: "earnings" }],
+    goal: "Earn $500 in one walk",
+    id: "bigPayday",
+    name: "Big Payday",
+  },
+  {
+    badgeLine: "Every leash is spoken for.",
+    conditions: [{ count: "all", kind: "dogsOwned" }],
+    goal: "Own all 9 dogs",
+    id: "fullKennel",
+    name: "Full Kennel",
+  },
+  {
+    badgeLine: "A pocket for everything.",
+    conditions: [{ count: "all", kind: "gearOwned" }],
+    goal: "Own all 5 gear items",
+    id: "kittedOut",
+    name: "Kitted Out",
+  },
+  {
+    badgeLine: "Everyone's met you now.",
+    conditions: [{ count: "all", kind: "dogsFinishedWith" }],
+    goal: "Finish a walk with every dog",
+    id: "neighbourhoodFavourite",
+    name: "Neighbourhood Favourite",
+    shortGoal: "All 9 dogs finish",
+  },
+  {
+    badgeLine: "Maple Street's finest.",
+    conditions: [
+      { count: "all", kind: "dogsOwned" },
+      { count: "all", kind: "dogSlotsOwned" },
+    ],
+    goal: "Own every dog and all 3 dog slots",
+    id: "topWalker",
+    name: "Top Walker",
+  },
+  {
+    badgeLine: "They always come back.",
+    conditions: [{ count: 10, kind: "timesFired" }],
+    goal: "Get fired 10 times",
+    id: "youreFired",
+    name: "You're Fired!",
+  },
+  {
+    badgeLine: "You can smell this badge.",
+    conditions: [{ count: 3, debuff: "stinky", kind: "debuffZones" }],
+    goal: "Be Stinky in 3 zones of one walk",
+    id: "eauDeSkunk",
+    name: "Eau de Skunk",
+  },
+  {
+    badgeLine: "So close. Every time.",
+    conditions: [{ count: 5, kind: "squirrelsChased" }],
+    goal: "Let a chaser chase 5 squirrels",
+    id: "squirrel",
+    name: "Squirrel!",
+  },
+] as const satisfies readonly [Achievement, ...Achievement[]];

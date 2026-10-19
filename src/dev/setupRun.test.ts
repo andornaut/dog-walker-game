@@ -37,7 +37,11 @@ describe("withSetupStart", () => {
   const state = testState({ koda: 3 });
 
   it("keeps the run's money and moves it to the setup's zone", () => {
-    expect(withSetupStart({ ...setup, zone: 3 }, state)).toEqual({ ...state, zoneIndex: 2 });
+    expect(withSetupStart({ ...setup, zone: 3 }, state)).toEqual({
+      ...state,
+      firstZone: 2,
+      zoneIndex: 2,
+    });
   });
 
   it("replaces the run's money with the setup's", () => {

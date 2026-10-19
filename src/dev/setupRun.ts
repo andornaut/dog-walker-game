@@ -23,10 +23,11 @@ export function loadoutFor(fallback: Loadout, setup: RunSetup<DogId, GearId>): L
 }
 
 // A new run moved to the setup's zone and given its money, applied after newRun so the
-// override replaces the gear's starting money.
+// override replaces the gear's starting money. The zones before the setup's are skipped.
 export function withSetupStart(setup: RunSetup, state: RunState): RunState {
   return {
     ...state,
+    firstZone: setup.zone - 1,
     money: setup.money === undefined ? state.money : cents(setup.money),
     zoneIndex: setup.zone - 1,
   };

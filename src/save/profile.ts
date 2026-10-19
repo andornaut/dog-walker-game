@@ -1,5 +1,7 @@
-import type { HintId } from "../data/types";
+import type { AchievementId, HintId } from "../data/types";
+import { type AchievementData, newlyEarned } from "../rules/achievements";
 import type { Change } from "../rules/causes";
+import { awardAchievements, type AwardContext, earnedSince } from "./achievements";
 import {
   bankCheckpoint,
   isNewBestWalk,
@@ -15,11 +17,18 @@ import type { SaveStore, StoreLoadResult } from "./storage";
 // in memory, and the home screen says progress won't be saved.
 export type StorageState = "available" | "unavailable";
 
-// What the end screen shows beyond the saved stats: whether the run beat the best walk, and
-// every change the run made, for the earnings breakdown.
+// What the end screen shows beyond the saved stats: the achievements the run earned, whether
+// it beat the best walk, and every change it made, for the earnings breakdown.
 export interface RunEnd {
+  readonly achievements: readonly AchievementId[];
   readonly changes: readonly Change[];
   readonly newBestWalk: boolean;
+}
+
+// The achievements and a clock, read each time something is awarded.
+export interface Awards {
+  readonly data: AchievementData;
+  readonly now: () => number;
 }
 
 export type SettingsListener = (settings: Settings) => void;
@@ -32,6 +41,8 @@ export interface OpenedProfile {
 // The player's save for this page's life. Every change applies to the save in memory at
 // once, so a scene can read it straight after, and is then written in the order made.
 export class ProfileSession {
+  // Earned away from a run's end (on launch or by a purchase), for the home screen to show.
+  private celebrations: AchievementId[] = [];
   private document: SaveDocument;
   private ended: RunEnd | null = null;
   private readonly settingsListeners = new Set<SettingsListener>();
@@ -39,6 +50,7 @@ export class ProfileSession {
   private writes: Promise<void> = Promise.resolve();
 
   private constructor(
+    private readonly awards: Awards,
     private readonly store: SaveStore,
     document: SaveDocument,
     state: StorageState,
@@ -49,20 +61,31 @@ export class ProfileSession {
 
   // Loads the save. A new player's save goes through newPlayer first (for settings read from
   // the device). A run left unfinished at its last checkpoint is banked as if the player had
-  // headed home, and the banked save is written back.
+  // headed home, and the banked save is written back. Achievements the save already meets
+  // (such as one from before they existed) are awarded and wait to be celebrated.
   static async open(
     context: SaveContext,
+    awards: Awards,
     store: SaveStore,
     newPlayer: (save: SaveDocument) => SaveDocument = (save) => save,
   ): Promise<OpenedProfile> {
     const load = await store.load(context);
     const state = load.status === "unavailable" ? "unavailable" : "available";
     const loaded = load.status === "loaded" ? load.save : newPlayer(load.save);
-    const session = new ProfileSession(store, loaded, state);
+    const session = new ProfileSession(awards, store, loaded, state);
     if (loaded.checkpoint !== null) {
-      await session.update(bankCheckpoint);
+      await session.update((save) => bankCheckpoint(session.awardContext(), save));
     }
+    const banked = session.save;
+    if (newlyEarned(awards.data, banked, banked, null).length > 0) {
+      await session.update((save) => awardAchievements(session.awardContext(), null, save, save));
+    }
+    session.celebrations = earnedSince(awards.data, loaded, session.save);
     return { load, session };
+  }
+
+  private awardContext(): AwardContext {
+    return { data: this.awards.data, now: this.awards.now() };
   }
 
   get save(): SaveDocument {
@@ -123,10 +146,32 @@ export class ProfileSession {
   }
 
   finishRun(result: RunResult, changes: readonly Change[]): Promise<void> {
+    const before = this.document;
+    const newBestWalk = isNewBestWalk(before.stats, result.earnedCents);
+    const written = this.update((save) => recordRunEnd(this.awardContext(), save, result));
     this.ended = {
+      achievements: earnedSince(this.awards.data, before, this.document),
       changes,
-      newBestWalk: isNewBestWalk(this.document.stats, result.earnedCents),
+      newBestWalk,
     };
-    return this.update((save) => recordRunEnd(save, result));
+    return written;
+  }
+
+  // A purchase, or another change to what the player owns: the ownership achievements it
+  // meets are awarded and wait to be celebrated.
+  purchase(change: (save: SaveDocument) => SaveDocument): Promise<void> {
+    const before = this.document;
+    const written = this.update((save) =>
+      awardAchievements(this.awardContext(), null, save, change(save)),
+    );
+    this.celebrations.push(...earnedSince(this.awards.data, before, this.document));
+    return written;
+  }
+
+  // The achievements waiting to be celebrated on the home screen, once each.
+  takeCelebrations(): AchievementId[] {
+    const taken = this.celebrations;
+    this.celebrations = [];
+    return taken;
   }
 }

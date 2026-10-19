@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import manifestJson from "../../public/art/manifest.json";
 import { parseManifest } from "../assets/manifest";
+import { badgeKey } from "../assets/spriteKeys";
 import { maxHearts } from "../rules/dogs";
 import { moneyCost } from "../rules/effects";
 import { modifiedStat, modifiersOf } from "../rules/modifiers";
@@ -360,5 +361,39 @@ describe("help", () => {
     }
     expect(new Set(help.map((page) => page.art)).size).toBe(help.length);
     expect(new Set(help.map((page) => page.title)).size).toBe(help.length);
+  });
+});
+
+describe("achievements", () => {
+  const { achievements } = gameData;
+
+  it("has the rulebook's 15 badges, each with its own id and name", () => {
+    expect(achievements).toHaveLength(15);
+    expect(new Set(achievements.map(({ id }) => id)).size).toBe(15);
+    expect(new Set(achievements.map(({ name }) => name)).size).toBe(15);
+  });
+
+  it("gives every badge a goal and a one-line badge line", () => {
+    for (const { badgeLine, goal, name } of achievements) {
+      expect(goal.trim(), name).not.toBe("");
+      expect(badgeLine.trim(), name).not.toBe("");
+      expect(badgeLine, name).not.toContain("\n");
+    }
+  });
+
+  it("keeps every numeric threshold a positive whole number", () => {
+    const thresholds = achievements.flatMap(({ conditions }) =>
+      conditions.map((condition) => ("count" in condition ? condition.count : condition.dollars)),
+    );
+    for (const threshold of thresholds) {
+      expect(threshold === "all" || (Number.isInteger(threshold) && threshold > 0)).toBe(true);
+    }
+  });
+
+  it("finds every badge's art in the manifest", () => {
+    const manifest = parseManifest(manifestJson);
+    const sprites = new Set(manifest.sprites.map(({ key }) => key));
+    const missing = achievements.map(({ id }) => badgeKey(id)).filter((key) => !sprites.has(key));
+    expect(missing).toEqual([]);
   });
 });

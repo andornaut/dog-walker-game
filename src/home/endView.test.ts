@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { QUIPS } from "../data/quips";
 import type { Cause, Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
-import { closingLines, earningsBreakdown } from "./endView";
+import { closingLines, earningsBreakdown, zonePips } from "./endView";
 
 const money = (amount: number, base: Cause): MoneyChange => ({
   amount: cents(amount),
@@ -54,6 +54,27 @@ describe("earningsBreakdown", () => {
   it("always adds up to the earnings", () => {
     const lines = earningsBreakdown([fee(700), tip(55), card(-300)], cents(9_999));
     expect(lines.reduce((total, line) => total + line.amount, 0)).toBe(9_999);
+  });
+});
+
+describe("zonePips", () => {
+  it("marks every zone done for a finished walk", () => {
+    expect(zonePips(4, { outcome: "finished", zonesFinished: 4 })).toEqual([
+      "done",
+      "done",
+      "done",
+      "done",
+    ]);
+  });
+
+  it("marks the zone an early end stopped in as current", () => {
+    expect(zonePips(4, { outcome: "wentHome", zonesFinished: 2 })).toEqual([
+      "done",
+      "done",
+      "current",
+      "todo",
+    ]);
+    expect(zonePips(4, { outcome: "noDogs", zonesFinished: 0 })[0]).toBe("current");
   });
 });
 

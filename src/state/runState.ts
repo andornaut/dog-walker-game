@@ -79,10 +79,17 @@ export type Phase =
   | { readonly kind: "walking" };
 
 export interface RunState {
+  // Obstacle hits, minor ones included, by zone index. A zone with no entry had none.
+  readonly bumpsByZone: readonly number[];
+  // How many zones ended with each debuff on.
+  readonly debuffZones: Readonly<Partial<Record<DebuffId, number>>>;
   // Each debuff at most once: applying one the pack has refreshes it.
   readonly debuffs: readonly ActiveDebuff[];
   // Fees each dog has paid this run, which its owner takes back on firing you.
   readonly feesEarned: Readonly<Partial<Record<DogId, Cents>>>;
+  // The zone index the run began in. A dev start skips the zones before it, which count
+  // toward no achievement.
+  readonly firstZone: number;
   readonly gear: GearId | null;
   readonly immunities: readonly ActiveImmunity[];
   readonly modifiers: readonly ActiveModifier[];
@@ -90,6 +97,8 @@ export interface RunState {
   readonly pack: Pack;
   readonly phase: Phase;
   readonly skipsLeft: number;
+  // Squirrel cards on which the chasers were let chase.
+  readonly squirrelChases: number;
   // Carried, up to counts.treatCarryMax.
   readonly treats: number;
   // Picked upgrades leave the pool for the rest of the run.
@@ -127,8 +136,11 @@ export function newRun(
       loadout.dogs,
     );
   const empty: RunState = {
+    bumpsByZone: [],
+    debuffZones: {},
     debuffs: [],
     feesEarned: {},
+    firstZone: 0,
     gear: loadout.gear,
     immunities: [],
     modifiers: [],
@@ -136,6 +148,7 @@ export function newRun(
     pack: packWith([]),
     phase: { kind: "walking" },
     skipsLeft: 0,
+    squirrelChases: 0,
     treats: 0,
     upgradesPicked: [],
     zoneDistance: pixels(0),

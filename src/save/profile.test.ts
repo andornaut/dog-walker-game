@@ -1,10 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { cents } from "../rules/units";
-import { testContext, veteranSave } from "./fixtures";
-import { ProfileSession } from "./profile";
+import { quietCounters, testAwards, testContext, veteranSave } from "./fixtures";
+import { type Awards, ProfileSession } from "./profile";
 import { DEFAULT_SETTINGS, type SaveDocument } from "./schema";
 import { memoryStorage, SAVE_KEY, type SaveStorage, saveStore } from "./storage";
+
+const awards: Awards = { data: testAwards.data, now: () => testAwards.now };
 
 function stored(entries: Map<string, string>): SaveDocument {
   return JSON.parse(entries.get(SAVE_KEY) ?? "null") as SaveDocument;
@@ -17,6 +19,7 @@ async function opened(save: SaveDocument | null = null) {
   }
   const { load, session } = await ProfileSession.open(
     testContext,
+    awards,
     saveStore(memoryStorage(entries)),
   );
   return { entries, load, session };
@@ -31,6 +34,7 @@ describe("ProfileSession.open", () => {
   it("starts a new player from the defaults, through newPlayer", async () => {
     const { session } = await ProfileSession.open(
       testContext,
+      awards,
       saveStore(memoryStorage()),
       (save) => ({ ...save, settings: { ...save.settings, reducedMotion: true } }),
     );
@@ -47,6 +51,7 @@ describe("ProfileSession.open", () => {
 
   it("banks a run left at a checkpoint as headed home and writes it back", async () => {
     const checkpoint = {
+      counters: quietCounters(),
       dogs: [{ fired: false, id: "koda" as const, zonesFinished: 2 }],
       earnedCents: cents(1_000),
       zonesFinished: 2,
@@ -59,11 +64,36 @@ describe("ProfileSession.open", () => {
   });
 
   it("plays on in memory when storage throws", async () => {
-    const { load, session } = await ProfileSession.open(testContext, saveStore(throwing));
+    const { load, session } = await ProfileSession.open(testContext, awards, saveStore(throwing));
     expect(load.status).toBe("unavailable");
     expect(session.storage).toBe("unavailable");
     await session.update((save) => ({ ...save, bankCents: cents(5) }));
     expect(session.save.bankCents).toBe(5);
+  });
+});
+
+describe("achievements away from a run", () => {
+  it("awards on launch what the save already meets, and celebrates it once", async () => {
+    const veteran = veteranSave();
+    const fired = { ...veteran, stats: { ...veteran.stats, timesFired: 10 } };
+    const { entries, session } = await opened(fired);
+    expect(session.save.achievements.youreFired).toBe(testAwards.now);
+    expect(stored(entries).achievements.youreFired).toBe(testAwards.now);
+    expect(session.takeCelebrations()).toEqual(["youreFired"]);
+    expect(session.takeCelebrations()).toEqual([]);
+  });
+
+  it("awards and celebrates an ownership achievement bought on the home screen", async () => {
+    const { session } = await opened(veteranSave());
+    const allGear = ["fannyPack", "luckyCollar", "poopBags", "runningShoes", "whistle"] as const;
+    await session.purchase((save) => ({ ...save, owned: { ...save.owned, gear: [...allGear] } }));
+    expect(session.save.achievements.kittedOut).toBe(testAwards.now);
+    expect(session.takeCelebrations()).toEqual(["kittedOut"]);
+  });
+
+  it("leaves a save that meets nothing new unwritten", async () => {
+    const { entries } = await opened(veteranSave());
+    expect(entries.get(SAVE_KEY)).toBe(JSON.stringify(veteranSave()));
   });
 });
 
@@ -83,7 +113,7 @@ describe("ProfileSession.update", () => {
       read: async (key) => entries.get(key) ?? null,
       write: () => Promise.reject(new Error("quota")),
     };
-    const { session } = await ProfileSession.open(testContext, saveStore(failing));
+    const { session } = await ProfileSession.open(testContext, awards, saveStore(failing));
     await session.update((save) => save);
     expect(session.storage).toBe("unavailable");
   });
@@ -116,6 +146,7 @@ describe("hints", () => {
 
 describe("runs", () => {
   const result = {
+    counters: quietCounters(),
     dogs: [{ fired: false, id: "koda" as const, zonesFinished: 4 }],
     earnedCents: cents(9_500),
     outcome: "finished" as const,
@@ -124,11 +155,24 @@ describe("runs", () => {
 
   it("saves a checkpoint, then banks the finished run and clears it", async () => {
     const { entries, session } = await opened(veteranSave());
-    await session.checkpointRun({ dogs: result.dogs, earnedCents: cents(500), zonesFinished: 1 });
+    await session.checkpointRun({
+      counters: quietCounters(),
+      dogs: result.dogs,
+      earnedCents: cents(500),
+      zonesFinished: 1,
+    });
     expect(stored(entries).checkpoint?.zonesFinished).toBe(1);
     await session.finishRun(result, []);
     expect(stored(entries).checkpoint).toBeNull();
     expect(stored(entries).bankCents).toBe(12_345 + 9_500);
+  });
+
+  it("lists the achievements the run earned for the end screen", async () => {
+    const { session } = await opened(veteranSave());
+    await session.finishRun(result, []);
+    expect(session.lastRunEnd?.achievements).toEqual(["roundTrip", "cleanPaws", "notAScratch"]);
+    expect(session.save.achievements.roundTrip).toBe(testAwards.now);
+    expect(session.takeCelebrations()).toEqual([]);
   });
 
   it("flags a new best walk from the stats before the run is banked", async () => {

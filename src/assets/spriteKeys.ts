@@ -1,4 +1,5 @@
 import type {
+  AchievementId,
   DogId,
   EncounterId,
   ForcedStopId,
@@ -54,6 +55,11 @@ export function dogFaceKey(dog: DogId): string {
 // A dog's 64x64 portrait, for the shop and its detail card.
 export function dogPortraitKey(dog: DogId): string {
   return `portrait-dog-${kebabCase(dog)}`;
+}
+
+// An achievement's 32x32 badge, tagged earned and locked.
+export function badgeKey(achievement: AchievementId): string {
+  return `badge-${kebabCase(achievement)}`;
 }
 
 // A gear item's 32x32 icon image.

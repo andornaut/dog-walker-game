@@ -36,6 +36,32 @@ describe("loadSave", () => {
     });
   });
 
+  it("loads a save from before achievements, with none earned and every counter at 0", () => {
+    const document = untyped(veteranSave() as StoredInput);
+    delete document.achievements;
+    const stats = { ...(document.stats as Record<string, unknown>) };
+    delete stats.dogsFinishedWith;
+    delete stats.squirrelsChased;
+    delete stats.walksWithoutFiring;
+    const result = loadSave(testContext, stored({ ...document, stats }));
+    expect(result.status).toBe("loaded");
+    expect(result.save.achievements).toEqual({});
+    expect(result.save.stats).toMatchObject({
+      dogsFinishedWith: [],
+      squirrelsChased: 0,
+      walksWithoutFiring: 0,
+    });
+  });
+
+  it("drops achievements and finished-with dogs the game no longer has", () => {
+    const save = loaded((document) => {
+      document.achievements = { firstSteps: 5, retiredBadge: 6 };
+      document.stats.dogsFinishedWith = ["koda", "ghost"];
+    });
+    expect(save.achievements).toEqual({ firstSteps: 5 });
+    expect(save.stats.dogsFinishedWith).toEqual(["koda"]);
+  });
+
   it("loads a pending checkpoint", () => {
     const checkpoint = {
       dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
@@ -45,7 +71,21 @@ describe("loadSave", () => {
     const save = loaded((document) => {
       document.checkpoint = checkpoint;
     });
-    expect(save.checkpoint).toEqual(checkpoint);
+    expect(save.checkpoint).toEqual({ ...checkpoint, counters: null });
+  });
+
+  it("loads a checkpoint's run counters", () => {
+    const counters = { bumpsByZone: [0, 3], debuffZones: { stinky: 1 }, squirrelChases: 2 };
+    const save = loaded((document) => {
+      document.checkpoint = {
+        counters,
+        dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
+        earnedCents: 4_250,
+        zonesFinished: 2,
+      };
+    });
+    // A checkpoint saved before firstZone walked from the first zone.
+    expect(save.checkpoint?.counters).toEqual({ ...counters, firstZone: 0 });
   });
 
   it("strips fields the schema does not know", () => {
@@ -296,6 +336,7 @@ describe("loadSave", () => {
         };
       });
       expect(save.checkpoint).toEqual({
+        counters: null,
         dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
         earnedCents: 900,
         zonesFinished: 2,
@@ -314,7 +355,9 @@ describe("loadSave", () => {
 describe("saveContextFrom", () => {
   const context = saveContextFrom(gameData);
 
-  it("knows every dog, gear item, hint and walker in the game data", () => {
+  it("knows every achievement, debuff, dog, gear item, hint and walker in the game data", () => {
+    expect([...context.known.achievements]).toEqual(gameData.achievements.map(({ id }) => id));
+    expect([...context.known.debuffs]).toEqual(Object.keys(gameData.debuffs));
     expect([...context.known.dogs]).toEqual(Object.keys(gameData.dogs));
     expect([...context.known.gear]).toEqual(Object.keys(gameData.shopGear));
     expect([...context.known.hints]).toEqual(Object.keys(gameData.hints));

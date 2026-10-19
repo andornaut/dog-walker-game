@@ -16,6 +16,7 @@ import { pageRunSetup } from "./dev/pageRunSetup";
 import { setOnHomeScreen, setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
+import { CelebrationScene } from "./scenes/CelebrationScene";
 import { DevOverlayScene } from "./scenes/DevOverlayScene";
 import { EndScene } from "./scenes/EndScene";
 import { HelpScene } from "./scenes/HelpScene";
@@ -83,6 +84,7 @@ const game = new Game({
     HelpScene,
     SettingsScene,
     StatsScene,
+    CelebrationScene,
     DevOverlayScene,
   ],
   type: AUTO,

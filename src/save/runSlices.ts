@@ -1,4 +1,5 @@
 import type { GameData } from "../data/types";
+import { runCountersOf } from "../rules/achievements";
 import type { RunState } from "../state/runState";
 import type { RunResult } from "./checkpoint";
 import type { Checkpoint, DogRun } from "./schema";
@@ -25,6 +26,7 @@ function dogRuns(data: RunSliceData, run: RunState): DogRun[] {
 // to the next zone).
 export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {
+    counters: runCountersOf(run),
     dogs: dogRuns(data, run),
     earnedCents: run.money,
     zonesFinished: Math.max(1, zonesDone(data, run)),
@@ -35,6 +37,7 @@ export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
 export function runResultOf(data: RunSliceData, run: RunState): RunResult {
   const outcome = run.phase.kind === "ended" ? run.phase.reason : "wentHome";
   return {
+    counters: runCountersOf(run),
     dogs: dogRuns(data, run),
     earnedCents: run.money,
     outcome,

@@ -44,7 +44,7 @@
 - **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser, and only tests may import `src/testing/`. ESLint enforces both, so all game logic runs in unit tests without a renderer.
 - **Assets:** the art agent exports into `public/art/`. `public/art/manifest.json` lists `sprites` (PNG plus Aseprite hash JSON), `fonts` (XML BMFont), `images` and `sounds`, with paths relative to `public/art/`; Valibot validates it and the sprite JSON at boot. Keys are kebab-case and unique. Animation keys are `<texture>:<tag>`. Sprites anchor on the feet, and a missing key draws a placeholder box. Art rules live in `art/style-guide.md`.
 - **Tests:** Vitest over all pure logic; scenes are checked by playing and by headless screenshots.
-- **Simulator:** bot policies (hearts unless an owner would drop to 1, always hearts, always pay) play the real rules over a matrix of packs and obstacle hit rates. `npm run simulate -- --runs 1000 --seed 1 [--policy ...] [--hit ...] [--out rows.json]`. Results are deterministic per seed. Balance changes are compared before and after at the same seed.
+- **Simulator:** bot policies (hearts unless an owner would drop to 1, always hearts, always pay) play the real rules over a matrix of packs and obstacle hit rates. `npm run simulate -- --runs 1000 --seed 1 [--policy ...] [--hit ...] [--out rows.json]`. Results are deterministic per seed. The Badges column counts the achievements a run earns on its own facts. Balance changes are compared before and after at the same seed.
 
 ## Game data
 
@@ -60,12 +60,13 @@
 ## Save data
 
 - **Scope:** one profile per browser, local only, per origin.
-- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, and the zone checkpoint, all referenced by data ids. Worlds finished is derived, not stored.
+- **Contents:** bank (cents), owned dogs, gear and slots, chosen walker, last loadout, stats and logbook (`gameplay/game-design.md`, Home screen and progression), shown hints, settings, earned achievements with the time each was earned, and the zone checkpoint (with the run's achievement counters), all referenced by data ids. Worlds finished is derived, not stored.
 - **Format:** one JSON document under `dog-walker-game:save` with a `version` field; every write replaces it.
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
 - **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
 - **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter will replace it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
 - **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
+- **Achievements:** `src/rules/achievements.ts` judges each badge's conditions (a closed set of kinds with thresholds in the data) when a run is banked, on a purchase and on launch. Badges earned at run end celebrate on the end screen; those earned on launch or by a purchase celebrate over the home screen.
 - **Scenes:** `src/scenes/profileStore.ts` holds the loaded save for every scene and is the only way scenes read or change it.
 
 ## Phone

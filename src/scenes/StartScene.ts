@@ -56,6 +56,7 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
+import type { CelebrationSceneData } from "./CelebrationScene";
 import { drawFocusRing, drawPixelLine, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
@@ -73,9 +74,11 @@ import {
   currentSettings,
   isMuted,
   profileSave,
+  purchaseInProfile,
   setMuted,
   setRunOverride,
   storageState,
+  takeCelebrations,
   updateProfile,
   walkerSpriteKey,
 } from "./profileStore";
@@ -396,6 +399,8 @@ export class StartScene extends Scene {
       }
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
+    // Badges earned on launch: a scene can pause itself only once it is running.
+    this.time.delayedCall(0, () => this.celebrate([]));
     // Settings can change reduced motion or mute, so the screen is drawn again.
     const onSettingsClosed = () => this.render();
     this.game.events.on(SETTINGS_CLOSED_EVENT, onSettingsClosed);
@@ -661,7 +666,7 @@ export class StartScene extends Scene {
       return;
     }
     this.pops.set(id, now);
-    void updateProfile(this, () => result.save);
+    void purchaseInProfile(this, () => result.save);
     if (purchase.kind === "gear") {
       this.setLoadout({ ...this.loadout, gear: purchase.gear });
     }
@@ -671,6 +676,23 @@ export class StartScene extends Scene {
     }
     this.action = { dog, kind: "bought", name };
     this.render();
+    this.celebrate(dog === null ? [] : [dog]);
+  }
+
+  // Badges earned on launch or by a purchase burst in over the home screen, with the owners
+  // of the dogs just bought or picked cheering.
+  private celebrate(owners: readonly DogId[]): void {
+    const achievements = takeCelebrations(this);
+    if (achievements.length === 0) {
+      return;
+    }
+    const data: CelebrationSceneData = {
+      achievements,
+      owners: [...new Set([...owners, ...this.loadout.dogs])],
+      resume: SCENE_KEYS.start,
+    };
+    this.scene.pause();
+    this.scene.launch(SCENE_KEYS.celebration, data);
   }
 
   private purchaseName(purchase: Purchase): string {

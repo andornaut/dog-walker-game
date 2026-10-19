@@ -166,6 +166,13 @@ describe("quipLine", () => {
 });
 
 describe("chooseOption", () => {
+  it("counts a squirrel chase only when the chasers are let chase", () => {
+    const state = testState({ koda: 5 }, { money: cents(5_000) });
+    const squirrel = encounter("squirrel", ["koda"]);
+    expect(choose(state, squirrel, 1).state.squirrelChases).toBe(1);
+    expect(choose(state, squirrel, 0).state.squirrelChases).toBe(0);
+  });
+
   it("applies an option only to the caught dogs, and reports each heart change", () => {
     const outcome = choose(testState({ duchess: 5, koda: 5 }), encounter("skunk", ["koda"]), 2);
     expect(heartsByDog(outcome.state)).toEqual({ duchess: 5, koda: 3 });

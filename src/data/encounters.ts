@@ -162,6 +162,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-squirrel-chase",
+          chase: true,
           effects: [{ amount: "squirrelChase", change: "lose", kind: "money" }],
           name: "Let them chase",
         },

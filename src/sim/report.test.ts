@@ -18,6 +18,7 @@ vi.mock("./simulate", async (importOriginal) => {
   const actual = await importOriginal<typeof import("./simulate")>();
   const { cents } = await import("../rules/units");
   const simulateRun: typeof actual.simulateRun = (_data, random, config) => ({
+    badges: [],
     cardsSeen: Math.floor(random() * 10),
     choices: [],
     earnings: cents(random() * 10_000),

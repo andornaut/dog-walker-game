@@ -1,5 +1,6 @@
 import "./main.css";
 
+import { badgeKey } from "../assets/spriteKeys";
 import { gameData, onGameDataChange } from "../data";
 import type {
   CardOption,
@@ -11,6 +12,7 @@ import type {
   Unlock,
   WalkerId,
 } from "../data/types";
+import { achievementConditionText } from "../rules/achievements";
 import {
   catchChance,
   inputLockSeconds,
@@ -304,6 +306,23 @@ function zonesSection(data: GameData): Section {
   };
 }
 
+function achievementsSection(data: GameData): Section {
+  return {
+    headers: ["Badge", "Goal", "Line", "Earned when", "Art"],
+    note: "In badge wall order. Every condition must hold; celebration only, no reward.",
+    rows: data.achievements.map((achievement) => [
+      achievement.name,
+      achievement.goal,
+      achievement.badgeLine,
+      achievement.conditions
+        .map((condition) => achievementConditionText(data, condition))
+        .join(" and "),
+      badgeKey(achievement.id),
+    ]),
+    title: "Achievements",
+  };
+}
+
 function helpSection(data: GameData): Section {
   return {
     headers: ["Page", "Title", "Body", "Art"],
@@ -349,7 +368,8 @@ function simulatedSection(rows: readonly MatrixRow[]): Section {
       "(npm run simulate runs 1,000). Hit is the chance of hitting each obstacle; tips, treats",
       `and lucky finds are picked up at ${percent(tipRate)}, ${percent(treatRate)} and`,
       `${percent(luckyRate)}. Fired and Cards are per run; Paid is the share of card choices`,
-      `that cost money. ${policies.map((id) => `${id}: ${POLICY_NAMES[id]}`).join(". ")}.`,
+      "that cost money; Badges is the achievements a run earns on its own, per run.",
+      `${policies.map((id) => `${id}: ${POLICY_NAMES[id]}`).join(". ")}.`,
       ...(rows.length < total ? [`Simulating: ${rows.length} of ${total} rows.`] : []),
     ].join(" "),
     rows: rows.map(rowCells),
@@ -377,6 +397,7 @@ function render(): void {
     hintsSection,
     debuffsSection,
     zonesSection,
+    achievementsSection,
     helpSection,
     tuningSection,
   ].map((section) => renderSection(section(data)));

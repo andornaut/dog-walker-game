@@ -1,5 +1,8 @@
 // Shared test fixtures, with real dog, gear, hint and walker ids.
+import { gameData } from "../data";
+import type { RunCounters } from "../rules/achievements";
 import { cents } from "../rules/units";
+import type { AwardContext } from "./achievements";
 import type { SaveContext } from "./load";
 import type { SaveDocument } from "./schema";
 
@@ -10,6 +13,8 @@ export const testContext: SaveContext = {
     walker: "casey",
   },
   known: {
+    achievements: new Set(["bigPayday", "firstSteps", "fullKennel", "squirrel"]),
+    debuffs: new Set(["stinky"]),
     dogs: new Set([
       "biscuit",
       "dash",
@@ -27,8 +32,20 @@ export const testContext: SaveContext = {
   },
 };
 
+// Awards from the live game data, stamped at a fixed time.
+export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000 };
+
+// A run with no bumps, debuffs or chases.
+export const quietCounters = (): RunCounters => ({
+  bumpsByZone: [],
+  debuffZones: {},
+  firstZone: 0,
+  squirrelChases: 0,
+});
+
 // A new player: the free dogs, one slot, and no loadout until they pick a dog.
 export const newPlayerSave: SaveDocument = {
+  achievements: {},
   bankCents: cents(0),
   checkpoint: null,
   helpSeen: false,
@@ -44,10 +61,13 @@ export const newPlayerSave: SaveDocument = {
     bestWalk: null,
     bestZoneFinished: 0,
     dogs: {},
+    dogsFinishedWith: [],
     lastWalk: null,
     lifetimeCents: cents(0),
     runs: { finished: 0, noDogs: 0, wentHome: 0 },
+    squirrelsChased: 0,
     timesFired: 0,
+    walksWithoutFiring: 0,
   },
   version: 1,
   walker: "casey",
@@ -56,6 +76,7 @@ export const newPlayerSave: SaveDocument = {
 // A player several runs in, with every field away from its default.
 export function veteranSave(): SaveDocument {
   return {
+    achievements: { firstSteps: 1_700_000_000_000, squirrel: 1_700_000_100_000 },
     bankCents: cents(12_345),
     checkpoint: null,
     helpSeen: true,
@@ -74,6 +95,7 @@ export function veteranSave(): SaveDocument {
         biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
         koda: { timesFired: 1, walks: 5, zonesFinished: 12 },
       },
+      dogsFinishedWith: ["biscuit"],
       lastWalk: {
         dogs: ["koda"],
         earnedCents: cents(2_500),
@@ -83,7 +105,9 @@ export function veteranSave(): SaveDocument {
       },
       lifetimeCents: cents(30_000),
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
+      squirrelsChased: 5,
       timesFired: 1,
+      walksWithoutFiring: 2,
     },
     version: 1,
     walker: "ada",

@@ -1,3 +1,4 @@
+import type { ACHIEVEMENTS } from "./achievements";
 import type { DEBUFFS } from "./debuffs";
 import type { DOGS } from "./dogs";
 import type { FORCED_STOPS } from "./forcedStops";
@@ -25,6 +26,7 @@ export type Temperament = "dramatic" | "fussy" | "laidBack";
 export type TraitId = "chaser" | "fancy" | "foodDriven";
 
 // Ids come from the data, so adding an entry to a value file is a data-only change.
+export type AchievementId = (typeof ACHIEVEMENTS)[number]["id"];
 export type DebuffId = keyof typeof DEBUFFS;
 export type DogId = keyof typeof DOGS;
 export type ForcedStopId = keyof typeof FORCED_STOPS;
@@ -219,6 +221,8 @@ export type EffectKind = Effect["kind"];
 export interface CardOption {
   // Key of the option's illustration in the art manifest's images.
   readonly art: string;
+  // Picking it lets the chasers chase, which counts toward squirrelsChased.
+  readonly chase?: true;
   readonly effects: readonly Effect[];
   readonly name: string;
 }
@@ -399,7 +403,48 @@ export interface Hint {
   readonly trigger: HintTrigger;
 }
 
+// How many a condition needs: a number, or "all" of what the game data has.
+export type Threshold = number | "all";
+
+// What earns an achievement. Run conditions are judged on one run as it is banked: zones it
+// finished (all: every zone of the world), zones it finished without a bump, dogs it set out
+// with, dollars it banked, and zones it finished with the debuff on. Profile conditions are
+// judged on the save after a run or a purchase: dogs, gear and dog slots owned (all: every
+// one in the data), finished walks with no owner firing you, times fired, distinct dogs that
+// finished a walk without firing you (all: every dog), and squirrel chases let happen.
+export type AchievementCondition =
+  | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffZones" }
+  | { readonly count: number; readonly kind: "packSize" }
+  | { readonly count: number; readonly kind: "squirrelsChased" }
+  | { readonly count: number; readonly kind: "timesFired" }
+  | { readonly count: number; readonly kind: "walksWithoutFiring" }
+  | { readonly count: Threshold; readonly kind: "cleanZones" }
+  | { readonly count: Threshold; readonly kind: "dogSlotsOwned" }
+  | { readonly count: Threshold; readonly kind: "dogsFinishedWith" }
+  | { readonly count: Threshold; readonly kind: "dogsOwned" }
+  | { readonly count: Threshold; readonly kind: "gearOwned" }
+  | { readonly count: Threshold; readonly kind: "zonesFinished" }
+  | { readonly dollars: number; readonly kind: "earnings" };
+
+export type AchievementConditionKind = AchievementCondition["kind"];
+
+// A badge on the Stats page's wall, earned once every condition holds. Celebration only: it
+// changes nothing in play. The badge art is badge-<id in kebab case>.
+export interface Achievement {
+  readonly badgeLine: string;
+  readonly conditions: readonly [AchievementCondition, ...AchievementCondition[]];
+  readonly goal: string;
+  readonly id: string;
+  readonly name: string;
+  // The goal on the badge wall when the full goal does not fit beside the name.
+  readonly shortGoal?: string;
+}
+
+export type GameAchievement = Achievement & { readonly id: AchievementId };
+
 export interface GameData {
+  // In badge wall order.
+  readonly achievements: readonly [GameAchievement, ...GameAchievement[]];
   readonly debuffs: Readonly<Record<DebuffId, Debuff>>;
   // The walker a new player starts with.
   readonly defaultWalker: WalkerId;

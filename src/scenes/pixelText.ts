@@ -124,6 +124,31 @@ export function addPixelText(
   return label;
 }
 
+// Text broken at spaces into lines no wider than maxWidth screen pixels at the style's font and
+// scale, measured on the font itself. A word wider than maxWidth gets a line of its own.
+export function wrapPixelText(
+  scene: Scene,
+  style: PixelTextStyle,
+  maxWidth: number,
+  text: string,
+): string[] {
+  const probe = addPixelText(scene, 0, 0, "", style).setVisible(false);
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(/\s+/).filter((part) => part !== "")) {
+    const next = line === "" ? word : `${line} ${word}`;
+    setPixelText(probe, next);
+    if (line !== "" && probe.width > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  probe.destroy();
+  return line === "" ? lines : [...lines, line];
+}
+
 // Moves a label made by addPixelText, keeping y the top of its capitals.
 export function placePixelText(label: GameObjects.BitmapText, x: number, y: number): void {
   const capTop = (label.getData("capTop") as number | undefined) ?? 0;

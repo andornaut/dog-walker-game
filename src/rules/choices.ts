@@ -8,6 +8,7 @@ import type {
 } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState, UpgradeOffer } from "../state/runState";
+import { countChase } from "./achievements";
 import { assertNever } from "./assertNever";
 import {
   amountText,
@@ -301,7 +302,8 @@ export function offerUpgrades(
 }
 
 // Applies the chosen option. Owners at 0 hearts fire you and take back their dog's fees;
-// with no dogs left the run ends. Throws for a disabled option or an ended run.
+// with no dogs left the run ends. An option that lets the chasers chase counts a chase.
+// Throws for a disabled option or an ended run.
 export function chooseOption(
   data: ChoiceData,
   random: () => number,
@@ -341,13 +343,14 @@ export function chooseOption(
     throw new Error(`${option.label} is disabled: ${option.availability.reason}`);
   }
   const upgrade = card.source.kind === "upgradeOffer" ? card.source.offered[choice] : undefined;
-  return outcomeOf(
+  const outcome = outcomeOf(
     data,
     { affected: view.affected, random, source: content.source },
     content.option.effects,
     state,
     upgrade,
   );
+  return { ...outcome, state: countChase(content.option, outcome.state) };
 }
 
 // Applies an instant encounter's effects on contact, to the dogs it caught, with the same

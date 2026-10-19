@@ -1,5 +1,6 @@
 import type { EncounterId, ForcedStopId, GameData, MinorObstacleId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { countBump, countDebuffZones } from "../rules/achievements";
 import type { MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd } from "../rules/durations";
@@ -512,11 +513,14 @@ export function stepWalk(
       }
       collected.push(item);
     } else if (isMinorObstacle(data, kind)) {
-      const bump = minorBump(data, nextRun);
+      const bump = minorBump(data, countBump(nextRun));
       nextRun = bump.state;
       control = lockSteering(read(data.tuning, "seconds", "minorStumble"), control);
       bumps.push({ change: bump.change, item });
     } else {
+      if (data.encounters[kind].kind === "obstacle") {
+        nextRun = countBump(nextRun);
+      }
       const affected = affectedDogs(data, random, nextRun, kind);
       if (!opensCard(data, affected, nextRun, kind)) {
         continue;
@@ -594,10 +598,11 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
   };
 }
 
-// The end of a zone: every dog still walking is paid, the effects that lasted the zone
-// expire, then the run moves to the next zone, or ends once the last zone is done.
+// The end of a zone: every dog still walking is paid, each debuff on counts the zone, the
+// effects that lasted the zone expire, then the run moves to the next zone, or ends once the
+// last zone is done.
 export function finishZone(data: WalkData, run: RunState): ZoneEnd {
-  const { changes, state: paid } = payZoneFees(data, run);
+  const { changes, state: paid } = payZoneFees(data, countDebuffZones(run));
   const expired = expireAtZoneEnd(run.zoneIndex, paid);
   if (run.zoneIndex >= data.world.zones.length - 1) {
     return { fees: changes, run: { ...expired, phase: { kind: "ended", reason: "finished" } } };

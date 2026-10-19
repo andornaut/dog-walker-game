@@ -17,8 +17,11 @@ export function testState(
     throw new Error(`A pack has 1 to 3 dogs, not ${pack.length}`);
   }
   return {
+    bumpsByZone: [],
+    debuffZones: {},
     debuffs: [],
     feesEarned: {},
+    firstZone: 0,
     gear: null,
     immunities: [],
     modifiers: [],
@@ -26,6 +29,7 @@ export function testState(
     pack: pack as readonly PackSlot[] as Pack,
     phase: { kind: "walking" },
     skipsLeft: 0,
+    squirrelChases: 0,
     treats: 0,
     upgradesPicked: [],
     zoneDistance: pixels(0),

@@ -1,6 +1,7 @@
 export const SCENE_KEYS = {
   boot: "boot",
   card: "card",
+  celebration: "celebration",
   end: "end",
   help: "help",
   hud: "hud",

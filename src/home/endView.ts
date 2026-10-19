@@ -69,6 +69,22 @@ export function earningsBreakdown(changes: readonly Change[], earned: Cents): Ea
   });
 }
 
+export type ZonePip = "current" | "done" | "todo";
+
+// One pip per zone of the world: done for each zone finished, current for the zone a run that
+// ended early stopped in, todo for the rest.
+export function zonePips(
+  zoneCount: number,
+  walk: Pick<LastWalk, "outcome" | "zonesFinished">,
+): ZonePip[] {
+  return Array.from({ length: zoneCount }, (_, zone): ZonePip => {
+    if (zone < walk.zonesFinished) {
+      return "done";
+    }
+    return zone === walk.zonesFinished && walk.outcome !== "finished" ? "current" : "todo";
+  });
+}
+
 export interface ClosingLine {
   readonly dog: DogId;
   readonly fired: boolean;

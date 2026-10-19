@@ -1,3 +1,4 @@
+import { ACHIEVEMENTS } from "./achievements";
 import { DEBUFFS } from "./debuffs";
 import { DOGS } from "./dogs";
 import { DOG_SLOTS } from "./dogSlots";
@@ -16,6 +17,7 @@ import { DEFAULT_WALKER, WALKERS } from "./walkers";
 import { WORLD } from "./world";
 
 interface ValueExports {
+  readonly ACHIEVEMENTS: typeof ACHIEVEMENTS;
   readonly DEBUFFS: typeof DEBUFFS;
   readonly DEFAULT_WALKER: typeof DEFAULT_WALKER;
   readonly DOGS: typeof DOGS;
@@ -36,6 +38,7 @@ interface ValueExports {
 
 function toGameData(values: ValueExports): GameData {
   return {
+    achievements: values.ACHIEVEMENTS,
     debuffs: values.DEBUFFS,
     defaultWalker: values.DEFAULT_WALKER,
     dogSlots: values.DOG_SLOTS,
@@ -56,6 +59,7 @@ function toGameData(values: ValueExports): GameData {
 }
 
 let values: ValueExports = {
+  ACHIEVEMENTS,
   DEBUFFS,
   DEFAULT_WALKER,
   DOGS,
@@ -89,6 +93,7 @@ export function onGameDataChange(listener: () => void): void {
 if (import.meta.hot) {
   import.meta.hot.accept(
     [
+      "./achievements.ts",
       "./debuffs.ts",
       "./dogSlots.ts",
       "./dogs.ts",

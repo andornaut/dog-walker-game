@@ -31,6 +31,8 @@ export interface MatrixCell {
 export interface MatrixRow {
   readonly finishedShare: number;
   readonly hitRate: number;
+  // Achievements a run earns on its own facts, per run.
+  readonly meanBadges: number;
   readonly meanCardsSeen: number;
   readonly meanEarnings: number;
   readonly meanFirings: number;
@@ -124,6 +126,7 @@ export function summarizeCell(cell: MatrixCell, results: readonly RunResult[]): 
   return {
     finishedShare: mean(results.map((result) => (result.finished ? 1 : 0))),
     hitRate: cell.hitRate,
+    meanBadges: mean(results.map((result) => result.badges.length)),
     meanCardsSeen: mean(results.map((result) => result.cardsSeen)),
     meanEarnings: mean(earnings),
     meanFirings: mean(results.map((result) => result.firings.length)),
@@ -171,6 +174,7 @@ export const MATRIX_HEADERS = [
   "Finished",
   "Cards",
   "Paid",
+  "Badges",
 ] as const;
 
 export function rowCells(row: MatrixRow): string[] {
@@ -186,6 +190,7 @@ export function rowCells(row: MatrixRow): string[] {
     percent(row.finishedShare),
     row.meanCardsSeen.toFixed(1),
     percent(row.moneyShare),
+    row.meanBadges.toFixed(2),
   ];
 }
 

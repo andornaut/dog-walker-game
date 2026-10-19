@@ -29,12 +29,28 @@ const midRun: RunState = {
 describe("checkpointOf", () => {
   it("records the zones paid, the money and each dog's zones", () => {
     expect(checkpointOf(data, midRun)).toEqual({
+      counters: { bumpsByZone: [], debuffZones: {}, firstZone: 0, squirrelChases: 0 },
       dogs: [
         { fired: false, id: "koda", zonesFinished: 2 },
         { fired: true, id: "duchess", zonesFinished: 1 },
       ],
       earnedCents: 4_250,
       zonesFinished: 2,
+    });
+  });
+
+  it("copies the run's achievement counters", () => {
+    const counted = {
+      ...midRun,
+      bumpsByZone: [0, 2],
+      debuffZones: { stinky: 1 },
+      squirrelChases: 3,
+    };
+    expect(checkpointOf(data, counted).counters).toEqual({
+      bumpsByZone: [0, 2],
+      debuffZones: { stinky: 1 },
+      firstZone: 0,
+      squirrelChases: 3,
     });
   });
 
@@ -48,6 +64,7 @@ describe("runResultOf", () => {
   it("ends a finished run in its last zone, every walking dog paid for all of them", () => {
     const finished = { ...midRun, phase: { kind: "ended", reason: "finished" } as const };
     expect(runResultOf(data, finished)).toEqual({
+      counters: { bumpsByZone: [], debuffZones: {}, firstZone: 0, squirrelChases: 0 },
       dogs: [
         { fired: false, id: "koda", zonesFinished: 4 },
         { fired: true, id: "duchess", zonesFinished: 1 },

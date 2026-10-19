@@ -1,6 +1,15 @@
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId, EncounterId, ForcedStopId, GameData, GearId, UpgradeId } from "../data/types";
+import type {
+  AchievementId,
+  DogId,
+  EncounterId,
+  ForcedStopId,
+  GameData,
+  GearId,
+  UpgradeId,
+} from "../data/types";
 import { screenLayout } from "../layout/screenLayout";
+import { countBump, earnedByRun, runCountersOf } from "../rules/achievements";
 import {
   applyInstantEncounter,
   cardFor,
@@ -31,7 +40,9 @@ import { packDogs } from "../state/pack";
 import { type CardSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { chooseCardOption, chooseUpgrade, type PolicyId, treatTarget } from "./policies";
 
-export type SimData = ChoiceData & WalkData & Pick<GameData, "upgrades">;
+export type SimData = ChoiceData &
+  WalkData &
+  Pick<GameData, "achievements" | "dogSlots" | "upgrades">;
 
 // Rates are chances from 0 to 1 per item spawned: hitRate for each obstacle, the others for
 // each pickup or lucky encounter the bot steers into.
@@ -76,6 +87,8 @@ export interface ZoneRecord {
 }
 
 export interface RunResult {
+  // The achievements the run earns on its own facts, whatever the profile holds.
+  readonly badges: readonly AchievementId[];
   // Encounter and forced stop cards; upgrade offers are not counted.
   readonly cardsSeen: number;
   readonly choices: readonly ChoiceRecord[];
@@ -228,7 +241,7 @@ function playZone(
       // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
       if (event.distance >= graceUntil && chance(random, config.hitRate)) {
         graceUntil = event.distance + graceDistance;
-        session.run = minorBump(data, session.run).state;
+        session.run = minorBump(data, countBump(session.run)).state;
       }
     } else if (data.encounters[event.item].kind === "lucky") {
       if (chance(random, config.luckyRate)) {
@@ -236,6 +249,7 @@ function playZone(
       }
     } else if (event.distance >= graceUntil && chance(random, config.hitRate)) {
       graceUntil = event.distance + graceDistance;
+      session.run = countBump(session.run);
       meet(data, random, config, session, "obstacle", event.item);
     }
     if (hasEnded(session)) {
@@ -285,7 +299,14 @@ export function simulateRun(data: SimData, random: Random, config: SimConfig): R
     }
   }
   const paidChoices = session.choices.filter((choice) => choice.cost > 0).length;
+  const facts = {
+    ...runCountersOf(session.run),
+    earnedCents: session.run.money,
+    packSize: config.pack.length,
+    zonesFinished: session.zones.length,
+  };
   return {
+    badges: earnedByRun(data, facts),
     cardsSeen: session.cardsSeen,
     choices: session.choices,
     earnings: session.run.money,

@@ -1,7 +1,7 @@
 import { type Scene, Scenes } from "phaser";
 
 import { gameData } from "../data";
-import type { HintId, WalkerId } from "../data/types";
+import type { AchievementId, HintId, WalkerId } from "../data/types";
 import { packOf } from "../home/home";
 import { soundVolumes } from "../home/settings";
 import type { Change } from "../rules/causes";
@@ -48,6 +48,7 @@ export async function openProfile(scene: Scene): Promise<StoreLoadResult> {
   const store = saveStore(browserStorage(lazyStorage(() => globalThis.localStorage)));
   const { load, session: opened } = await ProfileSession.open(
     saveContextFrom(gameData),
+    { data: gameData, now: () => Date.now() },
     store,
     (save) => ({ ...save, settings: { ...save.settings, reducedMotion: prefersReducedMotion() } }),
   );
@@ -65,6 +66,19 @@ export function updateProfile(
   change: (save: SaveDocument) => SaveDocument,
 ): Promise<void> {
   return session(scene).update(change);
+}
+
+// A purchase: like updateProfile, and the ownership achievements it meets are awarded.
+export function purchaseInProfile(
+  scene: Scene,
+  change: (save: SaveDocument) => SaveDocument,
+): Promise<void> {
+  return session(scene).purchase(change);
+}
+
+// Achievements earned on launch or by a purchase, for the home screen to celebrate once.
+export function takeCelebrations(scene: Scene): AchievementId[] {
+  return session(scene).takeCelebrations();
 }
 
 export function storageState(scene: Scene): StorageState {

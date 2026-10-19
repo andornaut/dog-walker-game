@@ -1,6 +1,7 @@
 import * as v from "valibot";
 
-import type { DogId, GearId, HintId, WalkerId } from "../data/types";
+import type { AchievementId, DogId, GearId, HintId, WalkerId } from "../data/types";
+import type { RunCounters } from "../rules/achievements";
 import { cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
@@ -36,8 +37,19 @@ const dogRunSchema = v.object({
   zonesFinished: count,
 });
 
+// A run's achievement counters (RunCounters), keyed by debuff id.
+const runCountersSchema = v.object({
+  bumpsByZone: v.array(count),
+  debuffZones: v.record(contentId, count),
+  // Checkpoints saved before it walked from the first zone.
+  firstZone: v.optional(count, 0),
+  squirrelChases: count,
+});
+
 // A run in progress, saved after each zone. zonesFinished is the zone that just ended.
+// counters is null in a checkpoint saved before achievements: its run earns no run badges.
 export const checkpointSchema = v.object({
+  counters: v.optional(v.nullable(runCountersSchema), null),
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,
   zonesFinished: zoneNumber,
@@ -75,6 +87,8 @@ const statsSchema = v.object({
   // The most zones one run finished. Heading home mid-zone does not count that zone.
   bestZoneFinished: count,
   dogs: v.record(contentId, dogStatsSchema),
+  // Every dog that finished a walk without its owner firing you, each once.
+  dogsFinishedWith: v.optional(ids, []),
   // The most recent walk; null until the first run ends.
   lastWalk: v.nullable(lastWalkSchema),
   lifetimeCents: cents,
@@ -84,10 +98,16 @@ const statsSchema = v.object({
     noDogs: count,
     wentHome: count,
   }),
+  // Squirrel chases let happen, over every run.
+  squirrelsChased: v.optional(count, 0),
   timesFired: count,
+  // Finished walks in which no owner fired you.
+  walksWithoutFiring: v.optional(count, 0),
 });
 
 export const saveSchema = v.object({
+  // Each earned achievement and when, in milliseconds since the Unix epoch.
+  achievements: v.optional(v.record(contentId, count), {}),
   bankCents: cents,
   checkpoint: v.nullable(checkpointSchema),
   // Whether the player has seen the help screen, so it opens by itself only once.
@@ -125,7 +145,11 @@ export interface DogRun extends Omit<v.InferOutput<typeof dogRunSchema>, "id"> {
   id: DogId;
 }
 
-export interface Checkpoint extends Omit<v.InferOutput<typeof checkpointSchema>, "dogs"> {
+export interface Checkpoint extends Omit<
+  v.InferOutput<typeof checkpointSchema>,
+  "counters" | "dogs"
+> {
+  counters: RunCounters | null;
   dogs: DogRun[];
 }
 
@@ -153,17 +177,22 @@ export interface LastWalk extends Walk {
   outcome: EndReason;
 }
 
-export interface SaveStats extends Omit<StoredStats, "bestWalk" | "dogs" | "lastWalk" | "runs"> {
+export interface SaveStats extends Omit<
+  StoredStats,
+  "bestWalk" | "dogs" | "dogsFinishedWith" | "lastWalk" | "runs"
+> {
   bestWalk: Walk | null;
   dogs: Partial<Record<DogId, DogStats>>;
+  dogsFinishedWith: DogId[];
   lastWalk: LastWalk | null;
   runs: Record<EndReason, number>;
 }
 
 export interface SaveDocument extends Omit<
   StoredSave,
-  "checkpoint" | "lastLoadout" | "owned" | "shownHints" | "stats" | "walker"
+  "achievements" | "checkpoint" | "lastLoadout" | "owned" | "shownHints" | "stats" | "walker"
 > {
+  achievements: Partial<Record<AchievementId, number>>;
   checkpoint: Checkpoint | null;
   lastLoadout: Loadout;
   owned: Owned;
@@ -193,6 +222,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
   const zero = toCents(0);
   return {
+    achievements: {},
     bankCents: zero,
     checkpoint: null,
     helpSeen: false,
@@ -208,10 +238,13 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       bestWalk: null,
       bestZoneFinished: 0,
       dogs: {},
+      dogsFinishedWith: [],
       lastWalk: null,
       lifetimeCents: zero,
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
+      squirrelsChased: 0,
       timesFired: 0,
+      walksWithoutFiring: 0,
     },
     version: SAVE_VERSION,
     walker: defaults.walker,
