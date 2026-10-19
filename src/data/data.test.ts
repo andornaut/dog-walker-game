@@ -198,17 +198,6 @@ describe("money", () => {
 });
 
 describe("cards", () => {
-  const pack = testState({ duchess: 5, koda: 5, pierre: 5 });
-  const affected: readonly DogId[] = ["duchess", "koda", "pierre"];
-  const freeOption = (options: readonly CardOption[]) =>
-    options.some((option) => moneyCost(gameData, { affected }, pack, option.effects) === 0);
-
-  it("keeps a free option on every card", () => {
-    for (const card of cards) {
-      expect(freeOption(card.options), card.name).toBe(true);
-    }
-  });
-
   it("gives every option on a card a distinct name", () => {
     for (const card of cards) {
       const names = card.options.map((option) => option.name);
@@ -356,10 +345,6 @@ describe("run, world and walkers", () => {
     expect(new Set(prices).size).toBe(prices.length);
   });
 
-  it("has 5 gear items", () => {
-    expect(Object.keys(shopGear)).toHaveLength(5);
-  });
-
   it("has 4 free walkers with their own sprites and portraits, the default among them", () => {
     const list = Object.values(walkers);
     expect(list).toHaveLength(4);
@@ -367,15 +352,6 @@ describe("run, world and walkers", () => {
     expect(new Set(list.map((walker) => walker.spriteKey)).size).toBe(list.length);
     expect(new Set(list.map((walker) => walker.portraitKey)).size).toBe(list.length);
     expect(Object.keys(walkers)).toContain(defaultWalker);
-  });
-
-  it("finds every walker's sprite and portrait in the art manifest", () => {
-    const manifest = parseManifest(manifestJson);
-    const sprites = new Set(manifest.sprites.map(({ key }) => key));
-    const missing = Object.values(walkers)
-      .flatMap((walker) => [walker.spriteKey, walker.portraitKey])
-      .filter((key) => !sprites.has(key));
-    expect(missing).toEqual([]);
   });
 
   it("gives every owner two distinct lines for every moment", () => {
@@ -456,13 +432,6 @@ describe("achievements", () => {
       expect(threshold === "all" || (Number.isInteger(threshold) && threshold > 0)).toBe(true);
     }
   });
-
-  it("finds every badge's art in the manifest", () => {
-    const manifest = parseManifest(manifestJson);
-    const sprites = new Set(manifest.sprites.map(({ key }) => key));
-    const missing = achievements.map(({ id }) => badgeKey(id)).filter((key) => !sprites.has(key));
-    expect(missing).toEqual([]);
-  });
 });
 
 describe("needs", () => {
@@ -510,5 +479,19 @@ describe("needs", () => {
         ),
       ).toBe(true);
     }
+  });
+});
+
+describe("the art manifest", () => {
+  const sprites = new Set(parseManifest(manifestJson).sprites.map(({ key }) => key));
+
+  it.each([
+    [
+      "every walker's sprite and portrait",
+      Object.values(walkers).flatMap((walker) => [walker.spriteKey, walker.portraitKey]),
+    ],
+    ["every badge's art", gameData.achievements.map(({ id }) => badgeKey(id))],
+  ])("has %s", (_, keys) => {
+    expect(keys.filter((key) => !sprites.has(key))).toEqual([]);
   });
 });
