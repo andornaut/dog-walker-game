@@ -213,6 +213,7 @@ export type Stat =
   | "chaserSquirrelPulls"
   | "fees"
   | "inputLock"
+  | "needSpotSpawns"
   | "obstacleSpawns"
   // The road's speed, which the spawns and movers are planned for.
   | "scrollSpeed"

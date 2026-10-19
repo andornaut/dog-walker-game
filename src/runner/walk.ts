@@ -409,12 +409,13 @@ export function needSpotWeights(
 
 // Each obstacle, minor obstacle, lucky find and need spot is drawn first by the zone's
 // weights, so its shape is known when it is placed. Rush hour and the like scale both obstacle
-// counts. Then each squirrel, other dog and minor obstacle comes as a mover at the zone's mover
-// share, and each goose as a mover always.
+// counts, and the walker's pace scales the obstacles, tips and need spots. Then each squirrel,
+// other dog and minor obstacle comes as a mover at the zone's mover share, and each goose as a
+// mover always.
 function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
   const zone = currentZone(data, run);
   const stats = zoneStats(data.tuning, zone, run.zoneIndex);
-  const scaled = (stat: "obstacleSpawns" | "tipSpawns", base: number) =>
+  const scaled = (stat: "needSpotSpawns" | "obstacleSpawns" | "tipSpawns", base: number) =>
     Math.round(modifiedStat(data.tuning, run.modifiers, stat, base));
   const drawn = <Kind extends WalkItemKind>(
     count: number,
@@ -425,7 +426,10 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
     ...drawn(scaled("obstacleSpawns", stats.obstacles), obstacleWeights(data, run)),
     ...drawn(scaled("obstacleSpawns", stats.minorObstacles), minorObstacleWeights(data, run)),
     ...drawn(stats.luckyEncounters, positiveWeights(zone.weights.luckyFinds)),
-    ...drawn(read(data.tuning, "counts", "needSpotsPerZone"), needSpotWeights(data, run)),
+    ...drawn(
+      scaled("needSpotSpawns", read(data.tuning, "counts", "needSpotsPerZone")),
+      needSpotWeights(data, run),
+    ),
   ];
   const quotas = new Map<WalkItemKind, number>();
   const movers = new Map<MoverKind, number>();

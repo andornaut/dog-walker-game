@@ -45,6 +45,9 @@ describe("newRun", () => {
     expect(state.modifiers.map(({ by, source, stat }) => [stat, by, source])).toEqual([
       ["scrollSpeed", "slowWalkerSpeed", ben],
       ["zoneLength", "slowWalkerSpeed", ben],
+      ["obstacleSpawns", "slowWalkerSpeed", ben],
+      ["tipSpawns", "slowWalkerSpeed", ben],
+      ["needSpotSpawns", "slowWalkerSpeed", ben],
       ["fees", "slowWalkerFees", ben],
       ["tipValue", "hustlerTip", ben],
       ["startMoney", "fannyPackStart", { gear: "fannyPack", kind: "gear" }],

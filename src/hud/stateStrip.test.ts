@@ -114,7 +114,7 @@ describe("stripText", () => {
     [
       "a walker's pace and its effects",
       { kind: "pace", pace: "slow" },
-      "Slow: road speed −10%, zone length −10%, fees −10%.",
+      "Slow: road speed −10%, zone length −10%, obstacles −10%, tips −10%, need spots −10%, fees −10%.",
     ],
     [
       "a walker's style and its effects",

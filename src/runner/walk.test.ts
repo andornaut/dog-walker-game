@@ -237,6 +237,40 @@ describe("planZone", { timeout: 15_000 }, () => {
     expect(countOf("lucky")).toBe(2);
   });
 
+  it("scales the obstacles, tips and need spots by the walker's pace, and nothing else", () => {
+    const paced = {
+      ...data,
+      tuning: { ...tuning, multipliers: { ...tuning.multipliers, fastWalkerSpeed: 2 } },
+    };
+    const counts = (tuned: typeof data) => {
+      const walk = {
+        ...walkWith(["koda"]),
+        run: newRun(tuned, 1, { dogs: ["koda"], gear: null, walker: "trista" }),
+      };
+      const plan = planZone(tuned, geometry, seededRandom(3), walk);
+      const count = (category: string) =>
+        plan.road.pending.filter((event) => itemCategory(tuned, event.kind) === category).length;
+      return {
+        lucky: count("lucky"),
+        minor: count("minor"),
+        needSpot: count("needSpot"),
+        obstacle: count("obstacle"),
+        tip: count("tip"),
+        treat: count("treat"),
+      };
+    };
+    const base = counts(data);
+    expect(base.needSpot).toBeGreaterThan(0);
+    expect(counts(paced)).toEqual({
+      lucky: base.lucky,
+      minor: 2 * base.minor,
+      needSpot: 2 * base.needSpot,
+      obstacle: 2 * base.obstacle,
+      tip: 2 * base.tip,
+      treat: base.treat,
+    });
+  });
+
   it("places a forced stop in the middle third of the zone", () => {
     const distance = planned.road.forcedStopAhead?.distance ?? 0;
     const length = zoneLength(data, planned.run);
