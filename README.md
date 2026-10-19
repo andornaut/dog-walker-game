@@ -78,7 +78,7 @@ npx wrangler login
 npm run deploy
 ```
 
-To serve a custom domain, add a `routes` entry to `wrangler.jsonc`.
+The custom domain is the `routes` entry in `wrangler.jsonc`.
 
 The build writes `dist/_headers`, the security headers Cloudflare serves with each static asset, from `src/headers/securityPolicy.ts`, with the hashes of every page's inline blocks.
 

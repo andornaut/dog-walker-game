@@ -47,13 +47,15 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 Rules in the rulebook that the game doesn't have yet:
 
-1. **Area effects:** fixed catches by size, the Hop label
-2. **Firing:** no fee clawback; a fired owner stops paying from the current zone
-3. **Obstacle skins:** the per-zone names, hit labels and art (Obstacle skins)
-4. **Pet shop and Pocket:** the shop building, the Pocket strip, the tile states and the top-right controls (Home screen and progression)
-5. **Scale:** 5 lanes of 64px with 40px sprites, and pack bands that grow with lane width
-6. **Walkers:** pace and style effects, unlocks on first finishing zones 1 to 3, and the sidewalk greeting (Walkers)
-7. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
+1. **Big Payday:** counted net of starting money (Achievements)
+2. **Debuffs:** Spooked, Tangled and Tuckered out on the cheap options, and a treat that clears them (Debuffs, Forced stops)
+3. **Obstacle skins:** the per-zone road sprites and card illustrations (Obstacle skins)
+4. **Panels:** a tap beside the game counts as outside the panel (Teaching, sound and settings)
+5. **Pocket section:** a third framed section whose band names the pocketed item, with no effect line (Home screen and progression)
+6. **Scale:** 5 lanes of 64px with 40px sprites, and pack bands that grow with lane width
+7. **Walkers:** locked walkers' name plates and the "New walker!" line (Home screen and progression)
+8. **Zone celebration:** Zone done and New walker, between a zone's fees and its upgrade card (Zone celebration)
+9. **Zone length:** zones run about 2 minutes on a phone, timed with the dev overlay's zone clock
 
 Tuning against the targets, after one re-baseline on the shared step loop with every item above in:
 

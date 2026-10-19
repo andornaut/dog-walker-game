@@ -152,7 +152,7 @@ Every dog has one need, shown by name on its detail card:
 | Regular  | A hydrant or a tree |
 | Thirsty  | A water bowl        |
 
-- **Need spots** appear on the road like pickups, drawn only for needs in the pack (Playful's spot is a friendly playmate dog, not the Other dog encounter). Steering the pack into one resets the matching dogs' needs; dogs whose need was urgent also get +♥ for their owners, a big need bubble and a happy owner. About 1 in 4 fulfilments opens a small card instead, e.g. "A stranger loves Duchess" (Let them fuss: +♥ and a tip · Keep walking) or "Play date!" (Let them play: +♥ each, −$ per dog in missed tips · Just a sniff: +♥ to the playful dog's owner)
+- **Need spots** appear on the road like pickups, drawn only for needs in the pack (Playful's spot is a friendly playmate dog, not the Other dog encounter). Steering the pack into one resets the matching dogs' needs; dogs whose need was urgent also get +♥ for their owners, a big need bubble and a happy owner. About 1 in 4 fulfilments of an urgent need opens a small card instead, e.g. "A stranger loves Duchess" (Let them fuss: +♥ and a tip · Keep walking) or "Play date!" (Let them play: +♥ each, −$ per dog in missed tips · Just a sniff: +♥ to the playful dog's owner)
 - **Urgency:** a need fills up during a zone, faster for higher energy, and resets at each zone end. When it's urgent, a bubble with the need's icon shows over the dog, and it pulls toward the nearest matching spot. One dog strains at a time, and each spot draws one pull
 - **Gone wrong:** an urgent need left too long goes wrong, then resets. A Regular dog has an accident and opens a card (Clean up with a bag: −$ · Walk on: −♥, labelled "grumpy neighbour"); any other need costs its owner −♥
 - The Other dog encounter's Let them sniff fulfils Playful, and the Can I pet them? stop's Of course! fulfils Friendly
@@ -201,31 +201,31 @@ A lucky find with no card pays out on contact, with a short popup and a quip fro
 
 ### Minor obstacles
 
-About half of the obstacles are minor: they open no card. Bumping one drops $8 in tips and makes the pack stumble (lane input locks briefly): a few coins burst out at the pack with "−$8", the walker wobbles, and the money counter ticks down. A hydrant is never an obstacle: it's always a need spot for Regular dogs
+About half of the obstacles are minor: they open no card. Bumping one drops $8 in tips and makes the pack stumble (lane input locks briefly): a few coins burst out at the pack with "−$8", the walker wobbles, and the money counter ticks down. A hydrant is never an obstacle: it's always a need spot for Regular dogs.
 
 ### Obstacle sizes
 
 Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part counts as one hit; the whole obstacle is removed and the grace window starts.
 
-| Obstacle                                          | Kind      | Size (lanes × rows) |
-| ------------------------------------------------- | --------- | ------------------- |
-| Skunk (with its spray cloud)                      | Encounter | 2 × 2               |
-| Puddle                                            | Encounter | 2 × 1               |
-| Squirrel, other dog, thief                        | Encounter | 1 × 1               |
-| Cone, bin                                         | Minor     | 1 × 1               |
-| Parked car                                        | Minor     | 1 × 3               |
-| Bench                                             | Minor     | 2 × 1               |
-| Hedge                                             | Minor     | 3 × 1               |
-| Construction barrier (Elm Avenue and Main Street) | Minor     | 2 or 3 × 1          |
+| Obstacle                                                                        | Kind      | Size (lanes × rows) |
+| ------------------------------------------------------------------------------- | --------- | ------------------- |
+| Skunk (with its spray cloud)                                                    | Encounter | 2 × 2               |
+| Puddle                                                                          | Encounter | 2 × 1               |
+| Squirrel, other dog, thief                                                      | Encounter | 1 × 1               |
+| Cone, bin                                                                       | Minor     | 1 × 1               |
+| Parked car                                                                      | Minor     | 1 × 3               |
+| Bench                                                                           | Minor     | 2 × 1               |
+| Hedge                                                                           | Minor     | 3 × 1               |
+| Construction barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path) | Minor     | 2 or 3 × 1          |
 
 ### Obstacle skins
 
-Each obstacle kind keeps one mechanic and wears a different look in each zone: a skin changes the name (the card title), the road sprite, the card illustration and the hit label, never the effects, the options or who's affected. The hit burst and screen-edge flash stay with the kind (a Stink skin always bursts mauve), so the same colour always means the same mechanic. A big dog still scares off every Snatch skin, and Chasers still pull toward every Chase skin. The zone encounters already have their own looks.
+Each obstacle kind keeps one mechanic and wears a different look in each zone: a skin changes the name (the card title), the road sprite, the card illustration and the hit label, never the effects, the options or who's affected. The hit burst and screen-edge flash stay with the kind (a Stink skin always bursts mauve), so the same colour always means the same mechanic. A big dog still scares off every Snatch skin, and Chasers still pull toward every Chase skin. The zone encounters already have their own looks, and the construction barrier keeps its look everywhere.
 
 | Kind               | Willow Crescent | Fairview Park  | Elm Avenue | Main Street       | Riverside Path  | The Long Way Home |
 | ------------------ | --------------- | -------------- | ---------- | ----------------- | --------------- | ----------------- |
 | Chase (squirrel)   | Cat on a lawn   | Squirrel       | Squirrel   | Pigeon flock      | Ducklings       | Rabbit            |
-| Snatch (thief)     | Raccoon         | Seagull        | Pickpocket | Pickpocket        | Seagull         | Raccoon           |
+| Snatch (thief)     | Raccoon         | Seagull        | Thief      | Thief             | Seagull         | Raccoon           |
 | Social (other dog) | Dog at a gate   | Frisbee dog    | Other dog  | Dog in a handbag  | Jogger's dog    | Other dog         |
 | Splash (puddle)    | Lawn sprinkler  | Mud patch      | Puddle     | Spilled milkshake | Splashy shore   | Puddle            |
 | Stink (skunk)      | Compost heap    | Skunk          | Skunk      | Fish crate        | Seaweed heap    | Garbage truck     |
@@ -305,7 +305,7 @@ Four walkers, on two axes. Pace is the difficulty: every zone takes the same tim
 | Ada    | Fast | Charmer | Speed and zone length ×1.1, fees ×1.1; +♥ start, 0.85× as many tips | Finish zone 2 |
 | Trista | Fast | Hustler | Speed and zone length ×1.1, fees ×1.1; 1.2× as many tips            | Finish zone 3 |
 
-- **Zone celebration:** see Between zones
+- A newly unlocked walker joins you in the Zone celebration
 - A walker's effects stack with the Pocket item and upgrade cards, and the state strip shows them
 - The numbers are first guesses; tuning sets them against the walker spread in [`README.md`](README.md)
 
@@ -314,7 +314,7 @@ Four walkers, on two axes. Pace is the difficulty: every zone takes the same tim
 Everything bought at the Pet shop is permanent; upgrade cards are the run-only boosts (the Hades split between keepsakes and boons). Progress (bank, owned items, stats, achievements) is saved between sessions; storage is in [`src/README.md`](../src/README.md).
 
 - **Layout, top to bottom:** the top bar (bank, best walk, walk count and the Logbook button on the left; every control at the top right: help, sound, settings); the gate scene; then three framed sections in order: Walker, Dogs, Pocket (optional); then the Start walk button at the bottom. A section's frame lights up once it's complete; until then its band prompts ("Tap a face"), and the Dogs band shows the pack count ("0/1"). Nothing else sits between the sections, so the screen reads as choose this, choose that, start your walk
-- **Pet shop:** a building in the gate scene, its sign the same green as Start walk (tappable entry points share one colour); tap it to open the shop, which sells everything you buy: gear, dogs and dog slots. It has two tabs. Gear lists the 5 items, each with a short effect line, marking owned ones ("Yours to keep"). Dogs lists the dogs you don't own yet and the pack slots ("1 of 3 owned", "Walk 2 dogs at once"; a later slot shows "Buy slot 2 first"). Tap an item to buy it, at any time you can pay; anything you can afford in the shop has a gold outline. On the home screen only the Pet shop building gets the gold outline, while anything in it is affordable. Tapping a locked dog or dog slot on the home screen opens the shop at that item. A dog unlocked another way shows its goal instead of a price
+- **Pet shop:** a building in the gate scene, its sign the same green as Start walk (tappable entry points share one colour); tap it to open the shop, which sells everything you buy: gear, dogs and dog slots. It has two tabs. Gear lists the 5 items under "Yours to keep", each with a short effect line, marking owned ones "Owned". Dogs lists the dogs you don't own yet and the pack slots ("1 of 3 owned", "Walk 2 dogs at once"; a later slot shows "Buy slot 2 first"). Tap an item to buy it, at any time you can pay; anything you can afford in the shop has a gold outline. On the home screen only the Pet shop building gets the gold outline, while anything in it is affordable. Tapping a locked dog or dog slot on the home screen opens the shop at that item. A dog unlocked another way shows its goal instead of a price
 - **Tile states** (walkers, dogs and Pocket gear alike): Locked (not owned): a grey silhouette with a padlock and a price or goal plate, and no word; Available (owned, not picked): full colour in a plain frame; Picked: full colour in a gold frame with a check; Pack full (owned, not picked, while every slot is filled): greyed in colour, and a tap shows "The pack is full. Tap a picked dog to take it out."
 - **Details:** hold any dog or gear item, on the home screen or in the shop, for a detail card: a dog's breed, traits in words, owner and temperament, fee and per-dog stats; a gear item's name and effect
 - **Start button:** the only button below the sections, reading "Start walk" in every state, and not ready until a dog is picked. The Dogs band shows the pack count with no label, "0/1" or "1/2"; each dog tile shows its fee
@@ -324,7 +324,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the run-only b
 - **Walker picker:** choose from the walkers you've unlocked (see Walkers). The choice is saved, and the saved walker counts as picked, so a first visit needs only a dog. Locked walkers use the Locked tile state with a name plate ("Ben"); tapping one shakes it and the bubble gives the goal, "Finish zone 1 to unlock Ben."; a picked walker's bubble gives their pace and style ("Ben: slow, hustler."); a newly unlocked walker shows the walker's line "New walker!"
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Elm Avenue under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
-- **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
+- **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you on Fairview Park."). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone). Each dog's roster card shows its walks, zones finished and times fired
 - **Achievements:** a badge wall on the Stats page, earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting money), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
