@@ -5,6 +5,7 @@ import { remapDarker } from "../assets/darkRamp";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
+  HOME_QUESTION_ANSWERS,
   homeQuestionLayout,
   PAUSE_MENU_ITEMS,
   type PauseMenuItem,
@@ -44,7 +45,7 @@ interface MenuEntry {
 }
 
 // The pause menu over the dimmed road: resume, help, settings or head home; or the Home
-// button's question, head home or keep walking. The HUD keeps running under it, so the top
+// button's question, keep walking or head home. The HUD keeps running under it, so the top
 // bar's buttons and their keys (P, Escape and M) stay with it.
 export class PauseScene extends Scene {
   private buttons: MenuButton[] = [];
@@ -73,10 +74,10 @@ export class PauseScene extends Scene {
     const menu = gameData.menuText.pause;
     const asking = mode === "homeQuestion";
     this.entries = asking
-      ? [
-          { label: question.headHome, press: headHome },
-          { label: question.keepWalking, press: onResume },
-        ]
+      ? HOME_QUESTION_ANSWERS.map((answer) => ({
+          label: question[answer],
+          press: answer === "headHome" ? headHome : onResume,
+        }))
       : PAUSE_MENU_ITEMS.map((item) => ({ label: menu[item], press: presses[item] }));
     const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, this.entries.length);
     const { panel } = layout;

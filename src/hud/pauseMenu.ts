@@ -4,6 +4,9 @@ import type { Rect } from "../layout/rect";
 export const PAUSE_MENU_ITEMS = ["resume", "help", "settings", "headHome"] as const;
 export type PauseMenuItem = (typeof PAUSE_MENU_ITEMS)[number];
 
+// The Home button's answers, top to bottom: the safe one first, as the primary and key 1.
+export const HOME_QUESTION_ANSWERS = ["keepWalking", "headHome"] as const;
+
 const PANEL_WIDTH = 232;
 // Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;
