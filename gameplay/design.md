@@ -97,7 +97,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Dogs
 
-A roster of 9. You start with 1 dog slot and 3 dogs, and buy up to 2 more slots and the other 6 dogs on the home screen. Walking more dogs is the main progression: more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more area-effect rolls.
+A roster of 9. You start with 1 dog slot and 3 dogs, and buy up to 2 more slots and the other 6 dogs on the home screen. Walking more dogs is the main progression: more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more dogs caught by area effects.
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
