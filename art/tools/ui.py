@@ -1119,8 +1119,8 @@ def top_bar():
     """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
     money 4,8 88x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 96,8 32x26
     (icon-treat at 100,13, the count at 118,18), and zone 212,5 144x29 (the zone name right aligned
-    at 352,10, ui-zone-pips from 271,22). Between the treats and zone wells sit two
-    ui-icon-buttons: Home at 130,10 and pause at 174,10. The state strip (ui-strip-well) hangs
+    at 352,10, ui-zone-pips from 271,22). Between the treats and zone wells sit three
+    ui-icon-buttons: Home at 130,10, sound at 152,10 and pause at 174,10. The state strip (ui-strip-well) hangs
     under the zone well, right aligned at 356."""
     g = Grid(360, 40)
     wood(g, 0, 40)
