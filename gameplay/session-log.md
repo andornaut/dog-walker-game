@@ -55,3 +55,9 @@ Format:
 - Covered: owner names, dog looks, size balance, fees, dog prices, a thief encounter
 - Decided: owner names and roles; a coat and one accessory per dog; size is never a straight upgrade (pull strength vs max happiness and who you meet); flat $20 fee, fussy $25; Thief encounter scared off by big dogs; $150 per locked dog; pull numbers stay placeholders until playtests
 - Open threads / next time: which encounters are area effects and how cards show who was caught
+
+## 2026-10-18 · Design · Area effects and numbers
+
+- Covered: area effects, where tuning numbers live
+- Decided: skunk and puddle roll per dog (50% placeholder) before the card; src/data/ becomes the source of truth for numbers once it exists
+- Open threads / next time: replace the v1-plan number tables with a link when src/data/ lands

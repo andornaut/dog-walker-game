@@ -97,3 +97,5 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · New Thief encounter: chase them off (−1 ♥ each) or let it go (−$); any big dog in the pack scares the thief away with no card
 - 2026-10-18 · Design · Owners: Rosa (Duchess), Kevin (Nugget), Mr. Pruitt (Zippy), Madame Lefevre (Pierre), Sam (Biscuit), Ophelia (Dash), Tiffany (Snowball), Dr. Hughes (Waffles), Jesse (Koda); each dog has a fixed look (coat and one accessory)
 - 2026-10-18 · Design · Every locked dog costs $150
+- 2026-10-18 · Design · Skunk and puddle are area effects: each dog rolls on contact, the card shows who was caught, and nobody caught means no card
+- 2026-10-18 · Process · Once typed data lands in src/data/, it is the source of truth for tuning numbers and roster stats; v1-plan.md keeps rules, names and looks and links to it
