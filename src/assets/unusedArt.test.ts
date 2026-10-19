@@ -9,7 +9,10 @@ const SOURCES = [
   `export const dogKey = (art: string) => \`dog-\${art}\`;`,
   `export const variant = (key: string, suffix: string) => \`\${key}\${suffix}\`;`,
 ];
-const DATA = { dogs: { koda: { art: "koda" } }, zones: [{ name: "The Long Way Home" }] };
+const DATA = {
+  dogs: { koda: { art: "koda" } },
+  zones: [{ art: "the-long-way-home", name: "The Long Way Home" }],
+};
 
 describe("unusedKeys", () => {
   const names = keyNames(SOURCES, DATA);

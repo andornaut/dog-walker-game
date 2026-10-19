@@ -2,7 +2,7 @@ import ts from "typescript";
 
 import { splitDepthKey } from "./depthSteps";
 import type { AssetManifest } from "./manifest";
-import { kebabCase, zoneArtName } from "./spriteKeys";
+import { kebabCase } from "./spriteKeys";
 
 // The names source code and game data could build a manifest key from: every string literal,
 // every template literal's fixed parts, and every string in the game data.
@@ -16,9 +16,10 @@ function escapeRegExp(text: string): string {
   return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
-// A data string as a key would spell it: as it is, in kebab case, and as a zone's art name.
+// A data string as a key would spell it: as it is, and in kebab case. A zone's art name is
+// already a data string.
 function spellings(text: string): string[] {
-  return [text, kebabCase(text), zoneArtName({ name: text })];
+  return [text, kebabCase(text)];
 }
 
 // Every string in a JSON-like value, its object keys included.
