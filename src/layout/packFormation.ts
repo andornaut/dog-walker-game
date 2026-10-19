@@ -49,6 +49,21 @@ export function leashHand(placement: PackPlacement): { dx: number; dy: number } 
   };
 }
 
+// A taut leash's highlight runs along its upper-left side: a pixel left of a steep leash, or
+// a pixel above a shallow one.
+export function tautLeashLine(
+  from: { x: number; y: number },
+  to: { x: number; y: number },
+): { from: { x: number; y: number }; to: { x: number; y: number } } {
+  const side =
+    Math.abs(to.y - from.y) >= Math.abs(to.x - from.x) ? { x: -1, y: 0 } : { x: 0, y: -1 };
+  const shift = (point: { x: number; y: number }) => ({
+    x: point.x + side.x,
+    y: point.y + side.y,
+  });
+  return { from: shift(from), to: shift(to) };
+}
+
 // The pack's vertical band in screen pixels, from the leading dog's head to the walker's
 // feet: the pack collides as one unit.
 export function packBand(dogCount: number, walkerFootY: number): { bottom: number; top: number } {

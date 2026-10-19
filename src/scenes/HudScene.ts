@@ -73,9 +73,8 @@ import {
   HINT_EVENT,
   type QuipBubble,
   QUIPS_EVENT,
-  type RunHudView,
-  type RunScene,
-} from "./RunScene";
+} from "./run/runMoments";
+import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";

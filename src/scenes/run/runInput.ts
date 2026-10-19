@@ -1,0 +1,146 @@
+import type { Input, Scene } from "phaser";
+
+import { gameData } from "../../data";
+import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
+import { onStrip, stripItems } from "../../hud/stateStrip";
+import { gameplayAllowed, type RunPause, topBarButtonAt, walkCovered } from "../../hud/topBar";
+import type { GestureAction, GestureContext } from "../../input/gestures";
+import { dogSlotForKey, laneDirectionForKey } from "../../input/keyBindings";
+import {
+  idleTrack,
+  type PointerSample,
+  type PointerTrack,
+  trackPointer,
+} from "../../input/pointerTracking";
+import type { LaneDirection } from "../../layout/lanes";
+import { read } from "../../rules/units";
+import { gestureAfterPulls, type PullStep } from "../../runner/pulls";
+import type { Walk } from "../../runner/walk";
+import { LAYOUT } from "./stage";
+
+// The inputs a simulation step applies, waiting for it. Only a replay heads home at a step:
+// played live, the pause menu ends the walk at once.
+export type PendingInput =
+  { direction: LaneDirection; kind: "lane" } | { kind: "home" } | { kind: "treat"; slot: number };
+
+// What the walk's input reads of the run, and the pause it opens.
+export interface RunInputHost {
+  openPause: () => void;
+  // Whether a replay drives the run, which then takes no live lane moves or treats.
+  replaying: () => boolean;
+  runPause: () => RunPause;
+  walk: () => Walk | undefined;
+}
+
+// Keys, the press driving the walk's gestures, and the lane moves and treats they queue for
+// the next simulation step.
+export class RunInput {
+  private readonly host: RunInputHost;
+  private pending: PendingInput[] = [];
+  private pointers: PointerTrack = idleTrack;
+  private readonly scene: Scene;
+
+  constructor(scene: Scene, host: RunInputHost) {
+    this.scene = scene;
+    this.host = host;
+  }
+
+  listen(): void {
+    const { input } = this.scene;
+    input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
+    input.on("pointerdown", (pointer: Input.Pointer) => this.onPointer("down", pointer));
+    input.on("pointermove", (pointer: Input.Pointer) => this.onPointer("move", pointer));
+    input.on("pointerup", (pointer: Input.Pointer) => this.onPointer("up", pointer));
+    input.on("pointerupoutside", (pointer: Input.Pointer) => this.onPointer("up", pointer));
+  }
+
+  // The lane moves and treats queued since the last step.
+  takePending(): PendingInput[] {
+    const inputs = this.pending;
+    this.pending = [];
+    return inputs;
+  }
+
+  // A press under way when a card or the menu opens, or the page loses focus, is dropped:
+  // its release may never arrive.
+  dropPress(): void {
+    this.pointers = idleTrack;
+  }
+
+  // A pull that moved the pack re-anchors the drag.
+  afterPulls(pulled: PullStep["pulled"]): void {
+    this.pointers = { ...this.pointers, gesture: gestureAfterPulls(pulled, this.pointers.gesture) };
+  }
+
+  // M, P and Escape are the top bar's keys, which the HUD handles.
+  private onKey(key: string): void {
+    const direction = laneDirectionForKey(key);
+    if (direction !== undefined) {
+      this.act({ direction, kind: "move" });
+      return;
+    }
+    const slot = dogSlotForKey(SCREEN_CONFIG.dogSlotCount, key);
+    if (slot !== undefined) {
+      this.act({ kind: "treat", slot });
+    }
+  }
+
+  // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
+  // running while a card or the pause menu covers the walk, and the press is theirs then.
+  private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
+    const walk = this.host.walk();
+    const walking = walk !== undefined && walk.run.phase.kind === "walking";
+    const held = !walking || walkCovered(this.host.runPause());
+    const sample: PointerSample = {
+      onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
+      onStrip:
+        phase === "down" &&
+        walk !== undefined &&
+        onStrip(SCREEN_CONFIG.width, stripItems(gameData, walk.run).length, pointer),
+      phase: phase === "up" && pointer.wasCanceled ? "cancel" : phase,
+      point: { x: pointer.x, y: pointer.y },
+      press: { downTime: pointer.downTime, id: pointer.id },
+    };
+    const result = trackPointer(gestureContext(), held, sample, this.pointers);
+    this.pointers = result.track;
+    result.actions.forEach((action) => this.act(action));
+  }
+
+  // Lane moves wait for the next simulation step, where they are logged.
+  private act(action: GestureAction): void {
+    const walk = this.host.walk();
+    if (walk === undefined || walk.run.phase.kind !== "walking") {
+      return;
+    }
+    if (action.kind !== "pause" && !gameplayAllowed(this.host.runPause())) {
+      return;
+    }
+    switch (action.kind) {
+      case "move":
+        if (!this.host.replaying()) {
+          this.pending.push({ direction: action.direction, kind: "lane" });
+        }
+        return;
+      case "pause":
+        this.host.openPause();
+        return;
+      case "treat":
+        if (!this.host.replaying()) {
+          this.pending.push({ kind: "treat", slot: action.slot });
+        }
+        return;
+      default:
+        action satisfies never;
+    }
+  }
+}
+
+function gestureContext(): GestureContext {
+  return {
+    config: {
+      laneCount: LANE_COUNT,
+      tapMaxDistance: read(gameData.tuning, "pixels", "tapMaxDistance"),
+    },
+    layout: LAYOUT,
+  };
+}

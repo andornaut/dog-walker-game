@@ -5,6 +5,7 @@ import {
   packBand,
   packPlacements,
   tallestPackBand,
+  tautLeashLine,
   WALKER_HANDS,
 } from "./packFormation";
 
@@ -37,6 +38,25 @@ describe("leashHand", () => {
     expect(leashHand({ dx: -12, footDy: -40 }).dx).toBe(WALKER_HANDS.leftDx);
     expect(leashHand({ dx: 0, footDy: -40 }).dx).toBe(WALKER_HANDS.rightDx);
     expect(leashHand({ dx: 12, footDy: -40 }).dy).toBe(-WALKER_HANDS.heightAboveFeet);
+  });
+});
+
+describe("tautLeashLine", () => {
+  it.each([
+    ["a steep leash a pixel left", { x: 10, y: 50 }, { x: 14, y: 20 }, { x: -1, y: 0 }],
+    ["a shallow leash a pixel up", { x: 10, y: 50 }, { x: 40, y: 44 }, { x: 0, y: -1 }],
+    [
+      "a leash at 45 degrees left, as a steep one",
+      { x: 0, y: 10 },
+      { x: 10, y: 0 },
+      { x: -1, y: 0 },
+    ],
+  ])("shifts %s", (_name, from, to, shift) => {
+    const moved = (point: { x: number; y: number }) => ({
+      x: point.x + shift.x,
+      y: point.y + shift.y,
+    });
+    expect(tautLeashLine(from, to)).toEqual({ from: moved(from), to: moved(to) });
   });
 });
 

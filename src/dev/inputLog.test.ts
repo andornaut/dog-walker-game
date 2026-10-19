@@ -10,6 +10,7 @@ import {
   recordInput,
   replayInputs,
   startInputLog,
+  takeCardChoice,
   takeDueInputs,
 } from "./inputLog";
 import type { RunSetup, RunSetupLimits } from "./runSetup";
@@ -158,6 +159,17 @@ describe("takeDueInputs", () => {
       due: due.map((index) => replayed[index]),
       next,
     });
+  });
+});
+
+describe("takeCardChoice", () => {
+  it.each([
+    ["takes the card choice next in line, whatever its time", 2, 2, 3],
+    ["takes a skip", 3, "skip", 4],
+    ["takes nothing when the next event is not a card choice", 0, undefined, 0],
+    ["takes nothing after the last event", events.length, undefined, events.length],
+  ])("%s", (_name, from, choice, next) => {
+    expect(takeCardChoice(events, from)).toEqual({ choice, next });
   });
 });
 

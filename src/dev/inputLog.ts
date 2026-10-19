@@ -70,6 +70,17 @@ export function takeDueInputs(
   return { due, next: index };
 }
 
+// The replayed choice for a card just opened, if events[next] is one, and the index after it.
+export function takeCardChoice(
+  events: readonly InputEvent[],
+  next: number,
+): { choice: CardChoice | undefined; next: number } {
+  const event = events[next];
+  return event?.kind === "card"
+    ? { choice: event.choice, next: next + 1 }
+    : { choice: undefined, next };
+}
+
 // Each event is a tuple, [timeMs, "l", direction], [timeMs, "c", choice], [timeMs, "t", slot]
 // or [timeMs, "h"], and the setup is its URL query, which keeps a long replay small.
 const timeMs = v.pipe(v.number(), v.finite(), v.minValue(0));
