@@ -31,6 +31,8 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
 - Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the three light roads (Bark Park, Sniff Street Shops, The Long Way Home), and the fill carries Woof Way. A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Woof Way. Snooze Crescent (grey) and Paws Promenade (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged.
+- Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them (a head over its body) stay two ramp steps darker.
+- Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings such as merle are a few flat patches.
 - Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` and `fx-heart` keep a ramp outline. Hazard warnings are outlined in ink.
 - Ground decals (puddles) have no outline and no shadow.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.

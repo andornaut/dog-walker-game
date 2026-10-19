@@ -53,6 +53,8 @@ def road_edge(c):
 class Grid:
     # edge(fill) gives the outline colour beside fill; None keeps two ramp steps darker
     edge = None
+    # close draws the outline along the bottom row too, where the frame cuts a bust or a seated dog
+    close = False
 
     def __init__(self, w=32, h=32):
         self.w, self.h = w, h
@@ -86,6 +88,22 @@ class Grid:
                     d = 0.7 * ((x + 0.5 - cx) / rx + (y + 0.5 - cy) / ry)
                     self.p(x, y, sh if sh and d > 0.5 else li if li and d < -0.72 else c)
 
+    def cel(self, cx, cy, rx, ry, c, sh=None, li=None, power=2):
+        """Filled oval (squarer at power above 2), cel shaded from a top-left light: sh a crescent along the
+        lower-right rim and li a thinner one along the upper-left, each following the outline, where ell
+        cuts a straight diagonal plane."""
+        def inside(x, y, o=0.0):
+            dx, dy = abs(x + 0.5 - cx - o) / rx, abs(y + 0.5 - cy - o) / ry
+            return dx ** power + dy ** power <= 1
+
+        s, l = max(1, 0.13 * (rx + ry)), max(1, 0.06 * (rx + ry))
+        for y in range(self.h):
+            for x in range(self.w):
+                if not inside(x, y):
+                    continue
+                lit = (x + 0.5 - cx) / rx + (y + 0.5 - cy) / ry < -0.7
+                self.p(x, y, sh if sh and not inside(x, y, -s) else li if li and lit and not inside(x, y, l) else c)
+
     def tri(self, a, b, c, col):
         def side(px, py, x1, y1, x2, y2):
             return (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2)
@@ -113,13 +131,25 @@ class Grid:
                         c = self.px[yy][xx]
                         out[y][x] = self.edge(c) if self.edge else DARKER[DARKER[c]]
                         break
+        if self.close:
+            y = self.h - 1
+            for x in range(self.w):
+                if self.px[y][x]:
+                    c = self.px[y][x]
+                    out[y][x] = self.edge(c) if self.edge else DARKER[DARKER[c]]
         return out
 
 
-def edged(g, edge=road_edge):
-    """Give g an outline rule (road_edge unless told otherwise) and return it. A grid that draws onto an
-    inner Grid (minis.Mini keeps it as g.g) passes the rule on, so the small versions keep it."""
-    getattr(g, "g", g).edge = edge
+def edged(g, edge=road_edge, close=False):
+    """Give g an outline rule (road_edge unless told otherwise) and return it. edge is a function of the
+    fill, or a colour name for one line round every fill. close runs the line along the bottom row. A grid
+    that draws onto an inner Grid (minis.Mini keeps it as g.g) passes the rule on, so the small versions
+    keep it."""
+    if isinstance(edge, str):
+        line = K.get(edge, edge)
+        edge = lambda c: line  # noqa: E731
+    inner = getattr(g, "g", g)
+    inner.edge, inner.close = edge, close
     return g
 
 
