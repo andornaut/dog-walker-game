@@ -68,7 +68,7 @@ export const HINTS = {
     trigger: { encounter: "squirrel", kind: "encounter" },
   },
   stinky: {
-    text: "Stinky: tips are halved until the zone ends.",
+    text: "Stinky: half as many tips appear until the zone ends.",
     trigger: { debuff: "stinky", kind: "debuff" },
   },
   strip: {
@@ -76,7 +76,7 @@ export const HINTS = {
     trigger: { kind: "strip" },
   },
   tip: {
-    text: "Tips are money. Smaller packs get a little extra.",
+    text: "Each tip is $1. Smaller packs see a few more.",
     trigger: { kind: "tip" },
   },
   treat: {

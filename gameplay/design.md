@@ -92,12 +92,12 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Pickups
 
-- **Tip:** +$. Smaller packs earn bigger tips: passers-by tip more for a calm walk
+- **Tip:** +$1. Smaller packs see more tips: passers-by tip more often for a calm walk
 - **Treat:** carried, up to a limit; tap a dog's doghouse to give its owner +♥
 
 ### Dogs
 
-A roster of 9. You start with 1 dog slot and 3 dogs, and buy up to 2 more slots and the other 6 dogs on the home screen. Walking more dogs is the main progression: more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more dogs caught by area effects.
+A roster of 9. You start with 1 dog slot and 3 dogs, and buy up to 2 more slots and the other 6 dogs at the Pet shop. Walking more dogs is the main progression: more fees and a longer-lasting run, but fewer tips, more owners to keep happy, more pulls and more dogs caught by area effects.
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 

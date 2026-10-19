@@ -21,7 +21,7 @@ The game grows sideways rather than upward. A world is a set of 4 zones with its
 - Sidewalk lanes: the outer 2 of the 5 lanes become sidewalks and the middle 3 stay road, so the choice comes from what each lane holds, not a timer. Sidewalks have no traffic movers, hold the need spots and most stranger tips, and their minor obstacles are frequent but cheap (pedestrians, strollers, sandwich boards); the road has the bigger tips, the pickups, traffic and card obstacles. Lane widths, the drag rule and the edge clamp stay
 - Special dogs found mid-walk, only with 2 or fewer dogs; once found, they join the roster
 - Time of day: dawn, midday, dusk, night
-- Tip streak: each tip collected without a hit raises tip value a little; a hit resets it
+- Tip streak: each tip collected without a hit makes tips appear a little more often; a hit resets it
 - Walk of the day: each walk rolls one modifier shown before starting (e.g. rainy: more puddles, tips ×1.2; market day: more thieves and tips; quiet Sunday: fewer obstacles and tips)
 - Walker kit (permanent, always on): Quick feet (lane changes 20% faster, $300); Treat belt (carry 4 treats, $300); Business cards (+$3 fee per dog per zone, $400); Good eye (the pull tell starts 0.5s earlier, $400)
 - Weather: variants with pros and cons, some mostly cosmetic

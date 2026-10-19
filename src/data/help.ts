@@ -16,7 +16,7 @@ export const HELP_PAGES = [
   {
     art: "help-pickups",
     body:
-      "Run into tips for money. Smaller packs get a little extra. Treats are carried, up to 3. " +
+      "Run into tips for $1 each. Smaller packs see a few more. Treats are carried, up to 3. " +
       "Tap a doghouse to give its owner a treat: +1♥.",
     title: "Tips and treats",
   },
