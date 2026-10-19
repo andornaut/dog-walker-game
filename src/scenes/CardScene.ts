@@ -36,7 +36,7 @@ import { addDim, drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole } from "./pixelText";
+import { addPixelText, type FontRole, scalePixelText } from "./pixelText";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
@@ -329,7 +329,7 @@ export class CardScene extends Scene {
       scale: 2,
     });
     if (body.height > bodyHeight) {
-      body.setScale(1).setMaxWidth(LARGE.body.width);
+      scalePixelText(body, 1, x + LARGE.body.x, bodyY);
     }
     const badge = LARGE.badge;
     if (this.textures.exists(COST_KEY)) {
@@ -510,7 +510,7 @@ export class CardScene extends Scene {
     );
     // A word too long to wrap, such as a difficulty, is wider than its wrap width.
     if (effect.height > effectHeight || effect.width > EFFECT.width) {
-      effect.setScale(1).setMaxWidth(EFFECT.width);
+      scalePixelText(effect, 1, x + EFFECT.x + EFFECT.width / 2, effectY);
     }
 
     const badge = { ...BADGE, x: x + BADGE.x, y: y + BADGE.y };
