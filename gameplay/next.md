@@ -15,7 +15,6 @@ The game grows sideways rather than upward. A world is a set of 4 zones with its
 - House hub: a home base you decorate and improve with mostly cosmetic unlocks
 - iOS and Android app wrappers
 - Minigames as an alternative way to resolve encounters
-- Off-leash dog park: a zone unlocked by an upgrade
 - Owner loyalty: each finished walk without a firing raises that owner's loyalty, slowly adding a small permanent bonus (+$1 fee, then a starting heart)
 - Owner requests: each owner asks for one small thing per walk (e.g. Rosa: "keep Duchess dry"), shown on the dog's slot; meeting it pays a bonus and a happy quip
 - Permanent unlocks as in-run choices: pick a run boost or a permanent unlock, Hades-style
