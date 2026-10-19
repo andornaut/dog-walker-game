@@ -18,6 +18,14 @@ export function isHashedAssetUrl(url: string): boolean {
   return url.startsWith("/assets/");
 }
 
+// How the service worker fetches a URL to precache it. Hashed build output never changes under
+// its name, so the HTTP cache may answer with the copy the page just loaded. Every other URL can,
+// so no-cache has the server confirm the HTTP cache's copy, or send the new one, before it is
+// stored.
+export function precacheFetchOptions(url: string): RequestInit {
+  return { cache: isHashedAssetUrl(url) ? "default" : "no-cache" };
+}
+
 export const CACHE_NAME_PREFIX = "dog-walker-";
 
 export function cacheNameFor(version: string): string {

@@ -5,6 +5,7 @@ import {
   cacheKeyFor,
   cacheNameFor,
   type FetchStrategy,
+  precacheFetchOptions,
   staleCacheNames,
   strategyFor,
 } from "./cachePolicy";
@@ -35,8 +36,7 @@ const precachedUrls = new Set(urls);
 
 async function precache(): Promise<void> {
   const cache = await caches.open(cacheName);
-  // reload skips the HTTP cache, so the new version's copies are stored, not stale ones.
-  await cache.addAll(urls.map((url) => new Request(url, { cache: "reload" })));
+  await cache.addAll(urls.map((url) => new Request(url, precacheFetchOptions(url))));
 }
 
 async function deleteStaleCaches(): Promise<void> {

@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { cacheKeyFor, cacheNameFor, staleCacheNames, strategyFor } from "./cachePolicy";
+import {
+  cacheKeyFor,
+  cacheNameFor,
+  precacheFetchOptions,
+  staleCacheNames,
+  strategyFor,
+} from "./cachePolicy";
 
 const precached = new Set(["/play/", "/nav.js", "/art/manifest.json", "/art/sprites/dog.png"]);
 const fetchOf = (pathname: string) => strategyFor(precached, { isNavigation: false, pathname });
@@ -34,6 +40,25 @@ describe("strategyFor", () => {
   it("leaves files outside the precache to the browser", () => {
     expect(fetchOf("/art/mocks/index.json")).toBe("network-only");
     expect(fetchOf("/sw.js")).toBe("network-only");
+  });
+});
+
+describe("precacheFetchOptions", () => {
+  it("lets the HTTP cache answer for hashed build output", () => {
+    expect(precacheFetchOptions("/assets/play-abc.js")).toEqual({ cache: "default" });
+    expect(precacheFetchOptions("/assets/play-abc.css")).toEqual({ cache: "default" });
+  });
+
+  it("has the server revalidate the game page and the manifests", () => {
+    expect(precacheFetchOptions("/play/")).toEqual({ cache: "no-cache" });
+    expect(precacheFetchOptions("/art/manifest.json")).toEqual({ cache: "no-cache" });
+    expect(precacheFetchOptions("/manifest.webmanifest")).toEqual({ cache: "no-cache" });
+  });
+
+  it("has the server revalidate unhashed public files", () => {
+    expect(precacheFetchOptions("/art/sprites/dog.png")).toEqual({ cache: "no-cache" });
+    expect(precacheFetchOptions("/icons/icon-192.png")).toEqual({ cache: "no-cache" });
+    expect(precacheFetchOptions("/nav.js")).toEqual({ cache: "no-cache" });
   });
 });
 
