@@ -183,6 +183,20 @@ WALKERS = {
 
 WALKER_WALK = [dict(lf=-2, rf=0, arms=1), dict(lf=-1, rf=-1, bob=-1), dict(lf=0, rf=-2, arms=-1), dict(lf=-1, rf=-1, bob=-1)]
 WALKER_REACT = [dict(lf=-4, rf=-4, bob=-4, arms=-3), dict(lf=-1, rf=-1, bob=-1, arms=-1)]
+# A bump: lurch left with the arms up, wobble back, steady (a right lean would push a tote out of the frame). Each pose is (lean, walker args).
+WALKER_STUMBLE = [(-3, dict(lf=-3, rf=0, bob=1, arms=-3)), (1, dict(lf=0, rf=-3, arms=-3)),
+                  (-1, dict(lf=-1, rf=0, arms=1)), (0, dict(lf=-1, rf=-1, bob=-1))]
+
+
+def lean(g, k):
+    """Shear a 32x48 figure about its feet: the head moves k pixels sideways, the shoes stay put."""
+    out = Grid(g.w, g.h)
+    for y in range(g.h):
+        dx = round(k * max(0, 44 - y) / 36)
+        for x in range(g.w):
+            if g.px[y][x] and 0 <= x + dx < g.w:
+                out.px[y][x + dx] = g.px[y][x]
+    return out
 
 
 # ---------- pickups ----------
@@ -681,11 +695,10 @@ def sprites():
     def frames(gs, outline=True):
         return [g.outlined(outline) for g in gs]
 
-    yield "walker-casey", [("walk", frames(walker(**q) for q in WALKER_WALK), 160),
-                     ("react", frames(walker(**q) for q in WALKER_REACT), 120)]
-    for key, draw in WALKERS.items():
+    for key, draw in {"walker-casey": walker, **WALKERS}.items():
         yield key, [("walk", frames(draw(**q) for q in WALKER_WALK), 160),
-                    ("react", frames(draw(**q) for q in WALKER_REACT), 120)]
+                    ("react", frames(draw(**q) for q in WALKER_REACT), 120),
+                    ("stumble", frames(lean(draw(**q), k) for k, q in WALKER_STUMBLE), 90)]
     yield "treat", [("idle", frames([treat(0), treat(-1)]), 400)]
     yield "tip", [("idle", frames(tip(rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames([skunk(0), skunk(1)]), 400)]

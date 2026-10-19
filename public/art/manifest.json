@@ -1,6 +1,81 @@
 {
   "sprites": [
     {
+      "key": "badge-clean-paws",
+      "png": "sprites/badge-clean-paws.png",
+      "json": "sprites/badge-clean-paws.json"
+    },
+    {
+      "key": "badge-every-owner-smiles",
+      "png": "sprites/badge-every-owner-smiles.png",
+      "json": "sprites/badge-every-owner-smiles.json"
+    },
+    {
+      "key": "badge-first-walk",
+      "png": "sprites/badge-first-walk.png",
+      "json": "sprites/badge-first-walk.json"
+    },
+    {
+      "key": "badge-full-kennel",
+      "png": "sprites/badge-full-kennel.png",
+      "json": "sprites/badge-full-kennel.json"
+    },
+    {
+      "key": "badge-full-route",
+      "png": "sprites/badge-full-route.png",
+      "json": "sprites/badge-full-route.json"
+    },
+    {
+      "key": "badge-fully-equipped",
+      "png": "sprites/badge-fully-equipped.png",
+      "json": "sprites/badge-fully-equipped.json"
+    },
+    {
+      "key": "badge-high-earner",
+      "png": "sprites/badge-high-earner.png",
+      "json": "sprites/badge-high-earner.json"
+    },
+    {
+      "key": "badge-no-hard-feelings",
+      "png": "sprites/badge-no-hard-feelings.png",
+      "json": "sprites/badge-no-hard-feelings.json"
+    },
+    {
+      "key": "badge-pack-of-three",
+      "png": "sprites/badge-pack-of-three.png",
+      "json": "sprites/badge-pack-of-three.json"
+    },
+    {
+      "key": "badge-pack-of-two",
+      "png": "sprites/badge-pack-of-two.png",
+      "json": "sprites/badge-pack-of-two.json"
+    },
+    {
+      "key": "badge-spotless",
+      "png": "sprites/badge-spotless.png",
+      "json": "sprites/badge-spotless.json"
+    },
+    {
+      "key": "badge-squirrel",
+      "png": "sprites/badge-squirrel.png",
+      "json": "sprites/badge-squirrel.json"
+    },
+    {
+      "key": "badge-stinky-streak",
+      "png": "sprites/badge-stinky-streak.png",
+      "json": "sprites/badge-stinky-streak.json"
+    },
+    {
+      "key": "badge-top-walker",
+      "png": "sprites/badge-top-walker.png",
+      "json": "sprites/badge-top-walker.json"
+    },
+    {
+      "key": "badge-youre-fired",
+      "png": "sprites/badge-youre-fired.png",
+      "json": "sprites/badge-youre-fired.json"
+    },
+    {
       "key": "biscuit-neighbour",
       "png": "sprites/biscuit-neighbour.png",
       "json": "sprites/biscuit-neighbour.json"
@@ -181,9 +256,44 @@
       "json": "sprites/fx-bark.json"
     },
     {
+      "key": "fx-bump",
+      "png": "sprites/fx-bump.png",
+      "json": "sprites/fx-bump.json"
+    },
+    {
+      "key": "fx-coins",
+      "png": "sprites/fx-coins.png",
+      "json": "sprites/fx-coins.json"
+    },
+    {
+      "key": "fx-confetti",
+      "png": "sprites/fx-confetti.png",
+      "json": "sprites/fx-confetti.json"
+    },
+    {
+      "key": "fx-dizzy",
+      "png": "sprites/fx-dizzy.png",
+      "json": "sprites/fx-dizzy.json"
+    },
+    {
       "key": "fx-dust",
       "png": "sprites/fx-dust.png",
       "json": "sprites/fx-dust.json"
+    },
+    {
+      "key": "fx-sparkle",
+      "png": "sprites/fx-sparkle.png",
+      "json": "sprites/fx-sparkle.json"
+    },
+    {
+      "key": "fx-splash",
+      "png": "sprites/fx-splash.png",
+      "json": "sprites/fx-splash.json"
+    },
+    {
+      "key": "fx-stinky",
+      "png": "sprites/fx-stinky.png",
+      "json": "sprites/fx-stinky.json"
     },
     {
       "key": "fx-tap",

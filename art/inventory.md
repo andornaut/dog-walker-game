@@ -26,13 +26,13 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
 
-| Asset             | Key                  | Type   | Size  | Animations         | Priority | Notes                                                                                                                                                                    |
-| ----------------- | -------------------- | ------ | ----- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Walkers           | `walker-<name>`      | sprite | 32×48 | `walk`, `react`    | M6       | Seen from behind, all free: Casey (cap and hoodie), Ada (11, mixed race, long black curls), Ben (45, bald, chin beard, in black), Trista (50, teacher, dirty blonde bob) |
-| Walker portraits  | `face-walker-<name>` | sprite | 32×32 | `happy`, `neutral` | core     | Front view for the walker picker                                                                                                                                         |
-| Other dog         | `other-dog`          | sprite | 32×32 | `walk`             | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                                                                                                   |
-| Other dog's owner | `other-dog-owner`    | sprite | 32×48 | `walk`             | M6       | Walks behind the other dog; the game draws the leash                                                                                                                     |
-| Stinky effect     | `fx-stinky`          | sprite | 32×32 | `loop`             | core     | Green stink lines over the pack while Stinky lasts                                                                                                                       |
+| Asset             | Key                  | Type   | Size  | Animations                 | Priority | Notes                                                                                                                                                                    |
+| ----------------- | -------------------- | ------ | ----- | -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Walkers           | `walker-<name>`      | sprite | 32×48 | `walk`, `react`, `stumble` | M6       | Seen from behind, all free: Casey (cap and hoodie), Ada (11, mixed race, long black curls), Ben (45, bald, chin beard, in black), Trista (50, teacher, dirty blonde bob) |
+| Walker portraits  | `face-walker-<name>` | sprite | 32×32 | `happy`, `neutral`         | core     | Front view for the walker picker                                                                                                                                         |
+| Other dog         | `other-dog`          | sprite | 32×32 | `walk`                     | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                                                                                                   |
+| Other dog's owner | `other-dog-owner`    | sprite | 32×48 | `walk`                     | M6       | Walks behind the other dog; the game draws the leash                                                                                                                     |
+| Stinky effect     | `fx-stinky`          | sprite | 32×32 | `loop`                     | core     | Green stink lines over the pack while Stinky lasts                                                                                                                       |
 
 ## Dogs
 
@@ -86,12 +86,15 @@ Good things to bump into; each opens a choice card.
 
 ## Effects
 
-| Asset          | Key          | Type   | Size  | Animations   | Priority | Notes                                                       |
-| -------------- | ------------ | ------ | ----- | ------------ | -------- | ----------------------------------------------------------- |
-| Collision puff | `fx-bump`    | sprite | 32×32 | `play`       | core     | Plays as the card opens                                     |
-| Pickup sparkle | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected                                     |
-| Bark pop       | `fx-bark`    | sprite | 16×16 | `pop`        | core     | Over a dog during the pull tell, with the dog's `tell` lean |
-| Heart up/down  | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot                                      |
+| Asset           | Key          | Type   | Size  | Animations   | Priority | Notes                                                             |
+| --------------- | ------------ | ------ | ----- | ------------ | -------- | ----------------------------------------------------------------- |
+| Collision burst | `fx-bump`    | sprite | 32×32 | `play`       | core     | Impact star where the pack hits anything; plays as the card opens |
+| Dizzy stars     | `fx-dizzy`   | sprite | 32×16 | `loop`       | core     | Circle over the walker while a minor bump locks lane input        |
+| Dropped tips    | `fx-coins`   | sprite | 32×32 | `play`       | core     | Two coins knocked loose on a minor bump, with the cause label     |
+| Puddle splash   | `fx-splash`  | sprite | 32×32 | `play`       | core     | Water thrown up when the pack runs through a puddle               |
+| Pickup sparkle  | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected                                           |
+| Bark pop        | `fx-bark`    | sprite | 16×16 | `pop`        | core     | Over a dog during the pull tell, with the dog's `tell` lean       |
+| Heart up/down   | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot                                            |
 
 Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
@@ -175,23 +178,25 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 ## Screens outside the run
 
-| Asset                | Key                        | Type   | Size             | Priority | Notes                                                                                      |
-| -------------------- | -------------------------- | ------ | ---------------- | -------- | ------------------------------------------------------------------------------------------ |
-| Title / home         | `screen-home`              | image  | 360×640          | core     | Background; bank total and buttons on top                                                  |
-| Logo                 | `logo`                     | image  | TBD              | later    |                                                                                            |
-| Dog portraits        | `portrait-dog-<name>`      | image  | TBD              | core     | 9 dogs; larger art for dog pick and the shop                                               |
-| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser                                                                 |
-| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper                                                                        |
-| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic                                                                 |
-| Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py` |
-| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price            |
-| Stats page           | `screen-stats`             | image  | 360×640          | core     | Behind the logbook; panel background for the full stats                                    |
-| Hint bubble          | `ui-hint`                  | image  | 9-slice          | core     | First-time hints: a one-line bubble the first time each thing appears                      |
-| Selection frame      | `ui-select`                | sprite | 24×24 nine-slice | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                             |
-| Pick badge           | `ui-check`                 | sprite | 16×16            | core     | Green badge on a picked tile: tags `1`, `2`, `3` (pack order) and `tick`                   |
-| Tap and dust effects | `fx-tap`, `fx-dust`        | sprite | 16×16            | core     | A sparkle where a tap lands; a puff when the walker or a dog hops                          |
-| Zone banner          | `ui-zone-banner`           | image  | TBD              | core     | "Maple Street, zone 2: Bark Park" between zones                                            |
-| End screen           | `screen-end`               | image  | 360×640          | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                        |
+| Asset                | Key                        | Type   | Size             | Priority | Notes                                                                                                                                  |
+| -------------------- | -------------------------- | ------ | ---------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Title / home         | `screen-home`              | image  | 360×640          | core     | Background; bank total and buttons on top                                                                                              |
+| Logo                 | `logo`                     | image  | TBD              | later    |                                                                                                                                        |
+| Dog portraits        | `portrait-dog-<name>`      | image  | TBD              | core     | 9 dogs; larger art for dog pick and the shop                                                                                           |
+| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser                                                                                                             |
+| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper                                                                                                                    |
+| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic                                                                                                             |
+| Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py`                                             |
+| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price                                                        |
+| Stats page           | `screen-stats`             | image  | 360×640          | core     | Behind the logbook; panel background for the full stats                                                                                |
+| Achievement badges   | `badge-<achievement>`      | sprite | 32×32            | core     | 15 medals, rim by category (firsts bronze, mastery silver, collection gold, silly pink); tags `earned`, `locked` (grey with a padlock) |
+| Badge celebration    | `fx-confetti`              | sprite | 64×64            | core     | Burst behind a badge as it is earned (tag `play`); the owners cheer with their `happy` faces                                           |
+| Hint bubble          | `ui-hint`                  | image  | 9-slice          | core     | First-time hints: a one-line bubble the first time each thing appears                                                                  |
+| Selection frame      | `ui-select`                | sprite | 24×24 nine-slice | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                                                                         |
+| Pick badge           | `ui-check`                 | sprite | 16×16            | core     | Green badge on a picked tile: tags `1`, `2`, `3` (pack order) and `tick`                                                               |
+| Tap and dust effects | `fx-tap`, `fx-dust`        | sprite | 16×16            | core     | A sparkle where a tap lands; a puff when the walker or a dog hops                                                                      |
+| Zone banner          | `ui-zone-banner`           | image  | TBD              | core     | "Maple Street, zone 2: Bark Park" between zones                                                                                        |
+| End screen           | `screen-end`               | image  | 360×640          | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                                                                    |
 
 ## UI kit
 
