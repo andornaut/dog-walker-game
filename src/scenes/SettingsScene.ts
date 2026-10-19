@@ -28,7 +28,7 @@ import type { Settings } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { drawFocusRing, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
-import { closeOverlay, onWindowEvent } from "./overlay";
+import { closeOverlay, listenOutsideTap, onWindowEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
@@ -179,6 +179,10 @@ export class SettingsScene extends Scene {
         this.render();
       },
     });
+    // The screen around the panel and its 1px rim closes, as the close control does.
+    const { close, panel } = this.layout;
+    const covered = [insetRect(-1, panel), close.hit];
+    listenOutsideTap(this, { covered, dim: SCREEN }, () => this.close());
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
   }

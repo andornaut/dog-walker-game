@@ -14,11 +14,11 @@ import {
 import { cardNumberForKey } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
 import { rectIndexAt } from "../layout/grid";
-import type { Rect } from "../layout/rect";
+import { insetRect, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { addDim, fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
-import { openOverlay } from "./overlay";
+import { listenOutsideTap, openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -119,6 +119,10 @@ export class PauseScene extends Scene {
       onTap: (target) => this.entries[target]?.press(),
       targetAt: (x, y) => rectIndexAt(layout.hits, x, y),
     });
+    // The dimmed road around the panel resumes, as Resume and Keep walking do. The top bar,
+    // backdrop and doghouses are not dimmed and keep their own taps.
+    const covered = [insetRect(-1, panel), ...layout.hits];
+    listenOutsideTap(this, { covered, dim: roadView }, onResume);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
       if (number !== undefined) {
