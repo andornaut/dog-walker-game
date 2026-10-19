@@ -36,7 +36,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Events raise or lower owner happiness.
 - Each dog is a fixed, named character with one fixed owner. The owner's personality sets the tone of their quips, and they react with a quip after every card choice.
 - At zero, the owner fires you with a funny quip (e.g. "You're fired!") and the dog leaves the run.
-- v1: a roster of 3 dogs (small, medium, big), picked freely.
+- Every dog is a fixed, named character with its own art and one value of each attribute: size (fee, pull strength), trait (what upsets its owner and what it pulls toward), energy (how often it pulls) and owner temperament (starting happiness, pay, quip tone). Players can have favourites.
+- v1: a roster of 9 dogs; 3 are unlocked from the start and the other 6 are bought in the shop.
 
 ## Mechanics
 
@@ -63,7 +64,7 @@ A top status bar (money, zone progress), a fixed-width dog column on the left wi
 
 ## Scope: v1 (web prototype)
 
-See `v1-plan.md`. One neighbourhood, fixed 4-zone route, 3-dog roster picked freely, choices only, minimal shop.
+See `v1-plan.md`. One neighbourhood, fixed 4-zone route, 9-dog roster (3 to start, 6 bought), choices only, minimal shop.
 
 ## Out of scope for v1
 

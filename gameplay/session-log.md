@@ -43,3 +43,9 @@ Format:
 - Covered: speed ramp, lane input, collisions after a hit and mid-move, treats, pay for fired dogs, Stinky stacking, upgrade repeats, Good leash, Sweet talker, permanent vs run-only upgrades, forced-stop art
 - Decided: +10% speed per zone; hold to keep moving, both lanes count mid-move; ~1s grace after a hit; carried treats given by tapping a dog; fired dogs unpaid for that zone; Stinky refreshes; no upgrade repeats; Good leash stops pulls too; Sweet talker covers missed tips; permanent gameplay gear, cosmetics later; forced-stop card art in Milestone 6
 - Open threads / next time: which encounters are area effects and how cards show who was caught; dog names, breeds and owner personalities
+
+## 2026-10-18 · Design · Dog roster
+
+- Covered: dog attributes, roster size, unlocks, temperament and size effects
+- Decided: four attributes (size, trait, energy, owner temperament); 9 named dogs; 3 starters, 6 bought in the shop; temperament trades happiness for pay; size sets pull strength; Lucky collar becomes +1 starting ♥
+- Open threads / next time: owner names and personalities; dog prices and pull numbers are placeholders; which encounters are area effects

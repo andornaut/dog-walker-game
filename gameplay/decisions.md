@@ -84,3 +84,10 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · Good leash also stops Chasers pulling toward squirrels; Sweet talker reduces every $ cost on a card, missed tips included
 - 2026-10-18 · Design · Shop items are permanent, gameplay-altering gear, bought once and kept; upgrade cards are the run-only boosts; cosmetic unlocks come after v1
 - 2026-10-18 · Design · Milestone 6 adds card illustrations for the 6 forced stops
+- 2026-10-18 · Design · Dogs have four attributes: size (fee, pull strength), trait, energy (how often it pulls) and owner temperament; each named dog has its own art, fixed attributes and a fixed owner, so players can have favourites
+- 2026-10-18 · Design · v1 roster of 9 named dogs, one per size and trait pair (Duchess, Nugget, Zippy, Pierre, Biscuit, Dash, Snowball, Waffles, Koda); refines the 2026-10-18 v1 scope entry "roster of 3 dogs picked freely"
+- 2026-10-18 · Design · Duchess, Biscuit and Koda are unlocked from the start; the other 6 are bought in the shop
+- 2026-10-18 · Design · Owner temperament: laid-back starts at 6 ♥; fussy starts at 4 ♥ and pays +50%; dramatic starts at 5 ♥ and every ♥ change counts double
+- 2026-10-18 · Design · Size sets pull strength: after a pull, lane input locks briefly, longest for big dogs
+- 2026-10-18 · Design · Lucky collar gives every owner +1 starting ♥, since starting happiness now varies by temperament
+- 2026-10-18 · Design · Keyboard lane changes also accept H/L, alongside arrows and A/D

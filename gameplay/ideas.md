@@ -32,7 +32,7 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **Dogs pull you vs. you pull them**: could vary with unlocks or choices (2026-10-18) · agreed: dogs pull the pack one lane (trait targets and random wander), more often with more dogs; Steady hands halves it
 - [parked] **Unlockable dog slots**: start with 1, unlock 2 and 3 via progression and better leashes (2026-10-18)
 - [parked] **Special dogs found mid-walk**: later levels, only if you have 2 or fewer dogs; once found, they join the pre-run roster (2026-10-18)
-- [agreed] **Named dogs and owners**: fixed characters with personalities (2026-10-18)
+- [agreed] **Named dogs and owners**: fixed characters with personalities (2026-10-18) · agreed: 9 named dogs, each a combination of size, trait, energy and owner temperament, so players can have favourites
 - [parked] **Walker customization**: pick or dress the walker; v1 has one fixed walker (2026-10-18)
 - [parked] **Your own dog**: end-game unlock (2026-10-18)
 
