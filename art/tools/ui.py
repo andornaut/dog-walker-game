@@ -829,14 +829,15 @@ SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
 def section(state):
     """24x32 nine-slice (3px left, right and bottom, 24px top): one start screen section (walker,
     dogs, gear) framed as a unit, its heading band across the top over transparent space for the
-    tiles. A 1px ink edge, then a 2px border: ink for incomplete (a required choice not yet made),
-    so dividers between sections read dark; amber for complete and for neutral (optional, nothing
-    chosen), since an optional section never blocks the walk and its heading matches the others. The band fills rows 3 to 23 between the side borders: navy over an ink line, or
+    tiles. A 1px ink edge, then a 2px border: ink for incomplete (a required choice not yet made)
+    and neutral (an optional section before the required picks are made), so dividers between
+    sections read dark; amber for complete. The game draws the optional Gear section complete once
+    the walker and dogs are picked or gear is equipped, so it never outshines a required section. The band fills rows 3 to 23 between the side borders: navy over an ink line, or
     amber over an orange line when complete. The game writes, in font-title x2 with caps in rows
     8 to 17: the heading 9px from the left, and right-aligned 9px from the right the missing step
     (incomplete: amber on navy 7.49:1) or the choice (complete: ink on amber 9.71:1); the heading is
     cream on navy (9.59:1) or ink on amber. neutral has no right-hand text."""
-    lit = state in ("complete", "neutral")
+    lit = state == "complete"
     g = Grid(SECTION_W, SECTION_H)
     g.rect(0, 0, SECTION_W, SECTION_H, "ink")
     g.rect(3, 3, SECTION_W - 6, SECTION_H - 6, None)
