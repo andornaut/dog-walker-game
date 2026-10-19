@@ -3,8 +3,8 @@
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, silly pink), each with an icon for its goal. Tags:
-earned (in colour) and locked (grey, the icon as a slate silhouette, a small
-padlock).
+earned (in colour) and locked (grey, the icon as a two-tone slate silhouette,
+a small padlock).
 fx-confetti: 64x64, the burst behind a badge as it is earned (tag play).
 
 Usage:
@@ -216,11 +216,12 @@ def badge(name, locked=False):
     face = [row[:] for row in g.px]
     ICONS[name](g)
     if locked:
-        # The icon becomes a slate silhouette so its goal still reads on the grey face.
+        # The icon becomes a two-tone silhouette (dark lines stay darker) so its goal still reads on the grey face.
         for y in range(32):
             for x in range(32):
-                if g.px[y][x]:
-                    g.px[y][x] = K["slate"] if g.px[y][x] != face[y][x] else grey(g.px[y][x])
+                c = g.px[y][x]
+                if c:
+                    g.px[y][x] = grey(c) if c == face[y][x] else K["dslate"] if lum(c) < 90 else K["slate"]
         g.rect(20, 22, 8, 7, "amber")
         g.rect(20, 22, 8, 1, "yellow")
         g.rect(21, 18, 1, 4, "grey")
