@@ -106,7 +106,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Size              | Small · medium · big. No size is a straight upgrade. Bigger dogs lock lane input longer after a pull (small: not at all) and have a higher max ♥. Each small dog attracts more Other dog encounters and each big dog fewer; any big dog scares thieves away. Small dogs hop over puddles |
 | Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                |
-| Energy            | Calm · steady · hyper. Sets how quickly the dog's need becomes urgent                                                                                                                                                                                                                    |
+| Energy            | **Calm** · **Steady** · **Hyper**. Sets how quickly the dog's need becomes urgent                                                                                                                                                                                                        |
 | Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                               |
 | Quirk             | One per dog, from its personality; see Quirks below. Quirks stay mild, and any downside comes with an upside                                                                                                                                                                             |
 
@@ -117,12 +117,12 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Zippy    | Jack Russell         | Playful  | Mr. Pruitt, retired accountant | White with tan patches, red collar                       |
 | Pierre   | Standard poodle      | Nosy     | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms                              |
 | Biscuit  | Beagle               | Regular  | Sam, barista                   | Tricolour, floppy ears, green collar                     |
-| Archie   | Australian Shepherd  | Playful  | Ophelia, stage actor           | Red merle, one blue eye, red bandana                     |
+| Archie   | Australian Shepherd  | Playful  | Kiwi, grandmother              | Red merle, one blue eye, red bandana                     |
 | Snowball | Samoyed              | Friendly | Tiffany, wedding planner       | Fluffy white, collar with a bell                         |
-| Penny    | Golden retriever mix | Friendly | Dr. Hughes, dentist            | Smooth golden coat, blocky head, otter tail, blue collar |
+| Penny    | Golden retriever mix | Friendly | Gadget, inspector              | Smooth golden coat, blocky head, otter tail, blue collar |
 | Koda     | Husky                | Nosy     | Jesse, trail runner            | Grey and white, blue eyes, harness                       |
 
-Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait and have laid-back owners, for an easier first run. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
+Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait; Sam and Jesse are laid-back and Rosa is dramatic, so the first walks are gentle but already show double heart swings. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
 ### Quirks
 

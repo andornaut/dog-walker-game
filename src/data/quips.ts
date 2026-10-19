@@ -5,10 +5,10 @@ import type { DogId, Quips } from "./types";
 // "parting" is when the player picks their dog on the home screen.
 export const QUIPS = {
   archie: {
-    fired: ["A tragedy in one act. You're fired!", "Exit, pursued by my disapproval!"],
-    happier: ["Bravo! Bravo!", "A standing ovation for you!"],
-    parting: ["Bring him back in one piece, I beg you!", "Mind his bandana. It's vintage."],
-    upset: ["How could you?!", "I need to lie down on a chaise."],
+    fired: ["Oh, sweetheart. I have to let you go.", "No hard feelings, dear. You're fired."],
+    happier: ["Look at him go! Lovely.", "You're a natural, pet."],
+    parting: ["He'll want to play with everyone. Let him.", "There's a cookie for you after."],
+    upset: ["Oh well, these things happen.", "Never mind, dear. Next time."],
   },
   biscuit: {
     fired: ["No hard feelings, but you're fired.", "Last call, friend. You're fired."],
@@ -17,10 +17,10 @@ export const QUIPS = {
     upset: ["Eh, bit of a bitter one.", "Not my favourite blend, man."],
   },
   duchess: {
-    fired: ["Time to repot, dear. You're fired.", "Duchess needs a gentler gardener."],
-    happier: ["She's in full bloom!", "Lovely. Just lovely, dear."],
-    parting: ["She likes to stop and smell the roses.", "Keep her bow straight, would you?"],
-    upset: ["Oh dear. A wilted moment.", "Poor petal."],
+    fired: ["My poor petal! You're fired!", "A catastrophe in full bloom! Fired!"],
+    happier: ["Divine! She's simply blossoming!", "Oh, I could weep with joy!"],
+    parting: ["She's as delicate as an orchid. Guard her!", "Her bow! Her bow must stay straight!"],
+    upset: ["She's wilting! I can't bear it!", "My heart! My poor petal!"],
   },
   koda: {
     fired: ["No worries, but you're fired.", "We'll find another pace. Fired."],
@@ -35,10 +35,13 @@ export const QUIPS = {
     upset: ["Not the content I wanted!", "I can't post this!"],
   },
   penny: {
-    fired: ["That's the end of the appointment. Fired.", "You're fired. And please floss."],
-    happier: ["Very good. A clean result.", "Now that's a smile."],
-    parting: ["No sweets, please. Doctor's orders.", "She's due back by noon."],
-    upset: ["That was careless.", "I'll make a note in her chart."],
+    fired: ["Oh no, oh no. Sorry, but you're fired.", "I'm so sorry. You're fired."],
+    happier: ["Phew! Good, good.", "Oh, what a relief. Thank you!"],
+    parting: [
+      "Is the leash tight? Check it twice, please.",
+      "She gets lonely. Don't leave her alone.",
+    ],
+    upset: ["Oh dear, oh dear.", "Was that safe? Was she scared?"],
   },
   pierre: {
     fired: ["Disqualified. You are fired.", "Pierre withdraws from your care."],

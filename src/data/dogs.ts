@@ -10,9 +10,9 @@ export const DOGS = {
     name: "Archie",
     need: "playful",
     owner: {
-      name: "Ophelia",
-      role: "stage actor",
-      temperament: "dramatic",
+      name: "Kiwi",
+      role: "grandmother",
+      temperament: "laidBack",
     },
     price: "lockedDog",
     quirk: "acrobatic",
@@ -47,7 +47,7 @@ export const DOGS = {
     owner: {
       name: "Rosa",
       role: "retired florist",
-      temperament: "laidBack",
+      temperament: "dramatic",
     },
     quirk: "pampered",
     size: "small",
@@ -97,8 +97,8 @@ export const DOGS = {
     name: "Penny",
     need: "friendly",
     owner: {
-      name: "Dr. Hughes",
-      role: "dentist",
+      name: "Gadget",
+      role: "inspector",
       temperament: "fussy",
     },
     price: "lockedDog",
