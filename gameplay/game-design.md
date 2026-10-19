@@ -1,6 +1,6 @@
-# Game Design (v1)
+# Game Design
 
-The whole v1 game as agreed: rules, content and starting numbers. v1 is the first complete game, set in one world, Maple Street. What comes after v1 lives in [`next.md`](next.md), undecided ideas in [`ideas.md`](ideas.md), and milestones in [`v1-plan.md`](v1-plan.md). Numbers and content lists are starting values to tune by playing.
+The game as currently planned: rules, content, starting numbers and milestones. It is the first complete game, set in one world, Maple Street. What comes later lives in [`next.md`](next.md), and undecided ideas in [`ideas.md`](ideas.md). Numbers and content lists are starting values to tune by playing.
 
 ## Pitch
 
@@ -129,7 +129,7 @@ Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card a
 - Construction detour: take the long way → −$ per dog (missed tips) · squeeze past → −1 ♥ to Fancy owners (dust)
 - Mail carrier: hold them back → −1 ♥ each (barking) · wait it out → −$ per dog (missed tips)
 
-### Debuff (one for v1)
+### Debuff
 
 - **Stinky:** tips are halved for the rest of the zone. A second skunk refreshes it (no stacking); Ignore doesn't apply it
 
@@ -190,6 +190,23 @@ Placeholders sized for a ~12-minute run (zone 1 ~3.8 minutes at base speed). Onc
 | Rush hour                    | Next zone tips ×2, obstacles ×1.5                                                                                            |
 | Shop                         | Each locked dog $150 · fanny pack $100 (start +$15) · whistle $150 · poop bags $175 · running shoes $200 · Lucky collar $250 |
 
-## After v1
+## Milestones
+
+The milestones build the core loop first; placeholder art is fine until Milestone 6.
+
+1. **Setup:** engine chosen, repo, auto-deploy of the web build, coloured-box placeholders
+2. **Runner core:** 5 lanes, scrolling, spawning, collisions, keyboard + touch
+3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, lucky encounters, Stinky, owner quips, dogs leave at 0 ♥
+4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
+5. **Dogs & home screen:** 9-dog roster (3 unlocked, 6 bought) with 1–3 picks, bank, shop in place, gear and loadout, dog training, walker kit, cosmetic unlocks, walker customization, logbook and stats, save
+6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; test on real phones
+
+**Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
+
+## Tech
+
+Stack, hosting and save storage: see [`tech-plan.md`](../tech-plan.md).
+
+## Next
 
 See [`next.md`](next.md).

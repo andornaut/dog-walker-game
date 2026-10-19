@@ -15,9 +15,9 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **Lose-lose choices**: sometimes every option costs something (2026-10-18) · upgrade cards with a gain and a cost are trade-off cards, not lose-lose
 - [agreed] **Forced stops**: one per zone, e.g. stop sign, neighbour waves you down to chat (2026-10-18)
 - [agreed] **Upgrade cards between zones**: pick 1 of 3 (2026-10-18)
-- [agreed] **Stinky / smell-cloud debuff**: lingering penalty from a cheap skunk fix (2026-10-18) · v1 plan uses "tips halved"
+- [agreed] **Stinky / smell-cloud debuff**: lingering penalty from a cheap skunk fix (2026-10-18) · the plan uses "tips halved"
 - [agreed] **Pickups you want to hit**: treats, tips; borrowed from Bowling Ballers' hit-things twist (2026-10-18)
-- [cut] **Mud encounter**: Fancy's trait mentioned mud, but there is no mud encounter (2026-10-18) · cut: puddles cover it; v1 keeps 4 encounters
+- [cut] **Mud encounter**: Fancy's trait mentioned mud, but there is no mud encounter (2026-10-18) · cut: puddles cover it; the plan keeps 4 encounters
 - [next] **Minigames**: as an alternative way to resolve encounters (2026-10-18)
 - [next] **Branching paths between zones**: player chooses the route (2026-10-18)
 - [next] **Permanent unlocks as in-run choices**: Hades-style: pick a run boost or a permanent unlock (2026-10-18)
@@ -33,14 +33,14 @@ Group by topic; add new topic headings as they come up.
 - [next] **Unlockable dog slots**: start with 1, unlock 2 and 3 via progression and better leashes (2026-10-18)
 - [next] **Special dogs found mid-walk**: later levels, only if you have 2 or fewer dogs; once found, they join the pre-run roster (2026-10-18)
 - [agreed] **Named dogs and owners**: fixed characters with personalities (2026-10-18) · agreed: 9 named dogs, each a combination of size, trait, energy and owner temperament, so players can have favourites
-- [agreed] **Walker customization**: pick or dress the walker; (2026-10-18) · in v1 (2026-10-19) as a few preset walkers
+- [agreed] **Walker customization**: pick or dress the walker; (2026-10-18) · in the plan (2026-10-19) as a few preset walkers
 - [next] **Your own dog**: end-game unlock (2026-10-18)
 
 ## World & setting
 
-- [agreed] **v1: one neighbourhood, fixed route** (2026-10-18)
+- [agreed] **One neighbourhood, fixed route** (2026-10-18)
 - [agreed] **Scenery gags**: a cat on a fence, a sprinkler, a ball rolling past; no card, no effect (2026-10-18)
-- [agreed] **Worlds**: unlockable sets of 4 zones with their own themes, obstacles and mechanics: fantasy, the future, the past, dinosaurs (2026-10-19) · v1 is Maple Street only; finish a world, then buy the next
+- [next] **Worlds**: unlockable sets of 4 zones with their own themes, obstacles and mechanics: fantasy, the future, the past, dinosaurs (2026-10-19) · the current plan has Maple Street only; finish a world, then buy the next
 - [next] **Biomes**: inner city, beach, forest, etc. (2026-10-18) · folded into Worlds
 - [next] **Time of day**: dawn, midday, dusk, night (2026-10-18)
 - [next] **Weather**: variants with pros and cons, some mostly cosmetic (2026-10-18)
@@ -54,9 +54,9 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **Head home**: end a walk early from the pause menu; the current zone pays nothing (2026-10-18)
 - [cut] **Story recap on the end screen**: retell the run's biggest moments (2026-10-18) · cut: the end screen shows earnings only
 - [agreed] **Gentle failure**: a fired dog leaves with a funny quip; keep what you've earned (2026-10-18) · refined 2026-10-19: the firing owner takes back their dog's fees for the run
-- [agreed] **Dog training**: level up a dog you own, e.g. calmer energy or a smaller pull lock (2026-10-19) · in v1 (2026-10-19); options to design
-- [agreed] **Walker kit**: permanent always-on walker upgrades, e.g. a bigger treat pouch (2026-10-19) · in v1 (2026-10-19); items to design
-- [agreed] **Cosmetic permanent unlocks**: permanent purchases that change looks only (2026-10-18) · in v1 (2026-10-19); items to design
+- [agreed] **Dog training**: level up a dog you own, e.g. calmer energy or a smaller pull lock (2026-10-19) · in the plan (2026-10-19); options to design
+- [agreed] **Walker kit**: permanent always-on walker upgrades, e.g. a bigger treat pouch (2026-10-19) · in the plan (2026-10-19); items to design
+- [agreed] **Cosmetic permanent unlocks**: permanent purchases that change looks only (2026-10-18) · in the plan (2026-10-19); items to design
 - [next] **House hub**: Hades-style home base you decorate and improve with mostly cosmetic unlocks; long-term progression (2026-10-18)
 
 ## Home screen
