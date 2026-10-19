@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zone celebration</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png">
+<link rel="stylesheet" href="/nav.css">
+<script src="/nav.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* The zone celebration in its two versions over the dimmed run screen, at 1x and 2x, with the cheer pose and the new pieces. Frames are drawn by art/tools/mock_celebrate.py from the exported art. */
+:root {
+  --bg: #13101e; --surface: #1d1a2c; --fg: #dfe4ee; --muted: #8b9bb4; --line: #33304a;
+  --accent: #feae34;
+  --f-display: "Silkscreen", ui-monospace, monospace;
+  --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 1280px; margin: 0 auto; padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 32px;
+}
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(22px, 4vw, 32px); line-height: 1.1; margin: 0; }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 18px; margin: 0; letter-spacing: 0.04em; color: var(--accent); }
+p, ul { margin: 0; }
+ul { padding-left: 18px; display: grid; gap: 4px; }
+.lede { color: var(--muted); max-width: 80ch; }
+section { display: grid; gap: 12px; }
+img { image-rendering: pixelated; image-rendering: crisp-edges; display: block; max-width: 100%; height: auto; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; min-width: 0; }
+figcaption { font-size: 13px; color: var(--muted); max-width: 46ch; }
+.x2 { width: 720px; }
+.scroll { overflow-x: auto; max-width: 100%; }
+table { border-collapse: collapse; font-size: 14px; }
+th, td { text-align: left; padding: 6px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-family: var(--f-display); font-weight: 400; color: var(--muted); }
+.note { background: var(--surface); border-left: 3px solid var(--accent); padding: 12px 14px; border-radius: 4px; display: grid; gap: 8px; max-width: 90ch; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>Zone celebration</h1>
+    <p class="lede">After zones 1 to 3, once the fee coins land and before the upgrade card, a short celebration plays over the paused road, dimmed as under a card, so the top bar and the doghouse row stay in view. The walker cheers at 2x in front of a starburst while confetti falls. Zone 4 goes straight to the end screen.</p>
+  </header>
+
+  <section>
+    <h2>New walker</h2>
+    <p class="lede">The first finish of zone 1, 2 or 3. The unlocked walker hops in from the right in the cheer and lands on the starburst. "NEW WALKER!" in <code>font-display</code> at 2x, "BEN JOINS YOU!" in <code>font-display-cream</code> under it, the walker's line in a speech bubble pointing up at them, their pace and style with their icons, and the green "Welcome!" button (key 1), which it waits for. It replaces the zone done version for that zone.</p>
+    <div class="row">
+      <figure><img src="celebrate/new-walker.png" width="360" height="560" alt="Ben joins after Elm Avenue"><figcaption>1x. Ben joins after Elm Avenue, the walk's first zone, with Casey's pack paused under the dim.</figcaption></figure>
+      <figure><img class="x2" src="celebrate/new-walker.png" width="360" height="560" alt="Ben joins, at 2x"><figcaption>2x</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Zone done</h2>
+    <p class="lede">Every other finish of zones 1 to 3. The walker you are walking with cheers under "ZONE DONE!" at 2x and the zone's name, with the zone's fees and tips on a cream plate. It moves on by itself after 2 seconds or at a tap, so it has no button.</p>
+    <div class="row">
+      <figure><img src="celebrate/zone-done.png" width="360" height="560" alt="Casey finishes Willow Crescent"><figcaption>1x. Casey finishes Willow Crescent, the walk's second zone.</figcaption></figure>
+      <figure><img class="x2" src="celebrate/zone-done.png" width="360" height="560" alt="Willow Crescent done, at 2x"><figcaption>2x</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>Headline</h2>
+    <p class="lede">The 2x display line is the big moment; the cream line under it carries the name. "Willow Crescent done!" in one line is 468px wide at 2x and "WILLOW CRESCENT" alone is 350px, past the 344px a line can take, so the zone done version leads with "ZONE DONE!" and names the zone under it. "TRISTA JOINS YOU!" is 356px at 2x, so the new walker version leads with "NEW WALKER!" for the same reason. Gameplay owns the text; this is the split the lettering fits.</p>
+  </section>
+
+  <section>
+    <h2>The cheer</h2>
+    <p class="lede">The full figure at 2x reads better than the face at 2x: the raised arms and the hop carry the cheer, and the face alone is a bust like the owners' cheering faces on the badge screen. Each frame is the walker's front view (the <code>wave</code> drawing) with both arms raised from the shoulders in a V: a crouch, a 2px hop, the 3px top of the hop, then the landing. Trista keeps her tote on her shoulder.</p>
+    <div class="row">
+      <figure><img src="celebrate/cheer-strip.png" width="448" height="520" alt="The four walkers' cheer frames at 2x, with each face at 2x"><figcaption>Casey, Ben, Ada and Trista: the four cheer frames at 2x, then the <code>face-walker-*</code> happy face at 2x.</figcaption></figure>
+    </div>
+  </section>
+
+  <section>
+    <h2>New pieces</h2>
+    <p class="lede">The starburst, the confetti bits in six colours and four tumble shapes, and the speech bubble's upward tail, at 3x on the dimmed road's navy.</p>
+    <div class="row">
+      <figure><img src="celebrate/new-art.png" width="660" height="396" alt="The starburst, the confetti bits and the upward tail at 3x"><figcaption>3x</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="note">
+    <h2>New shipped art</h2>
+    <div class="scroll">
+      <table>
+        <tr><th>Key</th><th>Type, size</th><th>Tags</th><th>New walker</th><th>Zone done</th><th>Note</th></tr>
+        <tr><td><code>walker-&lt;name&gt;</code></td><td>sprite, 40x60</td><td>new <code>cheer</code> after <code>wave</code>: 4 frames, 120ms, looping</td><td>yes</td><td>yes</td><td>Drawn at 2x. The run-in is the cheer's hop tweened in from the right edge, so it needs no tag of its own. <code>wave</code> has no use once the sidewalk greeting goes, and can be dropped later (it is the last tag, so no frame index moves).</td></tr>
+        <tr><td><code>ui-celebrate-burst</code></td><td>image, 148x132</td><td></td><td>yes</td><td>yes</td><td><code>ui-sticker</code>'s look (yellow body, amber spikes, ink outline) as a round burst of 18 spikes, behind the walker. <code>ui-sticker</code> itself never goes on the run screen's road.</td></tr>
+        <tr><td><code>fx-confetti-bit</code></td><td>sprite, 6x6</td><td>one per colour: <code>amber</code>, <code>cyan</code>, <code>green</code>, <code>pink</code>, <code>white</code>, <code>yellow</code>; 4 tumble frames each, 100ms</td><td>yes</td><td>yes</td><td>The game drops about 60 down the road view over 2 seconds, behind the panels; none with reduced motion. Plum rim, as every <code>fx-</code>.</td></tr>
+        <tr><td><code>ui-quip-tail-up</code></td><td>image, 8x6</td><td></td><td>yes</td><td>no</td><td><code>ui-quip-tail-down</code> turned up, over the bubble's top rim, pointing at the walker.</td></tr>
+      </table>
+    </div>
+    <p>Reused as they are: <code>fx-confetti</code> (the 64x64 burst, as the walker lands), <code>ui-quip</code> and <code>ui-panel</code>, <code>ui-button</code> <code>go</code>, <code>icon-pace-*</code>, <code>icon-style-*</code>, <code>font-display</code>, <code>font-display-cream</code>, <code>font-body</code> and <code>font-title</code>.</p>
+  </section>
+</main>
+</body>
+</html>
