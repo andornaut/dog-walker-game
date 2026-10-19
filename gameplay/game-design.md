@@ -29,13 +29,14 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 - Web, phone browser first. Touch and keyboard; mouse is not planned
 - Portrait, ¾ top-down view, 5 lanes
-- Layout: a top status bar (money, zone progress, pause); a backdrop band showing the current zone, where scenery gags play; a fixed-width dog column on the left with one slot per dog; and the road filling the rest. Cards cover the paused, dimmed road; the status bar and dog column stay visible. Sizes are in [`art/style-guide.md`](../art/style-guide.md)
+- Layout: a shorter screen (360×560). From the top: the status bar (money, treat count, zone progress, sound, a Home button and pause); a backdrop band showing the current zone, where scenery gags play; the road across the full width, scrolling all the way to the top of its area; and a row of doghouses along the bottom, one per dog slot. Cards cover the paused, dimmed road; the status bar and doghouses stay visible
+- **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees." with Head home and Keep walking
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead. Whether the far end fades into the backdrop band is decided after seeing it. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead
 - **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; each other press queues one more lane, and a pull waits for the current move to finish
-- Taps on the top bar never move the pack. It holds the money, the treat count, the sound button and pause. Pause offers Resume, Help, Settings and Head home
+- Taps on the top bar never move the pack. Pause offers Resume, Help, Settings and Head home
 - The walker is at the bottom, the dogs just ahead in the same lane; the pack collides as one unit
 - Spawning always leaves a reachable path, so every hit is avoidable
 - A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count. A hit that opens no card (a squirrel with no Chaser, a thief that flees, a skunk or puddle that catches nobody) is scenery: no bump and no grace window
