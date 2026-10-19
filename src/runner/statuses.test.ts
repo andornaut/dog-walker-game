@@ -8,6 +8,7 @@ import { testState } from "../testing/runState";
 import {
   activeStatuses,
   dogDepthStep,
+  shownStatus,
   startStatuses,
   STATUS_OVERLAY_LIFT,
   statusesKey,
@@ -147,6 +148,27 @@ describe("statusesOf and statusesKey", () => {
   it("changes when a status starts or ends, not when only the time moves", () => {
     expect(statusesKey(active)).toBe("nugget:spooked,koda:soaked,koda:stinky");
     expect(statusesKey(active.slice(1))).not.toBe(statusesKey(active));
+  });
+});
+
+describe("shownStatus", () => {
+  const active: StatusMark[] = [
+    { dog: "koda", startMs: 4000, status: "soaked", zoneIndex: 0 },
+    { dog: "koda", startMs: 1000, status: "stinky", zoneIndex: 0 },
+  ];
+
+  it("shows each of a dog's statuses for a second in turn, the most recent first", () => {
+    expect([4000, 4999, 5000, 6000].map((t) => shownStatus(active, t, "koda"))).toEqual([
+      "soaked",
+      "soaked",
+      "stinky",
+      "soaked",
+    ]);
+  });
+
+  it("shows a lone status throughout, and nothing for a dog without one", () => {
+    expect(shownStatus(active.slice(1), 9000, "koda")).toBe("stinky");
+    expect(shownStatus(active, 4000, "nugget")).toBeUndefined();
   });
 });
 

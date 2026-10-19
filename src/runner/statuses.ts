@@ -93,10 +93,25 @@ export function activeStatuses(
     .sort((a, b) => b.startMs - a.startMs);
 }
 
-// A dog's active statuses, newest first. The road shows the first; the doghouse slot shows as
-// many as it has room for.
+// A dog's active statuses, newest first. The doghouse slot shows as many as it has room for.
 export function statusesOf(active: readonly StatusMark[], dog: DogId): DogStatusId[] {
   return active.filter((mark) => mark.dog === dog).map((mark) => mark.status);
+}
+
+// The status a dog shows on the road: with two or more, each in turn for a second, starting
+// from the most recent when it starts.
+export function shownStatus(
+  active: readonly StatusMark[],
+  timeMs: number,
+  dog: DogId,
+): DogStatusId | undefined {
+  const marks = active.filter((mark) => mark.dog === dog);
+  const newest = marks[0];
+  if (newest === undefined) {
+    return undefined;
+  }
+  const turn = Math.floor(Math.max(0, timeMs - newest.startMs) / 1000) % marks.length;
+  return marks[turn]?.status;
 }
 
 // A key for the active statuses, so a scene redraws only when they change.

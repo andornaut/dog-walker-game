@@ -92,7 +92,7 @@ import {
   stepPulls,
 } from "../runner/pulls";
 import type { Random } from "../runner/random";
-import { activeStatuses, startStatuses, statusesOf, type StatusMark } from "../runner/statuses";
+import { activeStatuses, shownStatus, startStatuses, type StatusMark } from "../runner/statuses";
 import {
   type EncounterCard,
   finishZone,
@@ -303,7 +303,6 @@ export class RunScene extends Scene {
   private setup: RunSetup | undefined;
   private statusMarks: readonly StatusMark[] = [];
   private statusOverlays: StatusOverlays | undefined;
-  private stinky: GameObjects.Sprite | undefined;
   private stopSprites: { key: string; sprites: GameObjects.Sprite[] } = { key: "", sprites: [] };
   private stumbling = false;
   private walk: Walk | undefined;
@@ -477,7 +476,6 @@ export class RunScene extends Scene {
     this.walker = { key: walkerSprite, sprite: addStandingSprite(this, walkerSprite, 0, 0) };
     playTag(this.walker.sprite, walkerSprite, "walk");
     this.dizzy = this.add.sprite(0, 0, "fx-dizzy").setDepth(DEPTH.fx).setVisible(false);
-    this.stinky = this.add.sprite(0, 0, "fx-stinky").setDepth(DEPTH.fx).setVisible(false);
     this.statusOverlays = new StatusOverlays(this);
   }
 
@@ -1580,14 +1578,9 @@ export class RunScene extends Scene {
       this.dizzy.setVisible(this.stumbling).setPosition(walkerX, footY - 52);
       playTag(this.dizzy, "fx-dizzy", "loop", still);
     }
-    // Stink lines hang over the pack while Stinky lasts.
-    if (this.stinky !== undefined) {
-      const stinky = walk.run.debuffs.some(({ debuff }) => debuff === "stinky");
-      this.stinky.setVisible(stinky).setPosition(walkerX, footY - 70);
-      playTag(this.stinky, "fx-stinky", "loop", still);
-    }
     const statuses = this.statuses(walk.run);
-    this.statusOverlays?.draw(this.dogSprites, (dog) => statusesOf(statuses, dog)[0], still);
+    const shown = (dog: DogId) => shownStatus(statuses, this.runTimeMs, dog);
+    this.statusOverlays?.draw(this.dogSprites, shown, still);
   }
 
   // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the
