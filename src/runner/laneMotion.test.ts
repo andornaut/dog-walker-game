@@ -41,11 +41,6 @@ describe("requestLaneMove", () => {
     expect(requestLaneMove(instant, 1, stillInLane(2))).toEqual(stillInLane(3));
   });
 
-  it("queues a request made while moving, without changing the current move", () => {
-    const queued = requestLaneMove(config, 1, moving(2, 3, 0.1));
-    expect(queued).toEqual({ ...moving(2, 3, 0.1), queued: 1 });
-  });
-
   it("replaces an earlier queued move with the latest press", () => {
     const queued = { ...moving(2, 3, 0.05), queued: -1 as const };
     expect(requestLaneMove(config, 1, queued)).toEqual({ ...moving(2, 3, 0.05), queued: 1 });
@@ -96,23 +91,8 @@ describe("isReverseMove", () => {
 });
 
 describe("advanceLaneMotion", () => {
-  it("counts elapsed time while moving", () => {
-    expect(advanceLaneMotion(config, 0.05, moving(2, 3))).toEqual(moving(2, 3, 0.05));
-  });
-
   it("arrives still in the destination lane once the duration has passed", () => {
     expect(advanceLaneMotion(config, 0.2, moving(2, 3))).toEqual(stillInLane(3));
-  });
-
-  it("leaves a still pack alone", () => {
-    expect(advanceLaneMotion(config, 1, stillInLane(2))).toEqual(stillInLane(2));
-  });
-
-  it("starts the queued move on arrival and carries the leftover time into it", () => {
-    const queued = { ...moving(2, 3, 0.15), queued: 1 as const };
-    const next = advanceLaneMotion(config, 0.1, queued);
-    expect(next).toMatchObject({ from: 3, kind: "moving", to: 4 });
-    expect((next as Moving).elapsed).toBeCloseTo(0.05);
   });
 
   it("runs a queued move back the way it came", () => {

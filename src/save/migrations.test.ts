@@ -83,14 +83,14 @@ describe("migrateSave", () => {
   });
 
   it.each([
-    ["null", null],
-    ["an array", [1]],
-    ["a string", "save"],
-    ["no version", { bankCents: 0 }],
-    ["a string version", { version: "1" }],
-    ["a fractional version", { version: 0.5 }],
-  ])("rejects %s", (_, document) => {
-    expect(migrateSave([recordingStep(0)], 1, document).ok).toBe(false);
+    ["null", null, "the save is not an object"],
+    ["an array", [1], "the save is not an object"],
+    ["a string", "save", "the save is not an object"],
+    ["no version", { bankCents: 0 }, "the save has no integer version"],
+    ["a string version", { version: "1" }, "the save has no integer version"],
+    ["a fractional version", { version: 0.5 }, "the save has no integer version"],
+  ])("rejects %s", (_, document, reason) => {
+    expect(migrateSave([recordingStep(0)], 1, document)).toEqual({ ok: false, reason });
   });
 });
 

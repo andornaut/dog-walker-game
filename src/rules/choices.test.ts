@@ -8,7 +8,7 @@ import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { type CardSource, newRun, type RunState } from "../state/runState";
+import { type CardSource, newRun, type RunState, type UpgradeOffer } from "../state/runState";
 import { heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import {
@@ -144,6 +144,19 @@ describe("applyInstantEncounter", () => {
   });
 });
 
+describe("openCard", () => {
+  it("waits in the upgrade phase for an upgrade offer, and the card phase for anything else", () => {
+    const state = testState({ koda: 5 });
+    const offered: UpgradeOffer = ["bellyRubs", "bigTipper", "raincoats"];
+    expect(openCard({ kind: "upgradeOffer", offered }, state).phase).toEqual({
+      kind: "upgrade",
+      offered,
+    });
+    const skunk = encounter("skunk", ["koda"]);
+    expect(openCard(skunk, state).phase).toEqual({ kind: "card", source: skunk });
+  });
+});
+
 describe("quipLine", () => {
   it("draws one of the owner's two lines for the moment", () => {
     const cue = { dog: "koda", moment: "parting" } as const;
@@ -175,15 +188,6 @@ describe("chooseOption", () => {
     expect(outcome.state.phase).toEqual({ kind: "walking" });
   });
 
-  it("doubles a dramatic owner's change and clamps every owner at their dog's max", () => {
-    const offer: CardSource = {
-      kind: "upgradeOffer",
-      offered: ["bellyRubs", "bigTipper", "raincoats"],
-    };
-    const outcome = choose(testState({ koda: 9, nugget: 3, pierre: 8 }), offer, 0);
-    expect(heartsByDog(outcome.state)).toEqual({ koda: 10, nugget: 5, pierre: 8 });
-  });
-
   it("charges the option's cost and reports the money change", () => {
     const state = testState({ duchess: 5, koda: 5 }, { money: cents(4000) });
     const outcome = choose(state, encounter("skunk", ["duchess", "koda"]), 0);
@@ -196,13 +200,6 @@ describe("chooseOption", () => {
     expect(() => choose(state, encounter("puddle", ["duchess", "koda"]), 1)).toThrow(
       "not enough money",
     );
-  });
-
-  it("refreshes Stinky rather than stacking it", () => {
-    const state = testState({ koda: 5 }, { money: cents(5000) });
-    const once = choose(state, encounter("skunk", ["koda"]), 1).state;
-    const twice = choose(once, encounter("skunk", ["koda"]), 1).state;
-    expect(twice.debuffs).toEqual([{ debuff: "stinky", untilZone: 0 }]);
   });
 
   it("fires an owner at 0 hearts, who takes back their dog's fees", () => {

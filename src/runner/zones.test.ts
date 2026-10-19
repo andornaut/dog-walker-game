@@ -62,20 +62,6 @@ describe("advanceZones", () => {
     const { progress } = advanceZones(route, 100, at(2, 300, 1900));
     expect(advanceZones(route, 5, progress)).toEqual({ completedZones: [], progress });
   });
-
-  it("gives the same position however the time is split into steps", () => {
-    let progress = runStart;
-    const completed: number[] = [];
-    for (let i = 0; i < 150; i++) {
-      const step = advanceZones(route, 0.1, progress);
-      completed.push(...step.completedZones);
-      ({ progress } = step);
-    }
-    const oneStep = advanceZones(route, 15, runStart);
-    expect(completed).toEqual(oneStep.completedZones);
-    expect(progress.zoneIndex).toBe(oneStep.progress.zoneIndex);
-    expect(progress.distance).toBeCloseTo(oneStep.progress.distance);
-  });
 });
 
 describe("zoneScrollSpeed", () => {

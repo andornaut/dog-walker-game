@@ -95,17 +95,17 @@ describe("fireOwnersAtZero", () => {
     const withTips = { ...twoZones, money: cents(twoZones.money + 300), zoneIndex: 2 };
     const emptied = {
       ...withTips,
-      pack: testState({ duchess: 5, pierre: 0 }).pack,
+      pack: testState({ duchess: 1, pierre: 0 }).pack,
     };
     const { changes, fired, state } = fireOwnersAtZero(emptied);
     expect(fired).toEqual(["pierre"]);
     expect(state.money).toBe(2000 + 300);
     expect(state.feesEarned).toEqual({ duchess: 2000 });
     expect(state.pack).toEqual([
-      { dog: "duchess", hearts: 5, status: "walking" },
+      { dog: "duchess", hearts: 1, status: "walking" },
       { dog: "pierre", status: "fired", zoneIndex: 2 },
     ]);
-    expect(heartsByDog(state)).toEqual({ duchess: 5 });
+    expect(heartsByDog(state)).toEqual({ duchess: 1 });
     expect(changes).toEqual([
       {
         amount: -2600,

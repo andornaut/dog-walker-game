@@ -48,6 +48,8 @@ describe("evaluateCondition", () => {
     expect(evaluateCondition(DOGS, { kind: "packHasTrait", trait: "fancy" }, ["duchess"])).toBe(
       true,
     );
-    expect(evaluateCondition(DOGS, { kind: "packHasTrait", trait: "chaser" }, [])).toBe(false);
+    expect(evaluateCondition(DOGS, { kind: "packHasTrait", trait: "chaser" }, ["duchess"])).toBe(
+      false,
+    );
   });
 });

@@ -120,7 +120,7 @@ describe("spawnRowDistances", () => {
   });
 
   it("rejects a spacing that is not positive", () => {
-    expect(() => spawnRowDistances(0, 1000)).toThrow();
+    expect(() => spawnRowDistances(0, 1000)).toThrow("minSpacing must be positive");
   });
 });
 

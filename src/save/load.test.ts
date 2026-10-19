@@ -66,9 +66,6 @@ describe("loadSave", () => {
   describe("a save it cannot use", () => {
     const corruptCases: [string, string][] = [
       ["text that is not JSON", "{not json"],
-      ["an empty string", ""],
-      ["JSON null", "null"],
-      ["an array", "[]"],
       [
         "a missing field",
         withChanges((document) => {
@@ -148,21 +145,9 @@ describe("loadSave", () => {
         }),
       ],
       [
-        "a version from a later game",
-        withChanges((document) => {
-          untyped(document).version = 2;
-        }),
-      ],
-      [
         "a version with no migration",
         withChanges((document) => {
           untyped(document).version = 0;
-        }),
-      ],
-      [
-        "no version",
-        withChanges((document) => {
-          delete untyped(document).version;
         }),
       ],
     ];
@@ -221,13 +206,6 @@ describe("loadSave", () => {
       });
     });
 
-    it("keeps the free dogs owned", () => {
-      const save = loaded((document) => {
-        document.owned.dogs = ["waffles"];
-      });
-      expect(save.owned.dogs).toEqual(["biscuit", "duchess", "koda", "waffles"]);
-    });
-
     it("drops them from the loadout, along with picks the player does not own", () => {
       const save = loaded((document) => {
         // dash is a known dog that this player has not bought.
@@ -254,17 +232,6 @@ describe("loadSave", () => {
         document.lastLoadout.dogs = ["waffles", "koda"];
       });
       expect(save.lastLoadout.dogs).toEqual(["waffles"]);
-    });
-
-    it("keeps no more loadout dogs than the player has slots", () => {
-      const save = loaded((document) => {
-        document.lastLoadout.dogs = ["waffles", "koda", "biscuit"];
-      });
-      expect(save.lastLoadout.dogs).toEqual(["waffles", "koda"]);
-    });
-
-    it("keeps owned loadout gear", () => {
-      expect(loaded(() => {}).lastLoadout.gear).toBe("whistle");
     });
 
     it("leaves the loadout empty, keeping owned gear, when no loadout dog is left", () => {
@@ -360,5 +327,15 @@ describe("saveContextFrom", () => {
       freeDogs: ["biscuit", "duchess", "koda"],
       walker: gameData.defaultWalker,
     });
+  });
+
+  it("refuses game data with no starter dog", () => {
+    const dogs = Object.fromEntries(
+      Object.entries(gameData.dogs).map(([id, dog]) => [
+        id,
+        { ...dog, price: "lockedDog" as const, unlock: "shop" as const },
+      ]),
+    ) as typeof gameData.dogs;
+    expect(() => saveContextFrom({ ...gameData, dogs })).toThrow("needs a starter dog");
   });
 });

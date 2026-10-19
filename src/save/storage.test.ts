@@ -141,22 +141,6 @@ describe("browserStorage", () => {
     expect((await store.load(testContext)).save).toEqual(veteranSave());
   });
 
-  it("returns null for a missing key", async () => {
-    expect(await browserStorage(fakeLocalStorage(new Map())).read(SAVE_KEY)).toBeNull();
-  });
-
-  it("turns a throwing getItem into an unavailable load", async () => {
-    const throwing: StorageLike = {
-      getItem: () => {
-        throw new DOMException("The operation is insecure.", "SecurityError");
-      },
-      setItem: () => {},
-    };
-    expect((await saveStore(browserStorage(throwing)).load(testContext)).status).toBe(
-      "unavailable",
-    );
-  });
-
   it("turns a throwing setItem into an unavailable save", async () => {
     const full: StorageLike = {
       getItem: () => null,

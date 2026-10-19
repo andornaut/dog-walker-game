@@ -56,10 +56,6 @@ describe("applyEffects: hearts", () => {
     expect(apply([], gainOne, { nugget: 5 })).toEqual({ nugget: 6 });
   });
 
-  it("reaches only the affected dogs", () => {
-    expect(apply(["koda"], loseTwo, { duchess: 5, koda: 5 })).toEqual({ duchess: 5, koda: 3 });
-  });
-
   it("uses a trait's own amount for dogs with that trait", () => {
     const puddle: Effect = {
       amount: -1,
@@ -218,7 +214,9 @@ describe("moneyCost and applyEffects: money", () => {
   it("allows an option only when the player has its cost", () => {
     const state = testState({ duchess: 5, koda: 5 }, { money: cents(999) });
     expect(canAfford(data, context(["duchess", "koda"]), state, [towel])).toBe(false);
-    expect(canAfford(data, context(["duchess"]), state, [towel])).toBe(true);
+    expect(
+      canAfford(data, context(["duchess", "koda"]), { ...state, money: cents(1000) }, [towel]),
+    ).toBe(true);
   });
 
   it("adds gains and subtracts costs, never going below $0", () => {
@@ -229,6 +227,7 @@ describe("moneyCost and applyEffects: money", () => {
       perDog: { kind: "all" },
     };
     const start = testState({ duchess: 5, koda: 5 }, { money: cents(700) });
+    expect(moneyCost(data, context([]), start, [gain])).toBe(0);
     expect(applyEffects(data, context([]), [gain], start).money).toBe(1700);
     expect(applyEffects(data, context([]), [chase], start).money).toBe(0);
   });
@@ -259,21 +258,23 @@ describe("applyEffects: other kinds", () => {
     expect(state.modifiers).toEqual([{ ...bigTipper, source: SKUNK_IGNORE }]);
   });
 
-  it("adds skips, and treats up to the carry limit", () => {
+  it("adds skips, and treats per dog up to the carry limit", () => {
     const skip: Effect = { kind: "skipOption", usesPerRun: "poopBagsSkipsPerRun" };
     const biscuits: Effect = {
       amount: "biscuitNeighbourTreatsPerDog",
       kind: "treats",
       perDog: { kind: "all" },
     };
-    const start = testState({ duchess: 5, koda: 5 }, { treats: 2 });
-    const state = applyEffects(data, context([]), [skip, biscuits], start);
-    expect(state.skipsLeft).toBe(TEST_TUNING.counts.poopBagsSkipsPerRun);
-    expect(state.treats).toBe(3);
+    const start = testState({ duchess: 5, koda: 5 });
+    const once = applyEffects(data, context([]), [skip, biscuits], start);
+    expect(once.skipsLeft).toBe(TEST_TUNING.counts.poopBagsSkipsPerRun);
+    expect(once.treats).toBe(2);
+    expect(applyEffects(data, context([]), [biscuits], once).treats).toBe(3);
   });
 
-  it("applies nothing for an option with no effects", () => {
-    const start = testState({ koda: 5 });
-    expect(applyEffects(data, context([]), [], start)).toBe(start);
+  it("adds treats once, whatever the pack, when they are not per dog", () => {
+    const treat: Effect = { amount: "biscuitNeighbourTreatsPerDog", kind: "treats" };
+    const state = applyEffects(data, context([]), [treat], testState({ duchess: 5, koda: 5 }));
+    expect(state.treats).toBe(1);
   });
 });

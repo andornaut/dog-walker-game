@@ -50,8 +50,8 @@ describe("helpButtons", () => {
     expect(helpButtons(PAGES, LAST).nextLabel).toBe("GOT IT");
   });
 
-  it("shows GOT IT and no Back for a single page", () => {
-    expect(helpButtons(1, 0)).toEqual({ backEnabled: false, nextLabel: "GOT IT" });
+  it("treats a page past a shrunken page count as the new last page", () => {
+    expect(helpButtons(3, 5)).toEqual({ backEnabled: true, nextLabel: "GOT IT" });
   });
 });
 

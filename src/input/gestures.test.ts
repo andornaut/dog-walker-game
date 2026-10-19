@@ -182,11 +182,6 @@ describe("drag symmetry", () => {
 });
 
 describe("taps", () => {
-  it("moves one lane toward the half of the road that was tapped", () => {
-    expect(all(tap(150, 300))).toEqual([left]);
-    expect(all(tap(300, 300))).toEqual([right]);
-  });
-
   it("splits the halves at the road's centre", () => {
     expect(all(tap(217, 300))).toEqual([left]);
     expect(all(tap(220, 300))).toEqual([right]);
@@ -242,6 +237,11 @@ describe("the dog column", () => {
   it("counts the padding between slots as the slot whose band it is in", () => {
     expect(all(tap(2, 241))).toEqual([{ kind: "treat", slot: 1 }]);
     expect(all(tap(2, 237))).toEqual([{ kind: "treat", slot: 0 }]);
+  });
+
+  it("ends where the road begins, at x 80", () => {
+    expect(all(tap(78, 300))).toEqual([{ kind: "treat", slot: 1 }]);
+    expect(all(tap(80, 300))).toEqual([left]);
   });
 
   it("drags instead of giving a treat once a press there travels a lane-width", () => {

@@ -30,6 +30,12 @@ describe("dog stats", () => {
     expect(pullIntervalSeconds(TEST_TUNING, [halfAsOften], DOGS.zippy)).toBe(30);
   });
 
+  it("starts an owner no higher than their dog's max", () => {
+    // Duchess starts at her max, so a raised start without a raised max is clamped.
+    const raisedStart: Modifier = { by: "luckyCollarStart", operation: "add", stat: "startHearts" };
+    expect(startHearts(TEST_TUNING, [raisedStart], DOGS.duchess)).toBe(6);
+  });
+
   it("removes the input lock with running shoes", () => {
     const runningShoes: Modifier = {
       by: "runningShoesInputLock",

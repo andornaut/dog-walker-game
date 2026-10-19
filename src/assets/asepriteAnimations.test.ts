@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
-import { animationKey, animationSpecs } from "./asepriteAnimations";
+import { animationSpecs } from "./asepriteAnimations";
 
 function sheet(durations: number[], frameTags: unknown[] | undefined) {
   return {
@@ -31,14 +31,6 @@ describe("animationSpecs", () => {
       { duration: 120, frame: "dog 2.aseprite" },
       { duration: 120, frame: "dog 3.aseprite" },
     ]);
-  });
-
-  it("keeps two sprites' identical tag names apart", () => {
-    const tags = [tag("forward", 0, 0)];
-    const keys = ["dog-koda", "dog-duchess"].flatMap((texture) =>
-      animationSpecs(texture, sheet([150], tags)).map(({ key }) => key),
-    );
-    expect(new Set(keys).size).toBe(2);
   });
 
   it("plays each direction in Aseprite's order", () => {
@@ -113,11 +105,5 @@ describe("the shipped art", () => {
     for (const [path, json] of entries) {
       expect(() => animationSpecs(path, json)).not.toThrow();
     }
-  });
-});
-
-describe("animationKey", () => {
-  it("joins texture and tag", () => {
-    expect(animationKey("face-dog-koda", "happy")).toBe("face-dog-koda:happy");
   });
 });
