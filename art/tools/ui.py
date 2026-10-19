@@ -214,19 +214,19 @@ STINK_WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
 
 
 def stinky():
-    """Three stink lines waving in step out of a small cloud puff, after fx-status-stinky: green
-    with a teal right side and no outline, so the teal carries the lines on cream (8.25:1) and the
-    green on the top bar's ink (8.41:1). The puff takes the usual forest outline (5.39:1 on cream).
-    Returns frame pixels."""
+    """Three stink lines waving in step out of a small cloud puff, in the skunk's mauve family as
+    fx-status-stinky and skunk-cloud: pink with a plum right side and no outline, so the plum
+    carries the lines on cream (9.42:1) and the pink on the top bar's ink (6.64:1). The puff is
+    mauve, shaded purple, in its ramp outline. Returns frame pixels."""
     g = Grid(16, 16)
     for cx, cy, rx, ry in ((4, 12.5, 3, 2.3), (12, 12.5, 3, 2.3), (8, 11, 3.5, 3)):
-        g.ell(cx, cy, rx, ry, "green", "dgreen")
-    g.rect(4, 14, 8, 1, "dgreen")
+        g.ell(cx, cy, rx, ry, "mauve", "purple")
+    g.rect(4, 14, 8, 1, "purple")
     px = g.outlined()
     for x0, top in ((2, 1), (7, 0), (12, 1)):
         for y in range(top, 9):
             x = x0 + STINK_WAVE[(y + 6) % 8]
-            px[y][x], px[y][x + 1] = K["green"], K["teal"]
+            px[y][x], px[y][x + 1] = K["pink"], K["plum"]
     return px
 
 
@@ -724,8 +724,9 @@ def doghouse(dog):
     (98, 62) under pegs, and the owner's name at (6, 62) in font-body on the cream name strip
     (x 4 to 75, rows 60 to 70). The roof is rows 0 to 20: the ridge, the dog's emblem in a 12x12
     vent at the left gable, shingle courses around the name plate, and a dark eave. The empty
-    house (a fired dog's) is grey, its door dark, and has only a white plate for FIRED, centred at
-    (60, 74)."""
+    house (a fired dog's) is grey, its door dark, and has only a dred plate built as
+    ui-fired-plate (x 40 to 79, rows 68 to 84, the face x 44 to 75, rows 72 to 80) for FIRED in
+    font-title, white (7.34:1), centred on x 60 with its caps in rows 74 to 78."""
     base, shade, dark = ROOFS[dog]
     empty = dog == "empty"
     wall, plank, lit, unlit, paper, paper_sh, rim = (
@@ -801,9 +802,11 @@ def doghouse(dog):
     g.rect(39, 58, 38, 1, unlit)
     if empty:
         # the plate for FIRED, where a dog's house has its name strip, board and pegs
-        g.rect(42, 71, 36, 13, rim)
-        g.rect(43, 72, 34, 11, paper)
-        g.rect(43, 82, 34, 1, paper_sh)
+        fired = plate("dred", "red", "plum", 40, 17)
+        for y, row in enumerate(fired.px):
+            for x, c in enumerate(row):
+                if c:
+                    g.px[68 + y][40 + x] = c
         return g
     # hearts board, its right edge on the house's, dotted under the hearts
     g.rect(76, 22, 43, 34, rim)

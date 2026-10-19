@@ -108,19 +108,11 @@ def card_frame_large(kind):
 
 def card_cost():
     """71x13: the cost plaque, laid over the frame's badge socket at 6,121 (12,242 at 2x on the
-    large frame). Rounded ends, a dark brown bevel on top and brass rivets at both ends; the
-    game writes the cost ($, $$$, the heart change, Free or Need $...) centred in font-title,
-    cream, in the 63px between the rivets."""
-    g = Grid(71, 13)
-    g.rect(1, 0, 69, 13, "plum")
-    g.rect(0, 1, 71, 11, "plum")
-    g.rect(2, 1, 67, 1, "dbrown")
-    g.rect(2, 11, 67, 1, "ink")
-    for x in (2, 67):
-        g.rect(x, 5, 2, 2, "amber")
-        g.p(x, 5, "yellow")
-        g.p(x + 1, 6, "orange")
-    return g
+    large frame). ui.py's chrome with its corners cut 1px: the cream face is x 2 to 67, rows 2
+    to 9, over the tan lip. The game writes the cost ($, $$$, the heart change, Free or Need $...)
+    centred in font-title, plum (9.42:1), caps in rows 4 to 8. A disabled card's grey copy turns
+    the face lightGrey, where navy holds 8.48:1."""
+    return chrome(Grid(71, 13), 0, 0, 71, 13)
 
 
 # ---------- illustration helpers ----------
@@ -150,10 +142,15 @@ class Art(hp.Scene):
     def put(self, key, tag, cx, foot, i=0, flip=False, shadow=True):
         self.feet(key, tag, cx, foot, i, flip, shadow)
 
-    def stink(self, x, y, n=3):
+    def stink(self, x, y, n, col, sh):
+        """n wavy stink lines rising from x, y, every third pixel in sh."""
         for k in range(n):
             for j in range(7):
-                self.fill(x + k * 6 + (0 if (j % 4) < 2 else 1), y + j, 1, 1, "green" if j % 3 else "dgreen")
+                self.fill(x + k * 6 + (0 if (j % 4) < 2 else 1), y + j, 1, 1, col if j % 3 else sh)
+
+    def skunk_stink(self, x, y, n=3):
+        """Stink lines in the skunk's colours (road.CLOUD_INK), as skunk-cloud and fx-status-stinky."""
+        self.stink(x, y, n, road.CLOUD_INK["inner"], road.CLOUD_INK["outer"])
 
     def drops(self, pts, col="cyan"):
         for x, y in pts:
@@ -229,7 +226,7 @@ def skunk_rinse():
     a.fill(0, 10, 16, 2, "dgreen")
     a.fill(16, 9, 3, 4, "grey")
     a.drops([(20 + k * 2, 11 + k + (k % 2)) for k in range(10)])
-    a.stink(50, 8)
+    a.skunk_stink(50, 8)
     return a
 
 
@@ -237,9 +234,9 @@ def skunk_ignore():
     a = Art()
     a.ground("street")
     a.put("skunk", "idle", 18, 44)
-    a.stink(30, 6, 2)
+    a.skunk_stink(30, 6, 2)
     a.put("dog-koda", "walk", 54, 40, 2)
-    a.stink(46, 4, 2)
+    a.skunk_stink(46, 4, 2)
     return a
 
 
@@ -335,13 +332,11 @@ def drawn(g):
 
 
 def need_met(a, need, x, y):
-    """A need fulfilled: its icon in a white bubble with a sparkle at the corner. Only urgent
-    needs pay +♥, so these cards show the icon rather than hearts."""
-    a.fill(x + 1, y, 16, 18, "white")
-    a.fill(x, y + 1, 18, 16, "white")
-    a.fill(x + 1, y + 17, 16, 1, "lgrey")
-    a.paste(hp.frame(f"icon-need-{need}", "normal"), x + 1, y + 1)
-    a.sparkle(x + 18, y, "yellow")
+    """A need fulfilled: its icon in a 20x20 chrome bubble (ui.py) with a sparkle at the corner.
+    Only urgent needs pay +♥, so these cards show the icon rather than hearts."""
+    a.paste(to_image(chrome(Grid(20, 20), 0, 0, 20, 20).px), x, y)
+    a.paste(hp.frame(f"icon-need-{need}", "normal"), x + 2, y + 2)
+    a.sparkle(x + 20, y, "yellow")
 
 
 def coin_arc(a, pts):
@@ -487,7 +482,7 @@ def petunias_nature_calls():
     a.fill(32, 55, 9, 1, "ochre")
     a.fill(33, 53, 2, 1, "white")
     red_alert(a, 72, 2)
-    need_met(a, "regular", 4, 38)
+    need_met(a, "regular", 4, 36)
     broken_hearts(a, [(58, 40)])
     return a
 
@@ -548,7 +543,7 @@ def cafe_charm():
     a.put("dog-duchess", "react", 37, 55)
     a.lead(37, 40, 44)
     a.hearts([(30, 11), (40, 13)])
-    need_met(a, "friendly", 2, 39)
+    need_met(a, "friendly", 2, 36)
     clock(a, 67, 46)
     return a
 
@@ -1149,7 +1144,7 @@ def accident_walk_on():
     a = Art()
     grumpy_lawn(a)
     a.paste(to_image(needs.accident_spot(0).px), 30, 34)
-    a.stink(32, 24, 2)
+    a.stink(32, 24, 2, "green", "dgreen")
     a.fill(30, 2, 2, 5, "red")
     a.fill(30, 8, 2, 2, "red")
     a.put("dog-biscuit", "walk", 58, 38, 2)

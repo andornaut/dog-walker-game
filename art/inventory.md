@@ -107,7 +107,7 @@ Same tags, frames and durations as the original.
 | `spot-stranger`    | sprite | 32×48 | `idle`, `wave`           | core | Friendly spot                                                      |
 | `spot-tree`        | sprite | 32×48 | `idle`                   | core | Regular spot                                                       |
 | `spot-water-bowl`  | sprite | 32×32 | `idle`                   | core | Thirsty spot                                                       |
-| `ui-fires`         | sprite | 16×16 | `static`, `pulse`        | core | Card option that fires an owner; over the cost plaque's left rivet |
+| `ui-fires`         | sprite | 16×16 | `static`, `pulse`        | core | Card option that fires an owner; over the cost plaque's left end   |
 | `ui-pull-blocked`  | sprite | 10×10 | `normal`                 | core | Over the bubble's top-right corner when a pull is blocked          |
 | `ui-pull-bubble`   | sprite | 32×28 | `idle`, `show`, `urgent` | core | Over a dog with an urgent need; the game draws the need icon in it |
 

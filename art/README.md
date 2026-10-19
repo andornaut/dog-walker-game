@@ -39,6 +39,5 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 ## Remaining for the first build
 
 - **Road readability:** dog-duchess, dog-koda, dog-pierre, dog-snowball, the skunk cloud, walker-ada and walker-ben
-- **White art left on the cream chrome:** card-cost, the need-met icon bubble on the need cards, and the FIRED plate on the empty ui-doghouse
 
 New art follows the rulebook as it changes.

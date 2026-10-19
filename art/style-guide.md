@@ -48,35 +48,36 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 
 Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
-| Pair                           | Ratio | Use                                                                                             |
-| ------------------------------ | ----- | ----------------------------------------------------------------------------------------------- |
-| plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, callouts, the zone banner, `normal` tiles and buttons |
-| plum on tan                    | 6.49  | Body text on tan                                                                                |
-| plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                                    |
-| plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                  |
-| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                             |
-| forest on cream                | 5.39  | Money gained, affordable prices, Stinky status, `ui-payout-label`                               |
-| darkRed on cream               | 5.07  | Money lost, unaffordable prices, full heart, ♥ in help callouts                                 |
-| cream on darkBrown             | 5.85  | Text on the column or wood                                                                      |
-| amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                       |
-| yellow on darkBrown            | 6.79  | Floating gain on the column                                                                     |
-| white on darkBrown             | 8.48  | Floating loss on the column, filled page dot                                                    |
-| tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                      |
-| white on forest                | 7.80  | Labels on chips                                                                                 |
-| ink on green                   | 8.41  | `ui-button` `go` label                                                                          |
-| white on rust                  | 4.99  | Trait chip "Food"                                                                               |
-| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`                                                    |
-| white on navy                  | 13.89 | `ui-detail-band` title                                                                          |
-| ink on yellow                  | 14.43 | `ui-sticker` `new`                                                                              |
-| ink on cyan                    | 11.98 | `ui-sticker` `price`                                                                            |
-| navy on grey                   | 4.93  | Price on a `disabled` tile                                                                      |
-| darkSlate on grey              | 3.39  | Labels on `disabled` tiles and buttons (inactive, exempt)                                       |
-| grey on darkBrown              | 3.01  | `disabled` tile face on the wood                                                                |
-| amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                   |
-| `ui-zone-pips` on ink          | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked                                            |
-| `ui-difficulty` on cream       | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim                                          |
-| white over the dimmed road     | 4.5+  | Card subtitle                                                                                   |
-| tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                                  |
+| Pair                           | Ratio | Use                                                                                                                      |
+| ------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, callouts, the zone banner, `normal` tiles and buttons, the cost on `card-cost` |
+| plum on tan                    | 6.49  | Body text on tan                                                                                                         |
+| plum on amber                  | 7.35  | Text on amber: forced-stop band, step number                                                                             |
+| plum on yellow                 | 10.92 | Text on a selected face (`ui-tile` `selected`)                                                                           |
+| darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                                                      |
+| forest on cream                | 5.39  | Money gained, affordable prices, Stinky status, `ui-payout-label`                                                        |
+| darkRed on cream               | 5.07  | Money lost, unaffordable prices, full heart, ♥ in help callouts                                                          |
+| cream on darkBrown             | 5.85  | Text on the column or wood                                                                                               |
+| amber on darkBrown             | 4.57  | Warnings, "You're fired!"                                                                                                |
+| yellow on darkBrown            | 6.79  | Floating gain on the column                                                                                              |
+| white on darkBrown             | 8.48  | Floating loss on the column, filled page dot                                                                             |
+| tan on darkBrown               | 4.04  | Empty slot dashed border, hollow page dots                                                                               |
+| white on forest                | 7.80  | Labels on chips                                                                                                          |
+| ink on green                   | 8.41  | `ui-button` `go` label                                                                                                   |
+| white on rust                  | 4.99  | Trait chip "Food"                                                                                                        |
+| white on darkRed, blue, purple | 7.34+ | Card bands, `ui-hit-label`, `ui-fired-plate`, the FIRED plate on the empty `ui-doghouse`                                 |
+| white on navy                  | 13.89 | `ui-detail-band` title                                                                                                   |
+| ink on yellow                  | 14.43 | `ui-sticker` `new`                                                                                                       |
+| ink on cyan                    | 11.98 | `ui-sticker` `price`                                                                                                     |
+| navy on grey                   | 4.93  | Price on a `disabled` tile                                                                                               |
+| navy on lightGrey              | 8.48  | The cost on a disabled card's `card-cost`                                                                                |
+| darkSlate on grey              | 3.39  | Labels on `disabled` tiles and buttons (inactive, exempt)                                                                |
+| grey on darkBrown              | 3.01  | `disabled` tile face on the wood                                                                                         |
+| amber on navy                  | 7.49  | `icon-pause`, `icon-play` on `ui-icon-button`                                                                            |
+| `ui-zone-pips` on ink          | 3.0+  | `todo` dashed; `<zone>` rimmed; `<zone>-done` ticked                                                                     |
+| `ui-difficulty` on cream       | 9.42  | Filled paws plum-outlined; hollow paws a faint tan rim                                                                   |
+| white over the dimmed road     | 4.5+  | Card subtitle                                                                                                            |
+| tan on the dimmed road         | 3.0+  | 1px rim around the pause panel                                                                                           |
 
 ## UI
 
