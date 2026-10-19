@@ -1,50 +1,50 @@
 { "frames": {
    "thief 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 32, "h": 48 },
+    "frame": { "x": 0, "y": 0, "w": 40, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
-    "sourceSize": { "w": 32, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 60 },
+    "sourceSize": { "w": 40, "h": 60 },
     "duration": 200
    },
    "thief 1.aseprite": {
-    "frame": { "x": 32, "y": 0, "w": 32, "h": 48 },
+    "frame": { "x": 40, "y": 0, "w": 40, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
-    "sourceSize": { "w": 32, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 60 },
+    "sourceSize": { "w": 40, "h": 60 },
     "duration": 200
    },
    "thief 2.aseprite": {
-    "frame": { "x": 64, "y": 0, "w": 32, "h": 48 },
+    "frame": { "x": 80, "y": 0, "w": 40, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
-    "sourceSize": { "w": 32, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 60 },
+    "sourceSize": { "w": 40, "h": 60 },
     "duration": 110
    },
    "thief 3.aseprite": {
-    "frame": { "x": 96, "y": 0, "w": 32, "h": 48 },
+    "frame": { "x": 120, "y": 0, "w": 40, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
-    "sourceSize": { "w": 32, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 60 },
+    "sourceSize": { "w": 40, "h": 60 },
     "duration": 110
    },
    "thief 4.aseprite": {
-    "frame": { "x": 128, "y": 0, "w": 32, "h": 48 },
+    "frame": { "x": 160, "y": 0, "w": 40, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
-    "sourceSize": { "w": 32, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 60 },
+    "sourceSize": { "w": 40, "h": 60 },
     "duration": 400
    },
    "thief 5.aseprite": {
-    "frame": { "x": 160, "y": 0, "w": 32, "h": 48 },
+    "frame": { "x": 200, "y": 0, "w": 40, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 48 },
-    "sourceSize": { "w": 32, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 40, "h": 60 },
+    "sourceSize": { "w": 40, "h": 60 },
     "duration": 400
    }
  },
@@ -53,7 +53,7 @@
   "version": "1.2.30-x64",
   "image": "thief.png",
   "format": "RGBA8888",
-  "size": { "w": 192, "h": 48 },
+  "size": { "w": 240, "h": 60 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 1, "direction": "forward" },

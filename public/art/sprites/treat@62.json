@@ -1,18 +1,18 @@
 { "frames": {
    "treat@62 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 10, "h": 10 },
+    "frame": { "x": 0, "y": 0, "w": 13, "h": 13 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 10, "h": 10 },
-    "sourceSize": { "w": 10, "h": 10 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 13, "h": 13 },
+    "sourceSize": { "w": 13, "h": 13 },
     "duration": 400
    },
    "treat@62 1.aseprite": {
-    "frame": { "x": 10, "y": 0, "w": 10, "h": 10 },
+    "frame": { "x": 13, "y": 0, "w": 13, "h": 13 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 10, "h": 10 },
-    "sourceSize": { "w": 10, "h": 10 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 13, "h": 13 },
+    "sourceSize": { "w": 13, "h": 13 },
     "duration": 400
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "treat@62.png",
   "format": "RGBA8888",
-  "size": { "w": 20, "h": 10 },
+  "size": { "w": 26, "h": 13 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

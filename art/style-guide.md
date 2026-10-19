@@ -15,14 +15,16 @@
 | Road         | 150 to 469  | 5 lanes of 56px; at the pack the road spans x 40 to 320, centre x 180                                                                                                                 |
 | Doghouse row | 466 to 559  | `ui-dog-band` (360×94) at 0,466; three 120×90 `ui-doghouse` slots at x 0, 120 and 240, rows 470 to 559                                                                                |
 
-| Sprite                                                    | Frame                      |
-| --------------------------------------------------------- | -------------------------- |
-| Dogs on the road                                          | 40×40                      |
-| Road tiles, animals, dog and owner faces                  | 32×32                      |
-| People: walkers, owners, forced-stop and lucky characters | 32×48 (kids drawn shorter) |
-| Pickups, small effects, icons                             | 16×16                      |
-| Dog portraits                                             | 64×64                      |
-| Obstacle n lanes wide                                     | (56n−24)×24                |
+| Sprite                                                                                      | Frame                      |
+| ------------------------------------------------------------------------------------------- | -------------------------- |
+| Road tiles, dog and owner faces                                                             | 32×32                      |
+| Road animals: dogs, the other dog, skunk and squirrel                                       | 40×40                      |
+| Road people: walkers, forced-stop and lucky characters, the thief and the other dog's owner | 40×60 (kids drawn shorter) |
+| Owners                                                                                      | 32×48                      |
+| Pickups                                                                                     | 20×20                      |
+| Small effects, icons                                                                        | 16×16                      |
+| Dog portraits                                                                               | 64×64                      |
+| Obstacle n lanes wide                                                                       | (56n−24)×24                |
 
 A dog's road sprite is drawn on a 32-unit design grid and rasterized at 1.25× (its depth variants at 1.25× the step): every shape scales, while 1px lines and single pixels stay 1px, and a dog's feet keep to the frame's bottom rows. A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 88×24, hedge and `barrier-3` 144×24, the parked car 44×28 (1 lane by 3 rows of footprint), the two-lane ice cream truck 88×44 (a rear-view van) and construction 56×32 per lane. Ground decals (puddle 88×32, the skunk cloud 88×40) stay low so they read as lying on the road.
 

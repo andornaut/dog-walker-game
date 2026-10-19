@@ -314,8 +314,8 @@
       "png": "sprites/biscuit-neighbour.png",
       "json": "sprites/biscuit-neighbour.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 24
+        "feetY": 56,
+        "opaqueWidth": 30
       }
     },
     {
@@ -323,8 +323,8 @@
       "png": "sprites/biscuit-neighbour@50.png",
       "json": "sprites/biscuit-neighbour@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 13
+        "feetY": 28,
+        "opaqueWidth": 16
       }
     },
     {
@@ -332,8 +332,8 @@
       "png": "sprites/biscuit-neighbour@62.png",
       "json": "sprites/biscuit-neighbour@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 16
+        "feetY": 35,
+        "opaqueWidth": 19
       }
     },
     {
@@ -341,8 +341,8 @@
       "png": "sprites/biscuit-neighbour@75.png",
       "json": "sprites/biscuit-neighbour@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 18
+        "feetY": 42,
+        "opaqueWidth": 22
       }
     },
     {
@@ -350,8 +350,8 @@
       "png": "sprites/biscuit-neighbour@88.png",
       "json": "sprites/biscuit-neighbour@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 22
+        "feetY": 49,
+        "opaqueWidth": 27
       }
     },
     {
@@ -414,8 +414,8 @@
       "png": "sprites/chatty-neighbour.png",
       "json": "sprites/chatty-neighbour.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 24
+        "feetY": 56,
+        "opaqueWidth": 30
       }
     },
     {
@@ -423,8 +423,8 @@
       "png": "sprites/chatty-neighbour@50.png",
       "json": "sprites/chatty-neighbour@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 13
+        "feetY": 28,
+        "opaqueWidth": 16
       }
     },
     {
@@ -432,8 +432,8 @@
       "png": "sprites/chatty-neighbour@62.png",
       "json": "sprites/chatty-neighbour@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 16
+        "feetY": 35,
+        "opaqueWidth": 19
       }
     },
     {
@@ -441,8 +441,8 @@
       "png": "sprites/chatty-neighbour@75.png",
       "json": "sprites/chatty-neighbour@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 18
+        "feetY": 42,
+        "opaqueWidth": 22
       }
     },
     {
@@ -450,8 +450,8 @@
       "png": "sprites/chatty-neighbour@88.png",
       "json": "sprites/chatty-neighbour@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 22
+        "feetY": 49,
+        "opaqueWidth": 27
       }
     },
     {
@@ -1444,8 +1444,8 @@
       "png": "sprites/kid.png",
       "json": "sprites/kid.json",
       "anchor": {
-        "feetY": 46,
-        "opaqueWidth": 20
+        "feetY": 58,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1453,8 +1453,8 @@
       "png": "sprites/kid@50.png",
       "json": "sprites/kid@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 11
+        "feetY": 29,
+        "opaqueWidth": 14
       }
     },
     {
@@ -1462,8 +1462,8 @@
       "png": "sprites/kid@62.png",
       "json": "sprites/kid@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 14
+        "feetY": 36,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1471,8 +1471,8 @@
       "png": "sprites/kid@75.png",
       "json": "sprites/kid@75.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 16
+        "feetY": 43,
+        "opaqueWidth": 18
       }
     },
     {
@@ -1480,8 +1480,8 @@
       "png": "sprites/kid@88.png",
       "json": "sprites/kid@88.json",
       "anchor": {
-        "feetY": 40,
-        "opaqueWidth": 18
+        "feetY": 50,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1579,8 +1579,8 @@
       "png": "sprites/lost-wallet.png",
       "json": "sprites/lost-wallet.json",
       "anchor": {
-        "feetY": 13,
-        "opaqueWidth": 12
+        "feetY": 16,
+        "opaqueWidth": 14
       }
     },
     {
@@ -1588,8 +1588,8 @@
       "png": "sprites/lost-wallet@50.png",
       "json": "sprites/lost-wallet@50.json",
       "anchor": {
-        "feetY": 7,
-        "opaqueWidth": 7
+        "feetY": 8,
+        "opaqueWidth": 8
       }
     },
     {
@@ -1597,8 +1597,8 @@
       "png": "sprites/lost-wallet@62.png",
       "json": "sprites/lost-wallet@62.json",
       "anchor": {
-        "feetY": 8,
-        "opaqueWidth": 8
+        "feetY": 10,
+        "opaqueWidth": 10
       }
     },
     {
@@ -1606,8 +1606,8 @@
       "png": "sprites/lost-wallet@75.png",
       "json": "sprites/lost-wallet@75.json",
       "anchor": {
-        "feetY": 10,
-        "opaqueWidth": 10
+        "feetY": 12,
+        "opaqueWidth": 11
       }
     },
     {
@@ -1615,8 +1615,8 @@
       "png": "sprites/lost-wallet@88.png",
       "json": "sprites/lost-wallet@88.json",
       "anchor": {
-        "feetY": 11,
-        "opaqueWidth": 10
+        "feetY": 14,
+        "opaqueWidth": 13
       }
     },
     {
@@ -1624,8 +1624,8 @@
       "png": "sprites/mail-carrier.png",
       "json": "sprites/mail-carrier.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 26
+        "feetY": 56,
+        "opaqueWidth": 32
       }
     },
     {
@@ -1633,8 +1633,8 @@
       "png": "sprites/mail-carrier@50.png",
       "json": "sprites/mail-carrier@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 13
+        "feetY": 28,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1642,8 +1642,8 @@
       "png": "sprites/mail-carrier@62.png",
       "json": "sprites/mail-carrier@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 17
+        "feetY": 35,
+        "opaqueWidth": 21
       }
     },
     {
@@ -1651,8 +1651,8 @@
       "png": "sprites/mail-carrier@75.png",
       "json": "sprites/mail-carrier@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 20
+        "feetY": 42,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1660,8 +1660,8 @@
       "png": "sprites/mail-carrier@88.png",
       "json": "sprites/mail-carrier@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 23
+        "feetY": 49,
+        "opaqueWidth": 29
       }
     },
     {
@@ -1669,8 +1669,8 @@
       "png": "sprites/other-dog.png",
       "json": "sprites/other-dog.json",
       "anchor": {
-        "feetY": 30,
-        "opaqueWidth": 22
+        "feetY": 38,
+        "opaqueWidth": 27
       }
     },
     {
@@ -1678,8 +1678,8 @@
       "png": "sprites/other-dog-owner.png",
       "json": "sprites/other-dog-owner.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 25
+        "feetY": 56,
+        "opaqueWidth": 31
       }
     },
     {
@@ -1687,8 +1687,8 @@
       "png": "sprites/other-dog-owner@50.png",
       "json": "sprites/other-dog-owner@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 13
+        "feetY": 28,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1696,8 +1696,8 @@
       "png": "sprites/other-dog-owner@62.png",
       "json": "sprites/other-dog-owner@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 17
+        "feetY": 35,
+        "opaqueWidth": 20
       }
     },
     {
@@ -1705,8 +1705,8 @@
       "png": "sprites/other-dog-owner@75.png",
       "json": "sprites/other-dog-owner@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 19
+        "feetY": 42,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1714,8 +1714,8 @@
       "png": "sprites/other-dog-owner@88.png",
       "json": "sprites/other-dog-owner@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 23
+        "feetY": 49,
+        "opaqueWidth": 28
       }
     },
     {
@@ -1723,8 +1723,8 @@
       "png": "sprites/other-dog@50.png",
       "json": "sprites/other-dog@50.json",
       "anchor": {
-        "feetY": 15,
-        "opaqueWidth": 11
+        "feetY": 19,
+        "opaqueWidth": 15
       }
     },
     {
@@ -1732,8 +1732,8 @@
       "png": "sprites/other-dog@62.png",
       "json": "sprites/other-dog@62.json",
       "anchor": {
-        "feetY": 19,
-        "opaqueWidth": 15
+        "feetY": 24,
+        "opaqueWidth": 17
       }
     },
     {
@@ -1741,8 +1741,8 @@
       "png": "sprites/other-dog@75.png",
       "json": "sprites/other-dog@75.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 17
+        "feetY": 28,
+        "opaqueWidth": 20
       }
     },
     {
@@ -1750,8 +1750,8 @@
       "png": "sprites/other-dog@88.png",
       "json": "sprites/other-dog@88.json",
       "anchor": {
-        "feetY": 26,
-        "opaqueWidth": 20
+        "feetY": 33,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1930,8 +1930,8 @@
       "png": "sprites/photo-op.png",
       "json": "sprites/photo-op.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 28
+        "feetY": 56,
+        "opaqueWidth": 34
       }
     },
     {
@@ -1939,8 +1939,8 @@
       "png": "sprites/photo-op@50.png",
       "json": "sprites/photo-op@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 14
+        "feetY": 28,
+        "opaqueWidth": 18
       }
     },
     {
@@ -1948,8 +1948,8 @@
       "png": "sprites/photo-op@62.png",
       "json": "sprites/photo-op@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 18
+        "feetY": 35,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1957,8 +1957,8 @@
       "png": "sprites/photo-op@75.png",
       "json": "sprites/photo-op@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 22
+        "feetY": 42,
+        "opaqueWidth": 26
       }
     },
     {
@@ -1966,8 +1966,8 @@
       "png": "sprites/photo-op@88.png",
       "json": "sprites/photo-op@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 24
+        "feetY": 49,
+        "opaqueWidth": 31
       }
     },
     {
@@ -2065,8 +2065,8 @@
       "png": "sprites/skunk.png",
       "json": "sprites/skunk.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 23
+        "feetY": 36,
+        "opaqueWidth": 28
       }
     },
     {
@@ -2119,8 +2119,8 @@
       "png": "sprites/skunk@50.png",
       "json": "sprites/skunk@50.json",
       "anchor": {
-        "feetY": 15,
-        "opaqueWidth": 12
+        "feetY": 18,
+        "opaqueWidth": 15
       }
     },
     {
@@ -2128,8 +2128,8 @@
       "png": "sprites/skunk@62.png",
       "json": "sprites/skunk@62.json",
       "anchor": {
-        "feetY": 18,
-        "opaqueWidth": 15
+        "feetY": 23,
+        "opaqueWidth": 19
       }
     },
     {
@@ -2137,8 +2137,8 @@
       "png": "sprites/skunk@75.png",
       "json": "sprites/skunk@75.json",
       "anchor": {
-        "feetY": 22,
-        "opaqueWidth": 18
+        "feetY": 27,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2146,8 +2146,8 @@
       "png": "sprites/skunk@88.png",
       "json": "sprites/skunk@88.json",
       "anchor": {
-        "feetY": 25,
-        "opaqueWidth": 20
+        "feetY": 32,
+        "opaqueWidth": 25
       }
     },
     {
@@ -2335,8 +2335,8 @@
       "png": "sprites/squirrel.png",
       "json": "sprites/squirrel.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 19
+        "feetY": 36,
+        "opaqueWidth": 23
       }
     },
     {
@@ -2389,8 +2389,8 @@
       "png": "sprites/squirrel@50.png",
       "json": "sprites/squirrel@50.json",
       "anchor": {
-        "feetY": 15,
-        "opaqueWidth": 10
+        "feetY": 18,
+        "opaqueWidth": 13
       }
     },
     {
@@ -2398,8 +2398,8 @@
       "png": "sprites/squirrel@62.png",
       "json": "sprites/squirrel@62.json",
       "anchor": {
-        "feetY": 18,
-        "opaqueWidth": 13
+        "feetY": 23,
+        "opaqueWidth": 16
       }
     },
     {
@@ -2407,8 +2407,8 @@
       "png": "sprites/squirrel@75.png",
       "json": "sprites/squirrel@75.json",
       "anchor": {
-        "feetY": 22,
-        "opaqueWidth": 15
+        "feetY": 27,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2416,8 +2416,8 @@
       "png": "sprites/squirrel@88.png",
       "json": "sprites/squirrel@88.json",
       "anchor": {
-        "feetY": 25,
-        "opaqueWidth": 17
+        "feetY": 32,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2425,8 +2425,8 @@
       "png": "sprites/stop-sign.png",
       "json": "sprites/stop-sign.json",
       "anchor": {
-        "feetY": 47,
-        "opaqueWidth": 20
+        "feetY": 59,
+        "opaqueWidth": 24
       }
     },
     {
@@ -2434,8 +2434,8 @@
       "png": "sprites/stop-sign@50.png",
       "json": "sprites/stop-sign@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 11
+        "feetY": 29,
+        "opaqueWidth": 13
       }
     },
     {
@@ -2443,8 +2443,8 @@
       "png": "sprites/stop-sign@62.png",
       "json": "sprites/stop-sign@62.json",
       "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 14
+        "feetY": 37,
+        "opaqueWidth": 16
       }
     },
     {
@@ -2452,8 +2452,8 @@
       "png": "sprites/stop-sign@75.png",
       "json": "sprites/stop-sign@75.json",
       "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 16
+        "feetY": 44,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2461,8 +2461,8 @@
       "png": "sprites/stop-sign@88.png",
       "json": "sprites/stop-sign@88.json",
       "anchor": {
-        "feetY": 41,
-        "opaqueWidth": 18
+        "feetY": 51,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2470,8 +2470,8 @@
       "png": "sprites/thief.png",
       "json": "sprites/thief.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 27
+        "feetY": 56,
+        "opaqueWidth": 33
       }
     },
     {
@@ -2479,8 +2479,8 @@
       "png": "sprites/thief@50.png",
       "json": "sprites/thief@50.json",
       "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 14
+        "feetY": 28,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2488,8 +2488,8 @@
       "png": "sprites/thief@62.png",
       "json": "sprites/thief@62.json",
       "anchor": {
-        "feetY": 28,
-        "opaqueWidth": 18
+        "feetY": 35,
+        "opaqueWidth": 21
       }
     },
     {
@@ -2497,8 +2497,8 @@
       "png": "sprites/thief@75.png",
       "json": "sprites/thief@75.json",
       "anchor": {
-        "feetY": 34,
-        "opaqueWidth": 20
+        "feetY": 42,
+        "opaqueWidth": 25
       }
     },
     {
@@ -2506,8 +2506,8 @@
       "png": "sprites/thief@88.png",
       "json": "sprites/thief@88.json",
       "anchor": {
-        "feetY": 39,
-        "opaqueWidth": 24
+        "feetY": 49,
+        "opaqueWidth": 30
       }
     },
     {
@@ -2515,8 +2515,8 @@
       "png": "sprites/tip.png",
       "json": "sprites/tip.json",
       "anchor": {
-        "feetY": 13,
-        "opaqueWidth": 12
+        "feetY": 17,
+        "opaqueWidth": 16
       }
     },
     {
@@ -2524,7 +2524,7 @@
       "png": "sprites/tip@50.png",
       "json": "sprites/tip@50.json",
       "anchor": {
-        "feetY": 7,
+        "feetY": 8,
         "opaqueWidth": 8
       }
     },
@@ -2533,8 +2533,8 @@
       "png": "sprites/tip@62.png",
       "json": "sprites/tip@62.json",
       "anchor": {
-        "feetY": 8,
-        "opaqueWidth": 8
+        "feetY": 11,
+        "opaqueWidth": 11
       }
     },
     {
@@ -2542,8 +2542,8 @@
       "png": "sprites/tip@75.png",
       "json": "sprites/tip@75.json",
       "anchor": {
-        "feetY": 10,
-        "opaqueWidth": 10
+        "feetY": 13,
+        "opaqueWidth": 13
       }
     },
     {
@@ -2551,8 +2551,8 @@
       "png": "sprites/tip@88.png",
       "json": "sprites/tip@88.json",
       "anchor": {
-        "feetY": 12,
-        "opaqueWidth": 12
+        "feetY": 15,
+        "opaqueWidth": 14
       }
     },
     {
@@ -2605,8 +2605,8 @@
       "png": "sprites/treat.png",
       "json": "sprites/treat.json",
       "anchor": {
-        "feetY": 10,
-        "opaqueWidth": 14
+        "feetY": 13,
+        "opaqueWidth": 18
       }
     },
     {
@@ -2614,8 +2614,8 @@
       "png": "sprites/treat@50.png",
       "json": "sprites/treat@50.json",
       "anchor": {
-        "feetY": 6,
-        "opaqueWidth": 8
+        "feetY": 7,
+        "opaqueWidth": 10
       }
     },
     {
@@ -2623,8 +2623,8 @@
       "png": "sprites/treat@62.png",
       "json": "sprites/treat@62.json",
       "anchor": {
-        "feetY": 6,
-        "opaqueWidth": 10
+        "feetY": 9,
+        "opaqueWidth": 13
       }
     },
     {
@@ -2632,8 +2632,8 @@
       "png": "sprites/treat@75.png",
       "json": "sprites/treat@75.json",
       "anchor": {
-        "feetY": 8,
-        "opaqueWidth": 12
+        "feetY": 10,
+        "opaqueWidth": 15
       }
     },
     {
@@ -2641,8 +2641,8 @@
       "png": "sprites/treat@88.png",
       "json": "sprites/treat@88.json",
       "anchor": {
-        "feetY": 9,
-        "opaqueWidth": 14
+        "feetY": 11,
+        "opaqueWidth": 16
       }
     },
     {
@@ -2823,8 +2823,8 @@
       "png": "sprites/walker-ada.png",
       "json": "sprites/walker-ada.json",
       "anchor": {
-        "feetY": 46,
-        "opaqueWidth": 20
+        "feetY": 57,
+        "opaqueWidth": 25
       }
     },
     {
@@ -2832,8 +2832,8 @@
       "png": "sprites/walker-ben.png",
       "json": "sprites/walker-ben.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 24
+        "feetY": 56,
+        "opaqueWidth": 30
       }
     },
     {
@@ -2841,8 +2841,8 @@
       "png": "sprites/walker-casey.png",
       "json": "sprites/walker-casey.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 24
+        "feetY": 56,
+        "opaqueWidth": 30
       }
     },
     {
@@ -2850,8 +2850,8 @@
       "png": "sprites/walker-trista.png",
       "json": "sprites/walker-trista.json",
       "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 28
+        "feetY": 56,
+        "opaqueWidth": 35
       }
     }
   ],

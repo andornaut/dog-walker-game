@@ -13,8 +13,10 @@ kid, mail-carrier, photo-op, stop-sign, ice-cream-truck, construction, puddle
 pack, always drawn at 1x, and have none.
 
 Every variant keeps the original's tags, frame counts and durations, and its
-frame is floor(original size x scale + 0.5). Offsets that move a part by pixels (a
-step, a breath, a wag) are snapped to whole pixels at the small size.
+frame is floor(original size x scale + 0.5). road.py's people are drawn at
+road.SCALE x the step, as road.py draws them at road.SCALE. Offsets that move a
+part by pixels (a step, a breath, a wag) are snapped to whole pixels at the small
+size.
 
 Usage:
   depths.py preview OUT.png   every frame of every variant on the six road colours
@@ -28,7 +30,6 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import math
 import os
 import sys
 
@@ -38,7 +39,7 @@ import minis  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
 from minis import SCALES, STEPS, scaled, small, snap  # noqa: E402
-from pixel import K, build, preview  # noqa: E402
+from pixel import build, preview  # noqa: E402
 
 # The steps hazards.py has no hand-drawn art for.
 BETWEEN = tuple(q for q in STEPS if q not in SCALES)
@@ -53,35 +54,6 @@ def dressed(s, top, **q):
     return small(road, s, road.dressed, top, **{k: v for k, v in q.items() if k not in POSE}, **pose)
 
 
-def breathe(s, g, waist=33):
-    """g's 1px breath: the rows above full-size row waist lift 1px and the row under them stretches up to
-    fill. The thief's stripes are drawn row by row, so his top cannot take road.person's bob at a fraction
-    of a full-size pixel; this lifts it after drawing instead."""
-    y = scaled(waist, s)
-    g.px = g.px[1:y + 1] + g.px[y:]
-    return g
-
-
-def stop_sign(s, glint=None):
-    """road.stop_sign on a Mini, with its sheen laid on the small grid along x + y = glint x s. Below 0.875x
-    the 3x5 lettering turns to noise, so the legend is a white bar instead, 2px shorter than the lettering
-    and centred on it, across the face with a pixel of red each side."""
-    g = small(road, s, road.stop_sign)
-    if s < 0.875:
-        for y in range(math.floor(10.5 * s), math.floor(14.5 * s) + 1):
-            g.px[y] = [K["red"] if c == K["white"] else c for c in g.px[y]]
-        left, right = scaled(7, s) + 1, scaled(25, s) - 1
-        h = max(1, scaled(5, s) - 2)
-        g.rect(left, scaled(12.5 - h / 2 / s, s), right - left, h, "white")
-    if glint is not None:
-        red = K["red"]
-        for y in range(scaled(5, s), scaled(21, s)):
-            x = scaled(glint, s) - y
-            if 0 < x < g.w and g.px[y][x] == red and g.px[y - 1][x] and g.px[y][x - 1]:
-                g.p(x, y, "pink")
-    return g
-
-
 def obstacle(s, draw, spec):
     """An obstacles.*_IDLE tag on a Mini."""
     args, ms = spec
@@ -90,36 +62,38 @@ def obstacle(s, draw, spec):
 
 def own(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) at scale s for the road sprites only this file draws
-    small, with the tags road.sprites and obstacles.sprites give them."""
+    small, with the tags road.sprites and obstacles.sprites give them. road.py's people are drawn at
+    road.SCALE x s, since their drawing functions lay them out road.SCALE times smaller than they export."""
     breath, ms = road.BREATH, road.BREATH_MS
+    p = road.SCALE * s
 
     def walk(top, **q):
-        return ("walk", [dressed(s, top, lf=-2, **q).outlined(), dressed(s, top, rf=-2, **q).outlined()], 200)
+        return ("walk", [dressed(p, top, lf=-2, **q).outlined(), dressed(p, top, rf=-2, **q).outlined()], 200)
 
     owner = dict(shoes="dbrown")
     yield "other-dog-owner", [walk(road.dog_owner_top, **owner),
-                              ("idle", [dressed(s, road.dog_owner_top, bob=b, **owner).outlined() for b in breath], ms)]
+                              ("idle", [dressed(p, road.dog_owner_top, bob=b, **owner).outlined() for b in breath], ms)]
     yield "thief", [walk(road.thief_top),
-                    ("flee", [small(road, s, road.thief_fleeing, k).outlined() for k in (-1, 1)], 110),
-                    ("idle", [dressed(s, road.thief_top).outlined(),
-                              breathe(s, dressed(s, road.thief_top)).outlined()], ms)]
+                    ("flee", [small(road, p, road.thief_fleeing, k).outlined() for k in (-1, 1)], 110),
+                    ("idle", [dressed(p, road.thief_top, bob=b).outlined() for b in breath], ms)]
     for key, top, q in (("biscuit-neighbour", road.neighbour_top, dict(legs="purple", shoes="dbrown")),
                         ("chatty-neighbour", road.chatty_top, dict(legs="brown", shoes="dbrown"))):
-        yield key, [("wave", [dressed(s, top(w), **q).outlined() for w in (False, True)], 350),
-                    ("idle", [dressed(s, top(False), bob=b, **q).outlined() for b in breath], ms)]
+        yield key, [("wave", [dressed(p, top(w), **q).outlined() for w in (False, True)], 350),
+                    ("idle", [dressed(p, top(False), bob=b, **q).outlined() for b in breath], ms)]
     tourist = dict(legs="skin2", shoes="sky")
-    yield "photo-op", [("idle", [dressed(s, road.tourist_top(False), bob=b, **tourist).outlined() for b in breath], ms),
-                       ("flash", [dressed(s, road.tourist_top(f), **tourist).outlined() for f in (True, False)], 120)]
-    yield "stop-sign", [("idle", [stop_sign(s, c).outlined() for c in (None, None, 18, 24)], 400)]
+    yield "photo-op", [("idle", [dressed(p, road.tourist_top(False), bob=b, **tourist).outlined() for b in breath], ms),
+                       ("flash", [dressed(p, road.tourist_top(f), **tourist).outlined() for f in (True, False)], 120)]
+    # road.stop_sign draws its face, legend and sheen in pixels at the grid's scale
+    yield "stop-sign", [("idle", [small(road, p, road.stop_sign, c).outlined() for c in (None, None, 18, 24)], 400)]
 
     def kid(wave=False, mood="happy", bob=0):
-        return small(road, s, road.kid, wave, mood, **snap(dict(bob=bob), s)).outlined()
+        return small(road, p, road.kid, wave, mood, **snap(dict(bob=bob), p)).outlined()
 
     yield "kid", [("wave", [kid(False), kid(True)], 300), ("sad", [kid(False, "sad")], 1000),
                   ("idle", [kid(bob=b) for b in breath], ms)]
-    yield "mail-carrier", [("walk", [small(road, s, road.mail_carrier, **snap(q, s)).outlined()
+    yield "mail-carrier", [("walk", [small(road, p, road.mail_carrier, **snap(q, p)).outlined()
                                      for q in (dict(lf=-2), dict(rf=-2))], 200),
-                           ("idle", [small(road, s, road.mail_carrier, **snap(dict(bob=b), s)).outlined()
+                           ("idle", [small(road, p, road.mail_carrier, **snap(dict(bob=b), p)).outlined()
                                      for b in breath], ms)]
     yield "ice-cream-truck", [("idle", [small(road, s, road.ice_cream_truck, f).outlined() for f in (0, 1)], 400)]
     yield "construction", [("idle", [small(road, s, road.construction, f).outlined() for f in (0, 1)], 500)]

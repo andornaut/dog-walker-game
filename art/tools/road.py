@@ -1,16 +1,21 @@
 #!/usr/bin/env python3
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
-People are 32x48, animals 32x32, pickups and small effects 16x16 (the ice cream
-truck is 88x44, two lanes, the construction barrier 56x32, one lane, and the skunk's
-stink haze 88x40, a ground decal), all chibi and
-in Endesga 32 with coloured outlines. The walker is seen from behind, like the
+People (walkers, forced stops, lucky people, the thief and the other dog's owner)
+are 40x60, the other dog, skunk and squirrel 40x40 and pickups 20x20: their drawing
+functions lay them out on 32x48, 32x32 and 16x16, and sprites() draws them SCALE
+(1.25) times bigger on a scaling grid, never upscaled. The bark pop is 16x16, the
+ice cream truck 88x44, two lanes, the construction barrier 56x32, one lane, and the
+skunk's stink haze 88x40, a ground decal. All are chibi and in Endesga 32 with
+coloured outlines. The walker is seen from behind, like the
 dogs, except in wave; everything coming down the road faces the player.
 
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
 as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
-1, 3, 4 and 3px right of it. A walker who unlocks waves from the sidewalk in a popup stop. What stands on the road
+1, 3, 5 and 3px right of it. At rest (idle frame 0) a 40x60 walker's feet (the outline under the
+shoes) are on row 56, and the hands' top rows 16 above them, their outer columns 14 left and 13
+right of the centre column (x 20). A walker who unlocks waves from the sidewalk in a popup stop. What stands on the road
 is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
 front elevation (the ice cream truck a rear one, like obstacles.parked_car),
 with no top surface and its base on the last opaque row.
@@ -28,6 +33,7 @@ Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
+import math
 import os
 import sys
 
@@ -82,6 +88,22 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
            blue=("cyan", None), red=("pink", None), dred=("pink", None), mauve=("pink", None), purple=("pink", None))
 
 
+# Road sprites are drawn SCALE times the size their drawing functions lay them out at: a person laid out on
+# 32x48, an animal on 32x32 and a pickup on 16x16 export at 40x60, 40x40 and 20x20. sprites() runs the functions
+# on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines 1px, so nothing is upscaled;
+# the depth variants (minis.py, depths.py) run them at SCALE times each depth step.
+SCALE = 1.25
+
+
+def big(draw, *args, **q):
+    """draw(*args, **q) at SCALE on a minis.Mini, its numeric keyword arguments (pose offsets) snapped to whole
+    pixels as minis.snap has them."""
+    import minis  # minis imports this module, so it is imported when first used
+
+    pose = {k: v for k, v in q.items() if isinstance(v, (int, float)) and not isinstance(v, bool)}
+    return minis.small(sys.modules[__name__], SCALE, draw, *args, **{**q, **minis.snap(pose, SCALE)})
+
+
 # ---------- the walker (back view) ----------
 
 def walker(lf=0, rf=0, bob=0, arms=0):
@@ -128,7 +150,7 @@ def walker_girl(lf=0, rf=0, bob=0, arms=0):
     for x, f in ((12, lf), (17, rf)):
         g.rect(x, 40 + b, 3, 3 + f - b, "brown")
         g.rect(x, 43 + f, 3, 1, "white")
-        g.rect(x, 44 + f, 3, 2, "lgrey")
+        g.rect(x, 44 + f, 3, 1, "lgrey")
         g.rect(x, 45 + f, 3, 1, "pink")
     for x, d in ((7, -arms), (22, arms)):
         g.rect(x, 30 + b + d, 3, 7, "brown")
@@ -155,8 +177,8 @@ def walker_girl(lf=0, rf=0, bob=0, arms=0):
     # the curls as a few unbroken wavy locks down the back, dslate on the lit side and navy in the shade, so
     # the hair holds one mass at road scale with no single-pixel texture
     for x0, y0, length, c in CURL_LOCKS:
-        for k in range(length):
-            g.p(x0 + CURL_WAVE[k % len(CURL_WAVE)], y0 + k + b, c)
+        for k, n in curl_runs(length):
+            g.rect(x0 + CURL_WAVE[k % len(CURL_WAVE)], y0 + k + b, 1, n, c)
     g.ell(16, 12 + b, 2.5, 1.5, "pink", "mauve")
     # a light rim along the edges facing the light keeps her dark hair and skin off the dark road
     return rim(g, dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"),
@@ -245,6 +267,18 @@ CURL_LOCKS = ((11, 20, 10, "dslate"), (15, 19, 10, "dslate"), (19, 21, 8, "ink")
 CURL_WAVE = (0, 0, 1, 1, 0, 0, -1, -1)
 
 
+def curl_runs(length):
+    """(first row, rows) of each straight run of a lock length rows long: a run is one 1px-wide rect, so at
+    SCALE the lock stays unbroken."""
+    k = 0
+    while k < length:
+        n = 1
+        while k + n < length and CURL_WAVE[(k + n) % len(CURL_WAVE)] == CURL_WAVE[k % len(CURL_WAVE)]:
+            n += 1
+        yield k, n
+        k += n
+
+
 WALKERS = {
     "walker-ada": walker_girl,
     "walker-ben": walker_man,
@@ -264,11 +298,14 @@ BREATH, BREATH_MS = (0, -1), 400
 
 
 def lean(g, k):
-    """Shear a 32x48 figure about its feet: the head moves k pixels sideways, the shoes stay put."""
+    """Shear a person about its feet: the head moves k layout pixels sideways (k x SCALE on a 40x60 grid), the
+    shoes stay put."""
+    g = getattr(g, "g", g)
+    f = g.h / 48
     out = Grid(g.w, g.h)
     out.edge = g.edge
     for y in range(g.h):
-        dx = round(k * max(0, 44 - y) / 36)
+        dx = round(k * f * max(0, 44 * f - y) / (36 * f))
         for x in range(g.w):
             if g.px[y][x] and 0 <= x + dx < g.w:
                 out.px[y][x + dx] = g.px[y][x]
@@ -286,10 +323,16 @@ def raised_arm(g, x, w, top, bottom, dx, parts):
     y = top
     for i, (rows, fill, shade) in enumerate(parts):
         end = bottom + 1 if i == len(parts) - 1 else y + rows
-        for yy in range(y, end):
+        # each run of rows with the same shift is one rect, so at SCALE the arm stays solid
+        yy = y
+        while yy < end:
             s = round(dx * (bottom - yy) / (bottom - top))
-            g.rect(x + s, yy, w, 1, fill)
-            g.p(x + s + w - 1, yy, shade)
+            n = 1
+            while yy + n < end and round(dx * (bottom - yy - n) / (bottom - top)) == s:
+                n += 1
+            g.rect(x + s, yy, w, n, fill)
+            g.rect(x + s + w - 1, yy, 1, n, shade)
+            yy += n
         y = end
     # the thumb, so the hand reads as an open palm
     g.p(x + round(dx * (bottom - top - 1) / (bottom - top)) - 1, top + 1, parts[0][1])
@@ -300,6 +343,29 @@ def front_eyes(g, cx, y):
     for x in (cx - 5, cx + 3):
         g.rect(x, y, 1, 2, "white")
         g.rect(x + 1, y, 1, 2, "ink")
+
+
+def eye_boxes(g, cx, y):
+    """(left column, top row, size) in pixels of each eye face_front draws at (cx, y): 2px at 1x, and on a
+    minis.Mini the eyes minis.face_front draws at its scale."""
+    s = getattr(g, "s", 1)
+    n = max(1, math.floor(2 * s + 0.5))
+    top = math.floor((y + 1) * s + 0.5 - n / 2)
+    return [(math.floor(x * s + 0.5 - n / 2), top, n) for x in (cx - 4, cx + 4)]
+
+
+def glasses(g, cx, y, c):
+    """Round glasses on the eyes face_front draws at (cx, y): a ring 1px out from each eye with its corners
+    cut, and a bridge between them along the eyes' top row. Drawn in pixels round the eyes, so they fit
+    them at any scale."""
+    px = getattr(g, "g", g)
+    (lx, top, n), (rx, _, _) = eye_boxes(g, cx, y)
+    for x0 in (lx, rx):
+        px.rect(x0 - 1, top, 1, n, c)
+        px.rect(x0 + n, top, 1, n, c)
+        px.rect(x0, top - 1, n, 1, c)
+        px.rect(x0, top + n, n, 1, c)
+    px.rect(lx + n + 1, top, rx - lx - n - 2, 1, c)
 
 
 def casey_front(wave=0, bob=0):
@@ -352,7 +418,7 @@ def ada_front(wave=0, bob=0):
     for x in (12, 17):
         g.rect(x, 40 + b, 3, 3 - b, "brown")
         g.rect(x, 43, 3, 1, "white")
-        g.rect(x, 44, 3, 2, "lgrey")
+        g.rect(x, 44, 3, 1, "lgrey")
         g.rect(x, 45, 3, 1, "pink")
     # the curls behind her shoulders, then the tee and shorts over them
     g.ell(16, 18.5 + b, 8.5, 8, "navy", "ink", "dslate")
@@ -475,10 +541,7 @@ def trista_front(wave=0, bob=0):
     for x, y, h in ((11, 6, 3), (15, 5, 3), (19, 6, 2)):
         g.rect(x, y + b, 1, h, "amber")
     face_front(g, 16, 14 + b)
-    for cx in (11.5, 19.5):
-        for dx, dy in ((-2, 0), (-2, 1), (1, 0), (1, 1), (-1, -1), (0, -1), (-1, 2), (0, 2)):
-            g.p(cx + dx + 0.5, 14 + dy + b, "dbrown")
-    g.rect(14, 14 + b, 4, 1, "dbrown")
+    glasses(g, 16, 14 + b, "dbrown")
     return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
 
 
@@ -762,14 +825,27 @@ def dressed(top, **q):
     return rim(edged(person(top, **q)), LIT)
 
 
+def stripes(g, x, y0, y1, w, b):
+    """Layout rows y0 to y1 - 1 of the thief's stripes, from x, w wide: white where (row - b) % 4 < 2, else
+    ink. Drawn in pixels at the grid's scale, every stripe pair 4 x scale rows tall (white the shorter half),
+    so at SCALE the stripes stay even instead of breaking up into 1px rows."""
+    s = getattr(g, "s", 1)
+    px = getattr(g, "g", g)
+
+    def e(v):
+        return math.floor(v * s + 0.5)
+
+    period = max(2, e(4))
+    anchor = e(20 + b)
+    for r in range(e(y0), e(y1)):
+        px.rect(e(x), r, max(1, e(x + w) - e(x)), 1, "white" if (r - anchor) % period < period // 2 else "ink")
+
+
 def thief_top(g, b):
     """The thief coming down the road: striped shirt, beanie, mask and the loot sack over his shoulder."""
-    for y in range(21 + b, 34 + b):
-        stripe = "white" if (y - b) % 4 < 2 else "ink"
-        g.rect(9, y, 14, 1, stripe)
+    stripes(g, 9, 21 + b, 34 + b, 14, b)
     for x in (5, 23):
-        for y in range(22 + b, 31 + b):
-            g.rect(x, y, 4, 1, "white" if (y - b) % 4 < 2 else "ink")
+        stripes(g, x, 22 + b, 31 + b, 4, b)
         g.rect(x, 31 + b, 4, 3, "skin2")
     # loot sack over the shoulder
     g.ell(25, 20 + b, 5, 6, "tan", "brown", "cream")
@@ -810,15 +886,12 @@ def thief_fleeing(stride):
     # arms: the one on the lifted leg's side swings back and low, the other is bent forward and up
     for x, back in ((5, s < 0), (23, s > 0)):
         if back:
-            for y in range(25 + b, 33 + b):
-                g.rect(x - (1 if x < 16 else -1), y, 4, 1, "white" if (y - b) % 4 < 2 else "ink")
+            stripes(g, x - (1 if x < 16 else -1), 25 + b, 33 + b, 4, b)
             g.rect(x - (1 if x < 16 else -1), 33 + b, 4, 3, "skin2")
         else:
-            for y in range(21 + b, 26 + b):
-                g.rect(x, y, 4, 1, "white" if (y - b) % 4 < 2 else "ink")
+            stripes(g, x, 21 + b, 26 + b, 4, b)
             g.rect(x + (1 if x < 16 else -1), 26 + b, 3, 2, "skin2")
-    for y in range(21 + b, 34 + b):
-        g.rect(9, y, 14, 1, "white" if (y - b) % 4 < 2 else "ink")
+    stripes(g, 9, 21 + b, 34 + b, 14, b)
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
     # loot sack slung over the right shoulder, bouncing a pixel against the stride, its neck gathered at the top
@@ -926,8 +999,11 @@ def wallet(glint):
     g.rect(3, 9, 10, 1, "plum")
     g.rect(11, 9, 2, 2, "amber")
     if glint:
-        for x, y in ((13, 2), (12, 3), (14, 3), (13, 4), (13, 3)):
-            g.p(x, y, "white")
+        # a 3x3 cross centred on layout pixel (13, 3), drawn in pixels so it stays a cross at any scale
+        s = getattr(g, "s", 1)
+        px, cx, cy = getattr(g, "g", g), math.floor(13.5 * s), math.floor(3.5 * s)
+        px.rect(cx - 1, cy, 3, 1, "white")
+        px.rect(cx, cy - 1, 1, 3, "white")
     return rim(g, WALLET_RIM)
 
 
@@ -970,33 +1046,50 @@ def dog_owner_top(g, b):
 
 # ---------- forced stops ----------
 
+# The stop sign's legend, 3x5 letters, each as rows of three bits.
+STOP = {"S": "011100010001110", "T": "111010010010010", "O": "010101101101010", "P": "110101110100100"}
+
+
 def stop_sign(glint=None):
-    """glint is the diagonal x + y = glint along which a pink sheen crosses the red face, or None. The road
-    outline and the lit rim."""
+    """glint is the diagonal x + y = glint (in layout pixels) along which a pink sheen crosses the red face, or
+    None. The road outline and the lit rim. The face is drawn in pixels at the grid's scale: an octagon
+    18 x scale across, its corners cut in one-pixel stairs, shaded dred along the lower-right edges and
+    the bottom, and the legend in 3x5 letters spread to fill it. An octagon under 16px has no room for the
+    letters, so the legend is a white bar across the face instead, a pixel of red each side."""
     g = edged(Grid(32, 48))
     g.rect(15, 22, 3, 24, "grey")
     g.rect(17, 22, 1, 24, "slate")
     g.rect(13, 45, 7, 2, "slate")
-    # an 18px octagon, its corners cut in 5 one-pixel stairs, shaded dred along the lower-right edges
-    for y in range(18):
-        cut = max(0, 5 - y, y - 12)
-        g.rect(7 + cut, 4 + y, 18 - 2 * cut, 1, "red")
-        if y >= 6:
-            g.p(24 - cut, 4 + y, "dred")
-    g.rect(12, 21, 8, 1, "dred")
-    for i, ch in enumerate(("S", "T", "O", "P")):
-        x = 8 + i * 4
-        bits = {"S": "011100010001110", "T": "111010010010010", "O": "010101101101010", "P": "110101110100100"}[ch]
-        for r in range(5):
-            for k in range(3):
-                if bits[r * 3 + k] == "1":
-                    g.p(x + k, 10 + r, "white")
+    s = getattr(g, "s", 1)
+    px = getattr(g, "g", g)
+
+    def e(v):
+        return math.floor(v * s + 0.5)
+
+    d, cut, left, top = math.floor(18 * s), e(5), e(7), e(4)
+    for y in range(d):
+        c = max(0, cut - y, y - (d - 1 - cut))
+        px.rect(left + c, top + y, d - 2 * c, 1, "dred" if y == d - 1 else "red")
+        if y > cut:
+            px.p(left + d - 1 - c, top + y, "dred")
+    if d >= 16:
+        gap = max(1, (d - 14) // 3)
+        x0 = left + (d - 12 - 3 * gap) // 2
+        y0 = top + (d - 5) // 2
+        for i, ch in enumerate("STOP"):
+            for r in range(5):
+                for k in range(3):
+                    if STOP[ch][r * 3 + k] == "1":
+                        px.p(x0 + i * (3 + gap) + k, y0 + r, "white")
+    else:
+        h = max(1, e(5) - 2)
+        px.rect(left + 1, top + (d - h) // 2, d - 2, h, "white")
     if glint is not None:
         # the sheen stays inside the face, so the outline stays dark
-        for y in range(5, 21):
-            x = glint - y
-            if 0 < x < g.w and g.px[y][x] == K["red"] and g.px[y - 1][x] and g.px[y][x - 1]:
-                g.p(x, y, "pink")
+        for y in range(top + 1, top + d - 1):
+            x = e(glint) - y
+            if 0 < x < px.w and px.px[y][x] == K["red"] and px.px[y - 1][x] and px.px[y][x - 1]:
+                px.p(x, y, "pink")
     return rim(g, LIT)
 
 
@@ -1154,6 +1247,20 @@ def construction(f):
     return rim(g, LIT)
 
 
+def stair(g, x0, y0, x1, y1, c):
+    """A strap running down from layout (x0, y0) to (x1, y1), exclusive: one pixel row per step, each step an
+    equal share of the width. Drawn in pixels at the grid's scale, so its steps stay joined at SCALE."""
+    s = getattr(g, "s", 1)
+    px = getattr(g, "g", g)
+
+    def e(v):
+        return math.floor(v * s + 0.5)
+
+    left, top, w, n = e(x0), e(y0), e(x1) - e(x0), e(y1) - e(y0)
+    for i in range(n):
+        px.rect(left + i * w // n, top + i, (i + 1) * w // n - i * w // n, 1, c)
+
+
 def mail_top(g, b):
     """The mail carrier: a sky-blue shirt and cap, a navy brim, dark skin and a mailbag on a strap."""
     g.rect(9, 21 + b, 14, 12, "sky")
@@ -1169,11 +1276,7 @@ def mail_top(g, b):
     # mailbag on a strap
     g.ell(24, 30 + b, 5, 4.5, "brown", "dbrown", "tan")
     g.rect(22, 27 + b, 4, 3, "white")
-    g.rect(10, 22 + b, 2, 1, "dbrown")
-    g.rect(12, 23 + b, 2, 1, "dbrown")
-    g.rect(14, 24 + b, 2, 1, "dbrown")
-    g.rect(16, 25 + b, 2, 1, "dbrown")
-    g.rect(18, 26 + b, 2, 1, "dbrown")
+    stair(g, 10, 22 + b, 20, 27 + b, "dbrown")
     g.ell(16, 12.5 + b, 8, 8, "dbrown", "plum")
     g.ell(16, 7 + b, 8.5, 3.5, "sky", "blue", "cyan")
     g.rect(8, 9 + b, 17, 2, "navy")
@@ -1272,38 +1375,37 @@ def sprites():
     # the walkers carry the leash on every road, so their outlines hold 3:1 on the light roads
     for key, draw in {"walker-casey": walker, **WALKERS}.items():
         def pose(**q):
-            return edged(draw(**q))
+            return edged(big(draw, **q))
 
         yield key, [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
                     ("react", frames(pose(**q) for q in WALKER_REACT), 120),
                     ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
                     ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS),
-                    ("wave", frames(edged(WAVES[key](w)) for w in WALKER_WAVE), WALKER_WAVE_MS)]
-    yield "treat", [("idle", frames([treat(0), treat(-1)]), 400)]
-    yield "tip", [("idle", frames(tip(rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
-    yield "skunk", [("idle", frames([skunk(0), skunk(1)]), 400)]
-    yield "squirrel", [("idle", frames([squirrel(0), squirrel(1)]), 300),
-                       ("run", frames(squirrel_run(k) for k in (False, True)), 120)]
+                    ("wave", frames(edged(big(WAVES[key], wave=w)) for w in WALKER_WAVE), WALKER_WAVE_MS)]
+    yield "treat", [("idle", frames([big(treat, lift=0), big(treat, lift=-1)]), 400)]
+    yield "tip", [("idle", frames(big(tip, rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
+    yield "skunk", [("idle", frames([big(skunk, sway=0), big(skunk, sway=1)]), 400)]
+    yield "squirrel", [("idle", frames([big(squirrel, tail=0), big(squirrel, tail=1)]), 300),
+                       ("run", frames(big(squirrel_run, k) for k in (False, True)), 120)]
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
     yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
-    yield "other-dog", [("walk", frames(corgi(**q) for q in CORGI_WALK), 100),
-                        ("idle", frames(corgi(**q) for q in CORGI_IDLE), 300)]
-    yield "other-dog-owner", [("walk", [dressed(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
-                                        dressed(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200),
-                              ("idle", [dressed(dog_owner_top, shoes="dbrown", bob=bb).outlined() for bb in BREATH],
-                               BREATH_MS)]
-    yield "thief", [("walk", [dressed(thief_top, lf=-2).outlined(), dressed(thief_top, rf=-2).outlined()], 200),
-                    ("flee", frames(thief_fleeing(k) for k in (-1, 1)), 110),
-                    ("idle", [dressed(thief_top, bob=bb).outlined() for bb in BREATH], BREATH_MS)]
-    yield "lost-wallet", [("idle", frames([wallet(False), wallet(True)]), 450)]
-    yield "biscuit-neighbour", [("wave", [dressed(neighbour_top(w), legs="purple", shoes="dbrown").outlined()
-                                          for w in (False, True)], 350),
-                                ("idle", [dressed(neighbour_top(False), legs="purple", shoes="dbrown", bob=bb).outlined()
-                                          for bb in BREATH], BREATH_MS)]
-    yield "photo-op", [("idle", [dressed(tourist_top(False), legs="skin2", shoes="sky", bob=bb).outlined()
-                                 for bb in BREATH], BREATH_MS),
-                       ("flash", [dressed(tourist_top(True), legs="skin2", shoes="sky").outlined(),
-                                  dressed(tourist_top(False), legs="skin2", shoes="sky").outlined()], 120)]
+    yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),
+                        ("idle", frames(big(corgi, **q) for q in CORGI_IDLE), 300)]
+    owner = dict(shoes="dbrown")
+    yield "other-dog-owner", [("walk", frames([big(dressed, dog_owner_top, lf=-2, **owner),
+                                               big(dressed, dog_owner_top, rf=-2, **owner)]), 200),
+                              ("idle", frames(big(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH), BREATH_MS)]
+    yield "thief", [("walk", frames([big(dressed, thief_top, lf=-2), big(dressed, thief_top, rf=-2)]), 200),
+                    ("flee", frames(big(thief_fleeing, k) for k in (-1, 1)), 110),
+                    ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
+    neighbour = dict(legs="purple", shoes="dbrown")
+    yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(w), **neighbour) for w in (False, True)), 350),
+                                ("idle", frames(big(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
+                                 BREATH_MS)]
+    tourist = dict(legs="skin2", shoes="sky")
+    yield "photo-op", [("idle", frames(big(dressed, tourist_top(False), bob=bb, **tourist) for bb in BREATH), BREATH_MS),
+                       ("flash", frames(big(dressed, tourist_top(f), **tourist) for f in (True, False)), 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
     yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140]),
@@ -1311,17 +1413,20 @@ def sprites():
     yield "gag-sprinkler", [("spray", frames(sprinkler(i) for i in range(4)), 140)]
     yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
     # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
-    yield "stop-sign", [("idle", frames(stop_sign(c) for c in (None, None, 18, 24)), 400)]
-    yield "chatty-neighbour", [("wave", [dressed(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350),
-                               ("idle", [dressed(chatty_top(False), legs="brown", shoes="dbrown", bob=bb).outlined()
-                                         for bb in BREATH], BREATH_MS)]
-    yield "kid", [("wave", frames([kid(False), kid(True)]), 300), ("sad", frames([kid(False, "sad")]), 1000),
-                  ("idle", frames(kid(bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "stop-sign", [("idle", frames(big(stop_sign, c) for c in (None, None, 18, 24)), 400)]
+    chatty = dict(legs="brown", shoes="dbrown")
+    yield "chatty-neighbour", [("wave", frames(big(dressed, chatty_top(w), **chatty) for w in (False, True)), 350),
+                               ("idle", frames(big(dressed, chatty_top(False), bob=bb, **chatty) for bb in BREATH),
+                                BREATH_MS)]
+    yield "kid", [("wave", frames([big(kid, False), big(kid, True)]), 300), ("sad", frames([big(kid, False, "sad")]), 1000),
+                  ("idle", frames(big(kid, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "ice-cream-truck", [("idle", frames([ice_cream_truck(0), ice_cream_truck(1)]), 400)]
     yield "construction", [("idle", frames([construction(0), construction(1)]), 500)]
-    yield "mail-carrier", [("walk", [mail_carrier(lf=-2).outlined(), mail_carrier(rf=-2).outlined()], 200),
-                           ("idle", [mail_carrier(bob=bb).outlined() for bb in BREATH], BREATH_MS)]
+    yield "mail-carrier", [("walk", frames([big(mail_carrier, lf=-2), big(mail_carrier, rf=-2)]), 200),
+                           ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/road", __doc__)
+    # minis swaps the grid of the module named road, so the build runs that module's functions, not __main__'s
+    import road
+    main(sys.argv, road.sprites, "art/road", __doc__)

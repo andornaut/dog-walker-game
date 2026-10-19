@@ -7,9 +7,10 @@ outline, makes legs blink and freezes 1px bobs. These are redrawn at the small
 size instead: the same drawing functions run on a grid that scales every rect,
 ellipse and triangle before it rasterizes, then the small sprite gets its own
 full outline. Faces are drawn at the small size (small() swaps in face_front,
-squirrel() squirrel_head). Where that still loses a feature (the treat's knobs,
-the wallet's clasp and glint at 0.75x and 0.5x, the skunk's face), the sprite
-or the feature is a hand-drawn pixel map instead.
+squirrel() squirrel_head). Where that still loses a feature (the treat's knobs
+at @75 and @50, the skunk's face), the sprite or the feature is a hand-drawn
+pixel map instead. road.py's sprites are drawn at road.SCALE x the step, as
+road.py draws them at road.SCALE.
 
 <key>@<step> keeps the original's tags, frame counts and durations, and its
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
@@ -259,17 +260,25 @@ def paint(g, rows, x=0, y=0):
                 g.p(x + i, y + j, MAP[ch])
 
 
-# The bone drawn by hand: scaled, its four knobs merge unevenly. W is the glint. Each end is rounded, its
-# outer corners cut, so the small bone does not read as an H.
+# The bone drawn by hand at the scales where a Mini merges its four knobs into a bar (the 15px @75, 13px @62
+# and 10px @50 treats, at road.SCALE x 0.75, x 0.625 and x 0.5). W is the glint. Each end is two rows taller
+# than the shaft above and below it, its outer corners cut, so the small bone does not read as an H or a bar.
 TREAT = {
-    0.75: [".Wc....cc.",
-           "cccccccccc",
-           "cttttttttt",
-           ".tt....tt."],
-    0.5: [".W..c.",
-          "cccccc",
-          "cttttt",
-          ".t..t."],
+    0.9375: [".Wc.......cc.",
+             "cccc.....cccc",
+             "ccccccccccccc",
+             "ctttttttttttt",
+             ".tt.......tt."],
+    0.78125: [".Wc.....cc.",
+              "ccc.....ccc",
+              "ccccccccccc",
+              "ctttttttttt",
+              ".tt.....tt."],
+    0.625: [".W....c.",
+            "cc....cc",
+            "cccccccc",
+            "cttttttt",
+            ".t....t."],
 }
 
 
@@ -279,48 +288,14 @@ def treat(s, lift):
     if s not in TREAT:
         return shrunk(s, road.treat, lift=lift)
     g = edged(Grid(scaled(16, s), scaled(16, s)))
-    paint(g, TREAT[s], 1, g.h // 2 - 2 + lift)
+    rows = TREAT[s]
+    paint(g, rows, (g.w - len(rows[0])) // 2, (g.h - len(rows)) // 2 + lift)
     return g
 
 
-# road.wallet by hand, as (body, glint): the bill peeking out over the flap, the tan flap edge, the plum seam
-# and the amber clasp. Scaled, the seam and the clasp merge and the 5px glint turns to a blob; here the glint
-# is a 3px cross at 0.75x and 1px at 0.5x.
-WALLET = {
-    0.75: (["............",
-            "............",
-            "............",
-            "...GGGGG....",
-            "...ggGgg....",
-            "..tttttttt..",
-            "..BBBBBBBB..",
-            "..PPPPPPaB..",
-            "..BBBBBBaB..",
-            "..BBBBBBBB.."],
-           [(9, 1), (8, 2), (10, 2), (9, 3), (9, 2)]),
-    0.5: (["........",
-           "........",
-           "..gGg...",
-           ".ttttt..",
-           ".BBBBB..",
-           ".PPPPa..",
-           ".BBBBB.."],
-          [(6, 1)]),
-}
-
-
 def wallet(s, glint):
-    """road.wallet redrawn, with the road outline and road.WALLET_RIM. A scale with no map takes road.wallet
-    on a Mini."""
-    if s not in WALLET:
-        return small(road, s, road.wallet, glint)
-    g = edged(Grid(scaled(16, s), scaled(16, s)))
-    body, sparkle = WALLET[s]
-    paint(g, body)
-    if glint:
-        for x, y in sparkle:
-            g.p(x, y, "white")
-    return road.rim(g, road.WALLET_RIM)
+    """road.wallet on a Mini at scale s, with the road outline and road.WALLET_RIM."""
+    return small(road, s, road.wallet, glint)
 
 
 def cone(s, glint=None):
@@ -399,16 +374,12 @@ def squirrel(s, draw, *args, **q):
         road.squirrel_head = full
 
 
-# road.skunk's face by hand where Mini loses it, as (left column, top row, rows): scaled, the eyes' ink sinks
-# under the white or the eyes merge with the blaze. At 0.75x each eye keeps its white and its inner ink;
-# smaller, each eye is a white glint over ink, either side of the 1px blaze, with the pink nose under it.
+# road.skunk's face by hand where Mini loses it, as (left column, top row, rows): on the 20px @50 skunk
+# (road.SCALE x 0.5) the eyes merge with the blaze, so each eye is a white glint over ink, either side of the
+# 1px blaze.
 SKUNK_FACE = {
-    0.75: (7, 14, ["W#nWn#W",
-                   "W#nWn#W"]),
     0.625: (6, 11, ["WnWnW",
                     "#nWn#"]),
-    0.5: (5, 9, ["WnWnW",
-                 "#npn#"]),
 }
 
 
@@ -464,9 +435,11 @@ def skunk_cloud(s, step):
 
 
 def variants(s):
-    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s."""
-    yield "tip", [("idle", [tip(s, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
-    yield "treat", [("idle", [treat(s, lift).outlined() for lift in (0, -1)], 400)]
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s.
+    road.py's sprites are drawn at road.SCALE x s, as road.py draws them at road.SCALE."""
+    p = road.SCALE * s
+    yield "tip", [("idle", [tip(p, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
+    yield "treat", [("idle", [treat(p, lift).outlined() for lift in (0, -1)], 400)]
     frames, ms = obstacles.CONE_IDLE
     yield "cone", [("idle", [cone(s, gl).outlined() for gl in frames], ms)]
     # the lid's lift is in full-size pixels, so it is divided by the scale to stay 1px here
@@ -477,12 +450,12 @@ def variants(s):
     frames, ms = obstacles.BENCH_IDLE
     yield "bench", [("idle", [small(obstacles, s, obstacles.bench, (a[0] / s, a[1] / s) if a else a).outlined()
                               for a in frames], ms)]
-    yield "skunk", [("idle", [skunk(s, v).outlined() for v in (0, 1)], 400)]
-    yield "squirrel", [("idle", [squirrel(s, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
-                       ("run", [squirrel(s, road.squirrel_run, k).outlined() for k in (False, True)], 120)]
-    yield "other-dog", [("walk", [shrunk(s, road.corgi, **q).outlined() for q in road.CORGI_WALK], 100),
-                        ("idle", [shrunk(s, road.corgi, **q).outlined() for q in road.CORGI_IDLE], 300)]
-    yield "lost-wallet", [("idle", [wallet(s, gl).outlined() for gl in (False, True)], 450)]
+    yield "skunk", [("idle", [skunk(p, v).outlined() for v in (0, 1)], 400)]
+    yield "squirrel", [("idle", [squirrel(p, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
+                       ("run", [squirrel(p, road.squirrel_run, k).outlined() for k in (False, True)], 120)]
+    yield "other-dog", [("walk", [shrunk(p, road.corgi, **q).outlined() for q in road.CORGI_WALK], 100),
+                        ("idle", [shrunk(p, road.corgi, **q).outlined() for q in road.CORGI_IDLE], 300)]
+    yield "lost-wallet", [("idle", [wallet(p, gl).outlined() for gl in (False, True)], 450)]
     yield "skunk-cloud", [("loop", [skunk_cloud(s, i).outlined(False) for i in range(4)], 220)]
 
 
