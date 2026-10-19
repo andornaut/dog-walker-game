@@ -19,6 +19,7 @@ import {
   volumeSteps,
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
+import { closeFace } from "../layout/closeControl";
 import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import type { Settings } from "../save/schema";
@@ -31,7 +32,7 @@ import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import {
-  addMenuButton,
+  addCloseButton,
   addNineSlice,
   addPanel,
   addSelectTile,
@@ -60,7 +61,7 @@ type Row =
 
 type Target = { kind: "close" } | { key: SwitchKey; kind: "switch" };
 
-// Four rows, each its own tap target, then Back.
+// Four rows, each its own tap target, and the close control.
 const ROWS: readonly Row[] = [
   {
     icon: "icon-sound-panel",
@@ -85,10 +86,11 @@ const ICON = { dx: 6, dySlider: 4, dySwitch: 14 };
 const LABEL_DX = 26;
 const SWITCH = { dx: 188, dy: 14, height: 16, width: 32 };
 const KNOB_HEIGHT = 16;
-// The keyboard moves through the rows, then Back, one per focus row.
+// The keyboard moves through the rows, then the close control, one per focus row.
 const FOCUS_ROW_LENGTHS: readonly number[] = [...ROWS.map(() => 1), 1];
 // The ring stays inside the panel's 8px margin.
 const FOCUS_OUTSET = 3;
+const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 
 function rowIndex(key: SwitchKey | VolumeKey): number {
   return ROWS.findIndex((row) => row.key === key);
@@ -102,7 +104,7 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 // Sound on or off, music and effects volume, and reduced motion, reachable from the home
 // screen and the pause menu. Every change is saved and applied at once. A switch row that is
 // on shows the selected state; a tap dips the row, then flips it. Up and Down move the
-// keyboard's focus through the rows and Back; Enter or Space presses the focused row, and on
+// keyboard's focus through the rows and the close control; Enter or Space presses the focused row, and on
 // a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
@@ -212,7 +214,8 @@ export class SettingsScene extends Scene {
     }
   }
 
-  // Enter or Space flips a focused switch, and closes from Back or with nothing focused.
+  // Enter or Space flips a focused switch, and closes from the close control or with nothing
+  // focused.
   private confirm(focusedRow: Row | undefined): void {
     if (focusedRow?.kind === "switch") {
       this.pressed = { key: focusedRow.key, kind: "switch" };
@@ -229,7 +232,7 @@ export class SettingsScene extends Scene {
   }
 
   private targetAt(x: number, y: number): Target | undefined {
-    if (containsPoint(this.layout.back, x, y)) {
+    if (containsPoint(this.layout.close.hit, x, y)) {
       return { kind: "close" };
     }
     const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), x, y));
@@ -273,7 +276,7 @@ export class SettingsScene extends Scene {
   private render(): void {
     clearScene(this);
     const settings = currentSettings(this);
-    const { back, panel, title } = this.layout;
+    const { close, panel, title } = this.layout;
     const g = this.add.graphics();
     fillRect(g, PALETTE.darkBrown, {
       height: SCREEN_CONFIG.height,
@@ -315,11 +318,10 @@ export class SettingsScene extends Scene {
         this.drawSlider(row, settings);
       }
     }
-    addMenuButton(this, back, gameData.menuText.settings.back).setState(
-      this.pressed?.kind === "close" ? "pressed" : "normal",
-    );
+    addCloseButton(this, this.add.container(0, 0), SCREEN, this.pressed?.kind === "close");
     if (this.focus !== null) {
-      const focused = this.focus.row < ROWS.length ? this.rowRect(this.focus.row) : back;
+      const focused =
+        this.focus.row < ROWS.length ? this.rowRect(this.focus.row) : closeFace(close);
       drawFocusRing(this.add.graphics(), FOCUS_OUTSET, focused);
     }
   }

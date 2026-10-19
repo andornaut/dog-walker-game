@@ -82,7 +82,7 @@
 ## Phone
 
 - Audio resumes from iOS's `interrupted` or `suspended` on each return to the foreground and each gesture (`touchend` on iOS), unless the settings mute it.
-- Help tap targets (close X, page dots, Back, Next) are at least 44×44 render px, larger than their art where needed.
+- Tap targets are at least 44×44 render px, larger than their art where needed. Every full-screen page and overlay closes from the same control in its top-right corner (`src/layout/closeControl.ts`).
 - Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game, the atlas pages and atlas manifest, and every other file in the art manifest (fonts, and sounds in one format only). Boot makes about 30 requests: the page, its scripts, the two manifests, four atlas pages, four font files and a file per sound. HTML, the art manifest and the site nav's `nav.js` and `nav.css` are network-first; hashed assets, precached files and sound files are cache-first. A new version activates on the next launch, or sooner through the "Update ready" toast, shown on the home screen only, whose Reload posts `skip-waiting` and reloads on `controllerchange`.
 - Installed app: on `/play/` in `fullscreen` or `standalone` display mode, or with iOS's `navigator.standalone`, `public/nav.js` leaves the nav bar out (and follows a display-mode change), so no link leaves the app and the game takes the full height under the top safe-area inset.
 - Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, `app-hidden` pauses and checkpoints, and `turned-sideways` pauses. The run holds a screen wake lock, and the first gesture unlocks audio.

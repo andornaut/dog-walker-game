@@ -59,6 +59,7 @@ import {
 } from "../home/sections";
 import { choiceFull, type SelectLook } from "../home/selection";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
+import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHT, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, type Rect } from "../layout/rect";
@@ -257,7 +258,7 @@ function focusRows(): Focusable[][] {
 }
 
 // What is open over the screen: a held tile's detail card, or the logbook. rect is the
-// panel, so a tap outside it closes it.
+// panel, so a tap outside it or on its close control closes it.
 type Overlay =
   | {
       kind: "detail";
@@ -374,6 +375,9 @@ export class StartScene extends Scene {
         this.addBurst("fx-tap", pointer.x, pointer.y);
         if (this.overlay !== undefined) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
+          if (this.closePressed()) {
+            this.render();
+          }
           return;
         }
         this.pressedTarget = this.targetAt(pointer.x, pointer.y);
@@ -394,10 +398,15 @@ export class StartScene extends Scene {
       },
       up: (pointer, cancelled) => {
         const down = this.overlayPress;
+        const closeDown = this.closePressed();
         this.overlayPress = undefined;
         if (down !== undefined) {
           if (!cancelled) {
             this.releaseOnOverlay(down, pointer.x, pointer.y);
+          }
+          // A press on the close control that ended elsewhere lifts it again.
+          if (closeDown && this.overlay !== undefined) {
+            this.render();
           }
           return;
         }
@@ -516,8 +525,19 @@ export class StartScene extends Scene {
     this.render();
   }
 
-  // A tap while a panel is open: on the logbook's Stats button it opens Stats, outside the
-  // panel it closes it, and inside it does nothing.
+  // Whether the press under way on an open panel started on its close control.
+  private closePressed(): boolean {
+    const rect = this.overlay?.rect;
+    const down = this.overlayPress;
+    return (
+      rect !== undefined &&
+      down !== undefined &&
+      containsPoint(closeControl(rect).hit, down.x, down.y)
+    );
+  }
+
+  // A tap while a panel is open: on its close control or outside it, it closes the panel; on
+  // the logbook's Stats button it opens Stats; elsewhere inside it does nothing.
   private releaseOnOverlay(down: { x: number; y: number }, x: number, y: number): void {
     const overlay = this.overlay;
     if (overlay === undefined) {
@@ -525,6 +545,10 @@ export class StartScene extends Scene {
     }
     const within = (rect: Rect | undefined) =>
       rect !== undefined && containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y);
+    if (overlay.rect !== undefined && within(closeControl(overlay.rect).hit)) {
+      this.closeOverlay();
+      return;
+    }
     if (overlay.kind === "logbook" && within(overlay.stats)) {
       this.closeOverlay();
       this.act({ kind: "stats" });
@@ -971,7 +995,8 @@ export class StartScene extends Scene {
       return;
     }
     if (overlay.kind === "logbook") {
-      const panel = drawLogbookPanel(this, layer, logbookOf(gameData, save.stats));
+      const log = logbookOf(gameData, save.stats);
+      const panel = drawLogbookPanel(this, layer, this.closePressed(), log);
       this.overlay = { ...overlay, rect: panel.panel, stats: panel.stats };
       return;
     }
@@ -984,7 +1009,7 @@ export class StartScene extends Scene {
       target.kind === "dog"
         ? { key: dogPortraitKey(gameData, target.dog), scale: 1 }
         : { key: gearIconKey(target.gear), scale: 2 };
-    const rect = drawDetailCard(this, layer, card, picture, target.kind);
+    const rect = drawDetailCard(this, layer, this.closePressed(), card, picture, target.kind);
     this.overlay = { ...overlay, rect };
   }
 

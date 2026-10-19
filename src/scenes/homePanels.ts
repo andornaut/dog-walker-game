@@ -14,7 +14,7 @@ import { fillLine } from "../text/lines";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
-import { addNineSlice, TEXT_SCALE } from "./uiKit";
+import { addCloseButton, addNineSlice, TEXT_SCALE } from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on what the player can
 // afford, the slot sign, and the detail card and logbook that open over the
@@ -144,10 +144,12 @@ const CARD = HOME_LAYOUT.card;
 const DOG_CARD: Rect = HOME_LAYOUT.dogCard;
 const GEAR_CARD_HEIGHT = HOME_LAYOUT.gearCardHeight;
 
-// The card's frame and title band; the content goes in a container placed at the card.
+// The card's frame, title band and close control; the content goes in a container placed at
+// the card.
 function drawCardFrame(
   scene: Scene,
   parent: GameObjects.Container,
+  closePressed: boolean,
   rect: Rect,
   title: string,
   content: GameObjects.Container = scene.add.container(0, 0),
@@ -178,6 +180,7 @@ function drawCardFrame(
     font: "title",
     originX: 0.5,
   });
+  addCloseButton(scene, parent, rect, closePressed);
   return content;
 }
 
@@ -192,10 +195,12 @@ const LINE_GAP = 8;
 
 // A held dog's or gear item's detail card over a dim layer. A dog's card puts its breed and
 // status beside the portrait and its rows below; a gear card is shorter, with its effect and
-// status beside the icon. Returns the card's rect, so a tap outside it closes it.
+// status beside the icon. Returns the card's rect, so a tap outside it or on its close
+// control closes it.
 export function drawDetailCard(
   scene: Scene,
   parent: GameObjects.Container,
+  closePressed: boolean,
   card: DetailCard,
   picture: DetailPicture,
   kind: "dog" | "gear",
@@ -208,7 +213,7 @@ export function drawDetailCard(
           height: GEAR_CARD_HEIGHT,
           y: Math.round((SCREEN.height - GEAR_CARD_HEIGHT) / 2),
         };
-  const content = drawCardFrame(scene, parent, rect, card.title);
+  const content = drawCardFrame(scene, parent, closePressed, rect, card.title);
   const { well } = CARD;
   if (scene.textures.exists("ui-detail-well")) {
     content.add(scene.add.image(well.x, well.y, "ui-detail-well").setOrigin(0));
@@ -269,6 +274,7 @@ const FIELDS = HOME_TEXT_FIELDS.logbook;
 export function drawLogbookPanel(
   scene: Scene,
   parent: GameObjects.Container,
+  closePressed: boolean,
   log: Logbook | null,
 ): LogbookPanel {
   // The rows are laid out first, so the card is as tall as they and the button need.
@@ -298,7 +304,7 @@ export function drawLogbookPanel(
     x: (SCREEN.width - CARD.width) / 2,
     y: Math.round((SCREEN.height - height) / 2),
   };
-  drawCardFrame(scene, parent, rect, words.title, content);
+  drawCardFrame(scene, parent, closePressed, rect, words.title, content);
   const slice = addNineSlice(scene, "ui-button", button, "secondary");
   if (slice !== undefined) {
     content.add(slice);

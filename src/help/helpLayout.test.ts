@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { itemAt } from "../arrays";
+import { closeFace } from "../layout/closeControl";
 import { type Rect } from "../layout/rect";
 import {
   CLOSE_HIT_RECT,
@@ -41,16 +42,11 @@ describe("tapRect", () => {
     ],
     [
       "keeps a side already larger than the minimum",
-      HELP_LAYOUT.back,
-      { height: 44, width: 110, x: 8, y: 502 },
+      HELP_LAYOUT.previous,
+      { height: 44, width: 110, x: 8, y: 504 },
     ],
     [
-      "shifts a target that would leave the top of the screen back onto it",
-      HELP_LAYOUT.close,
-      { height: 44, width: 44, x: 313, y: 0 },
-    ],
-    [
-      "shifts a target that would leave the bottom right of the screen back onto it",
+      "shifts a target that would leave the screen back onto it",
       { height: 4, width: 4, x: 358, y: 558 },
       { height: 44, width: 44, x: 316, y: 516 },
     ],
@@ -62,7 +58,7 @@ describe("tapRect", () => {
 describe("help tap targets", () => {
   const targets = [
     CLOSE_HIT_RECT,
-    tapRect(HELP_LAYOUT.back),
+    tapRect(HELP_LAYOUT.previous),
     tapRect(HELP_LAYOUT.next),
     ...dotRects(7).map(tapRect),
   ];
@@ -72,7 +68,7 @@ describe("help tap targets", () => {
       expect(target.width).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
       expect(target.height).toBeGreaterThanOrEqual(MIN_TAP_SIZE);
     }
-    expect(encloses(CLOSE_HIT_RECT, HELP_LAYOUT.close)).toBe(true);
+    expect(encloses(CLOSE_HIT_RECT, closeFace(HELP_LAYOUT.close))).toBe(true);
     dotRects(7).forEach((dot) => expect(encloses(tapRect(dot), dot)).toBe(true));
   });
 
@@ -87,10 +83,10 @@ describe("helpActionAt", () => {
   // Taps at the edges of each target and just outside them.
   it.each<[number, number, HelpAction | undefined]>([
     [330, 20, { kind: "close" }],
-    [313, 0, { kind: "close" }],
+    [316, 0, { kind: "close" }],
     [356, 43, { kind: "close" }],
     [20, 520, { kind: "previous" }],
-    [20, 502, { kind: "previous" }],
+    [20, 504, { kind: "previous" }],
     [300, 520, { kind: "advance" }],
     [48, 482, { kind: "goTo", page: 0 }],
     [26, 458, { kind: "goTo", page: 0 }],

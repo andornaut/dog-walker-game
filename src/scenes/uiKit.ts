@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { type RestFace, type SelectLook, selectLook } from "../home/selection";
+import { type CloseControl, closeControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
@@ -234,6 +235,25 @@ export function soundIcon(scene: Scene, on: boolean, x: number, y: number): Plac
   return [
     addPixelText(scene, x + 8, y + 4, on ? "On" : "X", { color: PALETTE.plum, originX: 0.5 }),
   ];
+}
+
+// The close control in frame's top-right corner: icon-close on a ui-icon-button, or an X
+// while the icon is missing. Returns where it sits, so the caller can hit-test its target.
+export function addCloseButton(
+  scene: Scene,
+  parent: GameObjects.Container,
+  frame: Rect,
+  pressed: boolean,
+): CloseControl {
+  const control = closeControl(frame);
+  const button = addIconButton(scene, parent, control.x, control.y, (x, y) => {
+    const icon = imageIcon(scene, "icon-close", x, y);
+    return icon.length > 0
+      ? icon
+      : [addPixelText(scene, x + 8, y + 4, "X", { color: PALETTE.plum, originX: 0.5 })];
+  });
+  button.setPressed(pressed);
+  return control;
 }
 
 // An image icon by key, or nothing while the art is missing.

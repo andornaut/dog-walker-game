@@ -74,13 +74,13 @@ describe("volumeStepForKey", () => {
 });
 
 describe("settingsLayout", () => {
-  it("centres the panel on the screen, its rows, title and Back inside it", () => {
+  it("centres the panel on the screen with its rows and title, and closes from the corner", () => {
     const layout = settingsLayout({ height: 560, width: 360 });
-    expect(layout.panel).toEqual({ height: 276, width: 248, x: 56, y: 142 });
-    expect(layout.row).toEqual({ height: 44, width: 232, x: 64, y: 180 });
-    expect(layout.title).toEqual({ x: 180, y: 158 });
+    expect(layout.panel).toEqual({ height: 222, width: 248, x: 56, y: 169 });
+    expect(layout.row).toEqual({ height: 44, width: 232, x: 64, y: 207 });
+    expect(layout.title).toEqual({ x: 180, y: 185 });
     expect(layout.track.x).toBe(72);
-    expect(layout.back).toEqual({ height: 40, width: 200, x: 80, y: 364 });
+    expect(layout.close.hit).toEqual({ height: 44, width: 44, x: 316, y: 0 });
   });
 });
 

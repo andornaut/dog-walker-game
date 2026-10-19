@@ -1108,24 +1108,21 @@
       "titleY": 130
     },
     "help": {
-      "back": {
-        "height": 40,
-        "width": 110,
-        "x": 8,
-        "y": 504
-      },
       "body": {
         "lineHeight": 15,
         "width": 336,
         "x": 12,
         "y": 334
       },
-      "buttonLip": 4,
       "close": {
-        "height": 24,
-        "width": 34,
-        "x": 318,
-        "y": 8
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 316,
+          "y": 0
+        },
+        "x": 332,
+        "y": 10
       },
       "counter": {
         "x": 12,
@@ -1192,9 +1189,15 @@
         "y": 48
       },
       "next": {
-        "height": 40,
+        "height": 44,
         "width": 110,
         "x": 242,
+        "y": 504
+      },
+      "previous": {
+        "height": 44,
+        "width": 110,
+        "x": 8,
         "y": 504
       },
       "screen": {
@@ -1635,27 +1638,31 @@
       "titleY": 196
     },
     "settings": {
-      "back": {
-        "height": 40,
-        "width": 200,
-        "x": 80,
-        "y": 364
+      "close": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 316,
+          "y": 0
+        },
+        "x": 332,
+        "y": 10
       },
       "panel": {
-        "height": 276,
+        "height": 222,
         "width": 248,
         "x": 56,
-        "y": 142
+        "y": 169
       },
       "row": {
         "height": 44,
         "width": 232,
         "x": 64,
-        "y": 180
+        "y": 207
       },
       "title": {
         "x": 180,
-        "y": 158
+        "y": 185
       },
       "track": {
         "dy": 24,

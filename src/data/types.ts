@@ -615,11 +615,12 @@ export interface MenuText {
     readonly total: string;
     readonly zonesWalked: string;
   };
+  // Help's heading, and its paging buttons: Next reads gotIt on the last page.
   readonly help: {
-    readonly back: string;
     readonly gotIt: string;
     readonly heading: string;
     readonly next: string;
+    readonly previous: string;
   };
   readonly pause: {
     readonly headHome: string;
@@ -630,7 +631,6 @@ export interface MenuText {
     readonly title: string;
   };
   readonly settings: {
-    readonly back: string;
     readonly effects: string;
     readonly motion: string;
     readonly motionNote: string;

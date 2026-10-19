@@ -24,12 +24,11 @@ import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import {
-  addIconButton,
+  addCloseButton,
   addPanel,
   addSelectTile,
   addTapBurst,
   clearScene,
-  imageIcon,
   TEXT_SCALE,
 } from "./uiKit";
 
@@ -54,6 +53,7 @@ const WALL = STATS_LAYOUT.wall;
 const WALL_TEXT = STATS_LAYOUT.wallText;
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
 const DETAIL: Rect = STATS_LAYOUT.detail;
+const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 const DETAIL_TEXT_WIDTH = DETAIL.width - 32;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;
@@ -210,10 +210,7 @@ export class StatsScene extends Scene {
     }
     const words = gameData.menuText.stats;
     this.text(12, 12, words.title, { color: PALETTE.cream, font: "title" });
-    const close = addIconButton(this, this.add.container(0, 0), CLOSE.x, CLOSE.y, (x, y) =>
-      imageIcon(this, "icon-close", x, y),
-    );
-    close.setPressed(this.pressed === "close");
+    addCloseButton(this, this.add.container(0, 0), SCREEN, this.pressed === "close");
     // The open tab is selected, so the others always take the full choice's darker step.
     const tabs = this.add.container(0, 0);
     const { reducedMotion } = currentSettings(this);
@@ -355,7 +352,7 @@ export class StatsScene extends Scene {
   }
 
   // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts
-  // with confetti. Any tap closes it.
+  // with confetti, and the close control in its corner. Any tap closes it.
   private drawDetail(badge: BadgeView): void {
     const reduced = currentSettings(this).reducedMotion;
     fillRect(this.add.graphics().setAlpha(DIM_ALPHA), PALETTE.ink, {
@@ -365,6 +362,7 @@ export class StatsScene extends Scene {
       y: 0,
     });
     addPanel(this, DETAIL);
+    addCloseButton(this, this.add.container(0, 0), DETAIL, false);
     const center = DETAIL.x + DETAIL.width / 2;
     const badgeY = DETAIL.y + 48;
     if (badge.earned && (this.burst || reduced)) {

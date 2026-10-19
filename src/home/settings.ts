@@ -1,4 +1,5 @@
 import { laneDirectionForKey } from "../input/keyBindings";
+import { type CloseControl, closeControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
 import type { Settings } from "../save/schema";
 
@@ -59,7 +60,7 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
 }
 
 export interface SettingsLayout {
-  back: Rect;
+  close: CloseControl;
   panel: Rect;
   // The first row; the rest follow it down, each its height below.
   row: Rect;
@@ -67,15 +68,15 @@ export interface SettingsLayout {
   track: SliderTrack & { dy: number; height: number };
 }
 
-const PANEL = { height: 276, width: 248 };
+const PANEL = { height: 222, width: 248 };
 
-// The menus mock's layout: four rows 44 tall and Back, the panel centred on the screen,
-// which it covers wherever it opens from.
+// The menus mock's layout: four rows 44 tall on a panel centred on the screen, and the close
+// control in the screen's corner. Settings covers the screen wherever it opens from.
 export function settingsLayout(screen: { height: number; width: number }): SettingsLayout {
   const x = Math.round((screen.width - PANEL.width) / 2);
   const y = Math.round((screen.height - PANEL.height) / 2);
   return {
-    back: { height: 40, width: 200, x: x + 24, y: y + 222 },
+    close: closeControl({ height: screen.height, width: screen.width, x: 0, y: 0 }),
     panel: { ...PANEL, x, y },
     row: { height: 44, width: 232, x: x + 8, y: y + 38 },
     title: { x: x + 124, y: y + 16 },

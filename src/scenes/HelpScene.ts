@@ -3,14 +3,15 @@ import { Scene } from "phaser";
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { helpActionForKey, helpActionForPointer } from "../help/helpInput";
-import { dotRects, HELP_LAYOUT, type Point } from "../help/helpLayout";
+import { dotRects, HELP_LAYOUT, helpActionAt, type Point } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { insetRect, type Rect } from "../layout/rect";
 import { addFilledRect } from "./draw";
 import { listenOnePress } from "./onePress";
-import { colorFromHex } from "./palette";
+import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
+import { addCloseButton, addMenuButton, TEXT_SCALE } from "./uiKit";
 
 // Emitted on game.events when the help closes, by any route.
 export const HELP_CLOSED_EVENT = "help-closed";
@@ -20,30 +21,30 @@ export interface HelpSceneData {
   resume?: SceneKey;
 }
 
-interface ButtonColors {
-  face: number;
-  label: string;
-  lip: number;
-}
+// The other pages' dots are hollow rings and the current one is filled, so they differ by
+// shape.
+const DOT_COLOR = PALETTE.tan;
+const DOT_CURRENT_COLOR = PALETTE.white;
 
-// Wood palette from the art style guide (Endesga 32).
-const BACKGROUND_COLOR = 0x733e39;
-const BUTTON_DISABLED: ButtonColors = { face: 0x5a6988, label: "#c0cbdc", lip: 0x3a4466 };
-const BUTTON_ENABLED: ButtonColors = { face: 0xfeae34, label: "#3e2731", lip: 0xf77622 };
-const CLOSE_COLORS = { border: 0xe4a672, face: 0xead4aa, label: "#3e2731" };
-const COUNTER_COLOR = "#ead4aa";
-// The other pages' dots are hollow rings and the current one is filled, so they differ by shape.
-const DOT_COLOR = 0xe4a672;
-const DOT_CURRENT_COLOR = 0xffffff;
-const FRAME_COLOR = 0x3e2731;
-const PLACEHOLDER_COLORS = { fill: 0x262b44, label: "#c0cbdc" };
-const TEXT_COLOR = "#ead4aa";
-const TITLE_COLOR = "#feae34";
-const TOP_BAR_COLOR = 0x3e2731;
+type Pressed = "close" | "next" | "previous";
+
+// The control a press starts on shows pressed until it is released.
+function pressedBy(action: HelpAction | undefined): Pressed | undefined {
+  switch (action?.kind) {
+    case "advance":
+      return "next";
+    case "close":
+    case "previous":
+      return action.kind;
+    default:
+      return undefined;
+  }
+}
 
 // A full-screen overlay listed last in the game config, so it draws over every scene.
 export class HelpScene extends Scene {
   private page = 0;
+  private pressed: Pressed | undefined;
   private pressStart: Point | undefined;
   private resumeKey: SceneKey | undefined;
 
@@ -53,6 +54,7 @@ export class HelpScene extends Scene {
 
   create(data?: HelpSceneData): void {
     this.page = 0;
+    this.pressed = undefined;
     this.pressStart = undefined;
     this.resumeKey = data?.resume;
     this.draw();
@@ -67,10 +69,12 @@ export class HelpScene extends Scene {
     listenOnePress(this, {
       down: (pointer) => {
         this.pressStart = { x: pointer.x, y: pointer.y };
+        this.showPressed(pressedBy(helpActionAt(gameData.help.length, this.pressStart)));
       },
       up: (pointer, cancelled) => {
         const start = this.pressStart;
         this.pressStart = undefined;
+        this.showPressed(undefined);
         if (start === undefined || cancelled) {
           return;
         }
@@ -81,6 +85,13 @@ export class HelpScene extends Scene {
         }
       },
     });
+  }
+
+  private showPressed(pressed: Pressed | undefined): void {
+    if (pressed !== this.pressed) {
+      this.pressed = pressed;
+      this.draw();
+    }
   }
 
   private act(action: HelpAction): void {
@@ -107,37 +118,36 @@ export class HelpScene extends Scene {
   private draw(): void {
     this.children.removeAll(true);
     const pages = gameData.help;
+    const words = gameData.menuText.help;
     this.page = clampPage(pages.length, this.page);
     const page = itemAt(pages, this.page);
     const layout = HELP_LAYOUT;
 
-    addFilledRect(this, BACKGROUND_COLOR, layout.screen);
-    addFilledRect(this, TOP_BAR_COLOR, layout.topBar);
-    addFilledRect(this, BACKGROUND_COLOR, {
+    addFilledRect(this, PALETTE.darkBrown, layout.screen);
+    addFilledRect(this, PALETTE.plum, layout.topBar);
+    addFilledRect(this, PALETTE.darkBrown, {
       ...layout.topBar,
       height: layout.topBarEdge,
       y: layout.topBar.y + layout.topBar.height - layout.topBarEdge,
     });
-    addPixelText(this, layout.heading.x, layout.heading.y, gameData.menuText.help.heading, {
-      color: colorFromHex(TEXT_COLOR),
+    addPixelText(this, layout.heading.x, layout.heading.y, words.heading, {
+      color: PALETTE.cream,
       font: "title",
-      scale: 2,
+      scale: TEXT_SCALE,
     });
-    addFilledRect(this, CLOSE_COLORS.border, layout.close);
-    addFilledRect(this, CLOSE_COLORS.face, insetRect(1, layout.close));
-    this.addCenteredText(2, CLOSE_COLORS.label, layout.close, "X");
+    addCloseButton(this, this.add.container(0, 0), layout.screen, this.pressed === "close");
 
-    addFilledRect(this, FRAME_COLOR, insetRect(-1, layout.illustration));
+    addFilledRect(this, PALETTE.plum, insetRect(-1, layout.illustration));
     this.drawIllustration(page.art, layout.illustration);
 
     addPixelText(this, layout.counter.x, layout.counter.y, `${this.page + 1}/${pages.length}`, {
-      color: colorFromHex(COUNTER_COLOR),
+      color: PALETTE.cream,
       font: "title",
     });
     addPixelText(this, layout.title.x, layout.title.y, page.title, {
-      color: colorFromHex(TITLE_COLOR),
+      color: PALETTE.amber,
       font: "title",
-      scale: 2,
+      scale: TEXT_SCALE,
     });
     this.drawBody(page.body);
 
@@ -146,14 +156,18 @@ export class HelpScene extends Scene {
         addFilledRect(this, DOT_CURRENT_COLOR, dot);
       } else {
         addFilledRect(this, DOT_COLOR, dot);
-        addFilledRect(this, BACKGROUND_COLOR, insetRect(1, dot));
+        addFilledRect(this, PALETTE.darkBrown, insetRect(1, dot));
       }
     });
 
-    const labels = gameData.menuText.help;
-    const { backEnabled, next } = helpButtons(pages.length, this.page);
-    this.drawButton(backEnabled ? BUTTON_ENABLED : BUTTON_DISABLED, layout.back, labels.back);
-    this.drawButton(BUTTON_ENABLED, layout.next, labels[next]);
+    const { next, previousEnabled } = helpButtons(pages.length, this.page);
+    const previous = addMenuButton(this, layout.previous, words.previous, "secondary");
+    previous.setState(
+      !previousEnabled ? "disabled" : this.pressed === "previous" ? "pressed" : "normal",
+    );
+    addMenuButton(this, layout.next, words[next]).setState(
+      this.pressed === "next" ? "pressed" : "normal",
+    );
   }
 
   // The art is exported at the frame's size; a key not in the manifest yet shows a box.
@@ -162,37 +176,23 @@ export class HelpScene extends Scene {
       this.add.image(frame.x, frame.y, key).setOrigin(0).setCrop(0, 0, frame.width, frame.height);
       return;
     }
-    addFilledRect(this, PLACEHOLDER_COLORS.fill, frame);
-    this.addCenteredText(1, PLACEHOLDER_COLORS.label, frame, key.toUpperCase());
+    addFilledRect(this, PALETTE.navy, frame);
+    addPixelText(this, frame.x + frame.width / 2, frame.y + frame.height / 2, key.toUpperCase(), {
+      color: PALETTE.lightGrey,
+      font: "title",
+      originX: 0.5,
+      originY: 0.5,
+    });
   }
 
   // Wrapped by Phaser at the body's width, with the line pitch set to the layout's.
   private drawBody(body: string): void {
     const { lineHeight, width, x, y } = HELP_LAYOUT.body;
-    const scale = 2;
     const text = addPixelText(this, x, y, body, {
-      color: colorFromHex(TEXT_COLOR),
+      color: PALETTE.cream,
       maxWidth: width,
-      scale,
+      scale: TEXT_SCALE,
     });
-    text.setLineSpacing(lineHeight / scale - text.fontData.lineHeight);
-  }
-
-  private drawButton(colors: ButtonColors, rect: Rect, label: string): void {
-    const lip = HELP_LAYOUT.buttonLip;
-    const face = { ...rect, height: rect.height - lip };
-    addFilledRect(this, colors.lip, { ...face, y: rect.y + lip });
-    addFilledRect(this, colors.face, face);
-    this.addCenteredText(2, colors.label, face, label);
-  }
-
-  private addCenteredText(scale: number, color: string, rect: Rect, text: string): void {
-    addPixelText(this, rect.x + rect.width / 2, rect.y + rect.height / 2, text, {
-      color: colorFromHex(color),
-      font: "title",
-      originX: 0.5,
-      originY: 0.5,
-      scale,
-    });
+    text.setLineSpacing(lineHeight / TEXT_SCALE - text.fontData.lineHeight);
   }
 }

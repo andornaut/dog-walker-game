@@ -30,10 +30,10 @@ export const MENU_TEXT = {
     zonesWalked: "Zones walked",
   },
   help: {
-    back: "BACK",
-    gotIt: "GOT IT",
+    gotIt: "Got it",
     heading: "How to walk",
-    next: "NEXT",
+    next: "Next",
+    previous: "Previous",
   },
   pause: {
     headHome: "Head home",
@@ -44,7 +44,6 @@ export const MENU_TEXT = {
     title: "Paused",
   },
   settings: {
-    back: "Back",
     effects: "Effects",
     motion: "Reduced motion",
     motionNote: "Skips shakes, hops and bobs",

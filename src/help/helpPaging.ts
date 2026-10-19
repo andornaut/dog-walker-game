@@ -15,7 +15,7 @@ export type HelpOutcome =
   { readonly kind: "close" } | { readonly kind: "show"; readonly page: number };
 
 export interface HelpButtons {
-  readonly backEnabled: boolean;
+  readonly previousEnabled: boolean;
   // Which of menuText.help's labels the Next button shows.
   readonly next: "gotIt" | "next";
 }
@@ -48,5 +48,5 @@ export function applyHelpAction(pageCount: number, action: HelpAction, page: num
 
 export function helpButtons(pageCount: number, page: number): HelpButtons {
   const current = clampPage(pageCount, page);
-  return { backEnabled: current > 0, next: current === pageCount - 1 ? "gotIt" : "next" };
+  return { next: current === pageCount - 1 ? "gotIt" : "next", previousEnabled: current > 0 };
 }

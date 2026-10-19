@@ -39,15 +39,20 @@ describe("applyHelpAction", () => {
 
 describe("helpButtons", () => {
   it.each<[string, number, number, ReturnType<typeof helpButtons>]>([
-    ["disables Back on the first page", PAGES, 0, { backEnabled: false, next: "next" }],
-    ["enables Back past the first page", PAGES, 1, { backEnabled: true, next: "next" }],
-    ["labels Next Next before the last page", PAGES, LAST - 1, { backEnabled: true, next: "next" }],
-    ["labels Next Got it on the last page", PAGES, LAST, { backEnabled: true, next: "gotIt" }],
+    ["disables Previous on the first page", PAGES, 0, { next: "next", previousEnabled: false }],
+    ["enables Previous past the first page", PAGES, 1, { next: "next", previousEnabled: true }],
+    [
+      "labels Next Next before the last page",
+      PAGES,
+      LAST - 1,
+      { next: "next", previousEnabled: true },
+    ],
+    ["labels Next Got it on the last page", PAGES, LAST, { next: "gotIt", previousEnabled: true }],
     [
       "treats a page past a shrunken page count as the new last page",
       3,
       5,
-      { backEnabled: true, next: "gotIt" },
+      { next: "gotIt", previousEnabled: true },
     ],
   ])("%s", (_name, pages, page, expected) => {
     expect(helpButtons(pages, page)).toEqual(expected);

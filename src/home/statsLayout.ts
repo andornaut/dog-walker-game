@@ -1,3 +1,5 @@
+import { SCREEN_CONFIG } from "../data/screen";
+import { closeControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
 
 export type StatsTab = "badges" | "dogs" | "runs";
@@ -9,8 +11,8 @@ const PANEL = { height: 444, width: 344, x: 8, y: 108 };
 
 // The Stats page's geometry, from the menus mock.
 export const STATS_LAYOUT = {
-  // The close button's face, with its 44x44 hit area in the corner.
-  close: { hit: { height: 44, width: 44, x: 316, y: 0 }, x: 332, y: 10 },
+  // The close control, in the screen's corner.
+  close: closeControl({ height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
   // The badge tapped open, over the wall.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
   dogColumns: { fired: 344, walks: 236, zones: 290 },
