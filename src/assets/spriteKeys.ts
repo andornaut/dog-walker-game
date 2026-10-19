@@ -105,8 +105,8 @@ export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
   return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
 }
 
-// Each need spot's road sprite: the hydrant and the other dog reuse their obstacle's art,
-// marked on the road by the need's icon.
+// Each need spot's road sprite. The other dog reuses its obstacle's art; it and the hydrant
+// are marked on the road by the need's icon.
 const NEED_SPOT_SPRITES: Readonly<Record<NeedSpotId, string>> = {
   fireHydrant: "hydrant",
   lampPost: "spot-lamp-post",

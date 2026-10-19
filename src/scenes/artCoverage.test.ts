@@ -305,11 +305,13 @@ describe("need art", () => {
     expect(missing).toEqual([]);
   });
 
-  // The hydrant and the other dog reuse their obstacle's art.
+  // The other dog reuses its obstacle's art.
   it("names a road sprite for every need spot with its own art, at every step any spot has", () => {
     const spots = Object.keys(gameData.needSpots) as NeedSpotId[];
-    const own = spots.map(needSpotSpriteKey).filter((key) => key.startsWith("spot-"));
-    expect(own).toHaveLength(4);
+    const own = spots
+      .map(needSpotSpriteKey)
+      .filter((key) => key !== encounterSpriteKey("otherDog"));
+    expect(own).toHaveLength(5);
     const steps = variantSteps(own);
     expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
     const missing = own.flatMap((key) => {

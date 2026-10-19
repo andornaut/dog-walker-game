@@ -487,8 +487,8 @@ export class RunScene extends Scene {
     this.zoneShown = -1;
   }
 
-  // A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape
-  // in the data.
+  // A box for each minor obstacle, the skunk's cloud and the hydrant whose art is missing, from
+  // its shape in the data. The hydrant stands in for any need spot whose art is missing.
   private ensureRoadPlaceholders(): void {
     const { cell } = walkGeometry(LANE_COUNT, 1, PROJECTION, LAYOUT.road);
     const add = (key: string, lanes: number) =>
@@ -502,6 +502,7 @@ export class RunScene extends Scene {
     }
     const skunk = gameData.encounters.skunk;
     add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
+    add(needSpotSpriteKey("fireHydrant"), 1);
   }
 
   // A replay log waiting in the session starts the run from its setup and drives its inputs;

@@ -15,6 +15,5 @@ export const MINOR_OBSTACLES = {
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
-  hydrant: { name: "Hydrant", shape: { lanes: 1, rows: 1 } },
   parkedCar: { name: "Parked car", shape: { lanes: 1, rows: 3 } },
 } as const satisfies Record<string, MinorObstacle>;

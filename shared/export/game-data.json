@@ -2284,15 +2284,6 @@
       "spriteKey": "hedge"
     },
     {
-      "id": "hydrant",
-      "name": "Hydrant",
-      "shape": {
-        "lanes": 1,
-        "rows": 1
-      },
-      "spriteKey": "hydrant"
-    },
-    {
       "id": "parkedCar",
       "name": "Parked car",
       "shape": {
@@ -3038,7 +3029,6 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3109,7 +3099,6 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3180,7 +3169,6 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3251,7 +3239,6 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3322,7 +3309,6 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3393,7 +3379,6 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
