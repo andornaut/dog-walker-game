@@ -18,7 +18,7 @@ Theme: you're a dog walker trying to make money.
 
 - **Before a run:** pick your dogs and your loadout (gear from permanent unlocks).
 - **During a run:** the street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop that always opens a choice.
-- **Between zones:** pick 1 of 3 upgrade cards (some lose-lose).
+- **Between zones:** pick 1 of 3 upgrade cards (some are trade-offs).
 - **After a run:** bank your earnings and spend them on permanent unlocks.
 
 Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run structure, loadout, meta progression), Vampire Survivors (choices along the way), Slay the Spire (choices as cards).
@@ -26,7 +26,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ## Player & world
 
 - You are the dog walker.
-- A run is a walk through **4 zones**. v1: one neighbourhood, fixed route.
+- A run is a walk through **4 zones**, each a fixed distance that takes about 3 minutes. v1: one neighbourhood, fixed route.
 
 ## Dogs
 
@@ -41,7 +41,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 - **Movement:** 5 lanes; the walker and pack move left/right at the bottom of the screen.
 - **Pickups:** things you want to hit: treats (raise owner happiness) and tips (money).
-- **Encounters:** collisions pause the run and offer a choice, usually trading money against owner happiness or a debuff. Some problems can be fixed with money, e.g. skunk: pay a lot for grooming, or less and take the lingering **Stinky** debuff. Choices only in v1.
+- **Encounters:** collisions pause the run and offer a choice, usually trading money against owner happiness or a debuff. Some problems can be fixed with money, e.g. skunk: pay a lot for grooming, or less and take the lingering **Stinky** debuff. Choices only in v1. Each option's outcome is fixed and shown on the card. An option you can't afford is disabled; every encounter has a free option.
 - **Forced stops:** one per zone; always triggers a choice.
 - **Money:** the only currency. Earned in-run (tips, and each dog's fee per zone survived), spent on encounter choices, banked between runs.
 - **Run end:** finishing zone 4, or no dogs left. Failure is gentle: you keep what you've earned.
@@ -52,7 +52,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ## Controls
 
-Designed touch-first. v1 supports keyboard (web) and touch (mobile). Mouse is not planned.
+Designed touch-first. v1 supports keyboard (web) and touch (mobile: tap the left/right half of the screen, or swipe). Mouse is not planned.
 
 ## Scope: v1 (web prototype)
 
