@@ -32,7 +32,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 ### Screen & controls
 
 - Designed touch-first: keyboard (web) and touch (mobile); mouse is not planned
-- Layout: a top status bar (money, zone progress), a fixed-width dog column on the left with one slot per dog, and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in [`art/style-guide.md`](../art/style-guide.md)
+- Layout: a top status bar (money, zone progress); below it a neighbourhood backdrop band showing the current zone, where the scenery gags play; a fixed-width dog column on the left with one slot per dog; and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in [`art/style-guide.md`](../art/style-guide.md)
 - Portrait orientation, ¾ top-down view
 - 5 lanes. Keyboard: ←/→, A/D or H/L. Touch: tap the left/right half of the road, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
@@ -136,7 +136,7 @@ Two lucky finds open no card: bumping into them pays out at once, with a short p
 - Biscuit neighbour: +1 treat per dog, up to the carry limit
 - Photo op: +$ tip, +1 ♥ to dramatic owners
 
-Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card and have no effect.
+Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band above the road; they open no card and have no effect.
 
 ### Forced stops (one per zone, drawn at random with no repeats in a run)
 
