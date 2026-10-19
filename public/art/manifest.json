@@ -1105,6 +1105,11 @@
       "json": "sprites/ui-doghouse.json"
     },
     {
+      "key": "ui-doghouse-warn",
+      "png": "sprites/ui-doghouse-warn.png",
+      "json": "sprites/ui-doghouse-warn.json"
+    },
+    {
       "key": "ui-heart",
       "png": "sprites/ui-heart.png",
       "json": "sprites/ui-heart.json"

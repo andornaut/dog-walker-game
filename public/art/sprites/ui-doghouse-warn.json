@@ -1,0 +1,55 @@
+{ "frames": {
+   "ui-doghouse-warn 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 400
+   },
+   "ui-doghouse-warn 1.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 400
+   },
+   "ui-doghouse-warn 2.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 400
+   },
+   "ui-doghouse-warn 3.aseprite": {
+    "frame": { "x": 216, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 400
+   },
+   "ui-doghouse-warn 4.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-doghouse-warn.png",
+  "format": "RGBA8888",
+  "size": { "w": 360, "h": 146 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "pulse", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "static", "from": 4, "to": 4, "direction": "forward" }
+  ]
+ }
+}

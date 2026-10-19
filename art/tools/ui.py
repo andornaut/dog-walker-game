@@ -11,6 +11,7 @@ ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-zone-banner (248x48) and
 ui-touch-hint (96x36).
 Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
+ui-doghouse-warn (72x146, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check and ui-step-number (16x16; tags 1, 2, 3, tick),
 fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
@@ -456,45 +457,156 @@ def slot_locked():
 
 # ---------- the doghouse: one dog slot in the dog column ----------
 
-# Each dog's roof is its signature colour (bow, bandana, collar, sweater, harness).
+# Each dog's roof: base, shingle shade and the dark ridge, gable edge and eave, from the dog's
+# accessory. Zippy's red collar takes dred with a red ridge and eave trim, so he stays apart from
+# Nugget's red, which carries the bandana's white dots; Dash's forest takes the sweater's cream
+# stripe, so it stays apart from Biscuit's light green.
 ROOFS = {
-    "duchess": ("pink", "mauve"), "nugget": ("red", "dred"), "zippy": ("ochre", "rust"),
-    "pierre": ("purple", "plum"), "biscuit": ("green", "dgreen"), "dash": ("dgreen", "forest"),
-    "snowball": ("sky", "blue"), "waffles": ("amber", "orange"), "koda": ("orange", "rust"),
-    "empty": ("slate", "dslate"),
+    "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
+    "pierre": ("purple", "plum", "ink"), "biscuit": ("green", "dgreen", "forest"),
+    "dash": ("forest", "teal", "ink"), "snowball": ("sky", "blue", "navy"),
+    "waffles": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
+    "empty": ("slate", "dslate", "navy"),
 }
 
+# The 8x8 emblem on each gable, the dog's accessory: a letter is a colour, "." shows the vent behind.
+EMBLEMS = {
+    "duchess": ({"P": "pink", "M": "mauve"}, [  # bow
+        "........", "PP....PP", "PPP..PPP", "PPPMMPPP", "PPPMMPPP", "PPM..MPP", "PM....MP", "........"]),
+    "nugget": ({"R": "red", "D": "dred", "W": "white"}, [  # spotted bandana
+        "D......D", "RRRRRRRR", "RRWRRRWR", ".RRRRRR.", ".RRRWRR.", "..RRRR..", "..DRRD..", "...DD..."]),
+    "zippy": ({"R": "red", "D": "dred", "L": "lgrey", "W": "white", "G": "grey"}, [  # collar and tag
+        "R......R", "RR....RR", ".RRRRRR.", "..DDDD..", "...LL...", "..LWLL..", "..LLLG..", "...GG..."]),
+    "pierre": ({"M": "mauve", "P": "purple", "K": "pink"}, [  # show rosette
+        "..MMMM..", ".MMPPMM.", ".MPKPPM.", ".MPPPPM.", ".MMPPMM.", "..MMMM..", "..M..M..", ".M....M."]),
+    "biscuit": ({"G": "green", "D": "dgreen", "L": "lgrey", "W": "white"}, [  # collar and bone tag
+        "GGGGGGGG", "DDDDDDDD", "...LL...", "WW.LL.WW", ".WWWWWW.", ".WWWWWL.", "WL....LL", "........"]),
+    "dash": ({"G": "dgreen", "C": "cream", "F": "forest"}, [  # striped sweater
+        "GG....GG", "GGGGGGGG", "GCCCCCCG", "F.GGGG.F", "..CCCC..", "..GGGG..", "..FFFF..", "........"]),
+    "snowball": ({"S": "sky", "B": "blue", "Y": "yellow", "A": "amber", "O": "orange", "R": "rust"}, [  # bell
+        "SSSSSSSS", "BBBBBBBB", "...AY...", "..AYYA..", "..AAAO..", ".AAAAOO.", ".OOOOOO.", "...RR..."]),
+    "waffles": ({"A": "amber", "O": "orange", "B": "brown"}, [  # barrel
+        ".AAAAAO.", "BBBBBBBB", "AAAAAAAO", "AAAAAAAO", "AAAAAAAO", "AAAAAAAO", "BBBBBBBB", ".AAAAAO."]),
+    "koda": ({"O": "orange", "R": "rust", "L": "lgrey", "G": "grey"}, [  # harness clip
+        "O......O", "RO....OR", ".RO..OR.", "..LLLG..", "..L..G..", "..LGGG..", "...OO...", "...OR..."]),
+}
 
-def doghouse(roof, eave):
-    """72x146. The game draws, in slot pixels: the dog's name centred at (36, 11) in
-    font-title, the dog face at (20, 36), the owner face at (8, 78), the heart count
-    centred at (56, 90) in font-title, the owner's name at (9, 118) in font-body, and
-    hearts from (9, 127) in rows of six, 9px across and 8px down."""
-    empty = roof == "slate"
+# The status icon spots on the wall beside the window, top-left corners of 16x16 icons, each under a peg.
+STATUS_SPOTS = ((46, 78), (46, 96))
+
+
+def roof_width(y):
+    """Half the roof's width on row y: the gable slopes out 3px a row to the full 72px by row 8."""
+    return min(36, 12 + 3 * y)
+
+
+def doghouse(dog):
+    """72x146. The game draws, in slot pixels: the dog's name centred at (36, 16) in font-title on
+    the roof's name plate (56px wide, cream from row 14 to 25), the dog face at (20, 36), the n/max
+    count centred at (36, 70) in font-title on the doormat (cream, 34px wide), the owner face at
+    (8, 78), up to two 16x16 status icons at (46, 78) and (46, 96), the owner's name at (9, 118)
+    in font-body, and hearts from (9, 127) in rows of six, 9px across and 8px down. The roof is
+    rows 0 to 31: the ridge, the gable with the dog's emblem in a 12x12 vent, shingle courses
+    around the name plate, and a dark eave."""
+    base, shade, dark = ROOFS[dog]
+    empty = dog == "empty"
     g = Grid(72, 146)
-    for i in range(22):
-        w = round(36 * (i + 1) / 22)
-        g.rect(36 - w, i, w * 2, 1, roof)
-    g.rect(0, 20, 72, 3, eave)
-    g.rect(8, 9, 56, 11, "cream")
-    g.rect(8, 19, 56, 1, "tan")
-    g.rect(3, 23, 66, 123, "lgrey" if empty else "tan")
-    for y in range(30, 146, 8):
+    # walls, planks and the shadow under the eave
+    g.rect(3, 30, 66, 116, "lgrey" if empty else "tan")
+    for y in range(40, 146, 8):
         g.rect(3, y, 66, 1, "grey" if empty else "brown")
-    g.rect(3, 23, 2, 123, "grey" if empty else "brown")
-    g.rect(67, 23, 2, 123, "slate" if empty else "dbrown")
-    # arched doorway
-    g.rect(18, 32, 36, 38, "ink" if empty else "plum")
-    for i in range(6):
-        g.rect(18 + 6 - i, 26 + i, 36 - 2 * (6 - i), 1, "ink" if empty else "plum")
-    g.rect(16, 70, 40, 2, "grey" if empty else "dbrown")
+    g.rect(3, 30, 2, 116, "grey" if empty else "brown")
+    g.rect(67, 30, 2, 116, "slate" if empty else "dbrown")
+    g.rect(5, 32, 62, 1, "grey" if empty else "dbrown")
+    # roof: shingle courses every 4 rows, joints staggered by half a shingle
+    for y in range(32):
+        w = roof_width(y)
+        g.rect(36 - w, y, 2 * w, 1, base)
+        if y % 4 == 1 and y > 1:
+            g.rect(36 - w, y, 2 * w, 1, shade)
+        elif y % 4 in (2, 3) and y > 4:
+            for x in range(4 * (y // 4 % 2), 72, 8):
+                g.p(x, y, shade)
+    if dog == "nugget":
+        for y in (3, 7, 11, 15, 19, 23, 27):
+            for x in range(2 + 4 * (y // 4 % 2), 72, 8):
+                if abs(x + 0.5 - 36) < roof_width(y) - 2:
+                    g.p(x, y, "white")
+    if dog == "dash":
+        for y, c in ((6, "cream"), (7, "dgreen"), (28, "cream"), (29, "dgreen")):
+            w = roof_width(y)
+            g.rect(36 - w, y, 2 * w, 1, c)
+    # ridge and gable edges, then the eave
+    g.rect(24, 0, 24, 1, dark)
+    for y in range(9):
+        w = roof_width(y)
+        g.rect(36 - w, y, 3, 1, dark)
+        g.rect(33 + w, y, 3, 1, dark)
+    g.rect(0, 8, 1, 22, dark)
+    g.rect(71, 8, 1, 22, dark)
+    g.rect(0, 30, 72, 2, dark)
+    if dog == "zippy":
+        g.rect(27, 1, 18, 1, "red")
+        g.rect(0, 30, 72, 1, "red")
+    # the gable vent and its emblem
+    ring = "lgrey" if empty else "cream"
+    g.rect(30, 2, 12, 10, ring)
+    g.rect(31, 1, 10, 12, ring)
+    g.rect(31, 2, 10, 10, dark)
+    if dog in EMBLEMS:
+        colours, rows = EMBLEMS[dog]
+        for y, row in enumerate(rows):
+            for x, c in enumerate(row):
+                if c != ".":
+                    g.p(32 + x, 3 + y, colours[c])
+    # the name plate
+    g.rect(7, 13, 58, 15, dark)
+    g.rect(8, 14, 56, 12, "cream")
+    g.rect(8, 26, 56, 1, "tan")
+    # arched doorway, the sill and the doormat for the count
+    g.rect(18, 35, 36, 33, "ink" if empty else "plum")
+    g.rect(21, 33, 30, 1, "ink" if empty else "plum")
+    g.rect(19, 34, 34, 1, "ink" if empty else "plum")
+    g.rect(16, 68, 40, 1, "grey" if empty else "dbrown")
+    g.rect(19, 69, 34, 6, "white" if empty else "cream")
+    g.rect(19, 69, 1, 6, "lgrey" if empty else "tan")
+    g.rect(52, 69, 1, 6, "lgrey" if empty else "tan")
+    g.rect(19, 75, 34, 1, "grey" if empty else "brown")
     # owner window
     g.rect(6, 76, 36, 36, "white" if empty else "cream")
     g.rect(8, 78, 32, 32, "lgrey" if empty else "sky")
     g.rect(8, 78, 32, 1, "grey" if empty else "blue")
+    # pegs for the status icons
+    for x, y in STATUS_SPOTS:
+        g.rect(x + 7, y - 2, 2, 2, "slate" if empty else "dbrown")
     # hearts board
+    g.rect(5, 115, 62, 28, "grey" if empty else "dbrown")
     g.rect(6, 116, 60, 26, "white" if empty else "cream")
     g.rect(6, 141, 60, 1, "lgrey" if empty else "tan")
+    return g
+
+
+def doghouse_warn(step):
+    """72x146, drawn over ui-doghouse: a 2px warning rim inside the house's outline, for an owner at
+    one heart. Steps 0 to 2 run dim to bright; the outer pixel (orange 3.06:1, amber 4.57:1 on
+    the dbrown column) carries the contrast, the inner one (red or orange) the warning colour."""
+    outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
+    house = doghouse("empty").px
+    g = Grid(72, 146)
+
+    def solid(x, y):
+        return 0 <= x < 72 and 0 <= y < 146 and house[y][x] is not None
+
+    for y in range(146):
+        for x in range(72):
+            if not solid(x, y):
+                continue
+            near = [all(solid(x + dx, y + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1))
+                    for r in (1, 2)]
+            if not near[0]:
+                g.p(x, y, outer)
+            elif not near[1]:
+                g.p(x, y, inner)
     return g
 
 
@@ -857,7 +969,9 @@ IMAGES = {
 
 
 def sprites():
-    yield "ui-doghouse", [(dog, [doghouse(*cols).outlined(False)], 1000) for dog, cols in ROOFS.items()]
+    yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS]
+    warn = [doghouse_warn(i).outlined(False) for i in (0, 1, 2, 1)]
+    yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     rest, glint = afford_frame(False).outlined(False), afford_frame(True).outlined(False)
