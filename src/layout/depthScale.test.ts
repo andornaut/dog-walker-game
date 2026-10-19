@@ -112,7 +112,8 @@ describe("depthDraw", () => {
   });
 
   it("downscales the smallest step at least as big as the sprite is drawn", () => {
-    const arts = artsOf("cone");
+    // A 32-wide sprite with only @75 and @50, whatever steps the shipped cone has.
+    const arts = syntheticArts("cone", 32, [0.75, 0.5]);
     expect(depthDraw(arts, 0.8)).toMatchObject({ key: "cone", scale: 26 / 32 });
     expect(depthDraw(arts, 0.7)).toMatchObject({ key: "cone@75", scale: 22 / 24 });
     // A sprite with no @75 draws its 1x from just above 0.5.
