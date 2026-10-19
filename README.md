@@ -20,7 +20,7 @@ npm run dev
 
 ## Deploying
 
-Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which builds and deploys independently of GitHub CI. To set it up, connect this repository to a Worker named `dog-walker-game` in the Cloudflare dashboard, with build command `npm run build` and deploy command `npx wrangler deploy`.
+Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which runs `npm run build` and then `npx wrangler deploy` on Node `24.21.0` (the `NODE_VERSION` build variable). It runs independently of GitHub CI, so a commit that fails CI still deploys. Build settings live on the `dog-walker-game` Worker, under Settings → Build in the Cloudflare dashboard.
 
 To deploy by hand instead:
 
