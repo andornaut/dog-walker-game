@@ -18,7 +18,7 @@ import {
 import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
-import { containsPoint, type Rect } from "../layout/rect";
+import type { Rect } from "../layout/rect";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
@@ -27,7 +27,6 @@ import { fillLine } from "../text/lines";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { addDisplayText } from "./displayText";
 import { drawPixelLine, drawShadow, fillRect } from "./draw";
-import { listenOnePress } from "./onePress";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
@@ -35,7 +34,15 @@ import { currentSettings, lastRunEnd, profileSave, walkerSpriteKey } from "./pro
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { addStandingSprite, firstTag, spriteMetrics } from "./sprites";
-import { addMenuButton, addPanel, addTagImage, fitText, showTag, TEXT_SCALE } from "./uiKit";
+import {
+  addMenuButton,
+  addPanel,
+  addTagImage,
+  fitText,
+  listenButtonTap,
+  showTag,
+  TEXT_SCALE,
+} from "./uiKit";
 
 const END_SCREEN_KEY = "screen-end";
 const LOGO = { ...END_LAYOUT.logo, key: "logo" };
@@ -204,21 +211,7 @@ export class EndScene extends Scene {
       );
     }
 
-    const button = addMenuButton(this, BUTTON, words.backHome);
-    let pressed = false;
-    listenOnePress(this, {
-      down: (pointer) => {
-        pressed = containsPoint(BUTTON, pointer.x, pointer.y);
-        button.setState(pressed ? "pressed" : "normal");
-      },
-      up: (pointer, cancelled) => {
-        button.setState("normal");
-        if (!cancelled && pressed && containsPoint(BUTTON, pointer.x, pointer.y)) {
-          goHome();
-        }
-        pressed = false;
-      },
-    });
+    listenButtonTap(this, addMenuButton(this, BUTTON, words.backHome), goHome);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (isConfirmKey(event.key)) {
         goHome();

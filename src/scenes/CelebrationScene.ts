@@ -4,16 +4,15 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
-import { containsPoint, type Rect } from "../layout/rect";
+import type { Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { DIM_ALPHA } from "./draw";
-import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
-import { addMenuButton } from "./uiKit";
+import { addMenuButton, listenButtonTap } from "./uiKit";
 
 export interface CelebrationSceneData {
   achievements: readonly AchievementId[];
@@ -62,20 +61,7 @@ export class CelebrationScene extends Scene {
       this.scene.resume(resume);
       this.scene.stop();
     };
-    let pressed = false;
-    listenOnePress(this, {
-      down: (pointer) => {
-        pressed = containsPoint(buttonRect, pointer.x, pointer.y);
-        button.setState(pressed ? "pressed" : "normal");
-      },
-      up: (pointer, cancelled) => {
-        button.setState("normal");
-        if (!cancelled && pressed && containsPoint(buttonRect, pointer.x, pointer.y)) {
-          close();
-        }
-        pressed = false;
-      },
-    });
+    listenButtonTap(this, button, close);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (isConfirmKey(event.key) || isPauseKey(event.key)) {
         close();

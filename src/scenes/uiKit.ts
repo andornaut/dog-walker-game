@@ -4,8 +4,9 @@ import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
 import { type RestFace, type SelectLook, selectLook } from "../home/selection";
 import { type CloseControl, closeControl } from "../layout/closeControl";
-import { insetRect, type Rect } from "../layout/rect";
+import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
+import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, setPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
@@ -183,6 +184,26 @@ export function addMenuButton(
   };
   button.setState("normal");
   return button;
+}
+
+// A screen whose one control is button: it shows pressed while held, and a release over it
+// taps it.
+export function listenButtonTap(scene: Scene, button: MenuButton, onTap: () => void): void {
+  const { rect } = button;
+  let pressed = false;
+  listenOnePress(scene, {
+    down: (pointer) => {
+      pressed = containsPoint(rect, pointer.x, pointer.y);
+      button.setState(pressed ? "pressed" : "normal");
+    },
+    up: (pointer, cancelled) => {
+      button.setState("normal");
+      if (!cancelled && pressed && containsPoint(rect, pointer.x, pointer.y)) {
+        onTap();
+      }
+      pressed = false;
+    },
+  });
 }
 
 // A game object that can be placed and moved.
