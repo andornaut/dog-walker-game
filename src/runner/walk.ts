@@ -52,7 +52,6 @@ import {
   type SpawnQuota,
   takeDueSpawns,
 } from "./spawning";
-import { advanceZones } from "./zones";
 
 export type WalkData = Pick<
   GameData,
@@ -558,15 +557,14 @@ export function stepWalk(
       : stillStep(ticked.released, { road: { ...road, hitStop: null }, run });
   }
   const length = zoneLength(data, run);
-  const zone = advanceZones(
-    {
-      baseSpeed: walkScrollSpeed(data, run) * road.speedFactor,
-      zones: [{ length, speedMultiplier: 1 }],
-    },
-    stepSeconds,
-    { distance: run.zoneDistance, finished: false, zoneDistance: run.zoneDistance, zoneIndex: 0 },
-  );
-  const zoneDistance = zone.progress.zoneDistance;
+  // The step stops at the end of the zone.
+  let zoneDistance: number = run.zoneDistance;
+  let zoneEnded = false;
+  if (stepSeconds > 0) {
+    const step = walkScrollSpeed(data, run) * road.speedFactor * stepSeconds;
+    zoneEnded = !(step < length - zoneDistance);
+    zoneDistance = zoneEnded ? length : zoneDistance + step;
+  }
   const travel = zoneDistance - run.zoneDistance;
 
   const due = takeDueSpawns(zoneDistance, road.pending);
@@ -706,7 +704,6 @@ export function stepWalk(
     forcedStopOnRoad = null;
   }
 
-  const zoneEnded = zone.completedZones.length > 0;
   const hitStop = startHitStop(
     hitStopLength(
       {
