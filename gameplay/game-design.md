@@ -41,7 +41,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Spawning always leaves a reachable path, so every hit is avoidable
 - A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count. A hit that opens no card (a squirrel with no Chaser, a thief that flees, a skunk or puddle that catches nobody) is scenery: no bump and no grace window
 - Scroll speed and obstacle density rise gently each zone
-- **Pulls:** each dog pulls the pack one lane now and then, at an interval set by its energy: toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel), otherwise to a random side (inward at the road edge). The interval varies a little each time so pulls aren't predictable. Shortly before a pull the dog leans toward that side and barks. When the pull's lane move finishes, lane input locks for a time set by the dog's size. During a drag, a pull re-anchors the drag at the pack's new lane, so getting back takes another drag
+- **Pulls:** a dog pulls the pack one lane only toward something it wants that you can see: a treat (Food-driven), a squirrel (Chaser), or a spot for its urgent need. There are no random pulls. About 1 second before, a need or target bubble pops over the dog with an arrow and a line to the target, the leash goes taut and the dog strains; then the pack lurches one lane. Bigger dogs lock lane input longer after the move, and during a drag the pull re-anchors the drag at the new lane. A pull never moves the pack into an obstacle it can't react to: if the target lane has an obstacle too close, the dog strains but doesn't pull
 - **Area effects** (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have a dog caught; small dogs are caught less often. The card shows which dogs were caught, so its outcomes are fixed. If no dog is caught, no card opens
 
 ### Resources
@@ -57,14 +57,14 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Forks:** the road meets a cross street and a fork card offers three paths (left, straight, right), each leading to a zone you haven't walked this run, sorted easiest on the left to hardest on the right. Each path card shows the zone's name, difficulty and fee multiplier
 - **Zones** (6, each walk visits 4 with no repeats):
 
-| Zone               | Difficulty  | Fees  | Encounter mix                                                             |
-| ------------------ | ----------- | ----- | ------------------------------------------------------------------------- |
-| Snooze Crescent    | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
-| Bark Park          | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists          |
-| Woof Way           | Normal      | ×1    | Puddles, the mail carrier, cones; movers rare. Always the first zone      |
-| Sniff Street Shops | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers             |
-| Paws Promenade     | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds    |
-| The Long Way Home  | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
+| Zone | Difficulty | Fees | Encounter mix |
+| --- | --- | --- | --- | --- |
+| Snooze Crescent | Easiest | ×0.7 | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
+| Bark Park | Easy | ×0.8 | Other dogs, squirrels, more lucky finds; no thieves, no cyclists |
+| Woof Way | Normal | ×1 | Puddles, the mail carrier, cones; movers rare. Always the first zone |
+| Sniff Street Shops | Busy | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers |
+| Paws Promenade | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds |
+| The Long Way Home | Hard | ×1.5 | Everything, densest and fastest, the most movers |
 
 - After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
 - An owner who fires you takes back every fee their dog earned this run; tips stay
@@ -104,22 +104,39 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Size              | Small · medium · big. No size is a straight upgrade. Bigger dogs lock lane input longer after a pull (small: not at all) and have a higher max ♥. Each small dog attracts more Other dog encounters and each big dog fewer; any big dog scares thieves away. Small dogs are caught by area effects less often |
 | Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                     |
-| Energy            | Calm · steady · hyper. Sets how often the dog pulls                                                                                                                                                                                                                                                           |
+| Energy            | Calm · steady · hyper. Sets how quickly the dog's need becomes urgent                                                                                                                                                                                                                                         |
 | Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                                                    |
 
-| Dog      | Breed           | Owner                          | Look                                  |
+| Dog | Breed | Need | Owner | Look |
 | -------- | --------------- | ------------------------------ | ------------------------------------- |
-| Duchess  | Maltese         | Rosa, retired florist          | White coat, pink bow                  |
-| Nugget   | Pug             | Kevin, pet influencer          | Fawn, black mask, tiny bandana        |
-| Zippy    | Jack Russell    | Mr. Pruitt, retired accountant | White with tan patches, red collar    |
-| Pierre   | Standard poodle | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms           |
-| Biscuit  | Beagle          | Sam, barista                   | Tricolour, floppy ears, green collar  |
-| Dash     | Whippet         | Ophelia, stage actor           | Grey brindle, knit sweater            |
-| Snowball | Samoyed         | Tiffany, wedding planner       | Fluffy white, collar with a bell      |
-| Waffles  | Saint Bernard   | Dr. Hughes, dentist            | Brown and white, little barrel collar |
-| Koda     | Husky           | Jesse, trail runner            | Grey and white, blue eyes, harness    |
+| Duchess | Maltese | Friendly | Rosa, retired florist | White coat, pink bow |
+| Nugget | Pug | Thirsty | Kevin, pet influencer | Fawn, black mask, tiny bandana |
+| Zippy | Jack Russell | Playful | Mr. Pruitt, retired accountant | White with tan patches, red collar |
+| Pierre | Standard poodle | Nosy | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms |
+| Biscuit | Beagle | Regular | Sam, barista | Tricolour, floppy ears, green collar |
+| Dash | Whippet | Playful | Ophelia, stage actor | Grey brindle, knit sweater |
+| Snowball | Samoyed | Friendly | Tiffany, wedding planner | Fluffy white, collar with a bell |
+| Waffles | Saint Bernard | Thirsty | Dr. Hughes, dentist | Brown and white, little barrel collar |
+| Koda | Husky | Nosy | Jesse, trail runner | Grey and white, blue eyes, harness |
 
 Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait and have laid-back owners, for an easier first run. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
+
+### Needs
+
+Every dog has one need, shown as a word on its card:
+
+| Need     | Word     | Fulfilled by        |
+| -------- | -------- | ------------------- |
+| Potty    | Regular  | A hydrant or a tree |
+| Playful  | Playful  | Another dog         |
+| Friendly | Friendly | A stranger waving   |
+| Sniffy   | Nosy     | A lamp post         |
+| Thirsty  | Thirsty  | A water bowl        |
+
+- **Need spots** appear on the road like pickups. Steering the pack into one fulfils the matching dogs' needs: +♥ for their owners, a big need bubble and a happy owner. About 1 in 4 fulfilments opens a small card instead, e.g. "A stranger loves Duchess" (Let them fuss: +♥ and a tip · Keep walking) or "Play date!" (Let them play: +♥ each, −$ per dog in missed tips · Just a sniff: +♥ to the playful dog's owner)
+- **Urgency:** a need fills up during a zone, faster for higher energy. When it's urgent, a bubble with the need's icon shows over the dog, and it pulls toward the nearest matching spot
+- **Gone wrong:** an urgent need left too long goes wrong, then resets. A Regular dog has an accident and opens a card (Clean up with a bag: −$ · Walk on: −♥♥ and a grumpy neighbour); any other need costs its owner −♥
+- The Other dog encounter's Let them sniff fulfils Playful, and the Can I pet them? stop's Of course! fulfils Friendly
 
 ### Encounters
 
