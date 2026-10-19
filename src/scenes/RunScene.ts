@@ -39,6 +39,7 @@ import { pageRunSetup, runSetupLimitsFor } from "../dev/pageRunSetup";
 import { randomStream } from "../dev/randomStreams";
 import type { RunSetup } from "../dev/runSetup";
 import { loadoutFor, withSetupStart } from "../dev/setupRun";
+import { expectedRoadMs, startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
 import { type ChangeLabel, changeLabels } from "../hud/hudView";
 import {
   endScreenDelayMs,
@@ -104,6 +105,13 @@ import { currentZone, walkLength, zoneAt } from "../rules/route";
 import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
 import { holdForFiring } from "../runner/firingStop";
+import {
+  type FixedStepLimits,
+  frameSteps,
+  holdStepClock,
+  startStepClock,
+  type StepClock,
+} from "../runner/fixedStep";
 import { isSteeringLocked } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
 import { isMoverObstacle, type MoverOnRoad, moverPlace } from "../runner/movers";
@@ -218,9 +226,11 @@ export const QUIPS_EVENT = "quips";
 // AchievementId[] when the walk so far has earned badges, for a toast.
 export const ACHIEVEMENTS_EVENT = "achievements";
 
-// The simulation steps at a fixed rate, so a seed and an input log replay a run exactly.
+// Steps of 1/60 s. A frame catches up at most a second of steps (60), which covers a frame held
+// up by garbage collection or a slow device; a longer stall drops the rest rather than jumping
+// the walk ahead.
 const STEP_MS = 1000 / 60;
-const LONGEST_FRAME_MS = 250;
+const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 // An item plays the first of these tags it has: its own motion while the walk goes on, and
 // standing still while a card or the pause menu holds the walk.
 const ITEM_TAGS = {
@@ -306,7 +316,6 @@ const PLACEHOLDER_HEIGHT = 32;
 const SKUNK_IN_CLOUD = 8;
 
 export class RunScene extends Scene {
-  private accumulatorMs = 0;
   private achievements: AchievementPreview = NOTHING_PREVIEWED;
   private backdrop: GameObjects.Image | undefined;
   private banner: GameObjects.Container | undefined;
@@ -371,10 +380,12 @@ export class RunScene extends Scene {
   private setup: RunSetup | undefined;
   private statusMarks: readonly StatusMark[] = [];
   private statusOverlays: StatusOverlays | undefined;
+  private stepClock: StepClock = startStepClock;
   private stopSprites: { key: string; sprites: GameObjects.Sprite[] } = { key: "", sprites: [] };
   private stumbling = false;
   private walk: Walk | undefined;
   private walker: { key: string; sprite: GameObjects.Sprite } | undefined;
+  private zoneClocks: ZoneClocks = startZoneClocks(0);
   private zoneEndPending = false;
   private zoneShown = -1;
 
@@ -447,7 +458,6 @@ export class RunScene extends Scene {
   }
 
   private resetState(): void {
-    this.accumulatorMs = 0;
     this.achievements = NOTHING_PREVIEWED;
     this.cardQueue = [];
     this.cardView = undefined;
@@ -469,8 +479,10 @@ export class RunScene extends Scene {
     this.replay = undefined;
     this.runTimeMs = 0;
     this.statusMarks = [];
+    this.stepClock = startStepClock;
     this.stopSprites = { key: "", sprites: [] };
     this.stumbling = false;
+    this.zoneClocks = startZoneClocks(0);
     this.zoneEndPending = false;
     this.zoneShown = -1;
   }
@@ -730,17 +742,30 @@ export class RunScene extends Scene {
     }
   }
 
-  override update(_time: number, delta: number): void {
-    if (this.walk === undefined) {
+  override update(time: number): void {
+    const walk = this.walk;
+    if (walk === undefined) {
       return;
     }
-    this.accumulatorMs = Math.min(LONGEST_FRAME_MS, this.accumulatorMs + delta);
-    while (this.accumulatorMs >= STEP_MS && this.walking()) {
-      this.accumulatorMs -= STEP_MS;
+    const frame = frameSteps(STEPPING, time, this.stepClock);
+    this.stepClock = frame.clock;
+    const halted = !this.walking();
+    let roadMs = 0;
+    let stoppedMs = 0;
+    for (let step = 0; step < frame.steps && this.walking(); step++) {
+      if (this.walk?.road.hitStop == null) {
+        roadMs += STEP_MS;
+      } else {
+        stoppedMs += STEP_MS;
+      }
       this.simulate();
     }
+    const { frameMs } = frame;
+    const zoneIndex = walk.run.zoneIndex;
+    const clockFrame = { frameMs, halted, roadMs, stoppedMs, zoneIndex };
+    this.zoneClocks = tickZoneClocks(clockFrame, this.zoneClocks);
     if (!this.walking()) {
-      this.accumulatorMs = 0;
+      this.stepClock = holdStepClock(this.stepClock);
     }
     this.draw();
     this.emitDevState();
@@ -1425,10 +1450,15 @@ export class RunScene extends Scene {
     if (walk === undefined || setup === undefined) {
       return;
     }
+    const scrollSpeed = walkScrollSpeed(gameData, walk.run) * walk.road.speedFactor;
     const state: DevState = {
       run: walk.run,
-      scrollSpeed: walkScrollSpeed(gameData, walk.run) * walk.road.speedFactor,
+      scrollSpeed,
       setup,
+      time: {
+        clocks: this.zoneClocks,
+        expectedRoadMs: expectedRoadMs(zoneLength(gameData, walk.run), scrollSpeed),
+      },
       zoneDistance: walk.run.zoneDistance,
       zoneIndex: walk.run.zoneIndex,
     };

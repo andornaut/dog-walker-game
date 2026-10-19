@@ -1,4 +1,5 @@
 import type { RunSetup } from "./runSetup";
+import { lagMs, type ZoneClock, type ZoneClocks } from "./zoneClock";
 
 // Emitted on game.events with a DevState by whichever scene runs the road.
 export const DEV_STATE_EVENT = "dev-state";
@@ -23,6 +24,8 @@ export interface DevState {
   // Pixels per second, after the setup's speed multiplier.
   readonly scrollSpeed: number;
   readonly setup: RunSetup;
+  // The zone's wall-clock breakdown, and the road time the whole zone takes at scrollSpeed.
+  readonly time?: { readonly clocks: ZoneClocks; readonly expectedRoadMs: number };
   readonly zoneDistance: number;
   // 0-based, as RunState counts it.
   readonly zoneIndex: number;
@@ -31,6 +34,25 @@ export interface DevState {
 function moneyText(amountCents: number): string {
   const sign = amountCents < 0 ? "-" : "";
   return `${sign}$${(Math.abs(amountCents) / 100).toFixed(2)}`;
+}
+
+function secondsText(ms: number): string {
+  return `${(ms / 1000).toFixed(1)}s`;
+}
+
+function clockLines(expectedRoadMs: number, current: ZoneClock, last: ZoneClock | null): string[] {
+  const lines = [
+    `road ${secondsText(current.roadMs)} of ${secondsText(expectedRoadMs)}`,
+    `held ${secondsText(current.heldMs)}  wall ${secondsText(current.wallMs)}`,
+    `lag ${secondsText(lagMs(current))}`,
+  ];
+  if (last !== null) {
+    lines.push(
+      `zone ${last.zoneIndex + 1} wall ${secondsText(last.wallMs)}`,
+      ` road ${secondsText(last.roadMs)} held ${secondsText(last.heldMs)}`,
+    );
+  }
+  return lines;
 }
 
 // The overlay's lines. status is a transient message, such as the result of copying the link.
@@ -48,6 +70,10 @@ export function devOverlayLines(
       `zone ${state.zoneIndex + 1}  ${Math.floor(state.zoneDistance)}px`,
       `speed ${Math.round(state.scrollSpeed)}px/s x${setup.speed}`,
     );
+    if (state.time !== undefined) {
+      const { clocks, expectedRoadMs } = state.time;
+      lines.push(...clockLines(expectedRoadMs, clocks.current, clocks.last));
+    }
     if (state.run !== undefined) {
       lines.push(`money ${moneyText(state.run.money)}`);
       for (const slot of state.run.pack) {

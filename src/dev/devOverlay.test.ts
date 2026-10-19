@@ -50,6 +50,23 @@ describe("devOverlayLines", () => {
     ]);
   });
 
+  it("shows the zone's road, held, wall-clock and lag time, and the last zone's", () => {
+    const time = {
+      clocks: {
+        current: { heldMs: 12_000, roadMs: 60_000, wallMs: 75_000, zoneIndex: 1 },
+        last: { heldMs: 30_000, roadMs: 144_000, wallMs: 174_000, zoneIndex: 0 },
+      },
+      expectedRoadMs: 125_217,
+    };
+    expect(devOverlayLines(60, undefined, setup, { ...state, time }).slice(3, 8)).toEqual([
+      "road 60.0s of 125.2s",
+      "held 12.0s  wall 75.0s",
+      "lag 3.0s",
+      "zone 1 wall 174.0s",
+      " road 144.0s held 30.0s",
+    ]);
+  });
+
   it("shows a status in place of the key help", () => {
     expect(devOverlayLines(60, "link copied", setup, undefined).at(-1)).toBe("link copied");
   });

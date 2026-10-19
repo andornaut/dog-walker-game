@@ -527,6 +527,24 @@ describe("stepWalk", () => {
     expect(after.run.zoneDistance).toBe(length);
   });
 
+  it.each([
+    [1, 30],
+    [2, 15],
+  ])(
+    "takes the zone's length over its speed at speed x%i: %i s of 1/60 s steps",
+    (speedFactor, seconds) => {
+      const walk = walkWith(["koda"]);
+      let current: Walk = { ...walk, road: { ...walk.road, speedFactor } };
+      let steps = 0;
+      for (let ended = false; !ended; steps++) {
+        const next = step(current, 1 / 60);
+        current = next.walk;
+        ended = next.zoneEnded;
+      }
+      expect(Math.abs(steps - seconds * 60)).toBeLessThanOrEqual(1);
+    },
+  );
+
   it("stands still while a card is open", () => {
     const walk = walkWith(["koda"], [atPack("tip")]);
     const carded: Walk = {
