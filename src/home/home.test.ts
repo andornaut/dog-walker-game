@@ -223,12 +223,12 @@ describe("lastWalkLine", () => {
     },
     {
       changes: { route: ["street"] },
-      expected: "+$64. Headed home from Maple Street.",
+      expected: `+$64. Headed home from ${WORLD.name}.`,
       name: "names a zone the walk never picked as the world",
     },
     {
       changes: { outcome: "finished", zonesFinished: 4 },
-      expected: "+$64. Walked 4 zones of Maple Street.",
+      expected: `+$64. Walked 4 zones of ${WORLD.name}.`,
       name: "counts the zones a finished walk walked",
     },
   ])("$name", ({ changes, expected }) => {

@@ -1280,7 +1280,7 @@ export class RunScene extends Scene {
     });
   }
 
-  // "MAPLE STREET, ZONE n" and the zone's name, slid in over the road at each zone's start.
+  // "MAPLEWOOD, ZONE n" and the zone's name, slid in over the road at each zone's start.
   private showZoneBanner(): void {
     const walk = this.walk;
     if (walk === undefined || walk.run.zoneIndex === this.zoneShown) {

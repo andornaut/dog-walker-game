@@ -46,9 +46,9 @@ describe("gearDetail", () => {
     expect(card.lines.join(" ").toLowerCase()).toContain(
       effectText(data, data.shopGear.whistle.effects).toLowerCase(),
     );
-    expect(card.status).toBe("Equipped");
+    expect(card.status).toBe(data.homeText.detail.gearEquipped);
     expect(gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "whistle").status).toBe(
-      "Owned, tap to equip",
+      data.homeText.detail.gearOwned,
     );
   });
 

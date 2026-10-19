@@ -652,14 +652,14 @@
           width="360"
           height="600"
           role="img"
-          aria-label="A dog walker and three dogs walking up Maple Street through its four zones, switching lanes to collect tips, around obstacles and past a squirrel, a loose dog, a ball and a cyclist"
+          aria-label="A dog walker and three dogs walking through the four zones of Maplewood, switching lanes to collect tips, around obstacles and past a squirrel, a loose dog, a ball and a cyclist"
         ></canvas>
       </section>
 
       <dl class="stats" aria-label="In the game">
         <div>
           <dt>4</dt>
-          <dd>zones of Maple Street, about 12 minutes a walk</dd>
+          <dd>zones of Maplewood, about 8 minutes a walk</dd>
         </div>
         <div>
           <dt>9</dt>
@@ -2224,7 +2224,7 @@
             }),
           ]);
           if (KEYS.some((k) => !art[k]) || ZONES.some((z) => !z.backdrop || !z.road)) return;
-          // Each zone's banner: "Maple Street, zone n" over the zone's name, in plum.
+          // Each zone's banner: "Maplewood, zone n" over the zone's name, in plum.
           if (banner && title)
             ZONES.forEach((z, i) => {
               const c = document.createElement("canvas");
@@ -2232,7 +2232,7 @@
               c.height = 48;
               const x = c.getContext("2d");
               x.drawImage(banner, 0, 0);
-              write(x, title, `Maple Street, zone ${i + 1}`, { x: 124, y: 11, color: PLUM });
+              write(x, title, `Maplewood, zone ${i + 1}`, { x: 124, y: 11, color: PLUM });
               write(x, title, z.name, { x: 124, y: 27, color: PLUM, scale: 2 });
               z.banner = c;
             });
