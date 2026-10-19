@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 """Draw the road feedback for heart changes, near misses and minor bumps: the
 broken heart that pops over a dog and arcs into its doghouse, the pink heart
-that pops and flies up, the small splash or puff of an area effect that caught
-nobody, and the coins that burst from the pack on a minor bump.
+that pops and flies up, the small splash when an all-small pack hops a puddle,
+and the coins that burst from the pack on a minor bump.
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
 ink holds on the light roads and the cream doghouse and the white on Elm Avenue
-and the dimmed road. The splash takes the navy rim, the puff fx-hit-skunk's
-mauve in its plum rim, the coins fx-coin-fly's coin in its plum rim.
+and the dimmed road. The splash takes the navy rim, the coins fx-coin-fly's coin in its plum rim.
 
 fx-heart-loss  32x32  pop (6 frames: 50, 50, 90, 90, 90, 450ms; 820ms)  a small whole heart
                       pops in on a white star, then the big heart (17x15 in its rims, 21x19)
@@ -30,14 +29,13 @@ fx-heart-gain  32x32  pop (5 frames: 50, 50, 90, 90, 450ms; 730ms)  the same pop
                       centred on row 16. The game swaps pop's last frame for fly at the same
                       point and tweens fly's centre to the slot's heartLabels band (slot x 2
                       to 117, rows 64 to 87), where its 14 rows fit.
-fx-close-one   32x32  splash (5 frames, 70ms)  a small puddle splash: a ripple at the feet, a
-                      few drops up and back
-                      puff (5 frames, 80ms)  a small mauve stink puff (fx-hit-skunk's mauve and
-                      plum): three puffs swell, rise and break apart, a stink line curling up
-                      splash-word, puff-word  the same frames and timing, with PHEW! in the
-                      comic lettering in rows 1 to 11 over frames 0 to 3
+fx-hop-splash  32x32  splash (5 frames, 70ms)  a small puddle splash as an all-small pack hops
+                      a puddle: a ripple at the feet, a few drops up and back
+                      splash-word  the same frames and timing, with HOP! in the comic lettering
+                      in rows 1 to 11 over frames 0 to 3
                       The frame's centre column on the pack's centre, its bottom row on the
-                      walker's feet. The game writes "Close one!" centred on x 16, its line
+                      walker's feet. With splash-word the comic word is the label; with reduced
+                      motion the game plays splash and writes "Hop!" centred on x 16, its line
                       bottom 2px above the frame's top row
 fx-coin-burst  64x48  play (7 frames, 70ms; 490ms)  an amber pop at (32, 28), then five of
                       fx-coin-fly's coins thrown up and out, spinning, falling back under
@@ -170,12 +168,12 @@ def fly_gain(glint):
     return ringed(g)
 
 
-# ---------- the close one ----------
+# ---------- the hop splash ----------
 
 FEET = 28
 
 
-def close_splash(step):
+def hop_splash(step):
     """A small crown of water rises from a ripple at the feet and falls back, throwing five drops up and
     out; the ripple spreads and opens to a thin ring."""
     g = Grid(32, 32)
@@ -201,36 +199,8 @@ def close_splash(step):
     return rim(g, "navy")
 
 
-def close_puff(step):
-    """Three mauve puffs swell at the feet, rise and drift apart, the middle one breaking first, with a
-    stink line curling up out of them."""
-    g = Grid(32, 32)
-    rise = (0, 1, 3, 5, 7)[step]
-    spread = (0, 1, 2, 4, 5)[step]
-    r = (3, 4.2, 4.8, 4, 2.8)[step]
-    puffs = ((16 - 4 - spread, FEET - 3 - rise, r * 0.9), (16 + 4 + spread, FEET - 2 - rise, r * 0.85))
-    if step < 4:
-        puffs += ((16, FEET - 5 - rise * 1.2, r * 1.15),)
-
-    def cloud(p):
-        for x, y, pr in puffs:
-            p.ell(x, y, pr + 0.5, pr, "mauve", "purple", "pink" if step < 2 else None)
-    piece(g, cloud, "plum", 32)
-    if step >= 1:
-        # two stink lines curling up out of the puffs, pink with a plum side, as fx-hit-skunk's
-        squiggle = Grid(32, 32)
-        for x0, base, lean in ((12, FEET - 8, -1), (20, FEET - 9, 1)):
-            top = base - rise * 1.3
-            for t in range((3, 5, 6, 5)[step - 1]):
-                x = x0 + (0, 1, 1, 0, -1, -1)[(t + step) % 6] + lean * (t // 3)
-                squiggle.p(x, round(top - t), "pink")
-                squiggle.p(x + 1, round(top - t), "plum")
-        layer(g, squiggle)
-    return g
-
-
 # The comic word shows over frames 0 to 3, its ink ring's top on row 1.
-WORD = "PHEW!"
+WORD = "HOP!"
 WORD_FRAMES = 4
 
 
@@ -277,10 +247,8 @@ def sprites():
                             ("fly", [fly_loss(b).outlined(False) for b in (0, 1)], 120)]
     yield "fx-heart-gain", [("pop", [heart_gain(i).outlined(False) for i in range(5)], [50, 50, 90, 90, 450]),
                             ("fly", [fly_gain(b).outlined(False) for b in (0, 1)], 120)]
-    yield "fx-close-one", [("splash", [close_splash(i).outlined(False) for i in range(5)], 70),
-                           ("puff", [close_puff(i).outlined(False) for i in range(5)], 80),
-                           ("splash-word", [worded(close_splash(i), i).outlined(False) for i in range(5)], 70),
-                           ("puff-word", [worded(close_puff(i), i).outlined(False) for i in range(5)], 80)]
+    yield "fx-hop-splash", [("splash", [hop_splash(i).outlined(False) for i in range(5)], 70),
+                            ("splash-word", [worded(hop_splash(i), i).outlined(False) for i in range(5)], 70)]
     yield "fx-coin-burst", [("play", [coin_burst(i).outlined(False) for i in range(7)], 70)]
 
 

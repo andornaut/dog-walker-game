@@ -963,11 +963,6 @@
       "json": "sprites/fx-bump.json"
     },
     {
-      "key": "fx-close-one",
-      "png": "sprites/fx-close-one.png",
-      "json": "sprites/fx-close-one.json"
-    },
-    {
       "key": "fx-coin-burst",
       "png": "sprites/fx-coin-burst.png",
       "json": "sprites/fx-coin-burst.json"
@@ -1056,6 +1051,11 @@
       "key": "fx-hit-trash",
       "png": "sprites/fx-hit-trash.png",
       "json": "sprites/fx-hit-trash.json"
+    },
+    {
+      "key": "fx-hop-splash",
+      "png": "sprites/fx-hop-splash.png",
+      "json": "sprites/fx-hop-splash.json"
     },
     {
       "key": "fx-lemonade",
