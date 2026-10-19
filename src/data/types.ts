@@ -84,6 +84,7 @@ export interface Tuning {
   };
   readonly multipliers: OpenGroup & {
     readonly heartsByTemperament: Table<Temperament>;
+    readonly pullIntervalJitter: number;
     readonly scrollSpeedGainPerZone: number;
     readonly tipByPackSize: Table<number>;
   };

@@ -73,6 +73,8 @@ export const TUNING = {
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
     otherDogChangePerBigDog: -0.25,
     otherDogChangePerSmallDog: 0.25,
+    // Each pull interval varies by up to this share of it, either way.
+    pullIntervalJitter: 0.25,
     runningShoesInputLock: 0,
     rushHourObstacles: 1.5,
     rushHourTips: 2,

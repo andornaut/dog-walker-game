@@ -83,11 +83,18 @@ function treatLane(geometry: Pick<RoadGeometry, "packBand">, walk: Walk): number
   return nearest?.lane;
 }
 
+// direction from lane, turned inward when it would leave the road.
+function inward(laneCount: number, lane: number, direction: LaneDirection): LaneDirection {
+  const to = lane + direction;
+  return to < 0 || to >= laneCount ? (-direction as LaneDirection) : direction;
+}
+
 // Toward the dog's trait target when it has one off the pack's lane, otherwise toward the
-// random side. The side is drawn either way, so the stream's draws do not depend on the road.
+// random side, turned inward at the road edge. The side is drawn either way, so the stream's
+// draws do not depend on the road.
 function pullDirection(
   data: PullData,
-  geometry: Pick<RoadGeometry, "packBand">,
+  geometry: Pick<RoadGeometry, "laneCount" | "packBand">,
   random: Random,
   dog: DogId,
   walk: Walk,
@@ -96,9 +103,16 @@ function pullDirection(
   const target = data.dogs[dog].trait === "foodDriven" ? treatLane(geometry, walk) : undefined;
   const lane = destinationLane(walk.road.control.motion);
   if (target === undefined || target === lane) {
-    return side;
+    return inward(geometry.laneCount, lane, side);
   }
   return target < lane ? -1 : 1;
+}
+
+// The dog's interval, varied by up to pullIntervalJitter of it either way.
+function jitteredInterval(data: PullData, random: Random, dog: DogId, walk: Walk): number {
+  const interval = pullIntervalSeconds(data.tuning, walk.run.modifiers, data.dogs[dog]);
+  const jitter = read(data.tuning, "multipliers", "pullIntervalJitter");
+  return interval * (1 + jitter * (2 * random() - 1));
 }
 
 // A dog's first pull comes at a random point of its first interval, after a whole tell, so
@@ -110,8 +124,9 @@ function firstPull(data: PullData, random: Random, clock: number, dog: DogId, wa
 }
 
 // One step of the pull clock: each walking dog leans and barks pullTell seconds before its
-// pull, then pulls toward the side it leaned and schedules its next pull one interval later.
-// Fired dogs drop out. Nothing moves unless the walk is walking with no hit stop.
+// pull, then pulls toward the side it leaned, inward if the pack has since reached that edge,
+// and schedules its next pull one jittered interval later. Fired dogs drop out. Nothing moves
+// unless the walk is walking with no hit stop.
 export function stepPulls(
   data: PullData,
   geometry: Pick<RoadGeometry, "laneCount" | "packBand">,
@@ -139,15 +154,16 @@ export function stepPulls(
     if (state.lean === null || clock < state.at) {
       return state;
     }
-    const pull = pullWalk(data, geometry.laneCount, dog, state.lean, current);
+    const lane = destinationLane(current.road.control.motion);
+    const direction = inward(geometry.laneCount, lane, state.lean);
+    const pull = pullWalk(data, geometry.laneCount, dog, direction, current);
     current = pull.walk;
-    pulled.push({ direction: state.lean, dog, moved: pull.moved });
-    const interval = pullIntervalSeconds(data.tuning, walk.run.modifiers, data.dogs[dog]);
+    pulled.push({ direction, dog, moved: pull.moved });
     return {
-      at: state.at + interval,
+      at: state.at + jitteredInterval(data, random, dog, walk),
       dog,
       lean: null,
-      pulled: { at: clock, direction: state.lean },
+      pulled: { at: clock, direction },
     };
   });
   return { pulled, pulls: { clock, dogs }, tells, walk: current };

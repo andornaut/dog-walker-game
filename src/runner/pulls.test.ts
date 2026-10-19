@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { itemAt } from "../arrays";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
@@ -17,7 +18,7 @@ import { clampHearts } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { advanceLaneControl, isSteeringLocked, laneControlIn } from "./laneControl";
+import { advanceLaneControl, laneControlIn } from "./laneControl";
 import { destinationLane, stillInLane } from "./laneMotion";
 import {
   gestureAfterPulls,
@@ -132,20 +133,38 @@ describe("stepPulls scheduling", () => {
     expect(play(2).pulls).not.toEqual(first.pulls);
   });
 
-  it("pulls again one interval after each pull", () => {
+  // Biscuit is hyper: 15s, varied by up to 25% either way.
+  const pullTimes = (random: Random, seconds: number) => {
     let pulls = pullsAt(2, "biscuit");
-    let walk = walkWith(["biscuit"]);
+    const walk = walkWith(["biscuit"]);
     const times: number[] = [];
-    for (let frame = 0; frame < 60 * 40; frame++) {
-      const stepped = step(pulls, walk);
+    for (let frame = 0; frame < 60 * seconds; frame++) {
+      const stepped = step(pulls, walk, FRAME, random);
       if (stepped.pulled.length > 0) {
         times.push(stepped.pulls.clock);
       }
       pulls = stepped.pulls;
-      walk = walkWith(["biscuit"]);
     }
-    expect(times).toHaveLength(3);
-    times.forEach((time, index) => expect(time).toBeCloseTo(2 + 15 * index, 1));
+    return times;
+  };
+  const gaps = (times: number[]) =>
+    times.slice(1).map((time, index) => time - itemAt(times, index));
+
+  it("schedules each next pull one interval later, jittered by the drawn share", () => {
+    expect(gaps(pullTimes(fixed(0), 40))[0]).toBeCloseTo(15 * 0.75, 1);
+    expect(gaps(pullTimes(fixed(0.5), 40))[0]).toBeCloseTo(15, 1);
+    expect(gaps(pullTimes(fixed(0.9999), 50))[0]).toBeCloseTo(15 * 1.25, 1);
+  });
+
+  it("keeps every jittered interval within a quarter of the energy's interval", () => {
+    const intervals = gaps(pullTimes(randomStream(3, "pulls"), 600));
+    expect(intervals.length).toBeGreaterThan(30);
+    intervals.forEach((gap) => {
+      expect(gap).toBeGreaterThanOrEqual(15 * 0.75 - FRAME);
+      expect(gap).toBeLessThanOrEqual(15 * 1.25 + FRAME);
+    });
+    expect(Math.min(...intervals)).toBeLessThan(13);
+    expect(Math.max(...intervals)).toBeGreaterThan(17);
   });
 
   it("drops a fired dog's pulls", () => {
@@ -207,14 +226,27 @@ describe("stepPulls lane change", () => {
     });
   });
 
-  it("is blocked at the road edge: the pack stays and input locks at once", () => {
-    const edge = walkWith(["koda"], 0);
-    const telling = step(pullsAt(1, "koda"), edge);
+  it("turns a random side off the road edge inward, for the lean and the pull", () => {
+    const left = walkWith(["koda"], 0);
+    const telling = step(pullsAt(1, "koda"), left);
+    expect(telling.tells).toEqual([{ direction: 1, dog: "koda" }]);
     const pulled = step(telling.pulls, telling.walk, 1);
-    expect(pulled.pulled).toEqual([{ direction: -1, dog: "koda", moved: false }]);
-    expect(pulled.walk.road.control.target).toBe(0);
-    expect(pulled.walk.road.control.motion).toEqual(stillInLane(0));
-    expect(isSteeringLocked(pulled.walk.road.control)).toBe(true);
+    expect(pulled.pulled).toEqual([{ direction: 1, dog: "koda", moved: true }]);
+    expect(pulled.walk.road.control.target).toBe(1);
+
+    const right = walkWith(["koda"], 4);
+    expect(step(pullsAt(1, "koda"), right, FRAME, fixed(0.75)).tells).toEqual([
+      { direction: -1, dog: "koda" },
+    ]);
+  });
+
+  it("pulls inward when the pack reached the leaned-to edge during the tell", () => {
+    const telling = step(pullsAt(1, "koda"), walkWith(["koda"], 1));
+    expect(telling.tells).toEqual([{ direction: -1, dog: "koda" }]);
+    const pulled = step(telling.pulls, walkWith(["koda"], 0), 1);
+    expect(pulled.pulled).toEqual([{ direction: 1, dog: "koda", moved: true }]);
+    expect(pulled.walk.road.control.target).toBe(1);
+    expect(pullPose(data, pulled.pulls, "koda")).toEqual({ direction: 1, tag: "pull" });
   });
 
   it("locks nothing for a small dog, or with running shoes", () => {
