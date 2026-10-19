@@ -31,14 +31,12 @@ export function isNewBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: C
 }
 
 // counters is null for a checkpoint saved before achievements.
-interface BankedRun {
-  counters: RunCounters | null;
-  dogs: DogRun[];
-  earnedCents: Cents;
+type BankedRun = Pick<
+  Checkpoint,
+  "counters" | "dogs" | "earnedCents" | "route" | "zonesFinished"
+> & {
   outcome: EndReason;
-  route: ZoneId[];
-  zonesFinished: number;
-}
+};
 
 // Banks the earnings, counts the outcome and updates every stat and the logbook. Clears the
 // checkpoint, since the run it belonged to is now banked. Then awards what the run earned.
@@ -111,18 +109,7 @@ export function bankCheckpoint(context: AwardContext, save: SaveDocument): SaveD
   if (checkpoint === null) {
     return save;
   }
-  return bankRun(
-    context,
-    {
-      counters: checkpoint.counters,
-      dogs: checkpoint.dogs,
-      earnedCents: checkpoint.earnedCents,
-      outcome: "wentHome",
-      route: checkpoint.route,
-      zonesFinished: checkpoint.zonesFinished,
-    },
-    save,
-  );
+  return bankRun(context, { ...checkpoint, outcome: "wentHome" }, save);
 }
 
 // Banks a run that ended.
