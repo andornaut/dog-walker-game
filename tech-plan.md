@@ -6,7 +6,7 @@
 - Port to iOS and Android later
 - Mostly vibe coded (AI-assisted)
 - **Engine:** Phaser 4 + TypeScript, built with Vite. Web-native, AI tools write it well, fully terminal-driven, and the build is static files. Mobile later by wrapping the web build (e.g. Capacitor).
-- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `gameplay/v1-plan.md`, not in a GitHub Projects board.
+- **Repo:** private GitHub repository `andornaut/dog-walker-game`. Milestones live in `gameplay/game-design.md`, not in a GitHub Projects board.
 - **Hosting:** Cloudflare Workers static assets (no Worker script), free and unmetered.
 - **Deploys:** Cloudflare Workers Builds deploys every push to `main`. It runs independently of GitHub CI, so a commit with red CI still deploys. This is a deliberate exception to gating a release on its checks.
 - **Tooling:** copied from `andornaut/cloudflare-starter`: Node 24, Vitest, ESLint with the shared house rules, Prettier, markdownlint, husky + lint-staged pre-commit, Dependabot, and the Test and AI attributions workflows.
@@ -53,7 +53,7 @@ Player state that outlives a run. Local only: no accounts, no cloud saves.
   - A run banked from a zone checkpoint counts as headed home.
 - **Format:** one JSON document under one key (`dog-walker-game:save`) with a `version` field. Every write replaces the whole document.
 - **Validation:** a Valibot schema parses every load. The types come from the schema. Ids the data no longer has are dropped. A save that fails validation is kept under a backup key, and the game starts fresh instead of crashing.
-- **Migrations:** an ordered list of pure functions (v1 to v2, and so on), each tested against a fixture save. Renaming a dog or gear id needs one.
+- **Migrations:** an ordered list of pure functions (save version 1 to 2, and so on), each tested against a fixture save. Renaming a dog or gear id needs one.
 - **Storage interface:** async (`load()` and `save()` return promises) from the start. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter replaces it in the mobile app, where iOS can evict web view storage. If storage is unavailable or throws (private browsing, quota), the game stays playable and says progress won't be saved.
 - **When it writes:** on a shop purchase, at run end, and after each zone. The zone checkpoint records the run's earnings so far. On the next launch an unfinished run is banked as if the player had headed home.
 - **Code:** `src/save/` holds pure schema, migrations and load/save logic, tested with an in-memory store. Only the adapter touches browser storage.
