@@ -495,21 +495,20 @@ class Scene(Canvas):
 
     def doghouse(self, x, y, key, hearts):
         """A 120x90 dog slot as ui-doghouse lays it out (see its docstring in ui.py), in slot
-        pixels: the house roofed in the dog's colour, the name centred at 60 on the roof's name
-        plate (rows 4 to 15, at 2x where it fits the plate's 80px), the dog in the door at (6, 24),
-        the owner in the window at (42, 24), the hearts from (78, 26) in rows of five 8px apart
-        on the board with the n/max count centred at (98, 46) under them, the status pegs at
-        (78, 62) and (98, 62) left empty, and the owner's name at x 6 on the name strip (rows 60
-        to 70). At 0 hearts the owner has fired you: the house is the grey empty one with FIRED
-        centred on its plate (rows 72 to 82)."""
+        pixels: the dog's file card, the name centred at 60 with its caps from row 6 on the
+        header's name plate (at 2x where it fits name.width), the dog in its photo at (6, 24),
+        the owner in theirs at (42, 24), the hearts from (78, 26) in rows of five 8px apart in
+        the hearts box with the n/max count centred at (98, 46) under them, the status boxes at
+        (78, 62) and (98, 62) left empty, and the owner's name at x 6 on the ID line (rows 60
+        to 70). At 0 hearts the owner has fired you: the card is the grey empty one with FIRED
+        in white centred on its plate (caps from row 74)."""
         name, owner, max_h, _ = dog(key)
         self.paste(frame("ui-doghouse", key if hearts else "empty"), x, y)
-        if text_w(name, 2) <= 76:
-            text_c(self, name, x + 60, y + 5, "plum", 2)
-        else:
-            text_c(self, name, x + 60, y + 8, "plum")
+        plate = DOGHOUSE["name"]
+        text_c(self, name, x + plate["x"], y + plate["y"], "plum", 2 if text_w(name, 2) <= plate["width"] else 1)
         if not hearts:
-            text_c(self, "FIRED", x + 60, y + 75, "dred")
+            fired = DOGHOUSE["fired"]
+            text_c(self, "FIRED", x + fired["x"], y + fired["y"], "white")
             return
         m, dog_face, owner_face, row = mood(hearts), DOGHOUSE["dogFace"], DOGHOUSE["ownerFace"], DOGHOUSE["hearts"]
         self.paste(frame(f"face-dog-{key}", m), x + dog_face["x"], y + dog_face["y"])
@@ -601,7 +600,7 @@ def cards():
 def owners():
     c = Scene()
     c.fill(0, 0, W, H, "dbrown")
-    # Koda's house at its starting hearts, a fingertip tapping the wall under the board to give
+    # Koda's card at its starting hearts, a fingertip tapping the card under the hearts box to give
     # a treat, clear of the faces, hearts and names
     _, _, _, start = dog("koda")
     c.doghouse(8, 8, "koda", start)
@@ -614,7 +613,7 @@ def owners():
         c.fill(x, 164, 36, 36, "tan")
         c.paste(frame("face-owner-koda", m), x + 2, 166)
         text_c(c, m.upper(), x + 18, 204, "cream")
-    # Nugget's house at 0 hearts, and the firing moment under it: the owner's fired face in
+    # Nugget's card at 0 hearts, and the firing moment under it: the owner's fired face in
     # fx-fired-pop's storm with the cracked heart, and the FIRED! plate in the owner's
     # temperament (ui-fired-plate stretched to 72x28, the text's caps in rows 9 to 18)
     name, _, _, _ = dog("nugget")

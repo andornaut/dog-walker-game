@@ -3525,6 +3525,10 @@
       "png": "images/ui-detail-well.png"
     },
     {
+      "key": "ui-dog-band",
+      "png": "images/ui-dog-band.png"
+    },
+    {
       "key": "ui-hint",
       "png": "images/ui-hint.png"
     },
