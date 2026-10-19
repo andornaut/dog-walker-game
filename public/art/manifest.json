@@ -3172,7 +3172,7 @@
       "png": "sprites/roadside-house-cottage-pink@62.png",
       "json": "sprites/roadside-house-cottage-pink@62.json",
       "anchor": {
-        "feetY": 67,
+        "feetY": 68,
         "opaqueWidth": 75
       }
     },
@@ -3190,7 +3190,7 @@
       "png": "sprites/roadside-house-cottage-pink@88.png",
       "json": "sprites/roadside-house-cottage-pink@88.json",
       "anchor": {
-        "feetY": 94,
+        "feetY": 95,
         "opaqueWidth": 105
       }
     },
@@ -3208,7 +3208,7 @@
       "png": "sprites/roadside-house-cottage@62.png",
       "json": "sprites/roadside-house-cottage@62.json",
       "anchor": {
-        "feetY": 67,
+        "feetY": 68,
         "opaqueWidth": 75
       }
     },
@@ -3226,7 +3226,7 @@
       "png": "sprites/roadside-house-cottage@88.png",
       "json": "sprites/roadside-house-cottage@88.json",
       "anchor": {
-        "feetY": 94,
+        "feetY": 95,
         "opaqueWidth": 105
       }
     },
@@ -3271,7 +3271,7 @@
       "png": "sprites/roadside-house-porch-tan@75.png",
       "json": "sprites/roadside-house-porch-tan@75.json",
       "anchor": {
-        "feetY": 73,
+        "feetY": 74,
         "opaqueWidth": 105
       }
     },
@@ -3280,7 +3280,7 @@
       "png": "sprites/roadside-house-porch-tan@88.png",
       "json": "sprites/roadside-house-porch-tan@88.json",
       "anchor": {
-        "feetY": 85,
+        "feetY": 86,
         "opaqueWidth": 122
       }
     },
@@ -3307,7 +3307,7 @@
       "png": "sprites/roadside-house-porch@75.png",
       "json": "sprites/roadside-house-porch@75.json",
       "anchor": {
-        "feetY": 73,
+        "feetY": 74,
         "opaqueWidth": 105
       }
     },
@@ -3316,7 +3316,7 @@
       "png": "sprites/roadside-house-porch@88.png",
       "json": "sprites/roadside-house-porch@88.json",
       "anchor": {
-        "feetY": 85,
+        "feetY": 86,
         "opaqueWidth": 122
       }
     },
@@ -3425,7 +3425,7 @@
       "json": "sprites/roadside-lamp-post@50.json",
       "anchor": {
         "feetY": 62,
-        "opaqueWidth": 14
+        "opaqueWidth": 13
       }
     },
     {
@@ -3434,7 +3434,7 @@
       "json": "sprites/roadside-lamp-post@62.json",
       "anchor": {
         "feetY": 77,
-        "opaqueWidth": 18
+        "opaqueWidth": 17
       }
     },
     {
@@ -3443,7 +3443,7 @@
       "json": "sprites/roadside-lamp-post@75.json",
       "anchor": {
         "feetY": 93,
-        "opaqueWidth": 21
+        "opaqueWidth": 20
       }
     },
     {
