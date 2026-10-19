@@ -140,7 +140,7 @@ export const TUNING = {
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {
-    roadScrollSpeed: 150,
+    roadScrollSpeed: 200,
     // Road distance between rows of spawns; a row is all spawns at one distance.
     spawnRowSpacing: 160,
     // A press that drifts further than this is no longer a tap.
