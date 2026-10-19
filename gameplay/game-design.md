@@ -45,7 +45,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Pickups:** things you want to hit: treats (carried, then given to the dog of your choice to raise its owner's happiness) and tips (money).
 - **Encounters:** collisions pause the run and offer a choice, usually trading money against owner happiness or a debuff. Some problems can be fixed with money, e.g. skunk: pay a lot for grooming, or less and take the lingering **Stinky** debuff. Choices only in v1. Each option's outcome is fixed and shown on the card. An option you can't afford is disabled; every encounter has a free option.
 - **Forced stops:** one per zone, drawn from a pool with no repeats in a run; always triggers a choice.
-- **Area effects:** roll once per dog, so a bigger pack is more likely to have someone affected.
+- **Area effects:** skunk and puddle roll once per dog, so a bigger pack is more likely to have someone caught; the card shows who was caught before you choose.
 - **Scenery gags:** harmless neighbourhood moments that open no card.
 - **Money:** the only currency. Earned in-run (tips, and each dog's fee per zone survived), spent on encounter choices, banked between runs.
 - **Run end:** finishing zone 4, no dogs left, or heading home (any time; the current zone pays nothing). Failure is gentle: you keep what you've earned.

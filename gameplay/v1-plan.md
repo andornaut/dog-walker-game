@@ -17,7 +17,7 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
 - Calm speed: scroll speed and density both rise gently per zone, never frantic
 - Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back
-- Area effects roll once per dog, so a bigger pack is more likely to have someone affected. Which encounters are area effects, and how the card shows who was caught, is open
+- Area effects (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have someone caught. The card then shows which dogs were caught, so its outcomes stay fixed; if nobody is caught, there is no card
 
 ### Resources
 
@@ -75,13 +75,13 @@ More dogs means more pay and a longer-lasting run, but more owners to keep happy
 
 ### Encounters (things you hit by accident → choice card)
 
-| Encounter | Who's affected                                    | Options                                                                        |
-| --------- | ------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Skunk     | All dogs                                          | Pay $$$ for grooming · Pay $ for a quick rinse → _Stinky_ · Ignore → −2 ♥ each |
-| Squirrel  | Chasers (none: harmless scenery, no card)         | Hold tight → −1 ♥ · Let them chase → lose $ (dropped tips)                     |
-| Puddle    | All; Fancy dogs worse                             | Go through → −1 ♥ (−2 Fancy) · Pay $ for a towel                               |
-| Other dog | All dogs                                          | Let them sniff → +1 ♥ each, −$ per dog (missed tips) · Pull away → −1 ♥ each   |
-| Thief     | All dogs (none if any big dog: it flees, no card) | Chase them off → −1 ♥ each (dogs worked up) · Let it go → −$ (stolen tips)     |
+| Encounter | Who's affected                                         | Options                                                                        |
+| --------- | ------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| Skunk     | Area effect: dogs caught by the roll                   | Pay $$$ for grooming · Pay $ for a quick rinse → _Stinky_ · Ignore → −2 ♥ each |
+| Squirrel  | Chasers (none: harmless scenery, no card)              | Hold tight → −1 ♥ · Let them chase → lose $ (dropped tips)                     |
+| Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Go through → −1 ♥ (−2 Fancy) · Pay $ for a towel                               |
+| Other dog | All dogs                                               | Let them sniff → +1 ♥ each, −$ per dog (missed tips) · Pull away → −1 ♥ each   |
+| Thief     | All dogs (none if any big dog: it flees, no card)      | Chase them off → −1 ♥ each (dogs worked up) · Let it go → −$ (stolen tips)     |
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card and have no effect.
 
@@ -122,7 +122,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 
 ## Starting numbers
 
-Placeholders sized for ~3-minute zones. A full run is estimated at ~$215 with 2 dogs and ~$260 with 3.
+Placeholders sized for ~3-minute zones. Once the tech session has these as typed data in `src/data/`, that becomes the source of truth for numbers and roster stats, and this table is replaced by a link to it. A full run is estimated at ~$215 with 2 dogs and ~$260 with 3.
 
 | What                         | Value                                                                               |
 | ---------------------------- | ----------------------------------------------------------------------------------- |
@@ -134,6 +134,7 @@ Placeholders sized for ~3-minute zones. A full run is estimated at ~$215 with 2 
 | Fee per zone survived        | $20; fussy owners $25                                                               |
 | Other dog spawns             | +25% per small dog, −25% per big dog                                                |
 | Thief: let it go             | −$10                                                                                |
+| Area-effect roll             | 50% per dog                                                                         |
 | Pull interval (energy)       | About every 60s calm · 30s steady · 15s hyper                                       |
 | Input lock after a pull      | Small 0s · medium 0.25s · big 0.5s                                                  |
 | Tip                          | $2 (Big tipper $3, Stinky $1)                                                       |
