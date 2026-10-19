@@ -27,8 +27,8 @@ export function moneyTop(scale: number): number {
 // 0/3, both centred across the well. The count is at 2x with its glyphs a font pixel closer, so
 // it keeps WELL_INSET clear of the well's sides, and its capitals start 2px under the bone.
 export const TREAT_WELL = {
-  countTop: TOP_BAR.treats.y + 13,
   countStyle: { letterSpacing: -1, scale: 2 },
+  countTop: TOP_BAR.treats.y + 13,
   icon: { x: TOP_BAR.treats.x + (TOP_BAR.treats.width - 16) / 2, y: TOP_BAR.treats.y },
 } as const;
 

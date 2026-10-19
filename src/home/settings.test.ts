@@ -99,7 +99,7 @@ describe("settingsLayout", () => {
       throw new Error("no row");
     }
     if (kind === "switch") {
-      const { linePitch, noteDy, labelDy, switch: face } = SETTINGS_ROW.switch;
+      const { labelDy, linePitch, noteDy, switch: face } = SETTINGS_ROW.switch;
       expect(labelDy + 10).toBeLessThan(noteDy);
       expect(noteDy + linePitch + 14).toBeLessThanOrEqual(row.height);
       expect(face.dy + face.height).toBeLessThanOrEqual(row.height);

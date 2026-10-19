@@ -2,8 +2,8 @@ import type { DogId } from "../data/types";
 import type { Point, Rect } from "../layout/rect";
 import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
-import type { ChangeLabel } from "./hudView";
 import { DOGHOUSE } from "./doghouse";
+import type { ChangeLabel } from "./hudView";
 import { TREAT_WELL } from "./topBar";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a

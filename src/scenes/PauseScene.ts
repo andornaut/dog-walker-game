@@ -5,10 +5,10 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
   HOME_QUESTION_ANSWERS,
-  NOTE_PLATE,
-  PAUSE_NOTE_WIDTH,
   homeQuestionLayout,
+  NOTE_PLATE,
   PAUSE_MENU_ITEMS,
+  PAUSE_NOTE_WIDTH,
   type PauseMenuItem,
   pauseMenuLayout,
 } from "../hud/pauseMenu";

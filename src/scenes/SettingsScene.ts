@@ -11,8 +11,8 @@ import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { DISABLED_COLORS } from "../home/selection";
 import {
   knobX,
-  type SettingsLayout,
   SETTINGS_ROW,
+  type SettingsLayout,
   settingsLayout,
   setVolumeSteps,
   VOLUME_STEPS,

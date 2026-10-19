@@ -52,8 +52,8 @@ import {
   WELL_INSET,
 } from "../hud/topBar";
 import { insetRect, type Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { screenLayout } from "../layout/screenLayout";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { maxHearts } from "../rules/dogs";
 import { hintFor } from "../rules/hints";
 import { currentZone, walkLength } from "../rules/route";

@@ -12,8 +12,6 @@ import {
   HOME_BUTTON,
   MONEY_WELL,
   moneyTop,
-  TREAT_WELL,
-  WELL_INSET,
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
@@ -26,7 +24,9 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
+  TREAT_WELL,
   walkCovered,
+  WELL_INSET,
 } from "./topBar";
 
 const WALKING: RunPause = { card: false, hitStop: false, menu: "closed" };
