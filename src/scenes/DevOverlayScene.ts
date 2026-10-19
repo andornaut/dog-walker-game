@@ -6,11 +6,13 @@ import {
   DEV_OVERLAY_VISIBLE_KEY,
   DEV_STATE_EVENT,
   devOverlayLines,
+  devOverlayShown,
   type DevState,
 } from "../dev/devOverlay";
 import { pageRunSetup } from "../dev/pageRunSetup";
 import { runSetupLink } from "../dev/runSetup";
 import { screenLayout } from "../layout/screenLayout";
+import { SCENE_KEYS } from "./sceneKeys";
 
 export const DEV_OVERLAY_SCENE_KEY = "dev-overlay";
 
@@ -26,14 +28,18 @@ const TEXT_STYLE = {
 };
 
 // Starts with the game and runs for the page's life, so the backquote key can show it at any
-// time; dev=1 shows it from the start. Listed last in the game config to draw over every scene.
+// time; dev=1 shows it from the start. It draws only while the run scene is active. Listed last in
+// the game config to draw over every scene.
 // It learns about the run only from DEV_STATE_EVENT on game.events, and shows or hides on
 // DEV_OVERLAY_TOGGLE_EVENT, keeping DEV_OVERLAY_VISIBLE_KEY in the registry current.
 export class DevOverlayScene extends Scene {
+  private runActive = false;
   private sinceRedrawMs = 0;
   private state: DevState | undefined;
   private status: { readonly text: string; readonly untilMs: number } | undefined;
   private text?: GameObjects.Text;
+  // Whether the player or the URL wants the overlay, apart from whether the run scene is up.
+  private wanted = false;
 
   constructor() {
     super({ active: true, key: DEV_OVERLAY_SCENE_KEY });
@@ -41,12 +47,12 @@ export class DevOverlayScene extends Scene {
 
   create(): void {
     const { road } = screenLayout(SCREEN_CONFIG);
-    this.text = this.add
-      .text(road.x + INSET, road.y + INSET, "", TEXT_STYLE)
-      .setVisible(pageRunSetup().setup.dev);
-    this.redraw();
+    this.wanted = pageRunSetup().setup.dev;
+    this.runActive = this.scene.isActive(SCENE_KEYS.run);
+    this.text = this.add.text(road.x + INSET, road.y + INSET, "", TEXT_STYLE);
+    this.applyVisible();
 
-    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, this.text.visible);
+    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, this.wanted);
 
     const onDevState = (state: DevState) => {
       this.state = state;
@@ -54,15 +60,28 @@ export class DevOverlayScene extends Scene {
     const onToggle = (visible: boolean) => this.setVisible(visible);
     this.game.events.on(DEV_STATE_EVENT, onDevState);
     this.game.events.on(DEV_OVERLAY_TOGGLE_EVENT, onToggle);
+    const runEvents = this.scene.get(SCENE_KEYS.run).events;
+    const runListeners: readonly (readonly [string, () => void])[] = [
+      [Scenes.Events.START, () => this.setRunActive(true)],
+      [Scenes.Events.WAKE, () => this.setRunActive(true)],
+      [Scenes.Events.SHUTDOWN, () => this.setRunActive(false)],
+      [Scenes.Events.SLEEP, () => this.setRunActive(false)],
+    ];
+    for (const [event, listener] of runListeners) {
+      runEvents.on(event, listener);
+    }
     this.events.once(Scenes.Events.SHUTDOWN, () => {
       this.game.events.off(DEV_STATE_EVENT, onDevState);
       this.game.events.off(DEV_OVERLAY_TOGGLE_EVENT, onToggle);
+      for (const [event, listener] of runListeners) {
+        runEvents.off(event, listener);
+      }
     });
 
     // Matched on the physical key, so the toggle sits in the same place on every layout.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (event.code === "Backquote") {
-        this.setVisible(this.text?.visible !== true);
+        this.setVisible(!this.wanted);
       } else if (event.key.toLowerCase() === "c" && this.text?.visible === true) {
         this.copyLink();
       }
@@ -76,9 +95,19 @@ export class DevOverlayScene extends Scene {
     }
   }
 
-  private setVisible(visible: boolean): void {
-    this.text?.setVisible(visible);
-    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, visible);
+  private setVisible(wanted: boolean): void {
+    this.wanted = wanted;
+    this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, wanted);
+    this.applyVisible();
+  }
+
+  private setRunActive(active: boolean): void {
+    this.runActive = active;
+    this.applyVisible();
+  }
+
+  private applyVisible(): void {
+    this.text?.setVisible(devOverlayShown(this.wanted, this.runActive));
     this.redraw();
   }
 

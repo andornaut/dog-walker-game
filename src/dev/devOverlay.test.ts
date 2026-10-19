@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
 import { testState } from "../testing/runState";
-import { devOverlayLines, type DevState } from "./devOverlay";
+import { devOverlayLines, devOverlayShown, type DevState } from "./devOverlay";
 import type { RunSetup } from "./runSetup";
 
 const setup: RunSetup = { dev: true, seed: 42, speed: 1.5, zone: 1 };
@@ -69,5 +69,16 @@ describe("devOverlayLines", () => {
 
   it("shows a status in place of the key help", () => {
     expect(devOverlayLines(60, "link copied", setup, undefined).at(-1)).toBe("link copied");
+  });
+});
+
+describe("devOverlayShown", () => {
+  it.each([
+    { runActive: false, shown: false, wanted: false },
+    { runActive: false, shown: false, wanted: true },
+    { runActive: true, shown: false, wanted: false },
+    { runActive: true, shown: true, wanted: true },
+  ])("wanted $wanted and run active $runActive shows $shown", ({ runActive, shown, wanted }) => {
+    expect(devOverlayShown(wanted, runActive)).toBe(shown);
   });
 });
