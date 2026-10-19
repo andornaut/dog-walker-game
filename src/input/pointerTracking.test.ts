@@ -78,126 +78,136 @@ const right: GestureAction = { direction: 1, kind: "move" };
 const left: GestureAction = { direction: -1, kind: "move" };
 
 describe("trackPointer", () => {
-  it("drives the gestures from a press it saw go down", () => {
-    const press = finger(1);
-    expect(
-      feed([
-        { phase: "down", press, x: 200 },
-        { phase: "move", press, x: 257 },
-        { phase: "up", press, x: 257 },
-      ]),
-    ).toEqual({ actions: [right], track: idleTrack });
-  });
+  const first = finger(1, 1);
+  const second = finger(2, 2);
+  // The first pointer pressed again later.
+  const again = finger(2, 1);
 
-  it("drops the press under way while a card or the menu holds the walk", () => {
-    const press = finger(1);
-    const { actions, track } = feed([
-      { phase: "down", press, x: 200 },
-      { held: true, phase: "move", press, x: 210 },
-      { phase: "move", press, x: 300 },
-    ]);
-    expect(actions).toEqual([]);
-    expect(track).toEqual(idleTrack);
-  });
-
-  it("ends a cancelled press without acting: no tap, and no steps from where it was cancelled", () => {
-    const tap = finger(1);
-    expect(
-      feed([
-        { phase: "down", press: tap, x: 100 },
-        { phase: "cancel", press: tap, x: 100 },
-      ]),
-    ).toEqual({ actions: [], track: idleTrack });
-    const drag = finger(2);
-    expect(
-      feed([
-        { phase: "down", press: drag, x: 300 },
-        { phase: "move", press: drag, x: 290 },
-        { phase: "cancel", press: drag, x: 0 },
-      ]),
-    ).toEqual({ actions: [], track: idleTrack });
-  });
-
-  it("ignores a press whose down it never saw, rather than steering it from a stale anchor", () => {
-    const lost = finger(1);
-    const unseen = finger(2);
-    const { actions, track } = feed([
-      { phase: "down", press: lost, x: 200 },
-      { phase: "move", press: lost, x: 220 },
-      // The release went to another scene, and so did the next press's down.
-      { phase: "move", press: unseen, x: 330 },
-      { phase: "up", press: unseen, x: 330 },
-    ]);
-    expect(actions).toEqual([]);
-    expect(track).toEqual(idleTrack);
-  });
-
-  it("lets a new press take over from one whose release was lost", () => {
-    const lost = finger(1, 0);
-    const next = finger(2, 1);
-    const { actions } = feed([
-      { phase: "down", press: lost, x: 200 },
-      { phase: "move", press: lost, x: 220 },
-      { phase: "down", press: next, x: 300 },
-      { phase: "move", press: next, x: 243 },
-      { phase: "up", press: next, x: 243 },
-    ]);
-    expect(actions).toEqual([left]);
-  });
-
-  it("gives a press on a top-bar button no gesture", () => {
-    const press = finger(1);
-    expect(
-      feed([
-        { onButton: true, phase: "down", press, x: 190, y: 20 },
-        { phase: "move", press, x: 300, y: 300 },
-        { phase: "up", press, x: 300, y: 300 },
-      ]),
-    ).toEqual({ actions: [], track: idleTrack });
-  });
-
-  it("keeps a drag by another pointer while a top-bar button is pressed", () => {
-    const drag = finger(1, 1);
-    const button = finger(2, 0);
-    const { actions } = feed([
-      { phase: "down", press: drag, x: 200 },
-      { onButton: true, phase: "down", press: button, x: 190, y: 20 },
-      { phase: "up", press: button, x: 190, y: 20 },
-      { phase: "move", press: drag, x: 257 },
-    ]);
-    expect(actions).toEqual([right]);
-  });
-
-  it("steers by the latest finger, ignoring one that rests on the screen", () => {
-    const thumb = finger(1, 1);
-    const steering = finger(2, 2);
-    const { actions } = feed([
-      { phase: "down", press: thumb, x: 40, y: 300 },
-      { phase: "down", press: steering, x: 200 },
-      { phase: "move", press: thumb, x: 140, y: 300 },
-      { phase: "move", press: steering, x: 257 },
-      { phase: "up", press: thumb, x: 140, y: 300 },
-      { phase: "move", press: steering, x: 313 },
-    ]);
-    expect(actions).toEqual([right, right]);
-  });
-
-  it("drags from the state strip but never taps there, as the tap is the strip's", () => {
-    const tap = finger(1);
-    expect(
-      feed([
-        { onStrip: true, phase: "down", press: tap, x: 330, y: 60 },
-        { phase: "up", press: tap, x: 331, y: 61 },
-      ]).actions,
-    ).toEqual([]);
-    const drag = finger(2);
-    expect(
-      feed([
-        { onStrip: true, phase: "down", press: drag, x: 330, y: 60 },
-        { phase: "move", press: drag, x: 273, y: 70 },
-        { phase: "up", press: drag, x: 273, y: 70 },
-      ]).actions,
-    ).toEqual([left]);
+  // Every action the events emit, and whether a press is still tracked after the last; the fuzz
+  // below holds that an untracked press leaves the gesture idle.
+  it.each<{ actions: GestureAction[]; events: Event[]; name: string; tracking: boolean }>([
+    {
+      actions: [right],
+      events: [
+        { phase: "down", press: first, x: 200 },
+        { phase: "move", press: first, x: 257 },
+        { phase: "up", press: first, x: 257 },
+      ],
+      name: "drives the gestures from a press it saw go down",
+      tracking: false,
+    },
+    {
+      actions: [],
+      events: [
+        { phase: "down", press: first, x: 200 },
+        { held: true, phase: "move", press: first, x: 210 },
+        { phase: "move", press: first, x: 300 },
+      ],
+      name: "drops the press under way while a card or the menu holds the walk",
+      tracking: false,
+    },
+    {
+      actions: [],
+      events: [
+        { phase: "down", press: first, x: 100 },
+        { phase: "cancel", press: first, x: 100 },
+      ],
+      name: "ends a cancelled press without a tap",
+      tracking: false,
+    },
+    {
+      actions: [],
+      events: [
+        { phase: "down", press: first, x: 300 },
+        { phase: "move", press: first, x: 290 },
+        { phase: "cancel", press: first, x: 0 },
+      ],
+      name: "ends a cancelled press without steps from where it was cancelled",
+      tracking: false,
+    },
+    {
+      actions: [],
+      events: [
+        { phase: "down", press: first, x: 200 },
+        { phase: "move", press: first, x: 220 },
+        // The release went to another scene, and so did the same pointer's next down.
+        { phase: "move", press: again, x: 330 },
+        { phase: "up", press: again, x: 330 },
+      ],
+      name: "ignores a press whose down it never saw, rather than steering it from a stale anchor",
+      tracking: false,
+    },
+    {
+      actions: [left],
+      events: [
+        { phase: "down", press: first, x: 200 },
+        { phase: "move", press: first, x: 220 },
+        { phase: "down", press: second, x: 300 },
+        { phase: "move", press: second, x: 243 },
+        { phase: "up", press: second, x: 243 },
+      ],
+      name: "lets a new press take over from one whose release was lost",
+      tracking: false,
+    },
+    {
+      actions: [],
+      events: [
+        { onButton: true, phase: "down", press: first, x: 190, y: 20 },
+        { phase: "move", press: first, x: 300, y: 300 },
+        { phase: "up", press: first, x: 300, y: 300 },
+      ],
+      name: "gives a press on a top-bar button no gesture",
+      tracking: false,
+    },
+    {
+      actions: [right],
+      events: [
+        { phase: "down", press: first, x: 200 },
+        { onButton: true, phase: "down", press: second, x: 190, y: 20 },
+        { phase: "up", press: second, x: 190, y: 20 },
+        { phase: "move", press: first, x: 257 },
+      ],
+      name: "keeps a drag by another pointer while a top-bar button is pressed",
+      tracking: true,
+    },
+    {
+      actions: [right, right],
+      events: [
+        { phase: "down", press: first, x: 40, y: 300 },
+        { phase: "down", press: second, x: 200 },
+        { phase: "move", press: first, x: 140, y: 300 },
+        { phase: "move", press: second, x: 257 },
+        { phase: "up", press: first, x: 140, y: 300 },
+        { phase: "move", press: second, x: 313 },
+      ],
+      name: "steers by the latest finger, ignoring one that rests on the screen",
+      tracking: true,
+    },
+    {
+      actions: [],
+      events: [
+        { onStrip: true, phase: "down", press: first, x: 330, y: 60 },
+        { phase: "up", press: first, x: 331, y: 61 },
+      ],
+      name: "never taps on the state strip, as the tap is the strip's",
+      tracking: false,
+    },
+    {
+      actions: [left],
+      events: [
+        { onStrip: true, phase: "down", press: first, x: 330, y: 60 },
+        { phase: "move", press: first, x: 273, y: 70 },
+        { phase: "up", press: first, x: 273, y: 70 },
+      ],
+      name: "drags from the state strip",
+      tracking: false,
+    },
+  ])("$name", ({ actions, events, tracking }) => {
+    const result = feed(events);
+    expect({ actions: result.actions, tracking: result.track.press !== undefined }).toEqual({
+      actions,
+      tracking,
+    });
   });
 });
 

@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { chance, randomInt, seededRandom } from "../runner/random";
-import { followOnePress } from "./onePress";
+import { followOnePress, type OnePressStep } from "./onePress";
 import type { PointerPhase } from "./pointerTracking";
 
 describe("followOnePress", () => {
@@ -27,18 +27,22 @@ describe("followOnePress", () => {
     expect(handled).toEqual(["down 1", "move 1", "up 1", "down 2"]);
   });
 
-  it("hands a cancel to the followed press and lets the next press in", () => {
-    const step = followOnePress(true, "cancel", 1, 1);
-    expect(step).toEqual({ handle: true, owner: undefined });
-  });
+  // Pointer 1 is followed; ownerDown says whether it is still on the screen.
+  const step = (handle: boolean, owner: number | undefined): OnePressStep => ({ handle, owner });
 
-  it("frees the scene from a press whose release it never saw once that pointer is up", () => {
-    expect(followOnePress(false, "down", 2, 1)).toEqual({ handle: true, owner: 2 });
-    expect(followOnePress(true, "down", 2, 1)).toEqual({ handle: false, owner: 1 });
-  });
-
-  it("takes a new press of the followed pointer as a fresh one", () => {
-    expect(followOnePress(true, "down", 1, 1)).toEqual({ handle: true, owner: 1 });
+  it.each<[string, boolean, PointerPhase, number, OnePressStep]>([
+    [
+      "hands a cancel to the followed press, then frees it",
+      true,
+      "cancel",
+      1,
+      step(true, undefined),
+    ],
+    ["frees the scene from a press whose release it never saw", false, "down", 2, step(true, 2)],
+    ["keeps another press out while the followed one is down", true, "down", 2, step(false, 1)],
+    ["takes a new press of the followed pointer as a fresh one", true, "down", 1, step(true, 1)],
+  ])("%s", (_name, ownerDown, phase, id, expected) => {
+    expect(followOnePress(ownerDown, phase, id, 1)).toEqual(expected);
   });
 });
 

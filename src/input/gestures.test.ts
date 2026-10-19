@@ -66,68 +66,143 @@ const tap = (x: number, y: number): Step[] => [
 ];
 const left: GestureAction = { direction: -1, kind: "move" };
 const right: GestureAction = { direction: 1, kind: "move" };
+const treat = (slot: number): GestureAction => ({ kind: "treat", slot });
+const pause: GestureAction = { kind: "pause" };
 
-describe("drags", () => {
-  it("steps one lane per lane-width of horizontal travel from where the drag started", () => {
-    const steps: Step[] = [
-      ["down", 150, 300],
-      ["move", 205, 300],
-      ["move", 206, 300],
-      ["move", 261, 300],
-      ["move", 262, 300],
-      ["up", 262, 300],
-    ];
-    expect(play(steps)).toEqual([[], [], [right], [], [right], []]);
-  });
-
-  it("emits one move per lane boundary crossed in a single move", () => {
-    expect(
-      play([
+describe("pointer sequences", () => {
+  // The actions each step emits, from the press to the release.
+  it.each<{ expected: GestureAction[][]; name: string; steps: Step[] }>([
+    {
+      expected: [[], [], [right], [], [right], []],
+      name: "steps one lane per lane-width of horizontal travel from where the drag started",
+      steps: [
+        ["down", 150, 300],
+        ["move", 205, 300],
+        ["move", 206, 300],
+        ["move", 261, 300],
+        ["move", 262, 300],
+        ["up", 262, 300],
+      ],
+    },
+    {
+      expected: [[], [right, right, right]],
+      name: "emits one move per lane boundary crossed in a single move",
+      steps: [
         ["down", 100, 300],
         ["move", 270, 300],
-      ]),
-    ).toEqual([[], [right, right, right]]);
-  });
-
-  it("steps left the same way", () => {
-    expect(
-      play([
+      ],
+    },
+    {
+      expected: [[], [], [left, left]],
+      name: "steps left the same way",
+      steps: [
         ["down", 300, 300],
         ["move", 245, 300],
         ["move", 187, 300],
-      ]),
-    ).toEqual([[], [], [left, left]]);
+      ],
+    },
+    {
+      expected: [[], [right, right], [], [left, left], [left]],
+      name: "undoes a step for each lane-width travelled back",
+      steps: [
+        ["down", 100, 300],
+        ["move", 240, 300],
+        ["move", 230, 300],
+        ["move", 100, 300],
+        ["move", 40, 300],
+      ],
+    },
+    { expected: [[], [left]], name: "taps on release, not on press", steps: tap(150, 300) },
+    {
+      expected: [[], [], []],
+      name: "never drags from the top bar, nor pauses once past the tap distance",
+      steps: [
+        ["down", 100, 20],
+        ["move", 300, 25],
+        ["up", 300, 25],
+      ],
+    },
+  ])("$name", ({ expected, steps }) => {
+    expect(play(steps)).toEqual(expected);
   });
 
-  it("undoes a step for each lane-width travelled back", () => {
-    const steps: Step[] = [
-      ["down", 100, 300],
-      ["move", 240, 300],
-      ["move", 230, 300],
-      ["move", 100, 300],
-      ["move", 40, 300],
-    ];
-    expect(play(steps)).toEqual([[], [right, right], [], [left, left], [left]]);
-  });
-
-  it("ignores vertical travel", () => {
-    expect(
-      all([
+  // Every action the sequence emits, in order.
+  it.each<{ expected: GestureAction[]; name: string; steps: Step[] }>([
+    {
+      expected: [],
+      name: "ignores vertical travel",
+      steps: [
         ["down", 150, 100],
         ["move", 150, 600],
         ["move", 160, 50],
         ["up", 160, 600],
-      ]),
-    ).toEqual([]);
-  });
-
-  it("steps by horizontal travel alone during a diagonal drag", () => {
-    expect(
-      all([
+      ],
+    },
+    {
+      expected: [right],
+      name: "steps by horizontal travel alone during a diagonal drag",
+      steps: [
         ["down", 150, 100],
         ["move", 210, 500],
-      ]),
-    ).toEqual([right]);
+      ],
+    },
+    {
+      expected: [left],
+      name: "is a tap up to the tap distance",
+      steps: [
+        ["down", 150, 300],
+        ["move", 156, 308],
+        ["up", 156, 308],
+      ],
+    },
+    {
+      expected: [],
+      name: "is nothing past the tap distance short of a lane step",
+      steps: [
+        ["down", 150, 300],
+        ["move", 156, 309],
+        ["up", 156, 309],
+      ],
+    },
+    {
+      expected: [],
+      name: "stays cancelled after drifting back within the tap distance",
+      steps: [
+        ["down", 150, 300],
+        ["move", 190, 300],
+        ["up", 150, 300],
+      ],
+    },
+    {
+      expected: [right, left],
+      name: "does not also tap after a drag that came back to where it started",
+      steps: [
+        ["down", 150, 300],
+        ["move", 210, 300],
+        ["up", 150, 300],
+      ],
+    },
+    {
+      expected: [right],
+      name: "drags instead of giving a treat once a doghouse press travels a lane-width",
+      steps: [
+        ["down", 40, 500],
+        ["move", 96, 500],
+        ["up", 96, 500],
+      ],
+    },
+    {
+      expected: [],
+      name: "gives nothing for a doghouse press that leaves the tap distance short of a lane-width",
+      steps: [
+        ["down", 40, 500],
+        ["move", 95, 500],
+        ["up", 95, 500],
+      ],
+    },
+    { expected: [pause], name: "pauses on a tap anywhere across the top bar", steps: tap(300, 5) },
+  ])("$name", ({ expected, steps }) => {
+    expect(all(steps)).toEqual(expected);
   });
 
   it("derives the step from the road width, so a wider road needs a longer drag", () => {
@@ -140,6 +215,22 @@ describe("drags", () => {
     ];
     expect(play(drag)).toEqual([[], [right], []]);
     expect(play(drag, wide)).toEqual([[], [], [right]]);
+  });
+});
+
+describe("tap regions", () => {
+  // A tap on each side of a boundary between the screen's regions.
+  it.each<[string, [number, number], GestureAction, [number, number], GestureAction]>([
+    ["the road's halves at x 180", [177, 300], left, [180, 300], right],
+    ["doghouse slots 0 and 1 at x 120", [117, 480], treat(0), [120, 480], treat(1)],
+    ["doghouse slots 1 and 2 at x 240", [237, 480], treat(1), [240, 480], treat(2)],
+    ["the road and the doghouses at y 470", [60, 468], left, [60, 470], treat(0)],
+    ["the top bar and the road at y 40", [60, 38], pause, [60, 40], left],
+  ])("splits %s", (_name, [beforeX, beforeY], beforeAction, [afterX, afterY], afterAction) => {
+    expect([all(tap(beforeX, beforeY)), all(tap(afterX, afterY))]).toEqual([
+      [beforeAction],
+      [afterAction],
+    ]);
   });
 });
 
@@ -179,109 +270,6 @@ describe("drag symmetry", () => {
       ]);
     expect(drag(234)).toEqual([left]);
     expect(drag(346.00000939002405)).toEqual([right]);
-  });
-});
-
-describe("taps", () => {
-  it("splits the halves at the road's centre", () => {
-    expect(all(tap(177, 300))).toEqual([left]);
-    expect(all(tap(180, 300))).toEqual([right]);
-  });
-
-  it("acts on release, not on press", () => {
-    expect(play(tap(150, 300))).toEqual([[], [left]]);
-  });
-
-  it("is a tap up to the tap distance, and nothing past it short of a lane step", () => {
-    const within: Step[] = [
-      ["down", 150, 300],
-      ["move", 156, 308],
-      ["up", 156, 308],
-    ];
-    const past: Step[] = [
-      ["down", 150, 300],
-      ["move", 156, 309],
-      ["up", 156, 309],
-    ];
-    expect(all(within)).toEqual([left]);
-    expect(all(past)).toEqual([]);
-  });
-
-  it("stays cancelled after drifting back within the tap distance", () => {
-    expect(
-      all([
-        ["down", 150, 300],
-        ["move", 190, 300],
-        ["up", 150, 300],
-      ]),
-    ).toEqual([]);
-  });
-
-  it("does not also tap after a drag that came back to where it started", () => {
-    expect(
-      all([
-        ["down", 150, 300],
-        ["move", 210, 300],
-        ["up", 150, 300],
-      ]),
-    ).toEqual([right, left]);
-  });
-});
-
-describe("the doghouses", () => {
-  it("gives a treat to the dog slot under a tap, without moving", () => {
-    expect(all(tap(60, 500))).toEqual([{ kind: "treat", slot: 0 }]);
-    expect(all(tap(180, 500))).toEqual([{ kind: "treat", slot: 1 }]);
-    expect(all(tap(300, 550))).toEqual([{ kind: "treat", slot: 2 }]);
-  });
-
-  it("splits the row into three equal slots", () => {
-    expect(all(tap(117, 480))).toEqual([{ kind: "treat", slot: 0 }]);
-    expect(all(tap(120, 480))).toEqual([{ kind: "treat", slot: 1 }]);
-    expect(all(tap(237, 480))).toEqual([{ kind: "treat", slot: 1 }]);
-    expect(all(tap(240, 480))).toEqual([{ kind: "treat", slot: 2 }]);
-  });
-
-  it("starts where the road ends, at y 470", () => {
-    expect(all(tap(60, 468))).toEqual([left]);
-    expect(all(tap(60, 470))).toEqual([{ kind: "treat", slot: 0 }]);
-  });
-
-  it("drags instead of giving a treat once a press there travels a lane-width", () => {
-    expect(
-      all([
-        ["down", 40, 500],
-        ["move", 96, 500],
-        ["up", 96, 500],
-      ]),
-    ).toEqual([right]);
-  });
-
-  it("gives nothing for a press that leaves the tap distance short of a lane-width", () => {
-    expect(
-      all([
-        ["down", 40, 500],
-        ["move", 95, 500],
-        ["up", 95, 500],
-      ]),
-    ).toEqual([]);
-  });
-});
-
-describe("the top bar", () => {
-  it("pauses on a tap anywhere across it, without moving", () => {
-    expect(all(tap(40, 20))).toEqual([{ kind: "pause" }]);
-    expect(all(tap(300, 5))).toEqual([{ kind: "pause" }]);
-  });
-
-  it("never drags, and a press that leaves the tap distance does not pause", () => {
-    expect(
-      play([
-        ["down", 100, 20],
-        ["move", 300, 25],
-        ["up", 300, 25],
-      ]),
-    ).toEqual([[], [], []]);
   });
 });
 
