@@ -141,12 +141,14 @@ def bark_park_ground(g):
             x0 = 0 if side == 0 else W - w
             g.rect(x0, y, w, 1, "green")
             g.p(w if side == 0 else W - w - 1, y, "brown")
+    # blades at uneven spacing: a regular 3-row rhythm runs backwards at the scroll speed
     for side in (0, 1):
-        for i in range(22):
-            y = (i * 3 + side * 7) % H
-            x = 1 + (i * 5) % 4
+        y = side * 7
+        while y < H + side * 7 - 3:
+            x = 1 + rnd.randrange(4)
             x = x if side == 0 else W - 1 - x
             wrect(g, x, y, 1, 2, "dgreen")
+            y += rnd.randrange(2, 6)
         for y in (11 + side * 30, 37 - side * 20):
             x = 2 if side == 0 else W - 3
             wp(g, x, y, "yellow" if side == 0 else "white")
@@ -165,12 +167,13 @@ def bark_park_lines(g):
 def shops_ground(g):
     rnd = random.Random("road-sniff-street-shops")
     g.rect(0, 0, W, H, "lgrey")
+    # 2-row joints, lit on the left edge: under the projection a 1-row line blinks
     for row in range(H // 16):
         y, off = row * 16, 14 if row % 2 else 0
-        g.rect(0, y + 15, W, 1, "grey")
+        g.rect(0, y + 14, W, 2, "grey")
         for x in range(off - 28, W, 28):
-            g.rect(x + 27, y, 1, 15, "grey")
-            g.rect(x, y, 26, 1, "white")
+            g.rect(x + 27, y, 1, 14, "grey")
+            g.rect(x, y, 1, 14, "white")
             if rnd.random() < 0.18:
                 for _ in range(10):
                     g.p(x + rnd.randrange(1, 26), y + rnd.randrange(2, 14), "grey")
@@ -185,16 +188,17 @@ def shops_ground(g):
         g.rect(x0, 0, 4, H, "grey")
         g.rect(x0 + 1, 0, 2, H, "slate")
         for y in (10, 42):
+            # a slot along the road, not rungs across it, which strobe
             g.rect(x0, y, 4, 8, "dslate")
-            for yy in range(y + 1, y + 8, 2):
-                g.rect(x0 + 1, yy, 2, 1, "grey")
+            g.rect(x0 + (1 if x0 == 0 else 2), y + 1, 1, 6, "grey")
 
 
 def shops_lines(g):
     for x in DIVIDERS:
+        # setts 6 rows long with 2-row joints: an 8-row rhythm moves a quarter step per frame
         g.rect(x, 0, 2, H, "slate")
-        for y in range(0, H, 4):
-            g.rect(x, y, 2, 1, "dslate")
+        for y in range(6, H, 8):
+            g.rect(x, y, 2, 2, "dslate")
         g.rect(x - 1, 0, 1, H, "grey")
 
 
@@ -206,24 +210,24 @@ LEAVES = (("orange", "rust"), ("amber", "orange"), ("rust", "dbrown"))
 def home_ground(g):
     rnd = random.Random("road-the-long-way-home")
     g.rect(0, 0, W, H, "skin2")
+    # 2-row mortar and whole-brick tints: under the projection a 1-row line blinks
     for row in range(H // 8):
         y, off = row * 8, 7 if row % 2 else 0
-        g.rect(0, y + 7, W, 1, "brown")
+        g.rect(0, y + 6, W, 2, "brown")
         for x in range(off - 14, W, 14):
-            g.rect(x + 13, y, 1, 7, "brown")
+            g.rect(x + 13, y, 1, 6, "brown")
             r = rnd.random()
-            if r < 0.2:
-                g.rect(x, y, 13, 1, "skin1")
-            elif r < 0.26:
-                g.rect(x, y, 13, 7, "tan")
-                g.rect(x, y + 6, 13, 1, "skin2")
+            if r < 0.1:
+                g.rect(x, y, 13, 6, "skin1")
+            elif r < 0.16:
+                g.rect(x, y, 13, 6, "tan")
             g.p(x + rnd.randrange(2, 12), y + rnd.randrange(2, 6), "brown")
-    # soldier-course edges: bricks set on end along both sides
+    # soldier-course edges: bricks set on end along both sides, 6 rows plus a 2-row joint
     for x0, line in ((0, 6), (W - 6, W - 7)):
         g.rect(x0, 0, 6, H, "brown")
-        for y in range(0, H, 4):
-            g.rect(x0, y + 3, 6, 1, "dbrown")
-            g.rect(x0, y, 6, 1, "skin2")
+        for y in range(0, H, 8):
+            g.rect(x0, y + 6, 6, 2, "dbrown")
+            g.rect(x0, y, 1, 6, "skin2")
         g.rect(line, 0, 1, H, "dbrown")
     leaves(g, rnd, 11, 10, W - 10)
 
