@@ -4,7 +4,7 @@ Goal: the smallest web game that proves the core loop is fun. Placeholder art is
 
 ## The v1 game in one paragraph
 
-Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, then walk a fixed route of 4 zones through one neighbourhood. The street scrolls toward you at a relaxed pace; switch between 5 lanes to dodge trouble and grab treats and tips. Hitting an obstacle opens a choice card, and which owners it upsets depends on the dogs' traits. Each zone has one forced stop. After zones 1–3, pick 1 of 3 upgrade cards. Each dog pays a share of its fee for every zone it survives; if an owner's happiness hits zero, they fire you and the dog leaves. The run ends when you finish zone 4 or run out of dogs, and you keep what you've earned. Banked money buys gear and new dogs for future walks.
+Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, then walk a fixed route of 4 zones through Maple Street, the first world. The street scrolls toward you at a relaxed pace; switch between 5 lanes to dodge trouble and grab treats and tips. Hitting an obstacle opens a choice card, and which owners it upsets depends on the dogs' traits. Each zone has one forced stop. After zones 1–3, pick 1 of 3 upgrade cards. Each dog pays a share of its fee for every zone it survives; if an owner's happiness hits zero, they fire you and the dog leaves. The run ends when you finish zone 4 or run out of dogs, and you keep what you've earned. Banked money buys gear and new dogs for future walks.
 
 ## Core rules
 
@@ -16,12 +16,12 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 - A hit obstacle is removed after its card, then ~1s with no collisions
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
 - Calm speed: scroll speed and density both rise gently per zone, never frantic
-- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back
-- Area effects (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have someone caught. The card then shows which dogs were caught, so its outcomes stay fixed; if nobody is caught, there is no card
+- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. About 1s before a pull, the dog leans toward that side and barks
+- Area effects (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have someone caught; small dogs are nimble and roll half as often. The card then shows which dogs were caught, so its outcomes stay fixed; if nobody is caught, there is no card
 
 ### Resources
 
-- **Money ($):** earned during the run (tips, per-zone fees); spent in encounters (costs are per affected dog); banked at the end
+- **Money ($):** earned during the run (tips, per-zone fees); spent in encounters (costs are per affected dog); banked at the end. Money is tracked in cents and shown in whole dollars
 - **Owner happiness (♥):** one meter per dog, starts at 4–6 depending on the owner's temperament; max 6, 8 or 10 depending on the dog's size. Shown as the dog's and owner's faces plus the meter. At 0 the owner fires you (with a quip) and the dog leaves
 
 ### A run
@@ -30,7 +30,8 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 - One forced stop per zone
 - After zones 1, 2 and 3: choose 1 of 3 upgrade cards
 - After each zone: every remaining dog pays a share of its fee; a dog fired mid-zone isn't paid for that zone
-- Ends after zone 4 or when no dogs are left; everything earned is kept
+- When an owner fires you, they take back every fee their dog earned this run (tips stay)
+- Ends after zone 4 or when no dogs are left; everything earned is kept, except fees taken back by owners who fired you
 - Head home: available any time from the pause menu; keeps tips and earlier zones' fees, but the current zone pays nothing
 
 ### Choice cards
@@ -44,18 +45,18 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 ### Pickups (things you _want_ to hit)
 
 - Treat: carried (up to 3); tap a dog's slot in the dog column to give its owner +1 ♥
-- Tip: +$
+- Tip: +$. Smaller packs earn bigger tips: passers-by tip more for a calm walk
 
 ### Dogs (roster of 9, pick 1–3)
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
-| Attribute         | Values                                                                                                                                                                                                                                                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Size              | Small · medium · big. No size is a straight upgrade. Pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big). Max happiness: 6 small, 8 medium, 10 big. Who you meet: each small dog attracts more Other dog encounters, each big dog fewer, and any big dog scares thieves away |
-| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                                 |
-| Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                                                                                                                                                              |
-| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $25 instead of $20 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0 and the dog's max; also sets the quip tone                                                                                                           |
+| Attribute         | Values                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Size              | Small · medium · big. No size is a straight upgrade. Pull strength: after a pull, lane input locks for none (small), a moment (medium) or ~0.5s (big). Max happiness: 6 small, 8 medium, 10 big. Who you meet: each small dog attracts more Other dog encounters, each big dog fewer, and any big dog scares thieves away. Small dogs are nimble: they roll half as often for area effects |
+| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                                                                                                  |
+| Energy            | Calm · steady · hyper. Sets how often the dog pulls the pack                                                                                                                                                                                                                                                                                                                               |
+| Owner temperament | **Laid-back:** starts at 6 ♥ · **Fussy:** starts at 4 ♥, pays $13 instead of $10 · **Dramatic:** starts at 5 ♥, every ♥ gained or lost counts double, still within 0 and the dog's max; also sets the quip tone                                                                                                                                                                            |
 
 | Dog      | Breed           | Size   | Trait       | Energy | Owner                                  | Look                                  | Start    |
 | -------- | --------------- | ------ | ----------- | ------ | -------------------------------------- | ------------------------------------- | -------- |
@@ -71,7 +72,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 
 Each size and trait pairs once, and each energy and temperament appears three times. The three starters cover every size and trait, with laid-back owners for an easier first run.
 
-More dogs means more pay and a longer-lasting run, but more owners to keep happy, more pulls and more area-effect rolls. After every card choice, the affected owner reacts with a quip. The walker is one fixed character.
+More dogs means more fees and a longer-lasting run, but smaller tips, more owners to keep happy, more pulls and more area-effect rolls. After every card choice, the affected owner reacts with a quip. The walker is one fixed character.
 
 ### Encounters (things you hit by accident → choice card)
 
@@ -82,6 +83,14 @@ More dogs means more pay and a longer-lasting run, but more owners to keep happy
 | Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Go through → −1 ♥ (−2 Fancy) · Pay $ for a towel                               |
 | Other dog | All dogs                                               | Let them sniff → +1 ♥ each, −$ per dog (missed tips) · Pull away → −1 ♥ each   |
 | Thief     | All dogs (none if any big dog: it flees, no card)      | Chase them off → −1 ♥ each (dogs worked up) · Let it go → −$ (stolen tips)     |
+
+### Lucky encounters (good things to bump into → choice card)
+
+| Encounter         | Options                                                                           |
+| ----------------- | --------------------------------------------------------------------------------- |
+| Lost wallet       | Return it → +1 ♥ each (owners are proud) · Keep it → +$, −1 ♥ each                |
+| Biscuit neighbour | Take biscuits → +1 treat per dog, up to the carry limit · Politely pass → nothing |
+| Photo op          | Pose → +$ tip, +1 ♥ to dramatic owners · Wave and walk on → nothing               |
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card and have no effect.
 
@@ -115,49 +124,52 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 ### Meta progression (minimal)
 
 - Money earned in a run is banked
-- Home screen has a simple shop that sells the 6 locked dogs and 3 loadout items (e.g. fanny pack: start with +$30; poop bags: once per run, an encounter card offers a free Skip option; Lucky collar: every owner starts with +1 ♥)
+- Home screen has a simple shop that sells the 6 locked dogs and 5 loadout items: fanny pack (start with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +1 ♥ and has +1 max ♥)
 - Shop items are permanent, gameplay-altering gear: bought once and kept. Upgrade cards are the run-only boosts (the Hades split between keepsakes and boons)
 - Pick up to 1 owned item before each run (none is allowed, e.g. on a first run)
 - Progress (bank, owned items) is saved between sessions. Where it is stored (e.g. browser storage) is a tech proposal; see [`tech-plan.md`](../tech-plan.md)
 
 ## Starting numbers
 
-Placeholders sized for ~3-minute zones. Once the tech session has these as typed data in `src/data/`, that becomes the source of truth for numbers and roster stats, and this table is replaced by a link to it. A full run is estimated at ~$215 with 2 dogs and ~$260 with 3.
+Placeholders sized for ~3-minute zones. Once the tech session has these as typed data in `src/data/`, that becomes the source of truth for numbers and roster stats, and this table is replaced by a link to it. A full run is estimated at ~$96 with 1 dog, ~$92 with 2 and ~$83 with 3, before clawbacks and lucky encounters; buying everything in the shop ($1,775) takes ~20 runs.
 
-| What                         | Value                                                                               |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| Scroll speed                 | +10% per zone (zone 4 at 1.3× base)                                                 |
-| Obstacles per zone           | 18 in zone 1, +3 per later zone                                                     |
-| Tips per zone                | 24 in zone 1, +3 per later zone                                                     |
-| Treats per zone              | 4 (carry up to 3)                                                                   |
-| Owner happiness              | Start 6 laid-back · 4 fussy · 5 dramatic; max 6 small · 8 medium · 10 big; treat +1 |
-| Fee per zone survived        | $20; fussy owners $25                                                               |
-| Other dog spawns             | +25% per small dog, −25% per big dog                                                |
-| Thief: let it go             | −$10                                                                                |
-| Area-effect roll             | 50% per dog                                                                         |
-| Pull interval (energy)       | About every 60s calm · 30s steady · 15s hyper                                       |
-| Input lock after a pull      | Small 0s · medium 0.25s · big 0.5s                                                  |
-| Tip                          | $2 (Big tipper $3, Stinky $1)                                                       |
-| Encounter costs              | $ = $5, $$$ = $15, per affected dog                                                 |
-| Squirrel: let them chase     | −$10                                                                                |
-| Missed tips (slower options) | $5 per dog                                                                          |
-| Chatty neighbour tip         | +$15                                                                                |
-| Shortcut                     | Next zone 25% shorter, its fees −25%                                                |
-| Rush hour                    | Next zone tips ×2, obstacles ×1.5                                                   |
-| Shop                         | Fanny pack $100 · poop bags $175 · Lucky collar $250 · each locked dog $150         |
+| What                         | Value                                                                                                                        |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Scroll speed                 | +20% per zone (zone 4 at 1.6× base)                                                                                          |
+| Obstacles per zone           | 18 in zone 1, +3 per later zone                                                                                              |
+| Tips per zone                | 24 in zone 1, +3 per later zone                                                                                              |
+| Treats per zone              | 4 (carry up to 3)                                                                                                            |
+| Lucky encounters per zone    | 2                                                                                                                            |
+| Owner happiness              | Start 6 laid-back · 4 fussy · 5 dramatic; max 6 small · 8 medium · 10 big; treat +1; Lucky collar +1 start and +1 max        |
+| Fee per zone survived        | $10; fussy owners $13                                                                                                        |
+| Other dog spawns             | +25% per small dog, −25% per big dog                                                                                         |
+| Thief: let it go             | −$10                                                                                                                         |
+| Area-effect roll             | 50% per dog; small dogs 25%                                                                                                  |
+| Pull interval (energy)       | About every 60s calm · 30s steady · 15s hyper                                                                                |
+| Input lock after a pull      | Small 0s · medium 0.25s · big 0.5s                                                                                           |
+| Pull tell                    | ~1s lean and bark before a pull                                                                                              |
+| Tip                          | $1 (Big tipper $1.50, Stinky $0.50); ×1.5 with 1 dog, ×1.25 with 2, ×1 with 3                                                |
+| Encounter costs              | $ = $5, $$$ = $15, per affected dog                                                                                          |
+| Squirrel: let them chase     | −$10                                                                                                                         |
+| Missed tips (slower options) | $5 per dog                                                                                                                   |
+| Chatty neighbour tip         | +$15                                                                                                                         |
+| Lucky encounters             | Lost wallet kept +$15 · photo op +$10                                                                                        |
+| Shortcut                     | Next zone 25% shorter, its fees −25%                                                                                         |
+| Rush hour                    | Next zone tips ×2, obstacles ×1.5                                                                                            |
+| Shop                         | Each locked dog $150 · fanny pack $100 (start +$15) · whistle $150 · poop bags $175 · running shoes $200 · Lucky collar $250 |
 
 ## Explicitly out of v1
 
-Minigames · branching paths between zones · unlockable dog slots · special dogs found mid-walk · more biomes · time of day · weather · off-leash park · permanent unlocks as in-run choices · house hub and decoration · your own dog · art polish beyond a basic pixel pass · sound beyond a few effects · accounts / cloud saves
+Minigames · branching paths between zones · unlockable dog slots · special dogs found mid-walk · more worlds (see `game-design.md`) · time of day · weather · off-leash park · permanent unlocks as in-run choices · house hub and decoration · your own dog · art polish beyond a basic pixel pass · sound beyond a few effects · accounts / cloud saves
 
 ## Milestones
 
 1. **Setup:** engine chosen, repo, auto-deploy of the web build, coloured-box placeholders
 2. **Runner core:** 5 lanes, scrolling, spawning, collisions, keyboard + touch
-3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, Stinky, owner quips, dogs leave at 0 ♥
+3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, lucky encounters, Stinky, owner quips, dogs leave at 0 ♥
 4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
 5. **Dogs & meta:** 9-dog roster (3 unlocked, 6 in the shop) with 1–3 picks, bank, shop, loadout, save
-6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 5 encounters, 2 pickups, card frames, card illustrations for the 5 encounters and 6 forced stops; test on real phones
+6. **Pixel pass & phone playtest:** sprites for walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; test on real phones
 
 **Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
 

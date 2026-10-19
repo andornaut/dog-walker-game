@@ -101,3 +101,13 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Process · Once typed data lands in src/data/, it is the source of truth for tuning numbers and roster stats; v1-plan.md keeps rules, names and looks and links to it
 - 2026-10-19 · Art · Characters are chibi, with heads about as big as bodies
 - 2026-10-19 · Art · Dog walk cycles are 4 frames; react and pull are 2 frames each, and pull is drawn leaning right and mirrored for left
+- 2026-10-19 · Design · Scroll speed rises 20% per zone; replaces 10%
+- 2026-10-19 · Design · The game grows sideways through worlds: sets of 4 zones with their own themes (fantasy, future, past, dinosaurs), obstacles and mechanics; finish a world, then buy access to the next; v1 is the first world, Maple Street
+- 2026-10-19 · Design · Income halved while card costs stay: fees $10 ($13 fussy), tips $1; replaces fees of $20 and $25 and tips of $2
+- 2026-10-19 · Design · An owner who fires you takes back every fee their dog earned that run; tips stay; refines Gentle failure
+- 2026-10-19 · Design · Smaller packs earn bigger tips: ×1.5 with 1 dog, ×1.25 with 2, ×1 with 3
+- 2026-10-19 · Design · Small dogs are nimble: half the area-effect roll
+- 2026-10-19 · Design · Dogs lean and bark ~1s before a pull
+- 2026-10-19 · Design · Lucky encounters with an upside card: lost wallet, biscuit neighbour, photo op
+- 2026-10-19 · Design · Gear grows to 5 with the whistle (thieves flee without a big dog) and running shoes (no pull lock); fanny pack start drops to +$15; Lucky collar also raises the max by 1
+- 2026-10-19 · Design · Dog training and a walker kit are parked for after v1

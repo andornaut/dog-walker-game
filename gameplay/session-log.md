@@ -61,3 +61,9 @@ Format:
 - Covered: area effects, where tuning numbers live
 - Decided: skunk and puddle roll per dog (50% placeholder) before the card; src/data/ becomes the source of truth for numbers once it exists
 - Open threads / next time: replace the v1-plan number tables with a link when src/data/ lands
+
+## 2026-10-19 · Design · Economy and worlds
+
+- Covered: earning too fast with little to buy, speed, run length, content growth, head home's value, good bumps, pull fairness, small dogs, pack size
+- Decided: +20% speed per zone; worlds as the way to grow (Maple Street first; fantasy, future, past, dinosaurs later; finish then buy); income halved; firing claws back that dog's fees; smaller packs tip more; nimble small dogs; pull tells; 3 lucky encounters; whistle and running shoes; Lucky collar raises max; dog training and walker kit parked
+- Open threads / next time: run length with the faster ramp; shop prices once playtests show real earnings

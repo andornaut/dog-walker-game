@@ -40,7 +40,8 @@ Group by topic; add new topic headings as they come up.
 
 - [agreed] **v1: one neighbourhood, fixed route** (2026-10-18)
 - [agreed] **Scenery gags**: a cat on a fence, a sprinkler, a ball rolling past; no card, no effect (2026-10-18)
-- [parked] **Biomes**: inner city, beach, forest, etc. (2026-10-18)
+- [agreed] **Worlds**: unlockable sets of 4 zones with their own themes, obstacles and mechanics: fantasy, the future, the past, dinosaurs (2026-10-19) · v1 is Maple Street only; finish a world, then buy the next
+- [parked] **Biomes**: inner city, beach, forest, etc. (2026-10-18) · folded into Worlds
 - [parked] **Time of day**: dawn, midday, dusk, night (2026-10-18)
 - [parked] **Weather**: variants with pros and cons, some mostly cosmetic (2026-10-18)
 - [parked] **Off-leash dog park**: zone unlocked by an upgrade (2026-10-18)
@@ -52,7 +53,9 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **Pre-run loadout**: fanny packs and other gear from permanent unlocks (2026-10-18)
 - [agreed] **Head home**: end a walk early from the pause menu; the current zone pays nothing (2026-10-18)
 - [cut] **Story recap on the end screen**: retell the run's biggest moments (2026-10-18) · cut: the end screen shows earnings only
-- [agreed] **Gentle failure**: a fired dog leaves with a funny quip; keep what you've earned (2026-10-18)
+- [agreed] **Gentle failure**: a fired dog leaves with a funny quip; keep what you've earned (2026-10-18) · refined 2026-10-19: the firing owner takes back their dog's fees for the run
+- [parked] **Dog training**: level up a dog you own, e.g. calmer energy or a smaller pull lock (2026-10-19)
+- [parked] **Walker kit**: permanent always-on walker upgrades, e.g. a bigger treat pouch (2026-10-19)
 - [parked] **Cosmetic permanent unlocks**: permanent purchases that change looks only; v1 shop is gameplay-altering gear (2026-10-18)
 - [parked] **House hub**: Hades-style home base you decorate and improve with mostly cosmetic unlocks; long-term progression (2026-10-18)
 

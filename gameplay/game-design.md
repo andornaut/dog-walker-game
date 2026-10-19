@@ -26,7 +26,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ## Player & world
 
 - You are the dog walker (one fixed character in v1).
-- A run is a walk through **4 zones**, each a fixed distance that takes about 3 minutes. v1: one neighbourhood, fixed route.
+- A run is a walk through the **4 zones** of a **world**, each zone a fixed distance that takes about 3 minutes at base speed. v1: Maple Street, today's neighbourhood, on a fixed route.
+- **Worlds** expand the game sideways rather than upward: each has its own theme (e.g. fantasy, the future, the past, dinosaurs), obstacles and even mechanics. Finishing a full run in a world shows the next one in the shop; buying access lets you walk it. After v1.
 
 ## Dogs
 
@@ -48,7 +49,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Area effects:** skunk and puddle roll once per dog, so a bigger pack is more likely to have someone caught; the card shows who was caught before you choose.
 - **Scenery gags:** harmless neighbourhood moments that open no card.
 - **Money:** the only currency. Earned in-run (tips, and each dog's fee per zone survived), spent on encounter choices, banked between runs.
-- **Run end:** finishing zone 4, no dogs left, or heading home (any time; the current zone pays nothing). Failure is gentle: you keep what you've earned.
+- **Run end:** finishing zone 4, no dogs left, or heading home (any time; the current zone pays nothing). Failure is gentle: you keep what you've earned, except that an owner who fires you takes back their dog's fees for the run.
+- **Lucky encounters:** some things on the road are worth bumping into, and open a card with an upside.
 
 ## Progression & goals
 
