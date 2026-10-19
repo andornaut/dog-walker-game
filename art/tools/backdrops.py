@@ -12,11 +12,11 @@ the near corners either side of the street.
 Rows, in band rows (0 to 109): the far side's ground row 62 (BASE), the far sidewalk 66 to
 69, the far curb 70 to 71, the cross street 72 to 80 with its centre line on row 76, the near
 sidewalk 81 to 85, and the stub from row 86 (STUB) to the bottom row, 109, which continues the
-game's road (the 280-wide strip on columns 110 to 249, lane dividers on 138, 166, 193 and 221,
+game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and 227,
 verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
-the current constants): the near-left perch's top rail on rows 93 to 95, x 0 to 82; the
-near-right lawn, x 274 to 359 on rows 86 to 109 (the sprinkler at x 322 to 353); and the two
-sidewalks, whose middles run from (97, 109) to (103, 85) and from (263, 109) to (257, 85).
+the current constants): the near-left perch's top rail on rows 93 to 95, x 0 to 72; the
+near-right lawn, x 284 to 359 on rows 86 to 109 (the sprinkler at x 322 to 353); and the two
+sidewalks, whose middles run from (87, 109) to (94, 85) and from (273, 109) to (266, 85).
 
 Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
@@ -261,7 +261,7 @@ CORNER = 5                     # the near corners' curb radius, in pixels
 BASE = 62                      # the far side's ground row: the houses stand on it
 PERCH = round(Z0) + 3          # the near-left perch's z: its foot on the bottom row, for the cat
 PERCH_H = 30                   # the perch's height: its top rail is h 27 to 30
-PERCH_X = (-196, -600)         # the perch, across: from just past the sidewalk out off screen
+PERCH_X = (-(WALK + 8), -600)  # the perch, across: from just past the sidewalk out off screen
 
 
 def scale(yc):
@@ -615,7 +615,7 @@ def bark_park():
             cv.fill(px, py, 1, 1, trail(0, 0, 99, px, py))
     cross(cv, flat(trail), "brown", lawn, curb=None, top=CROSS)
     cross_line(cv, "dbrown", dash=(7, 16))
-    rough_patches = rough("bark-park-lawn", 10, ROAD + 30, 600, Z0 + 10, Z0 + 90)
+    rough_patches = rough("bark-park-lawn", 10, ROAD + 30, ROAD + 460, Z0 + 10, Z0 + 90)
 
     def paint(x, z, span, px, py):
         if abs(x) < ROAD:
@@ -1007,7 +1007,7 @@ def paws_promenade():
             return road_c["seam"]
         return road_c["fleck"] if hashed(px, py, 27) else road_c["road"]
 
-    rough_patches = rough("promenade-lawn", 8, WALK + 20, 600, Z0 + 10, Z0 + 90)
+    rough_patches = rough("promenade-lawn", 8, WALK + 20, ROAD + 460, Z0 + 10, Z0 + 90)
 
     def paint(x, z, span, px, py):
         a = abs(x)
