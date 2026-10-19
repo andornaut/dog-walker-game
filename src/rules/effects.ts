@@ -14,8 +14,8 @@ import type { EffectSource, RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
 import {
   type Cause,
-  centsCauses,
   type Change,
+  dollarCauses,
   type HeartChange,
   modifierCauses,
   type MoneyChange,
@@ -23,7 +23,15 @@ import {
 import { maxHearts } from "./dogs";
 import { lastingFor, longerLasting } from "./durations";
 import { statParts } from "./modifiers";
-import { type Cents, cents, clampHearts, nonNegativeCents, read, readTable } from "./units";
+import {
+  type Cents,
+  cents,
+  clampHearts,
+  nonNegativeCents,
+  read,
+  readTable,
+  roundDollars,
+} from "./units";
 
 export type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
 
@@ -142,7 +150,8 @@ export function quirkScaledDogs(
   );
 }
 
-// A quirk multiplier scales the amount, after any per-dog cost and its floor.
+// A quirk multiplier scales the amount, after any per-dog cost and its floor. Each amount is
+// rounded to the dollar.
 function moneyParts(
   data: RulesData,
   context: Pick<EffectContext, "affected">,
@@ -154,7 +163,7 @@ function moneyParts(
   if (scaling === null) {
     return parts;
   }
-  const amount = cents(parts.amount * scaling.factor);
+  const amount = roundDollars(parts.amount * scaling.factor);
   const sign = effect.change === "gain" ? 1 : -1;
   const quirk: Cause = {
     amount: sign * (amount - parts.amount),
@@ -175,7 +184,7 @@ function unscaledMoneyParts(
   const sign = effect.change === "gain" ? 1 : -1;
   const count = perDogCount(data, context, state, effect.perDog);
   if (effect.perDog === undefined || effect.change === "gain") {
-    return { adjustments: [], amount: cents(amount * count), base: sign * amount * count };
+    return { adjustments: [], amount: roundDollars(amount * count), base: sign * amount * count };
   }
   const parts = statParts(data.tuning, state.modifiers, "costPerDog", amount);
   const perDog = Math.max(0, parts.value);
@@ -185,7 +194,7 @@ function unscaledMoneyParts(
       : [{ amount: (parts.value - perDog) * count, bound: "min", kind: "limit" }];
   return {
     adjustments: [...modifierCauses(parts.contributions, -count), ...floor],
-    amount: cents(perDog * count),
+    amount: roundDollars(perDog * count),
     base: -amount * count,
   };
 }
@@ -327,7 +336,7 @@ function applyMoney(
     delta === intended ? [] : [{ amount: delta - intended, bound: "min", kind: "limit" }];
   const change: MoneyChange = {
     amount: cents(delta),
-    causes: centsCauses([
+    causes: dollarCauses([
       { amount: parts.base, kind: "effect", source: context.source },
       ...parts.adjustments,
       ...floor,

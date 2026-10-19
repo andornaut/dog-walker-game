@@ -4,19 +4,18 @@ import { fillNames } from "../text/lines";
 import { assertNever } from "./assertNever";
 import { sign, TEMPERAMENT_NAMES } from "./effectText";
 import type { Contribution } from "./modifiers";
-import { type Cents, cents, type Hearts } from "./units";
+import { type Cents, type Hearts, roundDollars } from "./units";
 
 // One reason behind a change, with how much of the change it accounts for, in the change's
 // unit: hearts, or cents for money. A change's causes sum to the change. The first is the
 // base: the effect, tip, fee, treat or bump. The rest are what changed it: a dog's
-// quirk, a temperament multiplier, the pack-size tip factor, a modifier, a zone's fee
+// quirk, a temperament multiplier, a modifier, a zone's fee
 // multiplier, or a limit (a meter held within 0 and its max, money held at $0 or more).
 export type Cause =
   | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
   | { readonly amount: number; readonly kind: "bump" | "fee" | "tip" | "treat" }
   | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
   | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
-  | { readonly amount: number; readonly kind: "packSize"; readonly packSize: number }
   // What a dog's quirk added, such as a show dog's fee.
   | { readonly amount: number; readonly kind: "quirk"; readonly quirk: QuirkId }
   | { readonly amount: number; readonly kind: "temperament"; readonly temperament: Temperament }
@@ -73,15 +72,15 @@ export function modifierCauses(
   }));
 }
 
-// Rounds money causes to whole cents so they still sum to the rounded total: each cause takes
-// the change it makes to the rounded running total. Causes left at 0 are dropped, except the
-// base.
-export function centsCauses(causes: readonly Cause[]): Cause[] {
+// Rounds money causes to whole dollars so they still sum to the rounded total: each cause
+// takes the change it makes to the rounded running total. Causes left at 0 are dropped, except
+// the base.
+export function dollarCauses(causes: readonly Cause[]): Cause[] {
   let exact = 0;
   let rounded = 0;
   return causes.flatMap((cause, index) => {
     exact += cause.amount;
-    const next = cents(exact);
+    const next = roundDollars(exact);
     const amount = next - rounded;
     rounded = next;
     return amount === 0 && index > 0 ? [] : [{ ...cause, amount }];
@@ -130,7 +129,7 @@ function effectSourceName(data: CauseData, source: ModifierSource): string {
   }
 }
 
-// A readable name for one cause of a change, such as "dramatic", "solo" or "Big tipper".
+// A readable name for one cause of a change, such as "dramatic" or "Big tipper".
 export function causeName(data: CauseData, change: Change, cause: Cause): string {
   switch (cause.kind) {
     case "effect":
@@ -147,8 +146,6 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
       }
       // A meter held at 0 means its owner fires you.
       return cause.bound === "max" ? "at max" : firedByText(data, change.dog);
-    case "packSize":
-      return cause.packSize === 1 ? "solo" : `pack of ${cause.packSize}`;
     case "quirk":
       return data.quirks[cause.quirk].name;
     case "temperament":
@@ -184,7 +181,7 @@ function namesBase(cause: Cause): boolean {
 
 // The short floating label for a change: its amount, then its base unless the player just
 // picked it on a card, then everything that changed it, as "−2 ♥, dramatic" or
-// "+$2 tip, solo".
+// "+$2 tip, Big tipper".
 export function causeLabel(data: CauseData, change: Change): string {
   const amount = amountText(change.kind, changeAmount(change));
   const [base, ...rest] = change.causes;
@@ -193,7 +190,7 @@ export function causeLabel(data: CauseData, change: Change): string {
   return [head, ...rest.map((cause) => causeName(data, change, cause))].join(", ");
 }
 
-// The names the label gives after the amount, as ["dramatic"] or ["tip", "solo"].
+// The names the label gives after the amount, as ["dramatic"] or ["tip", "Big tipper"].
 export function causeNames(data: CauseData, change: Change): string[] {
   const [base, ...rest] = change.causes;
   const named = base !== undefined && namesBase(base) ? change.causes : rest;

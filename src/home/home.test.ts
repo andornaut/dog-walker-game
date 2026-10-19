@@ -11,7 +11,7 @@ import { QUIRKS } from "../data/quirks";
 import { SHOP_GEAR } from "../data/shop";
 import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
-import { cents } from "../rules/units";
+import { cents, readTable } from "../rules/units";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import type { LastWalk, Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
@@ -59,6 +59,7 @@ const owned: Owned = {
   walkers: ["casey"],
 };
 const dollars = (amount: number) => cents(amount * 100);
+const whistlePrice = readTable(TEST_TUNING, "money", "prices", "whistle");
 
 describe("dollarText", () => {
   it("shows whole dollars with thousands separated", () => {
@@ -129,7 +130,7 @@ describe("packCapacity", () => {
 describe("purchasePrice", () => {
   it.each<[string, Owned, Purchase, number | null]>([
     ["a locked dog", owned, { dog: "nugget", kind: "dog" }, dollars(600)],
-    ["locked gear", owned, { gear: "whistle", kind: "gear" }, dollars(600)],
+    ["locked gear", owned, { gear: "whistle", kind: "gear" }, whistlePrice],
     ["the second dog slot", { ...owned, dogSlots: 1 }, { kind: "dogSlot" }, dollars(800)],
     ["the third dog slot", { ...owned, dogSlots: 2 }, { kind: "dogSlot" }, dollars(1800)],
     ["an owned dog as not for sale", owned, { dog: "koda", kind: "dog" }, null],
@@ -163,8 +164,8 @@ describe("buy", () => {
       purchase: { dog: "nugget", kind: "dog" },
     },
     {
-      bank: 2_000,
-      expected: { bankCents: dollars(1_400), owned: { ...start, gear: ["whistle"] } },
+      bank: whistlePrice / 100 + 600,
+      expected: { bankCents: dollars(600), owned: { ...start, gear: ["whistle"] } },
       name: "adds gear",
       purchase: { gear: "whistle", kind: "gear" },
     },
@@ -321,7 +322,7 @@ describe("dogInfo and gearInfo", () => {
     [
       "adds locked gear's price",
       () => gearInfo(data, owned, cents(0), "whistle"),
-      /\$600: need \$600 more\.$/,
+      new RegExp(`\\${dollarText(whistlePrice)}: need \\${dollarText(whistlePrice)} more\\.$`),
     ],
   ])("%s", (_name, line, pattern) => {
     expect(line()).toMatch(pattern);

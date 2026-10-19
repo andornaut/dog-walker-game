@@ -32,7 +32,7 @@ import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
 import { giveTreat } from "../rules/treats";
-import { cents, pixels, read } from "../rules/units";
+import { cents, pixels, read, readTable } from "../rules/units";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, lanesReachedAtEnd } from "../testing/avoidable";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
@@ -59,6 +59,7 @@ import {
   startRoad,
   steerWalk,
   stepWalk,
+  thinTips,
   type Walk,
   type WalkItem,
   walkScrollSpeed,
@@ -232,7 +233,8 @@ describe("planZone", { timeout: 15_000 }, () => {
   it("plans the zone's counts of each kind of spawn", () => {
     expect(countOf("obstacle")).toBe(6);
     expect(countOf("minor")).toBe(4);
-    expect(countOf("tip")).toBe(8);
+    const solo = readTable(tuning, "multipliers", "tipSpawnsByPackSize", 1);
+    expect(countOf("tip")).toBe(Math.round(tuning.counts.tipsFirstZone * solo));
     expect(countOf("treat")).toBe(2);
     expect(countOf("lucky")).toBe(2);
   });
@@ -371,6 +373,19 @@ describe("planZone", { timeout: 15_000 }, () => {
 });
 
 describe("stepWalk", () => {
+  it("brings only Stinky's share of the tips due into view", () => {
+    const walk = walkWith(["koda"]);
+    const pending = [0, 1, 3, 4].map((lane) => ({ distance: 0.5, kind: "tip", lane }) as const);
+    const due: Walk = { ...walk, road: { ...walk.road, pending } };
+    const stinky: Walk = { ...due, run: { ...due.run, debuffs: [{ debuff: "stinky" }] } };
+    const tipsInView = (from: Walk) =>
+      step(from, 0.05).walk.road.items.filter(({ kind }) => kind === "tip").length;
+    expect(tipsInView(due)).toBe(pending.length);
+    expect(tipsInView(stinky)).toBe(
+      pending.length * read(tuning, "multipliers", "stinkyTipSpawns"),
+    );
+  });
+
   it("brings a due spawn into view at the top of the road", () => {
     const walk = walkWith(["koda"]);
     const due: Walk = {
@@ -438,10 +453,11 @@ describe("stepWalk", () => {
 
   it("drops tips once for a minor bump, locks steering and starts the grace window", () => {
     const walk = walkWith(["koda", "duchess"], [atPack("cone"), atPack("otherDog", 1)]);
-    const rich = { ...walk, run: { ...walk.run, money: cents(500) } };
+    const drop = read(tuning, "money", "minorBump");
+    const rich = { ...walk, run: { ...walk.run, money: cents(drop + 300) } };
     const { bumps, cards, walk: after } = step(rich);
-    expect(bumps.map(({ change }) => change?.amount)).toEqual([-200]);
-    expect(bumps[0]?.change?.causes).toEqual([{ amount: -200, kind: "bump" }]);
+    expect(bumps.map(({ change }) => change?.amount)).toEqual([-drop]);
+    expect(bumps[0]?.change?.causes).toEqual([{ amount: -drop, kind: "bump" }]);
     expect(after.run.money).toBe(300);
     expect(cards).toEqual([]);
     expect(isSteeringLocked(after.road.control)).toBe(true);
@@ -969,6 +985,29 @@ describe("finishZone", () => {
     const { run } = walkWith(["koda"]);
     const last = finishZone(data, { ...run, zoneIndex: WORLD.walkLength - 1 }).run;
     expect(last.phase).toEqual({ kind: "ended", reason: "finished" });
+  });
+});
+
+describe("thinTips", () => {
+  const tips = (count: number) =>
+    Array.from({ length: count }, (_, lane) => ({ distance: 0, kind: "tip", lane }));
+
+  it.each<[string, number, number]>([
+    ["every tip at a whole share", 1, 4],
+    ["every second tip at half", 0.5, 2],
+    ["every tenth tip at a tenth, rounding error and all", 0.1, 1],
+    ["no tip at none", 0, 0],
+  ])("keeps %s", (_, share, kept) => {
+    expect(thinTips(share, 0, tips(share === 0.1 ? 10 : 4)).events).toHaveLength(kept);
+  });
+
+  it("carries a part-owed tip to the next step, and always keeps other spawns", () => {
+    const first = thinTips(0.5, 0, [
+      { distance: 0, kind: "tip", lane: 0 },
+      { distance: 0, kind: "cone", lane: 1 },
+    ]);
+    expect(first.events.map(({ kind }) => kind)).toEqual(["cone"]);
+    expect(thinTips(0.5, first.credit, tips(1)).events).toHaveLength(1);
   });
 });
 

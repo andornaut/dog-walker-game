@@ -3,9 +3,9 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { AchievementId } from "../data/types";
 import { countBump } from "../rules/achievements";
-import { cents } from "../rules/units";
 import { finishZone, headHome } from "../runner/walk";
 import { newRun, type RunState } from "../state/runState";
+import { earningsGoal } from "../testing/achievements";
 import {
   type AchievementPreview,
   earnedIfBanked,
@@ -59,7 +59,7 @@ describe("previewAchievements", () => {
   it("toasts Big Payday as the money reaches it mid-zone", () => {
     const { preview } = previewer();
     const first = preview(NOTHING_PREVIEWED, start);
-    const rich = preview(first.preview, { ...start, money: cents(50_000) });
+    const rich = preview(first.preview, { ...start, money: earningsGoal("bigPayday") });
     expect(rich.earned).toEqual(["bigPayday"]);
   });
 

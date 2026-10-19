@@ -53,10 +53,13 @@ export const TUNING = {
     startByTemperament: { dramatic: 3, fussy: 2, laidBack: 3 },
     treat: 1,
   },
-  // Dollars. The game counts money in cents, so $1.50 is exact.
+  // Whole dollars: $1 is the smallest amount, and an amount a multiplier changes is rounded to
+  // the nearest dollar.
   money: {
     // A Regular dog's accident, cleaned up with a bag.
     accidentCleanUp: 20,
+    // Added to each tip while Big tipper is on.
+    bigTipperTipBonus: 1,
     chattyNeighbourTip: 100,
     // The tip when a crowd pleaser's need is met.
     crowdPleaserTip: 8,
@@ -92,11 +95,10 @@ export const TUNING = {
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
-    bigTipperTip: 1.5,
     // A photo op's tip while a camera-ready dog walks.
     cameraReadyTip: 2,
-    // A charmer walker's tip value.
-    charmerTip: 0.85,
+    // How many tips appear for a charmer walker.
+    charmerTipSpawns: 0.85,
     // How much more often stranger spots are drawn while a crowd pleaser walks.
     crowdPleaserStrangerWeight: 2,
     // A cyclist rides down its lane this much faster than the road scrolls; above 1.
@@ -106,8 +108,8 @@ export const TUNING = {
     fastWalkerSpeed: 1.1,
     goodLeashSquirrelPull: 0,
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
-    // A hustler walker's tip value.
-    hustlerTip: 1.2,
+    // How many tips appear for a hustler walker.
+    hustlerTipSpawns: 1.2,
     // A nervous dog's need fills this much faster once firings leave her the only dog walking.
     nervousAloneUrgency: 2,
     otherDogChangePerBigDog: -0.25,
@@ -125,9 +127,10 @@ export const TUNING = {
     // A slow walker's fees, and the factor on its road speed, zone length and spawns.
     slowWalkerFees: 0.9,
     slowWalkerSpeed: 0.9,
-    stinkyTip: 0.5,
-    // By the number of dogs in the pack.
-    tipByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },
+    // How many tips appear for the rest of the zone while the pack is Stinky.
+    stinkyTipSpawns: 0.5,
+    // How many tips appear in a zone, by the number of dogs in the pack at its start.
+    tipSpawnsByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {

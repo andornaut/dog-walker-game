@@ -17,10 +17,10 @@ export const UPGRADES = {
     duration: "run",
     effects: [
       {
-        by: "bigTipperTip",
+        by: "bigTipperTipBonus",
         duration: "run",
         kind: "modifier",
-        operation: "multiply",
+        operation: "add",
         stat: "tipValue",
       },
     ],

@@ -61,7 +61,12 @@ describe("effectText", () => {
       ENCOUNTERS.biscuitNeighbour.resolution.effects,
       "+1 treat per dog (carry up to 3)",
     ],
-    ["a multiplier as a percentage", UPGRADES.bigTipper.effects, "Tip value +50% for the run"],
+    [
+      "a multiplier as a percentage",
+      UPGRADES.rushHour.effects,
+      "Tips +100% next zone, obstacles +50% next zone",
+    ],
+    ["an addition to each tip", UPGRADES.bigTipper.effects, "+$1 per tip for the run"],
     ["a removal", SHOP_GEAR.runningShoes.effects, "No lane-input lock after a pull"],
     ["an addition", SHOP_GEAR.fannyPack.effects, "Starting money +$15"],
     [

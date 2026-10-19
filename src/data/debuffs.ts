@@ -4,7 +4,7 @@ import type { Debuff } from "./types";
 export const DEBUFFS = {
   stinky: {
     duration: "zone",
-    modifiers: [{ by: "stinkyTip", operation: "multiply", stat: "tipValue" }],
+    modifiers: [{ by: "stinkyTipSpawns", operation: "multiply", stat: "tipSpawns" }],
     name: "Stinky",
   },
 } as const satisfies Record<string, Debuff>;

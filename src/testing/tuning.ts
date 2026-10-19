@@ -9,10 +9,10 @@ export function withNeutralWalkers(tuning: LiveTuning): LiveTuning {
     hearts: { ...tuning.hearts, charmerStart: 0 },
     multipliers: {
       ...tuning.multipliers,
-      charmerTip: 1,
+      charmerTipSpawns: 1,
       fastWalkerFees: 1,
       fastWalkerSpeed: 1,
-      hustlerTip: 1,
+      hustlerTipSpawns: 1,
       slowWalkerFees: 1,
       slowWalkerSpeed: 1,
     },
@@ -39,6 +39,7 @@ const PINNED_TUNING: LiveTuning = {
   },
   money: {
     ...TUNING.money,
+    bigTipperTipBonus: 1,
     crowdPleaserTip: 2,
     encounterHigh: 15,
     encounterLow: 5,
@@ -54,7 +55,6 @@ const PINNED_TUNING: LiveTuning = {
   },
   multipliers: {
     ...TUNING.multipliers,
-    bigTipperTip: 1.5,
     cameraReadyTip: 2,
     crowdPleaserStrangerWeight: 2,
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
@@ -63,8 +63,8 @@ const PINNED_TUNING: LiveTuning = {
     runningShoesInputLock: 0,
     scrollSpeedGainPerZone: 0.2,
     sledDogLaneSpeed: 1.25,
-    stinkyTip: 0.5,
-    tipByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },
+    stinkyTipSpawns: 0.5,
+    tipSpawnsByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },
   },
   pixels: { ...TUNING.pixels, roadScrollSpeed: 80 },
   probability: {

@@ -1,8 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { cents, clampHearts } from "../rules/units";
+import { tipValue } from "../rules/run";
+import { type Cents, cents, clampHearts } from "../rules/units";
+import type { RunState } from "../state/runState";
+import { activeModifier, testState } from "../testing/runState";
 import { changeLabels, heartRows, pipLook, wholeDollars, zonePips } from "./hudView";
+
+const bigTipper = activeModifier(
+  { kind: "upgrade", upgrade: "bigTipper" },
+  { by: "bigTipperTipBonus", operation: "add", stat: "tipValue" },
+);
 
 describe("changeLabels", () => {
   const skunkIgnore = { encounter: "skunk", kind: "encounter", option: 2 } as const;
@@ -27,10 +35,10 @@ describe("changeLabels", () => {
         kind: "hearts",
       },
       {
-        amount: cents(150),
+        amount: cents(200),
         causes: [
           { amount: 100, kind: "tip" },
-          { amount: 50, kind: "packSize", packSize: 1 },
+          { amount: 100, kind: "modifier", source: { kind: "upgrade", upgrade: "bigTipper" } },
         ],
         dog: null,
         kind: "money",
@@ -52,11 +60,11 @@ describe("changeLabels", () => {
         text: "+1 ♥ treat",
       },
       {
-        amount: 150,
-        cause: "tip, solo",
+        amount: 200,
+        cause: "tip, Big tipper",
         gain: true,
         target: { kind: "bank" },
-        text: "+$2 tip, solo",
+        text: "+$2 tip, Big tipper",
       },
     ]);
   });
@@ -85,6 +93,16 @@ describe("wholeDollars", () => {
   it("drops the cents", () => {
     expect(wholeDollars(cents(4_299))).toBe("$42");
     expect(wholeDollars(cents(0))).toBe("$0");
+  });
+
+  it.each<[string, RunState]>([
+    ["a tip", testState({ koda: 5 })],
+    ["a Big tipper tip", testState({ koda: 5 }, { modifiers: [bigTipper] })],
+  ])("moves the counter by the dollars %s's label shows", (_, run) => {
+    const tip = tipValue(gameData, run);
+    const shown = (money: Cents) => Number(wholeDollars(money).slice(1));
+    const gain = shown(cents(run.money + tip.amount)) - shown(run.money);
+    expect(changeLabels(gameData, [tip])[0]?.text.split(" ")[0]).toBe(`+$${gain}`);
   });
 });
 

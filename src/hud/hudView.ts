@@ -14,7 +14,7 @@ export interface ChangeLabel {
   text: string;
 }
 
-// One label per change, naming its causes ("−2 ♥, dramatic", "+$1.50 tip, solo"): a heart
+// One label per change, naming its causes ("−2 ♥, dramatic", "+$2 tip, Big tipper"): a heart
 // change over its dog's slot, a money change over the bank.
 export function changeLabels(data: CauseData, changes: readonly Change[]): ChangeLabel[] {
   return changes.map((change): ChangeLabel => ({

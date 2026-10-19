@@ -8,62 +8,48 @@ import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
 import { fireOwnersAtZero, payZoneFees, tipValue } from "./run";
-import { cents } from "./units";
+import { cents, read, readTable } from "./units";
 
 const data = { debuffs: DEBUFFS, dogs: DOGS, tuning: TEST_TUNING, world: TEST_WORLD };
 const bigTipper = activeModifier(
   { kind: "upgrade", upgrade: "bigTipper" },
-  { by: "bigTipperTip", operation: "multiply", stat: "tipValue" },
+  { by: "bigTipperTipBonus", operation: "add", stat: "tipValue" },
 );
+const stinky = { debuffs: [{ debuff: "stinky" }] } as const;
 const shortcut = activeModifier(
   { kind: "upgrade", upgrade: "shortcut" },
   { by: "shortcutFees", operation: "multiply", stat: "fees" },
 );
 
 describe("tipValue", () => {
+  const tip = read(TEST_TUNING, "money", "tip");
   const three = { duchess: 5, koda: 5, nugget: 5 };
 
   it.each<[string, RunState, number]>([
-    ["a solo walk the most", testState({ koda: 5 }), 150],
-    ["a pair less", testState({ duchess: 5, koda: 5 }), 125],
-    ["a pack of three the least", testState(three), 100],
+    ["a solo walk money.tip", testState({ koda: 5 }), tip],
+    ["a pack of three money.tip too", testState(three), tip],
     [
-      "a solo walk after two firings",
-      testState({ duchess: "fired", koda: 5, nugget: "fired" }),
-      150,
-    ],
-    [
-      "Big tipper on top of the pack-size factor",
+      "Big tipper money.tip and its bonus",
       testState(three, { modifiers: [bigTipper] }),
-      150,
+      tip + read(TEST_TUNING, "money", "bigTipperTipBonus"),
     ],
-    [
-      "Stinky on top of the pack-size factor",
-      testState(three, { debuffs: [{ debuff: "stinky" }] }),
-      50,
-    ],
+    ["Stinky money.tip: it thins the tips instead", testState(three, stinky), tip],
     ["nothing with no dogs left", testState({ koda: "fired" }), 0],
   ])("pays %s", (_, state, amount) => {
     expect(tipValue(data, state).amount).toBe(amount);
   });
 
-  it("gives the tip, the pack-size factor and each modifier as causes", () => {
-    const tip = tipValue(data, testState({ koda: 5 }, { debuffs: [{ debuff: "stinky" }] }));
-    expect(tip).toEqual({
-      amount: 75,
+  it("gives the tip and each modifier as causes", () => {
+    const bonus = read(TEST_TUNING, "money", "bigTipperTipBonus");
+    expect(tipValue(data, testState({ koda: 5 }, { modifiers: [bigTipper] }))).toEqual({
+      amount: tip + bonus,
       causes: [
-        { amount: 100, kind: "tip" },
-        { amount: 50, kind: "packSize", packSize: 1 },
-        { amount: -75, kind: "modifier", source: { debuff: "stinky", kind: "debuff" } },
+        { amount: tip, kind: "tip" },
+        { amount: bonus, kind: "modifier", source: { kind: "upgrade", upgrade: "bigTipper" } },
       ],
       dog: null,
       kind: "money",
     });
-  });
-
-  it("leaves out the pack-size factor for a pack it does not change", () => {
-    const tip = tipValue(data, testState({ duchess: 5, koda: 5, nugget: 5 }));
-    expect(tip.causes).toEqual([{ amount: 100, kind: "tip" }]);
   });
 });
 
@@ -107,11 +93,24 @@ describe("payZoneFees", () => {
       data,
       testState({ duchess: 5 }, { modifiers: [shortcut] }),
     );
-    expect(state.money).toBe(750);
+    expect(state.money).toBe(800);
     expect(changes[0]?.causes).toEqual([
       { amount: 1000, kind: "fee" },
-      { amount: -250, kind: "modifier", source: { kind: "upgrade", upgrade: "shortcut" } },
+      { amount: -200, kind: "modifier", source: { kind: "upgrade", upgrade: "shortcut" } },
     ]);
+  });
+
+  it("rounds a fee a multiplier makes fractional to the nearest dollar, causes and all", () => {
+    const fee =
+      readTable(TEST_TUNING, "money", "feeByTemperament", "fussy") *
+      read(TEST_TUNING, "multipliers", "shortcutFees");
+    expect(fee % 100).not.toBe(0);
+    const { changes, state } = payZoneFees(
+      data,
+      testState({ zippy: 5 }, { modifiers: [shortcut] }),
+    );
+    expect(state.money).toBe(Math.round(fee / 100) * 100);
+    expect(changes[0]?.causes.reduce((total, { amount }) => total + amount, 0)).toBe(state.money);
   });
 });
 

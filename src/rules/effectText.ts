@@ -174,6 +174,7 @@ function addedText(modifier: Modifier, value: number): string {
   switch (modifier.stat) {
     case "costPerDog":
     case "startMoney":
+    case "tipValue":
       return `${sign(value)}${formatDollars(cents(value))}`;
     case "treatReach":
       return `${sign(value)}${Math.abs(value)} ${Math.abs(value) === 1 ? "lane" : "lanes"}`;
@@ -182,14 +183,18 @@ function addedText(modifier: Modifier, value: number): string {
   }
 }
 
-// One modifier, such as "tip value +50% for the run" or "no lane-input lock after a pull".
+// One modifier, such as "+$1 per tip for the run", "tips +100% next zone" or "no lane-input
+// lock after a pull".
 export function modifierText(tuning: LiveTuning, modifier: Modifier): string {
   const value = modifierValue(tuning, modifier);
   const name = STAT_NAMES[modifier.stat];
   const percent = Math.round((value - 1) * 100);
   let change: string;
   if (modifier.operation === "add") {
-    change = `${name} ${addedText(modifier, value)}`;
+    change =
+      modifier.stat === "tipValue"
+        ? `${addedText(modifier, value)} per tip`
+        : `${name} ${addedText(modifier, value)}`;
   } else if (value === 0) {
     change = `no ${name}`;
   } else {

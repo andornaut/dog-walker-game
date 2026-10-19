@@ -49,7 +49,7 @@ describe("newRun", () => {
       ["tipSpawns", "slowWalkerSpeed", ben],
       ["needSpotSpawns", "slowWalkerSpeed", ben],
       ["fees", "slowWalkerFees", ben],
-      ["tipValue", "hustlerTip", ben],
+      ["tipSpawns", "hustlerTipSpawns", ben],
       ["startMoney", "fannyPackStart", { gear: "fannyPack", kind: "gear" }],
     ]);
     expect(state.modifiers.every(({ untilZone }) => untilZone === undefined)).toBe(true);

@@ -1,42 +1,38 @@
 import type { DogId, GameData } from "../data/types";
 import { mapPack, packDogs } from "../state/pack";
 import type { ActiveModifier, RunState } from "../state/runState";
-import { type Cause, centsCauses, modifierCauses, type MoneyChange } from "./causes";
+import { type Cause, dollarCauses, modifierCauses, type MoneyChange } from "./causes";
 import { zoneFeeParts } from "./dogs";
 import { statParts } from "./modifiers";
 import { currentZone } from "./route";
-import { addCents, cents, nonNegativeCents, read, readTable } from "./units";
+import { addCents, cents, nonNegativeCents, read, roundDollars } from "./units";
 
-// What one tip pickup pays now, with its causes: smaller packs tip more, then upgrades and
-// debuffs apply.
+// The modifiers the pack's debuffs apply, such as Stinky's on tipSpawns.
+export function debuffModifiers(
+  data: Pick<GameData, "debuffs">,
+  state: Pick<RunState, "debuffs">,
+): ActiveModifier[] {
+  return state.debuffs.flatMap(({ debuff }) =>
+    data.debuffs[debuff].modifiers.map((modifier) => ({
+      ...modifier,
+      source: { debuff, kind: "debuff" } as const,
+    })),
+  );
+}
+
+// What one tip pickup pays now, with its causes: money.tip, then upgrades and debuffs apply.
 export function tipValue(data: Pick<GameData, "debuffs" | "tuning">, state: RunState): MoneyChange {
-  const packSize = packDogs(state).length;
-  if (packSize === 0) {
+  if (packDogs(state).length === 0) {
     return { amount: cents(0), causes: [], dog: null, kind: "money" };
   }
   const tip = read(data.tuning, "money", "tip");
-  const bySize = readTable(
-    data.tuning,
-    "multipliers",
-    "tipByPackSize",
-    packSize as keyof GameData["tuning"]["multipliers"]["tipByPackSize"],
-  );
-  const modifiers: ActiveModifier[] = [
-    ...state.modifiers,
-    ...state.debuffs.flatMap(({ debuff }) =>
-      data.debuffs[debuff].modifiers.map((modifier) => ({
-        ...modifier,
-        source: { debuff, kind: "debuff" } as const,
-      })),
-    ),
-  ];
-  const factor = statParts(data.tuning, modifiers, "tipValue", bySize);
-  const causes = centsCauses([
+  const modifiers = [...state.modifiers, ...debuffModifiers(data, state)];
+  const value = statParts(data.tuning, modifiers, "tipValue", tip);
+  const causes = dollarCauses([
     { amount: tip, kind: "tip" },
-    ...(bySize === 1 ? [] : [{ amount: tip * (bySize - 1), kind: "packSize", packSize } as const]),
-    ...modifierCauses(factor.contributions, tip),
+    ...modifierCauses(value.contributions),
   ]);
-  return { amount: cents(tip * factor.value), causes, dog: null, kind: "money" };
+  return { amount: roundDollars(value.value), causes, dog: null, kind: "money" };
 }
 
 export interface Payment {
@@ -58,7 +54,7 @@ export function minorBump(data: Pick<GameData, "tuning">, state: RunState): Paym
     causes.push({ amount: delta - drop, bound: "min", kind: "limit" });
   }
   return {
-    change: { amount: cents(delta), causes: centsCauses(causes), dog: null, kind: "money" },
+    change: { amount: cents(delta), causes: dollarCauses(causes), dog: null, kind: "money" },
     state: { ...state, money },
   };
 }
@@ -69,7 +65,7 @@ export interface Payments {
 }
 
 // At the end of a zone, every dog still walking pays its fee times the zone's fee multiplier,
-// one change per dog.
+// rounded to the dollar, one change per dog.
 export function payZoneFees(
   data: Pick<GameData, "dogs" | "tuning" | "world">,
   state: RunState,
@@ -78,10 +74,10 @@ export function payZoneFees(
   const zone = currentZone(data, state);
   const changes = packDogs(state).map((id): MoneyChange => {
     const fee = zoneFeeParts(data.tuning, state.modifiers, data.dogs[id]);
-    const amount = cents(fee.value * zone.fees);
+    const amount = roundDollars(fee.value * zone.fees);
     money = addCents(money, amount);
     const { quirk } = data.dogs[id];
-    const causes = centsCauses([
+    const causes = dollarCauses([
       { amount: fee.base, kind: "fee" },
       ...(fee.quirk === 0 ? [] : [{ amount: fee.quirk, kind: "quirk", quirk } as const]),
       ...modifierCauses(fee.contributions),

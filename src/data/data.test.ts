@@ -208,7 +208,7 @@ describe("size and energy", () => {
 });
 
 describe("money", () => {
-  it("has a tip factor for every pack size, never rising with a bigger pack", () => {
+  it("has a tip spawns factor for every pack size, never rising with a bigger pack", () => {
     const sizes = Array.from(
       { length: tuning.counts.packSizeMax - tuning.counts.packSizeMin + 1 },
       (_, i) => tuning.counts.packSizeMin + i,
@@ -217,8 +217,8 @@ describe("money", () => {
       readTable(
         tuning,
         "multipliers",
-        "tipByPackSize",
-        size as keyof typeof tuning.multipliers.tipByPackSize,
+        "tipSpawnsByPackSize",
+        size as keyof typeof tuning.multipliers.tipSpawnsByPackSize,
       ),
     );
     expect([...factors].sort((a, b) => b - a)).toEqual(factors);

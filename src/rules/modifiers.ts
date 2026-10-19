@@ -10,6 +10,7 @@ export function modifierValue(tuning: LiveTuning, modifier: Modifier): number {
   switch (modifier.stat) {
     case "costPerDog":
     case "startMoney":
+    case "tipValue":
       return read(tuning, "money", modifier.by);
     case "maxHearts":
     case "startHearts":

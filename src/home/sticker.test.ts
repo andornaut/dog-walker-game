@@ -1,47 +1,65 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { cents } from "../rules/units";
+import { cents, readTable } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
 import { homeSticker, type Sticker } from "./sticker";
 
-const data = { ...gameData, tuning: TEST_TUNING };
+// The prices these cases step between, held so a price change in the tuning keeps their order:
+// the fanny pack is the cheapest, then the whistle and every locked dog, then poop bags.
+const tuning = {
+  ...TEST_TUNING,
+  money: {
+    ...TEST_TUNING.money,
+    prices: {
+      ...TEST_TUNING.money.prices,
+      fannyPack: 400,
+      lockedDog: 600,
+      luckyCollar: 1000,
+      poopBags: 700,
+      runningShoes: 800,
+      whistle: 600,
+    },
+  },
+};
+const data = { ...gameData, tuning };
 const dollars = (amount: number) => cents(amount * 100);
+const price = (key: keyof typeof tuning.money.prices) => readTable(tuning, "money", "prices", key);
 const owned: Owned = {
   dogSlots: 1,
   dogs: ["biscuit", "duchess", "koda"],
   gear: [],
   walkers: ["casey"],
 };
+const fannyPack = price("fannyPack") / 100;
+const lockedDog = price("lockedDog") / 100;
 
-// Under the test tuning the fanny pack is $400, the whistle and every locked dog $600, poop
-// bags $700 and the lucky collar $1,000.
 describe("homeSticker", () => {
   it.each<[string, number, number, Sticker | null]>([
     [
       "prices the cheapest locked item out of reach",
       0,
       0,
-      { item: { gear: "fannyPack", kind: "gear" }, kind: "price", price: dollars(400) },
+      { item: { gear: "fannyPack", kind: "gear" }, kind: "price", price: price("fannyPack") },
     ],
     [
       "marks an item the bank has just come to cover as new",
       0,
-      450,
-      { item: { gear: "fannyPack", kind: "gear" }, kind: "new", price: dollars(400) },
+      fannyPack,
+      { item: { gear: "fannyPack", kind: "gear" }, kind: "new", price: price("fannyPack") },
     ],
     [
       "puts new on the first newly covered item in the shop's order",
-      450,
-      650,
-      { item: { dog: "archie", kind: "dog" }, kind: "new", price: dollars(600) },
+      fannyPack,
+      lockedDog,
+      { item: { dog: "archie", kind: "dog" }, kind: "new", price: price("lockedDog") },
     ],
     [
       "prices the next item once nothing is new",
-      650,
-      650,
-      { item: { gear: "poopBags", kind: "gear" }, kind: "price", price: dollars(700) },
+      lockedDog,
+      lockedDog,
+      { item: { gear: "poopBags", kind: "gear" }, kind: "price", price: price("poopBags") },
     ],
     ["shows none once the bank covers everything and nothing is new", 10_000, 10_000, null],
   ])("%s", (_name, before, bank, expected) => {

@@ -128,7 +128,7 @@ export interface Tuning {
     readonly nervousAloneUrgency: number;
     readonly scrollSpeedGainPerZone: number;
     readonly sledDogLaneSpeed: number;
-    readonly tipByPackSize: Table<number>;
+    readonly tipSpawnsByPackSize: Table<number>;
   };
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
   readonly probability: OpenGroup & {
@@ -205,7 +205,7 @@ export type Duration = "nextZone" | "run" | "zone";
 // Stats a modifier changes. An "add" names a key in the stat's own unit group.
 export type CountStat = "treatReach";
 export type HeartsStat = "maxHearts" | "startHearts";
-export type MoneyStat = "costPerDog" | "startMoney";
+export type MoneyStat = "costPerDog" | "startMoney" | "tipValue";
 export type Stat =
   | CountStat
   | HeartsStat
@@ -218,7 +218,6 @@ export type Stat =
   // The road's speed, which the spawns and movers are planned for.
   | "scrollSpeed"
   | "tipSpawns"
-  | "tipValue"
   | "zoneLength";
 
 // duration is absent for gear, which lasts every run it is taken on.

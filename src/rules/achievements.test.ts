@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { AchievementCondition } from "../data/types";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
+import { earningsGoal } from "../testing/achievements";
 import { testState } from "../testing/runState";
 import {
   conditionHolds,
@@ -170,7 +171,7 @@ describe("newlyEarned", () => {
 
 describe("earnedByRun", () => {
   it("counts only achievements whose conditions are all about the run", () => {
-    const run = facts({ earnedCents: cents(60_000), packSize: 3, zonesFinished: 4 });
+    const run = facts({ earnedCents: earningsGoal("bigPayday"), packSize: 3, zonesFinished: 4 });
     expect(earnedByRun(gameData, run)).toEqual([
       "firstSteps",
       "roundTrip",

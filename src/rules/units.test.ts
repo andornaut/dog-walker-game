@@ -27,9 +27,9 @@ describe("units", () => {
       readTable(
         TEST_TUNING,
         "multipliers",
-        "tipByPackSize",
-        4 as keyof typeof TEST_TUNING.multipliers.tipByPackSize,
+        "tipSpawnsByPackSize",
+        4 as keyof typeof TEST_TUNING.multipliers.tipSpawnsByPackSize,
       ),
-    ).toThrow("multipliers.tipByPackSize.4");
+    ).toThrow("multipliers.tipSpawnsByPackSize.4");
   });
 });

@@ -32,7 +32,7 @@ const walkerData = {
     hearts: { ...TEST_TUNING.hearts, charmerStart: 1 },
     multipliers: {
       ...TEST_TUNING.multipliers,
-      charmerTip: 0.85,
+      charmerTipSpawns: 0.85,
       slowWalkerFees: 0.9,
       slowWalkerSpeed: 0.9,
     },
@@ -50,7 +50,7 @@ describe("stripItems", () => {
         modifiers: [
           activeModifier(
             { kind: "upgrade", upgrade: "bigTipper" },
-            { by: "bigTipperTip", operation: "multiply", stat: "tipValue" },
+            { by: "bigTipperTipBonus", operation: "add", stat: "tipValue" },
           ),
         ],
         upgradesPicked: ["raincoats", "bellyRubs", "bigTipper"],
@@ -99,7 +99,7 @@ describe("stripText", () => {
     [
       "an upgrade's name and effect as its card does",
       { kind: "upgrade", upgrade: "bigTipper" },
-      "Big tipper: tip value +50% for the run.",
+      "Big tipper: +$1 per tip for the run.",
     ],
     [
       "gear's name and effect as its home line does",
@@ -109,7 +109,7 @@ describe("stripText", () => {
     [
       "a debuff's modifiers for its duration",
       { debuff: "stinky", kind: "debuff" },
-      "Stinky: tip value −50% for the rest of the zone.",
+      "Stinky: tips −50% for the rest of the zone.",
     ],
     [
       "a walker's pace and its effects",
@@ -119,7 +119,7 @@ describe("stripText", () => {
     [
       "a walker's style and its effects",
       { kind: "style", style: "charm" },
-      "Charmer: starting ♥ +1, tip value −15%.",
+      "Charmer: starting ♥ +1, tips −15%.",
     ],
   ])("writes %s", (_name, item, expected) => {
     expect(stripText(walkerData, item)).toBe(expected);

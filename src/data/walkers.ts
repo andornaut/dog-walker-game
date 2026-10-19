@@ -29,18 +29,20 @@ export const WALKER_PACES = {
   },
 } as const satisfies Record<string, WalkerTrait>;
 
-// A walker's style is the play style: a charmer's owners start happier but tip less, a
-// hustler's tip more. The art is icon-style-<id>.
+// A walker's style is the play style: a charmer's owners start happier but fewer tips appear,
+// and more appear for a hustler. The art is icon-style-<id>.
 export const WALKER_STYLES = {
   charm: {
     effects: [
       { by: "charmerStart", kind: "modifier", operation: "add", stat: "startHearts" },
-      { by: "charmerTip", kind: "modifier", operation: "multiply", stat: "tipValue" },
+      { by: "charmerTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
     ],
     name: "Charmer",
   },
   hustle: {
-    effects: [{ by: "hustlerTip", kind: "modifier", operation: "multiply", stat: "tipValue" }],
+    effects: [
+      { by: "hustlerTipSpawns", kind: "modifier", operation: "multiply", stat: "tipSpawns" },
+    ],
     name: "Hustler",
   },
 } as const satisfies Record<string, WalkerTrait>;

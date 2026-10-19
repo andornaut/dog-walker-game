@@ -16,8 +16,8 @@ import { expireAtZoneEnd } from "../rules/durations";
 import { affectedDogs, hitLabel, hoppingDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
-import { minorBump, payZoneFees, tipValue } from "../rules/run";
-import { addCents, type Pixels, pixels, read } from "../rules/units";
+import { debuffModifiers, minorBump, payZoneFees, tipValue } from "../rules/run";
+import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
@@ -95,7 +95,9 @@ export interface ForcedStopOnRoad {
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
-// hitStop is set while an obstacle hit holds the walk still.
+// hitStop is set while an obstacle hit holds the walk still. tipCredit is the share of a tip
+// owed toward the next tip due: a tipSpawns debuff owes less than a whole tip for each one, so
+// only some come into view.
 export interface Road {
   control: LaneControl;
   forcedStopAhead: ForcedStopAhead | null;
@@ -107,6 +109,7 @@ export interface Road {
   nextItemId: number;
   pending: readonly SpawnEvent<WalkItemKind>[];
   speedFactor: number;
+  tipCredit: number;
 }
 
 export interface Walk {
@@ -297,6 +300,7 @@ export function startRoad(laneCount: number, speedFactor = 1): Road {
     nextItemId: 0,
     pending: [],
     speedFactor,
+    tipCredit: 0,
   };
 }
 
@@ -409,12 +413,18 @@ export function needSpotWeights(
 
 // Each obstacle, minor obstacle, lucky find and need spot is drawn first by the zone's
 // weights, so its shape is known when it is placed. Rush hour and the like scale both obstacle
-// counts, and the walker's pace scales the obstacles, tips and need spots. Then each squirrel,
-// other dog and minor obstacle comes as a mover at the zone's mover share, and each goose as a
-// mover always.
+// counts, the walker's pace scales the obstacles, tips and need spots, and the pack's size and
+// the like scale the tips. Then each squirrel, other dog and minor obstacle comes as a mover at
+// the zone's mover share, and each goose as a mover always.
 function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
   const zone = currentZone(data, run);
   const stats = zoneStats(data.tuning, zone, run.zoneIndex);
+  const tipSpawnsBySize = readTable(
+    data.tuning,
+    "multipliers",
+    "tipSpawnsByPackSize",
+    packDogs(run).length as keyof WalkData["tuning"]["multipliers"]["tipSpawnsByPackSize"],
+  );
   const scaled = (stat: "needSpotSpawns" | "obstacleSpawns" | "tipSpawns", base: number) =>
     Math.round(modifiedStat(data.tuning, run.modifiers, stat, base));
   const drawn = <Kind extends WalkItemKind>(
@@ -455,7 +465,7 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
       footprint: footprintOf(data, kind),
       kind,
     })),
-    { blocksLane: false, count: scaled("tipSpawns", stats.tips), kind: "tip" },
+    { blocksLane: false, count: scaled("tipSpawns", stats.tips * tipSpawnsBySize), kind: "tip" },
     { blocksLane: false, count: stats.treats, kind: "treat" },
   ];
 }
@@ -510,6 +520,7 @@ export function planZone(
       forcedStopAhead: { distance: (Math.min(after, rows - 1) + 0.5) * spacing, stop },
       forcedStopsSeen: [...road.forcedStopsSeen, stop],
       pending,
+      tipCredit: 0,
     },
     run,
   };
@@ -613,6 +624,36 @@ export function collect(
   };
 }
 
+// The share of the tips due that come into view while the pack's debuffs change tipSpawns,
+// such as half while Stinky. Other tipSpawns modifiers set the zone's tip count when it is
+// planned.
+function tipSpawnsShare(data: WalkData, run: RunState): number {
+  return modifiedStat(data.tuning, debuffModifiers(data, run), "tipSpawns", 1);
+}
+
+// Each due tip adds share to the credit, and comes into view only once a whole tip is owed.
+// Other spawns always come into view.
+export function thinTips<Kind extends string>(
+  share: number,
+  credit: number,
+  events: readonly SpawnEvent<Kind>[],
+): { readonly credit: number; readonly events: SpawnEvent<Kind>[] } {
+  let owed = credit;
+  const kept = events.filter((event) => {
+    if (event.kind !== "tip") {
+      return true;
+    }
+    owed += share;
+    // A whole tip less a rounding error, so a share such as 0.1 still adds up to one.
+    if (owed < 1 - 1e-9) {
+      return false;
+    }
+    owed -= 1;
+    return true;
+  });
+  return { credit: owed, events: kept };
+}
+
 // One frame of walking. Scrolls the road at the zone's speed, brings spawns into view,
 // moves the pack, then collides: pickups are collected into the run, minor obstacles drop
 // tips and lock lane input, obstacles (outside the grace window) and lucky encounters become
@@ -650,8 +691,9 @@ export function stepWalk(
   const travel = zoneDistance - run.zoneDistance;
 
   const due = takeDueSpawns(zoneDistance, road.pending);
+  const thinned = thinTips(tipSpawnsShare(data, run), road.tipCredit, due.due);
   let nextItemId = road.nextItemId;
-  const arrived = due.due.map((event): WalkItem => {
+  const arrived = thinned.events.map((event): WalkItem => {
     const height = itemHeight(data, geometry, event.kind);
     return {
       height,
@@ -819,6 +861,7 @@ export function stepWalk(
         items: [...remaining, ...cues, ...pickups.filter((item) => !pickupsHit.includes(item))],
         nextItemId,
         pending: due.pending,
+        tipCredit: thinned.credit,
       },
       run: nextRun,
     },

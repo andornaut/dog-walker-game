@@ -14,11 +14,12 @@ import type { EffectSource, RunState } from "../state/runState";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
+import { TEST_WORLD } from "../testing/world";
 import { causeLabel, causeNames, type Change, changeAmount } from "./causes";
 import { resolveEffects } from "./effects";
-import { tipValue } from "./run";
+import { payZoneFees, tipValue } from "./run";
 import { giveTreat } from "./treats";
-import { cents } from "./units";
+import { cents, read, readTable, roundDollars } from "./units";
 
 const data = {
   debuffs: DEBUFFS,
@@ -57,9 +58,19 @@ const sweetTalker = activeModifier(
   { kind: "upgrade", upgrade: "sweetTalker" },
   { by: "sweetTalkerCostPerDog", operation: "add", stat: "costPerDog" },
 );
-const bensTip = activeModifier(
+// The test tuning's walkers change nothing, so Ben's pace gets a fee factor of its own here.
+const benTuning = {
+  ...TEST_TUNING,
+  multipliers: { ...TEST_TUNING.multipliers, slowWalkerFees: 0.9 },
+};
+// Duchess's fee under Ben's pace, to the dollar.
+const bensFee = roundDollars(
+  readTable(benTuning, "money", "feeByTemperament", "dramatic") *
+    read(benTuning, "multipliers", "slowWalkerFees"),
+);
+const bensFees = activeModifier(
   { kind: "walker", walker: "ben" },
-  { by: "hustlerTip", operation: "multiply", stat: "tipValue" },
+  { by: "slowWalkerFees", operation: "multiply", stat: "fees" },
 );
 const towel: Effect = {
   amount: "encounterLow",
@@ -70,8 +81,11 @@ const towel: Effect = {
 const loseOne: Effect = { amount: -1, kind: "hearts", target: { kind: "affected" } };
 const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
 const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
-const stinkyTip = (slots: Parameters<typeof testState>[0]) =>
-  tipValue(data, testState(slots, { debuffs: [{ debuff: "stinky" }] }));
+const bigTipper = activeModifier(
+  { kind: "upgrade", upgrade: "bigTipper" },
+  { by: "bigTipperTipBonus", operation: "add", stat: "tipValue" },
+);
+const bigTipperTip = () => tipValue(data, testState({ koda: 5 }, { modifiers: [bigTipper] }));
 
 describe("causeLabel and causeNames", () => {
   it.each<[string, () => Change | null, string, string[]]>([
@@ -88,33 +102,21 @@ describe("causeLabel and causeNames", () => {
       "+1 ♥, dramatic, at max",
       ["dramatic", "at max"],
     ],
+    ["the tip and Big tipper's bonus", bigTipperTip, "+$2 tip, Big tipper", ["tip", "Big tipper"]],
     [
-      "the tip and a solo walk's tip factor",
-      () => tipValue(data, testState({ koda: 5 })),
-      "+$2 tip, solo",
-      ["tip", "solo"],
-    ],
-    [
-      "Stinky on a halved tip",
-      () => stinkyTip({ duchess: 5, koda: 5, nugget: 5 }),
-      "+$1 tip, Stinky",
-      ["tip", "Stinky"],
-    ],
-    [
-      "the walker who raised a tip",
-      () =>
-        tipValue(
-          {
-            ...data,
-            tuning: {
-              ...TEST_TUNING,
-              multipliers: { ...TEST_TUNING.multipliers, hustlerTip: 3 },
-            },
-          },
-          testState({ duchess: 5, koda: 5, nugget: 5 }, { modifiers: [bensTip] }),
-        ),
-      "+$3 tip, Ben",
-      ["tip", "Ben"],
+      "the walker who changed a fee",
+      () => {
+        const [fee] = payZoneFees(
+          { ...data, tuning: benTuning, world: TEST_WORLD },
+          testState({ duchess: 5 }, { modifiers: [bensFees] }),
+        ).changes;
+        if (fee === undefined) {
+          throw new Error("Expected a fee");
+        }
+        return fee;
+      },
+      `+$${bensFee / 100} fee, Ben`,
+      ["fee", "Ben"],
     ],
     [
       "Sweet talker on a per-dog cost",
@@ -164,7 +166,7 @@ describe("causeLabel and causeNames", () => {
 
 describe("change causes", () => {
   it.each<[string, () => Change]>([
-    ["a tip with a pack-size factor and Stinky", () => stinkyTip({ koda: 5 })],
+    ["a tip with Big tipper's bonus", bigTipperTip],
     ["hearts doubled and capped", () => resolved(gainTwo, testState({ nugget: 4 }))],
   ])("add up to the change: %s", (_, change) => {
     const made = change();

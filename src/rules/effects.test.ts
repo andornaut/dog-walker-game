@@ -251,10 +251,10 @@ describe("applyEffects: other kinds", () => {
 
   it("keeps a modifier, with its source, for the rules that read its stat", () => {
     const bigTipper: Effect = {
-      by: "bigTipperTip",
+      by: "bigTipperTipBonus",
       duration: "run",
       kind: "modifier",
-      operation: "multiply",
+      operation: "add",
       stat: "tipValue",
     };
     const state = applyEffects(data, context([]), [bigTipper], testState({ koda: 5 }));
