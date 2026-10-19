@@ -1,61 +1,52 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { HEIGHT, LANE_COUNT, SCREEN } from "../config";
-import { laneCenters, moveLane } from "../lanes";
-import { screenLayout } from "../layout";
+import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_SCROLL_SPEED } from "../data/tuning";
+import { laneDirectionForKey } from "../input/keyBindings";
+import { laneCenterXs, laneDividerXs, moveLane } from "../layout/lanes";
+import { screenLayout } from "../layout/screenLayout";
 import type { CardSceneData } from "./CardScene";
-import { addBox } from "./shapes";
+import { addFilledRect } from "./draw";
+import { SCENE_KEYS } from "./sceneKeys";
 
 const DASH_COLOR = 0xe0e0e0;
 const DASH_LENGTH = 16;
 const DASH_SPACING = 40;
 const DASH_WIDTH = 2;
-const PACK_COLOR = 0xc97c5d;
+const PACK = { color: 0xc97c5d, height: 16, offsetFromBottom: 80, width: 32 };
 const ROAD_COLOR = 0x8d8d8d;
-// Pixels per second. Placeholder until the runner core sets the base speed.
-const SCROLL_SPEED = 80;
-const WALKER_COLOR = 0x3d5a80;
+const WALKER = { color: 0x3d5a80, height: 32, offsetFromBottom: 40, width: 24 };
 
-// Lane change keys, by KeyboardEvent.key lowercased: arrows, A/D and the vim
-// keys H/L.
-const MOVE_KEYS: Partial<Record<string, -1 | 1>> = {
-  a: -1,
-  arrowleft: -1,
-  arrowright: 1,
-  d: 1,
-  h: -1,
-  l: 1,
-};
-
-interface Dash {
+interface LaneDash {
   rect: GameObjects.Rectangle;
   row: number;
 }
 
-// The road, the walker and the pack. Paused while choice cards are up.
+// Paused while choice cards are up, which stops its scrolling and key input.
 export class RunScene extends Scene {
-  private dashes: Dash[] = [];
+  private dashes: LaneDash[] = [];
   private lane = 0;
+  private laneXs: number[] = [];
   private pack?: GameObjects.Rectangle;
-  private scroll = 0;
+  private roadTop = 0;
+  private scrollOffset = 0;
   private walker?: GameObjects.Rectangle;
 
   constructor() {
-    super("run");
+    super(SCENE_KEYS.run);
   }
 
   create(): void {
-    const { road } = screenLayout(SCREEN);
-    addBox(this, ROAD_COLOR, road);
+    const { road } = screenLayout(SCREEN_CONFIG);
+    this.roadTop = road.y;
+    this.laneXs = laneCenterXs(LANE_COUNT, road);
+    addFilledRect(this, ROAD_COLOR, road);
 
-    // Dashed lines between lanes, scrolled in update() so a pause is visible.
     // Rows start one spacing above the road, where the top bar covers them.
-    const laneWidth = road.width / LANE_COUNT;
     const rows = Math.ceil(road.height / DASH_SPACING) + 1;
     this.dashes = [];
-    for (let lane = 1; lane < LANE_COUNT; lane++) {
+    for (const x of laneDividerXs(LANE_COUNT, road)) {
       for (let row = 0; row < rows; row++) {
-        const x = road.x + lane * laneWidth;
         const rect = this.add
           .rectangle(x, 0, DASH_WIDTH, DASH_LENGTH, DASH_COLOR)
           .setOrigin(0.5, 0);
@@ -64,29 +55,29 @@ export class RunScene extends Scene {
     }
 
     this.lane = Math.floor(LANE_COUNT / 2);
-    const x = laneCenters(LANE_COUNT, road)[this.lane];
-    this.walker = this.add.rectangle(x, HEIGHT - 40, 24, 32, WALKER_COLOR);
-    this.pack = this.add.rectangle(x, HEIGHT - 80, 32, 16, PACK_COLOR);
+    const x = this.laneXs[this.lane];
+    const addBody = ({ color, height, offsetFromBottom, width }: typeof WALKER) =>
+      this.add.rectangle(x, SCREEN_CONFIG.height - offsetFromBottom, width, height, color);
+    this.walker = addBody(WALKER);
+    this.pack = addBody(PACK);
 
-    // Key repeat from holding a key fires keydown again, so holding keeps
-    // moving lane to lane. A paused scene gets no key events.
+    // Holding a key repeats keydown, so the pack keeps moving lane to lane.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      const direction = MOVE_KEYS[event.key.toLowerCase()];
+      const direction = laneDirectionForKey(event.key);
       if (direction !== undefined) {
-        this.moveTo(moveLane(LANE_COUNT, direction, this.lane));
+        this.moveToLane(moveLane(LANE_COUNT, direction, this.lane));
       }
     });
 
-    this.scene.launch("hud");
+    this.scene.launch(SCENE_KEYS.hud);
 
-    // Open placeholder cards until collisions do (Milestone 3): E for three
-    // options, W for two.
+    // Placeholder until collisions open cards (Milestone 3): E for three options, W for two.
     this.input.keyboard?.on("keydown-E", () => this.openCards(3));
     this.input.keyboard?.on("keydown-W", () => this.openCards(2));
   }
 
-  private moveTo(lane: number): void {
-    const x = laneCenters(LANE_COUNT, screenLayout(SCREEN).road)[lane];
+  private moveToLane(lane: number): void {
+    const x = this.laneXs[lane];
     this.lane = lane;
     this.walker?.setX(x);
     this.pack?.setX(x);
@@ -95,14 +86,13 @@ export class RunScene extends Scene {
   private openCards(count: number): void {
     const data: CardSceneData = { count };
     this.scene.pause();
-    this.scene.launch("card", data);
+    this.scene.launch(SCENE_KEYS.card, data);
   }
 
   update(_time: number, delta: number): void {
-    const { road } = screenLayout(SCREEN);
-    this.scroll = (this.scroll + (SCROLL_SPEED * delta) / 1000) % DASH_SPACING;
+    this.scrollOffset = (this.scrollOffset + (ROAD_SCROLL_SPEED * delta) / 1000) % DASH_SPACING;
     for (const { rect, row } of this.dashes) {
-      rect.setY(road.y - DASH_SPACING + row * DASH_SPACING + this.scroll);
+      rect.setY(this.roadTop - DASH_SPACING + row * DASH_SPACING + this.scrollOffset);
     }
   }
 }

@@ -1,32 +1,35 @@
 import { Scene } from "phaser";
 
-import { SCREEN } from "../config";
-import { screenLayout } from "../layout";
-import { addBox, addLabel, TEXT_STYLE } from "./shapes";
+import { SCREEN_CONFIG } from "../data/screen";
+import { screenLayout } from "../layout/screenLayout";
+import { addCenteredLabel, addFilledRect, LABEL_TEXT_STYLE } from "./draw";
+import { SCENE_KEYS } from "./sceneKeys";
 
-const COLUMN_COLOR = 0x5a6b4f;
-const SLOT_COLOR = 0xd9cfae;
+const DOG_COLUMN_COLOR = 0x5a6b4f;
+const DOG_SLOT_COLOR = 0xd9cfae;
 const TOP_BAR_COLOR = 0xf2e8cf;
+const TOP_BAR_TEXT_INSET = 12;
 
-// The top status bar and the dog column, on top of the road for the whole run.
-// Stays visible while choice cards are up.
+// Stays running and visible while choice cards are up.
 export class HudScene extends Scene {
   constructor() {
-    super("hud");
+    super(SCENE_KEYS.hud);
   }
 
   create(): void {
-    const { dogColumn, dogSlots, topBar } = screenLayout(SCREEN);
+    const { dogColumn, dogSlots, topBar } = screenLayout(SCREEN_CONFIG);
 
-    addBox(this, TOP_BAR_COLOR, topBar);
+    addFilledRect(this, TOP_BAR_COLOR, topBar);
     const textY = topBar.y + topBar.height / 2;
-    this.add.text(topBar.x + 12, textY, "$0", TEXT_STYLE).setOrigin(0, 0.5);
-    this.add.text(topBar.x + topBar.width - 12, textY, "Zone 1/4", TEXT_STYLE).setOrigin(1, 0.5);
+    const leftX = topBar.x + TOP_BAR_TEXT_INSET;
+    const rightX = topBar.x + topBar.width - TOP_BAR_TEXT_INSET;
+    this.add.text(leftX, textY, "$0", LABEL_TEXT_STYLE).setOrigin(0, 0.5);
+    this.add.text(rightX, textY, "Zone 1/4", LABEL_TEXT_STYLE).setOrigin(1, 0.5);
 
-    addBox(this, COLUMN_COLOR, dogColumn);
+    addFilledRect(this, DOG_COLUMN_COLOR, dogColumn);
     dogSlots.forEach((slot, i) => {
-      addBox(this, SLOT_COLOR, slot);
-      addLabel(this, `Dog ${i + 1}`, slot);
+      addFilledRect(this, DOG_SLOT_COLOR, slot);
+      addCenteredLabel(this, `Dog ${i + 1}`, slot);
     });
   }
 }
