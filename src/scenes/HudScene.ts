@@ -25,10 +25,11 @@ import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
 import { faceMood } from "../rules/treats";
-import { read } from "../rules/units";
+import { type Cents, read } from "../rules/units";
 import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
+import { HudFeedback } from "./feedbackMoments";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
 import { isMuted, setMuted } from "./profileStore";
@@ -76,6 +77,7 @@ interface SlotView {
 export class HudScene extends Scene {
   private drawn: Record<string, unknown> = {};
   private dynamic: GameObjects.Graphics | undefined;
+  private feedback: HudFeedback | undefined;
   private hintQueue: { id: HintId; text: string }[] = [];
   private hintShowing = false;
   private money: GameObjects.BitmapText | undefined;
@@ -139,6 +141,7 @@ export class HudScene extends Scene {
     );
 
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
+    this.feedback = new HudFeedback(this, run, (labels) => this.floatLabels(labels));
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
     const onHint = (hint: { id: HintId; text: string }) => this.queueHint(hint);
     const onQuips = (quips: QuipBubble[]) => quips.forEach((quip) => this.sayQuip(quip));
@@ -277,6 +280,7 @@ export class HudScene extends Scene {
     if (view === undefined) {
       return;
     }
+    this.feedback?.update();
     const pause = run.runPause();
     this.strip?.show(stripItems(gameData, view.run));
     // The run state is immutable, so a changed pack or modifier list is a new array.
@@ -284,7 +288,7 @@ export class HudScene extends Scene {
       affected: view.affected.join(),
       fill: Math.round(view.zoneFraction * PIP.width),
       modifiers: view.run.modifiers,
-      money: view.run.money,
+      money: this.shownMoney(view.run.money),
       muted: isMuted(this),
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
@@ -299,6 +303,11 @@ export class HudScene extends Scene {
     }
   }
 
+  // The counter leaves out fees still flying to it.
+  private shownMoney(money: Cents): Cents {
+    return this.feedback?.shownMoney(money) ?? money;
+  }
+
   private redraw(view: RunHudView): void {
     const g = this.dynamic;
     if (g === undefined) {
@@ -307,7 +316,7 @@ export class HudScene extends Scene {
     const { run } = view;
     g.clear();
     if (this.money !== undefined) {
-      setPixelText(this.money, wholeDollars(run.money).slice(1));
+      setPixelText(this.money, wholeDollars(this.shownMoney(run.money)).slice(1));
     }
     if (this.mute !== undefined) {
       playTag(this.mute, "icon-sound", isMuted(this) ? "off" : "on");

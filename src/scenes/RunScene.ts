@@ -36,6 +36,17 @@ import { randomStream } from "../dev/randomStreams";
 import type { RunSetup } from "../dev/runSetup";
 import { loadoutFor, withSetupStart } from "../dev/setupRun";
 import { type ChangeLabel, changeLabels } from "../hud/hudView";
+import {
+  endScreenDelayMs,
+  FIRING_EVENT,
+  type FiringCue,
+  PAYOUT_EVENT,
+  type PayoutCue,
+  payoutFlights,
+  payoutMs,
+  TREAT_EVENT,
+  type TreatCue,
+} from "../hud/moments";
 import { gameplayAllowed, type RunPause, topBarButtonAt } from "../hud/topBar";
 import {
   type GestureAction,
@@ -71,7 +82,7 @@ import {
 } from "../layout/sceneryGags";
 import { screenLayout } from "../layout/screenLayout";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
-import type { Change } from "../rules/causes";
+import { amountText, type Change, type MoneyChange } from "../rules/causes";
 import {
   cardFor,
   type CardView,
@@ -87,6 +98,7 @@ import { hintFor } from "../rules/hints";
 import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
 import { chasePose, stepChase } from "../runner/chase";
+import { holdForFiring } from "../runner/firingStop";
 import { isSteeringLocked } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
 import { isMoverObstacle, type MoverOnRoad, moverPlace } from "../runner/movers";
@@ -123,6 +135,7 @@ import { packDogs } from "../state/pack";
 import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
 import type { CardSceneData } from "./CardScene";
 import { drawPixelLine, fillRect, shadowTexture } from "./draw";
+import { trotOffRoad } from "./feedbackMoments";
 import { hitLabelOf, playHitMoment } from "./hitMoment";
 import { colorFromHex, PALETTE } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
@@ -261,7 +274,7 @@ const PLACEHOLDERS: readonly [string, number, number][] = [
   ["cone", 32, 32],
   ["hedge", 144, 32],
   ["hydrant", 32, 32],
-  ["parked-car", 40, 80],
+  ["parked-car", 40, 128],
   [SKUNK_CLOUD_KEY, 88, 88],
 ];
 
@@ -279,6 +292,10 @@ export class RunScene extends Scene {
   private dogSprites = new Map<DogId, GameObjects.Sprite>();
   // The tag each dog's sprite last played.
   private dogTags = new Map<DogId, string>();
+  // How long the end screen waits for a final firing or payout.
+  private endMoments = { firingSeconds: 0, payoutMs: 0 };
+  // Owners who fired you since the walk last stepped, whose moment holds the walk.
+  private firedNow: DogId[] = [];
   private gags: Gags | undefined;
   private gesture: GestureState = idleGesture;
   private graphics?: {
@@ -295,6 +312,8 @@ export class RunScene extends Scene {
   private buttonPointerId: number | undefined;
   private items = new Map<number, ItemView>();
   private laneXs: number[] = [];
+  // Fired dogs trotting off the road, drawn by their trot and not with the pack.
+  private leaving = new Set<DogId>();
   private needsZonePlan = false;
   private pauseOpen = false;
   private packPose: "idle" | "walk" = "walk";
@@ -395,6 +414,9 @@ export class RunScene extends Scene {
     this.changes = [];
     this.distanceBeforeZone = 0;
     this.dogTags = new Map();
+    this.endMoments = { firingSeconds: 0, payoutMs: 0 };
+    this.firedNow = [];
+    this.leaving = new Set();
     this.gesture = idleGesture;
     this.items = new Map();
     this.buttonPointerId = undefined;
@@ -716,7 +738,28 @@ export class RunScene extends Scene {
     this.react(step);
     this.zoneEndPending ||= step.zoneEnded;
     this.cardQueue.push(...step.cards);
+    this.holdForFiring();
     this.continueWalk();
+  }
+
+  // An owner who just fired you holds the walk while their moment plays, as a hit stop does:
+  // the queued cards and the zone end wait for it.
+  private holdForFiring(): void {
+    const walk = this.walk;
+    const fired = this.firedNow;
+    this.firedNow = [];
+    if (walk === undefined || walk.run.phase.kind === "ended") {
+      return;
+    }
+    const hold = holdForFiring(
+      firingSeconds(),
+      fired,
+      { cards: this.cardQueue, zoneEnded: this.zoneEndPending },
+      walk.road.hitStop,
+    );
+    this.cardQueue = [...hold.queued.cards];
+    this.zoneEndPending = hold.queued.zoneEnded;
+    this.walk = { ...walk, road: { ...walk.road, hitStop: hold.stop } };
   }
 
   private dueInputs(): PendingInput[] {
@@ -738,7 +781,12 @@ export class RunScene extends Scene {
       return walk;
     }
     const { change, state: run } = giveTreat(gameData, dog, walk.run);
-    this.addChanges(change === null ? [] : [change]);
+    if (change !== null) {
+      // The HUD floats the change's label when the treat lands.
+      this.changes.push(change);
+      const cue: TreatCue = { dog, labels: changeLabels(gameData, [change]) };
+      this.events.emit(TREAT_EVENT, cue);
+    }
     return { ...walk, run };
   }
 
@@ -862,10 +910,29 @@ export class RunScene extends Scene {
     if (outcome.fired.length > 0) {
       soundboardOf(this).play("fired");
       this.hint({ kind: "firedOwner" });
+      this.firedNow.push(...outcome.fired);
+      outcome.fired.forEach((dog) => this.trotOff(dog));
+      if (outcome.state.phase.kind === "ended") {
+        this.endMoments.firingSeconds = firingSeconds();
+      }
     }
     for (const { debuff } of outcome.state.debuffs) {
       this.hint({ debuff, kind: "debuff" });
     }
+  }
+
+  // The fired dog trots off the road over the firing's hold.
+  private trotOff(dog: DogId): void {
+    const sprite = this.dogSprites.get(dog);
+    if (sprite === undefined || !sprite.visible) {
+      return;
+    }
+    this.leaving.add(dog);
+    const trot = { road: LAYOUT.road, seconds: firingSeconds(), still: this.reducedMotion() };
+    trotOffRoad(this, trot, sprite, () => {
+      this.leaving.delete(dog);
+      sprite.setVisible(false);
+    });
   }
 
   // Opens the next queued card, or ends the zone, or keeps walking.
@@ -903,7 +970,7 @@ export class RunScene extends Scene {
       return;
     }
     const { fees, run } = finishZone(gameData, walk.run);
-    this.addChanges(fees);
+    this.payOut(fees, walk.run);
     this.walk = { ...walk, run };
     if (run.phase.kind !== "ended") {
       this.distanceBeforeZone += zoneLength(gameData, walk.run);
@@ -915,6 +982,21 @@ export class RunScene extends Scene {
       });
     }
     this.continueWalk();
+  }
+
+  // Each fee flies as a coin from its doghouse to the bank while its amount rises over the
+  // doghouse.
+  private payOut(fees: readonly MoneyChange[], run: RunState): void {
+    this.changes.push(...fees);
+    const cues = fees.flatMap((fee): PayoutCue[] =>
+      fee.dog === null
+        ? []
+        : [{ amount: fee.amount, dog: fee.dog, text: amountText("money", fee.amount) }],
+    );
+    this.events.emit(PAYOUT_EVENT, cues);
+    if (run.zoneIndex >= gameData.world.zones.length - 1) {
+      this.endMoments.payoutMs = payoutMs(payoutFlights(cues, run.pack, this.reducedMotion()));
+    }
   }
 
   private showCard(source: CardSource): void {
@@ -976,18 +1058,26 @@ export class RunScene extends Scene {
     this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
     this.sayQuips(outcome.quips);
     this.afterOutcome(outcome);
+    this.holdForFiring();
     this.continueWalk();
   }
 
-  // Each owner who reacted says one of their lines beside their doghouse.
+  // Each owner who reacted says one of their lines beside their doghouse; an owner who fired
+  // you says theirs in the firing moment.
   private sayQuips(quips: readonly QuipCue[]): void {
     const random = this.random?.quips ?? Math.random;
-    const bubbles = quips.map((cue): QuipBubble => ({
-      dog: cue.dog,
-      text: quipLine(gameData, random, cue),
-    }));
+    const lines = quips.map((cue) => ({ cue, text: quipLine(gameData, random, cue) }));
+    const bubbles = lines.flatMap(({ cue, text }): QuipBubble[] =>
+      cue.moment === "fired" ? [] : [{ dog: cue.dog, text }],
+    );
     if (bubbles.length > 0) {
       this.events.emit(QUIPS_EVENT, bubbles);
+    }
+    for (const { cue, text } of lines) {
+      if (cue.moment === "fired") {
+        const firing: FiringCue = { dog: cue.dog, line: text, seconds: firingSeconds() };
+        this.events.emit(FIRING_EVENT, firing);
+      }
     }
   }
 
@@ -1136,10 +1226,17 @@ export class RunScene extends Scene {
     this.endWalk();
   }
 
-  // Saves the walk and its input log, then shows the end screen.
+  // Saves the walk and its input log, then shows the end screen, once a final firing or
+  // payout has played.
   private endWalk(): void {
     const walk = this.walk;
     if (walk === undefined) {
+      return;
+    }
+    const delayMs = endScreenDelayMs(this.endMoments);
+    if (delayMs > 0) {
+      this.endMoments = { firingSeconds: 0, payoutMs: 0 };
+      this.time.delayedCall(delayMs, () => this.endWalk());
       return;
     }
     this.walk = undefined;
@@ -1625,6 +1722,9 @@ export class RunScene extends Scene {
     const posed = pose !== this.packPose;
     this.packPose = pose;
     for (const [dog, sprite] of this.dogSprites) {
+      if (this.leaving.has(dog)) {
+        continue;
+      }
       const index = walking.indexOf(dog);
       sprite.setVisible(index >= 0);
       if (index < 0) {
@@ -1698,6 +1798,11 @@ export class RunScene extends Scene {
     }
     sprite.setFlipX(pull?.direction === -1);
   }
+}
+
+// A firing holds the walk as long as an encounter's hit stop, read live from the tuning.
+function firingSeconds(): number {
+  return read(gameData.tuning, "seconds", "hitStopSeconds");
 }
 
 // sessionStorage can be missing or throw (private browsing, blocked storage): the run goes on.
