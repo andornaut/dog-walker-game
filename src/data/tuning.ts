@@ -47,7 +47,7 @@ export const TUNING = {
       runningShoes: 400,
       whistle: 300,
     },
-    squirrelChase: 20,
+    squirrelChase: 10,
     sweetTalkerCostPerDog: -4,
     thiefLetGo: 20,
     tip: 1,
