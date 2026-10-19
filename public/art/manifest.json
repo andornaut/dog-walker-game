@@ -239,6 +239,14 @@
   "fonts": [],
   "images": [
     {
+      "key": "card-belly-rubs",
+      "png": "images/card-belly-rubs.png"
+    },
+    {
+      "key": "card-big-tipper",
+      "png": "images/card-big-tipper.png"
+    },
+    {
       "key": "card-biscuit-neighbour-pass",
       "png": "images/card-biscuit-neighbour-pass.png"
     },
@@ -261,6 +269,10 @@
     {
       "key": "card-construction-detour-squeeze",
       "png": "images/card-construction-detour-squeeze.png"
+    },
+    {
+      "key": "card-good-leash",
+      "png": "images/card-good-leash.png"
     },
     {
       "key": "card-ice-cream-truck-pup-cups",
@@ -319,6 +331,26 @@
       "png": "images/card-puddle-towel.png"
     },
     {
+      "key": "card-raincoats",
+      "png": "images/card-raincoats.png"
+    },
+    {
+      "key": "card-rush-hour",
+      "png": "images/card-rush-hour.png"
+    },
+    {
+      "key": "card-second-wind",
+      "png": "images/card-second-wind.png"
+    },
+    {
+      "key": "card-shortcut",
+      "png": "images/card-shortcut.png"
+    },
+    {
+      "key": "card-skip",
+      "png": "images/card-skip.png"
+    },
+    {
       "key": "card-skunk-grooming",
       "png": "images/card-skunk-grooming.png"
     },
@@ -347,12 +379,20 @@
       "png": "images/card-stop-sign-wait.png"
     },
     {
+      "key": "card-sweet-talker",
+      "png": "images/card-sweet-talker.png"
+    },
+    {
       "key": "card-thief-chase",
       "png": "images/card-thief-chase.png"
     },
     {
       "key": "card-thief-let-go",
       "png": "images/card-thief-let-go.png"
+    },
+    {
+      "key": "card-treat-magnet",
+      "png": "images/card-treat-magnet.png"
     },
     {
       "key": "help-cards",

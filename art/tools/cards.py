@@ -6,8 +6,9 @@
   body and the cost in the badge. Layout, in card pixels:
     band 2..12 (title), art window 4,15 to 79,72 (illustration at 5,16, 75x56),
     body 6..77 x 76..118, badge 6,121, 71x13.
-- card-<encounter>-<option>: 75x56 illustrations, one per option, composed
-  from the exported sprites. Build the sprites first.
+- card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
+  illustrations, one per option, composed from the exported sprites. Build
+  the sprites first.
 
 Usage:
   cards.py preview OUT.png   the frame and every illustration, scaled up
@@ -433,6 +434,147 @@ def mail_wait():
     return a
 
 
+# ---------- upgrades and the Skip option ----------
+
+def disc(a, cx, cy, r, col, edge=None):
+    for dy in range(-r, r + 1):
+        for dx in range(-r, r + 1):
+            d = dx * dx + dy * dy
+            if d <= r * r:
+                a.fill(cx + dx, cy + dy, 1, 1, edge if edge and d > (r - 1) * (r - 1) else col)
+
+
+def belly_rubs():
+    a = Art()
+    a.grass()
+    a.face("face-dog-biscuit", "happy", 22, 14)
+    a.fill(40, 30, 10, 5, "skin2")
+    a.fill(48, 28, 4, 4, "skin2")
+    for x in (41, 44, 47):
+        a.fill(x, 29, 1, 1, "brown")
+    a.hearts([(6, 4), (58, 6), (8, 40), (60, 40), (34, 4)])
+    return a
+
+
+def good_leash():
+    a = Art()
+    a.ground("park")
+    a.put("squirrel", "idle", 62, 24)
+    a.put("dog-koda", "walk", 36, 40, 1)
+    a.put("walker", "walk", 14, 56)
+    for d in (0, 1):
+        a.line(22 + d, 42, 36 + d, 26, "dred")
+    a.fill(34, 25, 3, 3, "amber")
+    # tick: the chaser ignores the squirrel
+    for i, (x, y) in enumerate(((52, 44), (53, 45), (54, 46), (55, 45), (56, 44), (57, 43), (58, 42), (59, 41))):
+        a.fill(x, y, 2, 2, "green" if i % 2 else "dgreen")
+    return a
+
+
+def big_tipper():
+    a = Art()
+    a.ground("shops")
+    for k, (x, y) in enumerate(((8, 38), (14, 34), (20, 38), (11, 30), (17, 26), (26, 36), (23, 30))):
+        a.paste(hp.frame("tip", "idle", k), x, y)
+    hp.text(a, "+50%", 38, 20, "yellow", 2)
+    hp.text(a, "+50%", 39, 21, "orange", 2)
+    hp.text(a, "+50%", 38, 20, "yellow", 2)
+    return a
+
+
+def shortcut():
+    a = Art()
+    a.ground("street")
+    for x, y in ((8, 50), (14, 44), (20, 38), (26, 32), (32, 26), (38, 20), (44, 14), (50, 8)):
+        a.fill(x, y, 3, 2, "amber")
+    a.chevron(56, 8, 1, "amber")
+    a.put("walker", "walk", 16, 56, 1)
+    a.bubble(44, 36, 28, ["-25%"], "dred")
+    return a
+
+
+def rush_hour():
+    a = Art()
+    a.ground("street")
+    a.paste(hp.frame("puddle", "idle"), 2, 38)
+    a.put("skunk", "idle", 62, 54)
+    a.put("squirrel", "idle", 36, 52)
+    a.coins([(8, 4), (22, 10), (40, 4), (50, 16), (30, 22), (14, 22)])
+    hp.text(a, "X2", 58, 4, "yellow", 2)
+    return a
+
+
+def raincoats():
+    a = Art()
+    a.ground("street")
+    a.paste(hp.frame("puddle", "idle", 1), 22, 36)
+    a.put("dog-duchess", "walk", 37, 46, shadow=False)
+    a.fill(31, 34, 13, 8, "amber")
+    a.fill(31, 34, 13, 1, "yellow")
+    a.fill(42, 34, 2, 8, "orange")
+    a.fill(34, 31, 7, 3, "amber")
+    for x, y in ((6, 4), (16, 12), (26, 2), (54, 8), (64, 16), (12, 28), (60, 30), (48, 2)):
+        a.fill(x, y, 1, 3, "cyan")
+    return a
+
+
+def treat_magnet():
+    a = Art()
+    a.ground("park")
+    # a horseshoe magnet
+    a.fill(46, 14, 6, 22, "red")
+    a.fill(60, 14, 6, 22, "red")
+    a.fill(46, 30, 20, 6, "red")
+    a.fill(46, 30, 20, 1, "pink")
+    a.fill(46, 14, 6, 4, "lgrey")
+    a.fill(60, 14, 6, 4, "lgrey")
+    a.fill(64, 18, 2, 18, "dred")
+    for k, (x, y) in enumerate(((6, 18), (20, 28), (10, 40))):
+        a.paste(hp.frame("treat", "idle"), x, y)
+        for d in range(3):
+            a.fill(x + 18 + d * 5, y + 6, 3, 1, "cream")
+    return a
+
+
+def second_wind():
+    a = Art()
+    a.grass()
+    a.face("face-owner-dash", "happy", 21, 12)
+    for y, x0 in ((8, 4), (22, 2), (36, 6)):
+        a.fill(x0, y, 12, 1, "white")
+        a.fill(x0 + 10, y - 1, 3, 1, "white")
+        a.fill(x0 + 12, y - 2, 1, 1, "white")
+    a.heart(56, 14, "red", "pink")
+    a.heart(56, 26, "red", "pink")
+    hp.text(a, "+2", 58, 38, "white")
+    return a
+
+
+def sweet_talker():
+    a = Art()
+    a.grass()
+    a.face("face-owner-pierre", "happy", 6, 14)
+    a.bubble(42, 8, 30, ["$$", "-$4"], "dgreen")
+    a.heart(50, 38, "red", "pink")
+    a.heart(60, 44, "red", "pink")
+    return a
+
+
+def skip():
+    a = Art()
+    a.ground("street")
+    a.put("skunk", "idle", 16, 54)
+    a.put("dog-biscuit", "walk", 46, 52, 2)
+    disc(a, 58, 13, 7, "green", "dgreen")
+    disc(a, 58, 13, 2, "forest")
+    a.fill(62, 17, 8, 4, "green")
+    a.fill(68, 17, 2, 4, "dgreen")
+    hp.text(a, "SKIP", 4, 4, "white", 2)
+    for y in (40, 44, 48):
+        a.fill(28, y, 8, 1, "lgrey")
+    return a
+
+
 ILLUSTRATIONS = {
     "card-skunk-grooming": skunk_grooming,
     "card-skunk-rinse": skunk_rinse,
@@ -463,6 +605,16 @@ ILLUSTRATIONS = {
     "card-construction-detour-squeeze": detour_squeeze,
     "card-mail-carrier-hold": mail_hold,
     "card-mail-carrier-wait": mail_wait,
+    "card-belly-rubs": belly_rubs,
+    "card-good-leash": good_leash,
+    "card-big-tipper": big_tipper,
+    "card-shortcut": shortcut,
+    "card-rush-hour": rush_hour,
+    "card-raincoats": raincoats,
+    "card-treat-magnet": treat_magnet,
+    "card-second-wind": second_wind,
+    "card-sweet-talker": sweet_talker,
+    "card-skip": skip,
 }
 
 
@@ -484,7 +636,7 @@ def mock_card(kind, key):
 
 def preview(out, scale=3):
     keys = list(ILLUSTRATIONS)
-    kinds = ["encounter"] * 11 + ["lucky"] * 6 + ["stop"] * 12
+    kinds = ["encounter"] * 11 + ["lucky"] * 6 + ["stop"] * 12 + ["upgrade"] * 9 + ["encounter"]
     cols = 10
     rows = (len(keys) + cols - 1) // cols
     sheet = Image.new("RGB", ((CW + 6) * cols * scale, (CH + 6) * rows * scale), hp.rgb("ink"))
