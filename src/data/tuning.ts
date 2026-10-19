@@ -74,7 +74,7 @@ export const TUNING = {
     shortcutZoneLength: 0.75,
     stinkyTip: 0.5,
     // By the number of dogs in the pack.
-    tipByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },
+    tipByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },
   },
   // Screen pixels at the 360x640 render size, or pixels per second for a speed.
   pixels: {
