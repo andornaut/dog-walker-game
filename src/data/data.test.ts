@@ -216,10 +216,14 @@ describe("cards", () => {
     }
   });
 
-  it("has 5 obstacle encounters and 3 lucky ones", () => {
+  it("has 10 obstacle encounters and 4 lucky ones", () => {
     const kinds = Object.values(encounters).map((encounter) => encounter.kind);
-    expect(countBy(kinds, "obstacle")).toBe(5);
-    expect(countBy(kinds, "lucky")).toBe(3);
+    expect(countBy(kinds, "obstacle")).toBe(10);
+    expect(countBy(kinds, "lucky")).toBe(4);
+  });
+
+  it("sends the goose across slower than a loose dog", () => {
+    expect(tuning.counts.gooseLanesPerSecond).toBeLessThan(tuning.counts.looseDogLanesPerSecond);
   });
 
   it("applies the biscuit neighbour and photo op at once, with only gains", () => {
@@ -323,6 +327,19 @@ describe("run, world and walkers", () => {
       const kinds = [...Object.keys(weights.obstacles), ...Object.keys(weights.luckyFinds)];
       expect(kinds.sort(), name).toEqual(Object.keys(encounters).sort());
     }
+  });
+
+  it("draws each zone encounter only in its zones", () => {
+    const zonesOf = (id: EncounterId) =>
+      world.zones
+        .filter(({ weights }) => ({ ...weights.obstacles, ...weights.luckyFinds })[id] > 0)
+        .map(({ name }) => name);
+    expect(zonesOf("cafe")).toEqual(["Sniff Street Shops"]);
+    expect(zonesOf("goose")).toEqual(["Paws Promenade", "The Long Way Home"]);
+    expect(zonesOf("lemonade")).toEqual(["Snooze Crescent", "Woof Way"]);
+    expect(zonesOf("petunias")).toEqual(["Snooze Crescent", "Woof Way"]);
+    expect(zonesOf("picnic")).toEqual(["Bark Park", "Paws Promenade"]);
+    expect(zonesOf("trash")).toEqual(["Woof Way", "The Long Way Home"]);
   });
 
   it("fits the largest pack in the doghouse row", () => {

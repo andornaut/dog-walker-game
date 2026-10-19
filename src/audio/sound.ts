@@ -2,16 +2,17 @@
 // soundboard in src/scenes/ applies these to the sound manager.
 
 import { kebabCase } from "../assets/spriteKeys";
-import type { EncounterId } from "../data/types";
+import type { Encounter, EncounterId } from "../data/types";
 import { assertNever } from "../rules/assertNever";
 
 export type BaseCue =
   "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
-// An encounter's hit, played with its own sound.
-export type HitCue = `hit:${EncounterId}`;
+// An encounter's hit moment, played with its own sound: an obstacle's or a lucky find's.
+export type HitCue = `hit:${EncounterId}` | `luckyHit:${EncounterId}`;
 export type SoundCue = BaseCue | HitCue;
 
 const HIT_PREFIX = "hit:";
+const LUCKY_HIT_PREFIX = "luckyHit:";
 
 export const SOUND_KEYS: Readonly<Record<BaseCue, string>> = {
   badge: "sfx-badge",
@@ -24,19 +25,23 @@ export const SOUND_KEYS: Readonly<Record<BaseCue, string>> = {
   treat: "sfx-treat",
 };
 
-export function hitCue(encounter: EncounterId): HitCue {
-  return `${HIT_PREFIX}${encounter}`;
+export function hitCue(kind: Encounter["kind"], encounter: EncounterId): HitCue {
+  return kind === "lucky" ? `${LUCKY_HIT_PREFIX}${encounter}` : `${HIT_PREFIX}${encounter}`;
 }
 
-function isHitCue(cue: SoundCue): cue is HitCue {
-  return cue.startsWith(HIT_PREFIX);
-}
-
-// The keys a cue may play, in preference order: an encounter hit's own sound, then the bump.
+// The keys a cue may play, in preference order: an obstacle hit's own sfx-hit-<encounter>,
+// then the bump; a lucky hit's own sfx-<encounter>, with nothing in its place.
 export function soundKeysOf(cue: SoundCue): readonly string[] {
-  return isHitCue(cue)
+  if (isBaseCue(cue)) {
+    return [SOUND_KEYS[cue]];
+  }
+  return cue.startsWith(HIT_PREFIX)
     ? [`sfx-hit-${kebabCase(cue.slice(HIT_PREFIX.length))}`, SOUND_KEYS.bump]
-    : [SOUND_KEYS[cue]];
+    : [`sfx-${kebabCase(cue.slice(LUCKY_HIT_PREFIX.length))}`];
+}
+
+function isBaseCue(cue: SoundCue): cue is BaseCue {
+  return Object.hasOwn(SOUND_KEYS, cue);
 }
 
 // The first of the cue's keys that loaded, or undefined with none.

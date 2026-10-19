@@ -2,7 +2,7 @@ import { itemAt } from "../arrays";
 import type { GameData, GearId } from "../data/types";
 import { MOVER_CONTACTS, type MoverKind } from "../runner/movers";
 import { seededRandom } from "../runner/random";
-import { itemCategory, type WalkItemKind } from "../runner/walk";
+import { ALWAYS_MOVERS, itemCategory, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
 import { DEFAULT_ROUTE_POLICY, POLICY_IDS, type PolicyId, type RoutePolicyId } from "./policies";
 import {
@@ -184,11 +184,12 @@ const MOVER_KINDS = Object.keys(MOVER_CONTACTS) as MoverKind[];
 const MOVER_COLUMNS: Readonly<Record<MoverKind, string>> = {
   ball: "ball",
   cyclist: "cyclist",
+  goose: "goose",
   looseDog: "looseDog",
   squirrel: "dartingSquirrel",
 };
 
-// Every obstacle kind, those that open a card first, then the minor ones.
+// Every obstacle kind that can stand still, those that open a card first, then the minor ones.
 export function obstacleKinds(
   data: Pick<GameData, "encounters" | "minorObstacles" | "needSpots">,
 ): WalkItemKind[] {
@@ -198,7 +199,7 @@ export function obstacleKinds(
   ] as WalkItemKind[];
   return kinds.filter((kind) => {
     const category = itemCategory(data, kind);
-    return category === "obstacle" || category === "minor";
+    return ALWAYS_MOVERS[kind] === undefined && (category === "obstacle" || category === "minor");
   });
 }
 

@@ -223,6 +223,23 @@ describe("planSpawns", () => {
     expect(planSpawns(seededRandom(1), tooBig)).toEqual(events);
   });
 
+  it("skips a bigger obstacle that would leave too few cells for the one-cell spawns", () => {
+    // 9 rows of 5 lanes: 30 tips leave 15 cells for benches two cells wide.
+    const crowded: SpawnPlan<Kind> = {
+      ...plan,
+      quotas: [
+        { blocksLane: true, count: 20, footprint: FOOTPRINTS.bench, kind: "bench" },
+        { blocksLane: false, count: 30, kind: "tip" },
+      ],
+    };
+    for (const seed of seeds.slice(0, 10)) {
+      const events = planSpawns(seededRandom(seed), crowded);
+      expect(countOf("tip", events)).toBe(30);
+      expect(countOf("bench", events)).toBeGreaterThan(0);
+      expect(countOf("bench", events)).toBeLessThanOrEqual(7);
+    }
+  });
+
   it("leaves an open lane within one move of every open lane on the row before", () => {
     for (const seed of seeds) {
       const open = openLanesByRow(tight, planSpawns(seededRandom(seed), tight));

@@ -12,7 +12,7 @@ import { countBump, countDebuffZones } from "../rules/achievements";
 import type { MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd } from "../rules/durations";
-import { affectedDogs, opensCard } from "../rules/encounters";
+import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import { minorBump, payZoneFees, tipValue } from "../rules/run";
@@ -144,8 +144,9 @@ export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 // bumps, cards and instants are in the order the pack met them; tips are the money changes of
 // the tips collected; spots the need spots steered into, which stepNeeds meets; zoneEnded is
 // set on the step that reaches the end of the zone.
-// encounterHits are the obstacle encounters hit this step. A hit stop holds the step's cards
-// and zone end back to the step it ends on.
+// encounterHits are the encounters met this step that play a hit moment: obstacles, and lucky
+// cards with a hit label. A hit stop holds the step's cards and zone end back to the step it
+// ends on.
 export interface WalkStep {
   bumps: MinorBump[];
   cards: CardSource[];
@@ -296,17 +297,30 @@ export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, 
   return last[0];
 }
 
-// The mover a drawn spawn comes as, at a chance of share: a squirrel darts, an other dog runs
-// loose, and a minor obstacle is a ball or a cyclist, evenly. Other spawns never move, and
-// draw nothing.
+// The kinds that always come as a mover, whatever the zone's mover share.
+export const ALWAYS_MOVERS: Readonly<Partial<Record<WalkItemKind, MoverKind>>> = {
+  goose: "goose",
+};
+
+// The mover a drawn spawn comes as: a goose always, drawing nothing; otherwise at a chance of
+// share, a squirrel darts, an other dog runs loose, and a minor obstacle is a ball or a
+// cyclist, evenly. Other spawns never move, and draw nothing, as does any spawn at a share of 0.
 export function moverFor(
   data: Pick<GameData, "minorObstacles">,
   random: Random,
   share: number,
   kind: WalkItemKind,
 ): MoverKind | null {
+  const always = ALWAYS_MOVERS[kind];
+  if (always !== undefined) {
+    return always;
+  }
   const minor = kind !== "tip" && kind !== "treat" && isMinorObstacle(data, kind);
-  if (!(kind === "squirrel" || kind === "otherDog" || minor) || !chance(random, share)) {
+  if (
+    !(kind === "squirrel" || kind === "otherDog" || minor) ||
+    share <= 0 ||
+    !chance(random, share)
+  ) {
     return null;
   }
   if (kind === "squirrel") {
@@ -325,6 +339,7 @@ export function moverSpec(data: Pick<GameData, "tuning">, mover: MoverKind): Mov
         kind: "ride",
         speedMultiplier: read(tuning, "multipliers", "cyclistSpeedMultiplier"),
       }) as const,
+    goose: () => cross(read(tuning, "counts", "gooseLanesPerSecond")),
     looseDog: () => cross(read(tuning, "counts", "looseDogLanesPerSecond")),
     squirrel: () => cross(read(tuning, "counts", "squirrelDartLanesPerSecond")),
   };
@@ -351,7 +366,7 @@ function needSpotsDrawn(data: WalkData, random: Random, run: RunState): NeedSpot
 // Each obstacle, minor obstacle, lucky find and need spot is drawn first by the zone's
 // weights, so its shape is known when it is placed. Rush hour and the like scale both obstacle
 // counts. Then each squirrel, other dog and minor obstacle comes as a mover at the zone's mover
-// share.
+// share, and each goose as a mover always.
 function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
   const zone = currentZone(data, run);
   const stats = zoneStats(data.tuning, zone, run.zoneIndex);
@@ -371,9 +386,8 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
   const quotas = new Map<WalkItemKind, number>();
   const movers = new Map<MoverKind, number>();
   const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
-  const share = zone.moverShare;
   for (const kind of kinds) {
-    const mover = share > 0 ? moverFor(data, random, share, kind) : null;
+    const mover = moverFor(data, random, zone.moverShare, kind);
     if (mover === null) {
       count(quotas, kind);
     } else {
@@ -521,8 +535,8 @@ export function collect(
 // tips and lock lane input, obstacles (outside the grace window) and lucky encounters become
 // cards for the dogs they affect or, for an instant lucky find, apply at once, and a forced
 // stop that reaches the pack always becomes a card. An obstacle that opens no card is
-// scenery: it is removed, and nothing else happens. A minor bump or an obstacle encounter
-// starts a hit stop, and the steps it lasts hold everything still. Does nothing unless
+// scenery: it is removed, and nothing else happens. A minor bump or an encounter with a hit
+// moment starts a hit stop, and the steps it lasts hold everything still. Does nothing unless
 // walking.
 export function stepWalk(
   data: WalkData,
@@ -675,7 +689,7 @@ export function stepWalk(
         instants.push({ encounter: kind, outcome });
       } else {
         const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
-        if (data.encounters[kind].kind === "obstacle") {
+        if (hitLabel(data.encounters[kind]) !== null) {
           encounterHits.push(card);
         }
         cards.push(card);

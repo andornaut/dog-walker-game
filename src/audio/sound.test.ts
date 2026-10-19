@@ -54,14 +54,19 @@ describe("SOUND_KEYS", () => {
 
 describe("soundKeysOf", () => {
   it("plays an encounter hit's own sound, falling back to the bump", () => {
-    expect(soundKeysOf(hitCue("otherDog"))).toEqual(["sfx-hit-other-dog", "sfx-bump"]);
-    expect(soundKeysOf(hitCue("skunk"))).toEqual(["sfx-hit-skunk", "sfx-bump"]);
+    expect(soundKeysOf(hitCue("obstacle", "otherDog"))).toEqual(["sfx-hit-other-dog", "sfx-bump"]);
+    expect(soundKeysOf(hitCue("obstacle", "skunk"))).toEqual(["sfx-hit-skunk", "sfx-bump"]);
     expect(soundKeysOf("badge")).toEqual(["sfx-badge"]);
+  });
+
+  it("plays a lucky hit's own sfx-<encounter>, with no bump in its place", () => {
+    expect(soundKeysOf(hitCue("lucky", "lemonade"))).toEqual(["sfx-lemonade"]);
+    expect(soundKeysOf(hitCue("obstacle", "goose"))).toEqual(["sfx-hit-goose", "sfx-bump"]);
   });
 
   it("picks the first key that loaded, or none", () => {
     const loaded = (keys: string[]) => (key: string) => keys.includes(key);
-    const hit = hitCue("puddle");
+    const hit = hitCue("obstacle", "puddle");
     expect(soundKeyFor(loaded(["sfx-hit-puddle", "sfx-bump"]), hit)).toBe("sfx-hit-puddle");
     expect(soundKeyFor(loaded(["sfx-bump"]), hit)).toBe("sfx-bump");
     expect(soundKeyFor(loaded([]), hit)).toBeUndefined();

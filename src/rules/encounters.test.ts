@@ -5,7 +5,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { evaluateCondition } from "./conditions";
-import { affectedDogs, opensCard } from "./encounters";
+import { affectedDogs, hitLabel, opensCard } from "./encounters";
 
 const data = { dogs: DOGS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
 const pack = testState({ duchess: 5, koda: 5, pierre: 5 });
@@ -22,6 +22,30 @@ describe("affectedDogs", () => {
     expect(affectedDogs(data, () => 0, pack, "squirrel")).toEqual(["koda"]);
     expect(affectedDogs(data, () => 0, pack, "otherDog")).toEqual(["duchess", "koda", "pierre"]);
   });
+
+  it("raids a picnic with the food-driven dogs only", () => {
+    const hungry = testState({ biscuit: 5, koda: 5, nugget: 5 });
+    expect(affectedDogs(data, () => 0, hungry, "picnic")).toEqual(["biscuit", "nugget"]);
+    expect(affectedDogs(data, () => 0, pack, "picnic")).toEqual([]);
+  });
+
+  it("affects every dog at the goose, the petunias, the trash, the cafe and the lemonade", () => {
+    for (const id of ["goose", "petunias", "trash", "cafe", "lemonade"] as const) {
+      expect(
+        affectedDogs(data, () => 0, pack, id),
+        id,
+      ).toEqual(["duchess", "koda", "pierre"]);
+    }
+  });
+});
+
+describe("hitLabel", () => {
+  it("labels every obstacle, and a lucky card only when it has a label", () => {
+    expect(hitLabel(ENCOUNTERS.goose)).toBe("HONK!");
+    expect(hitLabel(ENCOUNTERS.lemonade)).toBe("LEMONADE!");
+    expect(hitLabel(ENCOUNTERS.lostWallet)).toBeNull();
+    expect(hitLabel(ENCOUNTERS.photoOp)).toBeNull();
+  });
 });
 
 describe("opensCard", () => {
@@ -33,6 +57,10 @@ describe("opensCard", () => {
     expect(opensCard(data, ["koda", "pierre"], pack, "thief")).toBe(false);
     const noBigDog = testState({ duchess: 5, pierre: 5 });
     expect(opensCard(data, ["duchess", "pierre"], noBigDog, "thief")).toBe(true);
+  });
+
+  it("opens the goose's card even with a big dog, which does not scare it", () => {
+    expect(opensCard(data, ["duchess", "koda", "pierre"], pack, "goose")).toBe(true);
   });
 
   it("opens no card for an encounter the pack is immune to", () => {

@@ -18,6 +18,99 @@ export const ENCOUNTERS = {
       kind: "instant",
     },
   },
+  cafe: {
+    affects: { kind: "all" },
+    hitLabel: "SPILLED LATTE!",
+    kind: "obstacle",
+    name: "Cafe patio",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-cafe-charm",
+          effects: [
+            { kind: "fulfilNeed", need: "friendly" },
+            { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Charm the crowd",
+        },
+        {
+          art: "card-cafe-buy-lattes",
+          effects: [
+            { amount: "encounterLow", change: "lose", kind: "money", perDog: { kind: "affected" } },
+            { amount: 1, kind: "hearts", target: { kind: "temperament", temperament: "fussy" } },
+          ],
+          name: "Buy new lattes",
+        },
+        {
+          art: "card-cafe-slink-away",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Slink away",
+        },
+      ],
+    },
+    shape: { lanes: 2, rows: 1 },
+  },
+  // Always a mover: it waddles across the road, and a big dog does not scare it off.
+  goose: {
+    affects: { kind: "all" },
+    hitLabel: "HONK!",
+    kind: "obstacle",
+    name: "Angry goose",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-goose-back-off",
+          effects: [
+            { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Back off slowly",
+        },
+        {
+          art: "card-goose-honk-back",
+          effects: [
+            {
+              amount: -1,
+              kind: "hearts",
+              target: { kind: "affected" },
+              traitAmounts: { chaser: -2 },
+            },
+          ],
+          name: "Honk back",
+        },
+      ],
+    },
+    shape: { lanes: 1, rows: 1 },
+  },
+  lemonade: {
+    affects: { kind: "all" },
+    hitLabel: "LEMONADE!",
+    kind: "lucky",
+    name: "Lemonade stand",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-lemonade-water",
+          effects: [
+            { kind: "fulfilNeed", need: "thirsty" },
+            { amount: "lemonadeCup", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Water, please",
+        },
+        {
+          art: "card-lemonade-say-hi",
+          effects: [
+            { kind: "fulfilNeed", need: "friendly" },
+            { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Say hi",
+        },
+        { art: "card-lemonade-maybe-later", effects: [], name: "Maybe later" },
+      ],
+    },
+  },
   lostWallet: {
     affects: { kind: "all" },
     kind: "lucky",
@@ -67,6 +160,33 @@ export const ENCOUNTERS = {
     },
     shape: { lanes: 1, rows: 1 },
   },
+  petunias: {
+    affects: { kind: "all" },
+    hitLabel: "OOPS, PETUNIAS!",
+    kind: "obstacle",
+    name: "Prize petunias",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-petunias-replant",
+          effects: [
+            { amount: "encounterLow", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Replant them",
+        },
+        {
+          art: "card-petunias-nature-calls",
+          effects: [
+            { kind: "fulfilNeed", need: "regular" },
+            { amount: -1, kind: "hearts", target: { kind: "affected" } },
+          ],
+          name: "Nature calls",
+        },
+      ],
+    },
+    shape: { lanes: 2, rows: 1 },
+  },
   photoOp: {
     affects: { kind: "all" },
     kind: "lucky",
@@ -79,6 +199,30 @@ export const ENCOUNTERS = {
       ],
       kind: "instant",
     },
+  },
+  picnic: {
+    affects: { kind: "trait", trait: "foodDriven" },
+    hitLabel: "SNACK ATTACK!",
+    kind: "obstacle",
+    name: "Picnic raid",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-picnic-buy-lunch",
+          effects: [
+            { amount: "encounterLow", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Buy a new lunch",
+        },
+        {
+          art: "card-picnic-drop-it",
+          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          name: "Drop it!",
+        },
+      ],
+    },
+    shape: { lanes: 2, rows: 1 },
   },
   puddle: {
     affects: { kind: "caught" },
@@ -193,5 +337,46 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
+  },
+  trash: {
+    affects: { kind: "all" },
+    hitLabel: "TRASH DAY!",
+    kind: "obstacle",
+    name: "Trash day",
+    resolution: {
+      kind: "card",
+      options: [
+        {
+          art: "card-trash-sniff",
+          effects: [
+            { kind: "fulfilNeed", need: "nosy" },
+            { amount: -1, kind: "hearts", target: { kind: "trait", trait: "fancy" } },
+            { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
+          ],
+          name: "Sniff it all",
+        },
+        {
+          art: "card-trash-tidy-up",
+          effects: [
+            { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "affected" } },
+            { amount: 1, kind: "hearts", target: { kind: "temperament", temperament: "fussy" } },
+          ],
+          name: "Tidy up",
+        },
+        {
+          art: "card-trash-drag-on",
+          effects: [
+            {
+              amount: -1,
+              kind: "hearts",
+              target: { kind: "affected" },
+              traitAmounts: { foodDriven: -2 },
+            },
+          ],
+          name: "Drag them on",
+        },
+      ],
+    },
+    shape: { lanes: 2, rows: 1 },
   },
 } as const satisfies Record<EncounterId, Encounter>;

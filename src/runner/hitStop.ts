@@ -7,7 +7,7 @@ export interface HeldStep {
   readonly zoneEnded: boolean;
 }
 
-// The walk held still after an obstacle hit, for seconds more of simulated time.
+// The walk held still after a hit that plays a moment, for seconds more of simulated time.
 export interface HitStop extends HeldStep {
   readonly seconds: number;
 }
@@ -21,7 +21,7 @@ export interface HitStopLengths {
 // a rounding error), so a remainder this small ends the stop.
 const SECONDS_EPSILON = 1e-6;
 
-// The longest stop a step's hits call for: an obstacle encounter's, a minor obstacle's, or 0.
+// The longest stop a step's hits call for: an encounter hit moment's, a minor obstacle's, or 0.
 export function hitStopLength(
   lengths: HitStopLengths,
   hits: { readonly encounters: number; readonly minors: number },

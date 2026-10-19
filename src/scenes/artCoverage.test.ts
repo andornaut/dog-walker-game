@@ -22,7 +22,9 @@ import {
   doghouseTag,
   dogPortraitKey,
   dogSpriteKey,
+  encounterSpriteKey,
   kebabCase,
+  MOVER_SPRITES,
   NEED_ART,
   needSpotSpriteKey,
   ownerFaceKey,
@@ -50,13 +52,14 @@ import { pipLook, zonePips } from "../hud/hudView";
 import { stripIconKey } from "../hud/stateStrip";
 import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
+import { hitLabel } from "../rules/encounters";
 import { walkLength } from "../rules/route";
 import { faceMood } from "../rules/treats";
 import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
-import { hitBurstKey, hitFlashKey } from "./hitMoment";
+import { hitBurstKey, hitLook } from "./hitMoment";
 
 const manifest = parseManifest(shippedManifest);
 const images = new Set(manifest.images.map(({ key }) => key));
@@ -326,20 +329,54 @@ describe("need art", () => {
 });
 
 describe("hit moment art", () => {
-  const obstacles = ENCOUNTERS.filter((id) => gameData.encounters[id].kind === "obstacle");
+  const hits = ENCOUNTERS.filter((id) => hitLabel(gameData.encounters[id]) !== null);
+  const lookOf = (id: EncounterId) => hitLook(gameData.encounters[id].kind, id);
 
-  it("names an edge flash and a burst with play for every obstacle encounter", () => {
-    const missing = obstacles.flatMap((id) => [
-      ...missingTags(hitFlashKey(id), ["play"]),
-      ...missingTags(hitBurstKey(loadedScene, id), ["play"]),
-    ]);
-    expect(obstacles.length).toBeGreaterThan(0);
+  it("names a burst with play, its plate's tag and any edge flash for every hit moment", () => {
+    const missing = hits.flatMap((id) => {
+      const look = lookOf(id);
+      return [
+        ...missingTags(look.burst, ["play"]),
+        ...missingTags("ui-hit-label", [look.plate]),
+        ...(look.flash === null ? [] : missingTags(look.flash, ["play"])),
+      ];
+    });
+    expect(hits).toEqual(expect.arrayContaining(["goose", "lemonade", "otherDog"]));
     expect(missing).toEqual([]);
   });
 
-  it("gives every obstacle its own burst, with fx-bump as the fallback for one without", () => {
+  it("flashes the edges for every obstacle, and for no lucky find", () => {
+    const flashed = hits.filter((id) => lookOf(id).flash !== null);
+    expect(flashed).toEqual(hits.filter((id) => gameData.encounters[id].kind === "obstacle"));
+    expect(lookOf("goose").flash).toBe("ui-hit-flash-white");
+    expect(lookOf("lemonade")).toEqual({ burst: "fx-lemonade", flash: null, plate: "lucky" });
+  });
+
+  it("gives every hit moment its own burst, with fx-bump as the fallback for one without", () => {
     expect(missingTags("fx-bump", ["play"])).toEqual([]);
-    expect(obstacles.filter((id) => hitBurstKey(loadedScene, id) === "fx-bump")).toEqual([]);
+    expect(hits.filter((id) => hitBurstKey(loadedScene, lookOf(id)) === "fx-bump")).toEqual([]);
+  });
+});
+
+describe("road object art", () => {
+  it("names a road sprite for every encounter, at every step any encounter has", () => {
+    const keys = ENCOUNTERS.map(encounterSpriteKey);
+    const steps = [1, ...variantSteps(keys)];
+    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
+    const missing = keys.flatMap((key) =>
+      steps.map((step) => depthVariantKey(key, step) ?? key).filter((key) => !sprites.has(key)),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  it("tags every mover's sprite with its moving tag and any idle tag, at every step it has", () => {
+    const missing = Object.values(MOVER_SPRITES).flatMap((sprite) => {
+      const tags = "idle" in sprite ? [sprite.tag, sprite.idle] : [sprite.tag];
+      return [1, ...variantSteps([sprite.key])].flatMap((step) =>
+        missingTags(depthVariantKey(sprite.key, step) ?? sprite.key, tags),
+      );
+    });
+    expect(missing).toEqual([]);
   });
 });
 
@@ -389,11 +426,10 @@ describe("sound art", () => {
     expect(sounds.get(MUSIC_KEY)?.loop).toBe(true);
   });
 
-  it("has its own hit sound for every obstacle encounter", () => {
-    const obstacles = (Object.keys(gameData.encounters) as EncounterId[]).filter(
-      (id) => gameData.encounters[id].kind === "obstacle",
-    );
-    const missing = obstacles.filter((id) => !sounds.has(soundKeysOf(hitCue(id))[0] ?? ""));
-    expect(missing).toEqual([]);
+  it("has its own hit sound for every encounter with a hit moment", () => {
+    const hits = ENCOUNTERS.filter((id) => hitLabel(gameData.encounters[id]) !== null);
+    const keys = hits.map((id) => soundKeysOf(hitCue(gameData.encounters[id].kind, id))[0] ?? "");
+    expect(keys).toEqual(expect.arrayContaining(["sfx-hit-goose", "sfx-lemonade"]));
+    expect(keys.filter((key) => !sounds.has(key))).toEqual([]);
   });
 });

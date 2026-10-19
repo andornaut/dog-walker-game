@@ -7,7 +7,7 @@ import type { RoadItem } from "./roadItems";
 // keeps step with the road: it freezes when the road does, and a replay of the same scroll
 // puts it in the same place. A lane position is fractional: lane i spans i - 0.5 to i + 0.5.
 
-export type MoverKind = "ball" | "cyclist" | "looseDog" | "squirrel";
+export type MoverKind = "ball" | "cyclist" | "goose" | "looseDog" | "squirrel";
 // The movers that are minor obstacles; the others open their encounter on contact.
 export type MoverObstacleId = "ball" | "cyclist";
 
@@ -21,6 +21,7 @@ export function isMoverObstacle(kind: string): kind is MoverObstacleId {
 export const MOVER_CONTACTS = {
   ball: "ball",
   cyclist: "cyclist",
+  goose: "goose",
   looseDog: "otherDog",
   squirrel: "squirrel",
 } as const satisfies Readonly<Record<MoverKind, EncounterId | MoverObstacleId>>;
@@ -288,10 +289,12 @@ export function screenHasRoom(
 
 // The spawn planner's grid of rows and lanes. block blocks lanes in a row's window, with the
 // row before it as a lead-in if asked, if every lane-blocking spawn stays avoidable, and
-// undoes it unless keep is set.
+// undoes it unless keep is set. leavesRoom is false when taking the cells would leave too few
+// for the spawns placed later that are never skipped.
 export interface MoverGrid {
   block(row: number, lanes: LaneSpan, leadIn: boolean, keep: boolean): boolean;
   isFree(lane: number, row: number): boolean;
+  leavesRoom(cells: readonly { readonly lane: number; readonly row: number }[]): boolean;
   take(lane: number, row: number): void;
 }
 
@@ -338,6 +341,9 @@ export function placeMovers<Kind extends string>(
       end <= geometry.zoneLength &&
       screenHasRoom(onScreen, [start, end]) &&
       spot.placement.cells.every(({ lane, row }) => grid.isFree(lane, spot.row + row)) &&
+      grid.leavesRoom(
+        spot.placement.cells.map(({ lane, row }) => ({ lane, row: spot.row + row })),
+      ) &&
       grid.block(spot.row, spot.placement.lanes, spot.placement.leadIn, false)
     );
   };

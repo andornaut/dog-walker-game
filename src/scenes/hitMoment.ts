@@ -3,6 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import type { Rect } from "../layout/rect";
+import { hitLabel } from "../rules/encounters";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { playEffect } from "./sprites";
@@ -10,8 +11,9 @@ import { tagFrame } from "./uiKit";
 
 // An encounter hit's moment, played over the hit stop before its card: a burst over the pack,
 // a flash down both edges of the field, the encounter's label on a plate above the pack, and
-// the caught dogs shaking off. Reduced motion keeps the flash (one still frame, faded out),
-// the label (set in place) and the burst (its first frame, held), and drops the shake.
+// the caught dogs shaking off. A lucky find's moment has no flash and no shake. Reduced motion
+// keeps the flash (one still frame, faded out), the label (set in place) and the burst (its
+// first frame, held), and drops the shake.
 export interface HitMoment {
   // The caught dogs' sprites.
   caught: readonly GameObjects.Sprite[];
@@ -20,6 +22,7 @@ export interface HitMoment {
   // The burst's depth; the flash and the label draw over it.
   depth: number;
   encounter: EncounterId;
+  kind: Encounter["kind"];
   // The flash runs down this rect's left and right edges.
   field: Rect;
   label: string;
@@ -30,18 +33,23 @@ export interface HitMoment {
   still: boolean;
 }
 
-type FlashColour = "amber" | "green" | "orange" | "pink" | "sky";
+type FlashColour = "amber" | "green" | "orange" | "pink" | "sky" | "white";
 
 const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
+  cafe: "amber",
+  goose: "white",
   otherDog: "pink",
+  petunias: "pink",
+  picnic: "orange",
   puddle: "sky",
   skunk: "green",
   squirrel: "orange",
   thief: "amber",
+  trash: "green",
 };
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
 const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play" };
-const PLATE = { corner: 8, height: 32, key: "ui-hit-label", tag: "normal", width: 176 };
+const PLATE = { corner: 8, height: 32, key: "ui-hit-label", width: 176 };
 // The label's line starts this far below the plate's top; font-title's capitals start 4px
 // into the line.
 const LABEL = { capTop: 4, dropIn: 8, dropMs: 120, fadeMs: 150, lineTop: 3, scale: 2 };
@@ -49,32 +57,48 @@ const SHAKE = { angle: 12, delayMs: 120, swingMs: 60, swings: 4 };
 // The moment ends this long before the stop, so nothing is left on screen under the card.
 const END_MARGIN_MS = 100;
 
-// An obstacle's own label, or its name for an encounter with none.
+// The encounter's own label, or its name for an encounter with none.
 export function hitLabelOf(encounter: Encounter): string {
-  return encounter.kind === "obstacle" ? encounter.hitLabel : encounter.name.toUpperCase();
+  return hitLabel(encounter) ?? encounter.name.toUpperCase();
 }
 
-export function hitFlashKey(encounter: EncounterId): string {
-  return `ui-hit-flash-${FLASH_COLOURS[encounter] ?? "amber"}`;
+// The art of a hit moment: an obstacle's burst is fx-hit-<encounter> with an edge flash in its
+// colour and the normal plate; a lucky find's is fx-<encounter>, with no flash and the lucky
+// plate.
+export interface HitLook {
+  readonly burst: string;
+  readonly flash: string | null;
+  readonly plate: "lucky" | "normal";
 }
 
-export function hitBurstKey(scene: Scene, encounter: EncounterId): string {
-  const key = `fx-hit-${kebabCase(encounter)}`;
-  return scene.textures.exists(key) ? key : BURST.fallback;
+export function hitLook(kind: Encounter["kind"], encounter: EncounterId): HitLook {
+  const art = kebabCase(encounter);
+  if (kind === "lucky") {
+    return { burst: `fx-${art}`, flash: null, plate: "lucky" };
+  }
+  const colour = FLASH_COLOURS[encounter] ?? "amber";
+  return { burst: `fx-hit-${art}`, flash: `ui-hit-flash-${colour}`, plate: "normal" };
+}
+
+// The look's burst, or fx-bump when its art is missing.
+export function hitBurstKey(scene: Scene, look: HitLook): string {
+  return scene.textures.exists(look.burst) ? look.burst : BURST.fallback;
 }
 
 export function playHitMoment(scene: Scene, moment: HitMoment): void {
   const totalMs = Math.max(0, moment.seconds * 1000 - END_MARGIN_MS);
-  playBurst(scene, moment, totalMs);
-  playFlash(scene, moment);
-  showLabel(scene, moment, totalMs);
-  if (!moment.still) {
+  const look = hitLook(moment.kind, moment.encounter);
+  playBurst(scene, moment, hitBurstKey(scene, look), totalMs);
+  if (look.flash !== null) {
+    playFlash(scene, moment, look.flash);
+  }
+  showLabel(scene, moment, look.plate, totalMs);
+  if (!moment.still && moment.kind === "obstacle") {
     shakeOff(scene, moment.caught);
   }
 }
 
-function playBurst(scene: Scene, moment: HitMoment, totalMs: number): void {
-  const key = hitBurstKey(scene, moment.encounter);
+function playBurst(scene: Scene, moment: HitMoment, key: string, totalMs: number): void {
   if (!moment.still) {
     playEffect(scene, key, BURST.tag, moment.centre, moment.depth);
     return;
@@ -90,8 +114,7 @@ function playBurst(scene: Scene, moment: HitMoment, totalMs: number): void {
 }
 
 // The strip repeats every 4 rows, so it tiles down each edge; the right one is mirrored.
-function playFlash(scene: Scene, moment: HitMoment): void {
-  const key = hitFlashKey(moment.encounter);
+function playFlash(scene: Scene, moment: HitMoment, key: string): void {
   const first = tagFrame(scene, key, "play");
   if (first === undefined) {
     return;
@@ -121,11 +144,11 @@ function playFlash(scene: Scene, moment: HitMoment): void {
 }
 
 // The plate sits centred on labelX, its bottom a gap above the burst.
-function showLabel(scene: Scene, moment: HitMoment, totalMs: number): void {
+function showLabel(scene: Scene, moment: HitMoment, plate: string, totalMs: number): void {
   const top = Math.round(moment.centre.y - BURST.size / 2 - BURST.gap - PLATE.height);
   const left = Math.round(moment.labelX - PLATE.width / 2);
   const label = scene.add.container(left, top).setDepth(moment.depth + 2);
-  const frame = tagFrame(scene, PLATE.key, PLATE.tag);
+  const frame = tagFrame(scene, PLATE.key, plate);
   if (frame !== undefined) {
     const { corner } = PLATE;
     label.add(

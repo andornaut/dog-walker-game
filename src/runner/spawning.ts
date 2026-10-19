@@ -177,8 +177,8 @@ function blockingSpan(plan: SpawnPlan<string>, row: number, rows: number) {
 // last row. Movers are placed first, by placeMovers; a crosser keeps the row before its own
 // clear as a lead-in, so the pack steers into its row from two rows back. A mover, or an
 // obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
-// uses no random draw. A plan that cannot fit its one-cell spawns that way is a data error
-// and throws.
+// uses no random draw; so is one that would leave fewer free cells than there are one-cell
+// spawns. A plan that cannot fit its one-cell spawns that way is a data error and throws.
 export function planSpawns<Kind extends string>(
   random: Random,
   plan: SpawnPlan<Kind>,
@@ -195,6 +195,20 @@ export function planSpawns<Kind extends string>(
   const lanes = laneRun(0, laneCount);
 
   const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
+
+  const area = (quota: SpawnQuota<Kind>) => {
+    const { lanes: across, rows: length } = quota.footprint ?? SINGLE_CELL;
+    return across * length;
+  };
+  const statics = plan.quotas.filter((quota) => quota.mover === undefined);
+  // One-cell spawns are never skipped, so the others keep a free cell for each of them.
+  const reserved = statics.reduce((sum, quota) => sum + (area(quota) === 1 ? quota.count : 0), 0);
+  let cellsLeft = rows.length * laneCount;
+  const leavesRoom = (cells: number) => cellsLeft - cells >= reserved;
+  const takeCells = (row: number, mask: number) => {
+    cellsLeft -= laneTotal(mask & ~(taken[row] ?? 0));
+    taken[row] = (taken[row] ?? 0) | mask;
+  };
 
   // Rows a mover keeps clear before its own, so the pack steers from the row before them.
   const leadIns = new Set<number>();
@@ -276,6 +290,10 @@ export function planSpawns<Kind extends string>(
         return false;
       }
     }
+    const cells = footprint.lanes * (last - cell.row + 1);
+    if (footprint.lanes * footprint.rows > 1 && !leavesRoom(cells)) {
+      return false;
+    }
     return !blocksLane || tryBlock(cell, footprint, false);
   };
 
@@ -296,10 +314,6 @@ export function planSpawns<Kind extends string>(
     return cells;
   };
 
-  const area = (quota: SpawnQuota<Kind>) => {
-    const { lanes, rows: length } = quota.footprint ?? SINGLE_CELL;
-    return lanes * length;
-  };
   const movers = plan.quotas.flatMap(({ count, kind, mover }) =>
     mover === undefined ? [] : [{ count, kind, spec: mover }],
   );
@@ -319,9 +333,11 @@ export function planSpawns<Kind extends string>(
       return ok;
     },
     isFree: (lane: number, row: number) => ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
+    leavesRoom: (cells: readonly Cell[]) =>
+      leavesRoom(cells.filter(({ row }) => row >= 0 && row < rows.length).length),
     take: (lane: number, row: number) => {
       if (row >= 0 && row < rows.length) {
-        taken[row] = (taken[row] ?? 0) | laneRun(lane, 1);
+        takeCells(row, laneRun(lane, 1));
       }
     },
   };
@@ -338,8 +354,7 @@ export function planSpawns<Kind extends string>(
   events.push(...placeMovers(random, moverRoad, moverGrid, rows, movers));
 
   // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
-  const statics = plan.quotas.filter((quota) => quota.mover === undefined);
-  const ordered = statics.sort((a, b) => area(b) - area(a));
+  const ordered = [...statics].sort((a, b) => area(b) - area(a));
   for (const quota of ordered) {
     const footprint = quota.footprint ?? SINGLE_CELL;
     for (let i = 0; i < quota.count; i++) {
@@ -359,7 +374,7 @@ export function planSpawns<Kind extends string>(
       const cell = randomPick(random, cells);
       const covered = laneRun(cell.lane, footprint.lanes);
       for (let row = cell.row; row <= lastRowTaken(cell, footprint, quota.blocksLane); row++) {
-        taken[row] = (taken[row] ?? 0) | covered;
+        takeCells(row, covered);
       }
       if (quota.blocksLane) {
         tryBlock(cell, footprint, true);

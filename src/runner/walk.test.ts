@@ -210,7 +210,18 @@ describe("planZone", { timeout: 15_000 }, () => {
         ...TEST_WORLD.zones[0],
         weights: {
           ...TEST_WORLD.zones[0].weights,
-          obstacles: { otherDog: 0, puddle: 2, skunk: 0, squirrel: 0, thief: 0 },
+          obstacles: {
+            cafe: 0,
+            goose: 0,
+            otherDog: 0,
+            petunias: 0,
+            picnic: 0,
+            puddle: 2,
+            skunk: 0,
+            squirrel: 0,
+            thief: 0,
+            trash: 0,
+          },
         },
       },
       ...TEST_WORLD.zones.slice(1),
@@ -387,6 +398,11 @@ describe("stepWalk", () => {
       ["a squirrel with no chaser", walkWith(["duchess"], [atPack("squirrel")]), seededRandom(1)],
       ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), seededRandom(1)],
       ["a skunk that catches nobody", walkWith(["duchess"], [atPack("skunk")]), nobodyCaught],
+      [
+        "a picnic with no food-driven dog",
+        walkWith(["duchess", "koda"], [atPack("picnic", 0, 2, 2)]),
+        seededRandom(1),
+      ],
       [
         "a puddle Raincoats keep off",
         raincoats(walkWith(["duchess"], [atPack("puddle")])),
@@ -567,9 +583,26 @@ describe("hit stop", () => {
     expect(hit.walk.road.hitStop?.seconds).toBe(1);
   });
 
-  it("never stops for a lucky find", () => {
+  it("never stops for a lucky find without a hit label", () => {
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.road.hitStop).toBeNull();
     expect(step(walkWith(["koda"], [atPack("photoOp")])).walk.road.hitStop).toBeNull();
+  });
+
+  it("plays the lemonade stand's moment over a stop, then opens its card, with no bump", () => {
+    const met = step(walkWith(["duchess", "koda"], [atPack("lemonade")]), FRAME);
+    const card = { affected: ["duchess", "koda"], encounter: "lemonade", kind: "encounter" };
+    expect(met.encounterHits).toEqual([card]);
+    expect(met.cards).toEqual([]);
+    expect(met.walk.road.hitStop?.seconds).toBe(1);
+    expect(met.walk.run.bumpsByZone).toEqual([]);
+    expect(framesHeld(met.walk)).toBe(60);
+    let walk = met.walk;
+    for (let frame = 1; frame < 60; frame++) {
+      const held = step(walk, FRAME);
+      expect(held.cards).toEqual([]);
+      walk = held.walk;
+    }
+    expect(step(walk, FRAME).cards).toEqual([card]);
   });
 
   it("advances neither distance, the spawn plan, the road nor the pack during the stop", () => {
@@ -827,7 +860,18 @@ describe("obstacleWeights", () => {
 
   it("weighs every obstacle encounter, and no lucky one", () => {
     const ids = obstacleWeights(data, walkWith(["biscuit"]).run).map(([id]) => id);
-    expect(ids.sort()).toEqual(["otherDog", "puddle", "skunk", "squirrel", "thief"]);
+    expect(ids.sort()).toEqual([
+      "cafe",
+      "goose",
+      "otherDog",
+      "petunias",
+      "picnic",
+      "puddle",
+      "skunk",
+      "squirrel",
+      "thief",
+      "trash",
+    ]);
   });
 
   it("draws other dogs more often for each small dog and less for each big dog", () => {
@@ -884,7 +928,7 @@ describe("movers", () => {
     const movers = pending.filter((event) => event.mover !== undefined);
     expect(movers.length).toBeGreaterThan(0);
     for (const { kind } of movers) {
-      expect(["ball", "cyclist", "otherDog", "squirrel"]).toContain(kind);
+      expect(["ball", "cyclist", "goose", "otherDog", "squirrel"]).toContain(kind);
     }
     const still = pending.filter((event) => event.mover === undefined).map(({ kind }) => kind);
     expect(still).not.toContain("squirrel");
@@ -909,7 +953,63 @@ describe("movers", () => {
     for (const kind of ["puddle", "skunk", "thief", "photoOp", "tip", "treat"] as const) {
       expect(moverFor(data, counted(0), 1, kind)).toBeNull();
     }
+    expect(moverFor(data, counted(0), 0, "squirrel")).toBeNull();
     expect(draws).toBe(0);
+  });
+
+  it("always draws a goose as a mover, at any share, drawing nothing", () => {
+    const never = () => {
+      throw new Error("drew");
+    };
+    for (const share of [0, 0.5, 1]) {
+      expect(moverFor(data, never, share, "goose")).toBe("goose");
+    }
+  });
+
+  it("sends every goose across the road slower than a loose dog, one mover on screen", () => {
+    const tuned = { ...REAL, world: sharedWorld(WORLD, 0) };
+    const road = screenLayout(SCREEN_CONFIG).road;
+    const gameRoad = walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
+    const roadLength = gameRoad.roadBottom - gameRoad.roadTop;
+    const run = newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null });
+    const geese = ["pawsPromenade", "homeStretch"].flatMap((zone) => {
+      const zoned = inZone(run, zone as ZoneId, WORLD.walkLength - 1);
+      const speed = walkScrollSpeed(tuned, zoned);
+      return [1, 2, 3].flatMap((seed) => {
+        const { pending } = planZone(tuned, gameRoad, seededRandom(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        }).road;
+        const movers = pending.filter((event) => event.mover !== undefined);
+        expect(movers.every((event) => event.kind === "goose")).toBe(true);
+        expect(pending.filter((event) => event.kind === "goose")).toEqual(movers);
+        // From its cue until it has left the road or passed the bottom.
+        const screens = movers.flatMap(({ distance, mover }) => {
+          if (mover === undefined) {
+            return [];
+          }
+          const gone = Array.from({ length: 10_000 }, (_, since) => since).find((since) => {
+            const place = moverPlace(LANE_COUNT, mover, since);
+            return hasLeftRoad(LANE_COUNT, place) || place.travel > roadLength;
+          });
+          return [[distance, distance + (gone ?? 10_000)] as const];
+        });
+        screens.forEach(([start, end], i) => {
+          for (const [from, to] of screens.slice(i + 1)) {
+            expect(from >= end || to <= start).toBe(true);
+          }
+        });
+        return movers.map(({ mover }) => ({ mover, speed }));
+      });
+    });
+    expect(geese.length).toBeGreaterThan(3);
+    const loose = read(TUNING, "counts", "looseDogLanesPerSecond");
+    for (const { mover, speed } of geese) {
+      expect(mover).toMatchObject({ motion: "cross", mover: "goose" });
+      const lanesPerSecond = mover?.motion === "cross" ? mover.lanesPerPixel * speed : 0;
+      expect(lanesPerSecond).toBeCloseTo(read(TUNING, "counts", "gooseLanesPerSecond"));
+      expect(lanesPerSecond).toBeLessThan(loose);
+    }
   });
 
   it("plans movers at the mover share of the zone the route is in", () => {
@@ -927,9 +1027,10 @@ describe("movers", () => {
     expect(moversIn(rest[0]?.id as ZoneId)).toBe(0);
   });
 
-  it("plans no movers at a share of 0", () => {
+  it("plans no movers but geese at a share of 0", () => {
     const walk = planZone(withShare(tuning, 0), geometry, seededRandom(3), walkWith(["koda"]));
-    expect(walk.road.pending.filter((event) => event.mover !== undefined)).toEqual([]);
+    const movers = walk.road.pending.filter((event) => event.mover !== undefined);
+    expect(movers.filter((event) => event.kind !== "goose")).toEqual([]);
   });
 
   it("brings a mover onto the road as its cue, carrying its path", () => {
@@ -965,6 +1066,13 @@ describe("movers", () => {
     const loose = { ...crossing, mover: "looseDog" } as const;
     const { walk } = step(walkWith(["duchess"], [moverAt("otherDog", loose, 82)]));
     const card = { affected: ["duchess"], encounter: "otherDog", kind: "encounter" };
+    expect(walk.road.hitStop?.cards).toEqual([card]);
+  });
+
+  it("opens the goose's card on contact, big dog or not", () => {
+    const goose = { ...crossing, mover: "goose" } as const;
+    const { walk } = step(walkWith(["koda"], [moverAt("goose", goose, 82)]));
+    const card = { affected: ["koda"], encounter: "goose", kind: "encounter" };
     expect(walk.road.hitStop?.cards).toEqual([card]);
   });
 

@@ -1,4 +1,4 @@
-import type { DogId, EncounterId, GameData } from "../data/types";
+import type { DogId, Encounter, EncounterId, GameData } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
@@ -39,4 +39,13 @@ export function opensCard(
     !state.immunities.some(({ encounter }) => encounter === encounterId) &&
     !(noCardWhen !== undefined && evaluateCondition(data.dogs, noCardWhen, packDogs(state)))
   );
+}
+
+// The label shown large as the pack meets an encounter, before its card: every obstacle's, and
+// a lucky card's that has one. null for an encounter that plays no hit moment.
+export function hitLabel(encounter: Encounter): string | null {
+  if (encounter.kind === "obstacle") {
+    return encounter.hitLabel;
+  }
+  return "hitLabel" in encounter ? (encounter.hitLabel ?? null) : null;
 }

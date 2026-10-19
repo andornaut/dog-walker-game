@@ -50,8 +50,15 @@ export function kebabCase(id: string): string {
   return id.replace(/[A-Z]/g, (letter) => `-${letter.toLowerCase()}`);
 }
 
+// Encounters whose sprite is named for the thing on the road rather than the encounter.
+const ENCOUNTER_SPRITES: Readonly<Partial<Record<EncounterId, string>>> = {
+  cafe: "cafe-patio",
+  lemonade: "lemonade-stand",
+  trash: "trash-bins",
+};
+
 export function encounterSpriteKey(encounter: EncounterId): string {
-  return kebabCase(encounter);
+  return ENCOUNTER_SPRITES[encounter] ?? kebabCase(encounter);
 }
 
 // Every dog-keyed art key names the dog by its art id, which can differ from its data id.
@@ -186,13 +193,18 @@ export function zonePipTag(zone: ZoneArt | null, done: boolean): string {
   return done ? `${zone.art}-done` : zone.art;
 }
 
-// Each mover's road sprite and the tag it plays while moving. Crossers face right.
+// Each mover's road sprite and the tag it plays while moving. Crossers face right. A mover with
+// an idle tag also stands at the road's edge during its cue, and plays it there and whenever
+// the walk is halted.
 export const MOVER_SPRITES = {
   ball: { key: "ball-bounce", tag: "bounce" },
   cyclist: { key: "cyclist", tag: "ride" },
+  goose: { idle: "idle", key: "goose", tag: "run" },
   looseDog: { key: "loose-dog", tag: "run" },
   squirrel: { key: "squirrel-dash", tag: "run" },
-} as const satisfies Readonly<Record<MoverKind, { key: string; tag: string }>>;
+} as const satisfies Readonly<
+  Record<MoverKind, { readonly idle?: string; readonly key: string; readonly tag: string }>
+>;
 
 // A mover's cue: the sign at the lane edge and the arrow pointing the way it will go, which
 // faces right. Both play WARNING_TAG; the arrow plays WARNING_DOWN_TAG to point down a lane.

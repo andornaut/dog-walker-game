@@ -9,6 +9,8 @@ export const TUNING = {
     // A ball bounces across the road this many lanes a second.
     ballLanesPerSecond: 2.5,
     biscuitNeighbourTreatsPerDog: 1,
+    // A goose waddles across the road this many lanes a second, slower than a loose dog.
+    gooseLanesPerSecond: 1.5,
     loadoutMax: 1,
     looseDogLanesPerSecond: 2,
     luckyEncountersPerZone: 2,
@@ -52,6 +54,7 @@ export const TUNING = {
     encounterLow: 10,
     fannyPackStart: 15,
     feeByTemperament: { dramatic: 20, fussy: 30, laidBack: 20 },
+    lemonadeCup: 3,
     lostWalletKeep: 30,
     // The tips the pack drops on a minor obstacle, once for the pack.
     minorBump: 2,

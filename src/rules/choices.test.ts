@@ -115,6 +115,117 @@ describe("cardFor", () => {
   });
 });
 
+describe("the zone encounters' options", () => {
+  // In dollars, as the card text shows them; the state counts cents.
+  const { encounterLow, lemonadeCup, missedTips } = TEST_TUNING.money;
+  const start = cents(5000);
+  // Every need half way to urgent, so a need met shows as 0.
+  const walking = (dogs: DogId[]) =>
+    testState(Object.fromEntries(dogs.map((dog) => [dog, 5])), {
+      money: start,
+      needSeconds: Object.fromEntries(dogs.map((dog) => [dog, 30])),
+    });
+  const pick = (id: EncounterId, dogs: DogId[], name: string, affected = dogs) => {
+    const state = walking(dogs);
+    const card = cardFor(data, state, encounter(id, affected));
+    const option = card.options.find(({ label }) => label === name);
+    if (option === undefined) {
+      throw new Error(`${card.title} has no option ${name}`);
+    }
+    const { state: after } = choose(state, encounter(id, affected), option.index);
+    return {
+      hearts: heartsByDog(after),
+      met: Object.keys(after.needSeconds).filter((dog) => after.needSeconds[dog as DogId] === 0),
+      spent: start - after.money,
+      text: option.text,
+    };
+  };
+
+  it("lets the goose be backed away from for missed tips, or honked at, worst for chasers", () => {
+    // Koda is a laid-back chaser, Nugget a dramatic food-driven dog, Pierre a fussy fancy one.
+    const pack: DogId[] = ["koda", "nugget", "pierre"];
+    expect(pick("goose", pack, "Back off slowly")).toMatchObject({
+      hearts: { koda: 5, nugget: 5, pierre: 5 },
+      spent: 3 * missedTips * 100,
+    });
+    const honk = pick("goose", pack, "Honk back");
+    expect(honk).toMatchObject({ hearts: { koda: 3, nugget: 3, pierre: 4 }, spent: 0 });
+    expect(honk.text).toBe("−1 ♥ each (−2 Chaser)");
+  });
+
+  it("charges a picnic only for the food-driven dogs it affects", () => {
+    const pack: DogId[] = ["koda", "nugget", "pierre"];
+    expect(pick("picnic", pack, "Buy a new lunch", ["nugget"]).spent).toBe(encounterLow * 100);
+    expect(pick("picnic", pack, "Drop it!", ["nugget"])).toMatchObject({
+      hearts: { koda: 5, nugget: 3, pierre: 5 },
+      spent: 0,
+    });
+  });
+
+  it("replants the petunias per dog, or lets a Regular dog go there for −♥ each", () => {
+    const pack: DogId[] = ["biscuit", "koda", "nugget"];
+    expect(pick("petunias", pack, "Replant them").spent).toBe(3 * encounterLow * 100);
+    expect(pick("petunias", pack, "Nature calls")).toMatchObject({
+      hearts: { biscuit: 4, koda: 4, nugget: 3 },
+      met: ["biscuit"],
+      spent: 0,
+    });
+  });
+
+  it("meets Nosy at the trash for −♥ to fancy owners, tidies up for fussy ones, or drags on", () => {
+    const pack: DogId[] = ["koda", "nugget", "pierre"];
+    const sniff = pick("trash", pack, "Sniff it all");
+    expect(sniff).toMatchObject({
+      hearts: { koda: 5, nugget: 5, pierre: 4 },
+      met: ["koda", "pierre"],
+      spent: 3 * missedTips * 100,
+    });
+    expect(sniff.text).toBe(`Nosy needs met, −1 ♥ to Fancy owners, −$${missedTips} per dog`);
+    expect(pick("trash", pack, "Tidy up")).toMatchObject({
+      hearts: { koda: 5, nugget: 5, pierre: 6 },
+      spent: 3 * missedTips * 100,
+    });
+    expect(pick("trash", pack, "Drag them on")).toMatchObject({
+      hearts: { koda: 4, nugget: 1, pierre: 4 },
+      spent: 0,
+    });
+  });
+
+  it("meets Friendly at the cafe for missed tips, buys lattes for fussy owners, or slinks away", () => {
+    const pack: DogId[] = ["duchess", "nugget", "pierre"];
+    expect(pick("cafe", pack, "Charm the crowd")).toMatchObject({
+      hearts: { duchess: 5, nugget: 5, pierre: 5 },
+      met: ["duchess"],
+      spent: 3 * missedTips * 100,
+    });
+    expect(pick("cafe", pack, "Buy new lattes")).toMatchObject({
+      hearts: { duchess: 5, nugget: 5, pierre: 6 },
+      spent: 3 * encounterLow * 100,
+    });
+    expect(pick("cafe", pack, "Slink away")).toMatchObject({
+      hearts: { duchess: 4, nugget: 3, pierre: 4 },
+      spent: 0,
+    });
+  });
+
+  it("sells lemonade per dog for Thirsty, says hi for Friendly, or does nothing", () => {
+    const pack: DogId[] = ["duchess", "nugget", "pierre"];
+    const water = pick("lemonade", pack, "Water, please");
+    expect(water).toMatchObject({ met: ["nugget"], spent: 3 * lemonadeCup * 100 });
+    expect(water.text).toBe(`Thirsty needs met, −$${lemonadeCup} per dog`);
+    expect(pick("lemonade", pack, "Say hi")).toMatchObject({
+      met: ["duchess"],
+      spent: 3 * missedTips * 100,
+    });
+    expect(pick("lemonade", pack, "Maybe later")).toEqual({
+      hearts: { duchess: 5, nugget: 5, pierre: 5 },
+      met: [],
+      spent: 0,
+      text: "Nothing",
+    });
+  });
+});
+
 describe("applyInstantEncounter", () => {
   it("pays a photo op at once, with a quip from the owners who gained hearts", () => {
     const state = testState({ koda: 5, nugget: 3 });

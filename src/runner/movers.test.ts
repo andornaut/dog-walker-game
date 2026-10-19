@@ -265,6 +265,7 @@ describe("placeMovers", () => {
           return true;
         },
         isFree: (lane: number, row: number) => !taken.has(`${lane},${row}`),
+        leavesRoom: () => true,
         take: (lane: number, row: number) => {
           taken.add(`${lane},${row}`);
         },
@@ -320,9 +321,12 @@ describe("placeMovers", () => {
     );
   });
 
-  it("skips a mover the grid refuses everywhere, drawing nothing", () => {
+  it.each([
+    ["blocks", { block: () => false }],
+    ["has no room for", { leavesRoom: () => false }],
+  ])("skips a mover the grid %s everywhere, drawing nothing", (_, refusal) => {
     const { grid } = freeGrid();
-    const refusing = { ...grid, block: () => false };
+    const refusing = { ...grid, ...refusal };
     let draws = 0;
     const counting = () => {
       draws += 1;

@@ -15,13 +15,19 @@ import type { WORLD } from "./world";
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
   | "biscuitNeighbour"
+  | "cafe"
+  | "goose"
+  | "lemonade"
   | "lostWallet"
   | "otherDog"
+  | "petunias"
   | "photoOp"
+  | "picnic"
   | "puddle"
   | "skunk"
   | "squirrel"
-  | "thief";
+  | "thief"
+  | "trash";
 export type Energy = "calm" | "hyper" | "steady";
 export type NeedId = "friendly" | "nosy" | "playful" | "regular" | "thirsty";
 export type Size = "big" | "medium" | "small";
@@ -71,6 +77,7 @@ type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 export interface Tuning {
   readonly counts: OpenGroup & {
     readonly ballLanesPerSecond: number;
+    readonly gooseLanesPerSecond: number;
     readonly looseDogLanesPerSecond: number;
     readonly minorObstaclesFirstZone: number;
     readonly minorObstaclesGainPerZone: number;
@@ -302,14 +309,16 @@ export interface Shape {
 }
 
 // "obstacle": hit by accident, always a card, with hitLabel shown large as it hits; "lucky":
-// a good thing to bump into, a card or instant. Nothing happens when no dog is affected, when
-// the pack is immune, or when noCardWhen holds.
+// a good thing to bump into, a card or instant. A lucky card with a hitLabel shows it as the
+// pack meets it, before its card. Nothing happens when no dog is affected, when the pack is
+// immune, or when noCardWhen holds.
 export type Encounter = {
   readonly affects: AffectRule;
   readonly name: string;
   readonly noCardWhen?: Condition;
 } & (
-  | { readonly kind: "lucky"; readonly resolution: Resolution }
+  | { readonly hitLabel?: string; readonly kind: "lucky"; readonly resolution: CardResolution }
+  | { readonly kind: "lucky"; readonly resolution: InstantResolution }
   | {
       readonly hitLabel: string;
       readonly kind: "obstacle";

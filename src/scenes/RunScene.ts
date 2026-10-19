@@ -973,11 +973,14 @@ export class RunScene extends Scene {
       this.hint({ kind: "luckyFind" });
     }
     for (const hit of step.encounterHits) {
-      sound.play(hitCue(hit.encounter));
+      const { kind } = gameData.encounters[hit.encounter];
+      sound.play(hitCue(kind, hit.encounter));
       if (hit.encounter === "puddle") {
         playEffect(this, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
       }
-      this.stumble();
+      if (kind === "obstacle") {
+        this.stumble();
+      }
       this.playHit(hit, step.walk.road.hitStop?.seconds ?? 0);
     }
   }
@@ -992,6 +995,7 @@ export class RunScene extends Scene {
       depth: DEPTH.popup,
       encounter: hit.encounter,
       field: { ...roadView, height: roadView.y + roadView.height - backdrop.y, y: backdrop.y },
+      kind: gameData.encounters[hit.encounter].kind,
       label: hitLabelOf(gameData.encounters[hit.encounter]),
       labelX: road.x + road.width / 2,
       seconds,
@@ -1669,7 +1673,7 @@ export class RunScene extends Scene {
       seen.add(item.id);
       const view = this.items.get(item.id) ?? this.addItemView(item);
       if (item.mover !== undefined) {
-        this.drawMover(item.mover, view, item.y + item.height, roadTop, shadow);
+        this.drawMover(item.mover, view, item.y + item.height, roadTop, halted, shadow);
         continue;
       }
       const first = itemAt(this.laneXs, item.lane);
@@ -1708,12 +1712,14 @@ export class RunScene extends Scene {
   // A mover stands on the road through the projection once it moves, sized by showAtDepth, a
   // crosser mirrored when it runs left. Until then only its cue shows, at 1x: a sign at the
   // road's edge on its row with the arrow pointing across, or a cyclist's sign at the top of
-  // its lane with the arrow pointing down. The ball carries its own shadow.
+  // its lane with the arrow pointing down. The ball carries its own shadow. A mover with an idle
+  // tag, the goose, also stands at the edge during its cue, playing it then and while halted.
   private drawMover(
     mover: MoverOnRoad,
     view: ItemView,
     footY: number,
     roadTop: number,
+    halted: boolean,
     shadow: Shadow,
   ): void {
     const { road } = LAYOUT;
@@ -1723,11 +1729,15 @@ export class RunScene extends Scene {
     const still = this.reducedMotion();
     const laneX = itemAt(this.laneXs, 0) + (place.lanePosition * road.width) / LANE_COUNT;
     const leftward = path.motion === "cross" && path.direction === -1;
+    const sprite = MOVER_SPRITES[path.mover];
+    const idle = "idle" in sprite ? sprite.idle : undefined;
     if (body !== undefined) {
-      body.sprite.setVisible(place.moving);
-      if (place.moving) {
+      const shown = place.moving || idle !== undefined;
+      body.sprite.setVisible(shown);
+      if (shown) {
         const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
-        const { key, tag } = MOVER_SPRITES[path.mover];
+        const { key } = sprite;
+        const tag = idle !== undefined && (halted || !place.moving) ? idle : sprite.tag;
         const drawn = showAtDepth(body.sprite, key, placed.scale);
         const x = Math.round(placed.x);
         const y = Math.round(placed.y);

@@ -123,6 +123,5 @@ In build order:
 
 1. A per-zone wall-clock readout in the dev overlay, and the fixes for zones that run longer than road time plus cards.
 2. Forks and six zones: the fork card, per-zone weights and multipliers, the route in run state, saves and the input log, and route-aware zone pips.
-3. The six new encounters, including the goose mover, after forks and needs.
-4. The shared depth-step table (`@88`, `@62`) and `npm run check:art`.
-5. Art tooling: `npm run export:data` (game data and layout JSON), a manifest generated from the files on disk, and a depth preview script.
+3. The shared depth-step table (`@88`, `@62`) and `npm run check:art`.
+4. Art tooling: `npm run export:data` (game data and layout JSON), a manifest generated from the files on disk, and a depth preview script.
