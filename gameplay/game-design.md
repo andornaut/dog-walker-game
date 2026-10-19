@@ -1,6 +1,6 @@
 # Game Design
 
-The rulebook for the first complete game, set in one world, Maple Street. What comes later is in [`next.md`](next.md), and undecided ideas are in [`ideas.md`](ideas.md).
+The rulebook for the first complete game, set in one world, Maple Street. What's left to build and tune is in [`README.md`](README.md), what comes later is in [`next.md`](next.md), and undecided ideas are in [`ideas.md`](ideas.md).
 
 [`src/data/`](../src/data/) holds every number and all content, and the [data page](https://dog-walker-game.andornaut.workers.dev/data/) shows them with the generated card text. This doc states the rules and gives numbers only where the data has none. In the rules below, `$` and `♥` give the direction and rough size of a change (`$$$` and `♥♥` are bigger); the amounts are in the data.
 
@@ -279,31 +279,3 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 | Silly      | You're Fired!           | Get fired 10 times                  | They always come back.        |
 | Silly      | Eau de Skunk            | Be Stinky in 3 zones of one walk    | You can smell this badge.     |
 | Silly      | Squirrel!               | Let a chaser chase 5 squirrels      | So close. Every time.         |
-
-## Remaining for the first build
-
-**Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
-
-Rules above that the game doesn't have yet:
-
-1. **Layout:** 360×560 with doghouses along the bottom, the Home button, and the road scrolling to the top of its area
-2. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
-3. **Forks and zones:** the fork card and the 6 zones with their encounter mix, density, speed and fees
-4. **Needs and purposeful pulls:** need words, urgency, need spots, need cards, accidents; pulls only toward a visible target, never into an obstacle
-5. **Zone encounters:** the five above plus the lemonade stand
-6. **Art:** the zone encounters and the lemonade stand, the fork's path cards, and the need cards
-
-Tuning, after each build, with the simulator before and after:
-
-- Road speed to 150 px/s once the 560 layout lands
-- Need urgency, gone-wrong time and need card chance; zone encounter weights; per-zone density, speed and mover share
-- Pack size: a bigger pack earns little more per walk than one dog
-- Gear value against price (fanny pack is the only one that pays for itself)
-- Big Payday's threshold, now rarely earned
-- Earnings: about 45 walks to buy everything
-
-Decided at the phone playtest:
-
-- The game's name
-- Whether the far end of the road fades into the backdrop band
-- Fewer minor cards (in [`ideas.md`](ideas.md))

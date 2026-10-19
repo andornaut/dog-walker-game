@@ -1,30 +1,56 @@
-# Dog Walker Game: Start Here
+# Gameplay
 
-A pixel-art game (simple, retro, cute) about being a dog walker. Web first, then iOS and Android.
+The design of the game, how it's tuned and tested, and what's left for the first build. A pixel-art game (simple, retro, cute) about being a dog walker. Web first, then iOS and Android.
 
 ## Docs
 
-| Doc                                           | What it holds                                     | Changes when                     |
-| --------------------------------------------- | ------------------------------------------------- | -------------------------------- |
-| [`game-design.md`](game-design.md)            | The rulebook, and what's left for the first build | A design decision lands          |
-| [`next.md`](next.md)                          | Everything set aside for later, unscheduled       | Something is set aside for later |
-| [`ideas.md`](ideas.md)                        | Undecided and cut ideas, and open questions       | Every design session             |
-| [`art/style-guide.md`](../art/style-guide.md) | Visual rules: resolution, palette, sprites, mood  | An art decision lands            |
-| [`tech-plan.md`](../tech-plan.md)             | Stack, architecture, save data, porting           | A tech decision lands            |
+| Doc                                | What it holds                               | Changes when                     |
+| ---------------------------------- | ------------------------------------------- | -------------------------------- |
+| [`game-design.md`](game-design.md) | The rulebook: rules and content             | A design decision lands          |
+| [`next.md`](next.md)               | Everything set aside for later, unscheduled | Something is set aside for later |
+| [`ideas.md`](ideas.md)             | Undecided and cut ideas                     | Every design session             |
 
-Ideas stay in `ideas.md` until agreed in a session, then move to the doc they belong in and leave `ideas.md`. Docs state the current rule only; git keeps the history.
+Docs state the current rule only; git keeps the history. An idea stays in `ideas.md` until agreed, then moves to the doc it belongs in.
 
-## Idea statuses
+## Scope
 
-- **[floated]:** said out loud, not discussed
-- **[exploring]:** being discussed
-- **[cut]:** decided against; kept, with the reason, so it isn't argued again
+Gameplay owns the rulebook and the values and content in the data value files (every `src/data/*.ts` except `types.ts`, `index.ts`, `screen.ts` and the tests). A new field or effect kind goes through tech.
 
-## Sessions
+## Method
 
-Start a session by saying "design session" or "tech session", plus a topic if there is one; Claude reads the relevant docs. End by saying "wrap up": Claude proposes the doc changes and writes them only after we confirm.
+- **Design sessions:** start with "design session" and a topic. Claude keeps floated ideas apart from agreed ones, asks the question that unblocks a decision, and on "wrap up" proposes doc changes, writing them once confirmed.
+- **Simulate before tuning:** every economy or difficulty change is compared before and after at the same seed, with `npm run simulate -- --runs 1000 --seed 1 --skill novice,typical,expert`.
+- **Playtest each build:** after each deploy, play `/play/` headless on a phone viewport, with `?seed=N&pack=...&dev=1` for a reproducible run, and report what broke to tech or art.
+- **Card text:** generated from the effects, so a value-only edit regenerates the card-text snapshot.
 
-- **Design sessions** (mechanics, story, characters, dogs, progression, feel): Claude captures everything, keeps "floated" separate from "agreed", and asks the question that unblocks a decision.
-- **Tech sessions** (engine, code structure, tooling, builds, porting): Claude proposes options with trade-offs and flags choices that would make the mobile port harder.
+## Targets
 
-Art can come up in either.
+- A zone takes about 2 minutes and a walk about 8
+- Each extra dog raises a walk's earnings (the main progression)
+- About 45 walks to buy every dog, slot and gear item
+- Every gear item pays for itself over a reasonable number of walks
+
+## Remaining for the first build
+
+**Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
+
+Rules in the rulebook that the game doesn't have yet:
+
+1. **Layout:** 360×560 with doghouses along the bottom, the Home button, and the road scrolling to the top of its area
+2. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
+3. **Forks and zones:** the fork card and the 6 zones with their encounter mix, density, speed and fees
+4. **Needs and purposeful pulls:** need words, urgency, need spots, need cards, accidents; pulls only toward a visible target, never into an obstacle
+5. **Zone encounters:** the five zone encounters plus the lemonade stand
+
+Tuning, after each build, with the simulator before and after:
+
+- Road speed to 150 px/s once the 560 layout lands
+- Need urgency, gone-wrong time and need card chance; zone encounter weights; per-zone density, speed and mover share
+- Pack size, gear prices and overall earnings against the targets: a bigger pack earns little more than one dog, and only the fanny pack pays for itself
+- Big Payday's threshold, now rarely earned
+
+Decided at the phone playtest:
+
+- The game's name
+- Whether the far end of the road fades into the backdrop band
+- Fewer minor cards (in [`ideas.md`](ideas.md))

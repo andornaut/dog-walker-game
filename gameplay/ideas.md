@@ -1,8 +1,8 @@
 # Ideas
 
-Undecided and cut ideas; nothing here is a commitment. Statuses and how ideas move out are in [`README.md`](README.md).
+Undecided and cut ideas; nothing here is a commitment.
 
-Format: `- [status] **Idea**: short description · notes`
+Format: `- [status] **Idea**: short description · notes`. Statuses: **floated** (said, not discussed), **exploring** (being discussed), **cut** (decided against, kept with the reason so it isn't argued again).
 
 ## Run and onboarding
 
