@@ -92,6 +92,7 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; display: block; 
 }
 .play-c span { display: inline-block; transform: skewX(12deg); }
 .site kbd { font-family: var(--f-display); font-size: 11px; border: 1px solid currentColor; border-bottom-width: 3px; border-radius: 3px; padding: 0 5px; }
+.tree { margin: 0; font-family: ui-monospace, monospace; font-size: 13px; line-height: 1.45; white-space: pre; overflow-x: auto; color: var(--fg); }
 .note { background: var(--surface); border-left: 3px solid var(--accent); padding: 12px 14px; border-radius: 4px; display: grid; gap: 8px; max-width: 90ch; }
 </style>
 </head>
@@ -104,35 +105,72 @@ img { image-rendering: pixelated; image-rendering: crisp-edges; display: block; 
 
   <section class="stack" id="start-screen">
     <div>
-      <h2>Start screen: sign logo and step bands</h2>
-      <p class="lede">The start screen at /play/ keeps its gate scene as it is live. Only two things change: the logo on the yard sign is repainted as flat toy-box lettering (one flat fill, a 1px ink outline, a solid 2px offset shadow, no shading), and the steps below get bold flat bands with a large number (a tick once done) and a plain title. The gate rows are the live screen as captured; the steps use the assumed 360x560 fit, with dog and gear tiles redrawn shorter in the live look.</p>
+      <h2>Start screen: hierarchy, sections and one Start</h2>
+      <p class="lede">The gate scene stays as it is live, with the yellow sign logo. Below it are three framed sections and one call to action. There are no step numbers and no ticks. A required section with nothing picked has a dark frame and names what it needs in amber on its band. A complete section has a gold frame and a lit amber band that names the choice. Gear is optional, so with nothing equipped it stays dark and plain, never "incomplete". Start walk is the same button in every state: dim and flat until the walker and a dog are picked, then green and raised.</p>
+    </div>
+    <div class="card">
+      <h3>Hierarchy</h3>
+<pre class="tree">Start screen (360x560)
+├─ Top bar
+│  ├─ Bank: $0
+│  ├─ Best walk: "No walks yet"
+│  └─ Logbook, Settings (icon buttons)
+├─ Gate scene (live art, unchanged)
+│  ├─ Help, Sound (icon buttons)
+│  ├─ Walker's speech bubble: "Morning! Who are we walking today?"
+│  ├─ Yard sign: the DOG WALKER logo
+│  ├─ Slot sign: "Slot 2 · $800", "Save $800 more" (buys a pack slot; a secondary tap)
+│  └─ The chosen walker (and pack) at the gate
+├─ Pick a walker (required)
+│  ├─ Prompt: "Tap a face", then the walker's name once chosen
+│  └─ 4 walker faces
+├─ Pick your dogs (required)
+│  ├─ Prompt: "Add a dog", then the pack count ("Pack 1/1") once one is picked
+│  └─ 9 dog tiles: face, name, trait and owner icons, fee ($20/zone) or price ($600) and lock
+├─ Gear (optional)
+│  ├─ Prompt: none while nothing is equipped, then the item's name
+│  └─ 5 gear tiles: icon, price, name, lock
+└─ Start walk: the one call to action
+   ├─ Not ready: dim, flat, same words and place
+   └─ Ready: green, raised</pre>
+      <p class="tag">The "Hold for details" hint has no place in this tree. It belongs in the How to walk screen or the speech bubble's rotation of lines.</p>
+    </div>
+    <div class="card">
+      <h3>Patterns borrowed from loadout screens</h3>
+      <ul>
+        <li>One confirm button with a fixed name and place that only changes state, as in Slay the Spire's Embark, Into the Breach's squad start and mobile "pick a squad, then Battle" screens. Start walk never says what is missing.</li>
+        <li>The requirement is shown where it applies, like a team picker's empty slots or a "0/3" count: "Add a dog" sits on the dogs band, "Tap a face" on the walker band.</li>
+        <li>A locked-in choice lights up and names itself, like Mario Kart's character panel once confirmed: the gold frame and amber band show "CASEY" and "PACK 1/1".</li>
+        <li>Optional slots never block the run, like Hades' keepsake slot: Gear stays neutral when empty.</li>
+        <li>Each section is a card holding its heading and its options together, so the frame shows done or not done for the whole group at once.</li>
+      </ul>
+    </div>
+    <h3>Main: the fit's layout (walker heading beside the faces)</h3>
+    <div class="cols">
+      <figure class="card" style="margin:0"><p class="tag">Nothing picked</p><div class="screen"><img src="start-80s/start-main-incomplete.png" width="360" height="560" alt="Start screen, nothing picked"></div></figure>
+      <figure class="card" style="margin:0"><p class="tag">Walker picked, no dogs</p><div class="screen"><img src="start-80s/start-main-partial.png" width="360" height="560" alt="Start screen, walker picked, no dogs"></div></figure>
+      <figure class="card" style="margin:0"><p class="tag">Ready</p><div class="screen"><img src="start-80s/start-main-ready.png" width="360" height="560" alt="Start screen, ready to start"></div></figure>
+    </div>
+    <h3>Variant: the same anatomy for every section (band on top)</h3>
+    <div class="cols">
+      <figure class="card" style="margin:0"><p class="tag">Nothing picked</p><div class="screen"><img src="start-80s/start-uniform-incomplete.png" width="360" height="560" alt="Variant, nothing picked"></div></figure>
+      <figure class="card" style="margin:0"><p class="tag">Walker picked, no dogs</p><div class="screen"><img src="start-80s/start-uniform-partial.png" width="360" height="560" alt="Variant, walker picked, no dogs"></div></figure>
+      <figure class="card" style="margin:0"><p class="tag">Ready</p><div class="screen"><img src="start-80s/start-uniform-ready.png" width="360" height="560" alt="Variant, ready to start"></div></figure>
     </div>
     <div class="cols">
       <figure class="card" style="margin:0">
         <h3>Live /play/ (360x640)</h3>
         <div class="screen"><img src="start-80s/live-start.png" width="360" height="640" alt="The live start screen"></div>
       </figure>
-      <figure class="card" style="margin:0">
-        <h3>A: flat bands</h3>
-        <div class="screen"><img src="start-80s/start-a.png" width="360" height="560" alt="Start screen with flat navy step bands"></div>
-        <p class="tag">Navy band, ink outline and a solid ink shadow; the number in an amber block, ticks on green; cream titles at 2x. Pick a dog stays slate until a dog is picked.</p>
-        <img class="x2" style="--w:360" src="start-80s/start-kit-a.png" alt="Flat band and the enabled Start walk button">
-      </figure>
-      <figure class="card" style="margin:0">
-        <h3>C: slanted bands</h3>
-        <div class="screen"><img src="start-80s/start-c.png" width="360" height="560" alt="Start screen with slanted dark red step bands"></div>
-        <p class="tag">Dark red band slanted 6px with a yellow number disc and white titles; the button slants to match.</p>
-        <img class="x2" style="--w:360" src="start-80s/start-kit-c.png" alt="Slanted band and the enabled Start walk button">
-      </figure>
-    </div>
-    <div class="card">
-      <h3>Yard-sign logo, 128x30</h3>
-      <p class="tag">The board, grain and leash are the live ones. The yellow colourway is used in the mocks: yellow on the dbrown board holds 6.79:1, with a dark red shadow. Amber with rust and cream with orange are the alternatives.</p>
-      <div class="swatch" style="background:#181425;justify-content:flex-start;gap:24px;flex-wrap:wrap;align-items:center">
-        <img src="start-80s/sign-logo.png" width="128" height="30" alt="Sign logo at 1x">
-        <img src="start-80s/sign-logo-4x.png" width="512" height="120" alt="Sign logo at 4x">
+      <div class="card" style="grid-column: span 2">
+        <h3>Yard-sign logo, 128x30</h3>
+        <p class="tag">The board, grain and leash are the live ones. The letters are one flat yellow (6.79:1 on the dbrown board) with a 1px ink outline and a solid 2px dark red shadow. Amber with rust and cream with orange are the alternatives.</p>
+        <div class="swatch" style="background:#181425;justify-content:flex-start;gap:24px;flex-wrap:wrap;align-items:center">
+          <img src="start-80s/sign-logo.png" width="128" height="30" alt="Sign logo at 1x">
+          <img src="start-80s/sign-logo-4x.png" width="512" height="120" alt="Sign logo at 4x">
+        </div>
+        <img src="start-80s/sign-logo-sheet.png" alt="Live sign logo beside the three new colourways at 4x">
       </div>
-      <img src="start-80s/sign-logo-sheet.png" alt="Live sign logo beside the three new colourways at 4x">
     </div>
   </section>
 
