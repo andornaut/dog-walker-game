@@ -3,8 +3,7 @@ import type { Dog } from "./types";
 // The roster. Each size and trait pairs once; each energy and temperament appears three times.
 export const DOGS = {
   archie: {
-    // CLEANUP (added 2026-10-19): switch to "archie" once art ships the renamed keys
-    art: "dash",
+    art: "archie",
     breed: "Australian Shepherd",
     energy: "calm",
     look: "Blue merle, one blue eye, red bandana",
@@ -81,8 +80,7 @@ export const DOGS = {
     unlock: "shop",
   },
   penny: {
-    // CLEANUP (added 2026-10-19): switch to "penny" once art ships the renamed keys
-    art: "waffles",
+    art: "penny",
     breed: "Golden retriever",
     energy: "calm",
     look: "Golden coat, feathery tail, blue collar",
