@@ -117,7 +117,7 @@ export const HOME_LAYOUT = {
   sections: {
     dogs: { height: 160, width: 352, x: 4, y: 270 },
     pocket: POCKET_SECTION,
-    walker: { height: 72, width: 352, x: 4, y: 198 },
+    walker: { height: 72, width: 352, x: 4, y: 196 },
   },
   settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: 10 } },
   startButton: { height: 44, width: 352, x: 4, y: 514 },
@@ -130,7 +130,7 @@ export const HOME_LAYOUT = {
   tileSelectOutset: 1,
   topBar: { height: 40 },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
-  walkerOrigin: { x: 14, y: 223 },
+  walkerOrigin: { x: 14, y: 221 },
   // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
   // icon right of the box, and a locked walker's padlock over the tile's top-left corner and
   // its name plate's caps, centred. The tiles sit 7px inside

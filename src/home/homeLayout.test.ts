@@ -24,6 +24,15 @@ const rows = [
 ] as const;
 
 describe("home layout", () => {
+  it("spaces the three sections by the same gap", () => {
+    const gaps = [
+      sections.dogs.y - (sections.walker.y + sections.walker.height),
+      sections.pocket.y - (sections.dogs.y + sections.dogs.height),
+    ];
+    expect(gaps[0]).toBe(gaps[1]);
+    expect(gaps[0]).toBeGreaterThan(0);
+  });
+
   it.each(Object.entries(sections))(
     "section %s shares the Start walk button's edges",
     (_, rect) => {
