@@ -33,7 +33,7 @@ export interface HitMoment {
   still: boolean;
 }
 
-type FlashColour = "amber" | "green" | "orange" | "pink" | "sky" | "white";
+type FlashColour = "amber" | "green" | "mauve" | "orange" | "pink" | "sky" | "white";
 
 const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   cafe: "amber",
@@ -42,12 +42,16 @@ const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   petunias: "pink",
   picnic: "orange",
   puddle: "sky",
-  skunk: "green",
+  skunk: "mauve",
   squirrel: "orange",
   thief: "amber",
   trash: "green",
 };
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
+// The flash drawn while a colour's own strip is missing.
+const FLASH_FALLBACKS: Readonly<Record<string, string>> = {
+  "ui-hit-flash-mauve": "ui-hit-flash-green",
+};
 // A moving burst plays its word tag (the sound word on the impact star) when the art has one.
 const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play", wordTag: "play-word" };
 const PLATE = { height: 32, key: "ui-hit-label", width: 176 } as const;
@@ -81,6 +85,11 @@ export function hitLook(kind: Encounter["kind"], encounter: EncounterId): HitLoo
   return { burst: `fx-hit-${art}`, flash: `ui-hit-flash-${colour}`, plate: "normal" };
 }
 
+// The look's flash, or its fallback colour's when its art is missing.
+export function hitFlashKey(scene: Scene, flash: string): string {
+  return scene.textures.exists(flash) ? flash : (FLASH_FALLBACKS[flash] ?? flash);
+}
+
 // The look's burst, or fx-bump when its art is missing.
 export function hitBurstKey(scene: Scene, look: HitLook): string {
   return scene.textures.exists(look.burst) ? look.burst : BURST.fallback;
@@ -91,7 +100,7 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
   const look = hitLook(moment.kind, moment.encounter);
   playBurst(scene, moment, hitBurstKey(scene, look), totalMs);
   if (look.flash !== null) {
-    playFlash(scene, moment, look.flash);
+    playFlash(scene, moment, hitFlashKey(scene, look.flash));
   }
   showLabel(scene, moment, look.plate, totalMs);
   if (!moment.still && moment.kind === "obstacle") {

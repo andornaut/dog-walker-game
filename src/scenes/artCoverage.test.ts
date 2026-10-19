@@ -59,7 +59,7 @@ import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
-import { hitBurstKey, hitLook } from "./hitMoment";
+import { hitBurstKey, hitFlashKey, hitLook } from "./hitMoment";
 
 const manifest = parseManifest(shippedManifest);
 const images = new Set(manifest.images.map(({ key }) => key));
@@ -335,13 +335,13 @@ describe("hit moment art", () => {
   const hits = ENCOUNTERS.filter((id) => hitLabel(gameData.encounters[id]) !== null);
   const lookOf = (id: EncounterId) => hitLook(gameData.encounters[id].kind, id);
 
-  it("names a burst with play, its plate's tag and any edge flash for every hit moment", () => {
+  it("names a burst with play, its plate's tag and any edge flash or its fallback for every hit moment", () => {
     const missing = hits.flatMap((id) => {
       const look = lookOf(id);
       return [
         ...missingTags(look.burst, ["play"]),
         ...missingTags("ui-hit-label", [look.plate]),
-        ...(look.flash === null ? [] : missingTags(look.flash, ["play"])),
+        ...(look.flash === null ? [] : missingTags(hitFlashKey(loadedScene, look.flash), ["play"])),
       ];
     });
     expect(hits).toEqual(expect.arrayContaining(["goose", "lemonade", "otherDog"]));
