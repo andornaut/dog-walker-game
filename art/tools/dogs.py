@@ -5,8 +5,9 @@ Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
 
 - dog-<name>: the road sprite, seen from above and behind. Tags: walk (4
   frames), react (2), pull (2, leaning right; the game mirrors it for left),
-  tell (2, the lean before a pull; the game adds the fx-bark pop) and idle (4,
-  standing while the walk pauses: a slow tail wag and a twitch of the right ear).
+  tell (2, the lean before a pull; the game adds the fx-bark pop), idle (4,
+  standing while the walk pauses: a slow tail wag and a twitch of the right ear)
+  and shake (4, a quick shake-off after an encounter hit, throwing droplets).
 - face-dog-<name>: the dog column face. Tags: happy, neutral, upset.
 
 Usage:
@@ -51,14 +52,25 @@ IDLE = [
     dict(tail=1),
     dict(tail=0, twitch=-1),
 ]
-# Idle goes last so the frame indices of the other tags stay put.
-ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("tell", TELL, 250), ("idle", IDLE, 300)]
+# Shaking off after an encounter hit: the head whips 2px and the body 1px left and right (lean, with the
+# hind legs planted), the ears and tail flick against it, and droplets fly off on the middle two beats,
+# spray pixels out from the flanks.
+SHAKE = [
+    dict(lean=-2, tail=1, ears=-1),
+    dict(lean=2, tail=-2, ears=1, twitch=-1, spray=2),
+    dict(lean=-2, tail=2, ears=-1, spray=4),
+    dict(lean=2, tail=-1, ears=1),
+]
+# Idle and shake go last so the frame indices of the other tags stay put.
+ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("tell", TELL, 250), ("idle", IDLE, 300),
+             ("shake", SHAKE, 60)]
 FACE_TAGS = ["happy", "neutral", "upset"]
 
 
 def pose(q):
-    """Every pose key with its default. twitch moves the right ear alone (negative is up)."""
-    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0), **q)
+    """Every pose key with its default. twitch moves the right ear alone (negative is up); spray is how far
+    the shake-off's droplets have flown from the flanks, 0 for none."""
+    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0, spray=0), **q)
 
 
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
@@ -95,6 +107,7 @@ def koda_road(q):
     g.ell(hx, 9.5 + o + b, 8, 6, "slate", "dslate", "grey")
     g.ell(hx - 6.5, 12 + o + b, 2, 2.2, "lgrey")
     g.ell(hx + 6.5, 12 + o + b, 2, 2.2, "lgrey", "grey")
+    spray(g, q["spray"])
     return g
 
 
@@ -149,6 +162,7 @@ def biscuit_road(q):
     g.ell(hx, 11 + b, 5.5, 5, "ochre", None, "tan")
     g.ell(hx - 5, 13 + b - q["ears"], 2, 4.5, "rust", "dbrown")
     g.ell(hx + 5, 13 + b - q["ears"] + q["twitch"], 2, 4.5, "rust", "dbrown")
+    spray(g, q["spray"])
     return g
 
 
@@ -190,6 +204,7 @@ def duchess_road(q):
     g.ell(hx + 4.5, 18 + b - q["ears"] + q["twitch"], 2.2, 4, "lgrey")
     g.ell(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
     bow(g, hx, 10 + b)
+    spray(g, q["spray"])
     return g
 
 
@@ -229,6 +244,7 @@ def nugget_road(q):
     g.ell(hx - 4.5, 12 + b - q["ears"], 1.8, 1.5, "navy")
     g.ell(hx + 4.5, 12 + b - q["ears"] + q["twitch"], 1.8, 1.5, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
+    spray(g, q["spray"])
     return g
 
 
@@ -273,6 +289,7 @@ def zippy_road(q):
     g.tri((hx - 5, 14 + b), (hx - 4, 10 + b + e), (hx - 1.5, 12.5 + b), "ochre")
     t = q["twitch"]
     g.tri((hx + 5, 14 + b + t), (hx + 4, 10 + b + e + t), (hx + 1.5, 12.5 + b + t), "ochre")
+    spray(g, q["spray"])
     return g
 
 
@@ -324,6 +341,7 @@ def pierre_road(q):
     g.rect(hx + 3, 5 + b, 2, 3, "purple")
     g.p(hx + 2, 6 + b, "mauve")
     g.p(hx, 5 + b, "mauve")
+    spray(g, q["spray"])
     return g
 
 
@@ -373,6 +391,7 @@ def dash_road(q):
     for side, t in ((-1, 0), (1, q["twitch"])):
         g.ell(hx + 3.5 * side, 9.5 + b - q["ears"] + t, 1.5, 1.5, "grey")
         g.p(hx + 3 * side, 10 + b - q["ears"] + t, "slate")
+    spray(g, q["spray"])
     return g
 
 
@@ -425,6 +444,7 @@ def snowball_road(q):
     g.ell(hx, 9.5 + o + b, 8, 6, "white", "lgrey")
     g.ell(hx - 7, 12 + o + b, 2, 2.2, "white")
     g.ell(hx + 7, 12 + o + b, 2, 2.2, "lgrey")
+    spray(g, q["spray"])
     return g
 
 
@@ -473,6 +493,7 @@ def waffles_road(q):
     g.ell(hx - 6, 12.5 + o + b - q["ears"], 2.2, 4, "dbrown", "plum")
     g.ell(hx + 6, 12.5 + o + b - q["ears"] + q["twitch"], 2.2, 4, "dbrown", "plum")
     g.ell(hx, 8.5 + o + b, 7, 6.2, "rust", "dbrown", "ochre")
+    spray(g, q["spray"])
     return g
 
 
@@ -520,6 +541,16 @@ def puff(g, cx, cy, rx, ry, ring=False):
     if rx >= 2 and ry >= 2:
         g.p(cx + rx * 0.4, cy + ry * 0.3, "cream")
 
+
+
+def spray(g, d):
+    """The shake-off's water: droplets thrown d pixels out from both flanks, rising as they fly. Each is
+    1px of cyan, with a white one on each side, so the road outline rings it and it holds on every road."""
+    if not d:
+        return
+    for x, y, c in ((7, 14, "cyan"), (6, 20, "white"), (25, 12, "cyan"), (25, 18, "white"), (24, 23, "cyan")):
+        side = -1 if x < 16 else 1
+        g.p(x + side * d, y - d / 2, c)
 
 
 def bow(g, cx, y, big=False, colours=("pink", "mauve")):

@@ -40,7 +40,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from pixel import Grid, main, road_sprite  # noqa: E402
+from pixel import Grid, edged, main, road_sprite  # noqa: E402
 
 SCALES = (("75", 0.75), ("50", 0.5))
 
@@ -141,17 +141,20 @@ def snap(q, s):
 
 
 def tip(s, rx):
-    """road.tip; at 0.5x the coin keeps its face and rim but drops the stamped mark, which turns to noise."""
-    g = Mini(s, 16, 16)
+    """road.tip, with its road outline and white glint; at 0.5x the coin keeps its face and rim but drops the
+    stamped mark, which turns to noise."""
+    g = edged(Mini(s, 16, 16))
     if rx < 1.5:
         g.rect(7, 3, 2, 10, "orange")
         g.rect(7, 3, 1, 10, "amber")
+        g.p(7, 4, "white")
         return g
     g.ell(8, 8, rx, 5.5, "amber", "orange", "yellow")
     if rx > 2 and s > 0.5:
         g.rect(8, 5, 1, 6, "orange")
         g.p(7, 6, "orange")
         g.p(9, 9, "orange")
+    g.p(round(8 - rx * 0.55), 5, "white")
     return g
 
 
@@ -182,8 +185,9 @@ TREAT = {
 
 
 def treat(s, lift):
-    """road.treat redrawn: a bone whose knobs stick out above and below the shaft at both ends."""
-    g = Grid(round(16 * s), round(16 * s))
+    """road.treat redrawn: a bone whose knobs stick out above and below the shaft at both ends, with the road
+    outline."""
+    g = edged(Grid(round(16 * s), round(16 * s)))
     paint(g, TREAT[s], 1, g.h // 2 - 2 + lift)
     return g
 
@@ -290,6 +294,44 @@ def squirrel(tail, shift):
     return g
 
 
+# road.squirrel_run at 0.5x by hand, stretched then gathered, from row 1. Scaled, the gathered face turns to
+# glints over ink; here both keep the idle's face, and the gathered squirrel is 1px higher, in the air.
+SQUIRREL_RUN = (["......oooo......",
+                 "......ooro......",
+                 "......ttto......",
+                 "......ottor.....",
+                 "......ottr......",
+                 "......ottr......",
+                 ".....rtoorr.....",
+                 "......oco.......",
+                 "......oco.......",
+                 "......ocr.......",
+                 ".....toooor.....",
+                 ".....o#oo#r.....",
+                 "....tocPPcrt....",
+                 "......occr......"],
+                ["......oooo......",
+                 "......orrooo....",
+                 ".......totoo....",
+                 ".......ootor....",
+                 ".......ootrr....",
+                 ".......ootr.....",
+                 ".....toooor.....",
+                 ".....occcor.....",
+                 "....roccccrr....",
+                 ".....toooor.....",
+                 ".....o#oo#r.....",
+                 ".....ocPPcr.....",
+                 "......occr......"])
+
+
+def squirrel_run(gather):
+    """road.squirrel_run(gather) at 0.5x."""
+    g = Grid(16, 16)
+    paint(g, SQUIRREL_RUN[gather], 0, 1)
+    return g
+
+
 # road.corgi at 0.5x by hand. Scaled, the collar breaks, one ear loses its pink and the 1px nose sits off
 # centre; here the blaze and nose are 2px on the centre line.
 CORGI = ["......tooo......",
@@ -305,11 +347,18 @@ CORGI = ["......tooo......",
          ".....oWWllr....."]
 
 
-def corgi(step):
-    """road.corgi(step) at 0.5x: the raised hind leg peeks out above the back, left for -1 and right for 1."""
+def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
+    """road.corgi at 0.5x, posed as in road.CORGI_WALK: a hind paw swung back peeks out beside the rump and
+    a front paw reaching forward shows under the jaw. On the passing beats the body bobs up 1px and both
+    front paws show under it, planted."""
     g = Grid(16, 16)
-    paint(g, CORGI, 0, 3)
-    g.p(5 if step < 0 else 10, 3, "ochre")
+    paint(g, CORGI, 0, 3 + bob)
+    for x, back in ((5, bl < 0), (10, br < 0)):
+        if back:
+            g.p(x, 3, "ochre")
+    for x, paw, c in ((5, fl, "white"), (10, fr, "lgrey")):
+        if paw > 0 or bob:
+            g.p(x, 14 + bob, c)
     return g
 
 
@@ -319,8 +368,9 @@ CLOUD_PUFFS = [(44, 44, 30), (24, 28, 17), (64, 26, 18), (22, 62, 18), (64, 64, 
 
 def skunk_cloud(s, step):
     """road.skunk_cloud redrawn at its own size. The full-size fill is a dither on every other row, which
-    nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim is
-    1px, the stink wisps half as long, and a swelling puff still grows by a whole pixel."""
+    nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim
+    keeps both of its pixels, teal outside for the light roads and green inside it for Woof Way; the stink
+    wisps are half as long, and a swelling puff still grows by a whole pixel."""
     n = round(88 * s)
     g = Grid(n, n)
     puffs = [(cx * s, cy * s, r * s + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(CLOUD_PUFFS)]
@@ -330,7 +380,9 @@ def skunk_cloud(s, step):
             if d > 0:
                 continue
             if d > -1:
-                g.p(x, y, "green" if y < n // 2 else "dgreen")
+                g.p(x, y, "teal")
+            elif d > -2:
+                g.p(x, y, "green")
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
                 g.p(x, y, "green" if (x + y) % 8 else "dgreen")
     for x0, y0 in ((20, 22), (60, 18), (66, 58), (26, 58)):
@@ -356,9 +408,9 @@ def sprites():
                                            for tag, poses, ms in dogs.ROAD_TAGS]
         yield f"skunk@{suffix}", [("idle", [skunk(s, sway).outlined() for sway in (0, 1)], 400)]
     yield "skunk-cloud@50", [("loop", [skunk_cloud(0.5, i).outlined(False) for i in range(4)], 220)]
-    yield "other-dog@50", [("walk", [corgi(step).outlined() for step in (-1, 1)], 200)]
+    yield "other-dog@50", [("walk", [corgi(**q).outlined() for q in road.CORGI_WALK], 100)]
     yield "squirrel@50", [("idle", [squirrel(0, 0).outlined(), squirrel(1, 0).outlined()], 300),
-                          ("run", [squirrel(0, -1).outlined(), squirrel(-1, 1).outlined()], 120)]
+                          ("run", [squirrel_run(k).outlined() for k in (0, 1)], 120)]
 
 
 def originals():

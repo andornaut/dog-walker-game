@@ -22,7 +22,7 @@ Dogs are listed in their own section below. Each of the 9 dogs is a named charac
 
 ## Dogs
 
-Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react`, `pull`, `tell` (the lean and bark about 1s before a pull) and `idle` (standing, for pauses). Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
+Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react`, `pull`, `tell` (the lean and bark about 1s before a pull) `idle` (standing, for pauses) and `shake` (a shake-off after a hit). Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
 
 | Dog               | Road sprite    | Face                | Owner face            | Priority |
 | ----------------- | -------------- | ------------------- | --------------------- | -------- |

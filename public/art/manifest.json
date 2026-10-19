@@ -181,7 +181,7 @@
       "json": "sprites/chatty-neighbour.json",
       "anchor": {
         "feetY": 45,
-        "opaqueWidth": 26
+        "opaqueWidth": 24
       }
     },
     {
@@ -217,7 +217,7 @@
       "json": "sprites/construction.json",
       "anchor": {
         "feetY": 30,
-        "opaqueWidth": 54
+        "opaqueWidth": 52
       }
     },
     {
@@ -873,7 +873,7 @@
       "png": "sprites/other-dog.png",
       "json": "sprites/other-dog.json",
       "anchor": {
-        "feetY": 28,
+        "feetY": 30,
         "opaqueWidth": 18
       }
     },
@@ -891,7 +891,7 @@
       "png": "sprites/other-dog@50.png",
       "json": "sprites/other-dog@50.json",
       "anchor": {
-        "feetY": 14,
+        "feetY": 15,
         "opaqueWidth": 10
       }
     },
@@ -1018,7 +1018,7 @@
       "json": "sprites/stop-sign.json",
       "anchor": {
         "feetY": 47,
-        "opaqueWidth": 18
+        "opaqueWidth": 20
       }
     },
     {

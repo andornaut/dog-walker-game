@@ -110,6 +110,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
     "duration": 300
+   },
+   "dog-waffles@75 14.aseprite": {
+    "frame": { "x": 336, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 60
+   },
+   "dog-waffles@75 15.aseprite": {
+    "frame": { "x": 360, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 60
+   },
+   "dog-waffles@75 16.aseprite": {
+    "frame": { "x": 384, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 60
+   },
+   "dog-waffles@75 17.aseprite": {
+    "frame": { "x": 408, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 60
    }
  },
  "meta": {
@@ -117,14 +149,15 @@
   "version": "1.2.30-x64",
   "image": "dog-waffles@75.png",
   "format": "RGBA8888",
-  "size": { "w": 336, "h": 24 },
+  "size": { "w": 432, "h": 24 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
    { "name": "react", "from": 4, "to": 5, "direction": "forward" },
    { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
    { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
-   { "name": "idle", "from": 10, "to": 13, "direction": "forward" }
+   { "name": "idle", "from": 10, "to": 13, "direction": "forward" },
+   { "name": "shake", "from": 14, "to": 17, "direction": "forward" }
   ]
  }
 }

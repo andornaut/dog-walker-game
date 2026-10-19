@@ -175,14 +175,15 @@ def _lua(tags, out):
     h, w = len(tags[0][1][0]), len(tags[0][1][0][0])
     for tag, fs, ms in tags:
         tag_lines.append(f'do local t = spr:newTag({n + 1}, {n + len(fs)}); t.name = "{tag}" end')
-        for f in fs:
+        # ms is the tag's frame duration, or a list with one duration per frame
+        for f, d in zip(fs, ms if isinstance(ms, (list, tuple)) else [ms] * len(fs)):
             pts = []
             for y, row in enumerate(f):
                 for x, c in enumerate(row):
                     if c:
                         pts.append("{%d,%d,%d,%d,%d}" % (x, y, int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)))
             frames.append("{" + ",".join(pts) + "}")
-            durations.append(str(ms / 1000))
+            durations.append(str(d / 1000))
         n += len(fs)
     palette = "\n".join(
         f"pal:setColor({i}, Color{{ r = {int(c[0:2], 16)}, g = {int(c[2:4], 16)}, b = {int(c[4:6], 16)} }})"

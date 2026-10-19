@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
-    "duration": 260
+    "duration": 300
    },
    "gag-cat 1.aseprite": {
     "frame": { "x": 24, "y": 0, "w": 24, "h": 24 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
-    "duration": 260
+    "duration": 300
    },
    "gag-cat 2.aseprite": {
     "frame": { "x": 48, "y": 0, "w": 24, "h": 24 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
-    "duration": 260
+    "duration": 300
    },
    "gag-cat 3.aseprite": {
     "frame": { "x": 72, "y": 0, "w": 24, "h": 24 },
@@ -29,7 +29,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "sourceSize": { "w": 24, "h": 24 },
-    "duration": 260
+    "duration": 140
    },
    "gag-cat 4.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 24, "h": 24 },
