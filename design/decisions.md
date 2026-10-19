@@ -49,3 +49,8 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · Poop bags add a Skip option to an encounter card, once per run
 - 2026-10-18 · Design · Renames to avoid clashing with the Treat pickup: Treat pouch upgrade is now Belly rubs; treat bag gear is now Lucky collar
 - 2026-10-18 · Design · Milestone 4 waits for a forced-stop pool and ~8 upgrade cards
+- 2026-10-18 · Art · Base render resolution is 360×640, scaled up crisply with no smoothing; tile size is still open
+- 2026-10-18 · Art · Run screen layout: top status bar, fixed-width 3-slot dog column on the left, road fills the rest; encounter cards cover the paused, dimmed road while the bar and column stay visible
+- 2026-10-18 · Art · All UI is pixel art at the base resolution with a pixel font
+- 2026-10-18 · Tech · All run UI (road, top bar, dog column, choice cards) is drawn in the Phaser canvas; HTML is only the page shell: one pixel scale and one input system
+- 2026-10-18 · Tech · Run screen as three Phaser scenes (RunScene, HudScene, CardScene); game state is plain TypeScript with no Phaser dependency, so rules are unit-testable

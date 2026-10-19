@@ -54,6 +54,10 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 Designed touch-first. v1 supports keyboard (web) and touch (mobile: tap the left/right half of the screen, or swipe). Mouse is not planned.
 
+## Screen
+
+A top status bar (money, zone progress), a fixed-width dog column on the left with one slot per dog, and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in `art-style-guide.md`.
+
 ## Scope: v1 (web prototype)
 
 See `v1-plan.md`. One neighbourhood, fixed 4-zone route, 3-dog roster picked freely, choices only, minimal shop.
