@@ -287,6 +287,11 @@ function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, wal
 
 const NOTHING = { blocked: [], failed: [], pulled: [], tells: [] } as const;
 
+// The side of the pack's lane the target is on.
+function sideOf(lane: number, target: Target): LaneDirection {
+  return target.lanePosition < lane ? -1 : 1;
+}
+
 // One step of the pull clock. With no dog straining, the first dog in pack order that wants
 // a target starts its tell: a squirrel draws squirrelPulls pulls, anything else one. A strain
 // whose target has gone, passed or been reached ends. Once the tell has run, and a darting
@@ -309,7 +314,6 @@ export function stepPulls(
   let spent = pulls.spent.filter((id) => onRoad.has(id));
   const tell = read(data.tuning, "seconds", "pullTell");
   const lane = destinationLane(walk.road.control.motion);
-  const side = (target: Target): LaneDirection => (target.lanePosition < lane ? -1 : 1);
 
   let strain = pulls.strain;
   let target = strain === null ? null : currentTarget(data, geometry, strain, walk);
@@ -327,7 +331,7 @@ export function stepPulls(
       if (target !== null) {
         strain = {
           blocked: false,
-          direction: side(target),
+          direction: sideOf(lane, target),
           dog,
           itemId: target.itemId,
           kind: target.kind,
@@ -344,7 +348,7 @@ export function stepPulls(
 
   const leaned: Strain = {
     ...strain,
-    direction: side(target),
+    direction: sideOf(lane, target),
     tellSeconds: Math.max(0, strain.tellSeconds - stepSeconds),
   };
   if (leaned.tellSeconds > 0 || !target.ready || laneAt(target.lanePosition) === lane) {

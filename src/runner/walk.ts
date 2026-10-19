@@ -21,7 +21,13 @@ import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
-import { collideWithPack, type PackFootprint, tickInvulnerability, touchesPack } from "./collision";
+import {
+  collideWithPack,
+  type CollisionRules,
+  type PackFootprint,
+  tickInvulnerability,
+  touchesPack,
+} from "./collision";
 import { STEP_SECONDS } from "./fixedStep";
 import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 import {
@@ -755,41 +761,17 @@ export function stepWalk(
   const footprint: PackFootprint = { ...geometry.packBand, lanes };
   // A mover is only a cue until it moves, and cannot be hit.
   const cues = items.filter((item) => isWarning(geometry.laneCount, item));
-  const opens = (encounter: EncounterId) =>
-    opensCard(data, affectedDogs(data, run, encounter), run, encounter);
-  // A hit that opens no card is scenery: it counts no bump and starts no grace window.
-  const startsGrace = (item: WalkItem) => {
-    const { kind } = item;
-    if (
-      kind === "tip" ||
-      kind === "treat" ||
-      isMinorObstacle(data, kind) ||
-      isMoverObstacle(kind) ||
-      isNeedSpot(data, kind)
-    ) {
-      return true;
-    }
-    return opens(kind);
-  };
-  const { hits, invulnerableSeconds, remaining } = collideWithPack(
-    {
-      graced: (item: WalkItem) => blocksLane(data, item.kind),
-      invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
-      startsInvulnerability: startsGrace,
-    },
-    footprint,
-    tickInvulnerability(stepSeconds, road.invulnerableSeconds),
-    items.filter((item) => !isPickup(item.kind) && !cues.includes(item)),
-  );
-  const reachFootprint = (kind: PickupKind) => ({
-    ...footprint,
-    lanes: widenLanes(geometry.laneCount, pickupReach(data, run, kind), lanes),
-  });
-  const reaches = { tip: reachFootprint("tip"), treat: reachFootprint("treat") };
+  const solid = items.filter((item) => !isPickup(item.kind) && !cues.includes(item));
+  const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
+  // With nothing touching the pack, nothing is hit and the window only ticks.
+  const { hits, invulnerableSeconds, remaining } = solid.some((item) =>
+    touchesPack(footprint, item),
+  )
+    ? collideWithPack(collisionRules(data, run), footprint, invulnerable, solid)
+    : { hits: [], invulnerableSeconds: invulnerable, remaining: solid };
   const pickups = items.filter((item) => isPickup(item.kind));
-  const pickupsHit = pickups.filter(
-    (item) => isPickup(item.kind) && touchesPack(reaches[item.kind], item),
-  );
+  const pickupsHit =
+    pickups.length === 0 ? [] : pickupsReached(data, geometry, run, footprint, pickups);
 
   // Timed debuffs count down on walking steps only, so a hit stop or a card holds them.
   let nextRun: RunState = { ...tickDebuffs(stepSeconds, run), zoneDistance: pixels(zoneDistance) };
@@ -823,7 +805,7 @@ export function stepWalk(
       if (contact !== null) {
         areaContacts.push(contact);
       }
-      if (!opens(kind)) {
+      if (!opensFor(data, run, kind)) {
         continue;
       }
       if (data.encounters[kind].kind === "obstacle") {
@@ -885,6 +867,54 @@ export function stepWalk(
       run: nextRun,
     },
     zoneEnded: hitStop === null && zoneEnded,
+  };
+}
+
+function opensFor(data: WalkData, run: RunState, encounter: EncounterId): boolean {
+  return opensCard(data, affectedDogs(data, run, encounter), run, encounter);
+}
+
+// Obstacles are graced. A hit that opens no card is scenery: it counts no bump and starts no
+// grace window.
+function collisionRules(data: WalkData, run: RunState): CollisionRules<WalkItem> {
+  return {
+    graced: (item) => blocksLane(data, item.kind),
+    invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
+    startsInvulnerability: ({ kind }) =>
+      kind === "tip" ||
+      kind === "treat" ||
+      isMinorObstacle(data, kind) ||
+      isMoverObstacle(kind) ||
+      isNeedSpot(data, kind) ||
+      opensFor(data, run, kind),
+  };
+}
+
+// The pickups within reach of the pack's lanes.
+function pickupsReached(
+  data: WalkData,
+  geometry: RoadGeometry,
+  run: RunState,
+  footprint: PackFootprint,
+  pickups: readonly WalkItem[],
+): WalkItem[] {
+  const reaches = {
+    tip: reachFootprint(data, geometry, run, footprint, "tip"),
+    treat: reachFootprint(data, geometry, run, footprint, "treat"),
+  };
+  return pickups.filter((item) => isPickup(item.kind) && touchesPack(reaches[item.kind], item));
+}
+
+function reachFootprint(
+  data: WalkData,
+  geometry: RoadGeometry,
+  run: RunState,
+  footprint: PackFootprint,
+  kind: PickupKind,
+): PackFootprint {
+  return {
+    ...footprint,
+    lanes: widenLanes(geometry.laneCount, pickupReach(data, run, kind), footprint.lanes),
   };
 }
 

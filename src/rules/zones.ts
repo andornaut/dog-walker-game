@@ -23,26 +23,35 @@ export function zoneStats(
 ): ZoneStats {
   const speedFactor =
     (1 + read(tuning, "multipliers", "scrollSpeedGainPerZone") * zoneIndex) * zone.speed;
-  const counts = (first: number, gain: number, density: number) =>
-    Math.round((first + gain * zoneIndex) * density);
   const { density } = zone;
   return {
     duration: seconds(read(tuning, "seconds", "zoneAtBaseSpeed") / speedFactor),
     luckyEncounters: Math.round(
       read(tuning, "counts", "luckyEncountersPerZone") * density.luckyFinds,
     ),
-    minorObstacles: counts(
+    minorObstacles: zoneCount(
+      zoneIndex,
       tuning.counts.minorObstaclesFirstZone,
       tuning.counts.minorObstaclesGainPerZone,
       density.obstacles,
     ),
-    obstacles: counts(
+    obstacles: zoneCount(
+      zoneIndex,
       tuning.counts.obstaclesFirstZone,
       tuning.counts.obstaclesGainPerZone,
       density.obstacles,
     ),
     scrollSpeed: pixels(read(tuning, "pixels", "roadScrollSpeed") * speedFactor),
-    tips: counts(tuning.counts.tipsFirstZone, tuning.counts.tipsGainPerZone, density.tips),
+    tips: zoneCount(
+      zoneIndex,
+      tuning.counts.tipsFirstZone,
+      tuning.counts.tipsGainPerZone,
+      density.tips,
+    ),
     treats: read(tuning, "counts", "treatsPerZone"),
   };
+}
+
+function zoneCount(zoneIndex: number, first: number, gain: number, density: number): number {
+  return Math.round((first + gain * zoneIndex) * density);
 }
