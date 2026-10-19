@@ -8,7 +8,7 @@ export const HINTS = {
     trigger: { kind: "card" },
   },
   drag: {
-    text: "Drag anywhere to steer: a lane-width of drag moves one lane.",
+    text: "Drag to steer. Each lane-width you drag moves one lane.",
     trigger: { kind: "drag" },
   },
   firedOwner: {
@@ -24,11 +24,11 @@ export const HINTS = {
     trigger: { kind: "luckyFind" },
   },
   minorBump: {
-    text: "Bumping a cone or a bin drops a few tips and trips you up.",
+    text: "Cones and bins cost a few tips and a stumble. No card.",
     trigger: { kind: "minorBump" },
   },
   pause: {
-    text: "Head home from the pause menu to keep what you've earned.",
+    text: "Head home here: you keep tips and earlier zones' fees.",
     trigger: { kind: "pause" },
   },
   puddle: {
@@ -40,11 +40,11 @@ export const HINTS = {
     trigger: { kind: "pull" },
   },
   skunk: {
-    text: "The skunk's cloud catches some dogs, not always all of them.",
+    text: "A skunk's cloud catches some dogs, not always all.",
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Chasers want that squirrel. Hold tight, or let them chase.",
+    text: "Chasers want that squirrel. Hold tight or let them chase.",
     trigger: { encounter: "squirrel", kind: "encounter" },
   },
   stinky: {

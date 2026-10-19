@@ -26,6 +26,7 @@ export const HELP_PAGES = [
       "Hit a skunk, puddle or thief and the walk pauses. " +
       "Pick a card: pay up, or upset the owners. " +
       "Every card shows its outcome. One is always free. " +
+      "Cones and bins just cost a few tips. " +
       "Some bumps are lucky, like a lost wallet.",
     title: "Bumps become cards",
   },
