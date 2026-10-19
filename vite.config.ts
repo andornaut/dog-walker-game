@@ -1,5 +1,7 @@
 import { defineConfig } from "vitest/config";
 
+import { precachePlugin } from "./src/pwa/precachePlugin";
+
 export default defineConfig({
   build: {
     // The home page at /, the game at /play/ and the game data tables at /data/.
@@ -15,6 +17,13 @@ export default defineConfig({
     // Set just above it so that growth in game code still warns.
     chunkSizeWarningLimit: 1600,
   },
+  // Writes /sw.js, the service worker that precaches the game for offline play.
+  plugins: [
+    precachePlugin({
+      pageHtmlFile: "play/index.html",
+      serviceWorkerSource: "src/pwa/serviceWorker.ts",
+    }),
+  ],
   // The container name the Playwright MCP reaches the dev or preview server by,
   // over the playwright-mcp Docker network. Vite rejects any other Host header.
   preview: {

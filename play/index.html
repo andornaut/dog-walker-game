@@ -2,10 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover"
+    />
     <title>Dog Walker</title>
     <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="theme-color" content="#181425" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Dog Walker" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <script src="/nav.js" defer></script>
     <style>
       html,
@@ -15,17 +25,30 @@
         overflow: hidden;
         background: #1d1d1d;
         touch-action: none;
+        overscroll-behavior: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
       }
 
       body {
         display: flex;
         flex-direction: column;
+        /* The nav bar is the top element, so it clears the status bar and notch. */
+        padding-top: env(safe-area-inset-top, 0px);
+        box-sizing: border-box;
       }
 
+      /* Margins rather than padding: Phaser sizes and centres the canvas in the parent's
+         border box, padding included. */
       #game {
         flex: 1;
         min-height: 0;
-        width: 100%;
+        margin: 0 env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+          env(safe-area-inset-left, 0px);
       }
     </style>
   </head>

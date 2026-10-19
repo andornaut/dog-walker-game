@@ -1,6 +1,7 @@
 import { AUTO, Game, Scale } from "phaser";
 
 import { SCREEN_CONFIG } from "./data/screen";
+import { setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
 import { EndScene } from "./scenes/EndScene";
@@ -9,6 +10,8 @@ import { HudScene } from "./scenes/HudScene";
 import { PauseScene } from "./scenes/PauseScene";
 import { RunScene } from "./scenes/RunScene";
 import { StartScene } from "./scenes/StartScene";
+
+setupPhoneApp();
 
 // Scenes render in list order: the HUD over the road, cards and the pause menu over the
 // HUD, and help over everything. Boot runs first and starts the start screen.
