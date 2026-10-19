@@ -10,9 +10,9 @@ Play it at <https://dog-walker-game.andornaut.workers.dev/play/>. The site also 
 
 Each folder's README is its plan, with what's left for the first build:
 
+- [art/](art/README.md): art rules, assets and pipeline
 - [gameplay/](gameplay/README.md): the game design, tuning and playtesting
 - [src/](src/README.md): stack, architecture and save data
-- [art/](art/README.md): art rules, assets and pipeline
 
 ## Developing
 

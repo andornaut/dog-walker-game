@@ -10,6 +10,6 @@ Format: `- [status] **Idea**: short description · notes`. Statuses: **floated**
 
 ## Cut
 
-- [cut] **Scripted first walk**: a one-zone tutorial walk with guaranteed encounters · first-time hints and the help screen teach the rules
 - [cut] **Mud encounter**: a mud obstacle for Fancy dogs · puddles cover it
+- [cut] **Scripted first walk**: a one-zone tutorial walk with guaranteed encounters · first-time hints and the help screen teach the rules
 - [cut] **Story recap on the end screen**: retell the run's biggest moments · the end screen shows earnings only

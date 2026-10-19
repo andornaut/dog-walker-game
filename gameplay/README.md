@@ -26,8 +26,8 @@ Gameplay owns the rulebook and the values and content in the data value files (e
 ## Targets
 
 - A zone takes about 2 minutes and a walk about 8
-- Each extra dog raises a walk's earnings (the main progression)
 - About 45 walks to buy every dog, slot and gear item
+- Each extra dog raises a walk's earnings (the main progression)
 - Every gear item pays for itself over a reasonable number of walks
 
 ## Remaining for the first build
@@ -51,6 +51,6 @@ Tuning, after each build, with the simulator before and after:
 
 Decided at the phone playtest:
 
+- Fewer minor cards (in [`ideas.md`](ideas.md))
 - The game's name
 - Whether the far end of the road fades into the backdrop band
-- Fewer minor cards (in [`ideas.md`](ideas.md))

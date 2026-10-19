@@ -90,8 +90,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Pickups
 
-- **Treat:** carried, up to a limit; tap a dog's doghouse to give its owner +♥
 - **Tip:** +$. Smaller packs earn bigger tips: passers-by tip more for a calm walk
+- **Treat:** carried, up to a limit; tap a dog's doghouse to give its owner +♥
 
 ### Dogs
 
@@ -126,15 +126,15 @@ Every dog has one need, shown as a word on its card:
 
 | Need     | Word     | Fulfilled by        |
 | -------- | -------- | ------------------- |
-| Potty    | Regular  | A hydrant or a tree |
-| Playful  | Playful  | Another dog         |
 | Friendly | Friendly | A stranger waving   |
+| Playful  | Playful  | Another dog         |
+| Potty    | Regular  | A hydrant or a tree |
 | Sniffy   | Nosy     | A lamp post         |
 | Thirsty  | Thirsty  | A water bowl        |
 
-- **Need spots** appear on the road like pickups. Steering the pack into one fulfils the matching dogs' needs: +♥ for their owners, a big need bubble and a happy owner. About 1 in 4 fulfilments opens a small card instead, e.g. "A stranger loves Duchess" (Let them fuss: +♥ and a tip · Keep walking) or "Play date!" (Let them play: +♥ each, −$ per dog in missed tips · Just a sniff: +♥ to the playful dog's owner)
-- **Urgency:** a need fills up during a zone, faster for higher energy. When it's urgent, a bubble with the need's icon shows over the dog, and it pulls toward the nearest matching spot
-- **Gone wrong:** an urgent need left too long goes wrong, then resets. A Regular dog has an accident and opens a card (Clean up with a bag: −$ · Walk on: −♥♥ and a grumpy neighbour); any other need costs its owner −♥
+- **Need spots** appear on the road like pickups, drawn only for needs in the pack (Playful's spot is a friendly playmate dog, not the Other dog encounter). Steering the pack into one resets the matching dogs' needs; dogs whose need was urgent also get +♥ for their owners, a big need bubble and a happy owner. About 1 in 4 fulfilments opens a small card instead, e.g. "A stranger loves Duchess" (Let them fuss: +♥ and a tip · Keep walking) or "Play date!" (Let them play: +♥ each, −$ per dog in missed tips · Just a sniff: +♥ to the playful dog's owner)
+- **Urgency:** a need fills up during a zone, faster for higher energy, and resets at each zone end. When it's urgent, a bubble with the need's icon shows over the dog, and it pulls toward the nearest matching spot. One dog strains at a time, and each spot draws one pull
+- **Gone wrong:** an urgent need left too long goes wrong, then resets. A Regular dog has an accident and opens a card (Clean up with a bag: −$ · Walk on: −♥♥, labelled "grumpy neighbour"); any other need costs its owner −♥
 - The Other dog encounter's Let them sniff fulfils Playful, and the Can I pet them? stop's Of course! fulfils Friendly
 
 ### Encounters
@@ -143,10 +143,10 @@ Obstacles hit by accident open a choice card.
 
 | Encounter | Who's affected                                         | Options                                                                    |
 | --------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
+| Other dog | All dogs                                               | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each   |
+| Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                      |
 | Skunk     | Area effect: dogs caught by the roll                   | Full groom → −$$$ · Quick rinse → −$, _Stinky_ · Hold your nose → −♥♥ each |
 | Squirrel  | Chasers (none: harmless scenery, no card)              | Hold tight → −♥ · Let them chase → −$ (dropped tips)                       |
-| Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                      |
-| Other dog | All dogs                                               | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each   |
 | Thief     | All dogs (none if any big dog: it flees, no card)      | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)   |
 
 **Stinky** (debuff): cuts tip value for the rest of the zone. A second skunk refreshes it; it never stacks.
@@ -157,11 +157,11 @@ Each appears only in its zones:
 
 | Encounter      | Zones                         | Size                  | Who's affected                            | Options                                                                                                                                                         | Hit label         |
 | -------------- | ----------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
-| Picnic raid    | Bark Park, Paws Promenade     | 2 × 1                 | Food-driven dogs (none: scenery, no card) | Buy a new lunch → −$ per affected dog · Drop it! → −♥ to affected owners                                                                                        | "SNACK ATTACK!"   |
 | Angry goose    | Paws Promenade, Long Way Home | 1 × 1, waddles across | All dogs; a big dog doesn't scare it      | Back off slowly → −$ per dog (missed tips) · Honk back → −♥ each (−♥♥ Chasers)                                                                                  | "HONK!"           |
+| Café patio     | Sniff Street Shops            | 2 × 1                 | All dogs                                  | Charm the crowd → fulfils Friendly, −$ per dog (missed tips) · Buy new lattes → −$ per dog, +♥ to fussy owners · Slink away → −♥ each                           | "SPILLED LATTE!"  |
+| Picnic raid    | Bark Park, Paws Promenade     | 2 × 1                 | Food-driven dogs (none: scenery, no card) | Buy a new lunch → −$ per affected dog · Drop it! → −♥ to affected owners                                                                                        | "SNACK ATTACK!"   |
 | Prize petunias | Snooze Crescent, Woof Way     | 2 × 1                 | All dogs                                  | Replant them → −$ per dog · Nature calls → fulfils Regular, −♥ each                                                                                             | "OOPS, PETUNIAS!" |
 | Trash day      | Woof Way, Long Way Home       | 2 × 1                 | All dogs                                  | Sniff it all → fulfils Nosy, −♥ to Fancy owners, −$ per dog (missed tips) · Tidy up → −$ per dog, +♥ to fussy owners · Drag them on → −♥ each (−♥♥ Food-driven) | "TRASH DAY!"      |
-| Café patio     | Sniff Street Shops            | 2 × 1                 | All dogs                                  | Charm the crowd → fulfils Friendly, −$ per dog (missed tips) · Buy new lattes → −$ per dog, +♥ to fussy owners · Slink away → −♥ each                           | "SPILLED LATTE!"  |
 
 ### Lucky encounters
 
@@ -197,23 +197,23 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 
 Some things cross the road or come down it. Each gives about 1 second of warning (a cue at the lane edge) before it moves, at most one mover is on screen at a time, and the reachable-path rule accounts for its movement.
 
-- **Squirrel** darts across lanes: contact opens the squirrel encounter, and Chasers pull toward it while it's on screen
 - **Loose dog** crosses lanes: contact opens the Other dog encounter
+- **Squirrel** darts across lanes: contact opens the squirrel encounter, and Chasers pull toward it while it's on screen
 - **Ball** bounces across lanes: a minor obstacle
 - **Cyclist** rides down one lane toward you, faster than the road: a minor obstacle
 
 ### Feedback
 
-- **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
-- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (skunk "SPRAYED!", puddle "SOAKED!", thief "PICKPOCKETED!", squirrel "SQUIRREL!", other dog "NEW FRIEND!") and the caught dogs shaking off
 - **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through) and Spooked (after a thief) are visual only and fade after 10 seconds
-- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
-- **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
-- **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows
+- **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
+- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "PICKPOCKETED!") and the caught dogs shaking off
+- **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
+- **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
 - **State strip:** icons in the top bar for every active effect (Stinky, upgrades in effect, equipped gear); tap one for its description
+- **Treat given:** the treat arcs from the treat counter to the dog, the owner smiles, and a "+1 ♥" label shows
 
 Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the backdrop band; they open no card and have no effect.
 
@@ -221,12 +221,12 @@ Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) play in the ba
 
 One per zone, drawn at random with no repeats in a run.
 
-- Stop sign: Wait your turn → −$ per dog (missed tips) · Dart across → −♥ each
-- Chatty neighbour: Have a chat → +$ tip, −$ per dog (missed tips) · Wave and go → nothing
 - Can I pet them? (a kid): Of course! → +♥ each, −$ per dog (missed tips) · Sorry, not now → −♥ to one random owner
-- Ice cream truck: Pup cups! → −$ per dog, +♥ each · Not today → −♥ to Food-driven owners
+- Chatty neighbour: Have a chat → +$ tip, −$ per dog (missed tips) · Wave and go → nothing
 - Construction detour: Take the long way → −$ per dog (missed tips) · Squeeze past → −♥ to Fancy owners (dust)
+- Ice cream truck: Pup cups! → −$ per dog, +♥ each · Not today → −♥ to Food-driven owners
 - Mail carrier: Hold them back → −♥ each (barking) · Wait it out → −$ per dog (missed tips)
+- Stop sign: Wait your turn → −$ per dog (missed tips) · Dart across → −♥ each
 
 ### Upgrade cards
 
@@ -254,8 +254,8 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 - **Start button:** shows the pack, e.g. "Start walk · 2 dogs · $40/zone"; the pack count reads "Pack 1/1"
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who are we walking today?"; after a walk "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new is affordable "We could take on another client."; picking a dog shows that owner's parting line
 - **Messages:** buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; the hint line reads "Tap to pick or buy. Hold for details." The message line fits about 48 characters, and the walker's bubble 2 lines of about 30
-- **Gear** (5 items, bought once): fanny pack (start the run with +$); whistle (thieves flee even without a big dog); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); Lucky collar (every owner starts with +♥ and has a higher max). Equip up to 1 owned item before each run, or none
-- **Walker picker:** choose Casey, Ada, Ben or Trista. All are free; the choice is cosmetic and saved
+- **Gear** (5 items, bought once): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). Equip up to 1 owned item before each run, or none
+- **Walker picker:** choose Ada, Ben, Casey or Trista. All are free; the choice is cosmetic and saved
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
