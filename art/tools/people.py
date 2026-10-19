@@ -83,7 +83,7 @@ def specs(g, b, c):
 
 
 def rosa_top(wave):
-    """Rosa, retired florist, laid-back: grey bun with a pink flower, green cardigan open over a cream blouse,
+    """Rosa, retired florist, dramatic: grey bun with a pink flower, green cardigan open over a cream blouse,
     a brown skirt, and a posy of flowers in her left hand."""
     def top(g, b):
         g.rect(10, 33 + b, 12, 5, "brown")
@@ -236,33 +236,39 @@ def sam_top(wave):
     return top
 
 
-def ophelia_top(wave):
-    """Ophelia, stage actor, dramatic: big copper curls, lashes, a long mauve gown with a pink scarf, and a
-    prop skull held out in her left hand."""
+def kiwi_top(wave):
+    """Kiwi, grandmother, laid-back: a cloud of short white curls, a sky-blue cardigan over a white blouse with
+    a kiwi-slice brooch, a grey skirt, red shoes, and a ball of pink yarn on two knitting needles in her
+    left hand."""
     def top(g, b):
-        for cx, cy in ((7, 10), (25, 10), (6, 16), (26, 16), (7, 21), (25, 21), (11, 4), (21, 4), (16, 3)):
-            g.ell(cx, cy + b, 3.5, 3.5, "rust", "dbrown", "orange")
-        # the gown flares to the ankles, over the legs
-        g.rect(9, 33 + b, 14, 8 - b, "mauve")
-        g.rect(8, 37, 16, 4, "mauve")
-        g.rect(20, 33 + b, 4, 8 - b, "purple")
-        torso(g, b, "mauve", "purple")
-        g.ell(16, 21.5 + b, 6, 2, "pink", "mauve")
-        g.rect(18, 22 + b, 3, 8, "pink")
-        g.rect(20, 23 + b, 1, 7, "mauve")
-        arms(g, b, wave, "mauve", "purple", "skin1")
-        # the skull, on her palm
-        g.ell(6.5, 28 + b, 3, 3, "white", "lgrey")
-        g.rect(5, 28 + b, 1, 1, "ink")
-        g.rect(7, 28 + b, 1, 1, "ink")
-        g.rect(5, 30 + b, 4, 1, "lgrey")
-        head(g, b, "skin1", "skin2")
-        g.ell(16, 7.5 + b, 8.5, 4, "rust", "dbrown", "orange")
-        g.ell(12, 9 + b, 3, 2, "orange")
-        face_front(g, 16, 13 + b)
-        g.p(10, 12 + b, "ink")
-        g.p(22, 12 + b, "ink")
-        cheeks(g, b)
+        g.rect(10, 33 + b, 12, 5, "slate")
+        g.rect(19, 33 + b, 3, 5, "dslate")
+        torso(g, b, "sky", "blue")
+        g.rect(14, 21 + b, 4, 12, "white")
+        g.rect(17, 21 + b, 1, 12, "lgrey")
+        g.rect(11, 24 + b, 2, 2, "green")
+        g.p(11, 24 + b, "yellow")
+        arms(g, b, wave, "sky", "blue", "brown")
+        # the yarn: a pink ball with two needles through it and a strand hanging from the fist
+        for i in range(5):
+            g.p(3 + i, 21 + i + b, "lgrey")
+            g.p(10 - i, 21 + i + b, "lgrey")
+        g.ell(6.5, 27.5 + b, 3.5, 3.5, "pink", "mauve")
+        g.p(5, 26 + b, "mauve")
+        g.p(6, 27 + b, "mauve")
+        g.p(8, 28 + b, "mauve")
+        g.p(3, 22 + b, "white")
+        g.p(10, 22 + b, "white")
+        g.rect(4, 31 + b, 1, 5, "pink")
+        g.rect(5, 31 + b, 4, 3, "brown")
+        for cx, cy in ((8, 11), (24, 11), (9, 6.5), (23, 6.5), (12.5, 3.5), (19.5, 3.5), (16, 3)):
+            g.ell(cx, cy + b, 2.6, 2.6, "white", "lgrey")
+        head(g, b, "brown", "dbrown")
+        g.ell(16, 7 + b, 7.5, 3, "white", "lgrey")
+        for cx in (10.5, 14, 18, 21.5):
+            g.ell(cx, 9 + b, 2, 1.6, "white", "lgrey")
+        face_front(g, 16, 13 + b, lips="dbrown")
+        cheeks(g, b, "rust")
     return top
 
 
@@ -297,29 +303,41 @@ def tiffany_top(wave):
     return top
 
 
-def hughes_top(wave):
-    """Dr. Hughes, dentist, fussy: short dark hair, a head mirror, a white coat open over sky-blue scrubs,
-    and a giant toothbrush in his left hand."""
+def gadget_top(wave):
+    """Gadget, inspector, fussy: black hair under a brown brimmed hat, a tan trench coat belted at the waist
+    with its collar turned up, over a white shirt and red tie, and a magnifying glass in his left hand."""
     def top(g, b):
-        torso(g, b, "white", "lgrey")
-        g.rect(14, 21 + b, 4, 12, "sky")
-        g.rect(13, 21 + b, 1, 12, "lgrey")
-        g.rect(18, 21 + b, 1, 12, "lgrey")
-        g.rect(19, 26 + b, 3, 1, "lgrey")
-        arms(g, b, wave, "white", "lgrey", "dbrown")
-        # the toothbrush: a long sky-blue handle from the fist up to white bristles
-        g.rect(6, 21 + b, 2, 13, "sky")
-        g.rect(7, 21 + b, 1, 13, "blue")
-        g.rect(3, 17 + b, 4, 4, "white")
-        g.rect(3, 20 + b, 4, 1, "lgrey")
-        g.rect(4, 17 + b, 1, 3, "lgrey")
-        g.rect(5, 31 + b, 4, 2, "dbrown")
-        head(g, b, "dbrown", "plum")
-        g.ell(16, 7.5 + b, 8.5, 4, "ink", "ink", "navy")
-        g.rect(8, 9 + b, 16, 1, "slate")
-        g.ell(16, 8 + b, 3, 3, "lgrey", "grey", "white")
-        g.ell(16, 8 + b, 1.2, 1.2, "slate")
-        face_front(g, 16, 13 + b, lips="ink")
+        # the coat runs down over the knees
+        g.rect(9, 33 + b, 14, 6, "tan")
+        g.rect(20, 33 + b, 3, 6, "brown")
+        g.rect(16, 33 + b, 1, 6, "brown")
+        torso(g, b, "tan", "brown")
+        g.tri((13, 21 + b), (19, 21 + b), (16, 27 + b), "white")
+        g.rect(15, 22 + b, 2, 5, "dred")
+        g.tri((10, 19 + b), (14, 21 + b), (12, 26 + b), "cream")
+        g.tri((22, 19 + b), (18, 21 + b), (20, 26 + b), "brown")
+        g.rect(9, 29 + b, 14, 2, "dbrown")
+        g.rect(15, 29 + b, 2, 2, "amber")
+        arms(g, b, wave, "tan", "brown", "skin1")
+        # the magnifying glass: a dbrown handle from the fist up to a slate ring round a sky lens
+        g.rect(6, 26 + b, 2, 6, "dbrown")
+        g.ell(7, 22.5 + b, 3.5, 3.5, "slate")
+        g.ell(7, 22.5 + b, 2.2, 2.2, "sky")
+        g.p(6, 21 + b, "cyan")
+        g.rect(5, 31 + b, 4, 3, "skin1")
+        head(g, b, "skin1", "skin2")
+        g.rect(8, 8 + b, 2, 6, "navy")
+        g.rect(22, 8 + b, 2, 6, "ink")
+        # the hat: a pinched crown with a dred band over a wide brim
+        g.ell(16, 3.5 + b, 6, 3.5, "brown", "dbrown", "tan")
+        g.rect(15, 0 + b, 2, 1, "dbrown")
+        g.rect(10, 5 + b, 12, 1, "dred")
+        g.rect(5, 6 + b, 22, 2, "brown")
+        g.rect(16, 7 + b, 10, 1, "dbrown")
+        g.rect(4, 7 + b, 2, 1, "brown")
+        g.rect(26, 7 + b, 2, 1, "dbrown")
+        g.rect(6, 6 + b, 4, 1, "tan")
+        face_front(g, 16, 13 + b)
     return top
 
 
@@ -356,9 +374,9 @@ OWNERS = {
     "zippy": (pruitt_top, "slate", "ink", None),
     "pierre": (lefevre_top, "skin1", "ink", None),
     "biscuit": (sam_top, "navy", "dbrown", None),
-    "archie": (ophelia_top, "skin1", "plum", None),
+    "archie": (kiwi_top, "brown", "red", None),
     "snowball": (tiffany_top, "skin1", "pink", None),
-    "penny": (hughes_top, "sky", "white", None),
+    "penny": (gadget_top, "dslate", "dbrown", None),
     "koda": (jesse_top, "skin2", "sky", None),
 }
 

@@ -128,7 +128,7 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
 
 
 def rosa(mood):
-    """Retired florist, laid-back: grey bun with a flower, green cardigan."""
+    """Retired florist, dramatic: grey bun with a flower, green cardigan."""
     g = face()
     g.cel(16, 13, 9.5, 8, "lgrey", "grey")
     base(g, "skin1", "skin2", "green", "dgreen")
@@ -139,7 +139,7 @@ def rosa(mood):
         g.ell(22.5 + dx, 6 + dy, 1.3, 1.3, "pink")
     g.p(22, 5, "yellow")
     g.p(22, 6, "amber")
-    expression(g, mood)
+    expression(g, mood, lashes=True, wide=True)
     return g
 
 
@@ -216,16 +216,25 @@ def sam(mood):
     return g
 
 
-def ophelia(mood):
-    """Stage actor, dramatic: big curly copper hair, lashes, a flowing mauve scarf."""
+def kiwi(mood):
+    """Grandmother, laid-back: a cloud of short white curls, a sky-blue cardigan over a white collar, a
+    kiwi-slice brooch."""
     g = face()
-    for cx, cy in ((7, 12), (25, 12), (6, 18), (26, 18), (8, 23), (24, 23), (11, 6), (21, 6), (16, 5)):
-        g.cel(cx, cy, 3.5, 3.5, "rust", "dbrown", "orange")
-    base(g, "skin1", "skin2", "mauve", "purple")
-    g.cel(23, 29, 3, 2, "pink", "mauve")
-    g.cel(16, 9.5, 8.5, 4, "rust", "dbrown", "orange")
-    g.ell(12, 11, 3, 2, "orange")
-    expression(g, mood, lashes=True, wide=True)
+    # the perm: round curls from ear to ear over the crown, each lit white and shaded lgrey
+    for cx, cy in ((7.5, 15.5), (24.5, 15.5), (7.5, 11), (24.5, 11), (9.5, 7), (22.5, 7), (13, 4.5), (19, 4.5),
+                   (16, 4)):
+        g.cel(cx, cy, 2.6, 2.6, "white", "lgrey")
+    base(g, "brown", "dbrown", "sky", "blue")
+    g.tri((12, 26), (16, 26), (14, 29), "white")
+    g.tri((16, 26), (20, 26), (18, 29), "white")
+    g.rect(16, 29, 1, 2, "blue")
+    g.rect(10, 28, 3, 2, "green")
+    g.p(11, 28, "yellow")
+    # the fringe: a row of tight curls across the forehead
+    g.cel(16, 8.5, 7.5, 3, "white", "lgrey")
+    for cx in (10, 13.5, 17, 20.5, 23):
+        g.cel(cx, 10.5, 2, 1.8, "white", "lgrey")
+    expression(g, mood, feat="ink", blush="rust", whites=True)
     return g
 
 
@@ -245,16 +254,31 @@ def tiffany(mood):
     return g
 
 
-def hughes(mood):
-    """Dentist, fussy: short dark hair, head mirror, white coat over blue scrubs."""
+def gadget(mood):
+    """Inspector, fussy: black hair under a brown brimmed hat, a tan trench coat with its collar turned up
+    over a white shirt and a red tie."""
     g = face()
-    base(g, "brown", "dbrown", "white", "lgrey")
-    g.tri((13, 27), (19, 27), (16, 31), "sky")
-    g.cel(16, 9.5, 8.5, 4, "ink", "ink", "navy")
-    g.rect(8, 10, 16, 1, "slate")
-    g.cel(16, 10, 3, 3, "lgrey", "grey", "white")
-    g.ell(16, 10, 1.2, 1.2, "slate")
-    expression(g, mood, feat="ink", blush="rust", whites=True)
+    base(g, "skin1", "skin2", "tan", "brown")
+    g.tri((13, 27), (19, 27), (16, 31), "white")
+    g.rect(15, 28, 2, 3, "dred")
+    # the trench coat's collar, turned up either side of the neck
+    g.tri((8, 23), (13, 28), (10, 31), "cream")
+    g.tri((24, 23), (19, 28), (22, 31), "tan")
+    # short black hair at the temples, under the brim
+    g.rect(8, 11, 2, 6, "navy")
+    g.rect(22, 11, 2, 6, "ink")
+    g.rect(9, 11, 14, 1, "navy")
+    # the hat: a pinched crown with a dred band over a wide brim
+    g.cel(16, 5.5, 6.5, 4.5, "brown", "dbrown", "tan")
+    g.rect(14, 1, 4, 1, "dbrown")
+    g.p(16, 2, "dbrown")
+    g.rect(10, 8, 12, 1, "dred")
+    g.rect(5, 9, 22, 2, "brown")
+    g.rect(4, 10, 2, 1, "brown")
+    g.rect(26, 10, 2, 1, "dbrown")
+    g.rect(16, 10, 10, 1, "dbrown")
+    g.rect(6, 9, 4, 1, "tan")
+    expression(g, mood)
     return g
 
 
@@ -375,9 +399,9 @@ OWNERS = {
     "zippy": pruitt,
     "pierre": lefevre,
     "biscuit": sam,
-    "archie": ophelia,
+    "archie": kiwi,
     "snowball": tiffany,
-    "penny": hughes,
+    "penny": gadget,
     "koda": jesse,
 }
 
