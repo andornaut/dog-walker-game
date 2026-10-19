@@ -582,6 +582,11 @@
       "json": "sprites/fx-heart.json"
     },
     {
+      "key": "fx-new-best",
+      "png": "sprites/fx-new-best.png",
+      "json": "sprites/fx-new-best.json"
+    },
+    {
       "key": "fx-sparkle",
       "png": "sprites/fx-sparkle.png",
       "json": "sprites/fx-sparkle.json"

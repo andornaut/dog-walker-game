@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 90
+    "duration": 80
    },
    "fx-confetti 1.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 64, "h": 64 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 90
+    "duration": 80
    },
    "fx-confetti 2.aseprite": {
     "frame": { "x": 128, "y": 0, "w": 64, "h": 64 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 90
+    "duration": 80
    },
    "fx-confetti 3.aseprite": {
     "frame": { "x": 192, "y": 0, "w": 64, "h": 64 },
@@ -29,7 +29,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 90
+    "duration": 80
    },
    "fx-confetti 4.aseprite": {
     "frame": { "x": 256, "y": 0, "w": 64, "h": 64 },
@@ -37,7 +37,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 90
+    "duration": 80
    },
    "fx-confetti 5.aseprite": {
     "frame": { "x": 320, "y": 0, "w": 64, "h": 64 },
@@ -45,7 +45,39 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
     "sourceSize": { "w": 64, "h": 64 },
-    "duration": 90
+    "duration": 80
+   },
+   "fx-confetti 6.aseprite": {
+    "frame": { "x": 384, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 80
+   },
+   "fx-confetti 7.aseprite": {
+    "frame": { "x": 448, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 80
+   },
+   "fx-confetti 8.aseprite": {
+    "frame": { "x": 512, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 80
+   },
+   "fx-confetti 9.aseprite": {
+    "frame": { "x": 576, "y": 0, "w": 64, "h": 64 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 64, "h": 64 },
+    "sourceSize": { "w": 64, "h": 64 },
+    "duration": 80
    }
  },
  "meta": {
@@ -53,10 +85,10 @@
   "version": "1.2.30-x64",
   "image": "fx-confetti.png",
   "format": "RGBA8888",
-  "size": { "w": 384, "h": 64 },
+  "size": { "w": 640, "h": 64 },
   "scale": "1",
   "frameTags": [
-   { "name": "play", "from": 0, "to": 5, "direction": "forward" }
+   { "name": "play", "from": 0, "to": 9, "direction": "forward" }
   ]
  }
 }

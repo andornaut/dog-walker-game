@@ -5,10 +5,12 @@ badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
 silver, collection gold, silly pink), each with an icon for its goal. Tags:
 earned (in colour) and locked (grey, the icon as a two-tone slate silhouette,
 a small padlock).
-fx-confetti: 64x64, the burst behind a badge as it is earned (tag play).
+fx-confetti: 64x64, the burst behind a badge as it is earned (tag play, 10
+frames at 80ms), plum-rimmed so it reads on the Stats wood and the cream end panel.
 
 Usage:
-  badges.py preview OUT.png   every badge, earned and locked, and the burst
+  badges.py preview OUT.png   every badge, earned and locked, and the burst, on
+                              dark wood, slate and cream
   badges.py build             write art/badges/*.aseprite, export to
                               public/art/sprites/ and list them in the manifest
 
@@ -18,6 +20,7 @@ hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 
 import math
 import os
+import random
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
@@ -250,20 +253,34 @@ def badge(name, locked=False):
     return g
 
 
+# Confetti pieces, fixed so every build draws the same burst: (angle, reach, fall, drift, phase, last frame, colour).
+# Angles are jittered off an even spread and reaches vary, so the burst fills the square unevenly.
+_rng = random.Random(7)
+PIECES = [(math.radians(i * 360 / 36 + _rng.uniform(-14, 14)), _rng.uniform(16, 38), _rng.uniform(0.35, 0.7),
+           _rng.uniform(-3, 3), _rng.randrange(3), _rng.randrange(6, 11),
+           ("red", "amber", "green", "sky", "pink", "yellow", "white", "cyan", "orange", "mauve")[i % 10])
+          for i in range(36)]
+# A piece tumbles through these shapes, one per frame.
+TUMBLE = ((1, 2), (2, 1), (2, 2))
+
+
 def confetti(step):
-    """64x64: a burst of confetti and rays behind the badge, 6 frames."""
+    """64x64: confetti thrown out from behind the badge, slowing, then falling and drifting, 10 frames.
+    Each piece carries a 1px plum rim so the light colours hold on the cream end panel as well as the
+    dark wood; a piece drawn later covers an earlier one, rim and all, so overlaps stay apart."""
     g = Grid(64, 64)
-    cols = ("red", "amber", "green", "sky", "pink", "yellow")
-    r = 6 + step * 4.5
-    for i in range(18):
-        a = math.radians(i * 20 + step * 7)
-        x, y = 32 + math.cos(a) * r, 32 + math.sin(a) * r + step * step * 0.25
-        g.rect(x, y, 2, 2 if i % 2 else 1, cols[i % len(cols)])
-    if step < 3:
-        for i in range(8):
-            a = math.radians(i * 45)
-            for k in range(2, 4 + step * 2):
-                g.p(32 + math.cos(a) * (8 + k), 32 + math.sin(a) * (8 + k), "yellow" if step else "white")
+    for a, reach, fall, drift, phase, last, col in PIECES:
+        if step > last:
+            continue
+        # thrown fast and slowing, with a kick upward, then gravity takes over
+        r = reach * (1 - 0.55 ** (step + 1.2))
+        x = 32 + math.cos(a) * r + drift * math.sin(step * 0.8 + phase) * min(step / 3, 1)
+        y = 32 + math.sin(a) * r - 7 * (1 - 0.5 ** step) + fall * max(step - 1, 0) ** 2
+        w, h = TUMBLE[(step + phase) % 3]
+        x, y = round(x - w / 2), round(y - h / 2)
+        g.rect(x - 1, y, w + 2, h, "plum")
+        g.rect(x, y - 1, w, h + 2, "plum")
+        g.rect(x, y, w, h, col)
     return g
 
 
@@ -271,8 +288,8 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for name in BADGES:
         yield f"badge-{name}", [("earned", [badge(name).outlined()], 1000), ("locked", [badge(name, True).outlined()], 1000)]
-    yield "fx-confetti", [("play", [confetti(i).outlined(False) for i in range(6)], 90)]
+    yield "fx-confetti", [("play", [confetti(i).outlined(False) for i in range(10)], 80)]
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/badges", __doc__, grounds=("733e39",))
+    main(sys.argv, sprites, "art/badges", __doc__, grounds=("733e39", "3a4466", "ead4aa"))

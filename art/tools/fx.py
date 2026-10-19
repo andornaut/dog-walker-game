@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Draw the road effects for collisions and pickups. fx-bump, fx-dizzy, fx-coins
-and fx-sparkle are warm light that holds 3:1 on Woof Way but fades into the
-three light roads, so each carries a 1px plum rim (4.4:1 or more on those).
-fx-splash and fx-stinky have no outline. fx-heart is a token, like fx-bark, so
-it keeps its ramp outline over the doghouse roofs.
+"""Draw the road effects for collisions and pickups, and the new-best burst on
+the end screen. fx-bump, fx-dizzy, fx-coins and fx-sparkle are warm light that
+holds 3:1 on Woof Way but fades into the three light roads, so each carries a
+1px plum rim (4.4:1 or more on those). fx-splash and fx-stinky have no outline.
+fx-heart is a token, like fx-bark, so it keeps its ramp outline over the
+doghouse roofs. fx-new-best carries the plum rim too, for the cream panel and
+the sunset sky of screen-end.
 
 fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
 fx-dizzy    32x16  loop (4 frames)  stars circling over the pack while it stumbles
@@ -13,6 +15,8 @@ fx-stinky   32x32  loop (4 frames)  green stink lines over the pack while Stinky
 fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
 fx-heart    16x16  up (5 frames)    a heart floating up from a dog slot (+1 heart)
                    down (5 frames)  a heart cracking and falling apart (-1 heart)
+fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behind
+                                    the ui-new-best ribbon (centred on it)
 
 Usage:
   fx.py preview OUT.png   every frame of every effect on the street colours
@@ -199,6 +203,53 @@ def heart_down(step):
     return g
 
 
+# fx-new-best is centred on the 72x20 ui-new-best ribbon, whose top-left sits at RIBBON in the frame.
+RIBBON = (12, 14)
+# Sparkles thrown out from behind the ribbon, slowing as they go: (x, y on the ribbon's edge, full
+# throw dx, dy, first frame, colour). They keep inside the frame's bands above, below and beside it.
+SPARKS = ((20, 14, -6, -9, 0, "white"), (40, 14, -3, -10, 1, "yellow"), (58, 14, 4, -11, 0, "white"),
+          (76, 14, 8, -8, 2, "cyan"), (26, 34, -6, 9, 1, "yellow"), (50, 34, 1, 10, 0, "white"),
+          (70, 34, 6, 9, 2, "pink"), (12, 21, -10, -5, 0, "yellow"), (84, 20, 10, -6, 1, "white"),
+          (12, 30, -9, 6, 2, "cyan"), (84, 30, 10, 5, 0, "yellow"), (50, 14, 0, -8, 3, "white"))
+# Stars that pop out over the ribbon's edges and arc out under a little gravity: (x, y, dx, dy per frame,
+# first frame).
+STARS = ((30, 14, -2, -2.6, 0), (66, 14, 2.2, -2.8, 1), (48, 14, 0.3, -2.4, 3), (24, 34, -2.4, 1, 1),
+         (72, 34, 2.4, 0.8, 2), (8, 24, -0.6, -2, 2), (88, 24, 0.6, -2, 0))
+
+
+def new_best(step):
+    """96x48: a starburst behind the new-best ribbon, rays first, then sparkles and stars popping out
+    and fading. Everything carries the plum rim for the cream panel and the yellow end of the sunset,
+    and the ribbon's own area is left clear so the burst comes from behind it."""
+    g = Grid(96, 48)
+    cx, cy = 48, 24
+    if step < 4:
+        # rays that slide outward, stretched across so they clear the wide ribbon
+        r0, r1 = (6, 11, 17, 23)[step], (15, 21, 25, 27)[step]
+        for i in range(16):
+            a = math.radians(i * 22.5 + 11)
+            for k in range(r0 * 2, r1 * 2):
+                g.p(cx + math.cos(a) * k * 0.85, cy + math.sin(a) * k / 2, "white" if step == 0 else "yellow")
+    for x, y, dx, dy, first, col in SPARKS:
+        t = step - first
+        if 0 <= t < 5:
+            k = 1 - 0.5 ** (t + 1)
+            star4(g, round(x + dx * k), round(y + dy * k), (1, 3, 2, 2, 1)[t], col)
+    for x, y, dx, dy, first in STARS:
+        t = step - first
+        if 0 <= t < 5:
+            x, y, r = x + dx * (t + 1), y + dy * (t + 1) + 0.3 * t * t, (4, 5, 5, 4, 3)[t]
+            burst(g, x, y, r, r * 0.45, 5, "amber")
+            if r > 3:
+                burst(g, x, y, r - 2, (r - 2) * 0.45, 5, "yellow")
+                g.p(x, y, "white")
+    rim(g)
+    rx, ry = RIBBON
+    g.rect(rx + 5, ry + 1, 62, 17, None)
+    g.rect(rx, ry + 3, 72, 15, None)
+    return g
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
@@ -209,6 +260,7 @@ def sprites():
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-heart", [("up", [heart_up(i).outlined() for i in range(5)], 90),
                        ("down", [heart_down(i).outlined() for i in range(5)], 90)]
+    yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]
 
 
 if __name__ == "__main__":
