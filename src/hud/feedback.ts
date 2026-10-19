@@ -49,9 +49,13 @@ export function heartLabelAt(
 }
 
 // The 32x32 hop splash's top-left, its centre column on the pack's and its bottom row on the
-// walker's feet.
-export function hopSplashFrame(pack: { feetY: number; x: number }): Point {
-  return { x: pack.x - 16, y: pack.feetY - 31 };
+// walker's feet, and its label centred over it, 2px above its top.
+export function hopSplashLayout(pack: { feetY: number; x: number }): {
+  frame: Point;
+  label: LabelAnchor;
+} {
+  const frame = { x: pack.x - 16, y: pack.feetY - 31 };
+  return { frame, label: { centreX: frame.x + 16, lineBottom: frame.y - 2 } };
 }
 
 // The hop label over a dog, centred on its centre column, 2px above its top opaque row.

@@ -8,7 +8,7 @@ export const FEEDBACK_ART = {
   // The pop over the dog, then the small heart flying into the doghouse.
   heartGain: { fly: "fly", key: "fx-heart-gain", pop: "pop" },
   heartLoss: { fly: "fly", key: "fx-heart-loss", pop: "pop" },
-  // At the pack's feet when an area effect catches no dog, with a "PHEW!" in the tag's -word
-  // version; reduced motion plays the plain tag.
-  hopSplash: { key: "fx-close-one", tag: "splash", word: "-word" },
+  // At the pack's feet when an area effect catches no dog, with a comic HOP! in the tag's
+  // -word version; reduced motion plays the plain tag.
+  hopSplash: { key: "fx-hop-splash", tag: "splash", word: "-word" },
 } as const;

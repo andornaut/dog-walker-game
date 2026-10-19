@@ -205,15 +205,16 @@ export class RunMoments {
       this.deps.pack.showDizzy();
       this.hint({ kind: "minorBump" });
     }
-    // Each dog that hops over an area effect says so; an area effect that caught no dog
-    // splashes at the pack's feet, and opens no card.
+    // An area effect that caught no dog splashes at the pack's feet with its HOP!, and opens
+    // no card; one that caught some has "Hop!" over each dog that hopped.
     for (const { caught, hopped } of step.areaContacts) {
       const moment = { depth: DEPTH.fx, still: this.deps.still() };
       if (caught.length === 0) {
         playHopSplash(this.scene, { ...moment, feetY: walkerFootY(LAYOUT.road), x: pack.x });
+      } else {
+        const tops = hopped.flatMap((dog) => this.deps.pack.dogPoint(dog) ?? []);
+        playHops(this.scene, moment, tops);
       }
-      const tops = hopped.flatMap((dog) => this.deps.pack.dogPoint(dog) ?? []);
-      playHops(this.scene, moment, tops);
       this.hint({ kind: "areaEffect" });
     }
     for (const { encounter, outcome } of step.instants) {

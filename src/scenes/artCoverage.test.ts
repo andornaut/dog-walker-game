@@ -62,6 +62,7 @@ import type { PullPose } from "../runner/pulls";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
+import { FEEDBACK_ART } from "./feedbackArt";
 import { hitBurstKey, hitFlashKey, hitLook } from "./hitMoment";
 
 const manifest = parseManifest(shippedManifest);
@@ -364,6 +365,19 @@ describe("need art", () => {
     });
     expect(missing).toEqual([]);
     expect(missingTags(needSpotSpriteKey("stranger"), ["wave"])).toEqual([]);
+  });
+});
+
+describe("feedback art", () => {
+  it("names the coin burst, heart pops, doghouse loss and hop splash with their tags", () => {
+    const { coinBurst, doghouseLoss, heartGain, heartLoss, hopSplash } = FEEDBACK_ART;
+    const missing = [
+      ...missingTags(coinBurst.key, [coinBurst.tag]),
+      ...missingTags(doghouseLoss.key, [doghouseLoss.tag]),
+      ...[heartGain, heartLoss].flatMap((heart) => missingTags(heart.key, [heart.pop, heart.fly])),
+      ...missingTags(hopSplash.key, [hopSplash.tag, `${hopSplash.tag}${hopSplash.word}`]),
+    ];
+    expect(missing).toEqual([]);
   });
 });
 

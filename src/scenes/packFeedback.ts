@@ -6,7 +6,7 @@ import {
   coinBurstLayout,
   FEEDBACK,
   hopLabelAnchor,
-  hopSplashFrame,
+  hopSplashLayout,
   type LabelAnchor,
 } from "../hud/feedback";
 import type { Point } from "../layout/rect";
@@ -28,19 +28,25 @@ interface PackMoment {
   still: boolean;
 }
 
-// An area effect that caught no dog: a splash with "PHEW!" at the pack's feet. Reduced motion
-// plays it without its word.
+// An area effect that caught no dog: a splash at the pack's feet with a comic HOP!, which is
+// its label. Reduced motion plays the splash without its word and fades "Hop!" over it in
+// place, as does a splash whose art is missing.
 export function playHopSplash(
   scene: Scene,
   moment: PackMoment & { feetY: number; x: number },
 ): void {
   const { key, tag, word } = FEEDBACK_ART.hopSplash;
-  playFrame(
+  const layout = hopSplashLayout(moment);
+  const played = playFrame(
     scene,
     { key, tag: moment.still ? tag : `${tag}${word}` },
-    hopSplashFrame(moment),
+    layout.frame,
     moment,
   );
+  if (moment.still || !played) {
+    const text = gameData.runText.hopOver;
+    floatLabel(scene, moment, layout.label, text, PALETTE.plum, FEEDBACK.hop);
+  }
 }
 
 // "Hop!" over each dog that hopped over an area effect, by its top opaque row. Reduced motion
@@ -72,17 +78,19 @@ export function playMinorBump(
 }
 
 // A one-shot tag placed by its frame's top-left corner, or nothing while the art is missing.
+// Returns whether it played.
 function playFrame(
   scene: Scene,
   art: { key: string; tag: string },
   at: Point,
   moment: PackMoment,
-): void {
+): boolean {
   if (!scene.anims.exists(animationKey(art.key, art.tag))) {
-    return;
+    return false;
   }
   const sprite = scene.add.sprite(at.x, at.y, art.key).setOrigin(0).setDepth(moment.depth);
   playTagOnce(sprite, art.key, art.tag, () => sprite.destroy());
+  return true;
 }
 
 // The walker tips one way and the other on its feet, and stands straight again.
