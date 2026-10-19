@@ -22,6 +22,13 @@ export const FEEDBACK = {
   pressDipPx: 2,
   shakeMs: 320,
   shakePx: 3,
+  // The Pet shop's glint plays once every shopGlintEveryMs, and its building rises 1px then 2px
+  // and back, a step each shopBobBeatMs.
+  shopBobBeatMs: 500,
+  shopBobSteps: [0, -1, -2, -1],
+  shopGlintEveryMs: 4000,
+  shopGlintFrameMs: 60,
+  shopGlintFrames: 7,
   // fx-tap frames where the finger lands.
   tapFrameMs: 60,
   tapFrames: 4,
@@ -106,6 +113,28 @@ export function bobOffset(reducedMotion: boolean, nowMs: number, ready: boolean)
     return 0;
   }
   return Math.floor(nowMs / FEEDBACK.bobBeatMs) % 2 === 1 ? -1 : 0;
+}
+
+// The Pet shop's glint frame at nowMs, or undefined between glints and with reduced motion.
+export function shopGlintFrame(reducedMotion: boolean, nowMs: number): number | undefined {
+  if (reducedMotion) {
+    return undefined;
+  }
+  return effectFrame(
+    FEEDBACK.shopGlintFrameMs,
+    FEEDBACK.shopGlintFrames,
+    nowMs % FEEDBACK.shopGlintEveryMs,
+    0,
+  );
+}
+
+// The Pet shop's rise at nowMs: a gentle bob upward, none with reduced motion.
+export function shopBobOffset(reducedMotion: boolean, nowMs: number): number {
+  if (reducedMotion) {
+    return 0;
+  }
+  const steps = FEEDBACK.shopBobSteps;
+  return steps[Math.floor(nowMs / FEEDBACK.shopBobBeatMs) % steps.length] ?? 0;
 }
 
 // The frame of a one-shot effect, or undefined once it has played out.

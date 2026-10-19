@@ -1478,15 +1478,15 @@
       },
       "petShop": {
         "board": {
-          "height": 19,
-          "width": 61,
-          "x": 263,
-          "y": 90
+          "height": 22,
+          "width": 114,
+          "x": 237,
+          "y": 86
         },
-        "height": 104,
+        "height": 108,
         "width": 120,
         "x": 234,
-        "y": 90
+        "y": 86
       },
       "pocket": {
         "box": {
@@ -1515,6 +1515,38 @@
         },
         "priceY": 28,
         "tileInset": 1
+      },
+      "pocketLining": {
+        "denim": {
+          "height": 51,
+          "width": 346,
+          "x": 7,
+          "y": 456
+        },
+        "stitchBottom": {
+          "height": 2,
+          "width": 342,
+          "x": 9,
+          "y": 504
+        },
+        "stitchLeft": {
+          "height": 49,
+          "width": 2,
+          "x": 9,
+          "y": 457
+        },
+        "stitchRight": {
+          "height": 49,
+          "width": 2,
+          "x": 349,
+          "y": 457
+        },
+        "stitchTop": {
+          "height": 2,
+          "width": 342,
+          "x": 9,
+          "y": 457
+        }
       },
       "porchDogOffset": {
         "dx": -12,

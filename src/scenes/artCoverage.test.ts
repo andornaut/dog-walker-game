@@ -70,6 +70,7 @@ import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
 import { hitBurstKey, hitFlashKey, hitLook } from "./hitMoment";
+import { SHOP_ART } from "./itemArt";
 
 const manifest = parseManifest(shippedManifest);
 const images = new Set(manifest.images.map(({ key }) => key));
@@ -233,6 +234,12 @@ describe("walker art", () => {
   });
 });
 
+describe("Pet shop art", () => {
+  it("names the faces and the glint the Start screen plays", () => {
+    expect(missingTags(SHOP_ART.petShop, ["glint", "normal", "pressed"])).toEqual([]);
+  });
+});
+
 describe("image art", () => {
   it.each<[string, () => string[]]>([
     ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
@@ -258,6 +265,7 @@ describe("image art", () => {
         ...TEMPERAMENTS.map(temperamentIconKey),
       ],
     ],
+    ["the Pocket's denim and stitch", () => ["ui-denim", "ui-stitch-h", "ui-stitch-v"]],
     ["a help illustration for every help page", () => gameData.help.map(({ art }) => art)],
     [
       "card art for every option of every need card",

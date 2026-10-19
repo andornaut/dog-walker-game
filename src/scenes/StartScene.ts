@@ -9,6 +9,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
+import { bubbleRect } from "../home/bubbleRect";
 import { dogDetail, gearDetail } from "../home/detail";
 import {
   badgePopOffset,
@@ -19,6 +20,8 @@ import {
   pressDip,
   settleDelay,
   shakeOffset,
+  shopBobOffset,
+  shopGlintFrame,
 } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
@@ -162,6 +165,7 @@ const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
 const LOGBOOK_ICON = HOME_LAYOUT.logbook.icon;
 const PET_SHOP: Rect = HOME_LAYOUT.petShop;
 const PET_SHOP_BOARD: Rect = HOME_LAYOUT.petShop.board;
+const POCKET_LINING = HOME_LAYOUT.pocketLining;
 const POCKET = HOME_LAYOUT.pocket;
 const LOGO = { ...HOME_LAYOUT.logo, key: "logo" };
 const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
@@ -319,11 +323,15 @@ interface TileView {
   badge?: { image: GameObjects.Image; y: number };
   container: GameObjects.Container;
   face?: { object: GameObjects.Image | GameObjects.Sprite; y: number };
+  // The Pet shop's glint frames, shown in place of its normal face while one plays.
+  glint?: { frames: readonly (string | number)[]; image: GameObjects.Image };
   // An icon button shows its pressed face rather than dipping.
   iconButton?: IconButton;
   lift: number;
   // The pop timer that raises the whole tile for a moment, for the gear badge at the gate.
   rise?: string;
+  // The Pet shop's normal face, which the glint covers.
+  shopNormal?: GameObjects.Image;
 }
 
 // A one-shot effect sprite (fx-tap or fx-dust) and when it started.
@@ -860,10 +868,24 @@ export class StartScene extends Scene {
     for (const [id, view] of this.views) {
       const rise =
         view.rise === undefined ? 0 : badgePopOffset(reduced, now, this.pops.get(view.rise));
-      view.iconButton?.setPressed(dip(id) > 0);
+      const down = dip(id) > 0;
+      view.iconButton?.setPressed(down);
+      const glint = view.glint;
+      if (glint !== undefined) {
+        const frame = down ? undefined : shopGlintFrame(reduced, now);
+        const textureFrame = frame === undefined ? undefined : glint.frames[frame];
+        glint.image.setVisible(textureFrame !== undefined);
+        if (textureFrame !== undefined) {
+          glint.image.setFrame(textureFrame);
+          view.shopNormal?.setVisible(false);
+        }
+      }
       view.container.setPosition(
         shakeOffset(reduced, now, this.shakes.get(id)),
-        view.lift + (view.iconButton === undefined ? dip(id) : 0) + rise,
+        view.lift +
+          (view.iconButton === undefined ? dip(id) : 0) +
+          (glint === undefined || down ? 0 : shopBobOffset(reduced, now)) +
+          rise,
       );
       view.face?.object.setY(view.face.y + hopOffset(reduced, now, this.pops.get(id)));
       view.badge?.image.setY(view.badge.y + badgePopOffset(reduced, now, this.pops.get(id)));
@@ -961,6 +983,7 @@ export class StartScene extends Scene {
     for (const id of SECTION_IDS) {
       this.drawSection(root, SECTION_RECTS[id], sections[id]);
     }
+    this.drawPocketLining(root);
     this.drawWalkerPicker(root, save);
     // The sticker covers its tile's price line, which the tile then leaves out.
     const sticker = this.textures.exists(STICKER.key)
@@ -979,6 +1002,29 @@ export class StartScene extends Scene {
   // needs only a dog.
   private sections(save: SaveDocument): Sections {
     return homeSections(gameData, save.owned, { loadout: this.loadout, walker: save.walker });
+  }
+
+  // The Pocket's denim fill and tan stitch over its frame, under the gear tiles. Each piece is
+  // a TileSprite with its tile origin at its own top-left; a missing texture leaves the frame bare.
+  private drawPocketLining(root: GameObjects.Container): void {
+    const { denim, stitchBottom, stitchLeft, stitchRight, stitchTop } = POCKET_LINING;
+    const pieces: readonly [string, Rect][] = [
+      ["ui-denim", denim],
+      ["ui-stitch-v", stitchLeft],
+      ["ui-stitch-v", stitchRight],
+      ["ui-stitch-h", stitchTop],
+      ["ui-stitch-h", stitchBottom],
+    ];
+    for (const [key, rect] of pieces) {
+      if (this.textures.exists(key)) {
+        root.add(
+          this.add
+            .tileSprite(rect.x, rect.y, rect.width, rect.height, key)
+            .setOrigin(0)
+            .setTilePosition(0, 0),
+        );
+      }
+    }
   }
 
   // A section's ui-section frame and band by its state, with the heading on the band's left
@@ -1253,8 +1299,12 @@ export class StartScene extends Scene {
     // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.
     const board = PET_SHOP_BOARD;
     const centred = Math.round(x - width / 2);
-    const clear = top + height < board.y ? centred : Math.min(centred, board.x - 2 - width);
-    const rect = { height, width, x: Math.max(GAP / 2, clear), y: top };
+    const rect = bubbleRect(
+      board,
+      { clearance: 2, margin: GAP / 2 },
+      { x, y: top },
+      { height, width },
+    );
     labels.forEach((label) => label.setX(label.x + rect.x - centred));
     const quip = addNineSlice(this, "ui-quip", rect);
     if (quip === undefined) {
@@ -1297,12 +1347,30 @@ export class StartScene extends Scene {
         },
       };
       view.iconButton.setPressed(false);
+      this.addShopGlint(view, normal);
     } else {
       drawPetShopFallback(this, view.container, PET_SHOP, gameData.homeText.shop.title);
     }
     if (shopAffordable(gameData, save.owned, save.bankCents)) {
       addAffordFrame(this, view.container, PET_SHOP, currentSettings(this).reducedMotion);
     }
+  }
+
+  // The glint frames of the Pet shop's art, an image over the normal face, hidden between
+  // glints. update plays them from the clock, so there is no timer to stop.
+  private addShopGlint(view: TileView, normal: GameObjects.Image): void {
+    const frames = Array.from({ length: FEEDBACK.shopGlintFrames }, (_, i) =>
+      tagFrame(this, SHOP_ART.petShop, "glint", i),
+    ).filter((frame) => frame !== undefined);
+    const first = frames[0];
+    if (first === undefined) {
+      return;
+    }
+    const image = this.add.image(PET_SHOP.x, PET_SHOP.y, SHOP_ART.petShop, first).setOrigin(0);
+    image.setVisible(false);
+    view.container.add(image);
+    view.glint = { frames, image };
+    view.shopNormal = normal;
   }
 
   // A locked item's price (or goal) plate: green while the bank covers it, dark red when not.

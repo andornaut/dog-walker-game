@@ -10,6 +10,8 @@ import {
   pressDip,
   settleDelay,
   shakeOffset,
+  shopBobOffset,
+  shopGlintFrame,
 } from "./feedback";
 
 describe("shakeOffset", () => {
@@ -91,5 +93,39 @@ describe("effectFrame", () => {
     expect(effectFrame(60, 4, 1000, 1000)).toBe(0);
     expect(effectFrame(60, 4, 1185, 1000)).toBe(3);
     expect(effectFrame(60, 4, 1240, 1000)).toBeUndefined();
+  });
+});
+
+describe("shopGlintFrame", () => {
+  it.each([
+    ["starts each cycle on the first frame", false, 0, 0],
+    ["steps by the frame time", false, FEEDBACK.shopGlintFrameMs, 1],
+    [
+      "ends on the last frame",
+      false,
+      FEEDBACK.shopGlintFrameMs * (FEEDBACK.shopGlintFrames - 1),
+      FEEDBACK.shopGlintFrames - 1,
+    ],
+    ["repeats every cycle", false, FEEDBACK.shopGlintEveryMs * 3, 0],
+    ["rests between glints", false, FEEDBACK.shopGlintEveryMs - 1, undefined],
+    ["never plays with reduced motion", true, 0, undefined],
+  ])("%s", (_, reduced, now, expected) => {
+    expect(shopGlintFrame(reduced, now)).toBe(expected);
+  });
+});
+
+describe("shopBobOffset", () => {
+  it.each(FEEDBACK.shopBobSteps.map((step, i) => [i, step] as const))(
+    "beat %i rises by its step, never above 2px",
+    (beat, step) => {
+      const offset = shopBobOffset(false, beat * FEEDBACK.shopBobBeatMs);
+      expect(offset).toBe(step);
+      expect(offset).toBeGreaterThanOrEqual(-2);
+      expect(offset).toBeLessThanOrEqual(0);
+    },
+  );
+
+  it("holds still with reduced motion", () => {
+    expect(shopBobOffset(true, FEEDBACK.shopBobBeatMs)).toBe(0);
   });
 });
