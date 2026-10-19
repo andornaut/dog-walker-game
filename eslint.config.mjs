@@ -6,7 +6,8 @@ import { plugins, sourceRules, toolingRules } from "./eslint.config.base.mjs";
 
 export default ts.config(
   {
-    ignores: [".wrangler/", "dist/", "node_modules/"],
+    // .claude/ holds agent worktrees: full copies of the repo that CI never checks out.
+    ignores: [".claude/", ".wrangler/", "dist/", "node_modules/"],
   },
   js.configs.recommended,
   ...ts.configs.recommended,
