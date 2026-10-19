@@ -75,6 +75,12 @@ const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 const FIRES_KEY = "ui-fires";
 const FIRES_AT = { large: { x: 8, y: 238 }, small: { x: 4, y: 119 } };
 
+// Centres a label drawn from its left edge (origin x 0) on x, its left edge on a whole pixel:
+// a centre origin on an odd width puts it half a pixel off, which breaks thin glyphs such as ×.
+function snapCentre(label: GameObjects.BitmapText, x: number): GameObjects.BitmapText {
+  return label.setX(Math.round(x - label.width / 2));
+}
+
 interface Entry {
   choice: Choice;
   enabled: boolean;
@@ -165,7 +171,10 @@ export class CardScene extends Scene {
     const centerX = road.x + road.width / 2;
     const title = { font: "title", scale: 2 } as const;
     if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
-      addDisplayText(this, centerX, top - 38, view.title, { color: PALETTE.white, originX: 0.5 });
+      snapCentre(
+        addDisplayText(this, centerX, top - 38, view.title, { color: PALETTE.white }),
+        centerX,
+      );
     } else {
       this.centered(centerX + 1, top - 37, view.title, PALETTE.ink, title);
       this.centered(centerX, top - 38, view.title, PALETTE.white, title);
@@ -445,7 +454,7 @@ export class CardScene extends Scene {
     color: number,
     style: { font?: FontRole; maxWidth?: number; scale?: number } = {},
   ): GameObjects.BitmapText {
-    return addPixelText(this, x, y, text, { align: "center", color, originX: 0.5, ...style });
+    return snapCentre(addPixelText(this, x, y, text, { align: "center", color, ...style }), x);
   }
 
   private drawCard(view: CardView, tag: string, entry: Entry, rect: Rect): void {
@@ -533,7 +542,7 @@ export class CardScene extends Scene {
         firesText(gameData, fires),
         grey ? PALETTE.slate : PALETTE.darkRed,
         { maxWidth: EFFECT.width },
-      ).setOrigin(0.5, 1);
+      ).setOrigin(0, 1);
       effectHeight -= Math.ceil(warning.height) + 2;
     }
 
@@ -549,6 +558,7 @@ export class CardScene extends Scene {
     // A word too long to wrap, such as a difficulty, is wider than its wrap width.
     if (effect.height > effectHeight || effect.width > EFFECT.width) {
       scalePixelText(effect, 1, x + EFFECT.x + EFFECT.width / 2, effectY);
+      snapCentre(effect, x + EFFECT.x + EFFECT.width / 2);
     }
 
     const badge = { ...BADGE, x: x + BADGE.x, y: y + BADGE.y };
