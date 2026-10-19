@@ -44,12 +44,14 @@ reads on them.
 ui-pet-shop: a 120x104 sprite, tags normal and pressed: the pet shop on the
 yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
 (234,90), its base on the yard's bottom row (193), and its hit area is the
-frame. A board over the parapet carries PET SHOP in the sign letters at 1x
-(yellow, ink outline, 1px dred shadow); under it a red and white awning, a
+frame. A board over the parapet, built and coloured as ui-button's go state
+(green face, yellow highlight, forest lip, ink line), carries PET SHOP in the
+sign letters' fills at 1x in ink, as the go label; under it a red and white awning, a
 display window with a food bag and a bone, and a door with a paw on its
 glass; dgreen siding lit on the left, forest on the right, ink outline all
 round, on a grey step. pressed dips as ui-button does: the front sinks 2px
-onto the step, rows 0 and 1 clear and the step 1px shallower. An affordable
+onto the step, rows 0 and 1 clear and the step 1px shallower, and the board
+loses its lip and highlight to face, as go-pressed. An affordable
 item in the shop takes ui-afford 2px outside the frame (232,88 124x108).
 
 ui-loading-track: a 200x8 image, the dotted path the pair walks along, with a
@@ -85,6 +87,7 @@ import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
 import help as hp  # noqa: E402
 from pixel import DARKER, Grid, K, build as build_sprites  # noqa: E402
+from ui import STATES  # noqa: E402
 
 W, H = 360, 560
 LOGO_W, LOGO_H = 128, 30
@@ -372,17 +375,24 @@ def pet_shop(pressed=False):
     # the parapet trim
     cv.fill(2, 16 + t, w - 4, 4, "ink")
     cv.fill(3, 17 + t, w - 6, 2, "cream")
-    # the board: PET SHOP in the sign letters at 1x on a dbrown face, as the yard sign
+    # the board: ui-button's go state, a green face with a yellow top highlight on a forest lip 4px
+    # deep, in an ink line with its corners cut, and PET SHOP in the sign letters' fills at 1x in
+    # ink (8.41:1 on green), as the go label. Pressed, the lip and highlight give way to face, as
+    # go-pressed; the board rides down with the front, so its face and letters sink 2px.
     letters, _ = fonts.sign("PET SHOP", 1)
     x0 = min(x for x, _ in letters)
     bw = fonts.sign_width("PET SHOP", 1) + 14
     bx = (w - bw) // 2
-    cv.fill(bx, t, bw, 18, "ink")
-    cv.fill(bx + 1, 1 + t, bw - 2, 16, "dbrown")
-    cv.fill(bx + 1, 1 + t, bw - 2, 1, "brown")
-    cv.fill(bx + 1, 16 + t, bw - 2, 1, "plum")
+    face, lip, hi = STATES["go"]
+    cv.fill(bx + 1, t, bw - 2, 18, "ink")
+    cv.fill(bx, 1 + t, bw, 16, "ink")
+    cv.fill(bx + 1, 1 + t, bw - 2, 16, face)
+    if not pressed:
+        cv.fill(bx + 1, 1, bw - 2, 1, hi)
+        cv.fill(bx + 1, 13, bw - 2, 4, lip)
     for (x, y), c in letters.items():
-        cv.fill(bx + 7 - x0 + x, 4 + t + y, 1, 1, c)
+        if c not in ("ink", "dred"):
+            cv.fill(bx + 7 - x0 + x, 4 + t + y, 1, 1, "ink")
     # the awning: red and white stripes 6px wide, shaded along the bottom, over a scalloped ink edge
     top, bot = 24 + t, 36 + t
     cv.fill(2, top - 1, w - 4, bot - top + 2, "ink")

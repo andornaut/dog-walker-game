@@ -82,7 +82,7 @@ th { font-family: var(--f-display); font-weight: 400; color: var(--muted); }
         <tr><td>Padlock</td><td><code>icon-lock</code> at tile -2,-3 (locked only)</td><td></td></tr>
         <tr><td>Price plate</td><td>Centred on the tile, caps at tile y 28 (plate rows 25 to 39), over the box's foot (locked only)</td><td>Cream plate in a 1px ink edge, font-body 2x: forest when the bank covers it, darkRed when not; no gold outline here</td></tr>
         <tr><td>Pocketed</td><td>Lifted 2px onto a plum shadow; <code>ui-check</code> tick at tile -3,-3</td><td>The tick clears the label line by 1 row</td></tr>
-        <tr><td>Effect line</td><td>x 4, caps at y 499 (descenders to 512), up to 352 wide</td><td>font-body 2x, cream: "Whistle: thieves flee even without a big dog." or "Empty: tap an item to bring it"</td></tr>
+        <tr><td>Effect line</td><td>x 4, caps at y 499 (descenders to 512), up to 352 wide</td><td>font-body 2x, cream: "Whistle: thieves flee even without a big dog." or "Empty. Tap a gear item to pocket it."</td></tr>
       </table>
     </div>
   </section>
@@ -108,7 +108,7 @@ th { font-family: var(--f-display); font-weight: 400; color: var(--muted); }
   <section class="note">
     <h2>What it needs</h2>
     <ul>
-      <li>New shipped art: <code>ui-pet-shop</code> (120x104 at 234,90, tags normal and pressed, the board's letters baked in), <code>screen-home</code> redrawn without the mailbox behind it, and <code>icon-dog-slot</code> (32x32, the doghouse with a plus). Locked silhouettes and the grey "pack full" art can be made in code, the way <code>greyTextureKey</code> makes grey cards.</li>
+      <li>New shipped art: <code>ui-pet-shop</code> (120x104 at 234,90, tags normal and pressed, the board built and coloured as <code>ui-button</code> <code>go</code> with its ink letters baked in), <code>screen-home</code> redrawn without the mailbox behind it, and <code>icon-dog-slot</code> (32x32, the doghouse with a plus). Locked silhouettes and the grey "pack full" art can be made in code, the way <code>greyTextureKey</code> makes grey cards.</li>
       <li>Code:
         <ul>
           <li>Top bar: help, sound and settings at x 240, 284 and 328.</li>

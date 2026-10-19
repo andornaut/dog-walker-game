@@ -11,8 +11,8 @@ everything for sale is in a Pet shop building in the gate scene's right yard, wh
 shop page (Gear tab: gear with prices or OWNED; Dogs tab: pack slots and dogs). Also a strip of
 the tile states for dogs and pocket gear.
 
-New pieces drawn only here: the pet shop building, the locked silhouettes, the price and goal
-plates and the slot icon.
+New pieces drawn only here: the locked silhouettes, the price and goal plates and the slot icon.
+The pet shop building is the shipped ui-pet-shop sprite.
 
 Usage:
   start_shop.py build DIR    write public/art/mocks/start-shop/*.png, with the uniform frames in DIR
@@ -264,91 +264,7 @@ def check(cv, x, y, label="tick"):
     put(cv, frame("ui-check", label), x, y)
 
 
-# ---------- the pet shop building (new art) ----------
-
-def pet_shop():
-    """120x104: a small shop front on the yard's right lot. A board over the door carries PET SHOP
-    in the sign letters at 1x (yellow, ink outline, dred shadow, as the yard sign); under it a
-    striped awning, a display window with a food bag and a bone, and a door. Walls dgreen lit on
-    the left, forest on the right; ink outline all round."""
-    w, h = 120, 104
-    cv = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    # walls
-    fill(cv, 4, 18, w - 8, h - 18, "ink")
-    fill(cv, 5, 19, w - 10, h - 20, "dgreen")
-    fill(cv, 5, 19, 2, h - 20, "green")
-    fill(cv, w - 7, 19, 2, h - 20, "forest")
-    for y in range(26, h - 6, 6):  # siding
-        fill(cv, 7, y, w - 14, 1, "forest")
-    # parapet trim
-    fill(cv, 2, 16, w - 4, 4, "ink")
-    fill(cv, 3, 17, w - 6, 2, "cream")
-    # sign board
-    letters, adv = fonts.sign("PET SHOP", 1)
-    xs = [p[0] for p in letters]
-    lw = max(xs) + 1 - min(xs)
-    bw = lw + 14
-    bx = (w - bw) // 2
-    fill(cv, bx, 0, bw, 18, "ink")
-    fill(cv, bx + 1, 1, bw - 2, 16, "dbrown")
-    fill(cv, bx + 1, 1, bw - 2, 1, "brown")
-    fill(cv, bx + 1, 16, bw - 2, 1, "plum")
-    ox, oy = bx + 7 - min(xs), 4
-    px = cv.load()
-    for (x, y), c in letters.items():
-        if 0 <= ox + x < w and 0 <= oy + y < h:
-            px[ox + x, oy + y] = rgb(c)
-    # awning: red and white stripes over a scalloped edge
-    top, bot = 24, 36
-    fill(cv, 2, top - 1, w - 4, bot - top + 2, "ink")
-    for x in range(3, w - 3):
-        c = "red" if ((x - 3) // 6) % 2 == 0 else "white"
-        shade = "dred" if c == "red" else "lgrey"
-        for y in range(top, bot):
-            px[x, y] = rgb(shade if y >= bot - 3 else c)
-        if ((x - 3) % 6) in (1, 2, 3, 4):
-            px[x, bot] = rgb(shade)
-            px[x, bot + 1] = rgb("ink")
-        else:
-            px[x, bot] = rgb("ink")
-    # display window
-    wx, wy, ww, wh = 10, 44, 56, 46
-    fill(cv, wx - 1, wy - 1, ww + 2, wh + 2, "ink")
-    fill(cv, wx, wy, ww, wh, "cream")
-    fill(cv, wx + 2, wy + 2, ww - 4, wh - 4, "sky")
-    fill(cv, wx + 2, wy + wh - 8, ww - 4, 6, "blue")
-    for i in range(10):  # glints
-        if 0 <= wx + 6 + i < w:
-            px[wx + 6 + i, wy + 14 - i] = rgb("cyan")
-            px[wx + 10 + i, wy + 18 - i] = rgb("white")
-    # a food bag and a bone on the sill
-    fill(cv, wx + 8, wy + 20, 14, 18, "ink")
-    fill(cv, wx + 9, wy + 21, 12, 16, "amber")
-    fill(cv, wx + 9, wy + 21, 12, 2, "yellow")
-    fill(cv, wx + 19, wy + 23, 2, 14, "orange")
-    fill(cv, wx + 11, wy + 26, 7, 6, "red")
-    fill(cv, wx + 13, wy + 28, 3, 2, "white")
-    bone = ["..cc.......cc..", ".cccc.....cccc.", "ccccccccccccccc", "ccccccccccccccc", ".cccc.....cccc.", "..cc.......cc.."]
-    for y, row in enumerate(bone):
-        for x, ch in enumerate(row):
-            if ch == "c":
-                px[wx + 30 + x, wy + 30 + y] = rgb("white" if y < 2 else "lgrey" if y > 3 else "cream")
-    fill(cv, wx + 2, wy + wh - 2, ww - 4, 0 or 1, "plum")
-    # door
-    dx, dy, dw = 76, 44, 30
-    fill(cv, dx - 1, dy - 1, dw + 2, h - dy, "ink")
-    fill(cv, dx, dy, dw, h - dy - 4, "cream")
-    fill(cv, dx + 2, dy + 2, dw - 4, h - dy - 6, "navy")
-    fill(cv, dx + 2, dy + 2, 1, h - dy - 6, "dslate")
-    fill(cv, dx + 6, dy + 6, dw - 12, 14, "sky")
-    fill(cv, dx + 6, dy + 6, dw - 12, 1, "cyan")
-    fill(cv, dx + dw - 8, dy + 30, 3, 3, "amber")
-    # step
-    fill(cv, 2, h - 4, w - 4, 4, "ink")
-    fill(cv, 3, h - 3, w - 6, 2, "lgrey")
-    fill(cv, 3, h - 2, w - 6, 1, "grey")
-    return cv
-
+# ---------- new art ----------
 
 def slot_icon():
     """32x32: a doghouse with a plus, for a pack slot for sale (new art)."""
@@ -419,9 +335,9 @@ def gate(cv, base, line, shop_new, pocket):
         cv.paste(home.crop((x, y, x + w, y + h)), (x, y))
     # the tree and owners the bubble area cut are in screen-home or below it; redraw the porch row
     cv.paste(base.crop((60, 94, 240, 126)), (60, 94))
-    body(cv, "Maple St", 327, 75, "white", "centre", sc=1)
+    body(cv, "Woof Way", 327, 75, "white", "centre", sc=1)
     x, y, w, h = SHOP
-    put(cv, pet_shop(), x, y)
+    put(cv, frame("ui-pet-shop", "normal"), x, y)
     if shop_new:
         afford(cv, x, y, w, h)
     if pocket:
@@ -508,7 +424,7 @@ def dog_section(cv, picked, owned, bank, capacity=1, more_slots=True):
 
 def pocket_line(item):
     if item is None:
-        return "Empty: tap an item to bring it"
+        return "Empty. Tap a gear item to pocket it."
     line = f"{GEAR_NAME[item]}: {GEAR_ABOUT[item]}"
     return line if BODY.width(line, 2) <= 352 else f"{GEAR_NAME[item]}: {GEAR_LINE[item].lower()}"
 
