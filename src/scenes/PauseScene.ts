@@ -1,9 +1,10 @@
 import { type Input, Scene } from "phaser";
 
+import { itemAt } from "../arrays";
+import { remapDarker } from "../assets/darkRamp";
 import { SCREEN_CONFIG } from "../data/screen";
-import { wrapWords } from "../home/home";
+import { pauseMenuLayout, type PauseMenuTarget, pauseMenuTargetAt } from "../hud/pauseMenu";
 import { cardNumberForKey, isPauseKey } from "../input/keyBindings";
-import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { fillRect } from "./draw";
@@ -20,10 +21,10 @@ export interface PauseSceneData {
   onResume: () => void;
 }
 
-// Buttons are 44 game pixels tall (48 CSS pixels on a phone) with 8 between them.
-const PANEL = { height: 300, width: 264 };
-const BUTTON = { gap: 8, height: 44, width: 216 };
-const NOTE = { chars: 30, lineHeight: 16 };
+// The road under the menu is redrawn this many steps down each colour's ramp.
+const DIM_STEPS = 2;
+const DIM_TEXTURE = "pause-dim";
+// Stands in for the darkened road when the renderer gives no snapshot to remap.
 const DIM_ALPHA = 0.6;
 
 interface MenuEntry {
@@ -31,11 +32,12 @@ interface MenuEntry {
   press: () => void;
 }
 
-// The pause menu over the dimmed road: resume, head home, help or settings.
+// The pause menu over the dimmed road: resume, help, settings or head home. The top bar's
+// pause button shows play while it is up, and a press there resumes too.
 export class PauseScene extends Scene {
   private buttons: MenuButton[] = [];
   private entries: MenuEntry[] = [];
-  private pressed: number | undefined;
+  private pressed: PauseMenuTarget | undefined;
 
   constructor() {
     super(SCENE_KEYS.pause);
@@ -44,11 +46,11 @@ export class PauseScene extends Scene {
   create({ onHeadHome, onResume }: PauseSceneData): void {
     this.pressed = undefined;
     const { road } = screenLayout(SCREEN_CONFIG);
-    this.add
-      .rectangle(road.x, road.y, road.width, road.height, PALETTE.ink, DIM_ALPHA)
-      .setOrigin(0);
+    this.dimRoad(road);
     this.entries = [
       { label: "Resume", press: onResume },
+      { label: "Help", press: () => openHelp(this, SCENE_KEYS.pause) },
+      { label: "Settings", press: () => this.openSettings() },
       {
         label: "Head home",
         press: () => {
@@ -56,65 +58,49 @@ export class PauseScene extends Scene {
           onHeadHome();
         },
       },
-      { label: "Help", press: () => openHelp(this, SCENE_KEYS.pause) },
-      { label: "Settings", press: () => this.openSettings() },
     ];
+    const layout = pauseMenuLayout(road, this.entries.length);
+    const { panel } = layout;
 
-    const panel: Rect = {
-      ...PANEL,
-      x: Math.round(road.x + (road.width - PANEL.width) / 2),
-      y: Math.round(road.y + (road.height - PANEL.height) / 2),
-    };
     // A 1px tan rim keeps the panel's edge clear of the dimmed road.
-    fillRect(this.add.graphics(), PALETTE.tan, {
-      height: panel.height + 2,
-      width: panel.width + 2,
-      x: panel.x - 1,
-      y: panel.y - 1,
-    });
+    const rim = this.add.graphics();
+    fillRect(rim, PALETTE.tan, { ...panel, height: panel.height + 2, y: panel.y - 1 });
+    fillRect(rim, PALETTE.tan, { ...panel, width: panel.width + 2, x: panel.x - 1 });
     addPanel(this, panel);
     const center = panel.x + panel.width / 2;
-    addPixelText(this, center, panel.y + 12, "Paused", {
+    addPixelText(this, center, layout.titleY, "Paused", {
       color: PALETTE.plum,
       font: "title",
       originX: 0.5,
       scale: TEXT_SCALE,
     });
-
-    const top = panel.y + 34;
     this.buttons = this.entries.map((entry, i) =>
-      addMenuButton(
-        this,
-        {
-          height: BUTTON.height,
-          width: BUTTON.width,
-          x: Math.round(center - BUTTON.width / 2),
-          y: top + i * (BUTTON.height + BUTTON.gap),
-        },
-        entry.label,
-      ),
+      addMenuButton(this, itemAt(layout.buttons, i), entry.label),
     );
-    const noteTop = top + this.entries.length * (BUTTON.height + BUTTON.gap) + 2;
-    wrapWords(NOTE.chars, "Head home keeps tips and earlier zones' fees.").forEach((line, i) => {
-      addPixelText(this, center, noteTop + i * NOTE.lineHeight, line, {
-        color: PALETTE.plum,
-        originX: 0.5,
-        scale: TEXT_SCALE,
-      });
+    fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
+    addPixelText(this, center, layout.notePlate.y + 6, "Keeps tips and earlier zones' fees", {
+      color: PALETTE.plum,
+      originX: 0.5,
     });
 
-    const rects = () => this.buttons.map((button) => button.rect);
+    // A press counts where it began and ended on the same target, so the release that resumes
+    // the walk is never the road's.
     this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      this.pressed = rectIndexAt(rects(), pointer.x, pointer.y);
+      this.pressed = pauseMenuTargetAt(layout.hits, pointer.x, pointer.y);
       this.showPressed();
     });
     this.input.on("pointerup", (pointer: Input.Pointer) => {
-      const index = rectIndexAt(rects(), pointer.x, pointer.y);
+      const target = pauseMenuTargetAt(layout.hits, pointer.x, pointer.y);
       const pressed = this.pressed;
       this.pressed = undefined;
       this.showPressed();
-      if (index !== undefined && index === pressed) {
-        this.entries[index]?.press();
+      if (target === undefined || target !== pressed) {
+        return;
+      }
+      if (target === "resume") {
+        onResume();
+      } else {
+        this.entries[target]?.press();
       }
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
@@ -131,6 +117,41 @@ export class PauseScene extends Scene {
 
   private showPressed(): void {
     this.buttons.forEach((button, i) => button.setState(i === this.pressed ? "pressed" : "normal"));
+  }
+
+  // The frozen road read back from the next frame and redrawn darker. The panel drawn over
+  // it in that frame is darkened too, but this image sits under the panel.
+  private dimRoad(road: Rect): void {
+    const shade = this.add
+      .rectangle(road.x, road.y, road.width, road.height, PALETTE.ink, DIM_ALPHA)
+      .setOrigin(0)
+      .setVisible(false);
+    const dim = this.add.image(road.x, road.y, "__DEFAULT").setOrigin(0).setVisible(false);
+    const fallback = () => shade.setVisible(true);
+    this.game.renderer.snapshotArea(road.x, road.y, road.width, road.height, (snapshot) => {
+      if (!dim.active) {
+        return;
+      }
+      if (!(snapshot instanceof HTMLImageElement)) {
+        fallback();
+        return;
+      }
+      if (this.textures.exists(DIM_TEXTURE)) {
+        this.textures.remove(DIM_TEXTURE);
+      }
+      const texture = this.textures.createCanvas(DIM_TEXTURE, road.width, road.height);
+      const context = texture?.getContext();
+      if (texture === null || context === undefined) {
+        fallback();
+        return;
+      }
+      context.drawImage(snapshot, 0, 0);
+      const pixels = context.getImageData(0, 0, road.width, road.height);
+      remapDarker(DIM_STEPS, pixels.data);
+      context.putImageData(pixels, 0, 0);
+      texture.refresh();
+      dim.setTexture(DIM_TEXTURE).setVisible(true);
+    });
   }
 
   private openSettings(): void {

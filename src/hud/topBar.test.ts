@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { buttonIcon, PAUSE_BUTTON, SOUND_BUTTON, topBarButtonAt } from "./topBar";
+import { buttonIcon, PAUSE_BUTTON, pauseButtonIcon, SOUND_BUTTON, topBarButtonAt } from "./topBar";
+
+describe("pauseButtonIcon", () => {
+  it("shows pause while walking and play while the pause menu is up", () => {
+    expect(pauseButtonIcon(false)).toBe("icon-pause");
+    expect(pauseButtonIcon(true)).toBe("icon-play");
+  });
+});
 
 describe("topBarButtonAt", () => {
   it("finds the sound and pause buttons over their 44px hit areas", () => {

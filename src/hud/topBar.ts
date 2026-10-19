@@ -32,3 +32,8 @@ export function topBarButtonAt(x: number, y: number): TopBarPress | undefined {
   }
   return containsPoint(PAUSE_BUTTON.hit, x, y) ? "pause" : undefined;
 }
+
+// The pause button shows play while the pause menu is up, since a press then resumes.
+export function pauseButtonIcon(menuOpen: boolean): "icon-pause" | "icon-play" {
+  return menuOpen ? "icon-play" : "icon-pause";
+}

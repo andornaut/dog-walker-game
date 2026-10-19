@@ -7,7 +7,13 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
 import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
-import { buttonIcon, PAUSE_BUTTON, SOUND_BUTTON, type TopBarButton } from "../hud/topBar";
+import {
+  buttonIcon,
+  PAUSE_BUTTON,
+  pauseButtonIcon,
+  SOUND_BUTTON,
+  type TopBarButton,
+} from "../hud/topBar";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
@@ -21,6 +27,7 @@ import { isMuted } from "./profileStore";
 import {
   CHANGE_LABELS_EVENT,
   HINT_EVENT,
+  PAUSE_MENU_EVENT,
   type QuipBubble,
   QUIPS_EVENT,
   type RunHudView,
@@ -62,6 +69,8 @@ export class HudScene extends Scene {
   private hintShowing = false;
   private money: GameObjects.BitmapText | undefined;
   private mute: GameObjects.Sprite | undefined;
+  private pauseGlyph: GameObjects.Graphics | undefined;
+  private pauseIcon: GameObjects.Image | undefined;
   private pips: GameObjects.Sprite[] = [];
   private slots: SlotView[] = [];
   private treats: GameObjects.BitmapText | undefined;
@@ -86,12 +95,10 @@ export class HudScene extends Scene {
       fillRect(g, PALETTE.darkBrown, { ...topBar, height: 2, y: topBar.y + topBar.height - 2 });
     }
     this.addButton(PAUSE_BUTTON);
-    if (this.textures.exists("icon-pause")) {
-      const icon = buttonIcon(PAUSE_BUTTON, false);
-      this.add.image(icon.x, icon.y, "icon-pause").setOrigin(0);
-    } else {
-      this.drawPauseBars(this.add.graphics());
-    }
+    const pauseIcon = buttonIcon(PAUSE_BUTTON, false);
+    this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
+    this.pauseGlyph = this.add.graphics();
+    this.showPauseIcon(false);
     this.addButton(SOUND_BUTTON);
     const soundIcon = buttonIcon(SOUND_BUTTON, false);
     this.mute = this.add.sprite(soundIcon.x, soundIcon.y, "icon-sound").setOrigin(0);
@@ -124,10 +131,14 @@ export class HudScene extends Scene {
     run.events.on(CHANGE_LABELS_EVENT, onLabels);
     run.events.on(HINT_EVENT, onHint);
     run.events.on(QUIPS_EVENT, onQuips);
+    // This scene is paused while the menu is up, but a paused scene still draws.
+    const onPauseMenu = (open: boolean) => this.showPauseIcon(open);
+    run.events.on(PAUSE_MENU_EVENT, onPauseMenu);
     this.events.once("shutdown", () => {
       run.events.off(CHANGE_LABELS_EVENT, onLabels);
       run.events.off(HINT_EVENT, onHint);
       run.events.off(QUIPS_EVENT, onQuips);
+      run.events.off(PAUSE_MENU_EVENT, onPauseMenu);
     });
   }
 
@@ -147,11 +158,39 @@ export class HudScene extends Scene {
     );
   }
 
+  // The icon art when it is loaded, else cream pause bars or play triangle drawn on the face.
+  private showPauseIcon(menuOpen: boolean): void {
+    const key = pauseButtonIcon(menuOpen);
+    const art = this.textures.exists(key);
+    this.pauseIcon?.setTexture(art ? key : "__DEFAULT").setVisible(art);
+    const g = this.pauseGlyph;
+    if (g === undefined) {
+      return;
+    }
+    g.clear();
+    if (art) {
+      return;
+    }
+    if (menuOpen) {
+      this.drawPlayTriangle(g);
+    } else {
+      this.drawPauseBars(g);
+    }
+  }
+
   private drawPauseBars(g: GameObjects.Graphics): void {
     const { x, y } = PAUSE_BUTTON.face;
     for (const dx of [6, 11]) {
       fillRect(g, PALETTE.cream, { height: 10, width: 3, x: x + dx, y: y + 5 });
     }
+  }
+
+  // Columns narrowing to a point, over the same 8x10 the pause bars cover.
+  private drawPlayTriangle(g: GameObjects.Graphics): void {
+    const { x, y } = PAUSE_BUTTON.face;
+    [10, 8, 8, 6, 6, 4, 2, 2].forEach((height, i) => {
+      fillRect(g, PALETTE.cream, { height, width: 1, x: x + 6 + i, y: y + 10 - height / 2 });
+    });
   }
 
   private createSlot({ x, y }: Rect): SlotView {

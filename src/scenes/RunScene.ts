@@ -141,9 +141,11 @@ export interface QuipBubble {
 }
 
 // Emitted on this scene's events: ChangeLabel[] whenever money or hearts change, a first-time
-// hint's text, and QuipBubble[] when owners react.
+// hint's text, QuipBubble[] when owners react, and whether the pause menu is up when it opens
+// or closes.
 export const CHANGE_LABELS_EVENT = "change-labels";
 export const HINT_EVENT = "hint";
+export const PAUSE_MENU_EVENT = "pause-menu";
 export const QUIPS_EVENT = "quips";
 
 // The simulation steps at a fixed rate, so a seed and an input log replay a run exactly.
@@ -973,9 +975,11 @@ export class RunScene extends Scene {
     soundboardOf(this).setPaused(true);
     this.scene.pause();
     this.scene.pause(SCENE_KEYS.hud);
+    this.events.emit(PAUSE_MENU_EVENT, true);
     const resume = () => {
       this.scene.stop(SCENE_KEYS.pause);
       this.pauseOpen = false;
+      this.events.emit(PAUSE_MENU_EVENT, false);
       soundboardOf(this).setPaused(false);
       this.scene.resume(SCENE_KEYS.hud);
       this.scene.resume();
