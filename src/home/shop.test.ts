@@ -24,7 +24,7 @@ const dollars = (amount: number) => cents(amount * 100);
 const starters = (Object.keys(data.dogs) as DogId[]).filter(
   (dog) => data.dogs[dog].unlock === "start",
 );
-const owned: Owned = { dogSlots: 1, dogs: starters, gear: [] };
+const owned: Owned = { dogSlots: 1, dogs: starters, gear: [], walkers: [] };
 
 describe("shopRowLook", () => {
   const row = (price: number | null, blocked: string | null): ShopRow => ({
@@ -120,6 +120,7 @@ describe("shopAffordable", () => {
         dogSlots: data.dogSlots.length,
         dogs: Object.keys(data.dogs) as DogId[],
         gear: Object.keys(data.shopGear) as Owned["gear"],
+        walkers: [],
       },
       100_000,
       false,
