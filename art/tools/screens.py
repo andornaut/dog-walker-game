@@ -49,7 +49,7 @@ spans the parapet, its bottom 2 rows over it, built and coloured as ui-button's
 go state (green face, yellow highlight, forest lip, ink line), with PET SHOP in
 the sign letters' shapes at 2x in ink, as the go label. Under it a red and
 white awning, a display window with a food bag and a bone, and a door with a
-paw on its glass; dgreen siding lit on the left, forest on the right, ink
+paw on its glass; rust brick with dbrown mortar, lit ochre on the left, dred on the right, ink
 outline all round, on a grey step. pressed dips as ui-button does: the front
 sinks 2px onto the step, the step 1px shallower, and the board loses its lip
 and highlight to face, as go-pressed. glint is 7 frames at 60ms: a 6px light
@@ -436,13 +436,16 @@ def building(cv, w, h, pressed):
     full = cv
     cv = clear(w, h)
     t = 2 if pressed else 0
-    # walls: dgreen siding in an ink line, lit green on the left, forest on the right
+    # walls: rust brick in an ink line, lit ochre on the left, dred on the right, so the green board
+    # stands off them; dbrown mortar every 4 rows, the joints 8px apart and staggered a half brick
     cv.fill(4, 18 + t, w - 8, h - 18 - t, "ink")
-    cv.fill(5, 19 + t, w - 10, h - 19 - t, "dgreen")
-    cv.fill(5, 19 + t, 2, h - 19 - t, "green")
-    cv.fill(w - 7, 19 + t, 2, h - 19 - t, "forest")
-    for y in range(26 + t, h, 6):
-        cv.fill(7, y, w - 14, 1, "forest")
+    cv.fill(5, 19 + t, w - 10, h - 19 - t, "rust")
+    for n, y in enumerate(range(22 + t, h, 4)):
+        cv.fill(7, y, w - 14, 1, "dbrown")
+        for x in range(7 + (n % 2) * 4, w - 7, 8):
+            cv.fill(x, y + 1, 1, 3, "dbrown")
+    cv.fill(5, 19 + t, 2, h - 19 - t, "ochre")
+    cv.fill(w - 7, 19 + t, 2, h - 19 - t, "dred")
     # the parapet trim
     cv.fill(2, 16 + t, w - 4, 4, "ink")
     cv.fill(3, 17 + t, w - 6, 2, "cream")
