@@ -257,12 +257,12 @@ SKUNK = {
 
 
 def skunk(s, sway):
-    """road.skunk redrawn: the tail moves a whole pixel."""
-    g = Grid(round(32 * s), round(32 * s))
+    """road.skunk redrawn: the tail moves a whole pixel. The road outline and road.LIT's rim, as at full size."""
+    g = edged(Grid(round(32 * s), round(32 * s)))
     (tail_y, tail), (body_y, body) = SKUNK[s]
     paint(g, tail, sway, tail_y)
     paint(g, body, 0, body_y)
-    return g
+    return road.rim(g, road.LIT)
 
 
 # road.squirrel at 0.5x by hand: the tail, which swishes, and the body and head drawn over it, which shift.
@@ -286,12 +286,12 @@ SQUIRREL = ((1, ["......tooo......",
 
 
 def squirrel(tail, shift):
-    """road.squirrel(tail, shift) at 0.5x: each offset moves a whole pixel."""
-    g = Grid(16, 16)
+    """road.squirrel(tail, shift) at 0.5x: each offset moves a whole pixel. The road outline and road.LIT's rim."""
+    g = edged(Grid(16, 16))
     (tail_y, tail_rows), (body_y, body) = SQUIRREL
     paint(g, tail_rows, tail, tail_y)
     paint(g, body, shift, body_y)
-    return g
+    return road.rim(g, road.LIT)
 
 
 # road.squirrel_run at 0.5x by hand, stretched then gathered, from row 1. Scaled, the gathered face turns to
@@ -326,10 +326,10 @@ SQUIRREL_RUN = (["......oooo......",
 
 
 def squirrel_run(gather):
-    """road.squirrel_run(gather) at 0.5x."""
-    g = Grid(16, 16)
+    """road.squirrel_run(gather) at 0.5x, with the road outline and road.LIT's rim."""
+    g = edged(Grid(16, 16))
     paint(g, SQUIRREL_RUN[gather], 0, 1)
-    return g
+    return road.rim(g, road.LIT)
 
 
 # road.corgi at 0.5x by hand. Scaled, the collar breaks, one ear loses its pink and the 1px nose sits off
@@ -350,8 +350,8 @@ CORGI = ["......tooo......",
 def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
     """road.corgi at 0.5x, posed as in road.CORGI_WALK: a hind paw swung back peeks out beside the rump and
     a front paw reaching forward shows under the jaw. On the passing beats the body bobs up 1px and both
-    front paws show under it, planted."""
-    g = Grid(16, 16)
+    front paws show under it, planted. The road outline and road.LIT's rim."""
+    g = edged(Grid(16, 16))
     paint(g, CORGI, 0, 3 + bob)
     for x, back in ((5, bl < 0), (10, br < 0)):
         if back:
@@ -359,7 +359,7 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
     for x, paw, c in ((5, fl, "white"), (10, fr, "lgrey")):
         if paw > 0 or bob:
             g.p(x, 14 + bob, c)
-    return g
+    return road.rim(g, road.LIT)
 
 
 CLOUD_PUFFS = [(44, 44, 30), (24, 28, 17), (64, 26, 18), (22, 62, 18), (64, 64, 18), (44, 14, 13), (44, 74, 13),

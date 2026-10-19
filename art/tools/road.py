@@ -64,6 +64,15 @@ def rim(g, rims):
     return g
 
 
+# The lit rim for every road sprite that fails 3:1 on Woof Way, for rim(): navy, ink and dslate take grey
+# (slate opposite), slate lgrey, dark browns skin2, mid browns and ochre tan, greens green, blues cyan, and reds,
+# mauves and purples pink. minis.py lights its hand-drawn maps with it too.
+LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"), slate=("lgrey", None),
+           dbrown=("skin2", None), plum=("skin2", None), brown=("tan", None), rust=("tan", None),
+           ochre=("tan", None), dgreen=("green", None), forest=("green", None), sky=("cyan", None),
+           blue=("cyan", None), red=("pink", None), dred=("pink", None), mauve=("pink", None), purple=("pink", None))
+
+
 # ---------- the walker (back view) ----------
 
 def walker(lf=0, rf=0, bob=0, arms=0):
@@ -289,7 +298,8 @@ def tip(rx):
 # ---------- encounters (facing the player) ----------
 
 def skunk(sway=0):
-    g = Grid()
+    """The skunk, with the road outline and a grey rim on its dark fur so it holds on Woof Way."""
+    g = edged(Grid())
     g.ell(16 + sway, 9, 7, 6.5, "navy", "ink", "dslate")
     g.ell(16 + sway, 8, 3, 4, "white", "lgrey")
     g.ell(16, 19, 7, 6, "navy", "ink", "dslate")
@@ -304,11 +314,12 @@ def skunk(sway=0):
     g.p(12, 24, "white")
     g.p(18, 24, "white")
     g.rect(15, 27, 2, 1, "pink")
-    return g
+    return rim(g, LIT)
 
 
 def squirrel(tail=0, shift=0):
-    g = Grid()
+    """The squirrel, with the road outline and a tan rim on the fur facing the light."""
+    g = edged(Grid())
     t, h = tail, shift
     g.ell(20 + t, 12, 5.5, 7.5, "ochre", "rust", "tan")
     g.ell(16.5 + t, 5, 4.5, 3, "ochre", "rust", "tan")
@@ -316,7 +327,7 @@ def squirrel(tail=0, shift=0):
     g.ell(14 + h, 19.5, 4, 4.5, "ochre", "rust", "tan")
     g.ell(14 + h, 20.5, 2, 3, "cream")
     squirrel_head(g, 14 + h, 25.5)
-    return g
+    return rim(g, LIT)
 
 
 def squirrel_head(g, x, y):
@@ -337,7 +348,7 @@ def squirrel_run(gather):
     paws ahead under its chin and kicks its hind feet out behind, low, with the tail streaming straight
     back; gathered, it is airborne 2px higher and bunched up, the hind feet tucked beside its cheeks and
     the tail swept up in an arch that curls to the side."""
-    g = Grid()
+    g = edged(Grid())
     if gather:
         g.ell(19, 9, 4.5, 6, "ochre", "rust", "tan")
         g.ell(14.5, 3.5, 3.5, 2.5, "ochre", "rust", "tan")
@@ -358,7 +369,7 @@ def squirrel_run(gather):
         for x in (10, 19):
             g.rect(x, 28, 2, 2, "tan")
         squirrel_head(g, 15, 26.5)
-    return g
+    return rim(g, LIT)
 
 
 def puddle(f, w=88, h=32):
@@ -415,8 +426,9 @@ def skunk_cloud(step):
 
 def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
     """The other dog trotting toward the player. Each leg offset moves a paw along the road, positive
-    toward the player: the hind paws peek out beside the rump, the front paws beside the jaw."""
-    g = Grid()
+    toward the player: the hind paws peek out beside the rump, the front paws beside the jaw. The road
+    outline, and a tan rim on the fur facing the light."""
+    g = edged(Grid())
     g.rect(10, 4 + bl, 2, 4, "ochre")
     g.rect(20, 4 + br, 2, 4, "rust")
     g.rect(10, 26 + fl, 2, 3, "white")
@@ -437,7 +449,7 @@ def corgi(fl=0, fr=0, bl=0, br=0, bob=0):
     g.p(18, 22 + b, "white")
     g.rect(15, 25 + b, 2, 1, "ink")
     g.rect(11, 18 + b, 10, 1, "amber")
-    return g
+    return rim(g, LIT)
 
 
 # The other dog's trot, as dogs.WALK has it: diagonal pairs swap on beats 0 and 2 and the body bobs up
@@ -454,6 +466,11 @@ def person(top, legs="navy", shoes="ink", lf=0, rf=0, bob=0):
         g.rect(x, 43 + f, 4, 2, shoes)
     top(g, bob)
     return g
+
+
+def dressed(top, **q):
+    """person(top, **q) with the road outline and the lit rim."""
+    return rim(edged(person(top, **q)), LIT)
 
 
 def thief_top(g, b):
@@ -485,8 +502,8 @@ def thief_top(g, b):
 def thief_fleeing(stride):
     """The thief running off up the road, seen from behind: stride is -1 or 1, the side whose knee is up.
     The arms pump against the legs (the far arm bent forward and up, the near one swung back and low),
-    and the loot sack bounces on his back."""
-    g = Grid(32, 48)
+    and the loot sack bounces on his back. The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
     s = stride
     b = -1
     # legs: the lifted one is short, its shoe turned up to show the sole; the pushing one reaches the ground
@@ -534,7 +551,7 @@ def thief_fleeing(stride):
     g.ell(16, 7.5 + b, 8.5, 5, "navy", "ink", "dslate")
     g.rect(8, 9 + b, 17, 2, "dslate")
     g.rect(8, 12 + b, 17, 2, "ink")
-    return g
+    return rim(g, LIT)
 
 
 def neighbour_top(wave):
@@ -608,7 +625,8 @@ def tourist_top(flash):
 
 
 def wallet(glint):
-    g = Grid(16, 16)
+    """The lost wallet, with the road outline and the lit rim."""
+    g = edged(Grid(16, 16))
     g.rect(5, 4, 7, 4, "green")
     g.rect(5, 4, 7, 1, "dgreen")
     g.rect(8, 5, 2, 2, "dgreen")
@@ -619,7 +637,7 @@ def wallet(glint):
     if glint:
         for x, y in ((13, 2), (12, 3), (14, 3), (13, 4), (13, 3)):
             g.p(x, y, "white")
-    return g
+    return rim(g, LIT)
 
 
 def bark(big):
@@ -658,8 +676,9 @@ def dog_owner_top(g, b):
 # ---------- forced stops ----------
 
 def stop_sign(glint=None):
-    """glint is the diagonal x + y = glint along which a pink sheen crosses the red face, or None."""
-    g = Grid(32, 48)
+    """glint is the diagonal x + y = glint along which a pink sheen crosses the red face, or None. The road
+    outline and the lit rim."""
+    g = edged(Grid(32, 48))
     g.rect(15, 22, 3, 24, "grey")
     g.rect(17, 22, 1, 24, "slate")
     g.rect(13, 45, 7, 2, "slate")
@@ -683,7 +702,7 @@ def stop_sign(glint=None):
             x = glint - y
             if 0 < x < g.w and g.px[y][x] == K["red"] and g.px[y - 1][x] and g.px[y][x - 1]:
                 g.p(x, y, "pink")
-    return g
+    return rim(g, LIT)
 
 
 def chatty_top(wave):
@@ -722,7 +741,8 @@ def chatty_top(wave):
 
 
 def kid(wave=False, mood="happy", bob=0):
-    g = Grid(32, 48)
+    """The kid, with the road outline and the lit rim."""
+    g = edged(Grid(32, 48))
     b = bob
     for x in (12, 17):
         g.rect(x, 38 + b, 3, 6 - b, "skin1")
@@ -749,11 +769,12 @@ def kid(wave=False, mood="happy", bob=0):
         g.p(14, 27 + b, "dbrown")
         g.p(17, 27 + b, "dbrown")
         g.p(10, 23 + b, "cyan")
-    return g
+    return rim(g, LIT)
 
 
 def ice_cream_truck(f):
-    g = Grid(64, 48)
+    """The ice cream truck, with the road outline and the lit rim."""
+    g = edged(Grid(64, 48))
     g.rect(6, 12, 52, 30, "white")
     g.rect(6, 12, 52, 2, "lgrey")
     g.rect(54, 12, 4, 30, "lgrey")
@@ -782,15 +803,15 @@ def ice_cream_truck(f):
     else:
         g.rect(16, 3, 1, 5, "plum")
         g.rect(14, 7, 2, 2, "plum")
-    return g
+    return rim(g, LIT)
 
 
 def construction(f):
     """f swaps which lamp is lit. Striped like obstacles.barrier so the stripes hold steady at depth: the
     board's stripes are 8px orange every 16px, leaning right in 2-row stairs that start on even columns
     and stop at the board's ends, and its bottom stair is the shaded lower edge. The lower rail's squares
-    and the posts are 4px wide on even columns."""
-    g = Grid(56, 32)
+    and the posts are 4px wide on even columns. The road outline and the lit rim."""
+    g = edged(Grid(56, 32))
     for x in (6, 46):
         g.rect(x, 12, 4, 18, "grey")
         g.rect(x + 2, 12, 2, 18, "slate")
@@ -808,7 +829,7 @@ def construction(f):
     g.rect(20, 3, 16, 1, "orange")
     g.rect(23, 6, 10, 2, "plum")
     g.tri((21, 7), (25, 4), (25, 10), "plum")
-    return g
+    return rim(g, LIT)
 
 
 def mail_top(g, b):
@@ -943,22 +964,22 @@ def sprites():
     yield "puddle", [("idle", frames([puddle(0), puddle(1)], outline=False), 500)]
     yield "skunk-cloud", [("loop", frames((skunk_cloud(i) for i in range(4)), outline=False), 220)]
     yield "other-dog", [("walk", frames(corgi(**q) for q in CORGI_WALK), 100)]
-    yield "other-dog-owner", [("walk", [person(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
-                                        person(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200),
-                              ("idle", [person(dog_owner_top, shoes="dbrown", bob=bb).outlined() for bb in BREATH],
+    yield "other-dog-owner", [("walk", [dressed(dog_owner_top, shoes="dbrown", lf=-2).outlined(),
+                                        dressed(dog_owner_top, shoes="dbrown", rf=-2).outlined()], 200),
+                              ("idle", [dressed(dog_owner_top, shoes="dbrown", bob=bb).outlined() for bb in BREATH],
                                BREATH_MS)]
-    yield "thief", [("walk", [person(thief_top, lf=-2).outlined(), person(thief_top, rf=-2).outlined()], 200),
+    yield "thief", [("walk", [dressed(thief_top, lf=-2).outlined(), dressed(thief_top, rf=-2).outlined()], 200),
                     ("flee", frames(thief_fleeing(k) for k in (-1, 1)), 110),
-                    ("idle", [person(thief_top, bob=bb).outlined() for bb in BREATH], BREATH_MS)]
+                    ("idle", [dressed(thief_top, bob=bb).outlined() for bb in BREATH], BREATH_MS)]
     yield "lost-wallet", [("idle", frames([wallet(False), wallet(True)]), 450)]
-    yield "biscuit-neighbour", [("wave", [person(neighbour_top(w), legs="purple", shoes="dbrown").outlined()
+    yield "biscuit-neighbour", [("wave", [dressed(neighbour_top(w), legs="purple", shoes="dbrown").outlined()
                                           for w in (False, True)], 350),
-                                ("idle", [person(neighbour_top(False), legs="purple", shoes="dbrown", bob=bb).outlined()
+                                ("idle", [dressed(neighbour_top(False), legs="purple", shoes="dbrown", bob=bb).outlined()
                                           for bb in BREATH], BREATH_MS)]
-    yield "photo-op", [("idle", [person(tourist_top(False), legs="skin2", shoes="sky", bob=bb).outlined()
+    yield "photo-op", [("idle", [dressed(tourist_top(False), legs="skin2", shoes="sky", bob=bb).outlined()
                                  for bb in BREATH], BREATH_MS),
-                       ("flash", [person(tourist_top(True), legs="skin2", shoes="sky").outlined(),
-                                  person(tourist_top(False), legs="skin2", shoes="sky").outlined()], 120)]
+                       ("flash", [dressed(tourist_top(True), legs="skin2", shoes="sky").outlined(),
+                                  dressed(tourist_top(False), legs="skin2", shoes="sky").outlined()], 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
     yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140]),
@@ -967,8 +988,8 @@ def sprites():
     yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
     # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
     yield "stop-sign", [("idle", frames(stop_sign(c) for c in (None, None, 18, 24)), 400)]
-    yield "chatty-neighbour", [("wave", [person(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350),
-                               ("idle", [person(chatty_top(False), legs="brown", shoes="dbrown", bob=bb).outlined()
+    yield "chatty-neighbour", [("wave", [dressed(chatty_top(w), legs="brown", shoes="dbrown").outlined() for w in (False, True)], 350),
+                               ("idle", [dressed(chatty_top(False), legs="brown", shoes="dbrown", bob=bb).outlined()
                                          for bb in BREATH], BREATH_MS)]
     yield "kid", [("wave", frames([kid(False), kid(True)]), 300), ("sad", frames([kid(False, "sad")]), 1000),
                   ("idle", frames(kid(bob=bb) for bb in BREATH), BREATH_MS)]
