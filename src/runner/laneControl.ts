@@ -4,9 +4,9 @@ import {
   destinationLane,
   type LaneMotion,
   type LaneMotionConfig,
-  queueLaneMove,
-  requestLaneMove,
+  startMove,
   stillInLane,
+  turnAround,
 } from "./laneMotion";
 
 // target is the lane the pack heads for, one lane-change at a time; each steer moves it by
@@ -19,13 +19,8 @@ export interface LaneControl {
   target: number;
 }
 
-// The motion's own queued move counts toward the target.
 export function laneControlIn(motion: LaneMotion): LaneControl {
-  if (motion.kind === "still") {
-    return { lockSeconds: 0, motion, target: motion.lane };
-  }
-  const { queued, ...move } = motion;
-  return { lockSeconds: 0, motion: move, target: motion.to + (queued ?? 0) };
+  return { lockSeconds: 0, motion, target: destinationLane(motion) };
 }
 
 export function isSteeringLocked(control: LaneControl): boolean {
@@ -38,7 +33,6 @@ function startLock(seconds: number | undefined, runningSeconds: number): number 
 }
 
 const directionTo = (from: number, to: number): LaneDirection => (to < from ? -1 : 1);
-const reverse = (direction: LaneDirection): LaneDirection => (direction === 1 ? -1 : 1);
 
 // Still, the pack sets off toward target. Moving away from it, the pack turns around at once
 // from where it is; otherwise it carries on and heads on from the lane it reaches. A move
@@ -48,13 +42,13 @@ function headFor(config: LaneMotionConfig, target: number, motion: LaneMotion): 
   if (motion.kind === "still") {
     return motion.lane === target
       ? motion
-      : queueLaneMove(config, directionTo(motion.lane, target), motion);
+      : startMove(config, directionTo(motion.lane, target), motion.lane);
   }
   const heading = directionTo(motion.from, motion.to);
   if ((target - motion.to) * heading >= 0) {
     return motion;
   }
-  const turned = requestLaneMove(config, reverse(heading), motion);
+  const turned = turnAround(motion);
   return turned.kind === "still" ? headFor(config, target, turned) : turned;
 }
 

@@ -9,7 +9,7 @@ import {
   pullLane,
   steerLane,
 } from "./laneControl";
-import { advanceLaneMotion, destinationLane, type LaneMotion, stillInLane } from "./laneMotion";
+import { destinationLane, stillInLane } from "./laneMotion";
 
 const config = { laneCount: 5, moveDuration: 0.2 };
 
@@ -161,25 +161,19 @@ describe("advanceLaneControl", () => {
     expect(advance(1, locked).lockSeconds).toBe(0);
   });
 
-  it("moves the pack exactly as the lane motion alone does", () => {
-    const motion: LaneMotion = {
-      duration: 0.2,
-      elapsed: 0.03,
-      from: 1,
-      kind: "moving",
-      queued: 1,
-      to: 2,
+  it("carries the time left after an arrival into the next lane change", () => {
+    const control: LaneControl = {
+      lockSeconds: 0,
+      motion: { duration: 0.2, elapsed: 0.03, from: 1, kind: "moving", to: 2 },
+      target: 3,
     };
-    for (const seconds of [0.05, 0.17, 0.3, 1]) {
-      const actual = advance(seconds, laneControlIn(motion)).motion;
-      const expected = advanceLaneMotion(config, seconds, motion);
-      if (actual.kind === "moving" && expected.kind === "moving") {
-        expect(actual).toMatchObject({ from: expected.from, kind: "moving", to: expected.to });
-        expect(actual.elapsed).toBeCloseTo(expected.elapsed);
-      } else {
-        expect(actual).toEqual(expected);
-      }
-    }
+    const short = advance(0.05, control).motion;
+    expect(short).toMatchObject({ from: 1, kind: "moving", to: 2 });
+    expect(short.kind === "moving" && short.elapsed).toBeCloseTo(0.08);
+    const onward = advance(0.3, control).motion;
+    expect(onward).toMatchObject({ from: 2, kind: "moving", to: 3 });
+    expect(onward.kind === "moving" && onward.elapsed).toBeCloseTo(0.13);
+    expect(advance(1, control).motion).toEqual(stillInLane(3));
   });
 
   it("ends in the same place and lock however the time is split into steps", () => {

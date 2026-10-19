@@ -7,24 +7,22 @@ export interface LaneMotionConfig {
   moveDuration: number;
 }
 
-// Moving: elapsed and duration in seconds. queued is the one move waiting to start on arrival.
+// Moving: elapsed and duration in seconds.
 export type LaneMotion =
   | { kind: "still"; lane: number }
-  | {
-      duration: number;
-      elapsed: number;
-      from: number;
-      kind: "moving";
-      queued?: LaneDirection;
-      to: number;
-    };
+  | { duration: number; elapsed: number; from: number; kind: "moving"; to: number };
+export type MovingLaneMotion = Extract<LaneMotion, { kind: "moving" }>;
 
 export function stillInLane(lane: number): LaneMotion {
   return { kind: "still", lane };
 }
 
 // A move off the road edge leaves the pack where it is.
-function startMove(config: LaneMotionConfig, direction: LaneDirection, lane: number): LaneMotion {
+export function startMove(
+  config: LaneMotionConfig,
+  direction: LaneDirection,
+  lane: number,
+): LaneMotion {
   const to = moveLane(config.laneCount, direction, lane);
   if (to === lane || config.moveDuration <= 0) {
     return stillInLane(to);
@@ -32,32 +30,8 @@ function startMove(config: LaneMotionConfig, direction: LaneDirection, lane: num
   return { duration: config.moveDuration, elapsed: 0, from: lane, kind: "moving", to };
 }
 
-// While moving, the move is queued one deep: a later request replaces an earlier one.
-export function queueLaneMove(
-  config: LaneMotionConfig,
-  direction: LaneDirection,
-  motion: LaneMotion,
-): LaneMotion {
-  if (motion.kind === "still") {
-    return startMove(config, direction, motion.lane);
-  }
-  return { ...motion, queued: direction };
-}
-
-export function isReverseMove(direction: LaneDirection, motion: LaneMotion): boolean {
-  return motion.kind === "moving" && Math.sign(motion.to - motion.from) === -direction;
-}
-
-// The player's press. One against the current move turns the pack around at once, from
-// where it is, and drops any queued move. Any other press queues like queueLaneMove.
-export function requestLaneMove(
-  config: LaneMotionConfig,
-  direction: LaneDirection,
-  motion: LaneMotion,
-): LaneMotion {
-  if (motion.kind === "still" || !isReverseMove(direction, motion)) {
-    return queueLaneMove(config, direction, motion);
-  }
+// Turns the pack around at once, from where it is.
+export function turnAround(motion: MovingLaneMotion): LaneMotion {
   if (motion.elapsed <= 0) {
     return stillInLane(motion.from);
   }
@@ -68,27 +42,6 @@ export function requestLaneMove(
     kind: "moving",
     to: motion.from,
   };
-}
-
-// Time left over after arriving carries into the queued move, so the result does not
-// depend on how the time is split into steps.
-export function advanceLaneMotion(
-  config: LaneMotionConfig,
-  stepSeconds: number,
-  motion: LaneMotion,
-): LaneMotion {
-  if (motion.kind === "still") {
-    return motion;
-  }
-  const elapsed = motion.elapsed + stepSeconds;
-  if (elapsed < motion.duration) {
-    return { ...motion, elapsed };
-  }
-  if (motion.queued === undefined) {
-    return stillInLane(motion.to);
-  }
-  const next = startMove(config, motion.queued, motion.to);
-  return advanceLaneMotion(config, elapsed - motion.duration, next);
 }
 
 // Mid-move the pack spans both lanes, so it can hit things in either.
