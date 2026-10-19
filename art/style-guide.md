@@ -14,12 +14,13 @@
 - **Palette:** [Endesga 32](https://lospec.com/palette-list/endesga-32), and no other colours. Every pixel of every asset is one of its 32 colours. Darkening (shadows, the dimmed road behind cards) maps each colour to the next darker colour in its ramp rather than blending with black, so the screen stays on the palette.
 - **Outlines:** coloured. A sprite's outline is two ramp steps darker than the fill it borders, so dark sprites (the skunk) keep their silhouette. Ground decals such as puddles have no outline.
 - **UI colours (provisional):** wood. A dark brown frame (`#3e2731`, `#733e39`) with cream paper slots (`#ead4aa`) and tan face panels (`#e4a672`), as in the run screen mock. The mock's other defaults (zone road colours, card colours) stand until the style is refined.
+- **Proportions:** chibi. Heads are about as big as bodies, so a breed reads from its head shape, ears and markings at 32×32.
+- **Dog animation:** road sprites are seen from above and behind. `walk` is a 4-frame trot (diagonal leg pairs swap, the body bobs on the passing frames, the tail wags), `react` is a 2-frame hop, and `pull` is 2 frames leaning right, which the game mirrors for a pull to the left. Sprites carry no shadow; the game draws one in the road's darker ramp colour.
 - **UI art:** all UI (card frames, panels, status bar) is pixel art at the base resolution, with a pixel font.
 
 ## Open decisions
 
-- **Character proportions:** chibi/big-head vs realistic
-- **Animation budget:** frames per walk cycle, idle animations
+- **Animation budget beyond the walk:** idle animations, and frame counts for people and obstacles
 - **Card art size and frame:** illustration dimensions, border style
 - **Pixel font:** which font
 
@@ -28,6 +29,7 @@
 The art-side rules for every asset live here. The tooling that generates, cleans up and packs sprites lives in `../tech-plan.md`.
 
 - **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/art/` (manifest: `public/art/manifest.json`). The pixel font is a BMFont (`.fnt` plus `.png`). The export pipeline lives in `../tech-plan.md`.
+- **Dogs in code:** `art/tools/dogs.py` draws every dog and builds its sources in `art/dogs/` and exports in `public/art/sprites/`, then adds them to the manifest (`python3 art/tools/dogs.py build`; `preview OUT.png` writes a contact sheet). A build overwrites the `.aseprite` files, so change the script, not the sources.
 - **Inventory:** every asset v1 needs, with its manifest key, size and priority, is listed in `inventory.md`.
 - **Naming:** TBD (file and sprite naming scheme)
 - **Consistency checks:** every generated asset must match the agreed palette, resolution, proportions and outline style before it goes in the game. TBD once the open decisions above are settled

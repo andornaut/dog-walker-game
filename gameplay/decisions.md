@@ -99,3 +99,5 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · Every locked dog costs $150
 - 2026-10-18 · Design · Skunk and puddle are area effects: each dog rolls on contact, the card shows who was caught, and nobody caught means no card
 - 2026-10-18 · Process · Once typed data lands in src/data/, it is the source of truth for tuning numbers and roster stats; v1-plan.md keeps rules, names and looks and links to it
+- 2026-10-19 · Art · Characters are chibi, with heads about as big as bodies
+- 2026-10-19 · Art · Dog walk cycles are 4 frames; react and pull are 2 frames each, and pull is drawn leaning right and mirrored for left

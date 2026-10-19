@@ -1,5 +1,36 @@
 {
-  "sprites": [],
+  "sprites": [
+    {
+      "key": "dog-biscuit",
+      "png": "sprites/dog-biscuit.png",
+      "json": "sprites/dog-biscuit.json"
+    },
+    {
+      "key": "dog-duchess",
+      "png": "sprites/dog-duchess.png",
+      "json": "sprites/dog-duchess.json"
+    },
+    {
+      "key": "dog-koda",
+      "png": "sprites/dog-koda.png",
+      "json": "sprites/dog-koda.json"
+    },
+    {
+      "key": "face-dog-biscuit",
+      "png": "sprites/face-dog-biscuit.png",
+      "json": "sprites/face-dog-biscuit.json"
+    },
+    {
+      "key": "face-dog-duchess",
+      "png": "sprites/face-dog-duchess.png",
+      "json": "sprites/face-dog-duchess.json"
+    },
+    {
+      "key": "face-dog-koda",
+      "png": "sprites/face-dog-koda.png",
+      "json": "sprites/face-dog-koda.json"
+    }
+  ],
   "fonts": [],
   "images": []
 }
