@@ -26,8 +26,8 @@ frame 0 is the rest pose.
 
 Usage:
   obstacles.py preview OUT.png   every obstacle on the street colours
-  obstacles.py build             write art/obstacles/*.aseprite, export to
-                                 public/art/sprites/ and list them in the manifest
+  obstacles.py build             write art/obstacles/*.aseprite and export to
+                                 public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -37,7 +37,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, ROADS, Grid, edged, main, road_edge, road_sprite  # noqa: E402
+from pixel import K, ROADS, Grid, edged, main, road_edge  # noqa: E402
 from road import LIT, rim  # noqa: E402
 
 
@@ -269,4 +269,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/obstacles", __doc__, grounds=ROADS, anchored=road_sprite)
+    main(sys.argv, sprites, "art/obstacles", __doc__, grounds=ROADS)

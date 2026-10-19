@@ -54,8 +54,8 @@ spot-<spot>@<step>  every spot redrawn small on a Mini at each depth step in min
 
 Usage:
   needs.py preview OUT.png   every frame of every piece on the six road colours
-  needs.py build             write art/needs/*.aseprite, export to public/art/sprites/
-                             and list them in the manifest
+  needs.py build             write art/needs/*.aseprite and export them to
+                             public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
@@ -72,7 +72,7 @@ from fx import HEART, SMALL, burst, rim, stamp, star4  # noqa: E402
 from hits import layer, piece  # noqa: E402
 from minis import STEPS, small  # noqa: E402
 from moments import rounded  # noqa: E402
-from pixel import DARKER, K, Grid, contrast, edged, main, road_sprite  # noqa: E402
+from pixel import DARKER, K, Grid, contrast, edged, main  # noqa: E402
 import road  # noqa: E402
 
 # The six road colours: Woof Way, Bark Park, Sniff Street Shops, The Long Way Home, Snooze Crescent
@@ -616,7 +616,7 @@ def sprites():
     for need, draw in ICONS.items():
         yield f"icon-need-{need}", [("normal", [draw().outlined()], 1000)]
     yield "icon-growl", [("normal", [growl().outlined()], 1000)]
-    # idle leads, so frame 0 (the manifest anchor) is the rest pose
+    # idle leads, so frame 0 (the anchor the game measures) is the rest pose
     yield "ui-pull-bubble", [
         ("idle", [bubble().outlined(False), bubble(grow=1).outlined(False)], 400),
         ("show", [bubble(size=(10, 8)).outlined(False), bubble(grow=2).outlined(False), bubble().outlined(False)], 60),
@@ -637,4 +637,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/needs", __doc__, grounds=GROUNDS, anchored=road_sprite)
+    main(sys.argv, sprites, "art/needs", __doc__, grounds=GROUNDS)

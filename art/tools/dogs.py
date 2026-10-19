@@ -31,7 +31,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, edged, main, road_sprite  # noqa: E402
+from pixel import Grid, edged, main  # noqa: E402
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
 # and the body bobs up on the passing beats 1 and 3.
@@ -788,4 +788,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/dogs", __doc__, anchored=road_sprite)
+    main(sys.argv, sprites, "art/dogs", __doc__)

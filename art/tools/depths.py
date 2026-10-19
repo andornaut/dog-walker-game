@@ -21,8 +21,8 @@ Usage:
   depths.py compare DIR       DIR/<key>.png per sprite: each frame at 1x, then per
                               step nearest-neighbour beside the variant, on the
                               six road colours
-  depths.py build             write every variant to art/depths/*.aseprite, export
-                              to public/art/sprites/ and list them in the manifest
+  depths.py build             write every variant to art/depths/*.aseprite and
+                              export to public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -38,7 +38,7 @@ import minis  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
 from minis import SCALES, STEPS, scaled, small, snap  # noqa: E402
-from pixel import K, build, preview, road_sprite  # noqa: E402
+from pixel import K, build, preview  # noqa: E402
 
 # The steps hazards.py has no hand-drawn art for.
 BETWEEN = tuple(q for q in STEPS if q not in SCALES)
@@ -235,6 +235,6 @@ if __name__ == "__main__":
     elif len(argv) == 3 and argv[1] == "compare":
         compare(argv[2])
     elif len(argv) == 2 and argv[1] == "build":
-        build(checked(sprites()), "art/depths", anchored=road_sprite)
+        build(checked(sprites()), "art/depths")
     else:
         sys.exit(__doc__)

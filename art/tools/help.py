@@ -5,14 +5,14 @@ help-<page>: 344x236 images in Endesga 32, one per page of the in-game "How to
 walk" screen (see public/art/mocks/help-screen.html, which animates the same
 scenes). Built from public/art/sprites/ and the road strips, card illustrations
 and UI images in public/art/images/, so build those first (roads.py, cards.py, ui.py).
-Names and numbers come from src/data/ at build time, so the pages follow the data.
+Names, numbers, the camera and the layout come from the game's export in
+shared/export/ at build time, so the pages follow the game.
 The road pages show the run screen's bottom rows in the game's projection,
 each sprite at its depth step.
 
 Usage:
   help.py preview OUT.png   all six images side by side, scaled up
-  help.py build             write art/help/*.aseprite and public/art/images/*.png,
-                            and list them in the manifest's "images"
+  help.py build             write art/help/*.aseprite and public/art/images/*.png
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -125,35 +125,24 @@ def wrap(s, width, sc=1):
     return lines
 
 
-# ---------- game data, read from src/data/ at build time ----------
+# ---------- game data and layout, from the game's export in shared/export/ ----------
 
-def data(name):
-    return open(f"src/data/{name}.ts").read()
-
-
-def ts_block(src, key):
-    """The source between the braces of the first `key: {` in src: enough parsing for the plain
-    object literals in src/data/, so names and numbers are never copied into this file."""
-    i = re.search(rf"\b{key}: \{{", src).end()
-    depth = 1
-    for j in range(i, len(src)):
-        depth += {"{": 1, "}": -1}.get(src[j], 0)
-        if depth == 0:
-            return src[i:j]
-    raise ValueError(f"{key} is not closed")
+GAME = json.load(open("shared/export/game-data.json"))
+LAYOUT = json.load(open("shared/export/layout.json"))
 
 
-def ts_value(src, key):
-    """The first `key: "text"` or `key: number` in src."""
-    v = re.search(rf"(?<![\w.]){key}: (\"[^\"]*\"|-?[\d.]+)", src).group(1)
-    return v.strip('"') if v.startswith('"') else float(v)
+def by_id(items):
+    return {item["id"]: item for item in items}
+
+
+DOGS, ENCOUNTERS, DEBUFFS = by_id(GAME["dogs"]), by_id(GAME["encounters"]), by_id(GAME["debuffs"])
 
 
 def tuning(*path):
-    src = data("tuning")
-    for key in path[:-1]:
-        src = ts_block(src, key)
-    return ts_value(src, path[-1])
+    v = GAME["tuning"]
+    for key in path:
+        v = v[key]
+    return v
 
 
 def dollars(v):
@@ -163,12 +152,14 @@ def dollars(v):
 
 
 def dog(key):
-    """A dog in dogs.ts: (name, owner name, max hearts, starting hearts)."""
-    block = ts_block(data("dogs"), key)
-    owner = ts_block(block, "owner")
-    max_h = tuning("hearts", "maxBySize", ts_value(block, "size"))
-    start = tuning("hearts", "startByTemperament", ts_value(owner, "temperament"))
-    return ts_value(block, "name").upper(), ts_value(owner, "name").upper(), int(max_h), int(start)
+    """A dog: (name, owner name, max hearts, starting hearts)."""
+    d = DOGS[key]
+    return d["name"].upper(), d["owner"]["name"].upper(), d["figures"]["maxHearts"], d["figures"]["startHearts"]
+
+
+def fee(key):
+    """The fee a dog pays after each zone, in dollars."""
+    return DOGS[key]["figures"]["feeCents"] / 100
 
 
 def mood(hearts):
@@ -178,69 +169,37 @@ def mood(hearts):
     return "neutral" if hearts >= tuning("hearts", "faceNeutralFrom") else "upset"
 
 
-MONEY = r'amount: "(\w+)",\s*change: "(gain|lose)"'
-HEARTS = r'amount: (-?\d+),\s*kind: "hearts"'
-DEBUFF = r'debuff: "(\w+)"'
-
-
 def card_options(encounter):
-    """An encounter's card options in encounters.ts, left to right: (name, art key, effect text,
-    cost for one dog in dollars). The effect text follows the game's effectText, in capitals."""
+    """An encounter's card options, left to right: (name, art key, effect text, cost for one dog in
+    dollars). The effect text follows the game's effectText, in capitals."""
     out = []
-    for chunk in ts_block(data("encounters"), encounter).split("art: ")[1:]:
+    for option in ENCOUNTERS[encounter]["resolution"]["options"]:
         effects, cost = [], 0
-        for m in sorted((m for p in (MONEY, HEARTS, DEBUFF) for m in re.finditer(p, chunk)), key=lambda m: m.start()):
-            if m.re.pattern == MONEY:
-                v = tuning("money", m.group(1))
-                cost += v if m.group(2) == "lose" else 0
-                per_dog = " PER DOG" if "perDog" in chunk[m.end():].split("}")[0] else ""
-                effects.append(("-" if m.group(2) == "lose" else "+") + dollars(v) + per_dog)
-            elif m.re.pattern == HEARTS:
-                n = int(m.group(1))
+        for e in option["effects"]:
+            if e["kind"] == "money":
+                v = tuning("money", e["amount"])
+                cost += v if e["change"] == "lose" else 0
+                per_dog = " PER DOG" if "perDog" in e else ""
+                effects.append(("-" if e["change"] == "lose" else "+") + dollars(v) + per_dog)
+            elif e["kind"] == "hearts":
+                n = e["amount"]
                 effects.append(f"{'-' if n < 0 else '+'}{abs(n)}♥ EACH")
-            else:
-                effects.append(ts_value(ts_block(data("debuffs"), m.group(1)), "name").upper())
-        out.append((ts_value(chunk, "name").upper(), chunk.split('"')[1], ", ".join(effects), cost))
+            elif e["kind"] == "debuff":
+                effects.append(DEBUFFS[e["debuff"]]["name"].upper())
+        out.append((option["name"].upper(), option["art"], ", ".join(effects), cost))
     return out
 
 
-def ts_items(src, key):
-    """The source of each object literal in the array after the first `key: [` in src."""
-    i, out, depth = re.search(rf"\b{key}: \[", src).end(), [], 0
-    for j in range(i, len(src)):
-        if src[j] == "{":
-            depth += 1
-            start = j + 1 if depth == 1 else start
-        elif src[j] == "}":
-            depth -= 1
-            if depth == 0:
-                out.append(src[start:j])
-        elif src[j] == "]" and depth == 0:
-            return out
-    raise ValueError(f"{key} is not closed")
-
-
-def ts_opt(src, key, default=None):
-    """ts_value, or default where src has no such key."""
-    return ts_value(src, key) if re.search(rf"(?<![\w.]){key}: ", src) else default
-
-
 def world():
-    """The world in world.ts: its name, first zone, walk length and {zone id: zone} in its order.
-    Each zone has its name, art key (artId, else the name in kebab case), road shadow and leash
-    colours, and the difficulty (1 to 5), difficulty name and fee multiplier a fork's path card
-    shows, None where world.ts has none."""
-    src, zones = data("world"), {}
-    for block in ts_items(src, "zones"):
-        name = ts_value(block, "name")
-        zones[ts_value(block, "id")] = dict(
-            name=name, art=ts_opt(block, "artId", re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")),
-            shadow=ts_value(block, "roadShadowColor").lstrip("#"), leash=ts_value(block, "leashColor").lstrip("#"),
-            difficulty=ts_opt(block, "difficulty"), difficulty_name=ts_opt(block, "difficultyName"),
-            fees=ts_opt(block, "fees"))
-    head = src[:src.index("zones: [")]
-    return (ts_value(src, "name").upper(), ts_opt(head, "firstZone", next(iter(zones))),
-            int(ts_opt(head, "walkLength", len(zones))), zones)
+    """The world: its name, first zone, walk length and {zone id: zone} in its order. Each zone has
+    its name, art key, road shadow and leash colours, and the difficulty (1 to 5), difficulty name
+    and fee multiplier a fork's path card shows, None where the zone has none."""
+    zones = {z["id"]: dict(
+        name=z["name"], art=z["art"], shadow=z["roadShadowColor"].lstrip("#"), leash=z["leashColor"].lstrip("#"),
+        difficulty=z.get("difficulty"), difficulty_name=z.get("difficultyName"), fees=z.get("fees"))
+        for z in GAME["zones"]}
+    w = GAME["world"]
+    return w["name"].upper(), w["firstZone"], w["walkLength"], zones
 
 
 # ---------- road strips: the exported road-<zone> images (roads.py) ----------
@@ -254,27 +213,30 @@ TILES = {z: Image.open(f"public/art/images/road-{zone['art']}.png").convert("RGB
 # column x is screen column x + OX, image row y screen row y + TOP, so the feet (screen row
 # FOOT) land on row H - 8.
 
-# RATIO follows the game's camera at the base scroll speed: 5.25 s of road in view.
-YH, FOOT, RATIO = -164, 464, 0.797
+CAMERA = LAYOUT["camera"]
+YH, FOOT, F = CAMERA["horizonY"], CAMERA["footY"], CAMERA["focal"]
 KS = FOOT - YH
-F = KS / RATIO
-CX = 180                        # the road's centre on screen, verges either side out to 0 and 360
+CX = CAMERA["centerX"]          # the road's centre on screen, verges either side out to the screen's edges
 OX, TOP = CX - W // 2, FOOT - (H - 8)
-STRIP_X = CX - 140              # the road strip's left edge on screen, 280 wide
+STRIP_X, STRIP_W = LAYOUT["regions"]["road"]["x"], LAYOUT["regions"]["road"]["width"]
 # The verge beside the road, as src/layout/roadside.ts: across is the distance from the road's
-# centre line in road pixels; the curb to curbTo, the sidewalk or paving to walkTo, then lawn.
-CURB, WALK = 144, 188
-VERGES = {"street": (CURB, WALK, "mown"), "park": (140, 140, "rough"), "shops": (CURB, 10 ** 6, "none"),
-          "homeStretch": (CURB, WALK, "mown")}
+# centre line in road pixels; the curb to curbTo, the sidewalk or paving to walkTo (none where
+# walkTo is null), then lawn.
+VERGES = {z: ("%06x" % v["curbColor"], v["curbTo"], 10 ** 6 if v["walkTo"] is None else v["walkTo"], v["lawn"])
+          for z, v in LAYOUT["verges"].items()}
 MOWN = (44, 62, 36, 70, 50, 58, 40, 66)   # stripe widths out from the sidewalk, light then dark
 SEAM_PERIOD, SEAM_MAX_SPAN = 32, 16
-STEPS = (1, 0.75, 0.5)
+STEPS = {step["scale"]: step["suffix"] for step in LAYOUT["depthSteps"]}
 # The pack, as src/layout/packFormation.ts: each dog's (dx across, distance ahead of the feet) by
 # pack size, the first dog leading; the walker's hands (left dx, right dx, height above the
 # feet) and the collar's height above a dog's feet.
-FORMATIONS = {1: [(0, 44)], 2: [(-12, 48), (12, 44)], 3: [(0, 58), (-14, 42), (14, 40)]}
-HANDS = (-11, 10, 13)
-COLLAR = 14
+PACK = LAYOUT["pack"]
+FORMATIONS = {n + 1: [(p["dx"], -p["footDy"]) for p in f] for n, f in enumerate(PACK["formations"])}
+HANDS = (PACK["walkerHands"]["leftDx"], PACK["walkerHands"]["rightDx"], PACK["walkerHands"]["heightAboveFeet"])
+COLLAR = PACK["collarHeight"]
+TOP_BAR = LAYOUT["topBar"]
+DOGHOUSE = LAYOUT["doghouse"]["parts"]
+CARD = LAYOUT["scenes"]["cards"]
 
 
 def noise(x, y):
@@ -299,9 +261,9 @@ def verge(zone, across, s, z, span):
     """The colour beside the road at across, on a row of scale s covering span road pixels from
     z: the curb, the sidewalk with a seam every SEAM_PERIOD, then the lawn, mown in stripes
     (none narrower than 4px on screen) or rough, with sparse tufts."""
-    curb_to, walk_to, lawn = VERGES[zone]
+    curb, curb_to, walk_to, lawn = VERGES[zone]
     if across < curb_to:
-        return "grey"
+        return curb
     if across < walk_to:
         seam = span < SEAM_MAX_SPAN and z // SEAM_PERIOD != (z - max(span, 1)) // SEAM_PERIOD
         return "grey" if seam else "lgrey"
@@ -338,16 +300,16 @@ def frame(key, tag, i=0):
 
 
 def depth_frame(key, tag, s, i=0):
-    """A frame at the depth step for scale s: the redrawn key@75 or key@50 where it exists,
-    else the sprite scaled nearest-neighbour, as the game does."""
+    """A frame at the depth step for scale s: the redrawn variant (key@75) where it exists, else the
+    sprite scaled nearest-neighbour, as the game does."""
     step = snap(s)
     if step == 1:
         return frame(key, tag, i)
-    variant = f"{key}@{round(step * 100)}"
+    variant = f"{key}{STEPS[step]}"
     if os.path.exists(f"public/art/sprites/{variant}.json"):
         return frame(variant, tag, i)
     f = frame(key, tag, i)
-    return f.resize((round(f.width * step), round(f.height * step)), Image.NEAREST)
+    return f.resize((math.floor(f.width * step + 0.5), math.floor(f.height * step + 0.5)), Image.NEAREST)
 
 
 def image(key):
@@ -369,7 +331,7 @@ class Scene(Canvas):
             row = (63 - math.floor(z)) % 64
             for x in range(W):
                 rx = CX + (x + OX + 0.5 - CX) / s
-                if STRIP_X <= rx < STRIP_X + 280:
+                if STRIP_X <= rx < STRIP_X + STRIP_W:
                     px[x, y] = tile[math.floor(rx - STRIP_X), row]
                 else:
                     px[x, y] = rgb(verge(zone, abs(rx - CX), s, z, span))
@@ -449,11 +411,12 @@ class Scene(Canvas):
         label, the option's illustration, the effect text in the body (2x where it fits) and the
         cost on the card-cost plaque."""
         self.paste(frame("card-frame", "encounter"), x, y)
-        self.paste(image(art), x + 5, y + 16)
-        self.paste(image("card-cost"), x + 6, y + 121)
+        self.paste(image(art), x + CARD["art"]["x"], y + CARD["art"]["y"])
+        self.paste(image("card-cost"), x + CARD["badge"]["x"], y + CARD["badge"]["y"])
         text_c(self, label, x + 42, y + 5, "white")
-        sc = 2 if len(wrap(effect, 71, 2)) * 12 <= 42 else 1
-        for i, ln in enumerate(wrap(effect, 71, sc)):
+        body = CARD["effect"]["width"]
+        sc = 2 if len(wrap(effect, body, 2)) * 12 <= 42 else 1
+        for i, ln in enumerate(wrap(effect, body, sc)):
             text_c(self, ln, x + 42, y + 78 + i * 6 * sc, "plum", sc, {"♥": "dred"})
         text_c(self, cost, x + 42, y + 125, "cream")
 
@@ -471,12 +434,15 @@ class Scene(Canvas):
         bar, cut = image("ui-top-bar"), 200
         self.paste(bar.crop((0, 0, cut, 40)), 0, 0)
         self.paste(bar.crop((cut + bar.width - W, 0, bar.width, 40)), cut, 0)
-        r = W - 8  # the zone well's right edge, 352 on screen
+        r = TOP_BAR["wells"]["zone"]["nameRight"] - (LAYOUT["screen"]["width"] - W)  # the zone well's right edge
         self.paste(frame("tip", "idle"), 8, 13)
         text(self, "$", 26, 15, "amber", 2); text(self, f"{money:g}", 26 + text_w("$", 2) + 2, 15, "cream", 2)
         self.paste(frame("treat", "idle"), 100, 13)
         text(self, f"{treats}/{tuning('counts', 'treatCarryMax'):g}", 118, 18, "cream")
-        self.button(130, 10, image("icon-home")); self.button(174, 10, image("icon-pause"))
+        for name in ("home", "pause"):
+            b = TOP_BAR["buttons"][name]
+            self.paste(frame("ui-icon-button", "normal"), b["face"]["x"], b["face"]["y"])
+            self.paste(image(f"icon-{name}"), b["icon"]["x"], b["icon"]["y"])
         zone = ZONES[route[-1]]
         name = zone["name"].upper()
         text(self, name, r - text_w(name), 10, "cream")
@@ -543,19 +509,21 @@ class Scene(Canvas):
         if not hearts:
             text_c(self, "FIRED", x + 60, y + 75, "dred")
             return
-        m = mood(hearts)
-        self.paste(frame(f"face-dog-{key}", m), x + 6, y + 24)
-        self.paste(frame(f"face-owner-{key}", m), x + 42, y + 24)
+        m, dog_face, owner_face, row = mood(hearts), DOGHOUSE["dogFace"], DOGHOUSE["ownerFace"], DOGHOUSE["hearts"]
+        self.paste(frame(f"face-dog-{key}", m), x + dog_face["x"], y + dog_face["y"])
+        self.paste(frame(f"face-owner-{key}", m), x + owner_face["x"], y + owner_face["y"])
         for j in range(max_h):
-            self.paste(frame("ui-heart", "full" if j < hearts else "empty"), x + 78 + j % 5 * 8, y + 26 + j // 5 * 8)
-        text_c(self, f"{hearts}/{max_h}", x + 98, y + 46, "dred")
+            self.paste(frame("ui-heart", "full" if j < hearts else "empty"),
+                       x + row["x"] + j % row["perRow"] * row["pitchX"], y + row["y"] + j // row["perRow"] * row["pitchY"])
+        count = DOGHOUSE["heartCount"]
+        text_c(self, f"{hearts}/{max_h}", x + count["x"], y + count["y"], "dred")
         text(self, owner, x + 6, y + 63, "plum")
 
     def path_card(self, x, y, zone):
         """A fork's path card as CardScene draws it: the route card-frame (the upgrade one until
         cards.py draws it), the zone's name in the band, its card-zone preview in the art window
         (until that is drawn, a crop of its road strip under its zone icon), and in the body
-        the ui-difficulty paws, the difficulty name and the fee multiplier, where world.ts has
+        the ui-difficulty paws, the difficulty name and the fee multiplier, where the zone has
         them. Taking a path costs nothing."""
         z = ZONES[zone]
         self.paste(frame("card-frame", "route" if "route" in sheet("card-frame")[2] else "upgrade"), x, y)
@@ -577,7 +545,8 @@ class Scene(Canvas):
 
 
 def lane(n):
-    return 32 + n * 56 + 28
+    """Lane n's centre, in image columns."""
+    return LAYOUT["lanes"]["centers"][n] - OX
 
 
 def lanes():
@@ -608,8 +577,7 @@ def pickups():
     solo = round(tuning("money", "tip") * tuning("multipliers", "tipByPackSize", "1") * 100) / 100
     c.bubble(200, 168, 70, ["+" + dollars(solo)])
     # the bar after the first zone has paid the dog's fee, with two treats carried
-    owner = ts_block(ts_block(data("dogs"), "biscuit"), "owner")
-    c.top_bar([FIRST_ZONE, "park"], tuning("money", "feeByTemperament", ts_value(owner, "temperament")), 2, 0.4)
+    c.top_bar([FIRST_ZONE, "park"], fee("biscuit"), 2, 0.4)
     return c
 
 
@@ -619,7 +587,7 @@ def cards():
     c.stand("skunk", "idle", lane(2), 192)
     c.pack(lane(2), ("dog-koda",), "react")
     c.dim(0, 0, W, H)
-    text_c(c, ts_value(ts_block(data("encounters"), "skunk"), "name").upper() + "!", 172, 8, "white", 2)
+    text_c(c, ENCOUNTERS["skunk"]["name"].upper() + "!", 172, 8, "white", 2)
     # the skunk card as one dog would see it: each cost is per dog, and a hearts-only option is free
     opts = card_options("skunk")
     x0 = (W - len(opts) * 89 + 6) // 2
@@ -648,7 +616,7 @@ def owners():
     # fx-fired-pop's storm with the cracked heart, and the FIRED! plate in the owner's
     # temperament (ui-fired-plate stretched to 72x28, the text's caps in rows 9 to 18)
     name, _, _, _ = dog("nugget")
-    temperament = ts_value(ts_block(ts_block(data("dogs"), "nugget"), "owner"), "temperament")
+    temperament = DOGS["nugget"]["owner"]["temperament"]
     c.doghouse(216, 8, "nugget", 0)
     c.paste(frame("fx-fired-pop", "play", 3), 244, 104)
     c.paste(frame("face-owner-nugget", "fired"), 260, 120)
@@ -682,8 +650,7 @@ def zones():
     # the top bar's route with the first zone done and the rest not yet chosen
     c.road(FIRST_ZONE)
     c.dim(0, 0, W, H)
-    owner = ts_block(ts_block(data("dogs"), "koda"), "owner")
-    c.top_bar([FIRST_ZONE], tuning("money", "feeByTemperament", ts_value(owner, "temperament")), 2)
+    c.top_bar([FIRST_ZONE], fee("koda"), 2)
     text_c(c, "START", W - 8 - 81 + 9, 42, "amber")
     # CardScene's fork title, white on an ink shadow
     text_c(c, "WHICH WAY?", 173, 46, "ink", 2); text_c(c, "WHICH WAY?", 172, 45, "white", 2)
@@ -692,7 +659,7 @@ def zones():
     left = [z for z in ZONES if z != FIRST_ZONE]
     paths = [left[0], left[len(left) // 2], left[-1]]
     for i, z in enumerate(paths):
-        c.path_card(39 + i * 91, 61, z)
+        c.path_card(CARD["rows"][2][i]["x"] - OX, 61, z)
     c.nine(frame("ui-select", "pulse"), 126, 57, 91, 148)
     text_c(c, "BETWEEN ZONES: UPGRADE CARD, THEN A FORK", 172, 208, "yellow")
     # head home from the pause menu; while paused, the same button shows play and resumes
@@ -714,15 +681,6 @@ def build():
         png = f"public/art/images/{key}.png"
         draw().img.save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/help/{key}.aseprite"], check=True)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for name in PAGES:
-        entries[f"help-{name}"] = {"key": f"help-{name}", "png": f"images/help-{name}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(f"help-{n}" for n in PAGES))
 
 

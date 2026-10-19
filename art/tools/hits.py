@@ -43,8 +43,8 @@ fx-status-spooked  16x16  loop (4 frames, 150ms) sweat drop popping, surprise li
 
 Usage:
   hits.py preview OUT.png   every frame of every piece on the four road colours
-  hits.py build             write art/hits/*.aseprite, export to public/art/sprites/
-                            and list them in the manifest
+  hits.py build             write art/hits/*.aseprite and export to
+                            public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,

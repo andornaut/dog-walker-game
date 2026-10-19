@@ -38,8 +38,8 @@ so the silhouette holds 3:1 on every road. The drawing functions take new, the g
 
 Usage:
   encounters.py preview OUT.png   every frame on the road colours
-  encounters.py build             write art/encounters/*.aseprite, export to
-                                  public/art/sprites/ and list them in the manifest
+  encounters.py build             write art/encounters/*.aseprite and export to
+                                  public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -52,7 +52,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
 from minis import STEPS, Mini, paint  # noqa: E402
-from pixel import ROADS, Grid, edged, main, road_sprite  # noqa: E402
+from pixel import ROADS, Grid, edged, main  # noqa: E402
 from road import LIT  # noqa: E402
 
 # Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Snooze Crescent
@@ -582,4 +582,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/encounters", __doc__, grounds=GROUNDS, anchored=road_sprite)
+    main(sys.argv, sprites, "art/encounters", __doc__, grounds=GROUNDS)

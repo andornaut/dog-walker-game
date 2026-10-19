@@ -26,8 +26,8 @@ the cyclist drawn by hand at each size so its face and the turning crank stay re
 
 Usage:
   hazards.py preview OUT.png   every frame on the four road colours
-  hazards.py build             write art/hazards/*.aseprite, export to
-                               public/art/sprites/ and list them in the manifest
+  hazards.py build             write art/hazards/*.aseprite and export to
+                               public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -38,7 +38,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import K, ROADS, Grid, edged, main, road_sprite  # noqa: E402
+from pixel import K, ROADS, Grid, edged, main  # noqa: E402
 from minis import SCALES, Mini  # noqa: E402
 from road import face_front, lean  # noqa: E402
 
@@ -491,4 +491,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/hazards", __doc__, grounds=ROADS, anchored=road_sprite)
+    main(sys.argv, sprites, "art/hazards", __doc__, grounds=ROADS)

@@ -30,13 +30,12 @@ Usage:
   glyphs.py preview OUT.png   every icon on the UI's paper, panel, wood and ink colours, then
                               ui-difficulty's tags, scaled up
   glyphs.py build             write art/glyphs/*.aseprite, export to public/art/images/ and
-                              public/art/sprites/, and list them in the manifest
+                              public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import json
 import os
 import subprocess
 import sys
@@ -596,15 +595,6 @@ def build():
         image(draw).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/glyphs/{key}.aseprite"], check=True)
     build_sprites(list(sprites()), "art/glyphs")
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for key in IMAGES:
-        entries[key] = {"key": key, "png": f"images/{key}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(IMAGES))
 
 

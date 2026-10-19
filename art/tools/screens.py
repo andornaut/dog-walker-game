@@ -46,15 +46,13 @@ Usage:
                                scaled up, and every screen again with its UI
                                blocked in
   screens.py build             write art/screens/*.aseprite, public/art/images/*.png
-                               and public/art/sprites/ui-loading.*, and list them
-                               in the manifest
+                               and public/art/sprites/ui-loading.*
 
 Run from the repository root, after fonts.py build and the sprite builds. A
 build overwrites the .aseprite sources, so hand edits to them belong in this
 file instead.
 """
 
-import json
 import os
 import subprocess
 import sys
@@ -937,15 +935,6 @@ def build():
         png = f"public/art/images/{key}.png"
         draw().img.save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/screens/{key}.aseprite"], check=True)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for key in SCREENS:
-        entries[key] = {"key": key, "png": f"images/{key}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     build_sprites(list(sprites()), "art/screens")
     print("built", ", ".join(SCREENS))
 

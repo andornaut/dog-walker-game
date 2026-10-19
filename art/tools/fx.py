@@ -20,8 +20,8 @@ fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behin
 
 Usage:
   fx.py preview OUT.png   every frame of every effect on the street colours
-  fx.py build             write art/fx/*.aseprite, export to public/art/sprites/
-                          and list them in the manifest
+  fx.py build             write art/fx/*.aseprite and export to
+                          public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.

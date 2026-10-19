@@ -12,8 +12,8 @@ help pages' pack layout, the leashes running behind Casey to her hands.
 Built from public/art/images/ (logo, backdrop-woof-way, road-woof-way), the
 walker and dog sprites in public/art/sprites/ and the font-title BMFont in
 public/art/fonts/, so build those first (screens.py, backdrops.py, roads.py,
-road.py, dogs.py, fonts.py). It is not a game asset, so it stays out of the
-manifest.
+road.py, dogs.py, fonts.py). It is not a game asset, so it is written to public/,
+outside public/art/.
 
 Usage:
   share.py preview OUT.png   the card at 1200x630
@@ -46,7 +46,7 @@ VIEW_X = 152
 VIEW_W = W - 1 - VIEW_X
 BAND_TOP = 16              # the first backdrop row shown; the far side stands on band row bd.BASE
 BAND_ROWS = bd.H - BAND_TOP
-STREET = "street"          # Woof Way's zone id in world.ts
+STREET = next(z for z, zone in hp.ZONES.items() if zone["art"] == "woof-way")   # Woof Way's zone id
 
 
 # ---------- font-title, read from its BMFont export ----------

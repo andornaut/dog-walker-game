@@ -1,8 +1,7 @@
 """Shared pixel-art tooling: an Endesga 32 drawing grid with coloured outlines,
-and the step that turns frames into an Aseprite source, a PNG + JSON export and
-a manifest entry. Run the art scripts from the repository root."""
+and the step that turns frames into an Aseprite source and a PNG + JSON export.
+Run the art scripts from the repository root."""
 
-import json
 import os
 import subprocess
 import tempfile
@@ -193,29 +192,12 @@ def _lua(tags, out):
                       durations="{" + ",".join(durations) + "}", tags="\n".join(tag_lines), out=out)
 
 
-def anchor(frame):
-    """Where a road sprite stands: the row of its lowest opaque pixel and the width of its opaque
-    bounds, both in frame pixels. The game places and spaces sprites by these instead of
-    scanning pixels at boot."""
-    rows = [y for y, row in enumerate(frame) if any(row)]
-    cols = [x for row in frame for x, c in enumerate(row) if c]
-    return {"feetY": max(rows), "opaqueWidth": max(cols) - min(cols) + 1}
-
-
-def road_sprite(key):
-    """Road sprites get an anchor in the manifest; faces and effects do not."""
-    return not key.startswith(("face-", "fx-"))
-
-
-def build(sprites, src_dir, anchored=None):
-    """Write src_dir/<key>.aseprite for every sprite, export it to public/art/sprites/ and list it in
-    the manifest. Keys for which anchored(key) is true also get their frame 0 anchor."""
+def build(sprites, src_dir):
+    """Write src_dir/<key>.aseprite for every sprite and export it to public/art/sprites/."""
     os.makedirs(src_dir, exist_ok=True)
     os.makedirs("public/art/sprites", exist_ok=True)
-    built, anchors = [], {}
+    built = []
     for key, tags in sprites:
-        if anchored and anchored(key):
-            anchors[key] = anchor(tags[0][1][0])
         src = f"{src_dir}/{key}.aseprite"
         with tempfile.NamedTemporaryFile("w", suffix=".lua", delete=False) as f:
             f.write(_lua(tags, src))
@@ -225,27 +207,15 @@ def build(sprites, src_dir, anchored=None):
                         "--data", f"public/art/sprites/{key}.json", "--format", "json-hash", "--list-tags"],
                        check=True, stdout=subprocess.DEVNULL)
         built.append(key)
-    manifest_path = "public/art/manifest.json"
-    with open(manifest_path) as f:
-        manifest = json.load(f)
-    entries = {s["key"]: s for s in manifest.get("sprites", [])}
-    for key in built:
-        entries[key] = {"key": key, "png": f"sprites/{key}.png", "json": f"sprites/{key}.json"}
-        if key in anchors:
-            entries[key]["anchor"] = anchors[key]
-    manifest["sprites"] = sorted(entries.values(), key=lambda s: s["key"])
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(built))
 
 
-def main(argv, sprites, src_dir, doc, grounds=("3a4466", "c0cbdc", "c28569"), anchored=None):
+def main(argv, sprites, src_dir, doc, grounds=("3a4466", "c0cbdc", "c28569")):
     import sys
 
     if len(argv) == 3 and argv[1] == "preview":
         preview(list(sprites()), argv[2], grounds)
     elif len(argv) == 2 and argv[1] == "build":
-        build(list(sprites()), src_dir, anchored)
+        build(list(sprites()), src_dir)
     else:
         sys.exit(doc)

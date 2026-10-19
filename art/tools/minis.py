@@ -21,8 +21,8 @@ Usage:
   minis.py preview OUT.png   every small frame on the street colours
   minis.py compare OUT.png   each sprite at 1x, then plain nearest-neighbour and
                              this file's version at each scale it has, at 4x zoom
-  minis.py build             write art/minis/*.aseprite, export to
-                             public/art/sprites/ and list them in the manifest
+  minis.py build             write art/minis/*.aseprite and export them to
+                             public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
@@ -37,7 +37,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from pixel import K, Grid, edged, main, road_sprite  # noqa: E402
+from pixel import K, Grid, edged, main  # noqa: E402
 
 
 
@@ -45,11 +45,7 @@ def depth_steps():
     """(suffix, scale) for every depth step below full size in shared/depth-steps.json, the table the game
     reads, the suffix without its @: ("88", 0.875) and so on."""
     root = os.path.join(os.path.dirname(__file__), "..", "..")
-    path = os.path.join(root, "shared", "depth-steps.json")
-    # CLEANUP (added 2026-10-19): drop this fallback once the table's move from data/ to shared/ is on main.
-    if not os.path.exists(path):
-        path = os.path.join(root, "data", "depth-steps.json")
-    with open(path) as f:
+    with open(os.path.join(root, "shared", "depth-steps.json")) as f:
         steps = json.load(f)["steps"]
     return tuple((q["suffix"].lstrip("@"), q["scale"]) for q in steps if q["scale"] < 1)
 
@@ -531,4 +527,4 @@ if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "compare":
         compare(sys.argv[2])
     else:
-        main(sys.argv, sprites, "art/minis", __doc__, grounds=("3a4466", "c0cbdc"), anchored=road_sprite)
+        main(sys.argv, sprites, "art/minis", __doc__, grounds=("3a4466", "c0cbdc"))

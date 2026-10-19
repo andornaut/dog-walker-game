@@ -13,8 +13,8 @@ frames at 80ms), plum-rimmed so it reads on the Stats wood and the cream end pan
 Usage:
   badges.py preview OUT.png   every badge, earned and locked, and the burst, on
                               dark wood, slate and cream
-  badges.py build             write art/badges/*.aseprite, export to
-                              public/art/sprites/ and list them in the manifest
+  badges.py build             write art/badges/*.aseprite and export to
+                              public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.

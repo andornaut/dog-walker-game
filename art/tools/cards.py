@@ -25,17 +25,14 @@ Usage:
                              frames, scaled up
   cards.py build             write art/cards/*.aseprite, the frames to
                              public/art/sprites/ and the illustrations and cost
-                             plaque to public/art/images/, and list them in the
-                             manifest
+                             plaque to public/art/images/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import json
 import math
 import os
-import re
 import subprocess
 import sys
 from collections import Counter
@@ -197,7 +194,7 @@ class Art(hp.Scene):
 
     def arrow(self, x, y, d, col="green"):
         """A 9x9 arrow, up (d=-1) or down (d=1): upgrade art shows a change by direction, not a
-        number, so it never goes stale against tuning.ts."""
+        number, so it never goes stale against the tuning."""
         self.paste(pixmap(ARROW if d < 0 else ARROW[::-1], {"a": col}), x, y)
 
 
@@ -1624,25 +1621,25 @@ ILLUSTRATIONS = {
 }
 
 
+def card_frame_tags():
+    """{illustration key: the card-frame tag the game shows it in}, from the game's export: each card
+    face's frame, and lucky (or encounter) for the art an instant encounter shows."""
+    tags = {card["art"]: card["frame"] for card in hp.GAME["cards"]}
+    for e in hp.GAME["encounters"]:
+        if e["resolution"]["kind"] == "instant":
+            tags[e["resolution"]["art"]] = "lucky" if e["kind"] == "lucky" else "encounter"
+    return tags
+
+
+FRAME_TAGS = card_frame_tags()
+
+
 def card_kind(key):
-    """The frame an illustration shows in, from the data file that names it: a fork's path card
-    is route, a forced stop stop, an upgrade and Skip upgrade, a lucky encounter and a need's
-    payoff card lucky, and any other encounter or need card encounter."""
-    if key.startswith("card-zone-"):
-        return "route"
-    quoted = f'"{key}"'
-    if quoted in hp.data("forcedStops"):
-        return "stop"
-    if key == "card-skip" or quoted in hp.data("upgrades"):
-        return "upgrade"
-    for name in ("encounters", "needs"):
-        src = hp.data(name) if os.path.exists(f"src/data/{name}.ts") else ""
-        if quoted in src:
-            head = src[:src.index(quoted)]
-            entry = src[[m.end() for m in re.finditer(r"\n  \w+: \{", head)][-1]:]
-            lucky = re.search(r'\n    kind: "(\w+)"', entry).group(1) in ("lucky", "payoff")
-            return "lucky" if lucky else "encounter"
-    # CLEANUP (added 2026-10-19): drop once src/data/encounters.ts names the lemonade stand's cards.
+    """The frame an illustration shows in, as the game picks it."""
+    if key in FRAME_TAGS:
+        return FRAME_TAGS[key]
+    # CLEANUP (added 2026-10-19): drop once the game data names the new encounters' cards (picnic,
+    # goose, petunias, trash, cafe, lemonade stand).
     return "lucky" if key.startswith("card-lemonade-") else "encounter"
 
 
@@ -1692,15 +1689,6 @@ def build():
     to_image(card_cost().outlined(False)).save("public/art/images/card-cost.png")
     subprocess.run(["aseprite", "-b", "public/art/images/card-cost.png", "--save-as", "art/cards/card-cost.aseprite"],
                    check=True)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for key in [*ILLUSTRATIONS, "card-cost"]:
-        entries[key] = {"key": key, "png": f"images/{key}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join([*ILLUSTRATIONS, "card-cost"]))
 
 

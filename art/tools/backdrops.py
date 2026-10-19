@@ -22,13 +22,12 @@ Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
   backdrops.py gags              print the gag spots and the join for the current constants
   backdrops.py build             write art/backdrops/*.aseprite and
-                                 public/art/images/*.png, and list them in the manifest
+                                 public/art/images/*.png
 
 Run from the repository root, after fonts.py build. A build overwrites the
 .aseprite sources, so hand edits to them belong in this file instead.
 """
 
-import json
 import math
 import os
 import random
@@ -43,13 +42,17 @@ import help as hp  # noqa: E402
 from pixel import DARKER, K  # noqa: E402
 
 # ---------- the band and the camera ----------
-# Everything below is drawn from these. The camera is the game's: ROAD_CAMERA (horizonY, ratio)
-# in src/data/screen.ts, the walker's feet row and the road's centre column. The road below
-# the band then shows VISIBLE road pixels, F (1 / s - 1) for the scale s on screen row BAR + H.
-W, H = 360, 110                # the band: screen rows BAR to BAR + H - 1
-BAR = 40                       # the status bar's height: band row y is screen row BAR + y
-CX = 180                       # the road's centre column, and its vanishing point's
-YH, FOOT, RATIO = -164, 464, 0.85   # the horizon and foot rows on screen, ground speed r
+# Everything below is drawn from these, read from the game's layout export. The camera is the
+# game's: the horizon and foot rows on screen, the focal length F in road pixels and the road's
+# centre column. The road below the band then shows VISIBLE road pixels, F (1 / s - 1) for the
+# scale s on screen row BAR + H.
+LAYOUT = hp.LAYOUT
+BAND = LAYOUT["regions"]["backdrop"]
+W, H = BAND["width"], BAND["height"]   # the band: screen rows BAR to BAR + H - 1
+BAR = BAND["y"]                # the status bar's height: band row y is screen row BAR + y
+CAMERA = LAYOUT["camera"]
+CX = CAMERA["centerX"]         # the road's centre column, and its vanishing point's
+YH, FOOT, F = CAMERA["horizonY"], CAMERA["footY"], CAMERA["focal"]
 TITLE = None
 
 
@@ -208,18 +211,21 @@ def flowers(cv, x0, x1, y, cols=("red", "yellow", "pink", "white")):
 # the road ahead of the feet, h up from the ground.
 
 KS = FOOT - YH
-F = KS / RATIO                  # the focal length, in road pixels
 S0 = (BAR + H - 0.5 - YH) / KS  # scale on the band's bottom row
 VISIBLE = F * KS / (BAR + H - YH) - F   # road in view below the band, to its bottom edge
 Z0 = F / S0 - F                 # the road distance on the band's bottom row
-ROAD, CURB, WALK = 140, 144, 188   # half the road, its curb and its sidewalk, as the game draws them
-DIVIDERS = (-84, -28, 28, 84)      # lane divider lines, from the road's centre
+# half the road, its curb and its sidewalk, as the game draws Woof Way's verge
+ROAD = LAYOUT["regions"]["road"]["width"] // 2
+CURB, WALK = LAYOUT["verges"]["street"]["curbTo"], LAYOUT["verges"]["street"]["walkTo"]
+DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider lines, from the road's centre
 # The cross street, in band rows from the far side down: the far sidewalk, the far curb, the
 # road, the near curb and the near sidewalk, which the street's stub (rows STUB to the bottom)
 # opens into. These rows are drawn flat rather than to the projection, which would spread the
 # cross street over most of the band; across, they keep the projection's scale per row, so
 # lines along the street (curbs, slab seams) still lean toward the road's centre line.
-FAR_WALK, FAR_CURB, CROSS, NEAR_CURB, STUB = 66, 70, 72, 81, 86
+# The stub is the band's part of the approach region, where the game's road raster starts.
+FAR_WALK, FAR_CURB, CROSS, NEAR_CURB = 66, 70, 72, 81
+STUB = LAYOUT["regions"]["approach"]["y"] - BAR
 LINE = 76                      # the cross street's centre line
 CORNER = 5                     # the near corners' curb radius, in pixels
 BASE = 62                      # the far side's ground row: the houses stand on it
@@ -958,7 +964,7 @@ def gags():
         return CX + x * scale(py + 0.5)
 
     rail = sorted(round(at(PERCH_X[0], PERCH, h)[1] - 0.5) for h in (PERCH_H - 3, PERCH_H))
-    print(f"camera: yH {YH}, footY {FOOT}, r {RATIO}, f {F:.1f}, centre x {CX}; "
+    print(f"camera: yH {YH}, footY {FOOT}, r {KS / F:.4f}, f {F:.1f}, centre x {CX}; "
           f"{VISIBLE:.1f} road px in view below the band, scale {S0:.4f} on row {H - 1}")
     road = [px for px in range(W) if abs(px + 0.5 - CX) < ROAD * S0]
     lines = [round(CX + d * S0 - 0.5) for d in DIVIDERS]
@@ -986,15 +992,6 @@ def build():
         png = f"public/art/images/{key}.png"
         draw().img.save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/backdrops/{key}.aseprite"], check=True)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for key in ZONES:
-        entries[key] = {"key": key, "png": f"images/{key}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(ZONES))
 
 

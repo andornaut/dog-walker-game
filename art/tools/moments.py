@@ -25,8 +25,8 @@ fx-treat-pop    24x24  play (5 frames, 60ms)  hearts and crumbs bursting where t
 
 Usage:
   moments.py preview OUT.png   every frame of every piece on the column and road colours
-  moments.py build             write art/moments/*.aseprite, export to public/art/sprites/
-                               and list them in the manifest
+  moments.py build             write art/moments/*.aseprite and export to
+                               public/art/sprites/
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,

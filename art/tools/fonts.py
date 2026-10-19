@@ -10,13 +10,11 @@ ASCII, the middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither
 
 Usage:
   fonts.py preview OUT.png   a sample of both fonts, scaled up
-  fonts.py build             write public/art/fonts/*.png and *.fnt and list
-                             them in the manifest's "fonts"
+  fonts.py build             write public/art/fonts/*.png and *.fnt
 
 Run from the repository root.
 """
 
-import json
 import os
 import sys
 from xml.sax.saxutils import quoteattr
@@ -110,15 +108,6 @@ def build_font(key, face, path, size):
 def build():
     for key, (face, path, size) in FONTS.items():
         build_font(key, face, path, size)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {f["key"]: f for f in manifest.get("fonts", [])}
-    for key in FONTS:
-        entries[key] = {"key": key, "png": f"fonts/{key}.png", "fnt": f"fonts/{key}.fnt"}
-    manifest["fonts"] = sorted(entries.values(), key=lambda f: f["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(FONTS))
 
 

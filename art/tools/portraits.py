@@ -11,14 +11,12 @@ Usage:
   portraits.py preview OUT.png   every portrait beside its face (at 2x), on the
                                  start screen's tile colours, scaled up
   portraits.py build             write art/portraits/*.aseprite and
-                                 public/art/images/*.png, and list them in the
-                                 manifest's "images"
+                                 public/art/images/*.png
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import json
 import math
 import os
 import subprocess
@@ -435,15 +433,6 @@ def build():
         png = f"public/art/images/{key}.png"
         image(draw).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/portraits/{key}.aseprite"], check=True)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for name in PORTRAITS:
-        entries[f"portrait-dog-{name}"] = {"key": f"portrait-dog-{name}", "png": f"images/portrait-dog-{name}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(f"portrait-dog-{n}" for n in PORTRAITS))
 
 

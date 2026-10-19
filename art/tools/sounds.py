@@ -31,8 +31,8 @@ cannot play Ogg.
 
 Usage:
   sounds.py preview OUT_DIR   write the .ogg and .m4a files into OUT_DIR only
-  sounds.py build             write public/art/sounds/*.ogg and *.m4a and list
-                              them in the manifest
+  sounds.py build             write public/art/sounds/*.ogg and *.m4a, and flag
+                              the music as looping in public/art/manifest.extra.json
 
 Run from the repository root. Needs sox and ffmpeg. Every run is identical:
 sox runs in repeatable mode (fixed noise seed, no dither) and ffmpeg in
@@ -388,24 +388,25 @@ def render(out_dir):
     return keys
 
 
-def add_to_manifest(keys, path="public/art/manifest.json"):
-    """List each key under "sounds", with paths relative to public/art/; the music loops."""
-    with open(path) as f:
-        manifest = json.load(f)
-    entries = {s["key"]: s for s in manifest.get("sounds", [])}
+def mark_loops(keys, path="public/art/manifest.extra.json"):
+    """Flag each music key as looping in the manifest sidecar, keeping every other entry: the game
+    build reads the flags from there, since a sound file cannot say it loops."""
+    extra = {}
+    if os.path.exists(path):
+        with open(path) as f:
+            extra = json.load(f)
+    sounds = extra.setdefault("sounds", {})
     for key in keys:
-        entries[key] = {"key": key, "ogg": f"sounds/{key}.ogg", "m4a": f"sounds/{key}.m4a"}
         if key.startswith("music-"):
-            entries[key]["loop"] = True
-    manifest["sounds"] = sorted(entries.values(), key=lambda s: s["key"])
+            sounds.setdefault(key, {})["loop"] = True
     with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
+        json.dump(extra, f, indent=2)
         f.write("\n")
 
 
 def build():
     keys = render("public/art/sounds")
-    add_to_manifest(keys)
+    mark_loops(keys)
     print("built", ", ".join(keys))
 
 

@@ -19,14 +19,12 @@ stays clear of the 12px sprite margin.
 Usage:
   roads.py preview OUT.png   each zone's road scrolling up: two strips of the zone
                              before it in ZONES, the start strip, then three of this zone
-  roads.py build             write art/roads/*.aseprite and public/art/images/*.png,
-                             and list them in the manifest's "images"
+  roads.py build             write art/roads/*.aseprite and public/art/images/*.png
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import json
 import math
 import os
 import random
@@ -493,15 +491,6 @@ def build():
         to_image(g).save(png)
         subprocess.run(["aseprite", "-b", png, "--save-as", f"art/roads/{key}.aseprite"], check=True)
         built.append(key)
-    path = "public/art/manifest.json"
-    manifest = json.load(open(path))
-    entries = {i["key"]: i for i in manifest.get("images", [])}
-    for key in built:
-        entries[key] = {"key": key, "png": f"images/{key}.png"}
-    manifest["images"] = sorted(entries.values(), key=lambda i: i["key"])
-    with open(path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
     print("built", ", ".join(built))
 
 

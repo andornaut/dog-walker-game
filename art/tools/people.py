@@ -24,7 +24,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import edged, main, road_sprite  # noqa: E402
+from pixel import edged, main  # noqa: E402
 from road import BREATH, BREATH_MS, LIT, face_front, person, rim  # noqa: E402
 
 WAVES = ("up", "out")
@@ -380,4 +380,4 @@ def sprites():
 
 
 if __name__ == "__main__":
-    main(sys.argv, sprites, "art/people", __doc__, anchored=road_sprite)
+    main(sys.argv, sprites, "art/people", __doc__)
