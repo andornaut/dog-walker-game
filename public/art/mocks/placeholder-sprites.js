@@ -244,10 +244,10 @@ function build(mode) {
 // ---------- Road tiles (280x64, seamless vertically) ----------
 function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 const ZONES = {
-  street: { name: "STREET", base: K.dslate },
-  park: { name: "PARK", base: K.tan },
-  shops: { name: "SHOPS", base: K.lgrey },
-  home: { name: "HOME STRETCH", base: K.skin2 },
+  street: { name: "WOOF WAY", base: K.dslate },
+  park: { name: "BARK PARK", base: K.tan },
+  shops: { name: "SNIFF STREET SHOPS", base: K.lgrey },
+  home: { name: "THE LONG WAY HOME", base: K.skin2 },
 };
 const ZONE_ORDER = ["street", "park", "shops", "home"];
 function roadTile(zone) {

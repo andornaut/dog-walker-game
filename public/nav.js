@@ -1,4 +1,4 @@
-// The site navigation bar: Home, Play, the art gallery, each mock listed in
+// The site navigation bar: Home, Play, Data, the art gallery, each mock listed in
 // /art/mocks/index.json, and the art docs. A page loads it with
 // <script src="/nav.js" defer></script> and adds nothing else.
 (() => {
@@ -45,6 +45,7 @@
   ul.append(
     item("Home", "/"),
     item("Play", "/play/"),
+    item("Data", "/data/"),
     item("Gallery", "/art/"),
     mocksAt,
     item("Inventory", DOCS + "inventory.md"),

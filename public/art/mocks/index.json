@@ -8,5 +8,10 @@
     "title": "Start screen",
     "path": "start-screen.html",
     "description": "A proposal for the screen before a walk: bank and best walk, the walker and pack at the gate on Maple Street, the dog picker, gear, logbook and Start walk. Interactive, with sample data."
+  },
+  {
+    "title": "Help screen",
+    "path": "help-screen.html",
+    "description": "A proposal for the in-game How to walk screen: six pages, each with an illustration from the real sprites and a few lines drafted from the rulebook."
   }
 ]

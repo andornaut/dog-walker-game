@@ -95,7 +95,7 @@ Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
 ## Road and scenery (per zone)
 
-Four zones in a fixed order: street, park, shops, home stretch. Each zone needs a road that tiles vertically across the 280px road width, plus a few non-colliding scenery props at the road edges.
+Four zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each zone needs a road that tiles vertically across the 280px road width, plus a few non-colliding scenery props at the road edges.
 
 | Asset           | Key pattern          | Type  | Size   | Priority | Notes                                             |
 | --------------- | -------------------- | ----- | ------ | -------- | ------------------------------------------------- |
@@ -118,12 +118,12 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Top bar
 
-| Asset          | Key                | Type   | Size   | Priority | Notes                                        |
-| -------------- | ------------------ | ------ | ------ | -------- | -------------------------------------------- |
-| Bar background | `ui-top-bar`       | image  | 360×40 | core     |                                              |
-| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen         |
-| Zone progress  | `ui-zone-pips`     | sprite | TBD    | core     | 4 segments; frames `done`, `current`, `todo` |
-| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Street, park, shops, home stretch            |
+| Asset          | Key                | Type   | Size   | Priority | Notes                                                      |
+| -------------- | ------------------ | ------ | ------ | -------- | ---------------------------------------------------------- |
+| Bar background | `ui-top-bar`       | image  | 360×40 | core     |                                                            |
+| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                       |
+| Zone progress  | `ui-zone-pips`     | sprite | TBD    | core     | 4 segments; frames `done`, `current`, `todo`               |
+| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home |
 
 ## Choice cards
 
@@ -169,7 +169,7 @@ Total: 39 card illustrations, 29 of them in Milestone 6.
 | Energy icons      | `icon-energy-<energy>`     | image | 16×16   | core     | calm, steady, hyper                                         |
 | Temperament icons | `icon-owner-<temperament>` | image | 16×16   | core     | laid-back, fussy, dramatic                                  |
 | Shop items        | `item-<item>`              | image | 32×32   | core     | fanny pack, whistle, poop bags, running shoes, lucky collar |
-| Zone banner       | `ui-zone-banner`           | image | TBD     | core     | "Maple Street, zone 2: park" between zones                  |
+| Zone banner       | `ui-zone-banner`           | image | TBD     | core     | "Maple Street, zone 2: Bark Park" between zones             |
 | End screen        | `screen-end`               | image | 360×640 | later    | Earnings summary background                                 |
 
 ## UI kit

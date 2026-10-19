@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Help Screen</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png">
+<script src="/nav.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: the 360x640 help screen on a dark stage at an integer zoom, with page controls and notes beside it. */
+:root {
+  --bg: #13101e; --surface: #1d1a2c; --raise: #2a2740; --fg: #dfe4ee; --muted: #8b9bb4; --line: #33304a;
+  --accent: #feae34; --accent-ink: #181425; --stage: #0c0a14;
+  --f-display: "Silkscreen", ui-monospace, monospace;
+  --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 1240px; margin: 0 auto; padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 20px;
+}
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(22px, 4vw, 32px); line-height: 1.1; margin: 0; }
+header p { margin: 0; color: var(--muted); max-width: 70ch; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 20px; align-items: start; }
+@media (max-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.stage { background: var(--stage); border-radius: 6px; padding: 16px; display: grid; gap: 10px; min-width: 0; }
+.stage-scroll { overflow-x: auto; display: flex; justify-content: center; }
+canvas { display: block; image-rendering: pixelated; image-rendering: crisp-edges; touch-action: manipulation; cursor: pointer; }
+.hint { margin: 0; color: var(--muted); font-size: 13px; text-align: center; }
+.panel { display: grid; gap: 16px; min-width: 0; }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.box h2 { font-family: var(--f-display); font-weight: 400; font-size: 14px; letter-spacing: 0.06em; margin: 0; text-transform: uppercase; }
+.seg { display: flex; flex-wrap: wrap; gap: 4px; }
+.seg button { font: inherit; font-size: 13px; padding: 5px 10px; border-radius: 4px; border: 0; background: var(--raise); color: var(--fg); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 700; }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+b { font-weight: 700; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>Help Screen</h1>
+    <p>A proposal for the in-game "How to walk" screen: six short pages, each with an illustration built from the real sprites. It opens from the start screen and the pause menu. The text is drafted from the rulebook in gameplay/game-design.md.</p>
+  </header>
+  <div class="layout">
+    <section class="stage" aria-label="Help screen mock">
+      <div class="stage-scroll"><canvas id="screen" width="360" height="640" tabindex="0" aria-label="Help screen mock. Use Back and Next, the arrow keys, or the page dots to change pages."></canvas></div>
+      <p class="hint">Tap Back or Next, the page dots, or use ← and →.</p>
+    </section>
+    <aside class="panel">
+      <section class="box" aria-label="Pages">
+        <h2>Pages</h2>
+        <div class="seg" id="pages"></div>
+      </section>
+      <section class="box" aria-label="Design notes">
+        <h2>Design notes</h2>
+        <ul>
+          <li><b>Where it opens:</b> a "?" button on the start screen and a "How to walk" item in the pause menu. The first walk also opens it once.</li>
+          <li><b>One idea per page:</b> an illustration on top, a title, then at most four short lines. Pages turn with Back and Next, the dots or a swipe.</li>
+          <li><b>Real art:</b> every illustration uses the exported sprites, so the help screen stays in step as art changes.</li>
+          <li><b>Text:</b> drafted from the rulebook. The gameplay session owns the final wording.</li>
+        </ul>
+      </section>
+    </aside>
+  </div>
+</main>
+
+<script src="/art/mocks/placeholder-sprites.js"></script>
+<script>
+(() => {
+"use strict";
+const D = window.DWGPlaceholder;
+const { K, text, textW, textC } = D;
+const cv = document.getElementById("screen");
+const ctx = cv.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+const fill = (x, y, w, h, c) => { ctx.fillStyle = c; ctx.fillRect(x, y, w, h); };
+
+// ---------- Art from the manifest ----------
+const ART = {};
+async function loadArt() {
+  const m = await (await fetch("/art/manifest.json", { cache: "no-cache" })).json();
+  await Promise.all((m.sprites || []).map(async s => {
+    const img = new Image(); img.src = "/art/" + s.png; await img.decode();
+    const data = await (await fetch("/art/" + s.json, { cache: "no-cache" })).json();
+    ART[s.key] = { img, frames: Object.values(data.frames).map(f => f.frame), tags: Object.fromEntries(data.meta.frameTags.map(t => [t.name, t])) };
+  }));
+}
+function art(key, tag, i, x, y, flip) {
+  const a = ART[key]; if (!a || !a.tags[tag]) return;
+  const t = a.tags[tag], f = a.frames[t.from + (i % (t.to - t.from + 1))];
+  if (flip) {
+    ctx.save(); ctx.translate(Math.round(x) + f.w, Math.round(y)); ctx.scale(-1, 1);
+    ctx.drawImage(a.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h); ctx.restore();
+  } else ctx.drawImage(a.img, f.x, f.y, f.w, f.h, Math.round(x), Math.round(y), f.w, f.h);
+}
+// Draw a sprite by its feet: cx is the centre, foot the ground line.
+function feet(key, tag, i, cx, foot, flip) {
+  const a = ART[key]; if (!a) return;
+  const f = a.frames[0];
+  shadow(cx, foot, f.w);
+  art(key, tag, i, cx - f.w / 2, foot - f.h, flip);
+}
+let SHADE = K.navy;
+function shadow(cx, foot, w) {
+  const rx = Math.max(3, w / 2 - 2);
+  for (let y = -3; y <= 3; y++) for (let x = -rx - 1; x <= rx + 1; x++) {
+    const dx = (x + 0.5) / rx, dy = (y + 0.5) / 2.5;
+    if (dx * dx + dy * dy <= 1) fill(Math.floor(cx + x), Math.floor(foot - 1 + y), 1, 1, SHADE);
+  }
+}
+function line(x0, y0, x1, y1, col) {
+  const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
+  for (let i = 0; i <= n; i++) fill(Math.round(x0 + (x1 - x0) * i / n), Math.round(y0 + (y1 - y0) * i / n), 1, 1, col);
+}
+const TILES = Object.fromEntries(D.ZONE_ORDER.map(z => [z, D.roadTile(z)]));
+
+// ---------- Panel helpers ----------
+const P = { x: 8, y: 48, w: 344, h: 236 };
+function road(zone, scroll = 0) {
+  SHADE = D.dark(D.ZONES[zone].base);
+  const off = Math.floor(scroll) % 64;
+  for (let y = P.y - 64 + off; y < P.y + P.h; y += 64) { ctx.drawImage(TILES[zone], P.x + 32, y); }
+  fill(P.x, P.y, 32, P.h, K.green); fill(P.x + 312, P.y, 32, P.h, K.green);
+  for (let i = 0; i < 24; i++) { fill(P.x + 4 + (i * 13) % 24, P.y + (i * 37) % P.h, 1, 2, K.dgreen); fill(P.x + 316 + (i * 7) % 24, P.y + (i * 23) % P.h, 1, 2, K.dgreen); }
+}
+const laneX = l => P.x + 32 + l * 56 + 28;
+function pack(cx, base, fr, dogs = ["dog-koda", "dog-biscuit", "dog-duchess"], tag = "walk", flip = false) {
+  const spots = [[0, -40], [-13, -28], [13, -26]];
+  const items = dogs.map((k, i) => ({ k, dx: spots[i][0], foot: base + spots[i][1] }));
+  items.push({ k: "walker", dx: 0, foot: base });
+  items.sort((a, b) => a.foot - b.foot);
+  for (const it of items) feet(it.k, it.k === "walker" ? "walk" : (it.k === dogs[0] ? tag : "walk"), fr, cx + it.dx, it.foot, it.k === dogs[0] && flip);
+  for (const it of items) if (it.k !== "walker") line(it.dx < 0 ? cx - 9 : cx + 8, base - 14, cx + it.dx, it.foot - 15, K.dred);
+}
+function chevron(cx, cy, dir, col) {
+  for (let i = 0; i < 8; i++) {
+    fill(cx + dir * (i - 4), cy - 8 + i, 3, 1, col);
+    fill(cx + dir * (i - 4), cy + 8 - i, 3, 1, col);
+  }
+}
+function bubble(x, y, w, lines, col = K.plum) {
+  const h = lines.length * 8 + 6;
+  fill(x + 1, y, w - 2, h, K.white); fill(x, y + 1, w, h - 2, K.white); fill(x + 1, y + h, w - 2, 1, K.lgrey);
+  lines.forEach((l, i) => textC(ctx, l, x + w / 2, y + 4 + i * 8, col, 1, { "♥": K.red, $: K.dgreen }));
+}
+function miniCard(x, y, band, title, cost, keyArt) {
+  fill(x + 1, y, 62, 92, K.plum); fill(x, y + 1, 64, 90, K.plum);
+  fill(x + 2, y + 2, 60, 88, K.cream); fill(x + 2, y + 2, 60, 10, band);
+  textC(ctx, title, x + 32, y + 4, K.white);
+  fill(x + 5, y + 15, 54, 44, K.brown); fill(x + 6, y + 16, 52, 42, K.lgrey);
+  if (keyArt) keyArt(x + 6, y + 16);
+  fill(x + 6, y + 74, 52, 11, K.plum);
+  textC(ctx, cost, x + 32, y + 77, K.cream, 1, { "♥": K.red, $: K.amber });
+}
+function heart(x, y, col, hi) {
+  [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."].forEach((r, j) => { for (let i = 0; i < 7; i++) if (r[i] === "1") fill(x + i, y + j, 1, 1, col); });
+  if (hi) fill(x + 1, y + 1, 1, 1, hi);
+}
+
+// ---------- Pages ----------
+const PAGES = [
+  {
+    title: "SWITCH LANES",
+    lines: ["TAP THE LEFT OR RIGHT SIDE OF THE ROAD, OR SWIPE.", "KEYS: ARROWS, A/D OR H/L.", "EACH TAP MOVES THE PACK ONE LANE.", "HOLD TO KEEP MOVING."],
+    draw(t) {
+      road("street", t * 0.03);
+      const fr = Math.floor(t / 160), lane = Math.floor(t / 1400) % 4;
+      const l = [2, 1, 2, 3][lane];
+      pack(laneX(l), P.y + P.h - 8, fr);
+      const blink = Math.floor(t / 400) % 2;
+      chevron(P.x + 60, P.y + 70, -1, blink ? K.white : K.lgrey);
+      chevron(P.x + 284, P.y + 70, 1, blink ? K.lgrey : K.white);
+      textC(ctx, "TAP", P.x + 60, P.y + 86, K.white);
+      textC(ctx, "TAP", P.x + 284, P.y + 86, K.white);
+    },
+  },
+  {
+    title: "TIPS AND TREATS",
+    lines: ["RUN INTO TIPS FOR MONEY. A SMALLER PACK EARNS BIGGER TIPS.", "TREATS ARE CARRIED, UP TO 3.", "TAP A DOG'S SLOT TO GIVE ITS OWNER A TREAT: +1♥."],
+    draw(t) {
+      road("park", t * 0.03);
+      SHADE = D.dark(D.ZONES.park.base);
+      const fr = Math.floor(t / 150);
+      const sc = Math.floor(t * 0.03) % 200;
+      for (const [l, y] of [[2, 20], [2, 50], [2, 80], [1, 140], [3, 110]]) {
+        const yy = P.y + ((y + sc) % 200);
+        if (l === 3 || l === 1) feet("treat", "idle", fr, laneX(l), yy + 16);
+        else feet("tip", "idle", fr, laneX(l), yy + 16);
+      }
+      pack(laneX(2), P.y + P.h - 8, fr, ["dog-biscuit"]);
+      bubble(P.x + 200, P.y + 168, 70, ["+$1"]);
+      fill(P.x + 6, P.y + 6, 74, 22, K.plum); fill(P.x + 7, P.y + 7, 72, 20, K.cream);
+      art("treat", "idle", 0, P.x + 9, P.y + 9);
+      text(ctx, "TREATS 2/3", P.x + 28, P.y + 14, K.plum);
+    },
+  },
+  {
+    title: "BUMPS BECOME CARDS",
+    lines: ["HIT A SKUNK, PUDDLE OR THIEF AND THE WALK PAUSES.", "PICK A CARD: PAY UP, OR UPSET THE OWNERS.", "EVERY CARD SHOWS ITS OUTCOME. ONE IS ALWAYS FREE.", "SOME BUMPS ARE LUCKY, LIKE A LOST WALLET."],
+    draw(t) {
+      road("street");
+      const fr = Math.floor(t / 300);
+      feet("skunk", "idle", fr, laneX(2), P.y + 120);
+      pack(laneX(2), P.y + P.h - 8, 0, ["dog-koda"], "react");
+      // the paused road dims; cards rise over it
+      const im = ctx.getImageData(P.x, P.y, P.w, P.h), d = im.data;
+      const dimMap = new Map(D.PAL.map(h => [parseInt(h, 16), parseInt(D.dark(D.dark("#" + h)).slice(1), 16)]));
+      for (let i = 0; i < d.length; i += 4) { const m = dimMap.get(d[i] << 16 | d[i + 1] << 8 | d[i + 2]); if (m !== undefined) { d[i] = m >> 16; d[i + 1] = (m >> 8) & 255; d[i + 2] = m & 255; } }
+      ctx.putImageData(im, P.x, P.y);
+      textC(ctx, "SKUNK!", 180, P.y + 18, K.white, 2);
+      const groom = (x, y) => { fill(x, y, 52, 42, K.lgrey); art("dog-biscuit", "walk", 0, x + 10, y + 6); for (const [bx, by] of [[6, 8], [40, 10], [34, 30]]) { fill(x + bx, y + by, 3, 3, K.white); } };
+      const rinse = (x, y) => { fill(x, y, 52, 42, K.green); art("dog-biscuit", "walk", 1, x + 10, y + 6); for (let k = 0; k < 6; k++) fill(x + 4 + k * 3, y + 4 + k * 2, 1, 2, K.cyan); };
+      const ignore = (x, y) => { fill(x, y, 52, 42, K.tan); art("skunk", "idle", fr, x + 10, y + 6); };
+      miniCard(P.x + 66, P.y + 50, K.red, "GROOM", "-$15 EACH", groom);
+      miniCard(P.x + 140, P.y + 50, K.red, "RINSE", "-$5 EACH", rinse);
+      miniCard(P.x + 214, P.y + 50, K.red, "IGNORE", "-2♥ EACH", ignore);
+      if (Math.floor(t / 600) % 2) { fill(P.x + 214, P.y + 144, 64, 2, K.amber); textC(ctx, "FREE", P.x + 246, P.y + 150, K.amber); }
+    },
+  },
+  {
+    title: "KEEP OWNERS HAPPY",
+    lines: ["EACH OWNER HAS A HAPPINESS METER: ♥.", "BUMPS AND CHOICES RAISE OR LOWER IT.", "AT 0♥ THE OWNER FIRES YOU, TAKES BACK THAT DOG'S FEES, AND THE DOG GOES HOME."],
+    draw(t) {
+      fill(P.x, P.y, P.w, P.h, K.dbrown);
+      // a dog slot, as in the dog column
+      const sx = P.x + 20, sy = P.y + 20;
+      fill(sx, sy, 140, 96, K.plum); fill(sx + 1, sy + 1, 138, 94, K.cream);
+      fill(sx + 4, sy + 4, 66, 34, K.tan);
+      art("face-owner-koda", "happy", 0, sx + 5, sy + 5);
+      art("face-dog-koda", "happy", 0, sx + 37, sy + 5);
+      text(ctx, "KODA", sx + 76, sy + 8, K.plum);
+      text(ctx, "JESSE", sx + 76, sy + 18, K.dbrown);
+      const n = 4 + Math.floor(t / 900) % 3;
+      for (let j = 0; j < 10; j++) j < n ? heart(sx + 6 + j * 9, sy + 46, K.red, K.pink) : heart(sx + 6 + j * 9, sy + 46, K.tan);
+      text(ctx, n + "♥ OF 10", sx + 6, sy + 60, K.plum, 1, { "♥": K.red });
+      bubble(sx + 6, sy + 72, 128, ["TAP TO GIVE A TREAT: +1♥"]);
+      // a fired owner
+      const fx = P.x + 186, fy = P.y + 20;
+      fill(fx, fy, 140, 96, K.plum); fill(fx + 1, fy + 1, 138, 94, K.tan);
+      fill(fx + 4, fy + 4, 34, 34, K.brown);
+      art("face-owner-nugget", "fired", 0, fx + 5, fy + 5);
+      bubble(fx + 42, fy + 8, 92, ["YOU'RE FIRED!"], K.red);
+      for (let j = 0; j < 8; j++) heart(fx + 6 + j * 9, fy + 46, K.brown);
+      text(ctx, "0♥: NUGGET GOES HOME", fx + 6, fy + 60, K.plum, 1, { "♥": K.red });
+      text(ctx, "FEES TAKEN BACK", fx + 6, fy + 72, K.dred);
+      // happy, neutral, upset
+      const moods = ["happy", "neutral", "upset"];
+      moods.forEach((m, i) => { const x = P.x + 92 + i * 56; fill(x - 2, P.y + 138, 36, 36, K.tan); art("face-owner-duchess", m, 0, x - 1, P.y + 139); textC(ctx, m.toUpperCase(), x + 16, P.y + 180, K.cream); });
+      textC(ctx, "WATCH THEIR FACES", 180, P.y + 206, K.amber);
+    },
+  },
+  {
+    title: "WATCH FOR PULLS",
+    lines: ["A DOG THAT LEANS AND BARKS IS ABOUT TO PULL.", "IT TUGS THE PACK ONE LANE. STEER BACK ANY TIME.", "FOOD LOVERS PULL TOWARD TREATS, CHASERS TOWARD SQUIRRELS."],
+    draw(t) {
+      road("shops");
+      const phase = Math.floor(t / 1000) % 3;
+      const fr = Math.floor(t / 200);
+      feet("squirrel", "idle", fr, laneX(3), P.y + 70);
+      const cx = phase === 2 ? laneX(3) : laneX(2);
+      pack(cx, P.y + P.h - 8, fr, ["dog-koda", "dog-duchess"], phase === 0 ? "tell" : phase === 1 ? "pull" : "walk");
+      if (phase === 0) { art("fx-bark", "pop", fr, cx + 10, P.y + P.h - 92); }
+      if (phase < 2) { for (let x = cx + 20; x < laneX(3) - 8; x += 4) fill(x, P.y + 150, 2, 2, K.amber); chevron(laneX(3) - 6, P.y + 151, 1, K.amber); }
+      textC(ctx, ["LEAN AND BARK", "PULL!", "ONE LANE OVER"][phase], 180, P.y + 12, K.plum);
+    },
+  },
+  {
+    title: "FOUR ZONES",
+    lines: ["WALK THE 4 ZONES OF MAPLE STREET.", "EVERY DOG PAYS ITS FEE AFTER EACH ZONE.", "BETWEEN ZONES, PICK AN UPGRADE CARD.", "HEAD HOME ANY TIME FROM THE PAUSE MENU."],
+    draw(t) {
+      fill(P.x, P.y, P.w, P.h, K.dbrown);
+      D.ZONE_ORDER.forEach((z, i) => {
+        const x = P.x + 8 + i * 84, y = P.y + 44;
+        ctx.save(); ctx.beginPath(); ctx.rect(x, y, 76, 120); ctx.clip();
+        ctx.drawImage(TILES[z], x - 100, y); ctx.drawImage(TILES[z], x - 100, y + 64); ctx.restore();
+        fill(x, y, 76, 1, K.plum); fill(x, y + 119, 76, 1, K.plum);
+        textC(ctx, D.ZONES[z].name, x + 38, y - 12, K.cream);
+        textC(ctx, String(i + 1), x + 38, y + 50, K.white, 3);
+        const on = Math.floor(t / 700) % 4 >= i;
+        art("tip", "idle", Math.floor(t / 120), x + 30, y + 124);
+        textC(ctx, "+FEES", x + 38, y + 144, on ? K.amber : K.brown);
+      });
+      textC(ctx, "UPGRADE CARD BETWEEN ZONES", 180, P.y + 214, K.green);
+      textC(ctx, "MAPLE STREET", 180, P.y + 8, K.amber, 2);
+    },
+  },
+];
+
+// ---------- Screen ----------
+const S = { page: 0 };
+try { S.page = Math.min(PAGES.length - 1, Number(localStorage.getItem("dwg-help-page")) || 0); } catch (e) { /* storage unavailable */ }
+const BACK = { x: 8, y: 584, w: 110, h: 40 }, NEXT = { x: 242, y: 584, w: 110, h: 40 }, CLOSE = { x: 318, y: 8, w: 34, h: 24 };
+const dotX = i => Math.round(180 - (PAGES.length * 14) / 2 + i * 14 + 3);
+
+function button(r, label, on) {
+  fill(r.x, r.y + 4, r.w, r.h - 4, on ? K.orange : K.dslate);
+  fill(r.x, r.y, r.w, r.h - 4, on ? K.amber : K.slate);
+  textC(ctx, label, r.x + r.w / 2, r.y + 12, on ? K.plum : K.lgrey, 2);
+}
+
+function render(t) {
+  const pg = PAGES[S.page];
+  fill(0, 0, 360, 640, K.dbrown);
+  fill(0, 0, 360, 40, K.plum); fill(0, 38, 360, 2, K.dbrown);
+  text(ctx, "HOW TO WALK", 12, 15, K.cream, 2);
+  fill(CLOSE.x, CLOSE.y, CLOSE.w, CLOSE.h, K.tan); fill(CLOSE.x + 1, CLOSE.y + 1, CLOSE.w - 2, CLOSE.h - 2, K.cream);
+  textC(ctx, "X", CLOSE.x + CLOSE.w / 2, CLOSE.y + 7, K.plum, 2);
+  fill(P.x - 1, P.y - 1, P.w + 2, P.h + 2, K.plum);
+  ctx.save(); ctx.beginPath(); ctx.rect(P.x, P.y, P.w, P.h); ctx.clip();
+  pg.draw(t);
+  ctx.restore();
+  text(ctx, `${S.page + 1}/${PAGES.length}`, 12, 300, K.tan);
+  text(ctx, pg.title, 12, 314, K.amber, 2);
+  wrap(pg.lines.join(" "), 336, 2).forEach((l, i) => text(ctx, l, 12, 340 + i * 15, K.cream, 2, { "♥": K.red, $: K.amber }));
+  PAGES.forEach((_, i) => fill(dotX(i), 562, 8, 8, i === S.page ? K.amber : K.brown));
+  button(BACK, "BACK", S.page > 0);
+  button(NEXT, S.page === PAGES.length - 1 ? "GOT IT" : "NEXT", true);
+}
+
+// Greedy word wrap for the pixel font at a given scale.
+function wrap(str, maxW, sc) {
+  const out = []; let cur = "";
+  for (const word of str.split(" ")) {
+    const next = cur ? cur + " " + word : word;
+    if (textW(next, sc) > maxW && cur) { out.push(cur); cur = word; } else cur = next;
+  }
+  if (cur) out.push(cur);
+  return out;
+}
+
+function go(p) {
+  S.page = Math.max(0, Math.min(PAGES.length - 1, p));
+  try { localStorage.setItem("dwg-help-page", String(S.page)); } catch (e) { /* storage unavailable */ }
+  syncButtons();
+}
+const inside = (x, y, r) => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h;
+cv.addEventListener("pointerdown", e => {
+  const r = cv.getBoundingClientRect();
+  const x = (e.clientX - r.left) * 360 / r.width, y = (e.clientY - r.top) * 640 / r.height;
+  if (inside(x, y, BACK)) go(S.page - 1);
+  else if (inside(x, y, NEXT)) go(S.page === PAGES.length - 1 ? 0 : S.page + 1);
+  else if (inside(x, y, CLOSE)) go(0);
+  else PAGES.forEach((_, i) => { if (inside(x, y, { x: dotX(i) - 3, y: 556, w: 14, h: 20 })) go(i); });
+});
+addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") { go(S.page - 1); e.preventDefault(); }
+  if (e.key === "ArrowRight") { go(S.page + 1); e.preventDefault(); }
+});
+
+const host = document.getElementById("pages");
+PAGES.forEach((p, i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.textContent = `${i + 1}. ${p.title.charAt(0)}${p.title.slice(1).toLowerCase()}`;
+  b.addEventListener("click", () => go(i));
+  host.append(b);
+});
+function syncButtons() { [...host.children].forEach((b, i) => b.setAttribute("aria-pressed", String(i === S.page))); }
+syncButtons();
+
+const zoom = Math.max(1, Math.min(2, Math.floor((cv.parentElement.clientWidth || 360) / 360)));
+cv.style.width = 360 * zoom + "px"; cv.style.height = 640 * zoom + "px";
+
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let t = 0, last = performance.now();
+function frame(now) { t += reduced ? 0 : Math.max(0, Math.min(50, now - last)); last = now; render(t); requestAnimationFrame(frame); }
+loadArt().catch(() => {}).then(() => requestAnimationFrame(frame));
+})();
+</script>
+</body>
+</html>
