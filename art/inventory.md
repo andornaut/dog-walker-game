@@ -60,15 +60,15 @@ Starters come first: they are the dogs every new player sees.
 
 Bumped with no card. An obstacle n lanes wide and m rows long is drawn 56n−24 by 56m−24 px (one row is 56px of road); the drawn box is the hit box.
 
-| Asset                | Key                      | Type   | Size          | Animations           | Priority | Notes                                         |
-| -------------------- | ------------------------ | ------ | ------------- | -------------------- | -------- | --------------------------------------------- |
-| Cone                 | `cone`                   | sprite | 32×32         | `idle`               | core     | 1 lane                                        |
-| Bin                  | `bin`                    | sprite | 32×32         | `idle`               | core     | 1 lane; green wheelie bin                     |
-| Hydrant              | `hydrant`                | sprite | 32×32         | `idle`               | core     | 1 lane                                        |
-| Bench                | `bench`                  | sprite | 88×32         | `idle`               | core     | 2 lanes                                       |
-| Hedge                | `hedge`                  | sprite | 144×32        | `idle`               | core     | 3 lanes                                       |
-| Construction barrier | `barrier-2`, `barrier-3` | sprite | 88×32, 144×32 | `idle` (lamps blink) | core     | 2 or 3 lanes; Woof Way and Sniff Street Shops |
-| Parked car           | `parked-car`             | sprite | 40×144        | `idle`               | core     | 1 lane by 3 rows, top-down, nose up the road  |
+| Asset                | Key                      | Type   | Size          | Animations           | Priority | Notes                                                                                                          |
+| -------------------- | ------------------------ | ------ | ------------- | -------------------- | -------- | -------------------------------------------------------------------------------------------------------------- |
+| Cone                 | `cone`                   | sprite | 32×32         | `idle`               | core     | 1 lane                                                                                                         |
+| Bin                  | `bin`                    | sprite | 32×32         | `idle`               | core     | 1 lane; green wheelie bin                                                                                      |
+| Hydrant              | `hydrant`                | sprite | 32×32         | `idle`               | core     | 1 lane                                                                                                         |
+| Bench                | `bench`                  | sprite | 88×32         | `idle`               | core     | 2 lanes                                                                                                        |
+| Hedge                | `hedge`                  | sprite | 144×32        | `idle`               | core     | 3 lanes                                                                                                        |
+| Construction barrier | `barrier-2`, `barrier-3` | sprite | 88×32, 144×32 | `idle` (lamps blink) | core     | 2 or 3 lanes; Woof Way and Sniff Street Shops                                                                  |
+| Parked car           | `parked-car`             | sprite | 40×80         | `idle`               | core     | 1 lane by 3 rows, from behind and above, nose up the road; anchored bottom-centre at the footprint's near edge |
 
 ## Lucky encounters (road)
 

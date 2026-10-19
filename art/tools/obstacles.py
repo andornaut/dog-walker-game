@@ -9,7 +9,7 @@ bench               88x32   2 lanes
 barrier-2           88x32   2 lanes, lamps blink (Woof Way, Sniff Street Shops)
 barrier-3           144x32  3 lanes, lamps blink
 hedge               144x32  3 lanes
-parked-car          40x144  1 lane by 3 rows, top-down, nose up the road
+parked-car          40x80   1 lane by 3 rows, from behind and above, nose up the road
 
 Usage:
   obstacles.py preview OUT.png   every obstacle on the street colours
@@ -130,32 +130,49 @@ def barrier(lanes, f):
 
 
 def parked_car():
-    """A station wagon from above: short hood, long roof with rails, nose up the road."""
-    g = Grid(40, 144)
-    for y in (18, 104):
-        g.rect(1, y, 4, 18, "ink")
-        g.rect(35, y, 4, 18, "ink")
-    g.blob(20, 72, 17, 70, "sky", "blue", "cyan", power=6)
-    g.rect(19, 6, 2, 22, "blue")
-    g.tri((7, 40), (33, 40), (11, 28), "navy")
-    g.tri((33, 40), (29, 28), (11, 28), "navy")
-    g.rect(13, 30, 6, 2, "slate")
-    g.rect(1, 33, 4, 3, "blue")
-    g.rect(35, 33, 4, 3, "blue")
-    g.rect(7, 42, 26, 72, "sky")
-    g.rect(29, 42, 4, 72, "blue")
-    g.rect(7, 42, 2, 72, "cyan")
-    for x in (11, 28):
-        g.rect(x, 48, 1, 60, "dslate")
-    for y in (56, 78, 100):
-        g.rect(11, y, 18, 1, "dslate")
-    g.rect(8, 114, 24, 10, "navy")
-    g.rect(10, 115, 8, 1, "slate")
-    g.rect(7, 5, 6, 3, "yellow")
-    g.rect(27, 5, 6, 3, "yellow")
-    g.rect(6, 136, 6, 3, "red")
-    g.rect(28, 136, 6, 3, "red")
-    g.rect(15, 138, 10, 3, "lgrey")
+    """A station wagon from behind and above, nose up the road: a glimpse of hood, the roof
+    with rails, the tailgate with its window and lights, the bumper and rear wheels."""
+    g = Grid(40, 80)
+    for x in (2, 33):
+        g.rect(x, 4, 5, 8, "ink")
+    for x in (3, 32):
+        g.rect(x, 66, 5, 12, "ink")
+    g.rect(8, 70, 24, 4, "ink")
+    g.tri((8, 1), (31, 1), (1, 15), "sky")
+    g.tri((31, 1), (38, 15), (1, 15), "sky")
+    g.rect(1, 15, 38, 55, "sky")
+    for x, y in ((1, 69), (38, 69)):
+        g.p(x, y, None)
+    g.tri((8, 1), (1, 15), (3, 15), "cyan")
+    g.rect(1, 15, 2, 39, "cyan")
+    g.tri((31, 1), (38, 15), (35, 15), "blue")
+    g.rect(35, 15, 4, 39, "blue")
+    g.rect(0, 14, 2, 3, "blue")
+    g.rect(38, 14, 2, 3, "blue")
+    g.tri((8, 12), (31, 12), (10, 19), "navy")
+    g.tri((31, 12), (29, 19), (10, 19), "navy")
+    g.rect(12, 13, 4, 1, "slate")
+    g.tri((8, 12), (5, 46), (7, 46), "navy")
+    g.tri((31, 12), (34, 46), (32, 46), "navy")
+    g.rect(7, 19, 26, 26, "sky")
+    g.rect(7, 19, 2, 26, "cyan")
+    g.rect(30, 19, 3, 26, "blue")
+    for x in (10, 29):
+        g.rect(x, 21, 1, 22, "dslate")
+    g.rect(5, 45, 30, 9, "navy")
+    g.tri((9, 53), (13, 46), (17, 46), "slate")
+    g.rect(1, 54, 38, 1, "cyan")
+    g.rect(1, 55, 38, 9, "sky")
+    g.rect(1, 64, 38, 4, "blue")
+    for x in (2, 32):
+        g.rect(x, 56, 6, 5, "red")
+        g.rect(x, 56, 6, 1, "pink")
+        g.rect(x, 60, 6, 1, "dred")
+    g.rect(15, 61, 10, 4, "lgrey")
+    g.rect(17, 62, 6, 1, "grey")
+    g.rect(18, 57, 4, 2, "lgrey")
+    g.rect(1, 67, 38, 4, "dslate")
+    g.rect(1, 67, 38, 1, "slate")
     return g
 
 
