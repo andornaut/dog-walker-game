@@ -363,7 +363,12 @@ def pierre_face(mood):
     return g
 
 
-# ---------- Archie: Australian Shepherd, medium, blue merle, one blue eye, red bandana ----------
+# ---------- Archie: Australian Shepherd, medium, red merle, one blue eye, red bandana ----------
+
+# The coat (fill, shade, light), the merle blotches (patch, ragged edge) and the ears (ear, folded tip).
+COAT = ("skin2", "brown", "skin1")
+BLOT = ("dbrown", "brown")
+EAR = ("dbrown", "plum")
 
 def archie_road(q):
     g, q = edged(Grid()), pose(q)
@@ -373,10 +378,10 @@ def archie_road(q):
                     (19, 25, q["br"])):
         g.rect(x, y + d, 3 if y > 20 else 2, 4, "white")
         g.rect(x, y + d, 3 if y > 20 else 2, 1, "ochre")
-    # a silver-grey coat torn by navy merle blotches, a fluffy white ruff at the nape. As wide as
-    # Biscuit, longer in the coat
+    # a cinnamon coat torn by liver merle blotches, a fluffy white ruff at the nape. As wide as Biscuit,
+    # longer in the coat
     bx = 16 + ln // 2
-    g.ell(bx, 21.5 + b, 7, 6, "lgrey", "grey", "white")
+    g.ell(bx, 21.5 + b, 7, 6, *COAT)
     merle(g, bx, b, ((-5, 20, 2, 2), (1, 19, 3, 2), (3, 23, 2, 2), (-2, 24, 3, 1), (-4, 23, 1, 1), (5, 20, 1, 2)))
     g.ell(bx, 16.5 + b, 6, 2, "white", "lgrey")
     # the red bandana's knot at the nape, its two ends flaring down the back
@@ -387,16 +392,16 @@ def archie_road(q):
         g.p(bx + (side - 1) // 2 + 2 * side, 19 + b, "dred")
     # a short bobtail
     tx = 16 + q["tail"]
-    g.ell(tx, 27.5 + b, 2, 1.6, "lgrey", "grey", "white")
-    g.p(tx - 1, 27 + b, "navy")
+    g.ell(tx, 27.5 + b, 2, 1.6, *COAT)
+    g.p(tx - 1, 27 + b, BLOT[0])
     # ears set high and tipped forward, the folded tips darker
     hx = 16 + ln
     e, t = q["ears"], q["twitch"]
-    g.tri((hx - 5.5, 10 + b), (hx - 5, 5 + b + e), (hx - 1.5, 7 + b), "dslate")
-    g.tri((hx + 5.5, 10 + b + t), (hx + 5, 5 + b + e + t), (hx + 1.5, 7 + b + t), "dslate")
-    g.rect(hx - 6, 5 + b + e, 2, 1, "navy")
-    g.rect(hx + 4, 5 + b + e + t, 2, 1, "navy")
-    g.ell(hx, 11.5 + b, 5.5, 5, "lgrey", "grey", "white")
+    g.tri((hx - 5.5, 10 + b), (hx - 5, 5 + b + e), (hx - 1.5, 7 + b), EAR[0])
+    g.tri((hx + 5.5, 10 + b + t), (hx + 5, 5 + b + e + t), (hx + 1.5, 7 + b + t), EAR[0])
+    g.rect(hx - 6, 5 + b + e, 2, 1, EAR[1])
+    g.rect(hx + 4, 5 + b + e + t, 2, 1, EAR[1])
+    g.ell(hx, 11.5 + b, 5.5, 5, *COAT)
     merle(g, hx, b, ((-4, 9, 2, 2), (2, 8, 2, 1), (1, 12, 2, 2), (-2, 13, 1, 1)))
     spray(g, q["spray"])
     return g
@@ -406,21 +411,21 @@ def archie_face(mood):
     g = Grid()
     d = droop(mood)
     # ears set high, the tips folding forward and out
-    g.tri((7, 12), (8 - d, 3 + d), (13.5, 7 + d / 2), "dslate")
-    g.tri((25, 12), (24 + d, 3 + d), (18.5, 7 + d / 2), "dslate")
-    g.tri((8 - d, 3 + d), (4 - d, 6 + d), (9 - d, 6 + d), "navy")
-    g.tri((24 + d, 3 + d), (28 + d, 6 + d), (23 + d, 6 + d), "navy")
+    g.tri((7, 12), (8 - d, 3 + d), (13.5, 7 + d / 2), EAR[0])
+    g.tri((25, 12), (24 + d, 3 + d), (18.5, 7 + d / 2), EAR[0])
+    g.tri((8 - d, 3 + d), (4 - d, 6 + d), (9 - d, 6 + d), EAR[1])
+    g.tri((24 + d, 3 + d), (28 + d, 6 + d), (23 + d, 6 + d), EAR[1])
     # a white ruff, the red bandana tied over it
     g.ell(16, 27, 9, 3.5, "white", "lgrey")
     g.tri((8, 25), (24, 25), (16, 31.5), "red")
     g.tri((16, 25), (24, 25), (16, 31.5), "dred")
     g.rect(8, 25, 16, 1, "dred")
-    g.ell(16, 16, 9.5, 8.5, "lgrey", "grey", "white")
-    # merle: a navy patch over the blue eye, blotches across the skull and cheek
-    g.ell(11, 14, 4, 3.5, "navy", "dslate")
+    g.ell(16, 16, 9.5, 8.5, *COAT)
+    # merle: a liver patch over the blue eye, blotches across the skull and cheek
+    g.ell(11, 14, 4, 3.5, *BLOT)
     for x, y, w, h in ((19, 9, 3, 2), (22, 12, 2, 2), (23, 18, 2, 2), (8, 19, 1, 2), (12, 8, 2, 1)):
-        g.rect(x, y, w, h, "navy")
-        g.p(x + w, y + h - 1, "dslate")
+        g.rect(x, y, w, h, BLOT[0])
+        g.p(x + w, y + h - 1, BLOT[1])
     g.rect(15, 7, 2, 9, "white")
     # copper brows and cheeks
     g.p(10, 11, "ochre")
@@ -429,13 +434,14 @@ def archie_face(mood):
     g.rect(22, 18, 2, 2, "ochre")
     g.ell(16, 20.5, 5, 3.5, "white", "lgrey")
     eyes(g, 10, 19, 14, iris="sky", mood=mood)
-    # the other eye brown
-    g.rect(19, 14, 3, 3, "brown")
+    # the other eye amber
+    g.rect(19, 14, 3, 3, "amber")
     g.p(20, 15, "ink")
-    g.p(21, 16, "dbrown")
+    g.p(21, 16, "orange")
     g.p(19, 14, "white")
-    g.rect(14, 18, 4, 2, "ink")
-    g.p(14, 18, "slate")
+    # a liver nose
+    g.rect(14, 18, 4, 2, "plum")
+    g.p(14, 18, "dbrown")
     mouth(g, 20, mood)
     return g
 
@@ -568,11 +574,11 @@ def puff(g, cx, cy, rx, ry, ring=False):
 
 
 def merle(g, cx, b, blots):
-    """Blue merle blotches on Archie's coat: each (dx, y, w, h) a navy patch at x cx + dx, row y + b, with a
-    dslate pixel ragging its lower-right corner."""
+    """Red merle blotches on Archie's coat: each (dx, y, w, h) a BLOT[0] patch at x cx + dx, row y + b, with
+    a BLOT[1] pixel ragging its lower-right corner."""
     for dx, y, w, h in blots:
-        g.rect(cx + dx, y + b, w, h, "navy")
-        g.p(cx + dx + w, y + b + h - 1, "dslate")
+        g.rect(cx + dx, y + b, w, h, BLOT[0])
+        g.p(cx + dx + w, y + b + h - 1, BLOT[1])
 
 
 def spray(g, d):

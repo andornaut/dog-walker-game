@@ -494,12 +494,12 @@ def slot_locked():
 
 # Each dog's roof: base, shingle shade and the dark ridge, gable edge and eave, from the dog's
 # accessory. Zippy's red collar takes dred with a red ridge and eave trim, so he stays apart from
-# Nugget's red, which carries the bandana's white dots; Archie's bandana is the red trim on a grey merle
+# Nugget's red, which carries the bandana's white dots; Archie's bandana is the red trim on a red merle
 # roof, and Penny's blue collar trims her golden one.
 ROOFS = {
     "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
     "pierre": ("purple", "plum", "ink"), "biscuit": ("green", "dgreen", "forest"),
-    "archie": ("grey", "slate", "navy"), "snowball": ("sky", "blue", "navy"),
+    "archie": ("skin2", "brown", "dbrown"), "snowball": ("sky", "blue", "navy"),
     "penny": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
     "empty": ("slate", "dslate", "navy"),
 }
@@ -588,7 +588,7 @@ def doghouse(dog):
         for y in (2, 6, 10, 14, 17):
             for x in range(3 + 6 * (y // 4 % 3), HOUSE_W, 17):
                 if abs(x + 1.5 - 60) < roof_width(y) - 3:
-                    g.rect(x, y, 3, 2 if y < 17 else 1, "navy")
+                    g.rect(x, y, 3, 2 if y < 17 else 1, "dbrown")
     # ridge and gable edges, then the eave
     g.rect(10, 0, 100, 1, dark)
     for y in range(4):
@@ -830,14 +830,14 @@ SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
 def section(state):
     """24x32 nine-slice (3px left, right and bottom, 24px top): one start screen section (walker,
     dogs, gear) framed as a unit, its heading band across the top over transparent space for the
-    tiles. A 1px ink edge, then a 2px border: ink for incomplete (a required choice not yet made)
-    and neutral (optional, nothing chosen), so dividers between sections read dark; amber for
-    complete. The band fills rows 3 to 23 between the side borders: navy over an ink line, or
+    tiles. A 1px ink edge, then a 2px border: ink for incomplete (a required choice not yet made),
+    so dividers between sections read dark; amber for complete and for neutral (optional, nothing
+    chosen), since an optional section never blocks the walk and its heading matches the others. The band fills rows 3 to 23 between the side borders: navy over an ink line, or
     amber over an orange line when complete. The game writes, in font-title x2 with caps in rows
     8 to 17: the heading 9px from the left, and right-aligned 9px from the right the missing step
     (incomplete: amber on navy 7.49:1) or the choice (complete: ink on amber 9.71:1); the heading is
     cream on navy (9.59:1) or ink on amber. neutral has no right-hand text."""
-    lit = state == "complete"
+    lit = state in ("complete", "neutral")
     g = Grid(SECTION_W, SECTION_H)
     g.rect(0, 0, SECTION_W, SECTION_H, "ink")
     g.rect(3, 3, SECTION_W - 6, SECTION_H - 6, None)

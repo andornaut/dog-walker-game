@@ -252,15 +252,16 @@ def biscuit(g):
     nose(g, 20, 29)
 
 
-# ---------- Archie: Australian Shepherd, medium, blue merle, one blue eye, red bandana ----------
+# ---------- Archie: Australian Shepherd, medium, red merle, one blue eye, red bandana ----------
 
 def archie(g):
+    coat, (blot, rag), (ear, tip) = dogs.COAT, dogs.BLOT, dogs.EAR
     # merle haunch and bobtail behind, a white ruff down the chest in front
-    g.ell(45, 54, 12, 9, "lgrey", "grey", "white")
-    g.ell(53, 46, 3.5, 3, "lgrey", "grey", "white")
+    g.ell(45, 54, 12, 9, *coat)
+    g.ell(53, 46, 3.5, 3, *coat)
     for x, y, w, h in ((40, 49, 4, 3), (48, 55, 3, 3), (52, 46, 2, 2), (37, 58, 2, 2)):
-        g.rect(x, y, w, h, "navy")
-        g.p(x + w, y + h - 1, "dslate")
+        g.rect(x, y, w, h, blot)
+        g.p(x + w, y + h - 1, rag)
     g.ell(31, 52, 13, 11, "white", "lgrey")
     legs(g, (23, 33), 53, "white", "lgrey")
     for x in (23, 33):
@@ -270,16 +271,16 @@ def archie(g):
     g.tri((32, 46), (45, 40), (30, 57), "dred")
     g.rect(17, 40, 28, 1, "dred")
     # ears set high, the tips folding forward
-    g.tri((12, 21), (15, 7), (24, 13), "dslate")
-    g.tri((15, 7), (9, 13), (16, 13), "navy")
-    g.tri((47, 20), (45, 6), (36, 12), "dslate")
-    g.tri((45, 6), (51, 12), (44, 12), "navy")
-    g.ell(30, 26, 16, 14, "lgrey", "grey", "white")
-    # merle: a navy patch over the blue eye, blotches over the skull and cheek
-    g.ell(20, 23, 6.5, 6, "navy", None, "dslate")
+    g.tri((12, 21), (15, 7), (24, 13), ear)
+    g.tri((15, 7), (9, 13), (16, 13), tip)
+    g.tri((47, 20), (45, 6), (36, 12), ear)
+    g.tri((45, 6), (51, 12), (44, 12), tip)
+    g.ell(30, 26, 16, 14, *coat)
+    # merle: a liver patch over the blue eye, blotches over the skull and cheek
+    g.ell(20, 23, 6.5, 6, blot, None, rag)
     for x, y, w, h in ((34, 13, 4, 2), (39, 17, 3, 3), (42, 27, 3, 2), (15, 31, 2, 3), (22, 14, 3, 2)):
-        g.rect(x, y, w, h, "navy")
-        g.p(x + w, y + h - 1, "dslate")
+        g.rect(x, y, w, h, blot)
+        g.p(x + w, y + h - 1, rag)
     # white blaze into a white muzzle, copper brows and cheek
     g.tri((27, 12), (31, 12), (29, 26), "white")
     g.rect(27, 12, 4, 5, "white")
@@ -287,10 +288,14 @@ def archie(g):
     g.ell(38, 32, 3, 2.5, "ochre", "rust")
     g.ell(25, 33, 9, 6.5, "white", "lgrey")
     eye(g, 18, 22, 4, "sky")
-    # the near eye brown
-    eye(g, 33, 22, 5, "brown")
-    g.p(36, 26, "dbrown")
+    # the near eye amber
+    eye(g, 33, 22, 5, "amber")
+    g.p(36, 26, "orange")
     nose(g, 20, 29)
+    # a liver nose
+    g.rect(21, 29, 4, 4, "plum")
+    g.rect(20, 30, 6, 2, "plum")
+    g.rect(21, 30, 2, 1, "dbrown")
 
 
 # ---------- Snowball: Samoyed, big, fluffy white, collar with a bell ----------
