@@ -112,6 +112,8 @@ export const TUNING = {
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
     // How long a dog leans and barks before it pulls.
     pullTell: 1,
+    // How long Soaked and Spooked show on a dog; they change nothing in the rules.
+    statusVisualSeconds: 10,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 216,
   },

@@ -3,7 +3,7 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import type { SpriteAnchor } from "../assets/manifest";
 import { depthVariantKey, standsOnGround } from "../assets/spriteKeys";
-import { opaqueBoundsOfRgba } from "../layout/pixelShapes";
+import { opaqueBoundsOfRgba, type PixelBounds } from "../layout/pixelShapes";
 import type { ScaleStep } from "../layout/projection";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
@@ -15,7 +15,26 @@ export interface SpriteMetrics {
 }
 
 const measured = new Map<string, SpriteMetrics>();
+const tops = new Map<string, number>();
 let scanCanvas: HTMLCanvasElement | undefined;
+
+// The opaque bounds of a loaded sprite's first frame, from one read of its pixels.
+function firstFrameBounds(scene: Scene, key: string): PixelBounds | undefined {
+  const texture = scene.textures.get(key);
+  const frame = texture.get(texture.getFrameNames()[0] ?? "__BASE");
+  const { height, width } = frame;
+  scanCanvas ??= document.createElement("canvas");
+  scanCanvas.width = width;
+  scanCanvas.height = height;
+  const context = scanCanvas.getContext("2d", { willReadFrequently: true });
+  if (context === null) {
+    return undefined;
+  }
+  context.clearRect(0, 0, width, height);
+  const image = frame.source.image as CanvasImageSource;
+  context.drawImage(image, frame.cutX, frame.cutY, width, height, 0, 0, width, height);
+  return opaqueBoundsOfRgba(width, height, context.getImageData(0, 0, width, height).data);
+}
 
 // Records a loaded sprite's feet line once, so sprites of different sizes stand on the same
 // line: from the manifest's anchor, or else from one read of its first frame's pixels.
@@ -31,22 +50,23 @@ export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | 
   if (!standsOnGround(key)) {
     return;
   }
-  scanCanvas ??= document.createElement("canvas");
-  scanCanvas.width = width;
-  scanCanvas.height = height;
-  const context = scanCanvas.getContext("2d", { willReadFrequently: true });
-  if (context === null) {
-    return;
-  }
-  context.clearRect(0, 0, width, height);
-  const image = frame.source.image as CanvasImageSource;
-  context.drawImage(image, frame.cutX, frame.cutY, width, height, 0, 0, width, height);
-  const bounds = opaqueBoundsOfRgba(width, height, context.getImageData(0, 0, width, height).data);
+  const bounds = firstFrameBounds(scene, key);
   measured.set(key, {
     feetY: bounds?.bottom ?? height,
     frameHeight: height,
     opaqueWidth: bounds === undefined ? width : bounds.right - bounds.left,
   });
+}
+
+// A loaded sprite's top opaque row in its first frame, read from its pixels on first use and
+// kept: the manifest's anchors give only the feet line and width.
+export function spriteTopY(scene: Scene, key: string): number {
+  let top = tops.get(key);
+  if (top === undefined) {
+    top = scene.textures.exists(key) ? (firstFrameBounds(scene, key)?.top ?? 0) : 0;
+    tops.set(key, top);
+  }
+  return top;
 }
 
 // How a road sprite shows at a depth step: its hand-drawn variant when one is loaded, else

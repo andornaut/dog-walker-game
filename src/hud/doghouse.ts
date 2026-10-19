@@ -13,6 +13,12 @@ export const DOGHOUSE = {
   name: { scales: [2, 1], width: 56, x: 36, y: 11 },
   ownerFace: { x: 8, y: 78 },
   ownerName: { scales: [1], width: 57, x: 9, y: 118 },
+  // The dog's status icons (16x16, top-left corners), beside the owner's window: the newest
+  // above the heart count, the next below it.
+  statuses: [
+    { x: 48, y: 72 },
+    { x: 48, y: 98 },
+  ],
 } as const;
 
 export interface HeartCell extends Point {

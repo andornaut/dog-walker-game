@@ -1,12 +1,14 @@
 import { type GameObjects, type Input, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
+import { statusIconKey } from "../assets/iconKeys";
 import { dogFaceKey, doghouseTag, ownerFaceKey, zoneIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
 import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
+import { stripItems, stripTapAllowed } from "../hud/stateStrip";
 import {
   buttonIcon,
   PAUSE_BUTTON,
@@ -24,6 +26,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
 import { faceMood } from "../rules/treats";
 import { read } from "../rules/units";
+import { statusesKey, statusesOf, type StatusMark } from "../runner/statuses";
 import type { PackSlot, RunState } from "../state/runState";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { PALETTE } from "./palette";
@@ -39,6 +42,7 @@ import {
 } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { playEffect, playTag } from "./sprites";
+import { StateStripView } from "./stateStripView";
 
 const PIP = { gap: 3, height: 8, width: 18, x: 271, y: 22 };
 // The zone's name is right-aligned in its well, its icon just left of it.
@@ -61,6 +65,7 @@ interface SlotView {
   name: GameObjects.BitmapText;
   ownerFace: GameObjects.Sprite;
   ownerName: GameObjects.BitmapText;
+  statuses: GameObjects.Image[];
 }
 
 // The top bar and dog column, drawn over the road for the whole walk and kept in view while
@@ -79,6 +84,7 @@ export class HudScene extends Scene {
   private pauseIcon: GameObjects.Image | undefined;
   private pips: GameObjects.Sprite[] = [];
   private slots: SlotView[] = [];
+  private strip: StateStripView | undefined;
   private treats: GameObjects.BitmapText | undefined;
   private zoneIcon: GameObjects.Image | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
@@ -128,6 +134,7 @@ export class HudScene extends Scene {
     );
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
+    this.strip = new StateStripView(this, () => stripTapAllowed((this.scene.get(SCENE_KEYS.run) as RunScene).runPause()));
 
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
@@ -256,6 +263,9 @@ export class HudScene extends Scene {
       }),
       ownerFace: sprite("treat", DOGHOUSE.ownerFace),
       ownerName: addPixelText(this, owner.x, owner.y, "", { color: PALETTE.plum }),
+      statuses: DOGHOUSE.statuses.map((cell) =>
+        this.add.image(at(cell).x, at(cell).y, "__DEFAULT").setOrigin(0).setVisible(false),
+      ),
     };
   }
 
@@ -266,6 +276,7 @@ export class HudScene extends Scene {
       return;
     }
     const pause = run.runPause();
+    this.strip?.show(stripItems(gameData, view.run));
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
       affected: view.affected.join(),
@@ -275,6 +286,7 @@ export class HudScene extends Scene {
       muted: isMuted(this),
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
+      statuses: statusesKey(view.statuses),
       treats: view.run.treats,
       zone: view.run.zoneIndex,
     };
@@ -335,6 +347,7 @@ export class HudScene extends Scene {
         const packSlot = run.pack[i];
         const highlighted = packSlot !== undefined && view.affected.includes(packSlot.dog);
         this.drawSlot(g, rect, slot, run, highlighted, packSlot);
+        this.showStatuses(slot, packSlot, view.statuses);
       }
     });
   }
@@ -403,6 +416,21 @@ export class HudScene extends Scene {
       } else {
         drawHeart(g, x + cell.x, y + cell.y, cell.full ? PALETTE.darkRed : PALETTE.tan);
       }
+    });
+  }
+
+  // The dog's newest statuses on its slot; a fired dog has none.
+  private showStatuses(
+    view: SlotView,
+    slot: PackSlot | undefined,
+    statuses: readonly StatusMark[],
+  ): void {
+    const shown = slot === undefined ? [] : statusesOf(statuses, slot.dog);
+    view.statuses.forEach((image, i) => {
+      const status = shown[i];
+      const key = status === undefined ? undefined : statusIconKey(status);
+      const art = key !== undefined && this.textures.exists(key);
+      image.setTexture(art ? key : "__DEFAULT").setVisible(art);
     });
   }
 

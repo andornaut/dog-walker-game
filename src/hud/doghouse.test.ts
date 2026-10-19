@@ -33,3 +33,17 @@ describe("fittingScale", () => {
     expect(fittingScale(10, [2, 1], 41)).toBe(1);
   });
 });
+
+describe("DOGHOUSE.statuses", () => {
+  it("puts the 16x16 status icons right of the owner's window, clear of the count and board", () => {
+    // The window's cream frame ends at x=42, the board starts at y=116, and the 1x count's
+    // capitals take the 6 rows from its y.
+    for (const cell of DOGHOUSE.statuses) {
+      expect(cell.x).toBeGreaterThanOrEqual(42);
+      expect(cell.x + 16).toBeLessThanOrEqual(66);
+      const count = DOGHOUSE.heartCount.y;
+      expect(cell.y + 16 <= count || cell.y >= count + 6).toBe(true);
+      expect(cell.y + 16).toBeLessThanOrEqual(116);
+    }
+  });
+});

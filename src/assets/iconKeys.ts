@@ -1,4 +1,5 @@
 import type { Energy, Temperament, TraitId } from "../data/types";
+import type { DogStatusId } from "../runner/statuses";
 import { kebabCase } from "./spriteKeys";
 
 // The 16x16 icons for a dog's trait and energy and its owner's temperament.
@@ -12,4 +13,9 @@ export function energyIconKey(energy: Energy): string {
 
 export function temperamentIconKey(temperament: Temperament): string {
   return `icon-owner-${kebabCase(temperament)}`;
+}
+
+// The 16x16 icon a dog's status shows on its doghouse slot.
+export function statusIconKey(status: DogStatusId): string {
+  return `icon-${kebabCase(status)}`;
 }

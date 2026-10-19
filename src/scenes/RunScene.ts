@@ -92,6 +92,7 @@ import {
   stepPulls,
 } from "../runner/pulls";
 import type { Random } from "../runner/random";
+import { activeStatuses, startStatuses, statusesOf, type StatusMark } from "../runner/statuses";
 import {
   type EncounterCard,
   finishZone,
@@ -144,6 +145,7 @@ import {
   showDepthLook,
   spriteMetrics,
 } from "./sprites";
+import { StatusOverlays } from "./statusDraw";
 
 // StartScene's pick; the run reads its loadout through runLoadout instead.
 export interface RunSceneData {
@@ -152,10 +154,12 @@ export interface RunSceneData {
   walkerSprite: string;
 }
 
-// What the HUD draws: the run, the dogs the open card affects, and how far through the zone.
+// What the HUD draws: the run, the dogs the open card affects, the dogs' statuses, newest
+// first, and how far through the zone.
 export interface RunHudView {
   affected: readonly DogId[];
   run: RunState;
+  statuses: readonly StatusMark[];
   zoneFraction: number;
 }
 
@@ -297,6 +301,8 @@ export class RunScene extends Scene {
   private runTimeMs = 0;
   private settings: Settings | undefined;
   private setup: RunSetup | undefined;
+  private statusMarks: readonly StatusMark[] = [];
+  private statusOverlays: StatusOverlays | undefined;
   private stinky: GameObjects.Sprite | undefined;
   private stopSprites: { key: string; sprites: GameObjects.Sprite[] } = { key: "", sprites: [] };
   private stumbling = false;
@@ -390,6 +396,7 @@ export class RunScene extends Scene {
     this.pulls = NO_PULLS;
     this.replay = undefined;
     this.runTimeMs = 0;
+    this.statusMarks = [];
     this.stopSprites = { key: "", sprites: [] };
     this.stumbling = false;
     this.zoneEndPending = false;
@@ -471,6 +478,7 @@ export class RunScene extends Scene {
     playTag(this.walker.sprite, walkerSprite, "walk");
     this.dizzy = this.add.sprite(0, 0, "fx-dizzy").setDepth(DEPTH.fx).setVisible(false);
     this.stinky = this.add.sprite(0, 0, "fx-stinky").setDepth(DEPTH.fx).setVisible(false);
+    this.statusOverlays = new StatusOverlays(this);
   }
 
   private listen(): void {
@@ -507,8 +515,14 @@ export class RunScene extends Scene {
     return {
       affected: this.cardView?.affected ?? [],
       run,
+      statuses: this.statuses(run),
       zoneFraction: run.zoneDistance / zoneLength(gameData, run),
     };
+  }
+
+  private statuses(run: RunState): StatusMark[] {
+    const seconds = read(gameData.tuning, "seconds", "statusVisualSeconds");
+    return activeStatuses(seconds, run, this.runTimeMs, this.statusMarks);
   }
 
   // Whether animations and bursts keep still, from the player's settings.
@@ -941,6 +955,8 @@ export class RunScene extends Scene {
       choice,
     );
     this.log({ choice, kind: "card", timeMs: this.runTimeMs });
+    const at = { timeMs: this.runTimeMs, zoneIndex: walk.run.zoneIndex };
+    this.statusMarks = startStatuses(gameData, view, at, choice, this.statusMarks);
     this.walk = { ...walk, run: outcome.state };
     this.cardView = undefined;
     this.scene.stop(SCENE_KEYS.card);
@@ -1570,6 +1586,8 @@ export class RunScene extends Scene {
       this.stinky.setVisible(stinky).setPosition(walkerX, footY - 70);
       playTag(this.stinky, "fx-stinky", "loop", still);
     }
+    const statuses = this.statuses(walk.run);
+    this.statusOverlays?.draw(this.dogSprites, (dog) => statusesOf(statuses, dog)[0], still);
   }
 
   // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the

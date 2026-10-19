@@ -97,6 +97,7 @@ export interface Tuning {
     readonly minorStumble: number;
     readonly pullIntervalByEnergy: Table<Energy>;
     readonly pullTell: number;
+    readonly statusVisualSeconds: number;
     readonly zoneAtBaseSpeed: number;
   };
 }
