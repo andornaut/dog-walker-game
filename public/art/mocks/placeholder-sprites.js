@@ -286,5 +286,5 @@ function roadTile(zone) {
   return cv;
 }
 
-return { PAL, DARK, dark, K, textW, text, textC, DOGS, OWNERS, mood, build, ZONES, ZONE_ORDER, roadTile };
+return { PAL, DARK, dark, K, textW, text, textC, DOGS, OWNERS, mood, build, ZONES, ZONE_ORDER, roadTile, mk, P, E, R, T, finish };
 })();

@@ -3,5 +3,10 @@
     "title": "Color test",
     "path": "run-screen-color-test.html",
     "description": "The 360x640 run screen in Endesga 32: zone colours, UI colours, outline styles, card dimming and lane readability. Sprites are drawn in code as stand-ins."
+  },
+  {
+    "title": "Start screen",
+    "path": "start-screen.html",
+    "description": "A proposal for the screen before a walk: bank and best walk, the walker and pack at the gate on Maple Street, the dog picker, gear, logbook and Start walk. Interactive, with sample data."
   }
 ]
