@@ -6,6 +6,8 @@ Format: `- [status] **Idea**: short description · notes`. Statuses: **floated**
 
 ## Look and feel
 
+- [floated] **Walk the sidewalk, not the road**: the pack walks a sidewalk, park path or boardwalk instead of the road, so the scene reads as a walk · pairs with Sidewalk lanes in [`next.md`](next.md)
+
 ## Run and onboarding
 
 - [exploring] **Fewer minor cards**: a puddle that catches one dog resolves without a card unless the dog is Fancy or its owner would fire you · the tuning loop decides it against the 8-cards-a-walk target

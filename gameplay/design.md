@@ -212,6 +212,22 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Hedge                                             | Minor     | 3 × 1               |
 | Construction barrier (Elm Avenue and Main Street) | Minor     | 2 or 3 × 1          |
 
+### Obstacle skins
+
+Each obstacle kind keeps one mechanic and wears a different look in each zone: a skin changes the name (the card title), the art and the hit label, never the effects, the options or who's affected. A big dog still scares off every Snatch skin, and Chasers still pull toward every Chase skin. The zone encounters already have their own looks.
+
+| Kind               | Willow Crescent | Fairview Park  | Elm Avenue | Main Street       | Riverside Path  | The Long Way Home |
+| ------------------ | --------------- | -------------- | ---------- | ----------------- | --------------- | ----------------- |
+| Chase (squirrel)   | Cat on a lawn   | Squirrel       | Squirrel   | Pigeon flock      | Ducklings       | Rabbit            |
+| Snatch (thief)     | Raccoon         | Seagull        | Pickpocket | Pickpocket        | Seagull         | Raccoon           |
+| Social (other dog) | Dog at a gate   | Frisbee dog    | Other dog  | Dog in a handbag  | Jogger's dog    | Other dog         |
+| Splash (puddle)    | Lawn sprinkler  | Mud patch      | Puddle     | Spilled milkshake | Splashy shore   | Puddle            |
+| Stink (skunk)      | Compost heap    | Skunk          | Skunk      | Fish crate        | Seaweed heap    | Garbage truck     |
+| Minor 1 × 1        | Garden gnome    | Molehill       | Cone, bin  | Sandwich board    | Tackle box      | Cone, bin         |
+| Minor 2 × 1        | Kiddie pool     | Picnic blanket | Bench      | Cafe table        | Bench           | Bench             |
+| Minor 3 × 1        | Hedge           | Flower bed     | Hedge      | Flower cart       | Rowboat trailer | Hedge             |
+| Minor 1 × 3        | Tricycle row    | Log            | Parked car | Parked scooter    | Canoe rack      | Parked car        |
+
 ### Moving hazards
 
 Some things cross the road or come down it. Each gives about 1 second of warning (a cue at the lane edge) before it moves, at most one mover is on screen at a time, and the reachable-path rule accounts for its movement.
