@@ -28,15 +28,15 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | `other-dog-owner`                | sprite | 40×60          | `walk`, `idle`                       | core | Walks behind `other-dog`                                      |
 | `petunias`                       | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                            |
 | `picnic`                         | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                            |
-| `puddle`                         | sprite | 88×32          | `idle`                               | core | Encounter, 2 lanes; ground decal drawn under everything       |
+| `puddle`                         | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes; ground decal drawn under everything       |
 | `skunk`                          | sprite | 40×40          | `idle`                               | core | Encounter; centred on `skunk-cloud`                           |
-| `skunk-cloud`                    | sprite | 88×40          | `loop`                               | core | 2×2 lanes and rows; a low dithered haze under the skunk       |
+| `skunk-cloud`                    | sprite | 104×50         | `loop`                               | core | 2×2 lanes and rows; a low dithered haze under the skunk       |
 | `squirrel`                       | sprite | 40×40          | `idle`, `run`                        | core | Encounter                                                     |
 | `thief`                          | sprite | 40×60          | `walk`, `flee`, `idle`               | core | Encounter                                                     |
 | `trash-bins`                     | sprite | 104×40         | `idle`                               | core | Encounter, 2 lanes                                            |
 | `chatty-neighbour`               | sprite | 40×60          | `wave`, `idle`                       | core | Forced stop; coffee mug                                       |
-| `construction`                   | sprite | 56×32          | `idle`                               | core | Forced stop; one lane, repeated across the road               |
-| `ice-cream-truck`                | sprite | 88×44          | `idle`                               | core | Forced stop; 2 lanes; a rear-view van                         |
+| `construction`                   | sprite | 64×40          | `idle`                               | core | Forced stop; one whole lane, repeated across the road         |
+| `ice-cream-truck`                | sprite | 104×55         | `idle`                               | core | Forced stop; 2 lanes; a rear-view van                         |
 | `kid`                            | sprite | 40×60          | `wave`, `sad`, `idle`                | core | Forced stop                                                   |
 | `mail-carrier`                   | sprite | 40×60          | `walk`, `idle`                       | core | Forced stop                                                   |
 | `stop-sign`                      | sprite | 40×60          | `idle`                               | core | Forced stop                                                   |
@@ -50,31 +50,30 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | `bin`, `cone`                    | sprite | 40×40          | `idle`                               | core | Minor, 1 lane                                                 |
 | `hedge`                          | sprite | 168×30         | `idle`                               | core | Minor, 3 lanes                                                |
 | `parked-car`                     | sprite | 56×35          | `idle`                               | core | Minor, 1 lane by 3 rows; drawn at the footprint's near edge   |
-| `ball-bounce`                    | sprite | 16×24          | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`      |
-| `cyclist`                        | sprite | 32×48          | `ride`                               | core | Minor; rides down a lane                                      |
-| `loose-dog`                      | sprite | 32×32          | `run`                                | core | Crosser; the `other-dog` corgi with a broken leash            |
-| `squirrel-dash`                  | sprite | 32×32          | `run`                                | core | Crosser                                                       |
+| `ball-bounce`                    | sprite | 20×30          | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`      |
+| `cyclist`                        | sprite | 40×60          | `ride`                               | core | Minor; rides down a lane                                      |
+| `loose-dog`                      | sprite | 40×40          | `run`                                | core | Crosser; the `other-dog` corgi with a broken leash            |
+| `squirrel-dash`                  | sprite | 40×40          | `run`                                | core | Crosser                                                       |
 | `ui-warning`, `ui-warning-arrow` | sprite | 16×16          | `pulse`; the arrow also `down-pulse` | core | Hazard cue at the lane edge                                   |
 
 ### Depth variants
 
 Same tags, frames and durations as the original.
 
-| Key                                                                                                                                                                                   | Size `@75`, `@50` | Pri  |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---- |
-| `ball-bounce`                                                                                                                                                                         | 12×18, 8×12       | core |
-| `barrier-2`, `bench`                                                                                                                                                                  | 78×23, 52×15      | core |
-| `barrier-3`, `hedge`                                                                                                                                                                  | 126×23, 84×15     | core |
-| `biscuit-neighbour`, `chatty-neighbour`, `kid`, `lemonade-stand`, `mail-carrier`, `other-dog-owner`, `photo-op`, `spot-lamp-post`, `spot-stranger`, `spot-tree`, `stop-sign`, `thief` | 30×45, 20×30      | core |
-| `bin`, `cone`, `dog-<name>`, `goose`, `hydrant`, `other-dog`, `skunk`, `spot-water-bowl`, `squirrel`                                                                                  | 30×30, 20×20      | core |
-| `cafe-patio`                                                                                                                                                                          | 78×38, 52×25      | core |
-| `cyclist`                                                                                                                                                                             | 24×36, 16×24      | core |
-| `fx-status-<status>`                                                                                                                                                                  | 12×12, 8×8        | core |
-| `loose-dog`, `squirrel-dash`                                                                                                                                                          | 24×24, 16×16      | core |
-| `lost-wallet`, `tip`, `treat`                                                                                                                                                         | 15×15, 10×10      | core |
-| `parked-car`                                                                                                                                                                          | 42×26, 28×18      | core |
-| `petunias`, `picnic`, `trash-bins`                                                                                                                                                    | 78×30, 52×20      | core |
-| `skunk-cloud`                                                                                                                                                                         | 66×30, 44×20      | core |
+| Key                                                                                                                                                                                              | Size `@75`, `@50` | Pri  |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- | ---- |
+| `ball-bounce`                                                                                                                                                                                    | 15×23, 10×15      | core |
+| `barrier-2`, `bench`                                                                                                                                                                             | 78×23, 52×15      | core |
+| `barrier-3`, `hedge`                                                                                                                                                                             | 126×23, 84×15     | core |
+| `biscuit-neighbour`, `chatty-neighbour`, `cyclist`, `kid`, `lemonade-stand`, `mail-carrier`, `other-dog-owner`, `photo-op`, `spot-lamp-post`, `spot-stranger`, `spot-tree`, `stop-sign`, `thief` | 30×45, 20×30      | core |
+| `bin`, `cone`, `dog-<name>`, `goose`, `hydrant`, `loose-dog`, `other-dog`, `skunk`, `spot-water-bowl`, `squirrel`, `squirrel-dash`                                                               | 30×30, 20×20      | core |
+| `cafe-patio`, `skunk-cloud`                                                                                                                                                                      | 78×38, 52×25      | core |
+| `construction`                                                                                                                                                                                   | 48×30, 32×20      | core |
+| `fx-status-<status>`                                                                                                                                                                             | 12×12, 8×8        | core |
+| `ice-cream-truck`                                                                                                                                                                                | 78×41, 52×28      | core |
+| `lost-wallet`, `tip`, `treat`                                                                                                                                                                    | 15×15, 10×10      | core |
+| `parked-car`                                                                                                                                                                                     | 42×26, 28×18      | core |
+| `petunias`, `picnic`, `puddle`, `trash-bins`                                                                                                                                                     | 78×30, 52×20      | core |
 
 ## Effects
 
@@ -118,8 +117,8 @@ Same tags, frames and durations as the original.
 
 | Key                 | Type   | Size    | Tags            | Pri  | Note                                                                                        |
 | ------------------- | ------ | ------- | --------------- | ---- | ------------------------------------------------------------------------------------------- |
-| `road-<zone>`       | image  | 280×64  |                 | core | snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade, the-long-way-home |
-| `road-<zone>-start` | image  | 280×64  |                 | core | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19               |
+| `road-<zone>`       | image  | 320×64  |                 | core | snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade, the-long-way-home |
+| `road-<zone>-start` | image  | 320×64  |                 | core | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19               |
 | `backdrop-<zone>`   | image  | 360×110 |                 | core | Every zone; screen rows 40 to 149                                                           |
 | `gag-cat`           | sprite | 24×24   | `idle`, `react` | core | On a fence                                                                                  |
 | `gag-sprinkler`     | sprite | 32×24   | `spray`         | core |                                                                                             |

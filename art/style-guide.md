@@ -12,21 +12,21 @@
 | ------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Top bar      | 0 to 39     | `ui-top-bar` wells: money 4,8 88×26, treats 96,8 32×26, zone 212,5 144×29; `ui-icon-button` Home 130,10 and pause 174,10; `ui-strip-well` under the zone well, right aligned at x 356 |
 | Backdrop     | 40 to 149   | `backdrop-<zone>`, 360×110                                                                                                                                                            |
-| Road         | 150 to 469  | 5 lanes of 56px; at the pack the road spans x 40 to 320, centre x 180                                                                                                                 |
+| Road         | 150 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180                                                                                                                 |
 | Doghouse row | 466 to 559  | `ui-dog-band` (360×94) at 0,466; three 120×90 `ui-doghouse` slots at x 0, 120 and 240, rows 470 to 559                                                                                |
 
-| Sprite                                                                                      | Frame                      |
-| ------------------------------------------------------------------------------------------- | -------------------------- |
-| Road tiles, dog and owner faces                                                             | 32×32                      |
-| Road animals: dogs, the other dog, skunk and squirrel                                       | 40×40                      |
-| Road people: walkers, forced-stop and lucky characters, the thief and the other dog's owner | 40×60 (kids drawn shorter) |
-| Owners                                                                                      | 32×48                      |
-| Pickups                                                                                     | 20×20                      |
-| Small effects, icons                                                                        | 16×16                      |
-| Dog portraits                                                                               | 64×64                      |
-| Obstacle n lanes wide                                                                       | (64n−24)×30                |
+| Sprite                                                                                                   | Frame                      |
+| -------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Dog and owner faces                                                                                      | 32×32                      |
+| Road animals: dogs, the other dog, skunk, squirrel, goose, `loose-dog` and `squirrel-dash`               | 40×40                      |
+| Road people: walkers, forced-stop and lucky characters, the thief, the other dog's owner and the cyclist | 40×60 (kids drawn shorter) |
+| Owners                                                                                                   | 32×48                      |
+| Pickups                                                                                                  | 20×20                      |
+| Small effects, icons                                                                                     | 16×16                      |
+| Dog portraits                                                                                            | 64×64                      |
+| Obstacle n lanes wide                                                                                    | (64n−24)×30                |
 
-A dog's road sprite is drawn on a 32-unit design grid and rasterized at 1.25× (its depth variants at 1.25× the step): every shape scales, while 1px lines and single pixels stay 1px, and a dog's feet keep to the frame's bottom rows. A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 104×30, hedge and `barrier-3` 168×30, the parked car 56×35 (1 lane by 3 rows of footprint, centred with 4px to spare each side of its 64px lane), the two-lane encounters 104 wide (picnic, petunias and trash bins 104×40, the café patio 104×50), the goose, cone, bin, hydrant and water bowl 40×40, the lemonade stand and the need spots' tree, lamp post and stranger 40×60, the two-lane ice cream truck 88×44 (a rear-view van) and construction 56×32 per lane. Ground decals (puddle 88×32, the skunk cloud 88×40) stay low so they read as lying on the road.
+Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.25× (their depth variants at 1.25× the step): every shape scales, while 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. The minor obstacles, the ice cream truck and the construction barrier are drawn in their own pixels. A 40px sprite leaves 12px of margin each side of its 64px lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 104×30, hedge and `barrier-3` 168×30, the parked car 56×35 (1 lane by 3 rows of footprint, centred with 4px to spare each side of its 64px lane), the two-lane encounters 104 wide (picnic, petunias and trash bins 104×40, the café patio 104×50), the goose, cone, bin, hydrant and water bowl 40×40, the lemonade stand and the need spots' tree, lamp post and stranger 40×60, the cyclist 40×60 and the bouncing ball 20×30, the two-lane ice cream truck 104×55 (a rear-view van) and construction 64×40, one whole lane, repeated across the road. Ground decals (puddle 104×40, the skunk cloud 104×50) stay low so they read as lying on the road.
 
 ## Palette and outlines
 
@@ -45,7 +45,7 @@ A dog's road sprite is drawn on a 32-unit design grid and rasterized at 1.25× (
 
 - Text holds 4.5:1 against what it sits on (3:1 at 2× and larger); essential icons and marks hold 3:1. Inactive controls are exempt.
 - A state never relies on colour alone: it also changes shape (a tick, a hollow heart, a filled pip).
-- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Elm Avenue; dred on Fairview Park (3.49:1) and Riverside Path (5.07:1); plum on Willow Crescent (4.84:1), Main Street (5.03:1) and The Long Way Home (4.45:1).
+- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Elm Avenue; dred on Fairview Park (3.49:1) and Riverside Path (5.07:1); plum on Willow Crescent (4.84:1), Main Street (5.03:1) and The Long Way Home (4.45:1). It is drawn over the dogs and their shadows and under the walker, who hides the part behind her, here and in every composite (help pages, cards, the og-image).
 
 ### UI colour pairs
 
@@ -240,33 +240,33 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 
 ## Depth scaling
 
-Sprites scale by depth in steps of 1×, 0.75× and 0.5×, nearest-neighbour. A sprite whose 1px outline, legs or motion breaks at a step gets a redrawn `<key>@75` or `<key>@50`: round(size × scale), the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. Sprites whose features are all 2px or wider scale at runtime.
+Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`: `<key>@88`, `@75`, `@62` and `@50` (dogs `@75` and `@50` only), each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite at its projected size from the smallest of its steps at least that size, scaled down nearest-neighbour, so it never swaps to a smaller step as it approaches.
 
 ## Road strips
 
-- 280×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
+- 320×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Willow Crescent grey (slate), Fairview Park tan (brown), Elm Avenue dslate (navy), Main Street pink (mauve), Riverside Path cream (tan), The Long Way Home skin2 (brown).
-- The four lane dividers sit at x = 56k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Willow Crescent; dbrown on Fairview Park; white dashes 12 rows long in 32 with a mauve edge on Main Street; dbrown dashes 20 rows long in 32 on Riverside Path; white outlined in plum on The Long Way Home.
+- The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Willow Crescent; dbrown on Fairview Park; white dashes 12 rows long in 32 with a mauve edge on Main Street; dbrown dashes 20 rows long in 32 on Riverside Path; white outlined in plum on The Long Way Home.
 - Curbs and verges stay inside the outer 3 to 7px, clear of the 12px sprite margin.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
-- The camera has its horizon at y −164 and the walker's feet at y 464; the road's far edge meets the backdrop at y 150 at scale 0.5. Its ratio r derives from speed (the visible distance is 5.25 s × `roadScrollSpeed`, so r is 0.797 at 150 px/s). The rows from the far edge down to about y 180 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
+- The camera has its horizon at y −164 and the walker's feet at y 464; the road's far edge meets the backdrop at y 150 at scale 0.5. Its ratio r derives from speed (the visible distance is 4.5 s × `roadScrollSpeed`, 675 road px at 150 px/s, so r is 0.930). The rows from the far edge down to about y 160 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
 
 ## Backdrops
 
-Backdrops are 360×110 on screen rows 40 to 149; band row y is screen row 40 + y. The street ends at a T-junction. Rows 86 to 109 continue the road's projection at its slope (at row 109 the road spans columns 110 to 249, lane dividers on 138, 166, 193 and 221). Above them a flat cross street: far sidewalk 66 to 69, far curb 70 to 71, road 72 to 80 with its centre line on 76, near sidewalk 81 to 85. The far side faces the camera on ground row 62.
+Backdrops are 360×110 on screen rows 40 to 149; band row y is screen row 40 + y. The street ends at a T-junction. Rows 86 to 109 continue the road's projection at its slope (at row 109 the road spans columns 100 to 259, 160 wide, lane dividers on 132, 164, 195 and 227). Above them a flat cross street: far sidewalk 66 to 69, far curb 70 to 71, road 72 to 80 with its centre line on 76, near sidewalk 81 to 85. The far side faces the camera on ground row 62.
 
 Where row 149 meets the road, left side (the right mirrors it):
 
-| Zone              | Edge                             | Curb     | Road from  |
-| ----------------- | -------------------------------- | -------- | ---------- |
-| Willow Crescent   | Sidewalk 86 to 107               | 108..109 | 110        |
-| Fairview Park     | Grass to 109                     | none     | 110 (path) |
-| Elm Avenue        | Sidewalk 86 to 107               | 108..111 | 112        |
-| Main Street       | Paving to 99, planter 100 to 107 | 108..111 | 112        |
-| Riverside Path    | Paving 86 to 109                 | none     | 110        |
-| The Long Way Home | Sidewalk 86 to 107               | 108..109 | 110        |
+| Zone              | Edge                           | Curb    | Road from  |
+| ----------------- | ------------------------------ | ------- | ---------- |
+| Willow Crescent   | Sidewalk 76 to 97              | 98..99  | 100        |
+| Fairview Park     | Grass to 99                    | none    | 100 (path) |
+| Elm Avenue        | Sidewalk 76 to 97              | 98..101 | 102        |
+| Main Street       | Paving to 89, planter 90 to 97 | 98..101 | 102        |
+| Riverside Path    | Paving 76 to 99                | none    | 100        |
+| The Long Way Home | Sidewalk 76 to 97              | 98..99  | 100        |
 
-Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 93 to 95, x 0 to 82), the near-right lawn (x 274 to 359, rows 86 to 109), and both sidewalks.
+Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 93 to 95, x 0 to 72), the near-right lawn (x 284 to 359, rows 86 to 109), and both sidewalks.
 
 ## Skies
 
