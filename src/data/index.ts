@@ -5,6 +5,7 @@ import { ENCOUNTERS } from "./encounters";
 import { FORCED_STOPS } from "./forcedStops";
 import { HELP_PAGES } from "./help";
 import { HINTS } from "./hints";
+import { HOME_TEXT } from "./homeText";
 import { MINOR_OBSTACLES } from "./minorObstacles";
 import { QUIPS } from "./quips";
 import { SHOP_GEAR } from "./shop";
@@ -23,6 +24,7 @@ interface ValueExports {
   readonly FORCED_STOPS: typeof FORCED_STOPS;
   readonly HELP_PAGES: typeof HELP_PAGES;
   readonly HINTS: typeof HINTS;
+  readonly HOME_TEXT: typeof HOME_TEXT;
   readonly MINOR_OBSTACLES: typeof MINOR_OBSTACLES;
   readonly QUIPS: typeof QUIPS;
   readonly SHOP_GEAR: typeof SHOP_GEAR;
@@ -42,6 +44,7 @@ function toGameData(values: ValueExports): GameData {
     forcedStops: values.FORCED_STOPS,
     help: values.HELP_PAGES,
     hints: values.HINTS,
+    homeText: values.HOME_TEXT,
     minorObstacles: values.MINOR_OBSTACLES,
     quips: values.QUIPS,
     shopGear: values.SHOP_GEAR,
@@ -61,6 +64,7 @@ let values: ValueExports = {
   FORCED_STOPS,
   HELP_PAGES,
   HINTS,
+  HOME_TEXT,
   MINOR_OBSTACLES,
   QUIPS,
   SHOP_GEAR,
@@ -92,6 +96,7 @@ if (import.meta.hot) {
       "./forcedStops.ts",
       "./help.ts",
       "./hints.ts",
+      "./homeText.ts",
       "./minorObstacles.ts",
       "./quips.ts",
       "./shop.ts",

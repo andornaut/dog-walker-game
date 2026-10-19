@@ -334,6 +334,29 @@ export interface HelpPage {
   readonly title: string;
 }
 
+// The home screen's text. A {name} in a line is filled by code, and each line may use only
+// the names src/home/homeText.ts lists for it.
+export interface HomeText {
+  // The walker's speech bubble, by what happened last. Picking a dog shows its owner's
+  // parting quip instead.
+  readonly bubble: {
+    readonly afterFiring: string;
+    readonly afterWalk: string;
+    readonly firstVisit: string;
+    readonly newAffordable: string;
+  };
+  readonly dogBought: string;
+  readonly dogCantAfford: string;
+  readonly hint: string;
+  readonly packCount: string;
+  readonly packDogsOne: string;
+  readonly packDogsMany: string;
+  readonly slotBuy: string;
+  readonly slotSave: string;
+  readonly slotSign: string;
+  readonly startWalk: string;
+}
+
 // What makes an owner speak: a choice that raised or lowered their hearts, firing you, or
 // the player picking their dog on the home screen.
 export type QuipMoment = "fired" | "happier" | "parting" | "upset";
@@ -375,6 +398,7 @@ export interface GameData {
   readonly forcedStops: Readonly<Record<ForcedStopId, ForcedStop>>;
   readonly help: readonly [HelpPage, ...HelpPage[]];
   readonly hints: Readonly<Record<HintId, Hint>>;
+  readonly homeText: HomeText;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
