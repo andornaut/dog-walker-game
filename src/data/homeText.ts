@@ -39,6 +39,7 @@ export const HOME_TEXT = {
   },
   gateSign: "Woof Way",
   gearBought: "{gear} is yours. Pocket it for a walk.",
+  locked: "Locked",
   logbook: {
     badges: "Badges",
     best: "Best {best}, {note}",
@@ -59,12 +60,18 @@ export const HOME_TEXT = {
   noticePackFull: "The pack is full. Tap a picked dog to take it out.",
   noticeSoundOff: "Sound off.",
   noticeSoundOn: "Sound on.",
-  packCount: "Pack {count}/{max}",
+  packCount: "{count}/{max}",
+  pocket: {
+    empty: "Empty. Tap a gear item to pocket it.",
+  },
   sectionDogs: "Pick your dogs",
   sectionDogsPrompt: "Add a dog",
   sectionGear: "Pocket (optional)",
   sectionWalker: "Pick a walker",
   sectionWalkerPrompt: "Tap a face",
+  shop: {
+    title: "Pet shop",
+  },
   slotBought: "{slot} is open. Room for one more dog!",
   slotBuy: "Tap to buy",
   slotSave: "Save {amount} more",
