@@ -4,12 +4,16 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Dog Walker</title>
+    <meta
+      name="description"
+      content="A cozy pixel-art lane runner. Walk a pack of dogs through Maplewood, and every bump in the road turns into a choice."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://dog-walker-game.andornaut.workers.dev/" />
     <meta property="og:title" content="Dog Walker" />
     <meta
       property="og:description"
-      content="A cozy pixel-art lane runner. Walk a pack of dogs through the neighbourhood, and every bump in the road turns into a choice."
+      content="A cozy pixel-art lane runner. Walk a pack of dogs through Maplewood, and every bump in the road turns into a choice."
     />
     <meta
       property="og:image"
@@ -21,7 +25,7 @@
     <meta name="twitter:title" content="Dog Walker" />
     <meta
       name="twitter:description"
-      content="A cozy pixel-art lane runner. Walk a pack of dogs through the neighbourhood, and every bump in the road turns into a choice."
+      content="A cozy pixel-art lane runner. Walk a pack of dogs through Maplewood, and every bump in the road turns into a choice."
     />
     <meta
       name="twitter:image"
@@ -36,17 +40,25 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
     />
+    <link rel="stylesheet" href="/nav.css" />
+    <script src="/nav.js" defer></script>
     <style>
-      /* Project home: the title and a centred Play over a live road scene, the numbers, the pillars, the cast, a playable skunk hit and card, what's on the road, the kennel and the work-in-progress links. Colours are Endesga 32. */
+      /* Project home: the logo on The Long Way Home's banded sky, the pitch and Play, then five
+         highlights, each a cream chrome card with a navy band, game art at an integer scale
+         (1x on phones, 2x from 760px) and a line or two. Colours are Endesga 32. */
       :root {
-        --bg: #181425;
-        --surface: #262b44;
-        --line: #3a4466;
-        --fg: #ead4aa;
+        --amber: #feae34;
+        --cream: #ead4aa;
+        --dred: #a22633;
+        --forest: #265c42;
+        --green: #63c74d;
+        --ink: #181425;
         --muted: #8b9bb4;
-        --accent: #feae34;
-        --accent-deep: #f77622;
-        --accent-ink: #181425;
+        --navy: #262b44;
+        --pink: #f6757a;
+        --plum: #3e2731;
+        --tan: #e4a672;
+        --yellow: #fee761;
         --f-display: "Silkscreen", ui-monospace, monospace;
         --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
         color-scheme: dark;
@@ -56,1536 +68,443 @@
       }
       body {
         margin: 0;
-        background: var(--bg);
-        color: var(--fg);
+        background: var(--ink);
+        color: var(--cream);
         font-family: var(--f-body);
         font-size: 16px;
         line-height: 1.5;
       }
+      img {
+        display: block;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
       main {
-        max-width: 960px;
-        margin: 0 auto;
-        padding-block: 40px 56px;
+        display: grid;
+        justify-items: center;
+        gap: 32px;
+        padding-block: 0 40px;
         padding-left: max(16px, env(safe-area-inset-left, 0px));
         padding-right: max(16px, env(safe-area-inset-right, 0px));
-        display: grid;
-        gap: 48px;
       }
-      /* Title, pitch and a large Play button, centred, with the road scene below. */
-      .hero {
+      /* The sky band: its pink top band runs on above the backdrop, which sits at its foot. The
+         band is the backdrop's width, so on a 360px phone its margins pull it over the gutters.
+         The highlights centre the same way. */
+      .sky {
         display: grid;
         justify-items: center;
-        gap: 28px;
-        text-align: center;
-      }
-      .hero-text {
-        display: grid;
-        justify-items: center;
-        gap: 20px;
-        min-width: 0;
-        width: 100%;
+        --w: min(360px, 100vw);
+        width: var(--w);
+        margin-inline: calc((100% - var(--w)) / 2);
+        padding: 28px 0 138px;
+        background: var(--pink) url("/art/images/backdrop-the-long-way-home.png") no-repeat center
+          bottom / 360px 110px;
       }
       h1 {
-        font-family: var(--f-display);
-        font-weight: 400;
-        font-size: clamp(40px, 7vw, 56px);
-        line-height: 1;
         margin: 0;
-        letter-spacing: 0.02em;
+      }
+      .logo {
+        width: 256px;
+        height: 60px;
+      }
+      .intro {
+        display: grid;
+        justify-items: center;
+        gap: 16px;
+        max-width: 40ch;
+        text-align: center;
       }
       .pitch {
         margin: 0;
+        font-size: 19px;
+        line-height: 1.4;
+      }
+      .sub,
+      .keys {
+        margin: 0;
         color: var(--muted);
-        font-size: 18px;
-        max-width: 46ch;
-      }
-      .actions {
-        display: grid;
-        justify-items: center;
-        gap: 12px;
-        width: 100%;
-      }
-      .play {
-        display: block;
-        box-sizing: border-box;
-        width: 100%;
-        max-width: 320px;
-        font-family: var(--f-display);
-        font-size: 30px;
-        text-align: center;
-        text-decoration: none;
-        color: var(--accent-ink);
-        background: var(--accent);
-        padding: 14px 26px;
-        border-radius: 4px;
-        box-shadow: 0 5px 0 var(--accent-deep);
-      }
-      .play:hover {
-        background: #fee761;
-      }
-      .play:active {
-        transform: translateY(2px);
-        box-shadow: 0 2px 0 var(--accent-deep);
       }
       .keys {
-        color: var(--muted);
         font-size: 14px;
       }
-      kbd {
-        font-family: var(--f-display);
-        font-size: 12px;
-        border: 1px solid var(--line);
-        border-bottom-width: 3px;
-        border-radius: 3px;
-        padding: 0 5px;
-        color: var(--fg);
-      }
-      /* The run screen below its status bar, 360x600, drawn at 1x. */
-      .scene {
+      /* The primary button: a raised green face on a forest lip, ink label. */
+      .play {
         display: block;
-        width: min(360px, 100%);
-        height: auto;
-        aspect-ratio: 360 / 600;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-        border-radius: 4px;
-        outline: 4px solid var(--surface);
-        background: #3a4466;
+        width: 100%;
+        max-width: 288px;
+        margin-top: 4px;
+        padding: 12px 24px;
+        font-family: var(--f-display);
+        font-size: 32px;
+        line-height: 1;
+        text-align: center;
+        text-decoration: none;
+        color: var(--ink);
+        background: var(--green);
+        border: 2px solid var(--ink);
+        box-shadow:
+          0 0 0 2px var(--cream),
+          0 6px 0 2px var(--forest);
+        position: relative;
+        top: 0;
       }
-      h2 {
+      .play:hover {
+        background: #74d55e;
+      }
+      .play:active {
+        top: 4px;
+        box-shadow:
+          0 0 0 2px var(--cream),
+          0 2px 0 2px var(--forest);
+      }
+      .play:focus-visible {
+        outline: 3px solid var(--yellow);
+        outline-offset: 6px;
+      }
+      /* A highlight: the cream chrome (ink outer line, plum inner line, tan lip on the bottom
+         and right, corners cut 1px), a navy band with a display heading, then the art. */
+      .hl {
+        --w: min(350px, calc(100vw - 10px));
+        width: var(--w);
+        margin-block: 0;
+        margin-inline: calc((100% - var(--w)) / 2);
+        display: grid;
+        background: var(--cream);
+        color: var(--plum);
+        border: 1px solid var(--ink);
+        box-shadow:
+          inset 0 0 0 1px var(--plum),
+          inset -3px -3px 0 0 var(--tan);
+        clip-path: polygon(
+          1px 0,
+          calc(100% - 1px) 0,
+          100% 1px,
+          100% calc(100% - 1px),
+          calc(100% - 1px) 100%,
+          1px 100%,
+          0 calc(100% - 1px),
+          0 1px
+        );
+        padding: 1px 3px 3px 1px;
+      }
+      .hl h2 {
+        margin: 0;
+        padding: 10px 12px 12px;
+        background: var(--navy);
         font-family: var(--f-display);
         font-weight: 400;
-        font-size: 14px;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin: 0;
-      }
-      section {
-        display: grid;
-        gap: 14px;
-      }
-      .stats {
-        display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-        gap: 1px;
-        background: var(--line);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        overflow: hidden;
-        margin: 0;
-      }
-      .stats div {
-        background: var(--surface);
-        padding: 12px 10px;
-        display: grid;
-        gap: 2px;
-        align-content: start;
-      }
-      .stats dt {
-        font-family: var(--f-display);
-        font-size: 28px;
+        font-size: 16px;
         line-height: 1;
-        color: var(--accent);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--yellow);
+        text-shadow:
+          -1px -1px 0 var(--ink),
+          0 -1px 0 var(--ink),
+          1px -1px 0 var(--ink),
+          -1px 0 0 var(--ink),
+          1px 0 0 var(--ink),
+          -1px 1px 0 var(--ink),
+          0 1px 0 var(--ink),
+          1px 1px 0 var(--ink),
+          2px 2px 0 var(--dred),
+          3px 3px 0 var(--dred);
       }
-      .stats dd {
+      .hl p {
         margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.3;
+        padding: 12px 14px 14px;
       }
-      @media (max-width: 720px) {
-        .stats {
-          grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
+      /* A 344x236 help screen over a plum line, 1x on phones (cropped from the centre below 344px)
+         and 2x from 760px. */
+      .shot {
+        width: 100%;
+        height: 237px;
+        object-fit: none;
+        background: var(--ink);
+        border-bottom: 1px solid var(--plum);
       }
-      .pillars {
+      .art {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: end;
+        gap: 12px;
+        padding: 16px 12px 0;
+      }
+      /* Comic hit words: frame 0 of each play-word, cropped to the burst and shown at 2x. */
+      .word {
+        display: block;
+        background-repeat: no-repeat;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+      .w-skunk {
+        width: 98px;
+        height: 64px;
+        background-image: url("/art/sprites/fx-hit-skunk.png");
+        background-size: 2048px 128px;
+        background-position: -1040px -32px;
+      }
+      .w-puddle {
+        width: 84px;
+        height: 52px;
+        background-image: url("/art/sprites/fx-hit-puddle.png");
+        background-size: 1792px 128px;
+        background-position: -918px -54px;
+      }
+      .w-thief {
+        width: 70px;
+        height: 64px;
+        background-image: url("/art/sprites/fx-hit-thief.png");
+        background-size: 2048px 128px;
+        background-position: -1052px -48px;
+      }
+      .walkers {
+        display: flex;
+        gap: 12px;
+      }
+      /* A fork's three path cards, easiest on the left: zone art at 1x on phones, 2x from 760px. */
+      .fork {
         display: grid;
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
+        align-items: start;
+        gap: 8px;
       }
-      .pillars div {
-        border-top: 4px solid var(--accent);
-        background: var(--surface);
-        padding: 14px 16px;
-        border-radius: 0 0 6px 6px;
-      }
-      .pillars b,
-      .tile b,
-      .group b {
-        display: block;
-        font-family: var(--f-display);
-        font-weight: 400;
-        font-size: 15px;
-        margin-bottom: 4px;
-      }
-      .pillars p,
-      .tile p,
-      .group p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 15px;
-      }
-      canvas.px,
-      img.px {
-        display: block;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-      }
-      /* The cast: the walkers' faces, a compact grid of all nine dogs, and the three starter
-         owners standing beside their dogs. */
-      .cast {
-        display: grid;
-        grid-template-columns: 310px minmax(0, 1fr);
-        gap: 12px;
-      }
-      .tile {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        padding: 14px;
-        display: grid;
-        gap: 12px;
-        align-content: start;
-        min-width: 0;
-      }
-      .walker-row,
-      .dog-grid {
-        display: grid;
-        gap: 6px;
-      }
-      .walker-row {
-        grid-template-columns: repeat(4, minmax(0, 1fr));
-      }
-      .dog-grid {
-        grid-template-columns: repeat(9, minmax(0, 1fr));
-      }
-      .walker-row figure,
-      .dog-grid figure {
+      .fork figure {
         margin: 0;
         display: grid;
         justify-items: center;
-        align-content: start;
-        gap: 4px;
+        gap: 6px;
         text-align: center;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.25;
+        font-size: 14px;
+        line-height: 1.3;
       }
-      .walker-row canvas,
-      .dog-grid img {
-        background: #3a4466;
-        border-radius: 4px;
+      .fork img {
+        outline: 1px solid var(--ink);
       }
-      .walker-row b,
-      .dog-grid b,
-      .pairs b {
+      .fork b {
         display: block;
-        font-family: var(--f-display);
-        font-weight: 400;
-        font-size: 12px;
-        color: var(--fg);
       }
-      .dog-grid img {
+      .dogs {
+        display: grid;
+        grid-template-columns: repeat(3, 64px);
+        gap: 8px;
+      }
+      /* Sprite sheets in an img: object-fit cover scales the sheet by the box's height, an
+         integer, and object-position left shows its first frame. */
+      .sheet {
+        object-fit: cover;
+        object-position: left top;
+      }
+      .face {
         width: 64px;
         height: 64px;
-        max-width: 100%;
-        height: auto;
       }
-      .dog-grid .starter {
-        outline: 2px solid var(--accent);
-        outline-offset: 1px;
+      .shop {
+        width: 240px;
+        height: 208px;
       }
-      .key {
-        color: var(--accent);
-      }
-      .starters {
-        grid-column: 1 / -1;
-      }
-      .pairs {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 12px;
-      }
-      .pairs figure {
-        margin: 0;
-        display: flex;
-        align-items: end;
-        gap: 8px;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.3;
-      }
-      .pairs img {
-        background: #3a4466;
-        border-radius: 4px;
-      }
-      .pairs figcaption {
-        align-self: center;
-        min-width: 0;
-      }
-      @media (max-width: 860px) {
-        .cast,
-        .pillars,
-        .pairs {
-          grid-template-columns: minmax(0, 1fr);
+      @media (min-width: 760px) {
+        main {
+          gap: 40px;
         }
-        .dog-grid {
-          grid-template-columns: repeat(3, minmax(0, 1fr));
-          row-gap: 12px;
+        .sky {
+          --w: 720px;
+          padding: 48px 0 260px;
+          background-size: 720px 220px;
         }
-      }
-      /* The skunk hit: the hit moment plays, then the card's three options; pick one and the
-         owners react. */
-      .choice {
-        display: grid;
-        grid-template-columns: 352px minmax(0, 1fr);
-        gap: 16px 24px;
-        align-items: start;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        padding: 16px;
-      }
-      .choice > .lede {
-        grid-column: 1 / -1;
-      }
-      .hit-wrap {
-        display: grid;
-        gap: 8px;
-        justify-items: start;
-      }
-      #hit {
-        width: min(352px, 100%);
-        height: auto;
-        aspect-ratio: 176 / 144;
-        border-radius: 4px;
-        background: #3a4466;
-      }
-      .replay {
-        appearance: none;
-        font: 14px/1.2 var(--f-body);
-        color: var(--fg);
-        background: none;
-        border: 1px solid var(--line);
-        border-radius: 4px;
-        padding: 6px 10px;
-        cursor: pointer;
-      }
-      .replay:hover {
-        border-color: var(--accent);
-      }
-      .replay:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 2px;
-      }
-      .pick {
-        display: grid;
-        gap: 14px;
-        min-width: 0;
-      }
-      .cards {
-        display: flex;
-        gap: 10px;
-        transition:
-          opacity 0.3s,
-          transform 0.3s;
-      }
-      .choice[data-state="hit"] .cards {
-        opacity: 0.25;
-        transform: translateY(12px);
-      }
-      .cards button {
-        appearance: none;
-        border: 0;
-        padding: 0;
-        background: none;
-        cursor: pointer;
-        width: min(166px, calc((100% - 20px) / 3));
-        transition: transform 0.12s;
-      }
-      .cards button canvas {
-        width: 100%;
-        height: auto;
-        aspect-ratio: 83 / 140;
-        border-radius: 4px;
-        box-shadow: 0 0 0 3px transparent;
-      }
-      .cards button:hover {
-        transform: translateY(-3px);
-      }
-      .cards button[aria-pressed="true"] {
-        transform: translateY(-6px);
-      }
-      .cards button[aria-pressed="true"] canvas {
-        box-shadow: 0 0 0 3px var(--accent);
-      }
-      .cards button:focus-visible canvas {
-        box-shadow: 0 0 0 3px #fee761;
-      }
-      .owners {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 16px;
-      }
-      .owners figure {
-        margin: 0;
-        display: grid;
-        justify-items: center;
-        gap: 2px;
-        font-size: 13px;
-        color: var(--muted);
-        text-align: center;
-      }
-      .owners canvas {
-        background: #3a4466;
-        border-radius: 4px;
-      }
-      .owners .hearts {
-        color: var(--fg);
-      }
-      .outcome {
-        margin: 0;
-        min-height: 3em;
-      }
-      .outcome b {
-        color: var(--accent);
-        font-weight: 700;
-      }
-      @media (prefers-reduced-motion: reduce) {
-        .cards,
-        .cards button {
-          transition: none;
+        .logo {
+          width: 384px;
+          height: 90px;
         }
-      }
-      @media (max-width: 860px) {
-        .choice {
-          grid-template-columns: minmax(0, 1fr);
+        .pitch {
+          font-size: 22px;
         }
-        .hit-wrap {
-          justify-items: center;
+        .hl {
+          --w: 694px;
         }
-        .cards {
-          justify-content: center;
+        .hl h2 {
+          padding: 14px 16px 16px;
+          font-size: 24px;
         }
-      }
-      /* What's on the road, in groups. */
-      .road {
-        display: grid;
-        gap: 12px;
-      }
-      .road .group {
-        grid-template-columns: 200px minmax(0, 1fr);
-        align-items: center;
-        gap: 16px;
-      }
-      .group {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        padding: 14px;
-        display: grid;
-        gap: 10px;
-        align-content: start;
-        min-width: 0;
-      }
-      .group .n {
-        color: var(--accent);
-      }
-      .sprites {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px 12px;
-        align-items: end;
-      }
-      .sprites figure {
-        margin: 0;
-        display: grid;
-        justify-items: center;
-        gap: 4px;
-        font-size: 12px;
-        color: var(--muted);
-        text-align: center;
-      }
-      .sprites .pair {
-        display: flex;
-        align-items: end;
-        gap: 2px;
-      }
-      @media (max-width: 720px) {
-        .road .group {
-          grid-template-columns: minmax(0, 1fr);
+        .hl p {
+          padding: 16px 20px 20px;
+          font-size: 18px;
         }
-      }
-      /* Things to buy and earn. */
-      .collect {
-        display: grid;
-        grid-template-columns: auto minmax(0, 1fr);
-        gap: 12px;
-      }
-      .collect .wide {
-        grid-column: 1 / -1;
-      }
-      .houses {
-        display: flex;
-        gap: 6px;
-        align-items: end;
-      }
-      .houses canvas {
-        width: 72px;
-        height: 146px;
-      }
-      @media (min-width: 861px) {
-        .houses canvas {
-          width: 144px;
-          height: 292px;
+        .shot {
+          height: 473px;
+          object-fit: fill;
         }
-      }
-      .gear {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px 12px;
-        margin: 0;
-        padding: 0;
-        list-style: none;
-      }
-      .gear li {
-        display: grid;
-        justify-items: center;
-        gap: 4px;
-        width: 72px;
-        font-size: 12px;
-        line-height: 1.25;
-        color: var(--muted);
-        text-align: center;
-      }
-      .badge-groups {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 14px 24px;
-      }
-      .badge-groups figure {
-        margin: 0;
-        display: grid;
-        gap: 6px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-      .badge-groups div {
-        display: grid;
-        grid-template-columns: repeat(2, 64px);
-        gap: 8px;
-      }
-      @media (max-width: 860px) {
-        .collect {
-          grid-template-columns: minmax(0, 1fr);
+        .dogs {
+          grid-template-columns: repeat(9, 64px);
         }
-      }
-      .lede {
-        margin: 0;
-        color: var(--muted);
-      }
-      nav {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 12px;
-      }
-      @media (max-width: 640px) {
-        nav {
-          grid-template-columns: minmax(0, 1fr);
+        .fork {
+          grid-template-columns: repeat(3, 150px);
+          gap: 24px;
         }
-      }
-      nav a {
-        display: grid;
-        gap: 2px;
-        padding: 12px 14px;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        color: var(--fg);
-        text-decoration: none;
-      }
-      nav a:hover {
-        border-color: var(--accent);
-      }
-      nav a b {
-        color: var(--accent);
-      }
-      nav a span {
-        color: var(--muted);
-        font-size: 14px;
-      }
-      a:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 3px;
+        .fork img {
+          width: 150px;
+          height: 112px;
+        }
       }
       footer {
+        max-width: 694px;
         color: var(--muted);
-        font-size: 13px;
-        border-top: 1px solid var(--line);
-        padding-top: 16px;
+        font-size: 14px;
+        text-align: center;
       }
     </style>
   </head>
   <body>
     <main>
-      <section class="hero" aria-label="Dog Walker">
-        <div class="hero-text">
-          <h1>Dog Walker</h1>
-          <p class="pitch">
-            A cozy pixel-art lane runner. Walk a pack of dogs through the neighbourhood, and every
-            bump in the road turns into a choice.
-          </p>
-          <div class="actions">
-            <a class="play" href="/play/">Play</a>
-            <span class="keys"
-              >Drag to steer, or tap a side. Keys: <kbd>←</kbd> <kbd>→</kbd>, <kbd>A</kbd>/<kbd
-                >D</kbd
-              >
-              or <kbd>H</kbd>/<kbd>L</kbd>.</span
-            >
-          </div>
-        </div>
-        <canvas
-          class="scene"
-          id="scene"
-          width="360"
-          height="600"
-          role="img"
-          aria-label="A dog walker and three dogs walking through the four zones of Maplewood, switching lanes to collect tips, around obstacles and past a squirrel, a loose dog, a ball and a cyclist"
-        ></canvas>
-      </section>
+      <div class="sky">
+        <h1>
+          <img class="logo" src="/art/images/logo.png" width="128" height="30" alt="Dog Walker" />
+        </h1>
+      </div>
 
-      <dl class="stats" aria-label="In the game">
-        <div>
-          <dt>4</dt>
-          <dd>zones of Maplewood, about 8 minutes a walk</dd>
-        </div>
-        <div>
-          <dt>9</dt>
-          <dd>dogs, each with an owner to keep happy</dd>
-        </div>
-        <div>
-          <dt>14</dt>
-          <dd>road events: encounters, lucky finds and forced stops</dd>
-        </div>
-        <div>
-          <dt>4</dt>
-          <dd>moving hazards that cross or ride down the road</dd>
-        </div>
-        <div>
-          <dt>7</dt>
-          <dd>minor obstacles: no card, just a stumble</dd>
-        </div>
-        <div>
-          <dt>9</dt>
-          <dd>upgrade cards between zones</dd>
-        </div>
-        <div>
-          <dt>5</dt>
-          <dd>pieces of gear to buy</dd>
-        </div>
-        <div>
-          <dt>15</dt>
-          <dd>achievements to earn</dd>
-        </div>
-      </dl>
-
-      <section aria-labelledby="h-pillars">
-        <h2 id="h-pillars">The idea</h2>
-        <div class="pillars">
-          <div>
-            <b>Cozy, not frantic</b>
-            <p>A calm pace and gentle failure. You keep what you earn.</p>
-          </div>
-          <div>
-            <b>Every bump is a story</b>
-            <p>Hit a skunk or a puddle and pick a card: pay up, or upset the owners.</p>
-          </div>
-          <div>
-            <b>Charming chaos</b>
-            <p>Cute dogs, dramatic owners and a silly neighbourhood.</p>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="h-cast">
-        <h2 id="h-cast">The cast</h2>
-        <div class="cast">
-          <div class="tile">
-            <p>
-              <b>Pick a walker</b>Ada, Ben, Casey or Trista. All four are free from the first walk.
-            </p>
-            <div class="walker-row">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-walker-ada"
-                  data-tag="happy"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <b>Ada</b>11, long curls
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-walker-ben"
-                  data-tag="happy"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <b>Ben</b>45, all in black
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-walker-casey"
-                  data-tag="happy"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <b>Casey</b>cap and hoodie
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-walker-trista"
-                  data-tag="happy"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <b>Trista</b>50, teacher
-              </figure>
-            </div>
-          </div>
-          <div class="tile">
-            <p>
-              <b>Nine dogs to walk</b>Each has an owner to keep happy and a trait that changes how a
-              walk goes. The <span class="key">outlined</span> three are the starters; the rest join
-              from the shop.
-            </p>
-            <div class="dog-grid">
-              <figure>
-                <img
-                  class="px starter"
-                  src="/art/images/portrait-dog-duchess.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Duchess</b>Maltese
-              </figure>
-              <figure>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-nugget.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Nugget</b>Pug
-              </figure>
-              <figure>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-zippy.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Zippy</b>Jack Russell
-              </figure>
-              <figure>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-pierre.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Pierre</b>Poodle
-              </figure>
-              <figure>
-                <img
-                  class="px starter"
-                  src="/art/images/portrait-dog-biscuit.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Biscuit</b>Beagle
-              </figure>
-              <figure>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-archie.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Archie</b>Australian Shepherd
-              </figure>
-              <figure>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-snowball.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Snowball</b>Samoyed
-              </figure>
-              <figure>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-penny.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Penny</b>Golden retriever
-              </figure>
-              <figure>
-                <img
-                  class="px starter"
-                  src="/art/images/portrait-dog-koda.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <b>Koda</b>Husky
-              </figure>
-            </div>
-          </div>
-          <div class="tile starters">
-            <p>
-              <b>The first clients</b>The starters' owners are laid-back, for an easier first run.
-              On a new save they wait at the gate for the first walk.
-            </p>
-            <div class="pairs">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="owner-duchess"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-duchess.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <figcaption><b>Rosa</b>Retired florist, with Duchess</figcaption>
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="owner-biscuit"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-biscuit.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <figcaption><b>Sam</b>Barista, with Biscuit</figcaption>
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="owner-koda"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                <img
-                  class="px"
-                  src="/art/images/portrait-dog-koda.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />
-                <figcaption><b>Jesse</b>Trail runner, with Koda</figcaption>
-              </figure>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="h-choice">
-        <h2 id="h-choice">Every bump is a choice</h2>
-        <div class="choice">
-          <p class="lede">
-            The pack walks into a skunk. Each dog rolls to be caught: Biscuit and Koda are sprayed,
-            and small Duchess slips past. The card's costs cover the two caught dogs. Pick one and
-            see how it lands with the owners.
-          </p>
-          <div class="hit-wrap">
-            <canvas
-              class="px"
-              id="hit"
-              width="176"
-              height="144"
-              role="img"
-              aria-label="The hit moment: a green burst over the pack, a SPRAYED! label above it, and the caught dogs shaking off"
-            ></canvas>
-            <button type="button" class="replay">Replay the hit</button>
-          </div>
-          <div class="pick">
-            <div class="cards" role="group" aria-label="The skunk card's three options">
-              <button
-                type="button"
-                data-option="grooming"
-                aria-pressed="false"
-                aria-label="Full groom: $20 per caught dog, $40 in all"
-              >
-                <canvas
-                  class="px"
-                  data-card="card-skunk-grooming"
-                  data-label="Full groom"
-                  data-effect="−$20 per dog"
-                  data-cost="−$40"
-                  aria-hidden="true"
-                ></canvas>
-              </button>
-              <button
-                type="button"
-                data-option="rinse"
-                aria-pressed="false"
-                aria-label="Quick rinse: $10 per caught dog, $20 in all, and the pack is Stinky"
-              >
-                <canvas
-                  class="px"
-                  data-card="card-skunk-rinse"
-                  data-label="Quick rinse"
-                  data-effect="−$10 per dog, Stinky"
-                  data-cost="−$20"
-                  aria-hidden="true"
-                ></canvas>
-              </button>
-              <button
-                type="button"
-                data-option="ignore"
-                aria-pressed="false"
-                aria-label="Hold your nose: free, but 2 hearts lost for each caught dog's owner"
-              >
-                <canvas
-                  class="px"
-                  data-card="card-skunk-ignore"
-                  data-label="Hold your nose"
-                  data-effect="−2 ♥ each"
-                  data-cost="Free"
-                  aria-hidden="true"
-                ></canvas>
-              </button>
-            </div>
-            <div class="owners">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-owner-duchess"
-                  data-tag="neutral"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas>
-                Rosa <span class="hearts">♥ 4/6</span>
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-owner-biscuit"
-                  data-tag="neutral"
-                  data-scale="2"
-                  data-caught
-                  aria-hidden="true"
-                ></canvas>
-                Sam <span class="hearts" data-max="8">♥ 4/8</span>
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-owner-koda"
-                  data-tag="neutral"
-                  data-scale="2"
-                  data-caught
-                  aria-hidden="true"
-                ></canvas>
-                Jesse <span class="hearts" data-max="10">♥ 4/10</span>
-              </figure>
-            </div>
-            <p class="outcome" aria-live="polite"></p>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="h-road">
-        <h2 id="h-road">On the road</h2>
-        <div class="road">
-          <div class="group">
-            <p>
-              <b><span class="n">5</span> encounters</b>Hit one and a card opens.
-            </p>
-            <div class="sprites">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="skunk"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Skunk
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="squirrel"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Squirrel
-              </figure>
-              <figure>
-                <span class="pair">
-                  <canvas
-                    class="px"
-                    data-sprite="other-dog"
-                    data-tag="walk"
-                    data-scale="2"
-                    aria-hidden="true"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="other-dog-owner"
-                    data-tag="idle"
-                    data-scale="2"
-                    aria-hidden="true"
-                  ></canvas> </span
-                >Other dog
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="thief"
-                  data-tag="walk"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Thief
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="puddle"
-                  data-tag="idle"
-                  data-scale="1"
-                  aria-hidden="true"
-                ></canvas
-                >Puddle
-              </figure>
-            </div>
-          </div>
-          <div class="group">
-            <p>
-              <b><span class="n">4</span> moving hazards</b>A warning sign shows at the lane edge
-              about a second before each one moves. The squirrel and loose dog open their encounter
-              cards; the ball and cyclist are minor bumps.
-            </p>
-            <div class="sprites">
-              <figure>
-                <span class="pair">
-                  <canvas
-                    class="px"
-                    data-sprite="ui-warning"
-                    data-tag="pulse"
-                    data-scale="2"
-                    aria-hidden="true"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="ui-warning-arrow"
-                    data-tag="pulse"
-                    data-scale="2"
-                    aria-hidden="true"
-                  ></canvas> </span
-                >Warning
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="squirrel-dash"
-                  data-tag="run"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Squirrel dash
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="loose-dog"
-                  data-tag="run"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Loose dog
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="ball-bounce"
-                  data-tag="bounce"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Ball
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="cyclist"
-                  data-tag="ride"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Cyclist
-              </figure>
-            </div>
-          </div>
-          <div class="group">
-            <p>
-              <b><span class="n">3</span> lucky finds</b>Good things to bump into.
-            </p>
-            <div class="sprites">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="lost-wallet"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Lost wallet
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="biscuit-neighbour"
-                  data-tag="wave"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Neighbour
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="photo-op"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Photo op
-              </figure>
-            </div>
-          </div>
-          <div class="group">
-            <p>
-              <b><span class="n">6</span> forced stops</b>One per zone, and you can't dodge it.
-            </p>
-            <div class="sprites">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="stop-sign"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Stop sign
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="chatty-neighbour"
-                  data-tag="wave"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Neighbour
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="kid"
-                  data-tag="wave"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Kid
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="ice-cream-truck"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Ice cream
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="construction"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Detour
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="mail-carrier"
-                  data-tag="walk"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Mail
-              </figure>
-            </div>
-          </div>
-          <div class="group">
-            <p>
-              <b><span class="n">7</span> minor obstacles</b>No card: the pack stumbles and drops $2
-              in tips. Barriers stand only on Woof Way and Sniff Street Shops.
-            </p>
-            <div class="sprites">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="cone"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Cone
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="bin"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Bin
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="hydrant"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Hydrant
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="parked-car"
-                  data-tag="idle"
-                  data-scale="1"
-                  aria-hidden="true"
-                ></canvas
-                >Parked car
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="bench"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Bench
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="barrier-2"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Barrier
-              </figure>
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="hedge"
-                  data-tag="idle"
-                  data-scale="2"
-                  aria-hidden="true"
-                ></canvas
-                >Hedge
-              </figure>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section aria-labelledby="h-collect">
-        <h2 id="h-collect">Build your kennel</h2>
-        <p class="lede">
-          The home screen is the shop, in three steps: choose your walker, choose your dogs, choose
-          gear (optional), then start the walk. Hold a dog or gear item for its detail card.
+      <div class="intro">
+        <p class="pitch">
+          Walk a pack of dogs through Maplewood. Every bump in the road turns into a choice.
         </p>
-        <div class="collect">
-          <div class="group">
-            <p><b>Dog slots</b>Start with one; buy two more.</p>
-            <div class="houses" aria-hidden="true">
-              <canvas
-                class="px"
-                data-doghouse="koda"
-                data-name="Koda"
-                data-owner="Jesse"
-                data-hearts="7"
-                data-max="10"
-              ></canvas>
-              <canvas
-                class="px"
-                data-doghouse="duchess"
-                data-name="Duchess"
-                data-owner="Rosa"
-                data-hearts="4"
-                data-max="6"
-              ></canvas>
-              <canvas
-                class="px"
-                data-doghouse="biscuit"
-                data-name="Biscuit"
-                data-owner="Sam"
-                data-hearts="6"
-                data-max="8"
-              ></canvas>
-            </div>
-          </div>
-          <div class="group">
-            <p><b>Gear</b>Bought once; take up to one piece on each walk.</p>
-            <ul class="gear">
-              <li>
-                <img
-                  class="px"
-                  src="/art/images/item-fanny-pack.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />Fanny pack
-              </li>
-              <li>
-                <img
-                  class="px"
-                  src="/art/images/item-whistle.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />Whistle
-              </li>
-              <li>
-                <img
-                  class="px"
-                  src="/art/images/item-poop-bags.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />Poop bags
-              </li>
-              <li>
-                <img
-                  class="px"
-                  src="/art/images/item-running-shoes.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />Running shoes
-              </li>
-              <li>
-                <img
-                  class="px"
-                  src="/art/images/item-lucky-collar.png"
-                  width="64"
-                  height="64"
-                  alt=""
-                />Lucky collar
-              </li>
-            </ul>
-          </div>
-          <div class="group wide">
-            <p>
-              <b>Achievements</b>15 badges in four groups, on the Stats page's badge wall. Locked
-              ones are greyed with their goal.
-            </p>
-            <div class="badge-groups">
-              <figure>
-                Firsts
-                <div>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-first-steps"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="First Steps"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-round-trip"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="Round Trip"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-double-leash"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="Double Leash"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-pack-leader"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Pack Leader"
-                  ></canvas>
-                </div>
-              </figure>
-              <figure>
-                Mastery
-                <div>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-clean-paws"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="Clean Paws"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-not-a-scratch"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Not a Scratch"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-five-star-service"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Five-Star Service"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-big-payday"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Big Payday"
-                  ></canvas>
-                </div>
-              </figure>
-              <figure>
-                Collection
-                <div>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-full-kennel"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="Full Kennel"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-kitted-out"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Kitted Out"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-neighbourhood-favourite"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Neighbourhood Favourite"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-top-walker"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Top Walker"
-                  ></canvas>
-                </div>
-              </figure>
-              <figure>
-                Silly
-                <div>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-youre-fired"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="You're Fired!"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-eau-de-skunk"
-                    data-tag="locked"
-                    data-scale="2"
-                    title="Eau de Skunk"
-                  ></canvas>
-                  <canvas
-                    class="px"
-                    data-sprite="badge-squirrel"
-                    data-tag="earned"
-                    data-scale="2"
-                    title="Squirrel!"
-                  ></canvas>
-                </div>
-              </figure>
-            </div>
-          </div>
+        <p class="sub">
+          A cozy pixel-art lane runner for your phone. Four zones a walk, about 8 minutes.
+        </p>
+        <a class="play" href="/play/">Play</a>
+        <p class="keys">Drag or tap to steer, or use the arrow keys.</p>
+      </div>
+
+      <section class="hl" aria-labelledby="h-bump">
+        <h2 id="h-bump">Every bump, a choice</h2>
+        <img
+          class="shot"
+          src="/art/images/help-cards.png"
+          width="344"
+          height="236"
+          alt="The skunk card over the dimmed road, with three options: Full groom for $20, Quick rinse for $10 and Stinky, or Hold your nose for free at 2 hearts each"
+        />
+        <div class="art" role="img" aria-label="Comic hit words: PEE-YEW!, SPLOSH! and YOINK!">
+          <span class="word w-skunk"></span>
+          <span class="word w-puddle"></span>
+          <span class="word w-thief"></span>
         </div>
+        <p>
+          Walk into a skunk, a puddle or a thief and a card opens: pay up, or upset the owners.
+          Every outcome is on the card, and a bump is never game over.
+        </p>
       </section>
 
-      <section aria-labelledby="h-wip">
-        <h2 id="h-wip">Work in progress</h2>
-        <nav aria-labelledby="h-wip">
-          <a href="/art/"
-            ><b>Art</b
-            ><span>Every exported sprite, image and font, plus mocks and the palette</span></a
+      <section class="hl" aria-labelledby="h-dogs">
+        <h2 id="h-dogs">Nine dogs, nine quirks</h2>
+        <div class="art">
+          <div
+            class="dogs"
+            role="img"
+            aria-label="The nine dogs: Duchess, Nugget, Zippy, Pierre, Biscuit, Archie, Snowball, Penny and Koda"
           >
-          <a href="https://github.com/andornaut/dog-walker-game/tree/main/gameplay"
-            ><b>Design docs</b
-            ><span>Game design, ideas and what comes next (GitHub, sign-in required)</span></a
-          >
-          <a href="https://github.com/andornaut/dog-walker-game"
-            ><b>GitHub</b><span>Source code, issues and CI (sign-in required)</span></a
-          >
-          <a href="https://dash.cloudflare.com/?to=/:account/workers/services/view/dog-walker-game"
-            ><b>Cloudflare dashboard</b><span>Deploys, builds and logs (sign-in required)</span></a
-          >
-        </nav>
+            <img src="/art/images/portrait-dog-duchess.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-nugget.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-zippy.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-pierre.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-biscuit.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-archie.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-snowball.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-penny.png" width="64" height="64" alt="" />
+            <img src="/art/images/portrait-dog-koda.png" width="64" height="64" alt="" />
+          </div>
+        </div>
+        <p>
+          Koda the husky speeds up your lane changes, Biscuit the beagle sniffs out tips a lane
+          away, and nervous Penny lunges at other dogs. When a dog's need turns urgent, it pulls the
+          pack toward a hydrant, a lamp post or a water bowl.
+        </p>
+      </section>
+
+      <section class="hl" aria-labelledby="h-owners">
+        <h2 id="h-owners">Keep the owners happy</h2>
+        <img
+          class="shot"
+          src="/art/images/help-owners.png"
+          width="344"
+          height="236"
+          alt="Koda's doghouse with Jesse's face and 4 of 10 hearts and a finger tapping it to give a treat, Jesse's happy, neutral and upset faces, and Nugget's empty doghouse with a FIRED! plate"
+        />
+        <p>
+          Every dog comes with an owner and a row of hearts. Tap a doghouse to hand its owner a
+          treat. Let the hearts hit zero and the owner fires you, takes the dog home and takes back
+          this walk's fees.
+        </p>
+      </section>
+
+      <section class="hl" aria-labelledby="h-zones">
+        <h2 id="h-zones">Pick your path</h2>
+        <div class="art fork" role="group" aria-label="A fork: three paths to the next zone">
+          <figure>
+            <img src="/art/images/card-zone-snooze-crescent.png" width="75" height="56" alt="" />
+            <figcaption><b>Willow Crescent</b>Easiest, fees ×0.7</figcaption>
+          </figure>
+          <figure>
+            <img src="/art/images/card-zone-sniff-street-shops.png" width="75" height="56" alt="" />
+            <figcaption><b>Main Street</b>Busy, fees ×1.25</figcaption>
+          </figure>
+          <figure>
+            <img src="/art/images/card-zone-the-long-way-home.png" width="75" height="56" alt="" />
+            <figcaption><b>The Long Way Home</b>Hard, fees ×1.5</figcaption>
+          </figure>
+        </div>
+        <p>
+          Every walk starts on Elm Avenue and covers four of Maplewood's six zones. Between zones
+          you pick an upgrade card, then the road forks: easiest on the left, hardest and best paid
+          on the right.
+        </p>
+      </section>
+
+      <section class="hl" aria-labelledby="h-shop">
+        <h2 id="h-shop">Grow the business</h2>
+        <div class="art">
+          <img
+            class="sheet shop"
+            src="/art/sprites/ui-pet-shop.png"
+            width="240"
+            height="104"
+            alt="The Pet shop: a green storefront with a striped awning"
+          />
+          <div class="walkers" role="img" aria-label="The four walkers: Casey, Ben, Ada and Trista">
+            <img
+              class="sheet face"
+              src="/art/sprites/face-walker-casey.png"
+              width="64"
+              height="32"
+              alt=""
+            />
+            <img
+              class="sheet face"
+              src="/art/sprites/face-walker-ben.png"
+              width="64"
+              height="32"
+              alt=""
+            />
+            <img
+              class="sheet face"
+              src="/art/sprites/face-walker-ada.png"
+              width="64"
+              height="32"
+              alt=""
+            />
+            <img
+              class="sheet face"
+              src="/art/sprites/face-walker-trista.png"
+              width="64"
+              height="32"
+              alt=""
+            />
+          </div>
+        </div>
+        <p>
+          Spend your tips and fees at the Pet shop on new dogs, dog slots and gear, and pocket one
+          gear item for each walk. Casey walks first; Ben, Ada and Trista join when you first finish
+          zones 1, 2 and 3.
+        </p>
       </section>
 
       <footer>
@@ -1593,1065 +512,5 @@
         Cloudflare Workers.
       </footer>
     </main>
-
-    <script>
-      // Every canvas.px with data-sprite shows one tag of an exported sprite sheet, animated at
-      // its Aseprite frame durations; data-doghouse draws a dog slot and data-card a choice card
-      // as the game does. #hit is the skunk hit and #scene the hero's road scene.
-      (() => {
-        const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
-        const img = (src) =>
-          new Promise((ok) => {
-            const i = new Image();
-            i.onload = () => ok(i);
-            i.onerror = () => ok(null);
-            i.src = src;
-          });
-        const sheets = {};
-        const sheet = (key) =>
-          (sheets[key] ??= Promise.all([
-            img(`/art/sprites/${key}.png`),
-            fetch(`/art/sprites/${key}.json`)
-              .then((r) => (r.ok ? r.json() : null))
-              .catch(() => null),
-          ]).then(([im, data]) =>
-            im && data
-              ? {
-                  im,
-                  frames: Object.values(data.frames),
-                  tags: Object.fromEntries(data.meta.frameTags.map((t) => [t.name, t])),
-                }
-              : null,
-          ));
-        // The two bitmap fonts; capTop is how far into a line the capitals start.
-        const fonts = {
-          title: font("font-title").then((f) => f && { ...f, capTop: 4 }),
-          body: font("font-body").then((f) => f && { ...f, capTop: 2 }),
-        };
-        const PLUM = "#3e2731",
-          DRED = "#a22633",
-          CREAM = "#ead4aa",
-          WHITE = "#ffffff";
-        const live = [];
-
-        // The frame of a tag at time now; with reduced motion, the tag's first frame.
-        function frameAt(sh, tag, now) {
-          const t = sh.tags[tag];
-          if (!t) return null;
-          let i = t.from;
-          if (t.to > t.from && !reduced) {
-            const total = sh.frames.slice(t.from, t.to + 1).reduce((n, f) => n + f.duration, 0);
-            let m = now % total;
-            while (m >= sh.frames[i].duration) m -= sh.frames[i++].duration;
-          }
-          return sh.frames[i].frame;
-        }
-        // A tag played once from t = 0: its frame, or null once it has finished.
-        function frameOnce(sh, tag, t) {
-          const g = sh.tags[tag];
-          if (!g || t < 0) return null;
-          for (let i = g.from; i <= g.to; i++) {
-            if (t < sh.frames[i].duration) return sh.frames[i].frame;
-            t -= sh.frames[i].duration;
-          }
-          return null;
-        }
-
-        function paint(s, now) {
-          const f = frameAt(s.sh, s.c.dataset.tag, now);
-          if (!f) return;
-          const x = s.c.getContext("2d");
-          x.clearRect(0, 0, f.w, f.h);
-          x.drawImage(s.sh.im, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
-        }
-
-        function size(c, w, h, scale) {
-          c.width = w;
-          c.height = h;
-          c.style.width = `${w * scale}px`;
-          c.style.height = `${h * scale}px`;
-        }
-
-        async function mount(c) {
-          const sh = await sheet(c.dataset.sprite);
-          if (!sh) return;
-          const f = sh.frames[0].frame;
-          size(c, f.w, f.h, Number(c.dataset.scale) || 1);
-          const s = { c, sh };
-          c.repaint = () => paint(s, performance.now());
-          live.push(s);
-          c.repaint();
-        }
-
-        // Text in a bitmap font, white then tinted, word-wrapped to maxWidth font pixels and
-        // centred line by line.
-        const plain = (f, s) =>
-          (f.capTop === 4 ? s.toUpperCase() : s).replaceAll("−", "-").replaceAll("’", "'");
-        const glyphs = (f, s) => [...s].map((ch) => f.chars[ch.codePointAt(0)]).filter(Boolean);
-        const measure = (f, s) => glyphs(f, s).reduce((n, g) => n + g.adv, 0) - 1;
-        function wrap(f, s, maxWidth) {
-          const lines = [];
-          for (const word of s.split(" ")) {
-            const last = lines[lines.length - 1];
-            if (last !== undefined && measure(f, `${last} ${word}`) <= maxWidth)
-              lines[lines.length - 1] = `${last} ${word}`;
-            else lines.push(word);
-          }
-          return lines;
-        }
-        function textCanvas(f, s, color, maxWidth = Infinity) {
-          const lines = wrap(f, plain(f, s), maxWidth);
-          const widths = lines.map((l) => measure(f, l));
-          const c = document.createElement("canvas");
-          c.width = Math.max(1, ...widths);
-          c.height = lines.length * f.line;
-          const x = c.getContext("2d");
-          lines.forEach((l, i) => {
-            let pen = Math.floor((c.width - widths[i]) / 2);
-            for (const g of glyphs(f, l)) {
-              if (g.w)
-                x.drawImage(f.im, g.x, g.y, g.w, g.h, pen + g.ox, i * f.line + g.oy, g.w, g.h);
-              pen += g.adv;
-            }
-          });
-          x.globalCompositeOperation = "source-in";
-          x.fillStyle = color;
-          x.fillRect(0, 0, c.width, c.height);
-          return { c, lines: lines.length };
-        }
-        // Draws text centred on x, or from x, with its capitals' top on row y.
-        function write(ctx, f, s, { x, y, color, scale = 1, maxWidth, left = false }) {
-          const t = textCanvas(f, s, color, maxWidth);
-          const w = t.c.width * scale;
-          ctx.drawImage(
-            t.c,
-            left ? x : Math.round(x - w / 2),
-            y - f.capTop * scale,
-            w,
-            t.c.height * scale,
-          );
-          return t;
-        }
-        const blit = (ctx, sh, f, x, y, w = f.w, h = f.h) =>
-          ctx.drawImage(sh.im, f.x, f.y, f.w, f.h, x, y, w, h);
-        // A face looks happy from 6 hearts and neutral from 3, as in the game.
-        const mood = (hearts) => (hearts >= 6 ? "happy" : hearts >= 3 ? "neutral" : "upset");
-
-        // A dog slot as the run screen's dog column draws it: the dog's doghouse with its name
-        // on the roof, its face in the door, the n/max count on the doormat, the owner's face
-        // in the window, the owner's name and the hearts in rows of six.
-        async function doghouse(c) {
-          const d = c.dataset;
-          const [house, dogFace, ownerFace, heart, title, body] = await Promise.all([
-            sheet("ui-doghouse"),
-            sheet(`face-dog-${d.doghouse}`),
-            sheet(`face-owner-${d.doghouse}`),
-            sheet("ui-heart"),
-            fonts.title,
-            fonts.body,
-          ]);
-          if (!house || !dogFace || !ownerFace || !heart || !title || !body) return;
-          c.width = 72;
-          c.height = 146;
-          const x = c.getContext("2d");
-          const hearts = Number(d.hearts),
-            max = Number(d.max);
-          blit(x, house, house.frames[house.tags[d.doghouse].from].frame, 0, 0);
-          const nameScale = measure(title, plain(title, d.name)) * 2 <= 56 ? 2 : 1;
-          write(x, title, d.name, { x: 36, y: 16, color: PLUM, scale: nameScale });
-          blit(x, dogFace, frameAt(dogFace, mood(hearts), 0), 20, 36);
-          write(x, title, `${hearts}/${max}`, { x: 36, y: 70, color: DRED });
-          blit(x, ownerFace, frameAt(ownerFace, mood(hearts), 0), 8, 78);
-          write(x, body, d.owner, { x: 9, y: 118, color: PLUM, left: true });
-          for (let i = 0; i < max; i++) {
-            const f = frameAt(heart, i < hearts ? "full" : "empty", 0);
-            blit(x, heart, f, 9 + (i % 6) * 9, 127 + Math.floor(i / 6) * 8);
-          }
-        }
-
-        // An encounter card as the game draws it: the dred band with the option's name, its
-        // illustration, the effect (at 2x where it fits) and the cost badge.
-        async function card(c) {
-          const d = c.dataset;
-          const [frame, illus, cost, title, body] = await Promise.all([
-            sheet("card-frame"),
-            img(`/art/images/${d.card}.png`),
-            img("/art/images/card-cost.png"),
-            fonts.title,
-            fonts.body,
-          ]);
-          if (!frame || !illus || !title || !body) return;
-          c.width = 83;
-          c.height = 140;
-          const x = c.getContext("2d");
-          blit(x, frame, frame.frames[frame.tags.encounter.from].frame, 0, 0);
-          const band = measure(title, plain(title, d.label)) <= 77 ? title : body;
-          write(x, band, d.label, { x: 41.5, y: 5, color: WHITE });
-          x.drawImage(illus, 0, 0, 75, 56, 5, 16, 75, 56);
-          const big = wrap(body, plain(body, d.effect), 35).length;
-          if (((big - 1) * body.line + 7) * 2 <= 42)
-            write(x, body, d.effect, { x: 41.5, y: 76, color: PLUM, scale: 2, maxWidth: 35 });
-          else write(x, body, d.effect, { x: 41.5, y: 76, color: PLUM, maxWidth: 71 });
-          if (cost) x.drawImage(cost, 6, 121);
-          write(x, title, d.cost, { x: 41.5, y: 125, color: CREAM });
-        }
-
-        Promise.all([
-          ...[...document.querySelectorAll("canvas[data-sprite]")].map(mount),
-          ...[...document.querySelectorAll("canvas[data-doghouse]")].map(doghouse),
-          ...[...document.querySelectorAll("canvas[data-card]")].map(card),
-        ]).then(() => {
-          if (reduced) return;
-          const tick = (now) => {
-            for (const s of live) paint(s, now);
-            requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        });
-
-        // The skunk hit, as the game plays it over the hit stop: the pack walks into the
-        // skunk, the road stops, a burst plays over the pack, green flashes run down both
-        // edges, SPRAYED! drops in on its plate and the caught dogs shake off. Then the card's
-        // options are dealt. Reduced motion holds the burst's first frame and the label, with
-        // no shake.
-        async function hitScene(cv, choice) {
-          const KEYS = [
-            "walker-casey",
-            "dog-koda",
-            "dog-biscuit",
-            "dog-duchess",
-            "skunk",
-            "skunk-cloud",
-            "fx-hit-skunk",
-            "ui-hit-flash-green",
-            "ui-hit-label",
-            "fx-status-stinky",
-          ];
-          const [loaded, road, title] = await Promise.all([
-            Promise.all(KEYS.map(sheet)),
-            img("/art/images/road-woof-way.png"),
-            fonts.title,
-          ]);
-          if (loaded.some((s) => !s) || !road || !title) return null;
-          const S = Object.fromEntries(KEYS.map((k, i) => [k, loaded[i]]));
-          const ctx = cv.getContext("2d");
-          const W = 176,
-            H = 144,
-            WALK_MS = 700,
-            SPEED = 0.12,
-            DEAL_MS = WALK_MS + 900;
-          // The pack in the game's formation, the dogs 40 to 58 road px ahead of the walker.
-          const WALKER = { x: 88, foot: 132 };
-          const DOGS = [
-            { key: "dog-koda", x: 88, foot: 51, caught: true, phase: 0, hand: 10 },
-            { key: "dog-biscuit", x: 74, foot: 73, caught: true, phase: 110, hand: -11 },
-            { key: "dog-duchess", x: 102, foot: 76, caught: false, phase: 230, hand: 10 },
-          ];
-          const SKUNK = { x: 104, foot: 46 };
-          const BURST = { x: 88, y: 76 };
-          const PLATE = { y: BURST.y - 32 - 8 - 32 };
-          const label = textCanvas(title, "SPRAYED!", WHITE).c;
-          let start = performance.now() - 1e6,
-            stinky = false,
-            picked = false;
-
-          const stand = (key, f, x, foot, flip) => {
-            const left = Math.round(x - f.w / 2),
-              top = foot - f.h + 1;
-            if (!flip) return blit(ctx, S[key], f, left, top);
-            ctx.save();
-            ctx.translate(left + f.w, top);
-            ctx.scale(-1, 1);
-            blit(ctx, S[key], f, 0, 0);
-            ctx.restore();
-          };
-          function line(x0, y0, x1, y1) {
-            const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0));
-            for (let i = 0; i <= n; i++)
-              ctx.fillRect(
-                Math.round(x0 + ((x1 - x0) * i) / n),
-                Math.round(y0 + ((y1 - y0) * i) / n),
-                1,
-                1,
-              );
-          }
-          // The plate's 24x24 frame stretched to 176x32, keeping its 8px corners.
-          function plate(y) {
-            const sh = S["ui-hit-label"],
-              f = sh.frames[0].frame,
-              k = 8;
-            const xs = [0, k, W - k],
-              ws = [k, W - 2 * k, k],
-              ys = [0, k, 32 - k],
-              hs = [k, 32 - 2 * k, k];
-            const sx = [0, k, f.w - k],
-              sw = [k, f.w - 2 * k, k];
-            for (let i = 0; i < 3; i++)
-              for (let j = 0; j < 3; j++)
-                ctx.drawImage(
-                  sh.im,
-                  f.x + sx[i],
-                  f.y + sx[j],
-                  sw[i],
-                  sw[j],
-                  xs[i],
-                  y + ys[j],
-                  ws[i],
-                  hs[j],
-                );
-          }
-
-          function draw(now) {
-            const t = now - start;
-            const h = t - WALK_MS;
-            const hit = h >= 0;
-            const o = Math.min(t, WALK_MS) * SPEED;
-            ctx.imageSmoothingEnabled = false;
-            for (let y = (o % 64) - 64; y < H; y += 64)
-              ctx.drawImage(road, 52, 0, W, 64, 0, Math.round(y), W, 64);
-            const skunkFoot = Math.round(SKUNK.foot - (WALK_MS * SPEED - o));
-            const cloud = S["skunk-cloud"];
-            const cf = frameAt(cloud, "loop", now);
-            blit(ctx, cloud, cf, SKUNK.x - 44, skunkFoot - 58);
-            stand("skunk", frameAt(S.skunk, "idle", now), SKUNK.x, skunkFoot);
-            // Leashes first, so the dogs and the walker draw over their ends.
-            ctx.fillStyle = "#f6757a";
-            for (const d of DOGS) line(WALKER.x + d.hand, WALKER.foot - 13, d.x, d.foot - 14);
-            for (const d of DOGS) {
-              const sh = S[d.key];
-              let f;
-              if (!hit) f = frameAt(sh, "walk", now + d.phase);
-              else if (!reduced && d.caught && h >= 120 && h < 600)
-                f = frameAt(sh, "shake", h - 120);
-              else if (!reduced && !d.caught && h < 240) f = frameAt(sh, "react", h);
-              else f = frameAt(sh, "idle", now + d.phase);
-              stand(d.key, f, d.x, d.foot);
-              if (stinky && d.caught) {
-                const st = S["fx-status-stinky"];
-                stand("fx-status-stinky", frameAt(st, "loop", now), d.x, d.foot - 20);
-              }
-            }
-            const walker = S["walker-casey"];
-            const wf = !hit
-              ? frameAt(walker, "walk", now)
-              : (!reduced && frameOnce(walker, "stumble", h)) || frameAt(walker, "idle", now);
-            stand("walker-casey", wf, WALKER.x, WALKER.foot);
-            if (!hit) return;
-            const burst = S["fx-hit-skunk"];
-            const bf = reduced ? !picked && burst.frames[0].frame : frameOnce(burst, "play", h);
-            if (bf) blit(ctx, burst, bf, BURST.x - 32, BURST.y - 32);
-            const flash = S["ui-hit-flash-green"];
-            const ff = !reduced && frameOnce(flash, "play", h);
-            if (ff)
-              for (let y = 0; y < H; y += 64) {
-                blit(ctx, flash, ff, 0, y);
-                ctx.save();
-                ctx.translate(W, y);
-                ctx.scale(-1, 1);
-                blit(ctx, flash, ff, 0, 0);
-                ctx.restore();
-              }
-            // The label drops in, then fades so it is gone when the hit stop ends; with
-            // reduced motion it is set in place until a card is picked.
-            const k = reduced ? 1 : Math.min(1, h / 120);
-            const fade = reduced ? (picked ? 0 : 1) : Math.max(0, Math.min(1, (900 - h) / 150));
-            if (fade === 0) return;
-            ctx.globalAlpha = k * fade;
-            const top = Math.round(PLATE.y - 8 * (1 - k));
-            plate(top);
-            ctx.drawImage(
-              label,
-              Math.round(W / 2 - label.width),
-              top + 3,
-              label.width * 2,
-              label.height * 2,
-            );
-            ctx.globalAlpha = 1;
-          }
-
-          let visible = true;
-          new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(cv);
-          const tick = (now) => {
-            if (visible) {
-              draw(now);
-              if (choice.dataset.state === "hit" && now - start >= DEAL_MS)
-                delete choice.dataset.state;
-            }
-            requestAnimationFrame(tick);
-          };
-          if (!reduced) requestAnimationFrame(tick);
-          else draw(performance.now());
-          return {
-            play() {
-              stinky = false;
-              picked = false;
-              if (reduced) return draw(performance.now());
-              start = performance.now();
-              choice.dataset.state = "hit";
-            },
-            pick(on) {
-              stinky = on;
-              picked = true;
-              if (reduced) draw(performance.now());
-            },
-          };
-        }
-
-        // Picking a skunk option sets the caught owners' hearts and faces and says what it
-        // costs. Biscuit and Koda were caught; their owners start the walk on 4 hearts.
-        const OUTCOMES = {
-          grooming: {
-            loss: 0,
-            text: "<b>−$40,</b> $20 for each caught dog. They come back clean, and no hearts change.",
-          },
-          rinse: {
-            loss: 0,
-            stinky: true,
-            text: "<b>−$20,</b> $10 for each caught dog. No hearts change, but the pack is Stinky: tips are halved until the zone ends.",
-          },
-          ignore: {
-            loss: 2,
-            text: "<b>Free,</b> but Sam and Jesse each lose 2 hearts. Sam: “Eh, bit of a bitter one.” Jesse: “Eh, rough patch.”",
-          },
-        };
-        const choice = document.querySelector(".choice");
-        const outcome = document.querySelector(".outcome");
-        const buttons = document.querySelectorAll(".cards button");
-        const caught = [...document.querySelectorAll("canvas[data-caught]")];
-        function setOwners(loss) {
-          for (const c of caught) {
-            const hearts = 4 - loss;
-            const label = c.parentElement.querySelector(".hearts");
-            label.textContent = `♥ ${hearts}/${label.dataset.max}`;
-            c.dataset.tag = mood(hearts);
-            c.repaint?.();
-          }
-        }
-        const hit = hitScene(document.getElementById("hit"), choice);
-        function reset() {
-          buttons.forEach((o) => o.setAttribute("aria-pressed", "false"));
-          setOwners(0);
-          outcome.textContent = "";
-        }
-        buttons.forEach((b) =>
-          b.addEventListener("click", async () => {
-            const o = OUTCOMES[b.dataset.option];
-            delete choice.dataset.state;
-            buttons.forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-            setOwners(o.loss);
-            outcome.innerHTML = o.text;
-            (await hit)?.pick(!!o.stinky);
-          }),
-        );
-        document.querySelector(".replay").addEventListener("click", async () => {
-          reset();
-          (await hit)?.play();
-        });
-        // The hit plays the first time the section comes into view.
-        hit.then((h) => {
-          if (!h) return;
-          const seen = new IntersectionObserver(
-            ([e]) => {
-              if (!e.isIntersecting) return;
-              seen.disconnect();
-              if (outcome.textContent === "") h.play();
-            },
-            { threshold: 0.6 },
-          );
-          seen.observe(document.getElementById("hit"));
-        });
-
-        // The hero's road scene, as the run screen draws it below the status bar: the zone's
-        // backdrop band on top, ending at a cross street, and below it the road strip
-        // projected row by row with the game's camera, its lanes converging into the band's
-        // road, with the verge beside it. The pack walks up it through all four zones,
-        // steering for tips and around obstacles; each zone's banner slides in as it starts,
-        // and a moving hazard comes every few seconds after its warning.
-        async function roadScene(cv) {
-          const ctx = cv.getContext("2d");
-          const W = 360,
-            H = 600,
-            BAND = 150,
-            CX = 220;
-          // A point z road px ahead of the feet draws at scale s = F / (F + z) on row
-          // YH + KS s: the game's camera less its 40px status bar, so the feet are on row 594.
-          const YH = -300,
-            KS = 894,
-            F = KS / 1.4;
-          const scaleAt = (z) => F / (F + z);
-          const rowAt = (z) => YH + KS * scaleAt(z);
-          const FOOT = Math.round(rowAt(0));
-          // The nearest depth step of 1, 0.75 and 0.5, on a log scale.
-          const step = (s) => (s > 0.866 ? 1 : s > 0.612 ? 0.75 : 0.5);
-          // Half the road, its curb and its sidewalk; the lane centres, from the road's centre.
-          const ROAD = 140,
-            CURB = 144,
-            WALK = 188;
-          const LANES = [-112, -56, 0, 56, 112];
-          const SPEED = 120;
-          const ZONE_LEN = 64 * 36,
-            LOOP = ZONE_LEN * 4;
-          // Each zone's verge, as the game draws it: the curb, the sidewalk or paving, and a
-          // mown, rough or no lawn beyond; the park's lawn runs to the road's edge.
-          const ZONES = [
-            {
-              key: "woof-way",
-              name: "Woof Way",
-              leash: "#f6757a",
-              verge: { curbTo: CURB, walkTo: WALK, lawn: "mown" },
-              barriers: true,
-            },
-            {
-              key: "bark-park",
-              name: "Bark Park",
-              leash: "#a22633",
-              verge: { curbTo: ROAD, walkTo: ROAD, lawn: "rough" },
-            },
-            {
-              key: "sniff-street-shops",
-              name: "Sniff Street Shops",
-              leash: "#a22633",
-              verge: { curbTo: CURB, walkTo: Infinity, lawn: "none" },
-              barriers: true,
-            },
-            {
-              key: "the-long-way-home",
-              name: "The Long Way Home",
-              leash: "#3e2731",
-              verge: { curbTo: CURB, walkTo: WALK, lawn: "mown", leaves: true },
-            },
-          ];
-          const PACK = [
-            { key: "dog-koda", dx: 0, z: 58, phase: 0 },
-            { key: "dog-biscuit", dx: -14, z: 42, phase: 110 },
-            { key: "dog-duchess", dx: 14, z: 40, phase: 230 },
-          ];
-          const HANDS = { y: 13, left: -11, right: 10 };
-          const COLLAR = 14;
-          // The moving hazards in turn: crossers run across the lanes at their lanes a second,
-          // the cyclist rides down an outer lane 1.6 times as fast as the road.
-          const MOVERS = [
-            { key: "squirrel-dash", tag: "run", lanesPerSecond: 4 },
-            { key: "loose-dog", tag: "run", lanesPerSecond: 2 },
-            { key: "ball-bounce", tag: "bounce", lanesPerSecond: 2.5, ownShadow: true },
-            { key: "cyclist", tag: "ride", ride: 1.6 },
-          ];
-          const WARNING_MS = 1000;
-          const OBSTACLES = ["cone", "hydrant", "bin", "bench", "hedge", "barrier-2", "puddle"];
-          const KEYS = [
-            "walker-casey",
-            ...PACK.map((p) => p.key),
-            "tip",
-            "treat",
-            ...OBSTACLES,
-            ...MOVERS.map((m) => m.key),
-            "ui-warning",
-            "ui-warning-arrow",
-          ];
-
-          // Pixels as little-endian RGBA words; each colour one step down its Endesga 32 ramp.
-          const u = (hex) =>
-            (0xff000000 | ((hex & 0xff) << 16) | (hex & 0xff00) | (hex >> 16)) >>> 0;
-          const DARK = new Map(
-            "be4a2f:733e39 d77643:be4a2f ead4aa:e4a672 e4a672:b86f50 b86f50:733e39 733e39:3e2731 3e2731:181425 a22633:3e2731 e43b44:a22633 f77622:be4a2f feae34:f77622 fee761:feae34 63c74d:3e8948 3e8948:265c42 265c42:193c3e 193c3e:181425 124e89:262b44 0099db:124e89 2ce8f5:0099db ffffff:c0cbdc c0cbdc:8b9bb4 8b9bb4:5a6988 5a6988:3a4466 3a4466:262b44 262b44:181425 181425:181425 ff0044:a22633 68386c:3e2731 b55088:68386c f6757a:b55088 e8b796:c28569 c28569:b86f50"
-              .split(" ")
-              .map((p) => p.split(":").map((h) => u(parseInt(h, 16)))),
-          );
-          const C = {
-            green: u(0x63c74d),
-            dgreen: u(0x3e8948),
-            lgrey: u(0xc0cbdc),
-            grey: u(0x8b9bb4),
-            ochre: u(0xd77643),
-            rust: u(0xbe4a2f),
-          };
-
-          const pixels = async (src) => {
-            const im = await img(src);
-            if (!im) return null;
-            const c = document.createElement("canvas");
-            c.width = im.width;
-            c.height = im.height;
-            const x = c.getContext("2d");
-            x.drawImage(im, 0, 0);
-            return new Uint32Array(x.getImageData(0, 0, im.width, im.height).data.buffer);
-          };
-          // A 280x64 strip shrunk factor times along the road: each pixel takes the colour
-          // most of its rows have, ties to the strip's commonest colour, so far rows show the
-          // road's base rather than a speckle that blinks.
-          function shrink(strip, factor) {
-            const counts = new Map();
-            for (const p of strip) counts.set(p, (counts.get(p) ?? 0) + 1);
-            const base = [...counts].sort((a, b) => b[1] - a[1])[0][0];
-            const out = new Uint32Array((280 * 64) / factor);
-            for (let r = 0; r < 64 / factor; r++)
-              for (let x = 0; x < 280; x++) {
-                const seen = new Map();
-                for (let k = 0; k < factor; k++) {
-                  const p = strip[(r * factor + k) * 280 + x];
-                  seen.set(p, (seen.get(p) ?? 0) + 1);
-                }
-                const most = Math.max(...seen.values());
-                const tied = [...seen].filter(([, n]) => n === most).map(([p]) => p);
-                out[r * 280 + x] = tied.includes(base) ? base : tied[0];
-              }
-            return out;
-          }
-          const levels = (strip) => strip && [strip, shrink(strip, 2), shrink(strip, 4)];
-
-          const [manifest, title, banner] = await Promise.all([
-            fetch("/art/manifest.json")
-              .then((r) => (r.ok ? r.json() : null))
-              .catch(() => null),
-            fonts.title,
-            img("/art/images/ui-zone-banner.png"),
-          ]);
-          if (!manifest) return;
-          const anchors = Object.fromEntries(manifest.sprites.map((e) => [e.key, e.anchor]));
-          const names = KEYS.flatMap((k) => [k, `${k}@75`, `${k}@50`].filter((n) => n in anchors));
-          const art = {};
-          await Promise.all([
-            ...names.map(async (n) => (art[n] = await sheet(n))),
-            ...ZONES.map(async (z) => {
-              let road, start;
-              [z.backdrop, road, start] = await Promise.all([
-                img(`/art/images/backdrop-${z.key}.png`),
-                pixels(`/art/images/road-${z.key}.png`),
-                pixels(`/art/images/road-${z.key}-start.png`),
-              ]);
-              z.road = levels(road);
-              z.start = levels(start);
-            }),
-          ]);
-          if (KEYS.some((k) => !art[k]) || ZONES.some((z) => !z.backdrop || !z.road)) return;
-          // Each zone's banner: "Maplewood, zone n" over the zone's name, in plum.
-          if (banner && title)
-            ZONES.forEach((z, i) => {
-              const c = document.createElement("canvas");
-              c.width = 248;
-              c.height = 48;
-              const x = c.getContext("2d");
-              x.drawImage(banner, 0, 0);
-              write(x, title, `Maplewood, zone ${i + 1}`, { x: 124, y: 11, color: PLUM });
-              write(x, title, z.name, { x: 124, y: 27, color: PLUM, scale: 2 });
-              z.banner = c;
-            });
-
-          // Each ground row's scale, distance ahead, the length of road it covers, and the
-          // strip level that covers it.
-          const rows = [];
-          for (let y = BAND; y < H; y++) {
-            const s = (y + 0.5 - YH) / KS;
-            const z = F / s - F;
-            const span = z - (F / ((y + 1.5 - YH) / KS) - F);
-            rows.push({ s, z, span, level: span <= 2 ? 0 : span <= 4 ? 1 : 2 });
-          }
-          const Z_BAND = rows[0].z;
-          const mod = (a, n) => ((a % n) + n) % n;
-          const zoneIndex = (p) => Math.floor(mod(p, LOOP) / ZONE_LEN);
-          const zoneAt = (p) => ZONES[zoneIndex(p)];
-          const hashed = (x, y, n) => mod(x * 7919 + y * 104729 + x * y * 31, n) === 0;
-          const crosses = (z, span, period) =>
-            Math.floor(z / period) !== Math.floor((z - Math.max(span, 1)) / period);
-          const noise = (a, b) => {
-            let h = (Math.imul(a, 374761393) + Math.imul(b, 668265263)) | 0;
-            h = Math.imul(h ^ (h >>> 13), 1274126177);
-            return ((h ^ (h >>> 16)) & 0xffff) / 65536;
-          };
-          // Mown stripes run along the street, alternating light and dark outward from the
-          // sidewalk; a dark stripe narrower than 4 screen pixels is left light.
-          const MOWN = [44, 62, 36, 70, 50, 58, 40, 66];
-          function mown(a, s) {
-            let rest = a - WALK;
-            if (rest < 0 || rest >= 300) return false;
-            let i = 0,
-              w = MOWN[0];
-            while (rest >= w) {
-              rest -= w;
-              w = MOWN[++i % MOWN.length];
-            }
-            return i % 2 === 1 && w * s >= 4;
-          }
-          // The park's rough patches, placed by 512px blocks of road.
-          const patchCache = new Map();
-          const patches = (block) => {
-            if (!patchCache.has(block))
-              patchCache.set(
-                block,
-                Array.from({ length: 10 }, (_, i) => ({
-                  rx: 30 + 60 * noise(i, block + 7),
-                  rz: 50 + 100 * noise(block + 11, i),
-                  x:
-                    (noise(block, 3 * i) < 0.5 ? -1 : 1) *
-                    (ROAD + 30 + 730 * noise(block, 3 * i + 1)),
-                  z: (block + noise(block, 3 * i + 2)) * 512,
-                })),
-              );
-            return patchCache.get(block);
-          };
-
-          function verge(v, a, xi, zi, seam, s, inPatch) {
-            if (a < v.curbTo) return C.grey;
-            const leaf = v.leaves && a >= ROAD + 6 && hashed(xi, zi, 61);
-            if (leaf) return (xi + zi) % 3 ? C.ochre : C.rust;
-            if (a < v.walkTo) return seam ? C.grey : C.lgrey;
-            let c = v.lawn === "mown" && mown(a, s) ? C.dgreen : C.green;
-            if (inPatch) c = C.dgreen;
-            return hashed(xi, zi, 29) ? DARK.get(c) : c;
-          }
-
-          const ground = ctx.createImageData(W, H - BAND);
-          const px = new Uint32Array(ground.data.buffer);
-          function paintGround(scroll) {
-            rows.forEach(({ s, z, span, level }, r) => {
-              const p = mod(scroll + z, LOOP);
-              const zi = Math.floor(p);
-              const zone = ZONES[Math.floor(p / ZONE_LEN)];
-              const v = zone.verge;
-              // A zone's first 64 rows of road are its transition strip, where it has one.
-              const strip = (p % ZONE_LEN < 64 && zone.start ? zone.start : zone.road)[level];
-              const sr = ((63 - (zi % 64)) >> level) * 280;
-              const seam = span < 16 && crosses(p, span, 32);
-              const chords = [];
-              if (v.lawn === "rough")
-                for (let b = Math.floor((p - 150) / 512); b <= Math.floor((p + 150) / 512); b++)
-                  for (const q of patches(b)) {
-                    const along = (p - q.z) / q.rz;
-                    if (Math.abs(along) >= 1) continue;
-                    const half = q.rx * Math.sqrt(1 - along * along);
-                    chords.push([q.x - half, q.x + half]);
-                  }
-              for (let x = 0, i = r * W; x < W; x++, i++) {
-                const X = (x + 0.5 - CX) / s;
-                const a = Math.abs(X);
-                px[i] =
-                  a < ROAD
-                    ? strip[sr + Math.floor(X + ROAD)]
-                    : verge(
-                        v,
-                        a,
-                        Math.floor(X),
-                        zi,
-                        seam,
-                        s,
-                        chords.some(([l, h]) => X >= l && X < h),
-                      );
-              }
-            });
-          }
-          // The game's shadow: the ground under it one ramp step darker.
-          function shadow(cx, foot, rx, sc) {
-            const ry = Math.max(1, 2.5 * sc);
-            for (let j = -Math.floor(ry); j <= 0; j++) {
-              const y = foot - 1 + j + Math.floor(ry / 2) - BAND;
-              if (y < 0 || y >= H - BAND) continue;
-              const half = Math.round(rx * Math.sqrt(Math.max(0, 1 - (j / ry) ** 2)));
-              for (let x = Math.max(0, cx - half); x < Math.min(W, cx + half); x++)
-                px[y * W + x] = DARK.get(px[y * W + x]) ?? px[y * W + x];
-            }
-          }
-          // A sheet at a depth step: its redrawn @75 or @50 where the manifest has one,
-          // otherwise the full-size sheet scaled at draw time.
-          function variant(key, q) {
-            const n = q === 1 ? key : `${key}@${q * 100}`;
-            return art[n]
-              ? { sh: art[n], a: anchors[n], k: 1 }
-              : { sh: art[key], a: anchors[key], k: q };
-          }
-          function put(key, tag, x, foot, q, now, flip) {
-            const v = variant(key, q);
-            const f = frameAt(v.sh, tag, now);
-            const w = Math.round(f.w * v.k),
-              h = Math.round(f.h * v.k);
-            const left = Math.round(x - w / 2),
-              top = Math.round(foot - (v.a.feetY + 1) * v.k);
-            if (flip) {
-              ctx.save();
-              ctx.translate(left + w, top);
-              ctx.scale(-1, 1);
-              ctx.drawImage(v.sh.im, f.x, f.y, f.w, f.h, 0, 0, w, h);
-              ctx.restore();
-            } else ctx.drawImage(v.sh.im, f.x, f.y, f.w, f.h, left, top, w, h);
-          }
-          function line(x0, y0, x1, y1) {
-            const dx = Math.abs(x1 - x0),
-              dy = -Math.abs(y1 - y0);
-            const sx = x0 < x1 ? 1 : -1,
-              sy = y0 < y1 ? 1 : -1;
-            let err = dx + dy;
-            for (;;) {
-              ctx.fillRect(x0, y0, 1, 1);
-              if (x0 === x1 && y0 === y1) break;
-              const e2 = 2 * err;
-              if (e2 >= dy) {
-                err += dy;
-                x0 += sx;
-              }
-              if (e2 <= dx) {
-                err += dx;
-                y0 += sy;
-              }
-            }
-          }
-
-          // The road's items, one loop of all four zones, placed from a fixed seed. Barriers
-          // stand only on Woof Way and Sniff Street Shops, and every row leaves 2 lanes open.
-          let seed = 7;
-          const rnd = () => {
-            seed = (seed + 0x6d2b79f5) | 0;
-            let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-            t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-            return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-          };
-          const span = (lane, n) => {
-            const l = Math.min(lane, 5 - n);
-            return Array.from({ length: n }, (_, i) => l + i);
-          };
-          const items = [];
-          for (let p = 220; p < LOOP - 120; p += 150 + Math.floor(rnd() * 3) * 20) {
-            const r = rnd(),
-              lane = Math.floor(rnd() * 5);
-            const zone = ZONES[Math.floor(p / ZONE_LEN)];
-            if (r < 0.4)
-              for (let i = 0; i < 3; i++) items.push({ key: "tip", lanes: [lane], p: p + i * 36 });
-            else if (r < 0.5) items.push({ key: "treat", lanes: [lane], p });
-            else if (r < 0.62) items.push({ key: "cone", lanes: [lane], p, block: true });
-            else if (r < 0.72) items.push({ key: "hydrant", lanes: [lane], p, block: true });
-            else if (r < 0.8) items.push({ key: "bin", lanes: [lane], p, block: true });
-            else if (r < 0.86) items.push({ key: "bench", lanes: span(lane, 2), p, block: true });
-            else if (r < 0.9) items.push({ key: "hedge", lanes: span(lane, 3), p, block: true });
-            else if (r < 0.94 && zone.barriers)
-              items.push({ key: "barrier-2", lanes: span(lane, 2), p, block: true });
-            else items.push({ key: "puddle", lanes: span(lane, 2), p, block: true, decal: true });
-          }
-          const laneX = (lanes) => (LANES[lanes[0]] + LANES[lanes[lanes.length - 1]]) / 2;
-
-          let scroll = 0,
-            now = 0,
-            lane = 2,
-            from = 2,
-            moved = 1,
-            think = 0,
-            hazard = null,
-            nextHazard = 3500,
-            turn = 0,
-            shownZone = -1,
-            bannerAt = 0;
-          const walkerX = () => LANES[from] + (LANES[lane] - LANES[from]) * Math.min(1, moved);
-          // The items ahead and just behind the feet, with their loop, so a taken tip returns
-          // on the next loop.
-          const onRoad = () =>
-            items.flatMap((it) => {
-              let z = mod(it.p - scroll, LOOP);
-              if (z > LOOP - 80) z -= LOOP;
-              const loop = Math.floor((scroll + z) / LOOP);
-              return z < Z_BAND + 60 && it.taken !== loop ? [{ it, z, loop }] : [];
-            });
-          // Where the moving hazard is: its sign and arrow while it warns, then its body.
-          function mover() {
-            if (!hazard) return null;
-            const { m, t } = hazard;
-            const moving = t >= WARNING_MS;
-            if (m.ride)
-              return {
-                moving,
-                X: LANES[hazard.lane],
-                z: moving ? Z_BAND + 40 - (m.ride * SPEED * (t - WARNING_MS)) / 1000 : Z_BAND - 20,
-              };
-            const run = (m.lanesPerSecond * 56 * Math.max(0, t - WARNING_MS)) / 1000;
-            return {
-              moving,
-              X: moving ? -hazard.dir * ROAD + hazard.dir * run : -hazard.dir * (ROAD - 10),
-              z: hazard.p - scroll,
-            };
-          }
-
-          // A demo driver: one lane at a time toward the cheapest lane nearby, clear of
-          // obstacles and an oncoming cyclist, and with tips in it.
-          function steer(ahead) {
-            const at = mover();
-            if (at && hazard.m.ride)
-              ahead = [...ahead, { it: { block: true, lanes: [hazard.lane] }, z: at.z }];
-            let best = lane,
-              bestCost = Infinity;
-            for (let t = 0; t < 5; t++) {
-              let cost = Math.abs(t - lane) * 2 + Math.random();
-              const lo = Math.min(lane, t),
-                hi = Math.max(lane, t);
-              for (const { it, z } of ahead) {
-                if (it.block && z > -6 && z < 260) {
-                  if (it.lanes.includes(t)) cost += 100;
-                  if (it.lanes.some((l) => l > lo && l < hi)) cost += 30;
-                } else if (!it.block && z > 0 && z < 300 && it.lanes.includes(t)) cost -= 3;
-              }
-              if (cost < bestCost) {
-                bestCost = cost;
-                best = t;
-              }
-            }
-            if (best !== lane) {
-              from = lane;
-              lane += Math.sign(best - lane);
-              moved = 0;
-            }
-          }
-
-          function update(dt) {
-            now += dt;
-            scroll += (SPEED * dt) / 1000;
-            moved += dt / 180;
-            const ahead = onRoad();
-            const at = Math.round((walkerX() + 112) / 56);
-            for (const { it, z, loop } of ahead)
-              if (!it.block && z >= 0 && z <= 60 && it.lanes.includes(at)) it.taken = loop;
-            think -= dt;
-            if (think <= 0 && moved >= 1) {
-              think = 200;
-              steer(ahead);
-            }
-            nextHazard -= dt;
-            if (!hazard && nextHazard <= 0) {
-              const m = MOVERS[turn++ % MOVERS.length];
-              hazard = m.ride
-                ? { m, t: 0, lane: lane <= 2 ? 4 : 0 }
-                : { m, t: 0, p: scroll + 600, dir: Math.random() < 0.5 ? -1 : 1 };
-              nextHazard = 5000 + Math.random() * 3000;
-            }
-            if (hazard) {
-              hazard.t += dt;
-              const h = mover();
-              if (h.moving && (h.z < -80 || Math.abs(h.X) > WALK + 60)) hazard = null;
-            }
-            const zi = zoneIndex(scroll);
-            if (zi !== shownZone) {
-              shownZone = zi;
-              bannerAt = now;
-            }
-          }
-
-          function draw() {
-            paintGround(scroll);
-            const zone = zoneAt(scroll + Z_BAND);
-            const wx = walkerX();
-            // Billboards, scaled by depth step and drawn from the farthest in, decals first.
-            const list = onRoad().map(({ it, z }) => ({
-              key: it.key,
-              tag: "idle",
-              X: laneX(it.lanes),
-              z,
-              decal: it.decal,
-            }));
-            const dogs = PACK.map((d) => ({ ...d, tag: "walk", X: wx + d.dx, dog: true }));
-            list.push(...dogs, { key: "walker-casey", tag: "walk", X: wx, z: 0, phase: 0 });
-            const h = mover();
-            if (h?.moving)
-              list.push({
-                key: hazard.m.key,
-                tag: hazard.m.tag,
-                X: h.X,
-                z: h.z,
-                flip: hazard.dir < 0,
-                noShadow: hazard.m.ownShadow,
-              });
-            for (const o of list) {
-              o.s = scaleAt(o.z);
-              o.q = step(o.s);
-              o.x = Math.round(CX + o.X * o.s);
-              o.foot = Math.round(rowAt(o.z));
-            }
-            list.sort((a, b) => (b.decal ? 1 : 0) - (a.decal ? 1 : 0) || b.z - a.z);
-            for (const o of list)
-              if (!o.decal && !o.noShadow) {
-                const a = variant(o.key, o.q);
-                shadow(o.x, o.foot, Math.max(3, (a.a.opaqueWidth * a.k) / 2 - 2), o.q);
-              }
-            ctx.putImageData(ground, 0, BAND);
-            for (const o of list) {
-              o.dog && (o.collar = o.foot - Math.round(COLLAR * o.q));
-              put(o.key, o.tag, o.x, o.foot, o.q, now + (o.phase ?? 0), o.flip);
-            }
-            // Leashes from the walker's hands to each collar, in the zone's leash colour.
-            ctx.fillStyle = zoneAt(scroll).leash;
-            const hx = Math.round(CX + wx);
-            for (const d of dogs)
-              line(hx + (d.dx < 0 ? HANDS.left : HANDS.right), FOOT - HANDS.y, d.x, d.collar);
-            // The warning: a sign at the road edge on the crosser's row with an arrow the way
-            // it will go, or at the top of the cyclist's lane with an arrow pointing down.
-            if (h && !h.moving) {
-              const x = Math.round(CX + h.X * scaleAt(h.z));
-              const foot = Math.round(rowAt(h.z));
-              put("ui-warning", "pulse", x, foot, 1, now);
-              if (hazard.m.ride) put("ui-warning-arrow", "down-pulse", x, foot + 16, 1, now);
-              else
-                put("ui-warning-arrow", "pulse", x + hazard.dir * 16, foot, 1, now, hazard.dir < 0);
-            }
-            // The band over the road's far end, so things come out from behind it.
-            ctx.drawImage(zone.backdrop, 0, 0);
-            // The zone's banner slides in over the road, holds, and slides out.
-            const b = ZONES[shownZone]?.banner;
-            const t = now - bannerAt;
-            if (b && (reduced || t < 2400)) {
-              const x0 = 96;
-              const ease = (k) => Math.sin((Math.min(1, k) * Math.PI) / 2);
-              const x = reduced
-                ? x0
-                : t < 300
-                  ? x0 - 280 * (1 - ease(t / 300))
-                  : t < 2100
-                    ? x0
-                    : x0 + (280 * (t - 2100)) / 300;
-              ctx.drawImage(b, Math.round(x), BAND + 70);
-            }
-          }
-
-          ctx.imageSmoothingEnabled = false;
-          update(0);
-          draw();
-          if (reduced) return;
-          let visible = true;
-          new IntersectionObserver(([e]) => (visible = e.isIntersecting)).observe(cv);
-          let last = performance.now();
-          const tick = (t) => {
-            const dt = Math.max(0, Math.min(50, t - last));
-            last = t;
-            if (visible) {
-              update(dt);
-              draw();
-            }
-            requestAnimationFrame(tick);
-          };
-          requestAnimationFrame(tick);
-        }
-
-        // A bitmap font from its .png and BMFont .fnt.
-        async function font(key) {
-          const [im, fnt] = await Promise.all([
-            img(`/art/fonts/${key}.png`),
-            fetch(`/art/fonts/${key}.fnt`)
-              .then((r) => (r.ok ? r.text() : null))
-              .catch(() => null),
-          ]);
-          if (!im || !fnt) return null;
-          const doc = new DOMParser().parseFromString(fnt, "application/xml");
-          const chars = {};
-          for (const c of doc.querySelectorAll("char")) {
-            const n = (a) => Number(c.getAttribute(a));
-            chars[n("id")] = {
-              x: n("x"),
-              y: n("y"),
-              w: n("width"),
-              h: n("height"),
-              ox: n("xoffset"),
-              oy: n("yoffset"),
-              adv: n("xadvance"),
-            };
-          }
-          const common = doc.querySelector("common");
-          return { im, chars, line: Number(common?.getAttribute("lineHeight")) || 12 };
-        }
-
-        roadScene(document.getElementById("scene"));
-      })();
-    </script>
   </body>
 </html>
