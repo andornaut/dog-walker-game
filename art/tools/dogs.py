@@ -193,6 +193,268 @@ def duchess_face(mood):
     return g
 
 
+# ---------- Nugget: pug, small, fawn, black mask, red bandana ----------
+
+def nugget_road(q):
+    g, q = Grid(), pose(q)
+    b, ln = q["bob"], q["lean"]
+    g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 2, "skin2")
+    g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 2, "skin2")
+    g.rect(12, 27 + q["bl"], 2, 2, "skin2")
+    g.rect(18, 27 + q["br"], 2, 2, "skin2")
+    bx = 16 + ln // 2
+    g.ell(bx, 23.5 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    tx = 16 + q["tail"]
+    g.ell(tx, 26 + b, 2, 1.6, "skin1", "skin2")
+    g.p(tx, 26 + b, "skin2")
+    g.rect(bx - 4, 19 + b, 8, 1, "red")
+    g.rect(bx - 1, 19 + b, 2, 2, "dred")
+    hx = 16 + ln
+    g.ell(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
+    g.ell(hx - 4.5, 12 + b - q["ears"], 1.8, 1.5, "navy")
+    g.ell(hx + 4.5, 12 + b - q["ears"], 1.8, 1.5, "navy")
+    g.rect(hx - 2, 13 + b, 4, 1, "skin2")
+    return g
+
+
+def nugget_face(mood):
+    g = Grid()
+    g.tri((8, 26), (24, 26), (16, 31), "red")
+    g.p(13, 27, "white")
+    g.p(18, 27, "white")
+    g.p(16, 29, "white")
+    g.ell(16, 16, 9.5, 8.5, "skin1", "skin2", "cream")
+    g.tri((6, 13), (8, 7), (12, 10), "navy")
+    g.tri((26, 13), (24, 7), (20, 10), "navy")
+    g.rect(13, 9, 6, 1, "skin2")
+    g.ell(16, 20.5, 5.5, 4, "navy", "ink", "dslate")
+    eyes(g, 10, 20, 14, mood=mood)
+    g.rect(15, 18, 2, 1, "ink")
+    mouth(g, 20, mood)
+    return g
+
+
+# ---------- Zippy: Jack Russell, small, white with tan patches, red collar ----------
+
+def zippy_road(q):
+    g, q = Grid(), pose(q)
+    b, ln = q["bob"], q["lean"]
+    g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 3, "white")
+    g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 3, "white")
+    g.rect(12, 26 + q["bl"], 2, 3, "white")
+    g.rect(18, 26 + q["br"], 2, 3, "white")
+    bx = 16 + ln // 2
+    g.ell(bx, 23.5 + b, 5, 4.5, "white", "lgrey")
+    g.ell(bx + 1.5, 22.5 + b, 2.5, 2, "ochre", "rust")
+    tx = 16 + q["tail"]
+    g.rect(tx - 1, 27 + b, 2, 2, "white")
+    g.p(tx, 28 + b, "ochre")
+    g.rect(bx - 4, 19 + b, 8, 1, "red")
+    hx = 16 + ln
+    g.ell(hx, 15 + b, 5, 4.5, "white", "lgrey")
+    g.ell(hx + 2, 14 + b, 2.5, 2, "ochre")
+    e = q["ears"]
+    g.tri((hx - 5, 14 + b), (hx - 4, 10 + b + e), (hx - 1.5, 12.5 + b), "ochre")
+    g.tri((hx + 5, 14 + b), (hx + 4, 10 + b + e), (hx + 1.5, 12.5 + b), "ochre")
+    return g
+
+
+def zippy_face(mood):
+    g = Grid()
+    g.ell(16, 16, 9, 8, "white", "lgrey")
+    g.ell(10.5, 12.5, 4, 4, "ochre", "rust", "tan")
+    g.ell(21.5, 12.5, 4, 4, "ochre", "rust", "tan")
+    g.tri((6, 12), (9, 5), (13, 9), "ochre")
+    g.tri((26, 12), (23, 5), (19, 9), "ochre")
+    g.tri((7.5, 11), (9, 7), (11, 9), "rust")
+    g.tri((24.5, 11), (23, 7), (21, 9), "rust")
+    g.ell(16, 21, 5, 3.5, "white", "lgrey")
+    g.rect(9, 26, 14, 2, "red")
+    g.rect(9, 27, 14, 1, "dred")
+    eyes(g, 11, 19, 14, mood=mood)
+    g.rect(15, 18, 2, 2, "ink")
+    mouth(g, 20, mood)
+    return g
+
+
+# ---------- Pierre: standard poodle, medium, apricot, show-clip pom-poms ----------
+
+def pierre_road(q):
+    g, q = Grid(), pose(q)
+    b, ln = q["bob"], q["lean"]
+    for x, d in ((9 + ln // 2, q["fl"]), (23 + ln // 2, q["fr"])):
+        g.rect(x - 1, 18 + d + b, 2, 3, "brown")
+        g.ell(x, 22 + d + b, 2, 1.8, "skin1", "brown", "cream")
+    for x, d in ((11, q["bl"]), (21, q["br"])):
+        g.rect(x - 1, 24 + d, 2, 3, "brown")
+        g.ell(x, 28 + d, 2.2, 1.8, "skin1", "brown", "cream")
+    bx = 16 + ln // 2
+    g.ell(bx, 21.5 + b, 4.5, 5, "skin1", "brown")
+    g.ell(bx, 17.5 + b, 6.5, 3, "skin1", "brown", "cream")
+    tx = 16 + q["tail"]
+    g.rect(tx, 25 + b, 1, 3, "brown")
+    g.ell(tx + 0.5, 28.5 + b, 2.2, 2, "skin1", "brown", "cream")
+    hx = 16 + ln
+    g.ell(hx - 5, 13.5 + b - q["ears"], 2.2, 4.5, "skin1", "brown")
+    g.ell(hx + 5, 13.5 + b - q["ears"], 2.2, 4.5, "skin1", "brown")
+    g.ell(hx, 12.5 + b, 4.5, 4, "skin1", "brown", "cream")
+    g.ell(hx, 8 + b, 5, 4, "skin1", "brown", "cream")
+    return g
+
+
+def pierre_face(mood):
+    g = Grid()
+    g.ell(16, 28.5, 6.5, 3, "skin1", "brown", "cream")
+    g.ell(7, 19, 3.5, 7, "skin1", "brown", "cream")
+    g.ell(25, 19, 3.5, 7, "skin1", "brown")
+    g.ell(16, 17, 7, 7, "skin1", "brown", "cream")
+    g.ell(16, 8, 8, 5, "skin1", "brown", "cream")
+    g.ell(16, 22, 4, 3.5, "cream", "skin1")
+    eyes(g, 12, 19, 15, mood=mood)
+    g.rect(15, 19, 2, 2, "ink")
+    mouth(g, 22, mood)
+    return g
+
+
+# ---------- Dash: whippet, medium, grey brindle, knit sweater ----------
+
+def dash_road(q):
+    g, q = Grid(), pose(q)
+    b, ln = q["bob"], q["lean"]
+    g.rect(10 + ln // 2, 16 + q["fl"] + b, 2, 5, "slate")
+    g.rect(20 + ln // 2, 16 + q["fr"] + b, 2, 5, "slate")
+    g.rect(11, 24 + q["bl"], 2, 5, "slate")
+    g.rect(19, 24 + q["br"], 2, 5, "slate")
+    bx = 16 + ln // 2
+    g.ell(bx, 21 + b, 4.5, 6, "slate", "dslate", "grey")
+    g.ell(bx, 20 + b, 5, 4.5, "dgreen", "forest", "green")
+    g.rect(bx - 4, 18 + b, 8, 1, "cream")
+    g.rect(bx - 4, 21 + b, 8, 1, "cream")
+    g.rect(bx - 2, 24 + b, 4, 1, "dslate")
+    tx = 16 + q["tail"]
+    g.rect(tx, 26 + b, 1, 3, "slate")
+    g.p(tx + 1, 29 + b, "slate")
+    hx = 16 + ln
+    g.ell(hx, 11.5 + b, 3.5, 4.5, "slate", "dslate", "grey")
+    g.rect(hx - 1, 9 + b, 1, 4, "dslate")
+    g.ell(hx - 3.5, 9.5 + b - q["ears"], 1.5, 1.5, "dslate")
+    g.ell(hx + 3.5, 9.5 + b - q["ears"], 1.5, 1.5, "dslate")
+    return g
+
+
+def dash_face(mood):
+    g = Grid()
+    g.rect(8, 26, 16, 4, "dgreen")
+    g.rect(8, 27, 16, 1, "cream")
+    g.rect(8, 29, 16, 1, "forest")
+    g.ell(16, 15.5, 6.5, 9, "slate", "dslate", "grey")
+    for y in (9, 12):
+        g.rect(13, y, 2, 1, "dslate")
+        g.rect(18, y + 1, 2, 1, "dslate")
+    g.tri((10, 9), (6, 6), (9, 13), "dslate")
+    g.tri((22, 9), (26, 6), (23, 13), "dslate")
+    g.rect(15, 7, 2, 9, "lgrey")
+    g.ell(16, 21, 3.5, 3.5, "lgrey", "grey")
+    eyes(g, 11, 19, 14, mood=mood)
+    g.rect(15, 20, 2, 2, "ink")
+    mouth(g, 23, mood)
+    return g
+
+
+# ---------- Snowball: Samoyed, big, fluffy white, collar with a bell ----------
+
+def snowball_road(q):
+    g, q = Grid(), pose(q)
+    b, ln, o = q["bob"], q["lean"], 2
+    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
+    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
+    g.rect(9, 26 + q["bl"], 3, 4, "lgrey")
+    g.rect(20, 26 + q["br"], 3, 4, "lgrey")
+    bx = 16 + ln // 2
+    g.ell(bx, 20.5 + o + b, 8, 6, "white", "lgrey")
+    for dx, dy in ((-7, 0), (7, 0), (-5, 4), (5, 4)):
+        g.ell(bx + dx, 20.5 + o + b + dy, 2, 2, "white", "lgrey")
+    g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
+    g.p(bx + 6, 17 + o + b, "amber")
+    tx = 16 + q["tail"]
+    g.ell(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
+    g.ell(tx - 1, 23 + o + b, 2.5, 1.5, "lgrey")
+    hx = 16 + ln
+    e = q["ears"]
+    tip = max(1, 1 + o + b + e)
+    g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "white")
+    g.tri((hx + 7, 7 + o + b), (hx + 6, tip), (hx + 2, 4.5 + o + b), "lgrey")
+    g.ell(hx, 9.5 + o + b, 8, 6, "white", "lgrey")
+    g.ell(hx - 7, 12 + o + b, 2, 2.2, "white")
+    g.ell(hx + 7, 12 + o + b, 2, 2.2, "lgrey")
+    return g
+
+
+def snowball_face(mood):
+    g = Grid()
+    g.tri((7, 11), (8, 1), (13.5, 6), "white")
+    g.tri((25, 11), (24, 1), (18.5, 6), "lgrey")
+    g.tri((8.5, 8.5), (9, 4), (12, 6.5), "pink")
+    g.tri((23.5, 8.5), (23, 4), (20, 6.5), "pink")
+    g.ell(16, 28, 8, 3.5, "white", "lgrey")
+    g.ell(16, 16, 10, 8.5, "white", "lgrey")
+    for x in (5.5, 26.5):
+        g.ell(x, 20, 2.5, 3, "white", "lgrey")
+    g.rect(9, 26, 14, 1, "sky")
+    g.ell(16, 28, 2, 2, "amber", "orange", "yellow")
+    g.p(16, 29, "orange")
+    eyes(g, 11, 19, 14, mood=mood)
+    g.rect(15, 18, 2, 2, "ink")
+    mouth(g, 20, mood)
+    return g
+
+
+# ---------- Waffles: Saint Bernard, big, brown and white, barrel collar ----------
+
+def waffles_road(q):
+    g, q = Grid(), pose(q)
+    b, ln, o = q["bob"], q["lean"], 2
+    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
+    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
+    g.rect(9, 26 + q["bl"], 3, 4, "white")
+    g.rect(20, 26 + q["br"], 3, 4, "white")
+    bx = 16 + ln // 2
+    g.ell(bx, 20.5 + o + b, 8, 6, "white", "lgrey")
+    g.ell(bx, 20 + o + b, 6, 5, "rust", "dbrown", "ochre")
+    g.rect(bx - 6, 16 + o + b, 12, 1, "dbrown")
+    g.rect(bx + 5, 16 + o + b, 3, 3, "amber")
+    g.p(bx + 6, 17 + o + b, "brown")
+    tx = 16 + q["tail"]
+    g.rect(tx - 1, 26 + b, 2, 3, "rust")
+    g.rect(tx - 1, 29 + b, 2, 1, "white")
+    hx = 16 + ln
+    g.ell(hx, 9.5 + o + b, 8.5, 6.5, "rust", "dbrown", "ochre")
+    g.ell(hx - 7.5, 12 + o + b - q["ears"], 2.5, 4, "dbrown", "plum")
+    g.ell(hx + 7.5, 12 + o + b - q["ears"], 2.5, 4, "dbrown", "plum")
+    g.rect(hx - 1, 4 + o + b, 2, 4, "white")
+    return g
+
+
+def waffles_face(mood):
+    g = Grid()
+    g.ell(16, 28.5, 7, 3, "white", "lgrey")
+    g.ell(16, 16, 10, 8.5, "rust", "dbrown", "ochre")
+    g.ell(5.5, 18, 3, 6.5, "dbrown", "plum")
+    g.ell(26.5, 18, 3, 6.5, "dbrown", "plum")
+    g.rect(15, 7, 2, 8, "white")
+    g.ell(16, 21, 6.5, 4.5, "white", "lgrey")
+    g.ell(11.5, 14.5, 2.5, 2, "dbrown")
+    g.ell(20.5, 14.5, 2.5, 2, "dbrown")
+    eyes(g, 11, 19, 14, mood=mood)
+    g.rect(14, 18, 4, 2, "ink")
+    mouth(g, 21, mood)
+    g.rect(13, 26, 6, 5, "amber")
+    g.rect(13, 27, 6, 1, "brown")
+    g.rect(13, 29, 6, 1, "brown")
+    g.rect(18, 26, 1, 5, "orange")
+    return g
+
+
 # ---------- shared features ----------
 
 def bow(g, cx, y, big=False):
@@ -240,7 +502,13 @@ def mouth(g, y, mood):
 
 DOGS = {
     "duchess": (duchess_road, duchess_face),
+    "nugget": (nugget_road, nugget_face),
+    "zippy": (zippy_road, zippy_face),
+    "pierre": (pierre_road, pierre_face),
     "biscuit": (biscuit_road, biscuit_face),
+    "dash": (dash_road, dash_face),
+    "snowball": (snowball_road, snowball_face),
+    "waffles": (waffles_road, waffles_face),
     "koda": (koda_road, koda_face),
 }
 

@@ -190,6 +190,7 @@
       .dogs canvas {
         width: 64px;
         height: 64px;
+        align-self: start;
         image-rendering: pixelated;
         image-rendering: crisp-edges;
         background: #3a4466;
@@ -197,6 +198,32 @@
       }
       .dogs .trait {
         color: var(--accent);
+      }
+      .dogs .breed,
+      .dogs .owner {
+        display: block;
+        color: var(--muted);
+        font-size: 14px;
+      }
+      .dogs .breed {
+        margin-bottom: 4px;
+      }
+      .dogs .owner {
+        margin-top: 4px;
+      }
+      .dogs .starter {
+        font-family: var(--f-display);
+        font-size: 11px;
+        color: var(--accent-ink);
+        background: var(--accent);
+        border-radius: 3px;
+        padding: 0 5px;
+        margin-left: 6px;
+        vertical-align: 2px;
+      }
+      .lede {
+        margin: 0;
+        color: var(--muted);
       }
       nav {
         display: grid;
@@ -284,22 +311,85 @@
 
       <section aria-labelledby="h-dogs">
         <h2 id="h-dogs">The pack</h2>
+        <p class="lede">
+          Nine dogs to walk. Three are yours from the start; the rest join from the shop.
+        </p>
         <div class="dogs">
           <div>
-            <canvas width="32" height="32" data-dog="0" aria-hidden="true"></canvas>
-            <p><b>Small dog</b><span class="trait">Fancy:</span> puddles upset its owner more.</p>
-          </div>
-          <div>
-            <canvas width="32" height="32" data-dog="1" aria-hidden="true"></canvas>
+            <canvas width="32" height="32" data-dog="duchess" aria-hidden="true"></canvas>
             <p>
-              <b>Medium dog</b><span class="trait">Food-driven:</span> pulls the pack toward treats.
+              <b>Duchess</b> <span class="starter">Starter</span
+              ><span class="breed">Maltese, small</span> <span class="trait">Fancy:</span> puddles
+              upset its owner more.
+              <span class="owner">Owner: Rosa, retired florist</span>
             </p>
           </div>
           <div>
-            <canvas width="32" height="32" data-dog="2" aria-hidden="true"></canvas>
+            <canvas width="32" height="32" data-dog="nugget" aria-hidden="true"></canvas>
             <p>
-              <b>Big dog</b><span class="trait">Chaser:</span> squirrels upset its owner, and it
-              pulls toward them.
+              <b>Nugget</b><span class="breed">Pug, small</span>
+              <span class="trait">Food-driven:</span> pulls the pack toward treats.
+              <span class="owner">Owner: Kevin, pet influencer</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="zippy" aria-hidden="true"></canvas>
+            <p>
+              <b>Zippy</b><span class="breed">Jack Russell, small</span>
+              <span class="trait">Chaser:</span> squirrels upset its owner, and it pulls toward
+              them.
+              <span class="owner">Owner: Mr. Pruitt, retired accountant</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="pierre" aria-hidden="true"></canvas>
+            <p>
+              <b>Pierre</b><span class="breed">Standard poodle, medium</span>
+              <span class="trait">Fancy:</span> puddles upset its owner more.
+              <span class="owner">Owner: Madame Lefevre, dog-show judge</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="biscuit" aria-hidden="true"></canvas>
+            <p>
+              <b>Biscuit</b> <span class="starter">Starter</span
+              ><span class="breed">Beagle, medium</span>
+              <span class="trait">Food-driven:</span> pulls the pack toward treats.
+              <span class="owner">Owner: Sam, barista</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="dash" aria-hidden="true"></canvas>
+            <p>
+              <b>Dash</b><span class="breed">Whippet, medium</span>
+              <span class="trait">Chaser:</span> squirrels upset its owner, and it pulls toward
+              them.
+              <span class="owner">Owner: Ophelia, stage actor</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="snowball" aria-hidden="true"></canvas>
+            <p>
+              <b>Snowball</b><span class="breed">Samoyed, big</span>
+              <span class="trait">Fancy:</span> puddles upset its owner more.
+              <span class="owner">Owner: Tiffany, wedding planner</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="waffles" aria-hidden="true"></canvas>
+            <p>
+              <b>Waffles</b><span class="breed">Saint Bernard, big</span>
+              <span class="trait">Food-driven:</span> pulls the pack toward treats.
+              <span class="owner">Owner: Dr. Hughes, dentist</span>
+            </p>
+          </div>
+          <div>
+            <canvas width="32" height="32" data-dog="koda" aria-hidden="true"></canvas>
+            <p>
+              <b>Koda</b> <span class="starter">Starter</span><span class="breed">Husky, big</span>
+              <span class="trait">Chaser:</span> squirrels upset its owner, and it pulls toward
+              them.
+              <span class="owner">Owner: Jesse, trail runner</span>
             </p>
           </div>
         </div>
@@ -314,7 +404,7 @@
           >
           <a href="https://github.com/andornaut/dog-walker-game/tree/main/gameplay"
             ><b>Design docs</b
-            ><span>Game design, v1 plan, decisions and ideas (GitHub, sign-in required)</span></a
+            ><span>Game design, ideas and what comes next (GitHub, sign-in required)</span></a
           >
           <a href="https://github.com/andornaut/dog-walker-game"
             ><b>GitHub</b><span>Source code, issues and CI (sign-in required)</span></a
@@ -326,7 +416,7 @@
       </section>
 
       <footer>
-        Placeholder art, drawn in code in the Endesga 32 palette. Built with Phaser and served from
+        Pixel art in the Endesga 32 palette, drawn in code. Built with Phaser and served from
         Cloudflare Workers.
       </footer>
     </main>
@@ -336,11 +426,32 @@
       (() => {
         const D = window.DWGPlaceholder;
         if (!D) return;
-        const spr = D.build("colour");
+        // Exported sprite sheets: frames sit side by side in tag order.
+        const SHEETS = {
+          "dog-koda": [32, 32, 4],
+          "dog-biscuit": [32, 32, 4],
+          "dog-duchess": [32, 32, 4],
+          walker: [32, 48, 4],
+          tip: [16, 16, 4],
+          treat: [16, 16, 2],
+          squirrel: [32, 32, 2],
+          puddle: [32, 16, 2],
+        };
+        const img = (src) =>
+          new Promise((ok) => {
+            const i = new Image();
+            i.onload = () => ok(i);
+            i.onerror = () => ok(null);
+            i.src = src;
+          });
+        const art = {};
+        const loaded = Promise.all(
+          Object.keys(SHEETS).map(async (k) => (art[k] = await img(`/art/sprites/${k}.png`))),
+        );
 
-        document.querySelectorAll("canvas[data-dog]").forEach((c) => {
-          const ctx = c.getContext("2d");
-          ctx.drawImage(spr.dogFace[Number(c.dataset.dog)], 0, 0);
+        document.querySelectorAll("canvas[data-dog]").forEach(async (c) => {
+          const face = await img(`/art/sprites/face-dog-${c.dataset.dog}.png`);
+          if (face) c.getContext("2d").drawImage(face, 0, 0, 32, 32, 0, 0, 32, 32);
         });
 
         // A 5-lane street, 280 wide like the game's road, cycling through the four zones.
@@ -361,9 +472,9 @@
           { k: "tip", lane: 4, y: 420 },
         ];
         const pack = [
-          { k: "husky", dx: 0, foot: H - 52 },
-          { k: "lab", dx: -13, foot: H - 34 },
-          { k: "chi", dx: 13, foot: H - 31 },
+          { k: "dog-koda", dx: 0, foot: H - 56 },
+          { k: "dog-biscuit", dx: -13, foot: H - 44 },
+          { k: "dog-duchess", dx: 13, foot: H - 42 },
         ];
         const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
         let scroll = 0,
@@ -376,8 +487,21 @@
           ctx.fillStyle = col;
           ctx.fillRect(x, y, w, h);
         };
-        const put = (img, cx, foot) =>
-          ctx.drawImage(img, Math.round(cx - img.width / 2), Math.round(foot - img.height));
+        function put(k, i, cx, foot) {
+          const [w, h, n] = SHEETS[k];
+          if (!art[k]) return;
+          ctx.drawImage(
+            art[k],
+            (i % n) * w,
+            0,
+            w,
+            h,
+            Math.round(cx - w / 2),
+            Math.round(foot - h),
+            w,
+            h,
+          );
+        }
         function shadow(cx, foot, w, col) {
           const rx = Math.max(3, w / 2 - 2);
           for (let y = -3; y <= 3; y++)
@@ -403,25 +527,25 @@
           const zi = Math.floor(scroll / (64 * 12)) % 4;
           const zone = D.ZONES[D.ZONE_ORDER[zi]];
           const shade = D.dark(zone.base);
-          const fr = Math.floor(t / 260) % 2;
+          const fr = Math.floor(t / 150);
           const off = Math.floor(scroll) % 64;
           for (let y = -64 + off; y < H; y += 64) ctx.drawImage(tiles[zi], 0, y);
           const list = items.map((o) => ({
-            img: spr[o.k][fr],
+            k: o.k,
             cx: o.lane * 56 + 28,
             foot: ((o.y + Math.floor(scroll)) % LOOP) - 40,
             decal: o.k === "puddle",
           }));
           const cx = Math.round(laneX);
-          for (const p of pack) list.push({ img: spr[p.k][fr], cx: cx + p.dx, foot: p.foot });
-          list.push({ img: spr.walker[fr], cx, foot: H - 6 });
+          for (const p of pack) list.push({ k: p.k, cx: cx + p.dx, foot: p.foot });
+          list.push({ k: "walker", cx, foot: H - 3 });
           list.sort((a, b) => (b.decal ? 1 : 0) - (a.decal ? 1 : 0) || a.foot - b.foot);
-          for (const it of list) if (!it.decal) shadow(it.cx, it.foot, it.img.width, shade);
-          for (const it of list) put(it.img, it.cx, it.foot);
-          const hand = [cx - 9, H - 18];
-          line(hand[0], hand[1], cx, H - 73, D.K.dred);
-          line(hand[0], hand[1], cx - 13, H - 51, D.K.dred);
-          line(cx + 8, H - 18, cx + 13, H - 44, D.K.dred);
+          for (const it of list) if (!it.decal) shadow(it.cx, it.foot, SHEETS[it.k][0], shade);
+          for (const it of list) put(it.k, fr, it.cx, it.foot);
+          for (const p of pack) {
+            const hand = p.dx < 0 ? cx - 9 : cx + 8;
+            line(hand, H - 17, cx + p.dx, p.foot - 15, D.K.dred);
+          }
           D.textC(ctx, zone.name, W / 2 + 1, 9, D.K.ink);
           D.textC(ctx, zone.name, W / 2, 8, D.K.white);
         }
@@ -439,8 +563,10 @@
           draw();
           requestAnimationFrame(frame);
         }
-        draw();
-        if (!reduced) requestAnimationFrame(frame);
+        loaded.then(() => {
+          draw();
+          if (!reduced) requestAnimationFrame(frame);
+        });
       })();
     </script>
   </body>

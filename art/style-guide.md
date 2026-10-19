@@ -28,9 +28,9 @@
 
 ## Asset rules
 
-The art-side rules for every asset live here. The tooling that generates, cleans up and packs sprites lives in `../tech-plan.md`.
+The art-side rules for every asset live here. The tooling that draws, builds and exports sprites is the set of scripts in `art/tools/`.
 
-- **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/art/` (manifest: `public/art/manifest.json`). The pixel font is a BMFont (`.fnt` plus `.png`). The export pipeline lives in `../tech-plan.md`.
+- **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/art/` (manifest: `public/art/manifest.json`). The pixel font is a BMFont (XML `.fnt` plus `.png`).
 - **Sprites in code:** `art/tools/dogs.py` draws the dogs and `art/tools/road.py` everything else on the road (walker, pickups, encounters, lucky encounters, the bark pop). Each builds its sources (`art/dogs/`, `art/road/`) and exports in `public/art/sprites/`, then adds them to the manifest: `python3 art/tools/<script>.py build`, or `preview OUT.png` for a contact sheet. Shared drawing and build code is in `art/tools/pixel.py`. A build overwrites the `.aseprite` files, so change the script, not the sources.
 - **Inventory:** every asset the game needs, with its manifest key, size and priority, is listed in `inventory.md`.
 - **Naming:** a sprite's kebab-case manifest key is also its file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`. Keys use the prefixes `dog-`, `face-dog-`, `face-owner-`, `walker-`, `fx-`, `card-`, `icon-`, `item-` and `ui-`; road objects use their plain name (`skunk`, `tip`). Animation names are the Aseprite tag names.

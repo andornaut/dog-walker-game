@@ -11,6 +11,11 @@
       "json": "sprites/dog-biscuit.json"
     },
     {
+      "key": "dog-dash",
+      "png": "sprites/dog-dash.png",
+      "json": "sprites/dog-dash.json"
+    },
+    {
       "key": "dog-duchess",
       "png": "sprites/dog-duchess.png",
       "json": "sprites/dog-duchess.json"
@@ -21,9 +26,39 @@
       "json": "sprites/dog-koda.json"
     },
     {
+      "key": "dog-nugget",
+      "png": "sprites/dog-nugget.png",
+      "json": "sprites/dog-nugget.json"
+    },
+    {
+      "key": "dog-pierre",
+      "png": "sprites/dog-pierre.png",
+      "json": "sprites/dog-pierre.json"
+    },
+    {
+      "key": "dog-snowball",
+      "png": "sprites/dog-snowball.png",
+      "json": "sprites/dog-snowball.json"
+    },
+    {
+      "key": "dog-waffles",
+      "png": "sprites/dog-waffles.png",
+      "json": "sprites/dog-waffles.json"
+    },
+    {
+      "key": "dog-zippy",
+      "png": "sprites/dog-zippy.png",
+      "json": "sprites/dog-zippy.json"
+    },
+    {
       "key": "face-dog-biscuit",
       "png": "sprites/face-dog-biscuit.png",
       "json": "sprites/face-dog-biscuit.json"
+    },
+    {
+      "key": "face-dog-dash",
+      "png": "sprites/face-dog-dash.png",
+      "json": "sprites/face-dog-dash.json"
     },
     {
       "key": "face-dog-duchess",
@@ -34,6 +69,76 @@
       "key": "face-dog-koda",
       "png": "sprites/face-dog-koda.png",
       "json": "sprites/face-dog-koda.json"
+    },
+    {
+      "key": "face-dog-nugget",
+      "png": "sprites/face-dog-nugget.png",
+      "json": "sprites/face-dog-nugget.json"
+    },
+    {
+      "key": "face-dog-pierre",
+      "png": "sprites/face-dog-pierre.png",
+      "json": "sprites/face-dog-pierre.json"
+    },
+    {
+      "key": "face-dog-snowball",
+      "png": "sprites/face-dog-snowball.png",
+      "json": "sprites/face-dog-snowball.json"
+    },
+    {
+      "key": "face-dog-waffles",
+      "png": "sprites/face-dog-waffles.png",
+      "json": "sprites/face-dog-waffles.json"
+    },
+    {
+      "key": "face-dog-zippy",
+      "png": "sprites/face-dog-zippy.png",
+      "json": "sprites/face-dog-zippy.json"
+    },
+    {
+      "key": "face-owner-biscuit",
+      "png": "sprites/face-owner-biscuit.png",
+      "json": "sprites/face-owner-biscuit.json"
+    },
+    {
+      "key": "face-owner-dash",
+      "png": "sprites/face-owner-dash.png",
+      "json": "sprites/face-owner-dash.json"
+    },
+    {
+      "key": "face-owner-duchess",
+      "png": "sprites/face-owner-duchess.png",
+      "json": "sprites/face-owner-duchess.json"
+    },
+    {
+      "key": "face-owner-koda",
+      "png": "sprites/face-owner-koda.png",
+      "json": "sprites/face-owner-koda.json"
+    },
+    {
+      "key": "face-owner-nugget",
+      "png": "sprites/face-owner-nugget.png",
+      "json": "sprites/face-owner-nugget.json"
+    },
+    {
+      "key": "face-owner-pierre",
+      "png": "sprites/face-owner-pierre.png",
+      "json": "sprites/face-owner-pierre.json"
+    },
+    {
+      "key": "face-owner-snowball",
+      "png": "sprites/face-owner-snowball.png",
+      "json": "sprites/face-owner-snowball.json"
+    },
+    {
+      "key": "face-owner-waffles",
+      "png": "sprites/face-owner-waffles.png",
+      "json": "sprites/face-owner-waffles.json"
+    },
+    {
+      "key": "face-owner-zippy",
+      "png": "sprites/face-owner-zippy.png",
+      "json": "sprites/face-owner-zippy.json"
     },
     {
       "key": "fx-bark",

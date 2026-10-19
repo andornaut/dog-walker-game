@@ -18,7 +18,7 @@ Sizes marked TBD depend on an open decision in the style guide.
 | Top bar     | 360×40          | Money, zone progress                       |
 | Dog column  | 80×600          | 3 slots of ~72×192, 4px padding            |
 | Road        | 280×600 at x=80 | 5 lanes of 56px                            |
-| Choice card | ~85×140         | 3 across the road, 8px gaps, centred       |
+| Choice card | ~83×140         | Up to 3 across the road, 8px gaps, centred |
 | Tile        | 32×32           | Road tiles, dogs, obstacles; ~12px margins |
 
 ## Characters (road)
@@ -51,18 +51,18 @@ Starters come first: they are the dogs every new player sees.
 
 ## Obstacles and forced stops (road)
 
-| Asset            | Key                | Type   | Size  | Animations       | Priority | Notes                                                      |
-| ---------------- | ------------------ | ------ | ----- | ---------------- | -------- | ---------------------------------------------------------- |
-| Skunk            | `skunk`            | sprite | 32×32 | `idle`           | M6       |                                                            |
-| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack             |
-| Puddle           | `puddle`           | sprite | 32×32 | `idle` (shimmer) | M6       | Flat on the road; no shadow                                |
-| Thief            | `thief`            | sprite | 32×48 | `walk`, `flee`   | M6       | Pickpocket; flees from a pack with a big dog, with no card |
-| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | core     | Forced stop; may span the full road                        |
-| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | core     | Forced stop                                                |
-| Kid              | `kid`              | sprite | 32×48 | `wave`           | core     | Forced stop: wants to pet the dogs                         |
-| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | core     | Forced stop; wider than a lane                             |
-| Construction     | `construction`     | sprite | TBD   | none             | core     | Forced stop: detour barrier across the road                |
-| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | core     | Forced stop                                                |
+| Asset            | Key                | Type   | Size  | Animations       | Priority | Notes                                                       |
+| ---------------- | ------------------ | ------ | ----- | ---------------- | -------- | ----------------------------------------------------------- |
+| Skunk            | `skunk`            | sprite | 32×32 | `idle`           | M6       |                                                             |
+| Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack              |
+| Puddle           | `puddle`           | sprite | 32×16 | `idle` (shimmer) | M6       | Ground decal: no outline, no shadow, drawn under everything |
+| Thief            | `thief`            | sprite | 32×48 | `walk`, `flee`   | M6       | Pickpocket; flees from a pack with a big dog, with no card  |
+| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | core     | Forced stop; may span the full road                         |
+| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | core     | Forced stop                                                 |
+| Kid              | `kid`              | sprite | 32×48 | `wave`           | core     | Forced stop: wants to pet the dogs                          |
+| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | core     | Forced stop; wider than a lane                              |
+| Construction     | `construction`     | sprite | TBD   | none             | core     | Forced stop: detour barrier across the road                 |
+| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | core     | Forced stop                                                 |
 
 ## Lucky encounters (road)
 
@@ -76,18 +76,19 @@ Good things to bump into; each opens a choice card.
 
 ## Pickups (road)
 
-| Asset | Key     | Type   | Size        | Animations    | Priority | Notes               |
-| ----- | ------- | ------ | ----------- | ------------- | -------- | ------------------- |
-| Treat | `treat` | sprite | 16×16 (TBD) | `idle` (bob)  | M6       | Bone or biscuit     |
-| Tip   | `tip`   | sprite | 16×16 (TBD) | `idle` (spin) | M6       | Coin or folded bill |
+| Asset | Key     | Type   | Size  | Animations    | Priority | Notes               |
+| ----- | ------- | ------ | ----- | ------------- | -------- | ------------------- |
+| Treat | `treat` | sprite | 16×16 | `idle` (bob)  | M6       | Bone or biscuit     |
+| Tip   | `tip`   | sprite | 16×16 | `idle` (spin) | M6       | Coin or folded bill |
 
 ## Effects
 
-| Asset          | Key          | Type   | Size  | Animations   | Priority | Notes                   |
-| -------------- | ------------ | ------ | ----- | ------------ | -------- | ----------------------- |
-| Collision puff | `fx-bump`    | sprite | 32×32 | `play`       | core     | Plays as the card opens |
-| Pickup sparkle | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected |
-| Heart up/down  | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot  |
+| Asset          | Key          | Type   | Size  | Animations   | Priority | Notes                                                       |
+| -------------- | ------------ | ------ | ----- | ------------ | -------- | ----------------------------------------------------------- |
+| Collision puff | `fx-bump`    | sprite | 32×32 | `play`       | core     | Plays as the card opens                                     |
+| Pickup sparkle | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected                                     |
+| Bark pop       | `fx-bark`    | sprite | 16×16 | `pop`        | core     | Over a dog during the pull tell, with the dog's `tell` lean |
+| Heart up/down  | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot                                      |
 
 Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
@@ -105,14 +106,14 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Dog column
 
-| Asset            | Key                 | Type   | Size      | Priority | Notes                                                 |
-| ---------------- | ------------------- | ------ | --------- | -------- | ----------------------------------------------------- |
-| Slot frame       | `ui-dog-slot`       | image  | 72×192    | core     | 9-slice or fixed; includes an empty state             |
-| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`            |
-| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired` |
-| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 8 per slot              |
-| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing      |
-| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                          |
+| Asset            | Key                 | Type   | Size      | Priority | Notes                                                                                                |
+| ---------------- | ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
+| Slot frame       | `ui-dog-slot`       | image  | 72×192    | core     | 9-slice or fixed; includes an empty state                                                            |
+| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                           |
+| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                |
+| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows |
+| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing                                                     |
+| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                                                                         |
 
 ## Top bar
 
@@ -125,11 +126,11 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Choice cards
 
-Each card is a frame plus an illustration plus text drawn in the pixel font. Card art size is an open decision; the illustration sits in roughly the top 85×70 of the ~85×140 card.
+Each card is a frame plus an illustration plus text drawn in the pixel font. Card art size is an open decision; the illustration sits in roughly the top 83×70 of the ~83×140 card ((280 - 4×8) / 3 wide).
 
 | Asset          | Key                | Type   | Size    | Priority | Notes                                                         |
 | -------------- | ------------------ | ------ | ------- | -------- | ------------------------------------------------------------- |
-| Card frame     | `card-frame`       | sprite | ~85×140 | M6       | Frames `encounter`, `stop`, `upgrade`, `disabled`, `selected` |
+| Card frame     | `card-frame`       | sprite | ~83×140 | M6       | Frames `encounter`, `stop`, `upgrade`, `disabled`, `selected` |
 | Enlarged frame | `card-frame-large` | sprite | TBD     | core     | Tap-to-enlarge view; same frames                              |
 | Cost badge     | `card-cost`        | image  | TBD     | core     | Holds `$`, `$$$` or the ♥ change                              |
 
