@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
 import { animationKey, animationSpecs } from "../assets/asepriteAnimations";
+import { splitDepthKey, stepSize } from "../assets/depthSteps";
 import {
   energyIconKey,
   needIconKey,
@@ -94,7 +95,13 @@ const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
 const STATUSES = members<DogStatusId>({ soaked: true, spooked: true, stinky: true });
 const TEMPERAMENTS = members<Temperament>({ dramatic: true, fussy: true, laidBack: true });
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
-const DEPTH_STEPS = SCALE_STEPS.filter((step) => step < 1);
+// The steps below 1 at which any of keys has a variant. Art adds a step to a whole family of
+// sprites at once, so each of them must then have it.
+function variantSteps(keys: readonly string[]): number[] {
+  return SCALE_STEPS.filter(
+    (step) => step < 1 && keys.some((key) => sprites.has(depthVariantKey(key, step) ?? "")),
+  );
+}
 
 // Every mood a face can show, from no hearts up to well past any maximum.
 const MOODS = [...new Set(Array.from({ length: 21 }, (_, hearts) => faceMood(gameData, hearts)))];
@@ -110,11 +117,14 @@ describe("dog art", () => {
     expect(DOGS.flatMap((dog) => missingTags(dogSpriteKey(gameData, dog), tags))).toEqual([]);
   });
 
-  it("names a hand-drawn depth variant at every step for every dog", () => {
-    const missing = DOGS.flatMap((dog) =>
-      DEPTH_STEPS.map((step) => depthVariantKey(dogSpriteKey(gameData, dog), step) ?? "").filter(
-        (key) => !sprites.has(key),
-      ),
+  it("names a hand-drawn depth variant for every dog at every step any dog has", () => {
+    const keys = DOGS.map((dog) => dogSpriteKey(gameData, dog));
+    const steps = variantSteps(keys);
+    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
+    const missing = keys.flatMap((key) =>
+      steps
+        .map((step) => depthVariantKey(key, step) ?? "")
+        .filter((variant) => !sprites.has(variant)),
     );
     expect(missing).toEqual([]);
   });
@@ -179,12 +189,14 @@ describe("icon art", () => {
     expect(missingImages(keys)).toEqual([]);
   });
 
-  it("names a slot icon and a looping overlay at every depth step for every status", () => {
+  it("names a slot icon and a looping overlay for every status at every step any overlay has", () => {
+    const steps = [1, ...variantSteps(STATUSES.map(statusOverlayKey))];
+    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
     const missing = STATUSES.flatMap((status) => {
       const overlay = statusOverlayKey(status);
       return [
         ...missingImages([statusIconKey(status)]),
-        ...SCALE_STEPS.flatMap((step) =>
+        ...steps.flatMap((step) =>
           missingTags(depthVariantKey(overlay, step) ?? overlay, ["loop"]),
         ),
       ];
@@ -287,16 +299,18 @@ describe("need art", () => {
   });
 
   // The hydrant and the other dog reuse their obstacle's art.
-  it("names a road sprite, with its depth steps, for every need spot with its own art", () => {
+  it("names a road sprite for every need spot with its own art, at every step any spot has", () => {
     const spots = Object.keys(gameData.needSpots) as NeedSpotId[];
     const own = spots.map(needSpotSpriteKey).filter((key) => key.startsWith("spot-"));
     expect(own).toHaveLength(4);
+    const steps = variantSteps(own);
+    expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
     const missing = own.flatMap((key) => {
       return [
         ...missingTags(key, ["idle"]),
-        ...DEPTH_STEPS.map((step) => depthVariantKey(key, step) ?? "").filter(
-          (variant) => !sprites.has(variant),
-        ),
+        ...steps
+          .map((step) => depthVariantKey(key, step) ?? "")
+          .filter((variant) => !sprites.has(variant)),
       ];
     });
     expect(missing).toEqual([]);
@@ -350,19 +364,18 @@ describe("depth variants", () => {
     );
   }
 
-  it("draw each variant at its step of the base size, with the base's tags and timing", () => {
+  it("draw each variant at its step's exact scale of the base size, with the base's tags and timing", () => {
     const variants = [...sprites.keys()].filter((key) => key.includes("@"));
     expect(variants.length).toBeGreaterThan(0);
     for (const variant of variants) {
-      const [base = "", percent = ""] = variant.split("@");
-      const step = Number(percent) / 100;
-      expect(depthVariantKey(base, step), variant).toBe(variant);
+      const { base, step } = splitDepthKey(variant);
+      expect(step.scale, variant).toBeLessThan(1);
       expect(durationsByTag(variant), variant).toEqual(durationsByTag(base));
       const full = sizeOf(base);
       expect(sizeOf(variant), variant).toEqual(
         full === undefined
           ? undefined
-          : { h: Math.round(full.h * step), w: Math.round(full.w * step) },
+          : { h: stepSize(full.h, step.scale), w: stepSize(full.w, step.scale) },
       );
     }
   });

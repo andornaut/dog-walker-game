@@ -1,3 +1,4 @@
+import { DEPTH_STEPS } from "../assets/depthSteps";
 import type { Rect } from "./rect";
 
 // The pseudo-3D road. Game logic keeps the flat road: x is a point's screen x at the pack
@@ -41,8 +42,9 @@ export interface ColumnSpan {
   readonly last: number;
 }
 
-export const SCALE_STEPS = [1, 0.75, 0.5] as const;
-export type ScaleStep = (typeof SCALE_STEPS)[number];
+// The scales road art is drawn at, 1 first, from the depth step table.
+export const SCALE_STEPS: readonly number[] = DEPTH_STEPS.map(({ scale }) => scale);
+export type ScaleStep = number;
 
 type Camera = Pick<RoadProjection, "focal" | "footY" | "horizonY">;
 
@@ -147,9 +149,10 @@ export function lineColumn(
   return Math.floor(centerX + (x - centerX) * rowScale(projection, row));
 }
 
-// The depth step nearest a scale, judged by ratio, so 0.866 is the 1 / 0.75 boundary.
+// The depth step nearest a scale, judged by ratio, so two steps' boundary is their geometric
+// mean: 0.935 between 1 and 0.875.
 export function snapScale(scale: number): ScaleStep {
-  let best: ScaleStep = SCALE_STEPS[0];
+  let best = 1;
   for (const step of SCALE_STEPS) {
     if (Math.abs(Math.log(scale / step)) < Math.abs(Math.log(scale / best))) {
       best = step;

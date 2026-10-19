@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import { walkerFootY } from "../runner/walkGeometry";
+import { PACK_DEPTH } from "./packFormation";
 import {
   columnSpan,
   distanceAtY,
@@ -104,17 +105,25 @@ describe("inverses", () => {
 });
 
 describe("snapScale", () => {
-  it("snaps to the nearest of 1, 0.75 and 0.5 by ratio", () => {
+  it("snaps to the nearest depth step by ratio", () => {
     expect(snapScale(1.01)).toBe(1);
-    expect(snapScale(0.87)).toBe(1);
-    expect(snapScale(0.86)).toBe(0.75);
-    expect(snapScale(0.62)).toBe(0.75);
-    expect(snapScale(0.6)).toBe(0.5);
+    expect(snapScale(0.94)).toBe(1);
+    expect(snapScale(0.93)).toBe(0.875);
+    expect(snapScale(0.82)).toBe(0.875);
+    expect(snapScale(0.8)).toBe(0.75);
+    expect(snapScale(0.69)).toBe(0.75);
+    expect(snapScale(0.68)).toBe(0.625);
+    expect(snapScale(0.56)).toBe(0.625);
+    expect(snapScale(0.55)).toBe(0.5);
     expect(snapScale(0.3)).toBe(0.5);
   });
 
   it("draws the pack at 1 and the far edge at 0.5", () => {
-    expect(snapScale(scaleAt(projection, 58))).toBe(1);
+    expect(snapScale(PACK_DEPTH)).toBe(1);
     expect(snapScale(scaleAt(projection, projection.visibleDistance))).toBe(0.5);
+  });
+
+  it("snaps a road sprite as far ahead as the pack's back row to 0.875, unlike the pack", () => {
+    expect(snapScale(scaleAt(projection, 58))).toBe(0.875);
   });
 });

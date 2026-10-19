@@ -1,11 +1,13 @@
 import { itemAt } from "../arrays";
+import { stepSize } from "../assets/depthSteps";
 
 // How a road sprite is sized for its depth. Every road sprite, flat ones included, is a
 // billboard scaled uniformly with the projection, never stretched on one axis: its larger
-// frame side is drawn round(side x scale) pixels, with the scale capped at 1 so art past the
-// walker's feet is never upscaled. It is drawn from the smallest of its art steps (1x, @75,
-// @50) at least that size, downscaled with nearest-neighbour, so as it approaches it only
-// grows and it never swaps to a smaller step. Each step stands on its own feet line.
+// frame side is drawn stepSize(side, scale) pixels, with the scale capped at 1 so art past the
+// walker's feet is never upscaled. It is drawn from the smallest of its art steps (1x and the
+// depth step variants it has) at least that size, downscaled with nearest-neighbour, so as it
+// approaches it only grows and it never swaps to a smaller step. Each step stands on its own
+// feet line.
 
 // One art step of a road sprite: its frame and feet line in its own pixels.
 export interface DepthArt {
@@ -31,7 +33,7 @@ function side(art: DepthArt): number {
 // arts holds the 1x art first, then any smaller steps.
 export function depthDraw(arts: readonly DepthArt[], projected: number): DepthDraw {
   const full = itemAt(arts, 0);
-  const size = Math.max(1, Math.round(side(full) * Math.min(1, projected)));
+  const size = Math.max(1, stepSize(side(full), Math.min(1, projected)));
   let art = full;
   for (const step of arts) {
     if (side(step) >= size && side(step) < side(art)) {

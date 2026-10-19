@@ -22,6 +22,12 @@ const FORMATIONS: readonly (readonly PackPlacement[])[] = [
   ],
 ];
 
+// The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
+// ahead of the walker (projected 0.92 to 0.94), so they never change size, and following the
+// projection there would drop two or three pixel rows from every dog. Their status loops
+// follow, at full size.
+export const PACK_DEPTH = 1;
+
 // The walker sprite's hands, relative to its feet.
 export const WALKER_HANDS = { heightAboveFeet: 13, leftDx: -11, rightDx: 10 };
 // A dog's collar, above its feet, on every 32x32 dog sprite.

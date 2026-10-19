@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import manifest from "../../public/art/manifest.json";
-import { SCALE_STEPS } from "../layout/projection";
 import { type DogStatusId, statusOverlayKey } from "../runner/statuses";
 import { energyIconKey, statusIconKey, temperamentIconKey, traitIconKey } from "./iconKeys";
 import { depthVariantKey } from "./spriteKeys";
@@ -20,10 +19,10 @@ describe("icon keys", () => {
     expect(named.filter((key) => !keys.has(key))).toEqual([]);
   });
 
-  it("name a status loop the art manifest has at every depth variant", () => {
+  it("name a status loop the art manifest has at full size, @75 and @50", () => {
     const sprites = new Set(manifest.sprites.map((sprite) => sprite.key));
     const named = STATUSES.flatMap((status) =>
-      SCALE_STEPS.map((step) => {
+      [1, 0.75, 0.5].map((step) => {
         const key = statusOverlayKey(status);
         return depthVariantKey(key, step) ?? key;
       }),

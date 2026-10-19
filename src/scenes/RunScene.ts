@@ -62,7 +62,7 @@ import {
   trackPointer,
 } from "../input/pointerTracking";
 import { laneCenterXs, type LaneDirection } from "../layout/lanes";
-import { COLLAR_HEIGHT, leashHand, packPlacements } from "../layout/packFormation";
+import { COLLAR_HEIGHT, leashHand, PACK_DEPTH, packPlacements } from "../layout/packFormation";
 import { project } from "../layout/projection";
 import type { Rect } from "../layout/rect";
 import {
@@ -246,10 +246,6 @@ const DEPTH = {
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 // Every road sprite, the road and its verge are drawn through this one projection.
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
-// The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
-// ahead of the walker (projected 0.92 to 0.94), so they never change size, and following the
-// projection there would drop two or three pixel rows from every dog.
-const PACK_DEPTH = 1;
 const ROAD_TEXTURE = "road-projected";
 // An instant lucky find's art pops up over the road, then floats up and fades.
 const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };

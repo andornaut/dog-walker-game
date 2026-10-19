@@ -1,0 +1,10 @@
+{
+  "size": "floor(full * scale + 0.5)",
+  "steps": [
+    { "scale": 1, "suffix": "" },
+    { "scale": 0.875, "suffix": "@88" },
+    { "scale": 0.75, "suffix": "@75" },
+    { "scale": 0.625, "suffix": "@62" },
+    { "scale": 0.5, "suffix": "@50" }
+  ]
+}

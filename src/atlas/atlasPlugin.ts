@@ -1,4 +1,4 @@
-import type { Plugin } from "vite";
+import type { Logger, Plugin } from "vite";
 
 import { buildAtlases } from "./atlasBuild";
 import { ATLAS_MANIFEST_PATH } from "./atlasManifest";
@@ -11,6 +11,7 @@ const ART_DIR = "art";
 // them, and so does a build for any key the atlas leaves out.
 export function atlasPlugin(): Plugin {
   let publicDir = "";
+  let logger: Logger | undefined;
   return {
     apply: "build",
     async buildStart() {
@@ -19,6 +20,11 @@ export function atlasPlugin(): Plugin {
       );
       for (const warning of warnings) {
         this.warn(`atlas: ${warning}, so it loads from its own files`);
+      }
+      for (const { bytes, group, height, png, width } of manifest.pages) {
+        logger?.info(
+          `atlas: ${png} ${width}x${height}, ${(bytes / 1024).toFixed(1)} kB (${group})`,
+        );
       }
       for (const [png, source] of pngs) {
         this.emitFile({ fileName: `${ART_DIR}/${png}`, source, type: "asset" });
@@ -30,7 +36,7 @@ export function atlasPlugin(): Plugin {
       });
     },
     configResolved(config) {
-      ({ publicDir } = config);
+      ({ logger, publicDir } = config);
     },
     name: "dog-walker-atlas",
   };

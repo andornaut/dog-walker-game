@@ -1,3 +1,4 @@
+import { splitDepthKey } from "../assets/depthSteps";
 import type { DogId, EncounterId, GameData } from "../data/types";
 import { type ScaleStep, snapScale } from "../layout/projection";
 import type { Choice } from "../rules/choices";
@@ -124,17 +125,14 @@ export function statusOverlayKey(status: DogStatusId): string {
   return `fx-status-${status}`;
 }
 
-// The depth step a dog shows at: its sprite's variant (dog-koda@75 is 0.75) times the scale
+// The depth step a dog shows at: its sprite's variant (dog-koda@62 is 0.625) times the scale
 // it is drawn at. Its status loop is drawn at the same step.
 export function dogDepthStep(dogKey: string, scale: number): ScaleStep {
-  const percent = /@(\d+)$/.exec(dogKey)?.[1];
-  return snapScale((percent === undefined ? 1 : Number(percent) / 100) * scale);
+  return snapScale(splitDepthKey(dogKey).step.scale * scale);
 }
 
 // How far below the dog's top opaque row, in screen pixels, a status loop's bottom-centre sits
-// at each depth step, so its lower rows overlap the head.
-export const STATUS_OVERLAY_LIFT: Readonly<Record<ScaleStep, number>> = {
-  0.5: 3,
-  0.75: 4,
-  1: 6,
-};
+// at a depth step, so its lower rows overlap the head: 6 at full size, scaled and rounded down.
+export function statusOverlayLift(step: ScaleStep): number {
+  return Math.floor(6 * step);
+}

@@ -49,10 +49,16 @@ describe("kebabCase", () => {
 });
 
 describe("depthVariantKey", () => {
-  it("names the @75 and @50 versions, and none at full size", () => {
+  it("names each step's version by its suffix, and none at full size", () => {
+    expect(depthVariantKey("dog-koda", 0.875)).toBe("dog-koda@88");
     expect(depthVariantKey("dog-koda", 0.75)).toBe("dog-koda@75");
+    expect(depthVariantKey("dog-koda", 0.625)).toBe("dog-koda@62");
     expect(depthVariantKey("tip", 0.5)).toBe("tip@50");
     expect(depthVariantKey("tip", 1)).toBeNull();
+  });
+
+  it("throws for a scale that is not a depth step", () => {
+    expect(() => depthVariantKey("tip", 0.63)).toThrow("not a depth step");
   });
 
   it("names variants the manifest has, each with its own anchor", () => {

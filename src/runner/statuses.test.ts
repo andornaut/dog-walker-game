@@ -10,11 +10,11 @@ import {
   dogDepthStep,
   shownStatus,
   startStatuses,
-  STATUS_OVERLAY_LIFT,
   statusesKey,
   statusesOf,
   type StatusMark,
   statusOverlayKey,
+  statusOverlayLift,
 } from "./statuses";
 
 const data = { encounters: ENCOUNTERS };
@@ -180,11 +180,17 @@ describe("dogDepthStep", () => {
     expect(dogDepthStep("dog-koda", 0.75)).toBe(0.75);
     expect(dogDepthStep("dog-koda", 0.5)).toBe(0.5);
   });
+
+  it("reads the in-between steps' exact scales from their suffixes", () => {
+    expect(dogDepthStep("dog-koda@88", 1)).toBe(0.875);
+    expect(dogDepthStep("dog-koda@62", 1)).toBe(0.625);
+    expect(dogDepthStep("dog-koda", 0.875)).toBe(0.875);
+  });
 });
 
 describe("status overlays", () => {
-  it("draw fx-status-<status>, 6, 4 and 3px below the top row at the three steps", () => {
+  it("draw fx-status-<status>, 6, 5, 4, 3 and 3px below the top row from 1 down to 0.5", () => {
     expect(statusOverlayKey("stinky")).toBe("fx-status-stinky");
-    expect(STATUS_OVERLAY_LIFT).toEqual({ 0.5: 3, 0.75: 4, 1: 6 });
+    expect([1, 0.875, 0.75, 0.625, 0.5].map(statusOverlayLift)).toEqual([6, 5, 4, 3, 3]);
   });
 });

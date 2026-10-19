@@ -68,14 +68,14 @@ describe("parseManifest", () => {
     );
   });
 
-  it("accepts only the @75 and @50 size suffixes", () => {
+  it("accepts exactly the depth steps' suffixes", () => {
     const sized = (key: string) => [{ ...valid.sprites[0], key }];
-    expect(parseManifest({ ...valid, sprites: sized("bin@50") }).sprites[0]?.key).toBe("bin@50");
-    expect(parseManifest({ ...valid, sprites: sized("dog-koda@75") }).sprites[0]?.key).toBe(
-      "dog-koda@75",
-    );
-    expect(() => parseManifest({ ...valid, sprites: sized("bin@25") })).toThrow("kebab-case");
-    expect(() => parseManifest({ ...valid, sprites: sized("bin@") })).toThrow("kebab-case");
+    for (const key of ["bin@50", "dog-koda@62", "dog-koda@75", "parked-car@88"]) {
+      expect(parseManifest({ ...valid, sprites: sized(key) }).sprites[0]?.key).toBe(key);
+    }
+    for (const key of ["bin@25", "bin@33", "bin@63", "bin@", "bin@88@50", "bin@100"]) {
+      expect(() => parseManifest({ ...valid, sprites: sized(key) }), key).toThrow("kebab-case");
+    }
   });
 
   it("rejects a key used twice across lists, naming both lists", () => {

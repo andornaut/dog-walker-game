@@ -4,8 +4,8 @@ import type { DogId } from "../data/types";
 import {
   dogDepthStep,
   type DogStatusId,
-  STATUS_OVERLAY_LIFT,
   statusOverlayKey,
+  statusOverlayLift,
 } from "../runner/statuses";
 import { depthLook, playTag, spriteTopY } from "./sprites";
 
@@ -48,7 +48,7 @@ export class StatusOverlays {
       sprite
         .setVisible(true)
         .setScale(look.scale)
-        .setPosition(Math.round(centre), Math.round(top + STATUS_OVERLAY_LIFT[step]))
+        .setPosition(Math.round(centre), Math.round(top + statusOverlayLift(step)))
         .setDepth(dogSprite.depth + 0.5);
     }
   }

@@ -1,5 +1,6 @@
 import * as v from "valibot";
 
+import { DEPTH_STEPS } from "./depthSteps";
 import { issuePath, record } from "./jsonSchema";
 
 // Where a road sprite stands, measured from frame 0 by the art pipeline, in frame pixels.
@@ -42,8 +43,9 @@ export interface AssetManifest {
   sprites: SpriteAsset[];
 }
 
-// Kebab-case, with an optional @75 or @50 suffix for a sprite's hand-drawn smaller version.
-const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*(@(75|50))?$/;
+// Kebab-case, with an optional depth step suffix for a sprite's hand-drawn smaller version.
+const STEP_SUFFIXES = DEPTH_STEPS.flatMap(({ suffix }) => (suffix === "" ? [] : [suffix]));
+const KEBAB_CASE = new RegExp(`^[a-z0-9]+(-[a-z0-9]+)*(${STEP_SUFFIXES.join("|")})?$`);
 const URL_SCHEME = /^[a-z][a-z0-9+.-]*:/i;
 const LIST_NAMES = ["fonts", "images", "sounds", "sprites"] as const;
 

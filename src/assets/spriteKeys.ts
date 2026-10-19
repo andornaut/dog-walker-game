@@ -11,6 +11,7 @@ import type {
 } from "../data/types";
 import type { MoverKind } from "../runner/movers";
 import type { CardSource } from "../state/runState";
+import { depthStepOfScale } from "./depthSteps";
 
 // Forced stops whose sprite is named for the figure on the road rather than the stop.
 const FORCED_STOP_SPRITES: Readonly<Partial<Record<ForcedStopId, string>>> = {
@@ -124,10 +125,11 @@ export const NEED_ART = {
   pullFail: "fx-pull-fail",
 } as const;
 
-// A road sprite's hand-drawn version for a depth step, such as dog-koda@75 for 0.75x, or
-// null at full size.
+// A road sprite's hand-drawn version for a depth step, such as dog-koda@62 for 0.625x, or
+// null at full size. Throws for a scale that is not a step.
 export function depthVariantKey(key: string, step: number): string | null {
-  return step >= 1 ? null : `${key}@${Math.round(step * 100)}`;
+  const { suffix } = depthStepOfScale(step);
+  return suffix === "" ? null : `${key}${suffix}`;
 }
 
 // Sprites drawn standing on the road or the backdrop, which need their feet line. Faces,

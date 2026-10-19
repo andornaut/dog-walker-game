@@ -2,11 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
 import { itemAt } from "../arrays";
+import { DEPTH_STEPS, stepSize } from "../assets/depthSteps";
 import { parseManifest } from "../assets/manifest";
-import { depthVariantKey } from "../assets/spriteKeys";
+import { depthVariantKey, dogSpriteKey } from "../assets/spriteKeys";
+import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import type { DogId } from "../data/types";
+import { dogDepthStep, statusOverlayLift } from "../runner/statuses";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
+import { PACK_DEPTH } from "./packFormation";
 import { SCALE_STEPS, scaleAt } from "./projection";
 import { screenLayout } from "./screenLayout";
 
@@ -35,11 +40,30 @@ function artsOf(key: string): DepthArt[] {
 // A made-up sprite's art steps: its 1x, then each smaller step drawn to scale.
 function syntheticArts(key: string, width: number, steps: readonly number[]): DepthArt[] {
   return [1, ...steps].map((step) => ({
-    feetY: Math.round(width * 0.75 * step),
-    height: Math.round(width * 0.8 * step),
-    key: step === 1 ? key : `${key}@${step * 100}`,
-    width: Math.round(width * step),
+    feetY: stepSize(width * 0.75, step),
+    height: stepSize(width * 0.8, step),
+    key: depthVariantKey(key, step) ?? key,
+    width: stepSize(width, step),
   }));
+}
+
+// arts with every depth step it lacks drawn at the table's size, as art exports them.
+function withEveryStep(arts: readonly DepthArt[]): DepthArt[] {
+  const full = itemAt(arts, 0);
+  return DEPTH_STEPS.map(
+    ({ scale, suffix }) =>
+      arts.find((art) => art.key === `${full.key}${suffix}`) ?? {
+        feetY: stepSize(full.feetY, scale),
+        height: stepSize(full.height, scale),
+        key: `${full.key}${suffix}`,
+        width: stepSize(full.width, scale),
+      },
+  );
+}
+
+// Each sprite's shipped steps, then the same with every step.
+function stepSets(keys: readonly string[]): DepthArt[][] {
+  return keys.flatMap((key) => [artsOf(key), withEveryStep(artsOf(key))]);
 }
 
 const projection = walkProjection(ROAD_CAMERA, screenLayout(SCREEN_CONFIG).road);
@@ -51,7 +75,7 @@ const approach = Array.from({ length: Math.ceil(projection.visibleDistance) + 12
 const STANDING = ["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge"];
 const KEYS = [...STANDING, "skunk-cloud", "puddle"];
 // Every set of steps a sprite may have, whichever sprites ship with them.
-const STEP_SETS = [[], [0.75], [0.5], [0.75, 0.5]].flatMap((steps) =>
+const STEP_SETS = [[], [0.75], [0.5], [0.75, 0.5], [0.875, 0.75, 0.625, 0.5]].flatMap((steps) =>
   [16, 88].map((width) => syntheticArts(`w${width}`, width, steps)),
 );
 
@@ -68,6 +92,17 @@ describe("depthDraw", () => {
     const arts = artsOf("tip");
     expect(depthDraw(arts, 1)).toEqual({ depth: 1, key: "tip", originY: 13 / 16, scale: 1 });
     expect(depthDraw(arts, 1.07)).toEqual(depthDraw(arts, 1));
+  });
+
+  it("draws every pack dog's full-size art unscaled, with its status loop at 1, at every step", () => {
+    const dogs = (Object.keys(gameData.dogs) as DogId[]).map((dog) => dogSpriteKey(gameData, dog));
+    expect(dogs.length).toBeGreaterThan(0);
+    for (const arts of stepSets(dogs)) {
+      const drawn = depthDraw(arts, PACK_DEPTH);
+      expect(drawn, drawn.key).toMatchObject({ depth: 1, key: itemAt(arts, 0).key, scale: 1 });
+      expect(dogDepthStep(drawn.key, drawn.scale), drawn.key).toBe(1);
+    }
+    expect(statusOverlayLift(1)).toBe(6);
   });
 
   it("draws each hand-drawn step at its own size", () => {
@@ -87,8 +122,16 @@ describe("depthDraw", () => {
     });
   });
 
+  it("draws the in-between @88 and @62 steps when it has them", () => {
+    const arts = withEveryStep(artsOf("cone"));
+    expect(depthDraw(arts, 0.875)).toMatchObject({ key: "cone@88", scale: 1 });
+    expect(depthDraw(arts, 0.625)).toMatchObject({ key: "cone@62", scale: 1 });
+    expect(depthDraw(arts, 0.8)).toMatchObject({ key: "cone@88", scale: 26 / 28 });
+    expect(depthDraw(arts, 0.6)).toMatchObject({ key: "cone@62", scale: 19 / 20 });
+  });
+
   it("follows the projection to the nearest pixel, as it approaches only growing", () => {
-    for (const arts of [...KEYS.map(artsOf), ...STEP_SETS]) {
+    for (const arts of [...stepSets(KEYS), ...STEP_SETS]) {
       const full = itemAt(arts, 0);
       let last: { height: number; key: string; width: number } | undefined;
       for (const projected of approach) {
@@ -120,8 +163,7 @@ describe("depthDraw", () => {
   });
 
   it("stands each step on its own feet line, which stays put as the steps change", () => {
-    for (const key of STANDING) {
-      const arts = artsOf(key);
+    for (const arts of stepSets(STANDING)) {
       let last: { feetToTop: number; key: string } | undefined;
       for (const projected of approach) {
         const drawn = depthDraw(arts, projected);
