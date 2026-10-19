@@ -1,9 +1,12 @@
 import { assetUrl, parseManifest } from "../assets/manifest";
+import type { SoundFormat } from "../audio/soundFormat";
 import { isHashedAssetUrl } from "./cachePolicy";
 
-// The service worker's precache: every URL the game needs to boot offline, and a version that
-// changes whenever any of their contents change, so a deploy installs a new worker.
+// The service worker's precache: every URL the game needs to boot offline, each sound file by
+// format (the worker stores the one format the page plays), and a version that changes whenever
+// any of their contents change, so a deploy installs a new worker.
 export interface PrecacheManifest {
+  sounds: Record<SoundFormat, string[]>;
   urls: string[];
   version: string;
 }
@@ -64,16 +67,27 @@ export function resolveRelativePath(basePath: string, relativePath: string): str
   return segments.join("/");
 }
 
-// Every file /art/manifest.json lists, as URLs under artBaseUrl.
+// Every file /art/manifest.json lists except the sounds, as URLs under artBaseUrl.
 export function artManifestUrls(artBaseUrl: string, manifestJson: unknown): string[] {
-  const { fonts, images, sounds, sprites } = parseManifest(manifestJson);
+  const { fonts, images, sprites } = parseManifest(manifestJson);
   const paths = [
     ...fonts.flatMap(({ fnt, png }) => [png, fnt]),
     ...images.map(({ png }) => png),
-    ...sounds.flatMap(({ m4a, ogg }) => [ogg, m4a]),
     ...sprites.flatMap(({ json, png }) => [png, json]),
   ];
   return [...new Set(paths.map((path) => assetUrl(artBaseUrl, path)))];
+}
+
+// The sound files /art/manifest.json lists, by format, as URLs under artBaseUrl.
+export function artSoundUrls(
+  artBaseUrl: string,
+  manifestJson: unknown,
+): Record<SoundFormat, string[]> {
+  const { sounds } = parseManifest(manifestJson);
+  const urls = (format: SoundFormat) => [
+    ...new Set(sounds.map((sound) => assetUrl(artBaseUrl, sound[format]))),
+  ];
+  return { m4a: urls("m4a"), ogg: urls("ogg") };
 }
 
 const FONT_PAGE_FILE = /<page\b[^>]*\bfile="([^"]+)"/g;

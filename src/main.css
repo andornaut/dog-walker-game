@@ -1,4 +1,5 @@
-/* The game page's layout: the nav bar, the game and the dev panel stacked in one screen. */
+/* The game page's layout: the nav bar (absent in the installed app), the game and the dev panel
+   stacked in one screen. */
 
 :root {
   --dev-bar-height: 24px;
@@ -23,7 +24,7 @@ body {
 body {
   display: flex;
   flex-direction: column;
-  /* The nav bar is the top element, so it clears the status bar and notch. */
+  /* The top element, the nav bar or else the game, clears the status bar and notch. */
   padding-top: env(safe-area-inset-top, 0px);
   box-sizing: border-box;
 }

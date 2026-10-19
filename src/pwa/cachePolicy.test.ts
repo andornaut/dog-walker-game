@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  cachedUrlsOf,
   cacheKeyFor,
   cacheNameFor,
+  installUrls,
   precacheFetchOptions,
   staleCacheNames,
   strategyFor,
 } from "./cachePolicy";
+import type { PrecacheManifest } from "./precacheList";
 
 const precached = new Set(["/play/", "/nav.js", "/art/manifest.json", "/art/sprites/dog.png"]);
 const fetchOf = (pathname: string) => strategyFor(precached, { isNavigation: false, pathname });
@@ -67,6 +70,44 @@ describe("cacheKeyFor", () => {
     expect(cacheKeyFor("/play/index.html")).toBe("/play/");
     expect(cacheKeyFor("/play/")).toBe("/play/");
     expect(cacheKeyFor("/art/sprites/dog.png")).toBe("/art/sprites/dog.png");
+  });
+});
+
+describe("the sound files", () => {
+  const manifest: PrecacheManifest = {
+    sounds: { m4a: ["/art/sounds/a.m4a"], ogg: ["/art/sounds/a.ogg"] },
+    urls: ["/play/", "/art/sprites/dog.png"],
+    version: "v1",
+  };
+
+  it("installs with the format the page named and no other", () => {
+    expect(installUrls(manifest, "ogg")).toEqual([
+      "/play/",
+      "/art/sprites/dog.png",
+      "/art/sounds/a.ogg",
+    ]);
+    expect(installUrls(manifest, "m4a")).toEqual([
+      "/play/",
+      "/art/sprites/dog.png",
+      "/art/sounds/a.m4a",
+    ]);
+  });
+
+  it("installs no sounds for a missing or unknown format", () => {
+    expect(installUrls(manifest, null)).toEqual(manifest.urls);
+    expect(installUrls(manifest, "mp3")).toEqual(manifest.urls);
+    expect(installUrls(manifest, "toString")).toEqual(manifest.urls);
+  });
+
+  it("serves either format from the cache, storing one the install left out", () => {
+    const cached = cachedUrlsOf(manifest);
+    expect(strategyFor(cached, { isNavigation: false, pathname: "/art/sounds/a.ogg" })).toBe(
+      "cache-first",
+    );
+    expect(strategyFor(cached, { isNavigation: false, pathname: "/art/sounds/a.m4a" })).toBe(
+      "cache-first",
+    );
+    expect(strategyFor(cached, { isNavigation: true, pathname: "/play/" })).toBe("network-first");
   });
 });
 

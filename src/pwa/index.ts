@@ -2,9 +2,11 @@
 // lock, the back gesture, visibility and orientation events, the turn-upright notice and audio
 // unlock. setupPhoneApp runs once from main.ts; the scenes listen for PHONE_EVENTS on window and
 // call the functions below.
+import { chooseSoundFormat, type SoundFormat } from "../audio/soundFormat";
 import { guardBackNavigation } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
 import { type OrientationRelay, relayOrientationEvents, type Viewport } from "./orientation";
+import { serviceWorkerUrl } from "./serviceWorkerUrl";
 import {
   createUpdatePrompt,
   noticePlacement,
@@ -43,6 +45,12 @@ function placeNoticeOverGame(notice: HTMLElement): () => void {
   return place;
 }
 
+// The sound format BootScene loads and the service worker precaches.
+export function browserSoundFormat(): SoundFormat | undefined {
+  const audio = document.createElement("audio");
+  return chooseSoundFormat((mimeType) => audio.canPlayType(mimeType));
+}
+
 let orientation: OrientationRelay | undefined;
 let screenWakeLock: ScreenWakeLock | undefined;
 let updatePrompt: UpdatePrompt | undefined;
@@ -70,7 +78,7 @@ function registerServiceWorker(): void {
   notice?.querySelector("button")?.addEventListener("click", () => prompt.accept());
   window.addEventListener("load", () => {
     container
-      .register(SERVICE_WORKER_URL, { scope: "/" })
+      .register(serviceWorkerUrl(SERVICE_WORKER_URL, browserSoundFormat()), { scope: "/" })
       .then((registration) => {
         watchForWaitingWorker(container, (worker) => prompt.setWaiting(worker), registration);
       })

@@ -4,6 +4,7 @@ import { ART_BASE_URL, ART_MANIFEST_URL, cacheKeyFor } from "./cachePolicy";
 import {
   artManifestUrls,
   artReferencedUrls,
+  artSoundUrls,
   bundleDependencies,
   type BundleFile,
   precacheFingerprint,
@@ -30,7 +31,8 @@ async function sha256Hex(bytes: Uint8Array): Promise<string> {
 
 // Builds the service worker to /sw.js with the game page's precache list written into it: the
 // page, the build output it loads, the public files it links, the web app manifest's icons, and
-// every file /art/manifest.json lists along with the images those files load.
+// every file /art/manifest.json lists along with the images those files load. Sounds are listed
+// apart, by format, for the worker to precache the one format the page plays.
 export function precachePlugin({
   pageHtmlFile,
   serviceWorkerSource,
@@ -86,6 +88,7 @@ export function precachePlugin({
           ...pageUrls.filter((url) => !(url.slice(1) in bundle)),
           ART_MANIFEST_URL,
         ];
+        let soundUrls: PrecacheManifest["sounds"] = { m4a: [], ogg: [] };
         // The loop also visits the URLs pushed onto publicUrls while it runs.
         for (const url of publicUrls) {
           if (contents.has(url)) {
@@ -99,7 +102,9 @@ export function precachePlugin({
           }
           contents.set(url, bytes);
           if (url === ART_MANIFEST_URL) {
-            publicUrls.push(...artManifestUrls(ART_BASE_URL, JSON.parse(decoder.decode(bytes))));
+            const artManifest: unknown = JSON.parse(decoder.decode(bytes));
+            publicUrls.push(...artManifestUrls(ART_BASE_URL, artManifest));
+            soundUrls = artSoundUrls(ART_BASE_URL, artManifest);
           } else if (url.endsWith(".webmanifest")) {
             publicUrls.push(...webManifestIconUrls(JSON.parse(decoder.decode(bytes))));
           } else if (url.startsWith(`${ART_BASE_URL}/`)) {
@@ -112,8 +117,23 @@ export function precachePlugin({
             [...contents].map(async ([url, bytes]) => [url, await sha256Hex(bytes)] as const),
           ),
         );
-        const fingerprint = await sha256Hex(encoder.encode(precacheFingerprint(contentHashes)));
+        const soundHashes = new Map<string, string>();
+        await Promise.all(
+          [...soundUrls.ogg, ...soundUrls.m4a].map(async (url) => {
+            const bytes = await readPublicFile(url);
+            if (bytes !== undefined) {
+              soundHashes.set(url, await sha256Hex(bytes));
+            }
+          }),
+        );
+        const fingerprint = await sha256Hex(
+          encoder.encode(precacheFingerprint(new Map([...contentHashes, ...soundHashes]))),
+        );
         const manifest: PrecacheManifest = {
+          sounds: {
+            m4a: soundUrls.m4a.filter((url) => soundHashes.has(url)),
+            ogg: soundUrls.ogg.filter((url) => soundHashes.has(url)),
+          },
           urls: [...contentHashes.keys()].sort(),
           version: fingerprint.slice(0, 16),
         };

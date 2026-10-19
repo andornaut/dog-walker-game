@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   artManifestUrls,
   artReferencedUrls,
+  artSoundUrls,
   bundleDependencies,
   type BundleFile,
   precacheFingerprint,
@@ -82,6 +83,16 @@ describe("resolveRelativePath", () => {
   });
 });
 
+const withSounds = {
+  fonts: [],
+  images: [],
+  sounds: [
+    { key: "music-walk", m4a: "sounds/music-walk.m4a", ogg: "sounds/music-walk.ogg" },
+    { key: "sfx-tip", m4a: "sounds/sfx-tip.m4a", ogg: "sounds/sfx-tip.ogg" },
+  ],
+  sprites: [],
+};
+
 describe("artManifestUrls", () => {
   it("lists every file of every entry under the art base URL", () => {
     const manifest = {
@@ -98,21 +109,28 @@ describe("artManifestUrls", () => {
     ]);
   });
 
-  it("lists both audio files of every sound", () => {
-    const manifest = {
-      fonts: [],
-      images: [],
-      sounds: [{ key: "sfx-tip", m4a: "sounds/sfx-tip.m4a", ogg: "sounds/sfx-tip.ogg" }],
-      sprites: [],
-    };
-    expect(artManifestUrls("/art", manifest)).toEqual([
-      "/art/sounds/sfx-tip.ogg",
-      "/art/sounds/sfx-tip.m4a",
-    ]);
+  it("leaves out the sounds, which the worker stores in one format", () => {
+    expect(artManifestUrls("/art", withSounds)).toEqual([]);
   });
 
   it("rejects a malformed manifest, as the game does", () => {
     expect(() => artManifestUrls("/art", { fonts: [], images: [] })).toThrow("manifest.sprites");
+  });
+});
+
+describe("artSoundUrls", () => {
+  it("lists every sound's file in each format under the art base URL", () => {
+    expect(artSoundUrls("/art", withSounds)).toEqual({
+      m4a: ["/art/sounds/music-walk.m4a", "/art/sounds/sfx-tip.m4a"],
+      ogg: ["/art/sounds/music-walk.ogg", "/art/sounds/sfx-tip.ogg"],
+    });
+  });
+
+  it("lists no files for a manifest without sounds", () => {
+    expect(artSoundUrls("/art", { fonts: [], images: [], sprites: [] })).toEqual({
+      m4a: [],
+      ogg: [],
+    });
   });
 });
 

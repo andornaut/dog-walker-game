@@ -1,7 +1,10 @@
+import type { PrecacheManifest } from "./precacheList";
+
 // How the service worker answers a same-origin GET.
 // network-first: pages and the art manifest, so a deploy shows on the next load; the cached copy
 // answers offline.
-// cache-first: content-hashed build output and the precached art, icons and scripts.
+// cache-first: content-hashed build output, the precached art, icons and scripts, and the sound
+// files of either format, so one the install did not store is stored on its first fetch.
 // network-only: anything else, left to the browser.
 export type FetchStrategy = "cache-first" | "network-first" | "network-only";
 
@@ -45,18 +48,33 @@ export function cacheKeyFor(pathname: string): string {
   return pathname.replace(/\/index\.html$/, "/");
 }
 
+// The URLs the service worker stores on install: the precache list and the sound files in the
+// format the page named. An unknown or missing format stores no sounds.
+export function installUrls(
+  { sounds, urls }: PrecacheManifest,
+  soundFormat: string | null,
+): string[] {
+  const chosen = Object.entries(sounds).find(([format]) => format === soundFormat)?.[1] ?? [];
+  return [...urls, ...chosen];
+}
+
+// The URLs the service worker answers from its cache: the precache list and every sound file.
+export function cachedUrlsOf({ sounds, urls }: PrecacheManifest): Set<string> {
+  return new Set([...urls, ...Object.values(sounds).flat()]);
+}
+
 export function strategyFor(
-  precachedUrls: ReadonlySet<string>,
+  cachedUrls: ReadonlySet<string>,
   request: { isNavigation: boolean; pathname: string },
 ): FetchStrategy {
   const key = cacheKeyFor(request.pathname);
   if (request.isNavigation) {
-    return precachedUrls.has(key) ? "network-first" : "network-only";
+    return cachedUrls.has(key) ? "network-first" : "network-only";
   }
   if (ALWAYS_REVALIDATED_URLS.has(key)) {
     return "network-first";
   }
-  if (isHashedAssetUrl(key) || precachedUrls.has(key)) {
+  if (isHashedAssetUrl(key) || cachedUrls.has(key)) {
     return "cache-first";
   }
   return "network-only";

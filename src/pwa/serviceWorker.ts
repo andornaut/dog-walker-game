@@ -2,14 +2,17 @@
 // which the project's DOM typings do not describe, so the few members it uses are declared here.
 // It imports only cachePolicy.ts, so the build emits it as one classic script with no imports.
 import {
+  cachedUrlsOf,
   cacheKeyFor,
   cacheNameFor,
   type FetchStrategy,
+  installUrls,
   precacheFetchOptions,
   staleCacheNames,
   strategyFor,
 } from "./cachePolicy";
 import type { PrecacheManifest } from "./precacheList";
+import type { SoundFormatParam } from "./serviceWorkerUrl";
 import type { SkipWaitingMessage } from "./updateReady";
 
 interface LifecycleEvent extends Event {
@@ -32,12 +35,17 @@ interface WorkerScope {
 // Replaced with the precache manifest's JSON when the build writes sw.js.
 declare const DOG_WALKER_PRECACHE_MANIFEST: PrecacheManifest;
 
+const SOUND_FORMAT_PARAM: SoundFormatParam = "sound";
+
 const worker = self as unknown as WorkerScope;
-const { urls, version } = DOG_WALKER_PRECACHE_MANIFEST;
-const cacheName = cacheNameFor(version);
-const precachedUrls = new Set(urls);
+// Read once, so the build writes the manifest's JSON into sw.js once.
+const manifest = DOG_WALKER_PRECACHE_MANIFEST;
+const cacheName = cacheNameFor(manifest.version);
+const cachedUrls = cachedUrlsOf(manifest);
 
 async function precache(): Promise<void> {
+  const soundFormat = new URL(worker.location.href).searchParams.get(SOUND_FORMAT_PARAM);
+  const urls = installUrls(manifest, soundFormat);
   const cache = await caches.open(cacheName);
   await cache.addAll(urls.map((url) => new Request(url, precacheFetchOptions(url))));
 }
@@ -47,9 +55,11 @@ async function deleteStaleCaches(): Promise<void> {
   await Promise.all(stale.map((name) => caches.delete(name)));
 }
 
+// Only a whole response is stored: Cache.put rejects a 206, which an audio element's range
+// request can get.
 async function fetchAndStore(cache: Cache, key: string, request: Request): Promise<Response> {
   const response = await fetch(request);
-  if (response.ok) {
+  if (response.status === 200) {
     await cache.put(key, response.clone());
   }
   return response;
@@ -102,7 +112,7 @@ worker.addEventListener("fetch", (event) => {
   if (request.method !== "GET" || url.origin !== worker.location.origin) {
     return;
   }
-  const strategy = strategyFor(precachedUrls, {
+  const strategy = strategyFor(cachedUrls, {
     isNavigation: request.mode === "navigate",
     pathname: url.pathname,
   });

@@ -16,7 +16,7 @@ import {
   loadingWalkerAt,
   stepFraction,
 } from "../layout/loadingScreen";
-import { startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
+import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { addFilledRect } from "./draw";
 import { loadManifest, MANIFEST_CACHE_KEY, queueManifestImages } from "./manifestImages";
 import { PALETTE } from "./palette";
@@ -108,9 +108,14 @@ export class BootScene extends Scene {
     for (const { fnt, key, png } of fonts) {
       this.load.bitmapFont(key, assetUrl(ART_URL, png), assetUrl(ART_URL, fnt));
     }
-    // Phaser loads the first URL whose format this browser plays.
-    for (const { key, m4a, ogg } of sounds) {
-      this.load.audio(key, [assetUrl(ART_URL, ogg), assetUrl(ART_URL, m4a)]);
+    // One file per sound, in the format the service worker precaches.
+    const soundFormat = browserSoundFormat();
+    if (soundFormat !== undefined) {
+      for (const sound of sounds) {
+        this.load.audio(sound.key, assetUrl(ART_URL, sound[soundFormat]));
+      }
+    } else if (sounds.length > 0) {
+      console.warn("This browser plays neither Ogg nor AAC, so the game is silent.");
     }
     this.load.on("progress", (value: number) => this.showProgress(bootProgress("network", value)));
     this.load.once("complete", () =>

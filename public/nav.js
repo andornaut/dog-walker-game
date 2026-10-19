@@ -1,7 +1,9 @@
 // The site navigation bar: Home, Play, Data, the art gallery, each mock listed in
 // /art/mocks/index.json, and the art docs. A page loads it with
 // <script src="/nav.js" defer></script> and adds nothing else. On /play/ the bar is one slim
-// row that scrolls sideways, so the game keeps the height.
+// row that scrolls sideways, so the game keeps the height. On /play/ in the installed app
+// (fullscreen or standalone display mode, or iOS's navigator.standalone) there is no bar, so no
+// link leaves the app and the game takes the full height.
 (() => {
   "use strict";
   const DOCS = "https://github.com/andornaut/dog-walker-game/blob/main/art/";
@@ -77,9 +79,15 @@
     item("Style guide", DOCS + "style-guide.md"),
   );
 
-  const mount = () => document.body.prepend(nav);
+  const installed = matchMedia("(display-mode: fullscreen), (display-mode: standalone)");
+  const hide = () => here === "/play" && (installed.matches || navigator.standalone === true);
+  const mount = () => {
+    if (hide()) nav.remove();
+    else if (!nav.isConnected) document.body.prepend(nav);
+  };
   if (document.body) mount();
   else document.addEventListener("DOMContentLoaded", mount);
+  installed.addEventListener("change", mount);
 
   // The mocks list and pages are not precached, so offline the request would only log a
   // failed fetch and the links would lead nowhere.
