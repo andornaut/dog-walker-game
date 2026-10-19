@@ -1,12 +1,12 @@
 # Art Inventory
 
-Every art asset v1 needs, derived from the rulebook in `../gameplay/game-design.md` and the run screen layout in `../tech-plan.md`. What is already exported is listed in `../public/art/manifest.json` and shown in the gallery at `/art/`. The rules every asset must follow live in `style-guide.md`. Keys are the `public/art/manifest.json` keys (kebab-case). Type is the manifest list: `sprite` (PNG + Aseprite JSON, animations from frameTags), `image` (plain PNG) or `font` (BMFont).
+Every art asset the game needs, derived from the rulebook in `../gameplay/game-design.md` and the run screen layout in `../tech-plan.md`. What is already exported is listed in `../public/art/manifest.json` and shown in the gallery at `/art/`. The rules every asset must follow live in `style-guide.md`. Keys are the `public/art/manifest.json` keys (kebab-case). Type is the manifest list: `sprite` (PNG + Aseprite JSON, animations from frameTags), `image` (plain PNG) or `font` (BMFont).
 
 Priority:
 
 - **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops)
-- **v1:** needed before v1 ships, outside the Milestone 6 list
-- **later:** nice to have; placeholders are acceptable for v1
+- **core:** needed before the game ships, outside the Milestone 6 list
+- **later:** nice to have; placeholders are acceptable
 
 Sizes marked TBD depend on an open decision in the style guide.
 
@@ -29,7 +29,7 @@ Dogs are listed in their own section below. Each of the 9 dogs is a named charac
 | ----------------- | ------------------------------ | ------ | ----- | --------------- | -------- | ---------------------------------------------------------------------------------------------- |
 | Walker            | `walker`, then `walker-<name>` | sprite | 32×48 | `walk`, `react` | M6       | 3 to 4 presets the player picks from; seen from behind; the first (cap and hoodie) is `walker` |
 | Other dog + owner | `other-dog`                    | sprite | 32×32 | `walk`          | M6       | Encounter obstacle; with a 32×48 owner alongside                                               |
-| Stinky effect     | `fx-stinky`                    | sprite | 32×32 | `loop`          | v1       | Green stink lines over the pack while Stinky lasts                                             |
+| Stinky effect     | `fx-stinky`                    | sprite | 32×32 | `loop`          | core     | Green stink lines over the pack while Stinky lasts                                             |
 
 ## Dogs
 
@@ -57,12 +57,12 @@ Starters come first: they are the dogs every new player sees.
 | Squirrel         | `squirrel`         | sprite | 32×32 | `idle`, `run`    | M6       | Harmless scenery when no chaser is in the pack             |
 | Puddle           | `puddle`           | sprite | 32×32 | `idle` (shimmer) | M6       | Flat on the road; no shadow                                |
 | Thief            | `thief`            | sprite | 32×48 | `walk`, `flee`   | M6       | Pickpocket; flees from a pack with a big dog, with no card |
-| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | v1       | Forced stop; may span the full road                        |
-| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | v1       | Forced stop                                                |
-| Kid              | `kid`              | sprite | 32×48 | `wave`           | v1       | Forced stop: wants to pet the dogs                         |
-| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | v1       | Forced stop; wider than a lane                             |
-| Construction     | `construction`     | sprite | TBD   | none             | v1       | Forced stop: detour barrier across the road                |
-| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | v1       | Forced stop                                                |
+| Stop sign        | `stop-sign`        | sprite | 32×48 | none             | core     | Forced stop; may span the full road                        |
+| Chatty neighbour | `chatty-neighbour` | sprite | 32×48 | `wave`           | core     | Forced stop                                                |
+| Kid              | `kid`              | sprite | 32×48 | `wave`           | core     | Forced stop: wants to pet the dogs                         |
+| Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | core     | Forced stop; wider than a lane                             |
+| Construction     | `construction`     | sprite | TBD   | none             | core     | Forced stop: detour barrier across the road                |
+| Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | core     | Forced stop                                                |
 
 ## Lucky encounters (road)
 
@@ -85,8 +85,8 @@ Good things to bump into; each opens a choice card.
 
 | Asset          | Key          | Type   | Size  | Animations   | Priority | Notes                   |
 | -------------- | ------------ | ------ | ----- | ------------ | -------- | ----------------------- |
-| Collision puff | `fx-bump`    | sprite | 32×32 | `play`       | v1       | Plays as the card opens |
-| Pickup sparkle | `fx-sparkle` | sprite | 16×16 | `play`       | v1       | Treat and tip collected |
+| Collision puff | `fx-bump`    | sprite | 32×32 | `play`       | core     | Plays as the card opens |
+| Pickup sparkle | `fx-sparkle` | sprite | 16×16 | `play`       | core     | Treat and tip collected |
 | Heart up/down  | `fx-heart`   | sprite | 16×16 | `up`, `down` | later    | Floats from a dog slot  |
 
 Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
@@ -97,30 +97,30 @@ Four zones in a fixed order: street, park, shops, home stretch. Each zone needs 
 
 | Asset           | Key pattern          | Type  | Size   | Priority | Notes                                             |
 | --------------- | -------------------- | ----- | ------ | -------- | ------------------------------------------------- |
-| Road strip      | `road-<zone>`        | image | 280×64 | v1       | Seamless vertically; lane edges readable at speed |
+| Road strip      | `road-<zone>`        | image | 280×64 | core     | Seamless vertically; lane edges readable at speed |
 | Zone transition | `road-<zone>-start`  | image | 280×64 | later    | Blends from the previous zone                     |
 | Scenery props   | `prop-<zone>-<name>` | image | 32×32  | later    | e.g. tree, hydrant, bench, shop awning, mailbox   |
 
-Four zones give 4 road strips (v1) plus 3 transitions and roughly 12 props (later). Milestone 6 can ship a single `road-street` and reuse it.
+Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (later). Milestone 6 can ship a single `road-street` and reuse it.
 
 ## Dog column
 
 | Asset            | Key                 | Type   | Size      | Priority | Notes                                                 |
 | ---------------- | ------------------- | ------ | --------- | -------- | ----------------------------------------------------- |
-| Slot frame       | `ui-dog-slot`       | image  | 72×192    | v1       | 9-slice or fixed; includes an empty state             |
+| Slot frame       | `ui-dog-slot`       | image  | 72×192    | core     | 9-slice or fixed; includes an empty state             |
 | Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`            |
 | Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired` |
 | Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 8 per slot              |
-| Quip bubble      | `ui-quip`           | image  | TBD       | v1       | Owner quip after every card choice and on firing      |
-| Stinky badge     | `icon-stinky`       | image  | 16×16     | v1       | Shown while the debuff lasts                          |
+| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing      |
+| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                          |
 
 ## Top bar
 
 | Asset          | Key                | Type   | Size   | Priority | Notes                                        |
 | -------------- | ------------------ | ------ | ------ | -------- | -------------------------------------------- |
-| Bar background | `ui-top-bar`       | image  | 360×40 | v1       |                                              |
-| Money icon     | `icon-money`       | image  | 16×16  | v1       | Reused in cards, shop and end screen         |
-| Zone progress  | `ui-zone-pips`     | sprite | TBD    | v1       | 4 segments; frames `done`, `current`, `todo` |
+| Bar background | `ui-top-bar`       | image  | 360×40 | core     |                                              |
+| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen         |
+| Zone progress  | `ui-zone-pips`     | sprite | TBD    | core     | 4 segments; frames `done`, `current`, `todo` |
 | Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Street, park, shops, home stretch            |
 
 ## Choice cards
@@ -130,8 +130,8 @@ Each card is a frame plus an illustration plus text drawn in the pixel font. Car
 | Asset          | Key                | Type   | Size    | Priority | Notes                                                         |
 | -------------- | ------------------ | ------ | ------- | -------- | ------------------------------------------------------------- |
 | Card frame     | `card-frame`       | sprite | ~85×140 | M6       | Frames `encounter`, `stop`, `upgrade`, `disabled`, `selected` |
-| Enlarged frame | `card-frame-large` | sprite | TBD     | v1       | Tap-to-enlarge view; same frames                              |
-| Cost badge     | `card-cost`        | image  | TBD     | v1       | Holds `$`, `$$$` or the ♥ change                              |
+| Enlarged frame | `card-frame-large` | sprite | TBD     | core     | Tap-to-enlarge view; same frames                              |
+| Cost badge     | `card-cost`        | image  | TBD     | core     | Holds `$`, `$$$` or the ♥ change                              |
 
 Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An encounter with two options shows two centred cards:
 
@@ -151,8 +151,8 @@ Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An en
 | Construction      | long way, squeeze past                                                                                       | 2     | M6       |
 | Mail carrier      | hold them back, wait it out                                                                                  | 2     | M6       |
 | Chatty neighbour  | chat, move on                                                                                                | 2     | M6       |
-| Poop bags         | skip                                                                                                         | 1     | v1       |
-| Upgrades          | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, steady hands, sweet talker | 9     | v1       |
+| Poop bags         | skip                                                                                                         | 1     | core     |
+| Upgrades          | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, steady hands, sweet talker | 9     | core     |
 
 Total: 39 card illustrations, 29 of them in Milestone 6.
 
@@ -160,14 +160,14 @@ Total: 39 card illustrations, 29 of them in Milestone 6.
 
 | Asset             | Key                        | Type  | Size    | Priority | Notes                                                       |
 | ----------------- | -------------------------- | ----- | ------- | -------- | ----------------------------------------------------------- |
-| Title / home      | `screen-home`              | image | 360×640 | v1       | Background; bank total and buttons on top                   |
+| Title / home      | `screen-home`              | image | 360×640 | core     | Background; bank total and buttons on top                   |
 | Logo              | `logo`                     | image | TBD     | later    |                                                             |
-| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | v1       | 9 dogs; larger art for dog pick and the shop                |
-| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | v1       | fancy, food-driven, chaser                                  |
-| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | v1       | calm, steady, hyper                                         |
-| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | v1       | laid-back, fussy, dramatic                                  |
-| Shop items        | `item-<item>`              | image | 32×32   | v1       | fanny pack, whistle, poop bags, running shoes, lucky collar |
-| Zone banner       | `ui-zone-banner`           | image | TBD     | v1       | "Maple Street, zone 2: park" between zones                  |
+| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | core     | 9 dogs; larger art for dog pick and the shop                |
+| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | core     | fancy, food-driven, chaser                                  |
+| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | core     | calm, steady, hyper                                         |
+| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | core     | laid-back, fussy, dramatic                                  |
+| Shop items        | `item-<item>`              | image | 32×32   | core     | fanny pack, whistle, poop bags, running shoes, lucky collar |
+| Zone banner       | `ui-zone-banner`           | image | TBD     | core     | "Maple Street, zone 2: park" between zones                  |
 | End screen        | `screen-end`               | image | 360×640 | later    | Earnings summary background                                 |
 
 ## UI kit
@@ -175,9 +175,9 @@ Total: 39 card illustrations, 29 of them in Milestone 6.
 | Asset      | Key               | Type   | Size      | Priority | Notes                                                                       |
 | ---------- | ----------------- | ------ | --------- | -------- | --------------------------------------------------------------------------- |
 | Pixel font | `font-pixel`      | font   | TBD       | M6       | Needs `$`, `♥`, `+`, `-`, digits, punctuation                               |
-| Button     | `ui-button`       | sprite | 9-slice   | v1       | Frames `normal`, `pressed`, `disabled`                                      |
-| Panel      | `ui-panel`        | image  | 9-slice   | v1       | Shop, end screen, pause menu with Head home                                 |
-| Pause icon | `icon-pause`      | image  | 16×16     | v1       | Top bar; opens the pause menu                                               |
+| Button     | `ui-button`       | sprite | 9-slice   | core     | Frames `normal`, `pressed`, `disabled`                                      |
+| Panel      | `ui-panel`        | image  | 9-slice   | core     | Shop, end screen, pause menu with Head home                                 |
+| Pause icon | `icon-pause`      | image  | 16×16     | core     | Top bar; opens the pause menu                                               |
 | Touch hint | `ui-touch-hint`   | image  | TBD       | later    | First-run "tap left / right"                                                |
 | App icon   | (not in manifest) | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later |
 
@@ -186,7 +186,7 @@ Total: 39 card illustrations, 29 of them in Milestone 6.
 | Priority | Sprites | Images           | Fonts |
 | -------- | ------- | ---------------- | ----- |
 | M6       | ~41     | 29 (card illus.) | 1     |
-| v1       | ~13     | ~45              | 0     |
+| core     | ~13     | ~45              | 0     |
 | later    | ~1      | ~23              | 0     |
 
 ## Settled
