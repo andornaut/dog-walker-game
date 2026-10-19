@@ -2009,6 +2009,11 @@
       }
     },
     {
+      "key": "ui-section",
+      "png": "sprites/ui-section.png",
+      "json": "sprites/ui-section.json"
+    },
+    {
       "key": "ui-select",
       "png": "sprites/ui-select.png",
       "json": "sprites/ui-select.json"
@@ -2151,6 +2156,18 @@
       "png": "images/card-biscuit-neighbour-take.png"
     },
     {
+      "key": "card-cafe-buy-lattes",
+      "png": "images/card-cafe-buy-lattes.png"
+    },
+    {
+      "key": "card-cafe-charm",
+      "png": "images/card-cafe-charm.png"
+    },
+    {
+      "key": "card-cafe-slink-away",
+      "png": "images/card-cafe-slink-away.png"
+    },
+    {
       "key": "card-chatty-neighbour-chat",
       "png": "images/card-chatty-neighbour-chat.png"
     },
@@ -2183,12 +2200,12 @@
       "png": "images/card-good-spot-take-time.png"
     },
     {
-      "key": "card-grumpy-neighbour-apologise",
-      "png": "images/card-grumpy-neighbour-apologise.png"
+      "key": "card-goose-back-off",
+      "png": "images/card-goose-back-off.png"
     },
     {
-      "key": "card-grumpy-neighbour-ignore",
-      "png": "images/card-grumpy-neighbour-ignore.png"
+      "key": "card-goose-honk-back",
+      "png": "images/card-goose-honk-back.png"
     },
     {
       "key": "card-ice-cream-truck-pup-cups",
@@ -2205,6 +2222,18 @@
     {
       "key": "card-kid-wants-to-pet-pet",
       "png": "images/card-kid-wants-to-pet-pet.png"
+    },
+    {
+      "key": "card-lemonade-maybe-later",
+      "png": "images/card-lemonade-maybe-later.png"
+    },
+    {
+      "key": "card-lemonade-say-hi",
+      "png": "images/card-lemonade-say-hi.png"
+    },
+    {
+      "key": "card-lemonade-water",
+      "png": "images/card-lemonade-water.png"
     },
     {
       "key": "card-lost-wallet-keep",
@@ -2239,8 +2268,24 @@
       "png": "images/card-pee-mail-sniff.png"
     },
     {
+      "key": "card-petunias-nature-calls",
+      "png": "images/card-petunias-nature-calls.png"
+    },
+    {
+      "key": "card-petunias-replant",
+      "png": "images/card-petunias-replant.png"
+    },
+    {
       "key": "card-photo-op-pose",
       "png": "images/card-photo-op-pose.png"
+    },
+    {
+      "key": "card-picnic-buy-lunch",
+      "png": "images/card-picnic-buy-lunch.png"
+    },
+    {
+      "key": "card-picnic-drop-it",
+      "png": "images/card-picnic-drop-it.png"
     },
     {
       "key": "card-play-date-play",
@@ -2325,6 +2370,18 @@
     {
       "key": "card-thief-let-go",
       "png": "images/card-thief-let-go.png"
+    },
+    {
+      "key": "card-trash-drag-on",
+      "png": "images/card-trash-drag-on.png"
+    },
+    {
+      "key": "card-trash-sniff",
+      "png": "images/card-trash-sniff.png"
+    },
+    {
+      "key": "card-trash-tidy-up",
+      "png": "images/card-trash-tidy-up.png"
     },
     {
       "key": "card-treat-magnet",

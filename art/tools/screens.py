@@ -2,7 +2,8 @@
 """Draw the logo and the full-screen backgrounds outside the run.
 
 logo: a 128x30 wooden yard sign carrying the "DOG WALKER" wordmark in
-Silkscreen at 2x, with the leash and a paw print. It is the board of the yard
+block letters at 2x (flat yellow, a 1px ink outline and a solid 2px dred
+shadow), with the leash and a paw print. It is the board of the yard
 sign on the home screen (at 6,146, left of the gate path, where the pack never
 stands), and works as a header on any other screen.
 
@@ -62,7 +63,6 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
-import fonts  # noqa: E402
 import help as hp  # noqa: E402
 from pixel import DARKER, Grid, K, build as build_sprites  # noqa: E402
 
@@ -136,19 +136,35 @@ def planks(cv, x, y, w, h, step, vertical=False, seed=1):
 
 PAW = [".#.#.", "#...#", ".###.", ".###."]
 
+# The sign letters, 5 rows at 1x (W is 6 wide), drawn at 2x with a 2px gap and 7px more for a space.
+SIGN = {
+    "D": ["####.", "#...#", "#...#", "#...#", "####."],
+    "O": [".###.", "#...#", "#...#", "#...#", ".###."],
+    "G": [".####", "#....", "#..##", "#...#", ".####"],
+    "W": ["#....#", "#....#", "#.##.#", "#.##.#", ".#..#."],
+    "A": [".###.", "#...#", "#####", "#...#", "#...#"],
+    "L": ["#....", "#....", "#....", "#....", "#####"],
+    "K": ["#..#.", "#.#..", "##...", "#.#..", "#..#."],
+    "E": ["#####", "#....", "####.", "#....", "#####"],
+    "R": ["####.", "#...#", "####.", "#..#.", "#...#"],
+}
+# The leash's span under the word, from its handle to the paw print, centred on the board.
+LEASH_W = 112
+
 
 def wordmark(s):
-    """The word's Silkscreen pixels at 1x, as a set of (x, y), with the font's own spacing."""
-    gl, ascent, _ = fonts.glyphs(*fonts.FONTS["font-title"][1:])
+    """The word's pixels at 2x, as a set of (x, y) from its top-left."""
     pts, x = set(), 0
     for ch in s:
-        mask, ox, oy, adv = gl[ch]
-        if mask is not None:
-            for yy in range(mask.height):
-                for xx in range(mask.width):
-                    if mask.getpixel((xx, yy)):
-                        pts.add((x + ox + xx, oy + yy - (ascent - 5)))
-        x += adv
+        if ch == " ":
+            x += 7
+            continue
+        rows = SIGN[ch]
+        for y, row in enumerate(rows):
+            for i, c in enumerate(row):
+                if c == "#":
+                    pts |= {(x + 2 * i + dx, 2 * y + dy) for dx in (0, 1) for dy in (0, 1)}
+        x += 2 * len(rows[0]) + 2
     return pts
 
 
@@ -166,40 +182,36 @@ def board(cv, x, y):
 def logo():
     cv = clear(LOGO_W, LOGO_H)
     board(cv, 0, 0)
-    # the word at 2x: amber face with a yellow top and an orange foot (4.6, 6.8 and 3.1:1 on the dbrown
-    # face), extruded 1px in rust and outlined in plum
-    word = {(2 * x + i, 2 * y + j) for x, y in wordmark("DOG WALKER") for i in (0, 1) for j in (0, 1)}
-    wx = max(x for x, _ in word) + 1
-    ox, oy = (LOGO_W - wx) // 2, 5
-    drop = {(x, y + 1) for x, y in word} - word
-    body = word | drop
-    for x, y in body:
-        for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
-            if (x + dx, y + dy) not in body:
-                cv.fill(ox + x + dx, oy + y + dy, 1, 1, "plum")
-    for x, y in drop:
-        cv.fill(ox + x, oy + y, 1, 1, "rust")
-    for x, y in word:
-        cv.fill(ox + x, oy + y, 1, 1, "yellow" if y < 2 else "amber" if y < 7 else "orange")
-    # a little plum grain on the face, clear of the word and the leash
+    # a little plum grain on the face, under the word and clear of the leash
     for x, y, n in ((4, 3, 6), (118, 3, 5), (30, 25, 6), (86, 25, 5)):
         cv.fill(x, y, n, 1, "plum")
-    # the leash in pink (3.1:1 on the face): a handle loop under the D, a slack line under the word, a clip
-    # and a cream paw print at the end
-    cv.fill(ox, 20, 5, 1, "pink")
-    cv.fill(ox - 1, 21, 1, 3, "pink")
-    cv.fill(ox, 24, 5, 1, "pink")
-    cv.fill(ox + 5, 21, 1, 3, "pink")
-    a, b = ox + 6, ox + wx - 12
+    # the word: flat yellow letters (6.79:1 on the dbrown face) in a 1px ink outline, on a solid dred
+    # shadow offset 2px down and right, upright
+    word = wordmark("DOG WALKER")
+    wx = max(x for x, _ in word) + 1
+    ox, oy = (LOGO_W - wx - 3) // 2, 4
+    ring = {(x + dx, y + dy) for x, y in word for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    shadow = {(x + d, y + d) for x, y in ring for d in (1, 2)} - ring
+    for pts, col in ((shadow, "dred"), (ring - word, "ink"), (word, "yellow")):
+        for x, y in pts:
+            cv.fill(ox + x, oy + y, 1, 1, col)
+    # the leash in pink (3.1:1 on the face): a handle loop at the left, a slack line under the word, a
+    # clip and a cream paw print at the end
+    lx = (LOGO_W - LEASH_W) // 2
+    cv.fill(lx, 20, 5, 1, "pink")
+    cv.fill(lx - 1, 21, 1, 3, "pink")
+    cv.fill(lx, 24, 5, 1, "pink")
+    cv.fill(lx + 5, 21, 1, 3, "pink")
+    a, b = lx + 6, lx + LEASH_W - 12
     for x in range(a, b):
         t = (2 * x - a - b) / (b - a)
         cv.fill(x, 21 + round(2.4 * (1 - t * t)), 1, 1, "pink")
-    cv.fill(ox + wx - 12, 21, 3, 3, "lgrey")
-    cv.fill(ox + wx - 11, 22, 1, 1, "grey")
+    cv.fill(lx + LEASH_W - 12, 21, 3, 3, "lgrey")
+    cv.fill(lx + LEASH_W - 11, 22, 1, 1, "grey")
     for j, row in enumerate(PAW):
         for i, c in enumerate(row):
             if c == "#":
-                cv.fill(ox + wx - 6 + i, 20 + j, 1, 1, "cream")
+                cv.fill(lx + LEASH_W - 6 + i, 20 + j, 1, 1, "cream")
     return cv
 
 

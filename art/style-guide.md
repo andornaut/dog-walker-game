@@ -56,7 +56,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 | darkRed on cream           | 5.07  | Money lost, unaffordable prices, full heart               |
 | ink on brown               | 4.65  | Text on a darkened tile                                   |
 | cream on darkBrown         | 5.85  | Text on the column or wood                                |
-| amber on darkBrown         | 4.57  | Warnings, "You're fired!", logo letters                   |
+| amber on darkBrown         | 4.57  | Warnings, "You're fired!"                                 |
 | yellow on darkBrown        | 6.79  | Floating gain on the column                               |
 | white on darkBrown         | 8.48  | Floating loss on the column, filled page dot              |
 | tan on darkBrown           | 4.04  | Empty slot dashed border, hollow page dots                |
@@ -74,7 +74,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
 - Wood: a plum and dbrown frame, cream paper slots and tan face panels.
 - Full-screen backgrounds put low-contrast dark wood (dbrown with plum seams) under UI and scenery elsewhere.
-- `ui-button`: `normal` (amber) for the primary action, `secondary` (tan) for the others, `go` (green face, ink label) for Start walk only. Home, pause, help and sound sit on `ui-icon-button`.
+- `ui-button`: `normal` (amber) for the primary action, `secondary` (tan) for the others, `go` (green face, ink label) for Start walk only, `go-disabled` (sunk dslate face, slate label) for Start walk before a walker and a dog are picked. `ui-section` frames each start screen section: `incomplete` (ink frame, navy band, cream heading, amber prompt), `complete` (amber border and band, ink text), `neutral` (as incomplete, no prompt) for optional gear with nothing equipped. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Home, pause, help and sound sit on `ui-icon-button`.
 - Fonts: `font-body` (Tiny5, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
 
 ### Feedback and selected state

@@ -14,9 +14,10 @@ Sprites: ui-doghouse (120x90, one of three dog slots in a row; a tag per dog key
 ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check and ui-step-number (16x16; tags 1, 2, 3, tick),
-fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
+ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags incomplete, complete,
+neutral), fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
 (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
-secondary, secondary-pressed), ui-icon-button (20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
+secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
 ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
 empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
@@ -309,15 +310,24 @@ def button(state):
     """secondary is a tan face on a brown lip for the actions beside the amber primary (Help,
     Settings, Head home beside Resume). go is a green face on a forest lip for Start walk, the one
     button on the home screen that must not blend with the amber and yellow tiles. Labels are
-    plum: 7.35:1 on amber, 6.49:1 on tan; ink on green, 8.41:1.
+    plum: 7.35:1 on amber, 6.49:1 on tan; ink on green, 8.41:1. go-disabled is Start walk while
+    the pack is empty.
     Every row below 2 and above 19 is plain face, so the plate stretches to any height with
     slices of 3 at the top and sides and 5 at the bottom (or 6 all round). Pressed, the
     highlight sits on the face's top edge (row 2), inside the top slice."""
+    g = Grid(24, 24)
+    if state == "go-disabled":
+        # Start walk before the pack is ready: sunk flat to the pressed depth with no lip or
+        # highlight, a dslate face in a 1px ink rim, so it does not read as tappable. The face
+        # is rows 3 to 22; the label is slate (inactive, exempt from contrast).
+        g.rect(1, 2, 22, 22, "ink")
+        g.rect(0, 3, 24, 20, "ink")
+        g.rect(1, 3, 22, 20, "dslate")
+        return g
     face, lip, hi = {"normal": ("amber", "orange", "yellow"), "pressed": ("amber", None, "yellow"),
                      "disabled": ("slate", "dslate", "grey"), "secondary": ("tan", "brown", "cream"),
                      "secondary-pressed": ("tan", None, "cream"),
                      "go": ("green", "forest", "yellow"), "go-pressed": ("green", None, "yellow")}[state]
-    g = Grid(24, 24)
     pressed = state.endswith("pressed")
     top = 2 if pressed else 0
     if lip:
@@ -849,6 +859,34 @@ def step_number(label):
     return g
 
 
+SECTION_W, SECTION_H = 24, 32
+SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
+
+
+def section(state):
+    """24x32 nine-slice (3px left, right and bottom, 24px top): one start screen section (walker,
+    dogs, gear) framed as a unit, its heading band across the top over transparent space for the
+    tiles. A 1px ink edge, then a 2px border: ink for incomplete (a required choice not yet made)
+    and neutral (optional, nothing chosen), so dividers between sections read dark; amber for
+    complete. The band fills rows 3 to 23 between the side borders: navy over an ink line, or
+    amber over an orange line when complete. The game writes, in font-title x2 with caps in rows
+    8 to 17: the heading 9px from the left, and right-aligned 9px from the right the missing step
+    (incomplete: amber on navy 7.49:1) or the choice (complete: ink on amber 9.71:1); the heading is
+    cream on navy (9.59:1) or ink on amber. neutral has no right-hand text."""
+    lit = state == "complete"
+    g = Grid(SECTION_W, SECTION_H)
+    g.rect(0, 0, SECTION_W, SECTION_H, "ink")
+    g.rect(3, 3, SECTION_W - 6, SECTION_H - 6, None)
+    if lit:
+        g.rect(1, 1, SECTION_W - 2, 2, "amber")
+        g.rect(1, SECTION_H - 3, SECTION_W - 2, 2, "amber")
+        g.rect(1, 1, 2, SECTION_H - 2, "amber")
+        g.rect(SECTION_W - 3, 1, 2, SECTION_H - 2, "amber")
+    g.rect(3, 3, SECTION_W - 6, SECTION_BAND - 1, "amber" if lit else "navy")
+    g.rect(3, 2 + SECTION_BAND, SECTION_W - 6, 1, "orange" if lit else "ink")
+    return g
+
+
 # ---------- run screen: top bar, zone progress, quips, zone banner, touch hint ----------
 
 def well(g, x, y, w, h):
@@ -1105,11 +1143,13 @@ def sprites():
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
     yield "ui-step-number", [(lb, [step_number(lb).outlined(False)], 1000) for lb in ("1", "2", "3", "tick")]
+    yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in ("incomplete", "complete", "neutral")]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000)
-                        for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed", "go", "go-pressed")]
+                        for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed", "go", "go-pressed",
+                                  "go-disabled")]
     yield "ui-icon-button", [(s, [icon_button(s).outlined(False)], 1000) for s in ("normal", "pressed")]
     yield "ui-switch", [("on", [switch(True).outlined(False)], 1000), ("off", [switch(False).outlined(False)], 1000)]
     yield "ui-slider", [(t, [slider_track(t.startswith("filled"), not t.endswith("disabled")).outlined(False)], 1000)
