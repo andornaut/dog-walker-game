@@ -4,7 +4,8 @@ screen-edge flash in the encounter's colour, the plate behind the big label,
 and the per-dog status overlays. Bursts carry a 1px rim (plum, navy for water,
 teal for the skunk's green) so they hold 3:1 on the three light roads while
 their fills carry Woof Way. The flash strips pair a light ink with a dark
-fringe for the same reason.
+fringe for the same reason. The encounters' hits match their road sprites in
+encounters.py.
 
 fx-hit-skunk       64x64  play (8 frames, 70ms)  lumpy green gas cloud that thins to a dither, wisps
                                                   and stink squiggles
@@ -12,14 +13,27 @@ fx-hit-puddle      64x64  play (7 frames, 70ms)  splash crown and flying drops
 fx-hit-thief       64x64  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
 fx-hit-squirrel    64x64  play (7 frames, 70ms)  tail-flick sweep, motion lines, leaves
 fx-hit-other-dog   64x64  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
-ui-hit-flash-green, -sky, -amber, -orange, -pink
+fx-hit-picnic      64x64  play (8 frames, 70ms)  a poof, sandwiches, an apple and a cheese wedge
+                                                  flying up and falling, crumbs
+fx-hit-goose       64x64  play (8 frames, 70ms)  a white star, sound waves arcing out to both sides,
+                                                  feathers seesawing down
+fx-hit-petunias    64x64  play (8 frames, 70ms)  a puff of soil, clods, three whole flowers tumbling,
+                                                  falling petals
+fx-hit-trash       64x64  play (8 frames, 70ms)  a poof, the bin lid spinning, a can, a banana peel, a
+                                                  fish bone and paper flying, flies buzzing round
+fx-hit-cafe        64x64  play (8 frames, 70ms)  a latte splash, the cup flipping up, drops, the foam
+                                                  heart floating up
+fx-lemonade        64x64  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
+                                                  lemonade popping up, lemon slices, twinkles
+ui-hit-flash-green, -sky, -amber, -orange, -pink, -white
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
                           4x4 ordered dither to clear by x=15; tiles vertically, the
                           game mirrors it for the right edge
-ui-hit-label       24x24  normal (1 frame)       nine-slice, 8px corners: a dred plate in
-                          a yellow band with corner spikes, stretched to 176x32 for every
-                          label; white font-title text at 2x, centred, its line top 3px
-                          below the plate's top so the 10px caps sit in rows 11 to 20
+ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners: a dred
+                          (normal) or blue (lucky) plate in a yellow band with corner spikes,
+                          stretched to 176x32 for every label; white font-title text at 2x,
+                          centred, its line top 3px below the plate's top so the 10px caps sit
+                          in rows 11 to 20
 fx-status-stinky   16x16  loop (4 frames, 180ms) green stink lines, teal-rimmed, rising over a dog's head
 fx-status-soaked   16x16  loop (4 frames, 150ms) drips falling off
 fx-status-spooked  16x16  loop (4 frames, 150ms) sweat drop popping, surprise lines
@@ -380,10 +394,352 @@ def hit_other_dog(step):
     return g
 
 
+def fly(step, vx, vy, cx=32, cy=38, gravity=1.1, t0=0.5):
+    """Where a thrown piece is on a frame: launched from (cx, cy) at (vx, vy) a frame, falling under gravity."""
+    t = step - t0
+    return cx + vx * t, cy + vy * t + gravity * t * t
+
+
+def poof(g, step, cx, cy, frames=(0, 10, 13, 14), cols=("white", "lgrey")):
+    """A dust poof over the first frames, then six puffs drifting out and shrinking, as hit_thief's."""
+    pr = frames[step] if step < len(frames) else 0
+    if pr:
+        piece(g, lambda p: [p.ell(cx + dx * pr / 12, cy + dy * pr / 12, pr * 0.55, pr * 0.5, *cols)
+                            for dx, dy in ((-7, 2), (7, 2), (0, -5), (0, 5), (-4, -3), (4, -3))])
+    elif step < len(frames) + 2:
+        k = step - len(frames)
+
+        def puffs(p):
+            for j in range(6):
+                a = math.radians(j * 60 + 30)
+                d = 14 + k * 4
+                p.ell(cx + math.cos(a) * d, cy + math.sin(a) * d * 0.6, 3 - k, 2.5 - k * 0.8, *cols)
+        piece(g, puffs)
+
+
+def inside(x, y, m=4):
+    return m <= x < 64 - m and m <= y < 64 - m
+
+
+def sandwich(g, x, y, flip):
+    """A triangle sandwich, 13 wide: a tan crust round cream bread with lettuce and tomato showing at the
+    cut; flip turns it over."""
+    d = -1 if flip else 1
+    g.tri((x - 7, y + 4 * d), (x + 7, y + 4 * d), (x, y - 5 * d), "tan")
+    g.tri((x - 5, y + 3 * d), (x + 5, y + 3 * d), (x, y - 3 * d), "cream")
+    g.rect(x - 6, y + 2 * d, 13, 1, "green")
+    g.rect(x - 6, y + 3 * d, 13, 1, "red")
+    g.rect(x - 6, y + 4 * d, 13, 1, "tan")
+
+
+def apple(g, x, y, spin):
+    g.ell(x, y, 4, 4, "red", "dred", "pink")
+    g.p(x - 1, y - 2, "white")
+    g.rect(x + (0, 1, 0, -1)[spin % 4], y - 5, 1, 2, "dbrown")
+    g.rect(x + 1 + (0, 1, 0, -1)[spin % 4], y - 5, 2, 1, "green")
+
+
+def cheese(g, x, y, spin):
+    """A cheese wedge, its holes showing, tipping one way then the other."""
+    if spin % 2:
+        g.tri((x - 5, y + 3), (x + 5, y + 3), (x + 5, y - 4), "yellow")
+    else:
+        g.tri((x - 5, y + 3), (x + 5, y + 3), (x - 5, y - 4), "yellow")
+    g.rect(x - 5, y + 2, 11, 2, "amber")
+    g.p(x - 1 if spin % 2 else x - 3, y, "amber")
+    g.p(x + 2 if spin % 2 else x, y + 1, "amber")
+
+
+def hit_picnic(step):
+    """Lunch goes flying: a poof, then two sandwiches tumbling, an apple and a cheese wedge fan up and
+    fall back while crumbs scatter."""
+    g = Grid(64, 64)
+    cx, cy = 32, 40
+    if step == 0:
+        impact(g, "orange", cx, cy)
+        return rim(g)
+    poof(g, step, cx, cy)
+    for i, (vx, vy) in enumerate(((-3, -2), (4, -3), (-1.5, -4.5), (5, -1.5), (-5, -1), (2, -5), (-4, -3.5),
+                                   (1, -2.5))):
+        x, y = fly(step, vx, vy, cx, cy - 2, 0.9)
+        if inside(x, y, 2):
+            piece(g, lambda p: p.rect(x, y, 2, 1 + i % 2, ("tan", "cream", "brown")[i % 3]))
+    for i, (draw, vx, vy) in enumerate(((sandwich, -3.4, -6), (sandwich, 3.6, -5.5), (apple, -0.4, -8),
+                                        (cheese, 4.4, -3))):
+        x, y = fly(step, vx, vy, cx, cy - 4, 1.05)
+        if inside(x, y, 8):
+            piece(g, lambda p: draw(p, round(x), round(y), (step + i) % 4 if draw is not sandwich else (step + i) % 2))
+    return g
+
+
+FEATHER = ("...111", ".12211", "12111.", "2.....")
+
+
+def feather(g, x, y, flip, cols=("white", "lgrey")):
+    """A 6x4 feather, its quill in the second colour; flip mirrors it, so it seesaws as it drifts."""
+    for j, row in enumerate(FEATHER):
+        for i, ch in enumerate(row[::-1] if flip else row):
+            if ch != ".":
+                g.p(x + i, y + j, cols[int(ch) - 1])
+
+
+def hit_goose(step):
+    """The honk: a white puff, sound waves arcing out to both sides, and feathers flying off that seesaw
+    down."""
+    g = Grid(64, 64)
+    cx, cy = 32, 36
+    if step == 0:
+        impact(g, "white", cx, cy)
+        return rim(g)
+    poof(g, step, cx, cy, (0, 8, 10))
+    if step <= 5:
+        def waves(p):
+            for k in range(3):
+                r = 9 + k * 5 + step * 2
+                if r > 28:
+                    continue
+                for side in (-1, 1):
+                    for deg in range(-40, 41, 2):
+                        a = math.radians(deg)
+                        x, y = cx + side * math.cos(a) * r, cy + math.sin(a) * r
+                        p.rect(round(x) - (side < 0), round(y), 2, 1, "white")
+        piece(g, waves)
+    for i, (vx, vy) in enumerate(((-4, -5), (4, -5.5), (-6, -1.5), (6, -2), (-1.5, -6.5), (2, -6.5))):
+        t = step - 0.5
+        x = cx - 3 + vx * min(t, 3) + (math.sin(step * 1.7 + i) * 2 if step > 4 else 0)
+        y = cy + vy * min(t, 3) + max(0, t - 3) * 2.5
+        if inside(x, y, 3) and step >= 2:
+            piece(g, lambda p: feather(p, round(x), round(y), (step + i) % 2))
+    return g
+
+
+PETALS = (("pink", "mauve"), ("mauve", "purple"), ("white", "lgrey"), ("hot", "dred"))
+
+
+def flower(g, x, y, cols, tilt):
+    """A petunia pulled up whole: a trumpet of five petals round a yellow throat, two leaves and a stem
+    with roots; tilt leans the stem one way or the other as it tumbles."""
+    for j in range(6):
+        g.p(x + round(tilt * j / 3), y + 3 + j, "dgreen")
+    g.rect(x - 2 + tilt, y + 5, 2, 1, "green")
+    g.rect(x + 1 + tilt, y + 6, 2, 1, "green")
+    g.p(x - 1 + 2 * tilt, y + 9, "brown")
+    g.p(x + 1 + 2 * tilt, y + 9, "brown")
+    g.ell(x + 0.5, y + 0.5, 4, 3.6, cols[0], cols[1])
+    g.rect(x, y - 3, 1, 7, cols[1])
+    g.rect(x - 3, y, 7, 1, cols[1])
+    g.ell(x + 0.5, y + 0.5, 1.5, 1.5, "yellow")
+
+
+def hit_petunias(step):
+    """The bed bursts: a puff of soil, clods flying, three whole flowers tumbling up and falling, and
+    petals seesawing down."""
+    g = Grid(64, 64)
+    cx, cy = 32, 42
+    if step == 0:
+        impact(g, "pink", cx, cy)
+        return rim(g)
+    poof(g, step, cx, cy, (0, 9, 12, 13), ("brown", "dbrown"))
+    for i, (vx, vy) in enumerate(((-5, -4), (5, -4.5), (-3, -6.5), (3, -7), (-7, -1), (7, -0.5), (0, -8))):
+        x, y = fly(step, vx, vy, cx, cy, 1.1)
+        if inside(x, y, 3):
+            piece(g, lambda p: p.ell(x, y, 2.5 - (i % 2) * 0.5, 2, "brown", "dbrown"))
+    if step >= 3:
+        for i in range(9):
+            a = math.radians(i * 40 - 80)
+            x = cx + math.cos(a) * (8 + step * 3) + math.sin(step * 1.4 + i) * 2
+            y = cy - 18 + math.sin(a) * (5 + step * 2) + (step - 3) * 3
+            if inside(x, y, 2):
+                col = PETALS[i % 4]
+                piece(g, lambda p: (p.rect(x, y, 3, 2, col[0]), p.p(x + 2 * ((step + i) % 2), y + 1, col[1])))
+    for i, (vx, vy) in enumerate(((-3.5, -7), (3.5, -6.5), (-0.3, -8.5))):
+        x, y = fly(step, vx, vy, cx, cy - 6, 1.15)
+        if inside(x, y, 6):
+            piece(g, lambda p: flower(p, round(x), round(y), PETALS[i], (-1, 0, 1, 0)[(step + i) % 4]))
+    return g
+
+
+def can(g, x, y, spin):
+    """A drink can tumbling: upright, then on its side."""
+    if spin % 2 == 0:
+        g.rect(x - 3, y - 4, 7, 9, "red")
+        g.rect(x - 3, y - 4, 7, 1, "lgrey")
+        g.rect(x - 2, y - 2, 1, 5, "pink")
+        g.rect(x + 2, y - 3, 2, 8, "dred")
+        g.rect(x - 1, y, 3, 2, "white")
+    else:
+        g.rect(x - 4, y - 3, 9, 7, "red")
+        g.rect(x - 4, y - 3, 1, 7, "lgrey")
+        g.rect(x - 3, y - 2, 8, 1, "pink")
+        g.rect(x - 3, y + 2, 8, 2, "dred")
+        g.rect(x, y - 1, 2, 3, "white")
+
+
+def lid(g, x, y, spin):
+    """The bin's lid spinning like a plate: face on, tilted, edge on."""
+    ry = (4, 2.5, 1, 2.5)[spin % 4]
+    g.ell(x, y, 8, ry + 0.5, "grey", "slate", "lgrey")
+    if ry > 1:
+        g.rect(x - 2, y - round(ry * 0.5) - 1, 5, 2, "slate")
+        g.rect(x - 1, y - round(ry * 0.5) - 1, 3, 1, "lgrey")
+
+
+def peel(g, x, y, flip):
+    """A banana peel, its three flaps splayed; flip turns it upside down."""
+    d = -1 if flip else 1
+    g.rect(x - 1, y - d * 4, 3, 5, "yellow")
+    g.p(x, y - d * 5, "dbrown")
+    g.tri((x - 1, y), (x - 6, y + d * 5), (x - 1, y + d * 3), "yellow")
+    g.tri((x + 1, y), (x + 6, y + d * 5), (x + 2, y + d * 3), "amber")
+    g.tri((x - 1, y), (x + 1, y), (x, y + d * 6), "amber")
+
+
+def fishbone(g, x, y, flip):
+    """A fish skeleton: a spine with ribs, a head and a forked tail."""
+    d = -1 if flip else 1
+    g.rect(x - 5, y, 10, 1, "white")
+    for k in (-3, -1, 1, 3):
+        g.rect(x + k, y - 2, 1, 2, "white")
+        g.rect(x + k, y + 1, 1, 2, "white")
+    g.ell(x + 6 * d, y + 0.5, 2.5, 2.5, "white", "lgrey")
+    g.p(x + 6 * d + d, y - 1, "ink")
+    g.tri((x - 5 * d, y + 0.5), (x - 8 * d, y - 3), (x - 8 * d, y + 4), "white")
+
+
+def fly_bug(g, x, y, flap):
+    """A buzzing fly: an ink body under two white wings that flap."""
+    g.rect(x, y, 2, 2, "ink")
+    g.p(x - 1, y - 1 - flap, "white")
+    g.p(x + 2, y - 1 - flap, "white")
+    g.p(x - 2, y - 1 - flap, "white")
+    g.p(x + 3, y - 1 - flap, "white")
+
+
+def hit_trash(step):
+    """The bins' contents go up out of a green star: the lid spinning, a can, a banana peel, a fish bone
+    and paper, with flies buzzing round as it all comes down."""
+    g = Grid(64, 64)
+    cx, cy = 32, 40
+    if step == 0:
+        impact(g, "green", cx, cy)
+        return rim(g, "teal")
+    poof(g, step, cx, cy)
+    for i, (draw, vx, vy) in enumerate(((lid, 2.6, -7), (can, -4.4, -3.6), (peel, 5, -3.6), (fishbone, -1.6, -6.4),
+                                        (None, 5, -2), (None, -5.5, -1.5))):
+        x, y = fly(step, vx, vy, cx, cy - 2, 0.95)
+        if not inside(x, y, 8):
+            continue
+        if draw is None:
+            piece(g, lambda p: (p.ell(x, y, 3, 2.6, "white", "lgrey"), p.p(x - 1, y, "lgrey")))
+        elif draw in (can, lid):
+            piece(g, lambda p: draw(p, round(x), round(y), step + i))
+        else:
+            piece(g, lambda p: draw(p, round(x), round(y), (step + i) % 2))
+    if step >= 3:
+        for i in range(3):
+            a = math.radians(i * 120 + step * 50)
+            x, y = round(cx + math.cos(a) * 16), round(cy - 10 + math.sin(a) * 7)
+            piece(g, lambda p: fly_bug(p, x, y, step % 2))
+    return g
+
+
+def cup(g, x, y, tilt):
+    """A latte cup, 10 wide, tumbling, its handle on the right: upright (tilt 0) showing its foam, on its
+    side (1 and 3, the latte pouring out of the mouth) or upside down (2)."""
+    g.rect(x - 5, y - 4, 10, 9, "white")
+    g.rect(x + 2, y - 4, 3, 9, "lgrey")
+    if tilt % 2 == 0:
+        g.rect(x + 5, y - 2, 3, 5, "lgrey")
+        g.rect(x + 5, y - 1, 1, 3, None)
+        g.rect(x - 4, y - 4 if tilt == 0 else y + 4, 8, 1, "tan" if tilt == 0 else "lgrey")
+    else:
+        mouth = x + 5 if tilt == 1 else x - 6
+        g.rect(x - 2, y - 7 if tilt == 1 else y + 5, 5, 3, "lgrey")
+        g.rect(mouth, y - 3, 1, 7, "tan")
+        g.rect(mouth + (1 if tilt == 1 else -1), y - 1, 1, 4, "brown")
+
+
+def hit_cafe(step):
+    """The cup flips up out of an amber star with the latte splashing out of it in drops, and its foam
+    heart floats up out of the splash."""
+    g = Grid(64, 64)
+    cx, cy = 32, 40
+    if step == 0:
+        impact(g, "amber", cx, cy)
+        return rim(g)
+    if step <= 4:
+        def splash(p):
+            r = (0, 9, 13, 15, 16)[step]
+            for k in range(9):
+                a = math.radians(200 + k * 17.5)
+                x, y = cx + math.cos(a) * r, cy - 2 + math.sin(a) * r * 0.9
+                p.ell(x, y, 3 - step * 0.4, 3 - step * 0.4, "brown", "dbrown", "tan")
+            p.ell(cx, cy, r * 0.7, r * 0.28, "brown", "dbrown", "tan")
+        piece(g, splash)
+    for i, (vx, vy) in enumerate(((-6, -5), (6, -5.5), (-3.5, -7.5), (4, -8), (-8, -2), (8, -2.5))):
+        x, y = fly(step, vx, vy, cx, cy - 2, 1.3)
+        if inside(x, y, 3) and step >= 2:
+            piece(g, lambda p: p.ell(x, y, 2, 2.2, "brown", "dbrown", "tan"))
+    wy = (0, 30, 21, 15, 12, 11, 12, 14)[step]
+    piece(g, lambda p: cup(p, cx + 6 + (0, 1, 2, 3, 3, 2, 1, 0)[step], wy, step % 4))
+    if step >= 3:
+        hy = cy - 10 - (step - 3) * 4
+        piece(g, lambda p: stamp(p, HEART, cx - 16, hy, ("white", "white", "lgrey")))
+    return g
+
+
+def lemonade_cup(g, x, y):
+    """A paper cup of lemonade with a straw and a lemon slice on the rim."""
+    g.tri((x - 5, y - 6), (x + 6, y - 6), (x + 3.5, y + 6), "white")
+    g.tri((x - 5, y - 6), (x - 2.5, y + 6), (x + 3.5, y + 6), "white")
+    g.rect(x - 4, y - 5, 9, 4, "yellow")
+    g.rect(x - 4, y - 5, 9, 1, "white")
+    g.rect(x + 2, y - 4, 2, 9, "lgrey")
+    g.rect(x - 3, y + 1, 7, 1, "red")
+    g.rect(x + 1, y - 13, 1, 8, "red")
+    g.rect(x + 1, y - 13, 3, 1, "red")
+    g.ell(x - 5, y - 6, 2.5, 2.5, "yellow", "amber")
+    g.p(x - 5, y - 6, "white")
+
+
+def lemon(g, x, y, spin):
+    """A lemon slice spinning: face on, then edge on."""
+    if spin % 2 == 0:
+        g.ell(x, y, 2.5, 2.5, "yellow", "amber")
+        g.p(x, y, "white")
+    else:
+        g.rect(x - 1, y - 2, 2, 5, "amber")
+        g.p(x - 1, y - 2, "yellow")
+
+
+def lemonade_pop(step):
+    """The lucky lemonade: a yellow star, then the cup pops up out of a ring of sparkles while lemon slices
+    fan out and drops of water twinkle."""
+    g = Grid(64, 64)
+    cx, cy = 32, 38
+    if step == 0:
+        impact(g, "yellow", cx, cy, 14)
+        return rim(g)
+    if step == 1:
+        piece(g, lambda p: burst(p, cx, cy, 13, 5, 8, "white", 11))
+    wy = (0, 36, 30, 27, 26, 26, 27, 27)[step]
+    piece(g, lambda p: lemonade_cup(p, cx, wy))
+    for i, (vx, vy) in enumerate(((-8, -5), (8, -5.5), (-10, 0), (10, 0.5))):
+        x, y = fly(step, vx, vy, cx, cy, 0.8)
+        if inside(x, y, 4):
+            piece(g, lambda p: lemon(p, round(x), round(y), step + i))
+    if step >= 2:
+        for i, (x, y) in enumerate(((cx - 13, 18), (cx + 14, 16), (cx - 7, 9), (cx + 9, 7), (cx + 17, 30))):
+            if (step + i) % 3 != 0:
+                r = 2 if (step + i) % 3 == 1 else 1
+                piece(g, lambda p: star4(p, x, y, r, "cyan" if i % 2 else "yellow"))
+    return g
+
+
 # ---------- edge flash ----------
 
 FLASH = {"green": ("green", "teal"), "sky": ("cyan", "navy"), "amber": ("amber", "plum"),
-         "orange": ("orange", "plum"), "pink": ("pink", "plum")}
+         "orange": ("orange", "plum"), "pink": ("pink", "plum"), "white": ("white", "plum")}
 
 
 def flash(colour, step):
@@ -409,10 +765,14 @@ def flash(colour, step):
 
 # ---------- label plate ----------
 
-def label_plate():
+# The plate's face, its lit edge and its shaded edge: dred for an encounter, blue for a lucky find.
+PLATES = {"normal": ("dred", "red", "plum"), "lucky": ("blue", "sky", "navy")}
+
+
+def label_plate(face="dred", lit="red", shade="plum"):
     """24x24 nine-slice, 8px corners. The middle rows and columns are uniform, so a stretch keeps
-    them crisp. White text sits on the dred face (7.34:1) from 6px in; the yellow band carries Woof
-    Way and the plum rim the light roads. A spike pokes out of each corner."""
+    them crisp. White text sits on the face (7.34:1 on dred, 8.48:1 on blue) from 6px in; the yellow
+    band carries Woof Way and the plum rim the light roads. A spike pokes out of each corner."""
     g = Grid(24, 24)
     for (x0, y0), (sx, sy) in (((1, 1), (1, 1)), ((22, 1), (-1, 1)), ((1, 22), (1, -1)), ((22, 22), (-1, -1))):
         g.tri((x0 + 0.5 * sx, y0 + 0.5 * sy), (x0 + 7 * sx, y0 + 3.5 * sy), (x0 + 3.5 * sx, y0 + 7 * sy),
@@ -420,11 +780,11 @@ def label_plate():
     g.rect(3, 3, 18, 18, "yellow")
     g.rect(3, 19, 18, 2, "amber")
     g.rect(19, 5, 2, 14, "amber")
-    g.rect(5, 5, 14, 14, "dred")
-    g.rect(5, 5, 14, 1, "red")
-    g.rect(5, 5, 1, 14, "red")
-    g.rect(5, 18, 14, 1, "plum")
-    g.rect(18, 6, 1, 13, "plum")
+    g.rect(5, 5, 14, 14, face)
+    g.rect(5, 5, 14, 1, lit)
+    g.rect(5, 5, 1, 14, lit)
+    g.rect(5, 18, 14, 1, shade)
+    g.rect(18, 6, 1, 13, shade)
     rim(g)
     g.rect(3, 22, 18, 1, "plum")
     return g
@@ -525,9 +885,15 @@ def sprites():
     yield "fx-hit-thief", [("play", [hit_thief(i).outlined(False) for i in range(8)], 70)]
     yield "fx-hit-squirrel", [("play", [hit_squirrel(i).outlined(False) for i in range(7)], 70)]
     yield "fx-hit-other-dog", [("play", [hit_other_dog(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-hit-picnic", [("play", [hit_picnic(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-hit-goose", [("play", [hit_goose(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-hit-petunias", [("play", [hit_petunias(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-hit-trash", [("play", [hit_trash(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-hit-cafe", [("play", [hit_cafe(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-lemonade", [("play", [lemonade_pop(i).outlined(False) for i in range(8)], 70)]
     for colour in FLASH:
         yield f"ui-hit-flash-{colour}", [("play", [flash(colour, i).outlined(False) for i in range(4)], 70)]
-    yield "ui-hit-label", [("normal", [label_plate().outlined(False)], 1000)]
+    yield "ui-hit-label", [(tag, [label_plate(*cols).outlined(False)], 1000) for tag, cols in PLATES.items()]
     yield from sizes("fx-status-stinky", status_stinky, 180)
     yield from sizes("fx-status-soaked", status_soaked, 150)
     yield from sizes("fx-status-spooked", status_spooked, 150)

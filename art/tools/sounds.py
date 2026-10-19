@@ -14,6 +14,13 @@ sfx-hit-puddle     0.50s  splash: a pink noise burst and low plop, then rising t
 sfx-hit-thief      0.60s  coin scatter: seven fading triangle pings between F#6 and E7
 sfx-hit-squirrel   0.40s  chitter: seven quick falling square chirps near 3kHz, three then four
 sfx-hit-other-dog  0.40s  friendly woof: a soft low "boof", then a rising yip
+sfx-hit-picnic     0.45s  snack attack: two crunchy chomps over a "nom", then a plate clinking twice
+sfx-hit-goose      0.50s  honk honk: two nasal square honks with a wobble, the second higher, over a hiss
+sfx-hit-petunias   0.50s  oops: a leafy rustle and a soft thump of soil, then a falling "uh-oh" G5 E5
+sfx-hit-trash      0.55s  clatter: five metal pings at uneven pitches and gaps, each with a scrape of
+                          noise, then a lid wobbling to rest
+sfx-hit-cafe       0.50s  cup clink E7 C#7, then a splashy spill and a sad little slide down
+sfx-lemonade       0.45s  ice tinkling in a cup, then a bright triangle chime G5 D6 G6 over a square
 sfx-badge          1.00s  jingle: square D6 F#6 A6 up to a ringing D7, then a sparkle A7 F#7 D7 A7
 sfx-new-best       1.50s  fanfare: G4 C5 E5 G5, E5 G5 over a triangle bass, warm square
 music-walk         28.77s 12 bars at about 100 BPM in C, loops seamlessly: square lead,
@@ -193,6 +200,63 @@ EFFECTS = {
         ("pinknoise", 0.08, None, 0.01, dict(vol=0.15, low=1200, high=200, attack=0.01, release=0.8)),
         ("square", 0.18, (700, 1400), 0.22, dict(vol=0.4, duty=35, low=2500, attack=0.01, release=0.6)),
         ("triangle", 0.18, (350, 700), 0.22, dict(vol=0.6, attack=0.01, release=0.6)),
+    ],
+    "sfx-hit-picnic": [
+        ("pinknoise", 0.06, None, 0, dict(vol=0.8, low=2500, high=400, attack=0.002, release=0.7)),
+        ("triangle", 0.1, (260, 420), 0.01, dict(vol=0.5, attack=0.006, release=0.6)),
+        ("pinknoise", 0.06, None, 0.12, dict(vol=0.8, low=2500, high=400, attack=0.002, release=0.7)),
+        ("triangle", 0.1, (280, 460), 0.13, dict(vol=0.5, attack=0.006, release=0.6)),
+        ("triangle", 0.14, "E6", 0.27, dict(vol=0.7, release=0.9)),
+        ("square", 0.08, "E6", 0.27, dict(vol=0.2, duty=25, low=4000, release=0.9)),
+        ("triangle", 0.14, "B6", 0.33, dict(vol=0.55, release=0.9)),
+    ],
+    # A goose's honk is nasal: a narrow pulse with a fast wobble, low-passed so it stays soft.
+    "sfx-hit-goose": [
+        ("square", 0.18, (440, 400), 0.01, dict(vol=0.6, duty=20, low=1800, attack=0.01, release=0.5, shape="h",
+                                                fx=("tremolo", "28", "35"))),
+        ("triangle", 0.18, (220, 200), 0.01, dict(vol=0.5, attack=0.01, release=0.5, shape="h")),
+        ("square", 0.25, (500, 430), 0.23, dict(vol=0.6, duty=20, low=1800, attack=0.01, release=0.6, shape="h",
+                                                fx=("tremolo", "28", "35"))),
+        ("triangle", 0.25, (250, 215), 0.23, dict(vol=0.5, attack=0.01, release=0.6, shape="h")),
+        ("pinknoise", 0.12, None, 0, dict(vol=0.2, low=4000, high=1500, attack=0.01, release=0.8)),
+    ],
+    "sfx-hit-petunias": [
+        ("pinknoise", 0.22, None, 0, dict(vol=0.6, low=5000, high=1800, attack=0.01, release=0.6,
+                                          fx=("tremolo", "30", "70"))),
+        ("triangle", 0.15, (160, 60), 0.04, dict(vol=0.8, attack=0.004, release=0.8)),
+        ("pinknoise", 0.08, None, 0.04, dict(vol=0.3, low=800, attack=0.004, release=0.9)),
+        ("triangle", 0.1, "G5", 0.22, dict(vol=0.7, attack=0.008, release=0.5)),
+        ("triangle", 0.18, "E5", 0.32, dict(vol=0.7, attack=0.008, release=0.9)),
+        ("square", 0.18, "E5", 0.32, dict(vol=0.12, duty=25, low=2000, release=0.9)),
+    ],
+    # Bins and cans hit the road: uneven gaps and pitches, quieter as they settle.
+    "sfx-hit-trash": [
+        ("square", 0.06, 1100, 0, dict(vol=0.5, duty=25, low=5000, attack=0.002, release=0.8)),
+        ("pinknoise", 0.05, None, 0, dict(vol=0.5, low=6000, high=1500, attack=0.002, release=0.8)),
+        ("square", 0.06, 1650, 0.07, dict(vol=0.45, duty=25, low=5000, attack=0.002, release=0.8)),
+        ("pinknoise", 0.05, None, 0.07, dict(vol=0.45, low=6000, high=1500, attack=0.002, release=0.8)),
+        ("square", 0.06, 900, 0.12, dict(vol=0.4, duty=25, low=5000, attack=0.002, release=0.8)),
+        ("square", 0.06, 1400, 0.2, dict(vol=0.35, duty=25, low=5000, attack=0.002, release=0.8)),
+        ("pinknoise", 0.05, None, 0.2, dict(vol=0.35, low=6000, high=1500, attack=0.002, release=0.8)),
+        ("square", 0.06, 1250, 0.26, dict(vol=0.3, duty=25, low=5000, attack=0.002, release=0.8)),
+        ("square", 0.22, (700, 620), 0.32, dict(vol=0.3, duty=25, low=3000, attack=0.004, release=0.8,
+                                                 fx=("tremolo", "16", "80"))),
+    ],
+    "sfx-hit-cafe": [
+        ("triangle", 0.12, "E7", 0, dict(release=0.9)),
+        ("square", 0.06, "E6", 0, dict(vol=0.25, duty=25, low=5000, release=0.9)),
+        ("triangle", 0.12, "C#7", 0.07, dict(vol=0.85, release=0.9)),
+        ("pinknoise", 0.28, None, 0.14, dict(vol=0.6, low=1800, high=300, attack=0.02, release=0.8, shape="h")),
+        ("triangle", 0.22, (700, 350), 0.26, dict(vol=0.35, attack=0.01, release=0.8)),
+    ],
+    "sfx-lemonade": [
+        ("triangle", 0.05, "B7", 0, dict(vol=0.5, attack=0.002, release=0.8)),
+        ("triangle", 0.05, "G7", 0.05, dict(vol=0.4, attack=0.002, release=0.8)),
+        ("triangle", 0.05, "C8", 0.09, dict(vol=0.35, attack=0.002, release=0.8)),
+        ("square", 0.08, "G5", 0.12, dict(vol=0.4, duty=25, low=3500, release=0.5)),
+        ("triangle", 0.08, "D6", 0.19, dict(release=0.5)),
+        ("triangle", 0.2, "G6", 0.25, dict(release=0.9)),
+        ("square", 0.2, "G5", 0.25, dict(vol=0.15, duty=25, low=2500, release=0.9)),
     ],
     "sfx-badge": [
         ("square", 0.08, "D6", 0, dict(vol=0.5, duty=25, low=4000, release=0.4)),

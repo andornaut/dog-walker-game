@@ -847,10 +847,9 @@ def accident_bag():
     return a
 
 
-def accident_walk_on():
-    """Walk on: the pile left at the lawn's edge with its stink, the grumpy neighbour on his lawn
-    with his fists on his hips, and the dog trotting off."""
-    a = Art()
+def grumpy_lawn(a, x=-2):
+    """The street with the grumpy neighbour's lawn down its left edge, a grey curb along it, and
+    him standing on it, his left edge at column x."""
     a.ground("street")
     a.fill(0, 0, 26, AH, "green")
     for i in range(12):
@@ -858,15 +857,143 @@ def accident_walk_on():
     a.fill(26, 0, 2, AH, "grey")
     neighbour = to_image(road.dressed(grumpy_top, legs="lgrey", shoes="pink").px)
     shade, a.shade = a.shade, "dgreen"
-    a.shadow(14, 52, neighbour.width)
+    a.shadow(x + 16, 52, neighbour.width)
     a.shade = shade
-    a.paste(neighbour, -2, 4)
+    a.paste(neighbour, x, 4)
+
+
+def accident_walk_on():
+    """Walk on: the pile left at the lawn's edge with its stink, the grumpy neighbour on his lawn
+    with his fists on his hips, and the dog trotting off."""
+    a = Art()
+    grumpy_lawn(a)
     a.paste(to_image(needs.accident_spot(0).px), 30, 34)
     a.stink(32, 24, 2)
     a.fill(30, 2, 2, 5, "red")
     a.fill(30, 8, 2, 2, "red")
     a.put("dog-biscuit", "walk", 58, 38, 2)
     a.lead(58, 24, 64)
+    return a
+
+
+def broken_hearts(a, pts):
+    """Hearts broken in two down the middle, the right half dropped a pixel: a heart lost."""
+    for x, y in pts:
+        for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
+            for i, c in enumerate(r):
+                if c == "1":
+                    right = i > 3
+                    a.fill(x + i + right, y + j + right, 1, 1, "pink" if (i, j) == (1, 1) else "red")
+
+
+# A cross-popping vein: the anger mark over a scowl.
+VEIN = [".r.r.", "rr.rr", ".....", "rr.rr", ".r.r."]
+# A sealed envelope: pee-mail, the flap's V in lgrey.
+ENVELOPE = ["fwwwwwf", "wfwwwfw", "wwfwfww", "wwwfwww", "wwwwwww"]
+
+
+def envelopes(a, pts):
+    for x, y in pts:
+        a.paste(pixmap(ENVELOPE, {"w": "white", "f": "lgrey"}), x, y)
+
+
+def good_spot_take_time():
+    """Take your time: the dog settled at the foot of the tree, hearts over it, the clock running."""
+    a = Art()
+    a.ground("park")
+    a.put("spot-tree", "idle", 24, 50)
+    a.put("dog-biscuit", "idle", 44, 54)
+    a.lead(44, 40, 50)
+    a.hearts([(48, 8), (60, 14), (52, 22)])
+    clock(a, 66, 32)
+    return a
+
+
+def good_spot_keep_walking():
+    a = Art()
+    a.ground("park")
+    a.put("spot-tree", "idle", 54, 46, 1)
+    a.put("dog-biscuit", "walk", 26, 40, 2)
+    a.lead(26, 26, 18)
+    return a
+
+
+def grumpy_apologise():
+    """Apologise: the neighbour on his lawn takes the coins for his trouble, the dog sits it out."""
+    a = Art()
+    grumpy_lawn(a)
+    for x, y in ((44, 26), (40, 22), (35, 20), (31, 21), (28, 24)):
+        a.fill(x, y, 1, 1, "white")
+    a.coins([(30, 26), (40, 12)])
+    a.put("dog-biscuit", "idle", 56, 52)
+    a.lead(56, 38, 60)
+    a.drops([(48, 26), (66, 28)])
+    return a
+
+
+def grumpy_ignore():
+    """Ignore them: the neighbour fuming on his lawn, the pack walking off with hearts lost."""
+    a = Art()
+    grumpy_lawn(a)
+    a.paste(pixmap(VEIN, {"r": "red"}), 19, 1)
+    a.put("dog-biscuit", "walk", 44, 40, 2)
+    a.put("dog-koda", "walk", 62, 46, 1)
+    a.lead(44, 26, 48)
+    a.lead(62, 32, 56)
+    broken_hearts(a, [(38, 6), (58, 10)])
+    return a
+
+
+def pee_mail_sniff():
+    """Read it all: the dog's nose at the lamp post's foot, scent rising off it as envelopes,
+    hearts over it and the clock running."""
+    a = Art()
+    a.ground("street")
+    a.put("spot-lamp-post", "idle", 20, 52)
+    a.put("dog-koda", "idle", 38, 54)
+    a.lead(38, 40, 46)
+    for x, y in ((23, 38), (24, 43)):
+        for dx, dy in needs.SCENT:
+            a.fill(x + dx, y + dy, 1, 1, "white")
+    envelopes(a, [(36, 16), (46, 6), (58, 14)])
+    a.hearts([(62, 28), (54, 34)])
+    clock(a, 66, 6)
+    return a
+
+
+def pee_mail_keep_walking():
+    a = Art()
+    a.ground("street")
+    a.put("spot-lamp-post", "idle", 56, 50)
+    envelopes(a, [(62, 36)])
+    a.put("dog-koda", "walk", 26, 40, 2)
+    a.lead(26, 26, 18)
+    return a
+
+
+def water_stop_drink():
+    """A long drink: the dog's head down in the bowl, the water splashing, hearts over it and the
+    clock running."""
+    a = Art()
+    a.ground("park")
+    a.put("spot-water-bowl", "idle", 30, 33, 3)
+    a.put("dog-duchess", "idle", 36, 54)
+    a.lead(36, 40, 44)
+    a.drops([(26, 14), (31, 10), (42, 12), (47, 16), (36, 7)])
+    a.hearts([(54, 8), (64, 16)])
+    clock(a, 10, 10)
+    return a
+
+
+def water_stop_sip():
+    """Just a sip: a lap at the bowl and on, one drop off the chin and one heart."""
+    a = Art()
+    a.ground("park")
+    a.put("spot-water-bowl", "idle", 54, 40)
+    a.put("dog-duchess", "walk", 30, 44, 2)
+    a.lead(30, 30, 22)
+    a.drops([(38, 30)])
+    a.hearts([(24, 6)])
     return a
 
 
@@ -1204,6 +1331,14 @@ ILLUSTRATIONS = {
     "card-play-date-sniff": play_date_sniff,
     "card-accident-bag": accident_bag,
     "card-accident-walk-on": accident_walk_on,
+    "card-good-spot-take-time": good_spot_take_time,
+    "card-good-spot-keep-walking": good_spot_keep_walking,
+    "card-grumpy-neighbour-apologise": grumpy_apologise,
+    "card-grumpy-neighbour-ignore": grumpy_ignore,
+    "card-pee-mail-sniff": pee_mail_sniff,
+    "card-pee-mail-keep-walking": pee_mail_keep_walking,
+    "card-water-stop-drink": water_stop_drink,
+    "card-water-stop-sip": water_stop_sip,
     "card-zone-woof-way": woof_way_view,
     "card-zone-bark-park": bark_park_view,
     "card-zone-sniff-street-shops": shops_view,

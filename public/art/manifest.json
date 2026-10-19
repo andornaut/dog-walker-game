@@ -193,6 +193,33 @@
       }
     },
     {
+      "key": "cafe-patio",
+      "png": "sprites/cafe-patio.png",
+      "json": "sprites/cafe-patio.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "cafe-patio@50",
+      "png": "sprites/cafe-patio@50.png",
+      "json": "sprites/cafe-patio@50.json",
+      "anchor": {
+        "feetY": 19,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "cafe-patio@75",
+      "png": "sprites/cafe-patio@75.png",
+      "json": "sprites/cafe-patio@75.json",
+      "anchor": {
+        "feetY": 29,
+        "opaqueWidth": 65
+      }
+    },
+    {
       "key": "card-frame",
       "png": "sprites/card-frame.png",
       "json": "sprites/card-frame.json"
@@ -752,9 +779,29 @@
       "json": "sprites/fx-heart.json"
     },
     {
+      "key": "fx-hit-cafe",
+      "png": "sprites/fx-hit-cafe.png",
+      "json": "sprites/fx-hit-cafe.json"
+    },
+    {
+      "key": "fx-hit-goose",
+      "png": "sprites/fx-hit-goose.png",
+      "json": "sprites/fx-hit-goose.json"
+    },
+    {
       "key": "fx-hit-other-dog",
       "png": "sprites/fx-hit-other-dog.png",
       "json": "sprites/fx-hit-other-dog.json"
+    },
+    {
+      "key": "fx-hit-petunias",
+      "png": "sprites/fx-hit-petunias.png",
+      "json": "sprites/fx-hit-petunias.json"
+    },
+    {
+      "key": "fx-hit-picnic",
+      "png": "sprites/fx-hit-picnic.png",
+      "json": "sprites/fx-hit-picnic.json"
     },
     {
       "key": "fx-hit-puddle",
@@ -775,6 +822,16 @@
       "key": "fx-hit-thief",
       "png": "sprites/fx-hit-thief.png",
       "json": "sprites/fx-hit-thief.json"
+    },
+    {
+      "key": "fx-hit-trash",
+      "png": "sprites/fx-hit-trash.png",
+      "json": "sprites/fx-hit-trash.json"
+    },
+    {
+      "key": "fx-lemonade",
+      "png": "sprites/fx-lemonade.png",
+      "json": "sprites/fx-lemonade.json"
     },
     {
       "key": "fx-need-met",
@@ -886,6 +943,33 @@
       "anchor": {
         "feetY": 23,
         "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "goose",
+      "png": "sprites/goose.png",
+      "json": "sprites/goose.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 29
+      }
+    },
+    {
+      "key": "goose@50",
+      "png": "sprites/goose@50.png",
+      "json": "sprites/goose@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "goose@75",
+      "png": "sprites/goose@75.png",
+      "json": "sprites/goose@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 22
       }
     },
     {
@@ -1015,6 +1099,33 @@
       "anchor": {
         "feetY": 46,
         "opaqueWidth": 20
+      }
+    },
+    {
+      "key": "lemonade-stand",
+      "png": "sprites/lemonade-stand.png",
+      "json": "sprites/lemonade-stand.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "lemonade-stand@50",
+      "png": "sprites/lemonade-stand@50.png",
+      "json": "sprites/lemonade-stand@50.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "lemonade-stand@75",
+      "png": "sprites/lemonade-stand@75.png",
+      "json": "sprites/lemonade-stand@75.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 24
       }
     },
     {
@@ -1216,12 +1327,66 @@
       }
     },
     {
+      "key": "petunias",
+      "png": "sprites/petunias.png",
+      "json": "sprites/petunias.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "petunias@50",
+      "png": "sprites/petunias@50.png",
+      "json": "sprites/petunias@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "petunias@75",
+      "png": "sprites/petunias@75.png",
+      "json": "sprites/petunias@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 66
+      }
+    },
+    {
       "key": "photo-op",
       "png": "sprites/photo-op.png",
       "json": "sprites/photo-op.json",
       "anchor": {
         "feetY": 45,
         "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "picnic",
+      "png": "sprites/picnic.png",
+      "json": "sprites/picnic.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "picnic@50",
+      "png": "sprites/picnic@50.png",
+      "json": "sprites/picnic@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "picnic@75",
+      "png": "sprites/picnic@75.png",
+      "json": "sprites/picnic@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 65
       }
     },
     {
@@ -1477,6 +1642,33 @@
       }
     },
     {
+      "key": "trash-bins",
+      "png": "sprites/trash-bins.png",
+      "json": "sprites/trash-bins.json",
+      "anchor": {
+        "feetY": 30,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "trash-bins@50",
+      "png": "sprites/trash-bins@50.png",
+      "json": "sprites/trash-bins@50.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 44
+      }
+    },
+    {
+      "key": "trash-bins@75",
+      "png": "sprites/trash-bins@75.png",
+      "json": "sprites/trash-bins@75.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 64
+      }
+    },
+    {
       "key": "treat",
       "png": "sprites/treat.png",
       "json": "sprites/treat.json",
@@ -1567,6 +1759,11 @@
       "key": "ui-hit-flash-sky",
       "png": "sprites/ui-hit-flash-sky.png",
       "json": "sprites/ui-hit-flash-sky.json"
+    },
+    {
+      "key": "ui-hit-flash-white",
+      "png": "sprites/ui-hit-flash-white.png",
+      "json": "sprites/ui-hit-flash-white.json"
     },
     {
       "key": "ui-hit-label",
@@ -1773,6 +1970,22 @@
       "png": "images/card-good-leash.png"
     },
     {
+      "key": "card-good-spot-keep-walking",
+      "png": "images/card-good-spot-keep-walking.png"
+    },
+    {
+      "key": "card-good-spot-take-time",
+      "png": "images/card-good-spot-take-time.png"
+    },
+    {
+      "key": "card-grumpy-neighbour-apologise",
+      "png": "images/card-grumpy-neighbour-apologise.png"
+    },
+    {
+      "key": "card-grumpy-neighbour-ignore",
+      "png": "images/card-grumpy-neighbour-ignore.png"
+    },
+    {
       "key": "card-ice-cream-truck-pup-cups",
       "png": "images/card-ice-cream-truck-pup-cups.png"
     },
@@ -1811,6 +2024,14 @@
     {
       "key": "card-other-dog-sniff",
       "png": "images/card-other-dog-sniff.png"
+    },
+    {
+      "key": "card-pee-mail-keep-walking",
+      "png": "images/card-pee-mail-keep-walking.png"
+    },
+    {
+      "key": "card-pee-mail-sniff",
+      "png": "images/card-pee-mail-sniff.png"
     },
     {
       "key": "card-photo-op-pose",
@@ -1903,6 +2124,14 @@
     {
       "key": "card-treat-magnet",
       "png": "images/card-treat-magnet.png"
+    },
+    {
+      "key": "card-water-stop-drink",
+      "png": "images/card-water-stop-drink.png"
+    },
+    {
+      "key": "card-water-stop-sip",
+      "png": "images/card-water-stop-sip.png"
     },
     {
       "key": "card-zone-bark-park",
@@ -2350,9 +2579,29 @@
       "m4a": "sounds/sfx-fired.m4a"
     },
     {
+      "key": "sfx-hit-cafe",
+      "ogg": "sounds/sfx-hit-cafe.ogg",
+      "m4a": "sounds/sfx-hit-cafe.m4a"
+    },
+    {
+      "key": "sfx-hit-goose",
+      "ogg": "sounds/sfx-hit-goose.ogg",
+      "m4a": "sounds/sfx-hit-goose.m4a"
+    },
+    {
       "key": "sfx-hit-other-dog",
       "ogg": "sounds/sfx-hit-other-dog.ogg",
       "m4a": "sounds/sfx-hit-other-dog.m4a"
+    },
+    {
+      "key": "sfx-hit-petunias",
+      "ogg": "sounds/sfx-hit-petunias.ogg",
+      "m4a": "sounds/sfx-hit-petunias.m4a"
+    },
+    {
+      "key": "sfx-hit-picnic",
+      "ogg": "sounds/sfx-hit-picnic.ogg",
+      "m4a": "sounds/sfx-hit-picnic.m4a"
     },
     {
       "key": "sfx-hit-puddle",
@@ -2373,6 +2622,16 @@
       "key": "sfx-hit-thief",
       "ogg": "sounds/sfx-hit-thief.ogg",
       "m4a": "sounds/sfx-hit-thief.m4a"
+    },
+    {
+      "key": "sfx-hit-trash",
+      "ogg": "sounds/sfx-hit-trash.ogg",
+      "m4a": "sounds/sfx-hit-trash.m4a"
+    },
+    {
+      "key": "sfx-lemonade",
+      "ogg": "sounds/sfx-lemonade.ogg",
+      "m4a": "sounds/sfx-lemonade.m4a"
     },
     {
       "key": "sfx-new-best",

@@ -1,6 +1,14 @@
 { "frames": {
-   "ui-hit-label.aseprite": {
+   "ui-hit-label 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 1000
+   },
+   "ui-hit-label 1.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
@@ -13,10 +21,11 @@
   "version": "1.2.30-x64",
   "image": "ui-hit-label.png",
   "format": "RGBA8888",
-  "size": { "w": 24, "h": 24 },
+  "size": { "w": 48, "h": 24 },
   "scale": "1",
   "frameTags": [
-   { "name": "normal", "from": 0, "to": 0, "direction": "forward" }
+   { "name": "normal", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "lucky", "from": 1, "to": 1, "direction": "forward" }
   ]
  }
 }
