@@ -62,6 +62,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 35 },
     "sourceSize": { "w": 35, "h": 35 },
     "duration": 300
+   },
+   "social-jogger-dog@88 8.aseprite": {
+    "frame": { "x": 280, "y": 0, "w": 35, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 35 },
+    "sourceSize": { "w": 35, "h": 35 },
+    "duration": 100
+   },
+   "social-jogger-dog@88 9.aseprite": {
+    "frame": { "x": 315, "y": 0, "w": 35, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 35 },
+    "sourceSize": { "w": 35, "h": 35 },
+    "duration": 100
+   },
+   "social-jogger-dog@88 10.aseprite": {
+    "frame": { "x": 350, "y": 0, "w": 35, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 35 },
+    "sourceSize": { "w": 35, "h": 35 },
+    "duration": 100
+   },
+   "social-jogger-dog@88 11.aseprite": {
+    "frame": { "x": 385, "y": 0, "w": 35, "h": 35 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 35 },
+    "sourceSize": { "w": 35, "h": 35 },
+    "duration": 100
    }
  },
  "meta": {
@@ -69,11 +101,12 @@
   "version": "1.2.30-x64",
   "image": "social-jogger-dog@88.png",
   "format": "RGBA8888",
-  "size": { "w": 280, "h": 35 },
+  "size": { "w": 420, "h": 35 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 7, "direction": "forward" }
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "run", "from": 8, "to": 11, "direction": "forward" }
   ]
  }
 }

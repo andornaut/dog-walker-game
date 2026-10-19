@@ -29,7 +29,9 @@ Social (reskins other-dog, 40x40, and other-dog-owner, 40x60): the dog's walk
 (4 frames, 100ms) and idle (4 frames, 300ms: tail at -1, 0, +1, 0, the right
 ear 1px higher on the last frame), the owner's walk (2 frames, 200ms) and idle
 (2 frames, 400ms), as the other dog and its walker have them. The game draws
-the dog left of its owner.
+the dog left of its owner. The dog also runs as the zone's loose dog: run (4
+frames, 100ms), side view facing right in loose-dog's gallop (hazards.CORGI_RUN),
+without the broken leash, drawn in the dog's own 40x40 frame.
   social-gate-dog           Willow Crescent  a beagle with its paws on a picket gate
   social-gate-dog-owner                      a gardener: straw hat, green apron, gloves
   social-frisbee-dog        Fairview Park    a border collie with a red frisbee
@@ -53,6 +55,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
+import hazards  # noqa: E402
 import minis  # noqa: E402
 import road  # noqa: E402
 from minis import STEPS, snap  # noqa: E402
@@ -640,6 +643,87 @@ def jogger_top(g, b):
     g.p(22, 16 + b, "pink")
 
 
+# ---------- Social run: the loose dog's crossing, as the zone's Social dog ----------
+
+def side_dog(spec, bob=0, front=(14, 27), hind=(11, 27)):
+    """A Social dog galloping across the road in side view, facing right, on hazards.corgi_side's skeleton:
+    the same body, hips, shoulders and paw positions per frame (hazards.CORGI_RUN), so it runs in the loose
+    dog's pose, without the broken leash. spec is one of SIDE: the coat (fill, shade, light), the white or
+    cream underside, the leg and sock colours, the ears, the tail and an extra (the frisbee, the harness or
+    the collar)."""
+    g = edged(Grid())
+    b = bob + 1
+    coat, under, leg, sock = spec["coat"], spec["under"], spec["leg"], spec["sock"]
+    far = spec.get("far", coat[1])
+    for (x, y), (px, py) in (((10, 21 + b), hind), ((20, 21 + b), front)):
+        hazards.limb(g, x, y, px + 3, py - 1, 2, far)
+        g.rect(px + 3, py, 2, 2, "lgrey")
+    tail = spec["tail"]
+    if tail == "up":
+        g.ell(4, 12 + b, 1.5, 4.5, *coat)
+        g.ell(4, 8.5 + b, 1.3, 1.5, "white")
+    elif tail == "plume":
+        g.ell(4, 19 + b, 4, 2.2, *coat)
+        g.ell(1.5, 19.5 + b, 1.5, 1.4, "white")
+    elif tail == "curl":
+        g.ell(7, 14 + b, 3.5, 3.2, *coat)
+        g.ell(7, 14 + b, 1.5, 1.4, under)
+    else:
+        g.ell(4.5, 14 + b, 1.3, 3.5, *coat)
+    g.ell(14, 19 + b, 9.5, 5, *coat)
+    if spec.get("saddle"):
+        g.ell(12, 16.5 + b, 6, 2.5, spec["saddle"], None)
+    g.ell(15, 22 + b, 7, 2, under, "lgrey" if under == "white" else "tan")
+    g.ell(21, 19 + b, 3, 3.5, under, "lgrey" if under == "white" else "tan")
+    if spec.get("harness"):
+        g.rect(17, 14 + b, 2, 10, "sky")
+        g.rect(17, 14 + b, 1, 10, "cyan")
+        g.rect(9, 14 + b, 8, 1, "sky")
+    for (x, y), (px, py) in (((7, 21 + b), hind), ((18, 21 + b), front)):
+        hazards.limb(g, x, y, px, py - 1, 3, leg)
+        g.rect(px, py, 3, 2, sock)
+        g.p(px + 2, py + 1, "lgrey" if sock == "white" else "tan")
+    ears = spec["ears"]
+    if ears in ("prick", "big"):
+        big = ears == "big"
+        g.tri((19.5, 9 + b), (19 if big else 20.5, (0 if big else 2) + b), (24, 7.5 + b), coat[0])
+        g.tri((21, 8 + b), (20.5 if big else 21, (2.5 if big else 4.5) + b), (23, 7.5 + b), "pink")
+    g.ell(23.5, 12.5 + b, 5, 4.5, *coat)
+    if ears == "flop":
+        g.ell(21, 13.5 + b, 2.2, 4, "dbrown", "plum", "brown")
+    if spec.get("mask"):
+        g.ell(25, 13.5 + b, 3.5, 2.5, "white", "lgrey")
+        g.rect(23, 10 + b, 2, 1, "white")
+    g.ell(27, 14.5 + b, 3, 2, spec["muzzle"], "lgrey" if spec["muzzle"] == "white" else "tan")
+    g.rect(29, 13 + b, 1, 2, "ink")
+    g.p(28, 13 + b, "ink")
+    eye = spec.get("eye", "ink")
+    g.rect(24, 11 + b, 2, 2, eye)
+    g.p(24, 11 + b, "white")
+    if eye != "ink":
+        g.p(25, 12 + b, "ink")
+    g.p(27, 16 + b, "dbrown")
+    if spec.get("frisbee"):
+        g.ell(29.5, 17.5 + b, 2.2, 3.5, "red", "dred", "pink")
+        g.rect(29, 16 + b, 1, 3, "dred")
+    if spec.get("collar"):
+        g.rect(19, 13 + b, 2, 5, spec["collar"])
+    return lit(g)
+
+
+# Each Social dog's side view, for side_dog.
+SIDE = {
+    "social-gate-dog": dict(coat=("tan", "brown", "cream"), saddle="dbrown", under="white", leg="tan", sock="white",
+                            ears="flop", tail="up", muzzle="white", collar="red"),
+    "social-frisbee-dog": dict(coat=("navy", "ink", "dslate"), far="ink", under="white", leg="navy", sock="white",
+                               ears="prick", tail="plume", muzzle="white", eye="amber", frisbee=True),
+    "social-handbag-dog": dict(coat=("tan", "brown", "cream"), under="cream", leg="tan", sock="cream",
+                               ears="big", tail="thin", muzzle="cream", collar="sky"),
+    "social-jogger-dog": dict(coat=("grey", "slate", "lgrey"), under="white", leg="white", sock="white",
+                              ears="prick", tail="curl", muzzle="white", mask=True, eye="sky", harness=True),
+}
+
+
 # Each owner: (top, legs, shoes).
 OWNERS = {
     "social-gate-dog": (gardener_top, "blue", "dgreen"),
@@ -693,8 +777,10 @@ def skins(s):
                     ("flee", [drawn(s, flee, k) for k in (-1, 1)], 110),
                     ("idle", [drawn(s, draw, bob=bb) for bb in BREATH], BREATH_MS)]
     for key, draw in DOGS.items():
+        run = [dict(bob=q["bob"], front=q["front"], hind=q["hind"]) for q in hazards.CORGI_RUN]
         yield key, [("walk", [drawn(s, draw, **q) for q in road.CORGI_WALK], 100),
-                    ("idle", [drawn(s, draw, **q) for q in road.CORGI_IDLE], 300)]
+                    ("idle", [drawn(s, draw, **q) for q in road.CORGI_IDLE], 300),
+                    ("run", [drawn(s, side_dog, SIDE[key], **q) for q in run], 100)]
         top, legs, shoes = OWNERS[key]
         yield f"{key}-owner", [("walk", [dressed(s, top, legs, shoes, **q) for q in (dict(lf=-2), dict(rf=-2))], 200),
                                ("idle", [dressed(s, top, legs, shoes, bob=bb) for bb in BREATH], BREATH_MS)]
@@ -711,8 +797,9 @@ def base(key):
 
 def sprites():
     """Every skin at full size, then at each depth step, after checking each keeps its base kind's frame size,
-    tags, frame counts and durations."""
+    tags, frame counts and durations; a Social dog has loose-dog's run after other-dog's tags."""
     kinds = dict(road.sprites())
+    kinds["other-dog"] = kinds["other-dog"] + dict(hazards.sprites())["loose-dog"]
     out = list(skins(SCALE)) + [(f"{key}@{suffix}", tags) for suffix, step in STEPS
                                 for key, tags in skins(SCALE * step)]
     full = dict(out)

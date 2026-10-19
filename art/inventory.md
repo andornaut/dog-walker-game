@@ -77,7 +77,7 @@ Same tags, frames and durations as the original.
 
 ### Encounter skins
 
-Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and has the same depth variants at every step (`@88`, `@75`, `@62`, `@50`: 35, 30, 25 and 20 square for the animals, 35×53, 30×45, 25×38 and 20×30 for the 40×60 skins).
+Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and has the same depth variants at every step (`@88`, `@75`, `@62`, `@50`: 35, 30, 25 and 20 square for the animals, 35×53, 30×45, 25×38 and 20×30 for the 40×60 skins). A Social dog also runs as the zone's loose dog: `run` is `loose-dog`'s gallop, 4 frames at 100ms, side view facing right, in the dog's 40×40 frame.
 
 | Key                        | Type   | Size  | Tags                   | Pri  | Note                                                            |
 | -------------------------- | ------ | ----- | ---------------------- | ---- | --------------------------------------------------------------- |
@@ -87,13 +87,13 @@ Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn
 | `chase-rabbit`             | sprite | 40×40 | `idle`, `run`          | core | Chase on The Long Way Home; a white rabbit                      |
 | `snatch-raccoon`           | sprite | 40×60 | `walk`, `flee`, `idle` | core | Snatch on Willow Crescent and The Long Way Home; holds a sack   |
 | `snatch-seagull`           | sprite | 40×60 | `walk`, `flee`, `idle` | core | Snatch on Fairview Park and Riverside Path; flees flying        |
-| `social-frisbee-dog`       | sprite | 40×40 | `walk`, `idle`         | core | Social on Fairview Park; a border collie with a red frisbee     |
+| `social-frisbee-dog`       | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Fairview Park; a border collie with a red frisbee     |
 | `social-frisbee-dog-owner` | sprite | 40×60 | `walk`, `idle`         | core | Walks behind `social-frisbee-dog`; a backwards cap              |
-| `social-gate-dog`          | sprite | 40×40 | `walk`, `idle`         | core | Social on Willow Crescent; a beagle on a white picket gate      |
+| `social-gate-dog`          | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Willow Crescent; a beagle on a white picket gate      |
 | `social-gate-dog-owner`    | sprite | 40×60 | `walk`, `idle`         | core | Stands by `social-gate-dog`; a gardener in a straw hat          |
-| `social-handbag-dog`       | sprite | 40×40 | `walk`, `idle`         | core | Social on Main Street; a chihuahua in a purple handbag          |
+| `social-handbag-dog`       | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Main Street; a chihuahua in a purple handbag          |
 | `social-handbag-dog-owner` | sprite | 40×60 | `walk`, `idle`         | core | Stands by `social-handbag-dog`; a shopper in sunglasses         |
-| `social-jogger-dog`        | sprite | 40×40 | `walk`, `idle`         | core | Social on Riverside Path; a husky in a running harness          |
+| `social-jogger-dog`        | sprite | 40×40 | `walk`, `idle`, `run`  | core | Social on Riverside Path; a husky in a running harness          |
 | `social-jogger-dog-owner`  | sprite | 40×60 | `walk`, `idle`         | core | Runs behind `social-jogger-dog`; a jogger in a headband         |
 
 ## Effects

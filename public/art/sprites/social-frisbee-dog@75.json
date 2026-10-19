@@ -62,6 +62,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
     "duration": 300
+   },
+   "social-frisbee-dog@75 8.aseprite": {
+    "frame": { "x": 240, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 100
+   },
+   "social-frisbee-dog@75 9.aseprite": {
+    "frame": { "x": 270, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 100
+   },
+   "social-frisbee-dog@75 10.aseprite": {
+    "frame": { "x": 300, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 100
+   },
+   "social-frisbee-dog@75 11.aseprite": {
+    "frame": { "x": 330, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 100
    }
  },
  "meta": {
@@ -69,11 +101,12 @@
   "version": "1.2.30-x64",
   "image": "social-frisbee-dog@75.png",
   "format": "RGBA8888",
-  "size": { "w": 240, "h": 30 },
+  "size": { "w": 360, "h": 30 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 7, "direction": "forward" }
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "run", "from": 8, "to": 11, "direction": "forward" }
   ]
  }
 }

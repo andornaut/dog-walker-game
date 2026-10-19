@@ -62,6 +62,38 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 25 },
     "sourceSize": { "w": 25, "h": 25 },
     "duration": 300
+   },
+   "social-handbag-dog@62 8.aseprite": {
+    "frame": { "x": 200, "y": 0, "w": 25, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 25 },
+    "sourceSize": { "w": 25, "h": 25 },
+    "duration": 100
+   },
+   "social-handbag-dog@62 9.aseprite": {
+    "frame": { "x": 225, "y": 0, "w": 25, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 25 },
+    "sourceSize": { "w": 25, "h": 25 },
+    "duration": 100
+   },
+   "social-handbag-dog@62 10.aseprite": {
+    "frame": { "x": 250, "y": 0, "w": 25, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 25 },
+    "sourceSize": { "w": 25, "h": 25 },
+    "duration": 100
+   },
+   "social-handbag-dog@62 11.aseprite": {
+    "frame": { "x": 275, "y": 0, "w": 25, "h": 25 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 25, "h": 25 },
+    "sourceSize": { "w": 25, "h": 25 },
+    "duration": 100
    }
  },
  "meta": {
@@ -69,11 +101,12 @@
   "version": "1.2.30-x64",
   "image": "social-handbag-dog@62.png",
   "format": "RGBA8888",
-  "size": { "w": 200, "h": 25 },
+  "size": { "w": 300, "h": 25 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 7, "direction": "forward" }
+   { "name": "idle", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "run", "from": 8, "to": 11, "direction": "forward" }
   ]
  }
 }
