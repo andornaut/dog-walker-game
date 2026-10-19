@@ -717,10 +717,6 @@
       "png": "images/card-big-tipper.png"
     },
     {
-      "key": "card-biscuit-neighbour-pass",
-      "png": "images/card-biscuit-neighbour-pass.png"
-    },
-    {
       "key": "card-biscuit-neighbour-take",
       "png": "images/card-biscuit-neighbour-take.png"
     },
@@ -791,10 +787,6 @@
     {
       "key": "card-photo-op-pose",
       "png": "images/card-photo-op-pose.png"
-    },
-    {
-      "key": "card-photo-op-wave",
-      "png": "images/card-photo-op-wave.png"
     },
     {
       "key": "card-puddle-through",

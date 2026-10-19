@@ -121,11 +121,10 @@ Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
 Four zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each zone needs a road that tiles vertically across the 280px road width, plus a few non-colliding scenery props at the road edges.
 
-| Asset           | Key pattern          | Type  | Size   | Priority | Notes                                                                                                                                                |
-| --------------- | -------------------- | ----- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Road strip      | `road-<zone>`        | image | 280×64 | core     | Seamless vertically; base is the zone's road colour; 2px lane dividers at x = 56k−1; drawn by `art/tools/roads.py`                                   |
-| Zone transition | `road-<zone>-start`  | image | 280×64 | later    | Bottom rows are the previous zone's strip, top rows this zone's, joined by a crossing (kerb and zebra, stone sill, bricks on end); Woof Way has none |
-| Scenery props   | `prop-<zone>-<name>` | image | 32×32  | later    | e.g. tree, hydrant, bench, shop awning, mailbox                                                                                                      |
+| Asset           | Key pattern         | Type  | Size   | Priority | Notes                                                                                                                                                |
+| --------------- | ------------------- | ----- | ------ | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Road strip      | `road-<zone>`       | image | 280×64 | core     | Seamless vertically; base is the zone's road colour; 2px lane dividers at x = 56k−1; drawn by `art/tools/roads.py`                                   |
+| Zone transition | `road-<zone>-start` | image | 280×64 | later    | Bottom rows are the previous zone's strip, top rows this zone's, joined by a crossing (kerb and zebra, stone sill, bricks on end); Woof Way has none |
 
 Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (later). Milestone 6 can ship a single `road-street` and reuse it.
 
@@ -181,7 +180,7 @@ Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, 
 | Poop bags          | skip (`card-skip`)                                                                                          | 1     | core     |
 | Upgrades           | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, second wind, sweet talker | 9     | core     |
 
-Total: 37 card illustrations in use, 27 of them in Milestone 6. `card-biscuit-neighbour-pass` and `card-photo-op-wave` match no option and are unused.
+Total: 37 card illustrations, 27 of them in Milestone 6.
 
 ## Help screen
 

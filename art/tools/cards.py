@@ -328,14 +328,6 @@ def neighbour_take():
     return a
 
 
-def neighbour_pass():
-    a = Art()
-    a.grass()
-    a.put("biscuit-neighbour", "wave", 54, 54, 1)
-    a.put("walker-casey", "walk", 20, 56, 2)
-    return a
-
-
 def photo_pose():
     a = Art()
     a.ground("shops")
@@ -343,14 +335,6 @@ def photo_pose():
     a.put("dog-duchess", "react", 20, 46, shadow=False)
     a.sparkle(10, 10, "yellow")
     a.sparkle(30, 6, "white")
-    return a
-
-
-def photo_wave():
-    a = Art()
-    a.ground("shops")
-    a.put("photo-op", "idle", 56, 52, 1)
-    a.put("walker-casey", "walk", 22, 56, 3)
     return a
 
 
@@ -652,9 +636,7 @@ ILLUSTRATIONS = {
     "card-lost-wallet-return": wallet_return,
     "card-lost-wallet-keep": wallet_keep,
     "card-biscuit-neighbour-take": neighbour_take,
-    "card-biscuit-neighbour-pass": neighbour_pass,
     "card-photo-op-pose": photo_pose,
-    "card-photo-op-wave": photo_wave,
     "card-stop-sign-wait": stop_wait,
     "card-stop-sign-dart": stop_dart,
     "card-chatty-neighbour-chat": chatty_chat,
