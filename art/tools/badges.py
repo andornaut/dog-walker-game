@@ -116,14 +116,15 @@ def _(g):
 
 @icon("high-earner")
 def _(g):
-    g.ell(16, 19, 7, 6, "brown", "dbrown", "tan")
-    g.tri((12, 10), (20, 10), (16, 14), "brown")
-    g.rect(13, 12, 6, 1, "dbrown")
-    for y, row in enumerate(["0110", "1000", "0110", "0001", "1110"]):
+    for cx, cy in ((9, 21), (23, 21)):
+        g.ell(cx, cy, 3.5, 3.5, "amber", "orange", "yellow")
+    g.ell(16, 15, 8, 8, "orange", "rust")
+    g.ell(16, 15, 6, 6, "amber", "orange", "yellow")
+    for y, row in enumerate(["..1..", ".1111", "1.1..", ".111.", "..1.1", "1111.", "..1.."]):
         for x, c in enumerate(row):
             if c == "1":
-                g.p(14 + x, 16 + y, "yellow")
-    g.rect(15, 15, 1, 7, "yellow")
+                g.p(14 + x, 12 + y, "dbrown")
+    g.p(12, 11, "white")
 
 
 @icon("full-kennel")
@@ -136,12 +137,18 @@ def _(g):
 
 @icon("fully-equipped")
 def _(g):
-    g.rect(6, 14, 20, 2, "dslate")
-    g.rect(14, 13, 4, 4, "lgrey")
-    g.rect(15, 14, 2, 2, "slate")
-    g.blob(16, 21, 7, 4.5, "red", "dred", "pink")
-    g.rect(10, 20, 12, 1, "dred")
-    g.rect(20, 20, 1, 3, "yellow")
+    """Three of the five gear items: whistle, lucky collar, running shoe."""
+    g.ell(11, 11, 4, 3, "lgrey", "grey", "white")
+    g.rect(13, 10, 5, 2, "lgrey")
+    g.p(10, 11, "ink")
+    g.ell(21, 10, 5, 4, "red", "dred")
+    g.ell(21, 9.5, 3, 2, None)
+    g.ell(21, 15, 1.8, 1.8, "yellow", "amber")
+    g.ell(15, 20, 7, 3.5, "sky", "blue", "cyan")
+    g.rect(9, 20, 15, 2, "sky")
+    g.rect(8, 22, 16, 2, "white")
+    g.rect(13, 18, 1, 3, "white")
+    g.rect(16, 18, 1, 3, "white")
 
 
 @icon("every-owner-smiles")
