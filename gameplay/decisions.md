@@ -117,3 +117,9 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-19 · Tech · Player state is one versioned local save per browser, validated with Valibot on load and migrated between versions, behind an async storage interface; each zone checkpoints the run's earnings so a closed tab banks them as if heading home
 - 2026-10-19 · Design · Persistent stats: overall stats on a Stats page (runs by outcome, best and lifetime earnings, firings and most-firing owner, best zone, worlds finished), per-dog stats on each roster card, and a new-best flag on the end screen
 - 2026-10-19 · Art · Equipped gear shows as a badge beside the walker and in the gear row; the walker sprite has no gear variants
+- 2026-10-19 · Process · Docs split into v1 and Next: game-design.md is the single v1 rulebook (v1-plan.md's rules merged into it), next.md holds everything for after v1 with no versions or order, and v1-plan.md keeps the milestones and done-when
+- 2026-10-19 · Process · Idea status [parked] is replaced by [next]
+- 2026-10-19 · Design · v1 is the first complete game in one world, Maple Street; replaces "the smallest web game that proves the core loop is fun"
+- 2026-10-19 · Design · Dog training, the walker kit, cosmetic unlocks and walker customization move into v1; their content is still to design
+- 2026-10-19 · Design · The home screen is also the shop: tap a locked dog or gear item to buy it
+- 2026-10-19 · Design · A logbook panel on the home screen shows the best walk, totals and the last walk; best walk and walk count also sit in the top bar; the Stats page holds the full stats behind it
