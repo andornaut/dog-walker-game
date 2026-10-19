@@ -4,8 +4,8 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 | Doc                                | What it holds                                                       |
 | ---------------------------------- | ------------------------------------------------------------------- |
-| [`style-guide.md`](style-guide.md) | The rules: layout, palette, contrast, proportions, animation, sound |
 | [`inventory.md`](inventory.md)     | Every asset: key, kind, size, tags, priority                        |
+| [`style-guide.md`](style-guide.md) | The rules: layout, palette, contrast, proportions, animation, sound |
 
 ## Scope
 
@@ -26,7 +26,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 - The kebab-case manifest key is the file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`, `public/art/images/<key>.png` or `public/art/fonts/<key>.png` and `.fnt`.
 - A key starts with its kind's prefix, as in `inventory.md` (`dog-`, `fx-`, `ui-`); road objects, moving hazards and `logo` use a plain name.
 - A depth variant appends its step (`dog-koda@50`).
-- Zone keys use the zone's art id: `woof-way`, `bark-park`, `sniff-street-shops`, `the-long-way-home`, `snooze-crescent`, `paws-promenade`.
+- Zone keys use the zone's art id: `snooze-crescent`, `bark-park`, `woof-way`, `sniff-street-shops`, `paws-promenade`, `the-long-way-home` (easiest to hardest).
 
 ### Consistency checks
 
@@ -36,11 +36,8 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Remaining for the first build
 
-- **Six new encounters:** picnic, goose, petunias, trash bins, café patio and lemonade stand. Road sprites with depth variants, hit effects, label and flash colours, the lemonade popup and hit sounds, then a card illustration per option.
-- **Need cards:** the good spot, grumpy neighbour, pee-mail and water stop cards (two options each). The stranger, play date and accident cards are drawn.
-- **Fork path cards:** the route frame and a preview for each zone are drawn; they ship once forks are in the game.
-- **Depth variants:** variants for the thief, the people and the other road sprites that have none; the low skunk cloud, the front-view skunk, squirrel and corgi, and the wider ice cream truck at each step; the 0.875 and 0.625 steps once the game reads them.
-- **360×560 screens:** `screen-home`, `screen-stats`, `screen-end` and `screen-loading` are drawn and wait for the game's 560 layout.
-- **Start screen restyle:** the painted sign logo and the flat step bands from the start screen mock.
+- **Cleanup:** remove the `card-grumpy-neighbour-*` cards (the neighbour appears in `card-accident-walk-on`); after forks, retire the zone-free `ui-zone-pips` tags (`current`, `done`); retire `fx-stinky`, which nothing uses.
+- **Depth variants:** the `@88` and `@62` steps for every road sprite and need spot, once the game's step table lands.
+- **Encounter cards:** a card illustration per option of the six new encounters (16), in progress.
 - **Help:** rebuild `help-zones` for forks once they are in the game.
-- **Cleanup:** retire the `dash` and `waffles` keys and tags, the zone-free `ui-zone-pips` tags once the top bar uses the per-zone ones, and `fx-stinky`, which nothing uses.
+- **Start screen:** for the uniform layout, the `ui-section` frame and band (`incomplete`, `complete`, `neutral`), a not-ready Start button and the repainted sign logo.

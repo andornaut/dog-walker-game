@@ -39,7 +39,7 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 
 - Text holds 4.5:1 against what it sits on (3:1 at 2× and larger); essential icons and marks hold 3:1. Inactive controls are exempt.
 - A state never relies on colour alone: it also changes shape (a tick, a hollow heart, a filled pip).
-- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Woof Way, dred on Bark Park, Sniff Street Shops and Paws Promenade (5.07:1), plum on The Long Way Home and Snooze Crescent (4.84:1).
+- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Woof Way, dred on Bark Park, Sniff Street Shops and Paws Promenade (5.07:1), plum on Snooze Crescent and The Long Way Home (4.84:1).
 
 ### UI colour pairs
 
@@ -91,10 +91,10 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
 | Control      | Scene                | Button | Hit area     |
 | ------------ | -------------------- | ------ | ------------ |
+| Help         | Home gate, top left  | 8,46   | 0,40 44×44   |
 | Home         | Run top bar          | 130,10 | 118,0 44×44  |
 | Pause        | Run top bar          | 174,10 | 162,0 44×44  |
 | Sound toggle | Home gate, top right | 332,46 | 316,40 44×44 |
-| Help         | Home gate, top left  | 8,46   | 0,40 44×44   |
 
 - The run top bar has no sound button: mute is the Settings "Sound" row and the M key.
 
@@ -123,24 +123,24 @@ At 1 ♥, `ui-doghouse-warn` pulses over the house (`static` with reduced motion
 
 ### Choice cards
 
-- Band colour by card type: dred encounter, blue lucky, amber forced stop, forest upgrade.
+- Band colour by card type: dred encounter, amber forced stop, blue lucky, forest upgrade.
 - Illustrations are road sprites at 1× on a scrap of the zone's ground, with no walker: a leash runs off the bottom edge.
 - A disabled card is greyed with the grey ramp; the selected one is outlined in amber.
 
 ### Hits, moments and statuses
 
-| Event              | Shows                                                                                                                                                                                                    |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Any hit            | `fx-bump` at the contact point; walker `stumble`, dogs `react`                                                                                                                                           |
-| Minor bump         | `fx-coins` under the cause label; `fx-dizzy` over the walker while lane input is locked                                                                                                                  |
-| Puddle, pickup     | `fx-splash`, `fx-sparkle`                                                                                                                                                                                |
-| ♥ change at a slot | `fx-heart` `up` or `down` beside the floating label                                                                                                                                                      |
-| Encounter hit      | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (skunk green, puddle sky, thief amber, squirrel orange, other dog pink); the label at 2× on `ui-hit-label`; caught dogs `shake` |
-| Firing             | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2×; the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                                        |
-| 1 ♥                | Owner's `worried` face and `ui-doghouse-warn`                                                                                                                                                            |
-| Fee payout         | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                        |
-| Treat given        | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                              |
-| Moving hazard      | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead                                                                                                                                      |
+| Event                  | Shows                                                                                                                                                                                                                                                                                   |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1 ♥                    | Owner's `worried` face and `ui-doghouse-warn`                                                                                                                                                                                                                                           |
+| Any hit                | `fx-bump` at the contact point; walker `stumble`, dogs `react`                                                                                                                                                                                                                          |
+| Encounter hit          | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (café patio amber, goose white, other dog pink, petunias pink, picnic orange, puddle sky, skunk green, squirrel orange, thief amber, trash bins green); the label at 2× on `ui-hit-label`; caught dogs `shake` |
+| Fee payout             | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                                                                                       |
+| Firing                 | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2×; the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                                                                                                                       |
+| Heart change at a slot | `fx-heart` `up` or `down` beside the floating label                                                                                                                                                                                                                                     |
+| Minor bump             | `fx-coins` under the cause label; `fx-dizzy` over the walker while lane input is locked                                                                                                                                                                                                 |
+| Moving hazard          | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead                                                                                                                                                                                                                     |
+| Puddle, pickup         | `fx-splash`, `fx-sparkle`                                                                                                                                                                                                                                                               |
+| Treat given            | `fx-treat-pop` and the owner's `happy` face                                                                                                                                                                                                                                             |
 
 - `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog, never with the pack-wide `fx-stinky`. Two statuses alternate every second, most recent first.
 - With reduced motion, bursts and stars play and the stumble is skipped.
@@ -155,9 +155,9 @@ At 1 ♥, `ui-doghouse-warn` pulses over the house (`static` with reduced motion
 
 | Idle      | Frames | Timing       | Motion                                                                              |
 | --------- | ------ | ------------ | ----------------------------------------------------------------------------------- |
-| People    | 2      | 400ms        | Breathing: the body 1px higher on frame 2, feet planted, arms at rest               |
 | Dogs      | 4      | 300ms        | Tail at −1, 0, +1, 0; the right ear 1px higher on the last frame                    |
 | Obstacles | 2 to 4 | 350 to 500ms | A small event (glint, lid, drip, leaves, hazard lights); rest pose most of the loop |
+| People    | 2      | 400ms        | Breathing: the body 1px higher on frame 2, feet planted, arms at rest               |
 
 ## Depth scaling
 
@@ -166,8 +166,8 @@ Sprites scale by depth in steps of 1×, 0.75× and 0.5×, nearest-neighbour. A s
 ## Road strips
 
 - 280×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
-- The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Woof Way dslate (navy), Bark Park tan (brown), Sniff Street Shops lgrey (grey), The Long Way Home skin2 (brown), Snooze Crescent grey (slate), Paws Promenade cream (tan).
-- The four lane dividers sit at x = 56k−1, 2px wide, one look per zone. Lane marks are dbrown on Bark Park; white outlined in plum on The Long Way Home; faded white with a slate edge on Snooze Crescent; dbrown dashes 20 rows long in 32 on Paws Promenade.
+- The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Snooze Crescent grey (slate), Bark Park tan (brown), Woof Way dslate (navy), Sniff Street Shops lgrey (grey), Paws Promenade cream (tan), The Long Way Home skin2 (brown).
+- The four lane dividers sit at x = 56k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Snooze Crescent; dbrown on Bark Park; dbrown dashes 20 rows long in 32 on Paws Promenade; white outlined in plum on The Long Way Home.
 - Curbs and verges stay inside the outer 3 to 7px, clear of the 12px sprite margin.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The camera has its horizon at y −164 and the walker's feet at y 464; the road's far edge meets the backdrop at y 150 at scale 0.5. Its ratio r derives from speed (the visible distance is 5.25 s × `roadScrollSpeed`, so r is 0.797 at 150 px/s). The rows from the far edge down to about y 180 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
@@ -180,12 +180,12 @@ Where row 149 meets the road, left side (the right mirrors it):
 
 | Zone               | Edge               | Curb     | Road from  |
 | ------------------ | ------------------ | -------- | ---------- |
-| Woof Way           | Sidewalk 86 to 107 | 108..111 | 112        |
-| Bark Park          | Grass to 109       | none     | 110 (path) |
-| Sniff Street Shops | Paving to 107      | 108..111 | 112        |
-| The Long Way Home  | Sidewalk 86 to 107 | 108..109 | 110        |
 | Snooze Crescent    | Sidewalk 86 to 107 | 108..109 | 110        |
+| Bark Park          | Grass to 109       | none     | 110 (path) |
+| Woof Way           | Sidewalk 86 to 107 | 108..111 | 112        |
+| Sniff Street Shops | Paving to 107      | 108..111 | 112        |
 | Paws Promenade     | Paving 86 to 109   | none     | 110        |
+| The Long Way Home  | Sidewalk 86 to 107 | 108..109 | 110        |
 
 Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 93 to 95, x 0 to 82), the near-right lawn (x 274 to 359, rows 86 to 109), and both sidewalks.
 

@@ -10,7 +10,7 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 | Key                   | Type   | Size  | Tags                                             | Pri  | Note                                                                              |
 | --------------------- | ------ | ----- | ------------------------------------------------ | ---- | --------------------------------------------------------------------------------- |
-| `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | core | casey, ada, ben, trista                                                           |
+| `walker-<name>`       | sprite | 32×48 | `walk`, `react`, `stumble`, `idle`               | core | ada, ben, casey, trista                                                           |
 | `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                     |
 | `dog-<name>`          | sprite | 32×32 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny |
 | `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse                                                                          |
@@ -20,68 +20,90 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 ## Road objects
 
-| Key                              | Type   | Size          | Tags                                 | Pri  | Note                                                           |
-| -------------------------------- | ------ | ------------- | ------------------------------------ | ---- | -------------------------------------------------------------- |
-| `skunk`                          | sprite | 32×32         | `idle`                               | core | Centred on `skunk-cloud`                                       |
-| `skunk-cloud`                    | sprite | 88×88         | `loop`                               | core | 2×2 lanes and rows; dithered haze under the skunk; the hit box |
-| `squirrel`                       | sprite | 32×32         | `idle`, `run`                        | core |                                                                |
-| `puddle`                         | sprite | 88×32         | `idle`                               | core | 2 lanes; ground decal drawn under everything                   |
-| `thief`                          | sprite | 32×48         | `walk`, `flee`, `idle`               | core |                                                                |
-| `other-dog`                      | sprite | 32×32         | `walk`                               | core | A corgi                                                        |
-| `other-dog-owner`                | sprite | 32×48         | `walk`, `idle`                       | core | Walks behind `other-dog`                                       |
-| `stop-sign`                      | sprite | 32×48         | `idle`                               | core | Forced stop                                                    |
-| `chatty-neighbour`               | sprite | 32×48         | `wave`, `idle`                       | core | Forced stop; coffee mug                                        |
-| `kid`                            | sprite | 32×48         | `wave`, `sad`, `idle`                | core | Forced stop                                                    |
-| `ice-cream-truck`                | sprite | 64×48         | `idle`                               | core | Forced stop; 2 lanes                                           |
-| `construction`                   | sprite | 56×32         | `idle`                               | core | Forced stop; one lane, repeated across the road                |
-| `mail-carrier`                   | sprite | 32×48         | `walk`, `idle`                       | core | Forced stop                                                    |
-| `lost-wallet`                    | sprite | 16×16         | `idle`                               | core | Lucky                                                          |
-| `biscuit-neighbour`              | sprite | 32×48         | `wave`, `idle`                       | core | Lucky; holds a biscuit jar                                     |
-| `photo-op`                       | sprite | 32×48         | `idle`, `flash`                      | core | Lucky; tourist with a camera                                   |
-| `treat`, `tip`                   | sprite | 16×16         | `idle`                               | core | Pickups                                                        |
-| `cone`, `bin`, `hydrant`         | sprite | 32×32         | `idle`                               | core | Minor, 1 lane                                                  |
-| `bench`                          | sprite | 88×24         | `idle`                               | core | Minor, 2 lanes                                                 |
-| `hedge`                          | sprite | 144×24        | `idle`                               | core | Minor, 3 lanes                                                 |
-| `barrier-2`, `barrier-3`         | sprite | 88×24, 144×24 | `idle`                               | core | Minor; Woof Way and Sniff Street Shops                         |
-| `parked-car`                     | sprite | 44×28         | `idle`                               | core | Minor, 1 lane by 3 rows; drawn at the footprint's near edge    |
-| `squirrel-dash`                  | sprite | 32×32         | `run`                                | core | Crosser                                                        |
-| `loose-dog`                      | sprite | 32×32         | `run`                                | core | Crosser; the `other-dog` corgi with a broken leash             |
-| `ball-bounce`                    | sprite | 16×24         | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`       |
-| `cyclist`                        | sprite | 32×48         | `ride`                               | core | Minor; rides down a lane                                       |
-| `ui-warning`, `ui-warning-arrow` | sprite | 16×16         | `pulse`; the arrow also `down-pulse` | core | Hazard cue at the lane edge                                    |
+| Key                              | Type   | Size          | Tags                                 | Pri  | Note                                                          |
+| -------------------------------- | ------ | ------------- | ------------------------------------ | ---- | ------------------------------------------------------------- |
+| `cafe-patio`                     | sprite | 88×40         | `idle`                               | core | Encounter, 2 lanes                                            |
+| `goose`                          | sprite | 32×32         | `run`, `idle`                        | core | Encounter, a mover; side view facing right, mirrored for left |
+| `other-dog`                      | sprite | 32×32         | `walk`, `idle`                       | core | Encounter; a corgi                                            |
+| `other-dog-owner`                | sprite | 32×48         | `walk`, `idle`                       | core | Walks behind `other-dog`                                      |
+| `petunias`                       | sprite | 88×32         | `idle`                               | core | Encounter, 2 lanes                                            |
+| `picnic`                         | sprite | 88×32         | `idle`                               | core | Encounter, 2 lanes                                            |
+| `puddle`                         | sprite | 88×32         | `idle`                               | core | Encounter, 2 lanes; ground decal drawn under everything       |
+| `skunk`                          | sprite | 32×32         | `idle`                               | core | Encounter; centred on `skunk-cloud`                           |
+| `skunk-cloud`                    | sprite | 88×40         | `loop`                               | core | 2×2 lanes and rows; a low dithered haze under the skunk       |
+| `squirrel`                       | sprite | 32×32         | `idle`, `run`                        | core | Encounter                                                     |
+| `thief`                          | sprite | 32×48         | `walk`, `flee`, `idle`               | core | Encounter                                                     |
+| `trash-bins`                     | sprite | 88×32         | `idle`                               | core | Encounter, 2 lanes                                            |
+| `chatty-neighbour`               | sprite | 32×48         | `wave`, `idle`                       | core | Forced stop; coffee mug                                       |
+| `construction`                   | sprite | 56×32         | `idle`                               | core | Forced stop; one lane, repeated across the road               |
+| `ice-cream-truck`                | sprite | 88×44         | `idle`                               | core | Forced stop; 2 lanes; a rear-view van                         |
+| `kid`                            | sprite | 32×48         | `wave`, `sad`, `idle`                | core | Forced stop                                                   |
+| `mail-carrier`                   | sprite | 32×48         | `walk`, `idle`                       | core | Forced stop                                                   |
+| `stop-sign`                      | sprite | 32×48         | `idle`                               | core | Forced stop                                                   |
+| `biscuit-neighbour`              | sprite | 32×48         | `wave`, `idle`                       | core | Lucky; holds a biscuit jar                                    |
+| `lemonade-stand`                 | sprite | 32×48         | `idle`                               | core | Lucky; the kid behind a stand                                 |
+| `lost-wallet`                    | sprite | 16×16         | `idle`                               | core | Lucky                                                         |
+| `photo-op`                       | sprite | 32×48         | `idle`, `flash`                      | core | Lucky; tourist with a camera                                  |
+| `tip`, `treat`                   | sprite | 16×16         | `idle`                               | core | Pickups                                                       |
+| `barrier-2`, `barrier-3`         | sprite | 88×24, 144×24 | `idle`                               | core | Minor; Woof Way and Sniff Street Shops                        |
+| `bench`                          | sprite | 88×24         | `idle`                               | core | Minor, 2 lanes                                                |
+| `bin`, `cone`, `hydrant`         | sprite | 32×32         | `idle`                               | core | Minor, 1 lane                                                 |
+| `hedge`                          | sprite | 144×24        | `idle`                               | core | Minor, 3 lanes                                                |
+| `parked-car`                     | sprite | 44×28         | `idle`                               | core | Minor, 1 lane by 3 rows; drawn at the footprint's near edge   |
+| `ball-bounce`                    | sprite | 16×24         | `bounce`                             | core | Minor crosser; white with red stripes, unlike `gag-ball`      |
+| `cyclist`                        | sprite | 32×48         | `ride`                               | core | Minor; rides down a lane                                      |
+| `loose-dog`                      | sprite | 32×32         | `run`                                | core | Crosser; the `other-dog` corgi with a broken leash            |
+| `squirrel-dash`                  | sprite | 32×32         | `run`                                | core | Crosser                                                       |
+| `ui-warning`, `ui-warning-arrow` | sprite | 16×16         | `pulse`; the arrow also `down-pulse` | core | Hazard cue at the lane edge                                   |
 
 ### Depth variants
 
 Same tags, frames and durations as the original.
 
-| Key                                                                           | Size `@75`, `@50` | Pri  |
-| ----------------------------------------------------------------------------- | ----------------- | ---- |
-| `tip`, `treat`                                                                | 12×12, 8×8        | core |
-| `cone`, `bin`, `hydrant`, `dog-<name>`, `skunk`, `squirrel-dash`, `loose-dog` | 24×24, 16×16      | core |
-| `squirrel`, `other-dog` (`@50` only)                                          | 16×16             | core |
-| `skunk-cloud` (`@50` only)                                                    | 44×44             | core |
-| `ball-bounce`                                                                 | 12×18, 8×12       | core |
-| `bench`                                                                       | 66×18, 44×12      | core |
-| `cyclist`                                                                     | 24×36, 16×24      | core |
-| `lost-wallet`                                                                 | 12×12, 8×8        | core |
-| `fx-status-<status>`                                                          | 12×12, 8×8        | core |
+| Key                                                                                                       | Size `@75`, `@50` | Pri  |
+| --------------------------------------------------------------------------------------------------------- | ----------------- | ---- |
+| `ball-bounce`                                                                                             | 12×18, 8×12       | core |
+| `bench`                                                                                                   | 66×18, 44×12      | core |
+| `bin`, `cone`, `dog-<name>`, `goose`, `hydrant`, `loose-dog`, `skunk`, `spot-water-bowl`, `squirrel-dash` | 24×24, 16×16      | core |
+| `cafe-patio`, `skunk-cloud`                                                                               | 66×30, 44×20      | core |
+| `cyclist`, `lemonade-stand`, `spot-lamp-post`, `spot-stranger`, `spot-tree`                               | 24×36, 16×24      | core |
+| `fx-status-<status>`, `lost-wallet`, `tip`, `treat`                                                       | 12×12, 8×8        | core |
+| `other-dog`, `squirrel` (`@50` only)                                                                      | 16×16             | core |
+| `petunias`, `picnic`, `trash-bins`                                                                        | 66×24, 44×16      | core |
 
 ## Effects
 
-| Key                     | Type   | Size             | Tags         | Pri   | Note                                                                                 |
-| ----------------------- | ------ | ---------------- | ------------ | ----- | ------------------------------------------------------------------------------------ |
-| `fx-bump`               | sprite | 32×32            | `play`       | core  | Impact star on any hit                                                               |
-| `fx-dizzy`              | sprite | 32×16            | `loop`       | core  | Over the walker while a minor bump locks lane input                                  |
-| `fx-coins`              | sprite | 32×32            | `play`       | core  | Coins knocked loose on a minor bump                                                  |
-| `fx-splash`             | sprite | 32×32            | `play`       | core  | Puddle                                                                               |
-| `fx-sparkle`            | sprite | 16×16            | `play`       | core  | Pickup collected                                                                     |
-| `fx-stinky`             | sprite | 32×32            | `loop`       | core  | Pack-wide stink lines; not shown in the run (per-dog `fx-status-stinky` replaces it) |
-| `fx-bark`               | sprite | 16×16            | `pop`        | core  | Pull tell                                                                            |
-| `fx-heart`              | sprite | 16×16            | `up`, `down` | later | ♥ change at a slot                                                                   |
-| `fx-hit-<encounter>`    | sprite | 64×64            | `play`       | core  | skunk, puddle, thief, squirrel, other-dog                                            |
-| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`       | core  | green, sky, amber, orange, pink; left edge strip, mirrored for right                 |
-| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`     | core  | Stretched to 176×32                                                                  |
-| `fx-status-<status>`    | sprite | 16×16            | `loop`       | core  | stinky, soaked, spooked; over a dog's head                                           |
+| Key                     | Type   | Size             | Tags              | Pri   | Note                                                                                                            |
+| ----------------------- | ------ | ---------------- | ----------------- | ----- | --------------------------------------------------------------------------------------------------------------- |
+| `fx-bark`               | sprite | 16×16            | `pop`             | core  | Pull tell                                                                                                       |
+| `fx-bump`               | sprite | 32×32            | `play`            | core  | Impact star on any hit                                                                                          |
+| `fx-coins`              | sprite | 32×32            | `play`            | core  | Coins knocked loose on a minor bump                                                                             |
+| `fx-dizzy`              | sprite | 32×16            | `loop`            | core  | Over the walker while a minor bump locks lane input                                                             |
+| `fx-heart`              | sprite | 16×16            | `up`, `down`      | later | ♥ change at a slot                                                                                              |
+| `fx-hit-<encounter>`    | sprite | 64×64            | `play`            | core  | cafe, goose, other-dog, petunias, picnic, puddle, skunk, squirrel, thief, trash                                 |
+| `fx-lemonade`           | sprite | 64×64            | `play`            | core  | Lucky hit at the lemonade stand                                                                                 |
+| `fx-sparkle`            | sprite | 16×16            | `play`            | core  | Pickup collected                                                                                                |
+| `fx-splash`             | sprite | 32×32            | `play`            | core  | Puddle                                                                                                          |
+| `fx-status-<status>`    | sprite | 16×16            | `loop`            | core  | soaked, spooked, stinky; over a dog's head                                                                      |
+| `fx-stinky`             | sprite | 32×32            | `loop`            | core  | Pack-wide stink lines; not shown in the run (per-dog `fx-status-stinky` replaces it)                            |
+| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | core  | amber, green, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right |
+| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | core  | Stretched to 176×32; `lucky` for lucky encounters                                                               |
+
+## Dog needs
+
+| Key                | Type   | Size  | Tags                     | Pri  | Note                                                               |
+| ------------------ | ------ | ----- | ------------------------ | ---- | ------------------------------------------------------------------ |
+| `accident-spot`    | sprite | 16×16 | `idle`                   | core | Ground decal left by `fx-accident`, drawn under everything         |
+| `fx-accident`      | sprite | 32×32 | `play`                   | core | A Regular dog's accident, laid on the dog's frame                  |
+| `fx-need-met`      | sprite | 48×48 | `<need>`                 | core | Need fulfilled; bottom-centre on the dog's feet                    |
+| `fx-pull-fail`     | sprite | 16×16 | `play`                   | core | A blocked pull, over the dog's head                                |
+| `icon-need-<need>` | sprite | 16×16 | `normal`                 | core | friendly, nosy, playful, regular, thirsty                          |
+| `spot-lamp-post`   | sprite | 32×48 | `idle`                   | core | Nosy spot                                                          |
+| `spot-stranger`    | sprite | 32×48 | `idle`, `wave`           | core | Friendly spot                                                      |
+| `spot-tree`        | sprite | 32×48 | `idle`                   | core | Regular spot                                                       |
+| `spot-water-bowl`  | sprite | 32×32 | `idle`                   | core | Thirsty spot                                                       |
+| `ui-pull-blocked`  | sprite | 10×10 | `normal`                 | core | Over the bubble's top-right corner when a pull is blocked          |
+| `ui-pull-bubble`   | sprite | 32×28 | `idle`, `show`, `urgent` | core | Over a dog with an urgent need; the game draws the need icon in it |
 
 ## Road and backdrop
 
@@ -108,7 +130,8 @@ Same tags, frames and durations as the original.
 | `fx-treat-pop`                               | sprite | 24×24             | `play`                                             | core | Where a given treat lands                                                                                 |
 | `ui-quip`                                    | image  | 24×24 nine-slice  |                                                    | core |                                                                                                           |
 | `ui-quip-tail`                               | image  | 6×8               |                                                    | core | Points left at the owner; covers the bubble's left rim                                                    |
-| `icon-stinky`, `icon-soaked`, `icon-spooked` | image  | 16×16             |                                                    | core | Doghouse status icons                                                                                     |
+| `ui-quip-tail-down`                          | image  | 8×6               |                                                    | core | Points down, for a bubble above the doghouse row                                                          |
+| `icon-soaked`, `icon-spooked`, `icon-stinky` | image  | 16×16             |                                                    | core | Doghouse status icons                                                                                     |
 | `ui-top-bar`                                 | image  | 360×40            |                                                    | core |                                                                                                           |
 | `ui-strip-well`                              | image  | 24×24 nine-slice  |                                                    | core | State strip tab under the zone well, right-aligned at x 356                                               |
 | `icon-upgrade-<upgrade>`                     | image  | 16×16             |                                                    | core | State strip; one per upgrade id (9)                                                                       |
@@ -119,22 +142,24 @@ Same tags, frames and durations as the original.
 
 ## Choice cards and help
 
-| Key                           | Type   | Size    | Tags                                    | Pri  | Note                                                                     |
-| ----------------------------- | ------ | ------- | --------------------------------------- | ---- | ------------------------------------------------------------------------ |
-| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade` | core |                                                                          |
-| `card-frame-large`            | sprite | 166×280 | as `card-frame`                         | core | Tap-to-enlarge view                                                      |
-| `card-cost`                   | image  | 71×13   |                                         | core | Cost plaque, at 2× on the large frame                                    |
-| `card-<encounter>-<option>`   | image  | 75×56   |                                         | core | One per option of the encounters, lucky encounters and forced stops (27) |
-| `card-<upgrade>`, `card-skip` | image  | 75×56   |                                         | core | One per upgrade (9), and Poop bags' Skip                                 |
-| `help-<page>`                 | image  | 344×236 |                                         | core | lanes, pickups, cards, owners, pulls, zones                              |
+| Key                           | Type   | Size    | Tags                                             | Pri  | Note                                                                                   |
+| ----------------------------- | ------ | ------- | ------------------------------------------------ | ---- | -------------------------------------------------------------------------------------- |
+| `card-frame`                  | sprite | 83×140  | `encounter`, `lucky`, `stop`, `upgrade`, `route` | core | `route` for a fork's path cards                                                        |
+| `card-frame-large`            | sprite | 166×280 | as `card-frame`                                  | core | Tap-to-enlarge view                                                                    |
+| `card-cost`                   | image  | 71×13   |                                                  | core | Cost plaque, at 2× on the large frame                                                  |
+| `card-<encounter>-<option>`   | image  | 75×56   |                                                  | core | One per option of the encounters, lucky encounters and forced stops                    |
+| `card-<upgrade>`, `card-skip` | image  | 75×56   |                                                  | core | One per upgrade (9), and Poop bags' Skip                                               |
+| `card-<need card>-<option>`   | image  | 75×56   |                                                  | core | accident, good-spot, pee-mail, play-date, stranger-loves, water-stop; two options each |
+| `card-zone-<zone>`            | image  | 75×56   |                                                  | core | A fork's path card: the zone's road to a cross street, its backdrop scenery beyond     |
+| `help-<page>`                 | image  | 344×236 |                                                  | core | lanes, pickups, cards, owners, pulls, zones                                            |
 
-Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). The generous neighbour and photo op open no card: `card-biscuit-neighbour-take` and `card-photo-op-pose` are their popup art.
+Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). The generous neighbour and photo op open no card: `card-biscuit-neighbour-take` and `card-photo-op-pose` are their popup art. `card-accident-walk-on` shows the grumpy neighbour.
 
 ## Screens and home
 
 | Key                                                           | Type   | Size                                       | Tags                  | Pri   | Note                                                                                     |
 | ------------------------------------------------------------- | ------ | ------------------------------------------ | --------------------- | ----- | ---------------------------------------------------------------------------------------- |
-| `screen-home`, `screen-stats`, `screen-end`, `screen-loading` | image  | 360×640                                    |                       | core  |                                                                                          |
+| `screen-end`, `screen-home`, `screen-loading`, `screen-stats` | image  | 360×560                                    |                       | core  |                                                                                          |
 | `logo`                                                        | image  | 128×30                                     |                       | later | Yard sign board; also baked into `screen-loading`                                        |
 | `ui-loading-track`                                            | image  | 200×8                                      |                       | core  |                                                                                          |
 | `ui-loading`                                                  | sprite | 48×32                                      | `walk`                | core  | Casey and Biscuit                                                                        |
@@ -142,21 +167,21 @@ Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). T
 | `fx-new-best`                                                 | sprite | 96×48                                      | `play`                | core  | Burst behind `ui-new-best`                                                               |
 | `badge-<achievement>`                                         | sprite | 32×32                                      | `earned`, `locked`    | core  | 15; achievement name in kebab case                                                       |
 | `fx-confetti`                                                 | sprite | 64×64                                      | `play`                | core  | Behind a badge as it is earned                                                           |
-| `icon-trait-<trait>`                                          | image  | 16×16                                      |                       | core  | fancy, food-driven, chaser                                                               |
+| `icon-trait-<trait>`                                          | image  | 16×16                                      |                       | core  | chaser, fancy, food-driven                                                               |
 | `icon-energy-<energy>`                                        | image  | 16×16                                      |                       | core  | calm, steady, hyper                                                                      |
 | `icon-owner-<temperament>`                                    | image  | 16×16                                      |                       | core  | laid-back, fussy, dramatic                                                               |
 | `item-<gear>`                                                 | image  | 32×32                                      |                       | core  | One per gear id (5)                                                                      |
 | `ui-slot-locked`                                              | image  | 160×46                                     |                       | core  | Yard sign for the next dog slot; the game writes two lines                               |
 | `ui-detail-card`, `ui-detail-band`, `ui-detail-well`          | image  | 24×24 nine-slice, 24×22 three-slice, 68×68 |                       | core  | Hold-to-open detail card                                                                 |
 | `ui-step`                                                     | image  | 24×24 nine-slice                           |                       | core  | Home screen step plate                                                                   |
-| `ui-step-number`, `ui-check`                                  | sprite | 16×16                                      | `1`, `2`, `3`, `tick` | core  | Step badge; pick badge                                                                   |
+| `ui-check`, `ui-step-number`                                  | sprite | 16×16                                      | `1`, `2`, `3`, `tick` | core  | Pick badge; step badge                                                                   |
 | `ui-select`                                                   | sprite | 24×24 nine-slice                           | `pulse`               | core  | Selected frame                                                                           |
 | `ui-afford`                                                   | sprite | 24×24 nine-slice                           | `glint`               | core  | Affordable frame                                                                         |
 | `ui-hint`                                                     | image  | 24×24 nine-slice                           |                       | core  | First-time hint bubble                                                                   |
 | `ui-hint-tail`                                                | image  | 8×6                                        |                       | core  |                                                                                          |
 | `ui-zone-banner`                                              | image  | 248×48                                     |                       | core  | The game writes both lines                                                               |
 | `ui-difficulty`                                               | sprite | 55×10                                      | `1` to `5`            | core  | Under a zone's name on a fork's path card: that many filled paws out of five, 11px apart |
-| `fx-tap`, `fx-dust`                                           | sprite | 16×16                                      | `play`                | core  |                                                                                          |
+| `fx-dust`, `fx-tap`                                           | sprite | 16×16                                      | `play`                | core  |                                                                                          |
 
 ## UI kit
 
@@ -171,13 +196,12 @@ Card keys use the data keys (`card-kid-wants-to-pet-pet`, `card-second-wind`). T
 | `ui-slider-knob`                                                                                                | sprite | 10×16             | `normal`, `pressed`, `disabled`                                                       | core  |                                              |
 | `icon-sound`, `icon-music`                                                                                      | sprite | 16×16             | `on`, `off`                                                                           | core  |                                              |
 | `icon-<setting>-panel`                                                                                          | sprite | 16×16             | `on`, `off`                                                                           | core  | sound, music, effects, motion; Settings rows |
-| `icon-pause`, `icon-play`, `icon-home`, `icon-help`, `icon-close`, `icon-lock`, `icon-logbook`, `icon-settings` | image  | 16×16             |                                                                                       | core  |                                              |
+| `icon-close`, `icon-help`, `icon-home`, `icon-lock`, `icon-logbook`, `icon-pause`, `icon-play`, `icon-settings` | image  | 16×16             |                                                                                       | core  |                                              |
 | `ui-touch-hint`                                                                                                 | image  | 96×36             |                                                                                       | later | The game writes "drag to switch lanes"       |
 | App icons (not in manifest)                                                                                     | PNG    | 16 to 512         |                                                                                       | core  | `art/tools/appicons.py`                      |
 
 ## Sounds
 
-| Key                                                                                   | Pri  |
-| ------------------------------------------------------------------------------------- | ---- |
-| `sfx-tip`, `sfx-treat`, `sfx-bump`, `sfx-bark`, `sfx-card`, `sfx-fired`, `music-walk` | core |
-| `sfx-hit-<encounter>`, `sfx-badge`, `sfx-new-best`                                    | core |
+| Key                                                                                                                                                       | Pri  |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| `music-walk`, `sfx-badge`, `sfx-bark`, `sfx-bump`, `sfx-card`, `sfx-fired`, `sfx-hit-<encounter>`, `sfx-lemonade`, `sfx-new-best`, `sfx-tip`, `sfx-treat` | core |
