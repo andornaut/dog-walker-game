@@ -31,3 +31,9 @@ Format:
 - Covered: zone length, slower options, touch input, encounter edge cases, traits, card outcomes, trade-off cards, starting numbers, loadout, name collisions, poop bags, authorship
 - Decided: ~3-minute distance-based zones (~12-minute run); slower options cost money; tap and swipe; no-Chaser squirrels are scenery; unaffordable options disabled; per-dog encounter costs; max 8 ♥; mud dropped; Food-driven drifts toward treats; fixed, shown outcomes; trade-off cards; placeholder numbers; pick up to 1 item; Belly rubs and Lucky collar renames; poop bags as a once-per-run Skip; authorship no longer recorded and the both-agree rule removed
 - Open threads / next time: forced-stop pool and ~8 upgrade cards before Milestone 4; check in playtests whether walking 3 dogs is always best
+
+## 2026-10-18 · Design · Pillars
+
+- Covered: the three pillars: tension and pack size (Cozy, not frantic); forced stops, upgrades, quips, end screen (Every bump is a story); dogs, owners, neighbourhood, walker (Charming chaos)
+- Decided: gentle speed ramp; dogs pull the pack (trait targets and wander, more with more dogs); per-dog area-effect rolls; head home any time, forfeiting the current zone's fees; 6 forced stops drawn without repeats; 9 upgrade cards; a quip after every card choice; earnings-only end screen; fixed named dogs and owners; scenery gags; one fixed walker
+- Open threads / next time: dog names, breeds and owner personalities; which encounters are area effects; speed ramp amount

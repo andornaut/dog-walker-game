@@ -13,7 +13,9 @@ Pick 1–3 dogs from a roster of 3 and one piece of gear, then walk a fixed rout
 - Portrait orientation, ¾ top-down view
 - 5 lanes. Keyboard: ←/→ or A/D. Touch: tap the left/right half of the screen, or swipe left/right (both work)
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
-- Calm speed: gets slightly busier per zone, never frantic
+- Calm speed: scroll speed and density both rise gently per zone, never frantic
+- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back
+- Area effects roll once per dog, so a bigger pack is more likely to have someone affected
 
 ### Resources
 
@@ -27,6 +29,7 @@ Pick 1–3 dogs from a roster of 3 and one piece of gear, then walk a fixed rout
 - After zones 1, 2 and 3: choose 1 of 3 upgrade cards
 - After each zone: every remaining dog pays a share of its fee
 - Ends after zone 4 or when no dogs are left; everything earned is kept
+- Head home: available any time from the pause menu; keeps tips and earlier zones' fees, but the current zone pays nothing
 
 ### Choice cards
 
@@ -43,13 +46,15 @@ Pick 1–3 dogs from a roster of 3 and one piece of gear, then walk a fixed rout
 
 ### Dogs (roster of 3, pick 1–3)
 
-| Dog                    | Fee    | Trait                                                           |
-| ---------------------- | ------ | --------------------------------------------------------------- |
-| Small (e.g. chihuahua) | Low    | **Fancy:** puddles upset its owner more                         |
-| Medium (e.g. lab)      | Medium | **Food-driven:** the pack drifts one lane toward a nearby treat |
-| Big (e.g. husky)       | High   | **Chaser:** squirrels upset its owner                           |
+| Dog                    | Fee    | Trait                                                    |
+| ---------------------- | ------ | -------------------------------------------------------- |
+| Small (e.g. chihuahua) | Low    | **Fancy:** puddles upset its owner more                  |
+| Medium (e.g. lab)      | Medium | **Food-driven:** pulls the pack toward nearby treats     |
+| Big (e.g. husky)       | High   | **Chaser:** squirrels upset its owner; pulls toward them |
 
-More dogs means more pay and a longer-lasting run, but more owners to keep happy.
+More dogs means more pay and a longer-lasting run, but more owners to keep happy, more pulls and more area-effect rolls.
+
+Each dog is a fixed, named character with one fixed owner; the owner's personality (e.g. dramatic, laid-back, fussy) sets the tone of their quips. After every card choice, the affected owner reacts with a quip. Names, breeds and personalities are TBD. The walker is one fixed character.
 
 ### Encounters (things you hit by accident → choice card)
 
@@ -60,24 +65,34 @@ More dogs means more pay and a longer-lasting run, but more owners to keep happy
 | Puddle    | All; Fancy dogs worse                     | Go through → −1 ♥ (−2 Fancy) · Pay $ for a towel                               |
 | Other dog | All dogs                                  | Let them sniff → +1 ♥ each, −$ per dog (missed tips) · Pull away → −1 ♥ each   |
 
-### Forced stops (one per zone; pool to design before Milestone 4)
+Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card and have no effect.
+
+### Forced stops (one per zone, drawn at random with no repeats in a run)
 
 - Stop sign: wait patiently → −$ per dog (missed tips) · dart across → −1 ♥ each
 - Chatty neighbour: chat → +$ tip, −$ per dog (missed tips) · politely move on → nothing
+- Kid wants to pet them: let them pet → +1 ♥ each, −$ per dog (missed tips) · politely decline → −1 ♥ to one random owner
+- Ice cream truck: buy pup cups → −$ per dog, +1 ♥ each · walk past → −1 ♥ to Food-driven owners
+- Construction detour: take the long way → −$ per dog (missed tips) · squeeze past → −1 ♥ to Fancy owners (dust)
+- Mail carrier: hold them back → −1 ♥ each (barking) · wait it out → −$ per dog (missed tips)
 
 ### Debuff (one for v1)
 
 - **Stinky:** tips are halved for the rest of the zone
 
-### Upgrade cards (between zones; pool of ~8)
+### Upgrade cards (between zones; pool of 9)
 
-Mostly run-only boosts, plus a couple of trade-off cards. Pool to fill out to ~8 before Milestone 4. Examples:
+Run-only boosts, plus two trade-off cards:
 
 - Belly rubs: +1 ♥ to every owner now
 - Good leash: squirrels can't upset your chasers
 - Big tipper: tips worth +50%
 - Shortcut: next zone is shorter, but its fees −25% (trade-off)
 - Rush hour: more tips _and_ more obstacles for the next zone (trade-off)
+- Raincoats: puddles can't upset anyone for the rest of the run
+- Treat magnet: treats count from one lane away
+- Steady hands: dogs pull the pack half as often
+- Sweet talker: card $ costs −$2 per dog for the rest of the run
 
 ### Meta progression (minimal)
 
@@ -92,6 +107,7 @@ Placeholders sized for ~3-minute zones. A full run is estimated at ~$175 with 2 
 
 | What                         | Value                                                |
 | ---------------------------- | ---------------------------------------------------- |
+| Scroll speed                 | Rises gently per zone (amount TBD)                   |
 | Obstacles per zone           | 18 in zone 1, +3 per later zone                      |
 | Tips per zone                | 24 in zone 1, +3 per later zone                      |
 | Treats per zone              | 4                                                    |
@@ -115,7 +131,7 @@ Minigames · branching paths between zones · unlockable dog slots · special do
 1. **Setup:** engine chosen, repo, auto-deploy of the web build, coloured-box placeholders
 2. **Runner core:** 5 lanes, scrolling, spawning, collisions, keyboard + touch
 3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, Stinky, owner quips, dogs leave at 0 ♥
-4. **Run structure:** design the forced-stop pool and ~8 upgrade cards first; then 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
+4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
 5. **Dogs & meta:** 3-dog roster with 1–3 picks, bank, shop, loadout, save
 6. **Pixel pass & phone playtest:** sprites for walker, 3 dogs, owner faces, 4 encounters, 2 pickups, card frames; test on real phones
 

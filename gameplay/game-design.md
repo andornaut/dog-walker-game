@@ -25,7 +25,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ## Player & world
 
-- You are the dog walker.
+- You are the dog walker (one fixed character in v1).
 - A run is a walk through **4 zones**, each a fixed distance that takes about 3 minutes. v1: one neighbourhood, fixed route.
 
 ## Dogs
@@ -34,17 +34,20 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Each dog has its own traits, fee and look. Encounters affect dogs according to their traits.
 - Each dog has an **owner**. One meter per dog: **owner happiness**, shown with the dog's and owner's faces.
 - Events raise or lower owner happiness.
+- Each dog is a fixed, named character with one fixed owner. The owner's personality sets the tone of their quips, and they react with a quip after every card choice.
 - At zero, the owner fires you with a funny quip (e.g. "You're fired!") and the dog leaves the run.
 - v1: a roster of 3 dogs (small, medium, big), picked freely.
 
 ## Mechanics
 
-- **Movement:** 5 lanes; the walker and pack move left/right at the bottom of the screen.
+- **Movement:** 5 lanes; the walker and pack move left/right at the bottom of the screen. Dogs sometimes pull the pack one lane, toward what their trait cares about or at random; more dogs, more pulls.
 - **Pickups:** things you want to hit: treats (raise owner happiness) and tips (money).
 - **Encounters:** collisions pause the run and offer a choice, usually trading money against owner happiness or a debuff. Some problems can be fixed with money, e.g. skunk: pay a lot for grooming, or less and take the lingering **Stinky** debuff. Choices only in v1. Each option's outcome is fixed and shown on the card. An option you can't afford is disabled; every encounter has a free option.
-- **Forced stops:** one per zone; always triggers a choice.
+- **Forced stops:** one per zone, drawn from a pool with no repeats in a run; always triggers a choice.
+- **Area effects:** roll once per dog, so a bigger pack is more likely to have someone affected.
+- **Scenery gags:** harmless neighbourhood moments that open no card.
 - **Money:** the only currency. Earned in-run (tips, and each dog's fee per zone survived), spent on encounter choices, banked between runs.
-- **Run end:** finishing zone 4, or no dogs left. Failure is gentle: you keep what you've earned.
+- **Run end:** finishing zone 4, no dogs left, or heading home (any time; the current zone pays nothing). Failure is gentle: you keep what you've earned.
 
 ## Progression & goals
 

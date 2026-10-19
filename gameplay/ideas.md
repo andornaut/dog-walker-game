@@ -28,15 +28,18 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **1–3 dogs in one lane**: the pack moves as one unit (2026-10-18)
 - [agreed] **Owner happiness meter**: one per dog, shown with dog and owner faces; at zero the dog leaves (2026-10-18)
 - [agreed] **Encounters hit by trait**: e.g. squirrel upsets the chaser (2026-10-18)
-- [floated] **Owner quips**: random reactions to events: "You're fired!", crying about their little dog Poopy (2026-10-18) · the quip when a fired dog leaves is agreed (see Gentle failure); quips for other events are still floated
-- [floated] **Dogs pull you vs. you pull them**: could vary with unlocks or choices (2026-10-18)
+- [agreed] **Owner quips**: random reactions to events: "You're fired!", crying about their little dog Poopy (2026-10-18) · agreed: the affected owner quips after every card choice and when firing you; each owner's personality sets the tone
+- [agreed] **Dogs pull you vs. you pull them**: could vary with unlocks or choices (2026-10-18) · agreed: dogs pull the pack one lane (trait targets and random wander), more often with more dogs; Steady hands halves it
 - [parked] **Unlockable dog slots**: start with 1, unlock 2 and 3 via progression and better leashes (2026-10-18)
 - [parked] **Special dogs found mid-walk**: later levels, only if you have 2 or fewer dogs; once found, they join the pre-run roster (2026-10-18)
+- [agreed] **Named dogs and owners**: fixed characters with personalities (2026-10-18)
+- [parked] **Walker customization**: pick or dress the walker; v1 has one fixed walker (2026-10-18)
 - [parked] **Your own dog**: end-game unlock (2026-10-18)
 
 ## World & setting
 
 - [agreed] **v1: one neighbourhood, fixed route** (2026-10-18)
+- [agreed] **Scenery gags**: a cat on a fence, a sprinkler, a ball rolling past; no card, no effect (2026-10-18)
 - [parked] **Biomes**: inner city, beach, forest, etc. (2026-10-18)
 - [parked] **Time of day**: dawn, midday, dusk, night (2026-10-18)
 - [parked] **Weather**: variants with pros and cons, some mostly cosmetic (2026-10-18)
@@ -47,6 +50,8 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **Money as the only currency**: earned in-run, banked, buys unlocks (2026-10-18)
 - [agreed] **Paid per zone survived** (2026-10-18)
 - [agreed] **Pre-run loadout**: fanny packs and other gear from permanent unlocks (2026-10-18)
+- [agreed] **Head home**: end a walk early from the pause menu; the current zone pays nothing (2026-10-18)
+- [cut] **Story recap on the end screen**: retell the run's biggest moments (2026-10-18) · cut: the end screen shows earnings only
 - [agreed] **Gentle failure**: a fired dog leaves with a funny quip; keep what you've earned (2026-10-18)
 - [parked] **House hub**: Hades-style home base you decorate and improve with mostly cosmetic unlocks; long-term progression (2026-10-18)
 

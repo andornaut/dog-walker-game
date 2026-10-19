@@ -57,3 +57,14 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Art · Tile size is 32×32 for road tiles, dogs and obstacles; lanes are 56px wide
 - 2026-10-18 · Art · Aseprite sources go in art/; exported PNG sheets plus Aseprite JSON go in public/assets/; the pixel font is a BMFont (.fnt plus .png)
 - 2026-10-18 · Art · Exported art goes in public/art/ instead of public/assets/, which would collide with the dist/assets/ directory Vite writes the bundle to; refines the 2026-10-18 Art entry on asset formats
+- 2026-10-18 · Design · Scroll speed rises gently each zone, on top of rising density
+- 2026-10-18 · Design · Dogs pull the pack one lane, toward their trait's target (Food-driven: treats, Chaser: squirrels) or at random; each extra dog adds a chance; refines the 2026-10-18 Food-driven entry
+- 2026-10-18 · Design · Area effects roll once per dog, so a bigger pack is more likely to have someone affected
+- 2026-10-18 · Design · Head home is available any time from the pause menu; tips and earlier zones' fees are kept, the current zone pays nothing
+- 2026-10-18 · Design · Forced-stop pool: stop sign, chatty neighbour, kid wants to pet them, ice cream truck, construction detour, mail carrier; each zone draws one not yet seen this run
+- 2026-10-18 · Design · Upgrade pool of 9: Belly rubs, Good leash, Big tipper, Shortcut, Rush hour, Raincoats, Treat magnet, Steady hands, Sweet talker; Milestone 4 is unblocked
+- 2026-10-18 · Design · The affected owner quips after every card choice, as well as when firing you
+- 2026-10-18 · Design · The end screen shows earnings only, with no story recap
+- 2026-10-18 · Design · Dogs are fixed, named characters, each with one fixed owner whose personality sets the tone of their quips
+- 2026-10-18 · Design · The neighbourhood has harmless scenery gags that open no card
+- 2026-10-18 · Design · v1 has one fixed walker
