@@ -50,7 +50,7 @@ export interface ZoneGags {
 }
 
 // Every backdrop has a perch along its near-left lawn: a picket fence, a park rail or a
-// planter's ledge. Sniff Street Shops is paved, so it has no sprinkler.
+// planter's ledge. The shops zone is paved, so it has no sprinkler.
 const NEAR_LEFT_PERCH: Span = { x0: 0, x1: 82 };
 const NEAR_RIGHT_LAWN = 338;
 

@@ -31,6 +31,7 @@ export const HOME_TEXT_FIELDS = {
   },
   gateSign: [],
   gearBought: ["gear"],
+  locked: [],
   logbook: {
     best: ["best", "note"],
     bestNote: ["dogs", "zones"],

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { DogId, WalkerId } from "../data/types";
 import { TEST_TUNING } from "../testing/tuning";
+import { homeLine } from "./homeText";
 import { homeSections, startReady } from "./sections";
 
 const data = { ...gameData, tuning: TEST_TUNING };
@@ -30,7 +31,10 @@ describe("homeSections", () => {
     const loadout = { dogs: ["koda"], gear: "whistle" } as const;
     const sections = homeSections(data, { dogSlots: 2 }, { loadout, walker: "casey" });
     expect(sections.walker).toMatchObject({ note: "Casey", state: "complete" });
-    expect(sections.dogs).toMatchObject({ note: "Pack 1/2", state: "complete" });
+    expect(sections.dogs).toMatchObject({
+      note: homeLine(text, "packCount", { count: "1", max: "2" }),
+      state: "complete",
+    });
     expect(sections.gear).toMatchObject({ note: "Whistle", state: "complete" });
   });
 });

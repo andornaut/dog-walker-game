@@ -8,6 +8,7 @@ import { HOME_TEXT } from "../data/homeText";
 import { NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
+import type { ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
 import { cents } from "../rules/units";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
@@ -35,6 +36,7 @@ import {
 } from "./home";
 
 const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
+const zoneName = (id: ZoneId) => WORLD.zones.find((zone) => zone.id === id)?.name;
 
 const data = {
   debuffs: DEBUFFS,
@@ -213,12 +215,12 @@ describe("lastWalkLine", () => {
   it.each<{ changes: Partial<LastWalk>; expected: string; name: string }>([
     {
       changes: {},
-      expected: "+$64. Headed home from Bark Park.",
+      expected: `+$64. Headed home from ${zoneName("park")}.`,
       name: "names the zone the walk headed home from",
     },
     {
       changes: { firings: [{ dog: "koda", zone: 1 }], outcome: "noDogs" },
-      expected: "+$64. Jesse fired you on Woof Way.",
+      expected: `+$64. Jesse fired you on ${zoneName("street")}.`,
       name: "names the owner who fired you and where",
     },
     {
@@ -245,7 +247,7 @@ describe("logbookOf", () => {
     expect(logbookOf(data, veteranSave().stats)).toEqual({
       best: "$90",
       bestNote: "4 zones with Koda and Penny",
-      last: "+$25. Jesse fired you on Bark Park.",
+      last: `+$25. Jesse fired you on ${zoneName("park")}.`,
       totals: "Walks 5   Dogs walked 7   Fired 1",
     });
   });

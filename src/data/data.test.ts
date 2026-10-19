@@ -269,9 +269,10 @@ describe("run, world and walkers", () => {
     }
   });
 
-  it("walks 4 zones, starting on Woof Way, with three unwalked zones left at every fork", () => {
+  it("walks 4 zones, starting on the street zone, with three unwalked zones left at every fork", () => {
     expect(world.walkLength).toBe(4);
-    expect(world.zones.find(({ id }) => id === world.firstZone)?.name).toBe("Woof Way");
+    expect(world.firstZone).toBe("street");
+    expect(world.zones.map(({ id }) => id)).toContain(world.firstZone);
     expect(world.zones.length - (world.walkLength - 1)).toBeGreaterThanOrEqual(3);
   });
 
@@ -322,13 +323,13 @@ describe("run, world and walkers", () => {
     const zonesOf = (id: EncounterId) =>
       world.zones
         .filter(({ weights }) => ({ ...weights.obstacles, ...weights.luckyFinds })[id] > 0)
-        .map(({ name }) => name);
-    expect(zonesOf("cafe")).toEqual(["Sniff Street Shops"]);
-    expect(zonesOf("goose")).toEqual(["Paws Promenade", "The Long Way Home"]);
-    expect(zonesOf("lemonade")).toEqual(["Snooze Crescent", "Woof Way"]);
-    expect(zonesOf("petunias")).toEqual(["Snooze Crescent", "Woof Way"]);
-    expect(zonesOf("picnic")).toEqual(["Bark Park", "Paws Promenade"]);
-    expect(zonesOf("trash")).toEqual(["Woof Way", "The Long Way Home"]);
+        .map(({ id }) => id);
+    expect(zonesOf("cafe")).toEqual(["shops"]);
+    expect(zonesOf("goose")).toEqual(["pawsPromenade", "homeStretch"]);
+    expect(zonesOf("lemonade")).toEqual(["snoozeCrescent", "street"]);
+    expect(zonesOf("petunias")).toEqual(["snoozeCrescent", "street"]);
+    expect(zonesOf("picnic")).toEqual(["park", "pawsPromenade"]);
+    expect(zonesOf("trash")).toEqual(["street", "homeStretch"]);
   });
 
   it("fits the largest pack in the doghouse row", () => {

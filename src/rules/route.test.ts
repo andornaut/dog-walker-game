@@ -45,7 +45,7 @@ describe("forkPaths", () => {
 });
 
 describe("the walk's zones", () => {
-  it("starts on the world's first zone, Woof Way", () => {
+  it("starts on the world's first zone, street", () => {
     expect(firstZoneId(data)).toBe("street");
   });
 
@@ -57,7 +57,7 @@ describe("the walk's zones", () => {
   it("is the last zone walked between a zone's end and the fork after it", () => {
     expect(zoneAt(data, ["street", "park"], 1).id).toBe("park");
     expect(zoneAt(data, ["street", "park"], 2).id).toBe("park");
-    expect(currentZone(data, { route: ["street"], zoneIndex: 0 }).name).toBe("Woof Way");
+    expect(currentZone(data, { route: ["street"], zoneIndex: 0 }).id).toBe("street");
   });
 
   it("starts a later dev start on the pre-fork route", () => {

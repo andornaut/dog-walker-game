@@ -16,6 +16,7 @@ import {
   type WalkerLine,
   walkerLineKey,
 } from "./homeLines";
+import { homeLine } from "./homeText";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const text = data.homeText;
@@ -62,7 +63,9 @@ describe("slotSignLines", () => {
 
 describe("packCountLine", () => {
   it("reads the pack against its capacity", () => {
-    expect(packCountLine(data, { dogSlots: 2 }, { dogs: ["koda"], gear: null })).toBe("Pack 1/2");
+    expect(packCountLine(data, { dogSlots: 2 }, { dogs: ["koda"], gear: null })).toBe(
+      homeLine(text, "packCount", { count: "1", max: "2" }),
+    );
   });
 });
 

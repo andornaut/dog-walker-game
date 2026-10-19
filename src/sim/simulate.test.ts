@@ -79,7 +79,7 @@ describe("simulateRun", { timeout: 15_000 }, () => {
     );
   });
 
-  it("walks 4 different zones from Woof Way, taking the route policy's path at each fork", () => {
+  it("walks 4 different zones from the first zone, taking the route policy's path at each fork", () => {
     const order = gameData.world.zones.map(({ id }) => id);
     const routeOf = (route: SimConfig["route"]) =>
       runs(3, { hitRate: 0, policy: "alwaysPay", route }).map((result) => result.route);
@@ -88,7 +88,7 @@ describe("simulateRun", { timeout: 15_000 }, () => {
       expect(route[0]).toBe("street");
       expect(new Set(route).size).toBe(route.length);
     }
-    // A fork offers 3 of the 5 zones left after Woof Way: the easiest offered is one of the 3
+    // A fork offers 3 of the 5 zones left after the first zone: the easiest offered is one of the 3
     // easiest left, and the hardest one of the 3 hardest.
     const firstPick = (route: SimConfig["route"]) =>
       routeOf(route).map((walked) => order.indexOf(walked[1] ?? "street"));

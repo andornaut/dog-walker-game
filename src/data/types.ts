@@ -509,6 +509,8 @@ export interface HomeText {
   // The street sign on the gate art.
   readonly gateSign: string;
   readonly gearBought: string;
+  // The Locked tile state's label, on a walker, dog or gear tile not owned yet.
+  readonly locked: string;
   // The logbook card and the lines it shares with the Stats page: the best walk, the last
   // walk by how it ended, the totals, and what it says before any walk.
   readonly logbook: {
@@ -535,6 +537,10 @@ export interface HomeText {
   readonly noticeSoundOff: string;
   readonly noticeSoundOn: string;
   readonly packCount: string;
+  // The Pocket strip: what it says with no gear in it.
+  readonly pocket: {
+    readonly empty: string;
+  };
   // The section headings, and what a required section with nothing picked asks for on its
   // band.
   readonly sectionDogs: string;
@@ -542,6 +548,10 @@ export interface HomeText {
   readonly sectionGear: string;
   readonly sectionWalker: string;
   readonly sectionWalkerPrompt: string;
+  // The Pet shop building's sign.
+  readonly shop: {
+    readonly title: string;
+  };
   readonly slotBought: string;
   readonly slotBuy: string;
   readonly slotSave: string;

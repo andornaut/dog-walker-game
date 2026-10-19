@@ -90,14 +90,14 @@ describe("the verge beside the road", () => {
 
   // The runs of each backdrop's row 109 beside the road, without its tufts.
   it.each<{ name: string; runs: [number, number, number][]; zone: ZoneId }>([
-    { name: "Woof Way's mown lawn, sidewalk and curb", runs: MOWN_LAWN, zone: "street" },
+    { name: "street's mown lawn, sidewalk and curb", runs: MOWN_LAWN, zone: "street" },
     {
-      name: "The Long Way Home's mown lawn, sidewalk and curb",
+      name: "homeStretch's mown lawn, sidewalk and curb",
       runs: MOWN_LAWN,
       zone: "homeStretch",
     },
     {
-      name: "Bark Park's unmown grass up to the path",
+      name: "park's unmown grass up to the path",
       runs: [
         [0, 109, GREEN],
         [110, 249, STRIP_MARK],
@@ -106,7 +106,7 @@ describe("the verge beside the road", () => {
       zone: "park",
     },
     {
-      name: "Sniff Street Shops' paving up to a curb",
+      name: "shops' paving up to a curb",
       runs: [
         [0, 107, LIGHT_GREY],
         [108, 109, GREY],
@@ -180,14 +180,14 @@ describe("the verge beside the road", () => {
     expect(tuftShare(far, far + 40)).toBeLessThan(tuftShare(200, 300));
   });
 
-  it("lays rough patches on Bark Park's lawn and no stripes", () => {
+  it("lays rough patches on park's lawn and no stripes", () => {
     const darkened = [0, 400, 800, 1200].some((scroll) =>
       draw(frameOf({ current: look("park", 0x123456), scroll })).includes(pixelWord(DARK_GREEN)),
     );
     expect(darkened).toBe(true);
   });
 
-  it("scatters leaves on The Long Way Home only", () => {
+  it("scatters leaves on homeStretch only", () => {
     const tones = [0xd77643, 0xbe4a2f, 0x733e39].map(pixelWord);
     const leaves = (zone: ZoneId) =>
       [0, 100, 200].some((scroll) =>
@@ -293,7 +293,7 @@ describe("drawRoad", () => {
   });
 
   it("puts the previous zone's verge beside the start strip's cross street", () => {
-    // Woof Way's curb runs to 144 across; Bark Park has none, so its lawn starts at the road.
+    // street's curb runs to 144 across; park has none, so its lawn starts at the road.
     const y = 400;
     const row = itemAt(raster.rows, y - view.y);
     const curbX = Array.from(row.across).findIndex((across) => across >= 140 && across < 144);
