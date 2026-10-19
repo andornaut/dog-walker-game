@@ -155,11 +155,11 @@ export const WORLD = {
       difficultyName: "Busy",
       fees: 1.25,
       id: "shops",
-      leashColor: "#a22633",
+      leashColor: "#3e2731",
       moverShare: 0.15,
       name: "Main Street",
-      roadColor: "#c0cbdc",
-      roadShadowColor: "#8b9bb4",
+      roadColor: "#f6757a",
+      roadShadowColor: "#b55088",
       speed: 1,
       weights: {
         forcedStops: {
