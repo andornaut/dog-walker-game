@@ -2,27 +2,35 @@
 // this shape; then read the list from there and delete this file.
 export interface PresetWalker {
   readonly name: string;
-  readonly portraitKey: string;
-  readonly spriteKey: string;
 }
 
-// All free. classic is the original walker sprite.
+// All free. casey is the original walker.
 export const PRESET_WALKERS = {
-  ada: { name: "Ada", portraitKey: "face-walker-ada", spriteKey: "walker-girl" },
-  ben: { name: "Ben", portraitKey: "face-walker-ben", spriteKey: "walker-man" },
-  classic: { name: "Classic", portraitKey: "face-walker-classic", spriteKey: "walker" },
-  trista: { name: "Trista", portraitKey: "face-walker-trista", spriteKey: "walker-teacher" },
+  ada: { name: "Ada" },
+  ben: { name: "Ben" },
+  casey: { name: "Casey" },
+  trista: { name: "Trista" },
 } as const satisfies Record<string, PresetWalker>;
 
 export type PresetWalkerId = keyof typeof PRESET_WALKERS;
 
-export const DEFAULT_WALKER: PresetWalkerId = "classic";
+export const DEFAULT_WALKER: PresetWalkerId = "casey";
 
-// The walker's sprite, or the classic one while its own has not been exported.
+// A walker's 32x48 road sprite, with tags walk and react.
+export function walkerSpriteKeyOf(walker: PresetWalkerId): string {
+  return `walker-${walker}`;
+}
+
+// A walker's 32x32 portrait, with tags happy and neutral.
+export function walkerPortraitKey(walker: PresetWalkerId): string {
+  return `face-walker-${walker}`;
+}
+
+// The walker's sprite, or the default walker's while its own has not been exported.
 export function walkerSpriteKey(
   hasSprite: (key: string) => boolean,
   walker: PresetWalkerId,
 ): string {
-  const { spriteKey } = PRESET_WALKERS[walker];
-  return hasSprite(spriteKey) ? spriteKey : PRESET_WALKERS[DEFAULT_WALKER].spriteKey;
+  const own = walkerSpriteKeyOf(walker);
+  return hasSprite(own) ? own : walkerSpriteKeyOf(DEFAULT_WALKER);
 }

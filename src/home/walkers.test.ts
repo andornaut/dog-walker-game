@@ -1,25 +1,34 @@
 import { describe, expect, it } from "vitest";
 
-import { DEFAULT_WALKER, PRESET_WALKERS, walkerSpriteKey } from "./walkers";
+import {
+  DEFAULT_WALKER,
+  PRESET_WALKERS,
+  type PresetWalkerId,
+  walkerPortraitKey,
+  walkerSpriteKey,
+  walkerSpriteKeyOf,
+} from "./walkers";
 
-describe("PRESET_WALKERS", () => {
-  it("gives every walker its own sprite and portrait", () => {
-    const walkers = Object.values(PRESET_WALKERS);
-    expect(new Set(walkers.map(({ spriteKey }) => spriteKey)).size).toBe(walkers.length);
-    expect(new Set(walkers.map(({ portraitKey }) => portraitKey)).size).toBe(walkers.length);
+describe("walker keys", () => {
+  it("give every walker its own sprite and portrait", () => {
+    const ids = Object.keys(PRESET_WALKERS) as PresetWalkerId[];
+    expect(new Set(ids.map(walkerSpriteKeyOf)).size).toBe(ids.length);
+    expect(new Set(ids.map(walkerPortraitKey)).size).toBe(ids.length);
+    expect(walkerSpriteKeyOf("ada")).toBe("walker-ada");
+    expect(walkerPortraitKey("ben")).toBe("face-walker-ben");
   });
 
-  it("keeps the original walker sprite as the default", () => {
-    expect(PRESET_WALKERS[DEFAULT_WALKER].spriteKey).toBe("walker");
+  it("default to the original walker, Casey", () => {
+    expect(walkerSpriteKeyOf(DEFAULT_WALKER)).toBe("walker-casey");
   });
 });
 
 describe("walkerSpriteKey", () => {
   it("is the walker's own sprite once it exists", () => {
-    expect(walkerSpriteKey(() => true, "ada")).toBe("walker-girl");
+    expect(walkerSpriteKey(() => true, "ada")).toBe("walker-ada");
   });
 
   it("falls back to the default walker's sprite until then", () => {
-    expect(walkerSpriteKey((key) => key === "walker", "ben")).toBe("walker");
+    expect(walkerSpriteKey((key) => key === "walker-casey", "ben")).toBe("walker-casey");
   });
 });

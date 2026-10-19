@@ -6,6 +6,7 @@ import { gameData } from "../data";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { recordWalk, walkResult } from "../home/home";
+import { DEFAULT_WALKER, walkerSpriteKeyOf } from "../home/walkers";
 import { type ChangeLabel, changeLabels } from "../hud/hudView";
 import {
   advanceGesture,
@@ -559,7 +560,7 @@ export class RunScene extends Scene {
       );
     }
     this.walker?.setPosition(walkerX, footY).setDepth(DEPTH.sprite + footY);
-    shadow(this.walker?.texture.key ?? "walker", walkerX, footY);
+    shadow(this.walker?.texture.key ?? walkerSpriteKeyOf(DEFAULT_WALKER), walkerX, footY);
     // A pull will play the dog's "tell" tag, mirrored for the left, with fx-bark over its
     // head, and steer through pullLane; dogs do not pull yet.
   }

@@ -6,6 +6,7 @@ import { dogFaceKey, dogSpriteKey, encounterSpriteKey, ownerFaceKey } from "../a
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, EncounterId } from "../data/types";
+import { DEFAULT_WALKER, walkerSpriteKeyOf } from "../home/walkers";
 import { loadManifestImages, MANIFEST_CACHE_KEY } from "./manifestImages";
 import { PALETTE } from "./palette";
 import { registerFallbackPixelFont } from "./pixelText";
@@ -23,7 +24,7 @@ function placeholderSizes(): Map<string, Size> {
   const sizes = new Map<string, Size>([
     ["tip", box(16, 16, PALETTE.amber)],
     ["treat", box(16, 16, PALETTE.tan)],
-    ["walker", box(32, 48, PALETTE.blue)],
+    [walkerSpriteKeyOf(DEFAULT_WALKER), box(32, 48, PALETTE.blue)],
   ]);
   for (const dog of Object.keys(gameData.dogs) as DogId[]) {
     sizes.set(dogSpriteKey(dog), box(32, 32, PALETTE.slate));

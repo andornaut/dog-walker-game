@@ -16,7 +16,12 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
-import { PRESET_WALKERS, type PresetWalkerId, walkerSpriteKey } from "../home/walkers";
+import {
+  PRESET_WALKERS,
+  type PresetWalkerId,
+  walkerPortraitKey,
+  walkerSpriteKey,
+} from "../home/walkers";
 import { wholeDollars } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -556,15 +561,16 @@ export class StartScene extends Scene {
     this.text(8, 616, "Walker", PALETTE.cream, { font: "title" });
     (Object.keys(PRESET_WALKERS) as PresetWalkerId[]).forEach((id, i) => {
       const rect = itemAt(tiles, i);
-      const walker = PRESET_WALKERS[id];
+      const portrait = walkerPortraitKey(id);
       fillRect(g, id === chosen ? PALETTE.amber : PALETTE.plum, rect);
       fillRect(g, PALETTE.tan, { height: 32, width: 32, x: rect.x + 1, y: rect.y + 1 });
-      if (this.textures.exists(walker.portraitKey)) {
-        this.drawn.push(this.add.image(rect.x + 1, rect.y + 1, walker.portraitKey).setOrigin(0));
+      if (this.textures.exists(portrait)) {
+        const face = this.add.sprite(rect.x + 1, rect.y + 1, portrait).setOrigin(0);
+        playTag(face, portrait, id === chosen ? "happy" : "neutral");
+        this.drawn.push(face);
       } else {
-        this.textCentered(rect.x + 17, rect.y + 13, walker.name.charAt(0), PALETTE.plum, {
-          font: "title",
-        });
+        const initial = PRESET_WALKERS[id].name.charAt(0);
+        this.textCentered(rect.x + 17, rect.y + 13, initial, PALETTE.plum, { font: "title" });
       }
     });
     this.text(232, 616, PRESET_WALKERS[chosen].name, PALETTE.amber, { font: "title" });
