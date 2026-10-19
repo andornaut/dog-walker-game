@@ -68,3 +68,4 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · Dogs are fixed, named characters, each with one fixed owner whose personality sets the tone of their quips
 - 2026-10-18 · Design · The neighbourhood has harmless scenery gags that open no card
 - 2026-10-18 · Design · v1 has one fixed walker
+- 2026-10-18 · Tech · Keep Cloudflare Workers Builds for deploys rather than a GitHub Actions deploy gated on CI: a commit with red CI still deploys
