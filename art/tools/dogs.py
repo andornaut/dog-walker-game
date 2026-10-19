@@ -601,75 +601,97 @@ def snowball_face(mood):
     return g
 
 
-# ---------- Penny: golden retriever, big, golden coat, feathery tail, blue collar ----------
+# ---------- Penny: golden retriever with a Labrador build, big, golden coat, otter tail, blue collar ----------
+
+# Penny's coat, one ramp cel shaded: base, shade, light.
+GOLD = ("amber", "orange", "yellow")
+
 
 def penny_road(q):
     g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
-    # legs shaded down the outside, cream feathering trailing from the backs of the front pair
+    # solid legs, each shaded down its outer side
     for x, y, d in ((7 + ln // 2, 15 + o, q["fl"] + b), (22 + ln // 2, 15 + o, q["fr"] + b), (9, 26, q["bl"]),
                     (20, 26, q["br"])):
-        g.rect(x, y + d, 3, 4, "amber")
-        g.rect(x + (2 if x > 16 else 0), y + d, 1, 4, "orange")
-    for x, d in ((6 + ln // 2, q["fl"] + b + o), (25 + ln // 2, q["fr"] + b + o)):
-        g.rect(x, 17 + d, 1, 2, "cream")
+        g.rect(x, y + d, 3, 4, GOLD[0])
+        g.rect(x + (2 if x > 16 else 0), y + d, 1, 4, GOLD[1])
+    # a deep, broad chest and barrel
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + o + b, 7.5, 6, "amber", "orange", "yellow")
-    # the wavy coat down the back
-    for dx, dy in ((-4, 20), (2, 20), (-2, 23), (3, 24), (-5, 24)):
-        g.rect(bx + dx, dy + o + b, 2, 1, "orange")
+    gold(g, bx, 20.5 + o + b, 7.5, 6, 2.3)
     g.rect(bx - 6, 16 + o + b, 12, 2, "blue")
     g.rect(bx - 6, 16 + o + b, 12, 1, "sky")
     if q["hackles"]:
         hackles(g, bx, 18 + o + b)
-    # a long plumed tail swinging low behind, cream feathering fringing its tip; tucked, it is held in short
-    tx = 16 + q["tail"] * 2
-    if q["tuck"]:
-        g.ell(tx, 26 + b, 2.5, 2.5, "orange")
-        g.ell(tx, 25.5 + b, 1.5, 2, "amber", None, "yellow")
-        for dx in (-1, 0, 1):
-            g.p(tx + dx, 28 + b, "cream")
-    else:
-        g.ell(tx, 27 + b, 3, 3.8, "orange")
-        g.ell(tx, 26.5 + b, 2, 3, "amber", None, "yellow")
-        for dx, dy in ((-2, 29), (-1, 30), (0, 31), (1, 30), (2, 29)):
-            g.p(tx + dx, dy + b, "cream")
-    # a broad head with drop ears hanging over its sides, darker than the coat
+    # a thick otter tail laid over the rump in the shade colour, tapering to a blunt tip and swinging from
+    # its root, lit down its left side; tucked, it is clamped short and still
+    tuck = bool(q["tuck"])
+    tx, ty = 16 + (0 if tuck else q["tail"] * 2), (28 if tuck else 31) + b
+    for (l, r, tl, tr), c in (((13, 19, -1.5, 1.5), GOLD[1]), ((13, 14.5, -1.5, -0.5), GOLD[0])):
+        g.tri((l, 22 + b), (r, 22 + b), (tx + tr, ty), c)
+        g.tri((l, 22 + b), (tx + tl, ty), (tx + tr, ty), c)
+    # a broad skull with short flat drop ears at its sides, in the shade colour
     hx, hb = 16 + ln, b + q["reach"]
     if q["reach"]:
         # the neck stretched out between the collar and the head
-        g.ell((hx + bx) / 2, 13.5 + o + b + q["reach"] / 2, 5.5, 3 - q["reach"] / 2, "amber", "orange", "yellow")
-    g.ell(hx, 8.5 + o + hb, 6.5, 6, "amber", "orange", "yellow")
-    g.ell(hx - 6, 11.5 + o + hb - q["ears"], 2.2, 4.5, "orange", "ochre")
-    g.ell(hx + 6, 11.5 + o + hb - q["ears"] + q["twitch"], 2.2, 4.5, "orange", "ochre")
+        gold(g, (hx + bx) / 2, 13.5 + o + b + q["reach"] / 2, 5.5, 3 - q["reach"] / 2)
+    gold(g, hx, 9.5 + o + hb, 6.5, 4.5, 2.8)
+    for x, t in ((hx - 6.5, 0), (hx + 6.5, q["twitch"])):
+        g.blob(x, 10.5 + o + hb - q["ears"] + t, 1.8, 2.5, GOLD[1], power=3)
     if q["glance"]:
         glance(g, hx, 8.5 + o + hb, -1 if q["glance"] < 0 else 1)
     spray(g, q["spray"])
     return g
 
 
+def gold(g, cx, cy, rx, ry, power=2.6):
+    """A rounded mass of Penny's coat: the base lit along its top left, over its shade cast 1px down and
+    right, so the shade is a thin rim and not a diagonal plane that would swallow the ears and tail."""
+    g.blob(cx + 0.8, cy + 0.8, rx, ry, GOLD[1], power=power)
+    g.blob(cx, cy, rx, ry, GOLD[0], None, GOLD[2], power=power)
+
+
 def penny_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
-    g.cel(16, 28.5, 7.5, 3, "amber", "orange", "yellow")
-    # long feathered ears hanging low, set apart from the head by a darker fold, wavy at the tips
-    for x, s in ((5, -1), (27, 1)):
-        g.ell(x + s * d / 2, 20 + d, 3.5, 7, "orange")
-        g.cel(x + s * d / 2, 20 + d, 2.5, 6, "amber", "orange", "yellow")
-        g.p(x + s * d / 2 - 2, 27 + d, "amber")
-        g.p(x + s * d / 2 + 1, 27 + d, "amber")
-    g.cel(16, 16, 9.5, 8.5, "amber", "orange", "yellow")
-    g.cel(16, 21, 5.5, 4, "cream", "tan")
-    g.rect(13, 9, 6, 1, "yellow")
+    g.cel(16, 28.5, 8.5, 3.5, *GOLD)
+    # a broad, blocky head
+    g.cel(16, 14.5, 10, 8.5, *GOLD, power=2.5)
+    # short flat drop ears set at head height and hanging beside the cheeks; they sag and swing out as she
+    # loses heart
+    for s in (-1, 1):
+        x = 16 + s * 9 + s * d / 2
+
+        def ear(t, x=x, s=s):
+            t.tri((x - s * 3.5, 8 + d), (x + s * 2, 8.5 + d), (x + s * 1, 19 + d), GOLD[1])
+            t.tri((x - s * 3.5, 8 + d), (x - s * 1.5, 18 + d), (x + s * 1, 19 + d), GOLD[1])
+
+        inlay(g, "dbrown", ear)
+    # a square muzzle, a shade lighter than the coat, set off from the brow by a clear stop
+    inlay(g, GOLD[1], lambda t: t.cel(16, 20.5, 5.5, 4, GOLD[2], GOLD[0], power=3.2))
     # the blue collar and a round tag
-    g.rect(9, 26, 14, 2, "blue")
-    g.rect(9, 26, 14, 1, "sky")
+    g.rect(8, 26, 16, 2, "blue")
+    g.rect(8, 26, 16, 1, "sky")
     g.cel(16, 29, 1.6, 1.6, "lgrey", "grey", "white")
     eyes(g, 11, 19, 14, mood=mood)
     g.rect(14, 18, 4, 2, "ink")
     g.p(14, 18, "dslate")
     mouth(g, 20, mood)
     return g
+
+
+def inlay(g, line, draw):
+    """draw on a blank grid the size of g, then lay what it drew over g, ringed in line wherever it meets
+    what g already holds: an inner line two ramp steps darker where a shape crosses the figure, while its
+    open edges take the grid's outline."""
+    t = Grid(g.w, g.h)
+    draw(t)
+    shape = {(x, y) for y in range(g.h) for x in range(g.w) if t.px[y][x]}
+    ring = {(x + dx, y + dy) for x, y in shape for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0))} - shape
+    for x, y in ring:
+        if 0 <= x < g.w and 0 <= y < g.h and g.px[y][x]:
+            g.p(x, y, line)
+    for x, y in shape:
+        g.px[y][x] = t.px[y][x]
 
 
 # ---------- shared features ----------
@@ -708,7 +730,7 @@ def whirl(g, side, bx, b):
         g.p(bx + (dx if side > 0 else -1 - dx), y + b, "white")
 
 
-# Penny's hackles from the collar down: r rust spine, o ochre fur, y yellow tips lit from the top left.
+# Penny's hackles from the collar down: r rust spine, o orange fur, y yellow tips lit from the top left.
 HACKLES = ["yoroy", ".ory.", "yoroo", ".oro.", ".yro.", "..r.."]
 
 
@@ -718,17 +740,17 @@ def hackles(g, cx, y):
     for j, row in enumerate(HACKLES):
         for i, c in enumerate(row):
             if c != ".":
-                g.p(cx - 3 + i, y + j, {"r": "rust", "o": "ochre", "y": "yellow"}[c])
+                g.p(cx - 3 + i, y + j, {"r": "rust", "o": "orange", "y": "yellow"}[c])
     for x, side in ((cx - 8, -1), (cx + 7, 1)):
-        g.p(x, y - 1, "ochre")
-        g.p(x + side, y - 2, "ochre")
+        g.p(x, y - 1, "orange")
+        g.p(x + side, y - 2, "orange")
 
 
 def glance(g, hx, hy, side):
     """Penny looking back over her left (side < 0) or right shoulder: the side of her muzzle and one eye show
     past the head's edge."""
     x = hx + side * 5
-    g.ell(x + side, hy + 3, 2, 1.8, "cream", "tan")
+    g.ell(x + side, hy + 3, 2, 1.8, "yellow", "amber")
     g.p(x + side * 2, hy + 2, "ink")
     g.p(x, hy, "ink")
     g.p(x - side, hy, "white")

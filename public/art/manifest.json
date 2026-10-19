@@ -730,7 +730,7 @@
       "json": "sprites/dog-penny.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 22
+        "opaqueWidth": 20
       }
     },
     {
@@ -748,7 +748,7 @@
       "json": "sprites/dog-penny@75.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 18
+        "opaqueWidth": 16
       }
     },
     {

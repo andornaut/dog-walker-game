@@ -325,34 +325,32 @@ def snowball(g):
     nose(g, 21, 28)
 
 
-# ---------- Penny: golden retriever, big, golden coat, feathery tail, blue collar ----------
+# ---------- Penny: golden retriever with a Labrador build, big, golden coat, otter tail, blue collar ----------
 
 def penny(g):
-    # the plumed tail sweeping up behind on the right, cream feathering fringing its far edge
-    g.cel(58, 35, 5, 10.5, "cream", "tan")
-    g.cel(56, 36.5, 5.5, 11, "amber", "orange", "yellow")
-    g.cel(46, 53, 13, 10, "amber", "orange", "yellow")
-    g.cel(31, 51, 15, 13, "amber", "orange", "yellow")
-    legs(g, (22, 33), 53, "amber", "orange", w=6)
-    # a cream bib of feathering down the chest, wavy at its edge
-    g.cel(30, 49, 8, 6, "cream", "tan")
-    for x in (24, 28, 32, 36):
-        g.p(x, 54, "cream")
+    base, shade, light = dogs.GOLD
+    # the haunch, and a thick otter tail curled forward round it along the ground, tapering to a blunt tip
+    g.cel(46, 53, 13, 10, base, shade, light)
+    dogs.inlay(g, dk(base), lambda t: (t.cel(52, 59.5, 10, 3.5, base, shade, light),
+                                       t.tri((42, 58), (42, 63), (34, 62), base)))
+    # a deep chest on solid legs
+    g.cel(31, 51, 15.5, 13, base, shade, light, power=2.4)
+    legs(g, (21, 33), 53, base, shade, w=7)
     # blue collar and a silver tag
     g.rect(16, 42, 30, 3, "blue")
     g.rect(16, 42, 30, 1, "sky")
     g.cel(30, 47.5, 2.5, 2.5, "lgrey", "grey", "white")
-    # drop ears hanging past the collar from under the head, wavy feathered ends
-    for x in (13, 47):
-        g.cel(x, 34, 5.5, 11, "orange", "ochre")
-        g.cel(x, 33, 4, 9.5, "amber", "orange")
-        g.p(x - 2, 44, "amber")
-        g.p(x + 1, 45, "orange")
-    g.cel(30, 25, 16, 14, "amber", "orange", "yellow")
-    g.rect(25, 13, 8, 1, "yellow")
-    g.cel(25, 32, 9, 6.5, "cream", "tan")
+    # a broad, blocky head
+    g.cel(30, 25, 17, 14, base, shade, light, power=2.6)
+    # short flat drop ears set at the top of the skull's sides, hanging no lower than the jaw
+    dogs.inlay(g, dk(shade), lambda t: (t.tri((11, 16), (21, 13), (15, 37), shade),
+                                        t.tri((11, 16), (10, 33), (15, 37), shade)))
+    dogs.inlay(g, dk(shade), lambda t: (t.tri((39, 13), (49, 16), (47, 38), shade),
+                                        t.tri((49, 16), (51, 34), (47, 38), shade)))
+    # a square muzzle, a shade lighter than the coat, set off from the brow by a clear stop
+    dogs.inlay(g, dk(light), lambda t: t.cel(25, 34, 9, 6.5, light, base, power=3.2))
     eyes(g, 18, 33, 21)
-    nose(g, 21, 28)
+    nose(g, 21, 29)
 
 
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
