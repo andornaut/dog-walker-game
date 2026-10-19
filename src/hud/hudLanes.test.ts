@@ -5,6 +5,7 @@ import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
 import { centredInLane, hudLanes } from "./hudLanes";
+import { stripLayout } from "./stateStrip";
 
 const layout = screenLayout(SCREEN_CONFIG);
 const lanes = hudLanes(layout);
@@ -26,6 +27,10 @@ const slotPairs = layout.dogSlots.flatMap((slot, i): [string, Rect, Rect][] => {
 
 describe("hudLanes", () => {
   it.each<[string, Rect, Rect]>([
+    ["the bank and the top bar", lanes.bank, layout.topBar],
+    ["the bank and the toast", lanes.bank, lanes.toast],
+    ["the bank and the hint", lanes.bank, lanes.hint],
+    ["the bank and the road", lanes.bank, layout.roadView],
     ["the toast and the hint", lanes.toast, lanes.hint],
     ["the toast and the strip bubble", lanes.toast, lanes.stripBubble],
     ["the toast and the road", lanes.toast, layout.roadView],
@@ -39,12 +44,32 @@ describe("hudLanes", () => {
 
   it("keeps every lane on screen, with one heart label per slot", () => {
     expect(lanes.heartLabels).toHaveLength(layout.dogSlots.length);
-    const all = [lanes.toast, lanes.hint, lanes.stripBubble, lanes.quip, ...lanes.heartLabels];
+    const all = [
+      lanes.bank,
+      lanes.toast,
+      lanes.hint,
+      lanes.stripBubble,
+      lanes.quip,
+      ...lanes.heartLabels,
+    ];
     for (const lane of all) {
       expect(Math.min(lane.x, lane.y)).toBeGreaterThanOrEqual(0);
       expect(lane.x + lane.width).toBeLessThanOrEqual(SCREEN_CONFIG.width);
       expect(lane.y + lane.height).toBeLessThanOrEqual(SCREEN_CONFIG.height);
     }
+  });
+});
+
+describe("the bank lane", () => {
+  it("sits under the money well, as wide as it", () => {
+    expect([lanes.bank.x, lanes.bank.x + lanes.bank.width]).toEqual([4, 92]);
+    expect(lanes.bank.y).toBe(layout.topBar.y + layout.topBar.height);
+  });
+
+  it("keeps the toast left-aligned at x 4, clear of the widest state strip", () => {
+    const strip = stripLayout(SCREEN_CONFIG.width, 5);
+    expect(lanes.toast.x).toBe(4);
+    expect(lanes.toast.x + lanes.toast.width).toBeLessThanOrEqual(strip?.tab.x ?? 0);
   });
 });
 

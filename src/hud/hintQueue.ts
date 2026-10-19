@@ -8,7 +8,7 @@ import type { HintId } from "../data/types";
 // - A hint still queued staleMs after it was raised, counting only time in its own context, is
 //   dropped unshown; the caller marks a hint shown only when it starts, so it is raised again
 //   the next time it triggers.
-// - While blocked (the state strip's bubble is open), no hint starts.
+// - While blocked (the state strip's bubble is open, or a badge's toast shows), no hint starts.
 export type HintContext = "hold" | "walk";
 
 export interface RaisedHint {

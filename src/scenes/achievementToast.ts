@@ -10,8 +10,8 @@ import { addPixelText, scalePixelText } from "./pixelText";
 import { soundboardOf } from "./soundboard";
 import { addPanel } from "./uiKit";
 
-// A badge earned mid-walk: a small banner filling its lane, at the top-left of the backdrop
-// band, which cards leave uncovered, with the badge, an "Achievement!" line and its name. It
+// A badge earned mid-walk: a small banner filling its lane, at the left of the backdrop band
+// under the bank's money changes, with the badge, an "Achievement!" line and its name. It
 // drops in, holds, and fades; with reduced motion it appears in place. Badges earned together
 // show one after another. The end screen still celebrates them in full.
 const TOAST = { holdMs: 2000, inMs: 180, nameY: 24, outMs: 300, padding: 6, rise: 12 };
@@ -25,6 +25,10 @@ export class AchievementToasts {
     private readonly lane: Rect,
     private readonly reduced: () => boolean,
   ) {}
+
+  isShowing(): boolean {
+    return this.showing;
+  }
 
   show(ids: readonly AchievementId[]): void {
     this.queue.push(...ids);

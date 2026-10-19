@@ -94,7 +94,7 @@ const PIP = {
 };
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const LANES = hudLanes(LAYOUT);
-const LABEL = { height: 20, ms: 1100, rise: 18 };
+const LABEL = { height: 20, ms: 1100 };
 const HINT = { fadeMs: 400, holdMs: 4500, padding: 6 };
 // An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x. It
 // draws over the doghouses and their heart-loss flash (depth 0), under the HUD's moments.
@@ -142,11 +142,16 @@ export class HudScene extends Scene {
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
   private pips: GameObjects.Sprite[] = [];
+  private bankLabels: ChangeLabel[] = [];
+  private bankShowing = false;
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
   private slots: SlotView[] = [];
   private soundHolder: GameObjects.Container | undefined;
   private strip: StateStripView | undefined;
+  private toasts: AchievementToasts | undefined;
+  // Badges earned while a hint, card or menu shows, which wait for it to close.
+  private toastsWaiting: AchievementId[] = [];
   private treats: GameObjects.BitmapText | undefined;
   private zoneIcon: GameObjects.Image | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
@@ -163,6 +168,9 @@ export class HudScene extends Scene {
     this.hintRaised = [];
     this.quips = [];
     this.quipShowing = false;
+    this.bankLabels = [];
+    this.bankShowing = false;
+    this.toastsWaiting = [];
     const g = this.add.graphics();
     // The band under the doghouses ends on the screen's bottom row, its top rows (the divider)
     // over the road's last rows.
@@ -242,8 +250,8 @@ export class HudScene extends Scene {
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
     const onHint = (hint: RaisedHint) => this.hintRaised.push(hint);
     const onQuips = (quips: QuipBubble[]) => this.queueQuips(quips);
-    const toasts = new AchievementToasts(this, LANES.toast, () => run.reducedMotion());
-    const onAchievements = (ids: AchievementId[]) => toasts.show(ids);
+    this.toasts = new AchievementToasts(this, LANES.toast, () => run.reducedMotion());
+    const onAchievements = (ids: AchievementId[]) => this.toastsWaiting.push(...ids);
     run.events.on(ACHIEVEMENTS_EVENT, onAchievements);
     run.events.on(CHANGE_LABELS_EVENT, onLabels);
     run.events.on(HINT_EVENT, onHint);
@@ -448,6 +456,13 @@ export class HudScene extends Scene {
       this.strip?.closeBubble();
     }
     this.stepHints(delta, walkCovered(pause), runHintTriggers(gameData, view.run, items.length));
+    // A tall hint rises into the toast's rows and a card or a menu dims them, so a badge's
+    // toast waits for both to close.
+    const toastRoom = this.hints.shown === null && !walkCovered(pause);
+    if (toastRoom && this.toastsWaiting.length > 0) {
+      this.toasts?.show(this.toastsWaiting);
+      this.toastsWaiting = [];
+    }
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {
       affected: view.affected.join(),
@@ -663,27 +678,36 @@ export class HudScene extends Scene {
     scalePixelText(label, scale, at.x, at.y);
   }
 
-  // Each change shows in its lane and fades out: a money change floats up from under the bank,
-  // or fades in place with reduced motion; a heart change pops over its dog and flies into its
-  // doghouse (heartFeedback.ts), and its label then fades in place on the doghouse's bottom
-  // band.
+  // Each change shows in its lane and fades out: a money change in the bank lane (one at a
+  // time); a heart change pops over its dog and flies into its doghouse (heartFeedback.ts), and
+  // its label then fades in place on the doghouse's bottom band.
   private floatLabels(labels: ChangeLabel[]): void {
-    const { topBar } = LAYOUT;
     const run = this.runScene();
-    const still = run.reducedMotion();
-    let bankRow = 0;
-    labels.forEach((label) => {
-      if (label.target.kind === "bank") {
-        const y = topBar.y + topBar.height + 2 + bankRow * (LABEL.height + 2);
-        bankRow += 1;
-        this.showLabel(label, { scale: 2, x: 6, y }, still ? 0 : LABEL.rise, 0);
-      }
-    });
+    this.bankLabels.push(...labels.filter((label) => label.target.kind === "bank"));
+    if (!this.bankShowing) {
+      this.showNextBankLabel();
+    }
     const pops = heartPops({ lanes: LANES.heartLabels, run }, labels, (slot) => {
       const view = this.slots[slot];
       return view === undefined ? undefined : { house: view.house, parts: slotParts(view) };
     });
     pops.forEach((pop) => this.hearts?.play(pop));
+  }
+
+  // The next money change in the bank lane, under the money well: it rises from the lane's
+  // bottom to its top, or fades in place with reduced motion, then the next follows.
+  private showNextBankLabel(): void {
+    const label = this.bankLabels.shift();
+    this.bankShowing = label !== undefined;
+    if (label === undefined) {
+      return;
+    }
+    const lane = LANES.bank;
+    const y = lane.y + lane.height - LABEL.height;
+    const rise = this.runScene().reducedMotion() ? 0 : y - lane.y;
+    this.showLabel(label, { scale: 2, x: lane.x, y }, rise, lane.width, () =>
+      this.showNextBankLabel(),
+    );
   }
 
   // A heart change's label on its doghouse's bottom band, once its heart has landed.
@@ -693,19 +717,24 @@ export class HudScene extends Scene {
   }
 
   // A change on a cream chip, so gains in forest and losses in dark red read over anything. A
-  // label too wide for room at 2x is set at 1x; room 0 is no limit.
+  // label too wide for room at 2x is set at 1x, on two lines if one is still too wide.
   private showLabel(
     label: ChangeLabel,
     at: { scale: number; x: number; y: number },
     rise: number,
     room: number,
+    done: () => void = () => undefined,
   ): void {
     const text = addPixelText(this, at.x + 2, at.y + 4, label.text, {
       color: label.gain ? PALETTE.forest : PALETTE.darkRed,
       scale: at.scale,
     });
-    if (room > 0 && text.width + 4 > room) {
+    if (text.width + 4 > room) {
       scalePixelText(text, 1, at.x + 2, at.y + 7);
+    }
+    if (text.width + 4 > room) {
+      text.setMaxWidth(room - 4);
+      placePixelText(text, at.x + 2, at.y + 3);
     }
     const chip = this.add.graphics();
     drawFramedRect(
@@ -719,7 +748,10 @@ export class HudScene extends Scene {
       alpha: 0,
       duration: LABEL.ms,
       ease: "Sine.easeIn",
-      onComplete: () => parts.forEach((part) => part.destroy()),
+      onComplete: () => {
+        parts.forEach((part) => part.destroy());
+        done();
+      },
       targets: parts,
       y: `-=${rise}`,
     });
@@ -727,7 +759,7 @@ export class HudScene extends Scene {
 
   // Steps the hint queue (see hintQueue.ts) a frame: hints RunScene raised and those the run's
   // state raises join it, a card or the pause menu holds it, and the strip's open bubble keeps
-  // a new hint from starting. A hint is marked shown when it starts.
+  // a new hint from starting, as a toast does. A hint is marked shown when it starts.
   private stepHints(delta: number, held: boolean, triggers: readonly HintTrigger[]): void {
     const shown = triggers.length === 0 ? [] : [...shownHints(this)];
     for (const trigger of triggers) {
@@ -743,7 +775,7 @@ export class HudScene extends Scene {
       staleMs: read(gameData.tuning, "seconds", "hintStaleSeconds") * 1000,
     };
     const tick = {
-      blocked: this.strip?.isOpen() ?? false,
+      blocked: (this.strip?.isOpen() ?? false) || (this.toasts?.isShowing() ?? false),
       dtMs: delta,
       held,
       raised: this.hintRaised,

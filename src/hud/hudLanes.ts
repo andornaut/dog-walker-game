@@ -1,11 +1,16 @@
 import type { Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 import { DOGHOUSE } from "./doghouse";
+import { TOP_BAR } from "./topBar";
 
 // Each transient layer of the walk's HUD keeps to its own lane, so none covers another, the
 // road's far end or the pack, which walks just above the doghouses:
-// - toast: an achievement banner, at the top-left of the backdrop band.
-// - hint: a first-time hint, centred with its bottom on the lane's bottom.
+// - bank: a money change, under the top bar's money well and as wide as it, one at a time. It
+//   rises from the lane's bottom to its top, never into the top bar.
+// - toast: an achievement banner, left-aligned under the bank lane, clear of the state strip
+//   on the right.
+// - hint: a first-time hint, centred with its bottom on the lane's bottom. One taller than the
+//   lane rises into the toast's rows, so a hint and a toast take turns.
 // - stripBubble: the state strip's descriptions, right-aligned with its top on the lane's
 //   top, growing down as far as its rows need. It shares the hint's rows: the two never show
 //   together.
@@ -13,6 +18,7 @@ import { DOGHOUSE } from "./doghouse";
 //   speaker's face and kept on screen. It leaves the owners' faces uncovered.
 // - heartLabels: a heart change, by slot, on the doghouse's bottom band under the faces.
 export interface HudLanes {
+  bank: Rect;
   heartLabels: Rect[];
   hint: Rect;
   quip: Rect;
@@ -21,16 +27,25 @@ export interface HudLanes {
 }
 
 const MARGIN = 4;
+// A bank label is 20px tall and rises 4px.
+const BANK_HEIGHT = 24;
 const TOAST = { height: 44, width: 240 };
 const HINT_SIDE = 8;
 const HEART_LABEL_HEIGHT = 24;
 
 export function hudLanes(layout: Pick<ScreenLayout, "backdrop" | "dogRow" | "dogSlots">): HudLanes {
   const { backdrop, dogRow, dogSlots } = layout;
-  const toast = { ...TOAST, x: MARGIN, y: backdrop.y + 2 };
+  const bank = {
+    height: BANK_HEIGHT,
+    width: TOP_BAR.money.width,
+    x: TOP_BAR.money.x,
+    y: backdrop.y,
+  };
+  const toast = { ...TOAST, x: MARGIN, y: bank.y + bank.height + 2 };
   const lowTop = toast.y + toast.height + 2;
   const low = { height: backdrop.y + backdrop.height - MARGIN - lowTop, y: lowTop };
   return {
+    bank,
     heartLabels: dogSlots.map((slot) => ({
       height: HEART_LABEL_HEIGHT,
       width: slot.width - MARGIN,
