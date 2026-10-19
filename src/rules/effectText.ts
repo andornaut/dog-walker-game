@@ -4,6 +4,7 @@ import type {
   DogId,
   Duration,
   Effect,
+  Energy,
   GameData,
   HeartsEffect,
   LiveTuning,
@@ -23,6 +24,12 @@ import { modifierValue } from "./modifiers";
 import { type Cents, cents, read, readTable } from "./units";
 
 export type TextData = Pick<GameData, "debuffs" | "encounters" | "needs" | "quirks" | "tuning">;
+
+export const ENERGY_NAMES: { readonly [E in Energy]: string } = {
+  calm: "calm",
+  hyper: "hyper",
+  steady: "steady",
+};
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
   big: "big",
@@ -228,7 +235,8 @@ function effectPhrase(data: TextData, effect: Effect): string {
   }
 }
 
-function capitalize(text: string): string {
+// The text with its first letter upper-cased, for a name shown on its own, as a label.
+export function capitalize(text: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
 

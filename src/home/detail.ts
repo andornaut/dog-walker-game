@@ -1,5 +1,12 @@
 import type { DogId, GameData, GearId, HomeText } from "../data/types";
-import { effectText, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
+import {
+  capitalize,
+  effectText,
+  ENERGY_NAMES,
+  SIZE_NAMES,
+  TEMPERAMENT_NAMES,
+  TRAIT_NAMES,
+} from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
@@ -31,10 +38,6 @@ export interface DetailCard {
   readonly title: string;
 }
 
-function capitalized(text: string): string {
-  return text.charAt(0).toUpperCase() + text.slice(1);
-}
-
 const FIELDS = HOME_TEXT_FIELDS.detail;
 
 // What buying it would take, or null when it is already owned.
@@ -63,8 +66,8 @@ export function dogDetail(
   return {
     lines: [
       fillLine(FIELDS, text, "dogKind", {
-        energy: capitalized(energy),
-        size: capitalized(SIZE_NAMES[size]),
+        energy: capitalize(ENERGY_NAMES[energy]),
+        size: capitalize(SIZE_NAMES[size]),
         trait: TRAIT_NAMES[trait],
       }),
       fillLine(FIELDS, text, "dogQuirk", {
@@ -74,7 +77,7 @@ export function dogDetail(
       }),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
       fillLine(FIELDS, text, "dogTemperament", {
-        temperament: capitalized(TEMPERAMENT_NAMES[owner.temperament]),
+        temperament: capitalize(TEMPERAMENT_NAMES[owner.temperament]),
       }),
       fillLine(FIELDS, text, "dogFee", { fee }),
       fillLine(FIELDS, text, "dogTotals", {
@@ -103,7 +106,7 @@ export function gearDetail(
   const text = data.homeText.detail;
   const status = loadout.gear === gear ? text.gearEquipped : text.gearOwned;
   return {
-    lines: [`${capitalized(effectText(data, item.effects))}.`],
+    lines: [`${capitalize(effectText(data, item.effects))}.`],
     locked: cost !== null && cost > bank,
     status: priceLine(text, cost, bank) ?? status,
     subtitle: text.gearSubtitle,

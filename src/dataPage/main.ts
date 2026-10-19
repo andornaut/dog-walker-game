@@ -23,10 +23,13 @@ import {
 } from "../rules/dogs";
 import {
   affectText,
+  capitalize,
   conditionText,
   effectText,
+  ENERGY_NAMES,
   formatDollars,
   modifierText,
+  SIZE_NAMES,
   TEMPERAMENT_NAMES,
   TRAIT_NAMES,
 } from "../rules/effectText";
@@ -132,12 +135,12 @@ function dogsSection(data: GameData): Section {
     rows: Object.values(data.dogs).map((dog) => [
       dog.name,
       dog.breed,
-      dog.size,
+      capitalize(SIZE_NAMES[dog.size]),
       TRAIT_NAMES[dog.trait],
       data.quirks[dog.quirk].name,
-      dog.energy,
+      capitalize(ENERGY_NAMES[dog.energy]),
       `${dog.owner.name}, ${dog.owner.role}`,
-      TEMPERAMENT_NAMES[dog.owner.temperament],
+      capitalize(TEMPERAMENT_NAMES[dog.owner.temperament]),
       startHearts(tuning, [], dog),
       maxHearts(tuning, [], dog),
       `${startHearts(tuning, luckyCollar, dog)} / ${maxHearts(tuning, luckyCollar, dog)}`,
@@ -161,7 +164,7 @@ function quipsSection(data: GameData): Section {
       return QUIP_MOMENTS.map((moment, i) => [
         i === 0 ? dog.name : "",
         i === 0 ? dog.owner.name : "",
-        i === 0 ? TEMPERAMENT_NAMES[dog.owner.temperament] : "",
+        i === 0 ? capitalize(TEMPERAMENT_NAMES[dog.owner.temperament]) : "",
         moment,
         data.quips[id][moment].join(" / "),
       ]);
