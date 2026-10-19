@@ -281,13 +281,16 @@ def panel():
 
 def button(state):
     """secondary is a tan face on a brown lip for the actions beside the amber primary (Help,
-    Settings, Head home beside Resume). Labels are plum: 7.35:1 on amber, 6.49:1 on tan.
+    Settings, Head home beside Resume). go is a green face on a forest lip for Start walk, the one
+    button on the home screen that must not blend with the amber and yellow tiles. Labels are
+    plum: 7.35:1 on amber, 6.49:1 on tan; ink on green, 8.41:1.
     Every row below 2 and above 19 is plain face, so the plate stretches to any height with
     slices of 3 at the top and sides and 5 at the bottom (or 6 all round). Pressed, the
     highlight sits on the face's top edge (row 2), inside the top slice."""
     face, lip, hi = {"normal": ("amber", "orange", "yellow"), "pressed": ("amber", None, "yellow"),
                      "disabled": ("slate", "dslate", "grey"), "secondary": ("tan", "brown", "cream"),
-                     "secondary-pressed": ("tan", None, "cream")}[state]
+                     "secondary-pressed": ("tan", None, "cream"),
+                     "go": ("green", "forest", "yellow"), "go-pressed": ("green", None, "yellow")}[state]
     g = Grid(24, 24)
     pressed = state.endswith("pressed")
     top = 2 if pressed else 0
@@ -864,7 +867,7 @@ def sprites():
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000)
-                        for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed")]
+                        for s in ("normal", "pressed", "disabled", "secondary", "secondary-pressed", "go", "go-pressed")]
     yield "ui-icon-button", [(s, [icon_button(s).outlined(False)], 1000) for s in ("normal", "pressed")]
     yield "ui-switch", [("on", [switch(True).outlined(False)], 1000), ("off", [switch(False).outlined(False)], 1000)]
     yield "ui-slider", [(t, [slider_track(t.startswith("filled"), not t.endswith("disabled")).outlined(False)], 1000)
