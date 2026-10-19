@@ -6,18 +6,19 @@ import { heartRows } from "./hudView";
 export const DOGHOUSE = {
   dogFace: { x: 20, y: 36 },
   fired: { x: 36, y: 128 },
-  heartCount: { x: 56, y: 90 },
+  // On the doormat, 31px wide: room for "10/10".
+  heartCount: { x: 36, y: 70 },
   hearts: { perRow: 6, pitchX: 9, pitchY: 8, x: 9, y: 127 },
   // The roof's name plate and the hearts board, for fitting names: the scales each may take,
   // largest first. The owner's name has 9px above the hearts, room for 1x only.
-  name: { scales: [2, 1], width: 56, x: 36, y: 11 },
+  name: { scales: [2, 1], width: 56, x: 36, y: 16 },
   ownerFace: { x: 8, y: 78 },
   ownerName: { scales: [1], width: 57, x: 9, y: 118 },
-  // The dog's status icons (16x16, top-left corners) on the wall beside the owner's window:
-  // the newest under the heart count, the next over it.
+  // The dog's status icons (16x16, top-left corners) on the pegs beside the owner's window,
+  // the newest on the upper peg.
   statuses: [
-    { x: 48, y: 97 },
-    { x: 48, y: 73 },
+    { x: 46, y: 78 },
+    { x: 46, y: 96 },
   ],
 } as const;
 

@@ -35,15 +35,15 @@ describe("fittingScale", () => {
 });
 
 describe("DOGHOUSE.statuses", () => {
-  it("puts the 16x16 status icons right of the owner's window, clear of the count and board", () => {
-    // The window's cream frame ends at x=42, the board starts at y=116, and the 1x count's
-    // capitals take the 6 rows from its y.
+  it("puts the 16x16 status icons beside the owner's window, apart and above the board", () => {
+    // The window's cream frame ends at x=42, the house's dark edge starts at x=67 and the
+    // hearts board at y=116.
     for (const cell of DOGHOUSE.statuses) {
       expect(cell.x).toBeGreaterThanOrEqual(42);
-      expect(cell.x + 16).toBeLessThanOrEqual(66);
-      const count = DOGHOUSE.heartCount.y;
-      expect(cell.y + 16 <= count || cell.y >= count + 6).toBe(true);
+      expect(cell.x + 16).toBeLessThanOrEqual(67);
       expect(cell.y + 16).toBeLessThanOrEqual(116);
     }
+    const [upper, lower] = DOGHOUSE.statuses;
+    expect(upper.y + 16).toBeLessThanOrEqual(lower.y);
   });
 });

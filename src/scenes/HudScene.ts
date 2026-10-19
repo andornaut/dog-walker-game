@@ -134,7 +134,9 @@ export class HudScene extends Scene {
     );
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
-    this.strip = new StateStripView(this, () => stripTapAllowed((this.scene.get(SCENE_KEYS.run) as RunScene).runPause()));
+    this.strip = new StateStripView(this, () =>
+      stripTapAllowed((this.scene.get(SCENE_KEYS.run) as RunScene).runPause()),
+    );
 
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
