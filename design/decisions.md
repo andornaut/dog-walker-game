@@ -56,3 +56,4 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Tech · Run screen as three Phaser scenes (RunScene, HudScene, CardScene); game state is plain TypeScript with no Phaser dependency, so rules are unit-testable
 - 2026-10-18 · Art · Tile size is 32×32 for road tiles, dogs and obstacles; lanes are 56px wide
 - 2026-10-18 · Art · Aseprite sources go in art/; exported PNG sheets plus Aseprite JSON go in public/assets/; the pixel font is a BMFont (.fnt plus .png)
+- 2026-10-18 · Art · Exported art goes in public/art/ instead of public/assets/, which would collide with the dist/assets/ directory Vite writes the bundle to; refines the 2026-10-18 Art entry on asset formats

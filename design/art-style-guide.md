@@ -26,7 +26,7 @@
 
 The art-side rules for every asset live here. The tooling that generates, cleans up and packs sprites lives in `tech-plan.md`.
 
-- **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/assets/`. The pixel font is a BMFont (`.fnt` plus `.png`). The export pipeline lives in `tech-plan.md`.
+- **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/art/` (manifest: `public/art/manifest.json`). The pixel font is a BMFont (`.fnt` plus `.png`). The export pipeline lives in `tech-plan.md`.
 - **Naming:** TBD (file and sprite naming scheme)
 - **Consistency checks:** every generated asset must match the agreed palette, resolution, proportions and outline style before it goes in the game. TBD once the open decisions above are settled
 
