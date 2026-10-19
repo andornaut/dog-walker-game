@@ -2,7 +2,8 @@
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
 People are 32x48, animals 32x32, pickups and small effects 16x16 (the ice cream
-truck is 64x48 and the construction barrier 56x32, one lane), all chibi and
+truck is 88x44, two lanes, the construction barrier 56x32, one lane, and the skunk's
+stink haze 88x40, a ground decal), all chibi and
 in Endesga 32 with coloured outlines. The walker is seen from behind, like the
 dogs; everything coming down the road faces the player. What stands on the road
 is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
@@ -417,40 +418,43 @@ def puddle(f, w=88, h=32):
     return g
 
 
-# The spray cloud's puffs as (centre x, centre y, radius across) in the 88x88 frame. The cloud hugs the ground:
-# each puff is CLOUD_SQUASH as tall as it is wide, and together they fill the frame's width but only its
-# bottom 64 rows or so. A swollen puff still stops a pixel short of the frame's edge, so no lobe is clipped flat.
-CLOUD_PUFFS = [(44, 55, 30), (24, 44, 17), (64, 42, 18), (22, 68, 18), (64, 70, 18), (44, 33, 12), (44, 77, 12),
-               (12, 55, 10), (76, 55, 10)]
-CLOUD_SQUASH = 0.73
+# The stink haze's puffs as (centre x, centre y, radius across) in the 88x40 frame. The haze hugs the road: each
+# puff is CLOUD_SQUASH as tall as it is wide, so together they make a low, wide bank with a lumpy top, its base
+# on the frame's last row. A swollen puff still stops a pixel short of the frame's top and sides, so no lobe is
+# clipped flat; along the bottom the frame's last row cuts them level, where the haze meets the road.
+CLOUD_PUFFS = [(44, 28, 30), (22, 31, 15), (66, 31, 15), (31, 36, 15), (57, 36, 15), (32, 20, 11), (57, 19, 11),
+               (44, 14, 9), (11, 35, 9), (77, 35, 9), (19, 24, 7), (70, 24, 7)]
+CLOUD_SQUASH = 0.42
+CLOUD_W, CLOUD_H = 88, 40
 # Where each stink wisp starts, trailing 6 rows down.
-CLOUD_WISPS = ((20, 39), (60, 36), (66, 66), (26, 66))
+CLOUD_WISPS = ((22, 25), (62, 22), (72, 30), (14, 31), (42, 17))
 
 
 def skunk_cloud(step):
-    """88x88 spray cloud drawn under the skunk, low and wide on the road: puffs with a solid rim and a
-    2x2-dithered fill, so the road shows through. The puffs swell in turn. The rim is two pixels: teal outside,
-    which holds 3:1 on the light roads, and green inside it, which holds on Woof Way."""
-    g = Grid(88, 88)
+    """88x40 stink haze drawn under the skunk, low and wide on the road: puffs with a solid rim and a 2x2-dithered
+    fill, so the road shows through. The puffs swell in turn; the base stays on the last row. The rim is two
+    pixels: teal outside, which holds 3:1 on the light roads, and green inside it, which holds on Woof Way."""
+    w, h = CLOUD_W, CLOUD_H
+    g = Grid(w, h)
     puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(CLOUD_PUFFS)]
     dist = [[min(((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / CLOUD_SQUASH) ** 2) ** 0.5 / r for cx, cy, r in puffs)
-             for x in range(88)] for y in range(88)]
+             for x in range(w)] for y in range(h)]
 
     def inside(x, y):
-        return 0 <= x < 88 and 0 <= y < 88 and dist[y][x] <= 1
+        return 0 <= x < w and 0 <= y < h and dist[y][x] <= 1
 
     def beside(x, y, test):
         return any(test(x + dx, y + dy) for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
 
-    outer = {(x, y) for y in range(88) for x in range(88)
+    outer = {(x, y) for y in range(h) for x in range(w)
              if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
-    for y in range(88):
-        for x in range(88):
+    for y in range(h):
+        for x in range(w):
             if not inside(x, y):
                 continue
             if (x, y) in outer:
                 g.p(x, y, "teal")
-            elif dist[y][x] > 1 - 1.6 / 14 or beside(x, y, lambda a, b: (a, b) in outer):
+            elif beside(x, y, lambda a, b: (a, b) in outer):
                 g.p(x, y, "green")
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
                 g.p(x, y, "green" if (x + y) % 8 else "dgreen")
@@ -461,33 +465,55 @@ def skunk_cloud(step):
 
 
 def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
-    """The other dog trotting toward the player. Each leg offset moves a paw along the road, positive
-    toward the player: the hind paws peek out beside the rump, the front paws beside the jaw. tail moves
-    the fluffy tail peeking over the rump sideways; twitch moves the right ear alone (negative is up). The
-    road outline, and a tan rim on the fur facing the light."""
+    """The other dog trotting toward the player at its own eye level, a squat front elevation: the big fox head
+    with upright ears over a broad white chest ruff, short front legs either side of it and the hind paws
+    showing between them. Each leg offset is that paw's stride, positive reaching toward the player: a
+    reaching paw is lifted off the road 2px, a pushing one stays planted on the last row. tail moves the
+    fluffy tail, which rises off the rump behind the head and shows over the right shoulder, sideways; twitch
+    moves the right ear alone (negative is up). The road outline, and a tan rim on the fur facing the light."""
     g = edged(Grid())
-    g.rect(10, 4 + bl, 2, 4, "ochre")
-    g.rect(20, 4 + br, 2, 4, "rust")
-    g.rect(10, 26 + fl, 2, 3, "white")
-    g.rect(20, 26 + fr, 2, 3, "lgrey")
     b = bob
-    g.ell(16 + tail, 4 + b, 1.6, 2.2, "ochre", "rust", "tan")
-    g.ell(16, 13 + b, 6.5, 8, "ochre", "rust", "tan")
-    g.ell(16, 17 + b, 4, 4, "white", "lgrey")
+
+    def lift(k):
+        return -2 if k > 0 else 0
+
+    # the tail, a plume over the back behind the head
+    g.ell(24.5 + tail, 16.5 + b, 2.5, 2.5, "ochre", "rust", "tan")
+    g.p(24 + tail, 15 + b, "cream")
+    # hind paws between the front legs, further off and a shade darker
+    for x, k in ((13, bl), (17, br)):
+        g.rect(x, 25 + b, 2, 4 + lift(k) - b, "rust")
+        g.rect(x, 28 + lift(k), 2, 1, "lgrey")
+    # shoulders and the white chest ruff
+    g.ell(16, 22 + b, 8.5, 4.5, "ochre", "rust", "tan")
+    g.ell(16, 22 + b, 4.5, 4, "white", "lgrey")
+    # front legs: short, ochre with white socks
+    for x, k in ((9, fl), (20, fr)):
+        g.rect(x, 24 + b, 3, 4 + lift(k) - b, "ochre")
+        g.rect(x + 2, 24 + b, 1, 4 + lift(k) - b, "rust")
+        g.rect(x, 27 + lift(k), 3, 3, "white")
+        g.p(x + 2, 29 + lift(k), "lgrey")
+    # ears, the right one twitching
     t = twitch
-    g.tri((10, 24 + b), (8.5, 14.5 + b), (14, 19 + b), "ochre")
-    g.tri((22, 24 + b + t), (23.5, 14.5 + b + t), (18, 19 + b + t), "ochre")
-    g.tri((10.5, 21.5 + b), (9.5, 16.5 + b), (12.5, 19.5 + b), "pink")
-    g.tri((21.5, 21.5 + b + t), (22.5, 16.5 + b + t), (19.5, 19.5 + b + t), "pink")
-    g.ell(16, 23.5 + b, 6, 5, "ochre", "rust", "tan")
-    g.ell(16, 25.5 + b, 3.5, 2.5, "white", "lgrey")
-    g.rect(15, 18 + b, 2, 4, "white")
-    g.rect(12, 22 + b, 2, 2, "ink")
-    g.rect(18, 22 + b, 2, 2, "ink")
-    g.p(12, 22 + b, "white")
-    g.p(18, 22 + b, "white")
-    g.rect(15, 25 + b, 2, 1, "ink")
-    g.rect(11, 18 + b, 10, 1, "amber")
+    g.tri((7, 14 + b), (8.5, 4.5 + b), (14, 10 + b), "ochre")
+    g.tri((25, 14 + b + t), (23.5, 4.5 + b + t), (18, 10 + b + t), "ochre")
+    g.tri((9, 12 + b), (9.5, 7 + b), (12.5, 10.5 + b), "pink")
+    g.tri((23, 12 + b + t), (22.5, 7 + b + t), (19.5, 10.5 + b + t), "pink")
+    # head: ochre crown, white blaze, cheeks and muzzle, eyes, nose and a happy mouth
+    g.ell(16, 14 + b, 7.5, 5.5, "ochre", "rust", "tan")
+    g.ell(16, 17 + b, 5.5, 2.5, "white", "lgrey")
+    g.rect(15, 9 + b, 2, 7, "white")
+    g.rect(11, 13 + b, 2, 2, "ink")
+    g.rect(19, 13 + b, 2, 2, "ink")
+    g.p(11, 13 + b, "white")
+    g.p(19, 13 + b, "white")
+    g.rect(15, 16 + b, 2, 1, "ink")
+    g.p(14, 17 + b, "dbrown")
+    g.p(17, 17 + b, "dbrown")
+    g.rect(15, 18 + b, 2, 1, "pink")
+    # collar
+    g.rect(11, 19 + b, 10, 1, "amber")
+    g.p(16, 20 + b, "yellow")
     return rim(g, LIT)
 
 
@@ -821,62 +847,62 @@ def kid(wave=False, mood="happy", bob=0):
 
 
 def ice_cream_truck(f):
-    """The ice cream truck parked ahead, from straight behind like obstacles.parked_car: a wide box van,
-    squat, with its cone sign on the roof. The rear doors split down the middle, each with a window; a
-    pink drip stripe runs across the doors; tall tail lights sit at the outer corners, amber blinkers
-    under them; then the plate, the bumper and both rear wheels. f swaps the lit blinker and the music
-    note. The road outline and the lit rim."""
-    g = edged(Grid(64, 48))
-    for x in (7, 47):
-        g.rect(x, 39, 10, 7, "ink")
-        g.rect(x, 39, 3, 6, "dslate")
+    """The ice cream truck parked ahead across two lanes, from straight behind like obstacles.parked_car: a
+    wide box van, squat, with its cone sign on the roof. The rear doors split down the middle, each with a
+    window; a pink drip stripe runs across the doors; tall tail lights sit at the outer corners, amber
+    blinkers under them; then the plate, the bumper and both rear wheels. f swaps the lit blinker and the
+    music note. The road outline and the lit rim."""
+    g = edged(Grid(88, 44))
+    for x in (8, 66):
+        g.rect(x, 35, 14, 8, "ink")
+        g.rect(x, 35, 3, 7, "dslate")
     # roof edge, then the box body: lit along the top and the left, shaded on the right
-    g.rect(5, 13, 54, 2, "lgrey")
-    g.rect(5, 13, 54, 1, "white")
-    g.rect(3, 15, 58, 23, "white")
-    g.rect(56, 15, 5, 23, "lgrey")
-    g.rect(3, 15, 1, 23, "white")
+    g.rect(5, 10, 78, 2, "lgrey")
+    g.rect(5, 10, 78, 1, "white")
+    g.rect(3, 12, 82, 22, "white")
+    g.rect(80, 12, 5, 22, "lgrey")
+    g.p(3, 12, None)
+    g.p(84, 12, None)
     # the rear doors: a seam down the middle, a window in each, handles by the seam
-    g.rect(31, 16, 2, 20, "lgrey")
-    for x in (10, 35):
-        g.rect(x, 17, 19, 8, "navy")
-        g.rect(x, 17, 19, 1, "slate")
-    g.tri((12, 24), (17, 18), (21, 18), "slate")
-    g.tri((37, 24), (42, 18), (46, 18), "slate")
-    g.rect(28, 27, 2, 3, "grey")
-    g.rect(34, 27, 2, 3, "grey")
+    g.rect(43, 13, 2, 20, "lgrey")
+    for x in (16, 49):
+        g.rect(x, 14, 23, 9, "navy")
+        g.rect(x, 14, 23, 1, "slate")
+        g.tri((x + 3, 22), (x + 9, 15), (x + 13, 15), "slate")
+    g.rect(40, 24, 2, 3, "grey")
+    g.rect(46, 24, 2, 3, "grey")
     # the drip stripe: a pink band with drips hanging from it on even columns
-    g.rect(3, 30, 58, 3, "pink")
-    g.rect(3, 32, 58, 1, "mauve")
-    for x in range(8, 58, 6):
-        g.rect(x, 33, 2, 1 + (x // 6) % 2, "pink")
+    g.rect(3, 26, 82, 3, "pink")
+    g.rect(3, 28, 82, 1, "mauve")
+    for x in range(10, 80, 6):
+        g.rect(x, 29, 2, 1 + (x // 6) % 2, "pink")
     # tail lights up the outer corners, blinkers under them
-    for x in (4, 56):
-        g.rect(x, 17, 4, 11, "red")
-        g.rect(x, 17, 4, 1, "pink")
-        g.rect(x + 3, 18, 1, 10, "dred")
-    g.rect(4, 34, 4, 3, "yellow" if f else "amber")
-    g.rect(56, 34, 4, 3, "amber" if f else "yellow")
-    g.rect(26, 34, 12, 4, "cream")
-    g.rect(28, 35, 8, 1, "tan")
+    for x in (4, 79):
+        g.rect(x, 13, 5, 12, "red")
+        g.rect(x, 13, 5, 1, "pink")
+        g.rect(x + 4, 14, 1, 11, "dred")
+    g.rect(4, 30, 5, 3, "yellow" if f else "amber")
+    g.rect(79, 30, 5, 3, "amber" if f else "yellow")
+    g.rect(37, 29, 14, 5, "cream")
+    g.rect(39, 31, 10, 1, "tan")
     # bumper across the full width
-    g.rect(1, 38, 62, 3, "dslate")
-    g.rect(1, 38, 62, 1, "slate")
-    g.rect(1, 38, 1, 3, "grey")
+    g.rect(2, 34, 84, 3, "dslate")
+    g.rect(2, 34, 84, 1, "slate")
+    g.rect(2, 34, 1, 3, "grey")
     # cone sign on the roof
-    g.tri((28, 6), (36, 6), (32, 13), "tan")
-    g.p(30, 7, "brown")
-    g.p(33, 8, "brown")
-    g.p(31, 10, "brown")
-    g.ell(32, 4, 4, 3, "pink", "mauve", "white")
+    g.tri((40, 5), (48, 5), (44, 12), "tan")
+    g.p(42, 6, "brown")
+    g.p(45, 7, "brown")
+    g.p(43, 9, "brown")
+    g.ell(44, 4, 4, 3, "pink", "mauve", "white")
     if f:
-        g.rect(46, 3, 1, 6, "plum")
-        g.rect(46, 3, 3, 1, "plum")
-        g.rect(44, 8, 2, 2, "plum")
+        g.rect(62, 2, 1, 6, "plum")
+        g.rect(62, 2, 3, 1, "plum")
+        g.rect(60, 7, 2, 2, "plum")
     else:
-        g.rect(17, 4, 1, 6, "plum")
-        g.rect(17, 4, 3, 1, "plum")
-        g.rect(15, 9, 2, 2, "plum")
+        g.rect(25, 3, 1, 6, "plum")
+        g.rect(25, 3, 3, 1, "plum")
+        g.rect(23, 8, 2, 2, "plum")
     return rim(g, LIT)
 
 

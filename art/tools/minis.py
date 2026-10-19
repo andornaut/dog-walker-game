@@ -5,26 +5,28 @@
 legs blink and freezes 1px bobs. These are redrawn at the small size instead:
 the same drawing functions run on a grid that scales every rect, ellipse and
 triangle before it rasterizes, then the small sprite gets its own full outline.
-Where that still loses a feature (the treat's knobs, the wallet's clasp and
-glint, the faces of the skunk, squirrel and other dog), the sprite is a
+Faces are drawn at the small size (small() swaps in face_front, squirrel()
+squirrel_head). Where that still loses a feature (the treat's knobs, the
+wallet's clasp and glint, the skunk's face), the sprite or the feature is a
 hand-drawn pixel map instead.
 
 <key>@75 and <key>@50 keep the original's tags, frame counts and durations,
-and their frames are round(original size x scale):
+and their frames are floor(original size x scale + 0.5):
 
-tip@75, treat@75                    12x12
-tip@50, treat@50                    8x8
-cone@75, bin@75, hydrant@75         24x24
-cone@50, bin@50, hydrant@50         16x16
-bench@75                            66x18
-bench@50                            44x12
-dog-<name>@75 (all nine dogs)       24x24
-dog-<name>@50                       16x16
-lost-wallet@75                      12x12
-lost-wallet@50                      8x8
-skunk@75                            24x24
-skunk@50, other-dog@50, squirrel@50 16x16
-skunk-cloud@50 (no outline)         44x44
+tip@75, treat@75, lost-wallet@75                  12x12
+tip@50, treat@50, lost-wallet@50                  8x8
+cone@75, bin@75, hydrant@75                       24x24
+cone@50, bin@50, hydrant@50                       16x16
+bench@75                                          66x18
+bench@50                                          44x12
+dog-<name>@75 (every dog), skunk@75, squirrel@75,
+other-dog@75                                      24x24
+dog-<name>@50, skunk@50, squirrel@50, other-dog@50 16x16
+skunk-cloud@75 (no outline)                       66x30
+skunk-cloud@50 (no outline)                       44x20
+
+variants(s) draws the same set at any scale; depths.py uses it for the steps
+between these.
 
 Usage:
   minis.py preview OUT.png   every small frame on the street colours
@@ -45,9 +47,14 @@ sys.path.insert(0, os.path.dirname(__file__))
 import dogs  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from pixel import Grid, edged, main, road_sprite  # noqa: E402
+from pixel import K, Grid, edged, main, road_sprite  # noqa: E402
 
 SCALES = (("75", 0.75), ("50", 0.5))
+
+
+def scaled(v, s):
+    """v at scale s in whole pixels, halves rounding up as the game rounds them."""
+    return math.floor(v * s + 0.5)
 
 
 class Mini:
@@ -58,7 +65,7 @@ class Mini:
 
     def __init__(self, s, w=32, h=32):
         self.s, self.w, self.h = s, w, h
-        self.g = Grid(round(w * s), round(h * s))
+        self.g = Grid(scaled(w, s), scaled(h, s))
         self.keep = set()
 
     @property
@@ -66,7 +73,7 @@ class Mini:
         return self.g.px
 
     def _edge(self, v):
-        return math.floor(v * self.s + 0.5)
+        return scaled(v, self.s)
 
     def _set(self, draw, x, y, c, *args):
         before = [row[:] for row in self.g.px]
@@ -122,14 +129,44 @@ class Mini:
         return self.g.outlined(outline)
 
 
-def small(module, s, draw, *args):
-    """Run module's draw(*args) with its Grid swapped for a Mini at scale s."""
-    full = module.Grid
+def small(module, s, draw, *args, **q):
+    """Run module's draw(*args, **q) with its Grid swapped for a Mini at scale s. Meanwhile road.rim lights
+    the Mini's own grid, so a drawing that ends in rim gets the rim at the small size, and road.face_front
+    (module's too, where it imports it) is face_front at scale s."""
+    full, full_rim, full_face = module.Grid, road.rim, road.face_front
+    faced = [m for m in {road, module} if getattr(m, "face_front", None) is full_face]
     module.Grid = lambda w=32, h=32: Mini(s, w, h)
+    road.rim = lambda g, rims: full_rim(getattr(g, "g", g), rims)
+    for m in faced:
+        m.face_front = lambda g, cx, y, *a, **k: face_front(s, g, cx, y, *a, **k)
     try:
-        return draw(*args)
+        return draw(*args, **q)
     finally:
-        module.Grid = full
+        module.Grid, road.rim = full, full_rim
+        for m in faced:
+            m.face_front = full_face
+
+
+def face_front(s, g, cx, y, mood="happy", eyes="ink", lips="dbrown"):
+    """road.face_front at scale s on the Mini g, drawn at the small size: scaled, its eyes lose their glint
+    and its mouth swells into a dark blot. Each eye is 2 x s square, rounded, at least 1px, centred where it
+    is at full size, with its white glint at the top-left when it is 2px. The mouth is 2 x s wide on the row
+    under the mouth's full-size row; from 0.75x a happy or smirking mouth keeps its upturned corners."""
+    px = getattr(g, "g", g)
+    n = max(1, scaled(2, s))
+    top = math.floor((y + 1) * s + 0.5 - n / 2)
+    for x in (cx - 4, cx + 4):
+        x0 = math.floor(x * s + 0.5 - n / 2)
+        px.rect(x0, top, n, n, eyes)
+        if n > 1:
+            px.p(x0, top, "white")
+    m = max(1, scaled(3 if mood == "smirk" else 2, s))
+    row, left = math.floor((y + 5.5) * s), math.floor((cx + (0.5 if mood == "smirk" else 0)) * s + 0.5 - m / 2)
+    px.rect(left, row, m, 1, lips)
+    if s >= 0.75 and mood in ("happy", "smirk"):
+        if mood == "happy":
+            px.p(left - 1, row - 1, lips)
+        px.p(left + m, row - 1, lips)
 
 
 def snap(q, s, up=False):
@@ -210,8 +247,10 @@ TREAT = {
 
 def treat(s, lift):
     """road.treat redrawn: a bone whose knobs stick out above and below the shaft at both ends, with the road
-    outline."""
-    g = edged(Grid(round(16 * s), round(16 * s)))
+    outline. A scale with no map takes road.treat on a Mini."""
+    if s not in TREAT:
+        return shrunk(s, road.treat, lift=lift)
+    g = edged(Grid(scaled(16, s), scaled(16, s)))
     paint(g, TREAT[s], 1, g.h // 2 - 2 + lift)
     return g
 
@@ -243,8 +282,11 @@ WALLET = {
 
 
 def wallet(s, glint):
-    """road.wallet redrawn, with the road outline and road.WALLET_RIM."""
-    g = edged(Grid(round(16 * s), round(16 * s)))
+    """road.wallet redrawn, with the road outline and road.WALLET_RIM. A scale with no map takes road.wallet
+    on a Mini."""
+    if s not in WALLET:
+        return small(road, s, road.wallet, glint)
+    g = edged(Grid(scaled(16, s), scaled(16, s)))
     body, sparkle = WALLET[s]
     paint(g, body)
     if glint:
@@ -261,7 +303,7 @@ def cone(s, glint=None):
     g.rect(7, 25, 18, 1, "lgrey")
     g.tri((9, 26), (23, 26), (16, 6), "orange")
     g.tri((16, 26), (23, 26), (16, 6), "rust")
-    mid = round(16 * s)
+    mid = scaled(16, s)
     for y in (12, 19):
         yy = g._edge(y)
         for x in range(g.g.w):
@@ -276,223 +318,153 @@ def cone(s, glint=None):
     return g
 
 
-# road.skunk by hand, as (top row, map) for the tail, which sways, and for the body and head drawn over it.
-# Scaled, the stripe breaks where the head starts and the right eye sinks into the ink shading. At 0.5x
-# the stripe is 1px and each eye is a glint over ink, since ink alone does not show on navy.
-SKUNK = {
-    0.75: ((2, [".........ddnnnn.........",
-                "........ddnWWnnn........",
-                ".......ddnWWWWnnn.......",
-                ".......dnnWWWWlnn.......",
-                ".......nnnWWWlln#.......",
-                ".......nnnnWlln##.......",
-                ".......nnnnWlnn##.......",
-                "........nnnnn###........"]),
-           (10, [".........ddWlnn.........",
-                 "........ddnWlnnn........",
-                 ".......ddnnWlnnnn.......",
-                 ".......nnnnWlnnnn.......",
-                 ".......nnnnWlnn##.......",
-                 ".......nnnnWlnn##.......",
-                 ".......nnddWWnn##.......",
-                 "........dnnWWnnn........",
-                 "........nW#nnW#n........",
-                 "........n##nn##n........",
-                 "........nnnppn##........",
-                 "..........nn##.........."])),
-    0.5: ((1, ["......dnnn......",
-               ".....ddWWnn.....",
-               "....ddWWWlnn....",
-               "....dnWWWlnn....",
-               "....nnnWlnn#....",
-               ".....nnnnn##...."]),
-          (7, [".....dnWnnn.....",
-               "....dnnWnnnn....",
-               "....nnnWnnn#....",
-               ".....dnnnnn.....",
-               ".....nWnnWn.....",
-               ".....n#nn#n.....",
-               ".....nnppn#.....",
-               "......nn##......"])),
+def shrunk(s, draw, **q):
+    """road's draw(**q) on a Mini at scale s, its offsets snapped to whole pixels as snap() has them."""
+    return small(road, s, draw, **snap(q, s))
+
+
+class Faceless:
+    """A grid that passes every draw on to g except rects and pixels in the colours drop, so a drawing's
+    face can be left off and painted at the small size instead."""
+
+    def __init__(self, g, drop):
+        self.g, self.drop = g, {K[c] for c in drop}
+
+    def rect(self, x, y, w, h, c):
+        if K[c] not in self.drop:
+            self.g.rect(x, y, w, h, c)
+
+    def p(self, x, y, c):
+        if K[c] not in self.drop:
+            self.g.p(x, y, c)
+
+    def ell(self, *args):
+        self.g.ell(*args)
+
+    def tri(self, *args):
+        self.g.tri(*args)
+
+
+def squirrel_head(full, s, g, x, y):
+    """road.squirrel_head on the Mini g without its face, then the face at the small size: scaled, the eyes
+    and nose merge into one dark row. Each eye is 2 x s square, rounded, ink with a white glint at its
+    top-left when it is 2px, centred where it is at full size; the plum nose fills the gap between them on
+    the row under them."""
+    full(Faceless(g, ("ink", "white", "plum")), x, y)
+    n = max(1, scaled(2, s))
+    top = math.floor((y + 0.5) * s + 0.5 - n / 2)
+    left, right = (math.floor((x + d) * s + 0.5 - n / 2) for d in (-2, 2))
+    for x0 in (left, right):
+        g.g.rect(x0, top, n, n, "ink")
+        if n > 1:
+            g.g.p(x0, top, "white")
+    g.g.rect(left + n, top + n, right - left - n, 1, "plum")
+
+
+def squirrel(s, draw, *args, **q):
+    """road's squirrel drawing draw on a Mini at scale s, with squirrel_head's face."""
+    full = road.squirrel_head
+    road.squirrel_head = lambda g, x, y: squirrel_head(full, s, g, x, y)
+    try:
+        return small(road, s, draw, *args, **snap(q, s))
+    finally:
+        road.squirrel_head = full
+
+
+# road.skunk's face by hand where Mini loses it, as (left column, top row, rows): scaled, the eyes' ink sinks
+# under the white or the eyes merge with the blaze. At 0.75x each eye keeps its white and its inner ink;
+# smaller, each eye is a white glint over ink, either side of the 1px blaze, with the pink nose under it.
+SKUNK_FACE = {
+    0.75: (7, 14, ["W#nWn#W",
+                   "W#nWn#W"]),
+    0.625: (6, 11, ["WnWnW",
+                    "#nWn#"]),
+    0.5: (5, 9, ["WnWnW",
+                 "#npn#"]),
 }
 
 
 def skunk(s, sway):
-    """road.skunk redrawn: the tail moves a whole pixel. The road outline and road.LIT's rim, as at full size."""
-    g = edged(Grid(round(32 * s), round(32 * s)))
-    (tail_y, tail), (body_y, body) = SKUNK[s]
-    paint(g, tail, sway, tail_y)
-    paint(g, body, 0, body_y)
-    return road.rim(g, road.LIT)
-
-
-# road.squirrel at 0.5x by hand: the tail, which swishes, and the body and head drawn over it, which shift.
-# Scaled, the eyes and nose merge into one dark row. The eyes are 1px of ink, the nose 2px of plum on the muzzle.
-SQUIRREL = ((1, ["......tooo......",
-                 "......ooooro....",
-                 "......oorroo....",
-                 ".......tottoo...",
-                 ".......tottor...",
-                 ".......oottor...",
-                 ".......oottrr...",
-                 "........ottr....",
-                 "........orrr...."]),
-            (8, [".....tooo.......",
-                 ".....occo.......",
-                 ".....occo.......",
-                 "....toooor......",
-                 "....o#oo#r......",
-                 "....ocPPcr......",
-                 ".....occr......."]))
-
-
-def squirrel(tail, shift):
-    """road.squirrel(tail, shift) at 0.5x: each offset moves a whole pixel. The road outline and road.LIT's rim."""
-    g = edged(Grid(16, 16))
-    (tail_y, tail_rows), (body_y, body) = SQUIRREL
-    paint(g, tail_rows, tail, tail_y)
-    paint(g, body, shift, body_y)
-    return road.rim(g, road.LIT)
-
-
-# road.squirrel_run at 0.5x by hand, stretched then gathered, from row 1. Scaled, the gathered face turns to
-# glints over ink; here both keep the idle's face, and the gathered squirrel is 1px higher, in the air.
-SQUIRREL_RUN = (["......oooo......",
-                 "......ooro......",
-                 "......ttto......",
-                 "......ottor.....",
-                 "......ottr......",
-                 "......ottr......",
-                 ".....rtoorr.....",
-                 "......oco.......",
-                 "......oco.......",
-                 "......ocr.......",
-                 ".....toooor.....",
-                 ".....o#oo#r.....",
-                 "....tocPPcrt....",
-                 "......occr......"],
-                ["......oooo......",
-                 "......orrooo....",
-                 ".......totoo....",
-                 ".......ootor....",
-                 ".......ootrr....",
-                 ".......ootr.....",
-                 ".....toooor.....",
-                 ".....occcor.....",
-                 "....roccccrr....",
-                 ".....toooor.....",
-                 ".....o#oo#r.....",
-                 ".....ocPPcr.....",
-                 "......occr......"])
-
-
-def squirrel_run(gather):
-    """road.squirrel_run(gather) at 0.5x, with the road outline and road.LIT's rim."""
-    g = edged(Grid(16, 16))
-    paint(g, SQUIRREL_RUN[gather], 0, 1)
-    return road.rim(g, road.LIT)
-
-
-# road.corgi at 0.5x by hand. Scaled, the collar breaks, one ear loses its pink and the 1px nose sits off
-# centre; here the blaze and nose are 2px on the centre line.
-CORGI = ["......tooo......",
-         ".....tooooo.....",
-         ".....oooooo.....",
-         ".....ooooor.....",
-         "....ooWWWWro....",
-         "....opWWWlpo....",
-         ".....aaaaaa.....",
-         ".....toWWoo.....",
-         ".....o#oo#r.....",
-         ".....oW##Wr.....",
-         ".....oWWllr....."]
-
-
-def corgi(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, twitch=0):
-    """road.corgi at 0.5x, posed as in road.CORGI_WALK and road.CORGI_IDLE: a hind paw swung back peeks out
-    beside the rump and a front paw reaching forward shows under the jaw. On the passing beats the body bobs
-    up 1px and both front paws show under it, planted. The 2px tail over the rump moves a whole pixel with
-    tail, and twitch lifts the right ear's tip 1px. The road outline and road.LIT's rim."""
-    g = edged(Grid(16, 16))
-    g.rect(7 + int(tail), 2 + bob, 2, 1, "ochre")
-    paint(g, CORGI, 0, 3 + bob)
-    if twitch:
-        g.p(11, 6 + bob, "ochre")
-        g.p(11, 8 + bob, None)
-    for x, back in ((5, bl < 0), (10, br < 0)):
-        if back:
-            g.p(x, 3, "ochre")
-    for x, paw, c in ((5, fl, "white"), (10, fr, "lgrey")):
-        if paw > 0 or bob:
-            g.p(x, 14 + bob, c)
-    return road.rim(g, road.LIT)
+    """road.skunk on a Mini at scale s, its face from SKUNK_FACE where it has one."""
+    g = shrunk(s, road.skunk, sway=sway)
+    if s in SKUNK_FACE:
+        x, y, rows = SKUNK_FACE[s]
+        paint(g, rows, x, y)
+    return g
 
 
 def skunk_cloud(s, step):
     """road.skunk_cloud redrawn at its own size. The full-size fill is a dither on every other row, which
     nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim
     keeps both of its pixels, teal outside for the light roads and green inside it for Woof Way; the stink
-    wisps are half as long, and a swelling puff still grows by a whole pixel. A puff near the frame's edge is
-    trimmed so that, swollen, it still stops a pixel short of it."""
-    n = round(88 * s)
-    g = Grid(n, n)
+    wisps scale with it, and a swelling puff still grows by a whole pixel. A puff near the frame's top or
+    sides is trimmed so that, swollen, it still stops a pixel short of them; the frame's last row cuts the
+    haze level, as at full size."""
+    w, h = scaled(road.CLOUD_W, s), scaled(road.CLOUD_H, s)
+    g = Grid(w, h)
     k = road.CLOUD_SQUASH
     puffs = []
     for i, (cx, cy, r) in enumerate(road.CLOUD_PUFFS):
         cx, cy = cx * s, cy * s
-        r = min(r * s, cx - 1.6, n - cx - 1.6, (cy - 1.6) / k, (n - cy - 1.6) / k)
+        r = min(r * s, cx - 1.6, w - cx - 1.6, (cy - 1.6) / k)
         puffs.append((cx, cy, r + (1 if (i + step) % 4 == 0 else 0)))
     # how far inside the nearest puff each pixel is, in pixels across
     depth = [[max(r - ((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / k) ** 2) ** 0.5 for cx, cy, r in puffs)
-              for x in range(n)] for y in range(n)]
+              for x in range(w)] for y in range(h)]
 
     def inside(x, y):
-        return 0 <= x < n and 0 <= y < n and depth[y][x] >= 0
+        return 0 <= x < w and 0 <= y < h and depth[y][x] >= 0
 
     def beside(x, y, test):
         return any(test(x + dx, y + dy) for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
 
-    outer = {(x, y) for y in range(n) for x in range(n) if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
-    for y in range(n):
-        for x in range(n):
+    outer = {(x, y) for y in range(h) for x in range(w) if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
+    for y in range(h):
+        for x in range(w):
             if not inside(x, y):
                 continue
             if (x, y) in outer:
                 g.p(x, y, "teal")
-            elif depth[y][x] < 2 or beside(x, y, lambda a, b: (a, b) in outer):
+            elif beside(x, y, lambda a, b: (a, b) in outer):
                 g.p(x, y, "green")
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
                 g.p(x, y, "green" if (x + y) % 8 else "dgreen")
     for x0, y0 in road.CLOUD_WISPS:
-        for j in range(round(6 * s)):
+        for j in range(scaled(6, s)):
             g.p(x0 * s + (j + step) % 3 - 1, y0 * s + j, "dgreen")
     return g
+
+
+def variants(s):
+    """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s."""
+    yield "tip", [("idle", [tip(s, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
+    yield "treat", [("idle", [treat(s, lift).outlined() for lift in (0, -1)], 400)]
+    frames, ms = obstacles.CONE_IDLE
+    yield "cone", [("idle", [cone(s, gl).outlined() for gl in frames], ms)]
+    # the lid's lift is in full-size pixels, so it is divided by the scale to stay 1px here
+    frames, ms = obstacles.BIN_IDLE
+    yield "bin", [("idle", [small(obstacles, s, obstacles.bin_, a / s).outlined() for a in frames], ms)]
+    frames, ms = obstacles.HYDRANT_IDLE
+    yield "hydrant", [("idle", [small(obstacles, s, obstacles.hydrant, d).outlined() for d in frames], ms)]
+    frames, ms = obstacles.BENCH_IDLE
+    yield "bench", [("idle", [small(obstacles, s, obstacles.bench, (a[0] / s, a[1] / s) if a else a).outlined()
+                              for a in frames], ms)]
+    for name, (draw, _) in dogs.DOGS.items():
+        yield f"dog-{name}", [(tag, dog_frames(draw, poses, s), ms) for tag, poses, ms in dogs.ROAD_TAGS]
+    yield "skunk", [("idle", [skunk(s, v).outlined() for v in (0, 1)], 400)]
+    yield "squirrel", [("idle", [squirrel(s, road.squirrel, tail=v).outlined() for v in (0, 1)], 300),
+                       ("run", [squirrel(s, road.squirrel_run, k).outlined() for k in (False, True)], 120)]
+    yield "other-dog", [("walk", [shrunk(s, road.corgi, **q).outlined() for q in road.CORGI_WALK], 100),
+                        ("idle", [shrunk(s, road.corgi, **q).outlined() for q in road.CORGI_IDLE], 300)]
+    yield "lost-wallet", [("idle", [wallet(s, gl).outlined() for gl in (False, True)], 450)]
+    yield "skunk-cloud", [("loop", [skunk_cloud(s, i).outlined(False) for i in range(4)], 220)]
 
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for suffix, s in SCALES:
-        yield f"tip@{suffix}", [("idle", [tip(s, rx).outlined() for rx in (5.5, 3.5, 1, 3.5)], 120)]
-        yield f"treat@{suffix}", [("idle", [treat(s, lift).outlined() for lift in (0, -1)], 400)]
-        frames, ms = obstacles.CONE_IDLE
-        yield f"cone@{suffix}", [("idle", [cone(s, gl).outlined() for gl in frames], ms)]
-        # the lid's lift is in full-size pixels, so it is divided by the scale to stay 1px here
-        frames, ms = obstacles.BIN_IDLE
-        yield f"bin@{suffix}", [("idle", [small(obstacles, s, obstacles.bin_, a / s).outlined() for a in frames], ms)]
-        frames, ms = obstacles.HYDRANT_IDLE
-        yield f"hydrant@{suffix}", [("idle", [small(obstacles, s, obstacles.hydrant, d).outlined() for d in frames], ms)]
-        frames, ms = obstacles.BENCH_IDLE
-        yield f"bench@{suffix}", [("idle", [small(obstacles, s, obstacles.bench, (a[0] / s, a[1] / s) if a else a).outlined()
-                                            for a in frames], ms)]
-        for name, (draw, _) in dogs.DOGS.items():
-            yield f"dog-{name}@{suffix}", [(tag, dog_frames(draw, poses, s), ms) for tag, poses, ms in dogs.ROAD_TAGS]
-        yield f"skunk@{suffix}", [("idle", [skunk(s, sway).outlined() for sway in (0, 1)], 400)]
-        yield f"lost-wallet@{suffix}", [("idle", [wallet(s, gl).outlined() for gl in (False, True)], 450)]
-    yield "skunk-cloud@50", [("loop", [skunk_cloud(0.5, i).outlined(False) for i in range(4)], 220)]
-    yield "other-dog@50", [("walk", [corgi(**q).outlined() for q in road.CORGI_WALK], 100),
-                           ("idle", [corgi(**q).outlined() for q in road.CORGI_IDLE], 300)]
-    yield "squirrel@50", [("idle", [squirrel(0, 0).outlined(), squirrel(1, 0).outlined()], 300),
-                          ("run", [squirrel_run(k).outlined() for k in (0, 1)], 120)]
+        for key, tags in variants(s):
+            yield f"{key}@{suffix}", tags
 
 
 def originals():
@@ -506,8 +478,9 @@ def originals():
 
 def nearest(f, s):
     """What the game's nearest-neighbour scaling shows: each screen pixel samples the source at its centre."""
-    h, w = round(len(f) * s), round(len(f[0]) * s)
-    return [[f[int((y + 0.5) / s)][int((x + 0.5) / s)] for x in range(w)] for y in range(h)]
+    h, w = scaled(len(f), s), scaled(len(f[0]), s)
+    return [[f[min(int((y + 0.5) / s), len(f) - 1)][min(int((x + 0.5) / s), len(f[0]) - 1)] for x in range(w)]
+            for y in range(h)]
 
 
 def compare(out, grounds=("3a4466", "c0cbdc"), scale=4, gap=4):
