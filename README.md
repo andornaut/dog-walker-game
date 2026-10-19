@@ -9,7 +9,7 @@ Play it at <https://dog-walker-game.andornaut.workers.dev/play/>. The site also 
 ## Docs
 
 - [gameplay/](gameplay/README.md): the game design, rules and plan
-- [tech-plan.md](tech-plan.md): stack, architecture and save data
+- [src/README.md](src/README.md): stack, architecture, save data and what tech has left for the first build
 - [art/style-guide.md](art/style-guide.md): art rules
 
 ## Developing
