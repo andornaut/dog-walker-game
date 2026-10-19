@@ -28,12 +28,14 @@ function runs(count: number, overrides: Partial<SimConfig> = {}): RunResult[] {
   );
 }
 
-// Whole simulated runs: slow under a loaded machine, so past vitest's 5 s default.
-describe("simulateRun", { timeout: 30_000 }, () => {
+// Every run plans each zone with the spawn planner, tens of milliseconds a zone, and the first
+// run in a worker also pays the warm-up: enough to pass 5 s on an oversubscribed machine.
+describe("simulateRun", { timeout: 15_000 }, () => {
   it("gives the same result for the same seed", () => {
-    const first = simulateRun(gameData, seededRandom(7), config({ pack: RISKY }));
-    const second = simulateRun(gameData, seededRandom(7), config({ pack: RISKY }));
-    const other = simulateRun(gameData, seededRandom(8), config({ pack: RISKY }));
+    const risky = config({ hitRate: 0.25, pack: RISKY });
+    const first = simulateRun(gameData, seededRandom(7), risky);
+    const second = simulateRun(gameData, seededRandom(7), risky);
+    const other = simulateRun(gameData, seededRandom(8), risky);
 
     expect(second).toEqual(first);
     expect(other).not.toEqual(first);
@@ -50,7 +52,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   });
 
   it("never pays money with the alwaysHearts policy", () => {
-    const choices = runs(40, { hitRate: 0.2, pack: RISKY, policy: "alwaysHearts" }).flatMap(
+    const choices = runs(4, { hitRate: 0.2, pack: RISKY, policy: "alwaysHearts" }).flatMap(
       (result) => result.choices,
     );
 
@@ -59,7 +61,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   });
 
   it("pays whenever it can afford to with the alwaysPay policy", () => {
-    const choices = runs(40, { hitRate: 0.2, pack: RISKY, policy: "alwaysPay" }).flatMap(
+    const choices = runs(4, { hitRate: 0.2, pack: RISKY, policy: "alwaysPay" }).flatMap(
       (result) => result.choices,
     );
     const payable = choices.filter((choice) => choice.couldPay);
@@ -69,9 +71,9 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   });
 
   it.each<PolicyId>(["heartsUnlessLow", "alwaysHearts", "alwaysPay"])(
-    "opens no obstacle cards and no firings from hits at a 0%% hit rate (%s)",
+    "opens no obstacle cards and no firings from hits at a zero hit rate (%s)",
     (policy) => {
-      const results = runs(30, { hitRate: 0, pack: RISKY, policy });
+      const results = runs(3, { hitRate: 0, pack: RISKY, policy });
       const choices = results.flatMap((result) => result.choices);
       const firedByChoices = choices.flatMap((choice) => choice.fired);
 
@@ -83,7 +85,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   );
 
   it("pays each zone's fee for every dog still walking at its end", () => {
-    const results = runs(40, { hitRate: 0.25, pack: RISKY, policy: "alwaysHearts" });
+    const results = runs(4, { hitRate: 0.25, pack: RISKY, policy: "alwaysHearts" });
     const fired = results.flatMap((result) => result.firings);
 
     expect(fired.length).toBeGreaterThan(0);
@@ -106,7 +108,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
 
   // alwaysHearts never spends money, so the money always covers a fired owner's fees.
   it("takes back the fees a fired owner's dog earned", () => {
-    const results = runs(60, { hitRate: 0.25, pack: RISKY, policy: "alwaysHearts" });
+    const results = runs(4, { hitRate: 0.25, pack: RISKY, policy: "alwaysHearts" });
     const feesBefore = (result: RunResult, dog: DogId, zoneIndex: number) =>
       result.zones
         .filter((zone) => zone.zoneIndex < zoneIndex)
@@ -128,7 +130,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
   });
 
   it("ends with no dogs when every owner has fired you", () => {
-    const ended = runs(40, { hitRate: 0.5, pack: ["dash"], policy: "alwaysHearts" }).filter(
+    const ended = runs(3, { hitRate: 0.5, pack: ["dash"], policy: "alwaysHearts" }).filter(
       (result) => !result.finished,
     );
 

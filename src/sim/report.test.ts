@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
 import {
@@ -11,6 +11,27 @@ import {
   simulateMatrixInBatches,
 } from "./report";
 
+// These tests cover how report.ts seeds, orders, batches and summarizes runs, not the runs
+// themselves (simulate.test.ts does). A real run costs tens of milliseconds, so a stand-in
+// replaces it: like the real one, it draws only from its random, so a seed fixes its result.
+vi.mock("./simulate", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./simulate")>();
+  const { cents } = await import("../rules/units");
+  const simulateRun: typeof actual.simulateRun = (_data, random, config) => ({
+    cardsSeen: Math.floor(random() * 10),
+    choices: [],
+    earnings: cents(random() * 10_000),
+    finished: random() >= config.hitRate,
+    firings: [],
+    moneyShare: 0,
+    tips: cents(0),
+    upgrades: [],
+    zones: [],
+    zonesCompleted: 0,
+  });
+  return { ...actual, simulateRun };
+});
+
 const SMALL: Matrix = {
   ...DEFAULT_MATRIX,
   hitRates: [0.06, 0.15],
@@ -21,10 +42,7 @@ const SMALL: Matrix = {
   policies: ["heartsUnlessLow", "alwaysPay"],
 };
 
-// Whole simulated runs: slow under a loaded machine, so past vitest's 5 s default.
-const SLOW = { timeout: 30_000 };
-
-describe("simulateMatrix", SLOW, () => {
+describe("simulateMatrix", () => {
   it("covers every policy, hit rate and pack of the default matrix", () => {
     const cells = matrixCells(DEFAULT_MATRIX);
 
@@ -81,7 +99,7 @@ describe("simulateMatrix", SLOW, () => {
   });
 });
 
-describe("simulateMatrixInBatches", SLOW, () => {
+describe("simulateMatrixInBatches", () => {
   it("reports the same rows as simulateMatrix, one row at a time", () => {
     const queue: (() => void)[] = [];
     const reports: (readonly MatrixRow[])[] = [];
