@@ -70,7 +70,7 @@ describe("servedPath", () => {
   it.each([
     ["index.html", "/"],
     ["play/index.html", "/play/"],
-    ["art/mocks/help-screen.html", "/art/mocks/help-screen"],
+    ["art/mocks/example.html", "/art/mocks/example"],
   ])("serves %s at %s", (file, path) => {
     expect(servedPath(file)).toBe(path);
   });
@@ -83,7 +83,7 @@ describe("pathMatches", () => {
     ["/", "/", true],
     ["/", "/play/", false],
     ["/play/*", "/play/", true],
-    ["/art/*", "/art/mocks/start-screen", true],
+    ["/art/*", "/art/mocks/example", true],
     ["/art/*", "/artwork", false],
     ["/a.b", "/a.b", true],
     ["/a.b", "/axb", false],
@@ -158,7 +158,7 @@ describe("pageRules", () => {
   it("covers each of the site's pages with exactly one rule", () => {
     const files = ["index.html", "play/index.html", "data/index.html", "art/index.html"];
     const pages = new Map(
-      [...files, "art/mocks/start-screen.html"].map((file) => [
+      [...files, "art/mocks/example.html"].map((file) => [
         servedPath(file),
         { scriptHashes: [], styleHashes: [] },
       ]),
