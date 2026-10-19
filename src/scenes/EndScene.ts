@@ -5,7 +5,7 @@ import { MONEY_ICON_KEY } from "../assets/iconKeys";
 import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { END_LAYOUT } from "../home/endLayout";
+import { END_LAYOUT, endPanelLayout } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
 import { dollarText } from "../home/home";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
@@ -20,6 +20,7 @@ import { pipLook } from "../hud/hudView";
 import { isConfirmKey } from "../input/keyBindings";
 import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
@@ -30,7 +31,7 @@ import { addDisplayText } from "./displayText";
 import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
+import { addPixelText, fitPixelText } from "./pixelText";
 import { currentSettings, lastRunEnd, profileSave, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
@@ -39,7 +40,6 @@ import {
   addMenuButton,
   addPanel,
   addTagImage,
-  fitText,
   listenButtonTap,
   showTag,
   TEXT_SCALE,
@@ -47,7 +47,6 @@ import {
 
 const END_SCREEN_KEY = "screen-end";
 const LOGO = { ...END_LAYOUT.logo, key: "logo" };
-const PANEL: Rect = END_LAYOUT.panel;
 const RIBBON = { ...END_LAYOUT.ribbon, dropMs: 360, key: "ui-new-best", riseFrom: 12 };
 // With reduced motion the burst holds one still frame.
 const RIBBON_BURST = END_LAYOUT.ribbonBurst;
@@ -120,7 +119,11 @@ export class EndScene extends Scene {
       const { height, width, x, y } = RIBBON_BURST;
       addBurst(this, reduced, NEW_BEST_BURST, 1, x + width / 2, y + height / 2);
     }
-    addPanel(this, PANEL);
+    const lines =
+      ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
+    const closing = closingLines(gameData, Math.random, walk);
+    const { panel, quipsTop } = endPanelLayout(lines.length, closing.length);
+    addPanel(this, panel);
     const g = this.add.graphics();
     const text = (x: number, y: number, value: string, color: number, originX = 0) =>
       addPixelText(this, x, y, value, { color, originX, scale: TEXT_SCALE });
@@ -140,8 +143,6 @@ export class EndScene extends Scene {
     }
 
     let y = BREAKDOWN.top;
-    const lines =
-      ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
     for (const line of lines) {
       text(BREAKDOWN.label, y, line.label, PALETTE.plum);
       text(BREAKDOWN.amountRight, y, signed(line.amount), amountColor(line.amount), 1);
@@ -177,10 +178,10 @@ export class EndScene extends Scene {
     }
     title(SIDE.x + 20, SIDE.iconY + 2, dollarText(save.bankCents), PALETTE.plum);
 
-    fillRect(g, PALETTE.tan, { height: 1, width: 288, x: 36, y: QUIPS.top - 8 });
+    fillRect(g, PALETTE.tan, { height: 1, width: 288, x: 36, y: quipsTop - 8 });
     const celebrating = earned.length > 0;
-    closingLines(gameData, Math.random, walk).forEach((line, i) => {
-      const row = QUIPS.top + i * QUIPS.pitch;
+    closing.forEach((line, i) => {
+      const row = quipsTop + i * QUIPS.pitch;
       const { well } = QUIPS;
       fillRect(g, PALETTE.tan, { height: well.size, width: well.size, x: well.x, y: row + well.y });
       const faceX = QUIPS.face.x;
@@ -194,13 +195,12 @@ export class EndScene extends Scene {
       }
       this.addBubble({ ...QUIPS.bubble, y: row });
       const owner = gameData.dogs[line.dog].owner.name;
-      const name = title(QUIPS.textX, row + 5, owner, line.fired ? PALETTE.darkRed : PALETTE.plum);
-      if (line.fired) {
-        fitText(name, QUIPS.bubble.x + QUIPS.bubble.width - 6 - QUIPS.textX, [
-          fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner }),
-          owner,
-        ]);
-      }
+      const header = line.fired
+        ? fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner })
+        : owner;
+      const name = title(QUIPS.textX, row + 5, header, line.fired ? PALETTE.darkRed : PALETTE.plum);
+      const room = QUIPS.bubble.x + QUIPS.bubble.width - 6 - QUIPS.textX;
+      fitPixelText(name, { room, styles: TEXT_FIT_STYLES }, QUIPS.textX, row + 5);
       text(QUIPS.textX, row + 22, line.text, PALETTE.plum);
     });
 

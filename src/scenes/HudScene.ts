@@ -34,9 +34,7 @@ import {
 import {
   buttonIcon,
   DOLLAR_GAP,
-  fittingWellStyle,
   HOME_BUTTON,
-  MONEY_TEXT_STYLES,
   MONEY_WELL,
   moneyTop,
   PAUSE_BUTTON,
@@ -52,9 +50,9 @@ import {
   TREAT_WELL,
   walkCovered,
   WELL_INSET,
-  type WellTextStyle,
 } from "../hud/topBar";
 import { insetRect, type Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { screenLayout } from "../layout/screenLayout";
 import { maxHearts } from "../rules/dogs";
 import { hintFor } from "../rules/hints";
@@ -72,6 +70,7 @@ import { listenOnePress } from "./onePress";
 import { colorFromHex, PALETTE } from "./palette";
 import {
   addPixelText,
+  fitPixelText,
   inkSpan,
   placePixelText,
   scalePixelText,
@@ -506,7 +505,7 @@ export class HudScene extends Scene {
     return this.feedback?.shownMoney(money) ?? money;
   }
 
-  // The amount DOLLAR_GAP after the "$" ink, in the first of MONEY_TEXT_STYLES that ends
+  // The amount DOLLAR_GAP after the "$" ink, in the first of TEXT_FIT_STYLES that ends
   // WELL_INSET inside the money well, the bottom row of its capitals on the "$"'s.
   private showMoney(amount: string): void {
     const { dollar, money } = this;
@@ -516,16 +515,9 @@ export class HudScene extends Scene {
     setPixelText(money, amount);
     const well = TOP_BAR.money;
     const start = dollar.x + inkSpan(dollar).right + DOLLAR_GAP;
-    const apply = (style: WellTextStyle) =>
-      money.setLetterSpacing(style.letterSpacing).setScale(style.scale);
-    const inkWidth = (style: WellTextStyle) => {
-      const ink = inkSpan(apply(style));
-      return ink.right - ink.left;
-    };
     const room = well.x + well.width - WELL_INSET - start;
-    const style = fittingWellStyle(MONEY_TEXT_STYLES, inkWidth, room);
-    const { left } = inkSpan(apply(style));
-    scalePixelText(money, style.scale, start - left, moneyTop(style.scale));
+    const style = fitPixelText(money, { room, styles: TEXT_FIT_STYLES }, start, MONEY_WELL.top);
+    placePixelText(money, start - inkSpan(money).left, moneyTop(style.scale));
   }
 
   // The treat count centred across the treat well, under the treat icon.

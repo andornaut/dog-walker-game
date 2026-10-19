@@ -1,5 +1,6 @@
 import type { GameObjects, Scene, Types } from "phaser";
 
+import { fittingTextStyle, type TextFitStyle } from "../layout/textFit";
 import {
   glyphAdvance,
   LINE_HEIGHT,
@@ -194,6 +195,28 @@ export function inkSpan(label: GameObjects.BitmapText): { left: number; right: n
   const left = Math.min(...inked.map((char) => char.x));
   const right = Math.max(...inked.map((char) => char.x + char.w));
   return { left: left * label.scaleX, right: right * label.scaleX };
+}
+
+// Sets the label in the first of styles whose ink is no wider than room, else the last,
+// keeping (x, y) its origin's x and the top of its capitals, and returns that style.
+export function fitPixelText(
+  label: GameObjects.BitmapText,
+  fit: { room: number; styles: readonly TextFitStyle[] },
+  x: number,
+  y: number,
+): TextFitStyle {
+  const apply = (style: TextFitStyle) => {
+    label.setLetterSpacing(style.letterSpacing);
+    scalePixelText(label, style.scale, x, y);
+    return label;
+  };
+  const inkWidth = (style: TextFitStyle) => {
+    const ink = inkSpan(apply(style));
+    return ink.right - ink.left;
+  };
+  const style = fittingTextStyle(fit.styles, inkWidth, fit.room);
+  apply(style);
+  return style;
 }
 
 // Sets new text, in the characters the label's font has, only when it changed.

@@ -3,19 +3,17 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import { fittingTextStyle, TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import { read } from "../rules/units";
 import {
   buttonIcon,
   DOLLAR_GAP,
-  fittingWellStyle,
   gameplayAllowed,
   HOME_BUTTON,
-  MONEY_TEXT_STYLES,
   MONEY_WELL,
   moneyTop,
   TREAT_WELL,
   WELL_INSET,
-  type WellTextStyle,
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
@@ -175,7 +173,7 @@ const TITLE_GLYPHS = new Map(
 );
 
 // The screen columns text inks at a style, from its left edge, as Phaser lays it out.
-function titleInk(style: WellTextStyle, text: string): { left: number; right: number } {
+function titleInk(style: TextFitStyle, text: string): { left: number; right: number } {
   let x = 0;
   const spans = [...text].map((char) => {
     const glyph = TITLE_GLYPHS.get(char);
@@ -194,18 +192,18 @@ function titleInk(style: WellTextStyle, text: string): { left: number; right: nu
 describe("the money well", () => {
   const dollarRight = MONEY_WELL.dollarX + titleInk({ letterSpacing: 0, scale: 2 }, "$").right;
   const room = TOP_BAR.money.x + TOP_BAR.money.width - WELL_INSET - (dollarRight + DOLLAR_GAP);
-  const inkWidth = (amount: string) => (style: WellTextStyle) => {
+  const inkWidth = (amount: string) => (style: TextFitStyle) => {
     const ink = titleInk(style, amount);
     return ink.right - ink.left;
   };
 
-  it.each<[string, WellTextStyle]>([
+  it.each<[string, TextFitStyle]>([
     ["0", { letterSpacing: 0, scale: 2 }],
     ["9999", { letterSpacing: 0, scale: 2 }],
     ["49695", { letterSpacing: -1, scale: 2 }],
     ["999999", { letterSpacing: 0, scale: 1 }],
   ])("sets $%s at %o, inside the well", (amount, expected) => {
-    const style = fittingWellStyle(MONEY_TEXT_STYLES, inkWidth(amount), room);
+    const style = fittingTextStyle(TEXT_FIT_STYLES, inkWidth(amount), room);
     expect(style).toEqual(expected);
     expect(inkWidth(amount)(style)).toBeLessThanOrEqual(room);
   });

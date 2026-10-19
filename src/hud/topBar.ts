@@ -14,12 +14,6 @@ export const TOP_BAR = {
 export const WELL_INSET = 2;
 export const DOLLAR_GAP = 2;
 
-// A well's text: its scale and the font pixels added between glyphs.
-export interface WellTextStyle {
-  letterSpacing: number;
-  scale: number;
-}
-
 // The money well's "$" at 2x from dollarX, the top of its capitals at top. The amount's
 // capitals, capRows font pixels tall, end on the same row as the "$"'s at any scale.
 export const MONEY_WELL = { capRows: 5, dollarX: TOP_BAR.money.x + 22, top: TOP_BAR.money.y + 7 };
@@ -27,22 +21,6 @@ export const MONEY_WELL = { capRows: 5, dollarX: TOP_BAR.money.x + 22, top: TOP_
 // The amount's capitals' top at scale.
 export function moneyTop(scale: number): number {
   return MONEY_WELL.top + MONEY_WELL.capRows * (2 - scale);
-}
-
-// The bank's amount at 2x, then at 2x with its glyphs a font pixel closer, then at 1x.
-export const MONEY_TEXT_STYLES: readonly WellTextStyle[] = [
-  { letterSpacing: 0, scale: 2 },
-  { letterSpacing: -1, scale: 2 },
-  { letterSpacing: 0, scale: 1 },
-];
-
-// The first style whose ink, measured by inkWidth, is no wider than room; the last when none is.
-export function fittingWellStyle(
-  styles: readonly WellTextStyle[],
-  inkWidth: (style: WellTextStyle) => number,
-  room: number,
-): WellTextStyle {
-  return styles.find((style) => inkWidth(style) <= room) ?? (styles.at(-1) as WellTextStyle);
 }
 
 // The treat well stacks the 16px treat icon, its bone in rows 4 to 10, over the count, such as

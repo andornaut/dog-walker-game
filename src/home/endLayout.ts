@@ -16,7 +16,6 @@ export const END_LAYOUT = {
     pitch: 40,
     tail: { x: 75, y: 15 },
     textX: 86,
-    top: PANEL.y + 174,
     well: { size: 34, x: 36, y: 0 },
   },
   // The return home, under the logo and above the panel: the walker and pack walk up the
@@ -53,3 +52,21 @@ export const END_LAYOUT = {
   },
   titleY: PANEL.y + 18,
 } as const;
+
+// The breakdown's rule sits 2px under its last line and the 2x total 8px under it; the side
+// column ends with the 16px money icon. The owners' rows start QUIPS_GAP under whichever ends
+// lower, the tan rule 8px over them, and the panel, at most PANEL's height, ends 8px under the
+// last bubble.
+const QUIPS_GAP = 14;
+const PANEL_FOOT = 8;
+
+export function endPanelLayout(
+  breakdownLines: number,
+  quipRows: number,
+): { panel: typeof PANEL; quipsTop: number } {
+  const { breakdown, quips, side } = END_LAYOUT;
+  const totalBottom = breakdown.top + breakdownLines * breakdown.pitch + 8 + 10;
+  const quipsTop = Math.max(totalBottom, side.iconY + 16) + QUIPS_GAP;
+  const rowsBottom = quipsTop + (Math.max(1, quipRows) - 1) * quips.pitch + quips.bubble.height;
+  return { panel: { ...PANEL, height: rowsBottom + PANEL_FOOT - PANEL.y }, quipsTop };
+}
