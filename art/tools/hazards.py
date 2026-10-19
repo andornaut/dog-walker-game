@@ -19,8 +19,8 @@ outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
 roads and its fill carries Woof Way. The warning cues are outlined in ink.
 
 Depth variants, redrawn at their own size with a full outline (see minis.py):
-squirrel-dash@50, loose-dog@50 (16x16) and ball-bounce@75, ball-bounce@50
-(12x18, 8x12). The cyclist's features are 2px or wider, so it scales at runtime.
+squirrel-dash@75, loose-dog@75 (24x24), squirrel-dash@50, loose-dog@50 (16x16) and
+ball-bounce@75, ball-bounce@50 (12x18, 8x12). The cyclist's features are 2px or wider, so it scales at runtime.
 
 Usage:
   hazards.py preview OUT.png   every frame on the four road colours
