@@ -33,7 +33,7 @@ Group by topic; add new topic headings as they come up.
 - [next] **Unlockable dog slots**: start with 1, unlock 2 and 3 via progression and better leashes (2026-10-18)
 - [next] **Special dogs found mid-walk**: later levels, only if you have 2 or fewer dogs; once found, they join the pre-run roster (2026-10-18)
 - [agreed] **Named dogs and owners**: fixed characters with personalities (2026-10-18) · agreed: 9 named dogs, each a combination of size, trait, energy and owner temperament, so players can have favourites
-- [agreed] **Walker customization**: pick or dress the walker; (2026-10-18) · in v1 (2026-10-19); details to design
+- [agreed] **Walker customization**: pick or dress the walker; (2026-10-18) · in v1 (2026-10-19) as a few preset walkers
 - [next] **Your own dog**: end-game unlock (2026-10-18)
 
 ## World & setting

@@ -35,11 +35,13 @@ Pick 1–3 of your unlocked dogs (3 to start, 9 in all) and one piece of gear, t
 - Layout: a top status bar (money, zone progress), a fixed-width dog column on the left with one slot per dog, and the road filling the rest. Encounter cards cover the paused, dimmed road; the status bar and dog column stay visible. Layout details live in [`art/style-guide.md`](../art/style-guide.md)
 - Portrait orientation, ¾ top-down view
 - 5 lanes. Keyboard: ←/→, A/D or H/L. Touch: tap the left/right half of the screen, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
-- While moving between lanes, the pack can hit things in either lane
-- A hit obstacle is removed after its card, then ~1s with no collisions
+- While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; any other press, and any pull, waits for the current move to finish (latest wins)
+- The top bar holds the pause button (head home lives in pause); taps on it never move the pack
+- Spawning always leaves a path you can reach in time, so every hit is avoidable
+- A hit obstacle is removed after its card, then ~1s in which obstacles are ignored; pickups still count
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
 - Calm speed: scroll speed and density both rise gently per zone, never frantic
-- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. About 1s before a pull, the dog leans toward that side and barks
+- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. The size-based input lock starts when the pull's lane move finishes. About 1s before a pull, the dog leans toward that side and barks
 - Area effects (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have someone caught; small dogs are nimble and roll half as often. The card then shows which dogs were caught, so its outcomes stay fixed; if nobody is caught, there is no card
 
 ### Resources
@@ -153,7 +155,7 @@ Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the
 - **Dog training:** level up a dog you own, e.g. calmer energy or a smaller pull lock. Options and prices to design
 - **Walker kit:** permanent, always-on walker upgrades, e.g. a bigger treat pouch or faster lane changes. Items and prices to design
 - **Cosmetic unlocks:** looks-only purchases. Items and prices to design
-- **Walker customization:** pick or dress the walker. To design
+- **Walker customization:** pick from a few preset walkers (3 to 4 sprites); gear still shows as a badge. Looks to design
 - Upgrade cards are the run-only boosts; everything bought on the home screen is permanent (the Hades split between boons and keepsakes)
 - **Logbook** (a home screen panel): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
 - **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone reached and times each world was finished. Per-dog stats (walks, zones finished, times fired) show on each dog's roster card. The end screen flags a new best

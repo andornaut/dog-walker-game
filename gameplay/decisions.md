@@ -123,3 +123,8 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-19 · Design · Dog training, the walker kit, cosmetic unlocks and walker customization move into v1; their content is still to design
 - 2026-10-19 · Design · The home screen is also the shop: tap a locked dog or gear item to buy it
 - 2026-10-19 · Design · A logbook panel on the home screen shows the best walk, totals and the last walk; best walk and walk count also sit in the top bar; the Stats page holds the full stats behind it
+- 2026-10-19 · Design · A reverse press turns the pack around at once; other presses and pulls wait for the current lane move; the size-based input lock starts when a pull's move finishes
+- 2026-10-19 · Design · The top bar is for pause only; taps on it never move the pack
+- 2026-10-19 · Design · Spawning always leaves a reachable path, so every hit is avoidable; the grace window after a hit ignores obstacles but still collects pickups
+- 2026-10-19 · Design · Walker customization is a pick from 3 to 4 preset walkers; gear still shows as a badge
+- 2026-10-19 · Design · The tech session's runner input defaults are accepted as starting values: taps act on release, hold-to-repeat, one lane per swipe anywhere, and its gesture and timing numbers
