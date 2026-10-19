@@ -5,7 +5,8 @@ Images (16x16 icons unless noted): icon-pause, icon-help, icon-close, icon-lock,
 icon-money, icon-stinky; ui-panel, ui-hint (24x24 nine-slices, 8px corners),
 ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title),
 ui-slot-locked (112x50, a locked pack slot; the game writes the price).
-Sprites: ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
+Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
+ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
 corners; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off).
 
 Usage:
@@ -213,6 +214,50 @@ def slot_locked():
     return im
 
 
+# ---------- the doghouse: one dog slot in the dog column ----------
+
+# Each dog's roof is its signature colour (bow, bandana, collar, sweater, harness).
+ROOFS = {
+    "duchess": ("pink", "mauve"), "nugget": ("red", "dred"), "zippy": ("ochre", "rust"),
+    "pierre": ("purple", "plum"), "biscuit": ("green", "dgreen"), "dash": ("dgreen", "forest"),
+    "snowball": ("sky", "blue"), "waffles": ("amber", "orange"), "koda": ("orange", "rust"),
+    "empty": ("slate", "dslate"),
+}
+
+
+def doghouse(roof, eave):
+    """72x146. The game draws, in slot pixels: the dog's name centred at (36, 11) in
+    font-title, the dog face at (20, 36), the owner face at (8, 78), the heart count
+    centred at (56, 90) in font-title, the owner's name at (9, 118) in font-body, and
+    hearts from (9, 127) in rows of six, 9px across and 8px down."""
+    empty = roof == "slate"
+    g = Grid(72, 146)
+    for i in range(22):
+        w = round(36 * (i + 1) / 22)
+        g.rect(36 - w, i, w * 2, 1, roof)
+    g.rect(0, 20, 72, 3, eave)
+    g.rect(8, 9, 56, 11, "cream")
+    g.rect(8, 19, 56, 1, "tan")
+    g.rect(3, 23, 66, 123, "lgrey" if empty else "tan")
+    for y in range(30, 146, 8):
+        g.rect(3, y, 66, 1, "grey" if empty else "brown")
+    g.rect(3, 23, 2, 123, "grey" if empty else "brown")
+    g.rect(67, 23, 2, 123, "slate" if empty else "dbrown")
+    # arched doorway
+    g.rect(18, 32, 36, 38, "ink" if empty else "plum")
+    for i in range(6):
+        g.rect(18 + 6 - i, 26 + i, 36 - 2 * (6 - i), 1, "ink" if empty else "plum")
+    g.rect(16, 70, 40, 2, "grey" if empty else "dbrown")
+    # owner window
+    g.rect(6, 76, 36, 36, "white" if empty else "cream")
+    g.rect(8, 78, 32, 32, "lgrey" if empty else "sky")
+    g.rect(8, 78, 32, 1, "grey" if empty else "blue")
+    # hearts board
+    g.rect(6, 116, 60, 26, "white" if empty else "cream")
+    g.rect(6, 141, 60, 1, "lgrey" if empty else "tan")
+    return g
+
+
 IMAGES = {
     "icon-pause": lambda: to_image(pause().outlined()),
     "icon-help": lambda: to_image(help_icon().outlined()),
@@ -229,6 +274,7 @@ IMAGES = {
 
 
 def sprites():
+    yield "ui-doghouse", [(dog, [doghouse(*cols).outlined(False)], 1000) for dog, cols in ROOFS.items()]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
     yield "icon-sound", [("on", [speaker(True).outlined()], 1000), ("off", [speaker(False).outlined()], 1000)]

@@ -266,6 +266,11 @@
       "json": "sprites/ui-button.json"
     },
     {
+      "key": "ui-doghouse",
+      "png": "sprites/ui-doghouse.png",
+      "json": "sprites/ui-doghouse.json"
+    },
+    {
       "key": "ui-heart",
       "png": "sprites/ui-heart.png",
       "json": "sprites/ui-heart.json"

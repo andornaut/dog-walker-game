@@ -1,0 +1,103 @@
+{ "frames": {
+   "ui-doghouse 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 1.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 2.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 3.aseprite": {
+    "frame": { "x": 216, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 4.aseprite": {
+    "frame": { "x": 288, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 5.aseprite": {
+    "frame": { "x": 360, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 6.aseprite": {
+    "frame": { "x": 432, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 7.aseprite": {
+    "frame": { "x": 504, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 8.aseprite": {
+    "frame": { "x": 576, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   },
+   "ui-doghouse 9.aseprite": {
+    "frame": { "x": 648, "y": 0, "w": 72, "h": 146 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 72, "h": 146 },
+    "sourceSize": { "w": 72, "h": 146 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-doghouse.png",
+  "format": "RGBA8888",
+  "size": { "w": 720, "h": 146 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "duchess", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "nugget", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "zippy", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "pierre", "from": 3, "to": 3, "direction": "forward" },
+   { "name": "biscuit", "from": 4, "to": 4, "direction": "forward" },
+   { "name": "dash", "from": 5, "to": 5, "direction": "forward" },
+   { "name": "snowball", "from": 6, "to": 6, "direction": "forward" },
+   { "name": "waffles", "from": 7, "to": 7, "direction": "forward" },
+   { "name": "koda", "from": 8, "to": 8, "direction": "forward" },
+   { "name": "empty", "from": 9, "to": 9, "direction": "forward" }
+  ]
+ }
+}

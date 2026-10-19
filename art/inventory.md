@@ -114,14 +114,14 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Dog column
 
-| Asset            | Key                 | Type   | Size      | Priority | Notes                                                                                                                                                                |
-| ---------------- | ------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Slot frame       | `ui-dog-slot`       | image  | 72×192    | core     | 9-slice or fixed; includes an empty state                                                                                                                            |
-| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                                                                                           |
-| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                                                                                |
-| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows; a number beside the hearts so the meter doesn't rely on colour |
-| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing                                                                                                                     |
-| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                                                                                                                                         |
+| Asset            | Key                 | Type   | Size      | Priority | Notes                                                                                                                                                                                                              |
+| ---------------- | ------------------- | ------ | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Doghouse slot    | `ui-doghouse`       | sprite | 72×146    | core     | One per dog slot: a doghouse with the dog's colour roof (a tag per dog, plus `empty` for a fired dog); the dog peeks from the door, the owner sits in the window, hearts on the board. Layout in `art/tools/ui.py` |
+| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                                                                                                                                         |
+| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                                                                                                                              |
+| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows; a number beside the hearts so the meter doesn't rely on colour                                               |
+| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing                                                                                                                                                                   |
+| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                                                                                                                                                                                       |
 
 ## Top bar
 
