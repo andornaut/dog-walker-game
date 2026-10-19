@@ -73,6 +73,35 @@ export function bubbleX(screenWidth: number, centreX: number, width: number): nu
   return Math.round(Math.min(Math.max(2, centreX - width / 2), screenWidth - width - 2));
 }
 
+// Fired lines' bubbles all sit on one row, over the doghouses' faces. One opening beside
+// another keeps LINE_GAP pixels from it, and its tail starts at least LINE_TAIL_INSET in from
+// its edges, past the bubble's rim.
+const LINE_GAP = 2;
+const LINE_TAIL_INSET = 4;
+
+// The left edge of a fired line's bubble width wide: centred over its tail (bubbleX), else the
+// nearest place just beside an open bubble, on screen, clear of every open bubble and with the
+// tail on it. undefined while no such place is free, so the line waits for a bubble to close.
+// tail is the tail art's left edge and width.
+export function firedLineX(
+  screenWidth: number,
+  open: readonly Pick<Rect, "width" | "x">[],
+  tail: Pick<Rect, "width" | "x">,
+  width: number,
+): number | undefined {
+  const centred = bubbleX(screenWidth, tail.x + tail.width / 2, width);
+  const beside = open.flatMap((o) => [o.x + o.width + LINE_GAP, o.x - LINE_GAP - width]);
+  const fits = (x: number) =>
+    x >= 2 &&
+    x + width <= screenWidth - 2 &&
+    tail.x >= x + LINE_TAIL_INSET &&
+    tail.x + tail.width <= x + width - LINE_TAIL_INSET &&
+    open.every((o) => x + width + LINE_GAP <= o.x || o.x + o.width + LINE_GAP <= x);
+  return [centred, ...beside]
+    .filter(fits)
+    .sort((a, b) => Math.abs(a - centred) - Math.abs(b - centred))[0];
+}
+
 // How long the firing's face and plate show within a stop of seconds.
 export function firingShowMs(seconds: number): number {
   return Math.max(0, seconds * 1000 - MOMENTS.firingEndMarginMs);

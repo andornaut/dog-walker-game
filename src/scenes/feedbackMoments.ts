@@ -11,9 +11,9 @@ import type { ChangeLabel } from "../hud/hudView";
 import {
   arcControl,
   bowRightControl,
-  bubbleX,
   curvePoint,
   downTail,
+  firedLineX,
   FIRING_EVENT,
   FIRING_PARTS,
   type FiringCue,
@@ -53,6 +53,10 @@ const FACE = { fadeMs: 150, popMs: 160, scale: 2, size: 32 };
 const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
 const PLATE = { corner: 8, dropIn: 8, dropMs: 120, key: "ui-fired-plate" };
 const LINE = { fadeMs: 400, maxWidth: 200, padding: 6 };
+// Each fired line's bubble takes its own depth pair over the moments, panel then text, so two
+// lines up at once never interleave. The tail is 8px wide.
+const LINE_DEPTH = DEPTH + 2;
+const LINE_TAIL_WIDTH = 8;
 // The payout label: a three-slice with 8px caps, its amount's ink from x 9 and capitals from
 // row 3, and 5px after the ink.
 const PAYOUT_LABEL = { cap: 8, height: 16, inkX: 9, inkY: 3, key: "ui-payout-label", rise: 14 };
@@ -61,6 +65,13 @@ const COIN = { key: "fx-coin-fly", tag: "spin" };
 const TREAT_POP = { fallback: "fx-sparkle", key: "fx-treat-pop", tag: "play" };
 const LOW_CHIP = { height: 20, rise: 8 };
 const RIM = { minAlpha: 0.35, pulseMs: 600, width: 2 };
+
+interface FiredLine {
+  at: Point;
+  holdMs: number;
+  tail: Point;
+  text: string;
+}
 
 interface SlotWarning {
   parts: GameObjects.GameObject[];
@@ -73,6 +84,9 @@ interface SlotWarning {
 // the HUD keeps running under it.
 export class HudFeedback {
   private inFlight = 0;
+  // Fired lines' bubbles on screen, and lines waiting for room beside them.
+  private lines: { depth: number; rect: Rect }[] = [];
+  private linesWaiting: FiredLine[] = [];
   private low: DogId[] = [];
   private lowShown = "";
   private moneyTick: MoneyTick | undefined;
@@ -222,8 +236,15 @@ export class HudFeedback {
     }
     const shown = pop === undefined ? [face, plate] : [pop, face, plate];
     this.fadeOut(shown, Math.max(0, showMs - FACE.fadeMs), Math.min(showMs, FACE.fadeMs));
-    const line = this.addLine(cue.line, layout.line, layout.tail);
-    this.fadeOut(line, Math.max(showMs, MOMENTS.firingLineMs), LINE.fadeMs);
+    const holdMs = Math.max(showMs, MOMENTS.firingLineMs);
+    this.linesWaiting.push({ at: layout.line, holdMs, tail: layout.tail, text: cue.line });
+    this.showWaitingLines();
+  }
+
+  // Opens each waiting fired line that has room beside the bubbles up, in turn; the rest wait
+  // for one to close.
+  private showWaitingLines(): void {
+    this.linesWaiting = this.linesWaiting.filter((line) => !this.addLine(line));
   }
 
   // fx-fired-pop at 2x, played once and held on its last frame behind the face.
@@ -297,33 +318,56 @@ export class HudFeedback {
     return container;
   }
 
-  // The owner's fired line in a quip bubble over the face, kept on screen, its tail pointing
-  // down at the face.
-  private addLine(text: string, at: Point, tail: Point): GameObjects.GameObject[] {
-    const label = addPixelText(this.scene, 0, 0, text, {
+  // The owner's fired line in a quip bubble over the face, kept on screen and clear of the
+  // other fired lines, its tail pointing down at the face. It holds for holdMs, then fades.
+  // False, drawing nothing, while there is no room for it.
+  private addLine(line: FiredLine): boolean {
+    const label = addPixelText(this.scene, 0, 0, line.text, {
       color: PALETTE.plum,
       maxWidth: LINE.maxWidth - 2 * LINE.padding,
       scale: 2,
     });
     const width = Math.ceil(label.width) + 2 * LINE.padding;
     const height = Math.ceil(label.height) + 2 * LINE.padding;
-    const x = bubbleX(SCREEN_CONFIG.width, at.x, width);
-    const y = at.y - height;
-    placePixelText(label, x + LINE.padding, y + LINE.padding);
-    const parts: GameObjects.GameObject[] = [
-      addPanel(this.scene, { height, width, x, y }, "ui-quip").setDepth(DEPTH),
-    ];
     const downArt = downTail((key) => this.scene.textures.exists(key));
+    const tailX = line.tail.x - (downArt?.tipX ?? LINE_TAIL_WIDTH / 2);
+    const open = this.lines.map(({ rect }) => rect);
+    const x = firedLineX(SCREEN_CONFIG.width, open, { width: LINE_TAIL_WIDTH, x: tailX }, width);
+    if (x === undefined) {
+      label.destroy();
+      return false;
+    }
+    const y = line.at.y - height;
+    const rect = { height, width, x, y };
+    let depth = LINE_DEPTH;
+    while (this.lines.some((shown) => shown.depth === depth)) {
+      depth += 2;
+    }
+    const entry = { depth, rect };
+    this.lines.push(entry);
+    placePixelText(label, x + LINE.padding, y + LINE.padding);
+    const parts: GameObjects.GameObject[] = [addPanel(this.scene, rect, "ui-quip").setDepth(depth)];
     if (downArt !== undefined) {
       parts.push(
         this.scene.add
-          .image(tail.x - downArt.tipX, tail.y, downArt.key)
+          .image(tailX, line.tail.y, downArt.key)
           .setOrigin(0)
-          .setDepth(DEPTH + 1),
+          .setDepth(depth + 1),
       );
     }
-    parts.push(label.setDepth(DEPTH + 1));
-    return parts;
+    parts.push(label.setDepth(depth + 1));
+    this.tween({
+      alpha: 0,
+      delay: line.holdMs,
+      duration: LINE.fadeMs,
+      onComplete: () => {
+        parts.forEach((part) => part.destroy());
+        this.lines = this.lines.filter((shown) => shown !== entry);
+        this.showWaitingLines();
+      },
+      targets: parts,
+    });
+    return true;
   }
 
   // Each paid dog's coin flies from its roof to the bank while its amount rises from the

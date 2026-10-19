@@ -10,6 +10,7 @@ import {
   DOWN_TAILS,
   downTail,
   endScreenDelayMs,
+  firedLineX,
   firingLayout,
   firingShowMs,
   lowHeartDogs,
@@ -80,6 +81,32 @@ describe("bubbleX", () => {
     expect(bubbleX(360, 180, 100)).toBe(130);
     expect(bubbleX(360, 20, 100)).toBe(2);
     expect(bubbleX(360, 340, 100)).toBe(258);
+  });
+});
+
+describe("firedLineX", () => {
+  // A tail 8 wide over the faces of slots 0, 1 and 2.
+  const tails = [55, 175, 295].map((x) => ({ width: 8, x }));
+  it.each<[string, { width: number; x: number }[], number, number, number | undefined]>([
+    ["centres a lone bubble over its tail", [], 1, 100, 129],
+    ["keeps a lone bubble on screen", [], 0, 140, 2],
+    ["centres a bubble clear of an open one", [{ width: 100, x: 2 }], 1, 100, 129],
+    ["opens beside an open bubble it would overlap", [{ width: 150, x: 2 }], 1, 150, 154],
+    ["opens left of an open bubble on its right", [{ width: 150, x: 208 }], 1, 150, 56],
+    ["waits while beside would leave its tail", [{ width: 100, x: 40 }], 0, 100, undefined],
+    ["waits while beside would leave the screen", [{ width: 180, x: 90 }], 2, 120, undefined],
+    [
+      "waits while the room between two open bubbles is too small",
+      [
+        { width: 100, x: 2 },
+        { width: 100, x: 258 },
+      ],
+      1,
+      160,
+      undefined,
+    ],
+  ])("%s", (_name, open, slot, width, expected) => {
+    expect(firedLineX(360, open, tails[slot] ?? { width: 8, x: 0 }, width)).toBe(expected);
   });
 });
 
