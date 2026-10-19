@@ -134,6 +134,7 @@ export interface UpdateFlow {
   noteInteraction(): void;
   // The registration failed, so there is no newer version to wait for.
   noRegistration(): void;
+  // Whether the home screen is in front. Each arrival home after input checks for a newer version.
   setOnHome(onHome: boolean): void;
   // Follows the registration's newer versions, checking for one first unless offline.
   watch(registration: RegistrationLike): void;
@@ -158,6 +159,7 @@ export function createUpdateFlow(
   };
   let shown = false;
   let waitingWorker: ServiceWorkerLike | undefined;
+  let watched: RegistrationLike | undefined;
   let boot: () => void = () => undefined;
   const bootable = new Promise<void>((resolve) => {
     boot = resolve;
@@ -195,8 +197,15 @@ export function createUpdateFlow(
         update({ interacted: true });
       }
     },
-    setOnHome: (onHome) => update({ onHome }),
+    setOnHome(onHome) {
+      const arrived = onHome && !state.onHome && state.interacted;
+      update({ onHome });
+      if (arrived && online()) {
+        watched?.update().catch(() => undefined);
+      }
+    },
     watch(registration) {
+      watched = registration;
       const read = () => {
         const { newer, worker } = newerVersionOf(container, registration);
         waitingWorker = worker;

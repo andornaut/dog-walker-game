@@ -299,6 +299,24 @@ describe("createUpdateFlow", () => {
     expect(reload).toHaveBeenCalledTimes(1);
   });
 
+  // The load's own check, then one per arrival home after input; none offline.
+  it.each([
+    { online: true, updates: 3 },
+    { online: false, updates: 0 },
+  ])("with online $online checks $updates times", ({ online, updates }) => {
+    const { flow } = setup({ online });
+    const registration = new FakeRegistration();
+    flow.watch(registration);
+    flow.setOnHome(true);
+    flow.noteInteraction();
+    flow.setOnHome(false);
+    flow.setOnHome(true);
+    flow.setOnHome(true);
+    flow.setOnHome(false);
+    flow.setOnHome(true);
+    expect(registration.updates).toBe(updates);
+  });
+
   it("ignores Reload with no version waiting", () => {
     const { container, flow, reload, shown } = setup();
     flow.watch(new FakeRegistration());
