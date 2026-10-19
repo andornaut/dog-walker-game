@@ -73,21 +73,25 @@ Same tags, frames and durations as the original.
 
 ## Effects
 
-| Key                     | Type   | Size             | Tags                | Pri   | Note                                                                                                             |
-| ----------------------- | ------ | ---------------- | ------------------- | ----- | ---------------------------------------------------------------------------------------------------------------- |
-| `fx-bark`               | sprite | 16×16            | `pop`               | core  | Pull tell                                                                                                        |
-| `fx-bark-word`          | sprite | 32×16            | `pop`               | core  | WOOF! in place of `fx-bark` unless reduced motion                                                                |
-| `fx-bump`               | sprite | 32×32            | `play`              | core  | Impact star on any hit                                                                                           |
-| `fx-coins`              | sprite | 32×32            | `play`              | core  | Coins knocked loose on a minor bump                                                                              |
-| `fx-dizzy`              | sprite | 32×16            | `loop`              | core  | Over the walker while a minor bump locks lane input                                                              |
-| `fx-heart`              | sprite | 16×16            | `up`, `down`        | later | ♥ change at a slot                                                                                               |
-| `fx-hit-<encounter>`    | sprite | 64×64            | `play`, `play-word` | core  | cafe, goose, other-dog, petunias, picnic, puddle, skunk, squirrel, thief, trash; `play-word` adds the comic word |
-| `fx-lemonade`           | sprite | 64×64            | `play`              | core  | Lucky hit at the lemonade stand                                                                                  |
-| `fx-sparkle`            | sprite | 16×16            | `play`              | core  | Pickup collected                                                                                                 |
-| `fx-splash`             | sprite | 32×32            | `play`              | core  | Puddle                                                                                                           |
-| `fx-status-<status>`    | sprite | 16×16            | `loop`              | core  | soaked, spooked, stinky; over a dog's head                                                                       |
-| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`              | core  | amber, green, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right  |
-| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky`   | core  | Stretched to 176×32; `lucky` for lucky encounters                                                                |
+| Key                     | Type   | Size             | Tags                                         | Pri   | Note                                                                                                             |
+| ----------------------- | ------ | ---------------- | -------------------------------------------- | ----- | ---------------------------------------------------------------------------------------------------------------- |
+| `fx-bark`               | sprite | 16×16            | `pop`                                        | core  | Pull tell                                                                                                        |
+| `fx-bark-word`          | sprite | 32×16            | `pop`                                        | core  | WOOF! in place of `fx-bark` unless reduced motion                                                                |
+| `fx-bump`               | sprite | 32×32            | `play`                                       | core  | Impact star on any hit                                                                                           |
+| `fx-close-one`          | sprite | 32×32            | `splash`, `puff`, `splash-word`, `puff-word` | core  | An area effect that caught nobody, at the pack under "Close one!"; `-word` adds PHEW!                            |
+| `fx-coin-burst`         | sprite | 64×48            | `play`                                       | core  | Coins bursting from the pack on a minor bump, under "−$2"                                                        |
+| `fx-coins`              | sprite | 32×32            | `play`                                       | core  | Coins knocked loose on a minor bump                                                                              |
+| `fx-dizzy`              | sprite | 32×16            | `loop`                                       | core  | Over the walker while a minor bump locks lane input                                                              |
+| `fx-heart`              | sprite | 16×16            | `up`, `down`                                 | later | ♥ change at a slot                                                                                               |
+| `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`                                 | core  | Pink heart over a dog on +♥; `fly` is tweened into its doghouse                                                  |
+| `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`                                 | core  | Broken heart over a dog on −♥; `fly` is tweened into its doghouse                                                |
+| `fx-hit-<encounter>`    | sprite | 64×64            | `play`, `play-word`                          | core  | cafe, goose, other-dog, petunias, picnic, puddle, skunk, squirrel, thief, trash; `play-word` adds the comic word |
+| `fx-lemonade`           | sprite | 64×64            | `play`                                       | core  | Lucky hit at the lemonade stand                                                                                  |
+| `fx-sparkle`            | sprite | 16×16            | `play`                                       | core  | Pickup collected                                                                                                 |
+| `fx-splash`             | sprite | 32×32            | `play`                                       | core  | Puddle                                                                                                           |
+| `fx-status-<status>`    | sprite | 16×16            | `loop`                                       | core  | soaked, spooked, stinky; over a dog's head                                                                       |
+| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`                                       | core  | amber, green, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right  |
+| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky`                            | core  | Stretched to 176×32; `lucky` for lucky encounters                                                                |
 
 ## Dog needs
 
@@ -120,27 +124,27 @@ Same tags, frames and durations as the original.
 
 ## Doghouse row and top bar
 
-| Key                                          | Type   | Size              | Tags                             | Pri  | Note                                                        |
-| -------------------------------------------- | ------ | ----------------- | -------------------------------- | ---- | ----------------------------------------------------------- |
-| `ui-doghouse`                                | sprite | 120×90            | one per dog key, `empty`         | core | One per slot, three in a row                                |
-| `ui-doghouse-warn`                           | sprite | 120×90            | `pulse`, `static`                | core | Overlay at 1 ♥                                              |
-| `ui-heart`                                   | sprite | 8×7               | `full`, `empty`                  | core | Full is darkRed, empty a hollow darkBrown outline           |
-| `ui-fired-plate`                             | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic` | core | Stretched to 72×28                                          |
-| `fx-fired-pop`                               | sprite | 64×64             | `play`                           | core | Drawn at 2× behind the fired face                           |
-| `fx-coin-fly`                                | sprite | 12×12             | `spin`                           | core | Fee payout                                                  |
-| `ui-payout-label`                            | sprite | 24×16 three-slice | `normal`                         | core | Stretched to 60×16                                          |
-| `fx-treat-pop`                               | sprite | 24×24             | `play`                           | core | Where a given treat lands                                   |
-| `ui-quip`                                    | image  | 24×24 nine-slice  |                                  | core |                                                             |
-| `ui-quip-tail`                               | image  | 6×8               |                                  | core | Points left at the owner; covers the bubble's left rim      |
-| `ui-quip-tail-down`                          | image  | 8×6               |                                  | core | Points down, for a bubble above the doghouse row            |
-| `icon-soaked`, `icon-spooked`, `icon-stinky` | image  | 16×16             |                                  | core | Doghouse status icons                                       |
-| `ui-top-bar`                                 | image  | 360×40            |                                  | core |                                                             |
-| `ui-strip-well`                              | image  | 24×24 nine-slice  |                                  | core | State strip tab under the zone well, right-aligned at x 356 |
-| `icon-upgrade-<upgrade>`                     | image  | 16×16             |                                  | core | State strip; one per upgrade id (9)                         |
-| `icon-gear-<gear>`                           | image  | 16×16             |                                  | core | State strip; one per gear id (5)                            |
-| `icon-money`                                 | image  | 16×16             |                                  | core | Also cards, shop and end screen                             |
-| `ui-zone-pips`                               | sprite | 18×8              | `todo`, `<zone>`, `<zone>-done`  | core | One pip per zone of the route, 3px apart                    |
-| `icon-zone-<zone>`                           | image  | 16×16             |                                  | core | Every zone                                                  |
+| Key                                          | Type   | Size              | Tags                                   | Pri  | Note                                                                          |
+| -------------------------------------------- | ------ | ----------------- | -------------------------------------- | ---- | ----------------------------------------------------------------------------- |
+| `ui-doghouse`                                | sprite | 120×90            | one per dog key, `empty`, `heart-loss` | core | One per slot, three in a row; `heart-loss` is an overlay drawn over the house |
+| `ui-doghouse-warn`                           | sprite | 120×90            | `pulse`, `static`                      | core | Overlay at 1 ♥                                                                |
+| `ui-heart`                                   | sprite | 8×7               | `full`, `empty`                        | core | Full is darkRed, empty a hollow darkBrown outline                             |
+| `ui-fired-plate`                             | sprite | 24×24 nine-slice  | `laid-back`, `fussy`, `dramatic`       | core | Stretched to 72×28                                                            |
+| `fx-fired-pop`                               | sprite | 64×64             | `play`                                 | core | Drawn at 2× behind the fired face                                             |
+| `fx-coin-fly`                                | sprite | 12×12             | `spin`                                 | core | Fee payout                                                                    |
+| `ui-payout-label`                            | sprite | 24×16 three-slice | `normal`                               | core | Stretched to 60×16                                                            |
+| `fx-treat-pop`                               | sprite | 24×24             | `play`                                 | core | Where a given treat lands                                                     |
+| `ui-quip`                                    | image  | 24×24 nine-slice  |                                        | core |                                                                               |
+| `ui-quip-tail`                               | image  | 6×8               |                                        | core | Points left at the owner; covers the bubble's left rim                        |
+| `ui-quip-tail-down`                          | image  | 8×6               |                                        | core | Points down, for a bubble above the doghouse row                              |
+| `icon-soaked`, `icon-spooked`, `icon-stinky` | image  | 16×16             |                                        | core | Doghouse status icons                                                         |
+| `ui-top-bar`                                 | image  | 360×40            |                                        | core |                                                                               |
+| `ui-strip-well`                              | image  | 24×24 nine-slice  |                                        | core | State strip tab under the zone well, right-aligned at x 356                   |
+| `icon-upgrade-<upgrade>`                     | image  | 16×16             |                                        | core | State strip; one per upgrade id (9)                                           |
+| `icon-gear-<gear>`                           | image  | 16×16             |                                        | core | State strip; one per gear id (5)                                              |
+| `icon-money`                                 | image  | 16×16             |                                        | core | Also cards, shop and end screen                                               |
+| `ui-zone-pips`                               | sprite | 18×8              | `todo`, `<zone>`, `<zone>-done`        | core | One pip per zone of the route, 3px apart                                      |
+| `icon-zone-<zone>`                           | image  | 16×16             |                                        | core | Every zone                                                                    |
 
 ## Choice cards and help
 

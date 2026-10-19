@@ -963,6 +963,16 @@
       "json": "sprites/fx-bump.json"
     },
     {
+      "key": "fx-close-one",
+      "png": "sprites/fx-close-one.png",
+      "json": "sprites/fx-close-one.json"
+    },
+    {
+      "key": "fx-coin-burst",
+      "png": "sprites/fx-coin-burst.png",
+      "json": "sprites/fx-coin-burst.json"
+    },
+    {
       "key": "fx-coin-fly",
       "png": "sprites/fx-coin-fly.png",
       "json": "sprites/fx-coin-fly.json"
@@ -996,6 +1006,16 @@
       "key": "fx-heart",
       "png": "sprites/fx-heart.png",
       "json": "sprites/fx-heart.json"
+    },
+    {
+      "key": "fx-heart-gain",
+      "png": "sprites/fx-heart-gain.png",
+      "json": "sprites/fx-heart-gain.json"
+    },
+    {
+      "key": "fx-heart-loss",
+      "png": "sprites/fx-heart-loss.png",
+      "json": "sprites/fx-heart-loss.json"
     },
     {
       "key": "fx-hit-cafe",

@@ -10,7 +10,10 @@ nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down (8x6), ui-zone-banner (248x48) and
 ui-touch-hint (96x36).
-Sprites: ui-doghouse (120x90, one of three dog slots in a row; a tag per dog key and `empty`),
+Sprites: ui-doghouse (120x90, one of three dog slots in a row; a tag per dog key and `empty`,
+then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn over the house and under the
+game's faces, hearts and text, while the game shakes the whole slot 1px right, left, right, then
+back to rest, one offset per frame),
 ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
@@ -842,6 +845,50 @@ def doghouse_warn(step):
     return g
 
 
+# The panels the game draws on, left clear by the heart-loss flash: the name plate, the gable vent, the
+# doorway, the window, the hearts board and the name strip, as x, y, w, h.
+PANELS = ((19, 3, 82, 15), (5, 4, 12, 12), (3, 22, 36, 37), (39, 22, 38, 37), (76, 22, 43, 34), (3, 59, 74, 13))
+# Each heart-loss frame: the flash's fill and seam colours, or the rim's outer and inner colours.
+HEART_LOSS = (("flash", "red", "dred"), ("flash", "dred", "red"), ("rim", "red", "pink"), ("rim", "red", None))
+
+
+def doghouse_heart_loss(step):
+    """120x90, ui-doghouse's heart-loss frames: an overlay the game draws over the house, under its faces,
+    hearts and text, so it holds for every roof. Frames 0 and 1 flash the house's walls and roof red
+    inside a plum edge, with the planks and shingle courses as seams and the panels left clear; frames
+    2 and 3 fade to a 2px then 1px red rim inside the outline, like ui-doghouse-warn's."""
+    kind, a, b = HEART_LOSS[step]
+    house = doghouse("empty").px
+    g = Grid(HOUSE_W, HOUSE_H)
+
+    def solid(x, y):
+        return 0 <= x < HOUSE_W and 0 <= y < HOUSE_H and house[y][x] is not None
+
+    def panel(x, y):
+        return any(px <= x < px + w and py <= y < py + h for px, py, w, h in PANELS)
+
+    seams = {K[c] for c in ("grey", "dslate", "navy")}
+    for y in range(HOUSE_H):
+        for x in range(HOUSE_W):
+            if not solid(x, y):
+                continue
+            near = [all(solid(x + dx, y + dy) for dx in range(-r, r + 1) for dy in range(-r, r + 1))
+                    for r in (1, 2, 3)]
+            if not near[0]:
+                # the flash redraws the house's edge in plum, so no roof colour shows round it
+                if kind == "flash":
+                    g.p(x, y, "plum")
+                continue
+            if kind == "flash":
+                if not panel(x, y):
+                    g.p(x, y, b if house[y][x] in seams else a)
+            elif not near[1]:
+                g.p(x, y, a)
+            elif b and not near[2]:
+                g.p(x, y, b)
+    return g
+
+
 # ---------- selection and feedback ----------
 
 def select_frame(glow):
@@ -1212,7 +1259,8 @@ IMAGES = {
 
 
 def sprites():
-    yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS]
+    yield "ui-doghouse", [(dog, [doghouse(dog).outlined(False)], 1000) for dog in ROOFS] + [
+        ("heart-loss", [doghouse_heart_loss(i).outlined(False) for i in range(4)], [60, 60, 80, 80])]
     warn = [doghouse_warn(i).outlined(False) for i in (0, 1, 2, 1)]
     yield "ui-doghouse-warn", [("pulse", warn, 400), ("static", [warn[1]], 1000)]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
