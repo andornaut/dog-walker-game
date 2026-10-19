@@ -181,6 +181,16 @@
       "json": "sprites/fx-bark.json"
     },
     {
+      "key": "fx-dust",
+      "png": "sprites/fx-dust.png",
+      "json": "sprites/fx-dust.json"
+    },
+    {
+      "key": "fx-tap",
+      "png": "sprites/fx-tap.png",
+      "json": "sprites/fx-tap.json"
+    },
+    {
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json"
@@ -266,6 +276,11 @@
       "json": "sprites/ui-button.json"
     },
     {
+      "key": "ui-check",
+      "png": "sprites/ui-check.png",
+      "json": "sprites/ui-check.json"
+    },
+    {
       "key": "ui-doghouse",
       "png": "sprites/ui-doghouse.png",
       "json": "sprites/ui-doghouse.json"
@@ -274,6 +289,11 @@
       "key": "ui-heart",
       "png": "sprites/ui-heart.png",
       "json": "sprites/ui-heart.json"
+    },
+    {
+      "key": "ui-select",
+      "png": "sprites/ui-select.png",
+      "json": "sprites/ui-select.json"
     },
     {
       "key": "walker-ada",

@@ -1,0 +1,30 @@
+{ "frames": {
+   "ui-select 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 450
+   },
+   "ui-select 1.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 24 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
+    "duration": 450
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-select.png",
+  "format": "RGBA8888",
+  "size": { "w": 48, "h": 24 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "pulse", "from": 0, "to": 1, "direction": "forward" }
+  ]
+ }
+}

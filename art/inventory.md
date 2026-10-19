@@ -175,20 +175,23 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 ## Screens outside the run
 
-| Asset             | Key                        | Type  | Size    | Priority | Notes                                                                                      |
-| ----------------- | -------------------------- | ----- | ------- | -------- | ------------------------------------------------------------------------------------------ |
-| Title / home      | `screen-home`              | image | 360×640 | core     | Background; bank total and buttons on top                                                  |
-| Logo              | `logo`                     | image | TBD     | later    |                                                                                            |
-| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | core     | 9 dogs; larger art for dog pick and the shop                                               |
-| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | core     | fancy, food-driven, chaser                                                                 |
-| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | core     | calm, steady, hyper                                                                        |
-| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | core     | laid-back, fussy, dramatic                                                                 |
-| Gear icons        | `item-<gear>`              | image | 32×32   | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py` |
-| Locked dog slot   | `ui-slot-locked`           | image | TBD     | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price            |
-| Stats page        | `screen-stats`             | image | 360×640 | core     | Behind the logbook; panel background for the full stats                                    |
-| Hint bubble       | `ui-hint`                  | image | 9-slice | core     | First-time hints: a one-line bubble the first time each thing appears                      |
-| Zone banner       | `ui-zone-banner`           | image | TBD     | core     | "Maple Street, zone 2: Bark Park" between zones                                            |
-| End screen        | `screen-end`               | image | 360×640 | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                        |
+| Asset                | Key                        | Type   | Size             | Priority | Notes                                                                                      |
+| -------------------- | -------------------------- | ------ | ---------------- | -------- | ------------------------------------------------------------------------------------------ |
+| Title / home         | `screen-home`              | image  | 360×640          | core     | Background; bank total and buttons on top                                                  |
+| Logo                 | `logo`                     | image  | TBD              | later    |                                                                                            |
+| Dog portraits        | `portrait-dog-<name>`      | image  | TBD              | core     | 9 dogs; larger art for dog pick and the shop                                               |
+| Trait icons          | `icon-trait-<trait>`       | image  | 16×16            | core     | fancy, food-driven, chaser                                                                 |
+| Energy icons         | `icon-energy-<energy>`     | image  | 16×16            | core     | calm, steady, hyper                                                                        |
+| Temperament icons    | `icon-owner-<temperament>` | image  | 16×16            | core     | laid-back, fussy, dramatic                                                                 |
+| Gear icons           | `item-<gear>`              | image  | 32×32            | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py` |
+| Locked dog slot      | `ui-slot-locked`           | image  | TBD              | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price            |
+| Stats page           | `screen-stats`             | image  | 360×640          | core     | Behind the logbook; panel background for the full stats                                    |
+| Hint bubble          | `ui-hint`                  | image  | 9-slice          | core     | First-time hints: a one-line bubble the first time each thing appears                      |
+| Selection frame      | `ui-select`                | sprite | 24×24 nine-slice | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                             |
+| Pick badge           | `ui-check`                 | sprite | 16×16            | core     | Green badge on a picked tile: tags `1`, `2`, `3` (pack order) and `tick`                   |
+| Tap and dust effects | `fx-tap`, `fx-dust`        | sprite | 16×16            | core     | A sparkle where a tap lands; a puff when the walker or a dog hops                          |
+| Zone banner          | `ui-zone-banner`           | image  | TBD              | core     | "Maple Street, zone 2: Bark Park" between zones                                            |
+| End screen           | `screen-end`               | image  | 360×640          | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                        |
 
 ## UI kit
 

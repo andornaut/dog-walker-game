@@ -6,6 +6,8 @@ icon-money, icon-stinky; ui-panel, ui-hint (24x24 nine-slices, 8px corners),
 ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title),
 ui-slot-locked (112x50, a locked pack slot; the game writes the price).
 Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
+ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-check (16x16; tags 1, 2, 3,
+tick), fx-tap and fx-dust (16x16; tag play),
 ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
 corners; tags normal, pressed, disabled), icon-sound and icon-music (tags on, off).
 
@@ -258,6 +260,62 @@ def doghouse(roof, eave):
     return g
 
 
+# ---------- selection and feedback ----------
+
+def select_frame(glow):
+    """24x24 nine-slice (8px corners): a thick amber frame for a selected tile, pulsing between two frames."""
+    g = Grid(24, 24)
+    outer, inner = ("yellow", "white") if glow else ("amber", "yellow")
+    g.rect(1, 0, 22, 3, outer)
+    g.rect(1, 21, 22, 3, outer)
+    g.rect(0, 1, 3, 22, outer)
+    g.rect(21, 1, 3, 22, outer)
+    g.rect(3, 3, 18, 1, inner)
+    g.rect(3, 20, 18, 1, inner)
+    g.rect(3, 3, 1, 18, inner)
+    g.rect(20, 3, 1, 18, inner)
+    for x, y in ((1, 1), (22, 1), (1, 22), (22, 22)):
+        g.p(x, y, "white" if glow else "yellow")
+    return g
+
+
+def check_badge(label):
+    """16x16: the green badge on a selected tile, numbered by pick order, or a tick."""
+    g = Grid(16, 16)
+    g.ell(8, 8, 7, 7, "green", "dgreen")
+    if label == "tick":
+        for i, (x, y) in enumerate(((4, 8), (5, 9), (6, 10), (7, 9), (8, 8), (9, 7), (10, 6), (11, 5))):
+            g.rect(x, y, 2, 2, "white")
+    else:
+        bits = {"1": "010110010010111", "2": "110001010100111", "3": "110001010001110"}[label]
+        for r in range(5):
+            for k in range(3):
+                if bits[r * 3 + k] == "1":
+                    g.rect(5 + k * 2, 3 + r * 2, 2, 2, "white")
+    return g
+
+
+def tap_burst(step):
+    """16x16, 4 frames: sparkles flying out from where a tap lands."""
+    g = Grid(16, 16)
+    r = (1, 3, 5, 7)[step]
+    col = ("white", "yellow", "amber", "orange")[step]
+    for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0), (-0.7, -0.7), (0.7, -0.7), (-0.7, 0.7), (0.7, 0.7)):
+        g.p(8 + dx * r, 8 + dy * r, col)
+        if step < 2:
+            g.p(8 + dx * (r - 1), 8 + dy * (r - 1), "white")
+    return g
+
+
+def dust(step):
+    """16x16, 4 frames: a puff of dust when the walker hops or lands."""
+    g = Grid(16, 16)
+    spread, size = (2, 3.5, 5, 6)[step], (2.2, 3, 2.8, 1.8)[step]
+    for cx, lift in ((8 - spread, 0), (8, 1), (8 + spread, 0)):
+        g.ell(cx, 12 - step - lift, size, size, "white" if step == 3 else "lgrey", None if step == 3 else "grey")
+    return g
+
+
 IMAGES = {
     "icon-pause": lambda: to_image(pause().outlined()),
     "icon-help": lambda: to_image(help_icon().outlined()),
@@ -275,6 +333,10 @@ IMAGES = {
 
 def sprites():
     yield "ui-doghouse", [(dog, [doghouse(*cols).outlined(False)], 1000) for dog, cols in ROOFS.items()]
+    yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
+    yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
+    yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
+    yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
     yield "ui-button", [(s, [button(s).outlined(False)], 1000) for s in ("normal", "pressed", "disabled")]
     yield "icon-sound", [("on", [speaker(True).outlined()], 1000), ("off", [speaker(False).outlined()], 1000)]

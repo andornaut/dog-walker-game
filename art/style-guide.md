@@ -19,6 +19,7 @@
 - **Leash:** a 1px line drawn in code from the walker's hand to each collar, in `#a22633`; there is no leash sprite.
 - **Dog animation:** road sprites are seen from above and behind. `walk` is a 4-frame trot (diagonal leg pairs swap, the body bobs on the passing frames, the tail wags), `react` is a 2-frame hop, `pull` is 2 frames leaning right, which the game mirrors for a pull to the left, and `tell` is the 2-frame lean shown, with the `fx-bark` pop, before a pull. Sprites carry no shadow; the game draws one in the road's darker ramp colour.
 - **UI art:** all UI (card frames, panels, status bar) is pixel art at the base resolution, with a pixel font.
+- **Feedback:** every tap is visible. A pressed tile or button dips 2px (a button sinks into its lip) and a sparkle (`fx-tap`) bursts where the finger lands. A picked dog or gear item lifts 2px onto a shadow, turns white, takes a pulsing amber frame (`ui-select`) and a green badge with its pick order (`ui-check`), and its face hops; the dog also hops onto the gate path in a puff of dust (`fx-dust`). A locked item the player can't afford shakes. The ready Start walk button bobs. With reduced motion, the highlights stay and the movement is skipped.
 - **Fonts:** two 8px pixel fonts, both under the SIL Open Font License (files and licenses in `art/fonts/`). `font-body` is Tiny5, mixed case, for body text, quips and floating labels. `font-title` is Silkscreen, capitals, for titles, numbers and buttons. Glyphs are white so the game tints them; ♥ is a drawn 7×6 heart.
 
 ## Open decisions
