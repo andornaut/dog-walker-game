@@ -92,7 +92,7 @@ export const HOME_TEXT = {
     walkOne: "{count} walk",
   },
   unsaved: "Progress won't be saved.",
-  walkerGoal: "Zone {zone}",
+  walkerGoal: "{walker}",
   walkerInfo: "{walker}: {pace}, {style}.",
   walkerLocked: "Finish zone {zone} to unlock {walker}.",
   zoneFee: "{fee}/zone",

@@ -18,7 +18,7 @@ A cozy pixel-art lane runner where you walk a pack of dogs through the neighbour
 
 - **Before a run:** pick your dogs (one per owned dog slot) and put up to one owned gear item in your Pocket.
 - **During a run:** walk 4 of the 6 zones, starting on Elm Avenue. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. Hitting an obstacle opens a choice card. Each zone has one forced stop.
-- **Between zones:** pick 1 of 3 upgrade cards, then pick the next zone at a fork.
+- **Between zones:** a zone celebration, then pick 1 of 3 upgrade cards, then pick the next zone at a fork.
 - **After a run:** bank your earnings and spend them at the Pet shop: dogs, dog slots and gear.
 
 Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run structure, loadout, meta progression), Vampire Survivors (choices along the way), Slay the Spire (choices as cards).
@@ -270,6 +270,14 @@ One per zone, drawn at random with no repeats in a run.
 - Mail carrier: Hold them back → −♥ each (barking) · Wait it out → −$ per dog (missed tips)
 - Stop sign: Wait your turn → −$ per dog (missed tips) · Dart across → −♥ each
 
+### Zone celebration
+
+After each of zones 1 to 3, once the fee coins have flown to the bank and before the upgrade card, a short celebration plays over the paused road. After zone 4 the end screen takes its place.
+
+- **Zone done:** the walker you're walking with cheers, under "Willow Crescent done!", with the zone's fees and tips ("+$240 fees · +$38 tips"). It moves on by itself after 2 seconds, or at a tap
+- **New walker:** the first time you finish zone 1, 2 or 3, the walker it unlocks runs in to join, under "Ben joins you!", with their line ("Nice pack! Mind if I walk with you sometime?") and their pace and style ("Slow · Hustler"). It waits for a tap on "Welcome!" (key 1). This replaces the Zone done version for that zone
+- Confetti plays in both; with reduced motion it doesn't
+
 ### Upgrade cards
 
 Run-only boosts offered between zones, from a pool of 9. Each offer draws 3 at random from the remaining pool, with at most one trade-off card. A picked card leaves the pool for the rest of the run.
@@ -297,7 +305,7 @@ Four walkers, on two axes. Pace is the difficulty: every zone takes the same tim
 | Ada    | Fast | Charmer | Speed and zone length ×1.1, fees ×1.1; +♥ start, 0.85× as many tips | Finish zone 2 |
 | Trista | Fast | Hustler | Speed and zone length ×1.1, fees ×1.1; 1.2× as many tips            | Finish zone 3 |
 
-- **Greeting:** the first time you finish an unlocking zone, the next walker waves from the sidewalk in a 1-second popup stop, like the lemonade stand ("Nice pack! Mind if I walk with you sometime?"), then the zone ends as usual
+- **Zone celebration:** see Between zones
 - A walker's effects stack with the Pocket item and upgrade cards, and the state strip shows them
 - The numbers are first guesses; tuning sets them against the walker spread in [`README.md`](README.md)
 
@@ -313,7 +321,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the run-only b
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who's walking today? Tap to pick, hold for details."; after each of the first 3 walks "Tap to pick, hold for details."; after later walks "Back already? Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the pet shop."; picking a dog shows that owner's parting line
 - **Messages:** every message shows in the walker's bubble, up to 4 lines of about 30 characters: buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $450 more for Nugget."; notices such as "Progress won't be saved." Walker's lines and parting lines keep to 2 lines
 - **Gear and Pocket** (5 items, bought once at the Pet shop): fanny pack (start the run with +$); Lucky collar (every owner starts with +♥ and has a higher max); poop bags (once per run, an obstacle encounter card offers a free Skip option); running shoes (no lane-input lock after a pull); whistle (thieves flee even without a big dog). The Pocket section is a strip of all 5 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. One line below the strip gives the pocketed item's effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
-- **Walker picker:** choose from the walkers you've unlocked (see Walkers). The choice is saved, and the saved walker counts as picked, so a first visit needs only a dog. Locked walkers use the Locked tile state with a goal plate ("Zone 1"); tapping one shakes it and the bubble says "Finish zone 1 to unlock Ben."; a picked walker's bubble gives their pace and style ("Ben: slow, hustler."); a newly unlocked walker shows the walker's line "New walker!"
+- **Walker picker:** choose from the walkers you've unlocked (see Walkers). The choice is saved, and the saved walker counts as picked, so a first visit needs only a dog. Locked walkers use the Locked tile state with a name plate ("Ben"); tapping one shakes it and the bubble gives the goal, "Finish zone 1 to unlock Ben."; a picked walker's bubble gives their pace and style ("Ben: slow, hustler."); a newly unlocked walker shows the walker's line "New walker!"
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Elm Avenue under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
