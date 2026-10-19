@@ -21,7 +21,6 @@
 ## Open questions
 
 - Project structure & conventions beyond the Milestone 1 scaffold
-- Which stats persist across runs (gameplay decides; placeholder: runs, best run, lifetime earnings)
 - Testing / playtesting builds on phones early
 - Monetization & app-store needs (later)
 
@@ -48,6 +47,10 @@ Player state that outlives a run. Local only: no accounts, no cloud saves.
 
 - **Profiles:** one per browser.
 - **Contents:** bank (integer cents), owned gear, unlocked dogs, last loadout, stats and settings, referenced by data ids (`koda`, `luckyCollar`).
+- **Stats** (`gameplay/v1-plan.md`, Meta progression):
+  - Overall: runs by outcome (finished, headed home, out of dogs), best run and lifetime earnings, total firings and firings per owner, best zone reached, and times each world was finished.
+  - Per dog: walks, zones finished, times fired.
+  - A run banked from a zone checkpoint counts as headed home.
 - **Format:** one JSON document under one key (`dog-walker-game:save`) with a `version` field. Every write replaces the whole document.
 - **Validation:** a Valibot schema parses every load. The types come from the schema. Ids the data no longer has are dropped. A save that fails validation is kept under a backup key, and the game starts fresh instead of crashing.
 - **Migrations:** an ordered list of pure functions (v1 to v2, and so on), each tested against a fixture save. Renaming a dog or gear id needs one.
