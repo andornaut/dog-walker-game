@@ -1362,47 +1362,27 @@
     {
       "key": "icon-need-friendly",
       "png": "sprites/icon-need-friendly.png",
-      "json": "sprites/icon-need-friendly.json",
-      "anchor": {
-        "feetY": 14,
-        "opaqueWidth": 15
-      }
+      "json": "sprites/icon-need-friendly.json"
     },
     {
       "key": "icon-need-nosy",
       "png": "sprites/icon-need-nosy.png",
-      "json": "sprites/icon-need-nosy.json",
-      "anchor": {
-        "feetY": 14,
-        "opaqueWidth": 16
-      }
+      "json": "sprites/icon-need-nosy.json"
     },
     {
       "key": "icon-need-playful",
       "png": "sprites/icon-need-playful.png",
-      "json": "sprites/icon-need-playful.json",
-      "anchor": {
-        "feetY": 14,
-        "opaqueWidth": 15
-      }
+      "json": "sprites/icon-need-playful.json"
     },
     {
       "key": "icon-need-regular",
       "png": "sprites/icon-need-regular.png",
-      "json": "sprites/icon-need-regular.json",
-      "anchor": {
-        "feetY": 14,
-        "opaqueWidth": 14
-      }
+      "json": "sprites/icon-need-regular.json"
     },
     {
       "key": "icon-need-thirsty",
       "png": "sprites/icon-need-thirsty.png",
-      "json": "sprites/icon-need-thirsty.json",
-      "anchor": {
-        "feetY": 14,
-        "opaqueWidth": 14
-      }
+      "json": "sprites/icon-need-thirsty.json"
     },
     {
       "key": "icon-sound",
@@ -2713,20 +2693,12 @@
     {
       "key": "ui-pull-blocked",
       "png": "sprites/ui-pull-blocked.png",
-      "json": "sprites/ui-pull-blocked.json",
-      "anchor": {
-        "feetY": 9,
-        "opaqueWidth": 10
-      }
+      "json": "sprites/ui-pull-blocked.json"
     },
     {
       "key": "ui-pull-bubble",
       "png": "sprites/ui-pull-bubble.png",
-      "json": "sprites/ui-pull-bubble.json",
-      "anchor": {
-        "feetY": 27,
-        "opaqueWidth": 24
-      }
+      "json": "sprites/ui-pull-bubble.json"
     },
     {
       "key": "ui-section",

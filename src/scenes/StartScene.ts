@@ -38,6 +38,7 @@ import {
   walksPlayed,
   wrapWords,
 } from "../home/home";
+import { HOME_LAYOUT } from "../home/homeLayout";
 import {
   bubbleSpeech,
   type HomeAction,
@@ -113,68 +114,39 @@ import {
 } from "./uiKit";
 
 const SCREEN = SCREEN_CONFIG;
-// The gate scene in the screen-home art: the street, the yard and the path to the gate.
-const GATE = { height: 156, y: 40 };
-const PATH = { width: 32, x: 164 };
-const WALKER_AT_GATE = { footY: GATE.y + GATE.height, x: 180 };
-// At the gate the pack spreads out around the walker, the first dog through the gate.
-const GATE_SPOTS: readonly PackPlacement[] = [
-  { dx: 0, footDy: -46 },
-  { dx: -26, footDy: -14 },
-  { dx: 26, footDy: -12 },
-];
-// Before the first walk the starter owners wait in the yard left of the path, behind the
-// yard sign, each with their dog at their feet. Feet positions, by dog; a starter dog with no
-// spot is not drawn.
-const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>> = {
-  biscuit: { footY: 145, x: 120 },
-  duchess: { footY: 148, x: 150 },
-  koda: { footY: 145, x: 92 },
-};
-const PORCH_DOG_OFFSET = { dx: -12, footDy: 3 };
-// Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
-// each side; tiles side by side are 8 apart.
-const GAP = 8;
-const TOP_BAR = { height: 40 };
-// Each icon button is drawn at its *_ICON spot and tapped anywhere in its 44x44 hit area.
-const HELP_BUTTON: Rect = { height: 44, width: 44, x: 0, y: 40 };
-const HELP_ICON = { x: 8, y: 46 };
-const MUTE_BUTTON: Rect = { height: 44, width: 44, x: 316, y: 40 };
-const MUTE_ICON = { x: 332, y: 46 };
-const SETTINGS_BUTTON: Rect = { height: 44, width: 44, x: 256, y: 0 };
-const SETTINGS_ICON = { x: 268, y: 10 };
-const LOGBOOK_BUTTON: Rect = { height: 44, width: 44, x: 204, y: 0 };
-const LOGBOOK_ICON = { x: 216, y: 10 };
-const SLOT_SIGN: Rect = { height: 46, width: 160, x: 196, y: 140 };
-const LOGO = { key: "logo", x: 6, y: 146 };
-// Under the gate, three framed sections top to bottom (walker, dogs, gear), each a heading
-// band over its tiles; then Start walk.
-const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = {
-  dogs: { height: 160, width: 360, x: 0, y: 270 },
-  gear: { height: 73, width: 360, x: 0, y: 430 },
-  walker: { height: 72, width: 360, x: 0, y: 198 },
-};
-// A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
-const SECTION_FRAME = { band: 20, edge: 3 };
-// The band's text sits on section rows 8..17, 9px in from either side.
-const BAND_TEXT = { inset: 9, y: 8 };
-const WALKER_TILES = { cellHeight: 44, cellWidth: 44, columns: 4, gapX: GAP, gapY: 0 };
-const WALKER_ORIGIN = { x: 80, y: 223 };
-// The dog rows are hit areas 44 tall with no gap; each tile is drawn 42 tall inside its own,
-// leaving 2px between the rows.
-const DOG_TILES = { cellHeight: 44, cellWidth: 112, columns: 3, gapX: GAP, gapY: 0 };
-const DOG_ORIGIN = { x: 4, y: 294 };
-const DOG_TILE_INSET = 1;
-// A gear tile holds its icon with its price tag over the icon's foot while locked; its name
-// is on its detail card.
-const GEAR_SLOTS = { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 };
-const GEAR_ORIGIN = { x: 4, y: 456 };
-// A selected tile's ui-select frame sits 1px outside it.
-const TILE_SELECT_OUTSET = 1;
-const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
-// Start walk's label caps: on the raised face when ready, on the sunk face when not.
-const START_LABEL = { notReadyY: 15, readyY: 12, scale: 3 };
-const GEAR_BADGE: Rect = { height: 18, width: 18, x: 194, y: 166 };
+const GATE = HOME_LAYOUT.gate;
+const PATH = HOME_LAYOUT.path;
+const WALKER_AT_GATE = HOME_LAYOUT.walkerAtGate;
+const GATE_SPOTS: readonly PackPlacement[] = HOME_LAYOUT.gateSpots;
+const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>> =
+  HOME_LAYOUT.porchSpots;
+const PORCH_DOG_OFFSET = HOME_LAYOUT.porchDogOffset;
+const GAP = HOME_LAYOUT.gap;
+const TOP_BAR = HOME_LAYOUT.topBar;
+const HELP_BUTTON: Rect = HOME_LAYOUT.help.hit;
+const HELP_ICON = HOME_LAYOUT.help.icon;
+const MUTE_BUTTON: Rect = HOME_LAYOUT.mute.hit;
+const MUTE_ICON = HOME_LAYOUT.mute.icon;
+const SETTINGS_BUTTON: Rect = HOME_LAYOUT.settings.hit;
+const SETTINGS_ICON = HOME_LAYOUT.settings.icon;
+const LOGBOOK_BUTTON: Rect = HOME_LAYOUT.logbook.hit;
+const LOGBOOK_ICON = HOME_LAYOUT.logbook.icon;
+const SLOT_SIGN: Rect = HOME_LAYOUT.slotSign;
+const LOGO = { ...HOME_LAYOUT.logo, key: "logo" };
+const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = HOME_LAYOUT.sections;
+const SECTION_FRAME = HOME_LAYOUT.sectionFrame;
+const BAND_TEXT = HOME_LAYOUT.bandText;
+const WALKER_TILES = HOME_LAYOUT.walkerTiles;
+const WALKER_ORIGIN = HOME_LAYOUT.walkerOrigin;
+const DOG_TILES = HOME_LAYOUT.dogTiles;
+const DOG_ORIGIN = HOME_LAYOUT.dogOrigin;
+const DOG_TILE_INSET = HOME_LAYOUT.dogTileInset;
+const GEAR_SLOTS = HOME_LAYOUT.gearSlots;
+const GEAR_ORIGIN = HOME_LAYOUT.gearOrigin;
+const TILE_SELECT_OUTSET = HOME_LAYOUT.tileSelectOutset;
+const START_BUTTON: Rect = HOME_LAYOUT.startButton;
+const START_LABEL = HOME_LAYOUT.startLabel;
+const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
 const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];

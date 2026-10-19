@@ -4,7 +4,12 @@ import { itemAt } from "../arrays";
 import { remapDarker } from "../assets/darkRamp";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { homeQuestionLayout, pauseMenuLayout } from "../hud/pauseMenu";
+import {
+  homeQuestionLayout,
+  PAUSE_MENU_LABELS,
+  type PauseMenuLabel,
+  pauseMenuLayout,
+} from "../hud/pauseMenu";
 import { cardNumberForKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
@@ -58,6 +63,12 @@ export class PauseScene extends Scene {
       soundboardOf(this).stopMusic();
       onHeadHome();
     };
+    const presses: Readonly<Record<PauseMenuLabel, () => void>> = {
+      "Head home": headHome,
+      Help: () => openHelp(this, SCENE_KEYS.pause),
+      Resume: onResume,
+      Settings: () => this.openSettings(),
+    };
     const question = gameData.runText.homeQuestion;
     const asking = mode === "homeQuestion";
     this.entries = asking
@@ -65,12 +76,7 @@ export class PauseScene extends Scene {
           { label: question.headHome, press: headHome },
           { label: question.keepWalking, press: onResume },
         ]
-      : [
-          { label: "Resume", press: onResume },
-          { label: "Help", press: () => openHelp(this, SCENE_KEYS.pause) },
-          { label: "Settings", press: () => this.openSettings() },
-          { label: "Head home", press: headHome },
-        ];
+      : PAUSE_MENU_LABELS.map((label) => ({ label, press: presses[label] }));
     const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, this.entries.length);
     const { panel } = layout;
 

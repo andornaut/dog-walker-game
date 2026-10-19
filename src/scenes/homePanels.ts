@@ -5,6 +5,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard } from "../home/detail";
 import { loopFrame } from "../home/feedback";
 import type { Logbook } from "../home/home";
+import { HOME_LAYOUT } from "../home/homeLayout";
 import type { SlotSign } from "../home/homeLines";
 import type { Rect } from "../layout/rect";
 import { drawFramedRect, fillRect } from "./draw";
@@ -136,17 +137,9 @@ function addScrim(scene: Scene, parent: GameObjects.Container): void {
   parent.add(g);
 }
 
-// Inside a card, in card pixels: the paper starts 6px in, the band runs across its top with
-// the title's caps 6px below the band's top, and the well sits under the band.
-const CARD = {
-  band: { height: 22, inset: 6, titleY: 6 },
-  pad: 12,
-  well: { picture: 2, size: 68, x: 12, y: 34 },
-  width: 300,
-} as const;
-// The dog card's place on screen, and the gear card's height; the gear card is centred.
-const DOG_CARD: Rect = { height: 328, width: CARD.width, x: 30, y: 140 };
-const GEAR_CARD_HEIGHT = 150;
+const CARD = HOME_LAYOUT.card;
+const DOG_CARD: Rect = HOME_LAYOUT.dogCard;
+const GEAR_CARD_HEIGHT = HOME_LAYOUT.gearCardHeight;
 
 // The card's frame and title band; the content goes in a container placed at the card.
 function drawCardFrame(
@@ -265,7 +258,7 @@ export interface LogbookPanel {
   readonly stats: Rect;
 }
 
-const STATS_BUTTON = { height: 44, width: 140 };
+const STATS_BUTTON = HOME_LAYOUT.statsButton;
 
 // The logbook over the screen, as a card: the best walk, totals and the last walk, and a
 // Stats button.

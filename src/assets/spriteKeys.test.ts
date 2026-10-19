@@ -82,6 +82,11 @@ describe("standsOnGround", () => {
       expect(standsOnGround(key), key).toBe(false);
     }
   });
+
+  it("measures a mover's cue, which stands on the road", () => {
+    expect(standsOnGround(WARNING_KEY)).toBe(true);
+    expect(standsOnGround(WARNING_ARROW_KEY)).toBe(true);
+  });
 });
 
 describe("sprite keys", () => {

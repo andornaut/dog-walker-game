@@ -1,6 +1,6 @@
 import { PNG } from "pngjs";
 
-import { parseManifest } from "../assets/manifest";
+import { type AssetManifest, parseManifest } from "../assets/manifest";
 import {
   EXTRUDE,
   imageSource,
@@ -26,10 +26,17 @@ export function decodePng(bytes: Uint8Array): RgbaImage {
 
 // Pixel art's flat runs compress best unfiltered and with zlib's default strategy: about half
 // the size of pngjs's adaptive filters and run-length strategy.
-function encodePng({ data, height, width }: RgbaImage): Uint8Array {
+export function encodePng({ data, height, width }: RgbaImage): Uint8Array {
   const png = new PNG({ height, width });
   png.data = Buffer.from(data);
   return PNG.sync.write(png, { colorType: 6, deflateLevel: 9, deflateStrategy: 0, filterType: 0 });
+}
+
+// What a caller has already read: the art manifest, else read from manifest.json, and PNGs
+// decoded by their paths.
+export interface AtlasInputs {
+  decoded?: ReadonlyMap<string, RgbaImage>;
+  manifest?: AssetManifest;
 }
 
 // Packs every image and sprite frame of the art manifest into atlas pages, reading each file
@@ -37,13 +44,15 @@ function encodePng({ data, height, width }: RgbaImage): Uint8Array {
 // with a frame too large for a page, is left out with a warning.
 export async function buildAtlases(
   readArt: (path: string) => Promise<Uint8Array>,
+  inputs: AtlasInputs = {},
 ): Promise<AtlasBuild> {
   const decoder = new TextDecoder();
-  const manifest = parseManifest(JSON.parse(decoder.decode(await readArt("manifest.json"))));
+  const manifest =
+    inputs.manifest ?? parseManifest(JSON.parse(decoder.decode(await readArt("manifest.json"))));
   const warnings: string[] = [];
   const images = new Map<string, RgbaImage>();
   const readPng = async (path: string): Promise<RgbaImage> => {
-    const image = decodePng(await readArt(path));
+    const image = inputs.decoded?.get(path) ?? decodePng(await readArt(path));
     images.set(path, image);
     return image;
   };

@@ -13,7 +13,8 @@ import {
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { cardNumberForKey } from "../input/keyBindings";
-import { cardRowRects, type CardRowSpec } from "../layout/cardRow";
+import { CARD_LAYOUT, cardRowSpec, largeCardRect } from "../layout/cardLayout";
+import { cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -36,18 +37,13 @@ export interface CardSceneData {
   view: CardView;
 }
 
-const CARD = { height: 140, width: 83 };
-const CARD_ROW: CardRowSpec = {
-  cardHeight: CARD.height,
-  cardWidth: CARD.width,
-  gap: 8,
-  maxCount: MAX_CARD_OPTIONS,
-};
+const CARD = CARD_LAYOUT;
+const CARD_ROW = cardRowSpec(MAX_CARD_OPTIONS);
 // Card-pixel positions of the frame's parts.
-const BAND = { height: 11, y: 2 };
-const ART: Rect = { height: 56, width: 75, x: 5, y: 16 };
-const EFFECT: Rect = { height: 42, width: 71, x: 6, y: 76 };
-const BADGE: Rect = { height: 13, width: 71, x: 6, y: 121 };
+const BAND = CARD_LAYOUT.band;
+const ART: Rect = CARD_LAYOUT.art;
+const EFFECT: Rect = CARD_LAYOUT.effect;
+const BADGE: Rect = CARD_LAYOUT.badge;
 const DIM_ALPHA = 0.6;
 const SELECTED_OUTLINE = 2;
 const COST_KEY = "card-cost";
@@ -55,15 +51,7 @@ const COST_KEY = "card-cost";
 const REFUSE = { flashMs: 80, flashes: 4, shake: 3, shakeMs: 40 };
 // Holding a card this long enlarges it, with the changes behind its numbers.
 const HOLD_MS = 400;
-const LARGE = {
-  art: { x: 10, y: 32 },
-  badge: { height: 26, width: 142, x: 12, y: 242 },
-  band: { height: 18, y: 4 },
-  body: { height: 82, width: 142, x: 12, y: 152 },
-  height: 280,
-  key: "card-frame-large",
-  width: 166,
-};
+const LARGE = { ...CARD_LAYOUT.large, key: "card-frame-large" };
 
 interface Entry {
   choice: Choice;
@@ -253,8 +241,7 @@ export class CardScene extends Scene {
     this.pressed = undefined;
     this.drawOutline();
     const { roadView: road } = screenLayout(SCREEN_CONFIG);
-    const x = road.x + Math.floor((road.width - LARGE.width) / 2);
-    const y = road.y + Math.floor((road.height - LARGE.height) / 2);
+    const { x, y } = largeCardRect(road);
     const before = this.children.list.length;
     const tag = cardFrameTag(gameData, view.source);
     const g = this.add.graphics();

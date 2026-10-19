@@ -1,5 +1,9 @@
 import type { Rect } from "../layout/rect";
 
+// The menu's buttons, top to bottom.
+export const PAUSE_MENU_LABELS = ["Resume", "Help", "Settings", "Head home"] as const;
+export type PauseMenuLabel = (typeof PAUSE_MENU_LABELS)[number];
+
 const PANEL_WIDTH = 232;
 // Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;

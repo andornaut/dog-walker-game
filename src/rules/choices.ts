@@ -255,7 +255,7 @@ export const FORK_TITLE = "Which way?";
 
 // A fork's card: one free path card per path, left to right, each naming its zone, with the
 // zone's difficulty and fee multiplier.
-function forkCard(
+export function forkCard(
   data: ChoiceData,
   source: Extract<CardSource, { readonly kind: "fork" }>,
 ): CardView {

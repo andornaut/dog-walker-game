@@ -2,6 +2,9 @@ node_modules/
 dist/
 .wrangler/
 
+# npm run art:depth-preview writes its PNGs here.
+out/
+
 # Agent worktrees: full copies of the repository, local only.
 .claude/
 

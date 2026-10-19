@@ -1,0 +1,1864 @@
+{
+  "camera": {
+    "horizonY": -164,
+    "ratio": 0.9968253968253968,
+    "centerX": 180,
+    "farY": 150,
+    "focal": 630,
+    "footY": 464,
+    "secondsInView": 5.25,
+    "visibleDistance": 630
+  },
+  "depthSteps": [
+    {
+      "scale": 1,
+      "suffix": ""
+    },
+    {
+      "scale": 0.875,
+      "suffix": "@88"
+    },
+    {
+      "scale": 0.75,
+      "suffix": "@75"
+    },
+    {
+      "scale": 0.625,
+      "suffix": "@62"
+    },
+    {
+      "scale": 0.5,
+      "suffix": "@50"
+    }
+  ],
+  "doghouse": {
+    "parts": {
+      "dogFace": {
+        "x": 6,
+        "y": 24
+      },
+      "fired": {
+        "x": 60,
+        "y": 74
+      },
+      "heartCount": {
+        "x": 98,
+        "y": 46
+      },
+      "hearts": {
+        "perRow": 5,
+        "pitchX": 8,
+        "pitchY": 8,
+        "x": 78,
+        "y": 26
+      },
+      "name": {
+        "scales": [
+          2,
+          1
+        ],
+        "width": 108,
+        "x": 60,
+        "y": 6
+      },
+      "ownerFace": {
+        "x": 42,
+        "y": 24
+      },
+      "ownerName": {
+        "scales": [
+          1
+        ],
+        "width": 70,
+        "x": 6,
+        "y": 62
+      },
+      "roof": {
+        "height": 20
+      },
+      "size": {
+        "height": 90,
+        "width": 120
+      },
+      "statuses": [
+        {
+          "x": 78,
+          "y": 62
+        },
+        {
+          "x": 98,
+          "y": 62
+        }
+      ]
+    },
+    "slots": [
+      {
+        "height": 90,
+        "width": 120,
+        "x": 0,
+        "y": 470
+      },
+      {
+        "height": 90,
+        "width": 120,
+        "x": 120,
+        "y": 470
+      },
+      {
+        "height": 90,
+        "width": 120,
+        "x": 240,
+        "y": 470
+      }
+    ]
+  },
+  "gags": {
+    "keys": {
+      "ball": "gag-ball",
+      "cat": "gag-cat",
+      "sprinkler": "gag-sprinkler"
+    },
+    "sizes": {
+      "ball": {
+        "height": 14,
+        "width": 14
+      },
+      "cat": {
+        "height": 24,
+        "width": 24
+      },
+      "sprinkler": {
+        "height": 24,
+        "width": 32
+      }
+    },
+    "y": {
+      "cat": 71,
+      "sprinkler": 86
+    },
+    "zones": {
+      "homeStretch": {
+        "perches": [
+          {
+            "x0": 0,
+            "x1": 82
+          }
+        ],
+        "sprinklers": [
+          338
+        ]
+      },
+      "park": {
+        "perches": [
+          {
+            "x0": 0,
+            "x1": 82
+          }
+        ],
+        "sprinklers": [
+          338
+        ]
+      },
+      "pawsPromenade": {
+        "perches": [
+          {
+            "x0": 0,
+            "x1": 82
+          }
+        ],
+        "sprinklers": [
+          338
+        ]
+      },
+      "shops": {
+        "perches": [
+          {
+            "x0": 0,
+            "x1": 82
+          }
+        ],
+        "sprinklers": []
+      },
+      "snoozeCrescent": {
+        "perches": [
+          {
+            "x0": 0,
+            "x1": 82
+          }
+        ],
+        "sprinklers": [
+          338
+        ]
+      },
+      "street": {
+        "perches": [
+          {
+            "x0": 0,
+            "x1": 82
+          }
+        ],
+        "sprinklers": [
+          338
+        ]
+      }
+    }
+  },
+  "join": [
+    {
+      "bandRow": 86,
+      "distance": 731.9277108433735,
+      "laneCenters": [
+        128,
+        154,
+        180,
+        205,
+        231
+      ],
+      "laneDividers": [
+        141,
+        167,
+        192,
+        218
+      ],
+      "road": {
+        "first": 115,
+        "last": 244
+      },
+      "row": 126,
+      "scale": 0.4625796178343949
+    },
+    {
+      "bandRow": 87,
+      "distance": 727.2555746140652,
+      "laneCenters": [
+        128,
+        154,
+        180,
+        205,
+        231
+      ],
+      "laneDividers": [
+        141,
+        167,
+        192,
+        218
+      ],
+      "road": {
+        "first": 115,
+        "last": 244
+      },
+      "row": 127,
+      "scale": 0.464171974522293
+    },
+    {
+      "bandRow": 88,
+      "distance": 722.6153846153848,
+      "laneCenters": [
+        127,
+        153,
+        180,
+        206,
+        232
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 115,
+        "last": 244
+      },
+      "row": 128,
+      "scale": 0.46576433121019106
+    },
+    {
+      "bandRow": 89,
+      "distance": 718.0068143100511,
+      "laneCenters": [
+        127,
+        153,
+        180,
+        206,
+        232
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 115,
+        "last": 244
+      },
+      "row": 129,
+      "scale": 0.46735668789808915
+    },
+    {
+      "bandRow": 90,
+      "distance": 713.4295415959255,
+      "laneCenters": [
+        127,
+        153,
+        180,
+        206,
+        232
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 114,
+        "last": 245
+      },
+      "row": 130,
+      "scale": 0.46894904458598724
+    },
+    {
+      "bandRow": 91,
+      "distance": 708.8832487309646,
+      "laneCenters": [
+        127,
+        153,
+        180,
+        206,
+        232
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 114,
+        "last": 245
+      },
+      "row": 131,
+      "scale": 0.47054140127388533
+    },
+    {
+      "bandRow": 92,
+      "distance": 704.3676222596964,
+      "laneCenters": [
+        127,
+        153,
+        180,
+        206,
+        232
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 114,
+        "last": 245
+      },
+      "row": 132,
+      "scale": 0.4721337579617834
+    },
+    {
+      "bandRow": 93,
+      "distance": 699.8823529411766,
+      "laneCenters": [
+        126,
+        153,
+        180,
+        206,
+        233
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 114,
+        "last": 245
+      },
+      "row": 133,
+      "scale": 0.4737261146496815
+    },
+    {
+      "bandRow": 94,
+      "distance": 695.427135678392,
+      "laneCenters": [
+        126,
+        153,
+        180,
+        206,
+        233
+      ],
+      "laneDividers": [
+        140,
+        166,
+        193,
+        219
+      ],
+      "road": {
+        "first": 113,
+        "last": 246
+      },
+      "row": 134,
+      "scale": 0.4753184713375796
+    },
+    {
+      "bandRow": 95,
+      "distance": 691.0016694490819,
+      "laneCenters": [
+        126,
+        153,
+        180,
+        206,
+        233
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 113,
+        "last": 246
+      },
+      "row": 135,
+      "scale": 0.4769108280254777
+    },
+    {
+      "bandRow": 96,
+      "distance": 686.6056572379368,
+      "laneCenters": [
+        126,
+        153,
+        180,
+        206,
+        233
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 113,
+        "last": 246
+      },
+      "row": 136,
+      "scale": 0.4785031847133758
+    },
+    {
+      "bandRow": 97,
+      "distance": 682.2388059701493,
+      "laneCenters": [
+        126,
+        153,
+        180,
+        206,
+        233
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 113,
+        "last": 246
+      },
+      "row": 137,
+      "scale": 0.48009554140127386
+    },
+    {
+      "bandRow": 98,
+      "distance": 677.9008264462811,
+      "laneCenters": [
+        126,
+        153,
+        180,
+        206,
+        233
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 113,
+        "last": 246
+      },
+      "row": 138,
+      "scale": 0.48168789808917195
+    },
+    {
+      "bandRow": 99,
+      "distance": 673.5914332784184,
+      "laneCenters": [
+        125,
+        152,
+        180,
+        207,
+        234
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 112,
+        "last": 247
+      },
+      "row": 139,
+      "scale": 0.48328025477707004
+    },
+    {
+      "bandRow": 100,
+      "distance": 669.3103448275863,
+      "laneCenters": [
+        125,
+        152,
+        180,
+        207,
+        234
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 112,
+        "last": 247
+      },
+      "row": 140,
+      "scale": 0.48487261146496813
+    },
+    {
+      "bandRow": 101,
+      "distance": 665.0572831423897,
+      "laneCenters": [
+        125,
+        152,
+        180,
+        207,
+        234
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 112,
+        "last": 247
+      },
+      "row": 141,
+      "scale": 0.4864649681528662
+    },
+    {
+      "bandRow": 102,
+      "distance": 660.8319738988582,
+      "laneCenters": [
+        125,
+        152,
+        180,
+        207,
+        234
+      ],
+      "laneDividers": [
+        139,
+        166,
+        193,
+        220
+      ],
+      "road": {
+        "first": 112,
+        "last": 247
+      },
+      "row": 142,
+      "scale": 0.4880573248407643
+    },
+    {
+      "bandRow": 103,
+      "distance": 656.6341463414635,
+      "laneCenters": [
+        125,
+        152,
+        180,
+        207,
+        234
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 111,
+        "last": 248
+      },
+      "row": 143,
+      "scale": 0.4896496815286624
+    },
+    {
+      "bandRow": 104,
+      "distance": 652.4635332252838,
+      "laneCenters": [
+        124,
+        152,
+        180,
+        207,
+        235
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 111,
+        "last": 248
+      },
+      "row": 144,
+      "scale": 0.4912420382165605
+    },
+    {
+      "bandRow": 105,
+      "distance": 648.3198707592892,
+      "laneCenters": [
+        124,
+        152,
+        180,
+        207,
+        235
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 111,
+        "last": 248
+      },
+      "row": 145,
+      "scale": 0.4928343949044586
+    },
+    {
+      "bandRow": 106,
+      "distance": 644.2028985507247,
+      "laneCenters": [
+        124,
+        152,
+        180,
+        207,
+        235
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 111,
+        "last": 248
+      },
+      "row": 146,
+      "scale": 0.49442675159235666
+    },
+    {
+      "bandRow": 107,
+      "distance": 640.1123595505619,
+      "laneCenters": [
+        124,
+        152,
+        180,
+        207,
+        235
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 111,
+        "last": 248
+      },
+      "row": 147,
+      "scale": 0.49601910828025475
+    },
+    {
+      "bandRow": 108,
+      "distance": 636.048,
+      "laneCenters": [
+        124,
+        152,
+        180,
+        207,
+        235
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 110,
+        "last": 249
+      },
+      "row": 148,
+      "scale": 0.49761146496815284
+    },
+    {
+      "bandRow": 109,
+      "distance": 632.0095693779906,
+      "laneCenters": [
+        124,
+        152,
+        180,
+        207,
+        235
+      ],
+      "laneDividers": [
+        138,
+        166,
+        193,
+        221
+      ],
+      "road": {
+        "first": 110,
+        "last": 249
+      },
+      "row": 149,
+      "scale": 0.49920382165605093
+    }
+  ],
+  "lanes": {
+    "centers": [
+      68,
+      124,
+      180,
+      236,
+      292
+    ],
+    "count": 5,
+    "dividers": [
+      96,
+      152,
+      208,
+      264
+    ],
+    "width": 56
+  },
+  "pack": {
+    "collarHeight": 14,
+    "formations": [
+      [
+        {
+          "dx": 0,
+          "footDy": -44
+        }
+      ],
+      [
+        {
+          "dx": -12,
+          "footDy": -48
+        },
+        {
+          "dx": 12,
+          "footDy": -44
+        }
+      ],
+      [
+        {
+          "dx": 0,
+          "footDy": -58
+        },
+        {
+          "dx": -14,
+          "footDy": -42
+        },
+        {
+          "dx": 14,
+          "footDy": -40
+        }
+      ]
+    ],
+    "walkerFootY": 464,
+    "walkerHands": {
+      "heightAboveFeet": 13,
+      "leftDx": -11,
+      "rightDx": 10
+    }
+  },
+  "regions": {
+    "approach": {
+      "height": 24,
+      "width": 360,
+      "x": 0,
+      "y": 126
+    },
+    "backdrop": {
+      "height": 110,
+      "width": 360,
+      "x": 0,
+      "y": 40
+    },
+    "dogRow": {
+      "height": 90,
+      "width": 360,
+      "x": 0,
+      "y": 470
+    },
+    "dogSlots": [
+      {
+        "height": 90,
+        "width": 120,
+        "x": 0,
+        "y": 470
+      },
+      {
+        "height": 90,
+        "width": 120,
+        "x": 120,
+        "y": 470
+      },
+      {
+        "height": 90,
+        "width": 120,
+        "x": 240,
+        "y": 470
+      }
+    ],
+    "rasterView": {
+      "height": 344,
+      "width": 360,
+      "x": 0,
+      "y": 126
+    },
+    "road": {
+      "height": 320,
+      "width": 280,
+      "x": 40,
+      "y": 150
+    },
+    "roadView": {
+      "height": 320,
+      "width": 360,
+      "x": 0,
+      "y": 150
+    },
+    "topBar": {
+      "height": 40,
+      "width": 360,
+      "x": 0,
+      "y": 0
+    }
+  },
+  "scenes": {
+    "cards": {
+      "art": {
+        "height": 56,
+        "width": 75,
+        "x": 5,
+        "y": 16
+      },
+      "badge": {
+        "height": 13,
+        "width": 71,
+        "x": 6,
+        "y": 121
+      },
+      "band": {
+        "height": 11,
+        "y": 2
+      },
+      "effect": {
+        "height": 42,
+        "width": 71,
+        "x": 6,
+        "y": 76
+      },
+      "height": 140,
+      "large": {
+        "art": {
+          "x": 10,
+          "y": 32
+        },
+        "badge": {
+          "height": 26,
+          "width": 142,
+          "x": 12,
+          "y": 242
+        },
+        "band": {
+          "height": 18,
+          "y": 4
+        },
+        "body": {
+          "height": 82,
+          "width": 142,
+          "x": 12,
+          "y": 152
+        },
+        "height": 280,
+        "width": 166
+      },
+      "row": {
+        "gap": 8
+      },
+      "width": 83,
+      "largeRect": {
+        "height": 280,
+        "width": 166,
+        "x": 97,
+        "y": 170
+      },
+      "rows": [
+        [
+          {
+            "height": 140,
+            "width": 83,
+            "x": 138,
+            "y": 240
+          }
+        ],
+        [
+          {
+            "height": 140,
+            "width": 83,
+            "x": 93,
+            "y": 240
+          },
+          {
+            "height": 140,
+            "width": 83,
+            "x": 184,
+            "y": 240
+          }
+        ],
+        [
+          {
+            "height": 140,
+            "width": 83,
+            "x": 47,
+            "y": 240
+          },
+          {
+            "height": 140,
+            "width": 83,
+            "x": 138,
+            "y": 240
+          },
+          {
+            "height": 140,
+            "width": 83,
+            "x": 229,
+            "y": 240
+          }
+        ]
+      ]
+    },
+    "end": {
+      "badges": {
+        "height": 92,
+        "width": 344,
+        "x": 8,
+        "y": 416
+      },
+      "breakdown": {
+        "amountRight": 196,
+        "label": 40,
+        "pitch": 16,
+        "top": 154
+      },
+      "button": {
+        "height": 44,
+        "width": 264,
+        "x": 48,
+        "y": 512
+      },
+      "logo": {
+        "x": 116,
+        "y": 40
+      },
+      "panel": {
+        "height": 300,
+        "width": 312,
+        "x": 24,
+        "y": 112
+      },
+      "quips": {
+        "bubble": {
+          "height": 38,
+          "width": 244,
+          "x": 80
+        },
+        "face": {
+          "x": 37,
+          "y": 1
+        },
+        "pitch": 40,
+        "tail": {
+          "x": 75,
+          "y": 15
+        },
+        "textX": 86,
+        "top": 286,
+        "well": {
+          "size": 34,
+          "x": 36,
+          "y": 0
+        }
+      },
+      "returnHome": {
+        "dogs": [
+          {
+            "x": 166,
+            "y": 106
+          },
+          {
+            "x": 194,
+            "y": 105
+          },
+          {
+            "x": 152,
+            "y": 108
+          }
+        ],
+        "lawn": {
+          "height": 16,
+          "width": 360,
+          "x": 0,
+          "y": 96
+        },
+        "owners": [
+          {
+            "x": 144,
+            "y": 110
+          },
+          {
+            "x": 216,
+            "y": 110
+          },
+          {
+            "x": 116,
+            "y": 110
+          }
+        ],
+        "path": {
+          "height": 12,
+          "width": 24,
+          "x": 168,
+          "y": 100
+        },
+        "step": {
+          "height": 4,
+          "width": 32,
+          "x": 164,
+          "y": 96
+        },
+        "walker": {
+          "x": 180,
+          "y": 110
+        }
+      },
+      "ribbon": {
+        "x": 144,
+        "y": 102
+      },
+      "ribbonBurst": {
+        "height": 48,
+        "width": 96,
+        "x": 132,
+        "y": 88
+      },
+      "side": {
+        "bankY": 194,
+        "iconY": 212,
+        "pipPitch": 21,
+        "pipsY": 172,
+        "right": 320,
+        "x": 212
+      },
+      "titleY": 130
+    },
+    "help": {
+      "back": {
+        "height": 40,
+        "width": 110,
+        "x": 8,
+        "y": 504
+      },
+      "body": {
+        "lineHeight": 15,
+        "width": 336,
+        "x": 12,
+        "y": 334
+      },
+      "buttonLip": 4,
+      "close": {
+        "height": 24,
+        "width": 34,
+        "x": 318,
+        "y": 8
+      },
+      "counter": {
+        "x": 12,
+        "y": 296
+      },
+      "dots": {
+        "centerX": 180,
+        "size": 8,
+        "spacing": 44,
+        "y": 476,
+        "rects": [
+          {
+            "height": 8,
+            "width": 8,
+            "x": 66,
+            "y": 476
+          },
+          {
+            "height": 8,
+            "width": 8,
+            "x": 110,
+            "y": 476
+          },
+          {
+            "height": 8,
+            "width": 8,
+            "x": 154,
+            "y": 476
+          },
+          {
+            "height": 8,
+            "width": 8,
+            "x": 198,
+            "y": 476
+          },
+          {
+            "height": 8,
+            "width": 8,
+            "x": 242,
+            "y": 476
+          },
+          {
+            "height": 8,
+            "width": 8,
+            "x": 286,
+            "y": 476
+          }
+        ]
+      },
+      "heading": {
+        "x": 12,
+        "y": 15
+      },
+      "illustration": {
+        "height": 236,
+        "width": 344,
+        "x": 8,
+        "y": 48
+      },
+      "next": {
+        "height": 40,
+        "width": 110,
+        "x": 242,
+        "y": 504
+      },
+      "screen": {
+        "height": 560,
+        "width": 360,
+        "x": 0,
+        "y": 0
+      },
+      "title": {
+        "x": 12,
+        "y": 310
+      },
+      "topBar": {
+        "height": 40,
+        "width": 360,
+        "x": 0,
+        "y": 0
+      },
+      "topBarEdge": 2
+    },
+    "home": {
+      "bandText": {
+        "inset": 9,
+        "y": 8
+      },
+      "card": {
+        "band": {
+          "height": 22,
+          "inset": 6,
+          "titleY": 6
+        },
+        "pad": 12,
+        "well": {
+          "picture": 2,
+          "size": 68,
+          "x": 12,
+          "y": 34
+        },
+        "width": 300
+      },
+      "dogCard": {
+        "height": 328,
+        "width": 300,
+        "x": 30,
+        "y": 140
+      },
+      "dogOrigin": {
+        "x": 4,
+        "y": 294
+      },
+      "dogTileInset": 1,
+      "dogTiles": {
+        "cellHeight": 44,
+        "cellWidth": 112,
+        "columns": 3,
+        "gapX": 8,
+        "gapY": 0
+      },
+      "gap": 8,
+      "gate": {
+        "height": 156,
+        "y": 40
+      },
+      "gateSpots": [
+        {
+          "dx": 0,
+          "footDy": -46
+        },
+        {
+          "dx": -26,
+          "footDy": -14
+        },
+        {
+          "dx": 26,
+          "footDy": -12
+        }
+      ],
+      "gearBadge": {
+        "height": 18,
+        "width": 18,
+        "x": 194,
+        "y": 166
+      },
+      "gearCardHeight": 150,
+      "gearOrigin": {
+        "x": 4,
+        "y": 456
+      },
+      "gearSlots": {
+        "cellHeight": 44,
+        "cellWidth": 64,
+        "columns": 5,
+        "gapX": 8,
+        "gapY": 0
+      },
+      "help": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 0,
+          "y": 40
+        },
+        "icon": {
+          "x": 8,
+          "y": 46
+        }
+      },
+      "logbook": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 204,
+          "y": 0
+        },
+        "icon": {
+          "x": 216,
+          "y": 10
+        }
+      },
+      "logo": {
+        "x": 6,
+        "y": 146
+      },
+      "mute": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 316,
+          "y": 40
+        },
+        "icon": {
+          "x": 332,
+          "y": 46
+        }
+      },
+      "path": {
+        "width": 32,
+        "x": 164
+      },
+      "porchDogOffset": {
+        "dx": -12,
+        "footDy": 3
+      },
+      "porchSpots": {
+        "biscuit": {
+          "footY": 145,
+          "x": 120
+        },
+        "duchess": {
+          "footY": 148,
+          "x": 150
+        },
+        "koda": {
+          "footY": 145,
+          "x": 92
+        }
+      },
+      "sectionFrame": {
+        "band": 20,
+        "edge": 3
+      },
+      "sections": {
+        "dogs": {
+          "height": 160,
+          "width": 360,
+          "x": 0,
+          "y": 270
+        },
+        "gear": {
+          "height": 73,
+          "width": 360,
+          "x": 0,
+          "y": 430
+        },
+        "walker": {
+          "height": 72,
+          "width": 360,
+          "x": 0,
+          "y": 198
+        }
+      },
+      "settings": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 256,
+          "y": 0
+        },
+        "icon": {
+          "x": 268,
+          "y": 10
+        }
+      },
+      "slotSign": {
+        "height": 46,
+        "width": 160,
+        "x": 196,
+        "y": 140
+      },
+      "startButton": {
+        "height": 44,
+        "width": 352,
+        "x": 4,
+        "y": 514
+      },
+      "startLabel": {
+        "notReadyY": 15,
+        "readyY": 12,
+        "scale": 3
+      },
+      "statsButton": {
+        "height": 44,
+        "width": 140
+      },
+      "tileSelectOutset": 1,
+      "topBar": {
+        "height": 40
+      },
+      "walkerAtGate": {
+        "footY": 196,
+        "x": 180
+      },
+      "walkerOrigin": {
+        "x": 80,
+        "y": 223
+      },
+      "walkerTiles": {
+        "cellHeight": 44,
+        "cellWidth": 44,
+        "columns": 4,
+        "gapX": 8,
+        "gapY": 0
+      },
+      "dogRects": [
+        {
+          "height": 44,
+          "width": 112,
+          "x": 4,
+          "y": 294
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 124,
+          "y": 294
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 244,
+          "y": 294
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 4,
+          "y": 338
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 124,
+          "y": 338
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 244,
+          "y": 338
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 4,
+          "y": 382
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 124,
+          "y": 382
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 244,
+          "y": 382
+        }
+      ],
+      "gearRects": [
+        {
+          "height": 44,
+          "width": 64,
+          "x": 4,
+          "y": 456
+        },
+        {
+          "height": 44,
+          "width": 64,
+          "x": 76,
+          "y": 456
+        },
+        {
+          "height": 44,
+          "width": 64,
+          "x": 148,
+          "y": 456
+        },
+        {
+          "height": 44,
+          "width": 64,
+          "x": 220,
+          "y": 456
+        },
+        {
+          "height": 44,
+          "width": 64,
+          "x": 292,
+          "y": 456
+        }
+      ],
+      "walkerRects": [
+        {
+          "height": 44,
+          "width": 44,
+          "x": 80,
+          "y": 223
+        },
+        {
+          "height": 44,
+          "width": 44,
+          "x": 132,
+          "y": 223
+        },
+        {
+          "height": 44,
+          "width": 44,
+          "x": 184,
+          "y": 223
+        },
+        {
+          "height": 44,
+          "width": 44,
+          "x": 236,
+          "y": 223
+        }
+      ]
+    },
+    "loading": {
+      "art": {
+        "screen": "screen-loading",
+        "track": "ui-loading-track",
+        "walker": "ui-loading"
+      },
+      "track": {
+        "height": 8,
+        "width": 200,
+        "x": 80,
+        "y": 357
+      },
+      "walker": {
+        "travel": 148,
+        "x": 76,
+        "y": 332
+      }
+    },
+    "pause": {
+      "labels": [
+        "Resume",
+        "Help",
+        "Settings",
+        "Head home"
+      ],
+      "buttons": [
+        {
+          "height": 40,
+          "width": 200,
+          "x": 80,
+          "y": 220
+        },
+        {
+          "height": 40,
+          "width": 200,
+          "x": 80,
+          "y": 268
+        },
+        {
+          "height": 40,
+          "width": 200,
+          "x": 80,
+          "y": 316
+        },
+        {
+          "height": 40,
+          "width": 200,
+          "x": 80,
+          "y": 364
+        }
+      ],
+      "hits": [
+        {
+          "height": 44,
+          "width": 200,
+          "x": 80,
+          "y": 218
+        },
+        {
+          "height": 44,
+          "width": 200,
+          "x": 80,
+          "y": 266
+        },
+        {
+          "height": 44,
+          "width": 200,
+          "x": 80,
+          "y": 314
+        },
+        {
+          "height": 44,
+          "width": 200,
+          "x": 80,
+          "y": 362
+        }
+      ],
+      "notePlate": {
+        "height": 18,
+        "width": 200,
+        "x": 80,
+        "y": 408
+      },
+      "panel": {
+        "height": 260,
+        "width": 232,
+        "x": 64,
+        "y": 180
+      },
+      "titleY": 196
+    },
+    "settings": {
+      "back": {
+        "height": 40,
+        "width": 200,
+        "x": 80,
+        "y": 364
+      },
+      "panel": {
+        "height": 276,
+        "width": 248,
+        "x": 56,
+        "y": 142
+      },
+      "row": {
+        "height": 44,
+        "width": 232,
+        "x": 64,
+        "y": 180
+      },
+      "title": {
+        "x": 180,
+        "y": 158
+      },
+      "track": {
+        "dy": 24,
+        "height": 10,
+        "knobWidth": 10,
+        "width": 216,
+        "x": 72
+      }
+    },
+    "stats": {
+      "close": {
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 316,
+          "y": 0
+        },
+        "x": 332,
+        "y": 10
+      },
+      "detail": {
+        "height": 268,
+        "width": 312,
+        "x": 24,
+        "y": 140
+      },
+      "dogColumns": {
+        "fired": 344,
+        "walks": 236,
+        "zones": 290
+      },
+      "dogRow": {
+        "iconX": 14,
+        "nameX": 54,
+        "pitch": 34,
+        "top": 140
+      },
+      "panel": {
+        "height": 444,
+        "width": 344,
+        "x": 8,
+        "y": 108
+      },
+      "rows": {
+        "left": 16,
+        "pitch": 17,
+        "right": 344
+      },
+      "tab": {
+        "height": 44,
+        "pitch": 120,
+        "width": 112,
+        "x": 4,
+        "y": 56
+      },
+      "wall": {
+        "columnGap": 8,
+        "columnWidth": 168,
+        "rowHeight": 52,
+        "rows": 8,
+        "x": 8,
+        "y": 132
+      },
+      "wallText": {
+        "lineHeight": 16,
+        "lines": 3,
+        "width": 132,
+        "x": 36,
+        "y": 4
+      },
+      "tabRects": [
+        {
+          "height": 44,
+          "width": 112,
+          "x": 4,
+          "y": 56
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 124,
+          "y": 56
+        },
+        {
+          "height": 44,
+          "width": 112,
+          "x": 244,
+          "y": 56
+        }
+      ]
+    }
+  },
+  "screen": {
+    "height": 560,
+    "width": 360
+  },
+  "topBar": {
+    "buttons": {
+      "home": {
+        "face": {
+          "x": 130,
+          "y": 10
+        },
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 118,
+          "y": 0
+        },
+        "icon": {
+          "x": 132,
+          "y": 11
+        }
+      },
+      "pause": {
+        "face": {
+          "x": 174,
+          "y": 10
+        },
+        "hit": {
+          "height": 44,
+          "width": 44,
+          "x": 162,
+          "y": 0
+        },
+        "icon": {
+          "x": 176,
+          "y": 11
+        }
+      }
+    },
+    "strip": {
+      "gap": 2,
+      "icon": 16,
+      "inset": {
+        "bottom": 5,
+        "left": 3,
+        "right": 4,
+        "top": 1
+      },
+      "minHit": 44,
+      "padding": 2,
+      "right": 356,
+      "y": 40
+    },
+    "wells": {
+      "money": {
+        "height": 26,
+        "width": 88,
+        "x": 4,
+        "y": 8
+      },
+      "treats": {
+        "height": 26,
+        "width": 32,
+        "x": 96,
+        "y": 8
+      },
+      "zone": {
+        "height": 29,
+        "nameRight": 352,
+        "width": 144,
+        "x": 212,
+        "y": 5
+      }
+    }
+  },
+  "verges": {
+    "homeStretch": {
+      "curbColor": 9149364,
+      "curbTo": 144,
+      "lawn": "mown",
+      "leaves": true,
+      "walkTo": 188
+    },
+    "park": {
+      "curbColor": 9149364,
+      "curbTo": 140,
+      "lawn": "rough",
+      "leaves": false,
+      "walkTo": 140
+    },
+    "pawsPromenade": {
+      "curbColor": 9149364,
+      "curbTo": 140,
+      "lawn": "rough",
+      "leaves": false,
+      "walkTo": 188
+    },
+    "shops": {
+      "curbColor": 9149364,
+      "curbTo": 144,
+      "lawn": "none",
+      "leaves": false,
+      "walkTo": null
+    },
+    "snoozeCrescent": {
+      "curbColor": 5925256,
+      "curbTo": 144,
+      "lawn": "mown",
+      "leaves": false,
+      "walkTo": 188
+    },
+    "street": {
+      "curbColor": 9149364,
+      "curbTo": 144,
+      "lawn": "mown",
+      "leaves": false,
+      "walkTo": 188
+    }
+  }
+}

@@ -133,11 +133,12 @@ export function depthVariantKey(key: string, step: number): string | null {
 }
 
 // Sprites drawn standing on the road or the backdrop, which need their feet line. Faces,
-// effects, badges, cards, icons and UI are placed by their frame instead.
+// effects, badges, cards, icons and UI are placed by their frame instead, except a mover's
+// cue, which stands on the road (GROUND_UI_KEYS, below its keys).
 const UNMEASURED_PREFIXES = ["badge-", "card-", "face-", "fx-", "icon-", "portrait-", "ui-"];
 
 export function standsOnGround(key: string): boolean {
-  return !UNMEASURED_PREFIXES.some((prefix) => key.startsWith(prefix));
+  return GROUND_UI_KEYS.has(key) || !UNMEASURED_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
 // The skunk stands on its spray cloud, which is its hit box.
@@ -199,3 +200,5 @@ export const WARNING_KEY = "ui-warning";
 export const WARNING_ARROW_KEY = "ui-warning-arrow";
 export const WARNING_TAG = "pulse";
 export const WARNING_DOWN_TAG = "down-pulse";
+
+const GROUND_UI_KEYS: ReadonlySet<string> = new Set([WARNING_KEY, WARNING_ARROW_KEY]);

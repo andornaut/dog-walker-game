@@ -8,6 +8,7 @@ import { FEEDBACK, settleDelay } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { logbookOf, wrapWords } from "../home/home";
 import { choiceFull } from "../home/selection";
+import { STATS_LAYOUT, STATS_TABS, type StatsTab, statsTabRects } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
@@ -34,37 +35,23 @@ export interface StatsSceneData {
   resume?: SceneKey;
 }
 
-type Tab = "badges" | "dogs" | "runs";
+type Tab = StatsTab;
 type Target = "close" | { badge: number } | { tab: number };
 
-const TABS: readonly { label: string; tab: Tab }[] = [
-  { label: "Runs", tab: "runs" },
-  { label: "Dogs", tab: "dogs" },
-  { label: "Badges", tab: "badges" },
-];
-// Tabs are 44 game pixels tall (48 CSS pixels on a phone) with 8 between them.
-const TAB_RECTS: readonly Rect[] = TABS.map((_, i) => ({
-  height: 44,
-  width: 112,
-  x: 4 + i * 120,
-  y: 56,
-}));
-// The menus mock's close button, with its 44x44 hit area in the corner.
-const CLOSE = { hit: { height: 44, width: 44, x: 316, y: 0 }, x: 332, y: 10 };
-const PANEL: Rect = { height: 444, width: 344, x: 8, y: 108 };
-const LEFT = 16;
-const RIGHT = 344;
-const PITCH = 17;
-const DOG_ROW = { iconX: 14, nameX: 54, pitch: 34, top: PANEL.y + 32 };
-const DOG_COLUMNS = { fired: 344, walks: 236, zones: 290 };
+const TABS = STATS_TABS;
+const TAB_RECTS: readonly Rect[] = statsTabRects();
+const CLOSE = STATS_LAYOUT.close;
+const PANEL: Rect = STATS_LAYOUT.panel;
+const LEFT = STATS_LAYOUT.rows.left;
+const RIGHT = STATS_LAYOUT.rows.right;
+const PITCH = STATS_LAYOUT.rows.pitch;
+const DOG_ROW = STATS_LAYOUT.dogRow;
+const DOG_COLUMNS = STATS_LAYOUT.dogColumns;
 const LOG_CHARS = 46;
-// The badge wall: two columns filled down, each row the badge then a 132-wide text column of
-// three lines at 2x (the name, then the goal).
-const WALL = { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: PANEL.y + 24 };
-const WALL_TEXT = { lineHeight: 16, lines: 3, width: 132, x: 36, y: 4 };
+const WALL = STATS_LAYOUT.wall;
+const WALL_TEXT = STATS_LAYOUT.wallText;
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
-// The badge tapped open, over the wall.
-const DETAIL: Rect = { height: 268, width: 312, x: 24, y: PANEL.y + 32 };
+const DETAIL: Rect = STATS_LAYOUT.detail;
 const DETAIL_TEXT_WIDTH = DETAIL.width - 32;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;

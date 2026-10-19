@@ -4,6 +4,7 @@ import { itemAt } from "../arrays";
 import { dogSpriteKey, ownerFaceKey, ZONE_PIPS_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { END_LAYOUT } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
 import { dollarText } from "../home/home";
 import {
@@ -39,60 +40,21 @@ const TITLES: Readonly<Record<EndReason, string>> = {
   noDogs: "Out of dogs",
   wentHome: "Headed home",
 };
-// The menus mock's end screen, with every text at 2x: the rows are taller than the mock's, so
-// the quips sit lower, the panel is taller and the badges earned go in a second panel under it.
 const END_SCREEN_KEY = "screen-end";
-const LOGO = { key: "logo", x: 116, y: 40 };
-const PANEL: Rect = { height: 300, width: 312, x: 24, y: 112 };
-const RIBBON = { dropMs: 360, key: "ui-new-best", riseFrom: 12, x: 144, y: 102 };
-// fx-new-best's 96x48 frame sits 12 left of and 14 above the ribbon; with reduced motion it
-// holds one still frame.
-const RIBBON_BURST = { height: 48, width: 96, x: RIBBON.x - 12, y: RIBBON.y - 14 };
-const TITLE_Y = PANEL.y + 18;
-const BREAKDOWN = { amountRight: 196, label: 40, pitch: 16, top: PANEL.y + 42 };
-const SIDE = {
-  bankY: PANEL.y + 82,
-  iconY: PANEL.y + 100,
-  pipPitch: 21,
-  pipsY: PANEL.y + 60,
-  right: 320,
-  x: 212,
-};
-const QUIPS = {
-  bubble: { height: 38, width: 244, x: 80 },
-  face: { x: 37, y: 1 },
-  pitch: 40,
-  tail: { x: 75, y: 15 },
-  textX: 86,
-  top: PANEL.y + 174,
-  well: { size: 34, x: 36, y: 0 },
-};
-// Room for each badge's name on one line under it.
-const BADGES: Rect = { height: 92, width: 344, x: 8, y: 416 };
+const LOGO = { ...END_LAYOUT.logo, key: "logo" };
+const PANEL: Rect = END_LAYOUT.panel;
+const RIBBON = { ...END_LAYOUT.ribbon, dropMs: 360, key: "ui-new-best", riseFrom: 12 };
+// With reduced motion the burst holds one still frame.
+const RIBBON_BURST = END_LAYOUT.ribbonBurst;
+const TITLE_Y = END_LAYOUT.titleY;
+const BREAKDOWN = END_LAYOUT.breakdown;
+const SIDE = END_LAYOUT.side;
+const QUIPS = END_LAYOUT.quips;
+const BADGES: Rect = END_LAYOUT.badges;
 const BADGE_SOUND_AFTER_BEST_MS = 1200;
-// The return home, between the logo and the panel: the walker and pack walk up the front path
-// from behind the panel's top edge to the house's step while the owners wave either side.
-// The house, lawn, path and step are part of screen-end; without it a tan path and step
-// cross a strip of lawn. Spots are where feet end up, in pack order; the pack starts
-// returnHome's risePx lower.
-const RETURN_HOME_SCENE = {
-  dogs: [
-    { x: 166, y: 106 },
-    { x: 194, y: 105 },
-    { x: 152, y: 108 },
-  ],
-  lawn: { height: 16, width: 360, x: 0, y: 96 },
-  owners: [
-    { x: 144, y: 110 },
-    { x: 216, y: 110 },
-    { x: 116, y: 110 },
-  ],
-  path: { height: 12, width: 24, x: 168, y: 100 },
-  step: { height: 4, width: 32, x: 164, y: 96 },
-  walker: { x: 180, y: 110 },
-} as const;
-// 44 game pixels tall: 48 CSS pixels on a 390px-wide phone.
-const BUTTON: Rect = { height: 44, width: 264, x: 48, y: 512 };
+// The pack starts returnHome's risePx lower than its spots.
+const RETURN_HOME_SCENE = END_LAYOUT.returnHome;
+const BUTTON: Rect = END_LAYOUT.button;
 
 function signed(amount: number): string {
   const sign = amount < 0 ? "-" : "+";

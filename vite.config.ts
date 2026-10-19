@@ -5,6 +5,7 @@ import { defineConfig } from "vitest/config";
 import { atlasPlugin } from "./src/atlas/atlasPlugin";
 import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
 import { precachePlugin } from "./src/pwa/precachePlugin";
+import { generatedFilesPlugin } from "./src/tools/generatedFilesPlugin";
 
 // An absolute path in this repository. Vite resolves relative paths against root, which is
 // pages/, so every path below goes through here instead.
@@ -30,11 +31,15 @@ export default defineConfig({
     // Set just above it so that growth in game code still warns.
     chunkSizeWarningLimit: 1600,
   },
-  // atlasPlugin packs the art's images and sprites into /art/atlas/ and /art/atlas-manifest.json.
+  // atlasPlugin writes public/art/manifest.json from the art files, then packs the art's images
+  // and sprites into /art/atlas/ and /art/atlas-manifest.json.
+  // generatedFilesPlugin, on the dev server only, rewrites public/art/manifest.json and
+  // shared/export/ as the art and src/ change. npm run build writes shared/export/ first.
   // precachePlugin writes /sw.js, the service worker that precaches the game for offline play.
   // securityHeadersPlugin writes /_headers, the response headers with each page's CSP.
   plugins: [
     atlasPlugin(),
+    generatedFilesPlugin(),
     precachePlugin({
       pageHtmlFile: "play/index.html",
       serviceWorkerSource: repoPath("src/pwa/serviceWorker.ts"),

@@ -11,7 +11,7 @@ export const LOADING_TRACK: Rect = { height: 8, width: 200, x: 80, y: 357 };
 
 // The walker's top-left at progress 0, and how far right it walks by 1: from the track's
 // first dot to the doghouse.
-const WALKER = { travel: 148, x: 76, y: 332 };
+export const LOADING_WALKER = { travel: 148, x: 76, y: 332 };
 
 // Boot loads every asset over the network, then processes them: each sprite's animations
 // and metrics, the placeholders and the fallback font. Each phase fills its share of the
@@ -55,7 +55,10 @@ export function stepFraction(total: number, done: number): number {
 }
 
 export function loadingWalkerAt(progress: number): Point {
-  return { x: WALKER.x + Math.round(WALKER.travel * clamp01(progress)), y: WALKER.y };
+  return {
+    x: LOADING_WALKER.x + Math.round(LOADING_WALKER.travel * clamp01(progress)),
+    y: LOADING_WALKER.y,
+  };
 }
 
 // The fallback bar's width along the track, drawn while the walker's art is missing.

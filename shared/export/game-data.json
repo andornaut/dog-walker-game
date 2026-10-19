@@ -1,0 +1,2833 @@
+{
+  "cards": [
+    {
+      "art": "card-lost-wallet-return",
+      "frame": "lucky",
+      "id": "return",
+      "index": 0,
+      "name": "Hand it in",
+      "source": {
+        "id": "lostWallet",
+        "kind": "encounter"
+      },
+      "text": "+1 ♥ each",
+      "title": "Lost wallet"
+    },
+    {
+      "art": "card-lost-wallet-keep",
+      "frame": "lucky",
+      "id": "keep",
+      "index": 1,
+      "name": "Finders keepers",
+      "source": {
+        "id": "lostWallet",
+        "kind": "encounter"
+      },
+      "text": "+$30, −1 ♥ each",
+      "title": "Lost wallet"
+    },
+    {
+      "art": "card-other-dog-sniff",
+      "frame": "encounter",
+      "id": "sniff",
+      "index": 0,
+      "name": "Let them sniff",
+      "source": {
+        "id": "otherDog",
+        "kind": "encounter"
+      },
+      "text": "+1 ♥ each, −$10 per dog, Playful needs met",
+      "title": "Other dog"
+    },
+    {
+      "art": "card-other-dog-pull-away",
+      "frame": "encounter",
+      "id": "pull-away",
+      "index": 1,
+      "name": "Pull away",
+      "source": {
+        "id": "otherDog",
+        "kind": "encounter"
+      },
+      "text": "−1 ♥ each",
+      "title": "Other dog"
+    },
+    {
+      "art": "card-puddle-through",
+      "frame": "encounter",
+      "id": "through",
+      "index": 0,
+      "name": "Splash through",
+      "source": {
+        "id": "puddle",
+        "kind": "encounter"
+      },
+      "text": "−1 ♥ each (−2 Fancy)",
+      "title": "Puddle"
+    },
+    {
+      "art": "card-puddle-towel",
+      "frame": "encounter",
+      "id": "towel",
+      "index": 1,
+      "name": "Towel off",
+      "source": {
+        "id": "puddle",
+        "kind": "encounter"
+      },
+      "text": "−$10 per dog",
+      "title": "Puddle"
+    },
+    {
+      "art": "card-skunk-grooming",
+      "frame": "encounter",
+      "id": "grooming",
+      "index": 0,
+      "name": "Full groom",
+      "source": {
+        "id": "skunk",
+        "kind": "encounter"
+      },
+      "text": "−$20 per dog",
+      "title": "Skunk"
+    },
+    {
+      "art": "card-skunk-rinse",
+      "frame": "encounter",
+      "id": "rinse",
+      "index": 1,
+      "name": "Quick rinse",
+      "source": {
+        "id": "skunk",
+        "kind": "encounter"
+      },
+      "text": "−$10 per dog, Stinky",
+      "title": "Skunk"
+    },
+    {
+      "art": "card-skunk-ignore",
+      "frame": "encounter",
+      "id": "ignore",
+      "index": 2,
+      "name": "Hold your nose",
+      "source": {
+        "id": "skunk",
+        "kind": "encounter"
+      },
+      "text": "−2 ♥ each",
+      "title": "Skunk"
+    },
+    {
+      "art": "card-squirrel-hold",
+      "frame": "encounter",
+      "id": "hold",
+      "index": 0,
+      "name": "Hold tight",
+      "source": {
+        "id": "squirrel",
+        "kind": "encounter"
+      },
+      "text": "−1 ♥ each",
+      "title": "Squirrel"
+    },
+    {
+      "art": "card-squirrel-chase",
+      "frame": "encounter",
+      "id": "chase",
+      "index": 1,
+      "name": "Let them chase",
+      "source": {
+        "id": "squirrel",
+        "kind": "encounter"
+      },
+      "text": "−$10",
+      "title": "Squirrel"
+    },
+    {
+      "art": "card-thief-chase",
+      "frame": "encounter",
+      "id": "chase",
+      "index": 0,
+      "name": "Chase them off",
+      "source": {
+        "id": "thief",
+        "kind": "encounter"
+      },
+      "text": "−1 ♥ each",
+      "title": "Thief"
+    },
+    {
+      "art": "card-thief-let-go",
+      "frame": "encounter",
+      "id": "let-go",
+      "index": 1,
+      "name": "Let it go",
+      "source": {
+        "id": "thief",
+        "kind": "encounter"
+      },
+      "text": "−$20",
+      "title": "Thief"
+    },
+    {
+      "art": "card-chatty-neighbour-chat",
+      "frame": "stop",
+      "id": "chat",
+      "index": 0,
+      "name": "Have a chat",
+      "source": {
+        "id": "chattyNeighbour",
+        "kind": "forcedStop"
+      },
+      "text": "+$25, −$10 per dog",
+      "title": "Chatty neighbour"
+    },
+    {
+      "art": "card-chatty-neighbour-move-on",
+      "frame": "stop",
+      "id": "move-on",
+      "index": 1,
+      "name": "Wave and go",
+      "source": {
+        "id": "chattyNeighbour",
+        "kind": "forcedStop"
+      },
+      "text": "Nothing",
+      "title": "Chatty neighbour"
+    },
+    {
+      "art": "card-construction-detour-long-way",
+      "frame": "stop",
+      "id": "long-way",
+      "index": 0,
+      "name": "Take the long way",
+      "source": {
+        "id": "constructionDetour",
+        "kind": "forcedStop"
+      },
+      "text": "−$10 per dog",
+      "title": "Construction detour"
+    },
+    {
+      "art": "card-construction-detour-squeeze",
+      "frame": "stop",
+      "id": "squeeze",
+      "index": 1,
+      "name": "Squeeze past",
+      "source": {
+        "id": "constructionDetour",
+        "kind": "forcedStop"
+      },
+      "text": "−1 ♥ to Fancy owners",
+      "title": "Construction detour"
+    },
+    {
+      "art": "card-ice-cream-truck-pup-cups",
+      "frame": "stop",
+      "id": "pup-cups",
+      "index": 0,
+      "name": "Pup cups!",
+      "source": {
+        "id": "iceCreamTruck",
+        "kind": "forcedStop"
+      },
+      "text": "−$10 per dog, +1 ♥ each",
+      "title": "Ice cream truck"
+    },
+    {
+      "art": "card-ice-cream-truck-walk-past",
+      "frame": "stop",
+      "id": "walk-past",
+      "index": 1,
+      "name": "Not today",
+      "source": {
+        "id": "iceCreamTruck",
+        "kind": "forcedStop"
+      },
+      "text": "−1 ♥ to Food-driven owners",
+      "title": "Ice cream truck"
+    },
+    {
+      "art": "card-kid-wants-to-pet-pet",
+      "frame": "stop",
+      "id": "pet",
+      "index": 0,
+      "name": "Of course!",
+      "source": {
+        "id": "kidWantsToPet",
+        "kind": "forcedStop"
+      },
+      "text": "+1 ♥ each, −$10 per dog, Friendly needs met",
+      "title": "Can I pet them?"
+    },
+    {
+      "art": "card-kid-wants-to-pet-decline",
+      "frame": "stop",
+      "id": "decline",
+      "index": 1,
+      "name": "Sorry, not now",
+      "source": {
+        "id": "kidWantsToPet",
+        "kind": "forcedStop"
+      },
+      "text": "−1 ♥ to one random owner",
+      "title": "Can I pet them?"
+    },
+    {
+      "art": "card-mail-carrier-hold",
+      "frame": "stop",
+      "id": "hold",
+      "index": 0,
+      "name": "Hold them back",
+      "source": {
+        "id": "mailCarrier",
+        "kind": "forcedStop"
+      },
+      "text": "−1 ♥ each",
+      "title": "Mail carrier"
+    },
+    {
+      "art": "card-mail-carrier-wait",
+      "frame": "stop",
+      "id": "wait",
+      "index": 1,
+      "name": "Wait it out",
+      "source": {
+        "id": "mailCarrier",
+        "kind": "forcedStop"
+      },
+      "text": "−$10 per dog",
+      "title": "Mail carrier"
+    },
+    {
+      "art": "card-stop-sign-wait",
+      "frame": "stop",
+      "id": "wait",
+      "index": 0,
+      "name": "Wait your turn",
+      "source": {
+        "id": "stopSign",
+        "kind": "forcedStop"
+      },
+      "text": "−$10 per dog",
+      "title": "Stop sign"
+    },
+    {
+      "art": "card-stop-sign-dart",
+      "frame": "stop",
+      "id": "dart",
+      "index": 1,
+      "name": "Dart across",
+      "source": {
+        "id": "stopSign",
+        "kind": "forcedStop"
+      },
+      "text": "−1 ♥ each",
+      "title": "Stop sign"
+    },
+    {
+      "art": "card-accident-bag",
+      "frame": "encounter",
+      "id": "bag",
+      "index": 0,
+      "name": "Clean up with a bag",
+      "source": {
+        "id": "accident",
+        "kind": "need"
+      },
+      "text": "−$5",
+      "title": "Accident!"
+    },
+    {
+      "art": "card-accident-walk-on",
+      "frame": "encounter",
+      "id": "walk-on",
+      "index": 1,
+      "name": "Walk on",
+      "source": {
+        "id": "accident",
+        "kind": "need"
+      },
+      "text": "−2 ♥ each",
+      "title": "Accident!"
+    },
+    {
+      "art": "card-good-spot-take-time",
+      "frame": "lucky",
+      "id": "take-time",
+      "index": 0,
+      "name": "Take your time",
+      "source": {
+        "id": "goodSpot",
+        "kind": "need"
+      },
+      "text": "+2 ♥ each, −$10 per dog",
+      "title": "The perfect spot"
+    },
+    {
+      "art": "card-good-spot-keep-walking",
+      "frame": "lucky",
+      "id": "keep-walking",
+      "index": 1,
+      "name": "Keep walking",
+      "source": {
+        "id": "goodSpot",
+        "kind": "need"
+      },
+      "text": "Nothing",
+      "title": "The perfect spot"
+    },
+    {
+      "art": "card-pee-mail-sniff",
+      "frame": "lucky",
+      "id": "sniff",
+      "index": 0,
+      "name": "Read it all",
+      "source": {
+        "id": "peeMail",
+        "kind": "need"
+      },
+      "text": "+2 ♥ each, −$10 per dog",
+      "title": "Pee-mail for {dog}"
+    },
+    {
+      "art": "card-pee-mail-keep-walking",
+      "frame": "lucky",
+      "id": "keep-walking",
+      "index": 1,
+      "name": "Keep walking",
+      "source": {
+        "id": "peeMail",
+        "kind": "need"
+      },
+      "text": "Nothing",
+      "title": "Pee-mail for {dog}"
+    },
+    {
+      "art": "card-play-date-play",
+      "frame": "lucky",
+      "id": "play",
+      "index": 0,
+      "name": "Let them play",
+      "source": {
+        "id": "playDate",
+        "kind": "need"
+      },
+      "text": "+1 ♥ each, −$10 per dog",
+      "title": "Play date!"
+    },
+    {
+      "art": "card-play-date-sniff",
+      "frame": "lucky",
+      "id": "sniff",
+      "index": 1,
+      "name": "Just a sniff",
+      "source": {
+        "id": "playDate",
+        "kind": "need"
+      },
+      "text": "+1 ♥ to Playful owners",
+      "title": "Play date!"
+    },
+    {
+      "art": "card-stranger-loves-fuss",
+      "frame": "lucky",
+      "id": "fuss",
+      "index": 0,
+      "name": "Let them fuss",
+      "source": {
+        "id": "strangerLoves",
+        "kind": "need"
+      },
+      "text": "+1 ♥ each, +$10",
+      "title": "A stranger loves {dog}"
+    },
+    {
+      "art": "card-stranger-loves-keep-walking",
+      "frame": "lucky",
+      "id": "keep-walking",
+      "index": 1,
+      "name": "Keep walking",
+      "source": {
+        "id": "strangerLoves",
+        "kind": "need"
+      },
+      "text": "Nothing",
+      "title": "A stranger loves {dog}"
+    },
+    {
+      "art": "card-water-stop-drink",
+      "frame": "lucky",
+      "id": "drink",
+      "index": 0,
+      "name": "A long drink",
+      "source": {
+        "id": "waterStop",
+        "kind": "need"
+      },
+      "text": "+2 ♥ each, −$10 per dog",
+      "title": "Water stop"
+    },
+    {
+      "art": "card-water-stop-sip",
+      "frame": "lucky",
+      "id": "sip",
+      "index": 1,
+      "name": "Just a sip",
+      "source": {
+        "id": "waterStop",
+        "kind": "need"
+      },
+      "text": "+1 ♥ each",
+      "title": "Water stop"
+    },
+    {
+      "art": "card-zone-snooze-crescent",
+      "frame": "route",
+      "id": "snoozeCrescent",
+      "index": null,
+      "name": "Snooze Crescent",
+      "source": {
+        "id": "snoozeCrescent",
+        "kind": "fork"
+      },
+      "text": "Easiest. Fees ×0.7.",
+      "title": "Which way?"
+    },
+    {
+      "art": "card-zone-bark-park",
+      "frame": "route",
+      "id": "park",
+      "index": null,
+      "name": "Bark Park",
+      "source": {
+        "id": "park",
+        "kind": "fork"
+      },
+      "text": "Easy. Fees ×0.8.",
+      "title": "Which way?"
+    },
+    {
+      "art": "card-zone-woof-way",
+      "frame": "route",
+      "id": "street",
+      "index": null,
+      "name": "Woof Way",
+      "source": {
+        "id": "street",
+        "kind": "fork"
+      },
+      "text": "Normal. Fees ×1.",
+      "title": "Which way?"
+    },
+    {
+      "art": "card-zone-sniff-street-shops",
+      "frame": "route",
+      "id": "shops",
+      "index": null,
+      "name": "Sniff Street Shops",
+      "source": {
+        "id": "shops",
+        "kind": "fork"
+      },
+      "text": "Busy. Fees ×1.25.",
+      "title": "Which way?"
+    },
+    {
+      "art": "card-zone-paws-promenade",
+      "frame": "route",
+      "id": "pawsPromenade",
+      "index": null,
+      "name": "Paws Promenade",
+      "source": {
+        "id": "pawsPromenade",
+        "kind": "fork"
+      },
+      "text": "Medium-hard. Fees ×1.25.",
+      "title": "Which way?"
+    },
+    {
+      "art": "card-zone-the-long-way-home",
+      "frame": "route",
+      "id": "homeStretch",
+      "index": null,
+      "name": "The Long Way Home",
+      "source": {
+        "id": "homeStretch",
+        "kind": "fork"
+      },
+      "text": "Hard. Fees ×1.5.",
+      "title": "Which way?"
+    },
+    {
+      "art": "card-belly-rubs",
+      "frame": "upgrade",
+      "id": "bellyRubs",
+      "index": null,
+      "name": "Belly rubs",
+      "source": {
+        "id": "bellyRubs",
+        "kind": "upgrade"
+      },
+      "text": "+1 ♥ each",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-big-tipper",
+      "frame": "upgrade",
+      "id": "bigTipper",
+      "index": null,
+      "name": "Big tipper",
+      "source": {
+        "id": "bigTipper",
+        "kind": "upgrade"
+      },
+      "text": "Tip value +50% for the run",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-good-leash",
+      "frame": "upgrade",
+      "id": "goodLeash",
+      "index": null,
+      "name": "Good leash",
+      "source": {
+        "id": "goodLeash",
+        "kind": "upgrade"
+      },
+      "text": "No Squirrel cards for the run, no chaser pulls toward squirrels for the run",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-raincoats",
+      "frame": "upgrade",
+      "id": "raincoats",
+      "index": null,
+      "name": "Raincoats",
+      "source": {
+        "id": "raincoats",
+        "kind": "upgrade"
+      },
+      "text": "No Puddle cards for the run",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-rush-hour",
+      "frame": "upgrade",
+      "id": "rushHour",
+      "index": null,
+      "name": "Rush hour",
+      "source": {
+        "id": "rushHour",
+        "kind": "upgrade"
+      },
+      "text": "Tips +100% next zone, obstacles +50% next zone",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-second-wind",
+      "frame": "upgrade",
+      "id": "secondWind",
+      "index": null,
+      "name": "Second wind",
+      "source": {
+        "id": "secondWind",
+        "kind": "upgrade"
+      },
+      "text": "+2 ♥ to the unhappiest owner",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-shortcut",
+      "frame": "upgrade",
+      "id": "shortcut",
+      "index": null,
+      "name": "Shortcut",
+      "source": {
+        "id": "shortcut",
+        "kind": "upgrade"
+      },
+      "text": "Zone length −25% next zone, fees −25% next zone",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-sweet-talker",
+      "frame": "upgrade",
+      "id": "sweetTalker",
+      "index": null,
+      "name": "Sweet talker",
+      "source": {
+        "id": "sweetTalker",
+        "kind": "upgrade"
+      },
+      "text": "Card costs per dog −$4 for the run",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-treat-magnet",
+      "frame": "upgrade",
+      "id": "treatMagnet",
+      "index": null,
+      "name": "Treat magnet",
+      "source": {
+        "id": "treatMagnet",
+        "kind": "upgrade"
+      },
+      "text": "Treat reach +1 lane for the run",
+      "title": "Pick an upgrade"
+    },
+    {
+      "art": "card-skip",
+      "frame": "encounter",
+      "id": "skip",
+      "index": null,
+      "name": "Skip",
+      "source": {
+        "id": null,
+        "kind": "skip"
+      },
+      "text": "Nothing",
+      "title": ""
+    }
+  ],
+  "debuffs": [
+    {
+      "id": "stinky",
+      "duration": "zone",
+      "modifiers": [
+        {
+          "by": "stinkyTip",
+          "operation": "multiply",
+          "stat": "tipValue"
+        }
+      ],
+      "name": "Stinky"
+    }
+  ],
+  "dogs": [
+    {
+      "id": "archie",
+      "art": "archie",
+      "breed": "Australian Shepherd",
+      "energy": "calm",
+      "look": "Red merle, one blue eye, red bandana",
+      "name": "Archie",
+      "need": "playful",
+      "owner": {
+        "name": "Ophelia",
+        "role": "stage actor",
+        "temperament": "dramatic"
+      },
+      "price": "lockedDog",
+      "size": "medium",
+      "trait": "chaser",
+      "unlock": "shop",
+      "figures": {
+        "feeCents": 2000,
+        "maxHearts": 8,
+        "startHearts": 4,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "archie",
+        "face": "face-dog-archie",
+        "ownerFace": "face-owner-archie",
+        "portrait": "portrait-dog-archie",
+        "sprite": "dog-archie"
+      }
+    },
+    {
+      "id": "biscuit",
+      "art": "biscuit",
+      "breed": "Beagle",
+      "energy": "hyper",
+      "look": "Tricolour, floppy ears, green collar",
+      "name": "Biscuit",
+      "need": "regular",
+      "owner": {
+        "name": "Sam",
+        "role": "barista",
+        "temperament": "laidBack"
+      },
+      "size": "medium",
+      "trait": "foodDriven",
+      "unlock": "start",
+      "figures": {
+        "feeCents": 2000,
+        "maxHearts": 8,
+        "startHearts": 4,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "biscuit",
+        "face": "face-dog-biscuit",
+        "ownerFace": "face-owner-biscuit",
+        "portrait": "portrait-dog-biscuit",
+        "sprite": "dog-biscuit"
+      }
+    },
+    {
+      "id": "duchess",
+      "art": "duchess",
+      "breed": "Maltese",
+      "energy": "calm",
+      "look": "White coat, pink bow",
+      "name": "Duchess",
+      "need": "friendly",
+      "owner": {
+        "name": "Rosa",
+        "role": "retired florist",
+        "temperament": "laidBack"
+      },
+      "size": "small",
+      "trait": "fancy",
+      "unlock": "start",
+      "figures": {
+        "feeCents": 2000,
+        "maxHearts": 6,
+        "startHearts": 4,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "duchess",
+        "face": "face-dog-duchess",
+        "ownerFace": "face-owner-duchess",
+        "portrait": "portrait-dog-duchess",
+        "sprite": "dog-duchess"
+      }
+    },
+    {
+      "id": "koda",
+      "art": "koda",
+      "breed": "Husky",
+      "energy": "steady",
+      "look": "Grey and white, blue eyes, harness",
+      "name": "Koda",
+      "need": "nosy",
+      "owner": {
+        "name": "Jesse",
+        "role": "trail runner",
+        "temperament": "laidBack"
+      },
+      "size": "big",
+      "trait": "chaser",
+      "unlock": "start",
+      "figures": {
+        "feeCents": 2000,
+        "maxHearts": 10,
+        "startHearts": 4,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "koda",
+        "face": "face-dog-koda",
+        "ownerFace": "face-owner-koda",
+        "portrait": "portrait-dog-koda",
+        "sprite": "dog-koda"
+      }
+    },
+    {
+      "id": "nugget",
+      "art": "nugget",
+      "breed": "Pug",
+      "energy": "steady",
+      "look": "Fawn, black mask, tiny bandana",
+      "name": "Nugget",
+      "need": "thirsty",
+      "owner": {
+        "name": "Kevin",
+        "role": "pet influencer",
+        "temperament": "dramatic"
+      },
+      "price": "lockedDog",
+      "size": "small",
+      "trait": "foodDriven",
+      "unlock": "shop",
+      "figures": {
+        "feeCents": 2000,
+        "maxHearts": 6,
+        "startHearts": 4,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "nugget",
+        "face": "face-dog-nugget",
+        "ownerFace": "face-owner-nugget",
+        "portrait": "portrait-dog-nugget",
+        "sprite": "dog-nugget"
+      }
+    },
+    {
+      "id": "penny",
+      "art": "penny",
+      "breed": "Golden retriever",
+      "energy": "calm",
+      "look": "Golden coat, feathery tail, blue collar",
+      "name": "Penny",
+      "need": "thirsty",
+      "owner": {
+        "name": "Dr. Hughes",
+        "role": "dentist",
+        "temperament": "fussy"
+      },
+      "price": "lockedDog",
+      "size": "big",
+      "trait": "foodDriven",
+      "unlock": "shop",
+      "figures": {
+        "feeCents": 3000,
+        "maxHearts": 10,
+        "startHearts": 3,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "penny",
+        "face": "face-dog-penny",
+        "ownerFace": "face-owner-penny",
+        "portrait": "portrait-dog-penny",
+        "sprite": "dog-penny"
+      }
+    },
+    {
+      "id": "pierre",
+      "art": "pierre",
+      "breed": "Standard poodle",
+      "energy": "steady",
+      "look": "Apricot, show-clip pom-poms",
+      "name": "Pierre",
+      "need": "nosy",
+      "owner": {
+        "name": "Madame Lefevre",
+        "role": "dog-show judge",
+        "temperament": "fussy"
+      },
+      "price": "lockedDog",
+      "size": "medium",
+      "trait": "fancy",
+      "unlock": "shop",
+      "figures": {
+        "feeCents": 3000,
+        "maxHearts": 8,
+        "startHearts": 3,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "pierre",
+        "face": "face-dog-pierre",
+        "ownerFace": "face-owner-pierre",
+        "portrait": "portrait-dog-pierre",
+        "sprite": "dog-pierre"
+      }
+    },
+    {
+      "id": "snowball",
+      "art": "snowball",
+      "breed": "Samoyed",
+      "energy": "hyper",
+      "look": "Fluffy white, collar with a bell",
+      "name": "Snowball",
+      "need": "friendly",
+      "owner": {
+        "name": "Tiffany",
+        "role": "wedding planner",
+        "temperament": "dramatic"
+      },
+      "price": "lockedDog",
+      "size": "big",
+      "trait": "fancy",
+      "unlock": "shop",
+      "figures": {
+        "feeCents": 2000,
+        "maxHearts": 10,
+        "startHearts": 4,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "snowball",
+        "face": "face-dog-snowball",
+        "ownerFace": "face-owner-snowball",
+        "portrait": "portrait-dog-snowball",
+        "sprite": "dog-snowball"
+      }
+    },
+    {
+      "id": "zippy",
+      "art": "zippy",
+      "breed": "Jack Russell",
+      "energy": "hyper",
+      "look": "White with tan patches, red collar",
+      "name": "Zippy",
+      "need": "playful",
+      "owner": {
+        "name": "Mr. Pruitt",
+        "role": "retired accountant",
+        "temperament": "fussy"
+      },
+      "price": "lockedDog",
+      "size": "small",
+      "trait": "chaser",
+      "unlock": "shop",
+      "figures": {
+        "feeCents": 3000,
+        "maxHearts": 6,
+        "startHearts": 3,
+        "startMood": "neutral"
+      },
+      "keys": {
+        "doghouseTag": "zippy",
+        "face": "face-dog-zippy",
+        "ownerFace": "face-owner-zippy",
+        "portrait": "portrait-dog-zippy",
+        "sprite": "dog-zippy"
+      }
+    }
+  ],
+  "encounters": [
+    {
+      "id": "biscuitNeighbour",
+      "affects": {
+        "kind": "all"
+      },
+      "kind": "lucky",
+      "name": "Generous neighbour",
+      "resolution": {
+        "art": "card-biscuit-neighbour-take",
+        "effects": [
+          {
+            "amount": "biscuitNeighbourTreatsPerDog",
+            "kind": "treats",
+            "perDog": {
+              "kind": "affected"
+            }
+          }
+        ],
+        "kind": "instant"
+      },
+      "spriteKey": "biscuit-neighbour"
+    },
+    {
+      "id": "lostWallet",
+      "affects": {
+        "kind": "all"
+      },
+      "kind": "lucky",
+      "name": "Lost wallet",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-lost-wallet-return",
+            "effects": [
+              {
+                "amount": 1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Hand it in"
+          },
+          {
+            "art": "card-lost-wallet-keep",
+            "effects": [
+              {
+                "amount": "lostWalletKeep",
+                "change": "gain",
+                "kind": "money"
+              },
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Finders keepers"
+          }
+        ]
+      },
+      "spriteKey": "lost-wallet"
+    },
+    {
+      "id": "otherDog",
+      "affects": {
+        "kind": "all"
+      },
+      "hitLabel": "NEW FRIEND!",
+      "kind": "obstacle",
+      "name": "Other dog",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-other-dog-sniff",
+            "effects": [
+              {
+                "amount": 1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              },
+              {
+                "amount": "missedTips",
+                "change": "lose",
+                "kind": "money",
+                "perDog": {
+                  "kind": "affected"
+                }
+              },
+              {
+                "kind": "fulfilNeed",
+                "need": "playful"
+              }
+            ],
+            "name": "Let them sniff"
+          },
+          {
+            "art": "card-other-dog-pull-away",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Pull away"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "other-dog"
+    },
+    {
+      "id": "photoOp",
+      "affects": {
+        "kind": "all"
+      },
+      "kind": "lucky",
+      "name": "Photo op",
+      "resolution": {
+        "art": "card-photo-op-pose",
+        "effects": [
+          {
+            "amount": "photoOpTip",
+            "change": "gain",
+            "kind": "money"
+          },
+          {
+            "amount": 1,
+            "kind": "hearts",
+            "target": {
+              "kind": "temperament",
+              "temperament": "dramatic"
+            }
+          }
+        ],
+        "kind": "instant"
+      },
+      "spriteKey": "photo-op"
+    },
+    {
+      "id": "puddle",
+      "affects": {
+        "kind": "caught"
+      },
+      "hitLabel": "SOAKED!",
+      "kind": "obstacle",
+      "name": "Puddle",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-puddle-through",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                },
+                "traitAmounts": {
+                  "fancy": -2
+                }
+              }
+            ],
+            "name": "Splash through"
+          },
+          {
+            "art": "card-puddle-towel",
+            "effects": [
+              {
+                "amount": "encounterLow",
+                "change": "lose",
+                "kind": "money",
+                "perDog": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Towel off"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "spriteKey": "puddle"
+    },
+    {
+      "id": "skunk",
+      "affects": {
+        "kind": "caught"
+      },
+      "hitLabel": "SPRAYED!",
+      "kind": "obstacle",
+      "name": "Skunk",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-skunk-grooming",
+            "effects": [
+              {
+                "amount": "encounterHigh",
+                "change": "lose",
+                "kind": "money",
+                "perDog": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Full groom"
+          },
+          {
+            "art": "card-skunk-rinse",
+            "effects": [
+              {
+                "amount": "encounterLow",
+                "change": "lose",
+                "kind": "money",
+                "perDog": {
+                  "kind": "affected"
+                }
+              },
+              {
+                "debuff": "stinky",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Quick rinse"
+          },
+          {
+            "art": "card-skunk-ignore",
+            "effects": [
+              {
+                "amount": -2,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Hold your nose"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 2,
+        "rows": 2
+      },
+      "spriteKey": "skunk"
+    },
+    {
+      "id": "squirrel",
+      "affects": {
+        "kind": "trait",
+        "trait": "chaser"
+      },
+      "hitLabel": "SQUIRREL!",
+      "kind": "obstacle",
+      "name": "Squirrel",
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-squirrel-hold",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Hold tight"
+          },
+          {
+            "art": "card-squirrel-chase",
+            "chase": true,
+            "effects": [
+              {
+                "amount": "squirrelChase",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Let them chase"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "squirrel"
+    },
+    {
+      "id": "thief",
+      "affects": {
+        "kind": "all"
+      },
+      "hitLabel": "PICKPOCKETED!",
+      "kind": "obstacle",
+      "name": "Thief",
+      "noCardWhen": {
+        "kind": "packHasSize",
+        "size": "big"
+      },
+      "resolution": {
+        "kind": "card",
+        "options": [
+          {
+            "art": "card-thief-chase",
+            "effects": [
+              {
+                "amount": -1,
+                "kind": "hearts",
+                "target": {
+                  "kind": "affected"
+                }
+              }
+            ],
+            "name": "Chase them off"
+          },
+          {
+            "art": "card-thief-let-go",
+            "effects": [
+              {
+                "amount": "thiefLetGo",
+                "change": "lose",
+                "kind": "money"
+              }
+            ],
+            "name": "Let it go"
+          }
+        ]
+      },
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "thief"
+    }
+  ],
+  "forcedStops": [
+    {
+      "id": "chattyNeighbour",
+      "name": "Chatty neighbour",
+      "options": [
+        {
+          "art": "card-chatty-neighbour-chat",
+          "effects": [
+            {
+              "amount": "chattyNeighbourTip",
+              "change": "gain",
+              "kind": "money"
+            },
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Have a chat"
+        },
+        {
+          "art": "card-chatty-neighbour-move-on",
+          "effects": [],
+          "name": "Wave and go"
+        }
+      ],
+      "spriteKey": "chatty-neighbour"
+    },
+    {
+      "id": "constructionDetour",
+      "name": "Construction detour",
+      "options": [
+        {
+          "art": "card-construction-detour-long-way",
+          "effects": [
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Take the long way"
+        },
+        {
+          "art": "card-construction-detour-squeeze",
+          "effects": [
+            {
+              "amount": -1,
+              "kind": "hearts",
+              "target": {
+                "kind": "trait",
+                "trait": "fancy"
+              }
+            }
+          ],
+          "name": "Squeeze past"
+        }
+      ],
+      "spriteKey": "construction"
+    },
+    {
+      "id": "iceCreamTruck",
+      "name": "Ice cream truck",
+      "options": [
+        {
+          "art": "card-ice-cream-truck-pup-cups",
+          "effects": [
+            {
+              "amount": "encounterLow",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            },
+            {
+              "amount": 1,
+              "kind": "hearts",
+              "target": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Pup cups!"
+        },
+        {
+          "art": "card-ice-cream-truck-walk-past",
+          "effects": [
+            {
+              "amount": -1,
+              "kind": "hearts",
+              "target": {
+                "kind": "trait",
+                "trait": "foodDriven"
+              }
+            }
+          ],
+          "name": "Not today"
+        }
+      ],
+      "spriteKey": "ice-cream-truck"
+    },
+    {
+      "id": "kidWantsToPet",
+      "name": "Can I pet them?",
+      "options": [
+        {
+          "art": "card-kid-wants-to-pet-pet",
+          "effects": [
+            {
+              "amount": 1,
+              "kind": "hearts",
+              "target": {
+                "kind": "all"
+              }
+            },
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            },
+            {
+              "kind": "fulfilNeed",
+              "need": "friendly"
+            }
+          ],
+          "name": "Of course!"
+        },
+        {
+          "art": "card-kid-wants-to-pet-decline",
+          "effects": [
+            {
+              "amount": -1,
+              "kind": "hearts",
+              "target": {
+                "kind": "randomOne"
+              }
+            }
+          ],
+          "name": "Sorry, not now"
+        }
+      ],
+      "spriteKey": "kid"
+    },
+    {
+      "id": "mailCarrier",
+      "name": "Mail carrier",
+      "options": [
+        {
+          "art": "card-mail-carrier-hold",
+          "effects": [
+            {
+              "amount": -1,
+              "kind": "hearts",
+              "target": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Hold them back"
+        },
+        {
+          "art": "card-mail-carrier-wait",
+          "effects": [
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Wait it out"
+        }
+      ],
+      "spriteKey": "mail-carrier"
+    },
+    {
+      "id": "stopSign",
+      "name": "Stop sign",
+      "options": [
+        {
+          "art": "card-stop-sign-wait",
+          "effects": [
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Wait your turn"
+        },
+        {
+          "art": "card-stop-sign-dart",
+          "effects": [
+            {
+              "amount": -1,
+              "kind": "hearts",
+              "target": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Dart across"
+        }
+      ],
+      "spriteKey": "stop-sign"
+    }
+  ],
+  "gear": [
+    {
+      "id": "fannyPack",
+      "effects": [
+        {
+          "by": "fannyPackStart",
+          "kind": "modifier",
+          "operation": "add",
+          "stat": "startMoney"
+        }
+      ],
+      "name": "Fanny pack",
+      "price": "fannyPack",
+      "iconKey": "item-fanny-pack"
+    },
+    {
+      "id": "luckyCollar",
+      "effects": [
+        {
+          "by": "luckyCollarStart",
+          "kind": "modifier",
+          "operation": "add",
+          "stat": "startHearts"
+        },
+        {
+          "by": "luckyCollarMax",
+          "kind": "modifier",
+          "operation": "add",
+          "stat": "maxHearts"
+        }
+      ],
+      "name": "Lucky collar",
+      "price": "luckyCollar",
+      "iconKey": "item-lucky-collar"
+    },
+    {
+      "id": "poopBags",
+      "effects": [
+        {
+          "kind": "skipOption",
+          "usesPerRun": "poopBagsSkipsPerRun"
+        }
+      ],
+      "name": "Poop bags",
+      "price": "poopBags",
+      "iconKey": "item-poop-bags"
+    },
+    {
+      "id": "runningShoes",
+      "effects": [
+        {
+          "by": "runningShoesInputLock",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "inputLock"
+        }
+      ],
+      "name": "Running shoes",
+      "price": "runningShoes",
+      "iconKey": "item-running-shoes"
+    },
+    {
+      "id": "whistle",
+      "effects": [
+        {
+          "duration": "run",
+          "encounter": "thief",
+          "kind": "immune"
+        }
+      ],
+      "name": "Whistle",
+      "price": "whistle",
+      "iconKey": "item-whistle"
+    }
+  ],
+  "help": [
+    {
+      "art": "help-lanes",
+      "body": "Drag anywhere: each lane-width you drag moves the pack one lane. A tap moves one lane toward that side. Keys: arrows, A/D or H/L.",
+      "title": "Switch lanes"
+    },
+    {
+      "art": "help-pickups",
+      "body": "Run into tips for money. Smaller packs get a little extra. Treats are carried, up to 3. Tap a doghouse to give its owner a treat: +1♥.",
+      "title": "Tips and treats"
+    },
+    {
+      "art": "help-cards",
+      "body": "Hit a skunk, puddle or thief and the walk pauses. Pick a card: pay up, or upset the owners. Every card shows its outcome. One is always free. Cones and bins just cost a few tips. Some bumps are lucky, like a lost wallet.",
+      "title": "Bumps become cards"
+    },
+    {
+      "art": "help-owners",
+      "body": "Each owner has a happiness meter: ♥. Bumps and choices raise or lower it. At 0♥ the owner fires you, takes back that dog's fees, and the dog goes home.",
+      "title": "Keep owners happy"
+    },
+    {
+      "art": "help-pulls",
+      "body": "A dog that leans and barks is about to pull. It tugs the pack one lane. Drag it back any time. Food lovers pull toward treats, chasers toward squirrels.",
+      "title": "Watch for pulls"
+    },
+    {
+      "art": "help-zones",
+      "body": "Walk 4 zones of Maple Street, picking the next at each fork. Every dog pays its fee after each zone. Between zones, pick an upgrade card. Head home any time from the pause menu.",
+      "title": "Four zones"
+    }
+  ],
+  "minorObstacles": [
+    {
+      "id": "barrier2",
+      "name": "Construction barrier",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "spriteKey": "barrier-2"
+    },
+    {
+      "id": "barrier3",
+      "name": "Construction barrier",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "spriteKey": "barrier-3"
+    },
+    {
+      "id": "bench",
+      "name": "Bench",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "spriteKey": "bench"
+    },
+    {
+      "id": "bin",
+      "name": "Bin",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "bin"
+    },
+    {
+      "id": "cone",
+      "name": "Cone",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "cone"
+    },
+    {
+      "id": "hedge",
+      "name": "Hedge",
+      "shape": {
+        "lanes": 3,
+        "rows": 1
+      },
+      "spriteKey": "hedge"
+    },
+    {
+      "id": "hydrant",
+      "name": "Hydrant",
+      "shape": {
+        "lanes": 1,
+        "rows": 1
+      },
+      "spriteKey": "hydrant"
+    },
+    {
+      "id": "parkedCar",
+      "name": "Parked car",
+      "shape": {
+        "lanes": 1,
+        "rows": 3
+      },
+      "spriteKey": "parked-car"
+    }
+  ],
+  "needCards": [
+    {
+      "id": "accident",
+      "kind": "trouble",
+      "name": "Accident!",
+      "options": [
+        {
+          "art": "card-accident-bag",
+          "effects": [
+            {
+              "amount": "accidentCleanUp",
+              "change": "lose",
+              "kind": "money"
+            }
+          ],
+          "name": "Clean up with a bag"
+        },
+        {
+          "art": "card-accident-walk-on",
+          "cause": "grumpy neighbour",
+          "effects": [
+            {
+              "amount": -2,
+              "kind": "hearts",
+              "target": {
+                "kind": "affected"
+              }
+            }
+          ],
+          "name": "Walk on"
+        }
+      ]
+    },
+    {
+      "id": "goodSpot",
+      "kind": "payoff",
+      "name": "The perfect spot",
+      "options": [
+        {
+          "art": "card-good-spot-take-time",
+          "effects": [
+            {
+              "amount": 2,
+              "kind": "hearts",
+              "target": {
+                "kind": "affected"
+              }
+            },
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "affected"
+              }
+            }
+          ],
+          "name": "Take your time"
+        },
+        {
+          "art": "card-good-spot-keep-walking",
+          "effects": [],
+          "name": "Keep walking"
+        }
+      ]
+    },
+    {
+      "id": "peeMail",
+      "kind": "payoff",
+      "name": "Pee-mail for {dog}",
+      "options": [
+        {
+          "art": "card-pee-mail-sniff",
+          "effects": [
+            {
+              "amount": 2,
+              "kind": "hearts",
+              "target": {
+                "kind": "affected"
+              }
+            },
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "affected"
+              }
+            }
+          ],
+          "name": "Read it all"
+        },
+        {
+          "art": "card-pee-mail-keep-walking",
+          "effects": [],
+          "name": "Keep walking"
+        }
+      ]
+    },
+    {
+      "id": "playDate",
+      "kind": "payoff",
+      "name": "Play date!",
+      "options": [
+        {
+          "art": "card-play-date-play",
+          "effects": [
+            {
+              "amount": 1,
+              "kind": "hearts",
+              "target": {
+                "kind": "all"
+              }
+            },
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "all"
+              }
+            }
+          ],
+          "name": "Let them play"
+        },
+        {
+          "art": "card-play-date-sniff",
+          "effects": [
+            {
+              "amount": 1,
+              "kind": "hearts",
+              "target": {
+                "kind": "need",
+                "need": "playful"
+              }
+            }
+          ],
+          "name": "Just a sniff"
+        }
+      ]
+    },
+    {
+      "id": "strangerLoves",
+      "kind": "payoff",
+      "name": "A stranger loves {dog}",
+      "options": [
+        {
+          "art": "card-stranger-loves-fuss",
+          "effects": [
+            {
+              "amount": 1,
+              "kind": "hearts",
+              "target": {
+                "kind": "affected"
+              }
+            },
+            {
+              "amount": "strangerTip",
+              "change": "gain",
+              "kind": "money"
+            }
+          ],
+          "name": "Let them fuss"
+        },
+        {
+          "art": "card-stranger-loves-keep-walking",
+          "effects": [],
+          "name": "Keep walking"
+        }
+      ]
+    },
+    {
+      "id": "waterStop",
+      "kind": "payoff",
+      "name": "Water stop",
+      "options": [
+        {
+          "art": "card-water-stop-drink",
+          "effects": [
+            {
+              "amount": 2,
+              "kind": "hearts",
+              "target": {
+                "kind": "affected"
+              }
+            },
+            {
+              "amount": "missedTips",
+              "change": "lose",
+              "kind": "money",
+              "perDog": {
+                "kind": "affected"
+              }
+            }
+          ],
+          "name": "A long drink"
+        },
+        {
+          "art": "card-water-stop-sip",
+          "effects": [
+            {
+              "amount": 1,
+              "kind": "hearts",
+              "target": {
+                "kind": "affected"
+              }
+            }
+          ],
+          "name": "Just a sip"
+        }
+      ]
+    }
+  ],
+  "needSpots": [
+    {
+      "id": "fireHydrant",
+      "name": "Hydrant",
+      "need": "regular"
+    },
+    {
+      "id": "lampPost",
+      "name": "Lamp post",
+      "need": "nosy"
+    },
+    {
+      "id": "playmate",
+      "name": "Another dog",
+      "need": "playful"
+    },
+    {
+      "id": "stranger",
+      "name": "A stranger waving",
+      "need": "friendly"
+    },
+    {
+      "id": "tree",
+      "name": "Tree",
+      "need": "regular"
+    },
+    {
+      "id": "waterBowl",
+      "name": "Water bowl",
+      "need": "thirsty"
+    }
+  ],
+  "needs": [
+    {
+      "id": "friendly",
+      "goneWrong": {
+        "effects": [
+          {
+            "amount": -1,
+            "kind": "hearts",
+            "target": {
+              "kind": "affected"
+            }
+          }
+        ],
+        "kind": "effects"
+      },
+      "met": [
+        {
+          "amount": 1,
+          "kind": "hearts",
+          "target": {
+            "kind": "affected"
+          }
+        }
+      ],
+      "name": "Friendly",
+      "payoff": "strangerLoves"
+    },
+    {
+      "id": "nosy",
+      "goneWrong": {
+        "effects": [
+          {
+            "amount": -1,
+            "kind": "hearts",
+            "target": {
+              "kind": "affected"
+            }
+          }
+        ],
+        "kind": "effects"
+      },
+      "met": [
+        {
+          "amount": 1,
+          "kind": "hearts",
+          "target": {
+            "kind": "affected"
+          }
+        }
+      ],
+      "name": "Sniffy",
+      "payoff": "peeMail"
+    },
+    {
+      "id": "playful",
+      "goneWrong": {
+        "effects": [
+          {
+            "amount": -1,
+            "kind": "hearts",
+            "target": {
+              "kind": "affected"
+            }
+          }
+        ],
+        "kind": "effects"
+      },
+      "met": [
+        {
+          "amount": 1,
+          "kind": "hearts",
+          "target": {
+            "kind": "affected"
+          }
+        }
+      ],
+      "name": "Playful",
+      "payoff": "playDate"
+    },
+    {
+      "id": "regular",
+      "goneWrong": {
+        "card": "accident",
+        "kind": "card"
+      },
+      "met": [
+        {
+          "amount": 1,
+          "kind": "hearts",
+          "target": {
+            "kind": "affected"
+          }
+        }
+      ],
+      "name": "Potty",
+      "payoff": "goodSpot"
+    },
+    {
+      "id": "thirsty",
+      "goneWrong": {
+        "effects": [
+          {
+            "amount": -1,
+            "kind": "hearts",
+            "target": {
+              "kind": "affected"
+            }
+          }
+        ],
+        "kind": "effects"
+      },
+      "met": [
+        {
+          "amount": 1,
+          "kind": "hearts",
+          "target": {
+            "kind": "affected"
+          }
+        }
+      ],
+      "name": "Thirsty",
+      "payoff": "waterStop"
+    }
+  ],
+  "tuning": {
+    "counts": {
+      "ballLanesPerSecond": 2.5,
+      "biscuitNeighbourTreatsPerDog": 1,
+      "loadoutMax": 1,
+      "looseDogLanesPerSecond": 2,
+      "luckyEncountersPerZone": 2,
+      "minorObstaclesFirstZone": 22,
+      "minorObstaclesGainPerZone": 4,
+      "needSpotsPerZone": 6,
+      "obstaclesFirstZone": 22,
+      "obstaclesGainPerZone": 4,
+      "openLanesPerRowMin": 2,
+      "packSizeMax": 3,
+      "packSizeMin": 1,
+      "poopBagsSkipsPerRun": 1,
+      "squirrelDartLanesPerSecond": 4,
+      "tipsFirstZone": 52,
+      "tipsGainPerZone": 7,
+      "treatCarryMax": 3,
+      "treatMagnetReachLanes": 1,
+      "treatsPerZone": 2,
+      "upgradeChoiceCount": 3
+    },
+    "hearts": {
+      "faceHappyFrom": 6,
+      "faceNeutralFrom": 3,
+      "luckyCollarMax": 1,
+      "luckyCollarStart": 1,
+      "maxBySize": {
+        "big": 10,
+        "medium": 8,
+        "small": 6
+      },
+      "startByTemperament": {
+        "dramatic": 4,
+        "fussy": 3,
+        "laidBack": 4
+      },
+      "treat": 1
+    },
+    "money": {
+      "accidentCleanUp": 5,
+      "chattyNeighbourTip": 25,
+      "encounterHigh": 20,
+      "encounterLow": 10,
+      "fannyPackStart": 15,
+      "feeByTemperament": {
+        "dramatic": 20,
+        "fussy": 30,
+        "laidBack": 20
+      },
+      "lostWalletKeep": 30,
+      "minorBump": 2,
+      "missedTips": 10,
+      "photoOpTip": 10,
+      "prices": {
+        "dogSlot2": 800,
+        "dogSlot3": 1800,
+        "fannyPack": 400,
+        "lockedDog": 600,
+        "luckyCollar": 1000,
+        "poopBags": 700,
+        "runningShoes": 800,
+        "whistle": 600
+      },
+      "squirrelChase": 10,
+      "strangerTip": 10,
+      "sweetTalkerCostPerDog": -4,
+      "thiefLetGo": 20,
+      "tip": 0.5
+    },
+    "multipliers": {
+      "bigTipperTip": 1.5,
+      "cyclistSpeedMultiplier": 1.6,
+      "goodLeashSquirrelPull": 0,
+      "heartsByTemperament": {
+        "dramatic": 2,
+        "fussy": 1,
+        "laidBack": 1
+      },
+      "otherDogChangePerBigDog": -0.25,
+      "otherDogChangePerSmallDog": 0.25,
+      "runningShoesInputLock": 0,
+      "rushHourObstacles": 1.5,
+      "rushHourTips": 2,
+      "scrollSpeedGainPerZone": 0.15,
+      "shortcutFees": 0.75,
+      "shortcutZoneLength": 0.75,
+      "stinkyTip": 0.5,
+      "tipByPackSize": {
+        "1": 1.2,
+        "2": 1.1,
+        "3": 1
+      }
+    },
+    "pixels": {
+      "roadScrollSpeed": 120,
+      "spawnRowSpacing": 160,
+      "tapMaxDistance": 10
+    },
+    "probability": {
+      "catchBySize": {
+        "big": 0.5,
+        "medium": 0.5,
+        "small": 0.25
+      },
+      "needPayoffCard": 0.25
+    },
+    "seconds": {
+      "ballBounceSeconds": 0.4,
+      "collisionGrace": 1,
+      "hitStopSeconds": 1,
+      "inputLockBySize": {
+        "big": 0.5,
+        "medium": 0.25,
+        "small": 0
+      },
+      "laneMove": 0.18,
+      "lookAheadSeconds": 5.25,
+      "minorHitStopSeconds": 0.6,
+      "minorStumble": 0.3,
+      "moverWarningSeconds": 1,
+      "needGoneWrong": 20,
+      "needUrgentByEnergy": {
+        "calm": 90,
+        "hyper": 40,
+        "steady": 60
+      },
+      "pullReactionWindow": 0.6,
+      "pullTell": 1,
+      "statusVisualSeconds": 10,
+      "zoneAtBaseSpeed": 144
+    }
+  },
+  "upgrades": [
+    {
+      "id": "bellyRubs",
+      "art": "card-belly-rubs",
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "hearts",
+          "target": {
+            "kind": "all"
+          }
+        }
+      ],
+      "kind": "boost",
+      "name": "Belly rubs"
+    },
+    {
+      "id": "bigTipper",
+      "art": "card-big-tipper",
+      "effects": [
+        {
+          "by": "bigTipperTip",
+          "duration": "run",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "tipValue"
+        }
+      ],
+      "kind": "boost",
+      "name": "Big tipper"
+    },
+    {
+      "id": "goodLeash",
+      "art": "card-good-leash",
+      "effects": [
+        {
+          "duration": "run",
+          "encounter": "squirrel",
+          "kind": "immune"
+        },
+        {
+          "by": "goodLeashSquirrelPull",
+          "duration": "run",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "chaserSquirrelPulls"
+        }
+      ],
+      "kind": "boost",
+      "name": "Good leash"
+    },
+    {
+      "id": "raincoats",
+      "art": "card-raincoats",
+      "effects": [
+        {
+          "duration": "run",
+          "encounter": "puddle",
+          "kind": "immune"
+        }
+      ],
+      "kind": "boost",
+      "name": "Raincoats"
+    },
+    {
+      "id": "rushHour",
+      "art": "card-rush-hour",
+      "effects": [
+        {
+          "by": "rushHourTips",
+          "duration": "nextZone",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "tipSpawns"
+        },
+        {
+          "by": "rushHourObstacles",
+          "duration": "nextZone",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "obstacleSpawns"
+        }
+      ],
+      "kind": "tradeOff",
+      "name": "Rush hour"
+    },
+    {
+      "id": "secondWind",
+      "art": "card-second-wind",
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "hearts",
+          "target": {
+            "kind": "unhappiest"
+          }
+        }
+      ],
+      "kind": "boost",
+      "name": "Second wind"
+    },
+    {
+      "id": "shortcut",
+      "art": "card-shortcut",
+      "effects": [
+        {
+          "by": "shortcutZoneLength",
+          "duration": "nextZone",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "zoneLength"
+        },
+        {
+          "by": "shortcutFees",
+          "duration": "nextZone",
+          "kind": "modifier",
+          "operation": "multiply",
+          "stat": "fees"
+        }
+      ],
+      "kind": "tradeOff",
+      "name": "Shortcut"
+    },
+    {
+      "id": "sweetTalker",
+      "art": "card-sweet-talker",
+      "effects": [
+        {
+          "by": "sweetTalkerCostPerDog",
+          "duration": "run",
+          "kind": "modifier",
+          "operation": "add",
+          "stat": "costPerDog"
+        }
+      ],
+      "kind": "boost",
+      "name": "Sweet talker"
+    },
+    {
+      "id": "treatMagnet",
+      "art": "card-treat-magnet",
+      "effects": [
+        {
+          "by": "treatMagnetReachLanes",
+          "duration": "run",
+          "kind": "modifier",
+          "operation": "add",
+          "stat": "treatReach"
+        }
+      ],
+      "kind": "boost",
+      "name": "Treat magnet"
+    }
+  ],
+  "walkers": [
+    {
+      "id": "ada",
+      "name": "Ada",
+      "portraitKey": "face-walker-ada",
+      "spriteKey": "walker-ada",
+      "unlock": "start"
+    },
+    {
+      "id": "ben",
+      "name": "Ben",
+      "portraitKey": "face-walker-ben",
+      "spriteKey": "walker-ben",
+      "unlock": "start"
+    },
+    {
+      "id": "casey",
+      "name": "Casey",
+      "portraitKey": "face-walker-casey",
+      "spriteKey": "walker-casey",
+      "unlock": "start"
+    },
+    {
+      "id": "trista",
+      "name": "Trista",
+      "portraitKey": "face-walker-trista",
+      "spriteKey": "walker-trista",
+      "unlock": "start"
+    }
+  ],
+  "world": {
+    "firstZone": "street",
+    "name": "Maple Street",
+    "walkLength": 4
+  },
+  "zones": [
+    {
+      "art": "snooze-crescent",
+      "density": {
+        "luckyFinds": 1,
+        "obstacles": 1,
+        "tips": 1
+      },
+      "difficulty": 1,
+      "difficultyName": "Easiest",
+      "fees": 0.7,
+      "id": "snoozeCrescent",
+      "leashColor": "#3e2731",
+      "moverShare": 0.1,
+      "name": "Snooze Crescent",
+      "roadColor": "#8b9bb4",
+      "roadShadowColor": "#5a6988",
+      "speed": 1,
+      "weights": {
+        "forcedStops": {
+          "chattyNeighbour": 1,
+          "constructionDetour": 1,
+          "iceCreamTruck": 1,
+          "kidWantsToPet": 1,
+          "mailCarrier": 1,
+          "stopSign": 1
+        },
+        "luckyFinds": {
+          "biscuitNeighbour": 1,
+          "lostWallet": 1,
+          "photoOp": 1
+        },
+        "minorObstacles": {
+          "barrier2": 1,
+          "barrier3": 1,
+          "bench": 1,
+          "bin": 1,
+          "cone": 1,
+          "hedge": 1,
+          "hydrant": 1,
+          "parkedCar": 1
+        },
+        "needSpots": {
+          "fireHydrant": 2,
+          "lampPost": 2,
+          "playmate": 1,
+          "stranger": 1,
+          "tree": 1,
+          "waterBowl": 1
+        },
+        "obstacles": {
+          "otherDog": 1,
+          "puddle": 1,
+          "skunk": 1,
+          "squirrel": 1,
+          "thief": 1
+        }
+      },
+      "keys": {
+        "backdrop": "backdrop-snooze-crescent",
+        "card": "card-zone-snooze-crescent",
+        "icon": "icon-zone-snooze-crescent",
+        "road": "road-snooze-crescent",
+        "roadStart": "road-snooze-crescent-start"
+      }
+    },
+    {
+      "art": "bark-park",
+      "density": {
+        "luckyFinds": 1,
+        "obstacles": 1,
+        "tips": 1
+      },
+      "difficulty": 2,
+      "difficultyName": "Easy",
+      "fees": 0.8,
+      "id": "park",
+      "leashColor": "#a22633",
+      "moverShare": 0.15,
+      "name": "Bark Park",
+      "roadColor": "#e4a672",
+      "roadShadowColor": "#b86f50",
+      "speed": 1,
+      "weights": {
+        "forcedStops": {
+          "chattyNeighbour": 1,
+          "constructionDetour": 1,
+          "iceCreamTruck": 1,
+          "kidWantsToPet": 1,
+          "mailCarrier": 1,
+          "stopSign": 1
+        },
+        "luckyFinds": {
+          "biscuitNeighbour": 1,
+          "lostWallet": 1,
+          "photoOp": 1
+        },
+        "minorObstacles": {
+          "barrier2": 0,
+          "barrier3": 0,
+          "bench": 1,
+          "bin": 1,
+          "cone": 1,
+          "hedge": 1,
+          "hydrant": 1,
+          "parkedCar": 1
+        },
+        "needSpots": {
+          "fireHydrant": 1,
+          "lampPost": 1,
+          "playmate": 3,
+          "stranger": 1,
+          "tree": 2,
+          "waterBowl": 2
+        },
+        "obstacles": {
+          "otherDog": 1,
+          "puddle": 1,
+          "skunk": 1,
+          "squirrel": 1,
+          "thief": 1
+        }
+      },
+      "keys": {
+        "backdrop": "backdrop-bark-park",
+        "card": "card-zone-bark-park",
+        "icon": "icon-zone-bark-park",
+        "road": "road-bark-park",
+        "roadStart": "road-bark-park-start"
+      }
+    },
+    {
+      "art": "woof-way",
+      "density": {
+        "luckyFinds": 1,
+        "obstacles": 1,
+        "tips": 1
+      },
+      "difficulty": 3,
+      "difficultyName": "Normal",
+      "fees": 1,
+      "id": "street",
+      "leashColor": "#f6757a",
+      "moverShare": 0.1,
+      "name": "Woof Way",
+      "roadColor": "#3a4466",
+      "roadShadowColor": "#262b44",
+      "speed": 1,
+      "weights": {
+        "forcedStops": {
+          "chattyNeighbour": 1,
+          "constructionDetour": 1,
+          "iceCreamTruck": 1,
+          "kidWantsToPet": 1,
+          "mailCarrier": 1,
+          "stopSign": 1
+        },
+        "luckyFinds": {
+          "biscuitNeighbour": 1,
+          "lostWallet": 1,
+          "photoOp": 1
+        },
+        "minorObstacles": {
+          "barrier2": 1,
+          "barrier3": 1,
+          "bench": 1,
+          "bin": 1,
+          "cone": 1,
+          "hedge": 1,
+          "hydrant": 1,
+          "parkedCar": 1
+        },
+        "needSpots": {
+          "fireHydrant": 2,
+          "lampPost": 2,
+          "playmate": 1,
+          "stranger": 1,
+          "tree": 1,
+          "waterBowl": 1
+        },
+        "obstacles": {
+          "otherDog": 1,
+          "puddle": 1,
+          "skunk": 1,
+          "squirrel": 1,
+          "thief": 1
+        }
+      },
+      "keys": {
+        "backdrop": "backdrop-woof-way",
+        "card": "card-zone-woof-way",
+        "icon": "icon-zone-woof-way",
+        "road": "road-woof-way",
+        "roadStart": "road-woof-way-start"
+      }
+    },
+    {
+      "art": "sniff-street-shops",
+      "density": {
+        "luckyFinds": 1,
+        "obstacles": 1,
+        "tips": 1
+      },
+      "difficulty": 4,
+      "difficultyName": "Busy",
+      "fees": 1.25,
+      "id": "shops",
+      "leashColor": "#a22633",
+      "moverShare": 0.15,
+      "name": "Sniff Street Shops",
+      "roadColor": "#c0cbdc",
+      "roadShadowColor": "#8b9bb4",
+      "speed": 1,
+      "weights": {
+        "forcedStops": {
+          "chattyNeighbour": 1,
+          "constructionDetour": 1,
+          "iceCreamTruck": 1,
+          "kidWantsToPet": 1,
+          "mailCarrier": 1,
+          "stopSign": 1
+        },
+        "luckyFinds": {
+          "biscuitNeighbour": 1,
+          "lostWallet": 1,
+          "photoOp": 1
+        },
+        "minorObstacles": {
+          "barrier2": 1,
+          "barrier3": 1,
+          "bench": 1,
+          "bin": 1,
+          "cone": 1,
+          "hedge": 1,
+          "hydrant": 1,
+          "parkedCar": 1
+        },
+        "needSpots": {
+          "fireHydrant": 2,
+          "lampPost": 2,
+          "playmate": 1,
+          "stranger": 3,
+          "tree": 1,
+          "waterBowl": 2
+        },
+        "obstacles": {
+          "otherDog": 1,
+          "puddle": 1,
+          "skunk": 1,
+          "squirrel": 1,
+          "thief": 1
+        }
+      },
+      "keys": {
+        "backdrop": "backdrop-sniff-street-shops",
+        "card": "card-zone-sniff-street-shops",
+        "icon": "icon-zone-sniff-street-shops",
+        "road": "road-sniff-street-shops",
+        "roadStart": "road-sniff-street-shops-start"
+      }
+    },
+    {
+      "art": "paws-promenade",
+      "density": {
+        "luckyFinds": 1,
+        "obstacles": 1,
+        "tips": 1
+      },
+      "difficulty": 4,
+      "difficultyName": "Medium-hard",
+      "fees": 1.25,
+      "id": "pawsPromenade",
+      "leashColor": "#a22633",
+      "moverShare": 0.15,
+      "name": "Paws Promenade",
+      "roadColor": "#ead4aa",
+      "roadShadowColor": "#e4a672",
+      "speed": 1,
+      "weights": {
+        "forcedStops": {
+          "chattyNeighbour": 1,
+          "constructionDetour": 1,
+          "iceCreamTruck": 1,
+          "kidWantsToPet": 1,
+          "mailCarrier": 1,
+          "stopSign": 1
+        },
+        "luckyFinds": {
+          "biscuitNeighbour": 1,
+          "lostWallet": 1,
+          "photoOp": 1
+        },
+        "minorObstacles": {
+          "barrier2": 1,
+          "barrier3": 1,
+          "bench": 1,
+          "bin": 1,
+          "cone": 1,
+          "hedge": 1,
+          "hydrant": 1,
+          "parkedCar": 1
+        },
+        "needSpots": {
+          "fireHydrant": 2,
+          "lampPost": 2,
+          "playmate": 1,
+          "stranger": 3,
+          "tree": 1,
+          "waterBowl": 2
+        },
+        "obstacles": {
+          "otherDog": 1,
+          "puddle": 1,
+          "skunk": 1,
+          "squirrel": 1,
+          "thief": 1
+        }
+      },
+      "keys": {
+        "backdrop": "backdrop-paws-promenade",
+        "card": "card-zone-paws-promenade",
+        "icon": "icon-zone-paws-promenade",
+        "road": "road-paws-promenade",
+        "roadStart": "road-paws-promenade-start"
+      }
+    },
+    {
+      "art": "the-long-way-home",
+      "density": {
+        "luckyFinds": 1,
+        "obstacles": 1,
+        "tips": 1
+      },
+      "difficulty": 5,
+      "difficultyName": "Hard",
+      "fees": 1.5,
+      "id": "homeStretch",
+      "leashColor": "#3e2731",
+      "moverShare": 0.2,
+      "name": "The Long Way Home",
+      "roadColor": "#c28569",
+      "roadShadowColor": "#b86f50",
+      "speed": 1,
+      "weights": {
+        "forcedStops": {
+          "chattyNeighbour": 1,
+          "constructionDetour": 1,
+          "iceCreamTruck": 1,
+          "kidWantsToPet": 1,
+          "mailCarrier": 1,
+          "stopSign": 1
+        },
+        "luckyFinds": {
+          "biscuitNeighbour": 1,
+          "lostWallet": 1,
+          "photoOp": 1
+        },
+        "minorObstacles": {
+          "barrier2": 0,
+          "barrier3": 0,
+          "bench": 1,
+          "bin": 1,
+          "cone": 1,
+          "hedge": 1,
+          "hydrant": 1,
+          "parkedCar": 1
+        },
+        "needSpots": {
+          "fireHydrant": 1,
+          "lampPost": 1,
+          "playmate": 1,
+          "stranger": 1,
+          "tree": 1,
+          "waterBowl": 1
+        },
+        "obstacles": {
+          "otherDog": 1,
+          "puddle": 1,
+          "skunk": 1,
+          "squirrel": 1,
+          "thief": 1
+        }
+      },
+      "keys": {
+        "backdrop": "backdrop-the-long-way-home",
+        "card": "card-zone-the-long-way-home",
+        "icon": "icon-zone-the-long-way-home",
+        "road": "road-the-long-way-home",
+        "roadStart": "road-the-long-way-home-start"
+      }
+    }
+  ]
+}

@@ -48,6 +48,22 @@ npm run preview
 npm run clean
 ```
 
+Tooling for the art scripts (details in [src/README.md](src/README.md), Assets):
+
+```bash
+# Write shared/export/game-data.json and layout.json from the game's modules
+npm run export:data
+
+# Write public/art/manifest.json from the art files
+npm run art:manifest
+
+# Fail if the committed manifest differs from what the art files give
+npm run art:manifest -- --check
+
+# Draw a road sprite at a sweep of distances into out/depth-preview/<key>/
+npm run art:depth-preview -- cone woof-way
+```
+
 CI runs check, lint, test and build, and the AI attributions scan.
 
 ## Deploying

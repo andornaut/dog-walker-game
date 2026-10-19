@@ -2,6 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import type { SpriteAnchor } from "../assets/manifest";
+import { spriteAnchor } from "../assets/spriteAnchor";
 import { depthVariantKey, standsOnGround } from "../assets/spriteKeys";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { opaqueBoundsOfRgba, type PixelBounds } from "../layout/pixelShapes";
@@ -52,12 +53,10 @@ export function measureSprite(scene: Scene, key: string, anchor: SpriteAnchor | 
   if (!standsOnGround(key)) {
     return;
   }
-  const bounds = firstFrameBounds(scene, key);
   measured.set(key, {
-    feetY: bounds?.bottom ?? height,
+    ...spriteAnchor(firstFrameBounds(scene, key), width, height),
     frameHeight: height,
     frameWidth: width,
-    opaqueWidth: bounds === undefined ? width : bounds.right - bounds.left,
   });
 }
 
