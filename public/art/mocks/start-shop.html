@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Start screen shop</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png">
+<link rel="stylesheet" href="/nav.css">
+<script src="/nav.js" defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* The start screen with the controls top right, a one-item Pocket and a pet shop, at 1x and 2x. Frames are drawn by art/mocks-src/start_shop.py from the exported art. */
+:root {
+  --bg: #13101e; --surface: #1d1a2c; --fg: #dfe4ee; --muted: #8b9bb4; --line: #33304a;
+  --accent: #feae34; --stage: #0c0a14;
+  --f-display: "Silkscreen", ui-monospace, monospace;
+  --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 1280px; margin: 0 auto; padding-block: 24px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 32px;
+}
+h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(22px, 4vw, 32px); line-height: 1.1; margin: 0; }
+h2 { font-family: var(--f-display); font-weight: 400; font-size: 18px; margin: 0; letter-spacing: 0.04em; color: var(--accent); }
+p, ul { margin: 0; }
+ul { padding-left: 18px; display: grid; gap: 4px; }
+.lede { color: var(--muted); max-width: 80ch; }
+section { display: grid; gap: 12px; }
+img { image-rendering: pixelated; image-rendering: crisp-edges; display: block; max-width: 100%; height: auto; }
+.row { display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px; display: grid; gap: 8px; min-width: 0; }
+figcaption { font-size: 13px; color: var(--muted); max-width: 46ch; }
+.x2 { width: 720px; }
+.note { background: var(--surface); border-left: 3px solid var(--accent); padding: 12px 14px; border-radius: 4px; display: grid; gap: 8px; max-width: 90ch; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header style="display:grid;gap:8px">
+    <h1>Start screen shop</h1>
+    <p class="lede">Help, sound and settings sit together at the top right. The Gear section becomes a one-slot Pocket row: you own gear forever and bring one item per walk, as Hades' keepsakes. Gear, dogs and pack slots are bought in a pet shop. Walker and dogs stay the two steps; Start walk stays the one call to action. Sample banks are $640 (empty pocket, something affordable) and $560 (whistle in the pocket, nothing affordable).</p>
+  </header>
+
+  <section>
+    <h2>A: Pet shop in the gate scene (recommended)</h2>
+    <p class="lede">The shop is a building on the yard's right lot, replacing the slot sign, with a PET SHOP board in the yard sign's letters. When something new is affordable it takes the gold <code>ui-afford</code> outline and the walker says "Something new at the pet shop." The top bar keeps the bank, the Logbook and the best walk on the left. It reads as part of Maple Street and leaves the bar uncluttered. The building is a 120x104 hit area, but a first-time player may not know it can be tapped until the outline and the bubble point at it.</p>
+    <div class="row">
+      <figure><img src="start-shop/a-empty.png" width="360" height="560" alt="Variant A, empty pocket, the shop outlined in gold"><figcaption>1x. Pocket empty, no dog picked, $640: the fanny pack and every dog are affordable, so the building is outlined.</figcaption></figure>
+      <figure><img src="start-shop/a-item.png" width="360" height="560" alt="Variant A, whistle in the pocket, ready"><figcaption>1x. Whistle in the pocket (also a badge beside the walker), Duchess picked, pack 1/1, so Biscuit and Koda show "pack full".</figcaption></figure>
+    </div>
+    <figure><img class="x2" src="start-shop/a-empty.png" width="360" height="560" alt="Variant A at 2x"><figcaption>2x</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>B: SHOP button in the top bar</h2>
+    <p class="lede">Identical to A except that a SHOP button sits beside the controls (outlined in gold when something is affordable) and the yard keeps its lawn and mailbox. It is the most discoverable entry, but the bar loses the room for the best walk, which moves into the Logbook, and the shop reads as one more menu instead of a place on the street.</p>
+    <div class="row">
+      <figure><img src="start-shop/b-empty.png" width="360" height="560" alt="Variant B, empty pocket"><figcaption>1x. Pocket empty, $640.</figcaption></figure>
+      <figure><img src="start-shop/b-item.png" width="360" height="560" alt="Variant B, whistle in the pocket"><figcaption>1x. Whistle in the pocket, $560.</figcaption></figure>
+    </div>
+    <figure><img class="x2" src="start-shop/b-empty.png" width="360" height="560" alt="Variant B at 2x"><figcaption>2x</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>The shop page</h2>
+    <p class="lede">Both variants open the same page under the top bar, so the bank stays in view. The Gear tab holds the pocket picker (all five items, owned ones pickable, the rest locked) and every gear item with its price or OWNED. The Dogs tab sells pack slots and dogs. Tapping the Pocket row opens Gear. Tapping a locked dog or the lock on the Dogs band opens Dogs at that item (Nugget here, framed by <code>ui-select</code>). Affordable rows take the gold outline, and a row you cannot buy yet is greyed with its reason.</p>
+    <div class="row">
+      <figure><img src="start-shop/shop-gear.png" width="360" height="560" alt="Shop, Gear tab"><figcaption>1x. Gear tab at $760: whistle in the pocket, poop bags affordable.</figcaption></figure>
+      <figure><img src="start-shop/shop-dogs.png" width="360" height="560" alt="Shop, Dogs tab"><figcaption>1x. Dogs tab, opened by tapping Nugget. Slot 3 is locked until slot 2 is bought. With every dog at $600, the whole list lights up at once.</figcaption></figure>
+    </div>
+    <figure><img class="x2" src="start-shop/shop-gear.png" width="360" height="560" alt="Shop, Gear tab at 2x"><figcaption>2x</figcaption></figure>
+  </section>
+
+  <section>
+    <h2>Tile states</h2>
+    <p class="lede">Locked is a flat navy silhouette in a grey tile, with the padlock at its corner and a price (or goal) plate. "Pack full" is the same grey tile, but the art stays readable (grey ramp, one step darker), with no padlock or plate. Both are unchosen, and the silhouette, padlock and plate separate them. Pack full is needed for dogs with two or three slots. With one slot, or in the Pocket, a tap swaps the choice, so the Pocket never shows it. A price is forest when the bank covers it, but the gold outline appears only in the shop and on the building. No dog unlocks by a goal today; the goal plate is for one that does.</p>
+    <div class="row">
+      <figure><img src="start-shop/states.png" width="360" height="442" alt="Tile states for dogs and pocket gear at 1x"><figcaption>1x</figcaption></figure>
+      <figure><img class="x2" src="start-shop/states.png" width="360" height="442" alt="Tile states at 2x"><figcaption>2x</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="note">
+    <h2>Recommendation and what it needs</h2>
+    <p>A. The shop is a place on Maple Street, the top bar holds only the bank, the Logbook and the controls, and the gold outline plus the walker's line make it discoverable when it matters. B is the fallback if playtests show players miss the building.</p>
+    <ul>
+      <li>New shipped art: <code>ui-pet-shop</code> (120x104, tags normal and pressed, the board's letters baked in; A only) with <code>screen-home</code> redrawn without the mailbox behind it; <code>icon-dog-slot</code> (32x32, the doghouse with a plus). Locked silhouettes and the grey "pack full" art can be made in code, the way <code>greyTextureKey</code> makes grey cards. B needs no new art; an <code>icon-shop</code> would only be needed for an icon-only button.</li>
+      <li>Code (both): top bar with help, sound and settings at x 240, 284 and 328; the Gear section replaced by the Pocket row (352x44, opens the shop's Gear tab); the slot sign removed and a lock on the Dogs band that opens the Dogs tab; locked dog tiles drawn as silhouette, padlock and plate; tap a locked item to open the shop at it; a shop scene with Gear and Dogs tabs, rows, buying and the pocket picker; the walker line "Something new at the pet shop." the first time an item is affordable.</li>
+      <li>Code (A): the building's hit area, its press dip and its gold outline. Code (B): the SHOP button and its outline, and the best walk moved into the Logbook.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

@@ -8,5 +8,10 @@
     "title": "Sprite scale",
     "path": "scale.html",
     "description": "Woof Way at today's scale beside 40px dogs, a 40x60 walker and 64px lanes on the same 360x560 screen, and the bigger scale with 3.5 s of road in view instead of 5.25 s, with the camera numbers for each."
+  },
+  {
+    "title": "Start screen shop",
+    "path": "start-shop.html",
+    "description": "The start screen with help, sound and settings top right, a one-item Pocket in place of the Gear section, and a pet shop for gear, dogs and slots: a shop building in the gate scene or a SHOP button, the shop page, and the locked tile states."
   }
 ]
