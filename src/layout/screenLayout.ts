@@ -16,7 +16,9 @@ export interface ScreenConfig {
 // centred in it, which the walk, the lanes and the projection use. approach is the band's
 // bottom rows, where the backdrop paints the road's approach to its cross street: the moving
 // road surface is drawn over them, beside the backdrop's own verges. rasterView is the
-// approach and roadView together, which the road raster draws.
+// approach and roadView together, which the road raster draws. walkView is the backdrop band
+// and roadView together, everything between the top bar and the doghouses, which a card or
+// the pause menu dims.
 export interface ScreenLayout {
   approach: Rect;
   backdrop: Rect;
@@ -26,6 +28,7 @@ export interface ScreenLayout {
   road: Rect;
   roadView: Rect;
   topBar: Rect;
+  walkView: Rect;
 }
 
 // The doghouse row has a fixed number of equal slots, so the slots keep their place however
@@ -36,10 +39,11 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
   const dogRowY = height - dogRowHeight;
   const roadView = { height: dogRowY - roadY, width, x: 0, y: roadY };
   const slotWidth = width / dogSlotCount;
+  const backdrop = { height: backdropHeight, width, x: 0, y: config.topBarHeight };
   const approach = { height: config.roadIntoBand, width, x: 0, y: roadY - config.roadIntoBand };
   return {
     approach,
-    backdrop: { height: backdropHeight, width, x: 0, y: config.topBarHeight },
+    backdrop,
     dogRow: { height: dogRowHeight, width, x: 0, y: dogRowY },
     dogSlots: Array.from({ length: dogSlotCount }, (_, i) => ({
       height: dogRowHeight,
@@ -51,5 +55,6 @@ export function screenLayout(config: ScreenConfig): ScreenLayout {
     road: { ...roadView, width: roadWidth, x: (width - roadWidth) / 2 },
     roadView,
     topBar: { height: config.topBarHeight, width, x: 0, y: 0 },
+    walkView: { ...roadView, height: dogRowY - backdrop.y, y: backdrop.y },
   };
 }

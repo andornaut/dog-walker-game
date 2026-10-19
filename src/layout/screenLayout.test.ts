@@ -43,6 +43,11 @@ describe("screenLayout", () => {
       layout.road,
       { height: 320, width: 320, x: 20, y: 150 },
     ],
+    [
+      "the walk view from the band down to the doghouses",
+      layout.walkView,
+      { height: 430, width: 360, x: 0, y: 40 },
+    ],
     ["the doghouse row along the bottom", layout.dogRow, { height: 90, width: 360, x: 0, y: 470 }],
     [
       "three 120x90 doghouse slots in the row",

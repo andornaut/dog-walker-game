@@ -161,10 +161,12 @@ describe("stripTapAllowed", () => {
 
   it.each<[string, RunPause, boolean]>([
     ["takes taps while walking", pause, true],
-    ["takes taps under a card and hit stop", { ...pause, card: true, hitStop: true }, true],
-    ["takes taps in the pause menu", { ...pause, menu: "open" }, true],
-    ["leaves taps to help, which covers the bar", { ...pause, menu: "help" }, false],
-    ["leaves taps to settings, which cover the bar", { ...pause, menu: "settings" }, false],
+    ["takes taps in a hit stop", { ...pause, hitStop: true }, true],
+    ["leaves taps to a card, which dims the band", { ...pause, card: true }, false],
+    ["leaves taps to the pause menu", { ...pause, menu: "open" }, false],
+    ["leaves taps to the Home question", { ...pause, menu: "confirmHome" }, false],
+    ["leaves taps to help", { ...pause, menu: "help" }, false],
+    ["leaves taps to settings", { ...pause, menu: "settings" }, false],
   ])("%s", (_name, state, expected) => {
     expect(stripTapAllowed(state)).toBe(expected);
   });

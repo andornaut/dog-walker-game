@@ -12,7 +12,7 @@ import { exceedsTapDistance } from "../input/gestures";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
 import { namedEffectText, type TextData } from "../rules/effectText";
 import type { RunState } from "../state/runState";
-import type { RunPause } from "./topBar";
+import { type RunPause, walkCovered } from "./topBar";
 
 // An effect in force on the run, shown as an icon in the top bar's state strip.
 export type StripItem =
@@ -152,10 +152,10 @@ function stripName(
   }
 }
 
-// A tap on the strip opens its descriptions while the walk goes on, under a card and in the
-// pause menu; help and settings cover the bar, so a tap there is theirs.
+// A tap on the strip opens its descriptions while the walk goes on, and in a hit stop. A card
+// or a menu dims the band the strip hangs in, so a tap there is theirs.
 export function stripTapAllowed(pause: RunPause): boolean {
-  return pause.menu !== "help" && pause.menu !== "settings";
+  return !walkCovered(pause);
 }
 
 export function stripItemsKey(items: readonly StripItem[]): string {

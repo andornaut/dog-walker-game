@@ -34,11 +34,12 @@ import { encounterLook, type HasArt, type Look, skinnedArt, skinnedCardArt } fro
 import type { CardSource } from "../state/runState";
 import { fillLine } from "../text/lines";
 import { addDisplayText, hasDisplayFont } from "./displayText";
-import { addDim, drawRing, fillRect } from "./draw";
+import { drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, scalePixelText } from "./pixelText";
 import { currentSettings } from "./profileStore";
+import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
@@ -116,7 +117,7 @@ function illustrationKey(
   return look === null ? option.art : skinnedCardArt(has, look, option.art);
 }
 
-// Up to three cards over the dimmed road. The top bar and doghouses stay in view, and
+// Up to three cards over the dimmed band and road. The top bar and doghouses stay in view, and
 // the HUD marks the dogs the card affects. A disabled option is drawn in greys.
 export class CardScene extends Scene {
   private cardRects: Rect[] = [];
@@ -148,8 +149,8 @@ export class CardScene extends Scene {
     this.hold = undefined;
     this.parts = [];
     this.refusing = false;
-    const { roadView: road } = screenLayout(SCREEN_CONFIG);
-    addDim(this, road);
+    const { roadView: road, walkView } = screenLayout(SCREEN_CONFIG);
+    addRampDim(this, walkView);
 
     this.entries = [
       ...view.options.map((option) => ({

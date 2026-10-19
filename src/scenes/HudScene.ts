@@ -442,6 +442,10 @@ export class HudScene extends Scene {
     this.feedback?.update(view.run, pause);
     const items = stripItems(gameData, view.run);
     this.strip?.show(items);
+    // A card or a menu dims the band, so the strip's bubble closes under it.
+    if (walkCovered(pause)) {
+      this.strip?.closeBubble();
+    }
     this.stepHints(delta, walkCovered(pause), runHintTriggers(gameData, view.run, items.length));
     // The run state is immutable, so a changed pack or modifier list is a new array.
     const state: Record<string, unknown> = {

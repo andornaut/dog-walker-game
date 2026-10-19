@@ -1,7 +1,6 @@
 import { Scene } from "phaser";
 
 import { itemAt } from "../arrays";
-import { remapDarker } from "../assets/darkRamp";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
@@ -14,13 +13,14 @@ import {
 import { cardNumberForKey } from "../input/keyBindings";
 import { withKeyNumber } from "../input/keyNumbers";
 import { rectIndexAt } from "../layout/grid";
-import { insetRect, type Rect } from "../layout/rect";
+import { insetRect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { addDim, fillRect } from "./draw";
+import { fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
+import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import type { SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
@@ -35,17 +35,12 @@ export interface PauseSceneData {
   onResume: () => void;
 }
 
-// The road under the menu is redrawn this many steps down each colour's ramp.
-const DIM_STEPS = 2;
-const DIM_TEXTURE = "pause-dim";
-// Stands in for the darkened road when the renderer gives no snapshot to remap.
-
 interface MenuEntry {
   label: string;
   press: () => void;
 }
 
-// The pause menu over the dimmed road: resume, help, settings or head home; or the Home
+// The pause menu over the dimmed band and road: resume, help, settings or head home; or the Home
 // button's question, keep walking or head home. The HUD keeps running under it, so the top
 // bar's buttons and their keys (P, Escape and M) stay with it.
 export class PauseScene extends Scene {
@@ -59,8 +54,8 @@ export class PauseScene extends Scene {
 
   create({ mode, onHeadHome, onResume }: PauseSceneData): void {
     this.pressed = undefined;
-    const { roadView } = screenLayout(SCREEN_CONFIG);
-    this.dimRoad(roadView);
+    const { roadView, walkView } = screenLayout(SCREEN_CONFIG);
+    addRampDim(this, walkView);
     const headHome = () => {
       soundboardOf(this).stopMusic();
       onHeadHome();
@@ -119,10 +114,10 @@ export class PauseScene extends Scene {
       onTap: (target) => this.entries[target]?.press(),
       targetAt: (x, y) => rectIndexAt(layout.hits, x, y),
     });
-    // The dimmed road around the panel resumes, as Resume and Keep walking do. The top bar,
-    // backdrop and doghouses are not dimmed and keep their own taps.
+    // The dimmed band and road around the panel resume, as Resume and Keep walking do. The top
+    // bar and doghouses are not dimmed and keep their own taps.
     const covered = [insetRect(-1, panel), ...layout.hits];
-    listenOutsideTap(this, { covered, dim: roadView }, onResume);
+    listenOutsideTap(this, { covered, dim: walkView }, onResume);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       const number = cardNumberForKey(this.entries.length, event.key);
       if (number !== undefined) {
@@ -133,38 +128,6 @@ export class PauseScene extends Scene {
 
   private showPressed(): void {
     this.buttons.forEach((button, i) => button.setPressed(i === this.pressed));
-  }
-
-  // The frozen road read back from the next frame and redrawn darker. The panel drawn over
-  // it in that frame is darkened too, but this image sits under the panel.
-  private dimRoad(road: Rect): void {
-    const shade = addDim(this, road).setVisible(false);
-    const dim = this.add.image(road.x, road.y, "__DEFAULT").setOrigin(0).setVisible(false);
-    const fallback = () => shade.setVisible(true);
-    this.game.renderer.snapshotArea(road.x, road.y, road.width, road.height, (snapshot) => {
-      if (!dim.active) {
-        return;
-      }
-      if (!(snapshot instanceof HTMLImageElement)) {
-        fallback();
-        return;
-      }
-      if (this.textures.exists(DIM_TEXTURE)) {
-        this.textures.remove(DIM_TEXTURE);
-      }
-      const texture = this.textures.createCanvas(DIM_TEXTURE, road.width, road.height);
-      const context = texture?.getContext();
-      if (texture === null || context === undefined) {
-        fallback();
-        return;
-      }
-      context.drawImage(snapshot, 0, 0);
-      const pixels = context.getImageData(0, 0, road.width, road.height);
-      remapDarker(DIM_STEPS, pixels.data);
-      context.putImageData(pixels, 0, 0);
-      texture.refresh();
-      dim.setTexture(DIM_TEXTURE).setVisible(true);
-    });
   }
 
   private openSettings(): void {
