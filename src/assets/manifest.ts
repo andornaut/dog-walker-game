@@ -15,10 +15,19 @@ export interface ImageAsset {
   png: string;
 }
 
+// Each sound ships as Ogg Vorbis plus AAC, since iOS Safari cannot play Ogg.
+export interface SoundAsset {
+  key: string;
+  loop?: boolean;
+  m4a: string;
+  ogg: string;
+}
+
 // public/art/manifest.json: every asset the art agent exports, paths relative to public/art/.
 export interface AssetManifest {
   fonts: FontAsset[];
   images: ImageAsset[];
+  sounds: SoundAsset[];
   sprites: SpriteAsset[];
 }
 
@@ -39,17 +48,30 @@ function requireEntries<T>(fields: (keyof T & string)[], listName: string, value
   });
 }
 
+function requireSounds(value: unknown): SoundAsset[] {
+  // The list is optional so a manifest exported before sounds existed still loads.
+  const sounds = requireEntries<SoundAsset>(["key", "ogg", "m4a"], "sounds", value ?? []);
+  sounds.forEach((sound, index) => {
+    if (sound.loop !== undefined && typeof sound.loop !== "boolean") {
+      throw new Error(`manifest.sounds[${index}].loop must be a boolean`);
+    }
+  });
+  return sounds;
+}
+
 // Throws naming the offending entry, so a bad export fails at boot rather than as a missing texture.
 export function parseManifest(value: unknown): AssetManifest {
   const record = (value ?? {}) as Record<string, unknown>;
   const manifest: AssetManifest = {
     fonts: requireEntries<FontAsset>(["key", "png", "fnt"], "fonts", record.fonts),
     images: requireEntries<ImageAsset>(["key", "png"], "images", record.images),
+    sounds: requireSounds(record.sounds),
     sprites: requireEntries<SpriteAsset>(["key", "png", "json"], "sprites", record.sprites),
   };
 
   const seen = new Set<string>();
-  for (const { key } of [...manifest.fonts, ...manifest.images, ...manifest.sprites]) {
+  const entries = [...manifest.fonts, ...manifest.images, ...manifest.sounds, ...manifest.sprites];
+  for (const { key } of entries) {
     if (!KEBAB_CASE.test(key)) {
       throw new Error(`manifest key "${key}" must be kebab-case`);
     }

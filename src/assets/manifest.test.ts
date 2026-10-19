@@ -5,6 +5,9 @@ import { assetUrl, parseManifest } from "./manifest";
 const valid = {
   fonts: [{ fnt: "fonts/pixel.fnt", key: "pixel", png: "fonts/pixel.png" }],
   images: [{ key: "card-frame", png: "images/card-frame.png" }],
+  sounds: [
+    { key: "music-walk", loop: true, m4a: "sounds/music-walk.m4a", ogg: "sounds/music-walk.ogg" },
+  ],
   sprites: [{ json: "sprites/dog-koda.json", key: "dog-koda", png: "sprites/dog-koda.png" }],
 };
 
@@ -15,6 +18,17 @@ describe("parseManifest", () => {
 
   it("accepts empty lists", () => {
     expect(parseManifest({ fonts: [], images: [], sprites: [] }).sprites).toEqual([]);
+  });
+
+  it("treats a missing sounds list as no sounds", () => {
+    expect(parseManifest({ ...valid, sounds: undefined }).sounds).toEqual([]);
+  });
+
+  it("requires both audio formats and a boolean loop", () => {
+    const noM4a = [{ key: "sfx-tip", ogg: "sounds/sfx-tip.ogg" }];
+    expect(() => parseManifest({ ...valid, sounds: noM4a })).toThrow("manifest.sounds[0].m4a");
+    const badLoop = [{ key: "sfx-tip", loop: "yes", m4a: "a.m4a", ogg: "a.ogg" }];
+    expect(() => parseManifest({ ...valid, sounds: badLoop })).toThrow("loop must be a boolean");
   });
 
   it("names the list that is missing", () => {
