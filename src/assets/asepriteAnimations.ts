@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 import { assertNever } from "../rules/assertNever";
-import { isPlainObject, issuePath, objectMessage, record } from "./jsonSchema";
+import { isPlainObject, objectMessage, parseOrThrow, record } from "./jsonSchema";
 
 const DIRECTIONS = ["forward", "reverse", "pingpong", "pingpong_reverse"] as const;
 
@@ -84,12 +84,7 @@ function frameIndexes(tag: AsepriteTag): number[] {
 }
 
 function parseSheet(textureKey: string, value: unknown): AsepriteSheet {
-  const result = v.safeParse(sheetSchema, value, { abortPipeEarly: true });
-  if (!result.success) {
-    const [issue] = result.issues;
-    throw new Error(`${textureKey} sheet${issuePath(issue)} ${issue.message}`);
-  }
-  return result.output;
+  return parseOrThrow(`${textureKey} sheet`, sheetSchema, value);
 }
 
 // Frame names are the keys of the exported frames object, in export order, which is

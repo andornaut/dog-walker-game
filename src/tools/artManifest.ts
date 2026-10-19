@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { isPlainObject, issuePath } from "../assets/jsonSchema";
+import { isPlainObject, parseOrThrow } from "../assets/jsonSchema";
 import {
   type AssetManifest,
   type FontAsset,
@@ -54,12 +54,7 @@ const extraSchema = strictRecord({
 export type ArtManifestExtra = v.InferOutput<typeof extraSchema>;
 
 export function parseArtManifestExtra(value: unknown): ArtManifestExtra {
-  const result = v.safeParse(extraSchema, value, { abortPipeEarly: true });
-  if (!result.success) {
-    const [issue] = result.issues;
-    throw new Error(`${ART_MANIFEST_EXTRA}${issuePath(issue)} ${issue.message}`);
-  }
-  return result.output;
+  return parseOrThrow(ART_MANIFEST_EXTRA, extraSchema, value);
 }
 
 function splitName(name: string): { ext: string; stem: string } {

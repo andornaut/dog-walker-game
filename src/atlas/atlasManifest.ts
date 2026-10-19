@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { issuePath, record } from "../assets/jsonSchema";
+import { parseOrThrow, record } from "../assets/jsonSchema";
 
 // Written by the build next to /art/manifest.json, paths relative to /art/ like it.
 export const ATLAS_MANIFEST_PATH = "atlas-manifest.json";
@@ -72,12 +72,7 @@ const atlasManifestSchema = record({
 });
 
 export function parseAtlasManifest(value: unknown): AtlasManifest {
-  const result = v.safeParse(atlasManifestSchema, value, { abortPipeEarly: true });
-  if (!result.success) {
-    const [issue] = result.issues;
-    throw new Error(`atlas manifest${issuePath(issue)} ${issue.message}`);
-  }
-  return result.output;
+  return parseOrThrow("atlas manifest", atlasManifestSchema, value);
 }
 
 // The Phaser texture key an atlas page loads under. The colon keeps it apart from the

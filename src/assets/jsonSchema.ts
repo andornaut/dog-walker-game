@@ -21,8 +21,22 @@ export function record<T extends v.ObjectEntries>(entries: T) {
 }
 
 // The issue's location, as .field and [index] segments.
-export function issuePath(issue: v.BaseIssue<unknown>): string {
+function issuePath(issue: v.BaseIssue<unknown>): string {
   return (issue.path ?? [])
     .map(({ key }) => (typeof key === "number" ? `[${key}]` : `.${String(key)}`))
     .join("");
+}
+
+// The value as the schema reads it, or an error naming the first issue: what, where, and why.
+export function parseOrThrow<Schema extends v.GenericSchema>(
+  what: string,
+  schema: Schema,
+  value: unknown,
+): v.InferOutput<Schema> {
+  const result = v.safeParse(schema, value, { abortPipeEarly: true });
+  if (!result.success) {
+    const [issue] = result.issues;
+    throw new Error(`${what}${issuePath(issue)} ${issue.message}`);
+  }
+  return result.output;
 }

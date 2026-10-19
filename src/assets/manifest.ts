@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 import { DEPTH_STEPS } from "./depthSteps";
-import { issuePath, record } from "./jsonSchema";
+import { parseOrThrow, record } from "./jsonSchema";
 
 // Where a road sprite stands, measured from frame 0 by the art pipeline, in frame pixels.
 export interface SpriteAnchor {
@@ -121,12 +121,7 @@ const manifestSchema = v.pipe(
 
 // Throws naming the offending entry, so a bad export fails at boot rather than as a missing texture.
 export function parseManifest(value: unknown): AssetManifest {
-  const result = v.safeParse(manifestSchema, value, { abortPipeEarly: true });
-  if (!result.success) {
-    const [issue] = result.issues;
-    throw new Error(`manifest${issuePath(issue)} ${issue.message}`);
-  }
-  return result.output;
+  return parseOrThrow("manifest", manifestSchema, value);
 }
 
 export function assetUrl(baseUrl: string, path: string): string {

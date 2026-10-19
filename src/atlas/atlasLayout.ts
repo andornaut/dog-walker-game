@@ -1,7 +1,7 @@
 import * as v from "valibot";
 
 import { itemAt } from "../arrays";
-import { isPlainObject, issuePath, record } from "../assets/jsonSchema";
+import { isPlainObject, parseOrThrow, record } from "../assets/jsonSchema";
 import { LOADING_ART } from "../layout/loadingScreen";
 import type { Point, Rect } from "../layout/rect";
 import { ATLAS_DIR, type AtlasFrame, type AtlasTexture, BASE_FRAME } from "./atlasManifest";
@@ -103,12 +103,7 @@ const asepriteSheet = record({
 // A sprite's frames from its Aseprite "hash" export, in export order. Throws on a rotated or
 // trimmed frame, whose placement in the sheet the packer does not reproduce.
 export function spriteSource(key: string, png: string, json: unknown): SourceTexture {
-  const result = v.safeParse(asepriteSheet, json, { abortPipeEarly: true });
-  if (!result.success) {
-    const [issue] = result.issues;
-    throw new Error(`${key} sheet${issuePath(issue)} ${issue.message}`);
-  }
-  const { frames, meta } = result.output;
+  const { frames, meta } = parseOrThrow(`${key} sheet`, asepriteSheet, json);
   return {
     frames: Object.entries(frames).map(([name, { duration, frame, rotated, trimmed }]) => {
       if (rotated === true || trimmed === true) {
