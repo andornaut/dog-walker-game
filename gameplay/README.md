@@ -47,17 +47,22 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 Rules in the rulebook that the game doesn't have yet:
 
-1. **Dog quirks:** one per dog (the Quirks table), with the roster changes (Archie hyper, Snowball calm, Penny Friendly)
-2. **Walkers:** pace and style effects, unlocks on first finishing zones 1 to 3, and the sidewalk greeting (the Walkers section)
-3. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
+1. **Area effects:** fixed catches by size, the Hop label
+2. **Firing:** no fee clawback; a fired owner stops paying from the current zone
+3. **Obstacle skins:** the per-zone names, hit labels and art (Obstacle skins)
+4. **Pet shop and Pocket:** the shop building, the Pocket strip, the tile states and the top-right controls (Home screen and progression)
+5. **Scale:** 5 lanes of 64px with 40px sprites, and pack bands that grow with lane width
+6. **Walkers:** pace and style effects, unlocks on first finishing zones 1 to 3, and the sidewalk greeting (Walkers)
+7. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
 
-Tuning against the targets, with the simulator before and after:
+Tuning against the targets, after one re-baseline on the shared step loop with every item above in:
 
-- Firing: walks with a firing run too rare (novice 46%, typical 12%, expert 2%), and card policies differ too much, because every heart-costing card has a money way out; re-measure with the mixed policy
-- Area effects: with no catch roll, more puddle cards; lower puddle weights to hold about 8 cards a walk
-- Gear: each item within the window; running shoes and the whistle measured on a pack with no big dog
-- Quirks and walkers: re-baseline once both are in the simulator; walkers against the walker spread
+- Area effects: three-dog packs against skunks; puddle weights to hold about 8 cards a walk
 - Big Payday's threshold, now rarely earned
+- Firing: walks with a firing run too rare (typical 12%, expert 2%) and card policies differ too much; measure with the mixed policy
+- Gear: each item within the window; running shoes and the whistle on a pack with no big dog
+- Quirks: Nugget with Pierre below the two-dog window
+- Walkers: the walker spread at typical and novice skill
 
 Decided at the phone playtest:
 
