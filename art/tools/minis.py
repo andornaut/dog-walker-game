@@ -53,7 +53,7 @@ def depth_steps():
 
 
 STEPS = depth_steps()
-# The steps the hand-drawn maps here and in hazards.py are drawn for.
+# The steps the dogs get variants at, and that hazards.py builds itself.
 SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))
 
 

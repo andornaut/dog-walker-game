@@ -202,6 +202,11 @@ def fade(cv, y0, rows, colour, x0=0, x1=SW, keep=None):
 
 # ---------- sprites ----------
 
+def snap(s):
+    """The depth step nearest a scale, judged by ratio, for roadside.py's props."""
+    return min((d["scale"] for d in LAYOUT["depthSteps"]), key=lambda t: abs(math.log(s / t)))
+
+
 def sprite(key, tag, s, i=0):
     """The frame at scale s as the game draws it (help.depth_frame), with its feet row: the last
     opaque row."""

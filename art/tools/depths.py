@@ -2,7 +2,7 @@
 """Draw the depth variants of road sprites that the other art scripts leave
 out: every depth step (minis.STEPS, from shared/depth-steps.json) for the road
 sprites that have no variants elsewhere, and the steps in BETWEEN (those
-without hazards.py's hand-drawn art) for hazards.py's squirrel-dash, loose-dog,
+hazards.py does not build) for hazards.py's squirrel-dash, loose-dog,
 ball-bounce and cyclist. Each runs the sprite's own drawing function on a
 minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
@@ -41,7 +41,7 @@ import road  # noqa: E402
 from minis import SCALES, STEPS, small, snap  # noqa: E402
 from pixel import build, preview  # noqa: E402
 
-# The steps hazards.py has no hand-drawn art for.
+# The steps hazards.py leaves to this file: it builds SCALES itself.
 BETWEEN = tuple(q for q in STEPS if q not in SCALES)
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 # The pose arguments of road.person that move a part by pixels.
