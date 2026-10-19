@@ -30,8 +30,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Web, phone browser first. Touch and keyboard; mouse is not planned
 - Portrait, ¾ top-down view, 5 lanes
 - Layout: a shorter screen (360×560). From the top: the status bar (money, treat count, zone progress, a Home button and pause; mute is in Settings and on the M key); a backdrop band showing the current zone, where scenery gags play; the road across the full width, scrolling all the way to the top of its area; and a row of doghouses along the bottom, one per dog slot. Cards cover the paused, dimmed road; the status bar and doghouses stay visible
-- **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees." with Head home and Keep walking
-- The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead. Whether the far end fades into the backdrop band is decided after seeing it. Lanes, distances and collisions are unchanged by it
+- **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees." with Head home and Keep walking. Head home (here or in the pause menu) keeps tips and earlier zones' fees; the current zone pays nothing
+- The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 5 to 5.5 seconds of road are visible ahead. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. Each lane-width of horizontal travel moves the target lane one lane, relative to where the drag started, so the thumb never covers the walker. The pack moves lane by lane toward the target at the normal lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A tap on the dog column gives a treat instead
 - **Keyboard:** ←/→, A/D or H/L; one lane per press, and holding repeats
@@ -57,19 +57,18 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Forks:** the road meets a cross street and a fork card offers three paths (left, straight, right), each leading to a zone you haven't walked this run, sorted easiest on the left to hardest on the right. Each path card shows the zone's name, difficulty and fee multiplier
 - **Zones** (6, each walk visits 4 with no repeats):
 
-| Zone | Difficulty | Fees | Encounter mix |
-| --- | --- | --- | --- | --- |
-| Snooze Crescent | Easiest | ×0.7 | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
-| Bark Park | Easy | ×0.8 | Other dogs, squirrels, more lucky finds; no thieves, no cyclists |
-| Woof Way | Normal | ×1 | Puddles, the mail carrier, cones; movers rare. Always the first zone |
-| Sniff Street Shops | Busy | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers |
-| Paws Promenade | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds |
-| The Long Way Home | Hard | ×1.5 | Everything, densest and fastest, the most movers |
+| Zone               | Difficulty  | Fees  | Encounter mix                                                             |
+| ------------------ | ----------- | ----- | ------------------------------------------------------------------------- |
+| Snooze Crescent    | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
+| Bark Park          | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists          |
+| Woof Way           | Normal      | ×1    | Puddles, the mail carrier, cones; movers rare. Always the first zone      |
+| Sniff Street Shops | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers             |
+| Paws Promenade     | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds    |
+| The Long Way Home  | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
 
 - After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
 - An owner who fires you takes back every fee their dog earned this run; tips stay
 - The run ends after zone 4 or when no dogs are left. You keep everything earned except fees taken back
-- **Head home:** from the pause menu at any time. Keeps tips and earlier zones' fees; the current zone pays nothing
 - **End screen:** the run's total with a breakdown (fees, tips, card costs, fees taken back), zones walked and the bank; a new-best ribbon when it beats the best walk; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
@@ -107,17 +106,17 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Energy            | Calm · steady · hyper. Sets how quickly the dog's need becomes urgent                                                                                                                                                                                                                                         |
 | Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                                                    |
 
-| Dog | Breed | Need | Owner | Look |
-| -------- | --------------- | ------------------------------ | ------------------------------------- |
-| Duchess | Maltese | Friendly | Rosa, retired florist | White coat, pink bow |
-| Nugget | Pug | Thirsty | Kevin, pet influencer | Fawn, black mask, tiny bandana |
-| Zippy | Jack Russell | Playful | Mr. Pruitt, retired accountant | White with tan patches, red collar |
-| Pierre | Standard poodle | Nosy | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms |
-| Biscuit | Beagle | Regular | Sam, barista | Tricolour, floppy ears, green collar |
-| Archie | Australian Shepherd | Playful | Ophelia, stage actor | Blue merle, one blue eye, red bandana |
-| Snowball | Samoyed | Friendly | Tiffany, wedding planner | Fluffy white, collar with a bell |
-| Penny | Golden retriever | Thirsty | Dr. Hughes, dentist | Golden coat, feathery tail, blue collar |
-| Koda | Husky | Nosy | Jesse, trail runner | Grey and white, blue eyes, harness |
+| Dog      | Breed               | Need     | Owner                          | Look                                    |
+| -------- | ------------------- | -------- | ------------------------------ | --------------------------------------- |
+| Duchess  | Maltese             | Friendly | Rosa, retired florist          | White coat, pink bow                    |
+| Nugget   | Pug                 | Thirsty  | Kevin, pet influencer          | Fawn, black mask, tiny bandana          |
+| Zippy    | Jack Russell        | Playful  | Mr. Pruitt, retired accountant | White with tan patches, red collar      |
+| Pierre   | Standard poodle     | Nosy     | Madame Lefevre, dog-show judge | Apricot, show-clip pom-poms             |
+| Biscuit  | Beagle              | Regular  | Sam, barista                   | Tricolour, floppy ears, green collar    |
+| Archie   | Australian Shepherd | Playful  | Ophelia, stage actor           | Blue merle, one blue eye, red bandana   |
+| Snowball | Samoyed             | Friendly | Tiffany, wedding planner       | Fluffy white, collar with a bell        |
+| Penny    | Golden retriever    | Thirsty  | Dr. Hughes, dentist            | Golden coat, feathery tail, blue collar |
+| Koda     | Husky               | Nosy     | Jesse, trail runner            | Grey and white, blue eyes, harness      |
 
 Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait and have laid-back owners, for an easier first run. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
@@ -152,9 +151,9 @@ Obstacles hit by accident open a choice card.
 
 **Stinky** (debuff): cuts tip value for the rest of the zone. A second skunk refreshes it; it never stacks.
 
-### More encounters
+### Zone encounters
 
-Zone-specific encounters (they follow the zone's encounter mix):
+Each appears only in its zones:
 
 | Encounter      | Zones                         | Size                  | Who's affected                            | Options                                                                                                                                                         | Hit label         |
 | -------------- | ----------------------------- | --------------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
@@ -260,7 +259,7 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 - **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Maple Street, beside a "Dog Walker" yard sign. Equipped gear shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner in their temperament (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, zones, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you in the park"). Best walk and walk count also sit in the top bar next to the bank
-- **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone); times each world was finished. Each dog's roster card shows its walks, zones finished and times fired
+- **Stats page** (behind the logbook): runs played; runs finished, headed home or out of dogs; best run earnings; lifetime earnings; total firings and the owner who fired you most; best zone completed (heading home mid-zone doesn't count that zone). Each dog's roster card shows its walks, zones finished and times fired
 - **Achievements:** a badge wall on the Stats page, earned badges in colour and locked ones greyed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; there is no other reward. Each badge shows its name, goal and one line:
 
 | Group      | Badge                   | Goal                                | Line                          |
@@ -281,15 +280,30 @@ Everything bought on the home screen is permanent; upgrade cards are the run-onl
 | Silly      | Eau de Skunk            | Be Stinky in 3 zones of one walk    | You can smell this badge.     |
 | Silly      | Squirrel!               | Let a chaser chase 5 squirrels      | So close. Every time.         |
 
-## Milestones
-
-Each milestone builds on the last; placeholder art is fine until Milestone 6.
-
-1. **Setup:** engine chosen, repo, auto-deploy of the web build, coloured-box placeholders
-2. **Runner core:** 5 lanes, scrolling, spawning, collisions, keyboard and touch
-3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, lucky encounters, Stinky, owner quips, dogs leave at 0 ♥
-4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, pause and head home, end screen with earnings, first-time hints
-5. **Dogs and home screen:** 9-dog roster (3 unlocked, 6 bought), dog slots (1 to start, 2 bought), pack picks, bank, shop, gear and loadout, gate scene, walker picker, owner parting lines, logbook, Stats page and achievements, settings, save
-6. **Pixel pass and phone playtest:** sprites for the 4 walkers, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 3 scenery gags, 2 pickups, achievement badges and celebration, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops; sound effects and one music loop; accessibility basics; test on real phones
+## Remaining for the first build
 
 **Done when:** a walk lasts about 8 minutes, we want to play "one more", and it works by touch on a phone browser.
+
+Rules above that the game doesn't have yet:
+
+1. **Layout:** 360×560 with doghouses along the bottom, the Home button, and the road scrolling to the top of its area
+2. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
+3. **Forks and zones:** the fork card and the 6 zones with their encounter mix, density, speed and fees
+4. **Needs and purposeful pulls:** need words, urgency, need spots, need cards, accidents; pulls only toward a visible target, never into an obstacle
+5. **Zone encounters:** the five above plus the lemonade stand
+6. **Art:** the zone encounters, the lemonade stand and the fork's path cards (need art is in)
+
+Tuning, after each build, with the simulator before and after:
+
+- Road speed to 150 px/s once the 560 layout lands
+- Need urgency, gone-wrong time and need card chance; zone encounter weights; per-zone density, speed and mover share
+- Pack size: a bigger pack earns little more per walk than one dog
+- Gear value against price (fanny pack is the only one that pays for itself)
+- Big Payday's threshold, now rarely earned
+- Earnings: about 45 walks to buy everything
+
+Decided at the phone playtest:
+
+- The game's name
+- Whether the far end of the road fades into the backdrop band
+- Fewer minor cards (in [`ideas.md`](ideas.md))

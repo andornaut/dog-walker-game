@@ -13,7 +13,3 @@ Format: `- [status] **Idea**: short description · notes`
 - [cut] **Scripted first walk**: a one-zone tutorial walk with guaranteed encounters · first-time hints and the help screen teach the rules
 - [cut] **Mud encounter**: a mud obstacle for Fancy dogs · puddles cover it
 - [cut] **Story recap on the end screen**: retell the run's biggest moments · the end screen shows earnings only
-
-## Open questions
-
-- Check in playtests: whether 1, 2 and 3 dogs earn about the same; whether a 12-minute run feels right; shop prices against real earnings

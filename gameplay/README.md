@@ -4,13 +4,13 @@ A pixel-art game (simple, retro, cute) about being a dog walker. Web first, then
 
 ## Docs
 
-| Doc                                           | What it holds                                    | Changes when                     |
-| --------------------------------------------- | ------------------------------------------------ | -------------------------------- |
-| [`game-design.md`](game-design.md)            | The rulebook: rules, content and milestones      | A design decision lands          |
-| [`next.md`](next.md)                          | Everything set aside for later, unscheduled      | Something is set aside for later |
-| [`ideas.md`](ideas.md)                        | Undecided and cut ideas, and open questions      | Every design session             |
-| [`art/style-guide.md`](../art/style-guide.md) | Visual rules: resolution, palette, sprites, mood | An art decision lands            |
-| [`tech-plan.md`](../tech-plan.md)             | Stack, architecture, save data, porting          | A tech decision lands            |
+| Doc                                           | What it holds                                     | Changes when                     |
+| --------------------------------------------- | ------------------------------------------------- | -------------------------------- |
+| [`game-design.md`](game-design.md)            | The rulebook, and what's left for the first build | A design decision lands          |
+| [`next.md`](next.md)                          | Everything set aside for later, unscheduled       | Something is set aside for later |
+| [`ideas.md`](ideas.md)                        | Undecided and cut ideas, and open questions       | Every design session             |
+| [`art/style-guide.md`](../art/style-guide.md) | Visual rules: resolution, palette, sprites, mood  | An art decision lands            |
+| [`tech-plan.md`](../tech-plan.md)             | Stack, architecture, save data, porting           | A tech decision lands            |
 
 Ideas stay in `ideas.md` until agreed in a session, then move to the doc they belong in and leave `ideas.md`. Docs state the current rule only; git keeps the history.
 
