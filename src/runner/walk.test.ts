@@ -385,6 +385,22 @@ describe("planZone", { timeout: 15_000 }, () => {
     }
   });
 
+  // A one-row spawn's window is its hit box and the tallest pack's band; the rest of a row's
+  // spacing must hold a lane move, or the planner can steer no lane between rows and drops
+  // the spawns that would need one.
+  it("leaves a lane move between rows of the game's road, in every zone, at every pace", () => {
+    const { cell, tallestPackBand } = GAME_ROAD;
+    const gap =
+      read(TUNING, "pixels", "spawnRowSpacing") - (cell.length - 2 * cell.inset) - tallestPackBand;
+    for (const walker of Object.keys(WALKERS) as WalkerId[]) {
+      for (const zone of ZONE_IDS) {
+        const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
+        const laneMove = walkScrollSpeed(REAL, zoned) * read(TUNING, "seconds", "laneMove");
+        expect(gap, `${walker} in ${zone}`).toBeGreaterThanOrEqual(laneMove);
+      }
+    }
+  });
+
   it("draws a forced stop not met yet this run", () => {
     let walk = planned;
     for (let zone = 0; zone < 4; zone++) {

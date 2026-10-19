@@ -830,31 +830,31 @@
       [
         {
           "dx": 0,
-          "footDy": -58
+          "footDy": -53
         }
       ],
       [
         {
           "dx": -20,
-          "footDy": -58
+          "footDy": -53
         },
         {
           "dx": 20,
-          "footDy": -55
+          "footDy": -50
         }
       ],
       [
         {
           "dx": 0,
-          "footDy": -68
+          "footDy": -54
         },
         {
           "dx": -20,
-          "footDy": -64
+          "footDy": -49
         },
         {
           "dx": 20,
-          "footDy": -61
+          "footDy": -46
         }
       ]
     ],

@@ -11,20 +11,20 @@ export interface PackPlacement {
 
 // Indexed by pack size - 1; the first dog picked leads.
 const FORMATIONS: readonly (readonly PackPlacement[])[] = [
-  [{ dx: 0, footDy: -58 }],
+  [{ dx: 0, footDy: -53 }],
   [
-    { dx: -20, footDy: -58 },
-    { dx: 20, footDy: -55 },
+    { dx: -20, footDy: -53 },
+    { dx: 20, footDy: -50 },
   ],
   [
-    { dx: 0, footDy: -68 },
-    { dx: -20, footDy: -64 },
-    { dx: 20, footDy: -61 },
+    { dx: 0, footDy: -54 },
+    { dx: -20, footDy: -49 },
+    { dx: 20, footDy: -46 },
   ],
 ];
 
 // The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
-// ahead of the walker (projected 0.91 to 0.92), so they never change size, and following the
+// ahead of the walker (projected 0.93 to 0.94), so they never change size, and following the
 // projection there would drop two or three pixel rows from every dog. Their status loops
 // follow, at full size.
 export const PACK_DEPTH = 1;
