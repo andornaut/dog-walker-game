@@ -15,7 +15,13 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
 import { currentZoneId } from "../../rules/route";
-import { encounterLook, minorObstacleLook, skinnedArt, skinnedOwnerArt } from "../../rules/skins";
+import {
+  encounterLook,
+  minorObstacleLook,
+  skinnedArt,
+  skinnedCloudArt,
+  skinnedOwnerArt,
+} from "../../rules/skins";
 import { isMoverObstacle } from "../../runner/movers";
 import { isNeedSpot } from "../../runner/needs";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
@@ -188,7 +194,7 @@ export class ItemViews {
       parts = [part(skinnedArt(has, minorObstacleLook(gameData, zone, item.kind)))];
     } else if (item.kind === "skunk") {
       parts = [
-        part(SKUNK_CLOUD_KEY, flat),
+        part(skinnedCloudArt(has, encounterLook(gameData, zone, "skunk")), flat),
         part(encounterArt("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
       ];
     } else if (item.kind === "otherDog" && has(otherDogOwner())) {

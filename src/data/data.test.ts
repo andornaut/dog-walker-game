@@ -321,7 +321,19 @@ describe("obstacle skins", () => {
       expect(skin?.name, id).not.toBe("");
       expect(skin?.art, id).toMatch(KEBAB_CASE);
       expect(skin?.cardArtPrefix ?? "card-x", id).toMatch(/^card-[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(skin?.cloudArt ?? "x", id).toMatch(KEBAB_CASE);
+      expect(skin?.statusArt ?? "fx-status-x", id).toMatch(/^fx-status-[a-z0-9]+(-[a-z0-9]+)*$/);
     }
+  });
+
+  it("names a cloud only on a Stink skin, and a status overlay only where a status starts", () => {
+    const misplaced = skinned.flatMap(({ id, skin }) => [
+      ...(skin?.cloudArt === undefined || id === "skunk" ? [] : [`${id}: cloudArt`]),
+      ...(skin?.statusArt === undefined || ["puddle", "skunk", "thief"].includes(id)
+        ? []
+        : [`${id}: statusArt`]),
+    ]);
+    expect(misplaced).toEqual([]);
   });
 
   it("skins only the five obstacle kinds and the minor obstacles but the barrier", () => {

@@ -3,16 +3,16 @@ import type { GameObjects, Scene } from "phaser";
 import type { DogId } from "../data/types";
 import {
   dogDepthStep,
-  type DogStatusId,
-  statusOverlayKey,
+  markOverlayKey,
+  type StatusMark,
   statusOverlayLift,
 } from "../runner/statuses";
 import { depthLook, playTag, spriteTopY } from "./sprites";
 
-// The status loops over the dogs on the road: each dog's newest status, bottom-centre on its
-// centre column a few pixels below its top opaque row, at the dog's depth step and drawn just
-// over the dog. The top row is read from the dog's first frame on first use, since the
-// manifest's anchors give only the feet line and width.
+// The status loops over the dogs on the road: each dog's newest status, in the art of the skin
+// that started it, bottom-centre on its centre column a few pixels below its top opaque row, at
+// the dog's depth step and drawn just over the dog. The top row is read from the dog's first
+// frame on first use, since the manifest's anchors give only the feet line and width.
 export class StatusOverlays {
   private readonly scene: Scene;
   private readonly sprites = new Map<DogId, GameObjects.Sprite>();
@@ -23,15 +23,16 @@ export class StatusOverlays {
 
   draw(
     dogs: ReadonlyMap<DogId, GameObjects.Sprite>,
-    statusOf: (dog: DogId) => DogStatusId | undefined,
+    statusOf: (dog: DogId) => StatusMark | undefined,
     still: boolean,
   ): void {
+    const has = (key: string) => this.scene.textures.exists(key);
     for (const [dog, dogSprite] of dogs) {
-      const status = dogSprite.visible ? statusOf(dog) : undefined;
+      const mark = dogSprite.visible ? statusOf(dog) : undefined;
       const dogKey = dogSprite.texture.key;
       const step = dogDepthStep(dogKey, dogSprite.scaleY);
       const look =
-        status === undefined ? undefined : depthLook(this.scene, statusOverlayKey(status), step);
+        mark === undefined ? undefined : depthLook(this.scene, markOverlayKey(has, mark), step);
       let sprite = this.sprites.get(dog);
       if (look === undefined || !this.scene.textures.exists(look.key)) {
         sprite?.setVisible(false);

@@ -18,7 +18,7 @@ import { isSteeringLocked } from "../../runner/laneControl";
 import { laneMotionX } from "../../runner/laneMotion";
 import { isNeedUrgent, isNervousAlone } from "../../runner/needs";
 import { pullPose, type Pulls, type PullTargetKind } from "../../runner/pulls";
-import type { DogStatusId } from "../../runner/statuses";
+import type { StatusMark } from "../../runner/statuses";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
 import { drawPixelLine } from "../draw";
@@ -54,7 +54,8 @@ export interface PackFrame {
   shadow: Shadow;
   // Whether animations keep still, from the player's settings.
   still: boolean;
-  statusOf: (dog: DogId) => DogStatusId | undefined;
+  // The status mark a dog shows, if any.
+  statusOf: (dog: DogId) => StatusMark | undefined;
 }
 
 // The walker, the dogs on their leashes, and what shows over them: the stumble's dizzy

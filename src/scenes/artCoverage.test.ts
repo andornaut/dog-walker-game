@@ -31,6 +31,7 @@ import {
   NEED_ART,
   needSpotSpriteKey,
   ownerFaceKey,
+  SKUNK_CLOUD_KEY,
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
@@ -447,6 +448,28 @@ describe("road object art", () => {
     expect(steps).toEqual(expect.arrayContaining([0.75, 0.5]));
     const missing = keys.flatMap((key) =>
       steps.map((step) => depthVariantKey(key, step) ?? key).filter((key) => !sprites.has(key)),
+    );
+    expect(missing).toEqual([]);
+  });
+
+  // A skin may name art not drawn yet, which falls back to the base; once drawn, it must do
+  // A Stink skin's own cloud and a skin's own status overlay, once drawn, play what the base's
+  // do at every step the base has: skunk-cloud's tags, and a status overlay's loop.
+  it("draws every listed skin cloud and status overlay with its base's tags at each base step", () => {
+    const overlays = STATUSES.map(statusOverlayKey);
+    const skins = ENCOUNTERS.flatMap((id) => Object.values(gameData.encounters[id].skins ?? {}));
+    const pairs = skins.flatMap((skin) => [
+      ...(skin?.cloudArt !== undefined && sprites.has(skin.cloudArt)
+        ? [{ art: skin.cloudArt, bases: [SKUNK_CLOUD_KEY], tags: tagsOf(SKUNK_CLOUD_KEY) }]
+        : []),
+      ...(skin?.statusArt !== undefined && sprites.has(skin.statusArt)
+        ? [{ art: skin.statusArt, bases: overlays, tags: ["loop"] }]
+        : []),
+    ]);
+    const missing = pairs.flatMap(({ art, bases, tags }) =>
+      [1, ...variantSteps(bases)].flatMap((step) =>
+        missingTags(depthVariantKey(art, step) ?? art, tags),
+      ),
     );
     expect(missing).toEqual([]);
   });

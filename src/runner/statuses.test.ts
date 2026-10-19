@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { ENCOUNTERS } from "../data/encounters";
-import type { DogId, EncounterId } from "../data/types";
+import type { DogId, EncounterId, ZoneId } from "../data/types";
+import { WORLD } from "../data/world";
 import type { Choice } from "../rules/choices";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
@@ -9,6 +10,7 @@ import {
   activeStatuses,
   dogDepthStep,
   type DogStatusId,
+  markOverlayKey,
   shownStatus,
   startStatuses,
   statusesKey,
@@ -19,7 +21,7 @@ import {
 } from "./statuses";
 
 const data = { encounters: ENCOUNTERS };
-const at = { timeMs: 5000, zoneIndex: 1 };
+const at = { timeMs: 5000, zone: WORLD.firstZone, zoneIndex: 1 };
 
 function card(encounter: EncounterId, affected: readonly DogId[]) {
   return { affected, source: { affected, encounter, kind: "encounter" } as const };
@@ -77,6 +79,32 @@ describe("startStatuses", () => {
   it("starts nothing for a forced stop", () => {
     const stop: CardSource = { kind: "forcedStop", stop: "stopSign" };
     expect(startStatuses(data, { affected: ["koda"], source: stop }, at, 0, [])).toEqual([]);
+  });
+
+  // A Splash skin in the zone with its own soaked overlay; the other zone has no skin.
+  const MUD = "fx-status-soaked-mud";
+  const skinned = {
+    encounters: {
+      ...ENCOUNTERS,
+      puddle: {
+        ...ENCOUNTERS.puddle,
+        skins: { [at.zone]: { art: "splash-mud", name: "Mud patch", statusArt: MUD } },
+      },
+    },
+  };
+  const splash = (zone: ZoneId) =>
+    startStatuses(skinned, card("puddle", ["koda"]), { ...at, zone }, 0, []);
+  const otherZone = WORLD.zones.map(({ id }) => id).find((id) => id !== at.zone) ?? at.zone;
+
+  it.each<[string, () => StatusMark[], string | undefined]>([
+    ["remembers the skin's status art in its zone", () => splash(at.zone), MUD],
+    [
+      "keeps the base overlay where the encounter wears no skin",
+      () => splash(otherZone),
+      undefined,
+    ],
+  ])("%s", (_, marks, art) => {
+    expect(marks().map((mark) => mark.art)).toEqual([art]);
   });
 
   it("restarts a dog's status in place and drops marks from earlier zones", () => {
@@ -166,7 +194,7 @@ describe("shownStatus", () => {
   ];
 
   it("shows each of a dog's statuses for a second in turn, the most recent first", () => {
-    expect([4000, 4999, 5000, 6000].map((t) => shownStatus(active, t, "koda"))).toEqual([
+    expect([4000, 4999, 5000, 6000].map((t) => shownStatus(active, t, "koda")?.status)).toEqual([
       "soaked",
       "soaked",
       "stinky",
@@ -175,8 +203,30 @@ describe("shownStatus", () => {
   });
 
   it("shows a lone status throughout, and nothing for a dog without one", () => {
-    expect(shownStatus(active.slice(1), 9000, "koda")).toBe("stinky");
+    expect(shownStatus(active.slice(1), 9000, "koda")?.status).toBe("stinky");
     expect(shownStatus(active, 4000, "nugget")).toBeUndefined();
+  });
+});
+
+describe("markOverlayKey", () => {
+  const mark: StatusMark = { dog: "koda", startMs: 0, status: "soaked", zoneIndex: 0 };
+  const mud = { ...mark, art: "fx-status-soaked-mud" };
+  const base = statusOverlayKey("soaked");
+
+  it.each<[string, () => string, string]>([
+    ["draws the skin's overlay once loaded", () => markOverlayKey(() => true, mud), mud.art],
+    [
+      "draws the status's own while the skin's is missing",
+      () => markOverlayKey(() => false, mud),
+      base,
+    ],
+    [
+      "draws the status's own for a mark with no skin",
+      () => markOverlayKey(() => true, mark),
+      base,
+    ],
+  ])("%s", (_, key, expected) => {
+    expect(key()).toBe(expected);
   });
 });
 

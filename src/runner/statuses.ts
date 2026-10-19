@@ -1,7 +1,8 @@
 import { splitDepthKey } from "../assets/depthSteps";
-import type { DogId, EncounterId, GameData } from "../data/types";
+import type { DogId, EncounterId, GameData, ZoneId } from "../data/types";
 import { type ScaleStep, snapScale } from "../layout/projection";
 import type { Choice } from "../rules/choices";
+import { encounterLook, type HasArt } from "../rules/skins";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 
@@ -9,8 +10,10 @@ import type { CardSource, RunState } from "../state/runState";
 // rules' debuff, shown on the dogs the skunk caught; Soaked and Spooked are visual only.
 export type DogStatusId = "soaked" | "spooked" | "stinky";
 
-// A status a card's outcome put on a dog, at startMs of run time in zone zoneIndex.
+// A status a card's outcome put on a dog, at startMs of run time in zone zoneIndex. art is the
+// statusArt of the encounter's skin that started it, drawn in place of the status's overlay.
 export interface StatusMark {
+  readonly art?: string;
   readonly dog: DogId;
   readonly startMs: number;
   readonly status: DogStatusId;
@@ -47,18 +50,22 @@ function startedBy(data: StatusData, source: CardSource, option: number): DogSta
 }
 
 // The marks after a card's choice: each status the chosen option starts is put on every dog the
-// card affected, replacing that dog's earlier mark for it. Skip starts nothing, and marks from
-// earlier zones are dropped.
+// card affected, replacing that dog's earlier mark for it, with the art of the encounter's skin
+// in the zone when it names one. Skip starts nothing, and marks from earlier zones are dropped.
 export function startStatuses(
   data: StatusData,
   card: { readonly affected: readonly DogId[]; readonly source: CardSource },
-  at: { readonly timeMs: number; readonly zoneIndex: number },
+  at: { readonly timeMs: number; readonly zone: ZoneId; readonly zoneIndex: number },
   choice: Choice,
   marks: readonly StatusMark[],
 ): StatusMark[] {
   const statuses = choice === "skip" ? [] : startedBy(data, card.source, choice);
+  const { source } = card;
+  const art =
+    source.kind === "encounter" ? encounterLook(data, at.zone, source.encounter).statusArt : null;
   const started = statuses.flatMap((status) =>
     card.affected.map((dog): StatusMark => ({
+      ...(art === null ? {} : { art }),
       dog,
       startMs: at.timeMs,
       status,
@@ -105,14 +112,14 @@ export function shownStatus(
   active: readonly StatusMark[],
   timeMs: number,
   dog: DogId,
-): DogStatusId | undefined {
+): StatusMark | undefined {
   const marks = active.filter((mark) => mark.dog === dog);
   const newest = marks[0];
   if (newest === undefined) {
     return undefined;
   }
   const turn = Math.floor(Math.max(0, timeMs - newest.startMs) / 1000) % marks.length;
-  return marks[turn]?.status;
+  return marks[turn];
 }
 
 // A key for the active statuses, so a scene redraws only when they change.
@@ -123,6 +130,11 @@ export function statusesKey(active: readonly StatusMark[]): string {
 // The loop drawn over a dog with the status, before picking its depth variant.
 export function statusOverlayKey(status: DogStatusId): string {
   return `fx-status-${status}`;
+}
+
+// The loop drawn for a mark: its skin's art, or the status's own while that art is missing.
+export function markOverlayKey(has: HasArt, mark: StatusMark): string {
+  return mark.art !== undefined && has(mark.art) ? mark.art : statusOverlayKey(mark.status);
 }
 
 // The depth step a dog shows at: its sprite's variant (dog-koda@62 is 0.625) times the scale

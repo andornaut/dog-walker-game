@@ -493,7 +493,11 @@ export class RunScene extends Scene {
     const outcome = chooseOption(gameData, world.random.cards, walk.run, view, choice);
     world.recorder.log({ choice, kind: "card", timeMs: this.runTimeMs });
     moments.quirkActed(quirkActorsOf(gameData, view, choice));
-    const at = { timeMs: this.runTimeMs, zoneIndex: walk.run.zoneIndex };
+    const at = {
+      timeMs: this.runTimeMs,
+      zone: currentZoneId(gameData, walk.run),
+      zoneIndex: walk.run.zoneIndex,
+    };
     this.statusMarks = startStatuses(gameData, view, at, choice, this.statusMarks);
     this.walk = { ...walk, run: outcome.state };
     world.menus.closeCard();

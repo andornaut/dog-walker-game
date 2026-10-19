@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { encounterSpriteKey, minorObstacleSpriteKey } from "../assets/spriteKeys";
+import { encounterSpriteKey, minorObstacleSpriteKey, SKUNK_CLOUD_KEY } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { ENCOUNTERS } from "../data/encounters";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
@@ -12,6 +12,7 @@ import {
   minorObstacleLook,
   skinnedArt,
   skinnedCardArt,
+  skinnedCloudArt,
   skinnedOwnerArt,
 } from "./skins";
 
@@ -49,8 +50,10 @@ const base = (art: string, prefix: string, hitLabel: string | null, name: string
   baseArt: art,
   baseCardArtPrefix: prefix,
   cardArtPrefix: prefix,
+  cloudArt: null,
   hitLabel,
   name,
+  statusArt: null,
 });
 const squirrelBase = base(
   encounterSpriteKey("squirrel"),
@@ -99,7 +102,7 @@ describe("encounterLook and minorObstacleLook", () => {
   });
 });
 
-describe("skinnedArt, skinnedCardArt and skinnedOwnerArt", () => {
+describe("the skinned art keys", () => {
   const cat = encounterLook(data, skinnedZone, "squirrel");
   const plain = encounterLook(data, plainZone, "squirrel");
   const [hold] = squirrel.resolution.options;
@@ -129,6 +132,16 @@ describe("skinnedArt, skinnedCardArt and skinnedOwnerArt", () => {
       "stands the skin's own owner beside it once the manifest has it",
       () => skinnedOwnerArt(all, cat),
       `${CAT.art}-owner`,
+    ],
+    [
+      "stands a skin with its own cloud in it once the manifest has it",
+      () => skinnedCloudArt(all, { ...cat, cloudArt: "stink-fish-crate-cloud" }),
+      "stink-fish-crate-cloud",
+    ],
+    [
+      "stands a skin in skunk-cloud while its cloud is missing or it names none",
+      () => [skinnedCloudArt(none, { ...cat, cloudArt: "x" }), skinnedCloudArt(all, cat)].join(),
+      [SKUNK_CLOUD_KEY, SKUNK_CLOUD_KEY].join(),
     ],
     [
       "stands the base's owner beside a skin whose owner is missing",

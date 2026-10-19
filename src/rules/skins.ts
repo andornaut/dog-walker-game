@@ -1,18 +1,26 @@
-import { encounterSpriteKey, kebabCase, minorObstacleSpriteKey } from "../assets/spriteKeys";
+import {
+  encounterSpriteKey,
+  kebabCase,
+  minorObstacleSpriteKey,
+  SKUNK_CLOUD_KEY,
+} from "../assets/spriteKeys";
 import type { EncounterId, GameData, MinorObstacleId, Skins, ZoneId } from "../data/types";
 
 // Whether the art manifest has a key, so a skin's art can fall back while it is missing.
 export type HasArt = (key: string) => boolean;
 
 // What an obstacle looks like in a zone: its name, road sprite key and hit label (null when
-// neither the skin nor its base has one), and the prefix of its card illustrations. art and
-// cardArtPrefix are the skin's even while its art is missing: skinnedArt and skinnedCardArt
-// pick the keys to draw.
+// neither the skin nor its base has one), the prefix of its card illustrations, and a skin's
+// own spray cloud and status overlay (null for the base's). art, cardArtPrefix, cloudArt and
+// statusArt are the skin's even while its art is missing: the skinned* functions pick the
+// keys to draw.
 export interface Look {
   readonly art: string;
   readonly baseArt: string;
   readonly baseCardArtPrefix: string;
   readonly cardArtPrefix: string;
+  readonly cloudArt: string | null;
+  readonly statusArt: string | null;
   readonly hitLabel: string | null;
   readonly name: string;
 }
@@ -38,8 +46,10 @@ function skinFor(zone: ZoneId, base: BaseLook): Look {
     baseArt: base.art,
     baseCardArtPrefix: base.cardArtPrefix,
     cardArtPrefix: skin?.cardArtPrefix ?? base.cardArtPrefix,
+    cloudArt: skin?.cloudArt ?? null,
     hitLabel: skin?.hitLabel ?? base.hitLabel,
     name: skin?.name ?? base.name,
+    statusArt: skin?.statusArt ?? null,
   };
 }
 
@@ -85,6 +95,12 @@ export function skinnedArt(has: HasArt, look: Look): string {
 export function skinnedOwnerArt(has: HasArt, look: Look): string {
   const owner = `${skinnedArt(has, look)}-owner`;
   return has(owner) ? owner : `${look.baseArt}-owner`;
+}
+
+// The spray cloud a Stink look stands in: the skin's own, or skunk-cloud while it names none
+// or its art is missing.
+export function skinnedCloudArt(has: HasArt, look: Look): string {
+  return look.cloudArt !== null && has(look.cloudArt) ? look.cloudArt : SKUNK_CLOUD_KEY;
 }
 
 // A card option's illustration under the look: the option's key with the skin's prefix in
