@@ -9,8 +9,8 @@ on the column and on every road.
 ui-fired-plate  24x24  laid-back, fussy, dramatic (1 frame each)  nine-slice, 8px
                        corners: a stamp-like plate in the owner's temperament colour
                        (blue, purple, dred) inside a cream band, with a white stamp line
-                       6px in. Stretched to 84x28 for "FIRED!" in font-display (62px),
-                       centred, clearing the stamp line by 5px each side
+                       6px in. Stretched to 116x28 over the doghouse's name plate, with
+                       "FIRED!" in font-display (62px) centred
 fx-fired-pop    64x64  play (6 frames, 70ms)  drawn at 2x (128x128) centred on the 2x
                        owner face, so its pixels match the face's: an amber impact star, then
                        an amber starburst behind a POOF of cream puffs ringing the face, and

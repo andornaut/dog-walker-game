@@ -617,7 +617,7 @@ def hit_label(face="dred", lit="red", shade="plum"):
 def fired_plate(face, lit, shade):
     """ui-fired-plate's 24x24 nine-slice, 8px corners: a plate in the owner's temperament colour
     (blue, purple, dred) with a white stamp line 2px inside the face, its corners cut so it reads
-    as a stamp's rounded border. Stretched to 84x28, the line runs 6px in."""
+    as a stamp's rounded border. The game stretches it to 116x28 over the doghouse's name plate."""
     g = plate(face, lit, shade)
     g.rect(7, 6, 10, 1, "white")
     g.rect(7, 17, 10, 1, "white")
