@@ -18,11 +18,17 @@ export type OptionAvailability =
 export interface OptionView {
   readonly availability: OptionAvailability;
   readonly cost: Cents;
+  // The option's position in the source's data; pass it to chooseOption.
+  readonly index: number;
   readonly label: string;
   readonly text: string;
 }
 
-// What a card scene draws. skip is true when poop bags offer a free Skip option.
+// The most options a card shows.
+export const MAX_CARD_OPTIONS = 3;
+
+// What a card scene draws. skip is true when poop bags offer a free Skip option; on a card
+// that would then show more than MAX_CARD_OPTIONS, Skip takes the most expensive option's place.
 export interface CardView {
   readonly affected: readonly DogId[];
   readonly options: readonly OptionView[];
@@ -31,7 +37,7 @@ export interface CardView {
   readonly title: string;
 }
 
-// An option's index on the card, or the Skip option.
+// An option's index in the source's data (OptionView.index), or the Skip option.
 export type Choice = number | "skip";
 
 export interface HeartChange {
@@ -95,25 +101,34 @@ function affectedBy(state: RunState, source: CardSource): DogId[] {
 export function cardFor(data: ChoiceData, state: RunState, source: CardSource): CardView {
   const { options, title } = cardContent(data, source);
   const affected = affectedBy(state, source);
+  const skip =
+    source.kind === "encounter" &&
+    data.encounters[source.encounter].kind === "obstacle" &&
+    state.skipsLeft > 0;
+  const views = options.map((option, index): OptionView => {
+    const cost = moneyCost(data, { affected }, state, option.effects);
+    return {
+      availability:
+        cost <= state.money ? { enabled: true } : { enabled: false, reason: "not enough money" },
+      cost,
+      index,
+      label: option.name,
+      text: effectText(data, option.effects),
+    };
+  });
   return {
     affected,
-    options: options.map((option) => {
-      const cost = moneyCost(data, { affected }, state, option.effects);
-      return {
-        availability:
-          cost <= state.money ? { enabled: true } : { enabled: false, reason: "not enough money" },
-        cost,
-        label: option.name,
-        text: effectText(data, option.effects),
-      };
-    }),
-    skip:
-      source.kind === "encounter" &&
-      data.encounters[source.encounter].kind === "obstacle" &&
-      state.skipsLeft > 0,
+    options: skip && views.length >= MAX_CARD_OPTIONS ? withoutMostExpensive(views) : views,
+    skip,
     source,
     title,
   };
+}
+
+// Drops the costliest option, the first one if several tie, keeping the others in order.
+function withoutMostExpensive(options: readonly OptionView[]): OptionView[] {
+  const costliest = options.reduce((most, option) => (option.cost > most.cost ? option : most));
+  return options.filter((option) => option !== costliest);
 }
 
 // Opens a card: an upgrade offer waits in the upgrade phase, anything else in the card phase.
@@ -182,10 +197,10 @@ export function chooseOption(
     };
     return { fired: [], heartChanges: [], moneyDelta: cents(0), quips: [], state: skipped };
   }
-  const option = view.options[choice];
+  const option = view.options.find(({ index }) => index === choice);
   const content = cardContent(data, card.source).options[choice];
   if (option === undefined || content === undefined) {
-    throw new RangeError(`No option ${choice} on ${view.title}`);
+    throw new RangeError(`Option ${choice} is not on the ${view.title} card`);
   }
   if (!option.availability.enabled) {
     throw new Error(`${option.label} is disabled: ${option.availability.reason}`);

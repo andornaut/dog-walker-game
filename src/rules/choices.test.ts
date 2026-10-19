@@ -171,6 +171,27 @@ describe("skip option", () => {
     expect(cardFor(data, skipped.state, source).skip).toBe(false);
     expect(() => choose(skipped.state, source, "skip")).toThrow("no Skip option");
   });
+
+  it("takes the costliest option's place on a card that already shows three", () => {
+    const withBags = newRun(data, { dogs: ["koda"], gear: "poopBags" });
+    const skunk = encounter("skunk", ["koda"]);
+    const labels = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.label);
+    expect(labels(newRun(data, { dogs: ["koda"], gear: null }))).toEqual([
+      "Grooming",
+      "Quick rinse",
+      "Ignore",
+    ]);
+    expect(labels(withBags)).toEqual(["Quick rinse", "Ignore"]);
+    expect(() => choose(withBags, skunk, 0)).toThrow("not on the Skunk card");
+    expect(cardFor(data, withBags, skunk).options.map((o) => o.index)).toEqual([1, 2]);
+  });
+
+  it("is added beside the options of a card with fewer than three", () => {
+    const withBags = newRun(data, { dogs: ["koda"], gear: "poopBags" });
+    const card = cardFor(data, withBags, encounter("squirrel", ["koda"]));
+    expect(card.options).toHaveLength(2);
+    expect(card.skip).toBe(true);
+  });
 });
 
 describe("Lucky collar", () => {
