@@ -215,6 +215,9 @@ export function planSpawns<Kind extends string>(
   const taken = new Int32Array(rows.length);
   const blocked = new Int32Array(rows.length);
   const gapBlocked = new Int32Array(rows.length);
+  // What a trial block overwrote, by row, to undo it.
+  const blockedBefore = new Int32Array(rows.length);
+  const gapBefore = new Int32Array(rows.length);
   const events: SpawnEvent<Kind>[] = [];
   const lanes = laneRun(0, laneCount);
 
@@ -269,12 +272,12 @@ export function planSpawns<Kind extends string>(
       return false;
     }
     const covered = laneRun(cell.lane, footprint.lanes);
-    const blockedBefore = blocked.slice(cell.row, lastRow + 1);
-    const gapBefore = gapBlocked.slice(cell.row, Math.max(cell.row, lastGap + 1));
     for (let row = cell.row; row <= lastRow; row++) {
+      blockedBefore[row] = blocked[row] ?? 0;
       blocked[row] = (blocked[row] ?? 0) | covered;
     }
     for (let row = cell.row; row <= lastGap; row++) {
+      gapBefore[row] = gapBlocked[row] ?? 0;
       gapBlocked[row] = (gapBlocked[row] ?? 0) | covered;
     }
     let ok = true;
@@ -289,8 +292,12 @@ export function planSpawns<Kind extends string>(
       ok = crossesFrom(row);
     }
     if (!ok || !keep) {
-      blocked.set(blockedBefore, cell.row);
-      gapBlocked.set(gapBefore, cell.row);
+      for (let row = cell.row; row <= lastRow; row++) {
+        blocked[row] = blockedBefore[row] ?? 0;
+      }
+      for (let row = cell.row; row <= lastGap; row++) {
+        gapBlocked[row] = gapBefore[row] ?? 0;
+      }
     }
     return ok;
   };
