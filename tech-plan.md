@@ -47,4 +47,4 @@
 Running list of things to watch so mobile stays easy: touch controls, screen sizes/aspect ratios, performance, audio unlock on mobile browsers, offline play.
 
 - The page disables browser touch gestures (`touch-action: none`) and pinch zoom, so taps and swipes reach the game.
-- Phones taller than 9:16 are common. Open: fix the width and let the height grow, so the extra height shows more road instead of letterbox bars.
+- Scaling: Phaser `Scale.FIT`, the largest 9:16 view that fits the window. The scale is fractional, so pixel sizes are uneven, and phones taller than 9:16 get letterbox bars. Integer scaling, and a taller road on tall phones, were considered and not taken.
