@@ -29,10 +29,12 @@ body {
 }
 
 /* Margins rather than padding: Phaser sizes and centres the canvas in the parent's
-   border box, padding included. */
+   border box, padding included. Phaser re-measures the parent only every 500 ms of game
+   time, so a canvas sized for a taller parent is clipped rather than drawn over the nav. */
 #game {
   flex: 1;
   min-height: 0;
+  overflow: hidden;
   margin: 0 env(safe-area-inset-right, 0px) 0 env(safe-area-inset-left, 0px);
 }
 
