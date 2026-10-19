@@ -2,9 +2,10 @@
 """Draw the owners' and walkers' faces and build their Aseprite sources and exports.
 
 face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with coloured
-outlines. Tags: happy, neutral, upset and fired (angry, shown as the owner
-fires you). Each owner's job shows in their hair and accessories, and their
-temperament in how far the expressions go.
+outlines. Tags: happy, neutral, upset, fired (angry, shown as the owner
+fires you) and worried (at 1 heart, while their doghouse pulses). Each
+owner's job shows in their hair and accessories, and their temperament in
+how far the expressions go.
 
 face-walker-<name>: 32x32 portraits for the walker picker. Tags:
 happy, neutral.
@@ -24,7 +25,7 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import Grid, main  # noqa: E402
 
-MOODS = ["happy", "neutral", "upset", "fired"]
+MOODS = ["happy", "neutral", "upset", "fired", "worried"]
 
 
 def base(g, skin, shade, shirt, shirt_sh):
@@ -41,7 +42,8 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
     """Eyes, brows and mouth. wide marks the dramatic owners, whose faces go further. brow is the brows'
     colour (feat unless given). whites sets a white beside each pupil, so the eyes read on dark skin.
     Happy closes the eyes into smiling arcs under arched brows; neutral is open eyes under flat brows;
-    upset lifts the brows in the middle and breaks a sweat; fired narrows the eyes under brows pinched down."""
+    upset lifts the brows in the middle and breaks a sweat; fired narrows the eyes under brows pinched down;
+    worried opens the eyes wide under brows lifted high, with a wobbly mouth and a big sweat bead."""
     brow = brow or feat
     for x in (12, 19):
         if mood == "happy":
@@ -53,6 +55,10 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
             if whites:
                 g.rect(x - 1, 18, 1, 1, "white")
             g.rect(x, 18, 1, 1, "ink")
+        elif mood == "worried":
+            # wide eyes: a white beside a pupil one row taller than neutral's, glancing aside
+            g.rect(x - 1, 16, 1, 3, "white")
+            g.rect(x, 16, 1, 3, "ink")
         else:
             if whites:
                 g.rect(x - 1, 17, 1, 2, "white")
@@ -64,6 +70,8 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         "neutral": ((11, 15), (12, 15), (13, 15), (18, 15), (19, 15), (20, 15)),
         "upset": ((11, 15), (12, 14), (13, 13), (18, 13), (19, 14), (20, 15)),
         "fired": ((11, 13), (12, 14), (13, 15), (18, 15), (19, 14), (20, 13)),
+        # lifted clear of the eyes and tilted up to the middle, with a gap above each eye
+        "worried": ((10, 14), (11, 14), (12, 13), (13, 12), (18, 12), (19, 13), (20, 14), (21, 14)),
     }[mood]
     for x, y in brows:
         g.p(x, y, brow)
@@ -95,6 +103,18 @@ def expression(g, mood, feat="dbrown", blush="pink", lashes=False, wide=False, b
         if wide:
             g.p(10, 19, "cyan")
             g.p(10, 20, "sky")
+    elif mood == "worried":
+        # a wobbly mouth waving between two rows in 2px steps, and a big bead of sweat on the left temple
+        for x, y in ((12, 23), (13, 22), (14, 22), (15, 23), (16, 23), (17, 22), (18, 22), (19, 23)):
+            g.p(x, y, feat)
+        g.p(9, 12, "white")
+        g.rect(8, 13, 2, 1, "cyan")
+        g.p(8, 14, "white")
+        g.p(9, 14, "cyan")
+        g.rect(8, 15, 2, 1, "sky")
+        if wide:
+            g.p(22, 13, "cyan")
+            g.p(22, 14, "sky")
     else:
         # fired: mouth open mid-shout, red cheeks
         g.rect(14, 21, 4, 3, feat)

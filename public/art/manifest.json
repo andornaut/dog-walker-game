@@ -593,6 +593,11 @@
       "json": "sprites/fx-bump.json"
     },
     {
+      "key": "fx-coin-fly",
+      "png": "sprites/fx-coin-fly.png",
+      "json": "sprites/fx-coin-fly.json"
+    },
+    {
       "key": "fx-coins",
       "png": "sprites/fx-coins.png",
       "json": "sprites/fx-coins.json"
@@ -611,6 +616,11 @@
       "key": "fx-dust",
       "png": "sprites/fx-dust.png",
       "json": "sprites/fx-dust.json"
+    },
+    {
+      "key": "fx-fired-pop",
+      "png": "sprites/fx-fired-pop.png",
+      "json": "sprites/fx-fired-pop.json"
     },
     {
       "key": "fx-heart",
@@ -711,6 +721,11 @@
       "key": "fx-tap",
       "png": "sprites/fx-tap.png",
       "json": "sprites/fx-tap.json"
+    },
+    {
+      "key": "fx-treat-pop",
+      "png": "sprites/fx-treat-pop.png",
+      "json": "sprites/fx-treat-pop.json"
     },
     {
       "key": "gag-ball",
@@ -1110,6 +1125,11 @@
       "json": "sprites/ui-doghouse-warn.json"
     },
     {
+      "key": "ui-fired-plate",
+      "png": "sprites/ui-fired-plate.png",
+      "json": "sprites/ui-fired-plate.json"
+    },
+    {
       "key": "ui-heart",
       "png": "sprites/ui-heart.png",
       "json": "sprites/ui-heart.json"
@@ -1153,6 +1173,11 @@
       "key": "ui-loading",
       "png": "sprites/ui-loading.png",
       "json": "sprites/ui-loading.json"
+    },
+    {
+      "key": "ui-payout-label",
+      "png": "sprites/ui-payout-label.png",
+      "json": "sprites/ui-payout-label.json"
     },
     {
       "key": "ui-select",
