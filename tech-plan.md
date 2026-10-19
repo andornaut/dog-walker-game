@@ -70,8 +70,28 @@ Player state that outlives a run. Local only: no accounts, no cloud saves.
 
 Things to watch so mobile stays easy: touch controls, screen sizes and aspect ratios, performance, audio unlock on mobile browsers, offline play.
 
-- The page disables browser touch gestures (`touch-action: none`) and pinch zoom, so taps and swipes reach the game.
+- The page disables browser touch gestures (`touch-action: none`) and pinch zoom, so taps and drags reach the game.
 - Scaling: Phaser `Scale.FIT`, the largest 9:16 view that fits the window. The scale is fractional, so pixel sizes are uneven, and phones taller than 9:16 get letterbox bars.
+- Installable web app: `/manifest.webmanifest` (start URL `/play/`, fullscreen with a standalone fallback, portrait) and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`. It precaches the game page, its assets and every file in `public/art/manifest.json`. The HTML and the art manifest are network-first with a cache fallback, and hashed assets are cache-first. A new version activates on the next launch, never mid-run.
+- Phone events on `window` (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` (Android back) maps to pause, and `app-hidden` pauses the run and checkpoints the save. The run holds a screen wake lock. The first gesture unlocks audio.
+
+## Dev tools
+
+`/play/` reads a run setup from the URL (`src/dev/`). Invalid values are warned about and ignored, and parsing never throws.
+
+| Param   | Value                              | Default                      |
+| ------- | ---------------------------------- | ---------------------------- |
+| `seed`  | integer 0 to 4294967295            | random, shown in the overlay |
+| `pack`  | 1 to 3 dog ids, comma-separated    | saved loadout                |
+| `gear`  | a gear id, or `none`               | saved loadout                |
+| `zone`  | 1 to 4                             | 1                            |
+| `money` | whole cents                        | the gear's starting money    |
+| `speed` | scroll-speed multiplier, 0.1 to 10 | 1                            |
+| `dev`   | `1` shows the overlay at load      | `0`                          |
+
+- One seed feeds independent random streams (spawns per zone, rolls, pulls, cards), so a draw in one never shifts another.
+- Lane moves and card choices are recorded with their simulation time in a versioned input log, and replaying it reproduces the run exactly.
+- The dev overlay (backquote toggles it) shows the seed, zone, distance, speed, money, hearts and FPS. C copies a link that reproduces the run.
 
 ## Open questions
 
