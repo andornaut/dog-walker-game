@@ -91,3 +91,4 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Design · Size sets pull strength: after a pull, lane input locks briefly, longest for big dogs
 - 2026-10-18 · Design · Lucky collar gives every owner +1 starting ♥, since starting happiness now varies by temperament
 - 2026-10-18 · Design · Keyboard lane changes also accept H/L, alongside arrows and A/D
+- 2026-10-18 · Art · UI colours are wood (dark brown frame, cream slots) and the run screen mock's other defaults stand, provisionally, until the style is refined

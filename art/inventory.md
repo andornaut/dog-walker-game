@@ -4,7 +4,7 @@ Every art asset v1 needs, derived from `../gameplay/v1-plan.md` and the run scre
 
 Priority:
 
-- **M6:** in the Milestone 6 pixel pass (walker, dogs, owner faces, 2 pickups, card frames, card illustrations for the 4 encounters and 6 forced stops)
+- **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 4 encounters, 2 pickups, card frames, card illustrations for the 4 encounters and 6 forced stops)
 - **v1:** needed before v1 ships, outside the Milestone 6 list
 - **later:** nice to have; placeholders are acceptable for v1
 
@@ -23,16 +23,31 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 ## Characters (road)
 
-The dog roster is being redesigned into named dogs, each with its own art and owner, and will grow beyond these three. The dog rows below are placeholders until the roster is final.
+Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
 
-| Asset             | Key          | Type   | Size  | Animations                        | Priority | Notes                                              |
-| ----------------- | ------------ | ------ | ----- | --------------------------------- | -------- | -------------------------------------------------- |
-| Walker            | `walker`     | sprite | 32×48 | `walk`, `lane-left`, `lane-right` | M6       | Seen from behind (¾ top-down), at the bottom       |
-| Small dog         | `dog-small`  | sprite | 32×32 | `walk`, `react`, `pull`           | M6       | Chihuahua; fills well under the tile               |
-| Medium dog        | `dog-medium` | sprite | 32×32 | `walk`, `react`, `pull`           | M6       | Lab                                                |
-| Big dog           | `dog-big`    | sprite | 32×32 | `walk`, `react`, `pull`           | M6       | Husky; fills the tile                              |
-| Other dog + owner | `other-dog`  | sprite | 32×32 | `walk`                            | M6       | Encounter obstacle; with a 32×48 owner alongside   |
-| Stinky effect     | `fx-stinky`  | sprite | 32×32 | `loop`                            | v1       | Green stink lines over the pack while Stinky lasts |
+| Asset             | Key         | Type   | Size  | Animations                        | Priority | Notes                                              |
+| ----------------- | ----------- | ------ | ----- | --------------------------------- | -------- | -------------------------------------------------- |
+| Walker            | `walker`    | sprite | 32×48 | `walk`, `lane-left`, `lane-right` | M6       | Seen from behind (¾ top-down), at the bottom       |
+| Other dog + owner | `other-dog` | sprite | 32×32 | `walk`                            | M6       | Encounter obstacle; with a 32×48 owner alongside   |
+| Stinky effect     | `fx-stinky` | sprite | 32×32 | `loop`                            | v1       | Green stink lines over the pack while Stinky lasts |
+
+## Dogs
+
+Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react` and `pull`. Owner faces show the owner's temperament: laid-back, fussy or dramatic.
+
+| Dog               | Breed           | Size   | Road sprite    | Face                | Owner face            | Owner     | Priority |
+| ----------------- | --------------- | ------ | -------------- | ------------------- | --------------------- | --------- | -------- |
+| Duchess (starter) | Maltese         | Small  | `dog-duchess`  | `face-dog-duchess`  | `face-owner-duchess`  | Laid-back | M6       |
+| Biscuit (starter) | Beagle          | Medium | `dog-biscuit`  | `face-dog-biscuit`  | `face-owner-biscuit`  | Laid-back | M6       |
+| Koda (starter)    | Husky           | Big    | `dog-koda`     | `face-dog-koda`     | `face-owner-koda`     | Laid-back | M6       |
+| Nugget            | Pug             | Small  | `dog-nugget`   | `face-dog-nugget`   | `face-owner-nugget`   | Dramatic  | M6       |
+| Zippy             | Jack Russell    | Small  | `dog-zippy`    | `face-dog-zippy`    | `face-owner-zippy`    | Fussy     | M6       |
+| Pierre            | Standard poodle | Medium | `dog-pierre`   | `face-dog-pierre`   | `face-owner-pierre`   | Fussy     | M6       |
+| Dash              | Whippet         | Medium | `dog-dash`     | `face-dog-dash`     | `face-owner-dash`     | Dramatic  | M6       |
+| Snowball          | Samoyed         | Big    | `dog-snowball` | `face-dog-snowball` | `face-owner-snowball` | Dramatic  | M6       |
+| Waffles           | Saint Bernard   | Big    | `dog-waffles`  | `face-dog-waffles`  | `face-owner-waffles`  | Fussy     | M6       |
+
+Starters come first: they are the dogs every new player sees.
 
 ## Obstacles and forced stops (road)
 
@@ -79,14 +94,14 @@ Four zones give 4 road strips (v1) plus 3 transitions and roughly 12 props (late
 
 ## Dog column
 
-| Asset            | Key                 | Type   | Size        | Priority | Notes                                                 |
-| ---------------- | ------------------- | ------ | ----------- | -------- | ----------------------------------------------------- |
-| Slot frame       | `ui-dog-slot`       | image  | 72×192      | v1       | 9-slice or fixed; includes an empty state             |
-| Dog faces        | `face-dog-<size>`   | sprite | 32×32 (TBD) | M6       | 3 dogs; frames `happy`, `neutral`, `upset`            |
-| Owner faces      | `face-owner-<size>` | sprite | 32×32 (TBD) | M6       | 3 owners; frames `happy`, `neutral`, `upset`, `fired` |
-| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD)   | M6       | Frames `full`, `empty`; up to 8 per slot              |
-| Quip bubble      | `ui-quip`           | image  | TBD         | v1       | Owner quip after every card choice and on firing      |
-| Stinky badge     | `icon-stinky`       | image  | 16×16       | v1       | Shown while the debuff lasts                          |
+| Asset            | Key                 | Type   | Size      | Priority | Notes                                                 |
+| ---------------- | ------------------- | ------ | --------- | -------- | ----------------------------------------------------- |
+| Slot frame       | `ui-dog-slot`       | image  | 72×192    | v1       | 9-slice or fixed; includes an empty state             |
+| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`            |
+| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired` |
+| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 8 per slot              |
+| Quip bubble      | `ui-quip`           | image  | TBD       | v1       | Owner quip after every card choice and on firing      |
+| Stinky badge     | `icon-stinky`       | image  | 16×16     | v1       | Shown while the debuff lasts                          |
 
 ## Top bar
 
@@ -128,15 +143,17 @@ Total: 31 card illustrations, 21 of them in Milestone 6.
 
 ## Screens outside the run
 
-| Asset              | Key                   | Type  | Size    | Priority | Notes                                     |
-| ------------------ | --------------------- | ----- | ------- | -------- | ----------------------------------------- |
-| Title / home       | `screen-home`         | image | 360×640 | v1       | Background; bank total and buttons on top |
-| Logo               | `logo`                | image | TBD     | later    |                                           |
-| Dog pick portraits | `portrait-dog-<size>` | image | TBD     | v1       | Larger dog art with fee and trait         |
-| Trait icons        | `icon-trait-<trait>`  | image | 16×16   | v1       | fancy, food-driven, chaser                |
-| Shop items         | `item-<item>`         | image | 32×32   | v1       | fanny pack, poop bags, lucky collar       |
-| Zone banner        | `ui-zone-banner`      | image | TBD     | v1       | "Zone 2: Park" between zones              |
-| End screen         | `screen-end`          | image | 360×640 | later    | Earnings summary background               |
+| Asset             | Key                        | Type  | Size    | Priority | Notes                                        |
+| ----------------- | -------------------------- | ----- | ------- | -------- | -------------------------------------------- |
+| Title / home      | `screen-home`              | image | 360×640 | v1       | Background; bank total and buttons on top    |
+| Logo              | `logo`                     | image | TBD     | later    |                                              |
+| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | v1       | 9 dogs; larger art for dog pick and the shop |
+| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | v1       | fancy, food-driven, chaser                   |
+| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | v1       | calm, steady, hyper                          |
+| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | v1       | laid-back, fussy, dramatic                   |
+| Shop items        | `item-<item>`              | image | 32×32   | v1       | fanny pack, poop bags, lucky collar          |
+| Zone banner       | `ui-zone-banner`           | image | TBD     | v1       | "Zone 2: Park" between zones                 |
+| End screen        | `screen-end`               | image | 360×640 | later    | Earnings summary background                  |
 
 ## UI kit
 
@@ -153,17 +170,17 @@ Total: 31 card illustrations, 21 of them in Milestone 6.
 
 | Priority | Sprites | Images           | Fonts |
 | -------- | ------- | ---------------- | ----- |
-| M6       | ~18     | 21 (card illus.) | 1     |
-| v1       | ~13     | ~33              | 0     |
+| M6       | ~36     | 21 (card illus.) | 1     |
+| v1       | ~13     | ~45              | 0     |
 | later    | ~1      | ~23              | 0     |
 
 ## Settled
 
 - **People are 32×48:** the walker, the other dog's owner and the forced-stop characters stand over a tile and a half, so they read taller than the dogs.
 - **The leash is drawn in code:** a 1px line from hand to collar in a palette colour, so it follows the dogs without art.
+- **Faces are 32×32 for now:** the run screen mock's default. They fill only the top ~75px of each 192px slot, so 48×48 faces or a full-body dog stay an option when the style is refined.
 - **One illustration per option:** each card shows its own outcome. Encounters with two options show two centred cards.
 
 ## Open questions
 
 - **Pack arrangement:** 1 to 3 dogs share one 56px lane ahead of the walker. Side by side does not fit 3×32px, so they need a staggered formation; the art needs to know the offsets.
-- **Face size:** in the mock, two 32×32 faces and a row of 8 hearts (7px each) fill only the top ~75px of a 192px slot. 48×48 faces, or a full-body dog, would use the space.

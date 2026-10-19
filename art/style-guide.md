@@ -6,13 +6,14 @@
 - **Mood:** casual, cozy, low-stress.
 - **Camera:** ¾ top-down.
 - **Orientation:** portrait.
-- **Choice cards:** Slay the Spire–style cards, three across on screen, art-led: an illustration plus a one-line effect; tap a card to enlarge it for full details.
+- **Choice cards:** Slay the Spire–style cards, up to three across on screen (an encounter with two options shows two centred cards), art-led: an illustration plus a one-line effect; tap a card to enlarge it for full details.
 - **Owner happiness UI:** each dog shown with its owner's face and a happiness meter.
 - **Base render resolution:** 360×640, scaled up crisply with no smoothing.
 - **Run screen layout:** a top status bar (money, zone progress), not overlaid on the road; a fixed-width dog column on the left with 3 slots (a fired dog's slot empties and the road never changes width); the road fills the rest. On an encounter the road pauses and dims, and the three cards cover the road while the top bar and dog column stay visible.
 - **Tile size:** 32×32 for road tiles, dogs and obstacles; lanes are 56px wide, leaving ~12px of margin.
 - **Palette:** [Endesga 32](https://lospec.com/palette-list/endesga-32), and no other colours. Every pixel of every asset is one of its 32 colours. Darkening (shadows, the dimmed road behind cards) maps each colour to the next darker colour in its ramp rather than blending with black, so the screen stays on the palette.
 - **Outlines:** coloured. A sprite's outline is two ramp steps darker than the fill it borders, so dark sprites (the skunk) keep their silhouette. Ground decals such as puddles have no outline.
+- **UI colours (provisional):** wood. A dark brown frame (`#3e2731`, `#733e39`) with cream paper slots (`#ead4aa`) and tan face panels (`#e4a672`), as in the run screen mock. The mock's other defaults (zone road colours, card colours) stand until the style is refined.
 - **UI art:** all UI (card frames, panels, status bar) is pixel art at the base resolution, with a pixel font.
 
 ## Open decisions
@@ -21,7 +22,6 @@
 - **Animation budget:** frames per walk cycle, idle animations
 - **Card art size and frame:** illustration dimensions, border style
 - **Pixel font:** which font
-- **UI colours:** wood, navy or cream for the top bar, dog column and slots (compare them in the run screen mock)
 
 ## Asset rules
 
