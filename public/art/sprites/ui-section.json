@@ -14,14 +14,6 @@
     "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 32 },
     "sourceSize": { "w": 24, "h": 32 },
     "duration": 1000
-   },
-   "ui-section 2.aseprite": {
-    "frame": { "x": 48, "y": 0, "w": 24, "h": 32 },
-    "rotated": false,
-    "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 32 },
-    "sourceSize": { "w": 24, "h": 32 },
-    "duration": 1000
    }
  },
  "meta": {
@@ -29,12 +21,11 @@
   "version": "1.2.30-x64",
   "image": "ui-section.png",
   "format": "RGBA8888",
-  "size": { "w": 72, "h": 32 },
+  "size": { "w": 48, "h": 32 },
   "scale": "1",
   "frameTags": [
-   { "name": "incomplete", "from": 0, "to": 0, "direction": "forward" },
-   { "name": "complete", "from": 1, "to": 1, "direction": "forward" },
-   { "name": "neutral", "from": 2, "to": 2, "direction": "forward" }
+   { "name": "complete", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "neutral", "from": 1, "to": 1, "direction": "forward" }
   ]
  }
 }

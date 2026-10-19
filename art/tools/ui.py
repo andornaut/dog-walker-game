@@ -21,8 +21,8 @@ over the card and under the game's faces, hearts and text, while the game shakes
 ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
-ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags incomplete, complete,
-neutral), fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
+ui-section (24x32 nine-slice, 3px sides and bottom, 24px top; tags complete, neutral),
+fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
 (24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
 secondary, secondary-pressed, go, go-pressed, go-disabled), ui-icon-button (20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
 ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
@@ -1067,15 +1067,13 @@ SECTION_BAND = 21  # band rows, its bottom line included, under the 3px frame
 
 def section(state):
     """24x32 nine-slice (3px left, right and bottom, 24px top): one start screen section (walker,
-    dogs, gear) framed as a unit, its heading band across the top over transparent space for the
-    tiles. A 1px ink edge, then a 2px border: ink for incomplete (a required choice not yet made)
-    and neutral (an optional section before the required picks are made), so dividers between
-    sections read dark; amber for complete. The game draws the optional Gear section complete once
-    the walker and dogs are picked or gear is equipped, so it never outshines a required section. The band fills rows 3 to 23 between the side borders: navy over an ink line, or
-    amber over an orange line when complete. The game writes, in font-title x2 with caps in rows
-    8 to 17: the heading 9px from the left, and right-aligned 9px from the right the missing step
-    (incomplete: amber on navy 7.49:1) or the choice (complete: ink on amber 9.71:1); the heading is
-    cream on navy (9.59:1) or ink on amber. neutral has no right-hand text."""
+    dogs, Pocket) framed as a unit, its heading band across the top over transparent space for the
+    tiles. A 1px ink edge, then a 2px border: ink for neutral (nothing in the section chosen yet), so
+    dividers between sections read dark; amber for complete (something chosen). The band fills rows
+    3 to 23 between the side borders: navy over an ink line, or amber over an orange line when
+    complete. The game writes, in font-title x2 with caps in rows 8 to 17: the heading 9px from the
+    left, cream on navy (9.59:1) or ink on amber (9.71:1), and when complete the choice right-aligned
+    9px from the right in ink."""
     lit = state == "complete"
     g = Grid(SECTION_W, SECTION_H)
     g.rect(0, 0, SECTION_W, SECTION_H, "ink")
@@ -1357,7 +1355,7 @@ def sprites():
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
     yield "ui-afford", [("glint", [afford_frame(i).outlined(False) for i in (0, 0, 1, 2)], 400)]
-    yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in ("incomplete", "complete", "neutral")]
+    yield "ui-section", [(s, [section(s).outlined(False)], 1000) for s in ("complete", "neutral")]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]
