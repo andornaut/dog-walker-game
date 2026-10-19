@@ -24,7 +24,7 @@ Usage:
   backdrops.py build             write art/backdrops/*.aseprite and
                                  public/art/images/*.png
 
-Run from the repository root, after fonts.py build. A build overwrites the
+Run from the repository root. A build overwrites the
 .aseprite sources, so hand edits to them belong in this file instead.
 """
 
@@ -53,28 +53,20 @@ BAR = BAND["y"]                # the status bar's height: band row y is screen r
 CAMERA = LAYOUT["camera"]
 CX = CAMERA["centerX"]         # the road's centre column, and its vanishing point's
 YH, FOOT, F = CAMERA["horizonY"], CAMERA["footY"], CAMERA["focal"]
-TITLE = None
 
 
 def dk(c):
     return DARKER[K.get(c, c)]
 
 
-def title_width(s):
-    global TITLE
-    if TITLE is None:
-        TITLE = fonts.glyphs(*fonts.FONTS["font-title"][1:])[0]
-    return sum(TITLE[ch][3] for ch in s)
-
-
 def word(cv, s, mid, y, col):
-    """Shop-sign lettering in font-title."""
-    x = round(mid - title_width(s) / 2)
-    for ch in s:
-        mask, ox, oy, adv = TITLE[ch]
-        if mask is not None:
-            cv.img.paste(hp.rgb(col), (x + ox, y + oy), mask)
-        x += adv
+    """Sign lettering: the logo's letters at 1x in col, a 1px ink outline and a 1px dred shadow
+    (fonts.sign), 8 rows from the outline's top on row y to the shadow, centred on column mid
+    without the shadow."""
+    px, _ = fonts.sign(s, 1, col)
+    x = round(mid - fonts.sign_width(s) / 2)
+    for (px_x, px_y), c in px.items():
+        cv.fill(x + px_x, y + px_y, 1, 1, c)
 
 
 def sky(cv, top="cyan", low="sky", clouds=()):
@@ -560,7 +552,7 @@ def bark_park():
     cv.fill(CX - 62, 20, 124, 16, "dgreen")
     cv.fill(CX - 62, 20, 124, 1, "green")
     cv.fill(CX - 62, 35, 124, 1, "forest")
-    word(cv, "BARK PARK", CX, 24, "cream")
+    word(cv, "BARK PARK", CX, 24, "yellow")
     for x in (CX - 68, CX + 68):
         cv.fill(x, 44, 2, 24, "slate")
         cv.fill(x - 4, 38, 10, 7, "navy")
@@ -659,7 +651,7 @@ def shopfront(cv, x, w, top, base, wall_c, awn, sign):
             cv.fill(wx + 1, base - 43, 10, 8, "cyan")
     if sign:
         cv.fill(x + 6, base - 32, w - 12, 13, "plum")
-        word(cv, sign, x + w / 2, base - 30, "cream")
+        word(cv, sign, x + w / 2, base - 29, "cream")
     for i in range(0, w - 4, 8):
         cv.fill(x + 2 + i, base - 18, 4, 5, awn)
         cv.fill(x + 6 + i, base - 18, 4, 5, "white")

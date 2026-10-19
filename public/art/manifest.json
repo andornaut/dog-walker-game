@@ -2802,6 +2802,16 @@
       "fnt": "fonts/font-body.fnt"
     },
     {
+      "key": "font-display",
+      "png": "fonts/font-display.png",
+      "fnt": "fonts/font-display.fnt"
+    },
+    {
+      "key": "font-display-cream",
+      "png": "fonts/font-display-cream.png",
+      "fnt": "fonts/font-display-cream.fnt"
+    },
+    {
       "key": "font-title",
       "png": "fonts/font-title.png",
       "fnt": "fonts/font-title.fnt"

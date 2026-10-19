@@ -1424,7 +1424,7 @@ def bark_park_view():
     a.fill(9, 2, 57, 9, "dgreen")
     a.fill(9, 2, 57, 1, "green")
     a.fill(9, 10, 57, 1, "forest")
-    bd.word(a, "BARK PARK", AW / 2, 0, "cream")
+    bd.word(a, "BARK PARK", AW / 2, 3, "yellow")
     a.street()
     # the path on through the gate, widening to the cross trail
     for py in range(13, CROSS_Y):
@@ -1446,8 +1446,8 @@ def shops_view():
         a.fill(x, top, w, FAR_Y - top, wall_c)
         a.fill(x, top, w, 2, bd.dk(wall_c))
         a.fill(x + w - 2, top, 2, FAR_Y - top, bd.dk(wall_c))
-        a.fill(x + 4, 5, w - 8, 7, "plum")
-        bd.word(a, sign, x + w / 2, 2, "cream")
+        a.fill(x + 2, 5, w - 4, 8, "plum")
+        bd.word(a, sign, x + w / 2, 5, "cream")
         for i in range(0, w - 4, 6):
             a.fill(x + 2 + i, 13, 3, 2, awn)
             a.fill(x + 5 + i, 13, 3, 2, "white")

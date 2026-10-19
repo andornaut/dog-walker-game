@@ -101,7 +101,7 @@ def borrow(g, draw, x, y, *args, **q):
                 dst.p(ox + i, oy + j, c)
 
 
-# A 3x5 hand-lettered alphabet for the signs.
+# A 3x5 alphabet for the signs: the logo's blocky capitals, narrowed to fit a 32px sprite.
 GLYPHS = {
     "A": "010101111101101", "D": "110101101101110", "E": "111100110100111", "F": "111100110100100",
     "L": "100100100100111", "M": "101111111101101", "N": "110101101101101", "O": "010101101101010",
@@ -109,19 +109,26 @@ GLYPHS = {
 }
 
 
-def letter(g, text, x, y, col):
-    """text in GLYPHS from (x, y), 4px a letter. On a depth variant the letters are too small to read, so
-    the line is a scribble: a row of ink with a gap between words."""
+def letter(g, col, lines, clip=None):
+    """lines, each (text, x, y), in GLYPHS 4px a letter, lettered as the logo is: col letters in a 1px
+    ink outline on a 1px dred shadow down and right, the lines outlined together. clip (x0, y0, x1, y1)
+    keeps the outline and shadow on the board. On a depth variant the letters are too small to read, so
+    each line is a scribble: a row of ink with a gap between words."""
     if scale_of(g) != 1:
-        for i, ch in enumerate(text):
-            if ch != " ":
-                g.rect(x + 4 * i, y + 1, 4 if i + 1 < len(text) and text[i + 1] != " " else 3, 3, col)
+        for text, x, y in lines:
+            for i, ch in enumerate(text):
+                if ch != " ":
+                    g.rect(x + 4 * i, y + 1, 4 if i + 1 < len(text) and text[i + 1] != " " else 3, 3, "ink")
         return
-    for i, ch in enumerate(text):
-        bits = GLYPHS.get(ch)
-        for k in range(15) if bits else ():
-            if bits[k] == "1":
-                g.p(x + 4 * i + k % 3, y + k // 3, col)
+    fill = {(x + 4 * i + k % 3, y + k // 3) for text, x, y in lines for i, ch in enumerate(text)
+            for k, bit in enumerate(GLYPHS.get(ch, "")) if bit == "1"}
+    ring = {(px + dx, py + dy) for px, py in fill for dx in (-1, 0, 1) for dy in (-1, 0, 1)} - fill
+    shadow = {(px + 1, py + 1) for px, py in ring} - ring - fill
+    x0, y0, x1, y1 = clip or (0, 0, g.w - 1, g.h - 1)
+    for pts, c in ((shadow, "dred"), (ring, "ink"), (fill, col)):
+        for px, py in pts:
+            if x0 <= px <= x1 and y0 <= py <= y1:
+                g.p(px, py, c)
 
 
 def heart(g, x, y, col, shade):
@@ -517,8 +524,7 @@ def lemonade_stand(bob=0, glint=False, new=Grid):
     g.rect(3, 1, 26, 13, "cream")
     g.rect(3, 13, 26, 1, "tan")
     g.rect(3, 2, 26, 1, "white")
-    letter(g, "LEMON", 6, 3, "blue")
-    letter(g, "ADE", 10, 8, "blue")
+    letter(g, "yellow", (("LEMON", 6, 2), ("ADE", 9, 8)), clip=(3, 1, 28, 13))
     g.ell(25, 10.5, 2, 1.6, "yellow", "amber")
     # the counter, a pitcher and two paper cups on it
     g.rect(2, 31, 28, 2, "tan")
@@ -546,7 +552,7 @@ def lemonade_stand(bob=0, glint=False, new=Grid):
     g.rect(2, 45, 28, 1, "brown")
     g.ell(6, 37.5, 2.5, 2, "yellow", "amber")
     g.p(8, 36, "green")
-    letter(g, "50c", 11, 35, "red")
+    letter(g, "yellow", (("50c", 11, 34),))
     g.ell(6, 43, 1.6, 2, "cyan", "sky")
     g.p(6, 41, "cyan")
     g.ell(14, 43, 2, 2, "amber", "orange", "yellow")

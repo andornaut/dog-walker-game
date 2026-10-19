@@ -79,6 +79,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 - Full-screen backgrounds put low-contrast dark wood (dbrown with plum seams) under UI and scenery elsewhere.
 - `ui-button`: `normal` (amber) for the primary action, `secondary` (tan) for the others, `go` (green face, ink label) for Start walk only, `go-disabled` (sunk dslate face, slate label) for Start walk before a walker and a dog are picked. `ui-section` frames each start screen section: `incomplete` (ink frame, navy band, cream heading, amber prompt), `complete` (amber border and band, ink text), `neutral` (as incomplete, no prompt) for optional gear with nothing equipped. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Home, pause, help and sound sit on `ui-icon-button`.
 - Fonts: `font-body` (Tiny5, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
+- Display lettering: the yard sign logo's letters (yellow fill, 1px ink outline, solid dred shadow) for big words only, never body text: zone names on `ui-zone-banner`, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title and hit labels, in `font-display` (yellow) or `font-display-cream` (cream), 10px capitals with the colours baked in, drawn untinted. In-art signs (shop boards, the park gate, the lemonade stand) use the same letters and outline at 1x with a 1px shadow.
 
 ### Feedback and selected state
 

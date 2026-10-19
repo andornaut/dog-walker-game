@@ -1,15 +1,29 @@
 #!/usr/bin/env python3
-"""Rasterize the game's two pixel fonts into BMFonts (XML .fnt plus a PNG atlas).
+"""Rasterize the game's pixel fonts into BMFonts (XML .fnt plus a PNG atlas).
 
 - font-body: Tiny5 at 8px, for body text, quips and floating labels.
 - font-title: Silkscreen at 8px, for titles, numbers and buttons.
+- font-display and font-display-cream: the yard sign logo's lettering, for big display words only
+  (zone names, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title, hit labels). Upright blocky
+  capitals 5 rows tall drawn at 2x (10px caps), each in a 1px ink outline on a solid dred shadow 2px
+  down and right. The colours are baked in: yellow letters in font-display, cream in
+  font-display-cream, a red heart in both. Draw them untinted.
 
-Both are SIL Open Font License fonts; the font files and licenses are in
-art/fonts/. Glyphs are white on transparent so the game tints them. Printable
-ASCII, the middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has.
+font-body and font-title are SIL Open Font License fonts; the font files and licenses are in
+art/fonts/. Their glyphs are white on transparent so the game tints them. Printable ASCII, the
+middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has.
+
+font-display has A to Z, 0 to 9, ! ? , . ' - + $, space and ♥. Its line is 18px: the capitals'
+outline on rows 2 to 13 and their fill on rows 3 to 12 (base 13), with room above for the $ and
+below for the comma's tail and the shadow. Letters sit 2px apart, which their outlines fill;
+pairs whose shapes leave room (LT, P., TY) kern 2px closer. Lower case is not in the font: set it
+in capitals.
+
+In-art signs (shop boards, the park gate, the lemonade stand) use the same letters and outline at
+1x, with a 1px shadow, through sign().
 
 Usage:
-  fonts.py preview OUT.png   a sample of both fonts, scaled up
+  fonts.py preview OUT.png   a sample of every font, scaled up
   fonts.py build             write public/art/fonts/*.png and *.fnt
 
 Run from the repository root.
@@ -21,6 +35,9 @@ from xml.sax.saxutils import quoteattr
 
 from PIL import Image, ImageDraw, ImageFont
 
+sys.path.insert(0, os.path.dirname(__file__))
+from pixel import K  # noqa: E402
+
 FONTS = {
     "font-body": ("Tiny5", "art/fonts/tiny5/Tiny5.ttf", 8),
     "font-title": ("Silkscreen", "art/fonts/silkscreen/Silkscreen-Regular.ttf", 8),
@@ -29,6 +46,144 @@ CHARS = [chr(c) for c in range(32, 127)] + ["·", "♥"]
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
 ATLAS_W = 128
 
+# ---------- the sign lettering ----------
+
+# The yard sign logo's letters, 5 rows from the top of the capitals, one cell a row (D, O, G, W, A,
+# L, K, E and R are the logo's own). A glyph with more rows starts RISE[ch] rows above the capitals
+# ($) or runs below them (the comma's tail).
+SIGN = {
+    "A": [".###.", "#...#", "#####", "#...#", "#...#"],
+    "B": ["####.", "#...#", "####.", "#...#", "####."],
+    "C": [".####", "#....", "#....", "#....", ".####"],
+    "D": ["####.", "#...#", "#...#", "#...#", "####."],
+    "E": ["#####", "#....", "####.", "#....", "#####"],
+    "F": ["#####", "#....", "####.", "#....", "#...."],
+    "G": [".####", "#....", "#..##", "#...#", ".####"],
+    "H": ["#...#", "#...#", "#####", "#...#", "#...#"],
+    "I": ["###", ".#.", ".#.", ".#.", "###"],
+    "J": ["....#", "....#", "....#", "#...#", ".###."],
+    "K": ["#..#", "#.#.", "##..", "#.#.", "#..#"],
+    "L": ["#....", "#....", "#....", "#....", "#####"],
+    "M": ["#....#", "##..##", "#.##.#", "#....#", "#....#"],
+    "N": ["#...#", "##..#", "#.#.#", "#..##", "#...#"],
+    "O": [".###.", "#...#", "#...#", "#...#", ".###."],
+    "P": ["####.", "#...#", "####.", "#....", "#...."],
+    "Q": [".###.", "#...#", "#...#", "#..#.", ".##.#"],
+    "R": ["####.", "#...#", "####.", "#..#.", "#...#"],
+    "S": [".####", "#....", ".###.", "....#", "####."],
+    "T": ["#####", "..#..", "..#..", "..#..", "..#.."],
+    "U": ["#...#", "#...#", "#...#", "#...#", ".###."],
+    "V": ["#...#", "#...#", "#...#", ".#.#.", "..#.."],
+    "W": ["#....#", "#....#", "#.##.#", "#.##.#", ".#..#."],
+    "X": ["#...#", ".#.#.", "..#..", ".#.#.", "#...#"],
+    "Y": ["#...#", ".#.#.", "..#..", "..#..", "..#.."],
+    "Z": ["#####", "...#.", "..#..", ".#...", "#####"],
+    "0": [".##.", "#..#", "#..#", "#..#", ".##."],
+    "1": [".#.", "##.", ".#.", ".#.", "###"],
+    "2": ["###.", "...#", ".##.", "#...", "####"],
+    "3": ["###.", "...#", ".##.", "...#", "###."],
+    "4": ["#..#", "#..#", "####", "...#", "...#"],
+    "5": ["####", "#...", "###.", "...#", "###."],
+    "6": [".##.", "#...", "###.", "#..#", ".##."],
+    "7": ["####", "...#", "..#.", ".#..", ".#.."],
+    "8": [".##.", "#..#", ".##.", "#..#", ".##."],
+    "9": [".##.", "#..#", ".###", "...#", ".##."],
+    "!": ["#", "#", "#", ".", "#"],
+    "?": ["###.", "...#", ".##.", "....", ".#.."],
+    ".": [".", ".", ".", ".", "#"],
+    ",": ["..", "..", "..", "..", ".#", "#."],
+    "'": ["#", "#"],
+    "-": ["...", "...", "###"],
+    "+": ["...", ".#.", "###", ".#."],
+    "$": ["..#..", ".####", "#.#..", ".###.", "..#.#", "####.", "..#.."],
+    "♥": [".#.#.", "#####", "#####", ".###.", "..#.."],
+}
+RISE = {"$": 1}
+# The heart keeps its own colour in every colourway.
+FILL = {"♥": "red"}
+# The space's advance at 2x, as the logo spaces its words; half that, rounded up, at 1x.
+SPACE = 3.5
+DISPLAY = {"font-display": "yellow", "font-display-cream": "cream"}
+DISPLAY_SCALE = 2
+# The capitals' fill starts this far below the line's top at 2x, leaving room for the $ and its outline.
+CAP_TOP = 3
+LINE_HEIGHT = 18
+
+
+def cells(ch):
+    """The glyph's filled cells as (column, row), rows from the top of the capitals."""
+    rise = RISE.get(ch, 0)
+    return {(i, j - rise) for j, row in enumerate(SIGN[ch]) for i, c in enumerate(row) if c == "#"}
+
+
+def kerned(a, b):
+    """Whether b can sit a cell closer after a: their fills stay two cells apart, so each letter keeps
+    its own outline."""
+    if a not in SIGN or b not in SIGN:
+        return False
+    adv = len(SIGN[a][0])
+    second = {(x + adv, y) for x, y in cells(b)}
+    return all(max(abs(x - u), abs(y - v)) >= 2 for x, y in cells(a) for u, v in second)
+
+
+def sign(text, scale=1, fill="yellow", kern=True):
+    """text in the sign letters at scale: ({(x, y): colour}, the advance). x runs from the pen, where
+    the first letter's outline starts, and y from the top of the capitals' outline; a raised glyph
+    ($) reaches above 0. Letters are drawn first, then their 1px ink outline (8-neighbour) and a solid
+    dred shadow: the outline moved 1 to scale px down and right, under the outline and the letters."""
+    letters, x, prev = {}, 1, None
+    for ch in text:
+        if ch == " ":
+            x += int(SPACE * scale + 0.5)
+            prev = None
+            continue
+        if kern and prev is not None and kerned(prev, ch):
+            x -= scale
+        col = FILL.get(ch, fill)
+        for cx, cy in cells(ch):
+            for dx in range(scale):
+                for dy in range(scale):
+                    letters[(x + cx * scale + dx, 1 + cy * scale + dy)] = col
+        x += scale * (len(SIGN[ch][0]) + 1)
+        prev = ch
+    ring = {(px + dx, py + dy) for px, py in letters for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    shadow = {(px + d, py + d) for px, py in ring for d in range(1, scale + 1)} - ring
+    # a counter too small to show the shadow (the middle of O at 1x) stays ink
+    ring |= {(px, py) for px, py in shadow
+             if all(q in ring for q in ((px - 1, py), (px + 1, py), (px, py - 1), (px, py + 1)))}
+    out = {p: "dred" for p in shadow - ring}
+    out.update({p: "ink" for p in ring})
+    out.update(letters)
+    return out, x - 1
+
+
+def sign_width(text, scale=1):
+    """The width of text's letters and outline, without the shadow."""
+    px, _ = sign(text, scale)
+    xs = [x for (x, y), c in px.items() if c != "dred"]
+    return max(xs) + 1 - min(xs)
+
+
+def display_glyphs(fill):
+    """font-display's glyphs in fill: (RGBA image, xoffset, yoffset, xadvance) by character."""
+    out = {" ": (None, 0, 0, int(SPACE * DISPLAY_SCALE + 0.5))}
+    for ch in SIGN:
+        px, adv = sign(ch, DISPLAY_SCALE, fill, kern=False)
+        x0, y0 = min(x for x, _ in px), min(y for _, y in px)
+        w, h = max(x for x, _ in px) + 1 - x0, max(y for _, y in px) + 1 - y0
+        im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        for (x, y), c in px.items():
+            im.putpixel((x - x0, y - y0), tuple(int(K[c][i:i + 2], 16) for i in (0, 2, 4)) + (255,))
+        # the sign's y 0 is the capitals' outline, one row above their fill
+        out[ch] = (im, x0, y0 + CAP_TOP - 1, adv)
+    return out
+
+
+def kernings():
+    return [(a, b, -DISPLAY_SCALE) for a in SIGN for b in SIGN if kerned(a, b)]
+
+
+# ---------- the TrueType fonts ----------
 
 def glyphs(path, size):
     font = ImageFont.truetype(path, size)
@@ -57,6 +212,8 @@ def glyphs(path, size):
 
 
 def pack(gl):
+    """Lay the glyphs out in rows on an atlas ATLAS_W wide: a mask (mode L) goes on in white, a
+    coloured glyph (RGBA) as it is."""
     x = y = row_h = 0
     places = {}
     for ch, (im, *_rest) in gl.items():
@@ -73,14 +230,16 @@ def pack(gl):
         height *= 2
     atlas = Image.new("RGBA", (ATLAS_W, height), (0, 0, 0, 0))
     for ch, (im, *_rest) in gl.items():
-        if im is not None:
-            white = Image.new("RGBA", im.size, (255, 255, 255, 255))
-            atlas.paste(white, places[ch], im)
+        if im is None:
+            continue
+        if im.mode == "L":
+            atlas.paste(Image.new("RGBA", im.size, (255, 255, 255, 255)), places[ch], im)
+        else:
+            atlas.paste(im, places[ch])
     return atlas, places
 
 
-def build_font(key, face, path, size):
-    gl, ascent, descent = glyphs(path, size)
+def write_font(key, face, size, line_height, base, gl, kerns=()):
     atlas, places = pack(gl)
     os.makedirs("public/art/fonts", exist_ok=True)
     atlas.save(f"public/art/fonts/{key}.png")
@@ -89,7 +248,7 @@ def build_font(key, face, path, size):
         "<font>",
         f'  <info face={quoteattr(face)} size="{size}" bold="0" italic="0" charset="" unicode="1" stretchH="100" '
         'smooth="0" aa="0" padding="0,0,0,0" spacing="1,1"/>',
-        f'  <common lineHeight="{ascent + descent + 1}" base="{ascent}" scaleW="{atlas.width}" '
+        f'  <common lineHeight="{line_height}" base="{base}" scaleW="{atlas.width}" '
         f'scaleH="{atlas.height}" pages="1" packed="0"/>',
         f'  <pages><page id="0" file="{key}.png"/></pages>',
         f'  <chars count="{len(gl)}">',
@@ -99,22 +258,32 @@ def build_font(key, face, path, size):
         w, h = (im.width, im.height) if im is not None else (0, 0)
         lines.append(f'    <char id="{ord(ch)}" x="{x}" y="{y}" width="{w}" height="{h}" xoffset="{ox}" '
                      f'yoffset="{oy}" xadvance="{adv}" page="0" chnl="15"/>')
-    lines += ["  </chars>", "</font>", ""]
+    lines.append("  </chars>")
+    if kerns:
+        lines.append(f'  <kernings count="{len(kerns)}">')
+        lines += [f'    <kerning first="{ord(a)}" second="{ord(b)}" amount="{n}"/>' for a, b, n in kerns]
+        lines.append("  </kernings>")
+    lines += ["</font>", ""]
     with open(f"public/art/fonts/{key}.fnt", "w") as f:
         f.write("\n".join(lines))
-    return gl, ascent, descent
 
 
 def build():
     for key, (face, path, size) in FONTS.items():
-        build_font(key, face, path, size)
-    print("built", ", ".join(FONTS))
+        gl, ascent, descent = glyphs(path, size)
+        write_font(key, face, size, ascent + descent + 1, ascent, gl)
+    for key, fill in DISPLAY.items():
+        write_font(key, "Sign", 5 * DISPLAY_SCALE, LINE_HEIGHT, CAP_TOP + 5 * DISPLAY_SCALE,
+                   display_glyphs(fill), kernings())
+    print("built", ", ".join([*FONTS, *DISPLAY]))
 
 
 def preview(out, scale=3):
     samples = ["DOG WALKER  $42  ZONE 1: WOOF WAY", "Rosa: No rush, dear. ♥", "-2 ♥, dramatic   +$1.50 tip, solo",
                "0123456789 !?.,:'+-/$%&()"]
-    sheet = Image.new("RGB", (300, 20 + 14 * len(samples) * len(FONTS)), (115, 62, 57))
+    display = ["OOPS, PETUNIAS!", "WHICH WAY? $1.50 ♥"]
+    sheet = Image.new("RGB", (300, 26 + 14 * len(samples) * len(FONTS) + 20 * len(display) * len(DISPLAY)),
+                      (115, 62, 57))
     y = 4
     for key, (face, path, size) in FONTS.items():
         gl, ascent, _ = glyphs(path, size)
@@ -127,6 +296,12 @@ def preview(out, scale=3):
                 x += adv
             y += 12
         y += 6
+    for fill in DISPLAY.values():
+        for s in display:
+            px, _ = sign(s, DISPLAY_SCALE, fill)
+            for (x, yy), c in px.items():
+                sheet.putpixel((4 + x, y + CAP_TOP - 1 + yy), tuple(int(K[c][i:i + 2], 16) for i in (0, 2, 4)))
+            y += LINE_HEIGHT + 2
     sheet.resize((sheet.width * scale, sheet.height * scale), Image.NEAREST).save(out)
 
 
