@@ -117,15 +117,9 @@ describe("loadSave", () => {
         }),
       ],
       [
-        "no dog slots",
+        "fractional dog slots",
         withChanges((document) => {
-          document.owned.dogSlots = 0;
-        }),
-      ],
-      [
-        "four dog slots",
-        withChanges((document) => {
-          document.owned.dogSlots = 4;
+          document.owned.dogSlots = 1.5;
         }),
       ],
       [
@@ -201,6 +195,26 @@ describe("loadSave", () => {
         document.lastLoadout = { dogs: ["ghost", "waffles", "dash"], gear: "luckyCollar" };
       });
       expect(save.lastLoadout).toEqual({ dogs: ["waffles"], gear: null });
+    });
+
+    it.each([
+      [-2, 1],
+      [0, 1],
+      [4, 3],
+      [3, 3],
+    ])("clamps %i dog slots to %i", (stored, clamped) => {
+      const save = loaded((document) => {
+        document.owned.dogSlots = stored;
+      });
+      expect(save.owned.dogSlots).toBe(clamped);
+    });
+
+    it("trims the loadout to the clamped slots", () => {
+      const save = loaded((document) => {
+        document.owned.dogSlots = 0;
+        document.lastLoadout.dogs = ["waffles", "koda"];
+      });
+      expect(save.lastLoadout.dogs).toEqual(["waffles"]);
     });
 
     it("keeps no more loadout dogs than the player has slots", () => {

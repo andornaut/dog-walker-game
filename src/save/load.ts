@@ -12,6 +12,7 @@ import {
   type HelpTopicId,
   type KitId,
   type LeashColorId,
+  MAX_RUN_DOGS,
   type Owned,
   SAVE_VERSION,
   type SaveDefaults,
@@ -138,12 +139,12 @@ function keepKnownCosmetics(known: KnownIds, cosmetics: StoredSave["cosmetics"])
 }
 
 // Drops ids the game no longer has, and equipped items the player does not own. The free
-// dogs and walkers are always owned. A loadout keeps at most one dog per slot, and one left
-// without dogs falls back to the default.
+// dogs and walkers are always owned. Dog slots are clamped to 1 to MAX_RUN_DOGS. A loadout
+// keeps at most one dog per slot, and one left without dogs falls back to the default.
 export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { defaults, known } = context;
   const owned: Owned = {
-    dogSlots: save.owned.dogSlots,
+    dogSlots: Math.min(MAX_RUN_DOGS, Math.max(1, save.owned.dogSlots)),
     dogs: keepKnown(known.dogs, [...defaults.freeDogs, ...save.owned.dogs]),
     gear: keepKnown(known.gear, save.owned.gear),
     walkerKit: keepKnown(known.walkerKit, save.owned.walkerKit),

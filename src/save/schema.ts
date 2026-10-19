@@ -22,7 +22,8 @@ const count = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
 // Stored as a plain integer, branded on load.
 const cents = v.pipe(count, v.transform(toCents));
 const zoneNumber = v.pipe(v.number(), v.safeInteger(), v.minValue(1));
-const dogSlots = v.pipe(v.number(), v.safeInteger(), v.minValue(1), v.maxValue(MAX_RUN_DOGS));
+// Clamped to 1 to MAX_RUN_DOGS on load rather than rejected.
+const dogSlots = v.pipe(v.number(), v.safeInteger());
 // Stored ids stay strings: a saved id may be one the game data no longer has.
 const contentId = v.pipe(v.string(), v.minLength(1));
 const ids = v.array(contentId);
