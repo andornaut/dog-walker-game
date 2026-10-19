@@ -72,13 +72,13 @@ Bumped with no card. An obstacle n lanes wide and m rows long is drawn 56n−24 
 
 ## Lucky encounters (road)
 
-Good things to bump into. The lost wallet opens a choice card; the biscuit neighbour and the photo op pay out at once with a popup.
+Good things to bump into. The lost wallet opens a choice card; the generous neighbour and the photo op pay out at once with a popup.
 
-| Asset             | Key                 | Type   | Size  | Animations      | Priority | Notes                   |
-| ----------------- | ------------------- | ------ | ----- | --------------- | -------- | ----------------------- |
-| Lost wallet       | `lost-wallet`       | sprite | 16×16 | `idle` (glint)  | M6       | Lying on the road       |
-| Biscuit neighbour | `biscuit-neighbour` | sprite | 32×48 | `wave`          | M6       | Holds out a biscuit jar |
-| Photo op          | `photo-op`          | sprite | 32×48 | `idle`, `flash` | M6       | Tourist with a camera   |
+| Asset              | Key                 | Type   | Size  | Animations      | Priority | Notes                   |
+| ------------------ | ------------------- | ------ | ----- | --------------- | -------- | ----------------------- |
+| Lost wallet        | `lost-wallet`       | sprite | 16×16 | `idle` (glint)  | M6       | Lying on the road       |
+| Generous neighbour | `biscuit-neighbour` | sprite | 32×48 | `wave`          | M6       | Holds out a biscuit jar |
+| Photo op           | `photo-op`          | sprite | 32×48 | `idle`, `flash` | M6       | Tourist with a camera   |
 
 ## Depth variants (road)
 
@@ -160,26 +160,26 @@ Each card is a frame plus an illustration plus text drawn in the pixel font. The
 | Enlarged frame | `card-frame-large` | sprite | 166×280 | core     | Tap-to-enlarge view: the `card-frame` layout at 2× with 1px detail, illustration at 2×; same tags                                                                 |
 | Cost badge     | `card-cost`        | image  | 71×13   | core     | Plaque over the frame's badge (at 2× on the large frame); the game writes the cost between the rivets                                                             |
 
-Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. All are drawn. Forced-stop keys use the stop's data key (`card-kid-wants-to-pet-pet`), upgrades their id (`card-second-wind`), and Poop bags' Skip option is `card-skip`. Biscuit neighbour and photo op pay out at once without a card, so `card-biscuit-neighbour-take` and `card-photo-op-pose` serve as their popup art.
+Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. All are drawn. Forced-stop keys use the stop's data key (`card-kid-wants-to-pet-pet`), upgrades their id (`card-second-wind`), and Poop bags' Skip option is `card-skip`. The generous neighbour and the photo op pay out at once without a card, so `card-biscuit-neighbour-take` and `card-photo-op-pose` serve as their popup art.
 
-| Encounter         | Options                                                                                                     | Count | Priority |
-| ----------------- | ----------------------------------------------------------------------------------------------------------- | ----- | -------- |
-| Skunk             | grooming, quick rinse, ignore                                                                               | 3     | M6       |
-| Squirrel          | hold tight, let them chase                                                                                  | 2     | M6       |
-| Puddle            | go through, towel                                                                                           | 2     | M6       |
-| Other dog         | let them sniff, pull away                                                                                   | 2     | M6       |
-| Thief             | chase them off, let it go                                                                                   | 2     | M6       |
-| Lost wallet       | return it, keep it                                                                                          | 2     | M6       |
-| Biscuit neighbour | take biscuits (popup art)                                                                                   | 1     | M6       |
-| Photo op          | pose (popup art)                                                                                            | 1     | M6       |
-| Stop sign         | wait, dart across                                                                                           | 2     | M6       |
-| Kid               | let them pet, decline                                                                                       | 2     | M6       |
-| Ice cream truck   | buy pup cups, walk past                                                                                     | 2     | M6       |
-| Construction      | long way, squeeze past                                                                                      | 2     | M6       |
-| Mail carrier      | hold them back, wait it out                                                                                 | 2     | M6       |
-| Chatty neighbour  | chat, move on                                                                                               | 2     | M6       |
-| Poop bags         | skip (`card-skip`)                                                                                          | 1     | core     |
-| Upgrades          | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, second wind, sweet talker | 9     | core     |
+| Encounter          | Options                                                                                                     | Count | Priority |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- | ----- | -------- |
+| Skunk              | grooming, quick rinse, ignore                                                                               | 3     | M6       |
+| Squirrel           | hold tight, let them chase                                                                                  | 2     | M6       |
+| Puddle             | go through, towel                                                                                           | 2     | M6       |
+| Other dog          | let them sniff, pull away                                                                                   | 2     | M6       |
+| Thief              | chase them off, let it go                                                                                   | 2     | M6       |
+| Lost wallet        | return it, keep it                                                                                          | 2     | M6       |
+| Generous neighbour | take biscuits (popup art)                                                                                   | 1     | M6       |
+| Photo op           | pose (popup art)                                                                                            | 1     | M6       |
+| Stop sign          | wait, dart across                                                                                           | 2     | M6       |
+| Kid                | let them pet, decline                                                                                       | 2     | M6       |
+| Ice cream truck    | buy pup cups, walk past                                                                                     | 2     | M6       |
+| Construction       | long way, squeeze past                                                                                      | 2     | M6       |
+| Mail carrier       | hold them back, wait it out                                                                                 | 2     | M6       |
+| Chatty neighbour   | chat, move on                                                                                               | 2     | M6       |
+| Poop bags          | skip (`card-skip`)                                                                                          | 1     | core     |
+| Upgrades           | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, second wind, sweet talker | 9     | core     |
 
 Total: 37 card illustrations in use, 27 of them in Milestone 6. `card-biscuit-neighbour-pass` and `card-photo-op-wave` match no option and are unused.
 
