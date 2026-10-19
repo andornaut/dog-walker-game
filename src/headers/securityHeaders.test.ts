@@ -3,12 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   cspHash,
   headersFile,
-  injectedStyles,
   inlineBlocks,
+  navWithoutStylesheet,
   pageRules,
   pathMatches,
   renderPolicy,
-  scriptSources,
   servedPath,
 } from "./securityHeaders";
 import { PAGE_RULES, type PageRule } from "./securityPolicy";
@@ -46,32 +45,18 @@ describe("inlineBlocks", () => {
   });
 });
 
-describe("scriptSources", () => {
-  it("lists each external script's src as written", () => {
-    const html = `<script src="/nav.js" defer></script><script>x()</script>
-      <script src='placeholder-sprites.js'></script>`;
-    expect(scriptSources(html)).toEqual(["/nav.js", "placeholder-sprites.js"]);
-  });
-});
-
-describe("injectedStyles", () => {
-  it("returns the template literal a script assigns to a created <style>'s textContent", () => {
-    const script = 'const s = document.createElement("style");\ns.textContent = `\n.a { b: c; }`;';
-    expect(injectedStyles("/nav.js", script)).toEqual(["\n.a { b: c; }"]);
+describe("navWithoutStylesheet", () => {
+  it("flags a page that loads nav.js without linking nav.css", () => {
+    expect(navWithoutStylesheet(`<script src="/nav.js" defer></script>`)).toBe(true);
+    expect(
+      navWithoutStylesheet(`<link rel="stylesheet" href="/nav.css" />
+        <script src="/nav.js" defer></script>`),
+    ).toBe(false);
   });
 
-  it("returns nothing for a script that creates no <style>", () => {
-    expect(injectedStyles("/x.js", "el.textContent = `hi`;")).toEqual([]);
-  });
-
-  it("throws when the <style> text is not a literal it can hash", () => {
-    expect(() => injectedStyles("/x.js", 'createElement("style"); s.textContent = css;')).toThrow(
-      /no template literal/,
-    );
-    // The script text under test contains a template substitution.
-    // eslint-disable-next-line no-template-curly-in-string
-    const substituted = "createElement('style'); s.textContent = `a { color: ${c}; }`;";
-    expect(() => injectedStyles("/x.js", substituted)).toThrow(/substitutions or escapes/);
+  it("ignores a page without the nav and a script whose name only ends in nav.js", () => {
+    expect(navWithoutStylesheet(`<script src="/main.js"></script>`)).toBe(false);
+    expect(navWithoutStylesheet(`<script src="/sidenav.js"></script>`)).toBe(false);
   });
 });
 

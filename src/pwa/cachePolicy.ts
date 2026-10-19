@@ -1,8 +1,9 @@
 import type { PrecacheManifest } from "./precacheList";
 
 // How the service worker answers a same-origin GET.
-// network-first: pages and the art manifest, so a deploy shows on the next load; the cached copy
-// answers offline.
+// network-first: pages, the manifests and the site nav's script and stylesheet, so a deploy shows
+// on the next load; the cached copy answers offline. The nav files are unhashed, and a page
+// fetched from the network must not get the nav of the deploy the running worker precached.
 // cache-first: content-hashed build output, the precached art, icons and scripts, and the sound
 // files of either format, so one the install did not store is stored on its first fetch.
 // network-only: anything else, left to the browser.
@@ -14,6 +15,8 @@ export const ART_MANIFEST_URL = `${ART_BASE_URL}/manifest.json`;
 export const ALWAYS_REVALIDATED_URLS: ReadonlySet<string> = new Set([
   ART_MANIFEST_URL,
   "/manifest.webmanifest",
+  "/nav.css",
+  "/nav.js",
 ]);
 
 // Content-hashed build output, safe to serve from cache for as long as it is referenced.

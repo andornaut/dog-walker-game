@@ -47,36 +47,13 @@ export function inlineBlocks(html: string): { scripts: string[]; styles: string[
   return { scripts, styles };
 }
 
-// The src of each external <script> in a page, as written.
-export function scriptSources(html: string): string[] {
-  return [...html.matchAll(SCRIPT_PATTERN)].flatMap(
-    ([, attributes]) => SRC_PATTERN.exec(attributes ?? "")?.[1] ?? [],
-  );
-}
+const NAV_SCRIPT_PATTERN = /<script\b[^>]*\ssrc\s*=\s*["']?\/nav\.js["'\s>]/i;
+const NAV_STYLESHEET_PATTERN = /<link\b[^>]*\shref\s*=\s*["']?\/nav\.css["'\s>]/i;
 
-const TEXT_CONTENT_PATTERN = /\.textContent\s*=\s*`([^`]*)`/g;
-
-// The CSS a script injects as <style> elements: each template literal it assigns to a
-// textContent. Throws when a script creates a <style> whose text cannot be read statically,
-// since its hash would then be missing and the browser would block it.
-export function injectedStyles(scriptName: string, script: string): string[] {
-  if (!/createElement\(\s*["'`]style["'`]\s*\)/.test(script)) {
-    return [];
-  }
-  const styles = [...script.matchAll(TEXT_CONTENT_PATTERN)].map(([, text]) => text ?? "");
-  if (styles.length === 0) {
-    throw new Error(
-      `${scriptName} creates a <style> but assigns no template literal to textContent`,
-    );
-  }
-  for (const style of styles) {
-    if (style.includes("${") || style.includes("\\")) {
-      throw new Error(
-        `${scriptName} injects a <style> with substitutions or escapes; it can't be hashed`,
-      );
-    }
-  }
-  return styles;
+// Whether a page loads /nav.js without linking /nav.css. The script builds the site nav bar but
+// leaves its CSS to the page, since the CSP has no hash for a <style> a script injects.
+export function navWithoutStylesheet(html: string): boolean {
+  return NAV_SCRIPT_PATTERN.test(html) && !NAV_STYLESHEET_PATTERN.test(html);
 }
 
 // The path a page is served at: Cloudflare serves /dir/index.html at /dir/ and /x.html at /x.

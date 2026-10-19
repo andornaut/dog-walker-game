@@ -11,7 +11,13 @@ import {
 } from "./cachePolicy";
 import type { PrecacheManifest } from "./precacheList";
 
-const precached = new Set(["/play/", "/nav.js", "/art/manifest.json", "/art/sprites/dog.png"]);
+const precached = new Set([
+  "/play/",
+  "/nav.css",
+  "/nav.js",
+  "/art/manifest.json",
+  "/art/sprites/dog.png",
+]);
 const fetchOf = (pathname: string) => strategyFor(precached, { isNavigation: false, pathname });
 const navigationTo = (pathname: string) => strategyFor(precached, { isNavigation: true, pathname });
 
@@ -35,9 +41,13 @@ describe("strategyFor", () => {
     expect(fetchOf("/assets/play-abc.js")).toBe("cache-first");
   });
 
+  it("revalidates the site nav's script and stylesheet, though they are precached", () => {
+    expect(fetchOf("/nav.js")).toBe("network-first");
+    expect(fetchOf("/nav.css")).toBe("network-first");
+  });
+
   it("serves other precached files from the cache", () => {
     expect(fetchOf("/art/sprites/dog.png")).toBe("cache-first");
-    expect(fetchOf("/nav.js")).toBe("cache-first");
   });
 
   it("leaves files outside the precache to the browser", () => {

@@ -5,25 +5,22 @@ import {
   headersFile,
   type HeadersRule,
   type HtmlPage,
-  injectedStyles,
   inlineBlocks,
+  navWithoutStylesheet,
   type PageNeeds,
   pageRules,
-  scriptSources,
   servedPath,
 } from "./securityHeaders";
 import { BASE_DIRECTIVES, COMMON_RULE, PAGE_RULES } from "./securityPolicy";
 
 const HEADERS_FILE_NAME = "_headers";
-// A stand-in origin for resolving a page's script src to a path on this site.
-const SAME_ORIGIN = "https://site.invalid";
 const HEADING =
   "Written by the build from src/headers/securityPolicy.ts and the hashes of each page's inline " +
   "blocks.";
 
 // Writes dist/_headers: the common headers on every path and a Content-Security-Policy per
 // page rule, with the hashes of every inline <script> and <style> in the built pages and the
-// pages copied from public/, and of each <style> a same-origin script those pages load injects.
+// pages copied from public/. Fails the build for a page that loads nav.js without nav.css.
 export function securityHeadersPlugin(): Plugin {
   let publicDir = "";
   return {
@@ -68,31 +65,22 @@ export function securityHeadersPlugin(): Plugin {
           )),
         ];
 
-        // Scripts copied from public/, such as nav.js. Bundled code is left out: Phaser's CSS
-        // file loader injects a <style> whose text is only known at run time, and the game does
-        // not use it.
-        const injectedStyleHashes = async (pageFile: string, src: string): Promise<string[]> => {
-          const url = new URL(src, `${SAME_ORIGIN}/${pageFile}`);
-          const name = url.pathname.slice(1);
-          if (url.origin !== SAME_ORIGIN || name in bundle) {
-            return [];
+        for (const { fileName, html } of pages) {
+          if (navWithoutStylesheet(html)) {
+            this.error(
+              `security headers: ${fileName} loads /nav.js but does not link /nav.css, so its ` +
+                "nav bar would be unstyled",
+            );
           }
-          const script = await readPublic(name).catch(() =>
-            this.error(`security headers: ${pageFile} loads ${src}, which is not in ${publicDir}`),
-          );
-          return Promise.all(injectedStyles(`/${name}`, script).map(cspHash));
-        };
+        }
 
         const needs = new Map<string, PageNeeds>(
           await Promise.all(
             pages.map(async ({ fileName, html }) => {
               const { scripts, styles } = inlineBlocks(html);
-              const injected = await Promise.all(
-                scriptSources(html).map((src) => injectedStyleHashes(fileName, src)),
-              );
               const pageNeeds: PageNeeds = {
                 scriptHashes: await Promise.all(scripts.map(cspHash)),
-                styleHashes: [...(await Promise.all(styles.map(cspHash))), ...injected.flat()],
+                styleHashes: await Promise.all(styles.map(cspHash)),
               };
               return [servedPath(fileName), pageNeeds] as const;
             }),
