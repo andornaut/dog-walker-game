@@ -1,3 +1,4 @@
+import { exceedsTapDistance } from "../input/gestures";
 import type { Point } from "../layout/rect";
 
 // A press held this long without moving more than slopPx opens the item's detail card
@@ -21,8 +22,7 @@ export function moveHold(press: HoldPress, to: Point): HoldPress {
   if (press.state !== "holding") {
     return press;
   }
-  const far = Math.hypot(to.x - press.start.x, to.y - press.start.y) > HOLD.slopPx;
-  return far ? { ...press, state: "moved" } : press;
+  return exceedsTapDistance(HOLD.slopPx, press.start, to) ? { ...press, state: "moved" } : press;
 }
 
 // Each frame: fire tells the caller to open the card, once, when the hold time is up.
