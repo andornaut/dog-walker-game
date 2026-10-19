@@ -37,3 +37,9 @@ Format:
 - Covered: the three pillars: tension and pack size (Cozy, not frantic); forced stops, upgrades, quips, end screen (Every bump is a story); dogs, owners, neighbourhood, walker (Charming chaos)
 - Decided: gentle speed ramp; dogs pull the pack (trait targets and wander, more with more dogs); per-dog area-effect rolls; head home any time, forfeiting the current zone's fees; 6 forced stops drawn without repeats; 9 upgrade cards; a quip after every card choice; earnings-only end screen; fixed named dogs and owners; scenery gags; one fixed walker
 - Open threads / next time: dog names, breeds and owner personalities; which encounters are area effects; speed ramp amount
+
+## 2026-10-18 · Design · Rule details
+
+- Covered: speed ramp, lane input, collisions after a hit and mid-move, treats, pay for fired dogs, Stinky stacking, upgrade repeats, Good leash, Sweet talker, permanent vs run-only upgrades, forced-stop art
+- Decided: +10% speed per zone; hold to keep moving, both lanes count mid-move; ~1s grace after a hit; carried treats given by tapping a dog; fired dogs unpaid for that zone; Stinky refreshes; no upgrade repeats; Good leash stops pulls too; Sweet talker covers missed tips; permanent gameplay gear, cosmetics later; forced-stop card art in Milestone 6
+- Open threads / next time: which encounters are area effects and how cards show who was caught; dog names, breeds and owner personalities

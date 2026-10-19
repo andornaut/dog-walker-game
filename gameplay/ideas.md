@@ -53,6 +53,7 @@ Group by topic; add new topic headings as they come up.
 - [agreed] **Head home**: end a walk early from the pause menu; the current zone pays nothing (2026-10-18)
 - [cut] **Story recap on the end screen**: retell the run's biggest moments (2026-10-18) · cut: the end screen shows earnings only
 - [agreed] **Gentle failure**: a fired dog leaves with a funny quip; keep what you've earned (2026-10-18)
+- [parked] **Cosmetic permanent unlocks**: permanent purchases that change looks only; v1 shop is gameplay-altering gear (2026-10-18)
 - [parked] **House hub**: Hades-style home base you decorate and improve with mostly cosmetic unlocks; long-term progression (2026-10-18)
 
 ## Art & feel

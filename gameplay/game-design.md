@@ -41,7 +41,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ## Mechanics
 
 - **Movement:** 5 lanes; the walker and pack move left/right at the bottom of the screen. Dogs sometimes pull the pack one lane, toward what their trait cares about or at random; more dogs, more pulls.
-- **Pickups:** things you want to hit: treats (raise owner happiness) and tips (money).
+- **Pickups:** things you want to hit: treats (carried, then given to the dog of your choice to raise its owner's happiness) and tips (money).
 - **Encounters:** collisions pause the run and offer a choice, usually trading money against owner happiness or a debuff. Some problems can be fixed with money, e.g. skunk: pay a lot for grooming, or less and take the lingering **Stinky** debuff. Choices only in v1. Each option's outcome is fixed and shown on the card. An option you can't afford is disabled; every encounter has a free option.
 - **Forced stops:** one per zone, drawn from a pool with no repeats in a run; always triggers a choice.
 - **Area effects:** roll once per dog, so a bigger pack is more likely to have someone affected.
@@ -51,11 +51,11 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ## Progression & goals
 
-- Banked money buys permanent unlocks: loadout gear now; later, more dog slots, better leashes and more.
+- Banked money buys permanent unlocks: permanent, gameplay-altering loadout gear now (cosmetics later); upgrade cards are the run-only boosts; later, more dog slots, better leashes and more.
 
 ## Controls
 
-Designed touch-first. v1 supports keyboard (web) and touch (mobile: tap the left/right half of the screen, or swipe). Mouse is not planned.
+Designed touch-first. v1 supports keyboard (web) and touch (mobile: tap the left/right half of the screen, or swipe; holding keeps moving lane to lane). Mouse is not planned.
 
 ## Screen
 

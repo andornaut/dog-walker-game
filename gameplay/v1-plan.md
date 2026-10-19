@@ -11,11 +11,13 @@ Pick 1–3 dogs from a roster of 3 and one piece of gear, then walk a fixed rout
 ### Screen & controls
 
 - Portrait orientation, ¾ top-down view
-- 5 lanes. Keyboard: ←/→ or A/D. Touch: tap the left/right half of the screen, or swipe left/right (both work)
+- 5 lanes. Keyboard: ←/→ or A/D. Touch: tap the left/right half of the screen, or swipe left/right (both work). Each press, tap or swipe moves one lane; holding a key or finger keeps moving lane to lane. Taps on the dog column give a treat instead of moving
+- While moving between lanes, the pack can hit things in either lane
+- A hit obstacle is removed after its card, then ~1s with no collisions
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
 - Calm speed: scroll speed and density both rise gently per zone, never frantic
 - Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back
-- Area effects roll once per dog, so a bigger pack is more likely to have someone affected
+- Area effects roll once per dog, so a bigger pack is more likely to have someone affected. Which encounters are area effects, and how the card shows who was caught, is open
 
 ### Resources
 
@@ -27,7 +29,7 @@ Pick 1–3 dogs from a roster of 3 and one piece of gear, then walk a fixed rout
 - 4 zones in a fixed order (e.g. street, park, shops, home stretch), each a fixed distance that takes ~3 minutes at base speed (a full run is ~12 minutes)
 - One forced stop per zone
 - After zones 1, 2 and 3: choose 1 of 3 upgrade cards
-- After each zone: every remaining dog pays a share of its fee
+- After each zone: every remaining dog pays a share of its fee; a dog fired mid-zone isn't paid for that zone
 - Ends after zone 4 or when no dogs are left; everything earned is kept
 - Head home: available any time from the pause menu; keeps tips and earlier zones' fees, but the current zone pays nothing
 
@@ -41,7 +43,7 @@ Pick 1–3 dogs from a roster of 3 and one piece of gear, then walk a fixed rout
 
 ### Pickups (things you _want_ to hit)
 
-- Treat: +1 ♥ to the unhappiest owner
+- Treat: carried (up to 3); tap a dog's slot in the dog column to give its owner +1 ♥
 - Tip: +$
 
 ### Dogs (roster of 3, pick 1–3)
@@ -78,26 +80,27 @@ Scenery gags (a cat on a fence, a sprinkler, a ball rolling past) open no card a
 
 ### Debuff (one for v1)
 
-- **Stinky:** tips are halved for the rest of the zone
+- **Stinky:** tips are halved for the rest of the zone. A second skunk refreshes it (no stacking); Ignore doesn't apply it
 
 ### Upgrade cards (between zones; pool of 9)
 
-Run-only boosts, plus two trade-off cards:
+Run-only boosts, plus two trade-off cards. A picked card leaves the pool for the rest of the run:
 
 - Belly rubs: +1 ♥ to every owner now
-- Good leash: squirrels can't upset your chasers
+- Good leash: squirrels can't upset your chasers, and chasers don't pull toward them
 - Big tipper: tips worth +50%
 - Shortcut: next zone is shorter, but its fees −25% (trade-off)
 - Rush hour: more tips _and_ more obstacles for the next zone (trade-off)
 - Raincoats: puddles can't upset anyone for the rest of the run
 - Treat magnet: treats count from one lane away
 - Steady hands: dogs pull the pack half as often
-- Sweet talker: card $ costs −$2 per dog for the rest of the run
+- Sweet talker: every $ cost on a card, missed tips included, is $2 less per dog for the rest of the run
 
 ### Meta progression (minimal)
 
 - Money earned in a run is banked
 - Home screen has a simple shop with 3 loadout items (e.g. fanny pack: start with +$30; poop bags: once per run, an encounter card offers a free Skip option; Lucky collar: every owner starts at 6 ♥)
+- Shop items are permanent, gameplay-altering gear: bought once and kept. Upgrade cards are the run-only boosts (the Hades split between keepsakes and boons)
 - Pick up to 1 owned item before each run (none is allowed, e.g. on a first run)
 - Progress (bank, owned items) is saved between sessions. Where it is stored (e.g. browser storage) is a tech proposal; see [`tech-plan.md`](../tech-plan.md)
 
@@ -107,10 +110,10 @@ Placeholders sized for ~3-minute zones. A full run is estimated at ~$175 with 2 
 
 | What                         | Value                                                |
 | ---------------------------- | ---------------------------------------------------- |
-| Scroll speed                 | Rises gently per zone (amount TBD)                   |
+| Scroll speed                 | +10% per zone (zone 4 at 1.3× base)                  |
 | Obstacles per zone           | 18 in zone 1, +3 per later zone                      |
 | Tips per zone                | 24 in zone 1, +3 per later zone                      |
-| Treats per zone              | 4                                                    |
+| Treats per zone              | 4 (carry up to 3)                                    |
 | Owner happiness              | Start 5, max 8; treat +1                             |
 | Fee per zone survived        | Small $10 · medium $20 · big $30                     |
 | Tip                          | $2 (Big tipper $3, Stinky $1)                        |
@@ -133,7 +136,7 @@ Minigames · branching paths between zones · unlockable dog slots · special do
 3. **Encounters:** choice cards, money, per-dog owner happiness, trait targeting, Stinky, owner quips, dogs leave at 0 ♥
 4. **Run structure:** 4 zones, forced stops, upgrade cards, per-zone pay, end screen with earnings
 5. **Dogs & meta:** 3-dog roster with 1–3 picks, bank, shop, loadout, save
-6. **Pixel pass & phone playtest:** sprites for walker, 3 dogs, owner faces, 4 encounters, 2 pickups, card frames; test on real phones
+6. **Pixel pass & phone playtest:** sprites for walker, 3 dogs, owner faces, 2 pickups, card frames, card illustrations for the 4 encounters and 6 forced stops; test on real phones
 
 **Done when:** a run lasts about 12 minutes, we want to play "one more", and it works by touch on a phone browser.
 

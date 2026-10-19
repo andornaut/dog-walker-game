@@ -74,3 +74,13 @@ Format: `YYYY-MM-DD · [Design|Art|Tech|Process] · Decision[: why]`. The why is
 - 2026-10-18 · Art · People (walker, owners, forced-stop characters) are 32×48 sprites; dogs and obstacles stay 32×32
 - 2026-10-18 · Art · The leash is a 1px line drawn in code from hand to collar, not a sprite
 - 2026-10-18 · Art · Each card option gets its own illustration; an encounter with two options shows two centred cards
+- 2026-10-18 · Design · Scroll speed rises 10% per zone (placeholder)
+- 2026-10-18 · Design · Each press, tap or swipe moves one lane, and holding keeps moving lane to lane; mid-move, the pack can hit things in either lane
+- 2026-10-18 · Design · A hit obstacle is removed after its card, followed by ~1s with no collisions
+- 2026-10-18 · Design · Treats are carried (up to 3) and given by tapping a dog's slot; replaces the 2026-10-18 rule that a treat goes to the unhappiest owner
+- 2026-10-18 · Design · A dog fired mid-zone isn't paid for that zone
+- 2026-10-18 · Design · A second skunk refreshes Stinky without stacking; Ignore doesn't apply Stinky
+- 2026-10-18 · Design · A picked upgrade card leaves the pool for the rest of the run
+- 2026-10-18 · Design · Good leash also stops Chasers pulling toward squirrels; Sweet talker reduces every $ cost on a card, missed tips included
+- 2026-10-18 · Design · Shop items are permanent, gameplay-altering gear, bought once and kept; upgrade cards are the run-only boosts; cosmetic unlocks come after v1
+- 2026-10-18 · Design · Milestone 6 adds card illustrations for the 6 forced stops
