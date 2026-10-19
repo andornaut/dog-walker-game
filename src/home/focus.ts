@@ -1,6 +1,8 @@
 // Keyboard focus on the home screen: rows of items (the dog rows, gear, Start walk, walkers),
 // moved through with the arrow keys.
 
+import { clampIndex } from "../arrays";
+
 export interface Focus {
   readonly column: number;
   readonly row: number;
@@ -17,10 +19,6 @@ const KEY_DIRECTIONS: Readonly<Record<string, FocusDirection>> = {
 
 export function focusDirectionForKey(key: string): FocusDirection | undefined {
   return KEY_DIRECTIONS[key];
-}
-
-function clamp(max: number, value: number): number {
-  return Math.min(max, Math.max(0, value));
 }
 
 // The same share of the way along a row of another length.
@@ -46,11 +44,11 @@ export function moveFocus(
     case "left":
     case "right": {
       const column = focus.column + (direction === "left" ? -1 : 1);
-      return { ...focus, column: clamp(length(focus.row) - 1, column) };
+      return { ...focus, column: clampIndex(length(focus.row), column) };
     }
     case "down":
     case "up": {
-      const row = clamp(rowLengths.length - 1, focus.row + (direction === "up" ? -1 : 1));
+      const row = clampIndex(rowLengths.length, focus.row + (direction === "up" ? -1 : 1));
       if (row === focus.row) {
         return focus;
       }

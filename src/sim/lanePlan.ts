@@ -1,3 +1,4 @@
+import { clampIndex } from "../arrays";
 import type { LaneDirection } from "../layout/lanes";
 
 // Times are seconds of walking from now, and lanes are lane masks: bit n set means lane n.
@@ -156,9 +157,7 @@ export function planLanes(
   // A pull toward the road edge from the edge lane turns inward.
   const pulledTo = (pull: LanePull, lane: number) => {
     const to = lane + pull.direction;
-    return to < 0 || to >= laneCount
-      ? Math.min(laneCount - 1, Math.max(0, lane - pull.direction))
-      : to;
+    return to < 0 || to >= laneCount ? clampIndex(laneCount, lane - pull.direction) : to;
   };
   // A lane change started at time would still be under way when a pull comes.
   const pullDuring = (time: number) =>
