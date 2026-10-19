@@ -8,21 +8,23 @@ const browserPlaying =
     playable.includes(mimeType) ? "maybe" : "";
 
 describe("chooseSoundFormat", () => {
-  it("picks Ogg when the browser plays both, as Chrome and Firefox do", () => {
-    const both = browserPlaying(SOUND_FORMAT_MIME_TYPES.ogg, SOUND_FORMAT_MIME_TYPES.m4a);
-    expect(chooseSoundFormat(both)).toBe("ogg");
-  });
+  const { m4a, ogg } = SOUND_FORMAT_MIME_TYPES;
 
-  it("picks AAC when the browser plays only that, as older iOS Safari does", () => {
-    expect(chooseSoundFormat(browserPlaying(SOUND_FORMAT_MIME_TYPES.m4a))).toBe("m4a");
-  });
-
-  it("chooses nothing when the browser plays neither", () => {
-    expect(chooseSoundFormat(browserPlaying())).toBeUndefined();
-  });
-
-  it("treats an old browser's no as cannot play", () => {
-    expect(chooseSoundFormat(() => "no")).toBeUndefined();
+  it.each<[string, (mimeType: string) => string, string | undefined]>([
+    [
+      "picks Ogg when the browser plays both, as Chrome and Firefox do",
+      browserPlaying(ogg, m4a),
+      "ogg",
+    ],
+    [
+      "picks AAC when the browser plays only that, as older iOS Safari does",
+      browserPlaying(m4a),
+      "m4a",
+    ],
+    ["chooses nothing when the browser plays neither", browserPlaying(), undefined],
+    ["treats an old browser's no as cannot play", () => "no", undefined],
+  ])("%s", (_name, canPlay, expected) => {
+    expect(chooseSoundFormat(canPlay)).toBe(expected);
   });
 
   it("asks with the types Phaser's loader checks the extension against", () => {

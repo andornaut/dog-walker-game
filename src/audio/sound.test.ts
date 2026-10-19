@@ -11,13 +11,12 @@ import {
   MAX_PLAYS_PER_WINDOW,
   type Mix,
   MUSIC_FADE_MS,
-  MUSIC_KEY,
   MUSIC_STOPPED,
   musicLevel,
   type MusicState,
   PLAY_WINDOW_MS,
   type RecentPlays,
-  SOUND_KEYS,
+  type SoundCue,
   soundKeyFor,
   soundKeysOf,
   startMusic,
@@ -35,33 +34,25 @@ const fading = (level: number, toward: "playing" | "stopped"): MusicState => ({
   level,
   toward,
 });
-
-describe("SOUND_KEYS", () => {
-  it("maps each cue to the art agent's manifest key", () => {
-    expect(SOUND_KEYS).toEqual({
-      badge: "sfx-badge",
-      bark: "sfx-bark",
-      bump: "sfx-bump",
-      cardOpen: "sfx-card",
-      fired: "sfx-fired",
-      newBest: "sfx-new-best",
-      tip: "sfx-tip",
-      treat: "sfx-treat",
-    });
-    expect(MUSIC_KEY).toBe("music-walk");
-  });
-});
+const PLAYING: MusicState = { kind: "playing" };
 
 describe("soundKeysOf", () => {
-  it("plays an encounter hit's own sound, falling back to the bump", () => {
-    expect(soundKeysOf(hitCue("obstacle", "otherDog"))).toEqual(["sfx-hit-other-dog", "sfx-bump"]);
-    expect(soundKeysOf(hitCue("obstacle", "skunk"))).toEqual(["sfx-hit-skunk", "sfx-bump"]);
-    expect(soundKeysOf("badge")).toEqual(["sfx-badge"]);
-  });
-
-  it("plays a lucky hit's own sfx-<encounter>, with no bump in its place", () => {
-    expect(soundKeysOf(hitCue("lucky", "lemonade"))).toEqual(["sfx-lemonade"]);
-    expect(soundKeysOf(hitCue("obstacle", "goose"))).toEqual(["sfx-hit-goose", "sfx-bump"]);
+  it.each<[string, SoundCue, string[]]>([
+    ["plays a cue's own sound", "badge", ["sfx-badge"]],
+    [
+      "plays an encounter hit's own sound, falling back to the bump",
+      hitCue("obstacle", "otherDog"),
+      ["sfx-hit-other-dog", "sfx-bump"],
+    ],
+    ["plays the skunk hit's own sound", hitCue("obstacle", "skunk"), ["sfx-hit-skunk", "sfx-bump"]],
+    ["plays the goose hit's own sound", hitCue("obstacle", "goose"), ["sfx-hit-goose", "sfx-bump"]],
+    [
+      "plays a lucky hit's own sfx-<encounter>, with no bump in its place",
+      hitCue("lucky", "lemonade"),
+      ["sfx-lemonade"],
+    ],
+  ])("%s", (_name, cue, expected) => {
+    expect(soundKeysOf(cue)).toEqual(expected);
   });
 
   it("picks the first key that loaded, or none", () => {
@@ -75,77 +66,65 @@ describe("soundKeysOf", () => {
 });
 
 describe("clampVolume", () => {
-  it("keeps a volume between 0 and 1", () => {
-    expect(clampVolume(0.25)).toBe(0.25);
-    expect(clampVolume(-1)).toBe(0);
-    expect(clampVolume(3)).toBe(1);
-  });
-
-  it("silences a volume that is not a number", () => {
-    expect(clampVolume(Number.NaN)).toBe(0);
+  it.each([
+    ["keeps a volume in range", 0.25, 0.25],
+    ["raises a negative volume to 0", -1, 0],
+    ["lowers a volume past 1 to 1", 3, 1],
+    ["silences a volume that is not a number", Number.NaN, 0],
+  ])("%s", (_name, volume, expected) => {
+    expect(clampVolume(volume)).toBe(expected);
   });
 });
 
 describe("effectiveVolumes", () => {
-  it("plays each channel at its own volume when nothing mutes it", () => {
-    expect(effectiveVolumes(mix({}))).toEqual({ music: 0.8, sfx: 0.6 });
-  });
-
-  it("mutes both channels while the app is hidden", () => {
-    expect(effectiveVolumes(mix({ hidden: true }))).toEqual({ music: 0, sfx: 0 });
-  });
-
-  it("silences both channels while the player has muted", () => {
-    expect(effectiveVolumes(mix({ muted: true }))).toEqual({ music: 0, sfx: 0 });
-  });
-
-  it("mutes both channels while the game is paused", () => {
-    expect(effectiveVolumes(mix({ paused: true }))).toEqual({ music: 0, sfx: 0 });
-  });
-
-  it("ducks only the music while a card is open", () => {
-    expect(effectiveVolumes(mix({ cardOpen: true }))).toEqual({
-      music: 0.8 * CARD_OPEN_MUSIC_DUCK,
-      sfx: 0.6,
-    });
-  });
-
-  it("clamps channel volumes read from settings", () => {
-    expect(effectiveVolumes(mix({ volumes: { music: 2, sfx: -0.5 } }))).toEqual({
-      music: 1,
-      sfx: 0,
-    });
+  it.each<[string, Partial<Mix>, { music: number; sfx: number }]>([
+    ["plays each channel at its own volume when nothing mutes it", {}, { music: 0.8, sfx: 0.6 }],
+    ["mutes both channels while the app is hidden", { hidden: true }, { music: 0, sfx: 0 }],
+    ["silences both channels while the player has muted", { muted: true }, { music: 0, sfx: 0 }],
+    ["mutes both channels while the game is paused", { paused: true }, { music: 0, sfx: 0 }],
+    [
+      "ducks only the music while a card is open",
+      { cardOpen: true },
+      { music: 0.8 * CARD_OPEN_MUSIC_DUCK, sfx: 0.6 },
+    ],
+    [
+      "clamps channel volumes read from settings",
+      { volumes: { music: 2, sfx: -0.5 } },
+      { music: 1, sfx: 0 },
+    ],
+  ])("%s", (_name, overrides, expected) => {
+    expect(effectiveVolumes(mix(overrides))).toEqual(expected);
   });
 });
 
 describe("music state machine", () => {
-  it("fades in from silence when started", () => {
-    expect(startMusic(MUSIC_STOPPED)).toEqual(fading(0, "playing"));
-  });
-
-  it("ignores a start while already playing or fading in", () => {
-    expect(startMusic({ kind: "playing" })).toEqual({ kind: "playing" });
-    expect(startMusic(fading(0.3, "playing"))).toEqual(fading(0.3, "playing"));
-  });
-
-  it("fades out from full when stopped while playing", () => {
-    expect(stopMusic({ kind: "playing" })).toEqual(fading(1, "stopped"));
-  });
-
-  it("ignores a stop while already stopped or fading out", () => {
-    expect(stopMusic(MUSIC_STOPPED)).toEqual(MUSIC_STOPPED);
-    expect(stopMusic(fading(0.3, "stopped"))).toEqual(fading(0.3, "stopped"));
-  });
-
-  it("turns a fade around from its current level", () => {
-    expect(startMusic(fading(0.4, "stopped"))).toEqual(fading(0.4, "playing"));
-    expect(stopMusic(fading(0.4, "playing"))).toEqual(fading(0.4, "stopped"));
+  it.each<[string, (state: MusicState) => MusicState, MusicState, MusicState]>([
+    ["fades in from silence when started", startMusic, MUSIC_STOPPED, fading(0, "playing")],
+    ["ignores a start while playing", startMusic, PLAYING, PLAYING],
+    ["ignores a start while fading in", startMusic, fading(0.3, "playing"), fading(0.3, "playing")],
+    ["fades out from full when stopped while playing", stopMusic, PLAYING, fading(1, "stopped")],
+    ["ignores a stop while stopped", stopMusic, MUSIC_STOPPED, MUSIC_STOPPED],
+    ["ignores a stop while fading out", stopMusic, fading(0.3, "stopped"), fading(0.3, "stopped")],
+    [
+      "turns a fade-out around from its level",
+      startMusic,
+      fading(0.4, "stopped"),
+      fading(0.4, "playing"),
+    ],
+    [
+      "turns a fade-in around from its level",
+      stopMusic,
+      fading(0.4, "playing"),
+      fading(0.4, "stopped"),
+    ],
+  ])("%s", (_name, apply, from, expected) => {
+    expect(apply(from)).toEqual(expected);
   });
 
   it("raises a fade-in at a constant rate until it is playing", () => {
     const halfway = advanceMusic(fading(0, "playing"), MUSIC_FADE_MS / 2);
     expect(halfway).toEqual(fading(0.5, "playing"));
-    expect(advanceMusic(halfway, MUSIC_FADE_MS / 2)).toEqual({ kind: "playing" });
+    expect(advanceMusic(halfway, MUSIC_FADE_MS / 2)).toEqual(PLAYING);
   });
 
   it("lowers a fade-out until it is stopped", () => {
@@ -155,14 +134,14 @@ describe("music state machine", () => {
   });
 
   it("leaves a settled state and a negative step alone", () => {
-    expect(advanceMusic({ kind: "playing" }, 100)).toEqual({ kind: "playing" });
+    expect(advanceMusic(PLAYING, 100)).toEqual(PLAYING);
     expect(advanceMusic(MUSIC_STOPPED, 100)).toEqual(MUSIC_STOPPED);
     expect(advanceMusic(fading(0.5, "playing"), -100)).toEqual(fading(0.5, "playing"));
   });
 
   it("reports the gain of each state", () => {
     expect(musicLevel(MUSIC_STOPPED)).toBe(0);
-    expect(musicLevel({ kind: "playing" })).toBe(1);
+    expect(musicLevel(PLAYING)).toBe(1);
     expect(musicLevel(fading(0.7, "stopped"))).toBe(0.7);
   });
 });

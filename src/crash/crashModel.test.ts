@@ -62,43 +62,37 @@ describe("reportFromRejection", () => {
 });
 
 describe("isCrash", () => {
-  it("counts an error thrown by the game's own script", () => {
-    expect(isCrash(crash)).toBe(true);
-  });
+  const from = (source: string): CrashReport => ({ message: "boom", source, stack: undefined });
+  const saying = (message: string): CrashReport => ({ message, source: "", stack: undefined });
+  const extension = "chrome-extension://abcdef/content.js";
 
-  it.each([
-    "chrome-extension://abcdef/content.js",
-    "moz-extension://1234-5678/inject.js",
-    "safari-web-extension://ABCD/script.js",
-    "webkit-masked-url://hidden/",
-  ])("ignores an error from an extension script (%s)", (url) => {
-    expect(isCrash({ message: "boom", source: url, stack: undefined })).toBe(false);
-  });
-
-  it("ignores a rejection whose stack starts in an extension", () => {
-    const { stack } = thrownAt("chrome-extension://abcdef/content.js");
-
-    expect(isCrash({ message: "boom", source: "", stack })).toBe(false);
-  });
-
-  it("counts a rejection whose stack starts in the game", () => {
-    expect(isCrash({ ...crash, source: "" })).toBe(true);
-  });
-
-  it("ignores a cross-origin script's opaque error", () => {
-    expect(isCrash({ message: "Script error.", source: "", stack: undefined })).toBe(false);
-    expect(isCrash({ message: "Script error", source: "", stack: undefined })).toBe(false);
-  });
-
-  it("counts an error whose message is 'Script error.' when it has a stack", () => {
-    expect(isCrash({ ...crash, message: "Script error." })).toBe(true);
-  });
-
-  it.each([
-    "ResizeObserver loop limit exceeded",
-    "ResizeObserver loop completed with undelivered notifications.",
-  ])("ignores the ResizeObserver warning (%s)", (message) => {
-    expect(isCrash({ message, source: "", stack: undefined })).toBe(false);
+  it.each<[string, CrashReport, boolean]>([
+    ["counts an error thrown by the game's own script", crash, true],
+    ["ignores a Chrome extension's error", from(extension), false],
+    ["ignores a Firefox extension's error", from("moz-extension://1234-5678/inject.js"), false],
+    ["ignores a Safari extension's error", from("safari-web-extension://ABCD/script.js"), false],
+    ["ignores a masked WebKit script's error", from("webkit-masked-url://hidden/"), false],
+    [
+      "ignores a rejection whose stack starts in an extension",
+      { message: "boom", source: "", stack: thrownAt(extension).stack },
+      false,
+    ],
+    ["counts a rejection whose stack starts in the game", { ...crash, source: "" }, true],
+    ["ignores a cross-origin script's opaque error", saying("Script error."), false],
+    ["ignores an opaque error without its full stop", saying("Script error"), false],
+    ["counts 'Script error.' that has a stack", { ...crash, message: "Script error." }, true],
+    [
+      "ignores the ResizeObserver limit warning",
+      saying("ResizeObserver loop limit exceeded"),
+      false,
+    ],
+    [
+      "ignores the ResizeObserver undelivered warning",
+      saying("ResizeObserver loop completed with undelivered notifications."),
+      false,
+    ],
+  ])("%s", (_name, report, expected) => {
+    expect(isCrash(report)).toBe(expected);
   });
 });
 
@@ -131,17 +125,17 @@ describe("crashView", () => {
     });
   });
 
-  it("adds the stack in dev builds, once, when the stack already starts with the message", () => {
-    expect(crashView(true, crash).details).toBe(crash.stack);
-  });
+  const bareStack = `step@${APP_URL}:1:200`;
 
-  it("puts the message above a stack that leaves it out", () => {
-    const stack = `step@${APP_URL}:1:200`;
-
-    expect(crashView(true, { ...crash, stack }).details).toBe(`boom\n${stack}`);
-  });
-
-  it("shows only the message when there is no stack", () => {
-    expect(crashView(true, { ...crash, stack: undefined }).details).toBe("boom");
+  it.each<[string, CrashReport, string]>([
+    ["adds the stack once when it already starts with the message", crash, crash.stack ?? ""],
+    [
+      "puts the message above a stack that leaves it out",
+      { ...crash, stack: bareStack },
+      `boom\n${bareStack}`,
+    ],
+    ["shows only the message when there is no stack", { ...crash, stack: undefined }, "boom"],
+  ])("in dev builds, %s", (_name, report, expected) => {
+    expect(crashView(true, report).details).toBe(expected);
   });
 });
