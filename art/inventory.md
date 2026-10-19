@@ -163,12 +163,13 @@ Four zones give 4 road strips (core) plus 3 transitions (later); Woof Way has no
 
 ## Top bar
 
-| Asset          | Key                | Type   | Size   | Priority | Notes                                                                                                                                         |
-| -------------- | ------------------ | ------ | ------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| Bar background | `ui-top-bar`       | image  | 360×40 | core     | Plum wood with ink wells: money 4,8 94×26; treats 100,8 42×26; zone 194,5 162×29. Sound toggle at 146,10 and pause at 170,10 sit between them |
-| Money icon     | `icon-money`       | image  | 16×16  | core     | Reused in cards, shop and end screen                                                                                                          |
-| Zone progress  | `ui-zone-pips`     | sprite | 18×8   | core     | 4 pips 3px apart; frames `done` (ticked), `current` (the game fills it amber), `todo`                                                         |
-| Zone icons     | `icon-zone-<zone>` | image  | 16×16  | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home; drawn by `art/tools/glyphs.py`                                                    |
+| Asset           | Key                | Type   | Size             | Priority | Notes                                                                                                                                         |
+| --------------- | ------------------ | ------ | ---------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Bar background  | `ui-top-bar`       | image  | 360×40           | core     | Plum wood with ink wells: money 4,8 94×26; treats 100,8 42×26; zone 194,5 162×29. Sound toggle at 146,10 and pause at 170,10 sit between them |
+| State strip tab | `ui-strip-well`    | image  | 24×24 nine-slice | core     | Plum tab with an ink well hanging under the zone well, right-aligned at x 356, holding the 16×16 state icons; stretched to the strip's width  |
+| Money icon      | `icon-money`       | image  | 16×16            | core     | Reused in cards, shop and end screen                                                                                                          |
+| Zone progress   | `ui-zone-pips`     | sprite | 18×8             | core     | 4 pips 3px apart; frames `done` (ticked), `current` (the game fills it amber), `todo`                                                         |
+| Zone icons      | `icon-zone-<zone>` | image  | 16×16            | later    | Woof Way, Bark Park, Sniff Street Shops, The Long Way Home; drawn by `art/tools/glyphs.py`                                                    |
 
 ## Choice cards
 

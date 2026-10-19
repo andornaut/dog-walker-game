@@ -801,6 +801,22 @@ def well(g, x, y, w, h):
     g.rect(x + w - 1, y + 1, 1, h - 2, "dbrown")
 
 
+def strip_well():
+    """24x24 nine-slice (8px corners): the state strip's tab hanging under the zone well, plum wood
+    with a flat top (it tucks under the bar) and rounded bottom corners around an ink well that
+    holds the 16x16 state icons (they hold 3:1 on ink). Stretch it to the strip's width."""
+    g = Grid(24, 24)
+    g.rect(0, 0, 24, 22, "plum")
+    g.rect(1, 22, 22, 1, "plum")
+    g.rect(2, 23, 20, 1, "ink")
+    g.p(0, 22, "ink")
+    g.p(23, 22, "ink")
+    g.rect(0, 0, 1, 22, "dbrown")
+    g.rect(23, 0, 1, 22, "ink")
+    well(g, 3, 1, 18, 19)
+    return g
+
+
 def top_bar():
     """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
     money 4,8 94x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 100,8
@@ -957,6 +973,7 @@ IMAGES = {
     "ui-new-best": new_best,
     "ui-slot-locked": slot_locked,
     "ui-top-bar": lambda: to_image(top_bar().outlined(False)),
+    "ui-strip-well": lambda: to_image(strip_well().outlined(False)),
     "ui-quip": lambda: to_image(quip().outlined(False)),
     "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),

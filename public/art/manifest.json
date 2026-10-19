@@ -1749,6 +1749,10 @@
       "png": "images/ui-step.png"
     },
     {
+      "key": "ui-strip-well",
+      "png": "images/ui-strip-well.png"
+    },
+    {
       "key": "ui-top-bar",
       "png": "images/ui-top-bar.png"
     },
