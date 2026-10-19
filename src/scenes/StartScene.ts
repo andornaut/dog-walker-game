@@ -1024,10 +1024,10 @@ export class StartScene extends Scene {
   }
 
   // A container for one tappable tile, registered for its feedback.
-  private tileView(root: GameObjects.Container, id: string, lift: number): TileView {
+  private tileView(root: GameObjects.Container, id: string): TileView {
     const container = this.add.container(0, 0);
     root.add(container);
-    const view: TileView = { container, lift };
+    const view: TileView = { container, lift: 0 };
     this.views.set(id, view);
     return view;
   }
@@ -1061,7 +1061,7 @@ export class StartScene extends Scene {
     at: { x: number; y: number },
     icon: (x: number, y: number) => ReturnType<typeof cogIcon>,
   ): void {
-    const view = this.tileView(root, id, 0);
+    const view = this.tileView(root, id);
     view.iconButton = addIconButton(this, view.container, at.x, at.y, icon);
   }
 
@@ -1218,7 +1218,7 @@ export class StartScene extends Scene {
 
     // Equipped gear shows as a badge beside the walker.
     if (this.loadout.gear !== null) {
-      const badge = this.tileView(root, "gateBadge", 0);
+      const badge = this.tileView(root, "gateBadge");
       badge.rise = `gear:${this.loadout.gear}`;
       fillRect(this.graphics(badge.container), PALETTE.plum, GEAR_BADGE);
       this.addGearIcon(badge.container, this.loadout.gear, GEAR_BADGE.x + 1, GEAR_BADGE.y + 1, 0.5);
@@ -1232,7 +1232,7 @@ export class StartScene extends Scene {
       return;
     }
     const { height, width, x, y } = SLOT_SIGN;
-    const view = this.tileView(root, "slot", 0);
+    const view = this.tileView(root, "slot");
     const g = this.graphics(view.container);
     const postHeight = GATE.y + GATE.height - y - height;
     fillRect(g, PALETTE.darkBrown, { height: postHeight, width: 3, x: x + 10, y: y + height });

@@ -14,7 +14,6 @@ import { startingDogSlots } from "../rules/shop";
 import { migrateSave, saveMigrations } from "./migrations";
 import {
   createDefaultSave,
-  type DogStats,
   MAX_RUN_DOGS,
   type Owned,
   SAVE_VERSION,
@@ -95,19 +94,15 @@ function keepKnown<Id extends string>(known: ReadonlySet<Id>, ids: readonly stri
   return [...new Set(ids)].filter((id) => isKnown(known, id));
 }
 
-// Entries whose key is known, with each value mapped; a value mapped to undefined is dropped.
-function keepKnownEntries<Key extends string, Stored, Value>(
+// The entries whose key is known.
+function keepKnownEntries<Key extends string, Value>(
   known: ReadonlySet<Key>,
-  toValue: (stored: Stored, key: Key) => Value | undefined,
-  record: Readonly<Record<string, Stored>>,
+  record: Readonly<Record<string, Value>>,
 ): Partial<Record<Key, Value>> {
   const kept: Partial<Record<Key, Value>> = {};
-  for (const [key, stored] of Object.entries(record)) {
+  for (const [key, value] of Object.entries(record)) {
     if (isKnown(known, key)) {
-      const value = toValue(stored, key);
-      if (value !== undefined) {
-        kept[key] = value;
-      }
+      kept[key] = value;
     }
   }
   return kept;
@@ -144,11 +139,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
   const counters = checkpoint?.counters ?? null;
   return {
     ...save,
-    achievements: keepKnownEntries(
-      known.achievements,
-      (earnedAt: number) => earnedAt,
-      save.achievements,
-    ),
+    achievements: keepKnownEntries(known.achievements, save.achievements),
     checkpoint:
       checkpoint === null
         ? null
@@ -159,11 +150,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
                 ? null
                 : {
                     ...counters,
-                    debuffZones: keepKnownEntries(
-                      known.debuffs,
-                      (zones: number) => zones,
-                      counters.debuffZones,
-                    ),
+                    debuffZones: keepKnownEntries(known.debuffs, counters.debuffZones),
                   },
             dogs: checkpoint.dogs.flatMap(({ id, ...dog }) =>
               isKnown(known.dogs, id) ? [{ ...dog, id }] : [],
@@ -181,7 +168,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
     stats: {
       ...stats,
       bestWalk: stats.bestWalk === null ? null : keepKnownWalk(known, stats.bestWalk),
-      dogs: keepKnownEntries(known.dogs, (dogStats: DogStats) => dogStats, stats.dogs),
+      dogs: keepKnownEntries(known.dogs, stats.dogs),
       dogsFinishedWith: keepKnown(known.dogs, stats.dogsFinishedWith),
       lastWalk:
         stats.lastWalk === null

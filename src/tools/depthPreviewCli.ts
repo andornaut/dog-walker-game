@@ -202,7 +202,7 @@ await Promise.all(
       rows.map(async ({ distance, drawn, projected, rect }, i) => {
         const view = cloneImage(under);
         const art = arts.find((candidate) => candidate.key === drawn.key) ?? itemAt(arts, 0);
-        drawScaled(art.image, 0, { ...rect, y: rect.y - viewTop }, view);
+        drawScaled(art.image, { ...rect, y: rect.y - viewTop }, view);
         paste(over, 0, 0, view);
         await writeFile(
           join(zoneDir, `d${String(distance).padStart(4, "0")}.png`),

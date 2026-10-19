@@ -104,7 +104,7 @@ export function nextWalkEvent(road: BotRoad, pulls: Pulls, walk: Walk): number {
     }
     const start = fromTop(spawn.distance);
     const lanes = itemLanes({ lane: spawn.lane, laneSpan: footprintOf(data, spawn.kind).lanes });
-    if ((lanes & (spawn.kind === "treat" ? reached : occupied)) !== 0) {
+    if ((lanes & occupied) !== 0) {
       next = Math.min(next, start + PAST);
     }
   }

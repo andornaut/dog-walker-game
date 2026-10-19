@@ -102,13 +102,12 @@ export function drawPixelLine(
 
 const HEART_ROWS = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."];
 
-// A 7x6 heart, with an optional highlight pixel.
+// A 7x6 heart.
 export function drawHeart(
   graphics: GameObjects.Graphics,
   x: number,
   y: number,
   color: number,
-  highlight?: number,
 ): void {
   graphics.fillStyle(color);
   HEART_ROWS.forEach((row, dy) => {
@@ -118,9 +117,6 @@ export function drawHeart(
       }
     });
   });
-  if (highlight !== undefined) {
-    graphics.fillStyle(highlight).fillRect(x + 1, y + 1, 1, 1);
-  }
 }
 
 // A 1px border of 2-on, 2-off dashes, for an empty slot.

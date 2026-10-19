@@ -75,11 +75,11 @@ export function cloneImage(image: RgbaImage): RgbaImage {
 }
 
 // Draws art into target at rect, scaled to the rect's size with nearest-neighbour sampling,
-// skipping transparent pixels and anything above clipTop.
-export function drawScaled(art: RgbaImage, clipTop: number, rect: Rect, target: RgbaImage): void {
+// skipping transparent pixels and anything off the target.
+export function drawScaled(art: RgbaImage, rect: Rect, target: RgbaImage): void {
   for (let dy = 0; dy < rect.height; dy++) {
     const ty = rect.y + dy;
-    if (ty < clipTop || ty < 0 || ty >= target.height) {
+    if (ty < 0 || ty >= target.height) {
       continue;
     }
     const sy = Math.min(art.height - 1, Math.floor(((dy + 0.5) * art.height) / rect.height));
@@ -119,7 +119,7 @@ export function fill(rgba: readonly number[], rect: Rect, target: RgbaImage): vo
 }
 
 export function paste(source: RgbaImage, x: number, y: number, target: RgbaImage): void {
-  drawScaled(source, 0, { height: source.height, width: source.width, x, y }, target);
+  drawScaled(source, { height: source.height, width: source.width, x, y }, target);
 }
 
 // Text in the game's 3x5 pixel font, in capitals, with its top-left at x, y.
@@ -150,6 +150,6 @@ export const TEXT_HEIGHT = GLYPH_HEIGHT;
 // The image scaled up factor times, each pixel a factor-square block.
 export function upscale(factor: number, image: RgbaImage): RgbaImage {
   const out = blankImage(image.width * factor, image.height * factor);
-  drawScaled(image, 0, { height: out.height, width: out.width, x: 0, y: 0 }, out);
+  drawScaled(image, { height: out.height, width: out.width, x: 0, y: 0 }, out);
   return out;
 }
