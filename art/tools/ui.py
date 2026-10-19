@@ -680,9 +680,10 @@ def sticker(body, spikes, scale=1.0, turn=0.0):
 # ---------- the doghouse: one dog slot in the dog column, drawn as a character file card ----------
 
 # Each dog's colour: base, shade and dark, from the dog's accessory. It backs the dog's photo, rings
-# its emblem badge and runs along the card's foot stripe. No two dogs share a base, and a base is
-# never a zone's road colour. Snowball's is his collar's blue, not its sky, which backs every
-# owner's photo; Archie's is rust, for his red merle coat.
+# its emblem badge and runs along the card's foot stripe. No two dogs share a base. Card
+# backgrounds and the band never use zone colours; a dog's accent is its own colour. Snowball's is
+# his collar's blue, not its sky, which backs every owner's photo; Archie's is rust, for his red
+# merle coat.
 DOG_COLOURS = {
     "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
     "pierre": ("purple", "plum", "ink"), "biscuit": ("green", "dgreen", "forest"),
