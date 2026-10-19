@@ -1,18 +1,21 @@
 #!/usr/bin/env python3
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
-Images (16x16 icons unless noted): icon-pause, icon-play, icon-help, icon-close, icon-lock,
-icon-money, icon-stinky; ui-panel, ui-hint (24x24 nine-slices, 8px corners),
-ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text baked in with font-title),
-ui-slot-locked (112x50, a locked pack slot; the game writes the price); the run
-screen's ui-top-bar (360x40), ui-quip (24x24 nine-slice, 8px corners), ui-quip-tail
-(6x8), ui-zone-banner (248x48) and ui-touch-hint (96x36).
+Images (16x16 icons unless noted): icon-pause, icon-play, icon-help, icon-close,
+icon-logbook, icon-settings, icon-lock, icon-money, icon-stinky; ui-panel, ui-hint
+(24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
+baked in with font-title), ui-slot-locked (160x46, the yard sign for the next dog slot;
+the game writes its two lines); the home screen's ui-detail-card and ui-step (24x24
+nine-slices, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
+ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
+nine-slice, 8px corners), ui-quip-tail (6x8), ui-zone-banner (248x48) and
+ui-touch-hint (96x36).
 Sprites: ui-doghouse (72x146, one dog slot; a tag per dog key and `empty`),
-ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-check (16x16; tags 1, 2, 3,
-tick), fx-tap and fx-dust (16x16; tag play),
-ui-heart (8x7; tags full, empty), ui-button (24x24 nine-slice, 6px
-corners; tags normal, pressed, disabled, secondary, secondary-pressed), ui-icon-button
-(20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
+ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
+8px corners; tag glint), ui-check and ui-step-number (16x16; tags 1, 2, 3, tick),
+fx-tap and fx-dust (16x16; tag play), ui-heart (8x7; tags full, empty), ui-button
+(24x24 nine-slice, 3px corners and a 5px bottom; tags normal, pressed, disabled,
+secondary, secondary-pressed), ui-icon-button (20x20, the face under a 16x16 icon such as pause, help or sound; tags normal, pressed),
 ui-switch (32x16; tags on, off), ui-slider (24x10 three-slice, 4px caps; tags filled,
 empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pressed,
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
@@ -210,6 +213,38 @@ def motion(ink, on):
     return g
 
 
+def logbook_icon():
+    """An open ledger, its two pages bowed up from the spine with three ruled lines each; the
+    spine is a navy gap, so the face shows through."""
+    g = Grid(16, 16)
+    for y, row in enumerate(["cc..........cc..", "cccc......cccc..", "ccccccc.cccccct.", "c-----c.c-----t.",
+                             "ccccccc.cccccct.", "c----cc.c----ct.", "ccccccc.cccccct.", "c-----c.c-----t.",
+                             "ccccccc.cccccct.", "cccccct.ccccctt.", "tttccct.ccctttt.", "...ttt.t.ttt...."]):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                g.p(x, 2 + y, {"c": "cream", "t": "tan", "-": "tan"}[ch])
+    return g
+
+
+def settings_icon():
+    """A cog: eight square teeth around a ring with a round hole, cream with tan on the
+    lower-right edges like the other navy-face glyphs."""
+    import math
+
+    g = Grid(16, 16)
+    cx = cy = 7.5
+    for y in range(16):
+        for x in range(16):
+            dx, dy = x + 0.5 - cx - 0.5, y + 0.5 - cy - 0.5
+            r = math.hypot(dx, dy)
+            a = (math.degrees(math.atan2(dy, dx)) + 22.5) % 45
+            tooth = 11 <= a <= 34 and r <= 7.2
+            if (r <= 5.2 or tooth) and r > 2.2:
+                edge = r > 4.4 if not tooth else r > 6.3
+                g.p(x, y, "tan" if edge and dx + dy > 0 else "cream")
+    return g
+
+
 def heart(full):
     """8x7: a full heart is filled dark red; an empty one is a dark brown outline, so the two
     differ by fill as well as colour (5:1 or more on the cream and tan slots)."""
@@ -246,18 +281,22 @@ def panel():
 
 def button(state):
     """secondary is a tan face on a brown lip for the actions beside the amber primary (Help,
-    Settings, Head home beside Resume). Labels are plum: 7.35:1 on amber, 6.49:1 on tan."""
+    Settings, Head home beside Resume). Labels are plum: 7.35:1 on amber, 6.49:1 on tan.
+    Every row below 2 and above 19 is plain face, so the plate stretches to any height with
+    slices of 3 at the top and sides and 5 at the bottom (or 6 all round). Pressed, the
+    highlight sits on the face's top edge (row 2), inside the top slice."""
     face, lip, hi = {"normal": ("amber", "orange", "yellow"), "pressed": ("amber", None, "yellow"),
                      "disabled": ("slate", "dslate", "grey"), "secondary": ("tan", "brown", "cream"),
                      "secondary-pressed": ("tan", None, "cream")}[state]
     g = Grid(24, 24)
-    top = 2 if state.endswith("pressed") else 0
+    pressed = state.endswith("pressed")
+    top = 2 if pressed else 0
     if lip:
         g.rect(1, 20, 22, 4, lip)
         g.rect(0, 20, 24, 3, lip)
     g.rect(1, top, 22, 20, face)
     g.rect(0, top + 1, 24, 18, face)
-    g.rect(2, top + 1, 20, 1, hi)
+    g.rect(2, top if pressed else top + 1, 20, 1, hi)
     return g
 
 
@@ -386,18 +425,29 @@ def new_best():
 
 
 def slot_locked():
-    g = Grid(112, 50)
-    g.rect(0, 0, 112, 50, "brown")
-    g.rect(1, 1, 110, 48, "tan")
-    for x in range(2, 110, 4):
-        g.rect(x, 2, 2, 1, "brown")
-        g.rect(x, 47, 2, 1, "brown")
-    for y in range(2, 48, 4):
-        g.rect(2, y, 1, 2, "brown")
-        g.rect(109, y, 1, 2, "brown")
+    """160x46: the yard sign for the next dog slot, a plum-rimmed board with a tan header plank
+    over a cream panel and a padlock at the bottom right. The game writes, in sign pixels: line 1
+    ("Slot 2 · $800") in font-title x2, plum (6.49:1 on tan), caps at 5,6, up to 150 wide
+    ("SLOT 3 · $1,800" is 150); line 2 ("Save $650 more" darkRed, 5.07:1, or "Tap to buy"
+    forest, 5.39:1, on cream) in font-body x2, caps at 5,27, up to 130 wide, left of the lock
+    at 139,24. The posts stay in code."""
+    g = Grid(160, 46)
+    g.rect(1, 0, 158, 46, "plum")
+    g.rect(0, 1, 160, 44, "plum")
+    g.rect(1, 1, 158, 20, "tan")
+    g.rect(1, 1, 158, 1, "cream")
+    g.rect(1, 21, 158, 1, "brown")
+    g.rect(1, 22, 158, 22, "cream")
+    g.rect(1, 43, 158, 1, "tan")
+    g.rect(158, 2, 1, 19, "brown")
+    g.rect(158, 22, 1, 21, "tan")
+    # nail heads at the header plank's ends
+    for x in (2, 156):
+        g.p(x, 3, "dbrown")
+        g.p(x, 18, "dbrown")
     im = to_image(g.outlined(False))
     lk = to_image(lock().outlined())
-    im.paste(lk.resize((32, 32), Image.NEAREST), (8, 9), lk.resize((32, 32), Image.NEAREST))
+    im.paste(lk, (139, 24), lk)
     return im
 
 
@@ -498,6 +548,131 @@ def dust(step):
     spread, size = (2, 3.5, 5, 6)[step], (2.2, 3, 2.8, 1.8)[step]
     for cx, lift in ((8 - spread, 0), (8, 1), (8 + spread, 0)):
         g.ell(cx, 12 - step - lift, size, size, "white" if step == 3 else "lgrey", None if step == 3 else "grey")
+    return g
+
+
+# ---------- home screen: afford outline, detail card, step headings ----------
+
+# One coin stud, 7x7, lit from the top left: P plum rim, Y yellow, A amber, O orange.
+COIN = ["..PPP..", ".PYYAP.", "PYYAAAP", "PYAAAOP", "PAAAOOP", ".PAOOP.", "..PPP.."]
+
+
+def afford_frame(glint):
+    """24x24 nine-slice (8px corners), drawn 2px outside a dog, slot or gear tile the player can
+    afford: a plum keyline outside a 1px amber line, with a gold coin stud on each corner. It
+    differs from ui-select (ink, a 2px pulsing yellow band, ink, 3px out, square corners) by
+    its thin line, its round studs and its deeper gold, and it does not pulse. Amber holds
+    4.57:1 on the dark wood, the plum keyline 6.37:1 on the yard's grass and the studs' plum
+    rims 6.49:1 on tan tiles. The glint frame flashes the top-left stud white with two rays
+    along the line, all inside the corner slice so the stretched edges stay plain."""
+    g = Grid(24, 24)
+    g.rect(1, 0, 22, 24, "plum")
+    g.rect(0, 1, 24, 22, "plum")
+    g.rect(1, 1, 22, 22, "amber")
+    g.rect(2, 2, 20, 20, None)
+    for ox, oy in ((0, 0), (17, 0), (0, 17), (17, 17)):
+        for y, row in enumerate(COIN):
+            for x, ch in enumerate(row):
+                if ch != ".":
+                    g.p(ox + x, oy + y, {"P": "plum", "Y": "yellow", "A": "amber", "O": "orange"}[ch])
+    if glint:
+        for x, y in ((2, 2), (3, 1), (1, 3), (2, 1), (1, 2), (3, 2), (2, 3)):
+            g.p(x, y, "white")
+        g.p(7, 1, "white")
+        g.p(1, 7, "white")
+    return g
+
+
+def detail_card():
+    """24x24 nine-slice (8px corners): the hold-to-open detail card. A dark wood frame 3px wide
+    with brass rivets, between a 1px tan rim outside (4.04:1 on the dark wood) and a plum
+    keyline around the cream paper, so it reads apart from ui-panel's plain plum rim. The
+    paper starts 6px in."""
+    g = Grid(24, 24)
+    g.rect(1, 0, 22, 24, "plum")
+    g.rect(0, 1, 24, 22, "plum")
+    g.rect(1, 1, 22, 22, "tan")
+    g.rect(2, 2, 20, 20, "dbrown")
+    g.rect(5, 5, 14, 14, "plum")
+    g.rect(6, 6, 12, 12, "cream")
+    g.rect(6, 17, 12, 1, "tan")
+    g.rect(17, 6, 1, 12, "tan")
+    g.p(7, 7, "white")
+    for x, y in ((2, 2), (20, 2), (2, 20), (20, 20)):
+        g.rect(x, y, 2, 2, "amber")
+        g.p(x, y, "yellow")
+        g.p(x + 1, y + 1, "orange")
+    return g
+
+
+def detail_band():
+    """24x22 three-slice (8px caps; the middle 8 columns tile): the title band across the top
+    of the detail card's paper, forest with a dgreen highlight, a teal shade and a plum line
+    under it, pinned at both ends with brass pins. The game writes the name in font-title x2,
+    white (7.80:1), caps 6px below the band's top."""
+    g = Grid(24, 22)
+    g.rect(0, 0, 24, 21, "forest")
+    g.rect(0, 0, 24, 1, "dgreen")
+    g.rect(0, 19, 24, 2, "teal")
+    g.rect(0, 21, 24, 1, "plum")
+    for x in (2, 20):
+        g.rect(x, 9, 2, 2, "amber")
+        g.p(x, 9, "yellow")
+        g.p(x + 1, 10, "orange")
+    return g
+
+
+def detail_well():
+    """68x68: the recessed window on the detail card for a 64x64 portrait (portrait-dog-<name>,
+    an owner face or a 32x32 gear icon at 2x), drawn at 2,2. A plum rim (9.42:1 on the cream
+    paper), a dark brown lip on the top and left where the recess is in shadow and brown on the
+    lit bottom and right, around sky, which every portrait reads on (tan loses Pierre), with a
+    blue shadow line under the top and left lips."""
+    g = Grid(68, 68)
+    g.rect(1, 0, 66, 68, "plum")
+    g.rect(0, 1, 68, 66, "plum")
+    g.rect(1, 1, 66, 66, "brown")
+    g.rect(1, 1, 66, 1, "dbrown")
+    g.rect(1, 1, 1, 66, "dbrown")
+    g.rect(2, 2, 64, 64, "sky")
+    g.rect(2, 2, 64, 1, "blue")
+    g.rect(2, 2, 1, 64, "blue")
+    return g
+
+
+def step_plate():
+    """24x24 nine-slice (8px corners): the heading plate for the home screen's numbered steps
+    (Walker, Dogs, Gear), a tan board in a plum rim on a brown lip, set on the dark wood. The
+    game lays ui-step-number at 4,4 and writes the label in font-title x2, plum (6.49:1 on tan),
+    caps at 26,7; a note such as "(optional)" follows in font-body x2, plum. Width is the
+    label's plus 34; height 24."""
+    g = Grid(24, 24)
+    g.rect(1, 0, 22, 24, "plum")
+    g.rect(0, 1, 24, 22, "plum")
+    g.rect(1, 1, 22, 21, "tan")
+    g.rect(1, 1, 22, 1, "cream")
+    g.rect(1, 20, 22, 2, "brown")
+    g.rect(22, 2, 1, 18, "brown")
+    return g
+
+
+def step_number(label):
+    """16x16: the step's number on a round amber badge in a plum rim, plum digits (7.35:1), or a
+    white tick on forest (7.80:1) once the step is done, so done reads by shape as well."""
+    done = label == "tick"
+    g = Grid(16, 16)
+    g.ell(8, 8, 7.5, 7.5, "plum")
+    g.ell(8, 8, 6.5, 6.5, "forest" if done else "amber", "teal" if done else "orange",
+          "dgreen" if done else "yellow")
+    if done:
+        for x, y in ((4, 8), (5, 9), (6, 10), (7, 9), (8, 8), (9, 7), (10, 6), (11, 5)):
+            g.rect(x, y, 2, 2, "white")
+    else:
+        bits = {"1": "010110010010111", "2": "110001010100111", "3": "110001010001110"}[label]
+        for r in range(5):
+            for k in range(3):
+                if bits[r * 3 + k] == "1":
+                    g.rect(5 + k * 2, 3 + r * 2, 2, 2, "plum")
     return g
 
 
@@ -656,6 +831,8 @@ IMAGES = {
     "icon-play": lambda: to_image(play().outlined(False)),
     "icon-help": lambda: to_image(help_icon().outlined(False)),
     "icon-close": lambda: to_image(close().outlined(False)),
+    "icon-logbook": lambda: to_image(logbook_icon().outlined(False)),
+    "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-money": lambda: to_image(money().outlined()),
     "icon-stinky": lambda: to_image(stinky().outlined()),
@@ -669,6 +846,10 @@ IMAGES = {
     "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
     "ui-touch-hint": lambda: to_image(touch_hint().outlined()),
+    "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
+    "ui-detail-band": lambda: to_image(detail_band().outlined(False)),
+    "ui-detail-well": lambda: to_image(detail_well().outlined(False)),
+    "ui-step": lambda: to_image(step_plate().outlined(False)),
 }
 
 
@@ -676,6 +857,9 @@ def sprites():
     yield "ui-doghouse", [(dog, [doghouse(*cols).outlined(False)], 1000) for dog, cols in ROOFS.items()]
     yield "ui-select", [("pulse", [select_frame(False).outlined(False), select_frame(True).outlined(False)], 450)]
     yield "ui-check", [(lb, [check_badge(lb).outlined()], 1000) for lb in ("1", "2", "3", "tick")]
+    rest, glint = afford_frame(False).outlined(False), afford_frame(True).outlined(False)
+    yield "ui-afford", [("glint", [rest, rest, rest, glint], 400)]
+    yield "ui-step-number", [(lb, [step_number(lb).outlined(False)], 1000) for lb in ("1", "2", "3", "tick")]
     yield "fx-tap", [("play", [tap_burst(i).outlined(False) for i in range(4)], 60)]
     yield "fx-dust", [("play", [dust(i).outlined(False) for i in range(4)], 80)]
     yield "ui-heart", [("full", [heart(True).outlined(False)], 1000), ("empty", [heart(False).outlined(False)], 1000)]

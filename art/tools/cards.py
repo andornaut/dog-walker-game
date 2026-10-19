@@ -516,33 +516,58 @@ def disc(a, cx, cy, r, col, edge=None):
                 a.fill(cx + dx, cy + dy, 1, 1, edge if edge and d > (r - 1) * (r - 1) else col)
 
 
-# Casey's hand from above, fingers to the left with a gap between each (the outline draws the
-# creases), the thumb on top, then a white cuff and a sky sleeve that runs off the edge.
-HAND = [
-    ".......sss",
-    "......sssss",
-    ".......sssssssssWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    "..ssssssssssssssWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    ".ddddddddssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    ".........ssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    "sssssssssssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    "dddddddddssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    ".........ssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    ".ssssssssssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    ".ddddddddssssssdWWBBBBBBBBBBBBBBBBBBBBBBBBBB",
-    ".........ssssssdwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "...ssssssssssssdwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    "...ddddddssssssdwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
-    ".........dddddddwwbbbbbbbbbbbbbbbbbbbbbbbbbb",
-]
+def rolled_over():
+    """Biscuit rolled onto its back: the body lies along the grass with the navy saddle down
+    and the white belly up, four white legs in the air with curled paws, the white-tipped tail
+    wagging at the left, and the head at the right turned to the viewer, eyes shut in bliss and
+    tongue out, its ears flopped on the grass. 46x34 with its outline; the collar's lower end
+    is at 33,27."""
+    g = Grid(46, 34)
+    # tail, wagging up from the rump, white tipped
+    for i, (x, y) in enumerate(((7, 19), (6, 18), (5, 16), (5, 15), (5, 14))):
+        g.rect(x, y, 2, 2, "white" if i > 2 else "ochre")
+    # legs in the air: hind pair at the left, front pair at the right, the far leg of each
+    # pair shaded; each paw curls forward
+    for x, top, sh in ((10, 7, "lgrey"), (16, 5, "white"), (23, 5, "lgrey"), (29, 7, "white")):
+        g.rect(x, top, 2, 13 - top, sh)
+        g.rect(x, top - 1, 3, 2, sh)
+        g.p(x + 1, top - 1, "pink")
+    # the body, back down
+    g.ell(20, 19, 13, 6.5, "ochre", "rust")
+    g.ell(20, 24.5, 11, 2, "navy")
+    g.ell(20.5, 15.5, 9, 3, "white", "lgrey")
+    g.p(17, 15, "pink")
+    g.p(22, 15, "pink")
+    # ears flopped on the grass either side of the head
+    g.ell(32, 25, 3, 5, "rust", "dbrown")
+    g.ell(42, 25, 3, 5, "rust", "dbrown")
+    # the head, facing the viewer
+    g.ell(37, 19, 7, 6.5, "ochre", "rust", "tan")
+    g.rect(36, 13, 2, 6, "white")
+    g.ell(37, 22.5, 3.6, 2.6, "white", "lgrey")
+    g.rect(36, 21, 3, 1, "ink")
+    # eyes shut, happy arcs
+    for x in (32, 39):
+        g.p(x, 19, "ink")
+        g.rect(x + 1, 18, 2, 1, "ink")
+        g.p(x + 3, 19, "ink")
+    # tongue lolling out of the side of the mouth
+    g.rect(38, 24, 2, 4, "pink")
+    g.p(38, 24, "red")
+    # collar between the head and the chest
+    g.rect(30, 14, 2, 12, "green")
+    g.rect(31, 14, 1, 12, "dgreen")
+    g.p(31, 25, "amber")
+    return to_image(g.outlined())
 
 
 def belly_rubs():
     a = Art()
     a.grass()
-    a.face("face-dog-biscuit", "happy", 12, 10)
-    a.paste(pixmap(HAND, {"s": "skin1", "d": "skin2", "W": "white", "w": "lgrey", "B": "sky", "b": "blue"}), 30, 28)
-    a.hearts([(2, 4), (2, 30), (50, 4), (64, 10), (56, 18)])
+    a.paste(rolled_over(), 14, 12)
+    # the leash runs from the collar off the bottom edge
+    a.lead(45, 38, 52)
+    a.hearts([(6, 8), (20, 4), (50, 2), (64, 10), (4, 40)])
     return a
 
 

@@ -1085,6 +1085,11 @@
       }
     },
     {
+      "key": "ui-afford",
+      "png": "sprites/ui-afford.png",
+      "json": "sprites/ui-afford.json"
+    },
+    {
       "key": "ui-button",
       "png": "sprites/ui-button.png",
       "json": "sprites/ui-button.json"
@@ -1158,6 +1163,11 @@
       "key": "ui-slider-knob",
       "png": "sprites/ui-slider-knob.png",
       "json": "sprites/ui-slider-knob.json"
+    },
+    {
+      "key": "ui-step-number",
+      "png": "sprites/ui-step-number.png",
+      "json": "sprites/ui-step-number.json"
     },
     {
       "key": "ui-switch",
@@ -1474,6 +1484,10 @@
       "png": "images/icon-lock.png"
     },
     {
+      "key": "icon-logbook",
+      "png": "images/icon-logbook.png"
+    },
+    {
       "key": "icon-money",
       "png": "images/icon-money.png"
     },
@@ -1496,6 +1510,10 @@
     {
       "key": "icon-play",
       "png": "images/icon-play.png"
+    },
+    {
+      "key": "icon-settings",
+      "png": "images/icon-settings.png"
     },
     {
       "key": "icon-soaked",
@@ -1678,6 +1696,18 @@
       "png": "images/screen-stats.png"
     },
     {
+      "key": "ui-detail-band",
+      "png": "images/ui-detail-band.png"
+    },
+    {
+      "key": "ui-detail-card",
+      "png": "images/ui-detail-card.png"
+    },
+    {
+      "key": "ui-detail-well",
+      "png": "images/ui-detail-well.png"
+    },
+    {
       "key": "ui-hint",
       "png": "images/ui-hint.png"
     },
@@ -1708,6 +1738,10 @@
     {
       "key": "ui-slot-locked",
       "png": "images/ui-slot-locked.png"
+    },
+    {
+      "key": "ui-step",
+      "png": "images/ui-step.png"
     },
     {
       "key": "ui-top-bar",
