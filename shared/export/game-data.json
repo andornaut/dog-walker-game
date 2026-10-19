@@ -1623,6 +1623,10 @@
     {
       "id": "puddle",
       "affects": {
+        "catches": [
+          "big",
+          "medium"
+        ],
         "kind": "caught"
       },
       "hitLabel": "SOAKED!",
@@ -1673,6 +1677,11 @@
     {
       "id": "skunk",
       "affects": {
+        "catches": [
+          "big",
+          "medium",
+          "small"
+        ],
         "kind": "caught"
       },
       "hitLabel": "SPRAYED!",
@@ -2802,11 +2811,6 @@
       "tapMaxDistance": 10
     },
     "probability": {
-      "catchBySize": {
-        "big": 0.5,
-        "medium": 0.5,
-        "small": 0.25
-      },
       "needPayoffCard": 0.25
     },
     "seconds": {

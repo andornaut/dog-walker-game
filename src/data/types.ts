@@ -130,7 +130,6 @@ export interface Tuning {
   };
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
   readonly probability: OpenGroup & {
-    readonly catchBySize: Table<Size>;
     readonly needPayoffCard: number;
   };
   readonly seconds: OpenGroup & {
@@ -308,10 +307,11 @@ export type CardOptions =
 
 export type NonEmptyEffects = readonly [Effect, ...Effect[]];
 
-// Which dogs an encounter affects. "caught": each dog rolls probability.catchBySize.
+// Which dogs an encounter affects. "caught" is an area effect: it catches the dogs of the sizes
+// in catches, and every other dog hops over it.
 export type AffectRule =
   | { readonly kind: "all" }
-  | { readonly kind: "caught" }
+  | { readonly catches: readonly Size[]; readonly kind: "caught" }
   | { readonly kind: "trait"; readonly trait: TraitId };
 
 // The encounter opens a card of options.
@@ -633,8 +633,6 @@ export interface RunText {
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeTitle: string;
   };
-  // Shown at the pack when a skunk or puddle catches no dog.
-  readonly closeOne: string;
   readonly fired: string;
   readonly firedBy: string;
   readonly homeQuestion: {
@@ -643,6 +641,8 @@ export interface RunText {
     readonly keepWalking: string;
     readonly title: string;
   };
+  // Shown over each dog that hops over an area effect.
+  readonly hopOver: string;
   readonly lowHearts: string;
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;

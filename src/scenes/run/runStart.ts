@@ -15,7 +15,6 @@ export interface RunRandom {
   forks: Random;
   needs: Random;
   quips: Random;
-  rolls: Random;
   scenery: Random;
 }
 
@@ -25,7 +24,6 @@ export function runRandom(seed: number): RunRandom {
     forks: randomStream(seed, "forks"),
     needs: randomStream(seed, "needs"),
     quips: randomStream(seed, "quips"),
-    rolls: randomStream(seed, "rolls"),
     scenery: randomStream(seed, "scenery"),
   };
 }

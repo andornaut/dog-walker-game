@@ -87,10 +87,9 @@ describe("formatDollars", () => {
 
 describe("affectText and conditionText", () => {
   it("describes who an encounter affects and when it opens no card", () => {
-    expect(affectText(TEST_TUNING, ENCOUNTERS.skunk.affects)).toBe(
-      "Dogs caught by the roll (25% small, 50% medium, 50% big)",
-    );
-    expect(affectText(TEST_TUNING, ENCOUNTERS.squirrel.affects)).toBe("Chaser dogs");
+    expect(affectText({ catches: ["big", "medium"], kind: "caught" })).toBe("Big and medium dogs");
+    expect(affectText({ catches: ["big", "medium", "small"], kind: "caught" })).toBe("All dogs");
+    expect(affectText(ENCOUNTERS.squirrel.affects)).toBe("Chaser dogs");
     expect(conditionText({ kind: "packHasSize", size: "big" })).toBe("Pack has a big dog");
   });
 });

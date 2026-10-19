@@ -19,7 +19,6 @@ export const RUN_TEXT = {
     upgradeDuration: { nextZone: "Next zone", now: "Now", run: "Whole walk" },
     upgradeTitle: "Pick an upgrade",
   },
-  closeOne: "Hop!",
   fired: "FIRED!",
   firedBy: "{owner} fires you",
   homeQuestion: {
@@ -28,6 +27,7 @@ export const RUN_TEXT = {
     keepWalking: "Keep walking",
     title: "Head home?",
   },
+  hopOver: "Hop!",
   lowHearts: "1 ♥ left!",
   outOfMoney: "you're out of money",
 } as const satisfies RunText;

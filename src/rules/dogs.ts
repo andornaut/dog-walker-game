@@ -5,7 +5,6 @@ import {
   cents,
   clampHearts,
   type Hearts,
-  type Probability,
   read,
   readTable,
   type Seconds,
@@ -74,9 +73,4 @@ export function inputLockSeconds(
   }
   const lock = readTable(tuning, "seconds", "inputLockBySize", dog.size);
   return seconds(modifiedStat(tuning, modifiers, "inputLock", lock));
-}
-
-// The chance this dog is caught by an area effect such as a skunk or puddle.
-export function catchChance(tuning: LiveTuning, dog: Dog): Probability {
-  return readTable(tuning, "probability", "catchBySize", dog.size);
 }

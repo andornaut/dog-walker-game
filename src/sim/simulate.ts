@@ -289,7 +289,7 @@ function meet(
   from: CardFrom,
   encounter: EncounterId,
 ): boolean {
-  const affected = affectedDogs(data, random, session.run, encounter);
+  const affected = affectedDogs(data, session.run, encounter);
   if (!opensCard(data, affected, session.run, encounter)) {
     return false;
   }
@@ -405,7 +405,6 @@ interface Streams {
   readonly forks: Random;
   readonly needs: Random;
   readonly policy: Random;
-  readonly rolls: Random;
   readonly spawnSeed: number;
 }
 
@@ -416,10 +415,9 @@ function streamsFrom(random: Random): Streams {
   const cards = seededRandom(seed());
   const forks = seededRandom(seed());
   const needs = seededRandom(seed());
-  const rolls = seededRandom(seed());
   const spawnSeed = seed();
   const policy = seededRandom(seed());
-  return { bot, cards, forks, needs, policy, rolls, spawnSeed };
+  return { bot, cards, forks, needs, policy, spawnSeed };
 }
 
 // Needs met or gone wrong: their outcomes' firings are recorded, and their cards are played
@@ -564,7 +562,7 @@ function playZoneBySkill(
     );
     const pulled = stepPulls(data, road.geometry, seconds, pulls, walk);
     pulls = pulled.pulls;
-    const step = stepWalk(data, road.geometry, streams.rolls, seconds, pulled.walk);
+    const step = stepWalk(data, road.geometry, streams.cards, seconds, pulled.walk);
     bot.clock += seconds;
     observePulls(bot, pulled.tells, pulled.pulled);
     notePulls(data, session, bot.clock - seconds, walk, pulled.pulled);

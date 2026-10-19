@@ -3,12 +3,11 @@ import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
 import { evaluateCondition } from "./conditions";
-import { catchChance } from "./dogs";
 
-// The dogs an encounter affects when the pack meets it. "caught" rolls once per dog.
+// The dogs an encounter affects when the pack meets it: an area effect catches the dogs of
+// the sizes it lists.
 export function affectedDogs(
-  data: Pick<GameData, "dogs" | "encounters" | "tuning">,
-  random: () => number,
+  data: Pick<GameData, "dogs" | "encounters">,
   state: RunState,
   encounterId: EncounterId,
 ): DogId[] {
@@ -18,12 +17,25 @@ export function affectedDogs(
     case "all":
       return pack;
     case "caught":
-      return pack.filter((id) => random() < catchChance(data.tuning, data.dogs[id]));
+      return pack.filter((id) => affects.catches.includes(data.dogs[id].size));
     case "trait":
       return pack.filter((id) => data.dogs[id].trait === affects.trait);
     default:
       return assertNever(affects);
   }
+}
+
+// The dogs that hop over an area effect: those of a size it does not catch. None for any
+// other encounter.
+export function hoppingDogs(
+  data: Pick<GameData, "dogs" | "encounters">,
+  state: RunState,
+  encounterId: EncounterId,
+): DogId[] {
+  const { affects } = data.encounters[encounterId];
+  return affects.kind === "caught"
+    ? packDogs(state).filter((id) => !affects.catches.includes(data.dogs[id].size))
+    : [];
 }
 
 // No card opens when no dog is affected, the pack is immune, or noCardWhen holds.

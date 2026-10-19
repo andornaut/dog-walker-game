@@ -13,7 +13,7 @@ import { countBump, countDebuffZones } from "../rules/achievements";
 import type { MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd } from "../rules/durations";
-import { affectedDogs, hitLabel, opensCard } from "../rules/encounters";
+import { affectedDogs, hitLabel, hoppingDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
 import { minorBump, payZoneFees, tipValue } from "../rules/run";
@@ -144,19 +144,27 @@ export interface MinorBump {
 
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
+// An area effect (skunk, puddle) the pack touched with no immunity keeping it off: the dogs it
+// caught, and the dogs that hopped over it. One that caught no dog opens no card.
+export interface AreaContact {
+  caught: readonly DogId[];
+  encounter: EncounterId;
+  hopped: readonly DogId[];
+}
+
 // bumps, cards and instants are in the order the pack met them; tips are the money changes of
 // the tips collected; spots the need spots steered into, which stepNeeds meets; zoneEnded is
 // set on the step that reaches the end of the zone.
 // encounterHits are the encounters met this step that play a hit moment: obstacles, and lucky
-// cards with a hit label. misses are the area effects (skunk, puddle) the pack touched that
-// caught no dog. A hit stop holds the step's cards and zone end back to the step it ends on.
+// cards with a hit label. areaContacts are the area effects the pack touched, caught or
+// hopped. A hit stop holds the step's cards and zone end back to the step it ends on.
 export interface WalkStep {
+  areaContacts: AreaContact[];
   bumps: MinorBump[];
   cards: CardSource[];
   collected: WalkItem[];
   encounterHits: EncounterCard[];
   instants: InstantFind[];
-  misses: EncounterId[];
   spots: WalkItem[];
   tips: MoneyChange[];
   walk: Walk;
@@ -603,8 +611,8 @@ export function collect(
 // cards for the dogs they affect or, for an instant lucky find, apply at once, and a forced
 // stop that reaches the pack always becomes a card. An obstacle that opens no card is
 // scenery: it is removed, and nothing else happens. A minor bump or an encounter with a hit
-// moment starts a hit stop, and the steps it lasts hold everything still. Does nothing unless
-// walking.
+// moment starts a hit stop, and the steps it lasts hold everything still. random draws only
+// for an instant find's effects. Does nothing unless walking.
 export function stepWalk(
   data: WalkData,
   geometry: RoadGeometry,
@@ -679,15 +687,8 @@ export function stepWalk(
   const footprint: PackFootprint = { ...geometry.packBand, lanes };
   // A mover is only a cue until it moves, and cannot be hit.
   const cues = items.filter((item) => isWarning(geometry.laneCount, item));
-  // An encounter's dogs are drawn once, as it is hit.
-  const drawn = new Map<number, DogId[]>();
-  const affectedBy = (item: WalkItem, encounter: EncounterId): DogId[] => {
-    const affected = drawn.get(item.id) ?? affectedDogs(data, random, run, encounter);
-    drawn.set(item.id, affected);
-    return affected;
-  };
-  const opens = (item: WalkItem, encounter: EncounterId) =>
-    opensCard(data, affectedBy(item, encounter), run, encounter);
+  const opens = (encounter: EncounterId) =>
+    opensCard(data, affectedDogs(data, run, encounter), run, encounter);
   // A hit that opens no card is scenery: it counts no bump and starts no grace window.
   const startsGrace = (item: WalkItem) => {
     const { kind } = item;
@@ -700,7 +701,7 @@ export function stepWalk(
     ) {
       return true;
     }
-    return opens(item, kind);
+    return opens(kind);
   };
   const { hits, invulnerableSeconds, remaining } = collideWithPack(
     {
@@ -723,12 +724,12 @@ export function stepWalk(
   );
 
   let nextRun: RunState = { ...run, zoneDistance: pixels(zoneDistance) };
+  const areaContacts: AreaContact[] = [];
   const bumps: MinorBump[] = [];
   const cards: CardSource[] = [];
   const collected: WalkItem[] = [];
   const encounterHits: EncounterCard[] = [];
   const instants: InstantFind[] = [];
-  const misses: EncounterId[] = [];
   const spots: WalkItem[] = [];
   const tips: MoneyChange[] = [];
   for (const item of [...hits, ...pickupsHit]) {
@@ -748,13 +749,14 @@ export function stepWalk(
       control = lockSteering(read(data.tuning, "seconds", "minorStumble"), control);
       bumps.push({ change: bump.change, item });
     } else {
-      if (!opens(item, kind)) {
-        if (cleanMiss(data, affectedBy(item, kind), nextRun, kind)) {
-          misses.push(kind);
-        }
+      const affected = affectedDogs(data, run, kind);
+      const contact = areaContact(data, affected, nextRun, kind);
+      if (contact !== null) {
+        areaContacts.push(contact);
+      }
+      if (!opens(kind)) {
         continue;
       }
-      const affected = affectedBy(item, kind);
       if (data.encounters[kind].kind === "obstacle") {
         nextRun = countBump(nextRun);
       }
@@ -790,12 +792,12 @@ export function stepWalk(
     { cards, zoneEnded },
   );
   return {
+    areaContacts,
     bumps,
     cards: hitStop === null ? cards : [],
     collected,
     encounterHits,
     instants,
-    misses,
     spots,
     tips,
     walk: {
@@ -816,18 +818,21 @@ export function stepWalk(
   };
 }
 
-// An area effect the pack touched that caught no dog, where no immunity kept it off.
-function cleanMiss(
-  data: Pick<GameData, "encounters">,
-  affected: readonly DogId[],
+// The pack's contact with an area effect, or null for any other encounter or one an immunity
+// keeps off.
+function areaContact(
+  data: Pick<GameData, "dogs" | "encounters">,
+  caught: readonly DogId[],
   run: RunState,
   encounter: EncounterId,
-): boolean {
-  return (
-    data.encounters[encounter].affects.kind === "caught" &&
-    affected.length === 0 &&
-    !run.immunities.some((immunity) => immunity.encounter === encounter)
-  );
+): AreaContact | null {
+  if (
+    data.encounters[encounter].affects.kind !== "caught" ||
+    run.immunities.some((immunity) => immunity.encounter === encounter)
+  ) {
+    return null;
+  }
+  return { caught, encounter, hopped: hoppingDogs(data, run, encounter) };
 }
 
 const NOTHING_HELD: HeldStep = { cards: [], zoneEnded: false };
@@ -835,12 +840,12 @@ const NOTHING_HELD: HeldStep = { cards: [], zoneEnded: false };
 // A step in which the walk does not move, giving out only what it held.
 function stillStep(held: HeldStep, walk: Walk): WalkStep {
   return {
+    areaContacts: [],
     bumps: [],
     cards: [...held.cards],
     collected: [],
     encounterHits: [],
     instants: [],
-    misses: [],
     spots: [],
     tips: [],
     walk,

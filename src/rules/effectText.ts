@@ -352,17 +352,14 @@ export function conditionText(condition: Condition): string {
   }
 }
 
-export function affectText(tuning: LiveTuning, affects: AffectRule): string {
+export function affectText(affects: AffectRule): string {
   switch (affects.kind) {
     case "all":
       return "All dogs";
-    case "caught": {
-      const chances = (["small", "medium", "big"] as const).map(
-        (size) =>
-          `${Math.round(readTable(tuning, "probability", "catchBySize", size) * 100)}% ${size}`,
-      );
-      return `Dogs caught by the roll (${chances.join(", ")})`;
-    }
+    case "caught":
+      return affects.catches.length === Object.keys(SIZE_NAMES).length
+        ? "All dogs"
+        : `${capitalize(affects.catches.map((size) => SIZE_NAMES[size]).join(" and "))} dogs`;
     case "trait":
       return `${TRAIT_NAMES[affects.trait]} dogs`;
     default:

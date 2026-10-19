@@ -191,11 +191,16 @@ describe("size and energy", () => {
     expect([...urgentAfter].sort((a, b) => b - a)).toEqual(urgentAfter);
   });
 
-  it("keeps every catch chance a probability, with small dogs rolling half as often", () => {
-    for (const size of SIZES) {
-      expect(() => probability(tuning.probability.catchBySize[size])).not.toThrow();
+  it("has every area effect catch at least one size, each once", () => {
+    const catches = Object.values(encounters).flatMap(({ affects }) =>
+      affects.kind === "caught" ? [affects.catches] : [],
+    );
+    expect(catches.length).toBeGreaterThan(0);
+    for (const sizes of catches) {
+      expect(sizes.length).toBeGreaterThan(0);
+      expect(new Set(sizes).size).toBe(sizes.length);
+      expect(sizes.every((size) => SIZES.includes(size))).toBe(true);
     }
-    expect(tuning.probability.catchBySize.small).toBe(tuning.probability.catchBySize.medium / 2);
   });
 });
 

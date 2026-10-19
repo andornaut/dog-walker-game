@@ -3,25 +3,17 @@ import { describe, expect, it } from "vitest";
 import { DOGS } from "../data/dogs";
 import type { Modifier } from "../data/types";
 import { TEST_TUNING } from "../testing/tuning";
-import {
-  catchChance,
-  inputLockSeconds,
-  maxHearts,
-  needUrgentSeconds,
-  startHearts,
-  zoneFee,
-} from "./dogs";
+import { inputLockSeconds, maxHearts, needUrgentSeconds, startHearts, zoneFee } from "./dogs";
 import { zoneStats } from "./zones";
 
 describe("dog stats", () => {
-  it("derives start and max hearts, fee, need urgency, input lock and catch chance", () => {
+  it("derives start and max hearts, fee, need urgency and input lock", () => {
     const { duchess, penny } = DOGS;
     expect(startHearts(TEST_TUNING, [], duchess)).toBe(6);
     expect(maxHearts(TEST_TUNING, [], penny)).toBe(10);
     expect(zoneFee(TEST_TUNING, [], penny)).toBe(1300);
     expect(needUrgentSeconds(TEST_TUNING, penny)).toBe(100);
     expect(inputLockSeconds(TEST_TUNING, [], penny)).toBe(0.5);
-    expect(catchChance(TEST_TUNING, duchess)).toBe(0.25);
   });
 
   it("starts an owner no higher than their dog's max", () => {

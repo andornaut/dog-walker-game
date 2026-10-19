@@ -2,8 +2,13 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
-import type { EncounterId } from "../data/types";
-import { closeOneLayout, coinBurstLayout, FEEDBACK, type LabelAnchor } from "../hud/feedback";
+import {
+  coinBurstLayout,
+  FEEDBACK,
+  hopLabelAnchor,
+  hopSplashFrame,
+  type LabelAnchor,
+} from "../hud/feedback";
 import type { Point } from "../layout/rect";
 import { amountText } from "../rules/causes";
 import type { Cents } from "../rules/units";
@@ -23,19 +28,28 @@ interface PackMoment {
   still: boolean;
 }
 
-// An area effect that caught no dog: a splash or puff with "PHEW!" over the pack, and
-// "Close one!" over it. Reduced motion plays the burst without its word, and fades the label
-// in place.
-export function playCleanMiss(
+// An area effect that caught no dog: a splash with "PHEW!" at the pack's feet. Reduced motion
+// plays it without its word.
+export function playHopSplash(
   scene: Scene,
   moment: PackMoment & { feetY: number; x: number },
-  encounter: EncounterId,
 ): void {
-  const { key, tags, word } = FEEDBACK_ART.closeOne;
-  const base = encounter === "puddle" ? tags.puddle : tags.skunk;
-  const layout = closeOneLayout(moment);
-  playFrame(scene, { key, tag: moment.still ? base : `${base}${word}` }, layout.frame, moment);
-  floatLabel(scene, moment, layout.label, gameData.runText.closeOne, PALETTE.plum, FEEDBACK.miss);
+  const { key, tag, word } = FEEDBACK_ART.hopSplash;
+  playFrame(
+    scene,
+    { key, tag: moment.still ? tag : `${tag}${word}` },
+    hopSplashFrame(moment),
+    moment,
+  );
+}
+
+// "Hop!" over each dog that hopped over an area effect, by its top opaque row. Reduced motion
+// fades the labels in place.
+export function playHops(scene: Scene, moment: PackMoment, dogTops: readonly Point[]): void {
+  const text = gameData.runText.hopOver;
+  for (const top of dogTops) {
+    floatLabel(scene, moment, hopLabelAnchor(top), text, PALETTE.plum, FEEDBACK.hop);
+  }
 }
 
 // A minor bump: coins burst out at the contact point with the tips it dropped, and the walker

@@ -2,41 +2,60 @@ import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
-import type { Condition, DogId, EncounterId } from "../data/types";
+import type { Condition, DogId, EncounterId, Size } from "../data/types";
 import type { RunState } from "../state/runState";
 import { testState } from "../testing/runState";
-import { TEST_TUNING } from "../testing/tuning";
 import { evaluateCondition } from "./conditions";
-import { affectedDogs, hitLabel, opensCard } from "./encounters";
+import { affectedDogs, hitLabel, hoppingDogs, opensCard } from "./encounters";
 
-const data = { dogs: DOGS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
+const data = { dogs: DOGS, encounters: ENCOUNTERS };
 const pack = testState({ duchess: 5, koda: 5, pierre: 5 });
 const everyDog: DogId[] = ["duchess", "koda", "pierre"];
 
 describe("affectedDogs", () => {
-  // Duchess is small, Koda big and Pierre medium. 0.3 is under the medium and big catch
-  // chance (0.5) but over the small one (0.25).
-  it.each<[string, EncounterId, number, RunState, DogId[]]>([
-    ["an area roll catches each dog by its size", "skunk", 0.3, pack, ["koda", "pierre"]],
-    ["an area roll under every chance catches all", "puddle", 0.1, pack, everyDog],
-    ["an area roll over every chance catches none", "puddle", 0.6, pack, []],
-    ["a trait encounter takes only that trait", "squirrel", 0, pack, ["koda"]],
-    ["an every-dog encounter takes all", "otherDog", 0, pack, everyDog],
+  it.each<[string, EncounterId, RunState, DogId[]]>([
+    ["a trait encounter takes only that trait", "squirrel", pack, ["koda"]],
+    ["an every-dog encounter takes all", "otherDog", pack, everyDog],
     [
       "a picnic takes the food-driven dogs",
       "picnic",
-      0,
       testState({ biscuit: 5, koda: 5, nugget: 5 }),
       ["biscuit", "nugget"],
     ],
-    ["a picnic takes none without food-driven dogs", "picnic", 0, pack, []],
-    ["the goose takes all", "goose", 0, pack, everyDog],
-    ["the petunias take all", "petunias", 0, pack, everyDog],
-    ["the trash takes all", "trash", 0, pack, everyDog],
-    ["the cafe takes all", "cafe", 0, pack, everyDog],
-    ["the lemonade takes all", "lemonade", 0, pack, everyDog],
-  ])("%s", (_, id, roll, state, affected) => {
-    expect(affectedDogs(data, () => roll, state, id)).toEqual(affected);
+    ["a picnic takes none without food-driven dogs", "picnic", pack, []],
+    ["the goose takes all", "goose", pack, everyDog],
+    ["the petunias take all", "petunias", pack, everyDog],
+    ["the trash takes all", "trash", pack, everyDog],
+    ["the cafe takes all", "cafe", pack, everyDog],
+    ["the lemonade takes all", "lemonade", pack, everyDog],
+  ])("%s", (_, id, state, affected) => {
+    expect(affectedDogs(data, state, id)).toEqual(affected);
+  });
+});
+
+describe("an area effect", () => {
+  // The skunk, catching only the sizes given.
+  const catching = (catches: readonly Size[]) =>
+    ({
+      dogs: DOGS,
+      encounters: {
+        ...ENCOUNTERS,
+        skunk: { ...ENCOUNTERS.skunk, affects: { catches, kind: "caught" } },
+      },
+    }) as const;
+
+  // Duchess is small, Koda big and Pierre medium.
+  it.each<[Size[], DogId[], DogId[]]>([
+    [["big"], ["koda"], ["duchess", "pierre"]],
+    [["big", "medium"], ["koda", "pierre"], ["duchess"]],
+    [["big", "medium", "small"], everyDog, []],
+  ])("catching %j catches %j, and %j hop over it", (catches, caught, hopping) => {
+    expect(affectedDogs(catching(catches), pack, "skunk")).toEqual(caught);
+    expect(hoppingDogs(catching(catches), pack, "skunk")).toEqual(hopping);
+  });
+
+  it("has no dog hop an encounter that is not an area effect", () => {
+    expect(hoppingDogs(data, pack, "otherDog")).toEqual([]);
   });
 });
 

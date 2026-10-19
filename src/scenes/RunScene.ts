@@ -366,7 +366,7 @@ export class RunScene extends Scene {
     input.afterPulls(pulls.pulled);
     walk = pulls.walk;
     const moving = walk.road.hitStop === null;
-    const step = stepWalk(gameData, roadGeometry(walk.run), random.rolls, STEP_MS / 1000, walk);
+    const step = stepWalk(gameData, roadGeometry(walk.run), random.cards, STEP_MS / 1000, walk);
     this.runTimeMs += STEP_MS;
     const spots = step.spots.flatMap(({ kind }) => (isNeedSpot(gameData, kind) ? [kind] : []));
     const needs = stepNeeds(gameData, random.needs, STEP_MS / 1000, moving, spots, step.walk.run);

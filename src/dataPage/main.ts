@@ -15,7 +15,6 @@ import type {
 } from "../data/types";
 import { achievementConditionText } from "../rules/achievements";
 import {
-  catchChance,
   inputLockSeconds,
   maxHearts,
   needUrgentSeconds,
@@ -127,7 +126,6 @@ function dogsSection(data: GameData): Section {
       "Fee",
       "Need urgent after",
       "Input lock",
-      "Caught",
       "Unlock",
     ],
     rows: Object.values(data.dogs).map((dog) => [
@@ -145,7 +143,6 @@ function dogsSection(data: GameData): Section {
       formatDollars(zoneFee(tuning, [], dog)),
       `${needUrgentSeconds(tuning, dog)}s`,
       `${inputLockSeconds(tuning, [], dog)}s`,
-      `${Math.round(catchChance(tuning, dog) * 100)}%`,
       priceText(data, dog),
     ]),
     title: "Dogs",
@@ -199,7 +196,7 @@ function encountersSection(data: GameData): Section {
     const head = [
       encounter.name,
       encounter.kind,
-      affectText(data.tuning, encounter.affects),
+      affectText(encounter.affects),
       encounter.noCardWhen === undefined ? "" : conditionText(encounter.noCardWhen),
     ];
     const { resolution } = encounter;

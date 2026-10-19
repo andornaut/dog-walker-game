@@ -34,7 +34,7 @@ import type { RunResult } from "../../save/checkpoint";
 import { packDogs } from "../../state/pack";
 import type { RunState } from "../../state/runState";
 import { hitLabelOf, playHitMoment } from "../hitMoment";
-import { playCleanMiss, playMinorBump } from "../packFeedback";
+import { playHops, playHopSplash, playMinorBump } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
@@ -205,9 +205,15 @@ export class RunMoments {
       this.deps.pack.showDizzy();
       this.hint({ kind: "minorBump" });
     }
-    for (const encounter of step.misses) {
-      const miss = { feetY: walkerFootY(LAYOUT.road), x: pack.x };
-      playCleanMiss(this.scene, { ...miss, depth: DEPTH.fx, still: this.deps.still() }, encounter);
+    // Each dog that hops over an area effect says so; an area effect that caught no dog
+    // splashes at the pack's feet, and opens no card.
+    for (const { caught, hopped } of step.areaContacts) {
+      const moment = { depth: DEPTH.fx, still: this.deps.still() };
+      if (caught.length === 0) {
+        playHopSplash(this.scene, { ...moment, feetY: walkerFootY(LAYOUT.road), x: pack.x });
+      }
+      const tops = hopped.flatMap((dog) => this.deps.pack.dogPoint(dog) ?? []);
+      playHops(this.scene, moment, tops);
       this.hint({ kind: "areaEffect" });
     }
     for (const { encounter, outcome } of step.instants) {

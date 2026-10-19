@@ -127,8 +127,6 @@ export const TUNING = {
   },
   // Chances from 0 to 1.
   probability: {
-    // Each dog rolls once when the pack hits a skunk or puddle.
-    catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
     // Meeting a need at a spot opens its payoff card instead of its plain reward.
     needPayoffCard: 0.25,
   },

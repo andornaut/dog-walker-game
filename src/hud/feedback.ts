@@ -1,7 +1,7 @@
 import type { Point } from "../layout/rect";
 import { type Cents, cents } from "../rules/units";
 
-// The heart change, clean miss and minor bump moments' timings, in ms, and offsets, in pixels.
+// The heart change, hop and minor bump moments' timings, in ms, and offsets, in pixels.
 export const FEEDBACK = {
   // The bump's amount rises rise pixels and fades over labelMs; the walker tips by
   // wobbleDegrees each way, wobbleMs a swing, wobbles times.
@@ -10,8 +10,8 @@ export const FEEDBACK = {
   // dog's later change in one batch starts staggerMs after the one before. The doghouse shakes
   // by shakeDx, one step a frame of its flash.
   heart: { flyMs: 360, peak: 10, shakeDx: [1, -1, 1, 0], staggerMs: 1200 },
-  // The "Close one!" label rises rise pixels and fades over ms.
-  miss: { ms: 900, rise: 10 },
+  // The hop label rises rise pixels and fades over ms.
+  hop: { ms: 900, rise: 10 },
   // The money counter counts to a new amount at msPerDollar a dollar, taking at most maxMs.
   moneyTick: { maxMs: 600, msPerDollar: 150 },
 } as const;
@@ -48,14 +48,15 @@ export function heartLabelAt(
   return { x, y: Math.min(frame.y + 14, bounds.bottom - 5) };
 }
 
-// The 32x32 close-one burst's top-left, its centre column on the pack's and its bottom row
-// on the walker's feet, and its label centred over it, 2px above its top.
-export function closeOneLayout(pack: { feetY: number; x: number }): {
-  frame: Point;
-  label: LabelAnchor;
-} {
-  const frame = { x: pack.x - 16, y: pack.feetY - 31 };
-  return { frame, label: { centreX: frame.x + 16, lineBottom: frame.y - 2 } };
+// The 32x32 hop splash's top-left, its centre column on the pack's and its bottom row on the
+// walker's feet.
+export function hopSplashFrame(pack: { feetY: number; x: number }): Point {
+  return { x: pack.x - 16, y: pack.feetY - 31 };
+}
+
+// The hop label over a dog, centred on its centre column, 2px above its top opaque row.
+export function hopLabelAnchor(dogTop: Point): LabelAnchor {
+  return { centreX: dogTop.x, lineBottom: dogTop.y - 2 };
 }
 
 // The 64x48 coin burst's top-left, its (32, 28) on the contact point, and its amount

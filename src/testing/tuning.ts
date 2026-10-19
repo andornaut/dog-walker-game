@@ -52,7 +52,6 @@ export const TEST_TUNING: LiveTuning = {
   },
   pixels: { ...TUNING.pixels, roadScrollSpeed: 80 },
   probability: {
-    catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
     needPayoffCard: 0.25,
   },
   seconds: {

@@ -236,7 +236,7 @@ export const ENCOUNTERS = {
     shape: { lanes: 2, rows: 1 },
   },
   puddle: {
-    affects: { kind: "caught" },
+    affects: { catches: ["big", "medium"], kind: "caught" },
     hitLabel: "SOAKED!",
     kind: "obstacle",
     messy: true,
@@ -268,7 +268,7 @@ export const ENCOUNTERS = {
     shape: { lanes: 2, rows: 1 },
   },
   skunk: {
-    affects: { kind: "caught" },
+    affects: { catches: ["big", "medium", "small"], kind: "caught" },
     hitLabel: "SPRAYED!",
     kind: "obstacle",
     name: "Skunk",

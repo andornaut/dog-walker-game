@@ -72,6 +72,7 @@ describe("a card's text for the dogs it catches", () => {
     { affected: ["koda"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
     { affected: PACK, dollars: encounterHigh * 3, id: "skunk", label: "Full groom" },
     { affected: PACK, dollars: encounterLow * 3, id: "puddle", label: "Towel off" },
+    { affected: ["koda"], dollars: encounterLow, id: "puddle", label: "Towel off" },
   ] as const)("agrees with the cost plaque: $label for $affected.length", (row) => {
     const view = option(encounter(row.id, row.affected), row.label);
     expect(view.cost).toBe(dollarsToCents(row.dollars));

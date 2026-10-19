@@ -41,6 +41,7 @@ import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, type MoverPath, moverPlace } from "./movers";
 import { seededRandom } from "./random";
 import {
+  type AreaContact,
   blocksLane,
   finishZone,
   footprintOf,
@@ -415,54 +416,54 @@ describe("stepWalk", () => {
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
   });
 
+  it.each<[string, Walk, AreaContact]>([
+    [
+      "a skunk catches every dog",
+      walkWith(["koda", "duchess"], [atPack("skunk")]),
+      { caught: ["koda", "duchess"], encounter: "skunk", hopped: [] },
+    ],
+    [
+      "a puddle catches the big and medium dogs while the small one hops",
+      walkWith(["koda", "duchess", "pierre"], [atPack("puddle")]),
+      { caught: ["koda", "pierre"], encounter: "puddle", hopped: ["duchess"] },
+    ],
+  ])("%s, and opens its card for the dogs it caught", (_, walk, contact) => {
+    const after = step(walk);
+    expect(after.areaContacts).toEqual([contact]);
+    expect(after.encounterHits).toEqual([
+      { affected: contact.caught, encounter: contact.encounter, kind: "encounter" },
+    ]);
+  });
+
   describe("a hit that opens no card", () => {
-    const nobodyCaught = () => 0.999;
     const raincoats = (walk: Walk): Walk => ({
       ...walk,
       run: { ...walk.run, immunities: [{ encounter: "puddle" }] },
     });
-    // Each with the area effects it reports as caught no dog.
-    const scenery: [string, Walk, () => number, string[]][] = [
+    // Each with the area contacts it reports.
+    const scenery: [string, Walk, AreaContact[]][] = [
+      ["a squirrel with no chaser", walkWith(["duchess"], [atPack("squirrel")]), []],
+      ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), []],
       [
-        "a squirrel with no chaser",
-        walkWith(["duchess"], [atPack("squirrel")]),
-        seededRandom(1),
-        [],
-      ],
-      ["a thief that flees a big dog", walkWith(["koda"], [atPack("thief")]), seededRandom(1), []],
-      [
-        "a skunk that catches nobody",
-        walkWith(["duchess"], [atPack("skunk")]),
-        nobodyCaught,
-        ["skunk"],
-      ],
-      [
-        "a puddle that catches nobody",
-        walkWith(["duchess", "koda"], [atPack("puddle")]),
-        nobodyCaught,
-        ["puddle"],
+        "a puddle every dog hops",
+        walkWith(["duchess"], [atPack("puddle")]),
+        [{ caught: [], encounter: "puddle", hopped: ["duchess"] }],
       ],
       [
         "a picnic with no food-driven dog",
         walkWith(["duchess", "koda"], [atPack("picnic", 0, 2, 2)]),
-        seededRandom(1),
         [],
       ],
-      [
-        "a puddle Raincoats keep off",
-        raincoats(walkWith(["duchess"], [atPack("puddle")])),
-        () => 0,
-        [],
-      ],
+      ["a puddle Raincoats keep off", raincoats(walkWith(["koda"], [atPack("puddle")])), []],
     ];
 
     it.each(scenery)(
       "is scenery for %s: removed, with no bump, grace or hit stop",
-      (_, walk, random, misses) => {
-        const after = stepWalk(data, geometry, random, 0.01, walk);
+      (_, walk, contacts) => {
+        const after = step(walk);
         expect(after.cards).toEqual([]);
         expect(after.encounterHits).toEqual([]);
-        expect(after.misses).toEqual(misses);
+        expect(after.areaContacts).toEqual(contacts);
         expect(after.walk.road.items).toEqual([]);
         expect(after.walk.road.hitStop).toBeNull();
         expect(after.walk.road.invulnerableSeconds).toBe(0);
