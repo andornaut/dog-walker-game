@@ -287,6 +287,15 @@ function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, wal
 
 const NOTHING = { blocked: [], failed: [], pulled: [], tells: [] } as const;
 
+// The ids of items still on the road.
+function stillOnRoad(items: readonly WalkItem[], ids: readonly number[]): number[] {
+  if (ids.length === 0) {
+    return [];
+  }
+  const onRoad = new Set(items.map(({ id }) => id));
+  return ids.filter((id) => onRoad.has(id));
+}
+
 // The side of the pack's lane the target is on.
 function sideOf(lane: number, target: Target): LaneDirection {
   return target.lanePosition < lane ? -1 : 1;
@@ -310,8 +319,7 @@ export function stepPulls(
     return { ...NOTHING, pulls, walk };
   }
   const clock = pulls.clock + stepSeconds;
-  const onRoad = new Set(walk.road.items.map(({ id }) => id));
-  let spent = pulls.spent.filter((id) => onRoad.has(id));
+  let spent = stillOnRoad(walk.road.items, pulls.spent);
   const tell = read(data.tuning, "seconds", "pullTell");
   const lane = destinationLane(walk.road.control.motion);
 

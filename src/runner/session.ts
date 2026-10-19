@@ -174,19 +174,28 @@ export function stepSession(
   events.push({ kind: "pulled", step: pulled });
   const moving = pulled.walk.road.hitStop === null;
   const step = stepWalk(data, road, streams.cards, seconds, pulled.walk);
-  const spots = step.spots.flatMap(({ kind }) => (isNeedSpot(data, kind) ? [kind] : []));
+  const spots =
+    step.spots.length === 0
+      ? []
+      : step.spots.flatMap(({ kind }) => (isNeedSpot(data, kind) ? [kind] : []));
   const needs = stepNeeds(data, streams.needs, seconds, moving, spots, step.walk.run);
   walk = { ...step.walk, run: needs.run };
   const distance = session.distanceBeforeZone + walk.run.zoneDistance;
   events.push({ kind: "walked", step }, { distance, kind: "needs", step: needs });
-  const fired = [
-    ...step.instants.flatMap(({ outcome }) => outcome.fired),
-    ...needs.moments.flatMap(({ outcome }) => outcome?.fired ?? []),
-  ];
+  const fired =
+    step.instants.length === 0 && needs.moments.length === 0
+      ? []
+      : [
+          ...step.instants.flatMap(({ outcome }) => outcome.fired),
+          ...needs.moments.flatMap(({ outcome }) => outcome?.fired ?? []),
+        ];
   const walked: Session = {
     ...session,
     pulls: pulled.pulls,
-    queue: [...session.queue, ...step.cards, ...needs.cards],
+    queue:
+      step.cards.length === 0 && needs.cards.length === 0
+        ? session.queue
+        : [...session.queue, ...step.cards, ...needs.cards],
     timeMs: session.timeMs + seconds * 1000,
     walk,
     zoneEndPending: session.zoneEndPending || step.zoneEnded,
@@ -262,7 +271,8 @@ function treated(data: SessionData, events: SessionEvent[], slot: number, walk: 
 // the queued cards and the zone's end wait for it.
 function heldForFiring(data: SessionData, fired: readonly DogId[], session: Session): Session {
   const { walk } = session;
-  if (walk.run.phase.kind === "ended") {
+  // No firing holds nothing.
+  if (fired.length === 0 || walk.run.phase.kind === "ended") {
     return session;
   }
   const hold = holdForFiring(

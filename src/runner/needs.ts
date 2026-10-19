@@ -264,14 +264,19 @@ export function stepNeeds(
     return { cards, moments, run: next, urgent };
   }
   const wrongAfter = read(data.tuning, "seconds", "needGoneWrong");
+  // next's need seconds with this step's fill so far, copied once and set into next before a
+  // need goes wrong and at the end.
+  let filled: Partial<Record<DogId, number>> | null = null;
   for (const dog of packDogs(next)) {
-    const before = next.needSeconds[dog] ?? 0;
+    const before = (filled ?? next.needSeconds)[dog] ?? 0;
     const walked = before + stepSeconds * needFillRate(data, next, dog);
     const urgentAt = needUrgentSeconds(data.tuning, data.dogs[dog]);
     if (before < urgentAt && walked >= urgentAt) {
       urgent.push(dog);
     }
     if (walked >= urgentAt + wrongAfter && next.phase.kind === "walking") {
+      next = withNeedSeconds(filled, next);
+      filled = null;
       const wrong = goWrong(data, random, dog, next);
       next = wrong.run;
       moments.push(wrong.moment);
@@ -279,8 +284,16 @@ export function stepNeeds(
         cards.push(wrong.card);
       }
     } else {
-      next = { ...next, needSeconds: { ...next.needSeconds, [dog]: walked } };
+      filled ??= { ...next.needSeconds };
+      filled[dog] = walked;
     }
   }
-  return { cards, moments, run: next, urgent };
+  return { cards, moments, run: withNeedSeconds(filled, next), urgent };
+}
+
+function withNeedSeconds(
+  needSeconds: Partial<Record<DogId, number>> | null,
+  run: RunState,
+): RunState {
+  return needSeconds === null ? run : { ...run, needSeconds };
 }
