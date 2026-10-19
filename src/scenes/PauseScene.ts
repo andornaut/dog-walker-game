@@ -16,7 +16,7 @@ import { withKeyNumber } from "../input/keyNumbers";
 import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { fillRect } from "./draw";
+import { addDim, fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
@@ -38,7 +38,6 @@ export interface PauseSceneData {
 const DIM_STEPS = 2;
 const DIM_TEXTURE = "pause-dim";
 // Stands in for the darkened road when the renderer gives no snapshot to remap.
-const DIM_ALPHA = 0.6;
 
 interface MenuEntry {
   label: string;
@@ -142,10 +141,7 @@ export class PauseScene extends Scene {
   // The frozen road read back from the next frame and redrawn darker. The panel drawn over
   // it in that frame is darkened too, but this image sits under the panel.
   private dimRoad(road: Rect): void {
-    const shade = this.add
-      .rectangle(road.x, road.y, road.width, road.height, PALETTE.ink, DIM_ALPHA)
-      .setOrigin(0)
-      .setVisible(false);
+    const shade = addDim(this, road).setVisible(false);
     const dim = this.add.image(road.x, road.y, "__DEFAULT").setOrigin(0).setVisible(false);
     const fallback = () => shade.setVisible(true);
     this.game.renderer.snapshotArea(road.x, road.y, road.width, road.height, (snapshot) => {

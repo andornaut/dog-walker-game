@@ -9,7 +9,7 @@ import type { SlotSign } from "../home/homeLines";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
 import { insetRect, type Rect } from "../layout/rect";
 import { fillLine } from "../text/lines";
-import { drawFramedRect, drawRing, fillRect } from "./draw";
+import { addDim, drawFramedRect, drawRing, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
 import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, TEXT_SCALE } from "./uiKit";
@@ -88,9 +88,7 @@ export function drawSlotSign(
 
 // A dim layer over the whole screen, under a card.
 function addScrim(scene: Scene, parent: GameObjects.Container): void {
-  const g = scene.add.graphics();
-  g.fillStyle(PALETTE.ink, 0.6).fillRect(0, 0, SCREEN.width, SCREEN.height);
-  parent.add(g);
+  parent.add(addDim(scene, { height: SCREEN.height, width: SCREEN.width, x: 0, y: 0 }));
 }
 
 const CARD = HOME_LAYOUT.card;

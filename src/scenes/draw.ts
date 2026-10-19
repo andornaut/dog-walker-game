@@ -8,6 +8,15 @@ export function addFilledRect(scene: Scene, color: number, rect: Rect): GameObje
   return scene.add.rectangle(rect.x, rect.y, rect.width, rect.height, color).setOrigin(0);
 }
 
+// The ink layer an overlay dims what is under it with.
+export const DIM_ALPHA = 0.6;
+
+export function addDim(scene: Scene, rect: Rect): GameObjects.Rectangle {
+  return scene.add
+    .rectangle(rect.x, rect.y, rect.width, rect.height, PALETTE.ink, DIM_ALPHA)
+    .setOrigin(0);
+}
+
 export function fillRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
   graphics.fillStyle(color).fillRect(rect.x, rect.y, rect.width, rect.height);
 }

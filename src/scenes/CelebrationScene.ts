@@ -7,6 +7,7 @@ import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
+import { DIM_ALPHA } from "./draw";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
@@ -21,7 +22,6 @@ export interface CelebrationSceneData {
   resume: SceneKey;
 }
 
-const DIM_ALPHA = 0.6;
 // The badges' panel, as tall as the end screen's, then a row of faces when owners cheer.
 const PANEL = { badgesHeight: 118, facesHeight: 44, width: 344, x: 8 };
 const FACES = { pitch: 44, size: 32, top: 4 };

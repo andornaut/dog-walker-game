@@ -16,7 +16,7 @@ import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { fillLine } from "../text/lines";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
-import { fillRect } from "./draw";
+import { addDim, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
@@ -57,7 +57,6 @@ const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width,
 const DETAIL_TEXT_WIDTH = DETAIL.width - 32;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;
-const DIM_ALPHA = 0.6;
 const FIELDS = MENU_TEXT_FIELDS.stats;
 
 // The Stats page behind the logbook, in three tabs: overall figures and walks by outcome;
@@ -340,12 +339,7 @@ export class StatsScene extends Scene {
   // with confetti, and the close control in its corner. Any tap closes it.
   private drawDetail(badge: BadgeView): void {
     const reduced = currentSettings(this).reducedMotion;
-    fillRect(this.add.graphics().setAlpha(DIM_ALPHA), PALETTE.ink, {
-      height: SCREEN_CONFIG.height,
-      width: SCREEN_CONFIG.width,
-      x: 0,
-      y: 0,
-    });
+    addDim(this, SCREEN);
     addPanel(this, DETAIL);
     addCloseButton(this, this.add.container(0, 0), DETAIL, false);
     const center = DETAIL.x + DETAIL.width / 2;

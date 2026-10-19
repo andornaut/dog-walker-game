@@ -31,7 +31,7 @@ import { formatDollars } from "../rules/effectText";
 import type { CardSource } from "../state/runState";
 import { fillLine } from "../text/lines";
 import { addDisplayText, hasDisplayFont } from "./displayText";
-import { drawRing, fillRect } from "./draw";
+import { addDim, drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
@@ -54,7 +54,6 @@ const BAND = CARD_LAYOUT.band;
 const ART: Rect = CARD_LAYOUT.art;
 const EFFECT: Rect = CARD_LAYOUT.effect;
 const BADGE: Rect = CARD_LAYOUT.badge;
-const DIM_ALPHA = 0.6;
 const SELECTED_OUTLINE = 2;
 const COST_KEY = "card-cost";
 // A refused pick shakes its card and flashes its cost.
@@ -121,9 +120,7 @@ export class CardScene extends Scene {
     this.parts = [];
     this.refusing = false;
     const { roadView: road } = screenLayout(SCREEN_CONFIG);
-    this.add
-      .rectangle(road.x, road.y, road.width, road.height, PALETTE.ink, DIM_ALPHA)
-      .setOrigin(0);
+    addDim(this, road);
 
     this.entries = [
       ...view.options.map((option) => ({
