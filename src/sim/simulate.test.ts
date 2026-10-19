@@ -4,7 +4,7 @@ import { gameData } from "../data";
 import { zoneFee } from "../rules/dogs";
 import { modifiersOf } from "../rules/modifiers";
 import { zoneAt } from "../rules/route";
-import { cents } from "../rules/units";
+import { roundDollars } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
 import type { PackDogs } from "../state/runState";
 import type { PolicyId } from "./policies";
@@ -162,7 +162,9 @@ describe("simulateRun", { timeout: 15_000 }, () => {
         if (!result.upgrades.includes("shortcut")) {
           const { fees } = zoneAt(gameData, result.route, zone.zoneIndex);
           expect(zone.fees.map((fee) => fee.amount)).toEqual(
-            walking.map((dog) => cents(zoneFee(gameData.tuning, casey, gameData.dogs[dog]) * fees)),
+            walking.map((dog) =>
+              roundDollars(zoneFee(gameData.tuning, casey, gameData.dogs[dog]) * fees),
+            ),
           );
         }
       }
