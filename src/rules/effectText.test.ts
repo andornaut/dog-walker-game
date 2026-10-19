@@ -15,13 +15,15 @@ const data = { debuffs: DEBUFFS, encounters: ENCOUNTERS, tuning: TEST_TUNING };
 
 describe("effectText", () => {
   it("writes money per dog or once, from the tuning", () => {
-    expect(effectText(data, ENCOUNTERS.puddle.options[1].effects)).toBe("−$5 per dog");
-    expect(effectText(data, ENCOUNTERS.squirrel.options[1].effects)).toBe("−$10");
+    expect(effectText(data, ENCOUNTERS.puddle.resolution.options[1].effects)).toBe("−$5 per dog");
+    expect(effectText(data, ENCOUNTERS.squirrel.resolution.options[1].effects)).toBe("−$10");
   });
 
   it("writes hearts each, with a trait's own amount in brackets", () => {
-    expect(effectText(data, ENCOUNTERS.puddle.options[0].effects)).toBe("−1 ♥ each (−2 Fancy)");
-    expect(effectText(data, ENCOUNTERS.skunk.options[2].effects)).toBe("−2 ♥ each");
+    expect(effectText(data, ENCOUNTERS.puddle.resolution.options[0].effects)).toBe(
+      "−1 ♥ each (−2 Fancy)",
+    );
+    expect(effectText(data, ENCOUNTERS.skunk.resolution.options[2].effects)).toBe("−2 ♥ each");
   });
 
   it("names the owners a targeted change reaches", () => {
@@ -31,17 +33,19 @@ describe("effectText", () => {
     expect(effectText(data, FORCED_STOPS.kidWantsToPet.options[1].effects)).toBe(
       "−1 ♥ to one random owner",
     );
-    expect(effectText(data, ENCOUNTERS.photoOp.options[0].effects)).toBe(
+    expect(effectText(data, ENCOUNTERS.photoOp.resolution.effects)).toBe(
       "+$10, +1 ♥ to dramatic owners",
     );
   });
 
   it("joins several effects and names a debuff", () => {
-    expect(effectText(data, ENCOUNTERS.skunk.options[1].effects)).toBe("−$5 per dog, Stinky");
+    expect(effectText(data, ENCOUNTERS.skunk.resolution.options[1].effects)).toBe(
+      "−$5 per dog, Stinky",
+    );
   });
 
   it("writes treats with the carry limit", () => {
-    expect(effectText(data, ENCOUNTERS.biscuitNeighbour.options[0].effects)).toBe(
+    expect(effectText(data, ENCOUNTERS.biscuitNeighbour.resolution.effects)).toBe(
       "+1 treat per dog (carry up to 3)",
     );
   });
@@ -55,6 +59,10 @@ describe("effectText", () => {
     expect(effectText(data, UPGRADES.sweetTalker.effects)).toBe(
       "Card costs per dog −$2 for the run",
     );
+  });
+
+  it("names the unhappiest owner as the target", () => {
+    expect(effectText(data, UPGRADES.secondWind.effects)).toBe("+2 ♥ to the unhappiest owner");
   });
 
   it("writes an immunity as the cards it stops", () => {
@@ -102,8 +110,18 @@ describe("every card's text", () => {
       Object.fromEntries(
         Object.entries(items).map(([id, item]) => [id, effectText(gameData, item.effects)]),
       );
+    const encounters = Object.fromEntries(
+      Object.entries(gameData.encounters).flatMap(([id, { resolution }]) =>
+        resolution.kind === "instant"
+          ? [[`${id}: instant`, effectText(gameData, resolution.effects)]]
+          : resolution.options.map((option) => [
+              `${id}: ${option.name}`,
+              effectText(gameData, option.effects),
+            ]),
+      ),
+    );
     expect({
-      encounters: options(gameData.encounters),
+      encounters,
       forcedStops: options(gameData.forcedStops),
       gear: effects(gameData.shopGear),
       upgrades: effects(gameData.upgrades),

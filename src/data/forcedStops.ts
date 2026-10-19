@@ -6,23 +6,26 @@ export const FORCED_STOPS = {
     name: "Chatty neighbour",
     options: [
       {
+        art: "card-chatty-neighbour-chat",
         effects: [
           { amount: "chattyNeighbourTip", change: "gain", kind: "money" },
           { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
         ],
         name: "Chat",
       },
-      { effects: [], name: "Politely move on" },
+      { art: "card-chatty-neighbour-move-on", effects: [], name: "Politely move on" },
     ],
   },
   constructionDetour: {
     name: "Construction detour",
     options: [
       {
+        art: "card-construction-detour-long-way",
         effects: [{ amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } }],
         name: "Take the long way",
       },
       {
+        art: "card-construction-detour-squeeze",
         effects: [{ amount: -1, kind: "hearts", target: { kind: "trait", trait: "fancy" } }],
         name: "Squeeze past",
       },
@@ -32,6 +35,7 @@ export const FORCED_STOPS = {
     name: "Ice cream truck",
     options: [
       {
+        art: "card-ice-cream-truck-pup-cups",
         effects: [
           { amount: "encounterLow", change: "lose", kind: "money", perDog: { kind: "all" } },
           { amount: 1, kind: "hearts", target: { kind: "all" } },
@@ -39,6 +43,7 @@ export const FORCED_STOPS = {
         name: "Buy pup cups",
       },
       {
+        art: "card-ice-cream-truck-walk-past",
         effects: [{ amount: -1, kind: "hearts", target: { kind: "trait", trait: "foodDriven" } }],
         name: "Walk past",
       },
@@ -48,6 +53,7 @@ export const FORCED_STOPS = {
     name: "Kid wants to pet them",
     options: [
       {
+        art: "card-kid-wants-to-pet-pet",
         effects: [
           { amount: 1, kind: "hearts", target: { kind: "all" } },
           { amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
@@ -55,6 +61,7 @@ export const FORCED_STOPS = {
         name: "Let them pet",
       },
       {
+        art: "card-kid-wants-to-pet-decline",
         effects: [{ amount: -1, kind: "hearts", target: { kind: "randomOne" } }],
         name: "Politely decline",
       },
@@ -64,10 +71,12 @@ export const FORCED_STOPS = {
     name: "Mail carrier",
     options: [
       {
+        art: "card-mail-carrier-hold",
         effects: [{ amount: -1, kind: "hearts", target: { kind: "all" } }],
         name: "Hold them back",
       },
       {
+        art: "card-mail-carrier-wait",
         effects: [{ amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } }],
         name: "Wait it out",
       },
@@ -77,10 +86,15 @@ export const FORCED_STOPS = {
     name: "Stop sign",
     options: [
       {
+        art: "card-stop-sign-wait",
         effects: [{ amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } }],
         name: "Wait patiently",
       },
-      { effects: [{ amount: -1, kind: "hearts", target: { kind: "all" } }], name: "Dart across" },
+      {
+        art: "card-stop-sign-dart",
+        effects: [{ amount: -1, kind: "hearts", target: { kind: "all" } }],
+        name: "Dart across",
+      },
     ],
   },
 } as const satisfies Record<string, ForcedStop>;

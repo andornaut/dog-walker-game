@@ -2,16 +2,30 @@ import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
 import type { DogId, Effect } from "../data/types";
-import { heartsByDog, testState } from "../testing/runState";
+import type { EffectSource } from "../state/runState";
+import { activeModifier, heartsByDog, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { applyEffects, canAfford, type EffectContext, moneyCost, targetDogs } from "./effects";
+import {
+  applyEffects,
+  canAfford,
+  type EffectContext,
+  moneyCost,
+  resolveEffects,
+  targetDogs,
+} from "./effects";
 import { cents } from "./units";
 
 const data = { dogs: DOGS, tuning: TEST_TUNING };
+const SKUNK_IGNORE: EffectSource = { encounter: "skunk", kind: "encounter", option: 2 };
 const context = (affected: readonly DogId[], random = () => 0): EffectContext => ({
   affected,
   random,
+  source: SKUNK_IGNORE,
 });
+const sweetTalker = activeModifier(
+  { kind: "upgrade", upgrade: "sweetTalker" },
+  { by: "sweetTalkerCostPerDog", operation: "add", stat: "costPerDog" },
+);
 
 describe("applyEffects: hearts", () => {
   const loseTwo: Effect = { amount: -2, kind: "hearts", target: { kind: "affected" } };
@@ -59,11 +73,64 @@ describe("applyEffects: hearts", () => {
   });
 
   it("caps hearts at the max raised by a maxHearts modifier", () => {
-    const start = testState(
-      { duchess: 6 },
-      { modifiers: [{ by: "luckyCollarMax", operation: "add", stat: "maxHearts" }] },
+    const luckyCollar = activeModifier(
+      { gear: "luckyCollar", kind: "gear" },
+      { by: "luckyCollarMax", operation: "add", stat: "maxHearts" },
     );
+    const start = testState({ duchess: 6 }, { modifiers: [luckyCollar] });
     expect(heartsByDog(applyEffects(data, context([]), [gainOne], start))).toEqual({ duchess: 7 });
+  });
+});
+
+describe("resolveEffects: changes and their causes", () => {
+  it("reports the base, the dramatic doubling and the cap, summing to the change", () => {
+    const gainTwo: Effect = { amount: 2, kind: "hearts", target: { kind: "all" } };
+    const { changes } = resolveEffects(data, context([]), [gainTwo], testState({ nugget: 4 }));
+    expect(changes).toEqual([
+      {
+        after: 6,
+        before: 4,
+        causes: [
+          { amount: 2, kind: "effect", source: SKUNK_IGNORE },
+          { amount: 2, kind: "temperament", temperament: "dramatic" },
+          { amount: -2, bound: "max", kind: "limit" },
+        ],
+        dog: "nugget",
+        kind: "hearts",
+      },
+    ]);
+  });
+
+  it("reports no change for an owner whose meter does not move", () => {
+    const gainOne: Effect = { amount: 1, kind: "hearts", target: { kind: "all" } };
+    const { changes } = resolveEffects(data, context([]), [gainOne], testState({ duchess: 6 }));
+    expect(changes).toEqual([]);
+  });
+
+  it("reports a per-dog cost with Sweet talker's share and the $0 floor", () => {
+    const towel: Effect = {
+      amount: "encounterLow",
+      change: "lose",
+      kind: "money",
+      perDog: { kind: "affected" },
+    };
+    const state = testState(
+      { duchess: 5, koda: 5 },
+      { modifiers: [sweetTalker], money: cents(400) },
+    );
+    const { changes } = resolveEffects(data, context(["duchess", "koda"]), [towel], state);
+    expect(changes).toEqual([
+      {
+        amount: -400,
+        causes: [
+          { amount: -1000, kind: "effect", source: SKUNK_IGNORE },
+          { amount: 400, kind: "modifier", source: { kind: "upgrade", upgrade: "sweetTalker" } },
+          { amount: 200, bound: "min", kind: "limit" },
+        ],
+        dog: null,
+        kind: "money",
+      },
+    ]);
   });
 });
 
@@ -102,6 +169,15 @@ describe("targetDogs", () => {
       ),
     ).toEqual(["nugget"]);
   });
+
+  it("picks the owner with the fewest hearts, the first in pack order on a tie", () => {
+    const unhappiest = { kind: "unhappiest" } as const;
+    const lowestLast = testState({ duchess: 4, koda: 5, nugget: 2 });
+    expect(targetDogs(data, context([]), lowestLast, unhappiest)).toEqual(["nugget"]);
+    const tied = testState({ duchess: 5, koda: 2, nugget: 2 });
+    expect(targetDogs(data, context([]), tied, unhappiest)).toEqual(["koda"]);
+    expect(targetDogs(data, context([]), testState({ koda: "fired" }), unhappiest)).toEqual([]);
+  });
 });
 
 describe("moneyCost and applyEffects: money", () => {
@@ -112,11 +188,6 @@ describe("moneyCost and applyEffects: money", () => {
     perDog: { kind: "affected" },
   };
   const chase: Effect = { amount: "squirrelChase", change: "lose", kind: "money" };
-  const sweetTalker = {
-    by: "sweetTalkerCostPerDog",
-    operation: "add",
-    stat: "costPerDog",
-  } as const;
 
   it("charges a per-dog cost once per affected dog", () => {
     const state = testState({ duchess: 5, koda: 5, nugget: 5 });
@@ -175,7 +246,7 @@ describe("applyEffects: other kinds", () => {
     expect(state.immunities).toEqual(["puddle"]);
   });
 
-  it("keeps a modifier for the rules that read its stat", () => {
+  it("keeps a modifier, with its source, for the rules that read its stat", () => {
     const bigTipper: Effect = {
       by: "bigTipperTip",
       duration: "run",
@@ -184,7 +255,7 @@ describe("applyEffects: other kinds", () => {
       stat: "tipValue",
     };
     const state = applyEffects(data, context([]), [bigTipper], testState({ koda: 5 }));
-    expect(state.modifiers).toEqual([bigTipper]);
+    expect(state.modifiers).toEqual([{ ...bigTipper, source: SKUNK_IGNORE }]);
   });
 
   it("adds skips, and treats up to the carry limit", () => {

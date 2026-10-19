@@ -21,21 +21,53 @@ export function modifierValue(tuning: LiveTuning, modifier: Modifier): number {
   }
 }
 
-// A stat after its modifiers: the "add" values are summed onto base, then the "multiply"
-// values scale the result.
+// How much one modifier changed a stat.
+export interface Contribution<M extends Modifier> {
+  readonly amount: number;
+  readonly modifier: M;
+}
+
+export interface StatParts<M extends Modifier> {
+  // In the order applied; a modifier that changed nothing is left out.
+  readonly contributions: readonly Contribution<M>[];
+  readonly value: number;
+}
+
+// A stat after its modifiers, with what each one contributed: the "add" values are summed
+// onto base, then the "multiply" values scale the result in turn.
+export function statParts<M extends Modifier>(
+  tuning: LiveTuning,
+  modifiers: readonly M[],
+  stat: Stat,
+  base: number,
+): StatParts<M> {
+  const matching = modifiers.filter((modifier) => modifier.stat === stat);
+  const ordered = [
+    ...matching.filter((modifier) => modifier.operation === "add"),
+    ...matching.filter((modifier) => modifier.operation === "multiply"),
+  ];
+  const contributions: Contribution<M>[] = [];
+  let value = base;
+  for (const modifier of ordered) {
+    const next =
+      modifier.operation === "add"
+        ? value + modifierValue(tuning, modifier)
+        : value * modifierValue(tuning, modifier);
+    if (next !== value) {
+      contributions.push({ amount: next - value, modifier });
+    }
+    value = next;
+  }
+  return { contributions, value };
+}
+
 export function modifiedStat(
   tuning: LiveTuning,
   modifiers: readonly Modifier[],
   stat: Stat,
   base: number,
 ): number {
-  const matching = modifiers.filter((modifier) => modifier.stat === stat);
-  const added = matching
-    .filter((modifier) => modifier.operation === "add")
-    .reduce((sum, modifier) => sum + modifierValue(tuning, modifier), base);
-  return matching
-    .filter((modifier) => modifier.operation === "multiply")
-    .reduce((product, modifier) => product * modifierValue(tuning, modifier), added);
+  return statParts(tuning, modifiers, stat, base).value;
 }
 
 // The modifiers among a card's or a gear item's effects.

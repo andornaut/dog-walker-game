@@ -1,18 +1,58 @@
 import { describe, expect, it } from "vitest";
 
+import manifestJson from "../../public/art/manifest.json";
+import { parseManifest } from "../assets/manifest";
 import { maxHearts } from "../rules/dogs";
 import { moneyCost } from "../rules/effects";
 import { modifiedStat, modifiersOf } from "../rules/modifiers";
+import { unlockPrice } from "../rules/shop";
 import { probability, read, readTable } from "../rules/units";
 import { testState } from "../testing/runState";
 import { gameData } from ".";
 import { SCREEN_CONFIG } from "./screen";
-import type { CardOption, DogId, Energy, Modifier, Size, Temperament, TraitId } from "./types";
+import type {
+  CardOption,
+  DogId,
+  Effect,
+  Energy,
+  Modifier,
+  QuipMoment,
+  Size,
+  Temperament,
+  TraitId,
+} from "./types";
 
 // Invariants the rulebook states about the content and numbers, checked on the real data.
-const { dogs, encounters, forcedStops, help, quips, shopGear, tuning, upgrades, walkers, world } =
-  gameData;
+const {
+  defaultWalker,
+  dogSlots,
+  dogs,
+  encounters,
+  forcedStops,
+  help,
+  hints,
+  quips,
+  shopGear,
+  tuning,
+  upgrades,
+  walkers,
+  world,
+} = gameData;
 const dogList = Object.values(dogs);
+const KEBAB_CASE = /^[a-z0-9]+(-[a-z0-9]+)*$/;
+const QUIP_MOMENTS: readonly QuipMoment[] = ["fired", "happier", "parting", "upset"];
+
+// Every card: the encounters that open one, then the forced stops.
+const cards: readonly { readonly name: string; readonly options: readonly CardOption[] }[] = [
+  ...Object.values(encounters).flatMap(({ name, resolution }) =>
+    resolution.kind === "card" ? [{ name, options: resolution.options }] : [],
+  ),
+  ...Object.values(forcedStops),
+];
+const cardOptions = cards.flatMap((card) => card.options);
+const instantEffects: readonly (readonly Effect[])[] = Object.values(encounters).flatMap(
+  ({ resolution }) => (resolution.kind === "instant" ? [resolution.effects] : []),
+);
 const SIZES: readonly Size[] = ["small", "medium", "big"];
 const TRAITS: readonly TraitId[] = ["chaser", "fancy", "foodDriven"];
 const ENERGIES: readonly Energy[] = ["calm", "steady", "hyper"];
@@ -134,22 +174,24 @@ describe("money", () => {
   });
 
   it("names only positive amounts in money effects; the effect says gain or lose", () => {
-    const cards = [...Object.values(encounters), ...Object.values(forcedStops)];
-    const amounts = cards.flatMap((card) =>
-      card.options.flatMap((option) =>
+    const amounts = [...cardOptions, ...instantEffects.map((effects) => ({ effects }))].flatMap(
+      (option) =>
         option.effects.flatMap((effect) => (effect.kind === "money" ? [effect.amount] : [])),
-      ),
     );
     for (const amount of amounts) {
       expect(read(tuning, "money", amount)).toBeGreaterThan(0);
     }
   });
 
-  it("prices every gear item and locked dog above $0", () => {
+  it("prices every gear item, locked dog and bought dog slot above $0", () => {
     for (const gear of Object.values(shopGear)) {
       expect(tuning.money.prices[gear.price]).toBeGreaterThan(0);
     }
-    expect(tuning.money.prices.lockedDog).toBeGreaterThan(0);
+    for (const item of [...dogList, ...dogSlots]) {
+      if (item.unlock === "shop") {
+        expect(tuning.money.prices[item.price]).toBeGreaterThan(0);
+      }
+    }
   });
 });
 
@@ -159,14 +201,14 @@ describe("cards", () => {
   const freeOption = (options: readonly CardOption[]) =>
     options.some((option) => moneyCost(gameData, { affected }, pack, option.effects) === 0);
 
-  it("keeps a free option on every encounter and forced stop", () => {
-    for (const card of [...Object.values(encounters), ...Object.values(forcedStops)]) {
+  it("keeps a free option on every card", () => {
+    for (const card of cards) {
       expect(freeOption(card.options), card.name).toBe(true);
     }
   });
 
   it("gives every option on a card a distinct name", () => {
-    for (const card of [...Object.values(encounters), ...Object.values(forcedStops)]) {
+    for (const card of cards) {
       const names = card.options.map((option) => option.name);
       expect(new Set(names).size, card.name).toBe(names.length);
     }
@@ -176,6 +218,17 @@ describe("cards", () => {
     const kinds = Object.values(encounters).map((encounter) => encounter.kind);
     expect(countBy(kinds, "obstacle")).toBe(5);
     expect(countBy(kinds, "lucky")).toBe(3);
+  });
+
+  it("applies the biscuit neighbour and photo op at once, with only gains", () => {
+    const instant = Object.entries(encounters).flatMap(([id, encounter]) =>
+      encounter.resolution.kind === "instant" ? [id] : [],
+    );
+    expect(instant.sort()).toEqual(["biscuitNeighbour", "photoOp"]);
+    for (const effect of instantEffects.flat()) {
+      expect(effect.kind === "money" ? effect.change : "gain").toBe("gain");
+      expect(effect.kind === "hearts" ? effect.amount : 1).toBeGreaterThan(0);
+    }
   });
 
   it("has a forced stop for every zone, with none repeated", () => {
@@ -195,6 +248,20 @@ describe("cards", () => {
     expect(kinds).toHaveLength(9);
     expect(countBy(kinds, "tradeOff")).toBe(2);
   });
+
+  it("gives every card option, upgrade and instant popup its own kebab-case art key", () => {
+    const arts = [
+      ...cardOptions.map((option) => option.art),
+      ...Object.values(upgrades).map((upgrade) => upgrade.art),
+      ...Object.values(encounters).flatMap(({ resolution }) =>
+        resolution.kind === "instant" ? [resolution.art] : [],
+      ),
+    ];
+    for (const art of arts) {
+      expect(art).toMatch(KEBAB_CASE);
+    }
+    expect(new Set(arts).size).toBe(arts.length);
+  });
 });
 
 describe("run, world and walkers", () => {
@@ -211,23 +278,69 @@ describe("run, world and walkers", () => {
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
   });
 
+  it("has one dog slot per pack place, the first free and the others dearer in turn", () => {
+    expect(dogSlots).toHaveLength(tuning.counts.packSizeMax);
+    const prices = dogSlots.map((slot) => unlockPrice(tuning, slot));
+    expect(prices[0]).toBe(0);
+    expect(dogSlots.slice(1).every((slot) => slot.unlock === "shop")).toBe(true);
+    expect([...prices].sort((a, b) => a - b)).toEqual(prices);
+    expect(new Set(prices).size).toBe(prices.length);
+  });
+
   it("has 5 gear items", () => {
     expect(Object.keys(shopGear)).toHaveLength(5);
   });
 
-  it("has 3 to 4 walkers with distinct sprites, at least one available from the start", () => {
+  it("has 4 free walkers with their own sprites and portraits, the default among them", () => {
     const list = Object.values(walkers);
-    expect(list.length).toBeGreaterThanOrEqual(3);
-    expect(list.length).toBeLessThanOrEqual(4);
+    expect(list).toHaveLength(4);
+    expect(list.every((walker) => walker.unlock === "start")).toBe(true);
     expect(new Set(list.map((walker) => walker.spriteKey)).size).toBe(list.length);
-    expect(list.some((walker) => walker.unlock === "start")).toBe(true);
+    expect(new Set(list.map((walker) => walker.portraitKey)).size).toBe(list.length);
+    expect(Object.keys(walkers)).toContain(defaultWalker);
   });
 
-  it("has a quip for every temperament and moment", () => {
-    for (const temperament of TEMPERAMENTS) {
-      for (const lines of Object.values(quips[temperament])) {
-        expect(lines.length).toBeGreaterThan(0);
+  it("finds every walker's sprite and portrait in the art manifest", () => {
+    const manifest = parseManifest(manifestJson);
+    const sprites = new Set(manifest.sprites.map(({ key }) => key));
+    const missing = Object.values(walkers)
+      .flatMap((walker) => [walker.spriteKey, walker.portraitKey])
+      .filter((key) => !sprites.has(key));
+    expect(missing).toEqual([]);
+  });
+
+  it("gives every owner two distinct lines for every moment", () => {
+    for (const id of Object.keys(dogs) as DogId[]) {
+      for (const moment of QUIP_MOMENTS) {
+        const lines = quips[id][moment];
+        expect(lines, `${id} ${moment}`).toHaveLength(2);
+        expect(new Set(lines).size, `${id} ${moment}`).toBe(2);
+        expect(lines.every((line) => line.trim() !== "")).toBe(true);
       }
+    }
+  });
+});
+
+describe("hints", () => {
+  const hintList = Object.values(hints);
+
+  it("has one hint per trigger the rulebook names, each one line", () => {
+    const triggers = hintList.map(({ trigger }) => JSON.stringify(trigger));
+    expect(new Set(triggers).size).toBe(hintList.length);
+    expect(hintList.map(({ trigger }) => trigger.kind).sort()).toEqual([
+      "card",
+      "debuff",
+      "encounter",
+      "firedOwner",
+      "forcedStop",
+      "luckyFind",
+      "pull",
+      "tip",
+      "treat",
+    ]);
+    for (const { text } of hintList) {
+      expect(text).not.toBe("");
+      expect(text).not.toContain("\n");
     }
   });
 });
@@ -237,7 +350,7 @@ describe("help", () => {
     for (const page of help) {
       expect(page.title).not.toBe("");
       expect(page.body).not.toBe("");
-      expect(page.art).toMatch(/^[a-z0-9]+(-[a-z0-9]+)*$/);
+      expect(page.art).toMatch(KEBAB_CASE);
     }
     expect(new Set(help.map((page) => page.art)).size).toBe(help.length);
     expect(new Set(help.map((page) => page.title)).size).toBe(help.length);

@@ -2,8 +2,8 @@ import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import { defined } from "../testing/defined";
-import { knownOutsideData, newPlayerSave, testContext, veteranSave } from "./fixtures";
+import { defined, present } from "../testing/defined";
+import { newPlayerSave, testContext, veteranSave } from "./fixtures";
 import { loadSave, saveContextFrom } from "./load";
 import { type SaveDocument, saveSchema } from "./schema";
 
@@ -25,7 +25,7 @@ const loaded = (change: (document: StoredInput) => void): SaveDocument =>
   loadSave(testContext, withChanges(change)).save;
 
 describe("loadSave", () => {
-  it("gives a new player the free dogs and walker, and nothing else", () => {
+  it("gives a new player the free dogs, the default walker and no loadout", () => {
     expect(loadSave(testContext, null)).toEqual({ save: newPlayerSave, status: "new" });
   });
 
@@ -40,7 +40,7 @@ describe("loadSave", () => {
     const checkpoint = {
       dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
       earnedCents: 4_250,
-      zoneReached: 2,
+      zonesFinished: 2,
     };
     const save = loaded((document) => {
       document.checkpoint = checkpoint;
@@ -51,9 +51,16 @@ describe("loadSave", () => {
   it("strips fields the schema does not know", () => {
     const save = loaded((document) => {
       untyped(document).extra = true;
-      untyped(document).settings = { volume: 3 };
+      untyped(document).settings = { ...document.settings, language: "fr" };
     });
     expect(save).toEqual(veteranSave());
+  });
+
+  it("loads an empty loadout, as a new player has before picking a dog", () => {
+    const save = loaded((document) => {
+      document.lastLoadout = { dogs: [], gear: null };
+    });
+    expect(save.lastLoadout).toEqual({ dogs: [], gear: null });
   });
 
   describe("a save it cannot use", () => {
@@ -95,7 +102,13 @@ describe("loadSave", () => {
       [
         "fractional checkpoint earnings",
         withChanges((document) => {
-          document.checkpoint = { dogs: [], earnedCents: 2.5, zoneReached: 1 };
+          document.checkpoint = { dogs: [], earnedCents: 2.5, zonesFinished: 1 };
+        }),
+      ],
+      [
+        "a checkpoint before any zone finished",
+        withChanges((document) => {
+          document.checkpoint = { dogs: [], earnedCents: 0, zonesFinished: 0 };
         }),
       ],
       [
@@ -105,9 +118,9 @@ describe("loadSave", () => {
         }),
       ],
       [
-        "an empty loadout",
+        "a last walk with an unknown outcome",
         withChanges((document) => {
-          document.lastLoadout.dogs = [];
+          (present(document.stats.lastWalk) as Record<string, unknown>).outcome = "abducted";
         }),
       ],
       [
@@ -120,6 +133,18 @@ describe("loadSave", () => {
         "fractional dog slots",
         withChanges((document) => {
           document.owned.dogSlots = 1.5;
+        }),
+      ],
+      [
+        "a volume that is not a number",
+        withChanges((document) => {
+          (document.settings as Record<string, unknown>).musicVolume = "loud";
+        }),
+      ],
+      [
+        "reduced motion that is not a boolean",
+        withChanges((document) => {
+          (document.settings as Record<string, unknown>).reducedMotion = "yes";
         }),
       ],
       [
@@ -160,33 +185,47 @@ describe("loadSave", () => {
     });
   });
 
+  describe("settings", () => {
+    it.each([
+      [-0.5, 0],
+      [0, 0],
+      [0.4, 0.4],
+      [1, 1],
+      [3, 1],
+    ])("clamps a stored volume of %d to %d", (volume, clamped) => {
+      const save = loaded((document) => {
+        document.settings.musicVolume = volume;
+        document.settings.sfxVolume = volume;
+      });
+      expect([save.settings.musicVolume, save.settings.sfxVolume]).toEqual([clamped, clamped]);
+    });
+
+    it("keeps reduced motion as stored", () => {
+      expect(loaded(() => {}).settings.reducedMotion).toBe(true);
+    });
+  });
+
   describe("unknown ids", () => {
     it("drops them from everything owned, and removes duplicates", () => {
       const save = loaded((document) => {
         document.owned = {
           dogSlots: 2,
           dogs: ["koda", "ghost", "waffles", "koda"],
-          gear: ["whistle", "jetpack"],
-          walkerKit: ["firmGrip", "rocketBoots", "firmGrip"],
-          walkers: ["jordan", "retiredWalker"],
+          gear: ["whistle", "jetpack", "whistle"],
         };
       });
       expect(save.owned).toEqual({
         dogSlots: 2,
         dogs: ["biscuit", "duchess", "koda", "waffles"],
         gear: ["whistle"],
-        walkerKit: ["firmGrip"],
-        walkers: ["casey", "jordan"],
       });
     });
 
-    it("keeps the free dogs and walker owned", () => {
+    it("keeps the free dogs owned", () => {
       const save = loaded((document) => {
         document.owned.dogs = ["waffles"];
-        document.owned.walkers = ["jordan"];
       });
       expect(save.owned.dogs).toEqual(["biscuit", "duchess", "koda", "waffles"]);
-      expect(save.owned.walkers).toEqual(["casey", "jordan"]);
     });
 
     it("drops them from the loadout, along with picks the player does not own", () => {
@@ -202,9 +241,9 @@ describe("loadSave", () => {
       [0, 1],
       [4, 3],
       [3, 3],
-    ])("clamps %i dog slots to %i", (stored, clamped) => {
+    ])("clamps %i dog slots to %i", (storedSlots, clamped) => {
       const save = loaded((document) => {
-        document.owned.dogSlots = stored;
+        document.owned.dogSlots = storedSlots;
       });
       expect(save.owned.dogSlots).toBe(clamped);
     });
@@ -228,23 +267,17 @@ describe("loadSave", () => {
       expect(loaded(() => {}).lastLoadout.gear).toBe("whistle");
     });
 
-    it("falls back to the default loadout when no loadout dog is left", () => {
+    it("leaves the loadout empty, keeping owned gear, when no loadout dog is left", () => {
       const save = loaded((document) => {
         document.lastLoadout = { dogs: ["ghost"], gear: "whistle" };
       });
-      expect(save.lastLoadout).toEqual({ dogs: ["biscuit"], gear: null });
+      expect(save.lastLoadout).toEqual({ dogs: [], gear: "whistle" });
     });
 
-    it("keeps an owned walker in use", () => {
-      expect(loaded(() => {}).walker).toBe("jordan");
-    });
-
-    it.each([
-      ["an unknown walker", "retiredWalker"],
-      ["a walker the player has not bought", "robin"],
-    ])("swaps %s for the free walker", (_, walker) => {
+    it("keeps a known walker and swaps an unknown one for the default", () => {
+      expect(loaded(() => {}).walker).toBe("ada");
       const save = loaded((document) => {
-        document.walker = walker;
+        document.walker = "retiredWalker";
       });
       expect(save.walker).toBe("casey");
     });
@@ -258,6 +291,15 @@ describe("loadSave", () => {
       expect(save.stats.timesFired).toBe(3);
     });
 
+    it("drops unknown dogs from the logbook's walks and keeps the walks", () => {
+      const save = loaded((document) => {
+        present(document.stats.bestWalk).dogs = ["ghost", "koda"];
+        present(document.stats.lastWalk).dogs = ["ghost"];
+      });
+      expect(save.stats.bestWalk?.dogs).toEqual(["koda"]);
+      expect(save.stats.lastWalk).toEqual({ ...veteranSave().stats.lastWalk, dogs: [] });
+    });
+
     it("drops them from a checkpoint and keeps its earnings", () => {
       const save = loaded((document) => {
         document.checkpoint = {
@@ -266,91 +308,40 @@ describe("loadSave", () => {
             { fired: false, id: "koda", zonesFinished: 2 },
           ],
           earnedCents: 900,
-          zoneReached: 2,
+          zonesFinished: 2,
         };
       });
       expect(save.checkpoint).toEqual({
         dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
         earnedCents: 900,
-        zoneReached: 2,
+        zonesFinished: 2,
       });
     });
 
-    it("drops unknown dogs and courses from training", () => {
+    it("drops unknown hints from those shown, and duplicates", () => {
       const save = loaded((document) => {
-        document.training = { ghost: ["heel"], koda: ["heel", "agility", "heel"] };
+        document.shownHints = ["tip", "retiredHint", "tip", "puddle"];
       });
-      expect(save.training).toEqual({ koda: ["heel"] });
-    });
-
-    it("drops unknown help topics", () => {
-      const save = loaded((document) => {
-        document.helpSeen = ["lanes", "retiredTopic"];
-      });
-      expect(save.helpSeen).toEqual(["lanes"]);
-    });
-
-    it("drops unknown accessories, and unequips one the dog does not own", () => {
-      const save = loaded((document) => {
-        document.cosmetics.accessories = {
-          equipped: { ghost: "bandana", koda: "tophat", waffles: "raincoat" },
-          owned: { ghost: ["bandana"], koda: ["bandana", "tophat"], waffles: ["bowTie"] },
-        };
-      });
-      expect(save.cosmetics.accessories).toEqual({
-        equipped: {},
-        owned: { koda: ["bandana"], waffles: ["bowTie"] },
-      });
-    });
-
-    it("keeps an owned, equipped accessory", () => {
-      expect(loaded(() => {}).cosmetics.accessories.equipped).toEqual({ koda: "bandana" });
-    });
-
-    it("drops unknown leash colours, and unequips one the player does not own", () => {
-      const save = loaded((document) => {
-        document.cosmetics.leashColors = { equipped: "gold", owned: ["red", "neon"] };
-      });
-      expect(save.cosmetics.leashColors).toEqual({ equipped: null, owned: ["red"] });
-    });
-
-    it("keeps an owned, equipped leash colour", () => {
-      expect(loaded(() => {}).cosmetics.leashColors.equipped).toBe("teal");
-    });
-
-    it("drops unknown decor, and removes placed decor the player does not own", () => {
-      const save = loaded((document) => {
-        document.cosmetics.decor = { owned: ["rug", "fountain"], placed: ["rug", "plant"] };
-      });
-      expect(save.cosmetics.decor).toEqual({ owned: ["rug"], placed: ["rug"] });
+      expect(save.shownHints).toEqual(["tip", "puddle"]);
     });
   });
 });
 
 describe("saveContextFrom", () => {
-  const context = saveContextFrom(gameData, knownOutsideData);
+  const context = saveContextFrom(gameData);
 
-  it("knows every dog, gear item and walker in the game data", () => {
+  it("knows every dog, gear item, hint and walker in the game data", () => {
     expect([...context.known.dogs]).toEqual(Object.keys(gameData.dogs));
     expect([...context.known.gear]).toEqual(Object.keys(gameData.shopGear));
+    expect([...context.known.hints]).toEqual(Object.keys(gameData.hints));
     expect([...context.known.walkers]).toEqual(Object.keys(gameData.walkers));
-    expect(context.known.walkerKit).toBe(knownOutsideData.walkerKit);
   });
 
-  it("starts a new player with one dog slot and the starter dogs, walking the first", () => {
-    expect(context.defaults.dogSlots).toBe(1);
-    expect(context.defaults.freeDogs).toEqual(["biscuit", "duchess", "koda"]);
-    expect(context.defaults.lastLoadout).toEqual({ dogs: ["biscuit"], gear: null });
-  });
-
-  it("frees only walkers marked start, and uses the first of them", () => {
-    const walkers = {
-      ...gameData.walkers,
-      casey: { ...gameData.walkers.casey, unlock: "shop" as const },
-      robin: { ...gameData.walkers.robin, unlock: "shop" as const },
-    };
-    const { defaults } = saveContextFrom({ ...gameData, walkers }, knownOutsideData);
-    expect(defaults.freeWalkers).toEqual(["jordan", "morgan"]);
-    expect(defaults.walker).toBe("jordan");
+  it("starts a new player with one dog slot, the starter dogs and the default walker", () => {
+    expect(context.defaults).toEqual({
+      dogSlots: 1,
+      freeDogs: ["biscuit", "duchess", "koda"],
+      walker: gameData.defaultWalker,
+    });
   });
 });

@@ -1,13 +1,16 @@
 import type { Upgrade } from "./types";
 
 // Run-only boosts offered between zones. A picked card leaves the pool for the rest of the run.
+// art is a key into the art manifest's images.
 export const UPGRADES = {
   bellyRubs: {
+    art: "card-belly-rubs",
     effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
     kind: "boost",
     name: "Belly rubs",
   },
   bigTipper: {
+    art: "card-big-tipper",
     effects: [
       {
         by: "bigTipperTip",
@@ -21,6 +24,7 @@ export const UPGRADES = {
     name: "Big tipper",
   },
   goodLeash: {
+    art: "card-good-leash",
     effects: [
       { duration: "run", encounter: "squirrel", kind: "immune" },
       {
@@ -35,11 +39,13 @@ export const UPGRADES = {
     name: "Good leash",
   },
   raincoats: {
+    art: "card-raincoats",
     effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
     kind: "boost",
     name: "Raincoats",
   },
   rushHour: {
+    art: "card-rush-hour",
     effects: [
       {
         by: "rushHourTips",
@@ -59,7 +65,14 @@ export const UPGRADES = {
     kind: "tradeOff",
     name: "Rush hour",
   },
+  secondWind: {
+    art: "card-second-wind",
+    effects: [{ amount: 2, kind: "hearts", target: { kind: "unhappiest" } }],
+    kind: "boost",
+    name: "Second wind",
+  },
   shortcut: {
+    art: "card-shortcut",
     effects: [
       {
         by: "shortcutZoneLength",
@@ -79,20 +92,8 @@ export const UPGRADES = {
     kind: "tradeOff",
     name: "Shortcut",
   },
-  steadyHands: {
-    effects: [
-      {
-        by: "steadyHandsPullFrequency",
-        duration: "run",
-        kind: "modifier",
-        operation: "multiply",
-        stat: "pullFrequency",
-      },
-    ],
-    kind: "boost",
-    name: "Steady hands",
-  },
   sweetTalker: {
+    art: "card-sweet-talker",
     effects: [
       {
         by: "sweetTalkerCostPerDog",
@@ -106,6 +107,7 @@ export const UPGRADES = {
     name: "Sweet talker",
   },
   treatMagnet: {
+    art: "card-treat-magnet",
     effects: [
       {
         by: "treatMagnetReachLanes",

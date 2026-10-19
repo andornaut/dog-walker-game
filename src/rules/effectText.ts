@@ -82,6 +82,7 @@ function perDogText(target: Target | undefined): string {
     case "all":
       return " per dog";
     case "randomOne":
+    case "unhappiest":
       return "";
     case "temperament":
       return ` per ${TEMPERAMENT_NAMES[target.temperament]} dog`;
@@ -118,6 +119,8 @@ function heartsText(effect: HeartsEffect): string {
       return `${amount} to ${TEMPERAMENT_NAMES[target.temperament]} owners`;
     case "trait":
       return `${amount} to ${TRAIT_NAMES[target.trait]} owners`;
+    case "unhappiest":
+      return `${amount} to the unhappiest owner`;
     default:
       return assertNever(target);
   }

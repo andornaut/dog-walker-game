@@ -72,7 +72,6 @@ export const TUNING = {
     scrollSpeedGainPerZone: 0.15,
     shortcutFees: 0.75,
     shortcutZoneLength: 0.75,
-    steadyHandsPullFrequency: 0.5,
     stinkyTip: 0.5,
     // By the number of dogs in the pack.
     tipByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },

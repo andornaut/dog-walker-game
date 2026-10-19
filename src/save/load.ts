@@ -1,17 +1,11 @@
 import * as v from "valibot";
 
-import type { DogId, GameData, GearId, WalkerId } from "../data/types";
+import type { DogId, GameData, GearId, HintId, WalkerId } from "../data/types";
+import { startingDogSlots } from "../rules/shop";
 import { migrateSave, saveMigrations } from "./migrations";
 import {
-  type AccessoryId,
-  type Cosmetics,
-  type CourseId,
   createDefaultSave,
-  type DecorId,
   type DogStats,
-  type HelpTopicId,
-  type KitId,
-  type LeashColorId,
   MAX_RUN_DOGS,
   type Owned,
   SAVE_VERSION,
@@ -19,23 +13,16 @@ import {
   type SaveDocument,
   saveSchema,
   type StoredSave,
+  type Walk,
 } from "./schema";
 
 // The content ids the game currently has.
 export interface KnownIds {
-  accessories: ReadonlySet<AccessoryId>;
-  courses: ReadonlySet<CourseId>;
-  decor: ReadonlySet<DecorId>;
   dogs: ReadonlySet<DogId>;
   gear: ReadonlySet<GearId>;
-  helpTopics: ReadonlySet<HelpTopicId>;
-  leashColors: ReadonlySet<LeashColorId>;
-  walkerKit: ReadonlySet<KitId>;
+  hints: ReadonlySet<HintId>;
   walkers: ReadonlySet<WalkerId>;
 }
-
-// The known ids that src/data/ does not define yet.
-export type KnownIdsOutsideData = Omit<KnownIds, "dogs" | "gear" | "walkers">;
 
 export interface SaveContext {
   defaults: SaveDefaults;
@@ -52,34 +39,26 @@ function keysOf<Id extends string>(record: Readonly<Record<Id, unknown>>): Id[] 
   return Object.keys(record) as Id[];
 }
 
-// A new player has the fewest dog slots, owns the dogs and walkers marked "start", uses
-// the first starter walker, and walks the first starter dog with no gear.
-export function saveContextFrom(
-  data: Pick<GameData, "dogs" | "shopGear" | "tuning" | "walkers">,
-  outsideData: KnownIdsOutsideData,
-): SaveContext {
+export type SaveData = Pick<
+  GameData,
+  "defaultWalker" | "dogSlots" | "dogs" | "hints" | "shopGear" | "walkers"
+>;
+
+// A new player has the starting dog slots, owns the dogs marked "start" and walks with the
+// default walker.
+export function saveContextFrom(data: SaveData): SaveContext {
   const dogs = keysOf(data.dogs);
-  const walkers = keysOf(data.walkers);
   const freeDogs = dogs.filter((id) => data.dogs[id].unlock === "start");
-  const freeWalkers = walkers.filter((id) => data.walkers[id].unlock === "start");
-  const [firstDog] = freeDogs;
-  const [firstWalker] = freeWalkers;
-  if (firstDog === undefined || firstWalker === undefined) {
-    throw new Error("The game data needs a starter dog and a starter walker");
+  if (freeDogs.length === 0) {
+    throw new Error("The game data needs a starter dog");
   }
   return {
-    defaults: {
-      dogSlots: data.tuning.counts.packSizeMin,
-      freeDogs,
-      freeWalkers,
-      lastLoadout: { dogs: [firstDog], gear: null },
-      walker: firstWalker,
-    },
+    defaults: { dogSlots: startingDogSlots(data), freeDogs, walker: data.defaultWalker },
     known: {
-      ...outsideData,
       dogs: new Set(dogs),
       gear: new Set(keysOf(data.shopGear)),
-      walkers: new Set(walkers),
+      hints: new Set(keysOf(data.hints)),
+      walkers: new Set(keysOf(data.walkers)),
     },
   };
 }
@@ -111,58 +90,34 @@ function keepKnownEntries<Key extends string, Stored, Value>(
   return kept;
 }
 
-function keepKnownCosmetics(known: KnownIds, cosmetics: StoredSave["cosmetics"]): Cosmetics {
-  const { accessories, decor, leashColors } = cosmetics;
-  const ownedAccessories = keepKnownEntries(
-    known.dogs,
-    (stored: string[]) => keepKnown(known.accessories, stored),
-    accessories.owned,
-  );
-  const ownedDecor = keepKnown(known.decor, decor.owned);
-  const ownedLeashColors = keepKnown(known.leashColors, leashColors.owned);
-  const { equipped: leash } = leashColors;
-  return {
-    accessories: {
-      equipped: keepKnownEntries(
-        known.dogs,
-        (accessory: string, dog) => ownedAccessories[dog]?.find((id) => id === accessory),
-        accessories.equipped,
-      ),
-      owned: ownedAccessories,
-    },
-    decor: { owned: ownedDecor, placed: keepKnown(new Set(ownedDecor), decor.placed) },
-    leashColors: {
-      equipped: leash !== null && isKnown(new Set(ownedLeashColors), leash) ? leash : null,
-      owned: ownedLeashColors,
-    },
-  };
+function keepKnownWalk<W extends { dogs: string[] }>(
+  known: KnownIds,
+  walk: W | null,
+): (Omit<W, "dogs"> & Pick<Walk, "dogs">) | null {
+  return walk === null ? null : { ...walk, dogs: keepKnown(known.dogs, walk.dogs) };
 }
 
-// Drops ids the game no longer has, and equipped items the player does not own. The free
-// dogs and walkers are always owned. Dog slots are clamped to 1 to MAX_RUN_DOGS. A loadout
-// keeps at most one dog per slot, and one left without dogs falls back to the default.
+function clamp(min: number, max: number, value: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+// Drops ids the game no longer has, and loadout picks the player does not own. The free dogs
+// are always owned, and an unknown walker becomes the default. Dog slots are clamped to 1 to
+// MAX_RUN_DOGS and volumes to 0 to 1. A
+// loadout keeps at most one dog per slot, and may be empty.
 export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { defaults, known } = context;
   const owned: Owned = {
-    dogSlots: Math.min(MAX_RUN_DOGS, Math.max(1, save.owned.dogSlots)),
+    dogSlots: clamp(1, MAX_RUN_DOGS, save.owned.dogSlots),
     dogs: keepKnown(known.dogs, [...defaults.freeDogs, ...save.owned.dogs]),
     gear: keepKnown(known.gear, save.owned.gear),
-    walkerKit: keepKnown(known.walkerKit, save.owned.walkerKit),
-    walkers: keepKnown(known.walkers, [...defaults.freeWalkers, ...save.owned.walkers]),
   };
-  const loadoutDogs = keepKnown(new Set(owned.dogs), save.lastLoadout.dogs).slice(
-    0,
-    owned.dogSlots,
-  );
   const { gear } = save.lastLoadout;
-  const lastLoadout =
-    loadoutDogs.length > 0
-      ? {
-          dogs: loadoutDogs,
-          gear: gear !== null && isKnown(new Set(owned.gear), gear) ? gear : null,
-        }
-      : { dogs: [...defaults.lastLoadout.dogs], gear: defaults.lastLoadout.gear };
-  const { checkpoint, stats } = save;
+  const lastLoadout = {
+    dogs: keepKnown(new Set(owned.dogs), save.lastLoadout.dogs).slice(0, owned.dogSlots),
+    gear: gear !== null && isKnown(new Set(owned.gear), gear) ? gear : null,
+  };
+  const { checkpoint, settings, stats } = save;
   return {
     ...save,
     checkpoint:
@@ -174,20 +129,21 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
               isKnown(known.dogs, id) ? [{ ...dog, id }] : [],
             ),
           },
-    cosmetics: keepKnownCosmetics(known, save.cosmetics),
-    helpSeen: keepKnown(known.helpTopics, save.helpSeen),
     lastLoadout,
     owned,
+    settings: {
+      ...settings,
+      musicVolume: clamp(0, 1, settings.musicVolume),
+      sfxVolume: clamp(0, 1, settings.sfxVolume),
+    },
+    shownHints: keepKnown(known.hints, save.shownHints),
     stats: {
       ...stats,
+      bestWalk: keepKnownWalk(known, stats.bestWalk),
       dogs: keepKnownEntries(known.dogs, (dogStats: DogStats) => dogStats, stats.dogs),
+      lastWalk: keepKnownWalk(known, stats.lastWalk),
     },
-    training: keepKnownEntries(
-      known.dogs,
-      (courses: string[]) => keepKnown(known.courses, courses),
-      save.training,
-    ),
-    walker: isKnown(new Set(owned.walkers), save.walker) ? save.walker : defaults.walker,
+    walker: isKnown(known.walkers, save.walker) ? save.walker : defaults.walker,
   };
 }
 

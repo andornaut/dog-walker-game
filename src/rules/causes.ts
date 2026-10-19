@@ -1,0 +1,150 @@
+import type { DogId, GameData, Temperament } from "../data/types";
+import type { ActiveModifier, EffectSource, ModifierSource } from "../state/runState";
+import { assertNever } from "./assertNever";
+import { formatDollars, TEMPERAMENT_NAMES } from "./effectText";
+import type { Contribution } from "./modifiers";
+import { type Cents, cents, type Hearts } from "./units";
+
+// One reason behind a change, with how much of the change it accounts for, in the change's
+// unit: hearts, or cents for money. A change's causes sum to the change. The first is the
+// base: the effect, tip, fee, clawback or treat. The rest are what changed it: a temperament
+// multiplier, the pack-size tip factor, a modifier, or a limit (a meter held within 0 and its
+// max, money held at $0 or more).
+export type Cause =
+  | { readonly amount: number; readonly bound: "max" | "min"; readonly kind: "limit" }
+  | { readonly amount: number; readonly kind: "clawback" | "fee" | "tip" | "treat" }
+  | { readonly amount: number; readonly kind: "effect"; readonly source: EffectSource }
+  | { readonly amount: number; readonly kind: "modifier"; readonly source: ModifierSource }
+  | { readonly amount: number; readonly kind: "packSize"; readonly packSize: number }
+  | { readonly amount: number; readonly kind: "temperament"; readonly temperament: Temperament };
+
+// A change to one owner's meter.
+export interface HeartChange {
+  readonly after: Hearts;
+  readonly before: Hearts;
+  readonly causes: readonly Cause[];
+  readonly dog: DogId;
+  readonly kind: "hearts";
+}
+
+// A change to the money. dog is the dog a fee or clawback belongs to, or null.
+export interface MoneyChange {
+  readonly amount: Cents;
+  readonly causes: readonly Cause[];
+  readonly dog: DogId | null;
+  readonly kind: "money";
+}
+
+export type Change = HeartChange | MoneyChange;
+
+export type CauseData = Pick<
+  GameData,
+  "debuffs" | "encounters" | "forcedStops" | "shopGear" | "upgrades"
+>;
+
+export function modifierCauses(
+  contributions: readonly Contribution<ActiveModifier>[],
+  scale = 1,
+): Cause[] {
+  return contributions.map(({ amount, modifier }) => ({
+    amount: amount * scale,
+    kind: "modifier",
+    source: modifier.source,
+  }));
+}
+
+// Rounds money causes to whole cents so they still sum to the rounded total: each cause takes
+// the change it makes to the rounded running total. Causes left at 0 are dropped, except the
+// base.
+export function centsCauses(causes: readonly Cause[]): Cause[] {
+  let exact = 0;
+  let rounded = 0;
+  return causes.flatMap((cause, index) => {
+    exact += cause.amount;
+    const next = cents(exact);
+    const amount = next - rounded;
+    rounded = next;
+    return amount === 0 && index > 0 ? [] : [{ ...cause, amount }];
+  });
+}
+
+export function changeAmount(change: Change): number {
+  return change.kind === "hearts" ? change.after - change.before : change.amount;
+}
+
+function effectSourceName(data: CauseData, source: ModifierSource): string {
+  switch (source.kind) {
+    case "debuff":
+      return data.debuffs[source.debuff].name;
+    case "encounter": {
+      const { name, resolution } = data.encounters[source.encounter];
+      return resolution.kind === "card" ? (resolution.options[source.option]?.name ?? name) : name;
+    }
+    case "forcedStop":
+      return data.forcedStops[source.stop].options[source.option]?.name ?? "";
+    case "gear":
+      return data.shopGear[source.gear].name;
+    case "instant":
+      return data.encounters[source.encounter].name;
+    case "upgrade":
+      return data.upgrades[source.upgrade].name;
+    default:
+      return assertNever(source);
+  }
+}
+
+// A readable name for one cause of a change, such as "dramatic", "solo" or "Big tipper".
+export function causeName(data: CauseData, change: Change, cause: Cause): string {
+  switch (cause.kind) {
+    case "clawback":
+      return "fees taken back";
+    case "effect":
+    case "modifier":
+      return effectSourceName(data, cause.source);
+    case "fee":
+    case "tip":
+    case "treat":
+      return cause.kind;
+    case "limit":
+      if (change.kind === "money") {
+        return "at $0";
+      }
+      return cause.bound === "max" ? "at max" : "at 0 ♥";
+    case "packSize":
+      return cause.packSize === 1 ? "solo" : `pack of ${cause.packSize}`;
+    case "temperament":
+      return TEMPERAMENT_NAMES[cause.temperament];
+    default:
+      return assertNever(cause);
+  }
+}
+
+const MINUS = "−";
+
+// A signed amount in the change's unit, such as "−2 ♥" or "+$1.50".
+export function amountText(kind: Change["kind"], amount: number): string {
+  const sign = amount < 0 ? MINUS : "+";
+  return kind === "hearts"
+    ? `${sign}${Math.abs(amount)} ♥`
+    : `${sign}${formatDollars(cents(amount))}`;
+}
+
+// A card choice's own effects need no name: the player just picked them.
+function namesBase(cause: Cause): boolean {
+  if (cause.kind !== "effect") {
+    return true;
+  }
+  const { kind } = cause.source;
+  return kind !== "encounter" && kind !== "forcedStop" && kind !== "upgrade";
+}
+
+// The short floating label for a change: its amount, then its base unless the player just
+// picked it on a card, then everything that changed it, as "−2 ♥, dramatic" or
+// "+$1.50 tip, solo".
+export function causeLabel(data: CauseData, change: Change): string {
+  const amount = amountText(change.kind, changeAmount(change));
+  const [base, ...rest] = change.causes;
+  const head =
+    base !== undefined && namesBase(base) ? `${amount} ${causeName(data, change, base)}` : amount;
+  return [head, ...rest.map((cause) => causeName(data, change, cause))].join(", ");
+}

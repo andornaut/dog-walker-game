@@ -1,6 +1,6 @@
-import type { DogId } from "../data/types";
+import type { DogId, Modifier } from "../data/types";
 import { cents, clampHearts, pixels } from "../rules/units";
-import type { Pack, PackSlot, RunState } from "../state/runState";
+import type { ActiveModifier, ModifierSource, Pack, PackSlot, RunState } from "../state/runState";
 
 // A run state for tests: one pack slot per entry, walking at the given hearts or fired
 // in zone 0, and everything else empty.
@@ -39,4 +39,9 @@ export function heartsByDog(state: RunState): Partial<Record<DogId, number>> {
   return Object.fromEntries(
     state.pack.flatMap((slot) => (slot.status === "walking" ? [[slot.dog, slot.hearts]] : [])),
   );
+}
+
+// A modifier as the run state holds it, with the source a change names it by.
+export function activeModifier(source: ModifierSource, modifier: Modifier): ActiveModifier {
+  return { ...modifier, source };
 }

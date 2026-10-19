@@ -35,6 +35,20 @@ export type Pack =
 export type PackDogs = readonly [DogId] | readonly [DogId, DogId] | readonly [DogId, DogId, DogId];
 export type UpgradeOffer = readonly [UpgradeId, UpgradeId, UpgradeId];
 
+// What a list of effects came from: a card option by its index in the source's data, an
+// instant encounter, or gear.
+export type EffectSource =
+  | { readonly encounter: EncounterId; readonly kind: "encounter"; readonly option: number }
+  | { readonly kind: "forcedStop"; readonly option: number; readonly stop: ForcedStopId }
+  | { readonly gear: GearId; readonly kind: "gear" }
+  | { readonly encounter: EncounterId; readonly kind: "instant" }
+  | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
+
+export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonly kind: "debuff" };
+
+// A modifier in effect, with what it came from so a change can name it.
+export type ActiveModifier = Modifier & { readonly source: ModifierSource };
+
 // What opened a card. affected is the dogs the encounter affected (caught by an area roll,
 // the chasers for a squirrel, or the whole pack); lucky encounters are encounters too.
 export type CardSource =
@@ -64,7 +78,7 @@ export interface RunState {
   readonly feesEarned: Readonly<Partial<Record<DogId, Cents>>>;
   readonly gear: GearId | null;
   readonly immunities: readonly EncounterId[];
-  readonly modifiers: readonly Modifier[];
+  readonly modifiers: readonly ActiveModifier[];
   readonly money: Cents;
   readonly pack: Pack;
   readonly phase: Phase;
@@ -84,13 +98,17 @@ export interface Loadout {
 }
 
 // A run's opening state: the gear applied, then each owner's starting hearts and the
-// starting money.
+// starting money. Throws for a dog listed twice or more dogs than the player has slots.
 export function newRun(
   data: Pick<GameData, "dogs" | "shopGear" | "tuning">,
+  dogSlots: number,
   loadout: Loadout,
 ): RunState {
   if (new Set(loadout.dogs).size !== loadout.dogs.length) {
     throw new Error(`A dog can walk only once in a pack: ${loadout.dogs.join(", ")}`);
+  }
+  if (loadout.dogs.length > dogSlots) {
+    throw new Error(`A pack of ${loadout.dogs.length} needs that many dog slots, not ${dogSlots}`);
   }
   const packWith = (modifiers: readonly Modifier[]) =>
     packFor(
@@ -116,9 +134,16 @@ export function newRun(
     zoneDistance: pixels(0),
     zoneIndex: 0,
   };
-  const gearEffects = loadout.gear === null ? [] : data.shopGear[loadout.gear].effects;
+  if (loadout.gear === null) {
+    return empty;
+  }
   // Gear never targets a random dog, so the draw is never used.
-  const geared = applyEffects(data, { affected: [], random: () => 0 }, gearEffects, empty);
+  const geared = applyEffects(
+    data,
+    { affected: [], random: () => 0, source: { gear: loadout.gear, kind: "gear" } },
+    data.shopGear[loadout.gear].effects,
+    empty,
+  );
   return {
     ...geared,
     money: cents(modifiedStat(data.tuning, geared.modifiers, "startMoney", 0)),

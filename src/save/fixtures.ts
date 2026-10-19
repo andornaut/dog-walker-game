@@ -1,28 +1,15 @@
-// Shared test fixtures, with real dog, gear and walker ids and stand-ins for the rest.
+// Shared test fixtures, with real dog, gear, hint and walker ids.
 import { cents } from "../rules/units";
-import type { KnownIdsOutsideData, SaveContext } from "./load";
+import type { SaveContext } from "./load";
 import type { SaveDocument } from "./schema";
 
-export const knownOutsideData: KnownIdsOutsideData = {
-  accessories: new Set(["bandana", "bowTie", "raincoat"]),
-  courses: new Set(["heel", "goodManners"]),
-  decor: new Set(["dogBed", "plant", "rug"]),
-  helpTopics: new Set(["lanes", "cards", "shop"]),
-  leashColors: new Set(["red", "teal", "gold"]),
-  walkerKit: new Set(["quickFeet", "treatBelt", "businessCards", "firmGrip"]),
-};
-
-// One free walker, as the shop plans it.
 export const testContext: SaveContext = {
   defaults: {
     dogSlots: 1,
     freeDogs: ["biscuit", "duchess", "koda"],
-    freeWalkers: ["casey"],
-    lastLoadout: { dogs: ["biscuit"], gear: null },
     walker: "casey",
   },
   known: {
-    ...knownOutsideData,
     dogs: new Set([
       "biscuit",
       "dash",
@@ -35,37 +22,33 @@ export const testContext: SaveContext = {
       "zippy",
     ]),
     gear: new Set(["fannyPack", "luckyCollar", "poopBags", "runningShoes", "whistle"]),
-    walkers: new Set(["casey", "jordan", "morgan", "robin"]),
+    hints: new Set(["card", "puddle", "tip"]),
+    walkers: new Set(["ada", "ben", "casey", "trista"]),
   },
 };
 
+// A new player: the free dogs, one slot, and no loadout until they pick a dog.
 export const newPlayerSave: SaveDocument = {
   bankCents: cents(0),
   checkpoint: null,
-  cosmetics: {
-    accessories: { equipped: {}, owned: {} },
-    decor: { owned: [], placed: [] },
-    leashColors: { equipped: null, owned: [] },
-  },
-  helpSeen: [],
-  lastLoadout: { dogs: ["biscuit"], gear: null },
+  helpSeen: false,
+  lastLoadout: { dogs: [], gear: null },
   owned: {
     dogSlots: 1,
     dogs: ["biscuit", "duchess", "koda"],
     gear: [],
-    walkerKit: [],
-    walkers: ["casey"],
   },
-  settings: {},
+  settings: { musicVolume: 0.6, reducedMotion: false, sfxVolume: 0.8 },
+  shownHints: [],
   stats: {
-    bestRunCents: cents(0),
-    bestZoneReached: 0,
+    bestWalk: null,
+    bestZoneFinished: 0,
     dogs: {},
+    lastWalk: null,
     lifetimeCents: cents(0),
     runs: { finished: 0, noDogs: 0, wentHome: 0 },
     timesFired: 0,
   },
-  training: {},
   version: 1,
   walker: "casey",
 };
@@ -75,37 +58,33 @@ export function veteranSave(): SaveDocument {
   return {
     bankCents: cents(12_345),
     checkpoint: null,
-    cosmetics: {
-      accessories: {
-        equipped: { koda: "bandana" },
-        owned: { koda: ["bandana", "raincoat"], waffles: ["bowTie"] },
-      },
-      decor: { owned: ["plant", "rug"], placed: ["rug"] },
-      leashColors: { equipped: "teal", owned: ["red", "teal"] },
-    },
-    helpSeen: ["lanes", "cards"],
+    helpSeen: true,
     lastLoadout: { dogs: ["koda", "waffles"], gear: "whistle" },
     owned: {
       dogSlots: 2,
       dogs: ["biscuit", "duchess", "koda", "waffles"],
       gear: ["fannyPack", "whistle"],
-      walkerKit: ["quickFeet", "firmGrip"],
-      walkers: ["casey", "jordan"],
     },
-    settings: {},
+    settings: { musicVolume: 0.25, reducedMotion: true, sfxVolume: 0.5 },
+    shownHints: ["card", "tip"],
     stats: {
-      bestRunCents: cents(9_000),
-      bestZoneReached: 3,
+      bestWalk: { dogs: ["koda", "waffles"], earnedCents: cents(9_000), zonesFinished: 4 },
+      bestZoneFinished: 4,
       dogs: {
         biscuit: { timesFired: 0, walks: 2, zonesFinished: 6 },
         koda: { timesFired: 1, walks: 5, zonesFinished: 12 },
+      },
+      lastWalk: {
+        dogs: ["koda"],
+        earnedCents: cents(2_500),
+        outcome: "wentHome",
+        zonesFinished: 2,
       },
       lifetimeCents: cents(30_000),
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
       timesFired: 1,
     },
-    training: { biscuit: ["heel"], koda: ["heel", "goodManners"] },
     version: 1,
-    walker: "jordan",
+    walker: "ada",
   };
 }

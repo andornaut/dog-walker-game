@@ -3,14 +3,12 @@
 exports[`every card's text > matches the snapshot 1`] = `
 {
   "encounters": {
-    "biscuitNeighbour: Politely pass": "Nothing",
-    "biscuitNeighbour: Take biscuits": "+1 treat per dog (carry up to 3)",
+    "biscuitNeighbour: instant": "+1 treat per dog (carry up to 3)",
     "lostWallet: Keep it": "+$30, −1 ♥ each",
     "lostWallet: Return it": "+1 ♥ each",
     "otherDog: Let them sniff": "+1 ♥ each, −$10 per dog",
     "otherDog: Pull away": "−1 ♥ each",
-    "photoOp: Pose": "+$10, +1 ♥ to dramatic owners",
-    "photoOp: Wave and walk on": "Nothing",
+    "photoOp: instant": "+$10, +1 ♥ to dramatic owners",
     "puddle: Go through": "−1 ♥ each (−2 Fancy)",
     "puddle: Towel": "−$10 per dog",
     "skunk: Grooming": "−$20 per dog",
@@ -48,8 +46,8 @@ exports[`every card's text > matches the snapshot 1`] = `
     "goodLeash": "No Squirrel cards for the run, no chaser pulls toward squirrels for the run",
     "raincoats": "No Puddle cards for the run",
     "rushHour": "Tips +100% next zone, obstacles +50% next zone",
+    "secondWind": "+2 ♥ to the unhappiest owner",
     "shortcut": "Zone length −25% next zone, fees −25% next zone",
-    "steadyHands": "Pulls −50% for the run",
     "sweetTalker": "Card costs per dog −$4 for the run",
     "treatMagnet": "Treat reach +1 lane for the run",
   },

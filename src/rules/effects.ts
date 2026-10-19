@@ -8,19 +8,19 @@ import type {
   TreatsEffect,
 } from "../data/types";
 import { heartsOf, mapPack, packDogs } from "../state/pack";
-import type { RunState } from "../state/runState";
+import type { EffectSource, RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
-import { maxHearts } from "./dogs";
-import { modifiedStat } from "./modifiers";
 import {
-  addCents,
-  type Cents,
-  cents,
-  clampHearts,
-  nonNegativeCents,
-  read,
-  readTable,
-} from "./units";
+  type Cause,
+  centsCauses,
+  type Change,
+  type HeartChange,
+  modifierCauses,
+  type MoneyChange,
+} from "./causes";
+import { maxHearts } from "./dogs";
+import { statParts } from "./modifiers";
+import { type Cents, cents, clampHearts, nonNegativeCents, read, readTable } from "./units";
 
 export type RulesData = Pick<GameData, "dogs" | "tuning">;
 
@@ -29,11 +29,31 @@ export interface EffectContext {
   readonly affected: readonly DogId[];
   // Returns a number from 0 (inclusive) to 1 (exclusive), like Math.random.
   readonly random: () => number;
+  // What the effects came from, named by the changes and modifiers they make.
+  readonly source: EffectSource;
+}
+
+// The state after some effects, and every heart and money change they made, in order.
+export interface Applied {
+  readonly changes: readonly Change[];
+  readonly state: RunState;
+}
+
+// The walking dog whose owner has the fewest hearts, the first in pack order on a tie.
+function unhappiest(state: RunState): DogId[] {
+  let lowest: { readonly dog: DogId; readonly hearts: number } | undefined;
+  for (const dog of packDogs(state)) {
+    const hearts = heartsOf(state, dog) ?? 0;
+    if (lowest === undefined || hearts < lowest.hearts) {
+      lowest = { dog, hearts };
+    }
+  }
+  return lowest === undefined ? [] : [lowest.dog];
 }
 
 export function targetDogs(
   data: RulesData,
-  context: EffectContext,
+  context: Pick<EffectContext, "affected" | "random">,
   state: RunState,
   target: Target,
 ): DogId[] {
@@ -51,6 +71,8 @@ export function targetDogs(
       return pack.filter((id) => data.dogs[id].owner.temperament === target.temperament);
     case "trait":
       return pack.filter((id) => data.dogs[id].trait === target.trait);
+    case "unhappiest":
+      return unhappiest(state);
     default:
       return assertNever(target);
   }
@@ -72,23 +94,39 @@ function perDogCount(
   return targetDogs(data, { ...context, random: () => 0 }, state, target).length;
 }
 
+// A money effect's amount, and how it came about: base is the amount before modifiers, and
+// adjustments are the costPerDog modifiers and the $0 floor on a per-dog cost. base and
+// adjustments are signed as changes to the money.
+interface MoneyParts {
+  readonly adjustments: readonly Cause[];
+  readonly amount: Cents;
+  readonly base: number;
+}
+
 // Per-dog costs include costPerDog modifiers, never below $0 per dog.
-function moneyEffectAmount(
+function moneyParts(
   data: RulesData,
   context: Pick<EffectContext, "affected">,
   state: RunState,
   effect: MoneyEffect,
-): Cents {
+): MoneyParts {
   const amount = read(data.tuning, "money", effect.amount);
-  if (effect.perDog === undefined) {
-    return amount;
-  }
+  const sign = effect.change === "gain" ? 1 : -1;
   const count = perDogCount(data, context, state, effect.perDog);
-  const perDog =
-    effect.change === "lose"
-      ? Math.max(0, modifiedStat(data.tuning, state.modifiers, "costPerDog", amount))
-      : amount;
-  return cents(perDog * count);
+  if (effect.perDog === undefined || effect.change === "gain") {
+    return { adjustments: [], amount: cents(amount * count), base: sign * amount * count };
+  }
+  const parts = statParts(data.tuning, state.modifiers, "costPerDog", amount);
+  const perDog = Math.max(0, parts.value);
+  const floor: Cause[] =
+    perDog === parts.value
+      ? []
+      : [{ amount: (parts.value - perDog) * count, bound: "min", kind: "limit" }];
+  return {
+    adjustments: [...modifierCauses(parts.contributions, -count), ...floor],
+    amount: cents(perDog * count),
+    base: -amount * count,
+  };
 }
 
 // What an option's effects would take from the player. An option costing more than the
@@ -99,12 +137,14 @@ export function moneyCost(
   state: RunState,
   effects: readonly Effect[],
 ): Cents {
-  return effects.reduce(
-    (total, effect) =>
-      effect.kind === "money" && effect.change === "lose"
-        ? addCents(total, moneyEffectAmount(data, context, state, effect))
-        : total,
-    cents(0),
+  return cents(
+    effects.reduce(
+      (total, effect) =>
+        effect.kind === "money" && effect.change === "lose"
+          ? total + moneyParts(data, context, state, effect).amount
+          : total,
+      0,
+    ),
   );
 }
 
@@ -117,29 +157,96 @@ export function canAfford(
   return moneyCost(data, context, state, effects) <= state.money;
 }
 
+// Changes one owner's meter by base, the base cause's amount: the owner's temperament
+// multiplies it, then the meter is held within 0 and the dog's max. No change is reported
+// when the meter does not move.
+export function changeHearts(
+  data: RulesData,
+  base: Cause,
+  dogId: DogId,
+  state: RunState,
+): { readonly change: HeartChange | null; readonly state: RunState } {
+  const before = heartsOf(state, dogId);
+  if (before === undefined) {
+    return { change: null, state };
+  }
+  const dog = data.dogs[dogId];
+  const { temperament } = dog.owner;
+  const multiplied =
+    base.amount * readTable(data.tuning, "multipliers", "heartsByTemperament", temperament);
+  const unclamped = before + multiplied;
+  const after = clampHearts(maxHearts(data.tuning, state.modifiers, dog), unclamped);
+  if (after === before) {
+    return { change: null, state };
+  }
+  const causes: Cause[] = [base];
+  if (multiplied !== base.amount) {
+    causes.push({ amount: multiplied - base.amount, kind: "temperament", temperament });
+  }
+  if (after !== unclamped) {
+    causes.push({
+      amount: after - unclamped,
+      bound: unclamped > after ? "max" : "min",
+      kind: "limit",
+    });
+  }
+  const pack = mapPack(
+    (slot) => (slot.status === "walking" && slot.dog === dogId ? { ...slot, hearts: after } : slot),
+    state.pack,
+  );
+  return {
+    change: { after, before, causes, dog: dogId, kind: "hearts" },
+    state: { ...state, pack },
+  };
+}
+
 function applyHearts(
   data: RulesData,
   context: EffectContext,
   effect: HeartsEffect,
   state: RunState,
-): RunState {
-  const targets = targetDogs(data, context, state, effect.target);
-  const pack = mapPack((slot) => {
-    if (slot.status !== "walking" || !targets.includes(slot.dog)) {
-      return slot;
+): Applied {
+  const changes: HeartChange[] = [];
+  let next = state;
+  for (const dogId of targetDogs(data, context, state, effect.target)) {
+    const amount = effect.traitAmounts?.[data.dogs[dogId].trait] ?? effect.amount;
+    const base: Cause = { amount, kind: "effect", source: context.source };
+    const result = changeHearts(data, base, dogId, next);
+    next = result.state;
+    if (result.change !== null) {
+      changes.push(result.change);
     }
-    const dog = data.dogs[slot.dog];
-    const multiplier = readTable(
-      data.tuning,
-      "multipliers",
-      "heartsByTemperament",
-      dog.owner.temperament,
-    );
-    const delta = (effect.traitAmounts?.[dog.trait] ?? effect.amount) * multiplier;
-    const max = maxHearts(data.tuning, state.modifiers, dog);
-    return { ...slot, hearts: clampHearts(max, (heartsOf(state, slot.dog) ?? 0) + delta) };
-  }, state.pack);
-  return { ...state, pack };
+  }
+  return { changes, state: next };
+}
+
+// Money never goes below $0; a loss cut short there is reported as a limit.
+function applyMoney(
+  data: RulesData,
+  context: EffectContext,
+  effect: MoneyEffect,
+  state: RunState,
+): Applied {
+  const parts = moneyParts(data, context, state, effect);
+  const intended = effect.change === "gain" ? parts.amount : -parts.amount;
+  const money = nonNegativeCents(cents(state.money + intended));
+  const delta = money - state.money;
+  if (delta === 0) {
+    return { changes: [], state };
+  }
+  const floor: Cause[] =
+    delta === intended ? [] : [{ amount: delta - intended, bound: "min", kind: "limit" }];
+  const change: MoneyChange = {
+    amount: cents(delta),
+    causes: centsCauses([
+      { amount: parts.base, kind: "effect", source: context.source },
+      ...parts.adjustments,
+      ...floor,
+    ]),
+    dog: null,
+    kind: "money",
+  };
+  return { changes: [change], state: { ...state, money } };
 }
 
 function applyTreats(
@@ -154,53 +261,71 @@ function applyTreats(
   return { ...state, treats: Math.min(carryMax, state.treats + gained) };
 }
 
+const unchanged = (state: RunState): Applied => ({ changes: [], state });
+
 function applyEffect(
   data: RulesData,
   context: EffectContext,
   effect: Effect,
   state: RunState,
-): RunState {
+): Applied {
   switch (effect.kind) {
     case "debuff":
       // Refreshing a debuff the pack has leaves one copy: debuffs never stack.
-      return state.debuffs.includes(effect.debuff)
-        ? state
-        : { ...state, debuffs: [...state.debuffs, effect.debuff] };
+      return unchanged(
+        state.debuffs.includes(effect.debuff)
+          ? state
+          : { ...state, debuffs: [...state.debuffs, effect.debuff] },
+      );
     case "hearts":
       return applyHearts(data, context, effect, state);
     case "immune":
-      return state.immunities.includes(effect.encounter)
-        ? state
-        : { ...state, immunities: [...state.immunities, effect.encounter] };
+      return unchanged(
+        state.immunities.includes(effect.encounter)
+          ? state
+          : { ...state, immunities: [...state.immunities, effect.encounter] },
+      );
     case "modifier":
-      return { ...state, modifiers: [...state.modifiers, effect] };
-    case "money": {
-      const amount = moneyEffectAmount(data, context, state, effect);
-      const money =
-        effect.change === "gain"
-          ? addCents(state.money, amount)
-          : nonNegativeCents(cents(state.money - amount));
-      return { ...state, money };
-    }
+      return unchanged({
+        ...state,
+        modifiers: [...state.modifiers, { ...effect, source: context.source }],
+      });
+    case "money":
+      return applyMoney(data, context, effect, state);
     case "skipOption":
-      return {
+      return unchanged({
         ...state,
         skipsLeft: state.skipsLeft + read(data.tuning, "counts", effect.usesPerRun),
-      };
+      });
     case "treats":
-      return applyTreats(data, context, effect, state);
+      return unchanged(applyTreats(data, context, effect, state));
     default:
       return assertNever(effect);
   }
 }
 
-// Applies an option's effects in order. Hearts stay within 0 and each dog's max, dramatic
-// owners' changes are multiplied, and money never goes below $0.
+// Applies effects in order and reports each heart and money change. Hearts stay within 0
+// and each dog's max, dramatic owners' changes are multiplied, and money never goes below $0.
+export function resolveEffects(
+  data: RulesData,
+  context: EffectContext,
+  effects: readonly Effect[],
+  state: RunState,
+): Applied {
+  return effects.reduce<Applied>(
+    (applied, effect) => {
+      const next = applyEffect(data, context, effect, applied.state);
+      return { changes: [...applied.changes, ...next.changes], state: next.state };
+    },
+    { changes: [], state },
+  );
+}
+
 export function applyEffects(
   data: RulesData,
   context: EffectContext,
   effects: readonly Effect[],
   state: RunState,
 ): RunState {
-  return effects.reduce((next, effect) => applyEffect(data, context, effect, next), state);
+  return resolveEffects(data, context, effects, state).state;
 }

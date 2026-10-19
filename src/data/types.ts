@@ -1,6 +1,7 @@
 import type { DEBUFFS } from "./debuffs";
 import type { DOGS } from "./dogs";
 import type { FORCED_STOPS } from "./forcedStops";
+import type { HINTS } from "./hints";
 import type { SHOP_GEAR } from "./shop";
 import type { TUNING } from "./tuning";
 import type { UPGRADES } from "./upgrades";
@@ -26,6 +27,7 @@ export type DebuffId = keyof typeof DEBUFFS;
 export type DogId = keyof typeof DOGS;
 export type ForcedStopId = keyof typeof FORCED_STOPS;
 export type GearId = keyof typeof SHOP_GEAR;
+export type HintId = keyof typeof HINTS;
 export type UpgradeId = keyof typeof UPGRADES;
 export type WalkerId = keyof typeof WALKERS;
 
@@ -86,13 +88,17 @@ export interface Tuning {
   };
 }
 
+// "start": owned from the first run; "shop": bought on the home screen at its price.
+export type Unlock =
+  { readonly price: PriceKey; readonly unlock: "shop" } | { readonly unlock: "start" };
+
 export interface Owner {
   readonly name: string;
   readonly role: string;
   readonly temperament: Temperament;
 }
 
-export interface Dog {
+export type Dog = Unlock & {
   readonly breed: string;
   readonly energy: Energy;
   readonly look: string;
@@ -100,18 +106,18 @@ export interface Dog {
   readonly owner: Owner;
   readonly size: Size;
   readonly trait: TraitId;
-  // "start": unlocked from the first run; "shop": bought for money.prices.lockedDog.
-  readonly unlock: "shop" | "start";
-}
+};
 
 // Which dogs an effect reaches, among the dogs still in the pack. "affected" is the dogs
-// the encounter affected; "randomOne" is one dog drawn at random.
+// the encounter affected; "randomOne" is one dog drawn at random; "unhappiest" is the dog
+// whose owner has the fewest hearts, the first in pack order on a tie.
 export type Target =
   | { readonly kind: "affected" }
   | { readonly kind: "all" }
   | { readonly kind: "randomOne" }
   | { readonly kind: "temperament"; readonly temperament: Temperament }
-  | { readonly kind: "trait"; readonly trait: TraitId };
+  | { readonly kind: "trait"; readonly trait: TraitId }
+  | { readonly kind: "unhappiest" };
 
 export type Condition =
   | { readonly kind: "packHasSize"; readonly size: Size }
@@ -201,6 +207,8 @@ export type Effect =
 export type EffectKind = Effect["kind"];
 
 export interface CardOption {
+  // Key of the option's illustration in the art manifest's images.
+  readonly art: string;
   readonly effects: readonly Effect[];
   readonly name: string;
 }
@@ -217,15 +225,33 @@ export type AffectRule =
   | { readonly kind: "caught" }
   | { readonly kind: "trait"; readonly trait: TraitId };
 
-// "obstacle": hit by accident; "lucky": a good thing to bump into.
-// No card opens when no dog is affected, when the pack is immune, or when noCardWhen holds.
-export interface Encounter {
-  readonly affects: AffectRule;
-  readonly kind: "lucky" | "obstacle";
-  readonly name: string;
-  readonly noCardWhen?: Condition;
+// The encounter opens a card of options.
+export interface CardResolution {
+  readonly kind: "card";
   readonly options: CardOptions;
 }
+
+// The encounter applies its effects on contact, with a popup instead of a card. art is the
+// popup's illustration.
+export interface InstantResolution {
+  readonly art: string;
+  readonly effects: NonEmptyEffects;
+  readonly kind: "instant";
+}
+
+export type Resolution = CardResolution | InstantResolution;
+
+// "obstacle": hit by accident, always a card; "lucky": a good thing to bump into, a card or
+// instant. Nothing happens when no dog is affected, when the pack is immune, or when
+// noCardWhen holds.
+export type Encounter = {
+  readonly affects: AffectRule;
+  readonly name: string;
+  readonly noCardWhen?: Condition;
+} & (
+  | { readonly kind: "lucky"; readonly resolution: Resolution }
+  | { readonly kind: "obstacle"; readonly resolution: CardResolution }
+);
 
 export interface ForcedStop {
   readonly name: string;
@@ -233,6 +259,8 @@ export interface ForcedStop {
 }
 
 export interface Upgrade {
+  // Key of the card's illustration in the art manifest's images.
+  readonly art: string;
   readonly effects: NonEmptyEffects;
   readonly kind: "boost" | "tradeOff";
   readonly name: string;
@@ -244,18 +272,20 @@ export interface Gear {
   readonly price: PriceKey;
 }
 
+// The dog slots in order. A run takes at most one dog per owned slot.
+export type DogSlot = Unlock;
+
+// A walker the player can pick. spriteKey and portraitKey are keys into the art manifest.
+export type Walker = Unlock & {
+  readonly name: string;
+  readonly portraitKey: string;
+  readonly spriteKey: string;
+};
+
 export interface Debuff {
   readonly duration: Duration;
   readonly modifiers: readonly Modifier[];
   readonly name: string;
-}
-
-// "start": available from the first run; "shop": bought, at a price not set yet.
-export interface Walker {
-  readonly name: string;
-  // Key of the walker's sprite in the art manifest.
-  readonly spriteKey: string;
-  readonly unlock: "shop" | "start";
 }
 
 export interface Zone {
@@ -280,16 +310,38 @@ export interface HelpPage {
   readonly title: string;
 }
 
-export type QuipMoment = "fired" | "happier" | "upset";
-export type Quips = Readonly<Record<QuipMoment, readonly string[]>>;
+// What makes an owner speak: a choice that raised or lowered their hearts, firing you, or
+// the player picking their dog on the home screen.
+export type QuipMoment = "fired" | "happier" | "parting" | "upset";
+// One owner's lines, two per moment.
+export type Quips = Readonly<Record<QuipMoment, readonly [string, string]>>;
+
+// What a first-time hint waits for: an encounter, a debuff, or another event happening for
+// the first time.
+export type HintTrigger =
+  | { readonly debuff: DebuffId; readonly kind: "debuff" }
+  | { readonly encounter: EncounterId; readonly kind: "encounter" }
+  | {
+      readonly kind: "card" | "firedOwner" | "forcedStop" | "luckyFind" | "pull" | "tip" | "treat";
+    };
+
+// A one-line hint shown the first time its trigger happens.
+export interface Hint {
+  readonly text: string;
+  readonly trigger: HintTrigger;
+}
 
 export interface GameData {
   readonly debuffs: Readonly<Record<DebuffId, Debuff>>;
+  // The walker a new player starts with.
+  readonly defaultWalker: WalkerId;
+  readonly dogSlots: readonly [DogSlot, ...DogSlot[]];
   readonly dogs: Readonly<Record<DogId, Dog>>;
   readonly encounters: Readonly<Record<EncounterId, Encounter>>;
   readonly forcedStops: Readonly<Record<ForcedStopId, ForcedStop>>;
   readonly help: readonly [HelpPage, ...HelpPage[]];
-  readonly quips: Readonly<Record<Temperament, Quips>>;
+  readonly hints: Readonly<Record<HintId, Hint>>;
+  readonly quips: Readonly<Record<DogId, Quips>>;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;
   readonly upgrades: Readonly<Record<UpgradeId, Upgrade>>;

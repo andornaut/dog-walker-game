@@ -1,22 +1,27 @@
 import { DEBUFFS } from "./debuffs";
 import { DOGS } from "./dogs";
+import { DOG_SLOTS } from "./dogSlots";
 import { ENCOUNTERS } from "./encounters";
 import { FORCED_STOPS } from "./forcedStops";
 import { HELP_PAGES } from "./help";
+import { HINTS } from "./hints";
 import { QUIPS } from "./quips";
 import { SHOP_GEAR } from "./shop";
 import { TUNING } from "./tuning";
 import type { GameData } from "./types";
 import { UPGRADES } from "./upgrades";
-import { WALKERS } from "./walkers";
+import { DEFAULT_WALKER, WALKERS } from "./walkers";
 import { WORLD } from "./world";
 
 interface ValueExports {
   readonly DEBUFFS: typeof DEBUFFS;
+  readonly DEFAULT_WALKER: typeof DEFAULT_WALKER;
   readonly DOGS: typeof DOGS;
+  readonly DOG_SLOTS: typeof DOG_SLOTS;
   readonly ENCOUNTERS: typeof ENCOUNTERS;
   readonly FORCED_STOPS: typeof FORCED_STOPS;
   readonly HELP_PAGES: typeof HELP_PAGES;
+  readonly HINTS: typeof HINTS;
   readonly QUIPS: typeof QUIPS;
   readonly SHOP_GEAR: typeof SHOP_GEAR;
   readonly TUNING: typeof TUNING;
@@ -28,10 +33,13 @@ interface ValueExports {
 function toGameData(values: ValueExports): GameData {
   return {
     debuffs: values.DEBUFFS,
+    defaultWalker: values.DEFAULT_WALKER,
+    dogSlots: values.DOG_SLOTS,
     dogs: values.DOGS,
     encounters: values.ENCOUNTERS,
     forcedStops: values.FORCED_STOPS,
     help: values.HELP_PAGES,
+    hints: values.HINTS,
     quips: values.QUIPS,
     shopGear: values.SHOP_GEAR,
     tuning: values.TUNING,
@@ -43,10 +51,13 @@ function toGameData(values: ValueExports): GameData {
 
 let values: ValueExports = {
   DEBUFFS,
+  DEFAULT_WALKER,
   DOGS,
+  DOG_SLOTS,
   ENCOUNTERS,
   FORCED_STOPS,
   HELP_PAGES,
+  HINTS,
   QUIPS,
   SHOP_GEAR,
   TUNING,
@@ -71,10 +82,12 @@ if (import.meta.hot) {
   import.meta.hot.accept(
     [
       "./debuffs.ts",
+      "./dogSlots.ts",
       "./dogs.ts",
       "./encounters.ts",
       "./forcedStops.ts",
       "./help.ts",
+      "./hints.ts",
       "./quips.ts",
       "./shop.ts",
       "./tuning.ts",

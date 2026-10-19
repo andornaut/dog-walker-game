@@ -5,25 +5,23 @@ import { veteranSave } from "./fixtures";
 import { migrateSave, type Migration, saveMigrations } from "./migrations";
 import { SAVE_VERSION, saveSchema } from "./schema";
 
-// A made-up version 0 that kept the bank in dollars and had no walker shop.
+// A made-up version 0 that kept the bank in dollars and listed the help topics seen.
 function versionZeroSave(): Record<string, unknown> {
-  const { bankCents, owned, ...rest } = veteranSave();
-  const ownedBeforeWalkerShop = {
-    dogSlots: owned.dogSlots,
-    dogs: owned.dogs,
-    gear: owned.gear,
-    walkerKit: owned.walkerKit,
+  const { bankCents, helpSeen, ...rest } = veteranSave();
+  return {
+    ...rest,
+    bank: bankCents / 100,
+    helpTopicsSeen: helpSeen ? ["lanes"] : [],
+    version: 0,
   };
-  return { ...rest, bank: bankCents / 100, owned: ownedBeforeWalkerShop, version: 0 };
 }
 
 const versionZeroToOne: Migration = {
   from: 0,
-  migrate: ({ bank, owned, walker, ...rest }) => ({
+  migrate: ({ bank, helpTopicsSeen, ...rest }) => ({
     ...rest,
     bankCents: Math.round(Number(bank) * 100),
-    owned: { ...(owned as object), walkers: [walker] },
-    walker,
+    helpSeen: (helpTopicsSeen as unknown[]).length > 0,
   }),
 };
 
@@ -38,8 +36,7 @@ describe("migrateSave", () => {
     const result = migrateSave([versionZeroToOne], 1, versionZeroSave());
     const parsed = v.safeParse(saveSchema, result.ok ? result.document : null);
     expect(parsed.success).toBe(true);
-    const veteran = veteranSave();
-    expect(parsed.output).toEqual({ ...veteran, owned: { ...veteran.owned, walkers: ["jordan"] } });
+    expect(parsed.output).toEqual(veteranSave());
   });
 
   it("runs every step in version order, whatever order the registry lists them in", () => {

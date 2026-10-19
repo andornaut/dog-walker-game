@@ -5,3 +5,11 @@ export function defined<T>(value: T | undefined): T {
   }
   return value;
 }
+
+// Narrows a nullable field in a test, failing with a clear message when it is null.
+export function present<T>(value: T | null): T {
+  if (value === null) {
+    throw new Error("Expected a value, got null");
+  }
+  return value;
+}

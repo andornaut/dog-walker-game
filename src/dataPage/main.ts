@@ -1,5 +1,14 @@
 import { gameData, onGameDataChange } from "../data";
-import type { CardOption, GameData, Modifier } from "../data/types";
+import type {
+  CardOption,
+  DogId,
+  GameData,
+  HintTrigger,
+  Modifier,
+  QuipMoment,
+  Unlock,
+  WalkerId,
+} from "../data/types";
 import {
   catchChance,
   inputLockSeconds,
@@ -18,7 +27,7 @@ import {
   TRAIT_NAMES,
 } from "../rules/effectText";
 import { modifiersOf } from "../rules/modifiers";
-import { dollarsToCents } from "../rules/units";
+import { price, unlockPrice } from "../rules/shop";
 import { zoneStats } from "../rules/zones";
 
 type Cell = number | string;
@@ -74,7 +83,12 @@ function optionRows(data: GameData, name: string, options: readonly CardOption[]
     i === 0 ? name : "",
     option.name,
     effectText(data, option.effects),
+    option.art,
   ]);
+}
+
+function priceText(data: GameData, item: Unlock): string {
+  return item.unlock === "start" ? "Start" : formatDollars(unlockPrice(data.tuning, item));
 }
 
 function dogsSection(data: GameData): Section {
@@ -113,38 +127,84 @@ function dogsSection(data: GameData): Section {
       `${pullIntervalSeconds(tuning, [], dog)}s`,
       `${inputLockSeconds(tuning, [], dog)}s`,
       `${Math.round(catchChance(tuning, dog) * 100)}%`,
-      dog.unlock === "start"
-        ? "Start"
-        : formatDollars(dollarsToCents(tuning.money.prices.lockedDog)),
+      priceText(data, dog),
     ]),
     title: "Dogs",
   };
 }
 
-function encountersSection(data: GameData): Section {
+const QUIP_MOMENTS: readonly QuipMoment[] = ["happier", "upset", "fired", "parting"];
+
+function quipsSection(data: GameData): Section {
   return {
-    headers: ["Encounter", "Kind", "Affects", "No card when", "Option", "Effect"],
-    rows: Object.values(data.encounters).flatMap((encounter) =>
-      encounter.options.map((option, i) =>
-        i === 0
-          ? [
-              encounter.name,
-              encounter.kind,
-              affectText(data.tuning, encounter.affects),
-              encounter.noCardWhen === undefined ? "" : conditionText(encounter.noCardWhen),
-              option.name,
-              effectText(data, option.effects),
-            ]
-          : ["", "", "", "", option.name, effectText(data, option.effects)],
-      ),
-    ),
+    headers: ["Dog", "Owner", "Temperament", "Moment", "Lines"],
+    note: "Parting lines show when the player picks the dog on the home screen.",
+    rows: (Object.keys(data.dogs) as DogId[]).flatMap((id) => {
+      const dog = data.dogs[id];
+      return QUIP_MOMENTS.map((moment, i) => [
+        i === 0 ? dog.name : "",
+        i === 0 ? dog.owner.name : "",
+        i === 0 ? TEMPERAMENT_NAMES[dog.owner.temperament] : "",
+        moment,
+        data.quips[id][moment].join(" / "),
+      ]);
+    }),
+    title: "Owner quips",
+  };
+}
+
+function hintsSection(data: GameData): Section {
+  const triggerText = (trigger: HintTrigger): string => {
+    if (trigger.kind === "encounter") {
+      return `first ${data.encounters[trigger.encounter].name}`;
+    }
+    if (trigger.kind === "debuff") {
+      return `first ${data.debuffs[trigger.debuff].name}`;
+    }
+    return `first ${trigger.kind}`;
+  };
+  return {
+    headers: ["Hint", "Trigger", "Text"],
+    note: "Each shows once, the first time its trigger happens.",
+    rows: Object.entries(data.hints).map(([id, hint]) => [
+      id,
+      triggerText(hint.trigger),
+      hint.text,
+    ]),
+    title: "First-time hints",
+  };
+}
+
+function encountersSection(data: GameData): Section {
+  const rows = Object.values(data.encounters).flatMap((encounter): Cell[][] => {
+    const head = [
+      encounter.name,
+      encounter.kind,
+      affectText(data.tuning, encounter.affects),
+      encounter.noCardWhen === undefined ? "" : conditionText(encounter.noCardWhen),
+    ];
+    const { resolution } = encounter;
+    if (resolution.kind === "instant") {
+      return [[...head, "Instant", effectText(data, resolution.effects), resolution.art]];
+    }
+    return resolution.options.map((option, i) => [
+      ...(i === 0 ? head : head.map(() => "")),
+      option.name,
+      effectText(data, option.effects),
+      option.art,
+    ]);
+  });
+  return {
+    headers: ["Encounter", "Kind", "Affects", "No card when", "Option", "Effect", "Art"],
+    note: "An instant encounter opens no card: it applies on contact, with a popup.",
+    rows,
     title: "Encounters",
   };
 }
 
 function forcedStopsSection(data: GameData): Section {
   return {
-    headers: ["Forced stop", "Option", "Effect"],
+    headers: ["Forced stop", "Option", "Effect", "Art"],
     rows: Object.values(data.forcedStops).flatMap((stop) =>
       optionRows(data, stop.name, stop.options),
     ),
@@ -154,11 +214,12 @@ function forcedStopsSection(data: GameData): Section {
 
 function upgradesSection(data: GameData): Section {
   return {
-    headers: ["Upgrade", "Kind", "Effect"],
+    headers: ["Upgrade", "Kind", "Effect", "Art"],
     rows: Object.values(data.upgrades).map((upgrade) => [
       upgrade.name,
       upgrade.kind === "tradeOff" ? "trade-off" : "boost",
       effectText(data, upgrade.effects),
+      upgrade.art,
     ]),
     title: "Upgrades",
   };
@@ -167,27 +228,33 @@ function upgradesSection(data: GameData): Section {
 function shopSection(data: GameData): Section {
   const gearRows = Object.values(data.shopGear).map((gear) => [
     gear.name,
-    formatDollars(dollarsToCents(data.tuning.money.prices[gear.price])),
+    formatDollars(price(data.tuning, gear.price)),
     effectText(data, gear.effects),
   ]);
   const dogRows = Object.values(data.dogs)
     .filter((dog) => dog.unlock === "shop")
-    .map((dog) => [
-      dog.name,
-      formatDollars(dollarsToCents(data.tuning.money.prices.lockedDog)),
-      "Unlocks the dog",
-    ]);
+    .map((dog) => [dog.name, priceText(data, dog), "Unlocks the dog"]);
   return { headers: ["Item", "Price", "Effect"], rows: [...gearRows, ...dogRows], title: "Shop" };
+}
+
+function dogSlotsSection(data: GameData): Section {
+  return {
+    headers: ["Slot", "Price"],
+    note: "A run takes at most one dog per owned slot. Slots can be bought at any time.",
+    rows: data.dogSlots.map((slot, i) => [i + 1, priceText(data, slot)]),
+    title: "Dog slots",
+  };
 }
 
 function walkersSection(data: GameData): Section {
   return {
-    headers: ["Walker", "Sprite", "Unlock"],
-    rows: Object.values(data.walkers).map((walker) => [
-      walker.name,
-      walker.spriteKey,
-      walker.unlock === "start" ? "Start" : "Shop",
-    ]),
+    headers: ["Walker", "Sprite", "Portrait", "Price"],
+    note: "A new player starts with the default walker.",
+    rows: (Object.keys(data.walkers) as WalkerId[]).map((id) => {
+      const walker = data.walkers[id];
+      const name = id === data.defaultWalker ? `${walker.name} (default)` : walker.name;
+      return [name, walker.spriteKey, walker.portraitKey, priceText(data, walker)];
+    }),
     title: "Walkers",
   };
 }
@@ -269,7 +336,10 @@ function render(): void {
     forcedStopsSection,
     upgradesSection,
     shopSection,
+    dogSlotsSection,
     walkersSection,
+    quipsSection,
+    hintsSection,
     debuffsSection,
     zonesSection,
     helpSection,

@@ -24,13 +24,10 @@ describe("dog stats", () => {
     expect(catchChance(TEST_TUNING, duchess)).toBe(0.25);
   });
 
-  it("halves how often a dog pulls with Steady hands, which doubles the interval", () => {
-    const steadyHands: Modifier = {
-      by: "steadyHandsPullFrequency",
-      operation: "multiply",
-      stat: "pullFrequency",
-    };
-    expect(pullIntervalSeconds(TEST_TUNING, [steadyHands], DOGS.zippy)).toBe(30);
+  it("divides the pull interval by a pullFrequency factor", () => {
+    // No content halves pulls now; any 0.5 factor stands in for one that does.
+    const halfAsOften: Modifier = { by: "stinkyTip", operation: "multiply", stat: "pullFrequency" };
+    expect(pullIntervalSeconds(TEST_TUNING, [halfAsOften], DOGS.zippy)).toBe(30);
   });
 
   it("removes the input lock with running shoes", () => {

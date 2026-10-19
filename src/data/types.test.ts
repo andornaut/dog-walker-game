@@ -18,7 +18,7 @@ import type {
 
 // Type-level checks: tsc (npm run check) fails if a @ts-expect-error line stops erroring.
 const check = <T>(value: T): T => value;
-const option = { effects: [], name: "Option" };
+const option = { art: "card-option", effects: [], name: "Option" };
 
 describe("types", () => {
   it("reads each tuning group in its unit", () => {
@@ -85,6 +85,18 @@ describe("types", () => {
     check<Dog>({ ...noSize, unlock: "shop" });
     // @ts-expect-error: encounters missing
     check<Record<EncounterId, Encounter>>({});
+  });
+
+  it("lets only a lucky encounter apply at once", () => {
+    const instant = {
+      art: "card-instant",
+      effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
+      kind: "instant",
+    } as const;
+    const base = { affects: { kind: "all" }, name: "Find" } as const;
+    // @ts-expect-error: an obstacle always opens a card
+    check<Encounter>({ ...base, kind: "obstacle", resolution: instant });
+    expect(check<Encounter>({ ...base, kind: "lucky", resolution: instant }).kind).toBe("lucky");
   });
 
   it("holds 1 to 3 dogs in a pack and offers exactly 3 upgrades", () => {

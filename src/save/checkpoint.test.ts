@@ -2,12 +2,20 @@ import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
-import { bankCheckpoint, recordCheckpoint, recordRunEnd, type RunResult } from "./checkpoint";
-import { veteranSave } from "./fixtures";
+import {
+  bankCheckpoint,
+  isNewBestWalk,
+  recordCheckpoint,
+  recordRunEnd,
+  type RunResult,
+  zonesFinishedBy,
+} from "./checkpoint";
+import { newPlayerSave, veteranSave } from "./fixtures";
 import type { Checkpoint } from "./schema";
 
-// veteranSave: bank 12,345, best run 9,000, lifetime 30,000, best zone 3, runs finished 2 /
-// noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit 0 / 2 / 6.
+// veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000, best zone 4, runs
+// finished 2 / noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit
+// 0 / 2 / 6.
 
 // After zone 2: koda and duchess walked both zones, waffles was fired in zone 2.
 const checkpoint: Checkpoint = {
@@ -17,7 +25,7 @@ const checkpoint: Checkpoint = {
     { fired: true, id: "waffles", zonesFinished: 1 },
   ],
   earnedCents: cents(4_250),
-  zoneReached: 2,
+  zonesFinished: 2,
 };
 
 const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
@@ -27,8 +35,16 @@ const runResult = (changes: Partial<RunResult> = {}): RunResult => ({
   ],
   earnedCents: cents(6_000),
   outcome: "finished",
-  zoneReached: 4,
+  zone: 4,
   ...changes,
+});
+
+describe("zonesFinishedBy", () => {
+  it("counts only the zones a run finished", () => {
+    expect(zonesFinishedBy({ outcome: "finished", zone: 4 })).toBe(4);
+    expect(zonesFinishedBy({ outcome: "wentHome", zone: 3 })).toBe(2);
+    expect(zonesFinishedBy({ outcome: "noDogs", zone: 1 })).toBe(0);
+  });
 });
 
 describe("recordCheckpoint", () => {
@@ -39,7 +55,7 @@ describe("recordCheckpoint", () => {
   });
 
   it("replaces an earlier checkpoint from the same run", () => {
-    const first = recordCheckpoint(veteranSave(), { ...checkpoint, zoneReached: 1 });
+    const first = recordCheckpoint(veteranSave(), { ...checkpoint, zonesFinished: 1 });
     expect(recordCheckpoint(first, checkpoint).checkpoint).toEqual(checkpoint);
   });
 });
@@ -64,17 +80,28 @@ describe("bankCheckpoint", () => {
     expect(banked.stats.timesFired).toBe(2);
   });
 
-  it("keeps the best run and zone when the checkpoint is below them", () => {
-    expect(banked.stats.bestRunCents).toBe(9_000);
-    expect(banked.stats.bestZoneReached).toBe(3);
+  it("records the last walk with the zone that just ended", () => {
+    expect(banked.stats.lastWalk).toEqual({
+      dogs: ["koda", "duchess", "waffles"],
+      earnedCents: 4_250,
+      outcome: "wentHome",
+      zonesFinished: 2,
+    });
   });
 
-  it("raises the best run and zone when the checkpoint beats them", () => {
-    const { stats } = bankCheckpoint(
-      recordCheckpoint(veteranSave(), { ...checkpoint, earnedCents: cents(9_500), zoneReached: 4 }),
-    );
-    expect(stats.bestRunCents).toBe(9_500);
-    expect(stats.bestZoneReached).toBe(4);
+  it("keeps the best walk and zone when the checkpoint is below them", () => {
+    expect(banked.stats.bestWalk).toEqual(veteranSave().stats.bestWalk);
+    expect(banked.stats.bestZoneFinished).toBe(4);
+  });
+
+  it("raises the best walk and zone when the checkpoint beats them", () => {
+    const { stats } = bankCheckpoint(recordCheckpoint(newPlayerSave, checkpoint));
+    expect(stats.bestWalk).toEqual({
+      dogs: ["koda", "duchess", "waffles"],
+      earnedCents: 4_250,
+      zonesFinished: 2,
+    });
+    expect(stats.bestZoneFinished).toBe(2);
   });
 
   it("does not change the save it is given", () => {
@@ -129,14 +156,27 @@ describe("recordRunEnd", () => {
     expect(stats.timesFired).toBe(1 + 3);
   });
 
-  it("raises the best run and zone only when beaten", () => {
-    const low = recordRunEnd(veteranSave(), runResult({ earnedCents: cents(100), zoneReached: 1 }));
-    expect([low.stats.bestRunCents, low.stats.bestZoneReached]).toEqual([9_000, 3]);
-    const high = recordRunEnd(
-      veteranSave(),
-      runResult({ earnedCents: cents(9_999), zoneReached: 4 }),
-    );
-    expect([high.stats.bestRunCents, high.stats.bestZoneReached]).toEqual([9_999, 4]);
+  it("records heading home mid-zone 3 as 2 zones finished", () => {
+    const { stats } = recordRunEnd(newPlayerSave, runResult({ outcome: "wentHome", zone: 3 }));
+    expect(stats.bestZoneFinished).toBe(2);
+    expect(stats.lastWalk?.zonesFinished).toBe(2);
+  });
+
+  it("records the last walk every time, and the best walk only when beaten", () => {
+    const low = recordRunEnd(veteranSave(), runResult({ earnedCents: cents(100), zone: 1 }));
+    expect(low.stats.bestWalk).toEqual(veteranSave().stats.bestWalk);
+    expect(low.stats.lastWalk).toEqual({
+      dogs: ["koda", "biscuit"],
+      earnedCents: 100,
+      outcome: "finished",
+      zonesFinished: 1,
+    });
+    const high = recordRunEnd(veteranSave(), runResult({ earnedCents: cents(9_999) }));
+    expect(high.stats.bestWalk).toEqual({
+      dogs: ["koda", "biscuit"],
+      earnedCents: 9_999,
+      zonesFinished: 4,
+    });
   });
 
   it("clears the run's checkpoint so it is not banked again", () => {
@@ -149,5 +189,13 @@ describe("recordRunEnd", () => {
     const save = veteranSave();
     recordRunEnd(save, runResult());
     expect(save).toEqual(veteranSave());
+  });
+});
+
+describe("isNewBestWalk", () => {
+  it("flags a first walk and one that beats the best, but not a tie", () => {
+    expect(isNewBestWalk(newPlayerSave.stats, cents(0))).toBe(true);
+    expect(isNewBestWalk(veteranSave().stats, cents(9_001))).toBe(true);
+    expect(isNewBestWalk(veteranSave().stats, cents(9_000))).toBe(false);
   });
 });

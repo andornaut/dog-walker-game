@@ -1,5 +1,5 @@
 import type { Dog, LiveTuning, Modifier } from "../data/types";
-import { modifiedStat } from "./modifiers";
+import { type Contribution, modifiedStat, statParts } from "./modifiers";
 import {
   type Cents,
   cents,
@@ -31,9 +31,26 @@ export function startHearts(tuning: LiveTuning, modifiers: readonly Modifier[], 
   return clampHearts(maxHearts(tuning, modifiers, dog), start);
 }
 
+export interface FeeParts<M extends Modifier> {
+  // The owner's fee before any modifier.
+  readonly base: Cents;
+  readonly contributions: readonly Contribution<M>[];
+  readonly value: Cents;
+}
+
+// The fee a dog pays per zone: its owner's fee, changed by fees modifiers.
+export function zoneFeeParts<M extends Modifier>(
+  tuning: LiveTuning,
+  modifiers: readonly M[],
+  dog: Dog,
+): FeeParts<M> {
+  const base = readTable(tuning, "money", "feeByTemperament", dog.owner.temperament);
+  const parts = statParts(tuning, modifiers, "fees", base);
+  return { base, contributions: parts.contributions, value: cents(parts.value) };
+}
+
 export function zoneFee(tuning: LiveTuning, modifiers: readonly Modifier[], dog: Dog): Cents {
-  const fee = readTable(tuning, "money", "feeByTemperament", dog.owner.temperament);
-  return cents(modifiedStat(tuning, modifiers, "fees", fee));
+  return zoneFeeParts(tuning, modifiers, dog).value;
 }
 
 // pullFrequency modifiers scale how often a dog pulls, so they divide the interval.

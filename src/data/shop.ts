@@ -1,7 +1,7 @@
 import type { Gear } from "./types";
 
 // Permanent gear, bought once and kept. Take up to counts.loadoutMax on a run.
-// Locked dogs are sold too: those with unlock "shop" in dogs.ts, at money.prices.lockedDog.
+// Locked dogs are sold too: those with unlock "shop" in dogs.ts, at their price.
 export const SHOP_GEAR = {
   fannyPack: {
     effects: [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],

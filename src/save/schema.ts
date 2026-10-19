@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import type { DogId, GearId, WalkerId } from "../data/types";
+import type { DogId, GearId, HintId, WalkerId } from "../data/types";
 import { cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
@@ -9,14 +9,7 @@ export const SAVE_VERSION = 1;
 // The most dogs a run can take.
 export const MAX_RUN_DOGS = 3;
 
-// Content the game data does not define yet. The loader checks these against id sets the
-// caller passes in, like the others.
-export type AccessoryId = string;
-export type CourseId = string;
-export type DecorId = string;
-export type HelpTopicId = string;
-export type KitId = string;
-export type LeashColorId = string;
+const END_REASONS = ["finished", "noDogs", "wentHome"] as const satisfies readonly EndReason[];
 
 const count = v.pipe(v.number(), v.safeInteger(), v.minValue(0));
 // Stored as a plain integer, branded on load.
@@ -24,6 +17,8 @@ const cents = v.pipe(count, v.transform(toCents));
 const zoneNumber = v.pipe(v.number(), v.safeInteger(), v.minValue(1));
 // Clamped to 1 to MAX_RUN_DOGS on load rather than rejected.
 const dogSlots = v.pipe(v.number(), v.safeInteger());
+// Clamped to 0 to 1 on load rather than rejected.
+const volume = v.pipe(v.number(), v.finite());
 // Stored ids stay strings: a saved id may be one the game data no longer has.
 const contentId = v.pipe(v.string(), v.minLength(1));
 const ids = v.array(contentId);
@@ -41,40 +36,41 @@ const dogRunSchema = v.object({
   zonesFinished: count,
 });
 
-// A run in progress, saved after each zone. zoneReached is the zone that just ended.
+// A run in progress, saved after each zone. zonesFinished is the zone that just ended.
 export const checkpointSchema = v.object({
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,
-  zoneReached: zoneNumber,
+  zonesFinished: zoneNumber,
 });
 
+// Empty until a new player picks their first dog.
 const loadoutSchema = v.object({
-  dogs: v.pipe(ids, v.minLength(1), v.maxLength(MAX_RUN_DOGS)),
+  dogs: v.pipe(ids, v.maxLength(MAX_RUN_DOGS)),
   gear: v.nullable(contentId),
 });
 
-// Each kind keeps what the player owns and what is in use, which is always owned.
-const cosmeticsSchema = v.object({
-  // Owned and equipped accessories, per dog id: at most one equipped per dog.
-  accessories: v.object({
-    equipped: v.record(contentId, contentId),
-    owned: v.record(contentId, ids),
-  }),
-  decor: v.object({
-    owned: ids,
-    placed: ids,
-  }),
-  leashColors: v.object({
-    equipped: v.nullable(contentId),
-    owned: ids,
-  }),
+// One walk for the logbook: what it banked, how many zones it finished, and its dogs. Keys
+// stay in alphabetical order, as the stored JSON writes them.
+const walkSchema = v.object({
+  dogs: ids,
+  earnedCents: cents,
+  zonesFinished: count,
+});
+const lastWalkSchema = v.object({
+  dogs: ids,
+  earnedCents: cents,
+  outcome: v.picklist(END_REASONS),
+  zonesFinished: count,
 });
 
 const statsSchema = v.object({
-  bestRunCents: cents,
-  // 0 until the first run ends.
-  bestZoneReached: count,
+  // The walk that banked the most; null until the first run ends.
+  bestWalk: v.nullable(walkSchema),
+  // The most zones one run finished. Heading home mid-zone does not count that zone.
+  bestZoneFinished: count,
   dogs: v.record(contentId, dogStatsSchema),
+  // The most recent walk; null until the first run ends.
+  lastWalk: v.nullable(lastWalkSchema),
   lifetimeCents: cents,
   // Keyed by EndReason. A run banked from a checkpoint counts as wentHome.
   runs: v.object({
@@ -88,24 +84,25 @@ const statsSchema = v.object({
 export const saveSchema = v.object({
   bankCents: cents,
   checkpoint: v.nullable(checkpointSchema),
-  cosmetics: cosmeticsSchema,
-  // Help topics already shown, so first-time help shows once.
-  helpSeen: ids,
+  // Whether the player has seen the help screen, so it opens by itself only once.
+  helpSeen: v.boolean(),
   lastLoadout: loadoutSchema,
   owned: v.object({
     // How many dogs a run can take; the loadout never holds more.
     dogSlots,
     dogs: ids,
     gear: ids,
-    walkerKit: ids,
-    walkers: ids,
   }),
-  settings: v.object({}),
+  settings: v.object({
+    musicVolume: volume,
+    reducedMotion: v.boolean(),
+    sfxVolume: volume,
+  }),
+  // First-time hints already shown, each shown once.
+  shownHints: ids,
   stats: statsSchema,
-  // Courses each dog has finished, per dog id.
-  training: v.record(contentId, ids),
   version: v.literal(SAVE_VERSION),
-  // The walker in use, always one the player owns.
+  // The walker in use.
   walker: contentId,
 });
 
@@ -129,80 +126,77 @@ export interface Loadout {
   gear: GearId | null;
 }
 
-export interface Cosmetics {
-  accessories: {
-    equipped: Partial<Record<DogId, AccessoryId>>;
-    owned: Partial<Record<DogId, AccessoryId[]>>;
-  };
-  decor: { owned: DecorId[]; placed: DecorId[] };
-  leashColors: { equipped: LeashColorId | null; owned: LeashColorId[] };
-}
-
 export interface Owned {
   dogSlots: number;
   dogs: DogId[];
   gear: GearId[];
-  walkerKit: KitId[];
-  walkers: WalkerId[];
 }
 
-export interface SaveStats extends Omit<StoredStats, "dogs" | "runs"> {
+export interface Walk extends Omit<v.InferOutput<typeof walkSchema>, "dogs"> {
+  dogs: DogId[];
+}
+
+export interface LastWalk extends Walk {
+  outcome: EndReason;
+}
+
+export interface SaveStats extends Omit<StoredStats, "bestWalk" | "dogs" | "lastWalk" | "runs"> {
+  bestWalk: Walk | null;
   dogs: Partial<Record<DogId, DogStats>>;
+  lastWalk: LastWalk | null;
   runs: Record<EndReason, number>;
 }
 
 export interface SaveDocument extends Omit<
   StoredSave,
-  "checkpoint" | "cosmetics" | "lastLoadout" | "owned" | "stats" | "training" | "walker"
+  "checkpoint" | "lastLoadout" | "owned" | "shownHints" | "stats" | "walker"
 > {
   checkpoint: Checkpoint | null;
-  cosmetics: Cosmetics;
   lastLoadout: Loadout;
   owned: Owned;
+  shownHints: HintId[];
   stats: SaveStats;
-  training: Partial<Record<DogId, CourseId[]>>;
   walker: WalkerId;
 }
 
-// What a new player starts with. The free dogs and walkers stay owned on every load.
+// What a new player starts with. The free dogs stay owned on every load, and walker replaces
+// an unknown walker.
 export interface SaveDefaults {
   dogSlots: number;
   freeDogs: readonly DogId[];
-  freeWalkers: readonly WalkerId[];
-  lastLoadout: Readonly<Loadout>;
-  // One of freeWalkers.
   walker: WalkerId;
 }
 
+export const DEFAULT_SETTINGS: SaveDocument["settings"] = {
+  musicVolume: 0.6,
+  reducedMotion: false,
+  sfxVolume: 0.8,
+};
+
+// A new player has no loadout until they pick one of the free dogs.
 export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
   const zero = toCents(0);
   return {
     bankCents: zero,
     checkpoint: null,
-    cosmetics: {
-      accessories: { equipped: {}, owned: {} },
-      decor: { owned: [], placed: [] },
-      leashColors: { equipped: null, owned: [] },
-    },
-    helpSeen: [],
-    lastLoadout: { dogs: [...defaults.lastLoadout.dogs], gear: defaults.lastLoadout.gear },
+    helpSeen: false,
+    lastLoadout: { dogs: [], gear: null },
     owned: {
       dogSlots: defaults.dogSlots,
       dogs: [...defaults.freeDogs],
       gear: [],
-      walkerKit: [],
-      walkers: [...defaults.freeWalkers],
     },
-    settings: {},
+    settings: { ...DEFAULT_SETTINGS },
+    shownHints: [],
     stats: {
-      bestRunCents: zero,
-      bestZoneReached: 0,
+      bestWalk: null,
+      bestZoneFinished: 0,
       dogs: {},
+      lastWalk: null,
       lifetimeCents: zero,
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
       timesFired: 0,
     },
-    training: {},
     version: SAVE_VERSION,
     walker: defaults.walker,
   };
