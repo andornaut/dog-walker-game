@@ -24,7 +24,7 @@ const geometry: RoadGeometry = {
   sightLength: 514,
   tallestPackBand: 76,
 };
-const SECONDS = read(gameData.tuning, "seconds", "hitStopSeconds");
+const SECONDS = read(gameData.tuning, "seconds", "firingHoldSeconds");
 
 describe("holdForFiring", () => {
   it("changes nothing when nobody was fired", () => {
@@ -88,7 +88,7 @@ describe("a firing in the walk", () => {
     expect(outcome.state.phase.kind).toBe("walking");
   });
 
-  it("holds the road still and the cards back for hitStopSeconds of steps, then lets go", () => {
+  it("holds the road still and the cards back for firingHoldSeconds of steps, then lets go", () => {
     let walk = held;
     const frames = Math.round(SECONDS / FRAME);
     for (let frame = 1; frame < frames; frame++) {

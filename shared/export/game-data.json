@@ -2780,6 +2780,7 @@
     "seconds": {
       "ballBounceSeconds": 0.4,
       "collisionGrace": 1,
+      "firingHoldSeconds": 2,
       "hitStopSeconds": 1,
       "inputLockBySize": {
         "big": 0.5,

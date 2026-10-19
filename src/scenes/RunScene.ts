@@ -2029,9 +2029,9 @@ export class RunScene extends Scene {
   }
 }
 
-// A firing holds the walk as long as an encounter's hit stop, read live from the tuning.
+// How long a firing holds the walk, read live from the tuning.
 function firingSeconds(): number {
-  return read(gameData.tuning, "seconds", "hitStopSeconds");
+  return read(gameData.tuning, "seconds", "firingHoldSeconds");
 }
 
 // sessionStorage can be missing or throw (private browsing, blocked storage): the run goes on.

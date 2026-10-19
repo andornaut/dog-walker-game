@@ -117,6 +117,8 @@ export const TUNING = {
     ballBounceSeconds: 0.4,
     // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 1,
+    // An owner who fires you holds the walk still this long while their moment plays.
+    firingHoldSeconds: 2,
     // An obstacle encounter holds the road and the pack still this long before its card.
     hitStopSeconds: 1,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },

@@ -117,6 +117,7 @@ export interface Tuning {
   };
   readonly seconds: OpenGroup & {
     readonly ballBounceSeconds: number;
+    readonly firingHoldSeconds: number;
     readonly hitStopSeconds: number;
     readonly inputLockBySize: Table<Size>;
     readonly lookAheadSeconds: number;
