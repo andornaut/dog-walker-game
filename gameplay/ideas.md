@@ -59,6 +59,14 @@ Group by topic; add new topic headings as they come up.
 - [parked] **Cosmetic permanent unlocks**: permanent purchases that change looks only; v1 shop is gameplay-altering gear (2026-10-18)
 - [parked] **House hub**: Hades-style home base you decorate and improve with mostly cosmetic unlocks; long-term progression (2026-10-18)
 
+## Home screen
+
+- [floated] **Shop in place**: tap a locked dog or gear item on the start screen to buy it; no separate shop screen (2026-10-19)
+- [floated] **Logbook**: best walk ($, zones, which dogs), totals (walks, dogs walked, times fired), and the last walk as one line ("Kevin fired you in the park") (2026-10-19) · overlaps the agreed Stats page; could be its presentation
+- [floated] **Best walk and walk count in the top bar** next to the bank (2026-10-19)
+- [floated] **Owner parting line**: picking a dog shows its owner's quip in their temperament (e.g. Jesse: "He already did 10K. He's fine.") (2026-10-19)
+- [floated] **Gate scene**: the walker and the picked pack stand on the front path, heading out to Maple Street, with a "Dog Walker" yard sign (2026-10-19)
+
 ## Art & feel
 
 - [agreed] **Cozy, low-stress mood**: playable for long periods (2026-10-18)
