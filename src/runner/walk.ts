@@ -974,6 +974,10 @@ function pickupsReached(
   footprint: PackFootprint,
   pickups: readonly WalkItem[],
 ): WalkItem[] {
+  // Reach widens the lanes only: with no pickup level with the pack, none is reached.
+  if (!pickups.some((item) => item.y < footprint.bottom && item.y + item.height > footprint.top)) {
+    return [];
+  }
   const reaches = {
     tip: reachFootprint(data, geometry, run, footprint, "tip"),
     treat: reachFootprint(data, geometry, run, footprint, "treat"),
