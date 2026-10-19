@@ -1,16 +1,20 @@
 import type { Upgrade } from "./types";
 
 // Run-only boosts offered between zones. A picked card leaves the pool for the rest of the run.
+// duration is how long its effects last, which its plaque shows: now, the next zone, or the
+// whole run.
 // art is a key into the art manifest's images.
 export const UPGRADES = {
   bellyRubs: {
     art: "card-belly-rubs",
+    duration: "now",
     effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
     kind: "boost",
     name: "Belly rubs",
   },
   bigTipper: {
     art: "card-big-tipper",
+    duration: "run",
     effects: [
       {
         by: "bigTipperTip",
@@ -25,6 +29,7 @@ export const UPGRADES = {
   },
   goodLeash: {
     art: "card-good-leash",
+    duration: "run",
     effects: [
       { duration: "run", encounter: "squirrel", kind: "immune" },
       {
@@ -40,12 +45,14 @@ export const UPGRADES = {
   },
   raincoats: {
     art: "card-raincoats",
+    duration: "run",
     effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
     kind: "boost",
     name: "Raincoats",
   },
   rushHour: {
     art: "card-rush-hour",
+    duration: "nextZone",
     effects: [
       {
         by: "rushHourTips",
@@ -67,12 +74,14 @@ export const UPGRADES = {
   },
   secondWind: {
     art: "card-second-wind",
+    duration: "now",
     effects: [{ amount: 2, kind: "hearts", target: { kind: "unhappiest" } }],
     kind: "boost",
     name: "Second wind",
   },
   shortcut: {
     art: "card-shortcut",
+    duration: "nextZone",
     effects: [
       {
         by: "shortcutZoneLength",
@@ -94,6 +103,7 @@ export const UPGRADES = {
   },
   sweetTalker: {
     art: "card-sweet-talker",
+    duration: "run",
     effects: [
       {
         by: "sweetTalkerCostPerDog",
@@ -108,6 +118,7 @@ export const UPGRADES = {
   },
   treatMagnet: {
     art: "card-treat-magnet",
+    duration: "run",
     effects: [
       {
         by: "treatMagnetReachLanes",

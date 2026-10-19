@@ -368,9 +368,14 @@ export interface NeedCard {
   readonly options: CardOptions;
 }
 
+// How long an upgrade card's effects last: applied at once, through the next zone, or for
+// the rest of the run.
+export type UpgradeDuration = "nextZone" | "now" | "run";
+
 export interface Upgrade {
   // Key of the card's illustration in the art manifest's images.
   readonly art: string;
+  readonly duration: UpgradeDuration;
   readonly effects: NonEmptyEffects;
   readonly kind: "boost" | "tradeOff";
   readonly name: string;
@@ -562,6 +567,8 @@ export interface HomeText {
 export interface RunText {
   readonly card: {
     readonly fires: string;
+    // A fork's path card plaque, with the zone's fee multiplier.
+    readonly forkFees: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
     readonly free: string;
@@ -572,7 +579,8 @@ export interface RunText {
     readonly skipEffect: string;
     readonly skipHeld: string;
     readonly stopSubtitle: string;
-    readonly upgradeSubtitle: string;
+    // An upgrade card's plaque, by how long it lasts.
+    readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
     readonly upgradeTitle: string;
   };
   readonly fired: string;

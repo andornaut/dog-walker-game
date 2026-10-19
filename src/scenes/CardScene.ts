@@ -194,7 +194,7 @@ export class CardScene extends Scene {
       case "fork":
         return gameData.runText.card.forkSubtitle;
       default:
-        return gameData.runText.card.upgradeSubtitle;
+        return "";
     }
   }
 
@@ -362,11 +362,16 @@ export class CardScene extends Scene {
     return marker === undefined ? left + width / 2 : (marker + left + width) / 2;
   }
 
-  // A path card's plaque shows its zone's fee multiplier instead of a cost.
+  // A path card's plaque shows its zone's fee multiplier instead of a cost, and an upgrade
+  // card's how long it lasts.
   private costText(entry: Entry): string {
     const option = entry.option;
+    const text = gameData.runText.card;
     if (option?.path !== undefined) {
-      return `×${option.path.fees}`;
+      return fillLine(RUN_TEXT_FIELDS.card, text, "forkFees", { fees: String(option.path.fees) });
+    }
+    if (option?.duration !== undefined) {
+      return text.upgradeDuration[option.duration];
     }
     if (option === undefined || option.cost === 0) {
       return gameData.runText.card.free;

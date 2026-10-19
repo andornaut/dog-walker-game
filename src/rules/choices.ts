@@ -7,6 +7,7 @@ import type {
   EncounterId,
   GameData,
   QuipMoment,
+  UpgradeDuration,
   UpgradeId,
   ZoneId,
 } from "../data/types";
@@ -69,6 +70,8 @@ export interface OptionView {
   // The option's position in the source's data; pass it to chooseOption.
   readonly index: number;
   readonly label: string;
+  // Set on an upgrade card only: how long it lasts, which its plaque shows for a price.
+  readonly duration?: UpgradeDuration;
   // Set on a fork's path cards only.
   readonly path?: PathView;
   readonly text: string;
@@ -360,6 +363,9 @@ function effectCard(
       fires: preview.fired,
       index,
       label: option.name,
+      ...(effectSource.kind === "upgrade"
+        ? { duration: data.upgrades[effectSource.upgrade].duration }
+        : {}),
       text: cardEffectText(data, textContext, option.effects),
     };
   });

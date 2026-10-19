@@ -5,6 +5,7 @@ import type { RunText } from "./types";
 export const RUN_TEXT = {
   card: {
     fires: "Fires {owners}",
+    forkFees: "Fees ×{fees}",
     forkSubtitle: "Pick the next zone",
     forkTitle: "Which way?",
     free: "Free",
@@ -14,7 +15,7 @@ export const RUN_TEXT = {
     skipEffect: "Poop bags: walk on, nothing happens.",
     skipHeld: "Walk on: nothing happens.",
     stopSubtitle: "A stop on the way",
-    upgradeSubtitle: "Pick one for the rest of the walk",
+    upgradeDuration: { nextZone: "Next zone", now: "Now", run: "Whole walk" },
     upgradeTitle: "Pick an upgrade",
   },
   fired: "FIRED!",

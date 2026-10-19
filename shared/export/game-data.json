@@ -2805,6 +2805,7 @@
     {
       "id": "bellyRubs",
       "art": "card-belly-rubs",
+      "duration": "now",
       "effects": [
         {
           "amount": 1,
@@ -2820,6 +2821,7 @@
     {
       "id": "bigTipper",
       "art": "card-big-tipper",
+      "duration": "run",
       "effects": [
         {
           "by": "bigTipperTip",
@@ -2835,6 +2837,7 @@
     {
       "id": "goodLeash",
       "art": "card-good-leash",
+      "duration": "run",
       "effects": [
         {
           "duration": "run",
@@ -2855,6 +2858,7 @@
     {
       "id": "raincoats",
       "art": "card-raincoats",
+      "duration": "run",
       "effects": [
         {
           "duration": "run",
@@ -2868,6 +2872,7 @@
     {
       "id": "rushHour",
       "art": "card-rush-hour",
+      "duration": "nextZone",
       "effects": [
         {
           "by": "rushHourTips",
@@ -2890,6 +2895,7 @@
     {
       "id": "secondWind",
       "art": "card-second-wind",
+      "duration": "now",
       "effects": [
         {
           "amount": 2,
@@ -2905,6 +2911,7 @@
     {
       "id": "shortcut",
       "art": "card-shortcut",
+      "duration": "nextZone",
       "effects": [
         {
           "by": "shortcutZoneLength",
@@ -2927,6 +2934,7 @@
     {
       "id": "sweetTalker",
       "art": "card-sweet-talker",
+      "duration": "run",
       "effects": [
         {
           "by": "sweetTalkerCostPerDog",
@@ -2942,6 +2950,7 @@
     {
       "id": "treatMagnet",
       "art": "card-treat-magnet",
+      "duration": "run",
       "effects": [
         {
           "by": "treatMagnetReachLanes",
