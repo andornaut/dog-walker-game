@@ -474,7 +474,7 @@ class Scene(Canvas):
         r = TOP_BAR["wells"]["zone"]["nameRight"] - (LAYOUT["screen"]["width"] - W)  # the zone well's right edge
         self.paste(frame("tip", "idle"), 8, 13)
         text(self, "$", 26, 15, "amber", 2); text(self, f"{money:g}", 26 + text_w("$", 2) + 2, 15, "cream", 2)
-        self.paste(frame("treat", "idle"), 100, 13)
+        self.paste(image("icon-treat"), 100, 13)
         text(self, f"{treats}/{tuning('counts', 'treatCarryMax'):g}", 118, 18, "cream")
         for name in ("home", "pause"):
             b = TOP_BAR["buttons"][name]

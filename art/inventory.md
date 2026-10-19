@@ -196,6 +196,7 @@ Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside ta
 | `icon-upgrade-<upgrade>`                     | image  | 16×16             |                                        | core | State strip; one per upgrade id (9)                                                       |
 | `icon-gear-<gear>`                           | image  | 16×16             |                                        | core | State strip; one per gear id (5)                                                          |
 | `icon-money`                                 | image  | 16×16             |                                        | core | Also cards, shop and end screen                                                           |
+| `icon-treat`                                 | image  | 16×16             |                                        | core | The treat well; the treat pickup's bone at icon size                                      |
 | `ui-zone-pips`                               | sprite | 18×8              | `todo`, `<zone>`, `<zone>-done`        | core | One pip per zone of the route, 3px apart                                                  |
 | `icon-zone-<zone>`                           | image  | 16×16             |                                        | core | Every zone                                                                                |
 

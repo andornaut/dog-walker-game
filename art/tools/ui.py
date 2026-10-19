@@ -2,7 +2,8 @@
 """Draw the UI kit: icons, nine-slice panels and buttons, the hint bubble and badges.
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
-icon-logbook, icon-settings, icon-lock, icon-money, icon-stinky; icon-dog-slot (32x32, a pack
+icon-logbook, icon-settings, icon-lock, icon-money, icon-treat (the treat pickup's bone as
+road.treat lays it out at 16x16, for the top bar's treat well), icon-stinky; icon-dog-slot (32x32, a pack
 slot for sale in the shop: a doghouse with a green plus badge, as the shop's item-<gear> art,
 outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
@@ -208,6 +209,16 @@ def money():
     g.rect(8, 5, 1, 6, "orange")
     g.p(7, 6, "orange")
     g.p(9, 9, "orange")
+    return g
+
+
+def treat_icon():
+    """The treat pickup's bone as road.treat lays it out at 16x16 (idle frame 0), outlined with icon_edge
+    as the content icons are. Its cream holds 12.44:1 on the top bar's ink."""
+    import road
+
+    g = road.treat(lift=0)
+    g.edge = icon_edge
     return g
 
 
@@ -1107,7 +1118,7 @@ def strip_well():
 def top_bar():
     """360x40: plum wood with a trim along the bottom and three ink wells, in screen pixels:
     money 4,8 88x26 (coin at 8,13, the amount in font-title x2 at 26,15), treats 96,8 32x26
-    (treat at 100,13, the count at 118,18), and zone 212,5 144x29 (the zone name right aligned
+    (icon-treat at 100,13, the count at 118,18), and zone 212,5 144x29 (the zone name right aligned
     at 352,10, ui-zone-pips from 271,22). Between the treats and zone wells sit two
     ui-icon-buttons: Home at 130,10 and pause at 174,10. The state strip (ui-strip-well) hangs
     under the zone well, right aligned at 356."""
@@ -1270,6 +1281,7 @@ IMAGES = {
     "icon-settings": lambda: to_image(settings_icon().outlined(False)),
     "icon-lock": lambda: to_image(lock().outlined()),
     "icon-money": lambda: to_image(money().outlined()),
+    "icon-treat": lambda: to_image(treat_icon().outlined()),
     "icon-stinky": lambda: to_image(stinky()),
     "icon-dog-slot": lambda: to_image(dog_slot().outlined()),
     "ui-panel": lambda: to_image(panel().outlined(False)),

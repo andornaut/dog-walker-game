@@ -6010,6 +6010,10 @@
       "png": "images/icon-trait-food-driven.png"
     },
     {
+      "key": "icon-treat",
+      "png": "images/icon-treat.png"
+    },
+    {
       "key": "icon-upgrade-belly-rubs",
       "png": "images/icon-upgrade-belly-rubs.png"
     },
