@@ -32,7 +32,7 @@
 
 The colours scene code uses for text and marks on the wood UI. Names are the code's `PALETTE` names; forest (`#265c42`), rust (`#be4a2f`) and yellow (`#fee761`) are Endesga 32 colours the code palette does not list yet. Ratios are WCAG contrast.
 
-**General rules**
+### General rules
 
 | Usage                                      | Colour on background   | Ratio       |
 | ------------------------------------------ | ---------------------- | ----------- |
@@ -45,7 +45,7 @@ The colours scene code uses for text and marks on the wood UI. Names are the cod
 | Money lost or unaffordable price, on cream | darkRed on cream       | 5.07        |
 | White labels on a coloured chip or button  | white on forest / rust | 7.80 / 4.99 |
 
-**HudScene**
+### HudScene
 
 | Usage                             | Was                | Use                                                         | Ratio |
 | --------------------------------- | ------------------ | ----------------------------------------------------------- | ----- |
@@ -65,7 +65,7 @@ The colours scene code uses for text and marks on the wood UI. Names are the cod
 | Trait chip "Food"                 | white on orange    | white on rust                                               | 4.99  |
 | Stinky status                     | darkGreen on cream | forest on cream                                             | 5.39  |
 
-**StartScene**
+### StartScene
 
 | Usage                               | Was                        | Use                                                  | Ratio       |
 | ----------------------------------- | -------------------------- | ---------------------------------------------------- | ----------- |
@@ -80,7 +80,7 @@ The colours scene code uses for text and marks on the wood UI. Names are the cod
 | "Walks daily" sign                  | darkBrown on tan           | the `logo` image replaces the board and its text     | n/a         |
 | Owner name and "Tap to buy", locked | darkBrown on tan           | plum on tan                                          | 6.49        |
 
-**HelpScene**
+### HelpScene
 
 | Usage                      | Was                        | Use                                                  | Ratio |
 | -------------------------- | -------------------------- | ---------------------------------------------------- | ----- |
@@ -89,14 +89,14 @@ The colours scene code uses for text and marks on the wood UI. Names are the cod
 | Page counter               | tan on darkBrown           | cream on darkBrown                                   | 5.85  |
 | Disabled button and "BACK" | slate face, lightGrey text | `ui-button` `disabled`; inactive controls are exempt | n/a   |
 
-**PauseScene**
+### PauseScene
 
 | Usage                    | Was                      | Use                            | Ratio |
 | ------------------------ | ------------------------ | ------------------------------ | ----- |
 | Panel on the dimmed road | darkBrown on dimmed road | a 1px tan rim around the panel | 3.0+  |
 | "Head home" note         | darkBrown on tan         | plum on tan                    | 6.49  |
 
-**EndScene, CardScene, RunScene**
+### EndScene, CardScene, RunScene
 
 | Usage                                    | Was                          | Use                                           | Ratio |
 | ---------------------------------------- | ---------------------------- | --------------------------------------------- | ----- |
