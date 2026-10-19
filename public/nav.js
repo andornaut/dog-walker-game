@@ -81,10 +81,14 @@
   if (document.body) mount();
   else document.addEventListener("DOMContentLoaded", mount);
 
-  fetch("/art/mocks/index.json", { cache: "no-cache" })
-    .then((r) => (r.ok ? r.json() : []))
-    .then((mocks) =>
-      mocksAt.replaceWith(...mocks.map((m) => item(m.title, "/art/mocks/" + m.path))),
-    )
-    .catch(() => {});
+  // The mocks list and pages are not precached, so offline the request would only log a
+  // failed fetch and the links would lead nowhere.
+  if (navigator.onLine) {
+    fetch("/art/mocks/index.json", { cache: "no-cache" })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((mocks) =>
+        mocksAt.replaceWith(...mocks.map((m) => item(m.title, "/art/mocks/" + m.path))),
+      )
+      .catch(() => {});
+  }
 })();
