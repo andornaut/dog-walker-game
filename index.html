@@ -212,10 +212,10 @@
         image-rendering: pixelated;
         image-rendering: crisp-edges;
       }
-      /* The cast: walkers in a tall tile, three dog and owner pairs, and the locked dogs. */
+      /* The cast: the walkers' faces beside a compact grid of all nine dogs. */
       .cast {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: 260px minmax(0, 1fr);
         gap: 12px;
       }
       .tile {
@@ -224,109 +224,67 @@
         border-radius: 6px;
         padding: 14px;
         display: grid;
-        gap: 10px;
+        gap: 12px;
         align-content: start;
         min-width: 0;
       }
-      .tile.walkers {
-        grid-column: span 2;
-        grid-row: span 2;
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-      /* The walkers again from behind, on a strip of road with a dashed lane line between each. */
-      .street {
-        flex: 1;
-        min-height: 120px;
-        display: flex;
-        justify-content: space-around;
-        align-items: end;
-        padding: 12px 8px;
-        border-radius: 4px;
-        background:
-          repeating-linear-gradient(#8b9bb4 0 8px, transparent 8px 20px) 33.3% 0 / 2px 100%
-            no-repeat,
-          repeating-linear-gradient(#8b9bb4 0 8px, transparent 8px 20px) 66.6% 0 / 2px 100%
-            no-repeat,
-          #3a4466;
+      .walker-row,
+      .dog-grid {
+        display: grid;
+        gap: 6px;
       }
       .walker-row {
-        display: flex;
-        justify-content: space-around;
-        align-items: end;
-        gap: 8px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
-      .walker-row figure {
+      .dog-grid {
+        grid-template-columns: repeat(9, minmax(0, 1fr));
+      }
+      .walker-row figure,
+      .dog-grid figure {
         margin: 0;
         display: grid;
         justify-items: center;
-        gap: 6px;
+        align-content: start;
+        gap: 4px;
         text-align: center;
-      }
-      .walker-row figcaption {
-        font-family: var(--f-display);
-        font-size: 13px;
-      }
-      .walker-row figcaption span {
-        display: block;
-        font-family: var(--f-body);
         color: var(--muted);
-        font-size: 13px;
+        font-size: 12px;
+        line-height: 1.25;
       }
-      .pair {
-        position: relative;
-        width: 112px;
-        height: 96px;
-      }
-      .pair .dog {
-        position: absolute;
-        left: 0;
-        top: 0;
-        background: #3a4466;
-        border-radius: 6px;
-      }
-      .pair .owner {
-        position: absolute;
-        right: 0;
-        bottom: 0;
-        background: #c28569;
-        border-radius: 50%;
-        outline: 3px solid var(--surface);
-      }
-      .chip {
-        font-family: var(--f-display);
-        font-size: 11px;
-        color: var(--accent-ink);
-        background: var(--accent);
-        border-radius: 3px;
-        padding: 0 5px;
-        margin-left: 4px;
-        vertical-align: 2px;
-      }
-      .tile .owner-line {
-        display: block;
-        margin-top: 4px;
-        font-size: 14px;
-      }
-      .locked-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 48px);
-        gap: 6px;
-      }
-      .locked-grid canvas {
+      .walker-row canvas,
+      .dog-grid img {
         background: #3a4466;
         border-radius: 4px;
       }
-      @media (max-width: 720px) {
+      .walker-row b,
+      .dog-grid b {
+        display: block;
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: 12px;
+        color: var(--fg);
+      }
+      .dog-grid img {
+        width: 64px;
+        height: 64px;
+        max-width: 100%;
+        height: auto;
+      }
+      .dog-grid .starter {
+        outline: 2px solid var(--accent);
+        outline-offset: 1px;
+      }
+      .key {
+        color: var(--accent);
+      }
+      @media (max-width: 860px) {
         .cast,
         .pillars {
           grid-template-columns: minmax(0, 1fr);
         }
-        .tile.walkers {
-          grid-column: auto;
-          grid-row: auto;
-          gap: 18px;
+        .dog-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          row-gap: 12px;
         }
       }
       /* The skunk card: pick an option and the owners react. */
@@ -605,161 +563,141 @@
       <section aria-labelledby="h-cast">
         <h2 id="h-cast">The cast</h2>
         <div class="cast">
-          <div class="tile walkers">
-            <div>
-              <b>Pick a walker</b>
-              <p>Casey, Ada, Ben and Trista. All four are free from the first walk.</p>
-            </div>
+          <div class="tile">
+            <p>
+              <b>Pick a walker</b>Ada, Ben, Trista or Casey. All four are free from the first walk.
+            </p>
             <div class="walker-row">
-              <figure>
-                <canvas
-                  class="px"
-                  data-sprite="face-walker-casey"
-                  data-tag="happy"
-                  data-scale="3"
-                  aria-hidden="true"
-                ></canvas>
-                <figcaption>Casey<span>cap and hoodie</span></figcaption>
-              </figure>
               <figure>
                 <canvas
                   class="px"
                   data-sprite="face-walker-ada"
                   data-tag="happy"
-                  data-scale="3"
+                  data-scale="2"
                   aria-hidden="true"
                 ></canvas>
-                <figcaption>Ada<span>11, long curls</span></figcaption>
+                <b>Ada</b>11, long curls
               </figure>
               <figure>
                 <canvas
                   class="px"
                   data-sprite="face-walker-ben"
                   data-tag="happy"
-                  data-scale="3"
+                  data-scale="2"
                   aria-hidden="true"
                 ></canvas>
-                <figcaption>Ben<span>45, all in black</span></figcaption>
+                <b>Ben</b>45, all in black
+              </figure>
+              <figure>
+                <canvas
+                  class="px"
+                  data-sprite="face-walker-trista"
+                  data-tag="happy"
+                  data-scale="2"
+                  aria-hidden="true"
+                ></canvas>
+                <b>Trista</b>50, teacher
               </figure>
             </div>
-            <div class="street" aria-hidden="true">
-              <canvas class="px" data-sprite="walker-casey" data-tag="walk" data-scale="2"></canvas>
-              <canvas class="px" data-sprite="walker-ada" data-tag="walk" data-scale="2"></canvas>
-              <canvas class="px" data-sprite="walker-ben" data-tag="walk" data-scale="2"></canvas>
-            </div>
           </div>
           <div class="tile">
-            <div class="pair" aria-hidden="true">
-              <canvas
-                class="px dog"
-                data-sprite="face-dog-duchess"
-                data-tag="happy"
-                data-scale="3"
-              ></canvas>
-              <canvas
-                class="px owner"
-                data-sprite="face-owner-duchess"
-                data-tag="happy"
-                data-scale="2"
-              ></canvas>
-            </div>
             <p>
-              <b>Duchess <span class="chip">Starter</span></b
-              >Maltese, small. Fancy: puddles upset its owner more.
-              <span class="owner-line">Owner: Rosa, retired florist</span>
+              <b>Nine dogs to walk</b>Each has an owner to keep happy and a trait that changes how a
+              walk goes. The <span class="key">outlined</span> three are the starters; the rest join
+              from the shop.
             </p>
-          </div>
-          <div class="tile">
-            <div class="pair" aria-hidden="true">
-              <canvas
-                class="px dog"
-                data-sprite="face-dog-biscuit"
-                data-tag="happy"
-                data-scale="3"
-              ></canvas>
-              <canvas
-                class="px owner"
-                data-sprite="face-owner-biscuit"
-                data-tag="happy"
-                data-scale="2"
-              ></canvas>
+            <div class="dog-grid">
+              <figure>
+                <img
+                  class="px starter"
+                  src="/art/images/portrait-dog-duchess.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Duchess</b>Maltese
+              </figure>
+              <figure>
+                <img
+                  class="px"
+                  src="/art/images/portrait-dog-nugget.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Nugget</b>Pug
+              </figure>
+              <figure>
+                <img
+                  class="px"
+                  src="/art/images/portrait-dog-zippy.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Zippy</b>Jack Russell
+              </figure>
+              <figure>
+                <img
+                  class="px"
+                  src="/art/images/portrait-dog-pierre.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Pierre</b>Poodle
+              </figure>
+              <figure>
+                <img
+                  class="px starter"
+                  src="/art/images/portrait-dog-biscuit.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Biscuit</b>Beagle
+              </figure>
+              <figure>
+                <img
+                  class="px"
+                  src="/art/images/portrait-dog-dash.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Dash</b>Whippet
+              </figure>
+              <figure>
+                <img
+                  class="px"
+                  src="/art/images/portrait-dog-snowball.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Snowball</b>Samoyed
+              </figure>
+              <figure>
+                <img
+                  class="px"
+                  src="/art/images/portrait-dog-waffles.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Waffles</b>Saint Bernard
+              </figure>
+              <figure>
+                <img
+                  class="px starter"
+                  src="/art/images/portrait-dog-koda.png"
+                  width="64"
+                  height="64"
+                  alt=""
+                />
+                <b>Koda</b>Husky
+              </figure>
             </div>
-            <p>
-              <b>Biscuit <span class="chip">Starter</span></b
-              >Beagle, medium. Food-driven: pulls the pack toward treats.
-              <span class="owner-line">Owner: Sam, barista</span>
-            </p>
-          </div>
-          <div class="tile">
-            <div class="pair" aria-hidden="true">
-              <canvas
-                class="px dog"
-                data-sprite="face-dog-koda"
-                data-tag="happy"
-                data-scale="3"
-              ></canvas>
-              <canvas
-                class="px owner"
-                data-sprite="face-owner-koda"
-                data-tag="happy"
-                data-scale="2"
-              ></canvas>
-            </div>
-            <p>
-              <b>Koda <span class="chip">Starter</span></b
-              >Husky, big. Chaser: squirrels upset its owner, and it pulls toward them.
-              <span class="owner-line">Owner: Jesse, trail runner</span>
-            </p>
-          </div>
-          <div class="tile">
-            <div class="locked-grid" aria-hidden="true">
-              <canvas
-                class="px"
-                data-sprite="face-dog-nugget"
-                data-tag="neutral"
-                data-scale="1.5"
-                data-locked
-              ></canvas>
-              <canvas
-                class="px"
-                data-sprite="face-dog-zippy"
-                data-tag="neutral"
-                data-scale="1.5"
-                data-locked
-              ></canvas>
-              <canvas
-                class="px"
-                data-sprite="face-dog-pierre"
-                data-tag="neutral"
-                data-scale="1.5"
-                data-locked
-              ></canvas>
-              <canvas
-                class="px"
-                data-sprite="face-dog-dash"
-                data-tag="neutral"
-                data-scale="1.5"
-                data-locked
-              ></canvas>
-              <canvas
-                class="px"
-                data-sprite="face-dog-snowball"
-                data-tag="neutral"
-                data-scale="1.5"
-                data-locked
-              ></canvas>
-              <canvas
-                class="px"
-                data-sprite="face-dog-waffles"
-                data-tag="neutral"
-                data-scale="1.5"
-                data-locked
-              ></canvas>
-            </div>
-            <p>
-              <b>+6 more dogs</b>A pug, a poodle, a whippet, a Samoyed and more, each with its own
-              owner. Unlock them in the shop.
-            </p>
           </div>
         </div>
       </section>
