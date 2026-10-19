@@ -3,6 +3,7 @@ import { relative, sep } from "node:path";
 import type { Plugin, ViteDevServer } from "vite";
 
 import {
+  ART_DIR,
   ART_MANIFEST,
   ART_MANIFEST_EXTRA,
   artManifestText,
@@ -10,7 +11,6 @@ import {
 } from "./artManifest";
 import { nodeArtFiles, writeFiles, writeIfChanged } from "./files";
 
-const ART_DIR = "art";
 const ART_FOLDERS = ["fonts", "images", "sounds", "sprites"];
 // Edits arrive in bursts, as when art's tools export a set: regenerate once they settle.
 const SETTLE_MS = 200;

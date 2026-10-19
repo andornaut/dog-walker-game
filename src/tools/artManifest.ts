@@ -27,6 +27,8 @@ import { jsonText } from "./files";
 // - sounds/<key>.ogg with sounds/<key>.m4a is a sound.
 // Whatever a file cannot say is in the sidecar manifest.extra.json: a sound's loop flag.
 
+// The art's folder under the public directory, and its URL path.
+export const ART_DIR = "art";
 export const ART_MANIFEST = "manifest.json";
 export const ART_MANIFEST_EXTRA = "manifest.extra.json";
 

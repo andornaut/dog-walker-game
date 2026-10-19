@@ -1,12 +1,10 @@
 import type { Logger, Plugin } from "vite";
 
-import { ART_MANIFEST, artManifestText, generateArtManifest } from "../tools/artManifest";
+import { ART_DIR, ART_MANIFEST, artManifestText, generateArtManifest } from "../tools/artManifest";
 import { nodeArtFiles, writeIfChanged } from "../tools/files";
 import { buildAtlases } from "./atlasBuild";
 import { ATLAS_MANIFEST_PATH } from "./atlasManifest";
 import type { RgbaImage } from "./atlasPixels";
-
-const ART_DIR = "art";
 
 // Writes /art/manifest.json from the files under public/art/ first, so the build copies and
 // packs what is on disk. Then packs every image and sprite frame it lists into a few atlas

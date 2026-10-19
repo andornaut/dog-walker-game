@@ -29,7 +29,7 @@ import {
 } from "../layout/roadRaster";
 import { screenLayout } from "../layout/screenLayout";
 import { walkProjection } from "../runner/walkGeometry";
-import { generateArtManifest, measureAnchor } from "./artManifest";
+import { ART_DIR, ART_MANIFEST, generateArtManifest, measureAnchor } from "./artManifest";
 import {
   cloneImage,
   crop,
@@ -45,7 +45,7 @@ import {
 } from "./depthPreview";
 import { nodeArtFiles } from "./files";
 
-const ART_DIR = "public/art";
+const PUBLIC_ART = `public/${ART_DIR}`;
 const OUT_DIR = "out/depth-preview";
 const SWEEP_COUNT = 12;
 const CELL = { height: 96, width: 112 };
@@ -65,7 +65,7 @@ if (key === undefined) {
 }
 
 const root = process.cwd();
-const artFiles = nodeArtFiles(join(root, ART_DIR));
+const artFiles = nodeArtFiles(join(root, PUBLIC_ART));
 const manifest: AssetManifest = await generateArtManifest(artFiles);
 const sprites = new Map(manifest.sprites.map((entry) => [entry.key, entry]));
 const images = new Map(manifest.images.map((entry) => [entry.key, entry]));
@@ -104,7 +104,7 @@ const arts = (
   await Promise.all(SCALE_STEPS.map(async (step) => previewArt(depthVariantKey(key, step) ?? key)))
 ).filter((art) => art !== null);
 if (arts[0]?.key !== key) {
-  process.stderr.write(`${key} is not a sprite or image in ${ART_DIR}/manifest.json\n`);
+  process.stderr.write(`${key} is not a sprite or image in ${PUBLIC_ART}/${ART_MANIFEST}\n`);
   process.exit(1);
 }
 

@@ -3,15 +3,15 @@
 // --check writes nothing and fails if the committed manifest differs from what the files give.
 import { join } from "node:path";
 
-import { ART_MANIFEST, artManifestText, generateArtManifest } from "./artManifest";
+import { ART_DIR, ART_MANIFEST, artManifestText, generateArtManifest } from "./artManifest";
 import { nodeArtFiles, staleFiles, writeFiles } from "./files";
 
-const ART_DIR = "public/art";
+const PUBLIC_ART = `public/${ART_DIR}`;
 
 const check = process.argv.includes("--check");
 const root = process.cwd();
-const manifest = await generateArtManifest(nodeArtFiles(join(root, ART_DIR)));
-const files = new Map([[`${ART_DIR}/${ART_MANIFEST}`, artManifestText(manifest)]]);
+const manifest = await generateArtManifest(nodeArtFiles(join(root, PUBLIC_ART)));
+const files = new Map([[`${PUBLIC_ART}/${ART_MANIFEST}`, artManifestText(manifest)]]);
 
 if (check) {
   const stale = await staleFiles(root, files);
@@ -23,7 +23,7 @@ if (check) {
   const written = await writeFiles(root, files);
   process.stdout.write(
     written.length === 0
-      ? `${ART_DIR}/${ART_MANIFEST} is up to date\n`
+      ? `${PUBLIC_ART}/${ART_MANIFEST} is up to date\n`
       : `wrote ${written.join(", ")}\n`,
   );
 }
