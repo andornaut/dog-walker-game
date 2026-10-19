@@ -13,9 +13,9 @@ export const TUNING = {
     looseDogLanesPerSecond: 2,
     luckyEncountersPerZone: 2,
     // Obstacles that open no card, on top of obstaclesFirstZone.
-    minorObstaclesFirstZone: 23,
+    minorObstaclesFirstZone: 22,
     minorObstaclesGainPerZone: 4,
-    obstaclesFirstZone: 23,
+    obstaclesFirstZone: 22,
     obstaclesGainPerZone: 4,
     // Every row of spawns leaves at least this many lanes free of obstacles.
     openLanesPerRowMin: 2,
@@ -23,11 +23,11 @@ export const TUNING = {
     packSizeMin: 1,
     poopBagsSkipsPerRun: 1,
     squirrelDartLanesPerSecond: 4,
-    tipsFirstZone: 60,
-    tipsGainPerZone: 8,
+    tipsFirstZone: 52,
+    tipsGainPerZone: 7,
     treatCarryMax: 3,
     treatMagnetReachLanes: 1,
-    treatsPerZone: 3,
+    treatsPerZone: 2,
     upgradeChoiceCount: 3,
   },
   // Owner happiness. A meter is always held within 0 and its dog's max.
@@ -128,6 +128,6 @@ export const TUNING = {
     // How long Soaked and Spooked show on a dog; they change nothing in the rules.
     statusVisualSeconds: 10,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
-    zoneAtBaseSpeed: 216,
+    zoneAtBaseSpeed: 144,
   },
 } satisfies Tuning;
