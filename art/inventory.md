@@ -1,10 +1,10 @@
 # Art Inventory
 
-Every art asset v1 needs, derived from `../gameplay/v1-plan.md` and the run screen layout in `../tech-plan.md`. The rules every asset must follow live in `style-guide.md`. Keys are the `public/art/manifest.json` keys (kebab-case). Type is the manifest list: `sprite` (PNG + Aseprite JSON, animations from frameTags), `image` (plain PNG) or `font` (BMFont).
+Every art asset v1 needs, derived from the rulebook in `../gameplay/game-design.md` and the run screen layout in `../tech-plan.md`. What is already exported is listed in `../public/art/manifest.json` and shown in the gallery at `/art/`. The rules every asset must follow live in `style-guide.md`. Keys are the `public/art/manifest.json` keys (kebab-case). Type is the manifest list: `sprite` (PNG + Aseprite JSON, animations from frameTags), `image` (plain PNG) or `font` (BMFont).
 
 Priority:
 
-- **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 5 encounters, 2 pickups, card frames, card illustrations for the 5 encounters and 6 forced stops)
+- **M6:** in the Milestone 6 pixel pass (walker, 9 dogs, 9 owner faces, 5 encounters, 3 lucky encounters, 2 pickups, card frames, card illustrations for the 5 encounters, 3 lucky encounters and 6 forced stops)
 - **v1:** needed before v1 ships, outside the Milestone 6 list
 - **later:** nice to have; placeholders are acceptable for v1
 
@@ -25,15 +25,15 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
 
-| Asset             | Key         | Type   | Size  | Animations                        | Priority | Notes                                              |
-| ----------------- | ----------- | ------ | ----- | --------------------------------- | -------- | -------------------------------------------------- |
-| Walker            | `walker`    | sprite | 32×48 | `walk`, `lane-left`, `lane-right` | M6       | Seen from behind (¾ top-down), at the bottom       |
-| Other dog + owner | `other-dog` | sprite | 32×32 | `walk`                            | M6       | Encounter obstacle; with a 32×48 owner alongside   |
-| Stinky effect     | `fx-stinky` | sprite | 32×32 | `loop`                            | v1       | Green stink lines over the pack while Stinky lasts |
+| Asset             | Key                            | Type   | Size  | Animations      | Priority | Notes                                                                                          |
+| ----------------- | ------------------------------ | ------ | ----- | --------------- | -------- | ---------------------------------------------------------------------------------------------- |
+| Walker            | `walker`, then `walker-<name>` | sprite | 32×48 | `walk`, `react` | M6       | 3 to 4 presets the player picks from; seen from behind; the first (cap and hoodie) is `walker` |
+| Other dog + owner | `other-dog`                    | sprite | 32×32 | `walk`          | M6       | Encounter obstacle; with a 32×48 owner alongside                                               |
+| Stinky effect     | `fx-stinky`                    | sprite | 32×32 | `loop`          | v1       | Green stink lines over the pack while Stinky lasts                                             |
 
 ## Dogs
 
-Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react` and `pull`. Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
+Road sprites are seen from above and behind, like the walker. Small dogs sit well inside the 32×32 tile and big dogs fill it. Every road sprite has the animations `walk`, `react`, `pull` and `tell` (the lean and bark about 1s before a pull). Each dog's look (coat and accessory) must read on both its 32×32 road sprite and its face. Owner faces show the owner's job and temperament (laid-back, fussy or dramatic).
 
 | Dog               | Breed           | Size   | Look                                  | Owner                                  | Road sprite    | Face                | Owner face            | Priority |
 | ----------------- | --------------- | ------ | ------------------------------------- | -------------------------------------- | -------------- | ------------------- | --------------------- | -------- |
@@ -63,6 +63,16 @@ Starters come first: they are the dogs every new player sees.
 | Ice cream truck  | `ice-cream-truck`  | sprite | TBD   | `idle`           | v1       | Forced stop; wider than a lane                             |
 | Construction     | `construction`     | sprite | TBD   | none             | v1       | Forced stop: detour barrier across the road                |
 | Mail carrier     | `mail-carrier`     | sprite | 32×48 | `walk`           | v1       | Forced stop                                                |
+
+## Lucky encounters (road)
+
+Good things to bump into; each opens a choice card.
+
+| Asset             | Key                 | Type   | Size  | Animations      | Priority | Notes                   |
+| ----------------- | ------------------- | ------ | ----- | --------------- | -------- | ----------------------- |
+| Lost wallet       | `lost-wallet`       | sprite | 16×16 | `idle` (glint)  | M6       | Lying on the road       |
+| Biscuit neighbour | `biscuit-neighbour` | sprite | 32×48 | `wave`          | M6       | Holds out a biscuit jar |
+| Photo op          | `photo-op`          | sprite | 32×48 | `idle`, `flash` | M6       | Tourist with a camera   |
 
 ## Pickups (road)
 
@@ -125,37 +135,40 @@ Each card is a frame plus an illustration plus text drawn in the pixel font. Car
 
 Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An encounter with two options shows two centred cards:
 
-| Encounter        | Options                                                                                                      | Count | Priority |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ | ----- | -------- |
-| Skunk            | grooming, quick rinse, ignore                                                                                | 3     | M6       |
-| Squirrel         | hold tight, let them chase                                                                                   | 2     | M6       |
-| Puddle           | go through, towel                                                                                            | 2     | M6       |
-| Other dog        | let them sniff, pull away                                                                                    | 2     | M6       |
-| Thief            | chase them off, let it go                                                                                    | 2     | M6       |
-| Stop sign        | wait, dart across                                                                                            | 2     | M6       |
-| Kid              | let them pet, decline                                                                                        | 2     | M6       |
-| Ice cream truck  | buy pup cups, walk past                                                                                      | 2     | M6       |
-| Construction     | long way, squeeze past                                                                                       | 2     | M6       |
-| Mail carrier     | hold them back, wait it out                                                                                  | 2     | M6       |
-| Chatty neighbour | chat, move on                                                                                                | 2     | M6       |
-| Poop bags        | skip                                                                                                         | 1     | v1       |
-| Upgrades         | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, steady hands, sweet talker | 9     | v1       |
+| Encounter         | Options                                                                                                      | Count | Priority |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ | ----- | -------- |
+| Skunk             | grooming, quick rinse, ignore                                                                                | 3     | M6       |
+| Squirrel          | hold tight, let them chase                                                                                   | 2     | M6       |
+| Puddle            | go through, towel                                                                                            | 2     | M6       |
+| Other dog         | let them sniff, pull away                                                                                    | 2     | M6       |
+| Thief             | chase them off, let it go                                                                                    | 2     | M6       |
+| Lost wallet       | return it, keep it                                                                                           | 2     | M6       |
+| Biscuit neighbour | take biscuits, politely pass                                                                                 | 2     | M6       |
+| Photo op          | pose, wave and walk on                                                                                       | 2     | M6       |
+| Stop sign         | wait, dart across                                                                                            | 2     | M6       |
+| Kid               | let them pet, decline                                                                                        | 2     | M6       |
+| Ice cream truck   | buy pup cups, walk past                                                                                      | 2     | M6       |
+| Construction      | long way, squeeze past                                                                                       | 2     | M6       |
+| Mail carrier      | hold them back, wait it out                                                                                  | 2     | M6       |
+| Chatty neighbour  | chat, move on                                                                                                | 2     | M6       |
+| Poop bags         | skip                                                                                                         | 1     | v1       |
+| Upgrades          | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, steady hands, sweet talker | 9     | v1       |
 
-Total: 33 card illustrations, 23 of them in Milestone 6.
+Total: 39 card illustrations, 29 of them in Milestone 6.
 
 ## Screens outside the run
 
-| Asset             | Key                        | Type  | Size    | Priority | Notes                                        |
-| ----------------- | -------------------------- | ----- | ------- | -------- | -------------------------------------------- |
-| Title / home      | `screen-home`              | image | 360×640 | v1       | Background; bank total and buttons on top    |
-| Logo              | `logo`                     | image | TBD     | later    |                                              |
-| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | v1       | 9 dogs; larger art for dog pick and the shop |
-| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | v1       | fancy, food-driven, chaser                   |
-| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | v1       | calm, steady, hyper                          |
-| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | v1       | laid-back, fussy, dramatic                   |
-| Shop items        | `item-<item>`              | image | 32×32   | v1       | fanny pack, poop bags, lucky collar          |
-| Zone banner       | `ui-zone-banner`           | image | TBD     | v1       | "Zone 2: Park" between zones                 |
-| End screen        | `screen-end`               | image | 360×640 | later    | Earnings summary background                  |
+| Asset             | Key                        | Type  | Size    | Priority | Notes                                                       |
+| ----------------- | -------------------------- | ----- | ------- | -------- | ----------------------------------------------------------- |
+| Title / home      | `screen-home`              | image | 360×640 | v1       | Background; bank total and buttons on top                   |
+| Logo              | `logo`                     | image | TBD     | later    |                                                             |
+| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | v1       | 9 dogs; larger art for dog pick and the shop                |
+| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | v1       | fancy, food-driven, chaser                                  |
+| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | v1       | calm, steady, hyper                                         |
+| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | v1       | laid-back, fussy, dramatic                                  |
+| Shop items        | `item-<item>`              | image | 32×32   | v1       | fanny pack, whistle, poop bags, running shoes, lucky collar |
+| Zone banner       | `ui-zone-banner`           | image | TBD     | v1       | "Maple Street, zone 2: park" between zones                  |
+| End screen        | `screen-end`               | image | 360×640 | later    | Earnings summary background                                 |
 
 ## UI kit
 
@@ -172,7 +185,7 @@ Total: 33 card illustrations, 23 of them in Milestone 6.
 
 | Priority | Sprites | Images           | Fonts |
 | -------- | ------- | ---------------- | ----- |
-| M6       | ~37     | 23 (card illus.) | 1     |
+| M6       | ~41     | 29 (card illus.) | 1     |
 | v1       | ~13     | ~45              | 0     |
 | later    | ~1      | ~23              | 0     |
 

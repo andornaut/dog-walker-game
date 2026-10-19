@@ -4,7 +4,8 @@
 Each dog gets two sprites, both 32x32 and in Endesga 32 with coloured outlines:
 
 - dog-<name>: the road sprite, seen from above and behind. Tags: walk (4
-  frames), react (2) and pull (2, leaning right; the game mirrors it for left).
+  frames), react (2), pull (2, leaning right; the game mirrors it for left)
+  and tell (2, the lean before a pull; the game adds the fx-bark pop).
 - face-dog-<name>: the dog column face. Tags: happy, neutral, upset.
 
 Usage:
@@ -13,86 +14,14 @@ Usage:
                             public/art/sprites/*.png and *.json with Aseprite
 
 Run from the repository root. A build overwrites the .aseprite sources, so
-hand edits to them belong in this file instead.
+hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
-import json
 import os
-import subprocess
 import sys
-import tempfile
 
-# Endesga 32, by role.
-K = dict(
-    rust="be4a2f", ochre="d77643", cream="ead4aa", tan="e4a672", brown="b86f50", dbrown="733e39", plum="3e2731",
-    dred="a22633", red="e43b44", orange="f77622", amber="feae34", yellow="fee761", green="63c74d", dgreen="3e8948",
-    forest="265c42", teal="193c3e", blue="124e89", sky="0099db", cyan="2ce8f5", white="ffffff", lgrey="c0cbdc",
-    grey="8b9bb4", slate="5a6988", dslate="3a4466", navy="262b44", ink="181425", hot="ff0044", purple="68386c",
-    mauve="b55088", pink="f6757a", skin1="e8b796", skin2="c28569",
-)
-PALETTE = [
-    "be4a2f", "d77643", "ead4aa", "e4a672", "b86f50", "733e39", "3e2731", "a22633", "e43b44", "f77622", "feae34",
-    "fee761", "63c74d", "3e8948", "265c42", "193c3e", "124e89", "0099db", "2ce8f5", "ffffff", "c0cbdc", "8b9bb4",
-    "5a6988", "3a4466", "262b44", "181425", "ff0044", "68386c", "b55088", "f6757a", "e8b796", "c28569",
-]
-DARKER = dict(p.split(":") for p in (
-    "be4a2f:733e39 d77643:be4a2f ead4aa:e4a672 e4a672:b86f50 b86f50:733e39 733e39:3e2731 3e2731:181425 "
-    "a22633:3e2731 e43b44:a22633 f77622:be4a2f feae34:f77622 fee761:feae34 63c74d:3e8948 3e8948:265c42 "
-    "265c42:193c3e 193c3e:181425 124e89:262b44 0099db:124e89 2ce8f5:0099db ffffff:c0cbdc c0cbdc:8b9bb4 "
-    "8b9bb4:5a6988 5a6988:3a4466 3a4466:262b44 262b44:181425 181425:181425 ff0044:a22633 68386c:3e2731 "
-    "b55088:68386c f6757a:b55088 e8b796:c28569 c28569:b86f50"
-).split())
-SIZE = 32
-
-
-class Grid:
-    def __init__(self):
-        self.px = [[None] * SIZE for _ in range(SIZE)]
-
-    def p(self, x, y, c):
-        x, y = int(x), int(y)
-        if 0 <= x < SIZE and 0 <= y < SIZE:
-            self.px[y][x] = K.get(c, c) if c else None
-
-    def rect(self, x, y, w, h, c):
-        for j in range(h):
-            for i in range(w):
-                self.p(x + i, y + j, c)
-
-    def ell(self, cx, cy, rx, ry, c, sh=None, li=None):
-        """Filled ellipse, shaded from a top-left light: sh on the lower-right rim, li on the upper-left."""
-        for y in range(SIZE):
-            for x in range(SIZE):
-                dx, dy = (x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry
-                if dx * dx + dy * dy <= 1:
-                    d = 0.7 * (dx + dy)
-                    self.p(x, y, sh if sh and d > 0.5 else li if li and d < -0.72 else c)
-
-    def tri(self, a, b, c, col):
-        def side(px, py, x1, y1, x2, y2):
-            return (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2)
-
-        for y in range(SIZE):
-            for x in range(SIZE):
-                px, py = x + 0.5, y + 0.5
-                d1, d2, d3 = side(px, py, *a, *b), side(px, py, *b, *c), side(px, py, *c, *a)
-                if not ((d1 < 0 or d2 < 0 or d3 < 0) and (d1 > 0 or d2 > 0 or d3 > 0)):
-                    self.p(x, y, col)
-
-    def outlined(self):
-        """Coloured outline: each empty pixel touching the sprite takes the colour two ramp steps darker."""
-        out = [row[:] for row in self.px]
-        for y in range(SIZE):
-            for x in range(SIZE):
-                if self.px[y][x]:
-                    continue
-                for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
-                    xx, yy = x + dx, y + dy
-                    if 0 <= xx < SIZE and 0 <= yy < SIZE and self.px[yy][xx]:
-                        out[y][x] = DARKER[DARKER[self.px[yy][xx]]]
-                        break
-        return out
-
+sys.path.insert(0, os.path.dirname(__file__))
+from pixel import Grid, main  # noqa: E402
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
 # and the body bobs up on the passing beats 1 and 3.
@@ -110,7 +39,11 @@ PULL = [
     dict(fl=-1, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=2),
     dict(fl=-2, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=3),
 ]
-ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160)]
+TELL = [
+    dict(bob=0, tail=1, lean=1, ears=-1),
+    dict(bob=-1, tail=1, lean=2, ears=-1),
+]
+ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("tell", TELL, 250)]
 FACE_TAGS = ["happy", "neutral", "upset"]
 
 
@@ -122,33 +55,35 @@ def pose(q):
 
 def koda_road(q):
     g, q = Grid(), pose(q)
-    b, ln = q["bob"], q["lean"]
+    # o shifts the body down so the big head has headroom to hop and lean
+    b, ln, o = q["bob"], q["lean"], 2
     # legs: white, front pair beside the shoulders, back pair under the hips
-    g.rect(7 + ln // 2, 15 + q["fl"] + b, 3, 4, "lgrey")
-    g.rect(22 + ln // 2, 15 + q["fr"] + b, 3, 4, "lgrey")
-    g.rect(9, 25 + q["bl"], 3, 4, "lgrey")
-    g.rect(20, 25 + q["br"], 3, 4, "lgrey")
+    g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "lgrey")
+    g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "lgrey")
+    g.rect(9, 26 + q["bl"], 3, 4, "lgrey")
+    g.rect(20, 26 + q["br"], 3, 4, "lgrey")
     # body: white flanks, grey saddle, harness
     bx = 16 + ln // 2
-    g.ell(bx, 20.5 + b, 7.5, 6.5, "lgrey", "grey", "white")
-    g.ell(bx, 19.5 + b, 5, 5.5, "slate", "dslate", "grey")
-    g.rect(bx - 6, 16 + b, 12, 2, "orange")
-    g.rect(bx - 6, 17 + b, 12, 1, "rust")
-    g.rect(bx - 2, 20 + b, 4, 2, "orange")
-    g.rect(bx - 1, 21 + b, 2, 1, "slate")
-    g.ell(bx, 15 + b, 5, 1.5, "dslate")
+    g.ell(bx, 20.5 + o + b, 7.5, 6, "lgrey", "grey", "white")
+    g.ell(bx, 19.5 + o + b, 5, 5, "slate", "dslate", "grey")
+    g.rect(bx - 6, 16 + o + b, 12, 2, "orange")
+    g.rect(bx - 6, 17 + o + b, 12, 1, "rust")
+    g.rect(bx - 2, 20 + o + b, 4, 2, "orange")
+    g.rect(bx - 1, 21 + o + b, 2, 1, "slate")
+    g.ell(bx, 15 + o + b, 5, 1.5, "dslate")
     # curled tail over the hips
     tx = 16 + q["tail"]
-    g.ell(tx, 27 + b, 3.5, 2.5, "lgrey", "grey", "white")
-    g.p(tx, 27 + b, "grey")
+    g.ell(tx, 28 + b, 3.5, 2, "lgrey", "grey", "white")
+    g.p(tx, 28 + b, "grey")
     # big head with white cheeks and upright ears
     hx = 16 + ln
     e = q["ears"]
-    g.tri((hx - 7, 7 + b), (hx - 6, 1 + b + e), (hx - 2, 4.5 + b), "dslate")
-    g.tri((hx + 7, 7 + b), (hx + 6, 1 + b + e), (hx + 2, 4.5 + b), "dslate")
-    g.ell(hx, 9.5 + b, 8, 6, "slate", "dslate", "grey")
-    g.ell(hx - 6.5, 12 + b, 2, 2.2, "lgrey")
-    g.ell(hx + 6.5, 12 + b, 2, 2.2, "lgrey", "grey")
+    tip = max(1, 1 + o + b + e)
+    g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "slate")
+    g.tri((hx + 7, 7 + o + b), (hx + 6, tip), (hx + 2, 4.5 + o + b), "slate")
+    g.ell(hx, 9.5 + o + b, 8, 6, "slate", "dslate", "grey")
+    g.ell(hx - 6.5, 12 + o + b, 2, 2.2, "lgrey")
+    g.ell(hx + 6.5, 12 + o + b, 2, 2.2, "lgrey", "grey")
     return g
 
 
@@ -317,104 +252,5 @@ def sprites():
         yield f"face-dog-{name}", [(m, [face(m).outlined()], 1000) for m in FACE_TAGS]
 
 
-def preview(out):
-    from PIL import Image
-
-    scale, gap = 6, 4
-    grounds = ["3a4466", "c0cbdc", "c28569"]
-    rows = []
-    for key, tags in sprites():
-        frames = [f for _, fs, _ in tags for f in fs]
-        for ground in grounds if key.startswith("dog-") else ["e4a672"]:
-            rows.append((frames, ground))
-    width = max(len(f) for f, _ in rows) * (SIZE + gap) * scale
-    img = Image.new("RGB", (width, len(rows) * (SIZE + gap) * scale), (24, 20, 37))
-    for r, (frames, ground) in enumerate(rows):
-        for i, f in enumerate(frames):
-            x0, y0 = i * (SIZE + gap) * scale, r * (SIZE + gap) * scale
-            for y in range(SIZE):
-                for x in range(SIZE):
-                    c = f[y][x] or ground
-                    rgb = tuple(int(c[k:k + 2], 16) for k in (0, 2, 4))
-                    for yy in range(scale):
-                        for xx in range(scale):
-                            img.putpixel((x0 + x * scale + xx, y0 + y * scale + yy), rgb)
-    img.save(out)
-
-
-LUA = """
-local spr = Sprite({size}, {size}, ColorMode.RGB)
-local pal = Palette({ncolors})
-{palette}
-spr:setPalette(pal)
-local rgba = app.pixelColor.rgba
-local frames = {frames}
-local durations = {durations}
-for i, px in ipairs(frames) do
-  if i > 1 then spr:newFrame() end
-  local img = spr.layers[1]:cel(i).image
-  img:clear()
-  for _, p in ipairs(px) do img:drawPixel(p[1], p[2], rgba(p[3], p[4], p[5], 255)) end
-  spr.frames[i].duration = durations[i]
-end
-{tags}
-spr:saveAs("{out}")
-"""
-
-
-def lua_for(key, tags, out):
-    frames, durations, tag_lines, n = [], [], [], 0
-    for tag, fs, ms in tags:
-        tag_lines.append(f'do local t = spr:newTag({n + 1}, {n + len(fs)}); t.name = "{tag}" end')
-        for f in fs:
-            pts = []
-            for y in range(SIZE):
-                for x in range(SIZE):
-                    c = f[y][x]
-                    if c:
-                        pts.append("{%d,%d,%d,%d,%d}" % (x, y, int(c[0:2], 16), int(c[2:4], 16), int(c[4:6], 16)))
-            frames.append("{" + ",".join(pts) + "}")
-            durations.append(str(ms / 1000))
-        n += len(fs)
-    palette = "\n".join(
-        f"pal:setColor({i}, Color{{ r = {int(c[0:2], 16)}, g = {int(c[2:4], 16)}, b = {int(c[4:6], 16)} }})"
-        for i, c in enumerate(PALETTE)
-    )
-    return LUA.format(size=SIZE, ncolors=len(PALETTE), palette=palette, frames="{" + ",\n".join(frames) + "}",
-                      durations="{" + ",".join(durations) + "}", tags="\n".join(tag_lines), out=out)
-
-
-def build():
-    os.makedirs("art/dogs", exist_ok=True)
-    os.makedirs("public/art/sprites", exist_ok=True)
-    built = []
-    for key, tags in sprites():
-        src = f"art/dogs/{key}.aseprite"
-        with tempfile.NamedTemporaryFile("w", suffix=".lua", delete=False) as f:
-            f.write(lua_for(key, tags, src))
-        subprocess.run(["aseprite", "-b", "--script", f.name], check=True)
-        os.unlink(f.name)
-        subprocess.run(["aseprite", "-b", src, "--sheet", f"public/art/sprites/{key}.png",
-                        "--data", f"public/art/sprites/{key}.json", "--format", "json-hash", "--list-tags"],
-                       check=True, stdout=subprocess.DEVNULL)
-        built.append(key)
-    manifest_path = "public/art/manifest.json"
-    with open(manifest_path) as f:
-        manifest = json.load(f)
-    entries = {s["key"]: s for s in manifest.get("sprites", [])}
-    for key in built:
-        entries[key] = {"key": key, "png": f"sprites/{key}.png", "json": f"sprites/{key}.json"}
-    manifest["sprites"] = sorted(entries.values(), key=lambda s: s["key"])
-    with open(manifest_path, "w") as f:
-        json.dump(manifest, f, indent=2)
-        f.write("\n")
-    print("built", ", ".join(built))
-
-
 if __name__ == "__main__":
-    if len(sys.argv) == 3 and sys.argv[1] == "preview":
-        preview(sys.argv[2])
-    elif len(sys.argv) == 2 and sys.argv[1] == "build":
-        build()
-    else:
-        sys.exit(__doc__)
+    main(sys.argv, sprites, "art/dogs", __doc__)

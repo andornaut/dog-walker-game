@@ -1,6 +1,11 @@
 {
   "sprites": [
     {
+      "key": "biscuit-neighbour",
+      "png": "sprites/biscuit-neighbour.png",
+      "json": "sprites/biscuit-neighbour.json"
+    },
+    {
       "key": "dog-biscuit",
       "png": "sprites/dog-biscuit.png",
       "json": "sprites/dog-biscuit.json"
@@ -29,6 +34,61 @@
       "key": "face-dog-koda",
       "png": "sprites/face-dog-koda.png",
       "json": "sprites/face-dog-koda.json"
+    },
+    {
+      "key": "fx-bark",
+      "png": "sprites/fx-bark.png",
+      "json": "sprites/fx-bark.json"
+    },
+    {
+      "key": "lost-wallet",
+      "png": "sprites/lost-wallet.png",
+      "json": "sprites/lost-wallet.json"
+    },
+    {
+      "key": "other-dog",
+      "png": "sprites/other-dog.png",
+      "json": "sprites/other-dog.json"
+    },
+    {
+      "key": "photo-op",
+      "png": "sprites/photo-op.png",
+      "json": "sprites/photo-op.json"
+    },
+    {
+      "key": "puddle",
+      "png": "sprites/puddle.png",
+      "json": "sprites/puddle.json"
+    },
+    {
+      "key": "skunk",
+      "png": "sprites/skunk.png",
+      "json": "sprites/skunk.json"
+    },
+    {
+      "key": "squirrel",
+      "png": "sprites/squirrel.png",
+      "json": "sprites/squirrel.json"
+    },
+    {
+      "key": "thief",
+      "png": "sprites/thief.png",
+      "json": "sprites/thief.json"
+    },
+    {
+      "key": "tip",
+      "png": "sprites/tip.png",
+      "json": "sprites/tip.json"
+    },
+    {
+      "key": "treat",
+      "png": "sprites/treat.png",
+      "json": "sprites/treat.json"
+    },
+    {
+      "key": "walker",
+      "png": "sprites/walker.png",
+      "json": "sprites/walker.json"
     }
   ],
   "fonts": [],

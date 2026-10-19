@@ -29,7 +29,7 @@
 The art-side rules for every asset live here. The tooling that generates, cleans up and packs sprites lives in `../tech-plan.md`.
 
 - **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/art/` (manifest: `public/art/manifest.json`). The pixel font is a BMFont (`.fnt` plus `.png`). The export pipeline lives in `../tech-plan.md`.
-- **Dogs in code:** `art/tools/dogs.py` draws every dog and builds its sources in `art/dogs/` and exports in `public/art/sprites/`, then adds them to the manifest (`python3 art/tools/dogs.py build`; `preview OUT.png` writes a contact sheet). A build overwrites the `.aseprite` files, so change the script, not the sources.
+- **Sprites in code:** `art/tools/dogs.py` draws the dogs and `art/tools/road.py` everything else on the road (walker, pickups, encounters, lucky encounters, the bark pop). Each builds its sources (`art/dogs/`, `art/road/`) and exports in `public/art/sprites/`, then adds them to the manifest: `python3 art/tools/<script>.py build`, or `preview OUT.png` for a contact sheet. Shared drawing and build code is in `art/tools/pixel.py`. A build overwrites the `.aseprite` files, so change the script, not the sources.
 - **Inventory:** every asset v1 needs, with its manifest key, size and priority, is listed in `inventory.md`.
 - **Naming:** TBD (file and sprite naming scheme)
 - **Consistency checks:** every generated asset must match the agreed palette, resolution, proportions and outline style before it goes in the game. TBD once the open decisions above are settled
