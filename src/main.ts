@@ -4,6 +4,7 @@ import { SCREEN_CONFIG } from "./data/screen";
 import { setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
+import { DevOverlayScene } from "./scenes/DevOverlayScene";
 import { EndScene } from "./scenes/EndScene";
 import { HelpScene } from "./scenes/HelpScene";
 import { HudScene } from "./scenes/HudScene";
@@ -14,14 +15,25 @@ import { StartScene } from "./scenes/StartScene";
 setupPhoneApp();
 
 // Scenes render in list order: the HUD over the road, cards and the pause menu over the
-// HUD, and help over everything. Boot runs first and starts the start screen.
+// HUD, help over those, and the dev overlay, which starts itself, over everything. Boot
+// runs first and starts the start screen.
 new Game({
   backgroundColor: "#181425",
   height: SCREEN_CONFIG.height,
   parent: "game",
   pixelArt: true,
   scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.FIT },
-  scene: [BootScene, StartScene, RunScene, HudScene, CardScene, PauseScene, EndScene, HelpScene],
+  scene: [
+    BootScene,
+    StartScene,
+    RunScene,
+    HudScene,
+    CardScene,
+    PauseScene,
+    EndScene,
+    HelpScene,
+    DevOverlayScene,
+  ],
   type: AUTO,
   width: SCREEN_CONFIG.width,
 });

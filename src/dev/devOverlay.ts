@@ -1,0 +1,54 @@
+import type { RunSetup } from "./runSetup";
+
+// Emitted on game.events with a DevState by whichever scene runs the road.
+export const DEV_STATE_EVENT = "dev-state";
+
+// The slice of a run the overlay shows. RunState fits it as it is.
+export interface DevRunView {
+  readonly money: number;
+  readonly pack: readonly (
+    | { readonly dog: string; readonly hearts: number; readonly status: "walking" }
+    | { readonly dog: string; readonly status: "fired" }
+  )[];
+}
+
+export interface DevState {
+  readonly run?: DevRunView;
+  // Pixels per second, after the setup's speed multiplier.
+  readonly scrollSpeed: number;
+  readonly setup: RunSetup;
+  readonly zoneDistance: number;
+  // 0-based, as RunState counts it.
+  readonly zoneIndex: number;
+}
+
+function moneyText(amountCents: number): string {
+  const sign = amountCents < 0 ? "-" : "";
+  return `${sign}$${(Math.abs(amountCents) / 100).toFixed(2)}`;
+}
+
+// The overlay's lines. status is a transient message, such as the result of copying the link.
+export function devOverlayLines(
+  fps: number,
+  status: string | undefined,
+  setup: RunSetup,
+  state: DevState | undefined,
+): string[] {
+  const lines = [`seed ${setup.seed}  fps ${Math.round(fps)}`];
+  if (state === undefined) {
+    lines.push("no dev-state yet");
+  } else {
+    lines.push(
+      `zone ${state.zoneIndex + 1}  ${Math.floor(state.zoneDistance)}px`,
+      `speed ${Math.round(state.scrollSpeed)}px/s x${setup.speed}`,
+    );
+    if (state.run !== undefined) {
+      lines.push(`money ${moneyText(state.run.money)}`);
+      for (const slot of state.run.pack) {
+        lines.push(`${slot.dog} ${slot.status === "walking" ? `${slot.hearts}hp` : "fired"}`);
+      }
+    }
+  }
+  lines.push(status ?? "C copy link  ` hide");
+  return lines;
+}
