@@ -25,12 +25,12 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
 
-| Asset             | Key                            | Type   | Size  | Animations      | Priority | Notes                                                                                          |
-| ----------------- | ------------------------------ | ------ | ----- | --------------- | -------- | ---------------------------------------------------------------------------------------------- |
-| Walker            | `walker`, then `walker-<name>` | sprite | 32×48 | `walk`, `react` | M6       | 3 to 4 presets the player picks from; seen from behind; the first (cap and hoodie) is `walker` |
-| Other dog         | `other-dog`                    | sprite | 32×32 | `walk`          | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                         |
-| Other dog's owner | `other-dog-owner`              | sprite | 32×48 | `walk`          | M6       | Walks behind the other dog; the game draws the leash                                           |
-| Stinky effect     | `fx-stinky`                    | sprite | 32×32 | `loop`          | core     | Green stink lines over the pack while Stinky lasts                                             |
+| Asset             | Key               | Type   | Size  | Animations      | Priority | Notes                                                  |
+| ----------------- | ----------------- | ------ | ----- | --------------- | -------- | ------------------------------------------------------ |
+| Walker            | `walker`          | sprite | 32×48 | `walk`, `react` | M6       | One fixed walker, seen from behind (cap and hoodie)    |
+| Other dog         | `other-dog`       | sprite | 32×32 | `walk`          | M6       | Encounter obstacle (a corgi), led by `other-dog-owner` |
+| Other dog's owner | `other-dog-owner` | sprite | 32×48 | `walk`          | M6       | Walks behind the other dog; the game draws the leash   |
+| Stinky effect     | `fx-stinky`       | sprite | 32×32 | `loop`          | core     | Green stink lines over the pack while Stinky lasts     |
 
 ## Dogs
 
@@ -107,14 +107,14 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Dog column
 
-| Asset            | Key                 | Type   | Size      | Priority | Notes                                                                                                |
-| ---------------- | ------------------- | ------ | --------- | -------- | ---------------------------------------------------------------------------------------------------- |
-| Slot frame       | `ui-dog-slot`       | image  | 72×192    | core     | 9-slice or fixed; includes an empty state                                                            |
-| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                           |
-| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                |
-| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows |
-| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing                                                     |
-| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                                                                         |
+| Asset            | Key                 | Type   | Size      | Priority | Notes                                                                                                                                                                |
+| ---------------- | ------------------- | ------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Slot frame       | `ui-dog-slot`       | image  | 72×192    | core     | 9-slice or fixed; includes an empty state                                                                                                                            |
+| Dog faces        | `face-dog-<name>`   | sprite | 32×32     | M6       | 9 dogs; frames `happy`, `neutral`, `upset`                                                                                                                           |
+| Owner faces      | `face-owner-<name>` | sprite | 32×32     | M6       | 9 owners; frames `happy`, `neutral`, `upset`, `fired`                                                                                                                |
+| Happiness hearts | `ui-heart`          | sprite | 8×8 (TBD) | M6       | Frames `full`, `empty`; up to 11 per slot (big dogs reach 10, +1 with the Lucky collar), so two rows; a number beside the hearts so the meter doesn't rely on colour |
+| Quip bubble      | `ui-quip`           | image  | TBD       | core     | Owner quip after every card choice and on firing                                                                                                                     |
+| Stinky badge     | `icon-stinky`       | image  | 16×16     | core     | Shown while the debuff lasts                                                                                                                                         |
 
 ## Top bar
 
@@ -168,17 +168,20 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 
 ## Screens outside the run
 
-| Asset             | Key                        | Type  | Size    | Priority | Notes                                                       |
-| ----------------- | -------------------------- | ----- | ------- | -------- | ----------------------------------------------------------- |
-| Title / home      | `screen-home`              | image | 360×640 | core     | Background; bank total and buttons on top                   |
-| Logo              | `logo`                     | image | TBD     | later    |                                                             |
-| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | core     | 9 dogs; larger art for dog pick and the shop                |
-| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | core     | fancy, food-driven, chaser                                  |
-| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | core     | calm, steady, hyper                                         |
-| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | core     | laid-back, fussy, dramatic                                  |
-| Shop items        | `item-<item>`              | image | 32×32   | core     | fanny pack, whistle, poop bags, running shoes, lucky collar |
-| Zone banner       | `ui-zone-banner`           | image | TBD     | core     | "Maple Street, zone 2: Bark Park" between zones             |
-| End screen        | `screen-end`               | image | 360×640 | later    | Earnings summary background                                 |
+| Asset             | Key                        | Type  | Size    | Priority | Notes                                                                                      |
+| ----------------- | -------------------------- | ----- | ------- | -------- | ------------------------------------------------------------------------------------------ |
+| Title / home      | `screen-home`              | image | 360×640 | core     | Background; bank total and buttons on top                                                  |
+| Logo              | `logo`                     | image | TBD     | later    |                                                                                            |
+| Dog portraits     | `portrait-dog-<name>`      | image | TBD     | core     | 9 dogs; larger art for dog pick and the shop                                               |
+| Trait icons       | `icon-trait-<trait>`       | image | 16×16   | core     | fancy, food-driven, chaser                                                                 |
+| Energy icons      | `icon-energy-<energy>`     | image | 16×16   | core     | calm, steady, hyper                                                                        |
+| Temperament icons | `icon-owner-<temperament>` | image | 16×16   | core     | laid-back, fussy, dramatic                                                                 |
+| Gear icons        | `item-<gear>`              | image | 32×32   | core     | Fanny pack, whistle, poop bags, running shoes, lucky collar; drawn by `art/tools/icons.py` |
+| Locked dog slot   | `ui-slot-locked`           | image | TBD     | core     | Pack picker slots 2 and 3 until bought ($800 / $1,800): a padlock and the price            |
+| Stats page        | `screen-stats`             | image | 360×640 | core     | Behind the logbook; panel background for the full stats                                    |
+| Hint bubble       | `ui-hint`                  | image | 9-slice | core     | First-time hints: a one-line bubble the first time each thing appears                      |
+| Zone banner       | `ui-zone-banner`           | image | TBD     | core     | "Maple Street, zone 2: Bark Park" between zones                                            |
+| End screen        | `screen-end`               | image | 360×640 | core     | Earnings summary background, with a new-best ribbon (`ui-new-best`)                        |
 
 ## UI kit
 

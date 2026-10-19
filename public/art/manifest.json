@@ -428,6 +428,26 @@
     {
       "key": "help-zones",
       "png": "images/help-zones.png"
+    },
+    {
+      "key": "item-fanny-pack",
+      "png": "images/item-fanny-pack.png"
+    },
+    {
+      "key": "item-lucky-collar",
+      "png": "images/item-lucky-collar.png"
+    },
+    {
+      "key": "item-poop-bags",
+      "png": "images/item-poop-bags.png"
+    },
+    {
+      "key": "item-running-shoes",
+      "png": "images/item-running-shoes.png"
+    },
+    {
+      "key": "item-whistle",
+      "png": "images/item-whistle.png"
     }
   ]
 }
