@@ -51,7 +51,7 @@ export interface SpawnEvent<Kind extends string> {
 
 export interface DueSpawns<Kind extends string> {
   due: SpawnEvent<Kind>[];
-  pending: SpawnEvent<Kind>[];
+  pending: readonly SpawnEvent<Kind>[];
 }
 
 // entry is the reach into the first row from anywhere: the zone starts minSpacing clear,
@@ -385,11 +385,15 @@ export function planSpawns<Kind extends string>(
   return events.sort((a, b) => a.distance - b.distance || a.lane - b.lane);
 }
 
-// Spawns become due once the distance travelled reaches them.
+// Spawns become due once the distance travelled reaches them. Most steps have none due, and
+// keep the pending list as it is.
 export function takeDueSpawns<Kind extends string>(
   distance: number,
   events: readonly SpawnEvent<Kind>[],
 ): DueSpawns<Kind> {
+  if (!events.some((event) => event.distance <= distance)) {
+    return { due: [], pending: events };
+  }
   return {
     due: events.filter((event) => event.distance <= distance),
     pending: events.filter((event) => event.distance > distance),
