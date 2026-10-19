@@ -44,7 +44,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 - A hit obstacle is removed after its card, then ~1s in which obstacles are ignored; pickups still count
 - Walker at the bottom, dogs just ahead in the same lane; the pack collides as one unit
 - Calm speed: scroll speed and density both rise gently per zone, never frantic
-- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. During a drag, once the input lock ends the pack returns toward the lane the drag points at. The size-based input lock starts when the pull's lane move finishes. About 1s before a pull, the dog leans toward that side and barks
+- Pulling: now and then a dog pulls the pack one lane, toward its trait's target (Food-driven: a nearby treat; Chaser: a squirrel) or at random. Each extra dog adds another chance of a pull; you can always steer back. During a drag, a pull re-anchors the drag at the pack's new lane, so getting back takes another drag The size-based input lock starts when the pull's lane move finishes. About 1s before a pull, the dog leans toward that side and barks
 - Area effects (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have someone caught; small dogs are nimble and roll half as often. The card then shows which dogs were caught, so its outcomes stay fixed; if nobody is caught, there is no card
 
 ### Resources
