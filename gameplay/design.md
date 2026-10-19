@@ -42,7 +42,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count. A hit that opens no card (a squirrel with no Chaser, a thief that flees, a skunk or puddle that catches nobody) is scenery: no bump and no grace window
 - Scroll speed and obstacle density rise gently each zone
 - **Pulls:** a dog pulls the pack one lane only toward something it wants that you can see: a treat (Food-driven), a squirrel (Chaser), or a spot for its urgent need. There are no random pulls. About 1 second before, a need or target bubble pops over the dog with an arrow and a line to the target, the leash goes taut and the dog strains; then the pack lurches one lane. Bigger dogs lock lane input longer after the move, and during a drag the pull re-anchors the drag at the new lane. A pull never moves the pack into an obstacle it can't react to: if the target lane has an obstacle too close, the dog strains but doesn't pull
-- **Area effects** (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have a dog caught; small dogs are caught less often. The card shows which dogs were caught, so its outcomes are fixed. If no dog is caught, no card opens
+- **Area effects** (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have a dog caught; small dogs are caught less often. The card shows which dogs were caught, so its outcomes are fixed. If no dog is caught, no card opens: a small splash or puff and a "Close one!" label at the pack show that it was touched
 
 ### Resources
 
@@ -195,7 +195,7 @@ A lucky find with no card pays out on contact, with a short popup and a quip fro
 
 ### Minor obstacles
 
-About half of the obstacles are minor: they open no card. Bumping one drops $2 in tips and makes the pack stumble (lane input locks briefly), shown with a cause label.
+About half of the obstacles are minor: they open no card. Bumping one drops $2 in tips and makes the pack stumble (lane input locks briefly): a few coins burst out at the pack with "−$2", the walker wobbles, and the money counter ticks down. A hydrant is never an obstacle: it's always a need spot for Regular dogs
 
 ### Obstacle sizes
 
@@ -206,7 +206,7 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Skunk (with its spray cloud)                           | Encounter | 2 × 2               |
 | Puddle                                                 | Encounter | 2 × 1               |
 | Squirrel, other dog, thief                             | Encounter | 1 × 1               |
-| Cone, bin, hydrant                                     | Minor     | 1 × 1               |
+| Cone, bin                                              | Minor     | 1 × 1               |
 | Parked car                                             | Minor     | 1 × 3               |
 | Bench                                                  | Minor     | 2 × 1               |
 | Hedge                                                  | Minor     | 3 × 1               |
@@ -227,6 +227,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
+- **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse, which flashes red and shakes. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "PICKPOCKETED!") and the caught dogs shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds without a card don't stop the walk; the lemonade stand plays its popup during a 1-second stop, then opens its card
 - **Low hearts:** an owner at 1 ♥ looks worried and their doghouse pulses gently (a static warning rim with reduced motion)

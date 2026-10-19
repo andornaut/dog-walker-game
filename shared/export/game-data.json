@@ -3033,7 +3033,7 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 1,
+          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3104,7 +3104,7 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 1,
+          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3175,7 +3175,7 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 1,
+          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3246,7 +3246,7 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 1,
+          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3317,7 +3317,7 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 1,
+          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
@@ -3388,7 +3388,7 @@
           "bin": 1,
           "cone": 1,
           "hedge": 1,
-          "hydrant": 1,
+          "hydrant": 0,
           "parkedCar": 1
         },
         "needSpots": {
