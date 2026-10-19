@@ -4,6 +4,7 @@ import { addCents, type Cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 import { awardAchievements, type AwardContext } from "./achievements";
 import type { Checkpoint, DogRun, DogStats, LastWalk, SaveDocument, SaveStats } from "./schema";
+import { ZERO_DOG_STATS } from "./stats";
 
 // A finished run. earnedCents is what the run banks, after clawbacks. zone is the zone in
 // progress when the run ended, counting from 1; between zones it is the next one. A
@@ -22,8 +23,6 @@ export interface RunResult {
 export function zonesFinishedBy(result: Pick<RunResult, "outcome" | "zone">): number {
   return result.outcome === "finished" ? result.zone : result.zone - 1;
 }
-
-const zeroDogStats: DogStats = { timesFired: 0, walks: 0, zonesFinished: 0 };
 
 // Whether a run banking earnedCents would be the best walk yet; the end screen flags it.
 export function isNewBestWalk(stats: Pick<SaveStats, "bestWalk">, earnedCents: Cents): boolean {
@@ -44,7 +43,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
   const { stats } = save;
   const dogs: Partial<Record<DogId, DogStats>> = { ...stats.dogs };
   for (const { fired, id, zonesFinished } of run.dogs) {
-    const current = dogs[id] ?? zeroDogStats;
+    const current = dogs[id] ?? ZERO_DOG_STATS;
     dogs[id] = {
       timesFired: current.timesFired + (fired ? 1 : 0),
       walks: current.walks + 1,

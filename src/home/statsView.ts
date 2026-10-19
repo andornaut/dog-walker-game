@@ -1,6 +1,6 @@
 import type { DogId, GameData } from "../data/types";
 import type { DogStats, Owned, SaveStats } from "../save/schema";
-import { statsPage } from "../save/stats";
+import { statsPage, ZERO_DOG_STATS } from "../save/stats";
 import { fillLine } from "../text/lines";
 import { dollarText } from "./home";
 import { MENU_TEXT_FIELDS } from "./menuText";
@@ -61,9 +61,7 @@ export function dogRows(
       {
         dog,
         name: data.dogs[dog].name,
-        timesFired: walked?.timesFired ?? 0,
-        walks: walked?.walks ?? 0,
-        zonesFinished: walked?.zonesFinished ?? 0,
+        ...(walked ?? ZERO_DOG_STATS),
       },
     ];
   });

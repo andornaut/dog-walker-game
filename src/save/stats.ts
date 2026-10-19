@@ -1,7 +1,10 @@
 import type { DogId } from "../data/types";
 import { type Cents, cents } from "../rules/units";
 import type { EndReason } from "../state/runState";
-import type { SaveStats } from "./schema";
+import type { DogStats, SaveStats } from "./schema";
+
+// A dog's stats before its first walk.
+export const ZERO_DOG_STATS: DogStats = { timesFired: 0, walks: 0, zonesFinished: 0 };
 
 // What the logbook's Stats page shows, derived from the saved stats.
 export interface StatsPage {
