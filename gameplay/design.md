@@ -214,7 +214,7 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 
 ### Obstacle skins
 
-Each obstacle kind keeps one mechanic and wears a different look in each zone: a skin changes the name (the card title), the art and the hit label, never the effects, the options or who's affected. A big dog still scares off every Snatch skin, and Chasers still pull toward every Chase skin. The zone encounters already have their own looks.
+Each obstacle kind keeps one mechanic and wears a different look in each zone: a skin changes the name (the card title), the road sprite, the card illustration and the hit label, never the effects, the options or who's affected. The hit burst and screen-edge flash stay with the kind (a Stink skin always bursts green), so the same colour always means the same mechanic. A big dog still scares off every Snatch skin, and Chasers still pull toward every Chase skin. The zone encounters already have their own looks.
 
 | Kind               | Willow Crescent | Fairview Park  | Elm Avenue | Main Street       | Riverside Path  | The Long Way Home |
 | ------------------ | --------------- | -------------- | ---------- | ----------------- | --------------- | ----------------- |
