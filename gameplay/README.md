@@ -22,7 +22,7 @@ Ideas stay in `ideas.md` until agreed in a session, then move to the doc they be
 
 ## Sessions
 
-Start a session by saying "design session" or "tech session", plus a topic if there is one; Claude reads the relevant docs. Several people may talk at once (voice), and authorship is not recorded. End by saying "wrap up": Claude proposes the doc changes and writes them only after we confirm.
+Start a session by saying "design session" or "tech session", plus a topic if there is one; Claude reads the relevant docs. End by saying "wrap up": Claude proposes the doc changes and writes them only after we confirm.
 
 - **Design sessions** (mechanics, story, characters, dogs, progression, feel): Claude captures everything, keeps "floated" separate from "agreed", and asks the question that unblocks a decision.
 - **Tech sessions** (engine, code structure, tooling, builds, porting): Claude proposes options with trade-offs and flags choices that would make the mobile port harder.

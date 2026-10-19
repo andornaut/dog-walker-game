@@ -291,7 +291,7 @@ Rules above that the game doesn't have yet:
 3. **Forks and zones:** the fork card and the 6 zones with their encounter mix, density, speed and fees
 4. **Needs and purposeful pulls:** need words, urgency, need spots, need cards, accidents; pulls only toward a visible target, never into an obstacle
 5. **Zone encounters:** the five above plus the lemonade stand
-6. **Art:** the zone encounters, the lemonade stand and the fork's path cards (need art is in)
+6. **Art:** the zone encounters and the lemonade stand, the fork's path cards, and the need cards
 
 Tuning, after each build, with the simulator before and after:
 
