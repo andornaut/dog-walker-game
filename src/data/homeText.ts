@@ -20,4 +20,7 @@ export const HOME_TEXT = {
   slotSave: "Save {amount} more",
   slotSign: "Slot {slot} · {price}",
   startWalk: "Start walk · {dogs} · {fee}/zone",
+  stepDogs: "2 Dogs",
+  stepGear: "3 Gear (optional)",
+  stepWalker: "1 Walker",
 } as const satisfies HomeText;

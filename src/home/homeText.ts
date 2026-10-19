@@ -14,6 +14,9 @@ export const HOME_TEXT_FIELDS = {
   slotSave: ["amount"],
   slotSign: ["price", "slot"],
   startWalk: ["dogs", "fee"],
+  stepDogs: [],
+  stepGear: [],
+  stepWalker: [],
 } as const satisfies Record<LineKey, readonly string[]>;
 
 type Fields<K extends LineKey> = Record<(typeof HOME_TEXT_FIELDS)[K][number], string>;

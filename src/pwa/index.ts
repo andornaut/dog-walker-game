@@ -5,7 +5,12 @@
 import { guardBackNavigation } from "./backNavigation";
 import { PHONE_EVENTS } from "./events";
 import { relayOrientationEvents, type Viewport } from "./orientation";
-import { createUpdatePrompt, type UpdatePrompt, watchForWaitingWorker } from "./updateReady";
+import {
+  createUpdatePrompt,
+  noticePlacement,
+  type UpdatePrompt,
+  watchForWaitingWorker,
+} from "./updateReady";
 import { relayVisibilityEvents } from "./visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
@@ -16,6 +21,27 @@ const SERVICE_WORKER_URL = "/sw.js";
 // Elements in play/index.html.
 const TURN_UPRIGHT_ID = "turn-upright";
 const UPDATE_READY_ID = "update-ready";
+const GAME_ID = "game";
+
+// Keeps the notice over the game's top, wherever the canvas is scaled and letterboxed to.
+// Returns a function that places it now, for when it is shown.
+function placeNoticeOverGame(notice: HTMLElement): () => void {
+  const game = document.getElementById(GAME_ID);
+  if (game === null) {
+    return () => undefined;
+  }
+  const place = () => {
+    const canvas = game.querySelector("canvas") ?? game;
+    const { centreX, maxWidth, top } = noticePlacement(canvas.getBoundingClientRect());
+    notice.style.left = `${centreX}px`;
+    notice.style.top = `${top}px`;
+    notice.style.maxWidth = `${maxWidth}px`;
+  };
+  place();
+  new ResizeObserver(place).observe(game);
+  window.addEventListener("resize", place);
+  return place;
+}
 
 let screenWakeLock: ScreenWakeLock | undefined;
 let updatePrompt: UpdatePrompt | undefined;
@@ -28,11 +54,13 @@ function registerServiceWorker(): void {
   }
   const container = navigator.serviceWorker;
   const notice = document.getElementById(UPDATE_READY_ID);
+  const placeNotice = notice === null ? () => undefined : placeNoticeOverGame(notice);
   const prompt = createUpdatePrompt(
     container,
     () => location.reload(),
     (visible) => {
       if (notice !== null) {
+        placeNotice();
         notice.hidden = !visible;
       }
     },

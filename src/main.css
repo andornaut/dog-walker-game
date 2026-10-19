@@ -106,13 +106,14 @@ body:has(.dev-sheet:not([hidden])) #game {
   fill: #3e2731;
 }
 
-/* The update notice: bottom centre, just above the dev bar and the bottom safe area, kept low
-   so it covers as little of the home screen's bottom controls as it can. */
+/* The update notice: over the top of the game, under the home screen's top bar and clear of
+   its steps and Start walk. src/pwa sets left, top and max-width from the canvas's box. */
 .update-toast {
   position: fixed;
   left: 50%;
-  bottom: calc(var(--dev-bar-height) + env(safe-area-inset-bottom, 0px) + 4px);
+  top: 48px;
   z-index: 10;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 12px;

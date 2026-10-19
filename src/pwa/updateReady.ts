@@ -74,6 +74,32 @@ export function activateWaitingWorker(
   worker.postMessage(SKIP_WAITING_MESSAGE);
 }
 
+// The game's size, and where the notice sits in it: over the gate scene's street, under the
+// top bar, clear of the home screen's steps and Start walk at the bottom.
+const GAME = { height: 640, width: 360 } as const;
+const NOTICE = { maxWidth: 260, top: 48 } as const;
+
+export interface BoxLike {
+  readonly height: number;
+  readonly left: number;
+  readonly top: number;
+  readonly width: number;
+}
+
+// Where the notice goes, in page pixels, for the canvas's bounding box: centred on it
+// (centreX is the notice's centre), its top at game y 48, and at most 260 game pixels wide.
+export function noticePlacement(canvas: BoxLike): {
+  centreX: number;
+  maxWidth: number;
+  top: number;
+} {
+  return {
+    centreX: canvas.left + canvas.width / 2,
+    maxWidth: (canvas.width * NOTICE.maxWidth) / GAME.width,
+    top: canvas.top + (canvas.height * NOTICE.top) / GAME.height,
+  };
+}
+
 export interface UpdatePrompt {
   // Reload into the waiting version, if there is one.
   accept(): void;

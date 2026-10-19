@@ -2,9 +2,11 @@ import { type GameObjects, type Input, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
-import { dogFaceKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
+import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
+import { bankAtLastVisit, isAffordable, newlyAffordable } from "../home/afford";
+import { dogDetail, gearDetail } from "../home/detail";
 import {
   badgePopOffset,
   bobOffset,
@@ -16,6 +18,7 @@ import {
   shakeOffset,
 } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
+import { type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../home/hold";
 import {
   buy,
   dogInfo,
@@ -33,6 +36,17 @@ import {
   tapGear,
   wrapWords,
 } from "../home/home";
+import {
+  bubbleLine,
+  type HomeAction,
+  messageLine,
+  packCountLine,
+  slotSignLines,
+  startWalkLine,
+  stepHeading,
+  type WalkerLine,
+  walkerLineKey,
+} from "../home/homeLines";
 import { choiceFull, type SelectLook } from "../home/selection";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -45,6 +59,14 @@ import type { SaveDocument } from "../save/schema";
 import { drawFocusRing, drawPixelLine, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
+import {
+  addAffordFrame,
+  type DetailPicture,
+  drawDetailCard,
+  drawLogbookPanel,
+  drawSlotSign,
+  drawStepPlate,
+} from "./homePanels";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
 import {
@@ -64,6 +86,7 @@ import { addStandingSprite, spriteMetrics } from "./sprites";
 import type { StatsSceneData } from "./StatsScene";
 import {
   addIconButton,
+  addNineSlice,
   addSelectTile,
   cogIcon,
   fitText,
@@ -99,18 +122,26 @@ const MUTE_BUTTON: Rect = { height: 44, width: 44, x: 316, y: 40 };
 const MUTE_ICON = { x: 332, y: 46 };
 const SETTINGS_BUTTON: Rect = { height: 44, width: 44, x: 256, y: 0 };
 const SETTINGS_ICON = { x: 268, y: 10 };
-const SLOT_SIGN: Rect = { height: 44, width: 132, x: 222, y: 140 };
+const LOGBOOK_BUTTON: Rect = { height: 44, width: 44, x: 204, y: 0 };
+const LOGBOOK_ICON = { x: 216, y: 10 };
+const SLOT_SIGN: Rect = { height: 46, width: 160, x: 196, y: 140 };
 const LOGO = { key: "logo", x: 6, y: 146 };
-const HEADING_Y = 200;
-const DOG_TILES = { cellHeight: 50, cellWidth: 112, columns: 3, gapX: GAP, gapY: GAP };
-const DOG_ORIGIN = { x: 4, y: 214 };
-const GEAR_SLOTS = { cellHeight: 54, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 };
-const GEAR_ORIGIN = { x: 4, y: 388 };
-const INFO = { lineHeight: 16, maxWidth: 352, y: 447 };
-const LOGBOOK: Rect = { height: 54, width: 352, x: 4, y: 478 };
-const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 538 };
+// Under the gate, three steps top to bottom: the walker's plate beside its tiles, then the
+// dogs' and the gear's plates each over their tiles; then the message line and Start walk.
+const STEP_PLATE_HEIGHT = 24;
 const WALKER_TILES = { cellHeight: 44, cellWidth: 44, columns: 4, gapX: GAP, gapY: 0 };
-const WALKER_ORIGIN = { x: 84, y: 590 };
+const WALKER_ORIGIN = { x: 156, y: 202 };
+const DOGS_STEP_Y = 254;
+const DOG_TILES = { cellHeight: 50, cellWidth: 112, columns: 3, gapX: GAP, gapY: GAP };
+const DOG_ORIGIN = { x: 4, y: 286 };
+const GEAR_STEP_Y = 460;
+// A gear tile holds its icon with its price tag over the icon's foot while locked, and its
+// name on up to two lines.
+const GEAR_SLOTS = { cellHeight: 64, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 };
+const GEAR_ORIGIN = { x: 4, y: 492 };
+const GEAR_NAME = { lineHeight: 13, y: 39 };
+const INFO = { lineHeight: 15, maxWidth: 352, y: 560 };
+const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 592 };
 const GEAR_BADGE: Rect = { height: 18, width: 18, x: 194, y: 166 };
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
@@ -121,6 +152,8 @@ const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
 const SPEECH_CHARS = 30;
 const SPEECH_LINES = 3;
 const INFO_CHARS = 48;
+// A gear name breaks onto a second line past this many characters, as "Running" / "shoes".
+const GEAR_NAME_CHARS = 8;
 
 // The walkers in data order, as the picker shows them.
 function walkerIds(): WalkerId[] {
@@ -135,6 +168,7 @@ type Target =
   | { dog: DogId; kind: "dog" }
   | { gear: GearId; kind: "gear" }
   | { kind: "help" }
+  | { kind: "logbook" }
   | { kind: "mute" }
   | { kind: "settings" }
   | { kind: "slot" }
@@ -182,14 +216,21 @@ interface Focusable {
   target: Target;
 }
 
-// The keyboard's rows, top to bottom: the dog rows, gear, Start walk and the walkers.
+// The keyboard's rows, top to bottom as the screen shows them: the walkers, the dog rows,
+// gear and Start walk.
 function focusRows(): Focusable[][] {
+  const walkers = walkerTiles();
+  const rows: Focusable[][] = [
+    walkerIds().map((walker, i): Focusable => ({
+      rect: itemAt(walkers, i),
+      target: { kind: "walker", walker },
+    })),
+  ];
   const tiles = dogTiles();
   const dogs = rosterOrder().map((dog, i): Focusable => ({
     rect: itemAt(tiles, i),
     target: { dog, kind: "dog" },
   }));
-  const rows: Focusable[][] = [];
   for (let i = 0; i < dogs.length; i += DOG_TILES.columns) {
     rows.push(dogs.slice(i, i + DOG_TILES.columns));
   }
@@ -201,15 +242,18 @@ function focusRows(): Focusable[][] {
     })),
   );
   rows.push([{ rect: START_BUTTON, target: { kind: "start" } }]);
-  const walkers = walkerTiles();
-  rows.push(
-    walkerIds().map((walker, i): Focusable => ({
-      rect: itemAt(walkers, i),
-      target: { kind: "walker", walker },
-    })),
-  );
   return rows;
 }
+
+// What is open over the screen: a held tile's detail card, or the logbook. rect is the
+// panel, so a tap outside it closes it.
+type Overlay =
+  | {
+      kind: "detail";
+      rect: Rect | undefined;
+      target: { dog: DogId; kind: "dog" } | { gear: GearId; kind: "gear" };
+    }
+  | { kind: "logbook"; rect: Rect | undefined; stats: Rect | undefined };
 
 // A tile that reacts to taps: its container moves for the dip, lift and shake, its face hops,
 // and its badge pops.
@@ -231,76 +275,123 @@ interface Burst {
   startedMs: number;
 }
 
-// The screen before a walk: bank and best walk, the walker and pack at the gate, the dog
-// picker, gear, logbook and Start walk. It is also the shop: tapping a locked dog, gear item
-// or dog slot buys it when the bank covers it, and shakes it when not. The arrow keys move a
-// focus ring, Enter or Space picks, ? opens help, S settings and M mutes.
+// The bank the last time the home screen was shown this session, so the walker can say
+// when something new became affordable.
+const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
+
+// The screen before a walk: bank, best walk and the Logbook in the top bar, the walker and
+// pack at the gate, then three steps (walker, dogs, gear) and Start walk. It is also the
+// shop: tapping a locked dog, gear item or dog slot buys it when the bank covers it, and
+// shakes it when not; holding a dog or gear tile opens its detail card. The arrow keys move
+// a focus ring, Enter or Space picks, Escape closes a card, ? opens help, S settings, L the
+// logbook and M mutes.
 export class StartScene extends Scene {
+  // The last action, for the message line and the bubble.
+  private action: HomeAction = { kind: "none" };
   private bursts: Burst[] = [];
   private focus: Focus | null = null;
   private fxLayer: GameObjects.Container | undefined;
   private gateDogs: { dog: DogId; footY: number; sprite: GameObjects.Sprite }[] = [];
-  // What the info line describes: the item last tapped or focused.
-  private info: Target | undefined;
+  // A press on a dog or gear tile that may become a hold.
+  private hold: HoldPress | undefined;
   private loadout: HomeLoadout = { dogs: [], gear: null };
-  private notice = "";
+  private overlay: Overlay | undefined;
+  private overlayLayer: GameObjects.Container | undefined;
+  // A press that began while a panel was open: it never reaches the tiles under it.
+  private overlayPress: { x: number; y: number } | undefined;
   // Taps waiting for their dip to finish before they act.
   private pending = new Set<Time.TimerEvent>();
   private pops = new Map<string, number>();
   private press: { held: boolean; id: string; startedMs: number } | undefined;
   private pressedTarget: Target | undefined;
+  // The parting lines drawn this visit, one per dog picked or bought.
+  private quips = new Map<DogId, string>();
   private root: GameObjects.Container | undefined;
   private shakes = new Map<string, number>();
-  // The speech bubble's lines while the pack has dogs: the parting line of the owner whose
-  // dog was picked last, or null for the walker's own line.
-  private speech: string[] | null = null;
   private startButton:
     | { container: GameObjects.Container; down: GameObjects.Container; up: GameObjects.Container }
     | undefined;
   private views = new Map<string, TileView>();
+  private walkerLine: WalkerLine = "firstVisit";
 
   constructor() {
     super(SCENE_KEYS.start);
   }
 
   create(): void {
+    this.action = { kind: "none" };
     this.bursts = [];
     this.focus = null;
-    this.info = undefined;
-    this.notice = "";
+    this.hold = undefined;
+    this.overlay = undefined;
+    this.overlayPress = undefined;
     this.pending = new Set();
     this.pops = new Map();
     this.press = undefined;
     this.pressedTarget = undefined;
+    this.quips = new Map();
     this.shakes = new Map();
-    this.speech = null;
     this.views = new Map();
-    const { lastLoadout } = profileSave(this);
+    const { bankCents, lastLoadout, owned, stats } = profileSave(this);
     this.loadout = { dogs: [...lastLoadout.dogs], gear: lastLoadout.gear };
+    const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
+    const before = bankAtLastVisit(remembered, bankCents, stats.lastWalk);
+    this.walkerLine = walkerLineKey(
+      stats.lastWalk,
+      newlyAffordable(gameData, owned, before, bankCents),
+    );
     stopWakeLock();
     setRunOverride(this, null);
 
     this.drawGate();
     this.root = this.add.container(0, 0);
+    this.overlayLayer = this.add.container(0, 0);
     this.fxLayer = this.add.container(0, 0);
     this.render();
 
     this.input.on("pointerdown", (pointer: Input.Pointer) => {
       this.addBurst("fx-tap", pointer.x, pointer.y);
+      if (this.overlay !== undefined) {
+        this.overlayPress = { x: pointer.x, y: pointer.y };
+        return;
+      }
       this.pressedTarget = this.targetAt(pointer.x, pointer.y);
+      const kind = this.pressedTarget?.kind;
+      this.hold =
+        kind === "dog" || kind === "gear"
+          ? startHold({ x: pointer.x, y: pointer.y }, this.time.now)
+          : undefined;
       this.press =
         this.pressedTarget === undefined
           ? undefined
           : { held: true, id: targetId(this.pressedTarget), startedMs: this.time.now };
     });
+    this.input.on("pointermove", (pointer: Input.Pointer) => {
+      if (this.hold !== undefined && pointer.isDown) {
+        this.hold = moveHold(this.hold, { x: pointer.x, y: pointer.y });
+      }
+    });
     this.input.on("pointerup", (pointer: Input.Pointer) => {
+      const down = this.overlayPress;
+      this.overlayPress = undefined;
+      if (down !== undefined) {
+        this.releaseOnOverlay(down, pointer.x, pointer.y);
+        return;
+      }
       const target = this.targetAt(pointer.x, pointer.y);
       const pressed = this.pressedTarget;
+      const release = this.hold === undefined ? "tap" : releaseHold(this.hold, this.time.now);
+      this.hold = undefined;
       this.pressedTarget = undefined;
       if (this.press !== undefined) {
         this.press.held = false;
       }
-      if (target !== undefined && pressed !== undefined && targetId(target) === targetId(pressed)) {
+      if (target === undefined || pressed === undefined || targetId(target) !== targetId(pressed)) {
+        return;
+      }
+      if (release === "hold") {
+        this.openDetail(pressed);
+      } else if (release === "tap") {
         this.actAfterDip(target);
       }
     });
@@ -322,6 +413,18 @@ export class StartScene extends Scene {
   }
 
   private onKey(key: string): void {
+    if (this.overlay !== undefined) {
+      if (key === "Escape") {
+        this.closeOverlay();
+      } else if (isConfirmKey(key)) {
+        const stats = this.overlay.kind === "logbook";
+        this.closeOverlay();
+        if (stats) {
+          this.act({ kind: "stats" });
+        }
+      }
+      return;
+    }
     const direction = focusDirectionForKey(key);
     if (direction !== undefined) {
       const rows = focusRows();
@@ -330,9 +433,7 @@ export class StartScene extends Scene {
         direction,
         this.focus,
       );
-      const focused = rows[this.focus.row]?.[this.focus.column]?.target;
-      this.info = focused?.kind === "start" ? undefined : focused;
-      this.notice = "";
+      this.action = this.focusAction(rows[this.focus.row]?.[this.focus.column]?.target);
       this.render();
       return;
     }
@@ -348,6 +449,8 @@ export class StartScene extends Scene {
       this.act({ kind: "help" });
     } else if (key === "s" || key === "S") {
       this.act({ kind: "settings" });
+    } else if (key === "l" || key === "L") {
+      this.act({ kind: "logbook" });
     } else if (isMuteKey(key)) {
       this.act({ kind: "mute" });
     }
@@ -355,6 +458,53 @@ export class StartScene extends Scene {
 
   private save(): SaveDocument {
     return profileSave(this);
+  }
+
+  // A focused dog or gear item in words, so a keyboard player has what a hold shows.
+  private focusAction(target: Target | undefined): HomeAction {
+    const { bankCents, owned } = this.save();
+    if (target?.kind === "dog") {
+      return { kind: "focus", text: dogInfo(gameData, owned, bankCents, target.dog) };
+    }
+    if (target?.kind === "gear") {
+      return { kind: "focus", text: gearInfo(gameData, owned, bankCents, target.gear) };
+    }
+    return { kind: "none" };
+  }
+
+  private openDetail(target: Target): void {
+    if (target.kind !== "dog" && target.kind !== "gear") {
+      return;
+    }
+    this.press = undefined;
+    this.overlay = { kind: "detail", rect: undefined, target };
+    this.render();
+  }
+
+  private closeOverlay(): void {
+    this.overlay = undefined;
+    this.render();
+  }
+
+  // A tap while a panel is open: on the logbook's Stats button it opens Stats, outside the
+  // panel it closes it, and inside it does nothing.
+  private releaseOnOverlay(down: { x: number; y: number }, x: number, y: number): void {
+    const overlay = this.overlay;
+    if (overlay === undefined) {
+      return;
+    }
+    const within = (rect: Rect | undefined) =>
+      rect !== undefined && containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y);
+    if (overlay.kind === "logbook" && within(overlay.stats)) {
+      this.closeOverlay();
+      this.act({ kind: "stats" });
+      return;
+    }
+    const outside = (px: number, py: number) =>
+      overlay.rect === undefined || !containsPoint(overlay.rect, px, py);
+    if (outside(down.x, down.y) && outside(x, y)) {
+      this.closeOverlay();
+    }
   }
 
   private targetAt(x: number, y: number): Target | undefined {
@@ -375,7 +525,7 @@ export class StartScene extends Scene {
       [HELP_BUTTON, { kind: "help" }],
       [MUTE_BUTTON, { kind: "mute" }],
       [SETTINGS_BUTTON, { kind: "settings" }],
-      [LOGBOOK, { kind: "stats" }],
+      [LOGBOOK_BUTTON, { kind: "logbook" }],
     ];
     const hit = fixed.find(([rect]) => containsPoint(rect, x, y));
     if (hit !== undefined) {
@@ -385,13 +535,9 @@ export class StartScene extends Scene {
     return forSale && containsPoint(SLOT_SIGN, x, y) ? { kind: "slot" } : undefined;
   }
 
-  // A newly picked dog's owner says a parting line; it stays until that dog leaves the pack.
-  private speechAfter(next: HomeLoadout): string[] | null {
-    const added = next.dogs.find((dog) => !this.loadout.dogs.includes(dog));
-    if (added !== undefined) {
-      return partingSpeech(gameData, Math.random, SPEECH_CHARS, added).slice(0, SPEECH_LINES);
-    }
-    return next.dogs.length < this.loadout.dogs.length ? null : this.speech;
+  // A dog's owner says a parting line when it is picked or bought; it is drawn once a visit.
+  private drawQuip(dog: DogId): void {
+    this.quips.set(dog, partingSpeech(gameData, Math.random, Infinity, dog).join(" "));
   }
 
   // A tap's result, such as the selected state, shows once its press has dipped.
@@ -415,7 +561,6 @@ export class StartScene extends Scene {
     switch (target.kind) {
       case "dog":
       case "gear": {
-        this.info = target;
         const { owned } = this.save();
         const tap =
           target.kind === "dog"
@@ -425,7 +570,10 @@ export class StartScene extends Scene {
           this.purchase(id, tap.purchase);
         } else if (tap.kind === "full") {
           this.shakes.set(id, now);
-          this.notice = "The pack is full. Tap a picked dog to take it out.";
+          this.action = {
+            kind: "notice",
+            text: "The pack is full. Tap a picked dog to take it out.",
+          };
           this.render();
         } else {
           this.setLoadout(tap.loadout);
@@ -437,20 +585,26 @@ export class StartScene extends Scene {
         return;
       case "walker":
         this.pops.set(id, now);
-        this.info = undefined;
-        this.notice = `Walking as ${gameData.walkers[target.walker].name}.`;
+        this.action = {
+          kind: "notice",
+          text: `Walking as ${gameData.walkers[target.walker].name}.`,
+        };
         void updateProfile(this, (save) => ({ ...save, walker: target.walker }));
         this.render();
         return;
       case "mute": {
         const muted = !isMuted(this);
         setMuted(this, muted);
-        this.notice = muted ? "Sound off." : "Sound on.";
+        this.action = { kind: "notice", text: muted ? "Sound off." : "Sound on." };
         this.render();
         return;
       }
       case "help":
         openHelp(this, SCENE_KEYS.start);
+        return;
+      case "logbook":
+        this.overlay = { kind: "logbook", rect: undefined, stats: undefined };
+        this.render();
         return;
       case "settings": {
         const data: SettingsSceneData = { origin: "home", resume: SCENE_KEYS.start };
@@ -477,13 +631,13 @@ export class StartScene extends Scene {
     const now = this.time.now;
     for (const dog of next.dogs.filter((picked) => !this.loadout.dogs.includes(picked))) {
       this.pops.set(`dog:${dog}`, now);
+      this.drawQuip(dog);
     }
     if (next.gear !== null && next.gear !== this.loadout.gear) {
       this.pops.set(`gear:${next.gear}`, now);
     }
-    this.speech = this.speechAfter(next);
     this.loadout = next;
-    this.notice = "";
+    this.action = { kind: "loadout" };
     const lastLoadout = { dogs: [...next.dogs], gear: next.gear };
     void updateProfile(this, (save) => ({ ...save, lastLoadout }));
     this.render();
@@ -499,10 +653,10 @@ export class StartScene extends Scene {
     if (result.kind === "refused") {
       this.shakes.set(id, now);
       const cost = purchasePrice(gameData, save.owned, purchase);
-      this.notice =
+      this.action =
         cost === null
-          ? ""
-          : `${name} costs ${dollarText(cost)}. Need ${dollarText(cents(cost - save.bankCents))} more.`;
+          ? { kind: "none" }
+          : { amount: cents(cost - save.bankCents), kind: "cantAfford", name };
       this.render();
       return;
     }
@@ -511,7 +665,11 @@ export class StartScene extends Scene {
     if (purchase.kind === "gear") {
       this.setLoadout({ ...this.loadout, gear: purchase.gear });
     }
-    this.notice = `Bought ${name}!`;
+    const dog = purchase.kind === "dog" ? purchase.dog : null;
+    if (dog !== null) {
+      this.drawQuip(dog);
+    }
+    this.action = { dog, kind: "bought", name };
     this.render();
   }
 
@@ -533,7 +691,7 @@ export class StartScene extends Scene {
     const dogs = packOf(this.loadout);
     if (dogs === undefined) {
       this.shakes.set("start", this.time.now);
-      this.notice = "Pick a dog to walk first.";
+      this.action = { kind: "notice", text: "Pick a dog to walk first." };
       this.render();
       return;
     }
@@ -567,6 +725,13 @@ export class StartScene extends Scene {
 
   override update(): void {
     const now = this.time.now;
+    if (this.hold !== undefined) {
+      const { fire, press } = tickHold(this.hold, now);
+      this.hold = press;
+      if (fire && this.pressedTarget !== undefined) {
+        this.openDetail(this.pressedTarget);
+      }
+    }
     const reduced = currentSettings(this).reducedMotion;
     const pressed = this.press;
     const dip = (id: string) =>
@@ -662,17 +827,52 @@ export class StartScene extends Scene {
     this.views = new Map();
     this.gateDogs = [];
     const save = this.save();
+    this.registry.set(LAST_VISIT_BANK_KEY, save.bankCents);
     const g = this.graphics(root);
     this.drawTopBar(root, g, save);
     this.drawPackAtGate(root, g, save);
     this.drawSlotSign(root, save);
+    this.drawWalkerPicker(root, save);
     this.drawDogTiles(root, save);
     this.drawGear(root, save);
-    this.drawInfo(root, save);
-    this.drawLogbook(root, g, save);
+    this.drawInfo(root);
     this.drawStartButton(root);
-    this.drawWalkerPicker(root, save);
     this.drawFocus(root);
+    this.drawOverlay(save);
+  }
+
+  // Whether the bank covers a locked item: it then wears the gold outline.
+  private affordable(save: SaveDocument, purchase: Purchase): boolean {
+    return isAffordable(gameData, save.owned, save.bankCents, purchase);
+  }
+
+  // The detail card or logbook over everything else, recording its rect for taps.
+  private drawOverlay(save: SaveDocument): void {
+    const layer = this.overlayLayer;
+    if (layer === undefined) {
+      return;
+    }
+    layer.removeAll(true);
+    const overlay = this.overlay;
+    if (overlay === undefined) {
+      return;
+    }
+    if (overlay.kind === "logbook") {
+      const panel = drawLogbookPanel(this, layer, logbookOf(gameData, save.stats));
+      this.overlay = { ...overlay, rect: panel.panel, stats: panel.stats };
+      return;
+    }
+    const { target } = overlay;
+    const card =
+      target.kind === "dog"
+        ? dogDetail(gameData, save.owned, save.bankCents, save.stats, target.dog)
+        : gearDetail(gameData, save.owned, save.bankCents, this.loadout, target.gear);
+    const picture: DetailPicture =
+      target.kind === "dog"
+        ? { key: dogPortraitKey(target.dog), scale: 1 }
+        : { key: gearIconKey(target.gear), scale: 2 };
+    const rect = drawDetailCard(this, layer, card, picture, target.kind);
+    this.overlay = { ...overlay, rect };
   }
 
   // A container for one tappable tile, registered for its feedback.
@@ -732,7 +932,7 @@ export class StartScene extends Scene {
     });
     const { bestWalk, runs } = save.stats;
     const walks = runs.finished + runs.noDogs + runs.wentHome;
-    const right = SETTINGS_BUTTON.x - GAP;
+    const right = LOGBOOK_BUTTON.x - GAP;
     if (bestWalk === null) {
       this.text(root, right, 14, "No walks yet", PALETTE.cream, { originX: 1 });
     } else {
@@ -743,7 +943,16 @@ export class StartScene extends Scene {
         originX: 1,
       });
     }
-    this.iconButton(root, "settings", SETTINGS_ICON, (x, y) => cogIcon(this, x, y));
+    this.iconButton(root, "logbook", LOGBOOK_ICON, (x, y) => {
+      const icon = imageIcon(this, "icon-logbook", x, y);
+      return icon.length > 0
+        ? icon
+        : [addPixelText(this, x + 8, y + 4, "L", { color: PALETTE.plum, originX: 0.5 })];
+    });
+    this.iconButton(root, "settings", SETTINGS_ICON, (x, y) => {
+      const icon = imageIcon(this, "icon-settings", x, y);
+      return icon.length > 0 ? icon : cogIcon(this, x, y);
+    });
     // Help and sound sit in the gate scene's top corners, where the art places them.
     this.iconButton(root, "help", HELP_ICON, (x, y) => imageIcon(this, "icon-help", x, y));
     this.iconButton(root, "mute", MUTE_ICON, (x, y) => soundIcon(this, !isMuted(this), x, y));
@@ -795,10 +1004,9 @@ export class StartScene extends Scene {
       );
     });
 
-    const lines =
-      this.loadout.dogs.length === 0
-        ? ["Morning! Who are we", "walking today?"]
-        : (this.speech ?? ["Ready when you are."]);
+    const state = { action: this.action, loadout: this.loadout };
+    const said = bubbleLine(gameData.homeText, this.walkerLine, state, this.quips);
+    const lines = wrapWords(SPEECH_CHARS, said).slice(0, SPEECH_LINES);
     const top = GATE.y + 6;
     const bubble = this.graphics(root);
     const labels = lines.map((line, i) =>
@@ -828,8 +1036,8 @@ export class StartScene extends Scene {
 
   // The next dog slot for sale, on a sign in the yard; gone once every slot is owned.
   private drawSlotSign(root: GameObjects.Container, save: SaveDocument): void {
-    const slot = nextDogSlot(gameData, save.owned.dogSlots);
-    if (slot === null) {
+    const lines = slotSignLines(gameData, save.owned, save.bankCents);
+    if (lines === null) {
       return;
     }
     const { height, width, x, y } = SLOT_SIGN;
@@ -843,15 +1051,9 @@ export class StartScene extends Scene {
       x: x + width - 13,
       y: y + height,
     });
-    fillRect(g, PALETTE.plum, SLOT_SIGN);
-    fillRect(g, PALETTE.cream, { height: height - 4, width: width - 4, x: x + 2, y: y + 2 });
-    const parent = view.container;
-    this.text(parent, x + 7, y + 8, `Slot ${slot.slot}: ${dollarText(slot.price)}`, PALETTE.plum);
-    const short = slot.price > save.bankCents;
-    const status = short ? `Need ${dollarText(cents(slot.price - save.bankCents))}` : "Tap to buy";
-    this.text(parent, x + 7, y + 25, status, PALETTE.plum);
-    if (short) {
-      this.addLock(parent, x + width - 20, y + 22);
+    drawSlotSign(this, view.container, SLOT_SIGN, lines);
+    if (this.affordable(save, { kind: "dogSlot" })) {
+      addAffordFrame(this, view.container, SLOT_SIGN, currentSettings(this).reducedMotion);
     }
   }
 
@@ -885,17 +1087,10 @@ export class StartScene extends Scene {
     const { owned } = save;
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
-    this.text(root, 4, HEADING_Y, "Your pack", PALETTE.cream, { font: "title" });
     const picked = this.loadout.dogs.length;
-    const fee = dollarText(packFeePerZone(gameData, this.loadout));
-    this.text(
-      root,
-      356,
-      HEADING_Y,
-      picked === 0 ? `0/${capacity} dogs` : `${picked}/${capacity} dogs, ${fee} a zone`,
-      PALETTE.cream,
-      { originX: 1 },
-    );
+    this.stepPlate(root, { x: 4, y: DOGS_STEP_Y }, "stepDogs", picked > 0 ? "tick" : "2");
+    const count = packCountLine(gameData, owned, this.loadout);
+    this.text(root, 356, DOGS_STEP_Y + 7, count, PALETTE.cream, { originX: 1 });
     const full = choiceFull(picked, capacity);
     const tiles = dogTiles();
     rosterOrder().forEach((id, i) => {
@@ -940,13 +1135,39 @@ export class StartScene extends Scene {
           this.addLock(content, x + width - 19, y + 31);
         }
       }
+      this.affordFrame(view, rect, look, save, { dog: id, kind: "dog" });
     });
+  }
+
+  // The gold outline on an unselected item the bank covers; ui-select wins over it.
+  private affordFrame(
+    view: TileView,
+    rect: Rect,
+    look: SelectLook,
+    save: SaveDocument,
+    purchase: Purchase,
+  ): void {
+    if (!look.selected && this.affordable(save, purchase)) {
+      addAffordFrame(this, view.container, rect, currentSettings(this).reducedMotion);
+    }
+  }
+
+  // A step's heading plate, its number turning to a tick once the step is done.
+  private stepPlate(
+    root: GameObjects.Container,
+    at: { x: number; y: number },
+    key: "stepDogs" | "stepGear" | "stepWalker",
+    badge: string,
+  ): number {
+    return drawStepPlate(this, root, at, { badge, ...stepHeading(gameData.homeText[key]) });
   }
 
   private drawGear(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;
+    const equipped = this.loadout.gear;
+    this.stepPlate(root, { x: 4, y: GEAR_STEP_Y }, "stepGear", equipped === null ? "3" : "tick");
     const slots = gearSlots();
-    const full = choiceFull(this.loadout.gear === null ? 0 : 1, 1);
+    const full = choiceFull(equipped === null ? 0 : 1, 1);
     gearIds().forEach((id, i) => {
       const rect = itemAt(slots, i);
       const { width, x, y } = rect;
@@ -956,52 +1177,52 @@ export class StartScene extends Scene {
         edge: true,
         full,
         rest: isOwned ? "cream" : "tan",
-        selected: this.loadout.gear === id,
+        selected: equipped === id,
       });
       fillRect(this.graphics(content), PALETTE[look.box], {
         height: 34,
         width: 34,
         x: x + 15,
-        y: y + 3,
+        y: y + 2,
       });
-      const icon = this.addGearIcon(content, id, x + 16, y + 4, 1);
+      const icon = this.addGearIcon(content, id, x + 16, y + 3, 1);
       if (icon !== undefined) {
-        view.face = { object: icon, y: y + 4 };
+        view.face = { object: icon, y: y + 3 };
       }
+      // A locked item's price tag hangs over the foot of its icon.
       const price = purchasePrice(gameData, owned, { gear: id, kind: "gear" });
       if (price !== null) {
-        this.priceBadge(content, x + width / 2, y + 40, price, 0.5);
+        this.priceBadge(content, x + width / 2, y + 24, price, 0.5);
         if (price > save.bankCents) {
-          this.addLock(content, x + 44, y + 20);
+          this.addLock(content, x + width - 18, y + 2);
         }
       }
+      const name = wrapWords(GEAR_NAME_CHARS, gameData.shopGear[id].name).slice(0, 2);
+      const top = y + GEAR_NAME.y + (name.length === 1 ? Math.floor(GEAR_NAME.lineHeight / 2) : 0);
+      name.forEach((line, n) => {
+        this.text(
+          content,
+          x + width / 2,
+          top + n * GEAR_NAME.lineHeight,
+          line,
+          PALETTE[look.text],
+          {
+            originX: 0.5,
+          },
+        );
+      });
+      this.affordFrame(view, rect, look, save, { gear: id, kind: "gear" });
     });
   }
 
-  // Under the gear: a notice after a tap, or the tapped or focused item in words, or the
-  // equipped gear and what it does.
-  private infoText(save: SaveDocument): string {
-    const lines: string[] = [];
-    if (storageState(this) === "unavailable") {
-      lines.push("Progress won't be saved.");
-    }
-    const info = this.info;
-    if (this.notice !== "") {
-      lines.push(this.notice);
-    } else if (info?.kind === "dog") {
-      lines.push(dogInfo(gameData, save.owned, save.bankCents, info.dog));
-    } else if (info?.kind === "gear") {
-      lines.push(gearInfo(gameData, save.owned, save.bankCents, info.gear));
-    } else if (this.loadout.gear !== null) {
-      lines.push(gearInfo(gameData, save.owned, save.bankCents, this.loadout.gear));
-    } else {
-      lines.push("Tap a dog to walk it, or a locked one to buy it.");
-    }
-    return lines.join(" ");
+  // Under the steps: the last action's message, else the hint.
+  private infoText(): string {
+    const message = messageLine(gameData.homeText, this.action);
+    return storageState(this) === "unavailable" ? `Progress won't be saved. ${message}` : message;
   }
 
-  private drawInfo(root: GameObjects.Container, save: SaveDocument): void {
-    wrapWords(INFO_CHARS, this.infoText(save))
+  private drawInfo(root: GameObjects.Container): void {
+    wrapWords(INFO_CHARS, this.infoText())
       .slice(0, 2)
       .forEach((line, i) => {
         const label = this.text(root, 180, INFO.y + i * INFO.lineHeight, line, PALETTE.cream, {
@@ -1043,7 +1264,9 @@ export class StartScene extends Scene {
     const chosen = save.walker;
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
-    this.text(root, 4, WALKER_ORIGIN.y + 16, "Walker", PALETTE.cream, { font: "title" });
+    const plateY = WALKER_ORIGIN.y + (WALKER_TILES.cellHeight - STEP_PLATE_HEIGHT) / 2;
+    // A walker is always chosen, so this step is always done.
+    this.stepPlate(root, { x: 4, y: plateY }, "stepWalker", "tick");
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
@@ -1069,39 +1292,10 @@ export class StartScene extends Scene {
         });
       }
     });
-    const last = itemAt(tiles, tiles.length - 1);
-    const nameX = last.x + last.width + GAP;
-    this.text(root, nameX, WALKER_ORIGIN.y + 16, gameData.walkers[chosen].name, PALETTE.cream);
-  }
-
-  // The best and last walk; the totals are on the Stats page behind it.
-  private drawLogbook(
-    root: GameObjects.Container,
-    g: GameObjects.Graphics,
-    save: SaveDocument,
-  ): void {
-    const { height, width, x, y } = LOGBOOK;
-    fillRect(g, PALETTE.plum, LOGBOOK);
-    fillRect(g, PALETTE.cream, { height: height - 2, width: width - 2, x: x + 1, y: y + 1 });
-    fillRect(g, PALETTE.tan, { height: 15, width: width - 2, x: x + 1, y: y + 1 });
-    this.text(root, x + 6, y + 3, "Logbook", PALETTE.plum, { font: "title" });
-    this.text(root, x + width - 6, y + 4, "Stats >", PALETTE.plum, { originX: 1 });
-    const log = logbookOf(gameData, save.stats);
-    const line = (row: number, candidates: readonly string[]) => {
-      const label = this.text(root, x + 6, y + 21 + row * INFO.lineHeight, "", PALETTE.plum);
-      fitText(label, width - 12, candidates);
-    };
-    if (log === null) {
-      line(0, ["No walks yet."]);
-      line(1, ["Three clients are waiting on the porch."]);
-      return;
-    }
-    line(0, [`Best ${log.best}, ${log.bestNote}`, `Best ${log.best}`]);
-    line(1, [`Last ${log.last}`, log.last]);
   }
 
   // Start walk sinks into its lip when pressed: drawn twice, raised and pressed, and the
-  // frame shows one.
+  // frame shows one. Ready, it is the green go button and sums up the pack.
   private drawStartButton(root: GameObjects.Container): void {
     const { height, width, x, y } = START_BUTTON;
     const ready = this.loadout.dogs.length > 0;
@@ -1110,20 +1304,37 @@ export class StartScene extends Scene {
     const variant = (down: boolean) => {
       const group = this.add.container(0, 0);
       container.add(group);
-      const g = this.graphics(group);
       const drop = down ? FEEDBACK.buttonPressPx : 0;
-      if (!down) {
-        const lip = ready ? PALETTE.orange : PALETTE.darkSlate;
-        fillRect(g, lip, { height: height - 4, width, x, y: y + 4 });
+      const tag = ready ? (down ? "go-pressed" : "go") : "disabled";
+      const slice = addNineSlice(this, "ui-button", START_BUTTON, tag);
+      if (slice !== undefined) {
+        group.add(slice);
+      } else {
+        const g = this.graphics(group);
+        if (!down) {
+          const lip = ready ? PALETTE.forest : PALETTE.darkSlate;
+          fillRect(g, lip, { height: height - 4, width, x, y: y + 4 });
+        }
+        fillRect(g, ready ? PALETTE.green : PALETTE.slate, {
+          height: height - 4,
+          width,
+          x,
+          y: y + drop,
+        });
       }
-      const face = ready ? (down ? PALETTE.yellow : PALETTE.amber) : PALETTE.slate;
-      fillRect(g, face, { height: height - 4, width, x, y: y + drop });
-      const label = ready ? "Start walk" : "Pick a dog";
-      this.text(group, 180, y + 12 + drop, label, ready ? PALETTE.plum : PALETTE.white, {
-        font: "title",
-        originX: 0.5,
-        scale: 3,
-      });
+      const label = ready ? startWalkLine(gameData, this.loadout) : "Pick a dog";
+      this.text(
+        group,
+        180,
+        y + (ready ? 15 : 12) + drop,
+        label,
+        ready ? PALETTE.ink : PALETTE.white,
+        {
+          font: "title",
+          originX: 0.5,
+          scale: ready ? TEXT_SCALE : 3,
+        },
+      );
       return group;
     };
     const up = variant(false);

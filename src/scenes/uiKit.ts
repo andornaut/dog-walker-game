@@ -14,11 +14,18 @@ export const TEXT_SCALE = 2;
 
 // The UI kit's nine-slice borders, in pixels from each edge.
 const SLICES = {
+  // The gold outline on anything the player can afford.
+  "ui-afford": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-button": { bottom: 5, left: 3, right: 3, top: 3 },
+  // The detail card a held dog or gear tile opens, and the three-slice title band across it.
+  "ui-detail-band": { bottom: 0, left: 8, right: 8, top: 0 },
+  "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },
   // A three-slice: 4px caps and a middle that stretches.
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
+  // The home screen's step heading plates.
+  "ui-step": { bottom: 8, left: 8, right: 8, top: 8 },
 } as const;
 type SliceKey = keyof typeof SLICES;
 

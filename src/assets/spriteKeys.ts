@@ -51,6 +51,11 @@ export function dogFaceKey(dog: DogId): string {
   return `face-dog-${kebabCase(dog)}`;
 }
 
+// A dog's 64x64 portrait, for the shop and its detail card.
+export function dogPortraitKey(dog: DogId): string {
+  return `portrait-dog-${kebabCase(dog)}`;
+}
+
 // A gear item's 32x32 icon image.
 export function gearIconKey(gear: GearId): string {
   return `item-${kebabCase(gear)}`;

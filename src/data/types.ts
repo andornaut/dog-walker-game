@@ -362,6 +362,10 @@ export interface HomeText {
   readonly slotSave: string;
   readonly slotSign: string;
   readonly startWalk: string;
+  // The headings of the three steps, in order: walker, dogs, gear.
+  readonly stepDogs: string;
+  readonly stepGear: string;
+  readonly stepWalker: string;
 }
 
 // What makes an owner speak: a choice that raised or lowered their hearts, firing you, or

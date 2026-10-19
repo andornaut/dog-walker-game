@@ -1,0 +1,379 @@
+import type { GameObjects, Scene } from "phaser";
+
+import { animationKey } from "../assets/asepriteAnimations";
+import type { DetailCard } from "../home/detail";
+import { loopFrame } from "../home/feedback";
+import type { Logbook } from "../home/home";
+import type { SlotSign } from "../home/homeLines";
+import type { Rect } from "../layout/rect";
+import { drawFramedRect, fillRect } from "./draw";
+import { PALETTE } from "./palette";
+import { addPixelText, type FontRole } from "./pixelText";
+import { addNineSlice, addTagImage, TEXT_SCALE } from "./uiKit";
+
+// The home screen's drawing beyond its tiles: the gold outline on what the player can
+// afford, the slot sign, the step plates, and the detail card and logbook that open over the
+// screen. Positions inside a piece are the art's, from the style guide.
+
+const SCREEN = { height: 640, width: 360 };
+
+function text(
+  scene: Scene,
+  parent: GameObjects.Container,
+  at: { x: number; y: number },
+  value: string,
+  style: { color: number; font?: FontRole; maxWidth?: number; originX?: number },
+): GameObjects.BitmapText {
+  const { maxWidth, ...rest } = style;
+  const label = addPixelText(scene, at.x, at.y, value, {
+    scale: TEXT_SCALE,
+    ...rest,
+    ...(maxWidth === undefined ? {} : { maxWidth }),
+  });
+  parent.add(label);
+  return label;
+}
+
+// A ring of the given thickness just inside rect.
+function drawRing(g: GameObjects.Graphics, color: number, rect: Rect, thickness: number): void {
+  const { height, width, x, y } = rect;
+  fillRect(g, color, { height: thickness, width, x, y });
+  fillRect(g, color, { height: thickness, width, x, y: y + height - thickness });
+  fillRect(g, color, { height, width: thickness, x, y });
+  fillRect(g, color, { height, width: thickness, x: x + width - thickness, y });
+}
+
+// ui-afford sits this far outside an affordable item.
+const AFFORD_OUTSET = 2;
+
+// The ui-afford outline 2px outside rect, playing its glint tag, or holding its first frame
+// with reduced motion; while the art is missing, an amber line in a plum keyline. A selected
+// item never takes it: ui-select wins.
+export function addAffordFrame(
+  scene: Scene,
+  parent: GameObjects.Container,
+  rect: Rect,
+  reducedMotion: boolean,
+): void {
+  const outer = {
+    height: rect.height + AFFORD_OUTSET * 2,
+    width: rect.width + AFFORD_OUTSET * 2,
+    x: rect.x - AFFORD_OUTSET,
+    y: rect.y - AFFORD_OUTSET,
+  };
+  const frames = scene.anims.get(animationKey("ui-afford", "glint"))?.frames ?? [];
+  const slices = frames.flatMap((_, i) => {
+    const slice = addNineSlice(scene, "ui-afford", outer, "glint", i);
+    return slice === undefined ? [] : [slice];
+  });
+  const first = slices[0];
+  if (first === undefined) {
+    const g = scene.add.graphics();
+    drawRing(g, PALETTE.plum, outer, 1);
+    drawRing(
+      g,
+      PALETTE.amber,
+      {
+        ...outer,
+        height: outer.height - 2,
+        width: outer.width - 2,
+        x: outer.x + 1,
+        y: outer.y + 1,
+      },
+      1,
+    );
+    parent.add(g);
+    return;
+  }
+  parent.add(slices);
+  const durations = frames.map((frame) => frame.duration);
+  const show = () => {
+    const shown = loopFrame(reducedMotion, durations, scene.time.now);
+    slices.forEach((slice, i) => slice.setVisible(i === shown));
+  };
+  show();
+  if (!reducedMotion && slices.length > 1) {
+    scene.events.on("update", show);
+    first.once("destroy", () => scene.events.off("update", show));
+  }
+}
+
+// The slot sign's text, in sign pixels: line 1 in font-title over the header plank, line 2
+// in font-body on the panel below it, left of the padlock.
+const SIGN_TEXT = { line1: { x: 5, y: 6 }, line2: { x: 5, y: 27 } };
+
+// The slot sign's board, ui-slot-locked, or a tan plank over a cream panel in a plum rim
+// while the art is missing, with its two lines.
+export function drawSlotSign(
+  scene: Scene,
+  parent: GameObjects.Container,
+  rect: Rect,
+  sign: SlotSign,
+): void {
+  if (scene.textures.exists("ui-slot-locked")) {
+    parent.add(scene.add.image(rect.x, rect.y, "ui-slot-locked").setOrigin(0));
+  } else {
+    const g = scene.add.graphics();
+    drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.cream }, rect);
+    fillRect(g, PALETTE.tan, { height: 20, width: rect.width - 2, x: rect.x + 1, y: rect.y + 1 });
+    parent.add(g);
+  }
+  const { line1, line2 } = SIGN_TEXT;
+  text(scene, parent, { x: rect.x + line1.x, y: rect.y + line1.y }, sign.sign, {
+    color: PALETTE.plum,
+    font: "title",
+  });
+  text(scene, parent, { x: rect.x + line2.x, y: rect.y + line2.y }, sign.status, {
+    color: sign.short ? PALETTE.darkRed : PALETTE.forest,
+  });
+}
+
+// A step plate's parts, in plate pixels: the badge, the label's caps, and the gaps the
+// plate's width adds around them.
+const STEP = { badge: { x: 4, y: 4 }, height: 24, label: { x: 26, y: 7 }, noteGap: 8, pad: 34 };
+
+// A numbered step's heading plate at (x, y): the ui-step-number badge (its number, or a tick
+// once the step is done), the label in font-title and an optional note in font-body.
+// Returns the plate's width.
+export function drawStepPlate(
+  scene: Scene,
+  parent: GameObjects.Container,
+  at: { x: number; y: number },
+  step: { badge: string; label: string; note: string },
+): number {
+  const content = scene.add.container(0, 0);
+  const label = text(
+    scene,
+    content,
+    { x: at.x + STEP.label.x, y: at.y + STEP.label.y },
+    step.label,
+    {
+      color: PALETTE.plum,
+      font: "title",
+    },
+  );
+  let width = Math.ceil(label.width) + STEP.pad;
+  if (step.note !== "") {
+    const note = text(
+      scene,
+      content,
+      { x: at.x + width - 8 + STEP.noteGap, y: at.y + STEP.label.y },
+      step.note,
+      {
+        color: PALETTE.plum,
+      },
+    );
+    width += STEP.noteGap + Math.ceil(note.width);
+  }
+  const rect = { height: STEP.height, width, x: at.x, y: at.y };
+  const plate = addNineSlice(scene, "ui-step", rect);
+  if (plate !== undefined) {
+    parent.add(plate);
+  } else {
+    const g = scene.add.graphics();
+    drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.tan }, rect);
+    parent.add(g);
+  }
+  const badgeAt = { x: at.x + STEP.badge.x, y: at.y + STEP.badge.y };
+  const badge = addTagImage(scene, "ui-step-number", step.badge, badgeAt.x, badgeAt.y);
+  if (badge !== undefined) {
+    parent.add(badge);
+  } else {
+    const g = scene.add.graphics();
+    const done = step.badge === "tick";
+    fillRect(g, done ? PALETTE.forest : PALETTE.amber, { height: 16, width: 16, ...badgeAt });
+    const mark = addPixelText(scene, badgeAt.x + 8, badgeAt.y + 5, done ? "+" : step.badge, {
+      color: done ? PALETTE.white : PALETTE.plum,
+      font: "title",
+      originX: 0.5,
+    });
+    parent.add([g, mark]);
+  }
+  parent.add(content);
+  return width;
+}
+
+// A dim layer over the whole screen, under a card.
+function addScrim(scene: Scene, parent: GameObjects.Container): void {
+  const g = scene.add.graphics();
+  g.fillStyle(PALETTE.ink, 0.6).fillRect(0, 0, SCREEN.width, SCREEN.height);
+  parent.add(g);
+}
+
+// Inside a card, in card pixels: the paper starts 6px in, the band runs across its top with
+// the title's caps 6px below the band's top, and the well sits under the band.
+const CARD = {
+  band: { height: 22, inset: 6, titleY: 6 },
+  pad: 12,
+  well: { picture: 2, size: 68, x: 12, y: 34 },
+  width: 300,
+} as const;
+// The dog card's place on screen, and the gear card's height; the gear card is centred.
+const DOG_CARD: Rect = { height: 328, width: CARD.width, x: 30, y: 140 };
+const GEAR_CARD_HEIGHT = 150;
+
+// The card's frame and title band; the content goes in a container placed at the card.
+function drawCardFrame(
+  scene: Scene,
+  parent: GameObjects.Container,
+  rect: Rect,
+  title: string,
+  content: GameObjects.Container = scene.add.container(0, 0),
+): GameObjects.Container {
+  addScrim(scene, parent);
+  const frame = addNineSlice(scene, "ui-detail-card", rect);
+  if (frame !== undefined) {
+    parent.add(frame);
+  } else {
+    const g = scene.add.graphics();
+    drawFramedRect(g, { border: PALETTE.darkBrown, fill: PALETTE.cream }, rect);
+    parent.add(g);
+  }
+  const { height, inset, titleY } = CARD.band;
+  const band = { height, width: rect.width - inset * 2, x: rect.x + inset, y: rect.y + inset };
+  const bandSlice = addNineSlice(scene, "ui-detail-band", band);
+  if (bandSlice !== undefined) {
+    parent.add(bandSlice);
+  } else {
+    const bg = scene.add.graphics();
+    fillRect(bg, PALETTE.forest, band);
+    parent.add(bg);
+  }
+  content.setPosition(rect.x, rect.y);
+  parent.add(content);
+  text(scene, content, { x: rect.width / 2, y: inset + titleY }, title, {
+    color: PALETTE.white,
+    font: "title",
+    originX: 0.5,
+  });
+  return content;
+}
+
+// What a detail card shows in its well: a dog's portrait or a gear item's icon, by key.
+export interface DetailPicture {
+  readonly key: string;
+  // Drawn at this whole-number scale: 1 for a 64x64 portrait, 2 for a 32x32 icon.
+  readonly scale: number;
+}
+
+const LINE_GAP = 8;
+
+// A held dog's or gear item's detail card over a dim layer. A dog's card puts its breed and
+// status beside the portrait and its rows below; a gear card is shorter, with its effect and
+// status beside the icon. Returns the card's rect, so a tap outside it closes it.
+export function drawDetailCard(
+  scene: Scene,
+  parent: GameObjects.Container,
+  card: DetailCard,
+  picture: DetailPicture,
+  kind: "dog" | "gear",
+): Rect {
+  const rect =
+    kind === "dog"
+      ? DOG_CARD
+      : {
+          ...DOG_CARD,
+          height: GEAR_CARD_HEIGHT,
+          y: Math.round((SCREEN.height - GEAR_CARD_HEIGHT) / 2),
+        };
+  const content = drawCardFrame(scene, parent, rect, card.title);
+  const { well } = CARD;
+  if (scene.textures.exists("ui-detail-well")) {
+    content.add(scene.add.image(well.x, well.y, "ui-detail-well").setOrigin(0));
+  } else {
+    const g = scene.add.graphics();
+    drawFramedRect(
+      g,
+      { border: PALETTE.plum, fill: PALETTE.grey },
+      { height: well.size, width: well.size, x: well.x, y: well.y },
+    );
+    content.add(g);
+  }
+  if (scene.textures.exists(picture.key)) {
+    const inner = { x: well.x + well.picture, y: well.y + well.picture };
+    content.add(
+      scene.add.image(inner.x, inner.y, picture.key).setOrigin(0).setScale(picture.scale),
+    );
+  }
+  const besideX = well.x + well.size + 10;
+  const beside = (rows: readonly { color: number; value: string }[], top: number) => {
+    let y = top;
+    for (const row of rows) {
+      const label = text(scene, content, { x: besideX, y }, row.value, {
+        color: row.color,
+        maxWidth: rect.width - besideX - CARD.pad,
+      });
+      y += Math.ceil(label.height) + LINE_GAP;
+    }
+  };
+  const status = { color: PALETTE.forest, value: card.status };
+  if (kind === "gear") {
+    beside([...card.lines.map((value) => ({ color: PALETTE.plum, value })), status], well.y + 4);
+    return rect;
+  }
+  beside([{ color: PALETTE.darkBrown, value: card.subtitle }, status], well.y + 4);
+  let y = well.y + well.size + CARD.pad;
+  for (const line of card.lines) {
+    const label = text(scene, content, { x: CARD.pad, y }, line, {
+      color: PALETTE.plum,
+      maxWidth: rect.width - CARD.pad * 2,
+    });
+    y += Math.ceil(label.height) + LINE_GAP;
+  }
+  return rect;
+}
+
+export interface LogbookPanel {
+  readonly panel: Rect;
+  // The Stats button, in screen pixels.
+  readonly stats: Rect;
+}
+
+const STATS_BUTTON = { height: 44, width: 140 };
+
+// The logbook over the screen, as a card: the best walk, totals and the last walk, and a
+// Stats button.
+export function drawLogbookPanel(
+  scene: Scene,
+  parent: GameObjects.Container,
+  log: Logbook | null,
+): LogbookPanel {
+  // The rows are laid out first, so the card is as tall as they and the button need.
+  const content = scene.add.container(0, 0);
+  const rows =
+    log === null
+      ? ["No walks yet.", "Three clients are waiting on the porch."]
+      : [`Best ${log.best}, ${log.bestNote}`, log.totals, `Last ${log.last}`];
+  let y = CARD.well.y + 4;
+  for (const row of rows) {
+    const label = text(scene, content, { x: CARD.pad, y }, row, {
+      color: PALETTE.plum,
+      maxWidth: CARD.width - CARD.pad * 2,
+    });
+    y += Math.ceil(label.height) + LINE_GAP;
+  }
+  const button = { ...STATS_BUTTON, x: (CARD.width - STATS_BUTTON.width) / 2, y: y + LINE_GAP };
+  const height = button.y + button.height + CARD.pad;
+  const rect = {
+    height,
+    width: CARD.width,
+    x: (SCREEN.width - CARD.width) / 2,
+    y: Math.round((SCREEN.height - height) / 2),
+  };
+  drawCardFrame(scene, parent, rect, "Logbook", content);
+  const slice = addNineSlice(scene, "ui-button", button, "secondary");
+  if (slice !== undefined) {
+    content.add(slice);
+  } else {
+    const g = scene.add.graphics();
+    fillRect(g, PALETTE.brown, button);
+    fillRect(g, PALETTE.tan, { ...button, height: button.height - 4 });
+    content.add(g);
+  }
+  text(scene, content, { x: button.x + button.width / 2, y: button.y + 15 }, "Stats", {
+    color: PALETTE.plum,
+    font: "title",
+    originX: 0.5,
+  });
+  return { panel: rect, stats: { ...button, x: rect.x + button.x, y: rect.y + button.y } };
+}
