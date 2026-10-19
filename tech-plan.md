@@ -21,7 +21,7 @@
 ## Open questions
 
 - Project structure & conventions beyond the Milestone 1 scaffold
-- Save data: proposed browser `localStorage` for v1 (bank and owned items); local only, no accounts
+- Which stats persist across runs (gameplay decides; placeholder: runs, best run, lifetime earnings)
 - Testing / playtesting builds on phones early
 - Monetization & app-store needs (later)
 
@@ -41,6 +41,20 @@
 - **Game state:** plain TypeScript with no Phaser dependency (money, owner happiness, pack, zone progress), plus pure functions for encounter rules. Scenes only render it. Tuning numbers live in one data file.
 - **Assets:** the art agent exports into `public/art/`, which Vite serves at `/art/` and copies into `dist/`. `public/art/manifest.json` lists every asset with paths relative to `public/art/`: `sprites` (key, png, json: PNG sheets with Aseprite hash JSON and frameTags, loaded with `load.aseprite` and `anims.createFromAseprite`), `fonts` (key, png, fnt: XML BMFont, which `load.bitmapFont` requires, drawn with `bitmapText`) and `images` (key, png). Keys are kebab-case and unique. Mock pages live in `public/art/mocks/`, listed in `public/art/mocks/index.json` rather than the manifest. A scene draws a placeholder box for any key that has not landed yet. Sprite and road tile size is 32×32. Art-side rules live in `art/style-guide.md`.
 - **Tests:** Vitest unit tests over pure game logic (lane geometry, game state, encounter rules). Scenes are checked by playing.
+
+## Save data
+
+Player state that outlives a run. Local only: no accounts, no cloud saves.
+
+- **Profiles:** one per browser.
+- **Contents:** bank (integer cents), owned gear, unlocked dogs, last loadout, stats and settings, referenced by data ids (`koda`, `luckyCollar`).
+- **Format:** one JSON document under one key (`dog-walker-game:save`) with a `version` field. Every write replaces the whole document.
+- **Validation:** a Valibot schema parses every load. The types come from the schema. Ids the data no longer has are dropped. A save that fails validation is kept under a backup key, and the game starts fresh instead of crashing.
+- **Migrations:** an ordered list of pure functions (v1 to v2, and so on), each tested against a fixture save. Renaming a dog or gear id needs one.
+- **Storage interface:** async (`load()` and `save()` return promises) from the start. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter replaces it in the mobile app, where iOS can evict web view storage. If storage is unavailable or throws (private browsing, quota), the game stays playable and says progress won't be saved.
+- **When it writes:** on a shop purchase, at run end, and after each zone. The zone checkpoint records the run's earnings so far. On the next launch an unfinished run is banked as if the player had headed home.
+- **Code:** `src/save/` holds pure schema, migrations and load/save logic, tested with an in-memory store. Only the adapter touches browser storage.
+- **Scope:** saves are per origin. Moving to a custom domain starts players from zero unless saves are exported or migrated.
 
 ## Porting notes
 
