@@ -33,7 +33,7 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 - Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the three light roads (Bark Park, Sniff Street Shops, The Long Way Home), and the fill carries Woof Way. A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Woof Way. Snooze Crescent (grey) and Paws Promenade (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged.
 - Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them (a head over its body) stay two ramp steps darker.
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings such as merle are a few flat patches.
-- Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` and `fx-heart` keep a ramp outline, and `fx-dust` (light grey dust) has no rim. Hazard warnings are outlined in ink.
+- Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` and `fx-heart` keep a ramp outline, and `fx-dust` (light grey dust) has no rim. Comic words take the sign logo's ink ring and dred shadow. Hazard warnings are outlined in ink.
 - Ground decals (puddles) have no outline and no shadow.
 - Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons, such as `icon-gear-*`, `icon-need-*`, `icon-trait-*` and `icon-zone-*`, are outlined with `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
@@ -138,7 +138,7 @@ At 1 ♥, `ui-doghouse-warn` pulses over the house (`static` with reduced motion
 | Any hit                | `fx-bump` at the contact point; walker `stumble`, dogs `react`                                                                                                                                                                                                                          |
 | Encounter hit          | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (café patio amber, goose white, other dog pink, petunias pink, picnic orange, puddle sky, skunk green, squirrel orange, thief amber, trash bins green); the label at 2× on `ui-hit-label`; caught dogs `shake` |
 | Fee payout             | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                                                                                       |
-| Firing                 | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2×; the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                                                                                                                       |
+| Firing                 | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2× (an amber starburst behind a cream POOF cloud, and a front door slamming shut beside the face); the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                        |
 | Heart change at a slot | `fx-heart` `up` or `down` beside the floating label                                                                                                                                                                                                                                     |
 | Minor bump             | `fx-coins` under the cause label; `fx-dizzy` over the walker while lane input is locked                                                                                                                                                                                                 |
 | Moving hazard          | `ui-warning` and `ui-warning-arrow` at the lane edge about 1s ahead                                                                                                                                                                                                                     |
@@ -147,7 +147,44 @@ At 1 ♥, `ui-doghouse-warn` pulses over the house (`static` with reduced motion
 
 - `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog. Two statuses alternate every second, most recent first.
 - With reduced motion, bursts and stars play and the stumble is skipped.
+
+#### Comic words
+
+One word per moment, built like the sign logo: flat yellow letters 7 rows tall with 2px stems, a 1px ink ring that also fills the counters and the gaps between letters, and a solid dred shadow 2px down and right. Display words only, 2 to 7 letters, readable at 1×.
+
+| Effect             | Word     | Where it is                                                |
+| ------------------ | -------- | ---------------------------------------------------------- |
+| `fx-bark-word`     | WOOF!    | Its own 32×16 key, `pop` (4 frames, 60, 60, 140 and 140ms) |
+| `fx-hit-cafe`      | SPLAT!   | `play-word`                                                |
+| `fx-hit-goose`     | HONK!    | `play-word`                                                |
+| `fx-hit-other-dog` | SNIFF!   | `play-word`                                                |
+| `fx-hit-petunias`  | SQUISH!  | `play-word`                                                |
+| `fx-hit-picnic`    | CHOMP!   | `play-word`                                                |
+| `fx-hit-puddle`    | SPLOSH!  | `play-word`                                                |
+| `fx-hit-skunk`     | PEE-YEW! | `play-word`                                                |
+| `fx-hit-squirrel`  | CHITTER! | `play-word`                                                |
+| `fx-hit-thief`     | YOINK!   | `play-word`                                                |
+| `fx-hit-trash`     | CLANG!   | `play-word`                                                |
+
+- `play-word` follows `play` on every `fx-hit-*`: the same frames and timing, with the word centred on the impact star on frames 0 to 5 (420ms).
+- The game plays `play-word` and `fx-bark-word`. With reduced motion it shows `play` (held on frame 0) and `fx-bark`, so no word shows.
+- `fx-bark-word` plays at `fx-bark`'s point in place of it, over the dog's head as the tell starts.
+
 - Crossers are side views facing right, mirrored for left. Anything coming down a lane faces the player.
+
+## Badges
+
+`badge-<achievement>` medals are 32×32: a ring in the badge's tier colour around a cream face with the goal's icon. `locked` turns the whole badge grey, the icon a two-tone slate silhouette under a small padlock. The tiers, from first to hardest, then the joke tier:
+
+| Tier       | Ring   | Badges                                                               |
+| ---------- | ------ | -------------------------------------------------------------------- |
+| Firsts     | Bronze | `double-leash`, `first-steps`, `pack-leader`, `round-trip`           |
+| Mastery    | Silver | `big-payday`, `clean-paws`, `five-star-service`, `not-a-scratch`     |
+| Collection | Gold   | `full-kennel`, `kitted-out`, `neighbourhood-favourite`, `top-walker` |
+| Silly      | Pink   | `eau-de-skunk`, `squirrel`, `youre-fired`                            |
+
+- Silly is the joke tier: badges earned by mishaps (firings, skunk spray, squirrel chases). Pink marks a joke, never a rank, so it never joins the metal tiers.
+- Every ring is built the same way: a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade. Pink's are pink, mauve and white.
 
 ## Animation
 

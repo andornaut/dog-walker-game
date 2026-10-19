@@ -16,6 +16,15 @@ fx-heart    16x16  up (5 frames)    a heart floating up from a dog slot (+1 hear
                    down (5 frames)  a heart cracking and falling apart (-1 heart)
 fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behind
                                     the ui-new-best ribbon (centred on it)
+fx-bark-word 32x16 pop (4 frames, 60, 60, 140, 140ms)  WOOF! in the comic lettering, popping
+                                    up 2px, overshooting 1px and settling, 400ms in all. The
+                                    game plays it at fx-bark's point in place of fx-bark's pop,
+                                    and fx-bark with reduced motion
+
+The comic words (fx-bark-word, and play-word on every fx-hit-* in hits.py) are
+built like the sign logo: flat yellow letters, 7 rows with 2px stems, in a 1px ink
+ring that fills the counters and the gaps between letters, on a solid dred shadow
+2px down and right. Display words only, 2 to 7 letters.
 
 Usage:
   fx.py preview OUT.png   every frame of every effect on the street colours
@@ -63,6 +72,56 @@ def burst(g, cx, cy, r_out, r_in, points, col, turn=0.0):
         pts.append((cx + math.cos(a) * r, cy + math.sin(a) * r))
     for i in range(len(pts)):
         g.tri((cx, cy), pts[i], pts[(i + 1) % len(pts)], col)
+
+
+# The comic words' letters, 7 rows with 2px stems, so they read at 1x inside their ink ring.
+LETTERS = {
+    "A": [".###.", "##.##", "##.##", "#####", "##.##", "##.##", "##.##"],
+    "C": [".####", "##...", "##...", "##...", "##...", "##...", ".####"],
+    "E": ["#####", "##...", "##...", "####.", "##...", "##...", "#####"],
+    "F": ["#####", "##...", "##...", "####.", "##...", "##...", "##..."],
+    "G": [".####", "##...", "##...", "##.##", "##.##", "##.##", ".####"],
+    "H": ["##.##", "##.##", "##.##", "#####", "##.##", "##.##", "##.##"],
+    "I": ["##", "##", "##", "##", "##", "##", "##"],
+    "K": ["##.##", "##.##", "####.", "###..", "####.", "##.##", "##.##"],
+    "L": ["##...", "##...", "##...", "##...", "##...", "##...", "#####"],
+    "M": ["##...##", "###.###", "#######", "##.#.##", "##...##", "##...##", "##...##"],
+    "N": ["##..##", "###.##", "######", "##.###", "##..##", "##..##", "##..##"],
+    "O": [".###.", "##.##", "##.##", "##.##", "##.##", "##.##", ".###."],
+    "P": ["####.", "##.##", "##.##", "####.", "##...", "##...", "##..."],
+    "Q": [".###..", "##.##.", "##.##.", "##.##.", "##.##.", "##.##.", ".#####"],
+    "R": ["####.", "##.##", "##.##", "####.", "##.##", "##.##", "##.##"],
+    "S": [".####", "##...", "##...", ".###.", "...##", "...##", "####."],
+    "T": ["######", "..##..", "..##..", "..##..", "..##..", "..##..", "..##.."],
+    "U": ["##.##", "##.##", "##.##", "##.##", "##.##", "##.##", ".###."],
+    "W": ["##...##", "##...##", "##...##", "##.#.##", "#######", "###.###", "##...##"],
+    "Y": ["##..##", "##..##", "##..##", ".####.", "..##..", "..##..", "..##.."],
+    "!": ["##", "##", "##", "##", "..", "##", "##"],
+    "-": ["...", "...", "...", "###", "...", "...", "..."],
+}
+
+
+def word_size(text):
+    """The width and height of text's lettering: its letters 1px apart, the ink ring and the 2px shadow."""
+    return sum(len(LETTERS[ch][0]) for ch in text) + len(text) - 1 + 4, 11
+
+
+def word(g, text, cx, top, fill="yellow"):
+    """A comic word built like the sign logo: flat letters (yellow, or cream) in a 1px ink ring that also
+    fills the counters and the gaps between letters, on a solid dred shadow offset 2px down and right.
+    Centred on column cx, the ring's top on row top."""
+    w, _ = word_size(text)
+    x, letters = round(cx - w / 2) + 1, set()
+    for ch in text:
+        for j, row in enumerate(LETTERS[ch]):
+            letters |= {(x + i, top + 1 + j) for i, c in enumerate(row) if c == "#"}
+        x += len(LETTERS[ch][0]) + 1
+    ring = {(x + dx, y + dy) for x, y in letters for dx in (-1, 0, 1) for dy in (-1, 0, 1)}
+    shadow = {(x + d, y + d) for x, y in ring for d in (1, 2)} - ring
+    for pts, col in ((shadow, "dred"), (ring - letters, "ink"), (letters, fill)):
+        for x, y in pts:
+            g.p(x, y, col)
+    return g
 
 
 def bump(step):
@@ -235,6 +294,12 @@ def new_best(step):
     return g
 
 
+def bark_word(step):
+    """32x16: WOOF! pops up 2px from below, overshoots by 1px and settles, in the comic lettering. Its ink
+    ring holds on the light roads and the yellow fill on Woof Way."""
+    return word(Grid(32, 16), "WOOF!", 16, (4, 1, 2, 2)[step])
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
@@ -245,6 +310,7 @@ def sprites():
     yield "fx-heart", [("up", [heart_up(i).outlined() for i in range(5)], 90),
                        ("down", [heart_down(i).outlined() for i in range(5)], 90)]
     yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]
+    yield "fx-bark-word", [("pop", [bark_word(i).outlined(False) for i in range(4)], [60, 60, 140, 140])]
 
 
 if __name__ == "__main__":

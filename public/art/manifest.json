@@ -953,6 +953,11 @@
       "json": "sprites/fx-bark.json"
     },
     {
+      "key": "fx-bark-word",
+      "png": "sprites/fx-bark-word.png",
+      "json": "sprites/fx-bark-word.json"
+    },
+    {
       "key": "fx-bump",
       "png": "sprites/fx-bump.png",
       "json": "sprites/fx-bump.json"

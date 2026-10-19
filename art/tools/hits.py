@@ -23,6 +23,11 @@ fx-hit-trash       64x64  play (8 frames, 70ms)  a poof, the bin lid spinning, a
                                                   fish bone and paper flying, flies buzzing round
 fx-hit-cafe        64x64  play (8 frames, 70ms)  a latte splash, the cup flipping up, drops, the foam
                                                   heart floating up
+                   every fx-hit-* also has play-word, after play: the same frames and timing with
+                   its comic word over frames 0 to 5 (420ms), centred on the impact star: cafe
+                   SPLAT!, goose HONK!, other-dog SNIFF!, petunias SQUISH!, picnic CHOMP!, puddle
+                   SPLOSH!, skunk PEE-YEW!, squirrel CHITTER!, thief YOINK!, trash CLANG!. The game
+                   plays play-word, and play with reduced motion
 fx-lemonade        64x64  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
                                                   lemonade popping up, lemon slices, twinkles
 ui-hit-flash-green, -sky, -amber, -orange, -pink, -white
@@ -48,7 +53,7 @@ Usage:
 
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
-the rim, burst, twinkle and heart helpers in fx.py.
+the rim, burst, twinkle, heart and comic word helpers in fx.py.
 """
 
 import math
@@ -56,7 +61,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fx import HEART, SMALL, burst, rim, stamp, star4  # noqa: E402
+from fx import HEART, SMALL, burst, rim, stamp, star4, word  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
 BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
@@ -873,6 +878,28 @@ def status_spooked(size, step):
     return g
 
 
+# Each burst: its drawing, its frame count, its comic word and the row its impact star is centred on.
+HITS = {
+    "fx-hit-skunk": (hit_skunk, 8, "PEE-YEW!", 32),
+    "fx-hit-puddle": (hit_puddle, 7, "SPLOSH!", 40),
+    "fx-hit-thief": (hit_thief, 8, "YOINK!", 40),
+    "fx-hit-squirrel": (hit_squirrel, 7, "CHITTER!", 32),
+    "fx-hit-other-dog": (hit_other_dog, 8, "SNIFF!", 38),
+    "fx-hit-picnic": (hit_picnic, 8, "CHOMP!", 40),
+    "fx-hit-goose": (hit_goose, 8, "HONK!", 36),
+    "fx-hit-petunias": (hit_petunias, 8, "SQUISH!", 42),
+    "fx-hit-trash": (hit_trash, 8, "CLANG!", 40),
+    "fx-hit-cafe": (hit_cafe, 8, "SPLAT!", 40),
+}
+# The word shows on frames 0 to 5 (420ms at 70ms), then the last frames play out without it.
+WORD_FRAMES = 6
+
+
+def worded(g, text, cy, step):
+    """A burst frame with its comic word over it, centred on the impact star, while the word shows."""
+    return word(g, text, 32, cy - 5) if step < WORD_FRAMES else g
+
+
 def sizes(key, draw, ms):
     for size, suffix in ((16, ""), (12, "@75"), (8, "@50")):
         yield f"{key}{suffix}", [("loop", [draw(size, i).outlined(False) for i in range(4)], ms)]
@@ -880,16 +907,9 @@ def sizes(key, draw, ms):
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    yield "fx-hit-skunk", [("play", [hit_skunk(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-puddle", [("play", [hit_puddle(i).outlined(False) for i in range(7)], 70)]
-    yield "fx-hit-thief", [("play", [hit_thief(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-squirrel", [("play", [hit_squirrel(i).outlined(False) for i in range(7)], 70)]
-    yield "fx-hit-other-dog", [("play", [hit_other_dog(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-picnic", [("play", [hit_picnic(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-goose", [("play", [hit_goose(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-petunias", [("play", [hit_petunias(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-trash", [("play", [hit_trash(i).outlined(False) for i in range(8)], 70)]
-    yield "fx-hit-cafe", [("play", [hit_cafe(i).outlined(False) for i in range(8)], 70)]
+    for key, (draw, frames, text, cy) in HITS.items():
+        yield key, [("play", [draw(i).outlined(False) for i in range(frames)], 70),
+                    ("play-word", [worded(draw(i), text, cy, i).outlined(False) for i in range(frames)], 70)]
     yield "fx-lemonade", [("play", [lemonade_pop(i).outlined(False) for i in range(8)], 70)]
     for colour in FLASH:
         yield f"ui-hit-flash-{colour}", [("play", [flash(colour, i).outlined(False) for i in range(4)], 70)]

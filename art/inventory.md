@@ -73,20 +73,21 @@ Same tags, frames and durations as the original.
 
 ## Effects
 
-| Key                     | Type   | Size             | Tags              | Pri   | Note                                                                                                            |
-| ----------------------- | ------ | ---------------- | ----------------- | ----- | --------------------------------------------------------------------------------------------------------------- |
-| `fx-bark`               | sprite | 16×16            | `pop`             | core  | Pull tell                                                                                                       |
-| `fx-bump`               | sprite | 32×32            | `play`            | core  | Impact star on any hit                                                                                          |
-| `fx-coins`              | sprite | 32×32            | `play`            | core  | Coins knocked loose on a minor bump                                                                             |
-| `fx-dizzy`              | sprite | 32×16            | `loop`            | core  | Over the walker while a minor bump locks lane input                                                             |
-| `fx-heart`              | sprite | 16×16            | `up`, `down`      | later | ♥ change at a slot                                                                                              |
-| `fx-hit-<encounter>`    | sprite | 64×64            | `play`            | core  | cafe, goose, other-dog, petunias, picnic, puddle, skunk, squirrel, thief, trash                                 |
-| `fx-lemonade`           | sprite | 64×64            | `play`            | core  | Lucky hit at the lemonade stand                                                                                 |
-| `fx-sparkle`            | sprite | 16×16            | `play`            | core  | Pickup collected                                                                                                |
-| `fx-splash`             | sprite | 32×32            | `play`            | core  | Puddle                                                                                                          |
-| `fx-status-<status>`    | sprite | 16×16            | `loop`            | core  | soaked, spooked, stinky; over a dog's head                                                                      |
-| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | core  | amber, green, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right |
-| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | core  | Stretched to 176×32; `lucky` for lucky encounters                                                               |
+| Key                     | Type   | Size             | Tags                | Pri   | Note                                                                                                             |
+| ----------------------- | ------ | ---------------- | ------------------- | ----- | ---------------------------------------------------------------------------------------------------------------- |
+| `fx-bark`               | sprite | 16×16            | `pop`               | core  | Pull tell                                                                                                        |
+| `fx-bark-word`          | sprite | 32×16            | `pop`               | core  | WOOF! in place of `fx-bark` unless reduced motion                                                                |
+| `fx-bump`               | sprite | 32×32            | `play`              | core  | Impact star on any hit                                                                                           |
+| `fx-coins`              | sprite | 32×32            | `play`              | core  | Coins knocked loose on a minor bump                                                                              |
+| `fx-dizzy`              | sprite | 32×16            | `loop`              | core  | Over the walker while a minor bump locks lane input                                                              |
+| `fx-heart`              | sprite | 16×16            | `up`, `down`        | later | ♥ change at a slot                                                                                               |
+| `fx-hit-<encounter>`    | sprite | 64×64            | `play`, `play-word` | core  | cafe, goose, other-dog, petunias, picnic, puddle, skunk, squirrel, thief, trash; `play-word` adds the comic word |
+| `fx-lemonade`           | sprite | 64×64            | `play`              | core  | Lucky hit at the lemonade stand                                                                                  |
+| `fx-sparkle`            | sprite | 16×16            | `play`              | core  | Pickup collected                                                                                                 |
+| `fx-splash`             | sprite | 32×32            | `play`              | core  | Puddle                                                                                                           |
+| `fx-status-<status>`    | sprite | 16×16            | `loop`              | core  | soaked, spooked, stinky; over a dog's head                                                                       |
+| `ui-hit-flash-<colour>` | sprite | 16×64            | `play`              | core  | amber, green, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right  |
+| `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky`   | core  | Stretched to 176×32; `lucky` for lucky encounters                                                                |
 
 ## Dog needs
 

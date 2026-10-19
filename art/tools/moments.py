@@ -12,9 +12,10 @@ ui-fired-plate  24x24  laid-back, fussy, dramatic (1 frame each)  nine-slice, 8p
                        5px in. Stretched to 72x28 for "FIRED!" in white font-title at
                        2x, centred: caps in rows 9 to 18, ink from x=10 to 61
 fx-fired-pop    64x64  play (6 frames, 70ms)  drawn at 2x (128x128) centred on the 2x
-                       owner face, so its pixels match the face's: an impact star, then a
-                       storm cloud on each side with a bolt and a heart above the face
-                       that cracks and falls apart; the middle 32x32 stays behind the face
+                       owner face, so its pixels match the face's: an amber impact star, then
+                       an amber starburst behind a POOF of cream puffs ringing the face, and
+                       a front door at the left that swings shut and slams; the middle 32x32
+                       stays behind the face, and the game holds the last frame
 fx-coin-fly     12x12  spin (4 frames, 80ms)  a coin turning edge-on and back as it flies
                        from a doghouse to the bank
 ui-payout-label 24x16  normal (1 frame)  three-slice, 8px caps: a cream price tag with a
@@ -38,7 +39,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from fx import SMALL, burst, rim, stamp, star4  # noqa: E402
+from fx import burst, rim, stamp, star4  # noqa: E402
 from hits import piece  # noqa: E402
 from pixel import Grid, main  # noqa: E402
 
@@ -84,59 +85,81 @@ def fired_plate(face, lit, shade):
     return g
 
 
-def cloud(g, cx, cy, s, bolt=False):
-    """A storm cloud of three puffs, slate with a dslate underside and a grey top; s scales it.
-    bolt hangs a yellow lightning zigzag under it."""
-    for dx, dy, r in ((-0.55, 0.15, 0.5), (0.5, 0.2, 0.45), (0, -0.2, 0.62)):
-        g.ell(cx + dx * s * 2, cy + dy * s * 2, r * s * 1.6, r * s * 1.3, "slate", "dslate", "grey")
-    g.rect(round(cx - s * 1.1), round(cy + s * 0.55), round(s * 2.2), 1, "dslate")
-    if bolt:
-        x, y = round(cx), round(cy + s * 0.9)
-        for dx, dy in ((0, 0), (-1, 1), (-1, 2), (0, 2), (1, 2), (0, 3), (0, 4), (-1, 5)):
-            g.p(x + dx, y + dy, "yellow")
+def door(g, x, y, swing, jolt=0):
+    """A front door in its cream frame, the hinge at the left, 13x21 from (x, y): swing 0 is shut, 1 half
+    open and 2 wide open, the door then a narrowing amber slab swung out toward the viewer in front of a
+    plum doorway. jolt shifts the shut door and its frame right, as it slams."""
+    x += jolt
+    g.rect(x, y, 13, 21, "cream")
+    g.rect(x + 12, y + 1, 1, 20, "tan")
+    if swing == 0:
+        g.rect(x + 1, y + 1, 11, 20, "amber")
+        g.rect(x + 1, y + 1, 11, 1, "yellow")
+        g.rect(x + 1, y + 1, 1, 20, "yellow")
+        g.rect(x + 11, y + 1, 1, 20, "orange")
+        # two raised panels, outlined in orange
+        for py, ph in ((y + 3, 6), (y + 11, 8)):
+            g.rect(x + 3, py, 7, ph, "orange")
+            g.rect(x + 4, py + 1, 5, ph - 2, "amber")
+        g.rect(x + 9, y + 10, 2, 2, "yellow")
+        g.p(x + 10, y + 11, "ochre")
+        return
+    g.rect(x + 1, y + 1, 11, 20, "plum")
+    w = (0, 6, 3)[swing]
+    for i in range(w):
+        lift = round(i * 0.5)
+        g.rect(x + 1 - w + i, y + 1 - lift, 1, 20 + 2 * lift, "orange" if i == 0 else "amber")
+    g.rect(x + 1 - w, y + 1 - round((w - 1) * 0.5), w, 1, "yellow")
 
 
-# Big heart over the face: HEART at 2x is too heavy beside the 2x face, so a 13x11 drawn here.
-BIG = ["..111...111..", ".12211.11111.", "1221111111113", "1211111111113", "1111111111113",
-       ".11111111113.", "..111111113..", "...1111113...", "....11113....", ".....113.....", "......1......"]
-BIG_CRACK = [6, 6, 7, 6, 5, 6, 7, 6, 6, 6, 6]
+# The puffs of the POOF cloud round the face: (angle in degrees, size against the frame's puff radius).
+PUFFS = ((-90, 1.05), (-50, 0.9), (-15, 1.1), (20, 0.95), (55, 1.05), (125, 1.0), (160, 0.9), (200, 1.1),
+         (235, 0.95))
+
+
+def poof_cloud(g, cx, cy, d, pr):
+    """A ring of cream puffs d out from (cx, cy), tan on their lower-right, white on their upper-left."""
+    for deg, k in PUFFS:
+        a = math.radians(deg)
+        g.ell(cx + math.cos(a) * d, cy + math.sin(a) * d * 0.9, pr * k, pr * k * 0.9, "cream", "tan", "white")
 
 
 def fired_pop(step):
-    """64x64, shown at 2x behind the 2x face, which covers the middle 32x32. Frame 0 is an impact
-    star while the face is still small; then a storm cloud swells on each side of the face, one
-    with a bolt, and a heart pops up above it, cracks, splits and falls in two darkening halves."""
+    """64x64, shown at 2x behind the 2x face, which covers the middle 32x32. Frame 0 is an amber impact
+    star with a cream core while the face is still small; then an amber starburst opens behind a POOF of
+    cream puffs ringing the face, while a front door at the left swings shut and slams, jolting, with slam
+    lines and a puff of dust at its foot. The last frame, which the game holds, is the burst, the cloud
+    and the shut door."""
     g = Grid(64, 64)
-    cx, cy = 32, 34
-    if step < 2:
-        r = (14, 26)[step]
-        burst(g, cx, cy, r, r * 0.42, 8, "red" if step else "white", 11)
-        burst(g, cx, cy, r * 0.62, r * 0.26, 8, "yellow", 11)
-        g.ell(cx, cy, r * 0.24, r * 0.24, "white")
-        rim(g)
-    if step >= 1:
-        # half a cloud is about 2.1s wide, so the drift keeps both inside the frame
-        s = (0, 3, 4, 4.5, 4, 3.5)[step]
-        drift = (0, 0, 1, 2, 3, 3)[step]
-        piece(g, lambda p: cloud(p, 12 - drift, 28 - drift, s, step in (2, 3)))
-        piece(g, lambda p: cloud(p, 52 + drift, 24 - drift, s * 0.9, step in (3, 4)))
-    if step == 1:
-        piece(g, lambda p: stamp(p, SMALL, cx - 3, 8))
-    elif step in (2, 3):
-        def heart(p):
-            stamp(p, BIG, cx - 6, 4)
-            if step == 3:
-                for y, x in enumerate(BIG_CRACK):
-                    p.p(cx - 6 + x, 4 + y, "plum")
-        piece(g, heart)
-        if step == 2:
-            for x, y in ((cx - 10, 6), (cx + 9, 3), (cx + 11, 12)):
-                piece(g, lambda p: star4(p, x, y, 1, "white", "yellow"))
-    elif step >= 4:
-        spread, drop = (2, 4)[step - 4], (2, 6)[step - 4]
-        cols = ("red", "pink", "dred") if step == 4 else ("dred", "red", "plum")
-        piece(g, lambda p: stamp(p, BIG, cx - 6 - spread, 4 + drop, cols, lambda x, y: x < BIG_CRACK[y]))
-        piece(g, lambda p: stamp(p, BIG, cx - 6 + spread, 5 + drop, cols, lambda x, y: x > BIG_CRACK[y]))
+    cx, cy = 32, 33
+    if step == 0:
+        burst(g, cx, cy, 14, 6, 8, "amber", 11)
+        burst(g, cx, cy, 9, 3.6, 8, "cream", 11)
+        g.ell(cx, cy, 3.4, 3.4, "white")
+        return rim(g)
+    r = (0, 24, 30, 31, 31, 31)[step]
+    piece(g, lambda p: burst(p, cx, cy, r, r * 0.6, 8, "amber", 11))
+    d, pr = (0, 13, 18, 20, 21, 21)[step], (0, 5, 7, 7.5, 7, 7)[step]
+
+    def cloud(p):
+        poof_cloud(p, cx, cy, d, pr)
+        # on frame 1 the cloud is still one mass round the small face; after that the face fills its middle
+        if step == 1:
+            p.ell(cx, cy, 11, 10, "cream", "tan", "white")
+    piece(g, cloud)
+    swing, jolt = (0, 2, 1, 0, 0, 0)[step], (0, 0, 0, 1, 0, 0)[step]
+    piece(g, lambda p: door(p, 6, 30, swing, jolt))
+    if step == 3:
+        # slam lines beside the hinge, clear of the face, and a twinkle at the frame's top corner
+        def lines(p):
+            for x, y, n in ((1, 33, 3), (0, 40, 4), (1, 47, 3)):
+                p.rect(x, y, n, 1, "white")
+        piece(g, lines)
+        piece(g, lambda p: star4(p, 6, 27, 2, "yellow"))
+    if step in (3, 4):
+        t = step - 3
+        for x, rr in ((6 - t, 2.5), (17 + t, 2.5 - t * 0.5), (12, 2)):
+            piece(g, lambda p: p.ell(x, 52 + t, rr + 0.5, rr, "cream", "tan"))
     # the face covers the middle from frame 2 on, so keep it clear for a clean silhouette
     if step >= 2:
         g.rect(19, 21, 26, 30, None)
