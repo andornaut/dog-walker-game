@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { SCREEN_CONFIG } from "../data/screen";
+import { screenLayout } from "../layout/screenLayout";
 import { cents, clampHearts } from "../rules/units";
 import type { Pack } from "../state/runState";
 import {
@@ -16,9 +18,11 @@ import {
   lowHeartDogs,
   MOMENTS,
   newlyLow,
+  PAYOUT_TAG,
   type PayoutCue,
   payoutFlights,
   payoutMs,
+  payoutTagTop,
   trotOffX,
 } from "./moments";
 
@@ -128,6 +132,17 @@ describe("lowHeartDogs and newlyLow", () => {
     expect(newlyLow(["duchess"], ["duchess"])).toEqual([]);
     expect(newlyLow(["duchess"], ["duchess", "koda"])).toEqual(["koda"]);
   });
+});
+
+describe("payoutTagTop", () => {
+  const { dogSlots } = screenLayout(SCREEN_CONFIG);
+
+  it.each(dogSlots.map((slot, i) => [i, slot] as const))(
+    "starts slot %i's tag above its roof, clear of its faces and hearts",
+    (_, slot) => {
+      expect(payoutTagTop(slot) + PAYOUT_TAG.height + PAYOUT_TAG.gap).toBe(slot.y);
+    },
+  );
 });
 
 describe("payoutFlights", () => {

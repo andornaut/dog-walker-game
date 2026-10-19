@@ -184,6 +184,15 @@ export function payoutFlights(
     });
 }
 
+// A fee's amount on its 16px tag starts gap pixels above its doghouse's roof, clear of the
+// faces and hearts, and rises rise pixels over the road.
+export const PAYOUT_TAG = { gap: 2, height: 16, rise: 14 } as const;
+
+// The tag's top as it starts, for the doghouse at slot.
+export function payoutTagTop(slot: Pick<Rect, "y">): number {
+  return slot.y - PAYOUT_TAG.gap - PAYOUT_TAG.height;
+}
+
 // From the payout's start until the last amount has faded at the bank.
 export function payoutMs(flights: readonly PayoutFlight[]): number {
   return flights.length === 0

@@ -23,9 +23,11 @@ import {
   MOMENTS,
   newlyLow,
   PAYOUT_EVENT,
+  PAYOUT_TAG,
   type PayoutCue,
   type PayoutFlight,
   payoutFlights,
+  payoutTagTop,
   TOP_BAR_POINTS,
   TREAT_EVENT,
   type TreatCue,
@@ -59,7 +61,7 @@ const LINE_DEPTH = DEPTH + 2;
 const LINE_TAIL_WIDTH = 8;
 // The payout label: a three-slice with 8px caps, its amount's ink from x 9 and capitals from
 // row 3, and 5px after the ink.
-const PAYOUT_LABEL = { cap: 8, height: 16, inkX: 9, inkY: 3, key: "ui-payout-label", rise: 14 };
+const PAYOUT_LABEL = { cap: 8, inkX: 9, inkY: 3, key: "ui-payout-label" };
 const PAYOUT_LABEL_END = 5;
 const COIN = { key: "fx-coin-fly", tag: "spin" };
 const TREAT_POP = { fallback: "fx-sparkle", key: "fx-treat-pop", tag: "play" };
@@ -89,7 +91,9 @@ interface SlotWarning {
 // its dog. Moments that play out over time stop with the pause menu, as the walk does, while
 // the HUD keeps running under it.
 export class HudFeedback {
+  private cardUp = false;
   private inFlight = 0;
+  private readonly payoutLabels = new Set<GameObjects.Container>();
   // The firing moments' faces and plates on screen.
   private firingParts = new Set<Rect>();
   // Fired lines' bubbles on screen, and lines waiting for room beside them.
@@ -135,6 +139,10 @@ export class HudFeedback {
 
   update(run: RunState, pause: RunPause): void {
     this.holdWhilePaused(pause.menu !== "closed");
+    this.cardUp = pause.card;
+    if (this.cardUp) {
+      this.clearPayoutLabels();
+    }
     this.showLowHearts(run);
   }
 
@@ -428,23 +436,35 @@ export class HudFeedback {
     }
   }
 
+  // A card covering the walk takes the fees' amounts away; their coins fly on.
+  private clearPayoutLabels(): void {
+    [...this.payoutLabels].forEach((label) => label.destroy());
+  }
+
   private flyFee(flight: PayoutFlight, rect: Rect): void {
     const { bow, chipMs, roof } = MOMENTS.payout;
     const from = { x: rect.x + roof.x, y: rect.y + roof.y };
-    // The amount rises in the doghouse and stops just under the roof's name plate, so it never
-    // covers the name and stays clear of the dimmed road behind a card.
-    const under = rect.y + DOGHOUSE.roof.height;
-    const label = () => this.addPayoutLabel(flight.text, from.x, under + PAYOUT_LABEL.rise);
+    // The amount rises over the road from just above the roof, clear of the faces and hearts.
+    const label = () => {
+      const shown = this.addPayoutLabel(flight.text, from.x, payoutTagTop(rect));
+      this.payoutLabels.add(shown);
+      shown.once("destroy", () => this.payoutLabels.delete(shown));
+      return shown;
+    };
     if (flight.landMs === flight.startMs) {
-      this.fadeOut([label()], 0, chipMs);
+      if (!this.cardUp) {
+        this.fadeOut([label()], 0, chipMs);
+      }
       return;
     }
     this.inFlight += flight.amount;
     this.after(flight.startMs, () => {
-      const shown = label();
       const ms = flight.landMs - flight.startMs + chipMs;
-      this.tween({ duration: ms, targets: shown, y: shown.y - PAYOUT_LABEL.rise });
-      this.fadeOut([shown], ms - chipMs, chipMs);
+      if (!this.cardUp) {
+        const shown = label();
+        this.tween({ duration: ms, targets: shown, y: shown.y - PAYOUT_TAG.rise });
+        this.fadeOut([shown], ms - chipMs, chipMs);
+      }
       const coin = this.addCoin(from);
       const bank = TOP_BAR_POINTS.bank;
       const path = { control: bowRightControl(from, bank, bow), from, to: bank };
@@ -457,7 +477,8 @@ export class HudFeedback {
 
   // The amount on a price tag centred on x, its top at top.
   private addPayoutLabel(text: string, x: number, top: number): GameObjects.Container {
-    const { cap, height, inkX, inkY, key } = PAYOUT_LABEL;
+    const { cap, inkX, inkY, key } = PAYOUT_LABEL;
+    const { height } = PAYOUT_TAG;
     const amount = addPixelText(this.scene, inkX, inkY, text, {
       color: PALETTE.forest,
       font: "title",
