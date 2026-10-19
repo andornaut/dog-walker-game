@@ -84,6 +84,7 @@ describe("bankCheckpoint", () => {
     expect(banked.stats.lastWalk).toEqual({
       dogs: ["koda", "duchess", "waffles"],
       earnedCents: 4_250,
+      firings: [{ dog: "waffles", zone: 2 }],
       outcome: "wentHome",
       zonesFinished: 2,
     });
@@ -168,6 +169,7 @@ describe("recordRunEnd", () => {
     expect(low.stats.lastWalk).toEqual({
       dogs: ["koda", "biscuit"],
       earnedCents: 100,
+      firings: [{ dog: "biscuit", zone: 2 }],
       outcome: "finished",
       zonesFinished: 1,
     });

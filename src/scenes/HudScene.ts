@@ -17,7 +17,7 @@ import type { PackSlot, RunState } from "../state/runState";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText, scalePixelText, setPixelText } from "./pixelText";
-import { isMuted } from "./runSaveShim";
+import { isMuted } from "./profileStore";
 import {
   CHANGE_LABELS_EVENT,
   HINT_EVENT,

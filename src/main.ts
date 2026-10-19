@@ -15,7 +15,9 @@ import { HelpScene } from "./scenes/HelpScene";
 import { HudScene } from "./scenes/HudScene";
 import { PauseScene } from "./scenes/PauseScene";
 import { RunScene } from "./scenes/RunScene";
+import { SettingsScene } from "./scenes/SettingsScene";
 import { StartScene } from "./scenes/StartScene";
+import { StatsScene } from "./scenes/StatsScene";
 
 setupPhoneApp();
 
@@ -42,8 +44,8 @@ function devPanelHost(game: Game): DevPanelHost {
 }
 
 // Scenes render in list order: the HUD over the road, cards and the pause menu over the
-// HUD, help over those, and the dev overlay, which starts itself, over everything. Boot
-// runs first and starts the start screen.
+// HUD, help, settings and stats over those, and the dev overlay, which starts itself, over
+// everything. Boot runs first and starts the start screen.
 const game = new Game({
   backgroundColor: "#181425",
   height: SCREEN_CONFIG.height,
@@ -59,6 +61,8 @@ const game = new Game({
     PauseScene,
     EndScene,
     HelpScene,
+    SettingsScene,
+    StatsScene,
     DevOverlayScene,
   ],
   type: AUTO,

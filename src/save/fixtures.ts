@@ -38,7 +38,7 @@ export const newPlayerSave: SaveDocument = {
     dogs: ["biscuit", "duchess", "koda"],
     gear: [],
   },
-  settings: { musicVolume: 0.6, reducedMotion: false, sfxVolume: 0.8 },
+  settings: { musicVolume: 0.6, muted: false, reducedMotion: false, sfxVolume: 0.8 },
   shownHints: [],
   stats: {
     bestWalk: null,
@@ -65,7 +65,7 @@ export function veteranSave(): SaveDocument {
       dogs: ["biscuit", "duchess", "koda", "waffles"],
       gear: ["fannyPack", "whistle"],
     },
-    settings: { musicVolume: 0.25, reducedMotion: true, sfxVolume: 0.5 },
+    settings: { musicVolume: 0.25, muted: true, reducedMotion: true, sfxVolume: 0.5 },
     shownHints: ["card", "tip"],
     stats: {
       bestWalk: { dogs: ["koda", "waffles"], earnedCents: cents(9_000), zonesFinished: 4 },
@@ -77,6 +77,7 @@ export function veteranSave(): SaveDocument {
       lastWalk: {
         dogs: ["koda"],
         earnedCents: cents(2_500),
+        firings: [{ dog: "koda", zone: 2 }],
         outcome: "wentHome",
         zonesFinished: 2,
       },

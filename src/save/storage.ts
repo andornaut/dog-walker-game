@@ -47,6 +47,16 @@ export function browserStorage(storage: StorageLike): SaveStorage {
   };
 }
 
+// Looks the storage up on each call: reading window.localStorage itself throws when the
+// browser blocks site data, and this turns that into a throw from getItem or setItem, which
+// browserStorage reports as unavailable.
+export function lazyStorage(lookup: () => StorageLike): StorageLike {
+  return {
+    getItem: (key) => lookup().getItem(key),
+    setItem: (key, value) => lookup().setItem(key, value),
+  };
+}
+
 function describe(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }

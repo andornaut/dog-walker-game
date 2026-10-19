@@ -56,9 +56,15 @@ const walkSchema = v.object({
   earnedCents: cents,
   zonesFinished: count,
 });
+// An owner who fired you, and the zone they did it in, counting from 1.
+const firingSchema = v.object({
+  dog: contentId,
+  zone: zoneNumber,
+});
 const lastWalkSchema = v.object({
   dogs: ids,
   earnedCents: cents,
+  firings: v.array(firingSchema),
   outcome: v.picklist(END_REASONS),
   zonesFinished: count,
 });
@@ -95,6 +101,8 @@ export const saveSchema = v.object({
   }),
   settings: v.object({
     musicVolume: volume,
+    // Silences all sound without changing the volumes. Saves from before it load unmuted.
+    muted: v.optional(v.boolean(), false),
     reducedMotion: v.boolean(),
     sfxVolume: volume,
   }),
@@ -136,7 +144,12 @@ export interface Walk extends Omit<v.InferOutput<typeof walkSchema>, "dogs"> {
   dogs: DogId[];
 }
 
+export interface Firing extends Omit<v.InferOutput<typeof firingSchema>, "dog"> {
+  dog: DogId;
+}
+
 export interface LastWalk extends Walk {
+  firings: Firing[];
   outcome: EndReason;
 }
 
@@ -167,8 +180,11 @@ export interface SaveDefaults {
   walker: WalkerId;
 }
 
-export const DEFAULT_SETTINGS: SaveDocument["settings"] = {
+export type Settings = SaveDocument["settings"];
+
+export const DEFAULT_SETTINGS: Settings = {
   musicVolume: 0.6,
+  muted: false,
   reducedMotion: false,
   sfxVolume: 0.8,
 };

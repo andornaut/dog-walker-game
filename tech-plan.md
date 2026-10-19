@@ -58,7 +58,8 @@
 - **Validation:** a Valibot schema parses every load. Unknown ids are dropped. A save that fails validation is kept under a backup key and the game starts fresh.
 - **Migrations:** ordered pure functions between save versions, each tested against a fixture. Renaming a content id needs one.
 - **Storage:** an async interface. The web adapter wraps `localStorage`; a Capacitor `Preferences` adapter replaces it in the app, where iOS can evict web storage. When storage fails, the game stays playable and says progress won't be saved.
-- **Writes:** on a purchase, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
+- **Writes:** on a purchase, a loadout, walker, settings or hint change, after each zone (the checkpoint) and at run end. An unfinished run is banked on the next launch as a run that headed home.
+- **Scenes:** `src/scenes/profileStore.ts` holds the loaded save for every scene and is the only way scenes read or change it.
 
 ## Phone
 
@@ -69,7 +70,7 @@
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL. Invalid values are warned about and ignored.
+`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A URL with any run parameter (all but `dev`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
 
 | Param   | Value                           | Default         |
 | ------- | ------------------------------- | --------------- |

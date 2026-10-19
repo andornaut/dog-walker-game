@@ -1,31 +1,11 @@
-import type { DogId, GameData, GearId, WalkerId } from "../data/types";
+import type { DogId, GameData, GearId } from "../data/types";
 import { quipLine } from "../rules/choices";
 import { zoneFee } from "../rules/dogs";
-import { formatDollars } from "../rules/effectText";
-import { addCents, type Cents, cents, dollarsToCents, read } from "../rules/units";
-import type { EndReason, PackDogs, RunState } from "../state/runState";
-
-// The home screen's logbook: the best walk, totals, and the last walk as one line.
-export interface Logbook {
-  readonly bestWalk: Cents;
-  readonly bestWalkDogs: readonly DogId[];
-  readonly bestWalkZones: number;
-  readonly dogsWalked: number;
-  readonly lastWalk: string;
-  readonly timesFired: number;
-  readonly walks: number;
-}
-
-// What the player keeps between walks. logbook is null before the first walk; dogSlots is
-// how many dogs a pack may hold; walker is the one drawn at the gate and on the road.
-export interface HomeProfile {
-  readonly bank: Cents;
-  readonly dogSlots: number;
-  readonly logbook: Logbook | null;
-  readonly ownedDogs: readonly DogId[];
-  readonly ownedGear: readonly GearId[];
-  readonly walker: WalkerId;
-}
+import { effectText, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
+import { nextDogSlot, price, unlockPrice } from "../rules/shop";
+import { addCents, type Cents, cents, read } from "../rules/units";
+import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
+import type { PackDogs } from "../state/runState";
 
 // The pack being picked, in the order picked, and the gear to take.
 export interface HomeLoadout {
@@ -35,50 +15,42 @@ export interface HomeLoadout {
 
 export type Purchase =
   | { readonly dog: DogId; readonly kind: "dog" }
-  | { readonly kind: "dogSlot"; readonly slot: number }
+  | { readonly kind: "dogSlot" }
   | { readonly gear: GearId; readonly kind: "gear" };
 
-// A tap on the home screen either changes the loadout or asks to buy a locked item.
+// A tap on the home screen changes the loadout, asks to buy a locked item, or is refused
+// because the pack is full.
 export type HomeTap =
   | { readonly kind: "buy"; readonly purchase: Purchase }
-  | {
-      readonly kind: "loadout";
-      readonly loadout: HomeLoadout;
-    };
+  | { readonly kind: "full" }
+  | { readonly kind: "loadout"; readonly loadout: HomeLoadout };
 
 export const emptyLoadout: HomeLoadout = { dogs: [], gear: null };
 
+type ShopData = Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "tuning">;
+
+// Money is counted in cents and shown in whole dollars, with thousands separated.
+export function dollarText(amount: Cents): string {
+  return `$${Math.floor(amount / 100).toLocaleString("en-US")}`;
+}
+
 // How many dogs the player's pack may hold: one per dog slot, up to counts.packSizeMax.
-export function packCapacity(data: Pick<GameData, "tuning">, profile: HomeProfile): number {
-  return Math.min(profile.dogSlots, read(data.tuning, "counts", "packSizeMax"));
-}
-
-// The next dog slot for sale, or undefined once the pack holds the most it can.
-export function nextDogSlot(
+export function packCapacity(
   data: Pick<GameData, "tuning">,
-  profile: HomeProfile,
-): number | undefined {
-  return profile.dogSlots < read(data.tuning, "counts", "packSizeMax")
-    ? profile.dogSlots + 1
-    : undefined;
+  owned: Pick<Owned, "dogSlots">,
+): number {
+  return Math.min(owned.dogSlots, read(data.tuning, "counts", "packSizeMax"));
 }
 
-// The price of a dog slot, read from money.prices.dogSlot<slot>, or undefined if unpriced.
-export function dogSlotPrice(data: Pick<GameData, "tuning">, slot: number): Cents | undefined {
-  const prices: Readonly<Record<string, number>> = data.tuning.money.prices;
-  const dollars = prices[`dogSlot${slot}`];
-  return dollars === undefined ? undefined : dollarsToCents(dollars);
-}
-
-// An owned dog joins the pack, or leaves it if already picked; a full pack takes no more.
-// A dog not owned yet is a purchase.
+// An owned dog joins the pack, or leaves it if already picked; a full pack refuses it. A dog
+// not owned yet is a purchase.
 export function tapDog(
   data: Pick<GameData, "tuning">,
-  profile: HomeProfile,
+  owned: Owned,
   dog: DogId,
   loadout: HomeLoadout,
 ): HomeTap {
-  if (!profile.ownedDogs.includes(dog)) {
+  if (!owned.dogs.includes(dog)) {
     return { kind: "buy", purchase: { dog, kind: "dog" } };
   }
   if (loadout.dogs.includes(dog)) {
@@ -87,20 +59,63 @@ export function tapDog(
       loadout: { ...loadout, dogs: loadout.dogs.filter((id) => id !== dog) },
     };
   }
-  const full = loadout.dogs.length >= packCapacity(data, profile);
-  return {
-    kind: "loadout",
-    loadout: full ? loadout : { ...loadout, dogs: [...loadout.dogs, dog] },
-  };
+  if (loadout.dogs.length >= packCapacity(data, owned)) {
+    return { kind: "full" };
+  }
+  return { kind: "loadout", loadout: { ...loadout, dogs: [...loadout.dogs, dog] } };
 }
 
 // Owned gear is equipped, replacing any other, or unequipped if already on. Gear not owned
 // yet is a purchase.
-export function tapGear(profile: HomeProfile, gear: GearId, loadout: HomeLoadout): HomeTap {
-  if (!profile.ownedGear.includes(gear)) {
+export function tapGear(owned: Owned, gear: GearId, loadout: HomeLoadout): HomeTap {
+  if (!owned.gear.includes(gear)) {
     return { kind: "buy", purchase: { gear, kind: "gear" } };
   }
   return { kind: "loadout", loadout: { ...loadout, gear: loadout.gear === gear ? null : gear } };
+}
+
+// What a purchase costs, or null when it is not for sale: already owned, or no slot left.
+export function purchasePrice(data: ShopData, owned: Owned, purchase: Purchase): Cents | null {
+  switch (purchase.kind) {
+    case "dog":
+      return owned.dogs.includes(purchase.dog)
+        ? null
+        : unlockPrice(data.tuning, data.dogs[purchase.dog]);
+    case "dogSlot":
+      return nextDogSlot(data, owned.dogSlots)?.price ?? null;
+    case "gear":
+      return owned.gear.includes(purchase.gear)
+        ? null
+        : price(data.tuning, data.shopGear[purchase.gear].price);
+    default:
+      return purchase satisfies never;
+  }
+}
+
+export type BuyResult =
+  | { readonly kind: "bought"; readonly save: SaveDocument }
+  | { readonly kind: "refused"; readonly reason: "cantAfford" | "notForSale" };
+
+// Takes the price from the bank and adds the item to what the player owns.
+export function buy(data: ShopData, purchase: Purchase, save: SaveDocument): BuyResult {
+  const { owned } = save;
+  const cost = purchasePrice(data, owned, purchase);
+  if (cost === null) {
+    return { kind: "refused", reason: "notForSale" };
+  }
+  if (cost > save.bankCents) {
+    return { kind: "refused", reason: "cantAfford" };
+  }
+  const bought: Owned =
+    purchase.kind === "dog"
+      ? { ...owned, dogs: [...owned.dogs, purchase.dog] }
+      : purchase.kind === "gear"
+        ? { ...owned, gear: [...owned.gear, purchase.gear] }
+        : { ...owned, dogSlots: owned.dogSlots + 1 };
+  return {
+    kind: "bought",
+    save: { ...save, bankCents: cents(save.bankCents - cost), owned: bought },
+  };
 }
 
 // The picked dogs as a pack a walk can start with, or undefined with none picked.
@@ -126,43 +141,59 @@ export function packFeePerZone(
   );
 }
 
-export interface WalkResult {
-  readonly dogs: readonly DogId[];
-  readonly earned: Cents;
-  // Each owner who fired you, with the zone they did it in.
-  readonly firings: readonly { readonly dog: DogId; readonly zoneIndex: number }[];
-  readonly reason: EndReason;
-  readonly zonesFinished: number;
+function zoneName(data: Pick<GameData, "world">, zone: number): string {
+  return data.world.zones[zone - 1]?.name ?? data.world.name;
 }
 
-// The result of a run that has ended: everything it earned is kept.
-export function walkResult(data: Pick<GameData, "world">, run: RunState): WalkResult {
-  const reason = run.phase.kind === "ended" ? run.phase.reason : "wentHome";
-  return {
-    dogs: run.pack.map((slot) => slot.dog),
-    earned: run.money,
-    firings: run.pack.flatMap((slot) =>
-      slot.status === "fired" ? [{ dog: slot.dog, zoneIndex: slot.zoneIndex }] : [],
-    ),
-    reason,
-    zonesFinished: reason === "finished" ? data.world.zones.length : run.zoneIndex,
-  };
-}
-
-// The last walk as one line for the logbook, naming the owner who fired you if one did.
-export function lastWalkLine(data: Pick<GameData, "dogs" | "world">, result: WalkResult): string {
-  const earned = `+${formatDollars(result.earned)}.`;
-  const firing = result.firings.at(-1);
-  if (firing !== undefined) {
-    const owner = data.dogs[firing.dog].owner.name;
-    const zone = data.world.zones[firing.zoneIndex]?.name ?? data.world.name;
-    return `${earned} ${owner} fired you on ${zone}.`;
+// Dog names joined for a sentence: "Koda", "Koda and Biscuit", "Koda, Biscuit and Dash".
+export function dogNames(data: Pick<GameData, "dogs">, dogs: readonly DogId[]): string {
+  const names = dogs.map((dog) => data.dogs[dog].name);
+  const last = names.pop();
+  if (last === undefined) {
+    return "";
   }
-  if (result.reason === "finished") {
+  return names.length === 0 ? last : `${names.join(", ")} and ${last}`;
+}
+
+// The last walk as one line for the logbook, naming the last owner who fired you if one did.
+export function lastWalkLine(data: Pick<GameData, "dogs" | "world">, walk: LastWalk): string {
+  const earned = `+${dollarText(walk.earnedCents)}.`;
+  const firing = walk.firings.at(-1);
+  if (firing !== undefined) {
+    return `${earned} ${data.dogs[firing.dog].owner.name} fired you on ${zoneName(data, firing.zone)}.`;
+  }
+  if (walk.outcome === "finished") {
     return `${earned} Walked all of ${data.world.name}.`;
   }
-  const zone = data.world.zones[result.zonesFinished]?.name ?? data.world.name;
-  return `${earned} Headed home from ${zone}.`;
+  return `${earned} Headed home from ${zoneName(data, walk.zonesFinished + 1)}.`;
+}
+
+// The home screen's logbook: the best walk, totals, and the last walk; null before any walk.
+export interface Logbook {
+  readonly best: string;
+  readonly bestNote: string;
+  readonly last: string;
+  readonly totals: string;
+}
+
+export function logbookOf(
+  data: Pick<GameData, "dogs" | "world">,
+  stats: SaveStats,
+): Logbook | null {
+  const { bestWalk, lastWalk } = stats;
+  if (bestWalk === null || lastWalk === null) {
+    return null;
+  }
+  const walks = stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
+  const dogsWalked = Object.values(stats.dogs).reduce((total, dog) => total + dog.walks, 0);
+  const zones = `${bestWalk.zonesFinished} ${bestWalk.zonesFinished === 1 ? "zone" : "zones"}`;
+  const dogs = dogNames(data, bestWalk.dogs);
+  return {
+    best: dollarText(bestWalk.earnedCents),
+    bestNote: dogs === "" ? zones : `${zones} with ${dogs}`,
+    last: lastWalkLine(data, lastWalk),
+    totals: `Walks ${walks}   Dogs walked ${dogsWalked}   Fired ${stats.timesFired}`,
+  };
 }
 
 // Splits text into lines of at most maxChars, breaking between words; a longer word gets a
@@ -180,7 +211,7 @@ export function wrapWords(maxChars: number, text: string): string[] {
   return lines;
 }
 
-// What a dog's owner says when the player picks it: their name, then one of their parting
+// What a dog's owner says when the player picks it: their name and one of their parting
 // lines, wrapped to the speech bubble.
 export function partingSpeech(
   data: Pick<GameData, "dogs" | "quips">,
@@ -189,28 +220,36 @@ export function partingSpeech(
   dog: DogId,
 ): string[] {
   const line = quipLine(data, random, { dog, moment: "parting" });
-  return [`${data.dogs[dog].owner.name}:`, ...wrapWords(maxChars, line)];
+  return wrapWords(maxChars, `${data.dogs[dog].owner.name}: ${line}`);
 }
 
-// Banks a finished walk and records it in the logbook. Held in memory until saves land.
-export function recordWalk(
-  data: Pick<GameData, "dogs" | "world">,
-  result: WalkResult,
-  profile: HomeProfile,
-): HomeProfile {
-  const log = profile.logbook;
-  const best = log === null || result.earned > log.bestWalk;
-  return {
-    ...profile,
-    bank: addCents(profile.bank, result.earned),
-    logbook: {
-      bestWalk: best ? result.earned : log.bestWalk,
-      bestWalkDogs: best ? result.dogs : log.bestWalkDogs,
-      bestWalkZones: best ? result.zonesFinished : log.bestWalkZones,
-      dogsWalked: (log?.dogsWalked ?? 0) + result.dogs.length,
-      lastWalk: lastWalkLine(data, result),
-      timesFired: (log?.timesFired ?? 0) + result.firings.length,
-      walks: (log?.walks ?? 0) + 1,
-    },
-  };
+type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters">;
+
+// What buying an item would take: its price, and how much more the bank needs if short.
+function priceInfo(bank: Cents, cost: Cents): string {
+  return cost > bank
+    ? `${dollarText(cost)}: need ${dollarText(cents(cost - bank))} more.`
+    : `${dollarText(cost)}: tap to buy.`;
+}
+
+// A dog in words for the home screen's info line, so its tile's icons never stand alone: size
+// and trait, fee or price, and its owner's temperament.
+export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
+  const { name, owner, size, trait } = data.dogs[dog];
+  const kind = `${SIZE_NAMES[size]} ${TRAIT_NAMES[trait].toLowerCase()}`;
+  const temper = `${owner.name} is ${TEMPERAMENT_NAMES[owner.temperament]}.`;
+  const cost = purchasePrice(data, owned, { dog, kind: "dog" });
+  if (cost === null) {
+    const fee = dollarText(zoneFee(data.tuning, [], data.dogs[dog]));
+    return `${name}: ${kind}, ${fee} a zone. ${temper}`;
+  }
+  return `${name}: ${kind}. ${temper} ${priceInfo(bank, cost)}`;
+}
+
+// A gear item and what it does, with its price while locked.
+export function gearInfo(data: InfoData, owned: Owned, bank: Cents, gear: GearId): string {
+  const item = data.shopGear[gear];
+  const line = `${item.name}: ${effectText(data, item.effects)}.`;
+  const cost = purchasePrice(data, owned, { gear, kind: "gear" });
+  return cost === null ? line : `${line} ${priceInfo(bank, cost)}`;
 }

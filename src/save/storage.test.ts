@@ -4,6 +4,7 @@ import { cents } from "../rules/units";
 import { newPlayerSave, testContext, veteranSave } from "./fixtures";
 import {
   browserStorage,
+  lazyStorage,
   memoryStorage,
   SAVE_BACKUP_KEY,
   SAVE_KEY,
@@ -167,5 +168,21 @@ describe("browserStorage", () => {
       reason: "The quota has been exceeded.",
       status: "unavailable",
     });
+  });
+});
+
+describe("lazyStorage", () => {
+  it("turns a storage that cannot even be looked up into an unavailable load", async () => {
+    const blocked = lazyStorage(() => {
+      throw new DOMException("Access is denied for this document.", "SecurityError");
+    });
+    expect((await saveStore(browserStorage(blocked)).load(testContext)).status).toBe("unavailable");
+  });
+
+  it("reads and writes through the storage it looks up", async () => {
+    const entries = new Map<string, string>();
+    const store = saveStore(browserStorage(lazyStorage(() => fakeLocalStorage(entries))));
+    await store.save(veteranSave());
+    expect(entries.get(SAVE_KEY)).toBe(JSON.stringify(veteranSave()));
   });
 });

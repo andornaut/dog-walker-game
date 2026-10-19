@@ -92,9 +92,9 @@ function keepKnownEntries<Key extends string, Stored, Value>(
 
 function keepKnownWalk<W extends { dogs: string[] }>(
   known: KnownIds,
-  walk: W | null,
-): (Omit<W, "dogs"> & Pick<Walk, "dogs">) | null {
-  return walk === null ? null : { ...walk, dogs: keepKnown(known.dogs, walk.dogs) };
+  walk: W,
+): Omit<W, "dogs"> & Pick<Walk, "dogs"> {
+  return { ...walk, dogs: keepKnown(known.dogs, walk.dogs) };
 }
 
 function clamp(min: number, max: number, value: number): number {
@@ -139,9 +139,17 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
     shownHints: keepKnown(known.hints, save.shownHints),
     stats: {
       ...stats,
-      bestWalk: keepKnownWalk(known, stats.bestWalk),
+      bestWalk: stats.bestWalk === null ? null : keepKnownWalk(known, stats.bestWalk),
       dogs: keepKnownEntries(known.dogs, (dogStats: DogStats) => dogStats, stats.dogs),
-      lastWalk: keepKnownWalk(known, stats.lastWalk),
+      lastWalk:
+        stats.lastWalk === null
+          ? null
+          : {
+              ...keepKnownWalk(known, stats.lastWalk),
+              firings: stats.lastWalk.firings.flatMap(({ dog, zone }) =>
+                isKnown(known.dogs, dog) ? [{ dog, zone }] : [],
+              ),
+            },
     },
     walker: isKnown(known.walkers, save.walker) ? save.walker : defaults.walker,
   };

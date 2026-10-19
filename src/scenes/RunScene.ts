@@ -89,6 +89,7 @@ import {
   zoneLength,
 } from "../runner/walk";
 import { walkerFootY, walkGeometry } from "../runner/walkGeometry";
+import { checkpointOf, runResultOf } from "../save/runSlices";
 import { packDogs } from "../state/pack";
 import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
 import type { CardSceneData } from "./CardScene";
@@ -97,20 +98,17 @@ import { colorFromHex, PALETTE } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import { addPixelText } from "./pixelText";
 import {
-  checkpointOf,
   checkpointRun,
   currentSettings,
-  endSceneData,
   finishRun,
   isMuted,
   markHintShown,
   onSettingsChanged,
   runLoadout,
-  runResultOf,
   setMuted,
   type Settings,
   shownHints,
-} from "./runSaveShim";
+} from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import {
@@ -1013,7 +1011,7 @@ export class RunScene extends Scene {
     for (const key of [SCENE_KEYS.hud, SCENE_KEYS.card, SCENE_KEYS.pause]) {
       this.scene.stop(key);
     }
-    const showEnd = () => this.scene.start(SCENE_KEYS.end, endSceneData(this));
+    const showEnd = () => this.scene.start(SCENE_KEYS.end);
     finishRun(this, runResultOf(gameData, walk.run), this.changes).then(
       showEnd,
       (error: unknown) => {

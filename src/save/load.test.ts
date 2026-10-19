@@ -300,6 +300,23 @@ describe("loadSave", () => {
       expect(save.stats.lastWalk).toEqual({ ...veteranSave().stats.lastWalk, dogs: [] });
     });
 
+    it("loads a save from before the mute setting as unmuted", () => {
+      const save = loaded((document) => {
+        delete (document.settings as Partial<typeof document.settings>).muted;
+      });
+      expect(save.settings.muted).toBe(false);
+    });
+
+    it("drops unknown dogs from the last walk's firings", () => {
+      const save = loaded((document) => {
+        present(document.stats.lastWalk).firings = [
+          { dog: "ghost", zone: 1 },
+          { dog: "koda", zone: 2 },
+        ];
+      });
+      expect(save.stats.lastWalk?.firings).toEqual([{ dog: "koda", zone: 2 }]);
+    });
+
     it("drops them from a checkpoint and keeps its earnings", () => {
       const save = loaded((document) => {
         document.checkpoint = {

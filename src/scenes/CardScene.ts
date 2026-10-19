@@ -23,7 +23,7 @@ import { fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
-import { currentSettings } from "./runSaveShim";
+import { currentSettings } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { addStandingSprite, playTag } from "./sprites";
 

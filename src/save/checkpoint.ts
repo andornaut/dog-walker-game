@@ -45,10 +45,20 @@ function bankRun(run: BankedRun, save: SaveDocument): SaveDocument {
       zonesFinished: current.zonesFinished + zonesFinished,
     };
   }
-  const firings = run.dogs.filter((dog) => dog.fired).length;
+
   const { earnedCents, outcome, zonesFinished } = run;
   const walkDogs = run.dogs.map(({ id }) => id);
-  const lastWalk: LastWalk = { dogs: walkDogs, earnedCents, outcome, zonesFinished };
+  // A dog fired in a zone was paid for the zones before it.
+  const firedBy = run.dogs.flatMap(({ fired, id, zonesFinished: paid }) =>
+    fired ? [{ dog: id, zone: paid + 1 }] : [],
+  );
+  const lastWalk: LastWalk = {
+    dogs: walkDogs,
+    earnedCents,
+    firings: firedBy,
+    outcome,
+    zonesFinished,
+  };
   return {
     ...save,
     bankCents: addCents(save.bankCents, earnedCents),
@@ -63,7 +73,7 @@ function bankRun(run: BankedRun, save: SaveDocument): SaveDocument {
       lastWalk,
       lifetimeCents: addCents(stats.lifetimeCents, earnedCents),
       runs: { ...stats.runs, [outcome]: stats.runs[outcome] + 1 },
-      timesFired: stats.timesFired + firings,
+      timesFired: stats.timesFired + firedBy.length,
     },
   };
 }

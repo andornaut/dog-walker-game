@@ -30,9 +30,10 @@ const BACKGROUND_COLOR = 0x733e39;
 const BUTTON_DISABLED: ButtonColors = { face: 0x5a6988, label: "#c0cbdc", lip: 0x3a4466 };
 const BUTTON_ENABLED: ButtonColors = { face: 0xfeae34, label: "#3e2731", lip: 0xf77622 };
 const CLOSE_COLORS = { border: 0xe4a672, face: 0xead4aa, label: "#3e2731" };
-const COUNTER_COLOR = "#e4a672";
-const DOT_COLOR = 0xb86f50;
-const DOT_CURRENT_COLOR = 0xfeae34;
+const COUNTER_COLOR = "#ead4aa";
+// The other pages' dots are hollow rings and the current one is filled, so they differ by shape.
+const DOT_COLOR = 0xe4a672;
+const DOT_CURRENT_COLOR = 0xffffff;
 const FRAME_COLOR = 0x3e2731;
 const PLACEHOLDER_COLORS = { fill: 0x262b44, label: "#c0cbdc" };
 const TEXT_COLOR = "#ead4aa";
@@ -138,7 +139,12 @@ export class HelpScene extends Scene {
     this.drawBody(page.body);
 
     dotRects(pages.length).forEach((dot, i) => {
-      addFilledRect(this, i === this.page ? DOT_CURRENT_COLOR : DOT_COLOR, dot);
+      if (i === this.page) {
+        addFilledRect(this, DOT_CURRENT_COLOR, dot);
+      } else {
+        addFilledRect(this, DOT_COLOR, dot);
+        addFilledRect(this, BACKGROUND_COLOR, insetRect(1, dot));
+      }
     });
 
     const { backEnabled, nextLabel } = helpButtons(pages.length, this.page);

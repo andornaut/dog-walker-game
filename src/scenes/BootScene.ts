@@ -1,14 +1,20 @@
-import { type GameObjects, type Loader, Scene } from "phaser";
+import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
+import { itemAt } from "../arrays";
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
 import { type AssetManifest, assetUrl, parseManifest } from "../assets/manifest";
 import { dogFaceKey, dogSpriteKey, encounterSpriteKey, ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, EncounterId } from "../data/types";
+import { devRunLoadout, namesRunSetup } from "../dev/devStart";
+import { pageRunSetup } from "../dev/pageRunSetup";
+import { startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
 import { loadManifestImages, MANIFEST_CACHE_KEY } from "./manifestImages";
 import { PALETTE } from "./palette";
 import { registerFallbackPixelFont } from "./pixelText";
+import { openProfile, profileSave, setRunOverride, walkerSpriteKey } from "./profileStore";
+import type { RunSceneData } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { ensurePlaceholder, measureSprite } from "./sprites";
 
@@ -40,7 +46,8 @@ function placeholderSizes(): Map<string, Size> {
 }
 
 // Loads the art manifest and everything in it, then registers each sprite's animations.
-// A missing or broken asset is logged and replaced by a placeholder box, never fatal.
+// A missing or broken asset is logged and replaced by a placeholder box, never fatal. Then
+// opens the player's save and starts the home screen.
 export class BootScene extends Scene {
   private manifest: AssetManifest = { fonts: [], images: [], sounds: [], sprites: [] };
   private progressBar: GameObjects.Rectangle | undefined;
@@ -59,6 +66,9 @@ export class BootScene extends Scene {
   }
 
   create(): void {
+    if (this.sound instanceof Sound.WebAudioSoundManager) {
+      unlockAudioOnFirstGesture(window, this.sound.context);
+    }
     try {
       this.manifest = parseManifest(this.cache.json.get(MANIFEST_CACHE_KEY));
     } catch (error) {
@@ -100,7 +110,26 @@ export class BootScene extends Scene {
       ensurePlaceholder(this, key, size);
     }
     registerFallbackPixelFont(this);
-    this.scene.start(SCENE_KEYS.start);
+    void openProfile(this).then((load) => {
+      if (load.status === "corrupt" || load.status === "unavailable") {
+        console.warn(`The save is ${load.status}, so play starts fresh: ${load.reason}`);
+      }
+      this.startFirstScene();
+    });
+  }
+
+  // A dev link that names a run starts it straight away; otherwise the home screen shows.
+  private startFirstScene(): void {
+    if (!namesRunSetup(globalThis.location.search)) {
+      this.scene.start(SCENE_KEYS.start);
+      return;
+    }
+    const { lastLoadout, owned, walker } = profileSave(this);
+    const loadout = devRunLoadout(lastLoadout, itemAt(owned.dogs, 0), pageRunSetup().setup);
+    setRunOverride(this, loadout);
+    const data: RunSceneData = { loadout, walkerSprite: walkerSpriteKey(this, walker) };
+    startWakeLock();
+    this.scene.start(SCENE_KEYS.run, data);
   }
 
   private drawProgress(fraction: number): void {
