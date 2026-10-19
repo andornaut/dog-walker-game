@@ -4,7 +4,7 @@ Every art asset v1 needs, derived from `../gameplay/v1-plan.md` and the run scre
 
 Priority:
 
-- **M6:** in the Milestone 6 pixel pass (walker, 3 dogs, owner faces, 4 encounters, 2 pickups, card frames)
+- **M6:** in the Milestone 6 pixel pass (walker, dogs, owner faces, 2 pickups, card frames, card illustrations for the 4 encounters and 6 forced stops)
 - **v1:** needed before v1 ships, outside the Milestone 6 list
 - **later:** nice to have; placeholders are acceptable for v1
 
@@ -22,6 +22,8 @@ Sizes marked TBD depend on an open decision in the style guide.
 | Tile        | 32×32           | Road tiles, dogs, obstacles; ~12px margins |
 
 ## Characters (road)
+
+The dog roster is being redesigned into named dogs, each with its own art and owner, and will grow beyond these three. The dog rows below are placeholders until the roster is final.
 
 | Asset             | Key          | Type   | Size  | Animations                        | Priority | Notes                                              |
 | ----------------- | ------------ | ------ | ----- | --------------------------------- | -------- | -------------------------------------------------- |
@@ -113,16 +115,16 @@ Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An en
 | Squirrel         | hold tight, let them chase                                                                                   | 2     | M6       |
 | Puddle           | go through, towel                                                                                            | 2     | M6       |
 | Other dog        | let them sniff, pull away                                                                                    | 2     | M6       |
-| Stop sign        | wait, dart across                                                                                            | 2     | v1       |
-| Kid              | let them pet, decline                                                                                        | 2     | v1       |
-| Ice cream truck  | buy pup cups, walk past                                                                                      | 2     | v1       |
-| Construction     | long way, squeeze past                                                                                       | 2     | v1       |
-| Mail carrier     | hold them back, wait it out                                                                                  | 2     | v1       |
-| Chatty neighbour | chat, move on                                                                                                | 2     | v1       |
+| Stop sign        | wait, dart across                                                                                            | 2     | M6       |
+| Kid              | let them pet, decline                                                                                        | 2     | M6       |
+| Ice cream truck  | buy pup cups, walk past                                                                                      | 2     | M6       |
+| Construction     | long way, squeeze past                                                                                       | 2     | M6       |
+| Mail carrier     | hold them back, wait it out                                                                                  | 2     | M6       |
+| Chatty neighbour | chat, move on                                                                                                | 2     | M6       |
 | Poop bags        | skip                                                                                                         | 1     | v1       |
 | Upgrades         | belly rubs, good leash, big tipper, shortcut, rush hour, raincoats, treat magnet, steady hands, sweet talker | 9     | v1       |
 
-Total: 31 card illustrations, 9 of them in Milestone 6.
+Total: 31 card illustrations, 21 of them in Milestone 6.
 
 ## Screens outside the run
 
@@ -138,22 +140,22 @@ Total: 31 card illustrations, 9 of them in Milestone 6.
 
 ## UI kit
 
-| Asset      | Key               | Type   | Size      | Priority | Notes                                                  |
-| ---------- | ----------------- | ------ | --------- | -------- | ------------------------------------------------------ |
-| Pixel font | `font-pixel`      | font   | TBD       | M6       | Needs `$`, `♥`, `+`, `-`, digits, punctuation          |
-| Button     | `ui-button`       | sprite | 9-slice   | v1       | Frames `normal`, `pressed`, `disabled`                 |
-| Panel      | `ui-panel`        | image  | 9-slice   | v1       | Shop, end screen, pause menu with Head home            |
-| Pause icon | `icon-pause`      | image  | 16×16     | v1       | Top bar; opens the pause menu                          |
-| Touch hint | `ui-touch-hint`   | image  | TBD       | later    | First-run "tap left / right"                           |
-| App icon   | (not in manifest) | PNG    | 16 to 512 | later    | Favicon and home-screen icons; `public/` root, unowned |
+| Asset      | Key               | Type   | Size      | Priority | Notes                                                                       |
+| ---------- | ----------------- | ------ | --------- | -------- | --------------------------------------------------------------------------- |
+| Pixel font | `font-pixel`      | font   | TBD       | M6       | Needs `$`, `♥`, `+`, `-`, digits, punctuation                               |
+| Button     | `ui-button`       | sprite | 9-slice   | v1       | Frames `normal`, `pressed`, `disabled`                                      |
+| Panel      | `ui-panel`        | image  | 9-slice   | v1       | Shop, end screen, pause menu with Head home                                 |
+| Pause icon | `icon-pause`      | image  | 16×16     | v1       | Top bar; opens the pause menu                                               |
+| Touch hint | `ui-touch-hint`   | image  | TBD       | later    | First-run "tap left / right"                                                |
+| App icon   | (not in manifest) | PNG    | 16 to 512 | later    | Favicon done (`public/art/favicon.png`, 32 and 16); home-screen sizes later |
 
 ## Counts
 
-| Priority | Sprites | Images          | Fonts |
-| -------- | ------- | --------------- | ----- |
-| M6       | ~18     | 9 (card illus.) | 1     |
-| v1       | ~13     | ~45             | 0     |
-| later    | ~1      | ~23             | 0     |
+| Priority | Sprites | Images           | Fonts |
+| -------- | ------- | ---------------- | ----- |
+| M6       | ~18     | 21 (card illus.) | 1     |
+| v1       | ~13     | ~33              | 0     |
+| later    | ~1      | ~23              | 0     |
 
 ## Settled
 
