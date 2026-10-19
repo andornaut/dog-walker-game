@@ -1,25 +1,40 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import shippedManifest from "../../public/art/manifest.json";
 import { itemAt } from "../arrays";
-import { DEPTH_STEPS, stepSize } from "../assets/depthSteps";
+import { DEPTH_STEPS, splitDepthKey, stepSize } from "../assets/depthSteps";
 import { parseManifest } from "../assets/manifest";
-import { depthVariantKey, dogSpriteKey } from "../assets/spriteKeys";
+import { depthVariantKey, dogSpriteKey, MOVER_SPRITES, standsOnGround } from "../assets/spriteKeys";
+import { decodePng } from "../atlas/atlasBuild";
 import { gameData } from "../data";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
+import type { DogId, ZoneId } from "../data/types";
+import { encounterLook } from "../rules/skins";
+import { isMoverObstacle, MOVER_CONTACTS, type MoverKind } from "../runner/movers";
 import { dogDepthStep, statusOverlayLift } from "../runner/statuses";
 import { walkProjection } from "../runner/walkGeometry";
 import { type DepthArt, depthDraw } from "./depthScale";
 import { PACK_DEPTH } from "./packFormation";
+import { opaqueBoundsOfRgba } from "./pixelShapes";
 import { SCALE_STEPS, scaleAt } from "./projection";
 import { screenLayout } from "./screenLayout";
 
 const manifest = parseManifest(shippedManifest);
 const sprites = new Map(manifest.sprites.map((entry) => [entry.key, entry]));
 const sheets = import.meta.glob<{
-  frames: Record<string, { sourceSize: { h: number; w: number } }>;
+  frames: Record<
+    string,
+    { frame: { h: number; w: number; x: number; y: number }; sourceSize: { h: number; w: number } }
+  >;
 }>("../../public/art/sprites/*.json", { eager: true, import: "default" });
+const ART_DIR = new URL("../../public/art/", import.meta.url);
+
+// How tall a step draws in frame 0: its rows from its top opaque row down to its feet row. A
+// step's frame is the table's size, and its art sits within the next larger step drawn at that
+// size, so the frame can be a row taller than what it draws.
+const drawnRows = new Map<string, number>();
 
 // A shipped sprite's art steps, 1x first, as the scene reads them from the loaded art.
 function artsOf(key: string): DepthArt[] {
@@ -32,9 +47,26 @@ function artsOf(key: string): DepthArt[] {
       if (entry?.anchor === undefined || frame === undefined) {
         throw new Error(`${art} has no anchor or frame`);
       }
+      const { feetY } = entry.anchor;
+      if (!drawnRows.has(art)) {
+        const image = decodePng(readFileSync(new URL(entry.png, ART_DIR)));
+        const { h, w, x, y } = frame.frame;
+        const rgba = Uint8Array.from({ length: w * h * 4 }, (_, i) => {
+          const px = Math.floor(i / 4);
+          const at = ((y + Math.floor(px / w)) * image.width + x + (px % w)) * 4 + (i % 4);
+          return image.data[at] ?? 0;
+        });
+        drawnRows.set(art, feetY - (opaqueBoundsOfRgba(w, h, rgba)?.top ?? 0) + 1);
+      }
       const { h, w } = frame.sourceSize;
-      return { feetY: entry.anchor.feetY, height: h, key: art, width: w };
+      return { feetY, height: h, key: art, width: w };
     });
+}
+
+// How tall a step draws: its shipped art's opaque rows, or a made-up step's frame down to its
+// feet row.
+function drawnRowsOf(art: DepthArt): number {
+  return drawnRows.get(art.key) ?? art.feetY + 1;
 }
 
 // A made-up sprite's art steps: its 1x, then each smaller step drawn to scale.
@@ -48,17 +80,23 @@ function syntheticArts(key: string, width: number, steps: readonly number[]): De
 }
 
 // arts with every depth step it lacks drawn at the table's size, as art exports them.
+// A made-up step draws the 1x's art at its size.
 function withEveryStep(arts: readonly DepthArt[]): DepthArt[] {
   const full = itemAt(arts, 0);
-  return DEPTH_STEPS.map(
-    ({ scale, suffix }) =>
-      arts.find((art) => art.key === `${full.key}${suffix}`) ?? {
-        feetY: stepSize(full.feetY, scale),
-        height: stepSize(full.height, scale),
-        key: `${full.key}${suffix}`,
-        width: stepSize(full.width, scale),
-      },
-  );
+  return DEPTH_STEPS.map(({ scale, suffix }) => {
+    const shipped = arts.find((art) => art.key === `${full.key}${suffix}`);
+    if (shipped !== undefined) {
+      return shipped;
+    }
+    const key = `${full.key}${suffix}`;
+    drawnRows.set(key, stepSize(drawnRowsOf(full), scale));
+    return {
+      feetY: stepSize(full.feetY, scale),
+      height: stepSize(full.height, scale),
+      key,
+      width: stepSize(full.width, scale),
+    };
+  });
 }
 
 // Each sprite's shipped steps, then the same with every step.
@@ -72,8 +110,31 @@ const approach = Array.from({ length: Math.ceil(projection.visibleDistance) + 12
   scaleAt(projection, projection.visibleDistance - i),
 );
 // Shipped road sprites, small and large, flat and standing.
-const STANDING = ["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge"];
+// Every mover's body: its own sprite, and each zone's skin of the encounter it is.
+const MOVER_KEYS = [
+  ...new Set(
+    (Object.keys(MOVER_SPRITES) as MoverKind[]).flatMap((mover) => {
+      const contact = MOVER_CONTACTS[mover];
+      const skins = isMoverObstacle(contact)
+        ? []
+        : gameData.world.zones.map(({ id }) => encounterLook(gameData, id as ZoneId, contact).art);
+      return [MOVER_SPRITES[mover].key, ...skins];
+    }),
+  ),
+].filter((key) => sprites.has(key));
+const STANDING = [
+  ...new Set(["tip", "treat", "cone", "dog-koda", "loose-dog", "squirrel", "hedge", ...MOVER_KEYS]),
+];
 const KEYS = [...STANDING, "skunk-cloud", "puddle"];
+// Every shipped road sprite with a depth variant.
+const STEPPED = [
+  ...new Set(
+    manifest.sprites
+      .map(({ key }) => splitDepthKey(key))
+      .filter(({ step }) => step.scale < 1)
+      .map(({ base }) => base),
+  ),
+].filter((key) => sprites.has(key) && standsOnGround(key));
 // Every set of steps a sprite may have, whichever sprites ship with them.
 const STEP_SETS = [[], [0.75], [0.5], [0.75, 0.5], [0.875, 0.75, 0.625, 0.5]].flatMap((steps) =>
   [16, 88].map((width) => syntheticArts(`w${width}`, width, steps)),
@@ -166,39 +227,48 @@ describe("depthDraw", () => {
     expect(depthDraw(arts, projected)).toMatchObject({ key, scale });
   });
 
-  it("follows the projection to the nearest pixel, as it approaches only growing", () => {
-    for (const arts of [...stepSets(KEYS), ...STEP_SETS]) {
-      const full = itemAt(arts, 0);
-      let last: { height: number; key: string; width: number } | undefined;
-      for (const projected of approach) {
-        const drawn = depthDraw(arts, projected);
-        const art = arts.find((step) => step.key === drawn.key);
-        if (art === undefined) {
-          throw new Error(`${drawn.key} is not one of ${full.key}'s steps`);
+  // The frame follows the projection; what the art draws inside it, its opaque rows down to
+  // the feet, never draws a pixel shorter as it approaches.
+  it.each([
+    { name: "the sizing cases", sets: [...stepSets(KEYS), ...STEP_SETS] },
+    { name: "every shipped sprite with depth variants", sets: STEPPED.map(artsOf) },
+  ])(
+    "follows the projection to the nearest pixel, as it approaches only growing: $name",
+    ({ sets }) => {
+      const shrinks = new Set<string>();
+      for (const arts of sets) {
+        const full = itemAt(arts, 0);
+        const order = (stepKey: string) => arts.findIndex((step) => step.key === stepKey);
+        let last: { key: string; rows: number } | undefined;
+        for (const projected of approach) {
+          const drawn = depthDraw(arts, projected);
+          const art = arts.find((step) => step.key === drawn.key);
+          if (art === undefined) {
+            throw new Error(`${drawn.key} is not one of ${full.key}'s steps`);
+          }
+          const wanted = Math.max(full.width, full.height) * Math.min(1, projected);
+          const frame = Math.max(art.width, art.height) * drawn.scale;
+          expect(Math.abs(frame - wanted), art.key).toBeLessThanOrEqual(0.5 + 1e-9);
+          expect(drawn.scale).toBeLessThanOrEqual(1 + 0.5 / Math.max(art.width, art.height));
+          const shown = { key: art.key, rows: stepSize(drawnRowsOf(art), drawn.scale) };
+          if (last !== undefined) {
+            if (shown.rows < last.rows) {
+              shrinks.add(`${last.key} ${last.rows} to ${shown.key} ${shown.rows}`);
+            }
+            // Never back to a smaller step.
+            expect(order(shown.key), `${last.key} to ${shown.key}`).toBeLessThanOrEqual(
+              order(last.key),
+            );
+          }
+          last = shown;
         }
-        const shown = {
-          height: art.height * drawn.scale,
-          key: art.key,
-          width: art.width * drawn.scale,
-        };
-        const wanted = Math.max(full.width, full.height) * Math.min(1, projected);
-        expect(Math.abs(Math.max(shown.width, shown.height) - wanted)).toBeLessThanOrEqual(
-          0.5 + 1e-9,
-        );
-        expect(drawn.scale).toBeLessThanOrEqual(1 + 0.5 / Math.max(art.width, art.height));
-        if (last !== undefined) {
-          expect(shown.height).toBeGreaterThanOrEqual(last.height - 1e-9);
-          expect(shown.width).toBeGreaterThanOrEqual(last.width - 1e-9);
-          // Never back to a smaller step.
-          const order = (stepKey: string) => arts.findIndex((step) => step.key === stepKey);
-          expect(order(shown.key)).toBeLessThanOrEqual(order(last.key));
-        }
-        last = shown;
       }
-    }
-  });
+      expect([...shrinks]).toEqual([]);
+    },
+  );
 
   it("stands each step on its own feet line, which stays put as the steps change", () => {
+    const jumps = new Set<string>();
     for (const arts of stepSets(STANDING)) {
       let last: { feetToTop: number; key: string } | undefined;
       for (const projected of approach) {
@@ -207,12 +277,14 @@ describe("depthDraw", () => {
         expect(drawn.originY).toBe((art?.feetY ?? 0) / (art?.height ?? 1));
         const feetToTop = drawn.originY * (art?.height ?? 0) * drawn.scale;
         if (last !== undefined && last.key !== drawn.key) {
-          expect(Math.abs(feetToTop - last.feetToTop), `${last.key} to ${drawn.key}`).toBeLessThan(
-            1.5,
-          );
+          if (Math.abs(feetToTop - last.feetToTop) >= 1.5) {
+            const from = last.feetToTop.toFixed(1);
+            jumps.add(`${last.key} ${from} to ${drawn.key} ${feetToTop.toFixed(1)}`);
+          }
         }
         last = { feetToTop, key: drawn.key };
       }
     }
+    expect([...jumps]).toEqual([]);
   });
 });
