@@ -78,7 +78,7 @@ import {
 import { SCENE_KEYS } from "./sceneKeys";
 import { playEffect, playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
-import { artFits } from "./uiKit";
+import { addPanel, artFits } from "./uiKit";
 
 // The zone's name is right-aligned in its well, its icon just left of it, and the pips end
 // under the name's right edge.
@@ -96,7 +96,6 @@ const LABEL = { height: 20, ms: 1100, rise: 18 };
 const HINT = { fadeMs: 400, holdMs: 4500, padding: 6 };
 // An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x.
 const QUIP = { holdMs: 2600, padding: 4 };
-const NINE_SLICE_CORNER = 8;
 
 interface SlotView {
   anchors: { name: { x: number; y: number }; ownerName: { x: number; y: number } };
@@ -730,19 +729,7 @@ export class HudScene extends Scene {
     const x = centredInLane(lane, lane.x + lane.width / 2, width);
     const y = lane.y + lane.height - height;
     placePixelText(text, x + HINT.padding, y + HINT.padding);
-    const parts: GameObjects.GameObject[] = [];
-    if (this.textures.exists("ui-hint")) {
-      const corner = NINE_SLICE_CORNER;
-      parts.push(
-        this.add
-          .nineslice(x, y, "ui-hint", undefined, width, height, corner, corner, corner, corner)
-          .setOrigin(0),
-      );
-    } else {
-      const box = this.add.graphics();
-      drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
-      parts.push(box);
-    }
+    const parts: GameObjects.GameObject[] = [addPanel(this, { height, width, x, y }, "ui-hint")];
     if (this.textures.exists("ui-hint-tail")) {
       parts.push(
         this.add.image(road.x + road.width / 2, y + height - 1, "ui-hint-tail").setOrigin(0.5, 0),
@@ -807,19 +794,7 @@ export class HudScene extends Scene {
     const x = centredInLane(lane, faceX, width);
     const y = lane.y;
     placePixelText(text, x + QUIP.padding, y + Math.round((height - text.height) / 2));
-    const parts: GameObjects.GameObject[] = [];
-    if (this.textures.exists("ui-quip")) {
-      const corner = NINE_SLICE_CORNER;
-      parts.push(
-        this.add
-          .nineslice(x, y, "ui-quip", undefined, width, height, corner, corner, corner, corner)
-          .setOrigin(0),
-      );
-    } else {
-      const box = this.add.graphics();
-      drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
-      parts.push(box);
-    }
+    const parts: GameObjects.GameObject[] = [addPanel(this, { height, width, x, y }, "ui-quip")];
     text.setDepth(1);
     parts.push(text);
     this.tweens.add({

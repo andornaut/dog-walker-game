@@ -32,12 +32,19 @@ const SLICES = {
   // The detail card a held dog or gear tile opens, and the three-slice title band across it.
   "ui-detail-band": { bottom: 0, left: 8, right: 8, top: 0 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
+  // The run's hint bubble, the strip's bubble and the plate over a hit.
+  "ui-hint": { bottom: 8, left: 8, right: 8, top: 8 },
+  "ui-hit-label": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
+  // The owners' speech bubble.
+  "ui-quip": { bottom: 8, left: 8, right: 8, top: 8 },
   // The home screen's section frames: the top slice holds the frame and the heading band.
   "ui-section": { bottom: 3, left: 3, right: 3, top: 24 },
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },
   // A three-slice: 4px caps and a middle that stretches.
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
+  // The state strip's tab.
+  "ui-strip-well": { bottom: 8, left: 8, right: 8, top: 8 },
 } as const;
 export type SliceKey = keyof typeof SLICES;
 
@@ -89,9 +96,14 @@ export function addTagImage(
   return frame === undefined ? undefined : scene.add.image(x, y, key, frame).setOrigin(0);
 }
 
-// A ui-panel, or a framed cream box while the art is missing.
-export function addPanel(scene: Scene, rect: Rect): GameObjects.GameObject {
-  const panel = addNineSlice(scene, "ui-panel", rect);
+// A ui-panel or another bubble or panel nine-slice, or a framed cream box while the art is
+// missing.
+export function addPanel(
+  scene: Scene,
+  rect: Rect,
+  key: SliceKey = "ui-panel",
+): GameObjects.Graphics | GameObjects.NineSlice {
+  const panel = addNineSlice(scene, key, rect);
   if (panel !== undefined) {
     return panel;
   }

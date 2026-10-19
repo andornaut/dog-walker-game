@@ -7,7 +7,7 @@ import { hitLabel } from "../rules/encounters";
 import { addDisplayText } from "./displayText";
 import { PALETTE } from "./palette";
 import { firstTag, playEffect } from "./sprites";
-import { tagFrame } from "./uiKit";
+import { addNineSlice, tagFrame } from "./uiKit";
 
 // An encounter hit's moment, played over the hit stop before its card: a burst over the pack,
 // a flash down both edges of the field, the encounter's label on a plate above the pack, and
@@ -50,7 +50,7 @@ const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
 // A moving burst plays its word tag (the sound word on the impact star) when the art has one.
 const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play", wordTag: "play-word" };
-const PLATE = { corner: 8, height: 32, key: "ui-hit-label", width: 176 };
+const PLATE = { height: 32, key: "ui-hit-label", width: 176 } as const;
 // The label's line starts this far below the plate's top; font-title's capitals start 4px
 // into the line.
 const LABEL = { capTop: 4, dropIn: 8, dropMs: 120, fadeMs: 150, lineTop: 3, scale: 2 };
@@ -150,25 +150,14 @@ function showLabel(scene: Scene, moment: HitMoment, plate: string, totalMs: numb
   const top = Math.round(moment.centre.y - BURST.size / 2 - BURST.gap - PLATE.height);
   const left = Math.round(moment.labelX - PLATE.width / 2);
   const label = scene.add.container(left, top).setDepth(moment.depth + 2);
-  const frame = tagFrame(scene, PLATE.key, plate);
-  if (frame !== undefined) {
-    const { corner } = PLATE;
-    label.add(
-      scene.add
-        .nineslice(
-          0,
-          0,
-          PLATE.key,
-          frame,
-          PLATE.width,
-          PLATE.height,
-          corner,
-          corner,
-          corner,
-          corner,
-        )
-        .setOrigin(0),
-    );
+  const slice = addNineSlice(
+    scene,
+    PLATE.key,
+    { height: PLATE.height, width: PLATE.width, x: 0, y: 0 },
+    plate,
+  );
+  if (slice !== undefined) {
+    label.add(slice);
   }
   label.add(
     addDisplayText(

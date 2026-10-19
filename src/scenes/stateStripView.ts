@@ -12,16 +12,15 @@ import {
   stripText,
 } from "../hud/stateStrip";
 import type { Point, Rect } from "../layout/rect";
-import { drawFramedRect, fillRect } from "./draw";
+import { fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
-import { addTapBurst } from "./uiKit";
+import { addNineSlice, addPanel, addTapBurst } from "./uiKit";
 
 // The description bubble sits in its lane, right-aligned with the strip and growing down as far
 // as its rows need: one row per item, its icon then its text, at 2x.
-const BUBBLE = { corner: 8, gap: 4, holdMs: 6000, padding: 6, rowGap: 4 };
+const BUBBLE = { gap: 4, holdMs: 6000, padding: 6, rowGap: 4 };
 const DEPTH = 20;
-const TAB_CORNER = 8;
 
 // The top bar's state strip and the bubble a tap on it opens.
 export class StateStripView {
@@ -67,13 +66,8 @@ export class StateStripView {
       return;
     }
     const { tab } = layout;
-    if (this.scene.textures.exists("ui-strip-well")) {
-      const c = TAB_CORNER;
-      this.tab = this.scene.add
-        .nineslice(tab.x, tab.y, "ui-strip-well", undefined, tab.width, tab.height, c, c, c, c)
-        .setOrigin(0)
-        .setDepth(DEPTH);
-    } else {
+    this.tab = addNineSlice(this.scene, "ui-strip-well", tab)?.setDepth(DEPTH);
+    if (this.tab === undefined) {
       fillRect(this.well, PALETTE.plum, tab);
       fillRect(this.well, PALETTE.ink, layout.well);
     }
@@ -119,7 +113,7 @@ export class StateStripView {
     if (layout === undefined) {
       return;
     }
-    const { corner, gap, padding, rowGap } = BUBBLE;
+    const { gap, padding, rowGap } = BUBBLE;
     const { lane } = this;
     const icon = 16;
     const room = lane.width - 2 * padding - icon - gap;
@@ -138,19 +132,9 @@ export class StateStripView {
     const right = Math.min(lane.x + lane.width, layout.tab.x + layout.tab.width);
     const x = Math.max(lane.x, right - width);
     const y = lane.y;
-    const parts: GameObjects.GameObject[] = [];
-    if (this.scene.textures.exists("ui-hint")) {
-      parts.push(
-        this.scene.add
-          .nineslice(x, y, "ui-hint", undefined, width, height, corner, corner, corner, corner)
-          .setOrigin(0)
-          .setDepth(DEPTH),
-      );
-    } else {
-      const box = this.scene.add.graphics().setDepth(DEPTH);
-      drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
-      parts.push(box);
-    }
+    const parts: GameObjects.GameObject[] = [
+      addPanel(this.scene, { height, width, x, y }, "ui-hint").setDepth(DEPTH),
+    ];
     let rowY = y + padding;
     texts.forEach((text, i) => {
       const item = this.items[i];

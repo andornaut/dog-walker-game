@@ -40,7 +40,7 @@ import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
 import type { RunScene } from "./RunScene";
 import { firstTag, playEffect, playTag } from "./sprites";
-import { artFits, tagFrame } from "./uiKit";
+import { addPanel, artFits, tagFrame } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 // Over the doghouses, labels and quips the HUD draws.
@@ -50,7 +50,7 @@ const DEPTH = 50;
 const FACE = { fadeMs: 150, popMs: 160, scale: 2, size: 32 };
 const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
 const PLATE = { corner: 8, dropIn: 8, dropMs: 120, key: "ui-fired-plate" };
-const LINE = { corner: 8, fadeMs: 400, maxWidth: 200, padding: 6 };
+const LINE = { fadeMs: 400, maxWidth: 200, padding: 6 };
 // The payout label: a three-slice with 8px caps, its amount's ink from x 9 and capitals from
 // row 3, and 5px after the ink.
 const PAYOUT_LABEL = { cap: 8, height: 16, inkX: 9, inkY: 3, key: "ui-payout-label", rise: 14 };
@@ -307,20 +307,9 @@ export class HudFeedback {
     const x = bubbleX(SCREEN_CONFIG.width, at.x, width);
     const y = at.y - height;
     placePixelText(label, x + LINE.padding, y + LINE.padding);
-    const { corner } = LINE;
-    const parts: GameObjects.GameObject[] = [];
-    if (this.scene.textures.exists("ui-quip")) {
-      parts.push(
-        this.scene.add
-          .nineslice(x, y, "ui-quip", undefined, width, height, corner, corner, corner, corner)
-          .setOrigin(0)
-          .setDepth(DEPTH),
-      );
-    } else {
-      const box = this.scene.add.graphics().setDepth(DEPTH);
-      drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
-      parts.push(box);
-    }
+    const parts: GameObjects.GameObject[] = [
+      addPanel(this.scene, { height, width, x, y }, "ui-quip").setDepth(DEPTH),
+    ];
     const downArt = downTail((key) => this.scene.textures.exists(key));
     if (downArt !== undefined) {
       parts.push(

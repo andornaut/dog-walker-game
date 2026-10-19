@@ -325,32 +325,7 @@ export class EndScene extends Scene {
 
   // A ui-quip speech bubble with its tail towards the face, or a framed box while it is missing.
   private addBubble(rect: Rect): void {
-    if (this.textures.exists("ui-quip")) {
-      const corner = 8;
-      this.add
-        .nineslice(
-          rect.x,
-          rect.y,
-          "ui-quip",
-          undefined,
-          rect.width,
-          rect.height,
-          corner,
-          corner,
-          corner,
-          corner,
-        )
-        .setOrigin(0);
-    } else {
-      const g = this.add.graphics();
-      fillRect(g, PALETTE.plum, rect);
-      fillRect(g, PALETTE.cream, {
-        height: rect.height - 2,
-        width: rect.width - 2,
-        x: rect.x + 1,
-        y: rect.y + 1,
-      });
-    }
+    addPanel(this, rect, "ui-quip");
     if (this.textures.exists("ui-quip-tail")) {
       this.add.image(QUIPS.tail.x, rect.y + QUIPS.tail.y, "ui-quip-tail").setOrigin(0);
     }
