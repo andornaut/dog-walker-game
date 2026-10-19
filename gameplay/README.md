@@ -45,17 +45,17 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 
 Rules in the rulebook that the game doesn't have yet:
 
-1. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
-2. **Zone encounters:** the five zone encounters plus the lemonade stand
-3. **Start screen:** the uniform layout, with the how-to line in the walker's bubble
+1. **Dog quirks:** Archie's Acrobatic and Penny's Nervous, with the roster changes (Archie hyper, Snowball calm, Penny Friendly)
+2. **Zone length:** zones run about 2 minutes on a phone; the dev overlay shows each zone's wall-clock time
 
 Tuning against the targets, with the simulator before and after:
 
-- Difficulty by skill: typical and expert players finish too often, novices too rarely
+- Difficulty by skill: typical and expert players finish too often, novices too rarely; card policies differ too much (money options are cheap next to a walk's earnings)
 - Road speed 150 px/s and a 4.5 s look-ahead
+- Earnings: about $215 a walk, so about 45 walks buy everything (now $300 to $400)
 - Needs: urgency, gone-wrong time, accident cost and need card chance (Regular dogs fail too often)
-- Zones: per-zone density, speed, mover share and weights, so harder paths earn their fees; zone encounter weights
-- Pack size, gear prices and overall earnings: a bigger pack earns little more than one dog, and only the fanny pack pays for itself
+- Zones: per-zone density, speed, mover share and weights, so harder paths earn their fees; the six zone encounters' weights
+- Pack size and gear prices: a bigger pack earns little more than one dog, and only the fanny pack pays for itself (the simulator can't vary gear yet)
 - Big Payday's threshold, now rarely earned
 
 Decided at the phone playtest:
