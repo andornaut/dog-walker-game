@@ -171,6 +171,11 @@ export function lastWalkLine(data: Pick<GameData, "dogs" | "world">, walk: LastW
   return `${earned} Headed home from ${zoneName(data, walk.route, walk.zonesFinished + 1)}.`;
 }
 
+// Every walk played, however it ended.
+export function walksPlayed(stats: Pick<SaveStats, "runs">): number {
+  return stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
+}
+
 // The home screen's logbook: the best walk, totals, and the last walk; null before any walk.
 export interface Logbook {
   readonly best: string;
@@ -187,7 +192,7 @@ export function logbookOf(
   if (bestWalk === null || lastWalk === null) {
     return null;
   }
-  const walks = stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
+  const walks = walksPlayed(stats);
   const dogsWalked = Object.values(stats.dogs).reduce((total, dog) => total + dog.walks, 0);
   const zones = `${bestWalk.zonesFinished} ${bestWalk.zonesFinished === 1 ? "zone" : "zones"}`;
   const dogs = dogNames(data, bestWalk.dogs);

@@ -35,20 +35,26 @@ import {
   purchasePrice,
   tapDog,
   tapGear,
+  walksPlayed,
   wrapWords,
 } from "../home/home";
 import {
-  bubbleLine,
+  bubbleSpeech,
   type HomeAction,
-  messageLine,
-  packCountLine,
   slotSignLines,
-  startWalkLine,
-  stepHeading,
   type WalkerLine,
   walkerLineKey,
 } from "../home/homeLines";
 import { porchOwners } from "../home/porch";
+import {
+  homeSections,
+  type Section,
+  type SectionId,
+  type Sections,
+  type SectionState,
+  startReady,
+  walkerPicked,
+} from "../home/sections";
 import { choiceFull, type SelectLook } from "../home/selection";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -68,7 +74,6 @@ import {
   drawDetailCard,
   drawLogbookPanel,
   drawSlotSign,
-  drawStepPlate,
 } from "./homePanels";
 import { listenOnePress } from "./onePress";
 import { addOwnerFigure } from "./ownerFigure";
@@ -96,7 +101,7 @@ import {
   addNineSlice,
   addSelectTile,
   cogIcon,
-  fitText,
+  drawRing,
   type IconButton,
   imageIcon,
   type SelectTile,
@@ -128,7 +133,7 @@ const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>
 };
 const PORCH_DOG_OFFSET = { dx: -12, footDy: 3 };
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
-// each side, with 8 or more between them.
+// each side; tiles side by side are 8 apart.
 const GAP = 8;
 const TOP_BAR = { height: 40 };
 // Each icon button is drawn at its *_ICON spot and tapped anywhere in its 44x44 hit area.
@@ -142,22 +147,33 @@ const LOGBOOK_BUTTON: Rect = { height: 44, width: 44, x: 204, y: 0 };
 const LOGBOOK_ICON = { x: 216, y: 10 };
 const SLOT_SIGN: Rect = { height: 46, width: 160, x: 196, y: 140 };
 const LOGO = { key: "logo", x: 6, y: 146 };
-// Under the gate, three steps top to bottom: the walker's plate beside its tiles, then the
-// dogs' and the gear's plates each over their tiles; then the message line and Start walk.
-const STEP_PLATE_HEIGHT = 24;
+// Under the gate, three framed sections top to bottom (walker, dogs, gear), each a heading
+// band over its tiles; then Start walk.
+const SECTION_RECTS: Readonly<Record<SectionId, Rect>> = {
+  dogs: { height: 160, width: 360, x: 0, y: 270 },
+  gear: { height: 73, width: 360, x: 0, y: 430 },
+  walker: { height: 72, width: 360, x: 0, y: 198 },
+};
+// A section's 3px frame, and its band's 20 rows and 1px rule inside the frame's top.
+const SECTION_FRAME = { band: 20, edge: 3 };
+// The band's text sits on section rows 8..17, 9px in from either side.
+const BAND_TEXT = { inset: 9, y: 8 };
 const WALKER_TILES = { cellHeight: 44, cellWidth: 44, columns: 4, gapX: GAP, gapY: 0 };
-const WALKER_ORIGIN = { x: 156, y: 200 };
-const DOGS_STEP_Y = 248;
-const DOG_TILES = { cellHeight: 44, cellWidth: 112, columns: 3, gapX: GAP, gapY: GAP };
-const DOG_ORIGIN = { x: 4, y: 276 };
-const GEAR_STEP_Y = 428;
+const WALKER_ORIGIN = { x: 80, y: 223 };
+// The dog rows are hit areas 44 tall with no gap; each tile is drawn 42 tall inside its own,
+// leaving 2px between the rows.
+const DOG_TILES = { cellHeight: 44, cellWidth: 112, columns: 3, gapX: GAP, gapY: 0 };
+const DOG_ORIGIN = { x: 4, y: 294 };
+const DOG_TILE_INSET = 1;
 // A gear tile holds its icon with its price tag over the icon's foot while locked; its name
 // is on its detail card.
 const GEAR_SLOTS = { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 };
 const GEAR_ORIGIN = { x: 4, y: 456 };
-// One line of the message, between the gear and Start walk.
-const INFO = { maxWidth: 352, y: 502 };
+// A selected tile's ui-select frame sits 1px outside it.
+const TILE_SELECT_OUTSET = 1;
 const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
+// Start walk's label caps: on the raised face when ready, on the sunk face when not.
+const START_LABEL = { notReadyY: 15, readyY: 12, scale: 3 };
 const GEAR_BADGE: Rect = { height: 18, width: 18, x: 194, y: 166 };
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
@@ -166,14 +182,16 @@ const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
 
 // The widest line the speech bubble holds, in characters, and how many lines it shows.
 const SPEECH_CHARS = 30;
-const SPEECH_LINES = 3;
-const INFO_CHARS = 48;
+const SPEECH_LINES = 4;
 const SPEECH_LINE_HEIGHT = 15;
+const UNSAVED_LINE = "Progress won't be saved.";
 
 // The walkers in data order, as the picker shows them.
 function walkerIds(): WalkerId[] {
   return Object.keys(gameData.walkers) as WalkerId[];
 }
+
+const SECTION_IDS: readonly SectionId[] = ["walker", "dogs", "gear"];
 
 function gearIds(): GearId[] {
   return Object.keys(gameData.shopGear) as GearId[];
@@ -218,6 +236,11 @@ function dogTiles(): Rect[] {
   return gridRects(DOG_TILES, rosterOrder().length, DOG_ORIGIN);
 }
 
+// A dog tile as drawn, inside its hit area.
+function dogFace(hit: Rect): Rect {
+  return { ...hit, height: hit.height - DOG_TILE_INSET * 2, y: hit.y + DOG_TILE_INSET };
+}
+
 function gearSlots(): Rect[] {
   return gridRects(GEAR_SLOTS, gearIds().length, GEAR_ORIGIN);
 }
@@ -243,7 +266,7 @@ function focusRows(): Focusable[][] {
   ];
   const tiles = dogTiles();
   const dogs = rosterOrder().map((dog, i): Focusable => ({
-    rect: itemAt(tiles, i),
+    rect: dogFace(itemAt(tiles, i)),
     target: { dog, kind: "dog" },
   }));
   for (let i = 0; i < dogs.length; i += DOG_TILES.columns) {
@@ -295,7 +318,7 @@ interface Burst {
 const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 
 // The screen before a walk: bank, best walk and the Logbook in the top bar, the walker and
-// pack at the gate, then three steps (walker, dogs, gear) and Start walk. It is also the
+// pack at the gate, then three sections (walker, dogs, gear) and Start walk. It is also the
 // shop: tapping a locked dog, gear item or dog slot buys it when the bank covers it, and
 // shakes it when not; holding a dog or gear tile opens its detail card. The arrow keys move
 // a focus ring, Enter or Space picks, Escape closes a card, ? opens help, S settings, L the
@@ -324,10 +347,17 @@ export class StartScene extends Scene {
   private root: GameObjects.Container | undefined;
   private shakes = new Map<string, number>();
   private startButton:
-    | { container: GameObjects.Container; down: GameObjects.Container; up: GameObjects.Container }
+    | {
+        container: GameObjects.Container;
+        down: GameObjects.Container;
+        ready: boolean;
+        up: GameObjects.Container;
+      }
     | undefined;
   private views = new Map<string, TileView>();
   private walkerLine: WalkerLine = "firstVisit";
+  // Whether a walker face was tapped this visit, which picks the walker for a new player.
+  private walkerTapped = false;
 
   constructor() {
     super(SCENE_KEYS.start);
@@ -347,6 +377,7 @@ export class StartScene extends Scene {
     this.quips = new Map();
     this.shakes = new Map();
     this.views = new Map();
+    this.walkerTapped = false;
     const { bankCents, lastLoadout, owned, stats } = profileSave(this);
     this.loadout = { dogs: [...lastLoadout.dogs], gear: lastLoadout.gear };
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
@@ -354,6 +385,7 @@ export class StartScene extends Scene {
     this.walkerLine = walkerLineKey(
       stats.lastWalk,
       newlyAffordable(gameData, owned, before, bankCents),
+      walksPlayed(stats),
     );
     stopWakeLock();
     setRunOverride(this, null);
@@ -610,10 +642,8 @@ export class StartScene extends Scene {
         return;
       case "walker":
         this.pops.set(id, now);
-        this.action = {
-          kind: "notice",
-          text: `Walking as ${gameData.walkers[target.walker].name}.`,
-        };
+        this.walkerTapped = true;
+        this.action = { kind: "none" };
         void updateProfile(this, (save) => ({ ...save, walker: target.walker }));
         this.render();
         return;
@@ -662,7 +692,7 @@ export class StartScene extends Scene {
       this.pops.set(`gear:${next.gear}`, now);
     }
     this.loadout = next;
-    this.action = { kind: "loadout" };
+    this.action = { kind: "none" };
     const lastLoadout = { dogs: [...next.dogs], gear: next.gear };
     void updateProfile(this, (save) => ({ ...save, lastLoadout }));
     this.render();
@@ -727,16 +757,15 @@ export class StartScene extends Scene {
     }
   }
 
-  // A new player's first walk opens help once, then sets off when it closes.
+  // A new player's first walk opens help once, then sets off when it closes. Before then, a
+  // tap shakes the button: the incomplete sections' bands say what is missing.
   private startWalk(): void {
+    const save = this.save();
     const dogs = packOf(this.loadout);
-    if (dogs === undefined) {
+    if (dogs === undefined || !startReady(this.sections(save))) {
       this.shakes.set("start", this.time.now);
-      this.action = { kind: "notice", text: "Pick a dog to walk first." };
-      this.render();
       return;
     }
-    const save = this.save();
     const data: RunSceneData = {
       loadout: { dogs, gear: this.loadout.gear },
       walkerSprite: walkerSpriteKey(this, save.walker),
@@ -789,11 +818,11 @@ export class StartScene extends Scene {
       view.badge?.image.setY(view.badge.y + badgePopOffset(reduced, now, this.pops.get(id)));
     }
     if (this.startButton !== undefined) {
-      const down = dip("start") > 0 && this.loadout.dogs.length > 0;
-      const { container } = this.startButton;
+      const { container, ready } = this.startButton;
+      const down = dip("start") > 0 && ready;
       container.setPosition(
         shakeOffset(reduced, now, this.shakes.get("start")),
-        down ? 0 : bobOffset(reduced, now, this.loadout.dogs.length > 0),
+        down ? 0 : bobOffset(reduced, now, ready),
       );
       this.startButton.up.setVisible(!down);
       this.startButton.down.setVisible(down);
@@ -873,13 +902,80 @@ export class StartScene extends Scene {
     this.drawTopBar(root, g, save);
     this.drawPackAtGate(root, g, save);
     this.drawSlotSign(root, save);
+    const sections = this.sections(save);
+    for (const id of SECTION_IDS) {
+      this.drawSection(root, SECTION_RECTS[id], sections[id]);
+    }
     this.drawWalkerPicker(root, save);
     this.drawDogTiles(root, save);
     this.drawGear(root, save);
-    this.drawInfo(root);
-    this.drawStartButton(root);
+    this.drawStartButton(root, startReady(sections));
     this.drawFocus(root);
     this.drawOverlay(save);
+  }
+
+  // Each section's state and band text. The walker counts only once picked: see walkerPicked.
+  private sections(save: SaveDocument): Sections {
+    const picked = walkerPicked(walksPlayed(save.stats), this.walkerTapped);
+    return homeSections(gameData, save.owned, {
+      loadout: this.loadout,
+      walker: picked ? save.walker : null,
+    });
+  }
+
+  // A section's ui-section frame and band by its state, with the heading on the band's left
+  // and its note on the right: ink on the lit band, cream and amber on the dark one.
+  private drawSection(root: GameObjects.Container, rect: Rect, section: Section): void {
+    const frame = addNineSlice(this, "ui-section", rect, section.state);
+    if (frame === undefined) {
+      this.drawSectionFrame(root, rect, section.state);
+    } else {
+      root.add(frame);
+    }
+    const lit = section.state === "complete";
+    const y = rect.y + BAND_TEXT.y;
+    this.text(
+      root,
+      rect.x + BAND_TEXT.inset,
+      y,
+      section.heading,
+      lit ? PALETTE.ink : PALETTE.cream,
+      {
+        font: "title",
+      },
+    );
+    if (section.note !== "") {
+      const right = rect.x + rect.width - BAND_TEXT.inset;
+      this.text(root, right, y, section.note, lit ? PALETTE.ink : PALETTE.amber, {
+        font: "title",
+        originX: 1,
+      });
+    }
+  }
+
+  // The ui-section art drawn in code while it is missing: complete is an ink outline round a
+  // gold frame and a lit amber band over an orange rule; otherwise an ink frame and rule
+  // round a navy band. The tiles' area is left open.
+  private drawSectionFrame(root: GameObjects.Container, rect: Rect, state: SectionState): void {
+    const g = this.graphics(root);
+    const lit = state === "complete";
+    const { band, edge } = SECTION_FRAME;
+    drawRing(g, PALETTE.ink, rect, 1);
+    const inner = { height: rect.height - 2, width: rect.width - 2, x: rect.x + 1, y: rect.y + 1 };
+    drawRing(g, lit ? PALETTE.amber : PALETTE.ink, inner, edge - 1);
+    const width = rect.width - edge * 2;
+    fillRect(g, lit ? PALETTE.amber : PALETTE.navy, {
+      height: band,
+      width,
+      x: rect.x + edge,
+      y: rect.y + edge,
+    });
+    fillRect(g, lit ? PALETTE.orange : PALETTE.ink, {
+      height: 1,
+      width,
+      x: rect.x + edge,
+      y: rect.y + edge + band,
+    });
   }
 
   // Whether the bank covers a locked item: it then wears the gold outline.
@@ -930,10 +1026,14 @@ export class StartScene extends Scene {
     root: GameObjects.Container,
     id: string,
     rect: Rect,
-    options: Omit<SelectTileOptions, "reducedMotion">,
+    options: Omit<SelectTileOptions, "outset" | "reducedMotion">,
   ): { content: GameObjects.Container; look: SelectLook; view: TileView } {
     const reducedMotion = currentSettings(this).reducedMotion;
-    const tile: SelectTile = addSelectTile(this, root, rect, { ...options, reducedMotion });
+    const tile: SelectTile = addSelectTile(this, root, rect, {
+      ...options,
+      outset: TILE_SELECT_OUTSET,
+      reducedMotion,
+    });
     const view: TileView = { container: tile.container, lift: tile.lift };
     if (tile.badge !== undefined) {
       view.badge = { image: tile.badge, y: tile.badge.y };
@@ -971,8 +1071,8 @@ export class StartScene extends Scene {
     this.text(root, 24 + dollar.width + 2, 14, dollarText(save.bankCents).slice(1), PALETTE.cream, {
       font: "title",
     });
-    const { bestWalk, runs } = save.stats;
-    const walks = runs.finished + runs.noDogs + runs.wentHome;
+    const { bestWalk } = save.stats;
+    const walks = walksPlayed(save.stats);
     const right = LOGBOOK_BUTTON.x - GAP;
     if (bestWalk === null) {
       this.text(root, right, 14, "No walks yet", PALETTE.cream, { originX: 1 });
@@ -1075,8 +1175,11 @@ export class StartScene extends Scene {
     });
 
     const state = { action: this.action, loadout: this.loadout };
-    const said = bubbleLine(gameData.homeText, this.walkerLine, state, this.quips);
-    const lines = wrapWords(SPEECH_CHARS, said).slice(0, SPEECH_LINES);
+    const speech = bubbleSpeech(gameData.homeText, this.walkerLine, state, this.quips);
+    const unsaved = storageState(this) === "unavailable" ? [UNSAVED_LINE] : [];
+    const lines = [...unsaved, ...speech]
+      .flatMap((part) => wrapWords(SPEECH_CHARS, part))
+      .slice(0, SPEECH_LINES);
     const top = GATE.y + 6;
     const bubble = this.graphics(root);
     const labels = lines.map((line, i) =>
@@ -1157,36 +1260,30 @@ export class StartScene extends Scene {
     const { owned } = save;
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
-    const picked = this.loadout.dogs.length;
-    this.stepPlate(root, { x: 4, y: DOGS_STEP_Y }, "stepDogs", picked > 0 ? "tick" : "2");
-    const count = packCountLine(gameData, owned, this.loadout);
-    this.text(root, 356, DOGS_STEP_Y + 7, count, PALETTE.cream, { originX: 1 });
-    const full = choiceFull(picked, capacity);
+    const full = choiceFull(this.loadout.dogs.length, capacity);
     const tiles = dogTiles();
     rosterOrder().forEach((id, i) => {
-      const rect = itemAt(tiles, i);
+      const rect = dogFace(itemAt(tiles, i));
       const { width, x, y } = rect;
       const dog = gameData.dogs[id];
       const isOwned = owned.dogs.includes(id);
-      const order = this.loadout.dogs.indexOf(id);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
-        badge: String(order + 1),
         edge: true,
         full,
         rest: isOwned ? "cream" : "tan",
-        selected: order >= 0,
+        selected: this.loadout.dogs.includes(id),
       });
       const ink = PALETTE[look.text];
       fillRect(this.graphics(content), PALETTE[look.box], {
         height: 34,
         width: 34,
         x: x + 3,
-        y: y + 5,
+        y: y + 4,
       });
-      const face = this.add.sprite(x + 4, y + 6, dogFaceKey(gameData, id)).setOrigin(0);
+      const face = this.add.sprite(x + 4, y + 5, dogFaceKey(gameData, id)).setOrigin(0);
       showTag(reduced, face, dogFaceKey(gameData, id), isOwned ? "happy" : "neutral");
       content.add(face);
-      view.face = { object: face, y: y + 6 };
+      view.face = { object: face, y: y + 5 };
 
       this.text(content, x + 41, y + 2, dog.name, ink);
       // The trait and the owner's temperament as icons; the info line says them in words.
@@ -1198,11 +1295,11 @@ export class StartScene extends Scene {
       const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
       if (price === null) {
         const zoneFee = dollarText(packFeePerZone(gameData, { dogs: [id], gear: null }));
-        this.text(content, x + 41, y + 31, `${zoneFee}/zone`, ink);
+        this.text(content, x + 41, y + 29, `${zoneFee}/zone`, ink);
       } else {
-        this.priceBadge(content, x + 44, y + 31, price, 0);
+        this.priceBadge(content, x + 44, y + 28, price, 0);
         if (price > save.bankCents) {
-          this.addLock(content, x + width - 19, y + 25);
+          this.addLock(content, x + width - 19, y + 24);
         }
       }
       this.affordFrame(view, rect, look, save, { dog: id, kind: "dog" });
@@ -1222,20 +1319,9 @@ export class StartScene extends Scene {
     }
   }
 
-  // A step's heading plate, its number turning to a tick once the step is done.
-  private stepPlate(
-    root: GameObjects.Container,
-    at: { x: number; y: number },
-    key: "stepDogs" | "stepGear" | "stepWalker",
-    badge: string,
-  ): number {
-    return drawStepPlate(this, root, at, { badge, ...stepHeading(gameData.homeText[key]) });
-  }
-
   private drawGear(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;
     const equipped = this.loadout.gear;
-    this.stepPlate(root, { x: 4, y: GEAR_STEP_Y }, "stepGear", equipped === null ? "3" : "tick");
     const slots = gearSlots();
     const full = choiceFull(equipped === null ? 0 : 1, 1);
     gearIds().forEach((id, i) => {
@@ -1243,7 +1329,6 @@ export class StartScene extends Scene {
       const { width, x, y } = rect;
       const isOwned = owned.gear.includes(id);
       const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
-        badge: "tick",
         edge: true,
         full,
         rest: isOwned ? "cream" : "tan",
@@ -1269,22 +1354,6 @@ export class StartScene extends Scene {
       }
       this.affordFrame(view, rect, look, save, { gear: id, kind: "gear" });
     });
-  }
-
-  // Under the steps: the last action's message, else the hint.
-  private infoText(): string {
-    const message = messageLine(gameData.homeText, this.action);
-    return storageState(this) === "unavailable" ? `Progress won't be saved. ${message}` : message;
-  }
-
-  // One line: a message longer than it is cut short.
-  private drawInfo(root: GameObjects.Container): void {
-    const [first = "", ...rest] = wrapWords(INFO_CHARS, this.infoText());
-    const cut = `${first.slice(0, INFO_CHARS - 3)}...`;
-    const label = this.text(root, 180, INFO.y, rest.length > 0 ? cut : first, PALETTE.cream, {
-      originX: 0.5,
-    });
-    fitText(label, INFO.maxWidth, [label.text, cut]);
   }
 
   // The item's 32x32 icon, or its initials until the icon is in the manifest.
@@ -1313,21 +1382,17 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // One portrait per preset walker; the chosen one is selected, so the others are always
-  // a full choice's darker step.
+  // One portrait per preset walker. Once picked, the chosen one is selected and the others
+  // are a full choice's darker step; before then none is.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
-    const chosen = save.walker;
+    const chosen = walkerPicked(walksPlayed(save.stats), this.walkerTapped) ? save.walker : null;
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
-    const plateY = WALKER_ORIGIN.y + (WALKER_TILES.cellHeight - STEP_PLATE_HEIGHT) / 2;
-    // A walker is always chosen, so this step is always done.
-    this.stepPlate(root, { x: 4, y: plateY }, "stepWalker", "tick");
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
-        badge: "tick",
         edge: true,
-        full: choiceFull(1, 1),
+        full: choiceFull(chosen === null ? 0 : 1, 1),
         rest: "tan",
         selected: id === chosen,
       });
@@ -1349,53 +1414,48 @@ export class StartScene extends Scene {
     });
   }
 
-  // Start walk sinks into its lip when pressed: drawn twice, raised and pressed, and the
-  // frame shows one. Ready, it is the green go button and sums up the pack.
-  private drawStartButton(root: GameObjects.Container): void {
+  // Start walk keeps its words and place in every state. Ready, it is the raised green go
+  // button and sinks into its lip when pressed: drawn twice, raised and pressed, and the
+  // frame shows one. Not ready, it is a flat sunk slate face that never moves.
+  private drawStartButton(root: GameObjects.Container, ready: boolean): void {
     const { height, width, x, y } = START_BUTTON;
-    const ready = this.loadout.dogs.length > 0;
     const container = this.add.container(0, 0);
     root.add(container);
+    const label = gameData.homeText.startWalk;
     const variant = (down: boolean) => {
       const group = this.add.container(0, 0);
       container.add(group);
       const drop = down ? FEEDBACK.buttonPressPx : 0;
-      const tag = ready ? (down ? "go-pressed" : "go") : "disabled";
+      const tag = ready ? (down ? "go-pressed" : "go") : "go-disabled";
       const slice = addNineSlice(this, "ui-button", START_BUTTON, tag);
       if (slice !== undefined) {
         group.add(slice);
-      } else {
+      } else if (ready) {
         const g = this.graphics(group);
         if (!down) {
-          const lip = ready ? PALETTE.forest : PALETTE.darkSlate;
-          fillRect(g, lip, { height: height - 4, width, x, y: y + 4 });
+          fillRect(g, PALETTE.forest, { height: height - 4, width, x, y: y + 4 });
         }
-        fillRect(g, ready ? PALETTE.green : PALETTE.slate, {
+        fillRect(g, PALETTE.green, { height: height - 4, width, x, y: y + drop });
+      } else {
+        fillRect(this.graphics(group), PALETTE.darkSlate, {
           height: height - 4,
           width,
           x,
-          y: y + drop,
+          y: y + FEEDBACK.buttonPressPx,
         });
       }
-      const label = ready ? startWalkLine(gameData, this.loadout) : "Pick a dog";
-      this.text(
-        group,
-        180,
-        y + (ready ? 15 : 12) + drop,
-        label,
-        ready ? PALETTE.ink : PALETTE.white,
-        {
-          font: "title",
-          originX: 0.5,
-          scale: ready ? TEXT_SCALE : 3,
-        },
-      );
+      const top = ready ? START_LABEL.readyY + drop : START_LABEL.notReadyY;
+      this.text(group, x + width / 2, y + top, label, ready ? PALETTE.ink : PALETTE.slate, {
+        font: "title",
+        originX: 0.5,
+        scale: START_LABEL.scale,
+      });
       return group;
     };
     const up = variant(false);
     const down = variant(true);
     down.setVisible(false);
-    this.startButton = { container, down, up };
+    this.startButton = { container, down, ready, up };
   }
 
   // The keyboard's focus ring, outside any selection frame.

@@ -32,11 +32,11 @@ const SLICES = {
   "ui-detail-band": { bottom: 0, left: 8, right: 8, top: 0 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
+  // The home screen's section frames: the top slice holds the frame and the heading band.
+  "ui-section": { bottom: 3, left: 3, right: 3, top: 24 },
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },
   // A three-slice: 4px caps and a middle that stretches.
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
-  // The home screen's step heading plates.
-  "ui-step": { bottom: 8, left: 8, right: 8, top: 8 },
 } as const;
 type SliceKey = keyof typeof SLICES;
 
@@ -266,24 +266,29 @@ export function cogIcon(scene: Scene, x: number, y: number): Placed[] {
   return [g];
 }
 
-// ui-select sits this far outside a selected item on each side; its inner ink line lies on
-// the item's edge.
+// ui-select sits this far outside a selected item on each side by default; its inner ink
+// line then lies on the item's edge.
 export const SELECT_OUTSET = 3;
 
 // The ui-check badge overhangs the item's top-left corner by this much.
 const BADGE_OFFSET = { x: -6, y: -7 } as const;
 
-export function selectOuter(rect: Rect): Rect {
+export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
   return {
-    height: rect.height + SELECT_OUTSET * 2,
-    width: rect.width + SELECT_OUTSET * 2,
-    x: rect.x - SELECT_OUTSET,
-    y: rect.y - SELECT_OUTSET,
+    height: rect.height + outset * 2,
+    width: rect.width + outset * 2,
+    x: rect.x - outset,
+    y: rect.y - outset,
   };
 }
 
 // A ring of the given thickness just inside rect's edge.
-function drawRing(g: GameObjects.Graphics, color: number, rect: Rect, thickness: number): void {
+export function drawRing(
+  g: GameObjects.Graphics,
+  color: number,
+  rect: Rect,
+  thickness: number,
+): void {
   const { height, width, x, y } = rect;
   fillRect(g, color, { height: thickness, width, x, y });
   fillRect(g, color, { height: thickness, width, x, y: y + height - thickness });
@@ -300,17 +305,18 @@ function inset(rect: Rect, by: number): Rect {
   };
 }
 
-// The ui-select frame around rect, playing its pulse tag, or holding its first frame with
-// reduced motion. Each frame is its own nine-slice, shown one at a time from the scene's
-// update. While the art is missing it is drawn as the art draws it, without the pulse: an
-// ink line either side of a 2px amber band.
+// The ui-select frame around rect at outset, playing its pulse tag, or holding its first
+// frame with reduced motion. Each frame is its own nine-slice, shown one at a time from the
+// scene's update. While the art is missing it is drawn as the art draws it, without the
+// pulse: an ink line, a 2px amber band, and at the default outset an ink line on the edge.
 export function addSelectFrame(
   scene: Scene,
   parent: GameObjects.Container,
   rect: Rect,
   reducedMotion: boolean,
+  outset = SELECT_OUTSET,
 ): void {
-  const outer = selectOuter(rect);
+  const outer = selectOuter(rect, outset);
   const frames = scene.anims.get(animationKey("ui-select", "pulse"))?.frames ?? [];
   const slices = frames.flatMap((_, i) => {
     const slice = addNineSlice(scene, "ui-select", outer, "pulse", i);
@@ -321,7 +327,9 @@ export function addSelectFrame(
     const g = scene.add.graphics();
     drawRing(g, PALETTE.ink, outer, 1);
     drawRing(g, PALETTE.amber, inset(outer, 1), 2);
-    drawRing(g, PALETTE.ink, rect, 1);
+    if (outset >= SELECT_OUTSET) {
+      drawRing(g, PALETTE.ink, rect, 1);
+    }
     parent.add(g);
     return;
   }
@@ -376,19 +384,21 @@ export interface SelectTile {
 }
 
 export interface SelectTileOptions {
-  // The ui-check tag on a selected tile.
-  badge: string;
+  // The ui-check tag on a selected tile; none without one.
+  badge?: string;
   // Unselected, a slate edge marks the tile out from what it sits on; a row on a panel has
   // none.
   edge: boolean;
   full: boolean;
+  // How far the ui-select frame sits outside the tile; SELECT_OUTSET when unset.
+  outset?: number;
   reducedMotion: boolean;
   rest: RestFace;
   selected: boolean;
 }
 
 // A tappable item in the style guide's selected and active state. Selected, it has a yellow
-// face, the ui-select frame and a ui-check badge, and it is lifted 2px onto a plum shadow.
+// face, the ui-select frame and any ui-check badge, and it is lifted 2px onto a plum shadow.
 // Unselected, its face rests cream or tan, a ramp step darker when the choice is full,
 // inside a slate edge if edge is set. The shadow goes in parent so it stays put under the
 // lift.
@@ -398,10 +408,10 @@ export function addSelectTile(
   rect: Rect,
   options: SelectTileOptions,
 ): SelectTile {
-  const { badge, edge, full, reducedMotion, rest, selected } = options;
+  const { badge, edge, full, outset, reducedMotion, rest, selected } = options;
   const look = selectLook(rest, selected, full);
   if (selected) {
-    const outer = selectOuter(rect);
+    const outer = selectOuter(rect, outset);
     const shadow = scene.add.graphics();
     fillRect(shadow, PALETTE.plum, {
       height: FEEDBACK.liftPx,
@@ -422,8 +432,8 @@ export function addSelectTile(
   container.add([face, content]);
   const tile: SelectTile = { container, content, lift, look };
   if (selected) {
-    addSelectFrame(scene, container, rect, reducedMotion);
-    const image = addSelectBadge(scene, container, rect, badge);
+    addSelectFrame(scene, container, rect, reducedMotion, outset);
+    const image = badge === undefined ? undefined : addSelectBadge(scene, container, rect, badge);
     if (image !== undefined) {
       tile.badge = image;
     }

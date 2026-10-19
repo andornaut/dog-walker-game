@@ -457,24 +457,26 @@ export interface HomeText {
     readonly afterFiring: string;
     readonly afterWalk: string;
     readonly firstVisit: string;
+    // Said in place of afterWalk after each of the player's first few walks.
+    readonly howTo: string;
     readonly newAffordable: string;
   };
   readonly dogBought: string;
   readonly dogCantAfford: string;
   readonly gearBought: string;
-  readonly hint: string;
   readonly packCount: string;
-  readonly packDogsOne: string;
-  readonly packDogsMany: string;
+  // The section headings, and what a required section with nothing picked asks for on its
+  // band.
+  readonly sectionDogs: string;
+  readonly sectionDogsPrompt: string;
+  readonly sectionGear: string;
+  readonly sectionWalker: string;
+  readonly sectionWalkerPrompt: string;
   readonly slotBought: string;
   readonly slotBuy: string;
   readonly slotSave: string;
   readonly slotSign: string;
   readonly startWalk: string;
-  // The headings of the three steps, in order: walker, dogs, gear.
-  readonly stepDogs: string;
-  readonly stepGear: string;
-  readonly stepWalker: string;
 }
 
 // The walk's own text. homeQuestion is what the top bar's Home button asks, with its two

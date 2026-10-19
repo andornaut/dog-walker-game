@@ -2,16 +2,21 @@ import type { DogId, GameData, HomeText } from "../data/types";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
-import { dollarText, type HomeLoadout, packCapacity, packFeePerZone, type Purchase } from "./home";
+import { dollarText, type HomeLoadout, packCapacity, type Purchase } from "./home";
 import { homeLine } from "./homeText";
 
 export type WalkerLine = keyof HomeText["bubble"];
 
+// After each of this many first walks, the walker says how to use the screen.
+export const HOW_TO_WALKS = 3;
+
 // The walker's own line, in priority order: a player who has never walked; the last walk
-// had a firing; something became affordable since the last visit; back from a walk.
+// had a firing; something became affordable since the last visit; back from one of the
+// first few walks, how to use the screen; back from a later walk.
 export function walkerLineKey(
   lastWalk: Pick<LastWalk, "firings"> | null,
   newAffordable: boolean,
+  walks: number,
 ): WalkerLine {
   if (lastWalk === null) {
     return "firstVisit";
@@ -19,7 +24,10 @@ export function walkerLineKey(
   if (lastWalk.firings.length > 0) {
     return "afterFiring";
   }
-  return newAffordable ? "newAffordable" : "afterWalk";
+  if (newAffordable) {
+    return "newAffordable";
+  }
+  return walks <= HOW_TO_WALKS ? "howTo" : "afterWalk";
 }
 
 // The slot sign: the next slot and its price, then how much more to save (short) or that it
@@ -51,13 +59,6 @@ export function slotSignLines(
   return { short, sign, status };
 }
 
-// A step heading split for its plate: a leading number goes on the badge, so it is dropped
-// from the label, and a trailing "(...)" is a note in the body font.
-export function stepHeading(line: string): { label: string; note: string } {
-  const match = /^(?:\d+\s+)?(.*?)\s*(\([^)]*\))?$/.exec(line.trim());
-  return { label: match?.[1] ?? line, note: match?.[2] ?? "" };
-}
-
 // "Pack 1/2": the dogs picked and the pack's capacity.
 export function packCountLine(
   data: Pick<GameData, "homeText" | "tuning">,
@@ -70,31 +71,14 @@ export function packCountLine(
   });
 }
 
-// "Start walk · 2 dogs · $40/zone" for a picked pack.
-export function startWalkLine(
-  data: Pick<GameData, "dogs" | "homeText" | "tuning">,
-  loadout: HomeLoadout,
-): string {
-  const count = loadout.dogs.length;
-  const text = data.homeText;
-  const dogs = homeLine(text, count === 1 ? "packDogsOne" : "packDogsMany", {
-    count: String(count),
-  });
-  return homeLine(text, "startWalk", {
-    dogs,
-    fee: dollarText(packFeePerZone(data, loadout)),
-  });
-}
-
-// The player's last action on the home screen, for the message it leaves. Actions that only
-// change the loadout leave none, so dropping a dog returns the hint.
+// The player's last action on the home screen, for the message it leaves in the walker's
+// bubble. Picking a walker, dog or gear item leaves none.
 export type HomeAction =
   | { readonly kind: "none" }
   | { readonly kind: "bought"; readonly name: string; readonly purchase: Purchase }
   | { readonly amount: Cents; readonly kind: "cantAfford"; readonly name: string }
   // A keyboard focus move: the focused item in words, so its icons never stand alone.
   | { readonly kind: "focus"; readonly text: string }
-  | { readonly kind: "loadout" }
   | { readonly kind: "notice"; readonly text: string };
 
 // What buying an item says, naming it: a dog joins the clients, gear goes in the bag, a slot
@@ -112,8 +96,8 @@ function boughtLine(text: HomeText, purchase: Purchase, name: string): string {
   }
 }
 
-// The line under the steps: the last action's message, else the hint.
-export function messageLine(text: HomeText, action: HomeAction): string {
+// The last action's message, or null for an action that leaves none.
+export function messageLine(text: HomeText, action: HomeAction): string | null {
   switch (action.kind) {
     case "bought":
       return boughtLine(text, action.purchase, action.name);
@@ -125,32 +109,36 @@ export function messageLine(text: HomeText, action: HomeAction): string {
     case "focus":
     case "notice":
       return action.text;
-    case "loadout":
     case "none":
-      return text.hint;
+      return null;
     default:
       return action satisfies never;
   }
 }
 
-// Who speaks in the walker's bubble: a bought dog's owner right after the purchase, else the
-// owner of the most recently picked dog still in the pack, else the walker. quips holds the
-// owner lines drawn this visit as dogs were picked or bought.
-export function bubbleLine(
+// What the walker's bubble says, as paragraphs that each start on a new line, in priority
+// order: a bought dog's message with its owner's parting line; the last action's message;
+// the parting line of the most recently picked dog still in the pack; the walker's own line.
+// quips holds the owner lines drawn this visit as dogs were picked or bought.
+export function bubbleSpeech(
   text: HomeText,
   walkerLine: WalkerLine,
   state: { readonly action: HomeAction; readonly loadout: HomeLoadout },
   quips: ReadonlyMap<DogId, string>,
-): string {
+): string[] {
   const { action, loadout } = state;
-  const bought =
-    action.kind === "bought" && action.purchase.kind === "dog" ? action.purchase.dog : null;
-  const speakers = bought === null ? [...loadout.dogs].reverse() : [bought];
-  for (const dog of speakers) {
-    const quip = quips.get(dog);
-    if (quip !== undefined) {
-      return quip;
-    }
+  if (action.kind === "bought" && action.purchase.kind === "dog") {
+    const joined = boughtLine(text, action.purchase, action.name);
+    const quip = quips.get(action.purchase.dog);
+    return quip === undefined ? [joined] : [joined, quip];
   }
-  return text.bubble[walkerLine];
+  const message = messageLine(text, action);
+  if (message !== null) {
+    return [message];
+  }
+  const quip = [...loadout.dogs]
+    .reverse()
+    .map((dog) => quips.get(dog))
+    .find((line) => line !== undefined);
+  return [quip ?? text.bubble[walkerLine]];
 }

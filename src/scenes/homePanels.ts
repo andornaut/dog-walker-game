@@ -10,10 +10,10 @@ import type { Rect } from "../layout/rect";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
-import { addNineSlice, addTagImage, TEXT_SCALE } from "./uiKit";
+import { addNineSlice, TEXT_SCALE } from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on what the player can
-// afford, the slot sign, the step plates, and the detail card and logbook that open over the
+// afford, the slot sign, and the detail card and logbook that open over the
 // screen. Positions inside a piece are the art's, from the style guide.
 
 const SCREEN = SCREEN_CONFIG;
@@ -127,71 +127,6 @@ export function drawSlotSign(
   text(scene, parent, { x: rect.x + line2.x, y: rect.y + line2.y }, sign.status, {
     color: sign.short ? PALETTE.darkRed : PALETTE.forest,
   });
-}
-
-// A step plate's parts, in plate pixels: the badge, the label's caps, and the gaps the
-// plate's width adds around them.
-const STEP = { badge: { x: 4, y: 4 }, height: 24, label: { x: 26, y: 7 }, noteGap: 8, pad: 34 };
-
-// A numbered step's heading plate at (x, y): the ui-step-number badge (its number, or a tick
-// once the step is done), the label in font-title and an optional note in font-body.
-// Returns the plate's width.
-export function drawStepPlate(
-  scene: Scene,
-  parent: GameObjects.Container,
-  at: { x: number; y: number },
-  step: { badge: string; label: string; note: string },
-): number {
-  const content = scene.add.container(0, 0);
-  const label = text(
-    scene,
-    content,
-    { x: at.x + STEP.label.x, y: at.y + STEP.label.y },
-    step.label,
-    {
-      color: PALETTE.plum,
-      font: "title",
-    },
-  );
-  let width = Math.ceil(label.width) + STEP.pad;
-  if (step.note !== "") {
-    const note = text(
-      scene,
-      content,
-      { x: at.x + width - 8 + STEP.noteGap, y: at.y + STEP.label.y },
-      step.note,
-      {
-        color: PALETTE.plum,
-      },
-    );
-    width += STEP.noteGap + Math.ceil(note.width);
-  }
-  const rect = { height: STEP.height, width, x: at.x, y: at.y };
-  const plate = addNineSlice(scene, "ui-step", rect);
-  if (plate !== undefined) {
-    parent.add(plate);
-  } else {
-    const g = scene.add.graphics();
-    drawFramedRect(g, { border: PALETTE.plum, fill: PALETTE.tan }, rect);
-    parent.add(g);
-  }
-  const badgeAt = { x: at.x + STEP.badge.x, y: at.y + STEP.badge.y };
-  const badge = addTagImage(scene, "ui-step-number", step.badge, badgeAt.x, badgeAt.y);
-  if (badge !== undefined) {
-    parent.add(badge);
-  } else {
-    const g = scene.add.graphics();
-    const done = step.badge === "tick";
-    fillRect(g, done ? PALETTE.forest : PALETTE.amber, { height: 16, width: 16, ...badgeAt });
-    const mark = addPixelText(scene, badgeAt.x + 8, badgeAt.y + 5, done ? "+" : step.badge, {
-      color: done ? PALETTE.white : PALETTE.plum,
-      font: "title",
-      originX: 0.5,
-    });
-    parent.add([g, mark]);
-  }
-  parent.add(content);
-  return width;
 }
 
 // A dim layer over the whole screen, under a card.
