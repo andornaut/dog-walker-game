@@ -360,9 +360,9 @@ function replaySection(): { element: HTMLElement; refresh: () => void } {
   const element = section(
     "Replay",
     note(
-      el("strong", { textContent: "Playback is not wired yet. " }),
-      "Replay stores the log and loads the game with its setup, but RunScene does not read it " +
-        "yet, so the run plays normally.",
+      "Replay loads the game with the log's setup and plays its lane moves, treats, card " +
+        "choices and heading home at their recorded run times. Live lane moves and treats are " +
+        "ignored during it.",
     ),
     input,
     errors,
@@ -374,7 +374,7 @@ function replaySection(): { element: HTMLElement; refresh: () => void } {
       ": the log as encodeInputLog writes it, ",
       code(
         `{"version":${INPUT_LOG_VERSION},"setup":"seed=…","events":[[timeMs,"l",-1|1] | ` +
-          `[timeMs,"c",index|"skip"] | [timeMs,"t",slot]]}`,
+          `[timeMs,"c",index|"skip"] | [timeMs,"t",slot] | [timeMs,"h"]]}`,
       ),
       ". The run that plays it removes the key.",
     ),

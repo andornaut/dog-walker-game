@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { itemAt } from "../arrays";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
@@ -11,10 +12,19 @@ import { TUNING } from "../data/tuning";
 import type { EncounterId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
-import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
+import {
+  type CardChoice,
+  recordInput,
+  replayInputs,
+  startInputLog,
+  type StepInput,
+  takeDueInputs,
+} from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
+import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
+import { giveTreat } from "../rules/treats";
 import { cents, pixels, read } from "../rules/units";
 import { newRun, type PackDogs } from "../state/runState";
 import { lanesReachedAtEnd } from "../testing/avoidable";
@@ -540,6 +550,100 @@ describe("hit stop", () => {
     });
     expect(replayed.walk).toEqual(recorded.walk);
     expect(replayed.cards).toEqual(recorded.cards);
+  });
+
+  it("replays lane moves, treats, card choices and heading home to the same final state", () => {
+    const setup = { dev: true, seed: 8, speed: 1, zone: 1 };
+    const start = planZone(data, geometry, seededRandom(8), walkWith(["koda", "duchess"]));
+    const homeFrame = 60 * 25;
+    // As RunScene steps: the inputs due now, each logged at the run time it is applied, then
+    // the walk, then each card it opened, chosen and logged at the run time after the step.
+    // Heading home applies before a step, at the run time the pause menu was opened.
+    const play = (inputs: {
+      choose: (view: CardView) => CardChoice;
+      due: (frame: number, timeMs: number) => StepInput[];
+    }) => {
+      const rolls = seededRandom(9);
+      const cardRolls = seededRandom(10);
+      let log = startInputLog(setup);
+      let walk: Walk = { ...start, run: { ...start.run, treats: 4 } };
+      let treatsGiven = 0;
+      let cardsChosen = 0;
+      for (let frame = 0; frame <= homeFrame && walk.run.phase.kind === "walking"; frame++) {
+        const timeMs = frame * FRAME * 1000;
+        for (const input of inputs.due(frame, timeMs)) {
+          if (input.kind === "lane") {
+            walk = steerWalk(data, 5, input.direction, walk);
+          } else if (input.kind === "treat") {
+            const dog = walk.run.pack[input.slot]?.dog;
+            const before = walk.run.treats;
+            walk =
+              dog === undefined ? walk : { ...walk, run: giveTreat(data, dog, walk.run).state };
+            treatsGiven += before - walk.run.treats;
+          } else {
+            walk = { ...walk, run: headHome(walk.run) };
+          }
+          log = recordInput(input, log);
+        }
+        if (walk.run.phase.kind !== "walking") {
+          break;
+        }
+        const stepped = stepWalk(data, geometry, rolls, FRAME, walk);
+        walk = stepped.walk;
+        for (const source of stepped.cards) {
+          const run = openCard(source, walk.run);
+          const view = cardFor(data, run, source);
+          const choice = inputs.choose(view);
+          walk = { ...walk, run: chooseOption(data, cardRolls, run, view, choice).state };
+          log = recordInput({ choice, kind: "card", timeMs: timeMs + FRAME * 1000 }, log);
+          cardsChosen += 1;
+        }
+      }
+      return { cardsChosen, log, treatsGiven, walk };
+    };
+    const recorded = play({
+      // The last option the run can pay for.
+      choose: (view) => {
+        const enabled = view.options.filter((option) => option.availability.enabled);
+        return itemAt(enabled, enabled.length - 1).index;
+      },
+      due: (frame, timeMs) => {
+        const inputs: StepInput[] = [];
+        if (frame % 13 === 0) {
+          inputs.push({ direction: Math.floor(frame / 13) % 4 < 2 ? -1 : 1, kind: "lane", timeMs });
+        }
+        if (frame % 97 === 0) {
+          inputs.push({ kind: "treat", slot: Math.floor(frame / 97) % 2, timeMs });
+        }
+        if (frame === homeFrame) {
+          inputs.push({ kind: "home", timeMs });
+        }
+        return inputs;
+      },
+    });
+    expect(recorded.treatsGiven).toBeGreaterThan(0);
+    expect(recorded.cardsChosen).toBeGreaterThan(0);
+    expect(recorded.walk.run.phase).toEqual({ kind: "ended", reason: "wentHome" });
+
+    const events = [...replayInputs(recorded.log)];
+    let next = 0;
+    const replayed = play({
+      choose: () => {
+        const event = events[next];
+        next += 1;
+        if (event?.kind !== "card") {
+          throw new Error(`Expected a card choice at event ${next - 1}`);
+        }
+        return event.choice;
+      },
+      due: (_, timeMs) => {
+        const taken = takeDueInputs(events, next, timeMs);
+        next = taken.next;
+        return taken.due;
+      },
+    });
+    expect(replayed.walk).toEqual(recorded.walk);
+    expect(replayed.log).toEqual(recorded.log);
   });
 });
 

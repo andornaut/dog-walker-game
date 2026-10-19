@@ -93,7 +93,7 @@
 | `dev`   | `1` shows the overlay           | `0`             |
 
 - One seed feeds independent random streams: `spawns-<zone>`, `rolls`, `cards`, `quips` and `scenery`.
-- Lane moves, treats and card choices are recorded with their simulation step's time in a versioned input log that replays the run exactly. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
+- Lane moves, treats, card choices and heading home are recorded with their simulation step's time in a versioned input log that replays the run exactly. The log's setup names the pack and gear walked, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run.
 - The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, the far-road fade toggle (off by default), run link, replay, and save tools (reset, +$1,000, unlock all).
 

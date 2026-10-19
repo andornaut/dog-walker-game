@@ -216,8 +216,10 @@ interface ItemView {
 
 type Shadow = (look: DepthLook, x: number, footY: number, step: ScaleStep) => void;
 
-// The inputs a simulation step applies, waiting for it.
-type PendingInput = { direction: LaneDirection; kind: "lane" } | { kind: "treat"; slot: number };
+// The inputs a simulation step applies, waiting for it. Only a replay heads home at a step:
+// played live, the pause menu ends the walk at once.
+type PendingInput =
+  { direction: LaneDirection; kind: "lane" } | { kind: "home" } | { kind: "treat"; slot: number };
 
 interface Gags {
   ball: GameObjects.Sprite;
@@ -314,9 +316,13 @@ export class RunScene extends Scene {
       rolls: randomStream(setup.seed, "rolls"),
       scenery: randomStream(setup.seed, "scenery"),
     };
-    this.inputLog = startInputLog(setup);
-
     const picked = this.pickedLoadout(setup);
+    // The log names the pack and gear walked, so its replay does not read the saved loadout.
+    this.inputLog = startInputLog({
+      ...setup,
+      gear: picked.loadout.gear,
+      pack: picked.loadout.dogs,
+    });
     const run = withSetupStart(setup, newRun(gameData, picked.dogSlots, picked.loadout));
     this.walk = this.planned({ road: startRoad(LANE_COUNT, setup.speed), run });
 
@@ -656,6 +662,10 @@ export class RunScene extends Scene {
       return;
     }
     for (const input of this.dueInputs()) {
+      if (input.kind === "home") {
+        this.headHome(walk);
+        return;
+      }
       walk =
         input.kind === "lane"
           ? steerWalk(gameData, LANE_COUNT, input.direction, walk)
@@ -1037,15 +1047,20 @@ export class RunScene extends Scene {
     const data: PauseSceneData = {
       onHeadHome: () => {
         resume();
-        const current = this.walk;
-        if (current !== undefined) {
-          this.walk = { ...current, run: headHome(current.run) };
+        if (this.walk !== undefined) {
+          this.headHome(this.walk);
         }
-        this.endWalk();
       },
       onResume: resume,
     };
     this.scene.launch(SCENE_KEYS.pause, data);
+  }
+
+  // Logged at the run time of the step it comes before, which is where a replay applies it.
+  private headHome(walk: Walk): void {
+    this.log({ kind: "home", timeMs: this.runTimeMs });
+    this.walk = { ...walk, run: headHome(walk.run) };
+    this.endWalk();
   }
 
   // Saves the walk and its input log, then shows the end screen.
