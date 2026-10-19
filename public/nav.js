@@ -55,4 +55,59 @@
   if (document.body) mount();
   else document.addEventListener("DOMContentLoaded", mount);
   installed.addEventListener("change", mount);
+
+  // A "scroll to top" button at the bottom right of a long page (more than LONG viewports tall),
+  // shown once the page is scrolled down more than one viewport. A spacer as tall as the button
+  // and its margin ends a long page, so its last controls can scroll clear of the button. The
+  // game page has none.
+  if (here === "/play") return;
+  const LONG = 2;
+  const toTop = document.createElement("button");
+  toTop.type = "button";
+  toTop.className = "to-top";
+  toTop.hidden = true;
+  toTop.setAttribute("aria-label", "Scroll to top");
+  toTop.title = "Scroll to top";
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 16 16");
+  svg.setAttribute("aria-hidden", "true");
+  const arrow = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  arrow.setAttribute("d", "M7 2h2v2h2v2h2v2H9v6H7V8H3V6h2V4h2z");
+  svg.append(arrow);
+  toTop.append(svg);
+  const spacer = document.createElement("div");
+  spacer.className = "to-top-spacer";
+  spacer.setAttribute("aria-hidden", "true");
+
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  toTop.addEventListener("click", () => {
+    scrollTo({ top: 0, behavior: reduced.matches ? "auto" : "smooth" });
+    // The button hides at the top, so focus moves to the first link in the bar.
+    nav.querySelector("a")?.focus({ preventScroll: true });
+  });
+
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const view = innerHeight;
+    const long = document.documentElement.scrollHeight - spacer.offsetHeight > view * LONG;
+    if (long && !spacer.isConnected) document.body.append(spacer, toTop);
+    else if (!long && spacer.isConnected) {
+      spacer.remove();
+      toTop.remove();
+    }
+    toTop.hidden = !long || scrollY < view;
+  };
+  const queue = () => {
+    if (!queued) requestAnimationFrame(update);
+    queued = true;
+  };
+  const watch = () => {
+    addEventListener("scroll", queue, { passive: true });
+    addEventListener("resize", queue);
+    new ResizeObserver(queue).observe(document.body);
+    queue();
+  };
+  if (document.body) watch();
+  else document.addEventListener("DOMContentLoaded", watch);
 })();

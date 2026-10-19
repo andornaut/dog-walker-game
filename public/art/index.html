@@ -28,6 +28,8 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+/* The filters hide sections, cards and rows whose display rules would otherwise override the attribute. */
+[hidden] { display: none !important; }
 body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
 a { color: var(--accent); }
 .wrap {
@@ -41,7 +43,9 @@ header { display: grid; gap: 8px; }
 h1 { font-family: var(--f-display); font-weight: 400; font-size: clamp(26px, 5vw, 40px); line-height: 1.05; margin: 0; letter-spacing: 0.02em; }
 header p { margin: 0; color: var(--muted); max-width: 70ch; }
 .counts { display: flex; flex-wrap: wrap; gap: 8px; font-family: var(--f-mono); font-size: 12px; }
-.counts span { background: var(--raise); padding: 2px 10px; border-radius: 999px; }
+.counts button { font: inherit; color: var(--fg); background: var(--raise); border: 1px solid var(--line); padding: 4px 12px; border-radius: 999px; cursor: pointer; }
+.counts button:hover { border-color: var(--accent); }
+.counts button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
 .jump ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
 .jump a { display: inline-flex; gap: 6px; font-family: var(--f-mono); font-size: 13px; color: var(--fg); text-decoration: none; background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 3px 9px; }
 .jump a:hover { border-color: var(--accent); }
@@ -80,7 +84,7 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 .tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .tags button { font: inherit; font-family: var(--f-mono); font-size: 12px; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; cursor: pointer; }
 .tags button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
-.tags button:focus-visible, .toolbar :focus-visible, .sw:focus-visible, .jump a:focus-visible, .mock:focus-visible, .sound audio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tags button:focus-visible, .counts button:focus-visible, .toolbar :focus-visible, .sw:focus-visible, .jump a:focus-visible, .mock:focus-visible, .sound audio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .strip { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
 .strip canvas { background: rgba(255, 255, 255, 0.04); }
 .sounds { display: grid; gap: 8px; }
@@ -109,7 +113,7 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
   <header>
     <h1>Dog Walker Art</h1>
     <p>Every asset listed in <code>/art/manifest.json</code>, as the game loads it, grouped by key prefix. Sprites play their Aseprite animations. Mocks are design tests, not game assets.</p>
-    <div class="counts" id="counts"></div>
+    <div class="counts" id="counts" role="group" aria-label="Show only"></div>
     <p class="error" id="status" hidden></p>
   </header>
 
@@ -199,7 +203,7 @@ function applyGround(v) { v.classList.toggle("checker", prefs.ground === "checke
 function makeView() { const v = el("div", { className: "view" }); views.push(v); applyGround(v); return v; }
 function sizeCanvas(c, w, h) { c.width = w; c.height = h; c.style.width = w * prefs.zoom + "px"; c.style.height = h * prefs.zoom + "px"; }
 function emptyCard(host, text) { host.replaceChildren(el("div", { className: "empty", innerHTML: text })); }
-function errorCard(host, key, err) { host.append(el("div", { className: "empty error", textContent: `${key}: ${err.message}`, dataset: { key } })); }
+function errorCard(host, kind, key, err) { host.append(el("div", { className: "empty error", textContent: `${key}: ${err.message}`, dataset: { key, kind } })); }
 
 // Aseprite "hash" JSON: frames keyed by name in export order, animations in meta.frameTags.
 function sequence(tag) {
@@ -239,7 +243,7 @@ async function addSprite(host, s) {
     strip.append(c);
   });
   const view = makeView(); view.append(canvas);
-  host.append(el("article", { className: "card", dataset: { key: s.key } }, [view, el("div", { className: "meta" }, [
+  host.append(el("article", { className: "card", dataset: { key: s.key, kind: "sprites" } }, [view, el("div", { className: "meta" }, [
     el("div", { className: "key", textContent: s.key }),
     el("div", { className: "dims", textContent: `${fw}×${fh} · ${frames.length} frames · ${s.png}` }),
     tagBar, strip,
@@ -251,7 +255,7 @@ async function addImage(host, s) {
   const c = el("canvas"); sizeCanvas(c, img.width, img.height); scaled.push({ canvas: c, w: img.width, h: img.height, img });
   c.getContext("2d").drawImage(img, 0, 0);
   const view = makeView(); view.append(c);
-  host.append(el("article", { className: "card", dataset: { key: s.key } }, [view, el("div", { className: "meta" }, [
+  host.append(el("article", { className: "card", dataset: { key: s.key, kind: "images" } }, [view, el("div", { className: "meta" }, [
     el("div", { className: "key", textContent: s.key }),
     el("div", { className: "dims", textContent: `${img.width}×${img.height} · ${s.png}` }),
   ])]));
@@ -272,7 +276,7 @@ async function addFont(host, s) {
   draw(c.getContext("2d")); scaled.push({ canvas: c, w: W, h: H, redraw: draw });
   const missing = [...new Set(lines.join(""))].filter(ch => ch !== " " && !chars.has(ch.codePointAt(0)));
   const view = makeView(); view.append(c);
-  host.append(el("article", { className: "card", dataset: { key: s.key } }, [view, el("div", { className: "meta" }, [
+  host.append(el("article", { className: "card", dataset: { key: s.key, kind: "fonts" } }, [view, el("div", { className: "meta" }, [
     el("div", { className: "key", textContent: s.key }),
     el("div", { className: "dims", textContent: `${chars.size} glyphs · line height ${lineH} · ${s.fnt}` }),
     ...(missing.length ? [el("div", { className: "dims error", textContent: "Missing: " + missing.join(" ") })] : []),
@@ -286,7 +290,7 @@ async function addSound(host, s) {
     el("source", { src: BASE + s.m4a, type: "audio/mp4" }),
   ]);
   audio.setAttribute("aria-label", s.key);
-  host.append(el("div", { className: "sound", dataset: { key: s.key } }, [
+  host.append(el("div", { className: "sound", dataset: { key: s.key, kind: "sounds" } }, [
     el("div", { className: "key", textContent: s.key }),
     audio,
     ...(s.loop ? [el("span", { className: "loop", textContent: "loop" })] : []),
@@ -310,7 +314,7 @@ new ResizeObserver(() => document.documentElement.style.setProperty("--bar", $("
 async function fill(g, items) {
   const host = $("g-" + g.id);
   if (!items.length) { emptyCard(host, `No ${g.title.toLowerCase()} exported yet. Sources go in <code>art/</code>, exports in <code>public/art/</code>, each with an entry in <code>manifest.json</code>.`); return; }
-  await Promise.all(items.map(([s, add]) => add(host, s).catch(err => errorCard(host, s.key, err))));
+  await Promise.all(items.map(([s, add, kind]) => add(host, s).catch(err => errorCard(host, kind, s.key, err))));
   [...host.children].sort((x, y) => byKey(x.dataset.key || "", y.dataset.key || "")).forEach(c => host.append(c));
 }
 
@@ -320,14 +324,15 @@ async function main() {
   const sprites = manifest.sprites || [], images = manifest.images || [], fonts = manifest.fonts || [], sounds = manifest.sounds || [];
   let mocks = [];
   try { mocks = await getJSON(BASE + "mocks/index.json"); } catch (err) { /* no mocks listed */ }
-  $("counts").replaceChildren(...[[sprites, "sprites"], [images, "images"], [fonts, "fonts"], [sounds, "sounds"], [mocks, "mocks"]].map(([l, n]) => el("span", { textContent: `${l.length} ${n}` })));
+  const counts = { sprites: sprites.length, images: images.length, fonts: fonts.length, sounds: sounds.length, mocks: mocks.length };
+  for (const b of pills) if (b.dataset.kind in counts) b.textContent = `${counts[b.dataset.kind]} ${b.dataset.kind}`;
   $("n-mocks").textContent = $("jn-mocks").textContent = String(mocks.length);
   if (mocks.length) $("mocks").replaceChildren(...mocks.map(m => el("a", { className: "mock", href: BASE + "mocks/" + m.path }, [el("b", { textContent: m.title }), el("span", { textContent: m.description || "" })])));
   else emptyCard($("mocks"), "No mocks yet.");
-  const lists = { fonts: fonts.map(s => [s, addFont]), sounds: sounds.map(s => [s, addSound]) };
+  const lists = { fonts: fonts.map(s => [s, addFont, "fonts"]), sounds: sounds.map(s => [s, addSound, "sounds"]) };
   const families = Object.fromEntries(GROUPS.map(g => [g.id, lists[g.list] || []]));
-  for (const s of sprites) families[familyOf(s.key).id].push([s, addSprite]);
-  for (const s of images) families[familyOf(s.key).id].push([s, addImage]);
+  for (const s of sprites) families[familyOf(s.key).id].push([s, addSprite, "sprites"]);
+  for (const s of images) families[familyOf(s.key).id].push([s, addImage, "images"]);
   for (const g of GROUPS) $("g-" + g.id).dataset.total = String(families[g.id].length);
   applyFilter();
   await Promise.all(GROUPS.map(g => fill(g, families[g.id])));
@@ -341,18 +346,48 @@ $("palette").replaceChildren(...PAL.map((h, i) => {
 }));
 $("jn-palette").textContent = String(PAL.length);
 
-// Hides non-matching cards and sound rows, and any group (and its jump link) left with none. Counts read "shown/total" while filtering.
+// The count pills show one kind at a time: sprites or images keep only those cards, in the groups
+// that hold any; fonts, sounds, mocks and palette keep their own section. ?show=<kind> holds the
+// choice, so it can be linked and survives a reload, and leaves the #hash to the jump links.
+const KINDS = ["sprites", "images", "fonts", "sounds", "mocks", "palette"];
+let kind = new URLSearchParams(location.search).get("show");
+if (!KINDS.includes(kind)) kind = "";
+const pills = [["", "All"], ...KINDS.map(k => [k, k])].map(([k, label]) => {
+  const b = el("button", { type: "button", textContent: label, dataset: { kind: k } });
+  b.addEventListener("click", () => setKind(b.dataset.kind === kind ? "" : b.dataset.kind));
+  return b;
+});
+pills.find(b => b.dataset.kind === "palette").textContent = `${PAL.length} palette colours`;
+$("counts").replaceChildren(...pills);
+const markPills = () => pills.forEach(b => b.setAttribute("aria-pressed", String(b.dataset.kind === kind)));
+// A #hash naming a section the kind hides is dropped, so a reload doesn't jump to nothing.
+function setKind(k) {
+  kind = k;
+  markPills(); applyFilter();
+  const url = new URL(location.href);
+  if (k) url.searchParams.set("show", k); else url.searchParams.delete("show");
+  if (url.hash && document.getElementById(decodeURIComponent(url.hash.slice(1)))?.hidden) url.hash = "";
+  history.replaceState(history.state, "", url);
+}
+
+// Hides cards and sound rows that miss the key filter or the kind, and any group (and its jump link) left with none.
+// Counts read "shown/total" while a filter hides some of a group.
 function applyFilter() {
   const q = $("filter").value.trim().toLowerCase();
   for (const g of GROUPS) {
     const host = $("g-" + g.id), total = Number(host.dataset.total || 0);
     let shown = 0;
-    for (const item of host.querySelectorAll("[data-key]")) { item.hidden = !!q && !item.dataset.key.toLowerCase().includes(q); if (!item.hidden) shown++; }
-    const n = q ? `${shown}/${total}` : String(total);
-    $("n-" + g.id).textContent = $("jn-" + g.id).textContent = n;
-    $("s-" + g.id).hidden = $("j-" + g.id).hidden = !!q && !shown;
+    for (const item of host.querySelectorAll("[data-key]")) {
+      item.hidden = (!!q && !item.dataset.key.toLowerCase().includes(q)) || (!!kind && item.dataset.kind !== kind);
+      if (!item.hidden) shown++;
+    }
+    $("n-" + g.id).textContent = $("jn-" + g.id).textContent = (q || kind) && shown < total ? `${shown}/${total}` : String(total);
+    const ofKind = !kind || (g.list ? kind === g.list : kind === "sprites" || kind === "images");
+    $("s-" + g.id).hidden = $("j-" + g.id).hidden = !ofKind || ((!!q || (!!kind && !g.list)) && !shown);
   }
+  for (const id of ["mocks", "palette"]) $("s-" + id).hidden = $("j-" + id).hidden = !!kind && kind !== id;
 }
+markPills(); applyFilter();
 $("filter").addEventListener("input", applyFilter);
 for (const i of groundInputs) i.addEventListener("change", () => { prefs.ground = i.value; savePrefs(); showGroundName(); views.forEach(applyGround); });
 $("zoom").addEventListener("change", e => {
