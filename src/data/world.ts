@@ -190,7 +190,7 @@ export const WORLD = {
           puddle: 1,
           skunk: 1,
           squirrel: 1,
-          thief: 1,
+          thief: 2,
           trash: 0,
         },
       },

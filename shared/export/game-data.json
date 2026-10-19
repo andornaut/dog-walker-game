@@ -153,7 +153,7 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "−1 ♥ each",
+      "text": "Tangled",
       "title": "Other dog"
     },
     {
@@ -326,6 +326,19 @@
       "title": "Thief"
     },
     {
+      "art": "card-thief-let-them-run",
+      "frame": "encounter",
+      "id": "let-them-run",
+      "index": 2,
+      "name": "Let them run",
+      "source": {
+        "id": "thief",
+        "kind": "encounter"
+      },
+      "text": "Spooked",
+      "title": "Thief"
+    },
+    {
       "art": "card-trash-sniff",
       "frame": "encounter",
       "id": "sniff",
@@ -400,7 +413,7 @@
         "id": "constructionDetour",
         "kind": "forcedStop"
       },
-      "text": "−$20 per dog",
+      "text": "−$12 per dog, Tuckered out",
       "title": "Construction detour"
     },
     {
@@ -1518,11 +1531,8 @@
             "art": "card-other-dog-pull-away",
             "effects": [
               {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "affected"
-                }
+                "debuff": "tangled",
+                "kind": "debuff"
               }
             ],
             "name": "Pull away"
@@ -1980,6 +1990,16 @@
               }
             ],
             "name": "Let it go"
+          },
+          {
+            "art": "card-thief-let-them-run",
+            "effects": [
+              {
+                "debuff": "spooked",
+                "kind": "debuff"
+              }
+            ],
+            "name": "Let them run"
           }
         ]
       },
@@ -2140,12 +2160,16 @@
           "art": "card-construction-detour-long-way",
           "effects": [
             {
-              "amount": "missedTips",
+              "amount": "longWayMissedTips",
               "change": "lose",
               "kind": "money",
               "perDog": {
                 "kind": "all"
               }
+            },
+            {
+              "debuff": "tuckeredOut",
+              "kind": "debuff"
             }
           ],
           "name": "Take the long way"
@@ -3021,6 +3045,7 @@
         "laidBack": 80
       },
       "lemonadeCup": 12,
+      "longWayMissedTips": 12,
       "lostWalletKeep": 120,
       "minorBump": 8,
       "missedTips": 20,
@@ -3595,7 +3620,7 @@
           "puddle": 1,
           "skunk": 1,
           "squirrel": 1,
-          "thief": 1,
+          "thief": 2,
           "trash": 0
         }
       },

@@ -68,6 +68,8 @@ export const TUNING = {
     fannyPackStart: 60,
     feeByTemperament: { dramatic: 80, fussy: 100, laidBack: 80 },
     lemonadeCup: 12,
+    // The construction detour's long way, per dog: less than missedTips, since it also tires the pack.
+    longWayMissedTips: 12,
     lostWalletKeep: 120,
     // The tips the pack drops on a minor obstacle, once for the pack.
     minorBump: 8,

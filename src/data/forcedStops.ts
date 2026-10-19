@@ -21,7 +21,10 @@ export const FORCED_STOPS = {
     options: [
       {
         art: "card-construction-detour-long-way",
-        effects: [{ amount: "missedTips", change: "lose", kind: "money", perDog: { kind: "all" } }],
+        effects: [
+          { amount: "longWayMissedTips", change: "lose", kind: "money", perDog: { kind: "all" } },
+          { debuff: "tuckeredOut", kind: "debuff" },
+        ],
         name: "Take the long way",
       },
       {

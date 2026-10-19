@@ -158,7 +158,7 @@ export const ENCOUNTERS = {
         },
         {
           art: "card-other-dog-pull-away",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          effects: [{ debuff: "tangled", kind: "debuff" }],
           name: "Pull away",
         },
       ],
@@ -459,6 +459,11 @@ export const ENCOUNTERS = {
           art: "card-thief-let-go",
           effects: [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
           name: "Let it go",
+        },
+        {
+          art: "card-thief-let-them-run",
+          effects: [{ debuff: "spooked", kind: "debuff" }],
+          name: "Let them run",
         },
       ],
     },
