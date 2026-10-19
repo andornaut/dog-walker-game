@@ -158,6 +158,14 @@ Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An en
 
 Total: 39 card illustrations, 29 of them in Milestone 6.
 
+## Help screen
+
+One illustration per page of the in-game "How to walk" screen, composed from the exported sprites by `art/tools/help.py`. The help screen mock animates the same scenes.
+
+| Asset              | Key           | Type  | Size    | Priority | Notes                                       |
+| ------------------ | ------------- | ----- | ------- | -------- | ------------------------------------------- |
+| Help illustrations | `help-<page>` | image | 344×236 | core     | lanes, pickups, cards, owners, pulls, zones |
+
 ## Screens outside the run
 
 | Asset             | Key                        | Type  | Size    | Priority | Notes                                                       |

@@ -202,5 +202,30 @@
     }
   ],
   "fonts": [],
-  "images": []
+  "images": [
+    {
+      "key": "help-cards",
+      "png": "images/help-cards.png"
+    },
+    {
+      "key": "help-lanes",
+      "png": "images/help-lanes.png"
+    },
+    {
+      "key": "help-owners",
+      "png": "images/help-owners.png"
+    },
+    {
+      "key": "help-pickups",
+      "png": "images/help-pickups.png"
+    },
+    {
+      "key": "help-pulls",
+      "png": "images/help-pulls.png"
+    },
+    {
+      "key": "help-zones",
+      "png": "images/help-zones.png"
+    }
+  ]
 }
