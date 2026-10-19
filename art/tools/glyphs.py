@@ -751,7 +751,11 @@ def sprites():
 
 
 def image(draw):
-    return to_image(draw().outlined())
+    """Every content icon takes icon_edge unless its drawing set its own outline rule."""
+    g = draw()
+    if g.edge is None:
+        g.edge = icon_edge
+    return to_image(g.outlined())
 
 
 def preview(out, scale=6):
