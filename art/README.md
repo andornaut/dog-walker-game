@@ -38,11 +38,6 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ## Remaining for the first build
 
-In priority order:
-
-1. **40px sprites on 64px lanes:** every road sprite, road strip, backdrop join, help page and card redrawn for the 320px road; lands with tech's lane code
-2. **Obstacle skin road sprites:** the per-zone looks for Chase, Snatch, Social, Splash, Stink and the minor obstacles, with depth variants
-3. **Roadside props for the other zones:** a `PLACEMENT` entry in `art/tools/roadside.py` per zone, with any props the zone needs; Elm Avenue has its table and sprites
-4. **Skin card illustrations:** `card-<skin key>-<option>` for the Splash and Stink skins' options (Chase, Snatch and Social have theirs); a skin shows its base card art until then, so these can follow the first build
+- **Roadside props for the other zones:** a `PLACEMENT` entry in `art/tools/roadside.py` per zone, with any props the zone needs; Elm Avenue has its table and sprites
 
 New art follows the rulebook as it changes.
