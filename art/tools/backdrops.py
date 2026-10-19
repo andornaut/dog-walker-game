@@ -637,67 +637,138 @@ def rail(cv, x0, x1, z):
     front(cv, lo, hi, z, 12, 18, "brown")
 
 
+# Sniff Street Shops' flowers, in its planters and on its card
+SHOP_FLOWERS = ("red", "yellow", "white", "amber")
+# the planter along each curb, across: its brown sides on PLANTER[0]..+2 and PLANTER[1]-2..
+PLANTER = (CURB, CURB + 16)
+
+
+def sunburst(cv, cx, cy, n, a, b, y1, w=W):
+    """Flat rays of a and b from cx, cy over rows 0 to y1: n of each round the half turn."""
+    for py in range(y1):
+        for px in range(w):
+            ang = math.atan2(px + 0.5 - cx, cy - py - 0.5)
+            cv.fill(px, py, 1, 1, a if math.floor(ang / (math.pi / (2 * n)) + 0.5) % 2 else b)
+
+
+def bunting(cv, x0, x1, y, sag, cols, line="plum"):
+    """A string of pennants hung from x0 to x1 on row y, sagging sag rows in the middle."""
+    k = 0
+    for x in range(x0, x1):
+        t = (x - x0) / max(1, x1 - x0 - 1)
+        yy = round(y + sag * 4 * t * (1 - t))
+        cv.fill(x, yy, 1, 1, line)
+        if (x - x0) % 7 == 1 and x + 5 <= x1:
+            for r in range(4):
+                cv.fill(x + r // 2, yy + 1 + r, 5 - r // 2 * 2, 1, cols[k % len(cols)])
+            k += 1
+
+
+def outline_box(cv, x, y, w, h, col):
+    cv.fill(x, y, w, 1, col)
+    cv.fill(x, y + h - 1, w, 1, col)
+    cv.fill(x, y, 1, h, col)
+    cv.fill(x + w - 1, y, 1, h, col)
+
+
+def shops_verge(x, z, span, px, py):
+    """Sniff Street Shops' verge: a white curb, a flower planter along it (brown sides round
+    green and dgreen leaves, about one pixel in ten a flower), a tan edge, then cream paving
+    with a tan seam every 32 rows of road and sparse tan specks."""
+    a = abs(x)
+    if a < CURB:
+        return "white"
+    if a < PLANTER[1]:
+        if a < PLANTER[0] + 2 or a >= PLANTER[1] - 2:
+            return "brown"
+        n = noise(px, py)
+        if n < 0.10:
+            return SHOP_FLOWERS[int(n * 40) % 4]
+        return "dgreen" if noise(px + 3, py) < 0.35 else "green"
+    if a < PLANTER[1] + 2:
+        return "tan"
+    if span < 16 and crosses(z, span, 32):
+        return "tan"
+    return "tan" if noise(px, py) < 0.02 else "cream"
+
+
 def shops():
     cv = hp.Canvas(W, H)
-    # flatter clouds above the rooftops
-    sky(cv, clouds=((18, 8, 28, 3), (CX - 40, 6, 56, 4), (CX + 110, 9, 24, 3)))
-
-    def paint(x, z, span, px, py):
-        a = abs(x)
-        if a < ROAD:
-            if a >= ROAD - 4:
-                return "slate" if a < ROAD - 1 else "grey"
-            if span < 6 and crosses(z, span, 16):
-                return "grey"
-            return "white" if hashed(px, py, 19) else "lgrey"
-        if a < CURB:
-            return "grey"
-        if span < 16 and crosses(z, span, 32):
-            return "grey"
-        return "grey" if hashed(px, py, 29) else "lgrey"
+    # a sunburst of sky and cyan rays from the end of the street, a cloud either side
+    sunburst(cv, CX, BASE + 6, 7, "sky", "cyan", FAR_WALK)
+    for x, y, w, p in ((10, 9, 30, 4), (300, 13, 38, 5)):
+        cloud(cv, x, y, w, p, f"shops-{x}")
+    # colour-blocked shopfronts across the street, the toy shop at the end of it
+    for x, w, top, wall_c, awn, sign, board, letters in (
+            (-4, 64, 22, "cream", "pink", "BAKERY", "dred", "yellow"),
+            (CX - 116, 66, 16, "sky", "amber", "PETS", "navy", "yellow"),
+            (CX - 50, 100, 6, "yellow", "red", "TOYS", "blue", "white"),
+            (CX + 50, 70, 14, "green", "pink", "SCOOPS", "forest", "white"),
+            (CX + 120, 66, 20, "purple", "cyan", "RECORDS", "plum", "cyan")):
+        shopfront(cv, x, w, top, BASE, wall_c, awn, sign, board, letters)
+    # bunting from roof to roof either side of the toy shop, above the sign boards
+    bunting(cv, 0, CX - 50, 15, 5, ("red", "yellow", "sky", "green", "pink"))
+    bunting(cv, CX + 50, W, 15, 5, ("pink", "sky", "yellow", "red", "green"))
 
     def paving(px, py):
-        return "grey" if seam(px, py) or hashed(px, py, 29) else "lgrey"
+        return "tan" if seam(px, py) or hashed(px, py, 41) else "cream"
 
-    # the shopfronts across the street, the bookshop at the end of it
-    for x, w, top, wall_c, awn, sign in ((CX - 184, 66, 18, "rust", "red", "CAFE"),
-                                         (CX - 118, 72, 12, "cream", "dgreen", "PETS"),
-                                         (CX - 46, 92, 16, "tan", "blue", "BOOKS"),
-                                         (CX + 46, 76, 10, "lgrey", "amber", "BAKERY"),
-                                         (CX + 122, 66, 20, "brown", "teal", None)):
-        shopfront(cv, x, w, top, BASE, wall_c, awn, sign)
     yard(cv, BASE, FAR_WALK, paving)
-    for x in (CX - 152, CX - 84, CX + 24, CX + 102):
+    for x in (CX - 140, CX - 64, CX + 40, CX + 112):
         planter(cv, x, FAR_WALK)
-    cross(cv, flat(paint), "slate", paving)
-    cross_line(cv, "slate", dash=None)
+        flowers(cv, x + 2, x + 11, FAR_WALK - 8, SHOP_FLOWERS)
+
+    # the pink pavers of road-sniff-street-shops: cream gutter stones on its outer 4 columns
+    # inside a mauve seam, a mauve joint every 16 rows and a few skin1 flecks
+    def paint(x, z, span, px, py):
+        a = abs(x)
+        if a >= ROAD:
+            return shops_verge(x, z, span, px, py)
+        if a >= ROAD - 4:
+            return "cream"
+        if a >= ROAD - 5:
+            return "mauve"
+        if span < 6 and crosses(z, span, 16):
+            return "mauve"
+        return "skin1" if hashed(px, py, 23) else "pink"
+
+    cross(cv, flat(paint), "mauve", paving, curb="white")
+    cross_line(cv, "white", "mauve")
     street(cv, paint)
-    lanes(cv, "slate", dash=None, span=14)
+    lanes(cv, "white", "mauve")
     planter_wall(cv, *PERCH_X, PERCH)
     return cv
 
 
-def shopfront(cv, x, w, top, base, wall_c, awn, sign):
-    """A shop facing the camera, rows top to base: upstairs windows where there is room, a sign
-    board (none when sign is None), a striped awning over the shop window and the door."""
+def shopfront(cv, x, w, top, base, wall_c, awn, sign, board, letters, line="plum"):
+    """A shopfront facing the camera, rows top to base, drawn as a toy box: flat colour blocks
+    inside a 1px line, a shaded top and right side, upstairs windows where there is room, a sign
+    board in the sign letters, a striped awning, the shop window and the door."""
     cv.fill(x, top, w, base - top, wall_c)
+    cv.fill(x + w - 3, top, 3, base - top, dk(wall_c))
     cv.fill(x, top, w, 3, dk(wall_c))
-    cv.fill(x + w - 2, top, 2, base - top, dk(wall_c))
+    outline_box(cv, x, top, w, base - top + 1, line)
     if top <= base - 48:
-        for wx in (x + 10, x + w - 22):
-            cv.fill(wx, base - 44, 12, 10, "plum")
+        for wx in (x + 9, x + w - 21):
+            cv.fill(wx, base - 44, 12, 10, line)
             cv.fill(wx + 1, base - 43, 10, 8, "cyan")
-    if sign:
-        cv.fill(x + 6, base - 32, w - 12, 13, "plum")
-        word(cv, sign, x + w / 2, base - 29, "cream")
+            cv.fill(wx + 2, base - 42, 3, 1, "white")
+    cv.fill(x + 5, base - 32, w - 10, 13, line)
+    cv.fill(x + 6, base - 31, w - 12, 11, board)
+    word(cv, sign, x + w / 2, base - 29, letters)
     for i in range(0, w - 4, 8):
         cv.fill(x + 2 + i, base - 18, 4, 5, awn)
         cv.fill(x + 6 + i, base - 18, 4, 5, "white")
+    cv.fill(x + 1, base - 18, w - 2, 1, line)
     cv.fill(x + 2, base - 13, w - 4, 1, dk(awn))
-    cv.fill(x + 6, base - 11, w - 34, 11, "plum")
+    for i in range(2, w - 4, 4):
+        cv.fill(x + i, base - 12, 2, 1, awn)
+    cv.fill(x + 6, base - 11, w - 34, 11, line)
     cv.fill(x + 7, base - 10, w - 36, 9, "cyan")
     cv.fill(x + 9, base - 8, 6, 1, "white")
-    cv.fill(x + w - 22, base - 12, 12, 12, "dbrown")
+    cv.fill(x + 9, base - 6, 3, 1, "white")
+    cv.fill(x + w - 22, base - 12, 12, 12, line)
+    cv.fill(x + w - 21, base - 11, 10, 11, "dbrown")
     cv.fill(x + w - 13, base - 6, 1, 2, "amber")
 
 

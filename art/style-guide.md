@@ -30,7 +30,7 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 - [Endesga 32](https://lospec.com/palette-list/endesga-32) only, each pixel opaque or fully transparent. Colour names are the `K` names in `art/tools/pixel.py`.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
-- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the three light roads (Bark Park, Sniff Street Shops, The Long Way Home), and the fill carries Woof Way. A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Woof Way. Snooze Crescent (grey) and Paws Promenade (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged. A white coat on the road is white, not light grey, and its lower-right silhouette steps one ramp colour darker (white to lgrey, lgrey to grey), so it keeps its mass on Sniff Street Shops' light grey.
+- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against tan, light grey and skin2 (`ROADS` in `art/tools/pixel.py`), and the fill carries Woof Way. A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Woof Way. Snooze Crescent (grey), Sniff Street Shops (pink) and Paws Promenade (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged. A white coat on the road is white, not light grey, and its lower-right silhouette steps one ramp colour darker (white to lgrey, lgrey to grey), so it keeps its mass on the light roads.
 - Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them (a head over its body) stay two ramp steps darker.
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings such as merle are a few flat patches.
 - Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` keeps a ramp outline, `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim (ink for the light roads, white for Woof Way and the dimmed road), and `fx-dust` (light grey dust) has no rim. Comic words take the sign logo's ink ring and dred shadow. Hazard warnings are outlined in ink.
@@ -42,7 +42,7 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 
 - Text holds 4.5:1 against what it sits on (3:1 at 2× and larger); essential icons and marks hold 3:1. Inactive controls are exempt.
 - A state never relies on colour alone: it also changes shape (a tick, a hollow heart, a filled pip).
-- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Woof Way, dred on Bark Park, Sniff Street Shops and Paws Promenade (5.07:1), plum on Snooze Crescent and The Long Way Home (4.84:1).
+- The leash is a 1px line the game draws from the walker's hand to each collar: pink on Woof Way; dred on Bark Park (3.49:1) and Paws Promenade (5.07:1); plum on Snooze Crescent (4.84:1), Sniff Street Shops (5.03:1) and The Long Way Home (4.45:1).
 
 ### UI colour pairs
 
@@ -241,8 +241,8 @@ Sprites scale by depth in steps of 1×, 0.75× and 0.5×, nearest-neighbour. A s
 ## Road strips
 
 - 280×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
-- The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Snooze Crescent grey (slate), Bark Park tan (brown), Woof Way dslate (navy), Sniff Street Shops lgrey (grey), Paws Promenade cream (tan), The Long Way Home skin2 (brown).
-- The four lane dividers sit at x = 56k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Snooze Crescent; dbrown on Bark Park; dbrown dashes 20 rows long in 32 on Paws Promenade; white outlined in plum on The Long Way Home.
+- The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Snooze Crescent grey (slate), Bark Park tan (brown), Woof Way dslate (navy), Sniff Street Shops pink (mauve), Paws Promenade cream (tan), The Long Way Home skin2 (brown).
+- The four lane dividers sit at x = 56k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Snooze Crescent; dbrown on Bark Park; white dashes 12 rows long in 32 with a mauve edge on Sniff Street Shops; dbrown dashes 20 rows long in 32 on Paws Promenade; white outlined in plum on The Long Way Home.
 - Curbs and verges stay inside the outer 3 to 7px, clear of the 12px sprite margin.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The camera has its horizon at y −164 and the walker's feet at y 464; the road's far edge meets the backdrop at y 150 at scale 0.5. Its ratio r derives from speed (the visible distance is 5.25 s × `roadScrollSpeed`, so r is 0.797 at 150 px/s). The rows from the far edge down to about y 180 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
@@ -253,20 +253,20 @@ Backdrops are 360×110 on screen rows 40 to 149; band row y is screen row 40 + y
 
 Where row 149 meets the road, left side (the right mirrors it):
 
-| Zone               | Edge               | Curb     | Road from  |
-| ------------------ | ------------------ | -------- | ---------- |
-| Snooze Crescent    | Sidewalk 86 to 107 | 108..109 | 110        |
-| Bark Park          | Grass to 109       | none     | 110 (path) |
-| Woof Way           | Sidewalk 86 to 107 | 108..111 | 112        |
-| Sniff Street Shops | Paving to 107      | 108..111 | 112        |
-| Paws Promenade     | Paving 86 to 109   | none     | 110        |
-| The Long Way Home  | Sidewalk 86 to 107 | 108..109 | 110        |
+| Zone               | Edge                             | Curb     | Road from  |
+| ------------------ | -------------------------------- | -------- | ---------- |
+| Snooze Crescent    | Sidewalk 86 to 107               | 108..109 | 110        |
+| Bark Park          | Grass to 109                     | none     | 110 (path) |
+| Woof Way           | Sidewalk 86 to 107               | 108..111 | 112        |
+| Sniff Street Shops | Paving to 99, planter 100 to 107 | 108..111 | 112        |
+| Paws Promenade     | Paving 86 to 109                 | none     | 110        |
+| The Long Way Home  | Sidewalk 86 to 107               | 108..109 | 110        |
 
 Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 93 to 95, x 0 to 82), the near-right lawn (x 274 to 359, rows 86 to 109), and both sidewalks.
 
 ## Skies
 
-- Daytime skies (Bark Park, Paws Promenade, Sniff Street Shops, Woof Way) stay cyan over sky with clouds.
+- Daytime skies (Bark Park, Paws Promenade, Woof Way) stay cyan over sky with clouds. Sniff Street Shops' sky is a sunburst: flat rays of sky and cyan, seven of each, from the end of the street (`sunburst` in `art/tools/backdrops.py`), with a cloud either side; its zone card repeats it with five of each.
 - Sunset and night skies are hard-edged horizontal bands of flat colour (`bands` in `art/tools/backdrops.py`), each 0.7 times the height of the band above it, so they shrink toward the horizon. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.
 - The sun is a flat yellow disc (`sun`) whose visible lower half is cut by horizontal gaps that widen toward the horizon as the bars between them thin; the bands show through the gaps. It sits over the orange band, so the gaps hold against the yellow.
 - Bands, top to horizon:

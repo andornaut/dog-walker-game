@@ -420,7 +420,7 @@ class Scene(Canvas):
         sc = 2 if len(wrap(effect, body, 2)) * 12 <= 42 else 1
         for i, ln in enumerate(wrap(effect, body, sc)):
             text_c(self, ln, x + 42, y + 78 + i * 6 * sc, "plum", sc, {"♥": "dred"})
-        text_c(self, cost, x + 42, y + 125, "cream")
+        text_c(self, cost, x + 42, y + 125, "plum")
 
     def button(self, x, y, icon):
         """A ui-icon-button face with its 16x16 icon, as the top bar places them."""
@@ -542,7 +542,7 @@ class Scene(Canvas):
             text_c(self, z["difficulty_name"].upper(), x + 42, y + 94, "plum")
         if z["fees"] is not None:
             text_c(self, f"FEES ×{z['fees']:g}", x + 42, y + 104, "plum")
-        text_c(self, "FREE", x + 42, y + 125, "cream")
+        text_c(self, "FREE", x + 42, y + 125, "plum")
 
 
 def lane(n):

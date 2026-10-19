@@ -1291,12 +1291,15 @@ class ZoneView(Art):
     """A zone's path card illustration. road(px, py) paints the cross street, yard(px, py) the
     far side's ground and lawn(px, py) the near corners past the sidewalk; mark is the cross
     street's centre line, dashed (on, period) or solid with None, over an edge row where given.
-    walk and curb are the sidewalks' and curbs' colours, None where the zone has none."""
+    walk and curb are the sidewalks' and curbs' colours, None where the zone has none, and
+    walk_fleck the sidewalks' flecks."""
 
-    def __init__(self, zone, road, yard, mark, dash, curb="grey", walk="lgrey", lawn=tufted(), edge=None):
+    def __init__(self, zone, road, yard, mark, dash, curb="grey", walk="lgrey", lawn=tufted(), edge=None,
+                 walk_fleck="grey"):
         super().__init__()
         self.road_px, self.yard, self.lawn = road, yard, lawn
         self.mark, self.dash, self.edge, self.curb, self.walk = mark, dash, edge, curb, walk
+        self.walk_fleck = walk_fleck
         ground, lines = roads.ZONES[zone]
         g = Grid(roads.W, roads.H)
         ground(g)
@@ -1340,7 +1343,7 @@ class ZoneView(Art):
         self.lanes()
 
     def walk_px(self, px, py):
-        return "grey" if bd.hashed(px, py, 29) else self.walk
+        return self.walk_fleck if bd.hashed(px, py, 29) else self.walk
 
     def ground_px(self, px, py):
         if py < WALK_Y:
@@ -1423,19 +1426,22 @@ def bark_park_view():
 
 
 def shops_view():
-    paving = flecked("lgrey", "grey", 29)
-    a = ZoneView("sniff-street-shops", flecked("lgrey", "white", 19), paving, "slate", None, lawn=paving)
-    a.sky("cyan", "sky")
-    # the shopfronts across the street, the bookshop at the end of it: a sign board, a striped
-    # awning, the shop window and the door
-    for x, w, top, wall_c, awn, sign in ((-36, 44, 4, "cream", "dgreen", "PETS"),
-                                         (11, 54, 2, "tan", "blue", "BOOKS"),
-                                         (68, 40, 4, "lgrey", "amber", "BAKERY")):
+    paving = flecked("cream", "tan", 29)
+    a = ZoneView("sniff-street-shops", flecked("pink", "skin1", 19), paving, "white", (3, 6), curb="white",
+                 walk="cream", lawn=paving, walk_fleck="tan")
+    # the backdrop's sunburst of sky and cyan rays, from the end of the street
+    bd.sunburst(a, AW / 2, FAR_Y + 2, 5, "sky", "cyan", FAR_Y, w=AW)
+    # three of the backdrop's colour-blocked shopfronts, the toy shop at the end of the street:
+    # a sign board, a striped awning, the shop window and the door, inside a plum line
+    for (x, w, top), (wall_c, awn, sign, board, letters) in zip(
+            ((-36, 44, 4), (11, 54, 2), (68, 40, 4)),
+            (("sky", "amber", "PETS", "navy", "yellow"), ("yellow", "red", "TOYS", "blue", "white"),
+             ("green", "pink", "ICE", "forest", "white"))):
         a.fill(x, top, w, FAR_Y - top, wall_c)
-        a.fill(x, top, w, 2, bd.dk(wall_c))
         a.fill(x + w - 2, top, 2, FAR_Y - top, bd.dk(wall_c))
-        a.fill(x + 2, 5, w - 4, 8, "plum")
-        bd.word(a, sign, x + w / 2, 5, "cream")
+        bd.outline_box(a, x, top, w, FAR_Y - top + 1, "plum")
+        a.fill(x + 2, 5, w - 4, 8, board)
+        bd.word(a, sign, x + w / 2, 5, letters)
         for i in range(0, w - 4, 6):
             a.fill(x + 2 + i, 13, 3, 2, awn)
             a.fill(x + 5 + i, 13, 3, 2, "white")
@@ -1443,9 +1449,11 @@ def shops_view():
         a.fill(x + 4, 16, w - 20, 5, "plum")
         a.fill(x + 5, 17, w - 22, 4, "cyan")
         a.fill(x + 6, 18, 3, 1, "white")
-        a.fill(x + w - 13, 16, 7, 5, "dbrown")
-        a.fill(x + w - 8, 18, 1, 1, "amber")
+        a.fill(x + w - 13, 16, 7, 5, "plum")
+        a.fill(x + w - 12, 17, 5, 4, "dbrown")
     a.street()
+    for x0, x1 in ((0, 18), (57, 75)):
+        bd.bunting(a, x0, x1, 2, 3, ("red", "yellow", "sky", "pink"))
     return a
 
 

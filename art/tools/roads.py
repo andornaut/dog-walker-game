@@ -178,44 +178,39 @@ def bark_park_lines(g):
             g.rect(x, y + 7, 2, 1, "plum")
 
 
-# ---------- Sniff Street Shops: staggered paving slabs, sett lane lines, drains ----------
+# ---------- Sniff Street Shops: pink pavers, cream gutter stones, white dashes ----------
 
 def shops_ground(g):
     rnd = random.Random("road-sniff-street-shops")
-    g.rect(0, 0, W, H, "lgrey")
-    # 2-row joints, lit on the left edge: under the projection a 1-row line blinks
+    g.rect(0, 0, W, H, "pink")
+    # square pavers: 2-row mauve joints every 16 rows (low contrast, so they do not blink) and
+    # staggered 1px joints along the road; a few skin1 pavers, never side by side
+    tinted = False
     for row in range(H // 16):
         y, off = row * 16, 14 if row % 2 else 0
-        g.rect(0, y + 14, W, 2, "grey")
+        g.rect(0, y + 14, W, 2, "mauve")
         for x in range(off - 28, W, 28):
-            g.rect(x + 27, y, 1, 14, "grey")
-            g.rect(x, y, 1, 14, "white")
-            if rnd.random() < 0.18:
-                for _ in range(10):
-                    g.p(x + rnd.randrange(1, 26), y + rnd.randrange(2, 14), "grey")
-    specks(g, rnd, 50, "white", 4, W - 4)
-    specks(g, rnd, 30, "grey", 4, W - 4)
-    # a few dropped bits of gum
-    for x, y in ((40, 22), (131, 52), (215, 9)):
-        g.rect(x, y, 2, 2, "slate")
-        g.p(x, y, "grey")
-    # drainage channels, with a grate every 32 rows
-    for x0 in (0, W - 4):
-        g.rect(x0, 0, 4, H, "grey")
-        g.rect(x0 + 1, 0, 2, H, "slate")
-        for y in (10, 42):
-            # a slot along the road, not rungs across it, which strobe
-            g.rect(x0, y, 4, 8, "dslate")
-            g.rect(x0 + (1 if x0 == 0 else 2), y + 1, 1, 6, "grey")
+            g.rect(x + 27, y, 1, 14, "mauve")
+            tinted = not tinted and rnd.random() < 0.07
+            if tinted:
+                g.rect(x, y, 27, 14, "skin1")
+    specks(g, rnd, 20, "skin1", 6, W - 6)
+    specks(g, rnd, 16, "mauve", 6, W - 6)
+    # cream gutter stones on the outer 4 columns, a mauve seam on the road side and a 2-row
+    # tan joint every 16 rows
+    for x0, inner in ((0, 4), (W - 4, W - 5)):
+        g.rect(x0, 0, 4, H, "cream")
+        g.rect(inner, 0, 1, H, "mauve")
+        for y in range(0, H, 16):
+            g.rect(x0, y, 4, 2, "tan")
 
 
 def shops_lines(g):
     for x in DIVIDERS:
-        # setts 6 rows long with 2-row joints: an 8-row rhythm moves a quarter step per frame
-        g.rect(x, 0, 2, H, "slate")
-        for y in range(6, H, 8):
-            g.rect(x, y, 2, 2, "dslate")
-        g.rect(x - 1, 0, 1, H, "grey")
+        for y in (8, 40):
+            # white dashes (2.7:1 on the pink) with a mauve edge on the right
+            g.rect(x, y, 2, 12, "white")
+            g.rect(x + 2, y + 1, 1, 12, "mauve")
 
 
 # ---------- The Long Way Home: sunset brick, soldier-course edges, fallen leaves ----------
