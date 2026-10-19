@@ -1372,13 +1372,13 @@ export class StartScene extends Scene {
       content.add(face);
       view.face = { object: face, y: y + 5 };
 
-      this.text(content, x + 41, y + 2, dog.name, ink);
+      this.text(content, x + 39, y + 4, dog.name, ink);
       if (locked) {
         // A locked dog shows its padlock and its price or goal plate in place of its icons
         // and fee.
         addLock(this, content, x - 2, y - 3);
         if (!stickered({ dog: id, kind: "dog" })) {
-          this.lockedPlate(content, tile, { capY: y + 28, originX: 0, x: x + 41 });
+          this.lockedPlate(content, tile, { capY: y + 28, originX: 0, x: x + 39 });
         }
         return;
       }
@@ -1386,11 +1386,11 @@ export class StartScene extends Scene {
       [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
         if (this.textures.exists(key)) {
           const iconKey = tileTextureKey(this, state, key);
-          content.add(this.add.image(x + 40 + n * 18, y + 13, iconKey).setOrigin(0));
+          content.add(this.add.image(x + 38 + n * 18, y + 13, iconKey).setOrigin(0));
         }
       });
       const fee = homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData, id) });
-      this.text(content, x + 41, y + 29, fee, ink);
+      this.text(content, x + 39, y + 29, fee, ink);
     });
   }
 

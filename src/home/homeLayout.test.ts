@@ -3,13 +3,22 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
+import { insetRect } from "../layout/rect";
 import { HOME_LAYOUT } from "./homeLayout";
 
 const { dogOrigin, dogTiles, sectionFrame, sections, startButton, walkerOrigin, walkerTiles } =
   HOME_LAYOUT;
+const { pocket } = HOME_LAYOUT;
 
 const rows = [
   ["walker", sections.walker, gridRects(walkerTiles, walkerTiles.columns, walkerOrigin)],
+  [
+    "pocket",
+    sections.pocket,
+    gridRects(pocket.cells, pocket.cells.columns, pocket.origin).map((cell) =>
+      insetRect(pocket.tileInset, cell),
+    ),
+  ],
   ["dogs", sections.dogs, gridRects(dogTiles, Object.keys(gameData.dogs).length, dogOrigin)],
 ] as const;
 

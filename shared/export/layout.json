@@ -1490,19 +1490,19 @@
       },
       "pocket": {
         "box": {
-          "dx": 14,
+          "dx": 12,
           "dy": 3,
           "size": 34
         },
         "cells": {
           "cellHeight": 44,
-          "cellWidth": 64,
+          "cellWidth": 60,
           "columns": 5,
-          "gapX": 8,
+          "gapX": 9,
           "gapY": 0
         },
         "icon": {
-          "dx": 15,
+          "dx": 13,
           "dy": 4
         },
         "lock": {
@@ -1510,7 +1510,7 @@
           "dy": -3
         },
         "origin": {
-          "x": 4,
+          "x": 12,
           "y": 459
         },
         "priceY": 28,
@@ -1686,32 +1686,32 @@
       "pocketRects": [
         {
           "height": 44,
-          "width": 64,
-          "x": 4,
+          "width": 60,
+          "x": 12,
           "y": 459
         },
         {
           "height": 44,
-          "width": 64,
-          "x": 76,
+          "width": 60,
+          "x": 81,
           "y": 459
         },
         {
           "height": 44,
-          "width": 64,
-          "x": 148,
+          "width": 60,
+          "x": 150,
           "y": 459
         },
         {
           "height": 44,
-          "width": 64,
-          "x": 220,
+          "width": 60,
+          "x": 219,
           "y": 459
         },
         {
           "height": 44,
-          "width": 64,
-          "x": 292,
+          "width": 60,
+          "x": 288,
           "y": 459
         }
       ],

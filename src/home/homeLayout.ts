@@ -68,11 +68,11 @@ export const HOME_LAYOUT = {
   // In a tile: the icon box and the art in it, the padlock over its top-left corner, and the
   // price plate's caps, centred.
   pocket: {
-    box: { dx: 14, dy: 3, size: 34 },
-    cells: { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 },
-    icon: { dx: 15, dy: 4 },
+    box: { dx: 12, dy: 3, size: 34 },
+    cells: { cellHeight: 44, cellWidth: 60, columns: 5, gapX: 9, gapY: 0 },
+    icon: { dx: 13, dy: 4 },
     lock: { dx: -2, dy: -3 },
-    origin: { x: 4, y: 459 },
+    origin: { x: 12, y: 459 },
     priceY: 28,
     tileInset: 1,
   },
