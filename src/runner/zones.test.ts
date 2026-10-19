@@ -18,65 +18,74 @@ const at = (zoneIndex: number, zoneDistance: number, distance: number) => ({
   zoneDistance,
   zoneIndex,
 });
+const FINISHED = { distance: 2000, finished: true, zoneDistance: 400, zoneIndex: 2 };
 
 describe("advanceZones", () => {
-  it("travels at the base speed times the zone's multiplier", () => {
-    expect(advanceZones(route, 2, runStart)).toEqual({
+  it.each([
+    {
       completedZones: [],
+      from: runStart,
+      name: "travels at the base speed in the first zone",
       progress: at(0, 200, 200),
-    });
-    expect(advanceZones(route, 2, at(1, 0, 1000)).progress).toEqual(at(1, 300, 1300));
-  });
-
-  it("carries the rest of a step across a zone boundary at the next zone's speed", () => {
-    // 1 s finishes zone 0's last 100 px, then 1 s at 150 px/s in zone 1.
-    expect(advanceZones(route, 2, at(0, 900, 900))).toEqual({
+      seconds: 2,
+    },
+    {
+      completedZones: [],
+      from: at(1, 0, 1000),
+      name: "travels at the base speed times the zone's multiplier",
+      progress: at(1, 300, 1300),
+      seconds: 2,
+    },
+    {
+      // 1 s finishes zone 0's last 100 px, then 1 s at 150 px/s in zone 1.
       completedZones: [0],
+      from: at(0, 900, 900),
+      name: "carries the rest of a step across a zone boundary at the next zone's speed",
       progress: at(1, 150, 1150),
-    });
-  });
-
-  it("reports a zone as complete when the step ends exactly on its boundary", () => {
-    expect(advanceZones(route, 1, at(0, 900, 900))).toEqual({
+      seconds: 2,
+    },
+    {
       completedZones: [0],
+      from: at(0, 900, 900),
+      name: "reports a zone as complete when the step ends exactly on its boundary",
       progress: at(1, 0, 1000),
-    });
-  });
-
-  it("reports every zone crossed in one step, in order", () => {
-    // Zone 0 takes 10 s and zone 1 takes 4 s, leaving 1 s at 200 px/s in zone 2.
-    expect(advanceZones(route, 15, runStart)).toEqual({
+      seconds: 1,
+    },
+    {
+      // Zone 0 takes 10 s and zone 1 takes 4 s, leaving 1 s at 200 px/s in zone 2.
       completedZones: [0, 1],
+      from: runStart,
+      name: "reports every zone crossed in one step, in order",
       progress: at(2, 200, 1800),
-    });
-  });
-
-  it("finishes the run at the end of the last zone and stops the distance there", () => {
-    expect(advanceZones(route, 100, at(2, 300, 1900))).toEqual({
+      seconds: 15,
+    },
+    {
       completedZones: [2],
-      progress: { distance: 2000, finished: true, zoneDistance: 400, zoneIndex: 2 },
-    });
-  });
-
-  it("stays put once the run has finished", () => {
-    const { progress } = advanceZones(route, 100, at(2, 300, 1900));
-    expect(advanceZones(route, 5, progress)).toEqual({ completedZones: [], progress });
+      from: at(2, 300, 1900),
+      name: "finishes the run at the end of the last zone and stops the distance there",
+      progress: FINISHED,
+      seconds: 100,
+    },
+    {
+      completedZones: [],
+      from: FINISHED,
+      name: "stays put once the run has finished",
+      progress: FINISHED,
+      seconds: 5,
+    },
+  ])("$name", ({ completedZones, from, progress, seconds }) => {
+    expect(advanceZones(route, seconds, from)).toEqual({ completedZones, progress });
   });
 });
 
-describe("zoneScrollSpeed", () => {
-  it("is the base speed times the current zone's multiplier", () => {
+describe("zoneScrollSpeed and zoneFraction", () => {
+  it("are the current zone's speed and how far through it", () => {
     expect(zoneScrollSpeed(route, at(1, 0, 1000))).toBe(150);
-  });
-
-  it("is zero once the run has finished", () => {
-    expect(zoneScrollSpeed(route, { ...at(2, 400, 2000), finished: true })).toBe(0);
-  });
-});
-
-describe("zoneFraction", () => {
-  it("is how far through the current zone", () => {
     expect(zoneFraction(route, at(1, 150, 1150))).toBeCloseTo(0.25);
-    expect(zoneFraction(route, { ...at(2, 400, 2000), finished: true })).toBe(1);
+  });
+
+  it("are zero speed and the whole zone once the run has finished", () => {
+    expect(zoneScrollSpeed(route, FINISHED)).toBe(0);
+    expect(zoneFraction(route, FINISHED)).toBe(1);
   });
 });

@@ -113,9 +113,6 @@ describe("spawnRowDistances", () => {
   it("spaces rows minSpacing apart, clear of both ends of the zone by at least minSpacing", () => {
     expect(spawnRowDistances(100, 1000)).toEqual([100, 200, 300, 400, 500, 600, 700, 800, 900]);
     expect(spawnRowDistances(100, 1050).at(-1)).toBe(900);
-  });
-
-  it("has no rows in a zone too short for one", () => {
     expect(spawnRowDistances(100, 150)).toEqual([]);
     expect(spawnRowDistances(100, 50)).toEqual([]);
   });
@@ -134,15 +131,12 @@ describe("hitLength and blockingLength", () => {
 });
 
 describe("planSpawns", () => {
-  it("spawns exactly the count of each kind", () => {
+  it("spawns exactly the count of each kind, sorted by distance", () => {
     const events = planSpawns(seededRandom(1), plan);
     expect(countOf("obstacle", events)).toBe(6);
     expect(countOf("tip", events)).toBe(9);
     expect(countOf("treat", events)).toBe(3);
-  });
-
-  it("sorts the events by distance", () => {
-    const distances = planSpawns(seededRandom(2), plan).map((event) => event.distance);
+    const distances = events.map((event) => event.distance);
     expect(distances).toEqual([...distances].sort((a, b) => a - b));
   });
 
@@ -193,19 +187,47 @@ describe("planSpawns", () => {
       const open = openLanesByRow(crowded, planSpawns(seededRandom(seed), crowded));
       expect(open.every((lanes) => lanes.length === 2)).toBe(true);
     }
-    const tooMany = {
-      ...crowded,
-      quotas: [{ blocksLane: true, count: 9 * 3 + 1, kind: "obstacle" as const }],
-    };
-    expect(() => planSpawns(seededRandom(1), tooMany)).toThrow(/obstacle/);
   });
 
-  it("throws when the zone has no room for the obstacles asked for", () => {
-    const tooMany: SpawnPlan<Kind> = {
-      ...plan,
-      quotas: [{ blocksLane: true, count: 9 * 4 + 1, kind: "obstacle" }],
-    };
-    expect(() => planSpawns(seededRandom(1), tooMany)).toThrow(/obstacle/);
+  it.each<{ error: RegExp; name: string; unplannable: SpawnPlan<Kind> }>([
+    {
+      error: /obstacle/,
+      name: "the zone has no room for the obstacles asked for",
+      unplannable: { ...plan, quotas: [{ blocksLane: true, count: 9 * 4 + 1, kind: "obstacle" }] },
+    },
+    {
+      error: /obstacle/,
+      name: "the obstacles asked for would leave fewer than minOpenLanes open",
+      unplannable: {
+        ...plan,
+        minOpenLanes: 2,
+        quotas: [{ blocksLane: true, count: 9 * 3 + 1, kind: "obstacle" }],
+      },
+    },
+    {
+      error: /minSpacing/,
+      name: "the rows are too close for the pack to pass between them",
+      unplannable: { ...plan, packLength: 81 },
+    },
+    {
+      error: /sight/,
+      name: "the next row is out of sight before the pack must steer for it",
+      unplannable: { ...plan, sightLength: 49 },
+    },
+    {
+      // 100px of road into the first row at 100px/s is 1s, less than one 2s move, so every
+      // lane of the first row must stay open, and then of every row after it.
+      error: /obstacle/,
+      name: "no obstacle can be placed without blocking every reachable lane",
+      unplannable: {
+        ...plan,
+        laneMoveSeconds: 2,
+        packLength: 80,
+        quotas: [{ blocksLane: true, count: 1, kind: "obstacle" }],
+      },
+    },
+  ])("throws when $name", ({ error, unplannable }) => {
+    expect(() => planSpawns(seededRandom(1), unplannable)).toThrow(error);
   });
 
   it("skips an obstacle bigger than one cell that has no room left, the same way every time", () => {
@@ -240,20 +262,16 @@ describe("planSpawns", () => {
     }
   });
 
-  it("leaves an open lane within one move of every open lane on the row before", () => {
+  it("places every obstacle at a tight reach, an open lane within a move of each on the row before", () => {
     for (const seed of seeds) {
-      const open = openLanesByRow(tight, planSpawns(seededRandom(seed), tight));
+      const events = planSpawns(seededRandom(seed), tight);
+      expect(countOf("obstacle", events)).toBe(27);
+      const open = openLanesByRow(tight, events);
       open.slice(1).forEach((lanes, i) => {
         for (const from of itemAt(open, i)) {
           expect(lanes.some((lane) => Math.abs(lane - from) <= 1)).toBe(true);
         }
       });
-    }
-  });
-
-  it("still places every obstacle when the reach is tight", () => {
-    for (const seed of seeds) {
-      expect(countOf("obstacle", planSpawns(seededRandom(seed), tight))).toBe(27);
     }
   });
 
@@ -297,26 +315,6 @@ describe("planSpawns", () => {
     }
   });
 
-  it("throws when the rows are too close for the pack to pass between them", () => {
-    expect(() => planSpawns(seededRandom(1), { ...plan, packLength: 81 })).toThrow(/minSpacing/);
-  });
-
-  it("throws when the next row is out of sight before the pack must steer for it", () => {
-    expect(() => planSpawns(seededRandom(1), { ...plan, sightLength: 49 })).toThrow(/sight/);
-  });
-
-  it("throws when no obstacle can be placed without blocking every reachable lane", () => {
-    // 100px of road into the first row at 100px/s is 1s, less than one 2s move, so every
-    // lane of the first row must stay open, and then of every row after it.
-    const unreachable: SpawnPlan<Kind> = {
-      ...plan,
-      laneMoveSeconds: 2,
-      packLength: 80,
-      quotas: [{ blocksLane: true, count: 1, kind: "obstacle" }],
-    };
-    expect(() => planSpawns(seededRandom(1), unreachable)).toThrow(/obstacle/);
-  });
-
   it("spreads each kind over the zone, one per equal stretch of rows", () => {
     // 3 treats over 9 rows: one in rows 100-300, one in 400-600, one in 700-900.
     for (const seed of seeds) {
@@ -330,9 +328,7 @@ describe("laneReach", () => {
   it("counts the whole lane moves that fit in the clear road between rows", () => {
     expect(laneReach(tight)).toEqual({ betweenRows: 1, entry: 4 });
     expect(laneReach({ ...tight, scrollSpeed: 200 })).toEqual({ betweenRows: 0, entry: 2 });
-  });
-
-  it("never reaches further than the road is wide", () => {
+    // Never further than the road is wide.
     expect(laneReach({ ...plan, laneMoveSeconds: 0 })).toEqual({ betweenRows: 4, entry: 4 });
   });
 });
@@ -347,22 +343,50 @@ describe("laneMask", () => {
 describe("everyLaneReaches", () => {
   const notLane1 = ~laneMask([1]);
 
-  it("is true when every lane has a target within reach", () => {
-    expect(everyLaneReaches(1, laneMask([0, 2]), laneMask([1]))).toBe(true);
-  });
-
-  it("is false when one lane has no target within reach", () => {
-    expect(everyLaneReaches(1, laneMask([0, 4]), laneMask([1]))).toBe(false);
-    expect(everyLaneReaches(4, laneMask([0]), 0)).toBe(false);
-  });
-
-  it("is true when there are no lanes to reach from", () => {
-    expect(everyLaneReaches(0, 0, 0)).toBe(true);
-  });
-
-  it("is false when the only way crosses a lane that is not clear", () => {
-    expect(everyLaneReaches(2, laneMask([0]), laneMask([2]), notLane1)).toBe(false);
-    expect(everyLaneReaches(2, laneMask([0]), laneMask([0, 2]), notLane1)).toBe(true);
+  it.each([
+    {
+      clear: -1,
+      from: [0, 2],
+      name: "every lane has a target within reach",
+      reach: 1,
+      reaches: true,
+      to: [1],
+    },
+    {
+      clear: -1,
+      from: [0, 4],
+      name: "one lane has no target within reach",
+      reach: 1,
+      reaches: false,
+      to: [1],
+    },
+    { clear: -1, from: [0], name: "there are no targets", reach: 4, reaches: false, to: [] },
+    {
+      clear: -1,
+      from: [],
+      name: "there are no lanes to reach from",
+      reach: 0,
+      reaches: true,
+      to: [],
+    },
+    {
+      clear: notLane1,
+      from: [0],
+      name: "the only way crosses a lane that is not clear",
+      reach: 2,
+      reaches: false,
+      to: [2],
+    },
+    {
+      clear: notLane1,
+      from: [0],
+      name: "a target short of a lane that is not clear",
+      reach: 2,
+      reaches: true,
+      to: [0, 2],
+    },
+  ])("is $reaches when $name", ({ clear, from, reach, reaches, to }) => {
+    expect(everyLaneReaches(reach, laneMask(from), laneMask(to), clear)).toBe(reaches);
   });
 });
 
@@ -373,11 +397,8 @@ describe("takeDueSpawns", () => {
     { distance: 300, kind: "tip", lane: 2 },
   ];
 
-  it("splits the events into those reached and those still ahead", () => {
+  it("splits the events into those reached, at or past their distance, and those still ahead", () => {
     expect(takeDueSpawns(250, events)).toEqual({ due: events.slice(0, 2), pending: [events[2]] });
-  });
-
-  it("counts an event as due at exactly its distance", () => {
     expect(takeDueSpawns(200, events).due).toEqual(events.slice(0, 2));
     expect(takeDueSpawns(199.9, events).due).toEqual(events.slice(0, 1));
   });

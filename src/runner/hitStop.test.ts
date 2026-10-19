@@ -16,11 +16,8 @@ describe("hitStopLength", () => {
 });
 
 describe("startHitStop", () => {
-  it("starts no stop for no length", () => {
+  it("holds the step's cards and zone end, and starts no stop for no length", () => {
     expect(startHitStop(0, { cards: [CARD], zoneEnded: false })).toBeNull();
-  });
-
-  it("holds the step's cards and zone end", () => {
     expect(startHitStop(1, { cards: [CARD], zoneEnded: true })).toEqual({
       cards: [CARD],
       seconds: 1,

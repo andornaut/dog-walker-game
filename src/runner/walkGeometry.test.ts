@@ -9,14 +9,11 @@ const road = { height: 600, width: 280, x: 80, y: 40 };
 const flat = { visibleDistance: 594 };
 
 describe("walkGeometry", () => {
-  it("stands the walker just above the bottom of the road", () => {
-    expect(walkerFootY(road)).toBeLessThan(640);
-    expect(walkerFootY(road)).toBeGreaterThan(620);
-  });
-
-  it("spans the road from the far edge in view to the bottom", () => {
+  it("spans the road from the far edge in view to the bottom, the walker just above it", () => {
     const geometry = walkGeometry(5, 2, flat, road);
     expect([geometry.roadTop, geometry.roadBottom]).toEqual([40, 640]);
+    expect(walkerFootY(road)).toBeLessThan(640);
+    expect(walkerFootY(road)).toBeGreaterThan(620);
   });
 
   it("brings spawns into view at the projected road's far edge, 5.25s ahead of the feet", () => {

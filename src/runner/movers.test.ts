@@ -186,21 +186,16 @@ describe("moverPlacements", () => {
   const spanLanes = ({ count, first }: { count: number; first: number }) =>
     Array.from({ length: count }, (_, i) => first + i);
 
-  it("reserves every lane a crosser touches while it overlaps the pack, within its row's window", () => {
+  it("cues a crosser a second ahead and reserves each lane it touches on the pack, in its row's window", () => {
     const placements = moverPlacements(geometry, squirrelSpec);
     expect(placements.length).toBeGreaterThan(4);
     for (const placement of placements) {
+      expect(moverPlace(5, placement.path, 0).travel).toBeGreaterThanOrEqual(geometry.cellLength);
+      expect(placement.path.warning).toBe(100);
       const contact = packContact(placement);
       expect(contact.lanes.every((lane) => spanLanes(placement.lanes).includes(lane))).toBe(true);
       expect(Math.min(...contact.scrolls)).toBeGreaterThanOrEqual(geometry.sightLength);
       expect(Math.max(...contact.scrolls)).toBeLessThan(geometry.sightLength + geometry.window);
-    }
-  });
-
-  it("shows a crosser's cue on the road a full second before it moves", () => {
-    for (const placement of moverPlacements(geometry, squirrelSpec)) {
-      expect(moverPlace(5, placement.path, 0).travel).toBeGreaterThanOrEqual(geometry.cellLength);
-      expect(placement.path.warning).toBe(100);
     }
   });
 

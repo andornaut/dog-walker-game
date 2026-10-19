@@ -3,10 +3,13 @@ import { describe, expect, it } from "vitest";
 import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { SHOP_GEAR } from "../data/shop";
+import type { GearId } from "../data/types";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WORLD } from "../testing/world";
 import { newRun } from "./runState";
+
+const gearSource = (gear: GearId) => ({ source: { gear, kind: "gear" } });
 
 const data = {
   debuffs: DEBUFFS,
@@ -25,17 +28,12 @@ describe("newRun", () => {
     expect(state.zoneIndex).toBe(0);
   });
 
-  it("starts with the fanny pack's money", () => {
-    expect(newRun(data, 3, { dogs: ["koda"], gear: "fannyPack" }).money).toBe(1500);
-  });
-
-  it("makes the pack immune to thieves with the whistle, and gives poop bags' skips", () => {
-    expect(newRun(data, 3, { dogs: ["koda"], gear: "whistle" }).immunities).toEqual([
-      { encounter: "thief" },
-    ]);
-    expect(newRun(data, 3, { dogs: ["koda"], gear: "poopBags" }).skipsLeft).toBe(
-      TEST_TUNING.counts.poopBagsSkipsPerRun,
-    );
+  it.each<{ expected: object; gear: GearId }>([
+    { expected: { modifiers: [gearSource("fannyPack")], money: 1500 }, gear: "fannyPack" },
+    { expected: { immunities: [{ encounter: "thief" }] }, gear: "whistle" },
+    { expected: { skipsLeft: TEST_TUNING.counts.poopBagsSkipsPerRun }, gear: "poopBags" },
+  ])("starts with what the $gear gives", ({ expected, gear }) => {
+    expect(newRun(data, 3, { dogs: ["koda"], gear })).toMatchObject(expected);
   });
 
   it("takes no more dogs than the player owns slots", () => {
@@ -43,13 +41,6 @@ describe("newRun", () => {
     expect(() => newRun(data, 1, pair)).toThrow("needs that many dog slots");
     expect(heartsByDog(newRun(data, 2, pair))).toEqual({ duchess: 6, koda: 6 });
     expect(newRun(data, 1, { dogs: ["koda"], gear: null }).pack).toHaveLength(1);
-  });
-
-  it("names the gear as the source of its modifiers", () => {
-    const state = newRun(data, 1, { dogs: ["koda"], gear: "fannyPack" });
-    expect(state.modifiers.map(({ source }) => source)).toEqual([
-      { gear: "fannyPack", kind: "gear" },
-    ]);
   });
 
   it("rejects a dog listed twice", () => {

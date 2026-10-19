@@ -8,6 +8,7 @@ import { testState } from "../testing/runState";
 import {
   activeStatuses,
   dogDepthStep,
+  type DogStatusId,
   shownStatus,
   startStatuses,
   statusesKey,
@@ -24,49 +25,56 @@ function card(encounter: EncounterId, affected: readonly DogId[]) {
   return { affected, source: { affected, encounter, kind: "encounter" } as const };
 }
 
-function optionIndex(encounter: EncounterId, name: string): number {
-  const { resolution } = ENCOUNTERS[encounter];
-  const index =
-    resolution.kind === "card"
-      ? resolution.options.findIndex((option) => option.name === name)
-      : -1;
-  expect(index).toBeGreaterThanOrEqual(0);
-  return index;
-}
-
 const started = (encounter: EncounterId, affected: readonly DogId[], choice: Choice) =>
   startStatuses(data, card(encounter, affected), at, choice, []);
 
 describe("startStatuses", () => {
-  it("makes the dogs a skunk caught Stinky on Quick rinse, the option with the debuff", () => {
-    expect(started("skunk", ["koda", "nugget"], optionIndex("skunk", "Quick rinse"))).toEqual([
-      { dog: "koda", startMs: 5000, status: "stinky", zoneIndex: 1 },
-      { dog: "nugget", startMs: 5000, status: "stinky", zoneIndex: 1 },
-    ]);
-    expect(started("skunk", ["koda"], optionIndex("skunk", "Full groom"))).toEqual([]);
-    expect(started("skunk", ["koda"], optionIndex("skunk", "Hold your nose"))).toEqual([]);
-  });
+  // Every option of the encounter's card, and Skip.
+  const choicesOf = (encounter: EncounterId): { choice: Choice; name: string }[] => {
+    const { resolution } = ENCOUNTERS[encounter];
+    const options = resolution.kind === "card" ? resolution.options : [];
+    return [
+      ...options.map(({ name }, choice) => ({ choice, name })),
+      { choice: "skip", name: "Skip" },
+    ];
+  };
 
-  it("soaks the dogs a puddle caught on Splash through, and not on Towel off", () => {
-    expect(started("puddle", ["pierre"], optionIndex("puddle", "Splash through"))).toEqual([
-      { dog: "pierre", startMs: 5000, status: "soaked", zoneIndex: 1 },
-    ]);
-    expect(started("puddle", ["pierre"], optionIndex("puddle", "Towel off"))).toEqual([]);
-  });
+  it.each<{
+    affected: DogId[];
+    encounter: EncounterId;
+    startsOn: string[];
+    status: DogStatusId | "nothing";
+  }>([
+    {
+      affected: ["koda", "nugget"],
+      encounter: "skunk",
+      startsOn: ["Quick rinse"],
+      status: "stinky",
+    },
+    { affected: ["pierre"], encounter: "puddle", startsOn: ["Splash through"], status: "soaked" },
+    {
+      affected: ["koda", "biscuit"],
+      encounter: "thief",
+      startsOn: ["Chase them off", "Let it go"],
+      status: "spooked",
+    },
+    { affected: ["koda"], encounter: "squirrel", startsOn: [], status: "nothing" },
+  ])(
+    "starts $status after a $encounter on $startsOn, and nothing on its other options or Skip",
+    ({ affected, encounter, startsOn, status }) => {
+      const choices = choicesOf(encounter);
+      expect(choices.map(({ name }) => name)).toEqual(expect.arrayContaining(startsOn));
+      for (const { choice, name } of choices) {
+        const expected =
+          status !== "nothing" && startsOn.includes(name)
+            ? affected.map((dog) => ({ dog, startMs: 5000, status, zoneIndex: 1 }))
+            : [];
+        expect(started(encounter, affected, choice), name).toEqual(expected);
+      }
+    },
+  );
 
-  it("spooks every dog after a thief, whichever option, but not on Skip", () => {
-    for (const name of ["Chase them off", "Let it go"]) {
-      const marks = started("thief", ["koda", "biscuit"], optionIndex("thief", name));
-      expect(marks.map((mark) => [mark.dog, mark.status])).toEqual([
-        ["koda", "spooked"],
-        ["biscuit", "spooked"],
-      ]);
-    }
-    expect(started("thief", ["koda"], "skip")).toEqual([]);
-  });
-
-  it("starts nothing for other encounters, forced stops and upgrade offers", () => {
-    expect(started("squirrel", ["koda"], 0)).toEqual([]);
+  it("starts nothing for a forced stop", () => {
     const stop: CardSource = { kind: "forcedStop", stop: "stopSign" };
     expect(startStatuses(data, { affected: ["koda"], source: stop }, at, 0, [])).toEqual([]);
   });
@@ -77,7 +85,7 @@ describe("startStatuses", () => {
       { dog: "nugget", startMs: 1000, status: "soaked", zoneIndex: 1 },
       { dog: "biscuit", startMs: 900, status: "spooked", zoneIndex: 0 },
     ];
-    const splash = optionIndex("puddle", "Splash through");
+    const splash = choicesOf("puddle").findIndex(({ name }) => name === "Splash through");
     expect(startStatuses(data, card("puddle", ["koda"]), at, splash, earlier)).toEqual([
       { dog: "nugget", startMs: 1000, status: "soaked", zoneIndex: 1 },
       { dog: "koda", startMs: 5000, status: "soaked", zoneIndex: 1 },
@@ -173,18 +181,18 @@ describe("shownStatus", () => {
 });
 
 describe("dogDepthStep", () => {
-  it("reads the step from the dog's variant, or from its scale when drawn scaled", () => {
-    expect(dogDepthStep("dog-koda", 1)).toBe(1);
-    expect(dogDepthStep("dog-koda@75", 1)).toBe(0.75);
-    expect(dogDepthStep("dog-nugget@50", 1)).toBe(0.5);
-    expect(dogDepthStep("dog-koda", 0.75)).toBe(0.75);
-    expect(dogDepthStep("dog-koda", 0.5)).toBe(0.5);
-  });
-
-  it("reads the in-between steps' exact scales from their suffixes", () => {
-    expect(dogDepthStep("dog-koda@88", 1)).toBe(0.875);
-    expect(dogDepthStep("dog-koda@62", 1)).toBe(0.625);
-    expect(dogDepthStep("dog-koda", 0.875)).toBe(0.875);
+  it("reads the step from the variant's suffix, exact for @88 and @62, or else the drawn scale", () => {
+    const cases = [
+      ["dog-koda", 1, 1],
+      ["dog-koda@75", 1, 0.75],
+      ["dog-nugget@50", 1, 0.5],
+      ["dog-koda@88", 1, 0.875],
+      ["dog-koda@62", 1, 0.625],
+      ["dog-koda", 0.875, 0.875],
+      ["dog-koda", 0.75, 0.75],
+      ["dog-koda", 0.5, 0.5],
+    ] as const;
+    expect(cases.map(([key, scale]) => [key, scale, dogDepthStep(key, scale)])).toEqual(cases);
   });
 });
 

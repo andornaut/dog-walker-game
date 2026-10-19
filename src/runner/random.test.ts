@@ -5,11 +5,8 @@ import { chance, randomInt, randomPick, seededRandom } from "./random";
 const take = (count: number, random: () => number) => Array.from({ length: count }, random);
 
 describe("seededRandom", () => {
-  it("repeats the same sequence for the same seed", () => {
+  it("repeats the same sequence for the same seed and varies with the seed", () => {
     expect(take(10, seededRandom(42))).toEqual(take(10, seededRandom(42)));
-  });
-
-  it("gives a different sequence for a different seed", () => {
     expect(take(10, seededRandom(1))).not.toEqual(take(10, seededRandom(2)));
   });
 

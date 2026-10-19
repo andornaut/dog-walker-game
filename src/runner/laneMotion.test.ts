@@ -26,14 +26,41 @@ const moving = (from: number, to: number, elapsed = 0): Moving => ({
 });
 
 describe("requestLaneMove", () => {
-  it("starts a move one lane in the requested direction", () => {
-    expect(requestLaneMove(config, 1, stillInLane(2))).toEqual(moving(2, 3));
-    expect(requestLaneMove(config, -1, stillInLane(2))).toEqual(moving(2, 1));
-  });
-
-  it("stays still when moving off either road edge", () => {
-    expect(requestLaneMove(config, -1, stillInLane(0))).toEqual(stillInLane(0));
-    expect(requestLaneMove(config, 1, stillInLane(4))).toEqual(stillInLane(4));
+  it.each<{ direction: 1 | -1; expected: LaneMotion; from: LaneMotion; name: string }>([
+    { direction: 1, expected: moving(2, 3), from: stillInLane(2), name: "starts a move right" },
+    { direction: -1, expected: moving(2, 1), from: stillInLane(2), name: "starts a move left" },
+    {
+      direction: -1,
+      expected: stillInLane(0),
+      from: stillInLane(0),
+      name: "stays still off the left edge",
+    },
+    {
+      direction: 1,
+      expected: stillInLane(4),
+      from: stillInLane(4),
+      name: "stays still off the right edge",
+    },
+    {
+      direction: 1,
+      expected: { ...moving(2, 3, 0.05), queued: 1 },
+      from: { ...moving(2, 3, 0.05), queued: -1 },
+      name: "replaces an earlier queued move with the latest press",
+    },
+    {
+      direction: -1,
+      expected: moving(3, 2, 0.1),
+      from: { ...moving(2, 3, 0.1), queued: 1 },
+      name: "drops the queued move when it turns around",
+    },
+    {
+      direction: -1,
+      expected: stillInLane(2),
+      from: moving(2, 3, 0),
+      name: "is back still in the lane it came from when turned around before moving at all",
+    },
+  ])("$name", ({ direction, expected, from }) => {
+    expect(requestLaneMove(config, direction, from)).toEqual(expected);
   });
 
   it("changes lane at once when the move takes no time", () => {
@@ -41,40 +68,19 @@ describe("requestLaneMove", () => {
     expect(requestLaneMove(instant, 1, stillInLane(2))).toEqual(stillInLane(3));
   });
 
-  it("replaces an earlier queued move with the latest press", () => {
-    const queued = { ...moving(2, 3, 0.05), queued: -1 as const };
-    expect(requestLaneMove(config, 1, queued)).toEqual({ ...moving(2, 3, 0.05), queued: 1 });
-  });
-
-  it("turns the pack around at once on a press against the current move", () => {
-    const turned = requestLaneMove(config, -1, moving(2, 3, 0.05));
+  it("turns the pack around at once, where it is, on a press against the current move", () => {
+    const before = moving(2, 3, 0.05);
+    const turned = requestLaneMove(config, -1, before);
     expect(turned).toMatchObject({ from: 3, kind: "moving", to: 2 });
     expect((turned as Moving).elapsed).toBeCloseTo(0.15);
+    expect(laneMotionX(laneXs, turned)).toBeCloseTo(laneMotionX(laneXs, before));
     expect(requestLaneMove(config, 1, moving(2, 1, 0.12))).toMatchObject({ from: 1, to: 2 });
-  });
-
-  it("keeps the pack where it is when it turns around", () => {
-    const before = moving(2, 3, 0.05);
-    const after = requestLaneMove(config, -1, before);
-    expect(laneMotionX(laneXs, after)).toBeCloseTo(laneMotionX(laneXs, before));
-  });
-
-  it("drops the queued move when it turns around", () => {
-    const queued = { ...moving(2, 3, 0.1), queued: 1 as const };
-    expect(requestLaneMove(config, -1, queued)).toEqual(moving(3, 2, 0.1));
-  });
-
-  it("is back still in the lane it came from when turned around before moving at all", () => {
-    expect(requestLaneMove(config, -1, moving(2, 3, 0))).toEqual(stillInLane(2));
   });
 });
 
 describe("queueLaneMove", () => {
-  it("starts a move from still, like a press", () => {
+  it("starts a move from still like a press, but queues one against the current move", () => {
     expect(queueLaneMove(config, 1, stillInLane(2))).toEqual(moving(2, 3));
-  });
-
-  it("queues a move against the current one instead of turning around", () => {
     expect(queueLaneMove(config, -1, moving(2, 3, 0.05))).toEqual({
       ...moving(2, 3, 0.05),
       queued: -1,
@@ -91,23 +97,33 @@ describe("isReverseMove", () => {
 });
 
 describe("advanceLaneMotion", () => {
-  it("arrives still in the destination lane once the duration has passed", () => {
-    expect(advanceLaneMotion(config, 0.2, moving(2, 3))).toEqual(stillInLane(3));
-  });
-
-  it("runs a queued move back the way it came", () => {
-    const queued = { ...moving(2, 3), queued: -1 as const };
-    expect(advanceLaneMotion(config, 0.2, queued)).toEqual(moving(3, 2));
-  });
-
-  it("drops a queued move that would leave the road", () => {
-    const queued = { ...moving(3, 4), queued: 1 as const };
-    expect(advanceLaneMotion(config, 0.3, queued)).toEqual(stillInLane(4));
-  });
-
-  it("finishes both the current and queued moves in one long step", () => {
-    const queued = { ...moving(1, 2), queued: 1 as const };
-    expect(advanceLaneMotion(config, 1, queued)).toEqual(stillInLane(3));
+  it.each<{ expected: LaneMotion; from: LaneMotion; name: string; seconds: number }>([
+    {
+      expected: stillInLane(3),
+      from: moving(2, 3),
+      name: "arrives still in the destination lane once the duration has passed",
+      seconds: 0.2,
+    },
+    {
+      expected: moving(3, 2),
+      from: { ...moving(2, 3), queued: -1 },
+      name: "runs a queued move back the way it came",
+      seconds: 0.2,
+    },
+    {
+      expected: stillInLane(4),
+      from: { ...moving(3, 4), queued: 1 },
+      name: "drops a queued move that would leave the road",
+      seconds: 0.3,
+    },
+    {
+      expected: stillInLane(3),
+      from: { ...moving(1, 2), queued: 1 },
+      name: "finishes both the current and queued moves in one long step",
+      seconds: 1,
+    },
+  ])("$name", ({ expected, from, seconds }) => {
+    expect(advanceLaneMotion(config, seconds, from)).toEqual(expected);
   });
 
   it("ends in the same place however the time is split into steps", () => {
@@ -124,29 +140,16 @@ describe("advanceLaneMotion", () => {
   });
 });
 
-describe("occupiedLanes", () => {
-  it("is the one lane while still", () => {
+describe("occupiedLanes, destinationLane and laneMotionX", () => {
+  it("are the one lane and its centre while still", () => {
     expect(occupiedLanes(stillInLane(2))).toEqual([2]);
-  });
-
-  it("is both the origin and destination lanes while moving", () => {
-    expect(occupiedLanes(moving(2, 1, 0.01))).toEqual([2, 1]);
-  });
-});
-
-describe("destinationLane", () => {
-  it("is the lane being moved to while moving", () => {
-    expect(destinationLane(moving(2, 3))).toBe(3);
     expect(destinationLane(stillInLane(1))).toBe(1);
-  });
-});
-
-describe("laneMotionX", () => {
-  it("is the lane centre while still", () => {
     expect(laneMotionX(laneXs, stillInLane(4))).toBe(332);
   });
 
-  it("interpolates between the lane centres while moving", () => {
+  it("are both lanes, the lane moved to, and a point between the centres while moving", () => {
+    expect(occupiedLanes(moving(2, 1, 0.01))).toEqual([2, 1]);
+    expect(destinationLane(moving(2, 3))).toBe(3);
     expect(laneMotionX(laneXs, moving(2, 3, 0.05))).toBeCloseTo(234);
     expect(laneMotionX(laneXs, moving(2, 1, 0.1))).toBeCloseTo(192);
   });

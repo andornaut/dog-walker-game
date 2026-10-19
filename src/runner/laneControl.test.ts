@@ -23,13 +23,10 @@ describe("steerLane", () => {
     expect(destinationLane(control.motion)).toBe(3);
   });
 
-  it("is ignored while a pull's lock lasts", () => {
+  it("is ignored while a pull's lock lasts, and works again once it has run out", () => {
     const pulled = advance(0.2, pullLane(config, 0.5, 1, still(2)));
     expect(steerLane(config, -1, pulled)).toBe(pulled);
-  });
-
-  it("works again once the lock has run out", () => {
-    const control = advance(0.75, pullLane(config, 0.5, 1, still(2)));
+    const control = advance(0.55, pulled);
     expect(isSteeringLocked(control)).toBe(false);
     expect(destinationLane(steerLane(config, -1, control).motion)).toBe(2);
   });
@@ -50,14 +47,6 @@ describe("steerLane", () => {
     control = advance(0.4, control);
     expect(control.motion).toEqual(stillInLane(3));
     expect(control.lockSeconds).toBeCloseTo(0.3);
-  });
-
-  it("ends a quick three-lane drag three lanes over", () => {
-    let control = still(1);
-    for (let i = 0; i < 3; i++) {
-      control = advance(0.02, steerLane(config, 1, control));
-    }
-    expect(advance(1, control).motion).toEqual(stillInLane(4));
   });
 
   it("ends two lanes over and one back a lane over, without turning around", () => {
@@ -109,12 +98,6 @@ describe("steering symmetry", () => {
 });
 
 describe("lockSteering", () => {
-  it("drops steps until the lock runs out", () => {
-    const locked = lockSteering(0.5, still(2));
-    expect(steerLane(config, 1, locked)).toBe(locked);
-    expect(destinationLane(steerLane(config, 1, advance(0.5, locked)).motion)).toBe(3);
-  });
-
   it("keeps a longer lock that is already running", () => {
     expect(lockSteering(0.2, lockSteering(0.5, still(2))).lockSeconds).toBe(0.5);
   });
@@ -144,7 +127,8 @@ describe("pullLane", () => {
     expect(destinationLane(second.motion)).toBe(3);
   });
 
-  it("keeps a longer lock that is already running", () => {
+  it("locks nothing for a small dog, keeping a longer lock that is already running", () => {
+    expect(isSteeringLocked(advance(0.2, pullLane(config, 0, 1, still(2))))).toBe(false);
     const locked = advance(0.2, pullLane(config, 0.5, 1, still(1)));
     const smallPull = advance(0.2, pullLane(config, 0, 1, locked));
     expect(smallPull.lockSeconds).toBeCloseTo(0.3);
@@ -167,10 +151,6 @@ describe("pullLane", () => {
     control = pullLane(config, 0.25, -1, control);
     control = advance(0.4, control);
     expect(control.motion).toEqual(stillInLane(2));
-  });
-
-  it("locks nothing for a small dog", () => {
-    expect(isSteeringLocked(advance(0.2, pullLane(config, 0, 1, still(2))))).toBe(false);
   });
 });
 

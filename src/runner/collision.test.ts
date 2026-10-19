@@ -23,13 +23,11 @@ const item = (id: number, kind: Kind, lane: number, y: number, laneSpan = 1): Ro
 });
 
 describe("touchesPack", () => {
-  it("touches an item in an occupied lane that overlaps the band", () => {
+  it("touches an item in an occupied lane that overlaps the band, not one that only meets its edge", () => {
     expect(touchesPack(still, item(1, "tip", 2, 500))).toBe(true);
     expect(touchesPack(still, item(1, "tip", 2, 559))).toBe(true);
-  });
-
-  it("misses an item in a lane the pack is not in", () => {
-    expect(touchesPack(still, item(1, "tip", 3, 530))).toBe(false);
+    expect(touchesPack(still, item(1, "tip", 2, 488))).toBe(false);
+    expect(touchesPack(still, item(1, "tip", 2, 560))).toBe(false);
   });
 
   it("touches an item spanning several lanes in any of them", () => {
@@ -39,12 +37,8 @@ describe("touchesPack", () => {
     expect(touchesPack(still, item(1, "obstacle", 3, 530, 2))).toBe(false);
   });
 
-  it("misses an item that only meets the band's edge", () => {
-    expect(touchesPack(still, item(1, "tip", 2, 488))).toBe(false);
-    expect(touchesPack(still, item(1, "tip", 2, 560))).toBe(false);
-  });
-
-  it("touches items in both lanes while moving between them", () => {
+  it("touches items only in the lanes the pack is in, both of them while moving", () => {
+    expect(touchesPack(still, item(1, "tip", 3, 530))).toBe(false);
     expect(touchesPack(midMove, item(1, "tip", 2, 530))).toBe(true);
     expect(touchesPack(midMove, item(2, "tip", 3, 530))).toBe(true);
     expect(touchesPack(midMove, item(3, "tip", 1, 530))).toBe(false);
@@ -86,18 +80,23 @@ describe("collideWithPack", () => {
     });
   });
 
-  it("ignores obstacles during the window and keeps them on the road", () => {
+  it("ignores obstacles in the window, asking nothing and keeping them on the road, but collects pickups", () => {
     const obstacle = item(1, "obstacle", 2, 530);
-    expect(collideWithPack(rules, still, 0.4, [obstacle])).toEqual({
-      hits: [],
+    const tip = item(2, "tip", 2, 530);
+    const asked: number[] = [];
+    const asking = {
+      ...rules,
+      startsInvulnerability: ({ id }: RoadItem<Kind>) => {
+        asked.push(id);
+        return true;
+      },
+    };
+    expect(collideWithPack(asking, still, 0.4, [obstacle, tip])).toEqual({
+      hits: [tip],
       invulnerableSeconds: 0.4,
       remaining: [obstacle],
     });
-  });
-
-  it("still collects pickups during the window", () => {
-    const tip = item(1, "tip", 2, 530);
-    expect(collideWithPack(rules, still, 0.4, [tip]).hits).toEqual([tip]);
+    expect(asked).toEqual([]);
   });
 
   it("hits an obstacle again once the window has run out", () => {
@@ -127,19 +126,6 @@ describe("collideWithPack", () => {
     });
     expect(asked).toEqual([1, 2]);
     expect(collideWithPack(sceneryRules, still, 0, [scenery]).invulnerableSeconds).toBe(0);
-  });
-
-  it("asks nothing of an obstacle the window ignores", () => {
-    const asked: number[] = [];
-    const asking = {
-      ...rules,
-      startsInvulnerability: ({ id }: RoadItem<Kind>) => {
-        asked.push(id);
-        return true;
-      },
-    };
-    collideWithPack(asking, still, 0.4, [item(1, "obstacle", 2, 530)]);
-    expect(asked).toEqual([]);
   });
 
   it("hits every touching obstacle when the window is zero", () => {
