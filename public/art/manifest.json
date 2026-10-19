@@ -76,6 +76,33 @@
       "json": "sprites/badge-youre-fired.json"
     },
     {
+      "key": "ball-bounce",
+      "png": "sprites/ball-bounce.png",
+      "json": "sprites/ball-bounce.json",
+      "anchor": {
+        "feetY": 23,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "ball-bounce@50",
+      "png": "sprites/ball-bounce@50.png",
+      "json": "sprites/ball-bounce@50.json",
+      "anchor": {
+        "feetY": 11,
+        "opaqueWidth": 8
+      }
+    },
+    {
+      "key": "ball-bounce@75",
+      "png": "sprites/ball-bounce@75.png",
+      "json": "sprites/ball-bounce@75.json",
+      "anchor": {
+        "feetY": 17,
+        "opaqueWidth": 12
+      }
+    },
+    {
       "key": "barrier-2",
       "png": "sprites/barrier-2.png",
       "json": "sprites/barrier-2.json",
@@ -194,12 +221,21 @@
       }
     },
     {
+      "key": "cyclist",
+      "png": "sprites/cyclist.png",
+      "json": "sprites/cyclist.json",
+      "anchor": {
+        "feetY": 46,
+        "opaqueWidth": 27
+      }
+    },
+    {
       "key": "dog-biscuit",
       "png": "sprites/dog-biscuit.png",
       "json": "sprites/dog-biscuit.json",
       "anchor": {
         "feetY": 30,
-        "opaqueWidth": 20
+        "opaqueWidth": 16
       }
     },
     {
@@ -217,7 +253,7 @@
       "json": "sprites/dog-biscuit@75.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 12
       }
     },
     {
@@ -334,7 +370,7 @@
       "json": "sprites/dog-pierre.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 20
+        "opaqueWidth": 18
       }
     },
     {
@@ -352,7 +388,7 @@
       "json": "sprites/dog-pierre@75.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 16
+        "opaqueWidth": 14
       }
     },
     {
@@ -388,7 +424,7 @@
       "json": "sprites/dog-waffles.json",
       "anchor": {
         "feetY": 31,
-        "opaqueWidth": 22
+        "opaqueWidth": 20
       }
     },
     {
@@ -397,7 +433,7 @@
       "json": "sprites/dog-waffles@50.json",
       "anchor": {
         "feetY": 15,
-        "opaqueWidth": 12
+        "opaqueWidth": 11
       }
     },
     {
@@ -406,7 +442,7 @@
       "json": "sprites/dog-waffles@75.json",
       "anchor": {
         "feetY": 23,
-        "opaqueWidth": 18
+        "opaqueWidth": 16
       }
     },
     {
@@ -788,6 +824,33 @@
       }
     },
     {
+      "key": "loose-dog",
+      "png": "sprites/loose-dog.png",
+      "json": "sprites/loose-dog.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 31
+      }
+    },
+    {
+      "key": "loose-dog@50",
+      "png": "sprites/loose-dog@50.png",
+      "json": "sprites/loose-dog@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "loose-dog@75",
+      "png": "sprites/loose-dog@75.png",
+      "json": "sprites/loose-dog@75.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 24
+      }
+    },
+    {
       "key": "lost-wallet",
       "png": "sprites/lost-wallet.png",
       "json": "sprites/lost-wallet.json",
@@ -911,6 +974,33 @@
       "anchor": {
         "feetY": 29,
         "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "squirrel-dash",
+      "png": "sprites/squirrel-dash.png",
+      "json": "sprites/squirrel-dash.json",
+      "anchor": {
+        "feetY": 28,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "squirrel-dash@50",
+      "png": "sprites/squirrel-dash@50.png",
+      "json": "sprites/squirrel-dash@50.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 16
+      }
+    },
+    {
+      "key": "squirrel-dash@75",
+      "png": "sprites/squirrel-dash@75.png",
+      "json": "sprites/squirrel-dash@75.json",
+      "anchor": {
+        "feetY": 21,
+        "opaqueWidth": 23
       }
     },
     {
@@ -1073,6 +1163,24 @@
       "key": "ui-switch",
       "png": "sprites/ui-switch.png",
       "json": "sprites/ui-switch.json"
+    },
+    {
+      "key": "ui-warning",
+      "png": "sprites/ui-warning.png",
+      "json": "sprites/ui-warning.json",
+      "anchor": {
+        "feetY": 14,
+        "opaqueWidth": 14
+      }
+    },
+    {
+      "key": "ui-warning-arrow",
+      "png": "sprites/ui-warning-arrow.png",
+      "json": "sprites/ui-warning-arrow.json",
+      "anchor": {
+        "feetY": 15,
+        "opaqueWidth": 14
+      }
     },
     {
       "key": "ui-zone-pips",

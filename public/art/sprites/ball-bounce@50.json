@@ -1,0 +1,62 @@
+{ "frames": {
+   "ball-bounce@50 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 70
+   },
+   "ball-bounce@50 1.aseprite": {
+    "frame": { "x": 8, "y": 0, "w": 8, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 70
+   },
+   "ball-bounce@50 2.aseprite": {
+    "frame": { "x": 16, "y": 0, "w": 8, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 70
+   },
+   "ball-bounce@50 3.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 8, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 70
+   },
+   "ball-bounce@50 4.aseprite": {
+    "frame": { "x": 32, "y": 0, "w": 8, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 70
+   },
+   "ball-bounce@50 5.aseprite": {
+    "frame": { "x": 40, "y": 0, "w": 8, "h": 12 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 8, "h": 12 },
+    "sourceSize": { "w": 8, "h": 12 },
+    "duration": 70
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ball-bounce@50.png",
+  "format": "RGBA8888",
+  "size": { "w": 48, "h": 12 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "bounce", "from": 0, "to": 5, "direction": "forward" }
+  ]
+ }
+}

@@ -27,9 +27,34 @@ DARKER = dict(p.split(":") for p in (
     "8b9bb4:5a6988 5a6988:3a4466 3a4466:262b44 262b44:181425 181425:181425 ff0044:a22633 68386c:3e2731 "
     "b55088:68386c f6757a:b55088 e8b796:c28569 c28569:b86f50"
 ).split())
+# The road colours: Woof Way (dark), then Bark Park, Sniff Street Shops and The Long Way Home (light).
+ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
+
+
+def contrast(a, b):
+    """WCAG contrast ratio of two hex colours."""
+    def lum(c):
+        v = [int(c[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+        v = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in v]
+        return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2]
+
+    la, lb = lum(K.get(a, a)), lum(K.get(b, b))
+    return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+
+def road_edge(c):
+    """A road sprite's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1
+    against the three light roads. The fill inside it carries Woof Way."""
+    out = DARKER[DARKER[c]]
+    while DARKER[out] != out and any(contrast(out, r) < 3 for r in ROADS[1:]):
+        out = DARKER[out]
+    return out
 
 
 class Grid:
+    # edge(fill) gives the outline colour beside fill; None keeps two ramp steps darker
+    edge = None
+
     def __init__(self, w=32, h=32):
         self.w, self.h = w, h
         self.px = [[None] * w for _ in range(h)]
@@ -74,7 +99,8 @@ class Grid:
                     self.p(x, y, col)
 
     def outlined(self, outline=True):
-        """Coloured outline: each empty pixel touching the sprite takes the colour two ramp steps darker."""
+        """Coloured outline: each empty pixel touching the sprite takes the colour two ramp steps darker,
+        or edge(fill) when the grid has an edge rule."""
         out = [row[:] for row in self.px]
         if not outline:
             return out
@@ -85,9 +111,17 @@ class Grid:
                 for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)):
                     xx, yy = x + dx, y + dy
                     if 0 <= xx < self.w and 0 <= yy < self.h and self.px[yy][xx]:
-                        out[y][x] = DARKER[DARKER[self.px[yy][xx]]]
+                        c = self.px[yy][xx]
+                        out[y][x] = self.edge(c) if self.edge else DARKER[DARKER[c]]
                         break
         return out
+
+
+def edged(g, edge=road_edge):
+    """Give g an outline rule (road_edge unless told otherwise) and return it. A grid that draws onto an
+    inner Grid (minis.Mini keeps it as g.g) passes the rule on, so the small versions keep it."""
+    getattr(g, "g", g).edge = edge
+    return g
 
 
 def preview(sprites, out, grounds=("3a4466", "c0cbdc", "c28569"), scale=6, gap=4):

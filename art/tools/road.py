@@ -23,24 +23,45 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import DARKER, K, Grid, main, road_sprite  # noqa: E402
+from pixel import DARKER, K, Grid, edged, main, road_sprite  # noqa: E402
 
 
-def face_front(g, cx, y, mood="happy", eyes="ink"):
-    """Eyes and mouth for a chibi head seen from the front; y is the eye row."""
+def face_front(g, cx, y, mood="happy", eyes="ink", lips="dbrown"):
+    """Eyes and mouth for a chibi head seen from the front; y is the eye row. lips is the mouth's colour."""
     g.rect(cx - 5, y, 2, 2, eyes)
     g.rect(cx + 3, y, 2, 2, eyes)
     g.p(cx - 5, y, "white")
     g.p(cx + 3, y, "white")
     if mood == "happy":
-        g.p(cx - 2, y + 4, "dbrown")
-        g.p(cx + 1, y + 4, "dbrown")
-        g.rect(cx - 1, y + 5, 2, 1, "dbrown")
+        g.p(cx - 2, y + 4, lips)
+        g.p(cx + 1, y + 4, lips)
+        g.rect(cx - 1, y + 5, 2, 1, lips)
     elif mood == "smirk":
-        g.rect(cx - 1, y + 5, 3, 1, "dbrown")
-        g.p(cx + 2, y + 4, "dbrown")
+        g.rect(cx - 1, y + 5, 3, 1, lips)
+        g.p(cx + 2, y + 4, lips)
     else:
-        g.rect(cx - 1, y + 5, 2, 1, "dbrown")
+        g.rect(cx - 1, y + 5, 2, 1, lips)
+
+
+def rim(g, rims):
+    """Light a dark figure's silhouette so it holds on Woof Way: an edge pixel of a colour in rims takes
+    rims[colour] = (lit, shade), lit where the edge faces up or left into the light and shade where it
+    faces right or down. A shade of None leaves that side dark."""
+    rims = {K[c]: v for c, v in rims.items()}
+    edge = []
+    for y in range(g.h):
+        for x in range(g.w):
+            c = g.px[y][x]
+            if c not in rims:
+                continue
+            empty = [not (0 <= x + dx < g.w and 0 <= y + dy < g.h and g.px[y + dy][x + dx])
+                     for dx, dy in ((0, -1), (-1, 0), (1, 0), (0, 1))]
+            if any(empty):
+                edge.append((x, y, rims[c][0] if empty[0] or empty[1] else rims[c][1]))
+    for x, y, c in edge:
+        if c:
+            g.p(x, y, c)
+    return g
 
 
 # ---------- the walker (back view) ----------
@@ -82,34 +103,48 @@ def walker(lf=0, rf=0, bob=0, arms=0):
 # ---------- the other walkers (back view) ----------
 
 def walker_girl(lf=0, rf=0, bob=0, arms=0):
-    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: pink tee, teal shorts."""
+    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: pink tee, teal shorts.
+    She stands 4px shorter than the adults: her head and body sit lower and her legs are shorter."""
     g = Grid(32, 48)
     b = bob
     for x, f in ((12, lf), (17, rf)):
-        g.rect(x, 37 + b, 3, 6 + f - b, "brown")
+        g.rect(x, 40 + b, 3, 3 + f - b, "brown")
         g.rect(x, 43 + f, 3, 1, "white")
         g.rect(x, 44 + f, 3, 2, "lgrey")
         g.rect(x, 45 + f, 3, 1, "pink")
     for x, d in ((7, -arms), (22, arms)):
-        g.rect(x, 27 + b + d, 3, 7, "brown")
-        g.rect(x, 27 + b + d, 3, 3, "pink")
-    g.rect(10, 26 + b, 12, 8, "pink")
-    g.rect(19, 26 + b, 3, 8, "mauve")
-    g.rect(10, 33 + b, 12, 5, "sky")
-    g.rect(19, 33 + b, 3, 5, "blue")
-    g.rect(15, 33 + b, 2, 5, "blue")
-    g.rect(7, 16 + b, 2, 3, "brown")
-    g.rect(23, 16 + b, 2, 3, "brown")
-    # black hair: a rounded crown, then long defined curls hanging straight down the back
-    g.ell(16, 14.5 + b, 8, 7.5, "navy", "ink", "dslate")
-    g.rect(9, 16 + b, 14, 14, "navy")
-    g.ell(16, 30 + b, 7, 2, "navy", "ink")
-    for x in (10, 13, 16, 19):
-        for y in range(15, 31):
-            g.p(x + (y // 2) % 2, y + b, "dslate" if x < 18 else "ink")
-    g.rect(21, 16 + b, 2, 14, "ink")
-    g.ell(16, 8 + b, 2.5, 1.5, "pink", "mauve")
-    return g
+        g.rect(x, 30 + b + d, 3, 7, "brown")
+        g.rect(x, 30 + b + d, 3, 3, "pink")
+    g.rect(10, 29 + b, 12, 8, "pink")
+    g.rect(19, 29 + b, 3, 8, "mauve")
+    g.rect(10, 36 + b, 12, 4, "sky")
+    g.rect(19, 36 + b, 3, 4, "blue")
+    g.rect(15, 36 + b, 2, 4, "blue")
+    g.rect(7, 20 + b, 2, 3, "brown")
+    g.rect(23, 20 + b, 2, 3, "brown")
+    # black hair: a rounded crown, then long ringlets hanging straight down the back, their ends
+    # bunched into bumps along the sides and the hem
+    g.ell(16, 18.5 + b, 8, 7.5, "navy", "ink", "dslate")
+    g.rect(9, 20 + b, 14, 10, "navy")
+    g.rect(21, 20 + b, 2, 10, "ink")
+    for y in (21.5, 25, 28.5):
+        g.ell(8.8, y + b, 1.5, 1.8, "navy")
+        g.ell(23.2, y + b, 1.5, 1.8, "ink")
+    for x in (10.5, 14, 17.5, 21):
+        g.ell(x, 30.5 + b, 1.8, 1.5, "navy" if x < 20 else "ink")
+    # four ringlets of stacked curls, each lit purple and mauve on its upper left and dark on its lower right
+    for col, x in enumerate((10, 13, 16, 19)):
+        for y in range(20 + col % 2, 31, 3):
+            lit = col < 3
+            g.p(x, y + b, "mauve" if lit else "purple")
+            g.p(x + 1, y + b, "purple")
+            g.p(x, y + 1 + b, "purple" if lit else "dslate")
+            g.p(x + 1, y + 2 + b, "ink")
+            g.p(x + 2, y + 1 + b, "ink")
+    g.ell(16, 12 + b, 2.5, 1.5, "pink", "mauve")
+    # a light rim along the edges facing the light keeps her dark hair and skin off the dark road
+    return rim(g, dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate"),
+                       purple=("grey", "slate"), brown=("skin2", None), blue=("sky", None)))
 
 
 def walker_man(lf=0, rf=0, bob=0, arms=0):
@@ -118,7 +153,8 @@ def walker_man(lf=0, rf=0, bob=0, arms=0):
     b = bob
     for x, f in ((11, lf), (17, rf)):
         g.rect(x, 33 + b, 4, 10 + f - b, "navy")
-        g.rect(x + (3 if x > 16 else 0), 33 + b, 1, 10 + f - b, "slate")
+        # the track pants' stripe runs down the outside of each leg
+        g.rect(x + (3 if x > 16 else 0), 33 + b, 1, 10 + f - b, "grey")
         g.rect(x, 43 + f, 4, 2, "white")
         g.rect(x, 44 + f, 4, 1, "lgrey")
         g.rect(x + 1, 43 + f, 2, 1, "red")
@@ -127,18 +163,23 @@ def walker_man(lf=0, rf=0, bob=0, arms=0):
         g.rect(x, 26 + b + d, 4, 6, "dbrown")
         g.rect(x + 3, 26 + b + d, 1, 6, "plum")
         g.rect(x, 32 + b + d, 4, 3, "dbrown")
+    # the black tee: slate catches the light down the left side and across the shoulders
     g.rect(9, 21 + b, 14, 13, "navy")
     g.rect(20, 21 + b, 3, 13, "ink")
-    g.rect(9, 21 + b, 1, 12, "dslate")
+    g.rect(10, 22 + b, 1, 11, "slate")
+    g.rect(11, 22 + b, 8, 1, "slate")
     g.p(9, 21 + b, None)
     g.p(22, 21 + b, None)
     g.rect(13, 19 + b, 6, 3, "dbrown")
-    # bald head, the beard showing along the jaw
+    # bald head, the beard showing along the jaw, a shine on the crown
     g.rect(8, 12 + b, 2, 3, "dbrown")
     g.rect(22, 12 + b, 2, 3, "plum")
     g.blob(16, 12 + b, 7, 9, "dbrown", "plum", power=2.15)
-    g.rect(12, 8 + b, 2, 1, "brown")
-    return g
+    g.rect(11, 7 + b, 3, 1, "brown")
+    g.p(11, 8 + b, "brown")
+    # a light rim along the edges facing the light, a dimmer one opposite, so he holds on the dark road
+    return rim(g, dict(navy=("grey", "grey"), ink=("grey", "grey"), slate=("lgrey", "grey"),
+                       dbrown=("skin2", "brown"), plum=("skin2", "brown")))
 
 
 def walker_teacher(lf=0, rf=0, bob=0, arms=0):
@@ -166,16 +207,20 @@ def walker_teacher(lf=0, rf=0, bob=0, arms=0):
     g.rect(29, 25 + b, 2, 8, "tan")
     g.rect(26, 27 + b, 3, 3, "red")
     g.p(27, 26 + b, "dgreen")
-    # a dirty blonde bob to the shoulders, flicking out at the ends
-    g.ell(16, 12.5 + b, 9, 9, "tan", "brown", "cream")
-    g.rect(8, 14 + b, 17, 5, "tan")
-    g.rect(22, 14 + b, 3, 5, "brown")
-    g.ell(16, 19 + b, 9, 2.5, "tan", "brown")
-    g.p(7, 20 + b, "tan")
-    g.p(25, 20 + b, "brown")
-    g.rect(13, 9 + b, 1, 4, "brown")
-    g.rect(19, 11 + b, 1, 3, "brown")
-    return g
+    # a dirty blonde bob to the shoulders, flicking out at the ends: light brown, darker than her skin,
+    # with golden amber streaks where the light catches it
+    g.ell(16, 12.5 + b, 9, 9, "brown", "dbrown", "tan")
+    g.rect(8, 14 + b, 17, 5, "brown")
+    g.rect(22, 14 + b, 3, 5, "dbrown")
+    g.ell(16, 19 + b, 9, 2.5, "brown", "dbrown")
+    g.p(7, 20 + b, "brown")
+    g.p(25, 20 + b, "dbrown")
+    for x, y, h in ((10, 9, 5), (13, 6, 4), (16, 8, 6), (19, 6, 3)):
+        g.rect(x, y + b, 1, h, "amber")
+    g.rect(14, 11 + b, 1, 4, "dbrown")
+    g.rect(20, 11 + b, 1, 4, "dbrown")
+    # a light rim along the edges facing the light keeps her hair, cardigan and skirt off the dark road
+    return rim(g, dict(brown=("tan", None), dgreen=("green", None), navy=("grey", None), dslate=("grey", None)))
 
 
 WALKERS = {
@@ -199,6 +244,7 @@ BREATH, BREATH_MS = (0, -1), 400
 def lean(g, k):
     """Shear a 32x48 figure about its feet: the head moves k pixels sideways, the shoes stay put."""
     out = Grid(g.w, g.h)
+    out.edge = g.edge
     for y in range(g.h):
         dx = round(k * max(0, 44 - y) / 36)
         for x in range(g.w):
@@ -210,7 +256,8 @@ def lean(g, k):
 # ---------- pickups ----------
 
 def treat(lift=0):
-    g = Grid(16, 16)
+    """A bone, outlined in plum so it holds on the light roads; its cream carries Woof Way."""
+    g = edged(Grid(16, 16))
     y = 6 + lift
     g.rect(4, y, 8, 3, "cream")
     for cx, cy in ((3.5, y + 0.5), (3.5, y + 2.5), (12.5, y + 0.5), (12.5, y + 2.5)):
@@ -222,16 +269,20 @@ def treat(lift=0):
 
 
 def tip(rx):
-    g = Grid(16, 16)
+    """A coin spinning: rx is its half-width as it turns. Outlined in plum so it holds on the light roads,
+    with a white glint on its lit edge."""
+    g = edged(Grid(16, 16))
     if rx < 1.5:
         g.rect(7, 3, 2, 10, "orange")
         g.rect(7, 3, 1, 10, "amber")
+        g.p(7, 4, "white")
         return g
     g.ell(8, 8, rx, 5.5, "amber", "orange", "yellow")
     if rx > 2:
         g.rect(8, 5, 1, 6, "orange")
         g.p(7, 6, "orange")
         g.p(9, 9, "orange")
+    g.p(round(8 - rx * 0.55), 5, "white")
     return g
 
 
@@ -295,19 +346,31 @@ def puddle(f, w=88, h=32):
 
 def skunk_cloud(step):
     """88x88 spray cloud drawn under the skunk: puffs with a solid rim and a 2x2-dithered
-    fill, so the road shows through. The puffs swell in turn."""
+    fill, so the road shows through. The puffs swell in turn. The rim is two pixels: teal outside,
+    which holds 3:1 on the light roads, and green inside it, which holds on Woof Way."""
     g = Grid(88, 88)
     puffs = [(44, 44, 30), (24, 28, 17), (64, 26, 18), (22, 62, 18), (64, 64, 18), (44, 14, 13), (44, 74, 13),
              (12, 44, 11), (76, 44, 11)]
     puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(puffs)]
+    dist = [[min(((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2) ** 0.5 / r for cx, cy, r in puffs) for x in range(88)]
+            for y in range(88)]
+
+    def inside(x, y):
+        return 0 <= x < 88 and 0 <= y < 88 and dist[y][x] <= 1
+
+    def beside(x, y, test):
+        return any(test(x + dx, y + dy) for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
+
+    outer = {(x, y) for y in range(88) for x in range(88)
+             if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
     for y in range(88):
         for x in range(88):
-            d = min(((x + 0.5 - cx) ** 2 + (y + 0.5 - cy) ** 2) ** 0.5 / r for cx, cy, r in puffs)
-            if d > 1:
+            if not inside(x, y):
                 continue
-            rim = d > 1 - 1.6 / 14
-            if rim:
-                g.p(x, y, "green" if y < 44 else "dgreen")
+            if (x, y) in outer:
+                g.p(x, y, "teal")
+            elif dist[y][x] > 1 - 1.6 / 14 or beside(x, y, lambda a, b: (a, b) in outer):
+                g.p(x, y, "green")
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
                 g.p(x, y, "green" if (x + y) % 8 else "dgreen")
     for x0, y0 in ((20, 22), (60, 18), (66, 58), (26, 58)):
@@ -465,7 +528,8 @@ def wallet(glint):
 
 
 def bark(big):
-    g = Grid(16, 16)
+    """The bark pop: a white bubble with a red mark, outlined in plum on every side so it holds on the light roads."""
+    g = edged(Grid(16, 16), lambda c: K["plum"])
     r = 6 if big else 5
     g.ell(8.5, 7, r, r - 0.5, "white", "lgrey")
     g.tri((4, 10), (2, 15), (7, 11), "white")
@@ -636,12 +700,15 @@ def construction(f):
 
 
 def mail_top(g, b):
-    g.rect(9, 21 + b, 14, 12, "blue")
-    g.rect(20, 21 + b, 3, 12, "navy")
-    g.rect(15, 21 + b, 2, 12, "sky")
-    g.rect(5, 22 + b, 4, 9, "blue")
+    """The mail carrier: a sky-blue shirt and cap, a navy brim, dark skin and a mailbag on a strap."""
+    g.rect(9, 21 + b, 14, 12, "sky")
+    g.rect(20, 21 + b, 3, 12, "blue")
+    g.rect(15, 21 + b, 2, 12, "cyan")
+    g.rect(5, 22 + b, 4, 9, "sky")
+    g.rect(8, 22 + b, 1, 9, "blue")
     g.rect(5, 31 + b, 4, 3, "dbrown")
-    g.rect(23, 22 + b, 4, 9, "blue")
+    g.rect(23, 22 + b, 4, 9, "sky")
+    g.rect(26, 22 + b, 1, 9, "blue")
     g.rect(23, 31 + b, 4, 3, "dbrown")
     g.rect(9, 33 + b, 14, 3, "navy")
     # mailbag on a strap
@@ -653,12 +720,20 @@ def mail_top(g, b):
     g.rect(16, 25 + b, 2, 1, "dbrown")
     g.rect(18, 26 + b, 2, 1, "dbrown")
     g.ell(16, 12.5 + b, 8, 8, "dbrown", "plum")
-    g.ell(16, 7 + b, 8.5, 3.5, "blue", "navy", "sky")
+    g.ell(16, 7 + b, 8.5, 3.5, "sky", "blue", "cyan")
     g.rect(8, 9 + b, 17, 2, "navy")
     g.rect(15, 5 + b, 2, 2, "amber")
-    face_front(g, 16, 13 + b, eyes="ink")
+    face_front(g, 16, 13 + b, eyes="ink", lips="ink")
     g.p(11, 13 + b, "white")
     g.p(19, 13 + b, "white")
+
+
+def mail_carrier(**q):
+    """The mail carrier facing the player, with a light rim on the dark skin, brim and trousers so they hold
+    on Woof Way, and the road outline for the light roads."""
+    g = edged(person(mail_top, legs="navy", shoes="ink", **q))
+    return rim(g, dict(dbrown=("skin2", "brown"), plum=("skin2", "brown"), navy=("grey", "slate"),
+                       ink=("grey", "slate"), sky=("cyan", None), blue=("sky", None)))
 
 
 # ---------- scenery gags (front view, in the backdrop band) ----------
@@ -738,11 +813,15 @@ def sprites():
     def frames(gs, outline=True):
         return [g.outlined(outline) for g in gs]
 
+    # the walkers carry the leash on every road, so their outlines hold 3:1 on the light roads
     for key, draw in {"walker-casey": walker, **WALKERS}.items():
-        yield key, [("walk", frames(draw(**q) for q in WALKER_WALK), 160),
-                    ("react", frames(draw(**q) for q in WALKER_REACT), 120),
-                    ("stumble", frames(lean(draw(**q), k) for k, q in WALKER_STUMBLE), 90),
-                    ("idle", frames(draw(**q) for q in WALKER_IDLE), BREATH_MS)]
+        def pose(**q):
+            return edged(draw(**q))
+
+        yield key, [("walk", frames(pose(**q) for q in WALKER_WALK), 160),
+                    ("react", frames(pose(**q) for q in WALKER_REACT), 120),
+                    ("stumble", frames(lean(pose(**q), k) for k, q in WALKER_STUMBLE), 90),
+                    ("idle", frames(pose(**q) for q in WALKER_IDLE), BREATH_MS)]
     yield "treat", [("idle", frames([treat(0), treat(-1)]), 400)]
     yield "tip", [("idle", frames(tip(rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames([skunk(0), skunk(1)]), 400)]
@@ -782,10 +861,8 @@ def sprites():
                   ("idle", frames(kid(bob=bb) for bb in BREATH), BREATH_MS)]
     yield "ice-cream-truck", [("idle", frames([ice_cream_truck(0), ice_cream_truck(1)]), 400)]
     yield "construction", [("idle", frames([construction(0), construction(1)]), 500)]
-    yield "mail-carrier", [("walk", [person(mail_top, legs="navy", shoes="ink", lf=-2).outlined(),
-                                     person(mail_top, legs="navy", shoes="ink", rf=-2).outlined()], 200),
-                           ("idle", [person(mail_top, legs="navy", shoes="ink", bob=bb).outlined() for bb in BREATH],
-                            BREATH_MS)]
+    yield "mail-carrier", [("walk", [mail_carrier(lf=-2).outlined(), mail_carrier(rf=-2).outlined()], 200),
+                           ("idle", [mail_carrier(bob=bb).outlined() for bb in BREATH], BREATH_MS)]
 
 
 if __name__ == "__main__":

@@ -22,7 +22,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import Grid, main, road_sprite  # noqa: E402
+from pixel import Grid, edged, main, road_sprite  # noqa: E402
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
 # and the body bobs up on the passing beats 1 and 3.
@@ -64,7 +64,7 @@ def pose(q):
 # ---------- Koda: husky, big, grey and white, blue eyes, orange harness ----------
 
 def koda_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     # o shifts the body down so the big head has headroom to hop and lean
     b, ln, o = q["bob"], q["lean"], 2
     # legs: white, front pair beside the shoulders, back pair under the hips
@@ -100,10 +100,11 @@ def koda_road(q):
 
 def koda_face(mood):
     g = Grid()
-    g.tri((7, 11), (8, 1), (13.5, 6), "slate")
-    g.tri((25, 11), (24, 1), (18.5, 6), "slate")
-    g.tri((8.5, 8.5), (9, 4), (12, 6.5), "pink")
-    g.tri((23.5, 8.5), (23, 4), (20, 6.5), "pink")
+    d = droop(mood)
+    g.tri((7, 11), (8 - d, 1 + d), (13.5, 6 + d / 2), "slate")
+    g.tri((25, 11), (24 + d, 1 + d), (18.5, 6 + d / 2), "slate")
+    g.tri((8.5, 8.5), (9 - d, 4 + d), (12, 6.5 + d / 2), "pink")
+    g.tri((23.5, 8.5), (23 + d, 4 + d), (20, 6.5 + d / 2), "pink")
     g.ell(16, 28, 7, 3.5, "lgrey", "grey", "white")
     g.ell(16, 16, 10, 8.5, "slate", "dslate", "grey")
     # white mask: brows, cheeks and muzzle
@@ -125,7 +126,7 @@ def koda_face(mood):
 # ---------- Biscuit: beagle, medium, tricolour, long ears, green collar ----------
 
 def biscuit_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     g.rect(9 + ln // 2, 18 + q["fl"] + b, 2, 3, "white")
     g.rect(21 + ln // 2, 18 + q["fr"] + b, 2, 3, "white")
@@ -143,10 +144,11 @@ def biscuit_road(q):
     g.ell(bx, 16 + b, 4.5, 1.5, "ink")
     g.rect(bx - 5, 16 + b, 10, 2, "green")
     g.rect(bx - 5, 17 + b, 10, 1, "dgreen")
+    # a round head no wider than the body, the long ears hanging from its sides past the collar
     hx = 16 + ln
-    g.ell(hx, 11.5 + b, 7, 5.5, "ochre", "rust", "tan")
-    g.ell(hx - 6.5, 14 + b - q["ears"], 2.3, 4.5, "rust", "dbrown")
-    g.ell(hx + 6.5, 14 + b - q["ears"] + q["twitch"], 2.3, 4.5, "rust", "dbrown")
+    g.ell(hx, 11 + b, 5.5, 5, "ochre", None, "tan")
+    g.ell(hx - 5, 13 + b - q["ears"], 2, 4.5, "rust", "dbrown")
+    g.ell(hx + 5, 13 + b - q["ears"] + q["twitch"], 2, 4.5, "rust", "dbrown")
     return g
 
 
@@ -156,8 +158,9 @@ def biscuit_face(mood):
     g.ell(16, 15.5, 9, 8, "ochre", "rust", "tan")
     g.rect(15, 7, 2, 9, "white")
     g.ell(16, 20.5, 6, 4.5, "white", "lgrey")
-    g.ell(6.5, 18, 3, 7.5, "rust", "dbrown")
-    g.ell(25.5, 18, 3, 7.5, "rust", "dbrown")
+    d = droop(mood)
+    g.ell(6.5 - d / 2, 18 + d, 3, 7.5, "rust", "dbrown")
+    g.ell(25.5 + d / 2, 18 + d, 3, 7.5, "rust", "dbrown")
     g.rect(9, 26, 14, 2, "green")
     g.rect(9, 27, 14, 1, "dgreen")
     eyes(g, 11, 19, 14, mood=mood)
@@ -170,7 +173,7 @@ def biscuit_face(mood):
 # ---------- Duchess: Maltese, small, white, pink bow ----------
 
 def duchess_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     g.rect(12, 27 + q["bl"], 2, 2, "lgrey")
     g.rect(18, 27 + q["br"], 2, 2, "lgrey")
@@ -193,8 +196,9 @@ def duchess_road(q):
 def duchess_face(mood):
     g = Grid()
     g.ell(16, 26.5, 6, 3.5, "white", "lgrey")
-    g.ell(7.5, 19, 3.5, 7.5, "white", "lgrey")
-    g.ell(24.5, 19, 3.5, 7.5, "lgrey", "grey")
+    d = droop(mood)
+    g.ell(7.5 - d / 2, 19 + d, 3.5, 7.5, "white", "lgrey")
+    g.ell(24.5 + d / 2, 19 + d, 3.5, 7.5, "lgrey", "grey")
     g.ell(16, 16, 8.5, 8, "white", "lgrey")
     g.ell(16, 20.5, 4.5, 3.5, "white", "lgrey")
     bow(g, 16, 6, big=True)
@@ -207,7 +211,7 @@ def duchess_face(mood):
 # ---------- Nugget: pug, small, fawn, black mask, red bandana ----------
 
 def nugget_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 2, "skin2")
     g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 2, "skin2")
@@ -235,8 +239,9 @@ def nugget_face(mood):
     g.p(18, 27, "white")
     g.p(16, 29, "white")
     g.ell(16, 16, 9.5, 8.5, "skin1", "skin2", "cream")
-    g.tri((6, 13), (8, 7), (12, 10), "navy")
-    g.tri((26, 13), (24, 7), (20, 10), "navy")
+    d = droop(mood)
+    g.tri((6 - d / 2, 13 + d), (8 - d, 7 + d), (12, 10), "navy")
+    g.tri((26 + d / 2, 13 + d), (24 + d, 7 + d), (20, 10), "navy")
     g.rect(13, 9, 6, 1, "skin2")
     g.ell(16, 20.5, 5.5, 4, "navy", "ink", "dslate")
     eyes(g, 10, 20, 14, mood=mood)
@@ -248,7 +253,7 @@ def nugget_face(mood):
 # ---------- Zippy: Jack Russell, small, white with tan patches, red collar ----------
 
 def zippy_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
     g.rect(10 + ln // 2, 21 + q["fl"] + b, 2, 3, "white")
     g.rect(20 + ln // 2, 21 + q["fr"] + b, 2, 3, "white")
@@ -276,10 +281,11 @@ def zippy_face(mood):
     g.ell(16, 16, 9, 8, "white", "lgrey")
     g.ell(10.5, 12.5, 4, 4, "ochre", "rust", "tan")
     g.ell(21.5, 12.5, 4, 4, "ochre", "rust", "tan")
-    g.tri((6, 12), (9, 5), (13, 9), "ochre")
-    g.tri((26, 12), (23, 5), (19, 9), "ochre")
-    g.tri((7.5, 11), (9, 7), (11, 9), "rust")
-    g.tri((24.5, 11), (23, 7), (21, 9), "rust")
+    d = droop(mood)
+    g.tri((6, 12 + d), (9 - d, 5 + d), (13, 9), "ochre")
+    g.tri((26, 12 + d), (23 + d, 5 + d), (19, 9), "ochre")
+    g.tri((7.5, 11 + d), (9 - d, 7 + d), (11, 9), "rust")
+    g.tri((24.5, 11 + d), (23 + d, 7 + d), (21, 9), "rust")
     g.ell(16, 21, 5, 3.5, "white", "lgrey")
     g.rect(9, 26, 14, 2, "red")
     g.rect(9, 27, 14, 1, "dred")
@@ -292,36 +298,47 @@ def zippy_face(mood):
 # ---------- Pierre: standard poodle, medium, apricot, show-clip pom-poms ----------
 
 def pierre_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    for x, d in ((9 + ln // 2, q["fl"]), (23 + ln // 2, q["fr"])):
-        g.rect(x - 1, 18 + d + b, 2, 3, "brown")
-        g.ell(x, 22 + d + b, 2, 1.8, "skin1", "brown", "cream")
-    for x, d in ((11, q["bl"]), (21, q["br"])):
-        g.rect(x - 1, 24 + d, 2, 3, "brown")
-        g.ell(x, 28 + d, 2.2, 1.8, "skin1", "brown", "cream")
+    # shaved legs in skin2, each with a pom-pom bracelet at the paw
+    for x, d in ((10 + ln // 2, q["fl"]), (22 + ln // 2, q["fr"])):
+        g.rect(x - 1, 19 + d + b, 2, 2, "skin2")
+        puff(g, x, 22 + d + b, 1.8, 1.6)
+    for x, d in ((12, q["bl"]), (20, q["br"])):
+        g.rect(x - 1, 25 + d, 2, 3, "skin2")
+        puff(g, x, 28.5 + d, 2, 1.6)
+    # shaved hindquarters behind a curly mane over the shoulders
     bx = 16 + ln // 2
-    g.ell(bx, 21.5 + b, 4.5, 5, "skin1", "brown")
-    g.ell(bx, 17.5 + b, 6.5, 3, "skin1", "brown", "cream")
+    g.ell(bx, 23.5 + b, 3.5, 4, "skin2", "brown", "skin1")
+    puff(g, bx, 18.5 + b, 5, 3.2)
+    # a thin tail held up with a pom-pom on the end
     tx = 16 + q["tail"]
-    g.rect(tx, 25 + b, 1, 3, "brown")
-    g.ell(tx + 0.5, 28.5 + b, 2.2, 2, "skin1", "brown", "cream")
+    g.rect(tx, 25 + b, 1, 2, "brown")
+    puff(g, tx + 0.5, 28 + b, 2, 1.8)
+    # ear puffs hanging behind a round topknot, and a small purple show bow pinned to its top right
     hx = 16 + ln
-    g.ell(hx - 5, 13.5 + b - q["ears"], 2.2, 4.5, "skin1", "brown")
-    g.ell(hx + 5, 13.5 + b - q["ears"] + q["twitch"], 2.2, 4.5, "skin1", "brown")
-    g.ell(hx, 12.5 + b, 4.5, 4, "skin1", "brown", "cream")
-    g.ell(hx, 8 + b, 5, 4, "skin1", "brown", "cream")
+    puff(g, hx - 5, 14.5 + b - q["ears"], 2, 3.5, ring=True)
+    puff(g, hx + 5, 14.5 + b - q["ears"] + q["twitch"], 2, 3.5, ring=True)
+    puff(g, hx, 10 + b, 4, 3.8, ring=True)
+    g.rect(hx, 5 + b, 2, 3, "purple")
+    g.rect(hx + 3, 5 + b, 2, 3, "purple")
+    g.p(hx + 2, 6 + b, "mauve")
+    g.p(hx, 5 + b, "mauve")
     return g
 
 
 def pierre_face(mood):
     g = Grid()
+    d = droop(mood)
     g.ell(16, 28.5, 6.5, 3, "skin1", "brown", "cream")
-    g.ell(7, 19, 3.5, 7, "skin1", "brown", "cream")
-    g.ell(25, 19, 3.5, 7, "skin1", "brown")
+    g.ell(7 - d / 2, 19 + d, 3.5, 7, "skin1", "brown", "cream")
+    g.ell(25 + d / 2, 19 + d, 3.5, 7, "skin1", "brown")
     g.ell(16, 17, 7, 7, "skin1", "brown", "cream")
     g.ell(16, 8, 8, 5, "skin1", "brown", "cream")
+    for x, y in ((11, 6), (15, 4), (19, 6), (13, 9), (21, 9), (9, 15), (23, 16)):
+        g.p(x, y, "cream")
     g.ell(16, 22, 4, 3.5, "cream", "skin1")
+    bow(g, 16, 4, big=True, colours=("mauve", "purple"))
     eyes(g, 12, 19, 15, mood=mood)
     g.rect(15, 19, 2, 2, "ink")
     mouth(g, 22, mood)
@@ -331,42 +348,50 @@ def pierre_face(mood):
 # ---------- Dash: whippet, medium, grey brindle, knit sweater ----------
 
 def dash_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    g.rect(10 + ln // 2, 16 + q["fl"] + b, 2, 5, "slate")
-    g.rect(20 + ln // 2, 16 + q["fr"] + b, 2, 5, "slate")
-    g.rect(11, 24 + q["bl"], 2, 5, "slate")
-    g.rect(19, 24 + q["br"], 2, 5, "slate")
+    g.rect(10 + ln // 2, 16 + q["fl"] + b, 2, 5, "grey")
+    g.rect(20 + ln // 2, 16 + q["fr"] + b, 2, 5, "grey")
+    g.rect(11, 24 + q["bl"], 2, 5, "grey")
+    g.rect(19, 24 + q["br"], 2, 5, "grey")
+    # grey brindle: slate streaks over a grey coat, which shows past the sweater at the flanks and hips
     bx = 16 + ln // 2
-    g.ell(bx, 21 + b, 4.5, 6, "slate", "dslate", "grey")
-    g.ell(bx, 20 + b, 5, 4.5, "dgreen", "forest", "green")
-    g.rect(bx - 4, 18 + b, 8, 1, "cream")
-    g.rect(bx - 4, 21 + b, 8, 1, "cream")
-    g.rect(bx - 2, 24 + b, 4, 1, "dslate")
+    g.ell(bx, 21 + b, 5, 6, "grey", None, "lgrey")
+    for dx, dy in ((-3, 24), (-2, 25), (1, 24), (2, 25), (-1, 26), (3, 18), (-4, 21)):
+        g.p(bx + dx, dy + b, "slate")
+    g.ell(bx, 20 + b, 4, 4.5, "dgreen", "forest", "green")
+    g.rect(bx - 3, 18 + b, 6, 1, "cream")
+    g.rect(bx - 3, 21 + b, 6, 1, "cream")
     tx = 16 + q["tail"]
-    g.rect(tx, 26 + b, 1, 3, "slate")
-    g.p(tx + 1, 29 + b, "slate")
+    g.rect(tx, 26 + b, 1, 3, "grey")
+    g.p(tx + 1, 29 + b, "grey")
     hx = 16 + ln
-    g.ell(hx, 11.5 + b, 3.5, 4.5, "slate", "dslate", "grey")
-    g.rect(hx - 1, 9 + b, 1, 4, "dslate")
-    g.ell(hx - 3.5, 9.5 + b - q["ears"], 1.5, 1.5, "dslate")
-    g.ell(hx + 3.5, 9.5 + b - q["ears"] + q["twitch"], 1.5, 1.5, "dslate")
+    g.ell(hx, 11.5 + b, 3.5, 4.5, "grey", None, "lgrey")
+    for dx, dy in ((-2, 10), (-1, 11), (1, 9), (2, 10), (0, 13), (1, 14)):
+        g.p(hx + dx, dy + b, "slate")
+    # rose ears folded back, the fold in slate
+    for side, t in ((-1, 0), (1, q["twitch"])):
+        g.ell(hx + 3.5 * side, 9.5 + b - q["ears"] + t, 1.5, 1.5, "grey")
+        g.p(hx + 3 * side, 10 + b - q["ears"] + t, "slate")
     return g
 
 
 def dash_face(mood):
     g = Grid()
+    d = droop(mood)
     g.rect(8, 26, 16, 4, "dgreen")
     g.rect(8, 27, 16, 1, "cream")
     g.rect(8, 29, 16, 1, "forest")
-    g.ell(16, 15.5, 6.5, 9, "slate", "dslate", "grey")
-    for y in (9, 12):
-        g.rect(13, y, 2, 1, "dslate")
-        g.rect(18, y + 1, 2, 1, "dslate")
-    g.tri((10, 9), (6, 6), (9, 13), "dslate")
-    g.tri((22, 9), (26, 6), (23, 13), "dslate")
-    g.rect(15, 7, 2, 9, "lgrey")
-    g.ell(16, 21, 3.5, 3.5, "lgrey", "grey")
+    g.ell(16, 15.5, 6.5, 9, "grey", "slate", "lgrey")
+    # brindle streaks
+    for x, y in ((12, 9), (13, 10), (18, 9), (19, 10), (11, 12), (12, 13), (20, 12), (21, 13), (19, 17), (12, 18)):
+        g.p(x, y, "slate")
+    g.p(20, 11, "dslate")
+    g.p(11, 11, "dslate")
+    g.tri((10, 9), (6 - d / 2, 6 + 2 * d), (9, 13 + d), "slate")
+    g.tri((22, 9), (26 + d / 2, 6 + 2 * d), (23, 13 + d), "slate")
+    g.rect(15, 7, 2, 9, "white")
+    g.ell(16, 21, 3.5, 3.5, "lgrey", "grey", "white")
     eyes(g, 11, 19, 14, mood=mood)
     g.rect(15, 20, 2, 2, "ink")
     mouth(g, 23, mood)
@@ -376,7 +401,7 @@ def dash_face(mood):
 # ---------- Snowball: Samoyed, big, fluffy white, collar with a bell ----------
 
 def snowball_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
     g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
     g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
@@ -405,10 +430,11 @@ def snowball_road(q):
 
 def snowball_face(mood):
     g = Grid()
-    g.tri((7, 11), (8, 1), (13.5, 6), "white")
-    g.tri((25, 11), (24, 1), (18.5, 6), "lgrey")
-    g.tri((8.5, 8.5), (9, 4), (12, 6.5), "pink")
-    g.tri((23.5, 8.5), (23, 4), (20, 6.5), "pink")
+    d = droop(mood)
+    g.tri((7, 11), (8 - d, 1 + d), (13.5, 6 + d / 2), "white")
+    g.tri((25, 11), (24 + d, 1 + d), (18.5, 6 + d / 2), "lgrey")
+    g.tri((8.5, 8.5), (9 - d, 4 + d), (12, 6.5 + d / 2), "pink")
+    g.tri((23.5, 8.5), (23 + d, 4 + d), (20, 6.5 + d / 2), "pink")
     g.ell(16, 28, 8, 3.5, "white", "lgrey")
     g.ell(16, 16, 10, 8.5, "white", "lgrey")
     for x in (5.5, 26.5):
@@ -425,7 +451,7 @@ def snowball_face(mood):
 # ---------- Waffles: Saint Bernard, big, brown and white, barrel collar ----------
 
 def waffles_road(q):
-    g, q = Grid(), pose(q)
+    g, q = edged(Grid()), pose(q)
     b, ln, o = q["bob"], q["lean"], 2
     g.rect(7 + ln // 2, 15 + o + q["fl"] + b, 3, 4, "white")
     g.rect(22 + ln // 2, 15 + o + q["fr"] + b, 3, 4, "white")
@@ -433,32 +459,42 @@ def waffles_road(q):
     g.rect(20, 26 + q["br"], 3, 4, "white")
     bx = 16 + ln // 2
     g.ell(bx, 20.5 + o + b, 8, 6, "white", "lgrey")
-    g.ell(bx, 20 + o + b, 6, 5, "rust", "dbrown", "ochre")
-    g.rect(bx - 6, 16 + o + b, 12, 1, "dbrown")
-    g.rect(bx + 5, 16 + o + b, 3, 3, "amber")
-    g.p(bx + 6, 17 + o + b, "brown")
+    g.ell(bx, 21.5 + o + b, 5.5, 4, "rust", "dbrown", "ochre")
+    # a white ruff at the nape between the head and the collar (the blaze is on the face, out of sight)
+    g.ell(bx, 16 + o + b, 5.5, 1.6, "white", "lgrey")
+    g.rect(bx - 6, 17 + o + b, 12, 1, "dbrown")
+    g.rect(bx + 5, 17 + o + b, 3, 3, "amber")
+    g.p(bx + 6, 18 + o + b, "brown")
     tx = 16 + q["tail"]
     g.rect(tx - 1, 26 + b, 2, 3, "rust")
     g.rect(tx - 1, 29 + b, 2, 1, "white")
+    # the ears hang down beside the ruff from behind a round head
     hx = 16 + ln
-    g.ell(hx, 9.5 + o + b, 8.5, 6.5, "rust", "dbrown", "ochre")
-    g.ell(hx - 7.5, 12 + o + b - q["ears"], 2.5, 4, "dbrown", "plum")
-    g.ell(hx + 7.5, 12 + o + b - q["ears"] + q["twitch"], 2.5, 4, "dbrown", "plum")
-    g.rect(hx - 1, 4 + o + b, 2, 4, "white")
+    g.ell(hx - 6, 12.5 + o + b - q["ears"], 2.2, 4, "dbrown", "plum")
+    g.ell(hx + 6, 12.5 + o + b - q["ears"] + q["twitch"], 2.2, 4, "dbrown", "plum")
+    g.ell(hx, 8.5 + o + b, 7, 6.2, "rust", "dbrown", "ochre")
     return g
 
 
 def waffles_face(mood):
     g = Grid()
+    d = droop(mood)
     g.ell(16, 28.5, 7, 3, "white", "lgrey")
-    g.ell(16, 16, 10, 8.5, "rust", "dbrown", "ochre")
-    g.ell(5.5, 18, 3, 6.5, "dbrown", "plum")
-    g.ell(26.5, 18, 3, 6.5, "dbrown", "plum")
-    g.rect(15, 7, 2, 8, "white")
-    g.ell(16, 21, 6.5, 4.5, "white", "lgrey")
-    g.ell(11.5, 14.5, 2.5, 2, "dbrown")
-    g.ell(20.5, 14.5, 2.5, 2, "dbrown")
-    eyes(g, 11, 19, 14, mood=mood)
+    # a broad head, wider than any other dog's, with heavy ears set low
+    g.ell(16, 16, 11.5, 8.5, "rust", "dbrown", "ochre")
+    g.ell(4.5, 19 + d, 2.5, 6.5, "dbrown", "plum")
+    g.ell(27.5, 19 + d, 2.5, 6.5, "dbrown", "plum")
+    # a dark mask around both eyes, split by the white blaze
+    g.ell(11, 15.5, 3.5, 2.5, "dbrown", "plum")
+    g.ell(21, 15.5, 3.5, 2.5, "dbrown", "plum")
+    g.rect(15, 8, 2, 8, "white")
+    # a white muzzle with heavy jowls hanging past the chin
+    g.ell(16, 21, 7, 4.5, "white", "lgrey")
+    g.ell(11.5, 23.5, 3, 2.5, "white", "lgrey")
+    g.ell(20.5, 23.5, 3, 2.5, "lgrey", "grey")
+    g.p(13, 23, "lgrey")
+    g.p(19, 23, "lgrey")
+    eyes(g, 10, 20, 14, mood=mood)
     g.rect(14, 18, 4, 2, "ink")
     mouth(g, 21, mood)
     g.rect(13, 26, 6, 5, "amber")
@@ -470,16 +506,36 @@ def waffles_face(mood):
 
 # ---------- shared features ----------
 
-def bow(g, cx, y, big=False):
+def droop(mood):
+    """How far the ears sag, in pixels: perked when happy, relaxed when neutral, flat when upset."""
+    return {"happy": 0, "neutral": 1, "upset": 3}[mood]
+
+
+def puff(g, cx, cy, rx, ry, ring=False):
+    """A clipped poodle pom-pom: apricot with a cream highlight and a cream curl on the shade. ring
+    sets it apart from the puffs it is drawn over with a 1px skin2 ring."""
+    if ring:
+        g.ell(cx, cy, rx + 1, ry + 1, "skin2")
+    g.ell(cx, cy, rx, ry, "skin1", "skin2", "cream")
+    if rx >= 2 and ry >= 2:
+        g.p(cx + rx * 0.4, cy + ry * 0.3, "cream")
+
+
+
+def bow(g, cx, y, big=False, colours=("pink", "mauve")):
+    """A bow: Duchess's is pink, Pierre's show ribbon mauve tied in purple. The knot and folds take the
+    second colour."""
+    c, knot = colours
     w = 4 if big else 3
-    g.tri((cx - 1, y + 1), (cx - 1 - w, y - 1), (cx - 1 - w, y + 3), "pink")
-    g.tri((cx + 1, y + 1), (cx + 1 + w, y - 1), (cx + 1 + w, y + 3), "pink")
-    g.p(cx - 1 - w + 1, y + 2, "mauve")
-    g.p(cx + w, y + 2, "mauve")
-    g.rect(cx - 1, y, 2, 2, "mauve")
+    g.tri((cx - 1, y + 1), (cx - 1 - w, y - 1), (cx - 1 - w, y + 3), c)
+    g.tri((cx + 1, y + 1), (cx + 1 + w, y - 1), (cx + 1 + w, y + 3), c)
+    g.p(cx - 1 - w + 1, y + 2, knot)
+    g.p(cx + w, y + 2, knot)
+    g.rect(cx - 1, y, 2, 2, knot)
 
 
 def eyes(g, lx, rx, y, iris=None, mood="happy"):
+    wide = 3 if iris else 2
     for x in (lx, rx):
         if iris:
             g.rect(x, y, 3, 3, iris)
@@ -489,28 +545,38 @@ def eyes(g, lx, rx, y, iris=None, mood="happy"):
         else:
             g.rect(x, y, 2, 2, "ink")
             g.p(x, y, "white")
-    if mood == "upset":
-        wide = 3 if iris else 2
-        # brows tilt up toward the middle
-        g.p(lx - 1, y - 1, "ink")
-        g.rect(lx, y - 2, wide - 1, 1, "ink")
-        g.rect(rx + 1, y - 2, wide - 1, 1, "ink")
-        g.p(rx + wide, y - 1, "ink")
+    if mood == "happy":
+        # pink cheeks under the eyes
+        for x in (lx - 1, rx + wide - 1):
+            g.rect(x, y + wide + 1, 2, 1, "pink")
+    elif mood == "upset":
+        # brows slant up toward the middle, and a tear runs from the left eye
+        g.rect(lx - 2, y - 1, 2, 1, "ink")
+        g.rect(lx, y - 2, wide, 1, "ink")
+        g.rect(rx, y - 2, wide, 1, "ink")
+        g.rect(rx + wide, y - 1, 2, 1, "ink")
+        g.p(lx, y + wide, "cyan")
+        g.p(lx, y + wide + 1, "sky")
 
 
 def mouth(g, y, mood):
+    """happy: a wide open grin with the tongue out; neutral: a closed line; upset: a deep frown."""
     if mood == "happy":
-        g.p(14, y, "ink")
-        g.p(17, y, "ink")
-        g.rect(15, y + 1, 2, 1, "ink")
+        g.p(13, y, "ink")
+        g.p(18, y, "ink")
+        g.p(14, y + 1, "ink")
+        g.p(17, y + 1, "ink")
+        g.rect(15, y + 1, 2, 1, "dred")
         g.rect(15, y + 2, 2, 2, "pink")
         g.p(16, y + 3, "mauve")
     elif mood == "neutral":
-        g.rect(15, y + 1, 2, 1, "ink")
+        g.rect(14, y + 1, 4, 1, "ink")
     else:
         g.rect(15, y, 2, 1, "ink")
         g.p(14, y + 1, "ink")
         g.p(17, y + 1, "ink")
+        g.p(13, y + 2, "ink")
+        g.p(18, y + 2, "ink")
 
 
 DOGS = {

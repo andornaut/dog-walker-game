@@ -70,6 +70,17 @@ Bumped with no card. An obstacle n lanes wide and m rows long is drawn 56n−24 
 | Construction barrier | `barrier-2`, `barrier-3` | sprite | 88×32, 144×32 | `idle` (lamps blink) | core     | 2 or 3 lanes; Woof Way and Sniff Street Shops                                                                  |
 | Parked car           | `parked-car`             | sprite | 40×80         | `idle`               | core     | 1 lane by 3 rows, from behind and above, nose up the road; anchored bottom-centre at the footprint's near edge |
 
+## Moving hazards (road)
+
+| Asset                | Key                                                                       | Type   | Size                           | Animations      | Priority | Notes                                                                                      |
+| -------------------- | ------------------------------------------------------------------------- | ------ | ------------------------------ | --------------- | -------- | ------------------------------------------------------------------------------------------ |
+| Squirrel dash        | `squirrel-dash`                                                           | sprite | 32×32                          | `run`           | core     | Darts across lanes, side view facing right (mirrored for left); same colours as `squirrel` |
+| Loose dog            | `loose-dog`                                                               | sprite | 32×32                          | `run`           | core     | The `other-dog` corgi crossing with a broken leash, side view facing right (mirrored)      |
+| Bouncing ball        | `ball-bounce`                                                             | sprite | 16×24                          | `bounce`        | core     | Minor obstacle crossing lanes; squashes on contact; carries its own ground shadow          |
+| Cyclist              | `cyclist`                                                                 | sprite | 32×48                          | `ride`          | core     | Minor obstacle riding down a lane at the player, front view; scales at runtime             |
+| Hazard warning       | `ui-warning`, `ui-warning-arrow`                                          | sprite | 16×16                          | `pulse`         | core     | The ~1s cue at the lane edge; the arrow points right (mirrored); drawn at 1×               |
+| Small moving hazards | `squirrel-dash@75`, `@50`, `loose-dog@75`, `@50`, `ball-bounce@75`, `@50` | sprite | 24×24, 16×16; ball 12×18, 8×12 | as the original | core     | Redrawn for depth                                                                          |
+
 ## Lucky encounters (road)
 
 Good things to bump into. The lost wallet opens a choice card; the generous neighbour and the photo op pay out at once with a popup.

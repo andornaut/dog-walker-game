@@ -137,14 +137,16 @@ def duchess(g):
     nose(g, 21, 29)
 
 
-def bow(g, cx, y):
-    g.tri((cx - 1, y + 2), (cx - 9, y - 2), (cx - 8, y + 7), "pink")
-    g.tri((cx + 1, y + 2), (cx + 9, y - 2), (cx + 8, y + 7), "pink")
-    g.tri((cx - 1, y + 2), (cx - 8, y + 7), (cx - 6, y + 6), "mauve")
-    g.tri((cx + 1, y + 2), (cx + 8, y + 7), (cx + 6, y + 6), "mauve")
+def bow(g, cx, y, colours=("pink", "mauve")):
+    """Duchess's pink bow, or Pierre's mauve show ribbon tied in purple: the knot and folds take the second colour."""
+    c, knot = colours
+    g.tri((cx - 1, y + 2), (cx - 9, y - 2), (cx - 8, y + 7), c)
+    g.tri((cx + 1, y + 2), (cx + 9, y - 2), (cx + 8, y + 7), c)
+    g.tri((cx - 1, y + 2), (cx - 8, y + 7), (cx - 6, y + 6), knot)
+    g.tri((cx + 1, y + 2), (cx + 8, y + 7), (cx + 6, y + 6), knot)
     g.p(cx - 7, y, "white")
-    g.rect(cx - 2, y, 4, 4, "mauve")
-    g.rect(cx - 1, y + 1, 2, 1, "pink")
+    g.rect(cx - 2, y, 4, 4, knot)
+    g.rect(cx - 1, y + 1, 2, 1, c)
 
 
 # ---------- Nugget: pug, small, fawn, black mask, red bandana ----------
@@ -217,6 +219,7 @@ def pierre(g):
     pom(g, 45, 36, 6, 11, n=6)
     lined(g, 30, 29, 12, 11, "skin1", "brown", "cream")
     pom(g, 30, 13, 14, 10, n=10)
+    bow(g, 30, 4, colours=("mauve", "purple"))
     # shaved muzzle, long and narrow
     lined(g, 23, 35, 7, 4.5, "cream", "tan")
     eyes(g, 20, 32, 25)
@@ -252,10 +255,10 @@ def biscuit(g):
 # ---------- Dash: whippet, medium, grey brindle, knit sweater ----------
 
 def dash(g):
-    legs(g, (25, 34), 50, "slate", "dslate", w=4)
-    g.ell(47, 57, 9, 7, "slate", "dslate", "grey")
+    legs(g, (25, 34), 50, "grey", "slate", w=4)
+    g.ell(47, 57, 9, 7, "grey", "slate", "lgrey")
     # long neck into a knit sweater over the chest and back, cream stripes
-    g.rect(24, 32, 12, 12, "slate")
+    g.rect(24, 32, 12, 12, "grey")
     g.ell(34, 49, 15, 8, "dgreen", "forest", "green")
     g.rect(19, 49, 30, 7, "dgreen")
     g.rect(19, 55, 30, 1, "forest")
@@ -269,16 +272,20 @@ def dash(g):
     for x in range(20, 48, 2):
         g.p(x, 54, "forest")
     # narrow head, rose ears folded back
-    g.tri((18, 13), (11, 9), (14, 21), "dslate")
-    g.tri((40, 12), (49, 8), (46, 19), "dslate")
-    g.ell(29, 23, 12, 13, "slate", "dslate", "grey")
-    for y in (14, 19):
-        g.rect(31, y, 3, 1, "dslate")
-        g.rect(36, y + 2, 3, 1, "dslate")
-    g.rect(21, 17, 3, 1, "dslate")
-    # pale blaze down a long muzzle
-    g.rect(26, 11, 3, 18, "lgrey")
-    g.ell(24, 32, 7, 6, "lgrey", "grey")
+    g.tri((18, 13), (11, 9), (14, 21), "slate")
+    g.tri((40, 12), (49, 8), (46, 19), "slate")
+    g.ell(29, 23, 12, 13, "grey", "slate", "lgrey")
+    # grey brindle: slate streaks, a few dslate, slanting down the coat
+    for x, y in ((31, 14), (36, 16), (21, 17), (38, 21), (34, 26), (19, 27), (26, 34), (27, 38)):
+        g.rect(x, y, 3, 1, "slate")
+        g.p(x + 1, y + 1, "slate")
+    for x, y in ((32, 15), (37, 17), (27, 39)):
+        g.p(x, y, "dslate")
+    for x, y in ((42, 54), (47, 58), (51, 55)):
+        g.rect(x, y, 2, 1, "slate")
+    # white blaze down a long pale muzzle
+    g.rect(26, 11, 3, 18, "white")
+    g.ell(24, 32, 7, 6, "lgrey", "grey", "white")
     eyes(g, 19, 31, 21)
     nose(g, 20, 30)
 
@@ -317,14 +324,19 @@ def waffles(g):
     g.ell(31, 51, 16, 13, "white", "lgrey")
     legs(g, (21, 33), 53, "white", "lgrey", w=7)
     g.rect(16, 41, 30, 2, "dbrown")
-    g.ell(30, 26, 19, 16, "rust", "dbrown", "ochre")
-    # droopy ears, dark eye patches, white blaze and big white muzzle
-    g.ell(9, 32, 5.5, 10, "dbrown", "plum")
-    g.ell(50, 32, 6, 10, "dbrown", "plum")
-    g.ell(20, 23, 5, 4.5, "dbrown")
-    g.ell(37, 23, 6, 4.5, "dbrown")
+    # a broad head, the widest of the dogs
+    g.ell(30, 26, 22, 16, "rust", "dbrown", "ochre")
+    # droopy ears, a dark mask round the eyes, white blaze and big white muzzle with heavy jowls
+    g.ell(7, 33, 5.5, 10, "dbrown", "plum")
+    g.ell(53, 33, 6, 10, "dbrown", "plum")
+    g.ell(20, 23, 7, 5.5, "dbrown", "plum")
+    g.ell(37, 23, 7.5, 5.5, "dbrown", "plum")
     g.rect(27, 10, 4, 14, "white")
-    g.ell(26, 33, 12, 8, "white", "lgrey")
+    g.ell(26, 33, 13, 8, "white", "lgrey")
+    g.ell(17, 38, 6, 4.5, "white", "lgrey")
+    g.ell(35, 38, 6, 4.5, "white", "lgrey")
+    g.rect(22, 37, 1, 3, "lgrey")
+    g.rect(30, 37, 1, 3, "lgrey")
     eyes(g, 18, 34, 21)
     nose(g, 22, 29)
     # brandy barrel hanging from the collar
