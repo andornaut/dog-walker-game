@@ -64,7 +64,7 @@ Tuning against the targets, after one re-baseline on the shared step loop with e
 - Quirks: Nugget with Pierre below the two-dog window
 - Walkers: the walker spread at typical and novice skill
 
-Decided at the phone playtest:
+Decided at the phone playtest, after the tuning pass:
 
 - Fewer minor cards (in [`ideas.md`](ideas.md))
 - The game's name
