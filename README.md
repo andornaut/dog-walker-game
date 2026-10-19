@@ -18,6 +18,8 @@ Each folder's README is its plan, with what's left for the first build:
 
 Requires Node 24 (`.nvmrc`).
 
+The site's HTML pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`). `shared/` holds the files art's tools and the game both read.
+
 ```bash
 npm install
 

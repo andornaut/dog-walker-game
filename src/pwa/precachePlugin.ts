@@ -21,9 +21,10 @@ const SERVICE_WORKER_FILE_NAME = "sw.js";
 const MANIFEST_PLACEHOLDER = "DOG_WALKER_PRECACHE_MANIFEST";
 
 interface PrecachePluginOptions {
-  // The game page's HTML build input, relative to the project root, e.g. "play/index.html".
+  // The game page's file name in the build output, which is its path under Vite's root, e.g.
+  // "play/index.html".
   pageHtmlFile: string;
-  // The service worker's source module, relative to the project root like the HTML inputs.
+  // The service worker's source module, as an absolute path.
   serviceWorkerSource: string;
 }
 

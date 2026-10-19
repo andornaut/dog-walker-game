@@ -20,7 +20,7 @@ export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
 export { PHONE_EVENTS, type PhoneEventName } from "./events";
 
 const SERVICE_WORKER_URL = "/sw.js";
-// Elements in play/index.html.
+// Elements in pages/play/index.html.
 const TURN_UPRIGHT_ID = "turn-upright";
 const UPDATE_READY_ID = "update-ready";
 const GAME_ID = "game";

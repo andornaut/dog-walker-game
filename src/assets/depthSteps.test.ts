@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import table from "../../data/depth-steps.json";
+import table from "../../shared/depth-steps.json";
 import { DEPTH_STEPS, depthStepOfScale, splitDepthKey, stepSize } from "./depthSteps";
 
 describe("depth step table", () => {

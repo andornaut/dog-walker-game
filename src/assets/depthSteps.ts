@@ -1,6 +1,6 @@
-import table from "../../data/depth-steps.json";
+import table from "../../shared/depth-steps.json";
 
-// A road sprite's depth steps, from data/depth-steps.json, which art's tools read too. Each
+// A road sprite's depth steps, from shared/depth-steps.json, which art's tools read too. Each
 // step's art is the sprite's key plus the step's suffix: dog-koda@88 is dog-koda at 0.875.
 // Full size, with no suffix, comes first, then each smaller step in turn.
 export interface DepthStep {

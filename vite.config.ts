@@ -1,18 +1,29 @@
+import { resolve } from "node:path";
+
 import { defineConfig } from "vitest/config";
 
 import { atlasPlugin } from "./src/atlas/atlasPlugin";
 import { securityHeadersPlugin } from "./src/headers/securityHeadersPlugin";
 import { precachePlugin } from "./src/pwa/precachePlugin";
 
+// An absolute path in this repository. Vite resolves relative paths against root, which is
+// pages/, so every path below goes through here instead.
+function repoPath(path: string): string {
+  return resolve(import.meta.dirname, path);
+}
+
 export default defineConfig({
   build: {
-    // The home page at /, the game at /play/ and the game data tables at /data/.
-    // public/ is copied as-is.
+    // Outside root, so Vite would leave the previous build's files in place without emptyOutDir.
+    emptyOutDir: true,
+    outDir: repoPath("dist"),
+    // The home page at /, the game at /play/ and the game data tables at /data/. Each page's
+    // path under pages/ is its URL. public/ is copied as-is.
     rolldownOptions: {
       input: {
-        main: "index.html",
-        play: "play/index.html",
-        data: "data/index.html",
+        main: repoPath("pages/index.html"),
+        play: repoPath("pages/play/index.html"),
+        data: repoPath("pages/data/index.html"),
       },
     },
     // Phaser alone is about 1.4 MB minified, so the 500 kB default always warns.
@@ -26,7 +37,7 @@ export default defineConfig({
     atlasPlugin(),
     precachePlugin({
       pageHtmlFile: "play/index.html",
-      serviceWorkerSource: "src/pwa/serviceWorker.ts",
+      serviceWorkerSource: repoPath("src/pwa/serviceWorker.ts"),
     }),
     securityHeadersPlugin(),
   ],
@@ -35,11 +46,21 @@ export default defineConfig({
   preview: {
     allowedHosts: ["dwg-preview"],
   },
+  publicDir: repoPath("public"),
+  // The pages load their modules as /src/..., which names the repository's src/ rather than
+  // pages/src/.
+  resolve: {
+    alias: { "/src": repoPath("src") },
+  },
+  root: repoPath("pages"),
   server: {
     allowedHosts: ["dwg-preview"],
+    // The dev server serves src/ and node_modules/ from outside root, as /@fs/ URLs.
+    fs: { allow: [repoPath(".")] },
   },
   test: {
     environment: "node",
     include: ["src/**/*.test.ts"],
+    root: repoPath("."),
   },
 });
