@@ -39,7 +39,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 - **Trade-offs:** a strong downside always comes with a matching upside (a riskier dog pays a higher fee), and the net stays in the window
 - **Cards:** about 8 cards a walk, one a minute; trim minor cards (such as a puddle that catches one dog) if walks run over
 - **Length:** a zone takes about 2 minutes and a walk about 8
-- **Progression:** each extra dog raises a walk's earnings; about 45 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
+- **Progression:** each extra dog raises a walk's earnings; about 45 walks (about $39,000) buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
 
 ## Remaining for the first build
 

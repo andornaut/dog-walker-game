@@ -46,9 +46,9 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Resources
 
-- **Money ($):** the only currency. Earned during the run (tips, per-zone fees), spent in encounters, banked at the end. Tracked in cents, shown in whole dollars. Never goes below $0
+- **Money ($):** the only currency. Earned during the run (tips, per-zone fees), spent in encounters, banked at the end. Every amount is whole dollars, and a tip is always $1: tip bonuses and penalties (pack size, walker style, Stinky) change how many tips appear, and Big tipper adds +$1 to each. A fee or cost changed by a multiplier rounds to the nearest dollar. Never goes below $0
 - **Owner happiness (♥):** one meter per dog, shown as the dog's and owner's faces plus the meter, which never relies on colour alone. It starts at a value set by the owner's temperament, and its max is set by the dog's size. At 0 the owner fires you with a quip and the dog leaves
-- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog's slot or the bank (e.g. "−2 ♥, dramatic", "+$0.60 tip, solo"); a card's enlarged view lists the modifiers behind its numbers
+- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog's slot or the bank (e.g. "−2 ♥, dramatic", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
 
 ### A run
 
@@ -168,7 +168,7 @@ Obstacles hit by accident open a choice card.
 | Squirrel  | Chasers (none: harmless scenery, no card)               | Hold tight → −♥ · Let them chase → −$ (dropped tips)                       |
 | Thief     | All dogs (none if any big dog: it flees, no card)       | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)   |
 
-**Stinky** (debuff): cuts tip value for the rest of the zone. A second skunk refreshes it; it never stacks.
+**Stinky** (debuff): halves the tips that appear for the rest of the zone. A second skunk refreshes it; it never stacks.
 
 ### Zone encounters
 
@@ -195,7 +195,7 @@ A lucky find with no card pays out on contact, with a short popup and a quip fro
 
 ### Minor obstacles
 
-About half of the obstacles are minor: they open no card. Bumping one drops $2 in tips and makes the pack stumble (lane input locks briefly): a few coins burst out at the pack with "−$2", the walker wobbles, and the money counter ticks down. A hydrant is never an obstacle: it's always a need spot for Regular dogs
+About half of the obstacles are minor: they open no card. Bumping one drops $8 in tips and makes the pack stumble (lane input locks briefly): a few coins burst out at the pack with "−$8", the walker wobbles, and the money counter ticks down. A hydrant is never an obstacle: it's always a need spot for Regular dogs
 
 ### Obstacle sizes
 
@@ -239,7 +239,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 
 ### Feedback
 
-- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (tips halved). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) and Spooked (after a thief) are visual only and fade after 10 seconds
+- **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (half as many tips). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) and Spooked (after a thief) are visual only and fade after 10 seconds
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
 - **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
@@ -272,7 +272,7 @@ Run-only boosts offered between zones, from a pool of 9. Each offer draws 3 at r
 - Second wind: +♥♥ to the unhappiest owner now
 - Good leash: squirrels can't upset your chasers, and chasers don't pull toward them
 - Raincoats: puddles can't upset anyone
-- Big tipper: tips are worth more
+- Big tipper: every tip is worth $1 more
 - Treat magnet: treats count from one lane away
 - Sweet talker: every per-dog $ cost on a card, missed tips included, is lower
 - Shortcut (trade-off): the next zone is shorter, but its fees are lower
@@ -282,14 +282,14 @@ Effects without "now" or "next zone" last the rest of the run.
 
 ### Walkers
 
-Four walkers, on two axes. Pace is the difficulty: every zone takes the same time with any walker, about 2 minutes, but a fast walker covers more road in it. Their road scrolls faster and each zone is longer by the same factor, so more obstacles, tips and need spots pass each second, with less time to react, and fees rise to match; a slow walker's is the reverse. This is the same trade as a harder fork. Charm or hustle is the play style: a charmer's owners start with +♥ but tips are smaller; a hustler's tips are bigger. You start with Casey, the easiest; the others unlock the first time you finish zones 1, 2 and 3, so most players have all four within a few walks.
+Four walkers, on two axes. Pace is the difficulty: every zone takes the same time with any walker, about 2 minutes, but a fast walker covers more road in it. Their road scrolls faster and each zone is longer by the same factor, so more obstacles, tips and need spots pass each second, with less time to react, and fees rise to match; a slow walker's is the reverse. This is the same trade as a harder fork. Charm or hustle is the play style: a charmer's owners start with +♥ but fewer tips appear; a hustler sees more tips. You start with Casey, the easiest; the others unlock the first time you finish zones 1, 2 and 3, so most players have all four within a few walks.
 
-| Walker | Pace | Style   | Effects                                                     | Unlock        |
-| ------ | ---- | ------- | ----------------------------------------------------------- | ------------- |
-| Casey  | Slow | Charmer | Speed and zone length ×0.9, fees ×0.9; +♥ start, tips ×0.85 | Start         |
-| Ben    | Slow | Hustler | Speed and zone length ×0.9, fees ×0.9; tips ×1.2            | Finish zone 1 |
-| Ada    | Fast | Charmer | Speed and zone length ×1.1, fees ×1.1; +♥ start, tips ×0.85 | Finish zone 2 |
-| Trista | Fast | Hustler | Speed and zone length ×1.1, fees ×1.1; tips ×1.2            | Finish zone 3 |
+| Walker | Pace | Style   | Effects                                                             | Unlock        |
+| ------ | ---- | ------- | ------------------------------------------------------------------- | ------------- |
+| Casey  | Slow | Charmer | Speed and zone length ×0.9, fees ×0.9; +♥ start, 0.85× as many tips | Start         |
+| Ben    | Slow | Hustler | Speed and zone length ×0.9, fees ×0.9; 1.2× as many tips            | Finish zone 1 |
+| Ada    | Fast | Charmer | Speed and zone length ×1.1, fees ×1.1; +♥ start, 0.85× as many tips | Finish zone 2 |
+| Trista | Fast | Hustler | Speed and zone length ×1.1, fees ×1.1; 1.2× as many tips            | Finish zone 3 |
 
 - **Greeting:** the first time you finish an unlocking zone, the next walker waves from the sidewalk in a 1-second popup stop, like the lemonade stand ("Nice pack! Mind if I walk with you sometime?"), then the zone ends as usual
 - A walker's effects stack with the Pocket item and upgrade cards, and the state strip shows them
@@ -323,7 +323,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the run-only b
 | Mastery    | Clean Paws              | Finish a zone without a bump        | Not a speck on them.          |
 | Mastery    | Not a Scratch           | Finish a walk without a bump        | Spotless, start to finish.    |
 | Mastery    | Five-Star Service       | Finish 10 walks without being fired | The reviews are in.           |
-| Mastery    | Big Payday              | Earn $500 in one walk               | Treats are on you.            |
+| Mastery    | Big Payday              | Earn $2,000 in one walk             | Treats are on you.            |
 | Collection | Full Kennel             | Own all 9 dogs                      | Every leash is spoken for.    |
 | Collection | Kitted Out              | Own all 5 gear items                | A pocket for everything.      |
 | Collection | Neighbourhood Favourite | Finish a walk with every dog        | Everyone's met you now.       |
