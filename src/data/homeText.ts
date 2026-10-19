@@ -7,8 +7,8 @@ export const HOME_TEXT = {
   bubble: {
     afterFiring: "Rough walk. They'll come around.",
     afterWalk: "Back already? Who's next?",
-    firstVisit: "Morning! Who are we walking today? Tap to pick or buy. Hold for details.",
-    howTo: "Tap to pick or buy. Hold for details.",
+    firstVisit: "Morning! Who's walking today? Tap to pick, hold for details.",
+    howTo: "Tap to pick, hold for details.",
     newAffordable: "Something new at the pet shop.",
   },
   detail: {
