@@ -694,19 +694,19 @@ def sticker(body, spikes, scale=1.0, turn=0.0):
 # its emblem badge and runs along the card's foot stripe. No two dogs share a base. Card
 # backgrounds and the band never use zone colours; a dog's accent is its own colour. Snowball's is
 # his collar's blue, not its sky, which backs every owner's photo; Archie's is rust, for his red
-# merle coat.
+# merle coat; Pierre's is his show bow's mauve, which holds his black coat's ink line at 3.83:1.
 DOG_COLOURS = {
     "duchess": ("pink", "mauve", "purple"), "nugget": ("red", "dred", "plum"), "zippy": ("dred", "plum", "ink"),
-    "pierre": ("purple", "plum", "ink"), "biscuit": ("green", "dgreen", "forest"),
+    "pierre": ("mauve", "purple", "plum"), "biscuit": ("green", "dgreen", "forest"),
     "archie": ("rust", "dbrown", "plum"), "snowball": ("blue", "navy", "ink"),
     "penny": ("amber", "brown", "dbrown"), "koda": ("orange", "rust", "dbrown"),
     "empty": ("slate", "dslate", "navy"),
 }
 
 # The foot stripe's ticks for a dog whose colour alone would sit too close to another dog's: Zippy's
-# red collar on his dred, Archie's red bandana on his rust, Penny's blue collar on her gold and
-# Snowball's sky collar on his blue.
-TRIMS = {"zippy": "red", "archie": "red", "penny": "blue", "snowball": "sky"}
+# red collar on his dred, Archie's red bandana on his rust, Penny's blue collar on her gold,
+# Snowball's sky collar on his blue and Pierre's white stripe on his mauve.
+TRIMS = {"zippy": "red", "archie": "red", "penny": "blue", "snowball": "sky", "pierre": "white"}
 
 # The 8x8 emblem on each badge, the dog's accessory: a letter is a colour, "." shows the badge's face.
 EMBLEMS = {
@@ -716,7 +716,7 @@ EMBLEMS = {
         "D......D", "RRRRRRRR", "RRWRRRWR", ".RRRRRR.", ".RRRWRR.", "..RRRR..", "..DRRD..", "...DD..."]),
     "zippy": ({"R": "red", "D": "dred", "L": "lgrey", "W": "white", "G": "grey"}, [  # collar and tag
         "R......R", "RR....RR", ".RRRRRR.", "..DDDD..", "...LL...", "..LWLL..", "..LLLG..", "...GG..."]),
-    "pierre": ({"M": "mauve", "P": "purple", "K": "pink"}, [  # show rosette
+    "pierre": ({"M": "purple", "P": "mauve", "K": "pink"}, [  # show rosette
         "..MMMM..", ".MMPPMM.", ".MPKPPM.", ".MPPPPM.", ".MMPPMM.", "..MMMM..", "..M..M..", ".M....M."]),
     "biscuit": ({"G": "green", "D": "dgreen", "L": "lgrey", "W": "white"}, [  # collar and bone tag
         "GGGGGGGG", "DDDDDDDD", "...LL...", "WW.LL.WW", ".WWWWWW.", ".WWWWWL.", "WL....LL", "........"]),

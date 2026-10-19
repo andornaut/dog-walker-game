@@ -202,28 +202,37 @@ def zippy(g):
     nose(g, 21, 28)
 
 
-# ---------- Pierre: standard poodle, medium, apricot, show-clip pom-poms ----------
+# ---------- Pierre (Pepe): standard poodle, medium, black with a white stripe, show-clip pom-poms ----------
+
+# Pierre's coat, as in dogs.py: the curls (fill, shade, light), the shaved skin and the white stripe.
+CURL = ("navy", "ink", "dslate")
+SHAVED = ("slate", "dslate", "grey")
+
 
 def pierre(g):
     # shaved legs with pom-pom bracelets, a curly mane over the chest
-    g.cel(48, 56, 9, 7, "skin1", "brown", "cream")
+    g.cel(48, 56, 9, 7, *CURL)
     for x in (24, 35):
-        g.rect(x, 50, 4, 10, "skin2")
-        g.rect(x + 3, 50, 1, 10, "brown")
-        pom(g, x + 2, 60.5, 4.5, 3, n=5)
-    pom(g, 31, 48, 14, 9, n=10)
+        g.rect(x, 50, 4, 10, SHAVED[0])
+        g.rect(x + 3, 50, 1, 10, SHAVED[1])
+        pom(g, x + 2, 60.5, 4.5, 3, 5, *CURL)
+    pom(g, 31, 48, 14, 9, 10, *CURL)
     # long fluffy ears hanging from under the topknot
-    pom(g, 16, 35, 6, 11, n=6)
-    pom(g, 45, 35, 6, 11, n=6)
+    pom(g, 16, 35, 6, 11, 6, *CURL)
+    pom(g, 45, 35, 6, 11, 6, *CURL)
     # the smooth shaved face, ringed a step darker than the curls and set off from them by the shadow it
     # casts down and right, under a smaller topknot whose scalloped edge overlaps the brow
-    g.ell(31.5, 31.5, 11, 10.5, "brown")
-    g.ell(29.5, 27, 11.5, 10.5, "dbrown")
-    g.cel(29.5, 27, 10.5, 9.5, "skin1", "skin2", "cream")
-    pom(g, 30, 12, 12, 8, n=9)
+    g.ell(31.5, 31.5, 11, 10.5, "ink")
+    g.ell(29.5, 27, 11.5, 10.5, "navy")
+    g.cel(29.5, 27, 10.5, 9.5, *SHAVED)
+    pom(g, 30, 12, 12, 8, 9, *CURL)
+    # the white stripe from the brow up over the topknot, shaded down its right side, under the show bow
+    g.rect(28, 5, 4, 15, "white")
+    g.rect(31, 6, 1, 14, "lgrey")
+    g.rect(29, 20, 2, 2, "white")
     bow(g, 30, 5, colours=("mauve", "purple"))
     # shaved muzzle, long and narrow
-    lined(g, 23, 32, 7, 4.5, "cream", "tan")
+    lined(g, 23, 32, 7, 4.5, "grey", "slate")
     eyes(g, 20, 32, 22)
     nose(g, 15, 29)
 

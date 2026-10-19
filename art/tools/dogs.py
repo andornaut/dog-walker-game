@@ -425,36 +425,55 @@ def zippy_face(mood):
     return g
 
 
-# ---------- Pierre: standard poodle, medium, apricot, show-clip pom-poms ----------
+# ---------- Pierre (Pepe): standard poodle, medium, black with a white stripe, show-clip pom-poms ----------
+
+# Pierre's coat: the curls (fill, shade, light), the shaved skin and the white stripe (fill, shade).
+CURL = ("navy", "ink", "dslate")
+SHAVED = ("slate", "dslate", "grey")
+STRIPE = ("white", "lgrey")
+
 
 def pierre_road(q):
+    import road
+
     g, q = edged(Grid()), pose(q)
     b, ln = q["bob"], q["lean"]
-    # shaved legs in skin2, each with a pom-pom bracelet at the paw
+    # shaved legs, each with a pom-pom bracelet at the paw
     for x, d in ((10 + ln // 2, q["fl"]), (22 + ln // 2, q["fr"])):
-        g.rect(x - 1, 19 + d + b, 2, 2, "skin2")
+        g.rect(x - 1, 19 + d + b, 2, 2, SHAVED[0])
         puff(g, x, 22 + d + b, 1.8, 1.6)
     for x, d in ((12, q["bl"]), (20, q["br"])):
-        g.rect(x - 1, 25 + d, 2, 3, "skin2")
+        g.rect(x - 1, 25 + d, 2, 3, SHAVED[0])
         puff(g, x, 28.5 + d, 2, 1.6)
     # shaved hindquarters behind a curly mane over the shoulders
     bx = 16 + ln // 2
-    g.ell(bx, 23.5 + b, 3.5, 4, "skin2", "brown", "skin1")
+    g.ell(bx, 23.5 + b, 3.5, 4, *SHAVED)
     puff(g, bx, 18.5 + b, 5, 3.2)
     # a thin tail held up with a pom-pom on the end
     tx = 16 + q["tail"]
-    g.rect(tx, 25 + b, 1, 2, "brown")
+    g.rect(tx, 25 + b, 1, 2, SHAVED[0])
     puff(g, tx + 0.5, 28 + b, 2, 1.8)
-    # ear puffs hanging behind a round topknot, and a small purple show bow pinned to its top right
+    # ear puffs hanging behind a round topknot
     hx = 16 + ln
     puff(g, hx - 5, 14.5 + b - q["ears"], 2, 3.5, ring=True)
     puff(g, hx + 5, 14.5 + b - q["ears"] + q["twitch"], 2, 3.5, ring=True)
     puff(g, hx, 10.5 + b, 4, 3.8, ring=True)
-    g.rect(hx, 5 + b, 2, 3, "purple")
-    g.rect(hx + 3, 5 + b, 2, 3, "purple")
-    g.p(hx + 2, 6 + b, "mauve")
-    g.p(hx, 5 + b, "mauve")
-    despeckle(g, ("skin1", "skin2", "cream", "brown"))
+    # the white stripe from the top of the topknot down the neck, the mane and the back to the tail's tip;
+    # leaning, the head moves further than the body, so the neck steps it across halfway
+    g.rect(hx - 1, 7 + b, 2, 7, STRIPE[0])
+    g.rect((hx + bx) // 2 - 1, 13 + b, 2, 3, STRIPE[0])
+    g.rect(bx - 1, 15 + b, 2, 10, STRIPE[0])
+    g.rect(bx, 15 + b, 1, 10, STRIPE[1])
+    g.rect(tx, 25 + b, 1, 2, STRIPE[0])
+    g.ell(tx + 0.5, 28.8 + b, 1.2, 1, STRIPE[0])
+    # a small mauve show bow tied in purple, pinned to the topknot's top right
+    g.rect(hx, 5 + b, 2, 3, "mauve")
+    g.rect(hx + 3, 5 + b, 2, 3, "mauve")
+    g.p(hx + 2, 6 + b, "purple")
+    g.p(hx, 5 + b, "pink")
+    despeckle(g, CURL + SHAVED)
+    # the lit rim on the black coat's edges facing the light, and not on the show bow
+    road.rim(g, {c: (road.LIT[c][0], None) for c in CURL + SHAVED if c in road.LIT})
     spray(g, q["spray"])
     return g
 
@@ -462,16 +481,20 @@ def pierre_road(q):
 def pierre_face(mood):
     g = edged(Grid(), "ink", close=True)
     d = droop(mood)
-    g.cel(16, 28.5, 6.5, 3, "skin1", "brown", "cream")
+    g.cel(16, 28.5, 6.5, 3, *CURL)
     # long ears and the topknot in curly clumps, each cel shaded on its own
     for x, s in ((7, -1), (25, 1)):
         for y in (15, 22):
-            g.cel(x + s * d / 2, y + d, 3.5, 4, "skin1", "brown", "cream" if s < 0 else None)
-    g.cel(16, 17, 7, 7, "skin1", "brown", "cream")
-    g.cel(11, 9, 4, 3.5, "skin1", "brown", "cream")
-    g.cel(21, 9, 4, 3.5, "skin1", "brown", "cream")
-    g.cel(16, 6.5, 5, 4, "skin1", "brown", "cream")
-    g.cel(16, 22, 4, 3.5, "cream", "skin1")
+            g.cel(x + s * d / 2, y + d, 3.5, 4, CURL[0], CURL[1], CURL[2] if s < 0 else None)
+    # the shaved face, a short shaved muzzle lighter still
+    g.cel(16, 17, 7, 7, *SHAVED)
+    g.cel(11, 9, 4, 3.5, *CURL)
+    g.cel(21, 9, 4, 3.5, *CURL)
+    g.cel(16, 6.5, 5, 4, *CURL)
+    g.cel(16, 22, 4, 3.5, "grey", "slate", "lgrey")
+    # the white stripe from the brow up over the topknot, under the show bow
+    g.rect(15, 3, 2, 11, STRIPE[0])
+    g.rect(16, 4, 1, 10, STRIPE[1])
     bow(g, 16, 4, big=True, colours=("mauve", "purple"))
     eyes(g, 12, 19, 15, mood=mood)
     g.rect(15, 19, 2, 2, "ink")
@@ -717,12 +740,12 @@ def droop(mood):
 
 
 def puff(g, cx, cy, rx, ry, ring=False):
-    """A clipped poodle pom-pom: apricot, shaded skin2 on its lower right, with a cream highlight only on a
-    puff big enough to hold one as a shape, so the coat carries no single-pixel texture. ring sets it apart
-    from the puffs it is drawn over with a 1px skin2 ring."""
+    """A clipped poodle pom-pom in Pierre's curls (CURL), shaded on its lower right, with a highlight only
+    on a puff big enough to hold one as a shape, so the coat carries no single-pixel texture. ring sets it
+    apart from the puffs it is drawn over with a 1px ring in the shade."""
     if ring:
-        g.ell(cx, cy, rx + 1, ry + 1, "skin2")
-    g.ell(cx, cy, rx, ry, "skin1", "skin2", "cream" if min(rx, ry) >= 3 else None)
+        g.ell(cx, cy, rx + 1, ry + 1, CURL[1])
+    g.ell(cx, cy, rx, ry, CURL[0], CURL[1], CURL[2] if min(rx, ry) >= 3 else None)
 
 
 
