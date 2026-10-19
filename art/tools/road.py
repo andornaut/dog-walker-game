@@ -4,7 +4,10 @@
 People are 32x48, animals 32x32, pickups and small effects 16x16 (the ice cream
 truck is 64x48 and the construction barrier 56x32, one lane), all chibi and
 in Endesga 32 with coloured outlines. The walker is seen from behind, like the
-dogs; everything coming down the road faces the player.
+dogs; everything coming down the road faces the player. What stands on the road
+is a billboard seen from the walker's eye, as roadside objects in OutRun are: a
+front elevation (the ice cream truck a rear one, like obstacles.parked_car),
+with no top surface and its base on the last opaque row.
 
 Usage:
   road.py preview OUT.png   contact sheet of every frame, scaled up
@@ -307,35 +310,55 @@ def tip(rx):
 # ---------- encounters (facing the player) ----------
 
 def skunk(sway=0):
-    """The skunk, with the road outline and a grey rim on its dark fur so it holds on Woof Way."""
+    """The skunk facing the player at its own eye level, a squat front elevation: its tail fans up behind
+    its right shoulder with a white stripe curving along its inner edge, and sways 1px; the head is in front
+    of the body, the white blaze running up from the nose between the ears, front paws on the road. The road
+    outline and a grey rim on the dark fur so it holds on Woof Way."""
     g = edged(Grid())
-    g.ell(16 + sway, 9, 7, 6.5, "navy", "ink", "dslate")
-    g.ell(16 + sway, 8, 3, 4, "white", "lgrey")
-    g.ell(16, 19, 7, 6, "navy", "ink", "dslate")
-    g.rect(15, 13, 2, 9, "white")
-    g.rect(16, 13, 1, 9, "lgrey")
-    g.tri((11, 22), (12, 18.5), (14.5, 21), "navy")
-    g.tri((21, 22), (20, 18.5), (17.5, 21), "navy")
-    g.ell(16, 25, 5.5, 4.5, "navy", "ink", "dslate")
-    g.rect(15, 21, 2, 3, "white")
-    g.rect(12, 24, 2, 2, "ink")
-    g.rect(18, 24, 2, 2, "ink")
-    g.p(12, 24, "white")
-    g.p(18, 24, "white")
-    g.rect(15, 27, 2, 1, "pink")
+    s = sway
+    # the tail: a plume up behind the right shoulder, a white crescent along its upper left
+    g.ell(20 + s, 11, 8, 8.5, "navy", "ink", "dslate")
+    g.ell(20 + s, 11, 6, 6.5, "white", "lgrey")
+    g.ell(22 + s, 13, 5, 5.5, "navy", "ink")
+    # body, low and wide
+    g.ell(16, 24, 9, 5, "ink", None, "dslate")
+    # head: a dslate edge parts it from the body; pink-lined ears, the blaze, white-ringed eyes
+    for x, top, inner in ((9, 10, 11), (19, 18, 17)):
+        g.tri((x, 17), (top, 11), (2 * inner - x, 15), "dslate")
+        g.p(inner, 14, "pink")
+    g.ell(14, 19, 6.5, 5.5, "dslate")
+    g.ell(14, 19.5, 5.5, 4.5, "navy", None, "dslate")
+    g.rect(13, 13, 2, 8, "white")
+    g.rect(14, 14, 1, 7, "lgrey")
+    for x in (10, 16):
+        g.rect(x, 18, 2, 2, "white")
+        g.rect(x + (1 if x < 13 else 0), 18, 1, 2, "ink")
+    g.rect(13, 21, 2, 1, "pink")
+    # front paws
+    for x in (10, 16):
+        g.rect(x, 27, 3, 2, "ink")
     return rim(g, LIT)
 
 
 def squirrel(tail=0, shift=0):
-    """The squirrel, with the road outline and a tan rim on the fur facing the light."""
+    """The squirrel sitting up facing the player, a front elevation: its bushy tail curls up behind its
+    right side, the body sits upright with its paws held at its chest and its hind feet planted. tail
+    swishes the tail's tip 1px right; shift moves the head, body and paws 1px right. The road outline and a
+    tan rim on the fur facing the light."""
     g = edged(Grid())
     t, h = tail, shift
-    g.ell(20 + t, 12, 5.5, 7.5, "ochre", "rust", "tan")
-    g.ell(16.5 + t, 5, 4.5, 3, "ochre", "rust", "tan")
-    g.ell(20 + t, 12.5, 2.5, 5, "tan")
-    g.ell(14 + h, 19.5, 4, 4.5, "ochre", "rust", "tan")
-    g.ell(14 + h, 20.5, 2, 3, "cream")
-    squirrel_head(g, 14 + h, 25.5)
+    # the tail, rising from the base behind the body and curling over at the top
+    g.ell(21 + t, 15, 5.5, 9, "ochre", "rust", "tan")
+    g.ell(18 + t, 6.5, 5, 3.5, "ochre", "rust", "tan")
+    g.ell(21 + t, 15.5, 2.5, 6, "tan")
+    # body, sitting up, with a cream belly; hind feet either side
+    g.ell(15 + h, 21.5, 5.5, 6.5, "ochre", "rust", "tan")
+    g.ell(15 + h, 22.5, 3, 4.5, "cream")
+    for x in (10, 17):
+        g.rect(x + h, 27, 4, 2, "rust")
+    # paws held together at the chest
+    g.rect(13 + h, 19, 4, 2, "rust")
+    squirrel_head(g, 15 + h, 12.5)
     return rim(g, LIT)
 
 
@@ -353,31 +376,27 @@ def squirrel_head(g, x, y):
 
 
 def squirrel_run(gather):
-    """The squirrel bounding down the road at the player. Stretched (gather False), it reaches its front
-    paws ahead under its chin and kicks its hind feet out behind, low, with the tail streaming straight
-    back; gathered, it is airborne 2px higher and bunched up, the hind feet tucked beside its cheeks and
-    the tail swept up in an arch that curls to the side."""
+    """The squirrel bounding down the road at the player, a front elevation. Stretched (gather False), it
+    lands low and wide, front paws planted apart, tail streaming up behind; gathered, it is airborne 3px
+    higher, paws tucked under its chin and the tail flung up in an arch."""
     g = edged(Grid())
     if gather:
-        g.ell(19, 9, 4.5, 6, "ochre", "rust", "tan")
-        g.ell(14.5, 3.5, 3.5, 2.5, "ochre", "rust", "tan")
-        g.ell(19, 9.5, 2, 4, "tan")
-        for x in (9, 20):
-            g.rect(x, 20, 3, 2, "rust")
-        g.ell(15, 17.5, 4.5, 4, "ochre", "rust", "tan")
-        g.ell(15, 18.5, 2.5, 2.5, "cream")
-        squirrel_head(g, 15, 23.5)
+        g.ell(20, 9, 5, 6, "ochre", "rust", "tan")
+        g.ell(20, 9.5, 2.5, 4, "tan")
+        g.ell(15, 19, 5.5, 5, "ochre", "rust", "tan")
+        g.ell(15, 20, 3, 3, "cream")
+        for x in (11, 17):
+            g.rect(x, 24, 3, 2, "rust")
+        squirrel_head(g, 15, 14.5)
     else:
-        g.ell(16.5, 9, 4.5, 6.5, "ochre", "rust", "tan")
-        g.ell(15, 4, 3.5, 2.5, "ochre", "rust", "tan")
-        g.ell(16.5, 9.5, 2, 4.5, "tan")
-        for x in (10, 19):
-            g.rect(x, 13, 2, 3, "rust")
-        g.ell(15, 19.5, 3.5, 5.5, "ochre", "rust", "tan")
-        g.ell(15, 20.5, 1.5, 3.5, "cream")
-        for x in (10, 19):
-            g.rect(x, 28, 2, 2, "tan")
-        squirrel_head(g, 15, 26.5)
+        g.ell(22, 14, 5, 7, "ochre", "rust", "tan")
+        g.ell(22, 14.5, 2.5, 4.5, "tan")
+        g.ell(16, 22, 7, 4.5, "ochre", "rust", "tan")
+        g.ell(16, 23, 3.5, 2.5, "cream")
+        for x in (8, 21):
+            g.rect(x, 26, 3, 3, "rust")
+            g.rect(x, 28, 3, 1, "tan")
+        squirrel_head(g, 16, 18.5)
     return rim(g, LIT)
 
 
@@ -802,52 +821,62 @@ def kid(wave=False, mood="happy", bob=0):
 
 
 def ice_cream_truck(f):
-    """The ice cream truck parked ahead, seen from behind as a billboard: wide and low, with a sliver of roof,
-    the open serving hatch at the back under a striped awning, two cones on the counter, tail lights, a bumper
-    and the wheels, and the cone sign on the roof. f swaps the blinking lights and the music note. The road
-    outline and the lit rim."""
+    """The ice cream truck parked ahead, from straight behind like obstacles.parked_car: a wide box van,
+    squat, with its cone sign on the roof. The rear doors split down the middle, each with a window; a
+    pink drip stripe runs across the doors; tall tail lights sit at the outer corners, amber blinkers
+    under them; then the plate, the bumper and both rear wheels. f swaps the lit blinker and the music
+    note. The road outline and the lit rim."""
     g = edged(Grid(64, 48))
-    g.rect(6, 14, 52, 2, "lgrey")
-    g.rect(4, 16, 56, 22, "white")
-    g.rect(56, 16, 4, 22, "lgrey")
-    # the serving hatch: a striped awning, the window and a counter with two cones on it
-    g.rect(9, 18, 46, 2, "white")
-    for x in range(9, 55, 8):
-        g.rect(x, 18, 4, 2, "pink")
-        g.rect(x, 20, 4, 1, "mauve")
-    g.rect(11, 21, 42, 7, "cyan")
-    g.rect(11, 21, 42, 1, "sky")
-    for x in (18, 43):
-        g.rect(x, 24, 3, 2, "pink")
-        g.p(x, 24, "white")
-        g.rect(x + 1, 26, 1, 2, "tan")
-    g.rect(9, 28, 46, 2, "tan")
-    g.rect(9, 29, 46, 1, "brown")
-    g.rect(4, 31, 56, 3, "pink")
-    g.rect(4, 33, 56, 1, "mauve")
-    g.rect(5, 31, 3, 3, "red")
-    g.rect(56, 31, 3, 3, "dred")
-    g.rect(9, 35, 4, 2, "yellow" if f else "amber")
-    g.rect(51, 35, 4, 2, "amber" if f else "yellow")
-    g.rect(28, 35, 8, 3, "cream")
-    g.rect(2, 38, 60, 4, "lgrey")
-    g.rect(2, 41, 60, 1, "grey")
-    for x in (8, 46):
-        g.rect(x, 42, 10, 4, "ink")
-        g.rect(x + 2, 42, 6, 2, "dslate")
+    for x in (7, 47):
+        g.rect(x, 39, 10, 7, "ink")
+        g.rect(x, 39, 3, 6, "dslate")
+    # roof edge, then the box body: lit along the top and the left, shaded on the right
+    g.rect(5, 13, 54, 2, "lgrey")
+    g.rect(5, 13, 54, 1, "white")
+    g.rect(3, 15, 58, 23, "white")
+    g.rect(56, 15, 5, 23, "lgrey")
+    g.rect(3, 15, 1, 23, "white")
+    # the rear doors: a seam down the middle, a window in each, handles by the seam
+    g.rect(31, 16, 2, 20, "lgrey")
+    for x in (10, 35):
+        g.rect(x, 17, 19, 8, "navy")
+        g.rect(x, 17, 19, 1, "slate")
+    g.tri((12, 24), (17, 18), (21, 18), "slate")
+    g.tri((37, 24), (42, 18), (46, 18), "slate")
+    g.rect(28, 27, 2, 3, "grey")
+    g.rect(34, 27, 2, 3, "grey")
+    # the drip stripe: a pink band with drips hanging from it on even columns
+    g.rect(3, 30, 58, 3, "pink")
+    g.rect(3, 32, 58, 1, "mauve")
+    for x in range(8, 58, 6):
+        g.rect(x, 33, 2, 1 + (x // 6) % 2, "pink")
+    # tail lights up the outer corners, blinkers under them
+    for x in (4, 56):
+        g.rect(x, 17, 4, 11, "red")
+        g.rect(x, 17, 4, 1, "pink")
+        g.rect(x + 3, 18, 1, 10, "dred")
+    g.rect(4, 34, 4, 3, "yellow" if f else "amber")
+    g.rect(56, 34, 4, 3, "amber" if f else "yellow")
+    g.rect(26, 34, 12, 4, "cream")
+    g.rect(28, 35, 8, 1, "tan")
+    # bumper across the full width
+    g.rect(1, 38, 62, 3, "dslate")
+    g.rect(1, 38, 62, 1, "slate")
+    g.rect(1, 38, 1, 3, "grey")
     # cone sign on the roof
-    g.tri((28.5, 10), (35.5, 10), (32, 16.5), "tan")
-    g.ell(32, 7.5, 3.5, 3, "pink", "mauve", "white")
-    g.p(31, 11, "brown")
-    g.p(33, 11, "brown")
-    g.p(32, 13, "brown")
+    g.tri((28, 6), (36, 6), (32, 13), "tan")
+    g.p(30, 7, "brown")
+    g.p(33, 8, "brown")
+    g.p(31, 10, "brown")
+    g.ell(32, 4, 4, 3, "pink", "mauve", "white")
     if f:
-        g.rect(46, 6, 1, 5, "plum")
-        g.rect(46, 6, 3, 1, "plum")
-        g.rect(44, 10, 2, 2, "plum")
+        g.rect(46, 3, 1, 6, "plum")
+        g.rect(46, 3, 3, 1, "plum")
+        g.rect(44, 8, 2, 2, "plum")
     else:
-        g.rect(16, 7, 1, 5, "plum")
-        g.rect(14, 11, 2, 2, "plum")
+        g.rect(17, 4, 1, 6, "plum")
+        g.rect(17, 4, 3, 1, "plum")
+        g.rect(15, 9, 2, 2, "plum")
     return rim(g, LIT)
 
 

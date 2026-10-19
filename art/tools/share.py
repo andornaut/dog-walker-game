@@ -5,8 +5,8 @@ share-card: a 300x157 picture in Endesga 32, fully opaque, scaled 4x with
 nearest-neighbour to 1200x628, then padded with 1px of ink (its border colour)
 above and below to the 1200x630 Open Graph size. Dark wood boards on the left carry
 the logo and the tagline in font-title at 2x; on the right, a window onto Woof
-Way: the backdrop's street receding to its vanishing point under two clouds,
-the road widening below it, and Casey walking Koda, Biscuit and Duchess up the middle in the
+Way: the backdrop's houses and cross street, the road widening below them, and
+Casey walking Koda, Biscuit and Duchess up the middle in the
 help pages' pack layout, the leashes running behind Casey to her hands.
 
 Built from public/art/images/ (logo, backdrop-woof-way, road-woof-way), the
@@ -44,8 +44,8 @@ TAGLINE = ("A COZY", "PIXEL-ART", "DOG-WALKING", "LANE RUNNER")
 # The window onto Woof Way: its left edge, and the backdrop rows it shows above the road
 VIEW_X = 152
 VIEW_W = W - 1 - VIEW_X
-BAND_TOP = 24              # the first backdrop row shown; the backdrop's horizon is row 58
-BAND_ROWS = 150 - BAND_TOP
+BAND_TOP = 16              # the first backdrop row shown; the far side stands on band row bd.BASE
+BAND_ROWS = bd.H - BAND_TOP
 STREET = "street"          # Woof Way's zone id in world.ts
 
 
@@ -103,12 +103,10 @@ def street_view():
     sampled as the street keeps widening toward the viewer, with the pack walking up it."""
     cx = VIEW_W // 2
     view = hp.Scene(VIEW_W, H - 2)
-    _, view.shade, view.leash_col = hp.ZONES[STREET]
+    view.shade, view.leash_col = hp.ZONES[STREET]["shadow"], hp.ZONES[STREET]["leash"]
     band = hp.image("backdrop-woof-way").convert("RGB")
-    left = 220 - cx
-    view.img.paste(band.crop((left, BAND_TOP, left + VIEW_W, 150)), (0, 0))
-    bd.cloud(view, 12, 15, 34, 5, 0)
-    bd.cloud(view, 104, 25, 18, 3, 1)
+    left = bd.CX - cx
+    view.img.paste(band.crop((left, BAND_TOP, left + VIEW_W, bd.H)), (0, 0))
     # below the band the street keeps receding: the ground scale climbs from the band's bottom row
     # (about 0.5) to 1 at the walker's feet, and each row samples the road strip at that scale
     road = hp.TILES[STREET]

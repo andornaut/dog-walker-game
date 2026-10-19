@@ -906,7 +906,7 @@
       "json": "sprites/ice-cream-truck.json",
       "anchor": {
         "feetY": 46,
-        "opaqueWidth": 62
+        "opaqueWidth": 64
       }
     },
     {
@@ -1170,7 +1170,7 @@
       "json": "sprites/skunk.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 16
+        "opaqueWidth": 23
       }
     },
     {
@@ -1215,7 +1215,7 @@
       "json": "sprites/squirrel.json",
       "anchor": {
         "feetY": 29,
-        "opaqueWidth": 18
+        "opaqueWidth": 19
       }
     },
     {
