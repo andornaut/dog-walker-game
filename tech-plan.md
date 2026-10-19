@@ -19,6 +19,10 @@
 
 - **Render resolution:** 360×640 internal (portrait 9:16), scaled with `pixelArt` (no smoothing).
 - **All UI in the canvas:** the road, top bar, dog column, cards and menus are Phaser scenes drawn at one pixel scale with a pixel font. HTML is only the page shell. While cards are up, lane input is not listened for.
+- **Text:** the bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x (about 10.8 CSS px capitals on a 390px-wide phone); 1x is only for incidental marks. Text that can't fit at 2x is shortened, wrapped, or moved to the tap-to-enlarge card.
+- **Input:** keyboard (arrows, A/D or H/L, one lane per press). Touch is a relative drag: each lane-width of horizontal travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar is pause. A pull re-anchors the drag at the pack's new lane. The gesture state machine is pure (`src/input/gestures.ts`).
+- **Accessibility:** reduced motion (a setting, defaulting to `prefers-reduced-motion`) keeps every highlight and state change and drops decorative motion: idle loops hold frame 0, labels fade in place, and nothing shakes or hops. Road scrolling and the lane slide stay. Hearts show a count ("n/max") as well as icons, and affordability shows as text or a lock, not colour alone. Tap targets are at least 48 CSS px with 8 px between them. Text meets 4.5:1 contrast and essential icons 3:1.
+- **Sound:** `src/audio/` maps game cues to manifest keys, mixes music and effects volumes from settings, ducks music while a card is open, mutes while paused or hidden, and rate-limits repeated effects. `src/scenes/soundboard.ts` is the one Phaser wrapper. Each sound ships as Ogg plus AAC for iOS Safari.
 - **Screen layout:**
   - A top bar for status (money, zone progress) and pause, separate from the road so it never hides obstacles scrolling in from the top.
   - A fixed-width dog column on the left with 3 slots. A fired dog's slot empties, so the road never changes width.
@@ -36,6 +40,7 @@
 - **Boundary:** only `src/scenes/` and `src/main.ts` may import Phaser or a scene. ESLint's `no-restricted-imports` enforces it, so all game logic runs in unit tests without a renderer.
 - **Assets:** the art agent exports into `public/art/`, served at `/art/`. `public/art/manifest.json` lists every asset with paths relative to `public/art/`: `sprites` (key, png, json: PNG sheets with Aseprite hash JSON and frameTags), `fonts` (key, png, fnt: XML BMFont, which `load.bitmapFont` requires) and `images` (key, png). Keys are kebab-case and unique. Animation keys are `<texture>:<tag>`, because tag names repeat across sprites and Phaser animation keys are global. Sprites anchor on the feet. A missing key falls back to a placeholder box. Art rules live in `art/style-guide.md`.
 - **Tests:** Vitest unit tests over all pure logic. Scenes are checked by playing and by headless screenshots.
+- **Simulator:** `src/sim/` plays bot policies (hearts unless an owner would drop to 1, always hearts, always pay) on the real rules and data over a matrix of packs and obstacle hit rates. `npm run simulate -- --runs 1000 --seed 1 [--policy ...] [--hit ...] [--out rows.json]` prints a table; results are deterministic per seed. `/data/` shows a smaller live matrix. Balance changes are checked with it before and after, at the same seed.
 
 ## Game data
 
