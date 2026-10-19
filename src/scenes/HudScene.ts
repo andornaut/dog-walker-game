@@ -32,7 +32,12 @@ import {
 } from "../hud/stateStrip";
 import {
   buttonIcon,
+  DOLLAR_GAP,
+  fittingWellStyle,
   HOME_BUTTON,
+  MONEY_TEXT_STYLES,
+  MONEY_WELL,
+  moneyTop,
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
@@ -43,7 +48,10 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
+  TREAT_WELL,
   walkCovered,
+  WELL_INSET,
+  type WellTextStyle,
 } from "../hud/topBar";
 import { insetRect, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -63,6 +71,7 @@ import { listenOnePress } from "./onePress";
 import { colorFromHex, PALETTE } from "./palette";
 import {
   addPixelText,
+  inkSpan,
   placePixelText,
   scalePixelText,
   setPixelText,
@@ -138,6 +147,7 @@ export class HudScene extends Scene {
   private hintParts: GameObjects.GameObject[] = [];
   private hintRaised: RaisedHint[] = [];
   private hearts: HeartFeedback | undefined;
+  private dollar: GameObjects.BitmapText | undefined;
   private money: GameObjects.BitmapText | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
@@ -199,27 +209,20 @@ export class HudScene extends Scene {
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
 
-    const { money: moneyWell, treats: treatWell, zone: zoneWell } = TOP_BAR;
+    const { money: moneyWell, zone: zoneWell } = TOP_BAR;
     this.add.image(moneyWell.x + 4, moneyWell.y + 5, MONEY_ICON_KEY).setOrigin(0);
     const money = { font: "title", scale: 2 } as const;
-    const moneyX = moneyWell.x + 22;
-    const dollar = addPixelText(this, moneyX, moneyWell.y + 7, "$", {
+    this.dollar = addPixelText(this, MONEY_WELL.dollarX, MONEY_WELL.top, "$", {
       color: PALETTE.amber,
       ...money,
     });
-    this.money = addPixelText(this, moneyX + dollar.width + 2, moneyWell.y + 7, "0", {
-      color: PALETTE.cream,
-      ...money,
-    });
-    // The count, such as 0/3, right-aligned in the narrow well, and the 16px treat icon at the
-    // well's left edge, whose bone ends 2px before the count starts.
-    this.add.image(treatWell.x, treatWell.y + 5, TREAT_ICON_KEY).setOrigin(0);
-    const treatsRight = treatWell.x + treatWell.width;
-    this.treats = addPixelText(this, treatsRight, treatWell.y + 10, "0", {
+    this.money = addPixelText(this, 0, MONEY_WELL.top, "", { color: PALETTE.cream, ...money });
+    this.add.image(TREAT_WELL.icon.x, TREAT_WELL.icon.y, TREAT_ICON_KEY).setOrigin(0);
+    this.treats = addPixelText(this, 0, TREAT_WELL.countTop, "", {
       color: PALETTE.cream,
       font: "title",
-      originX: 1,
-    });
+      scale: TREAT_WELL.countStyle.scale,
+    }).setLetterSpacing(TREAT_WELL.countStyle.letterSpacing);
     this.zoneIcon = this.add.image(0, zoneWell.y - 1, "__DEFAULT").setOrigin(1, 0);
     this.zoneLabel = addPixelText(this, ZONE_WELL.right, ZONE_WELL.y, "", {
       color: PALETTE.cream,
@@ -498,6 +501,40 @@ export class HudScene extends Scene {
     return this.feedback?.shownMoney(money) ?? money;
   }
 
+  // The amount DOLLAR_GAP after the "$" ink, in the first of MONEY_TEXT_STYLES that ends
+  // WELL_INSET inside the money well, the bottom row of its capitals on the "$"'s.
+  private showMoney(amount: string): void {
+    const { dollar, money } = this;
+    if (dollar === undefined || money === undefined || money.text === amount) {
+      return;
+    }
+    setPixelText(money, amount);
+    const well = TOP_BAR.money;
+    const start = dollar.x + inkSpan(dollar).right + DOLLAR_GAP;
+    const apply = (style: WellTextStyle) =>
+      money.setLetterSpacing(style.letterSpacing).setScale(style.scale);
+    const inkWidth = (style: WellTextStyle) => {
+      const ink = inkSpan(apply(style));
+      return ink.right - ink.left;
+    };
+    const room = well.x + well.width - WELL_INSET - start;
+    const style = fittingWellStyle(MONEY_TEXT_STYLES, inkWidth, room);
+    const { left } = inkSpan(apply(style));
+    scalePixelText(money, style.scale, start - left, moneyTop(style.scale));
+  }
+
+  // The treat count centred across the treat well, under the treat icon.
+  private showTreats(count: string): void {
+    const { treats } = this;
+    if (treats === undefined || treats.text === count) {
+      return;
+    }
+    setPixelText(treats, count);
+    const ink = inkSpan(treats);
+    const centre = TOP_BAR.treats.x + TOP_BAR.treats.width / 2;
+    placePixelText(treats, centre - (ink.left + ink.right) / 2, TREAT_WELL.countTop);
+  }
+
   private redraw(view: RunHudView): void {
     const g = this.dynamic;
     if (g === undefined) {
@@ -505,15 +542,8 @@ export class HudScene extends Scene {
     }
     const { run } = view;
     g.clear();
-    if (this.money !== undefined) {
-      setPixelText(this.money, wholeDollars(this.shownMoney(run.money)).slice(1));
-    }
-    if (this.treats !== undefined) {
-      setPixelText(
-        this.treats,
-        `${run.treats}/${read(gameData.tuning, "counts", "treatCarryMax")}`,
-      );
-    }
+    this.showMoney(wholeDollars(this.shownMoney(run.money)).slice(1));
+    this.showTreats(`${run.treats}/${read(gameData.tuning, "counts", "treatCarryMax")}`);
     const zone = currentZone(gameData, run);
     if (this.zoneLabel !== undefined) {
       setPixelText(this.zoneLabel, zone.name);

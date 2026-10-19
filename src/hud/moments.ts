@@ -3,6 +3,7 @@ import type { Point, Rect } from "../layout/rect";
 import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
 import type { ChangeLabel } from "./hudView";
+import { TREAT_WELL } from "./topBar";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
 // zone's fees paid, and a treat given.
@@ -47,7 +48,10 @@ export const MOMENTS = {
 } as const;
 
 // The top bar's money and treat icons' centres, where coins land and treats leave from.
-export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 }, treats: { x: 104, y: 21 } } as const;
+export const TOP_BAR_POINTS = {
+  bank: { x: 16, y: 21 },
+  treats: { x: TREAT_WELL.icon.x + 8, y: TREAT_WELL.icon.y + 8 },
+} as const;
 
 // An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the
 // bubble's bottom rim, and tipX is the column it points from.

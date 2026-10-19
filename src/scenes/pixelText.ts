@@ -184,6 +184,18 @@ export function scalePixelText(
   placePixelText(label, x, y);
 }
 
+// The columns a label's glyphs ink, from its left edge, in screen pixels: the first glyph's
+// left side bearing and the last glyph's right one left out.
+export function inkSpan(label: GameObjects.BitmapText): { left: number; right: number } {
+  const inked = label.getTextBounds(true).characters.filter((char) => char.w > 0);
+  if (inked.length === 0) {
+    return { left: 0, right: 0 };
+  }
+  const left = Math.min(...inked.map((char) => char.x));
+  const right = Math.max(...inked.map((char) => char.x + char.w));
+  return { left: left * label.scaleX, right: right * label.scaleX };
+}
+
 // Sets new text, in the characters the label's font has, only when it changed.
 export function setPixelText(label: GameObjects.BitmapText, text: string): void {
   const role = (label.getData("fontRole") as FontRole | undefined) ?? "body";

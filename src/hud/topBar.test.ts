@@ -1,9 +1,21 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
+import { read } from "../rules/units";
 import {
   buttonIcon,
+  DOLLAR_GAP,
+  fittingWellStyle,
   gameplayAllowed,
   HOME_BUTTON,
+  MONEY_TEXT_STYLES,
+  MONEY_WELL,
+  moneyTop,
+  TREAT_WELL,
+  WELL_INSET,
+  type WellTextStyle,
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
@@ -147,4 +159,75 @@ describe("topBarButtonAt", () => {
   ])("finds at (%i, %i) the %s button", (x, y, expected) => {
     expect(topBarButtonAt(x, y)).toBe(expected);
   });
+});
+
+// The title font's glyphs, from its .fnt: each one's left side bearing, inked width and advance.
+const TITLE_FNT = new URL("../../public/art/fonts/font-title.fnt", import.meta.url);
+const TITLE_GLYPHS = new Map(
+  [
+    ...readFileSync(TITLE_FNT, "utf8").matchAll(
+      /<char id="(\d+)"[^>]*\bwidth="(\d+)"[^>]*\bxoffset="(-?\d+)"[^>]*\bxadvance="(\d+)"/g,
+    ),
+  ].map(([, id, width, xOffset, advance]) => [
+    String.fromCodePoint(Number(id)),
+    { advance: Number(advance), width: Number(width), xOffset: Number(xOffset) },
+  ]),
+);
+
+// The screen columns text inks at a style, from its left edge, as Phaser lays it out.
+function titleInk(style: WellTextStyle, text: string): { left: number; right: number } {
+  let x = 0;
+  const spans = [...text].map((char) => {
+    const glyph = TITLE_GLYPHS.get(char);
+    if (glyph === undefined) {
+      throw new Error(`font-title has no ${char}`);
+    }
+    const span = { left: x + glyph.xOffset, right: x + glyph.xOffset + glyph.width };
+    x += glyph.advance + style.letterSpacing;
+    return span;
+  });
+  const left = Math.min(...spans.map((span) => span.left));
+  const right = Math.max(...spans.map((span) => span.right));
+  return { left: left * style.scale, right: right * style.scale };
+}
+
+describe("the money well", () => {
+  const dollarRight = MONEY_WELL.dollarX + titleInk({ letterSpacing: 0, scale: 2 }, "$").right;
+  const room = TOP_BAR.money.x + TOP_BAR.money.width - WELL_INSET - (dollarRight + DOLLAR_GAP);
+  const inkWidth = (amount: string) => (style: WellTextStyle) => {
+    const ink = titleInk(style, amount);
+    return ink.right - ink.left;
+  };
+
+  it.each<[string, WellTextStyle]>([
+    ["0", { letterSpacing: 0, scale: 2 }],
+    ["9999", { letterSpacing: 0, scale: 2 }],
+    ["49695", { letterSpacing: -1, scale: 2 }],
+    ["999999", { letterSpacing: 0, scale: 1 }],
+  ])("sets $%s at %o, inside the well", (amount, expected) => {
+    const style = fittingWellStyle(MONEY_TEXT_STYLES, inkWidth(amount), room);
+    expect(style).toEqual(expected);
+    expect(inkWidth(amount)(style)).toBeLessThanOrEqual(room);
+  });
+
+  it.each([1, 2])("keeps the amount's capitals' bottom row on the $'s at %ix", (scale) => {
+    expect(moneyTop(scale) + MONEY_WELL.capRows * scale).toBe(
+      MONEY_WELL.top + MONEY_WELL.capRows * 2,
+    );
+  });
+});
+
+describe("the treat well", () => {
+  const max = read(gameData.tuning, "counts", "treatCarryMax");
+
+  it.each(Array.from({ length: max + 1 }, (_, count) => `${count}/${max}`))(
+    "fits %s under the icon, inside the well",
+    (count) => {
+      const ink = titleInk(TREAT_WELL.countStyle, count);
+      const well = TOP_BAR.treats;
+      const bottom = TREAT_WELL.countTop + MONEY_WELL.capRows * TREAT_WELL.countStyle.scale;
+      expect(ink.right - ink.left).toBeLessThanOrEqual(well.width - 2 * WELL_INSET);
+      expect(bottom).toBeLessThanOrEqual(well.y + well.height - WELL_INSET);
+    },
+  );
 });
