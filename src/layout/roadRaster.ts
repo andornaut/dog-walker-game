@@ -240,6 +240,11 @@ function wordOf(rgb: number): number {
 // The lawn's greens as pixel words, each to the next darker one.
 const GREENS = [0x63c74d, 0x3e8948];
 const darkerWords = new Map(GREENS.map((rgb) => [wordOf(rgb), wordOf(darkerGreen(rgb))]));
+const PATCH_WORD = wordOf(PATCH_COLOR);
+const SEAM_WORD = wordOf(SEAM_COLOR);
+const LEAF_WORDS = LEAF_PIXELS.map((rows) =>
+  rows.map((cells) => cells.map(({ color, dx }) => ({ dx, word: wordOf(color) }))),
+);
 
 // Where the verge reaches threshold across on each side of a row's road: the first column
 // nearer than it on the left, and the first as far or farther on the right.
@@ -400,8 +405,8 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     if (verge.walkTo > verge.curbTo && seamRow(z, row.span)) {
       const [curbLeft, curbRight] = splitAt(row, verge.curbTo);
       const [walkLeft, walkRight] = splitAt(row, verge.walkTo);
-      out.fill(wordOf(SEAM_COLOR), offset + walkLeft, offset + curbLeft);
-      out.fill(wordOf(SEAM_COLOR), offset + curbRight, offset + walkRight);
+      out.fill(SEAM_WORD, offset + walkLeft, offset + curbLeft);
+      out.fill(SEAM_WORD, offset + curbRight, offset + walkRight);
     }
 
     if (verge.lawn === "rough") {
@@ -435,12 +440,12 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
           break;
         }
         const column = Math.floor(centerX + mark.x * row.scale) - view.x;
-        const [upper = [], lower = []] = LEAF_PIXELS[mark.shape] ?? [];
-        for (const { color, dx } of upper) {
-          markPixel(out, marked, row, verge, offset, column + dx, wordOf(color));
+        const [upper = [], lower = []] = LEAF_WORDS[mark.shape] ?? [];
+        for (const { dx, word } of upper) {
+          markPixel(out, marked, row, verge, offset, column + dx, word);
         }
-        for (const { color, dx } of lower) {
-          carry(next, column + dx, wordOf(color));
+        for (const { dx, word } of lower) {
+          carry(next, column + dx, word);
         }
       }
     }
@@ -490,7 +495,7 @@ function drawPatches(
       const to = Math.ceil(centerX + (patch.x + half) * row.scale - 0.5) - view.x;
       for (let i = Math.max(0, from); i < Math.min(view.width, to); i++) {
         if (markFits(verge, "tuft", row.across[i] ?? -1)) {
-          out[offset + i] = wordOf(PATCH_COLOR);
+          out[offset + i] = PATCH_WORD;
         }
       }
     }
