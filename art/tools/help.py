@@ -574,9 +574,8 @@ def pickups():
     for ln, d, key in ((2, 274, "tip"), (2, 215, "tip"), (2, 158, "tip"), (1, 106, "treat"), (3, 182, "treat")):
         c.stand(key, "idle", lane(ln), d)
     c.pack(lane(2), ("dog-biscuit",))
-    # one tip for a solo dog, in whole cents as the game counts it
-    solo = round(tuning("money", "tip") * tuning("multipliers", "tipByPackSize", "1") * 100) / 100
-    c.bubble(200, 168, 70, ["+" + dollars(solo)])
+    # one tip: a pack's size changes how many tips appear, not what each is worth
+    c.bubble(200, 168, 70, ["+" + dollars(tuning("money", "tip"))])
     # the bar after the first zone has paid the dog's fee, with two treats carried
     c.top_bar([FIRST_ZONE, "park"], fee("biscuit"), 2, 0.4)
     return c
