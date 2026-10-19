@@ -19,31 +19,6 @@ import { UPGRADES } from "./upgrades";
 import { DEFAULT_WALKER, WALKERS } from "./walkers";
 import { WORLD } from "./world";
 
-interface ValueExports {
-  readonly ACHIEVEMENTS: typeof ACHIEVEMENTS;
-  readonly DEBUFFS: typeof DEBUFFS;
-  readonly DEFAULT_WALKER: typeof DEFAULT_WALKER;
-  readonly DOGS: typeof DOGS;
-  readonly DOG_SLOTS: typeof DOG_SLOTS;
-  readonly ENCOUNTERS: typeof ENCOUNTERS;
-  readonly FORCED_STOPS: typeof FORCED_STOPS;
-  readonly HELP_PAGES: typeof HELP_PAGES;
-  readonly HINTS: typeof HINTS;
-  readonly HOME_TEXT: typeof HOME_TEXT;
-  readonly MENU_TEXT: typeof MENU_TEXT;
-  readonly MINOR_OBSTACLES: typeof MINOR_OBSTACLES;
-  readonly NEED_CARDS: typeof NEED_CARDS;
-  readonly NEED_SPOTS: typeof NEED_SPOTS;
-  readonly NEEDS: typeof NEEDS;
-  readonly QUIPS: typeof QUIPS;
-  readonly RUN_TEXT: typeof RUN_TEXT;
-  readonly SHOP_GEAR: typeof SHOP_GEAR;
-  readonly TUNING: typeof TUNING;
-  readonly UPGRADES: typeof UPGRADES;
-  readonly WALKERS: typeof WALKERS;
-  readonly WORLD: typeof WORLD;
-}
-
 function toGameData(values: ValueExports): GameData {
   return {
     achievements: values.ACHIEVEMENTS,
@@ -71,7 +46,7 @@ function toGameData(values: ValueExports): GameData {
   };
 }
 
-let values: ValueExports = {
+const INITIAL_VALUES = {
   ACHIEVEMENTS,
   DEBUFFS,
   DEFAULT_WALKER,
@@ -94,7 +69,10 @@ let values: ValueExports = {
   UPGRADES,
   WALKERS,
   WORLD,
-};
+} as const;
+type ValueExports = typeof INITIAL_VALUES;
+
+let values: ValueExports = INITIAL_VALUES;
 const live: { -readonly [K in keyof GameData]: GameData[K] } = toGameData(values);
 
 // The one live copy of the game data. Read it at the time of use, never cache a value from
