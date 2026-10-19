@@ -25,10 +25,19 @@ Gameplay owns the rulebook and the values and content in the data value files (e
 
 ## Targets
 
-- A zone takes about 2 minutes and a walk about 8
-- About 45 walks to buy every dog, slot and gear item
-- Each extra dog raises a walk's earnings (the main progression)
-- Every gear item pays for itself over a reasonable number of walks
+Some walks should fail: the road stays calm, so losing comes from bumps and choices, not from speed. A failed walk is one that ends before zone 4 because every owner fired you. The simulator measures each target per skill preset and card policy.
+
+| Player  | Walks finished | Walks with a firing |
+| ------- | -------------- | ------------------- |
+| Novice  | 50 to 70%      | 50 to 80%           |
+| Typical | 75 to 90%      | 20 to 40%           |
+| Expert  | 90 to 98%      | 5 to 15%            |
+
+- **Play-style window:** for a given player, every pack, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
+- **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most
+- **Trade-offs:** a strong downside always comes with a matching upside (a riskier dog pays a higher fee), and the net stays in the window
+- **Length:** a zone takes about 2 minutes and a walk about 8
+- **Progression:** each extra dog raises a walk's earnings; about 45 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
 
 ## Remaining for the first build
 
