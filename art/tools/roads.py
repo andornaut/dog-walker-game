@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Draw the per-zone road strips and the transitions between zones.
 
-road-<zone>        280x64 images, one per zone. They tile vertically with no
+road-<zone>        320x64 images, one per zone. They tile vertically with no
                    seam: every pattern repeats in 64 rows (or a divisor of it)
                    and anything drawn near the top or bottom edge wraps.
-road-<zone>-start  280x64 images, one per zone. Rows 20 to 63 are a neutral cross
+road-<zone>-start  320x64 images, one per zone. Rows 20 to 63 are a neutral cross
                    street in the backdrops' asphalt (CROSSING) and rows 0 to 19
                    this zone's strip, so a start strip follows any zone at a
                    fork: the road reads up the screen as the previous zone's
@@ -12,7 +12,7 @@ road-<zone>-start  280x64 images, one per zone. Rows 20 to 63 are a neutral cros
 
 Each strip keeps its zone's road colour (src/data/world.ts) as the base, so the
 game's shadows (one ramp step darker) still match. The four lane dividers sit
-at x = 56k-1 (2px wide) and share one look per zone, so lane edges stay
+at x = 64k-1 (2px wide) and share one look per zone, so lane edges stay
 readable at speed; the outer 3 to 7 px of each side is a curb or verge that
 stays clear of the 12px sprite margin.
 
@@ -34,8 +34,9 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import PALETTE, Grid  # noqa: E402
 
-W, H = 280, 64
-DIVIDERS = [k * 56 - 1 for k in range(1, 5)]
+W, H = 320, 64
+LANE = 64
+DIVIDERS = [k * LANE - 1 for k in range(1, 5)]
 
 
 def wp(g, x, y, c):
@@ -100,7 +101,7 @@ def woof_way_ground(g):
         else:
             wrect(g, x, y, 2, 1, col)
     # cracks running along the road, 1 to 2px wide, kept inside lanes
-    for x, y, steps in ((20, 50, 12), (150, 20, 14), (236, 58, 10), (93, 33, 8)):
+    for x, y, steps in ((23, 50, 12), (171, 20, 14), (270, 58, 10), (106, 33, 8)):
         for _ in range(steps):
             wp(g, x, y, "navy")
             if rnd.random() < 0.25:
@@ -138,14 +139,14 @@ def bark_park_ground(g):
     # pebbles, lit from the top left
     for _ in range(12):
         x, y = rnd.randrange(12, W - 14), rnd.randrange(H)
-        if (x + 3) % 56 < 6:
+        if (x + 3) % LANE < 6:
             continue
         wrect(g, x, y, 2, 2, "lgrey")
         wp(g, x + 1, y + 1, "grey")
         wp(g, x, y, "white")
     # a trail of paw prints up lane 2, alternating sides, 16 rows apart
     for i in range(4):
-        x, y = 74 + (6 if i % 2 else 0), i * 16 + 4
+        x, y = 86 + (6 if i % 2 else 0), i * 16 + 4
         for j, row in enumerate(PAW):
             for k, ch in enumerate(row):
                 if ch == "x":
@@ -183,17 +184,18 @@ def bark_park_lines(g):
 def shops_ground(g):
     rnd = random.Random("road-sniff-street-shops")
     g.rect(0, 0, W, H, "pink")
-    # square pavers: 2-row mauve joints every 16 rows (low contrast, so they do not blink) and
-    # staggered 1px joints along the road; a few skin1 pavers, never side by side
+    # pavers half a lane wide: 2-row mauve joints every 16 rows (low contrast, so they do not blink)
+    # and staggered 1px joints along the road, on the lane dividers in the unstaggered rows; a few
+    # skin1 pavers, never side by side
     tinted = False
     for row in range(H // 16):
-        y, off = row * 16, 14 if row % 2 else 0
+        y, off = row * 16, 16 if row % 2 else 0
         g.rect(0, y + 14, W, 2, "mauve")
-        for x in range(off - 28, W, 28):
-            g.rect(x + 27, y, 1, 14, "mauve")
+        for x in range(off - 32, W, 32):
+            g.rect(x + 31, y, 1, 14, "mauve")
             tinted = not tinted and rnd.random() < 0.07
             if tinted:
-                g.rect(x, y, 27, 14, "skin1")
+                g.rect(x, y, 31, 14, "skin1")
     specks(g, rnd, 20, "skin1", 6, W - 6)
     specks(g, rnd, 16, "mauve", 6, W - 6)
     # cream gutter stones on the outer 4 columns, a mauve seam on the road side and a 2-row
@@ -229,18 +231,19 @@ LEAF_SHAPES = (_TILTED, tuple(r[::-1] for r in _TILTED), _SMALL, tuple(r[::-1] f
 def home_ground(g):
     rnd = random.Random("road-the-long-way-home")
     g.rect(0, 0, W, H, "skin2")
-    # 2-row mortar and whole-brick tints: under the projection a 1-row line blinks
+    # 2-row mortar and whole-brick tints: under the projection a 1-row line blinks. Bricks are a
+    # quarter lane long, so the lane dividers fall on head joints
     for row in range(H // 8):
-        y, off = row * 8, 7 if row % 2 else 0
+        y, off = row * 8, 8 if row % 2 else 0
         g.rect(0, y + 6, W, 2, "brown")
-        for x in range(off - 14, W, 14):
-            g.rect(x + 13, y, 1, 6, "brown")
+        for x in range(off - 16, W, 16):
+            g.rect(x + 15, y, 1, 6, "brown")
             r = rnd.random()
             if r < 0.1:
-                g.rect(x, y, 13, 6, "skin1")
+                g.rect(x, y, 15, 6, "skin1")
             elif r < 0.16:
-                g.rect(x, y, 13, 6, "tan")
-            g.p(x + rnd.randrange(2, 12), y + rnd.randrange(2, 6), "brown")
+                g.rect(x, y, 15, 6, "tan")
+            g.p(x + rnd.randrange(2, 14), y + rnd.randrange(2, 6), "brown")
     # soldier-course edges: bricks set on end along both sides, 6 rows plus a 2-row joint
     for x0, line in ((0, 6), (W - 6, W - 7)):
         g.rect(x0, 0, 6, H, "brown")
@@ -253,7 +256,7 @@ def home_ground(g):
 
 def leaves(g, rnd, n, x0, x1, y0=0, y1=H, tones=LEAVES):
     """n leaves spaced apart, clear of the lane dividers, each in one of tones."""
-    for x, y in scatter(rnd, n, x0, x1, 18, y0, y1, lambda x, y: (x + 7) % 56 >= 9):
+    for x, y in scatter(rnd, n, x0, x1, 18, y0, y1, lambda x, y: (x + 7) % LANE >= 9):
         tone = dict(zip("fsv", rnd.choice(tones)))
         for j, row in enumerate(rnd.choice(LEAF_SHAPES)):
             for k, ch in enumerate(row):
@@ -299,15 +302,15 @@ def snooze_ground(g):
         else:
             wrect(g, x, y, 2, 1, col)
     # sealed cracks running along the road, kept inside lanes
-    for x, y, steps in ((38, 12, 10), (196, 50, 14), (250, 30, 8)):
+    for x, y, steps in ((43, 12, 10), (224, 50, 14), (286, 30, 8)):
         for _ in range(steps):
             wp(g, x, y, "dslate")
             if rnd.random() < 0.25:
                 x += rnd.choice((-1, 1))
                 wp(g, x, y, "dslate")
             y -= 1
-    stamp(g, 22, 6, MOON, "yellow")
-    for x, y, col in ((182, 36, "white"), (72, 54, "lgrey")):
+    stamp(g, 25, 6, MOON, "yellow")
+    for x, y, col in ((208, 36, "white"), (82, 54, "lgrey")):
         stamp(g, x, y, BIG_Z, col)
         stamp(g, x + 8, y + 2, SMALL_Z, col)
     # a little leaf litter from the street trees, green so it reads apart from The Long Way Home
@@ -338,28 +341,28 @@ def snooze_lines(g):
 def paws_ground(g):
     rnd = random.Random("road-paws-promenade")
     g.rect(0, 0, W, H, "cream")
-    # boards 13px wide with 1px seams at x = 14k-1, so the lane dividers fall on seams; a few
+    # boards 15px wide with 1px seams at x = 16k-1, so the lane dividers fall on seams; a few
     # newer boards, never two side by side (a white board reads as a line along the road)
-    boards = range(0, W, 14)
+    boards = range(0, W, 16)
     tinted = False
     for x0 in boards:
         tinted = not tinted and rnd.random() < 0.1
         if tinted:
-            g.rect(x0, 0, 13, H, "skin1")
+            g.rect(x0, 0, 15, H, "skin1")
         # grain runs along the board, 5 to 11 rows long
         for _ in range(rnd.randrange(1, 3)):
-            wrect(g, x0 + rnd.randrange(1, 12), rnd.randrange(H), 1, rnd.randrange(5, 12), "tan")
+            wrect(g, x0 + rnd.randrange(1, 14), rnd.randrange(H), 1, rnd.randrange(5, 12), "tan")
     for x0 in boards[1:]:
         g.rect(x0 - 1, 0, 1, H, "tan")
     # each board ends once in the strip: a 2-row butt joint (low contrast, so it does not
     # blink) with a nail either side, at uneven rows
     for x0 in boards:
         y = rnd.randrange(H)
-        wrect(g, x0, y, 13, 2, "tan")
+        wrect(g, x0, y, 15, 2, "tan")
         wp(g, x0 + 3, y - 2, "grey")
-        wp(g, x0 + 9, y + 3, "grey")
+        wp(g, x0 + 11, y + 3, "grey")
     # a few knots, spaced apart
-    for x, y in scatter(rnd, 7, 8, W - 8, 20, ok=lambda x, y: x % 14 < 11):
+    for x, y in scatter(rnd, 7, 8, W - 8, 20, ok=lambda x, y: x % 16 < 13):
         wrect(g, x, y, 2, 2, "tan")
         wp(g, x + 1, y + 1, "brown")
     # edge beams along both sides, meeting the paving verge with no curb
@@ -411,7 +414,7 @@ def crossing(g):
     g.rect(0, y0, W, y1 - y0, "dslate")
     for x, y in scatter(rnd, 30, 0, W, 7, 27, 56):
         g.rect(x, y, 1, 2, rnd.choice(("slate", "navy", "navy")))
-    for x in range(8, W - 8, 12):
+    for x in range(12, W - 12, 12):
         g.rect(x, 35, 7, 14, "white")
         g.rect(x + 6, 35, 1, 14, "lgrey")
         g.rect(x, 47, 7, 2, "lgrey")
