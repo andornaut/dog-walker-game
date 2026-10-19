@@ -2,8 +2,9 @@
 """Draw the choice card frame and compose the card illustrations.
 
 - card-frame: an 83x140 sprite, one frame per card type (tags encounter, lucky,
-  stop, upgrade). The game draws the title in the band, the effect text in the
-  body and the cost in the badge. Layout, in card pixels:
+  stop, upgrade, and route for a fork's path cards). The game draws the title
+  in the band, the effect text in the body and the cost in the badge. Layout,
+  in card pixels:
     band 2..12 (title), art window 4,15 to 79,72 (illustration at 5,16, 75x56),
     body 6..77 x 76..118, badge 6,121, 71x13.
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
@@ -12,9 +13,12 @@
   body 12..154 x 152..234, badge 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
   large frame); the game writes the cost between its rivets.
-- card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
-  illustrations, one per option, composed from the exported sprites. Build
-  the sprites first.
+- card-<encounter>-<option>, card-<need card>-<option>, card-<upgrade> and
+  card-skip: 75x56 illustrations, one per option, composed from the exported
+  sprites. Build the sprites first.
+- card-zone-<zone>: 75x56, a fork's path card: the zone's road, sampled from
+  its road strip, running to a cross street, with the zone's backdrop scenery
+  beyond it in miniature.
 
 Usage:
   cards.py preview OUT.png   every illustration in a card, then the enlarged
@@ -29,22 +33,31 @@ hand edits to them belong in this file instead. Shared tooling is in pixel.py.
 """
 
 import json
+import math
 import os
+import re
 import subprocess
 import sys
+from collections import Counter
 
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
+import backdrops as bd  # noqa: E402
 import help as hp  # noqa: E402
+import needs  # noqa: E402
+import people  # noqa: E402
 import road  # noqa: E402
+import roads  # noqa: E402
 from ui import to_image  # noqa: E402
 from pixel import Grid, build as build_sprites  # noqa: E402
 
 CW, CH = 83, 140
 AW, AH = 75, 56
 # Band colours hold white labels at 7:1 or more; the amber stop band takes plum labels (7.35:1).
-BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amber", "orange"), "upgrade": ("forest", "teal")}
+# route goes last, so the frame indices of the older tags stay put.
+BANDS = {"encounter": ("dred", "plum"), "lucky": ("blue", "navy"), "stop": ("amber", "orange"),
+         "upgrade": ("forest", "teal"), "route": ("purple", "plum")}
 
 
 # ---------- the frame ----------
@@ -126,7 +139,7 @@ class Art(hp.Scene):
         super().__init__(AW, AH)
 
     def ground(self, zone, x0=100):
-        _, self.shade, self.leash_col = hp.ZONES[zone]
+        self.shade, self.leash_col = hp.ZONES[zone]["shadow"], hp.ZONES[zone]["leash"]
         tile = hp.TILES[zone].crop((x0, 0, x0 + AW, 64))
         self.img.paste(tile, (0, -4))
 
@@ -694,7 +707,7 @@ def treat_magnet():
 def second_wind():
     a = Art()
     a.grass()
-    a.face("face-owner-dash", "happy", 21, 12)
+    a.face("face-owner-archie", "happy", 21, 12)
     for y, x0 in ((8, 4), (22, 2), (36, 6)):
         a.fill(x0, y, 12, 1, "white")
         a.fill(x0 + 10, y - 1, 3, 1, "white")
@@ -730,6 +743,420 @@ def skip():
     hp.text(a, "SKIP", 4, 4, "white", 2)
     for y in (40, 44, 48):
         a.fill(28, y, 8, 1, "lgrey")
+    return a
+
+
+# ---------- need cards ----------
+
+def stranger_fuss():
+    a = Art()
+    a.ground("street")
+    a.put("spot-stranger", "wave", 52, 54, 1)
+    a.put("dog-duchess", "react", 28, 50)
+    a.lead(28, 36, 22)
+    a.hearts([(14, 8), (26, 3), (6, 18)])
+    a.coins([(6, 32)])
+    return a
+
+
+def stranger_keep_walking():
+    a = Art()
+    a.ground("street")
+    a.put("spot-stranger", "wave", 58, 50)
+    a.put("dog-duchess", "walk", 26, 40, 2)
+    a.lead(26, 26, 18)
+    return a
+
+
+def play_date_play():
+    a = Art()
+    a.ground("park")
+    a.put("other-dog", "walk", 52, 34, 1)
+    a.put("dog-zippy", "react", 26, 52)
+    a.lead(26, 38, 20)
+    a.paste(hp.frame("gag-ball", "roll", 1), 36, 28)
+    a.hearts([(10, 8), (22, 3), (28, 14)])
+    return a
+
+
+def play_date_sniff():
+    a = Art()
+    a.ground("park")
+    a.put("other-dog", "idle", 44, 30)
+    a.put("dog-zippy", "walk", 34, 50, 1)
+    a.lead(34, 36, 30)
+    # scent lines between the noses, as on the nosy need's icon
+    for dx, dy in needs.SCENT:
+        a.fill(38 + dx, 33 + dy, 1, 1, "white")
+        a.fill(38 + dx, 36 + dy, 1, 1, "white")
+    a.hearts([(20, 8)])
+    return a
+
+
+def grumpy_top(g, b):
+    """The grumpy neighbour out on his lawn: a blue dressing gown belted at the waist over a white
+    collar, fists on his hips, a bald crown with grey tufts over the ears, brows down in a scowl
+    and the mouth turned down."""
+    people.torso(g, b, "blue", "navy")
+    g.rect(14, 21 + b, 4, 3, "white")
+    g.rect(15, 24 + b, 2, 2, "white")
+    g.rect(9, 28 + b, 14, 2, "sky")
+    g.rect(20, 28 + b, 3, 2, "blue")
+    # arms akimbo: each upper arm out to the elbow, the forearm back in to a fist on the hip
+    for x0, d in ((5, -1), (23, 1)):
+        g.rect(x0, 22 + b, 4, 4, "blue")
+        g.rect(x0 + 2 * d, 25 + b, 4, 4, "blue")
+        g.rect(x0 - d, 29 + b, 4, 2, "blue")
+    g.rect(8, 29 + b, 3, 3, "skin2")
+    g.rect(21, 29 + b, 3, 3, "skin2")
+    g.rect(3, 26 + b, 1, 3, "navy")
+    g.rect(28, 26 + b, 1, 3, "navy")
+    people.head(g, b, "skin2", "brown", "skin1")
+    for x in (8, 22):
+        g.rect(x, 10 + b, 2, 5, "lgrey")
+    g.rect(13, 5 + b, 3, 1, "skin1")
+    road.face_front(g, 16, 13 + b, "neutral")
+    g.rect(10, 10 + b, 3, 1, "ink")
+    g.p(13, 11 + b, "ink")
+    g.rect(20, 10 + b, 3, 1, "ink")
+    g.p(19, 11 + b, "ink")
+    g.rect(14, 18 + b, 4, 1, "dbrown")
+    g.p(13, 19 + b, "dbrown")
+    g.p(18, 19 + b, "dbrown")
+
+
+# A tied poop bag: two ears (e) over the knot (k), the bag (f) with its shade (s) and a glint (h).
+BAG = ["e...e", ".eke.", "..k..", ".fff.", "fhffs", "ffffs", ".fss."]
+
+
+def accident_bag():
+    """Clean up with a bag: the spot wiped clean and sparkling, the tied bag arcing into a bin, the
+    dog walking on."""
+    a = Art()
+    a.ground("street")
+    a.put("bin", "idle", 62, 40)
+    for x, y in ((34, 34), (36, 28), (39, 22), (42, 17), (46, 13), (50, 11)):
+        a.fill(x, y, 1, 1, "white")
+    # pink, so it reads apart from the green bin
+    a.paste(pixmap(BAG, {"e": "pink", "k": "mauve", "f": "pink", "s": "mauve", "h": "white"}), 52, 5)
+    a.sparkle(30, 42, "white")
+    a.sparkle(37, 46, "yellow")
+    a.sparkle(26, 48, "yellow")
+    a.put("dog-biscuit", "walk", 14, 44, 1)
+    a.lead(14, 30, 10)
+    return a
+
+
+def accident_walk_on():
+    """Walk on: the pile left at the lawn's edge with its stink, the grumpy neighbour on his lawn
+    with his fists on his hips, and the dog trotting off."""
+    a = Art()
+    a.ground("street")
+    a.fill(0, 0, 26, AH, "green")
+    for i in range(12):
+        a.fill((i * 7) % 24, (i * 13) % AH, 1, 2, "dgreen")
+    a.fill(26, 0, 2, AH, "grey")
+    neighbour = to_image(road.dressed(grumpy_top, legs="lgrey", shoes="pink").px)
+    shade, a.shade = a.shade, "dgreen"
+    a.shadow(14, 52, neighbour.width)
+    a.shade = shade
+    a.paste(neighbour, -2, 4)
+    a.paste(to_image(needs.accident_spot(0).px), 30, 34)
+    a.stink(32, 24, 2)
+    a.fill(30, 2, 2, 5, "red")
+    a.fill(30, 8, 2, 2, "red")
+    a.put("dog-biscuit", "walk", 58, 38, 2)
+    a.lead(58, 24, 64)
+    return a
+
+
+# ---------- forks ----------
+# A fork's path card looks down the zone's road to a cross street, the zone's far side beyond
+# it as its backdrop draws it, in miniature. Rows: the far side stands on row FAR_Y, then the
+# far sidewalk from WALK_Y, the far curb from CURB_Y, the cross street from CROSS_Y with its
+# centre line on LINE_Y, and from STUB_Y the zone's road in projection, sampled from its road
+# strip: SPREAD * (row centre - HORIZON) pixels either side of the centre, the curb, sidewalk
+# and lawn beside it.
+FAR_Y, WALK_Y, CURB_Y, CROSS_Y, LINE_Y, STUB_Y = 21, 22, 25, 26, 29, 33
+HORIZON, SPREAD = 12.0, 0.75
+FOCAL = 16       # a stub row samples strip row FOCAL / scale: 1.5 rows apart near, 5 far
+DASH = 5.0       # a stub divider's dashes repeat every 1 / DASH of log(row centre - HORIZON)
+MINI = (2, 6, 5, 7)   # a far house's windows and door, as backdrops.house parts
+
+
+def tufted(lawn="green", rate=0.05):
+    def paint(px, py):
+        return bd.dk(lawn) if bd.noise(px, py) < rate or bd.noise(px, py - 1) < rate else lawn
+    return paint
+
+
+def flecked(base, fleck, n=23, second=None):
+    """A ground of base with about one fleck in n, and a sparser second fleck."""
+    def paint(px, py):
+        if bd.hashed(px, py, n):
+            return fleck
+        return second if second and bd.hashed(px, py + 3, n + 8) else base
+    return paint
+
+
+def leafy(paint, rate=0.06):
+    """paint, strewn with fallen leaves in orange, rust and ochre."""
+    def leaves(px, py):
+        n = bd.noise(px + 7, py * 3)
+        return ("orange", "rust", "ochre")[int(n * 300) % 3] if n < rate else paint(px, py)
+    return leaves
+
+
+def boards(px, py):
+    """The promenade's boards across the cross street, a seam every 5 columns."""
+    return "tan" if px % 5 == 0 else flecked("cream", "tan", 27)(px, py)
+
+
+class ZoneView(Art):
+    """A zone's path card illustration. road(px, py) paints the cross street, yard(px, py) the
+    far side's ground and lawn(px, py) the near corners past the sidewalk; mark is the cross
+    street's centre line, dashed (on, period) or solid with None, over an edge row where given.
+    walk and curb are the sidewalks' and curbs' colours, None where the zone has none."""
+
+    def __init__(self, zone, road, yard, mark, dash, curb="grey", walk="lgrey", lawn=tufted(), edge=None):
+        super().__init__()
+        self.road_px, self.yard, self.lawn = road, yard, lawn
+        self.mark, self.dash, self.edge, self.curb, self.walk = mark, dash, edge, curb, walk
+        ground, lines = roads.ZONES[zone]
+        g = Grid(roads.W, roads.H)
+        ground(g)
+        self.strip = [row[:] for row in g.px]
+        lines(g)
+        # the stub's dividers take the strip's colour, solid or dashed as the strip's are
+        marked = [g.px[y][roads.DIVIDERS[0]] for y in range(roads.H)
+                  if g.px[y][roads.DIVIDERS[0]] != self.strip[y][roads.DIVIDERS[0]]]
+        self.lane = Counter(marked).most_common(1)[0][0]
+        self.duty = 1 if len(marked) == roads.H else max(0.5, len(marked) / roads.H)
+        # lines along the road (board seams): columns off the base colour in 3 rows of 4
+        base = Counter(c for row in self.strip for c in row).most_common(1)[0][0]
+        lanes = {x + d for x in roads.DIVIDERS for d in (0, 1)}
+        self.seams = [x for x in range(8, roads.W - 8) if x not in lanes
+                      and sum(self.strip[y][x] != base for y in range(roads.H)) >= 0.75 * roads.H]
+
+    def sky(self, top, low):
+        self.fill(0, 0, AW, FAR_Y, low)
+        self.fill(0, 0, AW, 4, top)
+        for i in range(0, AW, 5):
+            self.fill(i, 4 + (i // 5) % 2, 5, 1, top)
+
+    def treeline(self, row, cols, phase, lo, hi):
+        """Treetops along row, rising lo to hi rows, over a lawn down to the far side's ground."""
+        for x in range(AW):
+            h = lo + round((hi - lo) * (0.5 + 0.5 * math.sin(x * 0.45 + phase) * math.cos(x * 0.21)))
+            self.fill(x, row - h, 1, h, cols[0])
+            self.fill(x, row - h, 1, 1, cols[1])
+        self.fill(0, row, AW, FAR_Y - row, "green")
+
+    def street(self):
+        """The far yard, sidewalk and curb, the cross street and the stub with its corners."""
+        for py in range(FAR_Y, AH):
+            for px in range(AW):
+                self.fill(px, py, 1, 1, self.ground_px(px, py))
+        for px in range(AW):
+            if not self.dash or (px + 2) % self.dash[1] < self.dash[0]:
+                self.fill(px, LINE_Y, 1, 1, self.mark)
+                if self.edge:
+                    self.fill(px, LINE_Y + 1, 1, 1, self.edge)
+        self.lanes()
+
+    def walk_px(self, px, py):
+        return "grey" if bd.hashed(px, py, 29) else self.walk
+
+    def ground_px(self, px, py):
+        if py < WALK_Y:
+            return self.yard(px, py)
+        if py < CURB_Y:
+            return self.walk_px(px, py) if self.walk else self.lawn(px, py)
+        if py < CROSS_Y:
+            return self.curb or self.road_px(px, py)
+        if py < STUB_Y:
+            return self.road_px(px, py)
+        hw = SPREAD * (py + 0.5 - HORIZON)
+        a = abs(px + 0.5 - AW / 2)
+        if a < hw:
+            return self.stub_px(px, py, hw / bd.ROAD)
+        if self.curb and a < hw + 1:
+            return self.curb
+        if self.walk and (py < STUB_Y + 3 or a < hw * bd.WALK / bd.ROAD):
+            return self.walk_px(px, py)
+        return self.lawn(px, py)
+
+    def stub_px(self, px, py, s):
+        """The strip at scale s: the pixel under this one's centre, or a seam in its span, so
+        the 1px seams along the road never drop out."""
+        row = self.strip[int(FOCAL / s) % roads.H]
+        u0, u1 = roads.W / 2 + (px - AW / 2) / s, roads.W / 2 + (px + 1 - AW / 2) / s
+        seam = next((x for x in self.seams if u0 <= x < u1), None)
+        return row[seam if seam is not None else min(roads.W - 1, int((u0 + u1) / 2))]
+
+    def lanes(self):
+        """The stub's four dividers, 1px wide, the dashes at least half on and shortening with
+        distance."""
+        for py in range(STUB_Y, AH):
+            if self.duty < 1 and (DASH * math.log(py + 0.5 - HORIZON)) % 1 >= self.duty:
+                continue
+            s = SPREAD * (py + 0.5 - HORIZON) / bd.ROAD
+            for x in roads.DIVIDERS:
+                self.fill(math.floor(AW / 2 + (x + 1 - roads.W / 2) * s), py, 1, 1, self.lane)
+
+
+def woof_way_view():
+    a = ZoneView("woof-way", flecked("dslate", "slate", 29, "navy"), tufted(), "lgrey", (3, 6))
+    a.sky("cyan", "sky")
+    bd.cloud(a, 1, 7, 18, 3, 0)
+    bd.cloud(a, 54, 5, 14, 2, 1)
+    # the house at the end of the street, its neighbours cut by the edges, a tree in each gap
+    for x in (14, 61):
+        bd.tree(a, x, 9, r=5, base=FAR_Y, girth=2)
+    for x, w, wall_c, roof, door, top in ((-21, 28, "pink", "purple", "white", 4),
+                                          (23, 30, "sky", "navy", "red", 3),
+                                          (69, 28, "cream", "dred", "sky", 4)):
+        bd.house(a, x, w, wall_c, roof, door, top=top, base=FAR_Y, roof_h=8, parts=MINI)
+    a.street()
+    bd.fence(a, FAR_Y - 3, 0, 32, h=4)
+    bd.fence(a, FAR_Y - 3, 46, AW, h=4)
+    return a
+
+
+def bark_park_view():
+    trail = flecked("tan", "brown", 13, "cream")
+    a = ZoneView("bark-park", trail, tufted(), "dbrown", (2, 5), curb=None, walk=None)
+    a.sky("cyan", "sky")
+    bd.cloud(a, 56, 4, 16, 3, 2)
+    a.treeline(15, ("dgreen", "green"), 0, 2, 5)
+    bd.tree(a, 3, 9, r=6, base=18, girth=2)
+    bd.tree(a, 72, 10, r=5, base=18, girth=2)
+    # the park gate's sign at the end of the path
+    for x in (12, 62):
+        a.fill(x, 8, 2, FAR_Y - 8, "dbrown")
+    a.fill(9, 2, 57, 9, "dgreen")
+    a.fill(9, 2, 57, 1, "green")
+    a.fill(9, 10, 57, 1, "forest")
+    bd.word(a, "BARK PARK", AW / 2, 0, "cream")
+    a.street()
+    # the path on through the gate, widening to the cross trail
+    for py in range(13, CROSS_Y):
+        half = 7 + (py - 13) // 2
+        for px in range(round(AW / 2) - half, round(AW / 2) + half):
+            a.fill(px, py, 1, 1, trail(px, py))
+    return a
+
+
+def shops_view():
+    paving = flecked("lgrey", "grey", 29)
+    a = ZoneView("sniff-street-shops", flecked("lgrey", "white", 19), paving, "slate", None, lawn=paving)
+    a.sky("cyan", "sky")
+    # the shopfronts across the street, the bookshop at the end of it: a sign board, a striped
+    # awning, the shop window and the door
+    for x, w, top, wall_c, awn, sign in ((-36, 44, 4, "cream", "dgreen", "PETS"),
+                                         (11, 54, 2, "tan", "blue", "BOOKS"),
+                                         (68, 40, 4, "lgrey", "amber", "BAKERY")):
+        a.fill(x, top, w, FAR_Y - top, wall_c)
+        a.fill(x, top, w, 2, bd.dk(wall_c))
+        a.fill(x + w - 2, top, 2, FAR_Y - top, bd.dk(wall_c))
+        a.fill(x + 4, 5, w - 8, 7, "plum")
+        bd.word(a, sign, x + w / 2, 2, "cream")
+        for i in range(0, w - 4, 6):
+            a.fill(x + 2 + i, 13, 3, 2, awn)
+            a.fill(x + 5 + i, 13, 3, 2, "white")
+        a.fill(x + 2, 15, w - 4, 1, bd.dk(awn))
+        a.fill(x + 4, 16, w - 20, 5, "plum")
+        a.fill(x + 5, 17, w - 22, 4, "cyan")
+        a.fill(x + 6, 18, 3, 1, "white")
+        a.fill(x + w - 13, 16, 7, 5, "dbrown")
+        a.fill(x + w - 8, 18, 1, 1, "amber")
+    a.street()
+    return a
+
+
+def long_way_home_view():
+    lawn = leafy(tufted())
+    a = ZoneView("the-long-way-home", flecked("skin2", "skin1", 31), lawn, "white", (4, 8), edge="plum", lawn=lawn)
+    a.sky("amber", "yellow")
+    bd.streaks(a, ((2, 3, 22), (50, 5, 26)))
+    # the low sun setting at the end of the street, behind the trees past the back yards
+    disc(a, 37, 16, 10, "cream")
+    disc(a, 37, 16, 7, "white")
+    bd.streaks(a, ((24, 11, 28),))
+    a.treeline(17, ("rust", "orange"), 4, 1, 4)
+    bd.tree(a, 23, 11, "orange", "rust", r=4, base=FAR_Y, girth=2)
+    # porch houses either side of the sunset
+    for x, w, wall_c, roof, door in ((-12, 28, "white", "dred", "dgreen"), (59, 28, "skin1", "navy", "red")):
+        bd.house(a, x, w, wall_c, roof, door, top=3, base=FAR_Y, roof_h=8, parts=MINI)
+        a.fill(x + 2, FAR_Y - 7, w - 4, 1, "brown")
+        a.fill(x + 3, FAR_Y - 6, 1, 6, "brown")
+        a.fill(x + w - 4, FAR_Y - 6, 1, 6, "brown")
+    a.street()
+    bd.fence(a, FAR_Y - 3, 26, 52, h=4)
+    return a
+
+
+def snooze_crescent_view():
+    a = ZoneView("snooze-crescent", flecked("grey", "slate", 23), tufted(), "white", (2, 6))
+    # a dusk sky: purple above, mauve, then pink low down, a crescent moon and the first stars
+    a.sky("purple", "mauve")
+    a.fill(0, 10, AW, FAR_Y - 10, "pink")
+    for i in range(0, AW, 5):
+        a.fill(i, 9 - (i // 5) % 2, 5, 1, "pink")
+    for dy in range(-4, 5):
+        for dx in range(-4, 5):
+            if dx * dx + dy * dy <= 16 and (dx + 2) ** 2 + (dy - 1) ** 2 > 10:
+                a.fill(64 + dx, 5 + dy, 1, 1, "cream")
+    for x, y in ((6, 2), (20, 5), (33, 1), (48, 3), (56, 8), (72, 1)):
+        a.fill(x, y, 1, 1, "white")
+    # quiet houses, curtains drawn, dark trees between them
+    for x in (14, 61):
+        bd.tree(a, x, 11, "dgreen", "forest", r=5, base=FAR_Y, girth=2)
+    for x, w, wall_c, roof, door, curtain, top in ((-21, 28, "lgrey", "purple", "navy", "pink", 6),
+                                                   (23, 30, "cream", "navy", "dred", "tan", 5),
+                                                   (69, 28, "sky", "dslate", "white", "pink", 6)):
+        bd.house(a, x, w, wall_c, roof, door, top=top, base=FAR_Y, roof_h=8, parts=MINI, curtains=curtain)
+    a.street()
+    bd.fence(a, FAR_Y - 3, 0, 32, h=4)
+    bd.fence(a, FAR_Y - 3, 46, AW, h=4)
+    bd.fence_cat(a, 50, FAR_Y - 3, "orange", "amber")
+    return a
+
+
+def paws_promenade_view():
+    a = ZoneView("paws-promenade", boards, flecked("lgrey", "grey", 29), "dbrown", (4, 9), curb=None)
+    a.sky("cyan", "sky")
+    bd.cloud(a, 40, 4, 20, 3, 4)
+    # the far bank's trees and the river, with ducks and a rowboat
+    for cx, top, r in ((6, 6, 5), (30, 5, 6), (66, 7, 4)):
+        bd.tree(a, cx, top, "dgreen", "forest", r=r, base=10, girth=2)
+    a.fill(0, 9, AW, 1, "green")
+    a.fill(0, 10, AW, 1, "grey")
+    for py in range(11, 17):
+        for px in range(AW):
+            c = "blue" if py < 13 else "sky"
+            if bd.hashed(px // 3, py, 9) and py % 2 == 0:
+                c = "cyan" if py > 13 else "sky"
+            a.fill(px, py, 1, 1, "white" if bd.hashed(px, py, 41) else c)
+    for x in (10, 16):
+        a.fill(x, 14, 4, 1, "white")
+        a.fill(x + 2, 13, 2, 1, "white")
+        a.fill(x + 4, 13, 1, 1, "amber")
+    a.fill(46, 13, 12, 2, "brown")
+    a.fill(47, 15, 10, 1, "dbrown")
+    a.fill(51, 12, 2, 1, "red")
+    # the embankment wall, the railing over the water and the promenade's lamps
+    a.fill(0, 17, AW, 1, "lgrey")
+    a.fill(0, 18, AW, 3, "grey")
+    a.street()
+    for x in range(1, AW, 6):
+        a.fill(x, FAR_Y - 4, 1, 5, "lgrey")
+    a.fill(0, FAR_Y - 4, AW, 1, "lgrey")
+    a.fill(0, FAR_Y - 2, AW, 1, "lgrey")
+    for x in (24, 54):
+        a.fill(x, FAR_Y - 12, 1, 13, "dslate")
+        a.fill(x - 1, FAR_Y - 15, 3, 3, "navy")
+        a.fill(x, FAR_Y - 14, 1, 1, "yellow")
     return a
 
 
@@ -771,7 +1198,40 @@ ILLUSTRATIONS = {
     "card-second-wind": second_wind,
     "card-sweet-talker": sweet_talker,
     "card-skip": skip,
+    "card-stranger-loves-fuss": stranger_fuss,
+    "card-stranger-loves-keep-walking": stranger_keep_walking,
+    "card-play-date-play": play_date_play,
+    "card-play-date-sniff": play_date_sniff,
+    "card-accident-bag": accident_bag,
+    "card-accident-walk-on": accident_walk_on,
+    "card-zone-woof-way": woof_way_view,
+    "card-zone-bark-park": bark_park_view,
+    "card-zone-sniff-street-shops": shops_view,
+    "card-zone-the-long-way-home": long_way_home_view,
+    "card-zone-snooze-crescent": snooze_crescent_view,
+    "card-zone-paws-promenade": paws_promenade_view,
 }
+
+
+def card_kind(key):
+    """The frame an illustration shows in, from the data file that names it: a fork's path card
+    is route, a forced stop stop, an upgrade and Skip upgrade, a lucky encounter and a need's
+    payoff card lucky, and any other encounter or need card encounter."""
+    if key.startswith("card-zone-"):
+        return "route"
+    quoted = f'"{key}"'
+    if quoted in hp.data("forcedStops"):
+        return "stop"
+    if key == "card-skip" or quoted in hp.data("upgrades"):
+        return "upgrade"
+    for name in ("encounters", "needs"):
+        src = hp.data(name) if os.path.exists(f"src/data/{name}.ts") else ""
+        if quoted in src:
+            head = src[:src.index(quoted)]
+            entry = src[[m.end() for m in re.finditer(r"\n  \w+: \{", head)][-1]:]
+            if re.search(r'\n    kind: "(\w+)"', entry).group(1) in ("lucky", "payoff"):
+                return "lucky"
+    return "encounter"
 
 
 def frame_sprite():
@@ -795,15 +1255,14 @@ def mock_card(kind, key, large=False):
 def preview(out, scale=3):
     """Every illustration in a normal card, then one enlarged card per card type."""
     keys = list(ILLUSTRATIONS)
-    kinds = ["encounter"] * 11 + ["lucky"] * 6 + ["stop"] * 12 + ["upgrade"] * 9 + ["encounter"]
     cols = 10
     rows = (len(keys) + cols - 1) // cols
     big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-return"),
-           ("stop", "card-kid-wants-to-pet-pet"), ("upgrade", "card-belly-rubs")]
+           ("route", "card-zone-woof-way"), ("stop", "card-kid-wants-to-pet-pet"), ("upgrade", "card-belly-rubs")]
     width = max((CW + 6) * cols, (LW + 6) * len(big))
     sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), hp.rgb("ink"))
-    for i, (key, kind) in enumerate(zip(keys, kinds)):
-        card = mock_card(kind, key).resize((CW * scale, CH * scale), Image.NEAREST)
+    for i, key in enumerate(keys):
+        card = mock_card(card_kind(key), key).resize((CW * scale, CH * scale), Image.NEAREST)
         sheet.paste(card, ((i % cols) * (CW + 6) * scale, (i // cols) * (CH + 6) * scale))
     for i, (kind, key) in enumerate(big):
         card = mock_card(kind, key, True).resize((LW * scale, LH * scale), Image.NEAREST)

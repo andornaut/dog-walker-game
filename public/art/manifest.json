@@ -1729,6 +1729,14 @@
       "png": "images/backdrop-woof-way.png"
     },
     {
+      "key": "card-accident-bag",
+      "png": "images/card-accident-bag.png"
+    },
+    {
+      "key": "card-accident-walk-on",
+      "png": "images/card-accident-walk-on.png"
+    },
+    {
       "key": "card-belly-rubs",
       "png": "images/card-belly-rubs.png"
     },
@@ -1809,6 +1817,14 @@
       "png": "images/card-photo-op-pose.png"
     },
     {
+      "key": "card-play-date-play",
+      "png": "images/card-play-date-play.png"
+    },
+    {
+      "key": "card-play-date-sniff",
+      "png": "images/card-play-date-sniff.png"
+    },
+    {
       "key": "card-puddle-through",
       "png": "images/card-puddle-through.png"
     },
@@ -1865,6 +1881,14 @@
       "png": "images/card-stop-sign-wait.png"
     },
     {
+      "key": "card-stranger-loves-fuss",
+      "png": "images/card-stranger-loves-fuss.png"
+    },
+    {
+      "key": "card-stranger-loves-keep-walking",
+      "png": "images/card-stranger-loves-keep-walking.png"
+    },
+    {
       "key": "card-sweet-talker",
       "png": "images/card-sweet-talker.png"
     },
@@ -1879,6 +1903,30 @@
     {
       "key": "card-treat-magnet",
       "png": "images/card-treat-magnet.png"
+    },
+    {
+      "key": "card-zone-bark-park",
+      "png": "images/card-zone-bark-park.png"
+    },
+    {
+      "key": "card-zone-paws-promenade",
+      "png": "images/card-zone-paws-promenade.png"
+    },
+    {
+      "key": "card-zone-sniff-street-shops",
+      "png": "images/card-zone-sniff-street-shops.png"
+    },
+    {
+      "key": "card-zone-snooze-crescent",
+      "png": "images/card-zone-snooze-crescent.png"
+    },
+    {
+      "key": "card-zone-the-long-way-home",
+      "png": "images/card-zone-the-long-way-home.png"
+    },
+    {
+      "key": "card-zone-woof-way",
+      "png": "images/card-zone-woof-way.png"
     },
     {
       "key": "help-cards",
