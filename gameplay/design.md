@@ -28,7 +28,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 ### Screen and controls
 
 - Web, phone browser first. Touch and keyboard; mouse is not planned
-- Portrait, ¾ top-down view, 5 lanes
+- Portrait, ¾ top-down view, 5 lanes of 64px (the road spans x 20 to 340 at the pack); road sprites are 40px, people 40×60
 - Layout: a shorter screen (360×560). From the top: the status bar (money, treat count, zone progress, a Home button and pause; mute is in Settings and on the M key); a backdrop band showing the current zone, where scenery gags play; the road across the full width, scrolling all the way to the top of its area; and a row of doghouses along the bottom, one per dog slot. Cards cover the paused, dimmed road; the status bar and doghouses stay visible
 - **Home button:** a house icon in the top bar pauses the walk and asks "Head home? You keep tips and earlier zones' fees. This zone pays nothing." with Keep walking (the default, key 1) and Head home. Head home (here or in the pause menu) keeps tips and earlier zones' fees; the current zone pays nothing
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 4.5 seconds of road are visible ahead. Lanes, distances and collisions are unchanged by it
