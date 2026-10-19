@@ -8,8 +8,6 @@ Priority:
 - **core:** needed before the game ships, outside the Milestone 6 list
 - **later:** nice to have; placeholders are acceptable
 
-Sizes marked TBD depend on an open decision in the style guide.
-
 ## Characters (road)
 
 Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
@@ -100,7 +98,7 @@ Redrawn for the pseudo-3D road at 0.75× and 0.5×, drawn by `art/tools/minis.py
 | Small tip, treat                        | `tip@75`, `treat@75`, `tip@50`, `treat@50`                              | sprite | 12×12, 8×8   | core     |                                                 |
 | Small cone, bin, hydrant                | `<key>@75`, `<key>@50`                                                  | sprite | 24×24, 16×16 | core     |                                                 |
 | Small dogs                              | `dog-<name>@75`, `dog-<name>@50`                                        | sprite | 24×24, 16×16 | core     | All nine dogs                                   |
-| Small skunk, cloud, other dog, squirrel | `skunk@75`, `skunk@50`, `skunk-cloud@50`, `other-dog@50`, `squirrel@50` | sprite |              | later    | Lose eyes, head or dither fill at runtime scale |
+| Small skunk, cloud, other dog, squirrel | `skunk@75`, `skunk@50`, `skunk-cloud@50`, `other-dog@50`, `squirrel@50` | sprite |              | core     | Lose eyes, head or dither fill at runtime scale |
 
 ## Pickups (road)
 
@@ -133,10 +131,10 @@ Floating numbers (`+$2`, `-1 ♥`) use the pixel font, not sprites.
 
 ## Road and scenery (per zone)
 
-| Asset          | Key                                    | Type   | Size                | Priority | Notes                                                                                                                                                                                                                                                          |
-| -------------- | -------------------------------------- | ------ | ------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Zone backdrops | `backdrop-<zone>`                      | image  | 360×150             | core     | woof-way, bark-park, sniff-street-shops, the-long-way-home. The street recedes to a vanishing point at (220, 58); the bottom row continues the road: road x 150..289, curbs 148..149 and 290..291, sidewalks 125..147 and 292..314. Gags sit on the near lawns |
-| Scenery gags   | `gag-cat`, `gag-sprinkler`, `gag-ball` | sprite | 24×24, 32×24, 14×14 | core     | In the backdrop band, no card, no collision: a cat on a fence (`idle` tail swish and blink, `react` ears up), a sprinkler (`spray`), a ball rolling along the sidewalk (`roll`)                                                                                |
+| Asset          | Key                                    | Type   | Size                | Priority | Notes                                                                                                                                                                                                                                                                                                                                                                                                        |
+| -------------- | -------------------------------------- | ------ | ------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Zone backdrops | `backdrop-<zone>`                      | image  | 360×150             | core     | woof-way, bark-park, sniff-street-shops, the-long-way-home. The street recedes to a vanishing point at (220, 58). Row 149 continues the road: Woof Way sidewalk 125..147, curb 148..150, road from 151; Bark Park grass to 150, path from 151; Sniff Street Shops paving to 147, curb 148..151, road from 152; The Long Way Home sidewalk 125..147, curb 148..149, road from 150. Gags sit on the near lawns |
+| Scenery gags   | `gag-cat`, `gag-sprinkler`, `gag-ball` | sprite | 24×24, 32×24, 14×14 | core     | In the backdrop band, no card, no collision: a cat on a fence (`idle` tail swish and blink, `react` ears up), a sprinkler (`spray`), a ball rolling along the sidewalk (`roll`)                                                                                                                                                                                                                              |
 
 Four zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home. Each zone needs a road that tiles vertically across the 280px road width, plus a few non-colliding scenery props at the road edges.
 
@@ -145,7 +143,7 @@ Four zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Lon
 | Road strip      | `road-<zone>`       | image | 280×64 | core     | Seamless vertically; base is the zone's road colour; 2px lane dividers at x = 56k−1; drawn by `art/tools/roads.py`                                   |
 | Zone transition | `road-<zone>-start` | image | 280×64 | later    | Bottom rows are the previous zone's strip, top rows this zone's, joined by a crossing (kerb and zebra, stone sill, bricks on end); Woof Way has none |
 
-Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (later). Milestone 6 can ship a single `road-street` and reuse it.
+Four zones give 4 road strips (core) plus 3 transitions (later); Woof Way has no transition strip.
 
 ## Dog column
 
@@ -229,7 +227,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Badge celebration          | `fx-confetti`                                        | sprite        | 64×64                                      | core     | Confetti burst behind a badge as it is earned (tag `play`, 10 frames at 80ms): pieces fly out unevenly, tumble and fall; the owners cheer with their `happy` faces                                                      |
 | Hint bubble                | `ui-hint`                                            | image         | 24×24 nine-slice                           | core     | First-time hints: a one-line bubble the first time each thing appears                                                                                                                                                   |
 | Hint tail                  | `ui-hint-tail`                                       | image         | 8×6                                        | core     | Points from the hint bubble at what it explains                                                                                                                                                                         |
-| Selection frame            | `ui-select`                                          | sprite        | 24×24 nine-slice                           | core     | Thick amber frame around a picked tile; tag `pulse` (2 frames)                                                                                                                                                          |
+| Selection frame            | `ui-select`                                          | sprite        | 24×24 nine-slice                           | core     | Ink edge either side of a 2px pulsing yellow band, drawn 3px outside a selected tile or active control; tag `pulse` (2 frames)                                                                                          |
 | Affordable frame           | `ui-afford`                                          | sprite        | 24×24 nine-slice                           | core     | Amber line with a plum keyline and gold coin studs, 2px outside an affordable tile; tag `glint` (4 at 400ms); a selected tile shows only `ui-select`                                                                    |
 | Detail card                | `ui-detail-card`, `ui-detail-band`, `ui-detail-well` | image         | 24×24 nine-slice, 24×22 three-slice, 68×68 | core     | Hold-to-open card for a dog or gear item: body, title band and a recessed portrait well                                                                                                                                 |
 | Step plate                 | `ui-step`, `ui-step-number`                          | image, sprite | 24×24 nine-slice, 16×16                    | core     | Home screen steps "1 Walker", "2 Dogs", "3 Gear (optional)"; the badge has tags `1`, `2`, `3`, `tick`                                                                                                                   |
@@ -258,6 +256,7 @@ One illustration per page of the in-game "How to walk" screen, composed from the
 | Switch         | `ui-switch`                                                                       | sprite | 32×16                       | core     | Settings on/off: `on` knob right, white tick on forest; `off` knob left, white cross on slate                                                                                               |
 | Panel          | `ui-panel`                                                                        | image  | 24×24 nine-slice            | core     | Shop, end screen, pause menu with Head home                                                                                                                                                 |
 | Pause icon     | `icon-pause`                                                                      | image  | 16×16                       | core     | Top bar; opens the pause menu                                                                                                                                                               |
+| Play icon      | `icon-play`                                                                       | image  | 16×16                       | core     | Replaces `icon-pause` in the top bar while paused; amber triangle for the navy `ui-icon-button` face                                                                                        |
 | Help icon      | `icon-help`                                                                       | image  | 16×16                       | core     | Opens the help screen, on `ui-icon-button`                                                                                                                                                  |
 | Close icon     | `icon-close`                                                                      | image  | 16×16                       | core     | Closes panels and the enlarged card                                                                                                                                                         |
 | Lock icon      | `icon-lock`                                                                       | image  | 16×16                       | core     | Locked dogs, gear and slots                                                                                                                                                                 |
