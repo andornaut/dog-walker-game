@@ -6,10 +6,12 @@ type LineKey = Exclude<keyof HomeText, "bubble">;
 export const HOME_TEXT_FIELDS = {
   dogBought: ["dog"],
   dogCantAfford: ["amount", "dog"],
+  gearBought: ["gear"],
   hint: [],
   packCount: ["count", "max"],
   packDogsMany: ["count"],
   packDogsOne: ["count"],
+  slotBought: ["slot"],
   slotBuy: [],
   slotSave: ["amount"],
   slotSign: ["price", "slot"],

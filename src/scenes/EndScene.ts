@@ -1,22 +1,34 @@
-import { type Input, Scene } from "phaser";
+import { type GameObjects, type Input, Scene } from "phaser";
 
-import { ownerFaceKey } from "../assets/spriteKeys";
+import { itemAt } from "../arrays";
+import { dogSpriteKey, ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
 import { dollarText } from "../home/home";
+import {
+  homecomers,
+  type ReturnPhase,
+  returnPhase,
+  walkUpOffset,
+  waveOffset,
+} from "../home/returnHome";
 import { isConfirmKey } from "../input/keyBindings";
+import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
 import { containsPoint, type Rect } from "../layout/rect";
 import { stopWakeLock } from "../pwa";
 import { cents } from "../rules/units";
+import type { LastWalk } from "../save/schema";
 import type { EndReason } from "../state/runState";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
-import { fillRect } from "./draw";
+import { drawPixelLine, drawShadow, fillRect } from "./draw";
+import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
-import { currentSettings, lastRunEnd, profileSave } from "./profileStore";
+import { currentSettings, lastRunEnd, profileSave, walkerSpriteKey } from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
+import { addStandingSprite, firstTag, spriteMetrics } from "./sprites";
 import { addMenuButton, addPanel, addTagImage, fitText, showTag, TEXT_SCALE } from "./uiKit";
 
 const TITLES: Readonly<Record<EndReason, string>> = {
@@ -26,6 +38,7 @@ const TITLES: Readonly<Record<EndReason, string>> = {
 };
 // The menus mock's end screen, with every text at 2x: the rows are taller than the mock's, so
 // the quips sit lower, the panel is taller and the badges earned go in a second panel under it.
+const END_SCREEN_KEY = "screen-end";
 const LOGO = { key: "logo", x: 116, y: 52 };
 const PANEL: Rect = { height: 312, width: 312, x: 24, y: 140 };
 const RIBBON = { dropMs: 360, key: "ui-new-best", riseFrom: 12, x: 144, y: 130 };
@@ -45,6 +58,28 @@ const QUIPS = {
   well: { size: 34, x: 36, y: 1 },
 };
 const BADGES: Rect = { height: 118, width: 344, x: 8, y: 458 };
+const BADGE_SOUND_AFTER_BEST_MS = 1200;
+// The return home, between the logo and the panel: the walker and pack walk up the front path
+// from behind the panel's top edge to the house's step while the owners wave either side.
+// The house, lawn, path and step are part of screen-end; without it a tan path and step
+// cross a strip of lawn. Spots are where feet end up, in pack order; the pack starts
+// returnHome's risePx lower.
+const RETURN_HOME_SCENE = {
+  dogs: [
+    { x: 166, y: 124 },
+    { x: 194, y: 123 },
+    { x: 152, y: 126 },
+  ],
+  lawn: { height: 20, width: 360, x: 0, y: 120 },
+  owners: [
+    { x: 144, y: 128 },
+    { x: 216, y: 128 },
+    { x: 116, y: 128 },
+  ],
+  path: { height: 12, width: 24, x: 168, y: 128 },
+  step: { height: 4, width: 32, x: 164, y: 124 },
+  walker: { x: 180, y: 128 },
+} as const;
 // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone.
 const BUTTON: Rect = { height: 44, width: 264, x: 48, y: 584 };
 
@@ -65,6 +100,8 @@ function amountColor(amount: number): number {
 // for a new best walk, and a closing line from each owner. Badges the run earned burst in
 // under the panel while the owners still walking cheer. Back home returns to the start screen.
 export class EndScene extends Scene {
+  private returnHomeStep: (() => void) | undefined;
+
   constructor() {
     super(SCENE_KEYS.end);
   }
@@ -75,6 +112,7 @@ export class EndScene extends Scene {
     const save = profileSave(this);
     const walk = save.stats.lastWalk;
     const goHome = () => this.scene.start(SCENE_KEYS.start);
+    this.returnHomeStep = undefined;
     if (walk === null) {
       goHome();
       return;
@@ -82,8 +120,8 @@ export class EndScene extends Scene {
     const ended = lastRunEnd(this);
     const earned = ended?.achievements ?? [];
     const reduced = currentSettings(this).reducedMotion;
-    if (this.textures.exists("screen-end")) {
-      this.add.image(0, 0, "screen-end").setOrigin(0);
+    if (this.textures.exists(END_SCREEN_KEY)) {
+      this.add.image(0, 0, END_SCREEN_KEY).setOrigin(0);
     } else {
       fillRect(this.add.graphics(), PALETTE.darkBrown, {
         height: SCREEN_CONFIG.height,
@@ -92,6 +130,8 @@ export class EndScene extends Scene {
         y: 0,
       });
     }
+    this.addReturnHome(reduced, walk);
+    // Over the pack: the walker's head reaches the logo's bottom edge.
     if (this.textures.exists(LOGO.key)) {
       this.add.image(LOGO.x, LOGO.y, LOGO.key).setOrigin(0);
     }
@@ -112,6 +152,7 @@ export class EndScene extends Scene {
     title(SCREEN_CONFIG.width / 2, TITLE_Y, TITLES[walk.outcome], PALETTE.plum, 0.5);
     if (newBest) {
       this.showRibbon(reduced);
+      soundboardOf(this).play("newBest");
     }
 
     let y = BREAKDOWN.top;
@@ -175,6 +216,10 @@ export class EndScene extends Scene {
 
     if (celebrating) {
       addBadgeCelebration(this, reduced, BADGES, earned);
+      // After a new best's fanfare, so the two do not play over each other.
+      this.time.delayedCall(newBest ? BADGE_SOUND_AFTER_BEST_MS : 0, () =>
+        soundboardOf(this).play("badge"),
+      );
     }
 
     const button = addMenuButton(this, BUTTON, "Back home");
@@ -195,6 +240,101 @@ export class EndScene extends Scene {
         goHome();
       }
     });
+  }
+
+  // The walker and the dogs still walking come up the front path, then their owners wave.
+  // Drawn before the panel, so the pack rises from behind its top edge.
+  private addReturnHome(reduced: boolean, walk: Pick<LastWalk, "dogs" | "firings">): void {
+    const scene = RETURN_HOME_SCENE;
+    if (!this.textures.exists(END_SCREEN_KEY)) {
+      const ground = this.add.graphics();
+      fillRect(ground, PALETTE.green, scene.lawn);
+      fillRect(ground, PALETTE.darkGreen, { ...scene.lawn, height: 2 });
+      fillRect(ground, PALETTE.tan, scene.path);
+      fillRect(ground, PALETTE.brown, scene.step);
+    }
+    const dogs = homecomers(walk);
+    const owners = dogs.map((dog, i) => {
+      const at = itemAt(scene.owners, i);
+      const sprite = addOwnerFigure(this, reduced, dog, { footY: at.y, x: at.x }, ["idle"]);
+      return { at, dog, sprite };
+    });
+
+    const pack = this.add.container(0, 0);
+    const shadows = this.add.graphics();
+    const leashes = this.add.graphics();
+    pack.add(shadows);
+    const walkerKey = walkerSpriteKey(this, profileSave(this).walker);
+    const { walker: walkerAt } = scene;
+    const onPath = (x: number) => x >= scene.path.x && x < scene.path.x + scene.path.width;
+    const sprites: { key: string; sprite: GameObjects.Sprite }[] = dogs.map((dog, i) => {
+      const at = itemAt(scene.dogs, i);
+      const key = dogSpriteKey(dog);
+      drawShadow(
+        shadows,
+        onPath(at.x) ? PALETTE.brown : PALETTE.darkGreen,
+        at.x,
+        at.y,
+        spriteMetrics(key).opaqueWidth,
+      );
+      return { key, sprite: addStandingSprite(this, key, at.x, at.y) };
+    });
+    drawShadow(
+      shadows,
+      PALETTE.brown,
+      walkerAt.x,
+      walkerAt.y,
+      spriteMetrics(walkerKey).opaqueWidth,
+    );
+    sprites.push({
+      key: walkerKey,
+      sprite: addStandingSprite(this, walkerKey, walkerAt.x, walkerAt.y),
+    });
+    pack.add(sprites.map(({ sprite }) => sprite));
+    pack.add(leashes);
+    dogs.forEach((_, i) => {
+      const at = itemAt(scene.dogs, i);
+      const hand = leashHand({ dx: at.x - walkerAt.x, footDy: at.y - walkerAt.y });
+      drawPixelLine(
+        leashes,
+        PALETTE.darkRed,
+        { x: walkerAt.x + hand.dx, y: walkerAt.y + hand.dy },
+        { x: at.x, y: at.y - COLLAR_HEIGHT },
+      );
+    });
+
+    // The game loop's time: in create, the scene clock still reads the time the scene booted
+    // or last ran, until its first frame.
+    const startedMs = this.game.loop.time;
+    let shown: ReturnPhase | undefined;
+    const step = () => {
+      const elapsed = this.game.loop.time - startedMs;
+      pack.setY(walkUpOffset(reduced, elapsed));
+      const phase = returnPhase(reduced, elapsed);
+      if (phase !== shown) {
+        shown = phase;
+        for (const { key, sprite } of sprites) {
+          showTag(reduced, sprite, key, phase === "walking" ? "walk" : "idle");
+        }
+        for (const { dog, sprite } of owners) {
+          const body = ownerSpriteKey(dog);
+          const tag = firstTag(this, body, phase === "waving" ? ["wave", "idle"] : ["idle"]);
+          if (sprite.texture.key === body && tag !== undefined) {
+            showTag(reduced, sprite, body, tag);
+          }
+        }
+      }
+      for (const { at, dog, sprite } of owners) {
+        const faceOnly = sprite.texture.key !== ownerSpriteKey(dog);
+        sprite.setX(at.x + (faceOnly ? waveOffset(reduced, elapsed) : 0));
+      }
+    };
+    step();
+    this.returnHomeStep = step;
+  }
+
+  override update(): void {
+    this.returnHomeStep?.();
   }
 
   // A ui-quip speech bubble with its tail towards the face, or a framed box while it is missing.

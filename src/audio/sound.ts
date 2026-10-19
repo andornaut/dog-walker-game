@@ -3,13 +3,16 @@
 
 import { assertNever } from "../rules/assertNever";
 
-export type SoundCue = "bark" | "bump" | "cardOpen" | "fired" | "tip" | "treat";
+export type SoundCue =
+  "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
 
 export const SOUND_KEYS: Readonly<Record<SoundCue, string>> = {
+  badge: "sfx-badge",
   bark: "sfx-bark",
   bump: "sfx-bump",
   cardOpen: "sfx-card",
   fired: "sfx-fired",
+  newBest: "sfx-new-best",
   tip: "sfx-tip",
   treat: "sfx-treat",
 };

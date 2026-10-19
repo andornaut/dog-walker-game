@@ -2,7 +2,7 @@ import type { DogId, GameData, HomeText } from "../data/types";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk, Owned } from "../save/schema";
-import { dollarText, type HomeLoadout, packCapacity, packFeePerZone } from "./home";
+import { dollarText, type HomeLoadout, packCapacity, packFeePerZone, type Purchase } from "./home";
 import { homeLine } from "./homeText";
 
 export type WalkerLine = keyof HomeText["bubble"];
@@ -90,20 +90,33 @@ export function startWalkLine(
 // change the loadout leave none, so dropping a dog returns the hint.
 export type HomeAction =
   | { readonly kind: "none" }
-  | { readonly kind: "bought"; readonly name: string; readonly dog: DogId | null }
+  | { readonly kind: "bought"; readonly name: string; readonly purchase: Purchase }
   | { readonly amount: Cents; readonly kind: "cantAfford"; readonly name: string }
   // A keyboard focus move: the focused item in words, so its icons never stand alone.
   | { readonly kind: "focus"; readonly text: string }
   | { readonly kind: "loadout" }
   | { readonly kind: "notice"; readonly text: string };
 
+// What buying an item says, naming it: a dog joins the clients, gear goes in the bag, a slot
+// opens.
+function boughtLine(text: HomeText, purchase: Purchase, name: string): string {
+  switch (purchase.kind) {
+    case "dog":
+      return homeLine(text, "dogBought", { dog: name });
+    case "dogSlot":
+      return homeLine(text, "slotBought", { slot: name });
+    case "gear":
+      return homeLine(text, "gearBought", { gear: name });
+    default:
+      return purchase satisfies never;
+  }
+}
+
 // The line under the steps: the last action's message, else the hint.
 export function messageLine(text: HomeText, action: HomeAction): string {
   switch (action.kind) {
     case "bought":
-      return action.dog === null
-        ? `Bought ${action.name}!`
-        : homeLine(text, "dogBought", { dog: action.name });
+      return boughtLine(text, action.purchase, action.name);
     case "cantAfford":
       return homeLine(text, "dogCantAfford", {
         amount: dollarText(action.amount),
@@ -130,7 +143,8 @@ export function bubbleLine(
   quips: ReadonlyMap<DogId, string>,
 ): string {
   const { action, loadout } = state;
-  const bought = action.kind === "bought" ? action.dog : null;
+  const bought =
+    action.kind === "bought" && action.purchase.kind === "dog" ? action.purchase.dog : null;
   const speakers = bought === null ? [...loadout.dogs].reverse() : [bought];
   for (const dog of speakers) {
     const quip = quips.get(dog);

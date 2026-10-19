@@ -36,10 +36,12 @@ const fading = (level: number, toward: "playing" | "stopped"): MusicState => ({
 describe("SOUND_KEYS", () => {
   it("maps each cue to the art agent's manifest key", () => {
     expect(SOUND_KEYS).toEqual({
+      badge: "sfx-badge",
       bark: "sfx-bark",
       bump: "sfx-bump",
       cardOpen: "sfx-card",
       fired: "sfx-fired",
+      newBest: "sfx-new-best",
       tip: "sfx-tip",
       treat: "sfx-treat",
     });

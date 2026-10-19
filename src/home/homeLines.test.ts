@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { cents } from "../rules/units";
 import { TEST_TUNING } from "../testing/tuning";
+import type { Purchase } from "./home";
 import {
   bubbleLine,
   type HomeAction,
@@ -90,10 +91,20 @@ describe("messageLine", () => {
     expect(messageLine(text, { kind: "none" })).toBe(text.hint);
   });
 
-  it("announces a bought dog, and how much more an unaffordable item needs", () => {
-    expect(messageLine(text, { dog: "nugget", kind: "bought", name: "Nugget" })).toBe(
+  it("announces a bought dog, gear item or slot, and how much more an unaffordable item needs", () => {
+    const bought = (purchase: Purchase, name: string): HomeAction => ({
+      kind: "bought",
+      name,
+      purchase,
+    });
+    const lines = { ...text, gearBought: "Got {gear}.", slotBought: "{slot} open." };
+    expect(messageLine(text, bought({ dog: "nugget", kind: "dog" }, "Nugget"))).toBe(
       "Nugget joins your clients!",
     );
+    expect(messageLine(lines, bought({ gear: "whistle", kind: "gear" }, "Whistle"))).toBe(
+      "Got Whistle.",
+    );
+    expect(messageLine(lines, bought({ kind: "dogSlot" }, "Dog slot 2"))).toBe("Dog slot 2 open.");
     expect(messageLine(text, { amount: dollars(480), kind: "cantAfford", name: "Nugget" })).toBe(
       "Save $480 more for Nugget.",
     );
@@ -121,7 +132,11 @@ describe("bubbleLine", () => {
 
   it("lets a just-bought dog's owner speak though the dog is not picked", () => {
     const nugget = new Map([["nugget", "Ava: Tag me in everything."]] as const);
-    const action: HomeAction = { dog: "nugget", kind: "bought", name: "Nugget" };
+    const action: HomeAction = {
+      kind: "bought",
+      name: "Nugget",
+      purchase: { dog: "nugget", kind: "dog" },
+    };
     expect(
       bubbleLine(text, "firstVisit", { action, loadout: { dogs: [], gear: null } }, nugget),
     ).toBe("Ava: Tag me in everything.");

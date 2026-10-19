@@ -47,6 +47,7 @@ import {
   type WalkerLine,
   walkerLineKey,
 } from "../home/homeLines";
+import { porchOwners } from "../home/porch";
 import { choiceFull, type SelectLook } from "../home/selection";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -68,6 +69,7 @@ import {
   drawSlotSign,
   drawStepPlate,
 } from "./homePanels";
+import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
 import {
@@ -114,6 +116,15 @@ const GATE_SPOTS: readonly PackPlacement[] = [
   { dx: -26, footDy: -14 },
   { dx: 26, footDy: -12 },
 ];
+// Before the first walk the starter owners wait in the yard left of the path, behind the
+// yard sign, each with their dog at their feet. Feet positions, by dog; a starter dog with no
+// spot is not drawn.
+const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>> = {
+  biscuit: { footY: 145, x: 120 },
+  duchess: { footY: 148, x: 150 },
+  koda: { footY: 145, x: 92 },
+};
+const PORCH_DOG_OFFSET = { dx: -12, footDy: 3 };
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
 // each side, with 8 or more between them.
 const GAP = 8;
@@ -670,13 +681,12 @@ export class StartScene extends Scene {
     if (purchase.kind === "gear") {
       this.setLoadout({ ...this.loadout, gear: purchase.gear });
     }
-    const dog = purchase.kind === "dog" ? purchase.dog : null;
-    if (dog !== null) {
-      this.drawQuip(dog);
+    if (purchase.kind === "dog") {
+      this.drawQuip(purchase.dog);
     }
-    this.action = { dog, kind: "bought", name };
+    this.action = { kind: "bought", name, purchase };
     this.render();
-    this.celebrate(dog === null ? [] : [dog]);
+    this.celebrate(purchase.kind === "dog" ? [purchase.dog] : []);
   }
 
   // Badges earned on launch or by a purchase burst in over the home screen, with the owners
@@ -980,6 +990,34 @@ export class StartScene extends Scene {
     this.iconButton(root, "mute", MUTE_ICON, (x, y) => soundIcon(this, !isMuted(this), x, y));
   }
 
+  // The starter owners waiting at the gate until the first walk; a picked dog has gone to the
+  // walker and leaves its owner standing alone.
+  private drawPorch(
+    root: GameObjects.Container,
+    g: GameObjects.Graphics,
+    save: SaveDocument,
+    reduced: boolean,
+  ): void {
+    const waiting = porchOwners(gameData, save.stats, this.loadout.dogs).flatMap((owner) => {
+      const at = PORCH_SPOTS[owner.dog];
+      return at === undefined ? [] : [{ ...owner, at }];
+    });
+    // Owners first, then the dogs in front of them.
+    for (const { at, dog } of waiting) {
+      drawShadow(g, PALETTE.darkGreen, at.x, at.footY, 20);
+      root.add(addOwnerFigure(this, reduced, dog, at, ["idle"]));
+    }
+    for (const { at, dog } of waiting.filter(({ withDog }) => withDog)) {
+      const key = dogSpriteKey(dog);
+      const x = at.x + PORCH_DOG_OFFSET.dx;
+      const footY = at.footY + PORCH_DOG_OFFSET.footDy;
+      drawShadow(g, PALETTE.darkGreen, x, footY, spriteMetrics(key).opaqueWidth);
+      const sprite = addStandingSprite(this, key, x, footY);
+      showTag(reduced, sprite, key, "idle");
+      root.add(sprite);
+    }
+  }
+
   private drawPackAtGate(
     root: GameObjects.Container,
     g: GameObjects.Graphics,
@@ -987,6 +1025,7 @@ export class StartScene extends Scene {
   ): void {
     const { footY, x } = WALKER_AT_GATE;
     const reduced = currentSettings(this).reducedMotion;
+    this.drawPorch(root, g, save, reduced);
     const walkerKey = walkerSpriteKey(this, save.walker);
     const placements = GATE_SPOTS.slice(0, this.loadout.dogs.length);
     const groundColor = (atX: number) =>

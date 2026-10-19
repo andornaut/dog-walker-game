@@ -369,10 +369,12 @@ export interface HomeText {
   };
   readonly dogBought: string;
   readonly dogCantAfford: string;
+  readonly gearBought: string;
   readonly hint: string;
   readonly packCount: string;
   readonly packDogsOne: string;
   readonly packDogsMany: string;
+  readonly slotBought: string;
   readonly slotBuy: string;
   readonly slotSave: string;
   readonly slotSign: string;

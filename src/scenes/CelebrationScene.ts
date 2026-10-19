@@ -9,6 +9,7 @@ import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
+import { soundboardOf } from "./soundboard";
 import { addMenuButton } from "./uiKit";
 
 export interface CelebrationSceneData {
@@ -41,6 +42,7 @@ export class CelebrationScene extends Scene {
     const top = Math.round((SCREEN_CONFIG.height - height - BUTTON.gap - BUTTON.height) / 2);
     const panel: Rect = { height, width: PANEL.width, x: PANEL.x, y: top };
     addBadgeCelebration(this, reduced, panel, achievements);
+    soundboardOf(this).play("badge");
     const left = SCREEN_CONFIG.width / 2 - ((cheering.length - 1) * FACES.pitch + FACES.size) / 2;
     const facesY = top + PANEL.badgesHeight + FACES.top;
     cheering.forEach((dog, i) => {
