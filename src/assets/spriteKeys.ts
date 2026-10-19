@@ -8,6 +8,7 @@ import type {
   MinorObstacleId,
   Zone,
 } from "../data/types";
+import type { MoverKind } from "../runner/movers";
 import type { CardSource } from "../state/runState";
 
 // Forced stops whose sprite is named for the figure on the road rather than the stop.
@@ -130,3 +131,18 @@ export function roadStartKey(zone: Pick<Zone, "name">): string {
 export function zoneIconKey(zone: Pick<Zone, "name">): string {
   return `icon-zone-${zoneArtName(zone)}`;
 }
+
+// Each mover's road sprite and the tag it plays while moving. Crossers face right.
+export const MOVER_SPRITES = {
+  ball: { key: "ball-bounce", tag: "bounce" },
+  cyclist: { key: "cyclist", tag: "ride" },
+  looseDog: { key: "loose-dog", tag: "run" },
+  squirrel: { key: "squirrel-dash", tag: "run" },
+} as const satisfies Readonly<Record<MoverKind, { key: string; tag: string }>>;
+
+// A mover's cue: the sign at the lane edge and the arrow pointing the way it will go, which
+// faces right. Both play WARNING_TAG; the arrow plays WARNING_DOWN_TAG to point down a lane.
+export const WARNING_KEY = "ui-warning";
+export const WARNING_ARROW_KEY = "ui-warning-arrow";
+export const WARNING_TAG = "pulse";
+export const WARNING_DOWN_TAG = "down-pulse";

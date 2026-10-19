@@ -1,4 +1,5 @@
 import { itemAt } from "../arrays";
+import { type LaneSpan, type MoverPath, type MoverSpec, placeMovers } from "./movers";
 import { type Random, randomPick } from "./random";
 
 // What a spawn covers: lanes across, and rows along the road of footprint.cellLength each.
@@ -10,19 +11,21 @@ export interface Footprint {
 export const SINGLE_CELL: Footprint = { lanes: 1, rows: 1 };
 
 // blocksLane marks kinds the pack must steer around, such as obstacles. Spawns without a
-// footprint take one cell.
+// footprint take one cell. A mover's spawns block the lanes it sweeps instead.
 export interface SpawnQuota<Kind extends string> {
   blocksLane: boolean;
   count: number;
   footprint?: Footprint;
   kind: Kind;
+  mover?: MoverSpec;
 }
 
 // Distances are scroll distances in pixels from the start of the zone. A spawn's footprint
 // is cellLength per row, and its hit box is the footprint less cellInset at each end; it
 // overlaps the pack over its hit box's length plus packLength. scrollSpeed (pixels per
 // second) and laneMoveSeconds set how far the pack can steer between rows. sightLength is the
-// road in view above the pack, so the next row shows before the pack has to steer for it.
+// road in view above the pack, so the next row shows before the pack has to steer for it, and
+// roadLength the whole road in view.
 export interface SpawnPlan<Kind extends string> {
   cellInset: number;
   cellLength: number;
@@ -32,16 +35,18 @@ export interface SpawnPlan<Kind extends string> {
   minSpacing: number;
   packLength: number;
   quotas: readonly SpawnQuota<Kind>[];
+  roadLength: number;
   scrollSpeed: number;
   sightLength: number;
   zoneLength: number;
 }
 
-// lane is the footprint's leftmost lane.
+// lane is the footprint's leftmost lane. A mover's distance is where its cue appears.
 export interface SpawnEvent<Kind extends string> {
   distance: number;
   kind: Kind;
   lane: number;
+  mover?: MoverPath;
 }
 
 export interface DueSpawns<Kind extends string> {
@@ -169,9 +174,11 @@ function blockingSpan(plan: SpawnPlan<string>, row: number, rows: number) {
 // lane of the previous zone, and from every open lane of each row, an open lane of the next
 // row is within reach without crossing a lane blocked in the gap between them. A spawn more
 // than one row long blocks every window and gap it overlaps, and must end within the zone's
-// last row. An obstacle bigger than one cell that the earlier draws left no room for is
-// skipped, which uses no random draw. A plan that cannot fit its one-cell spawns that way is
-// a data error and throws.
+// last row. Movers are placed first, by placeMovers; a crosser keeps the row before its own
+// clear as a lead-in, so the pack steers into its row from two rows back. A mover, or an
+// obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
+// uses no random draw. A plan that cannot fit its one-cell spawns that way is a data error
+// and throws.
 export function planSpawns<Kind extends string>(
   random: Random,
   plan: SpawnPlan<Kind>,
@@ -189,12 +196,24 @@ export function planSpawns<Kind extends string>(
 
   const openLanes = (row: number) => lanes & ~(blocked[row] ?? 0);
 
+  // Rows a mover keeps clear before its own, so the pack steers from the row before them.
+  const leadIns = new Set<number>();
+  const leadInReach = lanesWithin(plan, 2 * plan.minSpacing - blockingLength(plan, 1));
+
   const crossesFrom = (row: number): boolean => {
     if (row === -1) {
       return everyLaneReaches(reach.entry, lanes, openLanes(0));
     }
     if (row === rows.length - 1) {
       return true;
+    }
+    if (leadIns.has(row)) {
+      return everyLaneReaches(
+        leadInReach,
+        openLanes(row - 1),
+        openLanes(row + 1),
+        ~(gapBlocked[row - 1] ?? 0),
+      );
     }
     return everyLaneReaches(
       reach.betweenRows,
@@ -227,7 +246,8 @@ export function planSpawns<Kind extends string>(
     for (let row = cell.row; ok && row <= lastGap; row++) {
       ok = laneCount - laneTotal(gapBlocked[row] ?? 0) >= minOpenLanes;
     }
-    for (let row = cell.row - 1; ok && row <= lastRow; row++) {
+    const lastCrossing = leadIns.has(lastRow + 1) ? lastRow + 1 : lastRow;
+    for (let row = cell.row - 1; ok && row <= lastCrossing; row++) {
       ok = crossesFrom(row);
     }
     if (!ok || !keep) {
@@ -280,8 +300,46 @@ export function planSpawns<Kind extends string>(
     const { lanes, rows: length } = quota.footprint ?? SINGLE_CELL;
     return lanes * length;
   };
+  const movers = plan.quotas.flatMap(({ count, kind, mover }) =>
+    mover === undefined ? [] : [{ count, kind, spec: mover }],
+  );
+  const moverGrid = {
+    block: (row: number, span: LaneSpan, leadIn: boolean, keep: boolean) => {
+      // A lead-in needs a row before it to steer from.
+      if (leadIn && row < 2) {
+        return false;
+      }
+      if (leadIn) {
+        leadIns.add(row - 1);
+      }
+      const ok = tryBlock({ lane: span.first, row }, { lanes: span.count, rows: 1 }, keep);
+      if (leadIn && !(ok && keep)) {
+        leadIns.delete(row - 1);
+      }
+      return ok;
+    },
+    isFree: (lane: number, row: number) => ((taken[row] ?? 0) & laneRun(lane, 1)) === 0,
+    take: (lane: number, row: number) => {
+      if (row >= 0 && row < rows.length) {
+        taken[row] = (taken[row] ?? 0) | laneRun(lane, 1);
+      }
+    },
+  };
+  const moverRoad = {
+    cellLength: plan.cellLength,
+    laneCount,
+    roadLength: plan.roadLength,
+    rowSpacing: plan.minSpacing,
+    scrollSpeed: plan.scrollSpeed,
+    sightLength: plan.sightLength,
+    window: blockingLength(plan, 1),
+    zoneLength: plan.zoneLength,
+  };
+  events.push(...placeMovers(random, moverRoad, moverGrid, rows, movers));
+
   // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
-  const ordered = [...plan.quotas].sort((a, b) => area(b) - area(a));
+  const statics = plan.quotas.filter((quota) => quota.mover === undefined);
+  const ordered = statics.sort((a, b) => area(b) - area(a));
   for (const quota of ordered) {
     const footprint = quota.footprint ?? SINGLE_CELL;
     for (let i = 0; i < quota.count; i++) {

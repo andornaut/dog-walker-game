@@ -6,8 +6,11 @@ import type { Tuning } from "./types";
 export const TUNING = {
   // Plain counts.
   counts: {
+    // A ball bounces across the road this many lanes a second.
+    ballLanesPerSecond: 2.5,
     biscuitNeighbourTreatsPerDog: 1,
     loadoutMax: 1,
+    looseDogLanesPerSecond: 2,
     luckyEncountersPerZone: 2,
     // Obstacles that open no card, on top of obstaclesFirstZone.
     minorObstaclesFirstZone: 23,
@@ -19,6 +22,7 @@ export const TUNING = {
     packSizeMax: 3,
     packSizeMin: 1,
     poopBagsSkipsPerRun: 1,
+    squirrelDartLanesPerSecond: 4,
     tipsFirstZone: 60,
     tipsGainPerZone: 8,
     treatCarryMax: 3,
@@ -69,6 +73,8 @@ export const TUNING = {
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
     bigTipperTip: 1.5,
+    // A cyclist rides down its lane this much faster than the road scrolls; above 1.
+    cyclistSpeedMultiplier: 1.6,
     goodLeashSquirrelPull: 0,
     heartsByTemperament: { dramatic: 2, fussy: 1, laidBack: 1 },
     otherDogChangePerBigDog: -0.25,
@@ -97,8 +103,13 @@ export const TUNING = {
   probability: {
     // Each dog rolls once when the pack hits a skunk or puddle.
     catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
+    // By zone: the share of squirrels, other dogs and minor obstacles that come as movers
+    // (a darting squirrel, a loose dog, or a ball or cyclist).
+    moverShare: { homeStretch: 0.2, park: 0.15, shops: 0.15, street: 0.1 },
   },
   seconds: {
+    // One hop of a bouncing ball, which is only drawn.
+    ballBounceSeconds: 0.4,
     // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 1,
     // An obstacle encounter holds the road and the pack still this long before its card.
@@ -109,6 +120,8 @@ export const TUNING = {
     // A minor bump holds the road and the pack still this long.
     minorHitStopSeconds: 0.6,
     minorStumble: 0.3,
+    // A mover's cue shows this long before it moves.
+    moverWarningSeconds: 1,
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },
     // How long a dog leans and barks before it pulls.
     pullTell: 1,

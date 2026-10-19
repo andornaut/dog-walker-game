@@ -7,9 +7,14 @@ import {
   encounterSpriteKey,
   forcedStopSpriteKey,
   minorObstacleSpriteKey,
+  MOVER_SPRITES,
   roadStartKey,
   roadTileKey,
   SKUNK_CLOUD_KEY,
+  WARNING_ARROW_KEY,
+  WARNING_DOWN_TAG,
+  WARNING_KEY,
+  WARNING_TAG,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
@@ -81,8 +86,10 @@ import {
 import { hintFor } from "../rules/hints";
 import { giveTreat } from "../rules/treats";
 import { read } from "../rules/units";
+import { chasePose, stepChase } from "../runner/chase";
 import { isSteeringLocked } from "../runner/laneControl";
 import { laneMotionX } from "../runner/laneMotion";
+import { isMoverObstacle, type MoverOnRoad, moverPlace } from "../runner/movers";
 import {
   gestureAfterPulls,
   NO_PULLS,
@@ -205,6 +212,10 @@ const ROAD_TEXTURE = "road-projected";
 // An instant lucky find's art pops up over the road, then floats up and fades.
 const POPUP = { artY: 120, fadeMs: 1800, rise: 16 };
 const BANNER = { holdMs: 1800, key: "ui-zone-banner", slideMs: 300, width: 248, y: 70 };
+// A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
+// down from the far end of the road for a cyclist, and the arrow a sign's width beside it or
+// below it on screen.
+const CUE = { inset: 10, size: 16, top: 20 };
 
 // One sprite of an item. dx is across the road from the item's centre and footY the flat
 // road row it stands on, both in road pixels. feet "bottom" stands it on its frame's bottom
@@ -695,7 +706,10 @@ export class RunScene extends Scene {
     const geometry = this.geometry(walk.run);
     const pulls = stepPulls(gameData, geometry, random.pulls, STEP_MS / 1000, this.pulls, walk);
     this.reactToPulls(pulls);
-    walk = pulls.walk;
+    // A chaser after a squirrel barks and re-anchors a drag as a dog's own pull does.
+    const chased = stepChase(gameData, LANE_COUNT, STEP_MS / 1000, pulls.walk);
+    this.reactToPulls({ ...chased, pulls: this.pulls });
+    walk = chased.walk;
     const step = stepWalk(gameData, this.geometry(walk.run), random.rolls, STEP_MS / 1000, walk);
     this.runTimeMs += STEP_MS;
     this.walk = step.walk;
@@ -1394,9 +1408,14 @@ export class RunScene extends Scene {
     const seen = new Set<number>();
     const still = this.reducedMotion();
     const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
+    const { roadTop } = this.geometry(walk.run);
     for (const item of walk.road.items) {
       seen.add(item.id);
       const view = this.items.get(item.id) ?? this.addItemView(item);
+      if (item.mover !== undefined) {
+        this.drawMover(item.mover, view, item.y + item.height, roadTop, shadow);
+        continue;
+      }
       const first = itemAt(this.laneXs, item.lane);
       const laneX = (first + itemAt(this.laneXs, item.lane + item.laneSpan - 1)) / 2;
       for (const part of view.parts) {
@@ -1432,6 +1451,74 @@ export class RunScene extends Scene {
     }
   }
 
+  // A mover stands on the road through the projection once it moves, at its depth step, a
+  // crosser mirrored when it runs left. Until then only its cue shows, at 1x: a sign at the
+  // road's edge on its row with the arrow pointing across, or a cyclist's sign at the top of
+  // its lane with the arrow pointing down. The ball carries its own shadow.
+  private drawMover(
+    mover: MoverOnRoad,
+    view: ItemView,
+    footY: number,
+    roadTop: number,
+    shadow: Shadow,
+  ): void {
+    const { road } = LAYOUT;
+    const { path } = mover;
+    const [body, cue, arrow] = view.parts;
+    const place = moverPlace(LANE_COUNT, path, mover.since);
+    const still = this.reducedMotion();
+    const laneX = itemAt(this.laneXs, 0) + (place.lanePosition * road.width) / LANE_COUNT;
+    const leftward = path.motion === "cross" && path.direction === -1;
+    if (body !== undefined) {
+      body.sprite.setVisible(place.moving);
+      if (place.moving) {
+        const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
+        const step = snapScale(placed.scale);
+        const { key, tag } = MOVER_SPRITES[path.mover];
+        const look = depthLook(this, key, step);
+        showDepthLook(body.sprite, look);
+        const x = Math.round(placed.x);
+        const y = Math.round(placed.y);
+        body.sprite
+          .setPosition(x, y)
+          .setDepth(DEPTH.sprite + placed.y)
+          .setFlipX(leftward);
+        playTag(body.sprite, look.key, tag, still);
+        const cycle = body.sprite.anims.currentAnim?.duration;
+        if (path.mover !== "ball") {
+          shadow(look, x, y, step);
+        } else if (cycle !== undefined) {
+          const bounce = read(gameData.tuning, "seconds", "ballBounceSeconds");
+          body.sprite.anims.timeScale = cycle / (bounce * 1000);
+        }
+      }
+    }
+    const edgeX = leftward ? road.x + road.width - CUE.inset : road.x + CUE.inset;
+    const cueAt = project(
+      PROJECTION,
+      path.motion === "cross"
+        ? { distance: PROJECTION.footY - footY, x: edgeX }
+        : { distance: PROJECTION.footY - (roadTop + CUE.top), x: laneX },
+    );
+    const x = Math.round(cueAt.x);
+    const y = Math.round(cueAt.y);
+    cue?.sprite.setVisible(!place.moving).setPosition(x, y).setDepth(DEPTH.fx);
+    arrow?.sprite.setVisible(!place.moving).setDepth(DEPTH.fx).setFlipX(leftward);
+    if (place.moving) {
+      return;
+    }
+    if (cue !== undefined) {
+      playTag(cue.sprite, WARNING_KEY, WARNING_TAG, still);
+    }
+    if (arrow !== undefined && path.motion === "cross") {
+      arrow.sprite.setPosition(x + path.direction * CUE.size, y);
+      playTag(arrow.sprite, WARNING_ARROW_KEY, WARNING_TAG, still);
+    } else if (arrow !== undefined) {
+      arrow.sprite.setPosition(x, y + CUE.size);
+      playTag(arrow.sprite, WARNING_ARROW_KEY, WARNING_DOWN_TAG, still);
+    }
+  }
+
   // Each item stands at the bottom of its hit box, and a lucky find on its frame's bottom. A
   // puddle lies flat under the rest, a skunk stands in the middle of its spray cloud, which
   // lies flat too, and a parked car stands at the near end of its footprint, past its hit box.
@@ -1455,7 +1542,12 @@ export class RunScene extends Scene {
     };
     const flat = { feet: "bottom", flat: true } as const;
     let parts: ItemPart[];
-    if (item.kind === "tip" || item.kind === "treat") {
+    if (item.mover !== undefined) {
+      const body = MOVER_SPRITES[item.mover.path.mover].key;
+      parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY)];
+    } else if (isMoverObstacle(item.kind)) {
+      parts = [part(MOVER_SPRITES[item.kind].key)];
+    } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (isMinorObstacle(gameData, item.kind)) {
       const inset = this.walk === undefined ? 0 : this.geometry(this.walk.run).cell.inset;
@@ -1593,7 +1685,8 @@ export class RunScene extends Scene {
     still: boolean,
     head: { x: number; y: number },
   ): void {
-    const pull = pullPose(gameData, this.pulls, dog);
+    const pull =
+      pullPose(gameData, this.pulls, dog) ?? chasePose(this.walk?.road.chase ?? null, dog);
     const tag = pull?.tag ?? pose;
     const shown = this.dogTags.get(dog);
     if (tag !== shown) {

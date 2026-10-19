@@ -1,4 +1,4 @@
-import type { EncounterId, ForcedStopId, GameData, MinorObstacleId } from "../data/types";
+import type { EncounterId, ForcedStopId, GameData, MinorObstacleId, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { countBump, countDebuffZones } from "../rules/achievements";
 import type { MoneyChange } from "../rules/causes";
@@ -7,10 +7,11 @@ import { expireAtZoneEnd } from "../rules/durations";
 import { affectedDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { minorBump, payZoneFees, tipValue } from "../rules/run";
-import { addCents, type Pixels, pixels, read } from "../rules/units";
+import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
+import type { SquirrelChase } from "./chase";
 import { collideWithPack, type PackFootprint, tickInvulnerability, touchesPack } from "./collision";
 import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop } from "./hitStop";
 import {
@@ -21,8 +22,18 @@ import {
   steerLane,
 } from "./laneControl";
 import { type LaneMotionConfig, occupiedLanes, stillInLane } from "./laneMotion";
-import { type Random, randomInt, randomPick } from "./random";
-import { itemsOnRoad, type RoadItem, scrollRoadItems } from "./roadItems";
+import {
+  isMoverObstacle,
+  isWarning,
+  moveMovers,
+  MOVER_CONTACTS,
+  type MoverItem,
+  type MoverKind,
+  type MoverObstacleId,
+  type MoverSpec,
+} from "./movers";
+import { chance, type Random, randomInt, randomPick } from "./random";
+import { itemsOnRoad, scrollRoadItems } from "./roadItems";
 import {
   type Footprint,
   hitLength,
@@ -48,8 +59,8 @@ export type WalkData = Pick<
 >;
 
 export type PickupKind = "tip" | "treat";
-export type WalkItemKind = EncounterId | MinorObstacleId | PickupKind;
-export type WalkItem = RoadItem<WalkItemKind>;
+export type WalkItemKind = EncounterId | MinorObstacleId | MoverObstacleId | PickupKind;
+export type WalkItem = MoverItem<WalkItemKind>;
 // What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
 // no card, a lucky encounter, or a pickup.
 export type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
@@ -68,8 +79,10 @@ export interface ForcedStopOnRoad {
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
-// hitStop is set while an obstacle hit holds the walk still.
+// hitStop is set while an obstacle hit holds the walk still, and chase while a chaser is after
+// a squirrel on the road.
 export interface Road {
+  chase: SquirrelChase | null;
   control: LaneControl;
   forcedStopAhead: ForcedStopAhead | null;
   forcedStopOnRoad: ForcedStopOnRoad | null;
@@ -153,6 +166,9 @@ export function itemCategory(
   if (kind === "tip" || kind === "treat") {
     return kind;
   }
+  if (isMoverObstacle(kind)) {
+    return "minor";
+  }
   return isMinorObstacle(data, kind) ? "minor" : data.encounters[kind].kind;
 }
 
@@ -161,7 +177,7 @@ export function footprintOf(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   kind: WalkItemKind,
 ): Footprint {
-  if (kind === "tip" || kind === "treat") {
+  if (kind === "tip" || kind === "treat" || isMoverObstacle(kind)) {
     return SINGLE_CELL;
   }
   if (isMinorObstacle(data, kind)) {
@@ -214,6 +230,7 @@ export function zoneLength(data: Pick<GameData, "tuning">, run: RunState): Pixel
 
 export function startRoad(laneCount: number, speedFactor = 1): Road {
   return {
+    chase: null,
     control: laneControlIn(stillInLane(Math.floor(laneCount / 2))),
     forcedStopAhead: null,
     forcedStopOnRoad: null,
@@ -260,9 +277,57 @@ export function pickWeighted<T>(random: Random, entries: readonly (readonly [T, 
   return last[0];
 }
 
+// The share of the zone's squirrels, other dogs and minor obstacles that come as movers.
+export function moverShare(data: Pick<GameData, "tuning" | "world">, zoneIndex: number): number {
+  const zone = data.world.zones[zoneIndex];
+  return zone === undefined
+    ? 0
+    : readTable(data.tuning, "probability", "moverShare", zone.id as ZoneId);
+}
+
+// The mover a drawn spawn comes as, at a chance of share: a squirrel darts, an other dog runs
+// loose, and a minor obstacle is a ball or a cyclist, evenly. Other spawns never move, and
+// draw nothing.
+export function moverFor(
+  data: Pick<GameData, "minorObstacles">,
+  random: Random,
+  share: number,
+  kind: WalkItemKind,
+): MoverKind | null {
+  const minor = kind !== "tip" && kind !== "treat" && isMinorObstacle(data, kind);
+  if (!(kind === "squirrel" || kind === "otherDog" || minor) || !chance(random, share)) {
+    return null;
+  }
+  if (kind === "squirrel") {
+    return "squirrel";
+  }
+  return kind === "otherDog" ? "looseDog" : randomPick(random, ["ball", "cyclist"] as const);
+}
+
+export function moverSpec(data: Pick<GameData, "tuning">, mover: MoverKind): MoverSpec {
+  const { tuning } = data;
+  const cross = (lanesPerSecond: number) => ({ kind: "cross", lanesPerSecond }) as const;
+  const motions = {
+    ball: () => cross(read(tuning, "counts", "ballLanesPerSecond")),
+    cyclist: () =>
+      ({
+        kind: "ride",
+        speedMultiplier: read(tuning, "multipliers", "cyclistSpeedMultiplier"),
+      }) as const,
+    looseDog: () => cross(read(tuning, "counts", "looseDogLanesPerSecond")),
+    squirrel: () => cross(read(tuning, "counts", "squirrelDartLanesPerSecond")),
+  };
+  return {
+    motion: motions[mover](),
+    mover,
+    warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),
+  };
+}
+
 // Each obstacle kind is drawn first, weighted, so its shape is known when it is placed; a
 // zone's minor obstacles are drawn evenly from those allowed in it. Rush hour and the like
-// scale both counts.
+// scale both counts. Then each squirrel, other dog and minor obstacle comes as a mover at the
+// zone's mover share.
 function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
   const stats = zoneStats(data.tuning, run.zoneIndex);
   const scaled = (stat: "obstacleSpawns" | "tipSpawns", base: number) =>
@@ -282,11 +347,27 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
     ...drawn(stats.luckyEncounters, () => randomPick(random, lucky)),
   ];
   const quotas = new Map<WalkItemKind, number>();
-  kinds.forEach((kind) => quotas.set(kind, (quotas.get(kind) ?? 0) + 1));
+  const movers = new Map<MoverKind, number>();
+  const count = <Key>(map: Map<Key, number>, key: Key) => map.set(key, (map.get(key) ?? 0) + 1);
+  const share = moverShare(data, run.zoneIndex);
+  for (const kind of kinds) {
+    const mover = share > 0 ? moverFor(data, random, share, kind) : null;
+    if (mover === null) {
+      count(quotas, kind);
+    } else {
+      count(movers, mover);
+    }
+  }
   return [
-    ...[...quotas].map(([kind, count]) => ({
+    ...[...movers].map(([mover, moverCount]) => ({
+      blocksLane: true,
+      count: moverCount,
+      kind: MOVER_CONTACTS[mover],
+      mover: moverSpec(data, mover),
+    })),
+    ...[...quotas].map(([kind, kindCount]) => ({
       blocksLane: blocksLane(data, kind),
-      count,
+      count: kindCount,
       footprint: footprintOf(data, kind),
       kind,
     })),
@@ -302,7 +383,13 @@ export function planZone(
   data: WalkData,
   geometry: Pick<
     RoadGeometry,
-    "cell" | "itemHeights" | "laneCount" | "sightLength" | "tallestPackBand"
+    | "cell"
+    | "itemHeights"
+    | "laneCount"
+    | "roadBottom"
+    | "roadTop"
+    | "sightLength"
+    | "tallestPackBand"
   >,
   random: Random,
   walk: Walk,
@@ -319,6 +406,7 @@ export function planZone(
     minSpacing: spacing,
     packLength: geometry.tallestPackBand,
     quotas: spawnQuotas(data, random, run),
+    roadLength: geometry.roadBottom - geometry.roadTop,
     scrollSpeed: walkScrollSpeed(data, run),
     sightLength: geometry.sightLength,
     zoneLength: length,
@@ -451,12 +539,15 @@ export function stepWalk(
       kind: event.kind,
       lane: event.lane,
       laneSpan: footprintOf(data, event.kind).lanes,
+      ...(event.mover === undefined
+        ? {}
+        : { mover: { path: event.mover, since: zoneDistance - event.distance } }),
       y: geometry.roadTop - height + (zoneDistance - event.distance),
     };
   });
   const items = itemsOnRoad(geometry.roadBottom, [
-    ...scrollRoadItems(travel, road.items),
-    ...arrived,
+    ...moveMovers(geometry, travel, scrollRoadItems(travel, road.items)),
+    ...moveMovers(geometry, 0, arrived),
   ]);
 
   let forcedStopAhead = road.forcedStopAhead;
@@ -482,6 +573,8 @@ export function stepWalk(
   );
   const lanes = occupiedLanes(control.motion);
   const footprint: PackFootprint = { ...geometry.packBand, lanes };
+  // A mover is only a cue until it moves, and cannot be hit.
+  const cues = items.filter((item) => isWarning(geometry.laneCount, item));
   const { hits, invulnerableSeconds, remaining } = collideWithPack(
     {
       invulnerabilitySeconds: read(data.tuning, "seconds", "collisionGrace"),
@@ -489,7 +582,7 @@ export function stepWalk(
     },
     footprint,
     tickInvulnerability(stepSeconds, road.invulnerableSeconds),
-    items.filter((item) => item.kind !== "treat"),
+    items.filter((item) => item.kind !== "treat" && !cues.includes(item)),
   );
   const treatReach = Math.round(modifiedStat(data.tuning, run.modifiers, "treatReach", 0));
   const treatFootprint = { ...footprint, lanes: widenLanes(geometry.laneCount, treatReach, lanes) };
@@ -512,7 +605,7 @@ export function stepWalk(
         tips.push(pickup.tip);
       }
       collected.push(item);
-    } else if (isMinorObstacle(data, kind)) {
+    } else if (isMinorObstacle(data, kind) || isMoverObstacle(kind)) {
       const bump = minorBump(data, countBump(nextRun));
       nextRun = bump.state;
       control = lockSteering(read(data.tuning, "seconds", "minorStumble"), control);
@@ -572,7 +665,7 @@ export function stepWalk(
         forcedStopOnRoad,
         hitStop,
         invulnerableSeconds,
-        items: [...remaining, ...treats.filter((item) => !treatsHit.includes(item))],
+        items: [...remaining, ...cues, ...treats.filter((item) => !treatsHit.includes(item))],
         nextItemId,
         pending: due.pending,
       },

@@ -23,6 +23,7 @@ import { affectedDogs, opensCard } from "../rules/encounters";
 import { minorBump } from "../rules/run";
 import { giveTreat } from "../rules/treats";
 import { addCents, type Cents, cents, read } from "../rules/units";
+import { isMoverObstacle } from "../runner/movers";
 import { chance, type Random } from "../runner/random";
 import {
   collect,
@@ -237,7 +238,7 @@ function playZone(
       if (chance(random, config.treatRate)) {
         session.run = collect(data, "treat", session.run).run;
       }
-    } else if (isMinorObstacle(data, event.item)) {
+    } else if (isMinorObstacle(data, event.item) || isMoverObstacle(event.item)) {
       // A minor obstacle opens no card: the pack drops tips, and its grace window starts.
       if (event.distance >= graceUntil && chance(random, config.hitRate)) {
         graceUntil = event.distance + graceDistance;

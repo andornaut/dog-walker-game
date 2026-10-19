@@ -8,6 +8,7 @@ import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, GearId, MinorObstacleId } from "../data/types";
 import { WORLD } from "../data/world";
+import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
   backdropKey,
   CARD_FRAME_KEY,
@@ -21,11 +22,16 @@ import {
   gearIconKey,
   kebabCase,
   minorObstacleSpriteKey,
+  MOVER_SPRITES,
   ownerFaceKey,
   roadStartKey,
   roadTileKey,
   SKUNK_CLOUD_KEY,
   standsOnGround,
+  WARNING_ARROW_KEY,
+  WARNING_DOWN_TAG,
+  WARNING_KEY,
+  WARNING_TAG,
   zoneArtName,
   zoneIconKey,
 } from "./spriteKeys";
@@ -122,6 +128,23 @@ describe("sprite keys", () => {
     expect(minorObstacleSpriteKey("barrier3")).toBe("barrier-3");
     expect(minorObstacleSpriteKey("parkedCar")).toBe("parked-car");
     expect(spriteKeys.has(SKUNK_CLOUD_KEY)).toBe(true);
+  });
+
+  it("name a sprite with its moving tag for every mover, and the cue's sign and arrow", () => {
+    const sheets = import.meta.glob<unknown>("../../public/art/sprites/*.json", {
+      eager: true,
+      import: "default",
+    });
+    const hasTag = (key: string, tag: string) =>
+      animationSpecs(key, sheets[`../../public/art/sprites/${key}.json`]).some(
+        (spec) => spec.key === animationKey(key, tag),
+      );
+    for (const { key, tag } of Object.values(MOVER_SPRITES)) {
+      expect(hasTag(key, tag), key).toBe(true);
+    }
+    expect(hasTag(WARNING_KEY, WARNING_TAG)).toBe(true);
+    expect(hasTag(WARNING_ARROW_KEY, WARNING_TAG)).toBe(true);
+    expect(hasTag(WARNING_ARROW_KEY, WARNING_DOWN_TAG)).toBe(true);
   });
 
   it("name a doghouse tag for every dog, and the empty house", () => {

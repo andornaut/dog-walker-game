@@ -35,6 +35,7 @@ const plan: SpawnPlan<Kind> = {
     { blocksLane: false, count: 9, kind: "tip" },
     { blocksLane: false, count: 3, kind: "treat" },
   ],
+  roadLength: 1100,
   scrollSpeed: 100,
   sightLength: 1000,
   zoneLength: 1000,

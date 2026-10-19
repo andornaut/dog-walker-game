@@ -35,7 +35,10 @@ export const TEST_TUNING: LiveTuning = {
     tipByPackSize: { 1: 1.5, 2: 1.25, 3: 1 },
   },
   pixels: { ...TUNING.pixels, roadScrollSpeed: 80 },
-  probability: { catchBySize: { big: 0.5, medium: 0.5, small: 0.25 } },
+  probability: {
+    catchBySize: { big: 0.5, medium: 0.5, small: 0.25 },
+    moverShare: { homeStretch: 0, park: 0, shops: 0, street: 0 },
+  },
   seconds: {
     ...TUNING.seconds,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },

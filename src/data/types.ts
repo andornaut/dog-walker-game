@@ -59,12 +59,15 @@ type OpenGroup = Readonly<Record<string, number | Table<string>>>;
 // The values the rules read by name; each group may hold more keys for cards to name.
 export interface Tuning {
   readonly counts: OpenGroup & {
+    readonly ballLanesPerSecond: number;
+    readonly looseDogLanesPerSecond: number;
     readonly minorObstaclesFirstZone: number;
     readonly minorObstaclesGainPerZone: number;
     readonly obstaclesFirstZone: number;
     readonly obstaclesGainPerZone: number;
     readonly packSizeMax: number;
     readonly packSizeMin: number;
+    readonly squirrelDartLanesPerSecond: number;
     readonly tipsFirstZone: number;
     readonly tipsGainPerZone: number;
     readonly treatCarryMax: number;
@@ -83,18 +86,24 @@ export interface Tuning {
     readonly tip: number;
   };
   readonly multipliers: OpenGroup & {
+    readonly cyclistSpeedMultiplier: number;
     readonly heartsByTemperament: Table<Temperament>;
     readonly pullIntervalJitter: number;
     readonly scrollSpeedGainPerZone: number;
     readonly tipByPackSize: Table<number>;
   };
   readonly pixels: OpenGroup & { readonly roadScrollSpeed: number };
-  readonly probability: OpenGroup & { readonly catchBySize: Table<Size> };
+  readonly probability: OpenGroup & {
+    readonly catchBySize: Table<Size>;
+    readonly moverShare: Table<ZoneId>;
+  };
   readonly seconds: OpenGroup & {
+    readonly ballBounceSeconds: number;
     readonly hitStopSeconds: number;
     readonly inputLockBySize: Table<Size>;
     readonly minorHitStopSeconds: number;
     readonly minorStumble: number;
+    readonly moverWarningSeconds: number;
     readonly pullIntervalByEnergy: Table<Energy>;
     readonly pullTell: number;
     readonly statusVisualSeconds: number;
