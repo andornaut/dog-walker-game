@@ -7,8 +7,10 @@ import { dotRects, HELP_LAYOUT, helpActionAt, type Point } from "../help/helpLay
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { closeHelp } from "../help/helpSeen";
 import { insetRect, type Rect } from "../layout/rect";
+import { PHONE_EVENTS } from "../pwa";
 import { addFilledRect } from "./draw";
 import { listenOnePress } from "./onePress";
+import { closeOverlay, onWindowEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { updateProfile } from "./profileStore";
@@ -87,6 +89,7 @@ export class HelpScene extends Scene {
         }
       },
     });
+    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
   }
 
   private showPressed(pressed: Pressed | undefined): void {
@@ -109,12 +112,9 @@ export class HelpScene extends Scene {
   }
 
   private close(): void {
-    if (this.resumeKey !== undefined) {
-      this.scene.resume(this.resumeKey);
-    }
+    closeOverlay(this.resumeKey, this);
     void updateProfile(this, closeHelp);
     this.game.events.emit(HELP_CLOSED_EVENT);
-    this.scene.stop();
   }
 
   // Redrawn whole on every page turn, reading the pages then, so a live text edit shows up.

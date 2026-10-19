@@ -19,6 +19,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { addDim, fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
 import { listenOnePress } from "./onePress";
+import { openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -171,7 +172,6 @@ export class PauseScene extends Scene {
 
   private openSettings(): void {
     const data: SettingsSceneData = { resume: SCENE_KEYS.pause };
-    this.scene.pause();
-    this.scene.launch(SCENE_KEYS.settings, data);
+    openOverlay(this, SCENE_KEYS.settings, data);
   }
 }

@@ -18,6 +18,7 @@ import { fillLine } from "../text/lines";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { addDim, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
+import { closeOverlay, onWindowEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole, wrapPixelText } from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
@@ -138,11 +139,7 @@ export class StatsScene extends Scene {
         this.close();
       }
     });
-    const onBack = () => this.close();
-    window.addEventListener(PHONE_EVENTS.backPressed, onBack);
-    this.events.once("shutdown", () =>
-      window.removeEventListener(PHONE_EVENTS.backPressed, onBack),
-    );
+    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
   }
 
   private targetAt(x: number, y: number): Target | undefined {
@@ -167,10 +164,7 @@ export class StatsScene extends Scene {
   }
 
   private close(): void {
-    if (this.resumeKey !== undefined) {
-      this.scene.resume(this.resumeKey);
-    }
-    this.scene.stop();
+    closeOverlay(this.resumeKey, this);
   }
 
   private text(

@@ -28,6 +28,7 @@ import type { Settings } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { drawFocusRing, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
+import { closeOverlay, onWindowEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
@@ -177,11 +178,7 @@ export class SettingsScene extends Scene {
       },
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
-    const onBack = () => this.close();
-    window.addEventListener(PHONE_EVENTS.backPressed, onBack);
-    this.events.once("shutdown", () =>
-      window.removeEventListener(PHONE_EVENTS.backPressed, onBack),
-    );
+    onWindowEvent(this, PHONE_EVENTS.backPressed, () => this.close());
   }
 
   private onKey(key: string): void {
@@ -268,11 +265,8 @@ export class SettingsScene extends Scene {
   }
 
   private close(): void {
-    if (this.resumeKey !== undefined) {
-      this.scene.resume(this.resumeKey);
-    }
+    closeOverlay(this.resumeKey, this);
     this.game.events.emit(SETTINGS_CLOSED_EVENT);
-    this.scene.stop();
   }
 
   private render(): void {

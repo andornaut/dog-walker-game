@@ -8,6 +8,7 @@ import type { Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
 import { DIM_ALPHA } from "./draw";
+import { closeOverlay, onWindowEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
@@ -60,17 +61,13 @@ export class CelebrationScene extends Scene {
       available: true,
       primary: true,
     });
-    const close = () => {
-      this.scene.resume(resume);
-      this.scene.stop();
-    };
+    const close = () => closeOverlay(resume, this);
     listenButtonTap(this, button, close);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (isConfirmKey(event.key) || isPauseKey(event.key)) {
         close();
       }
     });
-    window.addEventListener(PHONE_EVENTS.backPressed, close);
-    this.events.once("shutdown", () => window.removeEventListener(PHONE_EVENTS.backPressed, close));
+    onWindowEvent(this, PHONE_EVENTS.backPressed, close);
   }
 }
