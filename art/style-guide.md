@@ -6,7 +6,7 @@
 - **Mood:** casual, cozy, low-stress.
 - **Camera:** ¾ top-down.
 - **Orientation:** portrait.
-- **Choice cards:** Slay the Spire–style cards, up to three across on screen (an encounter with two options shows two centred cards), art-led: an illustration plus a one-line effect; tap a card to enlarge it for full details. Every option has its own illustration showing its outcome.
+- **Choice cards:** Slay the Spire–style cards, up to three across on screen (an encounter with two options shows two centred cards), art-led: an illustration plus a one-line effect; tap a card to enlarge it for full details. Every option has its own illustration showing its outcome. A card is 83×140: a coloured title band (red for encounters, sky blue for lucky encounters, amber for forced stops, green for upgrades), a 75×56 illustration in a recessed window, the effect text below it, and a dark cost badge at the bottom. Illustrations are composed from the road sprites at 1× on a scrap of the zone's ground.
 - **Owner happiness UI:** each dog shown with its owner's face and a happiness meter.
 - **Base render resolution:** 360×640, scaled up crisply with no smoothing.
 - **Run screen layout:** a top status bar (money, zone progress), not overlaid on the road; a fixed-width dog column on the left with 3 slots (a fired dog's slot empties and the road never changes width); the road fills the rest. On an encounter the road pauses and dims, and the cards cover the road while the top bar and dog column stay visible.
@@ -23,7 +23,6 @@
 ## Open decisions
 
 - **Animation budget beyond the walk:** idle animations, and frame counts for people and obstacles
-- **Card art size and frame:** illustration dimensions, border style
 - **Pixel font:** which font
 
 ## Asset rules
@@ -31,7 +30,7 @@
 The art-side rules for every asset live here. The tooling that draws, builds and exports sprites is the set of scripts in `art/tools/`.
 
 - **Formats:** Aseprite source files go in `art/`; exported PNG sheets plus Aseprite JSON go in `public/art/` (manifest: `public/art/manifest.json`). The pixel font is a BMFont (XML `.fnt` plus `.png`).
-- **Sprites in code:** `art/tools/dogs.py` draws the dogs, `art/tools/owners.py` the owners' faces, `art/tools/road.py` everything else on the road (walker, pickups, encounters, lucky encounters, the bark pop), and `art/tools/help.py` composes the help screen's illustrations from those exports. Each builds its sources (`art/dogs/`, `art/owners/`, `art/road/`, `art/help/`) and exports in `public/art/sprites/` (or `public/art/images/`), then adds them to the manifest: `python3 art/tools/<script>.py build`, or `preview OUT.png` for a contact sheet. Shared drawing and build code is in `art/tools/pixel.py`. A build overwrites the `.aseprite` files, so change the script, not the sources.
+- **Sprites in code:** `art/tools/dogs.py` draws the dogs, `art/tools/owners.py` the owners' faces, `art/tools/road.py` everything else on the road (walker, pickups, encounters, lucky encounters, the bark pop), `art/tools/help.py` composes the help screen's illustrations and `art/tools/cards.py` the card frame and card illustrations from those exports. Each builds its sources (`art/dogs/`, `art/owners/`, `art/road/`, `art/help/`, `art/cards/`) and exports in `public/art/sprites/` (or `public/art/images/`), then adds them to the manifest: `python3 art/tools/<script>.py build`, or `preview OUT.png` for a contact sheet. Shared drawing and build code is in `art/tools/pixel.py`. A build overwrites the `.aseprite` files, so change the script, not the sources.
 - **Inventory:** every asset the game needs, with its manifest key, size and priority, is listed in `inventory.md`.
 - **Naming:** a sprite's kebab-case manifest key is also its file name: `art/<set>/<key>.aseprite` exports to `public/art/sprites/<key>.png` and `.json`. Keys use the prefixes `dog-`, `face-dog-`, `face-owner-`, `walker-`, `fx-`, `card-`, `icon-`, `item-` and `ui-`; road objects use their plain name (`skunk`, `tip`). Animation names are the Aseprite tag names.
 - **Consistency checks:** before an asset goes in the game, every pixel of its export is an Endesga 32 colour at full opacity or fully transparent, its frames are the size listed in `inventory.md`, and it follows the proportions and outline rules above. Check it in the gallery at `/art/` on each zone's ground colour.

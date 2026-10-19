@@ -1,0 +1,49 @@
+{ "frames": {
+   "card-frame 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 83, "h": 140 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 140 },
+    "sourceSize": { "w": 83, "h": 140 },
+    "duration": 1000
+   },
+   "card-frame 1.aseprite": {
+    "frame": { "x": 83, "y": 0, "w": 83, "h": 140 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 140 },
+    "sourceSize": { "w": 83, "h": 140 },
+    "duration": 1000
+   },
+   "card-frame 2.aseprite": {
+    "frame": { "x": 166, "y": 0, "w": 83, "h": 140 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 140 },
+    "sourceSize": { "w": 83, "h": 140 },
+    "duration": 1000
+   },
+   "card-frame 3.aseprite": {
+    "frame": { "x": 249, "y": 0, "w": 83, "h": 140 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 140 },
+    "sourceSize": { "w": 83, "h": 140 },
+    "duration": 1000
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "card-frame.png",
+  "format": "RGBA8888",
+  "size": { "w": 332, "h": 140 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "encounter", "from": 0, "to": 0, "direction": "forward" },
+   { "name": "lucky", "from": 1, "to": 1, "direction": "forward" },
+   { "name": "stop", "from": 2, "to": 2, "direction": "forward" },
+   { "name": "upgrade", "from": 3, "to": 3, "direction": "forward" }
+  ]
+ }
+}

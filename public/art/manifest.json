@@ -6,6 +6,11 @@
       "json": "sprites/biscuit-neighbour.json"
     },
     {
+      "key": "card-frame",
+      "png": "sprites/card-frame.png",
+      "json": "sprites/card-frame.json"
+    },
+    {
       "key": "dog-biscuit",
       "png": "sprites/dog-biscuit.png",
       "json": "sprites/dog-biscuit.json"
@@ -203,6 +208,74 @@
   ],
   "fonts": [],
   "images": [
+    {
+      "key": "card-biscuit-neighbour-pass",
+      "png": "images/card-biscuit-neighbour-pass.png"
+    },
+    {
+      "key": "card-biscuit-neighbour-take",
+      "png": "images/card-biscuit-neighbour-take.png"
+    },
+    {
+      "key": "card-lost-wallet-keep",
+      "png": "images/card-lost-wallet-keep.png"
+    },
+    {
+      "key": "card-lost-wallet-return",
+      "png": "images/card-lost-wallet-return.png"
+    },
+    {
+      "key": "card-other-dog-pull-away",
+      "png": "images/card-other-dog-pull-away.png"
+    },
+    {
+      "key": "card-other-dog-sniff",
+      "png": "images/card-other-dog-sniff.png"
+    },
+    {
+      "key": "card-photo-op-pose",
+      "png": "images/card-photo-op-pose.png"
+    },
+    {
+      "key": "card-photo-op-wave",
+      "png": "images/card-photo-op-wave.png"
+    },
+    {
+      "key": "card-puddle-through",
+      "png": "images/card-puddle-through.png"
+    },
+    {
+      "key": "card-puddle-towel",
+      "png": "images/card-puddle-towel.png"
+    },
+    {
+      "key": "card-skunk-grooming",
+      "png": "images/card-skunk-grooming.png"
+    },
+    {
+      "key": "card-skunk-ignore",
+      "png": "images/card-skunk-ignore.png"
+    },
+    {
+      "key": "card-skunk-rinse",
+      "png": "images/card-skunk-rinse.png"
+    },
+    {
+      "key": "card-squirrel-chase",
+      "png": "images/card-squirrel-chase.png"
+    },
+    {
+      "key": "card-squirrel-hold",
+      "png": "images/card-squirrel-hold.png"
+    },
+    {
+      "key": "card-thief-chase",
+      "png": "images/card-thief-chase.png"
+    },
+    {
+      "key": "card-thief-let-go",
+      "png": "images/card-thief-let-go.png"
+    },
     {
       "key": "help-cards",
       "png": "images/help-cards.png"

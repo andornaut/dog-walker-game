@@ -127,15 +127,15 @@ Four zones give 4 road strips (core) plus 3 transitions and roughly 12 props (la
 
 ## Choice cards
 
-Each card is a frame plus an illustration plus text drawn in the pixel font. Card art size is an open decision; the illustration sits in roughly the top 83×70 of the ~83×140 card ((280 - 4×8) / 3 wide).
+Each card is a frame plus an illustration plus text drawn in the pixel font. The illustration is 75×56 at (5, 16) inside the 83×140 frame; `art/tools/cards.py` documents the rest of the layout.
 
-| Asset          | Key                | Type   | Size    | Priority | Notes                                                         |
-| -------------- | ------------------ | ------ | ------- | -------- | ------------------------------------------------------------- |
-| Card frame     | `card-frame`       | sprite | ~83×140 | M6       | Frames `encounter`, `stop`, `upgrade`, `disabled`, `selected` |
-| Enlarged frame | `card-frame-large` | sprite | TBD     | core     | Tap-to-enlarge view; same frames                              |
-| Cost badge     | `card-cost`        | image  | TBD     | core     | Holds `$`, `$$$` or the ♥ change                              |
+| Asset          | Key                | Type   | Size   | Priority | Notes                                                                                                                                                             |
+| -------------- | ------------------ | ------ | ------ | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Card frame     | `card-frame`       | sprite | 83×140 | M6       | Tags `encounter`, `lucky`, `stop`, `upgrade` (band colour); the game greys out disabled cards with the palette's grey ramp and outlines the selected one in amber |
+| Enlarged frame | `card-frame-large` | sprite | TBD    | core     | Tap-to-enlarge view; same frames                                                                                                                                  |
+| Cost badge     | `card-cost`        | image  | TBD    | core     | Holds `$`, `$$$` or the ♥ change                                                                                                                                  |
 
-Illustrations, one per option (`card-<encounter>-<option>`, type `image`). An encounter with two options shows two centred cards:
+Illustrations, one per option, keyed `card-<encounter>-<option>` (type `image`, e.g. `card-skunk-grooming`, `card-other-dog-pull-away`). An encounter with two options shows two centred cards. Done: the 5 encounters and 3 lucky encounters.
 
 | Encounter         | Options                                                                                                      | Count | Priority |
 | ----------------- | ------------------------------------------------------------------------------------------------------------ | ----- | -------- |
