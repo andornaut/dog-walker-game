@@ -30,6 +30,7 @@ import {
 import { formatDollars } from "../rules/effectText";
 import type { CardSource } from "../state/runState";
 import { fillLine } from "../text/lines";
+import { addDisplayText, hasDisplayFont } from "./displayText";
 import { fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { listenOnePress } from "./onePress";
@@ -136,8 +137,12 @@ export class CardScene extends Scene {
     const top = itemAt(this.cardRects, 0).y;
     const centerX = road.x + road.width / 2;
     const title = { font: "title", scale: 2 } as const;
-    this.centered(centerX + 1, top - 37, view.title, PALETTE.ink, title);
-    this.centered(centerX, top - 38, view.title, PALETTE.white, title);
+    if (view.source.kind === "fork" && hasDisplayFont(this, view.title)) {
+      addDisplayText(this, centerX, top - 38, view.title, { color: PALETTE.white, originX: 0.5 });
+    } else {
+      this.centered(centerX + 1, top - 37, view.title, PALETTE.ink, title);
+      this.centered(centerX, top - 38, view.title, PALETTE.white, title);
+    }
     this.centered(centerX, top - 18, this.subtitle(view), PALETTE.white);
 
     const tag = cardFrameTag(gameData, view.source);

@@ -156,6 +156,7 @@ import { checkpointOf, runResultOf } from "../save/runSlices";
 import { packDogs } from "../state/pack";
 import { type CardSource, type Loadout, newRun, type RunState } from "../state/runState";
 import type { CardSceneData } from "./CardScene";
+import { addDisplayText } from "./displayText";
 import { drawPixelLine, fillRect, shadowTexture } from "./draw";
 import { trotOffRoad } from "./feedbackMoments";
 import { hitLabelOf, playHitMoment } from "./hitMoment";
@@ -1291,7 +1292,7 @@ export class RunScene extends Scene {
       }),
     );
     banner.add(
-      addPixelText(this, BANNER.width / 2, 27, zone.name, {
+      addDisplayText(this, BANNER.width / 2, 27, zone.name, {
         color: PALETTE.plum,
         font: "title",
         originX: 0.5,

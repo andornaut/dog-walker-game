@@ -25,6 +25,7 @@ import { cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
+import { addDisplayText } from "./displayText";
 import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
@@ -119,7 +120,12 @@ export class EndScene extends Scene {
       addPixelText(this, x, y, value, { color, font: "title", originX, scale: TEXT_SCALE });
 
     const words = gameData.menuText.end;
-    title(SCREEN_CONFIG.width / 2, TITLE_Y, words.titles[walk.outcome], PALETTE.plum, 0.5);
+    addDisplayText(this, SCREEN_CONFIG.width / 2, TITLE_Y, words.titles[walk.outcome], {
+      color: PALETTE.plum,
+      font: "title",
+      originX: 0.5,
+      scale: TEXT_SCALE,
+    });
     if (newBest) {
       this.showRibbon(reduced);
       soundboardOf(this).play("newBest");
@@ -353,7 +359,7 @@ export class EndScene extends Scene {
   // The new-best ribbon drops into place; with reduced motion it is simply there.
   private showRibbon(reduced: boolean): void {
     if (!this.textures.exists(RIBBON.key)) {
-      addPixelText(this, SCREEN_CONFIG.width / 2, RIBBON.y + 4, gameData.menuText.end.newBest, {
+      addDisplayText(this, SCREEN_CONFIG.width / 2, RIBBON.y + 4, gameData.menuText.end.newBest, {
         color: PALETTE.darkRed,
         font: "title",
         originX: 0.5,

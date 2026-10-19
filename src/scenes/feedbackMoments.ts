@@ -34,6 +34,7 @@ import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { type Cents, cents } from "../rules/units";
 import type { RunState } from "../state/runState";
+import { addDisplayText } from "./displayText";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
@@ -283,7 +284,7 @@ export class HudFeedback {
     }
     const { plateText } = FIRING_PARTS;
     container.add(
-      addPixelText(this.scene, plateText.x, plateText.y, gameData.runText.fired, {
+      addDisplayText(this.scene, plateText.x, plateText.y, gameData.runText.fired, {
         color: PALETTE.white,
         font: "title",
         scale: 2,

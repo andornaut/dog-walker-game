@@ -4,8 +4,8 @@ import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
 import type { Rect } from "../layout/rect";
 import { hitLabel } from "../rules/encounters";
+import { addDisplayText } from "./displayText";
 import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
 import { firstTag, playEffect } from "./sprites";
 import { tagFrame } from "./uiKit";
 
@@ -171,12 +171,18 @@ function showLabel(scene: Scene, moment: HitMoment, plate: string, totalMs: numb
     );
   }
   label.add(
-    addPixelText(scene, PLATE.width / 2, LABEL.lineTop + LABEL.capTop * LABEL.scale, moment.label, {
-      color: PALETTE.white,
-      font: "title",
-      originX: 0.5,
-      scale: LABEL.scale,
-    }),
+    addDisplayText(
+      scene,
+      PLATE.width / 2,
+      LABEL.lineTop + LABEL.capTop * LABEL.scale,
+      moment.label,
+      {
+        color: PALETTE.white,
+        font: "title",
+        originX: 0.5,
+        scale: LABEL.scale,
+      },
+    ),
   );
   if (!moment.still) {
     label.setY(top - LABEL.dropIn).setAlpha(0);
