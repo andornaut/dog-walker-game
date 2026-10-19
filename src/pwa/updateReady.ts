@@ -141,8 +141,9 @@ export interface UpdateFlow {
 }
 
 // Acts on updateAction whenever its state changes: lets the game boot, switches to the waiting
-// version, or shows the notice through show(visible), the last only on a change. The state
-// starts with a newer version pending, so the boot waits for watch or noRegistration.
+// version, or shows the notice through show(visible), the last only on a change. A page some
+// version controls starts with a newer one pending, so the boot waits for watch or
+// noRegistration; a first visit has none to wait for.
 export function createUpdateFlow(
   container: ContainerLike,
   online: () => boolean,
@@ -151,7 +152,7 @@ export function createUpdateFlow(
 ): UpdateFlow {
   let state: UpdateState = {
     interacted: false,
-    newer: "pending",
+    newer: container.controller === null ? "none" : "pending",
     onHome: false,
     online: online(),
     reloading: false,
@@ -182,6 +183,7 @@ export function createUpdateFlow(
       show(visible);
     }
   };
+  update({});
   return {
     accept() {
       if (waitingWorker !== undefined && !state.reloading) {

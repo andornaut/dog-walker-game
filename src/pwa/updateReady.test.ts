@@ -205,10 +205,14 @@ describe("createUpdateFlow", () => {
     return { booted: () => booted, container, flow, reload, shown };
   };
 
-  it("holds the boot until it is watching a registration", async () => {
-    const { booted } = setup();
+  // Before watch: a controlled page waits for its check, a first visit has nothing to wait for.
+  it.each([
+    { booted: false, controller: RUNNING_WORKER, name: "a controlled page" },
+    { booted: true, controller: null, name: "a first visit" },
+  ])("before watching, booted is $booted for $name", async ({ booted, controller }) => {
+    const flow = setup({ controller });
     await settle();
-    expect(booted()).toBe(false);
+    expect(flow.booted()).toBe(booted);
   });
 
   it.each([
