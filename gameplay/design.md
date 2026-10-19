@@ -39,10 +39,10 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - Taps on the top bar never move the pack. Pause offers Resume, Help, Settings and Head home
 - The walker is at the bottom, the dogs just ahead in the same lane; the pack collides as one unit
 - Spawning always leaves a reachable path, so every hit is avoidable
-- A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count. A hit that opens no card (a squirrel with no Chaser, a thief that flees, a skunk or puddle that catches nobody) is scenery: no bump and no grace window
+- A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count. A hit that opens no card (a squirrel with no Chaser, a thief that flees, a puddle an all-small pack hops over) is scenery: no bump and no grace window
 - Scroll speed and obstacle density rise gently each zone
 - **Pulls:** a dog pulls the pack one lane only toward something it wants that you can see: a treat (Food-driven), a squirrel (Chaser), or a spot for its urgent need. There are no random pulls. About 1 second before, a need or target bubble pops over the dog with an arrow and a line to the target, the leash goes taut and the dog strains; then the pack lurches one lane. Bigger dogs lock lane input longer after the move, and during a drag the pull re-anchors the drag at the new lane. A pull never moves the pack into an obstacle it can't react to: if the target lane has an obstacle too close, the dog strains but doesn't pull
-- **Area effects** (skunk, puddle) roll once per dog on contact, so a bigger pack is more likely to have a dog caught; small dogs are caught less often. The card shows which dogs were caught, so its outcomes are fixed. If no dog is caught, no card opens: a small splash or puff and a "Close one!" label at the pack show that it was touched
+- **Area effects** (skunk, puddle) catch dogs by size, with no roll: a skunk catches every dog; a puddle catches every dog except small ones, which hop over it with a "Hop!" label. A bigger pack pays more, and the card's per-dog totals show it. A puddle that catches no dog (an all-small pack) opens no card
 
 ### Resources
 
@@ -101,13 +101,13 @@ A roster of 9. You start with 1 dog slot and 3 dogs, and buy up to 2 more slots 
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
-| Attribute         | Values                                                                                                                                                                                                                                                                                                        |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Size              | Small · medium · big. No size is a straight upgrade. Bigger dogs lock lane input longer after a pull (small: not at all) and have a higher max ♥. Each small dog attracts more Other dog encounters and each big dog fewer; any big dog scares thieves away. Small dogs are caught by area effects less often |
-| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                                     |
-| Energy            | Calm · steady · hyper. Sets how quickly the dog's need becomes urgent                                                                                                                                                                                                                                         |
-| Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                                                    |
-| Quirk             | One per dog, from its personality; see Quirks below. Quirks stay mild, and any downside comes with an upside                                                                                                                                                                                                  |
+| Attribute         | Values                                                                                                                                                                                                                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Size              | Small · medium · big. No size is a straight upgrade. Bigger dogs lock lane input longer after a pull (small: not at all) and have a higher max ♥. Each small dog attracts more Other dog encounters and each big dog fewer; any big dog scares thieves away. Small dogs hop over puddles |
+| Trait             | **Fancy:** puddles upset its owner more · **Food-driven:** pulls the pack toward nearby treats · **Chaser:** squirrels upset its owner; pulls toward them                                                                                                                                |
+| Energy            | Calm · steady · hyper. Sets how quickly the dog's need becomes urgent                                                                                                                                                                                                                    |
+| Owner temperament | **Laid-back:** the easy-going baseline · **Fussy:** starts with fewer ♥, pays a higher fee · **Dramatic:** every ♥ gained or lost during a run counts double (starting bonuses don't), still within 0 and the max; also sets the quip tone                                               |
+| Quirk             | One per dog, from its personality; see Quirks below. Quirks stay mild, and any downside comes with an upside                                                                                                                                                                             |
 
 | Dog      | Breed                | Need     | Owner                          | Look                                                     |
 | -------- | -------------------- | -------- | ------------------------------ | -------------------------------------------------------- |
@@ -160,13 +160,13 @@ Every dog has one need, shown by name on its detail card:
 
 Obstacles hit by accident open a choice card.
 
-| Encounter | Who's affected                                         | Options                                                                    |
-| --------- | ------------------------------------------------------ | -------------------------------------------------------------------------- |
-| Other dog | All dogs                                               | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each   |
-| Puddle    | Area effect: dogs caught by the roll; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                      |
-| Skunk     | Area effect: dogs caught by the roll                   | Full groom → −$$$ · Quick rinse → −$, _Stinky_ · Hold your nose → −♥♥ each |
-| Squirrel  | Chasers (none: harmless scenery, no card)              | Hold tight → −♥ · Let them chase → −$ (dropped tips)                       |
-| Thief     | All dogs (none if any big dog: it flees, no card)      | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)   |
+| Encounter | Who's affected                                          | Options                                                                    |
+| --------- | ------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Other dog | All dogs                                                | Let them sniff → +♥ each, −$ per dog (missed tips) · Pull away → −♥ each   |
+| Puddle    | Area effect: every dog but small ones; Fancy dogs worse | Splash through → −♥ (more for Fancy) · Towel off → −$                      |
+| Skunk     | Area effect: every dog                                  | Full groom → −$$$ · Quick rinse → −$, _Stinky_ · Hold your nose → −♥♥ each |
+| Squirrel  | Chasers (none: harmless scenery, no card)               | Hold tight → −♥ · Let them chase → −$ (dropped tips)                       |
+| Thief     | All dogs (none if any big dog: it flees, no card)       | Chase them off → −♥ each (dogs worked up) · Let it go → −$ (stolen tips)   |
 
 **Stinky** (debuff): cuts tip value for the rest of the zone. A second skunk refreshes it; it never stacks.
 

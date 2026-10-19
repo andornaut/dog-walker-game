@@ -19,7 +19,7 @@ export const RUN_TEXT = {
     upgradeDuration: { nextZone: "Next zone", now: "Now", run: "Whole walk" },
     upgradeTitle: "Pick an upgrade",
   },
-  closeOne: "Close one!",
+  closeOne: "Hop!",
   fired: "FIRED!",
   firedBy: "{owner} fires you",
   homeQuestion: {

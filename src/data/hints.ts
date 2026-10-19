@@ -8,7 +8,7 @@ export const HINTS = {
     trigger: { kind: "accident" },
   },
   areaEffect: {
-    text: "Close one! Clouds and puddles don't catch every dog.",
+    text: "Small dogs hop over puddles. Skunks get everyone.",
     trigger: { kind: "areaEffect" },
   },
   card: {

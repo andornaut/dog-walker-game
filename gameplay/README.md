@@ -54,6 +54,7 @@ Rules in the rulebook that the game doesn't have yet:
 Tuning against the targets, with the simulator before and after:
 
 - Firing: walks with a firing run too rare (novice 46%, typical 12%, expert 2%), and card policies differ too much, because every heart-costing card has a money way out; re-measure with the mixed policy
+- Area effects: with no catch roll, more puddle cards; lower puddle weights to hold about 8 cards a walk
 - Gear: each item within the window; running shoes and the whistle measured on a pack with no big dog
 - Quirks and walkers: re-baseline once both are in the simulator; walkers against the walker spread
 - Big Payday's threshold, now rarely earned
