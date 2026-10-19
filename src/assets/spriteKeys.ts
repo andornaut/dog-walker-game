@@ -132,11 +132,10 @@ export const NEED_ART = {
   pullFail: "fx-pull-fail",
 } as const;
 
-// The zone celebration's new art, each piece drawn in code while it is missing: the 148x132
-// starburst behind the walker; the 6x6 confetti bit, a looping tag per colour, falling over the
-// road; the new walker's bubble's tail, pointing up at them; and the walker-<name> tag the
-// walker cheers in, and hops in with (idle while it is missing). fx-confetti bursts as a new
-// walker lands.
+// The zone celebration's own art: the 148x132 starburst behind the walker; the 6x6 confetti
+// bit, a looping tag per colour, falling over the road; the new walker's bubble's tail,
+// pointing up at them; and the walker-<name> tag the walker cheers in and hops in with (idle
+// while it is missing). fx-confetti bursts as a new walker lands.
 export const ZONE_CELEBRATION_ART = {
   burst: "ui-celebrate-burst",
   confettiBit: "fx-confetti-bit",

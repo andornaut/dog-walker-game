@@ -38,7 +38,7 @@ export const RUN_TEXT = {
   },
   outOfMoney: "you're out of money",
   zoneDone: {
-    earnings: "+{fees} fees · +{tips} tips",
+    earnings: "{fees} fees  ·  {tips} tips",
     subtitle: "{zone}",
     title: "Zone done!",
   },

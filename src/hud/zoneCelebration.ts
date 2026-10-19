@@ -56,12 +56,15 @@ export function zoneCelebration(
   return { fees: cents(fees), kind: "zoneDone", tips: cents(tips), walker, zone };
 }
 
-// A piece of a line with icons: text, or a name after its icon.
-export type LinePart = { readonly icon: string; readonly text: string } | { readonly text: string };
+// A piece of a line drawn in parts: plain text, an amount of money, or a name after its icon.
+export type LinePart =
+  | { readonly kind: "icon"; readonly icon: string; readonly text: string }
+  | { readonly kind: "money" | "text"; readonly text: string };
 
 export type CelebrationText =
   | {
-      readonly earnings: string;
+      // The zone's fees and tips, the amounts as money.
+      readonly earnings: readonly LinePart[];
       readonly kind: "zoneDone";
       readonly subtitle: string;
       readonly title: string;
@@ -76,7 +79,22 @@ export type CelebrationText =
       readonly title: string;
     };
 
-const INFO_NAMES = /\{(pace|style)\}/;
+// The line's text around its {name}s, with each name's part in its place.
+function lineParts(line: string, named: Readonly<Record<string, LinePart>>): LinePart[] {
+  // Split on a capturing pattern, each name sits at an odd index between the text around it.
+  return line.split(/\{(\w+)\}/).flatMap((part, i): LinePart[] => {
+    if (i % 2 === 1) {
+      const found = named[part];
+      return found === undefined ? [] : [found];
+    }
+    return part === "" ? [] : [{ kind: "text", text: part }];
+  });
+}
+
+// A gain, as "+$240".
+function gainText(amount: Cents): string {
+  return `+${dollarText(amount)}`;
+}
 
 export function celebrationText(
   data: Pick<GameData, "runText" | "walkerPaces" | "walkerStyles" | "walkers">,
@@ -85,11 +103,13 @@ export function celebrationText(
   const text = data.runText;
   if (celebration.kind === "zoneDone") {
     const words = text.zoneDone;
+    const amounts = { fees: celebration.fees, tips: celebration.tips };
+    const named: Record<keyof typeof amounts, LinePart> = {
+      fees: { kind: "money", text: gainText(amounts.fees) },
+      tips: { kind: "money", text: gainText(amounts.tips) },
+    };
     return {
-      earnings: fillLine(FIELDS.zoneDone, words, "earnings", {
-        fees: dollarText(celebration.fees),
-        tips: dollarText(celebration.tips),
-      }),
+      earnings: lineParts(words.earnings, named),
       kind: "zoneDone",
       subtitle: fillLine(FIELDS.zoneDone, words, "subtitle", { zone: celebration.zone }),
       title: words.title,
@@ -97,16 +117,19 @@ export function celebrationText(
   }
   const words = text.newWalker;
   const { name, pace, style } = data.walkers[celebration.walker];
-  const named = {
-    pace: { icon: stripIconKey({ kind: "pace", pace }), text: data.walkerPaces[pace].name },
-    style: { icon: stripIconKey({ kind: "style", style }), text: data.walkerStyles[style].name },
+  const named: Record<"pace" | "style", LinePart> = {
+    pace: {
+      icon: stripIconKey({ kind: "pace", pace }),
+      kind: "icon",
+      text: data.walkerPaces[pace].name,
+    },
+    style: {
+      icon: stripIconKey({ kind: "style", style }),
+      kind: "icon",
+      text: data.walkerStyles[style].name,
+    },
   };
-  // Split on a capturing pattern, each name sits at an odd index between the text around it.
-  const info = words.info
-    .split(INFO_NAMES)
-    .flatMap((part, i): LinePart[] =>
-      i % 2 === 1 ? [named[part as keyof typeof named]] : part === "" ? [] : [{ text: part }],
-    );
+  const info = lineParts(words.info, named);
   return {
     button: words.button,
     greeting: fillLine(FIELDS.card, text.card, "walkerGreeting", { walker: name }),

@@ -32,6 +32,7 @@ import {
   needSpotSpriteKey,
   ownerFaceKey,
   SKUNK_CLOUD_KEY,
+  ZONE_CELEBRATION_ART,
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
@@ -219,7 +220,17 @@ describe("walker art", () => {
     expect(sprites.has(gameData.walkers[gameData.defaultWalker].spriteKey)).toBe(true);
   });
 
-  it.todo("names ZONE_CELEBRATION_ART's cheer tag, confetti and banner, once art lands");
+  it("has the zone celebration's cheer for every walker, its burst, tail and confetti colours", () => {
+    const { burst, confettiBit, confettiBitTags, tailUp, walkerTags } = ZONE_CELEBRATION_ART;
+    const missing = [
+      ...Object.values(gameData.walkers).flatMap(({ spriteKey }) =>
+        missingTags(spriteKey, walkerTags),
+      ),
+      ...missingImages([burst, tailUp]),
+      ...missingTags(confettiBit, confettiBitTags),
+    ];
+    expect(missing).toEqual([]);
+  });
 });
 
 describe("image art", () => {

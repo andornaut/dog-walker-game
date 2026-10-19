@@ -7,6 +7,7 @@ import { HOME_LAYOUT } from "../home/homeLayout";
 import { settingsLayout } from "../home/settings";
 import { SHOP_LAYOUT, shopTabRects } from "../home/shopLayout";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
+import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
 import { DOGHOUSE } from "../hud/doghouse";
 import { hudLanes } from "../hud/hudLanes";
 import { PAUSE_MENU_ITEMS, pauseMenuLayout } from "../hud/pauseMenu";
@@ -121,6 +122,7 @@ export function layoutExport(
         // By count of cards, from 1.
         rows: cardRows(MAX_CARD_OPTIONS, roadView),
       },
+      celebration: CELEBRATION_LAYOUT,
       end: END_LAYOUT,
       help: {
         ...HELP_LAYOUT,

@@ -68,7 +68,7 @@ describe("zoneCelebration", () => {
 describe("celebrationText", () => {
   const text = gameData.runText;
 
-  it("heads Zone done with the zone and writes its fees and tips in dollars", () => {
+  it("heads Zone done with the zone and writes its fees and tips as gains in dollars", () => {
     const celebration = {
       fees: cents(24000),
       kind: "zoneDone",
@@ -76,12 +76,21 @@ describe("celebrationText", () => {
       walker: "casey",
       zone: "Willow Crescent",
     } as const;
-    expect(celebrationText(gameData, celebration)).toEqual({
-      earnings: text.zoneDone.earnings.replace("{fees}", "$240").replace("{tips}", "$38"),
+    const shown = celebrationText(gameData, celebration);
+    expect(shown).toMatchObject({
       kind: "zoneDone",
       subtitle: text.zoneDone.subtitle.replace("{zone}", "Willow Crescent"),
       title: text.zoneDone.title,
     });
+    if (shown.kind !== "zoneDone") {
+      throw new Error("a zone's text");
+    }
+    const filled = text.zoneDone.earnings.replace("{fees}", "+$240").replace("{tips}", "+$38");
+    expect(shown.earnings.map((part) => part.text).join("")).toBe(filled);
+    expect(shown.earnings.filter((part) => part.kind === "money")).toEqual([
+      { kind: "money", text: "+$240" },
+      { kind: "money", text: "+$38" },
+    ]);
   });
 
   it.each<{ pace: string; style: string; walker: WalkerId }>([
@@ -102,9 +111,9 @@ describe("celebrationText", () => {
     const filled = text.newWalker.info.replace("{pace}", pace).replace("{style}", style);
     expect(shown.info.map((part) => part.text).join("")).toBe(filled);
     const { pace: paceId, style: styleId } = gameData.walkers[walker];
-    expect(shown.info.filter((part) => "icon" in part)).toEqual([
-      { icon: `icon-pace-${paceId}`, text: pace },
-      { icon: `icon-style-${styleId}`, text: style },
+    expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
+      { icon: `icon-pace-${paceId}`, kind: "icon", text: pace },
+      { icon: `icon-style-${styleId}`, kind: "icon", text: style },
     ]);
   });
 });
