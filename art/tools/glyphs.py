@@ -19,7 +19,8 @@ icon-owner-<temperament>    laid-back (sunglasses and a grin), fussy (a frown an
 icon-zone-<zone>            snooze-crescent (a crescent moon over a roof), bark-park (a tree),
                             woof-way (a house), sniff-street-shops (a shopfront),
                             paws-promenade (a railing over a wave), the-long-way-home (a
-                            sunset over a path)
+                            sunset over a path); each inside a 1px ring for its outline, which
+                            holds 3:1 on cream and tan as the need icons' does
 icon-soaked, icon-spooked   dog statuses beside icon-stinky (ui.py), on cream: water drops; a
                             wide-eyed, floppy-eared dog face with fright lines and a sweat drop
 icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a hand under a heart),
@@ -53,7 +54,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import DARKER, K, Grid, build as build_sprites  # noqa: E402
+from pixel import DARKER, K, Grid, build as build_sprites, icon_edge  # noqa: E402
 from fx import star4  # noqa: E402
 from needs import SCENT, Icon  # noqa: E402
 from ui import to_image  # noqa: E402
@@ -339,8 +340,21 @@ def dramatic():
 
 # ---------- zones, after their backdrops ----------
 
+class Zone(Grid):
+    """A 16x16 zone picture drawn only inside the 1px ring its outline takes, with icon_edge outlines like
+    the need icons, so a picture that fills its frame is outlined on every side."""
+
+    def __init__(self):
+        super().__init__(16, 16)
+        self.edge = icon_edge
+
+    def p(self, x, y, c):
+        if 1 <= int(x) <= 14 and 1 <= int(y) <= 14:
+            super().p(x, y, c)
+
+
 def woof_way():
-    g = Grid(16, 16)
+    g = Zone()
     g.tri((0.5, 7.5), (8, 1), (15.5, 7.5), "red")
     g.rect(1, 7, 14, 1, "dred")
     g.rect(2, 8, 12, 7, "cream")
@@ -353,7 +367,7 @@ def woof_way():
 
 
 def bark_park():
-    g = Grid(16, 16)
+    g = Zone()
     g.rect(7, 9, 2, 5, "dbrown")
     g.ell(8, 6.5, 6.5, 5.5, "green", "dgreen")
     g.p(4, 4, "yellow")
@@ -366,7 +380,7 @@ def bark_park():
 
 
 def sniff_street_shops():
-    g = Grid(16, 16)
+    g = Zone()
     g.rect(1, 2, 14, 13, "rust")
     g.rect(14, 2, 1, 13, "dbrown")
     for x in range(1, 15, 4):
@@ -382,9 +396,9 @@ def sniff_street_shops():
 
 
 def the_long_way_home():
-    g = Grid(16, 16)
+    g = Zone()
     g.ell(8, 9, 5, 5, "amber", "orange", "yellow")
-    for x, y in ((8, 1), (2, 5), (14, 5), (1, 9), (15, 9)):
+    for x, y in ((8, 1), (2, 5), (14, 5), (1, 9), (14, 9)):
         g.p(x, y, "amber")
     g.ell(8, 16, 9, 6, "green", "dgreen")
     g.tri((7.5, 10), (8.5, 10), (12, 16), "tan")
@@ -393,7 +407,7 @@ def the_long_way_home():
 
 
 def snooze_crescent():
-    g = Grid(16, 16)
+    g = Zone()
     g.ell(11, 5, 4.5, 4.5, "yellow")
     g.ell(13.5, 3.5, 3.6, 3.6, None)
     g.p(2, 2, "white")
@@ -408,7 +422,7 @@ def snooze_crescent():
 
 
 def paws_promenade():
-    g = Grid(16, 16)
+    g = Zone()
     g.rect(0, 1, 16, 2, "ochre")
     g.rect(0, 1, 16, 1, "tan")
     g.rect(0, 5, 16, 1, "ochre")
@@ -418,7 +432,7 @@ def paws_promenade():
     g.rect(0, 7, 16, 1, "tan")
     g.rect(0, 10, 16, 6, "sky")
     bitmap(g, 0, 10, ["..cc......cc....", ".c..c....c..c...", "c....cccc....ccc"], {"c": "cyan"})
-    g.rect(0, 15, 16, 1, "blue")
+    g.rect(0, 14, 16, 1, "blue")
     g.p(6, 13, "white")
     return g
 

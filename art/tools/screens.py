@@ -13,12 +13,15 @@ reads on them.
 - screen-home: morning on Maple Street. The bar strip, then the gate scene
   (y 40 to 196: street, curb, sidewalk, fence with the open gate, front path,
   yard sign, mailbox), then the porch deck from y 198 under the walker, dog
-  and gear steps and Start walk. The slot sign (196,140 160x46) covers the
-  right of the yard while a slot is for sale.
-- screen-stats: evening indoors. A panelled den wall with, between the title
-  and the close button and above the tabs (y 56), a framed dog photo, a low
-  window onto Woof Way at night and the leash hooks. Below the tabs the wall
-  is open for the stats panel and the badge wall (8,108 to 352,552).
+  and gear steps and Start walk. The street sign's board (300,72 54x11) sits
+  at the right edge under the sound toggle, clear of the walker's speech
+  bubble; the game prints "Maple St" on it centred at 327,75. The slot sign
+  (196,140 160x46) covers the right of the yard while a slot is for sale.
+- screen-stats: evening indoors. A panelled den wall that leaves the top left
+  clear for the title (12,12 to 68,22); then, between the title and the close
+  button and above the tabs (y 56), a framed dog photo, a low window onto
+  Woof Way at night and the leash hooks. Below the tabs the wall is open for
+  the stats panel and the badge wall (8,108 to 352,552).
 - screen-end: sunset on The Long Way Home. Between the logo (116,40) and the
   summary panel (24,112 to 336,412), the front of the house the pack comes
   home to: its gable peeks over the logo, the front door (171,73 18x23) opens
@@ -264,14 +267,14 @@ def home():
                     cv.fill(71 + lx + dx, 80 + ly + dy, 1, 1, c)
     for x, y in ((58, 70), (66, 66), (74, 68), (56, 80)):
         cv.fill(x, y, 1, 1, "yellow")
-    # the street sign on the corner (the game prints the name on the board in white, which
-    # holds 7.8:1 on forest green)
-    # (it sits 36px in from the right so the sound toggle fits in the corner above it)
-    cv.fill(290, 62, 2, 54, "slate")
-    cv.fill(290, 62, 1, 54, "grey")
-    cv.fill(264, 56, 54, 11, "teal")
-    cv.fill(265, 57, 52, 9, "forest")
-    cv.fill(288, 114, 6, 2, "dslate")
+    # the street sign at the right edge, under the sound toggle and clear of the walker's speech
+    # bubble (x 70 to 290, rows 46 to 112); the game prints the name centred at 327,75 in white,
+    # which holds 7.8:1 on forest green
+    cv.fill(326, 72, 2, 44, "slate")
+    cv.fill(326, 72, 1, 44, "grey")
+    cv.fill(300, 72, 54, 11, "teal")
+    cv.fill(301, 73, 52, 9, "forest")
+    cv.fill(324, 114, 6, 2, "dslate")
     # the front yard
     cv.fill(0, 126, W, 70, "green")
     for i in range(46):
@@ -324,7 +327,7 @@ def home():
     cv.fill(250, 176, 2, 2, "pink")
     cv.fill(254, 179, 1, 2, "dred")
     for x, y, c in ((120, 50, "orange"), (210, 84, "rust"), (30, 104, "orange"), (140, 112, "rust"),
-                    (236, 100, "orange"), (240, 160, "orange"), (270, 150, "rust"), (344, 80, "orange")):
+                    (236, 100, "orange"), (240, 160, "orange"), (270, 150, "rust"), (344, 86, "orange")):
         leaf(cv, x, y, c)
     # the porch: a step nosing, then the deck under the panels
     cv.fill(0, 196, W, 1, "tan")
@@ -379,9 +382,9 @@ def stats():
     cv.fill(0, 548, W, 1, "brown")
     cv.fill(0, 549, W, 10, "plum")
     cv.fill(0, 559, W, 1, "ink")
-    # a low window onto Woof Way at night, between the title and the close button, above the tabs
-    wx, wy, ww, wh = 116, 16, 128, 28
-    view = night(bd.woof_way().img).crop((126, 20, 126 + ww, 20 + wh))
+    # a low window onto Woof Way at night, between the photo and the leash hooks, above the tabs
+    wx, wy, ww, wh = 140, 16, 100, 28
+    view = night(bd.woof_way().img).crop((120, 20, 120 + ww, 20 + wh))
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
     cv.fill(wx - 5, wy - 5, ww + 10, wh + 10, "tan")
     cv.fill(wx - 5, wy - 5, ww + 10, 1, "cream")
@@ -395,7 +398,7 @@ def stats():
     for dy in range(-4, 5):
         for dx in range(-4, 5):
             if dx * dx + dy * dy <= 16 and (dx + 2) ** 2 + (dy - 2) ** 2 > 10:
-                cv.fill(wx + 116 + dx, wy + 7 + dy, 1, 1, "cream")
+                cv.fill(wx + ww - 12 + dx, wy + 7 + dy, 1, 1, "cream")
     # the sill
     cv.fill(wx - 10, wy + wh + 6, ww + 20, 3, "tan")
     cv.fill(wx - 10, wy + wh + 6, ww + 20, 1, "cream")
@@ -416,7 +419,7 @@ def stats():
         tie = cx + (2 if d > 0 else 4)
         cv.fill(tie, wy + 22, 6, 2, "amber")
     # a framed photo of Koda, right of the title
-    fx, fy = 54, 14
+    fx, fy = 75, 14
     cv.fill(fx, fy, 38, 38, "plum")
     cv.fill(fx + 1, fy + 1, 36, 36, "amber")
     cv.fill(fx + 1, fy + 36, 36, 1, "orange")
@@ -850,7 +853,7 @@ def ui(cv, key):
             panel(x, 10, 20, 20, "tan")
         for x in (8, 332):
             panel(x, 46, 20, 20, "tan")
-        hp.text_c(cv, "MAPLE ST", 291, 59, "white")
+        hp.text_c(cv, "MAPLE ST", 327, 75, "white")
         panel(130, 46, 100, 34, "white")
         panel(196, 140, 160, 46, "tan")
         for x in (206, 343):

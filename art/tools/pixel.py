@@ -140,6 +140,15 @@ class Grid:
         return out
 
 
+def icon_edge(c):
+    """An icon's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1 on
+    cream and tan."""
+    out = DARKER[DARKER[c]]
+    while DARKER[out] != out and min(contrast(out, "cream"), contrast(out, "tan")) < 3:
+        out = DARKER[out]
+    return out
+
+
 def edged(g, edge=road_edge, close=False):
     """Give g an outline rule (road_edge unless told otherwise) and return it. edge is a function of the
     fill, or a colour name for one line round every fill. close runs the line along the bottom row. A grid

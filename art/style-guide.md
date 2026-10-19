@@ -33,8 +33,9 @@ A 32px sprite leaves 12px of margin each side of its lane. Obstacles follow the 
 - Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the three light roads (Bark Park, Sniff Street Shops, The Long Way Home), and the fill carries Woof Way. A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Woof Way. Snooze Crescent (grey) and Paws Promenade (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged.
 - Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them (a head over its body) stay two ramp steps darker.
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings such as merle are a few flat patches.
-- Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` and `fx-heart` keep a ramp outline. Hazard warnings are outlined in ink.
+- Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` and `fx-heart` keep a ramp outline, and `fx-dust` (light grey dust) has no rim. Hazard warnings are outlined in ink.
 - Ground decals (puddles) have no outline and no shadow.
+- Icons come in two kinds. Chrome glyphs on `ui-icon-button` (`icon-close`, `icon-help`, `icon-home`, `icon-logbook`, `icon-music`, `icon-pause`, `icon-play`, `icon-settings`, `icon-sound`) are two flat tones with no outline. Content icons, such as `icon-gear-*`, `icon-need-*`, `icon-trait-*` and `icon-zone-*`, are outlined with `icon_edge`: two ramp steps darker, then on down the ramp until the outline holds 3:1 on cream and tan. A picture that fills its frame keeps a 1px clear ring for the outline.
 - Sprites carry no shadow; the game draws one in the road's darker ramp colour. The bouncing ball carries its own.
 
 ## Contrast

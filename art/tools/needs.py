@@ -81,22 +81,13 @@ from fx import HEART, SMALL, burst, rim, stamp, star4  # noqa: E402
 from hits import layer, piece  # noqa: E402
 from minis import STEPS, small  # noqa: E402
 from moments import rounded  # noqa: E402
-from pixel import DARKER, K, Grid, contrast, edged, main  # noqa: E402
+from pixel import K, Grid, edged, icon_edge, main  # noqa: E402
 import road  # noqa: E402
 
 # The six road colours: Woof Way, Bark Park, Sniff Street Shops, The Long Way Home, Snooze Crescent
 # and Paws Promenade. Cream is also the cards' paper and tan the doghouse wall.
 GROUNDS = ("3a4466", "e4a672", "c0cbdc", "c28569", "8b9bb4", "ead4aa")
 NEEDS = ("regular", "playful", "friendly", "nosy", "thirsty")
-
-
-def icon_edge(c):
-    """An icon's outline for fill c: two ramp steps darker, then on down the ramp until it holds 3:1 on
-    cream and tan."""
-    out = DARKER[DARKER[c]]
-    while DARKER[out] != out and min(contrast(out, "cream"), contrast(out, "tan")) < 3:
-        out = DARKER[out]
-    return out
 
 
 def bitmap(g, x0, y0, rows, cols):
