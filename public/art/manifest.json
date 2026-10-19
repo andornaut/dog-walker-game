@@ -2289,6 +2289,10 @@
       "png": "images/ui-quip-tail.png"
     },
     {
+      "key": "ui-quip-tail-down",
+      "png": "images/ui-quip-tail-down.png"
+    },
+    {
       "key": "ui-slot-locked",
       "png": "images/ui-slot-locked.png"
     },

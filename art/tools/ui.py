@@ -8,7 +8,7 @@ baked in with font-title), ui-slot-locked (160x46, the yard sign for the next do
 the game writes its two lines); the home screen's ui-detail-card and ui-step (24x24
 nine-slices, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
 ui-detail-well (68x68); the run screen's ui-top-bar (360x40), ui-quip (24x24
-nine-slice, 8px corners), ui-quip-tail (6x8), ui-zone-banner (248x48) and
+nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down (8x6), ui-zone-banner (248x48) and
 ui-touch-hint (96x36).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row; a tag per dog key and `empty`),
 ui-doghouse-warn (120x90, the low-hearts rim drawn over ui-doghouse; tags pulse, static),
@@ -540,7 +540,7 @@ def doghouse(dog):
     """120x90, one of three slots in a row. A 1px gap down each side keeps neighbouring houses
     apart. The game draws, in slot pixels: the dog's name centred at (60, 6) in font-title on the
     roof's name plate (cream, x 20 to 99, rows 4 to 15), the dog face at (6, 24) in the door, the
-    owner face at (42, 24) in the window, hearts from (78, 26) in rows of five, 8px across and 8px
+    owner face at (42, 24) in the window, hearts from (78, 26) in rows of five, 8px across (7px hearts with a 1px gap) and 8px
     down, on the cream hearts board (x 77 to 117, rows 23 to 53), the n/max count centred at
     (98, 46) in font-title on the same board, up to two 16x16 status icons at (78, 62) and
     (98, 62) under pegs, and the owner's name at (6, 62) in font-body on the cream name strip
@@ -959,6 +959,17 @@ def zone_pip(zone=None, done=False, state=None):
     return g
 
 
+def quip_tail_down():
+    """8x6, ui-quip-tail turned to point down from a bubble above the doghouse row. Place its top row
+    over the bubble's bottom rim so the cream runs through; the tip is at column 5, row 5."""
+    left = quip_tail()
+    g = Grid(8, 6)
+    for y in range(6):
+        for x in range(8):
+            g.px[y][x] = left.px[x][5 - y]
+    return g
+
+
 def quip():
     """24x24 nine-slice (8px corners): the owner's speech bubble, cream paper with a round
     plum rim, so it reads apart from the white hint bubble. Text in font-body, plum."""
@@ -1080,6 +1091,7 @@ IMAGES = {
     "ui-strip-well": lambda: to_image(strip_well().outlined(False)),
     "ui-quip": lambda: to_image(quip().outlined(False)),
     "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
+    "ui-quip-tail-down": lambda: to_image(quip_tail_down().outlined(False)),
     "ui-zone-banner": lambda: to_image(zone_banner().outlined(False)),
     "ui-touch-hint": lambda: to_image(touch_hint().outlined()),
     "ui-detail-card": lambda: to_image(detail_card().outlined(False)),
