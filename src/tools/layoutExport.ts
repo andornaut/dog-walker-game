@@ -149,9 +149,11 @@ export function layoutExport(
       loading: { art: LOADING_ART, track: LOADING_TRACK, walker: LOADING_WALKER },
       pause: {
         labels: PAUSE_MENU_ITEMS.map((item) => data.menuText.pause[item]),
-        ...pauseMenuLayout(roadView, PAUSE_MENU_ITEMS.length),
+        // The note wraps to two lines at 2x on the plate.
+        ...pauseMenuLayout(roadView, { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: 2 }),
       },
-      settings: settingsLayout(SCREEN_CONFIG),
+      // SettingsScene's rows: sound, music, effects and reduced motion.
+      settings: settingsLayout(SCREEN_CONFIG, ["switch", "slider", "slider", "switch"]),
       shop: { ...SHOP_LAYOUT, tabRects: shopTabRects() },
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },
     },

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { DEFAULT_SETTINGS } from "../save/schema";
 import {
   knobX,
+  SETTINGS_ROW,
   settingsLayout,
   setVolumeSteps,
   type SliderTrack,
@@ -74,13 +75,40 @@ describe("volumeStepForKey", () => {
 });
 
 describe("settingsLayout", () => {
+  const kinds = ["switch", "slider", "slider", "switch"] as const;
+
   it("centres the panel on the screen with its rows and title, and closes from the corner", () => {
-    const layout = settingsLayout({ height: 560, width: 360 });
-    expect(layout.panel).toEqual({ height: 222, width: 248, x: 56, y: 169 });
-    expect(layout.row).toEqual({ height: 44, width: 232, x: 64, y: 207 });
-    expect(layout.title).toEqual({ x: 180, y: 185 });
+    const layout = settingsLayout({ height: 560, width: 360 }, kinds);
+    expect(layout.panel).toEqual({ height: 258, width: 248, x: 56, y: 151 });
+    expect(layout.rows.map((row) => [row.y, row.height])).toEqual([
+      [189, 62],
+      [251, 44],
+      [295, 44],
+      [339, 62],
+    ]);
+    expect(layout.title).toEqual({ x: 180, y: 167 });
     expect(layout.track.x).toBe(72);
     expect(layout.close.hit).toEqual({ height: 44, width: 44, x: 316, y: 0 });
+  });
+
+  // 2x capitals are 10 rows and body descenders 4 more; the knob is 16 tall over the track.
+  it.each(kinds.map((kind, i) => [i, kind] as const))("fits row %i's %s parts", (i, kind) => {
+    const layout = settingsLayout({ height: 560, width: 360 }, kinds);
+    const row = layout.rows[i];
+    if (row === undefined) {
+      throw new Error("no row");
+    }
+    if (kind === "switch") {
+      const { linePitch, noteDy, labelDy, switch: face } = SETTINGS_ROW.switch;
+      expect(labelDy + 10).toBeLessThan(noteDy);
+      expect(noteDy + linePitch + 14).toBeLessThanOrEqual(row.height);
+      expect(face.dy + face.height).toBeLessThanOrEqual(row.height);
+      expect(SETTINGS_ROW.labelDx + SETTINGS_ROW.switch.noteWidth).toBeLessThan(face.dx);
+    } else {
+      const { labelDy } = SETTINGS_ROW.slider;
+      expect(labelDy + 10).toBeLessThan(layout.track.dy - 3);
+      expect(layout.track.dy + layout.track.height + 3).toBeLessThanOrEqual(row.height);
+    }
   });
 });
 

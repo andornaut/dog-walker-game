@@ -11,7 +11,17 @@ const PANEL_WIDTH = 232;
 // Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;
 const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
-const NOTE_PLATE = { gap: 4, height: 18 };
+// The note plate is as wide as the buttons.
+export const PAUSE_NOTE_WIDTH = BUTTON.width;
+// The note is 2x body text wrapped to the plate's width less padX each side, its first line's
+// capitals pad under the plate's top, a line every linePitch, and the last line's 10-row
+// capitals and 4-row descenders pad over its bottom.
+export const NOTE_PLATE = { gap: 4, linePitch: 20, pad: 4, padX: 4 } as const;
+
+function notePlateHeight(lines: number): number {
+  const { linePitch, pad } = NOTE_PLATE;
+  return pad + (Math.max(1, lines) - 1) * linePitch + 14 + pad;
+}
 const BOTTOM = 14;
 // Each button's hit area reaches this far above and below its face.
 const HIT_REACH = 2;
@@ -26,13 +36,19 @@ export interface PauseMenuLayout {
 
 // The panel centred on the road, sized to its parts: the title, then the buttons stacked
 // down it with the note plate under them, or the note plate first when it is the question.
-function panelLayout(road: Rect, buttonCount: number, noteFirst: boolean): PauseMenuLayout {
+function panelLayout(
+  road: Rect,
+  parts: { buttonCount: number; noteLines: number },
+  noteFirst: boolean,
+): PauseMenuLayout {
+  const { buttonCount } = parts;
+  const noteHeight = notePlateHeight(parts.noteLines);
   const buttonsHeight = buttonCount * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
   // Offsets down the panel: a note first sits where the buttons would start, less its gap.
   const noteFirstY = BUTTON.y - NOTE_PLATE.gap;
-  const buttonsY = noteFirst ? noteFirstY + NOTE_PLATE.height + BUTTON.gap : BUTTON.y;
+  const buttonsY = noteFirst ? noteFirstY + noteHeight + BUTTON.gap : BUTTON.y;
   const noteY = noteFirst ? noteFirstY : BUTTON.y + buttonsHeight + NOTE_PLATE.gap;
-  const height = Math.max(buttonsY + buttonsHeight, noteY + NOTE_PLATE.height) + BOTTOM;
+  const height = Math.max(buttonsY + buttonsHeight, noteY + noteHeight) + BOTTOM;
   const panel: Rect = {
     height,
     width: PANEL_WIDTH,
@@ -53,7 +69,7 @@ function panelLayout(road: Rect, buttonCount: number, noteFirst: boolean): Pause
       y: button.y - HIT_REACH,
     })),
     notePlate: {
-      height: NOTE_PLATE.height,
+      height: noteHeight,
       width: BUTTON.width,
       x: panel.x + BUTTON.x,
       y: panel.y + noteY,
@@ -63,13 +79,19 @@ function panelLayout(road: Rect, buttonCount: number, noteFirst: boolean): Pause
   };
 }
 
-// The pause menu: its buttons, then the note plate.
-export function pauseMenuLayout(road: Rect, buttonCount: number): PauseMenuLayout {
-  return panelLayout(road, buttonCount, false);
+// The pause menu: its buttons, then the note plate, its note noteLines lines long.
+export function pauseMenuLayout(
+  road: Rect,
+  parts: { buttonCount: number; noteLines: number },
+): PauseMenuLayout {
+  return panelLayout(road, parts, false);
 }
 
 // The Home button's question: the title, the note plate saying what is kept, then the
 // answers.
-export function homeQuestionLayout(road: Rect, buttonCount: number): PauseMenuLayout {
-  return panelLayout(road, buttonCount, true);
+export function homeQuestionLayout(
+  road: Rect,
+  parts: { buttonCount: number; noteLines: number },
+): PauseMenuLayout {
+  return panelLayout(road, parts, true);
 }

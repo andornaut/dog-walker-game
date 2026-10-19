@@ -5,6 +5,8 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
   HOME_QUESTION_ANSWERS,
+  NOTE_PLATE,
+  PAUSE_NOTE_WIDTH,
   homeQuestionLayout,
   PAUSE_MENU_ITEMS,
   type PauseMenuItem,
@@ -19,7 +21,7 @@ import { fillRect } from "./draw";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
+import { addPixelText, wrapPixelText } from "./pixelText";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import type { SettingsSceneData } from "./SettingsScene";
@@ -75,7 +77,12 @@ export class PauseScene extends Scene {
           press: answer === "headHome" ? headHome : onResume,
         }))
       : PAUSE_MENU_ITEMS.map((item) => ({ label: menu[item], press: presses[item] }));
-    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, this.entries.length);
+    const note = asking ? question.body : menu.note;
+    const noteStyle = { color: PALETTE.plum, scale: TEXT_SCALE };
+    const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
+    const noteLines = wrapPixelText(this, noteStyle, noteWidth, note);
+    const parts = { buttonCount: this.entries.length, noteLines: noteLines.length };
+    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, parts);
     const { panel } = layout;
 
     // A 1px tan rim keeps the panel's edge clear of the dimmed road.
@@ -98,9 +105,9 @@ export class PauseScene extends Scene {
       }),
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
-    const note = asking ? question.body : menu.note;
-    addPixelText(this, center, layout.notePlate.y + 6, note, {
-      color: PALETTE.plum,
+    addPixelText(this, center, layout.notePlate.y + NOTE_PLATE.pad, noteLines.join("\n"), {
+      ...noteStyle,
+      align: "center",
       originX: 0.5,
     });
 

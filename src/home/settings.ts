@@ -59,26 +59,60 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
   return { music: settings.musicVolume, sfx: settings.sfxVolume };
 }
 
+export type SettingsRowKind = "slider" | "switch";
+
 export interface SettingsLayout {
   close: CloseControl;
   panel: Rect;
-  // The first row; the rest follow it down, each its height below.
-  row: Rect;
+  // The rows, top to bottom.
+  rows: Rect[];
   title: { x: number; y: number };
   track: SliderTrack & { dy: number; height: number };
 }
 
-const PANEL = { height: 222, width: 248 };
+// Offsets from a row's top-left corner. Every text is at 2x. A slider row has its 16x16 icon,
+// its 2x title-font label and its percentage over the track. A switch row has its icon and
+// label over its note, wrapped to noteWidth in up to two body-font lines a linePitch apart,
+// with the switch centred down the row's right side.
+export const SETTINGS_ROW = {
+  height: { slider: 44, switch: 62 },
+  labelDx: 26,
+  slider: { iconDy: 3, labelDy: 6 },
+  switch: {
+    iconDy: 5,
+    labelDy: 8,
+    linePitch: 20,
+    noteDy: 24,
+    noteWidth: 156,
+    switch: { dx: 188, dy: 23, height: 16, width: 32 },
+  },
+} as const;
 
-// The menus mock's layout: four rows 44 tall on a panel centred on the screen, and the close
-// control in the screen's corner. Settings covers the screen wherever it opens from.
-export function settingsLayout(screen: { height: number; width: number }): SettingsLayout {
+const PANEL = { width: 248 };
+// The rows start under the title; the panel ends this far under the last.
+const ROWS_TOP = 38;
+const PANEL_FOOT = 8;
+
+// The rows, by kind, on a panel centred on the screen, and the close control in the screen's
+// corner. Settings covers the screen wherever it opens from.
+export function settingsLayout(
+  screen: { height: number; width: number },
+  kinds: readonly SettingsRowKind[],
+): SettingsLayout {
+  const rowsHeight = kinds.reduce((sum, kind) => sum + SETTINGS_ROW.height[kind], 0);
+  const height = ROWS_TOP + rowsHeight + PANEL_FOOT;
   const x = Math.round((screen.width - PANEL.width) / 2);
-  const y = Math.round((screen.height - PANEL.height) / 2);
+  const y = Math.round((screen.height - height) / 2);
+  let rowY = y + ROWS_TOP;
+  const rows = kinds.map((kind) => {
+    const row = { height: SETTINGS_ROW.height[kind], width: 232, x: x + 8, y: rowY };
+    rowY += row.height;
+    return row;
+  });
   return {
     close: closeControl({ height: screen.height, width: screen.width, x: 0, y: 0 }),
-    panel: { ...PANEL, x, y },
-    row: { height: 44, width: 232, x: x + 8, y: y + 38 },
+    panel: { ...PANEL, height, x, y },
+    rows,
     title: { x: x + 124, y: y + 16 },
     track: { dy: 24, height: 10, knobWidth: 10, width: 216, x: x + 16 },
   };

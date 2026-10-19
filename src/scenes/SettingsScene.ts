@@ -1,5 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
+import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { MenuText } from "../data/types";
@@ -11,6 +12,7 @@ import { DISABLED_COLORS } from "../home/selection";
 import {
   knobX,
   type SettingsLayout,
+  SETTINGS_ROW,
   settingsLayout,
   setVolumeSteps,
   VOLUME_STEPS,
@@ -29,7 +31,7 @@ import { drawFocusRing, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText } from "./pixelText";
+import { addPixelText, wrapPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
@@ -87,11 +89,11 @@ const ROWS: readonly Row[] = [
     note: "motionNote",
   },
 ];
-// From a row's top-left: the icon, at the switch row's or the slider row's height, and the
-// label beside it.
-const ICON = { dx: 6, dySlider: 4, dySwitch: 14 };
-const LABEL_DX = 26;
-const SWITCH = { dx: 188, dy: 14, height: 16, width: 32 };
+const ROW_KINDS = ROWS.map((row) => row.kind);
+const ICON_DX = 6;
+const { labelDx: LABEL_DX } = SETTINGS_ROW;
+const SWITCH_ROW = SETTINGS_ROW.switch;
+const SWITCH = SWITCH_ROW.switch;
 const KNOB_HEIGHT = 16;
 // The keyboard moves through the rows, then the close control, one per focus row.
 const FOCUS_ROW_LENGTHS: readonly number[] = [...ROWS.map(() => 1), 1];
@@ -116,7 +118,7 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
   private focus: Focus | null = null;
-  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG);
+  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG, ROW_KINDS);
   private pressed: Target | undefined;
   private resumeKey: SceneKey | undefined;
 
@@ -126,7 +128,7 @@ export class SettingsScene extends Scene {
 
   create(data?: SettingsSceneData): void {
     this.resumeKey = data?.resume;
-    this.layout = settingsLayout(SCREEN_CONFIG);
+    this.layout = settingsLayout(SCREEN_CONFIG, ROW_KINDS);
     this.dragging = undefined;
     this.focus = null;
     this.pressed = undefined;
@@ -225,8 +227,7 @@ export class SettingsScene extends Scene {
   }
 
   private rowRect(index: number): Rect {
-    const { row } = this.layout;
-    return { ...row, y: row.y + index * row.height };
+    return itemAt(this.layout.rows, index);
   }
 
   private targetAt(x: number, y: number): Target | undefined {
@@ -343,14 +344,17 @@ export class SettingsScene extends Scene {
       tile.container.y += FEEDBACK.pressDipPx;
     }
     const { x, y } = rect;
-    const icon = addTagImage(this, row.icon, on ? "on" : "off", x + ICON.dx, y + ICON.dySwitch);
+    const icon = addTagImage(this, row.icon, on ? "on" : "off", x + ICON_DX, y + SWITCH_ROW.iconDy);
     const words = gameData.menuText.settings;
-    const label = addPixelText(this, x + LABEL_DX, y + 12, words[row.label], {
+    const label = addPixelText(this, x + LABEL_DX, y + SWITCH_ROW.labelDy, words[row.label], {
       color: PALETTE[tile.look.text],
       font: "title",
+      scale: TEXT_SCALE,
     });
-    const note = addPixelText(this, x + LABEL_DX, y + 26, words[row.note], {
-      color: PALETTE.darkBrown,
+    const noteStyle = { color: PALETTE.darkBrown, scale: TEXT_SCALE };
+    const lines = wrapPixelText(this, noteStyle, SWITCH_ROW.noteWidth, words[row.note]);
+    const note = addPixelText(this, x + LABEL_DX, y + SWITCH_ROW.noteDy, lines.join("\n"), {
+      ...noteStyle,
     });
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
     const switchX = x + SWITCH.dx;
@@ -378,23 +382,21 @@ export class SettingsScene extends Scene {
     const active = tileState({ ...PLAIN_ITEM, available: !settings.muted }) !== "disabled";
     const steps = volumeSteps(settings[key]);
     const ink = active ? PALETTE.plum : PALETTE[DISABLED_COLORS.text];
-    addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON.dx, y + ICON.dySlider);
+    const { iconDy, labelDy } = SETTINGS_ROW.slider;
+    addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON_DX, y + iconDy);
     const words = gameData.menuText.settings;
-    addPixelText(this, x + LABEL_DX, y + 9, words[row.label], { color: ink, font: "title" });
+    const label = { color: ink, font: "title", scale: TEXT_SCALE } as const;
+    addPixelText(this, x + LABEL_DX, y + labelDy, words[row.label], label);
     addPixelText(
       this,
       slider.x + slider.width,
-      y + 9,
+      y + labelDy,
       active
         ? fillLine(MENU_TEXT_FIELDS.settings, words, "volume", {
             percent: String(volumePercent(steps)),
           })
         : words.muted,
-      {
-        color: ink,
-        font: "title",
-        originX: 1,
-      },
+      { ...label, originX: 1 },
     );
     const track: Rect = {
       height: slider.height,
