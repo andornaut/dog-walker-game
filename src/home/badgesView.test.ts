@@ -13,7 +13,7 @@ describe("badgeWall", () => {
       "firstSteps",
       "squirrel",
     ]);
-    expect(earnedText(wall)).toBe("2/15 earned");
+    expect(earnedText(gameData, wall)).toBe("2/15 earned");
   });
 
   it("falls back to the full goal where there is no short one", () => {
@@ -46,7 +46,7 @@ describe("badgeStrip", () => {
 
 describe("celebrationTitle", () => {
   it("counts more than one badge", () => {
-    expect(celebrationTitle(1)).toBe("Badge earned!");
-    expect(celebrationTitle(3)).toBe("3 badges earned!");
+    expect(celebrationTitle(gameData, 1)).toBe("Badge earned!");
+    expect(celebrationTitle(gameData, 3)).toBe("3 badges earned!");
   });
 });

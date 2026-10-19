@@ -142,7 +142,7 @@ function cardFaces(data: GameData): CardFace[] {
       name: upgrade.name,
       source: { id, kind: "upgrade" },
       text: effectText(data, upgrade.effects),
-      title: "Pick an upgrade",
+      title: data.runText.card.upgradeTitle,
     }),
   );
   const skip: CardFace = {

@@ -1,8 +1,8 @@
 import type { HomeText } from "./types";
 
-// The home screen's text. A {name} is filled in by the game: {dog} a dog's name, {gear} a gear
-// item's name, {amount} and {price} money, {count} and {max} numbers. {slot} is a slot number
-// in slotSign and the slot's name ("Dog slot 2") in slotBought.
+// The home screen's text. A {name} is filled in by the game, and src/home/homeText.ts lists
+// the names each line may use. {slot} is a slot number in slotSign and dogSlotName, and the
+// slot's name ("Dog slot 2") in slotBought.
 export const HOME_TEXT = {
   bubble: {
     afterFiring: "Rough walk. They'll come around.",
@@ -11,9 +11,53 @@ export const HOME_TEXT = {
     howTo: "Tap to pick or buy. Hold for details.",
     newAffordable: "We could take on another client.",
   },
+  detail: {
+    dogFee: "Fee {fee}/zone",
+    dogKind: "{size} · {trait} · {energy} energy",
+    dogOwner: "Owner {owner}, {role}",
+    dogStatus: "Your client",
+    dogTemperament: "{temperament} owner",
+    dogTotals: "Walks {walks} · Zones {zones} · Fired {fired}",
+    gearEquipped: "Equipped",
+    gearOwned: "Owned, tap to equip",
+    gearSubtitle: "Gear",
+    priceBuy: "Price {price}, tap to buy",
+    priceLocked: "Price {price}, locked",
+  },
   dogBought: "{dog} joins your clients!",
   dogCantAfford: "Save {amount} more for {dog}.",
+  dogSlotName: "Dog slot {slot}",
+  focus: {
+    dogLocked: "{dog}: {kind}. {temper} {price}",
+    dogOwned: "{dog}: {kind}, {fee} a zone. {temper}",
+    gear: "{gear}: {effect}.",
+    gearLocked: "{gear}: {effect}. {price}",
+    kind: "{size} {trait}",
+    priceBuy: "{price}: tap to buy.",
+    priceShort: "{price}: need {amount} more.",
+    temper: "{owner} is {temperament}.",
+  },
+  gateSign: "Maple St",
   gearBought: "{gear} is in your bag.",
+  logbook: {
+    best: "Best {best}, {note}",
+    bestNote: "{zones} with {dogs}",
+    empty: "No walks yet.",
+    emptyNote: "Three clients are waiting on the porch.",
+    last: "Last {last}",
+    lastEarned: "+{amount}.",
+    lastFinished: "{earned} Walked {zones} zones of {world}.",
+    lastFired: "{earned} {owner} fired you on {zone}.",
+    lastHeadedHome: "{earned} Headed home from {zone}.",
+    stats: "Stats",
+    title: "Logbook",
+    totals: "Walks {walks}   Dogs walked {dogs}   Fired {fired}",
+    zoneMany: "{count} zones",
+    zoneOne: "{count} zone",
+  },
+  noticePackFull: "The pack is full. Tap a picked dog to take it out.",
+  noticeSoundOff: "Sound off.",
+  noticeSoundOn: "Sound on.",
   packCount: "Pack {count}/{max}",
   sectionDogs: "Pick your dogs",
   sectionDogsPrompt: "Add a dog",
@@ -25,4 +69,11 @@ export const HOME_TEXT = {
   slotSave: "Save {amount} more",
   slotSign: "Slot {slot} · {price}",
   startWalk: "Start walk",
+  topBar: {
+    best: "Best {amount}",
+    noWalks: "No walks yet",
+    walkMany: "{count} walks",
+    walkOne: "{count} walk",
+  },
+  unsaved: "Progress won't be saved.",
 } as const satisfies HomeText;

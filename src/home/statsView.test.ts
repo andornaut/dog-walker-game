@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
+import { MENU_TEXT } from "../data/menuText";
 import { WORLD } from "../data/world";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { dogRows, overallRows } from "./statsView";
 
-const data = { dogs: DOGS, world: WORLD };
+const data = { dogs: DOGS, menuText: MENU_TEXT, world: WORLD };
 
 describe("overallRows", () => {
   it("shows the overall figures and runs by outcome", () => {

@@ -6,6 +6,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
 import { QUIPS } from "../data/quips";
+import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
 import type { DogId, EncounterId, ForcedStopId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
@@ -18,7 +19,6 @@ import {
   cardFor,
   type Choice,
   chooseOption,
-  FORK_TITLE,
   offerFork,
   offerUpgrades,
   openCard,
@@ -35,6 +35,7 @@ const data = {
   needSpots: NEED_SPOTS,
   needs: NEEDS,
   quips: QUIPS,
+  runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,
   upgrades: UPGRADES,
@@ -517,7 +518,7 @@ describe("a fork", () => {
 
   it("shows a free path card per path with its zone, difficulty and fee multiplier", () => {
     const card = cardFor(data, openCard(source, afterZone), source);
-    expect(card.title).toBe(FORK_TITLE);
+    expect(card.title).toBe(data.runText.card.forkTitle);
     expect(card.affected).toEqual([]);
     expect(card.skip).toBe(false);
     expect(

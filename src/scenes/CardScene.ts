@@ -12,6 +12,7 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { RUN_TEXT_FIELDS } from "../hud/runText";
 import { cardNumberForKey } from "../input/keyBindings";
 import { CARD_LAYOUT, cardRowSpec, largeCardRect } from "../layout/cardLayout";
 import { cardRowRects } from "../layout/cardRow";
@@ -21,6 +22,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { type CardView, type Choice, MAX_CARD_OPTIONS, type OptionView } from "../rules/choices";
 import { formatDollars } from "../rules/effectText";
 import type { CardSource } from "../state/runState";
+import { fillLine } from "../text/lines";
 import { fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { listenOnePress } from "./onePress";
@@ -75,9 +77,6 @@ function sourceSpriteKey(source: CardSource): string | undefined {
 function illustrationKey(option: OptionView | undefined): string {
   return option === undefined ? SKIP_CARD_ART : option.art;
 }
-
-// Under a fork's title, over its path cards.
-const FORK_SUBTITLE = "Pick the next zone";
 
 // Up to three cards over the dimmed road. The top bar and doghouses stay in view, and
 // the HUD marks the dogs the card affects. A disabled option is drawn in greys.
@@ -176,16 +175,16 @@ export class CardScene extends Scene {
       case "encounter":
       case "need": {
         const names = view.affected.map((dog) => gameData.dogs[dog].name);
-        return names.length === 0 ? "Pick one" : `${names.join(", ")}`;
+        return names.length === 0 ? gameData.runText.card.pickOne : `${names.join(", ")}`;
       }
       case "forcedStop": {
         const names = view.affected.map((dog) => gameData.dogs[dog].name);
-        return names.length === 0 ? "A stop on the way" : names.join(", ");
+        return names.length === 0 ? gameData.runText.card.stopSubtitle : names.join(", ");
       }
       case "fork":
-        return FORK_SUBTITLE;
+        return gameData.runText.card.forkSubtitle;
       default:
-        return "Pick one for the rest of the walk";
+        return gameData.runText.card.upgradeSubtitle;
     }
   }
 
@@ -258,7 +257,7 @@ export class CardScene extends Scene {
       });
     }
     const option = entry.option;
-    const label = option?.label ?? "Skip";
+    const label = option?.label ?? gameData.runText.card.skip;
     this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, this.bandColor(tag), {
       font: "title",
     });
@@ -272,7 +271,7 @@ export class CardScene extends Scene {
     }
     const lines =
       option === undefined
-        ? ["Walk on: nothing happens."]
+        ? [gameData.runText.card.skipHeld]
         : option.breakdown.length === 0
           ? [option.text]
           : option.breakdown.map(({ dog, name, text }) =>
@@ -314,11 +313,13 @@ export class CardScene extends Scene {
       return `×${option.path.fees}`;
     }
     if (option === undefined || option.cost === 0) {
-      return "Free";
+      return gameData.runText.card.free;
     }
     return option.availability.enabled
       ? `−${formatDollars(option.cost)}`
-      : `Need ${formatDollars(option.cost)}`;
+      : fillLine(RUN_TEXT_FIELDS.card, gameData.runText.card, "need", {
+          amount: formatDollars(option.cost),
+        });
   }
 
   // The forced-stop band is amber, so its label is plum; every other band's is white.
@@ -361,7 +362,7 @@ export class CardScene extends Scene {
     }
 
     // The band's label is in the title font, or the narrower body font if it would not fit.
-    const label = entry.option?.label ?? "Skip";
+    const label = entry.option?.label ?? gameData.runText.card.skip;
     const bandX = x + CARD.width / 2;
     const bandColor = this.bandColor(tag);
     const bandLabel = this.centered(bandX, y + BAND.y + 3, label, bandColor, { font: "title" });
@@ -414,8 +415,7 @@ export class CardScene extends Scene {
     }
 
     // The effect at 2x where it fits the card, else at 1x; holding the card shows it larger.
-    const text =
-      path?.difficultyName ?? entry.option?.text ?? "Poop bags: walk on, nothing happens.";
+    const text = path?.difficultyName ?? entry.option?.text ?? gameData.runText.card.skipEffect;
     const effect = this.centered(
       x + EFFECT.x + EFFECT.width / 2,
       effectY,

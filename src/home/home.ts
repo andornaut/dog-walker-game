@@ -1,4 +1,4 @@
-import type { DogId, GameData, GearId, ZoneId } from "../data/types";
+import type { DogId, GameData, GearId, HomeText, ZoneId } from "../data/types";
 import { quipLine } from "../rules/choices";
 import { zoneFee } from "../rules/dogs";
 import { effectText, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
@@ -6,6 +6,8 @@ import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { addCents, type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import type { PackDogs } from "../state/runState";
+import { fillLine } from "../text/lines";
+import { HOME_TEXT_FIELDS } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.
 export interface HomeLoadout {
@@ -158,17 +160,35 @@ export function dogNames(data: Pick<GameData, "dogs">, dogs: readonly DogId[]): 
   return names.length === 0 ? last : `${names.join(", ")} and ${last}`;
 }
 
+type LogbookData = Pick<GameData, "dogs" | "homeText" | "world">;
+
+const LOGBOOK_FIELDS = HOME_TEXT_FIELDS.logbook;
+
 // The last walk as one line for the logbook, naming the last owner who fired you if one did.
-export function lastWalkLine(data: Pick<GameData, "dogs" | "world">, walk: LastWalk): string {
-  const earned = `+${dollarText(walk.earnedCents)}.`;
+export function lastWalkLine(data: LogbookData, walk: LastWalk): string {
+  const text = data.homeText.logbook;
+  const earned = fillLine(LOGBOOK_FIELDS, text, "lastEarned", {
+    amount: dollarText(walk.earnedCents),
+  });
   const firing = walk.firings.at(-1);
   if (firing !== undefined) {
-    return `${earned} ${data.dogs[firing.dog].owner.name} fired you on ${zoneName(data, walk.route, firing.zone)}.`;
+    return fillLine(LOGBOOK_FIELDS, text, "lastFired", {
+      earned,
+      owner: data.dogs[firing.dog].owner.name,
+      zone: zoneName(data, walk.route, firing.zone),
+    });
   }
   if (walk.outcome === "finished") {
-    return `${earned} Walked ${walk.zonesFinished} zones of ${data.world.name}.`;
+    return fillLine(LOGBOOK_FIELDS, text, "lastFinished", {
+      earned,
+      world: data.world.name,
+      zones: String(walk.zonesFinished),
+    });
   }
-  return `${earned} Headed home from ${zoneName(data, walk.route, walk.zonesFinished + 1)}.`;
+  return fillLine(LOGBOOK_FIELDS, text, "lastHeadedHome", {
+    earned,
+    zone: zoneName(data, walk.route, walk.zonesFinished + 1),
+  });
 }
 
 // Every walk played, however it ended.
@@ -184,23 +204,33 @@ export interface Logbook {
   readonly totals: string;
 }
 
-export function logbookOf(
-  data: Pick<GameData, "dogs" | "world">,
-  stats: SaveStats,
-): Logbook | null {
+export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
   const { bestWalk, lastWalk } = stats;
   if (bestWalk === null || lastWalk === null) {
     return null;
   }
+  const text = data.homeText.logbook;
   const walks = walksPlayed(stats);
   const dogsWalked = Object.values(stats.dogs).reduce((total, dog) => total + dog.walks, 0);
-  const zones = `${bestWalk.zonesFinished} ${bestWalk.zonesFinished === 1 ? "zone" : "zones"}`;
+  const count = String(bestWalk.zonesFinished);
+  const zones = fillLine(
+    LOGBOOK_FIELDS,
+    text,
+    bestWalk.zonesFinished === 1 ? "zoneOne" : "zoneMany",
+    {
+      count,
+    },
+  );
   const dogs = dogNames(data, bestWalk.dogs);
   return {
     best: dollarText(bestWalk.earnedCents),
-    bestNote: dogs === "" ? zones : `${zones} with ${dogs}`,
+    bestNote: dogs === "" ? zones : fillLine(LOGBOOK_FIELDS, text, "bestNote", { dogs, zones }),
     last: lastWalkLine(data, lastWalk),
-    totals: `Walks ${walks}   Dogs walked ${dogsWalked}   Fired ${stats.timesFired}`,
+    totals: fillLine(LOGBOOK_FIELDS, text, "totals", {
+      dogs: String(dogsWalked),
+      fired: String(stats.timesFired),
+      walks: String(walks),
+    }),
   };
 }
 
@@ -231,33 +261,47 @@ export function partingSpeech(
   return wrapWords(maxChars, `${data.dogs[dog].owner.name}: ${line}`);
 }
 
-type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters">;
+type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText">;
+
+const FOCUS_FIELDS = HOME_TEXT_FIELDS.focus;
 
 // What buying an item would take: its price, and how much more the bank needs if short.
-function priceInfo(bank: Cents, cost: Cents): string {
+function priceInfo(text: HomeText["focus"], bank: Cents, cost: Cents): string {
+  const price = dollarText(cost);
   return cost > bank
-    ? `${dollarText(cost)}: need ${dollarText(cents(cost - bank))} more.`
-    : `${dollarText(cost)}: tap to buy.`;
+    ? fillLine(FOCUS_FIELDS, text, "priceShort", { amount: dollarText(cents(cost - bank)), price })
+    : fillLine(FOCUS_FIELDS, text, "priceBuy", { price });
 }
 
 // A dog in words for the home screen's info line, so its tile's icons never stand alone: size
 // and trait, fee or price, and its owner's temperament.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
+  const text = data.homeText.focus;
   const { name, owner, size, trait } = data.dogs[dog];
-  const kind = `${SIZE_NAMES[size]} ${TRAIT_NAMES[trait].toLowerCase()}`;
-  const temper = `${owner.name} is ${TEMPERAMENT_NAMES[owner.temperament]}.`;
+  const kind = fillLine(FOCUS_FIELDS, text, "kind", {
+    size: SIZE_NAMES[size],
+    trait: TRAIT_NAMES[trait].toLowerCase(),
+  });
+  const temper = fillLine(FOCUS_FIELDS, text, "temper", {
+    owner: owner.name,
+    temperament: TEMPERAMENT_NAMES[owner.temperament],
+  });
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   if (cost === null) {
     const fee = dollarText(zoneFee(data.tuning, [], data.dogs[dog]));
-    return `${name}: ${kind}, ${fee} a zone. ${temper}`;
+    return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: name, fee, kind, temper });
   }
-  return `${name}: ${kind}. ${temper} ${priceInfo(bank, cost)}`;
+  const price = priceInfo(text, bank, cost);
+  return fillLine(FOCUS_FIELDS, text, "dogLocked", { dog: name, kind, price, temper });
 }
 
 // A gear item and what it does, with its price while locked.
 export function gearInfo(data: InfoData, owned: Owned, bank: Cents, gear: GearId): string {
+  const text = data.homeText.focus;
   const item = data.shopGear[gear];
-  const line = `${item.name}: ${effectText(data, item.effects)}.`;
+  const fields = { effect: effectText(data, item.effects), gear: item.name };
   const cost = purchasePrice(data, owned, { gear, kind: "gear" });
-  return cost === null ? line : `${line} ${priceInfo(bank, cost)}`;
+  return cost === null
+    ? fillLine(FOCUS_FIELDS, text, "gear", fields)
+    : fillLine(FOCUS_FIELDS, text, "gearLocked", { ...fields, price: priceInfo(text, bank, cost) });
 }

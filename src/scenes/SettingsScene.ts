@@ -1,8 +1,11 @@
 import { type GameObjects, Scene } from "phaser";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import type { MenuText } from "../data/types";
 import { FEEDBACK, settleDelay } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
+import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   knobX,
   type SettingsLayout,
@@ -19,6 +22,7 @@ import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import type { Settings } from "../save/schema";
+import { fillLine } from "../text/lines";
 import { drawFocusRing, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
@@ -46,11 +50,13 @@ export interface SettingsSceneData {
 export const SETTINGS_CLOSED_EVENT = "settings-closed";
 
 type SwitchKey = "muted" | "reducedMotion";
+type SettingsWord = Exclude<keyof MenuText["settings"], "volume">;
 
-// Each row carries a 16x16 -panel icon with on and off tags.
+// Each row carries a 16x16 -panel icon with on and off tags, and the menuText.settings keys
+// of its label and note.
 type Row =
-  | { icon: string; key: SwitchKey; kind: "switch"; label: string; note: string }
-  | { icon: string; key: VolumeKey; kind: "slider"; label: string };
+  | { icon: string; key: SwitchKey; kind: "switch"; label: SettingsWord; note: SettingsWord }
+  | { icon: string; key: VolumeKey; kind: "slider"; label: SettingsWord };
 
 type Target = { kind: "close" } | { key: SwitchKey; kind: "switch" };
 
@@ -60,17 +66,17 @@ const ROWS: readonly Row[] = [
     icon: "icon-sound-panel",
     key: "muted",
     kind: "switch",
-    label: "Sound",
-    note: "Mutes music and effects",
+    label: "sound",
+    note: "soundNote",
   },
-  { icon: "icon-music-panel", key: "musicVolume", kind: "slider", label: "Music" },
-  { icon: "icon-effects-panel", key: "sfxVolume", kind: "slider", label: "Effects" },
+  { icon: "icon-music-panel", key: "musicVolume", kind: "slider", label: "music" },
+  { icon: "icon-effects-panel", key: "sfxVolume", kind: "slider", label: "effects" },
   {
     icon: "icon-motion-panel",
     key: "reducedMotion",
     kind: "switch",
-    label: "Reduced motion",
-    note: "Skips shakes, hops and bobs",
+    label: "motion",
+    note: "motionNote",
   },
 ];
 // From a row's top-left: the icon, at the switch row's or the slider row's height, and the
@@ -283,7 +289,7 @@ export class SettingsScene extends Scene {
       y: panel.y - 1,
     });
     addPanel(this, panel);
-    addPixelText(this, title.x, title.y, "Settings", {
+    addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
       color: PALETTE.plum,
       font: "title",
       originX: 0.5,
@@ -309,7 +315,7 @@ export class SettingsScene extends Scene {
         this.drawSlider(row, settings);
       }
     }
-    addMenuButton(this, back, "Back").setState(
+    addMenuButton(this, back, gameData.menuText.settings.back).setState(
       this.pressed?.kind === "close" ? "pressed" : "normal",
     );
     if (this.focus !== null) {
@@ -338,11 +344,14 @@ export class SettingsScene extends Scene {
     }
     const { x, y } = rect;
     const icon = addTagImage(this, row.icon, on ? "on" : "off", x + ICON.dx, y + ICON.dySwitch);
-    const label = addPixelText(this, x + LABEL_DX, y + 12, row.label, {
+    const words = gameData.menuText.settings;
+    const label = addPixelText(this, x + LABEL_DX, y + 12, words[row.label], {
       color: PALETTE[tile.look.text],
       font: "title",
     });
-    const note = addPixelText(this, x + LABEL_DX, y + 26, row.note, { color: PALETTE.darkBrown });
+    const note = addPixelText(this, x + LABEL_DX, y + 26, words[row.note], {
+      color: PALETTE.darkBrown,
+    });
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
     const switchX = x + SWITCH.dx;
     const switchY = y + SWITCH.dy;
@@ -370,12 +379,17 @@ export class SettingsScene extends Scene {
     const steps = volumeSteps(settings[key]);
     const ink = active ? PALETTE.plum : PALETTE.slate;
     addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON.dx, y + ICON.dySlider);
-    addPixelText(this, x + LABEL_DX, y + 9, row.label, { color: ink, font: "title" });
+    const words = gameData.menuText.settings;
+    addPixelText(this, x + LABEL_DX, y + 9, words[row.label], { color: ink, font: "title" });
     addPixelText(
       this,
       slider.x + slider.width,
       y + 9,
-      active ? `${volumePercent(steps)}%` : "Muted",
+      active
+        ? fillLine(MENU_TEXT_FIELDS.settings, words, "volume", {
+            percent: String(volumePercent(steps)),
+          })
+        : words.muted,
       {
         color: ink,
         font: "title",

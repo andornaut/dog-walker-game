@@ -7,7 +7,7 @@ import { HOME_LAYOUT } from "../home/homeLayout";
 import { settingsLayout } from "../home/settings";
 import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { DOGHOUSE } from "../hud/doghouse";
-import { PAUSE_MENU_LABELS, pauseMenuLayout } from "../hud/pauseMenu";
+import { PAUSE_MENU_ITEMS, pauseMenuLayout } from "../hud/pauseMenu";
 import { STRIP } from "../hud/stateStrip";
 import { buttonIcon, HOME_BUTTON, PAUSE_BUTTON, TOP_BAR } from "../hud/topBar";
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
@@ -56,7 +56,7 @@ function roadRow(projection: RoadProjection, road: Rect, row: number) {
 }
 
 export function layoutExport(
-  data: Pick<GameData, "dogs" | "help" | "shopGear" | "walkers" | "tuning">,
+  data: Pick<GameData, "dogs" | "help" | "menuText" | "shopGear" | "walkers" | "tuning">,
 ) {
   const regions = screenLayout(SCREEN_CONFIG);
   const { approach, backdrop, road, roadView } = regions;
@@ -134,8 +134,8 @@ export function layoutExport(
       },
       loading: { art: LOADING_ART, track: LOADING_TRACK, walker: LOADING_WALKER },
       pause: {
-        labels: PAUSE_MENU_LABELS,
-        ...pauseMenuLayout(roadView, PAUSE_MENU_LABELS.length),
+        labels: PAUSE_MENU_ITEMS.map((item) => data.menuText.pause[item]),
+        ...pauseMenuLayout(roadView, PAUSE_MENU_ITEMS.length),
       },
       settings: settingsLayout(SCREEN_CONFIG),
       stats: { ...STATS_LAYOUT, tabRects: statsTabRects() },

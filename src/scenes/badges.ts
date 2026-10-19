@@ -94,7 +94,7 @@ export function addBadgeCelebration(
 ): void {
   addPanel(scene, rect);
   const center = rect.x + rect.width / 2;
-  addPixelText(scene, center, rect.y + 10, celebrationTitle(ids.length), {
+  addPixelText(scene, center, rect.y + 10, celebrationTitle(gameData, ids.length), {
     color: PALETTE.plum,
     font: "title",
     originX: 0.5,

@@ -71,7 +71,7 @@ import { nextWalkEvent } from "./walkEvents";
 
 export type SimData = ChoiceData &
   WalkData &
-  Pick<GameData, "achievements" | "dogSlots" | "needs" | "upgrades">;
+  Pick<GameData, "achievements" | "dogSlots" | "needs" | "runText" | "upgrades">;
 
 // Who plays the walk. rates: each item spawned is met in road order, and hit or collected by
 // chance, with rates from 0 to 1: hitRate for each obstacle, the others for each pickup or

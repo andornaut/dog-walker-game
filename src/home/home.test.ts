@@ -4,6 +4,7 @@ import { DEBUFFS } from "../data/debuffs";
 import { DOGS } from "../data/dogs";
 import { DOG_SLOTS } from "../data/dogSlots";
 import { ENCOUNTERS } from "../data/encounters";
+import { HOME_TEXT } from "../data/homeText";
 import { QUIPS } from "../data/quips";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
@@ -38,6 +39,7 @@ const data = {
   dogSlots: DOG_SLOTS,
   dogs: DOGS,
   encounters: ENCOUNTERS,
+  homeText: HOME_TEXT,
   quips: QUIPS,
   shopGear: SHOP_GEAR,
   tuning: TEST_TUNING,

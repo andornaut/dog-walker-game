@@ -30,6 +30,9 @@ import { type Cents, cents, type Hearts } from "./units";
 
 export type ChoiceData = CauseData & Pick<GameData, "dogs" | "tuning" | "world">;
 
+// What a card's view needs: ChoiceData, and the titles of the cards whose data names none.
+export type CardData = ChoiceData & Pick<GameData, "runText">;
+
 // A fork's path: the zone it leads to and what a path card shows of it.
 export interface PathView {
   readonly difficulty: Difficulty;
@@ -133,10 +136,11 @@ function encounterOptions(
 
 type EffectCardSource = Exclude<CardSource, { readonly kind: "fork" }>;
 
+// A card's options and its title; null for an upgrade offer, whose data names none.
 function cardContent(
   data: ChoiceData,
   source: EffectCardSource,
-): { readonly options: readonly SourcedOption[]; readonly title: string } {
+): { readonly options: readonly SourcedOption[]; readonly title: string | null } {
   switch (source.kind) {
     case "encounter":
       return {
@@ -171,7 +175,7 @@ function cardContent(
           option: data.upgrades[upgrade],
           source: { kind: "upgrade", upgrade },
         })),
-        title: "Pick an upgrade",
+        title: null,
       };
     default:
       return assertNever(source);
@@ -251,12 +255,10 @@ function breakdownOf(data: ChoiceData, changes: readonly Change[]): BreakdownLin
   );
 }
 
-export const FORK_TITLE = "Which way?";
-
 // A fork's card: one free path card per path, left to right, each naming its zone, with the
 // zone's difficulty and fee multiplier.
 export function forkCard(
-  data: ChoiceData,
+  data: CardData,
   source: Extract<CardSource, { readonly kind: "fork" }>,
 ): CardView {
   const options = source.paths.map((id, index): OptionView => {
@@ -278,16 +280,25 @@ export function forkCard(
       text: `${zone.difficultyName}. Fees ×${zone.fees}.`,
     };
   });
-  return { affected: [], options, skip: false, source, title: FORK_TITLE };
+  return { affected: [], options, skip: false, source, title: data.runText.card.forkTitle };
 }
 
 // The card for a source, with each option's text, cost, breakdown and whether the player can
 // pick it. An option with no cost is always enabled, so every card keeps its free option.
 // Throws for an instant encounter, which opens no card.
-export function cardFor(data: ChoiceData, state: RunState, source: CardSource): CardView {
+export function cardFor(data: CardData, state: RunState, source: CardSource): CardView {
   if (source.kind === "fork") {
     return forkCard(data, source);
   }
+  const { title, ...card } = effectCard(data, state, source);
+  return { ...card, title: title ?? data.runText.card.upgradeTitle };
+}
+
+function effectCard(
+  data: ChoiceData,
+  state: RunState,
+  source: EffectCardSource,
+): Omit<CardView, "title"> & { readonly title: string | null } {
   const { options, title } = cardContent(data, source);
   const affected = affectedBy(state, source);
   const skip =
@@ -412,7 +423,7 @@ export function chooseOption(
   if (card.source.kind === "fork") {
     return takePath(card.source, state, choice);
   }
-  const view = cardFor(data, state, card.source);
+  const view = effectCard(data, state, card.source);
   if (choice === "skip") {
     if (!view.skip) {
       throw new Error("This card has no Skip option");

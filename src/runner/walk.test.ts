@@ -9,6 +9,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { FORCED_STOPS } from "../data/forcedStops";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
 import { NEED_CARDS, NEED_SPOTS, NEEDS } from "../data/needs";
+import { RUN_TEXT } from "../data/runText";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
@@ -95,6 +96,7 @@ const data = {
   needCards: NEED_CARDS,
   needSpots: NEED_SPOTS,
   needs: NEEDS,
+  runText: RUN_TEXT,
   shopGear: SHOP_GEAR,
   tuning,
   upgrades: UPGRADES,

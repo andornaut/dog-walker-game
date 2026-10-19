@@ -56,7 +56,7 @@ const PAYOUT_LABEL = { cap: 8, height: 16, inkX: 9, inkY: 3, key: "ui-payout-lab
 const PAYOUT_LABEL_END = 5;
 const COIN = { key: "fx-coin-fly", tag: "spin" };
 const TREAT_POP = { fallback: "fx-sparkle", key: "fx-treat-pop", tag: "play" };
-const LOW_CHIP = { height: 20, rise: 8, text: "1 ♥ left!" };
+const LOW_CHIP = { height: 20, rise: 8 };
 const RIM = { minAlpha: 0.35, pulseMs: 600, width: 2 };
 
 interface SlotWarning {
@@ -283,7 +283,7 @@ export class HudFeedback {
     }
     const { plateText } = FIRING_PARTS;
     container.add(
-      addPixelText(this.scene, plateText.x, plateText.y, "FIRED!", {
+      addPixelText(this.scene, plateText.x, plateText.y, gameData.runText.fired, {
         color: PALETTE.white,
         font: "title",
         scale: 2,
@@ -517,7 +517,7 @@ export class HudFeedback {
     if (rect === undefined) {
       return;
     }
-    const text = addPixelText(this.scene, 2, 2, LOW_CHIP.text, {
+    const text = addPixelText(this.scene, 2, 2, gameData.runText.lowHearts, {
       color: PALETTE.darkRed,
       scale: 2,
     });

@@ -1,8 +1,8 @@
 import type { Rect } from "../layout/rect";
 
-// The menu's buttons, top to bottom.
-export const PAUSE_MENU_LABELS = ["Resume", "Help", "Settings", "Head home"] as const;
-export type PauseMenuLabel = (typeof PAUSE_MENU_LABELS)[number];
+// The menu's buttons, top to bottom; each one's label is menuText.pause[item].
+export const PAUSE_MENU_ITEMS = ["resume", "help", "settings", "headHome"] as const;
+export type PauseMenuItem = (typeof PAUSE_MENU_ITEMS)[number];
 
 const PANEL_WIDTH = 232;
 // Offsets from the panel's top-left corner, and the room under the last part.

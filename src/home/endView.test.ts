@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { QUIPS } from "../data/quips";
 import type { Cause, Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
@@ -30,7 +31,7 @@ const hearts: Change = {
 describe("earningsBreakdown", () => {
   it("totals fees, tips and card costs, and ignores heart changes", () => {
     const changes = [fee(1_000), tip(150), tip(100), card(-400), hearts, fee(1_000)];
-    expect(earningsBreakdown(changes, cents(1_850))).toEqual([
+    expect(earningsBreakdown(gameData, changes, cents(1_850))).toEqual([
       { amount: 2_000, kind: "fees", label: "Fees" },
       { amount: 250, kind: "tips", label: "Tips" },
       { amount: -400, kind: "cardCosts", label: "Card costs" },
@@ -40,7 +41,7 @@ describe("earningsBreakdown", () => {
   it("adds lucky finds, fees taken back and starting money only when the run had some", () => {
     const changes = [fee(1_000), card(500), money(-1_000, { amount: -1_000, kind: "clawback" })];
     expect(
-      earningsBreakdown(changes, cents(1_500)).map(({ amount, kind }) => [kind, amount]),
+      earningsBreakdown(gameData, changes, cents(1_500)).map(({ amount, kind }) => [kind, amount]),
     ).toEqual([
       ["fees", 1_000],
       ["tips", 0],
@@ -52,7 +53,7 @@ describe("earningsBreakdown", () => {
   });
 
   it("always adds up to the earnings", () => {
-    const lines = earningsBreakdown([fee(700), tip(55), card(-300)], cents(9_999));
+    const lines = earningsBreakdown(gameData, [fee(700), tip(55), card(-300)], cents(9_999));
     expect(lines.reduce((total, line) => total + line.amount, 0)).toBe(9_999);
   });
 });

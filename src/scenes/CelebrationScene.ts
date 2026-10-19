@@ -1,5 +1,6 @@
 import { Display, Scene } from "phaser";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, DogId } from "../data/types";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
@@ -56,7 +57,7 @@ export class CelebrationScene extends Scene {
       x: BUTTON.x,
       y: top + height + BUTTON.gap,
     };
-    const button = addMenuButton(this, buttonRect, "Nice!");
+    const button = addMenuButton(this, buttonRect, gameData.menuText.celebration.button);
     const close = () => {
       this.scene.resume(resume);
       this.scene.stop();

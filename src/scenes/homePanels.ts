@@ -1,13 +1,16 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard } from "../home/detail";
 import { loopFrame } from "../home/feedback";
 import type { Logbook } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import type { SlotSign } from "../home/homeLines";
+import { HOME_TEXT_FIELDS } from "../home/homeText";
 import type { Rect } from "../layout/rect";
+import { fillLine } from "../text/lines";
 import { drawFramedRect, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
@@ -259,6 +262,7 @@ export interface LogbookPanel {
 }
 
 const STATS_BUTTON = HOME_LAYOUT.statsButton;
+const FIELDS = HOME_TEXT_FIELDS.logbook;
 
 // The logbook over the screen, as a card: the best walk, totals and the last walk, and a
 // Stats button.
@@ -269,10 +273,15 @@ export function drawLogbookPanel(
 ): LogbookPanel {
   // The rows are laid out first, so the card is as tall as they and the button need.
   const content = scene.add.container(0, 0);
+  const words = gameData.homeText.logbook;
   const rows =
     log === null
-      ? ["No walks yet.", "Three clients are waiting on the porch."]
-      : [`Best ${log.best}, ${log.bestNote}`, log.totals, `Last ${log.last}`];
+      ? [words.empty, words.emptyNote]
+      : [
+          fillLine(FIELDS, words, "best", { best: log.best, note: log.bestNote }),
+          log.totals,
+          fillLine(FIELDS, words, "last", { last: log.last }),
+        ];
   let y = CARD.well.y + 4;
   for (const row of rows) {
     const label = text(scene, content, { x: CARD.pad, y }, row, {
@@ -289,7 +298,7 @@ export function drawLogbookPanel(
     x: (SCREEN.width - CARD.width) / 2,
     y: Math.round((SCREEN.height - height) / 2),
   };
-  drawCardFrame(scene, parent, rect, "Logbook", content);
+  drawCardFrame(scene, parent, rect, words.title, content);
   const slice = addNineSlice(scene, "ui-button", button, "secondary");
   if (slice !== undefined) {
     content.add(slice);
@@ -299,7 +308,7 @@ export function drawLogbookPanel(
     fillRect(g, PALETTE.tan, { ...button, height: button.height - 4 });
     content.add(g);
   }
-  text(scene, content, { x: button.x + button.width / 2, y: button.y + 15 }, "Stats", {
+  text(scene, content, { x: button.x + button.width / 2, y: button.y + 15 }, words.stats, {
     color: PALETTE.plum,
     font: "title",
     originX: 0.5,

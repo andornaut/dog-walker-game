@@ -46,6 +46,7 @@ import {
   type WalkerLine,
   walkerLineKey,
 } from "../home/homeLines";
+import { HOME_TEXT_FIELDS as FIELDS, homeLine } from "../home/homeText";
 import { porchOwners } from "../home/porch";
 import {
   homeSections,
@@ -65,6 +66,7 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
+import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { drawFocusRing, drawPixelLine, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
@@ -156,7 +158,6 @@ const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
 const SPEECH_CHARS = 30;
 const SPEECH_LINES = 4;
 const SPEECH_LINE_HEIGHT = 15;
-const UNSAVED_LINE = "Progress won't be saved.";
 
 // The walkers in data order, as the picker shows them.
 function walkerIds(): WalkerId[] {
@@ -601,7 +602,7 @@ export class StartScene extends Scene {
           this.shakes.set(id, now);
           this.action = {
             kind: "notice",
-            text: "The pack is full. Tap a picked dog to take it out.",
+            text: gameData.homeText.noticePackFull,
           };
           this.render();
         } else {
@@ -622,7 +623,8 @@ export class StartScene extends Scene {
       case "mute": {
         const muted = !isMuted(this);
         setMuted(this, muted);
-        this.action = { kind: "notice", text: muted ? "Sound off." : "Sound on." };
+        const { noticeSoundOff, noticeSoundOn } = gameData.homeText;
+        this.action = { kind: "notice", text: muted ? noticeSoundOff : noticeSoundOn };
         this.render();
         return;
       }
@@ -721,7 +723,9 @@ export class StartScene extends Scene {
       case "dog":
         return gameData.dogs[purchase.dog].name;
       case "dogSlot":
-        return `Dog slot ${this.save().owned.dogSlots + 1}`;
+        return homeLine(gameData.homeText, "dogSlotName", {
+          slot: String(this.save().owned.dogSlots + 1),
+        });
       case "gear":
         return gameData.shopGear[purchase.gear].name;
       default:
@@ -857,7 +861,7 @@ export class StartScene extends Scene {
     if (this.textures.exists(LOGO.key)) {
       this.add.image(LOGO.x, LOGO.y, LOGO.key).setOrigin(0);
     }
-    addPixelText(this, 291, 59, "Maple St", { color: PALETTE.white, originX: 0.5 });
+    addPixelText(this, 291, 59, gameData.homeText.gateSign, { color: PALETTE.white, originX: 0.5 });
   }
 
   private render(): void {
@@ -1046,13 +1050,20 @@ export class StartScene extends Scene {
     const { bestWalk } = save.stats;
     const walks = walksPlayed(save.stats);
     const right = LOGBOOK_BUTTON.x - GAP;
+    const words = gameData.homeText.topBar;
     if (bestWalk === null) {
-      this.text(root, right, 14, "No walks yet", PALETTE.cream, { originX: 1 });
+      this.text(root, right, 14, words.noWalks, PALETTE.cream, { originX: 1 });
     } else {
-      this.text(root, right, 5, `Best ${dollarText(bestWalk.earnedCents)}`, PALETTE.cream, {
+      const best = fillLine(FIELDS.topBar, words, "best", {
+        amount: dollarText(bestWalk.earnedCents),
+      });
+      this.text(root, right, 5, best, PALETTE.cream, {
         originX: 1,
       });
-      this.text(root, right, 22, `${walks} ${walks === 1 ? "walk" : "walks"}`, PALETTE.cream, {
+      const count = fillLine(FIELDS.topBar, words, walks === 1 ? "walkOne" : "walkMany", {
+        count: String(walks),
+      });
+      this.text(root, right, 22, count, PALETTE.cream, {
         originX: 1,
       });
     }
@@ -1148,7 +1159,7 @@ export class StartScene extends Scene {
 
     const state = { action: this.action, loadout: this.loadout };
     const speech = bubbleSpeech(gameData.homeText, this.walkerLine, state, this.quips);
-    const unsaved = storageState(this) === "unavailable" ? [UNSAVED_LINE] : [];
+    const unsaved = storageState(this) === "unavailable" ? [gameData.homeText.unsaved] : [];
     const lines = [...unsaved, ...speech]
       .flatMap((part) => wrapWords(SPEECH_CHARS, part))
       .slice(0, SPEECH_LINES);

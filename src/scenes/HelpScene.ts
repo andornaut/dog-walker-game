@@ -118,7 +118,7 @@ export class HelpScene extends Scene {
       height: layout.topBarEdge,
       y: layout.topBar.y + layout.topBar.height - layout.topBarEdge,
     });
-    addPixelText(this, layout.heading.x, layout.heading.y, "How to walk", {
+    addPixelText(this, layout.heading.x, layout.heading.y, gameData.menuText.help.heading, {
       color: colorFromHex(TEXT_COLOR),
       font: "title",
       scale: 2,
@@ -150,9 +150,10 @@ export class HelpScene extends Scene {
       }
     });
 
-    const { backEnabled, nextLabel } = helpButtons(pages.length, this.page);
-    this.drawButton(backEnabled ? BUTTON_ENABLED : BUTTON_DISABLED, layout.back, "BACK");
-    this.drawButton(BUTTON_ENABLED, layout.next, nextLabel);
+    const labels = gameData.menuText.help;
+    const { backEnabled, next } = helpButtons(pages.length, this.page);
+    this.drawButton(backEnabled ? BUTTON_ENABLED : BUTTON_DISABLED, layout.back, labels.back);
+    this.drawButton(BUTTON_ENABLED, layout.next, labels[next]);
   }
 
   // The art is exported at the frame's size; a key not in the manifest yet shows a box.

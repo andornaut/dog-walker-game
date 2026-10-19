@@ -7,6 +7,7 @@ import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badges
 import { FEEDBACK, settleDelay } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { logbookOf, wrapWords } from "../home/home";
+import { MENU_TEXT_FIELDS } from "../home/menuText";
 import { choiceFull } from "../home/selection";
 import { STATS_LAYOUT, STATS_TABS, type StatsTab, statsTabRects } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
@@ -14,6 +15,7 @@ import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
 import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
+import { fillLine } from "../text/lines";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
@@ -56,6 +58,7 @@ const DETAIL_TEXT_WIDTH = DETAIL.width - 32;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;
 const DIM_ALPHA = 0.6;
+const FIELDS = MENU_TEXT_FIELDS.stats;
 
 // The Stats page behind the logbook, in three tabs: overall figures, runs by outcome and the
 // logbook; each dog's walks, zones and firings; and the badge wall, where tapping a badge
@@ -122,7 +125,7 @@ export class StatsScene extends Scene {
       }
       const direction = focusDirectionForKey(event.key);
       if (direction === "left" || direction === "right") {
-        const index = TABS.findIndex(({ tab }) => tab === this.tab);
+        const index = TABS.indexOf(this.tab);
         const next = Math.min(
           TABS.length - 1,
           Math.max(0, index + (direction === "left" ? -1 : 1)),
@@ -159,7 +162,7 @@ export class StatsScene extends Scene {
   private openTab(index: number, delayMs: number): void {
     this.time.delayedCall(delayMs, () => {
       this.pressed = undefined;
-      this.tab = TABS[index]?.tab ?? this.tab;
+      this.tab = TABS[index] ?? this.tab;
       this.render();
     });
   }
@@ -205,7 +208,8 @@ export class StatsScene extends Scene {
         y: 0,
       });
     }
-    this.text(12, 12, "Stats", { color: PALETTE.cream, font: "title" });
+    const words = gameData.menuText.stats;
+    this.text(12, 12, words.title, { color: PALETTE.cream, font: "title" });
     const close = addIconButton(this, this.add.container(0, 0), CLOSE.x, CLOSE.y, (x, y) =>
       imageIcon(this, "icon-close", x, y),
     );
@@ -213,7 +217,7 @@ export class StatsScene extends Scene {
     // The open tab is selected, so the others always take the full choice's darker step.
     const tabs = this.add.container(0, 0);
     const { reducedMotion } = currentSettings(this);
-    TABS.forEach(({ label, tab }, i) => {
+    TABS.forEach((tab, i) => {
       const rect = TAB_RECTS[i];
       if (rect === undefined) {
         return;
@@ -230,7 +234,7 @@ export class StatsScene extends Scene {
         tile.container.y += FEEDBACK.pressDipPx;
       }
       tile.content.add(
-        addPixelText(this, rect.x + rect.width / 2, rect.y + rect.height / 2, label, {
+        addPixelText(this, rect.x + rect.width / 2, rect.y + rect.height / 2, words.tabs[tab], {
           color: PALETTE[tile.look.text],
           font: "title",
           originX: 0.5,
@@ -259,20 +263,24 @@ export class StatsScene extends Scene {
   private drawRuns(): void {
     const { stats } = profileSave(this);
     const { outcomes, overall } = overallRows(gameData, stats);
+    const words = gameData.menuText.stats;
     let y = PANEL.y + 10;
-    this.text(LEFT, y, "Overall", { font: "title" });
+    this.text(LEFT, y, words.sections.overall, { font: "title" });
     y = this.rows(y + 20, overall) + 6;
-    this.text(LEFT, y, "Runs", { font: "title" });
+    this.text(LEFT, y, words.sections.runs, { font: "title" });
     y = this.rows(y + 20, outcomes) + 6;
-    this.text(LEFT, y, "Logbook", { font: "title" });
+    this.text(LEFT, y, words.sections.logbook, { font: "title" });
     y += 20;
     const log = logbookOf(gameData, stats);
     const lines =
       log === null
-        ? ["No walks yet."]
+        ? [words.logEmpty]
         : [
-            ...wrapWords(LOG_CHARS, `Best ${log.best}, ${log.bestNote}.`),
-            ...wrapWords(LOG_CHARS, `Last ${log.last}`),
+            ...wrapWords(
+              LOG_CHARS,
+              fillLine(FIELDS, words, "logBest", { best: log.best, note: log.bestNote }),
+            ),
+            ...wrapWords(LOG_CHARS, fillLine(FIELDS, words, "logLast", { last: log.last })),
             log.totals,
           ];
     lines.forEach((line, i) => this.text(LEFT, y + i * 16, line, { color: PALETTE.darkBrown }));
@@ -281,8 +289,8 @@ export class StatsScene extends Scene {
   private drawDogs(): void {
     const save = profileSave(this);
     const top = PANEL.y + 10;
-    this.text(LEFT, top, "Dog", { font: "title" });
-    const headings = { fired: "Fired", walks: "Walks", zones: "Zones" } as const;
+    const headings = gameData.menuText.stats.dogColumns;
+    this.text(LEFT, top, headings.dog, { font: "title" });
     for (const key of ["walks", "zones", "fired"] as const) {
       this.text(DOG_COLUMNS[key], top, headings[key], { originX: 1 });
     }
@@ -308,8 +316,11 @@ export class StatsScene extends Scene {
   // with its goal, or its short goal where the full one does not fit under the name.
   private drawBadges(): void {
     const badges = badgeWall(gameData, profileSave(this));
-    this.text(12, PANEL.y + 4, "Badges", { color: PALETTE.cream, font: "title" });
-    this.text(SCREEN_CONFIG.width - 12, PANEL.y + 4, earnedText(badges), {
+    this.text(12, PANEL.y + 4, gameData.menuText.stats.badges, {
+      color: PALETTE.cream,
+      font: "title",
+    });
+    this.text(SCREEN_CONFIG.width - 12, PANEL.y + 4, earnedText(gameData, badges), {
       color: PALETTE.cream,
       originX: 1,
     });
@@ -366,7 +377,8 @@ export class StatsScene extends Scene {
     let y = badgeY + BADGE_SIZE + 12;
     this.text(center, y, badge.name, { font: "title", originX: 0.5 });
     y += 20;
-    this.text(center, y, badge.earned ? "Earned" : "Locked", {
+    const words = gameData.menuText.stats;
+    this.text(center, y, badge.earned ? words.badgeEarned : words.badgeLocked, {
       color: badge.earned ? PALETTE.forest : PALETTE.darkBrown,
       originX: 0.5,
     });
@@ -374,7 +386,8 @@ export class StatsScene extends Scene {
     const goal = this.wrap(badge.goal, DETAIL_TEXT_WIDTH);
     this.lines(DETAIL.x + 16, y, goal, {});
     y += goal.length * WALL_TEXT.lineHeight + 8;
-    this.lines(DETAIL.x + 16, y, this.wrap(`"${badge.badgeLine}"`, DETAIL_TEXT_WIDTH), {
+    const line = fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine });
+    this.lines(DETAIL.x + 16, y, this.wrap(line, DETAIL_TEXT_WIDTH), {
       color: PALETTE.darkBrown,
     });
   }

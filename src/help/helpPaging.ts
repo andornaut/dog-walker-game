@@ -2,8 +2,8 @@ import { clampIndex } from "../arrays";
 import { assertNever } from "../rules/assertNever";
 
 // "next" and "previous" turn one page and hold at the first and last pages, so a held
-// arrow key cannot close the help. "advance" is the Next button: on the last page it
-// reads GOT IT and closes. Pages are numbered from 0.
+// arrow key cannot close the help. "advance" is the Next button: on the last page it is
+// labelled menuText.help.gotIt and closes. Pages are numbered from 0.
 export type HelpAction =
   | { readonly kind: "advance" }
   | { readonly kind: "close" }
@@ -16,7 +16,8 @@ export type HelpOutcome =
 
 export interface HelpButtons {
   readonly backEnabled: boolean;
-  readonly nextLabel: "GOT IT" | "NEXT";
+  // Which of menuText.help's labels the Next button shows.
+  readonly next: "gotIt" | "next";
 }
 
 // Kept in range, so a page count that shrinks under a live edit still shows a page.
@@ -47,5 +48,5 @@ export function applyHelpAction(pageCount: number, action: HelpAction, page: num
 
 export function helpButtons(pageCount: number, page: number): HelpButtons {
   const current = clampPage(pageCount, page);
-  return { backEnabled: current > 0, nextLabel: current === pageCount - 1 ? "GOT IT" : "NEXT" };
+  return { backEnabled: current > 0, next: current === pageCount - 1 ? "gotIt" : "next" };
 }

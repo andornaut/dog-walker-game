@@ -6,8 +6,8 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import {
   homeQuestionLayout,
-  PAUSE_MENU_LABELS,
-  type PauseMenuLabel,
+  PAUSE_MENU_ITEMS,
+  type PauseMenuItem,
   pauseMenuLayout,
 } from "../hud/pauseMenu";
 import { cardNumberForKey } from "../input/keyBindings";
@@ -63,20 +63,21 @@ export class PauseScene extends Scene {
       soundboardOf(this).stopMusic();
       onHeadHome();
     };
-    const presses: Readonly<Record<PauseMenuLabel, () => void>> = {
-      "Head home": headHome,
-      Help: () => openHelp(this, SCENE_KEYS.pause),
-      Resume: onResume,
-      Settings: () => this.openSettings(),
+    const presses: Readonly<Record<PauseMenuItem, () => void>> = {
+      headHome,
+      help: () => openHelp(this, SCENE_KEYS.pause),
+      resume: onResume,
+      settings: () => this.openSettings(),
     };
     const question = gameData.runText.homeQuestion;
+    const menu = gameData.menuText.pause;
     const asking = mode === "homeQuestion";
     this.entries = asking
       ? [
           { label: question.headHome, press: headHome },
           { label: question.keepWalking, press: onResume },
         ]
-      : PAUSE_MENU_LABELS.map((label) => ({ label, press: presses[label] }));
+      : PAUSE_MENU_ITEMS.map((item) => ({ label: menu[item], press: presses[item] }));
     const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, this.entries.length);
     const { panel } = layout;
 
@@ -86,7 +87,7 @@ export class PauseScene extends Scene {
     fillRect(rim, PALETTE.tan, { ...panel, width: panel.width + 2, x: panel.x - 1 });
     addPanel(this, panel);
     const center = panel.x + panel.width / 2;
-    addPixelText(this, center, layout.titleY, asking ? question.title : "Paused", {
+    addPixelText(this, center, layout.titleY, asking ? question.title : menu.title, {
       color: PALETTE.plum,
       font: "title",
       originX: 0.5,
@@ -101,7 +102,7 @@ export class PauseScene extends Scene {
       ),
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
-    const note = asking ? question.body : "Keeps tips and earlier zones' fees";
+    const note = asking ? question.body : menu.note;
     addPixelText(this, center, layout.notePlate.y + 6, note, {
       color: PALETTE.plum,
       originX: 0.5,

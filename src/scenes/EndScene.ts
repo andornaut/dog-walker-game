@@ -7,6 +7,7 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { END_LAYOUT } from "../home/endLayout";
 import { closingLines, earningsBreakdown, zonePips } from "../home/endView";
 import { dollarText } from "../home/home";
+import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
   homecomers,
   type ReturnPhase,
@@ -22,7 +23,7 @@ import { stopWakeLock } from "../pwa";
 import { walkLength } from "../rules/route";
 import { cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
-import type { EndReason } from "../state/runState";
+import { fillLine } from "../text/lines";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
@@ -35,11 +36,6 @@ import { soundboardOf } from "./soundboard";
 import { addStandingSprite, firstTag, spriteMetrics } from "./sprites";
 import { addMenuButton, addPanel, addTagImage, fitText, showTag, TEXT_SCALE } from "./uiKit";
 
-const TITLES: Readonly<Record<EndReason, string>> = {
-  finished: "Walk done!",
-  noDogs: "Out of dogs",
-  wentHome: "Headed home",
-};
 const END_SCREEN_KEY = "screen-end";
 const LOGO = { ...END_LAYOUT.logo, key: "logo" };
 const PANEL: Rect = END_LAYOUT.panel;
@@ -122,14 +118,16 @@ export class EndScene extends Scene {
     const title = (x: number, y: number, value: string, color: number, originX = 0) =>
       addPixelText(this, x, y, value, { color, font: "title", originX, scale: TEXT_SCALE });
 
-    title(SCREEN_CONFIG.width / 2, TITLE_Y, TITLES[walk.outcome], PALETTE.plum, 0.5);
+    const words = gameData.menuText.end;
+    title(SCREEN_CONFIG.width / 2, TITLE_Y, words.titles[walk.outcome], PALETTE.plum, 0.5);
     if (newBest) {
       this.showRibbon(reduced);
       soundboardOf(this).play("newBest");
     }
 
     let y = BREAKDOWN.top;
-    const lines = ended === null ? [] : earningsBreakdown(ended.changes, walk.earnedCents);
+    const lines =
+      ended === null ? [] : earningsBreakdown(gameData, ended.changes, walk.earnedCents);
     for (const line of lines) {
       text(BREAKDOWN.label, y, line.label, PALETTE.plum);
       text(BREAKDOWN.amountRight, y, signed(line.amount), amountColor(line.amount), 1);
@@ -137,10 +135,10 @@ export class EndScene extends Scene {
     }
     const ruleWidth = BREAKDOWN.amountRight - BREAKDOWN.label;
     fillRect(g, PALETTE.tan, { height: 1, width: ruleWidth, x: BREAKDOWN.label, y: y + 2 });
-    title(BREAKDOWN.label, y + 8, "Total", PALETTE.plum);
+    title(BREAKDOWN.label, y + 8, words.total, PALETTE.plum);
     title(BREAKDOWN.amountRight, y + 8, signed(walk.earnedCents), PALETTE.forest, 1);
 
-    text(SIDE.x, BREAKDOWN.top, "Zones walked", PALETTE.plum);
+    text(SIDE.x, BREAKDOWN.top, words.zonesWalked, PALETTE.plum);
     zonePips(walkLength(gameData), walk).forEach((pip, i) => {
       const x = SIDE.x + i * SIDE.pipPitch;
       const { tag } = pipLook(gameData, {
@@ -159,7 +157,7 @@ export class EndScene extends Scene {
     });
     const zones = `${walk.zonesFinished}/${walkLength(gameData)}`;
     text(SIDE.right, SIDE.pipsY, zones, PALETTE.plum, 1);
-    text(SIDE.x, SIDE.bankY, "Bank", PALETTE.plum);
+    text(SIDE.x, SIDE.bankY, words.bank, PALETTE.plum);
     if (this.textures.exists("icon-money")) {
       this.add.image(SIDE.x, SIDE.iconY, "icon-money").setOrigin(0);
     }
@@ -185,7 +183,7 @@ export class EndScene extends Scene {
       const name = title(QUIPS.textX, row + 5, owner, line.fired ? PALETTE.darkRed : PALETTE.plum);
       if (line.fired) {
         fitText(name, QUIPS.bubble.x + QUIPS.bubble.width - 6 - QUIPS.textX, [
-          `${owner} fired you`,
+          fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner }),
           owner,
         ]);
       }
@@ -200,7 +198,7 @@ export class EndScene extends Scene {
       );
     }
 
-    const button = addMenuButton(this, BUTTON, "Back home");
+    const button = addMenuButton(this, BUTTON, words.backHome);
     let pressed = false;
     listenOnePress(this, {
       down: (pointer) => {
@@ -355,7 +353,7 @@ export class EndScene extends Scene {
   // The new-best ribbon drops into place; with reduced motion it is simply there.
   private showRibbon(reduced: boolean): void {
     if (!this.textures.exists(RIBBON.key)) {
-      addPixelText(this, SCREEN_CONFIG.width / 2, RIBBON.y + 4, "New best!", {
+      addPixelText(this, SCREEN_CONFIG.width / 2, RIBBON.y + 4, gameData.menuText.end.newBest, {
         color: PALETTE.darkRed,
         font: "title",
         originX: 0.5,

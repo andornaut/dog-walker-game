@@ -471,9 +471,64 @@ export interface HomeText {
     readonly howTo: string;
     readonly newAffordable: string;
   };
+  // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
+  // status, and the price status of anything not owned yet.
+  readonly detail: {
+    readonly dogFee: string;
+    readonly dogKind: string;
+    readonly dogOwner: string;
+    readonly dogStatus: string;
+    readonly dogTemperament: string;
+    readonly dogTotals: string;
+    readonly gearEquipped: string;
+    readonly gearOwned: string;
+    readonly gearSubtitle: string;
+    readonly priceBuy: string;
+    readonly priceLocked: string;
+  };
   readonly dogBought: string;
   readonly dogCantAfford: string;
+  // A dog slot's name in the purchase line.
+  readonly dogSlotName: string;
+  // The info line for a dog or gear tile the keyboard focuses: an owned dog's, a locked dog's
+  // with its price, a gear item's with its price while locked, and the parts they are built
+  // from.
+  readonly focus: {
+    readonly dogLocked: string;
+    readonly dogOwned: string;
+    readonly gear: string;
+    readonly gearLocked: string;
+    readonly kind: string;
+    readonly priceBuy: string;
+    readonly priceShort: string;
+    readonly temper: string;
+  };
+  // The street sign on the gate art.
+  readonly gateSign: string;
   readonly gearBought: string;
+  // The logbook card and the lines it shares with the Stats page: the best walk, the last
+  // walk by how it ended, the totals, and what it says before any walk.
+  readonly logbook: {
+    readonly best: string;
+    readonly bestNote: string;
+    readonly empty: string;
+    readonly emptyNote: string;
+    readonly last: string;
+    readonly lastEarned: string;
+    readonly lastFinished: string;
+    readonly lastFired: string;
+    readonly lastHeadedHome: string;
+    readonly stats: string;
+    readonly title: string;
+    readonly totals: string;
+    readonly zoneMany: string;
+    readonly zoneOne: string;
+  };
+  // What the walker says after a tap that changes nothing: the pack is full, or sound
+  // toggled.
+  readonly noticePackFull: string;
+  readonly noticeSoundOff: string;
+  readonly noticeSoundOn: string;
   readonly packCount: string;
   // The section headings, and what a required section with nothing picked asks for on its
   // band.
@@ -487,15 +542,147 @@ export interface HomeText {
   readonly slotSave: string;
   readonly slotSign: string;
   readonly startWalk: string;
+  // The top bar's best walk and walk count, or what it says before any walk.
+  readonly topBar: {
+    readonly best: string;
+    readonly noWalks: string;
+    readonly walkMany: string;
+    readonly walkOne: string;
+  };
+  // Said first in the walker's bubble while the browser keeps no save.
+  readonly unsaved: string;
 }
 
-// The walk's own text. homeQuestion is what the top bar's Home button asks, with its two
-// answers.
+// The walk's own text. card is the choice cards': the titles and subtitles a card's data
+// does not name, the Skip card, and the cost plaque's words. fired is the firing plate's
+// word, homeQuestion is what the top bar's Home button asks, with its two answers, and
+// lowHearts is the chip over a doghouse down to its last heart. A {name} in a line is filled
+// by code, and each line may use only the names src/hud/runText.ts lists for it.
 export interface RunText {
+  readonly card: {
+    readonly forkSubtitle: string;
+    readonly forkTitle: string;
+    readonly free: string;
+    readonly need: string;
+    readonly pickOne: string;
+    readonly skip: string;
+    // The Skip card's effect on its face, and in its body when held.
+    readonly skipEffect: string;
+    readonly skipHeld: string;
+    readonly stopSubtitle: string;
+    readonly upgradeSubtitle: string;
+    readonly upgradeTitle: string;
+  };
+  readonly fired: string;
   readonly homeQuestion: {
     readonly body: string;
     readonly headHome: string;
     readonly keepWalking: string;
+    readonly title: string;
+  };
+  readonly lowHearts: string;
+}
+
+// The text of the menus and pages over the game: Settings, Stats, Help, the End screen, the
+// pause menu and the badge celebration. A {name} in a line is filled by code, and each line
+// may use only the names src/home/menuText.ts lists for it.
+export interface MenuText {
+  readonly celebration: {
+    readonly button: string;
+    readonly titleMany: string;
+    readonly titleOne: string;
+  };
+  readonly end: {
+    readonly backHome: string;
+    readonly bank: string;
+    // The breakdown's lines, by what the money came from.
+    readonly earnings: {
+      readonly cardCosts: string;
+      readonly clawbacks: string;
+      readonly fees: string;
+      readonly luckyFinds: string;
+      readonly start: string;
+      readonly tips: string;
+    };
+    readonly firedYou: string;
+    readonly newBest: string;
+    // The title, by how the walk ended.
+    readonly titles: {
+      readonly finished: string;
+      readonly noDogs: string;
+      readonly wentHome: string;
+    };
+    readonly total: string;
+    readonly zonesWalked: string;
+  };
+  readonly help: {
+    readonly back: string;
+    readonly gotIt: string;
+    readonly heading: string;
+    readonly next: string;
+  };
+  readonly pause: {
+    readonly headHome: string;
+    readonly help: string;
+    readonly note: string;
+    readonly resume: string;
+    readonly settings: string;
+    readonly title: string;
+  };
+  readonly settings: {
+    readonly back: string;
+    readonly effects: string;
+    readonly motion: string;
+    readonly motionNote: string;
+    readonly music: string;
+    // A volume slider's value while sound is off; volume is its value while sound is on.
+    readonly muted: string;
+    readonly sound: string;
+    readonly soundNote: string;
+    readonly title: string;
+    readonly volume: string;
+  };
+  readonly stats: {
+    readonly badgeEarned: string;
+    readonly badgeLine: string;
+    readonly badgeLocked: string;
+    readonly badges: string;
+    readonly dogColumns: {
+      readonly dog: string;
+      readonly fired: string;
+      readonly walks: string;
+      readonly zones: string;
+    };
+    readonly earnedCount: string;
+    // The Runs tab's logbook block.
+    readonly logBest: string;
+    readonly logEmpty: string;
+    readonly logLast: string;
+    // Runs by how they ended.
+    readonly outcomes: {
+      readonly finished: string;
+      readonly noDogs: string;
+      readonly wentHome: string;
+    };
+    readonly overall: {
+      readonly bestRun: string;
+      readonly bestZone: string;
+      readonly lifetime: string;
+      readonly runsPlayed: string;
+      readonly timesFired: string;
+    };
+    readonly sections: {
+      readonly logbook: string;
+      readonly overall: string;
+      readonly runs: string;
+    };
+    readonly tabs: {
+      readonly badges: string;
+      readonly dogs: string;
+      readonly runs: string;
+    };
+    // Times fired once an owner has fired you, naming the owner who did it most.
+    readonly timesFiredBy: string;
     readonly title: string;
   };
 }
@@ -583,6 +770,7 @@ export interface GameData {
   readonly help: readonly [HelpPage, ...HelpPage[]];
   readonly hints: Readonly<Record<HintId, Hint>>;
   readonly homeText: HomeText;
+  readonly menuText: MenuText;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
   readonly needCards: Readonly<Record<NeedCardId, NeedCard>>;
   readonly needSpots: Readonly<Record<NeedSpotId, NeedSpot>>;

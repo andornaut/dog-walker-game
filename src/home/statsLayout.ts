@@ -2,11 +2,8 @@ import type { Rect } from "../layout/rect";
 
 export type StatsTab = "badges" | "dogs" | "runs";
 
-export const STATS_TABS: readonly { label: string; tab: StatsTab }[] = [
-  { label: "Runs", tab: "runs" },
-  { label: "Dogs", tab: "dogs" },
-  { label: "Badges", tab: "badges" },
-];
+// The tabs, left to right; each one's label is menuText.stats.tabs[tab].
+export const STATS_TABS: readonly StatsTab[] = ["runs", "dogs", "badges"];
 
 const PANEL = { height: 444, width: 344, x: 8, y: 108 };
 

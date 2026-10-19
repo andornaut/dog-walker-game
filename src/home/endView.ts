@@ -12,15 +12,6 @@ export interface EarningsLine {
   readonly label: string;
 }
 
-const LABELS: Readonly<Record<EarningsKind, string>> = {
-  cardCosts: "Card costs",
-  clawbacks: "Fees taken back",
-  fees: "Fees",
-  luckyFinds: "Lucky finds",
-  start: "Starting money",
-  tips: "Tips",
-};
-
 // Fees, tips and card costs always show; the rest only when the run had some.
 const ALWAYS_SHOWN: ReadonlySet<EarningsKind> = new Set(["cardCosts", "fees", "tips"]);
 const ORDER: readonly EarningsKind[] = [
@@ -50,7 +41,12 @@ function kindOf(change: MoneyChange): EarningsKind {
 
 // What made up a run's earnings, from the changes it made. Money that no change accounts for
 // is what the run started with (the fanny pack's), so the lines always add up to earned.
-export function earningsBreakdown(changes: readonly Change[], earned: Cents): EarningsLine[] {
+export function earningsBreakdown(
+  data: Pick<GameData, "menuText">,
+  changes: readonly Change[],
+  earned: Cents,
+): EarningsLine[] {
+  const labels = data.menuText.end.earnings;
   const totals = new Map<EarningsKind, number>();
   let counted = 0;
   for (const change of changes) {
@@ -64,7 +60,7 @@ export function earningsBreakdown(changes: readonly Change[], earned: Cents): Ea
   return ORDER.flatMap((kind) => {
     const amount = totals.get(kind) ?? 0;
     return amount !== 0 || ALWAYS_SHOWN.has(kind)
-      ? [{ amount: cents(amount), kind, label: LABELS[kind] }]
+      ? [{ amount: cents(amount), kind, label: labels[kind] }]
       : [];
   });
 }

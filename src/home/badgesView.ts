@@ -2,6 +2,8 @@ import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementId, GameData } from "../data/types";
 import type { Rect } from "../layout/rect";
 import type { SaveDocument } from "../save/schema";
+import { fillLine } from "../text/lines";
+import { MENU_TEXT_FIELDS } from "./menuText";
 
 export interface BadgeView {
   readonly art: string;
@@ -30,8 +32,14 @@ export function badgeWall(
   }));
 }
 
-export function earnedText(badges: readonly Pick<BadgeView, "earned">[]): string {
-  return `${badges.filter(({ earned }) => earned).length}/${badges.length} earned`;
+export function earnedText(
+  data: Pick<GameData, "menuText">,
+  badges: readonly Pick<BadgeView, "earned">[],
+): string {
+  return fillLine(MENU_TEXT_FIELDS.stats, data.menuText.stats, "earnedCount", {
+    earned: String(badges.filter(({ earned }) => earned).length),
+    total: String(badges.length),
+  });
 }
 
 export interface WallSpec {
@@ -80,6 +88,9 @@ export function badgeStrip(
   };
 }
 
-export function celebrationTitle(count: number): string {
-  return count === 1 ? "Badge earned!" : `${count} badges earned!`;
+export function celebrationTitle(data: Pick<GameData, "menuText">, count: number): string {
+  const text = data.menuText.celebration;
+  return count === 1
+    ? text.titleOne
+    : fillLine(MENU_TEXT_FIELDS.celebration, text, "titleMany", { count: String(count) });
 }
