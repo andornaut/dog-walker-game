@@ -2,12 +2,15 @@ name: Test
 
 # Every branch, not just main and pull requests: work lands on main directly as
 # often as it arrives through one, so a check that only runs on main is a check
-# that runs after the fact.
+# that runs after the fact. Docs, art sources and gameplay notes carry no code,
+# so a push that touches only those skips the checks, as the deploy does.
 on:
   push:
     branches: ["**"]
+    paths-ignore: ["**/*.md", "art/**", "gameplay/**"]
   pull_request:
     branches: [main]
+    paths-ignore: ["**/*.md", "art/**", "gameplay/**"]
   workflow_dispatch:
 
 permissions:
