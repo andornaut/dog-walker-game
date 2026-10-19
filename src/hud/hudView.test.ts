@@ -69,43 +69,45 @@ describe("wholeDollars", () => {
 });
 
 describe("heartRows", () => {
-  it("fills the first hearts and leaves the rest of the meter empty", () => {
-    expect(heartRows(8, 2, 4)).toEqual([[true, true, false, false]]);
-  });
+  const [o, x] = [true, false];
 
-  it("wraps onto a second row past perRow, so 11 hearts take two rows", () => {
-    const rows = heartRows(8, 9, 11);
-    expect(rows.map((row) => row.length)).toEqual([8, 3]);
-    expect(rows[1]).toEqual([true, false, false]);
-  });
-
-  it("has no rows for a meter of 0", () => {
-    expect(heartRows(8, 0, 0)).toEqual([]);
+  it.each([
+    ["fills the first hearts and leaves the rest of the meter empty", 2, 4, [[o, o, x, x]]],
+    [
+      "wraps onto a second row past perRow, so 11 hearts take two rows",
+      9,
+      11,
+      [
+        [o, o, o, o, o, o, o, o],
+        [o, x, x],
+      ],
+    ],
+    ["has no rows for a meter of 0", 0, 0, []],
+  ])("%s", (_name, hearts, max, expected) => {
+    expect(heartRows(8, hearts, max)).toEqual(expected);
   });
 });
 
 describe("zonePips", () => {
-  it("shows the route walked, the current zone part filled, and unknown forks ahead", () => {
-    expect(zonePips(4, ["street", "pawsPromenade"], 1, 0.25)).toEqual([
-      { fill: 1, state: "done", zone: "street" },
-      { fill: 0.25, state: "current", zone: "pawsPromenade" },
-      { fill: 0, state: "todo", zone: null },
-      { fill: 0, state: "todo", zone: null },
-    ]);
-  });
+  const done = { fill: 1, state: "done", zone: "street" } as const;
+  const street = (fill: number) => ({ fill, state: "current", zone: "street" }) as const;
+  const todo = { fill: 0, state: "todo", zone: null } as const;
 
-  it("shows the position after a zone as unknown until its fork is taken", () => {
-    expect(zonePips(4, ["street"], 1, 0)).toEqual([
-      { fill: 1, state: "done", zone: "street" },
-      { fill: 0, state: "todo", zone: null },
-      { fill: 0, state: "todo", zone: null },
-      { fill: 0, state: "todo", zone: null },
-    ]);
-  });
-
-  it("keeps the fill between 0 and 1", () => {
-    expect(zonePips(1, ["street"], 0, 1.4)[0]?.fill).toBe(1);
-    expect(zonePips(1, ["street"], 0, -1)[0]?.fill).toBe(0);
+  it.each<[string, Parameters<typeof zonePips>, ReturnType<typeof zonePips>]>([
+    [
+      "shows the route walked, the current zone part filled, and unknown forks ahead",
+      [4, ["street", "pawsPromenade"], 1, 0.25],
+      [done, { fill: 0.25, state: "current", zone: "pawsPromenade" }, todo, todo],
+    ],
+    [
+      "shows the position after a zone as unknown until its fork is taken",
+      [4, ["street"], 1, 0],
+      [done, todo, todo, todo],
+    ],
+    ["keeps the fill at most 1", [1, ["street"], 0, 1.4], [street(1)]],
+    ["keeps the fill at least 0", [1, ["street"], 0, -1], [street(0)]],
+  ])("%s", (_name, args, expected) => {
+    expect(zonePips(...args)).toEqual(expected);
   });
 });
 

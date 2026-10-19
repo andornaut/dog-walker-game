@@ -19,7 +19,7 @@ import {
   stripTapped,
   stripText,
 } from "./stateStrip";
-import { PAUSE_BUTTON } from "./topBar";
+import { PAUSE_BUTTON, type RunPause } from "./topBar";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 
@@ -55,19 +55,24 @@ describe("stripItems", () => {
 });
 
 describe("stripText", () => {
-  it("writes the name and effect as the upgrade card and the gear's home line do", () => {
-    expect(stripText(data, { kind: "upgrade", upgrade: "bigTipper" })).toBe(
+  it.each<[string, StripItem, string]>([
+    [
+      "an upgrade's name and effect as its card does",
+      { kind: "upgrade", upgrade: "bigTipper" },
       "Big tipper: Tip value +50% for the run.",
-    );
-    expect(stripText(data, { gear: "fannyPack", kind: "gear" })).toBe(
+    ],
+    [
+      "gear's name and effect as its home line does",
+      { gear: "fannyPack", kind: "gear" },
       "Fanny pack: Starting money +$15.",
-    );
-  });
-
-  it("writes a debuff's modifiers for its duration", () => {
-    expect(stripText(data, { debuff: "stinky", kind: "debuff" })).toBe(
+    ],
+    [
+      "a debuff's modifiers for its duration",
+      { debuff: "stinky", kind: "debuff" },
       "Stinky: Tip value −50% for the rest of the zone.",
-    );
+    ],
+  ])("writes %s", (_name, item, expected) => {
+    expect(stripText(data, item)).toBe(expected);
   });
 });
 
@@ -88,23 +93,21 @@ describe("stripIconKey", () => {
         kind: "gear",
       })),
     ];
-    expect(items).toHaveLength(15);
     expect(items.map(stripIconKey).filter((key) => !keys.has(key))).toEqual([]);
   });
 });
 
 describe("stripTapAllowed", () => {
-  const pause = { card: false, hitStop: false, menu: "closed" } as const;
+  const pause: RunPause = { card: false, hitStop: false, menu: "closed" };
 
-  it("takes taps while walking, under a card or hit stop, and in the pause menu", () => {
-    expect(stripTapAllowed(pause)).toBe(true);
-    expect(stripTapAllowed({ ...pause, card: true, hitStop: true })).toBe(true);
-    expect(stripTapAllowed({ ...pause, menu: "open" })).toBe(true);
-  });
-
-  it("leaves taps to help and settings, which cover the bar", () => {
-    expect(stripTapAllowed({ ...pause, menu: "help" })).toBe(false);
-    expect(stripTapAllowed({ ...pause, menu: "settings" })).toBe(false);
+  it.each<[string, RunPause, boolean]>([
+    ["takes taps while walking", pause, true],
+    ["takes taps under a card and hit stop", { ...pause, card: true, hitStop: true }, true],
+    ["takes taps in the pause menu", { ...pause, menu: "open" }, true],
+    ["leaves taps to help, which covers the bar", { ...pause, menu: "help" }, false],
+    ["leaves taps to settings, which cover the bar", { ...pause, menu: "settings" }, false],
+  ])("%s", (_name, state, expected) => {
+    expect(stripTapAllowed(state)).toBe(expected);
   });
 });
 

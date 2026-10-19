@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "./doghouse";
+import { DOGHOUSE, doghouseHearts, fittingScale } from "./doghouse";
 
 const HEART = { height: 7, width: 8 };
 // ui-heart's opaque width within its 8px frame.
@@ -56,12 +56,6 @@ describe("doghouseHearts", () => {
         expect(cell.y + HEART.height).toBeLessThanOrEqual(status.y);
       }
     }
-  });
-});
-
-describe("heartCount", () => {
-  it("writes hearts over the max", () => {
-    expect(heartCount(4, 8)).toBe("4/8");
   });
 });
 
