@@ -12,7 +12,8 @@ import {
   parseAtlasManifest,
 } from "../atlas/atlasManifest";
 
-const ART_BASE_URL = `${import.meta.env.BASE_URL}art`;
+// The URL the art manifests and files load from.
+export const ART_BASE_URL = assetUrl(import.meta.env.BASE_URL, "art");
 export const MANIFEST_CACHE_KEY = "art-manifest";
 const ATLAS_CACHE_KEY = "art-atlas-manifest";
 

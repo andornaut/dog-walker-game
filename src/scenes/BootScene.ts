@@ -21,6 +21,7 @@ import { addFilledRect } from "./draw";
 import { onLoadProgress } from "./loadProgress";
 import {
   addAtlasTextures,
+  ART_BASE_URL,
   atlasPageBytes,
   loadManifest,
   MANIFEST_CACHE_KEY,
@@ -39,7 +40,6 @@ import type { RunSceneData } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { ensurePlaceholder, measureSprite, playTag } from "./sprites";
 
-const ART_URL = assetUrl(import.meta.env.BASE_URL, "art");
 // Processing yields to the next frame once a batch has run this long.
 const FRAME_BUDGET_MS = 8;
 
@@ -109,13 +109,13 @@ export class BootScene extends Scene {
     const { fonts, sounds } = this.manifest;
     queueManifestArt(this, this.manifest);
     for (const { fnt, key, png } of fonts) {
-      this.load.bitmapFont(key, assetUrl(ART_URL, png), assetUrl(ART_URL, fnt));
+      this.load.bitmapFont(key, assetUrl(ART_BASE_URL, png), assetUrl(ART_BASE_URL, fnt));
     }
     // One file per sound, in the format the service worker precaches.
     const soundFormat = browserSoundFormat();
     if (soundFormat !== undefined) {
       for (const sound of sounds) {
-        this.load.audio(sound.key, assetUrl(ART_URL, sound[soundFormat]));
+        this.load.audio(sound.key, assetUrl(ART_BASE_URL, sound[soundFormat]));
       }
     } else if (sounds.length > 0) {
       console.warn("This browser plays neither Ogg nor AAC, so the game is silent.");
