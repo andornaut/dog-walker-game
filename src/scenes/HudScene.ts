@@ -96,8 +96,9 @@ const LAYOUT = screenLayout(SCREEN_CONFIG);
 const LANES = hudLanes(LAYOUT);
 const LABEL = { height: 20, ms: 1100, rise: 18 };
 const HINT = { fadeMs: 400, holdMs: 4500, padding: 6 };
-// An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x.
-const QUIP = { holdMs: 2600, padding: 4 };
+// An owner's quip fills the quip lane's height, its text at 2x on one line, else at 1x. It
+// draws over the doghouses and their heart-loss flash (depth 0), under the HUD's moments.
+const QUIP = { depth: 30, holdMs: 2600, padding: 4 };
 
 interface SlotView {
   anchors: { name: { x: number; y: number }; ownerName: { x: number; y: number } };
@@ -849,8 +850,10 @@ export class HudScene extends Scene {
     const x = centredInLane(lane, faceX, width);
     const y = lane.y;
     placePixelText(text, x + QUIP.padding, y + Math.round((height - text.height) / 2));
-    const parts: GameObjects.GameObject[] = [addPanel(this, { height, width, x, y }, "ui-quip")];
-    text.setDepth(1);
+    const parts: GameObjects.GameObject[] = [
+      addPanel(this, { height, width, x, y }, "ui-quip").setDepth(QUIP.depth),
+    ];
+    text.setDepth(QUIP.depth + 1);
     parts.push(text);
     this.tweens.add({
       alpha: 0,
