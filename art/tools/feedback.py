@@ -7,8 +7,8 @@ nobody, and the coins that burst from the pack on a minor bump.
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
 ink holds on the light roads and the cream doghouse and the white on Woof Way
-and the dimmed road. The splash takes the navy rim, the puff the teal rim of
-fx-hit-skunk's green, the coins fx-coin-fly's coin in its plum rim.
+and the dimmed road. The splash takes the navy rim, the puff fx-hit-skunk's
+mauve in its plum rim, the coins fx-coin-fly's coin in its plum rim.
 
 fx-heart-loss  32x32  pop (6 frames: 50, 50, 90, 90, 90, 450ms; 820ms)  a small whole heart
                       pops in on a white star, then the big heart (17x15 in its rims, 21x19)
@@ -32,8 +32,8 @@ fx-heart-gain  32x32  pop (5 frames: 50, 50, 90, 90, 450ms; 730ms)  the same pop
                       to 117, rows 64 to 87), where its 14 rows fit.
 fx-close-one   32x32  splash (5 frames, 70ms)  a small puddle splash: a ripple at the feet, a
                       few drops up and back
-                      puff (5 frames, 80ms)  a small green stink puff (fx-hit-skunk's green and
-                      teal): three puffs swell, rise and break apart, a stink line curling up
+                      puff (5 frames, 80ms)  a small mauve stink puff (fx-hit-skunk's mauve and
+                      plum): three puffs swell, rise and break apart, a stink line curling up
                       splash-word, puff-word  the same frames and timing, with PHEW! in the
                       comic lettering in rows 1 to 11 over frames 0 to 3
                       The frame's centre column on the pack's centre, its bottom row on the
@@ -202,7 +202,7 @@ def close_splash(step):
 
 
 def close_puff(step):
-    """Three green puffs swell at the feet, rise and drift apart, the middle one breaking first, with a
+    """Three mauve puffs swell at the feet, rise and drift apart, the middle one breaking first, with a
     stink line curling up out of them."""
     g = Grid(32, 32)
     rise = (0, 1, 3, 5, 7)[step]
@@ -214,17 +214,17 @@ def close_puff(step):
 
     def cloud(p):
         for x, y, pr in puffs:
-            p.ell(x, y, pr + 0.5, pr, "green", "dgreen", "yellow" if step < 2 else None)
-    piece(g, cloud, "teal", 32)
+            p.ell(x, y, pr + 0.5, pr, "mauve", "purple", "pink" if step < 2 else None)
+    piece(g, cloud, "plum", 32)
     if step >= 1:
-        # two stink lines curling up out of the puffs, green with a teal side, as fx-hit-skunk's
+        # two stink lines curling up out of the puffs, pink with a plum side, as fx-hit-skunk's
         squiggle = Grid(32, 32)
         for x0, base, lean in ((12, FEET - 8, -1), (20, FEET - 9, 1)):
             top = base - rise * 1.3
             for t in range((3, 5, 6, 5)[step - 1]):
                 x = x0 + (0, 1, 1, 0, -1, -1)[(t + step) % 6] + lean * (t // 3)
-                squiggle.p(x, round(top - t), "green")
-                squiggle.p(x + 1, round(top - t), "teal")
+                squiggle.p(x, round(top - t), "pink")
+                squiggle.p(x + 1, round(top - t), "plum")
         layer(g, squiggle)
     return g
 
