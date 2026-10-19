@@ -220,12 +220,23 @@ CX = CAMERA["centerX"]          # the road's centre on screen, verges either sid
 OX, TOP = CX - W // 2, FOOT - (H - 8)
 STRIP_X, STRIP_W = LAYOUT["regions"]["road"]["x"], LAYOUT["regions"]["road"]["width"]
 # The verge beside the road, as src/layout/roadside.ts: across is the distance from the road's
-# centre line in road pixels; the curb to curbTo, the sidewalk or paving to walkTo (none where
-# walkTo is null), then lawn.
-VERGES = {z: ("%06x" % v["curbColor"], v["curbTo"], 10 ** 6 if v["walkTo"] is None else v["walkTo"], v["lawn"])
+# centre line in road pixels; the curb to curbTo, the strips (bands out to each one's to), the
+# sidewalk or paving to walkTo (on out where walkTo is null), then lawn. Colours are hex strings
+# here. A plain grey sidewalk stands in where the export has no strips, walk or seam fields.
+SIDEWALK = dict(strips=[], walkColor=K["lgrey"], walkDots=[], seamColor=K["grey"], seamEvery=32)
+
+
+def hexed(c):
+    return "%06x" % c if isinstance(c, int) else c
+
+
+VERGES = {z: {**SIDEWALK, **v, "curbColor": hexed(v["curbColor"]),
+              "walkColor": hexed(v.get("walkColor", SIDEWALK["walkColor"])),
+              "seamColor": hexed(v.get("seamColor", SIDEWALK["seamColor"])),
+              "walkTo": 10 ** 6 if v["walkTo"] is None else v["walkTo"]}
           for z, v in LAYOUT["verges"].items()}
 MOWN = (44, 62, 36, 70, 50, 58, 40, 66)   # stripe widths out from the sidewalk, light then dark
-SEAM_PERIOD, SEAM_MAX_SPAN = 32, 16
+SEAM_MAX_SPAN = 16
 STEPS = {step["scale"]: step["suffix"] for step in LAYOUT["depthSteps"]}
 # The pack, as src/layout/packFormation.ts: each dog's (dx across, distance ahead of the feet) by
 # pack size, the first dog leading; the walker's hands (left dx, right dx, height above the
@@ -252,21 +263,32 @@ def distance_at(y):
     return F / s - F, s
 
 
-def snap(s):
-    """The depth step nearest a scale, judged by ratio, as the game's snapScale."""
-    return min(STEPS, key=lambda t: abs(math.log(s / t)))
+def dot(dots, value):
+    """The dot colour a noise value in [0, 1) picks, or None: each dot takes its share of the range in
+    turn, its colours equal parts of that share, as roadside.ts's dotColor."""
+    for d in dots:
+        if value < d["share"]:
+            return hexed(d["colors"][math.floor(value / d["share"] * len(d["colors"]))])
+        value -= d["share"]
+    return None
 
 
-def verge(zone, across, s, z, span):
-    """The colour beside the road at across, on a row of scale s covering span road pixels from
-    z: the curb, the sidewalk with a seam every SEAM_PERIOD, then the lawn, mown in stripes
-    (none narrower than 4px on screen) or rough, with sparse tufts."""
-    curb, curb_to, walk_to, lawn = VERGES[zone]
-    if across < curb_to:
-        return curb
+def verge(zone, across, s, z, span, rx=0):
+    """The colour beside the road at across (rx signed, negative on the left), on a row of scale s
+    covering span road pixels from z: the curb, the strips, the sidewalk or paving with a seam every
+    seamEvery, the strips and the paving with their dots, then the lawn, mown in stripes (none
+    narrower than 4px on screen) or rough, with sparse tufts."""
+    v = VERGES[zone]
+    walk_to, lawn = v["walkTo"], v["lawn"]
+    if across < v["curbTo"]:
+        return v["curbColor"]
+    for strip in v["strips"]:
+        if across < strip["to"]:
+            return dot(strip["dots"], noise(math.floor(rx), math.floor(z))) or hexed(strip["color"])
     if across < walk_to:
-        seam = span < SEAM_MAX_SPAN and z // SEAM_PERIOD != (z - max(span, 1)) // SEAM_PERIOD
-        return "grey" if seam else "lgrey"
+        if span < SEAM_MAX_SPAN and z // v["seamEvery"] != (z - max(span, 1)) // v["seamEvery"]:
+            return v["seamColor"]
+        return dot(v["walkDots"], noise(math.floor(rx), math.floor(z))) or v["walkColor"]
     col, rest, i = "green", across - walk_to, 0
     while lawn == "mown" and rest < 300 and rest >= MOWN[i % len(MOWN)]:
         rest -= MOWN[i % len(MOWN)]
@@ -300,16 +322,21 @@ def frame(key, tag, i=0):
 
 
 def depth_frame(key, tag, s, i=0):
-    """A frame at the depth step for scale s: the redrawn variant (key@75) where it exists, else the
-    sprite scaled nearest-neighbour, as the game does."""
-    step = snap(s)
-    if step == 1:
-        return frame(key, tag, i)
-    variant = f"{key}{STEPS[step]}"
-    if os.path.exists(f"public/art/sprites/{variant}.json"):
-        return frame(variant, tag, i)
-    f = frame(key, tag, i)
-    return f.resize((math.floor(f.width * step + 0.5), math.floor(f.height * step + 0.5)), Image.NEAREST)
+    """A frame at scale s as src/layout/depthScale.ts draws it: its larger side floor(side x s + 0.5),
+    s capped at 1, from the smallest of its art steps (1x and the redrawn key@88 to key@50 it has) at
+    least that size, scaled down nearest-neighbour."""
+    art = frame(key, tag, i)
+    size = max(1, math.floor(max(art.size) * min(1, s) + 0.5))
+    for step, suffix in STEPS.items():
+        if step < 1 and os.path.exists(f"public/art/sprites/{key}{suffix}.json"):
+            f = frame(f"{key}{suffix}", tag, i)
+            if size <= max(f.size) < max(art.size):
+                art = f
+    if max(art.size) == size:
+        return art
+    k = size / max(art.size)
+    return art.resize((max(1, math.floor(art.width * k + 0.5)), max(1, math.floor(art.height * k + 0.5))),
+                      Image.NEAREST)
 
 
 def image(key):
@@ -334,7 +361,7 @@ class Scene(Canvas):
                 if STRIP_X <= rx < STRIP_X + STRIP_W:
                     px[x, y] = tile[math.floor(rx - STRIP_X), row]
                 else:
-                    px[x, y] = rgb(verge(zone, abs(rx - CX), s, z, span))
+                    px[x, y] = rgb(verge(zone, abs(rx - CX), s, z, span, rx - CX))
 
     def at(self, x, d):
         """Where the road point at image column x (on the flat road at the feet) d road pixels
@@ -374,17 +401,25 @@ class Scene(Canvas):
 
     def pack(self, cx, dogs=("dog-koda", "dog-biscuit", "dog-duchess"), lead_tag="walk"):
         """The walker at the feet in lane centre cx and the dogs ahead of her in the game's
-        formation, far ones first, with a leash from her hand to each collar. Returns where each
-        stands: image column, row and scale."""
+        formation, far ones first, with a leash from her hand to each collar (COLLAR over a dog's
+        feet, its last opaque row; the hands HANDS[2] over the walker's). The leashes run under
+        the walker, who hides the part behind her, and over the dogs and their shadows. Returns
+        where each stands: image column, row and scale."""
+        def feet(key, tag, sy, s):
+            f = depth_frame(key, tag, s)
+            return round(sy) - f.height + f.getbbox()[3] - 1
+
         items = [(k, dx, d, lead_tag if i == 0 else "walk") for i, (k, (dx, d)) in enumerate(zip(dogs, FORMATIONS[len(dogs)]))]
-        items.append(("walker-casey", 0, 0, "walk"))
         placed = {k: self.stand(k, tag, cx + dx, d) for k, dx, d, tag in sorted(items, key=lambda it: -it[2])}
-        base = round(self.at(cx, 0)[1])
-        for k, dx, _, _ in items:
-            if k != "walker-casey":
-                x, y, s = placed[k]
-                hand = HANDS[0] if dx < 0 else HANDS[1]
-                self.line(cx + hand, base - HANDS[2], round(x), round(y - COLLAR * s), self.leash_col)
+        sx, sy, _ = self.at(cx, 0)
+        walker = frame("walker-casey", "walk")
+        self.shadow(round(sx), round(sy), walker.width)
+        hands = feet("walker-casey", "walk", sy, 1) - HANDS[2]
+        for k, dx, _, tag in items:
+            x, y, s = placed[k]
+            hand = HANDS[0] if dx < 0 else HANDS[1]
+            self.line(cx + hand, hands, round(x), round(feet(k, tag, y, s) - COLLAR * s), self.leash_col)
+        placed["walker-casey"] = self.stand("walker-casey", "walk", cx, 0, shadow=False)
         return placed
 
     def chevron(self, cx, cy, d, col):
@@ -562,8 +597,8 @@ def lanes():
     c.chevron(lane(3) - 26, 213, 1, "amber")
     # a squirrel about to dash across ahead: its warning at the road's left edge, the arrow
     # pointing the way it will run, and the squirrel waiting on the verge
-    c.cue(42, 195)
-    c.stand("squirrel-dash", "run", 10, 195)
+    c.cue(STRIP_X - OX + 10, 195)
+    c.stand("squirrel-dash", "run", STRIP_X - OX - 22, 195)
     c.pack(lane(3))
     return c
 
@@ -631,14 +666,17 @@ def pulls():
     c.road("shops")
     c.stand("squirrel", "idle", lane(3), 290)
     cx = lane(2)
-    kx, ky, _ = c.pack(cx, ("dog-koda", "dog-duchess"), "tell")["dog-koda"]
-    # the bark over the leaning dog's head, and the way it is about to pull
+    kx, ky, ks = c.pack(cx, ("dog-koda", "dog-duchess"), "tell")["dog-koda"]
+    # the bark 2 rows over the leaning dog's top opaque row, and the way it is about to pull
     kx, ky = round(kx), round(ky)
+    dog_sprite = depth_frame("dog-koda", "tell", ks)
+    top = ky - dog_sprite.height + dog_sprite.getbbox()[1]
     bark = frame("fx-bark", "pop", 1)
-    c.paste(bark, kx - bark.width // 2, ky - 34 - bark.height)
+    c.paste(bark, kx - bark.width // 2, top - 2 - bark.height)
+    mid = top - 2 - bark.height // 2
     for x in range(kx + bark.width // 2 + 4, lane(3) - 8, 4):
-        c.fill(x, ky - 42, 2, 2, "amber")
-    c.chevron(lane(3) - 6, ky - 41, 1, "amber")
+        c.fill(x, mid - 1, 2, 2, "amber")
+    c.chevron(lane(3) - 6, mid, 1, "amber")
     text_c(c, "LEAN AND BARK", 172, 12, "plum")
     return c
 

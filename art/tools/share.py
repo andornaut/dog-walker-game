@@ -116,7 +116,7 @@ def street_view():
         s = 0.5 + 0.5 * min(1, (r + 1) / (rows - 6))
         sy = int(z) % road.height
         for x in range(VIEW_W):
-            sx = int(140 + (x + 0.5 - cx) / s)
+            sx = int(road.width / 2 + (x + 0.5 - cx) / s)
             view.img.putpixel((x, BAND_ROWS + r), road.getpixel((min(max(sx, 0), road.width - 1), sy)))
         z -= 1 / s
     pack(view, cx, view.img.height - 6)
@@ -124,15 +124,25 @@ def street_view():
 
 
 def pack(view, cx, base):
-    """hp.Scene.pack's layout, drawn dogs, then leashes, then Casey, so the leashes pass behind her
-    and show only from her hands to the collars."""
-    dogs = [(k, dx, base + dy) for k, (dx, dy) in zip(("dog-koda", "dog-biscuit", "dog-duchess"),
-                                                       ((0, -40), (-13, -28), (13, -26)))]
-    for k, dx, foot in sorted(dogs, key=lambda d: d[2]):
-        view.feet(k, "walk", cx + dx, foot)
-    for _, dx, foot in dogs:
-        view.line(cx - 9 if dx < 0 else cx + 8, base - 14, cx + dx, foot - 15, view.leash_col)
-    view.feet("walker-casey", "walk", cx, base)
+    """hp.Scene.pack's layout at full size with the walker's feet on row base: the dogs in the game's
+    formation, far ones first, then a leash from her hand to each collar, then Casey over them, so
+    the leashes pass behind her and show only from her hands to the collars."""
+    def stand(key, x, feet, shadow=True):
+        f = hp.frame(key, "walk")
+        if shadow:
+            view.shadow(x, feet + 1, f.width)
+        view.paste(f, x - f.width // 2, feet - f.getbbox()[3] + 1)
+        return f
+
+    dogs = [(k, dx, base - d) for k, (dx, d) in zip(("dog-koda", "dog-biscuit", "dog-duchess"), hp.FORMATIONS[3])]
+    for k, dx, feet in sorted(dogs, key=lambda d: d[2]):
+        stand(k, cx + dx, feet)
+    walker = hp.frame("walker-casey", "walk")
+    view.shadow(cx, base + 1, walker.width)
+    for _, dx, feet in dogs:
+        hand = hp.HANDS[0] if dx < 0 else hp.HANDS[1]
+        view.line(cx + hand, base - hp.HANDS[2], cx + dx, feet - hp.COLLAR, view.leash_col)
+    stand("walker-casey", cx, base, shadow=False)
 
 
 # ---------- the card ----------

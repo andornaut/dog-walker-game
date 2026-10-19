@@ -45,11 +45,8 @@ YH, FOOT, F, CX = CAM["horizonY"], CAM["footY"], CAM["focal"], CAM["centerX"]
 KS = FOOT - YH
 FAR_Y = CAM["farY"]                       # the road's far edge, scale 0.5
 BAND_Y = LAYOUT["regions"]["backdrop"]["y"]
-STEPS = [d["scale"] for d in LAYOUT["depthSteps"]]
-SUFFIX = {d["scale"]: d["suffix"] for d in LAYOUT["depthSteps"]}
-ROAD_HALF = 140
+ROAD_HALF = LAYOUT["regions"]["road"]["width"] / 2
 LANES = LAYOUT["lanes"]["centers"]
-ANCHORS = {e["key"]: e.get("anchor", {}) for e in json.load(open("public/art/manifest.json"))["sprites"]}
 FADE_ROWS = 6
 BAYER_4 = (0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5)
 
@@ -121,13 +118,13 @@ def level_for(span):
     return 64
 
 
-# The game's verges (src/layout/roadside.ts), by zone id.
-VERGE = {k: dict(v) for k, v in LAYOUT["verges"].items()}
 MOWN = (44, 62, 36, 70, 50, 58, 40, 66)
 
 
-def mown(across, s):
-    rest, i = across - 188, 0
+def mown(across, s, walk_to):
+    """Whether the front lawn at across falls in a dark mown stripe; the stripes start at the
+    sidewalk's outer edge, walk_to."""
+    rest, i = across - walk_to, 0
     if rest < 0 or rest >= 300:
         return False
     while rest >= MOWN[i % len(MOWN)]:
@@ -147,16 +144,15 @@ def rough_patches(block):
 
 
 def verge_colour(zone, x, z, span, s, px, py):
-    v = VERGE[zone]
+    """The game's verge (src/layout/roadside.ts) at road x: help.py's curb, strips and sidewalk or
+    paving with their seams and dots, then the lawn, mown or with rough patches, and tufts."""
+    v = hp.VERGES[zone]
     across = abs(x)
-    if across < v["curbTo"]:
-        return "%06x" % v["curbColor"]
-    walk_to = v["walkTo"] if v["walkTo"] is not None else 10 ** 9
+    walk_to = v["walkTo"]
     if across < walk_to:
-        seam = span < 16 and math.floor(z / 32) != math.floor((z - max(span, 1)) / 32)
-        return K["grey"] if seam else K["lgrey"]
+        return hp.verge(zone, across, s, z, span, x)
     col = K["green"]
-    if v["lawn"] == "mown" and mown(across, s):
+    if v["lawn"] == "mown" and mown(across, s, walk_to):
         col = K["dgreen"]
     elif v["lawn"] == "rough":
         b = int(z // 512)
@@ -206,24 +202,13 @@ def fade(cv, y0, rows, colour, x0=0, x1=SW, keep=None):
 
 # ---------- sprites ----------
 
-def snap(s):
-    return min(STEPS, key=lambda t: abs(math.log(s / t)))
-
-
 def sprite(key, tag, s, i=0):
-    """The frame at the depth step for s: the redrawn variant where one exists, else scaled
-    nearest-neighbour; with its feet row."""
-    step = snap(s)
+    """The frame at scale s as the game draws it (help.depth_frame), with its feet row: the last
+    opaque row."""
     _, _, tags = hp.sheet(key)
     tag = tag if tag in tags else next(iter(tags))
-    variant = key + SUFFIX[step]
-    if step != 1 and os.path.exists(f"public/art/sprites/{variant}.json"):
-        return hp.frame(variant, tag, i), ANCHORS.get(variant, {}).get("feetY")
-    f = hp.frame(key, tag, i)
-    feet = ANCHORS.get(key, {}).get("feetY", f.height - 1)
-    if step == 1:
-        return f, feet
-    return f.resize((round(f.width * step), round(f.height * step)), Image.NEAREST), math.floor((feet + 1) * step) - 1
+    f = hp.depth_frame(key, tag, s, i)
+    return f, f.getbbox()[3] - 1
 
 
 class Screen(hp.Canvas):
@@ -251,34 +236,28 @@ class Screen(hp.Canvas):
         img, feet = sprite(key, tag, s, i)
         if shadow:
             self.shadow(round(sx), round(sy), img.width)
-        self.paste(img, round(sx - img.width / 2), round(sy) - feet - 1, flip)
+        self.paste(img, round(sx - img.width / 2), round(sy) - feet, flip)
         return sx, sy, s
 
     def pack(self, cx, dogs):
+        """The dogs footDy rows above the walker's feet, drawn at full size, far ones first; then a
+        leash from the walker's hand to each collar, over the dogs and their shadows; then the walker,
+        who hides the part of each leash behind her."""
         forms = LAYOUT["pack"]["formations"][len(dogs) - 1]
         hands = LAYOUT["pack"]["walkerHands"]
         collar = LAYOUT["pack"]["collarHeight"]
-        items = [(k, f["dx"], -f["footDy"]) for k, f in zip(dogs, forms)] + [("walker-casey", 0, 0)]
-        placed = {}
+        items = [(k, f["dx"], -f["footDy"]) for k, f in zip(dogs, forms)]
         for k, dx, d in sorted(items, key=lambda it: -it[2]):
-            if k == "walker-casey":
-                self.shadow(cx, FOOT, 24)
-                img, feet = sprite(k, "walk", 1, 1)
-                self.paste(img, cx - img.width // 2, FOOT - feet - 1)
-                placed[k] = (cx, FOOT, 1)
-            else:
-                # dogs stand footDy rows above the walker's feet, drawn at full size
-                y, s = FOOT - d, 1
-                img, feet = sprite(k, "walk", s, 2)
-                x = cx + dx
-                self.shadow(x, y, img.width)
-                self.paste(img, round(x - img.width / 2), y - feet - 1)
-                placed[k] = (x, y, s)
-        for k, dx, _ in items:
-            if k != "walker-casey":
-                x, y, s = placed[k]
-                hand = hands["leftDx"] if dx < 0 else hands["rightDx"]
-                self.line(cx + hand, FOOT - hands["heightAboveFeet"], round(x), round(y - collar * s), self.leash)
+            img, feet = sprite(k, "walk", 1, 2)
+            x, y = cx + dx, FOOT - d
+            self.shadow(x, y, img.width)
+            self.paste(img, round(x - img.width / 2), y - feet)
+        img, feet = sprite("walker-casey", "walk", 1, 1)
+        self.shadow(cx, FOOT, img.width)
+        for k, dx, d in items:
+            hand = hands["leftDx"] if dx < 0 else hands["rightDx"]
+            self.line(cx + hand, FOOT - hands["heightAboveFeet"], round(cx + dx), FOOT - d - collar, self.leash)
+        self.paste(img, cx - img.width // 2, FOOT - feet)
 
 
 # ---------- the HUD: top bar and doghouses, as HudScene draws them ----------

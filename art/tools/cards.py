@@ -121,7 +121,7 @@ class Art(hp.Scene):
     def __init__(self):
         super().__init__(AW, AH)
 
-    def ground(self, zone, x0=100):
+    def ground(self, zone, x0=122):
         self.shade, self.leash_col = hp.ZONES[zone]["shadow"], hp.ZONES[zone]["leash"]
         tile = hp.TILES[zone].crop((x0, 0, x0 + AW, 64))
         self.img.paste(tile, (0, -4))
@@ -140,7 +140,11 @@ class Art(hp.Scene):
             self.fill(0, y, AW, 1, line)
 
     def put(self, key, tag, cx, foot, i=0, flip=False, shadow=True):
+        """key's frame standing on its shadow, its frame's bottom on row foot; returns the row of a dog's
+        collar, help.COLLAR over its feet (its last opaque row)."""
         self.feet(key, tag, cx, foot, i, flip, shadow)
+        f = hp.frame(key, tag, i)
+        return foot - f.height + f.getbbox()[3] - 1 - hp.COLLAR
 
     def stink(self, x, y, n, col, sh):
         """n wavy stink lines rising from x, y, every third pixel in sh."""
@@ -243,19 +247,19 @@ def skunk_ignore():
 def squirrel_hold():
     a = Art()
     a.ground("park")
-    a.put("squirrel", "idle", 62, 24)
-    a.put("dog-koda", "pull", 34, 42)
+    a.put("squirrel", "idle", 60, 37)
+    c = a.put("dog-koda", "pull", 30, 54)
     # held back: the leash runs taut out of frame, behind the lunge
-    a.lead(34, 28, 18)
+    a.lead(30, c, 14)
     return a
 
 
 def squirrel_chase():
     a = Art()
     a.ground("park")
-    a.put("squirrel", "run", 60, 22, 1)
-    a.put("dog-koda", "pull", 40, 40, 1)
-    a.coins([(10, 34), (18, 42), (6, 44)])
+    a.put("squirrel", "run", 58, 37, 1)
+    a.put("dog-koda", "pull", 38, 56, 1)
+    a.coins([(0, 20), (8, 28), (0, 36)])
     a.sparkle(26, 34, "yellow")
     return a
 
@@ -288,8 +292,8 @@ def puddle_towel():
 def other_dog_sniff():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "walk", 38, 30)
-    a.put("dog-biscuit", "walk", 38, 54)
+    a.put("other-dog", "walk", 38, 36)
+    a.put("dog-biscuit", "walk", 38, 58)
     a.hearts([(24, 6), (46, 4)])
     return a
 
@@ -297,9 +301,9 @@ def other_dog_sniff():
 def other_dog_pull_away():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "walk", 54, 30)
-    a.put("dog-biscuit", "pull", 24, 46, flip=True)
-    a.lead(24, 31, 8)
+    a.put("other-dog", "walk", 56, 36)
+    c = a.put("dog-biscuit", "pull", 22, 56, flip=True)
+    a.lead(22, c, 6)
     a.fill(59, 4, 2, 5, "red")
     a.fill(59, 10, 2, 2, "red")
     return a
@@ -308,8 +312,8 @@ def other_dog_pull_away():
 def thief_chase():
     a = Art()
     a.ground("street")
-    a.put("thief", "flee", 54, 46, 1)
-    a.put("dog-koda", "react", 24, 52)
+    a.put("thief", "flee", 54, 59, 1)
+    a.put("dog-koda", "react", 22, 58)
     a.fill(30, 12, 2, 5, "red")
     a.fill(30, 18, 2, 2, "red")
     return a
@@ -318,8 +322,8 @@ def thief_chase():
 def thief_let_go():
     a = Art()
     a.ground("street")
-    a.put("thief", "walk", 50, 52)
-    a.coins([(10, 40), (20, 46)], 1)
+    a.put("thief", "walk", 52, 58)
+    a.coins([(8, 30), (18, 36)], 1)
     a.bubble(4, 8, 24, ["-$$"], "dred")
     return a
 
@@ -381,7 +385,8 @@ def sandwich(a, x, y):
 
 def calm_gardener():
     """The petunias with the gardener soothed: eyes shut in happy arcs and a smile."""
-    g, cx = enc.petunias(), 66
+    g = enc.petunias(new=enc.mini(enc.BIG), w=enc.TWO_LANES)
+    cx = 66 + enc.TWO_LANES - 88
     for x in (cx - 5, cx + 3):
         g.rect(x, 7, 3, 3, "skin1")
         g.p(x, 9, "ink")
@@ -396,7 +401,7 @@ def calm_gardener():
 
 def waving_kid_stand():
     """The lemonade stand with the kid's right arm up in a wave, as road.kid(wave=True) holds it."""
-    g = enc.lemonade_stand()
+    g = enc.lemonade_stand(new=enc.mini(enc.BIG))
     g.rect(22, 21, 3, 10, "yellow")
     g.rect(21, 17, 4, 4, "skin1")
     g.rect(24, 17, 1, 4, "skin2")
@@ -409,8 +414,8 @@ def picnic_buy_lunch():
     a = Art()
     a.ground("park")
     a.paste(hp.frame("picnic", "idle", 3), -10, 0)
-    a.put("dog-biscuit", "react", 24, 56)
-    a.lead(24, 41, 18)
+    c = a.put("dog-biscuit", "react", 24, 56)
+    a.lead(24, c, 18)
     sandwich(a, 21, 26)
     coin_arc(a, [(70, 54), (69, 50), (67, 46), (64, 43)])
     a.coins([(46, 36), (54, 38)], 1)
@@ -423,8 +428,8 @@ def picnic_drop_it():
     a = Art()
     a.ground("park")
     a.paste(hp.frame("picnic", "idle"), -10, 0)
-    a.put("dog-biscuit", "idle", 28, 56)
-    a.lead(28, 41, 22)
+    c = a.put("dog-biscuit", "idle", 28, 56)
+    a.lead(28, c, 22)
     sandwich(a, 42, 40)
     broken_hearts(a, [(58, 38)])
     return a
@@ -436,8 +441,8 @@ def goose_back_off():
     a.ground("homeStretch")
     a.put("goose", "idle", 54, 40, 1, flip=True)
     honk(a, 38, 15)
-    a.put("dog-koda", "pull", 22, 52, flip=True)
-    a.lead(22, 38, 34)
+    c = a.put("dog-koda", "pull", 22, 56, flip=True)
+    a.lead(22, c, 34)
     clock(a, 10, 9)
     return a
 
@@ -446,10 +451,10 @@ def goose_honk_back():
     """Honk back: the dog barking at the goose honking back, hearts lost (two for a chaser)."""
     a = Art()
     a.ground("homeStretch")
-    a.put("goose", "idle", 58, 38, 1, flip=True)
-    honk(a, 42, 13)
-    a.put("dog-koda", "react", 24, 52)
-    a.lead(24, 38, 20)
+    a.put("goose", "idle", 56, 38, 1, flip=True)
+    honk(a, 40, 13)
+    c = a.put("dog-koda", "react", 24, 57)
+    a.lead(24, c, 20)
     a.paste(hp.frame("fx-bark", "pop", 1), 22, 2)
     broken_hearts(a, [(2, 4), (10, 10)])
     return a
@@ -459,14 +464,14 @@ def petunias_replant():
     """Replant them: fresh petunias in pots by the bed, the coins to the gardener, now smiling."""
     a = Art()
     a.ground("street")
-    a.paste(calm_gardener(), -6, 2)
+    a.paste(calm_gardener(), -14, 2)
     for x in (6, 14):
         a.paste(pixmap(POT, {"p": "pink", "y": "yellow", "g": "green", "r": "rust", "o": "dbrown"}), x, 38)
     a.sparkle(30, 14, "white")
-    a.put("dog-biscuit", "idle", 36, 56)
-    a.lead(36, 41, 40)
+    c = a.put("dog-biscuit", "idle", 36, 57)
+    a.lead(36, c, 40)
     coin_arc(a, [(64, 54), (63, 50), (62, 46)])
-    a.coins([(54, 36), (62, 40)], 2)
+    a.coins([(52, 34), (58, 38)], 2)
     return a
 
 
@@ -475,8 +480,8 @@ def petunias_nature_calls():
     the need met and its owner's heart lost."""
     a = Art()
     a.ground("street")
-    a.paste(hp.frame("petunias", "idle"), -6, 2)
-    a.put("dog-biscuit", "idle", 36, 52)
+    a.paste(hp.frame("petunias", "idle"), -14, 2)
+    a.put("dog-biscuit", "idle", 36, 55)
     a.fill(32, 52, 9, 1, "ochre")
     a.fill(31, 53, 11, 2, "yellow")
     a.fill(32, 55, 9, 1, "ochre")
@@ -493,8 +498,8 @@ def trash_sniff():
     a = Art()
     a.ground("street")
     a.paste(hp.frame("trash-bins", "idle"), -7, 2)
-    a.put("dog-koda", "idle", 52, 56)
-    a.lead(52, 42, 58)
+    c = a.put("dog-koda", "idle", 52, 57)
+    a.lead(52, c, 58)
     for x, y in ((50, 14), (51, 18)):
         for dx, dy in needs.SCENT:
             a.fill(x + dx, y + dy, 1, 1, "white")
@@ -515,9 +520,9 @@ def trash_tidy_up():
     a.paste(pixmap(BAG, {"e": "pink", "k": "mauve", "f": "pink", "s": "mauve", "h": "white"}), 44, 0)
     a.sparkle(10, 48, "white")
     a.sparkle(30, 52, "yellow")
-    a.put("dog-koda", "idle", 60, 56)
-    a.lead(60, 42, 64)
-    a.coins([(0, 40)], 1)
+    c = a.put("dog-koda", "idle", 58, 57)
+    a.lead(58, c, 64)
+    a.coins([(0, 36)], 1)
     a.hearts([(62, 6)])
     return a
 
@@ -528,8 +533,8 @@ def trash_drag_on():
     a = Art()
     a.ground("homeStretch")
     a.paste(hp.frame("trash-bins", "idle", 1), -7, 0)
-    a.put("dog-biscuit", "pull", 42, 54)
-    a.lead(42, 39, 22)
+    c = a.put("dog-biscuit", "pull", 42, 56)
+    a.lead(42, c, 22)
     broken_hearts(a, [(2, 4), (11, 9)])
     return a
 
@@ -540,8 +545,8 @@ def cafe_charm():
     a = Art()
     a.ground("shops")
     a.paste(hp.frame("cafe-patio", "idle"), -7, 0)
-    a.put("dog-duchess", "react", 37, 55)
-    a.lead(37, 40, 44)
+    c = a.put("dog-duchess", "react", 37, 57)
+    a.lead(37, c, 44)
     a.hearts([(30, 11), (40, 13)])
     need_met(a, "friendly", 2, 36)
     clock(a, 67, 46)
@@ -557,9 +562,9 @@ def cafe_buy_lattes():
     a.fill(10, 52, 34, 1, "lgrey")
     for x in (12, 23, 34):
         a.paste(pixmap(LATTE, {"b": "brown", "c": "cream", "w": "white", "l": "lgrey"}), x, 44)
-    a.coins([(2, 40)], 1)
-    a.put("dog-duchess", "idle", 64, 56)
-    a.lead(64, 42, 68)
+    a.coins([(2, 36)], 1)
+    c = a.put("dog-duchess", "idle", 60, 57)
+    a.lead(60, c, 68)
     a.hearts([(46, 40)])
     return a
 
@@ -570,8 +575,8 @@ def cafe_slink_away():
     a.ground("shops")
     a.paste(hp.frame("cafe-patio", "idle"), -7, 0)
     paw_prints(a, [(16, 42), (24, 47), (32, 43), (40, 48)])
-    a.put("dog-biscuit", "pull", 60, 56)
-    a.lead(60, 41, 44)
+    c = a.put("dog-biscuit", "pull", 58, 57)
+    a.lead(58, c, 44)
     broken_hearts(a, [(34, 12)])
     return a
 
@@ -580,12 +585,12 @@ def lemonade_water():
     """Water, please: the dog lapping at a bowl by the stand, coins to the kid and the need met."""
     a = Art()
     a.ground("street")
-    a.put("lemonade-stand", "idle", 56, 50)
-    a.paste(pixmap(BOWL, {"b": "red", "c": "cyan", "h": "white"}), 26, 30)
-    a.put("dog-nugget", "pull", 22, 56)
-    a.lead(22, 43, 14)
-    a.drops([(28, 26), (33, 22), (38, 26)])
-    a.coins([(34, 40)], 1)
+    a.put("lemonade-stand", "idle", 56, 60)
+    c = a.put("dog-nugget", "pull", 16, 57)
+    a.lead(16, c, 8)
+    a.paste(pixmap(BOWL, {"b": "red", "c": "cyan", "h": "white"}), 26, 40)
+    a.drops([(28, 36), (33, 32), (38, 36)])
+    a.coins([(24, 14)], 1)
     need_met(a, "thirsty", 2, 1)
     return a
 
@@ -594,10 +599,10 @@ def lemonade_say_hi():
     """Say hi: the kid waving, the dog sat up for a fuss, the need met and the clock running."""
     a = Art()
     a.ground("street")
-    a.shadow(56, 50, 32)
-    a.paste(waving_kid_stand(), 40, 2)
-    a.put("dog-duchess", "react", 24, 54)
-    a.lead(24, 39, 18)
+    a.shadow(56, 55, 40)
+    a.paste(waving_kid_stand(), 36, 0)
+    c = a.put("dog-duchess", "react", 22, 57)
+    a.lead(22, c, 18)
     need_met(a, "friendly", 2, 1)
     clock(a, 30, 10)
     return a
@@ -606,9 +611,9 @@ def lemonade_say_hi():
 def lemonade_maybe_later():
     a = Art()
     a.ground("street")
-    a.put("lemonade-stand", "idle", 58, 50)
-    a.put("dog-duchess", "walk", 24, 42, 2)
-    a.lead(24, 28, 16)
+    a.put("lemonade-stand", "idle", 56, 60)
+    c = a.put("dog-duchess", "walk", 22, 52, 2)
+    a.lead(22, c, 16)
     return a
 
 
@@ -634,7 +639,7 @@ def wallet_keep():
 def neighbour_take():
     a = Art()
     a.grass()
-    a.put("biscuit-neighbour", "wave", 24, 54)
+    a.put("biscuit-neighbour", "wave", 24, 60)
     for x, y in ((46, 20), (56, 30), (50, 40)):
         a.paste(hp.frame("treat", "idle"), x, y)
     return a
@@ -643,8 +648,8 @@ def neighbour_take():
 def photo_pose():
     a = Art()
     a.ground("shops")
-    a.put("photo-op", "flash", 54, 52)
-    a.put("dog-duchess", "react", 20, 46, shadow=False)
+    a.put("photo-op", "flash", 54, 58)
+    a.put("dog-duchess", "react", 20, 54, shadow=False)
     a.sparkle(10, 10, "yellow")
     a.sparkle(30, 6, "white")
     return a
@@ -665,9 +670,9 @@ def clock(a, x, y):
 def stop_wait():
     a = Art()
     a.ground("street")
-    a.put("stop-sign", "idle", 58, 52, shadow=False)
-    a.put("dog-biscuit", "idle", 32, 48)
-    a.lead(32, 33, 30)
+    a.put("stop-sign", "idle", 58, 56, shadow=False)
+    c = a.put("dog-biscuit", "idle", 30, 56)
+    a.lead(30, c, 28)
     clock(a, 12, 12)
     return a
 
@@ -675,10 +680,10 @@ def stop_wait():
 def stop_dart():
     a = Art()
     a.ground("street")
-    a.put("stop-sign", "idle", 62, 52, shadow=False)
-    a.put("dog-koda", "pull", 36, 38, 1)
+    a.put("stop-sign", "idle", 62, 56, shadow=False)
+    c = a.put("dog-koda", "pull", 34, 48, 1)
     # the leash trails out of frame, speed lines behind the dash
-    a.lead(36, 24, 18)
+    a.lead(34, c, 18)
     for x, y in ((8, 18), (4, 26), (10, 34)):
         a.fill(x, y, 10, 1, "lgrey")
     return a
@@ -687,10 +692,10 @@ def stop_dart():
 def chatty_chat():
     a = Art()
     a.grass()
-    a.put("chatty-neighbour", "wave", 50, 54)
+    a.put("chatty-neighbour", "wave", 52, 58)
     # the dog waits out the chat; the neighbour talks to the walker out of frame
-    a.put("dog-biscuit", "idle", 18, 54)
-    a.lead(18, 39, 14)
+    c = a.put("dog-biscuit", "idle", 18, 57)
+    a.lead(18, c, 14)
     a.bubble(14, 2, 22, ["..."])
     # the tip, edge-on as it is handed over
     a.coins([(26, 26)], 1)
@@ -700,17 +705,17 @@ def chatty_chat():
 def chatty_move_on():
     a = Art()
     a.grass()
-    a.put("chatty-neighbour", "wave", 58, 54, 1)
-    a.put("dog-biscuit", "walk", 26, 40, 2)
-    a.lead(26, 25, 20)
+    a.put("chatty-neighbour", "wave", 56, 58, 1)
+    c = a.put("dog-biscuit", "walk", 24, 50, 2)
+    a.lead(24, c, 20)
     return a
 
 
 def kid_pet():
     a = Art()
     a.grass()
-    a.put("kid", "wave", 52, 54)
-    a.put("dog-duchess", "react", 30, 50)
+    a.put("kid", "wave", 54, 57)
+    a.put("dog-duchess", "react", 28, 56)
     a.hearts([(18, 6), (36, 10)])
     return a
 
@@ -718,9 +723,9 @@ def kid_pet():
 def kid_decline():
     a = Art()
     a.grass()
-    a.put("kid", "sad", 56, 54)
-    a.put("dog-duchess", "walk", 26, 40, 1)
-    a.lead(26, 26, 18)
+    a.put("kid", "sad", 56, 57)
+    c = a.put("dog-duchess", "walk", 24, 50, 1)
+    a.lead(24, c, 18)
     return a
 
 
@@ -731,8 +736,8 @@ CUP = ["..fff..", ".fhfff.", "fffffff", "WWWWWWW", ".RWRWR.", ".RWRWR.", "..WWW.
 def truck_cups():
     a = Art()
     a.ground("shops")
-    a.paste(hp.frame("ice-cream-truck", "idle"), 32, -4)
-    a.put("dog-biscuit", "react", 14, 52)
+    a.paste(hp.frame("ice-cream-truck", "idle"), 32, -1)
+    a.put("dog-biscuit", "react", 14, 57)
     for x, (f, h) in zip((34, 47, 60), (("pink", "white"), ("cream", "white"), ("brown", "tan"))):
         a.shadow(x + 4, 55, 9)
         a.paste(pixmap(CUP, {"f": f, "h": h, "W": "white", "R": "red"}), x, 45)
@@ -743,10 +748,10 @@ def truck_cups():
 def truck_walk_past():
     a = Art()
     a.ground("shops")
-    a.paste(hp.frame("ice-cream-truck", "idle", 1), 30, 2)
-    a.put("dog-biscuit", "pull", 18, 44)
+    a.paste(hp.frame("ice-cream-truck", "idle", 1), 32, 1)
+    c = a.put("dog-biscuit", "pull", 16, 54)
     # held back from the truck: the leash runs taut out of frame
-    a.lead(18, 29, 6)
+    a.lead(16, c, 4)
     a.fill(30, 30, 2, 5, "red")
     a.fill(30, 36, 2, 2, "red")
     return a
@@ -755,11 +760,12 @@ def truck_walk_past():
 def detour_long_way():
     a = Art()
     a.ground("street")
-    a.paste(hp.frame("construction", "idle"), 10, 4)
-    for x, y in ((8, 52), (6, 46), (4, 40), (4, 34), (6, 28), (10, 24), (66, 52), (70, 46), (72, 40), (72, 34), (70, 28), (66, 24)):
+    a.paste(hp.frame("construction", "idle"), 6, 0)
+    for x, y in ((5, 52), (3, 46), (1, 40), (1, 34), (3, 28), (5, 22), (68, 52), (70, 46), (72, 40), (72, 34), (70, 28),
+                 (68, 22)):
         a.fill(x, y, 2, 2, "amber")
-    a.put("dog-koda", "walk", 38, 52, 2)
-    a.lead(38, 38, 38)
+    c = a.put("dog-koda", "walk", 38, 56, 2)
+    a.lead(38, c, 38)
     clock(a, 66, 8)
     return a
 
@@ -767,8 +773,8 @@ def detour_long_way():
 def detour_squeeze():
     a = Art()
     a.ground("street")
-    a.paste(hp.frame("construction", "idle", 1), 10, 4)
-    a.put("dog-duchess", "walk", 37, 46, 3)
+    a.paste(hp.frame("construction", "idle", 1), 6, 0)
+    a.put("dog-duchess", "walk", 37, 52, 3)
     for x, y in ((24, 30), (48, 28), (28, 40), (50, 40), (40, 26)):
         a.fill(x, y, 4, 3, "lgrey")
         a.fill(x + 1, y - 1, 2, 1, "grey")
@@ -778,9 +784,9 @@ def detour_squeeze():
 def mail_hold():
     a = Art()
     a.ground("homeStretch")
-    a.put("mail-carrier", "walk", 58, 54)
-    a.put("dog-koda", "react", 30, 40)
-    a.lead(30, 24, 16)
+    a.put("mail-carrier", "walk", 56, 58)
+    c = a.put("dog-koda", "react", 26, 50)
+    a.lead(26, c, 14)
     a.paste(hp.frame("fx-bark", "pop", 1), 36, 2)
     return a
 
@@ -788,9 +794,9 @@ def mail_hold():
 def mail_wait():
     a = Art()
     a.ground("homeStretch")
-    a.put("mail-carrier", "walk", 56, 54, 1)
-    a.put("dog-koda", "idle", 28, 44)
-    a.lead(28, 30, 26)
+    a.put("mail-carrier", "walk", 56, 58, 1)
+    c = a.put("dog-koda", "idle", 26, 54)
+    a.lead(26, c, 24)
     clock(a, 10, 10)
     return a
 
@@ -902,10 +908,10 @@ def belly_rubs():
 def good_leash():
     a = Art()
     a.ground("park")
-    a.put("squirrel", "idle", 62, 24)
-    a.put("dog-koda", "walk", 34, 44, 1)
-    a.lead(34, 30, 26, 2)
-    a.fill(33, 29, 3, 3, "amber")
+    a.put("squirrel", "idle", 60, 37)
+    c = a.put("dog-koda", "walk", 30, 56, 1)
+    a.lead(30, c, 24, 2)
+    a.fill(29, c - 1, 3, 3, "amber")
     # tick: the chaser ignores the squirrel
     for i, (x, y) in enumerate(((52, 44), (53, 45), (54, 46), (55, 45), (56, 44), (57, 43), (58, 42), (59, 41))):
         a.fill(x, y, 2, 2, "green" if i % 2 else "dgreen")
@@ -929,8 +935,8 @@ def shortcut():
     for x, y in ((8, 50), (14, 44), (20, 38), (26, 32), (32, 26), (38, 20), (44, 14), (50, 8)):
         a.fill(x, y, 3, 2, "amber")
     a.chevron(56, 8, 1, "amber")
-    a.put("dog-biscuit", "walk", 16, 50, 1)
-    a.lead(16, 35, 12)
+    c = a.put("dog-biscuit", "walk", 18, 56, 1)
+    a.lead(18, c, 12)
     # the trade-off: a shorter zone, and fewer fees
     a.paste(hp.frame("tip", "idle"), 44, 38)
     a.arrow(60, 40, 1, "red")
@@ -941,7 +947,7 @@ def rush_hour():
     a = Art()
     a.ground("street")
     a.paste(small_puddle(), 2, 38)
-    a.put("skunk", "idle", 62, 54)
+    a.put("skunk", "idle", 59, 55)
     a.put("squirrel", "idle", 36, 52)
     a.coins([(8, 4), (22, 10), (40, 4), (50, 16), (30, 22), (14, 22)])
     a.arrow(62, 2, -1)
@@ -1027,9 +1033,9 @@ def skip():
 def stranger_fuss():
     a = Art()
     a.ground("street")
-    a.put("spot-stranger", "wave", 52, 54, 1)
-    a.put("dog-duchess", "react", 28, 50)
-    a.lead(28, 36, 22)
+    a.put("spot-stranger", "wave", 54, 60, 1)
+    c = a.put("dog-duchess", "react", 26, 57)
+    a.lead(26, c, 22)
     a.hearts([(14, 8), (26, 3), (6, 18)])
     a.coins([(6, 32)])
     return a
@@ -1038,18 +1044,18 @@ def stranger_fuss():
 def stranger_keep_walking():
     a = Art()
     a.ground("street")
-    a.put("spot-stranger", "wave", 58, 50)
-    a.put("dog-duchess", "walk", 26, 40, 2)
-    a.lead(26, 26, 18)
+    a.put("spot-stranger", "wave", 56, 60)
+    c = a.put("dog-duchess", "walk", 24, 50, 2)
+    a.lead(24, c, 18)
     return a
 
 
 def play_date_play():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "walk", 52, 34, 1)
-    a.put("dog-zippy", "react", 26, 52)
-    a.lead(26, 38, 20)
+    a.put("other-dog", "walk", 54, 37, 1)
+    c = a.put("dog-zippy", "react", 24, 57)
+    a.lead(24, c, 20)
     a.paste(hp.frame("gag-ball", "roll", 1), 36, 28)
     a.hearts([(10, 8), (22, 3), (28, 14)])
     return a
@@ -1058,9 +1064,9 @@ def play_date_play():
 def play_date_sniff():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "idle", 44, 30)
-    a.put("dog-zippy", "walk", 34, 50, 1)
-    a.lead(34, 36, 30)
+    a.put("other-dog", "idle", 46, 35)
+    c = a.put("dog-zippy", "walk", 32, 58, 1)
+    a.lead(32, c, 30)
     # scent lines between the noses, as on the nosy need's icon
     for dx, dy in needs.SCENT:
         a.fill(38 + dx, 33 + dy, 1, 1, "white")
@@ -1118,8 +1124,8 @@ def accident_bag():
     a.sparkle(30, 42, "white")
     a.sparkle(37, 46, "yellow")
     a.sparkle(26, 48, "yellow")
-    a.put("dog-biscuit", "walk", 14, 44, 1)
-    a.lead(14, 30, 10)
+    c = a.put("dog-biscuit", "walk", 14, 54, 1)
+    a.lead(14, c, 10)
     return a
 
 
@@ -1131,11 +1137,11 @@ def grumpy_lawn(a, x=-2):
     for i in range(12):
         a.fill((i * 7) % 24, (i * 13) % AH, 1, 2, "dgreen")
     a.fill(26, 0, 2, AH, "grey")
-    neighbour = to_image(road.dressed(grumpy_top, legs="lgrey", shoes="pink").px)
+    neighbour = to_image(road.big(road.dressed, grumpy_top, legs="lgrey", shoes="pink").px)
     shade, a.shade = a.shade, "dgreen"
-    a.shadow(x + 16, 52, neighbour.width)
+    a.shadow(x + 20, 55, neighbour.width)
     a.shade = shade
-    a.paste(neighbour, x, 4)
+    a.paste(neighbour, x, -1)
 
 
 def accident_walk_on():
@@ -1147,8 +1153,8 @@ def accident_walk_on():
     a.stink(32, 24, 2, "green", "dgreen")
     a.fill(30, 2, 2, 5, "red")
     a.fill(30, 8, 2, 2, "red")
-    a.put("dog-biscuit", "walk", 58, 38, 2)
-    a.lead(58, 24, 64)
+    c = a.put("dog-biscuit", "walk", 56, 50, 2)
+    a.lead(56, c, 64)
     return a
 
 
@@ -1175,9 +1181,9 @@ def good_spot_take_time():
     """Take your time: the dog settled at the foot of the tree, hearts over it, the clock running."""
     a = Art()
     a.ground("park")
-    a.put("spot-tree", "idle", 24, 50)
-    a.put("dog-biscuit", "idle", 44, 54)
-    a.lead(44, 40, 50)
+    a.put("spot-tree", "idle", 22, 58)
+    c = a.put("dog-biscuit", "idle", 46, 57)
+    a.lead(46, c, 52)
     a.hearts([(48, 8), (60, 14), (52, 22)])
     clock(a, 66, 32)
     return a
@@ -1186,9 +1192,9 @@ def good_spot_take_time():
 def good_spot_keep_walking():
     a = Art()
     a.ground("park")
-    a.put("spot-tree", "idle", 54, 46, 1)
-    a.put("dog-biscuit", "walk", 26, 40, 2)
-    a.lead(26, 26, 18)
+    a.put("spot-tree", "idle", 54, 58, 1)
+    c = a.put("dog-biscuit", "walk", 24, 50, 2)
+    a.lead(24, c, 18)
     return a
 
 
@@ -1197,10 +1203,10 @@ def pee_mail_sniff():
     hearts over it and the clock running."""
     a = Art()
     a.ground("street")
-    a.put("spot-lamp-post", "idle", 20, 52)
-    a.put("dog-koda", "idle", 38, 54)
-    a.lead(38, 40, 46)
-    for x, y in ((23, 38), (24, 43)):
+    a.put("spot-lamp-post", "idle", 18, 58)
+    c = a.put("dog-koda", "idle", 38, 57)
+    a.lead(38, c, 46)
+    for x, y in ((23, 42), (24, 47)):
         for dx, dy in needs.SCENT:
             a.fill(x + dx, y + dy, 1, 1, "white")
     envelopes(a, [(36, 16), (46, 6), (58, 14)])
@@ -1212,10 +1218,10 @@ def pee_mail_sniff():
 def pee_mail_keep_walking():
     a = Art()
     a.ground("street")
-    a.put("spot-lamp-post", "idle", 56, 50)
-    envelopes(a, [(62, 36)])
-    a.put("dog-koda", "walk", 26, 40, 2)
-    a.lead(26, 26, 18)
+    a.put("spot-lamp-post", "idle", 56, 58)
+    envelopes(a, [(64, 36)])
+    c = a.put("dog-koda", "walk", 24, 50, 2)
+    a.lead(24, c, 18)
     return a
 
 
@@ -1224,9 +1230,9 @@ def water_stop_drink():
     clock running."""
     a = Art()
     a.ground("park")
-    a.put("spot-water-bowl", "idle", 30, 33, 3)
-    a.put("dog-duchess", "idle", 36, 54)
-    a.lead(36, 40, 44)
+    a.put("spot-water-bowl", "idle", 30, 37, 3)
+    c = a.put("dog-duchess", "idle", 36, 57)
+    a.lead(36, c, 44)
     a.drops([(26, 14), (31, 10), (42, 12), (47, 16), (36, 7)])
     a.hearts([(54, 8), (64, 16)])
     clock(a, 10, 10)
@@ -1237,9 +1243,9 @@ def water_stop_sip():
     """Just a sip: a lap at the bowl and on, one drop off the chin and one heart."""
     a = Art()
     a.ground("park")
-    a.put("spot-water-bowl", "idle", 54, 40)
-    a.put("dog-duchess", "walk", 30, 44, 2)
-    a.lead(30, 30, 22)
+    a.put("spot-water-bowl", "idle", 54, 42)
+    c = a.put("dog-duchess", "walk", 28, 52, 2)
+    a.lead(28, c, 22)
     a.drops([(38, 30)])
     a.hearts([(24, 6)])
     return a
