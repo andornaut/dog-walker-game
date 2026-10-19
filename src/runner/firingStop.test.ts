@@ -81,7 +81,11 @@ describe("holdForFiring", () => {
 describe("a firing in the walk", () => {
   it("fires the owner at 0 hearts and holds the road and the cards for firingHoldSeconds of steps", () => {
     // Koda's owner down to 1 heart, a skunk card open on Koda, and a forced stop waiting.
-    const lastHeart = newRun(gameData, 3, { dogs: ["koda", "biscuit"], gear: null });
+    const lastHeart = newRun(gameData, 3, {
+      dogs: ["koda", "biscuit"],
+      gear: null,
+      walker: "casey",
+    });
     const run = {
       ...lastHeart,
       pack: mapPack(

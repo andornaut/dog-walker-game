@@ -13,12 +13,13 @@ export function namesRunSetup(search: string): boolean {
   return RUN_PARAMS.some((name) => params.has(name));
 }
 
-// The run a dev link starts: its pack, gear and walker over the saved last loadout, or over the
-// first owned dog when nothing was picked yet.
+// The run a dev link starts: its pack, gear and walker over the saved last loadout and walker,
+// or over the first owned dog when nothing was picked yet.
 export function devRunLoadout(
   saved: HomeLoadout,
+  walker: WalkerId,
   firstOwned: DogId,
   setup: RunSetup<DogId, GearId, WalkerId>,
 ): Loadout {
-  return loadoutFor({ dogs: packOf(saved) ?? [firstOwned], gear: saved.gear }, setup);
+  return loadoutFor({ dogs: packOf(saved) ?? [firstOwned], gear: saved.gear, walker }, setup);
 }

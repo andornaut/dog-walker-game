@@ -1,13 +1,12 @@
 import type { Scene } from "phaser";
 
-import { gameData } from "../../data";
 import type { DogId } from "../../data/types";
 import { randomStream } from "../../dev/randomStreams";
 import type { RunSetup } from "../../dev/runSetup";
 import { loadoutFor } from "../../dev/setupRun";
 import type { Random } from "../../runner/random";
 import type { Loadout } from "../../state/runState";
-import { runLoadout } from "../profileStore";
+import { profileSave, runLoadout, walkerSpriteKey } from "../profileStore";
 
 // The run's independent random streams, each from the setup's seed.
 export interface RunRandom {
@@ -28,7 +27,8 @@ export function runRandom(seed: number): RunRandom {
   };
 }
 
-// The saved pick with the setup's pack and gear over it; a setup pack walks without one.
+// The saved pick with the setup's pack, gear and walker over it; a setup pack walks without a
+// saved pick, with the saved walker.
 export function pickedLoadout(
   scene: Scene,
   setup: RunSetup,
@@ -47,10 +47,12 @@ export function pickedLoadout(
       throw error;
     }
     const dogs = [first, ...rest.slice(0, 2)] as unknown as Loadout["dogs"];
+    const fallback = { dogs, gear: null, walker: profileSave(scene).walker };
+    const loadout = loadoutFor(fallback, setup as Parameters<typeof loadoutFor>[1]);
     return {
       dogSlots: dogs.length,
-      loadout: loadoutFor({ dogs, gear: null }, setup as Parameters<typeof loadoutFor>[1]),
-      walkerSprite: gameData.walkers[gameData.defaultWalker].spriteKey,
+      loadout,
+      walkerSprite: walkerSpriteKey(scene, loadout.walker),
     };
   }
 }

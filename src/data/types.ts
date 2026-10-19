@@ -659,6 +659,10 @@ export interface HomeText {
   };
   // Said first in the walker's bubble while the browser keeps no save.
   readonly unsaved: string;
+  // A locked walker's goal plate on its tile, and what the walker's bubble says when it is
+  // tapped.
+  readonly walkerGoal: string;
+  readonly walkerLocked: string;
   // A dog's fee on its tile and its shop row.
   readonly zoneFee: string;
 }

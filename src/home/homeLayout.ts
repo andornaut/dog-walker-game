@@ -116,8 +116,18 @@ export const HOME_LAYOUT = {
   tileSelectOutset: 1,
   topBar: { height: 40 },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
-  walkerOrigin: { x: 80, y: 223 },
-  walkerTiles: { cellHeight: 44, cellWidth: 44, columns: 4, gapX: GAP, gapY: 0 },
+  walkerOrigin: { x: 4, y: 223 },
+  // A walker tile: the portrait's box and the portrait in it, the pace icon over the style
+  // icon right of the box, and a locked walker's padlock over the tile's top-left corner and
+  // its goal plate's caps, centred. The tiles stop short of the Dogs padlock's hit area.
+  walkerTile: {
+    box: { dx: 3, dy: 4, size: 34 },
+    face: { dx: 4, dy: 5 },
+    icons: { dx: 46, dy: [5, 23] },
+    lock: { dx: -2, dy: -3 },
+    plateY: 28,
+  },
+  walkerTiles: { cellHeight: 44, cellWidth: 72, columns: 4, gapX: GAP, gapY: 0 },
 } as const satisfies Readonly<Record<string, unknown>> & {
   dogTiles: GridSpec;
   gateSpots: readonly PackPlacement[];

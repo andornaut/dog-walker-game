@@ -409,7 +409,7 @@ describe("upgrades", () => {
 
 describe("skip option", () => {
   it("is offered on an obstacle card with poop bags, and only once per run", () => {
-    const state = newRun(data, 1, { dogs: ["koda"], gear: "poopBags" });
+    const state = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
     const source = encounter("skunk", ["koda"]);
     expect(cardFor(data, state, source).skip).toBe(true);
     expect(cardFor(data, state, encounter("lostWallet", ["koda"])).skip).toBe(false);
@@ -421,17 +421,19 @@ describe("skip option", () => {
   });
 
   it("takes the costliest option's place on a card that already shows three", () => {
-    const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags" });
+    const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
     const skunk = encounter("skunk", ["koda"]);
     const indexes = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.index);
     // Skunk's options in data order: grooming (the costliest), quick rinse, then the free one.
-    expect(indexes(newRun(data, 1, { dogs: ["koda"], gear: null }))).toEqual([0, 1, 2]);
+    expect(indexes(newRun(data, 1, { dogs: ["koda"], gear: null, walker: "casey" }))).toEqual([
+      0, 1, 2,
+    ]);
     expect(indexes(withBags)).toEqual([1, 2]);
     expect(() => choose(withBags, skunk, 0)).toThrow("not on the Skunk card");
   });
 
   it("is added beside the options of a card with fewer than three", () => {
-    const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags" });
+    const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
     const card = cardFor(data, withBags, encounter("squirrel", ["koda"]));
     expect(card.options).toHaveLength(2);
     expect(card.skip).toBe(true);
@@ -463,7 +465,11 @@ describe("Second wind", () => {
 
 describe("Lucky collar", () => {
   it("starts every owner one heart higher and raises the max by one", () => {
-    const state = newRun(data, 2, { dogs: ["duchess", "pierre"], gear: "luckyCollar" });
+    const state = newRun(data, 2, {
+      dogs: ["duchess", "pierre"],
+      gear: "luckyCollar",
+      walker: "casey",
+    });
     expect(heartsByDog(state)).toEqual({ duchess: 7, pierre: 5 });
     const offer: CardSource = {
       kind: "upgradeOffer",

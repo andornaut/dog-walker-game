@@ -30,18 +30,18 @@ describe("devRunLoadout", () => {
       { dogs: ["koda", "duchess"], gear: "whistle", walker: "trista" },
     ],
     [
-      "keeps the saved loadout for what the link leaves out",
+      "keeps the saved loadout and walker for what the link leaves out",
       { dogs: ["biscuit"], gear: "fannyPack" },
       {},
-      { dogs: ["biscuit"], gear: "fannyPack" },
+      { dogs: ["biscuit"], gear: "fannyPack", walker: "ben" },
     ],
     [
       "walks the first owned dog when nothing was picked yet",
       { dogs: [], gear: null },
       {},
-      { dogs: ["koda"], gear: null },
+      { dogs: ["koda"], gear: null, walker: "ben" },
     ],
   ])("%s", (_name, saved, overrides, expected) => {
-    expect(devRunLoadout(saved, "koda", { ...setup, ...overrides })).toEqual(expected);
+    expect(devRunLoadout(saved, "ben", "koda", { ...setup, ...overrides })).toEqual(expected);
   });
 });

@@ -6,7 +6,7 @@ import { testState } from "../testing/runState";
 import type { RunSetup } from "./runSetup";
 import { loadoutFor, withSetupStart } from "./setupRun";
 
-const fallback: Loadout = { dogs: ["biscuit"], gear: "whistle" };
+const fallback: Loadout = { dogs: ["biscuit"], gear: "whistle", walker: "casey" };
 const setup: RunSetup<DogId, GearId, WalkerId> = { dev: false, seed: 1, speed: 1, zone: 1 };
 
 describe("loadoutFor", () => {

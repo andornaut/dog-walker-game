@@ -134,13 +134,10 @@ export interface RunState {
   readonly zoneIndex: number;
 }
 
-// With no walker, the run walks with the default walker.
-// CLEANUP (added 2026-10-19): make walker required once RunScene and StartScene build every
-// Loadout with one.
 export interface Loadout {
   readonly dogs: PackDogs;
   readonly gear: GearId | null;
-  readonly walker?: WalkerId;
+  readonly walker: WalkerId;
 }
 
 // A run's opening state, in the world's first zone: the walker's effects and the gear's
@@ -150,7 +147,6 @@ export function newRun(
   data: Pick<
     GameData,
     | "debuffs"
-    | "defaultWalker"
     | "dogs"
     | "encounters"
     | "shopGear"
@@ -178,7 +174,7 @@ export function newRun(
       }),
       loadout.dogs,
     );
-  const walker = loadout.walker ?? data.defaultWalker;
+  const { walker } = loadout;
   const empty: RunState = {
     bumpsByZone: [],
     debuffZones: {},

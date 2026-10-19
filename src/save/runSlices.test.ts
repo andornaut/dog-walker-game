@@ -21,7 +21,7 @@ const data = {
   tuning: TEST_TUNING,
   world: WORLD,
 };
-const start = newRun(data, 3, { dogs: ["koda", "duchess"], gear: null });
+const start = newRun(data, 3, { dogs: ["koda", "duchess"], gear: null, walker: "casey" });
 // In zone 3 with 2 zones paid; duchess fired you in zone 2.
 const midRun: RunState = {
   ...start,

@@ -1516,12 +1516,35 @@
         "x": 180
       },
       "walkerOrigin": {
-        "x": 80,
+        "x": 4,
         "y": 223
+      },
+      "walkerTile": {
+        "box": {
+          "dx": 3,
+          "dy": 4,
+          "size": 34
+        },
+        "face": {
+          "dx": 4,
+          "dy": 5
+        },
+        "icons": {
+          "dx": 46,
+          "dy": [
+            5,
+            23
+          ]
+        },
+        "lock": {
+          "dx": -2,
+          "dy": -3
+        },
+        "plateY": 28
       },
       "walkerTiles": {
         "cellHeight": 44,
-        "cellWidth": 44,
+        "cellWidth": 72,
         "columns": 4,
         "gapX": 8,
         "gapY": 0
@@ -1617,26 +1640,26 @@
       "walkerRects": [
         {
           "height": 44,
-          "width": 44,
-          "x": 80,
+          "width": 72,
+          "x": 4,
           "y": 223
         },
         {
           "height": 44,
-          "width": 44,
-          "x": 132,
+          "width": 72,
+          "x": 84,
           "y": 223
         },
         {
           "height": 44,
-          "width": 44,
-          "x": 184,
+          "width": 72,
+          "x": 164,
           "y": 223
         },
         {
           "height": 44,
-          "width": 44,
-          "x": 236,
+          "width": 72,
+          "x": 244,
           "y": 223
         }
       ]

@@ -223,7 +223,7 @@ export class BootScene extends Scene {
       return;
     }
     const { lastLoadout, owned, walker } = profileSave(this);
-    const loadout = devRunLoadout(lastLoadout, itemAt(owned.dogs, 0), pageRunSetup().setup);
+    const loadout = devRunLoadout(lastLoadout, walker, itemAt(owned.dogs, 0), pageRunSetup().setup);
     setRunOverride(this, loadout);
     const data: RunSceneData = { loadout, walkerSprite: walkerSpriteKey(this, walker) };
     startWakeLock();

@@ -17,11 +17,10 @@ function packDogsOf(dogs: readonly DogId[]): PackDogs | undefined {
 
 // The setup's pack, gear and walker over a fallback loadout, such as the save's last one.
 export function loadoutFor(fallback: Loadout, setup: RunSetup<DogId, GearId, WalkerId>): Loadout {
-  const walker = setup.walker ?? fallback.walker;
   return {
     dogs: (setup.pack === undefined ? undefined : packDogsOf(setup.pack)) ?? fallback.dogs,
     gear: setup.gear === undefined ? fallback.gear : setup.gear,
-    ...(walker === undefined ? {} : { walker }),
+    walker: setup.walker ?? fallback.walker,
   };
 }
 

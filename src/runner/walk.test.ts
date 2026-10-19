@@ -182,7 +182,7 @@ const geometry: RoadGeometry = {
 
 const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
   road: { ...startRoad(5), items, nextItemId: items.length },
-  run: newRun(data, 3, { dogs, gear: null }),
+  run: newRun(data, 3, { dogs, gear: null, walker: "casey" }),
 });
 // An item in the middle lane, its bottom just inside the pack's band.
 const atPack = (kind: WalkItem["kind"], id = 0, lane = 2, laneSpan = 1): WalkItem => ({

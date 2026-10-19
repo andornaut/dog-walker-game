@@ -1,16 +1,57 @@
-import type { WalkerId } from "../data/types";
-import type { SaveDocument } from "../save/schema";
-import { PLAIN_ITEM, type TileState, tileState } from "./interaction";
+import type { GameData, WalkerId } from "../data/types";
+import { cents } from "../rules/units";
+import { walkerGoal } from "../rules/walkers";
+import type { Owned, SaveDocument } from "../save/schema";
+import { homeLine } from "./homeText";
+import { type ItemTile, itemTile } from "./interaction";
 
-// A walker's tile on the home screen: the walker in use is selected, another unlocked one
-// can be picked, and a locked one cannot until a walk finishes its zone.
-export function walkerTileState(
+type WalkerText = Pick<GameData, "homeText" | "walkers">;
+
+function goalZone(data: Pick<GameData, "walkers">, walker: WalkerId): string {
+  return String(walkerGoal(data.walkers[walker]));
+}
+
+// The walkers as the picker shows them, left to right in the order they unlock: the starting
+// walkers, then by the zone that unlocks each, ties in data order.
+export function walkerOrder(data: Pick<GameData, "walkers">): WalkerId[] {
+  const goal = (walker: WalkerId) => walkerGoal(data.walkers[walker]);
+  return (Object.keys(data.walkers) as WalkerId[]).sort((a, b) => goal(a) - goal(b));
+}
+
+// A walker's tile on the home screen: the walker in use is picked, another owned one is
+// available, and one not owned shows the zone a walk must finish to unlock it. Picking a
+// walker replaces the one in use, so the choice is never full.
+export function walkerTile(
+  data: WalkerText,
   save: Pick<SaveDocument, "owned" | "walker">,
   walker: WalkerId,
-): TileState {
-  return tileState({
-    ...PLAIN_ITEM,
-    available: save.owned.walkers.includes(walker),
+): ItemTile {
+  const owned = save.owned.walkers.includes(walker);
+  return itemTile({
+    bank: cents(0),
+    capacity: 1,
+    goal: owned ? null : homeLine(data.homeText, "walkerGoal", { zone: goalZone(data, walker) }),
     picked: save.walker === walker,
+    pickedCount: 1,
+    price: null,
   });
+}
+
+// A tap on a walker's tile picks an owned walker, or says what unlocks one not owned.
+export type WalkerTap =
+  { readonly kind: "pick" } | { readonly kind: "locked"; readonly text: string };
+
+export function tapWalker(
+  data: WalkerText,
+  owned: Pick<Owned, "walkers">,
+  walker: WalkerId,
+): WalkerTap {
+  if (owned.walkers.includes(walker)) {
+    return { kind: "pick" };
+  }
+  const text = homeLine(data.homeText, "walkerLocked", {
+    walker: data.walkers[walker].name,
+    zone: goalZone(data, walker),
+  });
+  return { kind: "locked", text };
 }

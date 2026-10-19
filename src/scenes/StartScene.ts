@@ -60,7 +60,9 @@ import { DISABLED_COLORS, type SelectLook } from "../home/selection";
 import { shopAffordable, type ShopTab } from "../home/shop";
 import type { StatsTab } from "../home/statsLayout";
 import { homeSticker, sameItem, type Sticker, type TileItem } from "../home/sticker";
+import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import { downTail } from "../hud/moments";
+import { STRIP, stripIconFallback, stripIconKey, walkerStripItems } from "../hud/stateStrip";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { closeControl } from "../layout/closeControl";
@@ -169,6 +171,7 @@ const SECTION_FRAME = HOME_LAYOUT.sectionFrame;
 const BAND_TEXT = HOME_LAYOUT.bandText;
 const WALKER_TILES = HOME_LAYOUT.walkerTiles;
 const WALKER_ORIGIN = HOME_LAYOUT.walkerOrigin;
+const WALKER_TILE = HOME_LAYOUT.walkerTile;
 const DOG_TILES = HOME_LAYOUT.dogTiles;
 const DOG_ORIGIN = HOME_LAYOUT.dogOrigin;
 const DOG_TILE_INSET = HOME_LAYOUT.dogTileInset;
@@ -195,9 +198,8 @@ const STICKER = {
   wordY: 12,
 };
 
-// The walkers in data order, as the picker shows them.
 function walkerIds(): WalkerId[] {
-  return Object.keys(gameData.walkers) as WalkerId[];
+  return walkerOrder(gameData);
 }
 
 const SECTION_IDS: readonly SectionId[] = ["walker", "dogs"];
@@ -558,7 +560,8 @@ export class StartScene extends Scene {
     return profileSave(this);
   }
 
-  // A focused dog or gear item in words, so a keyboard player has what a hold shows.
+  // A focused dog or gear item in words, so a keyboard player has what a hold shows, and a
+  // locked walker's goal, as a tap says it.
   private focusAction(target: Target | undefined): HomeAction {
     const { bankCents, owned } = this.save();
     if (target?.kind === "dog") {
@@ -566,6 +569,10 @@ export class StartScene extends Scene {
     }
     if (target?.kind === "gear") {
       return { kind: "focus", text: gearInfo(gameData, owned, bankCents, target.gear) };
+    }
+    if (target?.kind === "walker") {
+      const tap = tapWalker(gameData, owned, target.walker);
+      return tap.kind === "locked" ? { kind: "focus", text: tap.text } : { kind: "none" };
     }
     return { kind: "none" };
   }
@@ -729,12 +736,21 @@ export class StartScene extends Scene {
       case "petShop":
         this.openShop({});
         return;
-      case "walker":
+      case "walker": {
+        // A locked walker shakes and says its goal; nothing else changes.
+        const tap = tapWalker(gameData, this.save().owned, target.walker);
+        if (tap.kind === "locked") {
+          this.shakes.set(id, now);
+          this.action = { kind: "notice", text: tap.text };
+          this.render();
+          return;
+        }
         this.pops.set(id, now);
         this.action = { kind: "none" };
         void updateProfile(this, (save) => ({ ...save, walker: target.walker }));
         this.render();
         return;
+      }
       case "mute": {
         const muted = !isMuted(this);
         setMuted(this, muted);
@@ -814,7 +830,7 @@ export class StartScene extends Scene {
       return;
     }
     const data: RunSceneData = {
-      loadout: { dogs, gear: this.loadout.gear },
+      loadout: { dogs, gear: this.loadout.gear, walker: save.walker },
       walkerSprite: walkerSpriteKey(this, save.walker),
     };
     const go = () => {
@@ -902,7 +918,7 @@ export class StartScene extends Scene {
     y: number,
     value: string,
     color: number,
-    options: { font?: FontRole; originX?: number; scale?: number } = {},
+    options: { font?: FontRole; originX?: number; originY?: number; scale?: number } = {},
   ): GameObjects.BitmapText {
     const label = addPixelText(this, x, y, value, { color, scale: TEXT_SCALE, ...options });
     parent.add(label);
@@ -1503,46 +1519,77 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // One portrait per preset walker, in the shared tile states: the saved one is picked, and
-  // picking another replaces it, so the walker choice is never full. Every walker unlocks
-  // from the start in today's data, so none shows a goal yet.
+  // One tile per walker, in the shared tile states: the saved one is picked, and picking
+  // another replaces it, so the walker choice is never full. An owned walker shows its
+  // portrait with its pace icon over its style icon; a locked one its silhouette, the
+  // padlock and its goal plate.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
-    const chosen = save.walker;
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
-      const state = itemTileState(
-        itemTile({
-          bank: save.bankCents,
-          capacity: 1,
-          goal: null,
-          picked: id === chosen,
-          pickedCount: 1,
-          price: null,
-        }),
-      );
+      const { x, y } = rect;
+      const tile = walkerTile(gameData, save, id);
+      const state = itemTileState(tile);
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
         badge: "tick",
         edge: true,
         state,
         tile: true,
       });
-      const portrait = gameData.walkers[id].portraitKey;
-      const faceX = rect.x + (rect.width - 32) / 2;
-      const faceY = rect.y + (rect.height - 32) / 2;
-      if (this.textures.exists(portrait)) {
-        const faceTag = id === chosen ? "happy" : "neutral";
-        const face = addTileSprite(this, state, reduced, portrait, faceTag, { x: faceX, y: faceY });
+      const { box, face: faceAt, icons, lock, plateY } = WALKER_TILE;
+      fillRect(this.graphics(content), PALETTE[look.box], {
+        height: box.size,
+        width: box.size,
+        x: x + box.dx,
+        y: y + box.dy,
+      });
+      const walker = gameData.walkers[id];
+      const at = { x: x + faceAt.dx, y: y + faceAt.dy };
+      const locked = tile.kind === "goal";
+      if (this.textures.exists(walker.portraitKey)) {
+        const tag = tile.kind === "picked" ? "happy" : "neutral";
+        const face = locked
+          ? this.add
+              .sprite(
+                at.x,
+                at.y,
+                itemArtKey(this, tile, walker.portraitKey),
+                tagFrame(this, walker.portraitKey, tag),
+              )
+              .setOrigin(0)
+          : addTileSprite(this, state, reduced, walker.portraitKey, tag, at);
         content.add(face);
-        view.face = { object: face, y: faceY };
+        view.face = { object: face, y: at.y };
       } else {
-        const initial = gameData.walkers[id].name.charAt(0);
-        this.text(content, rect.x + 22, rect.y + 16, initial, PALETTE[look.text], {
+        const centre = { x: x + box.dx + box.size / 2, y: y + box.dy + box.size / 2 };
+        this.text(content, centre.x, centre.y, walker.name.charAt(0), PALETTE[look.text], {
           font: "title",
           originX: 0.5,
+          originY: 0.5,
         });
       }
+      if (locked) {
+        addLock(this, content, x + lock.dx, y + lock.dy);
+        const plateAt = { capY: y + plateY, originX: 0.5, x: x + rect.width / 2 };
+        this.lockedPlate(content, tile, plateAt);
+        return;
+      }
+      walkerStripItems(gameData, id).forEach((item, n) => {
+        const iconAt = { x: x + icons.dx, y: y + itemAt(icons.dy, n) };
+        const key = stripIconKey(item);
+        if (this.textures.exists(key)) {
+          const shown = tileTextureKey(this, state, key);
+          content.add(this.add.image(iconAt.x, iconAt.y, shown).setOrigin(0));
+          return;
+        }
+        const half = STRIP.icon / 2;
+        const letter = stripIconFallback(gameData, item);
+        this.text(content, iconAt.x + half, iconAt.y + half, letter, PALETTE[look.text], {
+          originX: 0.5,
+          originY: 0.5,
+        });
+      });
     });
   }
 

@@ -112,7 +112,7 @@ const walkWith = (dogs: PackDogs, items: WalkItem[] = []): Walk => ({
     items,
     nextItemId: items.length,
   },
-  run: newRun(data, 3, { dogs, gear: null }),
+  run: newRun(data, 3, { dogs, gear: null, walker: "casey" }),
 });
 // A one-cell item up the road, wholly ahead of the pack.
 const item = (kind: WalkItem["kind"], id: number, lane: number, y = 100): WalkItem => ({

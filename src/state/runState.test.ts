@@ -23,7 +23,11 @@ const data = {
 
 describe("newRun", () => {
   it("starts each owner at their temperament's hearts, walking, with no money", () => {
-    const state = newRun(data, 3, { dogs: ["duchess", "nugget", "pierre"], gear: null });
+    const state = newRun(data, 3, {
+      dogs: ["duchess", "nugget", "pierre"],
+      gear: null,
+      walker: "casey",
+    });
     expect(heartsByDog(state)).toEqual({ duchess: 6, nugget: 5, pierre: 4 });
     expect(state.money).toBe(0);
     expect(state.phase).toEqual({ kind: "walking" });
@@ -35,7 +39,7 @@ describe("newRun", () => {
     { expected: { immunities: [{ encounter: "thief" }] }, gear: "whistle" },
     { expected: { skipsLeft: TEST_TUNING.counts.poopBagsSkipsPerRun }, gear: "poopBags" },
   ])("starts with what the $gear gives", ({ expected, gear }) => {
-    expect(newRun(data, 3, { dogs: ["koda"], gear })).toMatchObject(expected);
+    expect(newRun(data, 3, { dogs: ["koda"], gear, walker: "casey" })).toMatchObject(expected);
   });
 
   it("applies the walker's pace and style, then the gear, for the whole run", () => {
@@ -55,38 +59,39 @@ describe("newRun", () => {
     expect(state.modifiers.every(({ untilZone }) => untilZone === undefined)).toBe(true);
   });
 
-  it.each<[WalkerId | undefined, number]>([
+  it.each<[WalkerId, number]>([
     ["ada", 8],
     ["ben", 6],
     ["casey", 8],
     ["trista", 6],
-    [undefined, 8],
   ])("starts %s's owners with the charmer's extra hearts or none", (walker, hearts) => {
     const charming = {
       ...data,
       tuning: { ...TEST_TUNING, hearts: { ...TEST_TUNING.hearts, charmerStart: 2 } },
     };
-    const loadout = {
-      dogs: ["koda"],
-      gear: null,
-      ...(walker === undefined ? {} : { walker }),
-    } as const;
+    const loadout = { dogs: ["koda"], gear: null, walker } as const;
     expect(heartsByDog(newRun(charming, 1, loadout))).toEqual({ koda: hearts });
   });
 
   it("takes no more dogs than the player owns slots", () => {
-    const pair = { dogs: ["duchess", "koda"], gear: null } as const;
+    const pair = { dogs: ["duchess", "koda"], gear: null, walker: "casey" } as const;
     expect(() => newRun(data, 1, pair)).toThrow("needs that many dog slots");
     expect(heartsByDog(newRun(data, 2, pair))).toEqual({ duchess: 6, koda: 6 });
-    expect(newRun(data, 1, { dogs: ["koda"], gear: null }).pack).toHaveLength(1);
+    expect(newRun(data, 1, { dogs: ["koda"], gear: null, walker: "casey" }).pack).toHaveLength(1);
   });
 
   it("rejects a dog listed twice", () => {
-    expect(() => newRun(data, 3, { dogs: ["koda", "koda"], gear: null })).toThrow("only once");
+    expect(() => newRun(data, 3, { dogs: ["koda", "koda"], gear: null, walker: "casey" })).toThrow(
+      "only once",
+    );
   });
 
   it("survives a round trip through JSON unchanged", () => {
-    const state = newRun(data, 3, { dogs: ["duchess", "koda"], gear: "luckyCollar" });
+    const state = newRun(data, 3, {
+      dogs: ["duchess", "koda"],
+      gear: "luckyCollar",
+      walker: "casey",
+    });
     expect(JSON.parse(JSON.stringify(state))).toEqual(state);
   });
 });
