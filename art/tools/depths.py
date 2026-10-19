@@ -38,7 +38,7 @@ import hazards  # noqa: E402
 import minis  # noqa: E402
 import obstacles  # noqa: E402
 import road  # noqa: E402
-from minis import SCALES, STEPS, scaled, small, snap  # noqa: E402
+from minis import SCALES, STEPS, small, snap  # noqa: E402
 from pixel import build, preview  # noqa: E402
 
 # The steps hazards.py has no hand-drawn art for.
@@ -105,34 +105,9 @@ def own(s):
     yield "parked-car", obstacle(s, obstacles.parked_car, obstacles.PARKED_CAR_IDLE)
 
 
-# hazards.BALL's bounce at 0.875x and 0.625x: frame size, ground row, heights, radii, stripes and shadow
-# widths between hazards.BALL's at 1, 0.75 and 0.5, the stripe step a whole cycle over the 6 frames. Radii
-# stop short of a half pixel: an ellipse whose tip reaches a pixel centre grows a 1px nub there.
-BALL = {
-    0.875: dict(size=(14, 21), ground=19, heights=(0, 5, 8, 9, 8, 5), squash=(5, 3.4), stretch=(3.4, 5),
-                round=(4.4, 4.4), stripes=(2, 6, 2), shadow=(10, 8, 6, 6, 6, 8)),
-    0.625: dict(size=(10, 15), ground=13, heights=(0, 3, 5, 6, 5, 3), squash=(4, 2.4), stretch=(2.4, 4),
-                round=(3.4, 3.4), stripes=(2, 4, 2), shadow=(8, 6, 6, 4, 6, 6)),
-}
-hazards.BALL.update(BALL)
-
-
-def cyclist(s, lf, rf, sway):
-    """hazards.cyclist on a Mini; the sway shifts the rows above the handlebar, where hazards.lean's shear
-    moves them 1px."""
-    g = small(hazards, s, hazards.cyclist, lf=lf, rf=rf).g
-    hazards.sway_rows(g, sway, scaled(26, s))
-    return g
-
-
 def hazard(s):
     """Yield (key, tags) at scale s for hazards.py's sprites, whose @75 and @50 it draws itself."""
-    yield "squirrel-dash", [("run", [hazards.squirrel_dash(**hazards.small(s, q, hazards.SQUIRREL_OFFSETS)).outlined()
-                                     for q in hazards.SQUIRREL_RUN], 80)]
-    yield "loose-dog", [("run", [hazards.corgi_side(**hazards.small(s, q, hazards.CORGI_OFFSETS)).outlined()
-                                 for q in hazards.CORGI_RUN], 100)]
-    yield "ball-bounce", [("bounce", [hazards.ball_bounce(f, s) for f in range(6)], 70)]
-    yield "cyclist", [("ride", [cyclist(s, **q).outlined() for q in hazards.CYCLIST_RIDE], 90)]
+    yield from hazards.steps("", s)
 
 
 def steps(scales, *sources):

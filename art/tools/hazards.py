@@ -2,13 +2,13 @@
 """Draw the moving hazards: things that cross the road or come down it, and the
 warning cue shown at the lane edge about a second before one enters.
 
-squirrel-dash       32x32   side view facing right, run (4 frames, 80ms): a bounding gallop, tail streaming
-loose-dog           32x32   the corgi from other-dog in side view facing right, no owner; run (4 frames,
+squirrel-dash       40x40   side view facing right, run (4 frames, 80ms): a bounding gallop, tail streaming
+loose-dog           40x40   the corgi from other-dog in side view facing right, no owner; run (4 frames,
                             100ms): a gallop, gathered, reaching, airborne and landing, the broken leash
                             trailing up off the back, frayed, a 1px wave travelling down it
-ball-bounce         16x24   the gag-ball ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
+ball-bounce         20x30   the gag-ball ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
                             contact, with its own ground shadow (the game draws none)
-cyclist             32x48   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
+cyclist             40x60   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
                             legs and a 1px sway
 ui-warning          16x16   a yellow warning sign with a bold "!", ink outline; pulse (2 frames, 250ms)
 ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms) points right for a
@@ -19,10 +19,13 @@ ui-warning-arrow for a crossing to the left. Every road sprite takes the road
 outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
 roads and its fill carries Elm Avenue. The warning cues are outlined in ink.
 
-Depth variants, redrawn at their own size with a full outline (see minis.py):
-squirrel-dash@75, loose-dog@75 (24x24), squirrel-dash@50, loose-dog@50 (16x16),
-ball-bounce@75, ball-bounce@50 (12x18, 8x12) and cyclist@75, cyclist@50 (24x36, 16x24),
-the cyclist drawn by hand at each size so its face and the turning crank stay readable.
+The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn SCALE (1.25)
+times bigger on a minis.Mini, which keeps 1px lines 1px; the ball is drawn at
+each size from BALL. Depth variants, redrawn at their own size with a full
+outline (see minis.py): squirrel-dash@75, loose-dog@75 (30x30), squirrel-dash@50,
+loose-dog@50 (20x20), ball-bounce@75, ball-bounce@50 (15x23, 10x15) and cyclist@75,
+cyclist@50 (30x45, 20x30), each on a Mini at SCALE times the step; depths.py draws
+the steps between them.
 
 Usage:
   hazards.py preview OUT.png   every frame on the four road colours
@@ -39,8 +42,9 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main  # noqa: E402
-from minis import SCALES, Mini  # noqa: E402
-from road import face_front, lean  # noqa: E402
+import minis  # noqa: E402
+from minis import SCALES, Mini, scaled  # noqa: E402
+from road import SCALE, face_front, lean  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -167,17 +171,21 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
 
 # ---------- ball-bounce: the gag-ball ball, bouncing ----------
 
-# The bounce at each size: frame size; the ground row (the ball's outline touches it on contact, and the
+# The bounce at each depth step, its frame floor(20x30 x step + 0.5): frame size; the ground row (the ball's outline touches it on contact, and the
 # shadow is centred on it); the ball's bottom height per frame; its radii when squashed on contact,
 # stretched near the ground and round at the top of the arc; the stripes' width, spacing and step per
 # frame (whole cycles over the 6 frames, so the loop has no jump); and the shadow's width per frame.
 BALL = {
-    1: dict(size=(16, 24), ground=22, heights=(0, 6, 9, 10, 9, 6), squash=(6, 4), stretch=(4, 6), round=(5, 5),
-            stripes=(2, 6, 2), shadow=(12, 10, 8, 6, 8, 10)),
-    0.75: dict(size=(12, 18), ground=16, heights=(0, 4, 6, 7, 6, 4), squash=(5, 3), stretch=(3, 5), round=(4, 4),
-               stripes=(2, 4, 2), shadow=(10, 8, 6, 4, 6, 8)),
-    0.5: dict(size=(8, 12), ground=11, heights=(0, 2, 3, 4, 3, 2), squash=(3.2, 2), stretch=(2, 3), round=(3, 3),
-              stripes=(1, 3, 1), shadow=(6, 6, 4, 4, 4, 6)),
+    1: dict(size=(20, 30), ground=28, heights=(0, 8, 11, 12, 11, 8), squash=(7.4, 5), stretch=(5, 7.4),
+            round=(6.4, 6.4), stripes=(2, 6, 2), shadow=(15, 12, 10, 8, 10, 12)),
+    0.875: dict(size=(18, 26), ground=24, heights=(0, 7, 10, 11, 10, 7), squash=(6.4, 4.4), stretch=(4.4, 6.4),
+                round=(5.4, 5.4), stripes=(2, 6, 2), shadow=(13, 11, 9, 7, 9, 11)),
+    0.75: dict(size=(15, 23), ground=21, heights=(0, 6, 8, 9, 8, 6), squash=(5.4, 3.6), stretch=(3.6, 5.4),
+               round=(4.4, 4.4), stripes=(2, 6, 2), shadow=(11, 9, 7, 6, 7, 9)),
+    0.625: dict(size=(13, 19), ground=17, heights=(0, 5, 7, 8, 7, 5), squash=(4.6, 3), stretch=(3, 4.6),
+                round=(3.9, 3.9), stripes=(2, 4, 2), shadow=(9, 8, 6, 5, 6, 8)),
+    0.5: dict(size=(10, 15), ground=13, heights=(0, 3, 5, 6, 5, 3), squash=(4, 2.4), stretch=(2.4, 4),
+              round=(3.4, 3.4), stripes=(2, 4, 2), shadow=(8, 6, 6, 4, 6, 6)),
 }
 
 
@@ -203,7 +211,7 @@ def ball_bounce(f, s=1):
     # the ground shadow: no outline, narrower as the ball rises; at 0.5 a single row
     sw = q["shadow"][f]
     rows = [(q["ground"], sw)] if s == 0.5 else [(q["ground"], sw), (q["ground"] + 1, sw - 2)]
-    if s == 1:
+    if s >= 0.875:
         rows.append((q["ground"] - 1, sw - 2))
     for y, rw in rows:
         for x in range(round(w / 2 - rw / 2), round(w / 2 + rw / 2)):
@@ -223,7 +231,8 @@ CYCLIST_RIDE = [
 ]
 
 
-def cyclist(lf=36, rf=41, sway=0):
+def cyclist(lf=36, rf=41):
+    """The rider facing the player, laid out on 32x48; cyclist_at draws it at size and adds the sway."""
     g = edged(Grid(32, 48))
     # front wheel: a tyre seen edge-on, with a mudguard and the fork
     g.blob(16, 39.5, 2.5, 7, "ink")
@@ -270,19 +279,7 @@ def cyclist(lf=36, rf=41, sway=0):
         g.rect(x - 1 if x == 16 else x, 4, 2, 3, "navy")
     g.rect(8, 13, 1, 5, "dslate")
     g.rect(23, 13, 1, 5, "dslate")
-    return edged(lean(g, sway)) if sway else g
-
-
-# The cyclist at 0.75x and 0.5x, drawn at size: scaled, the face goes and the pedals barely move. Per frame,
-# as CYCLIST_RIDE: the left and right foot rows, the sway of everything above the handlebar, and the row of
-# the tread mark rolling down the tyre. A foot coming forward is drawn wider and white, one going back
-# narrower and lgrey, so the four beats read as a turning crank.
-CYCLIST_SMALL = {
-    0.75: [dict(lf=26, rf=31, sway=-1, tread=26), dict(lf=29, rf=28, sway=0, tread=28),
-           dict(lf=31, rf=26, sway=1, tread=30), dict(lf=28, rf=29, sway=0, tread=32)],
-    0.5: [dict(lf=17, rf=21, sway=-1, tread=17), dict(lf=20, rf=18, sway=0, tread=19),
-          dict(lf=21, rf=17, sway=1, tread=21), dict(lf=18, rf=20, sway=0, tread=17)],
-}
+    return g
 
 
 def sway_rows(g, k, bottom):
@@ -293,123 +290,14 @@ def sway_rows(g, k, bottom):
             g.px[y] = [row[x - k] if 0 <= x - k < g.w else None for x in range(g.w)]
 
 
-def cyclist_75(lf, rf, sway, tread):
-    """cyclist at 24x36: a vented cyan helmet over a visor, a face with 2px eyes and a smile, the lime
-    jersey with its white band, and a 4px tyre between the legs, lit grey on its left as road.LIT has it."""
-    g = edged(Grid(24, 36))
-    # tyre, mudguard and fork; the tread mark rolls down the tyre
-    g.rect(11, 25, 2, 10, "ink")
-    g.rect(10, 26, 4, 8, "ink")
-    g.rect(10, 26, 1, 8, "grey")
-    g.p(12, tread, "slate")
-    g.p(12, tread + 1, "slate")
-    g.rect(10, 24, 4, 1, "lgrey")
-    g.rect(11, 22, 2, 2, "sky")
-    g.p(12, 22, "blue")
-    g.p(12, 23, "blue")
-    # legs: shorts, shins, then the feet on the pedals
-    for x, foot, fwd in ((7, lf, lf > rf), (15, rf, rf > lf)):
-        g.rect(x, 22, 3, 2, "navy")
-        g.p(x + 2, 22, "ink")
-        g.p(x + 2, 23, "ink")
-        g.rect(x, 24, 2, foot - 24, "skin1")
-        g.rect(x + 1, 24, 1, foot - 24, "skin2")
-        fx = x - 1 if x < 12 else x
-        if fwd:
-            g.rect(fx, foot, 3, 1, "white")
-            g.rect(fx, foot + 1, 3, 1, "lgrey")
-        else:
-            g.rect(fx + (1 if x < 12 else 0), foot, 2, 2, "lgrey")
-        g.rect(x if x < 12 else x, foot + 2, 2, 1, "grey")
-    # handlebar and grips, which do not sway
-    g.rect(4, 20, 16, 1, "lgrey")
-    g.rect(4, 21, 16, 1, "grey")
-    g.rect(2, 20, 3, 2, "ink")
-    g.rect(19, 20, 3, 2, "ink")
-    # jersey, arms and hands
-    g.rect(6, 15, 12, 5, "green")
-    g.rect(15, 15, 3, 5, "dgreen")
-    g.rect(6, 17, 12, 2, "white")
-    g.rect(15, 17, 3, 2, "lgrey")
-    g.p(6, 15, None)
-    g.p(17, 15, None)
-    for x in (3, 18):
-        g.rect(x, 15, 3, 3, "green" if x < 12 else "dgreen")
-        g.rect(x, 18, 3, 2, "skin1")
-        g.p(x + 2, 19, "skin2")
-    # face: eyes with a glint, a smile, the chin narrower
-    g.rect(6, 8, 12, 6, "skin1")
-    g.rect(7, 14, 10, 1, "skin1")
-    g.rect(16, 8, 2, 6, "skin2")
-    g.p(16, 14, "skin2")
-    for x in (8, 14):
-        g.rect(x, 9, 2, 2, "ink")
-        g.p(x, 9, "white")
-    g.p(10, 12, "dbrown")
-    g.p(13, 12, "dbrown")
-    g.rect(11, 13, 2, 1, "dbrown")
-    # helmet: a cyan dome, three vents, a sky right side, the dark visor under the brim
-    g.rect(8, 1, 8, 1, "cyan")
-    g.rect(6, 2, 12, 1, "cyan")
-    g.rect(5, 3, 14, 4, "cyan")
-    g.rect(16, 3, 3, 4, "sky")
-    g.rect(15, 2, 3, 1, "sky")
-    g.rect(7, 2, 2, 1, "white")
-    g.p(6, 3, "white")
-    for x, w in ((9, 1), (11, 2), (14, 1)):
-        g.rect(x, 3, w, 2, "navy")
-    g.rect(6, 7, 12, 1, "ink")
-    sway_rows(g, sway, 20)
-    return g
-
-
-def cyclist_50(lf, rf, sway, tread):
-    """cyclist at 16x24: helmet, visor, 1px eyes and mouth, jersey band, a 2px tyre between the legs."""
-    g = edged(Grid(16, 24))
-    g.rect(7, 17, 2, 6, "ink")
-    g.rect(7, 17, 1, 5, "grey")
-    g.p(8, tread, "slate")
-    g.rect(7, 16, 2, 1, "lgrey")
-    g.p(7, 15, "sky")
-    g.p(8, 15, "blue")
-    for x, foot, fwd in ((4, lf, lf > rf), (10, rf, rf > lf)):
-        g.rect(x, 15, 2, 1, "navy")
-        g.p(x + 1, 15, "ink")
-        g.rect(x, 16, 2, foot - 16, "skin1")
-        g.rect(x + 1, 16, 1, foot - 16, "skin2")
-        fx = x - 1 if x < 8 else x
-        if fwd:
-            g.rect(fx, foot, 3, 1, "white")
-        else:
-            g.rect(x, foot, 2, 1, "lgrey")
-        g.p(x + 1 if x < 8 else x, foot + 1, "grey")
-    g.rect(3, 14, 10, 1, "lgrey")
-    g.rect(1, 14, 3, 1, "ink")
-    g.rect(12, 14, 3, 1, "ink")
-    g.rect(4, 10, 8, 4, "green")
-    g.rect(10, 10, 2, 4, "dgreen")
-    g.rect(4, 12, 8, 1, "white")
-    g.rect(10, 12, 2, 1, "lgrey")
-    for x in (2, 12):
-        g.rect(x, 10, 2, 3, "green" if x < 8 else "dgreen")
-        g.rect(x, 13, 2, 1, "skin1")
-    g.rect(4, 6, 8, 3, "skin1")
-    g.rect(5, 9, 6, 1, "skin1")
-    g.rect(11, 6, 1, 3, "skin2")
-    g.p(10, 9, "skin2")
-    g.p(6, 7, "ink")
-    g.p(9, 7, "ink")
-    g.rect(7, 8, 2, 1, "dbrown")
-    g.rect(5, 1, 6, 1, "cyan")
-    g.rect(4, 2, 8, 1, "cyan")
-    g.rect(3, 3, 10, 2, "cyan")
-    g.rect(11, 2, 2, 3, "sky")
-    g.p(5, 1, "white")
-    g.p(4, 2, "white")
-    g.p(6, 2, "navy")
-    g.p(9, 2, "navy")
-    g.rect(4, 5, 8, 1, "ink")
-    sway_rows(g, sway, 14)
+def cyclist_at(s, lf=36, rf=41, sway=0):
+    """cyclist on a Mini at SCALE x step s. At full size the rider leans (road.lean shears about the feet);
+    smaller, the rows above the handlebar shift sideways, which keeps the bars and wheel put."""
+    g = minis.small(sys.modules[__name__], SCALE * s, cyclist, lf=lf, rf=rf)
+    if s == 1:
+        return edged(lean(g, sway)) if sway else g.g
+    g = g.g
+    sway_rows(g, sway, scaled(26, SCALE * s))
     return g
 
 
@@ -455,12 +343,15 @@ def snap(v, s):
 
 
 def small(s, q, offsets):
-    """Pose q for a depth variant at scale s: its offset keys snapped to whole pixels, and a Mini grid."""
+    """Pose q at depth step s (1 for the full size): drawn on a Mini at SCALE x s, its offset keys snapped to
+    whole pixels there."""
+    p = SCALE * s
+
     def fit(v):
-        return tuple(snap(x, s) for x in v) if isinstance(v, tuple) else snap(v, s)
+        return tuple(snap(x, p) for x in v) if isinstance(v, tuple) else snap(v, p)
 
     q = {k: fit(v) if k in offsets else v for k, v in q.items()}
-    return dict(q, new=lambda w=32, h=32: Mini(s, w, h))
+    return dict(q, new=lambda w=32, h=32: Mini(p, w, h))
 
 
 # the squirrel's tail sway is left unsnapped: snapped, it would push the plume out of the 16px frame
@@ -468,26 +359,26 @@ SQUIRREL_OFFSETS = ("dy",)
 CORGI_OFFSETS = ("bob", "leash")
 
 
+def steps(suffix, s):
+    """Yield (key + suffix, tags) for the road hazards at depth step s; depths.py draws the steps between
+    SCALES with this too."""
+    yield f"squirrel-dash{suffix}", [("run", [squirrel_dash(**small(s, q, SQUIRREL_OFFSETS)).outlined()
+                                              for q in SQUIRREL_RUN], 80)]
+    yield f"loose-dog{suffix}", [("run", [corgi_side(**small(s, q, CORGI_OFFSETS)).outlined() for q in CORGI_RUN],
+                                  100)]
+    yield f"ball-bounce{suffix}", [("bounce", [ball_bounce(f, s) for f in range(6)], 70)]
+    yield f"cyclist{suffix}", [("ride", [cyclist_at(s, **q).outlined() for q in CYCLIST_RIDE], 90)]
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    def corgi_frames(s=None):
-        return [corgi_side(**(small(s, q, CORGI_OFFSETS) if s else q)).outlined() for q in CORGI_RUN]
-
-    yield "squirrel-dash", [("run", [squirrel_dash(**q).outlined() for q in SQUIRREL_RUN], 80)]
-    yield "loose-dog", [("run", corgi_frames(), 100)]
-    yield "ball-bounce", [("bounce", [ball_bounce(f) for f in range(6)], 70)]
-    yield "cyclist", [("ride", [cyclist(**q).outlined() for q in CYCLIST_RIDE], 90)]
+    yield from steps("", 1)
     yield "ui-warning", [("pulse", [warning(False).outlined(), warning(True).outlined()], 250)]
     yield "ui-warning-arrow", [("pulse", [warning_arrow(0).outlined(), warning_arrow(1).outlined()], 250),
                                ("down-pulse", [warning_arrow(0, True).outlined(),
                                                warning_arrow(1, True).outlined()], 250)]
     for suffix, s in SCALES:
-        yield f"squirrel-dash@{suffix}", [("run", [squirrel_dash(**small(s, q, SQUIRREL_OFFSETS)).outlined()
-                                                   for q in SQUIRREL_RUN], 80)]
-        yield f"loose-dog@{suffix}", [("run", corgi_frames(s), 100)]
-        yield f"ball-bounce@{suffix}", [("bounce", [ball_bounce(f, s) for f in range(6)], 70)]
-        draw = cyclist_75 if s == 0.75 else cyclist_50
-        yield f"cyclist@{suffix}", [("ride", [draw(**q).outlined() for q in CYCLIST_SMALL[s]], 90)]
+        yield from steps(f"@{suffix}", s)
 
 
 if __name__ == "__main__":

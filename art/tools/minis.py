@@ -375,48 +375,6 @@ def skunk(s, sway):
     return g
 
 
-def skunk_cloud(s, step):
-    """road.skunk_cloud redrawn at its own size. The full-size fill is a dither on every other row, which
-    nearest-neighbour at 0.5x skips entirely, so the same dither is laid on the small grid instead. The rim
-    keeps both of its pixels, plum outside for the light roads and pink inside it for Elm Avenue; the stink
-    wisps scale with it, and a swelling puff still grows by a whole pixel. A puff near the frame's top or
-    sides is trimmed so that, swollen, it still stops a pixel short of them; the frame's last row cuts the
-    haze level, as at full size."""
-    w, h = scaled(road.CLOUD_W, s), scaled(road.CLOUD_H, s)
-    g = Grid(w, h)
-    k, ink = road.CLOUD_SQUASH, road.CLOUD_INK
-    puffs = []
-    for i, (cx, cy, r) in enumerate(road.CLOUD_PUFFS):
-        cx, cy = cx * s, cy * s
-        r = min(r * s, cx - 1.6, w - cx - 1.6, (cy - 1.6) / k)
-        puffs.append((cx, cy, r + (1 if (i + step) % 4 == 0 else 0)))
-    # how far inside the nearest puff each pixel is, in pixels across
-    depth = [[max(r - ((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / k) ** 2) ** 0.5 for cx, cy, r in puffs)
-              for x in range(w)] for y in range(h)]
-
-    def inside(x, y):
-        return 0 <= x < w and 0 <= y < h and depth[y][x] >= 0
-
-    def beside(x, y, test):
-        return any(test(x + dx, y + dy) for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
-
-    outer = {(x, y) for y in range(h) for x in range(w) if inside(x, y) and beside(x, y, lambda a, b: not inside(a, b))}
-    for y in range(h):
-        for x in range(w):
-            if not inside(x, y):
-                continue
-            if (x, y) in outer:
-                g.p(x, y, ink["outer"])
-            elif beside(x, y, lambda a, b: (a, b) in outer):
-                g.p(x, y, ink["inner"])
-            elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
-                g.p(x, y, ink["fill"] if (x + y) % 8 else ink["dark"])
-    for x0, y0 in road.CLOUD_WISPS:
-        for j in range(scaled(6, s)):
-            g.p(x0 * s + (j + step) % 3 - 1, y0 * s + j, ink["wisp"])
-    return g
-
-
 def variants(s):
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite this file draws small, at scale s.
     road.py's sprites are drawn at road.SCALE x s, as road.py draws them at road.SCALE."""
@@ -439,7 +397,7 @@ def variants(s):
     yield "other-dog", [("walk", [shrunk(p, road.corgi, **q).outlined() for q in road.CORGI_WALK], 100),
                         ("idle", [shrunk(p, road.corgi, **q).outlined() for q in road.CORGI_IDLE], 300)]
     yield "lost-wallet", [("idle", [wallet(p, gl).outlined() for gl in (False, True)], 450)]
-    yield "skunk-cloud", [("loop", [skunk_cloud(s, i).outlined(False) for i in range(4)], 220)]
+    yield "skunk-cloud", [("loop", [road.skunk_cloud(i, s).outlined(False) for i in range(4)], 220)]
 
 
 def sprites():

@@ -4,9 +4,11 @@
 People (walkers, forced stops, lucky people, the thief and the other dog's owner)
 are 40x60, the other dog, skunk and squirrel 40x40 and pickups 20x20: their drawing
 functions lay them out on 32x48, 32x32 and 16x16, and sprites() draws them SCALE
-(1.25) times bigger on a scaling grid, never upscaled. The bark pop is 16x16, the
-ice cream truck 88x44, two lanes, the construction barrier 56x32, one lane, and the
-skunk's stink haze 88x40, a ground decal. All are chibi and in Endesga 32 with
+(1.25) times bigger on a scaling grid, never upscaled. The bark pop is 16x16. The
+ice cream truck (104x55, two lanes, 64n-24 wide), the construction barrier (64x40, one
+whole lane, repeated across the road) and the puddle (104x40) are drawn in their own
+pixels; the skunk's stink haze (104x50) is a ground decal laid out on an 88x40 design
+and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
 dogs, except in wave; everything coming down the road faces the player.
 
@@ -682,8 +684,9 @@ def squirrel_run(gather):
     return rim(g, LIT)
 
 
-def puddle(f, w=88, h=32):
-    """The road's 2-lane puddle; cards draw a 32x16 one. Wide puddles get a second lobe."""
+def puddle(f, w=104, h=40):
+    """The road's 2-lane puddle, 104x40 (64n-24 wide for n = 2); cards draw a 32x16 one. Wide puddles get a
+    second lobe."""
     g = Grid(w, h)
     lobes = [(w / 2, h / 2, w / 2 - 2, h / 2 - 2)]
     if w > 40:
@@ -699,33 +702,45 @@ def puddle(f, w=88, h=32):
     return g
 
 
-# The stink haze's puffs as (centre x, centre y, radius across) in the 88x40 frame. The haze hugs the road: each
-# puff is CLOUD_SQUASH as tall as it is wide, so together they make a low, wide bank with a lumpy top, its base
-# on the frame's last row. A swollen puff still stops a pixel short of the frame's top and sides, so no lobe is
-# clipped flat; along the bottom the frame's last row cuts them level, where the haze meets the road.
+# The stink haze's puffs as (centre x, centre y, radius across), laid out on an 88x40 design that the sprite
+# stretches to CLOUD_SIZE (2 lanes, 64n-24 wide, by 1.25 x 40 rows). The haze hugs the road: each puff is
+# CLOUD_SQUASH as tall as it is wide, so together they make a low, wide bank with a lumpy top, its base on the
+# frame's last row. A swollen puff still stops a pixel short of the frame's top and sides, so no lobe is clipped
+# flat; along the bottom the frame's last row cuts them level, where the haze meets the road.
 CLOUD_PUFFS = [(44, 28, 30), (22, 31, 15), (66, 31, 15), (31, 36, 15), (57, 36, 15), (32, 20, 11), (57, 19, 11),
                (44, 14, 9), (11, 35, 9), (77, 35, 9), (19, 24, 7), (70, 24, 7)]
 CLOUD_SQUASH = 0.42
 CLOUD_W, CLOUD_H = 88, 40
-# Where each stink wisp starts, trailing 6 rows down.
+CLOUD_SIZE = (104, 50)
+# Where each stink wisp starts, trailing 6 design rows down.
 CLOUD_WISPS = ((22, 25), (62, 22), (72, 30), (14, 31), (42, 17))
 # The haze's colours: the outer and inner rim, the dithered fill and its darker pixels, and the wisps.
 CLOUD_INK = dict(outer="plum", inner="pink", fill="mauve", dark="purple", wisp="purple")
 
 
-def skunk_cloud(step):
-    """88x40 stink haze drawn under the skunk, low and wide on the road: puffs with a solid rim and a 2x2-dithered
-    mauve fill, so the road shows through. The puffs swell in turn; the base stays on the last row. The rim is
-    two pixels: plum outside, which holds 3:1 on the light roads, and pink inside it, which holds on Elm Avenue.
-    Mauve keeps it apart from the green hedges, and matches fx-hit-skunk and fx-status-stinky."""
-    w, h = CLOUD_W, CLOUD_H
+def skunk_cloud(step, s=1):
+    """The stink haze under the skunk at depth step s (CLOUD_SIZE at 1), low and wide on the road: puffs with a
+    solid rim and a 2x2-dithered mauve fill, so the road shows through. The puffs swell in turn by a whole
+    pixel; the base stays on the last row. The rim is two pixels at every size: plum outside, which holds 3:1
+    on the light roads, and pink inside it, which holds on Elm Avenue. The dither and the wisps' 1px wave are
+    laid on the drawn grid, so they keep their pixels at every step. A puff near the frame's top or sides is
+    trimmed so that, swollen, it still stops a pixel short of them. Mauve keeps it apart from the green
+    hedges, and matches fx-hit-skunk and fx-status-stinky."""
+    w, h = (math.floor(v * s + 0.5) for v in CLOUD_SIZE)
+    sx, sy = w / CLOUD_W, h / CLOUD_H
     g = Grid(w, h)
-    puffs = [(cx, cy, r + (1 if (i + step) % 4 == 0 else 0)) for i, (cx, cy, r) in enumerate(CLOUD_PUFFS)]
-    dist = [[min(((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / CLOUD_SQUASH) ** 2) ** 0.5 / r for cx, cy, r in puffs)
-             for x in range(w)] for y in range(h)]
+    k = CLOUD_SQUASH * sy / sx
+    puffs = []
+    for i, (cx, cy, r) in enumerate(CLOUD_PUFFS):
+        cx, cy = cx * sx, cy * sy
+        r = min(r * sx, cx - 1.6, w - cx - 1.6, (cy - 1.6) / k)
+        puffs.append((cx, cy, r + (1 if (i + step) % 4 == 0 else 0)))
+    # how far inside the nearest puff each pixel is, in pixels across
+    depth = [[max(r - ((x + 0.5 - cx) ** 2 + ((y + 0.5 - cy) / k) ** 2) ** 0.5 for cx, cy, r in puffs)
+              for x in range(w)] for y in range(h)]
 
     def inside(x, y):
-        return 0 <= x < w and 0 <= y < h and dist[y][x] <= 1
+        return 0 <= x < w and 0 <= y < h and depth[y][x] >= 0
 
     def beside(x, y, test):
         return any(test(x + dx, y + dy) for dx, dy in ((0, -1), (0, 1), (-1, 0), (1, 0)))
@@ -743,8 +758,8 @@ def skunk_cloud(step):
             elif x % 2 == (y // 2 + step) % 2 and y % 2 == 0:
                 g.p(x, y, CLOUD_INK["fill"] if (x + y) % 8 else CLOUD_INK["dark"])
     for x0, y0 in CLOUD_WISPS:
-        for k in range(6):
-            g.p(x0 + (k + step) % 3 - 1, y0 + k, CLOUD_INK["wisp"])
+        for j in range(max(1, math.floor(6 * sy + 0.5))):
+            g.p(math.floor(x0 * sx) + (j + step) % 3 - 1, math.floor(y0 * sy) + j, CLOUD_INK["wisp"])
     return g
 
 
@@ -1161,89 +1176,91 @@ def kid(wave=False, mood="happy", bob=0):
 
 
 def ice_cream_truck(f):
-    """The ice cream truck parked ahead across two lanes, from straight behind like obstacles.parked_car: a
-    wide box van, squat, with its cone sign on the roof. The rear doors split down the middle, each with a
-    window; a pink drip stripe runs across the doors; tall tail lights sit at the outer corners, amber
-    blinkers under them; then the plate, the bumper and both rear wheels. f swaps the lit blinker and the
-    music note. The road outline and the lit rim."""
-    g = edged(Grid(88, 44))
-    for x in (8, 66):
-        g.rect(x, 35, 14, 8, "ink")
-        g.rect(x, 35, 3, 7, "dslate")
+    """The ice cream truck parked ahead across two lanes, 104x55 (64n-24 wide for n = 2), from straight behind
+    like obstacles.parked_car: a wide box van, squat, with its cone sign on the roof. The rear doors split down
+    the middle, each with a window; a pink drip stripe runs across the doors; tall tail lights sit at the outer
+    corners, amber blinkers under them; then the plate, the bumper and both rear wheels. f swaps the lit
+    blinker and the music note. Drawn in its own pixels, symmetric about the seam on columns 51 and 52. The
+    road outline and the lit rim."""
+    g = edged(Grid(104, 55))
+    for x in (10, 77):
+        g.rect(x, 44, 17, 10, "ink")
+        g.rect(x, 44, 3, 9, "dslate")
     # roof edge, then the box body: lit along the top and the left, shaded on the right
-    g.rect(5, 10, 78, 2, "lgrey")
-    g.rect(5, 10, 78, 1, "white")
-    g.rect(3, 12, 82, 22, "white")
-    g.rect(80, 12, 5, 22, "lgrey")
-    g.p(3, 12, None)
-    g.p(84, 12, None)
+    g.rect(6, 12, 92, 3, "lgrey")
+    g.rect(6, 12, 92, 1, "white")
+    g.rect(3, 15, 98, 27, "white")
+    g.rect(95, 15, 6, 27, "lgrey")
+    g.p(3, 15, None)
+    g.p(100, 15, None)
     # the rear doors: a seam down the middle, a window in each, handles by the seam
-    g.rect(43, 13, 2, 20, "lgrey")
-    for x in (16, 49):
-        g.rect(x, 14, 23, 9, "navy")
-        g.rect(x, 14, 23, 1, "slate")
-        g.tri((x + 3, 22), (x + 9, 15), (x + 13, 15), "slate")
-    g.rect(40, 24, 2, 3, "grey")
-    g.rect(46, 24, 2, 3, "grey")
-    # the drip stripe: a pink band with drips hanging from it on even columns
-    g.rect(3, 26, 82, 3, "pink")
-    g.rect(3, 28, 82, 1, "mauve")
-    for x in range(10, 80, 6):
-        g.rect(x, 29, 2, 1 + (x // 6) % 2, "pink")
+    g.rect(51, 16, 2, 25, "lgrey")
+    for x in (19, 58):
+        g.rect(x, 17, 27, 11, "navy")
+        g.rect(x, 17, 27, 1, "slate")
+        g.tri((x + 4, 27), (x + 11, 18), (x + 16, 18), "slate")
+    g.rect(47, 30, 2, 4, "grey")
+    g.rect(55, 30, 2, 4, "grey")
+    # the drip stripe: a pink band with drips hanging from it, every 7 columns
+    g.rect(3, 32, 98, 4, "pink")
+    g.rect(3, 35, 98, 1, "mauve")
+    for x in range(12, 92, 7):
+        g.rect(x, 36, 2, 1 + (x // 7) % 2, "pink")
     # tail lights up the outer corners, blinkers under them
-    for x in (4, 79):
-        g.rect(x, 13, 5, 12, "red")
-        g.rect(x, 13, 5, 1, "pink")
-        g.rect(x + 4, 14, 1, 11, "dred")
-    g.rect(4, 30, 5, 3, "yellow" if f else "amber")
-    g.rect(79, 30, 5, 3, "amber" if f else "yellow")
-    g.rect(37, 29, 14, 5, "cream")
-    g.rect(39, 31, 10, 1, "tan")
+    for x in (4, 94):
+        g.rect(x, 16, 6, 15, "red")
+        g.rect(x, 16, 6, 1, "pink")
+        g.rect(x + 5, 17, 1, 14, "dred")
+    g.rect(4, 37, 6, 4, "yellow" if f else "amber")
+    g.rect(94, 37, 6, 4, "amber" if f else "yellow")
+    g.rect(44, 36, 16, 6, "cream")
+    g.rect(46, 38, 12, 1, "tan")
     # bumper across the full width
-    g.rect(2, 34, 84, 3, "dslate")
-    g.rect(2, 34, 84, 1, "slate")
-    g.rect(2, 34, 1, 3, "grey")
+    g.rect(2, 42, 100, 4, "dslate")
+    g.rect(2, 42, 100, 1, "slate")
+    g.rect(2, 42, 1, 4, "grey")
     # cone sign on the roof
-    g.tri((40, 5), (48, 5), (44, 12), "tan")
-    g.p(42, 6, "brown")
-    g.p(45, 7, "brown")
-    g.p(43, 9, "brown")
-    g.ell(44, 4, 4, 3, "pink", "mauve", "white")
+    g.tri((47, 6), (57, 6), (52, 15), "tan")
+    g.p(49, 8, "brown")
+    g.p(53, 9, "brown")
+    g.p(51, 11, "brown")
+    g.ell(52, 5, 5, 3.5, "pink", "mauve", "white")
     if f:
-        g.rect(62, 2, 1, 6, "plum")
-        g.rect(62, 2, 3, 1, "plum")
-        g.rect(60, 7, 2, 2, "plum")
+        g.rect(73, 2, 1, 7, "plum")
+        g.rect(73, 2, 3, 1, "plum")
+        g.rect(71, 8, 2, 2, "plum")
     else:
-        g.rect(25, 3, 1, 6, "plum")
-        g.rect(25, 3, 3, 1, "plum")
-        g.rect(23, 8, 2, 2, "plum")
+        g.rect(30, 3, 1, 7, "plum")
+        g.rect(30, 3, 3, 1, "plum")
+        g.rect(28, 9, 2, 2, "plum")
     return rim(g, LIT)
 
 
 def construction(f):
-    """f swaps which lamp is lit. A squat front elevation standing on the road line: the board, the lower rail
-    right under it on short legs, the lamps and the detour sign. Striped like obstacles.barrier so the stripes
-    hold steady at depth: the board's stripes are 8px orange every 16px, leaning right in 2-row stairs that
-    start on even columns and stop at the board's ends, and its bottom stair is the shaded lower edge. The
-    lower rail's squares and the posts are 4px wide on even columns. The road outline and the lit rim."""
-    g = edged(Grid(56, 32))
-    for x in (6, 46):
-        g.rect(x, 16, 4, 14, "grey")
-        g.rect(x + 2, 16, 2, 14, "slate")
-    for k, (base, stripe) in enumerate((("white", "orange"),) * 3 + (("lgrey", "rust"),)):
-        y = 16 + 2 * k
-        g.rect(3, y, 50, 2, base)
-        for x in range(10 - 2 * k - 16, 53, 16):
-            g.rect(max(x, 3), y, min(x + 8, 53) - max(x, 3), 2, stripe)
-    g.rect(3, 24, 50, 4, "white")
-    for x in range(4, 52, 8):
-        g.rect(x, 24, 4, 4, "orange")
-    g.ell(7.5, 12, 2.5, 2.5, "amber" if f else "orange", "orange", "yellow" if f else None)
-    g.ell(47.5, 12, 2.5, 2.5, "orange" if f else "amber", "orange", None if f else "yellow")
-    g.rect(20, 7, 16, 8, "amber")
-    g.rect(20, 7, 16, 1, "orange")
-    g.rect(23, 10, 10, 2, "plum")
-    g.tri((21, 11), (25, 8), (25, 14), "plum")
+    """One lane's barrier, 64x40, repeated across every lane; f swaps which lamp is lit. A squat front
+    elevation standing on the road line: the board, the lower rail right under it on short legs, the lamps
+    and the detour sign. Striped like obstacles.barrier so the stripes hold steady at depth: the board's 5
+    stairs of 2 rows are striped 10px orange every 20px, leaning right 2px a stair and stopping at the board's
+    ends, and its bottom stair is the shaded lower edge. The lower rail's squares are 4px wide on even
+    columns, as are the posts. The road outline and the lit rim."""
+    g = edged(Grid(64, 40))
+    for x in (7, 53):
+        g.rect(x, 20, 4, 19, "grey")
+        g.rect(x + 2, 20, 2, 19, "slate")
+    for k, (base, stripe) in enumerate((("white", "orange"),) * 4 + (("lgrey", "rust"),)):
+        y = 20 + 2 * k
+        g.rect(3, y, 58, 2, base)
+        for x in range(12 - 2 * k - 20, 61, 20):
+            g.rect(max(x, 3), y, min(x + 10, 61) - max(x, 3), 2, stripe)
+    g.rect(3, 30, 58, 5, "white")
+    for x in range(4, 60, 8):
+        g.rect(x, 30, 4, 5, "orange")
+    g.ell(9, 16, 3, 3, "amber" if f else "orange", "orange", "yellow" if f else None)
+    g.ell(55, 16, 3, 3, "orange" if f else "amber", "orange", None if f else "yellow")
+    g.rect(22, 8, 20, 10, "amber")
+    g.rect(22, 8, 20, 1, "orange")
+    g.rect(27, 12, 12, 2, "plum")
+    g.tri((24, 13), (29, 9), (29, 17), "plum")
     return rim(g, LIT)
 
 
