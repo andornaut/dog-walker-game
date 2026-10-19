@@ -3,6 +3,8 @@
 export const FEEDBACK_ART = {
   // Coins bursting out at the pack.
   coinBurst: { key: "fx-coin-burst", tag: "play" },
+  // Over each dog when a treat cures the pack's debuffs.
+  curePuff: { key: "fx-dust", tag: "play" },
   // The doghouse's flash as a lost heart lands, played on a second house over the slot's.
   doghouseLoss: { key: "ui-doghouse", tag: "heart-loss" },
   // The pop over the dog, then the small heart flying into the doghouse.

@@ -383,7 +383,7 @@ export class RunScene extends Scene {
         input.afterPulls(event.step.pulled);
         return;
       case "treat":
-        moments.treatGiven(event.dog, event.change);
+        moments.treatGiven(event.dog, event.change, event.cured);
         return;
       case "walked":
         moments.walked(event.step, packPoint(event.step.walk));

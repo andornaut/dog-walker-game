@@ -21,7 +21,7 @@ import {
   type MoneyChange,
 } from "./causes";
 import { maxHearts } from "./dogs";
-import { lastingFor, longerLasting } from "./durations";
+import { debuffLasting, lastingFor, longerLasting, refreshedDebuff } from "./durations";
 import { statParts } from "./modifiers";
 import {
   type Cents,
@@ -382,11 +382,12 @@ function applyEffect(
   switch (effect.kind) {
     case "debuff": {
       // Refreshing a debuff the pack has leaves one copy: debuffs never stack.
-      const lasting = lastingFor(data.debuffs[effect.debuff].duration, state);
+      const { duration } = data.debuffs[effect.debuff];
+      const applied = { debuff: effect.debuff, ...debuffLasting(data.tuning, duration, state) };
       const held = state.debuffs.find(({ debuff }) => debuff === effect.debuff);
       const others = state.debuffs.filter(({ debuff }) => debuff !== effect.debuff);
-      const refreshed = held === undefined ? lasting : longerLasting(held, lasting);
-      return unchanged({ ...state, debuffs: [...others, { debuff: effect.debuff, ...refreshed }] });
+      const refreshed = held === undefined ? applied : refreshedDebuff(held, applied);
+      return unchanged({ ...state, debuffs: [...others, refreshed] });
     }
     case "fulfilNeed":
       return unchanged(fulfilNeed(data, effect.need, state));

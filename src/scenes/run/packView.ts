@@ -22,6 +22,7 @@ import type { StatusMark } from "../../runner/statuses";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
 import { drawPixelLine } from "../draw";
+import { FEEDBACK_ART } from "../feedbackArt";
 import { trotOffRoad } from "../feedbackMoments";
 import {
   type DogSignal,
@@ -152,6 +153,16 @@ export class PackView {
       const sprite = this.dogSprites.get(dog);
       if (sprite?.visible === true) {
         playPullFail(this.scene, dogTop(sprite), DEPTH.fx);
+      }
+    }
+  }
+
+  // Debuffs a treat cured end with a puff over every dog on the road.
+  debuffsCured(): void {
+    const { key, tag } = FEEDBACK_ART.curePuff;
+    for (const sprite of this.dogSprites.values()) {
+      if (sprite.visible) {
+        playEffect(this.scene, key, tag, dogTop(sprite), DEPTH.fx);
       }
     }
   }

@@ -2,7 +2,7 @@ import type { Scene } from "phaser";
 
 import { hitCue } from "../../audio/sound";
 import { gameData } from "../../data";
-import type { DogId, HintTrigger } from "../../data/types";
+import type { DebuffId, DogId, HintTrigger } from "../../data/types";
 import { changeLabels } from "../../hud/hudView";
 import {
   endScreenDelayMs,
@@ -130,9 +130,13 @@ export class RunMoments {
     }
   }
 
-  // A treat from the doghouses: the HUD floats the change's label when the treat lands.
-  treatGiven(dog: DogId, change: Change): void {
+  // A treat from the doghouses: the HUD floats the change's label when the treat lands. Debuffs
+  // it cured end with a puff over the pack.
+  treatGiven(dog: DogId, change: Change, cured: readonly DebuffId[]): void {
     this.changes.push(change);
+    if (cured.length > 0) {
+      this.deps.pack.debuffsCured();
+    }
     const cue: TreatCue = { dog, labels: changeLabels(gameData, [change]) };
     this.scene.events.emit(TREAT_EVENT, cue);
   }

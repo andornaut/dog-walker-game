@@ -25,10 +25,10 @@ import {
   affectText,
   capitalize,
   conditionText,
+  debuffText,
   effectText,
   ENERGY_NAMES,
   formatDollars,
-  modifierText,
   SIZE_NAMES,
   TEMPERAMENT_NAMES,
   TRAIT_NAMES,
@@ -294,9 +294,7 @@ function debuffsSection(data: GameData): Section {
     headers: ["Debuff", "Effect"],
     rows: Object.values(data.debuffs).map((debuff) => [
       debuff.name,
-      debuff.modifiers
-        .map((modifier) => modifierText(data.tuning, { ...modifier, duration: debuff.duration }))
-        .join(", "),
+      debuffText(data.tuning, debuff),
     ]),
     title: "Debuffs",
   };

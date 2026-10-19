@@ -65,7 +65,11 @@ export type ModifierSource = EffectSource | { readonly debuff: DebuffId; readonl
 // lasts through.
 export type ActiveModifier = Lasting & Modifier & { readonly source: ModifierSource };
 
-export type ActiveDebuff = Lasting & { readonly debuff: DebuffId };
+// secondsLeft is the walking time a timed debuff has left; absent, it lasts to its zone's end.
+export type ActiveDebuff = Lasting & {
+  readonly debuff: DebuffId;
+  readonly secondsLeft?: number;
+};
 
 // No card opens for the encounter while the immunity lasts.
 export type ActiveImmunity = Lasting & { readonly encounter: EncounterId };

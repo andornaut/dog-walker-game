@@ -63,6 +63,10 @@ export const HINTS = {
     text: "A skunk's cloud catches some dogs, not always all.",
     trigger: { encounter: "skunk", kind: "encounter" },
   },
+  spooked: {
+    text: "Spooked: lane changes are slower for a while. A treat calms them.",
+    trigger: { debuff: "spooked", kind: "debuff" },
+  },
   squirrel: {
     text: "Chasers want that squirrel. Hold tight or let them chase.",
     trigger: { encounter: "squirrel", kind: "encounter" },
@@ -75,6 +79,10 @@ export const HINTS = {
     text: "Tap an icon to see what it does.",
     trigger: { kind: "strip" },
   },
+  tangled: {
+    text: "Tangled: each lane change makes the next one wait. A treat sorts them out.",
+    trigger: { debuff: "tangled", kind: "debuff" },
+  },
   tip: {
     text: "Each tip is $1. Smaller packs see a few more.",
     trigger: { kind: "tip" },
@@ -82,6 +90,10 @@ export const HINTS = {
   treat: {
     text: "Tap a doghouse to give its owner a treat.",
     trigger: { kind: "treat" },
+  },
+  tuckeredOut: {
+    text: "Tuckered out: needs turn urgent faster until the zone ends. A treat perks them up.",
+    trigger: { debuff: "tuckeredOut", kind: "debuff" },
   },
   upgrade: {
     text: "Pick one. Each card says how long it lasts.",

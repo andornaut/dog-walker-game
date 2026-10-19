@@ -1,6 +1,8 @@
 import type { DogId, EncounterId, GameData, MoneyEffect, NeedId, NeedSpotId } from "../data/types";
 import { applyEffectsNow, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
 import { needUrgentSeconds } from "../rules/dogs";
+import { modifiedStat } from "../rules/modifiers";
+import { packModifiers } from "../rules/run";
 import { addCents, read } from "../rules/units";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
@@ -8,8 +10,9 @@ import { chance, type Random } from "./random";
 
 // Each dog's need fills while the walk moves: urgent after its energy's needUrgentByEnergy
 // seconds, gone wrong needGoneWrong seconds later, when it starts again. A nervous dog left
-// alone by firings fills nervousAloneUrgency times as fast. Steering into a spot meets the need of every
-// dog that has it, except a nervous dog's at a spot that is another dog.
+// alone by firings fills nervousAloneUrgency times as fast, and needUrgency modifiers scale
+// every dog's fill. Steering into a spot meets the need of every dog that has it, except a
+// nervous dog's at a spot that is another dog.
 
 export type NeedData = ChoiceData & Pick<GameData, "needs" | "needSpots">;
 
@@ -59,14 +62,16 @@ export function isNervousAlone(
 }
 
 // How many seconds the dog's need fills per second walked.
+// The needUrgency modifiers, such as Tuckered out's, apply on top.
 export function needFillRate(
-  data: Pick<GameData, "dogs" | "tuning">,
-  run: Pick<RunState, "pack">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack">,
   dog: DogId,
 ): number {
-  return isNervousAlone(data, run, dog)
+  const base = isNervousAlone(data, run, dog)
     ? read(data.tuning, "multipliers", "nervousAloneUrgency")
     : 1;
+  return modifiedStat(data.tuning, packModifiers(data, run), "needUrgency", base);
 }
 
 // The acrobatic dogs whose need a spot that is another dog just met, who flourish.

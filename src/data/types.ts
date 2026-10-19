@@ -80,6 +80,7 @@ export type CountKey = NumberKeys<LiveTuning["counts"]>;
 export type HeartsKey = NumberKeys<LiveTuning["hearts"]>;
 export type MoneyKey = NumberKeys<LiveTuning["money"]>;
 export type MultiplierKey = NumberKeys<LiveTuning["multipliers"]>;
+export type SecondsKey = NumberKeys<LiveTuning["seconds"]>;
 export type PriceKey = keyof LiveTuning["money"]["prices"];
 
 type Table<Key extends PropertyKey> = Readonly<Record<Key, number>>;
@@ -206,14 +207,21 @@ export type Duration = "nextZone" | "run" | "zone";
 export type CountStat = "treatReach";
 export type HeartsStat = "maxHearts" | "startHearts";
 export type MoneyStat = "costPerDog" | "startMoney" | "tipValue";
+// The seconds lane input stays locked after each lane change, from 0.
+export type SecondsStat = "laneChangeLock";
 export type Stat =
   | CountStat
   | HeartsStat
   | MoneyStat
+  | SecondsStat
   | "chaserSquirrelPulls"
   | "fees"
   | "inputLock"
+  // How long one lane change takes.
+  | "laneMove"
   | "needSpotSpawns"
+  // How fast every dog's need fills toward urgent.
+  | "needUrgency"
   | "obstacleSpawns"
   // The road's speed, which the spawns and movers are planned for.
   | "scrollSpeed"
@@ -225,6 +233,7 @@ export type Modifier = { readonly duration?: Duration } & (
   | { readonly by: CountKey; readonly operation: "add"; readonly stat: CountStat }
   | { readonly by: HeartsKey; readonly operation: "add"; readonly stat: HeartsStat }
   | { readonly by: MoneyKey; readonly operation: "add"; readonly stat: MoneyStat }
+  | { readonly by: SecondsKey; readonly operation: "add"; readonly stat: SecondsStat }
   | { readonly by: MultiplierKey; readonly operation: "multiply"; readonly stat: Stat }
 );
 
@@ -477,8 +486,14 @@ export type Walker = WalkerUnlock & {
   readonly spriteKey: string;
 };
 
+// "zone": the rest of the current zone. seconds: that many seconds of walking, a time that
+// stops during a hit stop and under a card, and never past the zone's end.
+export type DebuffDuration = "zone" | { readonly seconds: SecondsKey };
+
+// curedByTreat: a treat given to any dog clears it.
 export interface Debuff {
-  readonly duration: Duration;
+  readonly curedByTreat: boolean;
+  readonly duration: DebuffDuration;
   readonly modifiers: readonly Modifier[];
   readonly name: string;
 }

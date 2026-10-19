@@ -27,7 +27,7 @@ import {
 
 export type PullData = Pick<
   GameData,
-  "dogs" | "encounters" | "minorObstacles" | "needSpots" | "tuning" | "world"
+  "debuffs" | "dogs" | "encounters" | "minorObstacles" | "needSpots" | "tuning" | "world"
 >;
 export type PullGeometry = Pick<RoadGeometry, "laneCount" | "packBand" | "roadTop">;
 
@@ -108,7 +108,7 @@ export interface PullPose {
 // A lane change caused by a dog: one lane toward direction, held on the road, then lane input
 // locks for the dog's lock. Dropped during a hit stop, as steering is.
 export function pullWalk(
-  data: Pick<GameData, "dogs" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
   laneCount: number,
   dog: DogId,
   direction: LaneDirection,
@@ -268,7 +268,7 @@ export function laneBlockedWithin(
 // The time a pull must leave before an obstacle reaches the pack in its new lane: the pull's
 // lane move, the dog's input lock, the reaction window and a lane move back out.
 export function pullHorizon(
-  data: Pick<GameData, "dogs" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
   dog: DogId,
   walk: Walk,
 ): number {

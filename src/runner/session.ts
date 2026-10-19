@@ -1,4 +1,4 @@
-import type { DogId } from "../data/types";
+import type { DebuffId, DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import {
@@ -93,7 +93,12 @@ export type SessionEvent =
   | { readonly input: SessionInput; readonly kind: "input"; readonly timeMs: number }
   | { readonly distance: number; readonly kind: "needs"; readonly step: NeedStep }
   | { readonly kind: "pulled"; readonly step: PullStep }
-  | { readonly change: HeartChange; readonly dog: DogId; readonly kind: "treat" }
+  | {
+      readonly change: HeartChange;
+      readonly cured: readonly DebuffId[];
+      readonly dog: DogId;
+      readonly kind: "treat";
+    }
   | { readonly kind: "walked"; readonly step: WalkStep }
   | {
       readonly after: RunState;
@@ -249,9 +254,9 @@ function treated(data: SessionData, events: SessionEvent[], slot: number, walk: 
   if (dog === undefined) {
     return walk;
   }
-  const { change, state: run } = giveTreat(data, dog, walk.run);
+  const { change, cured, state: run } = giveTreat(data, dog, walk.run);
   if (change !== null) {
-    events.push({ change, dog, kind: "treat" });
+    events.push({ change, cured, dog, kind: "treat" });
   }
   return { ...walk, run };
 }

@@ -1,6 +1,7 @@
 import type {
   AffectRule,
   Condition,
+  Debuff,
   DogId,
   Duration,
   Effect,
@@ -54,8 +55,11 @@ const STAT_NAMES: { readonly [S in Stat]: string } = {
   costPerDog: "card costs per dog",
   fees: "fees",
   inputLock: "lane-input lock after a pull",
+  laneChangeLock: "lane-input lock after a lane change",
+  laneMove: "lane change time",
   maxHearts: "max ♥",
   needSpotSpawns: "need spots",
+  needUrgency: "need fill speed",
   obstacleSpawns: "obstacles",
   scrollSpeed: "road speed",
   startHearts: "starting ♥",
@@ -185,6 +189,8 @@ function addedText(modifier: Modifier, value: number): string {
       return `${sign(value)}${formatDollars(cents(value))}`;
     case "treatReach":
       return `${sign(value)}${Math.abs(value)} ${Math.abs(value) === 1 ? "lane" : "lanes"}`;
+    case "laneChangeLock":
+      return `${sign(value)}${Math.abs(value)}s`;
     default:
       return `${sign(value)}${Math.abs(value)}`;
   }
@@ -254,6 +260,18 @@ export function effectText(data: TextData, effects: readonly Effect[]): string {
 export function effectClause(data: TextData, effects: readonly Effect[]): string {
   const text = effectText(data, effects);
   return text.charAt(0).toLowerCase() + text.slice(1);
+}
+
+// A debuff's modifiers and how long it lasts: "lane change time +25% for 10 seconds, or until
+// a treat".
+export function debuffText(tuning: LiveTuning, debuff: Debuff): string {
+  const { curedByTreat, duration, modifiers } = debuff;
+  const changes = modifiers.map((modifier) => modifierText(tuning, modifier)).join(", ");
+  const lasts =
+    duration === "zone"
+      ? DURATION_TEXT.zone
+      : `for ${read(tuning, "seconds", duration.seconds)} seconds`;
+  return `${changes} ${lasts}${curedByTreat ? ", or until a treat" : ""}`;
 }
 
 // A named item and its effect, lower case after the colon: "Big tipper: tip value +50% for

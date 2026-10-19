@@ -127,10 +127,14 @@ export const TUNING = {
     // A slow walker's fees, and the factor on its road speed, zone length and spawns.
     slowWalkerFees: 0.9,
     slowWalkerSpeed: 0.9,
+    // How long a lane change takes while the pack is Spooked.
+    spookedLaneMove: 1.25,
     // How many tips appear for the rest of the zone while the pack is Stinky.
     stinkyTipSpawns: 0.5,
     // How many tips appear in a zone, by the number of dogs in the pack at its start.
     tipSpawnsByPackSize: { 1: 1.2, 2: 1.1, 3: 1 },
+    // How fast every dog's need fills toward urgent while the pack is Tuckered out.
+    tuckeredUrgency: 1.5,
   },
   // Screen pixels at the 360x560 render size, or pixels per second for a speed.
   pixels: {
@@ -177,8 +181,14 @@ export const TUNING = {
     pullReactionWindow: 0.6,
     // How long a dog strains toward its target, with its bubble, before it pulls.
     pullTell: 1,
-    // How long Soaked and Spooked show on a dog; they change nothing in the rules.
+    // How long the Spooked debuff lasts, in walking time.
+    spookedSeconds: 10,
+    // How long Soaked shows on a dog; it changes nothing in the rules.
     statusVisualSeconds: 10,
+    // While the pack is Tangled, lane input stays locked this long after each lane change.
+    tangledLaneLock: 0.3,
+    // How long the Tangled debuff lasts, in walking time.
+    tangledSeconds: 10,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 144,
   },

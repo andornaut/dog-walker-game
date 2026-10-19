@@ -17,6 +17,8 @@ export function modifierValue(tuning: LiveTuning, modifier: Modifier): number {
       return read(tuning, "hearts", modifier.by);
     case "treatReach":
       return read(tuning, "counts", modifier.by);
+    case "laneChangeLock":
+      return read(tuning, "seconds", modifier.by);
     default:
       return assertNever(modifier);
   }

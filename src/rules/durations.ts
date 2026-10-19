@@ -1,6 +1,7 @@
-import type { Duration } from "../data/types";
-import type { RunState } from "../state/runState";
+import type { DebuffDuration, Duration, LiveTuning } from "../data/types";
+import type { ActiveDebuff, RunState } from "../state/runState";
 import { assertNever } from "./assertNever";
+import { read } from "./units";
 
 // The last zone an effect lasts through, by zone index. Absent: it lasts the run.
 export interface Lasting {
@@ -33,6 +34,45 @@ export function longerLasting(a: Lasting, b: Lasting): Lasting {
     return {};
   }
   return { untilZone: Math.max(a.untilZone, b.untilZone) };
+}
+
+// A debuff applied now: it lasts the rest of the zone, and a timed one only its seconds of it.
+export function debuffLasting(
+  tuning: LiveTuning,
+  duration: DebuffDuration,
+  state: Pick<RunState, "zoneIndex">,
+): Omit<ActiveDebuff, "debuff"> {
+  const untilZone = state.zoneIndex;
+  return duration === "zone"
+    ? { untilZone }
+    : { secondsLeft: read(tuning, "seconds", duration.seconds), untilZone };
+}
+
+// A debuff applied again: whichever runs longer, the one held or the new one.
+export function refreshedDebuff(held: ActiveDebuff, applied: ActiveDebuff): ActiveDebuff {
+  const { untilZone } = longerLasting(held, applied);
+  const timed = held.secondsLeft !== undefined && applied.secondsLeft !== undefined;
+  return {
+    debuff: applied.debuff,
+    ...(timed ? { secondsLeft: Math.max(held.secondsLeft, applied.secondsLeft) } : {}),
+    ...(untilZone === undefined ? {} : { untilZone }),
+  };
+}
+
+// Counts the timed debuffs down by seconds walked; one that runs out ends. Unchanged, the
+// same state comes back.
+export function tickDebuffs(seconds: number, state: RunState): RunState {
+  if (seconds <= 0 || !state.debuffs.some((active) => active.secondsLeft !== undefined)) {
+    return state;
+  }
+  const debuffs = state.debuffs.flatMap((active): ActiveDebuff[] => {
+    if (active.secondsLeft === undefined) {
+      return [active];
+    }
+    const secondsLeft = active.secondsLeft - seconds;
+    return secondsLeft > 0 ? [{ ...active, secondsLeft }] : [];
+  });
+  return { ...state, debuffs };
 }
 
 const outlasts = (endedZone: number, lasting: Lasting) =>

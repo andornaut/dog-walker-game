@@ -1,14 +1,15 @@
 import { splitDepthKey } from "../assets/depthSteps";
-import type { DogId, EncounterId, GameData, ZoneId } from "../data/types";
+import { kebabCase } from "../assets/spriteKeys";
+import type { DebuffId, DogId, Effect, EncounterId, GameData, ZoneId } from "../data/types";
 import { type ScaleStep, snapScale } from "../layout/projection";
 import type { Choice } from "../rules/choices";
 import { encounterLook, type HasArt } from "../rules/skins";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 
-// What a dog shows over its head on the road and as an icon on its doghouse slot. Stinky is the
-// rules' debuff, shown on the dogs the skunk caught; Soaked and Spooked are visual only.
-export type DogStatusId = "soaked" | "spooked" | "stinky";
+// What a dog shows over its head on the road and as an icon on its doghouse slot: each debuff,
+// shown on the dogs the card that applied it affected, and Soaked, which is visual only.
+export type DogStatusId = DebuffId | "soaked";
 
 // A status a card's outcome put on a dog, at startMs of run time in zone zoneIndex. art is the
 // statusArt of the encounter's skin that started it, drawn in place of the status's overlay.
@@ -25,28 +26,41 @@ export interface StatusMark {
 const VISUAL_STATUSES: readonly {
   encounter: EncounterId;
   options: readonly number[] | "any";
-  status: Exclude<DogStatusId, "stinky">;
+  status: Exclude<DogStatusId, DebuffId>;
 }[] = [
   // Splash through.
   { encounter: "puddle", options: [0], status: "soaked" },
-  { encounter: "thief", options: "any", status: "spooked" },
 ];
 
-export type StatusData = Pick<GameData, "encounters">;
+export type StatusData = Pick<GameData, "encounters" | "forcedStops" | "needCards">;
+
+// The effects of the option chosen on a card that has options in the data.
+function optionEffects(data: StatusData, source: CardSource, option: number): readonly Effect[] {
+  switch (source.kind) {
+    case "encounter": {
+      const { resolution } = data.encounters[source.encounter];
+      return resolution.kind === "card" ? (resolution.options[option]?.effects ?? []) : [];
+    }
+    case "forcedStop":
+      return data.forcedStops[source.stop].options[option]?.effects ?? [];
+    case "need":
+      return data.needCards[source.card].options[option]?.effects ?? [];
+    default:
+      return [];
+  }
+}
 
 function startedBy(data: StatusData, source: CardSource, option: number): DogStatusId[] {
-  if (source.kind !== "encounter") {
-    return [];
-  }
-  const { resolution } = data.encounters[source.encounter];
-  const effects = resolution.kind === "card" ? (resolution.options[option]?.effects ?? []) : [];
-  const stinky = effects.some((effect) => effect.kind === "debuff" && effect.debuff === "stinky");
+  const debuffs = optionEffects(data, source, option).flatMap((effect) =>
+    effect.kind === "debuff" ? [effect.debuff] : [],
+  );
   const visual = VISUAL_STATUSES.filter(
     (entry) =>
+      source.kind === "encounter" &&
       entry.encounter === source.encounter &&
       (entry.options === "any" || entry.options.includes(option)),
   ).map((entry) => entry.status);
-  return stinky ? ["stinky", ...visual] : visual;
+  return [...debuffs, ...visual];
 }
 
 // The marks after a card's choice: each status the chosen option starts is put on every dog the
@@ -78,8 +92,8 @@ export function startStatuses(
   return [...marks.filter(kept), ...started];
 }
 
-// Every status ends with the zone it started in. Stinky lasts as long as the pack has the
-// debuff; Soaked and Spooked show for visibleSeconds of run time. Fired dogs show nothing.
+// Every status ends with the zone it started in. A debuff shows as long as the pack has it;
+// Soaked shows for visibleSeconds of run time. Fired dogs show nothing.
 // Newest first: marks are kept in the order they started, so of two started at the same
 // time, the later card's comes first.
 export function activeStatuses(
@@ -89,14 +103,16 @@ export function activeStatuses(
   marks: readonly StatusMark[],
 ): StatusMark[] {
   const walking = packDogs(run);
-  const stinky = run.debuffs.some(({ debuff }) => debuff === "stinky");
+  const held = new Set<DogStatusId>(run.debuffs.map(({ debuff }) => debuff));
+  const shows = (status: DogStatusId, startMs: number) =>
+    status === "soaked" ? timeMs - startMs < visibleSeconds * 1000 : held.has(status);
   return [...marks]
     .reverse()
     .filter(
       (mark) =>
         walking.includes(mark.dog) &&
         mark.zoneIndex === run.zoneIndex &&
-        (mark.status === "stinky" ? stinky : timeMs - mark.startMs < visibleSeconds * 1000),
+        shows(mark.status, mark.startMs),
     )
     .sort((a, b) => b.startMs - a.startMs);
 }
@@ -129,7 +145,7 @@ export function statusesKey(active: readonly StatusMark[]): string {
 
 // The loop drawn over a dog with the status, before picking its depth variant.
 export function statusOverlayKey(status: DogStatusId): string {
-  return `fx-status-${status}`;
+  return `fx-status-${kebabCase(status)}`;
 }
 
 // The loop drawn for a mark: its skin's art, or the status's own while that art is missing.

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { DEBUFFS } from "../data/debuffs";
 import { HINTS } from "../data/hints";
-import type { HintId } from "../data/types";
+import type { DebuffId, HintId } from "../data/types";
 import { hintFor } from "./hints";
 
 const data = { hints: HINTS };
@@ -15,5 +16,9 @@ describe("hintFor", () => {
     ["nothing for an event no hint waits for", [], { encounter: "thief", kind: "encounter" }, null],
   ])("returns %s", (_, shown, event, id) => {
     expect(hintFor(data, shown, event)).toEqual(id === null ? null : { id, text: HINTS[id].text });
+  });
+
+  it.each(Object.keys(DEBUFFS) as DebuffId[])("has a first-time hint for %s", (debuff) => {
+    expect(hintFor(data, [], { debuff, kind: "debuff" })).not.toBeNull();
   });
 });

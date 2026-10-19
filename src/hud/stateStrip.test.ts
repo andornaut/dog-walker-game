@@ -4,6 +4,7 @@ import manifest from "../../public/art/manifest.json";
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import type { DebuffId, GearId, UpgradeId, WalkerId } from "../data/types";
+import { read } from "../rules/units";
 import { defined } from "../testing/defined";
 import { activeModifier, testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
@@ -24,6 +25,8 @@ import {
 import { PAUSE_BUTTON, type RunPause } from "./topBar";
 
 const data = { ...gameData, tuning: TEST_TUNING };
+const SPOOKED_PERCENT = Math.round((read(TEST_TUNING, "multipliers", "spookedLaneMove") - 1) * 100);
+const SPOOKED_SECONDS = read(TEST_TUNING, "seconds", "spookedSeconds");
 // Walkers that change what they do, for their text.
 const walkerData = {
   ...data,
@@ -109,7 +112,12 @@ describe("stripText", () => {
     [
       "a debuff's modifiers for its duration",
       { debuff: "stinky", kind: "debuff" },
-      "Stinky: tips −50% for the rest of the zone.",
+      "Stinky: tips −50% for the rest of the zone, or until a treat.",
+    ],
+    [
+      "a timed debuff's modifiers for its seconds",
+      { debuff: "spooked", kind: "debuff" },
+      `Spooked: lane change time +${SPOOKED_PERCENT}% for ${SPOOKED_SECONDS} seconds, or until a treat.`,
     ],
     [
       "a walker's pace and its effects",

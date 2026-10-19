@@ -10,6 +10,7 @@ import { STEP_SECONDS } from "../runner/session";
 import {
   isPickup,
   itemCategory,
+  laneChangeLockSeconds,
   laneMoveSeconds,
   pickupReach,
   type RoadGeometry,
@@ -353,6 +354,9 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
   const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
   const moveSeconds = wholeSteps(laneMoveSeconds(road.data, walk.run));
+  // A lane change's own lock, such as Tangled's, spaces the moves after it.
+  const lockAfterMove = laneChangeLockSeconds(road.data, walk.run);
+  const changeLock = lockAfterMove > 0 ? lockAfterMove + LOCK_MARGIN : 0;
   const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
   const view = botView(bot, road, pulls, walk);
   const moves = planLanes(
@@ -361,7 +365,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
       horizon: lookAheadSeconds,
       laneCount: road.geometry.laneCount,
       moveSeconds,
-      moveStep: Math.max(moveSeconds, laneChangeCooldown),
+      moveStep: Math.max(moveSeconds + changeLock, laneChangeCooldown),
     },
     {
       lane: moving ? motion.to : motion.lane,

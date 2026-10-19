@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
+import { DEBUFFS } from "../data/debuffs";
 import { ENCOUNTERS } from "../data/encounters";
-import type { DogId, EncounterId, ZoneId } from "../data/types";
+import { FORCED_STOPS } from "../data/forcedStops";
+import { NEED_CARDS } from "../data/needs";
+import type { CardOption, DebuffId, DogId, EncounterId, ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
 import type { Choice } from "../rules/choices";
 import type { CardSource } from "../state/runState";
@@ -13,6 +16,7 @@ import {
   markOverlayKey,
   shownStatus,
   startStatuses,
+  type StatusData,
   statusesKey,
   statusesOf,
   type StatusMark,
@@ -20,7 +24,7 @@ import {
   statusOverlayLift,
 } from "./statuses";
 
-const data = { encounters: ENCOUNTERS };
+const data = { encounters: ENCOUNTERS, forcedStops: FORCED_STOPS, needCards: NEED_CARDS };
 const at = { timeMs: 5000, zone: WORLD.firstZone, zoneIndex: 1 };
 
 function card(encounter: EncounterId, affected: readonly DogId[]) {
@@ -54,12 +58,6 @@ describe("startStatuses", () => {
       status: "stinky",
     },
     { affected: ["pierre"], encounter: "puddle", startsOn: ["Splash through"], status: "soaked" },
-    {
-      affected: ["koda", "biscuit"],
-      encounter: "thief",
-      startsOn: ["Chase them off", "Let it go"],
-      status: "spooked",
-    },
     { affected: ["koda"], encounter: "squirrel", startsOn: [], status: "nothing" },
   ])(
     "starts $status after a $encounter on $startsOn, and nothing on its other options or Skip",
@@ -76,14 +74,51 @@ describe("startStatuses", () => {
     },
   );
 
-  it("starts nothing for a forced stop", () => {
+  it("starts nothing for a forced stop option without a debuff", () => {
     const stop: CardSource = { kind: "forcedStop", stop: "stopSign" };
     expect(startStatuses(data, { affected: ["koda"], source: stop }, at, 0, [])).toEqual([]);
+  });
+
+  // Each debuff on an option of every kind of card that has options: the option starts it on
+  // the dogs the card affected.
+  const withDebuff = (debuff: DebuffId): StatusData => {
+    const effects = [{ debuff, kind: "debuff" } as const];
+    // The first option applies the debuff too.
+    const option = <T extends { readonly options: readonly CardOption[] }>(source: T): T => ({
+      ...source,
+      options: source.options.map((entry, index) =>
+        index === 0 ? { ...entry, effects: [...entry.effects, ...effects] } : entry,
+      ) as unknown as T["options"],
+    });
+    return {
+      ...data,
+      encounters: {
+        ...ENCOUNTERS,
+        thief: { ...ENCOUNTERS.thief, resolution: option(ENCOUNTERS.thief.resolution) },
+      },
+      forcedStops: { ...FORCED_STOPS, stopSign: option(FORCED_STOPS.stopSign) },
+    };
+  };
+  const sources: CardSource[] = [
+    { affected: ["koda", "biscuit"], encounter: "thief", kind: "encounter" },
+    { kind: "forcedStop", stop: "stopSign" },
+  ];
+  it.each(
+    (Object.keys(DEBUFFS) as DebuffId[]).flatMap((debuff) =>
+      sources.map((source) => ({ debuff, kind: source.kind, source })),
+    ),
+  )("starts $debuff from a $kind option that applies it", ({ debuff, source }) => {
+    const affected: DogId[] = ["koda", "biscuit"];
+    const marks = startStatuses(withDebuff(debuff), { affected, source }, at, 0, []);
+    expect(marks).toEqual(
+      affected.map((dog) => ({ dog, startMs: 5000, status: debuff, zoneIndex: 1 })),
+    );
   });
 
   // A Splash skin in the zone with its own soaked overlay; the other zone has no skin.
   const MUD = "fx-status-soaked-mud";
   const skinned = {
+    ...data,
     encounters: {
       ...ENCOUNTERS,
       puddle: {
@@ -127,9 +162,12 @@ describe("activeStatuses", () => {
     { dog: "koda", startMs: 2000, status: "soaked", zoneIndex: 0 },
     { dog: "nugget", startMs: 3000, status: "spooked", zoneIndex: 0 },
   ];
-  const stinkyRun = testState({ koda: 5, nugget: 5 }, { debuffs: [{ debuff: "stinky" }] });
+  const stinkyRun = testState(
+    { koda: 5, nugget: 5 },
+    { debuffs: [{ debuff: "stinky" }, { debuff: "spooked", secondsLeft: 1 }] },
+  );
 
-  it("shows Soaked and Spooked for the visible seconds of run time, newest first", () => {
+  it("shows Soaked for the visible seconds of run time and the held debuffs, newest first", () => {
     expect(activeStatuses(10, stinkyRun, 11_999, marks).map((mark) => mark.status)).toEqual([
       "spooked",
       "soaked",
@@ -146,25 +184,28 @@ describe("activeStatuses", () => {
       { dog: "nugget", startMs: 2000, status: "soaked", zoneIndex: 0 },
       { dog: "nugget", startMs: 2000, status: "spooked", zoneIndex: 0 },
     ];
-    const run = testState({ nugget: 5 });
+    const run = testState({ nugget: 5 }, { debuffs: [{ debuff: "spooked" }] });
     expect(statusesOf(activeStatuses(10, run, 2000, sameTime), "nugget")).toEqual([
       "spooked",
       "soaked",
     ]);
   });
 
-  it("shows Stinky only while the pack has the debuff", () => {
-    const clean = testState({ koda: 5, nugget: 5 });
-    expect(activeStatuses(10, clean, 60_000, marks)).toEqual([]);
-    expect(activeStatuses(10, stinkyRun, 60_000, marks).map((mark) => mark.status)).toEqual([
-      "stinky",
-    ]);
-  });
+  it.each(Object.keys(DEBUFFS) as DebuffId[])(
+    "shows %s only while the pack has the debuff, however long ago it started",
+    (debuff) => {
+      const mark: StatusMark = { dog: "koda", startMs: 0, status: debuff, zoneIndex: 0 };
+      const clean = testState({ koda: 5 });
+      const held = testState({ koda: 5 }, { debuffs: [{ debuff }] });
+      expect(activeStatuses(10, clean, 60_000, [mark])).toEqual([]);
+      expect(activeStatuses(10, held, 60_000, [mark])).toEqual([mark]);
+    },
+  );
 
   it("ends every status with its zone, and shows none on a fired dog", () => {
     const nextZone = testState({ koda: 5, nugget: 5 }, { zoneIndex: 1 });
     expect(activeStatuses(10, nextZone, 2500, marks)).toEqual([]);
-    const fired = testState({ koda: "fired", nugget: 5 }, { debuffs: [{ debuff: "stinky" }] });
+    const fired = testState({ koda: "fired", nugget: 5 }, { debuffs: stinkyRun.debuffs });
     expect(activeStatuses(10, fired, 3500, marks).map((mark) => mark.dog)).toEqual(["nugget"]);
   });
 });

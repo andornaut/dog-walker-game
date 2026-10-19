@@ -113,7 +113,13 @@ function members<K extends string>(record: Readonly<Record<K, true>>): K[] {
 const DOGS = Object.keys(gameData.dogs) as DogId[];
 const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
 const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
-const STATUSES = members<DogStatusId>({ soaked: true, spooked: true, stinky: true });
+const STATUSES = members<DogStatusId>({
+  soaked: true,
+  spooked: true,
+  stinky: true,
+  tangled: true,
+  tuckeredOut: true,
+});
 const TEMPERAMENTS = members<Temperament>({ dramatic: true, fussy: true, laidBack: true });
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
 // The steps below 1 at which any of keys has a variant. Art adds a step to a whole family of

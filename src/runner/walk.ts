@@ -12,11 +12,11 @@ import type { LaneDirection } from "../layout/lanes";
 import { countBump, countDebuffZones } from "../rules/achievements";
 import type { MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
-import { expireAtZoneEnd } from "../rules/durations";
+import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
 import { affectedDogs, hitLabel, hoppingDogs, opensCard } from "../rules/encounters";
 import { modifiedStat } from "../rules/modifiers";
 import { currentZone, walkLength } from "../rules/route";
-import { debuffModifiers, minorBump, payZoneFees, tipValue } from "../rules/run";
+import { debuffModifiers, minorBump, packModifiers, payZoneFees, tipValue } from "../rules/run";
 import { addCents, type Pixels, pixels, read, readTable } from "../rules/units";
 import { zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
@@ -27,6 +27,7 @@ import {
   advanceLaneControl,
   type LaneControl,
   laneControlIn,
+  lockOnArrival,
   lockSteering,
   steerLane,
 } from "./laneControl";
@@ -238,21 +239,31 @@ export function packHasQuirk(
 }
 
 // How long one lane move takes: seconds.laneMove, sledDogLaneSpeed times faster while a sled
-// dog walks.
+// dog walks, then the laneMove modifiers, such as Spooked's.
 export function laneMoveSeconds(
-  data: Pick<GameData, "dogs" | "tuning">,
-  run: Pick<RunState, "pack">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack">,
 ): number {
   const move = read(data.tuning, "seconds", "laneMove");
-  return packHasQuirk(data, run, "sledDog")
+  const base = packHasQuirk(data, run, "sledDog")
     ? move / read(data.tuning, "multipliers", "sledDogLaneSpeed")
     : move;
+  return modifiedStat(data.tuning, packModifiers(data, run), "laneMove", base);
+}
+
+// How long lane input stays locked once a lane change the player made arrives, such as
+// Tangled's: 0 without a laneChangeLock modifier.
+export function laneChangeLockSeconds(
+  data: Pick<GameData, "debuffs" | "tuning">,
+  run: Pick<RunState, "debuffs" | "modifiers">,
+): number {
+  return Math.max(0, modifiedStat(data.tuning, packModifiers(data, run), "laneChangeLock", 0));
 }
 
 export function laneMotionConfig(
-  data: Pick<GameData, "dogs" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
   laneCount: number,
-  run: Pick<RunState, "pack">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack">,
 ): LaneMotionConfig {
   return { laneCount, moveDuration: laneMoveSeconds(data, run) };
 }
@@ -526,9 +537,10 @@ export function planZone(
   };
 }
 
-// Steering during a hit stop is dropped, not queued.
+// Steering during a hit stop is dropped, not queued. A lane change that takes starts the
+// laneChangeLock once the pack arrives, as a pull's lock does.
 export function steerWalk(
-  data: Pick<GameData, "dogs" | "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning">,
   laneCount: number,
   direction: LaneDirection,
   walk: Walk,
@@ -537,7 +549,9 @@ export function steerWalk(
     return walk;
   }
   const config = laneMotionConfig(data, laneCount, walk.run);
-  const control = steerLane(config, direction, walk.road.control);
+  const steered = steerLane(config, direction, walk.road.control);
+  const lock = steered === walk.road.control ? 0 : laneChangeLockSeconds(data, walk.run);
+  const control = lock > 0 ? lockOnArrival(lock, steered) : steered;
   return { ...walk, road: { ...walk.road, control } };
 }
 
@@ -773,7 +787,8 @@ export function stepWalk(
     (item) => isPickup(item.kind) && touchesPack(reaches[item.kind], item),
   );
 
-  let nextRun: RunState = { ...run, zoneDistance: pixels(zoneDistance) };
+  // Timed debuffs count down on walking steps only, so a hit stop or a card holds them.
+  let nextRun: RunState = { ...tickDebuffs(stepSeconds, run), zoneDistance: pixels(zoneDistance) };
   const areaContacts: AreaContact[] = [];
   const bumps: MinorBump[] = [];
   const cards: CardSource[] = [];

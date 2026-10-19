@@ -20,14 +20,23 @@ export function debuffModifiers(
   );
 }
 
+// The run's modifiers and its debuffs' modifiers together.
+export function packModifiers(
+  data: Pick<GameData, "debuffs">,
+  state: Pick<RunState, "debuffs" | "modifiers">,
+): readonly ActiveModifier[] {
+  return state.debuffs.length === 0
+    ? state.modifiers
+    : [...state.modifiers, ...debuffModifiers(data, state)];
+}
+
 // What one tip pickup pays now, with its causes: money.tip, then upgrades and debuffs apply.
 export function tipValue(data: Pick<GameData, "debuffs" | "tuning">, state: RunState): MoneyChange {
   if (packDogs(state).length === 0) {
     return { amount: cents(0), causes: [], dog: null, kind: "money" };
   }
   const tip = read(data.tuning, "money", "tip");
-  const modifiers = [...state.modifiers, ...debuffModifiers(data, state)];
-  const value = statParts(data.tuning, modifiers, "tipValue", tip);
+  const value = statParts(data.tuning, packModifiers(data, state), "tipValue", tip);
   const causes = dollarCauses([
     { amount: tip, kind: "tip" },
     ...modifierCauses(value.contributions),

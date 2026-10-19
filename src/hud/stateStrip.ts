@@ -10,7 +10,7 @@ import type {
 } from "../data/types";
 import { exceedsTapDistance } from "../input/gestures";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
-import { namedEffectText, type TextData } from "../rules/effectText";
+import { debuffText, namedEffectText, type TextData } from "../rules/effectText";
 import type { RunState } from "../state/runState";
 import { type RunPause, walkCovered } from "./topBar";
 
@@ -95,13 +95,8 @@ export function stripText(
 ): string {
   switch (item.kind) {
     case "debuff": {
-      const { duration, modifiers, name } = data.debuffs[item.debuff];
-      const effects = modifiers.map((modifier) => ({
-        ...modifier,
-        duration,
-        kind: "modifier" as const,
-      }));
-      return namedEffectText(data, name, effects);
+      const debuff = data.debuffs[item.debuff];
+      return `${debuff.name}: ${debuffText(data.tuning, debuff)}.`;
     }
     case "gear": {
       const { effects, name } = data.shopGear[item.gear];
