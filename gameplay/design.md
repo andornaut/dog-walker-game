@@ -266,14 +266,14 @@ Effects without "now" or "next zone" last the rest of the run.
 
 ### Walkers
 
-Four walkers, on two axes. Pace is the difficulty: a slow walker's road scrolls slower and pays lower fees, a fast walker's faster with higher fees, the same trade as a harder fork. Charm or hustle is the play style: a charmer's owners start with +♥ but tips are smaller; a hustler's tips are bigger. You start with Casey, the easiest; the others unlock the first time you finish zones 1, 2 and 3, so most players have all four within a few walks.
+Four walkers, on two axes. Pace is the difficulty: every zone takes the same time with any walker, about 2 minutes, but a fast walker covers more road in it. Their road scrolls faster and each zone is longer by the same factor, so more obstacles, tips and need spots pass each second, with less time to react, and fees rise to match; a slow walker's is the reverse. This is the same trade as a harder fork. Charm or hustle is the play style: a charmer's owners start with +♥ but tips are smaller; a hustler's tips are bigger. You start with Casey, the easiest; the others unlock the first time you finish zones 1, 2 and 3, so most players have all four within a few walks.
 
-| Walker | Pace | Style   | Effects                                     | Unlock        |
-| ------ | ---- | ------- | ------------------------------------------- | ------------- |
-| Casey  | Slow | Charmer | Speed ×0.9, fees ×0.9; +♥ start, tips ×0.85 | Start         |
-| Ben    | Slow | Hustler | Speed ×0.9, fees ×0.9; tips ×1.2            | Finish zone 1 |
-| Ada    | Fast | Charmer | Speed ×1.1, fees ×1.1; +♥ start, tips ×0.85 | Finish zone 2 |
-| Trista | Fast | Hustler | Speed ×1.1, fees ×1.1; tips ×1.2            | Finish zone 3 |
+| Walker | Pace | Style   | Effects                                                     | Unlock        |
+| ------ | ---- | ------- | ----------------------------------------------------------- | ------------- |
+| Casey  | Slow | Charmer | Speed and zone length ×0.9, fees ×0.9; +♥ start, tips ×0.85 | Start         |
+| Ben    | Slow | Hustler | Speed and zone length ×0.9, fees ×0.9; tips ×1.2            | Finish zone 1 |
+| Ada    | Fast | Charmer | Speed and zone length ×1.1, fees ×1.1; +♥ start, tips ×0.85 | Finish zone 2 |
+| Trista | Fast | Hustler | Speed and zone length ×1.1, fees ×1.1; tips ×1.2            | Finish zone 3 |
 
 - **Greeting:** the first time you finish an unlocking zone, the next walker waves from the sidewalk in a 1-second popup stop, like the lemonade stand ("Nice pack! Mind if I walk with you sometime?"), then the zone ends as usual
 - A walker's effects stack with the Pocket item and upgrade cards, and the state strip shows them
