@@ -25,7 +25,6 @@ import {
   lastWalkLine,
   logbookOf,
   packCapacity,
-  packFeePerZone,
   packOf,
   partingSpeech,
   type Purchase,
@@ -190,12 +189,6 @@ describe("packOf", () => {
   it("is undefined with no dogs, and the dogs in order otherwise", () => {
     expect(packOf(emptyLoadout)).toBeUndefined();
     expect(packOf({ dogs: ["koda", "biscuit"], gear: null })).toEqual(["koda", "biscuit"]);
-  });
-});
-
-describe("packFeePerZone", () => {
-  it("adds up each picked dog's fee", () => {
-    expect(packFeePerZone(data, { dogs: ["koda", "pierre"], gear: null })).toBe(2300);
   });
 });
 

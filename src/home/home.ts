@@ -3,7 +3,7 @@ import { quipLine } from "../rules/choices";
 import { zoneFee } from "../rules/dogs";
 import { effectClause, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
-import { addCents, type Cents, cents, read } from "../rules/units";
+import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import { dogsWalked, walksPlayed } from "../save/stats";
 import type { PackDogs } from "../state/runState";
@@ -132,14 +132,9 @@ export function packOf(loadout: HomeLoadout): PackDogs | undefined {
 }
 
 // What the picked pack pays for each zone it finishes, before upgrades.
-export function packFeePerZone(
-  data: Pick<GameData, "dogs" | "tuning">,
-  loadout: HomeLoadout,
-): Cents {
-  return loadout.dogs.reduce(
-    (total, dog) => addCents(total, zoneFee(data.tuning, [], data.dogs[dog])),
-    cents(0),
-  );
+// A dog's fee for each zone it is walked, as the shop shows it.
+export function dogFeeText(data: Pick<GameData, "dogs" | "tuning">, dog: DogId): string {
+  return dollarText(zoneFee(data.tuning, [], data.dogs[dog]));
 }
 
 // The name of the walk's zone at position zone, counting from 1, or the world's name for a
@@ -281,7 +276,7 @@ export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): 
   });
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   if (cost === null) {
-    const fee = dollarText(zoneFee(data.tuning, [], data.dogs[dog]));
+    const fee = dogFeeText(data, dog);
     return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: name, fee, kind, temper });
   }
   const price = priceInfo(text, bank, cost);

@@ -23,13 +23,13 @@ import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import { type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../home/hold";
 import {
   buy,
+  dogFeeText,
   dogInfo,
   dollarText,
   gearInfo,
   type HomeLoadout,
   logbookOf,
   packCapacity,
-  packFeePerZone,
   packOf,
   partingSpeech,
   type Purchase,
@@ -1312,7 +1312,7 @@ export class StartScene extends Scene {
       });
       const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
       if (price === null) {
-        const zoneFee = dollarText(packFeePerZone(gameData, { dogs: [id], gear: null }));
+        const zoneFee = dogFeeText(gameData, id);
         this.text(content, x + 41, y + 29, `${zoneFee}/zone`, ink);
       } else {
         this.priceBadge(content, x + 44, y + 28, price, 0);

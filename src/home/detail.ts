@@ -1,10 +1,9 @@
 import type { DogId, GameData, GearId, HomeText } from "../data/types";
-import { zoneFee } from "../rules/dogs";
 import { effectText, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import type { Owned, SaveStats } from "../save/schema";
 import { fillLine } from "../text/lines";
-import { dollarText, type HomeLoadout, purchasePrice } from "./home";
+import { dogFeeText, dollarText, type HomeLoadout, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS } from "./homeText";
 
 type DetailData = Pick<
@@ -49,7 +48,7 @@ export function dogDetail(
 ): DetailCard {
   const { breed, energy, name, owner, size, trait } = data.dogs[dog];
   const counted = stats.dogs[dog] ?? { timesFired: 0, walks: 0, zonesFinished: 0 };
-  const fee = dollarText(zoneFee(data.tuning, [], data.dogs[dog]));
+  const fee = dogFeeText(data, dog);
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   const text = data.homeText.detail;
   return {
