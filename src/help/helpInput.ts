@@ -1,10 +1,10 @@
-import { exceedsTapDistance, type GestureConfig, swipeDirection } from "../input/gestures";
+import { exceedsTapDistance, swipeDirection } from "../input/gestures";
 import { isConfirmKey, laneDirectionForKey } from "../input/keyBindings";
 import type { Point } from "../layout/rect";
 import { helpActionAt } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
 
-export const HELP_GESTURES: Pick<GestureConfig, "swipeMinDistance" | "tapMaxDistance"> = {
+export const HELP_GESTURES = {
   swipeMinDistance: 40,
   tapMaxDistance: 10,
 };

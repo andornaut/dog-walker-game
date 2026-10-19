@@ -2,16 +2,9 @@ import type { LaneDirection } from "../layout/lanes";
 import { containsPoint, type Point } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 
-// A pointer position in screen pixels, at a time in milliseconds on one clock.
-export interface PointerSample extends Point {
-  timeMs: number;
-}
-
-// Distances in screen pixels, times in milliseconds.
+// tapMaxDistance is in screen pixels. A lane step is the road width over laneCount.
 export interface GestureConfig {
-  holdDelayMs: number;
-  holdRepeatMs: number;
-  swipeMinDistance: number;
+  laneCount: number;
   tapMaxDistance: number;
 }
 
@@ -23,16 +16,15 @@ export interface GestureContext {
 export type GestureAction =
   { direction: LaneDirection; kind: "move" } | { kind: "pause" } | { kind: "treat"; slot: number };
 
-// pressed: still within the tap distance, so a tap, hold or swipe.
-// dragging: past the tap distance, so only a swipe.
-// holding: repeating moves until the pointer lifts; movement no longer counts.
-// spent: swiped, so ignored until the pointer lifts.
+// start is where the press went down. tapping holds until the press leaves the tap distance
+// or takes a lane step.
+// topBar: a press on the top bar, which only pauses on a tap and never drags.
+// dragging: a press anywhere else. Lane steps count from anchorX, steps is the net number
+// already emitted since the anchor, and x is the latest pointer x.
 export type GestureState =
   | { kind: "idle" }
-  | { kind: "pressed"; start: PointerSample }
-  | { kind: "dragging"; start: PointerSample }
-  | { direction: LaneDirection; kind: "holding"; nextRepeatMs: number }
-  | { kind: "spent" };
+  | { kind: "topBar"; start: Point; tapping: boolean }
+  | { anchorX: number; kind: "dragging"; start: Point; steps: number; tapping: boolean; x: number };
 
 export interface GestureResult {
   actions: GestureAction[];
@@ -40,11 +32,6 @@ export interface GestureResult {
 }
 
 export const idleGesture: GestureState = { kind: "idle" };
-
-// The top bar and the dog column are buttons: a press there never holds to move.
-function startsOnButton(layout: GestureContext["layout"], { x, y }: PointerSample): boolean {
-  return containsPoint(layout.topBar, x, y) || containsPoint(layout.dogColumn, x, y);
-}
 
 // The column is split into equal bands, so the padding around a slot still counts as it.
 // y is inside the column, so the band is a valid slot.
@@ -79,70 +66,47 @@ export function exceedsTapDistance(maxDistance: number, start: Point, end: Point
   return Math.hypot(end.x - start.x, end.y - start.y) > maxDistance;
 }
 
-// Emits every hold move due by nowMs. The scene calls this each frame; the pointer
-// handlers call it first, so a late frame does not reorder a hold and a release.
-export function advanceGesture(
-  context: GestureContext,
-  nowMs: number,
-  state: GestureState,
-): GestureResult {
-  const { config, layout } = context;
-  let current = state;
-  if (current.kind === "pressed") {
-    const { start } = current;
-    const holdAtMs = start.timeMs + config.holdDelayMs;
-    if (nowMs < holdAtMs || startsOnButton(layout, start)) {
-      return { actions: [], state };
-    }
-    current = { direction: tapDirection(layout, start.x), kind: "holding", nextRepeatMs: holdAtMs };
-  }
-  if (current.kind !== "holding") {
-    return { actions: [], state };
-  }
-  const actions: GestureAction[] = [];
-  let { nextRepeatMs } = current;
-  while (nextRepeatMs <= nowMs) {
-    actions.push(move(current.direction));
-    nextRepeatMs = config.holdRepeatMs > 0 ? nextRepeatMs + config.holdRepeatMs : Infinity;
-  }
-  return { actions, state: { ...current, nextRepeatMs } };
+// Whole lane-widths from the anchor, rounded toward zero so both directions step at the
+// same distance.
+function laneOffset({ config, layout }: GestureContext, anchorX: number, x: number): number {
+  return Math.trunc(((x - anchorX) * config.laneCount) / layout.road.width);
 }
 
-export function pointerDown(
-  context: GestureContext,
-  point: PointerSample,
-  state: GestureState,
-): GestureResult {
-  const { actions } = advanceGesture(context, point.timeMs, state);
-  return { actions, state: { kind: "pressed", start: point } };
+// One move per lane boundary crossed; the sign is the direction.
+function laneSteps(count: number): GestureAction[] {
+  return Array.from({ length: Math.abs(count) }, () => move(count < 0 ? -1 : 1));
 }
 
-// A horizontal swipe moves once, as soon as it passes the minimum distance.
+// A press on the dog column can drag too; it gives a treat only on a tap.
+export function pointerDown(context: GestureContext, point: Point): GestureResult {
+  const state: GestureState = containsPoint(context.layout.topBar, point.x, point.y)
+    ? { kind: "topBar", start: point, tapping: true }
+    : { anchorX: point.x, kind: "dragging", start: point, steps: 0, tapping: true, x: point.x };
+  return { actions: [], state };
+}
+
+// Vertical travel never steps a lane, and travelling back undoes steps one at a time.
 export function pointerMove(
   context: GestureContext,
-  point: PointerSample,
+  point: Point,
   state: GestureState,
 ): GestureResult {
-  const { config } = context;
-  const advanced = advanceGesture(context, point.timeMs, state);
-  const current = advanced.state;
-  if (current.kind !== "pressed" && current.kind !== "dragging") {
-    return advanced;
+  if (state.kind === "idle") {
+    return { actions: [], state };
   }
-  const swipe = swipeDirection(config.swipeMinDistance, current.start, point);
-  if (swipe !== undefined) {
-    return { actions: [...advanced.actions, move(swipe)], state: { kind: "spent" } };
+  const tapping =
+    state.tapping && !exceedsTapDistance(context.config.tapMaxDistance, state.start, point);
+  if (state.kind === "topBar") {
+    return { actions: [], state: { ...state, tapping } };
   }
-  if (
-    current.kind === "pressed" &&
-    exceedsTapDistance(config.tapMaxDistance, current.start, point)
-  ) {
-    return { actions: advanced.actions, state: { kind: "dragging", start: current.start } };
-  }
-  return advanced;
+  const steps = laneOffset(context, state.anchorX, point.x);
+  return {
+    actions: laneSteps(steps - state.steps),
+    state: { ...state, steps, tapping: tapping && steps === state.steps, x: point.x },
+  };
 }
 
-function tapAction(layout: GestureContext["layout"], { x, y }: PointerSample): GestureAction {
+function tapAction(layout: GestureContext["layout"], { x, y }: Point): GestureAction {
   if (containsPoint(layout.topBar, x, y)) {
     return { kind: "pause" };
   }
@@ -152,16 +116,21 @@ function tapAction(layout: GestureContext["layout"], { x, y }: PointerSample): G
   return move(tapDirection(layout, x));
 }
 
-// A tap acts on release, once it can no longer turn into a swipe or a hold.
+// A tap acts on release, once it can no longer turn into a drag.
 export function pointerUp(
   context: GestureContext,
-  point: PointerSample,
+  point: Point,
   state: GestureState,
 ): GestureResult {
-  const { layout } = context;
-  const moved = pointerMove(context, point, state);
-  if (moved.state.kind !== "pressed") {
-    return { actions: moved.actions, state: idleGesture };
+  const { actions, state: moved } = pointerMove(context, point, state);
+  if (moved.kind === "idle" || !moved.tapping) {
+    return { actions, state: idleGesture };
   }
-  return { actions: [...moved.actions, tapAction(layout, moved.state.start)], state: idleGesture };
+  return { actions: [tapAction(context.layout, moved.start)], state: idleGesture };
+}
+
+// A pull moved the pack: lane steps count again from the pointer's latest position, so the
+// next step is a whole lane-width away.
+export function reanchorDrag(state: GestureState): GestureState {
+  return state.kind === "dragging" ? { ...state, anchorX: state.x, steps: 0 } : state;
 }

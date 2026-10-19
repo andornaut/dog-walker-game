@@ -81,8 +81,6 @@ export const TUNING = {
     roadScrollSpeed: 120,
     // Road distance between rows of spawns; a row is all spawns at one distance.
     spawnRowSpacing: 160,
-    // A horizontal drag this long is a swipe.
-    swipeMinDistance: 32,
     // A press that drifts further than this is no longer a tap.
     tapMaxDistance: 10,
   },
@@ -94,9 +92,6 @@ export const TUNING = {
   seconds: {
     // After a hit, obstacles are ignored this long; pickups still count.
     collisionGrace: 1,
-    // A held finger starts repeating lane moves after holdDelay, then every holdRepeat.
-    holdDelay: 0.3,
-    holdRepeat: 0.15,
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
     pullIntervalByEnergy: { calm: 60, hyper: 15, steady: 30 },

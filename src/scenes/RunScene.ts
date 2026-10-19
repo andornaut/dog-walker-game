@@ -8,7 +8,6 @@ import type { DogId, EncounterId } from "../data/types";
 import { recordWalk, walkResult, wrapWords } from "../home/home";
 import { type ChangeLabel, changeLabels, outcomeLabels } from "../hud/hudView";
 import {
-  advanceGesture,
   type GestureAction,
   type GestureContext,
   type GestureState,
@@ -184,9 +183,7 @@ export class RunScene extends Scene {
     const { tuning } = gameData;
     return {
       config: {
-        holdDelayMs: read(tuning, "seconds", "holdDelay") * 1000,
-        holdRepeatMs: read(tuning, "seconds", "holdRepeat") * 1000,
-        swipeMinDistance: read(tuning, "pixels", "swipeMinDistance"),
+        laneCount: LANE_COUNT,
         tapMaxDistance: read(tuning, "pixels", "tapMaxDistance"),
       },
       layout: screenLayout(SCREEN_CONFIG),
@@ -209,7 +206,7 @@ export class RunScene extends Scene {
     }
   }
 
-  // Only the first finger down drives the gestures until it lifts; all on the scene clock.
+  // Only the first finger down drives the gestures until it lifts.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     if (phase === "down" && this.pointerId === undefined) {
       this.pointerId = pointer.id;
@@ -217,7 +214,7 @@ export class RunScene extends Scene {
     if (pointer.id !== this.pointerId) {
       return;
     }
-    const sample = { timeMs: this.time.now, x: pointer.x, y: pointer.y };
+    const sample = { x: pointer.x, y: pointer.y };
     const handler = { down: pointerDown, move: pointerMove, up: pointerUp }[phase];
     const result = handler(this.gestureContext(), sample, this.gesture);
     this.gesture = result.state;
@@ -265,9 +262,6 @@ export class RunScene extends Scene {
     if (before === undefined) {
       return;
     }
-    const gesture = advanceGesture(this.gestureContext(), this.time.now, this.gesture);
-    this.gesture = gesture.state;
-    gesture.actions.forEach((action) => this.act(action));
     if (this.scene.isPaused()) {
       return;
     }
