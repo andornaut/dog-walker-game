@@ -83,10 +83,12 @@ export function addConfetti(
 }
 
 // Badges just earned, side by side in a panel with confetti behind each: they pop in one after
-// another, or with reduced motion are simply there over a still frame of confetti.
+// another, or with reduced motion are simply there over a still frame of confetti. Each name
+// takes up to nameLines lines.
 export function addBadgeCelebration(
   scene: Scene,
   reduced: boolean,
+  nameLines: number,
   rect: Rect,
   ids: readonly AchievementId[],
 ): void {
@@ -111,7 +113,8 @@ export function addBadgeCelebration(
     const image = addBadge(scene, badge.art, true, slot.centerX, badgeY);
     if (strip.named) {
       const style = { color: PALETTE.plum, originX: 0.5, scale: TEXT_SCALE };
-      wrapPixelText(scene, style, slot.width - 4, badge.name).forEach((line, n) => {
+      const name = wrapPixelText(scene, style, slot.width - 4, badge.name);
+      name.slice(0, nameLines).forEach((line, n) => {
         const y = badgeY + BADGE_SIZE / 2 + 6 + n * NAME_LINE_HEIGHT;
         addPixelText(scene, slot.centerX, y, line, style).setDepth(1);
       });

@@ -388,6 +388,17 @@ export interface HomeText {
   readonly stepWalker: string;
 }
 
+// The walk's own text. homeQuestion is what the top bar's Home button asks, with its two
+// answers.
+export interface RunText {
+  readonly homeQuestion: {
+    readonly body: string;
+    readonly headHome: string;
+    readonly keepWalking: string;
+    readonly title: string;
+  };
+}
+
 // What makes an owner speak: a choice that raised or lowered their hearts, firing you, or
 // the player picking their dog on the home screen.
 export type QuipMoment = "fired" | "happier" | "parting" | "upset";
@@ -473,6 +484,7 @@ export interface GameData {
   readonly homeText: HomeText;
   readonly minorObstacles: Readonly<Record<MinorObstacleId, MinorObstacle>>;
   readonly quips: Readonly<Record<DogId, Quips>>;
+  readonly runText: RunText;
   readonly shopGear: Readonly<Record<GearId, Gear>>;
   readonly tuning: LiveTuning;
   readonly upgrades: Readonly<Record<UpgradeId, Upgrade>>;

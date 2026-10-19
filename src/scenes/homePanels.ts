@@ -1,6 +1,7 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
+import { SCREEN_CONFIG } from "../data/screen";
 import type { DetailCard } from "../home/detail";
 import { loopFrame } from "../home/feedback";
 import type { Logbook } from "../home/home";
@@ -15,7 +16,7 @@ import { addNineSlice, addTagImage, TEXT_SCALE } from "./uiKit";
 // afford, the slot sign, the step plates, and the detail card and logbook that open over the
 // screen. Positions inside a piece are the art's, from the style guide.
 
-const SCREEN = { height: 640, width: 360 };
+const SCREEN = SCREEN_CONFIG;
 
 function text(
   scene: Scene,

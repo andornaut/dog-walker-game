@@ -10,7 +10,9 @@ import type { ChangeLabel } from "../hud/hudView";
 import {
   arcControl,
   bowRightControl,
+  bubbleX,
   curvePoint,
+  DOWN_TAIL,
   FIRING_EVENT,
   FIRING_PARTS,
   type FiringCue,
@@ -37,7 +39,7 @@ import { PALETTE } from "./palette";
 import { addPixelText, placePixelText } from "./pixelText";
 import type { RunScene } from "./RunScene";
 import { firstTag, playEffect, playTag } from "./sprites";
-import { tagFrame } from "./uiKit";
+import { artFits, tagFrame } from "./uiKit";
 
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 // Over the doghouses, labels and quips the HUD draws.
@@ -290,7 +292,8 @@ export class HudFeedback {
     return container;
   }
 
-  // The owner's fired line in a quip bubble, its tail pointing back at the face.
+  // The owner's fired line in a quip bubble over the face, kept on screen, its tail pointing
+  // down at the face.
   private addLine(text: string, at: Point, tail: Point): GameObjects.GameObject[] {
     const label = addPixelText(this.scene, 0, 0, text, {
       color: PALETTE.plum,
@@ -299,30 +302,27 @@ export class HudFeedback {
     });
     const width = Math.ceil(label.width) + 2 * LINE.padding;
     const height = Math.ceil(label.height) + 2 * LINE.padding;
-    const y = Math.min(at.y, SCREEN_CONFIG.height - height - 2);
-    placePixelText(label, at.x + LINE.padding, y + LINE.padding);
+    const x = bubbleX(SCREEN_CONFIG.width, at.x, width);
+    const y = at.y - height;
+    placePixelText(label, x + LINE.padding, y + LINE.padding);
     const { corner } = LINE;
     const parts: GameObjects.GameObject[] = [];
     if (this.scene.textures.exists("ui-quip")) {
       parts.push(
         this.scene.add
-          .nineslice(at.x, y, "ui-quip", undefined, width, height, corner, corner, corner, corner)
+          .nineslice(x, y, "ui-quip", undefined, width, height, corner, corner, corner, corner)
           .setOrigin(0)
           .setDepth(DEPTH),
       );
     } else {
       const box = this.scene.add.graphics().setDepth(DEPTH);
-      drawFramedRect(
-        box,
-        { border: PALETTE.plum, fill: PALETTE.cream },
-        { height, width, ...at, y },
-      );
+      drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
       parts.push(box);
     }
-    if (this.scene.textures.exists("ui-quip-tail")) {
+    if (this.scene.textures.exists(DOWN_TAIL.key)) {
       parts.push(
         this.scene.add
-          .image(tail.x, tail.y, "ui-quip-tail")
+          .image(tail.x, tail.y, DOWN_TAIL.key)
           .setOrigin(0)
           .setDepth(DEPTH + 1),
       );
@@ -477,7 +477,7 @@ export class HudFeedback {
       return;
     }
     const key = "ui-doghouse-warn";
-    if (this.scene.textures.exists(key)) {
+    if (artFits(this.scene, key, DOGHOUSE.size)) {
       const rim = this.scene.add.sprite(rect.x, rect.y, key).setOrigin(0);
       playTag(rim, key, still ? "static" : "pulse");
       warning.parts.push(rim);
@@ -527,7 +527,7 @@ export class HudFeedback {
       { height: LOW_CHIP.height, width: Math.ceil(text.width) + 4, x: 0, y: -4 },
     );
     const chip = this.scene.add
-      .container(LAYOUT.road.x + 2, rect.y + 6, [box, text])
+      .container(rect.x + 2, rect.y - LOW_CHIP.height - 2, [box, text])
       .setDepth(DEPTH);
     if (!still) {
       this.tween({ duration: MOMENTS.lowCueMs, targets: chip, y: chip.y - LOW_CHIP.rise });
@@ -536,8 +536,8 @@ export class HudFeedback {
   }
 }
 
-// A fired dog trots off the road by its nearer edge over seconds, under the dog column on the
-// left. Reduced motion fades it out where it stands.
+// A fired dog trots off the road by its nearer edge over seconds, off the side of the screen.
+// Reduced motion fades it out where it stands.
 export function trotOffRoad(
   scene: Scene,
   trot: { road: Rect; seconds: number; still: boolean },

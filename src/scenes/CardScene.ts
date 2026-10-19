@@ -85,7 +85,7 @@ function illustrationKey(option: OptionView | undefined): string {
   return option === undefined ? SKIP_CARD_ART : option.art;
 }
 
-// Up to three cards over the dimmed road. The top bar and dog column stay in view, and
+// Up to three cards over the dimmed road. The top bar and doghouses stay in view, and
 // the HUD marks the dogs the card affects. A disabled option is drawn in greys.
 export class CardScene extends Scene {
   private cardRects: Rect[] = [];
@@ -113,7 +113,7 @@ export class CardScene extends Scene {
     this.holdTimer = undefined;
     this.parts = [];
     this.refusing = false;
-    const { road } = screenLayout(SCREEN_CONFIG);
+    const { roadView: road } = screenLayout(SCREEN_CONFIG);
     this.add
       .rectangle(road.x, road.y, road.width, road.height, PALETTE.ink, DIM_ALPHA)
       .setOrigin(0);
@@ -241,7 +241,7 @@ export class CardScene extends Scene {
     }
     this.pressed = undefined;
     this.drawOutline();
-    const { road } = screenLayout(SCREEN_CONFIG);
+    const { roadView: road } = screenLayout(SCREEN_CONFIG);
     const x = road.x + Math.floor((road.width - LARGE.width) / 2);
     const y = road.y + Math.floor((road.height - LARGE.height) / 2);
     const before = this.children.list.length;

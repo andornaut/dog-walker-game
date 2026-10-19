@@ -41,7 +41,7 @@ export class CelebrationScene extends Scene {
     const height = PANEL.badgesHeight + (cheering.length > 0 ? PANEL.facesHeight : 0);
     const top = Math.round((SCREEN_CONFIG.height - height - BUTTON.gap - BUTTON.height) / 2);
     const panel: Rect = { height, width: PANEL.width, x: PANEL.x, y: top };
-    addBadgeCelebration(this, reduced, panel, achievements);
+    addBadgeCelebration(this, reduced, 2, panel, achievements);
     soundboardOf(this).play("badge");
     const left = SCREEN_CONFIG.width / 2 - ((cheering.length - 1) * FACES.pitch + FACES.size) / 2;
     const facesY = top + PANEL.badgesHeight + FACES.top;

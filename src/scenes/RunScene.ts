@@ -60,6 +60,7 @@ import {
 import { laneCenterXs, type LaneDirection } from "../layout/lanes";
 import { COLLAR_HEIGHT, leashHand, packPlacements } from "../layout/packFormation";
 import { project } from "../layout/projection";
+import type { Rect } from "../layout/rect";
 import {
   drawRoad,
   type PixelImage,
@@ -211,8 +212,10 @@ const ITEM_TAGS = {
   walking: ["walk", "wave", "loop", "idle"],
 } as const;
 // The backdrop band draws over the road's sprites, so what enters at the top of the road
-// comes out from behind the curb.
+// comes out from behind the curb. The road's approach in the band draws over the backdrop,
+// under its gags.
 const DEPTH = {
+  approach: 2400.5,
   backdrop: 2400,
   banner: 3100,
   decal: 2,
@@ -314,6 +317,7 @@ export class RunScene extends Scene {
   // Fired dogs trotting off the road, drawn by their trot and not with the pack.
   private leaving = new Set<DogId>();
   private needsZonePlan = false;
+  private pauseMode: PauseSceneData["mode"] = "menu";
   private pauseOpen = false;
   private packPose: "idle" | "walk" = "walk";
   private pendingInputs: PendingInput[] = [];
@@ -504,10 +508,10 @@ export class RunScene extends Scene {
     loadout: Loadout,
     walkerSprite: string,
   ): void {
-    const { backdrop, road } = layout;
+    const { backdrop, rasterView } = layout;
     this.backdrop = this.add.image(backdrop.x, backdrop.y, "__DEFAULT").setOrigin(0);
     this.backdrop.setDepth(DEPTH.backdrop);
-    this.createRoad(road);
+    this.createRoad(rasterView);
     this.graphics = { leash: this.add.graphics().setDepth(DEPTH.leash) };
     this.drawnLeash = "";
     this.drawnRoad = "";
@@ -775,7 +779,7 @@ export class RunScene extends Scene {
     return due;
   }
 
-  // A treat from the dog column, for the dog in slot; an empty slot takes none.
+  // A treat from the doghouses, for the dog in slot; an empty slot takes none.
   private treated(slot: number, walk: Walk): Walk {
     const dog = walk.run.pack[slot]?.dog;
     if (dog === undefined) {
@@ -866,14 +870,14 @@ export class RunScene extends Scene {
 
   // The hit moment over the stop, framed by the road and the backdrop band beside it.
   private playHit(hit: EncounterCard, seconds: number): void {
-    const { backdrop, road } = LAYOUT;
+    const { backdrop, road, roadView } = LAYOUT;
     const pack = this.packPoint();
     playHitMoment(this, {
       caught: hit.affected.flatMap((dog) => this.dogSprites.get(dog) ?? []),
       centre: { x: pack.x, y: pack.y - 20 },
       depth: DEPTH.popup,
       encounter: hit.encounter,
-      field: { ...road, height: road.y + road.height - backdrop.y, y: backdrop.y },
+      field: { ...roadView, height: roadView.y + roadView.height - backdrop.y, y: backdrop.y },
       label: hitLabelOf(gameData.encounters[hit.encounter]),
       labelX: road.x + road.width / 2,
       seconds,
@@ -932,7 +936,7 @@ export class RunScene extends Scene {
       return;
     }
     this.leaving.add(dog);
-    const trot = { road: LAYOUT.road, seconds: firingSeconds(), still: this.reducedMotion() };
+    const trot = { road: LAYOUT.roadView, seconds: firingSeconds(), still: this.reducedMotion() };
     trotOffRoad(this, trot, sprite, () => {
       this.leaving.delete(dog);
       sprite.setVisible(false);
@@ -1190,19 +1194,31 @@ export class RunScene extends Scene {
     if (this.scene.isActive(SCENE_KEYS.help)) {
       return "help";
     }
-    return this.scene.isActive(SCENE_KEYS.settings) ? "settings" : "open";
+    if (this.scene.isActive(SCENE_KEYS.settings)) {
+      return "settings";
+    }
+    return this.pauseMode === "homeQuestion" ? "confirmHome" : "open";
   }
 
-  // The pause menu over the walk, or over the card that holds it. The walk steps only while
-  // walking, so the menu stops it without pausing this scene: sprite animations loop on, while
-  // tweens and timers stop, keeping a hit moment in step with its hit stop. The card under the
-  // menu pauses. The HUD keeps running, so the top bar's buttons work and redraw.
-  openPause(): void {
+  // The pause menu, or the Home button's question, over the walk or over the card that holds
+  // it. The walk steps only while walking, so the menu stops it without pausing this scene:
+  // sprite animations loop on, while tweens and timers stop, keeping a hit moment in step
+  // with its hit stop. The card under the menu pauses. The HUD keeps running, so the top
+  // bar's buttons work and redraw. Asked while the menu is up, the question replaces it.
+  openPause(mode: PauseSceneData["mode"] = "menu"): void {
     const walk = this.walk;
-    if (walk === undefined || this.pauseOpen || walk.run.phase.kind === "ended") {
+    if (walk === undefined || walk.run.phase.kind === "ended") {
+      return;
+    }
+    if (this.pauseOpen) {
+      if (mode !== this.pauseMode) {
+        this.pauseMode = mode;
+        this.scene.get(SCENE_KEYS.pause).scene.restart(this.pauseData());
+      }
       return;
     }
     this.pauseOpen = true;
+    this.pauseMode = mode;
     this.dropPress();
     this.hint({ kind: "pause" });
     soundboardOf(this).setPaused(true);
@@ -1211,7 +1227,12 @@ export class RunScene extends Scene {
     if (this.cardView !== undefined) {
       this.scene.pause(SCENE_KEYS.card);
     }
-    const data: PauseSceneData = {
+    this.scene.launch(SCENE_KEYS.pause, this.pauseData());
+  }
+
+  private pauseData(): PauseSceneData {
+    return {
+      mode: this.pauseMode,
       onHeadHome: () => {
         this.closePause();
         if (this.walk !== undefined) {
@@ -1220,7 +1241,6 @@ export class RunScene extends Scene {
       },
       onResume: () => this.closePause(),
     };
-    this.scene.launch(SCENE_KEYS.pause, data);
   }
 
   closePause(): void {
@@ -1341,7 +1361,10 @@ export class RunScene extends Scene {
   private drawBackdrop(walk: Walk, zone: Zone): void {
     const key = backdropKey(zone);
     if (this.backdrop !== undefined && this.backdrop.texture.key !== key) {
-      this.backdrop.setTexture(this.textures.exists(key) ? key : "__DEFAULT");
+      const band = LAYOUT.backdrop;
+      this.backdrop
+        .setTexture(this.textures.exists(key) ? key : "__DEFAULT")
+        .setCrop(0, 0, band.width, band.height);
       this.placeGags(zone);
     }
     const gags = this.gags;
@@ -1389,8 +1412,9 @@ export class RunScene extends Scene {
 
   // One texture the size of the road, kept across runs, that the road is drawn into. Under
   // WebGL its pixel buffer uploads straight to the GPU; the Canvas renderer, which cannot draw
-  // a buffer, gets a canvas texture instead.
-  private createRoad(road: { height: number; width: number; x: number; y: number }): void {
+  // a buffer, gets a canvas texture instead. Its approach rows are a second image of it, over
+  // the backdrop.
+  private createRoad(road: Rect): void {
     const raster = roadRaster(PROJECTION, road);
     this.road = undefined;
     if (this.renderer.type === WEBGL) {
@@ -1420,7 +1444,10 @@ export class RunScene extends Scene {
         this.road = { pixels: new Uint32Array(image.data.buffer), raster, upload };
       }
     }
-    this.add.image(road.x, road.y, ROAD_TEXTURE).setOrigin(0).setDepth(DEPTH.road);
+    const near = road.height - raster.approachRows;
+    const image = () => this.add.image(road.x, road.y, ROAD_TEXTURE).setOrigin(0);
+    image().setCrop(0, raster.approachRows, road.width, near).setDepth(DEPTH.road);
+    image().setCrop(0, 0, road.width, raster.approachRows).setDepth(DEPTH.approach);
   }
 
   // The zone's road strip and verge, projected row by row; at a zone's start, its start strip
@@ -1481,9 +1508,9 @@ export class RunScene extends Scene {
     let row = this.bandRows.get(key);
     if (row === undefined) {
       const image = this.imagePixels(key);
-      const { road } = LAYOUT;
-      const start = image === null ? 0 : (image.height - 1) * image.width + road.x;
-      row = image === null ? null : image.pixels.slice(start, start + road.width);
+      const { rasterView } = LAYOUT;
+      const start = image === null ? 0 : (image.height - 1) * image.width + rasterView.x;
+      row = image === null ? null : image.pixels.slice(start, start + rasterView.width);
       this.bandRows.set(key, row);
     }
     return row;

@@ -5,6 +5,7 @@ import type { Pack } from "../state/runState";
 import {
   arcControl,
   bowRightControl,
+  bubbleX,
   curvePoint,
   endScreenDelayMs,
   firingLayout,
@@ -40,25 +41,40 @@ describe("firingShowMs", () => {
 
 describe("firingLayout", () => {
   it("places the face, pop, plate, line and tail from the slot's corner", () => {
-    expect(firingLayout({ x: 4, y: 194 })).toEqual({
-      face: { x: 64, y: 256 },
-      line: { x: 104, y: 224 },
-      plate: { height: 28, width: 72, x: 28, y: 292 },
-      pop: { x: 0, y: 192 },
-      tail: { x: 99, y: 246 },
+    expect(firingLayout({ x: 120, y: 470 })).toEqual({
+      face: { x: 180, y: 436 },
+      line: { x: 180, y: 398 },
+      plate: { height: 28, width: 72, x: 144, y: 468 },
+      pop: { x: 116, y: 372 },
+      tail: { x: 176, y: 397 },
     });
   });
 
   it("centres the 2x pop on the 2x face", () => {
-    const { face, pop } = firingLayout({ x: 4, y: 494 });
+    const { face, pop } = firingLayout({ x: 240, y: 470 });
     expect({ x: pop.x + 64, y: pop.y + 64 }).toEqual(face);
+  });
+
+  it("points the line's tail down at the top of the 2x face, under the bubble", () => {
+    const { face, line, tail } = firingLayout({ x: 0, y: 470 });
+    expect(tail.x + 4).toBe(face.x);
+    expect(tail.y).toBe(line.y - 1);
+    expect(tail.y + 6).toBeLessThanOrEqual(face.y - 32);
+  });
+});
+
+describe("bubbleX", () => {
+  it("centres a bubble on its speaker, kept 2px inside the screen", () => {
+    expect(bubbleX(360, 180, 100)).toBe(130);
+    expect(bubbleX(360, 20, 100)).toBe(2);
+    expect(bubbleX(360, 340, 100)).toBe(258);
   });
 });
 
 describe("trotOffX", () => {
-  const road = { width: 280, x: 80 };
+  const road = { width: 360, x: 0 };
   it("leaves by the nearer edge, just out of sight", () => {
-    expect(trotOffX(road, 16, 150)).toBe(64);
+    expect(trotOffX(road, 16, 150)).toBe(-16);
     expect(trotOffX(road, 16, 300)).toBe(376);
   });
 });

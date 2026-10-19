@@ -275,7 +275,7 @@ describe("run, world and walkers", () => {
     }
   });
 
-  it("fits the largest pack in the dog column", () => {
+  it("fits the largest pack in the doghouse row", () => {
     expect(tuning.counts.packSizeMin).toBeGreaterThanOrEqual(1);
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
   });

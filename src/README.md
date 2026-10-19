@@ -16,13 +16,13 @@
 
 ## Architecture
 
-- **Rendering:** 360×640 internal, portrait, scaled with Phaser `Scale.FIT` and `pixelArt`. Every game UI element is drawn in the canvas; HTML is only the page shell, the dev panel and the crash screen.
+- **Rendering:** 360×560 internal, portrait, scaled with Phaser `Scale.FIT` and `pixelArt`. Every game UI element is drawn in the canvas; HTML is only the page shell, the dev panel and the crash screen.
 - **Crash screen:** `src/crash/` shows it once, on the first uncaught error or unhandled rejection, and ignores extension, cross-origin (`Script error.`) and ResizeObserver-loop errors. Phaser does not catch errors in its step, so they reach `window` and stop its loop. It pauses the game, writes nothing (the next launch banks the last zone checkpoint) and offers Reload; with `dev=1` it adds the message, stack and a Copy button.
-- **Screen layout:** top bar 360×40, backdrop band 360×150 (the zone's neighbourhood and scenery gags, never part of a lane), dog column 80×450 with 3 slots, and road 280×450 split into 5 lanes. A fired dog's slot empties, so the road never changes width.
-- **Pseudo-3D road:** game logic keeps the flat road (lane x, distance ahead of the walker in road pixels, scale 1 at the pack); only drawing goes through `src/layout/projection.ts` (`ROAD_CAMERA` in `src/data/screen.ts`). The road and verge are drawn row by row into one canvas texture (`src/layout/roadRaster.ts`), with 2x and 4x shrunk strips for rows that cover more than 2 strip rows. Sprites snap to 1, 0.75 or 0.5 scale and use a manifest's `<key>@75` or `<key>@50` when loaded. Spawns come into view at the far edge of the projected road, about 630 road pixels ahead.
-- **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and dog column and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
+- **Screen layout:** from the top, each across the full width: top bar 360×40 (money, treats, Home, pause, zone), backdrop band 360×110 (the zone's neighbourhood and scenery gags, never part of a lane), road 360×320, and a row of 3 doghouses 120×90. The road's 5 lanes are 56px wide at the pack (x 40 to 320), with verges and sidewalks out to the screen's edges. Every rect comes from `SCREEN_CONFIG` through `screenLayout` (`src/layout/screenLayout.ts`), the top bar's from `TOP_BAR` (`src/hud/topBar.ts`) and a doghouse's insides from `DOGHOUSE` (`src/hud/doghouse.ts`). A fired dog's house empties, so the slots never move.
+- **Pseudo-3D road:** game logic keeps the flat road (lane x, distance ahead of the walker in road pixels, scale 1 at the pack); only drawing goes through `src/layout/projection.ts` (`ROAD_CAMERA` in `src/data/screen.ts`). The road and verge are drawn row by row into one canvas texture (`src/layout/roadRaster.ts`), with 2x and 4x shrunk strips for rows that cover more than 2 strip rows. Sprites snap to 1, 0.75 or 0.5 scale and use a manifest's `<key>@75` or `<key>@50` when loaded. The camera is derived so the far edge sits on the band's bottom edge at scale 0.5 with `ROAD_LOOK_AHEAD_SECONDS` (5.25) of road in view at the base speed; spawns come into view there. The backdrops paint the road's approach to their cross street in the band's bottom 24 rows: the raster draws the moving road surface over them too, beside the backdrop's own verges.
+- **Scenes:** `RunScene` draws the road, walker, pack and spawns, and pauses during cards. `HudScene` draws the top bar and doghouses and stays visible during cards. `CardScene` shows 2 or 3 cards over the dimmed road and reports the choice to `RunScene`.
 - **Text:** bitmap fonts `font-body` and `font-title`, tinted to palette colours. Body text is drawn at 2x; text that doesn't fit is shortened, wrapped, or moved to the enlarged card.
-- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road, a tap on a dog's slot gives a treat, and the top bar pauses. A pull that moves the pack re-anchors the drag at the pointer, so getting back takes another lane-width of drag.
+- **Input:** keys (arrows, A/D or H/L) move one lane per press. Touch is a relative drag: each lane-width of travel from where the press started moves the target lane by one, and the pack moves toward it lane by lane. A tap moves one lane toward the tapped half of the road (split at its centre), a tap on a doghouse gives that dog a treat, and the top bar's Home and pause buttons never move the pack. Home pauses and asks whether to head home; M mutes. A pull that moves the pack re-anchors the drag at the pointer, so getting back takes another lane-width of drag.
 - **Accessibility:** reduced motion (a setting, defaulting to `prefers-reduced-motion`) drops decorative motion but keeps every highlight and state change, the road scroll and the lane slide. No state relies on colour alone. Tap targets are at least 48 CSS px with 8 px between them. Text meets 4.5:1 contrast and essential icons 3:1.
 - **Sound:** `src/audio/` maps cues to manifest keys and mixes music and effects volumes from settings, ducking music under cards and muting while paused or hidden. `src/scenes/soundboard.ts` is the Phaser wrapper. Each sound ships as Ogg plus AAC.
 - **Source layout:**
@@ -110,11 +110,10 @@
 
 In build order:
 
-1. The 360x560 layout: full-width road, the doghouse row, the run's Home button, and the road scrolling into the band's approach rows.
-2. A per-zone wall-clock readout in the dev overlay, and the fixes for zones that run longer than road time plus cards.
-3. Forks and six zones: the fork card, per-zone weights and multipliers, the route in run state, saves and the input log, and route-aware zone pips.
-4. Dog needs and purposeful pulls: need spots, urgency, the payoff and accident cards, pulls only toward a visible target, and the strain-without-pull reaction window.
-5. The six new encounters, including the goose mover, after forks and needs.
-6. Input: the latest finger steers in the walk, a cancelled press picks nothing in cards and menus, and drags that start on the state strip reach the walk.
-7. The shared depth-step table (`@88`, `@62`) and `npm run check:art`.
-8. Art tooling: `npm run export:data` (game data and layout JSON), a manifest generated from the files on disk, and a depth preview script.
+1. A per-zone wall-clock readout in the dev overlay, and the fixes for zones that run longer than road time plus cards.
+2. Forks and six zones: the fork card, per-zone weights and multipliers, the route in run state, saves and the input log, and route-aware zone pips.
+3. Dog needs and purposeful pulls: need spots, urgency, the payoff and accident cards, pulls only toward a visible target, and the strain-without-pull reaction window.
+4. The six new encounters, including the goose mover, after forks and needs.
+5. Input: the latest finger steers in the walk, a cancelled press picks nothing in cards and menus, and drags that start on the state strip reach the walk.
+6. The shared depth-step table (`@88`, `@62`) and `npm run check:art`.
+7. Art tooling: `npm run export:data` (game data and layout JSON), a manifest generated from the files on disk, and a depth preview script.

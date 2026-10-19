@@ -14,19 +14,19 @@ export const MIN_TAP_SIZE = 44;
 // The help screen's geometry at the render resolution. A text position is the top-left of
 // its first line.
 export const HELP_LAYOUT = {
-  back: { height: 40, width: 110, x: 8, y: 584 },
-  body: { lineHeight: 15, width: 336, x: 12, y: 340 },
+  back: { height: 40, width: 110, x: 8, y: height - 56 },
+  body: { lineHeight: 15, width: 336, x: 12, y: 334 },
   buttonLip: 4,
   close: { height: 24, width: 34, x: 318, y: 8 },
-  counter: { x: 12, y: 300 },
+  counter: { x: 12, y: 296 },
   // A tap target apart, so each dot's target is its own slot, ending where Back's and Next's
   // targets start.
-  dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: 556 },
+  dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
   heading: { x: 12, y: 15 },
   illustration: { height: 236, width: 344, x: 8, y: 48 },
-  next: { height: 40, width: 110, x: 242, y: 584 },
+  next: { height: 40, width: 110, x: 242, y: height - 56 },
   screen: { height, width, x: 0, y: 0 },
-  title: { x: 12, y: 314 },
+  title: { x: 12, y: 310 },
   topBar: screenLayout(SCREEN_CONFIG).topBar,
   topBarEdge: 2,
 } as const;

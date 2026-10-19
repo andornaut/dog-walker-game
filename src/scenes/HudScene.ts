@@ -8,13 +8,15 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { AchievementId, HintId } from "../data/types";
 import { DOGHOUSE, doghouseHearts, fittingScale, heartCount } from "../hud/doghouse";
 import { type ChangeLabel, wholeDollars, zonePips } from "../hud/hudView";
+import { bubbleX, DOWN_TAIL } from "../hud/moments";
 import { stripItems, stripTapAllowed } from "../hud/stateStrip";
 import {
   buttonIcon,
+  HOME_BUTTON,
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
-  SOUND_BUTTON,
+  TOP_BAR,
   topBarAction,
   type TopBarButton,
   topBarButtonAt,
@@ -46,16 +48,29 @@ import {
 import { SCENE_KEYS } from "./sceneKeys";
 import { playEffect, playTag } from "./sprites";
 import { StateStripView } from "./stateStripView";
+import { artFits } from "./uiKit";
 
-const PIP = { gap: 3, height: 8, width: 18, x: 271, y: 22 };
-// The zone's name is right-aligned in its well, its icon just left of it.
-const ZONE_WELL = { right: 352, y: 9 };
+// The zone's name is right-aligned in its well, its icon just left of it, and the pips end
+// under the name's right edge.
+const ZONE_WELL = { right: TOP_BAR.zone.nameRight, y: TOP_BAR.zone.y + 4 };
+const PIP = {
+  gap: 3,
+  height: 8,
+  width: 18,
+  x: ZONE_WELL.right + 3 - gameData.world.zones.length * 21,
+  y: TOP_BAR.zone.y + 17,
+};
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const LABEL = { ms: 1100, rise: 18 };
 // First-time hints sit at the foot of the backdrop band, just above the road.
-const HINT = { bottom: 186, holdMs: 4500, margin: 8, padding: 6 };
-// An owner's quip floats beside their doghouse, its tail at the owner's window.
-const QUIP = { holdMs: 2600, maxWidth: 200, padding: 6, x: 82, y: 70 };
+const HINT = {
+  bottom: LAYOUT.backdrop.y + LAYOUT.backdrop.height - 4,
+  holdMs: 4500,
+  margin: 8,
+  padding: 6,
+};
+// An owner's quip floats over their doghouse, its tail pointing down at the owner's face.
+const QUIP = { gap: 6, holdMs: 2600, maxWidth: 200, padding: 6 };
 const NINE_SLICE_CORNER = 8;
 
 interface SlotView {
@@ -71,7 +86,7 @@ interface SlotView {
   statuses: GameObjects.Image[];
 }
 
-// The top bar and dog column, drawn over the road for the whole walk and kept in view while
+// The top bar and doghouses, drawn over the road for the whole walk and kept in view while
 // cards are up. It reads the run from RunScene every frame and redraws what changed, and
 // shows the run's change labels, first-time hints and owners' quips. It keeps running while
 // the walk is paused, so the top bar's buttons and their keys work in every state; its
@@ -83,7 +98,6 @@ export class HudScene extends Scene {
   private hintQueue: { id: HintId; text: string }[] = [];
   private hintShowing = false;
   private money: GameObjects.BitmapText | undefined;
-  private mute: GameObjects.Sprite | undefined;
   private pauseGlyph: GameObjects.Graphics | undefined;
   private pauseIcon: GameObjects.Image | undefined;
   private pips: GameObjects.Sprite[] = [];
@@ -98,36 +112,49 @@ export class HudScene extends Scene {
   }
 
   create(): void {
-    const { dogColumn, dogSlots, topBar } = LAYOUT;
+    const { dogRow, dogSlots, topBar } = LAYOUT;
     this.drawn = {};
     this.hintQueue = [];
     this.hintShowing = false;
     const g = this.add.graphics();
-    fillRect(g, PALETTE.darkBrown, dogColumn);
+    fillRect(g, PALETTE.darkBrown, dogRow);
     if (this.textures.exists("ui-top-bar")) {
       this.add.image(topBar.x, topBar.y, "ui-top-bar").setOrigin(0);
     } else {
       fillRect(g, PALETTE.plum, topBar);
       fillRect(g, PALETTE.darkBrown, { ...topBar, height: 2, y: topBar.y + topBar.height - 2 });
+      [TOP_BAR.money, TOP_BAR.treats, TOP_BAR.zone].forEach((well) =>
+        fillRect(g, PALETTE.ink, well),
+      );
     }
+    this.addButton(HOME_BUTTON);
+    this.addHomeIcon();
     this.addButton(PAUSE_BUTTON);
     const pauseIcon = buttonIcon(PAUSE_BUTTON, false);
     this.pauseIcon = this.add.image(pauseIcon.x, pauseIcon.y, "__DEFAULT").setOrigin(0);
     this.pauseGlyph = this.add.graphics();
-    this.addButton(SOUND_BUTTON);
-    const soundIcon = buttonIcon(SOUND_BUTTON, false);
-    this.mute = this.add.sprite(soundIcon.x, soundIcon.y, "icon-sound").setOrigin(0);
 
-    this.add.sprite(8, 13, "tip").setOrigin(0);
+    const { money: moneyWell, treats: treatWell, zone: zoneWell } = TOP_BAR;
+    this.add.sprite(moneyWell.x + 4, moneyWell.y + 5, "tip").setOrigin(0);
     const money = { font: "title", scale: 2 } as const;
-    const dollar = addPixelText(this, 26, 15, "$", { color: PALETTE.amber, ...money });
-    this.money = addPixelText(this, 26 + dollar.width + 2, 15, "0", {
+    const moneyX = moneyWell.x + 22;
+    const dollar = addPixelText(this, moneyX, moneyWell.y + 7, "$", {
+      color: PALETTE.amber,
+      ...money,
+    });
+    this.money = addPixelText(this, moneyX + dollar.width + 2, moneyWell.y + 7, "0", {
       color: PALETTE.cream,
       ...money,
     });
-    this.add.sprite(104, 13, "treat").setOrigin(0);
-    this.treats = addPixelText(this, 122, 18, "0", { color: PALETTE.cream, font: "title" });
-    this.zoneIcon = this.add.image(0, 4, "__DEFAULT").setOrigin(1, 0);
+    // The count right-aligned in the narrow well, the treat's 16px frame just left of it.
+    this.add.sprite(treatWell.x - 1, treatWell.y + 5, "treat").setOrigin(0);
+    const treatsRight = treatWell.x + treatWell.width - 2;
+    this.treats = addPixelText(this, treatsRight, treatWell.y + 10, "0", {
+      color: PALETTE.cream,
+      font: "title",
+      originX: 1,
+    });
+    this.zoneIcon = this.add.image(0, zoneWell.y - 1, "__DEFAULT").setOrigin(1, 0);
     this.zoneLabel = addPixelText(this, ZONE_WELL.right, ZONE_WELL.y, "", {
       color: PALETTE.cream,
       font: "title",
@@ -178,6 +205,9 @@ export class HudScene extends Scene {
   private press(via: "key" | "tap", button: TopBarPress): void {
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     switch (topBarAction(run.runPause(), via, button)) {
+      case "confirmHome":
+        run.openPause("homeQuestion");
+        break;
       case "mute":
         setMuted(this, !isMuted(this));
         break;
@@ -205,6 +235,22 @@ export class HudScene extends Scene {
       { border: PALETTE.darkBrown, fill: PALETTE.navy },
       { height: 20, width: 20, x, y },
     );
+  }
+
+  // icon-home on Home's face, else a cream house drawn on it.
+  private addHomeIcon(): void {
+    const { x, y } = buttonIcon(HOME_BUTTON, false);
+    if (this.textures.exists("icon-home")) {
+      this.add.image(x, y, "icon-home").setOrigin(0);
+      return;
+    }
+    const g = this.add.graphics();
+    // The roof's rows widening down from its peak, then the walls with a door in the middle.
+    [2, 4, 6, 8, 10, 12].forEach((width, row) => {
+      fillRect(g, PALETTE.cream, { height: 1, width, x: x + 8 - width / 2, y: y + 2 + row });
+    });
+    fillRect(g, PALETTE.cream, { height: 6, width: 10, x: x + 3, y: y + 8 });
+    fillRect(g, PALETTE.navy, { height: 4, width: 2, x: x + 7, y: y + 10 });
   }
 
   // The icon art when it is loaded, else cream pause bars or play triangle drawn on the face.
@@ -295,7 +341,6 @@ export class HudScene extends Scene {
       fill: Math.round(view.zoneFraction * PIP.width),
       modifiers: view.run.modifiers,
       money: this.shownMoney(view.run.money),
-      muted: isMuted(this),
       pack: view.run.pack,
       pauseIcon: pauseButtonIcon(pause),
       statuses: statusesKey(view.statuses),
@@ -323,9 +368,6 @@ export class HudScene extends Scene {
     g.clear();
     if (this.money !== undefined) {
       setPixelText(this.money, wholeDollars(this.shownMoney(run.money)).slice(1));
-    }
-    if (this.mute !== undefined) {
-      playTag(this.mute, "icon-sound", isMuted(this) ? "off" : "on");
     }
     if (this.treats !== undefined) {
       setPixelText(
@@ -369,6 +411,23 @@ export class HudScene extends Scene {
     });
   }
 
+  // The house drawn while its art is missing: a roof band over a tan front, grey when fired.
+  private drawHouse(g: GameObjects.Graphics, rect: Rect, fired: boolean): void {
+    const border = 1;
+    fillRect(g, PALETTE.plum, rect);
+    const inner = {
+      height: rect.height - 2 * border,
+      width: rect.width - 2 * border,
+      x: rect.x + border,
+      y: rect.y + border,
+    };
+    fillRect(g, fired ? PALETTE.lightGrey : PALETTE.tan, inner);
+    fillRect(g, fired ? PALETTE.grey : PALETTE.brown, {
+      ...inner,
+      height: DOGHOUSE.roof.height - border,
+    });
+  }
+
   // A doghouse roofed in the dog's colour: the dog in the door, the owner in the window, the
   // hearts and their count on the board. A fired dog's house is grey and empty.
   private drawSlot(
@@ -379,7 +438,6 @@ export class HudScene extends Scene {
     highlighted: boolean,
     slot: PackSlot | undefined,
   ): void {
-    const { x, y } = rect;
     const parts = [view.house, view.dogFace, view.ownerFace, ...view.hearts];
     if (slot === undefined) {
       parts.forEach((part) => part.setVisible(false));
@@ -390,10 +448,12 @@ export class HudScene extends Scene {
     }
     const dog = gameData.dogs[slot.dog];
     const fired = slot.status === "fired";
-    view.house.setVisible(true);
-    playTag(view.house, "ui-doghouse", doghouseTag(gameData, fired ? null : slot.dog));
-    if (!this.textures.exists("ui-doghouse")) {
-      fillRect(g, fired ? PALETTE.lightGrey : PALETTE.tan, rect);
+    const art = artFits(this, "ui-doghouse", DOGHOUSE.size);
+    view.house.setVisible(art);
+    if (art) {
+      playTag(view.house, "ui-doghouse", doghouseTag(gameData, fired ? null : slot.dog));
+    } else {
+      this.drawHouse(g, rect, fired);
     }
     this.fitName(view.name, dog.name, DOGHOUSE.name, view.anchors.name);
     setPixelText(view.fired.setTint(PALETTE.darkRed), fired ? "Fired" : "");
@@ -404,7 +464,7 @@ export class HudScene extends Scene {
       return;
     }
     if (highlighted) {
-      const frame = { height: rect.height + 4, width: rect.width + 4, x: x - 2, y: y - 2 };
+      const frame = rect;
       fillRect(g, PALETTE.amber, { ...frame, height: 2 });
       fillRect(g, PALETTE.amber, { ...frame, height: 2, y: frame.y + frame.height - 2 });
       fillRect(g, PALETTE.amber, { ...frame, width: 2 });
@@ -421,17 +481,17 @@ export class HudScene extends Scene {
     const max = maxHearts(gameData.tuning, run.modifiers, dog);
     setPixelText(view.count, heartCount(hearts, max));
     const cells = doghouseHearts(hearts, max);
-    const art = this.textures.exists("ui-heart");
+    const heartArt = this.textures.exists("ui-heart");
     view.hearts.forEach((sprite, i) => {
       const cell = cells[i];
-      sprite.setVisible(art && cell !== undefined);
+      sprite.setVisible(heartArt && cell !== undefined);
       if (cell === undefined) {
         return;
       }
-      if (art) {
+      if (heartArt) {
         playTag(sprite, "ui-heart", cell.full ? "full" : "empty");
       } else {
-        drawHeart(g, x + cell.x, y + cell.y, cell.full ? PALETTE.darkRed : PALETTE.tan);
+        drawHeart(g, rect.x + cell.x, rect.y + cell.y, cell.full ? PALETTE.darkRed : PALETTE.tan);
       }
     });
   }
@@ -481,12 +541,12 @@ export class HudScene extends Scene {
           return;
         }
         x = rect.x + 2;
-        y = rect.y + DOGHOUSE.ownerFace.y + 4;
+        y = rect.y - 22 - (labels.length - 1) * 22;
         playEffect(
           this,
           "fx-heart",
           label.gain ? "up" : "down",
-          { x: rect.x + rect.width - 8, y: y + 8 },
+          { x: rect.x + DOGHOUSE.hearts.x + 20, y: rect.y + DOGHOUSE.hearts.y },
           10,
         );
       }
@@ -562,7 +622,9 @@ export class HudScene extends Scene {
       );
     }
     if (hint.id === "drag" && this.textures.exists("ui-touch-hint")) {
-      parts.push(this.add.image(road.x + road.width / 2, road.y + 220, "ui-touch-hint"));
+      parts.push(
+        this.add.image(road.x + road.width / 2, road.y + road.height / 2, "ui-touch-hint"),
+      );
     }
     text.setDepth(1);
     parts.push(text);
@@ -578,7 +640,7 @@ export class HudScene extends Scene {
     });
   }
 
-  // An owner's line in a bubble beside their doghouse, the tail pointing at their window.
+  // An owner's line in a bubble over their doghouse, the tail pointing down at their face.
   private sayQuip(quip: QuipBubble): void {
     const run = this.scene.get(SCENE_KEYS.run) as RunScene;
     const index = run.hudView()?.run.pack.findIndex((slot) => slot.dog === quip.dog) ?? -1;
@@ -593,8 +655,9 @@ export class HudScene extends Scene {
     });
     const width = Math.ceil(text.width) + 2 * QUIP.padding;
     const height = Math.ceil(text.height) + 2 * QUIP.padding;
-    const x = QUIP.x;
-    const y = Math.min(rect.y + QUIP.y, SCREEN_CONFIG.height - height - 2);
+    const faceX = rect.x + DOGHOUSE.ownerFace.x + 16;
+    const x = bubbleX(SCREEN_CONFIG.width, faceX, width);
+    const y = rect.y - QUIP.gap - height;
     placePixelText(text, x + QUIP.padding, y + QUIP.padding);
     const parts: (
       GameObjects.BitmapText | GameObjects.Graphics | GameObjects.Image | GameObjects.NineSlice
@@ -611,10 +674,9 @@ export class HudScene extends Scene {
       drawFramedRect(box, { border: PALETTE.plum, fill: PALETTE.cream }, { height, width, x, y });
       parts.push(box);
     }
-    if (this.textures.exists("ui-quip-tail")) {
-      parts.push(
-        this.add.image(x - 5, rect.y + DOGHOUSE.ownerFace.y + 12, "ui-quip-tail").setOrigin(0),
-      );
+    if (this.textures.exists(DOWN_TAIL.key)) {
+      const tailX = faceX - DOWN_TAIL.width / 2;
+      parts.push(this.add.image(tailX, y + height - 1, DOWN_TAIL.key).setOrigin(0));
     }
     text.setDepth(1);
     parts.push(text);

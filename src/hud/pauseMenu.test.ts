@@ -3,21 +3,29 @@ import { describe, expect, it } from "vitest";
 import { itemAt } from "../arrays";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
-import { pauseMenuLayout } from "./pauseMenu";
-import { PAUSE_BUTTON, SOUND_BUTTON } from "./topBar";
+import { homeQuestionLayout, pauseMenuLayout } from "./pauseMenu";
+import { HOME_BUTTON, PAUSE_BUTTON } from "./topBar";
 
 const { road } = screenLayout(SCREEN_CONFIG);
 
 describe("pauseMenuLayout", () => {
   it("places the panel, title, buttons and note plate as the menus mock does", () => {
     const layout = pauseMenuLayout(road, 4);
-    expect(layout.panel).toEqual({ height: 260, width: 232, x: 104, y: 285 });
-    expect(layout.titleY).toBe(301);
-    expect(layout.buttons.map((button) => button.y)).toEqual([325, 373, 421, 469]);
+    expect(layout.panel).toEqual({ height: 260, width: 232, x: 64, y: 180 });
+    expect(layout.titleY).toBe(196);
+    expect(layout.buttons.map((button) => button.y)).toEqual([220, 268, 316, 364]);
     for (const button of layout.buttons) {
-      expect(button).toMatchObject({ height: 40, width: 200, x: 120 });
+      expect(button).toMatchObject({ height: 40, width: 200, x: 80 });
     }
-    expect(layout.notePlate).toEqual({ height: 18, width: 200, x: 120, y: 513 });
+    expect(layout.notePlate).toEqual({ height: 18, width: 200, x: 80, y: 408 });
+  });
+
+  it("puts the Home question's note under its title, over its two answers", () => {
+    const layout = homeQuestionLayout(road, 2);
+    expect(layout.panel).toEqual({ height: 164, width: 232, x: 64, y: 228 });
+    expect(layout.titleY).toBe(244);
+    expect(layout.notePlate).toEqual({ height: 18, width: 200, x: 80, y: 264 });
+    expect(layout.buttons.map((button) => button.y)).toEqual([290, 338]);
   });
 
   it("reaches each hit area 2px above and below its button without overlapping the next", () => {
@@ -34,12 +42,12 @@ describe("pauseMenuLayout", () => {
 });
 
 describe("pauseMenuLayout hits", () => {
-  const { hits } = pauseMenuLayout(road, 4);
+  const hits = [...pauseMenuLayout(road, 4).hits, ...homeQuestionLayout(road, 2).hits];
 
   // The top bar's buttons stay live while the menu is up, so no menu button may reach them.
   it("keeps every menu button's hit area clear of the top bar's buttons", () => {
     for (const hit of hits) {
-      for (const button of [PAUSE_BUTTON, SOUND_BUTTON]) {
+      for (const button of [HOME_BUTTON, PAUSE_BUTTON]) {
         expect(hit.y).toBeGreaterThanOrEqual(button.hit.y + button.hit.height);
       }
     }

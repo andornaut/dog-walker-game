@@ -62,9 +62,9 @@ describe("stepFraction", () => {
 
 describe("loadingWalkerAt", () => {
   it("walks from the track's first dot to the doghouse", () => {
-    expect(loadingWalkerAt(0)).toEqual({ x: 76, y: 412 });
-    expect(loadingWalkerAt(0.4)).toEqual({ x: 76 + 59, y: 412 });
-    expect(loadingWalkerAt(1)).toEqual({ x: 76 + 148, y: 412 });
+    expect(loadingWalkerAt(0)).toEqual({ x: 76, y: 332 });
+    expect(loadingWalkerAt(0.4)).toEqual({ x: 76 + 59, y: 332 });
+    expect(loadingWalkerAt(1)).toEqual({ x: 76 + 148, y: 332 });
   });
 
   it("stays on the track past either end", () => {

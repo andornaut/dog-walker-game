@@ -157,16 +157,16 @@ describe("createUpdatePrompt", () => {
 
 describe("noticePlacement", () => {
   it("centres the notice on the canvas, its top at game y 48 and at most 260 game px wide", () => {
-    // A 390x693 canvas letterboxed 20px down: 1 game pixel is 390/360 page pixels.
-    expect(noticePlacement({ height: 693, left: 0, top: 20, width: 390 })).toEqual({
-      centreX: 195,
-      maxWidth: (390 * 260) / 360,
-      top: 20 + (693 * 48) / 640,
+    // A 720x1120 canvas letterboxed 20px down: 1 game pixel is 2 page pixels.
+    expect(noticePlacement({ height: 1120, left: 0, top: 20, width: 720 })).toEqual({
+      centreX: 360,
+      maxWidth: 520,
+      top: 116,
     });
   });
 
   it("follows a canvas offset to the side", () => {
-    const placement = noticePlacement({ height: 640, left: 100, top: 0, width: 360 });
+    const placement = noticePlacement({ height: 560, left: 100, top: 0, width: 360 });
     expect(placement).toEqual({ centreX: 280, maxWidth: 260, top: 48 });
   });
 });

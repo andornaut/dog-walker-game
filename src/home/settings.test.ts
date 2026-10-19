@@ -92,22 +92,13 @@ describe("volumeStepForKey", () => {
 });
 
 describe("settingsLayout", () => {
-  it("centres the panel on the home screen", () => {
-    const layout = settingsLayout(360, "home");
-    expect(layout.panel).toEqual({ height: 276, width: 248, x: 56, y: 277 });
-    expect(layout.row.x).toBe(64);
-    expect(layout.title.x).toBe(180);
+  it("centres the panel on the screen, its rows, title and Back inside it", () => {
+    const layout = settingsLayout({ height: 560, width: 360 });
+    expect(layout.panel).toEqual({ height: 276, width: 248, x: 56, y: 142 });
+    expect(layout.row).toEqual({ height: 44, width: 232, x: 64, y: 180 });
+    expect(layout.title).toEqual({ x: 180, y: 158 });
     expect(layout.track.x).toBe(72);
-    expect(layout.back.x).toBe(80);
-  });
-
-  it("keeps the menus mock's x over the road", () => {
-    const layout = settingsLayout(360, "road");
-    expect(layout.panel.x).toBe(96);
-    expect(layout.row.x).toBe(104);
-    expect(layout.title.x).toBe(220);
-    expect(layout.track.x).toBe(112);
-    expect(layout.back.x).toBe(120);
+    expect(layout.back).toEqual({ height: 40, width: 200, x: 80, y: 364 });
   });
 });
 

@@ -54,8 +54,11 @@ export interface RasterRow {
 }
 
 // verges holds each zone's verge before seams, patches and marks, drawn once; marks and
-// patches cache what the road rows and blocks in view hold.
+// patches cache what the road rows and blocks in view hold. The first approachRows rows lie
+// past the far edge of the road in view, on the backdrop's approach to its cross street:
+// they draw only the road surface, leaving the backdrop's verge beside it.
 export interface RoadRaster {
+  readonly approachRows: number;
   readonly centerX: number;
   readonly marks: Map<number, RowMarks>;
   readonly patches: Map<number, readonly RoughPatch[]>;
@@ -169,9 +172,12 @@ function levelFor(span: number): 0 | 1 | 2 {
   return span <= 2 * LEVEL_SPAN ? 1 : 2;
 }
 
-// The per-row tables for drawing the road into view, which must lie in the road's rows.
+// The per-row tables for drawing the road into view, which must lie below the horizon.
 export function roadRaster(
-  projection: Pick<RoadProjection, "centerX" | "focal" | "footY" | "horizonY" | "visibleDistance">,
+  projection: Pick<
+    RoadProjection,
+    "centerX" | "farY" | "focal" | "footY" | "horizonY" | "visibleDistance"
+  >,
   view: Rect,
 ): RoadRaster {
   const rows: RasterRow[] = [];
@@ -206,6 +212,7 @@ export function roadRaster(
     });
   }
   return {
+    approachRows: Math.min(view.height, Math.max(0, projection.farY - view.y)),
     centerX,
     marks: new Map(),
     patches: new Map(),
@@ -368,7 +375,12 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
         : look.zone;
     const verge = VERGES[vergeZone];
     const offset = y * width;
-    out.set(vergeOf(raster, vergeZone).subarray(offset, offset + width), offset);
+    const approach = y < raster.approachRows;
+    if (approach) {
+      out.fill(0, offset, offset + width);
+    } else {
+      out.set(vergeOf(raster, vergeZone).subarray(offset, offset + width), offset);
+    }
 
     const image = look.strip[row.level];
     const pixels = image.pixels;
@@ -376,6 +388,10 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
     const { roadEnd, roadStart, roadX } = row;
     for (let i = roadStart; i < roadEnd; i++) {
       out[offset + i] = pixels[rowStart + (roadX[i] ?? 0)] ?? 0;
+    }
+    if (approach) {
+      fadeRow(frame.fade, view.x, y, offset, out);
+      return;
     }
 
     if (verge.walkTo > verge.curbTo && seamRow(z, row.span)) {
@@ -426,16 +442,26 @@ export function drawRoad(raster: RoadRaster, frame: RoadFrame, out: Uint32Array)
       }
     }
     [carried, next] = [next, carried];
-
-    const fade = y < FADE_ROWS ? frame.fade : null;
-    if (fade !== null) {
-      for (let i = 0; i < width; i++) {
-        if (fadeCovers(view.x + i, y)) {
-          out[offset + i] = fade[i] ?? 0;
-        }
-      }
-    }
+    fadeRow(frame.fade, view.x, y, offset, out);
   });
+}
+
+// The far rows' drawn pixels dithered into the band's bottom row, when the fade is on.
+function fadeRow(
+  fade: Uint32Array | null,
+  x: number,
+  y: number,
+  offset: number,
+  out: Uint32Array,
+): void {
+  if (fade === null || y >= FADE_ROWS) {
+    return;
+  }
+  for (let i = 0; i < fade.length; i++) {
+    if (out[offset + i] !== 0 && fadeCovers(x + i, y)) {
+      out[offset + i] = fade[i] ?? 0;
+    }
+  }
 }
 
 // The rough patches on an unmown lawn: each one's chord across this row, in the darker green.

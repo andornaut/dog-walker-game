@@ -9,6 +9,7 @@ import { HINTS } from "./hints";
 import { HOME_TEXT } from "./homeText";
 import { MINOR_OBSTACLES } from "./minorObstacles";
 import { QUIPS } from "./quips";
+import { RUN_TEXT } from "./runText";
 import { SHOP_GEAR } from "./shop";
 import { TUNING } from "./tuning";
 import type { GameData } from "./types";
@@ -29,6 +30,7 @@ interface ValueExports {
   readonly HOME_TEXT: typeof HOME_TEXT;
   readonly MINOR_OBSTACLES: typeof MINOR_OBSTACLES;
   readonly QUIPS: typeof QUIPS;
+  readonly RUN_TEXT: typeof RUN_TEXT;
   readonly SHOP_GEAR: typeof SHOP_GEAR;
   readonly TUNING: typeof TUNING;
   readonly UPGRADES: typeof UPGRADES;
@@ -50,6 +52,7 @@ function toGameData(values: ValueExports): GameData {
     homeText: values.HOME_TEXT,
     minorObstacles: values.MINOR_OBSTACLES,
     quips: values.QUIPS,
+    runText: values.RUN_TEXT,
     shopGear: values.SHOP_GEAR,
     tuning: values.TUNING,
     upgrades: values.UPGRADES,
@@ -71,6 +74,7 @@ let values: ValueExports = {
   HOME_TEXT,
   MINOR_OBSTACLES,
   QUIPS,
+  RUN_TEXT,
   SHOP_GEAR,
   TUNING,
   UPGRADES,
@@ -104,6 +108,7 @@ if (import.meta.hot) {
       "./homeText.ts",
       "./minorObstacles.ts",
       "./quips.ts",
+      "./runText.ts",
       "./shop.ts",
       "./tuning.ts",
       "./upgrades.ts",

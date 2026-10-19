@@ -46,6 +46,20 @@ export type ScaleStep = (typeof SCALE_STEPS)[number];
 
 type Camera = Pick<RoadProjection, "focal" | "footY" | "horizonY">;
 
+// The camera that draws the road's far edge, on row farY, at farScale, visibleDistance ahead
+// of the feet on row footY.
+export function roadCameraFor(view: {
+  farScale: number;
+  farY: number;
+  footY: number;
+  visibleDistance: number;
+}): RoadCamera {
+  const { farScale, farY, footY, visibleDistance } = view;
+  const horizonY = (farY - farScale * footY) / (1 - farScale);
+  const focal = (visibleDistance * farScale) / (1 - farScale);
+  return { horizonY, ratio: (footY - horizonY) / focal };
+}
+
 export function roadProjection(camera: RoadCamera, footY: number, road: Rect): RoadProjection {
   const focal = (footY - camera.horizonY) / camera.ratio;
   const lens = { focal, footY, horizonY: camera.horizonY };

@@ -21,14 +21,15 @@ import {
   reanchorDrag,
 } from "./gestures";
 
-// Dog column x 0-80 with slot bands at y 40-240, 240-440 and 440-640; road x 80-360, so
-// five lanes are 56px wide.
+// Road y 40-470 with its lanes at x 40-320, so five lanes are 56px wide and the centre is
+// x 180; doghouses x 0-120, 120-240 and 240-360 at y 470-560.
 const screen: ScreenConfig = {
   backdropHeight: 0,
-  dogColumnWidth: 80,
+  dogRowHeight: 90,
   dogSlotCount: 3,
-  dogSlotPadding: 4,
-  height: 640,
+  height: 560,
+  roadIntoBand: 0,
+  roadWidth: 280,
   topBarHeight: 40,
   width: 360,
 };
@@ -130,8 +131,8 @@ describe("drags", () => {
   });
 
   it("derives the step from the road width, so a wider road needs a longer drag", () => {
-    // Road x 80-440, so five lanes are 72px wide.
-    const wide = { ...context, layout: screenLayout({ ...screen, width: 440 }) };
+    // Lanes x 0-360, so five lanes are 72px wide.
+    const wide = { ...context, layout: screenLayout({ ...screen, roadWidth: 360 }) };
     const drag: Step[] = [
       ["down", 150, 300],
       ["move", 210, 300],
@@ -143,8 +144,8 @@ describe("drags", () => {
 });
 
 describe("drag symmetry", () => {
-  // Road centre is x 220; one lane-width is 56px.
-  const anchors = [150, 290];
+  // Road centre is x 180; one lane-width is 56px.
+  const anchors = [110, 250];
   const cases: [number, number][] = [
     [0.9, 0],
     [1.0, 1],
@@ -183,8 +184,8 @@ describe("drag symmetry", () => {
 
 describe("taps", () => {
   it("splits the halves at the road's centre", () => {
-    expect(all(tap(217, 300))).toEqual([left]);
-    expect(all(tap(220, 300))).toEqual([right]);
+    expect(all(tap(177, 300))).toEqual([left]);
+    expect(all(tap(180, 300))).toEqual([right]);
   });
 
   it("acts on release, not on press", () => {
@@ -227,29 +228,31 @@ describe("taps", () => {
   });
 });
 
-describe("the dog column", () => {
+describe("the doghouses", () => {
   it("gives a treat to the dog slot under a tap, without moving", () => {
-    expect(all(tap(40, 100))).toEqual([{ kind: "treat", slot: 0 }]);
-    expect(all(tap(40, 300))).toEqual([{ kind: "treat", slot: 1 }]);
-    expect(all(tap(40, 600))).toEqual([{ kind: "treat", slot: 2 }]);
+    expect(all(tap(60, 500))).toEqual([{ kind: "treat", slot: 0 }]);
+    expect(all(tap(180, 500))).toEqual([{ kind: "treat", slot: 1 }]);
+    expect(all(tap(300, 550))).toEqual([{ kind: "treat", slot: 2 }]);
   });
 
-  it("counts the padding between slots as the slot whose band it is in", () => {
-    expect(all(tap(2, 241))).toEqual([{ kind: "treat", slot: 1 }]);
-    expect(all(tap(2, 237))).toEqual([{ kind: "treat", slot: 0 }]);
+  it("splits the row into three equal slots", () => {
+    expect(all(tap(117, 480))).toEqual([{ kind: "treat", slot: 0 }]);
+    expect(all(tap(120, 480))).toEqual([{ kind: "treat", slot: 1 }]);
+    expect(all(tap(237, 480))).toEqual([{ kind: "treat", slot: 1 }]);
+    expect(all(tap(240, 480))).toEqual([{ kind: "treat", slot: 2 }]);
   });
 
-  it("ends where the road begins, at x 80", () => {
-    expect(all(tap(78, 300))).toEqual([{ kind: "treat", slot: 1 }]);
-    expect(all(tap(80, 300))).toEqual([left]);
+  it("starts where the road ends, at y 470", () => {
+    expect(all(tap(60, 468))).toEqual([left]);
+    expect(all(tap(60, 470))).toEqual([{ kind: "treat", slot: 0 }]);
   });
 
   it("drags instead of giving a treat once a press there travels a lane-width", () => {
     expect(
       all([
-        ["down", 40, 300],
-        ["move", 96, 300],
-        ["up", 96, 300],
+        ["down", 40, 500],
+        ["move", 96, 500],
+        ["up", 96, 500],
       ]),
     ).toEqual([right]);
   });
@@ -257,9 +260,9 @@ describe("the dog column", () => {
   it("gives nothing for a press that leaves the tap distance short of a lane-width", () => {
     expect(
       all([
-        ["down", 40, 300],
-        ["move", 95, 300],
-        ["up", 95, 300],
+        ["down", 40, 500],
+        ["move", 95, 500],
+        ["up", 95, 500],
       ]),
     ).toEqual([]);
   });

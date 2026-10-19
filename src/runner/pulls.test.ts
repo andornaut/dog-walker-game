@@ -345,9 +345,9 @@ describe("gestureAfterPulls", () => {
   const context = {
     config: { laneCount: 5, tapMaxDistance: 10 },
     layout: {
-      dogColumn: { height: 450, width: 80, x: 0, y: 190 },
+      dogRow: { height: 90, width: 360, x: 0, y: 470 },
       dogSlots: [],
-      road: { height: 450, width: 280, x: 80, y: 190 },
+      road: { height: 320, width: 280, x: 40, y: 150 },
       topBar: { height: 40, width: 360, x: 0, y: 0 },
     },
   };

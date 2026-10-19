@@ -22,13 +22,15 @@ import {
   trackPointer,
 } from "./pointerTracking";
 
-// Road x 80-360 in five 56px lanes; the top bar is y 0-40.
+// Road y 40-470 with its lanes at x 40-320, five of 56px; the top bar is y 0-40 and the
+// doghouses y 470-560.
 const screen: ScreenConfig = {
   backdropHeight: 0,
-  dogColumnWidth: 80,
+  dogRowHeight: 90,
   dogSlotCount: 3,
-  dogSlotPadding: 4,
-  height: 640,
+  height: 560,
+  roadIntoBand: 0,
+  roadWidth: 280,
   topBarHeight: 40,
   width: 360,
 };
@@ -178,8 +180,8 @@ describe("trackPointer fuzz", () => {
     track: PointerTrack;
   }
 
-  const roadX = (random: Random) => 80 + random() * 280;
-  const anyY = (random: Random) => random() * 640;
+  const roadX = (random: Random) => 40 + random() * 280;
+  const anyY = (random: Random) => random() * 560;
 
   function apply(world: World, actions: readonly GestureAction[]): void {
     for (const action of actions) {
@@ -347,7 +349,7 @@ describe("trackPointer fuzz", () => {
         ],
         world.track,
       );
-      expect(actions).toEqual([x < 220 ? left : right]);
+      expect(actions).toEqual([x < 180 ? left : right]);
     }
   });
 });

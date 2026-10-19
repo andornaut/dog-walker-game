@@ -41,30 +41,39 @@ export const MOMENTS = {
   // Each fee's coin leaves its doghouse's roof staggerMs after the slot above's, bowing bow
   // pixels right of the straight line, and takes flightMs to reach the bank; the amount rises
   // from the roof and fades over chipMs.
-  payout: { bow: 48, chipMs: 900, flightMs: 650, roof: { x: 36, y: 20 }, staggerMs: 200 },
+  payout: { bow: 48, chipMs: 900, flightMs: 650, roof: { x: 60, y: 10 }, staggerMs: 200 },
   // The treat's arc peaks this many pixels above its higher end; the owner smiles on landing.
   treat: { arcMs: 420, peak: 40, smileMs: 900 },
 } as const;
 
 // The top bar's money and treat icons' centres, where coins land and treats leave from.
-export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 }, treats: { x: 112, y: 21 } } as const;
+export const TOP_BAR_POINTS = { bank: { x: 16, y: 21 }, treats: { x: 103, y: 21 } } as const;
+
+// The 8x6 tail under a bubble, pointing down at who is speaking.
+export const DOWN_TAIL = { height: 6, key: "ui-hint-tail", width: 8 } as const;
+
+// The left edge of a bubble width wide centred on centreX, kept 2px inside the screen.
+export function bubbleX(screenWidth: number, centreX: number, width: number): number {
+  return Math.round(Math.min(Math.max(2, centreX - width / 2), screenWidth - width - 2));
+}
 
 // How long the firing's face and plate show within a stop of seconds.
 export function firingShowMs(seconds: number): number {
   return Math.max(0, seconds * 1000 - MOMENTS.firingEndMarginMs);
 }
 
-// The firing moment's parts, from the slot's top-left corner: the owner's face at 2x
-// centred on face, the 64x64 pop drawn at 2x from pop, the plate, and the fired line's
-// bubble with its tail pointing back at the face. Every slot's bubble fits on screen.
+// The firing moment's parts, from the slot's top-left corner, rising over the road above
+// the doghouse: the owner's face at 2x centred on face, the 64x64 pop drawn at 2x from pop,
+// the plate on the roof, and the fired line's bubble centred over line, its bottom edge on
+// it, with the 8x6 tail under it pointing down at the face from tail.
 export const FIRING_PARTS = {
-  face: { x: 60, y: 62 },
-  line: { x: 100, y: 30 },
-  plate: { height: 28, width: 72, x: 24, y: 98 },
+  face: { x: 60, y: -34 },
+  line: { x: 60, y: -72 },
+  plate: { height: 28, width: 72, x: 24, y: -2 },
   // "FIRED!" starts this far into the plate, the top of its capitals this far down.
   plateText: { x: 8, y: 9 },
-  pop: { x: -4, y: -2 },
-  tail: { x: 95, y: 52 },
+  pop: { x: -4, y: -98 },
+  tail: { x: 56, y: -73 },
 } as const;
 
 // The firing moment's parts on screen for the dog in slot.

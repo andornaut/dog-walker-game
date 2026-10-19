@@ -22,9 +22,9 @@ import {
 import { crossesLine, darkerGreen, isLawn, mownAt, vergeBase, VERGES } from "./roadside";
 import { screenLayout } from "./screenLayout";
 
-const { road } = screenLayout(SCREEN_CONFIG);
+const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
-const raster = roadRaster(projection, road);
+const raster = roadRaster(projection, view);
 
 const look = (zone: ZoneId, rgb: number): RoadLook => ({
   strip: stripLevels(solidStrip(rgb)),
@@ -44,11 +44,11 @@ const draw = (frame: RoadFrame, view = raster) => {
   return out;
 };
 const pixelAt = (out: Uint32Array, x: number, y: number) =>
-  out[(y - road.y) * road.width + (x - road.x)];
+  out[(y - view.y) * view.width + (x - view.x)];
 
 describe("the verge beside the road", () => {
-  // Band row 149 is screen row 189: the backdrop's bottom row, which the verge continues.
-  const bandRow = itemAt(roadRaster(projection, { ...road, height: 1, y: 189 }).rows, 0);
+  // Band row 109 is screen row 149: the backdrop's bottom row, which the verge continues.
+  const bandRow = itemAt(roadRaster(projection, { ...view, height: 1, y: 149 }).rows, 0);
   const [GREEN, DARK_GREEN, FOREST] = [0x63c74d, 0x3e8948, 0x265c42];
   const [GREY, LIGHT_GREY] = [0x8b9bb4, 0xc0cbdc];
   const STRIP_MARK = -1;
@@ -57,9 +57,9 @@ describe("the verge beside the road", () => {
     colors.forEach((color, i) => {
       const last = result.at(-1);
       if (last !== undefined && last[2] === color) {
-        last[1] = road.x + i;
+        last[1] = view.x + i;
       } else {
-        result.push([road.x + i, road.x + i, color]);
+        result.push([view.x + i, view.x + i, color]);
       }
     });
     return result;
@@ -71,38 +71,42 @@ describe("the verge beside the road", () => {
       ),
     );
 
-  // The runs of each backdrop's row 149 beside the road, without its tufts.
+  // The runs of each backdrop's row 109 beside the road, without its tufts.
   it("continues Woof Way's and The Long Way Home's mown lawn, sidewalk and curb", () => {
     for (const zone of ["street", "homeStretch"] as const) {
       expect(baseRuns(zone)).toEqual([
-        [80, 102, DARK_GREEN],
-        [103, 124, GREEN],
-        [125, 147, LIGHT_GREY],
-        [148, 149, GREY],
-        [150, 289, STRIP_MARK],
-        [290, 291, GREY],
-        [292, 314, LIGHT_GREY],
-        [315, 336, GREEN],
-        [337, 359, DARK_GREEN],
+        [0, 14, DARK_GREEN],
+        [15, 32, GREEN],
+        [33, 63, DARK_GREEN],
+        [64, 85, GREEN],
+        [86, 107, LIGHT_GREY],
+        [108, 109, GREY],
+        [110, 249, STRIP_MARK],
+        [250, 251, GREY],
+        [252, 273, LIGHT_GREY],
+        [274, 295, GREEN],
+        [296, 326, DARK_GREEN],
+        [327, 344, GREEN],
+        [345, 359, DARK_GREEN],
       ]);
     }
   });
 
   it("runs Bark Park's unmown grass up to the path", () => {
     expect(baseRuns("park")).toEqual([
-      [80, 149, GREEN],
-      [150, 289, STRIP_MARK],
-      [290, 359, GREEN],
+      [0, 109, GREEN],
+      [110, 249, STRIP_MARK],
+      [250, 359, GREEN],
     ]);
   });
 
   it("paves Sniff Street Shops up to a curb", () => {
     expect(baseRuns("shops")).toEqual([
-      [80, 147, LIGHT_GREY],
-      [148, 149, GREY],
-      [150, 289, STRIP_MARK],
-      [290, 291, GREY],
-      [292, 359, LIGHT_GREY],
+      [0, 107, LIGHT_GREY],
+      [108, 109, GREY],
+      [110, 249, STRIP_MARK],
+      [250, 251, GREY],
+      [252, 359, LIGHT_GREY],
     ]);
   });
 
@@ -121,10 +125,10 @@ describe("the verge beside the road", () => {
     let tufts = 0;
     raster.rows.forEach((row, y) => {
       row.across.forEach((across, i) => {
-        if (across < 0) {
+        if (across < 0 || y < raster.approachRows) {
           return;
         }
-        const color = words.get(out[y * road.width + i] ?? 0);
+        const color = words.get(out[y * view.width + i] ?? 0);
         const base = vergeBase(VERGES.street, across, row.scale);
         if (color !== base) {
           tufts += 1;
@@ -146,7 +150,7 @@ describe("the verge beside the road", () => {
           row.across.forEach((across, i) => {
             if (isLawn(VERGES.street, across)) {
               lawn += 1;
-              const color = out[(from + j) * road.width + i];
+              const color = out[(from + j) * view.width + i];
               marked +=
                 color === pixelWord(darkerGreen(vergeBase(VERGES.street, across, row.scale)))
                   ? 1
@@ -157,7 +161,8 @@ describe("the verge beside the road", () => {
       }
       return marked / Math.max(1, lawn);
     };
-    expect(tuftShare(0, 40)).toBeLessThan(tuftShare(200, 300));
+    const far = raster.approachRows;
+    expect(tuftShare(far, far + 40)).toBeLessThan(tuftShare(200, 300));
   });
 
   it("lays rough patches on Bark Park's lawn and no stripes", () => {
@@ -199,13 +204,14 @@ describe("drawRoad", () => {
   it("samples each road pixel from the strip column under its centre", () => {
     const out = draw(frameOf({ current: { strip: [labelled, labelled, labelled], zone: "park" } }));
     for (const [x, y] of [
-      [200, 639],
-      [151, 190],
+      [200, 469],
+      [111, 150],
       [300, 400],
+      [180, 126],
     ] as const) {
       const label = pixelAt(out, x, y) ?? 0;
       expect((label - 1) % STRIP.width).toBe(
-        Math.floor(140 + (x + 0.5 - 220) / rowScale(projection, y)),
+        Math.floor(140 + (x + 0.5 - 180) / rowScale(projection, y)),
       );
     }
     expect(itemAt(raster.rows, raster.rows.length - 1).level).toBe(0);
@@ -214,15 +220,37 @@ describe("drawRoad", () => {
   it("moves the road toward the pack as the walk scrolls", () => {
     const strips = { strip: stripLevels(labelled), zone: "park" as const };
     const row = (scroll: number) =>
-      Math.floor(((pixelAt(draw(frameOf({ current: strips, scroll })), 220, 600) ?? 1) - 1) / 280);
+      Math.floor(((pixelAt(draw(frameOf({ current: strips, scroll })), 180, 400) ?? 1) - 1) / 280);
     expect((row(0) - row(10) + STRIP.height) % STRIP.height).toBe(10);
   });
 
   it("samples the shrunk strips on the far rows, where a row covers more than 2 strip rows", () => {
-    const far = itemAt(raster.rows, 0);
-    expect(far.span).toBeGreaterThan(2);
-    expect(far.level).toBe(1);
-    expect(raster.rows.filter((row) => row.level === 2)).toEqual([]);
+    for (const row of raster.rows) {
+      expect(row.level).toBe(row.span <= 2 ? 0 : row.span <= 4 ? 1 : 2);
+    }
+    expect(itemAt(raster.rows, 0).level).toBe(2);
+    expect(itemAt(raster.rows, raster.rows.length - 1).level).toBe(0);
+  });
+
+  // The backdrop paints the road's approach to its cross street in the band's bottom rows.
+  // Left to the backdrop, the top of the road would stand still while the rest scrolled.
+  it("draws the moving road surface up the band's approach, leaving the verge beside it", () => {
+    expect(raster.approachRows).toBe(approach.height);
+    const strips = { strip: stripLevels(labelled), zone: "street" as const };
+    const stripRow = (out: Uint32Array, y: number) =>
+      Math.floor(((pixelAt(out, 180, y) ?? 1) - 1) / STRIP.width);
+    const [before, after] = [0, 24].map((scroll) => draw(frameOf({ current: strips, scroll })));
+    for (const y of [approach.y, approach.y + approach.height - 1, road.y]) {
+      expect(stripRow(before ?? new Uint32Array(), y)).not.toBe(
+        stripRow(after ?? new Uint32Array(), y),
+      );
+    }
+    const out = draw(frameOf({}));
+    for (const x of [0, 100, 260, 359]) {
+      expect(pixelAt(out, x, approach.y)).toBe(0);
+      expect(pixelAt(out, x, road.y)).not.toBe(0);
+    }
+    expect(pixelAt(out, 180, approach.y)).toBe(pixelWord(0x3a4466));
   });
 
   it("rolls the start strip in at the far edge over the previous zone's road", () => {
@@ -242,24 +270,24 @@ describe("drawRoad", () => {
         220,
         y,
       );
-    expect(at(0, 190)).toBe(pixelWord(0x111111));
-    expect(at(30, 190)).toBe(pixelWord(0x222222));
-    expect(at(30, 639)).toBe(pixelWord(0x111111));
-    expect(at(200, 190)).toBe(pixelWord(0x333333));
-    expect(at(800, 639)).toBe(pixelWord(0x333333));
+    expect(at(0, 150)).toBe(pixelWord(0x111111));
+    expect(at(30, 150)).toBe(pixelWord(0x222222));
+    expect(at(30, 469)).toBe(pixelWord(0x111111));
+    expect(at(200, 150)).toBe(pixelWord(0x333333));
+    expect(at(900, 469)).toBe(pixelWord(0x333333));
   });
 
   it("dithers the far rows into the band only when the fade is on", () => {
-    const band = new Uint32Array(road.width).fill(pixelWord(0xffffff));
+    const band = new Uint32Array(view.width).fill(pixelWord(0xffffff));
     const white = pixelWord(0xffffff);
     const count = (out: Uint32Array, y: number) =>
       out
-        .subarray((y - road.y) * road.width, (y - road.y + 1) * road.width)
+        .subarray((y - view.y) * view.width, (y - view.y + 1) * view.width)
         .filter((p) => p === white).length;
     const faded = draw(frameOf({ fade: band }));
-    expect(count(faded, 190)).toBeGreaterThan(count(faded, 190 + FADE_ROWS - 1));
-    expect(count(faded, 190 + FADE_ROWS)).toBe(0);
-    expect(count(draw(frameOf({})), 190)).toBe(0);
+    expect(count(faded, view.y)).toBeGreaterThan(count(faded, view.y + FADE_ROWS - 1));
+    expect(count(faded, view.y + FADE_ROWS)).toBe(0);
+    expect(count(draw(frameOf({})), view.y)).toBe(0);
   });
 });
 

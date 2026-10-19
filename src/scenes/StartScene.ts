@@ -4,6 +4,7 @@ import { itemAt } from "../arrays";
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
+import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
 import { bankAtLastVisit, isAffordable, newlyAffordable } from "../home/afford";
 import { dogDetail, gearDetail } from "../home/detail";
@@ -105,11 +106,11 @@ import {
   TEXT_SCALE,
 } from "./uiKit";
 
-const SCREEN = { height: 640, width: 360 };
+const SCREEN = SCREEN_CONFIG;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
 const PATH = { width: 32, x: 164 };
-const WALKER_AT_GATE = { footY: 196, x: 180 };
+const WALKER_AT_GATE = { footY: GATE.y + GATE.height, x: 180 };
 // At the gate the pack spreads out around the walker, the first dog through the gate.
 const GATE_SPOTS: readonly PackPlacement[] = [
   { dx: 0, footDy: -46 },
@@ -144,18 +145,18 @@ const LOGO = { key: "logo", x: 6, y: 146 };
 // dogs' and the gear's plates each over their tiles; then the message line and Start walk.
 const STEP_PLATE_HEIGHT = 24;
 const WALKER_TILES = { cellHeight: 44, cellWidth: 44, columns: 4, gapX: GAP, gapY: 0 };
-const WALKER_ORIGIN = { x: 156, y: 202 };
-const DOGS_STEP_Y = 254;
-const DOG_TILES = { cellHeight: 50, cellWidth: 112, columns: 3, gapX: GAP, gapY: GAP };
-const DOG_ORIGIN = { x: 4, y: 286 };
-const GEAR_STEP_Y = 460;
-// A gear tile holds its icon with its price tag over the icon's foot while locked, and its
-// name on up to two lines.
-const GEAR_SLOTS = { cellHeight: 64, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 };
-const GEAR_ORIGIN = { x: 4, y: 492 };
-const GEAR_NAME = { lineHeight: 13, y: 39 };
-const INFO = { lineHeight: 15, maxWidth: 352, y: 560 };
-const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 592 };
+const WALKER_ORIGIN = { x: 156, y: 200 };
+const DOGS_STEP_Y = 248;
+const DOG_TILES = { cellHeight: 44, cellWidth: 112, columns: 3, gapX: GAP, gapY: GAP };
+const DOG_ORIGIN = { x: 4, y: 276 };
+const GEAR_STEP_Y = 428;
+// A gear tile holds its icon with its price tag over the icon's foot while locked; its name
+// is on its detail card.
+const GEAR_SLOTS = { cellHeight: 44, cellWidth: 64, columns: 5, gapX: GAP, gapY: 0 };
+const GEAR_ORIGIN = { x: 4, y: 456 };
+// One line of the message, between the gear and Start walk.
+const INFO = { maxWidth: 352, y: 502 };
+const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
 const GEAR_BADGE: Rect = { height: 18, width: 18, x: 194, y: 166 };
 // The keyboard ring sits outside the ui-select frame.
 const FOCUS_OUTSET = 5;
@@ -166,8 +167,7 @@ const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
 const SPEECH_CHARS = 30;
 const SPEECH_LINES = 3;
 const INFO_CHARS = 48;
-// A gear name breaks onto a second line past this many characters, as "Running" / "shoes".
-const GEAR_NAME_CHARS = 8;
+const SPEECH_LINE_HEIGHT = 15;
 
 // The walkers in data order, as the picker shows them.
 function walkerIds(): WalkerId[] {
@@ -623,7 +623,7 @@ export class StartScene extends Scene {
         this.render();
         return;
       case "settings": {
-        const data: SettingsSceneData = { origin: "home", resume: SCENE_KEYS.start };
+        const data: SettingsSceneData = { resume: SCENE_KEYS.start };
         this.scene.pause();
         this.scene.launch(SCENE_KEYS.settings, data);
         return;
@@ -1071,10 +1071,10 @@ export class StartScene extends Scene {
     const top = GATE.y + 6;
     const bubble = this.graphics(root);
     const labels = lines.map((line, i) =>
-      this.text(root, x, top + 4 + i * INFO.lineHeight, line, PALETTE.plum, { originX: 0.5 }),
+      this.text(root, x, top + 4 + i * SPEECH_LINE_HEIGHT, line, PALETTE.plum, { originX: 0.5 }),
     );
     const width = Math.ceil(Math.max(...labels.map((label) => label.width))) + 10;
-    const height = lines.length * INFO.lineHeight + 4;
+    const height = lines.length * SPEECH_LINE_HEIGHT + 4;
     const left = Math.round(x - width / 2);
     fillRect(bubble, PALETTE.white, { height, width: width - 2, x: left + 1, y: top });
     fillRect(bubble, PALETTE.white, { height: height - 2, width, x: left, y: top + 1 });
@@ -1172,28 +1172,28 @@ export class StartScene extends Scene {
         height: 34,
         width: 34,
         x: x + 3,
-        y: y + 8,
+        y: y + 5,
       });
-      const face = this.add.sprite(x + 4, y + 9, dogFaceKey(gameData, id)).setOrigin(0);
+      const face = this.add.sprite(x + 4, y + 6, dogFaceKey(gameData, id)).setOrigin(0);
       showTag(reduced, face, dogFaceKey(gameData, id), isOwned ? "happy" : "neutral");
       content.add(face);
-      view.face = { object: face, y: y + 9 };
+      view.face = { object: face, y: y + 6 };
 
-      this.text(content, x + 41, y + 4, dog.name, ink);
+      this.text(content, x + 41, y + 2, dog.name, ink);
       // The trait and the owner's temperament as icons; the info line says them in words.
       [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
         if (this.textures.exists(key)) {
-          content.add(this.add.image(x + 40 + n * 18, y + 17, key).setOrigin(0));
+          content.add(this.add.image(x + 40 + n * 18, y + 13, key).setOrigin(0));
         }
       });
       const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
       if (price === null) {
         const zoneFee = dollarText(packFeePerZone(gameData, { dogs: [id], gear: null }));
-        this.text(content, x + 41, y + 37, `${zoneFee}/zone`, ink);
+        this.text(content, x + 41, y + 31, `${zoneFee}/zone`, ink);
       } else {
-        this.priceBadge(content, x + 44, y + 37, price, 0);
+        this.priceBadge(content, x + 44, y + 31, price, 0);
         if (price > save.bankCents) {
-          this.addLock(content, x + width - 19, y + 31);
+          this.addLock(content, x + width - 19, y + 25);
         }
       }
       this.affordFrame(view, rect, look, save, { dog: id, kind: "dog" });
@@ -1253,25 +1253,11 @@ export class StartScene extends Scene {
       // A locked item's price tag hangs over the foot of its icon.
       const price = purchasePrice(gameData, owned, { gear: id, kind: "gear" });
       if (price !== null) {
-        this.priceBadge(content, x + width / 2, y + 24, price, 0.5);
+        this.priceBadge(content, x + width / 2, y + 28, price, 0.5);
         if (price > save.bankCents) {
           this.addLock(content, x + width - 18, y + 2);
         }
       }
-      const name = wrapWords(GEAR_NAME_CHARS, gameData.shopGear[id].name).slice(0, 2);
-      const top = y + GEAR_NAME.y + (name.length === 1 ? Math.floor(GEAR_NAME.lineHeight / 2) : 0);
-      name.forEach((line, n) => {
-        this.text(
-          content,
-          x + width / 2,
-          top + n * GEAR_NAME.lineHeight,
-          line,
-          PALETTE[look.text],
-          {
-            originX: 0.5,
-          },
-        );
-      });
       this.affordFrame(view, rect, look, save, { gear: id, kind: "gear" });
     });
   }
@@ -1282,15 +1268,14 @@ export class StartScene extends Scene {
     return storageState(this) === "unavailable" ? `Progress won't be saved. ${message}` : message;
   }
 
+  // One line: a message longer than it is cut short.
   private drawInfo(root: GameObjects.Container): void {
-    wrapWords(INFO_CHARS, this.infoText())
-      .slice(0, 2)
-      .forEach((line, i) => {
-        const label = this.text(root, 180, INFO.y + i * INFO.lineHeight, line, PALETTE.cream, {
-          originX: 0.5,
-        });
-        fitText(label, INFO.maxWidth, [line, `${line.slice(0, INFO_CHARS - 3)}...`]);
-      });
+    const [first = "", ...rest] = wrapWords(INFO_CHARS, this.infoText());
+    const cut = `${first.slice(0, INFO_CHARS - 3)}...`;
+    const label = this.text(root, 180, INFO.y, rest.length > 0 ? cut : first, PALETTE.cream, {
+      originX: 0.5,
+    });
+    fitText(label, INFO.maxWidth, [label.text, cut]);
   }
 
   // The item's 32x32 icon, or its initials until the icon is in the manifest.

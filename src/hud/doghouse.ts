@@ -1,24 +1,27 @@
 import type { Point } from "../layout/rect";
 import { heartRows } from "./hudView";
 
-// Where the parts of a dog slot go, in pixels from the 72x146 doghouse's top-left corner.
+// Where the parts of a dog slot go, in pixels from the 120x90 doghouse's top-left corner.
 // Centred parts give the centre's x; every y is the top of the capitals or the sprite.
 export const DOGHOUSE = {
-  dogFace: { x: 20, y: 36 },
-  fired: { x: 36, y: 128 },
-  // On the doormat, 31px wide: room for "10/10".
-  heartCount: { x: 36, y: 70 },
-  hearts: { perRow: 6, pitchX: 9, pitchY: 8, x: 9, y: 127 },
-  // The roof's name plate and the hearts board, for fitting names: the scales each may take,
-  // largest first. The owner's name has 9px above the hearts, room for 1x only.
-  name: { scales: [2, 1], width: 56, x: 36, y: 16 },
-  ownerFace: { x: 8, y: 78 },
-  ownerName: { scales: [1], width: 57, x: 9, y: 118 },
-  // The dog's status icons (16x16, top-left corners) on the pegs beside the owner's window,
-  // the newest on the upper peg.
+  dogFace: { x: 6, y: 24 },
+  fired: { x: 60, y: 74 },
+  heartCount: { x: 98, y: 46 },
+  // Rows of five 8px hearts: from x 76 the fifth ends on the house's right edge.
+  hearts: { perRow: 5, pitchX: 9, pitchY: 8, x: 76, y: 26 },
+  // The roof's name plate and the owner's name under the faces, for fitting names: the
+  // scales each may take, largest first.
+  name: { scales: [2, 1], width: 108, x: 60, y: 6 },
+  ownerFace: { x: 42, y: 24 },
+  ownerName: { scales: [1], width: 70, x: 6, y: 62 },
+  // The roof band, which the name plate sits on.
+  roof: { height: 20 },
+  size: { height: 90, width: 120 },
+  // The dog's status icons (16x16, top-left corners) under the hearts, the newest on the
+  // left.
   statuses: [
-    { x: 46, y: 78 },
-    { x: 46, y: 96 },
+    { x: 78, y: 62 },
+    { x: 98, y: 62 },
   ],
 } as const;
 
@@ -26,7 +29,7 @@ export interface HeartCell extends Point {
   full: boolean;
 }
 
-// The meter's hearts in rows of six, the first `hearts` of them full.
+// The meter's hearts in rows, the first `hearts` of them full.
 export function doghouseHearts(hearts: number, max: number): HeartCell[] {
   const { perRow, pitchX, pitchY, x, y } = DOGHOUSE.hearts;
   return heartRows(perRow, hearts, max).flatMap((row, rowIndex) =>

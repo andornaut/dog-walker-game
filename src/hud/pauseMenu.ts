@@ -1,10 +1,11 @@
 import type { Rect } from "../layout/rect";
 
-const PANEL = { height: 260, width: 232 };
-// Offsets from the panel's top-left corner.
+const PANEL_WIDTH = 232;
+// Offsets from the panel's top-left corner, and the room under the last part.
 const TITLE_Y = 16;
 const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
 const NOTE_PLATE = { gap: 4, height: 18 };
+const BOTTOM = 14;
 // Each button's hit area reaches this far above and below its face.
 const HIT_REACH = 2;
 
@@ -16,18 +17,26 @@ export interface PauseMenuLayout {
   titleY: number;
 }
 
-// The panel centred on the road, its buttons stacked down it and the note plate under them.
-export function pauseMenuLayout(road: Rect, buttonCount: number): PauseMenuLayout {
+// The panel centred on the road, sized to its parts: the title, then the buttons stacked
+// down it with the note plate under them, or the note plate first when it is the question.
+function panelLayout(road: Rect, buttonCount: number, noteFirst: boolean): PauseMenuLayout {
+  const buttonsHeight = buttonCount * (BUTTON.height + BUTTON.gap) - BUTTON.gap;
+  // Offsets down the panel: a note first sits where the buttons would start, less its gap.
+  const noteFirstY = BUTTON.y - NOTE_PLATE.gap;
+  const buttonsY = noteFirst ? noteFirstY + NOTE_PLATE.height + BUTTON.gap : BUTTON.y;
+  const noteY = noteFirst ? noteFirstY : BUTTON.y + buttonsHeight + NOTE_PLATE.gap;
+  const height = Math.max(buttonsY + buttonsHeight, noteY + NOTE_PLATE.height) + BOTTOM;
   const panel: Rect = {
-    ...PANEL,
-    x: Math.round(road.x + (road.width - PANEL.width) / 2),
-    y: Math.round(road.y + (road.height - PANEL.height) / 2),
+    height,
+    width: PANEL_WIDTH,
+    x: Math.round(road.x + (road.width - PANEL_WIDTH) / 2),
+    y: Math.round(road.y + (road.height - height) / 2),
   };
   const buttons = Array.from({ length: buttonCount }, (_, i) => ({
     height: BUTTON.height,
     width: BUTTON.width,
     x: panel.x + BUTTON.x,
-    y: panel.y + BUTTON.y + i * (BUTTON.height + BUTTON.gap),
+    y: panel.y + buttonsY + i * (BUTTON.height + BUTTON.gap),
   }));
   return {
     buttons,
@@ -40,14 +49,20 @@ export function pauseMenuLayout(road: Rect, buttonCount: number): PauseMenuLayou
       height: NOTE_PLATE.height,
       width: BUTTON.width,
       x: panel.x + BUTTON.x,
-      y:
-        panel.y +
-        BUTTON.y +
-        buttonCount * (BUTTON.height + BUTTON.gap) -
-        BUTTON.gap +
-        NOTE_PLATE.gap,
+      y: panel.y + noteY,
     },
     panel,
     titleY: panel.y + TITLE_Y,
   };
+}
+
+// The pause menu: its buttons, then the note plate.
+export function pauseMenuLayout(road: Rect, buttonCount: number): PauseMenuLayout {
+  return panelLayout(road, buttonCount, false);
+}
+
+// The Home button's question: the title, the note plate saying what is kept, then the
+// answers.
+export function homeQuestionLayout(road: Rect, buttonCount: number): PauseMenuLayout {
+  return panelLayout(road, buttonCount, true);
 }

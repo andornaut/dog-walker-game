@@ -10,7 +10,7 @@ export interface GestureConfig {
 
 export interface GestureContext {
   config: GestureConfig;
-  layout: Pick<ScreenLayout, "dogColumn" | "dogSlots" | "road" | "topBar">;
+  layout: Pick<ScreenLayout, "dogRow" | "dogSlots" | "road" | "topBar">;
 }
 
 export type GestureAction =
@@ -33,11 +33,11 @@ export interface GestureResult {
 
 export const idleGesture: GestureState = { kind: "idle" };
 
-// The column is split into equal bands, so the padding around a slot still counts as it.
-// y is inside the column, so the band is a valid slot.
-function dogSlotAt(layout: GestureContext["layout"], y: number): number {
-  const { dogColumn, dogSlots } = layout;
-  return Math.floor(((y - dogColumn.y) * dogSlots.length) / dogColumn.height);
+// The row is split into equal bands, one per slot. x is inside the row, so the band is a
+// valid slot.
+function dogSlotAt(layout: GestureContext["layout"], x: number): number {
+  const { dogRow, dogSlots } = layout;
+  return Math.floor(((x - dogRow.x) * dogSlots.length) / dogRow.width);
 }
 
 // Split at the road's centre, so both halves of the road are the same width.
@@ -83,7 +83,7 @@ function laneSteps(count: number): GestureAction[] {
   return Array.from({ length: Math.abs(count) }, () => move(count < 0 ? -1 : 1));
 }
 
-// A press on the dog column can drag too; it gives a treat only on a tap.
+// A press on the doghouses can drag too; it gives a treat only on a tap.
 export function pointerDown(context: GestureContext, point: Point): GestureResult {
   const state: GestureState = containsPoint(context.layout.topBar, point.x, point.y)
     ? { kind: "topBar", start: point, tapping: true }
@@ -116,8 +116,8 @@ function tapAction(layout: GestureContext["layout"], { x, y }: Point): GestureAc
   if (containsPoint(layout.topBar, x, y)) {
     return { kind: "pause" };
   }
-  if (containsPoint(layout.dogColumn, x, y)) {
-    return { kind: "treat", slot: dogSlotAt(layout, y) };
+  if (containsPoint(layout.dogRow, x, y)) {
+    return { kind: "treat", slot: dogSlotAt(layout, x) };
   }
   return move(tapDirection(layout, x));
 }

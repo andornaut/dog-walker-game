@@ -2,8 +2,9 @@ import { type Input, Scene } from "phaser";
 
 import { itemAt } from "../arrays";
 import { remapDarker } from "../assets/darkRamp";
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { pauseMenuLayout } from "../hud/pauseMenu";
+import { homeQuestionLayout, pauseMenuLayout } from "../hud/pauseMenu";
 import { cardNumberForKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
 import type { Rect } from "../layout/rect";
@@ -17,7 +18,10 @@ import type { SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { addMenuButton, addPanel, type MenuButton, TEXT_SCALE } from "./uiKit";
 
+// menu is the pause menu; homeQuestion asks whether to head home, for the top bar's Home
+// button.
 export interface PauseSceneData {
+  mode: "homeQuestion" | "menu";
   onHeadHome: () => void;
   onResume: () => void;
 }
@@ -33,8 +37,9 @@ interface MenuEntry {
   press: () => void;
 }
 
-// The pause menu over the dimmed road: resume, help, settings or head home. The HUD keeps
-// running under it, so the top bar's buttons and their keys (P, Escape and M) stay with it.
+// The pause menu over the dimmed road: resume, help, settings or head home; or the Home
+// button's question, head home or keep walking. The HUD keeps running under it, so the top
+// bar's buttons and their keys (P, Escape and M) stay with it.
 export class PauseScene extends Scene {
   private buttons: MenuButton[] = [];
   private entries: MenuEntry[] = [];
@@ -44,23 +49,28 @@ export class PauseScene extends Scene {
     super(SCENE_KEYS.pause);
   }
 
-  create({ onHeadHome, onResume }: PauseSceneData): void {
+  create({ mode, onHeadHome, onResume }: PauseSceneData): void {
     this.pressed = undefined;
-    const { road } = screenLayout(SCREEN_CONFIG);
-    this.dimRoad(road);
-    this.entries = [
-      { label: "Resume", press: onResume },
-      { label: "Help", press: () => openHelp(this, SCENE_KEYS.pause) },
-      { label: "Settings", press: () => this.openSettings() },
-      {
-        label: "Head home",
-        press: () => {
-          soundboardOf(this).stopMusic();
-          onHeadHome();
-        },
-      },
-    ];
-    const layout = pauseMenuLayout(road, this.entries.length);
+    const { roadView } = screenLayout(SCREEN_CONFIG);
+    this.dimRoad(roadView);
+    const headHome = () => {
+      soundboardOf(this).stopMusic();
+      onHeadHome();
+    };
+    const question = gameData.runText.homeQuestion;
+    const asking = mode === "homeQuestion";
+    this.entries = asking
+      ? [
+          { label: question.headHome, press: headHome },
+          { label: question.keepWalking, press: onResume },
+        ]
+      : [
+          { label: "Resume", press: onResume },
+          { label: "Help", press: () => openHelp(this, SCENE_KEYS.pause) },
+          { label: "Settings", press: () => this.openSettings() },
+          { label: "Head home", press: headHome },
+        ];
+    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, this.entries.length);
     const { panel } = layout;
 
     // A 1px tan rim keeps the panel's edge clear of the dimmed road.
@@ -69,7 +79,7 @@ export class PauseScene extends Scene {
     fillRect(rim, PALETTE.tan, { ...panel, width: panel.width + 2, x: panel.x - 1 });
     addPanel(this, panel);
     const center = panel.x + panel.width / 2;
-    addPixelText(this, center, layout.titleY, "Paused", {
+    addPixelText(this, center, layout.titleY, asking ? question.title : "Paused", {
       color: PALETTE.plum,
       font: "title",
       originX: 0.5,
@@ -80,11 +90,12 @@ export class PauseScene extends Scene {
         this,
         itemAt(layout.buttons, i),
         entry.label,
-        entry.press === onResume ? "primary" : "secondary",
+        i === 0 ? "primary" : "secondary",
       ),
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
-    addPixelText(this, center, layout.notePlate.y + 6, "Keeps tips and earlier zones' fees", {
+    const note = asking ? question.body : "Keeps tips and earlier zones' fees";
+    addPixelText(this, center, layout.notePlate.y + 6, note, {
       color: PALETTE.plum,
       originX: 0.5,
     });
@@ -152,7 +163,7 @@ export class PauseScene extends Scene {
   }
 
   private openSettings(): void {
-    const data: SettingsSceneData = { origin: "road", resume: SCENE_KEYS.pause };
+    const data: SettingsSceneData = { resume: SCENE_KEYS.pause };
     this.scene.pause();
     this.scene.launch(SCENE_KEYS.settings, data);
   }

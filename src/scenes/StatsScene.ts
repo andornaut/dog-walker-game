@@ -46,24 +46,24 @@ const TAB_RECTS: readonly Rect[] = TABS.map((_, i) => ({
   height: 44,
   width: 112,
   x: 4 + i * 120,
-  y: 136,
+  y: 56,
 }));
 // The menus mock's close button, with its 44x44 hit area in the corner.
 const CLOSE = { hit: { height: 44, width: 44, x: 316, y: 0 }, x: 332, y: 10 };
-const PANEL: Rect = { height: 444, width: 344, x: 8, y: 188 };
+const PANEL: Rect = { height: 444, width: 344, x: 8, y: 108 };
 const LEFT = 16;
 const RIGHT = 344;
 const PITCH = 17;
-const DOG_ROW = { iconX: 14, nameX: 54, pitch: 34, top: 220 };
+const DOG_ROW = { iconX: 14, nameX: 54, pitch: 34, top: PANEL.y + 32 };
 const DOG_COLUMNS = { fired: 344, walks: 236, zones: 290 };
 const LOG_CHARS = 46;
 // The badge wall: two columns filled down, each row the badge then a 132-wide text column of
 // three lines at 2x (the name, then the goal).
-const WALL = { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: 212 };
+const WALL = { columnGap: 8, columnWidth: 168, rowHeight: 52, rows: 8, x: 8, y: PANEL.y + 24 };
 const WALL_TEXT = { lineHeight: 16, lines: 3, width: 132, x: 36, y: 4 };
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
 // The badge tapped open, over the wall.
-const DETAIL: Rect = { height: 268, width: 312, x: 24, y: 220 };
+const DETAIL: Rect = { height: 268, width: 312, x: 24, y: PANEL.y + 32 };
 const DETAIL_TEXT_WIDTH = DETAIL.width - 32;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;

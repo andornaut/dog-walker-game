@@ -14,9 +14,9 @@ export const GAG_SIZES = {
   sprinkler: { height: 24, width: 32 },
 } as const;
 
-// The cat's paws rest on the near-left perch's top rail, rows 132 and 133, and the
-// sprinkler stands on the near-right lawn, rows 120 to 149.
-export const GAG_Y = { cat: 110, sprinkler: 123 } as const;
+// The cat's paws rest on the near-left perch's top rail, on row 94, and the sprinkler
+// stands on the near-right lawn, rows 86 to 109.
+export const GAG_Y = { cat: 71, sprinkler: 86 } as const;
 
 // The ball's feet, rolling up the middle of a sidewalk from the band's bottom edge.
 export interface BallPath {
@@ -25,8 +25,8 @@ export interface BallPath {
 }
 
 const BALL_PATHS: readonly BallPath[] = [
-  { from: { x: 136, y: 149 }, to: { x: 141, y: 122 } },
-  { from: { x: 304, y: 149 }, to: { x: 299, y: 122 } },
+  { from: { x: 97, y: 109 }, to: { x: 103, y: 85 } },
+  { from: { x: 263, y: 109 }, to: { x: 257, y: 85 } },
 ];
 // The ball's feet, from the top-left of its sprite.
 const BALL_FEET = { x: 7, y: 13 } as const;
@@ -51,7 +51,7 @@ export interface ZoneGags {
 
 // Every backdrop has a perch along its near-left lawn: a picket fence, a park rail or a
 // planter's ledge. Sniff Street Shops is paved, so it has no sprinkler.
-const NEAR_LEFT_PERCH: Span = { x0: 0, x1: 120 };
+const NEAR_LEFT_PERCH: Span = { x0: 0, x1: 82 };
 const NEAR_RIGHT_LAWN = 338;
 
 export const ZONE_GAGS: Readonly<Record<ZoneId, ZoneGags>> = {

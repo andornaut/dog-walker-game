@@ -58,9 +58,6 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
   return { music: settings.musicVolume, sfx: settings.sfxVolume };
 }
 
-// Settings opens from the home screen or over the road, from the pause menu.
-export type SettingsOrigin = "home" | "road";
-
 export interface SettingsLayout {
   back: Rect;
   panel: Rect;
@@ -70,19 +67,18 @@ export interface SettingsLayout {
   track: SliderTrack & { dy: number; height: number };
 }
 
-const PANEL_WIDTH = 248;
-// Over the road, the panel sits where the menus mock puts it.
-const ROAD_PANEL_X = 96;
+const PANEL = { height: 276, width: 248 };
 
-// The menus mock's layout: four rows 44 tall and Back. On the home screen the panel is
-// centred; over the road it keeps the mock's x.
-export function settingsLayout(screenWidth: number, origin: SettingsOrigin): SettingsLayout {
-  const x = origin === "home" ? Math.round((screenWidth - PANEL_WIDTH) / 2) : ROAD_PANEL_X;
+// The menus mock's layout: four rows 44 tall and Back, the panel centred on the screen,
+// which it covers wherever it opens from.
+export function settingsLayout(screen: { height: number; width: number }): SettingsLayout {
+  const x = Math.round((screen.width - PANEL.width) / 2);
+  const y = Math.round((screen.height - PANEL.height) / 2);
   return {
-    back: { height: 40, width: 200, x: x + 24, y: 499 },
-    panel: { height: 276, width: PANEL_WIDTH, x, y: 277 },
-    row: { height: 44, width: 232, x: x + 8, y: 315 },
-    title: { x: x + 124, y: 293 },
+    back: { height: 40, width: 200, x: x + 24, y: y + 222 },
+    panel: { ...PANEL, x, y },
+    row: { height: 44, width: 232, x: x + 8, y: y + 38 },
+    title: { x: x + 124, y: y + 16 },
     track: { dy: 24, height: 10, knobWidth: 10, width: 216, x: x + 16 },
   };
 }

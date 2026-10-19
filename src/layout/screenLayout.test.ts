@@ -1,14 +1,15 @@
 import { describe, expect, it } from "vitest";
 
-import { SCREEN_CONFIG } from "../data/screen";
+import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "./screenLayout";
 
 const config = {
-  backdropHeight: 150,
-  dogColumnWidth: 80,
+  backdropHeight: 110,
+  dogRowHeight: 90,
   dogSlotCount: 3,
-  dogSlotPadding: 4,
-  height: 640,
+  height: 560,
+  roadIntoBand: 24,
+  roadWidth: 280,
   topBarHeight: 40,
   width: 360,
 };
@@ -19,28 +20,44 @@ describe("screenLayout", () => {
   });
 
   it("puts the backdrop band under the top bar, across the full width", () => {
-    expect(screenLayout(config).backdrop).toEqual({ height: 150, width: 360, x: 0, y: 40 });
+    expect(screenLayout(config).backdrop).toEqual({ height: 110, width: 360, x: 0, y: 40 });
   });
 
-  it("puts the dog column and the road side by side under the backdrop", () => {
-    const { dogColumn, road } = screenLayout(config);
-    expect(dogColumn).toEqual({ height: 450, width: 80, x: 0, y: 190 });
-    expect(road).toEqual({ height: 450, width: 280, x: 80, y: 190 });
+  it("draws the road across the full width from the band down to the doghouses", () => {
+    expect(screenLayout(config).roadView).toEqual({ height: 320, width: 360, x: 0, y: 150 });
   });
 
-  it("places a 72x146 doghouse slot every 150px, 4px in, the last meeting the bottom", () => {
-    expect(screenLayout(config).dogSlots).toEqual([
-      { height: 146, width: 72, x: 4, y: 194 },
-      { height: 146, width: 72, x: 4, y: 344 },
-      { height: 146, width: 72, x: 4, y: 494 },
+  it("runs the road's approach up the band's bottom 24 rows, band rows 86 to 109", () => {
+    const { approach, rasterView } = screenLayout(config);
+    expect(approach).toEqual({ height: 24, width: 360, x: 0, y: 126 });
+    expect(rasterView).toEqual({ height: 344, width: 360, x: 0, y: 126 });
+  });
+
+  it("centres the road's lanes in the drawn road", () => {
+    expect(screenLayout(config).road).toEqual({ height: 320, width: 280, x: 40, y: 150 });
+  });
+
+  it("puts a row of 120x90 doghouse slots along the bottom", () => {
+    const { dogRow, dogSlots } = screenLayout(config);
+    expect(dogRow).toEqual({ height: 90, width: 360, x: 0, y: 470 });
+    expect(dogSlots).toEqual([
+      { height: 90, width: 120, x: 0, y: 470 },
+      { height: 90, width: 120, x: 120, y: 470 },
+      { height: 90, width: 120, x: 240, y: 470 },
     ]);
   });
 
-  it("keeps the road width when there are fewer slots", () => {
-    expect(screenLayout({ ...config, dogSlotCount: 1 }).road.width).toBe(280);
+  it("splits the game's road into 56px lanes", () => {
+    const { road } = screenLayout(SCREEN_CONFIG);
+    expect(road.width / LANE_COUNT).toBe(56);
   });
 
-  it("splits the game's road into 56px lanes", () => {
-    expect(screenLayout(SCREEN_CONFIG).road.width / 5).toBe(56);
+  it("fits the game's screen in 360x560, every part touching the next", () => {
+    const { backdrop, dogRow, roadView, topBar } = screenLayout(SCREEN_CONFIG);
+    expect([SCREEN_CONFIG.width, SCREEN_CONFIG.height]).toEqual([360, 560]);
+    expect(backdrop.y).toBe(topBar.y + topBar.height);
+    expect(roadView.y).toBe(backdrop.y + backdrop.height);
+    expect(dogRow.y).toBe(roadView.y + roadView.height);
+    expect(dogRow.y + dogRow.height).toBe(SCREEN_CONFIG.height);
   });
 });

@@ -1,19 +1,33 @@
-import type { ScreenConfig } from "../layout/screenLayout";
+import { roadCameraFor } from "../layout/projection";
+import { type ScreenConfig, screenLayout } from "../layout/screenLayout";
+import { walkerFootY } from "../runner/walkGeometry";
+import { TUNING } from "./tuning";
 
-// Internal render resolution: portrait 9:16, scaled to the window without smoothing.
+// Internal render resolution: portrait, scaled to the window without smoothing.
 export const SCREEN_CONFIG: ScreenConfig = {
-  backdropHeight: 150,
-  dogColumnWidth: 80,
+  backdropHeight: 110,
+  dogRowHeight: 90,
   dogSlotCount: 3,
-  dogSlotPadding: 4,
-  height: 640,
+  height: 560,
+  roadIntoBand: 24,
+  roadWidth: 280,
   topBarHeight: 40,
   width: 360,
 };
 
 export const LANE_COUNT = 5;
 
+// Seconds of road in view ahead of the walker at the base scroll speed.
+export const ROAD_LOOK_AHEAD_SECONDS = 5.25;
+
 // The pseudo-3D road's camera: the screen row the road's vanishing point sits on, and the
-// ground's screen speed at the walker's feet relative to sprite scale there. The backdrops
-// are drawn to continue this road at their bottom row.
-export const ROAD_CAMERA = { horizonY: -260, ratio: 1.4 } as const;
+// ground's screen speed at the walker's feet relative to sprite scale there. The road's far
+// edge, on the backdrop band's bottom edge, is at scale 0.5 whatever the speed, so the
+// backdrops, drawn to continue the road at their bottom row, keep their join.
+const { road } = screenLayout(SCREEN_CONFIG);
+export const ROAD_CAMERA = roadCameraFor({
+  farScale: 0.5,
+  farY: road.y,
+  footY: walkerFootY(road),
+  visibleDistance: ROAD_LOOK_AHEAD_SECONDS * TUNING.pixels.roadScrollSpeed,
+});

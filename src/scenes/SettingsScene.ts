@@ -7,7 +7,6 @@ import {
   knobX,
   type SettingsLayout,
   settingsLayout,
-  type SettingsOrigin,
   setVolumeSteps,
   VOLUME_STEPS,
   type VolumeKey,
@@ -37,10 +36,8 @@ import {
   TEXT_SCALE,
 } from "./uiKit";
 
-// The caller pauses itself and launches settings; settings resumes it on close. origin
-// places the panel: centred on the home screen, or over the road.
+// The caller pauses itself and launches settings; settings resumes it on close.
 export interface SettingsSceneData {
-  origin: SettingsOrigin;
   resume?: SceneKey;
 }
 
@@ -103,7 +100,7 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
   private focus: Focus | null = null;
-  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG.width, "road");
+  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG);
   private pressed: Target | undefined;
   private resumeKey: SceneKey | undefined;
 
@@ -113,7 +110,7 @@ export class SettingsScene extends Scene {
 
   create(data?: SettingsSceneData): void {
     this.resumeKey = data?.resume;
-    this.layout = settingsLayout(SCREEN_CONFIG.width, data?.origin ?? "road");
+    this.layout = settingsLayout(SCREEN_CONFIG);
     this.dragging = undefined;
     this.focus = null;
     this.pressed = undefined;

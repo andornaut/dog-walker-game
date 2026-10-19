@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { WORLD } from "../data/world";
 import { ballAt, catReacts, catX, GAG_SIZES, GAG_Y, ZONE_GAGS } from "./sceneryGags";
 
-const BAND = { height: 150, width: 360 };
+const BAND = { height: 110, width: 360 };
 
 describe("ZONE_GAGS", () => {
   it("places gags for every zone, inside the 360px band", () => {
@@ -20,23 +20,23 @@ describe("ZONE_GAGS", () => {
     }
   });
 
-  it("perches a cat along every zone's near-left lawn, from x 0 to about 120", () => {
+  it("perches a cat along every zone's near-left lawn, from x 0 to 82", () => {
     for (const zone of WORLD.zones) {
-      expect(ZONE_GAGS[zone.id].perches).toEqual([{ x0: 0, x1: 120 }]);
+      expect(ZONE_GAGS[zone.id].perches).toEqual([{ x0: 0, x1: 82 }]);
     }
-    // The cat's paws, on its frame's bottom row, rest on the rail's rows 132 and 133.
-    expect(GAG_Y.cat + GAG_SIZES.cat.height - 1).toBe(133);
+    // The cat's paws, on its frame's bottom row, rest on the rail's row 94.
+    expect(GAG_Y.cat + GAG_SIZES.cat.height - 1).toBe(94);
   });
 
-  it("stands a sprinkler on the near-right lawn, x 316 to 360, rows 120 to 149, except at the shops", () => {
+  it("stands a sprinkler on the near-right lawn, x 274 to 359, rows 86 to 109, except at the shops", () => {
     for (const zone of ["street", "park", "homeStretch"] as const) {
       for (const x of ZONE_GAGS[zone].sprinklers) {
-        expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(316);
+        expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(274);
         expect(x + GAG_SIZES.sprinkler.width / 2).toBeLessThanOrEqual(360);
       }
     }
-    expect(GAG_Y.sprinkler).toBeGreaterThanOrEqual(120);
-    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height - 1).toBeLessThanOrEqual(149);
+    expect(GAG_Y.sprinkler).toBeGreaterThanOrEqual(86);
+    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height - 1).toBeLessThanOrEqual(109);
     expect(ZONE_GAGS.shops.sprinklers).toEqual([]);
   });
 });
@@ -68,9 +68,9 @@ describe("catReacts", () => {
 describe("ballAt", () => {
   it("rolls up the near-left sidewalk from the band's bottom edge, then the right one", () => {
     const start = ballAt(0);
-    expect(start).toEqual({ x: 129, y: 136 });
+    expect(start).toEqual({ x: 90, y: 96 });
     expect((ballAt(2)?.y ?? 0) < (start?.y ?? 0)).toBe(true);
-    expect(ballAt(30)).toEqual({ x: 297, y: 136 });
+    expect(ballAt(30)).toEqual({ x: 256, y: 96 });
   });
 
   it("stays in the band, and is gone between rolls", () => {
@@ -84,6 +84,6 @@ describe("ballAt", () => {
   });
 
   it("rests at the near end of the left sidewalk when still", () => {
-    expect(ballAt(17, true)).toEqual({ x: 129, y: 136 });
+    expect(ballAt(17, true)).toEqual({ x: 90, y: 96 });
   });
 });

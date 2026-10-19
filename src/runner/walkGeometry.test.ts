@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, ROAD_LOOK_AHEAD_SECONDS, SCREEN_CONFIG } from "../data/screen";
+import { TUNING } from "../data/tuning";
 import { screenLayout } from "../layout/screenLayout";
 import { walkerFootY, walkGeometry, walkProjection } from "./walkGeometry";
 
@@ -18,11 +19,12 @@ describe("walkGeometry", () => {
     expect([geometry.roadTop, geometry.roadBottom]).toEqual([40, 640]);
   });
 
-  it("brings spawns into view at the projected road's far edge, 630px ahead of the feet", () => {
+  it("brings spawns into view at the projected road's far edge, 5.25s ahead of the feet", () => {
     const gameRoad = screenLayout(SCREEN_CONFIG).road;
     const projection = walkProjection(ROAD_CAMERA, gameRoad);
     const geometry = walkGeometry(5, 3, projection, gameRoad);
-    expect(walkerFootY(gameRoad) - geometry.roadTop).toBeCloseTo(630.06, 2);
+    const lookAhead = ROAD_LOOK_AHEAD_SECONDS * TUNING.pixels.roadScrollSpeed;
+    expect(walkerFootY(gameRoad) - geometry.roadTop).toBeCloseTo(lookAhead, 6);
     expect(geometry.sightLength).toBeGreaterThan(500);
   });
 

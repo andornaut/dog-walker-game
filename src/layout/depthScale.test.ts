@@ -90,7 +90,9 @@ describe("depthDraw", () => {
           width: art.width * drawn.scale,
         };
         const wanted = Math.max(full.width, full.height) * Math.min(1, projected);
-        expect(Math.abs(Math.max(shown.width, shown.height) - wanted)).toBeLessThanOrEqual(0.5);
+        expect(Math.abs(Math.max(shown.width, shown.height) - wanted)).toBeLessThanOrEqual(
+          0.5 + 1e-9,
+        );
         expect(drawn.scale).toBeLessThanOrEqual(1 + 0.5 / Math.max(art.width, art.height));
         if (last !== undefined) {
           expect(shown.height).toBeGreaterThanOrEqual(last.height - 1e-9);

@@ -3,10 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   buttonIcon,
   gameplayAllowed,
+  HOME_BUTTON,
   PAUSE_BUTTON,
   pauseButtonIcon,
   type RunPause,
-  SOUND_BUTTON,
   topBarAction,
   topBarButtonAt,
   topBarButtonForKey,
@@ -19,13 +19,25 @@ const HIT_STOP: RunPause = { ...WALKING, hitStop: true };
 const MENU: RunPause = { ...WALKING, menu: "open" };
 const MENU_OVER_CARD: RunPause = { ...CARD, menu: "open" };
 const MENU_OVER_HIT_STOP: RunPause = { ...HIT_STOP, menu: "open" };
+const CONFIRM: RunPause = { ...WALKING, menu: "confirmHome" };
+const CONFIRM_OVER_CARD: RunPause = { ...CARD, menu: "confirmHome" };
 const HELP: RunPause = { ...WALKING, menu: "help" };
 const SETTINGS: RunPause = { ...WALKING, menu: "settings" };
-const HELD = [CARD, HIT_STOP, MENU, MENU_OVER_CARD, MENU_OVER_HIT_STOP, HELP, SETTINGS];
+const HELD = [
+  CARD,
+  HIT_STOP,
+  MENU,
+  MENU_OVER_CARD,
+  MENU_OVER_HIT_STOP,
+  CONFIRM,
+  CONFIRM_OVER_CARD,
+  HELP,
+  SETTINGS,
+];
 
 describe("pauseButtonIcon", () => {
-  it("shows play while the pause menu is up, under help or settings too", () => {
-    for (const pause of [MENU, MENU_OVER_CARD, HELP, SETTINGS]) {
+  it("shows play while the pause menu or Home's question is up, under help or settings too", () => {
+    for (const pause of [MENU, MENU_OVER_CARD, CONFIRM, HELP, SETTINGS]) {
       expect(pauseButtonIcon(pause)).toBe("icon-play");
     }
   });
@@ -57,11 +69,20 @@ describe("walkCovered", () => {
 });
 
 describe("topBarAction", () => {
-  it("mutes from the sound button and its key whenever the bar is in view", () => {
-    for (const pause of [WALKING, CARD, HIT_STOP, MENU, MENU_OVER_CARD]) {
-      expect(topBarAction(pause, "tap", "sound")).toBe("mute");
+  it("mutes from M whenever the bar is in view", () => {
+    for (const pause of [WALKING, CARD, HIT_STOP, MENU, MENU_OVER_CARD, CONFIRM]) {
       expect(topBarAction(pause, "key", "sound")).toBe("mute");
     }
+  });
+
+  it("asks whether to head home from Home, while walking, over a card or from the menu", () => {
+    for (const pause of [WALKING, CARD, HIT_STOP, MENU, MENU_OVER_CARD]) {
+      expect(topBarAction(pause, "tap", "home")).toBe("confirmHome");
+    }
+  });
+
+  it("leaves the question up when Home is tapped again", () => {
+    expect(topBarAction(CONFIRM, "tap", "home")).toBeUndefined();
   });
 
   it("opens the menu while walking, over a card and through the hit stop", () => {
@@ -71,8 +92,8 @@ describe("topBarAction", () => {
     }
   });
 
-  it("resumes while the menu is up, over a card or the hit stop too", () => {
-    for (const pause of [MENU, MENU_OVER_CARD, MENU_OVER_HIT_STOP]) {
+  it("resumes while the menu or the question is up, over a card or the hit stop too", () => {
+    for (const pause of [MENU, MENU_OVER_CARD, MENU_OVER_HIT_STOP, CONFIRM, CONFIRM_OVER_CARD]) {
       expect(topBarAction(pause, "tap", "pause")).toBe("resume");
       expect(topBarAction(pause, "key", "pause")).toBe("resume");
     }
@@ -80,7 +101,7 @@ describe("topBarAction", () => {
 
   it("leaves taps and the pause keys to help and settings, which cover the bar", () => {
     for (const pause of [HELP, SETTINGS]) {
-      expect(topBarAction(pause, "tap", "sound")).toBeUndefined();
+      expect(topBarAction(pause, "tap", "home")).toBeUndefined();
       expect(topBarAction(pause, "tap", "pause")).toBeUndefined();
       expect(topBarAction(pause, "key", "pause")).toBeUndefined();
     }
@@ -110,34 +131,37 @@ describe("topBarButtonForKey", () => {
 });
 
 describe("topBarButtonAt", () => {
-  it("finds the sound and pause buttons over their 44px hit areas", () => {
-    expect(topBarButtonAt(124, 0)).toBe("sound");
-    expect(topBarButtonAt(167, 43)).toBe("sound");
-    expect(topBarButtonAt(168, 0)).toBe("pause");
-    expect(topBarButtonAt(211, 43)).toBe("pause");
+  it("finds the Home and pause buttons over their 44px hit areas", () => {
+    expect(topBarButtonAt(118, 0)).toBe("home");
+    expect(topBarButtonAt(161, 43)).toBe("home");
+    expect(topBarButtonAt(162, 0)).toBe("pause");
+    expect(topBarButtonAt(205, 43)).toBe("pause");
   });
 
-  it("reaches 4px into the road and no further", () => {
-    expect(topBarButtonAt(150, 43)).toBe("sound");
-    expect(topBarButtonAt(150, 44)).toBeUndefined();
+  it("reaches 4px into the band and no further", () => {
+    expect(topBarButtonAt(140, 43)).toBe("home");
+    expect(topBarButtonAt(140, 44)).toBeUndefined();
   });
 
-  it("finds no button elsewhere on the bar", () => {
+  it("finds no button elsewhere on the bar, the sound button gone from it", () => {
     expect(topBarButtonAt(60, 20)).toBeUndefined();
+    expect(topBarButtonAt(117, 20)).toBeUndefined();
+    expect(topBarButtonAt(206, 20)).toBeUndefined();
     expect(topBarButtonAt(300, 20)).toBeUndefined();
   });
 
   it("keeps both hit areas at least 44px square, without overlapping", () => {
-    for (const { hit } of [SOUND_BUTTON, PAUSE_BUTTON]) {
+    for (const { hit } of [HOME_BUTTON, PAUSE_BUTTON]) {
       expect(Math.min(hit.width, hit.height)).toBeGreaterThanOrEqual(44);
     }
-    expect(SOUND_BUTTON.hit.x + SOUND_BUTTON.hit.width).toBeLessThanOrEqual(PAUSE_BUTTON.hit.x);
+    expect(HOME_BUTTON.hit.x + HOME_BUTTON.hit.width).toBeLessThanOrEqual(PAUSE_BUTTON.hit.x);
   });
 });
 
 describe("buttonIcon", () => {
-  it("puts the icon at +2,+1 on the face, and 2px lower while pressed", () => {
-    expect(buttonIcon(PAUSE_BUTTON, false)).toEqual({ x: 172, y: 11 });
-    expect(buttonIcon(PAUSE_BUTTON, true)).toEqual({ x: 172, y: 13 });
+  it("centres the 16px icons on x 140 and 184, 2px lower while pressed", () => {
+    expect(buttonIcon(HOME_BUTTON, false)).toEqual({ x: 132, y: 11 });
+    expect(buttonIcon(PAUSE_BUTTON, false)).toEqual({ x: 176, y: 11 });
+    expect(buttonIcon(PAUSE_BUTTON, true)).toEqual({ x: 176, y: 13 });
   });
 });

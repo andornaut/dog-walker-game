@@ -10,6 +10,17 @@ import { addPixelText, setPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
 
 // Text is drawn at 2x so it reads on a phone; 1x is for incidental marks only.
+// Whether key's art is loaded with frames of this size, so art drawn for another layout is
+// left for the drawn stand-in.
+export function artFits(scene: Scene, key: string, size: { height: number; width: number }) {
+  if (!scene.textures.exists(key)) {
+    return false;
+  }
+  const texture = scene.textures.get(key);
+  const frame = texture.get(texture.getFrameNames()[0]);
+  return frame.width === size.width && frame.height === size.height;
+}
+
 export const TEXT_SCALE = 2;
 
 // The UI kit's nine-slice borders, in pixels from each edge.

@@ -47,19 +47,19 @@ describe("helpActionForPointer", () => {
   });
 
   it("turns a page on a swipe that starts on a button, without pressing it", () => {
-    expect(helpActionForPointer(6, { x: 300, y: 600 }, { x: 350, y: 600 })).toEqual({
+    expect(helpActionForPointer(6, { x: 300, y: 520 }, { x: 350, y: 520 })).toEqual({
       kind: "previous",
     });
   });
 
   it("acts on the button where a tap started", () => {
-    expect(helpActionForPointer(6, { x: 300, y: 600 }, { x: 304, y: 603 })).toEqual({
+    expect(helpActionForPointer(6, { x: 300, y: 520 }, { x: 304, y: 523 })).toEqual({
       kind: "advance",
     });
   });
 
   it("ignores a drag that is neither a tap nor a horizontal swipe", () => {
-    expect(helpActionForPointer(6, { x: 300, y: 600 }, { x: 320, y: 600 })).toBeUndefined();
+    expect(helpActionForPointer(6, { x: 300, y: 520 }, { x: 320, y: 520 })).toBeUndefined();
     expect(helpActionForPointer(6, { x: 180, y: 300 }, { x: 190, y: 400 })).toBeUndefined();
   });
 });

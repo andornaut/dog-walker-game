@@ -76,7 +76,7 @@ export function activateWaitingWorker(
 
 // The game's size, and where the notice sits in it: over the gate scene's street, under the
 // top bar, clear of the home screen's steps and Start walk at the bottom.
-const GAME = { height: 640, width: 360 } as const;
+const GAME = { height: 560, width: 360 } as const;
 const NOTICE = { maxWidth: 260, top: 48 } as const;
 
 export interface BoxLike {
