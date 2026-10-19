@@ -69,7 +69,7 @@ export const TUNING = {
     runningShoesInputLock: 0,
     rushHourObstacles: 1.5,
     rushHourTips: 2,
-    scrollSpeedGainPerZone: 0.2,
+    scrollSpeedGainPerZone: 0.15,
     shortcutFees: 0.75,
     shortcutZoneLength: 0.75,
     steadyHandsPullFrequency: 0.5,
@@ -104,6 +104,6 @@ export const TUNING = {
     // How long a dog leans and barks before it pulls.
     pullTell: 1,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
-    zoneAtBaseSpeed: 228,
+    zoneAtBaseSpeed: 216,
   },
 } satisfies Tuning;

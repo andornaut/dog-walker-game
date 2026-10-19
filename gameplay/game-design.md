@@ -52,7 +52,7 @@ Pick as many of your unlocked dogs as you have dog slots (1 slot and 3 dogs to s
 
 ### A run
 
-- 4 zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home, each a fixed distance. Zone 1 takes ~3.8 minutes at base speed, and the speed ramp shortens later zones to ~3.2, ~2.7 and ~2.4 minutes (a full run is ~12 minutes)
+- 4 zones in a fixed order: Woof Way, Bark Park, Sniff Street Shops and The Long Way Home, each a fixed distance. Zone 1 takes ~3.6 minutes at base speed, and the speed ramp (+15% per zone) shortens later zones to ~3.1, ~2.8 and ~2.5 minutes (a full run is ~12 minutes)
 - One forced stop per zone
 - After zones 1, 2 and 3: choose 1 of 3 upgrade cards
 - After each zone: every remaining dog pays a share of its fee; a dog fired mid-zone isn't paid for that zone

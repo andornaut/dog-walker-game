@@ -8,6 +8,7 @@ The game grows sideways rather than upward. A world is a set of 4 zones with its
 
 ## Other ideas for later
 
+- Owner loyalty: each finished walk without a firing raises that owner's loyalty, slowly adding a small permanent bonus (+$1 fee, then a starting heart)
 - Dog training: two courses per dog you own: Heel (the dog pulls half as often, $100) and Good manners (its owner starts with +1 ♥ and has +1 max ♥, $150)
 - Walker kit (permanent, always on): Quick feet (lane changes 20% faster, $300); Treat belt (carry 4 treats, $300); Business cards (+$3 fee per dog per zone, $400); Good eye (the pull tell starts 0.5s earlier, $400)
 - Cosmetics: 2 accessories per dog, each made for that dog ($80 each; proposed: Duchess tiara and pearl collar, Nugget sunglasses and gold chain, Zippy racing goggles and sports jersey, Pierre beret and bow tie, Biscuit chef hat and scarf, Dash aviator cap and cape, Snowball flower crown and veil, Waffles firefighter hat and raincoat, Koda beanie and trail pack); 6 leash colours ($40 each); 6 home screen decor pieces with fixed spots in the gate scene ($60 to $160)

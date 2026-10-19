@@ -6,7 +6,6 @@ Format: `- [status] **Idea**: short description · notes`
 
 ## Run and onboarding
 
-- [floated] **Owner loyalty**: each finished walk without a firing raises that owner's loyalty, slowly adding a small permanent bonus (+$1 fee, then a starting heart)
 - [floated] **Fewer minor cards**: a puddle that catches one dog resolves without a card unless the dog is Fancy or its owner would fire you · decide after the first playtest
 
 ## Cut
