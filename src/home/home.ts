@@ -5,6 +5,7 @@ import { effectClause, SIZE_NAMES, TEMPERAMENT_NAMES, TRAIT_NAMES } from "../rul
 import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { addCents, type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
+import { dogsWalked, walksPlayed } from "../save/stats";
 import type { PackDogs } from "../state/runState";
 import { fillLine } from "../text/lines";
 import { HOME_TEXT_FIELDS } from "./homeText";
@@ -189,11 +190,6 @@ export function lastWalkLine(data: LogbookData, walk: LastWalk): string {
   });
 }
 
-// Every walk played, however it ended.
-export function walksPlayed(stats: Pick<SaveStats, "runs">): number {
-  return stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
-}
-
 // The home screen's logbook: the best walk, totals, and the last walk; null before any walk.
 export interface Logbook {
   readonly best: string;
@@ -209,7 +205,6 @@ export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
   }
   const text = data.homeText.logbook;
   const walks = walksPlayed(stats);
-  const dogsWalked = Object.values(stats.dogs).reduce((total, dog) => total + dog.walks, 0);
   const count = String(bestWalk.zonesFinished);
   const zones = fillLine(
     LOGBOOK_FIELDS,
@@ -225,7 +220,7 @@ export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
     bestNote: dogs === "" ? zones : fillLine(LOGBOOK_FIELDS, text, "bestNote", { dogs, zones }),
     last: lastWalkLine(data, lastWalk),
     totals: fillLine(LOGBOOK_FIELDS, text, "totals", {
-      dogs: String(dogsWalked),
+      dogs: String(dogsWalked(stats)),
       fired: String(stats.timesFired),
       walks: String(walks),
     }),

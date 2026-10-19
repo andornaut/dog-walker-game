@@ -17,6 +17,16 @@ export interface StatsPage {
   timesFired: number;
 }
 
+// Every walk played, however it ended.
+export function walksPlayed(stats: Pick<SaveStats, "runs">): number {
+  return stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome;
+}
+
+// Every dog's walks added up: a run with 3 dogs walks 3.
+export function dogsWalked(stats: Pick<SaveStats, "dogs">): number {
+  return Object.values(stats.dogs).reduce((total, { walks }) => total + walks, 0);
+}
+
 export function statsPage(stats: SaveStats): StatsPage {
   const dogs = Object.entries(stats.dogs) as [DogId, NonNullable<SaveStats["dogs"][DogId]>][];
   let mostFiredBy: DogId | null = null;
@@ -30,11 +40,11 @@ export function statsPage(stats: SaveStats): StatsPage {
   return {
     bestRunCents: stats.bestWalk?.earnedCents ?? cents(0),
     bestZoneFinished: stats.bestZoneFinished,
-    dogsWalked: dogs.reduce((total, [, { walks }]) => total + walks, 0),
+    dogsWalked: dogsWalked(stats),
     lifetimeCents: stats.lifetimeCents,
     mostFiredBy,
     runs: stats.runs,
-    runsPlayed: stats.runs.finished + stats.runs.noDogs + stats.runs.wentHome,
+    runsPlayed: walksPlayed(stats),
     timesFired: stats.timesFired,
   };
 }

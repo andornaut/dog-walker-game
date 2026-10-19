@@ -36,7 +36,6 @@ import {
   purchasePrice,
   tapDog,
   tapGear,
-  walksPlayed,
   wrapWords,
 } from "../home/home";
 import { HOME_LAYOUT } from "../home/homeLayout";
@@ -68,6 +67,7 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
+import { walksPlayed } from "../save/stats";
 import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import { drawFocusRing, drawPixelLine, drawRing, drawShadow, fillRect } from "./draw";
