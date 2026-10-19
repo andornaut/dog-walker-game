@@ -1,7 +1,7 @@
 import { type GameObjects, Scene } from "phaser";
 
 import { HEIGHT, LANE_COUNT, SCREEN } from "../config";
-import { laneCenters } from "../lanes";
+import { laneCenters, moveLane } from "../lanes";
 import { screenLayout } from "../layout";
 import type { CardSceneData } from "./CardScene";
 import { addBox } from "./shapes";
@@ -16,6 +16,17 @@ const ROAD_COLOR = 0x8d8d8d;
 const SCROLL_SPEED = 80;
 const WALKER_COLOR = 0x3d5a80;
 
+// Lane change keys, by KeyboardEvent.key lowercased: arrows, A/D and the vim
+// keys H/L.
+const MOVE_KEYS: Partial<Record<string, -1 | 1>> = {
+  a: -1,
+  arrowleft: -1,
+  arrowright: 1,
+  d: 1,
+  h: -1,
+  l: 1,
+};
+
 interface Dash {
   rect: GameObjects.Rectangle;
   row: number;
@@ -24,7 +35,10 @@ interface Dash {
 // The road, the walker and the pack. Paused while choice cards are up.
 export class RunScene extends Scene {
   private dashes: Dash[] = [];
+  private lane = 0;
+  private pack?: GameObjects.Rectangle;
   private scroll = 0;
+  private walker?: GameObjects.Rectangle;
 
   constructor() {
     super("run");
@@ -49,9 +63,19 @@ export class RunScene extends Scene {
       }
     }
 
-    const middle = laneCenters(LANE_COUNT, road)[Math.floor(LANE_COUNT / 2)];
-    this.add.rectangle(middle, HEIGHT - 40, 24, 32, WALKER_COLOR);
-    this.add.rectangle(middle, HEIGHT - 80, 32, 16, PACK_COLOR);
+    this.lane = Math.floor(LANE_COUNT / 2);
+    const x = laneCenters(LANE_COUNT, road)[this.lane];
+    this.walker = this.add.rectangle(x, HEIGHT - 40, 24, 32, WALKER_COLOR);
+    this.pack = this.add.rectangle(x, HEIGHT - 80, 32, 16, PACK_COLOR);
+
+    // Key repeat from holding a key fires keydown again, so holding keeps
+    // moving lane to lane. A paused scene gets no key events.
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      const direction = MOVE_KEYS[event.key.toLowerCase()];
+      if (direction !== undefined) {
+        this.moveTo(moveLane(LANE_COUNT, direction, this.lane));
+      }
+    });
 
     this.scene.launch("hud");
 
@@ -59,6 +83,13 @@ export class RunScene extends Scene {
     // options, W for two.
     this.input.keyboard?.on("keydown-E", () => this.openCards(3));
     this.input.keyboard?.on("keydown-W", () => this.openCards(2));
+  }
+
+  private moveTo(lane: number): void {
+    const x = laneCenters(LANE_COUNT, screenLayout(SCREEN).road)[lane];
+    this.lane = lane;
+    this.walker?.setX(x);
+    this.pack?.setX(x);
   }
 
   private openCards(count: number): void {
