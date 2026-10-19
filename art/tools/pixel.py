@@ -53,6 +53,15 @@ class Grid:
                     d = 0.7 * (dx + dy)
                     self.p(x, y, sh if sh and d > 0.5 else li if li and d < -0.72 else c)
 
+    def blob(self, cx, cy, rx, ry, c, sh=None, li=None, power=2.6):
+        """A squarer oval (superellipse): rounded, but fuller at the top and sides than ell."""
+        for y in range(self.h):
+            for x in range(self.w):
+                dx, dy = abs(x + 0.5 - cx) / rx, abs(y + 0.5 - cy) / ry
+                if dx ** power + dy ** power <= 1:
+                    d = 0.7 * ((x + 0.5 - cx) / rx + (y + 0.5 - cy) / ry)
+                    self.p(x, y, sh if sh and d > 0.5 else li if li and d < -0.72 else c)
+
     def tri(self, a, b, c, col):
         def side(px, py, x1, y1, x2, y2):
             return (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2)

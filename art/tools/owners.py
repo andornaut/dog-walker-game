@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
-"""Draw the owners' faces for the dog column and build their Aseprite sources and exports.
+"""Draw the owners' and walkers' faces and build their Aseprite sources and exports.
 
 face-owner-<dog>: 32x32, chibi, front view, in Endesga 32 with coloured
 outlines. Tags: happy, neutral, upset and fired (angry, shown as the owner
 fires you). Each owner's job shows in their hair and accessories, and their
 temperament in how far the expressions go.
+
+face-walker-<name>: 32x32 portraits for the walker picker. Tags:
+happy, neutral.
 
 Usage:
   owners.py preview OUT.png   contact sheet of every frame, scaled up
@@ -221,6 +224,95 @@ def jesse(mood):
     return g
 
 
+# ---------- the walkers' portraits, for the walker picker ----------
+
+def walker_cap(mood):
+    """The cap-and-hoodie walker."""
+    g = Grid()
+    base(g, "skin1", "skin2", "sky", "blue")
+    g.ell(16, 28, 4, 2, "blue")
+    g.ell(16, 11, 9, 5, "dbrown", "plum", "brown")
+    g.ell(16, 7.5, 9, 4.5, "amber", "orange", "yellow")
+    g.rect(7, 10, 18, 2, "orange")
+    g.rect(15, 5, 2, 2, "orange")
+    expression(g, mood)
+    return g
+
+
+def walker_girl(mood):
+    """Ada, 11, mixed race, caramel skin, long black curls falling straight down; pink tee."""
+    g = Grid()
+    g.ell(16, 13, 10, 9, "navy", "ink", "dslate")
+    g.rect(6, 13, 20, 16, "navy")
+    g.rect(23, 13, 3, 16, "ink")
+    for x in (7, 9, 22, 24):
+        for y in range(14, 29, 3):
+            g.p(x + (y // 3) % 2, y, "dslate")
+    base(g, "brown", "brown", "pink", "mauve")
+    g.rect(13, 24, 6, 1, "dbrown")
+    g.ell(16, 10, 8.5, 4, "navy", "ink", "dslate")
+    g.p(12, 8, "dslate")
+    g.p(18, 9, "dslate")
+    g.ell(22, 7, 2, 1.5, "pink", "mauve")
+    expression(g, mood, blush="pink", wide=True)
+    # big, bright eyes with two highlights
+    for x in (11, 18):
+        g.rect(x, 15, 3, 4, "ink")
+        g.p(x, 15, "white")
+        g.p(x + 2, 17, "white")
+    return g
+
+
+def walker_man(mood):
+    """Ben, 45, Black, bald, an oval face, a beard along the jaw and under the chin, no moustache; black tee."""
+    g = Grid()
+    g.rect(8, 27, 16, 1, "navy")
+    g.rect(6, 28, 20, 3, "navy")
+    g.rect(21, 28, 5, 3, "ink")
+    g.rect(13, 24, 6, 4, "plum")
+    g.ell(8.5, 16, 1.2, 1.8, "dbrown", "plum")
+    g.ell(23.5, 16, 1.2, 1.8, "dbrown", "plum")
+    g.blob(16, 14.5, 7.8, 9.3, "dbrown", "plum", power=2.3)
+    g.rect(12, 8, 2, 1, "brown")
+    # the chin-strap beard follows the jaw, leaving the upper lip bare
+    g.rect(9, 17, 1, 5, "ink")
+    g.rect(22, 17, 1, 5, "ink")
+    g.ell(16, 22.5, 6, 2.5, "ink")
+    g.rect(13, 20, 6, 2, "dbrown")
+    expression(g, mood, feat="cream", blush="rust")
+    for x in (12, 19):
+        g.rect(x - 1, 16, 2, 2, "white")
+        g.rect(x, 16, 1, 2, "ink")
+    return g
+
+
+def walker_teacher(mood):
+    """50, dirty blonde bob to the shoulders, cute: round glasses, green cardigan, white collar."""
+    g = Grid()
+    g.ell(16, 14, 10, 10, "tan", "brown", "cream")
+    g.rect(6, 14, 20, 9, "tan")
+    g.rect(22, 14, 4, 9, "brown")
+    base(g, "skin1", "skin2", "dgreen", "forest")
+    g.tri((12, 26), (16, 26), (14, 29), "white")
+    g.tri((16, 26), (20, 26), (18, 29), "white")
+    g.ell(16, 10, 9, 4.5, "tan", "brown", "cream")
+    g.ell(11, 11, 3, 2, "tan", "brown", "cream")
+    expression(g, mood)
+    for cx in (12, 19):
+        for dx, dy in ((-2, 0), (2, 0), (0, -2), (0, 2), (-1, -1), (1, -1), (-1, 1), (1, 1)):
+            g.p(cx + dx, 18 + dy, "dbrown")
+    g.rect(14, 18, 3, 1, "dbrown")
+    return g
+
+
+WALKERS = {
+    "walker-casey": walker_cap,
+    "walker-ada": walker_girl,
+    "walker-ben": walker_man,
+    "walker-trista": walker_teacher,
+}
+
+
 OWNERS = {
     "duchess": rosa,
     "nugget": kevin,
@@ -238,6 +330,8 @@ def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     for dog, draw in OWNERS.items():
         yield f"face-owner-{dog}", [(m, [draw(m).outlined()], 1000) for m in MOODS]
+    for key, draw in WALKERS.items():
+        yield f"face-{key}", [(m, [draw(m).outlined()], 1000) for m in ("happy", "neutral")]
 
 
 if __name__ == "__main__":

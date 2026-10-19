@@ -25,12 +25,13 @@ Sizes marked TBD depend on an open decision in the style guide.
 
 Dogs are listed in their own section below. Each of the 9 dogs is a named character with its own road sprite, face and owner face.
 
-| Asset             | Key               | Type   | Size  | Animations      | Priority | Notes                                                  |
-| ----------------- | ----------------- | ------ | ----- | --------------- | -------- | ------------------------------------------------------ |
-| Walker            | `walker`          | sprite | 32×48 | `walk`, `react` | M6       | One fixed walker, seen from behind (cap and hoodie)    |
-| Other dog         | `other-dog`       | sprite | 32×32 | `walk`          | M6       | Encounter obstacle (a corgi), led by `other-dog-owner` |
-| Other dog's owner | `other-dog-owner` | sprite | 32×48 | `walk`          | M6       | Walks behind the other dog; the game draws the leash   |
-| Stinky effect     | `fx-stinky`       | sprite | 32×32 | `loop`          | core     | Green stink lines over the pack while Stinky lasts     |
+| Asset             | Key                  | Type   | Size  | Animations         | Priority | Notes                                                                                                                                                                    |
+| ----------------- | -------------------- | ------ | ----- | ------------------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Walkers           | `walker-<name>`      | sprite | 32×48 | `walk`, `react`    | M6       | Seen from behind, all free: Casey (cap and hoodie), Ada (11, mixed race, long black curls), Ben (45, bald, chin beard, in black), Trista (50, teacher, dirty blonde bob) |
+| Walker portraits  | `face-walker-<name>` | sprite | 32×32 | `happy`, `neutral` | core     | Front view for the walker picker                                                                                                                                         |
+| Other dog         | `other-dog`          | sprite | 32×32 | `walk`             | M6       | Encounter obstacle (a corgi), led by `other-dog-owner`                                                                                                                   |
+| Other dog's owner | `other-dog-owner`    | sprite | 32×48 | `walk`             | M6       | Walks behind the other dog; the game draws the leash                                                                                                                     |
+| Stinky effect     | `fx-stinky`          | sprite | 32×32 | `loop`             | core     | Green stink lines over the pack while Stinky lasts                                                                                                                       |
 
 ## Dogs
 

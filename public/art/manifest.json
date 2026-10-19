@@ -156,6 +156,26 @@
       "json": "sprites/face-owner-zippy.json"
     },
     {
+      "key": "face-walker-ada",
+      "png": "sprites/face-walker-ada.png",
+      "json": "sprites/face-walker-ada.json"
+    },
+    {
+      "key": "face-walker-ben",
+      "png": "sprites/face-walker-ben.png",
+      "json": "sprites/face-walker-ben.json"
+    },
+    {
+      "key": "face-walker-casey",
+      "png": "sprites/face-walker-casey.png",
+      "json": "sprites/face-walker-casey.json"
+    },
+    {
+      "key": "face-walker-trista",
+      "png": "sprites/face-walker-trista.png",
+      "json": "sprites/face-walker-trista.json"
+    },
+    {
       "key": "fx-bark",
       "png": "sprites/fx-bark.png",
       "json": "sprites/fx-bark.json"
@@ -164,6 +184,16 @@
       "key": "ice-cream-truck",
       "png": "sprites/ice-cream-truck.png",
       "json": "sprites/ice-cream-truck.json"
+    },
+    {
+      "key": "icon-music",
+      "png": "sprites/icon-music.png",
+      "json": "sprites/icon-music.json"
+    },
+    {
+      "key": "icon-sound",
+      "png": "sprites/icon-sound.png",
+      "json": "sprites/icon-sound.json"
     },
     {
       "key": "kid",
@@ -231,9 +261,34 @@
       "json": "sprites/treat.json"
     },
     {
-      "key": "walker",
-      "png": "sprites/walker.png",
-      "json": "sprites/walker.json"
+      "key": "ui-button",
+      "png": "sprites/ui-button.png",
+      "json": "sprites/ui-button.json"
+    },
+    {
+      "key": "ui-heart",
+      "png": "sprites/ui-heart.png",
+      "json": "sprites/ui-heart.json"
+    },
+    {
+      "key": "walker-ada",
+      "png": "sprites/walker-ada.png",
+      "json": "sprites/walker-ada.json"
+    },
+    {
+      "key": "walker-ben",
+      "png": "sprites/walker-ben.png",
+      "json": "sprites/walker-ben.json"
+    },
+    {
+      "key": "walker-casey",
+      "png": "sprites/walker-casey.png",
+      "json": "sprites/walker-casey.json"
+    },
+    {
+      "key": "walker-trista",
+      "png": "sprites/walker-trista.png",
+      "json": "sprites/walker-trista.json"
     }
   ],
   "fonts": [
@@ -430,6 +485,30 @@
       "png": "images/help-zones.png"
     },
     {
+      "key": "icon-close",
+      "png": "images/icon-close.png"
+    },
+    {
+      "key": "icon-help",
+      "png": "images/icon-help.png"
+    },
+    {
+      "key": "icon-lock",
+      "png": "images/icon-lock.png"
+    },
+    {
+      "key": "icon-money",
+      "png": "images/icon-money.png"
+    },
+    {
+      "key": "icon-pause",
+      "png": "images/icon-pause.png"
+    },
+    {
+      "key": "icon-stinky",
+      "png": "images/icon-stinky.png"
+    },
+    {
       "key": "item-fanny-pack",
       "png": "images/item-fanny-pack.png"
     },
@@ -448,6 +527,26 @@
     {
       "key": "item-whistle",
       "png": "images/item-whistle.png"
+    },
+    {
+      "key": "ui-hint",
+      "png": "images/ui-hint.png"
+    },
+    {
+      "key": "ui-hint-tail",
+      "png": "images/ui-hint-tail.png"
+    },
+    {
+      "key": "ui-new-best",
+      "png": "images/ui-new-best.png"
+    },
+    {
+      "key": "ui-panel",
+      "png": "images/ui-panel.png"
+    },
+    {
+      "key": "ui-slot-locked",
+      "png": "images/ui-slot-locked.png"
     }
   ]
 }

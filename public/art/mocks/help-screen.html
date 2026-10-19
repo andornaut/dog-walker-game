@@ -139,10 +139,10 @@ const laneX = l => P.x + 32 + l * 56 + 28;
 function pack(cx, base, fr, dogs = ["dog-koda", "dog-biscuit", "dog-duchess"], tag = "walk", flip = false) {
   const spots = [[0, -40], [-13, -28], [13, -26]];
   const items = dogs.map((k, i) => ({ k, dx: spots[i][0], foot: base + spots[i][1] }));
-  items.push({ k: "walker", dx: 0, foot: base });
+  items.push({ k: "walker-casey", dx: 0, foot: base });
   items.sort((a, b) => a.foot - b.foot);
-  for (const it of items) feet(it.k, it.k === "walker" ? "walk" : (it.k === dogs[0] ? tag : "walk"), fr, cx + it.dx, it.foot, it.k === dogs[0] && flip);
-  for (const it of items) if (it.k !== "walker") line(it.dx < 0 ? cx - 9 : cx + 8, base - 14, cx + it.dx, it.foot - 15, K.dred);
+  for (const it of items) feet(it.k, it.k === "walker-casey" ? "walk" : (it.k === dogs[0] ? tag : "walk"), fr, cx + it.dx, it.foot, it.k === dogs[0] && flip);
+  for (const it of items) if (it.k !== "walker-casey") line(it.dx < 0 ? cx - 9 : cx + 8, base - 14, cx + it.dx, it.foot - 15, K.dred);
 }
 function chevron(cx, cy, dir, col) {
   for (let i = 0; i < 8; i++) {

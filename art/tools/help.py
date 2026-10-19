@@ -213,11 +213,11 @@ class Scene(Canvas):
     def pack(self, cx, base, dogs=("dog-koda", "dog-biscuit", "dog-duchess"), lead_tag="walk"):
         spots = [(0, -40), (-13, -28), (13, -26)]
         items = [(k, dx, base + dy, lead_tag if i == 0 else "walk") for i, (k, (dx, dy)) in enumerate(zip(dogs, spots))]
-        items.append(("walker", 0, base, "walk"))
+        items.append(("walker-casey", 0, base, "walk"))
         for k, dx, foot, tag in sorted(items, key=lambda it: it[2]):
             self.feet(k, tag, cx + dx, foot)
         for k, dx, foot, _ in items:
-            if k != "walker":
+            if k != "walker-casey":
                 self.line(cx - 9 if dx < 0 else cx + 8, base - 14, cx + dx, foot - 15, "dred")
 
     def chevron(self, cx, cy, d, col):

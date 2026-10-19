@@ -431,7 +431,7 @@
           "dog-koda": [32, 32, 4],
           "dog-biscuit": [32, 32, 4],
           "dog-duchess": [32, 32, 4],
-          walker: [32, 48, 4],
+          "walker-casey": [32, 48, 4],
           tip: [16, 16, 4],
           treat: [16, 16, 2],
           squirrel: [32, 32, 2],
@@ -538,7 +538,7 @@
           }));
           const cx = Math.round(laneX);
           for (const p of pack) list.push({ k: p.k, cx: cx + p.dx, foot: p.foot });
-          list.push({ k: "walker", cx, foot: H - 3 });
+          list.push({ k: "walker-casey", cx, foot: H - 3 });
           list.sort((a, b) => (b.decal ? 1 : 0) - (a.decal ? 1 : 0) || a.foot - b.foot);
           for (const it of list) if (!it.decal) shadow(it.cx, it.foot, SHEETS[it.k][0], shade);
           for (const it of list) put(it.k, fr, it.cx, it.foot);

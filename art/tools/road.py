@@ -54,7 +54,7 @@ def walker(lf=0, rf=0, bob=0, arms=0):
     for x, d in ((5, -arms), (23, arms)):
         g.rect(x, 22 + b + d, 4, 10, "sky")
         g.rect(x + 3, 22 + b + d, 1, 10, "blue")
-        g.rect(x, 32 + b + d, 4, 3, "skin2")
+        g.rect(x, 32 + b + d, 4, 3, "skin1")
     # hoodie
     g.rect(9, 21 + b, 14, 13, "sky")
     g.rect(20, 21 + b, 3, 13, "blue")
@@ -64,15 +64,121 @@ def walker(lf=0, rf=0, bob=0, arms=0):
     g.rect(9, 33 + b, 14, 1, "blue")
     g.ell(16, 22.5 + b, 6, 2.5, "blue", "navy")
     # head: hair, ears, cap and a ponytail
-    g.rect(14, 19 + b, 4, 3, "skin2")
+    g.rect(14, 19 + b, 4, 3, "skin1")
     g.ell(16, 12.5 + b, 8.5, 8.5, "dbrown", "plum", "brown")
-    g.rect(7, 13 + b, 2, 3, "skin2")
-    g.rect(23, 13 + b, 2, 3, "skin2")
+    g.rect(7, 13 + b, 2, 3, "skin1")
+    g.rect(23, 13 + b, 2, 3, "skin1")
     g.ell(16, 8 + b, 8.5, 5, "amber", "orange", "yellow")
     g.rect(8, 10 + b, 17, 2, "orange")
     g.rect(15, 10 + b, 2, 2, "dbrown")
     g.ell(16, 17 + b, 2.5, 4, "dbrown", "plum")
     return g
+
+
+# ---------- the other walkers (back view) ----------
+
+def walker_girl(lf=0, rf=0, bob=0, arms=0):
+    """Ada, 11, mixed race, caramel skin, long black curls falling straight down: pink tee, teal shorts."""
+    g = Grid(32, 48)
+    b = bob
+    for x, f in ((12, lf), (17, rf)):
+        g.rect(x, 37 + b, 3, 6 + f - b, "brown")
+        g.rect(x, 43 + f, 3, 1, "white")
+        g.rect(x, 44 + f, 3, 2, "lgrey")
+        g.rect(x, 45 + f, 3, 1, "pink")
+    for x, d in ((7, -arms), (22, arms)):
+        g.rect(x, 27 + b + d, 3, 7, "brown")
+        g.rect(x, 27 + b + d, 3, 3, "pink")
+    g.rect(10, 26 + b, 12, 8, "pink")
+    g.rect(19, 26 + b, 3, 8, "mauve")
+    g.rect(10, 33 + b, 12, 5, "sky")
+    g.rect(19, 33 + b, 3, 5, "blue")
+    g.rect(15, 33 + b, 2, 5, "blue")
+    g.rect(7, 16 + b, 2, 3, "brown")
+    g.rect(23, 16 + b, 2, 3, "brown")
+    # black hair: a rounded crown, then long defined curls hanging straight down the back
+    g.ell(16, 14.5 + b, 8, 7.5, "navy", "ink", "dslate")
+    g.rect(9, 16 + b, 14, 14, "navy")
+    g.ell(16, 30 + b, 7, 2, "navy", "ink")
+    for x in (10, 13, 16, 19):
+        for y in range(15, 31):
+            g.p(x + (y // 2) % 2, y + b, "dslate" if x < 18 else "ink")
+    g.rect(21, 16 + b, 2, 14, "ink")
+    g.ell(16, 8 + b, 2.5, 1.5, "pink", "mauve")
+    return g
+
+
+def walker_man(lf=0, rf=0, bob=0, arms=0):
+    """Ben, 45, Black, bald (his beard is under his chin, out of sight from behind): black tee, track pants, sneakers."""
+    g = Grid(32, 48)
+    b = bob
+    for x, f in ((11, lf), (17, rf)):
+        g.rect(x, 33 + b, 4, 10 + f - b, "navy")
+        g.rect(x + (3 if x > 16 else 0), 33 + b, 1, 10 + f - b, "slate")
+        g.rect(x, 43 + f, 4, 2, "white")
+        g.rect(x, 44 + f, 4, 1, "lgrey")
+        g.rect(x + 1, 43 + f, 2, 1, "red")
+    for x, d in ((5, -arms), (23, arms)):
+        g.rect(x, 22 + b + d, 4, 4, "navy")
+        g.rect(x, 26 + b + d, 4, 6, "dbrown")
+        g.rect(x + 3, 26 + b + d, 1, 6, "plum")
+        g.rect(x, 32 + b + d, 4, 3, "dbrown")
+    g.rect(9, 21 + b, 14, 13, "navy")
+    g.rect(20, 21 + b, 3, 13, "ink")
+    g.rect(9, 21 + b, 1, 12, "dslate")
+    g.p(9, 21 + b, None)
+    g.p(22, 21 + b, None)
+    g.rect(13, 19 + b, 6, 3, "dbrown")
+    # bald head, the beard showing along the jaw
+    g.rect(8, 12 + b, 2, 3, "dbrown")
+    g.rect(22, 12 + b, 2, 3, "plum")
+    g.blob(16, 12 + b, 7, 9, "dbrown", "plum", power=2.15)
+    g.rect(12, 8 + b, 2, 1, "brown")
+    return g
+
+
+def walker_teacher(lf=0, rf=0, bob=0, arms=0):
+    """50, dirty blonde bob to the shoulders, cute: green cardigan, navy skirt, tights, brown flats."""
+    g = Grid(32, 48)
+    b = bob
+    for x, f in ((11, lf), (17, rf)):
+        g.rect(x + 1, 37 + b, 3, 6 + f - b, "dslate")
+        g.rect(x, 43 + f, 4, 2, "dbrown")
+    for x, d in ((5, -arms), (23, arms)):
+        g.rect(x, 22 + b + d, 4, 10, "dgreen")
+        g.rect(x + 3, 22 + b + d, 1, 10, "forest")
+        g.rect(x, 32 + b + d, 4, 3, "skin1")
+    g.rect(9, 21 + b, 14, 11, "dgreen")
+    g.rect(20, 21 + b, 3, 11, "forest")
+    g.rect(9, 21 + b, 1, 10, "green")
+    g.p(9, 21 + b, None)
+    g.p(22, 21 + b, None)
+    g.rect(9, 31 + b, 14, 7, "navy")
+    g.rect(20, 31 + b, 3, 7, "ink")
+    g.rect(9, 31 + b, 14, 1, "dslate")
+    # a canvas tote with an apple on it
+    g.rect(25, 24 + b, 5, 1, "brown")
+    g.rect(24, 25 + b, 7, 8, "cream")
+    g.rect(29, 25 + b, 2, 8, "tan")
+    g.rect(26, 27 + b, 3, 3, "red")
+    g.p(27, 26 + b, "dgreen")
+    # a dirty blonde bob to the shoulders, flicking out at the ends
+    g.ell(16, 12.5 + b, 9, 9, "tan", "brown", "cream")
+    g.rect(8, 14 + b, 17, 5, "tan")
+    g.rect(22, 14 + b, 3, 5, "brown")
+    g.ell(16, 19 + b, 9, 2.5, "tan", "brown")
+    g.p(7, 20 + b, "tan")
+    g.p(25, 20 + b, "brown")
+    g.rect(13, 9 + b, 1, 4, "brown")
+    g.rect(19, 11 + b, 1, 3, "brown")
+    return g
+
+
+WALKERS = {
+    "walker-ada": walker_girl,
+    "walker-ben": walker_man,
+    "walker-trista": walker_teacher,
+}
 
 
 WALKER_WALK = [dict(lf=-2, rf=0, arms=1), dict(lf=-1, rf=-1, bob=-1), dict(lf=0, rf=-2, arms=-1), dict(lf=-1, rf=-1, bob=-1)]
@@ -503,8 +609,11 @@ def sprites():
     def frames(gs, outline=True):
         return [g.outlined(outline) for g in gs]
 
-    yield "walker", [("walk", frames(walker(**q) for q in WALKER_WALK), 160),
+    yield "walker-casey", [("walk", frames(walker(**q) for q in WALKER_WALK), 160),
                      ("react", frames(walker(**q) for q in WALKER_REACT), 120)]
+    for key, draw in WALKERS.items():
+        yield key, [("walk", frames(draw(**q) for q in WALKER_WALK), 160),
+                    ("react", frames(draw(**q) for q in WALKER_REACT), 120)]
     yield "treat", [("idle", frames([treat(0), treat(-1)]), 400)]
     yield "tip", [("idle", frames(tip(rx) for rx in (5.5, 3.5, 1, 3.5)), 120)]
     yield "skunk", [("idle", frames([skunk(0), skunk(1)]), 400)]

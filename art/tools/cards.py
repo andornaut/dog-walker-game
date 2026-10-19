@@ -163,7 +163,7 @@ def squirrel_hold():
     a.ground("park")
     a.put("squirrel", "idle", 62, 26)
     a.put("dog-koda", "pull", 36, 34)
-    a.put("walker", "walk", 26, 56, 1)
+    a.put("walker-casey", "walk", 26, 56, 1)
     a.leash(31, 42, 36, 22)
     return a
 
@@ -212,7 +212,7 @@ def other_dog_pull_away():
     a.ground("park")
     a.put("other-dog", "walk", 58, 30)
     a.put("dog-biscuit", "pull", 26, 40, flip=True)
-    a.put("walker", "walk", 16, 56)
+    a.put("walker-casey", "walk", 16, 56)
     a.leash(20, 42, 26, 26)
     a.fill(63, 4, 2, 5, "red")
     a.fill(63, 10, 2, 2, "red")
@@ -270,7 +270,7 @@ def neighbour_pass():
     a = Art()
     a.grass()
     a.put("biscuit-neighbour", "wave", 54, 54, 1)
-    a.put("walker", "walk", 20, 56, 2)
+    a.put("walker-casey", "walk", 20, 56, 2)
     return a
 
 
@@ -288,7 +288,7 @@ def photo_wave():
     a = Art()
     a.ground("shops")
     a.put("photo-op", "idle", 56, 52, 1)
-    a.put("walker", "walk", 22, 56, 3)
+    a.put("walker-casey", "walk", 22, 56, 3)
     return a
 
 
@@ -309,7 +309,7 @@ def stop_wait():
     a.ground("street")
     a.put("stop-sign", "idle", 58, 52, shadow=False)
     a.put("dog-biscuit", "walk", 40, 40, 1)
-    a.put("walker", "walk", 20, 56, 1)
+    a.put("walker-casey", "walk", 20, 56, 1)
     a.leash(28, 42, 40, 26)
     clock(a, 10, 10)
     return a
@@ -320,7 +320,7 @@ def stop_dart():
     a.ground("street")
     a.put("stop-sign", "idle", 62, 52, shadow=False)
     a.put("dog-koda", "pull", 42, 32, 1)
-    a.put("walker", "react", 20, 54)
+    a.put("walker-casey", "react", 20, 54)
     a.leash(28, 40, 42, 18)
     for y in (24, 30, 36):
         a.fill(6, y, 8, 1, "lgrey")
@@ -331,7 +331,7 @@ def chatty_chat():
     a = Art()
     a.grass()
     a.put("chatty-neighbour", "wave", 54, 54)
-    a.put("walker", "walk", 22, 56, 1)
+    a.put("walker-casey", "walk", 22, 56, 1)
     a.bubble(28, 4, 22, ["..."])
     a.coins([(6, 6)])
     return a
@@ -342,7 +342,7 @@ def chatty_move_on():
     a.grass()
     a.put("chatty-neighbour", "wave", 58, 54, 1)
     a.put("dog-biscuit", "walk", 36, 34, 2)
-    a.put("walker", "walk", 16, 54, 2)
+    a.put("walker-casey", "walk", 16, 54, 2)
     a.leash(24, 40, 36, 20)
     return a
 
@@ -361,7 +361,7 @@ def kid_decline():
     a.grass()
     a.put("kid", "sad", 56, 54)
     a.put("dog-duchess", "walk", 34, 38, 1)
-    a.put("walker", "walk", 14, 56, 1)
+    a.put("walker-casey", "walk", 14, 56, 1)
     a.leash(22, 42, 34, 26)
     return a
 
@@ -384,7 +384,7 @@ def truck_walk_past():
     a.ground("shops")
     a.paste(hp.frame("ice-cream-truck", "idle", 1), 30, 2)
     a.put("dog-biscuit", "pull", 18, 36, flip=False)
-    a.put("walker", "walk", 14, 56)
+    a.put("walker-casey", "walk", 14, 56)
     a.leash(18, 42, 18, 22)
     a.fill(30, 30, 2, 5, "red")
     a.fill(30, 36, 2, 2, "red")
@@ -397,7 +397,7 @@ def detour_long_way():
     a.paste(hp.frame("construction", "idle"), 10, 4)
     for x, y in ((8, 52), (6, 46), (4, 40), (4, 34), (6, 28), (10, 24), (66, 52), (70, 46), (72, 40), (72, 34), (70, 28), (66, 24)):
         a.fill(x, y, 2, 2, "amber")
-    a.put("walker", "walk", 38, 56, 2)
+    a.put("walker-casey", "walk", 38, 56, 2)
     return a
 
 
@@ -417,7 +417,7 @@ def mail_hold():
     a.ground("home")
     a.put("mail-carrier", "walk", 58, 54)
     a.put("dog-koda", "react", 36, 32)
-    a.put("walker", "walk", 14, 56)
+    a.put("walker-casey", "walk", 14, 56)
     a.leash(22, 42, 36, 18)
     a.paste(hp.frame("fx-bark", "pop", 1), 42, 0)
     return a
@@ -428,7 +428,7 @@ def mail_wait():
     a.ground("home")
     a.put("mail-carrier", "walk", 56, 54, 1)
     a.put("dog-koda", "walk", 36, 34, 1)
-    a.put("walker", "walk", 16, 56, 1)
+    a.put("walker-casey", "walk", 16, 56, 1)
     a.leash(24, 42, 36, 20)
     clock(a, 8, 10)
     return a
@@ -461,7 +461,7 @@ def good_leash():
     a.ground("park")
     a.put("squirrel", "idle", 62, 24)
     a.put("dog-koda", "walk", 36, 40, 1)
-    a.put("walker", "walk", 14, 56)
+    a.put("walker-casey", "walk", 14, 56)
     for d in (0, 1):
         a.line(22 + d, 42, 36 + d, 26, "dred")
     a.fill(34, 25, 3, 3, "amber")
@@ -488,7 +488,7 @@ def shortcut():
     for x, y in ((8, 50), (14, 44), (20, 38), (26, 32), (32, 26), (38, 20), (44, 14), (50, 8)):
         a.fill(x, y, 3, 2, "amber")
     a.chevron(56, 8, 1, "amber")
-    a.put("walker", "walk", 16, 56, 1)
+    a.put("walker-casey", "walk", 16, 56, 1)
     a.bubble(44, 36, 28, ["-25%"], "dred")
     return a
 

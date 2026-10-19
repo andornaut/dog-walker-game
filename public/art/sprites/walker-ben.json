@@ -1,5 +1,5 @@
 { "frames": {
-   "walker 0.aseprite": {
+   "walker-ben 0.aseprite": {
     "frame": { "x": 0, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -7,7 +7,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 160
    },
-   "walker 1.aseprite": {
+   "walker-ben 1.aseprite": {
     "frame": { "x": 32, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -15,7 +15,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 160
    },
-   "walker 2.aseprite": {
+   "walker-ben 2.aseprite": {
     "frame": { "x": 64, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -23,7 +23,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 160
    },
-   "walker 3.aseprite": {
+   "walker-ben 3.aseprite": {
     "frame": { "x": 96, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -31,7 +31,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 160
    },
-   "walker 4.aseprite": {
+   "walker-ben 4.aseprite": {
     "frame": { "x": 128, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -39,7 +39,7 @@
     "sourceSize": { "w": 32, "h": 48 },
     "duration": 120
    },
-   "walker 5.aseprite": {
+   "walker-ben 5.aseprite": {
     "frame": { "x": 160, "y": 0, "w": 32, "h": 48 },
     "rotated": false,
     "trimmed": false,
@@ -51,7 +51,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.30-x64",
-  "image": "walker.png",
+  "image": "walker-ben.png",
   "format": "RGBA8888",
   "size": { "w": 192, "h": 48 },
   "scale": "1",
