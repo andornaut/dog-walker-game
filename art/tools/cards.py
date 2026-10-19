@@ -175,6 +175,12 @@ class Art(hp.Scene):
     def leash(self, x0, y0, x1, y1):
         self.line(x0, y0, x1, y1, self.leash_col)
 
+    def lead(self, x, y, x1, n=1):
+        """A leash from the collar at x,y off the bottom edge at x1. Cards show no walker, since
+        the player picks one of four: the leash running out of frame stands for them."""
+        for d in range(n):
+            self.line(x + d, y, x1 + d, AH, self.leash_col)
+
     def arrow(self, x, y, d, col="green"):
         """A 9x9 arrow, up (d=-1) or down (d=1): upgrade art shows a change by direction, not a
         number, so it never goes stale against tuning.ts."""
@@ -236,10 +242,10 @@ def skunk_ignore():
 def squirrel_hold():
     a = Art()
     a.ground("park")
-    a.put("squirrel", "idle", 62, 26)
-    a.put("dog-koda", "pull", 36, 34)
-    a.put("walker-casey", "walk", 26, 56, 1)
-    a.leash(31, 42, 36, 22)
+    a.put("squirrel", "idle", 62, 24)
+    a.put("dog-koda", "pull", 34, 42)
+    # held back: the leash runs taut out of frame, behind the lunge
+    a.lead(34, 28, 18)
     return a
 
 
@@ -290,12 +296,11 @@ def other_dog_sniff():
 def other_dog_pull_away():
     a = Art()
     a.ground("park")
-    a.put("other-dog", "walk", 58, 30)
-    a.put("dog-biscuit", "pull", 26, 40, flip=True)
-    a.put("walker-casey", "walk", 16, 56)
-    a.leash(20, 42, 26, 26)
-    a.fill(63, 4, 2, 5, "red")
-    a.fill(63, 10, 2, 2, "red")
+    a.put("other-dog", "walk", 54, 30)
+    a.put("dog-biscuit", "pull", 24, 46, flip=True)
+    a.lead(24, 31, 8)
+    a.fill(59, 4, 2, 5, "red")
+    a.fill(59, 10, 2, 2, "red")
     return a
 
 
@@ -372,10 +377,9 @@ def stop_wait():
     a = Art()
     a.ground("street")
     a.put("stop-sign", "idle", 58, 52, shadow=False)
-    a.put("dog-biscuit", "walk", 40, 40, 1)
-    a.put("walker-casey", "walk", 20, 56, 1)
-    a.leash(28, 42, 40, 26)
-    clock(a, 10, 10)
+    a.put("dog-biscuit", "idle", 32, 48)
+    a.lead(32, 33, 30)
+    clock(a, 12, 12)
     return a
 
 
@@ -383,22 +387,24 @@ def stop_dart():
     a = Art()
     a.ground("street")
     a.put("stop-sign", "idle", 62, 52, shadow=False)
-    a.put("dog-koda", "pull", 42, 32, 1)
-    a.put("walker-casey", "react", 20, 54)
-    a.leash(28, 40, 42, 18)
-    for y in (24, 30, 36):
-        a.fill(6, y, 8, 1, "lgrey")
+    a.put("dog-koda", "pull", 36, 38, 1)
+    # the leash trails out of frame, speed lines behind the dash
+    a.lead(36, 24, 18)
+    for x, y in ((8, 18), (4, 26), (10, 34)):
+        a.fill(x, y, 10, 1, "lgrey")
     return a
 
 
 def chatty_chat():
     a = Art()
     a.grass()
-    a.put("chatty-neighbour", "wave", 57, 54)
-    a.put("walker-casey", "walk", 21, 56, 1)
-    a.bubble(30, 2, 22, ["..."])
-    # the tip, edge-on as it is handed over in the gap between them
-    a.coins([(31, 24)], 1)
+    a.put("chatty-neighbour", "wave", 50, 54)
+    # the dog waits out the chat; the neighbour talks to the walker out of frame
+    a.put("dog-biscuit", "idle", 18, 54)
+    a.lead(18, 39, 14)
+    a.bubble(14, 2, 22, ["..."])
+    # the tip, edge-on as it is handed over
+    a.coins([(26, 26)], 1)
     return a
 
 
@@ -406,9 +412,8 @@ def chatty_move_on():
     a = Art()
     a.grass()
     a.put("chatty-neighbour", "wave", 58, 54, 1)
-    a.put("dog-biscuit", "walk", 36, 34, 2)
-    a.put("walker-casey", "walk", 16, 54, 2)
-    a.leash(24, 40, 36, 20)
+    a.put("dog-biscuit", "walk", 26, 40, 2)
+    a.lead(26, 25, 20)
     return a
 
 
@@ -425,9 +430,8 @@ def kid_decline():
     a = Art()
     a.grass()
     a.put("kid", "sad", 56, 54)
-    a.put("dog-duchess", "walk", 34, 38, 1)
-    a.put("walker-casey", "walk", 14, 56, 1)
-    a.leash(22, 42, 34, 26)
+    a.put("dog-duchess", "walk", 26, 40, 1)
+    a.lead(26, 26, 18)
     return a
 
 
@@ -451,9 +455,9 @@ def truck_walk_past():
     a = Art()
     a.ground("shops")
     a.paste(hp.frame("ice-cream-truck", "idle", 1), 30, 2)
-    a.put("dog-biscuit", "pull", 18, 36, flip=False)
-    a.put("walker-casey", "walk", 14, 56)
-    a.leash(18, 42, 18, 22)
+    a.put("dog-biscuit", "pull", 18, 44)
+    # held back from the truck: the leash runs taut out of frame
+    a.lead(18, 29, 6)
     a.fill(30, 30, 2, 5, "red")
     a.fill(30, 36, 2, 2, "red")
     return a
@@ -465,7 +469,9 @@ def detour_long_way():
     a.paste(hp.frame("construction", "idle"), 10, 4)
     for x, y in ((8, 52), (6, 46), (4, 40), (4, 34), (6, 28), (10, 24), (66, 52), (70, 46), (72, 40), (72, 34), (70, 28), (66, 24)):
         a.fill(x, y, 2, 2, "amber")
-    a.put("walker-casey", "walk", 38, 56, 2)
+    a.put("dog-koda", "walk", 38, 52, 2)
+    a.lead(38, 38, 38)
+    clock(a, 66, 8)
     return a
 
 
@@ -484,10 +490,9 @@ def mail_hold():
     a = Art()
     a.ground("homeStretch")
     a.put("mail-carrier", "walk", 58, 54)
-    a.put("dog-koda", "react", 36, 32)
-    a.put("walker-casey", "walk", 14, 56)
-    a.leash(22, 42, 36, 18)
-    a.paste(hp.frame("fx-bark", "pop", 1), 42, 0)
+    a.put("dog-koda", "react", 30, 40)
+    a.lead(30, 24, 16)
+    a.paste(hp.frame("fx-bark", "pop", 1), 36, 2)
     return a
 
 
@@ -495,10 +500,9 @@ def mail_wait():
     a = Art()
     a.ground("homeStretch")
     a.put("mail-carrier", "walk", 56, 54, 1)
-    a.put("dog-koda", "walk", 36, 34, 1)
-    a.put("walker-casey", "walk", 16, 56, 1)
-    a.leash(24, 42, 36, 20)
-    clock(a, 8, 10)
+    a.put("dog-koda", "idle", 28, 44)
+    a.lead(28, 30, 26)
+    clock(a, 10, 10)
     return a
 
 
@@ -546,11 +550,9 @@ def good_leash():
     a = Art()
     a.ground("park")
     a.put("squirrel", "idle", 62, 24)
-    a.put("dog-koda", "walk", 36, 40, 1)
-    a.put("walker-casey", "walk", 14, 56)
-    for d in (0, 1):
-        a.line(22 + d, 42, 36 + d, 26, a.leash_col)
-    a.fill(34, 25, 3, 3, "amber")
+    a.put("dog-koda", "walk", 34, 44, 1)
+    a.lead(34, 30, 26, 2)
+    a.fill(33, 29, 3, 3, "amber")
     # tick: the chaser ignores the squirrel
     for i, (x, y) in enumerate(((52, 44), (53, 45), (54, 46), (55, 45), (56, 44), (57, 43), (58, 42), (59, 41))):
         a.fill(x, y, 2, 2, "green" if i % 2 else "dgreen")
@@ -574,7 +576,8 @@ def shortcut():
     for x, y in ((8, 50), (14, 44), (20, 38), (26, 32), (32, 26), (38, 20), (44, 14), (50, 8)):
         a.fill(x, y, 3, 2, "amber")
     a.chevron(56, 8, 1, "amber")
-    a.put("walker-casey", "walk", 16, 56, 1)
+    a.put("dog-biscuit", "walk", 16, 50, 1)
+    a.lead(16, 35, 12)
     # the trade-off: a shorter zone, and fewer fees
     a.paste(hp.frame("tip", "idle"), 44, 38)
     a.arrow(60, 40, 1, "red")
