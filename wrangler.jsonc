@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "dog-walker-game",
+  "compatibility_date": "2026-10-01",
+  // Static assets only: there is no Worker script, so every request is served
+  // from the Vite build output, which is free and unmetered.
+  "assets": {
+    "directory": "./dist",
+  },
+  // To serve a custom domain, add:
+  // "routes": [{ "pattern": "game.example.com", "custom_domain": true }]
+}
