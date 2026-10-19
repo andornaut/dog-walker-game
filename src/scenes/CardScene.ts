@@ -1,7 +1,6 @@
 import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
-import { animationKey } from "../assets/asepriteAnimations";
 import { SKIP_CARD_ART } from "../assets/cardArt";
 import {
   CARD_FRAME_KEY,
@@ -273,16 +272,12 @@ export class CardScene extends Scene {
     const tag = cardFrameTag(gameData, view.source);
     const g = this.add.graphics();
     if (this.textures.exists(LARGE.key)) {
-      const frameName = this.anims.get(animationKey(LARGE.key, tag))?.frames[0]?.textureFrame;
+      const frameName = tagFrame(this, LARGE.key, tag);
       this.add.sprite(x, y, LARGE.key, frameName).setOrigin(0);
     } else {
-      fillRect(g, PALETTE.plum, { height: LARGE.height, width: LARGE.width, x, y });
-      fillRect(g, PALETTE.cream, {
-        height: LARGE.height - 8,
-        width: LARGE.width - 8,
-        x: x + 4,
-        y: y + 4,
-      });
+      const card = { height: LARGE.height, width: LARGE.width, x, y };
+      fillRect(g, PALETTE.plum, card);
+      fillRect(g, PALETTE.cream, insetRect(4, card));
     }
     const option = entry.option;
     const label = option?.label ?? gameData.runText.card.skip;
@@ -421,17 +416,12 @@ export class CardScene extends Scene {
     const grey = !entry.enabled;
     const g = this.add.graphics();
     if (this.textures.exists(CARD_FRAME_KEY)) {
-      const frameName = this.anims.get(animationKey(CARD_FRAME_KEY, tag))?.frames[0]?.textureFrame;
+      const frameName = tagFrame(this, CARD_FRAME_KEY, tag);
       const key = grey ? greyTextureKey(this, CARD_FRAME_KEY) : CARD_FRAME_KEY;
       this.add.sprite(x, y, key, frameName).setOrigin(0);
     } else {
       fillRect(g, PALETTE.plum, rect);
-      fillRect(g, PALETTE.cream, {
-        height: rect.height - 4,
-        width: rect.width - 4,
-        x: x + 2,
-        y: y + 2,
-      });
+      fillRect(g, PALETTE.cream, insetRect(2, rect));
       fillRect(g, grey ? PALETTE.slate : PALETTE.red, {
         height: BAND.height,
         width: rect.width - 4,
