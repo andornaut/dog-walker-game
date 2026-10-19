@@ -285,6 +285,77 @@ def seated(key, tags, full_feet, scale):
     return shifted(tags, dy)
 
 
+def depth_envelope(w, h, scales):
+    """{scale: (width, height)}: the most art each of a w x h sprite's depth steps (scales) may fill. The
+    game sizes a road sprite by its frame's larger side, an integer, and draws it from the smallest step at
+    least that size (src/layout/depthScale.ts), so one pixel past a step's side it draws the next larger
+    step scaled down to it. A frame, floor(side x scale + 0.5), can round its shorter side past that: hedge@75
+    is 23 rows where hedge@88's 26 drawn at 127/147 are 22.46, so the hedge would shrink as it approached. So
+    each step's art keeps to the next larger step's art scaled to its own side plus one, rounded down,
+    working from full size down the steps."""
+    out, frame, art = {}, (w, h), (w, h)
+    for s in sorted(scales, reverse=True):
+        fw, fh = math.floor(w * s + 0.5), math.floor(h * s + 0.5)
+        k = (max(fw, fh) + 1) / max(frame)
+        art = (min(fw, math.floor(art[0] * k + 1e-9)), min(fh, math.floor(art[1] * k + 1e-9)))
+        out[s], frame = art, (fw, fh)
+    return out
+
+
+def _without_rows(frames, n):
+    """frames with n rows taken out from inside their opaque bounds, then as many clear rows added on top.
+    Each goes where the art changes least: the row most like the one above it in every frame, in the
+    longest run of equal rows, nearest the middle."""
+    for _ in range(n):
+        top, bottom = opaque_rows(frames)
+        h, mid = len(frames[0]), (top + bottom) / 2
+
+        def same(a, b):
+            return all(f[a] == f[b] for f in frames)
+
+        def run(r):
+            a, b = r, r
+            while a > top and same(a - 1, r):
+                a -= 1
+            while b < bottom and same(b + 1, r):
+                b += 1
+            return b - a + 1
+
+        def score(r):
+            diff = sum(x != y for f in frames for x, y in zip(f[r], f[r - 1]))
+            return diff, -run(r), abs(r - mid)
+
+        r = min(range(top + 1, bottom), key=score)
+        frames = [[[None] * len(f[0])] + f[:r] + f[r + 1:] for f in frames]
+        assert all(len(f) == h for f in frames)
+    return frames
+
+
+def _transposed(frames):
+    return [[list(col) for col in zip(*f)] for f in frames]
+
+
+def squatted(tags, w, h):
+    """tags with their art cut to at most w x h (see depth_envelope) by taking out the rows and columns
+    that change it least (see _without_rows). A column comes out with a clear one added on the side with
+    less margin, so the art stays centred."""
+    frames = [f for _, fs, _ in tags for f in fs]
+    fw, fh = len(frames[0][0]), len(frames[0])
+    frames = _without_rows(frames, fh - h)
+    if fw > w:
+        cols = _transposed(frames)
+        cols = _without_rows(cols, fw - w)
+        left, right = opaque_rows(cols)
+        if left > 0 and left - 1 > fw - 1 - right:
+            cols = [c[1:] + [[None] * len(c[0])] for c in cols]
+        frames = _transposed(cols)
+    out, i = [], 0
+    for tag, fs, ms in tags:
+        out.append((tag, frames[i:i + len(fs)], ms))
+        i += len(fs)
+    return out
+
+
 def _unanchored():
     """The keys public/art/manifest.json lists without an anchor: the game does not stand them on the
     ground (overlays, icons and the like), so they keep their place in their frame."""
@@ -296,9 +367,10 @@ def _unanchored():
 
 
 def depth_settled(sprites, originals=None):
-    """sprites with each depth variant (<key>@<step>) of a ground sprite seated on its feet row (see
-    seated). The full-size sprite is the one in sprites, else in originals ({key: tags}), else the one
-    already exported."""
+    """sprites with each depth variant (<key>@<step>) cut to its step's depth_envelope (see squatted) and,
+    for a ground sprite, seated on its feet row (see seated). The full-size sprite is the one in sprites,
+    else in originals ({key: tags}), else the one already exported. A sprite's steps are the ones in
+    sprites and the ones already exported."""
     sprites = list(sprites)
     full = {**(originals or {}), **dict(sprites)}
     scales = depth_scales()
@@ -306,11 +378,17 @@ def depth_settled(sprites, originals=None):
     out = []
     for key, tags in sprites:
         base, at, suffix = key.partition("@")
-        if at and f"@{suffix}" in scales and base not in unanchored:
+        if at and f"@{suffix}" in scales:
             frame0 = full[base][0][1][0] if base in full else _exported(base)
             if frame0 is None:
-                print(f"{key}: no full-size {base} to seat it by")
-            else:
+                print(f"{key}: no full-size {base} to settle it by")
+                out.append((key, tags))
+                continue
+            steps = [s for x, s in scales.items()
+                     if f"{base}{x}" in full or os.path.exists(f"public/art/sprites/{base}{x}.json")]
+            w, h = depth_envelope(len(frame0[0]), len(frame0), steps)[scales[f"@{suffix}"]]
+            tags = squatted(tags, w, h)
+            if base not in unanchored:
                 feet = (opaque_rows([frame0]) or (0, len(frame0) - 1))[1]
                 tags = seated(key, tags, feet, scales[f"@{suffix}"])
         out.append((key, tags))
