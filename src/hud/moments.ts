@@ -3,6 +3,7 @@ import type { Point, Rect } from "../layout/rect";
 import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
 import type { ChangeLabel } from "./hudView";
+import { DOGHOUSE } from "./doghouse";
 import { TREAT_WELL } from "./topBar";
 
 // The in-run feedback moments RunScene hands the HUD on its events: an owner firing you, a
@@ -111,12 +112,19 @@ export function firingShowMs(seconds: number): number {
 
 // The firing moment's parts, from the slot's top-left corner, rising over the road above
 // the doghouse: the owner's face at 2x centred on face, the 64x64 pop drawn at 2x from pop,
-// the plate on the roof, and the fired line's bubble centred over line, its bottom edge on
-// it, with the 8x6 tail's top row at tail.y over the bubble's rim, its tip at tail.x.
+// the plate on the roof, as wide as the roof's name plate and its 3px rim and 1px more each
+// side, and the fired line's bubble centred over line, its bottom edge on it, with the 8x6
+// tail's top row at tail.y over the bubble's rim, its tip at tail.x.
+const PLATE_REACH = 4;
 export const FIRING_PARTS = {
   face: { x: 60, y: -34 },
   line: { x: 60, y: -72 },
-  plate: { height: 28, width: 84, x: 18, y: -2 },
+  plate: {
+    height: 28,
+    width: DOGHOUSE.name.width + 2 * PLATE_REACH,
+    x: DOGHOUSE.name.x - DOGHOUSE.name.width / 2 - PLATE_REACH,
+    y: -2,
+  },
   // "FIRED!" is centred across the plate, the top of its capitals this far down.
   plateText: { y: 9 },
   pop: { x: -4, y: -98 },

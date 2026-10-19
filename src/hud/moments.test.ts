@@ -51,7 +51,7 @@ describe("firingLayout", () => {
     expect(firingLayout({ x: 120, y: 470 })).toEqual({
       face: { x: 180, y: 436 },
       line: { x: 180, y: 398 },
-      plate: { height: 28, width: 84, x: 138, y: 468 },
+      plate: { height: 28, width: 116, x: 122, y: 468 },
       pop: { x: 116, y: 372 },
       tail: { x: 180, y: 397 },
     });
