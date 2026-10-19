@@ -5,11 +5,13 @@ import { cardFor } from "../rules/choices";
 import { cents } from "../rules/units";
 import { type Random, seededRandom } from "../runner/random";
 import type { CardSource, RunState, UpgradeOffer } from "../state/runState";
+import { heartsFactor } from "../testing/dogs";
 import { testState } from "../testing/runState";
 import {
   chooseCardOption,
   choosePath,
   chooseUpgrade,
+  LOW_HEARTS,
   MIXED_PAY_SHARE,
   type PolicyId,
   treatTarget,
@@ -18,6 +20,10 @@ import {
 const SKUNK: CardSource = { affected: ["duchess"], encounter: "skunk", kind: "encounter" };
 const RINSE = 1;
 const IGNORE = 2;
+// Grooming is $20, Quick rinse $10, and Hold your nose costs Duchess's owner 2 hearts, scaled
+// by their temperament. At SAFE hearts it leaves the owner above LOW_HEARTS; at LOW it does not.
+const SAFE = LOW_HEARTS + 2 * heartsFactor(gameData, "duchess") + 1;
+const LOW = SAFE - 1;
 // For a choice that must not draw.
 const NO_DRAWS: Random = () => {
   throw new Error("drew");
@@ -28,12 +34,11 @@ function skunkChoice(policy: PolicyId, state: RunState, random: Random = NO_DRAW
 }
 
 describe("chooseCardOption", () => {
-  // Grooming is $20, Quick rinse $10, and Ignore costs Duchess's laid-back owner 2 hearts.
   it.each([
-    ["heartsUnlessLow", 4, IGNORE],
-    ["heartsUnlessLow", 3, RINSE],
-    ["alwaysHearts", 3, IGNORE],
-    ["alwaysPay", 4, RINSE],
+    ["heartsUnlessLow", SAFE, IGNORE],
+    ["heartsUnlessLow", LOW, RINSE],
+    ["alwaysHearts", LOW, IGNORE],
+    ["alwaysPay", SAFE, RINSE],
   ] as const)("%s at %i hearts takes option %i", (policy, hearts, expected) => {
     const state = testState({ duchess: hearts }, { money: cents(5000) });
 
@@ -79,19 +84,19 @@ describe("the mixed policy", () => {
   const rich = (hearts: number) => testState({ duchess: hearts }, { money: cents(5000) });
 
   it("pays for the cheapest safe option on a draw below the pay share, else takes hearts", () => {
-    expect(skunkChoice("mixed", rich(4), () => MIXED_PAY_SHARE - 0.01)).toBe(RINSE);
-    expect(skunkChoice("mixed", rich(4), () => MIXED_PAY_SHARE)).toBe(IGNORE);
+    expect(skunkChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE - 0.01)).toBe(RINSE);
+    expect(skunkChoice("mixed", rich(SAFE), () => MIXED_PAY_SHARE)).toBe(IGNORE);
   });
 
   it("keeps heartsUnlessLow's guard, and takes hearts with nothing affordable, without drawing", () => {
-    expect(skunkChoice("mixed", rich(3))).toBe(RINSE);
+    expect(skunkChoice("mixed", rich(LOW))).toBe(RINSE);
     expect(skunkChoice("mixed", testState({ duchess: 3 }, { money: cents(0) }))).toBe(IGNORE);
   });
 
   it("makes the same choices from the same seed, about half of them paid", () => {
     const choices = (seed: number) => {
       const random = seededRandom(seed);
-      return Array.from({ length: 200 }, () => skunkChoice("mixed", rich(4), random));
+      return Array.from({ length: 200 }, () => skunkChoice("mixed", rich(SAFE), random));
     };
     const first = choices(7);
     expect(choices(7)).toEqual(first);
