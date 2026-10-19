@@ -4,7 +4,7 @@ Every art asset the game needs. Keys are the `public/art/manifest.json` keys. Ty
 
 Priority: **core** is needed for the first build, **later** accepts a placeholder.
 
-`<zone>` is a zone id: snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade or the-long-way-home.
+`<zone>` is a zone's art id: snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade or the-long-way-home.
 
 ## People and dogs
 
@@ -13,7 +13,7 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 | `walker-<name>`       | sprite | 40×60 | `walk`, `react`, `stumble`, `idle`, `wave`       | core | ada, ben, casey, trista; `wave` faces the camera, for the unlock popup stop on the sidewalk                                                                                                           |
 | `face-walker-<name>`  | sprite | 32×32 | `happy`, `neutral`                               | core | Walker picker                                                                                                                                                                                         |
 | `dog-<name>`          | sprite | 40×40 | `walk`, `react`, `pull`, `tell`, `idle`, `shake` | core | duchess, biscuit, koda (starters), nugget, zippy, pierre, archie, snowball, penny; then the quirk's tags: archie `flourish`, biscuit `sniff`, nugget `pose`, penny `lunge`, `worried`, zippy `pounce` |
-| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse                                                                                                                                                                                              |
+| `face-dog-<name>`     | sprite | 32×32 | `happy`, `neutral`, `upset`                      | core | Doghouse; penny also `worried`                                                                                                                                                                        |
 | `face-owner-<name>`   | sprite | 32×32 | `happy`, `neutral`, `upset`, `fired`, `worried`  | core | Keyed by dog                                                                                                                                                                                          |
 | `owner-<name>`        | sprite | 32×48 | `idle`, `wave`                                   | core | Keyed by dog; gate on first visit, waving on the end screen                                                                                                                                           |
 | `portrait-dog-<name>` | image  | 64×64 |                                                  | core | Dog pick and shop                                                                                                                                                                                     |
@@ -65,27 +65,28 @@ Priority: **core** is needed for the first build, **later** accepts a placeholde
 
 ### Depth variants
 
-Same tags, frames and durations as the original.
+Same tags, frames and durations as the original. Roadside props are in their own table.
 
-| Key                                                                                                                                                                                                                                                                   | Size `@75`, `@50` | Pri  |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- | ---- |
-| `ball-bounce`                                                                                                                                                                                                                                                         | 15×23, 10×15      | core |
-| `barrier-2`, `bench`, `minor-cafe-table`, `minor-kiddie-pool`, `minor-picnic-blanket`                                                                                                                                                                                 | 78×23, 52×15      | core |
-| `barrier-3`, `hedge`, `minor-flower-bed`, `minor-flower-cart`, `minor-rowboat-trailer`                                                                                                                                                                                | 126×23, 84×15     | core |
-| `bin`, `cone`, `dog-<name>`, `goose`, `hydrant`, `loose-dog`, `minor-gnome`, `minor-molehill`, `minor-sandwich-board`, `minor-tackle-box`, `other-dog`, `skunk`, `spot-water-bowl`, `squirrel`, `squirrel-dash`, `stink-compost`, `stink-fish-crate`, `stink-seaweed` | 30×30, 20×20      | core |
-| `biscuit-neighbour`, `chatty-neighbour`, `cyclist`, `kid`, `lemonade-stand`, `mail-carrier`, `other-dog-owner`, `photo-op`, `spot-lamp-post`, `spot-stranger`, `spot-tree`, `stop-sign`, `thief`                                                                      | 30×45, 20×30      | core |
-| `cafe-patio`, `skunk-cloud`, `stink-fish-crate-cloud`                                                                                                                                                                                                                 | 78×38, 52×25      | core |
-| `construction`                                                                                                                                                                                                                                                        | 48×30, 32×20      | core |
-| `fx-status-<status>`                                                                                                                                                                                                                                                  | 12×12, 8×8        | core |
-| `ice-cream-truck`                                                                                                                                                                                                                                                     | 78×41, 52×28      | core |
-| `lost-wallet`, `tip`, `treat`                                                                                                                                                                                                                                         | 15×15, 10×10      | core |
-| `minor-canoe-rack`, `minor-log`, `minor-scooter`, `minor-tricycles`, `parked-car`                                                                                                                                                                                     | 42×26, 28×18      | core |
-| `petunias`, `picnic`, `puddle`, `splash-<skin>`, `trash-bins`                                                                                                                                                                                                         | 78×30, 52×20      | core |
-| `stink-garbage-truck`                                                                                                                                                                                                                                                 | 42×34, 28×23      | core |
+| Key                                                                                                                                                                                                                                                                                      | Size `@88`, `@75`, `@62`, `@50`    | Pri  |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ---- |
+| `ball-bounce`                                                                                                                                                                                                                                                                            | 18×26, 15×23, 13×19, 10×15         | core |
+| `barrier-2`, `bench`, `minor-cafe-table`, `minor-kiddie-pool`, `minor-picnic-blanket`                                                                                                                                                                                                    | 91×26, 78×23, 65×19, 52×15         | core |
+| `barrier-3`, `hedge`, `minor-flower-bed`, `minor-flower-cart`, `minor-rowboat-trailer`                                                                                                                                                                                                   | 147×26, 126×23, 105×19, 84×15      | core |
+| `bin`, `chase-<skin>`, `cone`, `goose`, `hydrant`, `loose-dog`, `minor-gnome`, `minor-molehill`, `minor-sandwich-board`, `minor-tackle-box`, `other-dog`, `skunk`, `social-<skin>`, `spot-water-bowl`, `squirrel`, `squirrel-dash`, `stink-compost`, `stink-fish-crate`, `stink-seaweed` | 35×35, 30×30, 25×25, 20×20         | core |
+| `biscuit-neighbour`, `chatty-neighbour`, `cyclist`, `kid`, `lemonade-stand`, `mail-carrier`, `other-dog-owner`, `photo-op`, `snatch-<skin>`, `social-<skin>-owner`, `spot-lamp-post`, `spot-stranger`, `spot-tree`, `stop-sign`, `thief`                                                 | 35×53, 30×45, 25×38, 20×30         | core |
+| `cafe-patio`, `skunk-cloud`, `stink-fish-crate-cloud`                                                                                                                                                                                                                                    | 91×44, 78×38, 65×31, 52×25         | core |
+| `construction`                                                                                                                                                                                                                                                                           | 56×35, 48×30, 40×25, 32×20         | core |
+| `dog-<name>`                                                                                                                                                                                                                                                                             | `@75` and `@50` only: 30×30, 20×20 | core |
+| `fx-status-<status>`                                                                                                                                                                                                                                                                     | `@75` and `@50` only: 12×12, 8×8   | core |
+| `ice-cream-truck`                                                                                                                                                                                                                                                                        | 91×48, 78×41, 65×34, 52×28         | core |
+| `lost-wallet`, `tip`, `treat`                                                                                                                                                                                                                                                            | 18×18, 15×15, 13×13, 10×10         | core |
+| `minor-canoe-rack`, `minor-log`, `minor-scooter`, `minor-tricycles`, `parked-car`                                                                                                                                                                                                        | 49×31, 42×26, 35×22, 28×18         | core |
+| `petunias`, `picnic`, `puddle`, `splash-<skin>`, `trash-bins`                                                                                                                                                                                                                            | 91×35, 78×30, 65×25, 52×20         | core |
+| `stink-garbage-truck`                                                                                                                                                                                                                                                                    | 49×39, 42×34, 35×28, 28×23         | core |
 
 ### Encounter skins
 
-Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and has the same depth variants at every step (`@88`, `@75`, `@62`, `@50`: 35, 30, 25 and 20 square for the animals, 35×53, 30×45, 25×38 and 20×30 for the 40×60 skins). A Social dog also runs as the zone's loose dog: `run` is `loose-dog`'s gallop, 4 frames at 100ms, side view facing right, in the dog's 40×40 frame. Each skin's card illustrations are in the choice cards table, drawn by `art/tools/skin_cards_animals.py`.
+Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn by `art/tools/skins_animals.py`. A skin keeps its base kind's size, tags, frame counts, durations and feet rows, and its base kind's depth variants (in the depth variants table). A Social dog also runs as the zone's loose dog: `run` is `loose-dog`'s gallop, 4 frames at 100ms, side view facing right, in the dog's 40×40 frame. Each skin's card illustrations are in the choice cards table, drawn by `art/tools/skin_cards_animals.py`.
 
 | Key                        | Type   | Size  | Tags                   | Pri  | Note                                                            |
 | -------------------------- | ------ | ----- | ---------------------- | ---- | --------------------------------------------------------------- |
@@ -133,6 +134,7 @@ Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn
 | `fx-need-met`      | sprite | 48×48 | `<need>`                 | core | Need fulfilled; bottom-centre on the dog's feet                    |
 | `fx-pull-fail`     | sprite | 16×16 | `play`                   | core | A blocked pull, over the dog's head                                |
 | `hydrant`          | sprite | 40×40 | `idle`                   | core | Regular spot; a drip off the side cap                              |
+| `icon-growl`       | sprite | 16×16 | `normal`                 | core | The Nervous quirk's strain toward another dog, in `ui-pull-bubble` |
 | `icon-need-<need>` | sprite | 16×16 | `normal`                 | core | friendly, nosy, playful, regular, thirsty                          |
 | `spot-lamp-post`   | sprite | 40×60 | `idle`                   | core | Nosy spot                                                          |
 | `spot-stranger`    | sprite | 40×60 | `idle`, `wave`           | core | Friendly spot                                                      |
@@ -157,22 +159,22 @@ Each zone dresses the Chase, Snatch and Social encounters in its own look, drawn
 
 Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside table. Each has `@88`, `@75`, `@62` and `@50` variants with the same tag and timing; one tag, `idle`.
 
-| Key                                                     | Type   | Size    | `@75`, `@50`  | Pri  | Note                                      |
-| ------------------------------------------------------- | ------ | ------- | ------------- | ---- | ----------------------------------------- |
-| `roadside-bike`                                         | sprite | 60×40   | 45×30, 30×20  | core | A kid's red bike, side on                 |
-| `roadside-fence`                                        | sprite | 125×35  | 94×26, 63×18  | core | White pickets                             |
-| `roadside-fence-cat`                                    | sprite | 125×50  | 94×38, 63×25  | core | The fence with a plum cat on top          |
-| `roadside-flowers`                                      | sprite | 75×25   | 56×19, 38×13  | core | A flower border, no box                   |
-| `roadside-gnome`                                        | sprite | 25×35   | 19×26, 13×18  | core | Blue hat, red coat                        |
-| `roadside-hedge`                                        | sprite | 110×40  | 83×30, 55×20  | core | Bumped top, white flowers                 |
-| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 120×110 | 90×83, 60×55  | core | Tan and pink                              |
-| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 140×100 | 105×75, 70×50 | core | Sky and tan                               |
-| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 110×130 | 83×98, 55×65  | core | Cream and light grey                      |
-| `roadside-lamp-post`                                    | sprite | 30×125  | 23×94, 15×63  | core | White globe, forest post, a flower basket |
-| `roadside-laundry`                                      | sprite | 135×80  | 101×60, 68×40 | core | A washing line on two T posts             |
-| `roadside-mailbox`                                      | sprite | 30×40   | 23×30, 15×20  | core | Blue, a yellow flag                       |
-| `roadside-sprinkler`                                    | sprite | 65×35   | 49×26, 33×18  | core | `idle` 2 frames of 200ms: the spray runs  |
-| `roadside-tree`, `roadside-tree-blossom`                | sprite | 95×130  | 71×98, 48×65  | core | Green and pink blossom                    |
+| Key                                                     | Type   | Size    | `@88`, `@75`, `@62`, `@50`   | Pri  | Note                                      |
+| ------------------------------------------------------- | ------ | ------- | ---------------------------- | ---- | ----------------------------------------- |
+| `roadside-bike`                                         | sprite | 60×40   | 53×35, 45×30, 38×25, 30×20   | core | A kid's red bike, side on                 |
+| `roadside-fence`                                        | sprite | 125×35  | 109×31, 94×26, 78×22, 63×18  | core | White pickets                             |
+| `roadside-fence-cat`                                    | sprite | 125×50  | 109×44, 94×38, 78×31, 63×25  | core | The fence with a plum cat on top          |
+| `roadside-flowers`                                      | sprite | 75×25   | 66×22, 56×19, 47×16, 38×13   | core | A flower border, no box                   |
+| `roadside-gnome`                                        | sprite | 25×35   | 22×31, 19×26, 16×22, 13×18   | core | Blue hat, red coat                        |
+| `roadside-hedge`                                        | sprite | 110×40  | 96×35, 83×30, 69×25, 55×20   | core | Bumped top, white flowers                 |
+| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 120×110 | 105×96, 90×83, 75×69, 60×55  | core | Tan and pink                              |
+| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 140×100 | 123×88, 105×75, 88×63, 70×50 | core | Sky and tan                               |
+| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 110×130 | 96×114, 83×98, 69×81, 55×65  | core | Cream and light grey                      |
+| `roadside-lamp-post`                                    | sprite | 30×125  | 26×109, 23×94, 19×78, 15×63  | core | White globe, forest post, a flower basket |
+| `roadside-laundry`                                      | sprite | 135×80  | 118×70, 101×60, 84×50, 68×40 | core | A washing line on two T posts             |
+| `roadside-mailbox`                                      | sprite | 30×40   | 26×35, 23×30, 19×25, 15×20   | core | Blue, a yellow flag                       |
+| `roadside-sprinkler`                                    | sprite | 65×35   | 57×31, 49×26, 41×22, 33×18   | core | `idle` 2 frames of 200ms: the spray runs  |
+| `roadside-tree`, `roadside-tree-blossom`                | sprite | 95×130  | 83×114, 71×98, 59×81, 48×65  | core | Green and pink blossom                    |
 
 ## Doghouse row and top bar
 

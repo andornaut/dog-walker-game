@@ -8,12 +8,12 @@
 
 ## Layout and sizes
 
-| Band         | Screen rows | Contents                                                                                                                                                                              |
-| ------------ | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Top bar      | 0 to 39     | `ui-top-bar` wells: money 4,8 88×26, treats 96,8 32×26, zone 212,5 144×29; `ui-icon-button` Home 130,10 and pause 174,10; `ui-strip-well` under the zone well, right aligned at x 356 |
-| Backdrop     | 40 to 149   | `backdrop-<zone>`, 360×110                                                                                                                                                            |
-| Road         | 150 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180                                                                                                                 |
-| Doghouse row | 466 to 559  | `ui-dog-band` (360×94) at 0,466; three 120×90 `ui-doghouse` slots at x 0, 120 and 240, rows 470 to 559                                                                                |
+| Band         | Screen rows | Contents                                                                                                                                                                                            |
+| ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Top bar      | 0 to 39     | `ui-top-bar` wells: money 4,8 88×26, treats 96,8 32×26, zone 212,5 144×29; `ui-icon-button` Home 130,10, sound 152,10 and pause 174,10; `ui-strip-well` under the zone well, right aligned at x 356 |
+| Backdrop     | 40 to 149   | `backdrop-<zone>`, 360×110                                                                                                                                                                          |
+| Road         | 150 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180                                                                                                                               |
+| Doghouse row | 466 to 559  | `ui-dog-band` (360×94) at 0,466; three 120×90 `ui-doghouse` slots at x 0, 120 and 240, rows 470 to 559                                                                                              |
 
 | Sprite                                                                                                   | Frame                      |
 | -------------------------------------------------------------------------------------------------------- | -------------------------- |
@@ -39,7 +39,7 @@ A zone skin of an area encounter keeps its base's frame, tags, timings and ancho
 - [Endesga 32](https://lospec.com/palette-list/endesga-32) only, each pixel opaque or fully transparent. Colour names are the `K` names in `art/tools/pixel.py`.
 - Darkening (shadows, the dimmed road) maps each colour one step down its ramp (`DARKER`), never a blend with black.
 - Outlines are coloured: two ramp steps darker than the fill they border.
-- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against tan, light grey and skin2 (`ROADS` in `art/tools/pixel.py`), and the fill carries Elm Avenue. A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Elm Avenue. Willow Crescent (grey), Main Street (pink) and Riverside Path (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged. A white coat on the road is white, not light grey, and its lower-right silhouette steps one ramp colour darker (white to lgrey, lgrey to grey), so it keeps its mass on the light roads.
+- Road sprites use `road_edge`: the outline continues down the ramp until it holds 3:1 against the light roads in `ROADS` (`art/tools/pixel.py`: Fairview Park tan, Main Street pink, The Long Way Home skin2), and the fill carries Elm Avenue (dslate, the first entry). A dark area takes a light rim on its edges facing the top-left light (grey on navy and black, skin2 on dark skin, cyan on sky) so it holds 3:1 on Elm Avenue. Willow Crescent (grey) and Riverside Path (cream) are lighter than The Long Way Home, so `road_edge` outlines hold 3:1 on them unchanged. A white coat on the road is white, not light grey, and its lower-right silhouette steps one ramp colour darker (white to lgrey, lgrey to grey), so it keeps its mass on the light roads.
 - Faces (`face-`) and portraits (`portrait-`) take one ink outer line round every fill, white coats included, closed along the bottom row where the frame cuts a bust or a seated dog. Lines inside them (a head over its body) stay two ramp steps darker.
 - Character shading is cel: per material a light, a base and a shade, the shade a crescent along the lower-right rim that follows the form (`Grid.cel`), never a diagonal plane or per-pixel texture. Markings such as merle are a few flat patches.
 - Effects (`fx-`) take a fixed 1px rim instead: plum, navy for water, teal for green. `fx-bark` keeps a ramp outline, `fx-heart-gain` and `fx-heart-loss` take `ui-fires`' 1px ink line inside a 1px white rim (ink for the light roads, white for Elm Avenue and the dimmed road), and `fx-dust` (light grey dust) has no rim. Comic words take the sign logo's ink ring and dred shadow. Hazard warnings are outlined in ink.
@@ -55,7 +55,7 @@ A zone skin of an area encounter keeps its base's frame, tags, timings and ancho
 
 ### UI colour pairs
 
-Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
+Names are `PALETTE` names in `src/scenes/palette.ts`, and `K` names in `art/tools/pixel.py` for a colour it leaves out (purple); ratios are WCAG.
 
 | Pair                           | Ratio | Use                                                                                                                      |
 | ------------------------------ | ----- | ------------------------------------------------------------------------------------------------------------------------ |
@@ -92,7 +92,7 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
 - One chrome for every panel, bubble, plate, tile and card frame: a cream face in a 1px ink outer line and a 1px plum inner line, with a tan lip along its bottom and right (`chrome` in `art/tools/ui.py`); `ui-doghouse` takes an amber face and orange lip instead. Corners are cut 1px (panels, cards), 2px (hints, detail cards) or 3px (quips). A coloured plate (`ui-hit-label`, `ui-fired-plate`) puts its face 4px in, inside a 2px cream band. Tails are cream in an ink line, laid over their bubble's ink row. No plain white boxes.
 - Wood is background only: full-screen backgrounds (dbrown with plum seams), the top bar and `ui-dog-band`. Navy bands (`ui-section`, `ui-detail-band`) head sections and cards; the zone banner's ribbon ends are navy.
-- `ui-section` frames each start screen section: `neutral` (ink frame, navy band, cream heading) while nothing in it is chosen, and `complete` (amber border and band, ink text) once something is. Walker, dogs and Pocket follow the same rule. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Home, pause, help and sound sit on `ui-icon-button`.
+- `ui-section` frames each start screen section: `neutral` (ink frame, navy band, cream heading) while nothing in it is chosen, and `complete` (amber border and band, ink text) once something is. Walker, dogs and Pocket follow the same rule. The yard sign logo is flat yellow letters with an ink outline and a solid dred shadow (yellow on darkBrown 6.79:1). Help, Home, Logbook, pause, Settings and sound sit on `ui-icon-button`.
 - `ui-sticker` (56×28) is a starburst in an ink outline: `new` (yellow body, amber spikes) on a dog or gear tile that just became affordable, `price` (cyan body, sky spikes) for the next locked item's price, `pop` (4 frames, 70ms, ending on the `new` look) for a badge-earned moment. At most one sticker per screen (`new` wins over `price`), never on the run screen's road or over a choice card. On a tile, its right edge sits 2px right of the tile's (kept 2px inside the screen) and its bottom 4px below the tile's, over the price line, which the tile then leaves out. The word is in `font-title` at 1×, ink, centred on x 28 with its caps in rows 12 to 16, up to 36px wide: "NEW!" or the price as the game formats it. Write the word after `pop` ends; with reduced motion show the last frame.
 - Fonts: `font-body` (Tiny5, mixed case) for body text, quips and floating labels; `font-title` (Silkscreen, capitals) for titles, numbers and buttons. Floating numbers use the font, not sprites.
 - Display lettering: the yard sign logo's letters (yellow fill, 1px ink outline, solid dred shadow) for big words only, never body text: zone names on `ui-zone-banner`, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title and hit labels, in `font-display` (yellow) or `font-display-cream` (cream), 10px capitals with the colours baked in, drawn untinted. In-art signs (shop boards, the park gate, the lemonade stand) use the same letters and outline at 1x with a 1px shadow. `ui-pet-shop`'s PET SHOP board is a button, not a sign: the same letter shapes at 1x, filled ink with no outline or shadow.
@@ -102,14 +102,15 @@ Names are `PALETTE` names in `src/scenes/palette.ts`; ratios are WCAG.
 
 Every tile, button, card, tab and switch row is in one of four states, drawn the same way everywhere. `ui-tile` (insets 4) draws the first three for walker, dog and gear tiles; `ui-button` (insets 3, 3, 3, 5) draws all four.
 
-| State    | When                                                                                  | Look                                                                                       | Label                                                |
-| -------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
-| normal   | Available, not chosen; a locked item the bank covers, with `ui-afford` 2px outside it | Cream face, ink and plum lines, tan lip (`ui-tile` `normal`, `ui-button` `normal`)         | plum (9.42:1)                                        |
-| selected | Picked, equipped, toggled on, the open tab or page                                    | Gold: ink line, amber band, orange line, yellow face (`ui-tile` `selected`)                | plum (10.92:1)                                       |
-| disabled | Cannot be chosen: locked and not affordable, the pack full, not available             | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt); a price in navy (4.93:1) |
-| primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board         | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board)                | ink (8.41:1)                                         |
+| State    | When                                                                          | Look                                                                                       | Label                      |
+| -------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | -------------------------- |
+| normal   | Available, not chosen                                                         | Cream face, ink and plum lines, tan lip (`ui-tile` `normal`, `ui-button` `normal`)         | plum (9.42:1)              |
+| selected | Picked, equipped, toggled on, the open tab or page                            | Gold: ink line, amber band, orange line, yellow face (`ui-tile` `selected`)                | plum (10.92:1)             |
+| disabled | Cannot be chosen now: locked (not owned), the pack full, not available        | Flat grey face, ink and slate lines, no lip (`ui-tile` `disabled`, `ui-button` `disabled`) | darkSlate (3.39:1, exempt) |
+| primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board)                | ink (8.41:1)               |
 
 - Art inside a disabled tile (faces, icons, the padlock) draws from its grey copy (`greyTextureKey`, as a disabled card) one ramp step darker (`remapDarker`), on a slate box; a normal tile's box is tan, a selected one's amber.
+- A locked tile (not owned) is disabled whether or not the bank covers it: its art is a flat navy silhouette (`silhouetteTextureKey`) under `icon-lock`, with a cream price plate in an ink line, its price forest (5.39:1) while the bank covers it and darkRed (5.07:1) while not, or a goal plate in plum.
 - The primary green marks a screen's call to action. On the start screen it marks Start walk and the Pet shop board, the one other tappable entry point there, so both read as tappable; Start walk stays the only full-width primary button.
 - A disabled primary (Start walk before a walker and a dog are picked) is `go-disabled`, which matches `disabled`.
 - `secondary` and `secondary-pressed` match `normal` and `pressed`: every button that is not the screen's primary is `normal`.
@@ -121,21 +122,25 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 - Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (`ui-tile` `selected` on tiles; on other controls a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge (pick order or tick) at its top-left.
 - When a multi-pick choice is full (the pack), the unselected items are disabled. A single-pick choice (gear) keeps the others normal, since tapping one swaps it in.
 - A picked item's face hops; a picked dog hops onto the gate path in `fx-dust`.
-- An affordable item takes `ui-afford` 2px outside it, unless selected.
-- An unaffordable locked item shakes when tapped. The ready Start walk button bobs.
+- `ui-afford` goes 2px outside the Pet shop building while something in the shop is affordable, and outside each affordable row in the shop; no start screen tile takes it.
+- A tap on a locked dog or gear tile opens the shop on that item. A locked walker, an unpicked dog while the pack is full, and Start walk before it is ready shake when tapped. The ready Start walk button bobs.
 - With reduced motion, highlights stay and movement is skipped.
 
 ### Icon buttons and settings
 
-| Control      | Scene                | Button | Hit area     |
-| ------------ | -------------------- | ------ | ------------ |
-| Help         | Home gate, top left  | 8,46   | 0,40 44×44   |
-| Home         | Run top bar          | 130,10 | 118,0 44×44  |
-| Pause        | Run top bar          | 174,10 | 162,0 44×44  |
-| Sound toggle | Home gate, top right | 332,46 | 316,40 44×44 |
+| Control  | Scene                                | Button                                  | Hit area                                       |
+| -------- | ------------------------------------ | --------------------------------------- | ---------------------------------------------- |
+| Close    | Every full-screen page and overlay   | 28px in from the frame's right, 10 down | 44×44 in the frame's top-right corner          |
+| Help     | Start screen top bar                 | 240,10                                  | 228,0 44×44                                    |
+| Home     | Run top bar                          | 130,10                                  | 118,0 44×44                                    |
+| Logbook  | Start screen top bar, after the bank | 104,10                                  | 92,0 134×44, over the best walk and walk count |
+| Pause    | Run top bar                          | 174,10                                  | 162,0 44×44                                    |
+| Settings | Start screen top bar                 | 328,10                                  | 316,0 44×44                                    |
+| Sound    | Run top bar                          | 152,10                                  | 140,0 44×44                                    |
+| Sound    | Start screen top bar                 | 284,10                                  | 272,0 44×44                                    |
 
-- The run top bar has no sound button: mute is the Settings "Sound" row and the M key.
-
+- Positions are the `ui-icon-button` face's top-left; the 16×16 icon sits at +2,+1 (+2,+3 pressed). The game's values are in `shared/export/layout.json` (`topBar.buttons`, `scenes.home`).
+- Sound toggles mute, as the M key and the Settings "Sound" switch do.
 - `icon-sound`: `on` is a speaker with two waves, `off` the same speaker with a pink X.
 - Settings: a "Sound" row with a right-aligned `ui-switch` above the Music and Effects sliders. Each row is one tap target at least 44 tall, led by its `-panel` icon (`off` adds a dred X).
 - Sliders: for a track of width w at x and value v, draw `empty` across w, `filled` from x to the knob's right edge, and `ui-slider-knob` at x + round((w − 10) × v / 100), 3px above the track. Muted, both switch to their `-disabled` tags.
@@ -247,7 +252,7 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 
 ## Depth scaling
 
-Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`: `<key>@88`, `@75`, `@62` and `@50` (dogs `@75` and `@50` only), each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite at its projected size from the smallest of its steps at least that size, scaled down nearest-neighbour, so it never swaps to a smaller step as it approaches.
+Road sprites have redrawn depth variants at the steps in `shared/depth-steps.json`: `<key>@88`, `@75`, `@62` and `@50` (dogs and `fx-status-<status>` `@75` and `@50` only), each floor(size × scale + 0.5) with the original's tags, frames and durations, a full 1px outline, and 1px motion kept at 1px. The game draws a sprite at its projected size from the smallest of its steps at least that size, scaled down nearest-neighbour, so it never swaps to a smaller step as it approaches.
 
 `art/tools/pixel.py` settles every variant as it builds, larger steps first. Its art fits the next larger step drawn at the variant's larger side plus 1px, rounded down, from the frame sizes: the frame keeps the size rule and the art drops the rows or columns that change it least. A ground sprite's variant is then held to the next larger step L, the one the game draws one pixel past the variant's side: frame 0's opaque rows are at most L's frame 0 rows × (side + 1) / L's side, to the nearest pixel, so its drawn height never shrinks when the drawing switches steps. It stands with frame 0's last opaque row on L's feet row × side / L's side, rounded up, or the frame's bottom row when that is past it, so the feet line moves less than 1px at a switch, or under 1.5px when the feet are on the frame's bottom row; art too tall for the rows above that feet row drops the rows that change it least. Status overlays are drawn at their own step and keep only the first rule. A set's variants that depend on another set's (`hazards.py` builds the movers' `@75` and `@50`, `depths.py` their `@88` and `@62`) settle on that set's exported art, so after changing either, build both again until neither changes. The 30-row two- and three-lane obstacles fill 22, 18 and 14 rows at `@75`, `@62` and `@50`.
 
