@@ -89,8 +89,8 @@ export interface MatrixRow {
   readonly walker: WalkerId;
 }
 
-// A pack named by its dogs' names in the data. The name also keys the pack's seeds, so
-// renaming a dog moves its packs' rows.
+// A pack named by its dogs' names in the data. The name is for display only: the pack's seeds
+// are keyed on its dog ids, so renaming a dog changes no result.
 function namedByDogs(dogs: PackDogs): NamedPack {
   return { dogs, name: dogs.map((dog) => DOGS[dog].name).join(" + ") };
 }
@@ -170,9 +170,9 @@ function simPlayer(matrix: Matrix, player: MatrixPlayer): SimPlayer {
   return { hitRate: player.hitRate, kind: "rates", luckyRate, tipRate, treatRate };
 }
 
-// Run number run of a cell. It is seeded by the seed, the pack and the run number alone, so
-// every policy, route policy, player, gear and walker meets the same first zone plan and their
-// rows differ by the choices and the play, not by the draw.
+// Run number run of a cell. It is seeded by the seed, the pack's dog ids in pack order and the
+// run number alone, so every policy, route policy, player, gear and walker meets the same first
+// zone plan and their rows differ by the choices and the play, not by the draw.
 export function simulateCellRun(
   data: SimData,
   seed: number,
@@ -180,7 +180,7 @@ export function simulateCellRun(
   cell: MatrixCell,
   run: number,
 ): RunResult {
-  return simulateRun(data, hashSeed(`${seed}:${cell.pack.name}:${run}`), {
+  return simulateRun(data, hashSeed(`${seed}:${cell.pack.dogs.join(",")}:${run}`), {
     gear: cell.gear,
     pack: cell.pack.dogs,
     player: simPlayer(matrix, cell.player),

@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
 import { gameData } from "../data";
+import { DOGS } from "../data/dogs";
+import type { DogId } from "../data/types";
+import type { PackDogs } from "../state/runState";
 import {
   DEFAULT_MATRIX,
   formatKindTable,
@@ -8,6 +11,7 @@ import {
   type Matrix,
   matrixCells,
   type MatrixRow,
+  type NamedPack,
   simulateMatrix,
   simulateMatrixInBatches,
 } from "./report";
@@ -68,6 +72,8 @@ const SMALL: Matrix = {
   ],
   policies: ["heartsUnlessLow", "alwaysPay"],
 };
+
+const [A, B] = Object.keys(DOGS).sort() as [DogId, DogId];
 
 describe("simulateMatrix", () => {
   it("covers every policy, skill preset and pack of the default matrix", () => {
@@ -154,6 +160,35 @@ describe("simulateMatrix", () => {
 
     expect(simulateMatrix(gameData, 5, 3, SMALL).at(-1)).toEqual(alone);
   });
+
+  it.each([
+    { case: "a renamed dog", dogs: [A], otherDogs: [A], otherName: "Renamed", same: true },
+    { case: "different dogs", dogs: [A], otherDogs: [B], otherName: undefined, same: false },
+    {
+      case: "the same dogs in another order",
+      dogs: [A, B],
+      otherDogs: [B, A],
+      otherName: undefined,
+      same: false,
+    },
+  ])(
+    "seeds a pack from its dog ids, not its names: $case",
+    ({ dogs, otherDogs, otherName, same }) => {
+      const pack = (ids: readonly DogId[], rename?: string): NamedPack => ({
+        dogs: ids as PackDogs,
+        name: ids.map((id) => rename ?? DOGS[id].name).join(" + "),
+      });
+      const rows = (named: NamedPack) =>
+        simulateMatrix(gameData, 5, 3, { ...SMALL, packs: [named] }).map((row) => ({
+          ...row,
+          pack: "",
+        }));
+
+      const expected = expect(rows(pack(otherDogs, otherName)));
+
+      (same ? expected : expected.not).toEqual(rows(pack(dogs)));
+    },
+  );
 
   it("measures each share over every run's items that reached the pack", () => {
     const [row] = simulateMatrix(gameData, 3, 2, SMALL);
