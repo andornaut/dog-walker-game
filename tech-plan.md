@@ -64,6 +64,7 @@
 
 - The canvas takes no browser gestures (`touch-action: none`).
 - Installable web app: `/manifest.webmanifest` and a service worker, `/sw.js`, built by `src/pwa/precachePlugin.ts`, precache the game and every file in the art manifest. HTML and the art manifest are network-first; hashed assets are cache-first. A new version activates on the next launch.
+- Security headers: `src/headers/securityHeadersPlugin.ts` writes `_headers` at build time: nosniff, referrer and permissions policies, and a CSP per path (`/`, `/play/*`, `/data/*`, `/art/*`) allowing `'self'` plus hashes of each page's inline blocks. Google Fonts is allowed only on `/` and `/art/*`. `/sw.js` keeps the platform's `max-age=0, must-revalidate`.
 - Phone events (`PHONE_EVENTS` in `src/pwa/`): `back-pressed` pauses, and `app-hidden` pauses and checkpoints. The run holds a screen wake lock, and the first gesture unlocks audio.
 
 ## Dev tools
