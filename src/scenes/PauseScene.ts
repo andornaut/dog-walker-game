@@ -160,7 +160,7 @@ export class PauseScene extends Scene {
   }
 
   private openSettings(): void {
-    const data: SettingsSceneData = { resume: SCENE_KEYS.pause };
+    const data: SettingsSceneData = { origin: "road", resume: SCENE_KEYS.pause };
     this.scene.pause();
     this.scene.launch(SCENE_KEYS.settings, data);
   }

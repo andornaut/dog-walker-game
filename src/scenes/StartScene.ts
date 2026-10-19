@@ -42,7 +42,7 @@ import { startWakeLock, stopWakeLock } from "../pwa";
 import { nextDogSlot } from "../rules/shop";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
-import { drawPixelLine, drawShadow, fillRect } from "./draw";
+import { drawFocusRing, drawPixelLine, drawShadow, fillRect } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { PALETTE } from "./palette";
@@ -453,7 +453,7 @@ export class StartScene extends Scene {
         openHelp(this, SCENE_KEYS.start);
         return;
       case "settings": {
-        const data: SettingsSceneData = { resume: SCENE_KEYS.start };
+        const data: SettingsSceneData = { origin: "home", resume: SCENE_KEYS.start };
         this.scene.pause();
         this.scene.launch(SCENE_KEYS.settings, data);
         return;
@@ -1141,16 +1141,6 @@ export class StartScene extends Scene {
     if (rect === undefined) {
       return;
     }
-    const g = this.graphics(root);
-    const ring = {
-      height: rect.height + FOCUS_OUTSET * 2,
-      width: rect.width + FOCUS_OUTSET * 2,
-      x: rect.x - FOCUS_OUTSET,
-      y: rect.y - FOCUS_OUTSET,
-    };
-    fillRect(g, PALETTE.cyan, { ...ring, height: 2 });
-    fillRect(g, PALETTE.cyan, { ...ring, height: 2, y: ring.y + ring.height - 2 });
-    fillRect(g, PALETTE.cyan, { ...ring, width: 2 });
-    fillRect(g, PALETTE.cyan, { ...ring, width: 2, x: ring.x + ring.width - 2 });
+    drawFocusRing(this.graphics(root), FOCUS_OUTSET, rect);
   }
 }

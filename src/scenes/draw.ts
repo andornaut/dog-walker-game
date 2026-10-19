@@ -1,7 +1,8 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { pixelEllipseSpans, pixelLinePoints, shadowRadiusX } from "../layout/pixelShapes";
-import type { Rect } from "../layout/rect";
+import { insetRect, type Rect } from "../layout/rect";
+import { PALETTE } from "./palette";
 
 export function addFilledRect(scene: Scene, color: number, rect: Rect): GameObjects.Rectangle {
   return scene.add.rectangle(rect.x, rect.y, rect.width, rect.height, color).setOrigin(0);
@@ -9,6 +10,15 @@ export function addFilledRect(scene: Scene, color: number, rect: Rect): GameObje
 
 export function fillRect(graphics: GameObjects.Graphics, color: number, rect: Rect): void {
   graphics.fillStyle(color).fillRect(rect.x, rect.y, rect.width, rect.height);
+}
+
+// The keyboard's focus ring: a 2px cyan frame outset pixels outside rect.
+export function drawFocusRing(graphics: GameObjects.Graphics, outset: number, rect: Rect): void {
+  const ring = insetRect(-outset, rect);
+  fillRect(graphics, PALETTE.cyan, { ...ring, height: 2 });
+  fillRect(graphics, PALETTE.cyan, { ...ring, height: 2, y: ring.y + ring.height - 2 });
+  fillRect(graphics, PALETTE.cyan, { ...ring, width: 2 });
+  fillRect(graphics, PALETTE.cyan, { ...ring, width: 2, x: ring.x + ring.width - 2 });
 }
 
 // A solid pixel ellipse under a sprite, centred on its x about a pixel above its feet.

@@ -2,24 +2,39 @@ import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
-import { type AssetManifest, assetUrl, parseManifest } from "../assets/manifest";
+import { type AssetManifest, assetUrl, parseManifest, type SpriteAsset } from "../assets/manifest";
 import { dogFaceKey, dogSpriteKey, encounterSpriteKey, ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, EncounterId } from "../data/types";
 import { devRunLoadout, namesRunSetup } from "../dev/devStart";
 import { pageRunSetup } from "../dev/pageRunSetup";
+import {
+  bootProgress,
+  LOADING_ART,
+  LOADING_TRACK,
+  loadingBarWidth,
+  loadingWalkerAt,
+  stepFraction,
+} from "../layout/loadingScreen";
 import { startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
-import { loadManifestImages, MANIFEST_CACHE_KEY } from "./manifestImages";
+import { addFilledRect } from "./draw";
+import { loadManifest, MANIFEST_CACHE_KEY, queueManifestImages } from "./manifestImages";
 import { PALETTE } from "./palette";
 import { registerFallbackPixelFont } from "./pixelText";
-import { openProfile, profileSave, setRunOverride, walkerSpriteKey } from "./profileStore";
+import {
+  currentSettings,
+  openProfile,
+  profileSave,
+  setRunOverride,
+  walkerSpriteKey,
+} from "./profileStore";
 import type { RunSceneData } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
-import { ensurePlaceholder, measureSprite } from "./sprites";
+import { ensurePlaceholder, measureSprite, playTag } from "./sprites";
 
 const ART_URL = assetUrl(import.meta.env.BASE_URL, "art");
-const BAR = { color: PALETTE.amber, height: 6, track: PALETTE.plum, width: 200 };
+// Processing yields to the next frame once a batch has run this long.
+const FRAME_BUDGET_MS = 8;
 
 type Size = { color: number; height: number; width: number };
 const box = (width: number, height: number, color: number): Size => ({ color, height, width });
@@ -45,24 +60,24 @@ function placeholderSizes(): Map<string, Size> {
   return sizes;
 }
 
-// Loads the art manifest and everything in it, then registers each sprite's animations.
-// A missing or broken asset is logged and replaced by a placeholder box, never fatal. Then
-// opens the player's save and starts the home screen.
+// Loads the art manifest and the loading screen's art, shows the loading screen while
+// everything else in the manifest loads, then registers each sprite's animations and metrics
+// in batches, a frame apart, so the bar and the walker keep moving. A missing or broken asset
+// is logged and replaced by a placeholder box, never fatal. Then starts the home screen.
 export class BootScene extends Scene {
+  private bar: GameObjects.Rectangle | undefined;
   private manifest: AssetManifest = { fonts: [], images: [], sounds: [], sprites: [] };
-  private progressBar: GameObjects.Rectangle | undefined;
+  private walker: GameObjects.Sprite | undefined;
 
   constructor() {
     super(SCENE_KEYS.boot);
   }
 
   preload(): void {
-    this.drawProgress(0);
-    this.load.on("progress", (value: number) => this.drawProgress(value));
     this.load.on("loaderror", (file: Loader.File) => {
       console.warn(`Asset failed to load, using a placeholder: ${file.key} (${file.url})`);
     });
-    loadManifestImages(this);
+    loadManifest(this, (manifest) => this.queueLoadingArt(manifest));
   }
 
   create(): void {
@@ -74,9 +89,21 @@ export class BootScene extends Scene {
     } catch (error) {
       console.error("The art manifest is invalid; drawing placeholders instead.", error);
     }
-    const { fonts, sounds, sprites } = this.manifest;
+    // Opened now so the loading walker follows the saved reduced motion setting.
+    const profileOpened = openProfile(this).then((load) => {
+      if (load.status === "corrupt" || load.status === "unavailable") {
+        console.warn(`The save is ${load.status}, so play starts fresh: ${load.reason}`);
+      }
+      this.setWalkerMotion(currentSettings(this).reducedMotion);
+    });
+    this.showLoadingScreen();
+
+    const { fonts, images, sounds, sprites } = this.manifest;
+    queueManifestImages(this, images);
     for (const { json, key, png } of sprites) {
-      this.load.aseprite(key, assetUrl(ART_URL, png), assetUrl(ART_URL, json));
+      if (!this.textures.exists(key)) {
+        this.load.aseprite(key, assetUrl(ART_URL, png), assetUrl(ART_URL, json));
+      }
     }
     for (const { fnt, key, png } of fonts) {
       this.load.bitmapFont(key, assetUrl(ART_URL, png), assetUrl(ART_URL, fnt));
@@ -85,37 +112,104 @@ export class BootScene extends Scene {
     for (const { key, m4a, ogg } of sounds) {
       this.load.audio(key, [assetUrl(ART_URL, ogg), assetUrl(ART_URL, m4a)]);
     }
-    this.load.once("complete", () => this.finish());
+    this.load.on("progress", (value: number) => this.showProgress(bootProgress("network", value)));
+    this.load.once("complete", () =>
+      this.processAssets(() => void profileOpened.then(() => this.startFirstScene())),
+    );
     this.load.start();
   }
 
-  private finish(): void {
-    for (const { anchor, key } of this.manifest.sprites) {
-      if (!this.textures.exists(key)) {
-        continue;
-      }
-      try {
-        const sheet = this.cache.json.get(key) as AsepriteSheet;
-        for (const spec of animationSpecs(key, sheet)) {
-          const frames = spec.frames.map(({ duration, frame }) => ({ duration, frame, key }));
-          const duration = frames.reduce((sum, frame) => sum + frame.duration, 0);
-          this.anims.create({ duration, frames, key: spec.key, repeat: -1 });
-        }
-        measureSprite(this, key, anchor);
-      } catch (error) {
-        console.warn(`Sprite ${key} has no usable animations.`, error);
+  // The loading screen's three files, from their manifest entries, ahead of everything else.
+  private queueLoadingArt(manifest: AssetManifest): void {
+    queueManifestImages(
+      this,
+      manifest.images.filter(({ key }) => key === LOADING_ART.screen || key === LOADING_ART.track),
+    );
+    const walker = manifest.sprites.find(({ key }) => key === LOADING_ART.walker);
+    if (walker !== undefined) {
+      this.load.aseprite(walker.key, assetUrl(ART_URL, walker.png), assetUrl(ART_URL, walker.json));
+    }
+  }
+
+  // Each missing piece of art is drawn plain: the track in plum and an amber bar along it.
+  private showLoadingScreen(): void {
+    if (this.textures.exists(LOADING_ART.screen)) {
+      this.add.image(0, 0, LOADING_ART.screen).setOrigin(0);
+    }
+    const { height, x, y } = LOADING_TRACK;
+    if (this.textures.exists(LOADING_ART.track)) {
+      this.add.image(x, y, LOADING_ART.track).setOrigin(0);
+    } else {
+      addFilledRect(this, PALETTE.plum, LOADING_TRACK);
+    }
+    const walker = this.manifest.sprites.find(({ key }) => key === LOADING_ART.walker);
+    if (walker !== undefined && this.textures.exists(walker.key)) {
+      this.registerSprite(walker);
+      const at = loadingWalkerAt(0);
+      this.walker = this.add.sprite(at.x, at.y, walker.key).setOrigin(0);
+      this.setWalkerMotion(currentSettings(this).reducedMotion);
+    } else {
+      this.bar = addFilledRect(this, PALETTE.amber, { height, width: 0, x, y });
+    }
+  }
+
+  private setWalkerMotion(reduced: boolean): void {
+    if (this.walker !== undefined) {
+      playTag(this.walker, LOADING_ART.walker, "walk", reduced);
+    }
+  }
+
+  private showProgress(progress: number): void {
+    const at = loadingWalkerAt(progress);
+    this.walker?.setPosition(at.x, at.y);
+    this.bar?.setSize(loadingBarWidth(progress), LOADING_TRACK.height);
+  }
+
+  // Runs each step in turn, yielding to the next frame once a frame's budget is spent, then
+  // calls done.
+  private processAssets(done: () => void): void {
+    const steps: (() => void)[] = [];
+    for (const sprite of this.manifest.sprites) {
+      if (sprite.key !== LOADING_ART.walker) {
+        steps.push(() => this.registerSprite(sprite));
       }
     }
     for (const [key, size] of placeholderSizes()) {
-      ensurePlaceholder(this, key, size);
+      steps.push(() => ensurePlaceholder(this, key, size));
     }
-    registerFallbackPixelFont(this);
-    void openProfile(this).then((load) => {
-      if (load.status === "corrupt" || load.status === "unavailable") {
-        console.warn(`The save is ${load.status}, so play starts fresh: ${load.reason}`);
+    steps.push(() => registerFallbackPixelFont(this));
+    let next = 0;
+    const runBatch = () => {
+      const started = performance.now();
+      while (next < steps.length && performance.now() - started < FRAME_BUDGET_MS) {
+        itemAt(steps, next)();
+        next += 1;
       }
-      this.startFirstScene();
-    });
+      this.showProgress(bootProgress("processing", stepFraction(steps.length, next)));
+      if (next < steps.length) {
+        this.time.delayedCall(0, runBatch);
+      } else {
+        done();
+      }
+    };
+    runBatch();
+  }
+
+  private registerSprite({ anchor, key }: SpriteAsset): void {
+    if (!this.textures.exists(key)) {
+      return;
+    }
+    try {
+      const sheet = this.cache.json.get(key) as AsepriteSheet;
+      for (const spec of animationSpecs(key, sheet)) {
+        const frames = spec.frames.map(({ duration, frame }) => ({ duration, frame, key }));
+        const duration = frames.reduce((sum, frame) => sum + frame.duration, 0);
+        this.anims.create({ duration, frames, key: spec.key, repeat: -1 });
+      }
+      measureSprite(this, key, anchor);
+    } catch (error) {
+      console.warn(`Sprite ${key} has no usable animations.`, error);
+    }
   }
 
   // A dev link that names a run starts it straight away; otherwise the home screen shows.
@@ -130,15 +224,5 @@ export class BootScene extends Scene {
     const data: RunSceneData = { loadout, walkerSprite: walkerSpriteKey(this, walker) };
     startWakeLock();
     this.scene.start(SCENE_KEYS.run, data);
-  }
-
-  private drawProgress(fraction: number): void {
-    if (this.progressBar === undefined) {
-      const x = Math.round((SCREEN_CONFIG.width - BAR.width) / 2);
-      const y = Math.round((SCREEN_CONFIG.height - BAR.height) / 2);
-      this.add.rectangle(x, y, BAR.width, BAR.height, BAR.track).setOrigin(0);
-      this.progressBar = this.add.rectangle(x, y, 0, BAR.height, BAR.color).setOrigin(0);
-    }
-    this.progressBar.width = Math.round(BAR.width * fraction);
   }
 }

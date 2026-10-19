@@ -2,20 +2,25 @@ import { type GameObjects, type Input, Scene } from "phaser";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { FEEDBACK, settleDelay } from "../home/feedback";
+import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
 import {
   knobX,
+  type SettingsLayout,
+  settingsLayout,
+  type SettingsOrigin,
   setVolumeSteps,
-  type SliderTrack,
   VOLUME_STEPS,
   type VolumeKey,
+  volumePercent,
   volumeStepAt,
+  volumeStepForKey,
   volumeSteps,
 } from "../home/settings";
 import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { containsPoint, type Rect } from "../layout/rect";
 import { PHONE_EVENTS } from "../pwa";
 import type { Settings } from "../save/schema";
-import { fillRect } from "./draw";
+import { drawFocusRing, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
@@ -32,8 +37,10 @@ import {
   TEXT_SCALE,
 } from "./uiKit";
 
-// The caller pauses itself and launches settings; settings resumes it on close.
+// The caller pauses itself and launches settings; settings resumes it on close. origin
+// places the panel: centred on the home screen, or over the road.
 export interface SettingsSceneData {
+  origin: SettingsOrigin;
   resume?: SceneKey;
 }
 
@@ -49,11 +56,7 @@ type Row =
 
 type Target = { kind: "close" } | { key: SwitchKey; kind: "switch" };
 
-// The layout of the menus mock, centred over the run's road: four rows 44 tall, each its own
-// tap target, and Back.
-const PANEL: Rect = { height: 276, width: 248, x: 96, y: 277 };
-const TITLE = { x: 220, y: 293 };
-const ROW = { height: 44, width: 232, x: 104, y: 315 };
+// Four rows, each its own tap target, then Back.
 const ROWS: readonly Row[] = [
   {
     icon: "icon-sound-panel",
@@ -77,19 +80,11 @@ const ROWS: readonly Row[] = [
 const ICON = { dx: 6, dySlider: 4, dySwitch: 14 };
 const LABEL_DX = 26;
 const SWITCH = { dx: 188, dy: 14, height: 16, width: 32 };
-const TRACK: SliderTrack & { dy: number; height: number } = {
-  dy: 24,
-  height: 10,
-  knobWidth: 10,
-  width: 216,
-  x: 112,
-};
 const KNOB_HEIGHT = 16;
-const BACK_BUTTON: Rect = { height: 40, width: 200, x: 120, y: 499 };
-
-function rowRect(index: number): Rect {
-  return { ...ROW, y: ROW.y + index * ROW.height };
-}
+// The keyboard moves through the rows, then Back, one per focus row.
+const FOCUS_ROW_LENGTHS: readonly number[] = [...ROWS.map(() => 1), 1];
+// The ring stays inside the panel's 8px margin.
+const FOCUS_OUTSET = 3;
 
 function rowIndex(key: SwitchKey | VolumeKey): number {
   return ROWS.findIndex((row) => row.key === key);
@@ -102,9 +97,13 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 
 // Sound on or off, music and effects volume, and reduced motion, reachable from the home
 // screen and the pause menu. Every change is saved and applied at once. A switch row that is
-// on shows the selected state; a tap dips the row, then flips it.
+// on shows the selected state; a tap dips the row, then flips it. Up and Down move the
+// keyboard's focus through the rows and Back; Enter or Space presses the focused row, and on
+// a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
+  private focus: Focus | null = null;
+  private layout: SettingsLayout = settingsLayout(SCREEN_CONFIG.width, "road");
   private pressed: Target | undefined;
   private resumeKey: SceneKey | undefined;
 
@@ -114,13 +113,15 @@ export class SettingsScene extends Scene {
 
   create(data?: SettingsSceneData): void {
     this.resumeKey = data?.resume;
+    this.layout = settingsLayout(SCREEN_CONFIG.width, data?.origin ?? "road");
     this.dragging = undefined;
+    this.focus = null;
     this.pressed = undefined;
     this.render();
 
     let pressedAt = 0;
     this.input.on("pointerdown", (pointer: Input.Pointer) => {
-      const row = ROWS.find((_, i) => containsPoint(rowRect(i), pointer.x, pointer.y));
+      const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), pointer.x, pointer.y));
       if (row?.kind === "slider") {
         if (!currentSettings(this).muted) {
           this.dragging = row.key;
@@ -165,15 +166,7 @@ export class SettingsScene extends Scene {
         this.render();
       }
     });
-    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (isPauseKey(event.key) || isConfirmKey(event.key)) {
-        this.close();
-      } else if (isMuteKey(event.key)) {
-        this.pressed = { key: "muted", kind: "switch" };
-        this.render();
-        this.flipAfter("muted", FEEDBACK.pressDipMs);
-      }
-    });
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     const onBack = () => this.close();
     window.addEventListener(PHONE_EVENTS.backPressed, onBack);
     this.events.once("shutdown", () =>
@@ -181,11 +174,59 @@ export class SettingsScene extends Scene {
     );
   }
 
+  private onKey(key: string): void {
+    const focusedRow = this.focus === null ? undefined : ROWS[this.focus.row];
+    if (focusedRow?.kind === "slider") {
+      const settings = currentSettings(this);
+      const current = volumeSteps(settings[focusedRow.key]);
+      const steps = volumeStepForKey(key, current);
+      if (steps !== undefined) {
+        if (!settings.muted && steps !== current) {
+          this.change(setVolumeSteps(focusedRow.key, steps, settings));
+          // A sample at the new level, as after a drag.
+          if (focusedRow.key === "sfxVolume") {
+            soundboardOf(this).play("tip");
+          }
+        }
+        return;
+      }
+    }
+    const direction = focusDirectionForKey(key);
+    if (direction !== undefined) {
+      this.focus = moveFocus(FOCUS_ROW_LENGTHS, direction, this.focus);
+      this.render();
+    } else if (isPauseKey(key)) {
+      this.close();
+    } else if (isConfirmKey(key)) {
+      this.confirm(focusedRow);
+    } else if (isMuteKey(key)) {
+      this.pressed = { key: "muted", kind: "switch" };
+      this.render();
+      this.flipAfter("muted", FEEDBACK.pressDipMs);
+    }
+  }
+
+  // Enter or Space flips a focused switch, and closes from Back or with nothing focused.
+  private confirm(focusedRow: Row | undefined): void {
+    if (focusedRow?.kind === "switch") {
+      this.pressed = { key: focusedRow.key, kind: "switch" };
+      this.render();
+      this.flipAfter(focusedRow.key, FEEDBACK.pressDipMs);
+    } else if (focusedRow === undefined) {
+      this.close();
+    }
+  }
+
+  private rowRect(index: number): Rect {
+    const { row } = this.layout;
+    return { ...row, y: row.y + index * row.height };
+  }
+
   private targetAt(x: number, y: number): Target | undefined {
-    if (containsPoint(BACK_BUTTON, x, y)) {
+    if (containsPoint(this.layout.back, x, y)) {
       return { kind: "close" };
     }
-    const row = ROWS.find((_, i) => containsPoint(rowRect(i), x, y));
+    const row = ROWS.find((_, i) => containsPoint(this.rowRect(i), x, y));
     return row?.kind === "switch" ? { key: row.key, kind: "switch" } : undefined;
   }
 
@@ -204,7 +245,7 @@ export class SettingsScene extends Scene {
       return;
     }
     const settings = currentSettings(this);
-    const steps = volumeStepAt(TRACK, x);
+    const steps = volumeStepAt(this.layout.track, x);
     if (steps !== volumeSteps(settings[key])) {
       this.change(setVolumeSteps(key, steps, settings));
     }
@@ -226,6 +267,7 @@ export class SettingsScene extends Scene {
   private render(): void {
     clearScene(this);
     const settings = currentSettings(this);
+    const { back, panel, title } = this.layout;
     const g = this.add.graphics();
     fillRect(g, PALETTE.darkBrown, {
       height: SCREEN_CONFIG.height,
@@ -235,13 +277,13 @@ export class SettingsScene extends Scene {
     });
     // A 1px tan rim keeps the panel's edge clear of what is behind it.
     fillRect(g, PALETTE.tan, {
-      height: PANEL.height + 2,
-      width: PANEL.width + 2,
-      x: PANEL.x - 1,
-      y: PANEL.y - 1,
+      height: panel.height + 2,
+      width: panel.width + 2,
+      x: panel.x - 1,
+      y: panel.y - 1,
     });
-    addPanel(this, PANEL);
-    addPixelText(this, TITLE.x, TITLE.y, "Settings", {
+    addPanel(this, panel);
+    addPixelText(this, title.x, title.y, "Settings", {
       color: PALETTE.plum,
       font: "title",
       originX: 0.5,
@@ -250,7 +292,7 @@ export class SettingsScene extends Scene {
     const separators = this.add.graphics();
     ROWS.forEach((_, i) => {
       if (i > 0) {
-        const rect = rowRect(i);
+        const rect = this.rowRect(i);
         fillRect(separators, PALETTE.tan, {
           height: 1,
           width: rect.width - 8,
@@ -267,9 +309,13 @@ export class SettingsScene extends Scene {
         this.drawSlider(row, settings);
       }
     }
-    addMenuButton(this, BACK_BUTTON, "Back").setState(
+    addMenuButton(this, back, "Back").setState(
       this.pressed?.kind === "close" ? "pressed" : "normal",
     );
+    if (this.focus !== null) {
+      const focused = this.focus.row < ROWS.length ? this.rowRect(this.focus.row) : back;
+      drawFocusRing(this.add.graphics(), FOCUS_OUTSET, focused);
+    }
   }
 
   private drawSwitchRow(
@@ -277,7 +323,7 @@ export class SettingsScene extends Scene {
     row: Extract<Row, { kind: "switch" }>,
     settings: Settings,
   ): void {
-    const rect = rowRect(rowIndex(row.key));
+    const rect = this.rowRect(rowIndex(row.key));
     const on = switchOn(row.key, settings);
     const tile = addSelectTile(this, parent, rect, {
       badge: "tick",
@@ -318,19 +364,31 @@ export class SettingsScene extends Scene {
   // A volume slider: drag along the row to set it. Muted, it is inactive and reads "Muted".
   private drawSlider(row: Extract<Row, { kind: "slider" }>, settings: Settings): void {
     const { key } = row;
-    const { x, y } = rowRect(rowIndex(key));
+    const { x, y } = this.rowRect(rowIndex(key));
+    const { track: slider } = this.layout;
     const active = !settings.muted;
     const steps = volumeSteps(settings[key]);
     const ink = active ? PALETTE.plum : PALETTE.slate;
     addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON.dx, y + ICON.dySlider);
     addPixelText(this, x + LABEL_DX, y + 9, row.label, { color: ink, font: "title" });
-    addPixelText(this, TRACK.x + TRACK.width, y + 9, active ? `${steps * 10}%` : "Muted", {
-      color: ink,
-      font: "title",
-      originX: 1,
-    });
-    const track: Rect = { height: TRACK.height, width: TRACK.width, x: TRACK.x, y: y + TRACK.dy };
-    const kx = knobX(TRACK, steps);
+    addPixelText(
+      this,
+      slider.x + slider.width,
+      y + 9,
+      active ? `${volumePercent(steps)}%` : "Muted",
+      {
+        color: ink,
+        font: "title",
+        originX: 1,
+      },
+    );
+    const track: Rect = {
+      height: slider.height,
+      width: slider.width,
+      x: slider.x,
+      y: y + slider.dy,
+    };
+    const kx = knobX(slider, steps);
     const knobTag = !active ? "disabled" : this.dragging === key ? "pressed" : "normal";
     if (this.textures.exists("ui-slider") && this.textures.exists("ui-slider-knob")) {
       const suffix = active ? "" : "-disabled";
@@ -338,7 +396,7 @@ export class SettingsScene extends Scene {
       addNineSlice(
         this,
         "ui-slider",
-        { ...track, width: kx + TRACK.knobWidth - track.x },
+        { ...track, width: kx + slider.knobWidth - track.x },
         `filled${suffix}`,
       );
       addTagImage(this, "ui-slider-knob", knobTag, kx, track.y - 3);
@@ -362,23 +420,23 @@ export class SettingsScene extends Scene {
       ...inner,
       width: Math.round((inner.width * steps) / VOLUME_STEPS),
     });
-    const kx = knobX(TRACK, steps);
+    const kx = knobX(this.layout.track, steps);
     const top = track.y - 3;
     fillRect(g, active ? PALETTE.plum : PALETTE.grey, {
       height: KNOB_HEIGHT,
-      width: TRACK.knobWidth,
+      width: this.layout.track.knobWidth,
       x: kx,
       y: top,
     });
     fillRect(g, active ? PALETTE.cream : PALETTE.lightGrey, {
       height: KNOB_HEIGHT - 2,
-      width: TRACK.knobWidth - 2,
+      width: this.layout.track.knobWidth - 2,
       x: kx + 1,
       y: top + 1,
     });
     fillRect(g, active ? PALETTE.tan : PALETTE.grey, {
       height: 2,
-      width: TRACK.knobWidth - 2,
+      width: this.layout.track.knobWidth - 2,
       x: kx + 1,
       y: top + 13,
     });
