@@ -254,7 +254,7 @@ export const WORLD = {
       name: "The Long Way Home",
       roadColor: "#c28569",
       roadShadowColor: "#b86f50",
-      speed: 1.1,
+      speed: 1.04,
       weights: {
         forcedStops: {
           chattyNeighbour: 1,
