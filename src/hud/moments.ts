@@ -85,7 +85,7 @@ export function firingShowMs(seconds: number): number {
 export const FIRING_PARTS = {
   face: { x: 60, y: -34 },
   line: { x: 60, y: -72 },
-  plate: { height: 28, width: 72, x: 24, y: -2 },
+  plate: { height: 28, width: 84, x: 18, y: -2 },
   // "FIRED!" is centred across the plate, the top of its capitals this far down.
   plateText: { y: 9 },
   pop: { x: -4, y: -98 },

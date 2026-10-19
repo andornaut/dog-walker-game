@@ -6,8 +6,8 @@ import { SCREEN_CONFIG } from "../data/screen";
 import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badgesView";
 import { FEEDBACK, settleDelay } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
+import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
-import { choiceFull } from "../home/selection";
 import { STATS_LAYOUT, STATS_TABS, type StatsTab, statsTabRects } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
@@ -210,7 +210,7 @@ export class StatsScene extends Scene {
     const words = gameData.menuText.stats;
     this.text(12, 12, words.title, { color: PALETTE.cream, font: "title" });
     addCloseButton(this, this.add.container(0, 0), SCREEN, this.pressed === "close");
-    // The open tab is selected, so the others always take the full choice's darker step.
+    // The open tab is selected and the others normal.
     const tabs = this.add.container(0, 0);
     const { reducedMotion } = currentSettings(this);
     TABS.forEach((tab, i) => {
@@ -221,10 +221,9 @@ export class StatsScene extends Scene {
       const tile = addSelectTile(this, tabs, rect, {
         badge: "tick",
         edge: true,
-        full: choiceFull(1, 1),
         reducedMotion,
-        rest: "cream",
-        selected: tab === this.tab,
+        state: tileState({ ...PLAIN_ITEM, picked: tab === this.tab }),
+        tile: false,
       });
       if (sameTarget({ tab: i }, this.pressed)) {
         tile.container.y += FEEDBACK.pressDipPx;

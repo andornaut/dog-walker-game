@@ -5,7 +5,9 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { MenuText } from "../data/types";
 import { FEEDBACK, settleDelay } from "../home/feedback";
 import { type Focus, focusDirectionForKey, moveFocus } from "../home/focus";
+import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
+import { DISABLED_COLORS } from "../home/selection";
 import {
   knobX,
   type SettingsLayout,
@@ -102,10 +104,10 @@ function switchOn(key: SwitchKey, settings: Settings): boolean {
 }
 
 // Sound on or off, music and effects volume, and reduced motion, reachable from the home
-// screen and the pause menu. Every change is saved and applied at once. A switch row that is
-// on shows the selected state; a tap dips the row, then flips it. Up and Down move the
-// keyboard's focus through the rows and the close control; Enter or Space presses the focused row, and on
-// a slider the left and right keys, Home and End set the volume.
+// screen and the pause menu. Every change is saved and applied at once. A switch row is
+// normal and shows its setting in its switch; a tap dips the row, then flips it. Up and Down
+// move the keyboard's focus through the rows and the close control; Enter or Space presses
+// the focused row, and on a slider the left and right keys, Home and End set the volume.
 export class SettingsScene extends Scene {
   private dragging: VolumeKey | undefined;
   private focus: Focus | null = null;
@@ -333,13 +335,12 @@ export class SettingsScene extends Scene {
   ): void {
     const rect = this.rowRect(rowIndex(row.key));
     const on = switchOn(row.key, settings);
+    // The row is normal; whether it is on shows in its switch.
     const tile = addSelectTile(this, parent, rect, {
-      badge: "tick",
       edge: false,
-      full: false,
       reducedMotion: settings.reducedMotion,
-      rest: "cream",
-      selected: on,
+      state: "normal",
+      tile: false,
     });
     if (this.pressed?.kind === "switch" && this.pressed.key === row.key) {
       tile.container.y += FEEDBACK.pressDipPx;
@@ -372,14 +373,14 @@ export class SettingsScene extends Scene {
     tile.content.add(g);
   }
 
-  // A volume slider: drag along the row to set it. Muted, it is inactive and reads "Muted".
+  // A volume slider: drag along the row to set it. Muted, it is disabled and reads "Muted".
   private drawSlider(row: Extract<Row, { kind: "slider" }>, settings: Settings): void {
     const { key } = row;
     const { x, y } = this.rowRect(rowIndex(key));
     const { track: slider } = this.layout;
-    const active = !settings.muted;
+    const active = tileState({ ...PLAIN_ITEM, available: !settings.muted }) !== "disabled";
     const steps = volumeSteps(settings[key]);
-    const ink = active ? PALETTE.plum : PALETTE.slate;
+    const ink = active ? PALETTE.plum : PALETTE[DISABLED_COLORS.text];
     addTagImage(this, row.icon, active && steps > 0 ? "on" : "off", x + ICON.dx, y + ICON.dySlider);
     const words = gameData.menuText.settings;
     addPixelText(this, x + LABEL_DX, y + 9, words[row.label], { color: ink, font: "title" });

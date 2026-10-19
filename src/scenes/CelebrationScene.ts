@@ -56,7 +56,10 @@ export class CelebrationScene extends Scene {
       x: BUTTON.x,
       y: top + height + BUTTON.gap,
     };
-    const button = addMenuButton(this, buttonRect, gameData.menuText.celebration.button);
+    const button = addMenuButton(this, buttonRect, gameData.menuText.celebration.button, {
+      available: true,
+      primary: true,
+    });
     const close = () => {
       this.scene.resume(resume);
       this.scene.stop();

@@ -384,7 +384,7 @@ export class HudScene extends Scene {
       }),
       dogFace: sprite("treat", DOGHOUSE.dogFace),
       fired: addPixelText(this, fired.x, fired.y, "", {
-        color: PALETTE.darkRed,
+        color: PALETTE.white,
         font: "title",
         originX: 0.5,
       }),
@@ -555,7 +555,7 @@ export class HudScene extends Scene {
       this.drawHouse(g, rect, fired);
     }
     this.fitName(view.name, dog.name, DOGHOUSE.name, view.anchors.name);
-    setPixelText(view.fired.setTint(PALETTE.darkRed), fired ? "Fired" : "");
+    setPixelText(view.fired.setTint(PALETTE.white), fired ? "Fired" : "");
     if (fired) {
       [view.dogFace, view.ownerFace, ...view.hearts].forEach((part) => part.setVisible(false));
       setPixelText(view.count, "");

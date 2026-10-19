@@ -159,13 +159,14 @@ export class HelpScene extends Scene {
       }
     });
 
+    // Next is the call to action; Previous is disabled on the first page.
     const { next, previousEnabled } = helpButtons(pages.length, this.page);
-    const previous = addMenuButton(this, layout.previous, words.previous, "secondary");
-    previous.setState(
-      !previousEnabled ? "disabled" : this.pressed === "previous" ? "pressed" : "normal",
+    const previous = { available: previousEnabled, primary: false };
+    addMenuButton(this, layout.previous, words.previous, previous).setPressed(
+      this.pressed === "previous",
     );
-    addMenuButton(this, layout.next, words[next]).setState(
-      this.pressed === "next" ? "pressed" : "normal",
+    addMenuButton(this, layout.next, words[next], { available: true, primary: true }).setPressed(
+      this.pressed === "next",
     );
   }
 

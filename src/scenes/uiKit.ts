@@ -2,10 +2,17 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
-import { type RestFace, type SelectLook, selectLook } from "../home/selection";
+import {
+  type ButtonState,
+  buttonState,
+  type InteractionInput,
+  type TileState,
+} from "../home/interaction";
+import { BUTTON_COLORS, DISABLED_COLORS, type SelectLook, selectLook } from "../home/selection";
 import { type CloseControl, closeControl } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
+import { disabledTextureKey } from "./greyTextures";
 import { listenOnePress } from "./onePress";
 import { PALETTE } from "./palette";
 import { addPixelText, setPixelText } from "./pixelText";
@@ -46,6 +53,8 @@ const SLICES = {
   "ui-slider": { bottom: 0, left: 4, right: 4, top: 0 },
   // The state strip's tab.
   "ui-strip-well": { bottom: 8, left: 8, right: 8, top: 8 },
+  // A walker, dog or gear tile's face, tagged by its interaction state.
+  "ui-tile": { bottom: 4, left: 4, right: 4, top: 4 },
 } as const;
 export type SliceKey = keyof typeof SLICES;
 
@@ -113,58 +122,80 @@ export function addPanel(
   return g;
 }
 
-export type ButtonState = "disabled" | "normal" | "pressed";
-
-// A screen's one main action is primary (amber); its other actions are secondary (tan).
-export type ButtonRole = "primary" | "secondary";
-
-const BUTTON_TAGS: Readonly<Record<ButtonRole, Record<ButtonState, string>>> = {
-  primary: { disabled: "disabled", normal: "normal", pressed: "pressed" },
-  secondary: { disabled: "disabled", normal: "secondary", pressed: "secondary-pressed" },
-};
-
-// The faces drawn while the art is missing: the lip under the face, and the face.
-const BUTTON_FALLBACK: Readonly<Record<ButtonRole, { face: number; lip: number }>> = {
-  primary: { face: PALETTE.amber, lip: PALETTE.orange },
-  secondary: { face: PALETTE.tan, lip: PALETTE.brown },
+// The ui-button tags of each state, raised then pressed, or one flat tag when disabled. A
+// disabled primary is go-disabled, which looks like disabled.
+const BUTTON_TAGS: Readonly<Record<ButtonState, readonly string[]>> = {
+  disabled: ["disabled"],
+  normal: ["normal", "pressed"],
+  primary: ["go", "go-pressed"],
 };
 
 // The ui-button's face sinks this far into its lip when pressed, as the art draws it.
 const BUTTON_PRESS_PX = 2;
 const BUTTON_LIP_PX = 4;
 
-export interface MenuButton {
-  readonly rect: Rect;
-  setState(state: ButtonState): void;
+// A disabled button drawn in code: a flat grey face in an ink line, pressPx down with no
+// lip, so it never looks raised.
+export function drawDisabledButton(
+  g: GameObjects.Graphics,
+  lipPx: number,
+  pressPx: number,
+  rect: Rect,
+): void {
+  drawFramedRect(
+    g,
+    { border: PALETTE.ink, fill: PALETTE[DISABLED_COLORS.face] },
+    { ...rect, height: rect.height - lipPx, y: rect.y + pressPx },
+  );
 }
 
-// A ui-button with a centred label. Pressed shows the sunk frame and moves the label with it.
-export function addMenuButton(
+export interface MenuButton {
+  readonly rect: Rect;
+  setPressed(pressed: boolean): void;
+}
+
+// The button's faces, raised then pressed, or the one flat face when disabled.
+function buttonFaces(
   scene: Scene,
+  primary: boolean,
   rect: Rect,
-  label: string,
-  role: ButtonRole = "primary",
-): MenuButton {
-  const fallback = BUTTON_FALLBACK[role];
-  const faces = (["normal", "pressed", "disabled"] as const).map((state) => {
-    const slice = addNineSlice(scene, "ui-button", rect, BUTTON_TAGS[role][state]);
+  state: ButtonState,
+): (GameObjects.Graphics | GameObjects.NineSlice)[] {
+  const { face: faceColor, lip } = BUTTON_COLORS[state];
+  return BUTTON_TAGS[state].map((tag, i) => {
+    const artTag = state === "disabled" && primary ? "go-disabled" : tag;
+    const slice = addNineSlice(scene, "ui-button", rect, artTag);
     if (slice !== undefined) {
       return slice;
     }
     const g = scene.add.graphics();
-    const top = state === "pressed" ? BUTTON_PRESS_PX : 0;
-    const face = { ...rect, height: rect.height - BUTTON_LIP_PX };
-    if (state !== "pressed") {
-      fillRect(g, state === "disabled" ? PALETTE.darkSlate : fallback.lip, rect);
+    if (lip === null) {
+      drawDisabledButton(g, BUTTON_LIP_PX, BUTTON_PRESS_PX, rect);
+      return g;
     }
-    fillRect(g, state === "disabled" ? PALETTE.slate : fallback.face, {
-      ...face,
-      y: face.y + top,
-    });
+    const pressed = i === 1;
+    const face = { ...rect, height: rect.height - BUTTON_LIP_PX };
+    if (!pressed) {
+      fillRect(g, PALETTE[lip], rect);
+    }
+    fillRect(g, PALETTE[faceColor], { ...face, y: face.y + (pressed ? BUTTON_PRESS_PX : 0) });
     return g;
   });
+}
+
+// A ui-button with a centred label in its interaction state. Pressed shows the sunk frame
+// and moves the label with it; disabled sits at the pressed depth and never moves.
+export function addMenuButton(
+  scene: Scene,
+  rect: Rect,
+  label: string,
+  input: Pick<InteractionInput, "available" | "primary">,
+): MenuButton {
+  const state = buttonState(input);
+  const faces = buttonFaces(scene, input.primary, rect, state);
+  const disabled = state === "disabled";
   const title = addPixelText(scene, rect.x + rect.width / 2, 0, label, {
-    color: PALETTE.plum,
+    color: PALETTE[BUTTON_COLORS[state].label],
     font: "title",
     originX: 0.5,
     originY: 0.5,
@@ -173,16 +204,16 @@ export function addMenuButton(
   const centerY = rect.y + (rect.height - BUTTON_LIP_PX) / 2;
   const button: MenuButton = {
     rect,
-    setState(state) {
-      const states: readonly ButtonState[] = ["normal", "pressed", "disabled"];
-      faces.forEach((face, i) => {
-        face.setVisible(states[i] === state);
-      });
-      title.setY(Math.round(centerY + (state === "pressed" ? BUTTON_PRESS_PX : 0)));
-      title.setTint(state === "disabled" ? PALETTE.lightGrey : PALETTE.plum);
+    setPressed(pressed) {
+      const [up, down] = faces;
+      if (down !== undefined) {
+        up?.setVisible(!pressed);
+        down.setVisible(pressed);
+      }
+      title.setY(Math.round(centerY + (disabled || pressed ? BUTTON_PRESS_PX : 0)));
     },
   };
-  button.setState("normal");
+  button.setPressed(false);
   return button;
 }
 
@@ -194,10 +225,10 @@ export function listenButtonTap(scene: Scene, button: MenuButton, onTap: () => v
   listenOnePress(scene, {
     down: (pointer) => {
       pressed = containsPoint(rect, pointer.x, pointer.y);
-      button.setState(pressed ? "pressed" : "normal");
+      button.setPressed(pressed);
     },
     up: (pointer, cancelled) => {
-      button.setState("normal");
+      button.setPressed(false);
       if (!cancelled && pressed && containsPoint(rect, pointer.x, pointer.y)) {
         onTap();
       }
@@ -426,32 +457,46 @@ export interface SelectTile {
 export interface SelectTileOptions {
   // The ui-check tag on a selected tile; none without one.
   badge?: string;
-  // Unselected, a slate edge marks the tile out from what it sits on; a row on a panel has
-  // none.
+  // Drawn in code, a slate edge marks the face out from what it sits on; a row on a panel
+  // has none.
   edge: boolean;
-  full: boolean;
   // How far the ui-select frame sits outside the tile; SELECT_OUTSET when unset.
   outset?: number;
   reducedMotion: boolean;
-  rest: RestFace;
-  selected: boolean;
+  state: TileState;
+  // A walker, dog or gear tile, drawn with ui-tile; other controls such as tabs draw their
+  // face in code, inside ui-select when selected.
+  tile: boolean;
 }
 
-// A tappable item in the style guide's selected and active state. Selected, it has a yellow
-// face, the ui-select frame and any ui-check badge, and it is lifted 2px onto a plum shadow.
-// Unselected, its face rests cream or tan, a ramp step darker when the choice is full,
-// inside a slate edge if edge is set. The shadow goes in parent so it stays put under the
-// lift.
+// The face drawn in code, as ui-tile draws it, for controls without the art.
+function drawTileFace(scene: Scene, edge: boolean, look: SelectLook, rect: Rect) {
+  const g = scene.add.graphics();
+  const fill = PALETTE[look.face];
+  const border =
+    look.state === "selected" ? PALETTE.ink : edge ? PALETTE[DISABLED_COLORS.edge] : fill;
+  drawFramedRect(g, { border, fill }, rect);
+  return g;
+}
+
+// A tappable item in its interaction state. Selected, it has the gold face and any ui-check
+// badge and is lifted 2px onto a plum shadow; a face drawn in code adds the ui-select frame.
+// Normal, its face is cream. Disabled, it is flat grey and never lifts, and the caller draws
+// its pictures through tileTextureKey or addTileSprite. The shadow goes in parent so it
+// stays put under the lift.
 export function addSelectTile(
   scene: Scene,
   parent: GameObjects.Container,
   rect: Rect,
   options: SelectTileOptions,
 ): SelectTile {
-  const { badge, edge, full, outset, reducedMotion, rest, selected } = options;
-  const look = selectLook(rest, selected, full);
+  const { badge, edge, outset, reducedMotion, state, tile: isTile } = options;
+  const look = selectLook(state);
+  const selected = state === "selected";
+  const art = isTile ? addNineSlice(scene, "ui-tile", rect, state) : undefined;
+  const framed = selected && art === undefined;
   if (selected) {
-    const outer = selectOuter(rect, outset);
+    const outer = framed ? selectOuter(rect, outset) : rect;
     const shadow = scene.add.graphics();
     fillRect(shadow, PALETTE.plum, {
       height: FEEDBACK.liftPx,
@@ -464,21 +509,46 @@ export function addSelectTile(
   const lift = selected ? -FEEDBACK.liftPx : 0;
   const container = scene.add.container(0, lift);
   parent.add(container);
-  const face = scene.add.graphics();
-  const fill = PALETTE[look.face];
-  const border = selected ? PALETTE.ink : edge ? PALETTE.slate : fill;
-  drawFramedRect(face, { border, fill }, rect);
+  const face = art ?? drawTileFace(scene, edge, look, rect);
   const content = scene.add.container(0, 0);
   container.add([face, content]);
   const tile: SelectTile = { container, content, lift, look };
-  if (selected) {
+  if (framed) {
     addSelectFrame(scene, container, rect, reducedMotion, outset);
+  }
+  if (selected) {
     const image = badge === undefined ? undefined : addSelectBadge(scene, container, rect, badge);
     if (image !== undefined) {
       tile.badge = image;
     }
   }
   return tile;
+}
+
+// A picture's texture on a tile in state: a disabled tile's is its grey copy a ramp step
+// darker.
+export function tileTextureKey(scene: Scene, state: TileState, key: string): string {
+  return state === "disabled" ? disabledTextureKey(scene, key) : key;
+}
+
+// A sprite on a tile, placed by its top-left corner, playing tag, or holding its first frame
+// with reduced motion. A disabled tile's holds the first frame in its disabled copy.
+export function addTileSprite(
+  scene: Scene,
+  state: TileState,
+  reducedMotion: boolean,
+  key: string,
+  tag: string,
+  at: { x: number; y: number },
+): GameObjects.Sprite {
+  if (state === "disabled") {
+    return scene.add
+      .sprite(at.x, at.y, tileTextureKey(scene, state, key), tagFrame(scene, key, tag))
+      .setOrigin(0);
+  }
+  const sprite = scene.add.sprite(at.x, at.y, key).setOrigin(0);
+  showTag(reducedMotion, sprite, key, tag);
+  return sprite;
 }
 
 // Kept by clearScene, so a tap's sparkle plays on while the screen is drawn again under it.

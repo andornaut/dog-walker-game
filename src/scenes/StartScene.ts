@@ -1,6 +1,7 @@
 import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
+import { animationKey } from "../assets/asepriteAnimations";
 import { temperamentIconKey, traitIconKey } from "../assets/iconKeys";
 import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
@@ -47,6 +48,7 @@ import {
   walkerLineKey,
 } from "../home/homeLines";
 import { HOME_TEXT_FIELDS as FIELDS, homeLine } from "../home/homeText";
+import { buttonState, PLAIN_ITEM, type TileState, tileState } from "../home/interaction";
 import { porchOwners } from "../home/porch";
 import {
   homeSections,
@@ -56,8 +58,10 @@ import {
   type SectionState,
   startReady,
 } from "../home/sections";
-import { choiceFull, type SelectLook } from "../home/selection";
+import { choiceFull, DISABLED_COLORS, type SelectLook } from "../home/selection";
 import type { StatsTab } from "../home/statsLayout";
+import { homeSticker, sameItem, type Sticker, type TileItem } from "../home/sticker";
+import { downTail } from "../hud/moments";
 import { isConfirmKey, isMuteKey } from "../input/keyBindings";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -70,7 +74,14 @@ import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
 import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { drawFocusRing, drawPixelLine, drawRing, drawShadow, fillRect } from "./draw";
+import {
+  drawFocusRing,
+  drawFramedRect,
+  drawPixelLine,
+  drawRing,
+  drawShadow,
+  fillRect,
+} from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import {
@@ -105,7 +116,10 @@ import {
   addIconButton,
   addNineSlice,
   addSelectTile,
+  addTileSprite,
   cogIcon,
+  drawDisabledButton,
+  fitText,
   type IconButton,
   imageIcon,
   type SelectTile,
@@ -114,6 +128,7 @@ import {
   soundIcon,
   tagFrame,
   TEXT_SCALE,
+  tileTextureKey,
 } from "./uiKit";
 
 const SCREEN = SCREEN_CONFIG;
@@ -159,6 +174,15 @@ const TRAIT_ORDER: readonly TraitId[] = ["fancy", "foodDriven", "chaser"];
 const SPEECH_CHARS = 30;
 const SPEECH_LINES = 4;
 const SPEECH_LINE_HEIGHT = 15;
+// ui-sticker: its word is centred on x 28 with its capitals from row 12, at most 36px wide.
+const STICKER = {
+  height: 28,
+  key: "ui-sticker",
+  maxWordWidth: 36,
+  width: 56,
+  wordX: 28,
+  wordY: 12,
+};
 
 // The walkers in data order, as the picker shows them.
 function walkerIds(): WalkerId[] {
@@ -325,6 +349,8 @@ export class StartScene extends Scene {
   private quips = new Map<DogId, string>();
   private root: GameObjects.Container | undefined;
   private shakes = new Map<string, number>();
+  // Whether the new sticker has popped this visit, so a redraw shows it without popping again.
+  private stickerPopped = false;
   private startButton:
     | {
         container: GameObjects.Container;
@@ -334,6 +360,8 @@ export class StartScene extends Scene {
       }
     | undefined;
   private views = new Map<string, TileView>();
+  // The bank at the last visit, against which a tile the bank now covers is new.
+  private visitBank: Cents = cents(0);
   private walkerLine: WalkerLine = "firstVisit";
 
   constructor() {
@@ -353,11 +381,13 @@ export class StartScene extends Scene {
     this.pressedTarget = undefined;
     this.quips = new Map();
     this.shakes = new Map();
+    this.stickerPopped = false;
     this.views = new Map();
     const { bankCents, lastLoadout, owned, stats } = profileSave(this);
     this.loadout = { dogs: [...lastLoadout.dogs], gear: lastLoadout.gear };
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
     const before = bankAtLastVisit(remembered, bankCents, stats.lastWalk);
+    this.visitBank = before;
     this.walkerLine = walkerLineKey(
       stats.lastWalk,
       newlyAffordable(gameData, owned, before, bankCents),
@@ -920,8 +950,14 @@ export class StartScene extends Scene {
       this.drawSection(root, SECTION_RECTS[id], sections[id]);
     }
     this.drawWalkerPicker(root, save);
-    this.drawDogTiles(root, save);
-    this.drawGear(root, save);
+    // The sticker covers its tile's price line, which the tile then leaves out.
+    const sticker = this.textures.exists(STICKER.key)
+      ? homeSticker(gameData, save.owned, this.visitBank, save.bankCents)
+      : null;
+    const stickered = (item: TileItem) => sticker !== null && sameItem(sticker.item, item);
+    this.drawDogTiles(root, stickered, save);
+    this.drawGear(root, stickered, save);
+    this.drawSticker(root, sticker);
     this.drawStartButton(root, startReady(sections));
     this.drawFocus(root);
     this.drawOverlay(save);
@@ -1032,7 +1068,7 @@ export class StartScene extends Scene {
     return view;
   }
 
-  // A tile in the selected-state style, registered for its feedback.
+  // A tile in its interaction state, registered for its feedback.
   private selectTile(
     root: GameObjects.Container,
     id: string,
@@ -1199,29 +1235,34 @@ export class StartScene extends Scene {
       .flatMap((part) => wrapWords(SPEECH_CHARS, part))
       .slice(0, SPEECH_LINES);
     const top = GATE.y + 6;
-    const bubble = this.graphics(root);
+    // The bubble goes under the words, which set its size.
+    const bubble = this.add.container(0, 0);
+    root.add(bubble);
     const labels = lines.map((line, i) =>
       this.text(root, x, top + 4 + i * SPEECH_LINE_HEIGHT, line, PALETTE.plum, { originX: 0.5 }),
     );
     const width = Math.ceil(Math.max(...labels.map((label) => label.width))) + 10;
-    const height = lines.length * SPEECH_LINE_HEIGHT + 4;
-    const left = Math.round(x - width / 2);
-    fillRect(bubble, PALETTE.white, { height, width: width - 2, x: left + 1, y: top });
-    fillRect(bubble, PALETTE.white, { height: height - 2, width, x: left, y: top + 1 });
-    fillRect(bubble, PALETTE.lightGrey, {
-      height: 1,
-      width: width - 2,
-      x: left + 1,
-      y: top + height,
-    });
-    fillRect(bubble, PALETTE.white, { height: 2, width: 6, x: x - 4, y: top + height });
+    const height = lines.length * SPEECH_LINE_HEIGHT + 6;
+    const rect = { height, width, x: Math.round(x - width / 2), y: top };
+    const quip = addNineSlice(this, "ui-quip", rect);
+    if (quip === undefined) {
+      drawFramedRect(this.graphics(bubble), { border: PALETTE.plum, fill: PALETTE.cream }, rect);
+    } else {
+      bubble.add(quip);
+    }
+    // The tail's top row lies over the bubble's bottom rim, its tip over the walker.
+    const tail = downTail((key) => this.textures.exists(key));
+    if (tail !== undefined) {
+      bubble.add(this.add.image(x - tail.tipX, top + height - 1, tail.key).setOrigin(0));
+    }
 
     // Equipped gear shows as a badge beside the walker.
     if (this.loadout.gear !== null) {
       const badge = this.tileView(root, "gateBadge");
       badge.rise = `gear:${this.loadout.gear}`;
       fillRect(this.graphics(badge.container), PALETTE.plum, GEAR_BADGE);
-      this.addGearIcon(badge.container, this.loadout.gear, GEAR_BADGE.x + 1, GEAR_BADGE.y + 1, 0.5);
+      const at = { x: GEAR_BADGE.x + 1, y: GEAR_BADGE.y + 1 };
+      this.addGearIcon(badge.container, "normal", this.loadout.gear, at, 0.5);
     }
   }
 
@@ -1248,25 +1289,27 @@ export class StartScene extends Scene {
     }
   }
 
-  private addLock(parent: GameObjects.Container, x: number, y: number): void {
+  private addLock(parent: GameObjects.Container, state: TileState, x: number, y: number): void {
     if (this.textures.exists("icon-lock")) {
-      parent.add(this.add.image(x, y, "icon-lock").setOrigin(0));
+      parent.add(this.add.image(x, y, tileTextureKey(this, state, "icon-lock")).setOrigin(0));
     }
   }
 
-  // A locked item's price on a cream chip: forest when the bank covers it, darkRed (and a
-  // padlock beside it) when not. originX places it by its left (0) or centre (0.5).
+  // A locked item's price on a chip of the tile's face, forest while the bank covers it and
+  // navy on a disabled tile (with a padlock beside it) when not. originX places it by its
+  // left (0) or centre (0.5).
   private priceBadge(
     parent: GameObjects.Container,
-    x: number,
-    y: number,
+    look: SelectLook,
+    at: { x: number; y: number },
     price: Cents,
     originX: number,
   ): void {
+    const { x, y } = at;
     const badge = this.graphics(parent);
-    const color = price > this.save().bankCents ? PALETTE.darkRed : PALETTE.forest;
+    const color = PALETTE[look.price];
     const label = this.text(parent, x, y, dollarText(price), color, { originX });
-    fillRect(badge, PALETTE.cream, {
+    fillRect(badge, PALETTE[look.face], {
       height: 14,
       width: Math.ceil(label.width) + 6,
       x: Math.round(x - originX * label.width) - 3,
@@ -1274,7 +1317,11 @@ export class StartScene extends Scene {
     });
   }
 
-  private drawDogTiles(root: GameObjects.Container, save: SaveDocument): void {
+  private drawDogTiles(
+    root: GameObjects.Container,
+    stickered: (item: TileItem) => boolean,
+    save: SaveDocument,
+  ): void {
     const { owned } = save;
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
@@ -1285,11 +1332,20 @@ export class StartScene extends Scene {
       const { width, x, y } = rect;
       const dog = gameData.dogs[id];
       const isOwned = owned.dogs.includes(id);
-      const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
-        edge: true,
+      const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
+      const state = tileState({
+        ...PLAIN_ITEM,
+        bank: save.bankCents,
         full,
-        rest: isOwned ? "cream" : "tan",
-        selected: this.loadout.dogs.includes(id),
+        picked: this.loadout.dogs.includes(id),
+        price,
+      });
+      const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
+        // A picked dog's badge is its place in the pick order.
+        badge: String(this.loadout.dogs.indexOf(id) + 1),
+        edge: true,
+        state,
+        tile: true,
       });
       const ink = PALETTE[look.text];
       fillRect(this.graphics(content), PALETTE[look.box], {
@@ -1298,8 +1354,9 @@ export class StartScene extends Scene {
         x: x + 3,
         y: y + 4,
       });
-      const face = this.add.sprite(x + 4, y + 5, dogFaceKey(gameData, id)).setOrigin(0);
-      showTag(reduced, face, dogFaceKey(gameData, id), isOwned ? "happy" : "neutral");
+      const faceKey = dogFaceKey(gameData, id);
+      const faceTag = isOwned ? "happy" : "neutral";
+      const face = addTileSprite(this, state, reduced, faceKey, faceTag, { x: x + 4, y: y + 5 });
       content.add(face);
       view.face = { object: face, y: y + 5 };
 
@@ -1307,24 +1364,26 @@ export class StartScene extends Scene {
       // The trait and the owner's temperament as icons; the info line says them in words.
       [traitIconKey(dog.trait), temperamentIconKey(dog.owner.temperament)].forEach((key, n) => {
         if (this.textures.exists(key)) {
-          content.add(this.add.image(x + 40 + n * 18, y + 13, key).setOrigin(0));
+          const iconKey = tileTextureKey(this, state, key);
+          content.add(this.add.image(x + 40 + n * 18, y + 13, iconKey).setOrigin(0));
         }
       });
-      const price = purchasePrice(gameData, owned, { dog: id, kind: "dog" });
       if (price === null) {
         const zoneFee = dogFeeText(gameData, id);
         this.text(content, x + 41, y + 29, `${zoneFee}/zone`, ink);
       } else {
-        this.priceBadge(content, x + 44, y + 28, price, 0);
+        if (!stickered({ dog: id, kind: "dog" })) {
+          this.priceBadge(content, look, { x: x + 44, y: y + 28 }, price, 0);
+        }
         if (price > save.bankCents) {
-          this.addLock(content, x + width - 19, y + 24);
+          this.addLock(content, state, x + width - 19, y + 24);
         }
       }
       this.affordFrame(view, rect, look, save, { dog: id, kind: "dog" });
     });
   }
 
-  // The gold outline on an unselected item the bank covers; ui-select wins over it.
+  // The gold outline on a normal item the bank covers.
   private affordFrame(
     view: TileView,
     rect: Rect,
@@ -1332,25 +1391,35 @@ export class StartScene extends Scene {
     save: SaveDocument,
     purchase: Purchase,
   ): void {
-    if (!look.selected && this.affordable(save, purchase)) {
+    if (look.state === "normal" && this.affordable(save, purchase)) {
       addAffordFrame(this, view.container, rect, currentSettings(this).reducedMotion);
     }
   }
 
-  private drawGear(root: GameObjects.Container, save: SaveDocument): void {
+  // Equipping a gear item replaces any other, so the gear choice is never full.
+  private drawGear(
+    root: GameObjects.Container,
+    stickered: (item: TileItem) => boolean,
+    save: SaveDocument,
+  ): void {
     const { owned } = save;
     const equipped = this.loadout.gear;
     const slots = gearSlots();
-    const full = choiceFull(equipped === null ? 0 : 1, 1);
     gearIds().forEach((id, i) => {
       const rect = itemAt(slots, i);
       const { width, x, y } = rect;
-      const isOwned = owned.gear.includes(id);
+      const price = purchasePrice(gameData, owned, { gear: id, kind: "gear" });
+      const state = tileState({
+        ...PLAIN_ITEM,
+        bank: save.bankCents,
+        picked: equipped === id,
+        price,
+      });
       const { content, look, view } = this.selectTile(root, `gear:${id}`, rect, {
+        badge: "tick",
         edge: true,
-        full,
-        rest: isOwned ? "cream" : "tan",
-        selected: equipped === id,
+        state,
+        tile: true,
       });
       fillRect(this.graphics(content), PALETTE[look.box], {
         height: 34,
@@ -1358,16 +1427,17 @@ export class StartScene extends Scene {
         x: x + 15,
         y: y + 2,
       });
-      const icon = this.addGearIcon(content, id, x + 16, y + 3, 1);
+      const icon = this.addGearIcon(content, state, id, { x: x + 16, y: y + 3 }, 1);
       if (icon !== undefined) {
         view.face = { object: icon, y: y + 3 };
       }
       // A locked item's price tag hangs over the foot of its icon.
-      const price = purchasePrice(gameData, owned, { gear: id, kind: "gear" });
       if (price !== null) {
-        this.priceBadge(content, x + width / 2, y + 28, price, 0.5);
+        if (!stickered({ gear: id, kind: "gear" })) {
+          this.priceBadge(content, look, { x: x + width / 2, y: y + 28 }, price, 0.5);
+        }
         if (price > save.bankCents) {
-          this.addLock(content, x + width - 18, y + 2);
+          this.addLock(content, state, x + width - 18, y + 2);
         }
       }
       this.affordFrame(view, rect, look, save, { gear: id, kind: "gear" });
@@ -1377,14 +1447,18 @@ export class StartScene extends Scene {
   // The item's 32x32 icon, or its initials until the icon is in the manifest.
   private addGearIcon(
     parent: GameObjects.Container,
+    state: TileState,
     gear: GearId,
-    x: number,
-    y: number,
+    at: { x: number; y: number },
     scale: number,
   ): GameObjects.Image | undefined {
+    const { x, y } = at;
     const key = gearIconKey(gear);
     if (this.textures.exists(key)) {
-      const icon = this.add.image(x, y, key).setOrigin(0).setScale(scale);
+      const icon = this.add
+        .image(x, y, tileTextureKey(this, state, key))
+        .setOrigin(0)
+        .setScale(scale);
       parent.add(icon);
       return icon;
     }
@@ -1400,26 +1474,27 @@ export class StartScene extends Scene {
     return undefined;
   }
 
-  // One portrait per preset walker: the saved one is selected and the others are a full
-  // choice's darker step.
+  // One portrait per preset walker: the saved one is selected, and picking another replaces
+  // it, so the others stay normal.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const chosen = save.walker;
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
     walkerIds().forEach((id, i) => {
       const rect = itemAt(tiles, i);
+      const state = tileState({ ...PLAIN_ITEM, picked: id === chosen });
       const { content, look, view } = this.selectTile(root, `walker:${id}`, rect, {
+        badge: "tick",
         edge: true,
-        full: choiceFull(1, 1),
-        rest: "tan",
-        selected: id === chosen,
+        state,
+        tile: true,
       });
       const portrait = gameData.walkers[id].portraitKey;
       const faceX = rect.x + (rect.width - 32) / 2;
       const faceY = rect.y + (rect.height - 32) / 2;
       if (this.textures.exists(portrait)) {
-        const face = this.add.sprite(faceX, faceY, portrait).setOrigin(0);
-        showTag(reduced, face, portrait, id === chosen ? "happy" : "neutral");
+        const faceTag = id === chosen ? "happy" : "neutral";
+        const face = addTileSprite(this, state, reduced, portrait, faceTag, { x: faceX, y: faceY });
         content.add(face);
         view.face = { object: face, y: faceY };
       } else {
@@ -1432,38 +1507,89 @@ export class StartScene extends Scene {
     });
   }
 
-  // Start walk keeps its words and place in every state. Ready, it is the raised green go
-  // button and sinks into its lip when pressed: drawn twice, raised and pressed, and the
-  // frame shows one. Not ready, it is a flat sunk slate face that never moves.
+  // The screen's one sticker over its tile's bottom-right corner: its right edge 2px past
+  // the tile's, kept 2px inside the screen, and its bottom 4px below. new pops in on the
+  // first draw of a visit, and its word is written once the pop ends; with reduced motion it
+  // shows the pop's last frame, the new look, at once.
+  private drawSticker(root: GameObjects.Container, sticker: Sticker | null): void {
+    if (sticker === null) {
+      return;
+    }
+    const { item } = sticker;
+    const rect =
+      item.kind === "dog"
+        ? dogFace(itemAt(dogTiles(), rosterOrder().indexOf(item.dog)))
+        : itemAt(gearSlots(), gearIds().indexOf(item.gear));
+    const right = Math.min(rect.x + rect.width + 2, SCREEN.width - 2);
+    const x = right - STICKER.width;
+    const y = rect.y + rect.height + 4 - STICKER.height;
+    const image = this.add
+      .sprite(x, y, STICKER.key, tagFrame(this, STICKER.key, sticker.kind))
+      .setOrigin(0);
+    root.add(image);
+    const writeWord = () => {
+      if (!image.active) {
+        return;
+      }
+      const word = sticker.kind === "new" ? "NEW!" : dollarText(sticker.price);
+      const label = this.text(root, x + STICKER.wordX, y + STICKER.wordY, word, PALETTE.ink, {
+        font: "title",
+        originX: 0.5,
+        scale: 1,
+      });
+      fitText(label, STICKER.maxWordWidth, [word, word.replace(/^\$/, "")]);
+    };
+    const pop = this.anims.get(animationKey(STICKER.key, "pop"));
+    const popping =
+      sticker.kind === "new" &&
+      !this.stickerPopped &&
+      !currentSettings(this).reducedMotion &&
+      pop !== undefined;
+    this.stickerPopped = this.stickerPopped || sticker.kind === "new";
+    if (!popping) {
+      writeWord();
+      return;
+    }
+    image.play({ key: pop.key, repeat: 0 });
+    image.once("animationcomplete", () => {
+      const settled = tagFrame(this, STICKER.key, "new");
+      if (image.active && settled !== undefined) {
+        image.setFrame(settled);
+      }
+      writeWord();
+    });
+  }
+
+  // Start walk keeps its words and place in every state. Ready, it is primary: the raised
+  // green go button, sinking into its lip when pressed, drawn twice, raised and pressed, and
+  // the frame shows one. Not ready, it is disabled: a flat sunk face that never moves.
   private drawStartButton(root: GameObjects.Container, ready: boolean): void {
     const { height, width, x, y } = START_BUTTON;
     const container = this.add.container(0, 0);
     root.add(container);
     const label = gameData.homeText.startWalk;
+    const state = buttonState({ available: ready, primary: true });
+    const disabled = state === "disabled";
     const variant = (down: boolean) => {
       const group = this.add.container(0, 0);
       container.add(group);
       const drop = down ? FEEDBACK.buttonPressPx : 0;
-      const tag = ready ? (down ? "go-pressed" : "go") : "go-disabled";
+      const tag = disabled ? "go-disabled" : down ? "go-pressed" : "go";
       const slice = addNineSlice(this, "ui-button", START_BUTTON, tag);
       if (slice !== undefined) {
         group.add(slice);
-      } else if (ready) {
+      } else if (disabled) {
+        drawDisabledButton(this.graphics(group), 4, FEEDBACK.buttonPressPx, START_BUTTON);
+      } else {
         const g = this.graphics(group);
         if (!down) {
           fillRect(g, PALETTE.forest, { height: height - 4, width, x, y: y + 4 });
         }
         fillRect(g, PALETTE.green, { height: height - 4, width, x, y: y + drop });
-      } else {
-        fillRect(this.graphics(group), PALETTE.darkSlate, {
-          height: height - 4,
-          width,
-          x,
-          y: y + FEEDBACK.buttonPressPx,
-        });
       }
-      const top = ready ? START_LABEL.readyY + drop : START_LABEL.notReadyY;
-      this.text(group, x + width / 2, y + top, label, ready ? PALETTE.ink : PALETTE.slate, {
+      const top = disabled ? START_LABEL.notReadyY : START_LABEL.readyY + drop;
+      const color = disabled ? PALETTE[DISABLED_COLORS.text] : PALETTE.ink;
+      this.text(group, x + width / 2, y + top, label, color, {
         font: "title",
         originX: 0.5,
         scale: START_LABEL.scale,

@@ -94,13 +94,12 @@ export class PauseScene extends Scene {
       originX: 0.5,
       scale: TEXT_SCALE,
     });
+    // The first entry, Resume or Keep walking, is the call to action.
     this.buttons = this.entries.map((entry, i) =>
-      addMenuButton(
-        this,
-        itemAt(layout.buttons, i),
-        withKeyNumber(i + 1, entry.label),
-        i === 0 ? "primary" : "secondary",
-      ),
+      addMenuButton(this, itemAt(layout.buttons, i), withKeyNumber(i + 1, entry.label), {
+        available: true,
+        primary: i === 0,
+      }),
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
     const note = asking ? question.body : menu.note;
@@ -135,7 +134,7 @@ export class PauseScene extends Scene {
   }
 
   private showPressed(): void {
-    this.buttons.forEach((button, i) => button.setState(i === this.pressed ? "pressed" : "normal"));
+    this.buttons.forEach((button, i) => button.setPressed(i === this.pressed));
   }
 
   // The frozen road read back from the next frame and redrawn darker. The panel drawn over

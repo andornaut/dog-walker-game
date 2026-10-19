@@ -15,9 +15,9 @@ const GATE = { height: 156, y: 40 };
 export const HOME_LAYOUT = {
   // The band's text sits on section rows 8..17, 9px in from either side.
   bandText: { inset: 9, y: 8 },
-  // The detail card that opens over the screen, in card pixels: the paper starts 6px in, the
-  // band runs across its top with the title's caps 6px below the band's top, and the well
-  // sits under the band.
+  // The detail card that opens over the screen, in card pixels: the paper starts 2px in, the
+  // band runs across its top 6px in with the title's caps 6px below the band's top, and the
+  // well sits under the band.
   card: {
     band: { height: 22, inset: 6, titleY: 6 },
     pad: 12,

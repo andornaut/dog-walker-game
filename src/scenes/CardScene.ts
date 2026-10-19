@@ -11,6 +11,8 @@ import {
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import { PLAIN_ITEM, tileState } from "../home/interaction";
+import { DISABLED_COLORS } from "../home/selection";
 import { RUN_TEXT_FIELDS } from "../hud/runText";
 import { cardNumberForKey } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
@@ -246,7 +248,7 @@ export class CardScene extends Scene {
     this.time.addEvent({
       callback: () => {
         flashes += 1;
-        badge?.setTint(flashes % 2 === 1 ? PALETTE.red : PALETTE.lightGrey);
+        badge?.setTint(flashes % 2 === 1 ? PALETTE.red : PALETTE.navy);
         if (flashes >= REFUSE.flashes) {
           this.refusing = false;
         }
@@ -336,7 +338,7 @@ export class CardScene extends Scene {
         .setOrigin(0)
         .setScale(2);
     } else {
-      fillRect(g, PALETTE.plum, { ...badge, x: x + badge.x, y: y + badge.y });
+      fillRect(g, PALETTE.cream, { ...badge, x: x + badge.x, y: y + badge.y });
     }
     const marker =
       option !== undefined && option.fires.length > 0
@@ -346,7 +348,7 @@ export class CardScene extends Scene {
       this.plaqueCenter(x + badge.x, badge.width, marker),
       y + badge.y + 9,
       this.costText(entry),
-      PALETTE.cream,
+      PALETTE.plum,
       {
         font: "title",
       },
@@ -413,7 +415,7 @@ export class CardScene extends Scene {
 
   private drawCard(view: CardView, tag: string, entry: Entry, rect: Rect): void {
     const { x, y } = rect;
-    const grey = !entry.enabled;
+    const grey = tileState({ ...PLAIN_ITEM, available: entry.enabled }) === "disabled";
     const g = this.add.graphics();
     if (this.textures.exists(CARD_FRAME_KEY)) {
       const frameName = tagFrame(this, CARD_FRAME_KEY, tag);
@@ -503,7 +505,7 @@ export class CardScene extends Scene {
       x + EFFECT.x + EFFECT.width / 2,
       effectY,
       text,
-      grey ? PALETTE.slate : PALETTE.plum,
+      grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum,
       { maxWidth: EFFECT.width / 2, scale: 2 },
     );
     // A word too long to wrap, such as a difficulty, is wider than its wrap width.
@@ -516,7 +518,7 @@ export class CardScene extends Scene {
       const key = grey ? greyTextureKey(this, COST_KEY) : COST_KEY;
       this.add.image(badge.x, badge.y, key).setOrigin(0);
     } else {
-      fillRect(g, grey ? PALETTE.navy : PALETTE.plum, badge);
+      fillRect(g, grey ? PALETTE.lightGrey : PALETTE.cream, badge);
     }
     const marker =
       fires.length > 0
@@ -527,7 +529,7 @@ export class CardScene extends Scene {
         this.plaqueCenter(badge.x, badge.width, marker),
         badge.y + 4,
         this.costText(entry),
-        grey ? PALETTE.lightGrey : PALETTE.cream,
+        grey ? PALETTE.navy : PALETTE.plum,
         { font: "title" },
       ),
     );

@@ -211,7 +211,8 @@ export class EndScene extends Scene {
       );
     }
 
-    listenButtonTap(this, addMenuButton(this, BUTTON, words.backHome), goHome);
+    const button = addMenuButton(this, BUTTON, words.backHome, { available: true, primary: true });
+    listenButtonTap(this, button, goHome);
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (isConfirmKey(event.key)) {
         goHome();
