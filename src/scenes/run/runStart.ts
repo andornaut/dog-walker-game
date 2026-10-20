@@ -5,7 +5,7 @@ import type { RunSetup } from "../../dev/runSetup";
 import { loadoutFor } from "../../dev/setupRun";
 import { type Random, randomStream } from "../../runner/random";
 import type { Loadout } from "../../state/runState";
-import { profileSave, runLoadout, walkerSpriteKey } from "../profileStore";
+import { profileSave, runLoadout, walkerInUse, walkerSpriteKey } from "../profileStore";
 
 // The streams only the run's views draw from, each named from the setup's seed beside the
 // session's own (runStreams).
@@ -38,7 +38,7 @@ export function pickedLoadout(
       throw error;
     }
     const dogs = [first, ...rest.slice(0, 2)] as unknown as Loadout["dogs"];
-    const fallback = { dogs, gear: null, walker: profileSave(scene).walker };
+    const fallback = { dogs, gear: null, walker: walkerInUse(profileSave(scene)) };
     const loadout = loadoutFor(fallback, setup as Parameters<typeof loadoutFor>[1]);
     return {
       dogSlots: dogs.length,

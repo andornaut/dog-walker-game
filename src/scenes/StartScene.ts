@@ -588,7 +588,9 @@ export class StartScene extends Scene {
       return { kind: "focus", text: gearInfo(gameData, owned, bankCents, target.gear) };
     }
     if (target?.kind === "walker") {
-      return { kind: "focus", text: tapWalker(gameData, owned, target.walker).text };
+      // With none picked, a tap never drops, so the focus always has words.
+      const tap = tapWalker(gameData, owned, null, target.walker);
+      return tap.kind === "drop" ? { kind: "none" } : { kind: "focus", text: tap.text };
     }
     return { kind: "none" };
   }
@@ -739,16 +741,20 @@ export class StartScene extends Scene {
       case "walker": {
         // A locked walker shakes and says its goal; nothing else changes. An owned one is
         // picked and says its pace and style.
-        const tap = tapWalker(gameData, this.save().owned, target.walker);
+        const save = this.save();
+        const tap = tapWalker(gameData, save.owned, save.walker, target.walker);
         if (tap.kind === "locked") {
           this.shakes.set(id, now);
           this.action = { kind: "notice", text: tap.text };
           this.render();
           return;
         }
-        this.pops.set(id, now);
-        this.action = { kind: "notice", text: tap.text };
-        void updateProfile(this, (save) => ({ ...save, walker: target.walker }));
+        const walker = tap.kind === "pick" ? tap.walker : null;
+        if (tap.kind === "pick") {
+          this.pops.set(id, now);
+        }
+        this.action = tap.kind === "pick" ? { kind: "notice", text: tap.text } : { kind: "none" };
+        void updateProfile(this, (current) => ({ ...current, walker }));
         this.render();
         return;
       }
@@ -825,13 +831,14 @@ export class StartScene extends Scene {
   private startWalk(): void {
     const save = this.save();
     const dogs = packOf(this.loadout);
-    if (dogs === undefined || !startReady(this.sections(save))) {
+    const { walker } = save;
+    if (dogs === undefined || walker === null || !startReady(this.sections(save))) {
       this.shakes.set("start", this.time.now);
       return;
     }
     const data: RunSceneData = {
-      loadout: { dogs, gear: this.loadout.gear, walker: save.walker },
-      walkerSprite: walkerSpriteKey(this, save.walker),
+      loadout: { dogs, gear: this.loadout.gear, walker },
+      walkerSprite: walkerSpriteKey(this, walker),
     };
     const go = () => {
       startWakeLock();
@@ -1262,7 +1269,7 @@ export class StartScene extends Scene {
     const { footY, x } = WALKER_AT_GATE;
     const reduced = currentSettings(this).reducedMotion;
     this.drawPorch(root, g, save, reduced);
-    const walkerKey = walkerSpriteKey(this, save.walker);
+    const walkerKey = save.walker === null ? undefined : walkerSpriteKey(this, save.walker);
     const placements = GATE_SPOTS.slice(0, this.loadout.dogs.length);
     const groundColor = (atX: number) =>
       atX >= PATH.x && atX < PATH.x + PATH.width ? PALETTE.brown : PALETTE.darkGreen;
@@ -1273,7 +1280,9 @@ export class StartScene extends Scene {
     for (const { dx, footY: dogFoot, key } of dogs) {
       drawShadow(g, groundColor(x + dx), x + dx, dogFoot, spriteMetrics(key).opaqueWidth);
     }
-    drawShadow(g, groundColor(x), x, footY, spriteMetrics(walkerKey).opaqueWidth);
+    if (walkerKey !== undefined) {
+      drawShadow(g, groundColor(x), x, footY, spriteMetrics(walkerKey).opaqueWidth);
+    }
     const now = this.time.now;
     for (const { dog, dx, footY: dogFoot, key } of dogs) {
       const sprite = addStandingSprite(this, key, x + dx, dogFoot);
@@ -1286,9 +1295,11 @@ export class StartScene extends Scene {
         this.addBurst("fx-dust", x + dx, dogFoot - 6);
       }
     }
-    const walker = addStandingSprite(this, walkerKey, x, footY);
-    showTag(reduced, walker, walkerKey, "walk");
-    root.add(walker);
+    if (walkerKey !== undefined) {
+      const walker = addStandingSprite(this, walkerKey, x, footY);
+      showTag(reduced, walker, walkerKey, "walk");
+      root.add(walker);
+    }
 
     const leash = this.graphics(root);
     dogs.forEach(({ dx, footY: dogFoot }, i) => {
@@ -1302,7 +1313,12 @@ export class StartScene extends Scene {
     });
 
     const state = { action: this.action, loadout: this.loadout };
-    const speech = bubbleSpeech(gameData.homeText, this.walkerLine, state, this.quips);
+    const speech = bubbleSpeech(
+      gameData.homeText,
+      save.walker === null ? "noWalker" : this.walkerLine,
+      state,
+      this.quips,
+    );
     const unsaved = storageState(this) === "unavailable" ? [gameData.homeText.unsaved] : [];
     const lines = [...unsaved, ...speech]
       .flatMap((part) => wrapWords(SPEECH_CHARS, part))

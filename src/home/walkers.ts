@@ -2,6 +2,7 @@ import type { GameData, WalkerId } from "../data/types";
 import { cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveDocument } from "../save/schema";
+import { togglePick } from "./home";
 import { homeLine } from "./homeText";
 import { type ItemTile, itemTile } from "./interaction";
 
@@ -49,19 +50,25 @@ export function walkerInfo(data: WalkerText, walker: WalkerId): string {
   });
 }
 
-// A tap on a walker's tile picks an owned walker, saying its pace and style, or says what
-// unlocks one not owned.
+// A tap on a walker's tile picks an owned walker, saying its pace and style, drops the one
+// picked, or says what unlocks one not owned. It toggles as a dog does, in a pick of one.
 export type WalkerTap =
-  | { readonly kind: "pick"; readonly text: string }
-  | { readonly kind: "locked"; readonly text: string };
+  | { readonly kind: "drop" }
+  | { readonly kind: "locked"; readonly text: string }
+  | { readonly kind: "pick"; readonly text: string; readonly walker: WalkerId };
 
 export function tapWalker(
   data: WalkerText,
   owned: Pick<Owned, "walkers">,
+  picked: WalkerId | null,
   walker: WalkerId,
 ): WalkerTap {
   if (owned.walkers.includes(walker)) {
-    return { kind: "pick", text: walkerInfo(data, walker) };
+    const toggled = togglePick(1, picked === null ? [] : [picked], walker);
+    const next = toggled.kind === "picked" ? toggled.picked[0] : undefined;
+    return next === undefined
+      ? { kind: "drop" }
+      : { kind: "pick", text: walkerInfo(data, next), walker: next };
   }
   const text = homeLine(data.homeText, "walkerLocked", {
     walker: data.walkers[walker].name,

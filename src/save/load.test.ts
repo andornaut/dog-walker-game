@@ -224,6 +224,14 @@ describe("loadSave", () => {
       "casey",
     ],
     [
+      "keeping an unset walker unset",
+      (document) => {
+        document.walker = null;
+      },
+      (save) => save.walker,
+      null,
+    ],
+    [
       "without stats for unknown dogs, keeping the total firings",
       (document) => {
         document.stats.dogs.ghost = { timesFired: 2, walks: 3, zonesFinished: 4 };

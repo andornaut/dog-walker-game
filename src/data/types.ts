@@ -572,6 +572,7 @@ export interface HomeText {
     readonly newAffordable: string;
     // After a walk that unlocked a walker.
     readonly newWalker: string;
+    readonly noWalker: string;
   };
   // A held dog or gear tile's detail card: the dog's rows, the gear card's subtitle and
   // status, and the price status of anything not owned yet.

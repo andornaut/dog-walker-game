@@ -11,6 +11,7 @@ export const HOME_TEXT = {
     howTo: "Tap to pick, hold for details.",
     newAffordable: "Something new at the pet shop.",
     newWalker: "New walker!",
+    noWalker: "Who's walking? Tap a face.",
   },
   detail: {
     dogFee: "Fee {fee}/zone",

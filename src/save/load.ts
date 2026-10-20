@@ -191,7 +191,12 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
     },
-    walker: isKnown(new Set(owned.walkers), save.walker) ? save.walker : defaults.walker,
+    walker:
+      save.walker === null
+        ? null
+        : isKnown(new Set(owned.walkers), save.walker)
+          ? save.walker
+          : defaults.walker,
   };
 }
 

@@ -43,6 +43,23 @@ export function packCapacity(
   return Math.min(owned.dogSlots, read(data.tuning, "counts", "packSizeMax"));
 }
 
+// A tap on an id in a pick of at most capacity: a picked id is dropped, a free slot takes it
+// in order, a full one-slot pick swaps it in, and a fuller pick refuses it. Dogs, the Pocket's
+// gear and walkers share this, so their taps stay alike.
+export function togglePick<T>(
+  capacity: number,
+  picked: readonly T[],
+  id: T,
+): { readonly kind: "full" } | { readonly kind: "picked"; readonly picked: readonly T[] } {
+  if (picked.includes(id)) {
+    return { kind: "picked", picked: picked.filter((other) => other !== id) };
+  }
+  if (picked.length < capacity) {
+    return { kind: "picked", picked: [...picked, id] };
+  }
+  return capacity === 1 ? { kind: "picked", picked: [id] } : { kind: "full" };
+}
+
 // An owned dog joins the pack, or leaves it if already picked. A full one-slot pack swaps
 // its dog for this one; a fuller pack refuses it. A dog not owned yet opens the shop on it.
 export function tapDog(
@@ -54,19 +71,10 @@ export function tapDog(
   if (!owned.dogs.includes(dog)) {
     return { kind: "shop", purchase: { dog, kind: "dog" } };
   }
-  if (loadout.dogs.includes(dog)) {
-    return {
-      kind: "loadout",
-      loadout: { ...loadout, dogs: loadout.dogs.filter((id) => id !== dog) },
-    };
-  }
-  const capacity = packCapacity(data, owned);
-  if (loadout.dogs.length < capacity) {
-    return { kind: "loadout", loadout: { ...loadout, dogs: [...loadout.dogs, dog] } };
-  }
-  return capacity === 1
-    ? { kind: "loadout", loadout: { ...loadout, dogs: [dog] } }
-    : { kind: "full" };
+  const toggled = togglePick(packCapacity(data, owned), loadout.dogs, dog);
+  return toggled.kind === "full"
+    ? { kind: "full" }
+    : { kind: "loadout", loadout: { ...loadout, dogs: toggled.picked } };
 }
 
 // Owned gear goes in the Pocket, replacing any other, or comes out if already in it. Gear
@@ -75,7 +83,11 @@ export function tapGear(owned: Owned, gear: GearId, loadout: HomeLoadout): HomeT
   if (!owned.gear.includes(gear)) {
     return { kind: "shop", purchase: { gear, kind: "gear" } };
   }
-  return { kind: "loadout", loadout: { ...loadout, gear: loadout.gear === gear ? null : gear } };
+  const toggled = togglePick(1, loadout.gear === null ? [] : [loadout.gear], gear);
+  return {
+    kind: "loadout",
+    loadout: { ...loadout, gear: toggled.kind === "picked" ? (toggled.picked[0] ?? null) : null },
+  };
 }
 
 // What a purchase costs, or null when it is not for sale: already owned, or no slot left.

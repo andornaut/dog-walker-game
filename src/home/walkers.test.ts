@@ -46,11 +46,11 @@ describe("walkerInfo", () => {
 
 describe("tapWalker", () => {
   it.each<[WalkerId, WalkerTap]>([
-    ["ben", { kind: "pick", text: "Ben: slow, hustler." }],
-    ["casey", { kind: "pick", text: "Casey: slow, charmer." }],
+    ["ben", { kind: "drop" }],
+    ["casey", { kind: "pick", text: "Casey: slow, charmer.", walker: "casey" }],
     ["ada", { kind: "locked", text: "Finish zone 2 to unlock Ada." }],
     ["trista", { kind: "locked", text: "Finish zone 3 to unlock Trista." }],
   ])("on %s gives %o", (walker, tap) => {
-    expect(tapWalker(gameData, save.owned, walker)).toEqual(tap);
+    expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap);
   });
 });

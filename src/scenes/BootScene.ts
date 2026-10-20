@@ -40,6 +40,7 @@ import {
   openProfile,
   profileSave,
   setRunOverride,
+  walkerInUse,
   walkerSpriteKey,
 } from "./profileStore";
 import type { RunSceneData } from "./RunScene";
@@ -231,7 +232,8 @@ export class BootScene extends Scene {
       this.scene.start(SCENE_KEYS.start);
       return;
     }
-    const { lastLoadout, owned, walker } = profileSave(this);
+    const { lastLoadout, owned } = profileSave(this);
+    const walker = walkerInUse(profileSave(this));
     const loadout = devRunLoadout(lastLoadout, walker, itemAt(owned.dogs, 0), pageRunSetup().setup);
     setRunOverride(this, loadout);
     const data: RunSceneData = { loadout, walkerSprite: walkerSpriteKey(this, walker) };

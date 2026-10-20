@@ -140,8 +140,8 @@ export const saveSchema = v.object({
   shownHints: ids,
   stats: statsSchema,
   version: v.literal(SAVE_VERSION),
-  // The walker in use, one of owned.walkers.
-  walker: contentId,
+  // The walker in use, one of owned.walkers; null once the player drops it on the home screen.
+  walker: v.nullable(contentId),
 });
 
 // The document as stored: ids are any non-empty string.
@@ -211,7 +211,7 @@ export interface SaveDocument extends Omit<
   owned: Owned;
   shownHints: HintId[];
   stats: SaveStats;
-  walker: WalkerId;
+  walker: WalkerId | null;
 }
 
 // What a new player starts with. The free dogs and walkers stay owned on every load, and

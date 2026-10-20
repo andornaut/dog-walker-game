@@ -32,7 +32,13 @@ import { drawPixelLine, drawShadow, fillRect } from "./draw";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, fitPixelText } from "./pixelText";
-import { currentSettings, lastRunEnd, profileSave, walkerSpriteKey } from "./profileStore";
+import {
+  currentSettings,
+  lastRunEnd,
+  profileSave,
+  walkerInUse,
+  walkerSpriteKey,
+} from "./profileStore";
 import { SCENE_KEYS } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { addStandingSprite, firstTag, spriteMetrics } from "./sprites";
@@ -245,7 +251,7 @@ export class EndScene extends Scene {
     const shadows = this.add.graphics();
     const leashes = this.add.graphics();
     pack.add(shadows);
-    const walkerKey = walkerSpriteKey(this, profileSave(this).walker);
+    const walkerKey = walkerSpriteKey(this, walkerInUse(profileSave(this)));
     const { walker: walkerAt } = scene;
     const onPath = (x: number) => x >= scene.path.x && x < scene.path.x + scene.path.width;
     const sprites: { key: string; sprite: GameObjects.Sprite }[] = dogs.map((dog, i) => {

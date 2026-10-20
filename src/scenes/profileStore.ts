@@ -160,6 +160,12 @@ export function finishRun(
   return session(scene).finishRun(result, changes);
 }
 
+// The walker a walk uses: the one picked, or the default while none is, as after a dev link
+// starts a run.
+export function walkerInUse(save: Pick<SaveDocument, "walker">): WalkerId {
+  return save.walker ?? gameData.defaultWalker;
+}
+
 // The walker's road sprite, or the default walker's while its own is not loaded.
 export function walkerSpriteKey(scene: Scene, walker: WalkerId): string {
   const own = gameData.walkers[walker].spriteKey;
@@ -189,7 +195,8 @@ function runOverride(scene: Scene): Loadout | null {
 // link's loadout with the slots it needs. Throws with no dog picked; the home screen starts
 // a walk only once one is.
 export function runLoadout(scene: Scene): RunLoadout {
-  const { lastLoadout, owned, walker } = session(scene).save;
+  const { lastLoadout, owned } = session(scene).save;
+  const walker = walkerInUse(session(scene).save);
   const override = runOverride(scene);
   const dogs = override?.dogs ?? packOf(lastLoadout);
   if (dogs === undefined) {
