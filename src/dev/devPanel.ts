@@ -29,6 +29,8 @@ import { NO_GEAR, randomSeed, type RunSetup, runSetupLink } from "./runSetup";
 export interface DevPanelHost {
   // The running scene's setup once it reports one, else the URL's.
   currentSetup(): RunSetup;
+  // Clears every dev override and turns dev mode off, on the current screen.
+  disable(): void;
   overlayVisible(): boolean;
   roadFade(): boolean;
   setOverlayVisible(visible: boolean): void;
@@ -520,7 +522,10 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       "header",
       { className: "dev-header" },
       el("strong", { textContent: "Dev" }),
-      button("Close", () => setOpen(false)),
+      button("Disable", () => {
+        host.disable();
+        container.hidden = true;
+      }),
     ),
     runSection(),
     overlay.element,

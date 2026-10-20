@@ -96,7 +96,7 @@
 
 ## Dev tools
 
-`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A renamed dog id is warned about and replaced by its new one, in a URL and in a replayed log's setup. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual.
+`/play/` reads a run setup from the URL. Invalid values are warned about and ignored. A renamed dog id is warned about and replaced by its new one, in a URL and in a replayed log's setup. A URL with any run parameter (all but `dev` and `route`) skips the home screen and starts the walk; the setup's pack and gear replace the saved loadout for that walk without changing it, and the result is banked as usual. The overrides (every parameter but `dev`) apply only to the walk they start: reaching the home screen removes them from the URL (`history.replaceState`, keeping the path and other parameters) and from the page's setup, so the start screen's picks decide every later walk.
 
 | Param    | Value                           | Default         |
 | -------- | ------------------------------- | --------------- |
@@ -114,7 +114,7 @@
 - One seed feeds independent random streams: `spawns-<zone>`, `cards`, `forks`, `needs`, `quips` and `scenery`, where `<zone>` is the position in the walk. `cards` also draws for an instant find's effects. Area effects draw nothing: each catches by size. Pulls draw nothing: each follows from the road. `needs` draws whether a need met opens its payoff card, so the input log needs nothing for either.
 - Lane moves, treats, card choices (a fork's path among them) and heading home are recorded with their simulation step's time in a versioned input log that replays the run exactly. The log's setup names the pack, gear and walker walked, and a later start's route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and plays a log found under `dog-walker-game:dev-replay`.
 - The overlay (backquote) shows the seed, zone, distance, speed, money, hearts and FPS; C copies a link that reproduces the run. Its zone clock (`src/dev/zoneClock.ts`) splits the current zone's wall-clock time into road time (simulated, the road moving), held time (hit stops and firings in simulated time, cards and the pause menu in wall-clock time) and lag (the rest: the loop behind real time), beside the road time the whole zone takes, and keeps the last zone's totals.
-- The dev panel is a collapsible HTML bar under the canvas. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, the far-road fade toggle (off by default), run link, replay, and save tools (reset, +$1,000, unlock all).
+- The dev panel is a collapsible HTML bar under the canvas. Its Disable button clears every override, removes `dev` and the run parameters from the URL, hides the overlay and the panel, and leaves the player on the current screen; the backquote key still toggles the overlay. Opened, its sheet sits below the game at the game's full size and the page scrolls to it. It has the run-setup form, overlay toggle, the far-road fade toggle (off by default), run link, replay, and save tools (reset, +$1,000, unlock all).
 
 ## Open questions
 

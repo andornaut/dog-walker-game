@@ -12,7 +12,7 @@ import {
   type DevState,
 } from "./dev/devOverlay";
 import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
-import { pageRunSetup } from "./dev/pageRunSetup";
+import { disableDevMode, pageRunSetup } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
 import { noteWalkStarted, setOnHomeScreen, setupPhoneApp } from "./pwa";
@@ -55,6 +55,12 @@ function devPanelHost(game: Game): DevPanelHost {
   });
   return {
     currentSetup: () => devState?.setup ?? pageRunSetup().setup,
+    disable: () => {
+      disableDevMode();
+      devState = undefined;
+      game.events.emit(DEV_OVERLAY_TOGGLE_EVENT, false);
+      Reflect.deleteProperty(globalThis, "dogWalkerGame");
+    },
     // Unset until the overlay scene has run create, which shows it when the URL has dev=1.
     overlayVisible: () =>
       (game.registry.get(DEV_OVERLAY_VISIBLE_KEY) as boolean | undefined) ??

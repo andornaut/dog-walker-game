@@ -1,6 +1,7 @@
 import { gameData } from "../data";
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { walkLength } from "../rules/route";
+import { homeRunSetup, stripDevParams } from "./devStart";
 import { type ParsedRunSetup, parseRunSetup, randomSeed, type RunSetupLimits } from "./runSetup";
 
 // The most dogs a pack holds, as PackDogs allows.
@@ -43,4 +44,29 @@ export function pageRunSetup(): ParsedRunSetup<DogId, GearId, WalkerId> {
     );
   }
   return parsed;
+}
+
+function forgetOverrides(disableDev: boolean): void {
+  const current = pageRunSetup();
+  parsed = {
+    notices: [],
+    setup: homeRunSetup(current.setup, randomSeed(), disableDev),
+    warnings: [],
+  };
+  const href = globalThis.location.href;
+  const stripped = stripDevParams(href, disableDev);
+  if (stripped !== href) {
+    globalThis.history.replaceState(globalThis.history.state, "", stripped);
+  }
+}
+
+// Called when the player is home: the URL's run overrides applied to the walk they started, so
+// they leave the URL and the page's setup, and the start screen's picks decide the next walk.
+export function clearRunOverrides(): void {
+  forgetOverrides(false);
+}
+
+// Turns dev mode off: the overrides and `dev` leave the URL and the page's setup.
+export function disableDevMode(): void {
+  forgetOverrides(true);
 }

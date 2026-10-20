@@ -7,6 +7,7 @@ import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
+import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
 import { bubbleRect } from "../home/bubbleRect";
@@ -422,6 +423,7 @@ export class StartScene extends Scene {
     );
     stopWakeLock();
     setRunOverride(this, null);
+    clearRunOverrides();
 
     this.drawGate();
     this.root = this.add.container(0, 0);
