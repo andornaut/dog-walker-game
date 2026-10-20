@@ -13,10 +13,10 @@ const TITLE_Y = 16;
 const BUTTON = { gap: 8, height: 40, width: 200, x: 16, y: 40 };
 // The note plate is as wide as the buttons.
 export const PAUSE_NOTE_WIDTH = BUTTON.width;
-// The note is 2x body text wrapped to the plate's width less padX each side, its first line's
-// capitals pad under the plate's top, a line every linePitch, and the last line's 10-row
+// The note is body text at scale, wrapped to the plate's width less padX each side, its first
+// line's capitals pad under the plate's top, a line every linePitch, and the last line's 10-row
 // capitals and 4-row descenders pad over its bottom.
-export const NOTE_PLATE = { gap: 4, linePitch: 20, pad: 4, padX: 4 } as const;
+export const NOTE_PLATE = { gap: 4, linePitch: 20, pad: 4, padX: 4, scale: 2 } as const;
 
 function notePlateHeight(lines: number): number {
   const { linePitch, pad } = NOTE_PLATE;
@@ -87,8 +87,19 @@ export function pauseMenuLayout(
   return panelLayout(road, parts, false);
 }
 
-// The Home button's question: the title, the note plate saying what is kept, then the
-// answers.
+// The capitals' top of each part of a note drawn in parts down its plate, one under another,
+// each part lineCounts[i] lines long.
+export function notePartTops(plate: Rect, lineCounts: readonly number[]): number[] {
+  let lines = 0;
+  return lineCounts.map((count) => {
+    const top = plate.y + NOTE_PLATE.pad + lines * NOTE_PLATE.linePitch;
+    lines += count;
+    return top;
+  });
+}
+
+// The Home button's question: the title, the note plate saying what going home keeps and gives
+// up, then the answers.
 export function homeQuestionLayout(
   road: Rect,
   parts: { buttonCount: number; noteLines: number },

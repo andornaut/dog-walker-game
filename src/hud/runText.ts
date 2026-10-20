@@ -10,6 +10,11 @@ export const RUN_TEXT_FIELDS = {
     quirkNoLoss: ["quirk"],
   },
   firedBy: ["owner"],
+  homeQuestion: {
+    keep: ["money"],
+    lose: ["fees", "zone"],
+    zonesLeft: ["count"],
+  },
   newWalker: {
     info: ["pace", "style"],
     subtitle: ["walker"],

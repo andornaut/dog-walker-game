@@ -1,7 +1,8 @@
 import type { Scene } from "phaser";
 
 import type { ZoneId } from "../../data/types";
-import type { RunPause } from "../../hud/topBar";
+import type { HomeNoteLine } from "../../hud/homeQuestion";
+import { playerPaused, type RunPause } from "../../hud/topBar";
 import type { CardView, Choice } from "../../rules/choices";
 import type { CardSceneData } from "../CardScene";
 import { openOverlay } from "../overlay";
@@ -15,19 +16,30 @@ export interface MenuFlowHost {
   dropPress: () => void;
   // Heads home from the pause menu, once it has closed.
   headHome: () => void;
+  // What the Home question says going home now keeps and gives up.
+  homeNote: () => readonly HomeNoteLine[];
   // Whether the walk is over or not yet started, when the menu stays shut.
   over: () => boolean;
 }
 
-// The scenes that hold the walk over the run scene: a card, the zone celebration, and the
-// pause menu or the Home button's question.
+// Everything that pauses the walk but the hit stop, which the session holds.
+export type MenuPause = Omit<RunPause, "hitStop">;
+
+// What pauses the walk over the run scene: a card, the zone celebration, the pause menu or the
+// Home button's question, the state strip's bubble, and the page out of view or focus. pause()
+// reports all of them, and walkPaused decides from it, so each new one pauses the walk.
 export class MenuFlow {
+  private blurred = false;
   private cardView: CardView | undefined;
   private celebrating = false;
+  // Whether the player's pause holds the run scene's tweens and timers and ducks the music.
+  private held = false;
+  private hidden = false;
   private readonly host: MenuFlowHost;
   private pauseMode: PauseSceneData["mode"] = "menu";
   private pauseOpen = false;
   private readonly scene: Scene;
+  private stripBubble = false;
 
   constructor(scene: Scene, host: MenuFlowHost) {
     this.scene = scene;
@@ -39,8 +51,13 @@ export class MenuFlow {
     return this.cardView;
   }
 
-  paused(): boolean {
-    return this.pauseOpen;
+  pause(): MenuPause {
+    return {
+      card: this.cardView !== undefined || this.celebrating,
+      menu: this.menuState(),
+      page: this.hidden ? "hidden" : this.blurred ? "blurred" : "shown",
+      stripBubble: this.stripBubble,
+    };
   }
 
   // Whether the zone celebration holds the walk: from the zone's end, while its fee coins fly,
@@ -71,9 +88,7 @@ export class MenuFlow {
   }
 
   showCard(zone: ZoneId, view: CardView, onChoose: (choice: Choice) => void): void {
-    const sound = soundboardOf(this.scene);
-    sound.play("cardOpen");
-    sound.setCardOpen(true);
+    soundboardOf(this.scene).play("cardOpen");
     const data: CardSceneData = { onChoose, view, zone };
     this.scene.scene.launch(SCENE_KEYS.card, data);
   }
@@ -81,7 +96,22 @@ export class MenuFlow {
   closeCard(): void {
     this.cardView = undefined;
     this.scene.scene.stop(SCENE_KEYS.card);
-    soundboardOf(this.scene).setCardOpen(false);
+  }
+
+  // The state strip's bubble opened or closed; it pauses the walk while open.
+  setStripBubble(open: boolean): void {
+    this.stripBubble = open;
+    this.hold();
+  }
+
+  // The tab hid or showed again.
+  setPageHidden(hidden: boolean): void {
+    this.hidden = hidden;
+  }
+
+  // The window lost focus or got it back.
+  setPageBlurred(blurred: boolean): void {
+    this.blurred = blurred;
   }
 
   menuState(): RunPause["menu"] {
@@ -118,9 +148,7 @@ export class MenuFlow {
     this.pauseOpen = true;
     this.pauseMode = mode;
     this.host.dropPress();
-    soundboardOf(scene).setPaused(true);
-    scene.tweens.pauseAll();
-    scene.time.paused = true;
+    this.hold();
     if (this.cardView !== undefined) {
       scene.scene.pause(SCENE_KEYS.card);
       scene.scene.setVisible(false, SCENE_KEYS.card);
@@ -138,9 +166,7 @@ export class MenuFlow {
     const { scene } = this;
     scene.scene.stop(SCENE_KEYS.pause);
     this.pauseOpen = false;
-    soundboardOf(scene).setPaused(false);
-    scene.tweens.resumeAll();
-    scene.time.paused = false;
+    this.hold();
     if (this.cardView !== undefined) {
       scene.scene.setVisible(true, SCENE_KEYS.card);
       scene.scene.resume(SCENE_KEYS.card);
@@ -150,14 +176,34 @@ export class MenuFlow {
     }
   }
 
+  // Stops or restarts the run scene's tweens and timers, and ducks or restores the music, as
+  // the player's pause starts or ends.
+  private hold(): void {
+    const held = playerPaused(this.pause());
+    if (held === this.held) {
+      return;
+    }
+    this.held = held;
+    const { scene } = this;
+    soundboardOf(scene).setPaused(held);
+    if (held) {
+      scene.tweens.pauseAll();
+    } else {
+      scene.tweens.resumeAll();
+    }
+    scene.time.paused = held;
+  }
+
   private pauseData(): PauseSceneData {
-    return {
-      mode: this.pauseMode,
+    const answers = {
       onHeadHome: () => {
         this.closePause();
         this.host.headHome();
       },
       onResume: () => this.closePause(),
     };
+    return this.pauseMode === "homeQuestion"
+      ? { ...answers, mode: "homeQuestion", note: this.host.homeNote() }
+      : { ...answers, mode: "menu" };
   }
 }

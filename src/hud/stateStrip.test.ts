@@ -165,11 +165,18 @@ describe("stripIconKey", () => {
 });
 
 describe("stripTapAllowed", () => {
-  const pause: RunPause = { card: false, hitStop: false, menu: "closed" };
+  const pause: RunPause = {
+    card: false,
+    hitStop: false,
+    menu: "closed",
+    page: "shown",
+    stripBubble: false,
+  };
 
   it.each<[string, RunPause, boolean]>([
     ["takes taps while walking", pause, true],
     ["takes taps in a hit stop", { ...pause, hitStop: true }, true],
+    ["takes the tap that closes its open bubble", { ...pause, stripBubble: true }, true],
     ["leaves taps to a card, which dims the band", { ...pause, card: true }, false],
     ["leaves taps to the pause menu", { ...pause, menu: "open" }, false],
     ["leaves taps to the Home question", { ...pause, menu: "confirmHome" }, false],

@@ -98,10 +98,6 @@ export class Soundboard {
     this.updateMix({ paused });
   }
 
-  setCardOpen(cardOpen: boolean): void {
-    this.updateMix({ cardOpen });
-  }
-
   private updateMix(change: Partial<Mix>): void {
     this.guard("update the mix", () => {
       this.mix = { ...this.mix, ...change };

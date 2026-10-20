@@ -95,13 +95,30 @@ export function topBarButtonForKey(repeat: boolean, key: string): TopBarPress | 
   return isPauseKey(key) ? "pause" : undefined;
 }
 
-// What holds the walk still. A card or the hit stop can sit under the pause menu or the
-// Home button's question. Help and settings, opened from the menu, cover the whole screen,
-// top bar included.
+// What holds the walk still. card: a card or the zone celebration, which can sit under the
+// pause menu or the Home button's question, as the hit stop can. Help and settings, opened from
+// the menu, cover the whole screen, top bar included. stripBubble: the state strip's bubble is
+// open. page: the tab is hidden or the window has lost focus.
 export interface RunPause {
   card: boolean;
   hitStop: boolean;
   menu: "closed" | "confirmHome" | "help" | "open" | "settings";
+  page: "blurred" | "hidden" | "shown";
+  stripBubble: boolean;
+}
+
+// Whether the walk is paused: no scroll, timers, needs or pulls, and the session does not step.
+// Every overlay over the walk, and the page out of view or focus, pauses it. A hit stop is part
+// of the walk and steps on.
+export function walkPaused(pause: Omit<RunPause, "hitStop">): boolean {
+  return pause.card || pause.menu !== "closed" || pause.stripBubble || pause.page !== "shown";
+}
+
+// Whether the player paused the walk: the pause menu and what opens from it, the Home question,
+// or the strip's bubble. The music ducks and the walk's timers stop; a card or the celebration
+// pauses the walk without either.
+export function playerPaused(pause: Pick<RunPause, "menu" | "stripBubble">): boolean {
+  return pause.menu !== "closed" || pause.stripBubble;
 }
 
 // A card or a menu over the walk takes every press. A hit stop covers nothing.
@@ -109,9 +126,15 @@ export function walkCovered(pause: RunPause): boolean {
   return pause.card || pause.menu !== "closed";
 }
 
-// Lane moves and treats act only while nothing holds the walk.
+// Whether the walk drops its presses: under a card or a menu, and while the strip's bubble is
+// open, whose closing tap never moves the pack.
+export function pressesHeld(pause: RunPause): boolean {
+  return walkCovered(pause) || pause.stripBubble;
+}
+
+// Lane moves and treats act only while nothing pauses the walk or holds it in a hit stop.
 export function gameplayAllowed(pause: RunPause): boolean {
-  return !walkCovered(pause) && !pause.hitStop;
+  return !walkPaused(pause) && !pause.hitStop;
 }
 
 export type TopBarAction = "confirmHome" | "mute" | "openMenu" | "resume";

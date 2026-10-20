@@ -7,7 +7,8 @@ import type { RunSetup } from "../dev/runSetup";
 import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
 import { cardHintTriggers } from "../hud/hintTriggers";
-import type { RunPause } from "../hud/topBar";
+import { homeQuestionNote } from "../hud/homeQuestion";
+import { type RunPause, walkPaused } from "../hud/topBar";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { type CardView, type Choice, quirkActorsOf } from "../rules/choices";
@@ -37,6 +38,7 @@ import { activeStatuses, shownStatus, type StatusMark } from "../runner/statuses
 import { startRoad, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
+import { onWindowEvent } from "./overlay";
 import { colorFromHex } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
 import {
@@ -52,7 +54,7 @@ import { AccidentSpots } from "./run/accidentSpots";
 import { BackdropView } from "./run/backdropView";
 import { ForcedStopView } from "./run/forcedStopView";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
-import { MenuFlow } from "./run/menuFlow";
+import { MenuFlow, type MenuPause } from "./run/menuFlow";
 import { PackView } from "./run/packView";
 import { ZoneBanner, zoneBannerMs } from "./run/roadBanners";
 import { RoadArt, RoadView } from "./run/roadView";
@@ -87,6 +89,9 @@ export interface RunHudView {
 const STEP_MS = STEP_SECONDS * 1000;
 const STEPPING: FixedStepLimits = { maxFrameMs: 1000, stepMs: STEP_MS };
 
+// Before the walk's menus exist, nothing is open over it.
+const NO_MENU_PAUSE: MenuPause = { card: false, menu: "closed", page: "shown", stripBubble: false };
+
 // The zone celebration due once a zone's fee coins have landed, delayMs from its end.
 interface Celebration {
   celebration: ZoneCelebration;
@@ -113,8 +118,8 @@ interface RunWorld {
 }
 
 // The walk: backdrop, road, walker, pack and everything spawned on the road. The session steps
-// at a fixed rate and stops while a card or the pause menu is up; the scene draws it, feeds it
-// input and plays its events.
+// at a fixed rate and stops while walkPaused says so; the scene draws it, feeds it input and
+// plays its events.
 export class RunScene extends Scene {
   private readonly roadArt = new RoadArt(this);
   private session: Session | undefined;
@@ -165,7 +170,6 @@ export class RunScene extends Scene {
 
     this.scene.launch(SCENE_KEYS.hud);
     sound.setPaused(false);
-    sound.setCardOpen(false);
     sound.startMusic();
     startWakeLock();
     this.world.banner.show(this.session.walk.run, this.reducedMotion());
@@ -228,6 +232,8 @@ export class RunScene extends Scene {
             this.apply(headHomeSession(this.session));
           }
         },
+        homeNote: () =>
+          this.session === undefined ? [] : homeQuestionNote(gameData, this.session.walk.run),
         over: () => this.session === undefined || this.session.walk.run.phase.kind === "ended",
       }),
       moments: new RunMoments(this, { pack, quips: random.quips, spots, still }),
@@ -239,28 +245,33 @@ export class RunScene extends Scene {
     };
   }
 
+  // A hidden tab or a window out of focus pauses the walk under the pause menu, which stays
+  // when the page comes back, so the walk resumes only on Resume.
   private listen(): void {
     const onBack = () => this.openPause();
     const onHidden = () => {
+      this.world?.menus.setPageHidden(true);
       this.openPause();
       const walk = this.session?.walk;
       if (walk !== undefined && walk.run.phase.kind !== "ended") {
         void checkpointRun(this, checkpointOf(gameData, walk.run));
       }
     };
+    const onVisible = () => this.world?.menus.setPageHidden(false);
     const onSideways = () => this.openPause();
-    const onBlur = () => this.world?.input.dropPress();
-    window.addEventListener("blur", onBlur);
-    window.addEventListener(PHONE_EVENTS.backPressed, onBack);
-    window.addEventListener(PHONE_EVENTS.appHidden, onHidden);
-    window.addEventListener(PHONE_EVENTS.turnedSideways, onSideways);
-    this.events.once("shutdown", () => {
-      window.removeEventListener("blur", onBlur);
-      window.removeEventListener(PHONE_EVENTS.backPressed, onBack);
-      window.removeEventListener(PHONE_EVENTS.appHidden, onHidden);
-      window.removeEventListener(PHONE_EVENTS.turnedSideways, onSideways);
-      stopWakeLock();
-    });
+    const onBlur = () => {
+      this.world?.input.dropPress();
+      this.world?.menus.setPageBlurred(true);
+      this.openPause();
+    };
+    const onFocus = () => this.world?.menus.setPageBlurred(false);
+    onWindowEvent(this, "blur", onBlur);
+    onWindowEvent(this, "focus", onFocus);
+    onWindowEvent(this, PHONE_EVENTS.appHidden, onHidden);
+    onWindowEvent(this, PHONE_EVENTS.appVisible, onVisible);
+    onWindowEvent(this, PHONE_EVENTS.backPressed, onBack);
+    onWindowEvent(this, PHONE_EVENTS.turnedSideways, onSideways);
+    this.events.once("shutdown", () => stopWakeLock());
   }
 
   hudView(): RunHudView | undefined {
@@ -322,7 +333,8 @@ export class RunScene extends Scene {
       session !== undefined &&
       session.card === null &&
       session.walk.run.phase.kind === "walking" &&
-      this.world?.menus.paused() === false
+      this.world !== undefined &&
+      !walkPaused(this.world.menus.pause())
     );
   }
 
@@ -480,13 +492,16 @@ export class RunScene extends Scene {
     this.apply(chooseCard(gameData, world.streams, screenRoadGeometry, choice, session));
   }
 
-  // What holds the walk still, for the HUD's top bar and for lane moves and treats.
+  // What holds the walk still, for the walk's steps, the HUD's top bar, and lane moves and
+  // treats.
   runPause(): RunPause {
-    return {
-      card: this.world?.menus.card() !== undefined || this.world?.menus.celebration() === true,
-      hitStop: this.session?.walk.road.hitStop != null,
-      menu: this.world?.menus.menuState() ?? "closed",
-    };
+    const hitStop = this.session?.walk.road.hitStop != null;
+    return { ...(this.world?.menus.pause() ?? NO_MENU_PAUSE), hitStop };
+  }
+
+  // The state strip's bubble opened or closed in the HUD.
+  setStripBubble(open: boolean): void {
+    this.world?.menus.setStripBubble(open);
   }
 
   openPause(mode: PauseSceneData["mode"] = "menu"): void {
@@ -513,7 +528,6 @@ export class RunScene extends Scene {
     this.session = undefined;
     const sound = soundboardOf(this);
     sound.stopMusic();
-    sound.setCardOpen(false);
     stopWakeLock();
     world.recorder.save();
     const overlays = [SCENE_KEYS.card, SCENE_KEYS.zoneCelebration, SCENE_KEYS.pause];

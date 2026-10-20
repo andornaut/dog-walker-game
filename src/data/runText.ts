@@ -23,10 +23,12 @@ export const RUN_TEXT = {
   fired: "FIRED!",
   firedBy: "{owner} fires you",
   homeQuestion: {
-    body: "You keep tips and earlier zones' fees. This zone pays nothing.",
     headHome: "Head home",
+    keep: "You keep {money}: tips and earlier zones' fees.",
     keepWalking: "Keep walking",
+    lose: "You give up {fees} in fees for {zone}.",
     title: "Head home?",
+    zonesLeft: "Zones left: {count}",
   },
   hopOver: "Hop!",
   lowHearts: "1 ♥ left!",

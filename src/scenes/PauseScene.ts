@@ -3,10 +3,12 @@ import { Scene } from "phaser";
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import type { HomeNoteLine } from "../hud/homeQuestion";
 import {
   HOME_QUESTION_ANSWERS,
   homeQuestionLayout,
   NOTE_PLATE,
+  notePartTops,
   PAUSE_MENU_ITEMS,
   PAUSE_NOTE_WIDTH,
   type PauseMenuItem,
@@ -30,12 +32,18 @@ import { listenTargetPress } from "./targetPress";
 import { addMenuButton, addPanel, type MenuButton, TEXT_SCALE } from "./uiKit";
 
 // menu is the pause menu; homeQuestion asks whether to head home, for the top bar's Home
-// button.
-export interface PauseSceneData {
-  mode: "homeQuestion" | "menu";
+// button, its note saying what going home keeps and gives up.
+export type PauseSceneData = {
   onHeadHome: () => void;
   onResume: () => void;
-}
+} & ({ mode: "homeQuestion"; note: readonly HomeNoteLine[] } | { mode: "menu" });
+
+// The Home question's note lines' colours, by what they say.
+const NOTE_COLORS: Readonly<Record<HomeNoteLine["kind"], number>> = {
+  keep: PALETTE.forest,
+  lose: PALETTE.darkRed,
+  zonesLeft: PALETTE.plum,
+};
 
 interface MenuEntry {
   label: string;
@@ -54,7 +62,8 @@ export class PauseScene extends Scene {
     super(SCENE_KEYS.pause);
   }
 
-  create({ mode, onHeadHome, onResume }: PauseSceneData): void {
+  create(data: PauseSceneData): void {
+    const { onHeadHome, onResume } = data;
     this.pressed = undefined;
     const { roadView, walkView } = screenLayout(SCREEN_CONFIG);
     addRampDim(this, walkView);
@@ -70,18 +79,24 @@ export class PauseScene extends Scene {
     };
     const question = gameData.runText.homeQuestion;
     const menu = gameData.menuText.pause;
-    const asking = mode === "homeQuestion";
+    const asking = data.mode === "homeQuestion";
     this.entries = asking
       ? HOME_QUESTION_ANSWERS.map((answer) => ({
           label: question[answer],
           press: answer === "headHome" ? headHome : onResume,
         }))
       : PAUSE_MENU_ITEMS.map((item) => ({ label: menu[item], press: presses[item] }));
-    const note = asking ? question.body : menu.note;
-    const noteStyle = { color: PALETTE.plum, scale: TEXT_SCALE };
+    const note =
+      data.mode === "homeQuestion"
+        ? data.note.map((line) => ({ color: NOTE_COLORS[line.kind], text: line.text }))
+        : [{ color: PALETTE.plum, text: menu.note }];
     const noteWidth = PAUSE_NOTE_WIDTH - 2 * NOTE_PLATE.padX;
-    const noteLines = wrapPixelText(this, noteStyle, noteWidth, note);
-    const parts = { buttonCount: this.entries.length, noteLines: noteLines.length };
+    const noteParts = note.map(({ color, text }) => {
+      const style = { color, scale: NOTE_PLATE.scale };
+      return { lines: wrapPixelText(this, style, noteWidth, text), style };
+    });
+    const noteLines = noteParts.reduce((sum, part) => sum + part.lines.length, 0);
+    const parts = { buttonCount: this.entries.length, noteLines };
     const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, parts);
     const { panel } = layout;
 
@@ -105,10 +120,16 @@ export class PauseScene extends Scene {
       }),
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
-    addPixelText(this, center, layout.notePlate.y + NOTE_PLATE.pad, noteLines.join("\n"), {
-      ...noteStyle,
-      align: "center",
-      originX: 0.5,
+    const tops = notePartTops(
+      layout.notePlate,
+      noteParts.map((part) => part.lines.length),
+    );
+    noteParts.forEach((part, i) => {
+      addPixelText(this, center, itemAt(tops, i), part.lines.join("\n"), {
+        ...part.style,
+        align: "center",
+        originX: 0.5,
+      });
     });
 
     // A press counts where it began and ended on the same target, so the release that resumes

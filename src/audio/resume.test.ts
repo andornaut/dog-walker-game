@@ -23,12 +23,7 @@ describe("settingsAllowSound and shouldResumeAudio", () => {
       true,
       RESUMED,
     ],
-    [
-      "ignores pause, hiding and cards",
-      { cardOpen: true, hidden: true, paused: true },
-      true,
-      RESUMED,
-    ],
+    ["ignores pause and hiding", { hidden: true, paused: true }, true, RESUMED],
     ["leaves the context stopped while muted", { muted: true }, false, []],
     ["leaves the context stopped at zero volume", { volumes: { music: 0, sfx: 0 } }, false, []],
   ])("%s", (_name, overrides, allow, resumes) => {

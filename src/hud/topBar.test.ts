@@ -14,6 +14,8 @@ import {
   moneyTop,
   PAUSE_BUTTON,
   pauseButtonIcon,
+  playerPaused,
+  pressesHeld,
   type RunPause,
   SOUND_BUTTON,
   TOP_BAR,
@@ -26,10 +28,18 @@ import {
   type TopBarPress,
   TREAT_WELL,
   walkCovered,
+  walkPaused,
   WELL_INSET,
 } from "./topBar";
 
-const WALKING: RunPause = { card: false, hitStop: false, menu: "closed" };
+const WALKING: RunPause = {
+  card: false,
+  hitStop: false,
+  menu: "closed",
+  page: "shown",
+  stripBubble: false,
+};
+// A card and the zone celebration hold the walk alike.
 const CARD: RunPause = { ...WALKING, card: true };
 const HIT_STOP: RunPause = { ...WALKING, hitStop: true };
 
@@ -38,8 +48,12 @@ describe("the top bar in each pause state", () => {
     // The pause button's icon, and whether lane moves and treats act.
     icon: "icon-pause" | "icon-play";
     gameplay: boolean;
-    // Whether a card or a menu takes the walk's presses.
+    // Whether a card or a menu takes the walk's presses, and whether the walk drops them.
     covered: boolean;
+    held: boolean;
+    // Whether the walk is paused, and whether by the player, which ducks the music.
+    paused: boolean;
+    player: boolean;
     // What a tap on Home, a tap or key on pause, the M key and a tap on sound do.
     home: TopBarAction | undefined;
     pause: TopBarAction | undefined;
@@ -50,20 +64,32 @@ describe("the top bar in each pause state", () => {
   const walking = {
     covered: false,
     gameplay: false,
+    held: false,
     home: "confirmHome",
     icon: "icon-pause",
     mute: "mute",
     pause: "openMenu",
+    paused: false,
+    player: false,
     sound: "mute",
   } as const;
-  const menu = { ...walking, covered: true, icon: "icon-play", pause: "resume" } as const;
+  const card = { ...walking, covered: true, held: true, paused: true } as const;
+  const menu = { ...card, icon: "icon-play", pause: "resume", player: true } as const;
   const confirm = { ...menu, home: undefined } as const;
   const cover = { ...confirm, pause: undefined, sound: undefined } as const;
 
   it.each<[string, RunPause, Expected]>([
     ["walking", WALKING, { ...walking, gameplay: true }],
-    ["under a card", CARD, { ...walking, covered: true }],
+    ["under a card", CARD, card],
     ["through the hit stop", HIT_STOP, walking],
+    [
+      "under the strip's bubble",
+      { ...WALKING, stripBubble: true },
+      { ...walking, held: true, paused: true, player: true },
+    ],
+    ["with the tab hidden", { ...WALKING, page: "hidden" }, { ...walking, paused: true }],
+    ["with the window out of focus", { ...WALKING, page: "blurred" }, { ...walking, paused: true }],
+    ["in the menu with the tab hidden", { ...WALKING, menu: "open", page: "hidden" }, menu],
     ["in the menu", { ...WALKING, menu: "open" }, menu],
     ["in the menu over a card", { ...CARD, menu: "open" }, menu],
     ["in the menu over the hit stop", { ...HIT_STOP, menu: "open" }, menu],
@@ -81,10 +107,13 @@ describe("the top bar in each pause state", () => {
     expect({
       covered: walkCovered(pause),
       gameplay: gameplayAllowed(pause),
+      held: pressesHeld(pause),
       home: topBarAction(pause, "tap", "home"),
       icon: pauseButtonIcon(pause),
       mute: topBarAction(pause, "key", "sound"),
       pause: tapPause,
+      paused: walkPaused(pause),
+      player: playerPaused(pause),
       sound: topBarAction(pause, "tap", "sound"),
     }).toEqual(expected);
   });

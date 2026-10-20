@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   admitPlay,
   advanceMusic,
-  CARD_OPEN_MUSIC_DUCK,
   clampVolume,
   effectiveVolumes,
   hitCue,
@@ -14,6 +13,7 @@ import {
   MUSIC_STOPPED,
   musicLevel,
   type MusicState,
+  PAUSED_MUSIC_DUCK,
   PLAY_WINDOW_MS,
   type RecentPlays,
   type SoundCue,
@@ -81,12 +81,17 @@ describe("effectiveVolumes", () => {
     ["plays each channel at its own volume when nothing mutes it", {}, { music: 0.8, sfx: 0.6 }],
     ["mutes both channels while the app is hidden", { hidden: true }, { music: 0, sfx: 0 }],
     ["silences both channels while the player has muted", { muted: true }, { music: 0, sfx: 0 }],
-    ["mutes both channels while the game is paused", { paused: true }, { music: 0, sfx: 0 }],
     [
-      "ducks only the music while a card is open",
-      { cardOpen: true },
-      { music: 0.8 * CARD_OPEN_MUSIC_DUCK, sfx: 0.6 },
+      "ducks the music and silences the effects while the player has paused",
+      { paused: true },
+      { music: 0.8 * PAUSED_MUSIC_DUCK, sfx: 0 },
     ],
+    [
+      "keeps a paused game silent while hidden",
+      { hidden: true, paused: true },
+      { music: 0, sfx: 0 },
+    ],
+    ["keeps a paused game silent while muted", { muted: true, paused: true }, { music: 0, sfx: 0 }],
     [
       "clamps channel volumes read from settings",
       { volumes: { music: 2, sfx: -0.5 } },

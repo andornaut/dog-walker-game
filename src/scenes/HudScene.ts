@@ -235,10 +235,13 @@ export class HudScene extends Scene {
     this.dynamic = this.add.graphics();
     this.slots = dogSlots.map((rect) => this.createSlot(rect));
     this.frames = this.add.graphics();
-    // Opening the strip's bubble closes the hint, and a hint opening closes the bubble.
+    // Opening the strip's bubble closes the hint, and a hint opening closes the bubble. The
+    // walk pauses while the bubble is open.
     this.strip = new StateStripView(this, LANES.stripBubble, {
+      onClose: () => this.runScene().setStripBubble(false),
       onOpen: () => {
         this.hints = dismissHint(this.hints);
+        this.runScene().setStripBubble(true);
       },
       tappable: () => stripTapAllowed(this.runScene().runPause()),
     });
@@ -271,14 +274,18 @@ export class HudScene extends Scene {
     });
 
     // A button acts on the press, as the walk's gestures never see it. A press on the strip
-    // taps it on release, and is the walk's drag if it travels.
+    // taps it on release, and is the walk's drag if it travels. While the strip's bubble is
+    // open, a press anywhere else closes it on release; the walk drops that press.
     const tapMaxDistance = read(gameData.tuning, "pixels", "tapMaxDistance");
     let stripPress: StripPress | undefined;
+    let closesBubble = false;
     listenOnePress(this, {
       down: (pointer) => {
         const point = { x: pointer.x, y: pointer.y };
         const button = topBarButtonAt(point.x, point.y);
-        stripPress = this.strip?.contains(point) ? { start: point, tapping: true } : undefined;
+        const onStrip = this.strip?.contains(point) === true;
+        stripPress = onStrip ? { start: point, tapping: true } : undefined;
+        closesBubble = !onStrip && button === undefined && this.strip?.isOpen() === true;
         if (button !== undefined) {
           this.press("tap", button);
         }
@@ -291,6 +298,10 @@ export class HudScene extends Scene {
       up: (pointer, cancelled) => {
         const press = stripPress;
         stripPress = undefined;
+        if (closesBubble) {
+          closesBubble = false;
+          this.strip?.closeBubble();
+        }
         const point = { x: pointer.x, y: pointer.y };
         if (press !== undefined && !cancelled && stripTapped(tapMaxDistance, point, press)) {
           this.strip?.tap(press.start);

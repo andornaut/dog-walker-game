@@ -713,11 +713,15 @@ export interface RunText {
   };
   readonly fired: string;
   readonly firedBy: string;
+  // keep is what going home keeps (the walk's money so far), lose the fees the current zone
+  // would pay the dogs still walking, and zonesLeft the zones after this one, shown when any are.
   readonly homeQuestion: {
-    readonly body: string;
     readonly headHome: string;
+    readonly keep: string;
     readonly keepWalking: string;
+    readonly lose: string;
     readonly title: string;
+    readonly zonesLeft: string;
   };
   // Shown over each dog that hops over an area effect.
   readonly hopOver: string;

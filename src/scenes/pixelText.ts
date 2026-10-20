@@ -1,6 +1,7 @@
 import type { GameObjects, Scene, Types } from "phaser";
 
 import { fittingTextStyle, type TextFitStyle } from "../layout/textFit";
+import { wrapWords } from "../text/lines";
 import {
   glyphAdvance,
   LINE_HEIGHT,
@@ -149,20 +150,13 @@ export function wrapPixelText(
   text: string,
 ): string[] {
   const probe = addPixelText(scene, 0, 0, "", style).setVisible(false);
-  const lines: string[] = [];
-  let line = "";
-  for (const word of text.split(/\s+/).filter((part) => part !== "")) {
-    const next = line === "" ? word : `${line} ${word}`;
-    setPixelText(probe, next);
-    if (line !== "" && probe.width > maxWidth) {
-      lines.push(line);
-      line = word;
-    } else {
-      line = next;
-    }
-  }
+  const width = (line: string) => {
+    setPixelText(probe, line);
+    return probe.width;
+  };
+  const lines = wrapWords(width, maxWidth, text);
   probe.destroy();
-  return line === "" ? lines : [...lines, line];
+  return lines;
 }
 
 // Moves a label made by addPixelText, keeping y the top of its capitals.

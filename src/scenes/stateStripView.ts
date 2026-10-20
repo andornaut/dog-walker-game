@@ -35,11 +35,12 @@ export class StateStripView {
   private readonly well: GameObjects.Graphics;
 
   // lane is where the bubble opens. tappable says whether a press on the strip is the strip's,
-  // which it is unless a screen covers the bar; onOpen runs as the bubble opens.
+  // which it is unless a screen covers the bar; onOpen and onClose run as the bubble opens and
+  // closes.
   constructor(
     private readonly scene: Scene,
     private readonly lane: Rect,
-    private readonly hooks: { onOpen: () => void; tappable: () => boolean },
+    private readonly hooks: { onClose: () => void; onOpen: () => void; tappable: () => boolean },
   ) {
     this.well = scene.add.graphics().setDepth(DEPTH);
   }
@@ -123,8 +124,12 @@ export class StateStripView {
   }
 
   closeBubble(): void {
+    if (this.bubble.length === 0) {
+      return;
+    }
     this.bubble.forEach((part) => part.destroy());
     this.bubble = [];
+    this.hooks.onClose();
   }
 
   private openBubble(): void {

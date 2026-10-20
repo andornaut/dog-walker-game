@@ -3,7 +3,7 @@ import type { Input, Scene } from "phaser";
 import { gameData } from "../../data";
 import { LANE_COUNT, SCREEN_CONFIG } from "../../data/screen";
 import { onStrip, stripItems } from "../../hud/stateStrip";
-import { gameplayAllowed, type RunPause, topBarButtonAt, walkCovered } from "../../hud/topBar";
+import { gameplayAllowed, pressesHeld, type RunPause, topBarButtonAt } from "../../hud/topBar";
 import type { GestureAction, GestureContext } from "../../input/gestures";
 import { dogSlotForKey, laneDirectionForKey } from "../../input/keyBindings";
 import {
@@ -81,11 +81,12 @@ export class RunInput {
   }
 
   // Phaser reports a cancelled touch as a release with wasCanceled set. The run scene keeps
-  // running while a card or the pause menu covers the walk, and the press is theirs then.
+  // running while a card or the pause menu covers the walk, and the press is theirs then, as
+  // is the press that closes the state strip's bubble.
   private onPointer(phase: "down" | "move" | "up", pointer: Input.Pointer): void {
     const walk = this.host.walk();
     const walking = walk !== undefined && walk.run.phase.kind === "walking";
-    const held = !walking || walkCovered(this.host.runPause());
+    const held = !walking || pressesHeld(this.host.runPause());
     const sample: PointerSample = {
       onButton: phase === "down" && topBarButtonAt(pointer.x, pointer.y) !== undefined,
       onStrip:

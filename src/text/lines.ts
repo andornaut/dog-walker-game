@@ -28,6 +28,27 @@ export function fillLine<Table extends FlatFieldTable, K extends keyof Table & s
   return fillNames(lines[key], fields);
 }
 
+// Text broken at spaces into lines no wider than maxWidth, as width measures a line. A word
+// wider than maxWidth gets a line of its own.
+export function wrapWords(
+  width: (line: string) => number,
+  maxWidth: number,
+  text: string,
+): string[] {
+  const lines: string[] = [];
+  let line = "";
+  for (const word of text.split(/\s+/).filter((part) => part !== "")) {
+    const next = line === "" ? word : `${line} ${word}`;
+    if (line !== "" && width(next) > maxWidth) {
+      lines.push(line);
+      line = word;
+    } else {
+      line = next;
+    }
+  }
+  return line === "" ? lines : [...lines, line];
+}
+
 function isTable(entry: FieldTable | readonly string[] | undefined): entry is FieldTable {
   return entry !== undefined && !Array.isArray(entry);
 }

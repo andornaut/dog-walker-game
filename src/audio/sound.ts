@@ -51,8 +51,9 @@ export function soundKeyFor(isLoaded: (key: string) => boolean, cue: SoundCue): 
 
 export const MUSIC_KEY = "music-walk";
 
-// The music plays at this fraction of its volume while a card is open.
-export const CARD_OPEN_MUSIC_DUCK = 0.5;
+// The music plays at this fraction of the player's music volume while the player has paused the
+// walk (the pause menu, Settings, Help, the Home question or a strip bubble).
+export const PAUSED_MUSIC_DUCK = 0.3;
 
 // A full fade between silence and full music volume.
 export const MUSIC_FADE_MS = 500;
@@ -68,7 +69,6 @@ export interface Volumes {
 }
 
 export interface Mix {
-  cardOpen: boolean;
   hidden: boolean;
   muted: boolean;
   paused: boolean;
@@ -78,7 +78,6 @@ export interface Mix {
 export const FULL_VOLUMES: Volumes = { music: 1, sfx: 1 };
 
 export const INITIAL_MIX: Mix = {
-  cardOpen: false,
   hidden: false,
   muted: false,
   paused: false,
@@ -93,14 +92,13 @@ export function clampVolume(volume: number): number {
   return Math.min(1, Math.max(0, volume));
 }
 
-// Channel volume times the master mute (silent while muted, hidden or paused). Music also ducks
-// while a card is open.
+// Channel volume times the master mute (silent while muted or hidden). While the player has
+// paused, the music ducks to PAUSED_MUSIC_DUCK of its volume and the effects are silent.
 export function effectiveVolumes(mix: Mix): Volumes {
-  const master = mix.muted || mix.hidden || mix.paused ? 0 : 1;
-  const duck = mix.cardOpen ? CARD_OPEN_MUSIC_DUCK : 1;
+  const master = mix.muted || mix.hidden ? 0 : 1;
   return {
-    music: clampVolume(mix.volumes.music) * master * duck,
-    sfx: clampVolume(mix.volumes.sfx) * master,
+    music: clampVolume(mix.volumes.music) * master * (mix.paused ? PAUSED_MUSIC_DUCK : 1),
+    sfx: clampVolume(mix.volumes.sfx) * master * (mix.paused ? 0 : 1),
   };
 }
 

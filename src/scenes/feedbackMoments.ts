@@ -33,7 +33,7 @@ import {
   type TreatCue,
   trotOffX,
 } from "../hud/moments";
-import type { RunPause } from "../hud/topBar";
+import { playerPaused, type RunPause } from "../hud/topBar";
 import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { type Cents, cents } from "../rules/units";
@@ -138,7 +138,7 @@ export class HudFeedback {
   }
 
   update(run: RunState, pause: RunPause): void {
-    this.holdWhilePaused(pause.menu !== "closed");
+    this.holdWhilePaused(playerPaused(pause));
     this.cardUp = pause.card;
     if (this.cardUp) {
       this.clearPayoutLabels();
