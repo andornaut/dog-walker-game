@@ -58,14 +58,14 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 - **Forks:** the road meets a cross street and a fork card offers three paths (left, straight, right), each leading to a zone you haven't walked this run, sorted easiest on the left to hardest on the right. Each path card shows the zone's name, difficulty and fee multiplier
 - **Zones** (6, each walk visits 4 with no repeats):
 
-| Zone              | Difficulty  | Fees  | Encounter mix                                                             |
-| ----------------- | ----------- | ----- | ------------------------------------------------------------------------- |
-| Willow Crescent   | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, no movers, mail carrier and kid stops |
-| Fairview Park     | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists          |
-| Elm Avenue        | Normal      | ×1    | Puddles, the mail carrier, cones; movers rare. Always the first zone      |
-| Main Street       | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers             |
-| Riverside Path    | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds    |
-| The Long Way Home | Hard        | ×1.5  | Everything, densest and fastest, the most movers                          |
+| Zone              | Difficulty  | Fees  | Encounter mix                                                              |
+| ----------------- | ----------- | ----- | -------------------------------------------------------------------------- |
+| Willow Crescent   | Easiest     | ×0.7  | A sleepy cul-de-sac: few obstacles, few movers, mail carrier and kid stops |
+| Fairview Park     | Easy        | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists           |
+| Elm Avenue        | Normal      | ×1    | Puddles, the mail carrier, cones; some movers. Always the first zone       |
+| Main Street       | Busy        | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers              |
+| Riverside Path    | Medium-hard | ×1.25 | A riverside path: wide puddles, cyclists, other dogs, more lucky finds     |
+| The Long Way Home | Hard        | ×1.5  | Everything, densest and fastest, the most movers                           |
 
 - After each zone, every remaining dog pays its fee. A dog fired mid-zone is not paid for that zone
 - An owner who fires you doesn't pay their dog's fee for the zone you're in, and pays no more after it; fees from earlier zones and all tips stay
@@ -206,7 +206,7 @@ About half of the obstacles are minor: they open no card. Bumping one drops $8 i
 
 ### Obstacle sizes
 
-Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of it on screen counts as one hit; the whole obstacle is removed and the grace window starts. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans.
+Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of it on screen counts as one hit; the whole obstacle is removed and the grace window starts. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans. Wherever the path has to change lanes between two obstacles, the gap between them is at least the whole pack's height plus a lane move, so the pack visibly fits between them.
 
 | Obstacle                                                                        | Kind      | Size (lanes × rows) |
 | ------------------------------------------------------------------------------- | --------- | ------------------- |
@@ -237,12 +237,18 @@ Each obstacle kind keeps one mechanic and wears a different look in each zone: a
 
 ### Moving hazards
 
-Some things cross the road or come down it. Each gives about 1 second of warning (a cue at the lane edge) before it moves, at most one mover is on screen at a time, and the reachable-path rule accounts for its movement.
+About a third of the obstacles move: people and animals of every kind, and some vehicles. How often depends on the zone (the zone's mover share). Each move is telegraphed about 1 second ahead (a cue at the lane edge, or an arrow up or down the lane), at most two movers are on screen at once, and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit.
 
-- **Loose dog** crosses lanes: contact opens the Other dog encounter
-- **Squirrel** darts across lanes: contact opens the squirrel encounter, and Chasers pull toward it while it's on screen
-- **Ball** bounces across lanes: a minor obstacle
-- **Cyclist** rides down one lane toward you, faster than the road: a minor obstacle
+| Movement | How it moves                                                                           | Who                                                                         |
+| -------- | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Away     | Down its lane slower than the road, so it lingers in view while the pack catches up    | Dog in a handbag (its owner strolls ahead), Frisbee dog (chasing the throw) |
+| Dart     | Fast, all the way across the road                                                      | Ball (bouncing), Cat, Loose dog, Rabbit, Seagull (swooping), Squirrel       |
+| Hop      | One lane, once, into a lane the path rule keeps passable                               | Ducklings, Parked car (pulling out), Parked scooter, Pigeon flock           |
+| Toward   | Up its lane toward the walker, faster than the road                                    | Cyclist, Garbage truck (slowly), Goose (charging), Jogger's dog             |
+| Wander   | Two or three steps, each telegraphed: a lane to either side, or a burst toward or away | Raccoon, Thief                                                              |
+
+- Squirrels still draw the Chasers' pull while on screen
+- Stationary kinds never move: area effects (Splash, Stink other than the garbage truck), benches, cones, bins, hedges, flower beds and the like
 
 ### Feedback
 
