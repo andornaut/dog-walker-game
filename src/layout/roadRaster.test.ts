@@ -412,7 +412,10 @@ describe("drawRoad", () => {
     expect(at(30, 150)).toBe(pixelWord(0x222222));
     expect(at(30, 469)).toBe(pixelWord(0x111111));
     expect(at(200, 150)).toBe(pixelWord(0x333333));
-    expect(at(900, 469)).toBe(pixelWord(0x333333));
+    // The strip has rolled past the nearest row once its far end has travelled the whole way.
+    const passed =
+      raster.visibleDistance + STRIP.height - itemAt(raster.rows, 469 - view.y).distance;
+    expect(at(passed + 1, 469)).toBe(pixelWord(0x333333));
   });
 
   it("puts the previous zone's verge beside the start strip's cross street", () => {

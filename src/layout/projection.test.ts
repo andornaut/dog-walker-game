@@ -119,7 +119,9 @@ describe("snapScale", () => {
     expect(snapScale(scaleAt(projection, projection.visibleDistance))).toBe(0.5);
   });
 
-  it("snaps a road sprite as far ahead as the pack's back row to 0.875, unlike the pack", () => {
-    expect(snapScale(scaleAt(projection, 58))).toBe(0.875);
+  it("snaps a road sprite just ahead of the pack to 0.875, unlike the pack", () => {
+    // The far edge is at scale 0.5 (visibleDistance), so scale s is (1 / s - 1) of it ahead.
+    const justAhead = projection.visibleDistance * (1 / 0.9 - 1);
+    expect(snapScale(scaleAt(projection, justAhead))).toBe(0.875);
   });
 });
