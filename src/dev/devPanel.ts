@@ -29,9 +29,9 @@ import { NO_GEAR, randomSeed, type RunSetup, runSetupLink } from "./runSetup";
 export interface DevPanelHost {
   // The running scene's setup once it reports one, else the URL's.
   currentSetup(): RunSetup;
-  // Clears every dev override and turns dev mode off, on the current screen.
-  disable(): void;
   overlayVisible(): boolean;
+  // Clears every dev cheat (run overrides, dev mode, overlay, road fade) on the current screen.
+  reset(): void;
   roadFade(): boolean;
   setOverlayVisible(visible: boolean): void;
   setRoadFade(on: boolean): void;
@@ -114,7 +114,7 @@ function playPageUrl(): string {
   return new URL("/play/", globalThis.location.href).href;
 }
 
-function runSection(): HTMLElement {
+function runSection(): { element: HTMLElement; refresh: () => void } {
   const parsedUrl = pageRunSetup();
   const { setup } = parsedUrl;
   const urlWarnings = [...parsedUrl.warnings, ...parsedUrl.notices];
@@ -216,6 +216,23 @@ function runSection(): HTMLElement {
   });
   update();
 
+  // Fills the form from the page's setup again, as after a reset cleared the overrides.
+  const refresh = () => {
+    const fresh = formFromSetup(pageRunSetup().setup);
+    seed.value = fresh.seed;
+    gear.value = fresh.gear;
+    zone.value = fresh.zone;
+    money.value = fresh.moneyDollars;
+    speed.value = fresh.speed;
+    dev.checked = fresh.dev;
+    pack = [...fresh.pack];
+    dogs.forEach(({ box }) => {
+      box.checked = pack.includes(box.value);
+    });
+    listInto(warnings, []);
+    update();
+  };
+
   const urlNotes: Node[] = [];
   if (urlWarnings.length > 0) {
     const list = el("ul", { className: "dev-warnings" });
@@ -225,7 +242,7 @@ function runSection(): HTMLElement {
     );
     urlNotes.push(list);
   }
-  return section("Run setup", ...urlNotes, form);
+  return { element: section("Run setup", ...urlNotes, form), refresh };
 }
 
 function overlaySection(host: DevPanelHost): { element: HTMLElement; refresh: () => void } {
@@ -485,6 +502,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
   sheet.setAttribute("aria-label", "Dev panel");
   const bar = el("button", { className: "dev-bar", type: "button" });
   bar.setAttribute("aria-controls", sheet.id);
+  const run = runSection();
   const overlay = overlaySection(host);
   const roadFade = roadSection(host);
   const replay = replaySection();
@@ -522,12 +540,15 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
       "header",
       { className: "dev-header" },
       el("strong", { textContent: "Dev" }),
-      button("Disable", () => {
-        host.disable();
-        container.hidden = true;
+      button("Reset", () => {
+        host.reset();
+        run.refresh();
+        overlay.refresh();
+        roadFade.refresh();
+        setOpen(false);
       }),
     ),
-    runSection(),
+    run.element,
     overlay.element,
     roadFade.element,
     linkSection(host),

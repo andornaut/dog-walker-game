@@ -67,6 +67,6 @@ export function clearRunOverrides(): void {
 }
 
 // Turns dev mode off: the overrides and `dev` leave the URL and the page's setup.
-export function disableDevMode(): void {
+export function resetDevMode(): void {
   forgetOverrides(true);
 }
