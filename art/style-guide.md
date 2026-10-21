@@ -264,7 +264,7 @@ A side that lacks room by x 4 or x 356 gives way to the other. A firing keeps `f
 | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1 ♥            | Owner's `worried` face and `ui-doghouse-warn`                                                                                                                                                                                                                                           |
 | Any hit        | `fx-bump` at the contact point; walker `stumble`, dogs `react`                                                                                                                                                                                                                          |
-| Encounter hit  | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (café patio amber, goose white, other dog pink, petunias pink, picnic orange, puddle sky, skunk mauve, squirrel orange, thief amber, trash bins green); the label at 2× on `ui-hit-label`; caught dogs `shake` |
+| Encounter hit  | `fx-hit-<encounter>` over the pack; `ui-hit-flash-<colour>` at the edges (goose white, other dog pink, puddle sky, skunk mauve, squirrel orange, thief amber); the label at 2× on `ui-hit-label`; caught dogs `shake`                                                                   |
 | Fee payout     | `fx-coin-fly` to the bank under `ui-payout-label`                                                                                                                                                                                                                                       |
 | Firing         | Owner's `fired` face at 2× over the doghouse on `fx-fired-pop` at 2× (an amber starburst behind a cream POOF cloud, and a front door slamming shut beside the face); the fired line in `ui-quip`; `ui-fired-plate` (blue laid-back, purple fussy, dred dramatic)                        |
 | Heart change   | `fx-heart-loss` or `fx-heart-gain` `pop` over the dog beside the "−1" or "+1" label, then `fly` tweened into its doghouse's heart labels band; on a loss the house plays `ui-doghouse` `heart-loss` while the slot shakes                                                               |
@@ -286,18 +286,14 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 | ------------------ | ------- | ---------------------------------------------------------- |
 | `fx-bark-word`     | WOOF!   | Its own 32×16 key, `pop` (4 frames, 60, 60, 140 and 140ms) |
 | `fx-dodge`         | DODGE!  | `play`, over frames 0 to 3                                 |
-| `fx-hit-cafe`      | SPLAT!  | `play-word`                                                |
 | `fx-hit-goose`     | HONK!   | `play-word`                                                |
 | `fx-hit-other-dog` | SNIFF!  | `play-word`                                                |
-| `fx-hit-petunias`  | SQUISH! | `play-word`                                                |
-| `fx-hit-picnic`    | CHOMP!  | `play-word`                                                |
 | `fx-hit-puddle`    | SPLOSH! | `play-word`                                                |
 | `fx-hit-skunk`     | PHEW!   | `play-word`                                                |
 | `fx-hit-squirrel`  | CHIRP!  | `play-word`                                                |
 | `fx-hit-thief`     | YOINK!  | `play-word`                                                |
-| `fx-hit-trash`     | CLANG!  | `play-word`                                                |
 
-- Every `fx-hit-*` and `fx-lemonade` opens on an impact frame: an eight-point star in the encounter's colour with a white core, a white speed line flying out between each pair of points.
+- Every `fx-hit-*` opens on an impact frame: an eight-point star in the encounter's colour with a white core, a white speed line flying out between each pair of points.
 - `play-word` follows `play` on every `fx-hit-*`: the same frames and timing, with the word centred on the impact star on frames 0 to 5 (420ms).
 - The game plays `play-word`, `fx-bark-word` and `splash-word`. With reduced motion it shows `play` (held on frame 0), `fx-bark` and `splash`, so no word shows.
 - `fx-bark-word` plays at `fx-bark`'s point in place of it, over the dog's head as the tell starts.

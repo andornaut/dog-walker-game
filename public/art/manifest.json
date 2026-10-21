@@ -1085,51 +1085,6 @@
       }
     },
     {
-      "key": "chatty-neighbour",
-      "png": "sprites/chatty-neighbour.png",
-      "json": "sprites/chatty-neighbour.json",
-      "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 35
-      }
-    },
-    {
-      "key": "chatty-neighbour@50",
-      "png": "sprites/chatty-neighbour@50.png",
-      "json": "sprites/chatty-neighbour@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "chatty-neighbour@62",
-      "png": "sprites/chatty-neighbour@62.png",
-      "json": "sprites/chatty-neighbour@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 22
-      }
-    },
-    {
-      "key": "chatty-neighbour@75",
-      "png": "sprites/chatty-neighbour@75.png",
-      "json": "sprites/chatty-neighbour@75.json",
-      "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "chatty-neighbour@88",
-      "png": "sprites/chatty-neighbour@88.png",
-      "json": "sprites/chatty-neighbour@88.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 30
-      }
-    },
-    {
       "key": "cone",
       "png": "sprites/cone.png",
       "json": "sprites/cone.json",
@@ -1885,11 +1840,6 @@
       "json": "sprites/fx-heart-loss.json"
     },
     {
-      "key": "fx-hit-cafe",
-      "png": "sprites/fx-hit-cafe.png",
-      "json": "sprites/fx-hit-cafe.json"
-    },
-    {
       "key": "fx-hit-goose",
       "png": "sprites/fx-hit-goose.png",
       "json": "sprites/fx-hit-goose.json"
@@ -1898,16 +1848,6 @@
       "key": "fx-hit-other-dog",
       "png": "sprites/fx-hit-other-dog.png",
       "json": "sprites/fx-hit-other-dog.json"
-    },
-    {
-      "key": "fx-hit-petunias",
-      "png": "sprites/fx-hit-petunias.png",
-      "json": "sprites/fx-hit-petunias.json"
-    },
-    {
-      "key": "fx-hit-picnic",
-      "png": "sprites/fx-hit-picnic.png",
-      "json": "sprites/fx-hit-picnic.json"
     },
     {
       "key": "fx-hit-puddle",
@@ -1928,16 +1868,6 @@
       "key": "fx-hit-thief",
       "png": "sprites/fx-hit-thief.png",
       "json": "sprites/fx-hit-thief.json"
-    },
-    {
-      "key": "fx-hit-trash",
-      "png": "sprites/fx-hit-trash.png",
-      "json": "sprites/fx-hit-trash.json"
-    },
-    {
-      "key": "fx-lemonade",
-      "png": "sprites/fx-lemonade.png",
-      "json": "sprites/fx-lemonade.json"
     },
     {
       "key": "fx-need-met",
@@ -2396,15 +2326,6 @@
       }
     },
     {
-      "key": "kid",
-      "png": "sprites/kid.png",
-      "json": "sprites/kid.json",
-      "anchor": {
-        "feetY": 69,
-        "opaqueWidth": 29
-      }
-    },
-    {
       "key": "kid-on-bike",
       "png": "sprites/kid-on-bike.png",
       "json": "sprites/kid-on-bike.json",
@@ -2447,87 +2368,6 @@
       "anchor": {
         "feetY": 60,
         "opaqueWidth": 33
-      }
-    },
-    {
-      "key": "kid@50",
-      "png": "sprites/kid@50.png",
-      "json": "sprites/kid@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 14
-      }
-    },
-    {
-      "key": "kid@62",
-      "png": "sprites/kid@62.png",
-      "json": "sprites/kid@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "kid@75",
-      "png": "sprites/kid@75.png",
-      "json": "sprites/kid@75.json",
-      "anchor": {
-        "feetY": 53,
-        "opaqueWidth": 21
-      }
-    },
-    {
-      "key": "kid@88",
-      "png": "sprites/kid@88.png",
-      "json": "sprites/kid@88.json",
-      "anchor": {
-        "feetY": 61,
-        "opaqueWidth": 25
-      }
-    },
-    {
-      "key": "lemonade-stand",
-      "png": "sprites/lemonade-stand.png",
-      "json": "sprites/lemonade-stand.json",
-      "anchor": {
-        "feetY": 69,
-        "opaqueWidth": 44
-      }
-    },
-    {
-      "key": "lemonade-stand@50",
-      "png": "sprites/lemonade-stand@50.png",
-      "json": "sprites/lemonade-stand@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 21
-      }
-    },
-    {
-      "key": "lemonade-stand@62",
-      "png": "sprites/lemonade-stand@62.png",
-      "json": "sprites/lemonade-stand@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 26
-      }
-    },
-    {
-      "key": "lemonade-stand@75",
-      "png": "sprites/lemonade-stand@75.png",
-      "json": "sprites/lemonade-stand@75.json",
-      "anchor": {
-        "feetY": 53,
-        "opaqueWidth": 32
-      }
-    },
-    {
-      "key": "lemonade-stand@88",
-      "png": "sprites/lemonade-stand@88.png",
-      "json": "sprites/lemonade-stand@88.json",
-      "anchor": {
-        "feetY": 61,
-        "opaqueWidth": 38
       }
     },
     {
@@ -3509,141 +3349,6 @@
       "anchor": {
         "feetY": 36,
         "opaqueWidth": 45
-      }
-    },
-    {
-      "key": "petunias",
-      "png": "sprites/petunias.png",
-      "json": "sprites/petunias.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 110
-      }
-    },
-    {
-      "key": "petunias@50",
-      "png": "sprites/petunias@50.png",
-      "json": "sprites/petunias@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 54
-      }
-    },
-    {
-      "key": "petunias@62",
-      "png": "sprites/petunias@62.png",
-      "json": "sprites/petunias@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 68
-      }
-    },
-    {
-      "key": "petunias@75",
-      "png": "sprites/petunias@75.png",
-      "json": "sprites/petunias@75.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 82
-      }
-    },
-    {
-      "key": "petunias@88",
-      "png": "sprites/petunias@88.png",
-      "json": "sprites/petunias@88.json",
-      "anchor": {
-        "feetY": 40,
-        "opaqueWidth": 96
-      }
-    },
-    {
-      "key": "photo-op",
-      "png": "sprites/photo-op.png",
-      "json": "sprites/photo-op.json",
-      "anchor": {
-        "feetY": 68,
-        "opaqueWidth": 40
-      }
-    },
-    {
-      "key": "photo-op@50",
-      "png": "sprites/photo-op@50.png",
-      "json": "sprites/photo-op@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 20
-      }
-    },
-    {
-      "key": "photo-op@62",
-      "png": "sprites/photo-op@62.png",
-      "json": "sprites/photo-op@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 25
-      }
-    },
-    {
-      "key": "photo-op@75",
-      "png": "sprites/photo-op@75.png",
-      "json": "sprites/photo-op@75.json",
-      "anchor": {
-        "feetY": 52,
-        "opaqueWidth": 30
-      }
-    },
-    {
-      "key": "photo-op@88",
-      "png": "sprites/photo-op@88.png",
-      "json": "sprites/photo-op@88.json",
-      "anchor": {
-        "feetY": 60,
-        "opaqueWidth": 35
-      }
-    },
-    {
-      "key": "picnic",
-      "png": "sprites/picnic.png",
-      "json": "sprites/picnic.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 108
-      }
-    },
-    {
-      "key": "picnic@50",
-      "png": "sprites/picnic@50.png",
-      "json": "sprites/picnic@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 54
-      }
-    },
-    {
-      "key": "picnic@62",
-      "png": "sprites/picnic@62.png",
-      "json": "sprites/picnic@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 68
-      }
-    },
-    {
-      "key": "picnic@75",
-      "png": "sprites/picnic@75.png",
-      "json": "sprites/picnic@75.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 81
-      }
-    },
-    {
-      "key": "picnic@88",
-      "png": "sprites/picnic@88.png",
-      "json": "sprites/picnic@88.json",
-      "anchor": {
-        "feetY": 40,
-        "opaqueWidth": 94
       }
     },
     {
@@ -6122,51 +5827,6 @@
       }
     },
     {
-      "key": "stop-sign",
-      "png": "sprites/stop-sign.png",
-      "json": "sprites/stop-sign.json",
-      "anchor": {
-        "feetY": 71,
-        "opaqueWidth": 29
-      }
-    },
-    {
-      "key": "stop-sign@50",
-      "png": "sprites/stop-sign@50.png",
-      "json": "sprites/stop-sign@50.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 14
-      }
-    },
-    {
-      "key": "stop-sign@62",
-      "png": "sprites/stop-sign@62.png",
-      "json": "sprites/stop-sign@62.json",
-      "anchor": {
-        "feetY": 44,
-        "opaqueWidth": 18
-      }
-    },
-    {
-      "key": "stop-sign@75",
-      "png": "sprites/stop-sign@75.png",
-      "json": "sprites/stop-sign@75.json",
-      "anchor": {
-        "feetY": 53,
-        "opaqueWidth": 21
-      }
-    },
-    {
-      "key": "stop-sign@88",
-      "png": "sprites/stop-sign@88.png",
-      "json": "sprites/stop-sign@88.json",
-      "anchor": {
-        "feetY": 62,
-        "opaqueWidth": 25
-      }
-    },
-    {
       "key": "stroller",
       "png": "sprites/stroller.png",
       "json": "sprites/stroller.json",
@@ -6299,51 +5959,6 @@
       "anchor": {
         "feetY": 18,
         "opaqueWidth": 16
-      }
-    },
-    {
-      "key": "trash-bins",
-      "png": "sprites/trash-bins.png",
-      "json": "sprites/trash-bins.json",
-      "anchor": {
-        "feetY": 45,
-        "opaqueWidth": 106
-      }
-    },
-    {
-      "key": "trash-bins@50",
-      "png": "sprites/trash-bins@50.png",
-      "json": "sprites/trash-bins@50.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 54
-      }
-    },
-    {
-      "key": "trash-bins@62",
-      "png": "sprites/trash-bins@62.png",
-      "json": "sprites/trash-bins@62.json",
-      "anchor": {
-        "feetY": 29,
-        "opaqueWidth": 67
-      }
-    },
-    {
-      "key": "trash-bins@75",
-      "png": "sprites/trash-bins@75.png",
-      "json": "sprites/trash-bins@75.json",
-      "anchor": {
-        "feetY": 35,
-        "opaqueWidth": 80
-      }
-    },
-    {
-      "key": "trash-bins@88",
-      "png": "sprites/trash-bins@88.png",
-      "json": "sprites/trash-bins@88.json",
-      "anchor": {
-        "feetY": 40,
-        "opaqueWidth": 93
       }
     },
     {
@@ -6669,14 +6284,6 @@
       "png": "images/backdrop-woof-way.png"
     },
     {
-      "key": "card-accident-bag",
-      "png": "images/card-accident-bag.png"
-    },
-    {
-      "key": "card-accident-walk-on",
-      "png": "images/card-accident-walk-on.png"
-    },
-    {
       "key": "card-belly-rubs",
       "png": "images/card-belly-rubs.png"
     },
@@ -6687,18 +6294,6 @@
     {
       "key": "card-biscuit-neighbour-take",
       "png": "images/card-biscuit-neighbour-take.png"
-    },
-    {
-      "key": "card-cafe-buy-lattes",
-      "png": "images/card-cafe-buy-lattes.png"
-    },
-    {
-      "key": "card-cafe-charm",
-      "png": "images/card-cafe-charm.png"
-    },
-    {
-      "key": "card-cafe-slink-away",
-      "png": "images/card-cafe-slink-away.png"
     },
     {
       "key": "card-chase-cat-chase",
@@ -6733,36 +6328,12 @@
       "png": "images/card-chase-rabbit-hold.png"
     },
     {
-      "key": "card-chatty-neighbour-chat",
-      "png": "images/card-chatty-neighbour-chat.png"
-    },
-    {
-      "key": "card-chatty-neighbour-move-on",
-      "png": "images/card-chatty-neighbour-move-on.png"
-    },
-    {
-      "key": "card-construction-detour-long-way",
-      "png": "images/card-construction-detour-long-way.png"
-    },
-    {
-      "key": "card-construction-detour-squeeze",
-      "png": "images/card-construction-detour-squeeze.png"
-    },
-    {
       "key": "card-cost",
       "png": "images/card-cost.png"
     },
     {
       "key": "card-good-leash",
       "png": "images/card-good-leash.png"
-    },
-    {
-      "key": "card-good-spot-keep-walking",
-      "png": "images/card-good-spot-keep-walking.png"
-    },
-    {
-      "key": "card-good-spot-take-time",
-      "png": "images/card-good-spot-take-time.png"
     },
     {
       "key": "card-goose-back-off",
@@ -6773,40 +6344,8 @@
       "png": "images/card-goose-honk-back.png"
     },
     {
-      "key": "card-ice-cream-truck-pup-cups",
-      "png": "images/card-ice-cream-truck-pup-cups.png"
-    },
-    {
-      "key": "card-ice-cream-truck-walk-past",
-      "png": "images/card-ice-cream-truck-walk-past.png"
-    },
-    {
-      "key": "card-kid-wants-to-pet-decline",
-      "png": "images/card-kid-wants-to-pet-decline.png"
-    },
-    {
-      "key": "card-kid-wants-to-pet-pet",
-      "png": "images/card-kid-wants-to-pet-pet.png"
-    },
-    {
-      "key": "card-lemonade-maybe-later",
-      "png": "images/card-lemonade-maybe-later.png"
-    },
-    {
-      "key": "card-lemonade-say-hi",
-      "png": "images/card-lemonade-say-hi.png"
-    },
-    {
-      "key": "card-lemonade-water",
-      "png": "images/card-lemonade-water.png"
-    },
-    {
       "key": "card-lost-wallet-keep",
       "png": "images/card-lost-wallet-keep.png"
-    },
-    {
-      "key": "card-lost-wallet-return",
-      "png": "images/card-lost-wallet-return.png"
     },
     {
       "key": "card-mail-carrier-hold",
@@ -6825,42 +6364,6 @@
       "png": "images/card-other-dog-sniff.png"
     },
     {
-      "key": "card-pee-mail-keep-walking",
-      "png": "images/card-pee-mail-keep-walking.png"
-    },
-    {
-      "key": "card-pee-mail-sniff",
-      "png": "images/card-pee-mail-sniff.png"
-    },
-    {
-      "key": "card-petunias-nature-calls",
-      "png": "images/card-petunias-nature-calls.png"
-    },
-    {
-      "key": "card-petunias-replant",
-      "png": "images/card-petunias-replant.png"
-    },
-    {
-      "key": "card-photo-op-pose",
-      "png": "images/card-photo-op-pose.png"
-    },
-    {
-      "key": "card-picnic-buy-lunch",
-      "png": "images/card-picnic-buy-lunch.png"
-    },
-    {
-      "key": "card-picnic-drop-it",
-      "png": "images/card-picnic-drop-it.png"
-    },
-    {
-      "key": "card-play-date-play",
-      "png": "images/card-play-date-play.png"
-    },
-    {
-      "key": "card-play-date-sniff",
-      "png": "images/card-play-date-sniff.png"
-    },
-    {
       "key": "card-puddle-through",
       "png": "images/card-puddle-through.png"
     },
@@ -6875,14 +6378,6 @@
     {
       "key": "card-rush-hour",
       "png": "images/card-rush-hour.png"
-    },
-    {
-      "key": "card-second-wind",
-      "png": "images/card-second-wind.png"
-    },
-    {
-      "key": "card-shortcut",
-      "png": "images/card-shortcut.png"
     },
     {
       "key": "card-skip",
@@ -7045,22 +6540,6 @@
       "png": "images/card-stink-seaweed-rinse.png"
     },
     {
-      "key": "card-stop-sign-dart",
-      "png": "images/card-stop-sign-dart.png"
-    },
-    {
-      "key": "card-stop-sign-wait",
-      "png": "images/card-stop-sign-wait.png"
-    },
-    {
-      "key": "card-stranger-loves-fuss",
-      "png": "images/card-stranger-loves-fuss.png"
-    },
-    {
-      "key": "card-stranger-loves-keep-walking",
-      "png": "images/card-stranger-loves-keep-walking.png"
-    },
-    {
       "key": "card-sweet-talker",
       "png": "images/card-sweet-talker.png"
     },
@@ -7075,30 +6554,6 @@
     {
       "key": "card-thief-let-them-run",
       "png": "images/card-thief-let-them-run.png"
-    },
-    {
-      "key": "card-trash-drag-on",
-      "png": "images/card-trash-drag-on.png"
-    },
-    {
-      "key": "card-trash-sniff",
-      "png": "images/card-trash-sniff.png"
-    },
-    {
-      "key": "card-trash-tidy-up",
-      "png": "images/card-trash-tidy-up.png"
-    },
-    {
-      "key": "card-treat-magnet",
-      "png": "images/card-treat-magnet.png"
-    },
-    {
-      "key": "card-water-stop-drink",
-      "png": "images/card-water-stop-drink.png"
-    },
-    {
-      "key": "card-water-stop-sip",
-      "png": "images/card-water-stop-sip.png"
     },
     {
       "key": "card-zone-bark-park",
@@ -7682,11 +7137,6 @@
       "m4a": "sounds/sfx-fired.m4a"
     },
     {
-      "key": "sfx-hit-cafe",
-      "ogg": "sounds/sfx-hit-cafe.ogg",
-      "m4a": "sounds/sfx-hit-cafe.m4a"
-    },
-    {
       "key": "sfx-hit-goose",
       "ogg": "sounds/sfx-hit-goose.ogg",
       "m4a": "sounds/sfx-hit-goose.m4a"
@@ -7695,16 +7145,6 @@
       "key": "sfx-hit-other-dog",
       "ogg": "sounds/sfx-hit-other-dog.ogg",
       "m4a": "sounds/sfx-hit-other-dog.m4a"
-    },
-    {
-      "key": "sfx-hit-petunias",
-      "ogg": "sounds/sfx-hit-petunias.ogg",
-      "m4a": "sounds/sfx-hit-petunias.m4a"
-    },
-    {
-      "key": "sfx-hit-picnic",
-      "ogg": "sounds/sfx-hit-picnic.ogg",
-      "m4a": "sounds/sfx-hit-picnic.m4a"
     },
     {
       "key": "sfx-hit-puddle",
@@ -7725,16 +7165,6 @@
       "key": "sfx-hit-thief",
       "ogg": "sounds/sfx-hit-thief.ogg",
       "m4a": "sounds/sfx-hit-thief.m4a"
-    },
-    {
-      "key": "sfx-hit-trash",
-      "ogg": "sounds/sfx-hit-trash.ogg",
-      "m4a": "sounds/sfx-hit-trash.m4a"
-    },
-    {
-      "key": "sfx-lemonade",
-      "ogg": "sounds/sfx-lemonade.ogg",
-      "m4a": "sounds/sfx-lemonade.m4a"
     },
     {
       "key": "sfx-new-best",

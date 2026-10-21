@@ -2,7 +2,7 @@
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
 People (walkers, forced stops, lucky people, the thief and the other dog's owner)
-are 48x72, the other dog, skunk and squirrel 48x48, the stop sign 48x72 and the
+are 48x72, the other dog, skunk and squirrel 48x48 and the
 pickups 24x24: their drawing functions lay them out on 32x48, 32x32 and 16x16, and
 sprites() draws them SCALE (1.5) times bigger on a scaling grid, never upscaled.
 The bark pop is 16x16. The ice cream truck (56x60, one lane, like
@@ -22,7 +22,7 @@ kicked up behind, sole showing, then that knee passing through, each side in
 turn, the ponytail swinging against the stride) wears an orange racerback
 singlet with a white race bib on its back; kid-on-bike (48x72, ride: 4 frames
 at 100ms, the pedals going round, a 1px sway and the streamers fluttering) is
-the kid in a red helmet on a mauve bike with training wheels.
+a kid in a red helmet on a mauve bike with training wheels.
 
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
@@ -46,11 +46,11 @@ The scenery gags play in the backdrop band, front view at the band's own scale: 
 (24x24) on the near-left perch and gag-kite (36x40) on the near-right lawn. gag-sprinkler
 (32x24) is not placed: each backdrop draws a static ornament on its spot. gag-kite is a street tree with a red and yellow diamond kite snagged at the top right of
 its crown, its ribboned tail streaming right; flutter (4 frames, 140ms, looping): the kite swings
-1 to 2px on its snag while a wave runs out along the tail. gag-ball (14x14), the rolling ball,
-stays for the play-date card's art.
+1 to 2px on its snag while a wave runs out along the tail. gag-ball (14x14) is the rolling
+ball.
 
 Everything that stands or waits on the road has a looping idle: people and
-walkers breathe (a 1px bob of the head and shoulders) and the stop sign glints.
+walkers breathe (a 1px bob of the head and shoulders).
 New tags go after the existing ones, so the frame indices the game uses stay put.
 
 Run from the repository root. A build overwrites the .aseprite sources, so
@@ -662,7 +662,6 @@ def hopped(rows, hop):
     return rows[hop:] + [[None] * len(rows[0]) for _ in range(hop)]
 
 
-
 # ---------- pickups ----------
 
 # The treat's idle: it bobs a pixel up and back.
@@ -1122,39 +1121,6 @@ def neighbour_top(wave):
     return top
 
 
-def tourist_top(flash):
-    def top(g, b):
-        g.rect(9, 21 + b, 14, 12, "orange")
-        g.rect(20, 21 + b, 3, 12, "rust")
-        for x, y in ((11, 23), (17, 25), (12, 29), (19, 30), (14, 26)):
-            g.rect(x, y + b, 2, 2, "yellow")
-        for x in (5, 23):
-            g.rect(x, 22 + b, 4, 6, "orange")
-            g.rect(x, 28 + b, 4, 4, "skin2")
-        g.rect(9, 33 + b, 14, 3, "tan")
-        # camera on a strap
-        g.rect(12, 24 + b, 9, 6, "ink")
-        g.rect(13, 25 + b, 7, 4, "dslate")
-        g.cel(16.5, 27 + b, 2, 2, "lgrey")
-        g.p(16, 26 + b, "white")
-        g.rect(18, 23 + b, 2, 1, "dslate")
-        face_disc(g, 16, 13.5 + b, 8, 8, "skin2", "brown")
-        g.rect(9, 12 + b, 6, 3, "ink")
-        g.rect(17, 12 + b, 6, 3, "ink")
-        g.rect(15, 12 + b, 2, 1, "ink")
-        g.p(10, 12 + b, "slate")
-        g.p(18, 12 + b, "slate")
-        g.rect(14, 18 + b, 4, 1, "dbrown")
-        g.cel(16, 8 + b, 13, 3, "tan", "brown", "cream")
-        g.cel(16, 6 + b, 7, 4, "tan", "brown", "cream")
-        g.rect(9, 7 + b, 14, 1, "red")
-        if flash:
-            for dx, dy in ((0, -3), (0, 3), (-3, 0), (3, 0), (-2, -2), (2, -2), (-2, 2), (2, 2), (0, 0)):
-                g.p(16 + dx, 27 + b + dy, "white")
-            g.p(16, 27 + b, "yellow")
-    return top
-
-
 # The bills sticking out of the wallet, back to front: left edge, width and top row.
 WALLET_BILLS = ((2, 5, 3.5), (9, 5, 2.5), (5.5, 5, 1))
 
@@ -1225,123 +1191,6 @@ def dog_owner_top(g, b):
 
 
 # ---------- forced stops ----------
-
-# The stop sign's legend, 3x5 letters, each as rows of three bits.
-STOP = {"S": "011100010001110", "T": "111010010010010", "O": "010101101101010", "P": "110101110100100"}
-
-
-def stop_sign(glint=None):
-    """glint is the diagonal x + y = glint (in layout pixels) along which a pink sheen crosses the red face, or
-    None. The road outline and the lit rim. The face is drawn in pixels at the grid's scale: an octagon
-    18 x scale across, its corners cut in one-pixel stairs, shaded dred along the lower-right edges and
-    the bottom, and the legend in 3x5 letters 1 or 2px apart, centred. An octagon under 16px has no room for the
-    letters, so the legend is a white bar across the face instead, a pixel of red each side."""
-    g = edged(Grid(32, 48))
-    g.rect(15, 22, 3, 24, "grey")
-    g.rect(17, 22, 1, 24, "slate")
-    g.rect(13, 45, 7, 2, "slate")
-    s = getattr(g, "s", 1)
-    px = getattr(g, "g", g)
-
-    def e(v):
-        return math.floor(v * s + 0.5)
-
-    d, cut, left, top = math.floor(18 * s), e(5), e(7), e(4)
-    for y in range(d):
-        c = max(0, cut - y, y - (d - 1 - cut))
-        px.rect(left + c, top + y, d - 2 * c, 1, "dred" if y == d - 1 else "red")
-        if y > cut:
-            px.p(left + d - 1 - c, top + y, "dred")
-    if d >= 16:
-        gap = max(1, min(2, (d - 14) // 3))
-        x0 = left + (d - 12 - 3 * gap) // 2
-        y0 = top + (d - 5) // 2
-        for i, ch in enumerate("STOP"):
-            for r in range(5):
-                for k in range(3):
-                    if STOP[ch][r * 3 + k] == "1":
-                        px.p(x0 + i * (3 + gap) + k, y0 + r, "white")
-    else:
-        h = max(1, e(5) - 2)
-        px.rect(left + 1, top + (d - h) // 2, d - 2, h, "white")
-    if glint is not None:
-        # the sheen stays inside the face, so the outline stays dark
-        for y in range(top + 1, top + d - 1):
-            x = e(glint) - y
-            if 0 < x < px.w and px.px[y][x] == K["red"] and px.px[y - 1][x] and px.px[y][x - 1]:
-                px.p(x, y, "pink")
-    return rim(g, LIT)
-
-
-def chatty_top(wave):
-    def top(g, b):
-        g.rect(9, 21 + b, 14, 13, "cream")
-        g.rect(11, 21 + b, 10, 12, "dgreen")
-        g.rect(19, 21 + b, 2, 12, "forest")
-        if wave:
-            g.rect(23, 12 + b, 4, 10, "cream")
-            g.rect(23, 9 + b, 4, 3, "skin2")
-        else:
-            g.rect(23, 22 + b, 4, 9, "cream")
-            g.rect(23, 31 + b, 4, 3, "skin2")
-        # the left arm bent across the chest, holding a red mug of coffee steady through the wave:
-        # the handle sticks out on the right, the hand cups it from the left
-        g.rect(5, 22 + b, 4, 7, "cream")
-        g.rect(5, 27 + b, 6, 3, "cream")
-        g.rect(11, 24 + b, 5, 6, "red")
-        g.rect(11, 24 + b, 1, 6, "pink")
-        g.rect(15, 24 + b, 1, 6, "dred")
-        g.rect(12, 24 + b, 3, 1, "dbrown")
-        g.rect(16, 25 + b, 2, 1, "red")
-        g.rect(17, 26 + b, 1, 2, "dred")
-        g.rect(16, 28 + b, 2, 1, "dred")
-        g.rect(10, 27 + b, 2, 3, "skin2")
-        g.p(10, 27 + b, "skin1")
-        face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
-        g.cel(16, 7 + b, 7, 3.5, "lgrey", "grey", "white")
-        g.rect(8, 9 + b, 2, 5, "lgrey")
-        g.rect(22, 9 + b, 2, 5, "lgrey")
-        face_front(g, 16, 13 + b)
-        g.rect(13, 16 + b, 6, 1, "lgrey")
-        g.p(12, 17 + b, "lgrey")
-        g.p(19, 17 + b, "lgrey")
-    return top
-
-
-def kid(wave=False, mood="happy", bob=0):
-    """The kid, with the road outline and the lit rim."""
-    g = edged(Grid(32, 48))
-    b = bob
-    for x in (12, 17):
-        g.rect(x, 38 + b, 3, 6 - b, "skin1")
-        g.rect(x, 44, 3, 2, "red")
-    g.rect(10, 28 + b, 12, 10, "yellow")
-    g.rect(19, 28 + b, 3, 10, "amber")
-    g.rect(10, 35 + b, 12, 3, "sky")
-    g.rect(7, 29 + b, 3, 6, "yellow")
-    g.rect(7, 35 + b, 3, 2, "skin1")
-    if wave:
-        # the arm raised from the shoulder behind the head
-        g.rect(22, 25 + b, 3, 5, "yellow")
-    else:
-        g.rect(22, 29 + b, 3, 6, "yellow")
-        g.rect(22, 35 + b, 3, 2, "skin1")
-    face_disc(g, 16, 20.5 + b, 7.5, 7.5, "skin1", "skin2")
-    g.cel(16, 15.5 + b, 8, 4, "red", "dred", "pink")
-    g.rect(16, 17 + b, 9, 2, "red")
-    g.rect(8, 18 + b, 2, 4, "ochre")
-    g.rect(22, 18 + b, 2, 4, "ochre")
-    face_front(g, 16, 21 + b, mood if mood != "sad" else "neutral")
-    if wave:
-        # the forearm up in front of the cap's brim, clear of the face, the hand open above it
-        g.rect(24, 19 + b, 3, 7, "yellow")
-        g.rect(24, 16 + b, 3, 3, "skin1")
-    if mood == "sad":
-        g.rect(15, 26 + b, 2, 1, "dbrown")
-        g.p(14, 27 + b, "dbrown")
-        g.p(17, 27 + b, "dbrown")
-        g.p(10, 23 + b, "cyan")
-    return rim(g, LIT)
 
 
 # The ice cream truck's drive: 4 frames of ice_cream_truck's roll, and their duration in ms.
@@ -1662,8 +1511,8 @@ KID_BIKE_RIDE_MS = 100
 
 
 def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
-    """The kid riding a little bike up the road, seen from behind, the kid's look (yellow tee, sky shorts,
-    red shoes, ochre hair) under a red helmet with a white stripe. The bike is mauve, on training wheels,
+    """A kid riding a little bike up the road, seen from behind: a yellow tee, sky shorts, red shoes and
+    ochre hair under a red helmet with a white stripe. The bike is mauve, on training wheels,
     with a red reflector under the saddle and streamers trailing from the grips. Shorter than an adult rider:
     the helmet's top is 7 rows lower than the cyclist's. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
@@ -1886,9 +1735,6 @@ def sprites():
     yield "biscuit-neighbour", [("wave", frames(big(dressed, neighbour_top(w), **neighbour) for w in (False, True)), 350),
                                 ("idle", frames(big(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
                                  BREATH_MS)]
-    tourist = dict(legs="skin2", shoes="sky")
-    yield "photo-op", [("idle", frames(big(dressed, tourist_top(False), bob=bb, **tourist) for bb in BREATH), BREATH_MS),
-                       ("flash", frames(big(dressed, tourist_top(f), **tourist) for f in (True, False)), 120)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
     # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
     yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140]),
@@ -1896,14 +1742,6 @@ def sprites():
     yield "gag-sprinkler", [("spray", frames(sprinkler(i) for i in range(4)), 140)]
     yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
     yield "gag-kite", [("flutter", frames(kite_tree(i) for i in range(4)), 140)]
-    # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
-    yield "stop-sign", [("idle", frames(big(stop_sign, c) for c in (None, None, 18, 24)), 400)]
-    chatty = dict(legs="brown", shoes="dbrown")
-    yield "chatty-neighbour", [("wave", frames(big(dressed, chatty_top(w), **chatty) for w in (False, True)), 350),
-                               ("idle", frames(big(dressed, chatty_top(False), bob=bb, **chatty) for bb in BREATH),
-                                BREATH_MS)]
-    yield "kid", [("wave", frames([big(kid, False), big(kid, True)]), 300), ("sad", frames([big(kid, False, "sad")]), 1000),
-                  ("idle", frames(big(kid, bob=bb) for bb in BREATH), BREATH_MS)]
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
                               ("drive", frames(drawn(TRUCK_SCALE, ice_cream_truck, 0, r) for r in drive), drive_ms)]

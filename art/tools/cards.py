@@ -13,8 +13,8 @@
   body 12..154 x 152..234, badge 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
   large frame); the game writes the cost between its rivets.
-- card-<encounter>-<option>, card-<need card>-<option>, card-<upgrade> and
-  card-skip: 75x56 illustrations, one per option, composed from the exported
+- card-<encounter>-<option>, card-<upgrade> and card-skip: 75x56
+  illustrations, one per option, composed from the exported
   sprites. Build the sprites first.
 - card-zone-<zone>: 75x56, a fork's path card: the zone's road, sampled from
   its road strip, running to a cross street, with the zone's backdrop scenery
@@ -41,10 +41,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
-import encounters as enc  # noqa: E402
 import help as hp  # noqa: E402
-import needs  # noqa: E402
-import people  # noqa: E402
 import road  # noqa: E402
 import roads  # noqa: E402
 from ui import chrome, to_image  # noqa: E402
@@ -340,110 +337,21 @@ def thief_let_them_run(zone="street", key="thief"):
 
 
 # ---------- zone encounters ----------
-# The encounter drawings from encounters.py at 1x, the 2-lane ones cropped by the card's edges.
 
-def drawn(g):
-    return to_image(g.outlined())
-
-
-def need_met(a, need, x, y):
-    """A need fulfilled: its icon in a 20x20 chrome bubble (ui.py) with a sparkle at the corner.
-    Only urgent needs pay +♥, so these cards show the icon rather than hearts."""
-    a.paste(to_image(chrome(Grid(20, 20), 0, 0, 20, 20).px), x, y)
-    a.paste(hp.frame(f"icon-need-{need}", "normal"), x + 2, y + 2)
-    a.sparkle(x + 20, y, "yellow")
-
-
-def coin_arc(a, pts):
-    """The dotted path a payment takes, off the bottom edge toward whoever is paid."""
+def broken_hearts(a, pts):
+    """Hearts broken in two down the middle, the right half dropped a pixel: a heart lost."""
     for x, y in pts:
-        a.fill(x, y, 1, 1, "white")
-
-
-def red_alert(a, x, y):
-    a.fill(x, y, 2, 5, "red")
-    a.fill(x, y + 6, 2, 2, "red")
+        for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
+            for i, c in enumerate(r):
+                if c == "1":
+                    right = i > 3
+                    a.fill(x + i + right, y + j + right, 1, 1, "pink" if (i, j) == (1, 1) else "red")
 
 
 def honk(a, x, y):
     """Three short lines fanning left from a beak at x, y."""
     for dy, dx in ((-3, -1), (0, 0), (3, -1)):
         a.fill(x - 4 + dx, y + dy, 3, 1, "white")
-
-
-def paw_prints(a, pts, col="brown"):
-    """5x4 prints: four toes round the pad."""
-    for x, y in pts:
-        for dx, dy in ((1, 0), (3, 0), (0, 1), (4, 1)):
-            a.fill(x + dx, y + dy, 1, 1, col)
-        a.fill(x + 1, y + 2, 3, 2, col)
-
-
-# A sandwich from the side with a bite out of its top right: crust (t), bread (c), lettuce (g),
-# tomato (r).
-SANDWICH = ["ttttt..", "cccccc.", "ggggggg", "rrrrrrr", "ttttttt"]
-# A fresh latte on its saucer: the foam (c) inside the rim (b), the cup (w) and its handle (l).
-LATTE = ["bccccb..", "wwwwwwll", "wwwwww.l", "wwwwwwll", ".wwwww..", "llllllll"]
-# A water bowl, its rim (b) round the water (c) with a glint (h).
-BOWL = [".bbbbbbbb.", "bchccccccb", "bccccccccb", ".bbbbbbbb."]
-# A petunia seedling in its pot: the flower (p) with its eye (y), a leaf (g), the pot (r, shade o).
-POT = [".ppp.", "ppypp", ".pgp.", "ggg..", "rrrrr", ".rro.", ".rro."]
-
-
-def sandwich(a, x, y):
-    a.paste(pixmap(SANDWICH, {"t": "tan", "c": "cream", "g": "green", "r": "red"}), x, y)
-
-
-def calm_gardener():
-    """The petunias with the gardener soothed: eyes shut in happy arcs and a smile."""
-    g = enc.petunias(new=enc.mini(enc.BIG), w=enc.TWO_LANES)
-    cx = 66 + enc.TWO_LANES - 88
-    for x in (cx - 5, cx + 3):
-        g.rect(x, 7, 3, 3, "skin1")
-        g.p(x, 9, "ink")
-        g.rect(x + 1, 8, 1, 1, "ink")
-        g.p(x + 2, 9, "ink")
-    g.rect(cx - 1, 12, 3, 2, "skin1")
-    g.p(cx - 2, 12, "dbrown")
-    g.rect(cx - 1, 13, 3, 1, "dbrown")
-    g.p(cx + 2, 12, "dbrown")
-    return drawn(g)
-
-
-def waving_kid_stand():
-    """The lemonade stand with the kid's right arm up in a wave, as road.kid(wave=True) holds it."""
-    g = enc.lemonade_stand(new=enc.mini(enc.BIG))
-    g.rect(22, 21, 3, 10, "yellow")
-    g.rect(21, 17, 4, 4, "skin1")
-    g.rect(24, 17, 1, 4, "skin2")
-    return drawn(g)
-
-
-def picnic_buy_lunch():
-    """Buy a new lunch: the dog keeps its stolen sandwich, the coins go to the picnicker, who
-    is happily chewing again."""
-    a = Art()
-    a.ground("park")
-    a.paste(hp.frame("picnic", "idle", 3), -10, 0)
-    c = a.put("dog-biscuit", "react", 24, 56)
-    a.lead(24, c, 18)
-    sandwich(a, 21, 26)
-    coin_arc(a, [(70, 54), (69, 50), (67, 46), (64, 43)])
-    a.coins([(46, 36), (54, 38)], 1)
-    a.sparkle(30, 18, "white")
-    return a
-
-
-def picnic_drop_it():
-    """Drop it!: the sandwich on the ground, the dog held back from it, its owner's heart lost."""
-    a = Art()
-    a.ground("park")
-    a.paste(hp.frame("picnic", "idle"), -10, 0)
-    c = a.put("dog-biscuit", "idle", 28, 56)
-    a.lead(28, c, 22)
-    sandwich(a, 42, 40)
-    broken_hearts(a, [(58, 38)])
-    return a
 
 
 def goose_back_off():
@@ -471,172 +379,7 @@ def goose_honk_back():
     return a
 
 
-def petunias_replant():
-    """Replant them: fresh petunias in pots by the bed, the coins to the gardener, now smiling."""
-    a = Art()
-    a.ground("street")
-    a.paste(calm_gardener(), -14, 2)
-    for x in (6, 14):
-        a.paste(pixmap(POT, {"p": "pink", "y": "yellow", "g": "green", "r": "rust", "o": "dbrown"}), x, 38)
-    a.sparkle(30, 14, "white")
-    c = a.put("dog-biscuit", "idle", 36, 57)
-    a.lead(36, c, 40)
-    coin_arc(a, [(64, 54), (63, 50), (62, 46)])
-    a.coins([(52, 34), (58, 38)], 2)
-    return a
-
-
-def petunias_nature_calls():
-    """Nature calls: the dog at the bed's edge with a puddle behind it, the gardener appalled,
-    the need met and its owner's heart lost."""
-    a = Art()
-    a.ground("street")
-    a.paste(hp.frame("petunias", "idle"), -14, 2)
-    a.put("dog-biscuit", "idle", 36, 55)
-    a.fill(32, 52, 9, 1, "ochre")
-    a.fill(31, 53, 11, 2, "yellow")
-    a.fill(32, 55, 9, 1, "ochre")
-    a.fill(33, 53, 2, 1, "white")
-    red_alert(a, 72, 2)
-    need_met(a, "regular", 4, 36)
-    broken_hearts(a, [(58, 40)])
-    return a
-
-
-def trash_sniff():
-    """Sniff it all: the dog's nose in the pizza box, scent rising off it, the need met and the
-    clock running."""
-    a = Art()
-    a.ground("street")
-    a.paste(hp.frame("trash-bins", "idle"), -7, 2)
-    c = a.put("dog-koda", "idle", 52, 57)
-    a.lead(52, c, 58)
-    for x, y in ((50, 14), (51, 18)):
-        for dx, dy in needs.SCENT:
-            a.fill(x + dx, y + dy, 1, 1, "white")
-    need_met(a, "nosy", 2, 1)
-    clock(a, 68, 8)
-    return a
-
-
-def trash_tidy_up():
-    """Tidy up: the bins upright again, the last bag on its way in, the ground swept, the
-    coins spent and a fussy owner pleased."""
-    a = Art()
-    a.ground("street")
-    a.put("bin", "idle", 16, 40)
-    a.put("bin", "idle", 40, 40)
-    for x, y in ((26, 48), (28, 42), (30, 36), (32, 30), (34, 24), (37, 18), (40, 13), (43, 9)):
-        a.fill(x, y, 1, 1, "white")
-    a.paste(pixmap(BAG, {"e": "pink", "k": "mauve", "f": "pink", "s": "mauve", "h": "white"}), 44, 0)
-    a.sparkle(10, 48, "white")
-    a.sparkle(30, 52, "yellow")
-    c = a.put("dog-koda", "idle", 58, 57)
-    a.lead(58, c, 64)
-    a.coins([(0, 36)], 1)
-    a.hearts([(62, 6)])
-    return a
-
-
-def trash_drag_on():
-    """Drag them on: the dog straining toward the pizza, the leash taut back out of frame,
-    hearts lost (two for a food-driven dog)."""
-    a = Art()
-    a.ground("homeStretch")
-    a.paste(hp.frame("trash-bins", "idle", 1), -7, 0)
-    c = a.put("dog-biscuit", "pull", 42, 56)
-    a.lead(42, c, 22)
-    broken_hearts(a, [(2, 4), (11, 9)])
-    return a
-
-
-def cafe_charm():
-    """Charm the crowd: the dog sat up between the tables, the patrons cooing, the need met and
-    the clock running."""
-    a = Art()
-    a.ground("shops")
-    a.paste(hp.frame("cafe-patio", "idle"), -7, 0)
-    c = a.put("dog-duchess", "react", 37, 57)
-    a.lead(37, c, 44)
-    a.hearts([(30, 11), (40, 13)])
-    need_met(a, "friendly", 2, 36)
-    clock(a, 67, 46)
-    return a
-
-
-def cafe_buy_lattes():
-    """Buy new lattes: a tray of fresh ones, the coins spent and a fussy owner pleased."""
-    a = Art()
-    a.ground("shops")
-    a.paste(hp.frame("cafe-patio", "idle", 2), -7, 0)
-    a.fill(10, 52, 34, 2, "slate")
-    a.fill(10, 52, 34, 1, "lgrey")
-    for x in (12, 23, 34):
-        a.paste(pixmap(LATTE, {"b": "brown", "c": "cream", "w": "white", "l": "lgrey"}), x, 44)
-    a.coins([(2, 36)], 1)
-    c = a.put("dog-duchess", "idle", 60, 57)
-    a.lead(60, c, 68)
-    a.hearts([(46, 40)])
-    return a
-
-
-def cafe_slink_away():
-    """Slink away: the dog sloping off, latte paw prints behind it, its owner's heart lost."""
-    a = Art()
-    a.ground("shops")
-    a.paste(hp.frame("cafe-patio", "idle"), -7, 0)
-    paw_prints(a, [(16, 42), (24, 47), (32, 43), (40, 48)])
-    c = a.put("dog-biscuit", "pull", 58, 57)
-    a.lead(58, c, 44)
-    broken_hearts(a, [(34, 12)])
-    return a
-
-
-def lemonade_water():
-    """Water, please: the dog lapping at a bowl by the stand, coins to the kid and the need met."""
-    a = Art()
-    a.ground("street")
-    a.put("lemonade-stand", "idle", 56, 60)
-    c = a.put("dog-nugget", "pull", 16, 57)
-    a.lead(16, c, 8)
-    a.paste(pixmap(BOWL, {"b": "red", "c": "cyan", "h": "white"}), 26, 40)
-    a.drops([(28, 36), (33, 32), (38, 36)])
-    a.coins([(24, 14)], 1)
-    need_met(a, "thirsty", 2, 1)
-    return a
-
-
-def lemonade_say_hi():
-    """Say hi: the kid waving, the dog sat up for a fuss, the need met and the clock running."""
-    a = Art()
-    a.ground("street")
-    a.shadow(56, 55, 40)
-    a.paste(waving_kid_stand(), 36, 0)
-    c = a.put("dog-duchess", "react", 22, 57)
-    a.lead(22, c, 18)
-    need_met(a, "friendly", 2, 1)
-    clock(a, 30, 10)
-    return a
-
-
-def lemonade_maybe_later():
-    a = Art()
-    a.ground("street")
-    a.put("lemonade-stand", "idle", 56, 60)
-    c = a.put("dog-duchess", "walk", 22, 52, 2)
-    a.lead(22, c, 16)
-    return a
-
-
 # ---------- lucky encounters ----------
-
-def wallet_return():
-    a = Art()
-    a.ground("homeStretch")
-    a.paste(hp.frame("lost-wallet", "idle", 1), 30, 22)
-    a.hearts([(14, 8), (52, 10), (24, 40), (48, 38)])
-    return a
-
 
 def wallet_keep():
     a = Art()
@@ -656,16 +399,6 @@ def neighbour_take():
     return a
 
 
-def photo_pose():
-    a = Art()
-    a.ground("shops")
-    a.put("photo-op", "flash", 54, 58)
-    a.put("dog-duchess", "react", 20, 54, shadow=False)
-    a.sparkle(10, 10, "yellow")
-    a.sparkle(30, 6, "white")
-    return a
-
-
 # ---------- forced stops ----------
 
 def clock(a, x, y):
@@ -676,120 +409,6 @@ def clock(a, x, y):
                 a.fill(x + dx, y + dy, 1, 1, "white" if d < 12 else "plum")
     a.fill(x, y - 3, 1, 4, "plum")
     a.fill(x, y, 3, 1, "plum")
-
-
-def stop_wait():
-    a = Art()
-    a.ground("street")
-    a.put("stop-sign", "idle", 58, 56, shadow=False)
-    c = a.put("dog-biscuit", "idle", 30, 56)
-    a.lead(30, c, 28)
-    clock(a, 12, 12)
-    return a
-
-
-def stop_dart():
-    a = Art()
-    a.ground("street")
-    a.put("stop-sign", "idle", 62, 56, shadow=False)
-    c = a.put("dog-koda", "pull", 34, 48, 1)
-    # the leash trails out of frame, speed lines behind the dash
-    a.lead(34, c, 18)
-    for x, y in ((8, 18), (4, 26), (10, 34)):
-        a.fill(x, y, 10, 1, "lgrey")
-    return a
-
-
-def chatty_chat():
-    a = Art()
-    a.grass()
-    a.put("chatty-neighbour", "wave", 52, 58)
-    # the dog waits out the chat; the neighbour talks to the walker out of frame
-    c = a.put("dog-biscuit", "idle", 18, 57)
-    a.lead(18, c, 14)
-    a.bubble(14, 2, 22, ["..."])
-    # the tip, edge-on as it is handed over
-    a.coins([(26, 26)], 1)
-    return a
-
-
-def chatty_move_on():
-    a = Art()
-    a.grass()
-    a.put("chatty-neighbour", "wave", 56, 58, 1)
-    c = a.put("dog-biscuit", "walk", 24, 50, 2)
-    a.lead(24, c, 20)
-    return a
-
-
-def kid_pet():
-    a = Art()
-    a.grass()
-    a.put("kid", "wave", 54, 57)
-    a.put("dog-duchess", "react", 28, 56)
-    a.hearts([(18, 6), (36, 10)])
-    return a
-
-
-def kid_decline():
-    a = Art()
-    a.grass()
-    a.put("kid", "sad", 56, 57)
-    c = a.put("dog-duchess", "walk", 24, 50, 1)
-    a.lead(24, c, 18)
-    return a
-
-
-# A pup cup: a scoop (f, highlight h) on a striped paper cup that narrows to its base.
-CUP = ["..fff..", ".fhfff.", "fffffff", "WWWWWWW", ".RWRWR.", ".RWRWR.", "..WWW.."]
-
-
-def truck_cups():
-    a = Art()
-    a.ground("shops")
-    a.paste(hp.frame("ice-cream-truck", "idle"), 32, -1)
-    a.put("dog-biscuit", "react", 14, 57)
-    for x, (f, h) in zip((34, 47, 60), (("pink", "white"), ("cream", "white"), ("brown", "tan"))):
-        a.shadow(x + 4, 55, 9)
-        a.paste(pixmap(CUP, {"f": f, "h": h, "W": "white", "R": "red"}), x, 45)
-    a.hearts([(4, 4)])
-    return a
-
-
-def truck_walk_past():
-    a = Art()
-    a.ground("shops")
-    a.paste(hp.frame("ice-cream-truck", "idle", 1), 32, 1)
-    c = a.put("dog-biscuit", "pull", 16, 54)
-    # held back from the truck: the leash runs taut out of frame
-    a.lead(16, c, 4)
-    a.fill(30, 30, 2, 5, "red")
-    a.fill(30, 36, 2, 2, "red")
-    return a
-
-
-def detour_long_way():
-    a = Art()
-    a.ground("street")
-    a.paste(hp.frame("construction", "idle"), 6, 0)
-    for x, y in ((5, 52), (3, 46), (1, 40), (1, 34), (3, 28), (5, 22), (68, 52), (70, 46), (72, 40), (72, 34), (70, 28),
-                 (68, 22)):
-        a.fill(x, y, 2, 2, "amber")
-    c = a.put("dog-koda", "walk", 38, 56, 2)
-    a.lead(38, c, 38)
-    clock(a, 66, 8)
-    return a
-
-
-def detour_squeeze():
-    a = Art()
-    a.ground("street")
-    a.paste(hp.frame("construction", "idle", 1), 6, 0)
-    a.put("dog-duchess", "walk", 37, 52, 3)
-    for x, y in ((24, 30), (48, 28), (28, 40), (50, 40), (40, 26)):
-        a.fill(x, y, 4, 3, "lgrey")
-        a.fill(x + 1, y - 1, 2, 1, "grey")
-    return a
 
 
 def mail_hold():
@@ -940,20 +559,6 @@ def big_tipper():
     return a
 
 
-def shortcut():
-    a = Art()
-    a.ground("street")
-    for x, y in ((8, 50), (14, 44), (20, 38), (26, 32), (32, 26), (38, 20), (44, 14), (50, 8)):
-        a.fill(x, y, 3, 2, "amber")
-    a.chevron(56, 8, 1, "amber")
-    c = a.put("dog-biscuit", "walk", 18, 56, 1)
-    a.lead(18, c, 12)
-    # the trade-off: a shorter zone, and fewer fees
-    a.paste(hp.frame("tip", "idle"), 44, 38)
-    a.arrow(60, 40, 1, "red")
-    return a
-
-
 def rush_hour():
     a = Art()
     a.ground("street")
@@ -976,38 +581,6 @@ def raincoats():
     a.fill(34, 31, 7, 3, "amber")
     for x, y in ((6, 4), (16, 12), (26, 2), (54, 8), (64, 16), (12, 28), (60, 30), (48, 2)):
         a.fill(x, y, 1, 3, "cyan")
-    return a
-
-
-def treat_magnet():
-    a = Art()
-    a.ground("park")
-    # a horseshoe magnet
-    a.fill(46, 14, 6, 22, "red")
-    a.fill(60, 14, 6, 22, "red")
-    a.fill(46, 30, 20, 6, "red")
-    a.fill(46, 30, 20, 1, "pink")
-    a.fill(46, 14, 6, 4, "lgrey")
-    a.fill(60, 14, 6, 4, "lgrey")
-    a.fill(64, 18, 2, 18, "dred")
-    for k, (x, y) in enumerate(((6, 18), (20, 28), (10, 40))):
-        a.paste(hp.frame("treat", "idle"), x, y)
-        for d in range(3):
-            a.fill(x + 18 + d * 5, y + 6, 3, 1, "cream")
-    return a
-
-
-def second_wind():
-    a = Art()
-    a.grass()
-    a.face("face-owner-archie", "happy", 21, 12)
-    for y, x0 in ((8, 4), (22, 2), (36, 6)):
-        a.fill(x0, y, 12, 1, "white")
-        a.fill(x0 + 10, y - 1, 3, 1, "white")
-        a.fill(x0 + 12, y - 2, 1, 1, "white")
-    a.heart(56, 14, "red", "pink")
-    a.heart(56, 26, "red", "pink")
-    a.arrow(55, 36, -1, "white")
     return a
 
 
@@ -1036,229 +609,6 @@ def skip():
     hp.text(a, "SKIP", 4, 4, "white", 2)
     for y in (40, 44, 48):
         a.fill(28, y, 8, 1, "lgrey")
-    return a
-
-
-# ---------- need cards ----------
-
-def stranger_fuss():
-    a = Art()
-    a.ground("street")
-    a.put("spot-stranger", "wave", 54, 60, 1)
-    c = a.put("dog-duchess", "react", 26, 57)
-    a.lead(26, c, 22)
-    a.hearts([(14, 8), (26, 3), (6, 18)])
-    a.coins([(6, 32)])
-    return a
-
-
-def stranger_keep_walking():
-    a = Art()
-    a.ground("street")
-    a.put("spot-stranger", "wave", 56, 60)
-    c = a.put("dog-duchess", "walk", 24, 50, 2)
-    a.lead(24, c, 18)
-    return a
-
-
-def play_date_play():
-    a = Art()
-    a.ground("park")
-    a.put("other-dog", "walk", 54, 37, 1)
-    c = a.put("dog-zippy", "react", 24, 57)
-    a.lead(24, c, 20)
-    a.paste(hp.frame("gag-ball", "roll", 1), 36, 28)
-    a.hearts([(10, 8), (22, 3), (28, 14)])
-    return a
-
-
-def play_date_sniff():
-    a = Art()
-    a.ground("park")
-    a.put("other-dog", "idle", 46, 35)
-    c = a.put("dog-zippy", "walk", 32, 58, 1)
-    a.lead(32, c, 30)
-    # scent lines between the noses, as on the nosy need's icon
-    for dx, dy in needs.SCENT:
-        a.fill(38 + dx, 33 + dy, 1, 1, "white")
-        a.fill(38 + dx, 36 + dy, 1, 1, "white")
-    a.hearts([(20, 8)])
-    return a
-
-
-def grumpy_top(g, b):
-    """The grumpy neighbour out on his lawn: a blue dressing gown belted at the waist over a white
-    collar, fists on his hips, a bald crown with grey tufts over the ears, brows down in a scowl
-    and the mouth turned down."""
-    people.torso(g, b, "blue", "navy")
-    g.rect(14, 21 + b, 4, 3, "white")
-    g.rect(15, 24 + b, 2, 2, "white")
-    g.rect(9, 28 + b, 14, 2, "sky")
-    g.rect(20, 28 + b, 3, 2, "blue")
-    # arms akimbo: each upper arm out to the elbow, the forearm back in to a fist on the hip
-    for x0, d in ((5, -1), (23, 1)):
-        g.rect(x0, 22 + b, 4, 4, "blue")
-        g.rect(x0 + 2 * d, 25 + b, 4, 4, "blue")
-        g.rect(x0 - d, 29 + b, 4, 2, "blue")
-    g.rect(8, 29 + b, 3, 3, "skin2")
-    g.rect(21, 29 + b, 3, 3, "skin2")
-    g.rect(3, 26 + b, 1, 3, "navy")
-    g.rect(28, 26 + b, 1, 3, "navy")
-    people.head(g, b, "skin2", "brown")
-    for x in (8, 22):
-        g.rect(x, 10 + b, 2, 5, "lgrey")
-    g.rect(13, 5 + b, 3, 1, "skin1")
-    road.face_front(g, 16, 13 + b, "neutral")
-    g.rect(10, 10 + b, 3, 1, "ink")
-    g.p(13, 11 + b, "ink")
-    g.rect(20, 10 + b, 3, 1, "ink")
-    g.p(19, 11 + b, "ink")
-    g.rect(14, 18 + b, 4, 1, "dbrown")
-    g.p(13, 19 + b, "dbrown")
-    g.p(18, 19 + b, "dbrown")
-
-
-# A tied poop bag: two ears (e) over the knot (k), the bag (f) with its shade (s) and a glint (h).
-BAG = ["e...e", ".eke.", "..k..", ".fff.", "fhffs", "ffffs", ".fss."]
-
-
-def accident_bag():
-    """Clean up with a bag: the spot wiped clean and sparkling, the tied bag arcing into a bin, the
-    dog walking on."""
-    a = Art()
-    a.ground("street")
-    a.put("bin", "idle", 62, 40)
-    for x, y in ((34, 34), (36, 28), (39, 22), (42, 17), (46, 13), (50, 11)):
-        a.fill(x, y, 1, 1, "white")
-    # pink, so it reads apart from the green bin
-    a.paste(pixmap(BAG, {"e": "pink", "k": "mauve", "f": "pink", "s": "mauve", "h": "white"}), 52, 5)
-    a.sparkle(30, 42, "white")
-    a.sparkle(37, 46, "yellow")
-    a.sparkle(26, 48, "yellow")
-    c = a.put("dog-biscuit", "walk", 14, 54, 1)
-    a.lead(14, c, 10)
-    return a
-
-
-def grumpy_lawn(a, x=-2):
-    """The street with the grumpy neighbour's lawn down its left edge, a grey curb along it, and
-    him standing on it, his left edge at column x."""
-    a.ground("street")
-    a.fill(0, 0, 26, AH, "green")
-    for i in range(12):
-        a.fill((i * 7) % 24, (i * 13) % AH, 1, 2, "dgreen")
-    a.fill(26, 0, 2, AH, "grey")
-    neighbour = to_image(road.big(road.dressed, grumpy_top, legs="lgrey", shoes="pink").px)
-    shade, a.shade = a.shade, "dgreen"
-    a.shadow(x + 20, 55, neighbour.width)
-    a.shade = shade
-    a.paste(neighbour, x, -1)
-
-
-def accident_walk_on():
-    """Walk on: the pile left at the lawn's edge with its stink, the grumpy neighbour on his lawn
-    with his fists on his hips, and the dog trotting off."""
-    a = Art()
-    grumpy_lawn(a)
-    a.paste(to_image(needs.accident_spot(0).px), 30, 34)
-    a.stink(32, 24, 2, "green", "dgreen")
-    a.fill(30, 2, 2, 5, "red")
-    a.fill(30, 8, 2, 2, "red")
-    c = a.put("dog-biscuit", "walk", 56, 50, 2)
-    a.lead(56, c, 64)
-    return a
-
-
-def broken_hearts(a, pts):
-    """Hearts broken in two down the middle, the right half dropped a pixel: a heart lost."""
-    for x, y in pts:
-        for j, r in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
-            for i, c in enumerate(r):
-                if c == "1":
-                    right = i > 3
-                    a.fill(x + i + right, y + j + right, 1, 1, "pink" if (i, j) == (1, 1) else "red")
-
-
-# A sealed envelope: pee-mail, the flap's V in lgrey.
-ENVELOPE = ["fwwwwwf", "wfwwwfw", "wwfwfww", "wwwfwww", "wwwwwww"]
-
-
-def envelopes(a, pts):
-    for x, y in pts:
-        a.paste(pixmap(ENVELOPE, {"w": "white", "f": "lgrey"}), x, y)
-
-
-def good_spot_take_time():
-    """Take your time: the dog settled at the foot of the tree, hearts over it, the clock running."""
-    a = Art()
-    a.ground("park")
-    a.put("spot-tree", "idle", 22, 58)
-    c = a.put("dog-biscuit", "idle", 46, 57)
-    a.lead(46, c, 52)
-    a.hearts([(48, 8), (60, 14), (52, 22)])
-    clock(a, 66, 32)
-    return a
-
-
-def good_spot_keep_walking():
-    a = Art()
-    a.ground("park")
-    a.put("spot-tree", "idle", 54, 58, 1)
-    c = a.put("dog-biscuit", "walk", 24, 50, 2)
-    a.lead(24, c, 18)
-    return a
-
-
-def pee_mail_sniff():
-    """Read it all: the dog's nose at the lamp post's foot, scent rising off it as envelopes,
-    hearts over it and the clock running."""
-    a = Art()
-    a.ground("street")
-    a.put("spot-lamp-post", "idle", 18, 58)
-    c = a.put("dog-koda", "idle", 38, 57)
-    a.lead(38, c, 46)
-    for x, y in ((23, 42), (24, 47)):
-        for dx, dy in needs.SCENT:
-            a.fill(x + dx, y + dy, 1, 1, "white")
-    envelopes(a, [(36, 16), (46, 6), (58, 14)])
-    a.hearts([(62, 28), (54, 34)])
-    clock(a, 66, 6)
-    return a
-
-
-def pee_mail_keep_walking():
-    a = Art()
-    a.ground("street")
-    a.put("spot-lamp-post", "idle", 56, 58)
-    envelopes(a, [(64, 36)])
-    c = a.put("dog-koda", "walk", 24, 50, 2)
-    a.lead(24, c, 18)
-    return a
-
-
-def water_stop_drink():
-    """A long drink: the dog's head down in the bowl, the water splashing, hearts over it and the
-    clock running."""
-    a = Art()
-    a.ground("park")
-    a.put("spot-water-bowl", "idle", 30, 37, 3)
-    c = a.put("dog-duchess", "idle", 36, 57)
-    a.lead(36, c, 44)
-    a.drops([(26, 14), (31, 10), (42, 12), (47, 16), (36, 7)])
-    a.hearts([(54, 8), (64, 16)])
-    clock(a, 10, 10)
-    return a
-
-
-def water_stop_sip():
-    """Just a sip: a lap at the bowl and on, one drop off the chin and one heart."""
-    a = Art()
-    a.ground("park")
-    a.put("spot-water-bowl", "idle", 54, 42)
-    c = a.put("dog-duchess", "walk", 28, 52, 2)
-    a.lead(28, c, 22)
-    a.drops([(38, 30)])
-    a.hearts([(24, 6)])
     return a
 
 
@@ -1569,59 +919,19 @@ ILLUSTRATIONS = {
     "card-thief-chase": thief_chase,
     "card-thief-let-go": thief_let_go,
     "card-thief-let-them-run": thief_let_them_run,
-    "card-picnic-buy-lunch": picnic_buy_lunch,
-    "card-picnic-drop-it": picnic_drop_it,
     "card-goose-back-off": goose_back_off,
     "card-goose-honk-back": goose_honk_back,
-    "card-petunias-replant": petunias_replant,
-    "card-petunias-nature-calls": petunias_nature_calls,
-    "card-trash-sniff": trash_sniff,
-    "card-trash-tidy-up": trash_tidy_up,
-    "card-trash-drag-on": trash_drag_on,
-    "card-cafe-charm": cafe_charm,
-    "card-cafe-buy-lattes": cafe_buy_lattes,
-    "card-cafe-slink-away": cafe_slink_away,
-    "card-lemonade-water": lemonade_water,
-    "card-lemonade-say-hi": lemonade_say_hi,
-    "card-lemonade-maybe-later": lemonade_maybe_later,
-    "card-lost-wallet-return": wallet_return,
     "card-lost-wallet-keep": wallet_keep,
     "card-biscuit-neighbour-take": neighbour_take,
-    "card-photo-op-pose": photo_pose,
-    "card-stop-sign-wait": stop_wait,
-    "card-stop-sign-dart": stop_dart,
-    "card-chatty-neighbour-chat": chatty_chat,
-    "card-chatty-neighbour-move-on": chatty_move_on,
-    "card-kid-wants-to-pet-pet": kid_pet,
-    "card-kid-wants-to-pet-decline": kid_decline,
-    "card-ice-cream-truck-pup-cups": truck_cups,
-    "card-ice-cream-truck-walk-past": truck_walk_past,
-    "card-construction-detour-long-way": detour_long_way,
-    "card-construction-detour-squeeze": detour_squeeze,
     "card-mail-carrier-hold": mail_hold,
     "card-mail-carrier-wait": mail_wait,
     "card-belly-rubs": belly_rubs,
     "card-good-leash": good_leash,
     "card-big-tipper": big_tipper,
-    "card-shortcut": shortcut,
     "card-rush-hour": rush_hour,
     "card-raincoats": raincoats,
-    "card-treat-magnet": treat_magnet,
-    "card-second-wind": second_wind,
     "card-sweet-talker": sweet_talker,
     "card-skip": skip,
-    "card-stranger-loves-fuss": stranger_fuss,
-    "card-stranger-loves-keep-walking": stranger_keep_walking,
-    "card-play-date-play": play_date_play,
-    "card-play-date-sniff": play_date_sniff,
-    "card-accident-bag": accident_bag,
-    "card-accident-walk-on": accident_walk_on,
-    "card-good-spot-take-time": good_spot_take_time,
-    "card-good-spot-keep-walking": good_spot_keep_walking,
-    "card-pee-mail-sniff": pee_mail_sniff,
-    "card-pee-mail-keep-walking": pee_mail_keep_walking,
-    "card-water-stop-drink": water_stop_drink,
-    "card-water-stop-sip": water_stop_sip,
     "card-zone-woof-way": woof_way_view,
     "card-zone-bark-park": bark_park_view,
     "card-zone-sniff-street-shops": shops_view,
@@ -1646,11 +956,7 @@ FRAME_TAGS = card_frame_tags()
 
 def card_kind(key):
     """The frame an illustration shows in, as the game picks it."""
-    if key in FRAME_TAGS:
-        return FRAME_TAGS[key]
-    # CLEANUP (added 2026-10-19): drop once the game data names the new encounters' cards (picnic,
-    # goose, petunias, trash, cafe, lemonade stand).
-    return "lucky" if key.startswith("card-lemonade-") else "encounter"
+    return FRAME_TAGS.get(key, "encounter")
 
 
 def frame_sprite():
@@ -1676,8 +982,8 @@ def preview(out, scale=3):
     keys = list(ILLUSTRATIONS)
     cols = 10
     rows = (len(keys) + cols - 1) // cols
-    big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-return"),
-           ("route", "card-zone-woof-way"), ("stop", "card-kid-wants-to-pet-pet"), ("upgrade", "card-belly-rubs")]
+    big = [("encounter", "card-skunk-rinse"), ("lucky", "card-lost-wallet-keep"),
+           ("route", "card-zone-woof-way"), ("stop", "card-mail-carrier-wait"), ("upgrade", "card-belly-rubs")]
     width = max((CW + 6) * cols, (LW + 6) * len(big))
     sheet = Image.new("RGB", (width * scale, ((CH + 6) * rows + LH + 6) * scale), hp.rgb("ink"))
     for i, key in enumerate(keys):
