@@ -946,13 +946,13 @@ def thief_top(g, b):
     for x in (5, 23):
         stripes(g, x, 22 + b, 31 + b, 4, b)
         g.rect(x, 31 + b, 4, 3, "skin2")
-    # loot sack over the shoulder
-    g.ell(25, 20 + b, 5, 6, "tan", "brown", "cream")
-    g.rect(24, 13 + b, 3, 3, "brown")
-    g.rect(23, 19 + b, 1, 3, "dbrown")
-    g.rect(24, 18 + b, 3, 1, "dbrown")
-    g.rect(24, 21 + b, 3, 1, "dbrown")
-    g.rect(26, 22 + b, 1, 2, "dbrown")
+    # the loot sack slung over the shoulder: its neck tied and flared at the shoulder, the bag bulging
+    # below it, a $ on its face
+    g.ell(26, 23 + b, 4.5, 5.5, "tan", "brown", "cream")
+    g.tri((22.5, 20 + b), (29.5, 20 + b), (26, 15 + b), "tan")
+    g.tri((24, 13 + b), (28, 13 + b), (26, 15.5 + b), "tan")
+    g.rect(24.5, 15 + b, 3, 1, "brown")
+    dollar(g, 26, 23 + b, "dbrown")
     face_disc(g, 16, 12.5 + b, 8, 8, "skin2", "brown")
     g.ell(16, 7.5 + b, 8.5, 5, "navy", "ink", "dslate")
     g.rect(8, 9 + b, 17, 2, "dslate")
@@ -961,6 +961,21 @@ def thief_top(g, b):
     g.rect(19, 13 + b, 2, 1, "white")
     g.rect(14, 17 + b, 4, 1, "dbrown")
     g.p(18, 16 + b, "dbrown")
+
+
+# A 3x7 dollar sign, drawn in the grid's own pixels so it keeps its strokes 1px at any scale.
+DOLLAR = (".#.", ".##", "#..", ".#.", "..#", "##.", ".#.")
+
+
+def dollar(g, cx, cy, c):
+    """DOLLAR centred on design point (cx, cy)."""
+    s, px = getattr(g, "s", 1), getattr(g, "g", g)
+    sy = getattr(g, "sy", s)
+    x0, y0 = math.floor((cx + 0.5) * s) - 1, math.floor((cy + 0.5) * sy) - 3
+    for j, row in enumerate(DOLLAR):
+        for i, ch in enumerate(row):
+            if ch == "#":
+                px.p(x0 + i, y0 + j, c)
 
 
 def thief_fleeing(stride):
@@ -999,11 +1014,7 @@ def thief_fleeing(stride):
     g.tri((19.5, 24 + k), (24.5, 24 + k), (22, 19 + k), "tan")
     g.rect(21, 21 + k, 3, 2, "brown")
     g.rect(20, 23 + k, 5, 1, "dbrown")
-    g.rect(21, 26 + k, 3, 1, "dbrown")
-    g.p(21, 27 + k, "dbrown")
-    g.rect(21, 28 + k, 3, 1, "dbrown")
-    g.p(23, 29 + k, "dbrown")
-    g.rect(21, 30 + k, 3, 1, "dbrown")
+    dollar(g, 22, 28 + k, "dbrown")
     # the back of the head: the beanie, the ears and the mask's band tied all the way round
     g.rect(14, 19 + b, 4, 3, "skin2")
     g.ell(16, 12.5 + b, 8, 8, "skin2", "brown", "skin1")
