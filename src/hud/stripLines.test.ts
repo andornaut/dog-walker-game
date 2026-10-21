@@ -81,12 +81,7 @@ describe("the strip's other lines", () => {
       firedLine(gameData, "koda").text,
       fillNames(strip.fired, { dog: koda.name, owner }),
     ],
-    ["a pull", pullLine(gameData, "koda", false).text, fillNames(strip.pull, { dog: koda.name })],
-    [
-      "a pull cancelled",
-      pullLine(gameData, "koda", true).text,
-      fillNames(strip.pullCancel, { dog: koda.name }),
-    ],
+    ["a pull", pullLine(gameData, "koda").text, fillNames(strip.pull, { dog: koda.name })],
     [
       "the generous neighbor",
       luckyLine(gameData, "biscuitNeighbour", [])?.text,

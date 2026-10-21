@@ -63,7 +63,6 @@ export const RUN_TEXT = {
     luckyWallet: "Found a wallet! +{amount}",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",
     pull: "{dog} spotted a squirrel!",
-    pullCancel: "{dog} stays with you.",
     treat: "{dog} got a treat! {owner} +{hearts}♥",
   },
   zoneBanner: "{world}, neighborhood {n}",

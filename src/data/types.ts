@@ -668,7 +668,6 @@ export interface RunText {
     readonly luckyWallet: string;
     readonly plainHit: string;
     readonly pull: string;
-    readonly pullCancel: string;
     readonly treat: string;
   };
   // Names a loss cut short because the money ran out.

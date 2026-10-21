@@ -12,7 +12,6 @@ export const STRIP_LINE_FIELDS = {
   luckyWallet: ["amount"],
   plainHit: ["dog", "hearts", "obstacle", "owner"],
   pull: ["dog"],
-  pullCancel: ["dog"],
   treat: ["dog", "hearts", "owner"],
 } as const;
 

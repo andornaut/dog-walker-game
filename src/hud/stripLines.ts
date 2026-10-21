@@ -87,10 +87,9 @@ export function firedLine(data: StripData, dog: DogId): MessageLine {
   return { icon: "fired", text: line(data, "fired", fields) };
 }
 
-// A dog that started straining toward a squirrel, or whose strain the player steered away from.
-export function pullLine(data: StripData, dog: DogId, cancelled: boolean): MessageLine {
-  const fields = { dog: data.dogs[dog].name };
-  return { icon: "pull", text: line(data, cancelled ? "pullCancel" : "pull", fields) };
+// A dog that started straining toward a squirrel. A pull the player steers away from is quiet.
+export function pullLine(data: StripData, dog: DogId): MessageLine {
+  return { icon: "pull", text: line(data, "pull", { dog: data.dogs[dog].name }) };
 }
 
 // A lucky find's line, with the money it found; a find with no line of its own says nothing.

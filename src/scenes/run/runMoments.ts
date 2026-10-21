@@ -151,8 +151,9 @@ export class RunMoments {
     }
   }
 
-  // A tell barks and says which dog spotted the squirrel; a blocked strain that ends without
-  // a pull bursts over its dog. A landed pull raises its hint. The strain, the bubble and the
+  // A tell barks and says which dog spotted the squirrel; a strain that ends without a pull,
+  // blocked or steered away from, bursts over its dog and says nothing. A landed pull raises
+  // its hint. The strain, the bubble and the
   // bark pop are drawn with the pack.
   pulled(step: PullStep): void {
     if (step.tells.length > 0) {
@@ -160,10 +161,7 @@ export class RunMoments {
       this.hint({ kind: "pull" });
     }
     for (const tell of step.tells) {
-      this.say(pullLine(gameData, tell.dog, false));
-    }
-    for (const dog of step.failed) {
-      this.say(pullLine(gameData, dog, true));
+      this.say(pullLine(gameData, tell.dog));
     }
     if (step.pulled.some(({ moved }) => moved)) {
       this.hint({ kind: "pullLanded" });
