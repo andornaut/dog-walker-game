@@ -345,7 +345,6 @@ export class StatsScene extends Scene {
         return;
       }
       const tile = addSelectTile(this, tabs, rect, {
-        badge: "tick",
         edge: true,
         reducedMotion,
         state: tileState({ ...PLAIN_ITEM, picked: tab === this.tab }),
