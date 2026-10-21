@@ -558,10 +558,11 @@ export class CardScene extends Scene {
   }
 
   // The row's band labels share one font: the title font where it has every glyph of every
-  // label and each fits its band, else the narrower body font, which every label fits.
+  // label and each keeps the band's title room, else the narrower body font, which every label
+  // fits.
   private bandFont(): FontRole {
     const labels = this.entries.map(bandLabel);
-    return labels.every((label) => this.bandLabelFits("title", label, BAND.room))
+    return labels.every((label) => this.bandLabelFits("title", label, BAND.titleRoom))
       ? "title"
       : "body";
   }

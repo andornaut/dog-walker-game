@@ -45,6 +45,18 @@ describe("the card's illustration", () => {
   });
 });
 
+// A card's band runs across the card inside its 2px frame. A title-font label keeps 3px of
+// the band clear either side; the body font, which every label fits, keeps at least 1px.
+describe("the card's band label", () => {
+  const { band, width } = CARD_LAYOUT;
+  it.each([
+    ["a title-font label", band.titleRoom, 3],
+    ["a body-font label", band.room, 1],
+  ])("keeps %s at least %ipx clear of either end of the band", (_name, room, pad) => {
+    expect((width - 2 * 2 - room) / 2).toBeGreaterThanOrEqual(pad);
+  });
+});
+
 const SCREEN = screenLayout(SCREEN_CONFIG);
 const WALK = SCREEN.walkView;
 const bottom = (rect: Rect) => rect.y + rect.height;

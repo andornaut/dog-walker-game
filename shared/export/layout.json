@@ -998,6 +998,7 @@
       "band": {
         "height": 11,
         "room": 77,
+        "titleRoom": 73,
         "y": 2
       },
       "effect": {
