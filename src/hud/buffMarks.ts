@@ -1,0 +1,419 @@
+import type { DogId, GameData } from "../data/types";
+import { fillLine, fillNames } from "../lib/lines";
+import { amountText } from "../rules/causes";
+import type { CardView, OptionView } from "../rules/choices";
+import { isHeavy, maxHearts, packSizeRaise, sizeHearts } from "../rules/dogs";
+import { formatDollars } from "../rules/effectText";
+import type { ModifiedValue } from "../rules/modified";
+import { standingModified } from "../rules/standing";
+import { cents, read } from "../rules/units";
+import type { WalkItem, WalkStep } from "../runner/walk";
+import { packDogs, placeInPack } from "../state/pack";
+import type { ModifierSource } from "../state/runState";
+import { effectIconKey, type EffectItem, effectLine, effectName } from "./effectIcons";
+import type { ChangeLabel } from "./hudView";
+import { messageIconKey,type MessageLine } from "./messageStrip";
+import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
+
+// What the player sees of a buff changing the game: its charm (the buff's walk bar icon in an
+// effect well) on the card, the road and the bar, and the value it changed struck through
+// beside the value it made.
+
+type MarkData = Pick<
+  GameData,
+  | "debuffs"
+  | "dogs"
+  | "runText"
+  | "shopGear"
+  | "tuning"
+  | "upgrades"
+  | "walkerPerks"
+  | "walkers"
+  | "world"
+>;
+
+// The charm a modifier's source shows: its gear, its upgrade or the walker's perk. A debuff,
+// a card's own option and a lucky find show none.
+export function charmItem(
+  data: Pick<GameData, "walkers">,
+  source: ModifierSource,
+): EffectItem | null {
+  switch (source.kind) {
+    case "gear":
+      return { gear: source.gear, kind: "gear" };
+    case "upgrade":
+      return { kind: "upgrade", upgrade: source.upgrade };
+    case "walker":
+      return { kind: "perk", perk: data.walkers[source.walker].perk };
+    default:
+      return null;
+  }
+}
+
+// The charms of a value's modifiers, one per modifier that has one, in the order applied.
+export function charmsOf(data: Pick<GameData, "walkers">, value: ModifiedValue): EffectItem[] {
+  return value.by.flatMap((cause) => charmItem(data, cause.source) ?? []);
+}
+
+function uniqueItems(items: readonly EffectItem[]): EffectItem[] {
+  const keys = items.map(effectIconKey);
+  return items.filter((item, i) => keys.indexOf(effectIconKey(item)) === i);
+}
+
+// A value struck through, then the value a buff made of it; before is null where nothing is
+// struck, as on a Skip a buff offers.
+export interface Struck {
+  readonly after: string;
+  readonly before: string | null;
+}
+
+// A heart change as a chip says it: "−1♥", "+2♥", and "0♥" for none.
+function heartsText(hearts: number): string {
+  return hearts === 0 ? "0♥" : amountText("hearts", hearts);
+}
+
+// A value as a chip over the road says it, before and after: a heart change, a money change
+// ("+$1" then "+$2") or a debuff's seconds ("8s" then "4s"). Null for any other value.
+export function chipStrike(data: Pick<GameData, "runText">, value: ModifiedValue): Struck | null {
+  const seconds = (amount: number) =>
+    fillNames(data.runText.seconds, { seconds: String(Math.round(amount)) });
+  switch (value.subject.kind) {
+    case "hearts":
+      return { after: heartsText(value.after), before: heartsText(value.before) };
+    case "money":
+      return { after: amountText("money", value.after), before: amountText("money", value.before) };
+    case "debuffSeconds":
+      return { after: seconds(value.after), before: seconds(value.before) };
+    default:
+      return null;
+  }
+}
+
+// What a card shows of the buffs on an option, or on the Skip a buff offers (option
+// undefined): the lit charms on its art window; the plaque, a waived price struck then FREE,
+// or FREE alone on the Skip (null leaves the plaque as the option has it); and a loss the
+// walker's perk forgives, struck then the hearts it leaves, with the perk's name under them, in
+// place of the effect text where that text says only the forgiving.
+export interface OptionMarks {
+  readonly charms: readonly EffectItem[];
+  readonly forgiven: { readonly name: string; readonly rows: readonly Struck[] } | null;
+  readonly plaque: Struck | null;
+}
+
+const NO_MARKS: OptionMarks = { charms: [], forgiven: null, plaque: null };
+
+export function optionMarks(
+  data: Pick<GameData, "dogs" | "runText" | "shopGear" | "upgrades" | "walkerPerks" | "walkers">,
+  card: Pick<CardView, "modified">,
+  option?: OptionView,
+): OptionMarks {
+  const free = data.runText.card.free;
+  if (option === undefined) {
+    const skips = card.modified.filter(({ subject }) => subject.kind === "skip");
+    const charms = uniqueItems(skips.flatMap((value) => charmsOf(data, value)));
+    return charms.length === 0
+      ? NO_MARKS
+      : { ...NO_MARKS, charms, plaque: { after: free, before: null } };
+  }
+  const charms = uniqueItems(option.modified.flatMap((value) => charmsOf(data, value)));
+  const waived = option.modified.find(
+    ({ after, before, subject }) => subject.kind === "money" && before < 0 && after > before,
+  );
+  const plaque =
+    waived === undefined || option.path !== undefined
+      ? null
+      : {
+          after: waived.after === 0 ? free : formatDollars(cents(-waived.after)),
+          before: formatDollars(cents(-waived.before)),
+        };
+  return { charms, forgiven: forgivenMarks(data, option), plaque };
+}
+
+// The losses an option's text says the walker's perk forgives, when that is all it says.
+function forgivenMarks(
+  data: Pick<GameData, "dogs" | "runText" | "shopGear" | "upgrades" | "walkerPerks" | "walkers">,
+  option: OptionView,
+): OptionMarks["forgiven"] {
+  const forgiven = option.modified.flatMap((value) =>
+    value.subject.kind === "hearts" && value.after > value.before
+      ? [{ dog: value.subject.dog, value }]
+      : [],
+  );
+  const said = forgiven.map(({ dog, value }) =>
+    fillNames(data.runText.card.heartForgiven, {
+      dog: data.dogs[dog].name,
+      hearts: String(-value.before),
+    }),
+  );
+  if (forgiven.length === 0 || said.join(", ") !== option.text) {
+    return null;
+  }
+  const items = uniqueItems(forgiven.flatMap(({ value }) => charmsOf(data, value)));
+  return {
+    name: items.map((item) => effectName(data, item)).join(", "),
+    rows: forgiven.map(({ dog, value }) => ({
+      after: `${heartsText(value.after)} ${data.dogs[dog].name}`,
+      before: heartsText(value.before),
+    })),
+  };
+}
+
+// Where a pop shows over the road: over a dog, over an item, over the pack's lead, or beside
+// the walker's head.
+export type PopAt =
+  | { readonly dog: DogId; readonly kind: "dog" }
+  | { readonly item: number; readonly kind: "item" }
+  | { readonly kind: "pack" }
+  | { readonly kind: "walker" };
+
+// One buff's pop over the road: its charm at at (index-th of the step's charms there), and a
+// chip of the value it struck. forgiven is a bump the walker's perk forgave, whole or in part,
+// whose heart pop turns from loss to gain as the charm shows; reach is a pickup grabbed by
+// Long reach, with a dotted line from its dog (the pack's lead when null) to the item.
+export interface BuffPop {
+  readonly at: PopAt;
+  readonly chip: Struck | null;
+  readonly forgiven: { readonly dog: DogId; readonly whole: boolean } | null;
+  readonly index: number;
+  readonly item: EffectItem;
+  readonly reach: { readonly dog: DogId | null; readonly item: number } | null;
+}
+
+// A value a buff changed, where it happened: at a road item, with the dog it happened to.
+export interface PoppedValue {
+  readonly bump: boolean;
+  readonly dog: DogId | null;
+  readonly item: WalkItem | null;
+  readonly value: ModifiedValue;
+}
+
+type UnplacedPop = Omit<BuffPop, "index">;
+
+function placeKey(at: PopAt): string {
+  return JSON.stringify(at);
+}
+
+// Each pop takes the next index at its place.
+function stacked(pops: readonly UnplacedPop[]): BuffPop[] {
+  const counts = new Map<string, number>();
+  return pops.map((pop) => {
+    const key = placeKey(pop.at);
+    const index = counts.get(key) ?? 0;
+    counts.set(key, index + 1);
+    return { ...pop, index };
+  });
+}
+
+// One pop per modifier with a charm on each value: a forgiven bump's by the walker's head, a
+// pickup grabbed by reach over the item with its dotted line, any other over its dog, its item
+// or the pack, with a chip of a raised tip or a shortened debuff.
+export function popsOf(
+  data: Pick<GameData, "runText" | "walkers">,
+  values: readonly PoppedValue[],
+): BuffPop[] {
+  return stacked(
+    values.flatMap(({ bump, dog, item, value }) => {
+      const place: PopAt =
+        dog !== null
+          ? { dog, kind: "dog" }
+          : item !== null
+            ? { item: item.id, kind: "item" }
+            : { kind: "pack" };
+      return value.by.flatMap((cause): UnplacedPop[] => {
+        const charm = charmItem(data, cause.source);
+        if (charm === null) {
+          return [];
+        }
+        const plain = { chip: null, forgiven: null, item: charm, reach: null };
+        switch (value.subject.kind) {
+          case "hearts":
+            return bump && dog !== null && cause.amount > 0
+              ? [{ ...plain, at: { kind: "walker" }, forgiven: { dog, whole: value.after === 0 } }]
+              : [{ ...plain, at: place }];
+          case "reach":
+            return item === null
+              ? []
+              : [{ ...plain, at: { item: item.id, kind: "item" }, reach: { dog, item: item.id } }];
+          case "immune":
+            return [{ ...plain, at: item === null ? place : { item: item.id, kind: "item" } }];
+          case "money":
+          case "debuffSeconds":
+            return [{ ...plain, at: place, chip: chipStrike(data, value) }];
+          default:
+            return [{ ...plain, at: place }];
+        }
+      });
+    }),
+  );
+}
+
+// A walk step's values a buff changed, with the dog each happened to: a bump's, a treat's
+// or a contact's dog.
+export function stepValues(
+  step: Pick<WalkStep, "bumps" | "contacts" | "modified" | "treats">,
+): PoppedValue[] {
+  return step.modified.map(({ item, value }) => {
+    const bump = step.bumps.find((entry) => entry.item.id === item.id);
+    const dog =
+      bump?.dog ??
+      step.treats.find((entry) => entry.item.id === item.id)?.dog ??
+      step.contacts.find((entry) => entry.item.id === item.id)?.dog ??
+      null;
+    return { bump: bump !== undefined, dog, item, value };
+  });
+}
+
+// How many tips and treats the walk has collected while a buff scaled their spawns.
+export interface SpawnCounts {
+  readonly tips: number;
+  readonly treats: number;
+}
+
+export const NO_SPAWNS: SpawnCounts = { tips: 0, treats: 0 };
+
+// Treat finder's and Rush hour's pops: while a buff scales a pickup's spawns, every second one
+// collected pops each scaling buff's charm over it. Returns the pops and the counts after.
+export function spawnPops(
+  data: MarkData,
+  run: Parameters<typeof standingModified>[1],
+  collected: readonly WalkItem[],
+  counts: SpawnCounts,
+): { counts: SpawnCounts; pops: BuffPop[] } {
+  const pickups = collected.filter(({ kind }) => kind === "tip" || kind === "treat");
+  if (pickups.length === 0) {
+    return { counts, pops: [] };
+  }
+  const scaled = standingModified(data, run);
+  const next = { ...counts };
+  const pops = pickups.flatMap((item): UnplacedPop[] => {
+    const spawn = item.kind === "tip" ? "tips" : "treats";
+    const value = scaled.find(
+      ({ subject }) => subject.kind === "spawns" && subject.spawn === spawn,
+    );
+    if (value === undefined) {
+      return [];
+    }
+    next[spawn] += 1;
+    if (next[spawn] % 2 !== 0) {
+      return [];
+    }
+    return charmsOf(data, value).map((charm) => ({
+      at: { item: item.id, kind: "item" },
+      chip: null,
+      forgiven: null,
+      item: charm,
+      reach: null,
+    }));
+  });
+  return { counts: next, pops: stacked(pops) };
+}
+
+// Good leash's pop over a dog that would have strained toward a squirrel: one per squirrel.
+export function leashPops(
+  data: MarkData,
+  run: Parameters<typeof standingModified>[1],
+  dogs: readonly DogId[],
+): BuffPop[] {
+  const value = standingModified(data, run).find(({ subject }) => subject.kind === "squirrelPulls");
+  if (value === undefined) {
+    return [];
+  }
+  return stacked(
+    dogs.flatMap((dog) =>
+      charmsOf(data, value).map((charm): UnplacedPop => ({
+        at: { dog, kind: "dog" },
+        chip: null,
+        forgiven: null,
+        item: charm,
+        reach: null,
+      })),
+    ),
+  );
+}
+
+// What a walk's start says of its gear and pack: a strip line for each gear that changes it
+// from the start, such as Running shoes' agility and Fanny pack's money, led by the gear's icon
+// as its well glints, Fanny pack's money rising over the bank, and a line for each heavy dog.
+export function walkStartMarks(
+  data: MarkData,
+  run: Parameters<typeof standingModified>[1],
+): { bank: ChangeLabel[]; glints: EffectItem[]; lines: MessageLine[] } {
+  const strip = data.runText.strip;
+  const values = standingModified(data, run).filter(
+    ({ subject }) => subject.kind === "agility" || subject.kind === "startMoney",
+  );
+  const gear = values.flatMap((value) =>
+    value.by.flatMap((cause) => {
+      const item = charmItem(data, cause.source);
+      return item?.kind === "gear"
+        ? [{ amount: cause.amount, item, money: value.subject.kind === "startMoney" }]
+        : [];
+    }),
+  );
+  const heavy = packDogs(run).filter((dog) => isHeavy(data.dogs[dog]));
+  return {
+    bank: gear.flatMap(({ amount, money }): ChangeLabel[] =>
+      money
+        ? [
+            {
+              amount,
+              gain: amount > 0,
+              target: { kind: "bank" },
+              text: amountText("money", amount),
+            },
+          ]
+        : [],
+    ),
+    glints: gear.map(({ item }) => item),
+    lines: [
+      ...gear.map(({ item }): MessageLine => ({
+        icon: item,
+        text: fillLine(STRIP_LINE_FIELDS, strip, "effectStart", {
+          effect: effectLine(data, item),
+          name: effectName(data, item),
+        }),
+      })),
+      ...heavy.map((dog): MessageLine => ({
+        icon: "hint",
+        text: fillLine(STRIP_LINE_FIELDS, strip, "heavyDog", { dog: data.dogs[dog].name }),
+      })),
+    ],
+  };
+}
+
+// A dog's extra max hearts, which its card draws amber, and each source's line for a held
+// card, led by its icon: the lead dog's small-pack bonus, and each buff's, such as Lucky
+// collar's. cells is how many of the meter's last cells are extra.
+export function extraHearts(
+  data: MarkData,
+  run: Parameters<typeof standingModified>[1],
+  dog: DogId,
+): { cells: number; lines: { iconKey: string; text: string }[] } {
+  const owner = data.dogs[dog].owner.name;
+  const line = (name: string, hearts: number) =>
+    fillLine(RUN_TEXT_FIELDS.explain, data.runText.explain, "extraHearts", {
+      hearts: String(hearts),
+      name,
+      owner,
+    });
+  const bonus = packSizeRaise(data.tuning, run.modifiers, placeInPack(run, dog), data.dogs[dog]);
+  const value = standingModified(data, run).find(
+    ({ subject }) => subject.kind === "maxHearts" && subject.dog === dog,
+  );
+  const buffs = (value?.by ?? []).flatMap((cause) => {
+    const item = charmItem(data, cause.source);
+    return item === null || cause.amount <= 0 ? [] : [{ hearts: cause.amount, item }];
+  });
+  const lines = [
+    ...(bonus > 0
+      ? [{ iconKey: messageIconKey("hint"), text: line(data.runText.explain.smallPack, bonus) }]
+      : []),
+    ...buffs.map(({ hearts, item }) => ({
+      iconKey: effectIconKey(item),
+      text: line(effectName(data, item), hearts),
+    })),
+  ];
+  const cap = read(data.tuning, "hearts", "maxOwnerHearts");
+  const max = maxHearts(data.tuning, run.modifiers, placeInPack(run, dog), data.dogs[dog]);
+  return { cells: max - Math.min(cap, sizeHearts(data.tuning, data.dogs[dog])), lines };
+}
