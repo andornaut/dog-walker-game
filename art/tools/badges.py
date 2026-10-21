@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Draw the 15 achievement badges and the celebration burst.
+"""Draw the 24 achievement badges and the celebration burst.
 
 badge-<achievement>: 32x32 medals, rimmed by category (firsts bronze, mastery
-silver, collection gold, silly pink), each with an icon for its goal. Tags:
-earned (in colour) and locked (grey, the icon as a two-tone slate silhouette,
-a small padlock). Where an icon's edge holds under 3:1 against the cream and tan
+silver, collection gold, silly pink), each with its own emblem for its goal: no
+two share a motif, so each reads apart from the rest at 1x on the badge wall.
+Tags: earned (in colour) and locked (a dark slate ring, a grey face, the emblem
+as a two-tone dark slate silhouette, a small padlock), dark enough that it never
+reads as silver. Where an emblem's edge holds under 3:1 against the cream and tan
 face, the face beside it takes a 1px keyline: plum (9.42:1 on cream, 6.49:1 on
 tan), teal for green (eau-de-skunk).
 fx-confetti: 64x64, the burst behind a badge as it is earned (tag play, 10
@@ -34,7 +36,6 @@ from pixel import K, Grid, contrast, main  # noqa: E402
 
 RIMS = {"firsts": ("ochre", "rust", "tan"), "mastery": ("lgrey", "grey", "white"),
         "collection": ("amber", "orange", "yellow"), "silly": ("pink", "mauve", "white")}
-GREYS = ["ffffff", "c0cbdc", "8b9bb4", "5a6988", "3a4466", "262b44", "181425"]
 # The icon keyline's colour where it is not plum, after the effects' rims.
 KEYLINES = {"eau-de-skunk": "teal"}
 
@@ -44,26 +45,55 @@ def lum(c):
     return 0.299 * int(c[0:2], 16) + 0.587 * int(c[2:4], 16) + 0.114 * int(c[4:6], 16)
 
 
-def grey(c):
-    return min(GREYS, key=lambda g: abs(lum(g) - lum(c)))
+# A muddy print: a pad under four toes, each toe apart from the others and the pad by a 1px gap, so the
+# print reads as a paw and not as arcs. 9x9.
+PAW = ["..xx.xx..", "..xx.xx..", ".........", "xx.....xx", "xx.xxx.xx", "..xxxxx..", ".xxxxxxx.",
+       ".xxxxxxx.", "..xx.xx.."]
 
 
-# A pad under four toes, each toe apart from the others and the pad by a 1px gap, so the print
-# reads as a paw and not as arcs. PAW is 11x10; SMALL_PAW (9x9) is for three to a badge.
-PAW = ["...xx.xx...", "..xxx.xxx..", "..xxx.xxx..", "xx.......xx", "xxx.....xxx", "xxx.xxx.xxx",
-       "...xxxxx...", "..xxxxxxx..", "..xxxxxxx..", "...xx.xx..."]
-SMALL_PAW = ["..xx.xx..", "..xx.xx..", ".........", "xx.....xx", "xx.xxx.xx", "..xxxxx..", ".xxxxxxx.",
-             ".xxxxxxx.", "..xx.xx.."]
-
-
-def paw(g, cx, cy, col="dbrown", small=False):
-    """A paw print centred on (cx, cy)."""
-    rows = SMALL_PAW if small else PAW
-    x0, y0 = cx - len(rows[0]) // 2, cy - len(rows) // 2
+def pix(g, x0, y0, rows, legend, mirror=False):
+    """Draw a character map at (x0, y0): each character in legend is a colour, any other is left clear."""
     for y, row in enumerate(rows):
-        for x, ch in enumerate(row):
-            if ch == "x":
-                g.p(x0 + x, y0 + y, col)
+        for x, ch in enumerate(row[::-1] if mirror else row):
+            if ch in legend:
+                g.p(x0 + x, y0 + y, legend[ch])
+
+
+def line(g, a, b, col, w=1):
+    """A w-pixel line from a to b."""
+    n = math.ceil(max(abs(b[0] - a[0]), abs(b[1] - a[1]), 1) * 2)
+    for i in range(n + 1):
+        x, y = a[0] + (b[0] - a[0]) * i / n, a[1] + (b[1] - a[1]) * i / n
+        g.rect(round(x - (w - 1) / 2), round(y - (w - 1) / 2), w, w, col)
+
+
+def ring(g, cx, cy, r, col, hi=None):
+    """A 1px circle of radius r, with a white glint at its upper left when hi is set."""
+    for y in range(32):
+        for x in range(32):
+            if r - 1 < math.hypot(x + 0.5 - cx, y + 0.5 - cy) <= r:
+                g.p(x, y, col)
+    if hi:
+        g.p(cx - r * 0.5, cy - r * 0.5, hi)
+
+
+def star(g, cx, cy, r, col, sh=None):
+    pts = [(cx + math.cos(math.radians(a - 90)) * (r if i % 2 == 0 else r * 0.45),
+            cy + math.sin(math.radians(a - 90)) * (r if i % 2 == 0 else r * 0.45)) for i, a in enumerate(range(0, 360, 36))]
+    for i in range(10):
+        g.tri((cx, cy), pts[i], pts[(i + 1) % 10], sh if sh and i in (3, 4, 5) else col)
+
+
+HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
+
+
+def heart(g, x0, y0, col="red", hi="pink"):
+    """A 14x12 heart: HEART at 2x, its upper-left lobe lit."""
+    for y, row in enumerate(HEART):
+        for x, c in enumerate(row):
+            if c == "1":
+                g.rect(x0 + x * 2, y0 + y * 2, 2, 2, col)
+    g.rect(x0 + 2, y0 + 2, 2, 2, hi)
 
 
 ICONS = {}
@@ -78,63 +108,113 @@ def icon(name):
 
 @icon("first-steps")
 def _(g):
-    paw(g, 12, 16)
-    for r in range(5):
-        for k in range(3):
-            if "010110010010111"[r * 3 + k] == "1":
-                g.rect(19 + k * 2, 9 + r * 2, 2, 2, "plum")
+    """A fingerpost: a green arrow pointing on, a sky one back, on a post in a grass tuft."""
+    g.rect(15, 7, 2, 18, "dbrown")
+    g.rect(15, 7, 1, 18, "brown")
+    for y in range(9, 14):
+        g.rect(8, y, 13 + 2 * (2 - abs(y - 11)), 1, "dgreen" if y == 13 else "green")
+    for y in range(15, 20):
+        x = 10 - 2 * (2 - abs(y - 17))
+        g.rect(x, y, 22 - x, 1, "blue" if y == 19 else "sky")
+    for x, h in ((11, 2), (12, 1), (13, 2), (17, 2), (18, 1), (19, 2), (20, 1)):
+        g.rect(x, 25 - h, 1, h, "green")
+    g.rect(11, 25, 10, 1, "dgreen")
 
 
 @icon("round-trip")
 def _(g):
-    g.rect(11, 8, 1, 17, "dbrown")
-    for y in range(8, 16, 2):
-        for x in range(12, 22, 2):
-            g.rect(x, y, 2, 2, "ink" if (x // 2 + y // 2) % 2 else "white")
+    """A loop arrow running clockwise round a house."""
+    for y in range(32):
+        for x in range(32):
+            dx, dy = x + 0.5 - 16, y + 0.5 - 16.5
+            r, a = math.hypot(dx, dy), math.degrees(math.atan2(dy, dx))
+            if 5.4 <= r <= 8 and not -80 <= a <= -20:
+                g.p(x, y, "blue" if r > 6.9 and dx + dy > 0 else "sky")
+    a = math.radians(-80)
+    px, py = 16 + 6.7 * math.cos(a), 16.5 + 6.7 * math.sin(a)
+    t, n = (-math.sin(a), math.cos(a)), (math.cos(a), math.sin(a))
+    g.tri((px + 4.5 * t[0], py + 4.5 * t[1]), (px + 3.8 * n[0], py + 3.8 * n[1]), (px - 3.8 * n[0], py - 3.8 * n[1]), "sky")
+    g.tri((12, 16.5), (20, 16.5), (16, 12.5), "red")
+    g.rect(13, 16, 6, 4, "brown")
+    g.rect(15, 17, 2, 3, "plum")
+
+
+# A dog's head face on, floppy ears beside its muzzle: F fur, E ears, M muzzle, N nose, I eyes.
+DOG_FACE = ["..FFFFFF..", ".FFFFFFFF.", "EEFFFFFFEE", "EEFIFFIFEE", "EEFIFFIFEE", "EEFMMMMFEE", "EE.MNNM.EE",
+            "E..MMMM..E", "....MM...."]
 
 
 @icon("double-leash")
 def _(g):
-    paw(g, 11, 18, small=True)
-    paw(g, 20, 11, small=True)
+    """Two dogs' heads side by side, each in its collar."""
+    for x0, y0, fur, ears, muzzle, collar in ((5, 9, "ochre", "dbrown", "white", "red"),
+                                              (16, 12, "white", "ink", "lgrey", "sky")):
+        pix(g, x0, y0, DOG_FACE, {"F": fur, "E": ears, "M": muzzle, "N": "ink", "I": "ink"})
+        g.rect(x0 + 3, y0 + 9, 4, 1, collar)
 
 
 @icon("pack-leader")
 def _(g):
-    paw(g, 16, 10, small=True)
-    paw(g, 11, 20, small=True)
-    paw(g, 21, 20, small=True)
+    """One leash handle, three leashes fanning out to three collars."""
+    g.ell(16, 8.5, 4.5, 3, "red", "dred")
+    g.ell(16, 8.5, 2.5, 1.2, None)
+    for (x, y), col in (((9, 20), "green"), ((16, 21), "sky"), ((23, 20), "amber")):
+        line(g, (16, 11), (x, y - 3), "dred")
+        g.ell(x, y, 3, 3, col)
+        g.ell(x, y, 1.5, 1.5, None)
+        g.p(x, y + 3, "yellow")
+
+
+# A walker's bust: H hair, S skin, I eyes, C shirt.
+WALKER = [".HHH.", "HHHHH", "HSSSH", "HISIH", ".SSS.", "CCCCC", "CCCCC", "CCCCC", "CCCCC", "CCCCC", "CCCCC"]
+
+
+@icon("dream-team")
+def _(g):
+    """The four walkers shoulder to shoulder, the outer two cheering."""
+    crew = (("ink", "skin2", "red"), ("ochre", "skin1", "sky"), ("dbrown", "brown", "green"), ("yellow", "skin1", "amber"))
+    for i, (hair, skin, shirt) in enumerate(crew):
+        x0, y0 = 6 + i * 5, 11 if i in (0, 3) else 10
+        pix(g, x0, y0, WALKER, {"H": hair, "S": skin, "I": "ink", "C": shirt})
+    for x, s in ((5, -1), (26, 1)):
+        g.rect(x, 12, 1, 4, "skin1")
+        g.p(x + s, 11, "skin1")
 
 
 @icon("clean-paws")
 def _(g):
-    paw(g, 16, 16, "blue")
-    for x, y in ((9, 9), (22, 10), (22, 21)):
-        g.rect(x, y - 1, 1, 3, "blue")
-        g.rect(x - 1, y, 3, 1, "blue")
+    """A bar of soap under three bubbles."""
+    g.rect(8, 16, 15, 7, "pink")
+    g.rect(9, 15, 13, 1, "pink")
+    g.rect(9, 23, 13, 1, "mauve")
+    g.rect(22, 17, 1, 6, "mauve")
+    g.rect(10, 17, 6, 1, "white")
+    g.p(10, 18, "white")
+    ring(g, 20, 10, 3.5, "sky", "white")
+    ring(g, 12, 10, 2.5, "sky", "white")
+    ring(g, 25, 15, 2, "sky")
 
 
 @icon("not-a-scratch")
 def _(g):
-    pts = [(16 + math.cos(math.radians(a - 90)) * (7 if i % 2 == 0 else 3),
-            16 + math.sin(math.radians(a - 90)) * (7 if i % 2 == 0 else 3)) for i, a in enumerate(range(0, 360, 36))]
-    for i in range(10):
-        g.tri((16, 16), pts[i], pts[(i + 1) % 10], "yellow")
-    g.p(14, 12, "white")
+    """A shield with a tick."""
+    for y in range(15):
+        w = 6 if y < 8 else round(6 - (y - 7) * 6 / 7.5)
+        g.rect(16 - w, 8 + y, w, 1, "sky")
+        g.rect(16, 8 + y, w + (1 if y < 8 else 0), 1, "blue")
+    line(g, (12, 15), (14.5, 18), "white", 2)
+    line(g, (14.5, 18), (20, 12), "white", 2)
+
+
+STAR = ["..xx..", "..xx..", "xxxxxx", ".xxxx.", ".xxxx.", "xx..xx"]
 
 
 @icon("five-star-service")
 def _(g):
-    for y, row in enumerate([".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]):
-        for x, c in enumerate(row):
-            if c == "1":
-                g.rect(9 + x * 2, 10 + y * 2, 2, 2, "red")
-    g.rect(11, 12, 2, 2, "pink")
-    g.rect(13, 13, 1, 1, "plum")
-    g.rect(18, 13, 1, 1, "plum")
-    g.rect(14, 16, 4, 1, "plum")
-    g.p(13, 15, "plum")
-    g.p(18, 15, "plum")
+    """Five stars, three over two."""
+    for x0, y0 in ((6, 9), (13, 8), (20, 9), (9, 17), (17, 17)):
+        pix(g, x0, y0, STAR, {"x": "yellow"})
+        g.rect(x0 + 2, y0 + 4, 3, 1, "amber")
 
 
 @icon("big-payday")
@@ -150,6 +230,46 @@ def _(g):
     g.p(12, 11, "white")
 
 
+@icon("everybody-home")
+def _(g):
+    """Three leashes reaching a front door."""
+    g.rect(15, 7, 10, 18, "dbrown")
+    g.rect(16, 8, 8, 17, "blue")
+    g.rect(16, 8, 1, 17, "sky")
+    g.rect(18, 10, 4, 3, "cyan")
+    g.rect(18, 15, 4, 7, "teal")
+    g.rect(19, 16, 2, 5, "blue")
+    g.rect(13, 25, 13, 1, "lgrey")
+    g.p(17, 18, "yellow")
+    for (x, y), col in (((7, 10), "dred"), ((6, 16), "dgreen"), ((7, 22), "purple")):
+        line(g, (x, y), (16, 18), col)
+        g.rect(x - 1, y - 1, 2, 2, col)
+
+
+@icon("close-shave")
+def _(g):
+    """A cracked heart breaking a sweat."""
+    heart(g, 7, 10)
+    for a, b in (((15, 10), (14, 13)), ((14, 13), (17, 16)), ((17, 16), (15, 19)), ((15, 19), (16, 21))):
+        line(g, a, b, "plum")
+    pix(g, 22, 5, ["..c..", ".ccc.", "cwccc", "ccccs", ".css."], {"c": "cyan", "w": "white", "s": "sky"})
+
+
+# A small dog side on, stretched mid-leap: B body, E ear, N nose, I eye.
+LEAPER = ["........EB..", "B......BIBBN", ".BBBBBBBBB..", "..BBBBBBB...", ".BB......BB.", "BB........BB"]
+
+
+@icon("dodge-ball")
+def _(g):
+    """A tiny dog mid-hop over a traffic cone."""
+    g.tri((16, 15), (11.5, 24.5), (20.5, 24.5), "orange")
+    g.rect(13, 19, 6, 2, "white")
+    g.rect(10, 24, 12, 2, "rust")
+    pix(g, 10, 7, LEAPER, {"B": "white", "E": "ink", "N": "ink", "I": "ink"})
+    for x, y in ((7, 20), (7, 17), (8, 14), (9, 12)):
+        g.p(x, y, "sky")
+
+
 @icon("full-kennel")
 def _(g):
     g.tri((8, 15), (24, 15), (16, 7), "red")
@@ -160,18 +280,17 @@ def _(g):
 
 @icon("kitted-out")
 def _(g):
-    """Three of the five gear items: whistle, lucky collar, running shoe."""
-    g.ell(11, 11, 4, 3, "lgrey", "grey", "white")
-    g.rect(13, 10, 5, 2, "lgrey")
-    g.p(10, 11, "ink")
+    """Three of the gear items: the fanny pack, the lucky collar and a running shoe."""
+    g.rect(6, 9, 12, 1, "dbrown")
+    g.rect(14, 8, 2, 3, "lgrey")
+    g.ell(11, 12.5, 4.5, 3, "amber", "orange", "yellow")
     g.ell(21, 10, 5, 4, "red", "dred")
     g.ell(21, 9.5, 3, 2, None)
-    g.ell(21, 15, 1.8, 1.8, "yellow", "amber")
+    g.ell(21, 15, 1.8, 1.8, "green", "dgreen")
     g.ell(15, 20, 7, 3.5, "sky", "blue", "cyan")
     g.rect(9, 20, 15, 2, "sky")
     g.rect(8, 22, 16, 2, "white")
-    g.rect(13, 18, 1, 3, "white")
-    g.rect(16, 18, 1, 3, "white")
+    g.rect(18, 19, 3, 1, "orange")
 
 
 @icon("neighbourhood-favourite")
@@ -216,23 +335,101 @@ def _(g):
             g.p(x + (k % 2), 6 + k, "forest")
 
 
+@icon("mud-season")
+def _(g):
+    """Muddy paw prints walking out of a puddle."""
+    g.ell(13, 22, 7, 3, "brown", "dbrown")
+    for cx, cy in ((12, 15), (21, 11)):
+        for y, row in enumerate(PAW):
+            for x, ch in enumerate(row):
+                if ch == "x":
+                    g.p(cx - 4 + x, cy - 4 + y, "dbrown")
+    for x, y in ((22, 19), (23, 20), (8, 9), (16, 7), (25, 17)):
+        g.p(x, y, "brown")
+
+
+# A dog side on at full stretch, ears streaming back: B body, S belly and legs, E ear, N nose, I eye, T tail.
+RUNNER = ["...........EEB...", "..........EBBIB..", "T.........BBBBBBN", "TBBBBBBBBBBBBBB..", ".BBBBBBBBBBBB....",
+          "..SSSSSSSSSS.....", ".SS........SS....", "SS..........SS..."]
+
+
+@icon("zoomies")
+def _(g):
+    """A dog at full stretch, speed lines and a dust puff behind it."""
+    pix(g, 9, 10, RUNNER, {"B": "brown", "S": "dbrown", "E": "dbrown", "N": "ink", "I": "ink", "T": "brown"})
+    for y, x0 in ((11, 5), (14, 4), (17, 5)):
+        g.rect(x0, y, 4, 1, "sky")
+    g.ell(9, 21.5, 2.5, 2, "white", "lgrey")
+    g.ell(6, 20.5, 1.5, 1.5, "white", "lgrey")
+
+
 @icon("squirrel")
 def _(g):
     g.ell(20, 13, 4.5, 6, "ochre", "rust", "tan")
     g.ell(13, 18, 4, 4.5, "ochre", "rust")
     g.ell(13, 13, 3, 2.5, "ochre", "rust")
     g.p(11, 10, "ochre")
-    g.p(14, 10, "ochre")
     g.p(12, 13, "ink")
+    g.p(14, 10, "ochre")
     g.ell(13, 20, 2, 2, "cream")
 
 
+# An open hand reaching down out of a striped sleeve: N and W the sleeve's stripes, H skin, h the gaps
+# between the fingers.
+GRAB = ["..NWNWNW..", "..NWNWNW..", "..NWNWNW..", "..HHHHHH..", ".HHHHHHHH.", "HHHHHHHHHH", "HH.HhHhHhH",
+        "H..HhHhHhH", "...HhHhHhH", "...H.H.H.H"]
+
+
+@icon("yoink")
+def _(g):
+    """A thief's hand swooping on a tip coin."""
+    pix(g, 11, 6, GRAB, {"N": "navy", "W": "white", "H": "skin1", "h": "skin2"})
+    g.ell(16, 21.5, 4.5, 4.5, "amber", "orange", "yellow")
+    g.rect(16, 19, 1, 5, "dbrown")
+    g.p(14, 19, "white")
+
+
+# A dog's head side on, its nose to the right: F fur, E ear, M muzzle, N nose, I eye.
+SNIFFER = ["..FFFF.....", ".FFFFFF....", "EEFFFIFF...", "EEFFFFFFFNN", "EEEFFFFFFNN", "EEEFFFFFFF.",
+           ".EEFFFFMM..", "..FFFF.....", "..FFFF....."]
+
+
+@icon("sniff-test")
+def _(g):
+    """Two dogs' noses meeting, sniff marks above them."""
+    pix(g, 5, 11, SNIFFER, {"F": "ochre", "E": "dbrown", "M": "white", "N": "ink", "I": "ink"})
+    pix(g, 16, 11, SNIFFER, {"F": "white", "E": "ink", "M": "lgrey", "N": "ink", "I": "ink"}, mirror=True)
+    for x, y in ((13, 8), (16, 6), (19, 8)):
+        g.rect(x, y, 1, 2, "sky")
+        g.p(x + 1, y - 1, "sky")
+
+
+BONE = ["xx......xx", "xxx....xxx", ".xxxxxxxx.", ".xxxxxxxx.", "xxx....xxx", "xx......xx"]
+
+
+@icon("snack-attack")
+def _(g):
+    """A pile of bone treats in their crumbs."""
+    for x0, y0 in ((6, 18), (16, 18), (11, 11)):
+        pix(g, x0, y0, BONE, {"x": "ochre"})
+        for y, row in enumerate(BONE):
+            for x, ch in enumerate(row):
+                if ch == "x" and (y == len(BONE) - 1 or BONE[y + 1][x] != "x"):
+                    g.p(x0 + x, y0 + y, "rust")
+        g.rect(x0 + 2, y0 + 2, 5, 1, "tan")
+    for x, y in ((22, 12), (24, 15), (8, 15), (6, 25), (11, 26), (20, 26), (25, 25)):
+        g.p(x, y, "rust")
+
+
 BADGES = {
-    "first-steps": "firsts", "round-trip": "firsts", "double-leash": "firsts", "pack-leader": "firsts",
-    "clean-paws": "mastery", "not-a-scratch": "mastery", "five-star-service": "mastery", "big-payday": "mastery",
+    "double-leash": "firsts", "dream-team": "firsts", "first-steps": "firsts", "pack-leader": "firsts",
+    "round-trip": "firsts",
+    "big-payday": "mastery", "clean-paws": "mastery", "close-shave": "mastery", "dodge-ball": "mastery",
+    "everybody-home": "mastery", "five-star-service": "mastery", "not-a-scratch": "mastery",
     "full-kennel": "collection", "kitted-out": "collection", "neighbourhood-favourite": "collection",
     "top-walker": "collection",
-    "youre-fired": "silly", "eau-de-skunk": "silly", "squirrel": "silly",
+    "eau-de-skunk": "silly", "mud-season": "silly", "sniff-test": "silly", "snack-attack": "silly",
+    "squirrel": "silly", "yoink": "silly", "youre-fired": "silly", "zoomies": "silly",
 }
 
 
@@ -257,17 +454,23 @@ def badge(name, locked=False):
     for x, y in keyline:
         g.p(x, y, KEYLINES.get(name, "plum"))
     if locked:
-        # The icon becomes a two-tone silhouette (dark lines stay darker) so its goal still reads on the grey face.
+        # The ring darkens to slate and the face to grey, so a locked badge never reads as silver; the icon
+        # becomes a two-tone silhouette (dark lines stay darker) so its goal still reads on the grey face.
+        ring_to = {K[rim]: K["dslate"], K[rim_sh]: K["navy"], K[rim_li]: K["slate"]}
         for y in range(32):
             for x in range(32):
                 c = g.px[y][x]
-                if c:
-                    g.px[y][x] = (K["dslate"] if lum(c) < 90 else K["slate"]) if (x, y) in icon_px | keyline else grey(c)
+                if not c:
+                    continue
+                if (x, y) in icon_px | keyline:
+                    g.px[y][x] = K["navy"] if lum(c) < 90 else K["dslate"]
+                else:
+                    g.px[y][x] = K["grey"] if disc.px[y][x] else ring_to[c]
         g.rect(20, 22, 8, 7, "amber")
         g.rect(20, 22, 8, 1, "yellow")
-        g.rect(21, 18, 1, 4, "grey")
-        g.rect(26, 18, 1, 4, "grey")
-        g.rect(22, 17, 4, 1, "grey")
+        g.rect(21, 18, 1, 4, "lgrey")
+        g.rect(26, 18, 1, 4, "lgrey")
+        g.rect(22, 17, 4, 1, "lgrey")
         g.rect(23, 24, 2, 3, "dbrown")
     return g
 

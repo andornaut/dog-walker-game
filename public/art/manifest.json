@@ -20,14 +20,34 @@
       "json": "sprites/badge-clean-paws.json"
     },
     {
+      "key": "badge-close-shave",
+      "png": "sprites/badge-close-shave.png",
+      "json": "sprites/badge-close-shave.json"
+    },
+    {
+      "key": "badge-dodge-ball",
+      "png": "sprites/badge-dodge-ball.png",
+      "json": "sprites/badge-dodge-ball.json"
+    },
+    {
       "key": "badge-double-leash",
       "png": "sprites/badge-double-leash.png",
       "json": "sprites/badge-double-leash.json"
     },
     {
+      "key": "badge-dream-team",
+      "png": "sprites/badge-dream-team.png",
+      "json": "sprites/badge-dream-team.json"
+    },
+    {
       "key": "badge-eau-de-skunk",
       "png": "sprites/badge-eau-de-skunk.png",
       "json": "sprites/badge-eau-de-skunk.json"
+    },
+    {
+      "key": "badge-everybody-home",
+      "png": "sprites/badge-everybody-home.png",
+      "json": "sprites/badge-everybody-home.json"
     },
     {
       "key": "badge-first-steps",
@@ -50,6 +70,11 @@
       "json": "sprites/badge-kitted-out.json"
     },
     {
+      "key": "badge-mud-season",
+      "png": "sprites/badge-mud-season.png",
+      "json": "sprites/badge-mud-season.json"
+    },
+    {
       "key": "badge-neighbourhood-favourite",
       "png": "sprites/badge-neighbourhood-favourite.png",
       "json": "sprites/badge-neighbourhood-favourite.json"
@@ -70,6 +95,16 @@
       "json": "sprites/badge-round-trip.json"
     },
     {
+      "key": "badge-snack-attack",
+      "png": "sprites/badge-snack-attack.png",
+      "json": "sprites/badge-snack-attack.json"
+    },
+    {
+      "key": "badge-sniff-test",
+      "png": "sprites/badge-sniff-test.png",
+      "json": "sprites/badge-sniff-test.json"
+    },
+    {
       "key": "badge-squirrel",
       "png": "sprites/badge-squirrel.png",
       "json": "sprites/badge-squirrel.json"
@@ -80,9 +115,19 @@
       "json": "sprites/badge-top-walker.json"
     },
     {
+      "key": "badge-yoink",
+      "png": "sprites/badge-yoink.png",
+      "json": "sprites/badge-yoink.json"
+    },
+    {
       "key": "badge-youre-fired",
       "png": "sprites/badge-youre-fired.png",
       "json": "sprites/badge-youre-fired.json"
+    },
+    {
+      "key": "badge-zoomies",
+      "png": "sprites/badge-zoomies.png",
+      "json": "sprites/badge-zoomies.json"
     },
     {
       "key": "ball-bounce",

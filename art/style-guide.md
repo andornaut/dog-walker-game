@@ -251,17 +251,18 @@ After zones 1 to 3, over the road view (rows 214 to 465) dimmed as under a card,
 
 ## Badges
 
-`badge-<achievement>` medals are 32×32: a ring in the badge's tier colour around a cream face with the goal's icon. `locked` turns the whole badge grey, the icon a two-tone slate silhouette under a small padlock. The tiers, from first to hardest, then the joke tier:
+`badge-<achievement>` medals are 32×32: a ring in the badge's tier colour around a cream face with the goal's emblem. Each badge has its own emblem and no two share a motif (paw prints belong to `mud-season` alone), so all 24 read apart at 1× on the badge wall's cream panel. `locked` darkens the ring to slate (dslate, navy shade, slate light and rivets) and the face to grey, the emblem a two-tone dark slate silhouette (navy for its dark lines) under a small amber padlock with a light grey shackle. A locked badge is darker than the panel and than any metal ring, so it never reads as silver. The tiers, from first to hardest, then the joke tier:
 
-| Tier       | Ring   | Badges                                                               |
-| ---------- | ------ | -------------------------------------------------------------------- |
-| Firsts     | Bronze | `double-leash`, `first-steps`, `pack-leader`, `round-trip`           |
-| Mastery    | Silver | `big-payday`, `clean-paws`, `five-star-service`, `not-a-scratch`     |
-| Collection | Gold   | `full-kennel`, `kitted-out`, `neighbourhood-favourite`, `top-walker` |
-| Silly      | Pink   | `eau-de-skunk`, `squirrel`, `youre-fired`                            |
+| Tier       | Ring   | Badges and emblems                                                                                                                                                                                                                                                                                                 |
+| ---------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Firsts     | Bronze | `double-leash` two dogs' heads in collars; `dream-team` the four walkers shoulder to shoulder; `first-steps` a fingerpost; `pack-leader` one leash handle fanning to three collars; `round-trip` a loop arrow round a house                                                                                        |
+| Mastery    | Silver | `big-payday` a big coin between two small ones; `clean-paws` a bar of soap under bubbles; `close-shave` a cracked heart with a sweat drop; `dodge-ball` a tiny dog hopping a cone; `everybody-home` three leashes reaching a front door; `five-star-service` five stars; `not-a-scratch` a shield with a tick      |
+| Collection | Gold   | `full-kennel` a doghouse; `kitted-out` the fanny pack, lucky collar and a running shoe; `neighbourhood-favourite` a smiling face; `top-walker` a crown                                                                                                                                                             |
+| Silly      | Pink   | `eau-de-skunk` a green stink cloud; `mud-season` muddy paw prints out of a puddle; `sniff-test` two dogs' noses meeting; `snack-attack` a pile of bone treats in crumbs; `squirrel` a squirrel; `yoink` a thief's hand swooping on a coin; `youre-fired` a flame; `zoomies` a dog at full stretch with speed lines |
 
-- Silly is the joke tier: badges earned by mishaps (firings, skunk spray, squirrel chases). Pink marks a joke, never a rank, so it never joins the metal tiers.
+- Silly is the joke tier: badges earned by mishaps and running gags (firings, skunk spray, mud, zoomies, squirrel chases, thieves, sniffs, treats). Pink marks a joke, never a rank, so it never joins the metal tiers.
 - Every ring is built the same way: a base, a shade on its lower right, a light on its upper left and twelve rivets in the shade. Pink's are pink, mauve and white.
+- An emblem shows only what is in the game: gear on `kitted-out` is gear the Pet shop sells.
 
 ## Animation
 
