@@ -922,7 +922,7 @@
     {
       "id": "car",
       "movement": {
-        "factor": 1.7,
+        "factor": 1.96,
         "kind": "inLane"
       },
       "name": "Car",
@@ -969,7 +969,7 @@
     {
       "id": "cyclist",
       "movement": {
-        "factor": 1.6,
+        "factor": 1.84,
         "kind": "inLane"
       },
       "name": "Cyclist",
@@ -982,7 +982,7 @@
     {
       "id": "deliveryTruck",
       "movement": {
-        "factor": 1.15,
+        "factor": 1.32,
         "kind": "inLane"
       },
       "name": "Delivery truck",
@@ -1035,7 +1035,7 @@
     {
       "id": "goose",
       "movement": {
-        "factor": 1.8,
+        "factor": 2.07,
         "kind": "inLane"
       },
       "name": "Goose",
@@ -1079,7 +1079,7 @@
     {
       "id": "jogger",
       "movement": {
-        "factor": 1.3,
+        "factor": 1.5,
         "kind": "inLane"
       },
       "name": "Jogger",
@@ -1158,7 +1158,7 @@
     {
       "id": "scooter",
       "movement": {
-        "factor": 1.5,
+        "factor": 1.73,
         "kind": "inLane"
       },
       "name": "Scooter",
@@ -1214,7 +1214,7 @@
       "loadoutMax": 1,
       "longReachLanes": 1,
       "luckyEncountersPerZone": 1,
-      "maxDartMovers": 3,
+      "maxDartMovers": 4,
       "maxMovers": 6,
       "maxSlowVehicles": 3,
       "minorObstaclesFirstZone": 42,

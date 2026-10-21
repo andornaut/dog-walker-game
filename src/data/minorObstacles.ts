@@ -18,7 +18,7 @@ export const MINOR_OBSTACLES = {
   bin: { name: "Bin", shape: { lanes: 1, rows: 1 } },
   bunny: { movement: { kind: "hop", most: 2 }, name: "Bunny", shape: { lanes: 1, rows: 1 } },
   car: {
-    movement: { factor: 1.7, kind: "inLane" },
+    movement: { factor: 1.96, kind: "inLane" },
     name: "Car",
     shape: { lanes: 1, rows: 3 },
   },
@@ -30,12 +30,12 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   cyclist: {
-    movement: { factor: 1.6, kind: "inLane" },
+    movement: { factor: 1.84, kind: "inLane" },
     name: "Cyclist",
     shape: { lanes: 1, rows: 1 },
   },
   deliveryTruck: {
-    movement: { factor: 1.15, kind: "inLane" },
+    movement: { factor: 1.32, kind: "inLane" },
     name: "Delivery truck",
     shape: { lanes: 1, rows: 3 },
   },
@@ -55,7 +55,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   goose: {
-    movement: { factor: 1.8, kind: "inLane" },
+    movement: { factor: 2.07, kind: "inLane" },
     name: "Goose",
     shape: { lanes: 1, rows: 1 },
   },
@@ -67,7 +67,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   jogger: {
-    movement: { factor: 1.3, kind: "inLane" },
+    movement: { factor: 1.5, kind: "inLane" },
     name: "Jogger",
     shape: { lanes: 1, rows: 1 },
   },
@@ -93,7 +93,7 @@ export const MINOR_OBSTACLES = {
   },
   raccoon: { movement: { kind: "hop", most: 1 }, name: "Raccoon", shape: { lanes: 1, rows: 1 } },
   scooter: {
-    movement: { factor: 1.5, kind: "inLane" },
+    movement: { factor: 1.73, kind: "inLane" },
     name: "Scooter",
     shape: { lanes: 1, rows: 1 },
   },
