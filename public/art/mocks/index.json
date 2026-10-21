@@ -3,10 +3,5 @@
     "title": "Toronto neighbourhoods",
     "path": "toronto.html",
     "description": "Six Toronto neighbourhoods as the first country's zones: Cabbagetown, High Park, Kensington Market, the Distillery District, Yonge Street and The Beaches, each a walk screen with new skyline art and scrolling roadside props."
-  },
-  {
-    "title": "Card cue",
-    "path": "card-cue.html",
-    "description": "Three replacements for the \"!\" over obstacles that open a card: a pulsing ground ring, a bright outline and a bobbing card-icon bubble, each on a walk screen at near, mid and far depths, with every zone road and the reduced-motion forms."
   }
 ]
