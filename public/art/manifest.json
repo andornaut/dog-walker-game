@@ -5180,6 +5180,11 @@
       "json": "sprites/ui-tile.json"
     },
     {
+      "key": "ui-touch-drag",
+      "png": "sprites/ui-touch-drag.png",
+      "json": "sprites/ui-touch-drag.json"
+    },
+    {
       "key": "ui-warning",
       "png": "sprites/ui-warning.png",
       "json": "sprites/ui-warning.json",

@@ -1,0 +1,80 @@
+{ "frames": {
+   "ui-touch-drag 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 1.aseprite": {
+    "frame": { "x": 104, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 2.aseprite": {
+    "frame": { "x": 208, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 3.aseprite": {
+    "frame": { "x": 312, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 4.aseprite": {
+    "frame": { "x": 416, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 5.aseprite": {
+    "frame": { "x": 520, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 6.aseprite": {
+    "frame": { "x": 624, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   },
+   "ui-touch-drag 7.aseprite": {
+    "frame": { "x": 728, "y": 0, "w": 104, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 104, "h": 40 },
+    "sourceSize": { "w": 104, "h": 40 },
+    "duration": 150
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "ui-touch-drag.png",
+  "format": "RGBA8888",
+  "size": { "w": 832, "h": 40 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "press", "from": 0, "to": 1, "direction": "forward" },
+   { "name": "drag", "from": 2, "to": 5, "direction": "forward" },
+   { "name": "release", "from": 6, "to": 7, "direction": "forward" }
+  ]
+ }
+}

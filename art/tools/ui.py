@@ -34,7 +34,8 @@ empty, filled-disabled, empty-disabled), ui-slider-knob (10x16; tags normal, pre
 disabled), icon-sound and icon-music (tags on, off), icon-sound-panel, icon-music-panel,
 icon-effects-panel and icon-motion-panel (tags on, off), ui-zone-pips (18x8; tags todo,
 and <zone> and <zone>-done for each zone in ZONE_COLOURS), ui-tile (24x24 nine-slice, 4px
-on every side; tags normal, selected, disabled), ui-sticker (56x28; tags new, price, pop).
+on every side; tags normal, selected, disabled), ui-sticker (56x28; tags new, price, pop),
+ui-touch-drag (104x40, the help screen's one lane-width drag; tags press, drag, release).
 Panels, bubbles, plates, tiles and card frames share one chrome (chrome_shape); hits.py,
 moments.py, help.py and cards.py draw their plates, callouts and frames with it.
 
@@ -1416,44 +1417,97 @@ def chevron(g, x, cy, left, col, sh):
         g.rect(px, cy + d, 3, 1, sh if d > 0 else col)
 
 
+def touch_track(g, left, right, y):
+    """The touch hint's two-way track on row y: an amber line (orange along its lower row) between
+    two orange arrowheads 5 columns long, their tips on columns left and right."""
+    g.rect(left + 5, y - 1, right - left - 9, 2, "amber")
+    g.rect(left + 5, y, right - left - 9, 1, "orange")
+    for i in range(5):
+        g.rect(left + i, y - i, 1, 1 + 2 * i, "orange")
+        g.rect(right - i, y - i, 1, 1 + 2 * i, "orange")
+
+
+def touch_mark(g, x, y, col):
+    """A touch mark the fingertip left at x, y: a small ring."""
+    g.ell(x, y, 3, 3, col)
+    g.ell(x, y, 1.6, 1.6, None)
+
+
+def touch_glow(g, x, y):
+    """The pressed fingertip's glow centred on x, y."""
+    g.ell(x, y, 4, 4, "yellow", "amber")
+
+
+def touch_speed(g, x, sides):
+    """Speed lines beside a hand whose fingertip is on column x: on the left (-1), the right (1) or both."""
+    for y, dx in ((16, 0), (20, 3), (24, 0)):
+        if -1 in sides:
+            g.rect(x - 20 - dx, y, 8, 1, "white")
+        if 1 in sides:
+            g.rect(x + 14 + dx, y, 8, 1, "white")
+
+
+def touch_hand(g, x, y):
+    """The pointing hand, its index fingertip's contact pixel at x, y (the finger's top row y - 1),
+    the other fingers curled to the right and a white cuff below: 17 columns, 29 rows."""
+    dx, dy = x - 48, y - 6
+    for rx, ry, w, h, c in ((46, 6, 5, 13, "skin1"), (47, 5, 3, 1, "skin1"), (47, 6, 3, 2, "cream"),
+                            (42, 16, 15, 12, "skin1"), (43, 15, 13, 1, "skin1"),
+                            (51, 19, 6, 1, "skin2"), (51, 23, 6, 1, "skin2"), (51, 27, 6, 1, "skin2"),
+                            (40, 18, 3, 6, "skin1"), (40, 23, 3, 1, "skin2"), (50, 7, 1, 11, "skin2"),
+                            (56, 16, 1, 12, "skin2"), (43, 27, 13, 1, "skin2"), (43, 28, 13, 6, "white"),
+                            (43, 33, 13, 1, "lgrey"), (55, 28, 1, 6, "lgrey")):
+        g.rect(rx + dx, ry + dy, w, h, c)
+
+
 def touch_hint():
     """96x36: a fingertip pressed on a two-way track, with fading touch marks either side and
     speed lines. Not exported: help.py crops it for the help pages' drag illustrations. The game
     shows no overlay tips over the play area."""
     g = Grid(96, 36)
-    # the track: a line between two arrowheads
-    g.rect(9, 5, 78, 2, "amber")
-    g.rect(9, 6, 78, 1, "orange")
-    for i in range(5):
-        g.rect(4 + i, 6 - i, 1, 1 + 2 * i, "orange")
-        g.rect(91 - i, 6 - i, 1, 1 + 2 * i, "orange")
-    # where the fingertip was a moment ago, fading out either side
+    touch_track(g, 4, 91, 6)
     for cx, col in ((26, "lgrey"), (70, "lgrey"), (36, "white"), (60, "white")):
-        g.ell(cx, 6, 3, 3, col)
-        g.ell(cx, 6, 1.6, 1.6, None)
-    g.ell(48, 6, 4, 4, "yellow", "amber")
-    # speed lines beside the hand
-    for y, dx in ((16, 0), (20, 3), (24, 0)):
-        g.rect(28 - dx, y, 8, 1, "white")
-        g.rect(62 + dx, y, 8, 1, "white")
-    # pointing hand: index finger up to the contact point, the other fingers curled to the right
-    g.rect(46, 6, 5, 13, "skin1")
-    g.rect(47, 5, 3, 1, "skin1")
-    g.rect(47, 6, 3, 2, "cream")
-    g.rect(42, 16, 15, 12, "skin1")
-    g.rect(43, 15, 13, 1, "skin1")
-    for y in (16, 20, 24):
-        g.rect(51, y + 3, 6, 1, "skin2")
-    g.rect(40, 18, 3, 6, "skin1")
-    g.rect(40, 23, 3, 1, "skin2")
-    g.rect(50, 7, 1, 11, "skin2")
-    g.rect(56, 16, 1, 12, "skin2")
-    g.rect(43, 27, 13, 1, "skin2")
-    g.rect(43, 28, 13, 6, "white")
-    g.rect(43, 33, 13, 1, "lgrey")
-    g.rect(55, 28, 1, 6, "lgrey")
+        touch_mark(g, cx, 6, col)
+    touch_glow(g, 48, 6)
+    touch_speed(g, 48, (-1, 1))
+    touch_hand(g, 48, 6)
     return g
 
+
+# ui-touch-drag: one lane-width drag (64px) to the right on a 104x40 frame, for the help screen.
+# The track's centre is row TOUCH_Y, the drag runs from column TOUCH_FROM to TOUCH_TO, and each
+# frame is (fingertip column, fingertip row, glow, the marks left behind, speed lines).
+TOUCH_SIZE, TOUCH_Y, TOUCH_FROM, TOUCH_TO = (104, 40), 6, 20, 84
+TOUCH_HALF = (TOUCH_FROM + TOUCH_TO) // 2
+TOUCH_FRAMES = {
+    "press": [(TOUCH_FROM, TOUCH_Y - 3, None, (), False), (TOUCH_FROM, TOUCH_Y, "glow", (), False)],
+    "drag": [(TOUCH_FROM, TOUCH_Y, "glow", (), False), (41, TOUCH_Y, "glow", ("faint",), True),
+             (63, TOUCH_Y, "glow", ("faint", "bright"), True), (TOUCH_TO, TOUCH_Y, "glow", ("faint", "bright"), True)],
+    "release": [(TOUCH_TO, TOUCH_Y - 3, "ring", ("faint", "bright"), False),
+                (TOUCH_TO, TOUCH_Y - 3, "fading", ("faint", "bright"), False)],
+}
+TOUCH_MS = 150
+
+
+def touch_drag(x, y, glow, marks, speed):
+    """A frame of ui-touch-drag: the track, the marks the drag left (faint at its start, bright
+    halfway), the glow under the fingertip (a wide yellow ring, then a light grey one, as it lifts), the speed
+    lines trailing on the left while it moves, and the hand. Drawn dragging right; the game
+    mirrors it for a drag to the left."""
+    g = Grid(*TOUCH_SIZE)
+    touch_track(g, 4, 99, TOUCH_Y)
+    for mark in marks:
+        touch_mark(g, TOUCH_FROM if mark == "faint" else TOUCH_HALF, TOUCH_Y, "lgrey" if mark == "faint" else "white")
+    if glow == "glow":
+        touch_glow(g, x, TOUCH_Y)
+    elif glow is not None:
+        # wider than a touch mark, so it shows either side of the lifted finger
+        g.ell(x, TOUCH_Y, 5, 5, "yellow" if glow == "ring" else "lgrey")
+        g.ell(x, TOUCH_Y, 3.4, 3.4, None)
+    if speed:
+        touch_speed(g, x, (-1,))
+    touch_hand(g, x, y)
+    return g
 
 IMAGES = {
     "icon-pause": lambda: to_image(pause().outlined(False)),
@@ -1530,6 +1584,8 @@ def sprites():
     yield "ui-zone-pips", [("todo", [zone_pip().outlined(False)], 1000)] + [
         (zone + suffix, [zone_pip(zone, bool(suffix)).outlined(False)], 1000)
         for zone in ZONE_COLOURS for suffix in ("", "-done")]
+    yield "ui-touch-drag", [(tag, [touch_drag(*f).outlined() for f in frames], TOUCH_MS)
+                            for tag, frames in TOUCH_FRAMES.items()]
     pop = [sticker(*STICKERS["new"], scale, turn).outlined(False)
            for scale, turn in ((0.45, 0.5), (0.85, 0.25), (1.06, 0), (1, 0))]
     yield "ui-sticker", [(t, [sticker(*cols).outlined(False)], 1000) for t, cols in STICKERS.items()] + [
