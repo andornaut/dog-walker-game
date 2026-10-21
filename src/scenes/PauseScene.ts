@@ -65,7 +65,7 @@ export class PauseScene extends Scene {
   create(data: PauseSceneData): void {
     const { onHeadHome, onResume } = data;
     this.pressed = undefined;
-    const { roadView, walkView } = screenLayout(SCREEN_CONFIG);
+    const { walkView } = screenLayout(SCREEN_CONFIG);
     addRampDim(this, walkView);
     const headHome = () => {
       soundboardOf(this).stopMusic();
@@ -97,7 +97,7 @@ export class PauseScene extends Scene {
     });
     const noteLines = noteParts.reduce((sum, part) => sum + part.lines.length, 0);
     const parts = { buttonCount: this.entries.length, noteLines };
-    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, parts);
+    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(walkView, parts);
     const { panel } = layout;
 
     addRimmedPanel(this, panel);

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CARD_LAYOUT, largeCardHeight, largeCardRect } from "./cardLayout";
 
-const road = { height: 320, width: 360, x: 0, y: 150 };
+const area = { height: 320, width: 360, x: 0, y: 150 };
 
 describe("largeCardHeight", () => {
   it.each([
@@ -20,7 +20,7 @@ describe("largeCardRect", () => {
   it.each([
     ["the full card", CARD_LAYOUT.large.height, { height: 280, width: 166, x: 97, y: 170 }],
     ["a shorter card", 218, { height: 218, width: 166, x: 97, y: 201 }],
-  ])("centres %s on the road", (_name, height, rect) => {
-    expect(largeCardRect(road, height)).toEqual(rect);
+  ])("centres %s in the area", (_name, height, rect) => {
+    expect(largeCardRect(area, height)).toEqual(rect);
   });
 });

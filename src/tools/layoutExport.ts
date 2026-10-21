@@ -75,7 +75,7 @@ export function layoutExport(
   data: Pick<GameData, "dogs" | "help" | "menuText" | "shopGear" | "walkers" | "tuning">,
 ) {
   const regions = screenLayout(SCREEN_CONFIG);
-  const { approach, backdrop, road, roadView } = regions;
+  const { approach, backdrop, road, roadView, walkView } = regions;
   const projection = walkProjection(ROAD_CAMERA, road);
   const scrollSpeed = read(data.tuning, "pixels", "roadScrollSpeed");
   const bandRows = Array.from({ length: approach.height }, (_, i) => approach.y + i);
@@ -139,7 +139,7 @@ export function layoutExport(
     scenes: {
       cards: {
         ...CARD_LAYOUT,
-        largeRect: largeCardRect(roadView),
+        largeRect: largeCardRect(walkView),
         // By count of cards, from 1.
         rows: cardRows(MAX_CARD_OPTIONS, roadView),
       },
@@ -171,7 +171,7 @@ export function layoutExport(
       pause: {
         labels: PAUSE_MENU_ITEMS.map((item) => data.menuText.pause[item]),
         // The note wraps to two lines at 2x on the plate.
-        ...pauseMenuLayout(roadView, { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: 2 }),
+        ...pauseMenuLayout(walkView, { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: 2 }),
       },
       // SettingsScene's rows: sound, music, effects and reduced motion.
       settings: settingsLayout(SCREEN_CONFIG, ["switch", "slider", "slider", "switch"]),

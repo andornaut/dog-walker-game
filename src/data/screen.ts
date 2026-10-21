@@ -11,7 +11,7 @@ const BANDS = {
   short: { backdropHeight: 110, roadIntoBand: 24 },
   tall: { backdropHeight: 174, roadIntoBand: 19 },
 } as const;
-const BAND: keyof typeof BANDS = "short";
+const BAND: keyof typeof BANDS = "tall";
 
 // Internal render resolution: portrait, scaled to the window without smoothing.
 export const SCREEN_CONFIG: ScreenConfig = {

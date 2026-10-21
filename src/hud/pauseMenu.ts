@@ -34,10 +34,11 @@ export interface PauseMenuLayout {
   titleY: number;
 }
 
-// The panel centred on the road, sized to its parts: the title, then the buttons stacked
-// down it with the note plate under them, or the note plate first when it is the question.
+// The panel centred in area, the dimmed band and road, sized to its parts: the title, then the
+// buttons stacked down it with the note plate under them, or the note plate first when it is
+// the question.
 function panelLayout(
-  road: Rect,
+  area: Rect,
   parts: { buttonCount: number; noteLines: number },
   noteFirst: boolean,
 ): PauseMenuLayout {
@@ -52,8 +53,8 @@ function panelLayout(
   const panel: Rect = {
     height,
     width: PANEL_WIDTH,
-    x: Math.round(road.x + (road.width - PANEL_WIDTH) / 2),
-    y: Math.round(road.y + (road.height - height) / 2),
+    x: Math.round(area.x + (area.width - PANEL_WIDTH) / 2),
+    y: Math.round(area.y + (area.height - height) / 2),
   };
   const buttons = Array.from({ length: buttonCount }, (_, i) => ({
     height: BUTTON.height,
@@ -81,10 +82,10 @@ function panelLayout(
 
 // The pause menu: its buttons, then the note plate, its note noteLines lines long.
 export function pauseMenuLayout(
-  road: Rect,
+  area: Rect,
   parts: { buttonCount: number; noteLines: number },
 ): PauseMenuLayout {
-  return panelLayout(road, parts, false);
+  return panelLayout(area, parts, false);
 }
 
 // The capitals' top of each part of a note drawn in parts down its plate, one under another,
@@ -101,8 +102,8 @@ export function notePartTops(plate: Rect, lineCounts: readonly number[]): number
 // The Home button's question: the title, the note plate saying what going home keeps and gives
 // up, then the answers.
 export function homeQuestionLayout(
-  road: Rect,
+  area: Rect,
   parts: { buttonCount: number; noteLines: number },
 ): PauseMenuLayout {
-  return panelLayout(road, parts, true);
+  return panelLayout(area, parts, true);
 }

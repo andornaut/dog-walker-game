@@ -1,6 +1,6 @@
 import { itemAt } from "../arrays";
 import type { ZoneId } from "../data/types";
-import type { Point } from "./rect";
+import type { Point, Rect } from "./rect";
 
 // The scenery gags in the backdrop band: a cat on a perch, a lawn sprinkler and a ball rolling
 // along a sidewalk. They have no collision and no effect. Positions are band pixels; the cat
@@ -14,9 +14,12 @@ export const GAG_SIZES = {
   sprinkler: { height: 24, width: 32 },
 } as const;
 
-// The cat's paws rest on the near-left perch's top rail, on row 94, and the sprinkler
-// stands on the near-right lawn, rows 86 to 109.
-export const GAG_Y = { cat: 71, sprinkler: 86 } as const;
+// The near-left perch's top rail, rows 158 and 159, on the band's approach rows.
+export const PERCH_RAIL_Y = 158;
+
+// The cat's paws, on its frame's bottom row, rest on the perch's top rail, and the sprinkler
+// stands on the near-right lawn from the near sidewalk, row 150, down to the band's bottom edge.
+export const GAG_Y = { cat: PERCH_RAIL_Y + 1 - GAG_SIZES.cat.height, sprinkler: 150 } as const;
 
 // The ball's feet, rolling up the middle of a sidewalk from the band's bottom edge.
 export interface BallPath {
@@ -25,8 +28,8 @@ export interface BallPath {
 }
 
 const BALL_PATHS: readonly BallPath[] = [
-  { from: { x: 97, y: 109 }, to: { x: 103, y: 85 } },
-  { from: { x: 263, y: 109 }, to: { x: 257, y: 85 } },
+  { from: { x: 97, y: 173 }, to: { x: 104, y: 154 } },
+  { from: { x: 263, y: 173 }, to: { x: 256, y: 154 } },
 ];
 // The ball's feet, from the top-left of its sprite.
 const BALL_FEET = { x: 7, y: 13 } as const;
@@ -78,6 +81,19 @@ export function catX(gags: ZoneGags, roll: number): number | null {
     offset -= width;
   }
   return null;
+}
+
+// Each perch from its top rail down to the band's bottom edge, bandHeight rows tall, both
+// ends of its span included. The perch stands on the approach rows, where the road's moving
+// verge is drawn over the backdrop, so the verge leaves these rects to the backdrop: the
+// perch never takes the verge's detail, and the cat never sits over a gap in its rail.
+export function perchRects(gags: ZoneGags, bandHeight: number): Rect[] {
+  return gags.perches.map(({ x0, x1 }) => ({
+    height: bandHeight - PERCH_RAIL_Y,
+    width: x1 - x0 + 1,
+    x: x0,
+    y: PERCH_RAIL_Y,
+  }));
 }
 
 // The cat sits up while the pack passes below it.

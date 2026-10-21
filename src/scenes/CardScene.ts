@@ -324,8 +324,8 @@ export class CardScene extends Scene {
     const height = largeCardHeight(measured.height + LARGE_BODY_GAP);
     // The rows under the body move up by what it gave up.
     const shift = height - LARGE.height;
-    const { roadView: road } = screenLayout(SCREEN_CONFIG);
-    const { x, y } = largeCardRect(road, height);
+    const { walkView } = screenLayout(SCREEN_CONFIG);
+    const { x, y } = largeCardRect(walkView, height);
     const before = this.children.list.length;
     const tag = cardFrameTag(gameData, view.source);
     const g = this.add.graphics();

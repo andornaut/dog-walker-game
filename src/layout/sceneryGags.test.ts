@@ -1,9 +1,22 @@
 import { describe, expect, it } from "vitest";
 
+import { SCREEN_CONFIG } from "../data/screen";
 import { WORLD } from "../data/world";
-import { ballAt, catReacts, catX, GAG_SIZES, GAG_Y, ZONE_GAGS } from "./sceneryGags";
+import {
+  ballAt,
+  catReacts,
+  catX,
+  GAG_SIZES,
+  GAG_Y,
+  PERCH_RAIL_Y,
+  perchRects,
+  ZONE_GAGS,
+} from "./sceneryGags";
+import { screenLayout } from "./screenLayout";
 
-const BAND = { height: 110, width: 360 };
+const { approach, backdrop: BAND } = screenLayout(SCREEN_CONFIG);
+// The first of the band's approach rows, counted from the band's top.
+const APPROACH_ROW = approach.y - BAND.y;
 
 describe("ZONE_GAGS", () => {
   it("places gags for every zone, inside the 360px band", () => {
@@ -24,19 +37,28 @@ describe("ZONE_GAGS", () => {
     for (const zone of WORLD.zones) {
       expect(ZONE_GAGS[zone.id].perches).toEqual([{ x0: 0, x1: 72 }]);
     }
-    // The cat's paws, on its frame's bottom row, rest on the rail's row 94.
-    expect(GAG_Y.cat + GAG_SIZES.cat.height - 1).toBe(94);
+    // The cat's paws, on its frame's bottom row, rest on the rail's top row.
+    expect(GAG_Y.cat + GAG_SIZES.cat.height - 1).toBe(PERCH_RAIL_Y);
   });
 
-  it("stands a sprinkler on the near-right lawn, x 284 to 359, rows 86 to 109, except at the shops", () => {
+  it("stands each perch's rail on the approach rows, its rect down to the band's bottom", () => {
+    for (const zone of WORLD.zones) {
+      for (const rect of perchRects(ZONE_GAGS[zone.id], BAND.height)) {
+        expect(rect.y).toBeGreaterThanOrEqual(APPROACH_ROW);
+        expect(rect.y + rect.height).toBe(BAND.height);
+      }
+    }
+  });
+
+  it("stands a sprinkler on the near-right lawn, x 284 to 359, down to the band's bottom, except at the shops", () => {
     for (const zone of ["street", "park", "homeStretch"] as const) {
       for (const x of ZONE_GAGS[zone].sprinklers) {
         expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(284);
         expect(x + GAG_SIZES.sprinkler.width / 2).toBeLessThanOrEqual(360);
       }
     }
-    expect(GAG_Y.sprinkler).toBeGreaterThanOrEqual(86);
-    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height - 1).toBeLessThanOrEqual(109);
+    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height).toBeLessThanOrEqual(BAND.height);
+    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height).toBeGreaterThan(APPROACH_ROW);
     expect(ZONE_GAGS.shops.sprinklers).toEqual([]);
   });
 });
@@ -68,9 +90,12 @@ describe("catReacts", () => {
 describe("ballAt", () => {
   it("rolls up the near-left sidewalk from the band's bottom edge, then the right one", () => {
     const start = ballAt(0);
-    expect(start).toEqual({ x: 90, y: 96 });
-    expect((ballAt(2)?.y ?? 0) < (start?.y ?? 0)).toBe(true);
-    expect(ballAt(30)).toEqual({ x: 256, y: 96 });
+    const right = ballAt(30);
+    // The ball's feet, its frame's bottom row, start on the band's bottom row.
+    expect((start?.y ?? 0) + GAG_SIZES.ball.height).toBe(BAND.height);
+    expect((ballAt(1)?.y ?? 0) < (start?.y ?? 0)).toBe(true);
+    expect(right?.y).toBe(start?.y);
+    expect((right?.x ?? 0) > BAND.width / 2 && (start?.x ?? 0) < BAND.width / 2).toBe(true);
   });
 
   it("stays in the band, and is gone between rolls", () => {
@@ -84,6 +109,6 @@ describe("ballAt", () => {
   });
 
   it("rests at the near end of the left sidewalk when still", () => {
-    expect(ballAt(17, true)).toEqual({ x: 90, y: 96 });
+    expect(ballAt(17, true)).toEqual(ballAt(0));
   });
 });

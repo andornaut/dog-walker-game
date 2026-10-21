@@ -16,6 +16,7 @@ import {
   stripLevels,
   stripLines,
 } from "../../layout/roadRaster";
+import { perchRects, ZONE_GAGS } from "../../layout/sceneryGags";
 import { zoneAt } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
 import { colorFromHex } from "../palette";
@@ -23,10 +24,11 @@ import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 const ROAD_TEXTURE = "road-projected";
 
-// Each road strip's look and each backdrop's approach rows, read once from their textures and
-// kept for the scene's life.
+// Each road strip's look and each backdrop's approach rows and bottom row, read once from
+// their textures and kept for the scene's life.
 export class RoadArt {
   private readonly approaches = new Map<string, Uint32Array | null>();
+  private readonly bandRows = new Map<string, Uint32Array | null>();
   private readonly looks = new Map<string, RoadLook>();
   private readonly scene: Scene;
 
@@ -51,20 +53,17 @@ export class RoadArt {
   }
 
   // The backdrop's bottom rows, where the road's approach is drawn over it, across the road's
-  // view: the approach rows, then its bottom row, which the far road fades into.
+  // view. The zone's perches are cleared from them, so the verge leaves the perches to the
+  // backdrop.
   approach(zone: Zone): Uint32Array | null {
     const key = backdropKey(zone);
     let rows = this.approaches.get(key);
     if (rows === undefined) {
-      rows = null;
-      const image = this.imagePixels(key);
-      const { approach, rasterView } = LAYOUT;
-      if (image !== null && image.height >= approach.height) {
-        rows = new Uint32Array(rasterView.width * approach.height);
-        for (let y = 0; y < approach.height; y++) {
-          const start = (image.height - approach.height + y) * image.width + rasterView.x;
-          rows.set(image.pixels.subarray(start, start + rasterView.width), y * rasterView.width);
-        }
+      rows = this.approachRows(key);
+      const bottom = rows?.subarray(rows.length - LAYOUT.rasterView.width);
+      this.bandRows.set(key, bottom === undefined ? null : bottom.slice());
+      if (rows !== null) {
+        clearPerches(rows, zone);
       }
       this.approaches.set(key, rows);
     }
@@ -73,9 +72,22 @@ export class RoadArt {
 
   // The backdrop's bottom row across the road, which the far road fades into.
   bandRow(zone: Zone): Uint32Array | null {
-    const rows = this.approach(zone);
-    const { width } = LAYOUT.rasterView;
-    return rows === null ? null : rows.subarray(rows.length - width);
+    this.approach(zone);
+    return this.bandRows.get(backdropKey(zone)) ?? null;
+  }
+
+  private approachRows(key: string): Uint32Array | null {
+    const image = this.imagePixels(key);
+    const { approach, rasterView } = LAYOUT;
+    if (image === null || image.height < approach.height) {
+      return null;
+    }
+    const rows = new Uint32Array(rasterView.width * approach.height);
+    for (let y = 0; y < approach.height; y++) {
+      const start = (image.height - approach.height + y) * image.width + rasterView.x;
+      rows.set(image.pixels.subarray(start, start + rasterView.width), y * rasterView.width);
+    }
+    return rows;
   }
 
   // A loaded image's pixels, read once through a canvas from its frame, which in a build is a
@@ -100,6 +112,22 @@ export class RoadArt {
     context.drawImage(image, cutX, cutY, width, height, 0, 0, width, height);
     const { data } = context.getImageData(0, 0, width, height);
     return { height, pixels: new Uint32Array(data.buffer), width };
+  }
+}
+
+// Clears the zone's perches from its approach rows, rasterView.width wide: a cleared pixel never
+// matches the verge's, so the backdrop's own perch shows there.
+function clearPerches(rows: Uint32Array, zone: Zone): void {
+  const { approach, backdrop, rasterView } = LAYOUT;
+  const firstBandRow = backdrop.height - approach.height;
+  const gags = ZONE_GAGS[zone.id as keyof typeof ZONE_GAGS];
+  for (const perch of perchRects(gags, backdrop.height)) {
+    const from = Math.max(0, perch.x - rasterView.x);
+    const to = Math.min(rasterView.width, perch.x + perch.width - rasterView.x);
+    for (let y = Math.max(perch.y, firstBandRow); y < perch.y + perch.height; y++) {
+      const offset = (y - firstBandRow) * rasterView.width;
+      rows.fill(0, offset + from, offset + to);
+    }
   }
 }
 

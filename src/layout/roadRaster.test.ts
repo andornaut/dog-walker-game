@@ -37,6 +37,12 @@ import {
 import { screenLayout } from "./screenLayout";
 
 const { approach, rasterView: view, road } = screenLayout(SCREEN_CONFIG);
+// The road's far row, nearest row and middle row, and the backdrop's bottom row above the far
+// row.
+const FAR_Y = road.y;
+const NEAR_Y = road.y + road.height - 1;
+const BAND_BOTTOM_Y = road.y - 1;
+const MID_Y = Math.round((FAR_Y + NEAR_Y) / 2);
 // Verge distances, across, count out from the road's edge.
 const ROAD_HALF = SCREEN_CONFIG.roadWidth / 2;
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
@@ -63,8 +69,8 @@ const pixelAt = (out: Uint32Array, x: number, y: number) =>
   out[(y - view.y) * view.width + (x - view.x)];
 
 describe("the verge beside the road", () => {
-  // Band row 109 is screen row 149: the backdrop's bottom row, which the verge continues.
-  const bandRow = itemAt(roadRaster(projection, { ...view, height: 1, y: 149 }).rows, 0);
+  // The backdrop's bottom row, which the verge continues.
+  const bandRow = itemAt(roadRaster(projection, { ...view, height: 1, y: BAND_BOTTOM_Y }).rows, 0);
   const [GREEN, DARK_GREEN, FOREST] = [0x63c74d, 0x3e8948, 0x265c42];
   const [GREY, LIGHT_GREY] = [0x8b9bb4, 0xc0cbdc];
   const [BROWN, CREAM, TAN, WHITE] = [0xb86f50, 0xead4aa, 0xe4a672, 0xffffff];
@@ -119,7 +125,7 @@ describe("the verge beside the road", () => {
     [Number.POSITIVE_INFINITY, DARK_GREEN],
   ]);
 
-  // The runs of each backdrop's row 109 beside the road, without its tufts.
+  // The runs of each backdrop's bottom row beside the road, without its tufts.
   it.each<{ name: string; runs: [number, number, number][]; zone: ZoneId }>([
     { name: "street's mown lawn, sidewalk and curb", runs: MOWN_LAWN, zone: "street" },
     {
@@ -206,7 +212,8 @@ describe("the verge beside the road", () => {
       return marked / Math.max(1, lawn);
     };
     const far = raster.approachRows;
-    expect(tuftShare(far, far + 40)).toBeLessThan(tuftShare(200, 300));
+    const near = raster.rows.length;
+    expect(tuftShare(far, far + 40)).toBeLessThan(tuftShare(near - 100, near));
   });
 
   it("lays rough patches on park's lawn and no stripes", () => {
@@ -357,10 +364,10 @@ describe("drawRoad", () => {
   it("samples each road pixel from the strip column under its centre", () => {
     const out = draw(frameOf({ current: { strip: [labelled, labelled, labelled], zone: "park" } }));
     for (const [x, y] of [
-      [200, 469],
-      [111, 150],
-      [300, 400],
-      [180, 126],
+      [200, NEAR_Y],
+      [111, FAR_Y],
+      [300, MID_Y],
+      [180, approach.y],
     ] as const) {
       const label = pixelAt(out, x, y) ?? 0;
       expect((label - 1) % STRIP.width).toBe(
@@ -374,7 +381,7 @@ describe("drawRoad", () => {
     const strips = { strip: stripLevels(labelled), zone: "park" as const };
     const row = (scroll: number) =>
       Math.floor(
-        ((pixelAt(draw(frameOf({ current: strips, scroll })), 180, 400) ?? 1) - 1) / STRIP.width,
+        ((pixelAt(draw(frameOf({ current: strips, scroll })), 180, MID_Y) ?? 1) - 1) / STRIP.width,
       );
     expect((row(0) - row(10) + STRIP.height) % STRIP.height).toBe(10);
   });
@@ -425,19 +432,19 @@ describe("drawRoad", () => {
         220,
         y,
       );
-    expect(at(0, 150)).toBe(pixelWord(0x111111));
-    expect(at(30, 150)).toBe(pixelWord(0x222222));
-    expect(at(30, 469)).toBe(pixelWord(0x111111));
-    expect(at(200, 150)).toBe(pixelWord(0x333333));
+    expect(at(0, FAR_Y)).toBe(pixelWord(0x111111));
+    expect(at(30, FAR_Y)).toBe(pixelWord(0x222222));
+    expect(at(30, NEAR_Y)).toBe(pixelWord(0x111111));
+    expect(at(200, FAR_Y)).toBe(pixelWord(0x333333));
     // The strip has rolled past the nearest row once its far end has travelled the whole way.
     const passed =
-      raster.visibleDistance + STRIP.height - itemAt(raster.rows, 469 - view.y).distance;
-    expect(at(passed + 1, 469)).toBe(pixelWord(0x333333));
+      raster.visibleDistance + STRIP.height - itemAt(raster.rows, NEAR_Y - view.y).distance;
+    expect(at(passed + 1, NEAR_Y)).toBe(pixelWord(0x333333));
   });
 
   it("puts the previous zone's verge beside the start strip's cross street", () => {
     // street's curb runs 4 past the road's edge; park has none, so its lawn starts at the road.
-    const y = 400;
+    const y = MID_Y;
     const row = itemAt(raster.rows, y - view.y);
     const curbX = Array.from(row.across).findIndex(
       (across) => across >= ROAD_HALF && across < ROAD_HALF + 4,

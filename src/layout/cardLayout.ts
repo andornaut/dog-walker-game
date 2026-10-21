@@ -2,7 +2,8 @@ import { cardRowRects, type CardRowSpec } from "./cardRow";
 import type { Rect } from "./rect";
 
 // The choice cards: the card-frame sprite's parts in card pixels, the row of cards centred
-// on the road, and the enlarged card a hold opens, card-frame-large, centred on the road.
+// on the road, and the enlarged card a hold opens, card-frame-large, centred in the dimmed band
+// and road.
 export const CARD_LAYOUT = {
   art: { height: 56, width: 75, x: 5, y: 16 },
   badge: { height: 13, width: 71, x: 6, y: 121 },
@@ -37,14 +38,14 @@ export function largeCardHeight(contentHeight: number): number {
   return height - Math.max(0, body.height - Math.ceil(contentHeight));
 }
 
-// The enlarged card's rect, height tall, centred on the road on whole pixels.
-export function largeCardRect(road: Rect, height: number = CARD_LAYOUT.large.height): Rect {
+// The enlarged card's rect, height tall, centred in area on whole pixels.
+export function largeCardRect(area: Rect, height: number = CARD_LAYOUT.large.height): Rect {
   const { width } = CARD_LAYOUT.large;
   return {
     height,
     width,
-    x: road.x + Math.floor((road.width - width) / 2),
-    y: road.y + Math.floor((road.height - height) / 2),
+    x: area.x + Math.floor((area.width - width) / 2),
+    y: area.y + Math.floor((area.height - height) / 2),
   };
 }
 
