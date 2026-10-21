@@ -43,7 +43,7 @@ export const HOME_TEXT = {
   dogSlotName: "Dog slot {slot}",
   focus: {
     dogLocked: "Locked dog. {price}",
-    dogOwned: "{dog}: {kind}, {fee} a neighborhood.",
+    dogOwned: "{dog}: {kind}.",
     gear: "{gear}: {effect}.",
     gearLocked: "{gear}: {effect}. {price}",
     kind: "{size}, {hearts}♥",
@@ -99,5 +99,4 @@ export const HOME_TEXT = {
   unsaved: "Progress won't be saved.",
   walkerInfo: "{walker}: {agility}, {perk}.",
   walkerLocked: "Finish {zone} to unlock.",
-  zoneFee: "Pay {fee}",
 } as const satisfies HomeText;
