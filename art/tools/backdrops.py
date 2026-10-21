@@ -8,26 +8,22 @@ at the same slope) up to a cross street that runs flat across the band. Beyond i
 zone's houses, park or shops, the scenery behind them (hills, a second row of houses, a
 town, a river) and the sky. The houses are slim, about as tall as they are wide under a steep
 gable (house with SLIM parts), with trees, hedges and side yards between them. The band, the
-approach and the camera come from the game's layout export. The scenery gags (cat on a perch,
-a kite caught in a tree) are separate sprites the game places in this band, on the near corners
-either side of the street. The backdrops draw no static scenery on the near corners or the stub's
-verges, where the game's road begins and its items spawn: only the verge's ground.
+approach and the camera come from the game's layout export. The backdrops draw no static scenery
+on the near corners or the stub's verges, where the game's road begins and its items spawn: only
+the verge's ground.
 
 Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the
 message strip; the far side's ground row 115 (BASE), the far sidewalk 119 to 122, the far curb
 123 to 124, the cross street 125 to 133 with its centre line on row 129, the near sidewalk 134
 to 138, and the stub from row 139 (STUB, the approach) to the bottom row, 157, which continues
 the game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and
-227, verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
-the current constants): the near-left perch's top rail on rows 142 to 143, x 0 to 72; the
-near-right lawn's kite spot, x 284 to 319 (its sprite's top row 117, its foot's outline on row
-155), with the ornament beside it at x 322 to 353, its feet on row 155; and the two sidewalks,
-whose middles run from (87, 157) to (94, 138) and from
-(273, 157) to (266, 138).
+227, verge outside). The two sidewalks' middles run from (87, 157) to (94, 138) and from
+(273, 157) to (266, 138) (python3 art/tools/backdrops.py camera prints them for the current
+constants).
 
 Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
-  backdrops.py gags              print the gag spots and the join for the current constants
+  backdrops.py camera            print the camera, the join with the road and the sidewalks
   backdrops.py verges [--write]  print the Toronto verges (TORONTO_VERGES) as JSON, or write
                                  them to shared/verges.json, which build also writes
   backdrops.py build             write art/backdrops/*.aseprite and
@@ -359,9 +355,9 @@ BASE = STUB - 24               # the far side's ground row: the houses stand on 
 # The sky above row CALM, 70 rows over the far side's ground row, is one flat colour with no
 # clouds, stars or scenery: the debuff bars and the message strip lie over it.
 CALM = BASE - 70
-PERCH = round(Z0) + 3          # the near-left perch's z: its foot on the bottom row, for the cat
-PERCH_H = 30                   # the perch's height: its top rail is h 27 to 30
-PERCH_X = (-(WALK + 8), -600)  # the perch, across: from just past the sidewalk out off screen
+PERCH = round(Z0) + 3          # the near-left fence's z: its foot on the bottom row
+PERCH_H = 30                   # the fence's height: its top rail is h 27 to 30
+PERCH_X = (-(WALK + 8), -600)  # the fence, across: from just past the sidewalk out off screen
 
 
 def scale(yc):
@@ -499,7 +495,7 @@ def cross_line(cv, mark, edge=None, dash=(12, 32), bend=no_bend):
 
 
 def ffence(cv, x0, x1, z, col="white", h=PERCH_H, gap=12):
-    """A picket fence facing the camera, across x0..x1 at z: its top rail is a perch."""
+    """A picket fence facing the camera, across x0..x1 at z."""
     lo, hi = min(x0, x1), max(x0, x1)
     x = lo
     while x < hi:
@@ -670,15 +666,6 @@ def stats_street():
     return cv
 
 
-def rail(cv, x0, x1, z):
-    """A wooden park rail facing the camera: posts and a flat top rail to perch on."""
-    lo, hi = min(x0, x1), max(x0, x1)
-    for x in range(int(lo), int(hi), 48):
-        front(cv, x, x + 8, z, 0, PERCH_H - 2, "dbrown")
-    front(cv, lo, hi, z, PERCH_H - 6, PERCH_H, "brown")
-    front(cv, lo, hi, z, 12, 18, "brown")
-
-
 def sunburst(cv, cx, cy, n, a, b, y1, w=W, r=None):
     """Flat rays of a and b from cx, cy over rows 0 to y1: n of each round the half turn. With r,
     (rx, ry), the rays end on that ellipse round cx, cy and b fills the rest."""
@@ -765,7 +752,7 @@ SUNSET_SKY = ("pink", "orange", "amber", "yellow")
 
 
 # ---------- Toronto ----------
-# The six Toronto neighborhoods, sharing the cross street and gag spots. Their
+# The six Toronto neighborhoods, sharing the cross street. Their
 # darkness ranges from the open sand of The Beaches to Yonge Street's evening, Kensington Market's
 # dark laneways and High Park's canopy, and each has its own sky.
 
@@ -1755,7 +1742,7 @@ def yonge():
 
 
 # ---------- the near-right lawn's ornament ----------
-# A static ornament on the near-right lawn, beside the kite's tree (stats_street's): drawn on a
+# A static ornament on the near-right lawn (stats_street's): drawn on a
 # grid ORN_W x ORN_H with its ground row ORN_H - 3, outlined two ramp steps darker, its grid's
 # top-left at band ORN_X, ORN_Y, so its art keeps to x 322 to 353 with its feet on row STUB + 16 (155).
 ORN_X, ORN_Y, ORN_W, ORN_H = 320, STUB - 7, 36, 26
@@ -1805,20 +1792,16 @@ ZONES = {
 }
 
 
-def gags():
-    """Print the camera, the bottom row's join with the road and the gag spots, in band pixels."""
+def camera():
+    """Print the camera, the bottom row's join with the road and the sidewalks, in band pixels."""
     def column(x, py):
         return CX + x * scale(py + 0.5)
 
-    rail = sorted(round(at(PERCH_X[0], PERCH, h)[1] - 0.5) for h in (PERCH_H - 3, PERCH_H))
     print(f"camera: yH {YH}, footY {FOOT}, r {KS / F:.4f}, f {F:.1f}, centre x {CX}; "
           f"{VISIBLE:.1f} road px in view below the band, scale {S0:.4f} on row {H - 1}")
     road = [px for px in range(W) if abs(px + 0.5 - CX) < ROAD * S0]
     lines = [round(CX + d * S0 - 0.5) for d in DIVIDERS]
     print(f"row {H - 1}: road columns {road[0]}..{road[-1]}, lane dividers {lines}")
-    print(f"perch top rail: rows {rail[0]}..{rail[1]}, x 0..{math.floor(column(PERCH_X[0], H - 1))}")
-    lawn = math.ceil(column(WALK, H - 1))
-    print(f"near-right lawn: x {lawn}..{W - 1}, rows {STUB}..{H - 1}")
     mid = (CURB + WALK) / 2
     for side in (-1, 1):
         ends = [(round(column(side * mid, py)), py) for py in (H - 1, STUB - 1)]
@@ -1845,8 +1828,8 @@ def build():
 if __name__ == "__main__":
     if len(sys.argv) == 3 and sys.argv[1] == "preview":
         preview(sys.argv[2])
-    elif len(sys.argv) == 2 and sys.argv[1] == "gags":
-        gags()
+    elif len(sys.argv) == 2 and sys.argv[1] == "camera":
+        camera()
     elif sys.argv[1:] == ["verges"]:
         print(json.dumps(TORONTO_VERGES, indent=2))
     elif sys.argv[1:] == ["verges", "--write"]:

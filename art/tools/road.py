@@ -42,13 +42,6 @@ Usage:
   road.py build             write art/road/*.aseprite, then export
                             public/art/sprites/*.png and *.json with Aseprite
 
-The scenery gags play in the backdrop band, front view at the band's own scale: gag-cat
-(24x24) on the near-left perch, idle (4 frames: its tail swinging, a blink on the last; the game
-shows frame 0), and gag-kite (36x40) on the near-right lawn. gag-kite is a street tree with a red
-and yellow diamond kite snagged at the top right of its crown, its ribboned tail streaming right;
-flutter (4 frames, 140ms, looping): the kite swings 1 to 2px on its snag while a wave runs out
-along the tail.
-
 Everything that stands or waits on the road has a looping idle: people and
 walkers breathe (a 1px bob of the head and shoulders).
 New tags go after the existing ones, so the frame indices the game uses stay put.
@@ -1581,98 +1574,6 @@ def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
     return rim(g, LIT)
 
 
-# ---------- scenery gags (front view, in the backdrop band) ----------
-
-def cat(tail=0, blink=False):
-    """A ginger cat sitting on a fence post; the game places its paws on the fence's top rail."""
-    g = Grid(24, 24)
-    tx = (0, 1, 2, 1)[tail]
-    # tail curling up the right side
-    g.rect(17 + tx, 10, 2, 8, "ochre")
-    g.rect(16 + tx, 9, 3, 2, "ochre")
-    g.p(17 + tx, 8, "rust")
-    # body and front paws
-    g.ell(12, 17.5, 6, 5.5, "ochre", "rust", "tan")
-    g.ell(12, 18.5, 3, 3.5, "cream")
-    g.rect(9, 22, 2, 1, "cream")
-    g.rect(13, 22, 2, 1, "cream")
-    # head and ears
-    hy = 10
-    g.tri((6.5, hy - 1), (7.5, hy - 6), (10.5, hy - 3), "ochre")
-    g.tri((17.5, hy - 1), (16.5, hy - 6), (13.5, hy - 3), "ochre")
-    g.p(8, hy - 3, "pink")
-    g.p(15, hy - 3, "pink")
-    g.ell(12, hy + 1, 5.5, 4.5, "ochre", "rust", "tan")
-    for x in (9, 14):
-        if blink:
-            g.rect(x, hy + 1, 2, 1, "plum")
-        else:
-            g.rect(x, hy, 2, 2, "green")
-            g.p(x + (1 if x < 12 else 0), hy, "ink")
-    g.p(12, hy + 3, "pink")
-    g.rect(10, hy + 2, 1, 1, "cream")
-    g.rect(13, hy + 2, 1, 1, "cream")
-    return g
-
-
-# The kite's tilt per flutter frame, in degrees, its bottom corner swinging right of its snag:
-# it tugs out to 16 and swings back past rest to 4 while the tail's wave runs out along it.
-KITE_TILT = (10, 16, 10, 4)
-
-
-def kite_tree(step):
-    """A street tree with a red and yellow diamond kite snagged on a twig at the top of its crown,
-    its ribboned tail streaming out to the right in the wind. The game stands it on the near-right
-    lawn; the outline under its root flare is on the sprite's row 38."""
-    g = Grid(36, 40)
-    # the kite's red and yellow take one plum outline, so its diamond reads as one shape
-    g.edge = lambda c: K["plum"] if c in (K["red"], K["yellow"]) else DARKER[DARKER[c]]
-    # trunk, a fork into the crown and the root flare
-    g.rect(9, 20, 4, 18, "brown")
-    g.rect(12, 20, 1, 18, "dbrown")
-    g.rect(8, 37, 6, 1, "dbrown")
-    g.p(8, 21, "brown")
-    g.p(13, 21, "dbrown")
-    # crown: three lobes, lit from the top left
-    g.ell(10.5, 14, 10, 7.5, "green", "dgreen")
-    g.ell(5.5, 9.5, 5.5, 5, "green", "dgreen")
-    g.ell(13.5, 7, 7, 6, "green", "dgreen")
-    for x, y in ((4, 15), (9, 18), (15, 15), (17, 11), (8, 12)):
-        g.p(x, y, "dgreen")
-    for x, y in ((3, 8), (4, 7), (5, 7), (10, 4), (11, 3), (12, 3)):
-        g.p(x, y, "yellow")
-    # the twig the kite is caught on, poking out of the crown's top right
-    for x, y in ((18, 4), (19, 3), (20, 2)):
-        g.p(x, y, "dbrown")
-    # the kite, hung from its top corner on the twig's tip and swinging about it
-    a = -math.radians(KITE_TILT[step])
-    top = (21.5, 1.5)
-
-    def at(u, v):
-        return (top[0] + u * math.cos(a) - v * math.sin(a), top[1] + u * math.sin(a) + v * math.cos(a))
-
-    left, right, cross, bottom = at(-5, 5), at(5, 5), at(0, 5), at(0, 13)
-    g.tri(top, cross, left, "red")
-    g.tri(top, right, cross, "yellow")
-    g.tri(left, cross, bottom, "yellow")
-    g.tri(cross, right, bottom, "red")
-    g.p(*top, "dbrown")
-    # the tail: a white ribbon streaming right from the kite's bottom corner, its wave moving
-    # out along it, with a bow every four pixels
-    bx, by = bottom
-    phase = step * math.pi / 2
-    for i in range(1, 14):
-        t = i / 13
-        x = bx + i * 0.75
-        y = by + i * 0.45 + math.sin(phase - i * 0.75) * 1.6 * t
-        bow = i % 4 == 2
-        g.p(x, y, ("red" if i % 8 == 2 else "yellow") if bow else "white")
-        if bow:
-            g.p(x, y - 1, "red" if i % 8 == 2 else "yellow")
-            g.p(x, y + 1, "red" if i % 8 == 2 else "yellow")
-    return g
-
-
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def frames(gs, outline=True):
@@ -1712,9 +1613,6 @@ def sprites():
                                 ("idle", frames(big(dressed, neighbour_top(False), bob=bb, **neighbour) for bb in BREATH),
                                  BREATH_MS)]
     yield "fx-bark", [("pop", frames([bark(False), bark(True)]), 120)]
-    # the cat blinks once a loop, briefly, as its tail swings home; the loop keeps its 1040ms
-    yield "gag-cat", [("idle", frames([cat(0), cat(1), cat(2), cat(3, blink=True)]), [300, 300, 300, 140])]
-    yield "gag-kite", [("flutter", frames(kite_tree(i) for i in range(4)), 140)]
     drive, drive_ms = TRUCK_DRIVE
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400),
                               ("drive", frames(drawn(TRUCK_SCALE, ice_cream_truck, 0, r) for r in drive), drive_ms)]

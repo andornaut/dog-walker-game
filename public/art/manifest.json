@@ -2075,24 +2075,6 @@
       "json": "sprites/fx-treat-pop.json"
     },
     {
-      "key": "gag-cat",
-      "png": "sprites/gag-cat.png",
-      "json": "sprites/gag-cat.json",
-      "anchor": {
-        "feetY": 23,
-        "opaqueWidth": 15
-      }
-    },
-    {
-      "key": "gag-kite",
-      "png": "sprites/gag-kite.png",
-      "json": "sprites/gag-kite.json",
-      "anchor": {
-        "feetY": 38,
-        "opaqueWidth": 35
-      }
-    },
-    {
       "key": "goose",
       "png": "sprites/goose.png",
       "json": "sprites/goose.json",
