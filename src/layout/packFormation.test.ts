@@ -23,7 +23,7 @@ const WALKER = { feetY: 68 };
 const DOGS: readonly DrawnDog[] = [
   { feetY: 52, frameHeight: 54, opaqueWidth: 36 },
   { feetY: 45, frameHeight: 48, opaqueWidth: 24 },
-  { feetY: 36, frameHeight: 38, opaqueWidth: 21 },
+  { feetY: 36, frameHeight: 38, opaqueWidth: 19 },
 ];
 const packOf = (count: number) => DOGS.slice(0, count);
 

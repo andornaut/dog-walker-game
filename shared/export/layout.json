@@ -755,13 +755,13 @@
     "collarHeights": {
       "archie": 20,
       "biscuit": 21,
-      "duchess": 17,
+      "duchess": 16,
       "koda": 21,
-      "nugget": 17,
+      "nugget": 16,
       "penny": 22,
       "pierre": 21,
       "snowball": 22,
-      "zippy": 17
+      "zippy": 16
     },
     "drawScale": 1.2,
     "formations": [
