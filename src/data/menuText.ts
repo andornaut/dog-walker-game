@@ -27,7 +27,7 @@ export const MENU_TEXT = {
       wentHome: "Home sweet home",
     },
     total: "Total",
-    zonesWalked: "Neighborhoods walked",
+    zonesWalked: "Neighborhoods",
   },
   help: {
     gotIt: "Got it",

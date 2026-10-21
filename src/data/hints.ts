@@ -4,11 +4,11 @@ import type { Hint } from "./types";
 
 export const HINTS = {
   card: {
-    text: "Every option shows its cost. Hold for more.",
+    text: "Each option shows its cost. Hold one.",
     trigger: { kind: "card" },
   },
   drag: {
-    text: "Drag to steer. Drag farther for more lanes.",
+    text: "Drag to steer, farther for more lanes.",
     trigger: { kind: "drag" },
   },
   firedOwner: {
@@ -20,7 +20,7 @@ export const HINTS = {
     trigger: { kind: "fork" },
   },
   homeButton: {
-    text: "Head home ends the walk. Banked pay stays.",
+    text: "Head home ends the walk. Pay stays.",
     trigger: { kind: "homeButton" },
   },
   luckyFind: {
@@ -32,7 +32,7 @@ export const HINTS = {
     trigger: { kind: "minorBump" },
   },
   puddle: {
-    text: "Puddles make the pack Muddy: bumps cost 2♥.",
+    text: "Puddles make the pack Muddy.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {

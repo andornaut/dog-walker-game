@@ -8,19 +8,19 @@ export const SHOP_GEAR = {
     effects: [{ by: "fannyPackStart", kind: "modifier", operation: "add", stat: "startMoney" }],
     name: "Fanny pack",
     price: "fannyPack",
-    short: "Start every walk with +$20",
+    short: "Start walks with +$20",
   },
   luckyCollar: {
     effects: [{ by: "luckyCollarMax", kind: "modifier", operation: "add", stat: "maxHearts" }],
     name: "Lucky collar",
     price: "luckyCollar",
-    short: "+1♥ max for every owner",
+    short: "Every owner +1♥ max",
   },
   poopBags: {
     effects: [{ kind: "skipOption" }],
     name: "Hall pass",
     price: "poopBags",
-    short: "One free skip per neighborhood",
+    short: "1 skip per neighborhood",
   },
   runningShoes: {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],

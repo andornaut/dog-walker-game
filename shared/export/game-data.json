@@ -761,7 +761,7 @@
       ],
       "name": "Fanny pack",
       "price": "fannyPack",
-      "short": "Start every walk with +$20",
+      "short": "Start walks with +$20",
       "iconKey": "item-fanny-pack"
     },
     {
@@ -776,7 +776,7 @@
       ],
       "name": "Lucky collar",
       "price": "luckyCollar",
-      "short": "+1♥ max for every owner",
+      "short": "Every owner +1♥ max",
       "iconKey": "item-lucky-collar"
     },
     {
@@ -788,7 +788,7 @@
       ],
       "name": "Hall pass",
       "price": "poopBags",
-      "short": "One free skip per neighborhood",
+      "short": "1 skip per neighborhood",
       "iconKey": "item-poop-bags"
     },
     {
