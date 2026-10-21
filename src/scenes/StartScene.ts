@@ -96,7 +96,13 @@ import {
 } from "./draw";
 import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
-import { addAffordFrame, type DetailPicture, drawDetailCard, drawLogbookPanel } from "./homePanels";
+import {
+  addAffordFrame,
+  type DetailPicture,
+  drawDetailCard,
+  drawLogbookPanel,
+  type LogbookPress,
+} from "./homePanels";
 import {
   addLock,
   addPlate,
@@ -447,7 +453,7 @@ export class StartScene extends Scene {
         this.addBurst("fx-tap", pointer.x, pointer.y);
         if (this.overlay !== undefined) {
           this.overlayPress = { x: pointer.x, y: pointer.y };
-          if (this.closePressed()) {
+          if (this.overlayPressed() !== undefined) {
             this.render();
           }
           return;
@@ -470,14 +476,14 @@ export class StartScene extends Scene {
       },
       up: (pointer, cancelled) => {
         const down = this.overlayPress;
-        const closeDown = this.closePressed();
+        const controlDown = this.overlayPressed() !== undefined;
         this.overlayPress = undefined;
         if (down !== undefined) {
           if (!cancelled) {
             this.releaseOnOverlay(down, pointer.x, pointer.y);
           }
-          // A press on the close control that ended elsewhere lifts it again.
-          if (closeDown && this.overlay !== undefined) {
+          // A press on a control that ended elsewhere lifts it again.
+          if (controlDown && this.overlay !== undefined) {
             this.render();
           }
           return;
@@ -626,15 +632,23 @@ export class StartScene extends Scene {
     this.render();
   }
 
-  // Whether the press under way on an open panel started on its close control.
-  private closePressed(): boolean {
-    const rect = this.overlay?.rect;
+  // The control on an open panel the press under way started on: its close control, or the
+  // logbook's Stats or Badges button.
+  private overlayPressed(): LogbookPress | undefined {
+    const overlay = this.overlay;
     const down = this.overlayPress;
-    return (
-      rect !== undefined &&
-      down !== undefined &&
-      containsPoint(closeControl(rect).hit, down.x, down.y)
-    );
+    if (overlay?.rect === undefined || down === undefined) {
+      return undefined;
+    }
+    const on = (rect: Rect | undefined) =>
+      rect !== undefined && containsPoint(rect, down.x, down.y);
+    if (on(closeControl(overlay.rect).hit)) {
+      return "close";
+    }
+    if (overlay.kind !== "logbook") {
+      return undefined;
+    }
+    return on(overlay.stats) ? "stats" : on(overlay.badges) ? "badges" : undefined;
   }
 
   // A tap while a panel is open: on its close control it closes the panel, as does one anywhere
@@ -1129,14 +1143,15 @@ export class StartScene extends Scene {
     }
     if (overlay.kind === "logbook") {
       const log = logbookOf(gameData, save.stats);
-      const panel = drawLogbookPanel(this, layer, this.closePressed(), log);
+      const panel = drawLogbookPanel(this, layer, this.overlayPressed(), log);
       this.overlay = { ...overlay, badges: panel.badges, rect: panel.panel, stats: panel.stats };
       return;
     }
     const { target } = overlay;
     const card = this.detailCard(save, target);
     const picture = this.detailPicture(target);
-    const rect = drawDetailCard(this, layer, this.closePressed(), card, picture, target.kind);
+    const closePressed = this.overlayPressed() === "close";
+    const rect = drawDetailCard(this, layer, closePressed, card, picture, target.kind);
     this.overlay = { ...overlay, rect };
   }
 

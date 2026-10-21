@@ -11,7 +11,14 @@ import { fillLine } from "../text/lines";
 import { addDim, drawFramedRect, drawRing, fillRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
-import { addCloseButton, addLoopingFrame, addNineSlice, selectOuter, TEXT_SCALE } from "./uiKit";
+import {
+  addCloseButton,
+  addLoopingFrame,
+  addMenuButton,
+  addNineSlice,
+  selectOuter,
+  TEXT_SCALE,
+} from "./uiKit";
 
 // The home screen's drawing beyond its tiles: the gold outline on what the player can
 // afford, and the detail card and logbook that open over the screen. Positions inside a
@@ -205,35 +212,17 @@ export interface LogbookPanel {
 const LOGBOOK_BUTTON = HOME_LAYOUT.logbookButton;
 const FIELDS = HOME_TEXT_FIELDS.logbook;
 
-// A secondary ui-button with its label, in the card's content.
-function addCardButton(
-  scene: Scene,
-  content: GameObjects.Container,
-  button: Rect,
-  label: string,
-): void {
-  const slice = addNineSlice(scene, "ui-button", button, "secondary");
-  if (slice !== undefined) {
-    content.add(slice);
-  } else {
-    const g = scene.add.graphics();
-    fillRect(g, PALETTE.brown, button);
-    fillRect(g, PALETTE.tan, { ...button, height: button.height - 4 });
-    content.add(g);
-  }
-  text(scene, content, { x: button.x + button.width / 2, y: button.y + 15 }, label, {
-    color: PALETTE.plum,
-    font: "title",
-    originX: 0.5,
-  });
-}
+// What a press on the logbook started on, which shows pressed until it lifts.
+export type LogbookPress = "badges" | "close" | "stats";
+
+const CARD_BUTTON = { available: true, primary: false, secondary: true } as const;
 
 // The logbook over the screen, as a card: the best walk, totals and the last walk, then
 // Stats and Badges buttons, Badges opening Stats on its badge wall.
 export function drawLogbookPanel(
   scene: Scene,
   parent: GameObjects.Container,
-  closePressed: boolean,
+  pressed: LogbookPress | undefined,
   log: Logbook | null,
 ): LogbookPanel {
   // The rows are laid out first, so the card is as tall as they and the button need.
@@ -266,9 +255,14 @@ export function drawLogbookPanel(
     x: (SCREEN.width - CARD.width) / 2,
     y: Math.round((SCREEN.height - height) / 2),
   };
-  drawCardFrame(scene, parent, closePressed, rect, words.title, content);
-  addCardButton(scene, content, button, words.stats);
-  addCardButton(scene, content, badges, words.badges);
+  drawCardFrame(scene, parent, pressed === "close", rect, words.title, content);
+  const buttons = [
+    [button, words.stats, "stats"],
+    [badges, words.badges, "badges"],
+  ] as const;
+  for (const [at, label, press] of buttons) {
+    addMenuButton(scene, at, label, CARD_BUTTON, content).setPressed(pressed === press);
+  }
   const onScreen = (r: Rect) => ({ ...r, x: rect.x + r.x, y: rect.y + r.y });
   return { badges: onScreen(badges), panel: rect, stats: onScreen(button) };
 }

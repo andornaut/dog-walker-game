@@ -41,12 +41,14 @@ describe("interaction-state colours", () => {
       PALETTE[disabled.box],
       EXEMPT,
     ],
-    ...(["normal", "primary"] as const).map((state): [string, number, number, number] => [
-      `a ${state} button's label`,
-      PALETTE[BUTTON_COLORS[state].label],
-      PALETTE[BUTTON_COLORS[state].face],
-      TEXT,
-    ]),
+    ...(["normal", "primary", "secondary"] as const).map(
+      (state): [string, number, number, number] => [
+        `a ${state} button's label`,
+        PALETTE[BUTTON_COLORS[state].label],
+        PALETTE[BUTTON_COLORS[state].face],
+        TEXT,
+      ],
+    ),
     [
       "a disabled button's label",
       PALETTE[BUTTON_COLORS.disabled.label],

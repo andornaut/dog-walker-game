@@ -2,13 +2,14 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { FEEDBACK, loopFrame } from "../home/feedback";
+import { buttonState, type InteractionInput, type TileState } from "../home/interaction";
 import {
-  type ButtonState,
-  buttonState,
-  type InteractionInput,
-  type TileState,
-} from "../home/interaction";
-import { BUTTON_COLORS, DISABLED_COLORS, type SelectLook, selectLook } from "../home/selection";
+  BUTTON_COLORS,
+  type ButtonLook,
+  DISABLED_COLORS,
+  type SelectLook,
+  selectLook,
+} from "../home/selection";
 import { BADGE_OFFSET } from "../layout/badge";
 import { type CloseControl, closeControl } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
@@ -132,12 +133,13 @@ export function addRimmedPanel(scene: Scene, rect: Rect): void {
   addPanel(scene, rect);
 }
 
-// The ui-button tags of each state, raised then pressed, or one flat tag when disabled. A
+// The ui-button tags of each look, raised then pressed, or one flat tag when disabled. A
 // disabled primary is go-disabled, which looks like disabled.
-const BUTTON_TAGS: Readonly<Record<ButtonState, readonly string[]>> = {
+const BUTTON_TAGS: Readonly<Record<ButtonLook, readonly string[]>> = {
   disabled: ["disabled"],
   normal: ["normal", "pressed"],
   primary: ["go", "go-pressed"],
+  secondary: ["secondary", "secondary-pressed"],
 };
 
 // The ui-button's face sinks this far into its lip when pressed, as the art draws it.
@@ -169,11 +171,11 @@ function buttonFaces(
   scene: Scene,
   primary: boolean,
   rect: Rect,
-  state: ButtonState,
+  look: ButtonLook,
 ): (GameObjects.Graphics | GameObjects.NineSlice)[] {
-  const { face: faceColor, lip } = BUTTON_COLORS[state];
-  return BUTTON_TAGS[state].map((tag, i) => {
-    const artTag = state === "disabled" && primary ? "go-disabled" : tag;
+  const { face: faceColor, lip } = BUTTON_COLORS[look];
+  return BUTTON_TAGS[look].map((tag, i) => {
+    const artTag = look === "disabled" && primary ? "go-disabled" : tag;
     const slice = addNineSlice(scene, "ui-button", rect, artTag);
     if (slice !== undefined) {
       return slice;
@@ -193,24 +195,34 @@ function buttonFaces(
   });
 }
 
-// A ui-button with a centred label in its interaction state. Pressed shows the sunk frame
-// and moves the label with it; disabled sits at the pressed depth and never moves.
+export interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"> {
+  // An available button that is not primary wears the secondary look, as a card's own
+  // controls do, in place of normal.
+  readonly secondary?: boolean;
+}
+
+// A ui-button with a centred label in its interaction state, drawn in parent when given.
+// Pressed shows the sunk frame and moves the label with it; disabled sits at the pressed depth
+// and never moves.
 export function addMenuButton(
   scene: Scene,
   rect: Rect,
   label: string,
-  input: Pick<InteractionInput, "available" | "primary">,
+  input: MenuButtonInput,
+  parent?: GameObjects.Container,
 ): MenuButton {
   const state = buttonState(input);
-  const faces = buttonFaces(scene, input.primary, rect, state);
+  const look: ButtonLook = state === "normal" && input.secondary === true ? "secondary" : state;
+  const faces = buttonFaces(scene, input.primary, rect, look);
   const disabled = state === "disabled";
   const title = addPixelText(scene, rect.x + rect.width / 2, 0, label, {
-    color: PALETTE[BUTTON_COLORS[state].label],
+    color: PALETTE[BUTTON_COLORS[look].label],
     font: "title",
     originX: 0.5,
     originY: 0.5,
     scale: TEXT_SCALE,
   });
+  parent?.add([...faces, title]);
   const centerY = rect.y + (rect.height - BUTTON_LIP_PX) / 2;
   const button: MenuButton = {
     rect,
