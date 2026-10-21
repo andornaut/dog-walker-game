@@ -12,6 +12,7 @@ import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { SHOP_GEAR } from "../data/shop";
 import { TUNING } from "../data/tuning";
 import type {
+  Effect,
   EncounterId,
   MinorObstacleId,
   Movement,
@@ -22,7 +23,7 @@ import type {
   ZoneId,
 } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
-import { DEFAULT_WALKER, WALKERS } from "../data/walkers";
+import { DEFAULT_WALKER, WALKER_PERKS, WALKERS } from "../data/walkers";
 import { WORLD } from "../data/world";
 import {
   type CardChoice,
@@ -37,13 +38,14 @@ import { screenLayout } from "../layout/screenLayout";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
+import { modifiersOf, modifierValue } from "../rules/modifiers";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
-import { newRun, type PackDogs, type RunState } from "../state/runState";
+import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, sharedWorld } from "../testing/movers";
-import { heartsByDog } from "../testing/runState";
+import { activeModifier, heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
@@ -361,6 +363,26 @@ describe("planZone", { timeout: 15_000 }, () => {
     expect(countOf("lucky")).toBe(2);
   });
 
+  // Rush hour's and Treat finder's treatSpawns factors, at the live tuning's values.
+  it.each<[string, readonly Effect[], ModifierSource]>([
+    ["Rush hour", UPGRADES.rushHour.effects, { kind: "upgrade", upgrade: "rushHour" }],
+    ["Treat finder", WALKER_PERKS.treatFinder.effects, { kind: "walker", walker: "ben" }],
+  ])("plans %s's treatSpawns factor of treats", (_, effects, source) => {
+    const live = { ...data, tuning: { ...tuning, multipliers: TUNING.multipliers } };
+    const factors = modifiersOf(effects).filter(({ stat }) => stat === "treatSpawns");
+    expect(factors).toHaveLength(1);
+    const walk = walkWith(["koda"]);
+    const run = { ...walk.run, modifiers: factors.map((factor) => activeModifier(source, factor)) };
+    const treats = planZone(live, geometry, seededRandom(3), { ...walk, run }).road.pending.filter(
+      ({ kind }) => kind === "treat",
+    );
+    const factor = factors.reduce(
+      (product, modifier) => product * modifierValue(live.tuning, modifier),
+      1,
+    );
+    expect(treats).toHaveLength(Math.round(tuning.counts.treatsPerZone * factor));
+  });
+
   it("draws only the minor obstacles the current zone weighs above 0", () => {
     const walk = walkWith(["koda"]);
     const real = { ...data, world: WORLD };
@@ -587,6 +609,26 @@ describe("stepWalk", () => {
     expect(heartsByDog(after.run).koda).toBe(1 + read(tuning, "hearts", "treat"));
     const full = walkWith(["koda"], [atPack("treat")]);
     expect(step(full).treats.map(({ change }) => change)).toEqual([null]);
+  });
+
+  it("gives a treat the front dog grabs at its owner's max to the hurt owner behind", () => {
+    const walk = walkWith(["koda", "biscuit"], [atPack("treat")]);
+    const hurt: Walk = {
+      ...walk,
+      run: {
+        ...walk.run,
+        pack: mapPack(
+          (slot) =>
+            slot.dog === "biscuit" && slot.status === "walking"
+              ? { ...slot, hearts: clampHearts(slot.hearts, 1) }
+              : slot,
+          walk.run.pack,
+        ),
+      },
+    };
+    const { treats, walk: after } = step(hurt);
+    expect(treats.map(({ dog }) => dog)).toEqual(["biscuit"]);
+    expect(heartsByDog(after.run).biscuit).toBe(1 + read(tuning, "hearts", "treat"));
   });
 
   it("grabs every treat of a planned zone that the pack walks into", () => {

@@ -27,6 +27,7 @@ import {
   payZone,
   tipValue,
 } from "../rules/run";
+import { treatRecipient } from "../rules/treats";
 import { addCents, type Pixels, pixels, read, type Seconds, seconds } from "../rules/units";
 import { packAgility, slowestAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
@@ -146,7 +147,8 @@ export interface MinorBump {
   item: WalkItem;
 }
 
-// A treat a dog grabbed: the hearts its owner gained, or null at their max.
+// A treat the pack grabbed: the dog whose owner it went to, by treatRecipient, and the hearts
+// that owner gained, or null at their max.
 export interface TreatGrab {
   change: HeartChange | null;
   dog: DogId;
@@ -853,7 +855,7 @@ export function stepWalk(
       tips.push(pickup.tip);
       collected.push(item);
     } else if (kind === "treat") {
-      const dog = landsOn(control.motion, nextRun, dogs);
+      const dog = treatRecipient(data, nextRun, landsOn(control.motion, nextRun, dogs));
       const grab = grabTreat(data, dog, countTally("treats", nextRun));
       nextRun = grab.state;
       treats.push({ change: grab.change, dog, item });
