@@ -17,70 +17,37 @@ Each folder's README is its plan, with what's left for the first build:
 
 ## Developing
 
-Requires Node 24 (`.nvmrc`).
+Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 
-The site's built pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`): Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery and mock pages under `public/art/`, which load no TypeScript. `shared/` holds the files art's tools and the game both read.
+| Command                                     | Does                                                                       |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `npm run art:depth-preview -- <key> [zone]` | Draw a road sprite at a sweep of distances into `out/depth-preview/<key>/` |
+| `npm run art:manifest [-- --check]`         | Write `public/art/manifest.json` from the art files, or fail if it differs |
+| `npm run build`                             | Build to `dist/`                                                           |
+| `npm run check`                             | Type check with tsc                                                        |
+| `npm run clean`                             | Remove the build and Wrangler state                                        |
+| `npm run dev`                               | Dev server                                                                 |
+| `npm run export:data`                       | Write `shared/export/` from the game's modules, for art's tools            |
+| `npm run format`                            | Rewrite files with Prettier and apply ESLint fixes                         |
+| `npm run lint`                              | Prettier check, ESLint and markdownlint                                    |
+| `npm run preview`                           | Build, then serve it through `wrangler dev`                                |
+| `npm run simulate -- --help`                | Simulate runs ([src/README.md](src/README.md), Simulator)                  |
+| `npm test`                                  | Run the unit tests                                                         |
 
-```bash
-npm install
-
-# Dev server
-npm run dev
-
-# Type check with tsc
-npm run check
-
-# Prettier check, ESLint and markdownlint
-npm run lint
-
-# Rewrite files with Prettier and apply ESLint fixes
-npm run format
-
-# Run the unit tests
-npm test
-
-# Build to dist/
-npm run build
-
-# Build, then serve it through wrangler dev
-npm run preview
-
-# Remove build and Wrangler state
-npm run clean
-```
-
-Tooling for the art scripts (details in [src/README.md](src/README.md), Assets):
-
-```bash
-# Write shared/export/game-data.json and layout.json from the game's modules
-npm run export:data
-
-# Write public/art/manifest.json from the art files
-npm run art:manifest
-
-# Fail if the committed manifest differs from what the art files give
-npm run art:manifest -- --check
-
-# Draw a road sprite at a sweep of distances into out/depth-preview/<key>/
-npm run art:depth-preview -- cone woof-way
-```
+The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery and mock pages under `public/art/`. `shared/` holds the files art's tools and the game both read.
 
 CI runs check, lint, test and build, and the AI attributions scan.
 
 ## Deploying
 
-Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which runs `npm run build:deploy` (the build alone) and then `npx wrangler deploy` on Node `24.21.0` (the `NODE_VERSION` build variable). The type check, lint and tests run before a push (every push to `main` passes the full gate first) and again in GitHub CI, not in the deploy build. The build watch paths exclude `**/*.md`, `art/**` and `gameplay/**`, which are not build inputs, so a push that changes only those doesn't deploy. Build settings are on the `dog-walker-game` Worker, under Settings → Build in the Cloudflare dashboard.
+Pushes to `main` deploy through [Cloudflare Workers Builds](https://developers.cloudflare.com/workers/ci-cd/builds/), which runs `npm run build:deploy` (the build alone) and then `npx wrangler deploy` on Node `24.21.0` (the `NODE_VERSION` build variable). The type check, lint and tests run before each push and in GitHub CI, not in the deploy build. The build watch paths exclude `**/*.md`, `art/**` and `gameplay/**`, which are not build inputs, so a push that changes only those doesn't deploy. Build settings are on the `dog-walker-game` Worker, under Settings → Build in the Cloudflare dashboard.
 
-To deploy by hand, to the account pinned by `account_id` in `wrangler.jsonc`:
+To deploy by hand, to the account and custom domain set in `wrangler.jsonc`:
 
 ```bash
 npx wrangler login
 npm run deploy
 ```
-
-The custom domain is the `routes` entry in `wrangler.jsonc`.
-
-The build writes `dist/_headers`, the security headers Cloudflare serves with each static asset, from `src/headers/securityPolicy.ts`, with the hashes of every page's inline blocks.
 
 ## License
 
