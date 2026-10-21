@@ -792,6 +792,9 @@ describe("stepWalk", () => {
     expect(after.cards).toEqual([]);
     expect(after.encounterHits).toEqual([]);
     expect(after.contacts.map(({ encounter }) => encounter)).toEqual(["puddle"]);
+    // The touching dog, as a plain obstacle in its place would land on.
+    const cone = step(walkWith(dogs, [atPack("cone")]));
+    expect(after.contacts.map(({ dog }) => dog)).toEqual(cone.bumps.map(({ dog }) => dog));
     expect(after.walk.run.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
     expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
     expect(after.walk.road.hitStop?.seconds).toBe(read(tuning, "seconds", "minorHitStopSeconds"));

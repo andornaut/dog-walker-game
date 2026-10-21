@@ -16,6 +16,7 @@ import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
 import { moverHintTriggers } from "../../hud/hintTriggers";
 import { project } from "../../layout/projection";
+import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { currentZoneId } from "../../rules/route";
 import {
   encounterLook,
@@ -26,7 +27,13 @@ import {
 } from "../../rules/skins";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
+import {
+  isMinorObstacle,
+  itemCategory,
+  type Walk,
+  type WalkItem,
+  type WalkStep,
+} from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
@@ -59,6 +66,26 @@ export interface ItemView {
   parts: ItemPart[];
 }
 
+// A struck obstacle's body sprite and the screen offset added where the road draws it, for its
+// jolt or shake.
+export interface StruckBody {
+  readonly offset: { dx: number; dy: number };
+  readonly sprite: GameObjects.Sprite;
+}
+
+interface StruckView {
+  readonly offset: { dx: number; dy: number };
+  readonly struck: StruckItem;
+  readonly view: ItemView;
+}
+
+// What a frame draws standing items with.
+interface StandFrame {
+  readonly shadow: Shadow;
+  readonly still: boolean;
+  readonly tags: readonly string[];
+}
+
 // A box for each minor obstacle and the skunk's cloud whose art and stand-in are missing, from
 // its shape in the data.
 export function ensureRoadPlaceholders(scene: Scene): void {
@@ -81,6 +108,9 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
 }
 
+// A struck obstacle's depth steps this much a row, keeping every row under DEPTH.sprite.
+const STRUCK_ROW_DEPTH = 1 / 1000;
+
 // Where a mover's arrow sits among its parts: body, sign, arrow, wander mark.
 const MOVER_ARROW_PART = 2;
 
@@ -88,6 +118,8 @@ const MOVER_ARROW_PART = 2;
 export class ItemViews {
   private readonly hint: (event: HintTrigger) => void;
   private readonly scene: Scene;
+  // Obstacles out of play, kept as scenery until they scroll off, by item id.
+  private readonly struck = new Map<number, StruckView>();
   private readonly views = new Map<number, ItemView>();
 
   constructor(scene: Scene, hint: (event: HintTrigger) => void) {
@@ -115,35 +147,96 @@ export class ItemViews {
         }
         continue;
       }
-      const first = itemAt(LANE_XS, item.lane);
-      const laneX = (first + itemAt(LANE_XS, item.lane + item.laneSpan - 1)) / 2;
-      for (const part of view.parts) {
-        const distance = PROJECTION.footY - part.footY(item);
-        const placed = project(PROJECTION, { distance, x: laneX + part.dx });
-        const drawn = showAtDepth(part.sprite, part.key, placed.scale, part.feet);
-        const x = Math.round(placed.x);
-        const y = Math.round(placed.y);
-        part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
-        clipToRoad(part.sprite);
-        const tag = firstTag(this.scene, drawn.key, tags);
-        if (tag !== undefined) {
-          playTag(part.sprite, drawn.key, tag, still);
-        }
-        if (part.lift > 0) {
-          part.sprite.setDepth(DEPTH.sprite + placed.y + 1);
-        } else if (part.flat) {
-          part.sprite.setDepth(DEPTH.decal);
-        } else {
-          part.sprite.setDepth(DEPTH.sprite + placed.y);
-          shadow(part.key, drawn.depth, x, y);
-        }
-      }
+      this.stand(item, view, { shadow, still, tags });
       applyItemCue(item, view.parts, still, this.scene.time.now);
     }
     for (const [id, view] of this.views) {
       if (!seen.has(id)) {
         view.parts.forEach(({ sprite }) => sprite.destroy());
         this.views.delete(id);
+      }
+    }
+    this.drawStruck(walk, roadTop, { shadow, still, tags });
+  }
+
+  // Takes the obstacles a step's hits took out of play off the live views and keeps them as
+  // scenery.
+  strike(step: WalkStep): void {
+    for (const struck of struckBy(step)) {
+      const view = this.views.get(struck.item.id);
+      if (view !== undefined) {
+        this.views.delete(struck.item.id);
+        this.struck.set(struck.item.id, { offset: { dx: 0, dy: 0 }, struck, view });
+      }
+    }
+  }
+
+  // A struck obstacle's body sprite, and the offset its draw adds, while it is kept.
+  struckBody(id: number): StruckBody | undefined {
+    const kept = this.struck.get(id);
+    const sprite = kept?.view.parts[0]?.sprite;
+    return kept === undefined || sprite === undefined ? undefined : { offset: kept.offset, sprite };
+  }
+
+  // Each struck obstacle where the road has scrolled it, a mover stopped and its cue hidden,
+  // moved by its offset, under every live road sprite and the pack; dropped once off the road.
+  private drawStruck(walk: Walk, roadTop: number, frame: StandFrame): void {
+    const { roadBottom } = screenRoadGeometry(walk.run);
+    for (const [id, kept] of this.struck) {
+      const item = struckNow(roadBottom, walk.run, kept.struck);
+      const { parts } = kept.view;
+      if (item === null) {
+        parts.forEach(({ sprite }) => sprite.destroy());
+        this.struck.delete(id);
+        continue;
+      }
+      if (item.mover === undefined) {
+        this.stand(item, kept.view, frame);
+      } else {
+        drawMover(
+          item.mover,
+          kept.view,
+          item.y + item.height,
+          roadTop,
+          true,
+          frame.still,
+          frame.shadow,
+        );
+        parts.slice(1).forEach(({ sprite }) => sprite.setVisible(false));
+      }
+      const { dx, dy } = kept.offset;
+      for (const { flat, sprite } of parts.filter((part) => part.sprite.visible)) {
+        sprite.setPosition(sprite.x + Math.round(dx), sprite.y + Math.round(dy));
+        if (!flat) {
+          sprite.setDepth(DEPTH.struck + sprite.y * STRUCK_ROW_DEPTH);
+        }
+      }
+    }
+  }
+
+  // A standing item's sprites on the road through the projection.
+  private stand(item: WalkItem, view: ItemView, { shadow, still, tags }: StandFrame): void {
+    const first = itemAt(LANE_XS, item.lane);
+    const laneX = (first + itemAt(LANE_XS, item.lane + item.laneSpan - 1)) / 2;
+    for (const part of view.parts) {
+      const distance = PROJECTION.footY - part.footY(item);
+      const placed = project(PROJECTION, { distance, x: laneX + part.dx });
+      const drawn = showAtDepth(part.sprite, part.key, placed.scale, part.feet);
+      const x = Math.round(placed.x);
+      const y = Math.round(placed.y);
+      part.sprite.setPosition(x, y - Math.round(part.lift * drawn.depth));
+      clipToRoad(part.sprite);
+      const tag = firstTag(this.scene, drawn.key, tags);
+      if (tag !== undefined) {
+        playTag(part.sprite, drawn.key, tag, still);
+      }
+      if (part.lift > 0) {
+        part.sprite.setDepth(DEPTH.sprite + placed.y + 1);
+      } else if (part.flat) {
+        part.sprite.setDepth(DEPTH.decal);
+      } else {
+        part.sprite.setDepth(DEPTH.sprite + placed.y);
+        shadow(part.key, drawn.depth, x, y);
       }
     }
   }

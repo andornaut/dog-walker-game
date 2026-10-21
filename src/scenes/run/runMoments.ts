@@ -33,6 +33,17 @@ import {
   treatLine,
 } from "../../hud/stripLines";
 import {
+  DOG_REACTIONS,
+  dogReaction,
+  hitEffects,
+  obstacleMotion,
+  shakesRoad,
+  splashEffect,
+  tipSide,
+  whiteFlash,
+} from "../../layout/hitEffects";
+import type { Rect } from "../../layout/rect";
+import {
   amountText,
   type Change,
   changeAmount,
@@ -45,11 +56,13 @@ import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
 import { currentZoneId, walkLength } from "../../rules/route";
 import { encounterLook, minorObstacleLook } from "../../rules/skins";
+import { read } from "../../rules/units";
 import type { PullStep } from "../../runner/pulls";
 import type { Random } from "../../runner/random";
 import {
   type EncounterCard,
   isMinorObstacle,
+  type MinorBump,
   type WalkItemKind,
   type WalkStep,
 } from "../../runner/walk";
@@ -60,16 +73,37 @@ import {
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
 import type { RunState } from "../../state/runState";
-import { hitLabelOf, playHitMoment, playMinorHitLabel } from "../hitMoment";
+import {
+  hitFlashKey,
+  hitLabelOf,
+  hitLook,
+  playEdgeFlash,
+  playHitMoment,
+  playMinorHitLabel,
+} from "../hitMoment";
 import { sayMessage } from "../messageStripView";
-import { playBump, playDodge, playForgiven } from "../packFeedback";
+import { playDodge, playForgiven } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
 import { SCENE_KEYS } from "../sceneKeys";
 import { soundboardOf } from "../soundboard";
 import { playEffect } from "../sprites";
+import { flashWhite, moveObstacle, playHitEffects, shakeRoad } from "./hitFx";
+import type { ItemViews } from "./itemViews";
 import type { PackView } from "./packView";
 import { showInstantPopup } from "./roadBanners";
 import { DEPTH, firingSeconds, LAYOUT } from "./stage";
+
+// How long the step's hit stop holds the road, or a plain obstacle's stop while it has none.
+function stopMs(step: WalkStep): number {
+  const seconds = step.walk.road.hitStop?.seconds;
+  return 1000 * (seconds ?? read(gameData.tuning, "seconds", "minorHitStopSeconds"));
+}
+
+// A hit's edge flash runs down the road and the backdrop band beside it.
+function hitField(): Rect {
+  const { backdrop, roadView } = LAYOUT;
+  return { ...roadView, height: roadView.y + roadView.height - backdrop.y, y: backdrop.y };
+}
 
 // An owner's line, said beside their dog's card.
 export interface QuipBubble {
@@ -113,6 +147,7 @@ export interface ZonePayout {
 }
 
 export interface RunMomentsDeps {
+  items: ItemViews;
   pack: PackView;
   quips: Random;
   // Whether animations and bursts keep still, from the player's settings.
@@ -212,6 +247,7 @@ export class RunMoments {
   // Sounds, bursts, labels, hints and strip lines for what happened in a step, around the pack
   // at pack.
   walked(step: WalkStep, pack: { x: number; y: number }): void {
+    this.deps.items.strike(step);
     const sound = soundboardOf(this.scene);
     if (step.tips.length > 0) {
       sound.play("tip");
@@ -249,10 +285,7 @@ export class RunMoments {
           .forEach((sprite) => playDodge(this.scene, moment, sprite));
         continue;
       }
-      const top = this.deps.pack.dogPoint(bump.dog);
-      if (top !== undefined) {
-        playBump(this.scene, moment, top);
-      }
+      this.playBumpHit(bump, step, pack);
       sound.play("bump");
       this.addChanges(bump.change === null ? [] : [bump.change]);
       this.playBumpLabel(kind, step, pack);
@@ -262,12 +295,24 @@ export class RunMoments {
       step.walk.run,
       step.bumps.flatMap(({ change }) => (change === null ? [] : [change])),
     );
-    // A contact obstacle, such as a puddle, plays its own hit sound and a splash, with a plain
-    // obstacle's stop.
-    for (const { encounter, outcome } of step.contacts) {
-      sound.play(hitCue(gameData.encounters[encounter].kind, encounter));
-      playEffect(this.scene, "fx-splash", "play", { x: pack.x, y: pack.y - 8 }, DEPTH.fx);
-      this.deps.pack.stumble(this.deps.still());
+    // A contact obstacle, such as a puddle, plays its own hit sound, a splash at the touching
+    // dog's feet and its edge flash, with a plain obstacle's stop; the walker stumbles and every
+    // dog reacts and shakes off.
+    for (const { dog, encounter, outcome } of step.contacts) {
+      const still = this.deps.still();
+      const { kind } = gameData.encounters[encounter];
+      sound.play(hitCue(kind, encounter));
+      const feet = this.deps.pack.dogFeet(dog);
+      if (feet !== undefined) {
+        const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
+        playHitEffects(this.scene, moment, [splashEffect(still, feet)]);
+      }
+      const { flash } = hitLook(kind, encounter);
+      if (flash !== null) {
+        const moment = { depth: DEPTH.popup, field: hitField(), still };
+        playEdgeFlash(this.scene, moment, hitFlashKey(this.scene, flash));
+      }
+      this.deps.pack.stumble(still, DOG_REACTIONS.splash);
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);
       this.sayQuips(outcome.quips);
       this.afterOutcome(outcome);
@@ -285,7 +330,7 @@ export class RunMoments {
     for (const hit of step.encounterHits) {
       const { kind } = gameData.encounters[hit.encounter];
       sound.play(hitCue(kind, hit.encounter));
-      this.deps.pack.stumble(this.deps.still());
+      this.deps.pack.stumble(this.deps.still(), DOG_REACTIONS.hit);
       this.playHit(hit, step, pack);
     }
   }
@@ -379,14 +424,14 @@ export class RunMoments {
   // The hit moment over the stop, framed by the road and the backdrop band beside it, labelled
   // with the encounter's look in the zone.
   private playHit(hit: EncounterCard, step: WalkStep, pack: { x: number; y: number }): void {
-    const { backdrop, road, roadView } = LAYOUT;
+    const { road } = LAYOUT;
     const look = encounterLook(gameData, currentZoneId(gameData, step.walk.run), hit.encounter);
     playHitMoment(this.scene, {
       caught: this.deps.pack.sprites(hit.affected),
       centre: { x: pack.x, y: pack.y - 20 },
       depth: DEPTH.popup,
       encounter: hit.encounter,
-      field: { ...roadView, height: roadView.y + roadView.height - backdrop.y, y: backdrop.y },
+      field: hitField(),
       kind: gameData.encounters[hit.encounter].kind,
       label: hitLabelOf(look),
       labelX: road.x + road.width / 2,
@@ -394,6 +439,34 @@ export class RunMoments {
       still: this.deps.still(),
       word: hitWord(gameData.encounters[hit.encounter]),
     });
+  }
+
+  // A plain or moving hit's cues: its bump and debris over the struck dog, the dog reacting
+  // and flashing white, the struck obstacle's motion, and a mover's road shake.
+  private playBumpHit(bump: MinorBump, step: WalkStep, pack: { x: number; y: number }): void {
+    const still = this.deps.still();
+    const { item } = bump;
+    const hit = {
+      kind: item.mover === undefined ? "plain" : "moving",
+      obstacle: isMinorObstacle(gameData, item.kind) ? item.kind : null,
+    } as const;
+    const top = this.deps.pack.dogPoint(bump.dog);
+    if (top !== undefined) {
+      const moment = { depth: DEPTH.fx, holdMs: stopMs(step) };
+      playHitEffects(this.scene, moment, hitEffects(still, { ...hit, top }));
+    }
+    for (const sprite of this.deps.pack.sprites([bump.dog])) {
+      flashWhite(this.scene, sprite, whiteFlash(still));
+    }
+    this.deps.pack.dogsReact([bump.dog], dogReaction(still, "hit"));
+    const body = this.deps.items.struckBody(item.id);
+    if (body !== undefined) {
+      const side = tipSide(body.sprite.x, pack.x);
+      moveObstacle(this.scene, body, obstacleMotion(still, hit, side));
+    }
+    if (shakesRoad(still, hit.kind)) {
+      shakeRoad(this.scene);
+    }
   }
 
   // A minor obstacle's hit label in its look for the zone, over the stop; none shows while it

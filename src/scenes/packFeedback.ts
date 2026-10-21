@@ -10,13 +10,11 @@ import { letterEffect } from "./comicWord";
 import { drawFramedRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, pixelFontMetrics } from "./pixelText";
-import { playEffect, playTagOnce } from "./sprites";
+import { playTagOnce } from "./sprites";
 import { fadeAway } from "./uiKit";
 
 // A sidestep puff, 48x48, laid on the dog's frame and lettered with the dodge word.
 const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
-// A plain hit's impact over the dog.
-const BUMP_ART = { key: "fx-bump", tag: "play" } as const;
 
 // The label is font-title at 2x; its chip reaches 2px past the capitals.
 const TITLE_SCALE = 2;
@@ -57,11 +55,6 @@ export function playForgiven(
   const anchor = { centreX: top.x, lineBottom };
   const { forgiven } = FEEDBACK;
   floatLabel(scene, moment, anchor, gameData.runText.forgiven, PALETTE.forest, forgiven);
-}
-
-// A plain hit's fx-bump over the dog it landed on.
-export function playBump(scene: Scene, moment: PackMoment, dogTop: Point): void {
-  playEffect(scene, BUMP_ART.key, BUMP_ART.tag, dogTop, moment.depth);
 }
 
 // font-title at 2x on a cream chip, centred on the anchor (moved in to stay on screen) with its

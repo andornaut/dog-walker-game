@@ -6,6 +6,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { randomStream } from "../lib/random";
 import { startAmbient, stepAmbient } from "../road/ambient";
 import { newRoadsidePlaces, placeRoadside, ROADSIDE } from "../road/roadsideProps";
+import { struckBy, type StruckItem, struckNow } from "../road/struckScenery";
 import { currentZone, currentZoneId, zoneAt } from "../rules/route";
 import { newRun } from "../state/runState";
 import { STEP_SECONDS } from "./fixedStep";
@@ -26,9 +27,9 @@ const LAYOUT = screenLayout(SCREEN_CONFIG);
 const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 const STAGE = { band: LAYOUT.backdrop, projection: PROJECTION };
 
-// A scenery layer stepped beside the walk as the run scene steps it, returning how many of its
-// sprites are out.
-type Layer = (session: Session) => number;
+// A scenery layer stepped beside the walk as the run scene steps it, with the step's events,
+// returning how many of its sprites are out.
+type Layer = (session: Session, events: readonly SessionEvent[]) => number;
 
 const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
   // The ambient movers, from the stream the scene gives them.
@@ -84,6 +85,19 @@ const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
       );
     };
   },
+  // The obstacles hits took out of play, kept as scenery until they scroll off.
+  struck: () => {
+    let kept: StruckItem[] = [];
+    return (session, events) => {
+      const { run } = session.walk;
+      const { roadBottom } = screenRoadGeometry(run);
+      const struck = events.flatMap((event) =>
+        event.kind === "walked" ? struckBy(event.step) : [],
+      );
+      kept = [...kept, ...struck].filter((item) => struckNow(roadBottom, run, item) !== null);
+      return kept.length;
+    };
+  },
 };
 
 // A walk of STEPS steps from seed with no lane moves, each card
@@ -101,7 +115,7 @@ function walk(
   });
   const events: SessionEvent[] = [];
   let out = 0;
-  for (let step = 0; step < STEPS && session.walk.run.phase.kind === "walking"; step++) {
+  for (let step = 0; step < STEPS && session.walk.run.phase.kind !== "ended"; step++) {
     const card = session.card;
     const next =
       card === null
@@ -115,7 +129,7 @@ function walk(
           );
     session = next.session;
     events.push(...next.events);
-    out += layer?.(session) ?? 0;
+    out += layer?.(session, next.events) ?? 0;
   }
   return { events, out, session };
 }
@@ -131,4 +145,20 @@ describe("scenery layers", () => {
       expect(layered.events).toEqual(plain.events);
     },
   );
+
+  it("never puts an obstacle a hit took out of play back on the road", () => {
+    const struck = new Set<number>();
+    let back = 0;
+    const walked = walk(1, (session, events) => {
+      for (const event of events) {
+        if (event.kind === "walked") {
+          struckBy(event.step).forEach(({ item }) => struck.add(item.id));
+        }
+      }
+      back += session.walk.road.items.filter(({ id }) => struck.has(id)).length;
+      return struck.size;
+    });
+    expect(walked.out).toBeGreaterThan(0);
+    expect(back).toBe(0);
+  });
 });

@@ -34,6 +34,9 @@ export const DEPTH = {
   roadside: 4,
   shadow: 3,
   sprite: 10,
+  // A struck obstacle out of play lies under every live road sprite and the pack, so it never
+  // covers the dogs as they pass it; nearer rows in front.
+  struck: 9,
 };
 
 // The row where the road's approach meets the band's cross street.

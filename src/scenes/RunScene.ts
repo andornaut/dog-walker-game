@@ -238,6 +238,7 @@ export class RunScene extends Scene {
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const roadside = new RoadsideView(this);
     const pack = new PackView(this, picked.loadout.dogs, picked.walkerSprite);
+    const items = new ItemViews(this, (event) => showHint(this, event));
     const still = () => this.reducedMotion();
     return {
       ...run,
@@ -251,7 +252,7 @@ export class RunScene extends Scene {
         runPause: () => this.runPause(),
         walk: () => this.session?.walk,
       }),
-      items: new ItemViews(this, (event) => showHint(this, event)),
+      items,
       menus: new MenuFlow(this, {
         dropPress: () => this.world?.input.dropPress(),
         headHome: () => {
@@ -263,7 +264,7 @@ export class RunScene extends Scene {
           this.session === undefined ? [] : homeQuestionNote(gameData, this.session.walk.run),
         over: () => this.session === undefined || this.session.walk.run.phase.kind === "ended",
       }),
-      moments: new RunMoments(this, { pack, quips: random.quips, still }),
+      moments: new RunMoments(this, { items, pack, quips: random.quips, still }),
       pack,
       road,
       roadside,

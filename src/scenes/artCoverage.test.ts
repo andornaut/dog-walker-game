@@ -50,6 +50,7 @@ import { effectIconKey, type EffectItem, walkBarIconKey } from "../hud/effectIco
 import { pipLook, zonePips } from "../hud/hudView";
 import { MESSAGE_ICONS } from "../hud/messageStrip";
 import { cardOwnerMood } from "../hud/moments";
+import { DOG_REACTIONS, HIT_ART } from "../layout/hitEffects";
 import { SCALE_STEPS } from "../layout/projection";
 import { cardFor } from "../rules/choices";
 import { hitLabel } from "../rules/encounters";
@@ -153,7 +154,8 @@ const loadedScene = {
 
 describe("dog art", () => {
   it("names a road sprite with every pose, pull and hit tag for every dog", () => {
-    const tags = ["idle", "walk", "react", ...PULL_TAGS];
+    const reactions = Object.values(DOG_REACTIONS).flat();
+    const tags = [...new Set(["idle", "walk", ...reactions, ...PULL_TAGS])];
     expect(DOGS.flatMap((dog) => missingTags(dogSpriteKey(gameData, dog), tags))).toEqual([]);
   });
 
@@ -414,6 +416,32 @@ describe("hit moment art", () => {
   it("gives every hit moment its own burst, with fx-bump as the fallback for one without", () => {
     expect(missingTags("fx-bump", ["play"])).toEqual([]);
     expect(hits.filter((id) => hitBurstKey(loadedScene, lookOf(id)) === "fx-bump")).toEqual([]);
+  });
+});
+
+describe("plain and moving hit art", () => {
+  const effects = [HIT_ART.bump, HIT_ART.bumpBig, HIT_ART.splash, ...Object.values(HIT_ART.debris)];
+  const framesOf = (key: string) =>
+    animationSpecs(key, sheetOf(key)).find((spec) => spec.key === animationKey(key, HIT_ART.tag))
+      ?.frames.length ?? 0;
+
+  it("plays every hit effect's tag", () => {
+    expect(effects.flatMap(({ key }) => missingTags(key, [HIT_ART.tag]))).toEqual([]);
+  });
+
+  it("holds a peak frame inside its effect's tag for reduced motion", () => {
+    const peaks = [HIT_ART.bump, HIT_ART.bumpBig, HIT_ART.splash];
+    expect(peaks.filter(({ key, peak }) => peak >= framesOf(key)).map(({ key }) => key)).toEqual(
+      [],
+    );
+  });
+
+  it("sets the splash's ground row inside its frame, as tall as the art", () => {
+    const { groundRow, height, key } = HIT_ART.splash;
+    const sheet = sheetOf(key) as { frames: Record<string, { sourceSize: { h: number } }> };
+    const heights = Object.values(sheet.frames).map(({ sourceSize }) => sourceSize.h);
+    expect(new Set(heights)).toEqual(new Set([height]));
+    expect(groundRow).toBeLessThan(height);
   });
 });
 

@@ -95,19 +95,38 @@ export class PackView {
     return dogs.flatMap((dog) => this.dogSprites.get(dog) ?? []);
   }
 
-  // The walker stumbles and the dogs hop, then each takes the pose the pack has by then;
-  // reduced motion skips it.
-  stumble(still: boolean): void {
+  // The dog's centre column and the row its feet stand on, while it is shown on the road.
+  dogFeet(dog: DogId): { x: number; y: number } | undefined {
+    const sprite = this.dogSprites.get(dog);
+    return sprite?.visible === true ? { x: dogTop(sprite).x, y: sprite.y } : undefined;
+  }
+
+  // The walker stumbles and every dog plays tags in order, then each takes the pose the pack
+  // has by then; reduced motion skips it.
+  stumble(still: boolean, tags: readonly string[]): void {
     if (still) {
       return;
     }
     const { walker } = this;
-    this.react(walker.sprite, walker.key, "stumble", () =>
+    this.react(walker.sprite, walker.key, ["stumble"], () =>
       playTag(walker.sprite, walker.key, this.pose),
     );
-    for (const [dog, sprite] of this.dogSprites) {
+    this.dogsReact([...this.dogSprites.keys()], tags);
+  }
+
+  // Each dog plays tags in order, then takes the pack's pose, a dog trotting off its walk; with
+  // no tags it carries on as it was.
+  dogsReact(dogs: readonly DogId[], tags: readonly string[]): void {
+    if (tags.length === 0) {
+      return;
+    }
+    for (const dog of dogs) {
+      const sprite = this.dogSprites.get(dog);
+      if (sprite === undefined) {
+        continue;
+      }
       const key = dogSpriteKey(gameData, dog);
-      this.react(sprite, key, "react", () => {
+      this.react(sprite, key, tags, () => {
         this.dogTags.delete(dog);
         if (this.leaving.has(dog)) {
           playTag(sprite, key, "walk");
@@ -116,12 +135,21 @@ export class PackView {
     }
   }
 
-  private react(sprite: GameObjects.Sprite, key: string, tag: string, done: () => void): void {
-    this.reacting.add(sprite);
-    playTagOnce(sprite, key, tag, () => {
+  // The sprite plays tags once each in order, the pack's pose waiting for them, then done.
+  private react(
+    sprite: GameObjects.Sprite,
+    key: string,
+    tags: readonly string[],
+    done: () => void,
+  ): void {
+    const [tag, ...rest] = tags;
+    if (tag === undefined) {
       this.reacting.delete(sprite);
       done();
-    });
+      return;
+    }
+    this.reacting.add(sprite);
+    playTagOnce(sprite, key, tag, () => this.react(sprite, key, rest, done));
   }
 
   // A blocked strain that ended without a pull bursts over its dog.

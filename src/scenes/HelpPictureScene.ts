@@ -7,6 +7,7 @@ import type { HelpPictureId } from "../data/types";
 import { type HelpPicture, helpPicture, TOUCH_DRAG } from "../help/helpPictures";
 import { changeLabels } from "../hud/hudView";
 import type { RunPause } from "../hud/topBar";
+import { DOG_REACTIONS } from "../layout/hitEffects";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { currentZone } from "../rules/route";
@@ -109,7 +110,7 @@ export class HelpPictureScene extends Scene {
       still: true,
     });
     if (picture.stumble) {
-      pack.stumble(false);
+      pack.stumble(false, DOG_REACTIONS.hit);
     }
     shadows.hideUnused();
     return pack;

@@ -100,7 +100,7 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
   const look = hitLook(moment.kind, moment.encounter);
   playBurst(scene, moment, look, totalMs);
   if (look.flash !== null) {
-    playFlash(scene, moment, hitFlashKey(scene, look.flash));
+    playEdgeFlash(scene, moment, hitFlashKey(scene, look.flash));
   }
   showLabel(scene, moment, look.plate, totalMs);
   if (!moment.still && moment.kind === "obstacle") {
@@ -147,8 +147,13 @@ function burstWordOn(scene: Scene, moment: HitMoment): Point | undefined {
   return starRow === undefined || width === undefined ? undefined : burstWordPlace(width, starRow);
 }
 
-// The strip repeats every 4 rows, so it tiles down each edge; the right one is mirrored.
-function playFlash(scene: Scene, moment: HitMoment, key: string): void {
+// The flash down both edges of the field, over the depth: the strip repeats every 4 rows, so
+// it tiles down each edge; the right one is mirrored. Reduced motion fades its first frame.
+export function playEdgeFlash(
+  scene: Scene,
+  moment: Pick<HitMoment, "depth" | "field" | "still">,
+  key: string,
+): void {
   const first = tagFrame(scene, key, "play");
   if (first === undefined) {
     return;

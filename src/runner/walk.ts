@@ -172,8 +172,10 @@ export interface TreatGrab {
 
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
-// A contact obstacle the pack touched, such as a puddle, and what its effects did.
+// A contact obstacle the pack touched, such as a puddle, the dog the touch landed on, and what
+// its effects did.
 export interface ContactHit {
+  dog: DogId;
   encounter: EncounterId;
   item: WalkItem;
   outcome: ChoiceOutcome;
@@ -957,7 +959,7 @@ export function stepWalk(
       } else if (resolution.kind === "contact") {
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
         nextRun = outcome.state;
-        contacts.push({ encounter: kind, item, outcome });
+        contacts.push({ dog, encounter: kind, item, outcome });
       } else if (resolution.kind === "card") {
         const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
         if (hitLabel(data.encounters[kind]) !== null) {
