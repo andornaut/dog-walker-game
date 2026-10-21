@@ -49,6 +49,8 @@ const SLICES = {
   "ui-panel": { bottom: 4, left: 4, right: 4, top: 4 },
   // The owners' speech bubble.
   "ui-quip": { bottom: 8, left: 8, right: 8, top: 8 },
+  // The speaking owner's name plate on their bubble: a three-slice, 4px caps.
+  "ui-quip-name": { bottom: 0, left: 4, right: 4, top: 0 },
   // The home screen's section frames: the top slice holds the frame and the heading band.
   "ui-section": { bottom: 3, left: 3, right: 3, top: 24 },
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },

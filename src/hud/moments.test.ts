@@ -13,6 +13,7 @@ import {
   downTail,
   endScreenDelayMs,
   firedLineX,
+  FIRING_PARTS,
   firingLayout,
   firingShowMs,
   lowHeartDogs,
@@ -48,22 +49,41 @@ describe("firingShowMs", () => {
 });
 
 describe("firingLayout", () => {
-  const cards = screenLayout(SCREEN_CONFIG).dogSlots;
+  const { dogSlots: cards, walkView: screen } = screenLayout(SCREEN_CONFIG);
+  const { popSize } = FIRING_PARTS;
 
   it.each(cards.map((card, i) => [i, card] as const))(
-    "centres card %i's 2x face on its owner's tab, the 2x pop on the face",
+    "centres card %i's 2x face on its owner's tab, the 2x pop level with it and whole on screen",
     (_i, card) => {
-      const { face, pop } = firingLayout(card);
+      const { face, pop } = firingLayout(screen, card);
       const tab = ownerTabRect(card);
       expect(face).toEqual({ x: tab.x + tab.width / 2, y: tab.y + tab.height / 2 });
-      expect({ x: pop.x + 64, y: pop.y + 64 }).toEqual(face);
+      expect(pop.y + popSize / 2).toBe(face.y);
+      expect(pop.x).toBeGreaterThanOrEqual(screen.x);
+      expect(pop.x + popSize).toBeLessThanOrEqual(screen.x + screen.width);
     },
   );
+
+  it.each<[string, number, number]>([
+    ["centres the pop on a face with room either side", 1, 0],
+    ["moves the pop right of the screen's left edge", 0, 1],
+    ["moves the pop left of the screen's right edge", cards.length - 1, -1],
+  ])("%s", (_name, slot, direction) => {
+    const card = cards[slot] ?? screen;
+    const { face, pop } = firingLayout(screen, card);
+    const offset = Math.sign(pop.x + popSize / 2 - face.x);
+    expect(offset).toBe(direction);
+    if (direction !== 0) {
+      expect(direction > 0 ? pop.x : pop.x + popSize).toBe(
+        direction > 0 ? screen.x : screen.x + screen.width,
+      );
+    }
+  });
 
   it.each(cards.map((card, i) => [i, card] as const))(
     "puts card %i's plate on the card under the 2x face, as wide as its name and inside it",
     (_i, card) => {
-      const { face, plate } = firingLayout(card);
+      const { face, plate } = firingLayout(screen, card);
       expect(plate.y).toBeGreaterThan(face.y + 32);
       expect(plate.x).toBeGreaterThanOrEqual(card.x);
       expect(plate.x + plate.width).toBeLessThanOrEqual(card.x + card.width);
@@ -72,7 +92,7 @@ describe("firingLayout", () => {
   );
 
   it("points the line's tail down at the top of the 2x face, under the bubble", () => {
-    const { face, line, tail } = firingLayout(cards[0] ?? { x: 0, y: 0 });
+    const { face, line, tail } = firingLayout(screen, cards[0] ?? { x: 0, y: 0 });
     expect(tail.x).toBe(face.x);
     expect(tail.y).toBe(line.y - 1);
     for (const { height } of DOWN_TAILS) {

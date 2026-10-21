@@ -1,6 +1,6 @@
 import { gameData } from "../data";
 import type { DebuffId, DogId } from "../data/types";
-import { containsPoint, type Point, type Rect } from "../layout/rect";
+import { containsPoint, type Point, type Rect, rectsOverlap } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
 import type { TextFitStyle } from "../layout/textFit";
 import { maxEffects } from "./effectIcons";
@@ -134,14 +134,17 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
 }
 
 // A dog card (ui-dog-card, 120x58). The name is centred on name.x at the largest of its scales
-// that fits name.room, its top by scale. Hearts sit in rows of perRow, pitch apart. The LEAD tag
-// is on the front dog's card, and FIRED is centred on fired.x on a fired dog's.
+// that fits name.room, its top by scale. The owner's name labels the hearts under it on every
+// card with a dog, a fired dog's included, within owner.room. Hearts sit in rows of perRow,
+// pitch apart. The LEAD tag is on the front dog's card, and FIRED is centred on fired.x on a
+// fired dog's.
 export const DOG_CARD = {
   dogFace: { x: 6, y: 21 },
-  fired: { x: 78, y: 34 },
-  hearts: { perRow: 5, pitch: 9, x: 52, y: 24 },
+  fired: { x: 78, y: 38 },
+  hearts: { perRow: 5, pitch: 9, x: 44, y: 31 },
   lead: { x: 88, y: 43 },
   name: { room: 108, tops: { 1: 7, 2: 5 }, x: 60 },
+  owner: { room: 72, x: 44, y: 22 },
   size: { height: 58, width: 120 },
 } as const;
 
@@ -170,25 +173,31 @@ export function leadSlot(walking: readonly boolean[]): number | undefined {
   return index < 0 ? undefined : index;
 }
 
-// The owner's photo tab (ui-owner-tab, 36x36) pops in on a card's top-right corner, the owner's
+// The owner's photo tab (ui-owner-tab, 36x36) pops in centred on a card's top edge, the owner's
 // face face pixels inside it. Their quip is a ui-quip bubble height tall, the text's width and
-// 2 padX wide, its top top rows into the tab and the text's capitals capsY rows in, beside the
-// tab gap pixels clear of it. Its tail (ui-quip-tail, tail.width wide) sits tail.y rows into the
-// tab against the bubble's edge, overlapping it tail.overlap pixels. A bubble keeps margin
-// pixels inside the screen.
+// 2 padX wide, the text padX in and its capitals capsY rows down. Beside the tab, the bubble's
+// top is top rows into the tab, gap pixels clear of it, and its tail (ui-quip-tail, tail's
+// size) sits tail.y rows into the tab against the bubble's edge, overlapping it tail.overlap
+// pixels. Above the tab, the bubble's top is above.top rows from the tab's top and its tail
+// (ui-quip-tail-down, above.tail's size) sits at above.tail from the tab's corner. A bubble
+// keeps margin pixels inside the screen. The speaker's name plate (ui-quip-name) is plate.height tall and the name's
+// width and 2 plate.padX wide, plate.rise rows above the bubble's top and plate.inset in from
+// the bubble's end nearest the tab, the name plate.padX in and its capitals plate.capsY down.
 export const OWNER_TAB = {
   face: 2,
   quip: {
-    capsY: 10,
+    above: { tail: { height: 6, width: 8, x: 13, y: -5 }, top: -22 },
+    capsY: 6,
     gap: 5,
     height: 18,
     margin: 4,
     padX: 6,
-    tail: { overlap: 1, width: 6, y: 9 },
+    plate: { capsY: 3, height: 12, inset: 4, padX: 4, rise: 9 },
+    tail: { height: 8, overlap: 1, width: 6, y: 9 },
     top: 4,
   },
   size: 36,
-  x: 80,
+  x: 42,
   y: -34,
 } as const;
 
@@ -197,67 +206,126 @@ export function ownerTabRect(card: Pick<Rect, "x" | "y">): Rect {
   return { height: size, width: size, x: card.x + x, y: card.y + y };
 }
 
+export type QuipSide = "above" | "left" | "right";
+type BesideSide = Exclude<QuipSide, "above">;
+
 export interface QuipPlace {
   bubble: Rect;
-  // The bubble is on this side of the tab; a left bubble's tail is mirrored.
-  side: "left" | "right";
-  tail: Point;
-  textX: number;
-  textY: number;
+  // The bubble, its plate and its tail: what the quip covers on screen.
+  covers: Rect[];
+  // The speaker's name, the top of its capitals.
+  name: Point;
+  // Whether the quip reaches above the owners' lane: above its tab, or grown onto a second line.
+  overLane: boolean;
+  plate: Rect;
+  // Beside the tab or above it: a left bubble's tail is mirrored, an above one's points down.
+  side: QuipSide;
+  tail: Rect;
+  // The quip's text, the top of its capitals.
+  text: Point;
 }
 
-// How wide a quip's text may be beside tab: the room on its roomier side. A quip wider than
-// this wraps.
-export function quipRoom(screen: Pick<Rect, "width" | "x">, tab: Rect): number {
+// The widest a quip's text may be on one line: a bubble across the screen inside its margins,
+// as one above its tab may be. A quip wider than this wraps.
+export function quipRoom(screen: Pick<Rect, "width">): number {
   const { quip } = OWNER_TAB;
-  const right = screen.x + screen.width - quip.margin - (tab.x + tab.width + quip.gap);
-  const left = tab.x - quip.gap - (screen.x + quip.margin);
-  return Math.max(left, right) - 2 * quip.padX;
+  return screen.width - 2 * quip.margin - 2 * quip.padX;
 }
 
 // A quip is 1x body text on up to two lines.
 export const QUIP_STYLES: readonly TextFitStyle[] = [{ letterSpacing: 0, lines: 2, scale: 1 }];
 
-// A quip's text as drawn: its lines, lineHeight apart, the widest width wide.
+// A quip as drawn: its text's lines, lineHeight apart, the widest width wide, and its speaker's
+// name name wide.
 export interface QuipText {
   lineHeight: number;
   lines: number;
+  name: number;
   width: number;
 }
 
-// The quip beside its tab: right of it while the pack's centre is at or left of the screen's
-// centre, else left of it, so it leans away from the pack. A side without room gives way to
-// the other. Each line past the first grows the bubble up by a line.
+// Whether a quip reaching above the owners' lane, which the HUD's other layers keep clear of,
+// would lie under any of clearOf: what a moment drawn over the lane covers.
+export function quipOverLaneBlocked(clearOf: readonly Rect[], place: QuipPlace): boolean {
+  return (
+    place.overLane &&
+    place.covers.some((cover) => clearOf.some((rect) => rectsOverlap(cover, rect)))
+  );
+}
+
+// The side of its tab a card's quip prefers: right on the first card and left on the last, so it
+// leans into the screen; on a card between them, right while the pack's centre is at or left
+// of the screen's centre, else left, so it leans away from the pack.
+export function quipSide(
+  screen: Pick<Rect, "width" | "x">,
+  slots: number,
+  packX: number,
+  slot: number,
+): BesideSide {
+  if (slot === 0) {
+    return "right";
+  }
+  if (slot === slots - 1) {
+    return "left";
+  }
+  return packX <= screen.x + screen.width / 2 ? "right" : "left";
+}
+
+// The quip and its speaker's name plate by their tab: on the preferred side, else the other
+// side, else above the tab, the first that keeps the bubble inside the screen's margins. Each
+// line past the first grows the bubble up by a line, its name plate riding on its top.
 export function quipPlace(
   screen: Pick<Rect, "width" | "x">,
-  packX: number,
+  prefers: BesideSide,
   tab: Rect,
   text: QuipText,
 ): QuipPlace {
   const { quip } = OWNER_TAB;
   const width = text.width + 2 * quip.padX;
   const grow = (Math.max(1, text.lines) - 1) * text.lineHeight;
-  const right = tab.x + tab.width + quip.gap;
-  const left = tab.x - quip.gap - width;
-  const rightFits = right + width <= screen.x + screen.width - quip.margin;
-  const leftFits = left >= screen.x + quip.margin;
-  const prefersRight = packX <= screen.x + screen.width / 2;
-  const side = prefersRight
-    ? rightFits || !leftFits
-      ? "right"
-      : "left"
-    : leftFits || !rightFits
-      ? "left"
-      : "right";
-  const x = side === "right" ? right : left;
-  const tailX =
-    side === "right" ? x - quip.tail.width + quip.tail.overlap : x + width - quip.tail.overlap;
+  const low = screen.x + quip.margin;
+  const high = screen.x + screen.width - quip.margin;
+  const besideX: Record<BesideSide, number> = {
+    left: tab.x - quip.gap - width,
+    right: tab.x + tab.width + quip.gap,
+  };
+  const sides: BesideSide[] = prefers === "right" ? ["right", "left"] : ["left", "right"];
+  const side: QuipSide =
+    sides.find((s) => besideX[s] >= low && besideX[s] + width <= high) ?? "above";
+  const bubble = { height: quip.height + grow, width, x: 0, y: 0 };
+  let tail: Rect;
+  if (side === "above") {
+    const centred = tab.x + tab.width / 2 - Math.floor(width / 2);
+    bubble.x = Math.max(low, Math.min(high - width, centred));
+    bubble.y = tab.y + quip.above.top - grow;
+    const { height, width: tailWidth, x, y } = quip.above.tail;
+    tail = { height, width: tailWidth, x: tab.x + x, y: tab.y + y };
+  } else {
+    bubble.x = besideX[side];
+    bubble.y = tab.y + quip.top - grow;
+    const tailX =
+      side === "right"
+        ? bubble.x - quip.tail.width + quip.tail.overlap
+        : bubble.x + width - quip.tail.overlap;
+    tail = { height: quip.tail.height, width: quip.tail.width, x: tailX, y: tab.y + quip.tail.y };
+  }
+  const { plate } = quip;
+  const plateWidth = text.name + 2 * plate.padX;
+  const plateRect = {
+    height: plate.height,
+    width: plateWidth,
+    x: side === "left" ? bubble.x + width - plate.inset - plateWidth : bubble.x + plate.inset,
+    y: bubble.y - plate.rise,
+  };
   return {
-    bubble: { height: quip.height + grow, width, x, y: tab.y + quip.top - grow },
+    bubble,
+    covers: [bubble, plateRect, tail],
+    name: { x: plateRect.x + plate.padX, y: plateRect.y + plate.capsY },
+    overLane: side === "above" || grow > 0,
+    plate: plateRect,
     side,
-    tail: { x: tailX, y: tab.y + quip.tail.y },
-    textX: x + quip.padX,
-    textY: tab.y + quip.capsY - grow,
+    tail,
+    text: { x: bubble.x + quip.padX, y: bubble.y + quip.capsY },
   };
 }
 

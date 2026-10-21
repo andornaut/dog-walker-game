@@ -242,7 +242,7 @@ export class HudFeedback {
       return;
     }
     const still = this.run.reducedMotion();
-    const layout = firingLayout(rect);
+    const layout = firingLayout(LAYOUT.walkView, rect);
     const showMs = firingShowMs(cue.seconds);
     const pop = this.addPop(layout.pop);
     const face = this.addFace(cue.dog, layout.face);

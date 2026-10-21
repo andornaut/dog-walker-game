@@ -120,6 +120,7 @@ interface CardView {
   hearts: GameObjects.Sprite[];
   lead: GameObjects.Image | GameObjects.BitmapText;
   name: GameObjects.BitmapText;
+  owner: GameObjects.BitmapText;
 }
 
 // A card's parts that shake with it.
@@ -127,8 +128,8 @@ function cardParts(view: CardView | undefined): GameObjects.Components.Transform
   if (view === undefined) {
     return [];
   }
-  const { card, dogFace, fired, hearts, lead, name } = view;
-  return [card, dogFace, name, fired, lead, ...hearts];
+  const { card, dogFace, fired, hearts, lead, name, owner } = view;
+  return [card, dogFace, name, owner, fired, lead, ...hearts];
 }
 
 interface DebuffBarView {
@@ -250,17 +251,25 @@ export class HudScene extends Scene {
     this.cards = dogSlots.map((rect) => this.createCard(rect));
 
     const run = this.walk();
+    // A quip above its tab or wrapped onto two lines reaches above the owners' lane: the
+    // moments drawn over the lane take it away or keep it from showing, and heart pops keep
+    // clear of it.
+    const firingRects = () => this.feedback?.firingRects() ?? [];
     this.owners = new OwnerTabs(this, {
+      clearOf: firingRects,
       packX: () => run.hudView()?.packX ?? LAYOUT.road.x + LAYOUT.road.width / 2,
       still: () => run.reducedMotion(),
     });
     this.feedback = new HudFeedback(this, run, {
-      firingShown: () => this.hearts?.clearWay(),
+      firingShown: () => {
+        this.hearts?.clearWay();
+        this.owners?.clearUnder(firingRects());
+      },
       floatLabels: (labels) => this.floatLabels(labels),
       popOwner: (dog, mood, ms) => this.popOwner(dog, mood, ms),
     });
     this.hearts = new HeartFeedback(this, {
-      clearOf: () => this.feedback?.firingRects() ?? [],
+      clearOf: () => [...firingRects(), ...(this.owners?.overLaneCovers() ?? [])],
       landed: (label, lane) => this.showHeartLabel(label, lane),
       quipTop: this.lanes().ownerTabs.y,
       still: () => run.reducedMotion(),
@@ -413,7 +422,7 @@ export class HudScene extends Scene {
         .setVisible(false);
     // The card first, so the face, hearts and labels draw over it.
     const card = sprite(CARD_KEY, { x: 0, y: 0 });
-    const { fired, lead, name } = DOG_CARD;
+    const { fired, lead, name, owner } = DOG_CARD;
     const leadTag = this.textures.exists("ui-lead-tag")
       ? this.add.image(x + lead.x, y + lead.y, "ui-lead-tag").setOrigin(0)
       : addPixelText(this, x + lead.x + 2, y + lead.y + 3, "Lead", {
@@ -435,6 +444,7 @@ export class HudScene extends Scene {
         font: "title",
         originX: 0.5,
       }),
+      owner: addPixelText(this, x + owner.x, y + owner.y, "", { color: PALETTE.tan }),
     };
   }
 
@@ -653,9 +663,10 @@ export class HudScene extends Scene {
     });
   }
 
-  // A dog's card: its name, face and hearts, and the LEAD tag on the front dog's. A fired dog's
-  // card is the empty one with FIRED. An owned slot with no dog is a dashed "Empty" outline on
-  // the band, and a slot not bought (null) shows the band alone.
+  // A dog's card: its name, face, owner's name and hearts, and the LEAD tag on the front dog's.
+  // A fired dog's card is the empty one with the owner's name and FIRED. An owned slot with no
+  // dog is a dashed "Empty" outline on the band, and a slot not bought (null) shows the band
+  // alone.
   private drawCard(
     g: GameObjects.Graphics,
     rect: Rect,
@@ -667,6 +678,7 @@ export class HudScene extends Scene {
     if (slot === undefined || slot === null) {
       parts.forEach((part) => part.setVisible(false));
       setPixelText(view.name, "");
+      setPixelText(view.owner, "");
       if (slot === null) {
         setPixelText(view.fired, "");
         return;
@@ -689,6 +701,7 @@ export class HudScene extends Scene {
       });
     }
     this.fitName(view.name, dog.name, rect);
+    setPixelText(view.owner, dog.owner.name);
     setPixelText(view.fired.setTint(PALETTE.white), fired ? gameData.runText.fired : "");
     if (fired) {
       [view.dogFace, ...view.hearts].forEach((part) => part.setVisible(false));
@@ -867,7 +880,7 @@ export class HudScene extends Scene {
   }
 
   // The owner pops in on their dog's card with their quip beside them, in the mood their hearts
-  // give. False when the dog has no card.
+  // give. False when the dog has no card, or the quip would go above its tab under a moment.
   private sayQuip(quip: QuipBubble): boolean {
     const slot = this.slotOf(quip.dog);
     const packSlot = this.walk().hudView()?.run.pack[slot ?? -1];
@@ -876,6 +889,9 @@ export class HudScene extends Scene {
       return false;
     }
     const at = { dog: quip.dog, mood: faceMood(gameData, hearts), slot };
-    return this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
+    const shown = this.owners.pop(at, QUIP_HOLD_MS, quip.text, () => this.sayNextQuip());
+    // Heart pops already on their way land at once if the quip went above its tab over them.
+    this.hearts?.clearWay();
+    return shown;
   }
 }

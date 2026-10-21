@@ -110,10 +110,11 @@ export function firingShowMs(seconds: number): number {
 }
 
 // The firing moment's parts, from the card's top-left corner: the owner's face at 2x centred on
-// the owner's tab, the 64x64 pop drawn at 2x from pop, centred on the face, the plate on the
-// card's body under the face, as wide as the card's name and PLATE_REACH more each side, and
-// the fired line's bubble centred over line, its bottom edge on it, with the 8x6 tail's top
-// row at tail.y over the bubble's rim, its tip at tail.x, LINE_CLEARANCE over the face's top.
+// the owner's tab, the 64x64 pop drawn at 2x (popSize square) from pop, centred on the face
+// (firingLayout keeps it on screen), the plate on the card's body under the face, as wide as
+// the card's name and PLATE_REACH more each side, and the fired line's bubble centred over
+// line, its bottom edge on it, with the 8x6 tail's top row at tail.y over the bubble's rim, its
+// tip at tail.x, LINE_CLEARANCE over the face's top.
 const PLATE_REACH = 4;
 const FACE_HALF = 32;
 const LINE_CLEARANCE = 6;
@@ -130,11 +131,16 @@ export const FIRING_PARTS = {
   // "FIRED!" is centred across the plate, the top of its capitals this far down.
   plateText: { y: 9 },
   pop: { x: FACE.x - 2 * FACE_HALF, y: FACE.y - 2 * FACE_HALF },
+  popSize: 4 * FACE_HALF,
   tail: { x: FACE.x, y: FACE.y - FACE_HALF - LINE_CLEARANCE - 1 },
 } as const;
 
-// The firing moment's parts on screen for the dog in slot.
-export function firingLayout(slot: Pick<Rect, "x" | "y">): {
+// The firing moment's parts on screen for the dog in slot, the pop moved in from the screen's
+// edge as far as it takes to keep it whole.
+export function firingLayout(
+  screen: Pick<Rect, "width" | "x">,
+  slot: Pick<Rect, "x" | "y">,
+): {
   face: Point;
   line: Point;
   plate: Rect;
@@ -142,12 +148,13 @@ export function firingLayout(slot: Pick<Rect, "x" | "y">): {
   tail: Point;
 } {
   const at = (point: Point) => ({ x: slot.x + point.x, y: slot.y + point.y });
-  const { face, line, plate, pop, tail } = FIRING_PARTS;
+  const { face, line, plate, pop, popSize, tail } = FIRING_PARTS;
+  const popX = Math.max(screen.x, Math.min(screen.x + screen.width - popSize, slot.x + pop.x));
   return {
     face: at(face),
     line: at(line),
     plate: { ...plate, ...at(plate) },
-    pop: at(pop),
+    pop: { x: popX, y: slot.y + pop.y },
     tail: at(tail),
   };
 }
