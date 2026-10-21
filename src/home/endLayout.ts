@@ -1,12 +1,12 @@
 import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
 
 // The end screen's geometry, with every text at 2x.
-const PANEL = { height: 300, width: 312, x: 24, y: 112 };
+const PANEL = { height: 304, width: 312, x: 24, y: 112 };
 const RIBBON = { x: 144, y: 102 };
 
 export const END_LAYOUT = {
   badges: { height: 92, width: 344, x: 8, y: 416 },
-  breakdown: { amountRight: 196, label: 40, pitch: 16, top: PANEL.y + 42 },
+  breakdown: { amountRight: 196, label: 40, pitch: 18, top: PANEL.y + 42 },
   // 44 game pixels tall: 48 CSS pixels on a 390px-wide phone.
   button: { height: 44, width: 264, x: 48, y: 512 },
   logo: { x: 116, y: 8 },
@@ -98,7 +98,7 @@ function quipBubbleHeight(body: FontMetrics, lines: number): number {
 // The breakdown's rule sits 2px under its last line and the 2x total 8px under it; the side
 // column ends with the 16px money icon. The owners' rows start QUIPS_GAP under whichever ends
 // lower, the tan rule 8px over them, and the panel ends 8px under the last bubble.
-const QUIPS_GAP = 14;
+const QUIPS_GAP = 10;
 const PANEL_FOOT = 8;
 
 interface EndPanelLayout {
