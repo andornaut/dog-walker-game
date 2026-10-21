@@ -1311,6 +1311,8 @@
       "approachSecondRoadShareMin": 0.25,
       "bigDogAgility": -0.1,
       "calmVoiceDebuffFactor": 0.5,
+      "dartStartRoadShareMax": 0.66,
+      "dartStartRoadShareMin": 0.3,
       "goodLeashSquirrelPull": 0,
       "moverSpeedJitter": 0.15,
       "muddyBumpHearts": 2,
