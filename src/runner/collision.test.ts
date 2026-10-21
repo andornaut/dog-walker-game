@@ -1,20 +1,23 @@
 import { describe, expect, it } from "vitest";
 
-import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { testState } from "../testing/runState";
 import {
+  boundingBox,
   type Box,
   collideWithPack,
   type DogBox,
-  dogsTouching,
+  hitDog,
   itemBox,
   overlaps,
+  type PackBoxes,
+  pickupDog,
   tickInvulnerability,
 } from "./collision";
 import { stillInLane } from "./laneMotion";
 import type { RoadItem } from "./roadItems";
-import { dogBoxes } from "./walk";
+import { screenRoadGeometry } from "./screenGeometry";
+import { packBoxes } from "./walk";
 
 type Kind = "obstacle" | "tip";
 
@@ -24,20 +27,21 @@ const rules = {
   startsInvulnerability: () => true,
 };
 const CELL = { inset: 8, length: 64 };
-// One dog box in lane 2, and one halfway between lanes 2 and 3, as mid-move.
-const box = (centreX: number, dog = "koda"): DogBox => ({
-  bottom: 600,
-  dog,
-  left: centreX - 20,
-  right: centreX + 20,
-  top: 560,
+// A pack of parts, outlined by their bounding box.
+const packOf = (walker: Box, dogs: readonly DogBox[]): PackBoxes => ({
+  dogs,
+  outline: boundingBox([walker, ...dogs]),
+  walker,
 });
-const stillBoxes = [box(160)];
-const midMoveBoxes = [box(192)];
-const touchingWith = (boxes: readonly DogBox[]) => (hit: RoadItem<Kind>) =>
-  dogsTouching(boxes, itemBox(CELL, hit));
-const still = touchingWith(stillBoxes);
-const midMove = touchingWith(midMoveBoxes);
+// A one-dog pack 40 wide centred on centreX, its dog over the walker's feet: in lane 2, or
+// halfway between lanes 2 and 3, as mid-move.
+const single = (centreX: number) =>
+  packOf({ bottom: 600, left: centreX - 20, right: centreX + 20, top: 585 }, [
+    { bottom: 585, dog: "koda", left: centreX - 20, right: centreX + 20, top: 560 },
+  ]);
+const touchingWith = (pack: PackBoxes) => (hit: RoadItem<Kind>) => hitDog(pack, itemBox(CELL, hit));
+const still = touchingWith(single(160));
+const midMove = touchingWith(single(192));
 
 const item = (id: number, kind: Kind, lane: number, y: number, laneSpan = 1): RoadItem<Kind> => ({
   height: 32,
@@ -60,67 +64,137 @@ describe("overlaps", () => {
   });
 });
 
-describe("dogsTouching", () => {
-  // The item's box spans y to y + 32; the dog's, 560 to 600.
+describe("a one-dog pack", () => {
+  // The item's box spans y to y + 32; the pack's, 560 to 600.
   it.each([
     { touches: false, where: "ending on the box's top", y: 528 },
     { touches: true, where: "reaching into the box", y: 529 },
     { touches: true, where: "starting just above the box's bottom", y: 599 },
     { touches: false, where: "starting on the box's bottom", y: 600 },
-  ])("touches an item in the dog's lane $where: $touches", ({ touches, y }) => {
-    expect(still(item(1, "tip", 2, y))).toEqual(touches ? ["koda"] : []);
+  ])("touches an item in the pack's lane $where: $touches", ({ touches, y }) => {
+    expect(still(item(1, "tip", 2, y))).toBe(touches ? "koda" : null);
   });
 
   it("touches an item spanning several lanes in any of them", () => {
-    expect(still(item(1, "obstacle", 0, 570, 3))).toEqual(["koda"]);
-    expect(still(item(1, "obstacle", 2, 570, 2))).toEqual(["koda"]);
-    expect(still(item(1, "obstacle", 0, 570, 2))).toEqual([]);
-    expect(still(item(1, "obstacle", 3, 570, 2))).toEqual([]);
+    expect(still(item(1, "obstacle", 0, 570, 3))).toBe("koda");
+    expect(still(item(1, "obstacle", 2, 570, 2))).toBe("koda");
+    expect(still(item(1, "obstacle", 0, 570, 2))).toBeNull();
+    expect(still(item(1, "obstacle", 3, 570, 2))).toBeNull();
   });
 
-  it("touches items only in the dog's lane, both lanes while it is between them", () => {
-    expect(still(item(1, "tip", 3, 570))).toEqual([]);
-    expect(midMove(item(1, "tip", 2, 570))).toEqual(["koda"]);
-    expect(midMove(item(2, "tip", 3, 570))).toEqual(["koda"]);
-    expect(midMove(item(3, "tip", 1, 570))).toEqual([]);
-  });
-
-  it("lists every dog touching, in pack order", () => {
-    const pair = [box(150, "koda"), box(170, "biscuit")];
-    expect(dogsTouching(pair, itemBox(CELL, item(1, "tip", 2, 570)))).toEqual(["koda", "biscuit"]);
+  it("touches items only in the pack's lane, both lanes while it is between them", () => {
+    expect(still(item(1, "tip", 3, 570))).toBeNull();
+    expect(midMove(item(1, "tip", 2, 570))).toBe("koda");
+    expect(midMove(item(2, "tip", 3, 570))).toBe("koda");
+    expect(midMove(item(3, "tip", 1, 570))).toBeNull();
   });
 });
 
-describe("a settled pack's hit boxes", () => {
-  const geometry = {
-    cell: { inset: 12, length: SCREEN_CONFIG.roadWidth / LANE_COUNT },
-    laneCount: LANE_COUNT,
-    walkerFootY: 634,
-  };
+// Koda leads in the centre, out front; Biscuit and Zippy walk front-left and front-right a
+// little behind, a gap between them under Koda; the walker below. Pickups touch the outline
+// around them all; obstacles touch the parts.
+const chevron = packOf({ bottom: 100, left: -10, right: 10, top: 50 }, [
+  { bottom: 20, dog: "koda", left: -10, right: 10, top: -20 },
+  { bottom: 40, dog: "biscuit", left: -30, right: -12, top: 0 },
+  { bottom: 40, dog: "zippy", left: 12, right: 30, top: 0 },
+]);
+// Between the side dogs, under Koda and over the walker: inside the outline, on no part.
+const GAP: Box = { bottom: 48, left: -8, right: 8, top: 26 };
+
+describe("hitDog", () => {
+  it.each<[string, Box, DogId | null]>([
+    [
+      "on the dog whose rectangle it touches",
+      { bottom: 30, left: 20, right: 40, top: 10 },
+      "zippy",
+    ],
+    ["on the lead when it touches the lead", { bottom: -10, left: -5, right: 5, top: -30 }, "koda"],
+    [
+      "on the front dog when it touches only the walker",
+      { bottom: 120, left: -5, right: 5, top: 90 },
+      "koda",
+    ],
+    [
+      "on the nearest of the dogs it touches",
+      { bottom: 35, left: -40, right: 40, top: 15 },
+      "koda",
+    ],
+    [
+      "on the nearer side dog when it touches both and not the lead",
+      { bottom: 38, left: -28, right: 14, top: 22 },
+      "biscuit",
+    ],
+    ["on nothing in the gap between the parts", GAP, null],
+    ["on nothing outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
+  ])("lands an obstacle %s", (_, box, dog) => {
+    expect(hitDog(chevron, box)).toBe(dog);
+  });
+
+  it("lands on no dog when the pack has none", () => {
+    const walker = { bottom: 100, left: -10, right: 10, top: 40 };
+    expect(hitDog(packOf(walker, []), walker)).toBeNull();
+  });
+});
+
+describe("pickupDog", () => {
+  it.each<[string, Box, DogId | null]>([
+    ["to the dog nearest the contact", { bottom: 30, left: 20, right: 40, top: 10 }, "zippy"],
+    ["to the dog nearest the contact in the gap between the parts", GAP, "biscuit"],
+    [
+      "to the front dog when the walker is nearest",
+      { bottom: 120, left: -5, right: 5, top: 90 },
+      "koda",
+    ],
+    [
+      "to the dog whose rectangle holds the contact",
+      { bottom: 10, left: -1, right: 1, top: -10 },
+      "koda",
+    ],
+    ["to no dog outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
+  ])("gives a pickup %s", (_, box, dog) => {
+    expect(pickupDog(chevron, box)).toBe(dog);
+  });
+
+  it("gives no dog a pickup when the pack has none", () => {
+    const walker = { bottom: 100, left: -10, right: 10, top: 40 };
+    expect(pickupDog(packOf(walker, []), walker)).toBeNull();
+  });
+});
+
+describe("a settled pack", () => {
   const DOGS: DogId[] = ["koda", "biscuit", "zippy"];
-  const packOf = (count: number) =>
+  const runOf = (count: number) =>
     testState(Object.fromEntries(DOGS.slice(0, count).map((dog) => [dog, 3])));
-  const level = (lane: number) => ({
-    height: 40,
-    id: 1,
-    kind: "obstacle" as const,
-    lane,
-    laneSpan: 1,
-    y: geometry.walkerFootY - 80,
+  // An obstacle level with the lead's rectangle, in lane.
+  const levelIn = (lane: number, count: number) => {
+    const { packParts } = screenRoadGeometry(runOf(count));
+    return {
+      height: 40,
+      id: 1,
+      kind: "obstacle" as const,
+      lane,
+      laneSpan: 1,
+      y: (packParts.dogs[0]?.top ?? 0) + 2,
+    };
+  };
+  const contact = (count: number, motion: Parameters<typeof packBoxes>[1], lane: number) => {
+    const run = runOf(count);
+    const geometry = screenRoadGeometry(run);
+    const pack = packBoxes(geometry, motion, run);
+    const box = itemBox(geometry.cell, levelIn(lane, count));
+    return [hitDog(pack, box), pickupDog(pack, box)];
+  };
+
+  it.each([1, 2, 3])("never touches anything in the lane beside, for %i dogs", (count) => {
+    expect(contact(count, stillInLane(2), 1)).toEqual([null, null]);
+    expect(contact(count, stillInLane(2), 3)).toEqual([null, null]);
+    expect(contact(count, stillInLane(2), 2)).not.toContain(null);
   });
 
-  it.each([1, 2, 3])("never touch an obstacle in the lane beside, for %i dogs", (count) => {
-    const boxes = dogBoxes(geometry, stillInLane(2), packOf(count));
-    expect(dogsTouching(boxes, itemBox(geometry.cell, level(1)))).toEqual([]);
-    expect(dogsTouching(boxes, itemBox(geometry.cell, level(3)))).toEqual([]);
-    expect(dogsTouching(boxes, itemBox(geometry.cell, level(2))).length).toBeGreaterThan(0);
-  });
-
-  it.each([1, 2, 3])("touch both lanes halfway through a lane change, for %i dogs", (count) => {
+  it.each([1, 2, 3])("touches both lanes halfway through a lane change, for %i dogs", (count) => {
     const motion = { duration: 1, elapsed: 0.5, from: 2, kind: "moving", to: 3 } as const;
-    const boxes = dogBoxes(geometry, motion, packOf(count));
-    expect(dogsTouching(boxes, itemBox(geometry.cell, level(2))).length).toBeGreaterThan(0);
-    expect(dogsTouching(boxes, itemBox(geometry.cell, level(3))).length).toBeGreaterThan(0);
+    expect(contact(count, motion, 2)).not.toContain(null);
+    expect(contact(count, motion, 3)).not.toContain(null);
   });
 });
 

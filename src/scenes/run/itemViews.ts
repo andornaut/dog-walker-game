@@ -60,7 +60,8 @@ export interface ItemView {
 // its shape in the data.
 export function ensureRoadPlaceholders(scene: Scene): void {
   const has = (key: string) => scene.textures.exists(key);
-  const { cell } = walkGeometry(LANE_COUNT, 1, PROJECTION, LAYOUT.road);
+  const pack = { dogs: [], walker: gameData.defaultWalker };
+  const { cell } = walkGeometry(LANE_COUNT, pack, PROJECTION, LAYOUT.road);
   const add = (key: string, lanes: number) =>
     ensurePlaceholder(scene, key, {
       color: PALETTE.slate,

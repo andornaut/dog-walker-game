@@ -1,6 +1,25 @@
-import type { DogId } from "../data/types";
+import type { DogId, GameData, Size } from "../data/types";
 import type { Hearts } from "../rules/units";
 import type { Pack, PackDogs, PackSlot, RunState } from "./runState";
+
+const SIZE_ORDER: readonly Size[] = ["big", "medium", "small"];
+
+// The pack's order, from the dogs alone, never the order they were picked in: the biggest
+// first, ties in roster order. The first is the front dog, which leads the formation and takes
+// head-on hits and the pickups only the walker touches.
+export function packOrder<Dogs extends readonly DogId[]>(
+  roster: GameData["dogs"],
+  dogs: Dogs,
+): Dogs {
+  const ids = Object.keys(roster);
+  const sorted = [...dogs].sort(
+    (a, b) =>
+      SIZE_ORDER.indexOf(roster[a].size) - SIZE_ORDER.indexOf(roster[b].size) ||
+      ids.indexOf(a) - ids.indexOf(b),
+  );
+  // Sorting keeps the dogs, and so a pack's length.
+  return sorted as readonly DogId[] as Dogs;
+}
 
 // Dogs still walking with at least one heart, in pack order. A loop, as the walk asks for it
 // several times a step.

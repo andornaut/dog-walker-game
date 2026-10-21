@@ -1,83 +1,276 @@
-import { clampIndex, itemAt } from "../arrays";
-import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { itemAt } from "../arrays";
+import { DOGS } from "../data/dogs";
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
-import type { DogId } from "../data/types";
+import type { DogId, Size, WalkerId } from "../data/types";
+import { packOrder } from "../state/pack";
+import { distanceAtY, type RoadProjection, scaleAt } from "./projection";
 
-// Where a dog walks, relative to the walker's feet: dx across, footDy up the screen
-// (negative). Dogs walk just ahead of the walker in the same lane, staggered because three
-// dogs do not fit side by side in a 64px lane: the centre dog of three stands behind the side
-// dogs' heads.
+// The pack walks in a formation set by its dogs' sizes, close in front of the walker, and
+// collides as it is drawn: an obstacle hits the walker's or a dog's rectangle, just inside its
+// opaque pixels, and a pickup touches the outline around them all, leashes included.
+
+// A sprite's opaque pixels over its walk loop, from the column it is placed on and its feet row:
+// left and right columns (right exclusive), and the rows above the feet row. Measured on the
+// full-size art; packFormation.test.ts checks them against it.
+export interface Silhouette {
+  above: number;
+  left: number;
+  right: number;
+}
+
+export const WALKER_SILHOUETTES: Readonly<Record<WalkerId, Silhouette>> = {
+  ada: { above: 55, left: -15, right: 15 },
+  ben: { above: 65, left: -17, right: 18 },
+  casey: { above: 65, left: -17, right: 18 },
+  trista: { above: 65, left: -17, right: 24 },
+};
+
+export const DOG_SILHOUETTES: Readonly<Record<DogId, Silhouette>> = {
+  archie: { above: 39, left: -11, right: 12 },
+  biscuit: { above: 38, left: -12, right: 12 },
+  duchess: { above: 32, left: -10, right: 10 },
+  koda: { above: 45, left: -15, right: 15 },
+  nugget: { above: 31, left: -10, right: 10 },
+  penny: { above: 42, left: -14, right: 14 },
+  pierre: { above: 39, left: -13, right: 13 },
+  snowball: { above: 46, left: -15, right: 15 },
+  zippy: { above: 31, left: -9, right: 10 },
+};
+
+// How far a dog reaches either side of its column, mirrored too, as a pull draws it.
+export function dogHalfWidth(dog: Silhouette): number {
+  return Math.max(-dog.left, dog.right);
+}
+
+// Half a lane's width at the walker's feet: the pack's box stays inside it, so a pack settled in
+// a lane never touches anything in the lane beside it. A function, since the screen config is
+// not yet loaded while this module loads in an import cycle.
+export function laneHalfWidth(): number {
+  return SCREEN_CONFIG.roadWidth / LANE_COUNT / 2;
+}
+
+// Where a dog walks, in screen pixels from the walker's feet: dx across from the walker's lane
+// centre as drawn on the dog's feet row (negative to the left), and footDy up the screen
+// (negative). Every dog walks in front of the walker on a leash from the walker's hand to its
+// collar, and is drawn by depth: the farthest feet first, then the leashes, then the walker.
 export interface PackPlacement {
   dx: number;
   footDy: number;
 }
 
-// The pack is laid out at the hit size, ROAD_HIT_SIZE, where collisions read it, and drawn
-// at the sprite size, ROAD_SPRITE_SIZE: the drawn formation's spread and stagger and the drawn
-// band's lengths are their hit lengths times PACK_DRAW_SCALE, rounded. The hands and collar are
-// measured on the drawn art.
-export const PACK_DRAW_SCALE = ROAD_SPRITE_SIZE / ROAD_HIT_SIZE;
-const drawn = (length: number) => Math.round(length * PACK_DRAW_SCALE);
+// A place in a formation: the lead in the centre, or a side.
+export type PackSlot = "lead" | "left" | "right";
 
-// Indexed by pack size - 1; the first dog picked leads. At the hit size, before the hit
-// formation brings the side dogs in and the drawn formation sets them by their width.
-const LAID_OUT: readonly (readonly PackPlacement[])[] = [
-  [{ dx: 0, footDy: -53 }],
-  [
-    { dx: -20, footDy: -53 },
-    { dx: 20, footDy: -50 },
-  ],
-  [
-    { dx: 0, footDy: -54 },
-    { dx: -20, footDy: -49 },
-    { dx: 20, footDy: -46 },
-  ],
+const SIDES: Readonly<Record<PackSlot, -1 | 0 | 1>> = { lead: 0, left: -1, right: 1 };
+
+// Indexed by pack size - 1, the slots in formation order (formationOrder): one dog leads in
+// the centre; two walk side by side, the front dog on the left; three walk in a triangle, the
+// lead out front and the others front-left and front-right. A larger pack takes the largest
+// formation.
+export const PACK_SLOTS: readonly (readonly PackSlot[])[] = [
+  ["lead"],
+  ["left", "right"],
+  ["lead", "left", "right"],
 ];
 
-// The farthest a dog's hit box sits from the lane's centre: half a 64px lane less half a box,
-// so no box reaches into the next lane and a pack settled in a lane never touches an obstacle
-// beside it.
-const HIT_SIDE_DX = 12;
+// The feet rows, up the screen from the walker's feet, by the dogs' sizes: a lone dog's; a
+// side dog's, of two or three; a side dog's of three bigs, closer in; and the lead's of three,
+// keyed by the lead's, the left dog's and the right dog's sizes.
+export const PACK_FEET = {
+  lead: { big: -49, medium: -50, small: -54 },
+  side: { big: -45, medium: -45, small: -48 },
+  sideOfThreeBigs: -37,
+  trioLead: {
+    "big big big": -53,
+    "big big medium": -60,
+    "big big small": -60,
+    "big medium medium": -52,
+    "big medium small": -52,
+    "big small small": -50,
+    "medium medium medium": -50,
+    "medium medium small": -56,
+    "medium small small": -50,
+    "small small small": -54,
+  } as Readonly<Record<string, number>>,
+} as const;
 
-// Where the dogs stand for collisions: as laid out, side dogs brought in to HIT_SIDE_DX.
-const HIT_FORMATIONS = LAID_OUT.map((formation) =>
-  formation.map(({ dx, footDy }) => ({
-    dx: Math.sign(dx) * Math.min(Math.abs(dx), HIT_SIDE_DX),
-    footDy,
-  })),
-);
+const ROSTER = Object.keys(DOGS) as DogId[];
 
-// A drawn formation's place: the side of the walker a dog walks on (-1 left, 0 centre, 1
-// right), and its feet from the nearest dog's, up the screen in pixels.
-export interface DrawnSlot {
-  footDy: number;
-  side: number;
+// The pack's dogs in formation order, by the roster's sizes (packOrder).
+export function formationOrder(dogs: readonly DogId[]): DogId[] {
+  return [...packOrder(DOGS, dogs)];
 }
 
-// The drawn formations' shapes: the laid-out sides, and their stagger at the draw scale.
-export const DRAWN_SHAPES: readonly (readonly DrawnSlot[])[] = LAID_OUT.map((formation) => {
-  const nearest = Math.max(...formation.map(({ footDy }) => footDy));
-  return formation.map(({ dx, footDy }) => ({
-    footDy: drawn(footDy - nearest),
-    side: Math.sign(dx),
-  }));
-});
-
-// Half a lane's width at the walker's feet: a side dog walks inside it. A function, since the
-// screen config is not yet loaded while this module loads in an import cycle.
-export function laneHalfWidth(): number {
-  return SCREEN_CONFIG.roadWidth / LANE_COUNT / 2;
+// Each dog's feet row, the dogs' sizes in formation order.
+function feetRows(sizes: readonly Size[]): number[] {
+  if (sizes.length === 1) {
+    return [PACK_FEET.lead[itemAt(sizes, 0)]];
+  }
+  const sides = sizes.slice(-2);
+  const threeBigs = sizes.length === 3 && sizes.every((size) => size === "big");
+  const sideRows = sides.map((size) =>
+    threeBigs ? PACK_FEET.sideOfThreeBigs : PACK_FEET.side[size],
+  );
+  if (sizes.length === 2) {
+    return sideRows;
+  }
+  const lead = PACK_FEET.trioLead[sizes.join(" ")];
+  if (lead === undefined) {
+    throw new Error(
+      `No lead's feet row for ${sizes.join(", ")}: the dogs must be in formation order`,
+    );
+  }
+  return [lead, ...sideRows];
 }
 
-// The pack's dogs are drawn at full size: their formation keeps them at a fixed depth just
-// ahead of the walker, so they never change size, and following the projection there would
-// drop two or three pixel rows from every dog. Their status loops follow, at full size.
+type Lens = Pick<RoadProjection, "focal" | "footY" | "horizonY">;
+
+// The road's scale on the row footDy up the screen from the walker's feet.
+function rowScale(projection: Lens, footDy: number): number {
+  return scaleAt(projection, distanceAtY(projection, projection.footY + footDy));
+}
+
+// A dog's silhouette and size.
+export interface PackDog {
+  silhouette: Silhouette;
+  size: Size;
+}
+
+// A side dog stands across from the lane's centre the lane's half width on its feet row less
+// half its opaque width, rounded in, so it is drawn inside its lane.
+export function sideDx(projection: Lens, footDy: number, dog: Silhouette): number {
+  const width = dog.right - dog.left;
+  return Math.floor(laneHalfWidth() * rowScale(projection, footDy) - Math.ceil(width / 2));
+}
+
+// Where each dog walks, the dogs in formation order and no more than the largest formation
+// holds: its feet row, and for a side dog its sideDx.
+export function packPlacements(projection: Lens, dogs: readonly PackDog[]): PackPlacement[] {
+  if (dogs.length === 0) {
+    return [];
+  }
+  const walking = dogs.slice(0, PACK_SLOTS.length);
+  const rows = feetRows(walking.map(({ size }) => size));
+  return itemAt(PACK_SLOTS, walking.length - 1).map((slot, i) => {
+    const footDy = itemAt(rows, i);
+    return { dx: SIDES[slot] * sideDx(projection, footDy, itemAt(walking, i).silhouette), footDy };
+  });
+}
+
+// A box: x across, y down.
+export interface PartBox {
+  bottom: number;
+  left: number;
+  right: number;
+  top: number;
+}
+
+// The pack's parts on the flat road: each part's opaque columns across from the walker's, a
+// dog's at the road's scale on its feet row, and its rows from its top row's top edge down to
+// its feet line as the road drawn there, y down the road from the walker's feet.
+export interface PackParts {
+  dogs: PartBox[];
+  walker: PartBox;
+}
+
+// How far inside its drawn sprite a part's hit rectangle lies on every side, in screen pixels:
+// an obstacle hits a dog or the walker only where it visibly overlaps them.
+export const PART_INSET = 2;
+
+// The road drawn on the row dy up the screen from the walker's feet, down from the feet.
+function roadY(projection: Lens, dy: number): number {
+  return -distanceAtY(projection, projection.footY + dy);
+}
+
+// The parts inset by inset screen pixels on every side: 0 for what is drawn. The dogs are in
+// formation order.
+export function packParts(
+  projection: Lens,
+  inset: number,
+  walker: Silhouette,
+  dogs: readonly PackDog[],
+): PackParts {
+  return {
+    dogs: packPlacements(projection, dogs).map(({ dx, footDy }, i) => {
+      const { silhouette } = itemAt(dogs, i);
+      const scale = rowScale(projection, footDy);
+      const half = dogHalfWidth(silhouette) - inset;
+      return {
+        bottom: roadY(projection, footDy - inset),
+        left: (dx - half) / scale,
+        right: (dx + half) / scale,
+        top: roadY(projection, footDy - silhouette.above + inset),
+      };
+    }),
+    walker: {
+      bottom: roadY(projection, -inset),
+      left: walker.left + inset,
+      right: walker.right - inset,
+      top: roadY(projection, -walker.above + inset),
+    },
+  };
+}
+
+// The bounding box of the parts.
+export function unionBox(parts: readonly PartBox[]): PartBox {
+  return {
+    bottom: Math.max(...parts.map(({ bottom }) => bottom)),
+    left: Math.min(...parts.map(({ left }) => left)),
+    right: Math.max(...parts.map(({ right }) => right)),
+    top: Math.min(...parts.map(({ top }) => top)),
+  };
+}
+
+// The bounding box of what is drawn for the pack: the walker, the dogs and the leashes between.
+export function packOutline(parts: PackParts): PartBox {
+  return unionBox([parts.walker, ...parts.dogs]);
+}
+
+// The walker's and the dogs' sprites.
+export interface PackSprites {
+  dogs: readonly DogId[];
+  walker: WalkerId;
+}
+
+export function packDogOf(dog: DogId): PackDog {
+  return { silhouette: DOG_SILHOUETTES[dog], size: DOGS[dog].size };
+}
+
+// The parts with the dogs in formation order, whatever order they are given in.
+export function packOnRoad(projection: Lens, inset: number, pack: PackSprites): PackParts {
+  const dogs = formationOrder(pack.dogs).map(packDogOf);
+  return packParts(projection, inset, WALKER_SILHOUETTES[pack.walker], dogs);
+}
+
+// Every pack of up to the largest formation's size the roster makes.
+export function everyPack(): DogId[][] {
+  const packs: DogId[][] = [[]];
+  for (const dog of ROSTER) {
+    for (const pack of [...packs]) {
+      if (pack.length < PACK_SLOTS.length) {
+        packs.push([...pack, dog]);
+      }
+    }
+  }
+  return packs.filter((pack) => pack.length > 0);
+}
+
+// The longest any pack's outline runs along the road, so spawns stay avoidable whoever walks.
+export function tallestPackLength(projection: Lens): number {
+  const packs = everyPack();
+  return Math.max(
+    ...(Object.keys(WALKER_SILHOUETTES) as WalkerId[]).flatMap((walker) =>
+      packs.map((dogs) => {
+        const box = packOutline(packOnRoad(projection, 0, { dogs, walker }));
+        return box.bottom - box.top;
+      }),
+    ),
+  );
+}
+
+// The pack's dogs are drawn at full size: their formation keeps them at a fixed depth around
+// the walker, so they never change size. Their status loops follow, at full size.
 export const PACK_DEPTH = 1;
-
-// How far a dog's body reaches up from its feet, for the drawn band: the shortest dog's height.
-const DOG_BODY_HEIGHT = 26;
-// The walker's legs below the drawn band.
-const WALKER_FEET_CLEARANCE = 5;
 
 // The walker sprite's hands, relative to its feet, as drawn at the sprite size.
 export const WALKER_HANDS = { heightAboveFeet: 20, leftDx: -16, rightDx: 16 };
@@ -94,71 +287,6 @@ export const COLLAR_HEIGHTS: Readonly<Record<DogId, number>> = {
   snowball: 22,
   zippy: 16,
 };
-
-// The pack's vertical band, from the leading dog's head to the walker's feet, laid out by a
-// formation table at a body height and feet clearance.
-interface PackSize {
-  bodyHeight: number;
-  feetClearance: number;
-  formations: readonly (readonly PackPlacement[])[];
-}
-
-// A sprite's frame rows from its top to its feet line, and its frame height.
-export interface FrameFeet {
-  feetY: number;
-  frameHeight: number;
-}
-
-// A pack dog's drawn frame: its feet line, frame height and opaque width.
-export interface DrawnDog extends FrameFeet {
-  opaqueWidth: number;
-}
-
-// How far up the screen the nearest dog's feet stand from the walker's, so every dog walks
-// ahead of the walker and its leash shows: the walker's frame above its feet, plus the most
-// rows any dog's frame has below its feet, so no dog's frame overlaps the walker's.
-export function packClearance(
-  walker: Pick<FrameFeet, "feetY">,
-  dogs: readonly FrameFeet[],
-): number {
-  return walker.feetY + Math.max(0, ...dogs.map((dog) => dog.frameHeight - dog.feetY));
-}
-
-function formationOf<T>(formations: readonly (readonly T[])[], dogCount: number): readonly T[] {
-  return itemAt(formations, clampIndex(formations.length, dogCount - 1));
-}
-
-function bandOf(size: PackSize, dogCount: number, walkerFootY: number) {
-  const lead = Math.min(...formationOf(size.formations, dogCount).map(({ footDy }) => footDy));
-  return { bottom: walkerFootY - size.feetClearance, top: walkerFootY + lead - size.bodyHeight };
-}
-
-// How far across a side dog walks from the walker: its opaque half inside the lane's edge.
-export function sideDx(opaqueWidth: number): number {
-  return Math.floor(laneHalfWidth() - opaqueWidth / 2);
-}
-
-// Where each dog is drawn, in screen pixels from the walker's feet: the formation's shape with
-// its nearest dog packClearance up the screen, so every dog walks ahead of the walker's frame,
-// and each side dog sideDx across, so the pack stays in its lane.
-export function packPlacements(
-  walker: Pick<FrameFeet, "feetY">,
-  dogs: readonly DrawnDog[],
-): PackPlacement[] {
-  if (dogs.length === 0) {
-    return [];
-  }
-  const clearance = packClearance(walker, dogs);
-  return formationOf(DRAWN_SHAPES, dogs.length).map(({ footDy, side }, i) => ({
-    dx: side === 0 ? 0 : side * sideDx(itemAt(dogs, i).opaqueWidth),
-    footDy: footDy - clearance,
-  }));
-}
-
-// Where each dog stands for collisions.
-export function hitPackPlacements(dogCount: number): readonly PackPlacement[] {
-  return formationOf(HIT_FORMATIONS, dogCount);
-}
 
 // A dog on the left of the walker is held in the left hand.
 export function leashHand(placement: PackPlacement): { dx: number; dy: number } {
@@ -181,48 +309,4 @@ export function tautLeashLine(
     y: point.y + side.y,
   });
   return { from: shift(from), to: shift(to) };
-}
-
-// The centre of a dog's hit box, relative to the walker's feet: the middle of its sprite at the
-// hit size, a square ROAD_HIT_SIZE tall standing on its feet.
-export function dogHitCentre(placement: PackPlacement): { dx: number; dy: number } {
-  return { dx: placement.dx, dy: placement.footDy - ROAD_HIT_SIZE / 2 };
-}
-
-// The pack's hit band in screen pixels, from the lead dog's box to the last dog's, with every
-// box at the largest hit size, ROAD_HIT_SIZE. The walker has no box. The planner's pack-fit
-// gap, the pulls and the bots read this band.
-export function packBand(dogCount: number, walkerFootY: number): { bottom: number; top: number } {
-  const feet = formationOf(HIT_FORMATIONS, dogCount).map(({ footDy }) => footDy);
-  return {
-    bottom: walkerFootY + Math.max(...feet),
-    top: walkerFootY + Math.min(...feet) - ROAD_HIT_SIZE,
-  };
-}
-
-// The band as drawn, from the leading dog's head to the walker's feet, at the sprite size and
-// the clearance. Nothing collides with it.
-export function drawnPackBand(
-  dogCount: number,
-  walkerFootY: number,
-  clearance: number,
-): { bottom: number; top: number } {
-  const drawnPack: PackSize = {
-    bodyHeight: drawn(DOG_BODY_HEIGHT),
-    feetClearance: drawn(WALKER_FEET_CLEARANCE),
-    formations: DRAWN_SHAPES.map((shape) =>
-      shape.map(({ footDy }) => ({ dx: 0, footDy: footDy - clearance })),
-    ),
-  };
-  return bandOf(drawnPack, dogCount, walkerFootY);
-}
-
-// The tallest hit band any pack can have, so spawns stay avoidable whoever is walking.
-export function tallestPackBand(walkerFootY: number): number {
-  return Math.max(
-    ...HIT_FORMATIONS.map((_, i) => {
-      const { bottom, top } = packBand(i + 1, walkerFootY);
-      return bottom - top;
-    }),
-  );
 }

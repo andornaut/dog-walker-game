@@ -8,19 +8,28 @@ export interface Box {
   readonly top: number;
 }
 
-// One dog's hit box. The walker has none.
+// One dog's hit rectangle: inside its drawn sprite, on the road.
 export interface DogBox<Dog extends string = string> extends Box {
   readonly dog: Dog;
 }
 
-// The pack's vertical band in screen pixels, from the lead dog's box to the last dog's.
+// The pack on the road: its outline, the bounding box of everything drawn for it (the walker,
+// the dogs and the leashes between them), which pickups touch; and its parts' hit rectangles,
+// each dog's in pack order and the walker's, which obstacles touch. A leash is not hit.
+export interface PackBoxes<Dog extends string = string> {
+  readonly dogs: readonly DogBox<Dog>[];
+  readonly outline: Box;
+  readonly walker: Box;
+}
+
+// The pack's band down the road, from its outline's top to its bottom.
 export interface PackBand {
   readonly bottom: number;
   readonly top: number;
 }
 
-// Whether an item's hit box, y to y + height, overlaps the pack's band, where it can touch a
-// dog's box: from when its near edge passes the band's top until its far edge passes the
+// Whether an item's hit box, y to y + height, overlaps the pack's band, where it can touch the
+// pack's outline: from when its near edge passes the band's top until its far edge passes the
 // band's bottom.
 export function levelWithPack(pack: PackBand, item: Pick<RoadItem, "height" | "y">): boolean {
   return item.y + item.height > pack.top && item.y < pack.bottom;
@@ -44,9 +53,74 @@ export function itemBox(
   };
 }
 
-// The dogs whose boxes overlap the box, in pack order.
-export function dogsTouching<Dog extends string>(dogs: readonly DogBox<Dog>[], box: Box): Dog[] {
-  return dogs.flatMap((dog) => (overlaps(dog, box) ? [dog.dog] : []));
+// The bounding box of boxes.
+export function boundingBox(boxes: readonly Box[]): Box {
+  return {
+    bottom: Math.max(...boxes.map(({ bottom }) => bottom)),
+    left: Math.min(...boxes.map(({ left }) => left)),
+    right: Math.max(...boxes.map(({ right }) => right)),
+    top: Math.min(...boxes.map(({ top }) => top)),
+  };
+}
+
+// The squared distance from a point to a box, 0 inside it.
+function distanceSquared(box: Box, point: { x: number; y: number }): number {
+  const dx = Math.max(box.left - point.x, 0, point.x - box.right);
+  const dy = Math.max(box.top - point.y, 0, point.y - box.bottom);
+  return dx * dx + dy * dy;
+}
+
+// The point of contact: the middle of where the box overlaps the pack's outline.
+function contactPoint(outline: Box, box: Box): { x: number; y: number } {
+  return {
+    x: (Math.max(outline.left, box.left) + Math.min(outline.right, box.right)) / 2,
+    y: (Math.max(outline.top, box.top) + Math.min(outline.bottom, box.bottom)) / 2,
+  };
+}
+
+// Of the dogs, the one whose rectangle is nearest the point, the first in pack order on a tie.
+function nearestOf<Dog extends string>(
+  dogs: readonly DogBox<Dog>[],
+  point: { x: number; y: number },
+): DogBox<Dog> | undefined {
+  let nearest: { distance: number; dog: DogBox<Dog> } | undefined;
+  for (const dog of dogs) {
+    const distance = distanceSquared(dog, point);
+    if (nearest === undefined || distance < nearest.distance) {
+      nearest = { distance, dog };
+    }
+  }
+  return nearest?.dog;
+}
+
+// The dog a pickup touching the pack's outline goes to: the dog whose rectangle is nearest the
+// point of contact, or the front dog, the first in pack order, when the walker's is nearer.
+// null when the box does not touch the outline, or the pack has no dogs.
+export function pickupDog<Dog extends string>(pack: PackBoxes<Dog>, box: Box): Dog | null {
+  const [front] = pack.dogs;
+  if (front === undefined || !overlaps(pack.outline, box)) {
+    return null;
+  }
+  const point = contactPoint(pack.outline, box);
+  const nearest = nearestOf(pack.dogs, point) ?? front;
+  return distanceSquared(pack.walker, point) < distanceSquared(nearest, point)
+    ? front.dog
+    : nearest.dog;
+}
+
+// The dog an obstacle hits: the dog whose rectangle it touches, the one nearest the point of
+// contact of those it touches; or the front dog when it touches only the walker's. null when it
+// touches no part, even inside the outline, or the pack has no dogs.
+export function hitDog<Dog extends string>(pack: PackBoxes<Dog>, box: Box): Dog | null {
+  const [front] = pack.dogs;
+  if (front === undefined) {
+    return null;
+  }
+  const touched = pack.dogs.filter((dog) => overlaps(dog, box));
+  if (touched.length === 0) {
+    return overlaps(pack.walker, box) ? front.dog : null;
+  }
+  return (nearestOf(touched, contactPoint(pack.outline, box)) ?? front).dog;
 }
 
 // graced picks the items, such as obstacles, ignored while the window is open; other items,
@@ -58,9 +132,9 @@ export interface CollisionRules<Item extends RoadItem> {
   startsInvulnerability: (item: Item) => boolean;
 }
 
-// An item hit, with the dogs whose boxes touch it.
+// An item hit, with the dog the touch lands on.
 export interface Hit<Item extends RoadItem, Dog extends string> {
-  readonly dogs: readonly Dog[];
+  readonly dog: Dog;
   readonly item: Item;
 }
 
@@ -72,17 +146,19 @@ export interface CollisionResult<Item extends RoadItem, Dog extends string> {
 }
 
 // Items nearest the bottom are hit first, so of two obstacles touching at once only the
-// lower one is hit; the window it opens lets the other pass. An item is hit when any dog's
-// box overlaps it, by touching.
+// lower one is hit; the window it opens lets the other pass. An item is hit when it touches the
+// pack's box: touching gives the dog the touch lands on, or null for none.
 export function collideWithPack<Item extends RoadItem, Dog extends string>(
   rules: CollisionRules<Item>,
-  touching: (item: Item) => readonly Dog[],
+  touching: (item: Item) => Dog | null,
   invulnerableSeconds: number,
   items: readonly Item[],
 ): CollisionResult<Item, Dog> {
   const touched = items
-    .map((item) => ({ dogs: touching(item), item }))
-    .filter(({ dogs }) => dogs.length > 0)
+    .flatMap((item) => {
+      const dog = touching(item);
+      return dog === null ? [] : [{ dog, item }];
+    })
     .sort((a, b) => b.item.y + b.item.height - (a.item.y + a.item.height));
   const hits: Hit<Item, Dog>[] = [];
   let windowSeconds = invulnerableSeconds;

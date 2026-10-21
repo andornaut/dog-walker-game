@@ -1,5 +1,12 @@
 import { ROAD_HIT_SIZE } from "../assets/spriteKeys";
-import { packBand, tallestPackBand } from "../layout/packFormation";
+import {
+  packOnRoad,
+  packOutline,
+  type PackSprites,
+  PART_INSET,
+  type PartBox,
+  tallestPackLength,
+} from "../layout/packFormation";
 import { type RoadCamera, type RoadProjection, roadProjection } from "../layout/projection";
 import type { Rect } from "../layout/rect";
 import type { RoadGeometry } from "./walk";
@@ -32,25 +39,33 @@ export function walkProjection(camera: RoadCamera, road: Rect): RoadProjection {
 }
 
 // A footprint row is a lane-width of road, so a cell is square. The road runs from the
-// walker's feet to the far edge of the projected road in view, where spawns come into view.
+// walker's feet to the far edge of the projected road in view, where spawns come into view. The
+// pack's hit rectangles, outline and band are those of this walker and these dogs.
 export function walkGeometry(
   laneCount: number,
-  dogCount: number,
-  view: Pick<RoadProjection, "visibleDistance">,
+  pack: PackSprites,
+  projection: Pick<RoadProjection, "focal" | "footY" | "horizonY" | "visibleDistance">,
   road: Rect,
 ): RoadGeometry {
   const footY = walkerFootY(road);
-  const tallest = tallestPackBand(footY);
-  const bandBottom = packBand(1, footY).bottom;
-  const roadTop = footY - view.visibleDistance;
+  const tallest = tallestPackLength(projection);
+  const parts = packOnRoad(projection, PART_INSET, pack);
+  const along = (part: PartBox): PartBox => ({
+    ...part,
+    bottom: footY + part.bottom,
+    top: footY + part.top,
+  });
+  const outline = along(packOutline(packOnRoad(projection, 0, pack)));
+  const roadTop = footY - projection.visibleDistance;
   return {
     cell: { inset: footprintInset(road.width / laneCount), length: road.width / laneCount },
     itemHeights: ITEM_HEIGHTS,
     laneCount,
-    packBand: packBand(dogCount, footY),
+    packBand: { bottom: outline.bottom, top: outline.top },
+    packParts: { dogs: parts.dogs.map(along), outline, walker: along(parts.walker) },
     roadBottom: road.y + road.height,
     roadTop,
-    sightLength: bandBottom - tallest - roadTop,
+    sightLength: outline.bottom - tallest - roadTop,
     tallestPackBand: tallest,
     walkerFootY: footY,
   };

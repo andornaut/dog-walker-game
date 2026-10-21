@@ -34,6 +34,7 @@ import {
   takeDueInputs,
 } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
+import type { PackSprites } from "../layout/packFormation";
 import { screenLayout } from "../layout/screenLayout";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
@@ -41,10 +42,11 @@ import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices
 import { modifiersOf, modifierValue } from "../rules/modifiers";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
-import { mapPack } from "../state/pack";
+import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
 import { type HopMovement, hoppingInstead, sharedWorld } from "../testing/movers";
+import { testPack } from "../testing/packGeometry";
 import { activeModifier, heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -120,10 +122,11 @@ const data = {
 const REAL = { ...data, tuning: TUNING, world: WORLD };
 type Real = Omit<typeof REAL, "world"> & { world: World };
 const ZONE_IDS = WORLD.zones.map(({ id }) => id);
-// The game's road, as RunScene lays it out for a pack of three.
+// The game's road, as RunScene lays it out for realRun's pack.
 const GAME_ROAD = (() => {
   const road = screenLayout(SCREEN_CONFIG).road;
-  return walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
+  const pack: PackSprites = { dogs: ["duchess", "biscuit", "koda"], walker: DEFAULT_WALKER };
+  return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
 const ROAD_LENGTH = GAME_ROAD.roadBottom - GAME_ROAD.roadTop;
 // A pack half again as tall as the game's three, as a taller pack box would make it.
@@ -284,7 +287,7 @@ const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
   itemHeights: { lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
-  packBand: { bottom: 630, top: 554 },
+  ...testPack(634),
   roadBottom: 640,
   roadTop: 40,
   sightLength: 514,
@@ -699,14 +702,34 @@ describe("stepWalk", () => {
     expect(heartsByDog(step(muddy).walk.run).koda).toBe((heartsByDog(walk.run).koda ?? 0) - bump);
   });
 
-  // The pack's first dog leads; a head-on hit lands on it, a side hit mid-move on the dog
-  // touching it.
-  it.each<[string, PackDogs, (walk: Walk) => Walk, string]>([
-    ["head-on on the front dog", ["koda", "biscuit"], (walk) => walk, "koda"],
-    ["head-on on the front dog, whoever leads", ["biscuit", "koda"], (walk) => walk, "biscuit"],
-  ])("lands a plain hit %s", (_, dogs, place, dog) => {
-    const { bumps } = step(place(walkWith(dogs, [atPack("cone")])));
+  // The game sets the pack's formation: the biggest dog leads, ties in roster order, whatever
+  // order the dogs were picked in, and a head-on hit lands on the lead.
+  it.each<[string, PackDogs, string]>([
+    ["on the front dog", ["koda", "biscuit"], "koda"],
+    ["on the bigger dog, picked second", ["biscuit", "koda"], "koda"],
+    ["on the first in roster order of two of a size", ["pierre", "archie"], "archie"],
+  ])("lands a plain hit head-on %s", (_, dogs, dog) => {
+    const { bumps } = step(walkWith(dogs, [atPack("cone")]));
     expect(bumps.map((bump) => bump.dog)).toEqual([dog]);
+  });
+
+  // Two quick taps carry the pack from lane 2 to lane 0 within one long step: it ends the step
+  // clear of lane 1, and starts it clear too, so only its sweep across lane 1 meets what is there.
+  it.each<[string, WalkItem["kind"], (step: ReturnType<typeof stepWalk>) => number]>([
+    ["collects a tip", "tip", (step) => step.tips.length],
+    ["bumps into a cone", "cone", (step) => step.bumps.length],
+  ])("%s in a lane it crosses within one step", (_, kind, met) => {
+    const walk = walkWith(["koda", "biscuit"], [atPack(kind, 0, 1)]);
+    const steered = steerWalk(data, 5, -1, steerWalk(data, 5, -1, walk));
+    const step = stepWalk(
+      data,
+      geometry,
+      () => 0.99,
+      2.5 * laneMoveSeconds(data, walk.run),
+      steered,
+    );
+    expect(step.walk.road.control.motion).toEqual(stillInLane(0));
+    expect(met(step)).toBe(1);
   });
 
   it.each<[string, number, boolean]>([
@@ -741,9 +764,9 @@ describe("stepWalk", () => {
   it.each(["otherDog", "skunk", "thief"] as const)(
     "opens the %s's card for the whole pack",
     (encounter) => {
-      const dogs: PackDogs = ["koda", "duchess", "pierre"];
-      expect(step(walkWith(dogs, [atPack(encounter)])).encounterHits).toEqual([
-        { affected: dogs, encounter, kind: "encounter" },
+      const walk = walkWith(["koda", "duchess", "pierre"], [atPack(encounter)]);
+      expect(step(walk).encounterHits).toEqual([
+        { affected: packDogs(walk.run), encounter, kind: "encounter" },
       ]);
     },
   );
@@ -1054,8 +1077,8 @@ describe("hit stop", () => {
   });
 
   it("replays lane moves, card choices and heading home to the same final state", () => {
-    const setup = { dev: true, seed: 8, speed: 1, zone: 1 };
-    const start = planZone(data, geometry, seededRandom(8), walkWith(["koda", "duchess"]));
+    const setup = { dev: true, seed: 1, speed: 1, zone: 1 };
+    const start = planZone(data, geometry, seededRandom(1), walkWith(["koda", "duchess"]));
     const homeFrame = 60 * 25;
     // As RunScene steps: the inputs due now, each logged at the run time it is applied, then
     // the walk, then each card it opened, chosen and logged at the run time after the step.

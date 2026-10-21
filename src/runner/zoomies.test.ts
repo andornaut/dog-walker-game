@@ -16,9 +16,11 @@ import { planZone, startRoad, steerWalk, stepWalk, type Walk, type WalkItem } fr
 import { walkGeometry, walkProjection } from "./walkGeometry";
 import { hasZoomies, stepZoomies } from "./zoomies";
 
+// The game's road for the pack of three the drift test walks; walkIn's lone Koda leads it.
 const ROAD = (() => {
   const road = screenLayout(SCREEN_CONFIG).road;
-  return walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
+  const pack = { dogs: ["koda", "biscuit", "duchess"], walker: "casey" } as const;
+  return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
 })();
 const EVERY = read(gameData.tuning, "seconds", "zoomiesDriftSeconds");
 // Steps between the test player's steers, a little over three drifts.

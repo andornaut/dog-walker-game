@@ -14,14 +14,15 @@ import { walkGeometry, walkProjection } from "./walkGeometry";
 const data = gameData;
 const { tuning } = data;
 const DEBUFF_IDS = Object.keys(data.debuffs) as DebuffId[];
-const GEOMETRY = (() => {
-  const road = screenLayout(SCREEN_CONFIG).road;
-  return walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
-})();
-const STEP = 1 / 60;
 const PACK = Object.fromEntries(
   (Object.keys(data.dogs) as DogId[]).slice(0, 2).map((dog) => [dog, 5]),
 );
+const GEOMETRY = (() => {
+  const road = screenLayout(SCREEN_CONFIG).road;
+  const pack = { dogs: Object.keys(PACK) as DogId[], walker: data.defaultWalker };
+  return walkGeometry(LANE_COUNT, pack, walkProjection(ROAD_CAMERA, road), road);
+})();
+const STEP = 1 / 60;
 const noRandom = () => 0;
 
 const withDebuffs = (run: RunState, ids: readonly DebuffId[]): RunState =>

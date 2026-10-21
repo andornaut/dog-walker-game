@@ -3,15 +3,16 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { ENCOUNTERS } from "../data/encounters";
 import { MINOR_OBSTACLES } from "../data/minorObstacles";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
 import { testState } from "../testing/runState";
-import { dogsTouching, itemBox } from "./collision";
+import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
-import { dogBoxes, itemHeight, type WalkItemKind } from "./walk";
-import { walkGeometry, walkProjection } from "./walkGeometry";
+import { screenRoadGeometry } from "./screenGeometry";
+import { itemHeight, packBoxes, type WalkItemKind } from "./walk";
+import { walkProjection } from "./walkGeometry";
 
 const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
 const LAYOUT = screenLayout(SCREEN_CONFIG);
@@ -35,17 +36,19 @@ describe("screenRoadGeometry", () => {
   it.each(CASES)(
     "hits %s only while its far edge is drawn in view, not below a pack of %i",
     (kind, dogs) => {
-      const geometry = walkGeometry(LANE_COUNT, dogs, PROJECTION, LAYOUT.road);
-      const height = itemHeight(DATA, geometry, kind);
       const slots = Object.fromEntries(
         (Object.keys(gameData.dogs) as DogId[]).slice(0, dogs).map((dog) => [dog, 3]),
       );
-      const boxes = dogBoxes(geometry, stillInLane(0), testState(slots));
+      const run = testState(slots);
+      const geometry = screenRoadGeometry(run);
+      const height = itemHeight(DATA, geometry, kind);
+      const pack = packBoxes(geometry, stillInLane(0), run);
       const hitRows: number[] = [];
       // From where the item spawns until it has scrolled off the road and is dropped.
       for (let y = geometry.roadTop - height; y < geometry.roadBottom; y += SCROLL_STEP) {
         const item = { height, id: 0, kind, lane: 0, laneSpan: 1, y };
-        if (dogsTouching(boxes, itemBox(geometry.cell, item)).length > 0) {
+        const box = itemBox(geometry.cell, item);
+        if (hitDog(pack, box) !== null || pickupDog(pack, box) !== null) {
           // Its far edge as the item views draw it, through the projection.
           hitRows.push(screenYAt(PROJECTION, PROJECTION.footY - y));
         }
@@ -55,4 +58,12 @@ describe("screenRoadGeometry", () => {
       expect(Math.max(...hitRows)).toBeLessThanOrEqual(PROJECTION.footY);
     },
   );
+
+  it("is the run's own pack's, one per walker and dogs", () => {
+    const run = testState({ duchess: 3, koda: 3 });
+    const other = { ...run, walker: "trista" } as const;
+    expect(screenRoadGeometry(run)).toBe(screenRoadGeometry({ ...run }));
+    expect(screenRoadGeometry(other)).not.toBe(screenRoadGeometry(run));
+    expect(screenRoadGeometry(run).packParts.dogs).toHaveLength(2);
+  });
 });

@@ -1,5 +1,4 @@
 import { itemAt } from "../arrays";
-import { ROAD_HIT_SIZE } from "../assets/spriteKeys";
 import type {
   DogId,
   EncounterId,
@@ -10,7 +9,7 @@ import type {
   Tuning,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { dogHitCentre, hitPackPlacements } from "../layout/packFormation";
+import { formationOrder } from "../layout/packFormation";
 import { countBump, countTally } from "../rules/achievements";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
@@ -38,8 +37,11 @@ import {
   collideWithPack,
   type CollisionRules,
   type DogBox,
-  dogsTouching,
+  hitDog,
   itemBox,
+  overlaps,
+  type PackBoxes,
+  pickupDog,
   tickInvulnerability,
 } from "./collision";
 import { STEP_SECONDS } from "./fixedStep";
@@ -114,8 +116,11 @@ export interface Walk {
 }
 
 // Flat road pixels, where y grows toward the walker and the pack stands at scale 1, before
-// the pseudo-3D projection draws them. packBand is the current pack's; tallestPackBand is any
-// pack's, so spawns stay avoidable whoever walks. An obstacle's footprint is cell.length per
+// the pseudo-3D projection draws them. packParts are the current pack's, across from its place
+// on the road: each dog's hit rectangle in pack order and the walker's, inside their drawn
+// sprites, which obstacles hit; and its outline, the bounding box of everything drawn for it,
+// which pickups touch. packBand is the outline's rows. tallestPackBand is the longest any pack's
+// outline runs, so spawns stay avoidable whoever walks. An obstacle's footprint is cell.length per
 // lane and row, and its hit box the footprint less cell.inset at each end; itemHeights are
 // everything else's. roadTop is the far edge of the road in view, where spawns come into
 // view, and sightLength the road in view above the tallest pack.
@@ -124,6 +129,7 @@ export interface RoadGeometry {
   itemHeights: Readonly<Record<"lucky" | PickupKind, number>>;
   laneCount: number;
   packBand: { bottom: number; top: number };
+  packParts: { dogs: readonly Box[]; outline: Box; walker: Box };
   roadBottom: number;
   roadTop: number;
   sightLength: number;
@@ -667,23 +673,40 @@ function packX(cellLength: number, laneCount: number, motion: LaneMotion): numbe
   return laneMotionX(centres, motion);
 }
 
-// Each walking dog's hit box, in pack order: a ROAD_HIT_SIZE square centred on its place in the
-// hit formation around the pack's place on the road.
-export function dogBoxes(
-  geometry: Pick<RoadGeometry, "cell" | "laneCount" | "walkerFootY">,
+// The pack's outline and hit rectangles swept across the road from its place in one motion to
+// its place in another: each spans every place between, so a quick lane change passes nothing
+// by between two steps. The walking dogs' rectangles are in pack order.
+export function sweptPackBoxes(
+  geometry: Pick<RoadGeometry, "cell" | "laneCount" | "packParts">,
+  from: LaneMotion,
+  to: LaneMotion,
+  run: Pick<RunState, "pack">,
+): PackBoxes<DogId> {
+  const fromX = packX(geometry.cell.length, geometry.laneCount, from);
+  const toX = packX(geometry.cell.length, geometry.laneCount, to);
+  const across = (part: Box): Box => ({
+    ...part,
+    left: Math.min(fromX, toX) + part.left,
+    right: Math.max(fromX, toX) + part.right,
+  });
+  const { packParts } = geometry;
+  return {
+    dogs: formationOrder(packDogs(run)).map((dog, index): DogBox<DogId> => ({
+      ...across(itemAt(packParts.dogs, index)),
+      dog,
+    })),
+    outline: across(packParts.outline),
+    walker: across(packParts.walker),
+  };
+}
+
+// The pack's outline and hit rectangles at its place on the road.
+export function packBoxes(
+  geometry: Pick<RoadGeometry, "cell" | "laneCount" | "packParts">,
   motion: LaneMotion,
   run: Pick<RunState, "pack">,
-): DogBox<DogId>[] {
-  const dogs = packDogs(run);
-  const placements = hitPackPlacements(dogs.length);
-  const x = packX(geometry.cell.length, geometry.laneCount, motion);
-  const half = ROAD_HIT_SIZE / 2;
-  return dogs.map((dog, index): DogBox<DogId> => {
-    const centre = dogHitCentre(itemAt(placements, index));
-    const cx = x + centre.dx;
-    const cy = geometry.walkerFootY + centre.dy;
-    return { bottom: cy + half, dog, left: cx - half, right: cx + half, top: cy - half };
-  });
+): PackBoxes<DogId> {
+  return sweptPackBoxes(geometry, motion, motion, run);
 }
 
 // An item's hit box on the road: a mover's from its continuous place across the lanes, so one
@@ -705,11 +728,9 @@ function dodges(data: Pick<GameData, "dogs" | "tuning">, random: Random, dog: Do
   );
 }
 
-// The dog a hit or a grab lands on. While the pack changes lanes, a side hit lands on the dog
-// touching it, the front one of those touching; otherwise, head-on, on the front dog, the
-// first walking dog in pack order. touching is in pack order.
-function landsOn(motion: LaneMotion, run: RunState, touching: readonly DogId[]): DogId {
-  const [front] = motion.kind === "moving" && touching.length > 0 ? touching : packDogs(run);
+// The front dog, the first walking dog in formation order.
+function frontDog(run: RunState): DogId {
+  const [front] = formationOrder(packDogs(run));
   if (front === undefined) {
     throw new Error("A hit needs a walking dog");
   }
@@ -813,8 +834,9 @@ export function stepWalk(
     stepSeconds,
     road.control,
   );
-  const boxes = dogBoxes(geometry, control.motion, run);
-  const touching = (item: WalkItem) => dogsTouching(boxes, walkItemBox(geometry, item));
+  // Swept from where the last step left the pack to where this one leaves it.
+  const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
+  const touching = (item: WalkItem) => hitDog(pack, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
   // A pull obstacle, such as a squirrel, passes through the pack: touching it does nothing.
   const passing = solid.filter((item) => isPullObstacle(data, item.kind));
@@ -824,17 +846,16 @@ export function stepWalk(
     invulnerable,
     passing.length === 0 ? solid : solid.filter((item) => !passing.includes(item)),
   );
-  // A pickup reached past its lanes, by Long reach, goes to the front dog: its dogs are only
-  // those touching it in its own lanes.
-  const pickupsHit = pickups.flatMap((item): { dogs: DogId[]; item: WalkItem }[] => {
+  // A pickup reached past its lanes, by Long reach, goes to the front dog.
+  const pickupsHit = pickups.flatMap((item): { dog: DogId; item: WalkItem }[] => {
     const reach = pickupReach(data, run, item.kind as PickupKind) * geometry.cell.length;
     const box: Box = walkItemBox(geometry, item);
-    const reached = dogsTouching(boxes, {
+    const reached = overlaps(pack.outline, {
       ...box,
       left: box.left - reach,
       right: box.right + reach,
     });
-    return reached.length === 0 ? [] : [{ dogs: touching(item), item }];
+    return reached ? [{ dog: pickupDog(pack, box) ?? frontDog(run), item }] : [];
   });
 
   // Timed debuffs count down on walking steps only, so a hit stop or a card holds them.
@@ -847,7 +868,7 @@ export function stepWalk(
   const instants: InstantFind[] = [];
   const tips: MoneyChange[] = [];
   const treats: TreatGrab[] = [];
-  for (const { dogs, item } of [...hits, ...pickupsHit]) {
+  for (const { dog, item } of [...hits, ...pickupsHit]) {
     const { kind } = item;
     if (kind === "tip") {
       const pickup = collectTip(data, nextRun);
@@ -855,13 +876,12 @@ export function stepWalk(
       tips.push(pickup.tip);
       collected.push(item);
     } else if (kind === "treat") {
-      const dog = treatRecipient(data, nextRun, landsOn(control.motion, nextRun, dogs));
-      const grab = grabTreat(data, dog, countTally("treats", nextRun));
+      const recipient = treatRecipient(data, nextRun, dog);
+      const grab = grabTreat(data, recipient, countTally("treats", nextRun));
       nextRun = grab.state;
-      treats.push({ change: grab.change, dog, item });
+      treats.push({ change: grab.change, dog: recipient, item });
       collected.push(item);
     } else if (isMinorObstacle(data, kind)) {
-      const dog = landsOn(control.motion, nextRun, dogs);
       if (dodges(data, random, dog)) {
         nextRun = countTally("dodges", nextRun);
         bumps.push({ change: null, dodged: true, dog, item });

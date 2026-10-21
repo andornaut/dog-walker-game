@@ -1468,8 +1468,8 @@ export class StartScene extends Scene {
       });
       const state = itemTileState(tile);
       const { content, look, view } = this.selectTile(root, `dog:${id}`, rect, {
-        // A picked dog's badge is its place in the pick order.
-        badge: String(this.loadout.dogs.indexOf(id) + 1),
+        // A picked dog wears a tick: the game sets the pack's order by the dogs' sizes.
+        badge: "tick",
         edge: true,
         state,
         tile: true,

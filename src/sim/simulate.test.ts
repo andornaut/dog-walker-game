@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { zoneAt } from "../rules/route";
 import { payFor } from "../rules/run";
 import { roundDollars } from "../rules/units";
+import { packOrder } from "../state/pack";
 import type { PackDogs } from "../state/runState";
 import type { PolicyId } from "./policies";
 import { type RunResult, type SimConfig, simulateRun } from "./simulate";
@@ -112,7 +113,7 @@ describe("simulateRun", { timeout: 30_000 }, () => {
         const gone = result.firings
           .filter((firing) => firing.zoneIndex <= zone.zoneIndex)
           .map((firing) => firing.dog);
-        const walking = RISKY.filter((dog) => !gone.includes(dog));
+        const walking = packOrder(gameData.dogs, RISKY).filter((dog) => !gone.includes(dog));
         const { fees } = zoneAt(gameData, result.route, zone.zoneIndex);
 
         expect(zone.fees.map((fee) => fee.dog)).toEqual(walking);

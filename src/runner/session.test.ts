@@ -1,15 +1,18 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { WalkerId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { cardFor, openCard } from "../rules/choices";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
-import { type CardSource, newRun } from "../state/runState";
+import { type CardSource, newRun, type PackDogs } from "../state/runState";
+import { testPack } from "../testing/packGeometry";
 import { STEP_SECONDS } from "./fixedStep";
 import { laneControlIn } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import { NO_PULLS, type Strain } from "./pulls";
+import { screenRoadGeometry } from "./screenGeometry";
 import {
   chooseCard,
   chooseShownCard,
@@ -21,7 +24,7 @@ import {
   startSession,
   stepSession,
 } from "./session";
-import { type RoadGeometry, startRoad, type WalkItem, zoneLength } from "./walk";
+import { itemHeight, type RoadGeometry, startRoad, type WalkItem, zoneLength } from "./walk";
 
 const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
 const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encounter" };
@@ -29,7 +32,7 @@ const GEOMETRY: RoadGeometry = {
   cell: { inset: 12, length: 56 },
   itemHeights: { lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
-  packBand: { bottom: 630, top: 554 },
+  ...testPack(634),
   roadBottom: 640,
   roadTop: 40,
   sightLength: 514,
@@ -291,5 +294,86 @@ describe("chooseShownCard", () => {
     const step = chooseShownCard(gameData, runStreams(1), geometry, view, choice, skunk);
     expect(kinds(step.events)[0]).toBe("chosen");
     expect(step.session.card).toBeNull();
+  });
+});
+
+describe("quick lane changes across a row", () => {
+  // The game's road for the pack, the pack in the first lane and a row of kind in lanes, the
+  // row's near edge just reaching the top of the pack's outline: the drawn pack meets the row as
+  // it steers across.
+  const crossing = (
+    walker: WalkerId,
+    dogs: PackDogs,
+    kind: "cone" | "tip",
+    lanes: readonly number[],
+  ): Session => {
+    const run = newRun(gameData, 3, { dogs, gear: null, walker });
+    const session = emptyRoad(
+      startSession(gameData, runStreams(1), screenRoadGeometry, { road: startRoad(5), run }),
+    );
+    const road = screenRoadGeometry(run);
+    const height = itemHeight(gameData, road, kind);
+    const items = lanes.map((lane, id) => ({
+      height,
+      id,
+      kind,
+      lane,
+      laneSpan: 1,
+      y: road.packBand.top - height + 1,
+    }));
+    const control = laneControlIn(stillInLane(0));
+    return {
+      ...session,
+      walk: { ...session.walk, road: { ...session.walk.road, control, items } },
+    };
+  };
+
+  // A tap every other step, as quick as a thumb taps, until the pack is taps lanes over, then
+  // steps until the row has passed: every tip in a lane it passes is collected, and a cone in a
+  // lane it passes is hit.
+  it.each<[string, WalkerId, PackDogs, "cone" | "tip", number, number[]]>([
+    [
+      "three dogs across tips in three lanes",
+      "casey",
+      ["koda", "biscuit", "zippy"],
+      "tip",
+      3,
+      [1, 2, 3],
+    ],
+    ["two dogs across tips in two lanes", "ada", ["duchess", "snowball"], "tip", 2, [1, 2]],
+    ["one dog across tips in two lanes", "trista", ["nugget"], "tip", 2, [1, 2]],
+    [
+      "three dogs past a cone two lanes back",
+      "casey",
+      ["koda", "biscuit", "zippy"],
+      "cone",
+      3,
+      [1],
+    ],
+    ["one dog past a cone a lane back", "trista", ["nugget"], "cone", 2, [1]],
+  ])("meets the row in every lane it passes: %s", (_, walker, dogs, kind, taps, lanes) => {
+    let session = crossing(walker, dogs, kind, lanes);
+    const met: number[] = [];
+    const right: SessionInput = { direction: 1, kind: "lane" };
+    for (let frame = 0; frame < 90; frame++) {
+      const inputs = frame % 2 === 0 && frame < taps * 2 ? [right] : [];
+      const { events, session: next } = stepSession(
+        gameData,
+        runStreams(1),
+        screenRoadGeometry,
+        STEP_SECONDS,
+        inputs,
+        session,
+      );
+      for (const event of events) {
+        if (event.kind === "walked") {
+          const { bumps, collected } = event.step;
+          met.push(...[...collected, ...bumps.map(({ item }) => item)].map(({ lane }) => lane));
+        }
+      }
+      session = next;
+    }
+    expect(met).toEqual(lanes);
+    expect(session.walk.road.control.motion).toEqual({ kind: "still", lane: taps });
   });
 });

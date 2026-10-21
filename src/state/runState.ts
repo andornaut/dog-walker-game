@@ -18,7 +18,7 @@ import { modifiedStat } from "../rules/modifiers";
 import { firstZoneId } from "../rules/route";
 import { type Cents, cents, type Hearts, type Pixels, pixels, read } from "../rules/units";
 import { walkerEffects } from "../rules/walkers";
-import { packFor } from "./pack";
+import { packFor, packOrder } from "./pack";
 
 // A run in progress. Plain JSON throughout: arrays for sets, records for maps, numbers for
 // units, so a slice of it can be saved and loaded as it is.
@@ -157,7 +157,7 @@ export function newRun(
         hearts: startHearts(data.tuning, modifiers, data.dogs[dog]),
         status: "walking",
       }),
-      loadout.dogs,
+      packOrder(data.dogs, loadout.dogs),
     );
   const { walker } = loadout;
   const empty: RunState = {

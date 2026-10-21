@@ -12,6 +12,7 @@ import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
 import { newRun, type PackDogs } from "../state/runState";
+import { testPack } from "../testing/packGeometry";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { isSteeringLocked, laneControlIn } from "./laneControl";
@@ -72,7 +73,7 @@ const geometry: RoadGeometry = {
   cell: { inset: 12, length: 56 },
   itemHeights: { lucky: 20, tip: 12, treat: 12 },
   laneCount: 5,
-  packBand: { bottom: 630, top: 554 },
+  ...testPack(634),
   roadBottom: 640,
   roadTop: 40,
   sightLength: 514,
@@ -186,17 +187,17 @@ describe("what a dog pulls toward", () => {
     expect(after(walkWith(["koda"], [item("squirrel", 0, 0, 600)]), 1.5).tells).toEqual([]);
   });
 
-  // Of two dogs, the first walks on the left and the second on the right.
+  // Of three dogs, the biggest leads, the next walks front-left and the smallest front-right.
   it("strains one dog at a time, the one nearest the squirrel, each squirrel once", () => {
     const walk = walkWith(
-      ["biscuit", "koda"],
+      ["zippy", "biscuit", "koda"],
       [item("squirrel", 0, 0), item("squirrel", 1, 4, 60)],
     );
     const { pulled, tells } = after(walk, 4);
-    expect(tells.map(({ dog }) => dog)).toEqual(["biscuit", "koda"]);
+    expect(tells.map(({ dog }) => dog)).toEqual(["biscuit", "zippy"]);
     expect(pulled.map(({ direction, dog }) => [dog, direction])).toEqual([
       ["biscuit", -1],
-      ["koda", 1],
+      ["zippy", 1],
     ]);
   });
 
@@ -260,8 +261,10 @@ describe("the fairness rule", () => {
       ["koda"],
       [{ ...item("ball", 0, 0, 0), mover: { path: crosser, since: 50 } }],
     );
+    // The pack's band from 554 to 630.
+    const banded = { ...geometry, packBand: { bottom: 630, top: 554 } };
     const blocked = (lane: number, horizon: number) =>
-      laneBlockedWithin(data, geometry, 80, horizon, lane, walk);
+      laneBlockedWithin(data, banded, 80, horizon, lane, walk);
 
     it("blocks the lanes a mover sweeps while it overlaps the pack within the horizon", () => {
       // Over 1s it travels 80px, overlapping the band from 14px on, in lanes 1 to 4.

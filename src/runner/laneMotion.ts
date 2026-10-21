@@ -44,11 +44,6 @@ export function turnAround(motion: MovingLaneMotion): LaneMotion {
   };
 }
 
-// Mid-move the pack spans both lanes, so it can hit things in either.
-export function occupiedLanes(motion: LaneMotion): number[] {
-  return motion.kind === "still" ? [motion.lane] : [motion.from, motion.to];
-}
-
 // The lane the pack is in, or heading to.
 export function destinationLane(motion: LaneMotion): number {
   return motion.kind === "still" ? motion.lane : motion.to;

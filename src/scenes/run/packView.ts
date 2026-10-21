@@ -7,8 +7,10 @@ import { gameData } from "../../data";
 import type { DogId } from "../../data/types";
 import {
   COLLAR_HEIGHTS,
+  formationOrder,
   leashHand,
   PACK_DEPTH,
+  packDogOf,
   packPlacements,
   tautLeashLine,
 } from "../../layout/packFormation";
@@ -130,19 +132,17 @@ export class PackView {
     });
   }
 
-  // The walker stands on the feet line at scale 1; each dog's feet stand its place in the drawn
-  // formation up the screen, across the road where the projection puts that row. While the
-  // walk is held, they stand idle.
+  // The walker stands on the feet line at scale 1; each dog's feet stand its place in the
+  // formation, up the screen and across from where the projection puts the walker's lane on that
+  // row, so the pack is drawn as it collides. Lower feet are drawn in front. While the walk is
+  // held, they stand idle.
   draw(walk: Walk, frame: PackFrame): void {
     const { halted, pulls, shadow, still } = frame;
     const { leash } = this;
     const walkerX = Math.round(laneMotionX(LANE_XS, walk.road.control.motion));
     const footY = PROJECTION.footY;
-    const walking = packDogs(walk.run);
-    const placements = packPlacements(
-      spriteMetrics(this.walker.key),
-      walking.map((dog) => spriteMetrics(dogSpriteKey(gameData, dog))),
-    );
+    const walking = formationOrder(packDogs(walk.run));
+    const placements = packPlacements(PROJECTION, walking.map(packDogOf));
     const leashColor = colorFromHex(currentZone(gameData, walk.run).leashColor);
     const taut = pulls.strain?.dog ?? null;
     const leashKey = `${walkerX}|${walking.join()}|${leashColor}|${taut}`;
@@ -165,15 +165,16 @@ export class PackView {
       }
       const placement = itemAt(placements, index);
       const distance = distanceAtY(PROJECTION, footY + placement.footDy);
-      const placed = project(PROJECTION, { distance, x: walkerX + placement.dx });
+      const placed = project(PROJECTION, { distance, x: walkerX });
       const drawn = showAtDepth(sprite, dogSpriteKey(gameData, dog), PACK_DEPTH);
-      const x = Math.round(placed.x);
+      const x = Math.round(placed.x + placement.dx);
       const dogFoot = Math.round(placed.y);
       this.poseDog(dog, sprite, drawn.key, pose, frame, {
         x,
         y: dogFoot - Math.round(spriteMetrics(drawn.key).feetY * drawn.scale),
       });
-      sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot);
+      // Of two dogs on one row, the later in formation order is drawn in front.
+      sprite.setPosition(x, dogFoot).setDepth(DEPTH.sprite + dogFoot + index / 1000);
       shadow(dogSpriteKey(gameData, dog), drawn.depth, x, dogFoot);
       if (redrawLeash) {
         const hand = leashHand(placement);

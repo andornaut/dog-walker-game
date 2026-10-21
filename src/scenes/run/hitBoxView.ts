@@ -1,22 +1,21 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { itemAt } from "../../arrays";
 import { project } from "../../layout/projection";
-import { occupiedLanes } from "../../runner/laneMotion";
+import { type Box, itemBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import type { Walk } from "../../runner/walk";
+import { packBoxes, type Walk } from "../../runner/walk";
 import { PALETTE } from "../palette";
-import { DEPTH, LANE_XS, PROJECTION } from "./stage";
+import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
 // Over every road sprite and burst, under the popups and banners.
 const HIT_BOX_DEPTH = DEPTH.fx + 1;
-const LANE_WIDTH = itemAt(LANE_XS, 1) - itemAt(LANE_XS, 0);
 // Rows behind the walker's feet are drawn no nearer than this, short of the projection's
 // focal point.
 const NEAREST_DISTANCE = -PROJECTION.focal / 2;
 
-// The dev panel's hit boxes cheat: the outline of the pack's band in each lane it occupies and
-// of every road item's hit box, drawn through the road's projection.
+// The dev panel's hit boxes cheat, drawn through the road's projection: the pack's outline,
+// which pickups touch, in green; its parts' hit rectangles, which obstacles hit, in yellow; and
+// every road item's hit box in red.
 export class HitBoxView {
   private readonly graphics: GameObjects.Graphics;
 
@@ -30,27 +29,30 @@ export class HitBoxView {
     if (!shown) {
       return;
     }
-    const { packBand } = screenRoadGeometry(walk.run);
+    const geometry = screenRoadGeometry(walk.run);
+    const pack = packBoxes(geometry, walk.road.control.motion, walk.run);
     graphics.lineStyle(1, PALETTE.green);
-    for (const lane of occupiedLanes(walk.road.control.motion)) {
-      this.box(lane, 1, packBand.top, packBand.bottom);
+    this.box(pack.outline);
+    graphics.lineStyle(1, PALETTE.yellow);
+    for (const part of [pack.walker, ...pack.dogs]) {
+      this.box(part);
     }
     graphics.lineStyle(1, PALETTE.red);
     for (const item of walk.road.items) {
-      this.box(item.lane, item.laneSpan, item.y, item.y + item.height);
+      this.box(itemBox(geometry.cell, item));
     }
   }
 
-  // A box across lanes from lane, between road rows top and bottom.
-  private box(lane: number, laneSpan: number, top: number, bottom: number): void {
+  // A box on the road, from its left edge across and down its rows.
+  private box({ bottom, left: boxLeft, right: boxRight, top }: Box): void {
     const { footY, visibleDistance } = PROJECTION;
     const near = Math.max(NEAREST_DISTANCE, footY - bottom);
     const far = Math.min(visibleDistance, footY - top);
     if (near >= far) {
       return;
     }
-    const left = itemAt(LANE_XS, lane) - LANE_WIDTH / 2;
-    const right = itemAt(LANE_XS, lane + laneSpan - 1) + LANE_WIDTH / 2;
+    const left = LAYOUT.road.x + boxLeft;
+    const right = LAYOUT.road.x + boxRight;
     const start = project(PROJECTION, { distance: near, x: left });
     const { graphics } = this;
     graphics.beginPath();

@@ -5,7 +5,6 @@ import {
   type LaneMotion,
   laneMotionX,
   type MovingLaneMotion,
-  occupiedLanes,
   startMove,
   stillInLane,
   turnAround,
@@ -52,15 +51,13 @@ describe("turnAround", () => {
   });
 });
 
-describe("occupiedLanes, destinationLane and laneMotionX", () => {
-  it("are the one lane and its centre while still", () => {
-    expect(occupiedLanes(stillInLane(2))).toEqual([2]);
+describe("destinationLane and laneMotionX", () => {
+  it("are the lane and its centre while still", () => {
     expect(destinationLane(stillInLane(1))).toBe(1);
     expect(laneMotionX(laneXs, stillInLane(4))).toBe(332);
   });
 
-  it("are both lanes, the lane moved to, and a point between the centres while moving", () => {
-    expect(occupiedLanes(moving(2, 1, 0.01))).toEqual([2, 1]);
+  it("are the lane moved to and a point between the centres while moving", () => {
     expect(destinationLane(moving(2, 3))).toBe(3);
     expect(laneMotionX(laneXs, moving(2, 3, 0.05))).toBeCloseTo(234);
     expect(laneMotionX(laneXs, moving(2, 1, 0.1))).toBeCloseTo(192);

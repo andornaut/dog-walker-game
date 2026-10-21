@@ -738,39 +738,6 @@
     ]
   },
   "pack": {
-    "bands": [
-      {
-        "drawn": {
-          "bottom": 488,
-          "top": 391
-        },
-        "hit": {
-          "bottom": 441,
-          "top": 401
-        }
-      },
-      {
-        "drawn": {
-          "bottom": 488,
-          "top": 387
-        },
-        "hit": {
-          "bottom": 444,
-          "top": 401
-        }
-      },
-      {
-        "drawn": {
-          "bottom": 488,
-          "top": 381
-        },
-        "hit": {
-          "bottom": 448,
-          "top": 400
-        }
-      }
-    ],
-    "clearance": 72,
     "collarHeights": {
       "archie": 20,
       "biscuit": 21,
@@ -782,40 +749,118 @@
       "snowball": 22,
       "zippy": 16
     },
-    "drawScale": 1.2,
-    "formations": [
-      [
-        {
-          "footDy": -72,
-          "side": 0
+    "feet": {
+      "lead": {
+        "big": -49,
+        "medium": -50,
+        "small": -54
+      },
+      "side": {
+        "big": -45,
+        "medium": -45,
+        "small": -48
+      },
+      "sideOfThreeBigs": -37,
+      "trioLead": {
+        "big big big": -53,
+        "big big medium": -60,
+        "big big small": -60,
+        "big medium medium": -52,
+        "big medium small": -52,
+        "big small small": -50,
+        "medium medium medium": -50,
+        "medium medium small": -56,
+        "medium small small": -50,
+        "small small small": -54
+      }
+    },
+    "laneHalfWidth": 32,
+    "partInset": 2,
+    "silhouettes": {
+      "dogs": {
+        "archie": {
+          "above": 39,
+          "left": -11,
+          "right": 12
+        },
+        "biscuit": {
+          "above": 38,
+          "left": -12,
+          "right": 12
+        },
+        "duchess": {
+          "above": 32,
+          "left": -10,
+          "right": 10
+        },
+        "koda": {
+          "above": 45,
+          "left": -15,
+          "right": 15
+        },
+        "nugget": {
+          "above": 31,
+          "left": -10,
+          "right": 10
+        },
+        "penny": {
+          "above": 42,
+          "left": -14,
+          "right": 14
+        },
+        "pierre": {
+          "above": 39,
+          "left": -13,
+          "right": 13
+        },
+        "snowball": {
+          "above": 46,
+          "left": -15,
+          "right": 15
+        },
+        "zippy": {
+          "above": 31,
+          "left": -9,
+          "right": 10
         }
+      },
+      "walkers": {
+        "ada": {
+          "above": 55,
+          "left": -15,
+          "right": 15
+        },
+        "ben": {
+          "above": 65,
+          "left": -17,
+          "right": 18
+        },
+        "casey": {
+          "above": 65,
+          "left": -17,
+          "right": 18
+        },
+        "trista": {
+          "above": 65,
+          "left": -17,
+          "right": 24
+        }
+      }
+    },
+    "slots": [
+      [
+        "lead"
       ],
       [
-        {
-          "footDy": -76,
-          "side": -1
-        },
-        {
-          "footDy": -72,
-          "side": 1
-        }
+        "left",
+        "right"
       ],
       [
-        {
-          "footDy": -82,
-          "side": 0
-        },
-        {
-          "footDy": -76,
-          "side": -1
-        },
-        {
-          "footDy": -72,
-          "side": 1
-        }
+        "lead",
+        "left",
+        "right"
       ]
     ],
-    "laneHalfWidth": 32,
     "walkerFootY": 494,
     "walkerHands": {
       "heightAboveFeet": 20,

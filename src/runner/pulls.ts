@@ -9,10 +9,10 @@ import { destinationLane } from "./laneMotion";
 import { laneAt, moverPlace } from "./movers";
 import {
   blocksLane,
-  dogBoxes,
   isPullObstacle,
   laneMotionConfig,
   laneMoveSeconds,
+  packBoxes,
   type RoadGeometry,
   type Walk,
   type WalkItem,
@@ -29,7 +29,7 @@ export type PullData = Pick<
 >;
 export type PullGeometry = Pick<
   RoadGeometry,
-  "cell" | "laneCount" | "packBand" | "roadTop" | "walkerFootY"
+  "cell" | "laneCount" | "packBand" | "packParts" | "roadTop" | "walkerFootY"
 >;
 
 export type PullTargetKind = "squirrel";
@@ -273,14 +273,12 @@ function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, wal
 
 const NOTHING = { blocked: [], failed: [], pulled: [], tells: [] } as const;
 
-// The walking dog whose hit box centre is nearest the target's, the first in pack order on a
-// tie.
+// The walking dog whose part of the pack's box has its centre nearest the target's across the
+// road, so the dog on the target's side strains, the first in pack order on a tie.
 function nearestDog(geometry: PullGeometry, target: Target, walk: Walk): DogId | undefined {
   let nearest: { readonly distance: number; readonly dog: DogId } | undefined;
-  for (const box of dogBoxes(geometry, walk.road.control.motion, walk.run)) {
-    const dx = (box.left + box.right) / 2 - target.centre.x;
-    const dy = (box.top + box.bottom) / 2 - target.centre.y;
-    const distance = dx * dx + dy * dy;
+  for (const box of packBoxes(geometry, walk.road.control.motion, walk.run).dogs) {
+    const distance = Math.abs((box.left + box.right) / 2 - target.centre.x);
     if (nearest === undefined || distance < nearest.distance) {
       nearest = { distance, dog: box.dog };
     }

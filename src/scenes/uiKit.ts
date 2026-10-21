@@ -427,8 +427,8 @@ export function addSelectFrame(
   });
 }
 
-// The ui-check badge at rect's top-left corner: tag is the pick order or "tick". While the
-// art is missing, a green square with the order or a plus.
+// The ui-check badge at rect's top-left corner: tag is its art's tag, such as "tick". While the
+// art is missing, a green square with the tag, or a plus for a tick.
 export function addSelectBadge(
   scene: Scene,
   parent: GameObjects.Container,
