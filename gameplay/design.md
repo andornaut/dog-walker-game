@@ -25,7 +25,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 ## Voice
 
-- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing (the walk's money is "cash"), ♥ right after its number ("+1♥", "{hearts}♥"), and no em dashes. Plain ASCII only, apart from ♥, · and the characters `src/text/pixelFont.ts` maps (−, × and curly quotes): the pixel font has no other glyphs
+- **Tone:** cozy, gentle and kid-friendly; the chaos is charming, the owners are dramatic, and no line mocks the player. American spelling (color, favorite, gray, neighbor), one name per thing (the walk's money is "cash"), ♥ right after its number ("+1♥", "{hearts}♥"), and no em dashes. Plain ASCII only, apart from ♥, · and the characters `src/ui/pixelFont.ts` maps (−, × and curly quotes): the pixel font has no other glyphs
 - **Lengths:** message strip lines at most about 46 characters (26 always fit), and first-time hints at most 312 px at 2× (about 36 characters), so they stay full size on the one row left under a debuff bar; the walker's bubble up to 4 lines of about 30 characters, with walker's lines and owner parting lines at 2; card option names 2 or 3 words; hit labels one or two uppercase words with "!"
 - **Walkers:** Ada calm and precise, Ben easygoing, Casey warm and encouraging, Trista sporty and quick
 - **Owners** (each with 2 lines for each of happier, upset, fired and parting):
