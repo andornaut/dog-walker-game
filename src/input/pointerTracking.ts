@@ -92,10 +92,10 @@ function result<Target>(
 // The latest press drives the gestures, so a finger resting on the screen never holds the
 // steering from the one that lands after it. A press on a walk-bar button is the HUD's and
 // drives none. held: a card or a menu takes every press, and the one under way is dropped. A hit
-// stop is no hold: its lane moves are dropped where they act, as a lock's are, and the drag goes
-// on. A press on an element that explains itself holds to explain once it has stayed within
-// the hold's slop for its time (tickTrack); one that moves past it, or takes a lane step, steers
-// as any drag does. While it explains, it moves and taps nothing, and its release ends it.
+// stop is no hold: its lane moves are dropped where they act, and the drag goes on. A press on
+// an element that explains itself holds to explain once it has stayed within the hold's slop
+// for its time (tickTrack); one that moves past it, or takes a lane step, steers as any drag
+// does. While it explains, it moves and taps nothing, and its release ends it.
 export function trackPointer<Target>(
   context: TrackContext<Target>,
   held: boolean,

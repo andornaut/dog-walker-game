@@ -2,10 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   advanceLaneControl,
-  isSteeringLocked,
   type LaneControl,
   laneControlIn,
-  lockSteering,
   pullLane,
   steerLane,
 } from "./laneControl";
@@ -18,35 +16,30 @@ const advance = (seconds: number, control: LaneControl) =>
   advanceLaneControl(config, seconds, control);
 
 describe("steerLane", () => {
-  it("moves the pack when steering is not locked", () => {
+  it("moves the pack one lane", () => {
     const control = steerLane(config, 1, still(2));
     expect(destinationLane(control.motion)).toBe(3);
   });
 
-  it("is ignored while a pull's lock lasts, and works again once it has run out", () => {
-    const pulled = advance(0.2, pullLane(config, 0.5, 1, still(2)));
-    expect(steerLane(config, -1, pulled)).toBe(pulled);
-    const control = advance(0.55, pulled);
-    expect(isSteeringLocked(control)).toBe(false);
-    expect(destinationLane(steerLane(config, -1, control).motion)).toBe(2);
+  it("works at once after a pull's move ends", () => {
+    const pulled = advance(0.2, pullLane(config, 1, still(2)));
+    expect(destinationLane(steerLane(config, -1, pulled).motion)).toBe(2);
   });
 
-  it("turns a pull around during its move, and the lock still starts on arrival", () => {
-    let control = advance(0.05, pullLane(config, 0.5, 1, still(2)));
+  it("turns a pull around during its move", () => {
+    let control = advance(0.05, pullLane(config, 1, still(2)));
     control = steerLane(config, -1, control);
     expect(destinationLane(control.motion)).toBe(2);
     control = advance(0.05, control);
     expect(control.motion).toEqual(stillInLane(2));
-    expect(control.lockSeconds).toBeCloseTo(0.5);
   });
 
-  it("lets a press during a pull's move change the target, and still locks on arrival", () => {
+  it("lets a press during a pull's move change the target", () => {
     let control = steerLane(config, 1, still(2));
-    control = pullLane(config, 0.5, 1, control);
+    control = pullLane(config, 1, control);
     control = steerLane(config, -1, control);
     control = advance(0.4, control);
     expect(control.motion).toEqual(stillInLane(3));
-    expect(control.lockSeconds).toBeCloseTo(0.3);
   });
 
   it("ends two lanes over and one back a lane over, without turning around", () => {
@@ -66,7 +59,7 @@ describe("steerLane", () => {
 
   it("heads on past the lane it started from when turning around before setting off", () => {
     let control = steerLane(config, 1, still(1));
-    control = pullLane(config, 0.5, -1, control);
+    control = pullLane(config, -1, control);
     control = steerLane(config, -1, control);
     expect(control.target).toBe(0);
     expect(advance(1, control).motion).toEqual(stillInLane(0));
@@ -99,73 +92,43 @@ describe("steering symmetry", () => {
   });
 });
 
-describe("lockSteering", () => {
-  it("keeps a longer lock that is already running", () => {
-    expect(lockSteering(0.2, lockSteering(0.5, still(2))).lockSeconds).toBe(0.5);
-  });
-});
-
 describe("pullLane", () => {
-  it("moves the pack one lane and does not lock until the move ends", () => {
-    const control = pullLane(config, 0.25, -1, still(2));
-    expect(destinationLane(control.motion)).toBe(1);
-    expect(isSteeringLocked(control)).toBe(false);
-    expect(isSteeringLocked(advance(0.19, control))).toBe(false);
-  });
-
-  it("starts the lock when the pull's move ends and counts down the time after it", () => {
-    const control = advance(0.3, pullLane(config, 0.25, -1, still(2)));
+  it("moves the pack one lane", () => {
+    const control = advance(0.3, pullLane(config, -1, still(2)));
     expect(control.motion).toEqual(stillInLane(1));
-    expect(control.lockSeconds).toBeCloseTo(0.15);
   });
 
-  it("locks at once when the pull cannot leave the road", () => {
-    expect(pullLane(config, 0.25, 1, still(4)).lockSeconds).toBe(0.25);
+  it("leaves the pack in the edge lane when the pull cannot leave the road", () => {
+    expect(pullLane(config, 1, still(4))).toEqual(still(4));
   });
 
-  it("is not blocked by a lock from an earlier pull", () => {
-    const first = advance(0.2, pullLane(config, 0.5, 1, still(1)));
-    const second = advance(0.25, pullLane(config, 0.5, 1, first));
+  it("moves on from an earlier pull", () => {
+    const first = advance(0.2, pullLane(config, 1, still(1)));
+    const second = advance(0.25, pullLane(config, 1, first));
     expect(destinationLane(second.motion)).toBe(3);
   });
 
-  it("locks nothing for a small dog, keeping a longer lock that is already running", () => {
-    expect(isSteeringLocked(advance(0.2, pullLane(config, 0, 1, still(2))))).toBe(false);
-    const locked = advance(0.2, pullLane(config, 0.5, 1, still(1)));
-    const smallPull = advance(0.2, pullLane(config, 0, 1, locked));
-    expect(smallPull.lockSeconds).toBeCloseTo(0.3);
-  });
-
-  it("queues behind the current move and locks only once its own move ends", () => {
+  it("queues behind the current move", () => {
     let control = steerLane(config, 1, still(1));
-    control = pullLane(config, 0.25, 1, control);
+    control = pullLane(config, 1, control);
     control = advance(0.3, control);
     expect(control.motion).toMatchObject({ from: 2, kind: "moving", to: 3 });
-    expect(isSteeringLocked(control)).toBe(false);
     control = advance(0.15, control);
     expect(control.motion).toEqual(stillInLane(3));
-    expect(control.lockSeconds).toBeCloseTo(0.2);
   });
 
   it("replaces the player's target mid-move", () => {
     let control = steerLane(config, 1, still(2));
     control = steerLane(config, 1, control);
-    control = pullLane(config, 0.25, -1, control);
+    control = pullLane(config, -1, control);
     control = advance(0.4, control);
     expect(control.motion).toEqual(stillInLane(2));
   });
 });
 
 describe("advanceLaneControl", () => {
-  it("runs a running lock down to zero and no further", () => {
-    const locked = pullLane(config, 0.25, 1, still(4));
-    expect(advance(0.1, locked).lockSeconds).toBeCloseTo(0.15);
-    expect(advance(1, locked).lockSeconds).toBe(0);
-  });
-
   it("carries the time left after an arrival into the next lane change", () => {
     const control: LaneControl = {
-      lockSeconds: 0,
       motion: { duration: 0.2, elapsed: 0.03, from: 1, kind: "moving", to: 2 },
       target: 3,
     };
@@ -178,15 +141,13 @@ describe("advanceLaneControl", () => {
     expect(advance(1, control).motion).toEqual(stillInLane(3));
   });
 
-  it("ends in the same place and lock however the time is split into steps", () => {
-    const pulled = pullLane(config, 0.5, 1, steerLane(config, 1, still(0)));
+  it("ends in the same place however the time is split into steps", () => {
+    const pulled = pullLane(config, 1, steerLane(config, 1, still(0)));
     let manySteps = pulled;
     for (let i = 0; i < 10; i++) {
       manySteps = advance(0.05, manySteps);
     }
     const oneStep = advance(0.5, pulled);
     expect(manySteps.motion).toEqual(oneStep.motion);
-    expect(manySteps.lockSeconds).toBeCloseTo(oneStep.lockSeconds);
-    expect(oneStep.lockSeconds).toBeCloseTo(0.4);
   });
 });

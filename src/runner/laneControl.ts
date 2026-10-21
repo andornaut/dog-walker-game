@@ -10,28 +10,16 @@ import {
 } from "./laneMotion";
 
 // target is the lane the pack heads for, one lane-change at a time; each steer moves it by
-// one, so a quick drag across three lanes ends three lanes over. lockSeconds is how long
-// steering is still ignored. lockOnArrival is a pull's lock, which starts once the pack stops.
-// heading is the way the target last moved, absent before it has.
+// one, so a quick drag across three lanes ends three lanes over. heading is the way the
+// target last moved, absent before it has.
 export interface LaneControl {
   heading?: LaneDirection;
-  lockOnArrival?: number;
-  lockSeconds: number;
   motion: LaneMotion;
   target: number;
 }
 
 export function laneControlIn(motion: LaneMotion): LaneControl {
-  return { lockSeconds: 0, motion, target: destinationLane(motion) };
-}
-
-export function isSteeringLocked(control: LaneControl): boolean {
-  return control.lockSeconds > 0;
-}
-
-// A longer lock already running is kept.
-function startLock(seconds: number | undefined, runningSeconds: number): number {
-  return Math.max(runningSeconds, seconds ?? 0);
+  return { motion, target: destinationLane(motion) };
 }
 
 // The heading a new control carries over from control.
@@ -59,16 +47,12 @@ function headFor(config: LaneMotionConfig, target: number, motion: LaneMotion): 
   return turned.kind === "still" ? headFor(config, target, turned) : turned;
 }
 
-// The player's lane change moves the target one lane, held on the road, and is ignored while
-// a lock lasts.
+// The player's lane change moves the target one lane, held on the road.
 export function steerLane(
   config: LaneMotionConfig,
   direction: LaneDirection,
   control: LaneControl,
 ): LaneControl {
-  if (isSteeringLocked(control)) {
-    return control;
-  }
   const target = clampIndex(config.laneCount, control.target + direction);
   if (target === control.target) {
     return control;
@@ -81,75 +65,43 @@ export function steerLane(
   };
 }
 
-// A dog's pull is never blocked by the lock. It moves the target one lane past the lane the
-// pack is in or heading to, and its lock starts when the pack stops. A pull off the road
-// locks at once.
+// A dog's pull moves the target one lane past the lane the pack is in or heading to, held on
+// the road.
 export function pullLane(
   config: LaneMotionConfig,
-  lockSeconds: number,
   direction: LaneDirection,
   control: LaneControl,
 ): LaneControl {
   const from = destinationLane(control.motion);
   const target = clampIndex(config.laneCount, from + direction);
   if (target === from && control.motion.kind === "still") {
-    return {
-      ...headingOf(control),
-      lockSeconds: startLock(lockSeconds, control.lockSeconds),
-      motion: control.motion,
-      target,
-    };
+    return { ...headingOf(control), motion: control.motion, target };
   }
   const motion =
     control.motion.kind === "still" ? headFor(config, target, control.motion) : control.motion;
-  return {
-    heading: direction,
-    lockOnArrival: startLock(lockSeconds, control.lockOnArrival ?? 0),
-    lockSeconds: control.lockSeconds,
-    motion,
-    target,
-  };
+  return { heading: direction, motion, target };
 }
 
-// Sets an extra lock, such as a stumble, at once; a longer running lock is kept.
-export function lockSteering(seconds: number, control: LaneControl): LaneControl {
-  return { ...control, lockSeconds: startLock(seconds, control.lockSeconds) };
-}
-
-// Steps from arrival to arrival, so a lock starts at the moment the pack stops and the time
-// left over counts it down. Arriving short of the target, the pack sets off for the next lane.
+// Steps from arrival to arrival. Arriving short of the target, the pack sets off for the next
+// lane.
 export function advanceLaneControl(
   config: LaneMotionConfig,
   stepSeconds: number,
   control: LaneControl,
 ): LaneControl {
-  let { lockSeconds, motion } = control;
-  let { lockOnArrival } = control;
+  let { motion } = control;
   let secondsLeft = stepSeconds;
   while (motion.kind === "moving") {
     const toArrival = motion.duration - motion.elapsed;
     if (secondsLeft < toArrival) {
       return {
         ...headingOf(control),
-        ...(lockOnArrival === undefined ? {} : { lockOnArrival }),
-        lockSeconds: Math.max(0, lockSeconds - secondsLeft),
         motion: { ...motion, elapsed: motion.elapsed + secondsLeft },
         target: control.target,
       };
     }
     secondsLeft -= toArrival;
-    lockSeconds = Math.max(0, lockSeconds - toArrival);
-    const arrived = stillInLane(motion.to);
-    motion = headFor(config, control.target, arrived);
-    if (motion.kind === "still") {
-      lockSeconds = startLock(lockOnArrival, lockSeconds);
-      lockOnArrival = undefined;
-    }
+    motion = headFor(config, control.target, stillInLane(motion.to));
   }
-  return {
-    ...headingOf(control),
-    lockSeconds: Math.max(0, lockSeconds - secondsLeft),
-    motion,
-    target: control.target,
-  };
+  return { ...headingOf(control), motion, target: control.target };
 }

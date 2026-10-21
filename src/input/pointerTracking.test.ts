@@ -5,10 +5,8 @@ import { clampIndex } from "../lib/arrays";
 import { chance, type Random, randomInt, randomPick, seededRandom } from "../lib/random";
 import {
   advanceLaneControl,
-  isSteeringLocked,
   type LaneControl,
   laneControlIn,
-  lockSteering,
   pullLane,
   steerLane,
 } from "../runner/laneControl";
@@ -206,8 +204,8 @@ describe("trackPointer", () => {
   });
 });
 
-// Random walks over presses, losses, holds, hit stops, pulls and locks, against the real gesture
-// and lane-control logic. A hit stop and a lock drop the moves that reach them, as the walk does.
+// Random walks over presses, losses, holds, hit stops and pulls, against the real gesture and
+// lane-control logic. A hit stop drops the moves that reach it, as the walk does.
 describe("trackPointer fuzz", () => {
   interface World {
     control: LaneControl;
@@ -304,9 +302,7 @@ describe("trackPointer fuzz", () => {
     } else if (roll < 0.85) {
       world.hitStop = !world.hitStop;
     } else if (roll < 0.9) {
-      world.control = pullLane(laneConfig, 0, chance(random, 0.5) ? 1 : -1, world.control);
-    } else if (roll < 0.93) {
-      world.control = lockSteering(random() * 0.6, world.control);
+      world.control = pullLane(laneConfig, chance(random, 0.5) ? 1 : -1, world.control);
     } else {
       world.control = advanceLaneControl(laneConfig, random() * 0.4, world.control);
     }
@@ -350,8 +346,7 @@ describe("trackPointer fuzz", () => {
         if (
           (track.press === undefined) !== (track.gesture.kind === "idle") ||
           control.target < 0 ||
-          control.target >= LANES ||
-          control.lockSeconds < 0
+          control.target >= LANES
         ) {
           broken.push(`seed ${seed} step ${i}`);
         }
@@ -360,7 +355,7 @@ describe("trackPointer fuzz", () => {
     expect(broken).toEqual([]);
   });
 
-  it("settles every lane change and lock once input stops", () => {
+  it("settles every lane change once input stops", () => {
     for (let seed = 1; seed <= 300; seed += 1) {
       const random = seededRandom(seed);
       const world = newWorld(random);
@@ -369,8 +364,6 @@ describe("trackPointer fuzz", () => {
       }
       const settled = advanceLaneControl(laneConfig, 5, world.control);
       expect(settled.motion).toEqual(stillInLane(settled.target));
-      expect(isSteeringLocked(settled)).toBe(false);
-      expect(settled.lockOnArrival).toBeUndefined();
     }
   });
 

@@ -106,8 +106,8 @@ export interface PullPose {
   readonly tag: "pull" | "tell";
 }
 
-// A lane change caused by a dog: one lane toward direction, held on the road, with no lock
-// after it. Dropped during a hit stop, as steering is.
+// A lane change caused by a dog: one lane toward direction, held on the road. Dropped during a
+// hit stop, as steering is.
 export function pullWalk(
   data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
   laneCount: number,
@@ -119,7 +119,7 @@ export function pullWalk(
     return { moved: false, walk };
   }
   const config = laneMotionConfig(data, laneCount, run);
-  const control = pullLane(config, 0, direction, road.control);
+  const control = pullLane(config, direction, road.control);
   return {
     moved: control.target !== road.control.target,
     walk: { ...walk, road: { ...road, control } },

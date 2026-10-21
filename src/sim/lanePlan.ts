@@ -20,18 +20,17 @@ export interface LanePrize {
 }
 
 // A dog's pull seen coming: at at, the pack is pulled one lane toward direction, or inward
-// from the edge lane, and lane changes lock for lockSeconds once that move ends. The plan
-// changes lanes no sooner than reactSeconds after the pull either.
+// from the edge lane. The plan changes lanes no sooner than that move ends, nor than
+// reactSeconds after the pull.
 export interface LanePull {
   readonly at: number;
   readonly direction: LaneDirection;
-  readonly lockSeconds: number;
   readonly reactSeconds: number;
 }
 
 // moveStep is the time from one lane change to the next: at least moveSeconds, longer with a
 // cooldown. gridSeconds spaces the times the plan may wait until; the ends of hazards and
-// locks, and whole lane changes after them, are tried too, so a gap is used to its full
+// waits, and whole lane changes after them, are tried too, so a gap is used to its full
 // length.
 export interface LanePlanConfig {
   readonly gridSeconds: number;
@@ -56,9 +55,9 @@ export interface PlannedMove {
 const HIT_COST = 1000;
 const MOVE_COST = 0.01;
 const SAME_TIME = 1e-9;
-// A lock is taken to last this much longer than it does, so rounding never has a lane change
+// A wait is taken to last this much longer than it does, so rounding never has a lane change
 // start during it.
-export const LOCK_MARGIN = 1e-4;
+export const WAIT_MARGIN = 1e-4;
 
 const STAY = 0;
 const PULLED = 2;
@@ -111,10 +110,9 @@ function indexAtOrAfter(times: readonly number[], time: number): number {
 }
 
 // When the plan may change lanes again after a pull: after the pull's lane change, if it
-// moves the pack, and its lock, and after the reaction.
-function unlocksAt(moveSeconds: number, pull: LanePull, moves: boolean): number {
-  const locked = (moves ? moveSeconds : 0) + pull.lockSeconds;
-  return pull.at + Math.max(locked, pull.reactSeconds) + LOCK_MARGIN;
+// moves the pack, and after the reaction.
+function movableAfter(moveSeconds: number, pull: LanePull, moves: boolean): number {
+  return pull.at + Math.max(moves ? moveSeconds : 0, pull.reactSeconds) + WAIT_MARGIN;
 }
 
 // The cheapest way through the hazards, collecting what prizes it safely can: a hit costs
@@ -122,7 +120,7 @@ function unlocksAt(moveSeconds: number, pull: LanePull, moves: boolean): number 
 // so the plan does not weave for nothing. Each lane change takes moveSeconds, during which
 // the pack occupies both lanes. A pull moves the pack whatever the plan, so the plan works
 // around it: none of its own lane changes is under way when a pull comes, and none starts
-// until the pull's lock ends. Returns the plan's own lane changes in time order.
+// until the pull's move ends and the plan has reacted to it. Returns the plan's own lane changes in time order.
 export function planLanes(
   config: LanePlanConfig,
   start: PlanStart,
@@ -136,7 +134,7 @@ export function planLanes(
     start.movableAt,
     ...hazards.map((hazard) => hazard.to),
     ...prizes.map((prize) => prize.at),
-    ...coming.map((pull) => unlocksAt(moveSeconds, pull, true)),
+    ...coming.map((pull) => movableAfter(moveSeconds, pull, true)),
   );
   const end = Math.max(
     start.readyAt + moveStep,
@@ -148,8 +146,8 @@ export function planLanes(
     ...prizes.map((prize) => prize.at - moveSeconds),
     ...coming.flatMap((pull) => [
       pull.at,
-      unlocksAt(moveSeconds, pull, false),
-      unlocksAt(moveSeconds, pull, true),
+      movableAfter(moveSeconds, pull, false),
+      movableAfter(moveSeconds, pull, true),
     ]),
   ]);
   const count = times.length;
@@ -220,7 +218,7 @@ export function planLanes(
     if (pull !== undefined) {
       for (let lane = 0; lane < laneCount; lane++) {
         const to = pulledTo(pull, lane);
-        const unlocked = indexAtOrAfter(times, unlocksAt(moveSeconds, pull, to !== lane));
+        const unlocked = indexAtOrAfter(times, movableAfter(moveSeconds, pull, to !== lane));
         const unlockedAt = times[unlocked] ?? end;
         value[i * laneCount + lane] =
           (to === lane
@@ -266,7 +264,7 @@ export function planLanes(
     const pull = pullAt(times[i] ?? 0);
     if (picked === PULLED && pull !== undefined) {
       const to = pulledTo(pull, lane);
-      i = indexAtOrAfter(times, unlocksAt(moveSeconds, pull, to !== lane));
+      i = indexAtOrAfter(times, movableAfter(moveSeconds, pull, to !== lane));
       lane = to;
     } else if (picked === STAY) {
       i += 1;

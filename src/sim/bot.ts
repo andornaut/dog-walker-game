@@ -22,9 +22,9 @@ import {
   type LaneHazard,
   type LanePrize,
   type LanePull,
-  LOCK_MARGIN,
   planLanes,
   type PlannedMove,
+  WAIT_MARGIN,
 } from "./lanePlan";
 import type { Skill } from "./skills";
 
@@ -394,7 +394,6 @@ function botView(
           {
             at: strain.tellSeconds,
             direction: strain.direction,
-            lockSeconds: 0,
             reactSeconds: bot.skill.reactionSeconds,
           },
         ]
@@ -417,8 +416,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const lane = control.target;
   const turns = moving ? Math.abs(lane - motion.to) : 0;
   const readyAt = moving ? motion.duration - motion.elapsed + turns * motion.duration : 0;
-  const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
-  const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
+  const settled = readyAt > 0 ? readyAt + WAIT_MARGIN : 0;
   const moveSeconds = wholeSteps(laneMoveSeconds(road.data, walk.run));
   const { laneChangeCooldown, lookAheadSeconds } = bot.skill;
   const view = botView(bot, road, pulls, walk);
@@ -434,7 +432,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
       lane,
       movableAt: Math.max(
         readyAt,
-        locked,
+        settled,
         bot.lastInputAt + laneChangeCooldown - bot.clock,
         bot.recoversAt - bot.clock,
       ),
@@ -448,7 +446,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   bot.replan = false;
 }
 
-// A lane change that does not take, such as one during a lock, makes the bot replan.
+// A lane change that does not take, such as one off the road, makes the bot replan.
 function steer(
   bot: Bot,
   road: BotRoad,
@@ -491,7 +489,7 @@ function attempt(
 }
 
 // A dog's tell starts the wait before the bot sees it. After a pull, the bot drags back, if
-// that is better, once it has reacted to the pull and the lock allows. A pull the bot did not
+// that is better, once it has reacted to the pull and the pull's move has ended. A pull the bot did not
 // see coming spoils its plan until it has seen the tell; one it saw coming was in its plan. A
 // blocked pull moved nothing, so the bot replans without the pull. A tell after a pull, for a
 // target with pulls left, starts the wait again.

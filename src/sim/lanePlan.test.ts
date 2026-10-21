@@ -60,7 +60,7 @@ describe("planLanes", () => {
       IN_LANE_2,
       [{ from: 0.6, lanes: lanes(3), to: 1.5 }],
       [],
-      [{ at: 0.5, direction: 1, lockSeconds: 0.5, reactSeconds: 0.3 }],
+      [{ at: 0.5, direction: 1, reactSeconds: 0.3 }],
     );
 
     expect(moves[0]).toEqual({ at: expect.any(Number), direction: -1 });

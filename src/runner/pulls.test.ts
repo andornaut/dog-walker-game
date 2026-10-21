@@ -17,7 +17,7 @@ import { newRun, type PackDogs } from "../state/runState";
 import { testPack } from "../testing/packGeometry";
 import { TEST_TUNING } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
-import { isSteeringLocked, laneControlIn } from "./laneControl";
+import { laneControlIn } from "./laneControl";
 import { stillInLane } from "./laneMotion";
 import type { MoverPath } from "./movers";
 import {
@@ -157,7 +157,6 @@ describe("what a dog pulls toward", () => {
       direction: -1,
       tag: "pull",
     });
-    expect(isSteeringLocked(after(walk, 1.3).walk.road.control)).toBe(false);
     expect(after(walk, 3).walk.road.control.target).toBe(1);
   });
 

@@ -56,8 +56,8 @@ function driftDirection(
 }
 
 // One step of the Zoomies clock: with the debuff on and the walk walking with no hit stop, the
-// clock runs, and each time it reaches zoomiesDriftSeconds the pack drifts a lane, past any
-// steering lock. Without the debuff the clock rests at 0.
+// clock runs, and each time it reaches zoomiesDriftSeconds the pack drifts a lane. Without
+// the debuff the clock rests at 0.
 export function stepZoomies(
   data: ZoomiesData,
   geometry: PullGeometry,
@@ -82,13 +82,13 @@ export function stepZoomies(
   }
   const { control } = walk.road;
   const config = laneMotionConfig(data, geometry.laneCount, walk.run);
-  const steered = steerLane(config, direction, { ...control, lockSeconds: 0 });
+  const steered = steerLane(config, direction, control);
   return {
     drifted: direction,
     seconds: elapsed - every,
     walk: {
       ...walk,
-      road: { ...walk.road, control: { ...steered, lockSeconds: control.lockSeconds } },
+      road: { ...walk.road, control: steered },
     },
   };
 }

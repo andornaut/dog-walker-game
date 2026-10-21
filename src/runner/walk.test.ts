@@ -1153,12 +1153,8 @@ describe("hit stop", () => {
 
   it("drops steering during the stop rather than queuing it", () => {
     const hit = step(walkWith(["koda"], [atPack("cone")]), FRAME).walk;
-    const unlocked = {
-      ...hit,
-      road: { ...hit.road, control: { ...hit.road.control, lockSeconds: 0 } },
-    };
-    const steered = steerWalk(data, 5, 1, unlocked);
-    expect(steered).toBe(unlocked);
+    const steered = steerWalk(data, 5, 1, hit);
+    expect(steered).toBe(hit);
     let walk = steered;
     while (walk.road.hitStop !== null) {
       walk = step(walk, FRAME).walk;
