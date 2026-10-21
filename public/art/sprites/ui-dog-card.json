@@ -1,114 +1,114 @@
 { "frames": {
    "ui-dog-card 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 0, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 1.aseprite": {
-    "frame": { "x": 120, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 120, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 2.aseprite": {
-    "frame": { "x": 240, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 240, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 3.aseprite": {
-    "frame": { "x": 360, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 360, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 4.aseprite": {
-    "frame": { "x": 480, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 480, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 5.aseprite": {
-    "frame": { "x": 600, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 600, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 6.aseprite": {
-    "frame": { "x": 720, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 720, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 7.aseprite": {
-    "frame": { "x": 840, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 840, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 8.aseprite": {
-    "frame": { "x": 960, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 960, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 9.aseprite": {
-    "frame": { "x": 1080, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 1080, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 1000
    },
    "ui-dog-card 10.aseprite": {
-    "frame": { "x": 1200, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 1200, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 60
    },
    "ui-dog-card 11.aseprite": {
-    "frame": { "x": 1320, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 1320, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 60
    },
    "ui-dog-card 12.aseprite": {
-    "frame": { "x": 1440, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 1440, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 80
    },
    "ui-dog-card 13.aseprite": {
-    "frame": { "x": 1560, "y": 0, "w": 120, "h": 58 },
+    "frame": { "x": 1560, "y": 0, "w": 120, "h": 74 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 58 },
-    "sourceSize": { "w": 120, "h": 58 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 120, "h": 74 },
+    "sourceSize": { "w": 120, "h": 74 },
     "duration": 80
    }
  },
@@ -117,7 +117,7 @@
   "version": "1.2.30-x64",
   "image": "ui-dog-card.png",
   "format": "RGBA8888",
-  "size": { "w": 1680, "h": 58 },
+  "size": { "w": 1680, "h": 74 },
   "scale": "1",
   "frameTags": [
    { "name": "duchess", "from": 0, "to": 0, "direction": "forward" },

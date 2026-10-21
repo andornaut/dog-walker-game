@@ -16,12 +16,12 @@ nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-
 owner's name plate), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48);
 the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
-ui-dog-card-band (360x64, drawn at (0, 496)), ui-lead-tag (27x11, LEAD baked in with
+ui-dog-card-band (360x80, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked in with
 font-title) and ui-owner-tab (36x36).
-Sprites: ui-dog-card (120x58, one of three cards in the walk's card row; a tag per dog key and
+Sprites: ui-dog-card (120x74, one of three cards in the walk's card row; a tag per dog key and
 `empty`, then heart-loss: 4 frames, 60, 60, 80 and 80ms, an overlay drawn over the card and under
 the game's faces, hearts and text),
-ui-dog-card-warn (120x58, the low-hearts rim drawn over ui-dog-card; tags pulse, static),
+ui-dog-card-warn (120x74, the low-hearts rim drawn over ui-dog-card; tags pulse, static),
 ui-debuff-bar (360x16, one active debuff's bar under the walk bar; tags muddy, stinky, zoomies),
 ui-select (24x24 nine-slice, 8px corners; tag pulse), ui-afford (24x24 nine-slice,
 8px corners; tag glint), ui-check (16x16; tags 1, 2, 3, tick),
@@ -1109,17 +1109,18 @@ def effect_well():
     return g
 
 
-# The dog card: 120x58 in its slot, the chrome on x 1 to 118 and rows 0 to 57, so a 1px gap runs
+# The dog card: 120x74 in its slot, the chrome on x 1 to 118 and rows 0 to 73, so a 1px gap runs
 # down each side and the card's foot is the screen's bottom row. The cards are navy, as a neutral
 # ui-section, so the eye stays on the road and the dogs' photos and hearts carry the row.
-DOG_CARD = (120, 58)
-DOG_CARD_FRAME = (1, 0, 118, 58)
-DOG_PHOTO = (4, 19)
+DOG_CARD = (120, 74)
+DOG_CARD_FRAME = (1, 0, 118, 74)
+# The photo in the body's middle (the navy on rows 18 to 70): 8 rows above it and 9 below.
+DOG_PHOTO = (4, 26)
 # The hearts area the heart-loss flash fills, as x, y, w, h: the only part of the card it touches,
 # so the warn rim stays the card's only border.
-DOG_CARD_HEARTS = (43, 30, 46, 18)
+DOG_CARD_HEARTS = (43, 35, 46, 18)
 # The empty card's FIRED plate, x and y: under the owner's name, clear of its descenders.
-DOG_CARD_FIRED = (44, 32)
+DOG_CARD_FIRED = (44, 36)
 # Each heart-loss frame: the flash's colour and how many of the area's pixels it fills (1 every
 # pixel, 2 a checkerboard, 4 one in four), so it bursts white and dithers away. White keeps the
 # hearts drawn over it readable (red 4.19:1, the grey outlines 2.82:1), where a red or pink flash
@@ -1128,14 +1129,14 @@ DOG_CARD_HEART_LOSS = (("white", 1), ("white", 1), ("white", 2), ("white", 4))
 
 
 def dog_card(dog):
-    """120x58, ui-dog-card: one of three cards in the walk's card row, in the neutral section look: a
+    """120x74, ui-dog-card: one of three cards in the walk's card row, in the neutral section look: a
     2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face, the header
     (rows 1 to 16) split from the body by an ink rule on row 17. The game writes the name on the
-    header in cream (9.59:1), with no plate. The dog's photo is an ink frame (4,19 36x36) round a
-    cream mat round its colour (6,21 32x32). The owner's name (tan, 6.61:1), the hearts under it
+    header in cream (9.59:1), with no plate. The dog's photo is an ink frame (4,26 36x36) round a
+    cream mat round its colour (6,28 32x32), in the body's middle. The owner's name (tan, 6.61:1), the hearts under it
     (ui-heart full-dark and empty-dark) and the LEAD tag go on the navy to its right. The empty card
     (a fired dog's) is dslate in the same frame, with a dslate photo, the owner's name (tan,
-    4.55:1) and a dred plate built as ui-fired-plate (44,32 68x17, its face 48,36 60x9) for FIRED."""
+    4.55:1) and a dred plate built as ui-fired-plate (44,36 68x17, its face 48,40 60x9) for FIRED."""
     empty = dog == "empty"
     face = "dslate" if empty else "navy"
     w, h = DOG_CARD
@@ -1165,7 +1166,7 @@ def dog_card_solid():
 
 
 def dog_card_warn(step):
-    """120x58, ui-dog-card-warn: a 2px rim inside the card's outline, for an owner at one heart;
+    """120x74, ui-dog-card-warn: a 2px rim inside the card's outline, for an owner at one heart;
     steps 0 to 2 run dim to bright. The outer pixel holds 7.35:1 on the wood and 7.49:1 on navy."""
     outer, inner = (("orange", "red"), ("amber", "red"), ("amber", "orange"))[step]
     solid = dog_card_solid()
@@ -1183,8 +1184,8 @@ def dog_card_warn(step):
 
 
 def dog_card_heart_loss(step):
-    """120x58, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
-    hearts and text that fills only the hearts area (43,30 46x18, its corners cut 1px), never the
+    """120x74, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
+    hearts and text that fills only the hearts area (43,35 46x18, its corners cut 1px), never the
     card's edge or header: frames 0 and 1 white (13.89:1 on navy), then white on a checkerboard and
     on one pixel in four, so the flash clears."""
     colour, every = DOG_CARD_HEART_LOSS[step]
@@ -1200,7 +1201,7 @@ def dog_card_heart_loss(step):
     return g
 
 
-CARD_BAND = (360, 64)
+CARD_BAND = (360, 80)
 # The band's top rows, where the road ends: a dithered ink shadow cast onto the road (rows 0 and
 # 1, a quarter then three quarters of their pixels), then the trim: ink, a lit tan line and ink
 # (rows 2 to 4), then the wood.
@@ -1208,10 +1209,10 @@ CARD_BAND_TRIM = ("ink", "tan", "ink")
 
 
 def dog_card_band():
-    """360x64, ui-dog-card-band: drawn at (0, 496) under the cards. Rows 0 and 1 (screen 496 and 497)
+    """360x80, ui-dog-card-band: drawn at (0, 480) under the cards. Rows 0 and 1 (screen 480 and 481)
     are a dithered ink shadow over the road's last rows, clear between its pixels; rows 2 to 4
-    (498 to 500) the trim, ink, tan and ink, so the road ends on a lit edge; then plum wood, which
-    shows on row 5 (501) above the cards and between them."""
+    (482 to 484) the trim, ink, tan and ink, so the road ends on a lit edge; then plum wood, which
+    shows on row 5 (485) above the cards and between them."""
     w, h = CARD_BAND
     g = Grid(w, h)
     wood(g, 2, h - 2)

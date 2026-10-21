@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Draw the six zone backdrops: the neighbourhood band between the top bar and the road.
 
-backdrop-<zone>: 360x174 images in Endesga 32, drawn on screen rows 40 to 213.
+backdrop-<zone>: 360x158 images in Endesga 32, drawn on screen rows 48 to 205.
 The street ends at a T-junction: the bottom rows continue the pseudo-3D road
 below the band (the same projection, so the same road, curb and sidewalk edges
 at the same slope) up to a cross street that runs flat across the band. Beyond it the far side faces the camera: the
@@ -15,17 +15,17 @@ near-right lawn (ORNAMENTS): a bird bath on Elm Avenue, a flower bed in Fairview
 flowers on Main Street's paving, pumpkins on The Long Way Home, a gnome and a toadstool on Willow
 Crescent and a rowboat planter on Riverside Path.
 
-Rows, in band rows (0 to 173): the sky is one flat colour above row 61 (CALM), under the
-message strip; the far side's ground row 131 (BASE), the far sidewalk 135 to 138, the far curb
-139 to 140, the cross street 141 to 149 with its centre line on row 145, the near sidewalk 150
-to 154, and the stub from row 155 (STUB, the approach) to the bottom row, 173, which continues
+Rows, in band rows (0 to 157): the sky is one flat colour above row 45 (CALM), under the
+message strip; the far side's ground row 115 (BASE), the far sidewalk 119 to 122, the far curb
+123 to 124, the cross street 125 to 133 with its centre line on row 129, the near sidewalk 134
+to 138, and the stub from row 139 (STUB, the approach) to the bottom row, 157, which continues
 the game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and
 227, verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
-the current constants): the near-left perch's top rail on rows 158 to 159, x 0 to 72; the
-near-right lawn's kite spot, x 284 to 319 (its sprite's top row 133, its foot's outline on row
-171), with the ornament beside it at x 322 to 353, its feet on row 171; and the two sidewalks,
-whose middles run from (87, 173) to (94, 154) and from
-(273, 173) to (266, 154).
+the current constants): the near-left perch's top rail on rows 142 to 143, x 0 to 72; the
+near-right lawn's kite spot, x 284 to 319 (its sprite's top row 117, its foot's outline on row
+155), with the ornament beside it at x 322 to 353, its feet on row 155; and the two sidewalks,
+whose middles run from (87, 157) to (94, 138) and from
+(273, 157) to (266, 138).
 
 Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
@@ -366,9 +366,9 @@ FAR_WALK, FAR_CURB, CROSS, NEAR_CURB = STUB - 20, STUB - 16, STUB - 14, STUB - 5
 LINE = STUB - 10               # the cross street's centre line
 CORNER = 5                     # the near corners' curb radius, in pixels
 BASE = STUB - 24               # the far side's ground row: the houses stand on it
-# The message strip lies over band rows 4 to 60 (screen rows 44 to 100), so the sky above row
-# CALM is one flat colour, with no clouds, stars or scenery.
-CALM = 61
+# The sky above row CALM, 70 rows over the far side's ground row, is one flat colour with no
+# clouds, stars or scenery: the debuff bars and the message strip lie over it.
+CALM = BASE - 70
 PERCH = round(Z0) + 3          # the near-left perch's z: its foot on the bottom row, for the cat
 PERCH_H = 30                   # the perch's height: its top rail is h 27 to 30
 PERCH_X = (-(WALK + 8), -600)  # the perch, across: from just past the sidewalk out off screen
@@ -1246,8 +1246,8 @@ def paws_promenade():
 # ---------- the near-right lawn's ornament ----------
 # A static ornament each zone draws on its near-right lawn, beside the kite's tree: drawn on a
 # grid ORN_W x ORN_H with its ground row ORN_H - 3, outlined two ramp steps darker, its grid's
-# top-left at band ORN_X, ORN_Y, so its art keeps to x 322 to 353 with its feet on row 171.
-ORN_X, ORN_Y, ORN_W, ORN_H = 320, 148, 36, 26
+# top-left at band ORN_X, ORN_Y, so its art keeps to x 322 to 353 with its feet on row STUB + 16 (155).
+ORN_X, ORN_Y, ORN_W, ORN_H = 320, STUB - 7, 36, 26
 
 
 def _birdbath(g, base):

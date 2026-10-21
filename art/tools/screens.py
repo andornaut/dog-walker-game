@@ -557,8 +557,9 @@ def image_rows(img):
 
 # Elm Avenue's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading.
 NIGHT_SKY = ("navy", "purple", "mauve")
-# The first backdrop band row screen-stats' window shows: the houses' lit walls, their doors and the ground row.
-STATS_VIEW_TOP = 106
+# The first backdrop band row screen-stats' window shows, 25 rows over the far side's ground row: the
+# houses' lit walls, their doors and the ground row.
+STATS_VIEW_TOP = bd.BASE - 25
 
 
 def night(img, top=20, horizon=46):
@@ -611,7 +612,7 @@ def stats():
     cv.fill(0, 549, W, 10, "plum")
     cv.fill(0, 559, W, 1, "ink")
     # a low window onto Elm Avenue at night, between the photo and the leash hooks, above the tabs: the
-    # houses across the street from STATS_VIEW_TOP, their windows lit, down past the ground row (band row 131)
+    # houses across the street from STATS_VIEW_TOP, their windows lit, down past the far side's ground row
     wx, wy, ww, wh = 140, 16, 100, 28
     view = night(bd.woof_way().img).crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh))
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
