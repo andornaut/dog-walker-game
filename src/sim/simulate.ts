@@ -15,7 +15,7 @@ import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
 import { hasLeftRoad, moverPlace } from "../runner/movers";
-import { type Random, randomStream, seededRandom } from "../runner/random";
+import { type Random, randomStream } from "../runner/random";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
   chooseCard,
@@ -161,7 +161,7 @@ interface Tally {
   readonly movers: MoverCounts;
   // What the card policy draws from, kept apart from the game's and the bot's draws so the
   // policies that never draw play identical runs.
-  policyRandom: Random;
+  readonly policyRandom: Random;
   run: RunState;
   tips: Cents;
   readonly upgrades: UpgradeId[];
@@ -323,7 +323,6 @@ function playBySkill(
 ): void {
   const streams = runStreams(seed);
   const bot = newBot(randomStream(seed, "bot"), skill);
-  tally.policyRandom = randomStream(seed, "policy");
   const start = { road: startRoad(LANE_COUNT), run: tally.run };
   let session = startSession(data, streams, screenRoadGeometry, start);
   let road = botRoadOf(data, session.walk);
@@ -409,7 +408,6 @@ function playBySkill(
 // Deterministic for a given seed. A skill player's run draws from the game's named streams
 // (runStreams) and the bot's and policies' own, so its seed and inputs replay it in the game.
 export function simulateRun(data: SimData, seed: number, config: SimConfig): RunResult {
-  const random = seededRandom(seed);
   const tally: Tally = {
     afterPull: null,
     cardsSeen: 0,
@@ -419,8 +417,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
     inputs: [],
     items: {},
     movers: {},
-    // A skill player's runs draw from a stream of their own instead.
-    policyRandom: random,
+    policyRandom: randomStream(seed, "policy"),
     pullsMoved: 0,
     run: newRun(data, config.pack.length, {
       dogs: config.pack,
