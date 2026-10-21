@@ -1282,19 +1282,19 @@ def top_bar():
 
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash and the neighbourhood with its pips.
-WALK_WELLS = ((4, 4, 112, 40), (122, 4, 104, 21))
+WALK_WELLS = ((4, 4, 95, 40), (103, 4, 80, 21))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
-# the grain: five 18x18 wells, 20px apart from x 122, on rows 26 to 43.
-EFFECT_ROW = (121, 25, 106, 20)
+# the grain: four 18x18 wells, 20px apart from x 103, on rows 26 to 43.
+EFFECT_ROW = (102, 25, 82, 20)
 EFFECT_WELL = 18
 
 
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with the top bar's trim (dbrown on row 1; brown, dbrown and
     ink on rows 45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,4 112x40 and neighbourhood 122,4 104x21, which ends clear of the Pause button's hit at
-    x 228. The game draws the effect wells, the Pause, Sound and Settings buttons (Settings rightmost) and every text
-    and icon on it."""
+    cash 4,4 95x40, sized for "$888" at 3x after the coin, and neighbourhood 103,4 80x21, which
+    ends clear of the Home button's hit at x 184. The game draws the effect wells, the Home, Sound,
+    Settings and Pause buttons and every text and icon on it."""
     w, h = WALK_BAR
     g = Grid(w, h)
     wood(g, 0, h)
@@ -1333,12 +1333,14 @@ def effect_well():
 DOG_CARD = (120, 58)
 DOG_CARD_FRAME = (1, 0, 118, 58)
 DOG_PHOTO = (4, 19)
-# The parts the heart-loss flash leaves clear, as x, y, w, h: the name's rows in the header, the
-# dog's photo, the hearts and the LEAD tag.
-DOG_CARD_PANELS = ((5, 2, 110, 14), (4, 19, 36, 36), (51, 23, 46, 27), (87, 42, 29, 13))
-# Each heart-loss frame on the navy card: the flash's fill and seam colours (red 3.31:1 and pink
-# 5.12:1 on navy), or the rim's outer and inner colours.
-DOG_CARD_HEART_LOSS = (("flash", "red", "dred"), ("flash", "pink", "red"), ("rim", "red", "pink"), ("rim", "red", None))
+# The hearts area the heart-loss flash fills, as x, y, w, h: the only part of the card it touches,
+# so the warn rim stays the card's only border.
+DOG_CARD_HEARTS = (51, 23, 46, 27)
+# Each heart-loss frame: the flash's colour and how many of the area's pixels it fills (1 every
+# pixel, 2 a checkerboard, 4 one in four), so it bursts white and dithers away. White keeps the
+# hearts drawn over it readable (red 4.19:1, the grey outlines 2.82:1), where a red or pink flash
+# would swallow the red hearts (1.0:1 and 1.55:1).
+DOG_CARD_HEART_LOSS = (("white", 1), ("white", 1), ("white", 2), ("white", 4))
 
 
 def dog_card(dog):
@@ -1399,34 +1401,19 @@ def dog_card_warn(step):
 
 def dog_card_heart_loss(step):
     """120x58, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
-    hearts and text: frame 0 flashes the navy red with dred seams and frame 1 pink with red seams
-    (the ink rule and lip are the seams), inside a plum edge, the name's rows, photo, hearts and
-    LEAD tag left clear; frames 2 and 3 fade to a 2px then 1px red rim inside the outline."""
-    kind, a, b = DOG_CARD_HEART_LOSS[step]
-    solid = dog_card_solid()
-    card = dog_card("koda").px
-    seam = K["ink"]
-    w, h = DOG_CARD
-    g = Grid(w, h)
-
-    def panel(x, y):
-        return any(px <= x < px + pw and py <= y < py + ph for px, py, pw, ph in DOG_CARD_PANELS)
-
-    for y in range(h):
-        for x in range(w):
-            if not solid(x, y):
+    hearts and text that fills only the hearts area (51,23 46x27, its corners cut 1px), never the
+    card's edge or header: frames 0 and 1 white (13.89:1 on navy), then white on a checkerboard and
+    on one pixel in four, so the flash clears."""
+    colour, every = DOG_CARD_HEART_LOSS[step]
+    x0, y0, w, h = DOG_CARD_HEARTS
+    inside = rounded_inside(x0, y0, w, h, 1)
+    g = Grid(*DOG_CARD)
+    for y in range(y0, y0 + h):
+        for x in range(x0, x0 + w):
+            if not inside(x, y):
                 continue
-            if not depth(solid, x, y, 1):
-                if kind == "flash":
-                    g.p(x, y, "plum")
-                continue
-            if kind == "flash":
-                if not panel(x, y):
-                    g.p(x, y, b if card[y][x] == seam else a)
-            elif not depth(solid, x, y, 2):
-                g.p(x, y, a)
-            elif b and not depth(solid, x, y, 3):
-                g.p(x, y, b)
+            if every == 1 or (every == 2 and (x + y) % 2 == 0) or (every == 4 and x % 2 == 0 and y % 2 == 0):
+                g.p(x, y, colour)
     return g
 
 
