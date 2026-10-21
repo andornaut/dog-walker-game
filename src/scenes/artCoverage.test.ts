@@ -80,7 +80,7 @@ function tagsOf(key: string): string[] {
 }
 
 function missingImages(keys: readonly string[]): string[] {
-  return keys.filter((key) => !images.has(key) && !PENDING_ART.has(key));
+  return keys.filter((key) => !images.has(key));
 }
 
 // The keys of a record typed over a union, so a new member is a compile error until listed.
@@ -92,9 +92,6 @@ const DOGS = Object.keys(gameData.dogs) as DogId[];
 const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
 const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
 const STATUSES = members<DogStatusId>({ muddy: true, stinky: true, zoomies: true });
-// CLEANUP (added 2026-10-21): icon-zoomies lands with the walk HUD art; drop this set once
-// the manifest has it.
-const PENDING_ART = new Set(["icon-zoomies"]);
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
 // The steps below 1 at which any of keys has a variant. Art adds a step to a whole family of
 // sprites at once, so each of them must then have it.

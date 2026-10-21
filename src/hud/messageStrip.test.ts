@@ -134,9 +134,7 @@ function pngSize(key: string): { height: number; width: number } {
 }
 
 describe("messageIconKey", () => {
-  // CLEANUP (added 2026-10-21): icon-zoomies lands with the walk HUD art; check every icon once
-  // the manifest has it.
-  it.each((Object.keys(MESSAGE_ICONS) as MessageIcon[]).filter((icon) => icon !== "zoomies"))(
+  it.each(Object.keys(MESSAGE_ICONS) as MessageIcon[])(
     "leads a %s line with a 16x16 icon",
     (icon) => {
       expect(pngSize(messageIconKey(icon))).toEqual({ height: 16, width: 16 });
