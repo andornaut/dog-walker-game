@@ -70,10 +70,12 @@ import {
   minorObstacleWeights,
   moverMovement,
   obstacleWeights,
+  opensACard,
   pickWeighted,
   plannedCellInset,
   planZone,
   type RoadGeometry,
+  spawnQuotas,
   startRoad,
   steerWalk,
   stepWalk,
@@ -456,6 +458,37 @@ describe("planZone", { timeout: 15_000 }, () => {
     expect(obstacleWeights(weighed, other).map(([id]) => id)).toContain("thief");
   });
 
+  // Cards are placed first: none is skipped while a plain obstacle got a place in the zone. Every
+  // zone at each walk position it can take, its quotas drawn as planZone draws them first.
+  const POSITIONS = ZONE_IDS.flatMap((zone): { position: number; zone: ZoneId }[] =>
+    zone === WORLD.firstZone
+      ? [{ position: 0, zone }]
+      : zone === WORLD.lastZone
+        ? [{ position: WORLD.walkLength - 1, zone }]
+        : Array.from({ length: WORLD.walkLength - 2 }, (_, i) => ({ position: i + 1, zone })),
+  );
+  it.each(POSITIONS)(
+    "skips no card for a plain obstacle in $zone at $position",
+    ({ position, zone }) => {
+      const zoned = inZone(realRun(REAL), zone, position);
+      for (const seed of [1, 2, 3, 4, 5, 6, 7, 8]) {
+        const asked = spawnQuotas(REAL, seededRandom(seed), zoned)
+          .filter(({ kind }) => opensACard(REAL, kind))
+          .reduce((sum, { count }) => sum + count, 0);
+        const { pending } = planZone(REAL, GAME_ROAD, seededRandom(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        }).road;
+        const cards = pending.filter(({ kind }) => opensACard(REAL, kind)).length;
+        const plain = pending.filter(
+          ({ kind }) => blocksLane(REAL, kind) && !opensACard(REAL, kind),
+        );
+        expect(plain.length, `seed ${seed}`).toBeGreaterThan(0);
+        expect(cards, `seed ${seed}`).toBe(asked);
+      }
+    },
+  );
+
   // planZone throws when a tuned spawn finds no room, so this also proves none is dropped. At
   // the road's base speed, which a walker's pace scales.
   it("plans every zone of the game's road, first walk and last, with a way past every obstacle from any lane", () => {
@@ -670,9 +703,15 @@ describe("stepWalk", () => {
     expect(heartsByDog(after.run).biscuit).toBe(1 + read(tuning, "hearts", "treat"));
   });
 
-  it("grabs every treat of a planned zone that the pack walks into", () => {
+  // Every treat that reaches the pack's band before the zone ends: one planned less than the
+  // road from the far edge to the band before the end comes into view too late to reach it.
+  it("grabs every treat of a planned zone that reaches the pack", () => {
     // The pack stands in the lane of the lowest treat in view, ignoring obstacles.
     let walk = planZone(data, geometry, seededRandom(4), walkWith(["koda"]));
+    const toBand = geometry.packBand.top - geometry.roadTop;
+    const reaching = walk.road.pending.filter(
+      ({ distance, kind }) => kind === "treat" && distance + toBand < zoneLength(data),
+    );
     let carried = 0;
     for (let i = 0; i < 2000; i++) {
       const treat = walk.road.items
@@ -684,7 +723,8 @@ describe("stepWalk", () => {
       carried += stepped.treats.length;
       walk = stepped.walk;
     }
-    expect(carried).toBe(2);
+    expect(reaching.length).toBeGreaterThan(0);
+    expect(carried).toBe(reaching.length);
   });
 
   it("hits an obstacle, holding its card for the dogs it affects, and starts the grace window", () => {

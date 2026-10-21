@@ -520,11 +520,27 @@ export function moverSpec(
   };
 }
 
+// Whether a kind is an obstacle that opens a card, which the planner places before every other
+// spawn, so it is the last skipped.
+export function opensACard(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): boolean {
+  return (
+    itemCategory(data, kind) === "obstacle" &&
+    data.encounters[kind as EncounterId].resolution.kind === "card"
+  );
+}
+
 // Each obstacle, minor obstacle and lucky find is drawn first by the zone's weights, so its
 // shape is known when it is placed. Rush hour and the like scale both obstacle counts, and the
 // pack's size and the like scale the tips. Then each obstacle whose look moves comes as a mover at the zone's
 // mover share: one quota per kind, and one per stepper, whose steps are its own.
-function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<WalkItemKind>[] {
+export function spawnQuotas(
+  data: WalkData,
+  random: Random,
+  run: RunState,
+): SpawnQuota<WalkItemKind>[] {
   const zone = currentZone(data, run);
   const stats = zoneStats(data.tuning, zone, run.zoneIndex);
   const scaled = (stat: "obstacleSpawns" | "tipSpawns" | "treatSpawns", base: number) =>
@@ -546,6 +562,7 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
   const moverQuota = (kind: WalkItemKind, movement: MovingMovement, moverCount: number) => ({
     blocksLane: true,
     count: moverCount,
+    first: opensACard(data, kind),
     kind,
     mover: moverSpec(data, random, footprintOf(data, kind), movement),
   });
@@ -570,6 +587,7 @@ function spawnQuotas(data: WalkData, random: Random, run: RunState): SpawnQuota<
     ...[...quotas].map(([kind, kindCount]) => ({
       blocksLane: blocksLane(data, kind),
       count: kindCount,
+      first: opensACard(data, kind),
       footprint: footprintOf(data, kind),
       kind,
     })),

@@ -591,6 +591,7 @@ describe("placeMovers", () => {
       zoned,
       CAPS,
       grid,
+      [],
       rows,
       SPECS.map(({ spec: moving }, i) => ({ count: 2, kind: `kind${i}`, spec: moving })),
     );
@@ -628,7 +629,7 @@ describe("placeMovers", () => {
   it("blocks the lanes a crosser sweeps with its lead-in, and takes the cells it keeps clear", () => {
     const { blocked, grid, taken } = freeGrid();
     const [moving] = SPECS;
-    const { spawns } = placeMovers(seededRandom(2), zoned, CAPS, grid, rows, [
+    const { spawns } = placeMovers(seededRandom(2), zoned, CAPS, grid, [], rows, [
       {
         count: 1,
         kind: "squirrel",
@@ -655,7 +656,7 @@ describe("placeMovers", () => {
       draws += 1;
       return 0;
     };
-    const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, rows, [
+    const placed = placeMovers(counting, zoned, CAPS, { ...grid, ...refusal }, [], rows, [
       { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
     ]);
     expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
@@ -680,6 +681,7 @@ describe("placeMovers", () => {
       zoned,
       CAPS,
       { ...grid, block: (row, ...rest) => !refusal.refused(row) && grid.block(row, ...rest) },
+      [],
       rows,
       [{ count: 3, kind: "car", spec: spec({ kind: "ride", speedMultiplier: 2 }) }],
     );

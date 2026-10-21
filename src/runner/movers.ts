@@ -827,16 +827,17 @@ function standsOf(spot: Spot): MoverStand[] {
 // it has no room for. A mover never stands still in place of moving. Each mover makes its own
 // draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
 // holds for the speed and moments it was drawn; of the places that fit, it takes one of those
-// with the highest rank.
+// with the highest rank. onScreen holds the movers already on screen, from an earlier call,
+// and gains each mover placed.
 export function placeMovers<Kind extends string>(
   random: Random,
   geometry: MoverGeometry & { readonly zoneLength: number },
   caps: MoverCaps,
   grid: MoverGrid,
+  onScreen: OnScreen[],
   rows: readonly number[],
   quotas: readonly MoverQuota<Kind>[],
 ): PlacedMovers<Kind> {
-  const onScreen: OnScreen[] = [];
   const fits = (spot: Spot) => {
     const [start, end] = screenOf(spot);
     const { placement } = spot;
