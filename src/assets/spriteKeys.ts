@@ -171,7 +171,7 @@ export function standsOnGround(key: string): boolean {
 // walker and the tall encounters this wide and half again as tall, and tips, treats and
 // puddles this wide and half as tall. An object spanning n lanes is drawn n lanes wide less
 // the lane's spare width beside a 1-lane sprite.
-export const ROAD_SPRITE_SIZE = 56;
+export const ROAD_SPRITE_SIZE = 48;
 
 // A 1-lane road object's hit box side, independent of how big it is drawn: an object spanning
 // n lanes is hit n lanes wide less the lane's spare width beside this.

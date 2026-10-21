@@ -726,8 +726,8 @@
     "bands": [
       {
         "drawn": {
-          "bottom": 457,
-          "top": 354
+          "bottom": 458,
+          "top": 369
         },
         "hit": {
           "bottom": 459,
@@ -736,8 +736,8 @@
       },
       {
         "drawn": {
-          "bottom": 457,
-          "top": 354
+          "bottom": 458,
+          "top": 369
         },
         "hit": {
           "bottom": 459,
@@ -746,8 +746,8 @@
       },
       {
         "drawn": {
-          "bottom": 457,
-          "top": 352
+          "bottom": 458,
+          "top": 368
         },
         "hit": {
           "bottom": 459,
@@ -755,45 +755,45 @@
         }
       }
     ],
-    "collarHeight": 24,
-    "drawScale": 1.4,
+    "collarHeight": 21,
+    "drawScale": 1.2,
     "formations": [
       [
         {
           "dx": 0,
-          "footDy": -74
+          "footDy": -64
         }
       ],
       [
         {
-          "dx": -28,
-          "footDy": -74
+          "dx": -24,
+          "footDy": -64
         },
         {
-          "dx": 28,
-          "footDy": -70
+          "dx": 24,
+          "footDy": -60
         }
       ],
       [
         {
           "dx": 0,
-          "footDy": -76
+          "footDy": -65
         },
         {
-          "dx": -28,
-          "footDy": -69
+          "dx": -24,
+          "footDy": -59
         },
         {
-          "dx": 28,
-          "footDy": -64
+          "dx": 24,
+          "footDy": -55
         }
       ]
     ],
     "walkerFootY": 464,
     "walkerHands": {
-      "heightAboveFeet": 23,
-      "leftDx": -19,
-      "rightDx": 18
+      "heightAboveFeet": 20,
+      "leftDx": -16,
+      "rightDx": 16
     }
   },
   "regions": {
@@ -867,7 +867,7 @@
     }
   },
   "roadSprites": {
-    "drawSize": 56,
+    "drawSize": 48,
     "hitSize": 40
   },
   "scenes": {

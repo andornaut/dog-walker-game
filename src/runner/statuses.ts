@@ -162,7 +162,7 @@ export function dogDepthStep(dogKey: string, scale: number): ScaleStep {
 // How far below the dog's top opaque row, in screen pixels, a status loop's bottom-centre sits
 // at a depth step, so its lower rows overlap the head: STATUS_OVERLAY_LIFT at full size, scaled
 // and rounded down.
-export const STATUS_OVERLAY_LIFT = 8;
+export const STATUS_OVERLAY_LIFT = 7;
 
 export function statusOverlayLift(step: ScaleStep): number {
   return Math.floor(STATUS_OVERLAY_LIFT * step);

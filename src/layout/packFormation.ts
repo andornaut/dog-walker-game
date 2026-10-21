@@ -46,10 +46,10 @@ const DOG_BODY_HEIGHT = 26;
 const WALKER_FEET_CLEARANCE = 5;
 
 // The walker sprite's hands, relative to its feet, as drawn at the sprite size.
-export const WALKER_HANDS = { heightAboveFeet: 23, leftDx: -19, rightDx: 18 };
+export const WALKER_HANDS = { heightAboveFeet: 20, leftDx: -16, rightDx: 16 };
 // A dog's collar, above its feet, on every dog sprite at the sprite size: the highest collar
 // top.
-export const COLLAR_HEIGHT = 24;
+export const COLLAR_HEIGHT = 21;
 
 // The pack's vertical band, from the leading dog's head to the walker's feet, laid out by a
 // formation table at a body height and feet clearance.
