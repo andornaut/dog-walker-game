@@ -11,12 +11,18 @@ import {
   bowRightControl,
   curvePoint,
   downTail,
+  FIRED_LINE,
+  FIRED_LINE_FIT,
+  firedLineHeight,
   firedLineX,
   FIRING_EVENT,
   FIRING_PARTS,
   type FiringCue,
   firingLayout,
   firingShowMs,
+  LOW_CHIP,
+  LOW_CHIP_FIT,
+  lowChipPlace,
   lowHeartDogs,
   MOMENTS,
   newlyLow,
@@ -41,7 +47,7 @@ import { fillNames } from "../text/lines";
 import { addDisplayText } from "./displayText";
 import { drawFramedRect, drawRing } from "./draw";
 import { PALETTE } from "./palette";
-import { addPixelText, placePixelText } from "./pixelText";
+import { addPixelText, fitPixelText, pixelFontMetrics, placePixelText } from "./pixelText";
 import type { RunScene } from "./RunScene";
 import { firstTag, playEffect, playTag } from "./sprites";
 import { addPanel, artFits, tagFrame } from "./uiKit";
@@ -54,7 +60,6 @@ const DEPTH = 50;
 const FACE = { fadeMs: 150, popMs: 160, scale: 2, size: 32 };
 const POP = { key: "fx-fired-pop", scale: 2, tag: "play" };
 const PLATE = { corner: 8, dropIn: 8, dropMs: 120, key: "ui-fired-plate" };
-const LINE = { maxWidth: 200, padding: 6 };
 // Each fired line's bubble takes its own depth pair over the moments, panel then text, so two
 // lines up at once never interleave. The tail is 8px wide.
 const LINE_DEPTH = DEPTH + 2;
@@ -65,7 +70,6 @@ const PAYOUT_LABEL = { cap: 8, inkX: 9, inkY: 3, key: "ui-payout-label" };
 const PAYOUT_LABEL_END = 5;
 const COIN = { key: "fx-coin-fly", tag: "spin" };
 const TREAT_POP = { fallback: "fx-sparkle", key: "fx-treat-pop", tag: "play" };
-const LOW_CHIP = { height: 20, rise: 8 };
 const RIM = { minAlpha: 0.35, pulseMs: 600, width: 2 };
 
 interface FiredLine {
@@ -388,11 +392,11 @@ export class HudFeedback {
   private addLine(line: FiredLine): boolean {
     const label = addPixelText(this.scene, 0, 0, line.text, {
       color: PALETTE.plum,
-      maxWidth: LINE.maxWidth - 2 * LINE.padding,
-      scale: 2,
+      scale: FIRED_LINE.scale,
     });
-    const width = Math.ceil(label.width) + 2 * LINE.padding;
-    const height = Math.ceil(label.height) + 2 * LINE.padding;
+    const { lines } = fitPixelText(label, FIRED_LINE_FIT, 0, 0);
+    const width = Math.ceil(label.width) + 2 * FIRED_LINE.padding;
+    const height = firedLineHeight(pixelFontMetrics(this.scene, "body"), lines.length);
     const downArt = downTail((key) => this.scene.textures.exists(key));
     const tailX = line.tail.x - (downArt?.tipX ?? LINE_TAIL_WIDTH / 2);
     const open = this.lines.map(({ rect }) => rect);
@@ -407,7 +411,7 @@ export class HudFeedback {
     while (this.lines.some((shown) => shown.depth === depth)) {
       depth += 2;
     }
-    placePixelText(label, x + LINE.padding, y + LINE.padding);
+    placePixelText(label, x + FIRED_LINE.padding, y + FIRED_LINE.padding);
     const parts: GameObjects.GameObject[] = [addPanel(this.scene, rect, "ui-quip").setDepth(depth)];
     if (downArt !== undefined) {
       parts.push(
@@ -587,19 +591,19 @@ export class HudFeedback {
     }
     this.hooks.popOwner(dog, "worried", MOMENTS.lowCueMs);
     const line = fillNames(gameData.runText.lowHearts, { owner: gameData.dogs[dog].owner.name });
-    const text = addPixelText(this.scene, 2, 2, line, {
-      color: PALETTE.darkRed,
-      scale: 2,
-    });
+    const text = addPixelText(this.scene, 0, 0, line, { color: PALETTE.darkRed, scale: 2 });
+    const { style } = fitPixelText(text, LOW_CHIP_FIT, 0, 0);
+    const shown = { scale: style.scale, width: Math.ceil(text.width) };
+    const body = pixelFontMetrics(this.scene, "body");
+    const place = lowChipPlace(body, SCREEN_CONFIG.width, rect, shown);
+    placePixelText(text, place.text.x - place.box.x, place.text.y - place.box.y);
     const box = this.scene.add.graphics();
     drawFramedRect(
       box,
       { border: PALETTE.plum, fill: PALETTE.cream },
-      { height: LOW_CHIP.height, width: Math.ceil(text.width) + 4, x: 0, y: -4 },
+      { ...place.box, x: 0, y: 0 },
     );
-    const chip = this.scene.add
-      .container(rect.x + 2, rect.y - LOW_CHIP.height - 2, [box, text])
-      .setDepth(DEPTH);
+    const chip = this.scene.add.container(place.box.x, place.box.y, [box, text]).setDepth(DEPTH);
     if (!still) {
       this.tween({ duration: MOMENTS.lowCueMs, targets: chip, y: chip.y - LOW_CHIP.rise });
     }

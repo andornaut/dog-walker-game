@@ -78,3 +78,9 @@ export function fontMetrics(font: {
 export function inkRowsFromCapTop(metrics: FontMetrics): number {
   return metrics.inkBottom - metrics.capTop;
 }
+
+// The rows from the first line's capitals to the last line's lowest ink, for lines lines a
+// line height apart (at least one).
+export function inkRowsOfLines(metrics: FontMetrics, lines: number): number {
+  return (Math.max(1, lines) - 1) * metrics.lineHeight + inkRowsFromCapTop(metrics);
+}

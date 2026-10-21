@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
 import { cents, clampHearts } from "../rules/units";
 import type { Pack } from "../state/runState";
+import { bodyTextWidth } from "../testing/bodyFont";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fillNames } from "../text/lines";
+import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { plainMarks } from "../ui/pixelFont";
+import { hudLanes } from "./hudLanes";
 import {
   arcControl,
   bowRightControl,
@@ -12,10 +19,16 @@ import {
   DOWN_TAILS,
   downTail,
   endScreenDelayMs,
+  FIRED_LINE,
+  FIRED_LINE_FIT,
+  firedLineHeight,
   firedLineX,
   FIRING_PARTS,
   firingLayout,
   firingShowMs,
+  LOW_CHIP,
+  LOW_CHIP_FIT,
+  lowChipPlace,
   lowHeartDogs,
   MOMENTS,
   newlyLow,
@@ -232,5 +245,55 @@ describe("curvePoint", () => {
     const bank = { x: 16, y: 21 };
     const middle = curvePoint(roof, bowRightControl(roof, bank, 48), bank, 0.5);
     expect(middle).toEqual({ x: 28 + 48, y: 117.5 });
+  });
+});
+
+const BODY = fontFileMetrics("font-body");
+const SLOTS = screenLayout(SCREEN_CONFIG).dogSlots;
+const OWNERS = Object.values(gameData.dogs).map(({ owner }) => owner.name);
+
+// Every owner's low-hearts line, over every card, fits on one line on a chip kept on screen,
+// the chip as tall as the body font's ink at the line's scale and clear of the card's top.
+describe("the low-hearts chip", () => {
+  it.each(
+    SLOTS.flatMap((slot, i) =>
+      OWNERS.map((owner) => [i, fillNames(gameData.runText.lowHearts, { owner }), slot] as const),
+    ),
+  )("over card %i keeps %j on screen", (_i, text, slot) => {
+    const plain = plainMarks(text);
+    const fitted = fitInFont("font-body", LOW_CHIP_FIT.styles, LOW_CHIP_FIT.room, plain);
+    expect(fitted.lines).toHaveLength(1);
+    expect(fitted.widest).toBeLessThanOrEqual(LOW_CHIP_FIT.room);
+    const { scale } = fitted.style;
+    const width = Math.ceil(bodyTextWidth(scale, plain));
+    const { box, text: caps } = lowChipPlace(BODY, SCREEN_CONFIG.width, slot, { scale, width });
+    expect(box.x).toBeGreaterThanOrEqual(LOW_CHIP.margin);
+    expect(box.x + box.width).toBeLessThanOrEqual(SCREEN_CONFIG.width - LOW_CHIP.margin);
+    expect(caps.y - box.y).toBe(LOW_CHIP.padTop);
+    const inkBottom = caps.y + inkRowsFromCapTop(BODY) * scale;
+    expect(box.y + box.height - inkBottom).toBe(LOW_CHIP.padBottom);
+    expect(box.y + box.height).toBe(slot.y - LOW_CHIP.gap);
+  });
+});
+
+// Every owner's fired line wraps onto the bubble's lines at 2x, and the bubble, grown up from
+// over the face, stays under the bank's lane.
+describe("a fired line's bubble", () => {
+  const lanes = hudLanes(BODY, screenLayout(SCREEN_CONFIG));
+  const fired = Object.values(gameData.quips).flatMap(({ fired: lines }) => lines);
+  it.each(fired)("holds %j", (text) => {
+    const plain = plainMarks(text);
+    const fitted = fitInFont("font-body", FIRED_LINE_FIT.styles, FIRED_LINE_FIT.room, plain);
+    expect(fitted.lines.length).toBeLessThanOrEqual(FIRED_LINE.lines);
+    expect(fitted.widest).toBeLessThanOrEqual(FIRED_LINE_FIT.room);
+    for (const slot of SLOTS) {
+      const top = firingLayout(slot).line.y - firedLineHeight(BODY, fitted.lines.length);
+      expect(top).toBeGreaterThanOrEqual(lanes.bank.y + lanes.bank.height);
+    }
+  });
+
+  it("pads the first line's capitals and the last line's lowest ink alike", () => {
+    const ink = (BODY.lineHeight + inkRowsFromCapTop(BODY)) * FIRED_LINE.scale;
+    expect(firedLineHeight(BODY, 2)).toBe(2 * FIRED_LINE.padding + ink);
   });
 });

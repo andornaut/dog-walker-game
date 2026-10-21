@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { fontMetrics, inkRowsFromCapTop, parseBitmapFont } from "./fontMetrics";
+import { fontMetrics, inkRowsFromCapTop, inkRowsOfLines, parseBitmapFont } from "./fontMetrics";
 
 // A font with a capital H on rows 2 to 7, a g reaching row 9 and a kerned pair.
 const FNT = `<?xml version="1.0"?>
@@ -38,5 +38,16 @@ describe("fontMetrics", () => {
     const metrics = fontMetrics(parseBitmapFont(FNT));
     expect(metrics).toEqual({ capHeight: 6, capTop: 2, inkBottom: 10, lineHeight: 11 });
     expect(inkRowsFromCapTop(metrics)).toBe(8);
+  });
+});
+
+describe("inkRowsOfLines", () => {
+  const metrics = fontMetrics(parseBitmapFont(FNT));
+  it.each([
+    [0, 8],
+    [1, 8],
+    [3, 2 * 11 + 8],
+  ])("spans %i lines' capitals to their lowest ink in %i rows", (lines, rows) => {
+    expect(inkRowsOfLines(metrics, lines)).toBe(rows);
   });
 });

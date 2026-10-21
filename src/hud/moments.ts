@@ -1,7 +1,10 @@
+import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import type { Point, Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import type { Cents } from "../rules/units";
 import type { Pack } from "../state/runState";
+import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { ChangeLabel } from "./hudView";
 import { cashTop, DOG_CARD, OWNER_TAB, TITLE_CAP_ROWS, WALK_BAR } from "./walkHud";
 
@@ -187,6 +190,60 @@ export function lowHeartDogs(pack: Pack): DogId[] {
 // The dogs low now that were not low before: each gets the one-off cue.
 export function newlyLow(before: readonly DogId[], now: readonly DogId[]): DogId[] {
   return now.filter((dog) => !before.includes(dog));
+}
+
+// The low-hearts chip over its card, then rising rise pixels: its line on one line on a cream
+// box gap over the card's top, from dx in from the card's left but kept margin inside the
+// screen. The text sits padX in from the box's sides, its capitals padTop under the box's top
+// and its lowest ink padBottom over the box's bottom, in the body font's rows.
+export const LOW_CHIP = {
+  dx: 2,
+  gap: 6,
+  margin: 2,
+  padBottom: 3,
+  padTop: 5,
+  padX: 2,
+  rise: 8,
+} as const;
+
+// The line in the first of TEXT_FIT_STYLES whose ink fits the screen less the chip's margin
+// and padding each side. The box holds the label's width, which counts the last glyph's
+// trailing pixel.
+export const LOW_CHIP_FIT = {
+  room: SCREEN_CONFIG.width - 2 * (LOW_CHIP.margin + LOW_CHIP.padX) - 1,
+  styles: TEXT_FIT_STYLES,
+} as const;
+
+// The chip's box and its text's capitals' top-left, for a line width wide at scale over slot.
+export function lowChipPlace(
+  body: FontMetrics,
+  screenWidth: number,
+  slot: Pick<Rect, "x" | "y">,
+  text: { scale: number; width: number },
+): { box: Rect; text: Point } {
+  const { dx, gap, margin, padBottom, padTop, padX } = LOW_CHIP;
+  const width = text.width + 2 * padX;
+  const height = padTop + inkRowsFromCapTop(body) * text.scale + padBottom;
+  const x = Math.max(margin, Math.min(slot.x + dx, screenWidth - margin - width));
+  const y = slot.y - gap - height;
+  return { box: { height, width, x, y }, text: { x: x + padX, y: y + padTop } };
+}
+
+// A fired line's bubble: its line wrapped onto up to lines lines at scale, no wider than
+// maxWidth less padding each side, its first line's capitals padding under the bubble's top
+// and its last line's lowest ink padding over its bottom, a line of the body font apart.
+export const FIRED_LINE = { lines: 3, maxWidth: 200, padding: 6, scale: 2 } as const;
+
+// The bubble holds the label's width, which counts the last glyph's trailing pixel.
+export const FIRED_LINE_FIT = {
+  room: FIRED_LINE.maxWidth - 2 * FIRED_LINE.padding - 1,
+  styles: [{ letterSpacing: 0, lines: FIRED_LINE.lines, scale: FIRED_LINE.scale }],
+} as const satisfies { room: number; styles: readonly TextFitStyle[] };
+
+// A fired line's bubble's height for lines lines.
+export function firedLineHeight(body: FontMetrics, lines: number): number {
+  const { padding, scale } = FIRED_LINE;
+  return padding + inkRowsOfLines(body, lines) * scale + padding;
 }
 
 export interface PayoutFlight extends PayoutCue {
