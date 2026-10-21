@@ -60,44 +60,53 @@ const all: Picks = { dog, gear, walker };
 
 describe("a tap on the one item of a kind", () => {
   // Walker, dogs and Pocket toggle alike; the Pocket is optional for Start walk.
-  it.each<{ after: Picks; kind: Kind; ready: boolean; start: Picks }>([
-    { after: { ...none, dog }, kind: "dog", ready: false, start: none },
-    { after: { ...all, dog: null }, kind: "dog", ready: false, start: all },
-    { after: { ...none, dog, walker }, kind: "dog", ready: true, start: { ...none, walker } },
-    { after: { ...none, gear }, kind: "gear", ready: false, start: none },
-    { after: { ...all, gear: null }, kind: "gear", ready: true, start: all },
-    { after: { ...none, walker }, kind: "walker", ready: false, start: none },
-    { after: { ...all, walker: null }, kind: "walker", ready: false, start: all },
-    { after: { ...none, dog, walker }, kind: "walker", ready: true, start: { ...none, dog } },
-  ])("$kind from $start gives $after, ready $ready", ({ after, kind, ready, start }) => {
-    const result = tap[kind](start);
-    expect(result).toEqual(after);
-    expect(startReady(sectionsOf(result))).toBe(ready);
+  it("toggles each kind alike, Start walk ready with a dog and a walker", () => {
+    const cases: readonly { after: Picks; kind: Kind; ready: boolean; start: Picks }[] = [
+      { after: { ...none, dog }, kind: "dog", ready: false, start: none },
+      { after: { ...all, dog: null }, kind: "dog", ready: false, start: all },
+      { after: { ...none, dog, walker }, kind: "dog", ready: true, start: { ...none, walker } },
+      { after: { ...none, gear }, kind: "gear", ready: false, start: none },
+      { after: { ...all, gear: null }, kind: "gear", ready: true, start: all },
+      { after: { ...none, walker }, kind: "walker", ready: false, start: none },
+      { after: { ...all, walker: null }, kind: "walker", ready: false, start: all },
+      { after: { ...none, dog, walker }, kind: "walker", ready: true, start: { ...none, dog } },
+    ];
+    for (const { after, kind, ready, start } of cases) {
+      const result = tap[kind](start);
+      expect(result).toEqual(after);
+      expect(startReady(sectionsOf(result))).toBe(ready);
+    }
   });
 
-  it.each<{ kind: Kind; section: SectionId }>([
-    { kind: "dog", section: "dogs" },
-    { kind: "gear", section: "pocket" },
-    { kind: "walker", section: "walker" },
-  ])("leaves the $section section neutral once its pick is dropped", ({ kind, section }) => {
-    expect(sectionsOf(tap[kind](all))[section].state).toBe("neutral");
+  it("leaves each kind's section neutral once its pick is dropped", () => {
+    const cases: readonly { kind: Kind; section: SectionId }[] = [
+      { kind: "dog", section: "dogs" },
+      { kind: "gear", section: "pocket" },
+      { kind: "walker", section: "walker" },
+    ];
+    for (const { kind, section } of cases) {
+      expect(sectionsOf(tap[kind](all))[section].state).toBe("neutral");
+    }
   });
 });
 
 describe("togglePick", () => {
-  it.each<{
-    capacity: number;
-    expected: ReturnType<typeof togglePick<string>>;
-    id: string;
-    picked: string[];
-  }>([
-    { capacity: 1, expected: { kind: "picked", picked: ["a"] }, id: "a", picked: [] },
-    { capacity: 1, expected: { kind: "picked", picked: [] }, id: "a", picked: ["a"] },
-    { capacity: 1, expected: { kind: "picked", picked: ["b"] }, id: "b", picked: ["a"] },
-    { capacity: 2, expected: { kind: "picked", picked: ["a", "b"] }, id: "b", picked: ["a"] },
-    { capacity: 2, expected: { kind: "picked", picked: ["b"] }, id: "a", picked: ["a", "b"] },
-    { capacity: 2, expected: { kind: "full" }, id: "c", picked: ["a", "b"] },
-  ])("capacity $capacity, picked $picked, tap $id", ({ capacity, expected, id, picked }) => {
-    expect(togglePick(capacity, picked, id)).toEqual(expected);
+  it("picks, drops, swaps at capacity 1 and refuses past a fuller capacity", () => {
+    const cases: readonly {
+      capacity: number;
+      expected: ReturnType<typeof togglePick<string>>;
+      id: string;
+      picked: string[];
+    }[] = [
+      { capacity: 1, expected: { kind: "picked", picked: ["a"] }, id: "a", picked: [] },
+      { capacity: 1, expected: { kind: "picked", picked: [] }, id: "a", picked: ["a"] },
+      { capacity: 1, expected: { kind: "picked", picked: ["b"] }, id: "b", picked: ["a"] },
+      { capacity: 2, expected: { kind: "picked", picked: ["a", "b"] }, id: "b", picked: ["a"] },
+      { capacity: 2, expected: { kind: "picked", picked: ["b"] }, id: "a", picked: ["a", "b"] },
+      { capacity: 2, expected: { kind: "full" }, id: "c", picked: ["a", "b"] },
+    ];
+    for (const { capacity, expected, id, picked } of cases) {
+      expect(togglePick(capacity, picked, id)).toEqual(expected);
+    }
   });
 });

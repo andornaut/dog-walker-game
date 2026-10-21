@@ -24,15 +24,16 @@ const overlaps = (a: Rect, b: Rect) =>
   a.x < b.x + b.width && b.x < a.x + a.width && a.y < b.y + b.height && b.y < a.y + a.height;
 
 describe("bubbleRect", () => {
-  it.each([1, 2, 3, 4, 5, 8].flatMap((lines) => [60, 120, 200].map((width) => [lines, width])))(
-    "keeps a %i line bubble %i wide clear of the Pet shop's board",
-    (lines, width) => {
-      const height = lines * 12 + 6;
-      const rect = bubbleRect(board, sizes, { x: walkerAtGate.x, y: top }, { height, width });
-      expect(overlaps(rect, board)).toBe(false);
-      expect(rect.x).toBeGreaterThanOrEqual(sizes.margin);
-    },
-  );
+  it("keeps a bubble of any size clear of the Pet shop's board", () => {
+    for (const lines of [1, 2, 3, 4, 5, 8]) {
+      for (const width of [60, 120, 200]) {
+        const height = lines * 12 + 6;
+        const rect = bubbleRect(board, sizes, { x: walkerAtGate.x, y: top }, { height, width });
+        expect(overlaps(rect, board), `${lines} lines, ${width} wide`).toBe(false);
+        expect(rect.x).toBeGreaterThanOrEqual(sizes.margin);
+      }
+    }
+  });
 
   it("leaves a bubble that stops above the board where it is centred", () => {
     const rect = bubbleRect(board, sizes, { x: 180, y: top }, { height: 10, width: 100 });
@@ -91,31 +92,34 @@ describe("the walker's speech", () => {
   const speeches = [...messages, ...joined].flatMap((parts) => [parts, [text.unsaved, ...parts]]);
   const width = (line: string) => bodyTextWidth(2, plainMarks(line));
 
-  it.each(speeches.map((parts) => [parts.join(" / "), parts] as const))("says %j", (_, parts) => {
-    const lines = speechLines(width, SPEECH_ROOM, HOME_LAYOUT.speech.lines, parts);
-    // Only a bought dog's parting line may be left out, after the warning and its message.
-    const kept = parts.length === 3 ? parts.slice(0, 2) : parts;
-    const whole = kept.flatMap((part) => wrapWords(width, SPEECH_ROOM, part));
-    expect(lines.slice(0, whole.length)).toEqual(whole);
-    const widest = Math.ceil(Math.max(...lines.map(width)));
-    expect(widest).toBeLessThanOrEqual(SPEECH_ROOM);
-    const size = {
-      height: speechBubbleHeight(body, lines.length),
-      width: widest + 2 * HOME_LAYOUT.speech.padX,
-    };
-    const rect = bubbleRect(board, HOME_LAYOUT.speech, { x: walkerAtGate.x, y: top }, size);
-    expect(overlaps(rect, board)).toBe(false);
-    expect(rect.x).toBeGreaterThanOrEqual(HOME_LAYOUT.speech.margin);
+  it("says every speech inside its bubble, clear of the board", () => {
+    const offenders = speeches.filter((parts) => {
+      const lines = speechLines(width, SPEECH_ROOM, HOME_LAYOUT.speech.lines, parts);
+      // Only a bought dog's parting line may be left out, after the warning and its message.
+      const kept = parts.length === 3 ? parts.slice(0, 2) : parts;
+      const whole = kept.flatMap((part) => wrapWords(width, SPEECH_ROOM, part));
+      const widest = Math.ceil(Math.max(...lines.map(width)));
+      const size = {
+        height: speechBubbleHeight(body, lines.length),
+        width: widest + 2 * HOME_LAYOUT.speech.padX,
+      };
+      const rect = bubbleRect(board, HOME_LAYOUT.speech, { x: walkerAtGate.x, y: top }, size);
+      return (
+        lines.slice(0, whole.length).join("\n") !== whole.join("\n") ||
+        widest > SPEECH_ROOM ||
+        overlaps(rect, board) ||
+        rect.x < HOME_LAYOUT.speech.margin
+      );
+    });
+    expect(offenders.map((parts) => parts.join(" / "))).toEqual([]);
   });
 });
 
 describe("speechLines", () => {
-  const chars = (line: string) => line.length;
-  it.each<[string, string[], string[]]>([
-    ["starts each paragraph on a new line", ["ab", "cd"], ["ab", "cd"]],
-    ["wraps a paragraph at spaces", ["ab cd ef"], ["ab", "cd", "ef"]],
-    ["leaves out a paragraph past the last line whole", ["ab cd", "ef gh"], ["ab", "cd"]],
-  ])("%s", (_name, paragraphs, lines) => {
-    expect(speechLines(chars, 3, 3, paragraphs)).toEqual(lines);
+  it("starts each paragraph on a new line, wraps at spaces and leaves out one past the last line", () => {
+    const chars = (line: string) => line.length;
+    expect(speechLines(chars, 3, 3, ["ab", "cd"])).toEqual(["ab", "cd"]);
+    expect(speechLines(chars, 3, 3, ["ab cd ef"])).toEqual(["ab", "cd", "ef"]);
+    expect(speechLines(chars, 3, 3, ["ab cd", "ef gh"])).toEqual(["ab", "cd"]);
   });
 });

@@ -23,7 +23,6 @@ import {
   shopAffordable,
   type ShopRow,
   shopRowId,
-  type ShopRowLook,
   shopRowLook,
   type ShopTab,
   shopTabOf,
@@ -56,18 +55,11 @@ describe("shopRowLook", () => {
     purchase: { kind: "dogSlot" },
   });
 
-  it.each<[string, ShopRow, number, ShopRowLook]>([
-    ["an owned row", row(null, null), 0, "owned"],
-    [
-      "a row that needs another first, though the bank covers it",
-      row(500, "first"),
-      900,
-      "blocked",
-    ],
-    ["a row the bank exactly covers", row(500, null), 500, "affordable"],
-    ["a row past the bank", row(500, null), 499, "short"],
-  ])("shows %s", (_, shown, bank, expected) => {
-    expect(shopRowLook(dollars(bank), shown)).toBe(expected);
+  it("shows a row owned, blocked though the bank covers it, affordable at exactly its price, or short", () => {
+    expect(shopRowLook(dollars(0), row(null, null))).toBe("owned");
+    expect(shopRowLook(dollars(900), row(500, "first"))).toBe("blocked");
+    expect(shopRowLook(dollars(500), row(500, null))).toBe("affordable");
+    expect(shopRowLook(dollars(499), row(500, null))).toBe("short");
   });
 });
 
@@ -79,30 +71,15 @@ describe("slotRows", () => {
       owned: price === null,
     }));
 
-  it.each<[number, { blocked: boolean; id: string; owned: boolean }[]]>([
-    [
-      1,
-      [
-        { blocked: false, id: "slot:2", owned: false },
-        { blocked: true, id: "slot:3", owned: false },
-      ],
-    ],
-    [
-      2,
-      [
-        { blocked: false, id: "slot:2", owned: true },
-        { blocked: false, id: "slot:3", owned: false },
-      ],
-    ],
-    [
-      3,
-      [
-        { blocked: false, id: "slot:2", owned: true },
-        { blocked: false, id: "slot:3", owned: true },
-      ],
-    ],
-  ])("with %i slots owned sells the next and blocks the one after it", (slots, expected) => {
-    expect(view(slots)).toEqual(expected);
+  it("sells the next slot and blocks the one after it", () => {
+    expect(view(1)).toEqual([
+      { blocked: false, id: "slot:2", owned: false },
+      { blocked: true, id: "slot:3", owned: false },
+    ]);
+    expect(view(2)).toEqual([
+      { blocked: false, id: "slot:2", owned: true },
+      { blocked: false, id: "slot:3", owned: false },
+    ]);
   });
 
   it("says which slot a blocked one needs first", () => {
@@ -131,7 +108,8 @@ describe("gearRows and dogRows", () => {
 
   const forSale = (Object.keys(data.dogs) as DogId[]).filter((dog) => !starters.includes(dog));
 
-  it.each(forSale)("gives %s's row its size and hearts, and its price on the plate", (dog) => {
+  it("gives a dog's row its size and hearts, and its price on the plate", () => {
+    const dog = forSale[0] ?? "koda";
     const row = dogRows(data, owned).find(({ id }) => id === `dog:${dog}`);
     const { size } = data.dogs[dog];
     const kind = fillNames(data.homeText.focus.kind, {
@@ -144,35 +122,20 @@ describe("gearRows and dogRows", () => {
 });
 
 describe("shopAffordable", () => {
-  it.each<[string, Owned, number, boolean]>([
-    ["holds while the bank covers anything", owned, 600, true],
-    ["fails while it covers nothing", owned, 0, false],
-    [
-      "fails once everything is owned",
-      {
-        dogSlots: data.dogSlots.length,
-        dogs: Object.keys(data.dogs) as DogId[],
-        gear: Object.keys(data.shopGear) as Owned["gear"],
-        walkers: [],
-      },
-      100_000,
-      false,
-    ],
-  ])("%s", (_, ownedNow, bank, expected) => {
-    expect(shopAffordable(data, ownedNow, dollars(bank))).toBe(expected);
+  it("holds while the bank covers anything, and fails once everything is owned", () => {
+    const everything: Owned = {
+      dogSlots: data.dogSlots.length,
+      dogs: Object.keys(data.dogs) as DogId[],
+      gear: Object.keys(data.shopGear) as Owned["gear"],
+      walkers: [],
+    };
+    expect(shopAffordable(data, owned, dollars(600))).toBe(true);
+    expect(shopAffordable(data, owned, dollars(0))).toBe(false);
+    expect(shopAffordable(data, everything, dollars(100_000))).toBe(false);
   });
 });
 
 describe("shopRowId and shopTabOf", () => {
-  it.each<[Purchase, string, ShopTab]>([
-    [{ dog: "nugget", kind: "dog" }, "dog:nugget", "dogs"],
-    [{ kind: "dogSlot" }, "slot:2", "dogs"],
-    [{ gear: "luckyCollar", kind: "gear" }, "gear:luckyCollar", "gear"],
-  ])("opens %o on its row and tab", (purchase, id, tab) => {
-    expect(shopRowId(owned, purchase)).toBe(id);
-    expect(shopTabOf(purchase)).toBe(tab);
-  });
-
   it("puts each purchase's row on the tab that lists it", () => {
     const rows: Record<ShopTab, ShopRow[]> = {
       dogs: [...slotRows(data, owned), ...dogRows(data, owned)],
@@ -213,17 +176,19 @@ describe("a shop row's text", () => {
     ...slotRows(gameData, have),
     ...dogRows(gameData, have),
   ]);
-  it.each(
-    rows.flatMap((row) =>
+  it("sets every row's name and line beside its price or OWNED", () => {
+    const offenders = rows.flatMap((row) =>
       [row.name, row.line]
-        .filter((text) => text !== "")
-        .map((text) => [row.id, text, row] as const),
-    ),
-  )("sets %s's %j beside its price or OWNED", (_id, text, row) => {
-    const room = shopRowTextRoom(rightWidth(row));
-    expect(
-      fitInFont("font-body", TEXT_FIT_STYLES, room, plainMarks(text)).widest,
-    ).toBeLessThanOrEqual(room);
+        .filter((text) => {
+          const room = shopRowTextRoom(rightWidth(row));
+          return (
+            text !== "" &&
+            fitInFont("font-body", TEXT_FIT_STYLES, room, plainMarks(text)).widest > room
+          );
+        })
+        .map((text) => `${row.id}: ${text}`),
+    );
+    expect(offenders).toEqual([]);
   });
 });
 

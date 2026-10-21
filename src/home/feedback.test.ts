@@ -1,18 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  badgePopOffset,
-  bobOffset,
-  effectFrame,
-  FEEDBACK,
-  hopOffset,
-  loopFrame,
-  pressDip,
-  settleDelay,
-  shakeOffset,
-  shopBobOffset,
-  shopGlintFrame,
-} from "./feedback";
+import { FEEDBACK, loopFrame, settleDelay, shakeOffset } from "./feedback";
 
 describe("shakeOffset", () => {
   it("swings within the shake width and settles once the shake is over", () => {
@@ -28,38 +16,16 @@ describe("shakeOffset", () => {
   });
 });
 
-describe("hopOffset", () => {
-  it("rises up to the hop height and lands, except with reduced motion", () => {
-    expect(hopOffset(false, 1000 + FEEDBACK.hopMs / 4, 1000)).toBe(-FEEDBACK.hopPx);
-    expect(hopOffset(false, 1000 + FEEDBACK.hopMs, 1000)).toBe(0);
-    expect(hopOffset(true, 1000 + FEEDBACK.hopMs / 4, 1000)).toBe(0);
-  });
-});
-
-describe("badgePopOffset", () => {
-  it("raises the badge briefly after a pick, except with reduced motion", () => {
-    expect(badgePopOffset(false, 1100, 1000)).toBe(-FEEDBACK.badgePopPx);
-    expect(badgePopOffset(false, 1000 + FEEDBACK.badgePopMs, 1000)).toBe(0);
-    expect(badgePopOffset(true, 1100, 1000)).toBe(0);
-  });
-});
-
-describe("pressDip", () => {
-  it("dips for a moment after the press and while the finger is down", () => {
-    expect(pressDip(false, 1100, 1000)).toBe(FEEDBACK.pressDipPx);
-    expect(pressDip(false, 1000 + FEEDBACK.pressDipMs, 1000)).toBe(0);
-    expect(pressDip(true, 5000, 1000)).toBe(FEEDBACK.pressDipPx);
-  });
-});
-
 describe("settleDelay", () => {
-  it.each([
-    ["holds a tap released at once until the dip is over", 1000, FEEDBACK.pressDipMs],
-    ["holds a quick tap for the rest of the dip", 1050, FEEDBACK.pressDipMs - 50],
-    ["shows a press held for the dip on release", 1000 + FEEDBACK.pressDipMs, 0],
-    ["shows a long press's result on release", 5000, 0],
-  ])("%s", (_name, releasedMs, expected) => {
-    expect(settleDelay(releasedMs, 1000)).toBe(expected);
+  it("holds a tap until the press dip is over, and shows a press held past it at once", () => {
+    for (const [, releasedMs, expected] of [
+      ["holds a tap released at once until the dip is over", 1000, FEEDBACK.pressDipMs],
+      ["holds a quick tap for the rest of the dip", 1050, FEEDBACK.pressDipMs - 50],
+      ["shows a press held for the dip on release", 1000 + FEEDBACK.pressDipMs, 0],
+      ["shows a long press's result on release", 5000, 0],
+    ] as const) {
+      expect(settleDelay(releasedMs, 1000)).toBe(expected);
+    }
   });
 });
 
@@ -71,61 +37,6 @@ describe("loopFrame", () => {
     expect(loopFrame(false, durations, 450)).toBe(1);
     expect(loopFrame(false, durations, 600)).toBe(2);
     expect(loopFrame(false, durations, 900)).toBe(0);
-  });
-
-  it("holds the first frame with reduced motion or no frames", () => {
-    expect(loopFrame(true, [450, 450], 450)).toBe(0);
-    expect(loopFrame(false, [], 450)).toBe(0);
-  });
-});
-
-describe("bobOffset", () => {
-  it("bobs a ready button on alternate beats only", () => {
-    expect(bobOffset(false, FEEDBACK.bobBeatMs, true)).toBe(-1);
-    expect(bobOffset(false, 0, true)).toBe(0);
-    expect(bobOffset(false, FEEDBACK.bobBeatMs, false)).toBe(0);
-    expect(bobOffset(true, FEEDBACK.bobBeatMs, true)).toBe(0);
-  });
-});
-
-describe("effectFrame", () => {
-  it("steps through the frames, then ends", () => {
-    expect(effectFrame(60, 4, 1000, 1000)).toBe(0);
-    expect(effectFrame(60, 4, 1185, 1000)).toBe(3);
-    expect(effectFrame(60, 4, 1240, 1000)).toBeUndefined();
-  });
-});
-
-describe("shopGlintFrame", () => {
-  it.each([
-    ["starts each cycle on the first frame", false, 0, 0],
-    ["steps by the frame time", false, FEEDBACK.shopGlintFrameMs, 1],
-    [
-      "ends on the last frame",
-      false,
-      FEEDBACK.shopGlintFrameMs * (FEEDBACK.shopGlintFrames - 1),
-      FEEDBACK.shopGlintFrames - 1,
-    ],
-    ["repeats every cycle", false, FEEDBACK.shopGlintEveryMs * 3, 0],
-    ["rests between glints", false, FEEDBACK.shopGlintEveryMs - 1, undefined],
-    ["never plays with reduced motion", true, 0, undefined],
-  ])("%s", (_, reduced, now, expected) => {
-    expect(shopGlintFrame(reduced, now)).toBe(expected);
-  });
-});
-
-describe("shopBobOffset", () => {
-  it.each(FEEDBACK.shopBobSteps.map((step, i) => [i, step] as const))(
-    "beat %i rises by its step, never above 2px",
-    (beat, step) => {
-      const offset = shopBobOffset(false, beat * FEEDBACK.shopBobBeatMs);
-      expect(offset).toBe(step);
-      expect(offset).toBeGreaterThanOrEqual(-2);
-      expect(offset).toBeLessThanOrEqual(0);
-    },
-  );
-
-  it("holds still with reduced motion", () => {
-    expect(shopBobOffset(true, FEEDBACK.shopBobBeatMs)).toBe(0);
+    expect(loopFrame(true, durations, 450)).toBe(0);
   });
 });

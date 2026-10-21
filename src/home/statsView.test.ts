@@ -24,11 +24,10 @@ describe("overallRows", () => {
       { label: words.outcomes.wentHome, value: "2" },
       { label: words.outcomes.noDogs, value: "1" },
     ]);
-  });
-
-  it("names no owner before anyone has fired you", () => {
-    const { overall } = overallRows(data, newPlayerSave.stats);
-    expect(overall).toContainEqual({ label: words.overall.timesFired, value: "0" });
+    expect(overallRows(data, newPlayerSave.stats).overall).toContainEqual({
+      label: words.overall.timesFired,
+      value: "0",
+    });
   });
 });
 
@@ -45,11 +44,7 @@ describe("dogRows", () => {
       zonesFinished: 12,
     });
     expect(rows.find((row) => row.dog === "duchess")).toMatchObject({ walks: 0 });
-  });
-
-  it("keeps a dog with stats the player no longer owns", () => {
-    const save = veteranSave();
-    const rows = dogRows(data, { dogs: [] }, save.stats);
-    expect(rows.map((row) => row.dog).sort()).toEqual(["biscuit", "koda"]);
+    const unowned = dogRows(data, { dogs: [] }, save.stats);
+    expect(unowned.map((row) => row.dog).sort()).toEqual(["biscuit", "koda"]);
   });
 });

@@ -10,18 +10,12 @@ describe("porchOwners", () => {
     (dog) => gameData.dogs[dog].unlock === "start",
   );
 
-  it("has the starter owners wait with their dogs before the first walk", () => {
+  it("has the starter owners wait before the first walk, without a picked dog, and nobody after", () => {
     expect(porchOwners(gameData, newPlayerSave.stats, [])).toEqual(
       starters.map((dog) => ({ dog, withDog: true })),
     );
-  });
-
-  it("leaves an owner waiting without the dog the player picked", () => {
     const owners = porchOwners(gameData, newPlayerSave.stats, starters.slice(0, 1));
     expect(owners.map(({ withDog }) => withDog)).toEqual(starters.map((_, i) => i !== 0));
-  });
-
-  it("has nobody waiting once a walk has ended", () => {
     expect(porchOwners(gameData, veteranSave().stats, [])).toEqual([]);
   });
 });

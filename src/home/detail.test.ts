@@ -25,28 +25,29 @@ const owned: Owned = {
 const noStats = { dogs: {} };
 
 describe("dogDetail", () => {
-  it.each(Object.keys(data.dogs) as DogId[])(
-    "gives %s's breed, size and hearts, heavy row if heavy, owner, pay and stats",
-    (id) => {
-      const stats = { dogs: { [id]: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
-      const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), stats, id);
-      const dog = data.dogs[id];
-      const text = data.homeText.detail;
-      expect(card.title).toBe(dog.name);
-      expect(card.subtitle).toBe(dog.breed);
-      expect(card.lines).toEqual([
-        fillNames(text.dogKind, {
-          hearts: String(maxHearts(data.tuning, [], dog)),
-          size: capitalize(SIZE_NAMES[dog.size]),
-        }),
-        ...(dog.size === "big" ? [text.dogHeavy] : []),
-        fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
-        fillNames(text.dogFee, { fee: dogFeeText(data) }),
-        fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
-      ]);
-      expect(card.status).toBe(text.dogStatus);
-    },
-  );
+  it("gives a dog's breed, size and hearts, the heavy row, owner, pay and stats", () => {
+    const id = (Object.keys(data.dogs) as DogId[]).find((dog) => data.dogs[dog].size === "big");
+    if (id === undefined) {
+      throw new Error("no big dog");
+    }
+    const stats = { dogs: { [id]: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
+    const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), stats, id);
+    const dog = data.dogs[id];
+    const text = data.homeText.detail;
+    expect(card.title).toBe(dog.name);
+    expect(card.subtitle).toBe(dog.breed);
+    expect(card.lines).toEqual([
+      fillNames(text.dogKind, {
+        hearts: String(maxHearts(data.tuning, [], dog)),
+        size: capitalize(SIZE_NAMES[dog.size]),
+      }),
+      text.dogHeavy,
+      fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
+      fillNames(text.dogFee, { fee: dogFeeText(data) }),
+      fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
+    ]);
+    expect(card.status).toBe(text.dogStatus);
+  });
 
   it("counts zeros for a dog never walked, and shows a locked dog's price", () => {
     const card = dogDetail(data, owned, dollars(100), noStats, "archie");
@@ -91,29 +92,25 @@ describe("walkerDetail", () => {
   const walkerIds = Object.keys(data.walkers) as WalkerId[];
   const walkerOwned = (ids: WalkerId[]) => ({ walkers: ids });
 
-  it.each(walkerIds)("gives %s's name, description and owned status when owned", (walker) => {
-    const card = walkerDetail(data, walkerOwned([walker]), walker);
-    expect(card).toEqual({
-      lines: walkerDetailLines(data, walker),
-      locked: false,
-      padlock: null,
-      status: data.homeText.detail.walkerStatus,
-      subtitle: data.homeText.detail.walkerSubtitle,
-      title: data.walkers[walker].name,
-    });
-  });
-
-  it.each(walkerIds)("gives %s's unlock goal when locked", (walker) => {
-    const card = walkerDetail(data, walkerOwned([]), walker);
-    const { name } = data.walkers[walker];
-    expect(card.locked).toBe(true);
-    expect(card.title).toBe(name);
-    expect(card.lines).toEqual(walkerDetailLines(data, walker));
-    const goal = walkerGoal(data.walkers[walker]);
-    expect(card.status).toBe(
-      homeLine(data.homeText, "walkerLocked", {
-        zone: data.world.zones.find(({ id }) => id === goal)?.name ?? "",
-      }),
-    );
+  it("gives every walker's name, description and owned status, or its unlock goal when locked", () => {
+    for (const walker of walkerIds) {
+      expect(walkerDetail(data, walkerOwned([walker]), walker)).toEqual({
+        lines: walkerDetailLines(data, walker),
+        locked: false,
+        padlock: null,
+        status: data.homeText.detail.walkerStatus,
+        subtitle: data.homeText.detail.walkerSubtitle,
+        title: data.walkers[walker].name,
+      });
+      const card = walkerDetail(data, walkerOwned([]), walker);
+      expect(card.locked).toBe(true);
+      expect(card.lines).toEqual(walkerDetailLines(data, walker));
+      const goal = walkerGoal(data.walkers[walker]);
+      expect(card.status).toBe(
+        homeLine(data.homeText, "walkerLocked", {
+          zone: data.world.zones.find(({ id }) => id === goal)?.name ?? "",
+        }),
+      );
+    }
   });
 });

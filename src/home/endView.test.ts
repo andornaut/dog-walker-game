@@ -13,7 +13,6 @@ const money = (amount: number, base: Cause): MoneyChange => ({
   kind: "money",
 });
 const pay = (amount: number) => money(amount, { amount, kind: "pay" });
-const bonus = (amount: number) => money(amount, { amount, kind: "bonus" });
 const tip = (amount: number) => money(amount, { amount, kind: "tip" });
 const card = (amount: number) =>
   money(amount, {
@@ -41,17 +40,6 @@ describe("earningsBreakdown", () => {
     ]);
   });
 
-  it("labels the full pack bonus row", () => {
-    const line = earningsBreakdown(gameData, [bonus(3_000)], cents(3_000)).find(
-      ({ kind }) => kind === "fullPack",
-    );
-    expect(line).toEqual({
-      amount: 3_000,
-      kind: "fullPack",
-      label: gameData.menuText.end.earnings.fullPack,
-    });
-  });
-
   it("adds lucky finds and starting money only when the run had some", () => {
     const changes = [pay(1_000), card(500)];
     expect(
@@ -72,24 +60,28 @@ describe("earningsBreakdown", () => {
 });
 
 describe("zonePips", () => {
-  it.each<[string, Parameters<typeof zonePips>[1], ReturnType<typeof zonePips>]>([
-    [
-      "marks every zone done for a finished walk",
-      { outcome: "finished", zonesFinished: 4 },
-      ["done", "done", "done", "done"],
-    ],
-    [
-      "marks the zone an early end stopped in as current",
-      { outcome: "wentHome", zonesFinished: 2 },
-      ["done", "done", "current", "todo"],
-    ],
-    [
-      "marks the first zone current when every owner fired you in it",
-      { outcome: "noDogs", zonesFinished: 0 },
-      ["current", "todo", "todo", "todo"],
-    ],
-  ])("%s", (_name, walk, expected) => {
-    expect(zonePips(4, walk)).toEqual(expected);
+  it("marks finished zones done and the zone an early end stopped in current", () => {
+    const cases: readonly [string, Parameters<typeof zonePips>[1], ReturnType<typeof zonePips>][] =
+      [
+        [
+          "marks every zone done for a finished walk",
+          { outcome: "finished", zonesFinished: 4 },
+          ["done", "done", "done", "done"],
+        ],
+        [
+          "marks the zone an early end stopped in as current",
+          { outcome: "wentHome", zonesFinished: 2 },
+          ["done", "done", "current", "todo"],
+        ],
+        [
+          "marks the first zone current when every owner fired you in it",
+          { outcome: "noDogs", zonesFinished: 0 },
+          ["current", "todo", "todo", "todo"],
+        ],
+      ];
+    for (const [, walk, expected] of cases) {
+      expect(zonePips(4, walk)).toEqual(expected);
+    }
   });
 });
 

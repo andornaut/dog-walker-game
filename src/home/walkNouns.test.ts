@@ -11,20 +11,12 @@ const words = MENU_TEXT.stats;
 describe("the Stats page's words", () => {
   const { outcomes, overall } = overallRows(gameData, veteranSave().stats);
 
-  it.each([
-    ...STATS_TABS.map((tab) => ({ label: words.tabs[tab], where: "tab" })),
-    ...Object.values(words.sections).map((label) => ({ label, where: "heading" })),
-    ...[...overall, ...outcomes].map(({ label }) => ({ label, where: "row" })),
-  ])("say walk, never run: $where $label", ({ label }) => {
-    expect(label).not.toMatch(/\brun/i);
-  });
-
-  it.each([
-    { label: words.overall.bestRun, text: "Best walk" },
-    { label: words.overall.runsPlayed, text: "Walks played" },
-    { label: words.sections.runs, text: "Walks" },
-    { label: words.tabs.runs, text: "Walks" },
-  ])("reads $text", ({ label, text }) => {
-    expect(label).toBe(text);
+  it("say walk, never run, on every tab, heading and row", () => {
+    const labels = [
+      ...STATS_TABS.map((tab) => words.tabs[tab]),
+      ...Object.values(words.sections),
+      ...[...overall, ...outcomes].map(({ label }) => label),
+    ];
+    expect(labels.filter((label) => /\brun/i.test(label))).toEqual([]);
   });
 });

@@ -38,14 +38,14 @@ const shown = (role: Role, text: string) =>
 const width = (role: Role) => (style: TextFitStyle, line: string) =>
   inkWidth(FONTS[role], style, line);
 
-// Text set in the first of styles that fits room, as fitPixelText sets it; every line fits.
-function expectFits(role: Role, styles: readonly TextFitStyle[], room: number, text: string) {
-  const fitted = fittingText(styles, width(role), room, shown(role, text));
-  expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
-  for (const line of fitted.lines) {
-    expect(width(role)(fitted.style, line), line).toBeLessThanOrEqual(room);
-  }
-  return fitted;
+// Text set in the first of styles that fits room, as fitPixelText sets it, or undefined when no
+// style fits it.
+function fitted(role: Role, styles: readonly TextFitStyle[], room: number, text: string) {
+  const set = fittingText(styles, width(role), room, shown(role, text));
+  const fits =
+    set.lines.length <= (set.style.lines ?? 1) &&
+    set.lines.every((line) => width(role)(set.style, line) <= room);
+  return fits ? set : undefined;
 }
 
 // Fees, tips and card costs always show, lucky finds and the starting money only sometimes;
@@ -56,30 +56,29 @@ const cases = BREAKDOWN_LINES.flatMap((lines) =>
 );
 
 describe("endPanelLayout", () => {
-  it.each(cases)("fits %i breakdown lines and %i owners' one-line rows", (lines, rows) => {
-    const { panel, rows: placed } = endPanelLayout(BODY, lines, Array<number>(rows).fill(1));
-    const totalBottom = breakdown.top + lines * breakdown.pitch + 8 + 10;
-    const rule = (placed[0]?.top ?? 0) - 8;
-    const last = placed.at(-1);
-    expect(rule).toBeGreaterThan(Math.max(totalBottom, side.iconY + 16));
-    expect(rule - Math.max(totalBottom, side.iconY + 16)).toBeLessThanOrEqual(8);
-    expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
-    expect(endPanelFits(panel)).toBe(true);
-  });
-
-  it.each(cases)("keeps %i breakdown lines' %i rows apart, each under the last", (lines, rows) => {
-    const placed = endPanelLayout(BODY, lines, Array<number>(rows).fill(2)).rows;
-    placed.slice(1).forEach((row, i) => {
-      const above = placed[i];
-      expect(row.top).toBe((above?.top ?? 0) + (above?.height ?? 0) + quips.gap);
-    });
+  it("fits every count of breakdown lines and owners' rows, each row under the last", () => {
+    for (const [lines, rows] of cases) {
+      const { panel, rows: placed } = endPanelLayout(BODY, lines, Array<number>(rows).fill(1));
+      const totalBottom = breakdown.top + lines * breakdown.pitch + 8 + 10;
+      const rule = (placed[0]?.top ?? 0) - 8;
+      const last = placed.at(-1);
+      expect(rule).toBeGreaterThan(Math.max(totalBottom, side.iconY + 16));
+      expect(rule - Math.max(totalBottom, side.iconY + 16)).toBeLessThanOrEqual(8);
+      expect(panel.y + panel.height).toBe((last?.top ?? 0) + (last?.height ?? 0) + 8);
+      expect(endPanelFits(panel), `${lines} lines, ${rows} rows`).toBe(true);
+      const two = endPanelLayout(BODY, lines, Array<number>(rows).fill(2)).rows;
+      two.slice(1).forEach((row, i) => {
+        const above = two[i];
+        expect(row.top).toBe((above?.top ?? 0) + (above?.height ?? 0) + quips.gap);
+      });
+    }
+    expect(most.y + most.height).toBeLessThanOrEqual(badges.y);
   });
 });
 
 describe("grantedQuipLines", () => {
-  it.each(cases)(
-    "grants %i breakdown lines' %i rows second lines while the panel fits",
-    (lines, rows) => {
+  it("grants rows second lines from the top while the panel fits", () => {
+    for (const [lines, rows] of cases) {
       const granted = grantedQuipLines(BODY, lines, Array<number>(rows).fill(2));
       expect(endPanelFits(endPanelLayout(BODY, lines, granted).panel)).toBe(true);
       // Every row granted one line could not have had two.
@@ -89,150 +88,141 @@ describe("grantedQuipLines", () => {
           expect(endPanelFits(endPanelLayout(BODY, lines, more).panel)).toBe(false);
         }
       });
-      // Rows are granted from the top.
       expect([...granted].sort((a, b) => b - a)).toEqual(granted);
-    },
-  );
+    }
+  });
 });
 
 const QUIPS = Object.values(gameData.quips).flatMap((moments) => Object.values(moments).flat());
+const ALL_STYLES = [...TEXT_FIT_STYLES, ...WRAPPING_TEXT_FIT_STYLES];
 
 // The end screen closes on each owner's fired or happier line. Every quip is checked, so a
 // screen that shows the others in the same bubble is covered too.
 describe("an owner's closing line", () => {
-  it.each(BREAKDOWN_LINES.flatMap((lines) => QUIPS.map((quip) => [lines, quip] as const)))(
-    "with %i breakdown lines, sets %j inside its bubble in every row",
-    (lines, quip) => {
-      const wanted = fittingText(
-        WRAPPING_TEXT_FIT_STYLES,
-        width("body"),
-        QUIP_TEXT_ROOM,
-        shown("body", quip),
-      );
-      const rows = Array<number>(SCREEN_CONFIG.dogSlotCount).fill(wanted.lines.length);
-      const granted = grantedQuipLines(BODY, lines, rows);
-      expect(endPanelFits(endPanelLayout(BODY, lines, granted).panel)).toBe(true);
-      for (const given of granted) {
-        const styles = given > 1 ? WRAPPING_TEXT_FIT_STYLES : TEXT_FIT_STYLES;
-        expect(expectFits("body", styles, QUIP_TEXT_ROOM, quip).lines.length).toBeLessThanOrEqual(
-          given,
+  it("sets every quip inside its bubble in every row, with any count of breakdown lines", () => {
+    const offenders = BREAKDOWN_LINES.flatMap((lines) =>
+      QUIPS.filter((quip) => {
+        const wanted = fittingText(
+          WRAPPING_TEXT_FIT_STYLES,
+          width("body"),
+          QUIP_TEXT_ROOM,
+          shown("body", quip),
         );
-      }
-    },
-  );
-
-  it.each(
-    [...TEXT_FIT_STYLES, ...WRAPPING_TEXT_FIT_STYLES].flatMap((style) =>
-      QUIPS.map((quip) => [style.scale, style.letterSpacing, quip, style] as const),
-    ),
-  )("at %ix, %f spacing, keeps a pixel between %j's glyphs", (_scale, _spacing, quip, style) => {
-    expect(narrowestGlyphGap("font-body", style, plainMarks(quip))).toBeGreaterThanOrEqual(1);
-  });
-});
-
-describe("TEXT_FIT_STYLES", () => {
-  it.each([...TEXT_FIT_STYLES, ...WRAPPING_TEXT_FIT_STYLES])(
-    "moves glyphs by whole screen pixels at %o",
-    (style) => {
-      expect(Number.isInteger(style.letterSpacing * style.scale)).toBe(true);
-    },
-  );
-});
-
-// Each owner's name, or the line saying they fired you, over their closing line.
-describe("an owner's row heading", () => {
-  const owners = Object.values(gameData.dogs).map((dog) => dog.owner.name);
-  const words = gameData.menuText.end;
-  const headings = owners.flatMap((owner) => [
-    owner,
-    fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner }),
-  ]);
-
-  it.each(headings)("sets %j inside its bubble", (heading) => {
-    expectFits("title", TEXT_FIT_STYLES, QUIP_TEXT_ROOM, heading);
-  });
-});
-
-describe("the side column", () => {
-  const words = gameData.menuText.end;
-
-  it.each([words.zonesWalked, words.bank])("sets %j inside the column at 2x", (label) => {
-    expect(expectFits("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, label).style.scale).toBe(2);
-  });
-
-  it("sets a six-figure bank beside the money icon", () => {
-    expectFits(
-      "title",
-      TEXT_FIT_STYLES,
-      SIDE_LABEL_ROOM - side.bankDx,
-      dollarText(cents(99_999_999)),
+        const rows = Array<number>(SCREEN_CONFIG.dogSlotCount).fill(wanted.lines.length);
+        const granted = grantedQuipLines(BODY, lines, rows);
+        return (
+          !endPanelFits(endPanelLayout(BODY, lines, granted).panel) ||
+          granted.some((given) => {
+            const styles = given > 1 ? WRAPPING_TEXT_FIT_STYLES : TEXT_FIT_STYLES;
+            const set = fitted("body", styles, QUIP_TEXT_ROOM, quip);
+            return set === undefined || set.lines.length > given;
+          })
+        );
+      }).map((quip) => `${lines} lines: ${quip}`),
     );
+    expect(offenders).toEqual([]);
+  });
+
+  it("keeps a pixel between every quip's glyphs at every style", () => {
+    const offenders = ALL_STYLES.flatMap((style) =>
+      QUIPS.filter((quip) => narrowestGlyphGap("font-body", style, plainMarks(quip)) < 1).map(
+        (quip) => `${JSON.stringify(style)}: ${quip}`,
+      ),
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it("moves glyphs by whole screen pixels at every style", () => {
+    expect(
+      ALL_STYLES.filter((style) => !Number.isInteger(style.letterSpacing * style.scale)),
+    ).toEqual([]);
   });
 });
 
-// Each label keeps clear of a four-figure amount, gained or lost, at 2x.
-describe("the breakdown", () => {
+describe("the end screen's text", () => {
   const words = gameData.menuText.end;
-  const amounts = [9_999_00, -9_999_00].map((amount) => signedDollarText(amount));
-  const labels: [Role, string, Role][] = [
-    ...Object.values(words.earnings).map((label): [Role, string, Role] => ["body", label, "body"]),
-    ["title", words.total, "title"],
-  ];
 
-  it.each(labels.flatMap((row) => amounts.map((amount) => [...row, amount] as const)))(
-    "sets the %s label %j beside %s amount %j",
-    (role, label, amountRole, amount) => {
-      const amountWidth = width(amountRole)(
-        { letterSpacing: 0, scale: 2 },
-        shown(amountRole, amount),
-      );
-      expectFits(role, TEXT_FIT_STYLES, breakdownLabelRoom(amountWidth), label);
-    },
-  );
+  // Each owner's name, or the line saying they fired you, over their closing line.
+  it("sets every owner's row heading inside its bubble", () => {
+    const owners = Object.values(gameData.dogs).map((dog) => dog.owner.name);
+    const headings = owners.flatMap((owner) => [
+      owner,
+      fillLine(MENU_TEXT_FIELDS.end, words, "firedYou", { owner }),
+    ]);
+    expect(
+      headings.filter((heading) => !fitted("title", TEXT_FIT_STYLES, QUIP_TEXT_ROOM, heading)),
+    ).toEqual([]);
+  });
+
+  it("sets the side column's labels at 2x and a six-figure bank beside the money icon", () => {
+    for (const label of [words.zonesWalked, words.bank]) {
+      expect(fitted("body", TEXT_FIT_STYLES, SIDE_LABEL_ROOM, label)?.style.scale, label).toBe(2);
+    }
+    const bank = dollarText(cents(99_999_999));
+    expect(fitted("title", TEXT_FIT_STYLES, SIDE_LABEL_ROOM - side.bankDx, bank)).toBeDefined();
+  });
+
+  // Each label keeps clear of a four-figure amount, gained or lost, at 2x.
+  it("sets every breakdown label beside a four-figure amount", () => {
+    const amounts = [9_999_00, -9_999_00].map((amount) => signedDollarText(amount));
+    const labels: [Role, string][] = [
+      ...Object.values(words.earnings).map((label): [Role, string] => ["body", label]),
+      ["title", words.total],
+    ];
+    const offenders = labels.flatMap(([role, label]) =>
+      amounts
+        .filter((amount) => {
+          const amountWidth = width(role)({ letterSpacing: 0, scale: 2 }, shown(role, amount));
+          return !fitted(role, TEXT_FIT_STYLES, breakdownLabelRoom(amountWidth), label);
+        })
+        .map((amount) => `${label} beside ${amount}`),
+    );
+    expect(offenders).toEqual([]);
+  });
 });
 
 describe("the end screen's badges", () => {
   const names = gameData.achievements.map(({ name }) => name);
   const strip = { maxNamed: 3, width: badges.width - 8, x: badges.x + 4 };
   const counts = Array.from({ length: strip.maxNamed }, (_, i) => i + 1);
-
-  it.each(counts.flatMap((count) => names.map((name) => [count, name] as const)))(
-    "with %i badges named, sets %j under its badge",
-    (count, name) => {
-      const slot = badgeStrip(strip, count).slots[0];
-      if (slot === undefined) {
-        throw new Error("no slot");
-      }
-      const fit = badgeNameFit(END_BADGE_NAME_LINES, slot);
-      expectFits("body", fit.styles, fit.room, name);
-    },
-  );
-
-  // A strip's names, on the lines its panel gives them, keep their lowest ink inside the
-  // panel's 2px frame: the end screen's strip and the celebration's over the home screen.
-  const panels = [
-    ["the end screen", END_BADGE_NAME_LINES, badges.y, badges.height],
-    ["a celebration", CELEBRATION_PANEL.nameLines, 0, CELEBRATION_PANEL.badgesHeight],
-  ] as const;
-  it.each(
-    panels.flatMap(([where, lines, top, height]) =>
-      counts.flatMap((count) =>
-        names.map((name) => [where, count, name, lines, top, height] as const),
-      ),
-    ),
-  )("in %s with %i badges, keeps %j inside the panel", (_, count, name, lines, top, height) => {
+  const firstSlot = (count: number) => {
     const slot = badgeStrip(strip, count).slots[0];
     if (slot === undefined) {
       throw new Error("no slot");
     }
-    const fit = badgeNameFit(lines, slot);
-    const fitted = fittingText(fit.styles, width("body"), fit.room, plainMarks(name));
-    const { scale } = fitted.style;
-    const last = badgeNameTops(BODY, scale, fitted.lines.length, top).at(-1) ?? top;
-    expect(last + inkRowsFromCapTop(BODY) * scale).toBeLessThanOrEqual(top + height - 2);
+    return slot;
+  };
+
+  it("sets every badge's name under its badge, with any count named", () => {
+    const offenders = counts.flatMap((count) => {
+      const fit = badgeNameFit(END_BADGE_NAME_LINES, firstSlot(count));
+      return names
+        .filter((name) => !fitted("body", fit.styles, fit.room, name))
+        .map((name) => `${count}: ${name}`);
+    });
+    expect(offenders).toEqual([]);
   });
 
-  it("keeps the panel above the badges", () => {
-    expect(most.y + most.height).toBeLessThanOrEqual(badges.y);
+  // A strip's names, on the lines its panel gives them, keep their lowest ink inside the
+  // panel's 2px frame: the end screen's strip and the celebration's over the home screen.
+  it("keeps every badge's name inside the end screen's and a celebration's panel", () => {
+    const panels = [
+      ["the end screen", END_BADGE_NAME_LINES, badges.y, badges.height],
+      ["a celebration", CELEBRATION_PANEL.nameLines, 0, CELEBRATION_PANEL.badgesHeight],
+    ] as const;
+    const offenders = panels.flatMap(([where, lines, top, height]) =>
+      counts.flatMap((count) => {
+        const fit = badgeNameFit(lines, firstSlot(count));
+        return names
+          .filter((name) => {
+            const set = fittingText(fit.styles, width("body"), fit.room, plainMarks(name));
+            const { scale } = set.style;
+            const last = badgeNameTops(BODY, scale, set.lines.length, top).at(-1) ?? top;
+            return last + inkRowsFromCapTop(BODY) * scale > top + height - 2;
+          })
+          .map((name) => `${where}, ${count}: ${name}`);
+      }),
+    );
+    expect(offenders).toEqual([]);
   });
 });

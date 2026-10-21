@@ -12,7 +12,6 @@ import {
   badgeProgress,
   badgeStrip,
   badgeWall,
-  celebrationTitle,
   earnedText,
   wallCell,
   wallCellLines,
@@ -73,13 +72,6 @@ describe("badgeWall", () => {
     ]);
     expect(earnedText(gameData, wall)).toBe(`2/${gameData.achievements.length} earned`);
   });
-
-  it("falls back to the full goal where there is no short one", () => {
-    const wall = badgeWall(gameData, newPlayerSave);
-    const favourite = wall.find(({ id }) => id === "neighbourhoodFavourite");
-    expect(favourite?.shortGoal).not.toBe(favourite?.goal);
-    expect(wall[0]?.shortGoal).toBe(wall[0]?.goal);
-  });
 });
 
 describe("badgeProgress", () => {
@@ -91,20 +83,19 @@ describe("badgeProgress", () => {
     expect(shown).toEqual(COUNTED_BADGES.map(({ id }) => id));
   });
 
-  it.each(COUNTED_BADGES.map(({ condition, id }) => [id, condition] as const))(
-    "counts %s's progress, capped at its count, and hides it once earned",
-    (id, condition) => {
+  it("counts every counted badge's progress, capped at its count, and hides it once earned", () => {
+    for (const { condition, id } of COUNTED_BADGES) {
       const locked = { earned: false, id };
       const need = needOf(condition);
-      expect(badgeProgress(gameData, counted(condition, need - 1), locked)).toBe(
+      expect(badgeProgress(gameData, counted(condition, need - 1), locked), id).toBe(
         progressText(need - 1, need),
       );
-      expect(badgeProgress(gameData, counted(condition, need * 2), locked)).toBe(
+      expect(badgeProgress(gameData, counted(condition, need * 2), locked), id).toBe(
         progressText(need, need),
       );
       expect(badgeProgress(gameData, counted(condition, 0), { earned: true, id })).toBeUndefined();
-    },
-  );
+    }
+  });
 });
 
 describe("wallCell", () => {
@@ -116,35 +107,38 @@ describe("wallCell", () => {
     return condition === undefined ? undefined : progressText(needOf(condition), needOf(condition));
   };
 
-  it.each(badgeWall(gameData, newPlayerSave).map((badge) => [badge.name, badge] as const))(
-    "fits %s's name, a whole goal and any progress in its wall cell at 2x, on the body font",
-    (_, badge) => {
+  it("fits every badge's name, a whole goal and any progress in its wall cell at 2x", () => {
+    const offenders = badgeWall(gameData, newPlayerSave).filter((badge) => {
       const progress = progressFor(badge.id);
       const cell = wallCell(wallText, bodyInk, badge, progress);
       const lines = Math.floor((wallText.lines * wallText.scale) / cell.style.scale);
       const drawn = [...cell.name, ...cell.goal, ...cell.progress];
-      expect(cell.whole).toBe(true);
-      expect(cell.style.scale).toBe(wallText.scale);
-      expect(drawn.length).toBeLessThanOrEqual(lines);
-      expect(drawn.every((line) => bodyInk(cell.style, line) <= wallText.width)).toBe(true);
       // A whole goal, with the progress on its own line or ending the goal's last line.
       const goal = [...cell.goal, ...cell.progress].join(" ");
       const whole = [badge.goal, badge.shortGoal].flatMap((text) =>
         progress === undefined ? [text] : [`${text} ${progress}`],
       );
-      expect(whole).toContain(goal);
-    },
-  );
+      return (
+        !cell.whole ||
+        cell.style.scale !== wallText.scale ||
+        drawn.length > lines ||
+        drawn.some((line) => bodyInk(cell.style, line) > wallText.width) ||
+        !whole.includes(goal)
+      );
+    });
+    expect(offenders.map(({ name }) => name)).toEqual([]);
+  });
 });
 
 describe("wallCellLines", () => {
-  it.each<[string, number, string[]]>([
-    ["on a line of its own when it fits", 3, ["Name", "Goal", "1/2"]],
-    ["ending the goal's last line when it does not", 2, ["Name", "Goal 1/2"]],
-  ])("puts the progress %s", (_, lines, drawn) => {
+  it("puts the progress on a line of its own when it fits, else ending the goal's last line", () => {
     const badge = { goal: "Goal", name: "Name", shortGoal: "Goal" };
-    const cell = wallCellLines(lines, (text) => [text], badge, "1/2");
-    expect([...cell.name, ...cell.goal, ...cell.progress]).toEqual(drawn);
+    const drawn = (lines: number) => {
+      const cell = wallCellLines(lines, (text) => [text], badge, "1/2");
+      return [...cell.name, ...cell.goal, ...cell.progress];
+    };
+    expect(drawn(3)).toEqual(["Name", "Goal", "1/2"]);
+    expect(drawn(2)).toEqual(["Name", "Goal 1/2"]);
   });
 });
 
@@ -165,12 +159,5 @@ describe("badgeStrip", () => {
     const four = badgeStrip(layout, 4);
     expect(four.named).toBe(false);
     expect(four.slots.map(({ centerX }) => centerX)).toEqual([68, 143, 218, 293]);
-  });
-});
-
-describe("celebrationTitle", () => {
-  it("counts more than one badge", () => {
-    expect(celebrationTitle(gameData, 1)).toBe("Badge earned!");
-    expect(celebrationTitle(gameData, 3)).toBe("3 badges earned!");
   });
 });

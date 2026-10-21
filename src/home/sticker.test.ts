@@ -40,33 +40,36 @@ const fannyPack = price("fannyPack") / 100;
 const lockedDog = price("archie") / 100;
 
 describe("homeSticker", () => {
-  it.each<[string, number, number, Sticker | null]>([
-    [
-      "prices the cheapest locked item out of reach",
-      0,
-      0,
-      { item: { gear: "fannyPack", kind: "gear" }, kind: "price", price: price("fannyPack") },
-    ],
-    [
-      "marks an item the bank has just come to cover as new",
-      0,
-      fannyPack,
-      { item: { gear: "fannyPack", kind: "gear" }, kind: "new", price: price("fannyPack") },
-    ],
-    [
-      "puts new on the first newly covered item in the shop's order",
-      fannyPack,
-      lockedDog,
-      { item: { dog: "archie", kind: "dog" }, kind: "new", price: price("archie") },
-    ],
-    [
-      "prices the next item once nothing is new",
-      lockedDog,
-      lockedDog,
-      { item: { gear: "poopBags", kind: "gear" }, kind: "price", price: price("poopBags") },
-    ],
-    ["shows none once the bank covers everything and nothing is new", 10_000, 10_000, null],
-  ])("%s", (_name, before, bank, expected) => {
-    expect(homeSticker(data, owned, dollars(before), dollars(bank))).toEqual(expected);
+  it("prices the cheapest item out of reach, marks a newly covered one new, and none once all are covered", () => {
+    const cases: readonly [string, number, number, Sticker | null][] = [
+      [
+        "prices the cheapest locked item out of reach",
+        0,
+        0,
+        { item: { gear: "fannyPack", kind: "gear" }, kind: "price", price: price("fannyPack") },
+      ],
+      [
+        "marks an item the bank has just come to cover as new",
+        0,
+        fannyPack,
+        { item: { gear: "fannyPack", kind: "gear" }, kind: "new", price: price("fannyPack") },
+      ],
+      [
+        "puts new on the first newly covered item in the shop's order",
+        fannyPack,
+        lockedDog,
+        { item: { dog: "archie", kind: "dog" }, kind: "new", price: price("archie") },
+      ],
+      [
+        "prices the next item once nothing is new",
+        lockedDog,
+        lockedDog,
+        { item: { gear: "poopBags", kind: "gear" }, kind: "price", price: price("poopBags") },
+      ],
+      ["shows none once the bank covers everything and nothing is new", 10_000, 10_000, null],
+    ];
+    for (const [, before, bank, expected] of cases) {
+      expect(homeSticker(data, owned, dollars(before), dollars(bank))).toEqual(expected);
+    }
   });
 });

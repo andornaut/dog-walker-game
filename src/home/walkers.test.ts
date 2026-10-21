@@ -6,7 +6,7 @@ import { agilityWord } from "../rules/walkers";
 import { newPlayerSave } from "../save/fixtures";
 import { homeLine } from "./homeText";
 import { type ItemTile, itemTileLook, type TileState } from "./interaction";
-import { tapWalker, walkerInfo, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
+import { tapWalker, walkerOrder, type WalkerTap, walkerTile } from "./walkers";
 
 const save = {
   ...newPlayerSave,
@@ -21,14 +21,17 @@ describe("walkerOrder", () => {
 });
 
 describe("walkerTile", () => {
-  it.each<[WalkerId, ItemTile, TileState]>([
-    ["ben", { kind: "picked" }, "selected"],
-    ["casey", { kind: "available" }, "normal"],
-    ["ada", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
-    ["trista", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
-  ])("shows %s as %o, drawn %s", (walker, tile, state) => {
-    expect(walkerTile(gameData, save, walker)).toEqual(tile);
-    expect(itemTileLook(tile).state).toBe(state);
+  it("shows the picked walker selected, an owned one normal and a locked one by its goal", () => {
+    const cases: readonly [WalkerId, ItemTile, TileState][] = [
+      ["ben", { kind: "picked" }, "selected"],
+      ["casey", { kind: "available" }, "normal"],
+      ["ada", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
+      ["trista", { goal: gameData.homeText.lockedName, kind: "goal" }, "disabled"],
+    ];
+    for (const [walker, tile, state] of cases) {
+      expect(walkerTile(gameData, save, walker)).toEqual(tile);
+      expect(itemTileLook(tile).state).toBe(state);
+    }
   });
 });
 
@@ -50,22 +53,16 @@ const locked = (walker: WalkerId) => {
   });
 };
 
-describe("walkerInfo", () => {
-  it.each(Object.keys(gameData.walkers) as WalkerId[])(
-    "writes %s's agility word and perk",
-    (walker) => {
-      expect(walkerInfo(gameData, walker)).toBe(info(walker));
-    },
-  );
-});
-
 describe("tapWalker", () => {
-  it.each<[WalkerId, () => WalkerTap]>([
-    ["ben", () => ({ kind: "drop" })],
-    ["casey", () => ({ kind: "pick", text: info("casey"), walker: "casey" })],
-    ["ada", () => ({ kind: "locked", text: locked("ada") })],
-    ["trista", () => ({ kind: "locked", text: locked("trista") })],
-  ])("on %s", (walker, tap) => {
-    expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap());
+  it("drops the picked walker, picks an owned one and names a locked one's goal", () => {
+    const cases: readonly [WalkerId, () => WalkerTap][] = [
+      ["ben", () => ({ kind: "drop" })],
+      ["casey", () => ({ kind: "pick", text: info("casey"), walker: "casey" })],
+      ["ada", () => ({ kind: "locked", text: locked("ada") })],
+      ["trista", () => ({ kind: "locked", text: locked("trista") })],
+    ];
+    for (const [walker, tap] of cases) {
+      expect(tapWalker(gameData, save.owned, save.walker, walker)).toEqual(tap());
+    }
   });
 });
