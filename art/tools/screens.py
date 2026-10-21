@@ -750,29 +750,21 @@ def end():
     # The Long Way Home, in the zone backdrop's palette: trees, houses with lit windows, yards and the sidewalk.
     # Everything standing is kept within x 8 to 352, so the badges panel never cuts it into slivers.
     strip = clear(W, 150)
-    for cx, top in ((30, 44), (182, 40), (330, 46)):
+    for cx, top in ((22, 44), (178, 40), (330, 46)):
         bd.tree(strip, cx, top, "orange", "rust", r=20)
-    for x, w, wall, roof, door in ((44, 70, "white", "dred", "dgreen"), (210, 80, "skin1", "navy", "red")):
-        bd.house(strip, x, w, wall, roof, door, top=36)
-        strip.fill(x + 8, 82, w - 16, 3, "brown")
-        strip.fill(x + 10, 85, 2, 17, "brown")
-        strip.fill(x + w - 12, 85, 2, 17, "brown")
-        strip.fill(x + w // 2 - 8, 84, 3, 4, "yellow")
-        for wx in (x + 6, x + w - 18):
-            strip.fill(wx + 1, 69, 10, 8, "yellow")
-            strip.fill(wx + 6, 69, 1, 8, "amber")
-            strip.fill(wx + 1, 73, 10, 1, "amber")
-    for x, w, wall, roof, door in ((124, 50, "tan", "brown", "dred"), (298, 50, "cream", "purple", "blue")):
-        bd.house(strip, x, w, wall, roof, door, top=48)
-        for wx in (x + 6, x + w - 18):
-            strip.fill(wx + 1, 81, 10, 8, "yellow")
-            strip.fill(wx + 1, 85, 10, 1, "amber")
+    # slim houses as on the zone's backdrop, about as tall as they are wide under steep gables, their
+    # curtains drawn against the low sun with the lamps lit between them
+    homes = ((46, 54, "white", "dred", "dgreen"), (106, 50, "tan", "brown", "dred"),
+             (200, 54, "skin1", "navy", "red"), (260, 50, "cream", "purple", "blue"))
+    for k, (x, w, wall, roof, door) in enumerate(homes):
+        bd.house(strip, x, w, wall, roof, door, top=104 - w, roof_h=w // 2, parts=bd.SLIM, curtains="orange",
+                 eave=2, rake=bd.LIT.get(roof), dormer=k % 2 == 0)
     bd.ground(strip)
-    bd.flowers(strip, 48, 110, 110, ("orange", "yellow", "red"))
-    bd.flowers(strip, 214, 286, 112, ("orange", "yellow", "red"))
-    bd.fence(strip, 104, 8, 40)
-    bd.fence(strip, 104, 120, 176)
-    bd.fence(strip, 104, 294, 352)
+    bd.flowers(strip, 50, 96, 110, ("orange", "yellow", "red"))
+    bd.flowers(strip, 204, 250, 112, ("orange", "yellow", "red"))
+    bd.fence(strip, 104, 8, 42)
+    bd.fence(strip, 104, 160, 196)
+    bd.fence(strip, 104, 314, 352)
     for x, y in ((20, 120), (100, 116), (176, 122), (260, 118), (330, 122)):
         strip.fill(x, y, 3, 2, "orange")
         strip.fill(x + 1, y - 1, 1, 1, "rust")
