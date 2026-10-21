@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { DEFAULT_SETTINGS } from "../save/schema";
+import { bodyTextWidth } from "../testing/bodyFont";
+import { wrapWords } from "../text/lines";
 import {
   knobX,
   SETTINGS_ROW,
@@ -118,5 +121,19 @@ describe("soundVolumes", () => {
       music: 0.2,
       sfx: 0.9,
     });
+  });
+});
+
+describe("a switch row's note", () => {
+  const { noteLines, noteWidth, scale } = SETTINGS_ROW.switch;
+  const { motionNote, soundNote } = gameData.menuText.settings;
+
+  it.each([
+    ["motionNote", motionNote],
+    ["soundNote", soundNote],
+  ])("wraps %s to at most noteLines lines within noteWidth", (_, note) => {
+    const lines = wrapWords((line) => bodyTextWidth(scale, line), noteWidth, note);
+    expect(lines.length).toBeLessThanOrEqual(noteLines);
+    expect(lines.every((line) => bodyTextWidth(scale, line) <= noteWidth)).toBe(true);
   });
 });

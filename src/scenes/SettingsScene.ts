@@ -344,7 +344,7 @@ export class SettingsScene extends Scene {
       font: "title",
       scale: TEXT_SCALE,
     });
-    const noteStyle = { color: PALETTE.darkBrown, scale: TEXT_SCALE };
+    const noteStyle = { color: PALETTE.darkBrown, scale: SWITCH_ROW.scale };
     const lines = wrapPixelText(this, noteStyle, SWITCH_ROW.noteWidth, words[row.note]);
     const note = addPixelText(this, x + LABEL_DX, y + SWITCH_ROW.noteDy, lines.join("\n"), {
       ...noteStyle,

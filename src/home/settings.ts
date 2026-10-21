@@ -83,7 +83,10 @@ export const SETTINGS_ROW = {
     labelDy: 8,
     linePitch: 20,
     noteDy: 24,
+    // The most lines a note wraps to.
+    noteLines: 2,
     noteWidth: 156,
+    scale: 2,
     switch: { dx: 188, dy: 23, height: 16, width: 32 },
   },
 } as const;
