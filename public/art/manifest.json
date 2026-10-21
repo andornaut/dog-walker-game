@@ -6320,6 +6320,51 @@
       }
     },
     {
+      "key": "streetcar",
+      "png": "sprites/streetcar.png",
+      "json": "sprites/streetcar.json",
+      "anchor": {
+        "feetY": 65,
+        "opaqueWidth": 54
+      }
+    },
+    {
+      "key": "streetcar@50",
+      "png": "sprites/streetcar@50.png",
+      "json": "sprites/streetcar@50.json",
+      "anchor": {
+        "feetY": 32,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "streetcar@62",
+      "png": "sprites/streetcar@62.png",
+      "json": "sprites/streetcar@62.json",
+      "anchor": {
+        "feetY": 40,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "streetcar@75",
+      "png": "sprites/streetcar@75.png",
+      "json": "sprites/streetcar@75.json",
+      "anchor": {
+        "feetY": 49,
+        "opaqueWidth": 40
+      }
+    },
+    {
+      "key": "streetcar@88",
+      "png": "sprites/streetcar@88.png",
+      "json": "sprites/streetcar@88.json",
+      "anchor": {
+        "feetY": 57,
+        "opaqueWidth": 47
+      }
+    },
+    {
       "key": "stroller",
       "png": "sprites/stroller.png",
       "json": "sprites/stroller.json",

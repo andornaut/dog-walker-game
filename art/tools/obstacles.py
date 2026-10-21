@@ -27,13 +27,17 @@ delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from 
                             roller door, drawn at the footprint's near edge; idle (4 frames,
                             400ms): an exhaust puff on frame 2. drive (4 frames, 100ms): tread lines
                             climb the tyres and the body dips 1px onto them on frames 1 and 2
+streetcar           56x66   1 lane by 3 rows of footprint, a red TTC Flexity from behind, its pantograph
+                            on the roof, drawn at the footprint's near edge; idle (4 frames, 400ms): a
+                            spark at the pan head on frame 2. drive (4 frames, 100ms): tread lines climb
+                            the wheels and the body sways 1px over the bogie
 
 Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
 frame is one argument to the drawing function, listed in the *_IDLE tuples;
 frame 0 is the rest pose. The drawings are in layout pixels, 40 for a 1-lane
 sprite and 30 rows for a lane-spanning one, drawn SCALE (1.2) times bigger on a
-minis.Mini, which keeps 1px lines 1px; the parked car and the delivery truck keep
-their 56 layout columns and draw only their rows SCALE times taller. minis.py and depths.py run them at
+minis.Mini, which keeps 1px lines 1px; the parked car, the delivery truck and the
+streetcar keep their 56 layout columns and draw only their rows SCALE times taller. minis.py and depths.py run them at
 SCALE (or CAR_SCALE) times each depth step for the depth variants.
 
 Usage:
@@ -390,6 +394,106 @@ def delivery_truck(puff=False, roll=None):
     return lit(g)
 
 
+# 3x5 letters for the streetcar's route sign and wordmark, one string per row, 1 for a lit pixel.
+LETTERS = {"0": ("111", "101", "101", "101", "111"), "4": ("101", "101", "111", "001", "001"),
+           "5": ("111", "100", "111", "001", "111"), "C": ("111", "100", "100", "100", "111"),
+           "T": ("111", "010", "010", "010", "010")}
+# The streetcar's idle: a spark at the pantograph on frame 2.
+STREETCAR_IDLE = (False, False, True, False), 400
+# Its drive's sideways sway, in drawn pixels per frame, as the bogies roll under it.
+STREETCAR_SWAY = (0, 1, 0, -1)
+
+
+def lettering(g, cx, y, text, c, bar=None):
+    """text in LETTERS centred on layout column cx with its top on layout row y, drawn pixel for pixel on the
+    grid holding g's pixels, 1px apart. Where the grid is too small for it to sit inside the layout's 5 rows
+    and 4 columns a letter, bar draws a 1px line of that colour across its middle instead, or nothing."""
+    px = getattr(g, "g", g)
+    s, sy = getattr(g, "s", 1), getattr(g, "sy", getattr(g, "s", 1))
+    w = 4 * len(text) - 1
+    if s < 0.85 or sy * 5 < 5:
+        if bar:
+            px.rect(math.floor((cx - w / 2) * s + 0.5), math.floor((y + 2.5) * sy), max(1, round(w * s)), 1, bar)
+        return
+    x0, y0 = math.floor(cx * s + 0.5) - w // 2, math.floor((y + 2.5) * sy + 0.5) - 2
+    for i, ch in enumerate(text):
+        for j, row in enumerate(LETTERS[ch]):
+            for k, on in enumerate(row):
+                if on == "1":
+                    px.p(x0 + 4 * i + k, y0 + j, c)
+
+
+def streetcar(spark=False, roll=None):
+    """A red TTC Flexity streetcar from straight behind, a lane wide, laid out on 56x55 and drawn at CAR_SCALE
+    to 56x66: a pantograph on the roof, its pan head under the wire, over a red body with a rounded roof; the
+    route sign "504" in amber on black at the top; the black window band across the back, a big rear window
+    with a glint; a white stripe under it, "TTC" in white on the red, tail lights and amber blinkers low at the
+    outer corners in black housings, the anticlimber bumper, and the rear bogie's two wheels under the skirt.
+    spark lights a cyan spark at the pan head. roll (0 to 3) is a drive frame: tread lines climb the wheels
+    1px a frame as it rolls away, and the body and pantograph sway STREETCAR_SWAY over the bogie."""
+    g = edged(Grid(56, 55))
+    px = getattr(g, "g", g)
+    uy = unit(g)[1]
+    # the bogie and its wheels first, so the body can sway over them
+    g.rect(14, 48, 28, 3, "dslate")
+    g.rect(14, 48, 28, 1, "slate")
+    for x in (8, 41):
+        g.rect(x, 47, 7, 8, "ink")
+        g.rect(x, 47, 2, 7, "dslate")
+        if roll is not None:
+            treads(g, x + 2, 48, 5, 6, roll, uy)
+    wheels = [row[:] for row in px.px]
+    px.px = [[None] * px.w for _ in range(px.h)]
+    # the pantograph: a diamond of grey arms on an insulated base, the lgrey pan head with its horns on top
+    g.rect(21, 8, 14, 2, "dslate")
+    g.rect(21, 8, 14, 1, "slate")
+    for (x0, y0), (x1, y1) in (((23, 7), (19, 5)), ((19, 5), (24, 3)), ((32, 7), (36, 5)), ((36, 5), (31, 3))):
+        n = max(abs(x1 - x0), abs(y1 - y0))
+        for k in range(n + 1):
+            g.rect(x0 + (x1 - x0) * k / n, y0 + (y1 - y0) * k / n, 1, 1, "grey")
+    g.rect(21, 2, 14, 1, "lgrey")
+    g.p(20, 3, "grey")
+    g.p(35, 3, "grey")
+    if spark:
+        g.rect(26, 0, 3, 2, "cyan")
+        g.p(27, 1, "white")
+        g.p(25, 1, "cyan")
+        g.p(29, 0, "cyan")
+    # the body: a rounded roof over a box, lit along the top and the left, shaded down the right
+    g.cel(28, 20, 26, 11, "red", "dred", "pink", power=3)
+    g.rect(2, 20, 52, 27, "red")
+    g.rect(50, 20, 4, 27, "dred")
+    # the route sign
+    g.rect(20, 12, 16, 6, "ink")
+    lettering(g, 28, 12.5, "504", "amber", "amber")
+    # the black band and the rear window in it, with a glint across the glass
+    g.rect(2, 19, 52, 13, "ink")
+    g.rect(7, 20, 42, 11, "navy")
+    g.rect(7, 20, 42, 1, "dslate")
+    g.tri((12, 31), (20, 20.5), (25, 20.5), "dslate")
+    g.tri((19, 31), (27, 20.5), (29, 20.5), "dslate")
+    # the white stripe, the wordmark, the lamps in their housings
+    g.rect(2, 32, 52, 1, "white")
+    lettering(g, 28, 36, "TTC", "white")
+    for x in (4, 46):
+        g.rect(x, 35, 6, 9, "ink")
+        g.rect(x + 1, 36, 4, 3, "red")
+        g.rect(x + 1, 36, 4, 1, "pink")
+        g.rect(x + 1, 40, 4, 2, "amber")
+        g.p(x + 1, 40, "yellow")
+    # the anticlimber bumper and the skirt over the bogie
+    g.rect(3, 44, 50, 3, "dslate")
+    g.rect(3, 44, 50, 1, "slate")
+    g.rect(3, 44, 1, 3, "grey")
+    g.rect(24, 44, 8, 2, "grey")
+    g.rect(24, 44, 8, 1, "lgrey")
+    sway = STREETCAR_SWAY[roll] if roll is not None else 0
+    body = px.px
+    px.px = [[(body[y][x - sway] if 0 <= x - sway < px.w else None) or wheels[y][x] for x in range(px.w)]
+             for y in range(px.h)]
+    return lit(g)
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def idle(draw, spec, s=SCALE):
@@ -410,6 +514,8 @@ def sprites():
         ("drive", [drawn(CAR_SCALE, parked_car, roll=f, blink=False).outlined() for f in drive], drive_ms)]
     yield "delivery-truck", idle(delivery_truck, DELIVERY_IDLE, CAR_SCALE) + [
         ("drive", [drawn(CAR_SCALE, delivery_truck, roll=f).outlined() for f in drive], drive_ms)]
+    yield "streetcar", idle(streetcar, STREETCAR_IDLE, CAR_SCALE) + [
+        ("drive", [drawn(CAR_SCALE, streetcar, roll=f).outlined() for f in drive], drive_ms)]
 
 
 if __name__ == "__main__":
