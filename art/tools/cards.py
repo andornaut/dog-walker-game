@@ -71,9 +71,6 @@ def card_frame(kind):
     g.rect(3, 15, AW + 2, AH + 2, "plum")
     g.rect(3, 15, AW + 2, 1, "ink")
     g.rect(4, 16, AW, AH, "tan")
-    # divider between the effect text and the badge
-    for x in range(8, CW - 8, 3):
-        g.p(x, 118, "tan")
     return g
 
 
@@ -96,8 +93,6 @@ def card_frame_large(kind):
     g.rect(6, 30, 2 * AW + 4, 2 * AH + 4, "plum")
     g.rect(6, 30, 2 * AW + 4, 2, "ink")
     g.rect(8, 32, 2 * AW, 2 * AH, "tan")
-    for x in range(16, LW - 16, 6):
-        g.rect(x, 236, 3, 1, "tan")
     return g
 
 
