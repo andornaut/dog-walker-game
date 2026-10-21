@@ -15,8 +15,8 @@ const WALKER_FRAME = { height: ROAD_SPRITE_SIZE * 1.5, width: ROAD_SPRITE_SIZE }
 // ui-celebrate-burst's width; its top sits BURST_DROP rows below the walker's frame top.
 const BURST_WIDTH = 148;
 const BURST_DROP = 6;
-// The big line's top over the small line's.
-const TITLE_OVER_SUBTITLE = 32;
+// The big line's top over the small line's, so the big line's outline clears the small one's.
+const TITLE_OVER_SUBTITLE = 38;
 
 // The celebration moves with the road, its rows set from the road's top row: the dim from 72
 // rows over it, and each version's walker's feet line under it, with the new walker's bubble

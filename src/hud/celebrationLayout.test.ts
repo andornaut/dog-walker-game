@@ -18,6 +18,17 @@ describe("the celebration's title", () => {
     });
     expect(misfits).toEqual([]);
   });
+
+  // The display font's capitals carry their outline and shadow in their rows.
+  it.each(["newWalker", "zoneDone"] as const)(
+    "keeps the %s title's outline 6 rows clear of the subtitle's",
+    (version) => {
+      const { capHeight, capTop } = fontFileMetrics("font-display");
+      const { subtitleY, titleY } = LAYOUT[version];
+      const titleBottom = titleY + (capTop + capHeight) * LAYOUT.titleScale;
+      expect(subtitleY + capTop - titleBottom).toBeGreaterThanOrEqual(6);
+    },
+  );
 });
 
 // Every walker's greeting fits the bubble's lines, none left out, its last line's lowest ink
