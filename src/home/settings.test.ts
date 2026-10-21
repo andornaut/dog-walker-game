@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { Rect } from "../lib/rect";
 import { DEFAULT_SETTINGS } from "../save/schema";
-import { fitInFont } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { closeFace } from "../ui/closeControl";
 import {
   knobX,
   SETTINGS_ROW,
@@ -78,6 +80,38 @@ describe("settingsLayout", () => {
         expect(layout.track.dy + layout.track.height + 3).toBeLessThanOrEqual(row.height);
       }
     }
+  });
+});
+
+// The standard card: the title's capitals and the close control's face inside the title band,
+// the close control's hit area on the card, and the rows starting 8px under the band.
+describe("the settings card", () => {
+  const layout = settingsLayout({ height: 560, width: 360 }, [
+    "switch",
+    "slider",
+    "slider",
+    "switch",
+  ]);
+  const { band, close, panel, rows, title } = layout;
+  const bandBottom = band.y + band.height;
+  const capHeight = fontFileMetrics("font-title").capHeight * 2;
+  const face = closeFace(close);
+
+  it.each<[string, Rect, Rect]>([
+    ["the band", band, panel],
+    ["the title's capitals", { height: capHeight, width: 0, x: title.x, y: title.y }, band],
+    ["the close control's face", face, band],
+    ["the close control's hit area", close.hit, panel],
+  ])("keeps %s inside its frame", (_, inner, outer) => {
+    expect(inner.x).toBeGreaterThanOrEqual(outer.x);
+    expect(inner.y).toBeGreaterThanOrEqual(outer.y);
+    expect(inner.x + inner.width).toBeLessThanOrEqual(outer.x + outer.width);
+    expect(inner.y + inner.height).toBeLessThanOrEqual(outer.y + outer.height);
+  });
+
+  it("centres the title on the card, and starts the rows 8px under the band", () => {
+    expect(title.x).toBe(panel.x + panel.width / 2);
+    expect(rows[0]?.y).toBe(bandBottom + 8);
   });
 });
 

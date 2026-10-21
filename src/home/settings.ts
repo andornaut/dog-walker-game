@@ -1,7 +1,7 @@
 import { laneDirectionForKey } from "../input/keyBindings";
 import type { Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
-import { type CloseControl, pageCloseControl } from "../ui/closeControl";
+import { type CloseControl, closeControl } from "../ui/closeControl";
 import { textFitStylesOnLines } from "../ui/textFit";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
@@ -63,6 +63,8 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
 type SettingsRowKind = "slider" | "switch";
 
 export interface SettingsLayout {
+  // The title band across the card's top, the title's capitals centred on it.
+  band: Rect;
   close: CloseControl;
   panel: Rect;
   // The rows, top to bottom.
@@ -102,13 +104,16 @@ export const SWITCH_NOTE_FIT = {
 };
 
 const PANEL = { width: 248 };
-// The rows start under the title; the panel ends this far under the last.
+// The card's title band, inset from its top and sides, with the title's capitals titleY under
+// the card's top.
+const BAND = { height: 24, inset: 6, titleY: 13 };
+// The rows start under the band; the panel ends this far under the last.
 const ROWS_TOP = 38;
 const PANEL_FOOT = 14;
 const SEPARATOR_INSET = 4;
 
-// The rows, by kind, on a panel centred on the screen, and the close control in the screen's
-// corner. Settings covers the screen wherever it opens from.
+// The rows, by kind, on a card centred on the screen, under its title band with the close
+// control in it. Settings covers the screen wherever it opens from.
 export function settingsLayout(
   screen: { height: number; width: number },
   kinds: readonly SettingsRowKind[],
@@ -123,9 +128,16 @@ export function settingsLayout(
     rowY += row.height;
     return row;
   });
+  const panel = { ...PANEL, height, x, y };
   return {
-    close: pageCloseControl({ height: screen.height, width: screen.width, x: 0, y: 0 }),
-    panel: { ...PANEL, height, x, y },
+    band: {
+      height: BAND.height,
+      width: PANEL.width - 2 * BAND.inset,
+      x: x + BAND.inset,
+      y: y + BAND.inset,
+    },
+    close: closeControl(panel),
+    panel,
     rows,
     separators: rows.slice(1).map((row) => ({
       height: 1,
@@ -133,7 +145,7 @@ export function settingsLayout(
       x: row.x + SEPARATOR_INSET,
       y: row.y,
     })),
-    title: { x: x + 124, y: y + 16 },
+    title: { x: x + PANEL.width / 2, y: y + BAND.titleY },
     track: { dy: 26, height: 10, knobWidth: 10, width: 216, x: x + 16 },
   };
 }

@@ -27,7 +27,7 @@ import { containsPoint, insetRect, type Rect } from "../lib/rect";
 import type { Settings } from "../save/schema";
 import { closeFace } from "../ui/closeControl";
 import { PLAIN_ITEM, tileState } from "../ui/interaction";
-import { drawFocusRing, fillRect } from "../ui/phaser/draw";
+import { drawFocusRing, drawFramedRect, fillRect } from "../ui/phaser/draw";
 import { PALETTE } from "../ui/phaser/palette";
 import { addPixelText, fitPixelText } from "../ui/phaser/pixelText";
 import { DISABLED_COLORS } from "../ui/selection";
@@ -40,7 +40,6 @@ import { listenTargetPress } from "./targetPress";
 import {
   addCloseButton,
   addNineSlice,
-  addRimmedPanel,
   addSelectTile,
   addTagImage,
   addTapBurst,
@@ -180,9 +179,8 @@ export class SettingsScene extends Scene {
         this.render();
       },
     });
-    // The screen around the panel and its 1px rim closes, as the close control does.
-    const { close, panel } = this.layout;
-    listenDismiss(this, [insetRect(-1, panel), close.hit], () => this.close());
+    // The screen around the card closes, as the close control in its band does.
+    listenDismiss(this, [this.layout.panel], () => this.close());
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
       if (menuKeyActs(event.repeat, event.key)) {
         this.onKey(event.key);
@@ -280,7 +278,7 @@ export class SettingsScene extends Scene {
   private render(): void {
     clearScene(this);
     const settings = currentSettings(this);
-    const { close, panel, title } = this.layout;
+    const { band, close, panel, title } = this.layout;
     const g = this.add.graphics();
     fillRect(g, PALETTE.darkBrown, {
       height: SCREEN_CONFIG.height,
@@ -288,9 +286,15 @@ export class SettingsScene extends Scene {
       x: 0,
       y: 0,
     });
-    addRimmedPanel(this, panel);
+    // The card and its title band.
+    if (addNineSlice(this, "ui-detail-card", panel) === undefined) {
+      drawFramedRect(g, { border: PALETTE.darkBrown, fill: PALETTE.cream }, panel);
+    }
+    if (addNineSlice(this, "ui-detail-band", band) === undefined) {
+      fillRect(this.add.graphics(), PALETTE.forest, band);
+    }
     addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
-      color: PALETTE.plum,
+      color: PALETTE.white,
       font: "title",
       originX: 0.5,
       scale: TEXT_SCALE,
