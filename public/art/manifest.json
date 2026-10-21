@@ -4076,6 +4076,14 @@
       "png": "images/icon-fired.png"
     },
     {
+      "key": "icon-gear-dog-whistle",
+      "png": "images/icon-gear-dog-whistle.png"
+    },
+    {
+      "key": "icon-gear-dog-whistle-20",
+      "png": "images/icon-gear-dog-whistle-20.png"
+    },
+    {
       "key": "icon-gear-fanny-pack",
       "png": "images/icon-gear-fanny-pack.png"
     },
@@ -4278,6 +4286,10 @@
     {
       "key": "icon-zoomies",
       "png": "images/icon-zoomies.png"
+    },
+    {
+      "key": "item-dog-whistle",
+      "png": "images/item-dog-whistle.png"
     },
     {
       "key": "item-fanny-pack",

@@ -396,6 +396,21 @@ def rush_hour():
 
 # The gear, after its 32x32 item art in icons.py.
 
+def gear_dog_whistle():
+    g = Grid(16, 16)
+    g.ell(3.5, 3.5, 3, 3.2, "mauve", "purple")
+    g.ell(3.5, 3.5, 1.4, 1.6, None)
+    g.ell(8, 10.5, 5, 4.5, "lgrey", "grey", "white")
+    g.rect(9, 5, 6, 3, "lgrey")
+    g.rect(9, 5, 6, 1, "white")
+    g.rect(14, 5, 1, 3, "grey")
+    g.rect(10, 6, 3, 1, "dslate")
+    g.rect(6, 10, 2, 2, "slate")
+    for x, y in ((11, 2), (14, 3)):
+        g.p(x, y, "cyan")
+    return g
+
+
 def gear_fanny_pack():
     g = Grid(16, 16)
     g.rect(0, 5, 16, 2, "brown")
@@ -638,6 +653,25 @@ def sweet_talker20():
     return g
 
 
+def gear_dog_whistle20():
+    """The dog whistle: a silver whistle with its mouthpiece up and right, an ink slot, a purple
+    lanyard loop (mauve, so it holds on the walk bar's navy) on its left end and cyan sound marks
+    off the slot."""
+    g = Grid(20, 20)
+    g.ell(4.5, 4.5, 3.6, 4, "mauve", "purple")
+    g.ell(4.5, 4.5, 1.8, 2.2, None)
+    g.ell(10, 13, 6, 5.5, "lgrey", "grey", "white")
+    g.rect(11, 6, 7, 4, "lgrey")
+    g.rect(11, 6, 7, 1, "white")
+    g.rect(17, 6, 1, 4, "grey")
+    g.rect(11, 9, 7, 1, "grey")
+    g.rect(12, 7, 4, 1, "dslate")
+    g.rect(8, 12, 3, 3, "slate")
+    for x, y in ((12, 3), (12, 2), (15, 3), (16, 2), (19, 4), (19, 5)):
+        g.p(x, y, "cyan")
+    return g
+
+
 def gear_fanny_pack20():
     """The fanny pack: an amber pouch zipped in orange on a brown strap with an lgrey buckle."""
     g = Grid(20, 20)
@@ -779,6 +813,7 @@ IMAGES = {
     "icon-upgrade-raincoats": raincoats,
     "icon-upgrade-rush-hour": rush_hour,
     "icon-upgrade-sweet-talker": sweet_talker,
+    "icon-gear-dog-whistle": gear_dog_whistle,
     "icon-gear-fanny-pack": gear_fanny_pack,
     "icon-gear-lucky-collar": gear_lucky_collar,
     "icon-gear-hall-pass": gear_hall_pass,
@@ -793,6 +828,7 @@ IMAGES = {
     "icon-upgrade-raincoats-20": raincoats20,
     "icon-upgrade-rush-hour-20": rush_hour20,
     "icon-upgrade-sweet-talker-20": sweet_talker20,
+    "icon-gear-dog-whistle-20": gear_dog_whistle20,
     "icon-gear-fanny-pack-20": gear_fanny_pack20,
     "icon-gear-lucky-collar-20": gear_lucky_collar20,
     "icon-gear-hall-pass-20": gear_hall_pass20,
