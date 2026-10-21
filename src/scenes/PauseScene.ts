@@ -29,7 +29,7 @@ import { SCENE_KEYS } from "./sceneKeys";
 import type { SettingsSceneData } from "./SettingsScene";
 import { soundboardOf } from "./soundboard";
 import { listenTargetPress } from "./targetPress";
-import { addMenuButton, addPanel, type MenuButton, TEXT_SCALE } from "./uiKit";
+import { addMenuButton, addRimmedPanel, type MenuButton, TEXT_SCALE } from "./uiKit";
 
 // menu is the pause menu; homeQuestion asks whether to head home, for the top bar's Home
 // button, its note saying what going home keeps and gives up.
@@ -100,11 +100,7 @@ export class PauseScene extends Scene {
     const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(roadView, parts);
     const { panel } = layout;
 
-    // A 1px tan rim keeps the panel's edge clear of the dimmed road.
-    const rim = this.add.graphics();
-    fillRect(rim, PALETTE.tan, { ...panel, height: panel.height + 2, y: panel.y - 1 });
-    fillRect(rim, PALETTE.tan, { ...panel, width: panel.width + 2, x: panel.x - 1 });
-    addPanel(this, panel);
+    addRimmedPanel(this, panel);
     const center = panel.x + panel.width / 2;
     addPixelText(this, center, layout.titleY, asking ? question.title : menu.title, {
       color: PALETTE.plum,

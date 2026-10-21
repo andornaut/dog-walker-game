@@ -1,4 +1,4 @@
-import { Display, Scene } from "phaser";
+import { Scene } from "phaser";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -6,10 +6,9 @@ import type { AchievementId, DogId } from "../data/types";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import type { Rect } from "../layout/rect";
 import { addBadgeCelebration, addCheeringFace } from "./badges";
-import { DIM_ALPHA } from "./draw";
 import { closeOverlay, listenDismiss } from "./overlay";
-import { PALETTE } from "./palette";
 import { currentSettings } from "./profileStore";
+import { addRampDim } from "./rampDim";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
 import { addMenuButton, listenButtonTap } from "./uiKit";
@@ -36,8 +35,8 @@ export class CelebrationScene extends Scene {
 
   create({ achievements, owners, resume }: CelebrationSceneData): void {
     const reduced = currentSettings(this).reducedMotion;
-    const { b, g, r } = Display.Color.IntegerToRGB(PALETTE.ink);
-    this.cameras.main.setBackgroundColor({ a: Math.round(DIM_ALPHA * 255), b, g, r });
+    // Dimmed down the colour ramps, as under the pause menu and the cards.
+    addRampDim(this, { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 });
     const cheering = owners.slice(0, 3);
     const height = PANEL.badgesHeight + (cheering.length > 0 ? PANEL.facesHeight : 0);
     const top = Math.round((SCREEN_CONFIG.height - height - BUTTON.gap - BUTTON.height) / 2);

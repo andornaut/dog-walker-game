@@ -39,7 +39,7 @@ import { listenTargetPress } from "./targetPress";
 import {
   addCloseButton,
   addNineSlice,
-  addPanel,
+  addRimmedPanel,
   addSelectTile,
   addTagImage,
   addTapBurst,
@@ -284,14 +284,7 @@ export class SettingsScene extends Scene {
       x: 0,
       y: 0,
     });
-    // A 1px tan rim keeps the panel's edge clear of what is behind it.
-    fillRect(g, PALETTE.tan, {
-      height: panel.height + 2,
-      width: panel.width + 2,
-      x: panel.x - 1,
-      y: panel.y - 1,
-    });
-    addPanel(this, panel);
+    addRimmedPanel(this, panel);
     addPixelText(this, title.x, title.y, gameData.menuText.settings.title, {
       color: PALETTE.plum,
       font: "title",

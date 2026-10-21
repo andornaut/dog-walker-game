@@ -9,7 +9,7 @@ export function addFilledRect(scene: Scene, color: number, rect: Rect): GameObje
 }
 
 // The ink layer an overlay dims what is under it with.
-export const DIM_ALPHA = 0.6;
+const DIM_ALPHA = 0.6;
 
 export function addDim(scene: Scene, rect: Rect): GameObjects.Rectangle {
   return scene.add

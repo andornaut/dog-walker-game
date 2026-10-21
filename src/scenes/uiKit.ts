@@ -123,6 +123,15 @@ export function addPanel(
   return g;
 }
 
+// A ui-panel in a 1px tan rim that keeps its edge clear of whatever is behind it. The rim
+// leaves out its corner pixels, following the panel's rounded corners.
+export function addRimmedPanel(scene: Scene, rect: Rect): void {
+  const rim = scene.add.graphics();
+  fillRect(rim, PALETTE.tan, { ...rect, height: rect.height + 2, y: rect.y - 1 });
+  fillRect(rim, PALETTE.tan, { ...rect, width: rect.width + 2, x: rect.x - 1 });
+  addPanel(scene, rect);
+}
+
 // The ui-button tags of each state, raised then pressed, or one flat tag when disabled. A
 // disabled primary is go-disabled, which looks like disabled.
 const BUTTON_TAGS: Readonly<Record<ButtonState, readonly string[]>> = {
