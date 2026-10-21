@@ -1,31 +1,54 @@
 import { describe, expect, it } from "vitest";
 
 import { DOGS } from "../data/dogs";
-import type { DogId, Size } from "../data/types";
+import { SHOP_GEAR } from "../data/shop";
+import { TUNING } from "../data/tuning";
+import type { DogId, Modifier, Size } from "../data/types";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
 import { maxHearts } from "./dogs";
-import { faceMood, treatRecipient } from "./treats";
+import { modifiersOf } from "./modifiers";
+import { type FaceMood, faceMood, treatRecipient } from "./treats";
 
 describe("faceMood", () => {
-  const { faceHappyWithin, faceNeutralFrom, maxBySize } = TEST_TUNING.hearts;
-  const data = { tuning: TEST_TUNING };
+  const { faceHappyWithin, faceNeutralFrom } = TUNING.hearts;
+  const data = { tuning: TUNING };
+  const collar = modifiersOf(SHOP_GEAR.luckyCollar.effects);
+  const GEAR: readonly (readonly [string, readonly Modifier[]])[] = [
+    ["", []],
+    [" with the Lucky collar", collar],
+  ];
+  // Upset below faceNeutralFrom; neutral at it, which wins over happy; happy within
+  // faceHappyWithin of max; neutral between.
+  const expected = (max: number, hearts: number): FaceMood => {
+    if (hearts < faceNeutralFrom) {
+      return "upset";
+    }
+    if (hearts === faceNeutralFrom) {
+      return "neutral";
+    }
+    return max - hearts <= faceHappyWithin ? "happy" : "neutral";
+  };
 
-  // Every size's max, and hearts placed against the happy and neutral edges.
+  // Every size, with and without the Lucky collar, at every hearts from its max down to 0.
   it.each(
-    Object.entries(maxBySize).flatMap(([size, max]) => {
-      const happyFrom = max - faceHappyWithin;
-      return [
-        [size, max, max, "happy"],
-        [size, max, happyFrom, "happy"],
-        [size, max, happyFrom - 1, happyFrom - 1 >= faceNeutralFrom ? "neutral" : "upset"],
-        [size, max, faceNeutralFrom, faceNeutralFrom >= happyFrom ? "happy" : "neutral"],
-        [size, max, faceNeutralFrom - 1, "upset"],
-        [size, max, 0, "upset"],
-      ] as const;
-    }),
-  )("shows a %s dog (max %i) at %i hearts as %s", (_, max, hearts, mood) => {
-    expect(faceMood(data, max, hearts)).toBe(mood);
+    (Object.keys(TUNING.hearts.maxBySize) as Size[]).flatMap((size) =>
+      GEAR.flatMap(([gear, modifiers]) => {
+        const max = maxHearts(TUNING, modifiers, { size });
+        return Array.from(
+          { length: max + 1 },
+          (_, below) => [size + gear, max, max - below] as const,
+        );
+      }),
+    ),
+  )("shows a %s dog (max %i) at %i hearts as its mood", (_, max, hearts) => {
+    expect(faceMood(data, max, hearts)).toBe(expected(max, hearts));
+  });
+
+  it("raises the max with the Lucky collar", () => {
+    expect(maxHearts(TUNING, collar, { size: "small" })).toBeGreaterThan(
+      maxHearts(TUNING, [], { size: "small" }),
+    );
   });
 });
 

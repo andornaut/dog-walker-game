@@ -6,13 +6,15 @@ import { read } from "./units";
 
 export type FaceMood = "happy" | "neutral" | "upset";
 
-// How an owner or dog looks at a number of hearts out of max: happy within faceHappyWithin of
-// max, else neutral from faceNeutralFrom hearts, else upset.
+// How an owner or dog looks at a number of hearts out of max: upset below faceNeutralFrom,
+// neutral at faceNeutralFrom or more than faceHappyWithin below max, and happy otherwise.
 export function faceMood(data: Pick<GameData, "tuning">, max: number, hearts: number): FaceMood {
-  if (hearts >= max - read(data.tuning, "hearts", "faceHappyWithin")) {
-    return "happy";
+  const neutralFrom = read(data.tuning, "hearts", "faceNeutralFrom");
+  if (hearts < neutralFrom) {
+    return "upset";
   }
-  return hearts >= read(data.tuning, "hearts", "faceNeutralFrom") ? "neutral" : "upset";
+  const happyFrom = max - read(data.tuning, "hearts", "faceHappyWithin");
+  return hearts === neutralFrom || hearts < happyFrom ? "neutral" : "happy";
 }
 
 // The dog whose owner gains a treat the touched dog grabbed: the touched dog's own owner, or
