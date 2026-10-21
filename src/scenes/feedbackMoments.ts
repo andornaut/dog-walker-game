@@ -47,6 +47,7 @@ import { fillNames } from "../text/lines";
 import { addDisplayText } from "./displayText";
 import { drawFramedRect, drawRing } from "./draw";
 import type { HudWalk } from "./hudWalk";
+import { onSceneEvent } from "./overlay";
 import { PALETTE } from "./palette";
 import { addPixelText, fitPixelText, pixelFontMetrics, placePixelText } from "./pixelText";
 import { firstTag, playEffect, playTag } from "./sprites";
@@ -152,17 +153,9 @@ export class HudFeedback {
     this.hooks = hooks;
     this.run = run;
     this.scene = scene;
-    const onFiring = (cue: FiringCue) => this.playFiring(cue);
-    const onPayout = (cues: PayoutCue[]) => this.playPayout(cues);
-    const onTreat = (cue: TreatCue) => this.playTreat(cue);
-    run.events.on(FIRING_EVENT, onFiring);
-    run.events.on(PAYOUT_EVENT, onPayout);
-    run.events.on(TREAT_EVENT, onTreat);
-    scene.events.once("shutdown", () => {
-      run.events.off(FIRING_EVENT, onFiring);
-      run.events.off(PAYOUT_EVENT, onPayout);
-      run.events.off(TREAT_EVENT, onTreat);
-    });
+    onSceneEvent(scene, run.events, FIRING_EVENT, (cue: FiringCue) => this.playFiring(cue));
+    onSceneEvent(scene, run.events, PAYOUT_EVENT, (cues: PayoutCue[]) => this.playPayout(cues));
+    onSceneEvent(scene, run.events, TREAT_EVENT, (cue: TreatCue) => this.playTreat(cue));
   }
 
   update(run: RunState, pause: RunPause): void {
