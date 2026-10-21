@@ -224,7 +224,7 @@ While a debuff (muddy, stinky or zoomies) lasts, a full-width `ui-debuff-bar` (3
 | Stinky  | mauve | purple | pink | white (4.70:1) |
 | Zoomies | sky   | blue   | cyan | ink (5.64:1)   |
 
-The message strip shares the band's flat sky with the bars. With no bar it is as today, 344×44 at 8,54. With n bars it shows its newest line only, in a one-line `ui-panel` 8,(50 + 16n) 344×26 (8,66 with one bar, 8,82 with two, ending on row 107): the icon at +6,+5, the line at 2× (1× when it does not fit 312px) with its capitals centred on the icon's rows.
+The message strip shares the band's flat sky with the bars. With no bar it is a `ui-panel` 344 wide at 8,54: 30 rows tall for one line, 50 for two. With n bars it shows its newest line only, in a one-line `ui-panel` 8,(50 + 16n) 344×26 (8,66 with one bar, 8,82 with two, ending on row 107): the icon at +6,+5, the line at 2× (1× when it does not fit 312px) with its capitals centred on the icon's rows.
 
 #### Dog cards
 
