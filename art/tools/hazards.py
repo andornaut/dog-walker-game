@@ -2,13 +2,13 @@
 """Draw the moving hazards: things that cross the road or come down it, and the
 warning cue shown at the lane edge about a second before one enters.
 
-squirrel-dash       40x40   side view facing right, run (4 frames, 80ms): a bounding gallop, tail streaming
-loose-dog           40x40   the corgi from other-dog in side view facing right, no owner; run (4 frames,
+squirrel-dash       56x56   side view facing right, run (4 frames, 80ms): a bounding gallop, tail streaming
+loose-dog           56x56   the corgi from other-dog in side view facing right, no owner; run (4 frames,
                             100ms): a gallop, gathered, reaching, airborne and landing, the broken leash
                             trailing up off the back, frayed, a 1px wave travelling down it
-ball-bounce         20x30   the gag-ball ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
+ball-bounce         28x42   the gag-ball ball bouncing across lanes; bounce (6 frames, 70ms), squashed on
                             contact, with its own ground shadow (the game draws none)
-cyclist             40x60   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
+cyclist             56x84   front view, riding down a lane at the player; ride (4 frames, 90ms): pedalling
                             legs and a 1px sway
 ui-warning          16x16   a yellow warning sign with a bold "!", ink outline; pulse (2 frames, 250ms)
 ui-warning-arrow    16x16   a yellow arrow, ink outline; pulse (2 frames, 250ms) points right for a
@@ -23,13 +23,13 @@ ui-warning-arrow for a crossing to the left. Every road sprite takes the road
 outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
 roads and its fill carries Elm Avenue. The warning cues are outlined in ink.
 
-The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn SCALE (1.25)
-times bigger on a minis.Mini, which keeps 1px lines 1px; the ball is drawn at
-each size from BALL. Depth variants, redrawn at their own size with a full
-outline (see minis.py): squirrel-dash@75, loose-dog@75 (30x30), squirrel-dash@50,
-loose-dog@50 (20x20), ball-bounce@75, ball-bounce@50 (15x23, 10x15) and cyclist@75,
-cyclist@50 (30x45, 20x30), each on a Mini at SCALE times the step; depths.py draws
-the steps between them.
+The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn
+road.OBJECT_SCALE (1.75) times bigger on a minis.Mini, which keeps 1px lines 1px;
+the ball is drawn at each size from BALL. Depth variants, redrawn at their own
+size with a full outline (see minis.py): squirrel-dash@75, loose-dog@75 (42x42),
+squirrel-dash@50, loose-dog@50 (28x28), ball-bounce@75, ball-bounce@50 (21x32,
+14x21) and cyclist@75, cyclist@50 (42x63, 28x42), each on a Mini at OBJECT_SCALE
+times the step; depths.py draws the steps between them.
 
 Usage:
   hazards.py preview OUT.png   every frame on the four road colours
@@ -48,7 +48,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import SCALE, face_front, lean  # noqa: E402
+from road import OBJECT_SCALE, face_front, lean  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -134,15 +134,18 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
         limb(g, x, y, px + 3, py - 1, 2, "rust")
         g.rect(px + 3, py, 2, 2, "lgrey")
     # the broken leash: up off the collar and trailing well clear of the back, waving, frayed at the end
+    # the leash is 1px wide and unbroken at any scale: its points are placed on the drawn grid and joined there
     w1, w2, w3 = leash
-    pts = [(19, 13), (15, 7), (10, 5 + w1), (6, 4 + w2), (3, 5 + w3)]
+    sc, px = getattr(g, "s", 1), getattr(g, "g", g)
+    pts = [(math.floor((x + 0.5) * sc), math.floor((y + b + 0.5) * sc))
+           for x, y in ((19, 13), (15, 7), (10, 5 + w1), (6, 4 + w2), (3, 5 + w3))]
     for (x0, y0), (x1, y1) in zip(pts, pts[1:]):
         n = max(abs(x1 - x0), abs(y1 - y0), 1)
-        for k in range(round(n) + 1):
-            g.p(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n + b), "red")
+        for k in range(n + 1):
+            px.p(round(x0 + (x1 - x0) * k / n), round(y0 + (y1 - y0) * k / n), "red")
     ex, ey = pts[-1]
-    g.p(ex - 1, ey - 1 + b, "red")
-    g.p(ex - 1, ey + 1 + b, "red")
+    px.p(ex - 1, ey - 1, "red")
+    px.p(ex - 1, ey + 1, "red")
     # stub tail: a fluffy tuft at the rump
     g.ell(4.5, 16 + b, 2.5, 2, "ochre", "rust", "tan")
     # body: long and low, white underneath
@@ -175,21 +178,21 @@ def corgi_side(bob=0, front=(14, 27), hind=(11, 27), leash=(0, 0, 0), new=Grid):
 
 # ---------- ball-bounce: the gag-ball ball, bouncing ----------
 
-# The bounce at each depth step, its frame floor(20x30 x step + 0.5): frame size; the ground row (the ball's outline touches it on contact, and the
+# The bounce at each depth step, its frame floor(28x42 x step + 0.5): frame size; the ground row (the ball's outline touches it on contact, and the
 # shadow is centred on it); the ball's bottom height per frame; its radii when squashed on contact,
 # stretched near the ground and round at the top of the arc; the stripes' width, spacing and step per
 # frame (whole cycles over the 6 frames, so the loop has no jump); and the shadow's width per frame.
 BALL = {
-    1: dict(size=(20, 30), ground=28, heights=(0, 8, 11, 12, 11, 8), squash=(7.4, 5), stretch=(5, 7.4),
-            round=(6.4, 6.4), stripes=(2, 6, 2), shadow=(15, 12, 10, 8, 10, 12)),
-    0.875: dict(size=(18, 26), ground=24, heights=(0, 7, 10, 11, 10, 7), squash=(6.4, 4.4), stretch=(4.4, 6.4),
+    1: dict(size=(28, 42), ground=40, heights=(0, 11, 15, 17, 15, 11), squash=(10.4, 7), stretch=(7, 10.4),
+            round=(9, 9), stripes=(3, 9, 3), shadow=(21, 17, 14, 11, 14, 17)),
+    0.875: dict(size=(25, 37), ground=35, heights=(0, 10, 13, 15, 13, 10), squash=(9.1, 6.1), stretch=(6.1, 9.1),
+                round=(7.9, 7.9), stripes=(3, 9, 3), shadow=(18, 15, 12, 10, 12, 15)),
+    0.75: dict(size=(21, 32), ground=30, heights=(0, 8, 11, 12, 11, 8), squash=(7.6, 5.1), stretch=(5.1, 7.6),
+               round=(6.6, 6.6), stripes=(2, 6, 2), shadow=(15, 12, 10, 8, 10, 12)),
+    0.625: dict(size=(18, 26), ground=24, heights=(0, 7, 10, 11, 10, 7), squash=(6.4, 4.4), stretch=(4.4, 6.4),
                 round=(5.4, 5.4), stripes=(2, 6, 2), shadow=(13, 11, 9, 7, 9, 11)),
-    0.75: dict(size=(15, 23), ground=21, heights=(0, 6, 8, 9, 8, 6), squash=(5.4, 3.6), stretch=(3.6, 5.4),
-               round=(4.4, 4.4), stripes=(2, 6, 2), shadow=(11, 9, 7, 6, 7, 9)),
-    0.625: dict(size=(13, 19), ground=17, heights=(0, 5, 7, 8, 7, 5), squash=(4.6, 3), stretch=(3, 4.6),
-                round=(3.9, 3.9), stripes=(2, 4, 2), shadow=(9, 8, 6, 5, 6, 8)),
-    0.5: dict(size=(10, 15), ground=13, heights=(0, 3, 5, 6, 5, 3), squash=(4, 2.4), stretch=(2.4, 4),
-              round=(3.4, 3.4), stripes=(2, 4, 2), shadow=(8, 6, 6, 4, 6, 6)),
+    0.5: dict(size=(14, 21), ground=19, heights=(0, 5, 7, 8, 7, 5), squash=(5.2, 3.4), stretch=(3.4, 5.2),
+              round=(4.4, 4.4), stripes=(2, 6, 2), shadow=(11, 9, 7, 6, 7, 9)),
 }
 
 
@@ -295,13 +298,13 @@ def sway_rows(g, k, bottom):
 
 
 def cyclist_at(s, lf=36, rf=41, sway=0):
-    """cyclist on a Mini at SCALE x step s. At full size the rider leans (road.lean shears about the feet);
+    """cyclist on a Mini at OBJECT_SCALE x step s. At full size the rider leans (road.lean shears about the feet);
     smaller, the rows above the handlebar shift sideways, which keeps the bars and wheel put."""
-    g = minis.small(sys.modules[__name__], SCALE * s, cyclist, lf=lf, rf=rf)
+    g = minis.small(sys.modules[__name__], OBJECT_SCALE * s, cyclist, lf=lf, rf=rf)
     if s == 1:
         return edged(lean(g, sway)) if sway else g.g
     g = g.g
-    sway_rows(g, sway, scaled(26, SCALE * s))
+    sway_rows(g, sway, scaled(26, OBJECT_SCALE * s))
     return g
 
 
@@ -369,9 +372,9 @@ def snap(v, s):
 
 
 def small(s, q, offsets):
-    """Pose q at depth step s (1 for the full size): drawn on a Mini at SCALE x s, its offset keys snapped to
-    whole pixels there."""
-    p = SCALE * s
+    """Pose q at depth step s (1 for the full size): drawn on a Mini at OBJECT_SCALE x s, its offset keys
+    snapped to whole pixels there."""
+    p = OBJECT_SCALE * s
 
     def fit(v):
         return tuple(snap(x, p) for x in v) if isinstance(v, tuple) else snap(v, p)
