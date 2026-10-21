@@ -2098,13 +2098,13 @@
         "y": 140
       },
       "dogColumns": {
-        "gap": 6
+        "gap": 4
       },
       "dogRow": {
         "faceSize": 32,
         "faceTop": 12,
-        "faceX": 14,
-        "nameX": 50,
+        "faceX": 12,
+        "nameX": 46,
         "pitch": 34,
         "top": 140
       },

@@ -21,9 +21,9 @@ export const STATS_LAYOUT = {
   // The badge tapped open, over the wall.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
   // The gap between one number column and the next, or the names.
-  dogColumns: { gap: 6 },
+  dogColumns: { gap: 4 },
   // Each row's 32x32 face, its top faceTop above the row's text row, and the name beside it.
-  dogRow: { faceSize: 32, faceTop: 12, faceX: 14, nameX: 50, pitch: 34, top: PANEL.y + 32 },
+  dogRow: { faceSize: 32, faceTop: 12, faceX: 12, nameX: 46, pitch: 34, top: PANEL.y + 32 },
   panel: PANEL,
   rows: { left: 16, pitch: 17, right: 344 },
   // Tabs are 44 game pixels tall (48 CSS pixels on a phone) with 8 between them.
