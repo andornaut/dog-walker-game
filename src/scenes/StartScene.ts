@@ -1,7 +1,6 @@
 import { type GameObjects, Scene, type Time } from "phaser";
 
 import { itemAt } from "../arrays";
-import { animationKey } from "../assets/asepriteAnimations";
 import {
   dogFaceKey,
   dogPortraitKey,
@@ -90,7 +89,6 @@ import {
 import { DISABLED_COLORS, type SelectLook } from "../home/selection";
 import { shopAffordable, type ShopTab } from "../home/shop";
 import type { StatsTab } from "../home/statsLayout";
-import { homeSticker, sameItem, type Sticker, type TileItem } from "../home/sticker";
 import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import {
   EFFECT_ICON_SIZE,
@@ -109,7 +107,7 @@ import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import { addFigure, PackFigures, YARD_LEASH_COLOR } from "../pack/phaser/packFigures";
 import { startWakeLock, stopWakeLock } from "../pwa";
-import { type Cents, cents } from "../rules/units";
+import type { Cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
 import { artReady, whenArtReady } from "./artReady";
@@ -177,7 +175,6 @@ import {
   addTileSprite,
   cogIcon,
   drawDisabledButton,
-  fitText,
   type IconButton,
   imageIcon,
   type SelectTile,
@@ -234,15 +231,6 @@ const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
 
 // The widest line the speech bubble holds, in characters, and how many lines it shows.
 const SPEECH = HOME_LAYOUT.speech;
-// ui-sticker: its word is centred on x 28 with its capitals from row 12, at most 36px wide.
-const STICKER = {
-  height: 28,
-  key: "ui-sticker",
-  maxWordWidth: 36,
-  width: 56,
-  wordX: 28,
-  wordY: 12,
-};
 
 function walkerIds(): WalkerId[] {
   return walkerOrder(gameData);
@@ -419,8 +407,6 @@ export class StartScene extends Scene {
   private quips = new Map<DogId, string>();
   private root: GameObjects.Container | undefined;
   private shakes = new Map<string, number>();
-  // Whether the new sticker has popped this visit, so a redraw shows it without popping again.
-  private stickerPopped = false;
   private startButton:
     | {
         container: GameObjects.Container;
@@ -430,8 +416,6 @@ export class StartScene extends Scene {
       }
     | undefined;
   private views = new Map<string, TileView>();
-  // The bank at the last visit, against which a tile the bank now covers is new.
-  private visitBank: Cents = cents(0);
   private walkerLine: WalkerLine = "firstVisit";
 
   constructor() {
@@ -451,13 +435,11 @@ export class StartScene extends Scene {
     this.pressedTarget = undefined;
     this.quips = new Map();
     this.shakes = new Map();
-    this.stickerPopped = false;
     this.views = new Map();
     const { bankCents, lastLoadout, owned, stats } = profileSave(this);
     this.loadout = { dogs: [...lastLoadout.dogs], gear: lastLoadout.gear };
     const remembered = this.registry.get(LAST_VISIT_BANK_KEY) as Cents | undefined;
     const before = bankAtLastVisit(remembered, bankCents, stats.lastWalk);
-    this.visitBank = before;
     const walkersBefore = this.registry.get(LAST_VISIT_WALKERS_KEY) as WalkerId[] | undefined;
     const news = {
       affordable: newlyAffordable(gameData, owned, before, bankCents),
@@ -1058,14 +1040,8 @@ export class StartScene extends Scene {
     }
     this.drawSectionFills(root);
     this.drawWalkerPicker(root, save);
-    // The sticker covers its tile's price line, which the tile then leaves out.
-    const sticker = this.textures.exists(STICKER.key)
-      ? homeSticker(gameData, save.owned, this.visitBank, save.bankCents)
-      : null;
-    const stickered = (item: TileItem) => sticker !== null && sameItem(sticker.item, item);
-    this.drawDogTiles(root, stickered, save);
-    this.drawPocket(root, stickered, save);
-    this.drawSticker(root, sticker);
+    this.drawDogTiles(root, save);
+    this.drawPocket(root, save);
     this.drawStartButton(root, startReady(sections));
     this.drawFocus(root);
     this.drawOverlay(save);
@@ -1511,11 +1487,7 @@ export class StartScene extends Scene {
     }
   }
 
-  private drawDogTiles(
-    root: GameObjects.Container,
-    stickered: (item: TileItem) => boolean,
-    save: SaveDocument,
-  ): void {
+  private drawDogTiles(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;
     const reduced = currentSettings(this).reducedMotion;
     const capacity = packCapacity(gameData, owned);
@@ -1574,9 +1546,7 @@ export class StartScene extends Scene {
       if (padlock !== null) {
         // A locked dog shows its padlock and its price plate in place of its icons and fee.
         addLock(this, content, padlock, { x: x + dogLock.dx, y: y + dogLock.dy });
-        if (!stickered({ dog: id, kind: "dog" })) {
-          this.lockedPlate(content, tile, { capY: y + feeY - 1, originX: 0, x: x + textX });
-        }
+        this.lockedPlate(content, tile, { capY: y + feeY - 1, originX: 0, x: x + textX });
         return;
       }
       fitText(homeLine(gameData.homeText, "zoneFee", { fee: dogFeeText(gameData) }), y + feeY);
@@ -1585,11 +1555,7 @@ export class StartScene extends Scene {
 
   // The Pocket section's tiles, one per gear item in shop order; a hold shows an item's
   // effect. Pocketing an item replaces any other, so the Pocket is never full.
-  private drawPocket(
-    root: GameObjects.Container,
-    stickered: (item: TileItem) => boolean,
-    save: SaveDocument,
-  ): void {
+  private drawPocket(root: GameObjects.Container, save: SaveDocument): void {
     const { owned } = save;
     const pocketed = this.loadout.gear;
     const slots = gearSlots();
@@ -1625,10 +1591,8 @@ export class StartScene extends Scene {
       }
       if (padlock !== null) {
         addLock(this, content, padlock, { x: x + lock.dx, y: y + lock.dy });
-        if (!stickered({ gear: id, kind: "gear" })) {
-          const plateAt = { capY: y + POCKET.priceY, originX: 0.5, x: x + width / 2 };
-          this.lockedPlate(content, tile, plateAt);
-        }
+        const plateAt = { capY: y + POCKET.priceY, originX: 0.5, x: x + width / 2 };
+        this.lockedPlate(content, tile, plateAt);
       }
     });
   }
@@ -1741,59 +1705,6 @@ export class StartScene extends Scene {
           originY: 0.5,
         });
       });
-    });
-  }
-
-  // The screen's one sticker over its tile's bottom-right corner: its right edge 2px past
-  // the tile's, kept 2px inside the screen, and its bottom 4px below. new pops in on the
-  // first draw of a visit, and its word is written once the pop ends; with reduced motion it
-  // shows the pop's last frame, the new look, at once.
-  private drawSticker(root: GameObjects.Container, sticker: Sticker | null): void {
-    if (sticker === null) {
-      return;
-    }
-    const { item } = sticker;
-    const rect =
-      item.kind === "dog"
-        ? dogFace(itemAt(dogTiles(), rosterOrder().indexOf(item.dog)))
-        : pocketTile(itemAt(gearSlots(), gearIds().indexOf(item.gear)));
-    const right = Math.min(rect.x + rect.width + 2, SCREEN.width - 2);
-    const x = right - STICKER.width;
-    const y = rect.y + rect.height + 4 - STICKER.height;
-    const image = this.add
-      .sprite(x, y, STICKER.key, tagFrame(this, STICKER.key, sticker.kind))
-      .setOrigin(0);
-    root.add(image);
-    const writeWord = () => {
-      if (!image.active) {
-        return;
-      }
-      const word = sticker.kind === "new" ? "NEW!" : dollarText(sticker.price);
-      const label = this.text(root, x + STICKER.wordX, y + STICKER.wordY, word, PALETTE.ink, {
-        font: "title",
-        originX: 0.5,
-        scale: 1,
-      });
-      fitText(label, STICKER.maxWordWidth, [word, word.replace(/^\$/, "")]);
-    };
-    const pop = this.anims.get(animationKey(STICKER.key, "pop"));
-    const popping =
-      sticker.kind === "new" &&
-      !this.stickerPopped &&
-      !currentSettings(this).reducedMotion &&
-      pop !== undefined;
-    this.stickerPopped = this.stickerPopped || sticker.kind === "new";
-    if (!popping) {
-      writeWord();
-      return;
-    }
-    image.play({ key: pop.key, repeat: 0 });
-    image.once("animationcomplete", () => {
-      const settled = tagFrame(this, STICKER.key, "new");
-      if (image.active && settled !== undefined) {
-        image.setFrame(settled);
-      }
-      writeWord();
     });
   }
 
