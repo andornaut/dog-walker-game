@@ -120,13 +120,14 @@ def long_reach():
 
 
 def treat_finder():
-    """A magnifying glass, its cyan lens over a cream treat, its brown handle down to the right."""
+    """A magnifying glass, its cyan lens over the treat (a white bone with a red heart on its shaft), its
+    brown handle down to the right."""
     g = Grid(16, 16)
     for i in range(5):
         g.rect(10 + i, 10 + i, 2, 2, "brown")
     g.ell(6.5, 6.5, 5.7, 5.7, "lgrey", "grey")
     g.ell(6.5, 6.5, 4.2, 4.2, "cyan", None, "white")
-    bitmap(g, 3, 5, ["cc...cc", ".ccccc.", "cc...cc"], {"c": "cream"})
+    bitmap(g, 3, 5, ["ww1.1ww", ".w111w.", "ww.1.ww"], {"w": "white", "1": "red"})
     return g
 
 
@@ -552,13 +553,15 @@ def long_reach20():
 
 
 def treat_finder20():
-    """A magnifying glass, its cyan lens over a cream treat, its brown handle down to the right."""
+    """A magnifying glass, its cyan lens over the treat (a white bone with a red heart on its shaft), its
+    brown handle down to the right."""
     g = Grid(20, 20)
     for i in range(5):
         g.rect(13 + i, 13 + i, 2, 2, "brown")
     g.ell(8, 8, 7, 7, "lgrey", "grey")
     g.ell(8, 8, 5.2, 5.2, "cyan", None, "white")
-    bitmap(g, 4, 7, ["cc.....cc", ".ccccccc.", "cc.....cc"], {"c": "cream"})
+    bitmap(g, 4, 6, ["..11.11..", "ww11111ww", ".ww111ww.", "ww..1..ww"],
+           {"w": "white", "1": "red"})
     return g
 
 

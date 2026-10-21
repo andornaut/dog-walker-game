@@ -392,20 +392,22 @@ def _(g):
 
 
 BONE = ["xx......xx", "xxx....xxx", ".xxxxxxxx.", ".xxxxxxxx.", "xxx....xxx", "xx......xx"]
+# The red heart on each bone's shaft, as the treat pickup carries it, its tip below the shaft: r red, d dred.
+BONE_HEART = ["r.r", "rrd", ".d."]
 
 
 @icon("snack-attack")
 def _(g):
-    """A pile of bone treats in their crumbs."""
+    """A pile of the treat pickup's white bones in their crumbs, each with its red heart."""
     for x0, y0 in ((6, 18), (16, 18), (11, 11)):
-        bitmap(g, x0, y0, BONE, {"x": "ochre"})
+        bitmap(g, x0, y0, BONE, {"x": "white"})
         for y, row in enumerate(BONE):
             for x, ch in enumerate(row):
                 if ch == "x" and (y == len(BONE) - 1 or BONE[y + 1][x] != "x"):
-                    g.p(x0 + x, y0 + y, "rust")
-        g.rect(x0 + 2, y0 + 2, 5, 1, "tan")
+                    g.p(x0 + x, y0 + y, "lgrey")
+        bitmap(g, x0 + 4, y0 + 2, BONE_HEART, {"r": "red", "d": "dred"})
     for x, y in ((22, 12), (24, 15), (8, 15), (6, 25), (11, 26), (20, 26), (25, 25)):
-        g.p(x, y, "rust")
+        g.p(x, y, "brown")
 
 
 BADGES = {

@@ -660,19 +660,48 @@ def hopped(rows, hop):
 
 # ---------- pickups ----------
 
-# The treat's idle: it bobs a pixel up and back.
+# The treat's idle: it bobs a pixel up and back, its heart glinting at the top of the bob.
 TREAT_IDLE = (dict(lift=0), dict(lift=-1))
+# The heart on the treat's bone, by its width in drawn pixels: 1 red, d dred, l the lit pixel (pink, white
+# when it glints; the 3-wide heart is too small for one). treat_heart picks the widest that suits the scale
+# it is drawn at.
+TREAT_HEARTS = {
+    7: [".11.11.", "1l11111", "111111d", ".1111d.", "..11d..", "...1..."],
+    5: ["11.11", "1l11d", ".11d.", "..1.."],
+    3: ["1.1", "111", ".1."],
+}
+
+
+def treat_heart(g, cx, cy, glint):
+    """A TREAT_HEARTS heart centred on (cx, cy) in design pixels, drawn pixel for pixel at g's scale (as
+    face_front draws a face) so it keeps its shape at every size: 7 wide from 1.3x, 5 from 0.9x, else 3."""
+    s = getattr(g, "s", 1)
+    w = 7 if s >= 1.3 else 5 if s >= 0.9 else 3
+    rows = TREAT_HEARTS[w]
+    x0 = math.floor(cx * s + 0.5 - w / 2)
+    y0 = math.floor(cy * s + 0.5 - len(rows) / 2)
+    cols = {"1": "red", "d": "dred", "l": "white" if glint else "pink"}
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch != ".":
+                raster(g).p(x0 + x, y0 + y, cols[ch])
 
 
 def treat(lift=0):
-    """A white bone, a fill no road uses, so it shows on every road; the road outline holds it on the light
-    ones."""
+    """A white bone, a fill no road uses, so it shows on every road, with a red heart on the middle of its
+    shaft: a treat that gives a heart. The heart's lit pixel glints white at the top of the bob. The road
+    outline holds it on the light roads and LIT's rim lights the heart where it stands proud of the bone.
+    lift moves the drawn treat whole pixels (lift x the scale, rounded) after it is drawn, so the bone keeps
+    its shape at the top of the bob."""
     g = edged(Grid(16, 16))
-    y = 6 + lift
+    y = 6
     g.rect(4, y, 8, 3, "white")
     for cx, cy in ((3.5, y + 0.5), (3.5, y + 2.5), (12.5, y + 0.5), (12.5, y + 2.5)):
         g.ell(cx, cy, 1.8, 1.8, "white", "lgrey")
     g.rect(4, y + 2, 8, 1, "lgrey")
+    treat_heart(g, 8, y + 1.5, lift < 0)
+    inner = raster(lit(g))
+    inner.px = hopped(inner.px, round(-lift * getattr(g, "s", 1)))
     return g
 
 

@@ -20,7 +20,7 @@ fx-coin-fly     12x12  spin (4 frames, 80ms)  a coin turning edge-on and back as
 ui-payout-label 24x16  normal (1 frame)  three-slice, 8px caps: a cream price tag with a
                        punched hole in its pointed left cap. Stretched to 60x16 for "+$20"
                        in forest font-title at 2x: caps in rows 3 to 12, ink from x=9
-fx-treat-pop    24x24  play (5 frames, 60ms)  hearts and crumbs bursting where the bone
+fx-treat-pop    24x24  play (5 frames, 60ms)  hearts and crumbs bursting where the treat
                        lands on the dog's face on its card
 
 Usage:
@@ -184,7 +184,7 @@ MINI = ["11.11", "12111", "11113", ".113.", "..1.."]
 
 
 def treat_pop(step):
-    """24x24, centred where the bone lands on the dog. A yellow twinkle, a white pop, then three
+    """24x24, centred where the treat lands on the dog. A yellow twinkle, a white pop, then three
     small hearts pop up out of it and fan out while crumbs scatter and fall; each part is rimmed on its own so
     they stay apart, and the last frame fades the hearts to pink."""
     g = Grid(24, 24)

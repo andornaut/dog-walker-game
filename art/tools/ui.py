@@ -3,8 +3,8 @@
 
 Images (16x16 icons unless noted): icon-pause, icon-play, icon-home, icon-help, icon-close,
 icon-logbook, icon-settings, icon-lock, icon-lock-open (the padlock with its shackle lifted, on a
-locked item the bank covers), icon-money, icon-treat (the treat pickup's bone as road.treat lays it
-out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
+locked item the bank covers), icon-money, icon-treat (the treat pickup, its bone and heart as road.treat lays
+them out at 16x16, for the message strip), icon-stinky; icon-dog-slot (32x32, a pack slot for sale in the
 shop: a doghouse with a green plus badge, as the shop's item-<gear> art, outlined with icon_edge);
 ui-panel (24x24 nine-slice, 4px corners), ui-hint (24x24 nine-slice, 8px corners), ui-hint-tail
 (8x6), ui-new-best (72x20 ribbon, text baked in with font-title); the start screen's ui-detail-card
@@ -232,7 +232,7 @@ def money():
 
 
 def treat_icon():
-    """The treat pickup's bone as road.treat lays it out at 16x16 (idle frame 0), outlined with icon_edge
+    """The treat pickup's bone and heart as road.treat lays them out at 16x16 (idle frame 0), outlined with icon_edge
     as the content icons are."""
     import road
 
