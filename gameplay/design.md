@@ -78,12 +78,12 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 | Neighborhood      | Difficulty | Pay   | Encounter mix                                                           |
 | ----------------- | ---------- | ----- | ----------------------------------------------------------------------- |
-| Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, few movers, the mail carrier        |
+| Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, cats, the mail carrier              |
 | Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, more lucky finds; no thieves, no cars   |
-| Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones; some movers. Always the first         |
-| Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers           |
+| Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones, cars. Always the first                |
+| Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, trucks, more tips                |
 | Riverside Path    | Hard       | ×1.25 | A riverside path: puddles, geese, ducklings, cyclists, more lucky finds |
-| The Long Way Home | Hardest    | ×1.5  | Everything, densest and fastest, the most movers. Always the last       |
+| The Long Way Home | Hardest    | ×1.5  | Everything, densest and fastest. Always the last                        |
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Full pack home:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Full pack bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
@@ -194,19 +194,19 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 
 ### Moving hazards
 
-Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share is lowest on Elm Avenue (a fifth), where every walk starts, and rises to about 60% in The Long Way Home, and most neighborhoods' obstacles are mostly kinds that can move. Each move is telegraphed about 1 second ahead, at most four movers are on screen at once (at most two darting animals and two vehicles slower than the road), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
+Each obstacle has one look everywhere. Some kinds can move, and every one that can always moves: none stands still. Each move is telegraphed about 1 second ahead, at most six movers are on screen at once (at most three darting animals and three vehicles slower than the road), a mover with no room on screen waits to come on rather than standing still, and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
 
-| Group      | How it moves                                                                                                                                                      | Who                                                                   |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| Animals    | Dart across the whole road, some on a slight tilt up or down the road, or stand still                                                                             | Ball, Cat, Frisbee dog, Other dog, Pigeons, Seagull, Squirrel         |
-| Bikes      | In their lane, down the road faster than it scrolls                                                                                                               | Cyclist, Kid on a bike, Scooter                                       |
-| Cars       | A driving car keeps its lane, down the road faster than it scrolls; a parked car stands still or pulls out one lane to either side (street neighborhoods)         | Car, Parked car                                                       |
-| Chargers   | In their lane, straight at the pack, fast                                                                                                                         | Goose                                                                 |
-| Hoppers    | Stand still, or jump in one quick hop: the bunny 1 or 2 spots (a lane to either side, or a row up or down), the ducklings 1 or 2 lanes across, the raccoon 1 spot | Bunny, Ducklings, Raccoon                                             |
-| People     | Stand still, or take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down                                                               | Mail carrier, Thief                                                   |
-| Runners    | In their lane, a jogger toward the pack and a stroller ahead of it, slower than the road                                                                          | Jogger, Stroller                                                      |
-| Trucks     | Like cars, in their lane, but slower; the garbage and ice cream trucks slower than the road                                                                       | Delivery truck, Garbage truck, Ice cream truck (street neighborhoods) |
-| Stationary | Never move                                                                                                                                                        | Barriers, benches, bins, cones, hedges, puddles and skunks            |
+| Group      | How it moves                                                                                                                                   | Who                                                                   |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Animals    | Dart across the whole road, some on a slight tilt up or down the road                                                                          | Ball, Cat, Frisbee dog, Other dog, Pigeons, Seagull, Squirrel         |
+| Bikes      | In their lane, down the road faster than it scrolls                                                                                            | Cyclist, Kid on a bike, Scooter                                       |
+| Cars       | A driving car keeps its lane, down the road faster than it scrolls; a parked car pulls out one lane to either side (street neighborhoods)      | Car, Parked car                                                       |
+| Chargers   | In their lane, straight at the pack, fast                                                                                                      | Goose                                                                 |
+| Hoppers    | Jump in quick hops: the bunny 1 or 2 spots (a lane to either side, or a row up or down), the ducklings 1 or 2 lanes across, the raccoon 1 spot | Bunny, Ducklings, Raccoon                                             |
+| People     | Take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down                                                            | Mail carrier, Thief                                                   |
+| Runners    | In their lane, a jogger toward the pack and a stroller ahead of it, slower than the road                                                       | Jogger, Stroller                                                      |
+| Trucks     | Like cars, in their lane, but slower; the garbage and ice cream trucks slower than the road                                                    | Delivery truck, Garbage truck, Ice cream truck (street neighborhoods) |
+| Stationary | Never move                                                                                                                                     | Barriers, benches, bins, cones, hedges, puddles and skunks            |
 
 ### Feedback
 
