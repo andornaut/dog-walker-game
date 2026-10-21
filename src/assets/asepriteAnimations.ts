@@ -1,6 +1,6 @@
 import * as v from "valibot";
 
-import { assertNever } from "../rules/assertNever";
+import { assertNever } from "../lib/assertNever";
 import { isPlainObject, objectMessage, parseOrThrow, record } from "./jsonSchema";
 
 const DIRECTIONS = ["forward", "reverse", "pingpong", "pingpong_reverse"] as const;

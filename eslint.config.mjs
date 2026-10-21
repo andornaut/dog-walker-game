@@ -43,7 +43,6 @@ const CONTEXTS = {
     "layout/loadingScreen",
     "layout/pixelShapes",
     "lib",
-    "rules/assertNever",
     "state/runState",
     "tools/artManifest",
     "tools/files",

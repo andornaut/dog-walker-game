@@ -25,7 +25,6 @@ import {
 } from "../hud/walkHud";
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
 import { COMIC_WORDS } from "../layout/comicWords";
-import { gridRects } from "../layout/grid";
 import { laneCenterXs, laneDividerXs } from "../layout/lanes";
 import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
 import {
@@ -45,12 +44,13 @@ import {
   type RoadProjection,
   rowScale,
 } from "../layout/projection";
-import type { Rect } from "../layout/rect";
 import { screenLayout, walkerFootY } from "../layout/screenLayout";
+import type { Rect } from "../lib/rect";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
 import { walkProjection } from "../runner/walkGeometry";
 import { fontMetrics } from "../ui/fontMetrics";
+import { gridRects } from "../ui/grid";
 import { readBitmapFont } from "./fontFile";
 
 // The screen geometry art's tools read, as shared/export/layout.json, all in screen pixels

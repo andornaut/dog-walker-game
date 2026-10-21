@@ -1,5 +1,8 @@
 import * as v from "valibot";
 
+import { decodePng } from "../assets/atlas/atlasBuild";
+import { spriteSource } from "../assets/atlas/atlasLayout";
+import type { RgbaImage } from "../assets/atlas/atlasPixels";
 import { isPlainObject, parseOrThrow } from "../assets/jsonSchema";
 import {
   type AssetManifest,
@@ -12,10 +15,7 @@ import {
 } from "../assets/manifest";
 import { spriteAnchor } from "../assets/spriteAnchor";
 import { standsOnGround } from "../assets/spriteKeys";
-import { decodePng } from "../atlas/atlasBuild";
-import { spriteSource } from "../atlas/atlasLayout";
-import type { RgbaImage } from "../atlas/atlasPixels";
-import { opaqueBoundsOfRgba } from "../layout/pixelShapes";
+import { opaqueBoundsOfRgba } from "../ui/pixelShapes";
 import { jsonText } from "./files";
 
 // public/art/manifest.json, derived from the files under public/art/. A key is its file's

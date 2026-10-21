@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { blankImage } from "../atlas/atlasPixels";
+import { blankImage } from "../assets/atlas/atlasPixels";
 import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { depthDraw } from "../layout/depthScale";
 import { project } from "../layout/projection";

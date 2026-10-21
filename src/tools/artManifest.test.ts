@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import { encodePng } from "../atlas/atlasBuild";
-import { blankImage } from "../atlas/atlasPixels";
+import { encodePng } from "../assets/atlas/atlasBuild";
+import { blankImage } from "../assets/atlas/atlasPixels";
 import { type ArtFiles, artManifestText, generateArtManifest } from "./artManifest";
 import { nodeArtFiles } from "./files";
 

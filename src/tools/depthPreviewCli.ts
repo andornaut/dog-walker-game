@@ -7,12 +7,11 @@
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { itemAt } from "../arrays";
+import { decodePng, encodePng } from "../assets/atlas/atlasBuild";
+import { spriteSource } from "../assets/atlas/atlasLayout";
+import { blankImage, type RgbaImage } from "../assets/atlas/atlasPixels";
 import type { AssetManifest } from "../assets/manifest";
 import { backdropKey, depthVariantKey, roadTileKey } from "../assets/spriteKeys";
-import { decodePng, encodePng } from "../atlas/atlasBuild";
-import { spriteSource } from "../atlas/atlasLayout";
-import { blankImage, type RgbaImage } from "../atlas/atlasPixels";
 import { gameData } from "../data";
 import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { Zone } from "../data/types";
@@ -28,6 +27,7 @@ import {
   stripLevels,
 } from "../layout/roadRaster";
 import { screenLayout } from "../layout/screenLayout";
+import { itemAt } from "../lib/arrays";
 import { walkProjection } from "../runner/walkGeometry";
 import { ART_DIR, ART_MANIFEST, generateArtManifest, measureAnchor } from "./artManifest";
 import {
