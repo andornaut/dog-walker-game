@@ -79,7 +79,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 | Neighborhood      | Difficulty | Pay   | Encounter mix                                                     |
 | ----------------- | ---------- | ----- | ----------------------------------------------------------------- |
 | Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, few movers, the mail carrier  |
-| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, more lucky finds; no thieves, no cyclists  |
+| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, joggers; no thieves, no cars      |
 | Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones; some movers. Always the first   |
 | Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, more tips, more movers     |
 | Riverside Path    | Hard       | ×1.25 | A riverside path: puddles, cyclists, other dogs, more lucky finds |
@@ -180,29 +180,33 @@ Plain obstacles open no card. A plain hit costs 1♥ from the owner of the dog i
 
 Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at least 2 lanes open, and the reachable-path rule still holds. Touching any part of it on screen counts as one hit; the whole obstacle is removed and the grace window starts. Once an obstacle is below the walker's feet it can no longer hit, however many rows it spans. Wherever the path has to change lanes between two obstacles, the gap between them is at least the whole pack's height plus every lane change the path needs there (crossing a 3-lane obstacle's width takes up to three) plus about half a second to react, so the pack visibly fits and has time to cross. Two obstacles 2 or more lanes wide never sit in neighboring rows: at least one empty row separates them.
 
-| Obstacle                                                                        | Kind  | Size (lanes × rows) |
-| ------------------------------------------------------------------------------- | ----- | ------------------- |
-| Skunk (with its spray cloud)                                                    | Card  | 2 × 2               |
-| Puddle                                                                          | Muddy | 2 × 1               |
-| Other dog, thief                                                                | Card  | 1 × 1               |
-| Squirrel                                                                        | Pull  | 1 × 1               |
-| Ball, bin, cone, cyclist, mail carrier                                          | Plain | 1 × 1               |
-| Car, delivery truck, ice cream truck                                            | Plain | 1 × 3               |
-| Bench                                                                           | Plain | 2 × 1               |
-| Hedge                                                                           | Plain | 3 × 1               |
-| Construction barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path) | Plain | 2 or 3 × 1          |
+| Obstacle                                                                                                                                               | Kind  | Size (lanes × rows) |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----- | ------------------- |
+| Skunk (with its spray cloud)                                                                                                                           | Card  | 2 × 2               |
+| Puddle                                                                                                                                                 | Muddy | 2 × 1               |
+| Other dog, thief                                                                                                                                       | Card  | 1 × 1               |
+| Squirrel                                                                                                                                               | Pull  | 1 × 1               |
+| Ball, bin, bunny, cat, cone, cyclist, ducklings, frisbee dog, goose, jogger, kid on a bike, mail carrier, pigeons, raccoon, scooter, seagull, stroller | Plain | 1 × 1               |
+| Car, delivery truck, garbage truck, ice cream truck                                                                                                    | Plain | 1 × 3               |
+| Bench                                                                                                                                                  | Plain | 2 × 1               |
+| Hedge                                                                                                                                                  | Plain | 3 × 1               |
+| Construction barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path)                                                                        | Plain | 2 or 3 × 1          |
 
 ### Moving hazards
 
-Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share rises from few movers in the first neighborhoods to about half in The Long Way Home. Each move is telegraphed about 1 second ahead, at most three movers are on screen at once (at most one darting animal and one slow vehicle), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
+Each obstacle has one look everywhere. Some kinds can move; each one that can moves at its neighborhood's mover share and stands still otherwise. The share rises from about a quarter in Willow Crescent to about 60% in The Long Way Home, and most neighborhoods' obstacles are mostly kinds that can move. Each move is telegraphed about 1 second ahead, at most four movers are on screen at once (at most two darting animals and two vehicles slower than the road), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
 
-| Group      | How it moves                                                                                        | Who                                                        |
-| ---------- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Animals    | Zoom across the whole road, some on a slight tilt up or down the road, or stand still               | Ball, Other dog, Squirrel                                  |
-| Cars       | Always in their lane, some down the road faster than it scrolls and some slower                     | Car (street neighborhoods), Cyclist                        |
-| People     | Stand still, or take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down | Mail carrier, Thief                                        |
-| Trucks     | Like cars, in their lane, but slower                                                                | Delivery truck, Ice cream truck (street neighborhoods)     |
-| Stationary | Never move                                                                                          | Barriers, benches, bins, cones, hedges, puddles and skunks |
+| Group      | How it moves                                                                                        | Who                                                                   |
+| ---------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Animals    | Dart across the whole road, some on a slight tilt up or down the road, or stand still               | Ball, Cat, Frisbee dog, Other dog, Pigeons, Seagull, Squirrel         |
+| Bikes      | In their lane, down the road faster than it scrolls                                                 | Cyclist, Kid on a bike, Scooter                                       |
+| Cars       | In their lane, down the road faster than it scrolls (street neighborhoods)                          | Car                                                                   |
+| Chargers   | In their lane, straight at the pack, fast                                                           | Goose                                                                 |
+| Hoppers    | Stand still, or hop 1 or 2 spots: a lane to either side, or a row up or down                        | Bunny, Ducklings, Raccoon                                             |
+| People     | Stand still, or take 1 or 2 slow steps in any direction: a lane to either side, or a row up or down | Mail carrier, Thief                                                   |
+| Runners    | In their lane, a jogger toward the pack and a stroller ahead of it, slower than the road            | Jogger, Stroller                                                      |
+| Trucks     | Like cars, in their lane, but slower; the garbage and ice cream trucks slower than the road         | Delivery truck, Garbage truck, Ice cream truck (street neighborhoods) |
+| Stationary | Never move                                                                                          | Barriers, benches, bins, cones, hedges, puddles and skunks            |
 
 ### Feedback
 
