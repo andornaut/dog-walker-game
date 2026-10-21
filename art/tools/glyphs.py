@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Draw the info icons shown beside a dog in the pack picker, the shop and the zone banner, a walker's
-pace and style icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
+pace, style and perk icons, the dog status icons on the doghouse heart board, and the run top bar's state strip icons.
 
 16x16 images in Endesga 32 with coloured outlines, on transparency:
 icon-trait-<trait>          fancy (a pink bow), food-driven (a bone), chaser (a squirrel)
@@ -8,6 +8,11 @@ icon-pace-<pace>            a walker's pace, on walker tiles and the detail card
                             (a hare bounding, with speed lines)
 icon-style-<style>          a walker's style beside the pace: charm (a red rose with a twinkle),
                             hustle (a green money bag with a yellow $)
+icon-perk-<perk>            a walker's perk, on walker tiles, the new walker celebration and
+                            the state strip: calm-voice (a sky speech bubble with a white
+                            wave), kind-words (a pink speech bubble with a red heart), long-reach
+                            (an open hand over a green arrow pointing both ways), treat-finder (a
+                            magnifying glass over a treat)
 icon-quirk-<dog>            each dog's quirk, beside its trait, outlined to hold 3:1 on cream and
                             tan: archie Acrobatic (a red arrow looping a flip around a paw),
                             biscuit Scent hound (a beagle in profile sniffing scent lines from a
@@ -181,6 +186,57 @@ def style_hustle():
     g.tri((11.5, 1), (8, 4.5), (9.5, 1), "dgreen")
     g.rect(5, 5, 6, 1, "amber")
     bitmap(g, 6, 7, [".y.", "yyy", "y..", "yyy", "..y", "yyy", ".y."], {"y": "yellow"})
+    return g
+
+
+# ---------- walkers: perks, on walker tiles, the new walker celebration and the state strip ----------
+# Each holds its silhouette on cream and on the strip's ink. The two voice perks are speech bubbles told
+# apart by colour and mark: calm voice a sky bubble with a wave, kind words a pink one with a heart.
+
+def calm_voice():
+    """A sky speech bubble, lit cyan along its top, holding a white wave: a soft, even tone."""
+    g = Grid(16, 16)
+    g.rect(1, 2, 14, 9, "sky")
+    g.rect(0, 3, 16, 7, "sky")
+    g.rect(1, 2, 14, 1, "cyan")
+    g.rect(0, 3, 1, 3, "cyan")
+    g.rect(1, 10, 14, 1, "blue")
+    g.tri((3, 10), (3, 15), (7, 10), "sky")
+    bitmap(g, 2, 5, [".ww...ww...ww", "w..w.w..w.w..", "....w....w..."], {"w": "white"})
+    return g
+
+
+def kind_words():
+    """A pink speech bubble holding a red heart."""
+    g = Grid(16, 16)
+    g.rect(1, 1, 14, 10, "pink")
+    g.rect(0, 2, 16, 8, "pink")
+    g.rect(1, 10, 14, 1, "mauve")
+    g.tri((10, 10), (13, 15), (13.5, 10), "pink")
+    heart(g, 4, 2, big=True)
+    return g
+
+
+def long_reach():
+    """An open hand, palm out, over a green arrow pointing both ways: a reach a lane to each side."""
+    g = Grid(16, 16)
+    bitmap(g, 4, 0, [".s.s.s..", ".s.s.s.s", ".sssss.s", "ss.sssss", "sssssssd", ".ssssssd",
+                     "..sssssd", "..sssdd."], {"s": "skin1", "d": "skin2"})
+    g.tri((0, 12.5), (3.5, 9), (3.5, 16), "green")
+    g.tri((16, 12.5), (12.5, 9), (12.5, 16), "green")
+    g.rect(3, 11, 10, 3, "green")
+    g.rect(3, 13, 10, 1, "dgreen")
+    return g
+
+
+def treat_finder():
+    """A magnifying glass, its cyan lens over a cream treat, its brown handle down to the right."""
+    g = Grid(16, 16)
+    for i in range(5):
+        g.rect(10 + i, 10 + i, 2, 2, "brown")
+    g.ell(6.5, 6.5, 5.7, 5.7, "lgrey", "grey")
+    g.ell(6.5, 6.5, 4.2, 4.2, "cyan", None, "white")
+    bitmap(g, 3, 5, ["cc...cc", ".ccccc.", "cc...cc"], {"c": "cream"})
     return g
 
 
@@ -823,6 +879,10 @@ IMAGES = {
     "icon-pace-fast": pace_fast,
     "icon-style-charm": style_charm,
     "icon-style-hustle": style_hustle,
+    "icon-perk-calm-voice": calm_voice,
+    "icon-perk-kind-words": kind_words,
+    "icon-perk-long-reach": long_reach,
+    "icon-perk-treat-finder": treat_finder,
     "icon-quirk-archie": acrobatic,
     "icon-quirk-biscuit": scent_hound,
     "icon-quirk-duchess": pampered,

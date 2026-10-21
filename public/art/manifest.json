@@ -6676,6 +6676,22 @@
       "png": "images/icon-pause.png"
     },
     {
+      "key": "icon-perk-calm-voice",
+      "png": "images/icon-perk-calm-voice.png"
+    },
+    {
+      "key": "icon-perk-kind-words",
+      "png": "images/icon-perk-kind-words.png"
+    },
+    {
+      "key": "icon-perk-long-reach",
+      "png": "images/icon-perk-long-reach.png"
+    },
+    {
+      "key": "icon-perk-treat-finder",
+      "png": "images/icon-perk-treat-finder.png"
+    },
+    {
       "key": "icon-play",
       "png": "images/icon-play.png"
     },
