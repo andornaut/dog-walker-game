@@ -2,10 +2,9 @@ import type { ZoneId } from "../data/types";
 import type { Point, Rect } from "./rect";
 
 // The scenery gags in the backdrop band: a cat on a perch and a kite snagged in a street tree.
-// They are still pictures, the first frame of their art, with no collision and no effect:
-// nothing in the band moves but the road. Positions are band pixels, by the top-left corner of
-// their sprites. The street runs up from the band's bottom edge to a cross street, and the gags
-// sit on the lawns either side of it.
+// They are still pictures, the first frame of their art, with no collision and no effect.
+// Positions are band pixels, by the top-left corner of their sprites. The street runs up from
+// the band's bottom edge to a cross street, and the gags sit on the lawns either side of it.
 
 export const GAG_KEYS = { cat: "gag-cat", kite: "gag-kite" } as const;
 export const GAG_SIZES = {
@@ -17,6 +16,11 @@ export const GAG_TAGS = { cat: "idle", kite: "flutter" } as const;
 
 // The near-left perch's top rail, rows 158 and 159, on the band's approach rows.
 export const PERCH_RAIL_Y = 158;
+
+// The backdrops' cross street, as the band rows its ambient movers stand on: the bottom row of
+// each sidewalk and lane (far sidewalk 135 to 138, far lane 141 to 144, near lane 146 to 149,
+// near sidewalk 150 to 154).
+export const CROSS_STREET = { farLane: 144, farWalk: 138, nearLane: 149, nearWalk: 154 } as const;
 
 // The cat's paws, on its frame's bottom row, rest on the perch's top rail, and the kite's tree
 // stands on the near-right lawn, its crown over the cross street.

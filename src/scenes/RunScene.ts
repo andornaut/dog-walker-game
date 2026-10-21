@@ -21,6 +21,7 @@ import { type RunPause, walkPaused } from "../hud/topBar";
 import { type ExplainShown, type ExplainTarget } from "../hud/walkHud";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
+import { AmbientView } from "../road/phaser/ambientView";
 import type { CardView, Choice } from "../rules/choices";
 import { currentZone, currentZoneId } from "../rules/route";
 import {
@@ -112,6 +113,7 @@ interface Celebration {
 
 // One run's views, input, menus and dev hooks, made as it starts.
 interface RunWorld {
+  ambient: AmbientView;
   backdrop: BackdropView;
   banner: ZoneBanner;
   hitBoxes: HitBoxView;
@@ -218,18 +220,21 @@ export class RunScene extends Scene {
     this.zoneClocks = startZoneClocks(0);
   }
 
-  // The views are made in draw order: the backdrop, the road, then the pack.
+  // The views are made in draw order: the backdrop and its ambient movers, the road, then the
+  // pack.
   private createWorld(
     run: Pick<RunWorld, "random" | "recorder" | "setup" | "streams">,
     picked: { loadout: Loadout; walkerSprite: string },
   ): RunWorld {
     const { random, recorder } = run;
     const backdrop = new BackdropView(this, random.scenery);
+    const ambient = new AmbientView(this, random.ambient);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const pack = new PackView(this, picked.loadout.dogs, picked.walkerSprite);
     const still = () => this.reducedMotion();
     return {
       ...run,
+      ambient,
       backdrop,
       banner: new ZoneBanner(this),
       hitBoxes: new HitBoxView(this),
@@ -617,6 +622,13 @@ export class RunScene extends Scene {
     const zone = currentZone(gameData, walk.run);
     const still = this.reducedMotion();
     world.backdrop.draw(zone);
+    const zoneId = currentZoneId(gameData, walk.run);
+    world.ambient.draw(gameData.ambient[zoneId], zoneId, {
+      halted,
+      now: (session.timeMs + (halted ? 0 : alpha * STEP_MS)) / 1000,
+      still,
+      travelled: distanceBeforeZone + walk.run.zoneDistance,
+    });
     world.road.draw(walk, zone, distanceBeforeZone);
     const shadow = world.shadows.frame(colorFromHex(zone.roadShadowColor));
     world.items.draw(walk, halted, still, shadow);

@@ -10,12 +10,17 @@ import { profileSave, runLoadout, walkerInUse, walkerSpriteKey } from "../profil
 // The streams only the run's views draw from, each named from the setup's seed beside the
 // session's own (runStreams).
 export interface RunRandom {
+  ambient: Random;
   quips: Random;
   scenery: Random;
 }
 
 export function runRandom(seed: number): RunRandom {
-  return { quips: randomStream(seed, "quips"), scenery: randomStream(seed, "scenery") };
+  return {
+    ambient: randomStream(seed, "ambient"),
+    quips: randomStream(seed, "quips"),
+    scenery: randomStream(seed, "scenery"),
+  };
 }
 
 // The saved pick with the setup's pack, gear and walker over it; a setup pack walks without a

@@ -1,4 +1,5 @@
 import { ACHIEVEMENTS } from "./achievements";
+import { AMBIENT } from "./ambient";
 import { DEBUFFS } from "./debuffs";
 import { DOGS } from "./dogs";
 import { DOG_SLOTS } from "./dogSlots";
@@ -20,6 +21,7 @@ import { WORLD } from "./world";
 function toGameData(values: ValueExports): GameData {
   return {
     achievements: values.ACHIEVEMENTS,
+    ambient: values.AMBIENT,
     debuffs: values.DEBUFFS,
     defaultWalker: values.DEFAULT_WALKER,
     dogSlots: values.DOG_SLOTS,
@@ -43,6 +45,7 @@ function toGameData(values: ValueExports): GameData {
 
 const INITIAL_VALUES = {
   ACHIEVEMENTS,
+  AMBIENT,
   DEBUFFS,
   DEFAULT_WALKER,
   DOGS,
@@ -82,6 +85,7 @@ if (import.meta.hot) {
   import.meta.hot.accept(
     [
       "./achievements.ts",
+      "./ambient.ts",
       "./debuffs.ts",
       "./dogSlots.ts",
       "./dogs.ts",

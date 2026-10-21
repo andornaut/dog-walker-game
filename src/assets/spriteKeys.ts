@@ -212,6 +212,20 @@ export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readon
 };
 export const IDLE_TAG = "idle";
 
+// An ambient mover whose art is not drawn yet plays the sprite and tag named here for it, or
+// is not shown while its entry is null.
+export const AMBIENT_FALLBACKS: Readonly<
+  Partial<Record<string, { readonly key: string; readonly tag: string } | null>>
+> = {
+  "ambient-bike": { key: "cyclist", tag: "ride" },
+  "ambient-bird": { key: "chase-pigeons", tag: "run" },
+  "ambient-car": { key: "parked-car", tag: "drive" },
+  "ambient-cat": { key: "chase-cat", tag: "run" },
+  "ambient-pedestrian": { key: "other-dog-owner", tag: "walk" },
+  "ambient-pedestrian-back": null,
+  "ambient-rabbit": { key: "chase-rabbit", tag: "run" },
+};
+
 // A mover's cue: the sign at the lane edge and the arrow pointing the way it will go, which
 // faces right. Both play WARNING_TAG; the arrow plays WARNING_DOWN_TAG or WARNING_UP_TAG to
 // point down or up a lane. A stepping mover's cue is WARNING_WANDER_KEY over its head, playing

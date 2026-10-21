@@ -53,10 +53,12 @@ const CONTEXTS = {
   road: [
     "assets",
     "data",
+    "layout/projection",
     "layout/sceneryGags",
     "layout/screenLayout",
     "lib",
     "runner/walk",
+    "runner/walkGeometry",
     "scenes/run/stage",
     "scenes/sprites",
   ],

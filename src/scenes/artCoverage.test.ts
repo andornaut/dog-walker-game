@@ -8,6 +8,7 @@ import { splitDepthKey, stepSize } from "../assets/depthSteps";
 import { SQUIRREL_ICON_KEY, statusIconKey } from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";
 import {
+  AMBIENT_FALLBACKS,
   artOrStandIn,
   CARD_FRAME_KEY,
   cardFrameTag,
@@ -440,6 +441,22 @@ describe("road object art", () => {
       const variant = depthVariantKey(key, step) ?? key;
       return tags.some((tag) => tagsOf(variant).includes(tag)) ? [] : [variant];
     });
+    expect(missing).toEqual([]);
+  });
+
+  it.each(
+    Object.entries(gameData.ambient).flatMap(([zone, movers]) =>
+      movers.map((mover) => ({ ...mover, zone })),
+    ),
+  )("draws the $zone ambient $key, or a fallback, with its tag at every step", (mover) => {
+    const fallback = AMBIENT_FALLBACKS[mover.key];
+    if (fallback === null && !sprites.has(mover.key)) {
+      return;
+    }
+    const { key, tag } = sprites.has(mover.key) || fallback == null ? mover : fallback;
+    const missing = [1, ...variantSteps([key])].flatMap((step) =>
+      missingTags(depthVariantKey(key, step) ?? key, [tag]),
+    );
     expect(missing).toEqual([]);
   });
 });
