@@ -107,7 +107,7 @@ export const ACHIEVEMENTS = [
     goal: "Finish a walk with each of the 9 dogs",
     id: "neighbourhoodFavourite",
     name: "Neighborhood Favorite",
-    shortGoal: "All 9 dogs finish",
+    shortGoal: "Walk all 9 dogs",
   },
   {
     badgeLine: "Maplewood's finest. Ask any dog.",

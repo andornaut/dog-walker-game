@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { AchievementCondition } from "../data/types";
+import type { AchievementCondition, DogId } from "../data/types";
 import { assertNever } from "../rules/assertNever";
 import { newPlayerSave } from "../save/fixtures";
 import type { SaveDocument } from "../save/schema";
@@ -21,15 +21,26 @@ import { STATS_LAYOUT } from "./statsLayout";
 // The condition kinds a save counts across walks, and a save that has counted n of one.
 type Counted = Extract<
   AchievementCondition,
-  { kind: "tally" | "timesFired" | "walksWithoutFiring" }
+  { kind: "dogsFinishedWith" | "tally" | "timesFired" | "walksWithoutFiring" }
 >;
-const COUNTED_KINDS: readonly string[] = ["tally", "timesFired", "walksWithoutFiring"];
+const COUNTED_KINDS: readonly string[] = [
+  "dogsFinishedWith",
+  "tally",
+  "timesFired",
+  "walksWithoutFiring",
+];
+const ALL_DOGS = Object.keys(gameData.dogs) as DogId[];
+// How many a counted condition needs: "all" is every dog in the data.
+const needOf = (condition: Counted) =>
+  condition.count === "all" ? ALL_DOGS.length : condition.count;
 const isCounted = (condition: AchievementCondition): condition is Counted =>
   COUNTED_KINDS.includes(condition.kind);
 
 function counted(condition: Counted, n: number): SaveDocument {
   const stats = newPlayerSave.stats;
   switch (condition.kind) {
+    case "dogsFinishedWith":
+      return { ...newPlayerSave, stats: { ...stats, dogsFinishedWith: ALL_DOGS.slice(0, n) } };
     case "tally":
       return { ...newPlayerSave, stats: { ...stats, tallies: { [condition.tally]: n } } };
     case "timesFired":
@@ -82,7 +93,7 @@ describe("badgeProgress", () => {
     "counts %s's progress, capped at its count, and hides it once earned",
     (id, condition) => {
       const locked = { earned: false, id };
-      const need = condition.count;
+      const need = needOf(condition);
       expect(badgeProgress(gameData, counted(condition, need - 1), locked)).toBe(
         progressText(need - 1, need),
       );
@@ -100,7 +111,7 @@ describe("wallCellLines", () => {
   // The widest progress a badge shows: its count over its count.
   const progressFor = (id: string) => {
     const condition = COUNTED_BADGES.find((badge) => badge.id === id)?.condition;
-    return condition === undefined ? undefined : progressText(condition.count, condition.count);
+    return condition === undefined ? undefined : progressText(needOf(condition), needOf(condition));
   };
 
   it.each(badgeWall(gameData, newPlayerSave).map((badge) => [badge.name, badge] as const))(
@@ -111,10 +122,23 @@ describe("wallCellLines", () => {
       const drawn = [...cell.name, ...cell.goal, ...cell.progress];
       expect(drawn.length).toBeLessThanOrEqual(lines);
       expect(drawn.every((line) => bodyTextWidth(scale, line) <= width)).toBe(true);
-      expect([wrap(badge.goal), wrap(badge.shortGoal)]).toContainEqual(cell.goal);
-      expect(cell.progress).toEqual(progress === undefined ? [] : [progress]);
+      // A whole goal, with the progress on its own line or ending the goal's last line.
+      const goal = [...cell.goal, ...cell.progress].join(" ");
+      const whole = [badge.goal, badge.shortGoal].flatMap((text) =>
+        progress === undefined ? [text] : [`${text} ${progress}`],
+      );
+      expect(whole).toContain(goal);
     },
   );
+
+  it.each<[string, number, string[]]>([
+    ["on a line of its own when it fits", 3, ["Name", "Goal", "1/2"]],
+    ["ending the goal's last line when it does not", 2, ["Name", "Goal 1/2"]],
+  ])("puts the progress %s", (_, lines, drawn) => {
+    const badge = { goal: "Goal", name: "Name", shortGoal: "Goal" };
+    const cell = wallCellLines(lines, (text) => [text], badge, "1/2");
+    expect([...cell.name, ...cell.goal, ...cell.progress]).toEqual(drawn);
+  });
 });
 
 describe("wallRects", () => {

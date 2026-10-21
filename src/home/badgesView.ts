@@ -47,13 +47,13 @@ export function earnedText(
 // The progress under a locked badge's goal when its condition counts across walks ("7/15");
 // undefined for an earned badge and for one judged on a single walk or on what the save owns.
 export function badgeProgress(
-  data: Pick<GameData, "achievements" | "menuText">,
+  data: Pick<GameData, "achievements" | "dogs" | "menuText">,
   save: Pick<SaveDocument, "stats">,
   badge: Pick<BadgeView, "earned" | "id">,
 ): string | undefined {
   const achievement = data.achievements.find(({ id }) => id === badge.id);
   const progress =
-    badge.earned || achievement === undefined ? null : achievementProgress(save, achievement);
+    badge.earned || achievement === undefined ? null : achievementProgress(data, save, achievement);
   return progress === null
     ? undefined
     : fillLine(MENU_TEXT_FIELDS.stats, data.menuText.stats, "badgeProgress", {
@@ -63,8 +63,9 @@ export function badgeProgress(
 }
 
 // A wall cell's text, broken into lines by wrap: the name, then the goal, then the progress
-// when there is one. The goal is the full one when it fits the lines left, else the short
-// one, cut to the lines left.
+// when there is one. The goal is the full one when it fits the lines left, else the short one.
+// When neither fits with the progress on a line of its own, the progress ends the goal's last
+// line instead; failing that, the short goal is cut to the lines left.
 export function wallCellLines(
   lines: number,
   wrap: (text: string) => string[],
@@ -72,11 +73,25 @@ export function wallCellLines(
   progress: string | undefined,
 ): { goal: string[]; name: string[]; progress: string[] } {
   const name = wrap(badge.name);
-  const progressLines = progress === undefined ? [] : [progress];
-  const room = Math.max(0, lines - name.length - progressLines.length);
-  const fullGoal = wrap(badge.goal);
-  const goal = fullGoal.length <= room ? fullGoal : wrap(badge.shortGoal);
-  return { goal: goal.slice(0, room), name, progress: progressLines };
+  const left = lines - name.length;
+  const own = progress === undefined ? [] : [progress];
+  const goals = [badge.goal, badge.shortGoal];
+  const whole = goals.map(wrap).find((goal) => goal.length + own.length <= left);
+  if (whole !== undefined) {
+    return { goal: whole, name, progress: own };
+  }
+  const inline =
+    progress === undefined
+      ? undefined
+      : goals.map((goal) => wrap(`${goal} ${progress}`)).find((goal) => goal.length <= left);
+  if (inline !== undefined) {
+    return { goal: inline, name, progress: [] };
+  }
+  return {
+    goal: wrap(badge.shortGoal).slice(0, Math.max(0, left - own.length)),
+    name,
+    progress: own,
+  };
 }
 
 export interface WallSpec {

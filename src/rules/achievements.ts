@@ -176,9 +176,11 @@ export function conditionHolds(
 }
 
 // How far a save has come toward a condition that counts across walks (a lifetime tally,
-// times fired, finished walks with no firing): have is capped at need. null for a condition
-// judged on one walk or on what the save owns.
+// times fired, finished walks with no firing, distinct dogs that finished a walk without firing
+// you): have is capped at need. null for a condition judged on one walk or on what the save
+// owns.
 export function acrossWalksProgress(
+  data: Pick<GameData, "dogs">,
   save: Pick<SaveDocument, "stats">,
   condition: AchievementCondition,
 ): { readonly have: number; readonly need: number } | null {
@@ -190,10 +192,14 @@ export function acrossWalksProgress(
       return progress(save.stats.timesFired, condition.count);
     case "walksWithoutFiring":
       return progress(save.stats.walksWithoutFiring, condition.count);
+    case "dogsFinishedWith":
+      return progress(
+        save.stats.dogsFinishedWith.length,
+        needed(Object.keys(data.dogs).length, condition.count),
+      );
     case "cleanZones":
     case "debuffsGot":
     case "dogSlotsOwned":
-    case "dogsFinishedWith":
     case "dogsOwned":
     case "earnings":
     case "finishOnLastHeart":
@@ -211,11 +217,12 @@ export function acrossWalksProgress(
 // A badge's progress toward its one condition when that condition counts across walks; null
 // for a badge with any other condition, or with more than one.
 export function achievementProgress(
+  data: Pick<GameData, "dogs">,
   save: Pick<SaveDocument, "stats">,
   achievement: Pick<Achievement, "conditions">,
 ): { readonly have: number; readonly need: number } | null {
   const [condition, ...rest] = achievement.conditions;
-  return rest.length === 0 ? acrossWalksProgress(save, condition) : null;
+  return rest.length === 0 ? acrossWalksProgress(data, save, condition) : null;
 }
 
 // The achievements a run end or a purchase earned, in wall order: those not yet earned in
