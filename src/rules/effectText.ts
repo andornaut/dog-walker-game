@@ -231,15 +231,15 @@ export type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 // money effect's total for the dogs it counts, after modifiers.
 export interface CardTextContext {
   readonly dogs: (target: Target) => readonly DogId[];
-  // Whether the walker's perk, such as Kind words, would forgive the dog's owner's loss.
+  // Whether the walker's perk, such as Second chance, would forgive the dog's owner's loss.
   readonly forgiven: (dog: DogId) => boolean;
   readonly money: (effect: MoneyEffect) => Cents;
   // How long a debuff would last on this walk.
   readonly seconds: (debuff: DebuffId) => number;
 }
 
-// Each owner's change by their dog's name, a loss the walker's perk would forgive saying so:
-// "−1♥ Duchess, forgiven, −1♥ Koda".
+// Each owner's change by their dog's name, a loss the walker's perk would forgive saying so in
+// place of its cost: "♥ Duchess's safe!, −1♥ Koda".
 function cardHeartsText(
   data: CardTextData,
   context: CardTextContext,

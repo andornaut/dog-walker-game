@@ -56,7 +56,7 @@ describe("bumpLine", () => {
       fillNames(strip.plainHit, { dog: koda.name, hearts: "2", obstacle: "cone", owner }),
     ],
     [
-      "the hearts still lost past Kind words",
+      "the hearts still lost past Second chance",
       {
         change: hearts(4, 3, [
           { amount: -2, kind: "bump" },
@@ -71,7 +71,7 @@ describe("bumpLine", () => {
     expect(bumpLine(gameData, bump, "Cone")?.text).toBe(text);
   });
 
-  it("says nothing of a loss Kind words forgave whole: its forgiven line says it", () => {
+  it("says nothing of a loss Second chance forgave whole: its forgiven line says it", () => {
     expect(bumpLine(gameData, { change: forgivenLoss, dodged: false, dog: "koda" }, "Cone")).toBe(
       null,
     );
@@ -124,7 +124,7 @@ describe("the strip's other lines", () => {
     ],
     ["no bonus without one", fullPackLine(gameData, []), null],
     [
-      "Kind words for a forgiven loss, and nothing for a plain one",
+      "Second chance for a forgiven loss, and nothing for a plain one",
       forgivenLines(gameData, [forgivenLoss, hearts(4, 3, [{ amount: -1, kind: "bump" }])]),
       [{ icon: "hint", text: fillNames(strip.kindWords, { owner }) }],
     ],

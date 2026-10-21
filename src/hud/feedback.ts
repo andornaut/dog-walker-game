@@ -45,6 +45,12 @@ export interface LabelAnchor {
   lineBottom: number;
 }
 
+// The left edge of a chip width wide centred on centreX, moved in to stay on a screen
+// screenWidth wide.
+export function chipLeft(screenWidth: number, centreX: number, width: number): number {
+  return Math.max(0, Math.min(screenWidth - width, Math.round(centreX - width / 2)));
+}
+
 // The 32x32 heart pop's top-left: its centre column on the dog's, its bottom row 4px below
 // the dog's top opaque row.
 export function heartPopFrame(dogTop: Point): Point {

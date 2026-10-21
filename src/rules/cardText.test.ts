@@ -73,7 +73,7 @@ describe("a card's text for the dogs it catches", () => {
     expect(view.text).toBe(`−$${row.dollars}`);
   });
 
-  describe("with Kind words", () => {
+  describe("with Second chance", () => {
     const kindWords = activeModifier(
       { kind: "walker", walker: "casey" },
       { by: "kindWordsForgiven", operation: "add", stat: "forgivenHearts" },
@@ -84,7 +84,11 @@ describe("a card's text for the dogs it catches", () => {
 
     it.each([
       ["the first dog's loss forgiven", 0, `${forgiven("duchess")}, ${heartsText(["koda"], -1)}`],
-      ["nothing forgiven once Kind words is used", allowance, heartsText(["duchess", "koda"], -1)],
+      [
+        "nothing forgiven once Second chance is used",
+        allowance,
+        heartsText(["duchess", "koda"], -1),
+      ],
     ])("says %s", (_, used, text) => {
       const kind = testState(
         { duchess: 5, koda: 5 },

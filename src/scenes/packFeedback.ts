@@ -2,7 +2,8 @@ import type { GameObjects, Scene } from "phaser";
 
 import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
-import { FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
+import { SCREEN_CONFIG } from "../data/screen";
+import { chipLeft, FEEDBACK, heartPopFrame, type LabelAnchor } from "../hud/feedback";
 import { COMIC_WORDS } from "../layout/comicWords";
 import type { Point } from "../layout/rect";
 import { letterEffect } from "./comicWord";
@@ -63,8 +64,8 @@ export function playBump(scene: Scene, moment: PackMoment, dogTop: Point): void 
   playEffect(scene, BUMP_ART.key, BUMP_ART.tag, dogTop, moment.depth);
 }
 
-// font-title at 2x on a cream chip, centred on the anchor with its line's bottom there, rising
-// and fading out; with reduced motion it fades in place.
+// font-title at 2x on a cream chip, centred on the anchor (moved in to stay on screen) with its
+// line's bottom there, rising and fading out; with reduced motion it fades in place.
 function floatLabel(
   scene: Scene,
   moment: PackMoment,
@@ -76,16 +77,19 @@ function floatLabel(
   const label = addPixelText(scene, 0, 0, text, { color, font: "title", scale: TITLE_SCALE });
   const title = pixelFontMetrics(scene, "title");
   const width = Math.ceil(label.width) + 2 * CHIP_PAD;
-  label.setPosition(CHIP_PAD, CHIP_PAD + label.y);
+  // A glyph inked above the capitals, such as ♥, grows the chip up to hold it.
+  const tops = label.getTextBounds(true).characters.flatMap((char) => (char.h > 0 ? [char.y] : []));
+  const above = Math.max(0, title.capTop - Math.min(title.capTop, ...tops)) * TITLE_SCALE;
+  label.setPosition(CHIP_PAD, CHIP_PAD + above + label.y);
   const box = scene.add.graphics();
   drawFramedRect(
     box,
     { border: PALETTE.plum, fill: PALETTE.cream },
-    { height: title.capHeight * TITLE_SCALE + 2 * CHIP_PAD, width, x: 0, y: 0 },
+    { height: title.capHeight * TITLE_SCALE + above + 2 * CHIP_PAD, width, x: 0, y: 0 },
   );
   const capTop = anchor.lineBottom - (title.lineHeight - title.capTop) * TITLE_SCALE;
-  const x = Math.round(anchor.centreX - width / 2);
-  const y = capTop - CHIP_PAD;
+  const x = chipLeft(SCREEN_CONFIG.width, anchor.centreX, width);
+  const y = capTop - CHIP_PAD - above;
   const chip = scene.add.container(x, y, [box, label]).setDepth(moment.depth);
   fadeAway(scene, [chip], { ms: timing.ms, rise: moment.still ? 0 : timing.rise });
 }

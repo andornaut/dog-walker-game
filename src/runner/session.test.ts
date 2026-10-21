@@ -215,7 +215,7 @@ describe("a strain in the session", () => {
 
 describe("a firing in the walk", () => {
   it("holds the road, the queued cards and the zone's end for firingHoldSeconds of steps", () => {
-    // Koda's owner down to 1 heart with Kind words' forgiveness used, a skunk card open on Koda,
+    // Koda's owner down to 1 heart with Second chance's forgiveness used, a skunk card open on Koda,
     // a puddle queued behind it and the zone's end waiting.
     const streams = runStreams(1);
     const walk = emptyRoad(started()).walk;

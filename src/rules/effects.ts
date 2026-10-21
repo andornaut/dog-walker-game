@@ -126,7 +126,7 @@ export function moneyCost(
 }
 
 // Changes one owner's meter by the sum of causes, held within 0 and the dog's max. A loss is
-// cut by the hearts forgivenHearts modifiers, such as Kind words', still forgive this zone, and
+// cut by the hearts forgivenHearts modifiers, such as Second chance's, still forgive this zone, and
 // a forgiven loss is reported even when the meter does not move, so its forgiving shows. No
 // other change is reported when the meter does not move, nor a loss in an invincible run.
 export function changeHearts(

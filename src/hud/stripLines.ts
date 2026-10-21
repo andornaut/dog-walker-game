@@ -25,7 +25,7 @@ function line<K extends StripKey>(
 const ownerOf = (data: StripData, dog: DogId) => data.dogs[dog].owner.name;
 
 // A plain obstacle that landed on dog: a dodge, or the hearts its owner lost. obstacle is the
-// obstacle's name. A bump that cost nothing, such as one Kind words forgave whole, says nothing:
+// obstacle's name. A bump that cost nothing, such as one Second chance forgave whole, says nothing:
 // forgivenLines says the forgiving.
 export function bumpLine(
   data: StripData,
@@ -49,7 +49,7 @@ export function bumpLine(
   };
 }
 
-// Each owner whose loss the walker's perk, such as Kind words, forgave.
+// Each owner whose loss the walker's perk, such as Second chance, forgave.
 export function forgivenLines(data: StripData, changes: readonly Change[]): MessageLine[] {
   return changes.flatMap((change): MessageLine[] =>
     change.kind === "hearts" && heartsForgiven(change) > 0

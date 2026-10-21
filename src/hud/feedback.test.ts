@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
+import { SCREEN_CONFIG } from "../data/screen";
 import { cents } from "../rules/units";
+import { readBitmapFont } from "../tools/fontFile";
+import { plainMarks } from "../ui/pixelFont";
 import {
+  chipLeft,
   FEEDBACK,
   heartLabelAt,
   heartPopBlocked,
@@ -44,6 +49,35 @@ describe("heartLabelAt", () => {
     ["raises it out of the lane below", 100, 470, { x: 115, y: 455 }],
   ])("%s", (_, x, top, at) => {
     expect(heartLabelAt(bounds, heartPopFrame({ x, y: top }), 20)).toEqual(at);
+  });
+});
+
+describe("the labels floated over a dog", () => {
+  const screenWidth = SCREEN_CONFIG.width;
+
+  it.each([
+    ["centres the chip on the dog", 180, 40, 160],
+    ["moves it in from the left edge", 10, 40, 0],
+    ["moves it in from the right edge", 350, 40, screenWidth - 40],
+  ])("%s", (_, centreX, width, left) => {
+    expect(chipLeft(screenWidth, centreX, width)).toBe(left);
+  });
+
+  // font-title at 2x in capitals, as Phaser sizes it, on a chip 2px wider each side.
+  const { glyphs } = readBitmapFont("font-title");
+  const chipWidth = (text: string) =>
+    4 +
+    2 *
+      [...plainMarks(text).toUpperCase()].reduce(
+        (sum, c) => sum + (glyphs.get(c)?.advance ?? 0),
+        0,
+      );
+
+  it.each([
+    ["dodge", gameData.runText.dodge],
+    ["forgiven", gameData.runText.forgiven],
+  ])("fits the %s label's chip on the screen", (_, text) => {
+    expect(chipWidth(text)).toBeLessThanOrEqual(screenWidth);
   });
 });
 

@@ -624,7 +624,8 @@ export interface RunText {
     readonly forkTitle: string;
     // The plaque of an option that costs no money.
     readonly free: string;
-    // A dog's heart loss Kind words would forgive, in an option's text.
+    // In an option's text, in place of a dog's heart loss Second chance would forgive; it may
+    // name the loss as {hearts}.
     readonly heartForgiven: string;
     // A money option's plaque, with its price.
     readonly need: string;
@@ -651,7 +652,7 @@ export interface RunText {
   };
   readonly fired: string;
   readonly firedBy: string;
-  // Over a dog whose owner's heart loss Kind words forgave.
+  // Over a dog whose owner's heart loss Second chance forgave.
   readonly forgiven: string;
   // The end screen's line when every dog set out with got home after the last zone.
   readonly fullPackHome: string;

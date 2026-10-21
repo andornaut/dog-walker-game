@@ -92,7 +92,7 @@ describe("resolveEffects: changes and their causes", () => {
     expect(changes).toEqual([]);
   });
 
-  describe("Kind words", () => {
+  describe("Second chance", () => {
     const tuning = TUNING;
     const allowance = read(tuning, "hearts", "kindWordsForgiven");
     const source = { kind: "walker", walker: "casey" } as const;
