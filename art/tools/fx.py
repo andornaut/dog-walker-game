@@ -132,7 +132,7 @@ def bump(step):
     elif step == 2:
         burst(g, 16, 16, 14, 6, 8, "orange", 11)
         burst(g, 16, 16, 10, 4, 8, "yellow", 11)
-        g.ell(16, 16, 4.5, 4.5, None)
+        g.ell(16, 16, 3.5, 3.5, "amber")
     else:
         r, col = (11, 13)[step - 3], ("amber", "orange")[step - 3]
         for i in range(8):
