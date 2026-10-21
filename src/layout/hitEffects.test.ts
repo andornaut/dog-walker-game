@@ -39,19 +39,21 @@ function motionOf(steps: readonly MotionStep[]): { ends: number; moves: string[]
 }
 
 describe("hit effects", () => {
-  it.each<[string, HitKind, MinorObstacleId | null, string[]]>([
-    ["a barrier", "plain", "barrier3", [HIT_ART.bump.key]],
-    ["a bench", "plain", "bench", [HIT_ART.bump.key]],
-    ["a bin, with litter", "plain", "bin", [HIT_ART.bump.key, HIT_ART.debris.litter.key]],
-    ["a cone", "plain", "cone", [HIT_ART.bump.key]],
-    ["a hedge, with leaves", "plain", "hedge", [HIT_ART.bump.key, HIT_ART.debris.leaves.key]],
-    ["a standing hazard", "plain", STANDING_HAZARD ?? null, [HIT_ART.bump.key]],
-    ["a mover", "moving", "car", [HIT_ART.bumpBig.key]],
-  ])("bursts over %s with its effects", (_, kind, obstacle, keys) => {
-    const effects = hitEffects(false, struck(kind, obstacle));
-    expect(effects.map(({ key }) => key)).toEqual(keys);
-    expect(effects.map(({ above }) => above)).toEqual(keys.map((__, index) => index));
-    expect(effects.every(({ frame }) => frame === null)).toBe(true);
+  it("bursts over every hit with its effects", () => {
+    for (const [, kind, obstacle, keys] of [
+      ["a barrier", "plain", "barrier3", [HIT_ART.bump.key]],
+      ["a bench", "plain", "bench", [HIT_ART.bump.key]],
+      ["a bin, with litter", "plain", "bin", [HIT_ART.bump.key, HIT_ART.debris.litter.key]],
+      ["a cone", "plain", "cone", [HIT_ART.bump.key]],
+      ["a hedge, with leaves", "plain", "hedge", [HIT_ART.bump.key, HIT_ART.debris.leaves.key]],
+      ["a standing hazard", "plain", STANDING_HAZARD ?? null, [HIT_ART.bump.key]],
+      ["a mover", "moving", "car", [HIT_ART.bumpBig.key]],
+    ] satisfies readonly [string, HitKind, MinorObstacleId | null, string[]][]) {
+      const effects = hitEffects(false, struck(kind, obstacle));
+      expect(effects.map(({ key }) => key)).toEqual(keys);
+      expect(effects.map(({ above }) => above)).toEqual(keys.map((__, index) => index));
+      expect(effects.every(({ frame }) => frame === null)).toBe(true);
+    }
   });
 
   it("centres a hit's effects on the struck dog's column, just over its top row", () => {
@@ -91,13 +93,15 @@ describe("hit effects", () => {
     expect(jolt?.dy).toBeLessThan(0);
   });
 
-  it.each<[string, number, number]>([
-    ["right of the pack falls right", 200, 1],
-    ["left of the pack falls left", 100, -1],
-  ])("tips a cone away from the pack: one %s", (_, coneX, sign) => {
-    const side = tipSide(coneX, 150);
-    const { ends } = motionOf(obstacleMotion(false, struck("plain", "cone"), side));
-    expect(Math.sign(ends)).toBe(sign);
+  it("tips a cone away from the pack, whichever side it is hit from", () => {
+    for (const [, coneX, sign] of [
+      ["right of the pack falls right", 200, 1],
+      ["left of the pack falls left", 100, -1],
+    ] satisfies readonly [string, number, number][]) {
+      const side = tipSide(coneX, 150);
+      const { ends } = motionOf(obstacleMotion(false, struck("plain", "cone"), side));
+      expect(Math.sign(ends)).toBe(sign);
+    }
   });
 
   it("shakes the road for a mover's hit only", () => {
@@ -112,12 +116,14 @@ describe("hit effects", () => {
 });
 
 describe("hit effects with reduced motion", () => {
-  it.each<[string, () => { frame: number | null; key: string }[], number]>([
-    ["a plain hit's bump", () => hitEffects(true, struck("plain", "hedge")), HIT_ART.bump.peak],
-    ["a mover's bump", () => hitEffects(true, struck("moving", "car")), HIT_ART.bumpBig.peak],
-    ["the splash", () => [splashEffect(true, TOP)], HIT_ART.splash.peak],
-  ])("holds %s's peak frame, with no debris", (_, effects, peak) => {
-    expect(effects().map(({ frame }) => frame)).toEqual([peak]);
+  it("holds each splash's peak frame, with no debris", () => {
+    for (const [, effects, peak] of [
+      ["a plain hit's bump", () => hitEffects(true, struck("plain", "hedge")), HIT_ART.bump.peak],
+      ["a mover's bump", () => hitEffects(true, struck("moving", "car")), HIT_ART.bumpBig.peak],
+      ["the splash", () => [splashEffect(true, TOP)], HIT_ART.splash.peak],
+    ] satisfies readonly [string, () => { frame: number | null; key: string }[], number][]) {
+      expect(effects().map(({ frame }) => frame)).toEqual([peak]);
+    }
   });
 
   it.each<[HitKind, MinorObstacleId]>([
@@ -140,16 +146,18 @@ describe("white flash", () => {
       cue.on ? [(cues[index + 1]?.ms ?? Number.POSITIVE_INFINITY) - cue.ms] : [],
     );
 
-  it.each<[string, boolean, number]>([
-    ["flashes twice in motion", false, 2],
-    ["blinks once with reduced motion", true, 1],
-  ])("%s, from the hit, alternating and ending off", (_, still, flashes) => {
-    const cues = whiteFlash(still);
-    expect(cues[0]).toEqual({ ms: 0, on: true });
-    expect(cues.map(({ on }) => on)).toEqual(cues.map((__, index) => index % 2 === 0));
-    expect(cues.at(-1)?.on).toBe(false);
-    expect(cues.map(({ ms }) => ms)).toEqual(cues.map(({ ms }) => ms).sort((a, b) => a - b));
-    expect(onSpans(cues)).toHaveLength(flashes);
+  it("blinks from the hit, alternating and ending off", () => {
+    for (const [, still, flashes] of [
+      ["flashes twice in motion", false, 2],
+      ["blinks once with reduced motion", true, 1],
+    ] satisfies readonly [string, boolean, number][]) {
+      const cues = whiteFlash(still);
+      expect(cues[0]).toEqual({ ms: 0, on: true });
+      expect(cues.map(({ on }) => on)).toEqual(cues.map((__, index) => index % 2 === 0));
+      expect(cues.at(-1)?.on).toBe(false);
+      expect(cues.map(({ ms }) => ms)).toEqual(cues.map(({ ms }) => ms).sort((a, b) => a - b));
+      expect(onSpans(cues)).toHaveLength(flashes);
+    }
   });
 
   it("holds the reduced-motion blink longer than either flash in motion", () => {

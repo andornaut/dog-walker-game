@@ -138,23 +138,25 @@ describe("drawnObstacleBox", () => {
   const CASES = LOOKS.flatMap(({ kind, moving }) =>
     SCALE_STEPS.map((step) => ({ kind, moving, step })),
   );
-  it.each(CASES)("hits $kind (moving: $moving) as drawn at $step", ({ kind, moving, step }) => {
-    const feetY = lens.footY - (lens.focal / step - lens.focal);
-    const lanes = footprintOf(gameData, kind).lanes;
-    const lane = LANE_COUNT - lanes;
-    const x = (lane + (moving ? 1 : lanes) / 2) * cell.length;
-    const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, kind, moving);
-    const hit = onScreen(drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }));
-    const drawn = drawnBounds(kind, moving, feetY, x);
-    const insides = [
-      hit.top - drawn.top,
-      drawn.bottom - hit.bottom,
-      hit.left - drawn.left,
-      drawn.right - hit.right,
-    ];
-    for (const inside of insides) {
-      expect(inside).toBeGreaterThanOrEqual(-2);
-      expect(inside).toBeLessThanOrEqual(2 * PART_INSET + 2);
+  it("hits every obstacle, moving or not, as drawn at every depth step", () => {
+    for (const { kind, moving, step } of CASES) {
+      const feetY = lens.footY - (lens.focal / step - lens.focal);
+      const lanes = footprintOf(gameData, kind).lanes;
+      const lane = LANE_COUNT - lanes;
+      const x = (lane + (moving ? 1 : lanes) / 2) * cell.length;
+      const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, kind, moving);
+      const hit = onScreen(drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }));
+      const drawn = drawnBounds(kind, moving, feetY, x);
+      const insides = [
+        hit.top - drawn.top,
+        drawn.bottom - hit.bottom,
+        hit.left - drawn.left,
+        drawn.right - hit.right,
+      ];
+      for (const inside of insides) {
+        expect(inside).toBeGreaterThanOrEqual(-2);
+        expect(inside).toBeLessThanOrEqual(2 * PART_INSET + 2);
+      }
     }
   });
 });
@@ -162,23 +164,24 @@ describe("drawnObstacleBox", () => {
 describe("an obstacle's hit length", () => {
   // Its rows from its near edge back by its hit length overlap the pack's band exactly while
   // its drawn hit box does: the box's far edge reaches the band's bottom as the rows' far end does.
-  it.each(LOOKS)(
-    "covers $kind's drawn box leaving the band (moving: $moving)",
-    ({ kind, moving }) => {
+  it("covers every obstacle's drawn box leaving the band", () => {
+    for (const { kind, moving } of LOOKS) {
       const height = itemHeight(gameData, GEOMETRY, ZONE, kind, moving);
       const parts = obstacleOnRoad(gameData, GEOMETRY, ZONE, kind, moving);
       const bottom = GEOMETRY.packBand.bottom;
       const box = drawnObstacleBox(lens, PART_INSET, parts, { feetY: bottom + height, x: 0 });
       expect(box.top).toBeCloseTo(bottom, 6);
-    },
-  );
+    }
+  });
 
   // The planner's blocking spans hold every obstacle's, in every zone.
-  it.each(ZONES)("is no longer than the planner gives its rows in %s", (zone) => {
-    const inset = plannedCellInset(gameData, GEOMETRY, zone);
-    for (const { kind, moving } of LOOKS) {
-      const planned = footprintOf(gameData, kind).rows * cell.length - 2 * inset;
-      expect(itemHeight(gameData, GEOMETRY, zone, kind, moving)).toBeLessThanOrEqual(planned);
+  it("is no longer than the planner gives its rows in any zone", () => {
+    for (const zone of ZONES) {
+      const inset = plannedCellInset(gameData, GEOMETRY, zone);
+      for (const { kind, moving } of LOOKS) {
+        const planned = footprintOf(gameData, kind).rows * cell.length - 2 * inset;
+        expect(itemHeight(gameData, GEOMETRY, zone, kind, moving)).toBeLessThanOrEqual(planned);
+      }
     }
   });
 });
@@ -188,38 +191,40 @@ describe("a pack settled in a lane", () => {
   // edge anywhere from the pack's top to past the walker's feet.
   const WALKERS = Object.keys(gameData.walkers) as WalkerId[];
   const PACKS = everyPack();
-  it.each(WALKERS)("never touches an obstacle in another lane, walked by %s", (walker) => {
-    const touched: string[] = [];
-    for (const dogs of PACKS) {
-      const run = testState(Object.fromEntries(dogs.map((dog: DogId) => [dog, 3])), { walker });
-      const geometry = screenRoadGeometry(run);
-      const { packBand } = geometry;
-      for (let packLane = 0; packLane < LANE_COUNT; packLane++) {
-        const pack = packBoxes(geometry, stillInLane(packLane), run);
-        for (const { kind, moving } of LOOKS) {
-          const lanes = moving ? 1 : footprintOf(gameData, kind).lanes;
-          const parts = obstacleOnRoad(gameData, geometry, ZONE, kind, moving);
-          const height = itemHeight(gameData, geometry, ZONE, kind, moving);
-          for (const lane of [packLane - lanes, packLane + 1]) {
-            if (lane < 0 || lane + lanes > LANE_COUNT) {
-              continue;
-            }
-            const x = (lane + lanes / 2) * cell.length;
-            const span = { left: lane * cell.length, right: (lane + lanes) * cell.length };
-            for (let feetY = packBand.top; feetY < packBand.bottom + height; feetY += 4) {
-              const box = {
-                ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }),
-                lanes: span,
-              };
-              if (hitDog(pack, box) !== null) {
-                touched.push(`${dogs.join(",")} in ${packLane}: ${kind} in ${lane}`);
+  it("never touches an obstacle in another lane, walked by any walker", () => {
+    for (const walker of WALKERS) {
+      const touched: string[] = [];
+      for (const dogs of PACKS) {
+        const run = testState(Object.fromEntries(dogs.map((dog: DogId) => [dog, 3])), { walker });
+        const geometry = screenRoadGeometry(run);
+        const { packBand } = geometry;
+        for (let packLane = 0; packLane < LANE_COUNT; packLane++) {
+          const pack = packBoxes(geometry, stillInLane(packLane), run);
+          for (const { kind, moving } of LOOKS) {
+            const lanes = moving ? 1 : footprintOf(gameData, kind).lanes;
+            const parts = obstacleOnRoad(gameData, geometry, ZONE, kind, moving);
+            const height = itemHeight(gameData, geometry, ZONE, kind, moving);
+            for (const lane of [packLane - lanes, packLane + 1]) {
+              if (lane < 0 || lane + lanes > LANE_COUNT) {
+                continue;
+              }
+              const x = (lane + lanes / 2) * cell.length;
+              const span = { left: lane * cell.length, right: (lane + lanes) * cell.length };
+              for (let feetY = packBand.top; feetY < packBand.bottom + height; feetY += 4) {
+                const box = {
+                  ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }),
+                  lanes: span,
+                };
+                if (hitDog(pack, box) !== null) {
+                  touched.push(`${dogs.join(",")} in ${packLane}: ${kind} in ${lane}`);
+                }
               }
             }
           }
         }
       }
+      expect(touched).toEqual([]);
     }
-    expect(touched).toEqual([]);
   });
 
   it("is touched by an obstacle in its own lane level with it", () => {

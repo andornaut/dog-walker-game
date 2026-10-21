@@ -48,8 +48,10 @@ const KINDS = [
 const inManifest = (key: string) => FEET.has(key);
 
 describe("OBSTACLE_SILHOUETTES", () => {
-  it.each(Object.entries(OBSTACLE_SILHOUETTES))("measures %s on its art", (key, silhouette) => {
-    expect(silhouette).toEqual(measured(key));
+  it("measures every obstacle on its art", () => {
+    for (const [key, silhouette] of Object.entries(OBSTACLE_SILHOUETTES)) {
+      expect(silhouette).toEqual(measured(key));
+    }
   });
 
   // Each obstacle, in every zone, standing and moving, as the art loaded draws it.
