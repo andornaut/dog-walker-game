@@ -86,9 +86,14 @@ export function downTail(exists: (key: string) => boolean): DownTail | undefined
   return DOWN_TAILS.find(({ key }) => exists(key));
 }
 
-// The left edge of a bubble width wide centred on centreX, kept 2px inside the screen.
+// A bubble keeps the screen's gutter, this many pixels, from either edge.
+const BUBBLE_GUTTER = 8;
+
+// The left edge of a bubble width wide centred on centreX, kept inside the screen's gutter.
 export function bubbleX(screenWidth: number, centreX: number, width: number): number {
-  return Math.round(Math.min(Math.max(2, centreX - width / 2), screenWidth - width - 2));
+  return Math.round(
+    Math.min(Math.max(BUBBLE_GUTTER, centreX - width / 2), screenWidth - width - BUBBLE_GUTTER),
+  );
 }
 
 // Fired lines' bubbles all sit on one row, over the owners' faces. One opening beside
@@ -98,8 +103,9 @@ const LINE_GAP = 2;
 const LINE_TAIL_INSET = 4;
 
 // The left edge of a fired line's bubble width wide: centred over its tail (bubbleX), else the
-// nearest place just beside an open bubble, on screen, clear of every open bubble and with the
-// tail on it. undefined while no such place is free, so the line waits for a bubble to close.
+// nearest place just beside an open bubble, inside the screen's gutter, clear of every open
+// bubble and with the tail on it. undefined while no such place is free, so the line waits for
+// a bubble to close.
 // tail is the tail art's left edge and width.
 export function firedLineX(
   screenWidth: number,
@@ -110,8 +116,8 @@ export function firedLineX(
   const centred = bubbleX(screenWidth, tail.x + tail.width / 2, width);
   const beside = open.flatMap((o) => [o.x + o.width + LINE_GAP, o.x - LINE_GAP - width]);
   const fits = (x: number) =>
-    x >= 2 &&
-    x + width <= screenWidth - 2 &&
+    x >= BUBBLE_GUTTER &&
+    x + width <= screenWidth - BUBBLE_GUTTER &&
     tail.x >= x + LINE_TAIL_INSET &&
     tail.x + tail.width <= x + width - LINE_TAIL_INSET &&
     open.every((o) => x + width + LINE_GAP <= o.x || o.x + o.width + LINE_GAP <= x);
