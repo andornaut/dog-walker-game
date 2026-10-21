@@ -96,7 +96,7 @@
       "frame": "route",
       "id": "snoozeCrescent",
       "index": null,
-      "name": "Willow Crescent",
+      "name": "Cabbagetown",
       "source": {
         "id": "snoozeCrescent",
         "kind": "fork"
@@ -109,7 +109,7 @@
       "frame": "route",
       "id": "park",
       "index": null,
-      "name": "Fairview Park",
+      "name": "High Park",
       "source": {
         "id": "park",
         "kind": "fork"
@@ -122,7 +122,7 @@
       "frame": "route",
       "id": "street",
       "index": null,
-      "name": "Elm Avenue",
+      "name": "Distillery District",
       "source": {
         "id": "street",
         "kind": "fork"
@@ -135,7 +135,7 @@
       "frame": "route",
       "id": "shops",
       "index": null,
-      "name": "Main Street",
+      "name": "Kensington Market",
       "source": {
         "id": "shops",
         "kind": "fork"
@@ -148,7 +148,7 @@
       "frame": "route",
       "id": "pawsPromenade",
       "index": null,
-      "name": "Riverside Path",
+      "name": "The Beaches",
       "source": {
         "id": "pawsPromenade",
         "kind": "fork"
@@ -161,7 +161,7 @@
       "frame": "route",
       "id": "homeStretch",
       "index": null,
-      "name": "The Long Way Home",
+      "name": "Yonge Street",
       "source": {
         "id": "homeStretch",
         "kind": "fork"
@@ -1051,6 +1051,15 @@
       "spriteKey": "hedge"
     },
     {
+      "id": "hotDogCart",
+      "name": "Hot dog cart",
+      "shape": {
+        "lanes": 2,
+        "rows": 1
+      },
+      "spriteKey": "hot-dog-cart"
+    },
+    {
       "id": "iceCreamTruck",
       "movement": {
         "factor": 0.7,
@@ -1167,6 +1176,19 @@
         "rows": 1
       },
       "spriteKey": "snatch-seagull"
+    },
+    {
+      "id": "streetcar",
+      "movement": {
+        "factor": 0.7,
+        "kind": "inLane"
+      },
+      "name": "Streetcar",
+      "shape": {
+        "lanes": 1,
+        "rows": 3
+      },
+      "spriteKey": "streetcar"
     },
     {
       "id": "stroller",
@@ -1433,7 +1455,7 @@
       "portraitKey": "face-walker-ben",
       "spriteKey": "walker-ben",
       "unlock": "finishZone",
-      "zone": "park"
+      "zone": "snoozeCrescent"
     },
     {
       "id": "casey",
@@ -1458,9 +1480,9 @@
     }
   ],
   "world": {
-    "firstZone": "street",
+    "firstZone": "park",
     "lastZone": "homeStretch",
-    "name": "Maplewood",
+    "name": "Toronto",
     "walkLength": 4
   },
   "zones": [
@@ -1477,7 +1499,7 @@
       "id": "snoozeCrescent",
       "leashColor": "#3e2731",
       "moverShare": 1,
-      "name": "Willow Crescent",
+      "name": "Cabbagetown",
       "roadColor": "#8b9bb4",
       "roadShadowColor": "#5a6988",
       "speed": 1,
@@ -1504,6 +1526,7 @@
           "garbageTruck": 0,
           "goose": 0,
           "hedge": 1,
+          "hotDogCart": 0,
           "iceCreamTruck": 0,
           "jogger": 1,
           "kidOnBike": 2,
@@ -1513,6 +1536,7 @@
           "raccoon": 1,
           "scooter": 0,
           "seagull": 0,
+          "streetcar": 0,
           "stroller": 1
         },
         "obstacles": {
@@ -1544,7 +1568,7 @@
       "id": "park",
       "leashColor": "#a22633",
       "moverShare": 1,
-      "name": "Fairview Park",
+      "name": "High Park",
       "roadColor": "#e4a672",
       "roadShadowColor": "#b86f50",
       "speed": 1,
@@ -1571,6 +1595,7 @@
           "garbageTruck": 0,
           "goose": 1,
           "hedge": 1,
+          "hotDogCart": 0,
           "iceCreamTruck": 0,
           "jogger": 2,
           "kidOnBike": 1,
@@ -1580,6 +1605,7 @@
           "raccoon": 0,
           "scooter": 0,
           "seagull": 0,
+          "streetcar": 0,
           "stroller": 1
         },
         "obstacles": {
@@ -1611,7 +1637,7 @@
       "id": "street",
       "leashColor": "#f6757a",
       "moverShare": 1,
-      "name": "Elm Avenue",
+      "name": "Distillery District",
       "roadColor": "#3a4466",
       "roadShadowColor": "#262b44",
       "speed": 1,
@@ -1638,6 +1664,7 @@
           "garbageTruck": 1,
           "goose": 0,
           "hedge": 1,
+          "hotDogCart": 1,
           "iceCreamTruck": 1,
           "jogger": 1,
           "kidOnBike": 1,
@@ -1647,6 +1674,7 @@
           "raccoon": 0,
           "scooter": 1,
           "seagull": 0,
+          "streetcar": 1,
           "stroller": 1
         },
         "obstacles": {
@@ -1678,7 +1706,7 @@
       "id": "shops",
       "leashColor": "#3e2731",
       "moverShare": 1,
-      "name": "Main Street",
+      "name": "Kensington Market",
       "roadColor": "#f6757a",
       "roadShadowColor": "#b55088",
       "speed": 1,
@@ -1705,6 +1733,7 @@
           "garbageTruck": 1,
           "goose": 0,
           "hedge": 1,
+          "hotDogCart": 1,
           "iceCreamTruck": 1,
           "jogger": 1,
           "kidOnBike": 0,
@@ -1714,6 +1743,7 @@
           "raccoon": 1,
           "scooter": 2,
           "seagull": 0,
+          "streetcar": 1,
           "stroller": 2
         },
         "obstacles": {
@@ -1745,7 +1775,7 @@
       "id": "pawsPromenade",
       "leashColor": "#a22633",
       "moverShare": 1,
-      "name": "Riverside Path",
+      "name": "The Beaches",
       "roadColor": "#ead4aa",
       "roadShadowColor": "#e4a672",
       "speed": 1,
@@ -1772,6 +1802,7 @@
           "garbageTruck": 0,
           "goose": 2,
           "hedge": 1,
+          "hotDogCart": 1,
           "iceCreamTruck": 0,
           "jogger": 2,
           "kidOnBike": 1,
@@ -1781,6 +1812,7 @@
           "raccoon": 0,
           "scooter": 1,
           "seagull": 2,
+          "streetcar": 0,
           "stroller": 1
         },
         "obstacles": {
@@ -1812,7 +1844,7 @@
       "id": "homeStretch",
       "leashColor": "#3e2731",
       "moverShare": 1,
-      "name": "The Long Way Home",
+      "name": "Yonge Street",
       "roadColor": "#c28569",
       "roadShadowColor": "#b86f50",
       "speed": 1.04,
@@ -1839,6 +1871,7 @@
           "garbageTruck": 1,
           "goose": 1,
           "hedge": 1,
+          "hotDogCart": 2,
           "iceCreamTruck": 1,
           "jogger": 1,
           "kidOnBike": 1,
@@ -1848,6 +1881,7 @@
           "raccoon": 1,
           "scooter": 1,
           "seagull": 0,
+          "streetcar": 1,
           "stroller": 1
         },
         "obstacles": {

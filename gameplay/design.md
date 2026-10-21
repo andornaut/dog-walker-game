@@ -1,6 +1,6 @@
 # Game Design
 
-The rulebook for the first complete game, set in one world, Maplewood. What's left to build and tune is in [`README.md`](README.md), what comes later is in [`next.md`](next.md), and undecided ideas are in [`ideas.md`](ideas.md).
+The rulebook for the first complete game, set in one world, Toronto. What's left to build and tune is in [`README.md`](README.md), what comes later is in [`next.md`](next.md), and undecided ideas are in [`ideas.md`](ideas.md).
 
 [`src/data/`](../src/data/) holds every number and all content, and the [data page](https://dogwalker.tristamittermayer.com/data/) shows them with the generated card text. This doc states the rules, with numbers where they define one; the data holds the exact values. In the rules below, `$` and `♥` give the direction and rough size of a change (`$$$` and `♥♥` are bigger); the amounts are in the data.
 
@@ -17,7 +17,7 @@ A cozy pixel-art lane runner: you are a dog walker walking a pack of dogs throug
 ## Core loop
 
 - **Before a walk:** pick a walker, your dogs (one per owned dog slot) and up to one owned gear item for your Pocket.
-- **During a walk:** walk 4 of the 6 neighborhoods, starting on Elm Avenue and ending on The Long Way Home. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. A plain obstacle costs a heart; a card obstacle opens a choice card.
+- **During a walk:** walk 4 of the 6 neighborhoods, starting in High Park and ending on Yonge Street. The street scrolls toward you; switch lanes to dodge obstacles and grab pickups. A plain obstacle costs a heart; a card obstacle opens a choice card.
 - **Between neighborhoods:** a neighborhood celebration that banks the pay, then a fork: each path leads to a neighborhood and carries one upgrade card, so one pick sets both.
 - **After a walk:** bank your cash and spend your earnings at the Pet shop: dogs, dog slots and gear.
 
@@ -47,7 +47,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Doghouse cards:** slim cards (120×58) in pack order (the front dog, then the left and right dogs): a name header, the dog's face, the owner's face and name with their hearts, and a LEAD tag on the front dog. The owner's face shows their mood (see Owner faces), and a fired dog's card keeps it, looking fired. The owner pops in as a photo tab when something happens to them (a heart change, the firing moment), with a quip after a card choice, a lucky find or the firing. Tapping or dragging on them steers like anywhere on the road; a still hold on one shows its dog's size, hearts and owner
 - **Hold to explain:** during a walk, holding anything that explains itself (an effect icon, a debuff bar, a dog card) shows its explanation and pauses the walk; releasing resumes it
 - **Auto-pause:** the walk pauses whenever something takes the player's attention: the pause menu, Settings and Help, the Home question, a card, the neighborhood celebration, anything held for its explanation, and the tab being hidden or the window losing focus. Coming back to a hidden tab shows the pause menu, so the walk resumes only on Resume. Hints and achievement toasts don't pause: they show in the message strip
-- **Head home:** the top bar's Home button, the pause menu's Head home and the fork card's Head home ask "Head home?", showing only what heading home gives up: "You give up $10 in pay for Elm Avenue and the Full pack bonus." (in red), plus "Neighborhoods left: 2" when any are left after this one. Keep walking is the default (key 1); Head home is key 2. Head home ends the walk (see A walk); the current neighborhood pays nothing
+- **Head home:** the top bar's Home button, the pause menu's Head home and the fork card's Head home ask "Head home?", showing only what heading home gives up: "You give up $10 in pay for Distillery District and the Full pack bonus." (in red), plus "Neighborhoods left: 2" when any are left after this one. Keep walking is the default (key 1); Head home is key 2. Head home ends the walk (see A walk); the current neighborhood pays nothing
 - The road is drawn in pseudo-3D: lanes converge toward the backdrop band and things shrink with distance. About 3.6 seconds of road are visible ahead. Lanes, distances and collisions are unchanged by it
 - **Drag** (the main touch control): put a thumb down anywhere and drag. The first lane step comes after a short drag (about a third of a lane-width), and each further lane-width of travel adds one more, all relative to where the drag started, so the thumb never covers the walker. Dragging back turns the drag around. The pack moves lane by lane toward the target at the walker's lane-change speed
 - **Tap:** moves one lane toward the tapped half of the road. A drag shorter than the first lane step counts as a tap
@@ -71,19 +71,19 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 ### A walk
 
-- A walk is 4 neighborhoods of Maplewood. Each neighborhood is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
+- A walk is 4 neighborhoods of Toronto. Each neighborhood is the same distance and takes about 2 minutes; a full walk takes about 8 minutes
 - After neighborhoods 1 to 3, the neighborhood celebration, then a fork. Neighborhood 4 has no fork
-- **Forks:** the road meets a cross street; after neighborhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighborhood you haven't walked this walk other than The Long Way Home, sorted easiest on the left to hardest on the right. The fork after neighborhood 3 leads only to The Long Way Home, so it shows one path (with its upgrade) plus Head home. Each path card shows the neighborhood's name, difficulty and pay multiplier, and the one upgrade card it carries. Picking a path picks the next neighborhood and its upgrade at once. A Head home button under the paths ends the walk there, with the same give-up line as the Home question
+- **Forks:** the road meets a cross street; after neighborhoods 1 and 2 a fork card offers three paths (left, straight, right), each leading to a neighborhood you haven't walked this walk other than Yonge Street, sorted easiest on the left to hardest on the right. The fork after neighborhood 3 leads only to Yonge Street, so it shows one path (with its upgrade) plus Head home. Each path card shows the neighborhood's name, difficulty and pay multiplier, and the one upgrade card it carries. Picking a path picks the next neighborhood and its upgrade at once. A Head home button under the paths ends the walk there, with the same give-up line as the Home question
 - **Neighborhoods** (6, each walk visits 4 with no repeats):
 
-| Neighborhood      | Difficulty | Pay   | Encounter mix                                                           |
-| ----------------- | ---------- | ----- | ----------------------------------------------------------------------- |
-| Willow Crescent   | Easiest    | ×0.7  | A sleepy cul-de-sac: few obstacles, cats, the mail carrier              |
-| Fairview Park     | Easy       | ×0.8  | Other dogs, squirrels, bunnies, more lucky finds; no thieves, no cars   |
-| Elm Avenue        | Normal     | ×1    | Puddles, the mail carrier, cones, cars. Always the first                |
-| Main Street       | Hard       | ×1.25 | Thieves, the ice cream truck, benches, trucks, more tips                |
-| Riverside Path    | Hard       | ×1.25 | A riverside path: puddles, geese, ducklings, cyclists, more lucky finds |
-| The Long Way Home | Hardest    | ×1.5  | Everything, the fastest. Always the last                                |
+| Neighborhood        | Difficulty | Pay   | Encounter mix                                                                                   |
+| ------------------- | ---------- | ----- | ----------------------------------------------------------------------------------------------- |
+| Cabbagetown         | Easiest    | ×0.7  | Quiet Victorian streets: few obstacles, cats, raccoons, the mail carrier                        |
+| High Park           | Easy       | ×0.8  | Other dogs, black squirrels, bunnies, Canada geese, more lucky finds; no cars. Always the first |
+| Distillery District | Normal     | ×1    | Brick lanes: puddles, cones, the streetcar, a hot dog cart, cars                                |
+| Kensington Market   | Hard       | ×1.25 | Thieves, the streetcar, hot dog carts, trucks, benches, more tips                               |
+| The Beaches         | Hard       | ×1.25 | The lakeshore boardwalk: puddles, geese, ducklings, cyclists, more lucky finds                  |
+| Yonge Street        | Hardest    | ×1.5  | Everything, the fastest, with the streetcar. Always the last                                    |
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Full pack home:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Full pack bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
@@ -191,11 +191,11 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Car, delivery truck, garbage truck, ice cream truck, parked car                                                                                                | Plain | 1 × 3               |
 | Bench                                                                                                                                                          | Plain | 2 × 1               |
 | Hedge                                                                                                                                                          | Plain | 3 × 1               |
-| Barrier (Willow Crescent, Elm Avenue, Main Street, Riverside Path)                                                                                             | Plain | 2 or 3 × 1          |
+| Barrier (Cabbagetown, Distillery District, Kensington Market, The Beaches)                                                                                     | Plain | 2 or 3 × 1          |
 
 ### Moving hazards
 
-Each obstacle has one look everywhere. Some kinds can move, and every one that can always moves: none stands still. A mover moves only while it is still ahead of the pack: once it reaches the pack's rows it makes no more moves, and nothing ever moves back up the road toward a pack that has passed it. Every movement has some randomness: each in-lane mover's speed and each dart's speed vary by up to about 15% either way, and the moment of each step, hop or dart varies too, so no two movers of a kind move alike. Each move is telegraphed about 1 second ahead (except a coyote's second step, see Stalkers), at most six movers are on screen at once (at most three darting animals and three in-lane movers slower than the road), a mover with no room on screen waits to come on rather than standing still (a card obstacle with no room stands still in its place instead, so no card is ever skipped), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Elm Avenue, Main Street and The Long Way Home.
+Each obstacle has one look everywhere. Some kinds can move, and every one that can always moves: none stands still. A mover moves only while it is still ahead of the pack: once it reaches the pack's rows it makes no more moves, and nothing ever moves back up the road toward a pack that has passed it. Every movement has some randomness: each in-lane mover's speed and each dart's speed vary by up to about 15% either way, and the moment of each step, hop or dart varies too, so no two movers of a kind move alike. Each move is telegraphed about 1 second ahead (except a coyote's second step, see Stalkers), at most six movers are on screen at once (at most three darting animals and three in-lane movers slower than the road), a mover with no room on screen waits to come on rather than standing still (a card obstacle with no room stands still in its place instead, so no card is ever skipped), and the reachable-path rule accounts for every move. A mover's hit is its standing obstacle's hit. The street neighborhoods are Distillery District, Kensington Market and Yonge Street.
 
 | Group      | How it moves                                                                                                                                                                                                                                                                                                                                                                                                 | Who                                                                   |
 | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
@@ -242,7 +242,7 @@ Scenery gags (a cat on a fence, a sprinkler, a kite caught in a tree) play in th
 
 After each of neighborhoods 1 to 3, before the fork, a short celebration plays over the paused road. After neighborhood 4 the end screen takes its place, preceded by a New walker celebration when finishing it unlocks a walker.
 
-- **Neighborhood banner:** each neighborhood opens with a banner over the road, "Maplewood, neighborhood 2" above its name; the player never sees the word "zone"
+- **Neighborhood banner:** each neighborhood opens with a banner over the road, "Toronto, neighborhood 2" above its name; the player never sees the word "zone"
 - **Neighborhood done:** the walker you're walking with cheers, under a big "Neighborhood done!" and the neighborhood's name below it, with the pay it banks and its tips ("+$20 pay · +$26 tips"). It moves on by itself after 2 seconds, or at a tap
 - **New walker:** the first time you finish the neighborhood that unlocks a walker, that walker runs in to join, under a big "New walker!" and "Ben joins you!" below it, with their line ("Nice pack! Mind if I tag along?") and their agility and perk ("Relaxed · Treat finder"). It waits for a tap on "Welcome!" (key 1). This replaces the Neighborhood done version for that neighborhood
 - Confetti plays in both; with reduced motion it doesn't
@@ -264,12 +264,12 @@ Effects without "now" or "next neighborhood" last the rest of the walk.
 
 Four walkers. Each has an agility, which sets how fast the pack changes lanes, and one perk. Walkers' agility spreads from 0.9× to 1.2× the base lane-change speed, and Running shoes add 0.1, so Trista wearing them reaches 1.3 (each big dog in the pack takes 0.1 off, never below Relaxed). Players see it as a word: Relaxed (0.9), Steady (1.0), Quick (1.1), Nimble (1.2), Lightning (1.3, reached only with Running shoes); the slowest walker's lane move sets the row spacing, so the low end stays near 1. Every walker walks the same road at the same speed. You start with Casey; each other walker unlocks the first time you finish a named neighborhood.
 
-| Walker | Agility | Perk          | Effect                                                                                             | Unlock                   |
-| ------ | ------- | ------------- | -------------------------------------------------------------------------------------------------- | ------------------------ |
-| Casey  | Steady  | Second chance | The first ♥ lost in each neighborhood is forgiven (one heart, including one of a Muddy bump's two) | Start                    |
-| Ben    | Relaxed | Treat finder  | Twice as many treats appear                                                                        | Finish Fairview Park     |
-| Ada    | Quick   | Calm voice    | Debuffs last half as long (10 seconds)                                                             | Finish Riverside Path    |
-| Trista | Nimble  | Long reach    | Grabs tips and treats one lane to either side (front dog)                                          | Finish The Long Way Home |
+| Walker | Agility | Perk          | Effect                                                                                             | Unlock              |
+| ------ | ------- | ------------- | -------------------------------------------------------------------------------------------------- | ------------------- |
+| Casey  | Steady  | Second chance | The first ♥ lost in each neighborhood is forgiven (one heart, including one of a Muddy bump's two) | Start               |
+| Ben    | Relaxed | Treat finder  | Twice as many treats appear                                                                        | Finish Cabbagetown  |
+| Ada    | Quick   | Calm voice    | Debuffs last half as long (10 seconds)                                                             | Finish The Beaches  |
+| Trista | Nimble  | Long reach    | Grabs tips and treats one lane to either side (front dog)                                          | Finish Yonge Street |
 
 - A newly unlocked walker joins you in a New walker celebration (see Neighborhood celebration)
 - A walker's effects stack with the Pocket item and upgrade cards
@@ -287,10 +287,10 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Walker's lines:** the walker's speech bubble reacts to state: first visit "Morning! Who's walking today? Tap to pick, hold for details."; after each of the first 3 walks "Tap to pick, hold for details."; after later walks "Nice walk! Who's next?"; after a firing "Rough walk. They'll come around."; when something new in the shop is affordable "Something new at the Pet shop!"
 - **Messages:** every message shows in the walker's bubble (lengths in Voice): buying a dog shows "Nugget joins your clients!" with the owner's parting line; tapping something you can't afford shows "Save $45 more for Nugget."; notices such as "Progress won't be saved."
 - **Gear and Pocket** (4 items, bought once at the Pet shop): Fanny pack (start every walk with +$20); Hall pass (once per neighborhood, skip one encounter card for free); Lucky collar (every owner has +1 max ♥); Running shoes (+0.1 agility, one agility word up). The Pocket section is a strip of all 4 items: tap an owned item to pocket it (gold frame), tap it again to empty the Pocket; an unowned item is locked with its price, and tapping it opens the shop on it. The section's band names the pocketed item, or reads "One per walk" when the Pocket is empty; hold an item for its effect. Put 1 owned item in your Pocket before each walk, or none. The item is kept, never used up, and switches freely between walks; its effects refresh each walk
-- **Walker picker:** choose from the walkers you've unlocked (see Walkers). Walkers, dogs and the Pocket item share one pick toggle: tap to pick, tap the picked one again to unpick it. The walker choice is saved and comes back picked, unless it was unpicked; with no walker picked, the bubble asks "Who's walking? Tap a face." Locked walkers use the Locked tile state with a "???" name plate; tapping one shakes it and the bubble gives the goal, "Finish Fairview Park to unlock."; a picked walker's bubble gives their agility and perk ("Ben: relaxed, Treat finder."); a newly unlocked walker shows the walker's line "New walker!", which comes ahead of the firing line
-- **Gate scene:** the chosen walker and the picked pack on the front path, heading out to Elm Avenue under its street sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
+- **Walker picker:** choose from the walkers you've unlocked (see Walkers). Walkers, dogs and the Pocket item share one pick toggle: tap to pick, tap the picked one again to unpick it. The walker choice is saved and comes back picked, unless it was unpicked; with no walker picked, the bubble asks "Who's walking? Tap a face." Locked walkers use the Locked tile state with a "???" name plate; tapping one shakes it and the bubble gives the goal, "Finish Cabbagetown to unlock."; a picked walker's bubble gives their agility and perk ("Ben: relaxed, Treat finder."); a newly unlocked walker shows the walker's line "New walker!", which comes ahead of the firing line
+- **Gate scene:** the chosen walker and the picked pack on the front path, heading out to High Park under its sign, beside a "Dog Walker" yard sign and the Pet shop. The Pocket item shows as a badge beside the walker
 - **Owner parting line:** picking a dog shows a line from its owner (e.g. Jesse: "He already did 10K. He's fine.")
-- **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, neighborhoods, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("+$45. Kevin fired you on Fairview Park.")
+- **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, neighborhoods, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("+$45. Kevin fired you on High Park.")
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; most neighborhoods finished in a walk (heading home mid-neighborhood doesn't count it). Each dog's roster card shows its walks, neighborhoods finished and times fired
 - **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal; a locked badge that counts across walks (Neighborhood Favorite included) also shows its progress ("7/15"). Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting cash), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
@@ -310,7 +310,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 | Collection | Full Kennel           | Own all 9 dogs                                   | Every leash is spoken for.                |
 | Collection | Kitted Out            | Own every gear item                              | A pocket for everything. Well, one thing. |
 | Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs            | Everyone's met you now.                   |
-| Collection | Top Walker            | Own every dog, slot and gear item                | Maplewood's finest. Ask any dog.          |
+| Collection | Top Walker            | Own every dog, slot and gear item                | Toronto's finest. Ask any dog.            |
 | Silly      | You're Fired!         | Get fired 10 times                               | They always come back.                    |
 | Silly      | Close Shave           | Finish a walk with an owner on 1♥                | Phew. Nobody saw that.                    |
 | Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                   | You can smell this badge.                 |

@@ -110,7 +110,7 @@ export const ACHIEVEMENTS = [
     shortGoal: "Walk all 9 dogs",
   },
   {
-    badgeLine: "Maplewood's finest. Ask any dog.",
+    badgeLine: "Toronto's finest. Ask any dog.",
     conditions: [
       { count: "all", kind: "dogsOwned" },
       { count: "all", kind: "dogSlotsOwned" },

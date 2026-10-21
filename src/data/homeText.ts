@@ -50,7 +50,7 @@ export const HOME_TEXT = {
     priceBuy: "{price}: tap to buy.",
     priceShort: "{price}: need {amount} more.",
   },
-  gateSign: "Elm Avenue",
+  gateSign: "High Park",
   gearBought: "{gear} is yours. Pocket it for a walk.",
   lockedName: "???",
   logbook: {
@@ -83,7 +83,7 @@ export const HOME_TEXT = {
   sectionWalkerPrompt: "Tap a face",
   shop: {
     dogs: "Dogs",
-    dogsAllOwned: "Every dog in Maplewood is a client!",
+    dogsAllOwned: "Every dog in Toronto is a client!",
     gearNote: "Yours to keep",
     owned: "Owned",
     slotFirst: "Buy slot {slot} first",

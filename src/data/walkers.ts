@@ -62,7 +62,7 @@ export const WALKERS = {
     portraitKey: "face-walker-ben",
     spriteKey: "walker-ben",
     unlock: "finishZone",
-    zone: "park",
+    zone: "snoozeCrescent",
   },
   casey: {
     agility: 1,

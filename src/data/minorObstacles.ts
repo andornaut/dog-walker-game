@@ -60,6 +60,7 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 1 },
   },
   hedge: { name: "Hedge", shape: { lanes: 3, rows: 1 } },
+  hotDogCart: { name: "Hot dog cart", shape: { lanes: 2, rows: 1 } },
   iceCreamTruck: {
     movement: { factor: 0.7, kind: "inLane" },
     name: "Ice cream truck",
@@ -100,6 +101,11 @@ export const MINOR_OBSTACLES = {
     movement: { kind: "dart", tilt: 0.3 },
     name: "Seagull",
     shape: { lanes: 1, rows: 1 },
+  },
+  streetcar: {
+    movement: { factor: 0.7, kind: "inLane" },
+    name: "Streetcar",
+    shape: { lanes: 1, rows: 3 },
   },
   stroller: {
     movement: { factor: 0.6, kind: "inLane" },
