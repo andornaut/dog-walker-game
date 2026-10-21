@@ -254,16 +254,16 @@ describe("applyEffects: other kinds", () => {
       { by: "calmVoiceDebuffFactor", operation: "multiply", stat: "debuffSeconds" },
     );
     const stinky: Effect = { debuff: "stinky", kind: "debuff" };
+    // The test tuning makes every walker's perk neutral, so this one is put back at a half.
+    const { multipliers } = TEST_TUNING;
+    const tuning = { ...TEST_TUNING, multipliers: { ...multipliers, calmVoiceDebuffFactor: 0.5 } };
     const state = applyEffects(
-      data,
+      { ...data, tuning },
       context([]),
       [stinky],
       testState({ koda: 5 }, { modifiers: [calmVoice] }),
     );
-    expect(state.debuffs[0]?.secondsLeft).toBe(
-      read(TEST_TUNING, "seconds", "stinkySeconds") *
-        read(TEST_TUNING, "multipliers", "calmVoiceDebuffFactor"),
-    );
+    expect(state.debuffs[0]?.secondsLeft).toBe(read(TEST_TUNING, "seconds", "stinkySeconds") / 2);
   });
 
   it("records an immunity once", () => {

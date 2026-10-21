@@ -33,16 +33,19 @@ describe("newRun", () => {
     const state = newRun(data, 3, { dogs, gear: null, walker: "casey" });
     expect(heartsByDog(state)).toEqual(startsOf(dogs));
     expect(state.money).toBe(read(TEST_TUNING, "money", "startPurse"));
+    expect(state.startMoney).toBe(state.money);
     expect(state.phase).toEqual({ kind: "walking" });
     expect(state.zoneIndex).toBe(0);
   });
 
   it("starts with what the gear gives", () => {
+    const fannyPackPurse =
+      read(TEST_TUNING, "money", "startPurse") + read(TEST_TUNING, "money", "fannyPackStart");
     for (const { expected, gear } of [
       {
         expected: {
-          money:
-            read(TEST_TUNING, "money", "startPurse") + read(TEST_TUNING, "money", "fannyPackStart"),
+          money: fannyPackPurse,
+          startMoney: fannyPackPurse,
         },
         gear: "fannyPack",
       },

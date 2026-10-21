@@ -333,7 +333,13 @@ describe("skip option", () => {
     expect(cardFor(data, state, source).skip).toBe(true);
     const skipped = choose(state, source, "skip");
     expect(heartsByDog(skipped.state)).toEqual(heartsByDog(state));
-    expect(skipped.state.skipUsed).toBe(true);
+    // The card counts toward the zone's, so a Sweet talker free card is used up by it.
+    expect(skipped.state).toMatchObject({
+      cardsThisZone: state.cardsThisZone + 1,
+      money: state.money,
+      phase: { kind: "walking" },
+      skipUsed: true,
+    });
     expect(cardFor(data, skipped.state, source).skip).toBe(false);
     expect(() => choose(skipped.state, source, "skip")).toThrow("no Skip option");
   });

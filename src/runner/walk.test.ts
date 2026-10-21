@@ -1298,11 +1298,12 @@ describe("finishZone", () => {
     expect(next.phase).toEqual({ kind: "walking" });
   });
 
-  it("starts the next zone with Hall pass's Skip back and no cards counted", () => {
+  it("starts the next zone with Hall pass's Skip and Second chance back and no cards counted", () => {
     const { run } = walkWith(["koda"]);
-    const used = { ...run, cardsThisZone: 2, skipPass: true, skipUsed: true };
+    const used = { ...run, cardsThisZone: 2, heartsForgiven: 1, skipPass: true, skipUsed: true };
     expect(finishZone(data, used).run).toMatchObject({
       cardsThisZone: 0,
+      heartsForgiven: 0,
       skipPass: true,
       skipUsed: false,
     });
