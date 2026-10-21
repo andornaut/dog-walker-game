@@ -637,7 +637,8 @@ export class StartScene extends Scene {
     );
   }
 
-  // A tap while a panel is open: on its close control it closes the panel; on the logbook's
+  // A tap while a panel is open: on its close control it closes the panel, as does one anywhere
+  // on a detail card, which has no other controls, as on the shop and Stats; on the logbook's
   // Stats button it opens Stats. A tap outside it is listenOutsideTap's.
   private releaseOnOverlay(down: { x: number; y: number }, x: number, y: number): void {
     const overlay = this.overlay;
@@ -646,7 +647,8 @@ export class StartScene extends Scene {
     }
     const within = (rect: Rect | undefined) =>
       rect !== undefined && containsPoint(rect, down.x, down.y) && containsPoint(rect, x, y);
-    if (overlay.rect !== undefined && within(closeControl(overlay.rect).hit)) {
+    const { rect } = overlay;
+    if (rect !== undefined && within(overlay.kind === "detail" ? rect : closeControl(rect).hit)) {
       this.closeOverlay();
       return;
     }

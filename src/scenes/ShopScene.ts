@@ -69,7 +69,13 @@ export interface ShopClosed {
   readonly action: HomeAction;
 }
 
-type Target = { kind: "close" } | { id: string; kind: "row" } | { kind: "tab"; tab: ShopTab };
+// While a detail card is open, a press anywhere on the shop's panel is dismiss: its tap
+// closes the card.
+type Target =
+  | { kind: "close" }
+  | { kind: "dismiss" }
+  | { id: string; kind: "row" }
+  | { kind: "tab"; tab: ShopTab };
 
 const LAYOUT = SHOP_LAYOUT;
 const PANEL: Rect = LAYOUT.panel;
@@ -124,14 +130,12 @@ export class ShopScene extends Scene {
     this.render();
 
     // A tap acts once its dip ends; holding a dog or gear row opens its detail card, and the
-    // hold takes the press. Any press closes an open card.
+    // hold takes the press. With a card open, a tap anywhere closes it, as on Stats.
     this.presses = listenTargetPress<Target>(this, {
-      dipMs: () => FEEDBACK.pressDipMs,
+      dipMs: (target) => (target.kind === "dismiss" ? 0 : FEEDBACK.pressDipMs),
       onDown: (pointer, target) => {
         addTapBurst(this, pointer.x, pointer.y);
         if (this.detail !== undefined) {
-          this.detail = undefined;
-          this.render();
           return;
         }
         const purchase = target?.kind === "row" ? this.rowById(target.id)?.purchase : undefined;
@@ -141,7 +145,7 @@ export class ShopScene extends Scene {
             : undefined;
       },
       onPressed: (target) => {
-        this.pressed = target;
+        this.pressed = target?.kind === "dismiss" ? undefined : target;
         if (target === undefined) {
           this.hold = undefined;
         }
@@ -149,7 +153,12 @@ export class ShopScene extends Scene {
       },
       onTap: (target) => this.act(target),
       same: sameTarget,
-      targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : undefined),
+      targetAt: (x, y) => {
+        if (this.detail === undefined) {
+          return this.targetAt(x, y);
+        }
+        return containsPoint(PANEL, x, y) ? { kind: "dismiss" } : undefined;
+      },
     });
     this.input.on("pointermove", (pointer: Input.Pointer) => {
       if (this.hold !== undefined && pointer.isDown) {
@@ -277,6 +286,9 @@ export class ShopScene extends Scene {
     switch (target.kind) {
       case "close":
         this.close();
+        return;
+      case "dismiss":
+        this.back();
         return;
       case "tab":
         this.tab = target.tab;
