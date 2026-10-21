@@ -222,9 +222,9 @@ export function achievementConditionText(
 ): string {
   switch (condition.kind) {
     case "cleanZones":
-      return `${thresholdText(condition.count, "zones")} of a run finished without a bump`;
+      return `${thresholdText(condition.count, "neighborhoods")} of a walk finished without a bump`;
     case "debuffsGot":
-      return `${data.debuffs[condition.debuff].name} ${condition.count} times in one run`;
+      return `${data.debuffs[condition.debuff].name} ${condition.count} times in one walk`;
     case "dogSlotsOwned":
       return `own ${thresholdText(condition.count, "dog slots")}`;
     case "dogsFinishedWith":
@@ -232,7 +232,7 @@ export function achievementConditionText(
     case "dogsOwned":
       return `own ${thresholdText(condition.count, "dogs")}`;
     case "earnings":
-      return `bank $${condition.dollars} in one run, net of starting money`;
+      return `bank $${condition.dollars} in one walk, net of starting cash`;
     case "gearOwned":
       return `own ${thresholdText(condition.count, "gear items")}`;
     case "finishOnLastHeart":
@@ -240,7 +240,7 @@ export function achievementConditionText(
     case "fullPackBonus":
       return `finish a walk with every dog of a pack of ${condition.packSize} or more home`;
     case "packSize":
-      return `start a run with ${condition.count} dogs`;
+      return `start a walk with ${condition.count} dogs`;
     case "tally":
       return `${condition.count} ${TALLY_NAMES[condition.tally]} in total`;
     case "timesFired":
@@ -250,7 +250,7 @@ export function achievementConditionText(
     case "walksWithoutFiring":
       return `${condition.count} finished walks with no firing`;
     case "zonesFinished":
-      return `${thresholdText(condition.count, "zones")} of a run finished`;
+      return `${thresholdText(condition.count, "neighborhoods")} of a walk finished`;
     default:
       return assertNever(condition);
   }

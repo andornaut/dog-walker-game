@@ -7,6 +7,7 @@ import { type SaveDocument, TALLY_IDS } from "../save/schema";
 import { earningsGoal } from "../testing/achievements";
 import { testState } from "../testing/runState";
 import {
+  achievementConditionText,
   conditionHolds,
   countBump,
   countOptionTally,
@@ -295,4 +296,17 @@ describe("counters", () => {
     const twice = countTally("treats", countTally("treats", testState({ koda: 5 })));
     expect(twice.tallies).toEqual({ treats: 2 });
   });
+});
+
+describe("achievementConditionText", () => {
+  it.each(gameData.achievements.map(({ conditions, name }) => [name, conditions] as const))(
+    "words %s's conditions in walks and neighborhoods, never runs or zones",
+    (_, conditions) => {
+      for (const condition of conditions) {
+        expect(achievementConditionText(gameData, condition)).not.toMatch(
+          /\b(runs?|zones?|money)\b/,
+        );
+      }
+    },
+  );
 });
