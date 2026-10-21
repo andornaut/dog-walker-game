@@ -15,7 +15,6 @@ import {
   topBarButtonAt,
   topBarButtonForKey,
   type TopBarPress,
-  walkCovered,
   walkPaused,
 } from "./topBar";
 import { WALK_BAR, WALK_BAR_BUTTONS, walkBarLayout } from "./walkHud";
@@ -37,8 +36,7 @@ describe("the walk bar in each pause state", () => {
     // The pause button's icon, and whether lane moves act.
     icon: "icon-pause" | "icon-play";
     gameplay: boolean;
-    // Whether a card or a menu takes the walk's presses, and whether the walk drops them.
-    covered: boolean;
+    // Whether a card or a menu takes the walk's presses, so the walk drops them.
     held: boolean;
     // Whether the walk is paused, and whether by the player, which ducks the music.
     paused: boolean;
@@ -54,7 +52,6 @@ describe("the walk bar in each pause state", () => {
   }
 
   const walking = {
-    covered: false,
     gameplay: false,
     held: false,
     help: "openHelp",
@@ -67,7 +64,7 @@ describe("the walk bar in each pause state", () => {
     settings: "openSettings",
     sound: "mute",
   } as const;
-  const card = { ...walking, covered: true, held: true, paused: true } as const;
+  const card = { ...walking, held: true, paused: true } as const;
   const menu = { ...card, icon: "icon-play", pause: "resume", player: true } as const;
   const confirm = { ...menu, home: undefined } as const;
   const cover = {
@@ -102,7 +99,6 @@ describe("the walk bar in each pause state", () => {
       expect(topBarAction(pause, "key", "pause"), name).toBe(tapPause);
       expect(
         {
-          covered: walkCovered(pause),
           gameplay: gameplayAllowed(pause),
           held: pressesHeld(pause),
           help: topBarAction(pause, "tap", "help"),

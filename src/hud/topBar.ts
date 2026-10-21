@@ -61,15 +61,10 @@ export function playerPaused(pause: Pick<RunPause, "menu">): boolean {
   return pause.menu !== "closed";
 }
 
-// A card or a menu over the walk takes every press. A hit stop covers nothing.
-export function walkCovered(pause: RunPause): boolean {
-  return pause.card || pause.menu !== "closed";
-}
-
-// Whether the walk drops its presses: under a card or a menu. A held explanation keeps its
-// press, whose release resumes the walk.
+// Whether the walk drops its presses: a card or a menu over the walk takes every press. A hit
+// stop covers nothing, and a held explanation keeps its press, whose release resumes the walk.
 export function pressesHeld(pause: RunPause): boolean {
-  return walkCovered(pause);
+  return pause.card || pause.menu !== "closed";
 }
 
 // Lane moves act only while nothing pauses the walk or holds it in a hit stop.
