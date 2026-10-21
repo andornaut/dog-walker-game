@@ -7,7 +7,8 @@ import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontM
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
-// each side; tiles side by side are 8 apart.
+// each side, except the top bar's buttons, 34 wide in the walk bar's columns; tiles side by
+// side are 8 apart.
 const GAP = 8;
 // The gate scene in the screen-home art: the street, the yard and the path to the gate.
 const GATE = { height: 156, y: 40 };
@@ -87,7 +88,7 @@ export function pocketLining(section: Rect) {
 }
 
 // The home screen's geometry, in screen pixels. Each icon button is drawn at its icon spot
-// and tapped anywhere in its 44x44 hit area.
+// and tapped anywhere in its hit area.
 export const HOME_LAYOUT = {
   // The band's text sits on section rows 8..17, 9px in from either side.
   bandText: { inset: 9, y: 8 },
@@ -127,15 +128,15 @@ export const HOME_LAYOUT = {
   ],
   gearBadge: { height: 18, width: 18, x: 194, y: 166 },
   // The top bar's four buttons at its right end, left to right: Logbook, Help, Sound and
-  // Settings, as the walk bar orders Help, Sound and Settings. Each is its ui-icon-button face
-  // and its 44x44 hit area from the bar's top. The faces are as far apart as the first is from
-  // the bank's well, and the last ends as far from the screen's edge as the well starts.
-  help: { face: { x: 248, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 228, y: 0 } },
-  logbook: { face: { x: 204, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 184, y: 0 } },
+  // Settings, under the walk bar's last four (its Help, Sound, Settings and Pause). Each is its
+  // ui-icon-button face and its 34x44 hit area from the bar's top, the walk bar's hit columns,
+  // side by side to the screen's edge with each face centred in its hit.
+  help: { face: { x: 265, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 258, y: 0 } },
+  logbook: { face: { x: 231, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 224, y: 0 } },
   // The logbook card's Stats and Badges buttons, side by side across its padded width.
   logbookButton: { gap: 12, height: 44, width: 132 },
   logo: { x: 6, y: 146 },
-  mute: { face: { x: 292, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 44, x: 272, y: 0 } },
+  mute: { face: { x: 299, y: TOP_BAR_FACE_Y }, hit: { height: 44, width: 34, x: 292, y: 0 } },
   path: { width: 32, x: 164 },
   // The Pet shop building on the yard's right lot, which opens the shop; its hit area is its
   // frame. board is its PET SHOP board, which the walker's bubble keeps clear of.
@@ -181,8 +182,8 @@ export const HOME_LAYOUT = {
     walker: WALKER_SECTION,
   },
   settings: {
-    face: { x: 336, y: TOP_BAR_FACE_Y },
-    hit: { height: 44, width: 44, x: 316, y: 0 },
+    face: { x: 333, y: TOP_BAR_FACE_Y },
+    hit: { height: 44, width: 34, x: 326, y: 0 },
   },
   // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
   // of 2x body text a line of the font apart, padX in from its sides, the first line's
@@ -209,22 +210,23 @@ export const HOME_LAYOUT = {
   tileOffset: TILE_OFFSET,
   // A selected tile's ui-select frame sits 1px outside it.
   tileSelectOutset: 1,
-  // The top bar: the bank in its well at the left, then the buttons. The well (wellKey) is ink
-  // on its first well.width - lip columns and well.height - lip rows, its lip on the last. The
-  // bank, the title font's "$" and amount one font advance apart, is set at the largest of
-  // bank.scales whose ink fits the columns bank.ink.left to bank.ink.right, centred across them,
-  // its capitals' top at bank.capsY by scale; past every scale, its short form.
+  // The top bar: the bank in its well at the left, then plain plum, then the buttons. The well
+  // (wellKey) is ink on its first well.width - lip columns and well.height - lip rows, its lip
+  // on the last. The bank, the title font's "$" and amount one font advance apart, is set at the
+  // largest of bank.scales whose ink fits the columns bank.ink.left to bank.ink.right (the
+  // well's ink), centred across them, its capitals' top at bank.capsY by scale; past every
+  // scale, its short form at the smallest.
   topBar: {
     bank: {
-      capsY: { 1: 16, 2: 14, 3: 11 },
-      ink: { left: 8, right: 174 },
-      scales: [3, 2, 1],
+      capsY: { 2: 14, 3: 11 },
+      ink: { left: 5, right: 73 },
+      scales: [3, 2],
     },
     faceSize: TOP_BAR_FACE,
     height: TOP_BAR_HEIGHT,
     mid: TOP_BAR_MID,
     rule: TOP_BAR_RULE,
-    well: { height: 30, lip: 1, width: 176, x: 4, y: 4 },
+    well: { height: 28, lip: 1, width: 70, x: 5, y: 5 },
     wellKey: "ui-home-cash-well",
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
@@ -279,7 +281,7 @@ export function bankFit(
       return { scale, text };
     }
   }
-  return { scale: scales[scales.length - 1] ?? 1, text: texts[texts.length - 1] ?? "" };
+  return { scale: scales.at(-1) ?? scales[0], text: texts[texts.length - 1] ?? "" };
 }
 
 // The bank's first ink column for ink inkWidth wide on screen: centred across its ink columns,

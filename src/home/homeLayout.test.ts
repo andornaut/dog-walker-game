@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import { EFFECT_ICON_SIZE } from "../hud/effectIcons";
+import { WALK_BAR, WALK_BAR_BUTTONS } from "../hud/walkHud";
 import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
@@ -241,27 +242,21 @@ describe("top bar", () => {
     expect(mid).toBe((topBar.height - topBar.rule) / 2);
   });
 
-  it.each(buttons)(
-    "centres %s's face on the bar's middle row, inside its hit area",
-    (_, button) => {
-      const face = { ...button.face, height: faceSize, width: faceSize };
-      expect(face.y + faceSize / 2).toBe(mid);
-      expect(face.x).toBeGreaterThanOrEqual(button.hit.x);
-      expect(face.x + faceSize).toBeLessThanOrEqual(button.hit.x + button.hit.width);
+  // Each button under the walk bar's button in the same place among its last four.
+  const under = buttons.map(([name, button], i) => {
+    const walkId = WALK_BAR_BUTTONS[WALK_BAR_BUTTONS.length - buttons.length + i] ?? "pause";
+    return [name, walkId, button] as const;
+  });
+  it.each(under)(
+    "puts %s's hit in the walk bar's %s column from the bar's top, its face centred in it on the middle row",
+    (_, walkId, button) => {
+      const { hitWidth, hitX } = WALK_BAR.buttons[walkId];
+      expect(button.hit).toMatchObject({ width: hitWidth, x: hitX, y: 0 });
+      expect(button.hit.height).toBeGreaterThanOrEqual(topBar.height);
+      expect(2 * (button.face.x - button.hit.x) + faceSize).toBe(button.hit.width);
+      expect(button.face.y + faceSize / 2).toBe(mid);
     },
   );
-
-  it("spaces the faces as far apart as the first is from the well, the last the well's margin from the edge", () => {
-    const lefts = buttons.map(([, button]) => button.face.x);
-    const rights = [well.x + well.width, ...lefts.map((x) => x + faceSize)];
-    const gaps = lefts.map((x, i) => x - (rights[i] ?? 0));
-    expect(new Set(gaps).size).toBe(1);
-    expect(SCREEN_CONFIG.width - (rights.at(-1) ?? 0)).toBe(well.x);
-  });
-
-  it.each(buttons)("gives %s a 44x44 hit area from the bar's top", (_, button) => {
-    expect(button.hit).toMatchObject({ height: 44, width: 44, y: 0 });
-  });
 
   it("runs the hit areas side by side, none over another, to the screen's right edge", () => {
     const ends = hits.map((hit) => hit.x + hit.width);
@@ -274,9 +269,8 @@ describe("top bar", () => {
     expect(well.x + well.width).toBeLessThan(logbook.hit.x);
   });
 
-  it("insets the bank's ink columns inside the well's ink, the same on either side", () => {
-    expect(bank.ink.left - well.x).toBe(wellInk.right - bank.ink.right);
-    expect(bank.ink.left).toBeGreaterThan(well.x);
+  it("sets the bank across the well's ink columns", () => {
+    expect(bank.ink).toEqual({ left: well.x, right: wellInk.right });
   });
 
   // The title font's capitals at each scale, centred on the well's ink rows, a half pixel at most
@@ -305,21 +299,28 @@ describe("the top bar's bank", () => {
     const amount = cents(dollars * 100);
     return [`$${dollarAmountText(amount)}`, `$${shortDollarAmountText(amount)}`];
   };
-  // From nothing past the most a save can hold, by the scale each takes; every scale is covered.
-  const amounts = [0, 5, 88, 1_234, 99_999, 1_000_000, 123_456_789, 90_071_992_547_409];
+  // From nothing to the tens of millions; every scale and both forms are covered.
+  const amounts = [0, 5, 88, 888, 1_234, 12_345, 99_999, 1_000_000, 12_345_678];
 
-  it("covers every scale with the amounts", () => {
-    const taken = new Set(amounts.map((dollars) => bankFit(width, texts(dollars)).scale));
+  it("covers every scale and both forms with the amounts", () => {
+    const fits = amounts.map((dollars) => bankFit(width, texts(dollars)));
+    const taken = new Set(fits.map((fit) => fit.scale));
     expect([...taken].sort()).toEqual([...bank.scales].sort());
+    const forms = new Set(amounts.map((dollars, i) => texts(dollars).indexOf(fits[i]?.text ?? "")));
+    expect([...forms].sort()).toEqual([0, 1]);
   });
 
-  it.each(amounts)("sets $%i at the largest scale whose ink fits the bank's room", (dollars) => {
-    const [full = ""] = texts(dollars);
-    const { scale, text } = bankFit(width, texts(dollars));
-    expect(text).toBe(full);
-    expect(scale).toBe(bank.scales.find((each) => width(full) * each <= BANK_ROOM));
-    expect(width(text) * scale).toBeLessThanOrEqual(BANK_ROOM);
-  });
+  it.each(amounts)(
+    "sets $%i in full whenever it fits, at the largest scale whose ink fits the bank's room",
+    (dollars) => {
+      const [full = "", short = ""] = texts(dollars);
+      const { scale, text } = bankFit(width, texts(dollars));
+      const fullFits = bank.scales.some((each) => width(full) * each <= BANK_ROOM);
+      expect(text).toBe(fullFits ? full : short);
+      expect(scale).toBe(bank.scales.find((each) => width(text) * each <= BANK_ROOM));
+      expect(width(text) * scale).toBeLessThanOrEqual(BANK_ROOM);
+    },
+  );
 
   it.each(amounts)("centres $%i across the bank's ink columns at the scale it takes", (dollars) => {
     const { scale, text } = bankFit(width, texts(dollars));

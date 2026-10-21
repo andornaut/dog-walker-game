@@ -275,8 +275,8 @@
   "hudLanes": {
     "bank": {
       "height": 24,
-      "width": 75,
-      "x": 4,
+      "width": 70,
+      "x": 5,
       "y": 108
     },
     "heartLabels": [
@@ -1551,25 +1551,25 @@
       },
       "help": {
         "face": {
-          "x": 248,
+          "x": 265,
           "y": 9
         },
         "hit": {
           "height": 44,
-          "width": 44,
-          "x": 228,
+          "width": 34,
+          "x": 258,
           "y": 0
         }
       },
       "logbook": {
         "face": {
-          "x": 204,
+          "x": 231,
           "y": 9
         },
         "hit": {
           "height": 44,
-          "width": 44,
-          "x": 184,
+          "width": 34,
+          "x": 224,
           "y": 0
         }
       },
@@ -1584,13 +1584,13 @@
       },
       "mute": {
         "face": {
-          "x": 292,
+          "x": 299,
           "y": 9
         },
         "hit": {
           "height": 44,
-          "width": 44,
-          "x": 272,
+          "width": 34,
+          "x": 292,
           "y": 0
         }
       },
@@ -1720,13 +1720,13 @@
       },
       "settings": {
         "face": {
-          "x": 336,
+          "x": 333,
           "y": 9
         },
         "hit": {
           "height": 44,
-          "width": 44,
-          "x": 316,
+          "width": 34,
+          "x": 326,
           "y": 0
         }
       },
@@ -1776,18 +1776,16 @@
       "topBar": {
         "bank": {
           "capsY": {
-            "1": 16,
             "2": 14,
             "3": 11
           },
           "ink": {
-            "left": 8,
-            "right": 174
+            "left": 5,
+            "right": 73
           },
           "scales": [
             3,
-            2,
-            1
+            2
           ]
         },
         "faceSize": 20,
@@ -1795,11 +1793,11 @@
         "mid": 19,
         "rule": 2,
         "well": {
-          "height": 30,
+          "height": 28,
           "lip": 1,
-          "width": 176,
-          "x": 4,
-          "y": 4
+          "width": 70,
+          "x": 5,
+          "y": 5
         },
         "wellKey": "ui-home-cash-well"
       },
@@ -2463,7 +2461,7 @@
       {
         "id": "home",
         "face": {
-          "x": 204,
+          "x": 197,
           "y": 14
         },
         "hit": {
@@ -2473,14 +2471,14 @@
           "y": 0
         },
         "icon": {
-          "x": 206,
+          "x": 199,
           "y": 15
         }
       },
       {
         "id": "help",
         "face": {
-          "x": 237,
+          "x": 231,
           "y": 14
         },
         "hit": {
@@ -2490,14 +2488,14 @@
           "y": 0
         },
         "icon": {
-          "x": 239,
+          "x": 233,
           "y": 15
         }
       },
       {
         "id": "sound",
         "face": {
-          "x": 270,
+          "x": 265,
           "y": 14
         },
         "hit": {
@@ -2507,14 +2505,14 @@
           "y": 0
         },
         "icon": {
-          "x": 272,
+          "x": 267,
           "y": 15
         }
       },
       {
         "id": "settings",
         "face": {
-          "x": 303,
+          "x": 299,
           "y": 14
         },
         "hit": {
@@ -2524,14 +2522,14 @@
           "y": 0
         },
         "icon": {
-          "x": 305,
+          "x": 301,
           "y": 15
         }
       },
       {
         "id": "pause",
         "face": {
-          "x": 336,
+          "x": 333,
           "y": 14
         },
         "hit": {
@@ -2541,7 +2539,7 @@
           "y": 0
         },
         "icon": {
-          "x": 338,
+          "x": 335,
           "y": 15
         }
       }
@@ -2655,27 +2653,27 @@
       },
       "buttons": {
         "help": {
-          "faceX": 237,
+          "faceX": 231,
           "hitWidth": 34,
           "hitX": 224
         },
         "home": {
-          "faceX": 204,
+          "faceX": 197,
           "hitWidth": 34,
           "hitX": 190
         },
         "pause": {
-          "faceX": 336,
+          "faceX": 333,
           "hitWidth": 34,
           "hitX": 326
         },
         "settings": {
-          "faceX": 303,
+          "faceX": 299,
           "hitWidth": 34,
           "hitX": 292
         },
         "sound": {
-          "faceX": 270,
+          "faceX": 265,
           "hitWidth": 34,
           "hitX": 258
         }
@@ -2683,10 +2681,10 @@
       "cash": {
         "capsBottom": 30,
         "ink": {
-          "left": 4,
-          "right": 77
+          "left": 5,
+          "right": 73
         },
-        "room": 70,
+        "room": 69,
         "scales": [
           3,
           2,
@@ -2694,8 +2692,8 @@
         ],
         "well": {
           "height": 37,
-          "width": 75,
-          "x": 4,
+          "width": 70,
+          "x": 5,
           "y": 5
         }
       },

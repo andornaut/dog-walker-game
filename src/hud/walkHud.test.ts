@@ -166,22 +166,18 @@ describe("the walk bar", () => {
     });
   });
 
-  it("sits each face in its hit area, evenly apart, the last the cash well's margin from the end", () => {
+  it("runs the hits side by side to the bar's right edge, each face centred in its hit", () => {
     const { size } = WALK_BAR.buttonFace;
-    const faces = WALK_BAR_BUTTONS.map((id) => ({
-      ...BAR.buttons[id].face,
-      height: size,
-      width: size,
-    }));
-    faces.forEach((face, i) => {
-      const id = WALK_BAR_BUTTONS[i];
-      expect(id && inside(face, BAR.buttons[id].hit)).toBe(true);
+    const hits = WALK_BAR_BUTTONS.map((id) => BAR.buttons[id].hit);
+    hits.slice(1).forEach((hit, i) => {
+      expect(hit.x).toBe((hits[i]?.x ?? 0) + (hits[i]?.width ?? 0));
     });
-    const pitches = new Set(faces.slice(1).map((face, i) => face.x - (faces[i]?.x ?? 0)));
-    expect(pitches.size).toBe(1);
-    const last = faces.at(-1);
-    const margin = topBar.x + topBar.width - ((last?.x ?? 0) + size);
-    expect(margin).toBe(WALK_BAR.cash.well.x);
+    const last = hits.at(-1);
+    expect((last?.x ?? 0) + (last?.width ?? 0)).toBe(topBar.x + topBar.width);
+    for (const id of WALK_BAR_BUTTONS) {
+      const { face, hit } = BAR.buttons[id];
+      expect(2 * (face.x - hit.x) + size).toBe(hit.width);
+    }
   });
 
   it("spans the cash well from the neighbourhood well's top to the effect wells' bottom", () => {

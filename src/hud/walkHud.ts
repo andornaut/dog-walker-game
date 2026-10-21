@@ -19,9 +19,10 @@ export const WALK_BAR_BUTTONS = ["home", "help", "sound", "settings", "pause"] a
 export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 
 // The walk bar as ui-walk-bar draws it, in bar pixels; every position the HUD uses comes from
-// this table. buttons: each button's face x and its hit area's x and width, the hit area the
-// bar's full height and minHitWidth wide or more (narrower than the 44px square elsewhere, so
-// five fit beside five effect wells), its face buttonFace.size square on row buttonFace.y. cash:
+// this table. buttons: each button's face x and its hit area's x and width, the hit areas the
+// bar's full height and minHitWidth wide or more (narrower than a 44px square, so five fit beside
+// five effect wells), side by side to the bar's right edge, each face buttonFace.size square on
+// row buttonFace.y, centred in its hit area. cash:
 // the "$" and the amount at the largest of scales whose ink fits room, centred across the well's
 // ink columns (ink.left to ink.right), their capitals' bottom on capsBottom. zone: the
 // neighbourhood well on one text line, the name from name.x and "n of N" right-aligned to end on
@@ -33,18 +34,18 @@ export type WalkBarButtonId = (typeof WALK_BAR_BUTTONS)[number];
 export const WALK_BAR = {
   buttonFace: { size: 20, y: 14 },
   buttons: {
-    help: { faceX: 237, hitWidth: 34, hitX: 224 },
-    home: { faceX: 204, hitWidth: 34, hitX: 190 },
-    pause: { faceX: 336, hitWidth: 34, hitX: 326 },
-    settings: { faceX: 303, hitWidth: 34, hitX: 292 },
-    sound: { faceX: 270, hitWidth: 34, hitX: 258 },
+    help: { faceX: 231, hitWidth: 34, hitX: 224 },
+    home: { faceX: 197, hitWidth: 34, hitX: 190 },
+    pause: { faceX: 333, hitWidth: 34, hitX: 326 },
+    settings: { faceX: 299, hitWidth: 34, hitX: 292 },
+    sound: { faceX: 265, hitWidth: 34, hitX: 258 },
   } satisfies Readonly<Record<WalkBarButtonId, { faceX: number; hitWidth: number; hitX: number }>>,
   cash: {
     capsBottom: 30,
-    ink: { left: 4, right: 77 },
-    room: 70,
+    ink: { left: 5, right: 73 },
+    room: 69,
     scales: [3, 2, 1],
-    well: { height: 37, width: 75, x: 4, y: 5 },
+    well: { height: 37, width: 70, x: 5, y: 5 },
   },
   effects: { holdInset: 1, icon: 1, iconSize: 20, pitch: 22, size: 22, x: 80, y: 20 },
   minHitWidth: 34,
