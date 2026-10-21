@@ -296,9 +296,9 @@ def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     return lit(g)
 
 
-# The waddle: the near foot back, passing, forward, passing; the body bobs and the wings dip on the
-# passing frames.
-GOOSE_RUN = [dict(fa=-2, fb=2), dict(bob=-1, flap=1), dict(fa=2, fb=-2), dict(bob=-1, flap=1)]
+# The waddle: the near foot back, passing, forward, passing; the body bobs on the passing frames, and the
+# wings beat with the stride, raised on the steps and swept down as the body rises.
+GOOSE_RUN = [dict(fa=-2, fb=2, flap=-1), dict(bob=-1, flap=2), dict(fa=2, fb=-2, flap=-1), dict(bob=-1, flap=2)]
 # The honk: open, a thrust with the beak wide, open, shut.
 GOOSE_IDLE = [dict(), dict(beak=2, thrust=1), dict(), dict(beak=0)]
 GOOSE_OFFSETS = ("fa", "fb", "bob", "flap", "thrust")
