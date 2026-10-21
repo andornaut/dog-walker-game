@@ -45,6 +45,8 @@ export const TUNING = {
     kindWordsForgiven: 1,
     luckyCollarMax: 1,
     maxBySize: { big: 5, medium: 4, small: 3 },
+    // No owner's max goes above this, whatever the dog's size, the pack's size and the gear add.
+    maxOwnerHearts: 6,
     // Added to every owner's max by how many dogs the walk set out with.
     packSizeBonus: { 1: 2, 2: 1, 3: 0 },
     treat: 1,
