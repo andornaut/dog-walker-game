@@ -289,18 +289,15 @@ export type MovementKind = Movement["kind"];
 
 // An obstacle's look in one zone, in place of its base look: the name (an encounter's card
 // title), the road sprite's art key, the hit label, and the prefix replacing card-<kebab id>
-// in each card option's illustration key. A Stink skin may name its spray cloud's art key, and
-// a skin whose encounter gives a status may name the status overlay's art key, drawn while the
-// status it gave lasts. A missing hitLabel, cardArtPrefix, cloudArt or statusArt falls back to
-// the base's, and an art key not yet in the manifest to the base art. movement is how the look
-// A skin never changes what the obstacle does.
+// in each card option's illustration key. A Stink skin may name its spray cloud's art key. A
+// missing hitLabel, cardArtPrefix or cloudArt falls back to the base's, and an art key not yet
+// in the manifest to the base art. A skin never changes what the obstacle does.
 export interface Skin {
   readonly art: string;
   readonly cardArtPrefix?: string;
   readonly cloudArt?: string;
   readonly hitLabel?: string;
   readonly name: string;
-  readonly statusArt?: string;
 }
 
 // Skins by zone id. The keys are strings, not ZoneId: ZoneId comes from the world's data, whose

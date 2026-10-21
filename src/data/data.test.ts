@@ -167,17 +167,13 @@ describe("obstacle skins", () => {
       expect(skin?.art, id).toMatch(KEBAB_CASE);
       expect(skin?.cardArtPrefix ?? "card-x", id).toMatch(/^card-[a-z0-9]+(-[a-z0-9]+)*$/);
       expect(skin?.cloudArt ?? "x", id).toMatch(KEBAB_CASE);
-      expect(skin?.statusArt ?? "fx-status-x", id).toMatch(/^fx-status-[a-z0-9]+(-[a-z0-9]+)*$/);
     }
   });
 
-  it("names clouds only on Stink skins and status overlays only where a status starts, skinning only obstacles", () => {
-    const misplaced = skinned.flatMap(({ id, skin }) => [
-      ...(skin?.cloudArt === undefined || id === "skunk" ? [] : [`${id}: cloudArt`]),
-      ...(skin?.statusArt === undefined || ["puddle", "skunk", "thief"].includes(id)
-        ? []
-        : [`${id}: statusArt`]),
-    ]);
+  it("names clouds only on Stink skins, skinning only obstacles", () => {
+    const misplaced = skinned.flatMap(({ id, skin }) =>
+      skin?.cloudArt === undefined || id === "skunk" ? [] : [`${id}: cloudArt`],
+    );
     expect(misplaced).toEqual([]);
     const kinds = [...Object.entries(encounters), ...minorObstacles].flatMap(([id, { skins }]) =>
       skins === undefined ? [] : [id],

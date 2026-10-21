@@ -75,6 +75,7 @@ const KEY_FUNCTIONS: Readonly<Record<string, () => readonly string[]>> = {
   animationKey: none,
   artTextureKey: none,
   badgeKey: keysStarting("badge-"),
+  debuffIconKey: keysStarting("icon-"),
   // A depth step's variant, which falls back to the full-size key while it is not loaded.
   depthVariantKey: none,
   disabledTextureKey: none,
@@ -96,7 +97,6 @@ const KEY_FUNCTIONS: Readonly<Record<string, () => readonly string[]>> = {
   ownerSpriteKey: () => dogs.map((dog) => ownerSpriteKey(gameData, dog)),
   perkIconKey: keysStarting("icon-perk-"),
   silhouetteTextureKey: none,
-  statusIconKey: keysStarting("icon-"),
   tileTextureKey: none,
   volumeStepForKey: none,
   walkBarIconKey: keysStarting("icon-"),

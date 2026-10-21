@@ -11,13 +11,11 @@ import {
   offerFork,
   openCard,
 } from "../rules/choices";
-import { currentZoneId } from "../rules/route";
 import { read } from "../rules/units";
 import type { CardSource, RunState } from "../state/runState";
 import { holdForFiring } from "./firingStop";
 import { NO_PULLS, type PullData, type Pulls, type PullStep, stepPulls } from "./pulls";
 import { type Random, randomStream } from "./random";
-import { startStatuses, type StatusData, type StatusMark } from "./statuses";
 import {
   finishZone,
   headHome,
@@ -36,7 +34,7 @@ import { stepZoomies, type ZoomiesData } from "./zoomies";
 // Zoomies' drift, the walk, the firing hold, then the queued cards, the zone's end and the next
 // zone's plan. The walk stands still while a card waits for its choice.
 
-export type SessionData = CardData & PullData & StatusData & WalkData & ZoomiesData;
+export type SessionData = CardData & PullData & WalkData & ZoomiesData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
 // the walk is driven. Each zone is planned from a stream of its own, spawns-<zone index>.
@@ -64,7 +62,6 @@ export interface Session {
   readonly pulls: Pulls;
   // Cards still to open, in order.
   readonly queue: readonly CardSource[];
-  readonly statusMarks: readonly StatusMark[];
   // Run time: the milliseconds walked, hit stops included and cards not.
   readonly timeMs: number;
   readonly walk: Walk;
@@ -124,7 +121,6 @@ export function startSession(
     needsZonePlan: false,
     pulls: NO_PULLS,
     queue: [],
-    statusMarks: [],
     timeMs: 0,
     walk: planned(data, streams, geometry, walk),
     zoneEndPending: false,
@@ -202,15 +198,9 @@ export function chooseCard(
   const events: SessionEvent[] = [
     { choice, kind: "chosen", outcome, timeMs: session.timeMs, view },
   ];
-  const at = {
-    timeMs: session.timeMs,
-    zone: currentZoneId(data, run),
-    zoneIndex: run.zoneIndex,
-  };
   const chosen: Session = {
     ...session,
     card: null,
-    statusMarks: startStatuses(data, view, at, choice, session.statusMarks),
     walk: { ...session.walk, run: outcome.state },
   };
   return continueWalk(data, streams, geometry, events, heldForFiring(data, outcome.fired, chosen));

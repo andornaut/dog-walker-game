@@ -1,9 +1,9 @@
-import type { DogStatusId } from "../runner/statuses";
+import type { DebuffId } from "../data/types";
 import { kebabCase } from "./spriteKeys";
 
-// The 16x16 icon of a debuff, on its bar and as a dog's status.
-export function statusIconKey(status: DogStatusId): string {
-  return `icon-${kebabCase(status)}`;
+// The 16x16 icon of a debuff, on its bar.
+export function debuffIconKey(debuff: DebuffId): string {
+  return `icon-${kebabCase(debuff)}`;
 }
 
 // The 16x16 icon in a dog's pull bubble while it strains toward a squirrel.

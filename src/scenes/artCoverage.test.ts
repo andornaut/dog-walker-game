@@ -5,7 +5,7 @@ import { describe, expect, it } from "vitest";
 import shippedManifest from "../../public/art/manifest.json";
 import { animationKey, animationSpecs } from "../assets/asepriteAnimations";
 import { splitDepthKey, stepSize } from "../assets/depthSteps";
-import { SQUIRREL_ICON_KEY, statusIconKey } from "../assets/iconKeys";
+import { debuffIconKey, SQUIRREL_ICON_KEY } from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";
 import {
   AMBIENT_FALLBACKS,
@@ -35,6 +35,7 @@ import {
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
 import type {
+  DebuffId,
   DogId,
   EncounterId,
   GearId,
@@ -59,7 +60,6 @@ import { baseCardArtPrefix } from "../rules/skins";
 import { faceMood } from "../rules/treats";
 import { clampHearts } from "../rules/units";
 import type { PullPose } from "../runner/pulls";
-import type { DogStatusId } from "../runner/statuses";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
@@ -108,10 +108,10 @@ function members<K extends string>(record: Readonly<Record<K, true>>): K[] {
   return Object.keys(record) as K[];
 }
 
+const DEBUFFS = Object.keys(gameData.debuffs) as DebuffId[];
 const DOGS = Object.keys(gameData.dogs) as DogId[];
 const ENCOUNTERS = Object.keys(gameData.encounters) as EncounterId[];
 const MINOR_OBSTACLES = Object.keys(gameData.minorObstacles) as MinorObstacleId[];
-const STATUSES = members<DogStatusId>({ muddy: true, stinky: true, zoomies: true });
 const PULL_TAGS = members<PullPose["tag"]>({ pull: true, tell: true });
 // The steps below 1 at which any of keys has a variant. Art adds a step to a whole family of
 // sprites at once, so each of them must then have it.
@@ -283,8 +283,8 @@ describe("help art", () => {
 });
 
 describe("icon art", () => {
-  it("names a debuff bar icon for every status", () => {
-    expect(missingImages(STATUSES.map(statusIconKey))).toEqual([]);
+  it("names a debuff bar icon for every debuff", () => {
+    expect(missingImages(DEBUFFS.map(debuffIconKey))).toEqual([]);
   });
 
   it("names a badge with earned and locked for every achievement", () => {

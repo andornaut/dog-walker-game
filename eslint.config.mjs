@@ -44,7 +44,6 @@ const CONTEXTS = {
     "layout/pixelShapes",
     "lib",
     "rules/assertNever",
-    "runner/statuses",
     "state/runState",
     "tools/artManifest",
     "tools/files",

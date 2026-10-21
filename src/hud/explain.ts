@@ -1,4 +1,4 @@
-import { statusIconKey } from "../assets/iconKeys";
+import { debuffIconKey } from "../assets/iconKeys";
 import type { GameData } from "../data/types";
 import { maxHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
@@ -57,7 +57,7 @@ export function explainLines(
       const { name, stake } = data.debuffs[target.debuff];
       const seconds = String(Math.ceil(active.secondsLeft));
       const line = fillLine(FIELDS, text, "debuff", { name, stake: fillNames(stake, { seconds }) });
-      return [{ iconKey: statusIconKey(target.debuff), text: line }];
+      return [{ iconKey: debuffIconKey(target.debuff), text: line }];
     }
     case "dog": {
       const slot = run.pack.find(({ dog }) => dog === target.dog);

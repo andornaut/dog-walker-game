@@ -12,16 +12,14 @@ export type HasArt = (key: string) => boolean;
 
 // What an obstacle looks like in a zone: its name, road sprite key and hit label (null when
 // neither the skin nor its base has one), the prefix of its card illustrations, and a skin's
-// own spray cloud and status overlay (null for the base's). art, cardArtPrefix, cloudArt and
-// statusArt are the skin's even while its art is missing: the skinned* functions pick the
-// keys to draw.
+// own spray cloud (null for the base's). art, cardArtPrefix and cloudArt are the skin's even
+// while its art is missing: the skinned* functions pick the keys to draw.
 export interface Look {
   readonly art: string;
   readonly baseArt: string;
   readonly baseCardArtPrefix: string;
   readonly cardArtPrefix: string;
   readonly cloudArt: string | null;
-  readonly statusArt: string | null;
   readonly hitLabel: string | null;
   readonly name: string;
 }
@@ -50,7 +48,6 @@ function skinFor(zone: ZoneId, base: BaseLook): Look {
     cloudArt: skin?.cloudArt ?? null,
     hitLabel: skin?.hitLabel ?? base.hitLabel,
     name: skin?.name ?? base.name,
-    statusArt: skin?.statusArt ?? null,
   };
 }
 

@@ -1,6 +1,6 @@
 import { type GameObjects, Scene } from "phaser";
 
-import { statusIconKey } from "../assets/iconKeys";
+import { debuffIconKey } from "../assets/iconKeys";
 import { dogCardTag, dogFaceKey, ownerCardFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -609,7 +609,7 @@ export class HudScene extends Scene {
       parts.push(art);
     }
     const { icon, name } = DEBUFF_BAR;
-    const iconKey = statusIconKey(debuff);
+    const iconKey = debuffIconKey(debuff);
     if (this.textures.exists(iconKey)) {
       parts.push(this.add.image(rect.x + icon.x, rect.y + icon.y, iconKey).setOrigin(0));
     }

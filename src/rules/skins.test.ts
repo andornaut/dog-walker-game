@@ -53,7 +53,6 @@ const base = (art: string, prefix: string, hitLabel: string | null, name: string
   cloudArt: null,
   hitLabel,
   name,
-  statusArt: null,
 });
 const otherDogBase = base(
   encounterSpriteKey("otherDog"),
