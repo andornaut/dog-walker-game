@@ -77,14 +77,16 @@ Names are `PALETTE` names in `src/ui/phaser/palette.ts`, or `K` names for the ne
 | darkBrown on cream             | 5.85  | Secondary text, empty heart outline                                                   |
 | darkRed on cream               | 5.07  | Money lost, an unaffordable price or unlock line, full heart                          |
 | darkRed on nlgrey              | 5.15  | Price on the short plate                                                              |
-| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`                             |
+| forest on cream                | 5.39  | Money gained, an affordable price line, `ui-payout-label`, an earned badge's name     |
 | ink on green                   | 8.41  | `ui-button` `go` label, `ui-pet-shop` board, price on the buy plate                   |
 | ink on ngrey                   | 7.23  | The emblem's silhouette on a `locked` badge                                           |
 | ink on nlgrey                  | 12.64 | The goal plate: a walker's name, a blocked slot's price, a disabled card's cost       |
 | ink on nslate                  | 3.75  | A disabled picture's outline on its art box                                           |
 | navy on cream                  | 9.59  | `ui-scroll-track` on the shop card (its ink edge 12.44:1)                             |
+| ndslate on cream               | 6.12  | A locked badge's name in the logbook                                                  |
 | ndslate on ngrey               | 3.56  | Labels on `disabled` tiles and buttons (inactive, exempt), a `locked` badge's emblem  |
 | ngrey on darkBrown             | 3.40  | `disabled` tile face on the wood                                                      |
+| nslate on cream                | 3.32  | A locked badge's goal and progress in the logbook (inactive, exempt)                  |
 | plum on amber                  | 7.35  | Text on amber: step number                                                            |
 | plum on cream                  | 9.42  | Body text on cream: panels, quips, hints, the zone banner, `normal` tiles and buttons |
 | plum on tan                    | 6.49  | Body text on tan                                                                      |
