@@ -1270,7 +1270,7 @@ describe("hit stop", () => {
 
   it("never stops for a lucky find without a hit label", () => {
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.road.hitStop).toBeNull();
-    expect(step(walkWith(["koda"], [atPack("biscuitNeighbour")])).walk.road.hitStop).toBeNull();
+    expect(step(walkWith(["koda"], [atPack("pettingNeighbor")])).walk.road.hitStop).toBeNull();
   });
 
   it("advances neither distance, the spawn plan, the road nor the pack during the stop", () => {

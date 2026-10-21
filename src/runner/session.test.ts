@@ -309,7 +309,7 @@ describe("a firing's hold", () => {
     return { ...session, walk: { ...session.walk, road } };
   };
   // The data with encounter costing the dogs it meets a heart.
-  const costing = (encounter: "biscuitNeighbour" | "puddle"): SessionData => {
+  const costing = (encounter: "pettingNeighbor" | "puddle"): SessionData => {
     const effects = [{ amount: -1, kind: "hearts", target: { kind: "affected" } }] as const;
     const shown = gameData.encounters[encounter];
     return {
@@ -362,8 +362,8 @@ describe("a firing's hold", () => {
     },
     {
       cause: "a lucky find",
-      data: costing("biscuitNeighbour"),
-      fire: (data, session) => walkOn(data, meeting("biscuitNeighbour", session)),
+      data: costing("pettingNeighbor"),
+      fire: (data, session) => walkOn(data, meeting("pettingNeighbor", session)),
     },
     {
       cause: "a plain obstacle's bump",

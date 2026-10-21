@@ -12,7 +12,7 @@ import type { WORLD } from "./world";
 
 // The rule vocabulary: adding a value means new rules code, not only data.
 export type EncounterId =
-  "biscuitNeighbour" | "lostWallet" | "otherDog" | "puddle" | "skunk" | "squirrel" | "thief";
+  "lostWallet" | "otherDog" | "pettingNeighbor" | "puddle" | "skunk" | "squirrel" | "thief";
 // How many dogs a walk sets out with.
 export type PackSize = 1 | 2 | 3;
 export type Size = "big" | "medium" | "small";

@@ -132,7 +132,7 @@ export function luckyLine(
   encounter: EncounterId,
   money: readonly MoneyChange[],
 ): MessageLine | null {
-  if (encounter === "biscuitNeighbour") {
+  if (encounter === "pettingNeighbor") {
     return { icon: "lucky", text: data.runText.strip.luckyNeighbor };
   }
   if (encounter === "lostWallet") {

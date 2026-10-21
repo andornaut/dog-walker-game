@@ -542,25 +542,6 @@
   ],
   "encounters": [
     {
-      "id": "biscuitNeighbour",
-      "kind": "lucky",
-      "name": "Generous neighbor",
-      "resolution": {
-        "art": "card-biscuit-neighbour-take",
-        "effects": [
-          {
-            "amount": 1,
-            "kind": "hearts",
-            "target": {
-              "kind": "all"
-            }
-          }
-        ],
-        "kind": "instant"
-      },
-      "spriteKey": "biscuit-neighbour"
-    },
-    {
       "id": "lostWallet",
       "kind": "lucky",
       "name": "Lost wallet",
@@ -625,6 +606,25 @@
         "rows": 1
       },
       "spriteKey": "other-dog"
+    },
+    {
+      "id": "pettingNeighbor",
+      "kind": "lucky",
+      "name": "Friendly neighbor",
+      "resolution": {
+        "art": "card-petting-neighbor-take",
+        "effects": [
+          {
+            "amount": 1,
+            "kind": "hearts",
+            "target": {
+              "kind": "all"
+            }
+          }
+        ],
+        "kind": "instant"
+      },
+      "spriteKey": "petting-neighbor"
     },
     {
       "id": "puddle",
@@ -833,7 +833,7 @@
     },
     {
       "art": "pickups",
-      "body": "Tips are {tip} each, and they're most of your earnings, so grab plenty. A dog that reaches a treat cheers its owner: +{treatHearts}♥. Aim for a lost wallet or a generous neighbor, too.",
+      "body": "Tips are {tip} each, and they're most of your earnings, so grab plenty. A dog that reaches a treat cheers its owner: +{treatHearts}♥. Aim for a lost wallet or a friendly neighbor, too.",
       "title": "Tips and treats"
     },
     {
@@ -1515,8 +1515,8 @@
       "speed": 1,
       "weights": {
         "luckyFinds": {
-          "biscuitNeighbour": 1,
-          "lostWallet": 1
+          "lostWallet": 1,
+          "pettingNeighbor": 1
         },
         "minorObstacles": {
           "ball": 1,
@@ -1584,8 +1584,8 @@
       "speed": 1,
       "weights": {
         "luckyFinds": {
-          "biscuitNeighbour": 1,
-          "lostWallet": 1
+          "lostWallet": 1,
+          "pettingNeighbor": 1
         },
         "minorObstacles": {
           "ball": 1,
@@ -1653,8 +1653,8 @@
       "speed": 1,
       "weights": {
         "luckyFinds": {
-          "biscuitNeighbour": 1,
-          "lostWallet": 1
+          "lostWallet": 1,
+          "pettingNeighbor": 1
         },
         "minorObstacles": {
           "ball": 1,
@@ -1722,8 +1722,8 @@
       "speed": 1,
       "weights": {
         "luckyFinds": {
-          "biscuitNeighbour": 1,
-          "lostWallet": 1
+          "lostWallet": 1,
+          "pettingNeighbor": 1
         },
         "minorObstacles": {
           "ball": 1,
@@ -1791,8 +1791,8 @@
       "speed": 1,
       "weights": {
         "luckyFinds": {
-          "biscuitNeighbour": 1,
-          "lostWallet": 1
+          "lostWallet": 1,
+          "pettingNeighbor": 1
         },
         "minorObstacles": {
           "ball": 1,
@@ -1860,8 +1860,8 @@
       "speed": 0.94,
       "weights": {
         "luckyFinds": {
-          "biscuitNeighbour": 1,
-          "lostWallet": 1
+          "lostWallet": 1,
+          "pettingNeighbor": 1
         },
         "minorObstacles": {
           "ball": 1,

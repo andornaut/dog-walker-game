@@ -3,10 +3,10 @@
 exports[`every card's text > matches the snapshot 1`] = `
 {
   "encounters": {
-    "biscuitNeighbour: instant": "+1♥ each",
     "lostWallet: instant": "+$20",
     "otherDog: Let them sniff": "+1♥ each, −$8",
     "otherDog: Pull away": "Zoomies: the pack drifts on its own for 20s",
+    "pettingNeighbor: instant": "+1♥ each",
     "puddle: contact": "Muddy: bumps cost 2♥ for 20s",
     "skunk: Full groom": "−$10",
     "skunk: Hold your nose": "−1♥ each",
