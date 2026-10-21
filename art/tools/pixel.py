@@ -34,6 +34,28 @@ DARKER = dict(p.split(":") for p in (
 NEUTRAL = dict(nlgrey="d8d8d8", ngrey="a4a4a4", nslate="727272", ndslate="4a4a4a")
 K.update(NEUTRAL)
 DARKER.update({"d8d8d8": "a4a4a4", "a4a4a4": "727272", "727272": "4a4a4a", "4a4a4a": "181425"})
+# The Toronto colours, 32 past Endesga 32 for the Toronto neighborhoods' scenery, roads, verges and
+# skies, in ramps that end on an Endesga colour: canopy and olive greens, brick and warm browns,
+# warm stones and dark slates for shaded laneways, TTC red, Kensington's painted-house brights, lake
+# blues and sky tones. Endesga 32 plus these is the 64-colour house palette.
+TORONTO = dict(
+    moss="9cb04a", olive="6b8a35", dolive="445a26", canopy="357a2f", pine="1e4d2b", fir="11301c",
+    brick="8e3b2b", dbrick="5e2620", clay="9a6a4a", bark="523a2c", walnut="2e2019", driftwood="a99c86",
+    stone="8a857c", dstone="625e58", ash="57606a", shale="353b45", coal="26292f", ttc="da291c",
+    turquoise="35c2a6", dturq="1f8a7a", lilac="a77bd9", violet="6d4bb0", lime="b2d94a", foam="a8e0e6",
+    shallow="58b8c9", lake="2f7fa6", dlake="1d5576", gold="f9c74f", peach="ff9e6b", haze="cfe3ea",
+    azure="3d86e0", cobalt="2654b0",
+)
+K.update(TORONTO)
+PALETTE64 = PALETTE + list(TORONTO.values())
+DARKER.update(dict(p.split(":") for p in (
+    "9cb04a:6b8a35 6b8a35:445a26 445a26:11301c 357a2f:1e4d2b 1e4d2b:11301c 11301c:181425 "
+    "8e3b2b:5e2620 5e2620:2e2019 9a6a4a:523a2c 523a2c:2e2019 2e2019:181425 a99c86:8a857c "
+    "8a857c:625e58 625e58:26292f 57606a:353b45 353b45:26292f 26292f:181425 da291c:a22633 "
+    "35c2a6:1f8a7a 1f8a7a:193c3e a77bd9:6d4bb0 6d4bb0:68386c b2d94a:63c74d a8e0e6:58b8c9 "
+    "58b8c9:2f7fa6 2f7fa6:1d5576 1d5576:262b44 f9c74f:feae34 ff9e6b:f77622 cfe3ea:c0cbdc "
+    "3d86e0:2654b0 2654b0:124e89"
+).split()))
 # The road colours: Elm Avenue (dark), then Fairview Park, Main Street and The Long Way Home (light).
 ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
 
@@ -231,9 +253,11 @@ def _lua(tags, out):
             frames.append("{" + ",".join(pts) + "}")
             durations.append(str(d / 1000))
         n += len(fs)
-    # A sprite drawn in the neutral greys carries them after Endesga 32 in its palette.
+    # A sprite drawn in the neutral greys or the Toronto colours carries them after Endesga 32 in its
+    # palette.
     used = {c for _, fs, _ in tags for f in fs for row in f for c in row if c}
-    colours = PALETTE + [c for c in NEUTRAL.values() if used & set(NEUTRAL.values())]
+    colours = (PALETTE + [c for c in NEUTRAL.values() if used & set(NEUTRAL.values())]
+               + [c for c in TORONTO.values() if used & set(TORONTO.values())])
     palette = "\n".join(
         f"pal:setColor({i}, Color{{ r = {int(c[0:2], 16)}, g = {int(c[2:4], 16)}, b = {int(c[4:6], 16)} }})"
         for i, c in enumerate(colours)

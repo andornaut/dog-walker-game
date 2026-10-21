@@ -57,7 +57,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 import fonts  # noqa: E402
-from pixel import DARKER, K, Grid, contrast, edged, icon_edge, build as build_sprites  # noqa: E402
+from pixel import DARKER, TORONTO, K, Grid, contrast, edged, icon_edge, build as build_sprites  # noqa: E402
 
 
 def to_image(px):
@@ -1303,8 +1303,9 @@ ZONE_COLOURS = {
     "woof-way": "dslate", "bark-park": "tan", "sniff-street-shops": "pink", "the-long-way-home": "skin2",
     "snooze-crescent": "grey", "paws-promenade": "cream",
 }
-# One ramp step up: the inverse of DARKER, for rims that must lighten to hold 3:1 on ink.
-LIGHTER = {v: k for k, v in DARKER.items() if k != v}
+# One ramp step up: the inverse of DARKER over Endesga 32 and the neutral greys, for rims that must
+# lighten to hold 3:1 on ink.
+LIGHTER = {v: k for k, v in DARKER.items() if k != v and k not in TORONTO.values()}
 
 
 def pip_rim(fill):
