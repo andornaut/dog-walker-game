@@ -73,6 +73,7 @@ import {
   drawnLanes,
   hasLeftRoad,
   hopSequences,
+  hopShapes,
   isWarning,
   laneAt,
   moveMovers,
@@ -85,6 +86,7 @@ import {
   type StepShape,
 } from "./movers";
 import { drawnObstacleBox, exitLength, type PlacedPart, type RoadLens } from "./obstacleBox";
+import { awayHop, nextShyChoiceAt, shyChoices, type ShyPath, takeHop } from "./shy";
 import {
   type Footprint,
   planSpawns,
@@ -523,12 +525,23 @@ export function moverSpec(
       steps: movement.steps,
     };
   } else if (movement.kind === "hop") {
+    const sideways = movement.sideways === true;
     motion = {
       count: movement.times,
       kind: "steps",
       sequences: countsOf(movement.times).flatMap((times) =>
-        hopSequences(movement.most, movement.sideways === true, times),
+        hopSequences(movement.most, sideways, times),
       ),
+      ...(movement.shy === true
+        ? {
+            shy: {
+              nearSeconds: read(tuning, "seconds", "shyHopNearSeconds"),
+              rise: sideways ? 0 : movement.most,
+              shapes: hopShapes(movement.most, sideways),
+              share: read(tuning, "probability", "shyHopperShare"),
+            },
+          }
+        : {}),
       stepSeconds: hopSeconds(data),
     };
   } else {
@@ -923,6 +936,40 @@ function stalkersStepped(
   });
 }
 
+// Each shy hopper whose next hop is due to be chosen, as its cue begins, chooses that hop away
+// from the pack where it is now (shy.ts): the pack's centre, across from where its lane motion
+// has it and half way down its band, with the lanes it is in or moving into, and the hopper's
+// centre as the hop starts.
+function shyHopped(
+  geometry: Pick<RoadGeometry, "cell" | "laneCount" | "packBand" | "roadTop">,
+  motion: LaneMotion,
+  items: readonly WalkItem[],
+): WalkItem[] {
+  const { cell, laneCount, packBand, roadTop } = geometry;
+  const pack = {
+    lanes: motion.kind === "still" ? [motion.lane] : [motion.from, motion.to],
+    x: packX(cell.length, laneCount, motion),
+    y: (packBand.top + packBand.bottom) / 2,
+  };
+  return items.map((item) => {
+    const { mover } = item;
+    if (mover?.path.motion !== "shy") {
+      return item;
+    }
+    let path: ShyPath = mover.path;
+    for (let choice = nextShyChoiceAt(path); choice !== null && mover.since >= choice;) {
+      const place = moverPlace(laneCount, path, choice + path.warning);
+      const centre = {
+        x: (place.lanePosition + item.laneSpan / 2) * cell.length,
+        y: roadTop - item.height / 2 + place.travel,
+      };
+      path = takeHop(path, awayHop(cell.length, centre, pack, shyChoices(path), path.burst));
+      choice = nextShyChoiceAt(path);
+    }
+    return path === mover.path ? item : { ...item, mover: { ...mover, path } };
+  });
+}
+
 // The lane an item's footprint starts on: a mover's continuous place across the lanes, so one
 // between lanes touches what is beside it in both, and anything else's lane.
 function footprintLane(laneCount: number, item: WalkItem): number {
@@ -1035,7 +1082,11 @@ export function stepWalk(
     road.control,
   );
   const { cues, pickups } = scrolled;
-  const solid = stalkersStepped(geometry, control.motion, scrolled.solid);
+  const solid = shyHopped(
+    geometry,
+    control.motion,
+    stalkersStepped(geometry, control.motion, scrolled.solid),
+  );
   // Swept from where the last step left the pack to where this one leaves it.
   const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
   // An obstacle hits a part of the pack; a lucky find, as a pickup does, touches its outline.

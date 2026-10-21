@@ -286,7 +286,11 @@ export interface MoveCount {
 // reaches the pack's rows passes harmlessly. inLane: down its lane at factor of the road's speed,
 // above 1 toward the pack, below 1 away. hop: times jumps, each of 1 to most spots one way, lanes
 // to either side or, unless sideways, a row up the road or diagonally up, landing
-// seconds.moverHopSeconds after it leaves. step: steps spots, each a lane to either side or a row
+// seconds.moverHopSeconds after it leaves; a shy hopper, at probability.shyHopperShare of its
+// kind drawn per mover, instead makes each hop away from the pack, starting once the road between
+// it and the pack's rows is down to seconds.shyHopNearSeconds of the road's travel, ending in
+// neither the pack's lane nor one it is moving into, no nearer it across the road, and at most
+// most rows up the road. step: steps spots, each a lane to either side or a row
 // toward or away, seconds.moverStepSeconds each. still: it never moves, as with no movement.
 // Each mover's speed varies by up to multipliers.moverSpeedJitter either way, and each step and
 // hop comes up to seconds.moverTimingJitter late.
@@ -296,6 +300,7 @@ export type Movement =
   | {
       readonly kind: "hop";
       readonly most: 1 | 2;
+      readonly shy?: true;
       readonly sideways?: true;
       readonly times: MoveCount;
     }

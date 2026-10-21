@@ -56,7 +56,7 @@ import { TEST_WORLD } from "../testing/world";
 import { approachOutcomes } from "./approach";
 import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
-import { hasLeftRoad, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
+import { hasLeftRoad, hopShapes, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
 import {
   blocksLane,
   collectTip,
@@ -1913,6 +1913,63 @@ describe("movers", { timeout: 60_000 }, () => {
       first,
       { at: 150, lanes: 1, length: 50, travel: geometry.cell.length, uncued: true },
     ]);
+  });
+
+  // A shy hopper in lane 2 that may hop a lane either side and a row up chooses its hop as its
+  // cue begins, away from the pack where the pack stands then: out of the pack's lane, to the
+  // side away from it, and up the road, the first way on a tie.
+  it.each([
+    { lane: 0, want: 1 },
+    { lane: 1, want: 1 },
+    { lane: 2, want: -1 },
+    { lane: 3, want: -1 },
+    { lane: 4, want: -1 },
+  ])("hops a shy hopper away from the pack in lane $lane as its cue begins", ({ lane, want }) => {
+    const shy: MoverPath = {
+      burst: geometry.cell.length,
+      lane: 2,
+      length: 30,
+      motion: "shy",
+      movement: "hop",
+      pending: [300],
+      reach: { count: 3, first: 1 },
+      rise: 1,
+      shapes: hopShapes(1, false),
+      steps: [],
+      stopTravel: geometry.sightLength,
+      warning: 100,
+    };
+    const before = inLane(lane, walkWith(["koda"], [moverAt("bunny", shy, 200 - 1e-6)]));
+    const [waiting] = step(before, 0).walk.road.items;
+    expect(waiting?.mover?.path).toBe(shy);
+    const [item] = step(before).walk.road.items;
+    const path = item?.mover?.path;
+    expect(path?.motion === "shy" ? path.steps : []).toEqual([
+      { at: 300, lanes: want, length: 30, travel: -geometry.cell.length },
+    ]);
+  });
+
+  // About half of a shy kind's hoppers hop shy, drawn per mover, across zones and seeds.
+  it("hops about half of a shy kind's hoppers shy", () => {
+    const shyHops = hoppingInstead(everyMover, {
+      kind: "hop",
+      most: 2,
+      shy: true,
+      times: { max: 2, min: 1 },
+    });
+    const motions = ZONE_IDS.flatMap((zone) =>
+      [1, 2, 3].flatMap((seed) => {
+        const zoned = inZone(realRun(shyHops, FASTEST_WALKER), zone, 0);
+        return planZone(shyHops, GAME_ROAD, plannerStreams(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        }).road.pending.flatMap(({ mover }) => (mover?.movement === "hop" ? [mover.motion] : []));
+      }),
+    );
+    const share = motions.filter((motion) => motion === "shy").length / motions.length;
+    expect(motions.length).toBeGreaterThan(40);
+    expect(share).toBeGreaterThan(0.35);
+    expect(share).toBeLessThan(0.65);
   });
 
   it("passes through a squirrel however it meets it: no card, heart, grace or stop", () => {

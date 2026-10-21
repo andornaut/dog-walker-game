@@ -1,10 +1,10 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { chance, type Random } from "../lib/random";
-import { approachOutcomes } from "../runner/approach";
 import { type LanedBox, levelWithPack, touchesAsDrawn } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
+import { moverOutcomes } from "../runner/outcomes";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import {
   isPullObstacle,
@@ -245,15 +245,15 @@ function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneCont
 
 const OUTCOMES = new WeakMap<object, readonly MoverPath[]>();
 
-// The paths a mover may yet take: its own, or, for a stalker with steps still to choose, every
-// way it may choose them, since each choice waits on where the pack is when its cue begins.
+// The paths a mover may yet take: its own, or, for a stalker or shy hopper with moves still to
+// choose, every way it may choose them, since each choice waits on where the pack is then.
 function pathsAhead(path: MoverPath): readonly MoverPath[] {
-  if (path.motion !== "approach" || path.pending.length === 0) {
+  if ((path.motion !== "approach" && path.motion !== "shy") || path.pending.length === 0) {
     return [path];
   }
   let outcomes = OUTCOMES.get(path);
   if (outcomes === undefined) {
-    outcomes = approachOutcomes(path);
+    outcomes = moverOutcomes(path);
     OUTCOMES.set(path, outcomes);
   }
   return outcomes;

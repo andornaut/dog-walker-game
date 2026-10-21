@@ -6,10 +6,10 @@ import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
-import { approachOutcomes } from "./approach";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
 import { laneAt, moverPlace } from "./movers";
+import { moverOutcomes } from "./outcomes";
 import {
   blocksLane,
   isPullObstacle,
@@ -240,7 +240,7 @@ export function laneBlockedWithin(
       const end = (bottom - item.y) / speed;
       return inLane && end > 0 && start < horizon;
     }
-    const paths = mover.path.motion === "approach" ? approachOutcomes(mover.path) : [mover.path];
+    const paths = moverOutcomes(mover.path);
     return paths.some((path) => {
       for (let sample = 0; sample <= SWEEP_SAMPLES; sample++) {
         const scroll = (sample / SWEEP_SAMPLES) * horizon * speed;

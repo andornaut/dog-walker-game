@@ -32,6 +32,11 @@ export interface MoverStep {
 // still to choose: within its reach of lanes and rows down, burst a row's travel, each length
 // long; none starts once its travel reaches stopTravel, the pack's rows. reach and lane are its
 // leftmost lane's, so one several lanes wide keeps every lane on the road.
+// shy (a shy hop): it stands on the road from its spawn and takes the hops it has chosen, each
+// away from the pack as the pack stood when its cue began (shy.ts), and has pending hops still to
+// choose, each starting at a scroll since it spawned: one of shapes, within its reach of lanes
+// and rise of rows up, burst a row's travel, each length long; none starts once its travel
+// reaches stopTravel, the pack's rows.
 export type MoverPath = {
   readonly movement: MovementKind;
   readonly warning: number;
@@ -58,6 +63,18 @@ export type MoverPath = {
       readonly pending: readonly ApproachTiming[];
       readonly reach: LaneSpan;
       readonly rows: number;
+      readonly steps: readonly MoverStep[];
+      readonly stopTravel: number;
+    }
+  | {
+      readonly burst: number;
+      readonly lane: number;
+      readonly length: number;
+      readonly motion: "shy";
+      readonly pending: readonly number[];
+      readonly reach: LaneSpan;
+      readonly rise: number;
+      readonly shapes: readonly StepShape[];
       readonly steps: readonly MoverStep[];
       readonly stopTravel: number;
     }
@@ -115,7 +132,7 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
       travel: Math.max(0, moved) * path.speedMultiplier,
     };
   }
-  if (path.motion === "steps" || path.motion === "approach") {
+  if (path.motion === "steps" || path.motion === "approach" || path.motion === "shy") {
     let lanePosition = path.lane;
     let travel = since;
     for (const step of path.steps) {
@@ -286,7 +303,7 @@ export function sweptLanes(laneCount: number, path: MoverPath, from: number, to:
   if (path.motion === "ride") {
     return { count: path.lanes, first: path.lane };
   }
-  if (path.motion === "steps" || path.motion === "approach") {
+  if (path.motion === "steps" || path.motion === "approach" || path.motion === "shy") {
     return { count: 1, first: path.lane };
   }
   const moving = Math.max(from, path.enterTravel);
@@ -349,16 +366,27 @@ export function hopSequences(most: number, sideways: boolean, times: number): St
   );
 }
 
+// How a shy hopper hops, at a share of the movers of its kind drawn per mover: as the road between
+// it and the pack's rows comes down to nearSeconds of the road's travel, each of its hops one of
+// shapes chosen away from the pack (shy.ts), ending at most rise rows up the road.
+export interface ShyHops {
+  readonly nearSeconds: number;
+  readonly rise: number;
+  readonly shapes: readonly StepShape[];
+  readonly share: number;
+}
+
 // cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed,
 // setting off a share of the road ahead of the pack drawn per mover from startRoadShare, never so
 // low that the pack has less than reactionSeconds after its cue to meet it.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of the sequences as long as its count, drawn per mover from count, each step
 // stepSeconds long however many spots it covers; the planner picks whichever keeps the road
-// passable. approach: steps steps toward the pack, drawn per mover, each stepSeconds long, the
-// first's cue firstDelaySeconds after the mover is wholly on the road and each later one, with no
-// cue, once the step before has ended and the road between it and the pack is secondRoadShare of
-// the road's length, each range drawn from per mover.
+// passable. With shy, a share of them hop shy instead, as many times as their count. approach:
+// steps steps toward the pack, drawn per mover, each stepSeconds long, the first's cue
+// firstDelaySeconds after the mover is wholly on the road and each later one, with no cue, once
+// the step before has ended and the road between it and the pack is secondRoadShare of the road's
+// length, each range drawn from per mover.
 export type MoverMotion =
   | {
       readonly firstDelaySeconds: readonly [number, number];
@@ -379,6 +407,7 @@ export type MoverMotion =
       readonly count: MoveCount;
       readonly kind: "steps";
       readonly sequences: readonly (readonly StepShape[])[];
+      readonly shy?: ShyHops;
       readonly stepSeconds: number;
     };
 
@@ -398,21 +427,30 @@ export interface MoverSpec {
 }
 
 // One mover's draws, each from 0 up to 1, made as it is planned: how many times it moves, its
-// speed, the delay before each of its moves, a stalker's later-step road share and where a dart
-// sets off. EVEN_DRAWS moves it at its kind's speed with no delay, at the near end of a range.
+// speed, the delay before each of its moves, a stalker's later-step road share, where a dart
+// sets off, and whether a hopper of a shy kind hops shy (below its kind's share). EVEN_DRAWS moves
+// it at its kind's speed with no delay, at the near end of a range, and never shy.
 export interface MoverDraws {
   readonly count: number;
   readonly delays: readonly [number, number, number];
   readonly share: number;
+  readonly shy: number;
   readonly speed: number;
   readonly start: number;
 }
 
-const EVEN_DRAWS: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5, start: 0 };
+const EVEN_DRAWS: MoverDraws = {
+  count: 0,
+  delays: [0, 0, 0],
+  share: 0,
+  shy: 0.999999,
+  speed: 0.5,
+  start: 0,
+};
 
 // The planner's random streams. spawns places every spawn and draws each mover's speed, first two
-// delays and share; movers draws each mover's count, third delay and start, so those never shift
-// the spawns stream.
+// delays and share; movers draws each mover's count, third delay, start and shyness, so those
+// never shift the spawns stream.
 export interface PlannerStreams {
   readonly movers: Random;
   readonly spawns: Random;
@@ -426,7 +464,8 @@ export function drawMover(streams: PlannerStreams): MoverDraws {
   const speed = spawns();
   const count = movers();
   const third = movers();
-  return { count, delays: [...delays, third], share, speed, start: movers() };
+  const start = movers();
+  return { count, delays: [...delays, third], share, shy: movers(), speed, start };
 }
 
 // The count a draw from 0 up to 1 picks from a mover's range, each count as likely.
@@ -665,6 +704,9 @@ function stepsPlacements(
   const length = motion.stepSeconds * scrollSpeed;
   const height = spec.footprint.rows * cellLength;
   const count = drawnCount(motion.count, draws.count);
+  if (motion.shy !== undefined && draws.shy < motion.shy.share) {
+    return shyPlacements(geometry, spec, motion.shy, motion.stepSeconds, count);
+  }
   const ways = motion.sequences.filter((sequence) => sequence.length === count);
   return ways.flatMap((shapes) => {
     const spots: StandOffset[] = [{ lane: 0, travel: 0 }];
@@ -699,9 +741,9 @@ function stepsPlacements(
   });
 }
 
-// The ways a stalker's lane range may reach from its start lane, widest first: a lane to
-// either side, one side only, or none.
-const APPROACH_REACHES: readonly (readonly [number, number])[] = [
+// The ways a stalker's or shy hopper's lane range may reach from its start lane, widest first: a
+// lane to either side, one side only, or none.
+const REACHES: readonly (readonly [number, number])[] = [
   [-1, 1],
   [-1, 0],
   [0, 1],
@@ -735,7 +777,7 @@ function approachPlacements(
       travel: sightLength - within(motion.secondRoadShare, draws.share) * roadLength,
     })),
   ];
-  return APPROACH_REACHES.flatMap(([left, right], rank) => {
+  return REACHES.flatMap(([left, right], rank) => {
     const spots = Array.from({ length: right - left + 1 }, (_, i) =>
       Array.from({ length: steps + 1 }, (_unused, row) => ({
         lane: left + i,
@@ -754,7 +796,50 @@ function approachPlacements(
       steps: [],
       stopTravel: sightLength,
       warning,
-    })).map((placement) => ({ ...placement, rank: APPROACH_REACHES.length - rank }));
+    })).map((placement) => ({ ...placement, rank: REACHES.length - rank }));
+  });
+}
+
+// A shy hopper may be at any spot in its lanes, from its start up as many rows as its rise, and is
+// placed as standing at each of them, so whichever hop it chooses on the road keeps the road
+// passable. Its lanes are its start lane and, where there is room, a lane to either side, the
+// widest that fits (rank). Its first hop's cue begins as its row comes within nearSeconds of the
+// road's travel of the tallest pack's rows at sightLength, but no sooner than it is wholly on the
+// road, and each later one's as the hop before ends; it makes as many hops as its drawn count.
+function shyPlacements(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  shy: ShyHops,
+  hopSeconds: number,
+  count: number,
+): MoverPlacement[] {
+  const { cellLength, scrollSpeed, sightLength } = geometry;
+  const warning = spec.warningSeconds * scrollSpeed;
+  const length = hopSeconds * scrollSpeed;
+  const height = spec.footprint.rows * cellLength;
+  const first = Math.max(height, sightLength - shy.nearSeconds * scrollSpeed) + warning;
+  const pending = Array.from({ length: count }, (_, i) => first + i * (length + warning));
+  return REACHES.flatMap(([left, right], rank) => {
+    const spots = Array.from({ length: right - left + 1 }, (_, i) =>
+      Array.from({ length: shy.rise + 1 }, (_unused, row) => ({
+        lane: left + i,
+        travel: -row * cellLength,
+      })),
+    ).flat();
+    return standingPlacements(geometry, spec, spots, (lane) => ({
+      burst: cellLength,
+      lane,
+      length,
+      motion: "shy",
+      movement: spec.movement,
+      pending,
+      reach: { count: right - left + 1, first: lane + left },
+      rise: shy.rise,
+      shapes: shy.shapes,
+      steps: [],
+      stopTravel: sightLength,
+      warning,
+    })).map((placement) => ({ ...placement, rank: REACHES.length - rank }));
   });
 }
 

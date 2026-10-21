@@ -5,7 +5,6 @@ import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from ".
 import type { LaneDirection } from "../layout/lanes";
 import { seededRandom } from "../lib/random";
 import { read } from "../rules/units";
-import { approachOutcomes } from "../runner/approach";
 import { hitDog } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { type LaneMotion, stillInLane } from "../runner/laneMotion";
@@ -16,6 +15,7 @@ import {
   moverPlace,
   moverPlacements,
 } from "../runner/movers";
+import { moverOutcomes } from "../runner/outcomes";
 import { NO_PULLS } from "../runner/pulls";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import { blockingLength } from "../runner/spawning";
@@ -209,12 +209,14 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
   const movements = new Map(
     entries.map((entry) => [JSON.stringify([entry.movement, entry.shape]), entry]),
   );
-  // Each end of every draw, the count's included: the fewest and the most times it moves.
-  const LOW: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, speed: 0, start: 0 };
+  // Each end of every draw, the count's included: the fewest and the most times it moves, and a
+  // hopper of a shy kind hopping shy and not.
+  const LOW: MoverDraws = { count: 0, delays: [0, 0, 0], share: 0, shy: 0, speed: 0, start: 0 };
   const HIGH: MoverDraws = {
     count: 0.999999,
     delays: [0.999999, 0.999999, 0.999999],
     share: 0.999999,
+    shy: 0.999999,
     speed: 0.999999,
     start: 0.999999,
   };
@@ -266,12 +268,12 @@ describe("a mover's moves and hazards", { timeout: 60_000 }, () => {
         placed.add(JSON.stringify(mover.movement));
       }
       for (const { path } of placements) {
-        const outcomes = path.motion === "approach" ? approachOutcomes(path) : [path];
+        const outcomes = moverOutcomes(path);
         for (const outcome of outcomes) {
           if (outcome.motion === "cross") {
             expect(outcome.enterTravel).toBeLessThan(sightLength);
           }
-          if (outcome.motion === "steps" || outcome.motion === "approach") {
+          if (outcome.motion !== "cross" && outcome.motion !== "ride") {
             const before = (index: number) =>
               outcome.steps.slice(0, index).reduce((sum, step) => sum + step.travel, 0);
             outcome.steps.forEach((step, index) => {

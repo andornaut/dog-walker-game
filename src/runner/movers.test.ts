@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import { TUNING } from "../data/tuning";
 import { read } from "../rules/units";
 import { plannerStreams } from "../testing/movers";
-import { approachOutcomes } from "./approach";
 import {
   drawMover,
   drawnCount,
@@ -33,6 +32,7 @@ import {
   stepSpots,
   sweptLanes,
 } from "./movers";
+import { moverOutcomes } from "./outcomes";
 
 // 100px/s: a 1s warning is 100px, and a crosser at 2 lanes a second crosses 0.02 lanes a pixel.
 const geometry: MoverGeometry = {
@@ -382,14 +382,25 @@ describe("sweptLanes", () => {
 });
 
 // A mover's draws with no delay at its kind's speed, and the count and a dart's start at the low
-// end of their ranges (the fewest moves, the lowest start) or the high end.
+// end of their ranges (the fewest moves, the lowest start), there and shy, or at the high end.
 const DRAW_ENDS: readonly { draws: MoverDraws; end: string }[] = [
   {
-    draws: { count: 0, delays: [0, 0, 0], share: 0, speed: 0.5, start: 0 },
+    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0.999999, speed: 0.5, start: 0 },
     end: "the low end",
   },
   {
-    draws: { count: 0.999999, delays: [0, 0, 0], share: 0, speed: 0.5, start: 0.999999 },
+    draws: { count: 0, delays: [0, 0, 0], share: 0, shy: 0, speed: 0.5, start: 0 },
+    end: "the low end, shy",
+  },
+  {
+    draws: {
+      count: 0.999999,
+      delays: [0, 0, 0],
+      share: 0,
+      shy: 0.999999,
+      speed: 0.5,
+      start: 0.999999,
+    },
     end: "the high end",
   },
 ];
@@ -468,6 +479,16 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
     }),
   },
   {
+    name: "a hopper of a shy kind",
+    spec: spec({
+      count: { max: 2, min: 1 },
+      kind: "steps",
+      sequences: [...hopSequences(2, false, 1), ...hopSequences(2, false, 2)],
+      shy: { nearSeconds: 1.6, rise: 2, shapes: hopShapes(2, false), share: 0.5 },
+      stepSeconds: 0.3,
+    }),
+  },
+  {
     name: "a stalker",
     spec: spec({
       firstDelaySeconds: [0, 0.5],
@@ -526,7 +547,7 @@ describe("moverPlacements", () => {
         const blocked = window + (placement.rows - 1) * cellLength;
         const reach = window + (rows - 1) * cellLength;
         const { path } = placement;
-        const outcomes = path.motion === "approach" ? approachOutcomes(path) : [path];
+        const outcomes = moverOutcomes(path);
         for (const outcome of outcomes) {
           for (let since = 0; since < 4000; since += 1) {
             const place = moverPlace(geometry.laneCount, outcome, since);
@@ -567,13 +588,16 @@ describe("moverPlacements", () => {
     }
     const count = drawnCount(range, draws.count);
     expect(count).toBe(draws.count === 0 ? range.min : range.max);
-    const moves = moverPlacements(geometry, moving, draws).flatMap(({ path }) =>
-      (path.motion === "approach" ? approachOutcomes(path) : [path]).map((outcome) =>
-        outcome.motion === "steps" || outcome.motion === "approach" ? outcome.steps.length : 0,
+    const placements = moverPlacements(geometry, moving, draws);
+    const moves = placements.flatMap(({ path }) =>
+      moverOutcomes(path).map((outcome) =>
+        outcome.motion === "cross" || outcome.motion === "ride" ? 0 : outcome.steps.length,
       ),
     );
+    // A shy hopper may make no hop at all, when the pack leaves it none that move away.
+    const shy = placements.some(({ path }) => path.motion === "shy");
     expect(Math.max(...moves)).toBe(count);
-    expect(Math.min(...moves)).toBeGreaterThanOrEqual(1);
+    expect(Math.min(...moves)).toBeGreaterThanOrEqual(shy ? 0 : 1);
   });
 
   it.each([
@@ -614,7 +638,14 @@ describe("moverPlacements", () => {
   ])(
     "meets the pack with a dart set off $end only if it is still crossing",
     ({ lanes, meets, start }) => {
-      const draws = { count: 0, delays: [0, 0, 0] as const, share: 0, speed: 0.5, start };
+      const draws = {
+        count: 0,
+        delays: [0, 0, 0] as const,
+        share: 0,
+        shy: 0.999999,
+        speed: 0.5,
+        start,
+      };
       const [rightward] = moverPlacements(geometry, spec(cross(3, 0)), draws);
       expect(rightward?.lanes.count).toBe(lanes);
       expect(rightward?.leadIn).toBe(meets);
@@ -628,6 +659,7 @@ describe("moverPlacements", () => {
         count: 0,
         delays: [0, 0, 0],
         share: 0,
+        shy: 0.999999,
         speed: 0.5,
         start,
       });
