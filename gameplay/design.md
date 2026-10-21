@@ -53,11 +53,11 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - **Keyboard:** ←/→, A/D or H/L; one lane per press; holding a key doesn't repeat
 - While moving between lanes, the pack can hit things in either lane. A reverse press turns the pack around at once; each other press queues one more lane
 - Taps on the top bar and the doghouse cards never move the pack. Pause offers Resume, Help, Settings and Head home
-- The walker is at the bottom, the dogs just ahead in the same lane; the pack collides as one unit, and each plain hit lands on one dog, the dog that touched the obstacle: the front dog on a head-on hit, and on a side hit during a lane change the dog that touched it. Card obstacles hit the whole pack. The dogs walk in the order you picked them, first dog in front, so who leads is a choice. The pack stays inside its lane: no dog's hit box reaches into the next lane, so a pack fully in a lane never touches an obstacle in the lane beside it. A treat or a tip grabbed head-on goes to the front dog too. A small dog dodges 1 in 4 of the plain hits that would land on it, with a "Dodge!" label over it; the hit then costs nothing
+- The walker is at the bottom, the dogs just ahead in the same lane; the pack collides as one unit, and each plain hit lands on one dog, the dog that touched the obstacle: the front dog on a head-on hit, and on a side hit during a lane change the dog that touched it. Card obstacles hit the whole pack. The dogs walk in the order you picked them, first dog in front, so who leads is a choice. The pack stays inside its lane: no dog's hit box reaches into the next lane, so a pack fully in a lane never touches an obstacle in the lane beside it. A treat or a tip grabbed head-on goes to the front dog too. A small dog dodges 1 in 4 of the plain hits that would land on it, with a "Dodge!" label over it; the hit then costs nothing and doesn't count as a bump (Clean Paws, Not a Scratch)
 - Spawning always leaves a reachable path, so every hit is avoidable
 - A hit obstacle is removed at once, and obstacles are ignored for a short grace window; pickups still count.
 - Scroll speed and obstacle density rise gently each neighborhood
-- **Pulls:** every dog pulls toward squirrels. A dog pulls the pack one lane only toward a squirrel you can see, and one dog strains at a time, the one nearest the squirrel. The dog strains for about 1 second, with a bubble over it, an arrow and a line to the squirrel, and a taut leash; then the pack lurches one lane toward the squirrel, unless you steer away during the strain, which cancels the pull. A pull never moves the pack into an obstacle it can't react to: if the target lane has an obstacle too close, the dog strains but doesn't pull
+- **Pulls:** every dog pulls toward squirrels, and the pull is a squirrel's only cost: touching one does nothing. A dog pulls the pack one lane only toward a squirrel you can see, and one dog strains at a time, the one nearest the squirrel. The dog strains for about 1 second, with a bubble over it, an arrow and a line to the squirrel, and a taut leash; then the pack lurches one lane toward the squirrel, unless you steer away during the strain, which cancels the pull. A pull never moves the pack into an obstacle it can't react to: if the target lane has an obstacle too close, the dog strains but doesn't pull
 
 ### Resources
 
@@ -65,8 +65,8 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
   - **Cash:** what you carry during the walk. It starts at a $5 purse (more with the Fanny pack) and grows with tips and lucky finds; card options are paid from it. It never goes below $0, and what's left is banked at the end
   - **Tips:** a tip is $1. Tips are the main income: each neighborhood spawns 52 or more, whatever the pack size, and a careful walk grabs about half
   - **Pay:** the steady part. After each neighborhood, each walking dog earns $10, times the neighborhood's pay multiplier. Pay is banked at the end of each neighborhood: at its celebration, or on the end screen after neighborhood 4. A firing loses that dog's pay for the current neighborhood and the Full pack bonus; its earlier pay stays banked
-- **Owner happiness (♥):** one meter per dog, shown as the dog's and owner's faces plus the meter, which never relies on color alone. The dog's size sets its max (see Dogs). Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
-- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1 ♥, bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
+- **Owner happiness (♥):** one meter per dog, shown on its doghouse card as the dog's face and its hearts, with the owner popping in on events (see Doghouse cards); it never relies on color alone. The dog's size sets its max (see Dogs). Every owner starts full, and treats restore hearts up to the max. At 0 the owner fires you with a quip and the dog leaves
+- **Every change shows its cause:** each ♥ or $ change shows a short floating label at the dog or the bank (e.g. "−1♥, bump", "+$1 tip"); a card's enlarged view lists the modifiers behind its numbers
 
 ### A walk
 
@@ -96,18 +96,17 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 - A hit that opens a card costs nothing until you choose
 - A money option you can't afford is grayed out, so cash never goes below $0; every card keeps at least one option that costs no money
 - An option that would fire an owner says so ("Fires Jesse")
-- A debuff option states its stake on the card ("Splash through → Muddy: bumps cost 2♥ for 20s", "Quick rinse → Stinky: half the tips for 20s")
+- A debuff option states its stake on the card ("Pull away → Zoomies: the pack drifts on its own for 20s", "Quick rinse → Stinky: tips pay nothing for 20s")
 - A fork's path card shows its pay multiplier ("Pay ×1.25") and its upgrade's duration (Now, Next neighborhood, Whole walk) where other cards show a price
 - Slower options cost money (missed tips) instead of time
 - Money options are charged once per card, whatever the pack size; heart options cost each owner, so a bigger pack has more owners who can fire you
-- An immunity (Good leash, Raincoats) means the obstacle is harmless: no card, no heart and no hit stop
-- A card shows at most 3 options. Hall pass offers Skip on every card until it's used in that neighborhood; Skip replaces the most expensive option when a card already has 3. Sweet talker and Hall pass can both apply to the same card: its money options are free and Skip is offered, and the player chooses
+- A card shows at most 3 options. Hall pass offers Walk on by (a free option that skips the card) on every card until it's used in that neighborhood; Walk on by replaces the most expensive option when a card already has 3. Sweet talker and Hall pass can both apply to the same card: its money options are free and Walk on by is offered, and the player chooses; Sweet talker is used up by that card whichever option is picked
 - After a card choice, each owner whose hearts changed reacts with a quip in the message strip. Each owner has 2 lines for each of: happier, upset, fired, and parting
 
 ### Teaching, sound and settings
 
 - **First-time hints:** a one-line hint in the message strip the first time each thing appears (first puddle, first pull, first treat and so on); the help screen covers the rest. Nothing teaches by overlaying the road: no tutorial overlays or swipe tips on the play area
-- **Sound:** short effects (tip, treat, bump, bark, card open, fired), a sound for each encounter hit (spray hiss, splash, coin scatter, squirrel chitter, friendly woof), a badge-earned jingle and a new-best fanfare, and one music loop for the walk. While the walk is paused by the player (the pause menu, Settings, Help or the Home question), the music drops to 30% volume and comes back on resume; it stays full under cards and the celebration, and goes silent while the tab is hidden
+- **Sound:** short effects (tip, treat, bump, bark, card open, fired), a sound for each card obstacle's hit (spray hiss, coin scatter, friendly woof), a splash on a puddle, a chitter when a dog strains toward a squirrel, a badge-earned jingle and a new-best fanfare, and one music loop for the walk. While the walk is paused by the player (the pause menu, Settings, Help or the Home question), the music drops to 30% volume and comes back on resume; it stays full under cards and the celebration, and goes silent while the tab is hidden
 - **Settings** (from pause and the home screen): sound on or off, music volume, effects volume, reduced motion
 - **Panels:** every page and overlay has one close control at the top right. Tapping the dimmed background outside a panel closes it (Help, the logbook, the Pet shop, Settings, Stats, the Nice! badge, the home screen's detail cards and the Neighborhood done celebration), and outside the pause menu resumes the walk; only taps count, not drags. Choice cards and the New walker celebration wait for a button. A tap on the page beside the game (left or right of it on a wide screen) counts as outside too; the nav bar and the dev panel don't
 
@@ -144,25 +143,28 @@ Three dogs come in each size. Size shows at a glance: on the road, medium dogs a
 
 ### Encounters
 
-A card obstacle opens a choice card. Card obstacles carry no special marking on the road.
+Three card obstacles open a choice card: the other dog, the skunk and the thief. Card obstacles carry no special marking on the road.
 
 | Encounter | Options                                                                     |
 | --------- | --------------------------------------------------------------------------- |
 | Other dog | Let them sniff → −$ (missed tips), +♥ each · Pull away → _Zoomies_          |
-| Puddle    | Towel off → −$ · Splash through → _Muddy_                                   |
 | Skunk     | Full groom → −$$ · Quick rinse → _Stinky_ · Hold your nose → −♥ each        |
-| Squirrel  | Let them chase → −$ (dropped tips) · Hold tight → −♥ each                   |
 | Thief     | Let them go → −$$ (stolen tips) · Chase them off → −♥ each (dogs worked up) |
 
-Each option costs one thing: money, hearts or a debuff. Let them sniff is the one trade, money for hearts. Each debuff comes from the card it fits: Muddy from the puddle, Stinky from the skunk, Zoomies from the other dog.
+Each option costs one thing: money, hearts or a debuff. Let them sniff is the one trade, money for hearts.
 
-**Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's color runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over the 20 seconds; two active debuffs stack as two bars. Each debuff has its own color. Nothing changes on the road.
+- **Puddle:** no card. Hitting one costs no heart and makes the pack _Muddy_, with a plain obstacle's short hit stop
+- **Squirrel:** no card and no hit: touching one does nothing. It darts across as an animal mover, and its cost is the pull toward it (see Pulls)
 
-- **Muddy:** every plain bump costs 2 ♥ instead of 1
-- **Stinky:** half as many tips appear
-- **Zoomies:** each lane change carries the pack two lanes instead of one, stopping at the road's edge
+Each debuff has one source: Muddy from a puddle, Stinky from the skunk's Quick rinse, Zoomies from the other dog's Pull away.
 
-### Lucky encounters
+**Debuffs** are mild, and each lasts 20 seconds of walking. Nothing on the road cures one; it runs out. Applying one the pack already has restarts its 20 seconds; none stacks. Each is announced in the message strip when it starts and when it ends. While it lasts, a bar in the debuff's color runs the full width of the game just below the top bar, over the clouds, with the debuff's icon and name, and drains over the 20 seconds; two active debuffs stack as two bars. Each debuff has its own color.
+
+- **Muddy:** every plain bump costs 2♥ instead of 1
+- **Stinky:** tips still appear, but a grabbed tip pays $0 and shows a gray "+$0 Stinky" label
+- **Zoomies:** about once a second, the pack drifts one lane in the direction it last moved, stopping at the road's edge. Steering still works, so you counter the drift. A drift never moves the pack into an obstacle it can't react to, the same as a pull
+
+### Lucky finds
 
 Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained.
 
@@ -171,7 +173,7 @@ Good things to bump into on purpose. None opens a card: each bobs on the road an
 
 ### Plain obstacles
 
-About half of the obstacles are plain: they open no card. A plain hit costs 1 ♥ from the owner of the dog it lands on (see Screen and controls).
+Plain obstacles open no card. A plain hit costs 1♥ from the owner of the dog it lands on (see Screen and controls).
 
 ### Obstacle sizes
 
@@ -180,8 +182,9 @@ Obstacles span lanes and rows. None is wider than 3 lanes, every row leaves at l
 | Obstacle                                                                        | Kind  | Size (lanes × rows) |
 | ------------------------------------------------------------------------------- | ----- | ------------------- |
 | Skunk (with its spray cloud)                                                    | Card  | 2 × 2               |
-| Puddle                                                                          | Card  | 2 × 1               |
-| Squirrel, other dog, thief                                                      | Card  | 1 × 1               |
+| Puddle                                                                          | Muddy | 2 × 1               |
+| Other dog, thief                                                                | Card  | 1 × 1               |
+| Squirrel                                                                        | Pull  | 1 × 1               |
 | Ball, bin, cone, cyclist, mail carrier                                          | Plain | 1 × 1               |
 | Car, delivery truck, ice cream truck                                            | Plain | 1 × 3               |
 | Bench                                                                           | Plain | 2 × 1               |
@@ -204,7 +207,7 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
 
 - **Message strip:** a strip over the clouds at the top of the backdrop band tells what just happened, newest line big with its icon, older lines fading. Lines (in the text data):
   - Debuff ends: "All clean again." · "The pack smells fine again." · "The zoomies wore off."
-  - Debuff starts: "Muddy paws! Bumps cost 2♥ for 20s." · "Stinky pack! Half the tips for 20s." · "Zoomies! Every move goes two lanes for 20s."
+  - Debuff starts: "Muddy paws! Bumps cost 2♥ for 20s." · "Stinky pack! Tips pay nothing for 20s." · "Zoomies! The pack won't sit still for 20s."
   - Effect starts: the effect line of an upgrade, the walker's perk or the Pocket item
   - Fired: "Jesse fired you! Koda heads home."
   - First-time hints (see Teaching)
@@ -218,7 +221,7 @@ Each obstacle has one look everywhere. Some kinds can move; each one that can mo
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse card with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the hit or card choice that fired you
 - **First visit:** on a brand-new save, the starter's owner waits at the gate in the gate scene until the first walk
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
-- **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "YOINK!") and the pack shaking off
+- **Hit moments:** every card obstacle's hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", skunk "SPRAYED!", thief "YOINK!") and the pack shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.3 seconds for a plain obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
 - **Low hearts:** an owner at 1 ♥ looks upset, and their doghouse card shows it
 - **Pay banked:** at each neighborhood's end, the celebration shows the pay banked for it
@@ -241,16 +244,16 @@ Walk-only boosts, one on each fork path, from a pool of 6. Each fork draws one p
 
 - Belly rubs: +♥ to every owner now
 - Big tipper: every tip is worth $1 more in the next neighborhood
-- Good leash: squirrels open no card, and no dog pulls toward them
-- Raincoats: puddles open no card
+- Good leash: no dog pulls toward squirrels
+- Raincoats: puddles don't muddy: no Muddy and no hit stop
 - Rush hour (trade-off): more tips and more obstacles in the next neighborhood
-- Sweet talker: the first card in each neighborhood costs nothing: its money options are free
+- Sweet talker: the first card in each neighborhood costs nothing: its money options are free, and that card uses it up whichever option you pick
 
 Effects without "now" or "next neighborhood" last the rest of the walk.
 
 ### Walkers
 
-Four walkers. Each has an agility, which sets how fast the pack changes lanes, and one perk. Agility spreads from 0.9× to 1.2× the base lane-change speed (each big dog in the pack takes 0.05 off, never below Relaxed), and players see it as a word: Relaxed (0.9), Steady (1.0), Quick (1.1), Nimble (1.2), Lightning (1.3, reached only with Running shoes); the slowest walker's lane move sets the row spacing, so the low end stays near 1. Every walker walks the same road at the same speed. You start with Casey; each other walker unlocks the first time you finish a named neighborhood.
+Four walkers. Each has an agility, which sets how fast the pack changes lanes, and one perk. Walkers' agility spreads from 0.9× to 1.2× the base lane-change speed, and Running shoes add 0.1, so Trista wearing them reaches 1.3 (each big dog in the pack takes 0.05 off, never below Relaxed). Players see it as a word: Relaxed (0.9), Steady (1.0), Quick (1.1), Nimble (1.2), Lightning (1.3, reached only with Running shoes); the slowest walker's lane move sets the row spacing, so the low end stays near 1. Every walker walks the same road at the same speed. You start with Casey; each other walker unlocks the first time you finish a named neighborhood.
 
 | Walker | Agility | Perk         | Effect                                                                                             | Unlock                   |
 | ------ | ------- | ------------ | -------------------------------------------------------------------------------------------------- | ------------------------ |
@@ -282,20 +285,20 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best neighborhood completed (heading home mid-neighborhood doesn't count it). Each dog's roster card shows its walks, neighborhoods finished and times fired
 - **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting money), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
-| Group      | Badge                 | Goal                                             | Line                                      |
-| ---------- | --------------------- | ------------------------------------------------ | ----------------------------------------- |
-| Firsts     | First Steps           | Finish your first neighborhood                   | Every walk starts somewhere.              |
-| Firsts     | Round Trip            | Finish all 4 neighborhoods of a walk             | Home before the streetlights.             |
-| Firsts     | Double Leash          | Walk 2 dogs at once                              | Twice the tails.                          |
-| Firsts     | Pack Leader           | Walk 3 dogs at once                              | Twelve paws, one plan.                    |
-| Mastery    | Clean Paws            | Finish a neighborhood without a plain bump       | Not a speck on them.                      |
-| Mastery    | Not a Scratch         | Finish a walk without a plain bump               | Spotless, start to finish.                |
-| Mastery    | Five-Star Service     | Finish 10 walks without being fired              | The reviews are in.                       |
-| Mastery    | Big Payday            | Earn $300 in one walk                            | Treats are on you.                        |
-| Collection | Full Kennel           | Own all 9 dogs                                   | Every leash is spoken for.                |
-| Collection | Kitted Out            | Own every gear item                              | A pocket for everything. Well, one thing. |
-| Collection | Neighborhood Favorite | Finish a walk with every dog                     | Everyone's met you now.                   |
-| Collection | Top Walker            | Own every dog and all 3 dog slots                | Maplewood's finest. Ask any dog.          |
-| Silly      | You're Fired!         | Get fired 10 times                               | They always come back.                    |
-| Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                   | You can smell this badge.                 |
-| Silly      | Squirrel!             | Let the pack chase 5 squirrels, across all walks | So close. Every time.                     |
+| Group      | Badge                 | Goal                                            | Line                                      |
+| ---------- | --------------------- | ----------------------------------------------- | ----------------------------------------- |
+| Firsts     | First Steps           | Finish your first neighborhood                  | Every walk starts somewhere.              |
+| Firsts     | Round Trip            | Finish all 4 neighborhoods of a walk            | Home before the streetlights.             |
+| Firsts     | Double Leash          | Walk 2 dogs at once                             | Twice the tails.                          |
+| Firsts     | Pack Leader           | Walk 3 dogs at once                             | Twelve paws, one plan.                    |
+| Mastery    | Clean Paws            | Finish a neighborhood without a plain bump      | Not a speck on them.                      |
+| Mastery    | Not a Scratch         | Finish a walk without a plain bump              | Spotless, start to finish.                |
+| Mastery    | Five-Star Service     | Finish 10 walks without being fired             | The reviews are in.                       |
+| Mastery    | Big Payday            | Earn $300 in one walk                           | Treats are on you.                        |
+| Collection | Full Kennel           | Own all 9 dogs                                  | Every leash is spoken for.                |
+| Collection | Kitted Out            | Own every gear item                             | A pocket for everything. Well, one thing. |
+| Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs           | Everyone's met you now.                   |
+| Collection | Top Walker            | Own every dog and all 3 dog slots               | Maplewood's finest. Ask any dog.          |
+| Silly      | You're Fired!         | Get fired 10 times                              | They always come back.                    |
+| Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                  | You can smell this badge.                 |
+| Silly      | Squirrel!             | Get pulled toward 5 squirrels, across all walks | So close. Every time.                     |

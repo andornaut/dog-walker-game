@@ -8,10 +8,6 @@ Format: `- [status] **Idea**: short description · notes`. Statuses: **floated**
 
 - [floated] **Walk the sidewalk, not the road**: the pack walks a sidewalk, park path or boardwalk instead of the road, so the scene reads as a walk · pairs with Sidewalk lanes in [`next.md`](next.md)
 
-## Run and onboarding
-
-- [exploring] **Fewer minor cards**: a puddle resolves without a card unless an owner would fire you · decided at the phone playtest, against the 8-cards-a-walk target
-
 ## Cut
 
 - [cut] **Dog energy, owner temperament and quirks**: per-dog rules beyond size · dogs differ by size only, and owners differ only in their quips

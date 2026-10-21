@@ -32,11 +32,11 @@ export const HINTS = {
     trigger: { kind: "minorBump" },
   },
   puddle: {
-    text: "Puddles soak everyone. Towel off or get muddy.",
+    text: "Puddles make the pack muddy: bumps cost 2♥.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {
-    text: "A dog spotted a squirrel! Steer away.",
+    text: "A dog is straining! Steer away to cancel.",
     trigger: { kind: "pull" },
   },
   skunk: {
@@ -44,7 +44,7 @@ export const HINTS = {
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Squirrel! Chasing costs tips, holding costs ♥.",
+    text: "Squirrels tempt the pack. Steer away!",
     trigger: { encounter: "squirrel", kind: "encounter" },
   },
   tip: {

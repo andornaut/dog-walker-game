@@ -13,6 +13,6 @@ export const DEBUFFS = {
     modifiers: [{ by: "stinkyTipSpawns", operation: "multiply", stat: "tipSpawns" }],
     name: "Stinky",
     seconds: "stinkySeconds",
-    stake: "half the tips for {seconds}s",
+    stake: "tips pay nothing for {seconds}s",
   },
 } as const satisfies Record<string, Debuff>;

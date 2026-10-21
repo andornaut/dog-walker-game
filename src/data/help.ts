@@ -25,9 +25,10 @@ export const HELP_PAGES = [
   {
     art: "help-cards",
     body:
-      "Bump a puddle, skunk, squirrel, thief or another dog and the walk pauses for a card. " +
+      "Bump a skunk, a thief or another dog and the walk pauses for a card. " +
       "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
-      "Hold a card for details. Debuffs wear off on their own.",
+      "Hold a card for details. A puddle opens no card, but makes the pack Muddy. " +
+      "Debuffs wear off on their own.",
     title: "Some bumps bring cards",
   },
   {
@@ -41,7 +42,7 @@ export const HELP_PAGES = [
   {
     art: "help-pulls",
     body:
-      "Every dog loves squirrels. A bubble and a line to a squirrel mean a dog is straining. " +
+      "Every dog loves squirrels. Touching one does nothing, but a bubble and a line to it mean a dog is straining. " +
       "Steer away and the pull is off; wait and the pack hops one lane toward it. " +
       "A pull never drags you into a bump too close to dodge.",
     title: "Watch for pulls",

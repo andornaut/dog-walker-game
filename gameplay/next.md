@@ -10,8 +10,8 @@ The game grows sideways rather than upward. A world is a set of neighborhoods wi
 
 - Accounts and cloud saves
 - Art polish beyond a basic pixel pass; sound beyond a few effects and one music loop
-- Card variety: once the numbers are tuned, give each card obstacle a look per neighborhood or a second option set, so the five don't repeat
-- Cosmetics: 2 accessories per dog, each made for that dog ($60 each; proposed: Duchess tiara and pearl collar, Nugget sunglasses and gold chain, Zippy racing goggles and sports jersey, Pepe beret and bow tie, Biscuit chef hat and scarf, Archie aviator cap and cape, Snowball flower crown and veil, Penny firefighter hat and raincoat, Koda beanie and trail pack); 6 leash colours ($30 each); 6 home screen decor pieces with fixed spots in the gate scene ($50 to $130)
+- Card variety: once the numbers are tuned, give each card obstacle a look per neighborhood or a second option set, so the three don't repeat
+- Cosmetics: 2 accessories per dog, each made for that dog ($60 each; proposed: Duchess tiara and pearl collar, Nugget sunglasses and gold chain, Zippy racing goggles and sports jersey, Pepe beret and bow tie, Biscuit chef hat and scarf, Archie aviator cap and cape, Snowball flower crown and veil, Penny firefighter hat and raincoat, Koda beanie and trail pack); 6 leash colors ($30 each); 6 home screen decor pieces with fixed spots in the gate scene ($50 to $130)
 - Dog training: two courses per dog you own: Heel (the dog strains twice as long before it pulls, $80) and Good manners (its owner has +1 max ♥, $120)
 - House hub: a home base you decorate and improve with mostly cosmetic unlocks
 - iOS and Android app wrappers

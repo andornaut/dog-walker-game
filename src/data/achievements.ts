@@ -108,7 +108,7 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "So close. Every time.",
     conditions: [{ count: 5, kind: "squirrelsChased" }],
-    goal: "Let the pack chase 5 squirrels, across all walks",
+    goal: "Get pulled toward 5 squirrels, across all walks",
     id: "squirrel",
     name: "Squirrel!",
   },
