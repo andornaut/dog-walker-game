@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { maxHearts } from "../rules/dogs";
+import { capitalize, SIZE_NAMES } from "../rules/effectText";
+import { unlockPrice } from "../rules/shop";
 import { cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
+import { fillNames } from "../text/lines";
 import type { Purchase } from "./home";
 import {
   dogRows,
@@ -107,6 +111,19 @@ describe("gearRows and dogRows", () => {
     );
     const rows = dogRows(data, { ...owned, dogs: [...starters, bought ?? "koda"] });
     expect(rows.map(({ id }) => id)).toEqual(rest.map((dog) => `dog:${dog}`));
+  });
+
+  const forSale = (Object.keys(data.dogs) as DogId[]).filter((dog) => !starters.includes(dog));
+
+  it.each(forSale)("gives %s's row its size and hearts, and its price on the plate", (dog) => {
+    const row = dogRows(data, owned).find(({ id }) => id === `dog:${dog}`);
+    const { size } = data.dogs[dog];
+    const kind = fillNames(data.homeText.focus.kind, {
+      hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
+      size: SIZE_NAMES[size],
+    });
+    expect(row?.line).toBe(capitalize(kind));
+    expect(row?.price).toBe(unlockPrice(data.tuning, data.dogs[dog]));
   });
 });
 

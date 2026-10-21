@@ -284,15 +284,23 @@ function priceInfo(text: HomeText["focus"], bank: Cents, cost: Cents): string {
     : fillLine(FOCUS_FIELDS, text, "priceBuy", { price });
 }
 
+// A dog's size and hearts in words ("big, 5♥"), as the info line and the shop's row say them.
+export function dogKindText(
+  data: Pick<GameData, "dogs" | "homeText" | "tuning">,
+  dog: DogId,
+): string {
+  return fillLine(FOCUS_FIELDS, data.homeText.focus, "kind", {
+    hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
+    size: SIZE_NAMES[data.dogs[dog].size],
+  });
+}
+
 // A dog in words for the home screen's info line, so its tile's icons never stand alone: its
 // size and hearts, and its pay or price.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
   const text = data.homeText.focus;
-  const { name, size } = data.dogs[dog];
-  const kind = fillLine(FOCUS_FIELDS, text, "kind", {
-    hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
-    size: SIZE_NAMES[size],
-  });
+  const { name } = data.dogs[dog];
+  const kind = dogKindText(data, dog);
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   if (cost === null) {
     const fee = dogFeeText(data);

@@ -1,10 +1,11 @@
 import type { DogId, GameData, GearId } from "../data/types";
+import { capitalize } from "../rules/effectText";
 import { startingDogSlots, unlockPrice } from "../rules/shop";
 import type { Cents } from "../rules/units";
 import type { Owned } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { isAffordable, purchases } from "./afford";
-import { dogFeeText, type Purchase, purchasePrice } from "./home";
+import { dogKindText, type Purchase, purchasePrice } from "./home";
 import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 type ShopData = Pick<GameData, "dogSlots" | "dogs" | "homeText" | "shopGear" | "tuning">;
@@ -80,7 +81,8 @@ export function slotRows(data: ShopData, owned: Owned): ShopRow[] {
   });
 }
 
-// The dogs still for sale, in data order: a bought dog leaves the list.
+// The dogs still for sale, in data order, each with its size and hearts: a bought dog leaves
+// the list. Its price shows on the row's plate.
 export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
   const sold = (Object.keys(data.dogs) as DogId[]).filter(
     (dog) => data.dogs[dog].unlock === "shop" && !owned.dogs.includes(dog),
@@ -90,7 +92,7 @@ export function dogRows(data: ShopData, owned: Owned): ShopRow[] {
     return {
       blocked: null,
       id: `dog:${dog}`,
-      line: homeLine(data.homeText, "zoneFee", { fee: dogFeeText(data) }),
+      line: capitalize(dogKindText(data, dog)),
       name: data.dogs[dog].name,
       price: purchasePrice(data, owned, purchase),
       purchase,
