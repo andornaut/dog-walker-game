@@ -32,7 +32,7 @@ export const HINTS = {
     trigger: { kind: "minorBump" },
   },
   puddle: {
-    text: "Puddles make the pack muddy: bumps cost 2♥.",
+    text: "Puddles make the pack Muddy: bumps cost 2♥.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {

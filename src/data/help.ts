@@ -17,7 +17,7 @@ export const HELP_PAGES = [
   {
     art: "help-pickups",
     body:
-      "Tips are $1 each, and they're most of your money, so grab plenty. " +
+      "Tips are $1 each, and they're most of your earnings, so grab plenty. " +
       "A dog that reaches a treat cheers its owner: +1♥. " +
       "Aim for a lost wallet or a generous neighbor, too.",
     title: "Tips and treats",

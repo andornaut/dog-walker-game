@@ -26,7 +26,7 @@ export const QUIPS = {
     upset: ["Oof. Bit of a bitter blend.", "Not my favorite roast, friend."],
   },
   duchess: {
-    fired: ["My poor petal! I need a new gardener!", "A catastrophe in full bloom! Fired!"],
+    fired: ["My poor petal! Consider yourself pruned!", "A catastrophe in full bloom! Fired!"],
     happier: ["Divine! She's simply blossoming!", "Oh, I could weep with joy!"],
     parting: ["She's as delicate as an orchid. Guard her!", "Her bow! Her bow must stay straight!"],
     upset: ["She's wilting! I can't bear it!", "My heart! My prize rose, trampled!"],

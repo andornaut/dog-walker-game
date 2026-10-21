@@ -12,7 +12,7 @@ export const RUN_TEXT = {
     need: "Need {amount}",
     pickOne: "Pick one",
     skip: "Walk on by",
-    skipEffect: "Hall pass: a free Walk on by per neighborhood.",
+    skipEffect: "Skip this card, free once each neighborhood.",
     skipHeld: "Walk on by: nothing happens.",
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Whole walk" },
   },
