@@ -23,21 +23,22 @@ function sprite(key: string, count: number, width: number, height: number): Sour
 describe("atlasGroupOf", () => {
   // The loading screen's art is boot; the home screen's road art is home; the rest goes by key
   // prefix, with the road as the rest.
-  it.each<[string, string]>([
-    ...Object.values(LOADING_ART).map((key): [string, string] => [key, "boot"]),
-    ["card-skip", "cards"],
-    ["screen-home", "ui"],
-    ["icon-lock", "ui"],
-    ["logo", "ui"],
-    ["dog-koda", "home"],
-    ["owner-koda", "home"],
-    ["walker-ada", "home"],
-    ["fx-tap", "home"],
-    ["dog-koda@50", "run"],
-    ["other-dog-owner", "run"],
-    ["fx-hit-skunk", "run"],
-  ])("puts %s in %s", (key, group) => {
-    expect(atlasGroupOf(key)).toBe(group);
+  it("puts each key in its group", () => {
+    const cases: [string, string][] = [
+      ...Object.values(LOADING_ART).map((key): [string, string] => [key, "boot"]),
+      ["card-skip", "cards"],
+      ["screen-home", "ui"],
+      ["icon-lock", "ui"],
+      ["logo", "ui"],
+      ["dog-koda", "home"],
+      ["owner-koda", "home"],
+      ["walker-ada", "home"],
+      ["fx-tap", "home"],
+      ["dog-koda@50", "run"],
+      ["other-dog-owner", "run"],
+      ["fx-hit-skunk", "run"],
+    ];
+    expect(cases.filter(([key, group]) => atlasGroupOf(key) !== group)).toEqual([]);
   });
 });
 
@@ -70,19 +71,22 @@ describe("spriteSource", () => {
     });
   });
 
-  it.each([
-    {
-      error: 'dog-koda frame "a 0" is rotated or trimmed',
-      json: { frames: { "a 0": { ...frame(0, 80), trimmed: true } }, meta: {} },
-      name: "a frame the export trimmed, whose offset the packer does not read",
-    },
-    {
-      error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
-      json: { frames: [], meta: {} },
-      name: "the array export",
-    },
-  ])("rejects $name", ({ error, json }) => {
-    expect(() => spriteSource("dog-koda", "dog-koda.png", json)).toThrow(error);
+  it("rejects a trimmed frame and the array export", () => {
+    const cases = [
+      {
+        error: 'dog-koda frame "a 0" is rotated or trimmed',
+        json: { frames: { "a 0": { ...frame(0, 80), trimmed: true } }, meta: {} },
+        name: "a frame the export trimmed, whose offset the packer does not read",
+      },
+      {
+        error: 'dog-koda sheet.frames must be an object: export with the "hash" JSON format',
+        json: { frames: [], meta: {} },
+        name: "the array export",
+      },
+    ];
+    for (const { error, json, name } of cases) {
+      expect(() => spriteSource("dog-koda", "dog-koda.png", json), name).toThrow(error);
+    }
   });
 });
 

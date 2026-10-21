@@ -25,33 +25,36 @@ const projection = walkProjection(ROAD_CAMERA, road);
 const lookAhead = TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed;
 
 describe("layoutExport", () => {
-  it.each([
-    ["camera.farScale", layout.camera.farScale, ROAD_FAR_SCALE],
-    ["camera.farY", layout.camera.farY, road.y],
-    ["camera.focal", layout.camera.focal, projection.focal],
-    ["camera.footY", layout.camera.footY, footY],
-    ["camera.horizonY", layout.camera.horizonY, ROAD_CAMERA.horizonY],
-    ["camera.secondsInView", layout.camera.secondsInView, TUNING.seconds.lookAheadSeconds],
-    ["camera.visibleDistance", layout.camera.visibleDistance, lookAhead],
-  ])("exports %s from the camera", (_field, actual, expected) => {
-    expect(actual).toBeCloseTo(expected, 6);
-  });
-
-  it.each([
-    ["pack.collarHeights", layout.pack.collarHeights, COLLAR_HEIGHTS],
-    ["pack.feet", layout.pack.feet, PACK_FEET],
-    ["pack.laneHalfWidth", layout.pack.laneHalfWidth, laneHalfWidth()],
-    [
-      "pack.silhouettes",
-      layout.pack.silhouettes,
-      { dogs: DOG_SILHOUETTES, walkers: WALKER_SILHOUETTES },
-    ],
-    ["pack.partInset", layout.pack.partInset, PART_INSET],
-    ["pack.slots", layout.pack.slots, PACK_SLOTS],
-    ["pack.walkerFootY", layout.pack.walkerFootY, footY],
-    ["pack.walkerHands", layout.pack.walkerHands, WALKER_HANDS],
-    ["roadSprites", layout.roadSprites, { drawSize: ROAD_SPRITE_SIZE, hitSize: ROAD_HIT_SIZE }],
-  ])("exports %s as the game draws it", (_field, actual, expected) => {
-    expect(actual).toEqual(expected);
+  it("exports the camera, the pack and the road sprites' sizes as the game draws them", () => {
+    const camera: [string, number, number][] = [
+      ["camera.farScale", layout.camera.farScale, ROAD_FAR_SCALE],
+      ["camera.farY", layout.camera.farY, road.y],
+      ["camera.focal", layout.camera.focal, projection.focal],
+      ["camera.footY", layout.camera.footY, footY],
+      ["camera.horizonY", layout.camera.horizonY, ROAD_CAMERA.horizonY],
+      ["camera.secondsInView", layout.camera.secondsInView, TUNING.seconds.lookAheadSeconds],
+      ["camera.visibleDistance", layout.camera.visibleDistance, lookAhead],
+    ];
+    for (const [field, actual, expected] of camera) {
+      expect(actual, field).toBeCloseTo(expected, 6);
+    }
+    const drawn: [string, unknown, unknown][] = [
+      ["pack.collarHeights", layout.pack.collarHeights, COLLAR_HEIGHTS],
+      ["pack.feet", layout.pack.feet, PACK_FEET],
+      ["pack.laneHalfWidth", layout.pack.laneHalfWidth, laneHalfWidth()],
+      [
+        "pack.silhouettes",
+        layout.pack.silhouettes,
+        { dogs: DOG_SILHOUETTES, walkers: WALKER_SILHOUETTES },
+      ],
+      ["pack.partInset", layout.pack.partInset, PART_INSET],
+      ["pack.slots", layout.pack.slots, PACK_SLOTS],
+      ["pack.walkerFootY", layout.pack.walkerFootY, footY],
+      ["pack.walkerHands", layout.pack.walkerHands, WALKER_HANDS],
+      ["roadSprites", layout.roadSprites, { drawSize: ROAD_SPRITE_SIZE, hitSize: ROAD_HIT_SIZE }],
+    ];
+    for (const [field, actual, expected] of drawn) {
+      expect(actual, field).toEqual(expected);
+    }
   });
 });

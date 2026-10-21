@@ -8,16 +8,18 @@ const DARKEST = RAMP.length - 1;
 describe("greyFor", () => {
   // A grey of the ramp stays, or steps down it and stops at its darkest; light colours go to
   // light greys and dark ones to dark greys.
-  it.each<[number, number, number | undefined]>([
-    ...RAMP.flatMap((grey, i): [number, number, number | undefined][] => [
-      [0, grey, grey],
-      [1, grey, RAMP[Math.min(i + 1, DARKEST)]],
-    ]),
-    [0, 0xead4aa, 0xd8d8d8],
-    [0, 0x733e39, 0x4a4a4a],
-    [1, 0xead4aa, 0xa4a4a4],
-  ])("moves %i steps from %i to %i", (steps, colour, grey) => {
-    expect(greyFor(RAMP, steps, colour)).toBe(grey);
+  it("keeps or steps a ramp grey down to its darkest, and maps other colours by lightness", () => {
+    const cases: [number, number, number | undefined][] = [
+      ...RAMP.flatMap((grey, i): [number, number, number | undefined][] => [
+        [0, grey, grey],
+        [1, grey, RAMP[Math.min(i + 1, DARKEST)]],
+      ]),
+      [0, 0xead4aa, 0xd8d8d8],
+      [0, 0x733e39, 0x4a4a4a],
+      [1, 0xead4aa, 0xa4a4a4],
+    ];
+    const wrong = cases.filter(([steps, colour, grey]) => greyFor(RAMP, steps, colour) !== grey);
+    expect(wrong).toEqual([]);
   });
 });
 

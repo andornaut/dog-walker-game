@@ -220,16 +220,28 @@ describe("a trimmed atlas frame", () => {
   );
 
   // Clipping 3 rows leaves some of either frame's pixels; 9 or 10 leave none.
-  it.each(draws)(
-    "draws $frame as the whole frame does at origin $origin, flipX $flipX, flipY $flipY, " +
-      "$clipRows rows clipped, scale $scale",
-    ({ frame, ...draw }) => {
-      const trimmed = packedFrame(FRAMES[frame], true);
-      const whole = packedFrame(FRAMES[frame], false);
+  it("draws each frame as the whole frame does, at every origin, flip, clip and scale", () => {
+    const packed = new Map(
+      (Object.keys(FRAMES) as (keyof typeof FRAMES)[]).map((frame) => [
+        frame,
+        { trimmed: packedFrame(FRAMES[frame], true), whole: packedFrame(FRAMES[frame], false) },
+      ]),
+    );
+    for (const { trimmed, whole } of packed.values()) {
       expect(trimmed.frame.cutWidth).toBeLessThan(whole.frame.cutWidth);
+    }
+    const offenders = draws.flatMap(({ frame, ...draw }) => {
+      const entry = packed.get(frame);
+      if (entry === undefined) {
+        return [frame];
+      }
+      const { trimmed, whole } = entry;
       const texels = drawnTexels(whole, draw);
-      expect(texels.length > 0).toBe(draw.clipRows <= 3);
-      expect(drawnTexels(trimmed, draw)).toEqual(texels);
-    },
-  );
+      const same = JSON.stringify(drawnTexels(trimmed, draw)) === JSON.stringify(texels);
+      return texels.length > 0 === draw.clipRows <= 3 && same
+        ? []
+        : [`${frame} ${JSON.stringify(draw)}`];
+    });
+    expect(offenders).toEqual([]);
+  });
 });

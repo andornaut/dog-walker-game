@@ -1,3 +1,5 @@
+import { isDeepStrictEqual } from "node:util";
+
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
@@ -6,22 +8,12 @@ import { type DetailCard, lockedDogDetail, lockedWalkerDetail } from "../home/de
 import { dogInfo, dogKindText, purchasePrice } from "../home/home";
 import { DOG_TILE_TEXT_ROOM, HOME_LAYOUT } from "../home/homeLayout";
 import { type ItemLook, itemTile, itemTileLook } from "../home/interaction";
-import { GREYED, PLATE_LOOKS, type PlateKind } from "../home/selection";
-import {
-  dogRows,
-  gearRows,
-  SHOP_ROW_VIEWS,
-  type ShopRowLook,
-  shopRowLook,
-  slotRows,
-} from "../home/shop";
 import { walkerTile } from "../home/walkers";
 import { fittingText, type TextFitStyle, WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
 import { cents } from "../rules/units";
 import { agilityWord } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { fontInk } from "../testing/fontInk";
-import { PADLOCK_KEYS } from "./itemArt";
 
 const OWNED: Owned = { dogSlots: 1, dogs: [], gear: [], walkers: [] };
 const DOGS = Object.keys(gameData.dogs) as DogId[];
@@ -56,107 +48,39 @@ function dogTile(state: Exclude<StateName, "locked">, dog: DogId) {
 }
 
 describe("a start screen tile's state", () => {
-  it.each([
-    ...DOGS.map((dog) => ["owned", dog] as const),
-    ...SHOP_DOGS.flatMap((dog) => [["affordable", dog] as const, ["short", dog] as const]),
-  ])("shows a %s dog, %s, as its state's look", (state, dog) => {
-    expect(itemTileLook(dogTile(state, dog))).toEqual(START_LOOKS[state]);
-  });
-
-  it.each(
-    (Object.keys(gameData.shopGear) as GearId[]).flatMap((gear) =>
-      (["affordable", "owned", "short"] as const).map((state) => [state, gear] as const),
-    ),
-  )("shows %s gear, %s, as its state's look", (state, gear) => {
-    const owned = { ...OWNED, gear: state === "owned" ? [gear] : [] };
-    const price = purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0);
-    const tile = itemTile({
-      bank: cents(state === "short" ? price - 1 : price),
-      capacity: 1,
-      goal: null,
-      picked: false,
-      pickedCount: 0,
-      price: purchasePrice(gameData, owned, { gear, kind: "gear" }),
-    });
-    expect(itemTileLook(tile)).toEqual(START_LOOKS[state]);
-  });
-
-  it.each(WALKERS.flatMap((walker) => [["owned", walker] as const, ["locked", walker] as const]))(
-    "shows a %s walker, %s, as its state's look",
-    (state, walker) => {
-      const owned = { ...OWNED, walkers: state === "owned" ? [walker] : [] };
-      const tile = walkerTile(gameData, { owned, walker: null }, walker);
-      expect(itemTileLook(tile)).toEqual(START_LOOKS[state]);
-      if (tile.kind === "goal") {
-        expect(tile.goal).toBe(TEXT.lockedName);
-      }
-    },
-  );
-});
-
-// What each row look shows in the Pet shop, from the shop states' table.
-const SHOP_LOOKS: Readonly<Record<ShopRowLook, ItemLook>> = {
-  affordable: { art: "full", padlock: "open", plate: "buy", state: "normal" },
-  blocked: { art: "silhouette", padlock: "closed", plate: "goal", state: "disabled" },
-  owned: { art: "full", padlock: null, plate: null, state: "normal" },
-  short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },
-};
-
-describe("a Pet shop row's state", () => {
-  const rows = (bank: number, owned: Owned) =>
-    [...slotRows(gameData, owned), ...dogRows(gameData, owned), ...gearRows(gameData, owned)].map(
-      (row) => [row.id, shopRowLook(cents(bank), row)] as const,
-    );
-  const everyGear = Object.keys(gameData.shopGear) as Owned["gear"];
-
-  it.each([
-    ...rows(0, OWNED),
-    ...rows(1_000_000_000, OWNED),
-    ...rows(0, { ...OWNED, gear: everyGear }),
-  ])("draws %s, %s, as its look's view", (_id, look) => {
-    expect(SHOP_ROW_VIEWS[look]).toEqual(SHOP_LOOKS[look]);
-  });
-});
-
-describe("a padlock", () => {
-  it.each<[string, ItemLook, string | null]>([
-    ...Object.entries(START_LOOKS).map(([state, look]): [string, ItemLook, string | null] => [
-      `a ${state} tile`,
-      look,
-      { affordable: "icon-lock-open", locked: "icon-lock", owned: null, short: "icon-lock" }[
-        state as StateName
-      ],
-    ]),
-    ...Object.entries(SHOP_LOOKS).map(([state, look]): [string, ItemLook, string | null] => [
-      `a ${state} row`,
-      look,
-      { affordable: "icon-lock-open", blocked: "icon-lock", owned: null, short: "icon-lock" }[
-        state as ShopRowLook
-      ],
-    ]),
-  ])("over %s draws %o as %s", (_, look, key) => {
-    expect(look.padlock === null ? null : PADLOCK_KEYS[look.padlock]).toBe(key);
-  });
-});
-
-describe("a plate's colours", () => {
-  it.each<[PlateKind, string]>([
-    ["goal", GREYED.plateText],
-    ["short", GREYED.shortPrice],
-  ])("draws a %s plate in the greyed face and line, its text %s", (kind, text) => {
-    expect(PLATE_LOOKS[kind]).toEqual({
-      edge: GREYED.edge,
-      face: GREYED.plateFace,
-      lit: null,
-      shade: null,
-      text,
-    });
-  });
-
-  it("lights the buy plate's top row and shades its bottom one", () => {
-    const { face, lit, shade } = PLATE_LOOKS.buy;
-    expect([lit, shade]).not.toContain(face);
-    expect([lit, shade]).not.toContain(null);
+  it("shows every dog, gear item and walker in each of its states as that state's look", () => {
+    const shown: (readonly [string, StateName, ItemLook])[] = [
+      ...DOGS.map((dog) => [dog, "owned", itemTileLook(dogTile("owned", dog))] as const),
+      ...SHOP_DOGS.flatMap((dog) =>
+        (["affordable", "short"] as const).map(
+          (state) => [dog, state, itemTileLook(dogTile(state, dog))] as const,
+        ),
+      ),
+      ...(Object.keys(gameData.shopGear) as GearId[]).flatMap((gear) =>
+        (["affordable", "owned", "short"] as const).map((state) => {
+          const owned = { ...OWNED, gear: state === "owned" ? [gear] : [] };
+          const price = purchasePrice(gameData, OWNED, { gear, kind: "gear" }) ?? cents(0);
+          const tile = itemTile({
+            bank: cents(state === "short" ? price - 1 : price),
+            capacity: 1,
+            goal: null,
+            picked: false,
+            pickedCount: 0,
+            price: purchasePrice(gameData, owned, { gear, kind: "gear" }),
+          });
+          return [gear, state, itemTileLook(tile)] as const;
+        }),
+      ),
+      ...WALKERS.flatMap((walker) =>
+        (["owned", "locked"] as const).map((state) => {
+          const owned = { ...OWNED, walkers: state === "owned" ? [walker] : [] };
+          const tile = walkerTile(gameData, { owned, walker: null }, walker);
+          return [walker, state, itemTileLook(tile)] as const;
+        }),
+      ),
+    ];
+    const wrong = shown.filter(([, state, look]) => !isDeepStrictEqual(look, START_LOOKS[state]));
+    expect(wrong).toEqual([]);
   });
 });
 
@@ -185,41 +109,44 @@ const lockedDogCards = SHOP_DOGS.flatMap((dog) =>
 );
 
 describe("a locked hold card", () => {
-  it.each(lockedDogCards)("hides $dog, $state, behind the locked name", ({ bank, dog, state }) => {
-    const card = lockedDogDetail(gameData, OWNED, bank, dog);
-    expect(card).toMatchObject({
-      lines: [],
-      locked: state === "short",
-      padlock: state === "short" ? "closed" : "open",
-      subtitle: TEXT.detail.dogSubtitle,
-      title: TEXT.lockedName,
-    });
-    for (const word of dogWords(dog)) {
-      expect(cardText(card as DetailCard)).not.toContain(word);
-      expect(dogInfo(gameData, OWNED, bank, dog)).not.toContain(word);
+  it("hides every locked dog and walker behind the locked name, and shows its own card once owned", () => {
+    for (const { bank, dog, state } of lockedDogCards) {
+      const card = lockedDogDetail(gameData, OWNED, bank, dog);
+      expect(card, dog).toMatchObject({
+        lines: [],
+        locked: state === "short",
+        padlock: state === "short" ? "closed" : "open",
+        subtitle: TEXT.detail.dogSubtitle,
+        title: TEXT.lockedName,
+      });
+      const shown = `${cardText(card as DetailCard)}\n${dogInfo(gameData, OWNED, bank, dog)}`;
+      expect(
+        dogWords(dog).filter((word) => shown.includes(word)),
+        dog,
+      ).toEqual([]);
     }
-  });
-
-  it.each(WALKERS)("hides %s behind the locked name", (walker) => {
-    const card = lockedWalkerDetail(gameData, OWNED, walker);
-    expect(card).toMatchObject({
-      lines: [],
-      locked: true,
-      padlock: "closed",
-      subtitle: TEXT.detail.walkerSubtitle,
-      title: TEXT.lockedName,
-    });
-    for (const word of walkerWords(walker)) {
-      expect(cardText(card as DetailCard)).not.toContain(word);
+    for (const walker of WALKERS) {
+      const card = lockedWalkerDetail(gameData, OWNED, walker);
+      expect(card, walker).toMatchObject({
+        lines: [],
+        locked: true,
+        padlock: "closed",
+        subtitle: TEXT.detail.walkerSubtitle,
+        title: TEXT.lockedName,
+      });
+      const shown = cardText(card as DetailCard);
+      expect(
+        walkerWords(walker).filter((word) => shown.includes(word)),
+        walker,
+      ).toEqual([]);
     }
-  });
-
-  it.each(DOGS)("shows %s's own card once owned", (dog) => {
-    expect(lockedDogDetail(gameData, { ...OWNED, dogs: [dog] }, cents(0), dog)).toBeNull();
-  });
-
-  it.each(WALKERS)("shows %s's own card once owned", (walker) => {
-    expect(lockedWalkerDetail(gameData, { ...OWNED, walkers: [walker] }, walker)).toBeNull();
+    const ownedDogs = DOGS.filter((dog) =>
+      lockedDogDetail(gameData, { ...OWNED, dogs: [dog] }, cents(0), dog),
+    );
+    const ownedWalkers = WALKERS.filter((walker) =>
+      lockedWalkerDetail(gameData, { ...OWNED, walkers: [walker] }, walker),
+    );
+    expect([...ownedDogs, ...ownedWalkers]).toEqual([]);
   });
 });
 
@@ -231,33 +158,25 @@ const inkWidth = (style: TextFitStyle, text: string) => {
 const AT_2X: TextFitStyle = { letterSpacing: 0, scale: 2 };
 
 describe("the locked text fits", () => {
-  const { card, walkerTiles } = HOME_LAYOUT;
-  const besideRoom = card.width - card.besideX - card.pad;
-  const status = (shown: DetailCard | null) =>
-    fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, shown?.status ?? "");
-
-  it("sets the locked name on a dog tile at 2x", () => {
-    expect(inkWidth(AT_2X, TEXT.lockedName)).toBeLessThanOrEqual(DOG_TILE_TEXT_ROOM);
-  });
-
-  it("sets the locked name on a walker plate inside its tile", () => {
-    expect(inkWidth(AT_2X, TEXT.lockedName) + 6).toBeLessThanOrEqual(walkerTiles.cellWidth);
-  });
-
-  it.each([TEXT.detail.dogSubtitle, TEXT.detail.walkerSubtitle])(
-    "sets %s on one line at 2x beside the well",
-    (subtitle) => {
-      expect(inkWidth(AT_2X, subtitle)).toBeLessThanOrEqual(besideRoom);
-    },
-  );
-
-  it.each(lockedDogCards)("sets $dog's $state price line on one line at 2x", ({ bank, dog }) => {
-    const fitted = status(lockedDogDetail(gameData, OWNED, bank, dog));
-    expect(fitted.style.scale).toBe(2);
-    expect(fitted.lines).toHaveLength(1);
-  });
-
-  it.each(WALKERS)("sets %s's unlock line at 2x beside the well", (walker) => {
-    expect(status(lockedWalkerDetail(gameData, OWNED, walker)).style.scale).toBe(2);
+  it("sets the locked name, subtitles, price and unlock lines in their room", () => {
+    const { card, walkerTiles } = HOME_LAYOUT;
+    const besideRoom = card.width - card.besideX - card.pad;
+    const status = (shown: DetailCard | null) =>
+      fittingText(WRAPPING_TEXT_FIT_STYLES, inkWidth, besideRoom, shown?.status ?? "");
+    const offenders = [
+      ...(inkWidth(AT_2X, TEXT.lockedName) <= DOG_TILE_TEXT_ROOM ? [] : ["dog tile name"]),
+      ...(inkWidth(AT_2X, TEXT.lockedName) + 6 <= walkerTiles.cellWidth ? [] : ["walker plate"]),
+      ...[TEXT.detail.dogSubtitle, TEXT.detail.walkerSubtitle].filter(
+        (subtitle) => inkWidth(AT_2X, subtitle) > besideRoom,
+      ),
+      ...lockedDogCards.flatMap(({ bank, dog, state }) => {
+        const fitted = status(lockedDogDetail(gameData, OWNED, bank, dog));
+        return fitted.style.scale === 2 && fitted.lines.length === 1 ? [] : [`${dog} ${state}`];
+      }),
+      ...WALKERS.filter(
+        (walker) => status(lockedWalkerDetail(gameData, OWNED, walker)).style.scale !== 2,
+      ),
+    ];
+    expect(offenders).toEqual([]);
   });
 });

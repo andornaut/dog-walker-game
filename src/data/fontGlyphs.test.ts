@@ -35,13 +35,14 @@ const FONTS = [
 describe("the text data", () => {
   const lines = strings(gameData, "gameData");
 
-  it("has text to check", () => {
+  it("uses only characters each font can draw", () => {
     expect(lines.length).toBeGreaterThan(100);
-  });
-
-  it.each(FONTS)("uses only characters %s can draw", (_, chars, drawn) => {
-    const missing = lines.flatMap(([path, text]) =>
-      [...drawn(text)].filter((char) => !chars.has(char)).map((char) => `${path}: ${char}`),
+    const missing = FONTS.flatMap(([font, chars, drawn]) =>
+      lines.flatMap(([path, text]) =>
+        [...drawn(text)]
+          .filter((char) => !chars.has(char))
+          .map((char) => `${font} ${path}: ${char}`),
+      ),
     );
     expect(missing).toEqual([]);
   });

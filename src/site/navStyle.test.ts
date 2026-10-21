@@ -21,18 +21,14 @@ const LINK_RULES = RULES.filter(({ selector }) =>
 const CURRENT = '.art-nav a[aria-current="page"]';
 
 describe("the site nav's current page", () => {
-  it.each([CURRENT, `${CURRENT}::before`])("is styled by %s", (selector) => {
-    expect(LINK_RULES.map((rule) => rule.selector)).toContain(selector);
-  });
-
-  it.each(LINK_RULES.map(({ body, selector }) => [selector, body]))(
-    "%s neither animates nor transitions",
-    (_, body) => {
-      expect(body).not.toMatch(/(^|[\s;])(animation|transition)[\w-]*\s*:/);
-    },
-  );
-
-  it("has no keyframes to run", () => {
+  it("is styled, and no link rule animates or transitions", () => {
+    const selectors = LINK_RULES.map((rule) => rule.selector);
+    expect(selectors).toContain(CURRENT);
+    expect(selectors).toContain(`${CURRENT}::before`);
+    const moving = LINK_RULES.filter(({ body }) =>
+      /(^|[\s;])(animation|transition)[\w-]*\s*:/.test(body),
+    );
+    expect(moving.map(({ selector }) => selector)).toEqual([]);
     expect(CSS).not.toContain("@keyframes");
   });
 });

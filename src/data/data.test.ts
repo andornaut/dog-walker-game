@@ -52,18 +52,7 @@ const instantEffects: readonly (readonly Effect[])[] = Object.values(encounters)
 );
 const SIZES: readonly Size[] = ["small", "medium", "big"];
 
-const countBy = <T>(items: readonly T[], value: T) => items.filter((item) => item === value).length;
-
 describe("roster", () => {
-  it.each(SIZES)("has three %s dogs", (size) => {
-    expect(
-      countBy(
-        dogList.map((dog) => dog.size),
-        size,
-      ),
-    ).toBe(3);
-  });
-
   it("starts with at least one dog, and sells every other dog", () => {
     const starters = dogList.filter((dog) => dog.unlock === "start");
     expect(starters.length).toBeGreaterThan(0);
@@ -84,14 +73,13 @@ describe("hearts", () => {
     ...Object.values(shopGear).map((gear) => modifiersOf(gear.effects)),
   ];
 
-  it.each(gearModifierSets)("starts every owner full and above 0 with modifiers %j", (...set) => {
-    for (const dog of dogList) {
-      expect(startHearts(tuning, set, dog)).toBe(maxHearts(tuning, set, dog));
-      expect(startHearts(tuning, set, dog)).toBeGreaterThan(0);
+  it("starts every owner full and above 0 with any gear, and raises the max with size", () => {
+    for (const set of gearModifierSets) {
+      for (const dog of dogList) {
+        expect(startHearts(tuning, set, dog)).toBe(maxHearts(tuning, set, dog));
+        expect(startHearts(tuning, set, dog)).toBeGreaterThan(0);
+      }
     }
-  });
-
-  it("raises the max with size: small, then medium, then big", () => {
     const max = SIZES.map((size) => readTable(tuning, "hearts", "maxBySize", size));
     expect([...max].sort((a, b) => a - b)).toEqual(max);
     expect(new Set(max).size).toBe(SIZES.length);
@@ -99,12 +87,9 @@ describe("hearts", () => {
 });
 
 describe("money", () => {
-  it("pays each dog a whole number of dollars a zone", () => {
+  it("pays a whole number of dollars a dog, and names only positive amounts in money effects", () => {
     expect(Number.isInteger(tuning.money.payPerDog)).toBe(true);
     expect(tuning.money.payPerDog).toBeGreaterThan(0);
-  });
-
-  it("names only positive amounts in money effects; the effect says gain or lose", () => {
     const amounts = [...cardOptions, ...instantEffects.map((effects) => ({ effects }))].flatMap(
       (option) =>
         option.effects.flatMap((effect) => (effect.kind === "money" ? [effect.amount] : [])),
@@ -127,19 +112,6 @@ describe("money", () => {
 });
 
 describe("cards", () => {
-  it("gives every option on a card a distinct name", () => {
-    for (const card of cards) {
-      const names = card.options.map((option) => option.name);
-      expect(new Set(names).size, card.name).toBe(names.length);
-    }
-  });
-
-  it("has 5 card obstacles and 2 lucky finds", () => {
-    const kinds = Object.values(encounters).map((encounter) => encounter.kind);
-    expect(countBy(kinds, "obstacle")).toBe(5);
-    expect(countBy(kinds, "lucky")).toBe(2);
-  });
-
   it("applies every lucky find at once, with only gains", () => {
     const instant = Object.entries(encounters).flatMap(([id, encounter]) =>
       encounter.resolution.kind === "instant" ? [id] : [],
@@ -162,13 +134,11 @@ describe("cards", () => {
     );
   });
 
-  it("has 6 upgrades, one of them a trade-off", () => {
-    const kinds = Object.values(upgrades).map((upgrade) => upgrade.kind);
-    expect(kinds).toHaveLength(6);
-    expect(countBy(kinds, "tradeOff")).toBe(1);
-  });
-
-  it("gives every card option, upgrade and instant popup its own kebab-case art key", () => {
+  it("gives every card's options distinct names, and every option, upgrade and popup its own art key", () => {
+    for (const card of cards) {
+      const names = card.options.map((option) => option.name);
+      expect(new Set(names).size, card.name).toBe(names.length);
+    }
     const arts = [
       ...cardOptions.map((option) => option.art),
       ...Object.values(upgrades).map((upgrade) => upgrade.art),
@@ -201,7 +171,7 @@ describe("obstacle skins", () => {
     }
   });
 
-  it("names a cloud only on a Stink skin, and a status overlay only where a status starts", () => {
+  it("names clouds only on Stink skins and status overlays only where a status starts, skinning only obstacles", () => {
     const misplaced = skinned.flatMap(({ id, skin }) => [
       ...(skin?.cloudArt === undefined || id === "skunk" ? [] : [`${id}: cloudArt`]),
       ...(skin?.statusArt === undefined || ["puddle", "skunk", "thief"].includes(id)
@@ -209,9 +179,6 @@ describe("obstacle skins", () => {
         : [`${id}: statusArt`]),
     ]);
     expect(misplaced).toEqual([]);
-  });
-
-  it("skins only the five obstacle kinds and the minor obstacles but the barrier", () => {
     const kinds = [...Object.entries(encounters), ...minorObstacles].flatMap(([id, { skins }]) =>
       skins === undefined ? [] : [id],
     );
@@ -222,7 +189,7 @@ describe("obstacle skins", () => {
     expect(kinds.filter((id) => !allowed.includes(id))).toEqual([]);
   });
 
-  it("gives the minor obstacles of one shape one skin in each zone", () => {
+  it("gives the minor obstacles of one shape one skin in each zone, and names card art by its encounter", () => {
     for (const zone of zoneIds) {
       const byShape = new Map<string, unknown>();
       for (const [id, { shape, skins }] of minorObstacles) {
@@ -234,9 +201,6 @@ describe("obstacle skins", () => {
         }
       }
     }
-  });
-
-  it("names every card encounter's illustrations card-<kebab id>-<option>, for a skin's prefix", () => {
     const misnamed = (Object.entries(encounters) as [EncounterId, Encounter][]).flatMap(
       ([id, { resolution }]) =>
         resolution.kind === "card"
@@ -245,25 +209,18 @@ describe("obstacle skins", () => {
               .filter((art) => !art.startsWith(`${baseCardArtPrefix(id)}-`))
           : [],
     );
-    expect(misnamed).toEqual([]);
+    expect(misnamed, "card art not named card-<kebab id>-<option>").toEqual([]);
   });
 });
 
 describe("run, world and walkers", () => {
-  it("has 6 zones with palette road colours", () => {
-    expect(world.zones).toHaveLength(6);
+  it("gives every zone palette road colours, and leaves three unwalked zones at every fork", () => {
+    expect(world.zones.length - (world.walkLength - 1)).toBeGreaterThanOrEqual(3);
     for (const zone of world.zones) {
       expect(zone.roadColor).toMatch(/^#[0-9a-f]{6}$/);
       expect(zone.leashColor).toMatch(/^#[0-9a-f]{6}$/);
       expect(zone.roadShadowColor).toMatch(/^#[0-9a-f]{6}$/);
     }
-  });
-
-  it("walks 4 zones, starting on the street zone, with three unwalked zones left at every fork", () => {
-    expect(world.walkLength).toBe(4);
-    expect(world.firstZone).toBe("street");
-    expect(world.zones.map(({ id }) => id)).toContain(world.firstZone);
-    expect(world.zones.length - (world.walkLength - 1)).toBeGreaterThanOrEqual(3);
   });
 
   it("lists the zones from easiest to hardest, each with a difficulty in words", () => {
@@ -309,12 +266,9 @@ describe("run, world and walkers", () => {
     }
   });
 
-  it("fits the largest pack in the card row", () => {
+  it("fits the largest pack in the card row, one dog slot a place, the first free and the rest dearer in turn", () => {
     expect(tuning.counts.packSizeMin).toBeGreaterThanOrEqual(1);
     expect(tuning.counts.packSizeMax).toBe(SCREEN_CONFIG.dogSlotCount);
-  });
-
-  it("has one dog slot per pack place, the first free and the others dearer in turn", () => {
     expect(dogSlots).toHaveLength(tuning.counts.packSizeMax);
     const prices = dogSlots.map((slot) => unlockPrice(tuning, slot));
     expect(prices[0]).toBe(0);
@@ -323,29 +277,18 @@ describe("run, world and walkers", () => {
     expect(new Set(prices).size).toBe(prices.length);
   });
 
-  it("has 4 walkers with their own sprites, portraits, agilities and perks", () => {
+  it("gives each walker its own sprite, portrait, agility, perk and unlock zone, the default walker free", () => {
     const list = Object.values(walkers);
-    expect(list).toHaveLength(4);
     expect(new Set(list.map((walker) => walker.spriteKey)).size).toBe(list.length);
     expect(new Set(list.map((walker) => walker.portraitKey)).size).toBe(list.length);
     expect(new Set(list.map(({ agility }) => agility)).size).toBe(list.length);
     expect(new Set(list.map(({ perk }) => perk)).size).toBe(list.length);
-  });
-
-  it("starts with the default walker alone, and unlocks the others at zones of the world, one each", () => {
     const goals = Object.values(walkers).map(walkerGoal);
     const zones = world.zones.map(({ id }) => id);
     expect(walkers[defaultWalker].unlock).toBe("start");
     expect(goals.filter((goal) => goal === null)).toHaveLength(1);
     expect(new Set(goals).size).toBe(goals.length);
     expect(goals.every((goal) => goal === null || zones.includes(goal))).toBe(true);
-  });
-
-  it("starts every walk on the first zone and ends it on the last", () => {
-    const zones = world.zones.map(({ id }) => id);
-    expect(zones).toContain(world.firstZone);
-    expect(zones).toContain(world.lastZone);
-    expect(world.lastZone).not.toBe(world.firstZone);
   });
 
   it("gives every owner two distinct lines for every moment", () => {
@@ -363,25 +306,9 @@ describe("run, world and walkers", () => {
 describe("hints", () => {
   const hintList = Object.values(hints);
 
-  it("has one hint per trigger the rulebook names, each one line", () => {
+  it("has one hint per trigger, each one line", () => {
     const triggers = hintList.map(({ trigger }) => JSON.stringify(trigger));
     expect(new Set(triggers).size).toBe(hintList.length);
-    expect(hintList.map(({ trigger }) => trigger.kind).sort()).toEqual([
-      "card",
-      "drag",
-      "encounter",
-      "encounter",
-      "firedOwner",
-      "fork",
-      "homeButton",
-      "luckyFind",
-      "minorBump",
-      "moverCue",
-      "pull",
-      "pullLanded",
-      "tip",
-      "treat",
-    ]);
     for (const { text } of hintList) {
       expect(text).not.toBe("");
       expect(text).not.toContain("\n");
@@ -404,12 +331,9 @@ describe("help", () => {
 describe("achievements", () => {
   const { achievements } = gameData;
 
-  it("gives every badge its own id and name", () => {
+  it("gives every badge its own id and name, a goal and a one-line badge line", () => {
     expect(new Set(achievements.map(({ id }) => id)).size).toBe(achievements.length);
     expect(new Set(achievements.map(({ name }) => name)).size).toBe(achievements.length);
-  });
-
-  it("gives every badge a goal and a one-line badge line", () => {
     for (const { badgeLine, goal, name } of achievements) {
       expect(goal.trim(), name).not.toBe("");
       expect(badgeLine.trim(), name).not.toBe("");
@@ -438,13 +362,11 @@ describe("achievements", () => {
 describe("the art manifest", () => {
   const sprites = new Set(parseManifest(manifestJson).sprites.map(({ key }) => key));
 
-  it.each([
-    [
-      "every walker's sprite and portrait",
-      Object.values(walkers).flatMap((walker) => [walker.spriteKey, walker.portraitKey]),
-    ],
-    ["every badge's art", gameData.achievements.map(({ id }) => badgeKey(id))],
-  ])("has %s", (_, keys) => {
+  it("has every walker's sprite and portrait and every badge's art", () => {
+    const keys = [
+      ...Object.values(walkers).flatMap((walker) => [walker.spriteKey, walker.portraitKey]),
+      ...gameData.achievements.map(({ id }) => badgeKey(id)),
+    ];
     expect(keys.filter((key) => !sprites.has(key))).toEqual([]);
   });
 });

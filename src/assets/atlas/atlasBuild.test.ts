@@ -202,68 +202,71 @@ describe("compactFrames", () => {
 
   // Each frame's packed from rect, the bounds its border is read in, and its trim as
   // [x, y, whole width, whole height].
-  it.each<{
-    expected: { bounds?: Rect4; from: Rect4; trim?: Rect4 }[];
-    frames: string[][];
-    name: string;
-    trim: boolean;
-  }>([
-    {
-      expected: [{ from: whole(0) }],
-      frames: [middle],
-      name: "keeps a frame whole without trim",
-      trim: false,
-    },
-    {
-      expected: [{ bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] }],
-      frames: [middle],
-      name: "trims a frame to its opaque pixels, recording where they sit",
-      trim: true,
-    },
-    {
-      expected: [{ bounds: whole(0), from: [0, 0, 1, 1], trim: [0, 0, 6, 5] }],
-      frames: [clear],
-      name: "trims a clear frame to its top-left pixel",
-      trim: true,
-    },
-    {
-      expected: [
-        { bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] },
-        { bounds: whole(0), from: [2, 1, 2, 2], trim: [3, 1, 6, 5] },
-      ],
-      frames: [middle, shifted],
-      name: "shares one rect between trimmed frames with the same pixels, each at its own offset",
-      trim: true,
-    },
-    {
-      expected: [
-        { bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] },
-        { bounds: whole(1), from: [10, 1, 2, 2], trim: [4, 1, 6, 5] },
-      ],
-      frames: [middle, edge],
-      name: "keeps apart frames whose extruded borders differ",
-      trim: true,
-    },
-    {
-      expected: [{ from: whole(0) }, { from: whole(0) }],
-      frames: [middle, middle],
-      name: "shares one rect between whole frames with the same pixels",
-      trim: false,
-    },
-  ])("$name", ({ expected, frames, trim }) => {
-    const { image, texture } = sheetFromRows("dog-koda", frames);
-    const compacted = compactFrames(image, trim, texture).frames.map(
-      ({ bounds, from, trim: offset }) => ({ bounds, from, trim: offset }),
-    );
-    expect(compacted).toEqual(
-      expected.map(({ bounds, from, trim: offset }) => ({
-        bounds: bounds === undefined ? undefined : rect(bounds),
-        from: rect(from),
-        trim:
-          offset === undefined
-            ? undefined
-            : { h: offset[3], w: offset[2], x: offset[0], y: offset[1] },
-      })),
-    );
+  it("keeps, trims and shares frames, each with its own bounds and offset", () => {
+    const cases: {
+      expected: { bounds?: Rect4; from: Rect4; trim?: Rect4 }[];
+      frames: string[][];
+      name: string;
+      trim: boolean;
+    }[] = [
+      {
+        expected: [{ from: whole(0) }],
+        frames: [middle],
+        name: "keeps a frame whole without trim",
+        trim: false,
+      },
+      {
+        expected: [{ bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] }],
+        frames: [middle],
+        name: "trims a frame to its opaque pixels, recording where they sit",
+        trim: true,
+      },
+      {
+        expected: [{ bounds: whole(0), from: [0, 0, 1, 1], trim: [0, 0, 6, 5] }],
+        frames: [clear],
+        name: "trims a clear frame to its top-left pixel",
+        trim: true,
+      },
+      {
+        expected: [
+          { bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] },
+          { bounds: whole(0), from: [2, 1, 2, 2], trim: [3, 1, 6, 5] },
+        ],
+        frames: [middle, shifted],
+        name: "shares one rect between trimmed frames with the same pixels, each at its own offset",
+        trim: true,
+      },
+      {
+        expected: [
+          { bounds: whole(0), from: [2, 1, 2, 2], trim: [2, 1, 6, 5] },
+          { bounds: whole(1), from: [10, 1, 2, 2], trim: [4, 1, 6, 5] },
+        ],
+        frames: [middle, edge],
+        name: "keeps apart frames whose extruded borders differ",
+        trim: true,
+      },
+      {
+        expected: [{ from: whole(0) }, { from: whole(0) }],
+        frames: [middle, middle],
+        name: "shares one rect between whole frames with the same pixels",
+        trim: false,
+      },
+    ];
+    for (const { expected, frames, trim } of cases) {
+      const { image, texture } = sheetFromRows("dog-koda", frames);
+      const compacted = compactFrames(image, trim, texture).frames.map(
+        ({ bounds, from, trim: offset }) => ({ bounds, from, trim: offset }),
+      );
+      expect(compacted).toEqual(
+        expected.map(({ bounds, from, trim: offset }) => ({
+          bounds: bounds === undefined ? undefined : rect(bounds),
+          from: rect(from),
+          trim:
+            offset === undefined
+              ? undefined
+              : { h: offset[3], w: offset[2], x: offset[0], y: offset[1] },
+        })),
+      );
+    }
   });
 });
