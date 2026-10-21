@@ -324,7 +324,7 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 ### Drawing
 
 - A prop d road px ahead of the feet draws at the road camera's scale s, at x = 180 − across × s on the left and 180 + across × s on the right, its feet on the row of d, from the smallest of its steps at least its projected size, as the road objects.
-- Draw order: depth `DEPTH.sprite` + feet row, so back to front with the road objects; under the backdrop band, so a far prop rises from behind the band's bottom edge, and under the doghouses.
+- Draw order: depth `DEPTH.sprite` + feet row, so back to front with the road objects; over the backdrop, cropped at the juncture (row 126), so a far prop shows in full from the cross street; and under the doghouses.
 - Free-standing props (mailbox, both trees, lamp post, gnome, bike) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in dgreen, the lawn one ramp step darker. Houses, fences, the hedge, the flower border, the sprinkler and the washing line take none.
 - With 20px of verge at the pack, a prop leaves the screen's side once its inner edge does, at about s 0.85; houses never show whole. No prop stands within the 64 rows of a zone's start strip, so the cross street stays clear.
 
