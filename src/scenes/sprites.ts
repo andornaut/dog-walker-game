@@ -95,7 +95,9 @@ function depthArtsOf(scene: Scene, key: string): DepthArt[] {
 
 // Shows a road sprite at its projected scale by depthDraw, the one rule for every road
 // sprite: on its art's feet line or, with feet "bottom", its frame's bottom. A changed
-// texture carries on the same tag from the same frame.
+// texture carries on the same tag from the same frame. Its corners snap to whole pixels, as
+// Phaser snaps only unscaled sprites: a scaled sprite left on a fractional corner samples its
+// art from a different phase each frame as it moves, and its pixels shimmer.
 export function showAtDepth(
   sprite: GameObjects.Sprite,
   key: string,
@@ -119,7 +121,7 @@ export function showAtDepth(
       }
     }
   }
-  sprite.setScale(drawn.scale);
+  sprite.setScale(drawn.scale).setVertexRoundMode("full");
   return drawn;
 }
 
