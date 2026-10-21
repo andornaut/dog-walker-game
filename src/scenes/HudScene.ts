@@ -15,7 +15,13 @@ import {
 } from "../hud/effectIcons";
 import { explainLines } from "../hud/explain";
 import { runHintTriggers } from "../hud/hintTriggers";
-import { type HudLanes, hudLanes } from "../hud/hudLanes";
+import {
+  CHANGE_LABEL_STYLES,
+  changeChipPlace,
+  changeLabelRoom,
+  type HudLanes,
+  hudLanes,
+} from "../hud/hudLanes";
 import type { ChangeLabel } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
 import { FORGIVEN_EVENT, type ForgivenCue } from "../hud/moments";
@@ -69,6 +75,7 @@ import { OwnerTabs } from "./ownerTabs";
 import { PALETTE } from "./palette";
 import {
   addPixelText,
+  fitPixelText,
   inkSpan,
   pixelFontMetrics,
   placePixelText,
@@ -94,7 +101,7 @@ import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from ".
 const LAYOUT = screenLayout(SCREEN_CONFIG);
 const BAR = walkBarLayout(LAYOUT.topBar);
 
-const LABEL = { height: 20, ms: 1100 };
+const LABEL = { ms: 1100 };
 // The message strip draws under the HUD's other parts, and over a card's or the pause menu's
 // parts when it draws there.
 const MESSAGE_DEPTH = { hud: -1, overlay: 1000 };
@@ -787,47 +794,38 @@ export class HudScene extends Scene {
     if (label === undefined) {
       return;
     }
-    const lane = this.lanes().bank;
-    const y = lane.y + lane.height - LABEL.height;
-    const rise = this.walk().reducedMotion() ? 0 : y - lane.y;
-    this.showLabel(label, { scale: 2, x: lane.x, y }, rise, lane.width, () =>
+    const rise = !this.walk().reducedMotion();
+    this.showLabel(label, { anchor: "bottom", lane: this.lanes().bank, rise }, () =>
       this.showNextBankLabel(),
     );
   }
 
   // A heart change's label on its card's bottom rows, once its heart has landed.
   private showHeartLabel(label: ChangeLabel, lane: Rect): void {
-    const at = { scale: 2, x: lane.x, y: lane.y + (lane.height - LABEL.height) / 2 };
-    this.showLabel(label, at, 0, lane.width);
+    this.showLabel(label, { anchor: "middle", lane, rise: false });
   }
 
-  // A change on a cream chip, so gains in forest and losses in dark red read over anything. A
-  // label too wide for room at 2x is set at 1x, on two lines if one is still too wide.
+  // A change on a cream chip, so gains in forest and losses in dark red read over anything,
+  // fitted to its lane by CHANGE_LABEL_STYLES. A rising chip rises to the lane's top.
   private showLabel(
     label: ChangeLabel,
-    at: { scale: number; x: number; y: number },
-    rise: number,
-    room: number,
+    at: { anchor: "bottom" | "middle"; lane: Rect; rise: boolean },
     done: () => void = () => undefined,
   ): void {
-    const text = addPixelText(this, at.x + 2, at.y + 4, label.text, {
+    const text = addPixelText(this, 0, 0, label.text, {
       color: label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed,
-      scale: at.scale,
+      scale: 2,
     });
-    if (text.width + 4 > room) {
-      scalePixelText(text, 1, at.x + 2, at.y + 7);
-    }
-    if (text.width + 4 > room) {
-      text.setMaxWidth(room - 4);
-      placePixelText(text, at.x + 2, at.y + 3);
-    }
+    const room = changeLabelRoom(at.lane.width);
+    const { lines, style } = fitPixelText(text, { room, styles: CHANGE_LABEL_STYLES }, 0, 0);
+    const ink = inkSpan(text);
+    const shown = { lines: lines.length, scale: style.scale, width: ink.right - ink.left };
+    const place = changeChipPlace(pixelFontMetrics(this, "body"), at.lane, at.anchor, shown);
+    placePixelText(text, place.text.x - ink.left, place.text.y);
     const chip = this.add.graphics();
-    drawFramedRect(
-      chip,
-      { border: PALETTE.plum, fill: PALETTE.cream },
-      { height: LABEL.height, width: Math.ceil(text.width) + 4, x: at.x, y: at.y },
-    );
+    drawFramedRect(chip, { border: PALETTE.plum, fill: PALETTE.cream }, place.chip);
     text.setDepth(1);
+    const rise = at.rise ? place.chip.y - at.lane.y : 0;
     fadeAway(this, [chip, text], { ms: LABEL.ms, rise }, done);
   }
 

@@ -1,10 +1,21 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import type { DogId } from "../data/types";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
-import { fontFileMetrics } from "../testing/fontInk";
-import { hudLanes } from "./hudLanes";
+import { firedByText } from "../rules/causes";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { inkRowsOfLines } from "../ui/fontMetrics";
+import { plainMarks } from "../ui/pixelFont";
+import {
+  CHANGE_CHIP,
+  CHANGE_LABEL_STYLES,
+  changeChipPlace,
+  changeLabelRoom,
+  hudLanes,
+} from "./hudLanes";
 import { messageStripLayout } from "./messageStrip";
 import { DOG_CARD, ownerTabRect, WALK_BAR } from "./walkHud";
 
@@ -64,5 +75,48 @@ describe("the bank lane", () => {
     expect(lanes.bank.x).toBe(layout.topBar.x + WALK_BAR.cash.well.x);
     expect(lanes.bank.width).toBe(WALK_BAR.cash.well.width);
     expect(lanes.bank.y).toBeGreaterThan(messages.y + messages.height);
+  });
+});
+
+// Every cause a change label names, alone after the largest amounts and after a tip, fits its
+// lane on a chip inside the lane, the text's ink padded inside the chip.
+describe("a change label", () => {
+  const names = [
+    ...Object.values(gameData.debuffs).map(({ name }) => name),
+    ...Object.values(gameData.encounters).flatMap(({ name, resolution }) => [
+      name,
+      ...(resolution.kind === "card"
+        ? resolution.options.map((option) => option.cause ?? option.name)
+        : []),
+    ]),
+    ...Object.values(gameData.shopGear).map(({ name }) => name),
+    ...Object.values(gameData.upgrades).map(({ name }) => name),
+    ...Object.values(gameData.walkerPerks).map(({ name }) => name),
+    ...gameData.world.zones.map(({ name }) => name),
+    ...(Object.keys(gameData.dogs) as DogId[]).map((dog) => firedByText(gameData, dog)),
+    gameData.runText.outOfMoney,
+  ];
+  const texts = [
+    ...new Set(names.flatMap((name) => [`−10♥ ${name}`, `+$999 ${name}`, `+$99 tip, ${name}`])),
+  ];
+  const cases = texts.flatMap((text) => [
+    ["bank", text, lanes.bank, "bottom"] as const,
+    ["heart", text, lanes.heartLabels[0] ?? lanes.bank, "middle"] as const,
+  ]);
+  it.each(cases)("in the %s lane, sets %j", (_, text, lane, anchor) => {
+    const room = changeLabelRoom(lane.width);
+    const fitted = fitInFont("font-body", CHANGE_LABEL_STYLES, room, plainMarks(text));
+    expect(fitted.lines.length).toBeLessThanOrEqual(fitted.style.lines ?? 1);
+    expect(fitted.widest).toBeLessThanOrEqual(room);
+    const { scale } = fitted.style;
+    const width = fitted.widest;
+    const shown = { lines: fitted.lines.length, scale, width };
+    const { chip, text: caps } = changeChipPlace(BODY, lane, anchor, shown);
+    expect(chip.y).toBeGreaterThanOrEqual(lane.y);
+    expect(chip.y + chip.height).toBeLessThanOrEqual(lane.y + lane.height);
+    expect(chip.x + chip.width).toBeLessThanOrEqual(lane.x + lane.width);
+    const inkBottom = caps.y + inkRowsOfLines(BODY, shown.lines) * scale;
+    expect(caps.y - chip.y).toBeGreaterThanOrEqual(CHANGE_CHIP.padY);
+    expect(chip.y + chip.height - inkBottom).toBeGreaterThanOrEqual(CHANGE_CHIP.padY);
   });
 });

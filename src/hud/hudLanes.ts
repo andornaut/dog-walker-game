@@ -1,6 +1,7 @@
-import type { Rect } from "../layout/rect";
+import type { Point, Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
-import type { FontMetrics } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { type FontMetrics, inkRowsOfLines } from "../ui/fontMetrics";
 import { messageStripLayout } from "./messageStrip";
 import { OWNER_TAB, WALK_BAR } from "./walkHud";
 
@@ -22,7 +23,7 @@ export interface HudLanes {
 }
 
 const MARGIN = 4;
-// A bank label is 20px tall and rises 4px.
+// A bank label rises up to 4px from the lane's bottom.
 const BANK_HEIGHT = 24;
 const HEART_LABEL_HEIGHT = 24;
 // How far a name plate on a bubble beside its tab reaches above the tab's top.
@@ -57,4 +58,39 @@ export function hudLanes(
       y: cardTop + OWNER_TAB.y - PLATE_RISE,
     },
   };
+}
+
+// A change label: its text on a cream chip, padX either side, at least height tall and padY
+// over and under the text's ink, the ink centred in it. A bank label starts at its lane's
+// bottom and rises to its top; a heart label sits at its lane's middle.
+export const CHANGE_CHIP = { height: 20, padX: 2, padY: 3 } as const;
+
+// At 2x, with its glyphs closer, at 1x, or at 1x on two lines.
+export const CHANGE_LABEL_STYLES: readonly TextFitStyle[] = [
+  ...TEXT_FIT_STYLES,
+  { letterSpacing: 0, lines: 2, scale: 1 },
+];
+
+// How wide a change label's ink may be in a lane width wide.
+export function changeLabelRoom(laneWidth: number): number {
+  return laneWidth - 2 * CHANGE_CHIP.padX;
+}
+
+// A change label's chip in lane, and where its ink's left edge and capitals' top go, for text
+// on lines lines at scale, its ink width wide.
+export function changeChipPlace(
+  body: FontMetrics,
+  lane: Rect,
+  anchor: "bottom" | "middle",
+  text: { lines: number; scale: number; width: number },
+): { chip: Rect; text: Point } {
+  const { height: least, padX, padY } = CHANGE_CHIP;
+  const ink = inkRowsOfLines(body, text.lines) * text.scale;
+  const height = Math.max(least, ink + 2 * padY);
+  const y =
+    anchor === "bottom"
+      ? lane.y + lane.height - height
+      : lane.y + Math.floor((lane.height - height) / 2);
+  const chip = { height, width: text.width + 2 * padX, x: lane.x, y };
+  return { chip, text: { x: lane.x + padX, y: y + Math.floor((height - ink) / 2) } };
 }
