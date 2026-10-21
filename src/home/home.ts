@@ -300,15 +300,13 @@ export function dogKindText(
 }
 
 // A dog in words for the home screen's info line, so its tile's icons never stand alone: an
-// owned dog's name, size, hearts and pay; a locked dog's price alone, as its tile names
-// nothing.
+// owned dog's name and size; a locked dog's price alone, as its tile names nothing.
 export function dogInfo(data: InfoData, owned: Owned, bank: Cents, dog: DogId): string {
   const text = data.homeText.focus;
   const cost = purchasePrice(data, owned, { dog, kind: "dog" });
   if (cost === null) {
-    const fee = dogFeeText(data);
     const kind = dogKindText(data, dog);
-    return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: data.dogs[dog].name, fee, kind });
+    return fillLine(FOCUS_FIELDS, text, "dogOwned", { dog: data.dogs[dog].name, kind });
   }
   return fillLine(FOCUS_FIELDS, text, "dogLocked", { price: priceInfo(text, bank, cost) });
 }

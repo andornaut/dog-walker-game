@@ -22,7 +22,7 @@ export const HOME_TEXT_FIELDS = {
   dogSlotName: ["slot"],
   focus: {
     dogLocked: ["price"],
-    dogOwned: ["dog", "fee", "kind"],
+    dogOwned: ["dog", "kind"],
     gear: ["effect", "gear"],
     gearLocked: ["effect", "gear", "price"],
     kind: ["hearts", "size"],
@@ -62,7 +62,6 @@ export const HOME_TEXT_FIELDS = {
   unsaved: [],
   walkerInfo: ["agility", "perk", "walker"],
   walkerLocked: ["zone"],
-  zoneFee: ["fee"],
 } as const satisfies Record<LineKey, readonly string[]> & FieldTable;
 
 type Fields<K extends LineKey> = Record<(typeof HOME_TEXT_FIELDS)[K][number], string>;

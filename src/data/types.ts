@@ -601,8 +601,6 @@ export interface HomeText {
   readonly walkerInfo: string;
   // What a locked walker's hold card and a tap on its tile say: the goal that unlocks it.
   readonly walkerLocked: string;
-  // A dog's fee on its tile and its shop row.
-  readonly zoneFee: string;
 }
 
 // The walk's own text. card is the choice cards': the titles and subtitles a card's data

@@ -332,7 +332,7 @@ describe("dogInfo and gearInfo", () => {
       [
         "describes an owned dog in words, with its size, hearts and pay",
         () => dogInfo(data, owned, cents(0), "koda"),
-        new RegExp(`^${DOGS.koda.name}: ${DOGS.koda.size}, \\d+♥, \\$\\d+ a neighborhood\\.$`),
+        new RegExp(`^${DOGS.koda.name}: ${DOGS.koda.size}, \\d+♥\\.$`),
       ],
       [
         "adds a locked dog's price and how much more the bank needs",
