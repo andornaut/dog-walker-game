@@ -48,12 +48,14 @@ last opaque row; the frame keeps a clear ring for the outline. Outlines are road
 light rim (road.LIT), since the props stand on the lawn, never on the road.
 
 PLACEMENT holds the per-zone placement table (see the style guide's Roadside section); `table`
-prints it as JSON with every prop's across offset resolved, for the game.
+prints it as JSON with every prop's across offset resolved, for the game. It places only the odd
+street tree: most of the props are drawn but not placed.
 
 Usage:
   roadside.py preview OUT.png   every frame on green, dgreen and Elm Avenue's road
   roadside.py build             write art/roadside/*.aseprite and export to public/art/sprites/
   roadside.py table             print the placement table as JSON
+  roadside.py table --write     write it to shared/roadside.json, which the game reads
 
 Run from the repository root. A build overwrites the .aseprite sources, so hand edits to them
 belong in this file instead. Shared tooling is in pixel.py.
@@ -730,21 +732,9 @@ def sprites():
 # Road px: across from the road's centre line, z along the road. The sidewalk ends at across 208
 # (layout.json verges.street.walkTo). Each prop's across is its frame's centre, set from its inner edge.
 
-HOUSE_IN = 220      # a house's inner edge
-FRONT_IN = 224      # a fence's or hedge's inner edge
-FRONT_DZ = -32      # the fence or hedge stands this far nearer than its house
-
-
 def at_inner(key, inner):
     """The across of a prop's centre, in whole road px, whose frame's inner edge is at inner or beyond."""
     return math.ceil(inner + size(key)[0] / 2)
-
-
-def lot(house, front, *extras):
-    """A lot: the house at its slot, the fence or hedge in front, then (key, inner edge, dz) extras."""
-    return ((f"roadside-{house}", at_inner(f"roadside-{house}", HOUSE_IN), 0),
-            (f"roadside-{front}", at_inner(f"roadside-{front}", FRONT_IN), FRONT_DZ),
-            *gap(*extras))
 
 
 def gap(*props):
@@ -755,38 +745,29 @@ def gap(*props):
 # Per zone, by art id. slot: road px along z between one side's slots. Slot n on a side stands at
 # z = n * slot; with m = n - offset, an even m is a lot and an odd m a gap, k = m // 2 counts them, and
 # the side takes lots[(lotStart + k * lotStride) % len(lots)] and gaps[(gapStart + k * gapStride) %
-# len(gaps)]. The right side's offset of one slot puts a gap across from every lot. Each extra prop is (key,
-# inner edge, dz), its across resolved from its frame's width: dz is road px from the slot's z, nearer
-# negative.
+# len(gaps)]. gap() takes each prop as (key, inner edge, dz) and resolves its across from its frame's width;
+# dz is road px from the slot's z, nearer negative.
+# The verges stay mostly bare lawn: a lot is empty and one gap in three holds a single street tree, so each
+# side has a tree every 6 slots (840 px). The right side's gapStart of 2 puts its trees 3 slots after the
+# left's, so the trees alternate sides, one every 420 px, and one is always in view.
 PLACEMENT = {
     "woof-way": dict(
         slot=140,
-        lots=(
-            lot("house-cottage", "fence", ("mailbox", 213, -38), ("flowers", 250, -42), ("birdbath", 262, -16)),
-            lot("house-tall", "hedge", ("mailbox", 213, -38), ("gnome", 250, -15), ("topiary", 296, -12)),
-            lot("house-porch", "fence-cat", ("bike", 231, -45)),
-            lot("house-cottage-pink", "fence", ("mailbox", 213, -38), ("well", 275, -15)),
-            lot("house-tall-grey", "fence", ("gnome", 260, -15), ("flamingos", 296, -18)),
-            lot("house-porch-tan", "hedge", ("mailbox", 213, -38), ("flowers", 255, -42)),
-        ),
+        lots=((),),
         gaps=(
-            gap(("tree", 213, 0), ("shrub", 300, -20)),
-            gap(("lamp-post", 213, -12), ("tree-blossom", 245, 12)),
-            gap(("laundry", 232, 0)),
-            gap(("tree", 220, 0), ("lamp-post", 213, -38)),
-            gap(("tree-blossom", 215, 0), ("urn", 296, -16)),
-            gap(("library", 213, -30), ("shrub", 250, 8)),
-            gap(("wheelbarrow", 213, -36), ("swing", 240, 4)),
+            gap(("tree", 220, 0)), (), (),
+            gap(("tree-blossom", 220, 0)), (), (),
         ),
         sides=dict(
-            left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=2),
-            right=dict(offset=1, lotStart=3, lotStride=5, gapStart=1, gapStride=3),
+            left=dict(offset=0, lotStart=0, lotStride=1, gapStart=0, gapStride=1),
+            right=dict(offset=1, lotStart=0, lotStride=1, gapStart=2, gapStride=1),
         ),
     ),
 }
 # Props that stand free and take the game's ground shadow.
 SHADOWED = tuple(k for k, v in PROPS.items() if v[3])
 SHADOW_COLOUR = "dgreen"
+TABLE_JSON = "shared/roadside.json"
 
 
 def placements(zone, side, z0, z1):
@@ -806,8 +787,8 @@ def placements(zone, side, z0, z1):
 
 
 def check_placement():
-    """Every prop's frame clears the sidewalk by at least 4 road px, and no slot holds the same lot or gap
-    on both sides."""
+    """Every prop's frame clears the sidewalk by at least 4 road px, and at no k do the two sides take the
+    same lot or gap that holds props."""
     walk = 208
     for zone, p in PLACEMENT.items():
         for group in p["lots"] + p["gaps"]:
@@ -816,10 +797,13 @@ def check_placement():
                 if inner < walk + 4:
                     sys.exit(f"{zone}: {key} at across {across} has its inner edge at {inner}")
         left, right = p["sides"]["left"], p["sides"]["right"]
-        n = len(p["lots"])
-        if any((left["lotStart"] + k * left["lotStride"]) % n == (right["lotStart"] + k * right["lotStride"]) % n
-               for k in range(n)):
-            sys.exit(f"{zone}: the sides take the same lot in step")
+        for kind in ("lot", "gap"):
+            groups = p[f"{kind}s"]
+            n = len(groups)
+            for k in range(n):
+                a, b = ((sd[f"{kind}Start"] + k * sd[f"{kind}Stride"]) % n for sd in (left, right))
+                if a == b and groups[a]:
+                    sys.exit(f"{zone}: the sides take the same {kind} in step")
 
 
 def table():
@@ -837,6 +821,9 @@ def table():
 if __name__ == "__main__":
     if len(sys.argv) == 2 and sys.argv[1] == "table":
         print(json.dumps(table(), indent=2))
+    elif sys.argv[1:] == ["table", "--write"]:
+        with open(TABLE_JSON, "w") as f:
+            f.write(json.dumps(table(), indent=2) + "\n")
     else:
         check_placement()
         main(sys.argv, sprites, "art/roadside", __doc__, grounds=GROUNDS)
