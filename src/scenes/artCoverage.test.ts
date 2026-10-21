@@ -29,7 +29,15 @@ import {
 } from "../assets/spriteKeys";
 import { hitCue, MUSIC_KEY, SOUND_KEYS, soundKeysOf } from "../audio/sound";
 import { gameData } from "../data";
-import type { DogId, EncounterId, GearId, MinorObstacleId, UpgradeId, ZoneId } from "../data/types";
+import type {
+  DogId,
+  EncounterId,
+  GearId,
+  MinorObstacleId,
+  UpgradeId,
+  WalkerPerkId,
+  ZoneId,
+} from "../data/types";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { effectIconKey } from "../hud/effectIcons";
@@ -183,13 +191,16 @@ describe("image art", () => {
     ["a portrait for every dog", () => DOGS.map((dog) => dogPortraitKey(gameData, dog))],
     ["an icon for every message strip line", () => Object.values(MESSAGE_ICONS)],
     [
-      "an effect icon for every upgrade and gear item",
+      "an effect icon for every upgrade, gear item and walker perk",
       () => [
         ...(Object.keys(gameData.upgrades) as UpgradeId[]).map((upgrade) =>
           effectIconKey({ kind: "upgrade", upgrade }),
         ),
         ...(Object.keys(gameData.shopGear) as GearId[]).map((gear) =>
           effectIconKey({ gear, kind: "gear" }),
+        ),
+        ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map((perk) =>
+          effectIconKey({ kind: "perk", perk }),
         ),
       ],
     ],
