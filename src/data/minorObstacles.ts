@@ -24,6 +24,11 @@ export const MINOR_OBSTACLES = {
   },
   cat: { movement: { kind: "dart" }, name: "Cat", shape: { lanes: 1, rows: 1 } },
   cone: { name: "Cone", shape: { lanes: 1, rows: 1 } },
+  coyote: {
+    movement: { kind: "approach", steps: 2 },
+    name: "Coyote",
+    shape: { lanes: 1, rows: 1 },
+  },
   cyclist: {
     movement: { factor: 1.6, kind: "inLane" },
     name: "Cyclist",

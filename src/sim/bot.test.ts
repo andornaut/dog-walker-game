@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { GameData, MinorObstacleId, ZoneId } from "../data/types";
+import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { read } from "../rules/units";
+import { approachOutcomes } from "../runner/approach";
 import { hitDog, itemBox } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { stillInLane } from "../runner/laneMotion";
-import { hasLeftRoad, moverPlace, moverPlacements } from "../runner/movers";
+import {
+  hasLeftRoad,
+  type MoverDraws,
+  type MoverFootprint,
+  moverPlace,
+  moverPlacements,
+} from "../runner/movers";
 import { NO_PULLS } from "../runner/pulls";
 import { seededRandom } from "../runner/random";
 import { screenRoadGeometry } from "../runner/screenGeometry";
@@ -166,33 +173,51 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   });
 });
 
-// The bot reads a mover as the walk's collision has it, for a pack standing in each lane. A lane
-// change starts on the first walk step at or after the plan has it due, so it can come up to a
-// step late. For each way a minor obstacle moves, every place the planner may put it, on the
-// first zone's road and the last's, sampled a quarter step apart since the walk's steps can fall
-// anywhere along its path: wherever the mover would hit a pack standing in a lane, the bot keeps
-// the pack out of that lane from a step before to a step after; and it keeps the pack out of no
-// lane the mover never hits, so a lane a mover only passes near stays open to the plan.
-describe("a mover's hazards", () => {
+// For each way an obstacle moves, at both ends of every draw that varies it (its speed, the
+// delays before its moves and a stalker's second-step share), every place the planner may put
+// it, on the first zone's road and the last's, and every way a stalker may choose its steps:
+// - it moves only while ahead of the pack's rows: no step, hop or dart starts once it has
+//   reached them, a stalker never steps up the road and a hopper never hops down it;
+// - the bot reads it as the walk's collision has it, for a pack standing in each lane. A lane
+//   change starts on the first walk step at or after the plan has it due, so it can come up to
+//   a step late; sampled a quarter step apart, wherever the mover would hit a pack standing in a
+//   lane, the bot keeps the pack out of that lane from a step before to a step after; and it
+//   keeps the pack out of no lane the mover never hits.
+describe("a mover's moves and hazards", () => {
   const route = gameData.world.zones.map(({ id }) => id as ZoneId);
-  const movements = new Map(
-    (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).flatMap((kind) => {
+  type Moving = Exclude<Movement, { kind: "still" }>;
+  const entries: { kind: WalkItemKind; movement: Moving; shape: MoverFootprint }[] = [
+    ...(Object.keys(gameData.minorObstacles) as MinorObstacleId[]).map((kind) => {
       const { movement, shape } = gameData.minorObstacles[kind];
-      return movement === undefined || movement.kind === "still"
-        ? []
-        : [[JSON.stringify({ movement, shape }), { kind, movement }] as const];
+      return { kind: kind as WalkItemKind, movement, shape };
     }),
+    ...(Object.keys(gameData.encounters) as EncounterId[]).flatMap((kind) => {
+      const entry = gameData.encounters[kind];
+      return entry.kind === "obstacle"
+        ? [{ kind: kind as WalkItemKind, movement: entry.movement, shape: entry.shape }]
+        : [];
+    }),
+  ].flatMap(({ kind, movement, shape }) =>
+    movement === undefined || movement.kind === "still" ? [] : [{ kind, movement, shape }],
   );
-  const cases = [0, route.length - 1].flatMap((zoneIndex) =>
-    [...movements.values()].map(({ kind, movement }) => ({
-      kind,
-      movement,
-      name: `${JSON.stringify(movement)} in zone ${zoneIndex}`,
-      zoneIndex,
-    })),
+  const movements = new Map(
+    entries.map((entry) => [JSON.stringify([entry.movement, entry.shape]), entry]),
   );
+  const LOW: MoverDraws = { delays: [0, 0], share: 0, speed: 0 };
+  const HIGH: MoverDraws = { delays: [0.999999, 0.999999], share: 0.999999, speed: 0.999999 };
+  const cases = [0, gameData.world.walkLength - 1].flatMap((zoneIndex) =>
+    [LOW, HIGH].flatMap((draws) =>
+      [...movements.values()].map((entry) => ({
+        ...entry,
+        draws,
+        name: `${JSON.stringify(entry.movement)} in zone ${zoneIndex}, draws ${draws === LOW ? "low" : "high"}`,
+        zoneIndex,
+      })),
+    ),
+  );
+  const placed = new Set<string>();
 
-  it.each(cases)("covers every hit and only hits, moving $name", (mover) => {
+  it.each(cases)("moves ahead of the pack and is read as it hits, moving $name", (mover) => {
     const run = testState(
       { biscuit: 3, duchess: 3, snowball: 3 },
       { route, zoneIndex: mover.zoneIndex },
@@ -200,10 +225,9 @@ describe("a mover's hazards", () => {
     const geometry = screenRoadGeometry(run);
     const speed = walkScrollSpeed(gameData, run);
     const road: BotRoad = { data: gameData, geometry, speed };
-    const { cell, laneCount, roadBottom, roadTop, tallestPackBand } = geometry;
-    const footprint = gameData.minorObstacles[mover.kind].shape;
+    const { cell, laneCount, roadBottom, roadTop, sightLength, tallestPackBand } = geometry;
     const height = itemHeight(gameData, geometry, mover.kind);
-    const spec = moverSpec(gameData, seededRandom(1), footprint, mover.movement);
+    const spec = moverSpec(gameData, seededRandom(1), mover.shape, mover.movement);
     const placements = moverPlacements(
       {
         cellLength: cell.length,
@@ -212,63 +236,119 @@ describe("a mover's hazards", () => {
         roadLength: roadBottom - roadTop,
         rowSpacing: read(gameData.tuning, "pixels", "spawnRowSpacing"),
         scrollSpeed: speed,
-        sightLength: geometry.sightLength,
+        sightLength,
         window: blockingLength(
           { cellInset: cell.inset, cellLength: cell.length, packLength: tallestPackBand },
           1,
         ),
       },
       spec,
+      mover.draws,
     );
-    expect(placements.length).toBeGreaterThan(0);
+    if (placements.length > 0) {
+      placed.add(JSON.stringify(mover.movement));
+    }
     for (const { path } of placements) {
+      const outcomes = path.motion === "approach" ? approachOutcomes(path) : [path];
+      for (const outcome of outcomes) {
+        if (outcome.motion === "cross") {
+          expect(outcome.enterTravel).toBeLessThan(sightLength);
+        }
+        if (outcome.motion === "steps" || outcome.motion === "approach") {
+          const before = (index: number) =>
+            outcome.steps.slice(0, index).reduce((sum, step) => sum + step.travel, 0);
+          outcome.steps.forEach((step, index) => {
+            expect(step.at + before(index)).toBeLessThan(sightLength);
+            if (mover.movement.kind === "hop") {
+              expect(step.travel).toBeLessThanOrEqual(0);
+            }
+            if (mover.movement.kind === "approach") {
+              expect(step.travel).toBeGreaterThanOrEqual(0);
+            }
+          });
+        }
+      }
       const item: WalkItem = {
         height,
         id: 1,
         kind: mover.kind,
         lane: 0,
-        laneSpan: footprint.lanes,
+        laneSpan: mover.shape.lanes,
         mover: { path, since: 0 },
         y: roadTop - height,
       };
       const hazards = moverHazards(road, Infinity, item);
-      const hits: { at: number; lane: number }[] = [];
-      for (let at = 0; ; at += STEP_SECONDS / 4) {
-        const place = moverPlace(laneCount, path, at * speed);
-        const y = roadTop - height + place.travel;
-        if (hasLeftRoad(laneCount, place) || y >= roadBottom) {
-          break;
-        }
-        const box = itemBox(cell, {
-          height,
-          lane: place.lanePosition,
-          laneSpan: footprint.lanes,
-          y,
-        });
-        for (let lane = 0; lane < laneCount; lane++) {
-          if (place.solid && hitDog(packBoxes(geometry, stillInLane(lane), run), box) !== null) {
-            hits.push({ at, lane });
+      const packs = Array.from({ length: laneCount }, (_, lane) =>
+        packBoxes(geometry, stillInLane(lane), run),
+      );
+      // The lanes in which a pack standing there is hit at a time, of any way it moves; null
+      // once every way has left.
+      const hitLanes = (at: number): number[] | null => {
+        const lanes = new Set<number>();
+        let onRoad = false;
+        for (const outcome of outcomes) {
+          const place = moverPlace(laneCount, outcome, at * speed);
+          const y = roadTop - height + place.travel;
+          if (hasLeftRoad(laneCount, place) || y >= roadBottom) {
+            continue;
           }
+          onRoad = true;
+          const box = itemBox(cell, {
+            height,
+            lane: place.lanePosition,
+            laneSpan: mover.shape.lanes,
+            y,
+          });
+          packs.forEach((pack, lane) => {
+            if (place.solid && hitDog(pack, box) !== null) {
+              lanes.add(lane);
+            }
+          });
         }
-      }
+        return onRoad ? [...lanes] : null;
+      };
       const inLane = (lane: number, hazard: { readonly lanes: number }) =>
         (hazard.lanes & (1 << lane)) !== 0;
-      for (const { at, lane } of hits) {
-        const covered = hazards.some(
-          (hazard) =>
-            inLane(lane, hazard) &&
-            hazard.from <= at - STEP_SECONDS + 1e-9 &&
-            hazard.to >= at + STEP_SECONDS - 1e-9,
-        );
-        expect(covered, `lane ${lane} at ${at.toFixed(4)}s`).toBe(true);
+      for (let at = 0, lanes = hitLanes(at); lanes !== null; at += STEP_SECONDS / 4) {
+        for (const lane of lanes) {
+          const covered = hazards.some(
+            (hazard) =>
+              inLane(lane, hazard) &&
+              hazard.from <= at - STEP_SECONDS + 1e-9 &&
+              hazard.to >= at + STEP_SECONDS - 1e-9,
+          );
+          expect(covered, `lane ${lane} at ${at.toFixed(4)}s`).toBe(true);
+        }
+        lanes = hitLanes(at + STEP_SECONDS / 4);
       }
+      // Searched a tenth of a pixel of scroll apart, finer than the bot's sampling.
       for (const hazard of hazards) {
-        const hit = hits.some(
-          ({ at, lane }) => inLane(lane, hazard) && at > hazard.from && at < hazard.to,
-        );
+        let hit = false;
+        for (let at = hazard.from; !hit && at < hazard.to; at += 0.1 / speed) {
+          hit = (hitLanes(at) ?? []).some((lane) => inLane(lane, hazard));
+        }
         expect(hit, `lanes ${hazard.lanes} from ${hazard.from.toFixed(4)}s`).toBe(true);
       }
     }
+  });
+
+  // Every way of moving has somewhere the planner can put it.
+  it("places every way of moving somewhere", () => {
+    expect([...placed].sort()).toEqual(
+      [...new Set(entries.map(({ movement }) => JSON.stringify(movement)))].sort(),
+    );
+  });
+
+  // A rider slower than the road still comes down it, at its slowest draw, so it never comes
+  // back up at a pack that has passed it.
+  it.each(
+    entries.flatMap(({ kind, movement }) =>
+      movement.kind === "inLane" ? [{ factor: movement.factor, kind }] : [],
+    ),
+  )("keeps the $kind coming down the road", ({ factor }) => {
+    expect(factor * (1 - read(gameData.tuning, "multipliers", "moverSpeedJitter"))).toBeGreaterThan(
+      0,
+    );
   });
 });
 

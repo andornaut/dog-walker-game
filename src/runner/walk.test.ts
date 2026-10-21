@@ -51,6 +51,7 @@ import { activeModifier, heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
 import { TEST_WORLD } from "../testing/world";
+import { approachOutcomes } from "./approach";
 import { STEP_SECONDS } from "./fixedStep";
 import { stillInLane } from "./laneMotion";
 import { hasLeftRoad, laneAt, type MoverPath, moverPlace, onScreenOf } from "./movers";
@@ -227,14 +228,23 @@ function moverSpans(
   const sight = road.sightLength;
   const window = itemHeight(tuned, road, event.kind) + road.tallestPackBand;
   const across = footprintOf(tuned, event.kind).lanes;
-  return Array.from({ length: Math.ceil(4 * ROAD_LENGTH) }, (_, since) => {
-    const place = moverPlace(LANE_COUNT, event.mover, since);
-    const first = laneAt(place.lanePosition);
-    const overlaps = place.solid && place.travel >= sight && place.travel < sight + window;
-    return Array.from({ length: across }, (_unused, i) => first + i)
-      .filter((lane) => overlaps && lane >= 0 && lane < LANE_COUNT)
-      .map((lane) => ({ distance: event.distance + since - sight, lane, laneSpan: 1, length: 1 }));
-  }).flat();
+  // A stalker's every way of choosing its steps.
+  const paths = event.mover.motion === "approach" ? approachOutcomes(event.mover) : [event.mover];
+  return paths.flatMap((path) =>
+    Array.from({ length: Math.ceil(4 * ROAD_LENGTH) }, (_, since) => {
+      const place = moverPlace(LANE_COUNT, path, since);
+      const first = laneAt(place.lanePosition);
+      const overlaps = place.solid && place.travel >= sight && place.travel < sight + window;
+      return Array.from({ length: across }, (_unused, i) => first + i)
+        .filter((lane) => overlaps && lane >= 0 && lane < LANE_COUNT)
+        .map((lane) => ({
+          distance: event.distance + since - sight,
+          lane,
+          laneSpan: 1,
+          length: 1,
+        }));
+    }).flat(),
+  );
 }
 // Every lane-blocking spawn's spans on the game's road: a standing one's, or a mover's as it
 // passes the pack.
@@ -1452,8 +1462,9 @@ describe("movers", { timeout: 60_000 }, () => {
     },
   );
 
-  // A hop is one jump of 1 to most spots one way, sideways only when it says so, as long as the
-  // tuning's hop; across zones and seeds, hoppers make hops of every length they can.
+  // A hop is one jump of 1 to most spots one way, across, up the road or diagonally up, never
+  // down, sideways only when it says so, as long as the tuning's hop; across zones and seeds,
+  // hoppers make hops of every length they can.
   it.each(hopping)("hops each hopper once with $name", ({ hop, tuned }) => {
     const spots = new Set<number>();
     for (const zone of ZONE_IDS) {
@@ -1472,12 +1483,14 @@ describe("movers", { timeout: 60_000 }, () => {
           const steps = mover.motion === "steps" ? mover.steps : [];
           expect(steps).toHaveLength(1);
           for (const { lanes, length: hopLength, travel } of steps) {
-            expect(lanes === 0 || travel === 0).toBe(true);
+            const rows = -travel / GAME_ROAD.cell.length;
+            expect(rows).toBeGreaterThanOrEqual(0);
+            expect(lanes === 0 || rows === 0 || Math.abs(lanes) === rows).toBe(true);
             if (hop.sideways === true) {
               expect(travel).toBe(0);
             }
             expect(hopLength).toBeCloseTo(length);
-            spots.add(Math.abs(lanes) + Math.abs(travel) / GAME_ROAD.cell.length);
+            spots.add(Math.max(Math.abs(lanes), rows));
           }
         }
       }
@@ -1497,6 +1510,38 @@ describe("movers", { timeout: 60_000 }, () => {
     const [item] = step(due, 0.05).walk.road.items;
     expect(item?.mover?.since).toBeCloseTo(3.5);
     expect(item?.y).toBeCloseTo(40 - 32 + 450 + 3.5);
+  });
+
+  // A stalker in lane 2 that may step a lane either side and a row down chooses its step as
+  // its cue begins, toward the pack where the pack stands then.
+  it.each([
+    { lane: 0, want: -1 },
+    { lane: 1, want: -1 },
+    { lane: 2, want: 0 },
+    { lane: 3, want: 1 },
+    { lane: 4, want: 1 },
+  ])("steps a stalker toward a pack in lane $lane as its cue begins", ({ lane, want }) => {
+    const stalking: MoverPath = {
+      burst: geometry.cell.length,
+      lane: 2,
+      length: 50,
+      motion: "approach",
+      movement: "approach",
+      pending: [{ at: 300, kind: "after" }],
+      reach: { count: 3, first: 1 },
+      rows: 1,
+      steps: [],
+      stopTravel: geometry.sightLength,
+      warning: 100,
+    };
+    const before = inLane(lane, walkWith(["koda"], [moverAt("coyote", stalking, 200 - 1e-6)]));
+    const [waiting] = step(before, 0).walk.road.items;
+    expect(waiting?.mover?.path).toBe(stalking);
+    const [item] = step(before).walk.road.items;
+    const path = item?.mover?.path;
+    expect(path?.motion === "approach" ? path.steps : []).toEqual([
+      { at: 300, lanes: want, length: 50, travel: geometry.cell.length },
+    ]);
   });
 
   it("cannot be hit while it is only a cue", () => {

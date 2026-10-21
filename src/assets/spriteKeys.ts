@@ -93,6 +93,7 @@ export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
 // Road art not drawn yet, and the drawn sprite that stands in for it until its key is in the
 // manifest.
 export const ART_STAND_INS: Readonly<Partial<Record<string, string>>> = {
+  coyote: "chase-cat",
   jogger: "social-jogger-dog-owner",
   "kid-on-bike": "minor-tricycles",
   stroller: "social-handbag-dog-owner",
@@ -204,6 +205,7 @@ export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
   squirrel: "squirrel-dash",
 };
 export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readonly string[]>> = {
+  approach: ["walk", "run"],
   dart: ["flee", "run", "bounce", "walk"],
   hop: ["hop", "pull-out", "run", "walk"],
   inLane: ["drive", "ride", "run", "walk", "pull-out"],

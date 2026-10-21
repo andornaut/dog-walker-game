@@ -1,0 +1,115 @@
+import type { MoverPath, MoverStep, StepShape } from "./movers";
+
+// A stalker steps toward the pack while it is still ahead of it. Each pending step is chosen as
+// its cue begins, from where the pack is then: of the spots a step away, a lane to either side,
+// a row down or diagonally down, the one nearest the pack, within the lanes and rows the planner
+// left it; the first of them in APPROACH_STEPS on a tie. Never a row up. A step that would start
+// once the stalker has reached the pack's rows, and every step after it, is dropped instead.
+
+export type ApproachPath = Extract<MoverPath, { motion: "approach" }>;
+
+// The steps a stalker may take, in the order a tie goes.
+export const APPROACH_STEPS: readonly StepShape[] = [
+  { lanes: 0, travel: 1 },
+  { lanes: -1, travel: 1 },
+  { lanes: 1, travel: 1 },
+  { lanes: -1, travel: 0 },
+  { lanes: 1, travel: 0 },
+];
+
+// Where the steps taken leave it: lanes across from its start and rows down.
+function stepped(path: ApproachPath): { readonly lanes: number; readonly rows: number } {
+  return {
+    lanes: path.steps.reduce((sum, step) => sum + step.lanes, 0),
+    rows: path.steps.reduce((sum, step) => sum + step.travel, 0) / path.burst,
+  };
+}
+
+// The scroll since it spawned at which its next pending step starts, or null with none.
+export function nextStepAt(path: ApproachPath): number | null {
+  const [next] = path.pending;
+  if (next === undefined) {
+    return null;
+  }
+  if (next.kind === "after") {
+    return next.at;
+  }
+  const last = path.steps.at(-1);
+  const soonest = last === undefined ? 0 : last.at + Math.max(last.length, path.warning);
+  return Math.max(next.travel - stepped(path).rows * path.burst, soonest);
+}
+
+// The steps it may take next: those that keep it within its lanes and rows. None once its next
+// step would start at or past its stop travel, or with no step pending.
+export function approachChoices(path: ApproachPath): StepShape[] {
+  const at = nextStepAt(path);
+  const { lanes, rows } = stepped(path);
+  if (at === null || at + rows * path.burst >= path.stopTravel) {
+    return [];
+  }
+  const lane = path.lane + lanes;
+  const { count, first } = path.reach;
+  return APPROACH_STEPS.filter(
+    (shape) =>
+      lane + shape.lanes >= first &&
+      lane + shape.lanes < first + count &&
+      rows + shape.travel <= path.rows,
+  );
+}
+
+// The path with its next pending step taken as shape, or, with no shape, with every pending step
+// dropped: one it cannot take leaves it nowhere to step later either.
+export function takeStep(path: ApproachPath, shape: StepShape | null): ApproachPath {
+  const at = nextStepAt(path);
+  if (at === null) {
+    return path;
+  }
+  if (shape === null) {
+    return { ...path, pending: [] };
+  }
+  const step: MoverStep = {
+    at,
+    lanes: shape.lanes,
+    length: path.length,
+    travel: shape.travel * path.burst,
+  };
+  return { ...path, pending: path.pending.slice(1), steps: [...path.steps, step] };
+}
+
+// A point on the road, in road pixels: x across from the road's left edge, y down the screen.
+export interface RoadPoint {
+  readonly x: number;
+  readonly y: number;
+}
+
+// The step that brings it nearest the pack: centre is the stalker's centre now, and the step
+// moves it a cell per lane across and burst per row down.
+export function nearestStep(
+  cellLength: number,
+  centre: RoadPoint,
+  pack: RoadPoint,
+  choices: readonly StepShape[],
+  burst: number,
+): StepShape | null {
+  let best: { readonly distance: number; readonly shape: StepShape } | null = null;
+  for (const shape of choices) {
+    const dx = centre.x + shape.lanes * cellLength - pack.x;
+    const dy = centre.y + shape.travel * burst - pack.y;
+    const distance = dx * dx + dy * dy;
+    if (best === null || distance < best.distance) {
+      best = { distance, shape };
+    }
+  }
+  return best?.shape ?? null;
+}
+
+// Every path the stalker may yet take, whatever the pack does: each choice of each pending step.
+export function approachOutcomes(path: ApproachPath): ApproachPath[] {
+  if (path.pending.length === 0) {
+    return [path];
+  }
+  const choices = approachChoices(path);
+  return choices.length === 0
+    ? approachOutcomes(takeStep(path, null))
+    : choices.flatMap((shape) => approachOutcomes(takeStep(path, shape)));
+}

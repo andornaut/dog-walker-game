@@ -264,14 +264,22 @@ export interface Shape {
 }
 
 // How an obstacle moves when it comes as a mover, each move after a cue
-// seconds.moverWarningSeconds long. dart: across the road at counts.dartLanesPerSecond, coming
-// down it at 1 + tilt of the road's speed meanwhile (tilt 0 when absent). inLane: down its lane
-// at factor of the road's speed, above 1 toward the pack, below 1 away. hop: one jump of 1 to
-// most spots one way, lanes to either side or, unless sideways, rows toward or away, landing
-// seconds.moverHopSeconds after it leaves. step: steps spots, each a lane to either side or a
-// row toward or away, seconds.moverStepSeconds each. still: it never moves, as with no
-// movement.
+// seconds.moverWarningSeconds long, and only while the mover is still ahead of the pack's rows.
+// approach: steps steps toward the pack, each to the spot a lane to either side, a row down or
+// diagonally down that is nearest the pack as the step's cue begins, seconds.moverStepSeconds
+// each; the first seconds.approachFirstDelayMin to approachFirstDelayMax after it is wholly on
+// the road, the second once the road left between it and the pack is
+// multipliers.approachSecondRoadShareMin to Max of the road's length. dart: across the road at
+// counts.dartLanesPerSecond, coming down it at 1 + tilt of the road's speed meanwhile (tilt 0
+// when absent). inLane: down its lane at factor of the road's speed, above 1 toward the pack,
+// below 1 away. hop: one jump of 1 to most spots one way, lanes to either side or, unless
+// sideways, a row up the road or diagonally up, landing seconds.moverHopSeconds after it
+// leaves. step: steps spots, each a lane to either side or a row toward or away,
+// seconds.moverStepSeconds each. still: it never moves, as with no movement. Each mover's speed
+// varies by up to multipliers.moverSpeedJitter either way, and each step, hop and dart comes up
+// to seconds.moverTimingJitter late.
 export type Movement =
+  | { readonly kind: "approach"; readonly steps: 1 | 2 }
   | { readonly kind: "dart"; readonly tilt?: number }
   | { readonly kind: "hop"; readonly most: 1 | 2; readonly sideways?: true }
   | { readonly kind: "inLane"; readonly factor: number }

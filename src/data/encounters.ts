@@ -109,7 +109,7 @@ export const ENCOUNTERS = {
     hitLabel: "YOINK!",
     hitWord: "YOINK!",
     kind: "obstacle",
-    movement: { kind: "step", steps: 2 },
+    movement: { kind: "approach", steps: 1 },
     name: "Thief",
     resolution: {
       kind: "card",

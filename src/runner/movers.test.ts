@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TUNING } from "../data/tuning";
 import { read } from "../rules/units";
 import {
+  drawMover,
   facesLeft,
   hasLeftRoad,
   hopShapes,
@@ -85,7 +86,15 @@ const CAPS: MoverCaps = {
 const spec = (motion: MoverSpec["motion"], lanes = 1, rows = 1): MoverSpec => ({
   footprint: { lanes, rows },
   motion,
-  movement: motion.kind === "cross" ? "dart" : motion.kind === "ride" ? "inLane" : "step",
+  movement:
+    motion.kind === "cross"
+      ? "dart"
+      : motion.kind === "ride"
+        ? "inLane"
+        : motion.kind === "approach"
+          ? "approach"
+          : "step",
+  variation: { delaySeconds: 0, speedShare: 0 },
   warningSeconds: 1,
 });
 
@@ -397,22 +406,28 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
 ];
 
 describe("hopShapes", () => {
+  // A hop goes a lane to either side or, unless sideways, a row up the road or diagonally up:
+  // never down toward the pack.
   it.each([
     { most: 1, sideways: false },
     { most: 2, sideways: false },
     { most: 2, sideways: true },
-  ])("hops 1 to $most spots one way, rows too unless sideways is $sideways", (hop) => {
+  ])("hops 1 to $most spots one way, up too unless sideways is $sideways", (hop) => {
     const shapes = hopShapes(hop.most, hop.sideways);
-    expect(shapes.every(({ lanes, travel }) => lanes === 0 || travel === 0)).toBe(true);
-    expect(shapes.some(({ travel }) => travel !== 0)).toBe(!hop.sideways);
+    expect(shapes.every(({ travel }) => travel <= 0)).toBe(true);
+    expect(shapes.some(({ travel }) => travel < 0)).toBe(!hop.sideways);
+    expect(shapes.some(({ lanes, travel }) => lanes !== 0 && travel !== 0)).toBe(!hop.sideways);
+    expect(
+      shapes.every(
+        ({ lanes, travel }) => lanes === 0 || travel === 0 || Math.abs(lanes) === -travel,
+      ),
+    ).toBe(true);
     expect([...new Set(shapes.map(stepSpots))].sort()).toEqual(
       Array.from({ length: hop.most }, (_, i) => i + 1),
     );
-    // Each hop has its mirror image, so the planner can send it either way.
+    // Each hop across has its mirror image, so the planner can send it either way.
     for (const { lanes, travel } of shapes) {
-      expect(shapes).toContainEqual(
-        lanes === 0 ? { lanes, travel: -travel } : { lanes: -lanes, travel },
-      );
+      expect(shapes).toContainEqual({ lanes: lanes === 0 ? 0 : -lanes, travel });
     }
   });
 });
@@ -633,7 +648,7 @@ describe("placeMovers", () => {
     ["blocks", { block: () => false }],
     ["has no room for", { leavesRoom: () => false }],
     ["leaves no pack-fit gap for", { packFits: () => false }],
-  ])("drops a mover the grid %s everywhere, drawing nothing", (_, refusal) => {
+  ])("drops a mover the grid %s everywhere, drawing only its own draws", (_, refusal) => {
     const { grid } = freeGrid();
     let draws = 0;
     const counting = () => {
@@ -644,7 +659,12 @@ describe("placeMovers", () => {
       { count: 1, kind: "squirrel", spec: spec({ kind: "cross", lanesPerSecond: 2, tilt: 0 }) },
     ]);
     expect(placed).toEqual({ dropped: ["squirrel"], spawns: [] });
-    expect(draws).toBe(0);
+    let own = 0;
+    drawMover(() => {
+      own += 1;
+      return 0;
+    });
+    expect(draws).toBe(own);
   });
 
   // Three movers, one per third of the rows. One with no room in its own third, such as one over

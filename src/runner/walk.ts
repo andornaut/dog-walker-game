@@ -32,6 +32,7 @@ import { packAgility, slowestAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
+import { approachChoices, type ApproachPath, nearestStep, nextStepAt, takeStep } from "./approach";
 import {
   type Box,
   collideWithPack,
@@ -456,6 +457,20 @@ export function moverSpec(
     };
   } else if (movement.kind === "inLane") {
     motion = { kind: "ride", speedMultiplier: movement.factor };
+  } else if (movement.kind === "approach") {
+    motion = {
+      firstDelaySeconds: [
+        read(tuning, "seconds", "approachFirstDelayMin"),
+        read(tuning, "seconds", "approachFirstDelayMax"),
+      ],
+      kind: "approach",
+      secondRoadShare: [
+        read(tuning, "multipliers", "approachSecondRoadShareMin"),
+        read(tuning, "multipliers", "approachSecondRoadShareMax"),
+      ],
+      stepSeconds: read(tuning, "seconds", "moverStepSeconds"),
+      steps: movement.steps,
+    };
   } else if (movement.kind === "hop") {
     motion = {
       kind: "steps",
@@ -475,6 +490,10 @@ export function moverSpec(
     footprint,
     motion,
     movement: movement.kind,
+    variation: {
+      delaySeconds: read(tuning, "seconds", "moverTimingJitter"),
+      speedShare: read(tuning, "multipliers", "moverSpeedJitter"),
+    },
     warningSeconds: read(tuning, "seconds", "moverWarningSeconds"),
   };
 }
@@ -709,6 +728,41 @@ export function packBoxes(
   return sweptPackBoxes(geometry, motion, motion, run);
 }
 
+// Each stalker whose next step's cue has begun chooses that step, toward the pack where it is
+// now (approach.ts): the pack's centre, across from where its lane motion has it and half way
+// down its band, and the stalker's centre as the step starts.
+function stalkersStepped(
+  geometry: Pick<RoadGeometry, "cell" | "laneCount" | "packBand" | "roadTop">,
+  motion: LaneMotion,
+  items: readonly WalkItem[],
+): WalkItem[] {
+  const { cell, laneCount, packBand, roadTop } = geometry;
+  const pack = {
+    x: packX(cell.length, laneCount, motion),
+    y: (packBand.top + packBand.bottom) / 2,
+  };
+  return items.map((item) => {
+    const { mover } = item;
+    if (mover?.path.motion !== "approach") {
+      return item;
+    }
+    let path: ApproachPath = mover.path;
+    for (let at = nextStepAt(path); at !== null && mover.since >= at - path.warning;) {
+      const place = moverPlace(laneCount, path, at);
+      const centre = {
+        x: (place.lanePosition + item.laneSpan / 2) * cell.length,
+        y: roadTop - item.height / 2 + place.travel,
+      };
+      path = takeStep(
+        path,
+        nearestStep(cell.length, centre, pack, approachChoices(path), path.burst),
+      );
+      at = nextStepAt(path);
+    }
+    return path === mover.path ? item : { ...item, mover: { ...mover, path } };
+  });
+}
+
 // An item's hit box on the road: a mover's from its continuous place across the lanes, so one
 // between lanes touches what is beside it in both, and anything else's from its lane.
 function walkItemBox(geometry: Pick<RoadGeometry, "cell" | "laneCount">, item: WalkItem): Box {
@@ -822,18 +876,15 @@ export function stepWalk(
       y: geometry.roadTop - height + (zoneDistance - event.distance),
     };
   });
-  const { cues, pickups, solid } = scrolledItems(
-    geometry,
-    travel,
-    road.items,
-    moveMovers(geometry, 0, arrived),
-  );
+  const scrolled = scrolledItems(geometry, travel, road.items, moveMovers(geometry, 0, arrived));
 
   const control = advanceLaneControl(
     laneMotionConfig(data, geometry.laneCount, run),
     stepSeconds,
     road.control,
   );
+  const { cues, pickups } = scrolled;
+  const solid = stalkersStepped(geometry, control.motion, scrolled.solid);
   // Swept from where the last step left the pack to where this one leaves it.
   const pack = sweptPackBoxes(geometry, road.control.motion, control.motion, run);
   const touching = (item: WalkItem) => hitDog(pack, walkItemBox(geometry, item));

@@ -1,8 +1,9 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { approachOutcomes } from "../runner/approach";
 import { type Box, itemBox, levelWithPack, overlaps } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
-import { hasLeftRoad, moverPlace } from "../runner/movers";
+import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
@@ -39,13 +40,14 @@ export interface BotRoad {
 // not. Moves are at clock times. target is the lane the pack headed for when the bot last acted,
 // null before it has. late holds mistimed lane changes still to come; noticeAt,
 // when set, is when the bot notices its mistake, and until then it does not replan. tellsAt is
-// when each leaning dog's tell started.
+// when each leaning dog's tell started, and paths each mover's path as last seen.
 export interface Bot {
   readonly appearedAt: Map<number, number>;
   clock: number;
   readonly late: PlannedMove[];
   lastInputAt: number;
   noticeAt: number | null;
+  readonly paths: Map<number, MoverPath>;
   readonly perceived: Set<number>;
   readonly perceivedTells: Set<DogId>;
   plan: PlannedMove[];
@@ -80,6 +82,7 @@ export function newBot(random: Random, skill: Skill): Bot {
     lastInputAt: -Infinity,
     late: [],
     noticeAt: null,
+    paths: new Map(),
     perceived: new Set(),
     perceivedTells: new Set(),
     plan: [],
@@ -204,14 +207,32 @@ export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): L
     return [];
   }
   const contacts: LaneContact[] = [];
-  for (const { from, lane, to } of scrollContacts(road.geometry, item, mover.path)) {
-    const start = (from - MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
-    const end = (to + MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
-    if (end > 0 && start < horizon) {
-      contacts.push({ from: start, lane, to: end });
+  for (const path of pathsAhead(mover.path)) {
+    for (const { from, lane, to } of scrollContacts(road.geometry, item, path)) {
+      const start = (from - MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
+      const end = (to + MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
+      if (end > 0 && start < horizon) {
+        contacts.push({ from: start, lane, to: end });
+      }
     }
   }
   return contacts;
+}
+
+const OUTCOMES = new WeakMap<object, readonly MoverPath[]>();
+
+// The paths a mover may yet take: its own, or, for a stalker with steps still to choose, every
+// way it may choose them, since each choice waits on where the pack is when its cue begins.
+function pathsAhead(path: MoverPath): readonly MoverPath[] {
+  if (path.motion !== "approach" || path.pending.length === 0) {
+    return [path];
+  }
+  let outcomes = OUTCOMES.get(path);
+  if (outcomes === undefined) {
+    outcomes = approachOutcomes(path);
+    OUTCOMES.set(path, outcomes);
+  }
+  return outcomes;
 }
 
 // The hazards a mover makes, one per lane and stretch it touches the pack in, each
@@ -265,7 +286,8 @@ function perceiveAt(bot: Bot, road: BotRoad, item: WalkItem): number {
 }
 
 // Records when each item new on the road came into view, from how far the road has scrolled
-// since, and forgets items that have left.
+// since, and forgets items that have left. A mover whose path has changed, a stalker that has
+// chosen a step, makes the bot replan.
 export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
   const { items } = walk.road;
   let oldest = Infinity;
@@ -275,10 +297,19 @@ export function observeRoad(bot: Bot, road: BotRoad, walk: Walk): void {
       const scrolled = item.mover?.since ?? item.y - (road.geometry.roadTop - item.height);
       bot.appearedAt.set(item.id, bot.clock - scrolled / road.speed);
     }
+    const path = item.mover?.path;
+    if (path !== undefined) {
+      const seen = bot.paths.get(item.id);
+      if (seen !== undefined && seen !== path) {
+        bot.replan = true;
+      }
+      bot.paths.set(item.id, path);
+    }
   }
   for (const id of bot.appearedAt.keys()) {
     if (id < oldest) {
       bot.appearedAt.delete(id);
+      bot.paths.delete(id);
       bot.perceived.delete(id);
     }
   }

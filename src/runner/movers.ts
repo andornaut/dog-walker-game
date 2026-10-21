@@ -25,7 +25,11 @@ export interface MoverStep {
 // as it crosses.
 // ride (inLane): its cue is at the top of its lanes, where it enters once the cue ends, coming
 // down them at speedMultiplier of the road's speed.
-// steps (step): it stands on the road from its spawn and takes each step in turn.
+// steps (step, hop): it stands on the road from its spawn and takes each step in turn.
+// approach: it stands on the road from its spawn and takes the steps it has chosen, each
+// toward the pack as the pack stood when its cue began (approach.ts), and has pending steps
+// still to choose: within its reach of lanes and rows down, burst a row's travel, each length
+// long; none starts once its travel reaches stopTravel, the pack's rows.
 export type MoverPath = {
   readonly movement: MovementKind;
   readonly warning: number;
@@ -44,7 +48,25 @@ export type MoverPath = {
       readonly speedMultiplier: number;
     }
   | { readonly lane: number; readonly motion: "steps"; readonly steps: readonly MoverStep[] }
+  | {
+      readonly burst: number;
+      readonly lane: number;
+      readonly length: number;
+      readonly motion: "approach";
+      readonly pending: readonly ApproachTiming[];
+      readonly reach: LaneSpan;
+      readonly rows: number;
+      readonly steps: readonly MoverStep[];
+      readonly stopTravel: number;
+    }
 );
+
+// When a stalker's pending step starts: after, at a scroll since it spawned; near, once its
+// travel reaches travel, and no sooner than its cue can show after the step before began and
+// that step has ended.
+export type ApproachTiming =
+  | { readonly at: number; readonly kind: "after" }
+  | { readonly kind: "near"; readonly travel: number };
 
 // since is the scroll since its cue appeared, or since it spawned for a stepping mover.
 export interface MoverOnRoad {
@@ -83,7 +105,7 @@ export function moverPlace(laneCount: number, path: MoverPath, since: number): M
       travel: Math.max(0, moved) * path.speedMultiplier,
     };
   }
-  if (path.motion === "steps") {
+  if (path.motion === "steps" || path.motion === "approach") {
     let lanePosition = path.lane;
     let travel = since;
     for (const step of path.steps) {
@@ -126,7 +148,7 @@ export function moverTell(path: MoverPath, since: number): MoverTell | null {
 
 // Whether a mover is moving rather than standing or showing its cue.
 export function inMotion(path: MoverPath, since: number): boolean {
-  if (path.motion !== "steps") {
+  if (path.motion === "cross" || path.motion === "ride") {
     return since >= path.warning;
   }
   return path.steps.some((step) => since >= step.at && since < step.at + step.length);
@@ -225,7 +247,8 @@ export interface MoverStand {
 // are the row offsets and lanes kept clear of other spawns: those it passes through on the
 // road, and with leadIn, the whole row before its own, so the pack has two rows of road to
 // steer around a sweep of several lanes. stands are each place it stands as an obstacle, by
-// distance from its row. screen is from its cue appearing until it is out of sight.
+// distance from its row. screen is from its cue appearing until it is out of sight. Of the
+// placements that fit, the planner takes one of the highest rank, 0 when unset.
 export interface MoverPlacement {
   readonly appears: number;
   readonly cells: readonly { readonly lane: number; readonly row: number }[];
@@ -233,6 +256,7 @@ export interface MoverPlacement {
   readonly lanes: LaneSpan;
   readonly leadIn: boolean;
   readonly path: MoverPath;
+  readonly rank?: number;
   readonly rows: number;
   readonly screen: readonly [number, number];
   readonly stands: readonly MoverStand[];
@@ -250,7 +274,7 @@ export function sweptLanes(laneCount: number, path: MoverPath, from: number, to:
   if (path.motion === "ride") {
     return { count: path.lanes, first: path.lane };
   }
-  if (path.motion === "steps") {
+  if (path.motion === "steps" || path.motion === "approach") {
     return { count: 1, first: path.lane };
   }
   const moving = Math.max(from, path.enterTravel);
@@ -270,15 +294,17 @@ export interface MoverFootprint {
   readonly rows: number;
 }
 
-// One step of a stepping mover: lanes to either side, or rows toward the pack (travel above 0)
-// or away (below 0). A step is a spot; a hop is one step of 1 or more spots one way.
+// One step of a stepping mover: lanes to either side, rows toward the pack (travel above 0) or
+// away (below 0), or both, diagonally. A step is a spot; a hop is one step of 1 or more spots one
+// way, a diagonal spot a lane across and a row along at once.
 export interface StepShape {
   readonly lanes: number;
   readonly travel: number;
 }
 
-// Every hop of 1 to most spots one way: lanes to either side or, unless sideways, rows toward
-// the pack or away. The planner picks among those that keep the road passable.
+// Every hop of 1 to most spots one way: lanes to either side or, unless sideways, a row up the
+// road, away from the pack, or diagonally up. A hop never goes down toward the pack. The planner
+// picks among those that keep the road passable.
 export function hopShapes(most: number, sideways: boolean): StepShape[] {
   const ways: readonly StepShape[] = sideways
     ? [
@@ -288,8 +314,9 @@ export function hopShapes(most: number, sideways: boolean): StepShape[] {
     : [
         { lanes: -1, travel: 0 },
         { lanes: 1, travel: 0 },
-        { lanes: 0, travel: 1 },
         { lanes: 0, travel: -1 },
+        { lanes: -1, travel: -1 },
+        { lanes: 1, travel: -1 },
       ];
   return Array.from({ length: most }, (_, i) => i + 1).flatMap((spots) =>
     ways.map(({ lanes, travel }) => ({ lanes: lanes * spots, travel: travel * spots })),
@@ -304,8 +331,18 @@ export function stepSpots(shape: StepShape): number {
 // cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of sequences, each step stepSeconds long however many spots it covers; the
-// planner picks whichever keeps the road passable.
+// planner picks whichever keeps the road passable. approach: steps steps toward the pack, each
+// stepSeconds long, the first firstDelaySeconds after the mover is wholly on the road and the
+// second once the road between it and the pack is secondRoadShare of the road's length, each
+// range drawn from per mover.
 export type MoverMotion =
+  | {
+      readonly firstDelaySeconds: readonly [number, number];
+      readonly kind: "approach";
+      readonly secondRoadShare: readonly [number, number];
+      readonly stepSeconds: number;
+      readonly steps: number;
+    }
   | { readonly kind: "cross"; readonly lanesPerSecond: number; readonly tilt: number }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
   | {
@@ -314,11 +351,48 @@ export type MoverMotion =
       readonly stepSeconds: number;
     };
 
+// How much movers of a kind differ: each one's speed by up to speedShare of it either way, and
+// each of its steps, hops or darts up to delaySeconds later than its earliest moment.
+export interface MoverVariation {
+  readonly delaySeconds: number;
+  readonly speedShare: number;
+}
+
 export interface MoverSpec {
   readonly footprint: MoverFootprint;
   readonly motion: MoverMotion;
   readonly movement: MovementKind;
+  readonly variation: MoverVariation;
   readonly warningSeconds: number;
+}
+
+// One mover's draws, each from 0 up to 1, made as it is planned: its speed, the delay before
+// each of its moves, and a stalker's second-step road share. EVEN_DRAWS moves it at its kind's
+// speed with no delay, at the near end of a range.
+export interface MoverDraws {
+  readonly delays: readonly [number, number];
+  readonly share: number;
+  readonly speed: number;
+}
+
+export const EVEN_DRAWS: MoverDraws = { delays: [0, 0], share: 0, speed: 0.5 };
+
+// Every mover draws the same number of times, whatever it is and wherever it goes.
+export function drawMover(random: Random): MoverDraws {
+  return { delays: [random(), random()], share: random(), speed: random() };
+}
+
+// The factor a mover's speed is multiplied by, from 1 - speedShare to 1 + speedShare.
+export function speedFactor(variation: MoverVariation, draws: MoverDraws): number {
+  return 1 + variation.speedShare * (2 * draws.speed - 1);
+}
+
+function delayOf(variation: MoverVariation, draws: MoverDraws, index: number): number {
+  return variation.delaySeconds * (draws.delays[index] ?? 0);
+}
+
+function within(range: readonly [number, number], draw: number): number {
+  return range[0] + (range[1] - range[0]) * draw;
 }
 
 // The fewest rows whose blocking length covers rows' blocking length stretched by stretch.
@@ -331,32 +405,36 @@ function rowsCovering(geometry: MoverGeometry, rows: number, stretch: number): n
 const HALF_LANE_STEPS = 2;
 
 // Crossers meet the pack partway across: one placement per side and per half lane crossed
-// by the middle of its contact with the pack, which starts as its row's window does. Tilted,
-// its contact lasts window / (1 + tilt), which its rows cover. Each cue appears on the road, a
-// cell down from its top. A tilted crosser keeps the row after its own clear too, as it drifts
-// along the road against its row.
+// by the middle of its contact with the pack, which starts as its row's window does, at the
+// mover's drawn speed and later by its drawn delay. Tilted, its contact lasts window / (1 + tilt),
+// which its rows cover. Each cue appears on the road, a cell down from its top. A crosser that
+// would set off only once it has reached the pack's rows, at sightLength, would never cross, so
+// it has no placement there. A tilted crosser keeps the row after its own clear too, as it
+// drifts along the road against its row.
 function crossPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
   motion: Extract<MoverMotion, { kind: "cross" }>,
+  draws: MoverDraws,
 ): MoverPlacement[] {
   const { cellLength, laneCount, roadLength, scrollSpeed, sightLength, window } = geometry;
   const { tilt } = motion;
   if (tilt <= -1) {
     throw new Error("A crosser's tilt must keep it coming down the road");
   }
-  const lanesPerPixel = motion.lanesPerSecond / scrollSpeed;
+  const lanesPerPixel = (motion.lanesPerSecond * speedFactor(spec.variation, draws)) / scrollSpeed;
   const warning = spec.warningSeconds * scrollSpeed;
+  const late = (delayOf(spec.variation, draws, 0) * scrollSpeed) / (1 + tilt);
   const contact = window / (1 + tilt);
   const keptRows = tilt === 0 ? [-1, 0] : [-1, 0, 1];
   const placements: MoverPlacement[] = [];
   for (const direction of [1, -1] as const) {
     for (let step = 0; step <= laneCount * HALF_LANE_STEPS; step++) {
       // Moved this far by the middle of its contact, at which its travel is mid-window.
-      const middle = step / HALF_LANE_STEPS / lanesPerPixel;
+      const middle = step / HALF_LANE_STEPS / lanesPerPixel - late;
       const enterTravel = sightLength + window / 2 - (1 + tilt) * middle;
       const appears = sightLength + contact / 2 - warning - middle;
-      if (appears < cellLength) {
+      if (appears < cellLength || enterTravel >= sightLength) {
         continue;
       }
       const path: MoverPath = {
@@ -403,13 +481,16 @@ function crossPlacements(
 // A rider enters as its row reaches the point where riding at its speed brings it to the pack
 // just as the row's window starts. Faster than the road, it overtakes what is in its lanes,
 // from the rows above its own to those below the pack; slower, those rows overtake it, and it
-// overlaps the pack for longer, which its rows cover.
+// overlaps the pack for longer, which its rows cover. Its speed is its kind's at its drawn
+// factor; every factor keeps it coming down the road.
 function ridePlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
-  speedMultiplier: number,
+  kindMultiplier: number,
+  draws: MoverDraws,
 ): MoverPlacement[] {
   const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, sightLength } = geometry;
+  const speedMultiplier = kindMultiplier * speedFactor(spec.variation, draws);
   if (speedMultiplier <= 0 || speedMultiplier === 1) {
     throw new Error("A rider must move faster or slower than the road");
   }
@@ -453,89 +534,182 @@ function ridePlacements(
   }));
 }
 
-// A stepping mover stands on the road from its spawn. Its first cue shows once it is wholly on
-// the road, and each later one once the step before has ended. It spawns late enough that its
-// furthest step toward the pack meets the pack no sooner than its row would, and blocks every
-// lane it can step into for as long as it can overlap the pack. It stands at every spot a step
-// of several spots passes over, as it does at each step's ends.
+// Where a mover that stands on the road may be, by lane offset and travel from where it spawns.
+interface StandOffset {
+  readonly lane: number;
+  readonly travel: number;
+}
+
+// The placements of a mover that stands on the road from its spawn and may be at any of the
+// spots given, by offset from its start, one per start lane that keeps them on the road: it
+// blocks every lane it may be in for as long as it can overlap the pack, and stands at every
+// spot. It spawns late enough that its furthest spot toward the pack meets the pack no sooner
+// than its row would.
+function standingPlacements(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  spots: readonly StandOffset[],
+  pathAt: (start: number) => MoverPath,
+): MoverPlacement[] {
+  const { cellLength, laneCount, roadLength, rowSpacing, window } = geometry;
+  const { lanes: across, rows } = spec.footprint;
+  const height = rows * cellLength;
+  const lanes = spots.map(({ lane }) => lane);
+  const travels = spots.map(({ travel }) => travel);
+  const [minLane, maxLane] = [Math.min(...lanes), Math.max(...lanes)];
+  const [minTravel, maxTravel] = [Math.min(...travels), Math.max(...travels)];
+  const blockRows = rows + Math.ceil((maxTravel - minTravel) / cellLength - 1e-9);
+  const rowCount = Math.ceil((window + (blockRows - 1) * cellLength) / rowSpacing);
+  const leaves = maxTravel + roadLength + height - minTravel;
+  const placements: MoverPlacement[] = [];
+  for (let start = -minLane; start + maxLane + across <= laneCount; start++) {
+    const first = start + minLane;
+    const count = maxLane - minLane + across;
+    placements.push({
+      appears: maxTravel,
+      cells: Array.from({ length: rowCount }, (_, row) =>
+        Array.from({ length: count }, (_unused, i) => ({ lane: first + i, row })),
+      ).flat(),
+      lane: start,
+      lanes: { count, first },
+      leadIn: false,
+      path: pathAt(start),
+      rows: blockRows,
+      screen: [maxTravel, leaves],
+      stands: spots.map((spot) => ({
+        distance: maxTravel - spot.travel,
+        lane: start + spot.lane,
+        lanes: across,
+        length: window + (rows - 1) * cellLength - geometry.packLength,
+      })),
+    });
+  }
+  return placements;
+}
+
+// A stepping mover takes each step of a sequence in turn. Its first cue shows once it is
+// wholly on the road, and each later one once the step before has ended, each move up to its
+// drawn delay later. A step that would start once the mover has reached the pack's rows, at
+// sightLength, never comes, nor any after it; a sequence with no step left has no placement,
+// since a mover always moves. It stands at every spot a step of several spots passes over, as
+// it does at each step's ends.
 function stepsPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
   motion: Extract<MoverMotion, { kind: "steps" }>,
+  draws: MoverDraws,
 ): MoverPlacement[] {
-  const { cellLength, laneCount, roadLength, rowSpacing, scrollSpeed, window } = geometry;
+  const { cellLength, scrollSpeed, sightLength } = geometry;
   const warning = spec.warningSeconds * scrollSpeed;
   const length = motion.stepSeconds * scrollSpeed;
-  const burst = cellLength;
-  const { lanes: across, rows } = spec.footprint;
-  const height = rows * cellLength;
+  const height = spec.footprint.rows * cellLength;
   return motion.sequences.flatMap((shapes) => {
-    const positions = [{ lane: 0, travel: 0 }];
-    const steps = shapes.map((shape, i): MoverStep => {
-      const last = positions.at(-1) ?? { lane: 0, travel: 0 };
-      const spots = stepSpots(shape);
-      for (let spot = 1; spot <= spots; spot++) {
-        positions.push({
-          lane: last.lane + (shape.lanes * spot) / spots,
-          travel: last.travel + (shape.travel * burst * spot) / spots,
+    const spots: StandOffset[] = [{ lane: 0, travel: 0 }];
+    const steps: MoverStep[] = [];
+    let ready = height + warning;
+    for (const [i, shape] of shapes.entries()) {
+      const at = ready + delayOf(spec.variation, draws, i) * scrollSpeed;
+      const last = spots.at(-1) ?? { lane: 0, travel: 0 };
+      if (at + last.travel >= sightLength) {
+        break;
+      }
+      const spotCount = stepSpots(shape);
+      for (let spot = 1; spot <= spotCount; spot++) {
+        spots.push({
+          lane: last.lane + (shape.lanes * spot) / spotCount,
+          travel: last.travel + (shape.travel * cellLength * spot) / spotCount,
         });
       }
-      return {
-        at: height + warning + i * (warning + length),
-        lanes: shape.lanes,
-        length,
-        travel: shape.travel * burst,
-      };
-    });
-    const lanes = positions.map(({ lane }) => lane);
-    const travels = positions.map(({ travel }) => travel);
-    const [minLane, maxLane] = [Math.min(...lanes), Math.max(...lanes)];
-    const [minTravel, maxTravel] = [Math.min(...travels), Math.max(...travels)];
-    const blockRows = rows + Math.ceil((maxTravel - minTravel) / cellLength - 1e-9);
-    const rowCount = Math.ceil((window + (blockRows - 1) * cellLength) / rowSpacing);
-    const leaves = maxTravel + roadLength + height - minTravel;
-    const placements: MoverPlacement[] = [];
-    for (let start = -minLane; start + maxLane + across <= laneCount; start++) {
-      const first = start + minLane;
-      const count = maxLane - minLane + across;
-      placements.push({
-        appears: maxTravel,
-        cells: Array.from({ length: rowCount }, (_, row) =>
-          Array.from({ length: count }, (_unused, i) => ({ lane: first + i, row })),
-        ).flat(),
-        lane: start,
-        lanes: { count, first },
-        leadIn: false,
-        path: {
-          lane: start,
-          motion: "steps",
-          movement: spec.movement,
-          steps,
-          warning,
-        },
-        rows: blockRows,
-        screen: [maxTravel, leaves],
-        stands: positions.map((position) => ({
-          distance: maxTravel - position.travel,
-          lane: start + position.lane,
-          lanes: across,
-          length: window + (rows - 1) * cellLength - geometry.packLength,
-        })),
-      });
+      steps.push({ at, lanes: shape.lanes, length, travel: shape.travel * cellLength });
+      ready = at + length + warning;
     }
-    return placements;
+    if (steps.length === 0) {
+      return [];
+    }
+    return standingPlacements(geometry, spec, spots, (lane) => ({
+      lane,
+      motion: "steps",
+      movement: spec.movement,
+      steps,
+      warning,
+    }));
   });
 }
 
-export function moverPlacements(geometry: MoverGeometry, spec: MoverSpec): MoverPlacement[] {
+// The ways a stalker's lane range may reach from its start lane, widest first: a lane to
+// either side, one side only, or none.
+const APPROACH_REACHES: readonly (readonly [number, number])[] = [
+  [-1, 1],
+  [-1, 0],
+  [0, 1],
+  [0, 0],
+];
+
+// A stalker may be at any spot in its lanes, from its start down as many rows as it has steps,
+// and is placed as standing at each of them, so whichever step it chooses on the road keeps
+// the road passable. Its lanes are its start lane and, where there is room, a lane to either
+// side: the wider, the more it can follow the pack, and the planner takes the widest that fits
+// (rank). Its first step comes its drawn delay after it is wholly on the road, and its second
+// once the road between it and the pack, the tallest pack's rows at sightLength, is down to its
+// drawn share of the road's length.
+function approachPlacements(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  motion: Extract<MoverMotion, { kind: "approach" }>,
+  draws: MoverDraws,
+): MoverPlacement[] {
+  const { cellLength, roadLength, scrollSpeed, sightLength } = geometry;
+  const warning = spec.warningSeconds * scrollSpeed;
+  const height = spec.footprint.rows * cellLength;
+  const pending: ApproachTiming[] = [
+    {
+      at: height + (within(motion.firstDelaySeconds, draws.delays[0]) * scrollSpeed + warning),
+      kind: "after",
+    },
+    ...Array.from({ length: motion.steps - 1 }, (): ApproachTiming => ({
+      kind: "near",
+      travel: sightLength - within(motion.secondRoadShare, draws.share) * roadLength,
+    })),
+  ];
+  return APPROACH_REACHES.flatMap(([left, right], rank) => {
+    const spots = Array.from({ length: right - left + 1 }, (_, i) =>
+      Array.from({ length: motion.steps + 1 }, (_unused, row) => ({
+        lane: left + i,
+        travel: row * cellLength,
+      })),
+    ).flat();
+    return standingPlacements(geometry, spec, spots, (lane) => ({
+      burst: cellLength,
+      lane,
+      length: motion.stepSeconds * scrollSpeed,
+      motion: "approach",
+      movement: spec.movement,
+      pending,
+      reach: { count: right - left + 1, first: lane + left },
+      rows: motion.steps,
+      steps: [],
+      stopTravel: sightLength,
+      warning,
+    })).map((placement) => ({ ...placement, rank: APPROACH_REACHES.length - rank }));
+  });
+}
+
+// One mover's placements, at its draws.
+export function moverPlacements(
+  geometry: MoverGeometry,
+  spec: MoverSpec,
+  draws: MoverDraws = EVEN_DRAWS,
+): MoverPlacement[] {
   const { motion } = spec;
   switch (motion.kind) {
+    case "approach":
+      return approachPlacements(geometry, spec, motion, draws);
     case "cross":
-      return crossPlacements(geometry, spec, motion);
+      return crossPlacements(geometry, spec, motion, draws);
     case "ride":
-      return ridePlacements(geometry, spec, motion.speedMultiplier);
+      return ridePlacements(geometry, spec, motion.speedMultiplier, draws);
     default:
-      return stepsPlacements(geometry, spec, motion);
+      return stepsPlacements(geometry, spec, motion, draws);
   }
 }
 
@@ -647,8 +821,11 @@ function standsOf(spot: Spot): MoverStand[] {
 // stretch of the zone as the planner spreads other spawns, each mover wholly on screen
 // within the zone, within the caps on screen. A mover with no room in its stretch, such as one
 // over a cap there, waits: it comes on at a later row with room. One with no room on any later
-// row is dropped, which uses no random draw, as the planner drops an obstacle it has no room
-// for. A mover never stands still in place of moving.
+// row is dropped, which uses no random draw past its own draws, as the planner drops an obstacle
+// it has no room for. A mover never stands still in place of moving. Each mover makes its own
+// draws (drawMover) before it is placed, and is placed as they have it move, so the path rule
+// holds for the speed and moments it was drawn; of the places that fit, it takes one of those
+// with the highest rank.
 export function placeMovers<Kind extends string>(
   random: Random,
   geometry: MoverGeometry & { readonly zoneLength: number },
@@ -682,16 +859,20 @@ export function placeMovers<Kind extends string>(
   const spawns: MoverSpawn<Kind>[] = [];
   const dropped: Kind[] = [];
   for (const { count, kind, spec } of quotas) {
-    const placements = moverPlacements(geometry, spec);
     for (let i = 0; i < count; i++) {
+      const placements = moverPlacements(geometry, spec, drawMover(random));
       const end = Math.floor(((i + 1) * rows.length) / count);
       const stretch = spotsIn(placements, Math.floor((i * rows.length) / count), end);
-      const spots = stretch.length > 0 ? stretch : spotsIn(placements, end, rows.length);
-      if (spots.length === 0) {
+      const fitting = stretch.length > 0 ? stretch : spotsIn(placements, end, rows.length);
+      if (fitting.length === 0) {
         dropped.push(kind);
         continue;
       }
-      const spot = randomPick(random, spots);
+      const rank = Math.max(...fitting.map(({ placement }) => placement.rank ?? 0));
+      const spot = randomPick(
+        random,
+        fitting.filter(({ placement }) => (placement.rank ?? 0) === rank),
+      );
       const { placement } = spot;
       placement.cells.forEach(({ lane, row }) => grid.take(lane, spot.row + row));
       grid.block(spot.row, placement.lanes, placement.rows, placement.leadIn, true);

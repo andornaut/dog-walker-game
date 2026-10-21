@@ -85,11 +85,18 @@ export const TUNING = {
   // Factors: 1 changes nothing, 0.75 is 25% less, 2 is double. The "change" values are
   // added per dog instead: 0.25 is 25% more.
   multipliers: {
+    // A stalker's second step comes once the road between it and the pack is down to a share
+    // of the road's length drawn per stalker between these.
+    approachSecondRoadShareMax: 0.45,
+    approachSecondRoadShareMin: 0.25,
     // Each big dog in the pack adds this to the walker's agility.
     bigDogAgility: -0.1,
     // How long a debuff lasts while Ada's Calm voice walks.
     calmVoiceDebuffFactor: 0.5,
     goodLeashSquirrelPull: 0,
+    // Each mover's speed, an in-lane mover's or a dart's, is its kind's times a factor drawn per
+    // mover up to this far from 1 either way.
+    moverSpeedJitter: 0.15,
     // How many hearts a minor bump costs while the pack is Muddy.
     muddyBumpHearts: 2,
     // Running shoes add this much to the walker's agility.
@@ -120,6 +127,10 @@ export const TUNING = {
     smallDodgeChance: 0.25,
   },
   seconds: {
+    // A stalker's first step's cue begins a delay drawn per stalker between these after it is
+    // wholly on the road.
+    approachFirstDelayMax: 0.5,
+    approachFirstDelayMin: 0,
     // One hop of a bouncing ball, which is only drawn.
     ballBounceSeconds: 0.4,
     // After a hit, obstacles are ignored this long; pickups still count.
@@ -142,6 +153,8 @@ export const TUNING = {
     minorHitStopSeconds: 0.3,
     // Each step of a stepping mover takes this long.
     moverStepSeconds: 0.6,
+    // Each step, hop and dart comes up to this long after its soonest moment, drawn per move.
+    moverTimingJitter: 0.3,
     // A mover's cue shows this long before each move.
     moverWarningSeconds: 1,
     // How long the Muddy debuff lasts, in walking time.
