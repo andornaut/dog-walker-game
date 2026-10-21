@@ -18,11 +18,11 @@ export const ACHIEVEMENTS = [
     name: "Round Trip",
   },
   {
-    badgeLine: "Twice the tails.",
+    badgeLine: "Twice the tails, twice the tangles.",
     conditions: [{ count: 2, kind: "packSize" }],
     goal: "Walk 2 dogs at once",
     id: "doubleLeash",
-    name: "Double Leash",
+    name: "Double Trouble",
   },
   {
     badgeLine: "Twelve paws, one plan.",

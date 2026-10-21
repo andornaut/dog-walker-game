@@ -286,20 +286,29 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; best neighborhood completed (heading home mid-neighborhood doesn't count it). Each dog's roster card shows its walks, neighborhoods finished and times fired
 - **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting cash), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
-| Group      | Badge                 | Goal                                            | Line                                      |
-| ---------- | --------------------- | ----------------------------------------------- | ----------------------------------------- |
-| Firsts     | First Steps           | Finish your first neighborhood                  | Every walk starts somewhere.              |
-| Firsts     | Round Trip            | Finish all 4 neighborhoods of a walk            | Home before the streetlights.             |
-| Firsts     | Double Leash          | Walk 2 dogs at once                             | Twice the tails.                          |
-| Firsts     | Pack Leader           | Walk 3 dogs at once                             | Twelve paws, one plan.                    |
-| Mastery    | Clean Paws            | Finish a neighborhood without a plain bump      | Not a speck on them.                      |
-| Mastery    | Not a Scratch         | Finish a walk without a plain bump              | Spotless, start to finish.                |
-| Mastery    | Five-Star Service     | Finish 10 walks without being fired             | The reviews are in.                       |
-| Mastery    | Big Payday            | Earn $300 in one walk                           | Treats are on you.                        |
-| Collection | Full Kennel           | Own all 9 dogs                                  | Every leash is spoken for.                |
-| Collection | Kitted Out            | Own every gear item                             | A pocket for everything. Well, one thing. |
-| Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs           | Everyone's met you now.                   |
-| Collection | Top Walker            | Own every dog and all 3 dog slots               | Maplewood's finest. Ask any dog.          |
-| Silly      | You're Fired!         | Get fired 10 times                              | They always come back.                    |
-| Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                  | You can smell this badge.                 |
-| Silly      | Squirrel!             | Get pulled toward 5 squirrels, across all walks | So close. Every time.                     |
+| Group      | Badge                 | Goal                                            | Line                                |
+| ---------- | --------------------- | ----------------------------------------------- | ----------------------------------- |
+| Firsts     | First Steps           | Finish your first neighborhood                  | Every walk starts somewhere.        |
+| Firsts     | Round Trip            | Finish all 4 neighborhoods of a walk            | Home before the streetlights.       |
+| Firsts     | Double Trouble        | Walk 2 dogs at once                             | Twice the tails, twice the tangles. |
+| Firsts     | Pack Leader           | Walk 3 dogs at once                             | Twelve paws, one plan.              |
+| Firsts     | Dream Team            | Unlock all four walkers                         | The whole crew's here.              |
+| Mastery    | Clean Paws            | Finish a neighborhood without a plain bump      | Not a speck on them.                |
+| Mastery    | Not a Scratch         | Finish a walk without a plain bump              | Spotless, start to finish.          |
+| Mastery    | Everybody Home        | Earn the Full pack bonus with 3 dogs            | Nobody left behind.                 |
+| Mastery    | Close Shave           | Finish a walk with an owner on 1♥               | Phew. Nobody saw that.              |
+| Mastery    | Dodge Ball            | Small dogs dodge 10 bumps, across all walks     | Small but mighty.                   |
+| Mastery    | Five-Star Service     | Finish 10 walks without being fired             | The reviews are in.                 |
+| Mastery    | Big Payday            | Earn $300 in one walk                           | Treats are on you.                  |
+| Collection | Full Kennel           | Own all 9 dogs                                  | Every leash is spoken for.          |
+| Collection | Kitted Out            | Own every gear item                             | A pocket for everything.            |
+| Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs           | Everyone's met you now.             |
+| Collection | Top Walker            | Own every dog and all 3 dog slots               | Maplewood's finest.                 |
+| Silly      | You're Fired!         | Get fired 10 times                              | They always come back.              |
+| Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                  | You can smell this badge.           |
+| Silly      | Mud Season            | Get Muddy 3 times in one walk                   | Wipe your paws, please.             |
+| Silly      | Zoomies!              | Get the zoomies 3 times in one walk             | Zero to sixty, every time.          |
+| Silly      | Squirrel!             | Get pulled toward 5 squirrels, across all walks | So close. Every time.               |
+| Silly      | Yoink!                | Let 10 thieves get away, across all walks       | They had a getaway scooter.         |
+| Silly      | Sniff Test            | Let the pack sniff 20 dogs, across all walks    | Hello. Hello. Hello.                |
+| Silly      | Snack Attack          | Grab 50 treats, across all walks                | Crumbs everywhere.                  |
