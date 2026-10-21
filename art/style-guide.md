@@ -372,6 +372,16 @@ Where row 213 meets the road, left side (the right mirrors it):
 
 Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 158 to 159, x 0 to 72), the near-right lawn (x 284 to 359, rows 155 to 173), and both sidewalks.
 
+Scenery gags are sprites the game places on those spots, drawn front view at the band's own scale, in `art/tools/road.py`. They loop, open no card and have no effect.
+
+| Key             | Spot            | Top-left (band px) | Note                                                                                                                                                                                                                     |
+| --------------- | --------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `gag-cat`       | Near-left perch | x 0 to 48, row 135 | Paws on the top rail, row 158                                                                                                                                                                                             |
+| `gag-kite`      | Near-right lawn | 284, 133           | A street tree with a diamond kite snagged in its crown. Its crown rises over the cross street, rows 133 to 149; its foot's outline is on row 171. Every zone takes it, Main Street's paving included |
+| `gag-sprinkler` | Near-right lawn | 322, 150           | Not on Main Street, which is paved                                                                                                                                                                                       |
+
+- One sprite for every zone: the kite's tree is drawn into it, since Main Street has no tree and Riverside Path's stand across the river. Its crown is green with a forest outline, and the kite red and yellow with a plum outline, so both hold on every zone's ground and far side.
+
 ## Skies
 
 - Daytime skies (Fairview Park, Riverside Path, Elm Avenue) stay cyan over sky with clouds: flat cyan down to row 61, then sky. Main Street's sky is a sunburst: flat rays of sky and cyan, seven of each, from the end of the street (`sunburst` in `art/tools/backdrops.py`), ending on an arc below row 61 with flat cyan beyond it, and a cloud either side; its zone card repeats it with five of each.

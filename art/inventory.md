@@ -162,9 +162,10 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 | `road-<zone>`       | image  | 320×64  |                 | core | snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade, the-long-way-home |
 | `road-<zone>-start` | image  | 320×64  |                 | core | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19               |
 | `backdrop-<zone>`   | image  | 360×174 |                 | core | Every zone; screen rows 40 to 213                                                           |
+| `gag-ball`          | sprite | 14×14   | `roll`          | core | The ball in `card-play-date-play`, and the game's sidewalk gag until it places `gag-kite`   |
 | `gag-cat`           | sprite | 24×24   | `idle`, `react` | core | On a fence                                                                                  |
+| `gag-kite`          | sprite | 36×40   | `flutter`       | core | A kite caught in a street tree, on the near-right lawn                                      |
 | `gag-sprinkler`     | sprite | 32×24   | `spray`         | core |                                                                                             |
-| `gag-ball`          | sprite | 14×14   | `roll`          | core | Rolls along the sidewalk                                                                    |
 
 ### Roadside props
 

@@ -7,7 +7,7 @@ below the band (the same projection, so the same road, curb and sidewalk edges
 at the same slope) up to a cross street that runs flat across the band. Beyond it the far side faces the camera: the
 zone's houses, park or shops, the scenery behind them (hills, a second row of houses, a
 town, a river) and the sky. The band, the approach and the camera come from the game's
-layout export. The scenery gags (cat on a perch, sprinkler, rolling ball) are separate
+layout export. The scenery gags (cat on a perch, sprinkler, a kite caught in a tree) are separate
 sprites the game places in this band, on the near corners either side of the street.
 
 Rows, in band rows (0 to 173): the sky is one flat colour above row 61 (CALM), under the
@@ -17,8 +17,8 @@ to 154, and the stub from row 155 (STUB, the approach) to the bottom row, 173, w
 the game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and
 227, verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
 the current constants): the near-left perch's top rail on rows 158 to 159, x 0 to 72; the
-near-right lawn, x 284 to 359 on rows 155 to 173 (the sprinkler at x 322 to 353, its sprite's
-top row 150); and the two sidewalks, whose middles run from (87, 173) to (94, 154) and from
+near-right lawn, x 284 to 359 on rows 155 to 173 (the kite's tree at x 284 to 319, its sprite's
+top row 133; the sprinkler at x 322 to 353, its sprite's top row 150); and the two sidewalks, whose middles run from (87, 173) to (94, 154) and from
 (273, 173) to (266, 154).
 
 Usage:

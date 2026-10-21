@@ -1688,6 +1688,15 @@
       }
     },
     {
+      "key": "gag-kite",
+      "png": "sprites/gag-kite.png",
+      "json": "sprites/gag-kite.json",
+      "anchor": {
+        "feetY": 38,
+        "opaqueWidth": 35
+      }
+    },
+    {
       "key": "gag-sprinkler",
       "png": "sprites/gag-sprinkler.png",
       "json": "sprites/gag-sprinkler.json",

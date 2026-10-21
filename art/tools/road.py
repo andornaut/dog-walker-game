@@ -32,6 +32,13 @@ Usage:
   road.py build             write art/road/*.aseprite, then export
                             public/art/sprites/*.png and *.json with Aseprite
 
+The scenery gags play in the backdrop band, front view at the band's own scale: gag-cat
+(24x24) on the near-left perch, gag-sprinkler (32x24) and gag-kite (36x40) on the near-right
+lawn. gag-kite is a street tree with a red and yellow diamond kite snagged at the top right of
+its crown, its ribboned tail streaming right; flutter (4 frames, 140ms, looping): the kite swings
+1 to 2px on its snag while a wave runs out along the tail. gag-ball (14x14), the rolling ball,
+stays for the play-date card's art.
+
 Everything that stands or waits on the road has a looping idle: people and
 walkers breathe (a 1px bob of the head and shoulders) and the stop sign glints.
 New tags go after the existing ones, so the frame indices the game uses stay put.
@@ -1489,6 +1496,64 @@ def ball(step):
     return g
 
 
+# The kite's tilt per flutter frame, in degrees, its bottom corner swinging right of its snag:
+# it tugs out to 16 and swings back past rest to 4 while the tail's wave runs out along it.
+KITE_TILT = (10, 16, 10, 4)
+
+
+def kite_tree(step):
+    """A street tree with a red and yellow diamond kite snagged on a twig at the top of its crown,
+    its ribboned tail streaming out to the right in the wind. The game stands it on the near-right
+    lawn; the outline under its root flare is on the sprite's row 38."""
+    g = Grid(36, 40)
+    # the kite's red and yellow take one plum outline, so its diamond reads as one shape
+    g.edge = lambda c: K["plum"] if c in (K["red"], K["yellow"]) else DARKER[DARKER[c]]
+    # trunk, a fork into the crown and the root flare
+    g.rect(9, 20, 4, 18, "brown")
+    g.rect(12, 20, 1, 18, "dbrown")
+    g.rect(8, 37, 6, 1, "dbrown")
+    g.p(8, 21, "brown")
+    g.p(13, 21, "dbrown")
+    # crown: three lobes, lit from the top left
+    g.ell(10.5, 14, 10, 7.5, "green", "dgreen")
+    g.ell(5.5, 9.5, 5.5, 5, "green", "dgreen")
+    g.ell(13.5, 7, 7, 6, "green", "dgreen")
+    for x, y in ((4, 15), (9, 18), (15, 15), (17, 11), (8, 12)):
+        g.p(x, y, "dgreen")
+    for x, y in ((3, 8), (4, 7), (5, 7), (10, 4), (11, 3), (12, 3)):
+        g.p(x, y, "yellow")
+    # the twig the kite is caught on, poking out of the crown's top right
+    for x, y in ((18, 4), (19, 3), (20, 2)):
+        g.p(x, y, "dbrown")
+    # the kite, hung from its top corner on the twig's tip and swinging about it
+    a = -math.radians(KITE_TILT[step])
+    top = (21.5, 1.5)
+
+    def at(u, v):
+        return (top[0] + u * math.cos(a) - v * math.sin(a), top[1] + u * math.sin(a) + v * math.cos(a))
+
+    left, right, cross, bottom = at(-5, 5), at(5, 5), at(0, 5), at(0, 13)
+    g.tri(top, cross, left, "red")
+    g.tri(top, right, cross, "yellow")
+    g.tri(left, cross, bottom, "yellow")
+    g.tri(cross, right, bottom, "red")
+    g.p(*top, "dbrown")
+    # the tail: a white ribbon streaming right from the kite's bottom corner, its wave moving
+    # out along it, with a bow every four pixels
+    bx, by = bottom
+    phase = step * math.pi / 2
+    for i in range(1, 14):
+        t = i / 13
+        x = bx + i * 0.75
+        y = by + i * 0.45 + math.sin(phase - i * 0.75) * 1.6 * t
+        bow = i % 4 == 2
+        g.p(x, y, ("red" if i % 8 == 2 else "yellow") if bow else "white")
+        if bow:
+            g.p(x, y - 1, "red" if i % 8 == 2 else "yellow")
+            g.p(x, y + 1, "red" if i % 8 == 2 else "yellow")
+    return g
+
+
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     def frames(gs, outline=True):
@@ -1536,6 +1601,7 @@ def sprites():
                       ("react", frames([cat(1, alert=True), cat(2, alert=True)]), 200)]
     yield "gag-sprinkler", [("spray", frames(sprinkler(i) for i in range(4)), 140)]
     yield "gag-ball", [("roll", frames(ball(i) for i in range(4)), 90)]
+    yield "gag-kite", [("flutter", frames(kite_tree(i) for i in range(4)), 140)]
     # the sheen crosses the sign's top-left half, lit side, then the sign rests for two frames
     yield "stop-sign", [("idle", frames(big(stop_sign, c) for c in (None, None, 18, 24)), 400)]
     chatty = dict(legs="brown", shoes="dbrown")

@@ -1,0 +1,46 @@
+{ "frames": {
+   "gag-kite 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 36, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 40 },
+    "sourceSize": { "w": 36, "h": 40 },
+    "duration": 140
+   },
+   "gag-kite 1.aseprite": {
+    "frame": { "x": 36, "y": 0, "w": 36, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 40 },
+    "sourceSize": { "w": 36, "h": 40 },
+    "duration": 140
+   },
+   "gag-kite 2.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 36, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 40 },
+    "sourceSize": { "w": 36, "h": 40 },
+    "duration": 140
+   },
+   "gag-kite 3.aseprite": {
+    "frame": { "x": 108, "y": 0, "w": 36, "h": 40 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 40 },
+    "sourceSize": { "w": 36, "h": 40 },
+    "duration": 140
+   }
+ },
+ "meta": {
+  "app": "http://www.aseprite.org/",
+  "version": "1.2.30-x64",
+  "image": "gag-kite.png",
+  "format": "RGBA8888",
+  "size": { "w": 144, "h": 40 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "flutter", "from": 0, "to": 3, "direction": "forward" }
+  ]
+ }
+}
