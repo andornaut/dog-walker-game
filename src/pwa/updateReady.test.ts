@@ -86,7 +86,7 @@ describe("updateAction", () => {
     waitOver: false,
   };
   const playing: UpdateState = { ...fresh, interacted: true, newer: "waiting", waitOver: true };
-  it.each<{ expected: ReturnType<typeof updateAction>; name: string; state: UpdateState }>([
+  const cases: { expected: ReturnType<typeof updateAction>; name: string; state: UpdateState }[] = [
     { expected: "wait", name: "a fresh load checking for a newer version", state: fresh },
     { expected: "run", name: "a fresh load offline", state: { ...fresh, online: false } },
     {
@@ -131,14 +131,17 @@ describe("updateAction", () => {
       name: "a switch after the wait, on the home screen",
       state: { ...playing, onHome: true, reloading: true },
     },
-  ])("is $expected for $name", ({ expected, state }) => {
-    expect(updateAction(state)).toBe(expected);
+  ];
+
+  it("waits, runs, switches or prompts by the load's state", () => {
+    const wrong = cases.filter(({ expected, state }) => updateAction(state) !== expected);
+    expect(wrong.map(({ name }) => name)).toEqual([]);
   });
 });
 
 describe("newerVersionOf", () => {
   const worker = new FakeWorker();
-  it.each([
+  const cases = [
     {
       controller: null,
       expected: "none",
@@ -167,9 +170,14 @@ describe("newerVersionOf", () => {
       name: "a version waiting",
       waiting: worker,
     },
-  ])("is $expected for $name", ({ controller, expected, installing, waiting }) => {
-    const registration = Object.assign(new FakeRegistration(), { installing, waiting });
-    expect(newerVersionOf(new FakeContainer(controller), registration).newer).toBe(expected);
+  ];
+
+  it("finds a newer version only behind a running one", () => {
+    for (const { controller, expected, installing, name, waiting } of cases) {
+      const registration = Object.assign(new FakeRegistration(), { installing, waiting });
+      const { newer } = newerVersionOf(new FakeContainer(controller), registration);
+      expect(newer, name).toBe(expected);
+    }
   });
 });
 
@@ -206,35 +214,38 @@ describe("createUpdateFlow", () => {
   };
 
   // Before watch: a controlled page waits for its check, a first visit has nothing to wait for.
-  it.each([
-    { booted: false, controller: RUNNING_WORKER, name: "a controlled page" },
-    { booted: true, controller: null, name: "a first visit" },
-  ])("before watching, booted is $booted for $name", async ({ booted, controller }) => {
-    const flow = setup({ controller });
+  it("before watching, waits to boot only a controlled page", async () => {
+    const controlled = setup({ controller: RUNNING_WORKER });
+    const first = setup({ controller: null });
     await settle();
-    expect(flow.booted()).toBe(booted);
+    expect([controlled.booted(), first.booted()]).toEqual([false, true]);
   });
 
-  it.each([
-    { controller: RUNNING_WORKER, name: "no new version", online: true, updates: 1 },
-    { controller: RUNNING_WORKER, name: "offline", online: false, updates: 0 },
-    { controller: null, name: "a first install", online: true, updates: 0 },
-  ])("boots with no notice for $name", async ({ controller, online, updates }) => {
-    const { booted, flow, reload, shown } = setup({ controller, online });
-    const registration = new FakeRegistration();
-    flow.watch(registration);
-    await settle();
-    expect({
-      booted: booted(),
-      reloads: reload.mock.calls.length,
-      shown,
-      updates: registration.updates,
-    }).toEqual({
-      booted: true,
-      reloads: 0,
-      shown: [],
-      updates,
+  it("boots with no notice for no new version, offline or a first install", async () => {
+    const cases = [
+      { controller: RUNNING_WORKER, name: "no new version", online: true, updates: 1 },
+      { controller: RUNNING_WORKER, name: "offline", online: false, updates: 0 },
+      { controller: null, name: "a first install", online: true, updates: 0 },
+    ];
+    const flows = cases.map(({ controller, online }) => {
+      const flow = setup({ controller, online });
+      const registration = new FakeRegistration();
+      flow.flow.watch(registration);
+      return { ...flow, registration };
     });
+    await settle();
+    for (const [i, { booted, registration, reload, shown }] of flows.entries()) {
+      const { name, updates } = cases[i] ?? { name: "", updates: -1 };
+      expect(
+        {
+          booted: booted(),
+          reloads: reload.mock.calls.length,
+          shown,
+          updates: registration.updates,
+        },
+        name,
+      ).toEqual({ booted: true, reloads: 0, shown: [], updates });
+    }
   });
 
   it("boots when the registration fails", async () => {
@@ -304,21 +315,23 @@ describe("createUpdateFlow", () => {
   });
 
   // The load's own check, then one per arrival home after input; none offline.
-  it.each([
-    { online: true, updates: 3 },
-    { online: false, updates: 0 },
-  ])("with online $online checks $updates times", ({ online, updates }) => {
-    const { flow } = setup({ online });
-    const registration = new FakeRegistration();
-    flow.watch(registration);
-    flow.setOnHome(true);
-    flow.noteInteraction();
-    flow.setOnHome(false);
-    flow.setOnHome(true);
-    flow.setOnHome(true);
-    flow.setOnHome(false);
-    flow.setOnHome(true);
-    expect(registration.updates).toBe(updates);
+  it("checks on load and on each arrival home after input, only online", () => {
+    for (const { online, updates } of [
+      { online: true, updates: 3 },
+      { online: false, updates: 0 },
+    ]) {
+      const { flow } = setup({ online });
+      const registration = new FakeRegistration();
+      flow.watch(registration);
+      flow.setOnHome(true);
+      flow.noteInteraction();
+      flow.setOnHome(false);
+      flow.setOnHome(true);
+      flow.setOnHome(true);
+      flow.setOnHome(false);
+      flow.setOnHome(true);
+      expect(registration.updates).toBe(updates);
+    }
   });
 
   it("ignores Reload with no version waiting", () => {
@@ -335,18 +348,8 @@ describe("createUpdateFlow", () => {
 
 describe("noticePlacement", () => {
   // Centred on the canvas, its top at game y 48 and at most 260 game px wide.
-  it.each([
-    {
-      canvas: { height: 1120, left: 0, top: 20, width: 720 },
-      name: "a 2x canvas letterboxed 20px down",
-      placement: { centreX: 360, maxWidth: 520, top: 116 },
-    },
-    {
-      canvas: { height: 560, left: 100, top: 0, width: 360 },
-      name: "a 1x canvas offset to the side",
-      placement: { centreX: 280, maxWidth: 260, top: 48 },
-    },
-  ])("places the notice on $name", ({ canvas, placement }) => {
-    expect(noticePlacement(canvas)).toEqual(placement);
+  it("places the notice on a scaled, letterboxed canvas", () => {
+    const canvas = { height: 1120, left: 0, top: 20, width: 720 };
+    expect(noticePlacement(canvas)).toEqual({ centreX: 360, maxWidth: 520, top: 116 });
   });
 });

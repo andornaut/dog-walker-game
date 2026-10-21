@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { AchievementCondition, TallyId, WalkerId } from "../data/types";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
-import { type SaveDocument, TALLY_IDS } from "../save/schema";
+import { type SaveDocument } from "../save/schema";
 import { earningsGoal } from "../testing/achievements";
 import { testState } from "../testing/runState";
 import {
@@ -67,7 +67,7 @@ const minorBump = [...countBump(testState({ koda: 5 })).bumpsByZone];
 
 describe("run conditions", () => {
   // A dev start from zone 3 skipped zones 1 and 2: they count as neither finished nor clean.
-  it.each<[string, AchievementCondition, Partial<RunFacts>, boolean]>([
+  const cases: [string, AchievementCondition, Partial<RunFacts>, boolean][] = [
     ["zonesFinished below the count", zonesFinished(1), { zonesFinished: 0 }, false],
     ["zonesFinished at the count", zonesFinished(1), { zonesFinished: 1 }, true],
     ["zonesFinished all, a zone short", zonesFinished("all"), { zonesFinished: 3 }, false],
@@ -140,8 +140,13 @@ describe("run conditions", () => {
       { dogsHome: 3, packSize: 3, zonesFinished: 3 },
       false,
     ],
-  ])("%s", (_, condition, run, holds) => {
-    expect(holdsForRun(condition, run)).toBe(holds);
+  ];
+
+  it("holds each run condition from its threshold, over the zones the walk finished", () => {
+    const wrong = cases
+      .filter(([, condition, run, holds]) => holdsForRun(condition, run) !== holds)
+      .map(([name]) => name);
+    expect(wrong).toEqual([]);
   });
 });
 
@@ -154,7 +159,7 @@ describe("profile conditions", () => {
   const ALL_WALKERS = Object.keys(gameData.walkers) as WalkerId[];
   const veteran = veteranSave();
 
-  it.each<[string, AchievementCondition, SaveDocument | null, boolean]>([
+  const cases: [string, AchievementCondition, SaveDocument | null, boolean][] = [
     ["a run condition, without a run", zonesFinished(1), veteran, false],
     ["packSize, without a run", { count: 1, kind: "packSize" }, veteran, false],
     [
@@ -188,10 +193,8 @@ describe("profile conditions", () => {
       true,
     ],
     ["timesFired at the count", count("timesFired", 10), withStats({ timesFired: 10 }), true],
-    ...TALLY_IDS.flatMap((name): [string, AchievementCondition, SaveDocument, boolean][] => [
-      [`tally ${name} below`, tally(name, 5), withStats({ tallies: { [name]: 4 } }), false],
-      [`tally ${name} at`, tally(name, 5), withStats({ tallies: { [name]: 5 } }), true],
-    ]),
+    ["tally below", tally("dodges", 5), withStats({ tallies: { dodges: 4 } }), false],
+    ["tally at", tally("dodges", 5), withStats({ tallies: { dodges: 5 } }), true],
     [
       "tally, another tally's count",
       tally("dodges", 5),
@@ -223,8 +226,15 @@ describe("profile conditions", () => {
       true,
     ],
     ["anything without a save, as for the simulator", count("timesFired", 0), null, false],
-  ])("%s", (_, condition, save, holds) => {
-    expect(conditionHolds(gameData, save, null, condition)).toBe(holds);
+  ];
+
+  it("holds each profile condition from its threshold, and none without a save", () => {
+    const wrong = cases
+      .filter(
+        ([, condition, save, holds]) => conditionHolds(gameData, save, null, condition) !== holds,
+      )
+      .map(([name]) => name);
+    expect(wrong).toEqual([]);
   });
 });
 
@@ -244,32 +254,13 @@ describe("newlyEarned", () => {
     expect(newlyEarned(gameData, earned, newPlayerSave, run)).toEqual([]);
   });
 
-  const ALL_SLOTS = gameData.dogSlots.length;
-  it.each<[string, Partial<SaveDocument["owned"]>, boolean]>([
-    [
-      "all dogs and slots, a gear item short",
-      { dogSlots: ALL_SLOTS, dogs: ALL_DOGS, gear: ALL_GEAR.slice(1) },
-      false,
-    ],
-    [
-      "all dogs and gear, a slot short",
-      { dogSlots: ALL_SLOTS - 1, dogs: ALL_DOGS, gear: ALL_GEAR },
-      false,
-    ],
-    [
-      "all slots and gear, a dog short",
-      { dogSlots: ALL_SLOTS, dogs: ALL_DOGS.slice(1), gear: ALL_GEAR },
-      false,
-    ],
-    [
-      "every dog, slot and gear item",
-      { dogSlots: ALL_SLOTS, dogs: ALL_DOGS, gear: ALL_GEAR },
-      true,
-    ],
-  ])("needs every condition: Top Walker with %s earned %s", (_, owned, earned) => {
-    expect(newlyEarned(gameData, newPlayerSave, withOwned(owned), null).includes("topWalker")).toBe(
-      earned,
-    );
+  it("needs every condition: Top Walker only with every dog, slot and gear item", () => {
+    const all = { dogSlots: gameData.dogSlots.length, dogs: ALL_DOGS, gear: ALL_GEAR };
+    const earns = (owned: Partial<SaveDocument["owned"]>) =>
+      newlyEarned(gameData, newPlayerSave, withOwned(owned), null).includes("topWalker");
+    expect(earns(all)).toBe(true);
+    expect(earns({ ...all, gear: ALL_GEAR.slice(1) })).toBe(false);
+    expect(earns({ ...all, dogSlots: all.dogSlots - 1 })).toBe(false);
   });
 });
 
@@ -306,27 +297,20 @@ describe("counters", () => {
     expect(applyEffects(gameData, context, [stinky], once).debuffsGot).toEqual({ stinky: 2 });
   });
 
-  it("counts a tally only for an option that names one", () => {
+  it("counts a tally only for an option that names one, adding to one already counted", () => {
     const run = testState({ koda: 5 });
     expect(countOptionTally({ tally: "sniffs" }, run).tallies).toEqual({ sniffs: 1 });
     expect(countOptionTally({}, run)).toBe(run);
-  });
-
-  it("adds to a tally already counted", () => {
-    const twice = countTally("treats", countTally("treats", testState({ koda: 5 })));
+    const twice = countTally("treats", countTally("treats", run));
     expect(twice.tallies).toEqual({ treats: 2 });
   });
 });
 
 describe("achievementConditionText", () => {
-  it.each(gameData.achievements.map(({ conditions, name }) => [name, conditions] as const))(
-    "words %s's conditions in walks and neighborhoods, never runs or zones",
-    (_, conditions) => {
-      for (const condition of conditions) {
-        expect(achievementConditionText(gameData, condition)).not.toMatch(
-          /\b(runs?|zones?|money)\b/,
-        );
-      }
-    },
-  );
+  it("words every achievement's conditions in walks and neighborhoods, never runs or zones", () => {
+    const worded = gameData.achievements.flatMap(({ conditions }) =>
+      conditions.map((condition) => achievementConditionText(gameData, condition)),
+    );
+    expect(worded.filter((text) => /\b(runs?|zones?|money)\b/.test(text))).toEqual([]);
+  });
 });

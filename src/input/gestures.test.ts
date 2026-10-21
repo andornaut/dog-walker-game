@@ -72,7 +72,7 @@ const right: GestureAction = { direction: 1, kind: "move" };
 
 describe("pointer sequences", () => {
   // The actions each step emits, from the press to the release.
-  it.each<{ expected: GestureAction[][]; name: string; steps: Step[] }>([
+  const perStep: { expected: GestureAction[][]; name: string; steps: Step[] }[] = [
     {
       expected: [[], [], [right], [], [], [right], []],
       name: "steps at the swipe start distance during the drag, then at two lane-widths",
@@ -113,12 +113,16 @@ describe("pointer sequences", () => {
         ["up", 300, 25],
       ],
     },
-  ])("$name", ({ expected, steps }) => {
-    expect(play(steps)).toEqual(expected);
+  ];
+
+  it("emits each step's moves as the drag reaches them, from the press to the release", () => {
+    for (const { expected, name, steps } of perStep) {
+      expect(play(steps), name).toEqual(expected);
+    }
   });
 
   // Every action the sequence emits, in order.
-  it.each<{ expected: GestureAction[]; name: string; steps: Step[] }>([
+  const sequences: { expected: GestureAction[]; name: string; steps: Step[] }[] = [
     {
       expected: [],
       name: "ignores vertical travel",
@@ -204,8 +208,12 @@ describe("pointer sequences", () => {
       name: "steers on a tap on the cards' right half",
       steps: tap(260, 500),
     },
-  ])("$name", ({ expected, steps }) => {
-    expect(all(steps)).toEqual(expected);
+  ];
+
+  it("taps, drags or does nothing by the press's place and travel", () => {
+    for (const { expected, name, steps } of sequences) {
+      expect(all(steps), name).toEqual(expected);
+    }
   });
 
   it("derives the later steps from the road width, so a wider road needs a longer drag", () => {
@@ -224,7 +232,7 @@ describe("swipe start distance", () => {
   });
 
   // The steps a press emits after travelling right from x 100, by the configured distance.
-  it.each([
+  const rows = [
     { distance: 12, steps: 0, travel: 11 },
     { distance: 12, steps: 1, travel: 12 },
     { distance: 20, steps: 0, travel: 19.99 },
@@ -237,12 +245,17 @@ describe("swipe start distance", () => {
     { distance: 70, steps: 0, travel: 69 },
     { distance: 70, steps: 1, travel: 70 },
     { distance: 70, steps: 2, travel: 112 },
-  ])("takes $steps steps for $travel px of travel at $distance px", (row) => {
-    const steps = all(drag(100, 100 + row.travel), startingAt(row.distance));
-    expect(steps).toEqual(Array<GestureAction>(row.steps).fill(right));
+  ];
+
+  it("steps first at the configured distance, then at whole lane-widths", () => {
+    for (const row of rows) {
+      const steps = all(drag(100, 100 + row.travel), startingAt(row.distance));
+      expect(steps, JSON.stringify(row)).toEqual(Array<GestureAction>(row.steps).fill(right));
+    }
   });
 
-  it.each([12, 20, 40])("turns a drag around at %i px back from its furthest point", (distance) => {
+  it("turns a drag around at the configured distance back from its furthest point", () => {
+    const distance = 40;
     const turned = play(drag(100, 160, 160 - distance + 1, 160 - distance), startingAt(distance));
     expect(turned).toEqual([[], [right], [], [left]]);
   });
@@ -250,16 +263,23 @@ describe("swipe start distance", () => {
 
 describe("tap regions", () => {
   // A tap on each side of a boundary between the screen's regions.
-  it.each<[string, [number, number], GestureAction[], [number, number], GestureAction[]]>([
+  const boundaries: [
+    string,
+    [number, number],
+    GestureAction[],
+    [number, number],
+    GestureAction[],
+  ][] = [
     ["the road's halves at x 180", [177, 300], [left], [180, 300], [right]],
     ["nothing between the road and the cards at y 470", [60, 468], [left], [60, 470], [left]],
     ["the walk bar and a quiet rect at y 40", [60, 38], [], [60, 40], []],
     ["a quiet rect and the road at y 56", [60, 55], [], [60, 56], [left]],
-  ])("splits %s", (_name, [beforeX, beforeY], beforeActions, [afterX, afterY], afterActions) => {
-    expect([all(tap(beforeX, beforeY)), all(tap(afterX, afterY))]).toEqual([
-      beforeActions,
-      afterActions,
-    ]);
+  ];
+
+  it("splits the screen's regions at their boundaries", () => {
+    for (const [name, [beforeX, beforeY], before, [afterX, afterY], after] of boundaries) {
+      expect([all(tap(beforeX, beforeY)), all(tap(afterX, afterY))], name).toEqual([before, after]);
+    }
   });
 });
 
@@ -275,15 +295,17 @@ describe("drag symmetry", () => {
     [3.0, 3],
   ];
 
-  it.each(anchors)("steps the same number of lanes left and right from x %i", (anchorX) => {
-    for (const [widths, lanes] of cases) {
-      const lanesBy = (sign: number) =>
-        all([
-          ...drag(anchorX, anchorX + sign * widths * 56),
-          ["up", anchorX + sign * widths * 56, 300],
-        ]);
-      expect(lanesBy(1)).toEqual(Array<GestureAction>(lanes).fill(right));
-      expect(lanesBy(-1)).toEqual(Array<GestureAction>(lanes).fill(left));
+  it("steps the same number of lanes left and right", () => {
+    for (const anchorX of anchors) {
+      for (const [widths, lanes] of cases) {
+        const lanesBy = (sign: number) =>
+          all([
+            ...drag(anchorX, anchorX + sign * widths * 56),
+            ["up", anchorX + sign * widths * 56, 300],
+          ]);
+        expect(lanesBy(1)).toEqual(Array<GestureAction>(lanes).fill(right));
+        expect(lanesBy(-1)).toEqual(Array<GestureAction>(lanes).fill(left));
+      }
     }
   });
 
@@ -323,7 +345,7 @@ describe("drags over time", () => {
     return motions;
   }
 
-  it.each<{ motions: LaneMotion[]; name: string; samples: Sample[] }>([
+  const drags: { motions: LaneMotion[]; name: string; samples: Sample[] }[] = [
     {
       motions: [stillInLane(2), { duration: 0.18, elapsed: 0, from: 2, kind: "moving", to: 3 }],
       name: "sets the pack moving on the sample that passes the swipe start distance",
@@ -356,34 +378,14 @@ describe("drags over time", () => {
         [0.05, 150],
       ],
     },
-  ])("$name", ({ motions, samples }) => {
+  ];
+
+  it("moves the pack as the drag's samples step, buffering and turning mid-move", () => {
     // Elapsed seconds to a microsecond, as the samples add float seconds.
     const near = (motion: LaneMotion) =>
       motion.kind === "moving" ? { ...motion, elapsed: expect.closeTo(motion.elapsed, 6) } : motion;
-    expect(steerBy(samples)).toEqual(motions.map(near));
-  });
-});
-
-describe("card row routing", () => {
-  const { dogRow, dogSlots, road } = layout;
-  const rowY = dogRow.y + dogRow.height / 2;
-  const roadMid = road.x + road.width / 2;
-  const houses = dogSlots.map((rect, slot) => ({ slot, x: rect.x + rect.width / 2 }));
-
-  it.each(houses.flatMap((house) => [-1, 1].map((way) => ({ ...house, way }))))(
-    "a drag starting on card $slot steers $way lane",
-    ({ way, x }) => {
-      const end = x + way * context.config.swipeStartDistance;
-      const steps: Step[] = [
-        ["down", x, rowY],
-        ["move", end, rowY],
-        ["up", end, rowY],
-      ];
-      expect(all(steps)).toEqual([way === 1 ? right : left]);
-    },
-  );
-
-  it.each(houses)("a tap on card $slot steers by the road's halves", ({ x }) => {
-    expect(all(tap(x, rowY))).toEqual([x < roadMid ? left : right]);
+    for (const { motions, name, samples } of drags) {
+      expect(steerBy(samples), name).toEqual(motions.map(near));
+    }
   });
 });

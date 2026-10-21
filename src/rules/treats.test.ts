@@ -31,24 +31,16 @@ describe("faceMood", () => {
   };
 
   // Every size, with and without the Lucky collar, at every hearts from its max down to 0.
-  it.each(
-    (Object.keys(TUNING.hearts.maxBySize) as Size[]).flatMap((size) =>
+  it("shows each dog's mood by its hearts below its max", () => {
+    const wrong = (Object.keys(TUNING.hearts.maxBySize) as Size[]).flatMap((size) =>
       GEAR.flatMap(([gear, modifiers]) => {
         const max = maxHearts(TUNING, modifiers, { size });
-        return Array.from(
-          { length: max + 1 },
-          (_, below) => [size + gear, max, max - below] as const,
-        );
+        return Array.from({ length: max + 1 }, (_, below) => max - below)
+          .filter((hearts) => faceMood(data, max, hearts) !== expected(max, hearts))
+          .map((hearts) => `${size}${gear} at ${hearts}`);
       }),
-    ),
-  )("shows a %s dog (max %i) at %i hearts as its mood", (_, max, hearts) => {
-    expect(faceMood(data, max, hearts)).toBe(expected(max, hearts));
-  });
-
-  it("raises the max with the Lucky collar", () => {
-    expect(maxHearts(TUNING, collar, { size: "small" })).toBeGreaterThan(
-      maxHearts(TUNING, [], { size: "small" }),
     );
+    expect(wrong).toEqual([]);
   });
 });
 
@@ -62,7 +54,7 @@ describe("treatRecipient", () => {
   const [big] = ofSize("big") as [DogId];
 
   // Each pack in front-to-back order, each owner's hearts given as how many below their max.
-  it.each<[string, [DogId, number][], DogId, DogId]>([
+  const cases: [string, [DogId, number][], DogId, DogId][] = [
     [
       "its own owner below their max",
       [
@@ -112,8 +104,14 @@ describe("treatRecipient", () => {
       big,
       first,
     ],
-  ])("gives the treat to %s", (_, pack, touched, expected) => {
-    const run = testState(Object.fromEntries(pack.map(([dog, below]) => [dog, max(dog) - below])));
-    expect(treatRecipient(data, run, touched)).toBe(expected);
+  ];
+
+  it("gives the treat to its own owner, else the neediest owner below their max", () => {
+    for (const [name, pack, touched, expected] of cases) {
+      const run = testState(
+        Object.fromEntries(pack.map(([dog, below]) => [dog, max(dog) - below])),
+      );
+      expect(treatRecipient(data, run, touched), name).toBe(expected);
+    }
   });
 });

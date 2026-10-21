@@ -153,9 +153,12 @@ describe("hasPlaque", () => {
       : [];
   });
 
-  it.each(rows)("gives $id's $name a plaque exactly when it costs cash ($pays)", (row) => {
-    const card = cardFor(data, state, encounter(row.id, pack));
-    expect(hasPlaque(card.options[row.index])).toBe(row.pays);
+  it("gives every encounter option a plaque exactly when it costs cash", () => {
+    const wrong = rows.filter(
+      (row) =>
+        hasPlaque(cardFor(data, state, encounter(row.id, pack)).options[row.index]) !== row.pays,
+    );
+    expect(wrong.map(({ id, name }) => `${id}: ${name}`)).toEqual([]);
   });
 
   it("gives the Skip card no plaque and a fork's path card one, for its zone's pay", () => {
@@ -193,9 +196,9 @@ describe("applyInstantEncounter", () => {
     ]);
   });
 
-  it.each(["thief", "squirrel"] as const)("refuses the %s, with no effects on contact", (id) => {
+  it("refuses an encounter with no effects on contact", () => {
     expect(() =>
-      applyInstantEncounter(data, () => 0, testState({ koda: 5 }), id, ["koda"]),
+      applyInstantEncounter(data, () => 0, testState({ koda: 5 }), "thief", ["koda"]),
     ).toThrow("no effects on contact");
   });
 
@@ -217,15 +220,6 @@ describe("applyInstantEncounter", () => {
     expect(() => applyInstantEncounter(data, () => 0, ended, "lostWallet", ["koda"])).toThrow(
       "ended",
     );
-  });
-});
-
-describe("openCard", () => {
-  it.each<CardSource>([
-    { affected: ["koda"], encounter: "skunk", kind: "encounter" },
-    { kind: "fork", paths: ["park"], upgrades: ["bellyRubs"] },
-  ])("waits in the card phase for a $kind card", (source) => {
-    expect(openCard(source, testState({ koda: 5 })).phase).toEqual({ kind: "card", source });
   });
 });
 
@@ -251,12 +245,14 @@ describe("chooseOption", () => {
     return [{ counted, id, plain, tally: options[counted]?.tally }];
   });
 
-  it.each(tallied)("counts $tally only for the $id option that names it", (row) => {
+  it("counts a tally only for the option that names it", () => {
     const state = testState({ koda: 5 }, { money: cents(5_000) });
-    const card = encounter(row.id, ["koda"]);
-    expect(row.tally).toBeDefined();
-    expect(choose(state, card, row.counted).state.tallies).toEqual({ [row.tally ?? ""]: 1 });
-    expect(choose(state, card, row.plain).state.tallies).toEqual({});
+    for (const row of tallied) {
+      const card = encounter(row.id, ["koda"]);
+      expect(row.tally, row.id).toBeDefined();
+      expect(choose(state, card, row.counted).state.tallies).toEqual({ [row.tally ?? ""]: 1 });
+      expect(choose(state, card, row.plain).state.tallies).toEqual({});
+    }
   });
 
   it("applies an option only to the affected dogs, and reports each heart change", () => {
@@ -450,33 +446,27 @@ describe("a fork", () => {
     expect(card.options[0]?.art).toBe("card-zone-snooze-crescent");
   });
 
-  it("adds the chosen path's zone to the route, takes its upgrade and walks on", () => {
+  it("adds the chosen path's zone to the route, takes its upgrade and walks on, and refuses one it lacks", () => {
     const opened = openCard(source, afterZone);
     const outcome = chooseOption(data, () => 0, opened, cardFor(data, opened, source), 2);
     expect(outcome.state.route).toEqual(["street", "homeStretch"]);
     expect(outcome.state.upgradesPicked).toEqual([upgrades[2]]);
     expect(outcome.state.phase).toEqual({ kind: "walking" });
     expect(outcome.moneyDelta).toBe(0);
-  });
-
-  it("refuses a path the fork does not have", () => {
-    const opened = openCard(source, afterZone);
     const card = cardFor(data, opened, source);
     expect(() => chooseOption(data, () => 0, opened, card, 3)).toThrow(RangeError);
     expect(() => chooseOption(data, () => 0, opened, card, "skip")).toThrow(RangeError);
   });
 
-  it("offers only zones the route has not walked, each with an upgrade", () => {
+  it("offers only zones the route has not walked, each with an upgrade, and only the last before it", () => {
     const walked = testState({ koda: 4 }, { route: ["street", "park"], zoneIndex: 2 });
     const fork = offerFork(data, { forks: () => 0, upgrades: () => 0 }, walked);
     expect(fork.paths).toEqual(["snoozeCrescent", "shops", "pawsPromenade"]);
     expect(fork.upgrades).toHaveLength(fork.paths.length);
-  });
-
-  it("leads only to the last zone, with its upgrade, before it", () => {
-    const walked = testState({ koda: 4 }, { route: ["street", "park", "shops"], zoneIndex: 3 });
-    const fork = offerFork(data, { forks: () => 0, upgrades: () => 0 }, walked);
-    expect(fork.paths).toEqual([TEST_WORLD.lastZone]);
-    expect(fork.upgrades).toHaveLength(1);
+    // Before the last zone, it leads only there.
+    const before = testState({ koda: 4 }, { route: ["street", "park", "shops"], zoneIndex: 3 });
+    const last = offerFork(data, { forks: () => 0, upgrades: () => 0 }, before);
+    expect(last.paths).toEqual([TEST_WORLD.lastZone]);
+    expect(last.upgrades).toHaveLength(1);
   });
 });

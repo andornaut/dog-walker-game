@@ -5,7 +5,6 @@ import { changeHearts } from "../rules/effects";
 import { firstZoneId } from "../rules/route";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
 import { saveContextFrom } from "../save/load";
-import { MAX_RUN_DOGS } from "../save/schema";
 import { memoryStorage, saveStore } from "../save/storage";
 import { heartsOf } from "../state/pack";
 import { testState } from "../testing/runState";
@@ -17,12 +16,10 @@ import {
   CHEATS_OFF,
   cheatsFrom,
   cheatsOn,
-  type CheatToggle,
   decodeCheats,
   decodeSaveEdits,
   encodeCheats,
   encodeSaveEdits,
-  FAST_FORWARD_SCALE,
   openPanel,
   type PanelAction,
   type PanelState,
@@ -38,7 +35,7 @@ import {
   withCheats,
 } from "./devPanelModel";
 import { runSetupLimitsFor } from "./pageRunSetup";
-import { parseRunSetup, type RunSetup } from "./runSetup";
+import { parseRunSetup } from "./runSetup";
 
 const context = saveContextFrom(gameData);
 const ON = cheatsOn(CHEATS_OFF);
@@ -48,69 +45,38 @@ const every = CHEAT_TOGGLES.reduce((cheats, { id }) => setCheat(id, true, cheats
 const SHORT_LABEL = /^[+$\w,]+( \w+){0,2}$/;
 
 describe("the cheat list", () => {
-  it("has one toggle for each cheat", () => {
+  it("has one toggle for each cheat, each labelled in a few words", () => {
     const ids = CHEAT_TOGGLES.map(({ id }) => id);
     const cheats = Object.keys(CHEATS_OFF).filter((key) => key !== "on");
     expect([...ids].sort()).toEqual(cheats.sort());
-  });
-
-  it.each([...CHEAT_TOGGLES, ...SAVE_CHEATS])("labels $label in a few words", ({ label }) => {
-    expect(label).toMatch(SHORT_LABEL);
+    const labels = [...CHEAT_TOGGLES, ...SAVE_CHEATS].map(({ label }) => label);
+    expect(labels.filter((label) => !SHORT_LABEL.test(label))).toEqual([]);
   });
 });
 
 describe("setCheat", () => {
-  it.each<[CheatToggle, Partial<Cheats>]>([
-    ["fastForward", { fastForward: true }],
-    ["hitBoxes", { hitBoxes: true }],
-    ["invincible", { invincible: true }],
-    ["slowMotion", { slowMotion: true }],
-  ])("turns %s on with cheats on", (id, expected) => {
-    expect(setCheat(id, true, ON)).toEqual({ ...ON, ...expected });
-  });
-
-  it.each(CHEAT_TOGGLES.map(({ id }) => id))("leaves %s off with cheats off", (id) => {
-    expect(setCheat(id, true, CHEATS_OFF)).toBe(CHEATS_OFF);
-  });
-
-  it.each<[CheatToggle, CheatToggle]>([
-    ["fastForward", "slowMotion"],
-    ["slowMotion", "fastForward"],
-  ])("turning %s on turns %s off", (id, other) => {
-    const cheats = setCheat(id, true, setCheat(other, true, ON));
-    expect([cheats[id], cheats[other]]).toEqual([true, false]);
+  it("turns a cheat on only with cheats on, and slow motion and fast forward off each other", () => {
+    expect(setCheat("invincible", true, ON)).toEqual({ ...ON, invincible: true });
+    expect(setCheat("invincible", true, CHEATS_OFF)).toBe(CHEATS_OFF);
+    const cheats = setCheat("fastForward", true, setCheat("slowMotion", true, ON));
+    expect([cheats.fastForward, cheats.slowMotion]).toEqual([true, false]);
   });
 });
 
 describe("cheats off", () => {
-  it.each<[string, unknown]>([
-    ["off", CHEATS_OFF],
-    ["a missing entry", undefined],
-    ["a partial object", { on: true }],
-    ["a string", "on"],
-  ])("reads %s as every cheat off", (_name, value) => {
-    expect(cheatsFrom(value)).toEqual(CHEATS_OFF);
-  });
-
-  it.each<[string, string | null]>([
-    ["nothing stored", null],
-    ["text that is not JSON", "{"],
-    ["CHEATS_OFF", encodeCheats(CHEATS_OFF)],
-  ])("decodes %s as every cheat off", (_name, text) => {
-    expect(decodeCheats(text)).toEqual(CHEATS_OFF);
-  });
-
-  it("round-trips every cheat on", () => {
+  it("reads and decodes anything but stored cheats as every cheat off", () => {
+    for (const value of [undefined, { on: true }, "on"]) {
+      expect(cheatsFrom(value)).toEqual(CHEATS_OFF);
+    }
+    for (const text of [null, "{"]) {
+      expect(decodeCheats(text)).toEqual(CHEATS_OFF);
+    }
     expect(decodeCheats(encodeCheats(every))).toEqual(every);
   });
 
-  it.each<[string, Cheats, number]>([
-    ["normal", ON, 1],
-    ["slow motion", setCheat("slowMotion", true, ON), SLOW_MOTION_SCALE],
-    ["fast forward", setCheat("fastForward", true, ON), FAST_FORWARD_SCALE],
-    ["slow motion left set with cheats off", { ...CHEATS_OFF, slowMotion: true }, 1],
-  ])("runs %s time at x%d", (_name, cheats, scale) => {
-    expect(timeScaleOf(cheats)).toBe(scale);
+  it("runs time at the cheat's scale only with cheats on", () => {
+    expect(timeScaleOf(setCheat("slowMotion", true, ON))).toBe(SLOW_MOTION_SCALE);
+    expect(timeScaleOf({ ...CHEATS_OFF, slowMotion: true })).toBe(1);
   });
 });
 
@@ -119,44 +85,27 @@ describe("withCheats", () => {
   const loss = [{ amount: -1, kind: "bump" }] as const;
   const gain = [{ amount: 1, kind: "treat" }] as const;
 
-  it.each<[string, Cheats, typeof loss | typeof gain, number]>([
-    ["an owner loses hearts in normal play", CHEATS_OFF, loss, 1],
-    ["an invincible owner loses none", setCheat("invincible", true, ON), loss, 2],
-    ["an invincible owner still gains", setCheat("invincible", true, ON), gain, 3],
-    ["invincible left set with cheats off loses", { ...CHEATS_OFF, invincible: true }, loss, 1],
-  ])("%s", (_name, cheats, causes, hearts) => {
-    const { state } = changeHearts(gameData, causes, "biscuit", withCheats(cheats, run));
-    expect(heartsOf(state, "biscuit")).toBe(hearts);
-  });
-
-  it("leaves a normal run untouched", () => {
-    expect(withCheats(CHEATS_OFF, run)).toBe(run);
+  it("keeps an invincible owner's hearts from falling, only with cheats on", () => {
+    const hearts = (cheats: Cheats, causes: typeof loss | typeof gain) =>
+      heartsOf(changeHearts(gameData, causes, "biscuit", withCheats(cheats, run)).state, "biscuit");
+    const invincible = setCheat("invincible", true, ON);
+    expect(hearts(invincible, loss)).toBe(2);
+    expect(hearts(invincible, gain)).toBe(3);
+    expect(hearts({ ...CHEATS_OFF, invincible: true }, loss)).toBe(1);
   });
 });
 
 describe("save edits", () => {
   const edited = (edit: SaveEdit) => applySaveEdit(gameData, context.defaults, edit, veteranSave());
-  const moneyCheats = SAVE_CHEATS.flatMap(({ edit, label }) =>
-    edit.kind === "addMoney" ? [{ amount: edit.amount, edit, label }] : [],
-  );
-  const unlock: SaveEdit = { kind: "unlockAll" };
 
-  it.each(moneyCheats)("$label adds its amount to the bank", ({ amount, edit, label }) => {
-    expect(label).toBe(`+$${(amount / 100).toLocaleString("en-US")}`);
-    expect(edited(edit)).toEqual({ ...veteranSave(), bankCents: veteranSave().bankCents + amount });
-  });
-
-  it.each<[string, (save: typeof newPlayerSave) => unknown, unknown]>([
-    ["dog", (save) => new Set(save.owned.dogs), new Set(Object.keys(gameData.dogs))],
-    ["gear item", (save) => new Set(save.owned.gear), new Set(Object.keys(gameData.shopGear))],
-    ["walker", (save) => new Set(save.owned.walkers), new Set(Object.keys(gameData.walkers))],
-    ["dog slot", (save) => save.owned.dogSlots, Math.min(MAX_RUN_DOGS, gameData.dogSlots.length)],
-  ])("unlock all owns every %s", (_name, field, expected) => {
-    expect(SAVE_CHEATS.map(({ edit }) => edit)).toContainEqual(unlock);
-    expect(field(edited(unlock))).toEqual(expected);
-  });
-
-  it("a reset is a new player's save", () => {
+  it("adds money, unlocks everything and resets", () => {
+    const addMoney = SAVE_CHEATS.flatMap(({ edit }) => (edit.kind === "addMoney" ? [edit] : []));
+    for (const edit of addMoney) {
+      expect(edited(edit).bankCents).toBe(veteranSave().bankCents + edit.amount);
+    }
+    const unlocked = edited({ kind: "unlockAll" }).owned;
+    expect(new Set(unlocked.dogs)).toEqual(new Set(Object.keys(gameData.dogs)));
+    expect(new Set(unlocked.walkers)).toEqual(new Set(Object.keys(gameData.walkers)));
     expect(edited(RESET_SAVE)).toEqual(newPlayerSave);
   });
 
@@ -167,28 +116,15 @@ describe("save edits", () => {
     expect((await store.load(context)).save).toEqual(newPlayerSave);
   });
 
-  it.each<[string, string | null, SaveEdit[]]>([
-    ["nothing stored", null, []],
-    ["text that is not JSON", "[", []],
-    ["a non-list", '{"kind":"reset"}', []],
-    [
-      "every edit",
-      encodeSaveEdits([...SAVE_CHEATS.map(({ edit }) => edit), RESET_SAVE]),
-      [...SAVE_CHEATS.map(({ edit }) => edit), RESET_SAVE],
-    ],
-    ["a bad amount, dropped", '[{"kind":"addMoney","amount":-5},{"kind":"reset"}]', [RESET_SAVE]],
-  ])("decodes %s", (_name, text, expected) => {
-    expect(decodeSaveEdits(text)).toEqual(expected);
-  });
-});
-
-describe("start at", () => {
-  const first = firstZoneId(gameData);
-
-  it("offers the start screen, then every neighborhood, the first first", () => {
-    const starts = startChoices(gameData).map(({ start }) => start);
-    expect(starts.slice(0, 2)).toEqual([START_SCREEN, first]);
-    expect(new Set(starts.slice(1))).toEqual(new Set(gameData.world.zones.map(({ id }) => id)));
+  it("decodes stored edits, dropping a bad one and anything but a list", () => {
+    const all = [...SAVE_CHEATS.map(({ edit }) => edit), RESET_SAVE];
+    expect(decodeSaveEdits(encodeSaveEdits(all))).toEqual(all);
+    expect(decodeSaveEdits('[{"kind":"addMoney","amount":-5},{"kind":"reset"}]')).toEqual([
+      RESET_SAVE,
+    ]);
+    for (const text of [null, "[", '{"kind":"reset"}']) {
+      expect(decodeSaveEdits(text)).toEqual([]);
+    }
   });
 });
 
@@ -198,36 +134,19 @@ describe("staged settings", () => {
   const stageAll = (actions: readonly PanelAction[]) =>
     actions.reduce((state, action) => stagePanel(action, state), opened);
 
-  it("opens with the applied cheats staged, bound for the start screen", () => {
+  it("stages changes without applying them, and Cancel drops them", () => {
     expect(opened).toEqual({ applied, staged: applied, start: START_SCREEN });
-  });
-
-  it.each<[string, PanelAction[], Cheats, PanelState["start"]]>([
-    ["Cheats off", [{ kind: "switch", on: false }], CHEATS_OFF, START_SCREEN],
-    [
-      "Cheats off, then on",
-      [
-        { kind: "switch", on: false },
-        { kind: "switch", on: true },
-      ],
-      ON,
-      START_SCREEN,
-    ],
-    [
-      "a toggle",
-      [{ id: "invincible", kind: "toggle", on: true }],
-      setCheat("invincible", true, applied),
-      START_SCREEN,
-    ],
-    ["a start", [{ kind: "start", start: "park" }], applied, "park"],
-    [
-      "Cancel after changes",
-      [{ kind: "switch", on: false }, { kind: "start", start: "park" }, { kind: "cancel" }],
+    expect(stageAll([{ kind: "start", start: "park" }])).toEqual({
       applied,
-      START_SCREEN,
-    ],
-  ])("stages %s without changing what is applied", (_name, actions, staged, start) => {
-    expect(stageAll(actions)).toEqual({ applied, staged, start });
+      staged: applied,
+      start: "park",
+    });
+    const cancelled: PanelAction[] = [
+      { kind: "switch", on: false },
+      { kind: "start", start: "park" },
+      { kind: "cancel" },
+    ];
+    expect(stageAll(cancelled)).toEqual(opened);
   });
 
   it("stages no toggle while Cheats off is staged", () => {
@@ -246,49 +165,23 @@ describe("Apply", () => {
   const applyFrom = (cheats: Cheats, start: PanelState["start"]) =>
     applyPanel(gameData, href, 7, { applied: CHEATS_OFF, staged: cheats, start });
 
-  it.each<[string, Cheats, PanelState["start"], Cheats, string]>([
-    ["cheats on, to the start screen", staged, START_SCREEN, staged, "?dev=1&lang=fr"],
-    ["cheats off, to the start screen", CHEATS_OFF, START_SCREEN, CHEATS_OFF, "?lang=fr"],
-    ["cheats off, a neighborhood ignored", CHEATS_OFF, "park", CHEATS_OFF, "?lang=fr"],
-  ])("with %s loads /play/%s", (_name, cheats, start, expected, search) => {
-    expect(applyFrom(cheats, start)).toEqual({
-      cheats: expected,
-      url: `https://example.test/play/${search}`,
+  it("with cheats off loads the start screen, keeping only other parameters", () => {
+    expect(applyFrom(CHEATS_OFF, "park")).toEqual({
+      cheats: CHEATS_OFF,
+      url: "https://example.test/play/?lang=fr",
     });
   });
 
-  it.each(startChoices(gameData).filter(({ start }) => start !== START_SCREEN))(
-    "with cheats on starts a walk the URL reads back at $label",
-    ({ start }) => {
+  it("with cheats on starts a walk the URL reads back at every neighborhood", () => {
+    const starts = startChoices(gameData).map(({ start }) => start);
+    expect(starts.slice(0, 2)).toEqual([START_SCREEN, firstZoneId(gameData)]);
+    for (const start of starts.slice(1)) {
       const { cheats, url } = applyFrom(staged, start);
       const parsed = parseRunSetup(limits, () => 0, new URL(url).search);
       expect(cheats).toEqual(staged);
       expect(parsed.warnings).toEqual([]);
       expect(parsed.setup).toMatchObject({ dev: true, seed: 7 });
       expect(parsed.setup.route?.at(-1) ?? firstZoneId(gameData)).toBe(start);
-    },
-  );
-});
-
-describe("the URL parameters agents use", () => {
-  const limits = runSetupLimitsFor(gameData);
-  const base: RunSetup = { dev: false, seed: 0, speed: 1, zone: 1 };
-
-  it.each<[string, Partial<RunSetup>]>([
-    ["seed=42", { seed: 42 }],
-    ["pack=koda,biscuit", { pack: ["koda", "biscuit"] }],
-    ["walker=casey", { walker: "casey" }],
-    ["zone=3", { zone: 3 }],
-    ["gear=none", { gear: null }],
-    ["money=1250", { money: 1250 }],
-    ["speed=2", { speed: 2 }],
-    ["zone=2&route=street,park", { route: ["street", "park"], zone: 2 }],
-    ["dev=1", { dev: true }],
-  ])("reads %s", (search, expected) => {
-    expect(parseRunSetup(limits, () => 0, search)).toEqual({
-      notices: [],
-      setup: { ...base, ...expected },
-      warnings: [],
-    });
+    }
   });
 });

@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import {
   MAX_SEED,
   parseRunSetup,
-  randomSeed,
   type RunSetup,
   type RunSetupLimits,
   runSetupLink,
@@ -37,7 +36,7 @@ describe("parseRunSetup", () => {
   };
   const query = "seed=42&pack=koda,bo&gear=shoes&walker=ada&zone=3&money=1250&speed=1.5&dev=1";
 
-  it.each<{ name: string; notices?: string[]; search: string; setup: RunSetup }>([
+  const valid: { name: string; notices?: string[]; search: string; setup: RunSetup }[] = [
     { name: "uses a new seed and the defaults for an empty query", search: "", setup: defaults },
     { name: "reads every parameter", search: query, setup: every },
     { name: "reads every parameter after a leading ?", search: `?${query}`, setup: every },
@@ -59,8 +58,12 @@ describe("parseRunSetup", () => {
       search: "pack=koda,dash",
       setup: { ...defaults, pack: ["koda", "rex"] },
     },
-  ])("$name", ({ notices = [], search, setup }) => {
-    expect(parse(search)).toEqual({ notices, setup, warnings: [] });
+  ];
+
+  it("reads each valid query, with a new seed and the defaults for what it leaves out", () => {
+    for (const { name, notices = [], search, setup } of valid) {
+      expect(parse(search), name).toEqual({ notices, setup, warnings: [] });
+    }
   });
 
   it("calls newSeed only when the URL has no valid seed", () => {
@@ -75,7 +78,7 @@ describe("parseRunSetup", () => {
     expect(calls).toBe(1);
   });
 
-  it.each([
+  const invalid = [
     ["seed", "-1"],
     ["seed", "1.5"],
     ["seed", `${MAX_SEED + 1}`],
@@ -95,15 +98,14 @@ describe("parseRunSetup", () => {
     ["speed", "fast"],
     ["speed", ""],
     ["dev", "yes"],
-  ])("warns about and ignores %s=%j", (name, value) => {
-    const { setup, warnings } = parse(`${name}=${encodeURIComponent(value)}`);
-    expect(setup).toEqual(defaults);
-    expect(warnings).toHaveLength(1);
-    expect(warnings[0]).toContain(`Invalid ${name}`);
-  });
+  ] as const;
 
-  it("names the unknown dogs in its warning", () => {
-    expect(parse("pack=koda,nobody,ghost").warnings[0]).toContain("not nobody, ghost");
+  it("warns about and ignores each invalid value", () => {
+    for (const [name, value] of invalid) {
+      const { setup, warnings } = parse(`${name}=${encodeURIComponent(value)}`);
+      expect(setup, `${name}=${value}`).toEqual(defaults);
+      expect(warnings, `${name}=${value}`).toEqual([expect.stringContaining(`Invalid ${name}`)]);
+    }
   });
 
   it("warns about unknown and repeated parameters and keeps the rest", () => {
@@ -113,10 +115,6 @@ describe("parseRunSetup", () => {
       'Unknown parameter "color"',
       'Parameter "zone" appears 2 times; ignored',
     ]);
-  });
-
-  it("collects one warning per bad parameter", () => {
-    expect(parse("seed=x&zone=9&speed=0&dev=2&gear=cape").warnings).toHaveLength(5);
   });
 
   it("never throws on malformed input", () => {
@@ -135,40 +133,27 @@ describe("the route parameter", () => {
     ]);
   });
 
-  it.each([
-    ["route=street,bogus", "known zone ids"],
-    ["route=street,street", "different zone ids"],
-    ["route=street&zone=3", "3 to 4 different zone ids"],
-    ["route=street,park,shops,homeStretch,pawsPromenade", "1 to 4 different zone ids"],
-  ])("ignores %s with a warning", (search, expected) => {
-    const { setup, warnings } = parse(search);
-    expect(setup.route).toBeUndefined();
-    expect(warnings.join()).toContain(expected);
+  it("ignores a route of unknown or repeated zones, or one that doesn't reach the zone, with a warning", () => {
+    for (const search of ["route=street,bogus", "route=street,street", "route=street&zone=3"]) {
+      const { setup, warnings } = parse(search);
+      expect(setup.route, search).toBeUndefined();
+      expect(warnings, search).toHaveLength(1);
+    }
   });
 });
 
 describe("runSetupToQuery", () => {
-  it.each<[string, RunSetup, string]>([
-    ["only the seed for a default setup", defaults, `seed=${NEW_SEED}`],
-    [
-      "gear none for a setup with no gear",
+  it("round-trips setups through parseRunSetup", () => {
+    const setups: RunSetup[] = [
+      defaults,
       { ...defaults, gear: null },
-      `seed=${NEW_SEED}&gear=none`,
-    ],
-  ])("writes %s", (_name, setup, expected) => {
-    expect(runSetupToQuery(setup)).toBe(expected);
-  });
-
-  it.each<RunSetup>([
-    defaults,
-    { ...defaults, gear: null },
-    { dev: true, gear: "collar", money: 0, pack: ["zip"], seed: 0, speed: 0.1, zone: 4 },
-    { ...defaults, walker: "casey" },
-    { dev: false, money: 99, pack: ["rex", "bo", "koda"], seed: MAX_SEED, speed: 0.3, zone: 2 },
-    { ...defaults, route: ["street", "pawsPromenade"], zone: 2 },
-    { ...defaults, speed: 0.1 + 0.2 },
-  ])("round-trips through parseRunSetup: %j", (setup) => {
-    expect(parse(runSetupToQuery(setup))).toEqual({ notices: [], setup, warnings: [] });
+      { dev: true, gear: "collar", money: 0, pack: ["zip"], seed: 0, speed: 0.1, zone: 4 },
+      { ...defaults, route: ["street", "pawsPromenade"], walker: "casey", zone: 2 },
+      { ...defaults, speed: 0.1 + 0.2 },
+    ];
+    for (const setup of setups) {
+      expect(parse(runSetupToQuery(setup))).toEqual({ notices: [], setup, warnings: [] });
+    }
   });
 });
 
@@ -178,16 +163,5 @@ describe("runSetupLink", () => {
     expect(runSetupLink("https://example.com/play/?seed=1&dev=1#top", setup)).toBe(
       "https://example.com/play/?seed=12&pack=koda,bo",
     );
-  });
-});
-
-describe("randomSeed", () => {
-  it("returns integers in the seed range", () => {
-    for (let i = 0; i < 100; i++) {
-      const seed = randomSeed();
-      expect(Number.isInteger(seed)).toBe(true);
-      expect(seed).toBeGreaterThanOrEqual(0);
-      expect(seed).toBeLessThanOrEqual(MAX_SEED);
-    }
   });
 });

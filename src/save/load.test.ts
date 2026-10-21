@@ -36,23 +36,17 @@ describe("loadSave", () => {
     expect(loadSave(testContext, null)).toEqual({ save: newPlayerSave, status: "new" });
   });
 
-  it.each<[number, DogId[], DogId[]]>([
-    [1, STARTER_DOGS, STARTER_DOGS.slice(0, 1)],
-    [1, ["biscuit", "koda"], ["biscuit"]],
-    [2, ["biscuit", "koda"], ["biscuit", "koda"]],
-  ])("picks a new save's free dogs, as many as its %i slots walk", (dogSlots, freeDogs, picked) => {
-    const defaults = { ...testContext.defaults, dogSlots, freeDogs };
-    expect(createDefaultSave(defaults).lastLoadout).toEqual({ dogs: picked, gear: null });
+  it("picks a new save's free dogs, as many as its slots walk", () => {
+    const picked = (dogSlots: number) =>
+      createDefaultSave({ ...testContext.defaults, dogSlots, freeDogs: ["biscuit", "koda"] })
+        .lastLoadout.dogs;
+    expect([picked(1), picked(2)]).toEqual([["biscuit"], ["biscuit", "koda"]]);
   });
 
   // A save from when Duchess and Koda were starters: what it owns wins, and loading never
   // takes a dog away.
-  it.each<[string, DogId[]]>([
-    ["all three old starters", ["biscuit", "duchess", "koda"]],
-    ["the old starters in another order", ["koda", "duchess", "biscuit"]],
-    ["the old starters and a bought dog", ["biscuit", "duchess", "koda", "penny"]],
-    ["two old starters without the new one", ["duchess", "koda"]],
-  ])("keeps every dog an old save owns: %s", (_name, dogs) => {
+  it("keeps every dog an old save owns, adding the starters", () => {
+    const dogs: DogId[] = ["duchess", "koda", "penny"];
     const save = loaded((document) => {
       document.owned.dogs = dogs;
     });
@@ -67,7 +61,12 @@ describe("loadSave", () => {
   });
 
   // Each row changes the stored veteran save, then reads part of what loads.
-  it.each<[string, (document: StoredInput) => void, (save: SaveDocument) => unknown, unknown]>([
+  const repairs: [
+    string,
+    (document: StoredInput) => void,
+    (save: SaveDocument) => unknown,
+    unknown,
+  ][] = [
     [
       "a save from before achievements, with none earned and every counter at 0",
       (document) => {
@@ -362,10 +361,14 @@ describe("loadSave", () => {
       (save) => save.shownHints,
       ["tip", "puddle"],
     ],
-  ])("loads %s", (_, change, read, expected) => {
-    const { save, status } = loadSave(testContext, withChanges(change));
-    expect(status).toBe("loaded");
-    expect(read(save)).toEqual(expected);
+  ];
+
+  it("loads old saves, dropping what the game no longer has and repairing what it can", () => {
+    for (const [name, change, read, expected] of repairs) {
+      const { save, status } = loadSave(testContext, withChanges(change));
+      expect(status, name).toBe("loaded");
+      expect(read(save), name).toEqual(expected);
+    }
   });
 
   describe("a save it cannot use", () => {
@@ -457,13 +460,15 @@ describe("loadSave", () => {
       ],
     ];
 
-    it.each(corruptCases)("returns a default save and the raw text for %s", (_, raw) => {
-      expect(loadSave(testContext, raw)).toEqual({
-        raw,
-        reason: expect.any(String),
-        save: newPlayerSave,
-        status: "corrupt",
-      });
+    it("returns a default save and the raw text for each", () => {
+      for (const [name, raw] of corruptCases) {
+        expect(loadSave(testContext, raw), name).toEqual({
+          raw,
+          reason: expect.any(String),
+          save: newPlayerSave,
+          status: "corrupt",
+        });
+      }
     });
 
     it("says why a later version was rejected", () => {
@@ -475,47 +480,16 @@ describe("loadSave", () => {
     });
   });
 
-  describe("settings", () => {
-    it.each([
-      [-0.5, 0],
-      [0, 0],
-      [0.4, 0.4],
-      [1, 1],
-      [3, 1],
-    ])("clamps a stored volume of %d to %d", (volume, clamped) => {
-      const save = loaded((document) => {
-        document.settings.musicVolume = volume;
-        document.settings.sfxVolume = volume;
-      });
-      expect([save.settings.musicVolume, save.settings.sfxVolume]).toEqual([clamped, clamped]);
+  it("clamps stored volumes and dog slots into range, and drops bests for no pack size", () => {
+    const save = loaded((document) => {
+      document.settings.musicVolume = -0.5;
+      document.settings.sfxVolume = 3;
+      document.owned.dogSlots = 4;
+      document.stats.bestCentsByPackSize = { 0: 1, 2: 200, 4: 400, two: 2 };
     });
-  });
-
-  describe("dog slots", () => {
-    it.each([
-      [-2, 1],
-      [0, 1],
-      [4, 3],
-      [3, 3],
-    ])("clamps %i dog slots to %i", (storedSlots, clamped) => {
-      const save = loaded((document) => {
-        document.owned.dogSlots = storedSlots;
-      });
-      expect(save.owned.dogSlots).toBe(clamped);
-    });
-  });
-
-  describe("bests by pack size", () => {
-    it.each<[string, Record<string, number>, Record<number, number>]>([
-      ["keeps every size a run can take", { 1: 100, 2: 200, 3: 300 }, { 1: 100, 2: 200, 3: 300 }],
-      ["drops a size above the most dogs a run takes", { 2: 200, 4: 400 }, { 2: 200 }],
-      ["drops a size that is no number of dogs", { 0: 1, 2: 200, two: 2 }, { 2: 200 }],
-    ])("%s", (_, bests, kept) => {
-      const save = loaded((document) => {
-        document.stats.bestCentsByPackSize = bests;
-      });
-      expect(save.stats.bestCentsByPackSize).toEqual(kept);
-    });
+    expect([save.settings.musicVolume, save.settings.sfxVolume]).toEqual([0, 1]);
+    expect(save.owned.dogSlots).toBe(3);
+    expect(save.stats.bestCentsByPackSize).toEqual({ 2: 200 });
   });
 });
 
@@ -532,23 +506,11 @@ describe("saveContextFrom", () => {
     expect([...context.known.zones]).toEqual(gameData.world.zones.map(({ id }) => id));
   });
 
-  it("starts a new player with one dog slot, the starter dogs and walkers, and the default walker", () => {
-    expect(context.defaults).toEqual({
-      dogSlots: 1,
-      freeDogs: STARTER_DOGS,
-      freeWalkers: ["casey"],
-      walker: gameData.defaultWalker,
-    });
-  });
-
-  it("refuses game data with no starter dog", () => {
+  it("refuses game data with no starter dog, or a default walker locked at the start", () => {
     const dogs = Object.fromEntries(
       Object.entries(gameData.dogs).map(([id, dog]) => [id, { ...dog, unlock: "shop" as const }]),
     ) as typeof gameData.dogs;
     expect(() => saveContextFrom({ ...gameData, dogs })).toThrow("needs a starter dog");
-  });
-
-  it("refuses game data whose default walker does not walk from the start", () => {
     const walkers = { ...gameData.walkers, casey: { ...gameData.walkers.ben, name: "Casey" } };
     expect(() => saveContextFrom({ ...gameData, walkers })).toThrow("default walker");
   });

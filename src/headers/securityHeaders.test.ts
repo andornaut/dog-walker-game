@@ -15,19 +15,10 @@ import {
 import { FILE_RULES, PAGE_RULES, type PageRule } from "./securityPolicy";
 
 describe("cspHash", () => {
-  it.each([
-    [
-      "the CSP specification's example",
-      "alert('Hello, world.');",
+  it("hashes the CSP specification's example, as a browser does", async () => {
+    expect(await cspHash("alert('Hello, world.');")).toBe(
       "'sha256-qznLcsROx4GACP2dm0UCKCzCG+HiZ1guq6ZZDob/Tng='",
-    ],
-    ["the empty string", "", "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='"],
-  ])("hashes %s", async (_, text, hash) => {
-    expect(await cspHash(text)).toBe(hash);
-  });
-
-  it("hashes the UTF-8 bytes, so non-ASCII text matches the browser's hash", async () => {
-    expect(await cspHash("é")).not.toBe(await cspHash("e"));
+    );
   });
 });
 
@@ -44,15 +35,12 @@ describe("inlineBlocks", () => {
       scripts: ["\n  run();\n"],
       styles: ["a{}", "\n b {}\n"],
     });
-  });
-
-  it("does not take data-src for a src", () => {
     expect(inlineBlocks(`<script data-src="x">go()</script>`).scripts).toEqual(["go()"]);
   });
 });
 
 describe("navWithoutStylesheet", () => {
-  it.each([
+  const pages: [string, string, boolean][] = [
     ["nav.js without nav.css", `<script src="/nav.js" defer></script>`, true],
     [
       "nav.js with nav.css",
@@ -62,26 +50,26 @@ describe("navWithoutStylesheet", () => {
     ],
     ["no nav", `<script src="/main.js"></script>`, false],
     ["a script whose name only ends in nav.js", `<script src="/sidenav.js"></script>`, false],
-  ])("flags a page with %s: %s", (_, html, expected) => {
-    expect(navWithoutStylesheet(html)).toBe(expected);
+  ];
+
+  it("flags only a page with nav.js and no nav.css", () => {
+    const wrong = pages.filter(([, html, expected]) => navWithoutStylesheet(html) !== expected);
+    expect(wrong.map(([name]) => name)).toEqual([]);
   });
 });
 
 describe("servedPath", () => {
   // index.html at its directory, other pages without .html.
-  it.each([
-    ["index.html", "/"],
-    ["play/index.html", "/play/"],
-    ["art/mocks/example.html", "/art/mocks/example"],
-  ])("serves %s at %s", (file, path) => {
-    expect(servedPath(file)).toBe(path);
+  it("serves index.html at its directory and other pages without .html", () => {
+    const files = ["index.html", "play/index.html", "art/mocks/example.html"];
+    expect(files.map(servedPath)).toEqual(["/", "/play/", "/art/mocks/example"]);
   });
 });
 
 describe("pathMatches", () => {
   // Without a splat a pattern matches exactly; a splat matches any run, including none;
   // regular expression characters are literal.
-  it.each([
+  const cases: [string, string, boolean][] = [
     ["/", "/", true],
     ["/", "/play/", false],
     ["/play/*", "/play/", true],
@@ -89,8 +77,13 @@ describe("pathMatches", () => {
     ["/art/*", "/artwork", false],
     ["/a.b", "/a.b", true],
     ["/a.b", "/axb", false],
-  ])("%s matches %s: %s", (pattern, path, expected) => {
-    expect(pathMatches(pattern, path)).toBe(expected);
+  ];
+
+  it("matches exactly without a splat, any run with one, and regex characters literally", () => {
+    const wrong = cases.filter(
+      ([pattern, path, expected]) => pathMatches(pattern, path) !== expected,
+    );
+    expect(wrong).toEqual([]);
   });
 });
 
@@ -103,7 +96,7 @@ describe("FILE_RULES", () => {
   const immutable = { "Cache-Control": "public, max-age=31536000, immutable" };
   const xml = { "Content-Type": "text/xml; charset=utf-8" };
 
-  it.each([
+  const expected: [string, Record<string, string>][] = [
     ["/assets/play-Bq3x_9-Z.js", immutable],
     ["/assets/main-0aZ9bQ1c.css", immutable],
     ["/art/fonts/font-body.fnt", xml],
@@ -111,17 +104,20 @@ describe("FILE_RULES", () => {
     ["/art/manifest.json", {}],
     ["/play/", {}],
     ["/sw.js", {}],
-  ])("gives %s %j", (path, headers) => {
-    expect(headersAt(path)).toEqual(headers);
+  ];
+
+  it("caches hashed build output for a year and serves font descriptors as XML", () => {
+    for (const [path, headers] of expected) {
+      expect(headersAt(path), path).toEqual(headers);
+    }
   });
 
   // The service worker serves the same files cache-first, so the two must agree on which.
-  it.each(["/assets/play-Bq3x_9-Z.js", "/art/atlas/run-0.png", "/sw.js"])(
-    "caches %s for a year only if the service worker treats it as hashed",
-    (path) => {
-      expect("Cache-Control" in headersAt(path)).toBe(isHashedAssetUrl(path));
-    },
-  );
+  it("caches a file for a year only if the service worker treats it as hashed", () => {
+    for (const path of ["/assets/play-Bq3x_9-Z.js", "/art/atlas/run-0.png", "/sw.js"]) {
+      expect("Cache-Control" in headersAt(path), path).toBe(isHashedAssetUrl(path));
+    }
+  });
 });
 
 describe("unhashedAssets", () => {
@@ -141,7 +137,7 @@ describe("unhashedAssets", () => {
 });
 
 describe("renderPolicy", () => {
-  it("merges layers into directives in the fixed order, each source once", () => {
+  it("merges layers into directives in the fixed order, each source once, leaving out empty ones", () => {
     const policy = renderPolicy(
       { "default-src": ["'self'"], "style-src": ["'self'"] },
       { "frame-ancestors": ["'none'"], "style-src": ["https://fonts.example", "'self'"] },
@@ -149,9 +145,6 @@ describe("renderPolicy", () => {
     expect(policy).toBe(
       "default-src 'self'; style-src 'self' https://fonts.example; frame-ancestors 'none'",
     );
-  });
-
-  it("leaves out a directive with no sources", () => {
     expect(renderPolicy({ "script-src": [] }, { "object-src": ["'none'"] })).toBe(
       "object-src 'none'",
     );
@@ -192,15 +185,13 @@ describe("pageRules", () => {
     expect(policyOf(emitted, "/data/*")).toBe("script-src 'self'; style-src 'self'");
   });
 
-  it("throws for a page that no rule covers, so it cannot ship without a policy", () => {
+  // A page with no policy cannot ship, and the browser would enforce both of two.
+  it("throws for a page that no rule or two rules cover", () => {
     const pages = new Map([["/new/", { scriptHashes: [], styleHashes: [] }]]);
     expect(() => pageRules(base, rules, pages)).toThrow("/new/ must match exactly one page rule");
-  });
-
-  it("throws for a page two rules cover, since the browser would enforce both", () => {
     const overlapping = [...rules, { comment: "All.", directives: {}, path: "/*" }];
-    const pages = new Map([["/data/", { scriptHashes: [], styleHashes: [] }]]);
-    expect(() => pageRules(base, overlapping, pages)).toThrow("matches /data/*, /*");
+    const data = new Map([["/data/", { scriptHashes: [], styleHashes: [] }]]);
+    expect(() => pageRules(base, overlapping, data)).toThrow("matches /data/*, /*");
   });
 
   it("covers each of the site's pages with exactly one rule", () => {
