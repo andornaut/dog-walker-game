@@ -15,6 +15,12 @@ const RENAMED_DOG_IDS: ReadonlyMap<string, DogId> = new Map<string, DogId>([
   ["waffles", "penny"],
 ]);
 
+// A link or replay log that names gear by a former id walks with the gear it is now.
+// CLEANUP (added 2026-10-21): empty this once no dev link or replay log in use names poopBags.
+const RENAMED_GEAR_IDS: ReadonlyMap<string, GearId> = new Map<string, GearId>([
+  ["poopBags", "hallPass"],
+]);
+
 export function runSetupLimitsFor(
   data: Pick<GameData, "dogs" | "shopGear" | "walkers" | "world">,
 ): RunSetupLimits<DogId, GearId, WalkerId> {
@@ -23,6 +29,7 @@ export function runSetupLimitsFor(
     gearIds: Object.keys(data.shopGear) as GearId[],
     maxPackSize: MAX_RUN_DOGS,
     renamedDogIds: RENAMED_DOG_IDS,
+    renamedGearIds: RENAMED_GEAR_IDS,
     speed: SPEED_LIMITS,
     walkerIds: Object.keys(data.walkers) as WalkerId[],
     zoneCount: walkLength(data),

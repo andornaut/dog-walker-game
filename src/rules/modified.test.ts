@@ -136,7 +136,7 @@ const sources = {
   calmVoice: { kind: "walker", walker: walkerWith("calmVoice") },
   fannyPack: { gear: "fannyPack", kind: "gear" },
   goodLeash: { kind: "upgrade", upgrade: "goodLeash" },
-  hallPass: { gear: "poopBags", kind: "gear" },
+  hallPass: { gear: "hallPass", kind: "gear" },
   kindWords: { kind: "walker", walker: walkerWith("kindWords") },
   longReach: { kind: "walker", walker: walkerWith("longReach") },
   luckyCollar: { gear: "luckyCollar", kind: "gear" },
@@ -207,7 +207,7 @@ describe("a card option's modified values", () => {
   });
 
   it.each([
-    ["poopBags", [{ after: 1, before: 0, by: by(1, sources.hallPass), subject: { kind: "skip" } }]],
+    ["hallPass", [{ after: 1, before: 0, by: by(1, sources.hallPass), subject: { kind: "skip" } }]],
     [null, []],
   ] as const)("with gear %s, the card's Skip names it", (gear, expected) => {
     const source = cardSource("thief");

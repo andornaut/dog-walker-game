@@ -314,3 +314,54 @@ describe("the version 2 to 3 migration", () => {
     });
   });
 });
+
+describe("the version 5 to 6 migration", () => {
+  const fromVersion5 = (document: Record<string, unknown>) =>
+    migrateSave(saveMigrations, 6, { ...document, version: 5 });
+
+  it("migrates each case", () => {
+    for (const [, document, expected] of [
+      [
+        "renames poopBags to hallPass in the gear owned",
+        { owned: { dogs: ["koda"], gear: ["fannyPack", "poopBags"] } },
+        { owned: { dogs: ["koda"], gear: ["fannyPack", "hallPass"] } },
+      ],
+      [
+        "renames poopBags to hallPass in the last loadout's gear",
+        { lastLoadout: { dogs: ["koda"], gear: "poopBags" } },
+        { lastLoadout: { dogs: ["koda"], gear: "hallPass" } },
+      ],
+      [
+        "keeps other gear",
+        { lastLoadout: { dogs: [], gear: "fannyPack" }, owned: { gear: ["luckyCollar"] } },
+        { lastLoadout: { dogs: [], gear: "fannyPack" }, owned: { gear: ["luckyCollar"] } },
+      ],
+      [
+        "keeps a last loadout with no gear",
+        { lastLoadout: { dogs: [], gear: null } },
+        { lastLoadout: { dogs: [], gear: null } },
+      ],
+      [
+        "leaves fields of the wrong shape for the schema",
+        { lastLoadout: "poopBags", owned: { gear: "poopBags" } },
+        { lastLoadout: "poopBags", owned: { gear: "poopBags" } },
+      ],
+    ] satisfies readonly [string, Record<string, unknown>, Record<string, unknown>][]) {
+      expect(fromVersion5(document)).toEqual({ document: { ...expected, version: 6 }, ok: true });
+    }
+  });
+
+  it("loads an old save with the Hall pass owned and in the Pocket", () => {
+    const save = veteranSave();
+    const stored = {
+      ...save,
+      lastLoadout: { ...save.lastLoadout, gear: "poopBags" },
+      owned: { ...save.owned, gear: ["fannyPack", "poopBags"] },
+      version: 5,
+    };
+    const result = loadSave(saveContextFrom(gameData), JSON.stringify(stored));
+    expect(result.status).toBe("loaded");
+    expect(result.save.owned.gear).toEqual(["fannyPack", "hallPass"]);
+    expect(result.save.lastLoadout.gear).toBe("hallPass");
+  });
+});

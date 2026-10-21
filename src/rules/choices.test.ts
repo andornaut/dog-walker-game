@@ -329,7 +329,7 @@ describe("offerUpgrades", () => {
 
 describe("skip option", () => {
   it("is offered on every obstacle card with Hall pass until it is taken, once per zone", () => {
-    const state = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
+    const state = newRun(data, 1, { dogs: ["koda"], gear: "hallPass", walker: "casey" });
     const source = encounter("skunk", ["koda"]);
     expect(cardFor(data, state, source).skip).toBe(true);
     const skipped = choose(state, source, "skip");
@@ -346,7 +346,7 @@ describe("skip option", () => {
   });
 
   it("takes the costliest option's place on a card that already shows three", () => {
-    const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
+    const withPass = newRun(data, 1, { dogs: ["koda"], gear: "hallPass", walker: "casey" });
     const skunk = encounter("skunk", ["koda"]);
     const indexes = (state: RunState) => cardFor(data, state, skunk).options.map((o) => o.index);
     // Skunk's options in data order, the money one the costliest.
@@ -354,8 +354,8 @@ describe("skip option", () => {
       0, 1, 2,
     ]);
     const groom = optionWith("skunk", "money");
-    expect(indexes(withBags)).toEqual([0, 1, 2].filter((index) => index !== groom));
-    expect(() => choose(withBags, skunk, groom)).toThrow("not on the Skunk card");
+    expect(indexes(withPass)).toEqual([0, 1, 2].filter((index) => index !== groom));
+    expect(() => choose(withPass, skunk, groom)).toThrow("not on the Skunk card");
   });
 });
 

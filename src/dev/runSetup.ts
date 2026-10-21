@@ -11,6 +11,8 @@ export interface RunSetupLimits<
   readonly maxPackSize: number;
   // Former dog ids and the id each one is now.
   readonly renamedDogIds: ReadonlyMap<string, DogId>;
+  // Former gear ids and the id each one is now.
+  readonly renamedGearIds: ReadonlyMap<string, GearId>;
   readonly speed: { readonly max: number; readonly min: number };
   readonly walkerIds: readonly WalkerId[];
   // The zones a walk visits.
@@ -149,6 +151,11 @@ export function parseRunSetup<DogId extends string, GearId extends string, Walke
   const gear = read("gear", (value) => {
     if (value === NO_GEAR) {
       return null;
+    }
+    const renamed = limits.renamedGearIds.get(value);
+    if (renamed !== undefined) {
+      notices.push(`Gear "${value}" is now "${renamed}"; used "${renamed}"`);
+      return renamed;
     }
     return includes(limits.gearIds, value)
       ? value

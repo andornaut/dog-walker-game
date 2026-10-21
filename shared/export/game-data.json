@@ -783,6 +783,18 @@
       "iconKey": "item-fanny-pack"
     },
     {
+      "id": "hallPass",
+      "effects": [
+        {
+          "kind": "skipOption"
+        }
+      ],
+      "name": "Hall pass",
+      "price": "hallPass",
+      "short": "1 skip per neighborhood",
+      "iconKey": "item-hall-pass"
+    },
+    {
       "id": "luckyCollar",
       "effects": [
         {
@@ -796,18 +808,6 @@
       "price": "luckyCollar",
       "short": "Every owner +1♥ max",
       "iconKey": "item-lucky-collar"
-    },
-    {
-      "id": "poopBags",
-      "effects": [
-        {
-          "kind": "skipOption"
-        }
-      ],
-      "name": "Hall pass",
-      "price": "poopBags",
-      "short": "1 skip per neighborhood",
-      "iconKey": "item-poop-bags"
     },
     {
       "id": "runningShoes",
@@ -1264,12 +1264,12 @@
         "dogSlot3": 2500,
         "duchess": 100,
         "fannyPack": 300,
+        "hallPass": 500,
         "koda": 200,
         "luckyCollar": 750,
         "nugget": 150,
         "penny": 250,
         "pierre": 200,
-        "poopBags": 500,
         "runningShoes": 400,
         "snowball": 300,
         "zippy": 125

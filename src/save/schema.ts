@@ -14,7 +14,7 @@ import { PRE_FORK_ROUTE } from "../rules/route";
 import { type Cents, cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 // Every tally the save keeps; a stored key outside it is dropped on load.
 export const TALLY_IDS = [

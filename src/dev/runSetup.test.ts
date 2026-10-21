@@ -14,6 +14,7 @@ const limits: RunSetupLimits<"bo" | "koda" | "rex" | "zip", "collar" | "shoes"> 
   gearIds: ["collar", "shoes"],
   maxPackSize: 3,
   renamedDogIds: new Map([["dash", "rex"]]),
+  renamedGearIds: new Map([["bags", "shoes"]]),
   speed: { max: 10, min: 0.1 },
   walkerIds: ["ada", "casey"],
   zoneCount: 4,
@@ -57,6 +58,12 @@ describe("parseRunSetup", () => {
       notices: ['Dog "dash" is now "rex"; used "rex"'],
       search: "pack=koda,dash",
       setup: { ...defaults, pack: ["koda", "rex"] },
+    },
+    {
+      name: "replaces a renamed gear id with its new one, with a notice",
+      notices: ['Gear "bags" is now "shoes"; used "shoes"'],
+      search: "gear=bags",
+      setup: { ...defaults, gear: "shoes" },
     },
   ];
 

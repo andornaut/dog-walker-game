@@ -92,7 +92,7 @@ describe("achievements away from a run", () => {
 
   it("awards and celebrates an ownership achievement bought on the home screen", async () => {
     const { session } = await opened(veteranSave());
-    const allGear = ["fannyPack", "luckyCollar", "poopBags", "runningShoes"] as const;
+    const allGear = ["fannyPack", "hallPass", "luckyCollar", "runningShoes"] as const;
     await session.purchase((save) => ({ ...save, owned: { ...save.owned, gear: [...allGear] } }));
     expect(session.save.achievements.kittedOut).toBe(testAwards.now);
     expect(session.takeCelebrations()).toEqual(["kittedOut"]);

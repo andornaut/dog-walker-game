@@ -20,6 +20,7 @@ const limits: RunSetupLimits<"bo" | "koda", "collar"> = {
   gearIds: ["collar"],
   maxPackSize: 3,
   renamedDogIds: new Map([["dash", "koda"]]),
+  renamedGearIds: new Map([["bags", "collar"]]),
   speed: { max: 10, min: 0.1 },
   walkerIds: ["ada", "casey"],
   zoneCount: 4,
@@ -118,12 +119,12 @@ describe("encodeInputLog and decodeInputLog", () => {
     ],
   ];
 
-  it("still decode older logs, leaving out their treats, and a renamed dog as the dog it is now", () => {
+  it("still decode older logs, leaving out their treats, and renamed ids as the ids they are now", () => {
     for (const [name, json, expected] of older) {
       expect(decodeOk(json).events, name).toEqual(expected);
     }
-    const json = encoded({ events: [], setup: "seed=1&pack=bo,dash" });
-    expect(decodeOk(json).setup.pack).toEqual(["bo", "koda"]);
+    const json = encoded({ events: [], setup: "seed=1&pack=bo,dash&gear=bags" });
+    expect(decodeOk(json).setup).toMatchObject({ gear: "collar", pack: ["bo", "koda"] });
   });
 
   const invalid: [string, string][] = [

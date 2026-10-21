@@ -81,7 +81,7 @@ describe("gearDetail", () => {
   });
 
   it("shows a locked item's price", () => {
-    const card = gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "poopBags");
+    const card = gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "hallPass");
     const price = data.homeText.detail.priceLocked.split("{price}");
     expect(card.status.startsWith(price[0] ?? "")).toBe(true);
     expect(card.status.endsWith(price[1] ?? "")).toBe(true);

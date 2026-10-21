@@ -65,6 +65,23 @@ function renameDogIds(
   );
 }
 
+// Every place a version 5 save holds a gear id, with each renamed id replaced.
+function renameGearIds(
+  renames: ReadonlyMap<string, string>,
+  document: Record<string, unknown>,
+): Record<string, unknown> {
+  const id = (value: unknown) =>
+    typeof value === "string" ? (renames.get(value) ?? value) : value;
+  const ids = (value: unknown) => (Array.isArray(value) ? value.map(id) : value);
+  return updateFields(
+    [
+      ["lastLoadout", (loadout) => updateFields([["gear", id]], loadout)],
+      ["owned", (owned) => updateFields([["gear", ids]], owned)],
+    ],
+    document,
+  );
+}
+
 // The zones one walk had to finish to unlock each walker when version 3 added unlocks, the
 // starting walker first, as a load lists the walkers owned.
 const VERSION_3_WALKER_GOALS: readonly (readonly [walker: string, zones: number])[] = [
@@ -164,6 +181,9 @@ export const saveMigrations: readonly Migration[] = [
   { from: 2, migrate: unlockWalkers },
   { from: 3, migrate: tallySquirrelPulls },
   { from: 4, migrate: seedPackSizeBests },
+  // CLEANUP (added 2026-10-21): rename poopBags saves; remove once every stored save has
+  // loaded on a build with this migration.
+  { from: 5, migrate: (document) => renameGearIds(new Map([["poopBags", "hallPass"]]), document) },
 ];
 
 // Runs each migration from the document's version up to targetVersion, in order. A
