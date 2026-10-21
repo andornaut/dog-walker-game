@@ -1297,7 +1297,7 @@
     "pixels": {
       "roadScrollSpeed": 200,
       "spawnRowSpacing": 213,
-      "swipeStartDistance": 24,
+      "swipeStartDistance": 16,
       "tapMaxDistance": 10
     },
     "probability": {

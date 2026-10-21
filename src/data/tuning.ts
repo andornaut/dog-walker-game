@@ -124,7 +124,7 @@ export const TUNING = {
     spawnRowSpacing: 213,
     // A drag takes its first lane step at this much horizontal travel, and its Nth at N
     // lane-widths; travelling back this far from its furthest point turns it around.
-    swipeStartDistance: 24,
+    swipeStartDistance: 16,
     // A press that drifts further than this is no longer a tap.
     tapMaxDistance: 10,
   },
