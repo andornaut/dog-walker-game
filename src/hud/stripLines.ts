@@ -50,13 +50,24 @@ export function bumpLine(
   };
 }
 
-// Each owner whose loss the walker's perk, such as Second chance, forgave.
-export function forgivenLines(data: StripData, changes: readonly Change[]): MessageLine[] {
-  return changes.flatMap((change): MessageLine[] =>
-    change.kind === "hearts" && heartsForgiven(change) > 0
-      ? [{ icon: "hint", text: line(data, "kindWords", { owner: ownerOf(data, change.dog) }) }]
-      : [],
-  );
+// Each owner whose loss the walker's perk, such as Second chance, forgave, led by the perk's
+// icon.
+export function forgivenLines(
+  data: StripData & Pick<GameData, "walkers">,
+  changes: readonly Change[],
+): MessageLine[] {
+  return changes.flatMap((change): MessageLine[] => {
+    if (change.kind !== "hearts" || heartsForgiven(change) <= 0) {
+      return [];
+    }
+    const perk = change.causes.flatMap((cause) =>
+      cause.kind === "modifier" && cause.source.kind === "walker"
+        ? [data.walkers[cause.source.walker].perk]
+        : [],
+    )[0];
+    const text = line(data, "kindWords", { owner: ownerOf(data, change.dog) });
+    return [{ icon: perk === undefined ? "hint" : { kind: "perk", perk }, text }];
+  });
 }
 
 // A treat that raised its owner's hearts; one at their max says nothing.

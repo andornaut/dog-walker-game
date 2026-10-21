@@ -105,7 +105,12 @@ describe("the strip's other lines", () => {
       [
         "Second chance for a forgiven loss, and nothing for a plain one",
         forgivenLines(gameData, [forgivenLoss, hearts(4, 3, [{ amount: -1, kind: "bump" }])]),
-        [{ icon: "hint", text: fillNames(strip.kindWords, { owner }) }],
+        [
+          {
+            icon: { kind: "perk", perk: gameData.walkers.casey.perk },
+            text: fillNames(strip.kindWords, { owner }),
+          },
+        ],
       ],
     ];
     for (const [name, line, expected] of cases) {

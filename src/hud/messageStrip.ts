@@ -3,6 +3,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { wrapWords } from "../lib/lines";
 import type { Point, Rect } from "../lib/rect";
 import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
+import { effectIconKey, type EffectItem } from "./effectIcons";
 import { DEBUFF_BAR } from "./walkHud";
 
 // The message strip: what just happened, in a ui-panel across the top of the backdrop band's
@@ -12,7 +13,8 @@ import { DEBUFF_BAR } from "./walkHud";
 // the line on one row (messageLinePanel). A line waits its turn, shows, and fades out at the end
 // of its life. The strip shows while it has a line.
 
-// What a line is about, and the icon that leads it.
+// What a line is about, and the icon that leads it; or a walk effect, such as a gear, a perk or
+// an upgrade, led by its 16x16 icon.
 export const MESSAGE_ICONS = {
   achievement: "icon-lucky",
   bump: "icon-bump",
@@ -26,10 +28,10 @@ export const MESSAGE_ICONS = {
   treat: "icon-treat",
   zoomies: "icon-zoomies",
 } as const;
-export type MessageIcon = keyof typeof MESSAGE_ICONS;
+export type MessageIcon = EffectItem | keyof typeof MESSAGE_ICONS;
 
 export function messageIconKey(icon: MessageIcon): string {
-  return MESSAGE_ICONS[icon];
+  return typeof icon === "string" ? MESSAGE_ICONS[icon] : effectIconKey(icon);
 }
 
 // Screen pixels. The strip starts gap rows under the walk bar. From its top-left
