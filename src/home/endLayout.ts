@@ -1,6 +1,6 @@
 import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
 
-// The end screen's geometry: the menus mock's end screen with every text at 2x.
+// The end screen's geometry, with every text at 2x.
 const PANEL = { height: 300, width: 312, x: 24, y: 112 };
 const RIBBON = { x: 144, y: 102 };
 

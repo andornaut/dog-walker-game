@@ -1,7 +1,7 @@
-// The home screen's tap feedback, from the art style guide and the start-screen mock: offsets
+// The home screen's tap feedback, from the art style guide: offsets
 // in pixels and animation frames, each a function of how long ago its effect started. With
 // reduced motion every movement is 0 and the pulse holds its first frame; the press dip,
-// the picked lift and the tap sparkle stay, as in the mock, since they show the tap landed.
+// the picked lift and the tap sparkle stay, since they show the tap landed.
 // A tap shows in order: the dip and the sparkle at once, then the result once the dip is over.
 
 export const FEEDBACK = {

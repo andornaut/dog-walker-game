@@ -273,7 +273,7 @@ function targetId(target: Target): string {
   }
 }
 
-// The roster in rows by size, each row in data order, as the mock lays it out.
+// The roster in rows by size, each row in data order.
 function rosterOrder(): DogId[] {
   const rank = (dog: DogId) => SIZE_ORDER.indexOf(gameData.dogs[dog].size);
   return (Object.keys(gameData.dogs) as DogId[]).sort((a, b) => rank(a) - rank(b));

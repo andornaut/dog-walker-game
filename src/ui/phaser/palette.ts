@@ -1,4 +1,4 @@
-// The Endesga 32 colours the scenes draw with, named as in the art mocks.
+// The Endesga 32 colours the scenes draw with.
 const ENDESGA = {
   amber: 0xfeae34,
   blue: 0x124e89,

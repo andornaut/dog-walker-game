@@ -107,7 +107,7 @@ export const PAGE_RULES: readonly PageRule[] = [
   { comment: "The game data tables.", directives: {}, path: "/data/*" },
   {
     comment:
-      "The art gallery and mocks. style-src-attr: the gallery's ground swatches and palette " +
+      "The art gallery. style-src-attr: the gallery's ground swatches and palette " +
       "chips carry style attributes.",
     directives: { ...GOOGLE_FONTS, "style-src-attr": ["'unsafe-inline'"] },
     path: "/art/*",

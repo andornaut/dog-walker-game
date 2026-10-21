@@ -1,4 +1,4 @@
-// The 3x5 pixel font from the art mocks, plus a 5-wide heart. Each glyph is its rows top
+// The 3x5 pixel font, plus a 5-wide heart. Each glyph is its rows top
 // to bottom, "1" for a lit pixel. Text is drawn in capitals.
 const GLYPHS: Readonly<Record<string, string>> = {
   "!": "010010010000010",

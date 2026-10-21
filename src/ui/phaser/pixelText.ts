@@ -18,7 +18,7 @@ export type FontRole = "body" | "title";
 
 const FONT_KEYS: Readonly<Record<FontRole, string>> = { body: "font-body", title: "font-title" };
 
-// Drawn from the mocks' 3x5 glyphs when a manifest font is missing.
+// Drawn from the 3x5 fallback glyphs when a manifest font is missing.
 const FALLBACK_FONT_KEY = "font-pixel-fallback";
 
 export function registerFallbackPixelFont(scene: Scene): void {
@@ -159,7 +159,7 @@ export function addPixelText(
   const role = style.font ?? "body";
   const key = fontKey(scene, role);
   const scale = style.scale ?? 1;
-  // So y is the top of the capitals, as in the mocks, whichever font draws it.
+  // So y is the top of the capitals, whichever font draws it.
   const capTop = (style.originY ?? 0) !== 0 ? 0 : pixelFontMetrics(scene, role).capTop;
   const label = scene.add
     .bitmapText(Math.round(x), Math.round(y - capTop * scale), key, textFor(key, role, text))

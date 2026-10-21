@@ -15,7 +15,7 @@ export const STATS_TABS: readonly StatsTab[] = ["runs", "dogs", "badges"];
 
 const PANEL = { height: 444, width: 344, x: 8, y: 108 };
 
-// The Stats page's geometry, from the menus mock.
+// The Stats page's geometry.
 export const STATS_LAYOUT = {
   // The close control, in the screen's corner.
   close: pageCloseControl({ height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
