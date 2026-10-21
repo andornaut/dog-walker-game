@@ -24,7 +24,7 @@ The player-facing rules (controls, layout, movers, pulls, feedback) are in `game
 - **Fixed step:** `RunScene` steps the walk session at 1/60 s, as many steps per frame as the wall-clock time since the last frame holds, banking at most a second (`src/runner/fixedStep.ts`). It reads the frame timestamps, not Phaser's delta, which Phaser smooths and clamps, so a slow device keeps to real time and a replay matches the run step for step.
 - **Movers:** `src/runner/movers.ts` plans each mover's whole path from the zone's spawn stream, so the game and the simulator's bot see the same moves. `planSpawns` (`src/runner/spawning.ts`) places the obstacles that open a card first, then the other movers, then the other spawns, so a card is the last thing skipped. It holds the on-screen mover caps (`counts.maxMovers` and its dart and slow-vehicle limits) and the pack-fit gap (`packFitsBetween`) wherever a mover can stand.
 - **Pausing:** the walk steps only while `walkPaused` (`src/hud/topBar.ts`) finds nothing pausing it. Each overlay reports to `MenuFlow.pause()` (`src/scenes/run/menuFlow.ts`), so a new overlay pauses the walk too.
-- **Pseudo-3D road:** game logic keeps a flat road (lane x, distance ahead of the walker in road pixels, scale 1 at the pack). Only drawing projects it, through `src/layout/projection.ts` with `ROAD_CAMERA` (`src/data/screen.ts`). `src/layout/roadRaster.ts` draws the road and verges row by row into one canvas texture. Road sprites snap to the depth steps and draw the manifest's `<key>@88`, `@75`, `@62` or `@50` variant when it is loaded.
+- **Pseudo-3D road:** game logic keeps a flat road (lane x, distance ahead of the walker in road pixels, scale 1 at the pack). Only drawing projects it, through `src/layout/projection.ts` with `ROAD_CAMERA` (`src/data/screen.ts`). `src/layout/roadRaster.ts` draws the road and verges row by row into one canvas texture. Road sprites scale smoothly with distance, drawn from the smallest of their art steps (1x and the manifest's `<key>@88`, `@75`, `@62` and `@50` variants that are loaded) at least their projected size (`src/layout/depthScale.ts`).
 - **Pulls:** `src/runner/pulls.ts` draws no random numbers: each pull follows from the road, so the input log needs nothing for them. A pull into a lane where an obstacle or mover would reach the pack before the player could steer back (`seconds.pullReactionWindow`) waits until the lane clears.
 - **Walk session:** `src/runner/session.ts` is the walk's one step order, pure and shared by `RunScene` and the simulator. A step applies its inputs (lane moves, heading home), then the pulls, the Zoomies' drift and the walk, then any firing hold; then it opens the queued cards, ends the zone (fees, then the fork) or plans the next zone. Its random streams are named from the run's seed (`runStreams`; each zone's spawns from `spawns-<zone index>`), so a seed and an input log replay the same walk wherever they are played. It returns events that the scene plays as sounds and effects and the simulator counts.
 
@@ -44,6 +44,7 @@ The player-facing rules (controls, layout, movers, pulls, feedback) are in `game
 Each context keeps its pure code at its root and the code that imports Phaser in a `phaser/` subfolder. A moved module leaves a one-line re-export at its old path until its importers move to the new one.
 
 - `src/assets/`: manifest and Aseprite parsing, art keys and depth steps; `atlas/` packs the atlases at build time
+- `src/audio/`: sound cues, the music and effects mix, and the sound format
 - `src/crash/`: the crash screen
 - `src/data/`: content and tuning
 - `src/dataPage/`: the `/data/` page, with filter pills kept in the query string
@@ -61,6 +62,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - `src/scenes/`, `src/main.ts`: the Phaser scenes
 - `src/sim/`: the run simulator
 - `src/site/`: tests of the site nav's stylesheet, `public/nav.css`
+- `src/testing/`: helpers shared by the tests
 - `src/tools/`: the art manifest, the data export and the depth preview
 - `src/ui/`: the pixel-art UI kit; `phaser/` draws text, panels and the dimmed ramps
 
@@ -74,7 +76,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - **Depth preview:** `npm run art:depth-preview -- <key> [zone]` draws a road sprite through the walk's projection at a sweep of distances on each zone's road, writing PNGs and a contact sheet to `out/depth-preview/<key>/`.
 - **Keys:** kebab-case and unique. Dog-keyed art (`dog-<art>`, `face-dog-<art>`, `portrait-dog-<art>`, `owner-<art>` and the like) and zone-keyed art (`backdrop-<art>`, `road-<art>` and the like) name their dog or zone by the `art` id in its data, so a renamed dog or zone keeps its art. Animation keys are `<texture>:<tag>`. Sprites anchor on the feet, and a missing key draws a placeholder box.
 - **Manifest:** `public/art/manifest.json` is derived from the files under `public/art/` and committed (`src/tools/artManifest.ts`): a key is its file's name less the extension, and its kind is its folder (`sprites/`, `images/`, `fonts/`, `sounds/`). `public/art/manifest.extra.json` holds what a file cannot say, such as a sound's `loop`. A build writes it before packing the atlases, the dev server rewrites it as the art changes, and `npm run art:manifest` writes it. Valibot validates it and the sprite JSON at boot.
-- **Shared tables:** `shared/` holds the files the game and art's tools both read: `depth-steps.json` (each depth step's key suffix and scale, and the frame size rule), and the tables art's tools generate, `palette.json` (`art/tools/pixel.py palette`), `verges.json` (`art/tools/backdrops.py verges --write`) and `roadside.json` (`art/tools/roadside.py table`, which a test compares against). Never edit a generated table by hand.
+- **Shared tables:** `shared/` holds the files the game and art's tools both read: `depth-steps.json` (each depth step's key suffix and scale, and the frame size rule), and the tables art's tools generate, `palette.json` (`art/tools/pixel.py palette`), `verges.json` (`art/tools/backdrops.py verges --write`) and `roadside.json` (`art/tools/roadside.py table --write`, which a test compares against). Never edit a generated table by hand.
 
 ### Tests and simulator
 
@@ -136,7 +138,7 @@ Each context keeps its pure code at its root and the code that imports Phaser in
 - **Far-road fade:** off unless the game registry's `dev-road-fade` is set, as through the console handle `dogWalkerGame`.
 - **Input log:** lane moves, card choices and heading home are recorded with their step's time in a versioned log, whose setup names the pack, gear, walker and route, so a replay does not depend on the saved loadout. RunScene writes the finished run's log to `sessionStorage` key `dog-walker-game:dev-last-log` and the next walk started plays a log found under `dog-walker-game:dev-replay`.
 - **Overlay** (backquote): the seed, zone, distance, speed, money, hearts and FPS, and a zone clock (`src/dev/zoneClock.ts`) that splits the zone's wall-clock time into road time, held time and lag. C copies a link that reproduces the run.
-- **Random streams:** one seed feeds `spawns-<zone>`, `ambient`, `cards`, `forks`, `quips` and `scenery`, where `<zone>` is the position in the walk. `cards` also draws a lucky find's effects, a small dog's dodges and each fork's upgrades.
+- **Random streams:** one seed feeds `spawns-<zone>`, `ambient`, `cards`, `forks` and `quips`, where `<zone>` is the position in the walk. `cards` also draws a lucky find's effects, a small dog's dodges and each fork's upgrades.
 
 ## Open questions
 

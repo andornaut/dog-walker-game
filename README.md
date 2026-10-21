@@ -23,8 +23,10 @@ Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 | ------------------------------------------- | -------------------------------------------------------------------------- |
 | `npm run art:depth-preview -- <key> [zone]` | Draw a road sprite at a sweep of distances into `out/depth-preview/<key>/` |
 | `npm run art:manifest [-- --check]`         | Write `public/art/manifest.json` from the art files, or fail if it differs |
+| `npm run art:unused`                        | List manifest keys that no source file, game data or shared table names    |
 | `npm run build`                             | Build to `dist/`                                                           |
 | `npm run check`                             | Type check with tsc                                                        |
+| `npm run check:art`                         | Run only the art tests                                                     |
 | `npm run clean`                             | Remove the build and Wrangler state                                        |
 | `npm run dev`                               | Dev server                                                                 |
 | `npm run export:data`                       | Write `shared/export/` from the game's modules, for art's tools            |
@@ -34,7 +36,7 @@ Requires Node 24 (`.nvmrc`). Run `npm install`, then:
 | `npm run simulate -- --help`                | Simulate runs ([src/README.md](src/README.md), Simulator)                  |
 | `npm test`                                  | Run the unit tests                                                         |
 
-The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery and mock pages under `public/art/`. `shared/` holds the files art's tools and the game both read.
+The site's pages are in `pages/`, each at its URL's path (`pages/play/index.html` is `/play/`), and Vite bundles the TypeScript they load. `public/` is copied into the build unchanged: the art, the nav bar, the icons, and the art gallery, `public/art/index.html`. `shared/` holds the files art's tools and the game both read.
 
 CI runs check, lint, test and build, and the AI attributions scan.
 
