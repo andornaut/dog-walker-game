@@ -61,7 +61,6 @@ export const MENU_TEXT = {
     badgeProgress: "{have}/{need}",
     badges: "Badges",
     dogColumns: {
-      dog: "Dog",
       fired: "Fired",
       walks: "Walks",
       zones: "Neighborhoods",

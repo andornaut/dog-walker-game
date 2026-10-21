@@ -776,7 +776,6 @@ export interface MenuText {
     readonly badgeProgress: string;
     readonly badges: string;
     readonly dogColumns: {
-      readonly dog: string;
       readonly fired: string;
       readonly walks: string;
       readonly zones: string;
