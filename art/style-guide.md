@@ -149,7 +149,7 @@ The walk HUD's layout is in `src/hud/walkHud.ts` and `topBar.ts`, and each piece
 - The walk bar is plum wood with an ink cash well, a neighborhood well (the zone's name in cream `font-body`, "n of N" right-aligned in grey) and five `ui-effect-well`s holding the effects' `-20` icons. The 16×16 icon keys stay for the message strip, the shop and the cards.
 - A `ui-debuff-bar` (360×16) per active debuff sits under the walk bar, its face, shade and fill in the debuff's colours: muddy brown, dbrown and tan with an ink name (4.66:1); stinky mauve, purple and pink with a white name (4.70:1); zoomies green, forest and yellow with an ink name (8.41:1).
 - `ui-dog-card` (120×74) is a file card in the neutral `ui-section` look so the eye stays on the road: a navy face, the dog's photo and the owner's photo (`face-owner-<dog>-20`) with the owner's name in tan and hearts as `ui-heart` `full-dark` and `empty-dark`. The `empty` card (a fired dog's) is the same frame in dslate with the FIRED plate across the photo. `ui-dog-card-warn` pulses at 1 ♥ (`static` with reduced motion); `heart-loss` fills only the hearts area, never the card's edge, so `ui-dog-card-warn` stays the card's only border.
-- `ui-owner-tab` pops in centred on a card's top edge when its dog's hearts change, its owner quips or the dog is fired; the quip goes in `ui-quip` beside it (or above, when neither side has room), named by `ui-quip-name`.
+- `ui-owner-tab` pops in centred on a card's top edge when its dog's hearts change or the dog is fired. An owner's quip on the walk is a message strip line led by their face (`face-owner-<dog>-20`, framed in ink over tan) with their name under it in rust.
 
 ### Choice cards
 

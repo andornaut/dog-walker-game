@@ -14,8 +14,7 @@ ui-scroll-thumb (6x24, three-slices with 3px caps); the walker section's ui-cork
 (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h
 (8x2) and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the card rows'
 ui-strip-well (24x24 nine-slice, the band behind a card row's subtitle), ui-quip (24x24 nine-slice,
-8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking owner's name plate),
-ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
+8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6), ui-celebrate-burst (148x132, the
 starburst behind the walker in the zone celebration), ui-zone-banner (248x48); the start screen top
 bar's ui-home-cash-well (70x28, drawn at (5, 5)); the walk HUD's ui-walk-bar (360x48),
 ui-effect-well (22x22), ui-dog-card-band (360x80, drawn at (0, 480)), ui-lead-tag (27x11, LEAD baked
@@ -1346,25 +1345,8 @@ def quip():
     return chrome(Grid(24, 24), 0, 0, 24, 24, 3)
 
 
-QUIP_NAME = (12, 12)
-
-
-def quip_name():
-    """12x12 three-slice (4px caps), ui-quip-name: the plate that names the speaking owner, laid on
-    the corner of their ui-quip nearest the tab. An ink line with its corners cut 1px round a plum
-    face lit purple along its top row; columns 4 to 7 are uniform, so it stretches to the name's
-    width + 8. The game writes the name in font-body, cream (9.42:1), its capitals at +3."""
-    w, h = QUIP_NAME
-    g = Grid(w, h)
-    g.rect(1, 0, w - 2, h, "ink")
-    g.rect(0, 1, w, h - 2, "ink")
-    g.rect(1, 1, w - 2, h - 2, "plum")
-    g.rect(1, 1, w - 2, 1, "purple")
-    return g
-
-
 def quip_tail():
-    """6x8, pointing left at the speaking owner's ui-owner-tab (flipped for a bubble on its left): cream in
+    """6x8, pointing left at the speaker (flipped for a bubble on its left): cream in
     an ink line. Place its
     right column over the bubble's left rim so the cream meets the bubble's plum line."""
     rows = ["....##", "...###", "..####", ".#####", "######", ".#####", "...###", ".....#"]
@@ -1494,7 +1476,6 @@ IMAGES = {
     "ui-new-best": new_best,
     "ui-strip-well": lambda: to_image(strip_well().outlined(False)),
     "ui-quip": lambda: to_image(quip().outlined(False)),
-    "ui-quip-name": lambda: to_image(quip_name().outlined(False)),
     "ui-quip-tail": lambda: to_image(quip_tail().outlined(False)),
     "ui-quip-tail-down": lambda: to_image(quip_tail_down().outlined(False)),
     "ui-quip-tail-up": lambda: to_image(quip_tail_up().outlined(False)),
