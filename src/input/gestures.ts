@@ -14,6 +14,9 @@ export interface GestureConfig {
 export interface GestureContext {
   config: GestureConfig;
   layout: Pick<ScreenLayout, "dogRow" | "dogSlots" | "road" | "topBar">;
+  // TREAT TAP (delete with the doghouse treat tap): whether a dog in the slot has a treat to
+  // give. Absent means none, so every tap in the doghouse row steers.
+  treatToGive?: (slot: number) => boolean;
 }
 
 export type GestureAction =
@@ -120,7 +123,7 @@ function dragTo(
   };
 }
 
-// A press on the doghouses can drag too; it gives a treat only on a tap.
+// A press on the doghouses drags and taps like one anywhere on the walk.
 export function pointerDown(context: GestureContext, point: Point): GestureResult {
   const state: GestureState = containsPoint(context.layout.topBar, point.x, point.y)
     ? { kind: "topBar", start: point, tapping: true }
@@ -150,12 +153,15 @@ export function pointerMove(
   };
 }
 
-function tapAction(layout: GestureContext["layout"], { x, y }: Point): GestureAction {
+function tapAction({ layout, treatToGive }: GestureContext, { x, y }: Point): GestureAction {
   if (containsPoint(layout.topBar, x, y)) {
     return { kind: "pause" };
   }
-  if (containsPoint(layout.dogRow, x, y)) {
-    return { kind: "treat", slot: dogSlotAt(layout, x) };
+  // TREAT TAP (delete this block with the doghouse treat tap, and dogSlotAt with it): a tap on
+  // a doghouse with a treat to give gives it; any other tap in the row steers.
+  const slot = containsPoint(layout.dogRow, x, y) ? dogSlotAt(layout, x) : -1;
+  if (slot >= 0 && treatToGive?.(slot) === true) {
+    return { kind: "treat", slot };
   }
   return move(tapDirection(layout, x));
 }
@@ -170,7 +176,7 @@ export function pointerUp(
   if (moved.kind === "idle" || !moved.tapping) {
     return { actions, state: idleGesture };
   }
-  return { actions: [tapAction(context.layout, moved.start)], state: idleGesture };
+  return { actions: [tapAction(context, moved.start)], state: idleGesture };
 }
 
 // A pull moved the pack: lane steps count again from the pointer's latest position, as a new

@@ -233,6 +233,8 @@ describe("swipe start distance", () => {
 });
 
 describe("tap regions", () => {
+  // Every doghouse has a treat to give.
+  const giving: GestureContext = { ...context, treatToGive: () => true };
   // A tap on each side of a boundary between the screen's regions.
   it.each<[string, [number, number], GestureAction, [number, number], GestureAction]>([
     ["the road's halves at x 180", [177, 300], left, [180, 300], right],
@@ -241,7 +243,7 @@ describe("tap regions", () => {
     ["the road and the doghouses at y 470", [60, 468], left, [60, 470], treat(0)],
     ["the top bar and the road at y 40", [60, 38], pause, [60, 40], left],
   ])("splits %s", (_name, [beforeX, beforeY], beforeAction, [afterX, afterY], afterAction) => {
-    expect([all(tap(beforeX, beforeY)), all(tap(afterX, afterY))]).toEqual([
+    expect([all(tap(beforeX, beforeY), giving), all(tap(afterX, afterY), giving)]).toEqual([
       [beforeAction],
       [afterAction],
     ]);
@@ -397,4 +399,51 @@ describe("drags during a pull's input lock", () => {
     control = steer(unlocked.actions, control);
     expect(destinationLane(control.motion)).toBe(2);
   });
+});
+
+describe("doghouse row routing", () => {
+  const { dogRow, dogSlots, road } = context.layout;
+  const rowY = dogRow.y + dogRow.height / 2;
+  const roadMid = road.x + road.width / 2;
+  const houses = dogSlots.map((rect, slot) => ({ slot, x: rect.x + rect.width / 2 }));
+  const allSlots = houses.map(({ slot }) => slot);
+  const treatsFor = (given: number[]): GestureContext => ({
+    ...context,
+    treatToGive: (slot) => given.includes(slot),
+  });
+
+  it.each(houses.flatMap((house) => [-1, 1].map((way) => ({ ...house, way }))))(
+    "a drag starting on doghouse $slot steers $way lane",
+    ({ way, x }) => {
+      const end = x + way * context.config.swipeStartDistance;
+      const steps: Step[] = [
+        ["down", x, rowY],
+        ["move", end, rowY],
+        ["up", end, rowY],
+      ];
+      // Even a doghouse with a treat to give steers on a drag.
+      expect(all(steps, treatsFor(allSlots))).toEqual([way === 1 ? right : left]);
+    },
+  );
+
+  it.each(houses)(
+    "a tap on doghouse $slot with no treat to give steers by the road's halves",
+    ({ x }) => {
+      const steered = x < roadMid ? left : right;
+      expect(all(tap(x, rowY), treatsFor([]))).toEqual([steered]);
+      expect(all(tap(x, rowY))).toEqual([steered]);
+    },
+  );
+
+  it.each(houses)("a tap on doghouse $slot with a treat to give gives it", ({ slot, x }) => {
+    expect(all(tap(x, rowY), treatsFor([slot]))).toEqual([treat(slot)]);
+  });
+
+  it.each(houses)(
+    "a tap on doghouse $slot steers while only the other doghouses have a treat",
+    ({ slot, x }) => {
+      const others = allSlots.filter((other) => other !== slot);
+      expect(all(tap(x, rowY), treatsFor(others))).toEqual([x < roadMid ? left : right]);
+    },
+  );
 });

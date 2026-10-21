@@ -12,6 +12,7 @@ import {
   type PointerTrack,
   trackPointer,
 } from "../../input/pointerTracking";
+import { giveTreat } from "../../rules/treats";
 import { read } from "../../rules/units";
 import { gestureAfterPulls, type PullStep } from "../../runner/pulls";
 import type { SessionInput } from "../../runner/session";
@@ -98,7 +99,7 @@ export class RunInput {
       point: { x: pointer.x, y: pointer.y },
       press: { downTime: pointer.downTime, id: pointer.id },
     };
-    const result = trackPointer(gestureContext(), held, sample, this.pointers);
+    const result = trackPointer(gestureContext(walk), held, sample, this.pointers);
     this.pointers = result.track;
     result.actions.forEach((action) => this.act(action));
   }
@@ -132,7 +133,16 @@ export class RunInput {
   }
 }
 
-function gestureContext(): GestureContext {
+// TREAT TAP (delete with the doghouse treat tap): whether a tap on the doghouse in the slot
+// gives its dog a treat.
+function treatToGive(walk: Walk | undefined, slot: number): boolean {
+  const dog = walk?.run.pack[slot]?.dog;
+  return (
+    walk !== undefined && dog !== undefined && giveTreat(gameData, dog, walk.run).change !== null
+  );
+}
+
+function gestureContext(walk: Walk | undefined): GestureContext {
   return {
     config: {
       laneCount: LANE_COUNT,
@@ -140,5 +150,6 @@ function gestureContext(): GestureContext {
       tapMaxDistance: read(gameData.tuning, "pixels", "tapMaxDistance"),
     },
     layout: LAYOUT,
+    treatToGive: (slot) => treatToGive(walk, slot),
   };
 }
