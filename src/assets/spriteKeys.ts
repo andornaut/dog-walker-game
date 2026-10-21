@@ -198,8 +198,7 @@ export function zonePipTag(zone: ZoneArt | null, done: boolean): string {
   return done ? `${zone.art}-done` : zone.art;
 }
 
-// A mover plays its look's art, or the sprite named here for it, and the first of its
-// movement's tags that the sprite has while it moves; without any, its idle tag.
+// A mover plays its look's art, or the sprite named here for it, in the tag moverBodyTag picks.
 export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
   "other-dog": "loose-dog",
   squirrel: "squirrel-dash",
@@ -211,6 +210,29 @@ export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readon
   step: ["walk", "run"],
 };
 export const IDLE_TAG = "idle";
+
+// A standing road item plays the first of these tags its sprite has: its own motion while the
+// walk goes on, and standing still while a card or the pause menu holds the walk. The movement
+// tags come last, so an item drawn only in motion, such as the jogger's run, still plays it.
+export const STANDING_TAGS = {
+  halted: ["idle", "loop", "walk", "wave", "run", "ride", "drive", "bounce", "flee", "hop"],
+  walking: ["walk", "wave", "loop", "idle", "run", "ride", "drive", "bounce", "flee", "hop"],
+} as const;
+
+// The tag a mover's body plays, of those has says its sprite has: while it moves, its
+// movement's first tag, else its idle; otherwise its idle, else that movement tag; and
+// failing both, what a standing item would play.
+export function moverBodyTag(
+  has: (tag: string) => boolean,
+  movement: MovementKind,
+  moving: boolean,
+): string | undefined {
+  const motion = movement === "still" ? [] : MOVING_TAGS[movement];
+  const tags = moving
+    ? [...motion, IDLE_TAG, ...STANDING_TAGS.walking]
+    : [IDLE_TAG, ...motion, ...STANDING_TAGS.halted];
+  return tags.find(has);
+}
 
 // An ambient mover wears its own art or one of the variants named here, picked at random as
 // it sets out, among those loaded.

@@ -33,13 +33,6 @@ export const DEPTH = {
   sprite: 10,
 };
 
-// An item plays the first of these tags it has: its own motion while the walk goes on, and
-// standing still while a card or the pause menu holds the walk.
-export const ITEM_TAGS = {
-  halted: ["idle", "loop", "walk", "wave"],
-  walking: ["walk", "wave", "loop", "idle"],
-} as const;
-
 // The row where the road's approach meets the band's cross street.
 export const JUNCTURE_Y = LAYOUT.approach.y;
 

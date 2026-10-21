@@ -1,10 +1,11 @@
 import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
+import { animationKey } from "../../assets/asepriteAnimations";
 import {
   IDLE_TAG,
   MOVER_SPRITE_KEYS,
-  MOVING_TAGS,
+  moverBodyTag,
   WARNING_ARROW_KEY,
   WARNING_DOWN_TAG,
   WARNING_KEY,
@@ -59,13 +60,12 @@ export function moverBodyKey(
 
 // Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at
 // the juncture; a cue shows only once wholly below it. A mover stands on the road through the
-// projection while it is solid, sized by showAtDepth,
-// mirrored while it faces left (facesLeft), playing its movement's first tag that its sprite has
-// while it moves and its idle tag otherwise. Before a dart or in-lane move only its cue shows,
-// at 1x: a sign at the road's edge on its row with the arrow pointing across, or a sign at the
-// top of its lanes with the arrow pointing down or up. A crosser with an idle tag also stands
-// at the edge during its cue. A stepper stands on the road throughout, with the wander mark over
-// it before each step.
+// projection while it is solid, sized by showAtDepth, mirrored while it faces left (facesLeft),
+// playing the tag moverBodyTag picks. Before a dart or in-lane move only its cue shows, at 1x:
+// a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
+// its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
+// edge during its cue. A stepper stands on the road throughout, with the wander mark over it
+// before each step.
 export function drawMover(
   mover: MoverOnRoad,
   view: ItemView,
@@ -93,11 +93,8 @@ export function drawMover(
     if (shown) {
       const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
       const drawn = showAtDepth(body.sprite, body.key, placed.scale);
-      const movingTag =
-        path.movement === "still"
-          ? undefined
-          : firstTag(scene, drawn.key, MOVING_TAGS[path.movement]);
-      const tag = moving && !halted ? (movingTag ?? idle) : (idle ?? movingTag);
+      const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
+      const tag = moverBodyTag(has, path.movement, moving && !halted);
       const x = Math.round(placed.x);
       const y = Math.round(placed.y);
       body.sprite

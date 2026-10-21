@@ -22,10 +22,12 @@ import {
   encounterSpriteKey,
   minorObstacleSpriteKey,
   MOVER_SPRITE_KEYS,
+  moverBodyTag,
   MOVING_TAGS,
   ownerFaceKey,
   PULL_ART,
   SKUNK_CLOUD_KEY,
+  STANDING_TAGS,
   ZONE_CELEBRATION_ART,
   ZONE_PIPS_KEY,
 } from "../assets/spriteKeys";
@@ -461,6 +463,70 @@ describe("road object art", () => {
       return tags.some((tag) => tagsOf(variant).includes(tag)) ? [] : [variant];
     });
     expect(missing).toEqual([]);
+  });
+
+  // Every road item's sprite, standing and as a mover, its own art or a skin's with any owner
+  // and spray cloud beside it, plays a tag it has, of more than one frame where it has one:
+  // standing halted and walking, and a mover moving and stopped, at every step it has.
+  it.each(
+    [
+      ...ENCOUNTERS.map((kind) => ({
+        art: encounterSpriteKey(kind),
+        entry: gameData.encounters[kind],
+        kind,
+      })),
+      ...MINOR_OBSTACLES.map((kind) => ({
+        art: minorObstacleSpriteKey(kind),
+        entry: gameData.minorObstacles[kind],
+        kind,
+      })),
+    ].flatMap(({ art, entry, kind }) => {
+      const skins = Object.values(entry.skins ?? {});
+      const arts = [
+        artOrStandIn(hasSprite, art),
+        ...skins.flatMap((skin) => (skin === undefined ? [] : [skin.art])),
+      ].filter(hasSprite);
+      const clouds =
+        kind === "skunk" ? [SKUNK_CLOUD_KEY, ...skins.map((skin) => skin?.cloudArt)] : [];
+      const standing = [...arts, ...arts.map((shown) => `${shown}-owner`), ...clouds]
+        .filter((key) => key !== undefined && hasSprite(key))
+        .map((key) => ({ key: key as string, kind, movement: null, role: "standing" }));
+      const movement = "movement" in entry ? entry.movement : undefined;
+      const movers = arts.map((shown) => {
+        const body = MOVER_SPRITE_KEYS[shown];
+        return {
+          key: body !== undefined && hasSprite(body) ? body : shown,
+          kind,
+          movement: movement?.kind ?? null,
+          role: `a ${movement?.kind ?? ""} mover`,
+        };
+      });
+      return movement === undefined ? standing : [...standing, ...movers];
+    }),
+  )("animates the $kind's $key as $role, at every step", (item) => {
+    const unanimated = [1, ...variantSteps([item.key])].flatMap((step) => {
+      const variant = depthVariantKey(item.key, step) ?? item.key;
+      const frames = new Map(
+        animationSpecs(variant, sheetOf(variant)).map((spec) => [
+          spec.key.slice(variant.length + 1),
+          spec.frames.length,
+        ]),
+      );
+      const least = Math.min(2, Math.max(...frames.values()));
+      const has = (tag: string) => frames.has(tag);
+      const { movement } = item;
+      const played =
+        movement === null
+          ? { halted: STANDING_TAGS.halted.find(has), walking: STANDING_TAGS.walking.find(has) }
+          : {
+              moving: moverBodyTag(has, movement, true),
+              stopped: moverBodyTag(has, movement, false),
+            };
+      return Object.entries(played).flatMap(([state, tag]) =>
+        tag !== undefined && (frames.get(tag) ?? 0) >= least ? [] : [`${variant} ${state}: ${tag}`],
+      );
+    });
+    expect(unanimated).toEqual([]);
   });
 
   it.each(

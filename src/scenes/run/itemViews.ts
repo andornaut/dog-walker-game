@@ -6,6 +6,7 @@ import {
   minorObstacleSpriteKey,
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
+  STANDING_TAGS,
   WARNING_ARROW_KEY,
   WARNING_KEY,
   WARNING_WANDER_KEY,
@@ -29,7 +30,7 @@ import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
 import { drawMover, moverBodyKey } from "./moverView";
-import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
+import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.
@@ -93,7 +94,7 @@ export class ItemViews {
   // by showAtDepth.
   draw(walk: Walk, halted: boolean, still: boolean, shadow: Shadow): void {
     const seen = new Set<number>();
-    const tags = halted ? ITEM_TAGS.halted : ITEM_TAGS.walking;
+    const tags = halted ? STANDING_TAGS.halted : STANDING_TAGS.walking;
     const { roadTop } = screenRoadGeometry(walk.run);
     const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
