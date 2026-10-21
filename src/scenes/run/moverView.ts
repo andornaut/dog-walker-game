@@ -17,7 +17,7 @@ import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
 import { project } from "../../layout/projection";
 import { encounterLook, minorObstacleLook, skinnedArt } from "../../rules/skins";
 import { read } from "../../rules/units";
-import { inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
+import { facesLeft, inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
 import { firstTag, playTag, showAtDepth } from "../sprites";
 import type { ItemView } from "./itemViews";
 import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
@@ -60,7 +60,7 @@ export function moverBodyKey(
 // Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at
 // the juncture; a cue shows only once wholly below it. A mover stands on the road through the
 // projection while it is solid, sized by showAtDepth,
-// a crosser mirrored when it runs left, playing its movement's first tag that its sprite has
+// mirrored while it faces left (facesLeft), playing its movement's first tag that its sprite has
 // while it moves and its idle tag otherwise. Before a dart or in-lane move only its cue shows,
 // at 1x: a sign at the road's edge on its row with the arrow pointing across, or a sign at the
 // top of its lanes with the arrow pointing down or up. A crosser with an idle tag also stands
@@ -82,7 +82,7 @@ export function drawMover(
   const span = path.motion === "ride" ? path.lanes : 1;
   const laneX =
     itemAt(LANE_XS, 0) + ((place.lanePosition + (span - 1) / 2) * road.width) / LANE_COUNT;
-  const leftward = path.motion === "cross" && path.direction === -1;
+  const leftward = facesLeft(path, since);
   const tell = moverTell(path, since);
   const moving = inMotion(path, since);
   if (body !== undefined) {

@@ -132,6 +132,20 @@ export function inMotion(path: MoverPath, since: number): boolean {
   return path.steps.some((step) => since >= step.at && since < step.at + step.length);
 }
 
+// Whether a mover faces left. Side-view art faces right, so it is mirrored while this holds: a
+// crosser running left, and a stepper or hopper from the start of a step to the left until a
+// step to the right. A rider and a stepper yet to move sideways face right.
+export function facesLeft(path: MoverPath, since: number): boolean {
+  if (path.motion === "cross") {
+    return path.direction === -1;
+  }
+  if (path.motion === "ride") {
+    return false;
+  }
+  const sideways = path.steps.filter((step) => step.lanes !== 0 && since >= step.at);
+  return (sideways.at(-1)?.lanes ?? 0) < 0;
+}
+
 // A crosser has left once it is half a lane past the far edge, out of sight.
 export function hasLeftRoad(laneCount: number, place: MoverPlace): boolean {
   return place.lanePosition < -1 || place.lanePosition > laneCount;

@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { TUNING } from "../data/tuning";
 import { read } from "../rules/units";
 import {
+  facesLeft,
   hasLeftRoad,
   hopShapes,
   inMotion,
@@ -224,6 +225,31 @@ describe("moverTell and inMotion", () => {
   ])("cues $name", ({ moving, path, since, tell }) => {
     expect(moverTell(path, since)).toEqual(tell);
     expect(inMotion(path, since)).toBe(moving);
+  });
+});
+
+describe("facesLeft", () => {
+  // A step a lane left at 100, a row toward the pack at 200, then a lane right at 300.
+  const wanderer: MoverPath = {
+    ...stepper,
+    steps: [
+      { at: 100, lanes: -1, length: 50, travel: 0 },
+      { at: 200, lanes: 0, length: 50, travel: 50 },
+      { at: 300, lanes: 1, length: 50, travel: 0 },
+    ],
+  };
+  it.each<{ left: boolean; name: string; path: MoverPath; since: number }>([
+    { left: false, name: "a crosser running right", path: crosser(1), since: 150 },
+    { left: true, name: "a crosser running left", path: crosser(-1), since: 150 },
+    { left: false, name: "a rider", path: rider(2), since: 150 },
+    { left: false, name: "a hopper before its hop left", path: hopper, since: 90 },
+    { left: true, name: "a hopper as it hops left", path: hopper, since: 100 },
+    { left: true, name: "a hopper landed left", path: hopper, since: 200 },
+    { left: false, name: "a stepper stepping right", path: stepper, since: 125 },
+    { left: true, name: "a stepper stepping a row after a step left", path: wanderer, since: 225 },
+    { left: false, name: "a stepper stepping back right", path: wanderer, since: 300 },
+  ])("is $left for $name", ({ left, path, since }) => {
+    expect(facesLeft(path, since)).toBe(left);
   });
 });
 
