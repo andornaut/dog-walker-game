@@ -168,34 +168,31 @@ describe("depthDraw", () => {
   it.each([
     { name: "the sizing cases", sets: [...stepSets(KEYS), ...STEP_SETS] },
     { name: "every shipped sprite with depth variants", sets: STEPPED.map(artsOf) },
-  ])(
-    "draws only the depth steps, growing a step at a time as it approaches: $name",
-    ({ sets }) => {
-      for (const arts of sets) {
-        const full = itemAt(arts, 0);
-        const fullSide = Math.max(full.width, full.height);
-        const order = (stepKey: string) => arts.findIndex((step) => step.key === stepKey);
-        const complete = arts.length === DEPTH_STEPS.length;
-        const drawnAt = approach.map((projected) => depthDraw(arts, projected));
-        drawnAt.forEach((drawn, i) => {
-          const step = snapScale(Math.min(1, itemAt(approach, i)));
-          expect(drawn.depth, drawn.key).toBe(stepSize(fullSide, step) / fullSide);
-          if (complete) {
-            expect(drawn.scale, drawn.key).toBe(1);
-          }
-          if (i > 0) {
-            const last = itemAt(drawnAt, i - 1);
-            expect(order(drawn.key), `${last.key} to ${drawn.key}`).toBeLessThanOrEqual(
-              order(last.key),
-            );
-          }
-        });
-        expect(new Set(drawnAt.map((drawn) => drawn.depth)).size).toBeLessThanOrEqual(
-          SCALE_STEPS.length,
-        );
-      }
-    },
-  );
+  ])("draws only the depth steps, growing a step at a time as it approaches: $name", ({ sets }) => {
+    for (const arts of sets) {
+      const full = itemAt(arts, 0);
+      const fullSide = Math.max(full.width, full.height);
+      const order = (stepKey: string) => arts.findIndex((step) => step.key === stepKey);
+      const complete = arts.length === DEPTH_STEPS.length;
+      const drawnAt = approach.map((projected) => depthDraw(arts, projected));
+      drawnAt.forEach((drawn, i) => {
+        const step = snapScale(Math.min(1, itemAt(approach, i)));
+        expect(drawn.depth, drawn.key).toBe(stepSize(fullSide, step) / fullSide);
+        if (complete) {
+          expect(drawn.scale, drawn.key).toBe(1);
+        }
+        if (i > 0) {
+          const last = itemAt(drawnAt, i - 1);
+          expect(order(drawn.key), `${last.key} to ${drawn.key}`).toBeLessThanOrEqual(
+            order(last.key),
+          );
+        }
+      });
+      expect(new Set(drawnAt.map((drawn) => drawn.depth)).size).toBeLessThanOrEqual(
+        SCALE_STEPS.length,
+      );
+    }
+  });
 
   it.each([
     { name: "the sizing cases", sets: stepSets(STANDING) },

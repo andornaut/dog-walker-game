@@ -15,6 +15,7 @@ import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
 import { pageRunSetup, resetDevMode } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
+import { integerZoom } from "./layout/integerZoom";
 import { noteWalkStarted, setOnHomeScreen, setupPhoneApp } from "./pwa";
 import { BootScene } from "./scenes/BootScene";
 import { CardScene } from "./scenes/CardScene";
@@ -77,6 +78,24 @@ function devPanelHost(game: Game): DevPanelHost {
   };
 }
 
+// Keeps the canvas at the integer zoom for #game's size and the screen's pixel ratio, centred
+// in it with the page's background around it. Phaser measures #game and emits a resize on
+// each change, a change of pixel ratio included, since that resizes the window.
+function fitWholePixels(game: Game): void {
+  const fit = () => {
+    const { height, width } = game.scale.parentSize;
+    if (width <= 0 || height <= 0) {
+      return;
+    }
+    const zoom = integerZoom(SCREEN_CONFIG, window.devicePixelRatio || 1, { height, width });
+    if (zoom !== game.scale.zoom) {
+      game.scale.setZoom(zoom);
+    }
+  };
+  game.scale.on(Scale.Events.RESIZE, fit);
+  game.events.once(Core.Events.READY, fit);
+}
+
 // Reports the first walk, which counts as the player interacting, then stops watching.
 function watchFirstWalk(game: Game): void {
   const check = () => {
@@ -99,7 +118,8 @@ function bootGame(): Game {
     input: { activePointers: 2 },
     parent: "game",
     pixelArt: true,
-    scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.FIT },
+    // Sized by whole device pixels per game pixel, in fitWholePixels.
+    scale: { autoCenter: Scale.CENTER_BOTH, mode: Scale.NONE },
     scene: [
       BootScene,
       StartScene,
@@ -120,6 +140,7 @@ function bootGame(): Game {
     width: SCREEN_CONFIG.width,
   });
 
+  fitWholePixels(game);
   mountDevPanel(devPanelHost(game), document.getElementById("dev-panel"));
 
   // Captured before the scenes see it, so the key that opens a menu already shows its numbers.
