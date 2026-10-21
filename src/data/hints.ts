@@ -31,6 +31,10 @@ export const HINTS = {
     text: "A plain bump costs that dog's owner 1♥.",
     trigger: { kind: "minorBump" },
   },
+  moverCue: {
+    text: "Watch the arrow: that one's about to move.",
+    trigger: { kind: "moverCue" },
+  },
   puddle: {
     text: "Puddles make the pack Muddy.",
     trigger: { encounter: "puddle", kind: "encounter" },

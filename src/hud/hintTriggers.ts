@@ -1,4 +1,5 @@
 import type { HintTrigger } from "../data/types";
+import type { MoverTell } from "../runner/movers";
 import type { CardSource, RunState } from "../state/runState";
 import { lowHeartDogs } from "./moments";
 
@@ -13,6 +14,12 @@ export function cardHintTriggers(source: CardSource): HintTrigger[] {
     default:
       return source satisfies never;
   }
+}
+
+// The hint triggers a mover's cue raises while it shows on the road: an arrow across the road
+// or along its lanes. The wander mark before a step is no arrow, so it raises none.
+export function moverHintTriggers(tell: MoverTell | null): HintTrigger[] {
+  return tell === null || tell.kind === "wander" ? [] : [{ kind: "moverCue" }];
 }
 
 // The hint triggers the run's state raises while it lasts: an owner down to their last heart.

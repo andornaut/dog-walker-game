@@ -14,6 +14,7 @@ import {
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
+import { moverHintTriggers } from "../../hud/hintTriggers";
 import { project } from "../../layout/projection";
 import { currentZoneId } from "../../rules/route";
 import {
@@ -23,6 +24,7 @@ import {
   skinnedCloudArt,
   skinnedOwnerArt,
 } from "../../rules/skins";
+import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import { isMinorObstacle, itemCategory, type Walk, type WalkItem } from "../../runner/walk";
 import { walkGeometry } from "../../runner/walkGeometry";
@@ -79,6 +81,9 @@ export function ensureRoadPlaceholders(scene: Scene): void {
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);
 }
 
+// Where a mover's arrow sits among its parts: body, sign, arrow, wander mark.
+const MOVER_ARROW_PART = 2;
+
 // The sprites of everything spawned on the road, by item id.
 export class ItemViews {
   private readonly hint: (event: HintTrigger) => void;
@@ -102,6 +107,12 @@ export class ItemViews {
       const view = this.views.get(item.id) ?? this.addView(zone, item);
       if (item.mover !== undefined) {
         drawMover(item.mover, view, item.y + item.height, roadTop, halted, still, shadow);
+        // The cue's arrow shows only once it is wholly on the road below the juncture.
+        if (view.parts[MOVER_ARROW_PART]?.sprite.visible === true) {
+          for (const trigger of moverHintTriggers(moverTell(item.mover.path, item.mover.since))) {
+            this.hint(trigger);
+          }
+        }
         continue;
       }
       const first = itemAt(LANE_XS, item.lane);

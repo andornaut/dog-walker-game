@@ -818,7 +818,7 @@ export type QuipMoment = "fired" | "happier" | "parting" | "upset";
 export type Quips = Readonly<Record<QuipMoment, readonly [string, string, ...string[]]>>;
 
 // What a first-time hint waits for: an encounter, a debuff, or another event happening for
-// the first time.
+// the first time (moverCue: a mover's arrow cue showing on the road).
 export type HintTrigger =
   | { readonly encounter: EncounterId; readonly kind: "encounter" }
   | {
@@ -830,6 +830,7 @@ export type HintTrigger =
         | "homeButton"
         | "luckyFind"
         | "minorBump"
+        | "moverCue"
         | "pull"
         | "pullLanded"
         | "tip"

@@ -376,6 +376,7 @@ describe("hints", () => {
       "homeButton",
       "luckyFind",
       "minorBump",
+      "moverCue",
       "pull",
       "pullLanded",
       "tip",
