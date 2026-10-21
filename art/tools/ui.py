@@ -9,7 +9,7 @@ outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
-ui-detail-well (68x68); the walker section's ui-cork (16x16 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
+ui-detail-well (68x68); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
 and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-top-bar (360x40), ui-quip (24x24
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48)
@@ -1110,27 +1110,31 @@ def denim():
     return g
 
 
+# The cork's tile side: twice the denim's, so its scattered granules repeat too far apart to show a grid.
+CORK = 32
+
+
 def cork():
-    """16x16 seamless tile: the walker section's corkboard, repeated (TileSprite) over its tile area,
+    """32x32 seamless tile: the walker section's corkboard, repeated (TileSprite) over its tile area,
     where the walkers' cards are pinned. Brown with scattered ochre and dbrown granules; the cream
     tiles' ink edges hold on it, and it holds apart from the Pocket's blue and the dogs' plaid."""
-    g = Grid(DENIM, DENIM)
-    g.rect(0, 0, DENIM, DENIM, "brown")
+    g = Grid(CORK, CORK)
+    g.rect(0, 0, CORK, CORK, "brown")
     for x, y, c in CORK_GRAINS:
         g.p(x, y, c)
     return g
 
 
-def cork_grains(seed=11, gap=3.2, tries=4000):
-    """The cork's granules: blue noise on the 16x16 torus (no two closer than gap, measured across the tile's
-    wrap too), so the repeated tile scatters evenly with no diagonal lattice. Each is dbrown or ochre, and
+def cork_grains(seed=11, gap=3.4, tries=8000):
+    """The cork's granules: blue noise on the CORK x CORK torus (no two closer than gap, measured across the
+    tile's wrap too), so the repeated tile scatters evenly with no lattice. Each is dbrown or ochre, and
     about half grow a second pixel beside or below them, so the grains vary in size as cork's do."""
     import random
 
     r, seeds = random.Random(seed), []
     for _ in range(tries):
-        x, y = r.randrange(DENIM), r.randrange(DENIM)
-        if all(min(abs(x - a), DENIM - abs(x - a)) ** 2 + min(abs(y - b), DENIM - abs(y - b)) ** 2 >= gap * gap
+        x, y = r.randrange(CORK), r.randrange(CORK)
+        if all(min(abs(x - a), CORK - abs(x - a)) ** 2 + min(abs(y - b), CORK - abs(y - b)) ** 2 >= gap * gap
                for a, b in seeds):
             seeds.append((x, y))
     pts = []
@@ -1139,7 +1143,7 @@ def cork_grains(seed=11, gap=3.2, tries=4000):
         pts.append((x, y, c))
         if r.random() < 0.5:
             dx, dy = r.choice(((1, 0), (0, 1), (1, 1)))
-            pts.append(((x + dx) % DENIM, (y + dy) % DENIM, c))
+            pts.append(((x + dx) % CORK, (y + dy) % CORK, c))
     return pts
 
 
@@ -1148,21 +1152,14 @@ CORK_GRAINS = cork_grains()
 
 def plaid():
     """16x16 seamless tile: the dogs section's dog-blanket tartan, repeated (TileSprite) over its tile
-    area. A dred ground crossed by a 6px plum band each way, woven where a band crosses the ground
-    (alternate pixels), solid where the bands cross, and a 1px tan thread each way, dashed as weave."""
+    area. A dred ground crossed each way by a 2px plum band and, halfway between, a 1px plum thread, so a
+    plum line runs about every 8px: quiet enough that the dog tiles stay the loudest thing on it."""
     g = Grid(DENIM, DENIM)
     for y in range(DENIM):
         for x in range(DENIM):
-            bx, by = x < 6, y < 6
-            if bx and by:
-                c = "plum"
-            elif bx or by:
-                c = "plum" if (x + y) % 2 else "dred"
-            else:
-                c = "dred"
-            if (x == 11 and y % 2 == 0) or (y == 11 and x % 2 == 1):
-                c = "tan"
-            g.p(x, y, c)
+            band = x < 2 or y < 2
+            thread = x == 9 or y == 9
+            g.p(x, y, "plum" if band or thread else "dred")
     return g
 
 
