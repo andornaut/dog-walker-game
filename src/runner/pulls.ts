@@ -89,10 +89,13 @@ interface PullTell {
 }
 
 // blocked is the strains blocked this step; failed the dogs whose strain ended without a pull,
-// blocked until its target went or cancelled by steering away.
+// blocked until its target went or cancelled by steering away; leashed the dogs that would have
+// started straining toward a squirrel that draws no pulls, such as under Good leash, once per
+// squirrel.
 export interface PullStep {
   readonly blocked: readonly PullTell[];
   readonly failed: readonly DogId[];
+  readonly leashed: readonly DogId[];
   readonly pulled: readonly PullEvent[];
   readonly pulls: Pulls;
   readonly tells: readonly PullTell[];
@@ -179,16 +182,12 @@ function squirrelPulls(data: PullData, walk: Walk): number {
   return Math.round(modifiedStat(data.tuning, walk.run.modifiers, "squirrelPulls", 1));
 }
 
-// The nearest squirrel that has not drawn its pulls.
-function nearestTarget(
-  data: PullData,
+// The nearest squirrel that has not drawn its pulls, whether or not it draws any.
+function nearestSquirrel(
   geometry: PullGeometry,
   spent: readonly number[],
   walk: Walk,
 ): Target | null {
-  if (squirrelPulls(data, walk) < 1) {
-    return null;
-  }
   const lane = destinationLane(walk.road.control.motion);
   let nearest: Target | null = null;
   for (const item of walk.road.items) {
@@ -278,7 +277,7 @@ function pullBlocked(data: PullData, geometry: PullGeometry, strain: Strain, wal
   return laneBlockedWithin(data, geometry, speed, horizon, lane, walk);
 }
 
-const NOTHING = { blocked: [], failed: [], pulled: [], tells: [] } as const;
+const NOTHING = { blocked: [], failed: [], leashed: [], pulled: [], tells: [] } as const;
 
 // The walking dog whose part of the pack's box has its centre nearest the target's across the
 // road, so the dog on the target's side strains, the first in pack order on a tie.
@@ -359,8 +358,12 @@ export function stepPulls(
     strain = null;
   }
   if (strain === null || target === null) {
-    target = nearestTarget(data, geometry, spent, walk);
+    target = nearestSquirrel(geometry, spent, walk);
     const dog = target === null ? undefined : nearestDog(geometry, target, walk);
+    if (dog !== undefined && target !== null && squirrelPulls(data, walk) < 1) {
+      const next = { ...pulls, clock, spent: [...spent, target.itemId], strain: null };
+      return { ...NOTHING, failed, leashed: [dog], pulls: next, walk };
+    }
     if (dog !== undefined && target !== null) {
       strain = {
         blocked: false,

@@ -134,6 +134,7 @@ function after(walk: Walk, seconds: number, pulls: Pulls = NO_PULLS) {
   return {
     blocked: steps.flatMap((stepped) => stepped.blocked),
     failed: steps.flatMap((stepped) => stepped.failed),
+    leashed: steps.flatMap((stepped) => stepped.leashed),
     pulled: steps.flatMap((stepped) => stepped.pulled),
     pulls: state,
     tells: steps.flatMap((stepped) => stepped.tells),
@@ -191,7 +192,9 @@ describe("what a dog pulls toward", () => {
   it("does not chase with Good leash, or toward a squirrel in the pack's lane", () => {
     const leashed = walkWith(["koda"], [item("squirrel", 0, 0)]);
     const withLeash = { ...leashed, run: { ...leashed.run, modifiers: [GOOD_LEASH] } };
-    expect(after(withLeash, 2).tells).toEqual([]);
+    const held = after(withLeash, 2);
+    expect(held.tells).toEqual([]);
+    expect(held.leashed).toEqual(["koda"]);
     expect(after(walkWith(["koda"], [item("squirrel", 0, 2)]), 2).tells).toEqual([]);
   });
 
