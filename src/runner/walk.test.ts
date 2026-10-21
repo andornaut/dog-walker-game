@@ -1452,14 +1452,15 @@ describe("pickWeighted", () => {
 
 describe("movers", { timeout: 60_000 }, () => {
   const OBSTACLE_KINDS = [...OBSTACLE_IDS, ...MINOR_OBSTACLE_IDS] as WalkItem["kind"][];
-  // The rulebook's obstacles that never move: Splash, Stink, benches, bins, cones and hedges.
+  // The rulebook's obstacles that never move: barriers, benches, bins, cones, hedges and puddles.
   const NEVER_MOVE: readonly WalkItem["kind"][] = [
+    "barrier2",
+    "barrier3",
     "bench",
     "bin",
     "cone",
     "hedge",
     "puddle",
-    "skunk",
   ];
   const movementOf = (kind: WalkItem["kind"], tuned: Real = REAL) => {
     const entry = Object.hasOwn(MINOR_OBSTACLES, kind)

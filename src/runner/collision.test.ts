@@ -19,9 +19,10 @@ import {
   tickInvulnerability,
 } from "./collision";
 import { stillInLane } from "./laneMotion";
+import type { MoverPath } from "./movers";
 import type { RoadItem } from "./roadItems";
 import { screenRoadGeometry } from "./screenGeometry";
-import { itemHeight, obstacleHitBox, packBoxes, type WalkItem } from "./walk";
+import { footprintOf, itemHeight, obstacleHitBox, packBoxes, type WalkItem } from "./walk";
 
 type Kind = "obstacle" | "tip";
 
@@ -239,6 +240,49 @@ describe("a settled pack", () => {
       expect(contact(count, motion, 2)).not.toContain(null);
       expect(contact(count, motion, 3)).not.toContain(null);
     }
+  });
+
+  // Every stalker kind, standing on the road at lane 1 with no step taken, its feet level with
+  // the lead's rectangle.
+  const stalkers = [
+    ...Object.entries(gameData.encounters),
+    ...Object.entries(gameData.minorObstacles),
+  ].flatMap(([kind, entry]) =>
+    "movement" in entry && entry.movement.kind === "approach" ? [kind as WalkItem["kind"]] : [],
+  );
+  it.each(stalkers)("hits a pack in every lane a standing %s covers, and none beside", (kind) => {
+    const run = runOf(3);
+    const geometry = screenRoadGeometry(run);
+    const zone = currentZoneId(gameData, run);
+    const { lanes } = footprintOf(gameData, kind);
+    const height = itemHeight(gameData, geometry, zone, kind, true);
+    const feetY = (geometry.packParts.dogs[0]?.top ?? 0) + 20;
+    const path: MoverPath = {
+      burst: 1,
+      lane: 1,
+      length: 1,
+      motion: "approach",
+      movement: "approach",
+      pending: [],
+      reach: { count: 1, first: 1 },
+      rows: 0,
+      steps: [],
+      stopTravel: 0,
+      warning: 0,
+    };
+    const item: WalkItem = {
+      height,
+      id: 1,
+      kind,
+      lane: 1,
+      laneSpan: lanes,
+      mover: { path, since: 0 },
+      y: feetY - height,
+    };
+    const box = obstacleHitBox(gameData, geometry, zone, item);
+    const hitIn = (lane: number) => hitDog(packBoxes(geometry, stillInLane(lane), run), box);
+    expect(Array.from({ length: lanes }, (_, i) => hitIn(1 + i))).not.toContain(null);
+    expect([hitIn(0), hitIn(1 + lanes)]).toEqual([null, null]);
   });
 });
 

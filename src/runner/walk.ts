@@ -62,6 +62,7 @@ import { type HeldStep, type HitStop, hitStopLength, startHitStop, tickHitStop }
 import { advanceLaneControl, type LaneControl, laneControlIn, steerLane } from "./laneControl";
 import { type LaneMotion, type LaneMotionConfig, laneMotionX, stillInLane } from "./laneMotion";
 import {
+  drawnLanes,
   hasLeftRoad,
   hopShapes,
   isWarning,
@@ -898,7 +899,7 @@ function walkItemBox(geometry: Pick<RoadGeometry, "cell" | "laneCount">, item: W
 
 // The box an obstacle hits the pack's parts with, in the lanes of its footprint: as it is drawn
 // (drawnObstacleBox), from its sprites standing on its near edge across from the middle of the
-// lanes it is drawn over, which for a moving mover is one lane wide unless it rides.
+// lanes it is drawn over (drawnLanes for a mover).
 export function obstacleHitBox(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   geometry: Pick<RoadGeometry, "cell" | "itemHeights" | "laneCount" | "lens" | "packBand">,
@@ -913,10 +914,9 @@ export function obstacleHitBox(
   const lane = footprintLane(geometry.laneCount, item);
   const lanes = { left: lane * cell.length, right: (lane + item.laneSpan) * cell.length };
   const { mover } = item;
-  const drawnLanes =
-    mover === undefined ? item.laneSpan : mover.path.motion === "ride" ? mover.path.lanes : 1;
+  const drawn = mover === undefined ? item.laneSpan : drawnLanes(item.laneSpan, mover.path);
   const parts = obstacleOnRoad(data, geometry, zone, item.kind, mover !== undefined);
-  const x = (lane + drawnLanes / 2) * cell.length;
+  const x = (lane + drawn / 2) * cell.length;
   return { ...drawnObstacleBox(lens, PART_INSET, parts, { feetY, x }), lanes };
 }
 

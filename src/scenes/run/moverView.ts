@@ -5,6 +5,7 @@ import { animationKey } from "../../assets/asepriteAnimations";
 import {
   IDLE_TAG,
   moverBodyTag,
+  STANDING_TAGS,
   WARNING_ARROW_KEY,
   WARNING_DOWN_TAG,
   WARNING_KEY,
@@ -17,9 +18,17 @@ import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
 import { moverBodyArt } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
 import { read } from "../../rules/units";
-import { facesLeft, inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
+import {
+  drawnLanes,
+  facesLeft,
+  inMotion,
+  type MoverOnRoad,
+  moverPlace,
+  moverTell,
+} from "../../runner/movers";
+import type { WalkItem } from "../../runner/walk";
 import { firstTag, playTag, showAtDepth } from "../sprites";
-import type { ItemView } from "./itemViews";
+import type { ItemPart, ItemView } from "./itemViews";
 import { clipToRoad, DEPTH, JUNCTURE_Y, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A mover's cue, in road pixels before projection: its sign inset from the road's edge, or
@@ -41,6 +50,45 @@ function showBelowJuncture(sprite: GameObjects.Sprite): void {
   sprite.setVisible(sprite.visible && aboveJuncture(sprite) === 0);
 }
 
+// How many cue sprites follow a mover's body among its parts: the sign, the arrow and the
+// wander mark. Any after them go with the body.
+export const MOVER_CUE_PARTS = 3;
+
+// What drawMover reads of a mover on the road.
+export type MoverItemView = Pick<WalkItem, "height" | "laneSpan" | "y"> & {
+  readonly mover: MoverOnRoad;
+};
+
+// One of a mover's other sprites, at its body's place across the road, standing as itemViews
+// stands an obstacle's: flat on the road under everything, or on its feet row with a shadow.
+function drawWithBody(
+  item: MoverItemView,
+  part: ItemPart,
+  laneX: number,
+  still: boolean,
+  shadow: Shadow,
+): void {
+  const placed = project(PROJECTION, {
+    distance: PROJECTION.footY - part.footY(item),
+    x: laneX + part.dx,
+  });
+  const drawn = showAtDepth(part.sprite, part.key, placed.scale);
+  const x = Math.round(placed.x);
+  const y = Math.round(placed.y);
+  part.sprite.setPosition(x, y);
+  clipToRoad(part.sprite);
+  const tag = firstTag(part.sprite.scene, drawn.key, STANDING_TAGS.walking);
+  if (tag !== undefined) {
+    playTag(part.sprite, drawn.key, tag, still);
+  }
+  if (part.flat) {
+    part.sprite.setDepth(DEPTH.decal);
+  } else {
+    part.sprite.setDepth(DEPTH.sprite + placed.y);
+    shadow(part.key, drawn.depth, x, y);
+  }
+}
+
 // A mover's body sprite (moverBodyArt), of the art loaded.
 export function moverBodyKey(
   scene: Scene,
@@ -52,26 +100,28 @@ export function moverBodyKey(
 
 // Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at
 // the juncture; a cue shows only once wholly below it. A mover stands on the road through the
-// projection while it is solid, sized by showAtDepth, mirrored while it faces left (facesLeft),
-// playing the tag moverBodyTag picks. Before a dart or in-lane move only its cue shows, at 1x:
+// projection, across the middle of the lanes it is drawn over (drawnLanes), while it is solid,
+// sized by showAtDepth, mirrored while it faces left (facesLeft), playing the tag moverBodyTag
+// picks. Before a dart or in-lane move only its cue shows, at 1x:
 // a sign at the road's edge on its row with the arrow pointing across, or a sign at the top of
 // its lanes with the arrow pointing down or up. A crosser with an idle tag also stands at the
 // edge during its cue. A stepper stands on the road throughout, with the wander mark over it
-// before each step.
+// before each step. Its other sprites, after the wander mark, such as a skunk's cloud, go with
+// its body wherever it shows.
 export function drawMover(
-  mover: MoverOnRoad,
+  item: MoverItemView,
   view: ItemView,
-  footY: number,
   roadTop: number,
   halted: boolean,
   still: boolean,
   shadow: Shadow,
 ): void {
   const { road } = LAYOUT;
-  const { path, since } = mover;
+  const { path, since } = item.mover;
+  const footY = item.y + item.height;
   const [body, cue, arrow, wander] = view.parts;
   const place = moverPlace(LANE_COUNT, path, since);
-  const span = path.motion === "ride" ? path.lanes : 1;
+  const span = drawnLanes(item.laneSpan, path);
   const laneX =
     itemAt(LANE_XS, 0) + ((place.lanePosition + (span - 1) / 2) * road.width) / LANE_COUNT;
   const leftward = facesLeft(path, since);
@@ -82,8 +132,15 @@ export function drawMover(
     const idle = firstTag(scene, body.key, [IDLE_TAG]);
     const shown = place.solid || (path.motion === "cross" && idle !== undefined);
     body.sprite.setVisible(shown);
+    for (const part of view.parts.slice(MOVER_CUE_PARTS + 1)) {
+      part.sprite.setVisible(shown);
+      if (shown) {
+        drawWithBody(item, part, laneX, still, shadow);
+      }
+    }
     if (shown) {
-      const placed = project(PROJECTION, { distance: PROJECTION.footY - footY, x: laneX });
+      const distance = PROJECTION.footY - body.footY(item);
+      const placed = project(PROJECTION, { distance, x: laneX });
       const drawn = showAtDepth(body.sprite, body.key, placed.scale);
       const has = (candidate: string) => scene.anims.exists(animationKey(drawn.key, candidate));
       const tag = moverBodyTag(has, path.movement, moving && !halted);

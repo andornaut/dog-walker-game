@@ -107,8 +107,9 @@ export function moverBodyArt(
 
 // The sprites an obstacle draws in the zone, standing or moving. Each stands at the near edge of
 // the item's hit box, however many rows it covers. A puddle lies flat under the rest, and a
-// skunk stands just inside the front of its spray cloud, which lies flat too. An obstacle wears
-// its skin for the zone, and the other dog's owner stands beside it in the skin's owner art.
+// skunk stands just inside the front of its spray cloud, which lies flat too and goes with it
+// when it moves; any other mover draws its body alone. An obstacle wears its skin for the zone,
+// and the other dog's owner stands beside it in the skin's owner art.
 export function obstacleParts(
   data: ObstacleData,
   has: HasArt,
@@ -116,17 +117,18 @@ export function obstacleParts(
   kind: EncounterId | MinorObstacleId,
   moving: boolean,
 ): ObstaclePart[] {
+  const look = lookOf(data, zone, kind);
+  if (kind === "skunk") {
+    const body = moving ? moverBodyArt(data, has, zone, kind) : skinnedArt(has, look);
+    return [
+      part(skinnedCloudArt(has, look), { flat: true }),
+      part(body, { behind: SKUNK_IN_CLOUD }),
+    ];
+  }
   if (moving) {
     return [part(moverBodyArt(data, has, zone, kind))];
   }
-  const look = lookOf(data, zone, kind);
   const art = skinnedArt(has, look);
-  if (kind === "skunk") {
-    return [
-      part(skinnedCloudArt(has, look), { flat: true }),
-      part(art, { behind: SKUNK_IN_CLOUD }),
-    ];
-  }
   const owner = skinnedOwnerArt(has, look);
   if (kind === "otherDog" && has(owner)) {
     return [part(art, { dx: OTHER_DOG_DX }), part(owner, { dx: OTHER_DOG_OWNER_DX })];

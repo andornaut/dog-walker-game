@@ -30,7 +30,8 @@ export interface MoverStep {
 // approach: it stands on the road from its spawn and takes the steps it has chosen, each
 // toward the pack as the pack stood when its cue began (approach.ts), and has pending steps
 // still to choose: within its reach of lanes and rows down, burst a row's travel, each length
-// long; none starts once its travel reaches stopTravel, the pack's rows.
+// long; none starts once its travel reaches stopTravel, the pack's rows. reach and lane are its
+// leftmost lane's, so one several lanes wide keeps every lane on the road.
 export type MoverPath = {
   readonly movement: MovementKind;
   readonly warning: number;
@@ -84,6 +85,15 @@ export interface MoverPlace {
 
 export function laneAt(lanePosition: number): number {
   return Math.floor(lanePosition + 0.5);
+}
+
+// The lanes a mover is drawn across, from its leftmost lane: a crosser one, as it crosses them; a
+// rider its own lanes; a stepper or stalker every lane of its footprint, laneSpan, as it stands.
+export function drawnLanes(laneSpan: number, path: MoverPath): number {
+  if (path.motion === "cross") {
+    return 1;
+  }
+  return path.motion === "ride" ? path.lanes : laneSpan;
 }
 
 // A crosser enters on the road's edge.

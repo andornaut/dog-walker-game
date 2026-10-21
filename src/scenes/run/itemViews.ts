@@ -27,7 +27,7 @@ import { walkGeometry } from "../../runner/walkGeometry";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
 import { applyItemCue } from "./itemCueViews";
-import { drawMover, moverBodyKey } from "./moverView";
+import { drawMover, MOVER_CUE_PARTS, moverBodyKey } from "./moverView";
 import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
@@ -43,7 +43,7 @@ export interface ItemPart {
   dx: number;
   feet: "anchor" | "bottom";
   flat: boolean;
-  footY: (item: WalkItem) => number;
+  footY: (item: Pick<WalkItem, "height" | "y">) => number;
   key: string;
   lift: number;
   sprite: GameObjects.Sprite;
@@ -98,7 +98,8 @@ export function ensureRoadPlaceholders(scene: Scene): void {
 // A struck obstacle's depth steps this much a row, keeping every row under DEPTH.sprite.
 const STRUCK_ROW_DEPTH = 1 / 1000;
 
-// Where a mover's arrow sits among its parts: body, sign, arrow, wander mark.
+// Where a mover's arrow sits among its parts: body, sign, arrow, wander mark, then any that go
+// with its body.
 const MOVER_ARROW_PART = 2;
 
 // The sprites of everything spawned on the road, by item id.
@@ -125,7 +126,7 @@ export class ItemViews {
       seen.add(item.id);
       const view = this.views.get(item.id) ?? this.addView(zone, item);
       if (item.mover !== undefined) {
-        drawMover(item.mover, view, item.y + item.height, roadTop, halted, still, shadow);
+        drawMover({ ...item, mover: item.mover }, view, roadTop, halted, still, shadow);
         // The cue's arrow shows only once it is wholly on the road below the juncture.
         if (view.parts[MOVER_ARROW_PART]?.sprite.visible === true) {
           for (const trigger of moverHintTriggers(moverTell(item.mover.path, item.mover.since))) {
@@ -181,15 +182,14 @@ export class ItemViews {
         this.stand(item, kept.view, frame);
       } else {
         drawMover(
-          item.mover,
+          { ...item, mover: item.mover },
           kept.view,
-          item.y + item.height,
           roadTop,
           true,
           frame.still,
           frame.shadow,
         );
-        parts.slice(1).forEach(({ sprite }) => sprite.setVisible(false));
+        parts.slice(1, MOVER_CUE_PARTS + 1).forEach(({ sprite }) => sprite.setVisible(false));
       }
       const { dx, dy } = kept.offset;
       for (const { flat, sprite } of parts.filter((part) => part.sprite.visible)) {
@@ -242,7 +242,7 @@ export class ItemViews {
   private addView(zone: ZoneId, item: WalkItem): ItemView {
     const { scene } = this;
     const has = (key: string) => scene.textures.exists(key);
-    const bottom = (shown: WalkItem) => shown.y + shown.height;
+    const bottom = (shown: Pick<WalkItem, "height" | "y">) => shown.y + shown.height;
     const lucky = itemCategory(gameData, item.kind) === "lucky";
     const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
       const made: ItemPart = {
@@ -262,8 +262,21 @@ export class ItemViews {
     };
     let parts: ItemPart[];
     if (item.mover !== undefined) {
-      const body = moverBodyKey(scene, zone, item.kind as EncounterId | MinorObstacleId);
-      parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY), part(WARNING_WANDER_KEY)];
+      const kind = item.kind as EncounterId | MinorObstacleId;
+      const body = moverBodyKey(scene, zone, kind);
+      const drawn = obstacleParts(gameData, has, zone, kind, true);
+      const behind = drawn.find(({ key }) => key === body)?.behind ?? 0;
+      parts = [
+        part(body, { footY: (shown) => bottom(shown) - behind }),
+        part(WARNING_KEY),
+        part(WARNING_ARROW_KEY),
+        part(WARNING_WANDER_KEY),
+        ...drawn
+          .filter(({ key }) => key !== body)
+          .map(({ behind: back, dx, flat, key }) =>
+            part(key, { dx, flat, footY: (shown) => bottom(shown) - back }),
+          ),
+      ];
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
     } else if (lucky) {
