@@ -52,7 +52,7 @@ const LAYERS: Readonly<Record<string, (seed: number) => Layer>> = {
   // layer places props however sparse the shipped table is.
   roadside: () => {
     const out = newRoadsidePlaces();
-    const tree = { across: 270, dz: 0, key: "roadside-tree" };
+    const tree = { across: 270, dz: 0, key: "roadside-tree-maple" };
     const side = { gapStart: 0, gapStride: 1, lotStart: 0, lotStride: 1 };
     const zone = {
       gaps: [[tree]],

@@ -57,8 +57,8 @@ const SIDES: RoadsideZone["sides"] = {
   left: { gapStart: 0, gapStride: 1, lotStart: 0, lotStride: 1, offset: 0 },
   right: { gapStart: 0, gapStride: 1, lotStart: 0, lotStride: 1, offset: 1 },
 };
-const TREE = { across: 270, dz: 0, key: "roadside-tree" };
-const MAILBOX = { across: 231, dz: -38, key: "roadside-mailbox" };
+const TREE = { across: 270, dz: 0, key: "roadside-tree-maple" };
+const LAMP = { across: 231, dz: -38, key: "roadside-gas-lamp" };
 const SHADOW = "3e8948";
 
 // A table holding ART's zone with these lots and gaps.
@@ -69,7 +69,7 @@ function tableOf(zone: Pick<RoadsideZone, "gaps" | "lots">): RoadsideTable {
   };
 }
 
-const DENSE = tableOf({ gaps: [[TREE, MAILBOX]], lots: [[TREE, MAILBOX], [MAILBOX]] });
+const DENSE = tableOf({ gaps: [[TREE, LAMP]], lots: [[TREE, LAMP], [LAMP]] });
 // The shipped table, and made-up ones from empty to dense.
 const TABLES: readonly (readonly [string, RoadsideTable])[] = [
   ["the shipped table", ROADSIDE],
