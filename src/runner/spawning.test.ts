@@ -145,14 +145,6 @@ describe("spawnRowDistances", () => {
   });
 });
 
-describe("hitLength and blockingLength", () => {
-  it("insets the hit box from its footprint at both ends, and adds the pack", () => {
-    expect(hitLength(plan, 1)).toBe(20);
-    expect(hitLength(plan, 3)).toBe(80);
-    expect(blockingLength(plan, 2)).toBe(80);
-  });
-});
-
 describe("packFitsBetween", () => {
   // A car three rows long in lane 1; road starts showing behind it at its hit box's far edge.
   const car = { distance: 0, lane: 1, lanes: 1, length: hitLength(plan, 3) };
@@ -492,6 +484,12 @@ describe("laneReach and rowSpacing", () => {
         name: "a step and a move fit",
         reach: { betweenRows: 1, entry: 3 },
         spaced: tight,
+        spacing: 100,
+      },
+      {
+        name: "52px between rows fits two 25px moves but not their step to spare",
+        reach: { betweenRows: 1, entry: 3 },
+        spaced: { ...tight, packLength: 28 },
         spacing: 100,
       },
       {

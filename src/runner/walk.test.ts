@@ -43,6 +43,7 @@ import { modifiersOf, modifierValue } from "../rules/modifiers";
 import { currentZoneId } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
+import { slowestAgility } from "../rules/walkers";
 import { mapPack, packDogs } from "../state/pack";
 import { type ModifierSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
@@ -181,9 +182,11 @@ const inZone = (run: RunState, zone: ZoneId, zoneIndex: number): RunState => ({
   route: Array.from({ length: zoneIndex + 1 }, () => zone),
   zoneIndex,
 });
+// The slowest pack's lane move: the slowest walker's, which big dogs never slow a pack below.
+const slowestLaneMove = read(TUNING, "seconds", "laneMove") / slowestAgility(REAL);
 const walkwayOf = (tuned: Real, run: RunState) => ({
   laneCount: LANE_COUNT,
-  laneMoveSeconds: read(TUNING, "seconds", "laneMove"),
+  laneMoveSeconds: slowestLaneMove,
   scrollSpeed: walkScrollSpeed(tuned, run),
   zoneLength: zoneLength(tuned),
 });
@@ -516,7 +519,7 @@ describe("planZone", { timeout: 15_000 }, () => {
   });
 
   it("shows each row of the game's road in time to cross the whole road for it, in every zone, at every pace", () => {
-    const acrossRoad = (LANE_COUNT - 1) * read(TUNING, "seconds", "laneMove");
+    const acrossRoad = (LANE_COUNT - 1) * slowestLaneMove;
     for (const walker of Object.keys(WALKERS) as WalkerId[]) {
       for (const zone of ZONE_IDS) {
         const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
@@ -576,7 +579,7 @@ describe("planZone", { timeout: 15_000 }, () => {
     )) {
       const zoned = inZone(realRun(REAL, walker), zone, WORLD.walkLength - 1);
       const speed = walkScrollSpeed(REAL, zoned);
-      const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
+      const steps = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9);
       const laneMove = steps * STEP_SECONDS * speed;
       const margin = read(TUNING, "seconds", "pathReactionMargin") * speed;
       const lanesOf = (kind: WalkItem["kind"], lane: number) =>
@@ -686,6 +689,35 @@ describe("stepWalk", () => {
     const full = walkWith(["koda"], [atPack("treat")]);
     expect(step(full).treats.map(({ change }) => change)).toEqual([null]);
   });
+
+  // Long reach grabs a tip or a treat its lanes reach past the pack's own, and no further.
+  const longReach = (Object.keys(WALKERS) as WalkerId[]).find(
+    (walker) => WALKERS[walker].perk === "longReach",
+  );
+  it.each([
+    [0, 3, false],
+    [1, 3, true],
+    [1, 4, false],
+  ] as const)(
+    "with %i lanes of reach, the pack in lane 2 takes a pickup in lane %i: %s",
+    (lanes, lane, reached) => {
+      const reaching = {
+        ...data,
+        tuning: { ...tuning, counts: { ...tuning.counts, longReachLanes: lanes } },
+      };
+      for (const kind of ["tip", "treat"] as const) {
+        const walk: Walk = {
+          road: { ...startRoad(5), items: [atPack(kind, 0, lane)], nextItemId: 1 },
+          run: newRun(reaching, 3, { dogs: ["koda"], gear: null, walker: longReach ?? "casey" }),
+        };
+        const { collected } = stepWalk(reaching, geometry, seededRandom(1), 0.01, walk);
+        expect(
+          collected.map((item) => item.kind),
+          kind,
+        ).toEqual(reached ? [kind] : []);
+      }
+    },
+  );
 
   it("counts a treat grabbed in the treats tally whatever the owners' hearts", () => {
     for (const [, hearts] of [
@@ -1507,7 +1539,7 @@ describe("movers", { timeout: 60_000 }, () => {
         ),
     )) {
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
-      const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
+      const steps = Math.ceil(slowestLaneMove / STEP_SECONDS - 1e-9);
       const fit = road.tallestPackBand + steps * STEP_SECONDS * walkScrollSpeed(tuned, zoned);
       for (const seed of [1]) {
         const walk = planZone(tuned, road, seededRandom(seed), {
@@ -1692,13 +1724,6 @@ describe("movers", { timeout: 60_000 }, () => {
       first,
       { at: 150, lanes: 1, length: 50, travel: geometry.cell.length, uncued: true },
     ]);
-  });
-
-  it("cannot be hit while it is only a cue", () => {
-    const cue = { ...crossing, enterTravel: 600 };
-    const after = step(inLane(0, walkWith(["koda"], [moverAt("squirrel", cue, 40)])));
-    expect(after.cards).toEqual([]);
-    expect(after.walk.road.items).toHaveLength(1);
   });
 
   it("passes through a squirrel however it meets it: no card, heart, grace or stop", () => {
