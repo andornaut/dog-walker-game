@@ -45,6 +45,8 @@ export const TUNING = {
     kindWordsForgiven: 1,
     luckyCollarMax: 1,
     maxBySize: { big: 5, medium: 4, small: 3 },
+    // Added to every owner's max by how many dogs the walk set out with.
+    packSizeBonus: { 1: 2, 2: 1, 3: 0 },
     treat: 1,
   },
   // Whole dollars: $1 is the smallest amount, and an amount a multiplier changes is rounded to
