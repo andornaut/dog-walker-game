@@ -4,6 +4,7 @@ import { gameData } from "../data";
 import type { GameData } from "../data/types";
 import { blocksLane, type WalkItemKind } from "../runner/walk";
 import type { PackDogs } from "../state/runState";
+import { hoppingInstead, sharedWorld } from "../testing/movers";
 import { type RunResult, type SimData, simulateRun } from "./simulate";
 import { IDEAL_SKILL, type Skill, SKILL_PRESETS } from "./skills";
 
@@ -111,9 +112,16 @@ describe("a steering bot", { timeout: 60_000 }, () => {
   });
 
   // The spawn planner keeps every obstacle avoidable from any lane the pack can be in; only a
-  // dog's pull can force a hit.
-  it("avoids every obstacle no pull forces, as an ideal player", () => {
-    const busy = withoutPulls(SHORT);
+  // dog's pull can force a hit. The bot reads a hopper's hop as it reads any mover's path.
+  it.each([
+    { busy: withoutPulls(SHORT), name: "the game's movers" },
+    {
+      busy: withoutPulls(
+        hoppingInstead({ ...SHORT, world: sharedWorld(SHORT.world, 1) }, { kind: "hop", most: 2 }),
+      ),
+      name: "every mover moving and every stepper hopping",
+    },
+  ])("avoids every obstacle no pull forces, as an ideal player, with $name", ({ busy }) => {
     const results = [run(busy, 1, IDEAL_SKILL, ["duchess"]), run(busy, 2, IDEAL_SKILL, NO_CHASER)];
     const counts = obstacleCounts(busy, results);
 

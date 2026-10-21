@@ -42,6 +42,7 @@ import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { type BlockingSpan, laneChangesBehind, lanesReachedAtEnd } from "../testing/avoidable";
+import { type HopMovement, hoppingInstead, sharedWorld } from "../testing/movers";
 import { heartsByDog } from "../testing/runState";
 import { TEST_TUNING, withNeutralWalkers } from "../testing/tuning";
 import { TEST_WALKER_DATA } from "../testing/walkers";
@@ -56,6 +57,7 @@ import {
   finishZone,
   footprintOf,
   headHome,
+  hopSeconds,
   itemCategory,
   itemHeight,
   laneMoveSeconds,
@@ -124,12 +126,6 @@ const GAME_ROAD = (() => {
 const ROAD_LENGTH = GAME_ROAD.roadBottom - GAME_ROAD.roadTop;
 const realRun = (tuned: Real, walker: WalkerId = DEFAULT_WALKER) =>
   newRun(tuned, 3, { dogs: ["duchess", "biscuit", "koda"], gear: null, walker });
-// The world with every zone at this mover share.
-function sharedWorld(world: World, share: number): World {
-  const [first, ...rest] = world.zones;
-  const shared = (zone: Zone): Zone => ({ ...zone, moverShare: share });
-  return { ...world, zones: [shared(first), ...rest.map(shared)] };
-}
 // The world with every zone's weights changed by reweigh.
 function reweighed(reweigh: (weights: Zone["weights"]) => Zone["weights"]): World {
   const [first, ...rest] = WORLD.zones;
@@ -340,16 +336,16 @@ describe("planZone", { timeout: 15_000 }, () => {
     expect(countOf("lucky")).toBe(2);
   });
 
+  // With no movers, which a zone this short has too little room for at the real shares.
   it("draws only the minor obstacles the current zone weighs above 0", () => {
     const walk = walkWith(["koda"]);
-    const real = { ...data, world: WORLD };
+    const real = { ...data, world: sharedWorld(WORLD, 0) };
     for (const zone of ZONE_IDS) {
       const run = inZone(walk.run, zone, 0);
       const allowed = minorObstacleWeights(real, run).map(([kind]) => kind as string);
       for (const seed of [1, 2, 3]) {
         const kinds = planZone(real, geometry, seededRandom(seed), { ...walk, run })
-          .road.pending.filter((event) => event.mover === undefined)
-          .map((event) => event.kind as string)
+          .road.pending.map((event) => event.kind as string)
           .filter((kind) => itemCategory(real, kind as WalkItem["kind"]) === "minor");
         expect(
           kinds.filter((kind) => !allowed.includes(kind)),
@@ -1208,10 +1204,10 @@ describe("movers", { timeout: 60_000 }, () => {
     "puddle",
     "skunk",
   ];
-  const movementOf = (kind: WalkItem["kind"]) => {
+  const movementOf = (kind: WalkItem["kind"], tuned: Real = REAL) => {
     const entry = Object.hasOwn(MINOR_OBSTACLES, kind)
-      ? REAL.minorObstacles[kind as MinorObstacleId]
-      : REAL.encounters[kind as ObstacleEncounterId];
+      ? tuned.minorObstacles[kind as MinorObstacleId]
+      : tuned.encounters[kind as ObstacleEncounterId];
     const movement = ("movement" in entry ? entry.movement : undefined) as Movement | undefined;
     return movement === undefined || movement.kind === "still" ? null : movement;
   };
@@ -1257,14 +1253,25 @@ describe("movers", { timeout: 60_000 }, () => {
   // obstacle that can move moving: a way past every lane-blocking spawn from every lane, at
   // most the caps of movers on screen, the pack-fit gap wherever the path changes lanes between
   // two obstacles, and each mover moving as its kind does.
-  const worlds = [
-    { name: "the zones' shares", world: WORLD },
-    { name: "a share of 1", world: sharedWorld(WORLD, 1) },
+  const everyMover: Real = { ...REAL, world: sharedWorld(WORLD, 1) };
+  // Every stepper hopping instead, each hop up to 2 spots any way, or sideways only.
+  const HOPS: readonly HopMovement[] = [
+    { kind: "hop", most: 2 },
+    { kind: "hop", most: 2, sideways: true },
   ];
-  it.each(worlds.flatMap(({ name, world }) => ZONE_IDS.map((zone) => ({ name, world, zone }))))(
+  const hopping = HOPS.map((hop) => ({
+    hop,
+    name: `hops of up to ${hop.most} spots${hop.sideways === true ? ", sideways" : ""}`,
+    tuned: hoppingInstead(everyMover, hop),
+  }));
+  const worlds = [
+    { name: "the zones' shares", tuned: REAL },
+    { name: "a share of 1", tuned: everyMover },
+    ...hopping,
+  ];
+  it.each(worlds.flatMap(({ name, tuned }) => ZONE_IDS.map((zone) => ({ name, tuned, zone }))))(
     "keeps every move passable in $zone at $name",
-    ({ world, zone }) => {
-      const tuned = { ...REAL, world };
+    ({ tuned, zone }) => {
       const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
       const steps = Math.ceil(read(TUNING, "seconds", "laneMove") / STEP_SECONDS - 1e-9);
       const fit = GAME_ROAD.tallestPackBand + steps * STEP_SECONDS * walkScrollSpeed(tuned, zoned);
@@ -1283,7 +1290,7 @@ describe("movers", { timeout: 60_000 }, () => {
           mover === undefined ? [] : [{ distance, kind, mover }],
         );
         for (const { kind, mover } of movers) {
-          expect(mover.movement).toBe(movementOf(kind)?.kind);
+          expect(mover.movement).toBe(movementOf(kind, tuned)?.kind);
         }
         expectCapsOnScreen(movers);
         // Each obstacle's contact with the pack: its hit box's extent and its lanes.
@@ -1328,13 +1335,49 @@ describe("movers", { timeout: 60_000 }, () => {
     },
   );
 
-  it("plans the same movers for the same seed", () => {
-    const tuned = { ...REAL, world: sharedWorld(WORLD, 1) };
-    const zoned = inZone(realRun(tuned, FASTEST_WALKER), "homeStretch", WORLD.walkLength - 1);
-    const plan = () =>
-      planZone(tuned, GAME_ROAD, seededRandom(4), { road: startRoad(LANE_COUNT), run: zoned }).road
-        .pending;
-    expect(plan()).toEqual(plan());
+  it.each([{ name: "every mover", tuned: everyMover }, ...hopping])(
+    "plans the same movers for the same seed, with $name",
+    ({ tuned }) => {
+      const zoned = inZone(realRun(tuned, FASTEST_WALKER), "homeStretch", WORLD.walkLength - 1);
+      const plan = (seed: number) =>
+        planZone(tuned, GAME_ROAD, seededRandom(seed), { road: startRoad(LANE_COUNT), run: zoned })
+          .road.pending;
+      expect(plan(4)).toEqual(plan(4));
+      expect(plan(5)).not.toEqual(plan(4));
+    },
+  );
+
+  // A hop is one jump of 1 to most spots one way, sideways only when it says so, as long as the
+  // tuning's hop; across zones and seeds, hoppers make hops of every length they can.
+  it.each(hopping)("hops each hopper once with $name", ({ hop, tuned }) => {
+    const spots = new Set<number>();
+    for (const zone of ZONE_IDS) {
+      const zoned = inZone(realRun(tuned, FASTEST_WALKER), zone, WORLD.walkLength - 1);
+      const length = hopSeconds(tuned) * walkScrollSpeed(tuned, zoned);
+      for (const seed of [1, 2, 3]) {
+        const walk = planZone(tuned, GAME_ROAD, seededRandom(seed), {
+          road: startRoad(LANE_COUNT),
+          run: zoned,
+        });
+        for (const { mover } of walk.road.pending) {
+          if (mover?.movement !== "hop") {
+            continue;
+          }
+          expect(mover.motion).toBe("steps");
+          const steps = mover.motion === "steps" ? mover.steps : [];
+          expect(steps).toHaveLength(1);
+          for (const { lanes, length: hopLength, travel } of steps) {
+            expect(lanes === 0 || travel === 0).toBe(true);
+            if (hop.sideways === true) {
+              expect(travel).toBe(0);
+            }
+            expect(hopLength).toBeCloseTo(length);
+            spots.add(Math.abs(lanes) + Math.abs(travel) / GAME_ROAD.cell.length);
+          }
+        }
+      }
+    }
+    expect([...spots].sort()).toEqual(Array.from({ length: hop.most }, (_, i) => i + 1));
   });
 
   it("brings a mover onto the road as its cue, carrying its path", () => {

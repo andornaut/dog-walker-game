@@ -1,4 +1,5 @@
 import {
+  artOrStandIn,
   encounterSpriteKey,
   kebabCase,
   minorObstacleSpriteKey,
@@ -85,9 +86,10 @@ export function minorObstacleLook(
   });
 }
 
-// The road sprite key to draw: the skin's art, or the base art while the skin's is missing.
+// The road sprite key to draw: the skin's art, or the base art while the skin's is missing, or
+// the base art's stand-in while that is missing too.
 export function skinnedArt(has: HasArt, look: Look): string {
-  return has(look.art) ? look.art : look.baseArt;
+  return has(look.art) ? look.art : artOrStandIn(has, look.baseArt);
 }
 
 // The figure standing beside the drawn road sprite, such as the other dog's owner: the drawn

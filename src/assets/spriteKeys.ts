@@ -74,10 +74,33 @@ const MINOR_OBSTACLE_SPRITES: Readonly<Partial<Record<MinorObstacleId, string>>>
   ball: "ball-bounce",
   barrier2: "barrier-2",
   barrier3: "barrier-3",
+  bunny: "chase-rabbit",
+  cat: "chase-cat",
+  ducklings: "chase-ducklings",
+  frisbeeDog: "social-frisbee-dog",
+  garbageTruck: "stink-garbage-truck",
+  pigeons: "chase-pigeons",
+  raccoon: "snatch-raccoon",
+  scooter: "minor-scooter",
+  seagull: "snatch-seagull",
 };
 
 export function minorObstacleSpriteKey(obstacle: MinorObstacleId): string {
   return MINOR_OBSTACLE_SPRITES[obstacle] ?? kebabCase(obstacle);
+}
+
+// Road art not drawn yet, and the drawn sprite that stands in for it until its key is in the
+// manifest.
+export const ART_STAND_INS: Readonly<Partial<Record<string, string>>> = {
+  jogger: "social-jogger-dog-owner",
+  "kid-on-bike": "minor-tricycles",
+  stroller: "social-handbag-dog-owner",
+};
+
+// The key to draw for art: its own while it is loaded, else its stand-in once that is.
+export function artOrStandIn(has: (key: string) => boolean, art: string): string {
+  const standIn = ART_STAND_INS[art];
+  return has(art) || standIn === undefined || !has(standIn) ? art : standIn;
 }
 
 // The pull signals over a dog: the bubble its target's icon sits in, and the mark of a pull
@@ -181,8 +204,9 @@ export const MOVER_SPRITE_KEYS: Readonly<Partial<Record<string, string>>> = {
   squirrel: "squirrel-dash",
 };
 export const MOVING_TAGS: Readonly<Record<Exclude<MovementKind, "still">, readonly string[]>> = {
-  dart: ["run", "flee", "bounce", "walk"],
-  inLane: ["drive", "pull-out", "ride", "run", "walk"],
+  dart: ["flee", "run", "bounce", "walk"],
+  hop: ["hop", "run", "walk"],
+  inLane: ["drive", "ride", "run", "walk", "pull-out"],
   step: ["walk", "run"],
 };
 export const IDLE_TAG = "idle";

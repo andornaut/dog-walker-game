@@ -898,7 +898,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "bunny"
+      "spriteKey": "chase-rabbit"
     },
     {
       "id": "cat",
@@ -910,7 +910,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "cat"
+      "spriteKey": "chase-cat"
     },
     {
       "id": "cone",
@@ -958,7 +958,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "ducklings"
+      "spriteKey": "chase-ducklings"
     },
     {
       "id": "frisbeeDog",
@@ -971,7 +971,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "frisbee-dog"
+      "spriteKey": "social-frisbee-dog"
     },
     {
       "id": "garbageTruck",
@@ -984,7 +984,7 @@
         "lanes": 1,
         "rows": 3
       },
-      "spriteKey": "garbage-truck"
+      "spriteKey": "stink-garbage-truck"
     },
     {
       "id": "goose",
@@ -1084,7 +1084,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "pigeons"
+      "spriteKey": "chase-pigeons"
     },
     {
       "id": "raccoon",
@@ -1097,7 +1097,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "raccoon"
+      "spriteKey": "snatch-raccoon"
     },
     {
       "id": "scooter",
@@ -1110,7 +1110,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "scooter"
+      "spriteKey": "minor-scooter"
     },
     {
       "id": "seagull",
@@ -1123,7 +1123,7 @@
         "lanes": 1,
         "rows": 1
       },
-      "spriteKey": "seagull"
+      "spriteKey": "snatch-seagull"
     },
     {
       "id": "stroller",

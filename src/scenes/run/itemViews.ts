@@ -2,6 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { itemAt } from "../../arrays";
 import {
+  artOrStandIn,
   minorObstacleSpriteKey,
   ROAD_SPRITE_SIZE,
   SKUNK_CLOUD_KEY,
@@ -55,9 +56,10 @@ export interface ItemView {
   parts: ItemPart[];
 }
 
-// A box for each minor obstacle and the skunk's cloud whose art is missing, from its shape in
-// the data.
+// A box for each minor obstacle and the skunk's cloud whose art and stand-in are missing, from
+// its shape in the data.
 export function ensureRoadPlaceholders(scene: Scene): void {
+  const has = (key: string) => scene.textures.exists(key);
   const { cell } = walkGeometry(LANE_COUNT, 1, PROJECTION, LAYOUT.road);
   const add = (key: string, lanes: number) =>
     ensurePlaceholder(scene, key, {
@@ -66,7 +68,10 @@ export function ensureRoadPlaceholders(scene: Scene): void {
       width: lanes * cell.length - (cell.length - ROAD_SPRITE_SIZE),
     });
   for (const [id, obstacle] of Object.entries(gameData.minorObstacles)) {
-    add(minorObstacleSpriteKey(id as MinorObstacleId), obstacle.shape.lanes);
+    const art = minorObstacleSpriteKey(id as MinorObstacleId);
+    if (artOrStandIn(has, art) === art) {
+      add(art, obstacle.shape.lanes);
+    }
   }
   const skunk = gameData.encounters.skunk;
   add(SKUNK_CLOUD_KEY, skunk.kind === "obstacle" ? skunk.shape.lanes : 1);

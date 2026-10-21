@@ -8,6 +8,7 @@ import { splitDepthKey, stepSize } from "../assets/depthSteps";
 import { SQUIRREL_ICON_KEY, statusIconKey } from "../assets/iconKeys";
 import { parseManifest } from "../assets/manifest";
 import {
+  artOrStandIn,
   CARD_FRAME_KEY,
   cardFrameTag,
   depthVariantKey,
@@ -51,6 +52,7 @@ import { SHOP_ART } from "./itemArt";
 const manifest = parseManifest(shippedManifest);
 const images = new Set(manifest.images.map(({ key }) => key));
 const sprites = new Map(manifest.sprites.map((entry) => [entry.key, entry]));
+const hasSprite = (key: string) => sprites.has(key);
 const sheets = import.meta.glob<unknown>("../../public/art/sprites/*.json", {
   eager: true,
   import: "default",
@@ -417,9 +419,10 @@ describe("road object art", () => {
         return [];
       }
       const movement = "movement" in entry ? entry.movement : undefined;
+      const shown = artOrStandIn(hasSprite, art);
       return movement === undefined || movement.kind === "still"
         ? []
-        : [{ key: MOVER_SPRITE_KEYS[art] ?? art, kind, tags: MOVING_TAGS[movement.kind] }];
+        : [{ key: MOVER_SPRITE_KEYS[shown] ?? shown, kind, tags: MOVING_TAGS[movement.kind] }];
     }),
   )("tags the moving $kind's sprite with a tag of its movement, at every step", ({ key, tags }) => {
     const missing = [1, ...variantSteps([key])].flatMap((step) => {

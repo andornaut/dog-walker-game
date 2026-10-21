@@ -4,6 +4,7 @@ import { TUNING } from "../data/tuning";
 import { read } from "../rules/units";
 import {
   hasLeftRoad,
+  hopShapes,
   inMotion,
   isWarning,
   laneAt,
@@ -22,6 +23,7 @@ import {
   onScreenOf,
   placeMovers,
   screenHasRoom,
+  stepSpots,
   sweptLanes,
 } from "./movers";
 import { seededRandom } from "./random";
@@ -63,6 +65,14 @@ const stepper: MoverPath = {
     { at: 100, lanes: 1, length: 50, travel: 0 },
     { at: 300, lanes: 0, length: 50, travel: 50 },
   ],
+  warning: 100,
+};
+// A hop two lanes left at 100, 30px long.
+const hopper: MoverPath = {
+  lane: 3,
+  motion: "steps",
+  movement: "hop",
+  steps: [{ at: 100, lanes: -2, length: 30, travel: 0 }],
   warning: 100,
 };
 // The game's caps on movers on screen.
@@ -145,6 +155,18 @@ describe("moverPlace", () => {
       path: stepper,
       since: 400,
       want: { lanePosition: 3, solid: true, travel: 450 },
+    },
+    {
+      name: "a hopper over the lane between, halfway through a two-lane hop",
+      path: hopper,
+      since: 115,
+      want: { lanePosition: 2, solid: true, travel: 115 },
+    },
+    {
+      name: "a hopper landed",
+      path: hopper,
+      since: 130,
+      want: { lanePosition: 1, solid: true, travel: 130 },
     },
   ])("places $name", ({ path, since, want }) => {
     expect(moverPlace(5, path, since)).toEqual(want);
@@ -330,7 +352,44 @@ const SPECS: readonly { name: string; spec: MoverSpec }[] = [
       stepSeconds: 0.5,
     }),
   },
+  {
+    name: "a hopper",
+    spec: spec({
+      kind: "steps",
+      sequences: hopShapes(2, false).map((shape) => [shape]),
+      stepSeconds: 0.3,
+    }),
+  },
+  {
+    name: "a sideways hopper",
+    spec: spec({
+      kind: "steps",
+      sequences: hopShapes(2, true).map((shape) => [shape]),
+      stepSeconds: 0.3,
+    }),
+  },
 ];
+
+describe("hopShapes", () => {
+  it.each([
+    { most: 1, sideways: false },
+    { most: 2, sideways: false },
+    { most: 2, sideways: true },
+  ])("hops 1 to $most spots one way, rows too unless sideways is $sideways", (hop) => {
+    const shapes = hopShapes(hop.most, hop.sideways);
+    expect(shapes.every(({ lanes, travel }) => lanes === 0 || travel === 0)).toBe(true);
+    expect(shapes.some(({ travel }) => travel !== 0)).toBe(!hop.sideways);
+    expect([...new Set(shapes.map(stepSpots))].sort()).toEqual(
+      Array.from({ length: hop.most }, (_, i) => i + 1),
+    );
+    // Each hop has its mirror image, so the planner can send it either way.
+    for (const { lanes, travel } of shapes) {
+      expect(shapes).toContainEqual(
+        lanes === 0 ? { lanes, travel: -travel } : { lanes: -lanes, travel },
+      );
+    }
+  });
+});
 
 describe("moverPlacements", () => {
   // Wherever it is placed, a mover touches the pack only within what its placement blocks: in
@@ -360,6 +419,24 @@ describe("moverPlacements", () => {
         expect(first).toBeGreaterThanOrEqual(placement.lanes.first);
         expect(last).toBeLessThan(placement.lanes.first + placement.lanes.count);
       }
+    }
+  });
+
+  // The pack-fit gap keeps room behind a hopper at every spot it hops over, not only where it
+  // takes off and lands.
+  it("stands a hopper at every spot its hop passes over", () => {
+    const placements = moverPlacements(
+      geometry,
+      spec({
+        kind: "steps",
+        sequences: [[{ lanes: 2, travel: 0 }], [{ lanes: 0, travel: 2 }]],
+        stepSeconds: 0.3,
+      }),
+    );
+    for (const { lane, path, stands } of placements) {
+      const sideways = path.motion === "steps" && path.steps.some(({ lanes }) => lanes !== 0);
+      expect(stands.map((stand) => stand.lane - lane)).toEqual(sideways ? [0, 1, 2] : [0, 0, 0]);
+      expect(new Set(stands.map(({ distance }) => distance)).size).toBe(sideways ? 1 : 3);
     }
   });
 

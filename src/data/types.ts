@@ -95,6 +95,8 @@ export interface Tuning {
     readonly hitStopSeconds: number;
     readonly lookAheadSeconds: number;
     readonly minorHitStopSeconds: number;
+    // A hopping mover's jump lasts this long; the rules' own default while it is absent.
+    readonly moverHopSeconds?: number;
     readonly moverStepSeconds: number;
     readonly moverWarningSeconds: number;
     readonly pathReactionMargin: number;
@@ -261,11 +263,14 @@ export interface Shape {
 // How an obstacle moves when it comes as a mover, each move after a cue
 // seconds.moverWarningSeconds long. dart: across the road at counts.dartLanesPerSecond, coming
 // down it at 1 + tilt of the road's speed meanwhile (tilt 0 when absent). inLane: down its lane
-// at factor of the road's speed, above 1 toward the pack, below 1 away. step: steps spots, each
-// a lane to either side or a row toward or away, seconds.moverStepSeconds each. still: it never
-// moves, as with no movement.
+// at factor of the road's speed, above 1 toward the pack, below 1 away. hop: one jump of 1 to
+// most spots one way, lanes to either side or, unless sideways, rows toward or away, landing
+// seconds.moverHopSeconds after it leaves. step: steps spots, each a lane to either side or a
+// row toward or away, seconds.moverStepSeconds each. still: it never moves, as with no
+// movement.
 export type Movement =
   | { readonly kind: "dart"; readonly tilt?: number }
+  | { readonly kind: "hop"; readonly most: 1 | 2; readonly sideways?: true }
   | { readonly kind: "inLane"; readonly factor: number }
   | { readonly kind: "step"; readonly steps: 1 | 2 }
   | { readonly kind: "still" };

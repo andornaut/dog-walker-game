@@ -10,6 +10,8 @@ import { WORLD } from "../data/world";
 import type { CardSource } from "../state/runState";
 import { animationKey, animationSpecs } from "./asepriteAnimations";
 import {
+  ART_STAND_INS,
+  artOrStandIn,
   backdropKey,
   CARD_FRAME_KEY,
   cardFrameTag,
@@ -85,6 +87,23 @@ describe("key names", () => {
   );
 });
 
+describe("artOrStandIn", () => {
+  const [art, standIn] = Object.entries(ART_STAND_INS).find(
+    (entry): entry is [string, string] => entry[1] !== undefined,
+  ) ?? ["", ""];
+  it.each<{ loaded: string[]; name: string; want: string }>([
+    { loaded: [art, standIn], name: "its own art once loaded", want: art },
+    { loaded: [standIn], name: "the stand-in while its own art is missing", want: standIn },
+    { loaded: [], name: "its own art while the stand-in is missing too", want: art },
+  ])("draws $name", ({ loaded, want }) => {
+    expect(artOrStandIn((key) => loaded.includes(key), art)).toBe(want);
+  });
+
+  it("draws art with no stand-in as itself", () => {
+    expect(artOrStandIn(() => false, "cone")).toBe("cone");
+  });
+});
+
 describe("standsOnGround", () => {
   // A mover's cue stands on the road; faces, effects, badges and UI do not.
   it.each([
@@ -125,11 +144,13 @@ describe("the art manifest", () => {
     },
     {
       keys: () => [
-        ...(Object.keys(MINOR_OBSTACLES) as MinorObstacleId[]).map(minorObstacleSpriteKey),
+        ...(Object.keys(MINOR_OBSTACLES) as MinorObstacleId[]).map((id) =>
+          artOrStandIn((key) => spriteKeys.has(key), minorObstacleSpriteKey(id)),
+        ),
         SKUNK_CLOUD_KEY,
         CARD_FRAME_KEY,
       ],
-      name: "a sprite for every minor obstacle, the skunk's cloud and the card frame",
+      name: "a sprite, or its stand-in, for every minor obstacle, the skunk's cloud and the card frame",
       set: spriteKeys,
     },
     {

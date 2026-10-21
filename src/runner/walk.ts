@@ -7,6 +7,7 @@ import type {
   MinorObstacleId,
   Movement,
   ObstacleEncounterId,
+  Tuning,
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { dogHitCentre, hitPackPlacements } from "../layout/packFormation";
@@ -26,7 +27,7 @@ import {
   payZone,
   tipValue,
 } from "../rules/run";
-import { addCents, type Pixels, pixels, read } from "../rules/units";
+import { addCents, type Pixels, pixels, read, type Seconds, seconds } from "../rules/units";
 import { packAgility, slowestAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
@@ -46,6 +47,7 @@ import { advanceLaneControl, type LaneControl, laneControlIn, steerLane } from "
 import { type LaneMotion, type LaneMotionConfig, laneMotionX, stillInLane } from "./laneMotion";
 import {
   hasLeftRoad,
+  hopShapes,
   isWarning,
   laneAt,
   moveMovers,
@@ -419,9 +421,17 @@ const STEPS: readonly StepShape[] = [
   { lanes: 0, travel: -1 },
 ];
 
+// A hop lasts this long while the tuning names no seconds.moverHopSeconds.
+const DEFAULT_HOP_SECONDS = 0.3;
+
+export function hopSeconds(data: Pick<GameData, "tuning">): Seconds {
+  const tuned: Tuning["seconds"] = data.tuning.seconds;
+  return seconds(tuned.moverHopSeconds ?? DEFAULT_HOP_SECONDS);
+}
+
 // How a mover moves, by its movement and the tuning. A stepper's steps are drawn here, with
-// their mirror image as the other way it may go: the planner takes whichever keeps the road
-// passable.
+// their mirror image as the other way it may go, and a hopper may make any hop it can: the
+// planner takes whichever keeps the road passable, drawing among those from the zone's seed.
 export function moverSpec(
   data: Pick<GameData, "tuning">,
   random: Random,
@@ -438,6 +448,12 @@ export function moverSpec(
     };
   } else if (movement.kind === "inLane") {
     motion = { kind: "ride", speedMultiplier: movement.factor };
+  } else if (movement.kind === "hop") {
+    motion = {
+      kind: "steps",
+      sequences: hopShapes(movement.most, movement.sideways === true).map((shape) => [shape]),
+      stepSeconds: hopSeconds(data),
+    };
   } else {
     const steps = Array.from({ length: movement.steps }, () => randomPick(random, STEPS));
     const mirrored = steps.map(({ lanes, travel }) => ({ lanes: -lanes as -1 | 0 | 1, travel }));

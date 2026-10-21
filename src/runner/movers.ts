@@ -256,17 +256,41 @@ export interface MoverFootprint {
   readonly rows: number;
 }
 
-// One step of a stepping mover: a lane to either side, or a row toward the pack (travel 1) or
-// away (travel -1).
+// One step of a stepping mover: lanes to either side, or rows toward the pack (travel above 0)
+// or away (below 0). A step is a spot; a hop is one step of 1 or more spots one way.
 export interface StepShape {
-  readonly lanes: -1 | 0 | 1;
-  readonly travel: -1 | 0 | 1;
+  readonly lanes: number;
+  readonly travel: number;
+}
+
+// Every hop of 1 to most spots one way: lanes to either side or, unless sideways, rows toward
+// the pack or away. The planner picks among those that keep the road passable.
+export function hopShapes(most: number, sideways: boolean): StepShape[] {
+  const ways: readonly StepShape[] = sideways
+    ? [
+        { lanes: -1, travel: 0 },
+        { lanes: 1, travel: 0 },
+      ]
+    : [
+        { lanes: -1, travel: 0 },
+        { lanes: 1, travel: 0 },
+        { lanes: 0, travel: 1 },
+        { lanes: 0, travel: -1 },
+      ];
+  return Array.from({ length: most }, (_, i) => i + 1).flatMap((spots) =>
+    ways.map(({ lanes, travel }) => ({ lanes: lanes * spots, travel: travel * spots })),
+  );
+}
+
+// How many spots a step covers.
+export function stepSpots(shape: StepShape): number {
+  return Math.max(Math.abs(shape.lanes), Math.abs(shape.travel));
 }
 
 // cross: across the road at lanesPerSecond, tilted down the road by tilt of the road's speed.
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
-// away. steps: one of sequences, each step stepSeconds long; the planner picks whichever keeps
-// the road passable.
+// away. steps: one of sequences, each step stepSeconds long however many spots it covers; the
+// planner picks whichever keeps the road passable.
 export type MoverMotion =
   | { readonly kind: "cross"; readonly lanesPerSecond: number; readonly tilt: number }
   | { readonly kind: "ride"; readonly speedMultiplier: number }
@@ -418,7 +442,8 @@ function ridePlacements(
 // A stepping mover stands on the road from its spawn. Its first cue shows once it is wholly on
 // the road, and each later one once the step before has ended. It spawns late enough that its
 // furthest step toward the pack meets the pack no sooner than its row would, and blocks every
-// lane it can step into for as long as it can overlap the pack.
+// lane it can step into for as long as it can overlap the pack. It stands at every spot a step
+// of several spots passes over, as it does at each step's ends.
 function stepsPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,
@@ -434,7 +459,13 @@ function stepsPlacements(
     const positions = [{ lane: 0, travel: 0 }];
     const steps = shapes.map((shape, i): MoverStep => {
       const last = positions.at(-1) ?? { lane: 0, travel: 0 };
-      positions.push({ lane: last.lane + shape.lanes, travel: last.travel + shape.travel * burst });
+      const spots = stepSpots(shape);
+      for (let spot = 1; spot <= spots; spot++) {
+        positions.push({
+          lane: last.lane + (shape.lanes * spot) / spots,
+          travel: last.travel + (shape.travel * burst * spot) / spots,
+        });
+      }
       return {
         at: height + warning + i * (warning + length),
         lanes: shape.lanes,
