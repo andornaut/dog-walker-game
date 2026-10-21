@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "sourceSize": { "w": 42, "h": 63 },
-    "duration": 200
+    "duration": 100
    },
    "thief@75 1.aseprite": {
     "frame": { "x": 42, "y": 0, "w": 42, "h": 63 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "sourceSize": { "w": 42, "h": 63 },
-    "duration": 200
+    "duration": 100
    },
    "thief@75 2.aseprite": {
     "frame": { "x": 84, "y": 0, "w": 42, "h": 63 },
@@ -21,7 +21,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "sourceSize": { "w": 42, "h": 63 },
-    "duration": 110
+    "duration": 100
    },
    "thief@75 3.aseprite": {
     "frame": { "x": 126, "y": 0, "w": 42, "h": 63 },
@@ -29,7 +29,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "sourceSize": { "w": 42, "h": 63 },
-    "duration": 110
+    "duration": 100
    },
    "thief@75 4.aseprite": {
     "frame": { "x": 168, "y": 0, "w": 42, "h": 63 },
@@ -37,10 +37,26 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
     "sourceSize": { "w": 42, "h": 63 },
-    "duration": 400
+    "duration": 110
    },
    "thief@75 5.aseprite": {
     "frame": { "x": 210, "y": 0, "w": 42, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
+    "duration": 110
+   },
+   "thief@75 6.aseprite": {
+    "frame": { "x": 252, "y": 0, "w": 42, "h": 63 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "sourceSize": { "w": 42, "h": 63 },
+    "duration": 400
+   },
+   "thief@75 7.aseprite": {
+    "frame": { "x": 294, "y": 0, "w": 42, "h": 63 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
@@ -53,12 +69,12 @@
   "version": "1.2.30-x64",
   "image": "thief@75.png",
   "format": "RGBA8888",
-  "size": { "w": 252, "h": 63 },
+  "size": { "w": 336, "h": 63 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "flee", "from": 2, "to": 3, "direction": "forward" },
-   { "name": "idle", "from": 4, "to": 5, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "flee", "from": 4, "to": 5, "direction": "forward" },
+   { "name": "idle", "from": 6, "to": 7, "direction": "forward" }
   ]
  }
 }

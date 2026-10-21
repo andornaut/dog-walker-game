@@ -5,7 +5,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
     "sourceSize": { "w": 28, "h": 42 },
-    "duration": 200
+    "duration": 100
    },
    "other-dog-owner@50 1.aseprite": {
     "frame": { "x": 28, "y": 0, "w": 28, "h": 42 },
@@ -13,7 +13,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
     "sourceSize": { "w": 28, "h": 42 },
-    "duration": 200
+    "duration": 100
    },
    "other-dog-owner@50 2.aseprite": {
     "frame": { "x": 56, "y": 0, "w": 28, "h": 42 },
@@ -21,10 +21,26 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
     "sourceSize": { "w": 28, "h": 42 },
-    "duration": 400
+    "duration": 100
    },
    "other-dog-owner@50 3.aseprite": {
     "frame": { "x": 84, "y": 0, "w": 28, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "sourceSize": { "w": 28, "h": 42 },
+    "duration": 100
+   },
+   "other-dog-owner@50 4.aseprite": {
+    "frame": { "x": 112, "y": 0, "w": 28, "h": 42 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "sourceSize": { "w": 28, "h": 42 },
+    "duration": 400
+   },
+   "other-dog-owner@50 5.aseprite": {
+    "frame": { "x": 140, "y": 0, "w": 28, "h": 42 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
@@ -37,11 +53,11 @@
   "version": "1.2.30-x64",
   "image": "other-dog-owner@50.png",
   "format": "RGBA8888",
-  "size": { "w": 112, "h": 42 },
+  "size": { "w": 168, "h": 42 },
   "scale": "1",
   "frameTags": [
-   { "name": "walk", "from": 0, "to": 1, "direction": "forward" },
-   { "name": "idle", "from": 2, "to": 3, "direction": "forward" }
+   { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
+   { "name": "idle", "from": 4, "to": 5, "direction": "forward" }
   ]
  }
 }

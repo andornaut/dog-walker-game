@@ -72,7 +72,7 @@ def own(s):
     p = road.SCALE * s
 
     def walk(top, **q):
-        return ("walk", [dressed(p, top, lf=-2, **q).outlined(), dressed(p, top, rf=-2, **q).outlined()], 200)
+        return ("walk", [dressed(p, top, **w, **q).outlined() for w in road.PERSON_WALK], road.PERSON_WALK_MS)
 
     owner = dict(shoes="dbrown")
     yield "other-dog-owner", [walk(road.dog_owner_top, **owner),
@@ -96,7 +96,7 @@ def own(s):
     yield "kid", [("wave", [kid(False), kid(True)], 300), ("sad", [kid(False, "sad")], 1000),
                   ("idle", [kid(bob=b) for b in breath], ms)]
     yield "mail-carrier", [("walk", [small(road, p, road.mail_carrier, **snap(q, p)).outlined()
-                                     for q in (dict(lf=-2), dict(rf=-2))], 200),
+                                     for q in road.PERSON_WALK], road.PERSON_WALK_MS),
                            ("idle", [small(road, p, road.mail_carrier, **snap(dict(bob=b), p)).outlined()
                                      for b in breath], ms)]
     def times(q):

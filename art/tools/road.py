@@ -329,6 +329,11 @@ WALKER_STUMBLE = [(-3, dict(lf=-3, rf=0, bob=1, arms=-3)), (1, dict(lf=0, rf=-3,
 WALKER_IDLE = [dict(), dict(bob=-1)]
 # The breathing bob every standing person shares, and its frame duration in ms.
 BREATH, BREATH_MS = (0, -1), 400
+# A person walking down the road at the player, as the walkers walk: the left foot lifted, both feet 1px up
+# as the body passes over them 1px higher, the right foot lifted, passing again; 4 frames at 100ms, a 400ms
+# stride.
+PERSON_WALK = (dict(lf=-2), dict(lf=-1, rf=-1, bob=-1), dict(rf=-2), dict(lf=-1, rf=-1, bob=-1))
+PERSON_WALK_MS = 100
 
 
 def lean(g, k):
@@ -1511,10 +1516,10 @@ def sprites():
     yield "other-dog", [("walk", frames(big(corgi, **q) for q in CORGI_WALK), 100),
                         ("idle", frames(big(corgi, **q) for q in CORGI_IDLE), 300)]
     owner = dict(shoes="dbrown")
-    yield "other-dog-owner", [("walk", frames([big(dressed, dog_owner_top, lf=-2, **owner),
-                                               big(dressed, dog_owner_top, rf=-2, **owner)]), 200),
+    yield "other-dog-owner", [("walk", frames(big(dressed, dog_owner_top, **q, **owner) for q in PERSON_WALK),
+                               PERSON_WALK_MS),
                               ("idle", frames(big(dressed, dog_owner_top, bob=bb, **owner) for bb in BREATH), BREATH_MS)]
-    yield "thief", [("walk", frames([big(dressed, thief_top, lf=-2), big(dressed, thief_top, rf=-2)]), 200),
+    yield "thief", [("walk", frames(big(dressed, thief_top, **q) for q in PERSON_WALK), PERSON_WALK_MS),
                     ("flee", frames(big(thief_fleeing, k) for k in (-1, 1)), 110),
                     ("idle", frames(big(dressed, thief_top, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "lost-wallet", [("idle", frames([big(wallet, False), big(wallet, True)]), 450)]
@@ -1541,7 +1546,7 @@ def sprites():
                   ("idle", frames(big(kid, bob=bb) for bb in BREATH), BREATH_MS)]
     yield "ice-cream-truck", [("idle", frames([drawn(TRUCK_SCALE, ice_cream_truck, f) for f in (0, 1)]), 400)]
     yield "construction", [("idle", frames([drawn(CONSTRUCTION_SCALE, construction, f) for f in (0, 1)]), 500)]
-    yield "mail-carrier", [("walk", frames([big(mail_carrier, lf=-2), big(mail_carrier, rf=-2)]), 200),
+    yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in PERSON_WALK), PERSON_WALK_MS),
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
 
 
