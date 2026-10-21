@@ -437,7 +437,7 @@ def patron(g, cx, hair, shirt, shade, skin, skin_shade):
     clasped under the chin."""
     g.rect(cx - 7, 25, 14, 8, shirt)
     g.rect(cx + 4, 25, 3, 8, shade)
-    g.ell(cx, 18, 7.5, 7.5, skin, skin_shade)
+    road.face_disc(g, cx, 18, 7.5, 7.5, skin, skin_shade)
     g.ell(cx, 13.5, 8, 4, *hair)
     g.rect(cx - 8, 14, 2, 6, hair[0])
     g.rect(cx + 6, 14, 2, 6, hair[1])
