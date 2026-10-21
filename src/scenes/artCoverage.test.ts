@@ -392,7 +392,14 @@ describe("road object art", () => {
     expect(missing).toEqual([]);
   });
 
-  // Every kind that moves plays one of its movement's tags at each step it has.
+  // Every kind that moves and some zone draws plays one of its movement's tags at each step it
+  // has.
+  const drawn = (kind: string) =>
+    gameData.world.zones.some(({ weights }) =>
+      [weights.obstacles, weights.minorObstacles, weights.luckyFinds].some(
+        (table) => ((table as Readonly<Record<string, number>>)[kind] ?? 0) > 0,
+      ),
+    );
   it.each(
     [
       ...ENCOUNTERS.map((kind) => ({
@@ -406,6 +413,9 @@ describe("road object art", () => {
         kind,
       })),
     ].flatMap(({ art, entry, kind }) => {
+      if (!drawn(kind)) {
+        return [];
+      }
       const movement = "movement" in entry ? entry.movement : undefined;
       return movement === undefined || movement.kind === "still"
         ? []
@@ -413,8 +423,8 @@ describe("road object art", () => {
     }),
   )("tags the moving $kind's sprite with a tag of its movement, at every step", ({ key, tags }) => {
     const missing = [1, ...variantSteps([key])].flatMap((step) => {
-      const drawn = depthVariantKey(key, step) ?? key;
-      return tags.some((tag) => tagsOf(drawn).includes(tag)) ? [] : [drawn];
+      const variant = depthVariantKey(key, step) ?? key;
+      return tags.some((tag) => tagsOf(variant).includes(tag)) ? [] : [variant];
     });
     expect(missing).toEqual([]);
   });
