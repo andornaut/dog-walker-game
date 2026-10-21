@@ -1,3 +1,5 @@
+import { SCREEN_CONFIG } from "../data/screen";
+
 // The message a page posts to a waiting service worker to make it take over now.
 // serviceWorker.ts imports only its type, so the worker still builds with no imports.
 export const SKIP_WAITING_MESSAGE = "skip-waiting";
@@ -99,9 +101,8 @@ export function activateWaitingWorker(
   worker.postMessage(SKIP_WAITING_MESSAGE);
 }
 
-// The game's size, and where the notice sits in it: over the gate scene's street, under the
-// top bar, clear of the home screen's steps and Start walk at the bottom.
-const GAME = { height: 560, width: 360 } as const;
+// Where the notice sits in the game: over the gate scene's street, under the top bar, clear of
+// the home screen's steps and Start walk at the bottom.
 const NOTICE = { maxWidth: 260, top: 48 } as const;
 
 interface BoxLike {
@@ -120,8 +121,8 @@ export function noticePlacement(canvas: BoxLike): {
 } {
   return {
     centreX: canvas.left + canvas.width / 2,
-    maxWidth: (canvas.width * NOTICE.maxWidth) / GAME.width,
-    top: canvas.top + (canvas.height * NOTICE.top) / GAME.height,
+    maxWidth: (canvas.width * NOTICE.maxWidth) / SCREEN_CONFIG.width,
+    top: canvas.top + (canvas.height * NOTICE.top) / SCREEN_CONFIG.height,
   };
 }
 
