@@ -530,9 +530,15 @@ export class StartScene extends Scene {
         this.closeOverlay();
       }
     });
-    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
+    // A held arrow keeps moving the focus; any other key's auto-repeat does nothing, so an Enter
+    // held from the end screen cannot start a walk.
+    this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
+      if (!event.repeat || focusDirectionForKey(event.key) !== undefined) {
+        this.onKey(event.key);
+      }
+    });
     // Badges earned on launch: a scene can pause itself only once it is running.
-    this.time.delayedCall(0, () => this.celebrate([]));
+    this.time.delayedCall(0, () => this.celebrate());
     // Settings can change reduced motion or mute, so the screen is drawn again.
     onSceneEvent(this, this.game.events, SETTINGS_CLOSED_EVENT, () => this.render());
     // The shop draws under the top bar, so the bank there follows each purchase; on close
@@ -542,10 +548,11 @@ export class StartScene extends Scene {
       this.shopClosed(closed),
     );
     // A tap made while another tap's act opened help, settings or stats over this screen is
-    // dropped, so it cannot act once the screen resumes.
+    // dropped, so it cannot act once the screen resumes, as is a press waiting for the art.
     onSceneEvent(this, this.events, "pause", () => {
       this.pending.forEach((timer) => timer.remove());
       this.pending.clear();
+      this.artWait = undefined;
     });
   }
 
@@ -842,14 +849,14 @@ export class StartScene extends Scene {
 
   // Badges earned on launch burst in over the home screen, with the owners of the dogs
   // picked cheering.
-  private celebrate(owners: readonly DogId[]): void {
+  private celebrate(): void {
     const achievements = takeCelebrations(this);
     if (achievements.length === 0) {
       return;
     }
     const data: CelebrationSceneData = {
       achievements,
-      owners: [...new Set([...owners, ...this.loadout.dogs])],
+      owners: [...this.loadout.dogs],
       resume: SCENE_KEYS.start,
     };
     openOverlay(this, SCENE_KEYS.celebration, data);

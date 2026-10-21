@@ -316,7 +316,8 @@ export class CardScene extends Scene {
   }
 
   // An option the player cannot afford shakes its card, unless motion is reduced, and
-  // flashes its cost, so the player knows to pick another.
+  // flashes its cost red, ending in the grey plate's text it was drawn in, so the player knows
+  // to pick another.
   private refuse(index: number): void {
     if (this.refusing) {
       return;
@@ -337,7 +338,7 @@ export class CardScene extends Scene {
     this.time.addEvent({
       callback: () => {
         flashes += 1;
-        badge?.setTint(flashes % 2 === 1 ? PALETTE.red : PALETTE.navy);
+        badge?.setTint(flashes % 2 === 1 ? PALETTE.red : PALETTE[GREYED.plateText]);
         if (flashes >= REFUSE.flashes) {
           this.refusing = false;
         }

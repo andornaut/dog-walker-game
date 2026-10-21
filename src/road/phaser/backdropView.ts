@@ -8,6 +8,8 @@ import { DEPTH, LAYOUT } from "../../scenes/run/stage";
 export class BackdropView {
   private readonly image: GameObjects.Image;
   private readonly scene: Scene;
+  // The backdrop key last drawn, which a missing texture's placeholder does not change.
+  private shown: string | undefined;
 
   constructor(scene: Scene) {
     this.scene = scene;
@@ -18,7 +20,8 @@ export class BackdropView {
 
   draw(zone: Zone): void {
     const key = backdropKey(zone);
-    if (this.image.texture.key !== key) {
+    if (this.shown !== key) {
+      this.shown = key;
       const band = LAYOUT.backdrop;
       this.image
         .setTexture(this.scene.textures.exists(key) ? key : "__DEFAULT")

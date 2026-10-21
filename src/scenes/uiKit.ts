@@ -17,7 +17,7 @@ import { TEXT_SCALE } from "../layout/textFit";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
 import { disabledTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
-import { addPixelText, setPixelText } from "./pixelText";
+import { addPixelText } from "./pixelText";
 import { playEffect, playTag } from "./sprites";
 import { listenTargetPress } from "./targetPress";
 
@@ -622,19 +622,5 @@ export function showTag(
   if (frame !== undefined) {
     sprite.stop();
     sprite.setFrame(frame);
-  }
-}
-
-// Sets the first candidate that fits maxWidth at the label's font and scale, else the last.
-export function fitText(
-  label: GameObjects.BitmapText,
-  maxWidth: number,
-  candidates: readonly string[],
-): void {
-  for (const candidate of candidates) {
-    setPixelText(label, candidate);
-    if (label.width <= maxWidth) {
-      return;
-    }
   }
 }

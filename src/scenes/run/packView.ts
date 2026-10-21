@@ -40,6 +40,8 @@ export class PackView {
   private readonly dogSprites: ReadonlyMap<DogId, GameObjects.Sprite>;
   // The tag each dog's sprite last played.
   private readonly dogTags = new Map<DogId, string>();
+  // Each dog's pull pose tag on the last frame drawn, which a reaction does not hold back.
+  private readonly pullTags = new Map<DogId, string | undefined>();
   private readonly figures: PackFigures;
   // Fired dogs trotting off the road, drawn by their trot and not with the pack.
   private readonly leaving = new Map<DogId, Tweens.Tween>();
@@ -230,8 +232,12 @@ export class PackView {
       }
     }
     const { walker } = this;
+    // A fired dog's trot fades it with reduced motion.
+    const trotting: ReadonlySet<object> = new Set(this.sprites([...this.leaving.keys()]));
     for (const layer of this.figures.layers()) {
-      layer.setAlpha(alpha);
+      if (!trotting.has(layer)) {
+        layer.setAlpha(alpha);
+      }
     }
     if (posed && !this.reacting.has(walker.sprite)) {
       playTag(walker.sprite, walker.key, pose, still && halted);
@@ -260,8 +266,8 @@ export class PackView {
   }
 
   // A dog leans for its tell and its pull, mirrored for the left, and otherwise takes the
-  // pack's pose; the bark pops over its head as the tell starts. The pack's pose holds still
-  // only while the walk is halted.
+  // pack's pose; the bark pops over its head as the tell starts, once, whether or not a
+  // reaction holds back the lean. The pack's pose holds still only while the walk is halted.
   private poseDog(
     dog: DogId,
     sprite: GameObjects.Sprite,
@@ -278,7 +284,9 @@ export class PackView {
       playTag(sprite, key, tag, pull === null ? still && halted : still);
       this.dogTags.set(dog, tag);
     }
-    if (tag === "tell" && shown !== tag) {
+    const told = this.pullTags.get(dog);
+    this.pullTags.set(dog, pull?.tag);
+    if (pull?.tag === "tell" && told !== "tell") {
       // The bark word in motion; the plain bark with reduced motion or without font-comic.
       const word = gameData.runText.comicWords.bark;
       if (still || !playBarkWord(this.scene, head, DEPTH.fx, word)) {

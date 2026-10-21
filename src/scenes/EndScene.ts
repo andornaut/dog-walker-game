@@ -258,9 +258,9 @@ export class EndScene extends Scene {
     const button = addMenuButton(this, BUTTON, words.backHome, { available: true, primary: true });
     listenButtonTap(this, button, goHome);
     // Back home is the page's way out, so Escape and back take it too. P does not: a player
-    // pausing as the walk ends would skip the page.
+    // pausing as the walk ends would skip the page. A key's auto-repeat does nothing.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (isConfirmKey(event.key) || event.key === "Escape") {
+      if (!event.repeat && (isConfirmKey(event.key) || event.key === "Escape")) {
         goHome();
       }
     });
