@@ -673,6 +673,9 @@ export interface RunText {
   };
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;
+  // The heading of the banner each zone opens with, over the zone's name: {world} is the
+  // world's name and {n} the zone's place in the walk, from 1.
+  readonly zoneBanner: string;
   // The zone celebration after any other zone but the last: its headline, as newWalker's,
   // and the zone's fees and tips.
   readonly zoneDone: {

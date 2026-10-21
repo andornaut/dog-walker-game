@@ -66,6 +66,7 @@ export const RUN_TEXT = {
     pullCancel: "{dog} stays with you.",
     treat: "{dog} got a treat! {owner} +{hearts}♥",
   },
+  zoneBanner: "{world}, neighborhood {n}",
   zoneDone: {
     earnings: "{fees} pay · {tips} tips",
     subtitle: "{zone}",

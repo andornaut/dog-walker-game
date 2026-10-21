@@ -5,8 +5,9 @@ import type { WalkerId, ZoneId } from "../data/types";
 import type { Change, MoneyChange } from "../rules/causes";
 import { cents, type Hearts } from "../rules/units";
 import { agilityWord } from "../rules/walkers";
+import { fillNames } from "../text/lines";
 import { perkIconKey } from "./effectIcons";
-import { celebrationText, zoneCelebration } from "./zoneCelebration";
+import { celebrationText, zoneBannerHeading, zoneCelebration } from "./zoneCelebration";
 
 function money(kind: "bump" | "pay" | "tip", amount: number): MoneyChange {
   return {
@@ -119,5 +120,20 @@ describe("celebrationText", () => {
     expect(shown.info.filter((part) => part.kind === "icon")).toEqual([
       { icon: perkIconKey(perk), kind: "icon", text: perkName },
     ]);
+  });
+});
+
+describe("zoneBannerHeading", () => {
+  const places = Array.from({ length: gameData.world.walkLength }, (_, zoneIndex) => zoneIndex);
+
+  it.each(places)("names the world and zone %i's place in the walk, from 1", (zoneIndex) => {
+    const heading = zoneBannerHeading(gameData, { zoneIndex });
+    expect(heading).toBe(
+      fillNames(gameData.runText.zoneBanner, {
+        n: String(zoneIndex + 1),
+        world: gameData.world.name,
+      }),
+    );
+    expect(heading).not.toMatch(/\bzone\b/i);
   });
 });

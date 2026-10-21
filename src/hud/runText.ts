@@ -46,6 +46,7 @@ export const RUN_TEXT_FIELDS = {
     ...STRIP_LINE_FIELDS,
     debuffStart: { muddy: ["seconds"], stinky: ["seconds"], zoomies: ["seconds"] },
   },
+  zoneBanner: ["n", "world"],
   zoneDone: {
     earnings: ["fees", "tips"],
     subtitle: ["zone"],

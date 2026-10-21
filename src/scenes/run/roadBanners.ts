@@ -2,6 +2,7 @@ import type { GameObjects, Scene } from "phaser";
 
 import { gameData } from "../../data";
 import type { EncounterId } from "../../data/types";
+import { zoneBannerHeading } from "../../hud/zoneCelebration";
 import { currentZone } from "../../rules/route";
 import type { RunState } from "../../state/runState";
 import { addDisplayText } from "../displayText";
@@ -35,7 +36,8 @@ export function showInstantPopup(scene: Scene, encounter: EncounterId, still: bo
   fadeAway(scene, [art], { ms: POPUP.fadeMs, rise: still ? 0 : POPUP.rise });
 }
 
-// "MAPLEWOOD, ZONE n" and the zone's name, slid in over the road at each zone's start.
+// The zone banner's heading ("Maplewood, neighborhood 2") and the zone's name, slid in over
+// the road at each zone's start.
 export class ZoneBanner {
   private banner: GameObjects.Container | undefined;
   private readonly scene: Scene;
@@ -63,7 +65,7 @@ export class ZoneBanner {
       fillRect(g, PALETTE.cream, { height: 48, width: BANNER.width, x: 0, y: 0 });
       banner.add(g);
     }
-    const heading = `${gameData.world.name}, zone ${run.zoneIndex + 1}`;
+    const heading = zoneBannerHeading(gameData, run);
     banner.add(
       addPixelText(scene, BANNER.width / 2, 11, heading, {
         color: PALETTE.plum,

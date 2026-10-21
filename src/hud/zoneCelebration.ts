@@ -4,7 +4,8 @@ import { signedDollarText } from "../home/home";
 import type { Change } from "../rules/causes";
 import { type Cents, cents } from "../rules/units";
 import { agilityWord, newWalkers } from "../rules/walkers";
-import { fillLine } from "../text/lines";
+import type { RunState } from "../state/runState";
+import { fillLine, fillNames } from "../text/lines";
 import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
 
@@ -54,6 +55,19 @@ export function zoneCelebration(
   }
   const { walker, zone } = finish;
   return { fees: cents(fees), kind: "zoneDone", tips: cents(tips), walker, zone };
+}
+
+// The heading of the banner a zone opens with: the world's name and the zone's place in the
+// walk, from 1.
+export function zoneBannerHeading(
+  data: Pick<GameData, "runText" | "world">,
+  run: Pick<RunState, "zoneIndex">,
+): string {
+  const fields: Record<(typeof FIELDS.zoneBanner)[number], string> = {
+    n: String(run.zoneIndex + 1),
+    world: data.world.name,
+  };
+  return fillNames(data.runText.zoneBanner, fields);
 }
 
 // A piece of a line drawn in parts: plain text, an amount of money, or a name after its icon.
