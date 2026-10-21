@@ -33,7 +33,14 @@ import { packAgility, slowestAgility } from "../rules/walkers";
 import { zoneScrollSpeed, zoneStats } from "../rules/zones";
 import { packDogs } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
-import { approachChoices, type ApproachPath, nearestStep, nextStepAt, takeStep } from "./approach";
+import {
+  approachChoices,
+  type ApproachPath,
+  nearestStep,
+  nextChoiceAt,
+  nextStepAt,
+  takeStep,
+} from "./approach";
 import {
   type Box,
   collideWithPack,
@@ -722,9 +729,10 @@ export function packBoxes(
   return sweptPackBoxes(geometry, motion, motion, run);
 }
 
-// Each stalker whose next step's cue has begun chooses that step, toward the pack where it is
-// now (approach.ts): the pack's centre, across from where its lane motion has it and half way
-// down its band, and the stalker's centre as the step starts.
+// Each stalker whose next step is due to be chosen, as its cue begins or, with no cue, as it
+// starts, chooses that step toward the pack where it is now (approach.ts): the pack's centre,
+// across from where its lane motion has it and half way down its band, and the stalker's centre
+// as the step starts.
 function stalkersStepped(
   geometry: Pick<RoadGeometry, "cell" | "laneCount" | "packBand" | "roadTop">,
   motion: LaneMotion,
@@ -741,7 +749,8 @@ function stalkersStepped(
       return item;
     }
     let path: ApproachPath = mover.path;
-    for (let at = nextStepAt(path); at !== null && mover.since >= at - path.warning;) {
+    for (let choice = nextChoiceAt(path); choice !== null && mover.since >= choice;) {
+      const at = nextStepAt(path) ?? choice;
       const place = moverPlace(laneCount, path, at);
       const centre = {
         x: (place.lanePosition + item.laneSpan / 2) * cell.length,
@@ -751,7 +760,7 @@ function stalkersStepped(
         path,
         nearestStep(cell.length, centre, pack, approachChoices(path), path.burst),
       );
-      at = nextStepAt(path);
+      choice = nextChoiceAt(path);
     }
     return path === mover.path ? item : { ...item, mover: { ...mover, path } };
   });

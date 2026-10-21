@@ -9,14 +9,15 @@ import type { RoadItem } from "./roadItems";
 // A mover is an obstacle of a kind that moves: it meets the pack as its kind does.
 
 // One step of a stepping mover. at is the scroll since it spawned when the step starts, and
-// its cue shows for the path's warning before that; the step lasts length of scroll, moves
-// lanes across, and travel down the road on top of the road's scroll (toward the pack when
-// positive).
+// its cue shows for the path's warning before that, unless uncued; the step lasts length of
+// scroll, moves lanes across, and travel down the road on top of the road's scroll (toward the
+// pack when positive).
 export interface MoverStep {
   readonly at: number;
   readonly lanes: number;
   readonly length: number;
   readonly travel: number;
+  readonly uncued?: true;
 }
 
 // A planned mover. warning is the scroll each cue shows for before its move.
@@ -61,9 +62,8 @@ export type MoverPath = {
     }
 );
 
-// When a stalker's pending step starts: after, at a scroll since it spawned; near, once its
-// travel reaches travel, and no sooner than its cue can show after the step before began and
-// that step has ended.
+// When a stalker's pending step starts: after, at a scroll since it spawned, after its cue;
+// near, with no cue of its own, once its travel reaches travel and the step before has ended.
 export type ApproachTiming =
   | { readonly at: number; readonly kind: "after" }
   | { readonly kind: "near"; readonly travel: number };
@@ -142,7 +142,9 @@ export function moverTell(path: MoverPath, since: number): MoverTell | null {
     }
     return { kind: path.speedMultiplier > 1 ? "down" : "up" };
   }
-  const next = path.steps.some((step) => since >= step.at - path.warning && since < step.at);
+  const next = path.steps.some(
+    (step) => step.uncued !== true && since >= step.at - path.warning && since < step.at,
+  );
   return next ? { kind: "wander" } : null;
 }
 
@@ -332,9 +334,9 @@ export function stepSpots(shape: StepShape): number {
 // ride: down its lane at speedMultiplier of the road's speed, above 1 toward the pack, below 1
 // away. steps: one of sequences, each step stepSeconds long however many spots it covers; the
 // planner picks whichever keeps the road passable. approach: steps steps toward the pack, each
-// stepSeconds long, the first firstDelaySeconds after the mover is wholly on the road and the
-// second once the road between it and the pack is secondRoadShare of the road's length, each
-// range drawn from per mover.
+// stepSeconds long, the first's cue firstDelaySeconds after the mover is wholly on the road and
+// the second, with no cue, once the first has ended and the road between it and the pack is
+// secondRoadShare of the road's length, each range drawn from per mover.
 export type MoverMotion =
   | {
       readonly firstDelaySeconds: readonly [number, number];
@@ -649,9 +651,9 @@ const APPROACH_REACHES: readonly (readonly [number, number])[] = [
 // and is placed as standing at each of them, so whichever step it chooses on the road keeps
 // the road passable. Its lanes are its start lane and, where there is room, a lane to either
 // side: the wider, the more it can follow the pack, and the planner takes the widest that fits
-// (rank). Its first step comes its drawn delay after it is wholly on the road, and its second
-// once the road between it and the pack, the tallest pack's rows at sightLength, is down to its
-// drawn share of the road's length.
+// (rank). Its first step's cue comes its drawn delay after it is wholly on the road, and its
+// second step, with no cue, once the first has ended and the road between it and the pack, the
+// tallest pack's rows at sightLength, is down to its drawn share of the road's length.
 function approachPlacements(
   geometry: MoverGeometry,
   spec: MoverSpec,

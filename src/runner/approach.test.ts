@@ -5,8 +5,10 @@ import {
   approachOutcomes,
   type ApproachPath,
   nearestStep,
+  nextChoiceAt,
   takeStep,
 } from "./approach";
+import { moverTell } from "./movers";
 
 const CELL = 64;
 // A stalker in lane 2 that may step within lanes 1 to 3 and a row down, its one step pending
@@ -83,12 +85,12 @@ describe("a stalker's step", () => {
     expect(takeStep(late, choose(late, packAt(0, 3)))).toEqual({ ...late, pending: [] });
   });
 
-  // Its second step waits until it is near the pack, and no sooner than its cue can follow
-  // the first step's start and that step has ended.
+  // Its second step waits until it is near the pack and its first step has ended. It has no
+  // cue of its own: it is chosen as it starts, and only the first step shows the wander mark.
   it.each([
     { name: "near the pack", near: 450, want: 450 - CELL },
-    { name: "right after its first step", near: 100, want: 300 },
-  ])("takes its second step $name", ({ near, want }) => {
+    { name: "right after its first step", near: 100, want: 200 },
+  ])("takes its second step $name, with no cue", ({ near, want }) => {
     const path = stalker({
       pending: [
         { at: 100, kind: "after" },
@@ -96,9 +98,14 @@ describe("a stalker's step", () => {
       ],
       rows: 2,
     });
+    expect(nextChoiceAt(path)).toBe(100 - path.warning);
     const first = takeStep(path, { lanes: 0, travel: 1 });
+    expect(nextChoiceAt(first)).toBe(want);
     const second = takeStep(first, { lanes: 1, travel: 1 });
     expect(second.steps.map(({ at }) => at)).toEqual([100, want]);
+    const cued = (since: number) => moverTell(second, since)?.kind ?? null;
+    expect(cued(100 - path.warning)).toBe("wander");
+    expect(cued(want - 1)).toBeNull();
   });
 
   // Every way it may choose its steps stays within its lanes and rows, never steps up, and

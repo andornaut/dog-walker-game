@@ -1544,6 +1544,33 @@ describe("movers", { timeout: 60_000 }, () => {
     ]);
   });
 
+  // A stalker's second step has no cue: it is chosen as it starts, once the first has ended.
+  it("chooses a stalker's second step as it starts, with no cue", () => {
+    const first = { at: 100, lanes: 0, length: 50, travel: geometry.cell.length };
+    const stalking: MoverPath = {
+      burst: geometry.cell.length,
+      lane: 2,
+      length: 50,
+      motion: "approach",
+      movement: "approach",
+      pending: [{ kind: "near", travel: 0 }],
+      reach: { count: 3, first: 1 },
+      rows: 2,
+      steps: [first],
+      stopTravel: geometry.sightLength,
+      warning: 100,
+    };
+    const before = inLane(4, walkWith(["koda"], [moverAt("coyote", stalking, 150 - 1e-6)]));
+    const [waiting] = step(before, 0).walk.road.items;
+    expect(waiting?.mover?.path).toBe(stalking);
+    const [item] = step(before).walk.road.items;
+    const path = item?.mover?.path;
+    expect(path?.motion === "approach" ? path.steps : []).toEqual([
+      first,
+      { at: 150, lanes: 1, length: 50, travel: geometry.cell.length, uncued: true },
+    ]);
+  });
+
   it("cannot be hit while it is only a cue", () => {
     const cue = { ...crossing, enterTravel: 600 };
     const after = step(inLane(0, walkWith(["koda"], [moverAt("squirrel", cue, 40)])));
