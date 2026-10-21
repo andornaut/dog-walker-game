@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """Draw the road feedback for heart changes, near misses and dodges: the
 broken heart that pops over a dog and arcs into its doghouse, the pink heart
-that pops and flies up, the small splash when an all-small pack hops a puddle,
-a small dog's dodge, and the coins that burst from the pack.
+that pops and flies up, and a small dog's dodge.
 
 The hearts are built like ui-fires (needs.py): red, pink and dred (white, pink
 and mauve for a gained heart) in a 1px ink line inside a 1px white rim, so the
 ink holds on the light roads and the cream doghouse and the white on Elm Avenue
-and the dimmed road. The splash takes the navy rim, the dodge's dust and lines a plum one, and the coins
-fx-coin-fly's coin in its plum rim.
+and the dimmed road. The dodge's dust and lines take a plum rim.
 
 fx-heart-loss  32x32  pop (6 frames: 50, 50, 90, 90, 90, 450ms; 820ms)  a small whole heart
                       pops in on a white star, then the big heart (17x15 in its rims, 21x19)
@@ -30,22 +28,11 @@ fx-heart-gain  32x32  pop (5 frames: 50, 50, 90, 90, 450ms; 730ms)  the same pop
                       centred on row 16. The game swaps pop's last frame for fly at the same
                       point and tweens fly's centre to the slot's heartLabels band (slot x 2
                       to 117, rows 64 to 87), where its 14 rows fit.
-fx-hop-splash  32x32  splash (5 frames, 70ms)  a small puddle splash as an all-small pack hops
-                      a puddle: a ripple at the feet, a few drops up and back
-                      splash-word  the same frames and timing, with HOP! in the comic lettering
-                      in rows 1 to 11 over frames 0 to 3
-                      The frame's centre column on the pack's centre, its bottom row on the
-                      walker's feet. With splash-word the comic word is the label; with reduced
-                      motion the game plays splash and writes "Hop!" centred on x 16, its line
-                      bottom 2px above the frame's top row
 fx-dodge       48x48  play (5 frames, 70ms; 350ms)  laid on a small dog's 48x48 frame as it dodges a
                       hit: a dust puff kicked up at its left foot swells, drifts back and thins,
                       three speed lines trail on its left and shorten, and DODGE! in the comic
                       lettering sits centred over its head (ring top on row 0) on frames 0 to 3.
                       Drawn for a sidestep right; the game mirrors it for a sidestep left
-fx-coin-burst  64x48  play (7 frames, 70ms; 490ms)  an amber pop at (32, 28), then five of
-                      fx-coin-fly's coins thrown up and out, spinning, falling back under
-                      gravity; the highest coin's top is row 8. (32, 28) on the contact point
 
 Usage:
   feedback.py preview OUT.png   every frame on the six road colours and the dimmed road
@@ -55,7 +42,7 @@ Usage:
 Run from the repository root. A build overwrites the .aseprite sources, so
 hand edits to them belong in this file instead. Shared tooling is in pixel.py,
 the rim, burst, twinkle, heart and comic word helpers in fx.py, piece and
-layer in hits.py, the coin in moments.py, the broken heart in needs.py.
+layer in hits.py, the broken heart in needs.py.
 """
 
 import math
@@ -65,7 +52,6 @@ import sys
 sys.path.insert(0, os.path.dirname(__file__))
 from fx import burst, rim, stamp, star4, word  # noqa: E402
 from hits import layer, piece  # noqa: E402
-from moments import coin_fly  # noqa: E402
 from needs import BROKEN, BROKEN_CRACK  # noqa: E402
 from pixel import DARKER, Grid, main  # noqa: E402
 
@@ -173,46 +159,6 @@ def fly_gain(glint):
     return ringed(g)
 
 
-# ---------- the hop splash ----------
-
-FEET = 28
-
-
-def hop_splash(step):
-    """A small crown of water rises from a ripple at the feet and falls back, throwing five drops up and
-    out; the ripple spreads and opens to a thin ring."""
-    g = Grid(32, 32)
-    rx, ry = (5, 7, 9, 10, 11)[step], (1.5, 2, 2.5, 2.5, 2)[step]
-    g.ell(16, FEET, rx, ry, "sky", "blue", "cyan")
-    if step:
-        g.ell(16, FEET - 0.5, rx - (2, 2, 2, 2, 1.5)[step], ry - 1, None)
-    # the crown: five spikes round the ripple's back, cyan with white tips
-    h = (2, 5, 6, 3, 0)[step]
-    for k, dx in enumerate((-6, -3, 0, 3, 6)):
-        hk = h - (1 if k in (0, 4) else 0)
-        x = 16 + round(dx * rx / 10)
-        if hk > 0:
-            g.rect(x, FEET - 1 - hk, 1 + (k == 2), hk, "cyan")
-            g.p(x, FEET - 1 - hk, "white")
-    for i, (vx, vy) in enumerate(((-3.2, -5.5), (-1.6, -7.5), (0.2, -8.5), (1.8, -7.5), (3.3, -5.5))):
-        t = step + 0.4
-        x, y = 16 + vx * t, FEET - 3 + vy * t + 2.2 * t * t
-        if step and y < FEET - 3:
-            g.rect(x, y, 2 if i % 2 else 1, 2, "cyan" if step < 3 else "sky")
-            if step < 3:
-                g.p(x, y, "white")
-    return rim(g, "navy")
-
-
-# The comic word shows over frames 0 to 3, its ink ring's top on row 1.
-WORD = "HOP!"
-WORD_FRAMES = 4
-
-
-def worded(g, step):
-    return word(g, WORD, 16, 1) if step < WORD_FRAMES else g
-
-
 # ---------- the dodge ----------
 
 # fx-dodge is laid on a 48x48 dog's frame. The dog sidesteps right: its dust kicks up at the left foot and
@@ -247,48 +193,12 @@ def dodge(step, worded=True):
     return g
 
 
-# ---------- the coin burst ----------
-
-BURST = (32, 28)
-# Each coin's launch angle in degrees (0 points right, -90 straight up) and its first spin phase.
-COINS = ((-150, 0), (-118, 1), (-90, 2), (-62, 3), (-30, 1))
-# How far each coin has been thrown out from the pop, slowing, and how far it has fallen, per frame.
-THROW = (0, 12, 18, 21, 23, 24, 25)
-FALL = (0, 0, 1, 3, 6, 10, 14)
-
-
-def coin_burst(step):
-    """64x48: an amber pop, then five coins thrown up and out, slowing as they rise and falling back,
-    each spinning through fx-coin-fly's four faces."""
-    g = Grid(64, 48)
-    cx, cy = BURST
-    if step == 0:
-        burst(g, cx, cy, 8, 3.5, 8, "amber", 11)
-        burst(g, cx, cy, 5, 2, 8, "yellow", 11)
-        g.p(cx, cy, "white")
-        g.p(cx - 1, cy, "white")
-        return rim(g)
-    for deg, phase in COINS:
-        a = math.radians(deg)
-        x = cx + math.cos(a) * THROW[step] * 1.1
-        y = cy + math.sin(a) * THROW[step] * 0.8 + FALL[step]
-        coin = coin_fly((phase + step) % 4)
-        for yy, row in enumerate(coin.px):
-            for xx, c in enumerate(row):
-                if c:
-                    g.p(round(x) - 6 + xx, round(y) - 6 + yy, c)
-    return g
-
-
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-heart-loss", [("pop", [heart_loss(i).outlined(False) for i in range(6)], [50, 50, 90, 90, 90, 450]),
                             ("fly", [fly_loss(b).outlined(False) for b in (0, 1)], 120)]
     yield "fx-heart-gain", [("pop", [heart_gain(i).outlined(False) for i in range(5)], [50, 50, 90, 90, 450]),
                             ("fly", [fly_gain(b).outlined(False) for b in (0, 1)], 120)]
-    yield "fx-hop-splash", [("splash", [hop_splash(i).outlined(False) for i in range(5)], 70),
-                            ("splash-word", [worded(hop_splash(i), i).outlined(False) for i in range(5)], 70)]
-    yield "fx-coin-burst", [("play", [coin_burst(i).outlined(False) for i in range(7)], 70)]
     yield "fx-dodge", [("play", [dodge(i).outlined(False) for i in range(5)], 70)]
 
 

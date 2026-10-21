@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 """Draw the road effects for collisions and pickups, and the new-best burst on
-the end screen. fx-bump, fx-dizzy and fx-sparkle are warm light that
+the end screen. fx-bump and fx-sparkle are warm light that
 holds 3:1 on Elm Avenue but fades into the three light roads, so each carries a
 1px plum rim (4.4:1 or more on those). fx-splash has no outline.
 fx-new-best carries the plum rim too, for the cream panel and
 the sunset sky of screen-end.
 
 fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
-fx-dizzy    32x16  loop (4 frames)  stars circling over the pack while it stumbles
 fx-splash   32x32  play (5 frames)  water thrown up by a puddle
 fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
 fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behind
@@ -142,18 +141,6 @@ def bump(step):
     return g
 
 
-def dizzy(step):
-    g = Grid(32, 16)
-    for i in range(3):
-        a = math.radians(step * 30 + i * 120)
-        x, y = 16 + math.cos(a) * 11, 8 + math.sin(a) * 3.5
-        if math.sin(a) > -0.2:
-            star4(g, round(x), round(y), 2, "yellow")
-        else:
-            star4(g, round(x), round(y), 1, "amber", "yellow")
-    return g
-
-
 def splash(step):
     g = Grid(32, 32)
     if step < 2:
@@ -246,7 +233,6 @@ def bark_word(step):
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
     yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
-    yield "fx-dizzy", [("loop", [rim(dizzy(i)).outlined(False) for i in range(4)], 110)]
     yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(5)], 70)]
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]

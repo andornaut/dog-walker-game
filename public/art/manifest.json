@@ -1845,11 +1845,6 @@
       "json": "sprites/fx-bump.json"
     },
     {
-      "key": "fx-coin-burst",
-      "png": "sprites/fx-coin-burst.png",
-      "json": "sprites/fx-coin-burst.json"
-    },
-    {
       "key": "fx-coin-fly",
       "png": "sprites/fx-coin-fly.png",
       "json": "sprites/fx-coin-fly.json"
@@ -1863,11 +1858,6 @@
       "key": "fx-confetti-bit",
       "png": "sprites/fx-confetti-bit.png",
       "json": "sprites/fx-confetti-bit.json"
-    },
-    {
-      "key": "fx-dizzy",
-      "png": "sprites/fx-dizzy.png",
-      "json": "sprites/fx-dizzy.json"
     },
     {
       "key": "fx-dodge",
@@ -1943,11 +1933,6 @@
       "key": "fx-hit-trash",
       "png": "sprites/fx-hit-trash.png",
       "json": "sprites/fx-hit-trash.json"
-    },
-    {
-      "key": "fx-hop-splash",
-      "png": "sprites/fx-hop-splash.png",
-      "json": "sprites/fx-hop-splash.json"
     },
     {
       "key": "fx-lemonade",
