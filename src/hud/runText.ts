@@ -5,8 +5,10 @@ import type { FieldTable } from "../lib/lines";
 export const STRIP_LINE_FIELDS = {
   achievement: ["name"],
   dodge: ["dog", "obstacle"],
+  effectStart: ["effect", "name"],
   fired: ["dog", "owner"],
   fullPackHome: ["amount"],
+  heavyDog: ["dog"],
   kindWords: ["owner"],
   lowHearts: ["owner"],
   luckyWallet: ["amount"],
@@ -29,6 +31,7 @@ export const RUN_TEXT_FIELDS = {
     debuff: ["name", "stake"],
     dog: ["dog", "hearts", "max", "owner", "size"],
     effect: ["effect", "name"],
+    extraHearts: ["hearts", "name", "owner"],
   },
   firedBy: ["owner"],
   fullPackHome: ["amount"],
@@ -43,6 +46,7 @@ export const RUN_TEXT_FIELDS = {
     info: ["agility", "perk"],
     subtitle: ["walker"],
   },
+  seconds: ["seconds"],
   strip: {
     ...STRIP_LINE_FIELDS,
     debuffStart: { muddy: ["seconds"], stinky: ["seconds"], zoomies: ["seconds"] },

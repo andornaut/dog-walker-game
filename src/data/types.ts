@@ -613,6 +613,9 @@ export interface RunText {
     readonly forkFees: string;
     readonly forkSubtitle: string;
     readonly forkTitle: string;
+    // A plaque whose cost a modifier, such as Sweet talker, waived, after the struck price; and
+    // the plaque of the Skip a modifier, such as Hall pass, offers.
+    readonly free: string;
     // In an option's text, in place of a dog's heart loss Second chance would forgive; it may
     // name the loss as {hearts}.
     readonly heartForgiven: string;
@@ -638,6 +641,10 @@ export interface RunText {
     readonly debuff: string;
     readonly dog: string;
     readonly effect: string;
+    // A held dog card's line for each source of its owner's extra max hearts: {name} is the
+    // gear's name, such as Lucky collar's, or smallPack for the lead dog's pack-size bonus.
+    readonly extraHearts: string;
+    readonly smallPack: string;
   };
   readonly fired: string;
   readonly firedBy: string;
@@ -659,6 +666,8 @@ export interface RunText {
     readonly zonesLeft: string;
   };
   readonly lowHearts: string;
+  // A debuff's length in seconds on a struck chip, such as Calm voice's "8s" then "4s".
+  readonly seconds: string;
   // The zone celebration as a walker joins, the first time a walk finishes the zone that
   // unlocks them: its headline (a big title of about 14 characters over a subtitle of about
   // 28), their agility and perk under their greeting, and the button.
@@ -675,8 +684,13 @@ export interface RunText {
     readonly debuffEnd: { readonly [D in DebuffId]: string };
     readonly debuffStart: { readonly [D in DebuffId]: string };
     readonly dodge: string;
+    // At a walk's start, for gear that changes it from the start, such as Running shoes: the
+    // gear's name and short line.
+    readonly effectStart: string;
     readonly fired: string;
     readonly fullPackHome: string;
+    // At a walk's start, for each heavy dog in the pack, which slows lane changes.
+    readonly heavyDog: string;
     readonly kindWords: string;
     readonly lowHearts: string;
     readonly luckyNeighbor: string;
