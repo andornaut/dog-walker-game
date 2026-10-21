@@ -25,3 +25,8 @@ export function startHearts(
   const max = maxHearts(tuning, modifiers, dog);
   return clampHearts(max, max);
 }
+
+// A heavy dog slows the pack's lane changes by bigDogAgility: every big dog.
+export function isHeavy(dog: Pick<Dog, "size">): boolean {
+  return dog.size === "big";
+}

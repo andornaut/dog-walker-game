@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { WalkerId } from "../data/types";
+import type { DogId, WalkerId } from "../data/types";
 import { maxHearts } from "../rules/dogs";
 import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import { cents } from "../rules/units";
@@ -25,24 +25,28 @@ const owned: Owned = {
 const noStats = { dogs: {} };
 
 describe("dogDetail", () => {
-  it("gives the breed, size and hearts, owner, pay and stats", () => {
-    const stats = { dogs: { koda: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
-    const card = dogDetail(data, owned, dollars(0), stats, "koda");
-    const dog = data.dogs.koda;
-    const text = data.homeText.detail;
-    expect(card.title).toBe(dog.name);
-    expect(card.subtitle).toBe(dog.breed);
-    expect(card.lines).toEqual([
-      fillNames(text.dogKind, {
-        hearts: String(maxHearts(data.tuning, [], dog)),
-        size: capitalize(SIZE_NAMES[dog.size]),
-      }),
-      fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
-      fillNames(text.dogFee, { fee: dogFeeText(data) }),
-      fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
-    ]);
-    expect(card.status).toBe(text.dogStatus);
-  });
+  it.each(Object.keys(data.dogs) as DogId[])(
+    "gives %s's breed, size and hearts, heavy row if heavy, owner, pay and stats",
+    (id) => {
+      const stats = { dogs: { [id]: { timesFired: 1, walks: 5, zonesFinished: 12 } } };
+      const card = dogDetail(data, { ...owned, dogs: [id] }, dollars(0), stats, id);
+      const dog = data.dogs[id];
+      const text = data.homeText.detail;
+      expect(card.title).toBe(dog.name);
+      expect(card.subtitle).toBe(dog.breed);
+      expect(card.lines).toEqual([
+        fillNames(text.dogKind, {
+          hearts: String(maxHearts(data.tuning, [], dog)),
+          size: capitalize(SIZE_NAMES[dog.size]),
+        }),
+        ...(dog.size === "big" ? [text.dogHeavy] : []),
+        fillNames(text.dogOwner, { owner: dog.owner.name, role: dog.owner.role }),
+        fillNames(text.dogFee, { fee: dogFeeText(data) }),
+        fillNames(text.dogTotals, { fired: "1", walks: "5", zones: "12" }),
+      ]);
+      expect(card.status).toBe(text.dogStatus);
+    },
+  );
 
   it("counts zeros for a dog never walked, and shows a locked dog's price", () => {
     const card = dogDetail(data, owned, dollars(100), noStats, "archie");

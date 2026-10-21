@@ -482,6 +482,8 @@ export interface HomeText {
   // status, and the price status of anything not owned yet.
   readonly detail: {
     readonly dogFee: string;
+    // A heavy dog's row, under its size and hearts: it slows lane changes.
+    readonly dogHeavy: string;
     readonly dogKind: string;
     readonly dogOwner: string;
     readonly dogStatus: string;

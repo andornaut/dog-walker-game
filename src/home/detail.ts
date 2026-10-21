@@ -1,5 +1,5 @@
 import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
-import { maxHearts } from "../rules/dogs";
+import { isHeavy, maxHearts } from "../rules/dogs";
 import { capitalize, effectText, SIZE_NAMES } from "../rules/effectText";
 import type { Cents } from "../rules/units";
 import { walkerGoal } from "../rules/walkers";
@@ -46,8 +46,8 @@ function priceLine(text: HomeText["detail"], cost: Cents | null, bank: Cents): s
   return fillLine(FIELDS, text, cost > bank ? "priceLocked" : "priceBuy", { price });
 }
 
-// A dog's breed, its size and hearts, its owner, its pay, and the walks, zones and firings the
-// save has counted for it.
+// A dog's breed, its size and hearts, a heavy dog's row, its owner, its pay, and the walks, zones
+// and firings the save has counted for it.
 export function dogDetail(
   data: DetailData,
   owned: Owned,
@@ -66,6 +66,7 @@ export function dogDetail(
         hearts: String(maxHearts(data.tuning, [], data.dogs[dog])),
         size: capitalize(SIZE_NAMES[size]),
       }),
+      ...(isHeavy(data.dogs[dog]) ? [text.dogHeavy] : []),
       fillLine(FIELDS, text, "dogOwner", { owner: owner.name, role: owner.role }),
       fillLine(FIELDS, text, "dogFee", { fee }),
       fillLine(FIELDS, text, "dogTotals", {

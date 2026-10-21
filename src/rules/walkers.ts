@@ -1,6 +1,7 @@
 import type { Effect, GameData, HomeText, Modifier, Walker, WalkerId, ZoneId } from "../data/types";
 import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
+import { isHeavy } from "./dogs";
 import { modifiedStat } from "./modifiers";
 import { read } from "./units";
 
@@ -11,12 +12,12 @@ export function walkerEffects(data: WalkerData, walker: WalkerId): readonly Effe
   return data.walkerPerks[data.walkers[walker].perk].effects;
 }
 
-// What the pack's big dogs take off the walker's agility: bigDogAgility for each walking one.
+// What the pack's heavy dogs take off the walker's agility: bigDogAgility for each walking one.
 export function bigDogsAgility(
   data: Pick<GameData, "dogs" | "tuning">,
   run: Pick<RunState, "pack">,
 ): number {
-  const big = packDogs(run).filter((dog) => data.dogs[dog].size === "big").length;
+  const big = packDogs(run).filter((dog) => isHeavy(data.dogs[dog])).length;
   return big * read(data.tuning, "multipliers", "bigDogAgility");
 }
 
