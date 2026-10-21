@@ -220,7 +220,7 @@ export function debuffText(tuning: LiveTuning, debuff: Debuff): string {
 type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 
 // What a card's text knows of the walk: the dogs a target reaches, in pack order, and a
-// money effect's total for the dogs it counts, after modifiers.
+// money effect's total after modifiers.
 export interface CardTextContext {
   readonly dogs: (target: Target) => readonly DogId[];
   // Whether the walker's perk, such as Second chance, would forgive the dog's owner's loss.

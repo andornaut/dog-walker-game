@@ -73,14 +73,9 @@ function freeCardModifier(
     : undefined;
 }
 
-// Each amount is rounded to the dollar. A cost on a free card is waived, naming the modifier
-// that waived it.
-function moneyParts(
-  data: RulesData,
-  context: Pick<EffectContext, "affected">,
-  state: RunState,
-  effect: MoneyEffect,
-): MoneyParts {
+// Each amount is rounded to the dollar, and charged once whatever the pack. A cost on a free
+// card is waived, naming the modifier that waived it.
+function moneyParts(data: RulesData, state: RunState, effect: MoneyEffect): MoneyParts {
   const amount = read(data.tuning, "money", effect.amount);
   const total = roundDollars(amount);
   if (effect.change === "gain") {
@@ -110,29 +105,19 @@ export function baseMoneyCost(data: Pick<GameData, "tuning">, effects: readonly 
   );
 }
 
-// A money effect's total for the dogs it counts, after modifiers, unsigned.
-export function moneyAmount(
-  data: RulesData,
-  context: Pick<EffectContext, "affected">,
-  state: RunState,
-  effect: MoneyEffect,
-): Cents {
-  return moneyParts(data, context, state, effect).amount;
+// A money effect's total after modifiers, unsigned.
+export function moneyAmount(data: RulesData, state: RunState, effect: MoneyEffect): Cents {
+  return moneyParts(data, state, effect).amount;
 }
 
 // What an option's effects would take from the player. An option costing more than the
 // player has is disabled.
-export function moneyCost(
-  data: RulesData,
-  context: Pick<EffectContext, "affected">,
-  state: RunState,
-  effects: readonly Effect[],
-): Cents {
+export function moneyCost(data: RulesData, state: RunState, effects: readonly Effect[]): Cents {
   return cents(
     effects.reduce(
       (total, effect) =>
         effect.kind === "money" && effect.change === "lose"
-          ? total + moneyParts(data, context, state, effect).amount
+          ? total + moneyParts(data, state, effect).amount
           : total,
       0,
     ),
@@ -229,7 +214,7 @@ function applyMoney(
   effect: MoneyEffect,
   state: RunState,
 ): Applied {
-  const parts = moneyParts(data, context, state, effect);
+  const parts = moneyParts(data, state, effect);
   const intended = effect.change === "gain" ? parts.amount : -parts.amount;
   if (intended === 0) {
     return { changes: [], state };

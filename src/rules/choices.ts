@@ -332,11 +332,11 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
       dogs: (target) => targetDogs(data, { affected, random: () => 0 }, state, target),
       forgiven: (dog) =>
         preview.heartChanges.some((change) => change.dog === dog && heartsForgiven(change) > 0),
-      money: (effect) => moneyAmount(data, { affected }, state, effect),
+      money: (effect) => moneyAmount(data, state, effect),
       seconds: (debuff) =>
         debuffLasting(data.tuning, data.debuffs[debuff].seconds, state).secondsLeft,
     };
-    const cost = moneyCost(data, { affected }, state, option.effects);
+    const cost = moneyCost(data, state, option.effects);
     return {
       art: option.art,
       availability:

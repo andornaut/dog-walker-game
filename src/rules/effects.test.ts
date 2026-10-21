@@ -151,7 +151,7 @@ describe("resolveEffects: changes and their causes", () => {
     const state = testState({ duchess: 5, koda: 5 }, { modifiers: [sweetTalker] });
     const { changes } = resolveEffects(data, context(["duchess", "koda"]), [towel], state);
     expect(changes).toEqual([]);
-    expect(moneyCost(data, context(["duchess", "koda"]), state, [towel])).toBe(0);
+    expect(moneyCost(data, state, [towel])).toBe(0);
   });
 });
 
@@ -202,32 +202,24 @@ describe("moneyCost and applyEffects: money", () => {
   // Sweet talker, with cardsThisZone cards resolved this zone.
   const talked = (slots: Parameters<typeof testState>[0], cardsThisZone = 0) =>
     testState(slots, { cardsThisZone, modifiers: [sweetTalker] });
-  const both: DogId[] = ["duchess", "koda"];
   const low = read(TEST_TUNING, "money", "encounterLow");
   const letGoCost = read(TEST_TUNING, "money", "thiefLetGo");
 
   it("charges a cost once, nothing on the zone's first card with Sweet talker", () => {
-    for (const [, affected, effect, state, cost] of [
-      [
-        "a cost once, whatever the pack",
-        both,
-        towel,
-        testState({ duchess: 5, koda: 5, nugget: 5 }),
-        low,
-      ],
-      ["another cost once too", both, letGo, testState({ duchess: 5, koda: 5 }), letGoCost],
+    for (const [, effect, state, cost] of [
+      ["a cost once, whatever the pack", towel, testState({ duchess: 5, koda: 5, nugget: 5 }), low],
+      ["another cost once too", letGo, testState({ duchess: 5, koda: 5 }), letGoCost],
       [
         "nothing on the zone's first card with Sweet talker",
-        both,
         towel,
         talked({ duchess: 5, koda: 5 }),
         0,
       ],
-      ["a flat cost free too on that card", ["duchess"], letGo, talked({ duchess: 5 }), 0],
-      ["in full on the zone's next card", both, towel, talked({ duchess: 5, koda: 5 }, 1), low],
-      ["nothing for a gain", [], gain, testState({ duchess: 5, koda: 5 }), 0],
-    ] satisfies readonly [string, DogId[], Effect, RunState, number][]) {
-      expect(moneyCost(data, context(affected), state, [effect])).toBe(cost);
+      ["a flat cost free too on that card", letGo, talked({ duchess: 5 }), 0],
+      ["in full on the zone's next card", towel, talked({ duchess: 5, koda: 5 }, 1), low],
+      ["nothing for a gain", gain, testState({ duchess: 5, koda: 5 }), 0],
+    ] satisfies readonly [string, Effect, RunState, number][]) {
+      expect(moneyCost(data, state, [effect])).toBe(cost);
     }
   });
 
