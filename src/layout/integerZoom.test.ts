@@ -11,18 +11,25 @@ const games = (across: number, down: number) => ({
 });
 
 describe("integerZoom", () => {
-  it.each([
-    { devicePixels: 1, name: "exactly one game", pixelRatio: 1, space: games(1, 1) },
-    { devicePixels: 1, name: "just short of two", pixelRatio: 1, space: games(1.99, 3) },
-    { devicePixels: 2, name: "two games by height", pixelRatio: 1, space: games(3, 2.5) },
-    { devicePixels: 3, name: "a phone at ratio 3", pixelRatio: 3, space: games(1.08, 1.2) },
-    { devicePixels: 3, name: "a phone at ratio 2.625", pixelRatio: 2.625, space: games(1.15, 1.3) },
-    { devicePixels: 2, name: "a phone at ratio 2", pixelRatio: 2, space: games(1.08, 1.2) },
-  ])("gives each game pixel $devicePixels device pixels: $name", (row) => {
-    const zoom = integerZoom(GAME, row.pixelRatio, row.space);
-    expect(zoom * row.pixelRatio).toBeCloseTo(row.devicePixels);
-    expect(GAME.width * zoom).toBeLessThanOrEqual(row.space.width);
-    expect(GAME.height * zoom).toBeLessThanOrEqual(row.space.height);
+  it("gives each game pixel a whole number of device pixels that fits the space", () => {
+    for (const row of [
+      { devicePixels: 1, name: "exactly one game", pixelRatio: 1, space: games(1, 1) },
+      { devicePixels: 1, name: "just short of two", pixelRatio: 1, space: games(1.99, 3) },
+      { devicePixels: 2, name: "two games by height", pixelRatio: 1, space: games(3, 2.5) },
+      { devicePixels: 3, name: "a phone at ratio 3", pixelRatio: 3, space: games(1.08, 1.2) },
+      {
+        devicePixels: 3,
+        name: "a phone at ratio 2.625",
+        pixelRatio: 2.625,
+        space: games(1.15, 1.3),
+      },
+      { devicePixels: 2, name: "a phone at ratio 2", pixelRatio: 2, space: games(1.08, 1.2) },
+    ]) {
+      const zoom = integerZoom(GAME, row.pixelRatio, row.space);
+      expect(zoom * row.pixelRatio).toBeCloseTo(row.devicePixels);
+      expect(GAME.width * zoom).toBeLessThanOrEqual(row.space.width);
+      expect(GAME.height * zoom).toBeLessThanOrEqual(row.space.height);
+    }
   });
 
   it("fits a space too small for one device pixel per game pixel", () => {

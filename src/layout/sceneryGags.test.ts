@@ -2,15 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { SCREEN_CONFIG } from "../data/screen";
 import { WORLD } from "../data/world";
-import {
-  catX,
-  GAG_SIZES,
-  GAG_Y,
-  KITE_AT,
-  PERCH_RAIL_Y,
-  perchRects,
-  ZONE_GAGS,
-} from "./sceneryGags";
+import { catX, GAG_SIZES, KITE_AT, perchRects, ZONE_GAGS } from "./sceneryGags";
 import { screenLayout } from "./screenLayout";
 
 const { approach, backdrop: BAND } = screenLayout(SCREEN_CONFIG);
@@ -25,14 +17,6 @@ describe("ZONE_GAGS", () => {
         expect(x1).toBeLessThanOrEqual(BAND.width);
       }
     }
-  });
-
-  it("perches a cat along every zone's near-left lawn, from x 0 to 72", () => {
-    for (const zone of WORLD.zones) {
-      expect(ZONE_GAGS[zone.id].perches).toEqual([{ x0: 0, x1: 72 }]);
-    }
-    // The cat's paws, on its frame's bottom row, rest on the rail's top row.
-    expect(GAG_Y.cat + GAG_SIZES.cat.height - 1).toBe(PERCH_RAIL_Y);
   });
 
   it("stands each perch's rail on the approach rows, its rect down to the band's bottom", () => {

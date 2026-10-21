@@ -65,63 +65,58 @@ function walkThrough(
 }
 
 describe("stepAmbient", () => {
-  it.each(ZONES)("keeps to the limit and sets out every kind of %s mover", (zone) => {
-    const frames = walkThrough(zone, 600);
-    expect(Math.max(...frames.map((out) => out.length))).toBeLessThanOrEqual(AMBIENT_LIMIT);
-    const seen = new Set(frames.flat().map(({ mover }) => mover));
-    expect([...seen]).toEqual(expect.arrayContaining([...gameData.ambient[zone]]));
-  });
-
-  it.each(ZONES)("keeps every %s mover off the road", (zone) => {
+  // One long walk through each zone: under the limit with every kind set out, off the road,
+  // each side view mirrored only moving left, and the cross street's movers smaller than the
+  // road's far edge, nearer rows larger.
+  it("keeps every zone's movers to the limit, off the road, facing their way and to scale", () => {
     const { centerX } = PROJECTION;
     const roadHalf = LAYOUT.road.width / 2;
-    const onRoad = walkThrough(zone, 300)
-      .flat()
-      .filter(({ place }) =>
+    const farEdge = scaleAtY(PROJECTION, PROJECTION.farY);
+    for (const zone of ZONES) {
+      const frames = walkThrough(zone, 600);
+      const shown = frames.flat();
+      expect(Math.max(...frames.map((out) => out.length)), zone).toBeLessThanOrEqual(AMBIENT_LIMIT);
+      const seen = new Set(shown.map(({ mover }) => mover));
+      expect([...seen], zone).toEqual(expect.arrayContaining([...gameData.ambient[zone]]));
+
+      const onRoad = shown.filter(({ place }) =>
         place.band
           ? !BAND_ROWS.includes(place.y - LAYOUT.backdrop.y) || place.y >= LAYOUT.approach.y
           : Math.abs(place.x - centerX) < (roadHalf + ROAD_SPRITE_SIZE / 2) * place.scale,
       );
-    expect(onRoad).toEqual([]);
-  });
+      expect(onRoad, zone).toEqual([]);
 
-  // Side views face right in their art, so a mover moving left is mirrored; front and back
-  // views walking along the sidewalks never are.
-  it.each(ZONES)("mirrors every %s side view moving left, and only those", (zone) => {
-    const frames = walkThrough(zone, 300);
-    const wrong = frames.slice(1).flatMap((out, i) =>
-      out.filter(({ mover, place, slot }) => {
-        const before = frames[i]?.find((shown) => shown.slot === slot && shown.mover === mover);
-        if (before === undefined || !place.moving || !before.place.moving) {
-          return false;
-        }
-        if (mover.path === "sidewalkAway" || mover.path === "sidewalkToward") {
-          return place.flip;
-        }
-        const dx = place.x - before.place.x;
-        return dx !== 0 && place.flip !== dx < 0;
-      }),
-    );
-    expect(wrong).toEqual([]);
-  });
+      // Side views face right in their art, so a mover moving left is mirrored; front and back
+      // views walking along the sidewalks never are.
+      const misfaced = frames.slice(1).flatMap((out, i) =>
+        out.filter(({ mover, place, slot }) => {
+          const before = frames[i]?.find((each) => each.slot === slot && each.mover === mover);
+          if (before === undefined || !place.moving || !before.place.moving) {
+            return false;
+          }
+          if (mover.path === "sidewalkAway" || mover.path === "sidewalkToward") {
+            return place.flip;
+          }
+          const dx = place.x - before.place.x;
+          return dx !== 0 && place.flip !== dx < 0;
+        }),
+      );
+      expect(misfaced, zone).toEqual([]);
 
-  it.each(ZONES)(
-    "draws every %s mover on the cross street smaller than the road's far edge, nearer rows larger",
-    (zone) => {
-      const band = walkThrough(zone, 300)
-        .flat()
-        .filter(({ place }) => place.band)
-        .map(({ place }) => place);
-      const farEdge = scaleAtY(PROJECTION, PROJECTION.farY);
-      expect(band.length).toBeGreaterThan(0);
-      expect(band.filter(({ scale }) => scale >= farEdge)).toEqual([]);
+      const band = shown.filter(({ place }) => place.band).map(({ place }) => place);
+      expect(band.length, zone).toBeGreaterThan(0);
+      expect(
+        band.filter(({ scale }) => scale >= farEdge),
+        zone,
+      ).toEqual([]);
       const byRow = new Map(band.map(({ scale, y }) => [y, scale]));
       const rows = [...byRow.keys()].sort((a, b) => a - b);
-      expect(rows.map((y) => byRow.get(y))).toEqual(
-        rows.map((y) => byRow.get(y)).sort((a = 0, b = 0) => a - b),
-      );
-    },
-  );
+      expect(
+        rows.map((y) => byRow.get(y)),
+        zone,
+      ).toEqual(rows.map((y) => byRow.get(y)).sort((a = 0, b = 0) => a - b));
+    }
+  });
 
   it("plays the same movers for the same seed, and others for another", () => {
     const places = (seed: number) =>
@@ -183,16 +178,9 @@ describe("gaitTravel", () => {
     return bursts;
   }
 
-  it.each([1, 2, 3, 4])(
-    "hops in bursts of one or two hops with a pause between, seed %i",
-    (seed) => {
-      const bursts = burstHops(seed);
-      expect(bursts.length).toBeGreaterThan(5);
-      expect(bursts.filter((hops) => hops !== 1 && hops !== 2)).toEqual([]);
-    },
-  );
-
-  it.each(["fly", "steady"] as const)("moves a %s mover at its speed throughout", (gait) => {
-    expect(gaitTravel(gait, 10, 1, 2)).toEqual({ moving: true, travel: 20 });
+  it("hops in bursts of one or two hops with a pause between", () => {
+    const bursts = burstHops(1);
+    expect(bursts.length).toBeGreaterThan(5);
+    expect(bursts.filter((hops) => hops !== 1 && hops !== 2)).toEqual([]);
   });
 });

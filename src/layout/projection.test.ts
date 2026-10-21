@@ -48,33 +48,37 @@ describe("roadProjection", () => {
   // the tuned look-ahead: horizonY puts the far scale on farY, and focal shows the look-ahead.
   const footY = walkerFootY(road);
   const lookAhead = TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed;
-  it.each([
-    ["the far edge in view on the band's bottom edge", screenYAt(projection, lookAhead), road.y],
-    ["the far edge at the far scale", scaleAt(projection, lookAhead), ROAD_FAR_SCALE],
-    ["the feet at scale 1", scaleAt(projection, 0), 1],
-    ["the look-ahead in view", projection.visibleDistance, lookAhead],
-    [
-      "the horizon row",
-      ROAD_CAMERA.horizonY,
-      (road.y - ROAD_FAR_SCALE * footY) / (1 - ROAD_FAR_SCALE),
-    ],
-    ["the focal length", projection.focal, (lookAhead * ROAD_FAR_SCALE) / (1 - ROAD_FAR_SCALE)],
-  ])("derives %s from the screen layout and tuning", (_name, actual, expected) => {
-    expect(actual).toBeCloseTo(expected, 6);
+  it("derives the far edge, horizon and focal length from the screen layout and tuning", () => {
+    for (const [, actual, expected] of [
+      ["the far edge in view on the band's bottom edge", screenYAt(projection, lookAhead), road.y],
+      ["the far edge at the far scale", scaleAt(projection, lookAhead), ROAD_FAR_SCALE],
+      ["the feet at scale 1", scaleAt(projection, 0), 1],
+      ["the look-ahead in view", projection.visibleDistance, lookAhead],
+      [
+        "the horizon row",
+        ROAD_CAMERA.horizonY,
+        (road.y - ROAD_FAR_SCALE * footY) / (1 - ROAD_FAR_SCALE),
+      ],
+      ["the focal length", projection.focal, (lookAhead * ROAD_FAR_SCALE) / (1 - ROAD_FAR_SCALE)],
+    ] as const) {
+      expect(actual).toBeCloseTo(expected, 6);
+    }
   });
 
-  it.each([120, 150, 200])("keeps the join's columns at a base speed of %d", (speed) => {
-    const camera = roadCameraFor({
-      farScale: ROAD_FAR_SCALE,
-      farY: road.y,
-      footY,
-      visibleDistance: TUNING.seconds.lookAheadSeconds * speed,
-    });
-    const other = roadProjection(camera, footY, road);
-    expect(other.visibleDistance / speed).toBeCloseTo(TUNING.seconds.lookAheadSeconds, 6);
-    expect(columnSpan(other, bandRow, road.x, road.x + road.width)).toEqual(
-      columnSpan(projection, bandRow, road.x, road.x + road.width),
-    );
+  it("keeps the join's columns at any base speed", () => {
+    for (const speed of [120, 150, 200]) {
+      const camera = roadCameraFor({
+        farScale: ROAD_FAR_SCALE,
+        farY: road.y,
+        footY,
+        visibleDistance: TUNING.seconds.lookAheadSeconds * speed,
+      });
+      const other = roadProjection(camera, footY, road);
+      expect(other.visibleDistance / speed).toBeCloseTo(TUNING.seconds.lookAheadSeconds, 6);
+      expect(columnSpan(other, bandRow, road.x, road.x + road.width)).toEqual(
+        columnSpan(projection, bandRow, road.x, road.x + road.width),
+      );
+    }
   });
 
   it("keeps a lane step 56px wide at the pack", () => {
@@ -85,8 +89,10 @@ describe("roadProjection", () => {
 });
 
 describe("inverses", () => {
-  it.each([-6, 0, 100, 400, 700])("distanceAtY undoes screenYAt at %d", (distance) => {
-    expect(distanceAtY(projection, screenYAt(projection, distance))).toBeCloseTo(distance);
+  it("distanceAtY undoes screenYAt", () => {
+    for (const distance of [-6, 0, 100, 400, 700]) {
+      expect(distanceAtY(projection, screenYAt(projection, distance))).toBeCloseTo(distance);
+    }
   });
 
   it("roadXAt undoes project's x", () => {
@@ -97,19 +103,21 @@ describe("inverses", () => {
 
 describe("snapScale", () => {
   // The nearest depth step by ratio, each pair either side of a boundary.
-  it.each([
-    [1.01, 1],
-    [0.94, 1],
-    [0.93, 0.875],
-    [0.82, 0.875],
-    [0.8, 0.75],
-    [0.69, 0.75],
-    [0.68, 0.625],
-    [0.56, 0.625],
-    [0.55, 0.5],
-    [0.3, 0.5],
-  ])("snaps %d to %d", (scale, step) => {
-    expect(snapScale(scale)).toBe(step);
+  it("snaps a scale to the nearest depth step by ratio", () => {
+    for (const [scale, step] of [
+      [1.01, 1],
+      [0.94, 1],
+      [0.93, 0.875],
+      [0.82, 0.875],
+      [0.8, 0.75],
+      [0.69, 0.75],
+      [0.68, 0.625],
+      [0.56, 0.625],
+      [0.55, 0.5],
+      [0.3, 0.5],
+    ] as const) {
+      expect(snapScale(scale)).toBe(step);
+    }
   });
 
   it("draws the pack at 1 and the far edge at 0.5", () => {

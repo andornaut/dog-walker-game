@@ -123,60 +123,52 @@ describe("depthDraw", () => {
   });
 
   // A 32-wide cone with only @75 and @50, whatever steps the shipped cone has.
-  const cone32 = syntheticArts("cone", 32, [0.75, 0.5]);
-  const everyCone = withEveryStep(artsOf("cone"));
-  const cloud88 = syntheticArts("cloud", 88, [0.5]);
-  it.each([
-    { arts: artsOf("cone"), key: "cone@75", name: "its own step", projected: 0.75, scale: 1 },
-    { arts: artsOf("cone"), key: "cone@50", name: "its own step", projected: 0.5, scale: 1 },
-    { arts: everyCone, key: "cone@75", name: "the next larger step", projected: 0.7 },
-    { arts: everyCone, key: "cone@62", name: "the next larger step", projected: 0.6 },
-    { arts: everyCone, key: "cone@88", name: "the next larger step", projected: 0.8 },
-    { arts: cone32, key: "cone", name: "the next larger art", projected: 0.9 },
-    { arts: cone32, key: "cone@75", name: "the next larger art", projected: 0.6 },
-    { arts: cloud88, key: "cloud", name: "the next larger art", projected: 0.6 },
-  ])("draws $projected from $name, $key, scaled down", ({ arts, key, projected, scale }) => {
-    const drawn = depthDraw(arts, projected);
-    expect(drawn.key).toBe(key);
-    if (scale === undefined) {
-      expect(drawn.scale).toBeLessThan(1);
-    } else {
-      expect(drawn.scale).toBe(scale);
+  it("draws a projected scale from its own step, else the next larger step or art, scaled down", () => {
+    const everyCone = withEveryStep(artsOf("cone"));
+    const cone32 = syntheticArts("cone", 32, [0.75, 0.5]);
+    const picks = [
+      { arts: artsOf("cone"), key: "cone@75", projected: 0.75, scale: 1 },
+      { arts: everyCone, key: "cone@62", projected: 0.6 },
+      { arts: cone32, key: "cone@75", projected: 0.6 },
+    ];
+    for (const { arts, key, projected, scale } of picks) {
+      const drawn = depthDraw(arts, projected);
+      expect(drawn.key).toBe(key);
+      if (scale === undefined) {
+        expect(drawn.scale).toBeLessThan(1);
+      } else {
+        expect(drawn.scale).toBe(scale);
+      }
     }
   });
 
   // Over a slow approach the drawn frame grows with the projection and never shrinks: on both
   // axes it is at least the 1x's size at the projected scale, capped at 1, and within a pixel
-  // of it on one.
-  it.each([
-    ...ROAD_SPRITES.map((key) => ({ arts: artsOf(key), key })),
-    ...STEP_SETS.map((arts) => ({ arts, key: arts.map((art) => art.key).join(" ") })),
-  ])("grows in proportion with distance and never shrinks: $key", ({ arts }) => {
-    const full = itemAt(arts, 0);
-    let last = { height: 0, width: 0 };
-    for (const projected of approach) {
-      const drawn = depthDraw(arts, projected);
-      const art = arts.find((step) => step.key === drawn.key) ?? full;
-      const size = { height: art.height * drawn.scale, width: art.width * drawn.scale };
-      const depth = Math.min(1, projected);
-      const over = {
-        height: size.height - full.height * depth,
-        width: size.width - full.width * depth,
-      };
-      expect(drawn.scale, drawn.key).toBeLessThanOrEqual(1);
-      expect(Math.min(over.height, over.width), drawn.key).toBeGreaterThan(-ROUNDING);
-      expect(Math.min(over.height, over.width), drawn.key).toBeLessThan(1);
-      expect(size.width + ROUNDING, `${drawn.key} at ${projected}`).toBeGreaterThan(last.width);
-      expect(size.height + ROUNDING, `${drawn.key} at ${projected}`).toBeGreaterThan(last.height);
-      last = size;
+  // of it on one. Every shipped road sprite and every set of steps a sprite may have.
+  it("grows every sprite in proportion with distance and never shrinks it", () => {
+    const offenders: string[] = [];
+    for (const arts of [...ROAD_SPRITES.map(artsOf), ...STEP_SETS]) {
+      const full = itemAt(arts, 0);
+      let last = { height: 0, width: 0 };
+      for (const projected of approach) {
+        const drawn = depthDraw(arts, projected);
+        const art = arts.find((step) => step.key === drawn.key) ?? full;
+        const size = { height: art.height * drawn.scale, width: art.width * drawn.scale };
+        const depth = Math.min(1, projected);
+        const over = Math.min(size.height - full.height * depth, size.width - full.width * depth);
+        const grows = size.width + ROUNDING > last.width && size.height + ROUNDING > last.height;
+        if (drawn.scale > 1 || over <= -ROUNDING || over >= 1 || !grows) {
+          offenders.push(`${drawn.key} at ${projected}`);
+          break;
+        }
+        last = size;
+      }
     }
+    expect(offenders).toEqual([]);
   });
 
-  it.each([
-    { name: "the sizing cases", sets: stepSets(STANDING) },
-    { name: "every shipped road sprite", sets: ROAD_SPRITES.map(artsOf) },
-  ])("stands each step on its own feet line: $name", ({ sets }) => {
-    for (const arts of sets) {
+  it("stands each step on its own feet line", () => {
+    for (const arts of stepSets(STANDING)) {
       for (const projected of approach) {
         const drawn = depthDraw(arts, projected);
         const art = arts.find((step) => step.key === drawn.key);

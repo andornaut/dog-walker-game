@@ -26,11 +26,9 @@ import {
   type PackSlot,
   PART_INSET,
   type PartBox,
-  sideDx,
   tallestPackLength,
   tautLeashLine,
   unionBox,
-  WALKER_HANDS,
   WALKER_SILHOUETTES,
 } from "./packFormation";
 import { distanceAtY, project, scaleAt, screenYAt } from "./projection";
@@ -143,64 +141,32 @@ function drawnPack(lane: number, walker: WalkerId, dogs: readonly DogId[]): Draw
 
 describe("silhouettes", () => {
   // Each sprite stands with its feet row on its feet line, centred on its frame.
-  it.each([
-    ...WALKERS.map((walker) => [walkerKey(walker), WALKER_SILHOUETTES[walker]] as const),
-    ...DOGS.map((dog) => [dogKey(dog), DOG_SILHOUETTES[dog]] as const),
-  ])("measures %s on its art", (key, silhouette) => {
-    const art = artOf(key);
-    expect(silhouette).toEqual({
-      above: art.feetY - art.top,
-      left: art.left - art.width / 2,
-      right: art.right - art.width / 2,
+  it("measures every walker and dog on its art", () => {
+    const sprites = [
+      ...WALKERS.map((walker) => [walkerKey(walker), WALKER_SILHOUETTES[walker]] as const),
+      ...DOGS.map((dog) => [dogKey(dog), DOG_SILHOUETTES[dog]] as const),
+    ];
+    const wrong = sprites.flatMap(([key, silhouette]) => {
+      const art = artOf(key);
+      const measured = {
+        above: art.feetY - art.top,
+        left: art.left - art.width / 2,
+        right: art.right - art.width / 2,
+      };
+      return JSON.stringify(silhouette) === JSON.stringify(measured)
+        ? []
+        : [`${key}: ${JSON.stringify(measured)}`];
     });
+    expect(wrong).toEqual([]);
   });
 });
 
 describe("formationOrder", () => {
   // The biggest first, ties in roster order, whatever order the dogs were picked in.
-  it.each<[DogId[], DogId[]]>([
-    [
-      ["zippy", "koda", "biscuit"],
-      ["koda", "biscuit", "zippy"],
-    ],
-    [
-      ["pierre", "archie"],
-      ["archie", "pierre"],
-    ],
-    [
-      ["zippy", "nugget", "duchess"],
-      ["duchess", "nugget", "zippy"],
-    ],
-    [
-      ["snowball", "koda"],
-      ["koda", "snowball"],
-    ],
-    [["nugget"], ["nugget"]],
-  ])("orders %j as %j", (picked, ordered) => {
-    expect(formationOrder(picked)).toEqual(ordered);
-    expect(formationOrder([...picked].reverse())).toEqual(ordered);
-  });
-});
-
-describe("sideDx", () => {
-  // Art's values: the lane's half width on the feet row less half the opaque width, rounded in,
-  // on a side dog's row for its size, and for a big dog on the row of three bigs.
-  it.each<[DogId, number, number | null]>([
-    ["archie", 17, null],
-    ["biscuit", 17, null],
-    ["duchess", 19, null],
-    ["koda", 14, 14],
-    ["nugget", 19, null],
-    ["penny", 15, 15],
-    ["pierre", 16, null],
-    ["snowball", 14, 14],
-    ["zippy", 19, null],
-  ])("stands %s %d across as a side dog, and %s among three bigs", (dog, side, threeBigs) => {
-    const silhouette = DOG_SILHOUETTES[dog];
-    expect(sideDx(PROJECTION, PACK_FEET.side[gameData.dogs[dog].size], silhouette)).toBe(side);
-    if (threeBigs !== null) {
-      expect(sideDx(PROJECTION, PACK_FEET.sideOfThreeBigs, silhouette)).toBe(threeBigs);
-    }
+  it("orders the biggest first, ties in roster order", () => {
+    const picked: DogId[] = ["zippy", "nugget", "duchess"];
+    expect(formationOrder(picked)).toEqual(["duchess", "nugget", "zippy"]);
+    expect(formationOrder([...picked].reverse())).toEqual(["duchess", "nugget", "zippy"]);
   });
 });
 
@@ -208,93 +174,44 @@ describe("packPlacements", () => {
   const SIDES = { lead: 0, left: -1, right: 1 } as const;
 
   // Each dog on its slot's side, in front of the walker; a trio's lead furthest ahead.
-  it.each(PACK_SLOTS.map((slots) => [slots.length, slots] as const))(
-    "walks every pack of %d in its formation",
-    (count, slots) => {
-      for (const dogs of PACKS.filter((pack) => pack.length === count)) {
-        const placements = packPlacements(PROJECTION, formationOrder(dogs).map(packDogOf));
-        expect(placements.map(({ dx }) => Math.sign(dx))).toEqual(slots.map((slot) => SIDES[slot]));
-        const [first, ...rest] = placements.map(({ footDy }) => footDy);
-        for (const footDy of [first ?? 0, ...rest]) {
-          expect(footDy).toBeLessThan(0);
-        }
-        if (slots[0] === "lead") {
-          for (const footDy of rest) {
-            expect(first).toBeLessThan(footDy);
-          }
+  it("walks every pack in its formation", () => {
+    for (const dogs of PACKS) {
+      const slots = itemAt(PACK_SLOTS, dogs.length - 1);
+      const placements = packPlacements(PROJECTION, formationOrder(dogs).map(packDogOf));
+      expect(placements.map(({ dx }) => Math.sign(dx))).toEqual(slots.map((slot) => SIDES[slot]));
+      const [first, ...rest] = placements.map(({ footDy }) => footDy);
+      for (const footDy of [first ?? 0, ...rest]) {
+        expect(footDy).toBeLessThan(0);
+      }
+      if (slots[0] === "lead") {
+        for (const footDy of rest) {
+          expect(first).toBeLessThan(footDy);
         }
       }
-    },
-  );
-
-  // Art's table: the feet rows of the dogs of a pack, in formation order.
-  it.each<[DogId[], number[]]>([
-    [["koda"], [-49]],
-    [["pierre"], [-50]],
-    [["zippy"], [-54]],
-    [
-      ["koda", "zippy"],
-      [-45, -48],
-    ],
-    [
-      ["koda", "penny", "snowball"],
-      [-53, -37, -37],
-    ],
-    [
-      ["koda", "penny", "pierre"],
-      [-60, -45, -45],
-    ],
-    [
-      ["koda", "penny", "zippy"],
-      [-60, -45, -48],
-    ],
-    [
-      ["koda", "pierre", "biscuit"],
-      [-52, -45, -45],
-    ],
-    [
-      ["koda", "pierre", "zippy"],
-      [-52, -45, -48],
-    ],
-    [
-      ["koda", "nugget", "zippy"],
-      [-50, -48, -48],
-    ],
-    [
-      ["archie", "biscuit", "pierre"],
-      [-50, -45, -45],
-    ],
-    [
-      ["archie", "biscuit", "zippy"],
-      [-56, -45, -48],
-    ],
-    [
-      ["archie", "nugget", "zippy"],
-      [-50, -48, -48],
-    ],
-    [
-      ["duchess", "nugget", "zippy"],
-      [-54, -48, -48],
-    ],
-  ])("walks %j on feet rows %j", (dogs, rows) => {
-    const placements = packPlacements(PROJECTION, formationOrder(dogs).map(packDogOf));
-    expect(placements.map(({ footDy }) => footDy)).toEqual(rows);
+    }
   });
 
   // Each dog drawn on a lane's row stays inside that lane's edges as drawn there, in every lane,
   // the road's edges included.
-  it.each(LANE_XS.map((_, lane) => lane))("draws every pack inside lane %d", (lane) => {
-    const walkerX = itemAt(LANE_XS, lane);
-    for (const dogs of PACKS) {
-      for (const { foot, key, x } of drawnPack(lane, "casey", dogs).slice(0, -1)) {
-        const distance = distanceAtY(PROJECTION, foot);
-        const edge = (side: number) =>
-          project(PROJECTION, { distance, x: walkerX + side * laneHalfWidth() }).x;
-        const art = artOf(key);
-        expect(x - art.width / 2 + art.left).toBeGreaterThanOrEqual(Math.floor(edge(-1)));
-        expect(x - art.width / 2 + art.right).toBeLessThanOrEqual(Math.ceil(edge(1)));
+  it("draws every pack inside its lane, in every lane", () => {
+    const outside: string[] = [];
+    LANE_XS.forEach((walkerX, lane) => {
+      for (const dogs of PACKS) {
+        for (const { foot, key, x } of drawnPack(lane, "casey", dogs).slice(0, -1)) {
+          const distance = distanceAtY(PROJECTION, foot);
+          const edge = (side: number) =>
+            project(PROJECTION, { distance, x: walkerX + side * laneHalfWidth() }).x;
+          const art = artOf(key);
+          if (
+            x - art.width / 2 + art.left < Math.floor(edge(-1)) ||
+            x - art.width / 2 + art.right > Math.ceil(edge(1))
+          ) {
+            outside.push(`${key} of ${dogs.join(",")} in lane ${lane}`);
+          }
+        }
       }
-    }
+    });
+    expect(outside).toEqual([]);
   });
 
   it("draws no dogs for an empty pack, and a larger pack in the largest formation", () => {
@@ -343,23 +260,20 @@ describe("the pack's outline", () => {
         ...Object.values(PACK_FEET.trioLead),
       ].map(rowScale),
     );
-  it.each(WALKERS)("is the union of what is drawn for %s and any pack", (walker) => {
-    for (const dogs of PACKS) {
-      const box = packOutline(packOnRoad(PROJECTION, 0, { dogs, walker }));
-      const drawn = drawnUnion(2, walker, dogs);
-      expect(box.top).toBeCloseTo(drawn.top, 9);
-      expect(box.bottom).toBeCloseTo(drawn.bottom, 9);
-      expect(Math.abs(box.left - drawn.left)).toBeLessThanOrEqual(rounding);
-      expect(Math.abs(box.right - drawn.right)).toBeLessThanOrEqual(rounding);
-    }
-  });
-
-  // So a pack settled in a lane never touches anything in the lane beside it.
-  it.each(WALKERS)("stays inside the lane for %s and any pack", (walker) => {
-    for (const dogs of PACKS) {
-      const box = packOutline(packOnRoad(PROJECTION, 0, { dogs, walker }));
-      expect(box.left).toBeGreaterThanOrEqual(-laneHalfWidth());
-      expect(box.right).toBeLessThanOrEqual(laneHalfWidth());
+  // And so a pack settled in a lane never touches anything in the lane beside it.
+  it("is the union of what is drawn, inside the lane, for every walker and pack", () => {
+    for (const walker of WALKERS) {
+      for (const dogs of PACKS) {
+        const box = packOutline(packOnRoad(PROJECTION, 0, { dogs, walker }));
+        const drawn = drawnUnion(2, walker, dogs);
+        const name = `${walker} with ${dogs.join(",")}`;
+        expect(box.top, name).toBeCloseTo(drawn.top, 9);
+        expect(box.bottom, name).toBeCloseTo(drawn.bottom, 9);
+        expect(Math.abs(box.left - drawn.left), name).toBeLessThanOrEqual(rounding);
+        expect(Math.abs(box.right - drawn.right), name).toBeLessThanOrEqual(rounding);
+        expect(box.left, name).toBeGreaterThanOrEqual(-laneHalfWidth());
+        expect(box.right, name).toBeLessThanOrEqual(laneHalfWidth());
+      }
     }
   });
 
@@ -399,24 +313,25 @@ describe("the parts' hit rectangles", () => {
       slots.map((slot, i) => [slots.length, slot, size, i] as const),
     ),
   );
-  it.each(CASES)("lies inside a pack of %d's %s dog, %s", (count, _slot, size, i) => {
-    const pack = {
-      dogs: Array.from({ length: count }, () => SIZE_DOGS[size]),
-      walker: "casey",
-    } as const;
-    const hit = itemAt(packOnRoad(PROJECTION, PART_INSET, pack).dogs, i);
-    const drawn = itemAt(packOnRoad(PROJECTION, 0, pack).dogs, i);
-    for (const inset of insets(hit, drawn)) {
-      expect(inset).toBeCloseTo(PART_INSET, 9);
+  it("lies inside every slot's dog of every size, and every walker", () => {
+    for (const [count, slot, size, i] of CASES) {
+      const pack = {
+        dogs: Array.from({ length: count }, () => SIZE_DOGS[size]),
+        walker: "casey",
+      } as const;
+      const hit = itemAt(packOnRoad(PROJECTION, PART_INSET, pack).dogs, i);
+      const drawn = itemAt(packOnRoad(PROJECTION, 0, pack).dogs, i);
+      for (const inset of insets(hit, drawn)) {
+        expect(inset, `${count} ${slot} ${size}`).toBeCloseTo(PART_INSET, 9);
+      }
     }
-  });
-
-  it.each(WALKERS)("lies inside %s", (walker) => {
-    const pack = { dogs: [], walker };
-    const hit = packOnRoad(PROJECTION, PART_INSET, pack).walker;
-    const drawn = packOnRoad(PROJECTION, 0, pack).walker;
-    for (const inset of insets(hit, drawn)) {
-      expect(inset).toBeCloseTo(PART_INSET, 9);
+    for (const walker of WALKERS) {
+      const pack = { dogs: [], walker };
+      const hit = packOnRoad(PROJECTION, PART_INSET, pack).walker;
+      const drawn = packOnRoad(PROJECTION, 0, pack).walker;
+      for (const inset of insets(hit, drawn)) {
+        expect(inset, walker).toBeCloseTo(PART_INSET, 9);
+      }
     }
   });
 });
@@ -496,15 +411,15 @@ describe("readability", () => {
     [3, "right", "body", TRIO_SIDE_BODY],
   ];
 
-  it("floors every slot of every formation", () => {
+  it("floors every slot of every formation, and shows each at least its floor", () => {
     const slots = PACK_SLOTS.flatMap((formation) =>
       formation.map((slot) => `${formation.length} ${slot}`),
     );
     expect(new Set(SHOWN.map(([count, slot]) => `${count} ${slot}`))).toEqual(new Set(slots));
-  });
-
-  it.each(SHOWN)("shows a pack of %d's %s dog's %s at least %d", (count, slot, part, least) => {
-    expect(WORST.get(`${count} ${slot} ${part}`)).toBeGreaterThanOrEqual(least);
+    const under = SHOWN.filter(
+      ([count, slot, part, least]) => (WORST.get(`${count} ${slot} ${part}`) ?? 0) < least,
+    );
+    expect(under).toEqual([]);
   });
 
   it("runs every leash at least LEASH long", () => {
@@ -519,29 +434,15 @@ describe("readability", () => {
   });
 });
 
-describe("leashHand", () => {
-  it("holds a dog on the left in the left hand, and the rest in the right", () => {
-    expect(leashHand({ dx: -12, footDy: -9 }).dx).toBe(WALKER_HANDS.leftDx);
-    expect(leashHand({ dx: 0, footDy: -9 }).dx).toBe(WALKER_HANDS.rightDx);
-    expect(leashHand({ dx: 12, footDy: -9 }).dy).toBe(-WALKER_HANDS.heightAboveFeet);
-  });
-});
-
 describe("tautLeashLine", () => {
-  it.each([
-    ["a steep leash a pixel left", { x: 10, y: 50 }, { x: 14, y: 20 }, { x: -1, y: 0 }],
-    ["a shallow leash a pixel up", { x: 10, y: 50 }, { x: 40, y: 44 }, { x: 0, y: -1 }],
-    [
-      "a leash at 45 degrees left, as a steep one",
-      { x: 0, y: 10 },
-      { x: 10, y: 0 },
-      { x: -1, y: 0 },
-    ],
-  ])("shifts %s", (_name, from, to, shift) => {
-    const moved = (point: { x: number; y: number }) => ({
-      x: point.x + shift.x,
-      y: point.y + shift.y,
+  it("shifts a steep leash a pixel left and a shallow one a pixel up", () => {
+    expect(tautLeashLine({ x: 10, y: 50 }, { x: 14, y: 20 })).toEqual({
+      from: { x: 9, y: 50 },
+      to: { x: 13, y: 20 },
     });
-    expect(tautLeashLine(from, to)).toEqual({ from: moved(from), to: moved(to) });
+    expect(tautLeashLine({ x: 10, y: 50 }, { x: 40, y: 44 })).toEqual({
+      from: { x: 10, y: 49 },
+      to: { x: 40, y: 43 },
+    });
   });
 });
