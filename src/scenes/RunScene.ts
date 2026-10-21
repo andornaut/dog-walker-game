@@ -547,6 +547,12 @@ export class RunScene extends Scene implements HudRun {
     world.input.dropPress();
     cardHintTriggers(view.source).forEach((trigger) => showHint(this, trigger));
     const replayed = world.recorder.cardChoice();
+    if (replayed === "home") {
+      if (this.session !== undefined) {
+        this.apply(headHomeSession(this.session));
+      }
+      return;
+    }
     if (replayed !== undefined) {
       this.choose(view, replayed);
       return;

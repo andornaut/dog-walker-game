@@ -71,11 +71,16 @@ export class RunRecorder {
     return due;
   }
 
-  // The next replayed card choice, if a replay is driving the run.
-  cardChoice(): CardChoice | undefined {
+  // The next replayed card choice, if a replay is driving the run, or "home" when the player
+  // headed home from the card, as a fork card's Head home or the pause menu over a card does.
+  cardChoice(): CardChoice | "home" | undefined {
     const replay = this.replay;
     if (replay === undefined) {
       return undefined;
+    }
+    if (replay.events[replay.next]?.kind === "home") {
+      replay.next += 1;
+      return "home";
     }
     const { choice, next } = takeCardChoice(replay.events, replay.next);
     replay.next = next;

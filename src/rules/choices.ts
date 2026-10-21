@@ -26,7 +26,14 @@ import {
   type MoneyChange,
 } from "./causes";
 import { debuffLasting } from "./durations";
-import { type EffectContext, moneyAmount, moneyCost, resolveEffects, targetDogs } from "./effects";
+import {
+  baseMoneyCost,
+  type EffectContext,
+  moneyAmount,
+  moneyCost,
+  resolveEffects,
+  targetDogs,
+} from "./effects";
 import { cardEffectText, type CardTextContext, sentenceList } from "./effectText";
 import { currentZoneId, forkPaths, type PathSide, pathSide, zoneById } from "./route";
 import { fireOwnersAtZero } from "./run";
@@ -343,16 +350,26 @@ function effectCard(data: ChoiceData, state: RunState, source: EncounterCardSour
   });
   return {
     affected,
-    options: skip && views.length >= MAX_CARD_OPTIONS ? withoutMostExpensive(views) : views,
+    options:
+      skip && views.length >= MAX_CARD_OPTIONS
+        ? withoutMostExpensive(
+            (view) => baseMoneyCost(data, options[view.index]?.option.effects ?? []),
+            views,
+          )
+        : views,
     skip,
     source,
     title,
   };
 }
 
-// Drops the costliest option, the first one if several tie, keeping the others in order.
-function withoutMostExpensive(options: readonly OptionView[]): OptionView[] {
-  const costliest = options.reduce((most, option) => (option.cost > most.cost ? option : most));
+// Drops the costliest option by its cost before a free card waives it, the first one if several
+// tie, keeping the others in order.
+function withoutMostExpensive(
+  cost: (option: OptionView) => number,
+  options: readonly OptionView[],
+): OptionView[] {
+  const costliest = options.reduce((most, option) => (cost(option) > cost(most) ? option : most));
   return options.filter((option) => option !== costliest);
 }
 

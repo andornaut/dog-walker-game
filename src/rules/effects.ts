@@ -96,6 +96,20 @@ function moneyParts(
       };
 }
 
+// What an option's effects would take from the player before a free card waives it, such as
+// Sweet talker's.
+export function baseMoneyCost(data: Pick<GameData, "tuning">, effects: readonly Effect[]): Cents {
+  return cents(
+    effects.reduce(
+      (total, effect) =>
+        effect.kind === "money" && effect.change === "lose"
+          ? total + roundDollars(read(data.tuning, "money", effect.amount))
+          : total,
+      0,
+    ),
+  );
+}
+
 // A money effect's total for the dogs it counts, after modifiers, unsigned.
 export function moneyAmount(
   data: RulesData,

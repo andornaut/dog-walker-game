@@ -56,13 +56,14 @@ export interface LanedBox extends ScaledBox {
 
 // Whether an item's box touches a part's as drawn: along the road, and across the screen, each
 // at its scale. The item's box is cut to its lanes as the road is drawn on the part's row, so it
-// never reaches a part settled in another lane however wide the projection draws it. Boxes that
-// only meet at an edge do not touch.
+// never reaches a part settled in another lane however wide the projection draws it; a box its
+// lanes cut away entirely touches nothing. Boxes that only meet at an edge do not touch.
 export function touchesAsDrawn(centerX: number, part: ScaledBox, item: LanedBox): boolean {
   const across = (scale: number, x: number) => centerX + (x - centerX) * scale;
   const left = Math.max(across(item.scale, item.left), across(part.scale, item.lanes.left));
   const right = Math.min(across(item.scale, item.right), across(part.scale, item.lanes.right));
   return (
+    left < right &&
     across(part.scale, part.left) < right &&
     left < across(part.scale, part.right) &&
     part.top < item.bottom &&

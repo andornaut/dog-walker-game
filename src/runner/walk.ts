@@ -691,7 +691,8 @@ export function obstacleOnRoad(
   return parts;
 }
 
-const EXIT_LENGTHS = new WeakMap<object, Map<readonly PlacedPart[], number>>();
+// By lens, then the pack band's bottom, then the parts.
+const EXIT_LENGTHS = new WeakMap<object, Map<number, Map<readonly PlacedPart[], number>>>();
 
 // An obstacle's hit length: how far its drawn hit box runs up the road from its near edge as it
 // leaves the pack's band (exitLength), so its rows overlap the band exactly while its drawn hit
@@ -708,14 +709,20 @@ export function itemHeight(
     return geometry.itemHeights[category];
   }
   const parts = obstacleOnRoad(data, geometry, zone, kind, moving);
-  let lengths = EXIT_LENGTHS.get(geometry.lens);
+  const { bottom } = geometry.packBand;
+  let byBottom = EXIT_LENGTHS.get(geometry.lens);
+  if (byBottom === undefined) {
+    byBottom = new Map();
+    EXIT_LENGTHS.set(geometry.lens, byBottom);
+  }
+  let lengths = byBottom.get(bottom);
   if (lengths === undefined) {
     lengths = new Map();
-    EXIT_LENGTHS.set(geometry.lens, lengths);
+    byBottom.set(bottom, lengths);
   }
   let length = lengths.get(parts);
   if (length === undefined) {
-    length = exitLength(geometry.lens, PART_INSET, parts, geometry.packBand.bottom);
+    length = exitLength(geometry.lens, PART_INSET, parts, bottom);
     lengths.set(parts, length);
   }
   return length;
