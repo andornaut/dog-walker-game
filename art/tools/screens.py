@@ -48,7 +48,7 @@ frame. The PET SHOP board (BOARD, 3,0 114x22 in the frame, 237,86 on screen)
 spans the parapet, its bottom 2 rows over it, built and coloured as ui-button's
 go state (green face, yellow highlight, forest lip, ink line), with PET SHOP in
 the sign letters' shapes at 2x in ink, as the go label. Under it a red and
-white awning, a display window with a food bag and a bone, and a door with a
+white awning, a display window with a food bag and a puppy behind its bone, and a door with a
 paw on its glass; rust brick with dbrown mortar, lit ochre on the left, dred on the right, ink
 outline all round, on a grey step. pressed dips as ui-button does: the front
 sinks 2px onto the step, the step 1px shallower, and the board loses its lip
@@ -91,7 +91,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
 import help as hp  # noqa: E402
-from pixel import DARKER, Grid, K, build as build_sprites  # noqa: E402
+from pixel import DARKER, Grid, K, build as build_sprites, edged  # noqa: E402
 from ui import STATES  # noqa: E402
 
 W, H = 360, 560
@@ -370,6 +370,26 @@ BONE = ["..cc.......cc..", ".cccc.....cccc.", "ccccccccccccccc", "cccccccccccccc
 DOOR_PAW = [".#.#.", "#...#", ".###.", ".###."]
 
 
+def window_puppy():
+    """17x21: a tan puppy sitting up in the shop window, front view, floppy brown ears, a white muzzle
+    and chest, a pink tongue out; cel shaded in an ink line, as the faces are."""
+    g = edged(Grid(17, 21), "ink")
+    g.cel(8.5, 16, 5.5, 4.5, "tan", "brown")
+    g.cel(8.5, 16.5, 2.5, 3, "white", "lgrey")
+    g.cel(8.5, 8.2, 6, 5.3, "tan", "brown", "skin1", power=2.6)
+    for x in (2.5, 14.5):
+        g.cel(x, 9, 1.8, 3.6, "brown", "dbrown")
+    g.cel(8.5, 11, 2.6, 1.9, "white", "lgrey")
+    for x in (5, 11):
+        g.rect(x, 7, 2, 2, "ink")
+        g.p(x, 7, "white")
+    g.rect(8, 9, 2, 1, "ink")
+    g.rect(8, 11, 2, 2, "pink")
+    g.p(4, 10, "pink")
+    g.p(13, 10, "pink")
+    return g
+
+
 def pet_shop(pressed=False, glint=None):
     """The shop front, PET_SHOP_W x PET_SHOP_H: the building from BOARD_RISE down, under the board.
     Everything but the step is drawn t rows lower, so pressed sinks the front 2px onto a step 1px
@@ -378,11 +398,11 @@ def pet_shop(pressed=False, glint=None):
     w, h = PET_SHOP_W, PET_SHOP_H
     cv = clear(w, h)
     building(cv, w, h - BOARD_RISE, pressed)
-    board(cv, pressed, glint)
+    shop_board(cv, pressed, glint)
     return cv
 
 
-def board(cv, pressed, glint):
+def shop_board(cv, pressed, glint):
     """The PET SHOP board at BOARD: ui-button's go state, a green face with a yellow top highlight on a
     forest lip 4px deep, in an ink line with its corners cut, and PET SHOP in the sign letters' shapes at
     2x, filled ink (8.41:1 on green) with no outline or shadow, as the go label. Raised, row 0 is ink,
@@ -478,6 +498,11 @@ def building(cv, w, h, pressed):
     cv.fill(wx + 19, wy + 23, 2, 14, "orange")
     cv.fill(wx + 11, wy + 26, 7, 6, "red")
     cv.fill(wx + 13, wy + 28, 3, 2, "white")
+    # a puppy sitting on the sill behind the bone, waiting to be taken home
+    for y, row in enumerate(window_puppy().outlined()):
+        for x, c in enumerate(row):
+            if c:
+                cv.fill(wx + 28 + x, wy + 15 + y, 1, 1, c)
     bone = {(x, y) for y, row in enumerate(BONE) for x, ch in enumerate(row) if ch == "c"}
     for x, y in {(x + dx, y + dy) for x, y in bone for dx, dy in ((0, 1), (1, 0), (0, -1), (-1, 0))} - bone:
         cv.fill(wx + 29 + x, wy + 31 + y, 1, 1, "blue")
