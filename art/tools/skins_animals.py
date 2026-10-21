@@ -5,6 +5,10 @@ animal or person per zone. Each skin has its base kind's frame size, tags,
 frame counts, durations and anchor (the feet on the frame's bottom rows), and
 the same depth variants at every step in minis.STEPS (@88, @75, @62, @50).
 
+This script does not build: it imports road.PERSON_SCALE, which road.py no
+longer has. Zone skins are not drawn in play (the game draws only the base
+looks), so its exports stay as they are, unmaintained.
+
 Like road.py's encounters, every skin is laid out on 32x32 (animals) or 32x48
 (people and the Snatch animals) and drawn bigger on a minis.Mini: the animals
 road.SCALE (1.25) times, exporting at 40x40 (35/30/25/20 at the steps), the

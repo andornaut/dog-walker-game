@@ -59,8 +59,13 @@ SCALES = tuple((suffix, s) for suffix, s in STEPS if s in (0.75, 0.5))
 
 
 def scaled(v, s):
-    """v at scale s in whole pixels, halves rounding up as the game rounds them. A scale with no exact binary
-    form (1.4) can land a hair under a half, so the half is taken with a hair to spare."""
+    """v at scale s in whole pixels, halves rounding up as the game rounds them."""
+    return math.floor(v * s + 0.5)
+
+
+def side(v, s):
+    """A frame side v at scale s, as scaled, but with a hair to spare at a half: a scale with no exact binary
+    form (1.4) can land a whole side a hair under a half, and the frame must be the size rule's."""
     return math.floor(v * s + 0.5 + 1e-9)
 
 
@@ -72,7 +77,7 @@ class Mini:
 
     def __init__(self, s, w=32, h=32, sy=None):
         self.s, self.sy, self.w, self.h = s, s if sy is None else sy, w, h
-        self.g = Grid(scaled(w, s), scaled(h, self.sy))
+        self.g = Grid(side(w, s), side(h, self.sy))
         self.keep = set()
 
     @property

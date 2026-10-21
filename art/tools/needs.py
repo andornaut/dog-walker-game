@@ -640,7 +640,7 @@ def shrunk(module, s, draw, q):
 
 # The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 56x84,
 # the people's size, which the stranger is drawn at too.
-BIG = road.OBJECT_SCALE
+BIG = road.SCALE
 # The pose arguments that move a whole part by pixels.
 MOTION = ("rustle", "wave", "bob")
 # Each spot's drawing function, the module whose Grid it draws on, its scale and its tags as (tag, poses, ms).

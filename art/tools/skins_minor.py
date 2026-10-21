@@ -6,6 +6,11 @@ billboards from a low camera: a front elevation, squat, with at most a sliver of
 top surface, and no people, so they read as something to bump rather than a
 pickup or an encounter.
 
+This script does not build: it draws in pixels on a plain Grid at full size,
+and obstacles.span now gives a lane-spanning width in layout units for a 1.4x
+minis.Mini. Zone skins are not drawn in play (the game draws only the base
+looks), so its exports stay as they are, unmaintained.
+
 Minor 1x1, 40x40, 1 lane (as cone and bin):
 minor-gnome           Willow Crescent  a garden gnome on a grass tuft; it winks
 minor-molehill        Fairview Park    a mound of soil with grass sprigs; crumbs pop from the top

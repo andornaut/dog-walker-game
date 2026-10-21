@@ -24,11 +24,11 @@ outline rule (pixel.road_edge), so its silhouette holds 3:1 on the three light
 roads and its fill carries Elm Avenue. The warning cues are outlined in ink.
 
 The road sprites are laid out on 32x32 (the cyclist 32x48) and drawn
-road.OBJECT_SCALE (1.75) times bigger on a minis.Mini, which keeps 1px lines 1px;
+road.SCALE (1.75) times bigger on a minis.Mini, which keeps 1px lines 1px;
 the ball is drawn at each size from BALL. Depth variants, redrawn at their own
 size with a full outline (see minis.py): squirrel-dash@75, loose-dog@75 (42x42),
 squirrel-dash@50, loose-dog@50 (28x28), ball-bounce@75, ball-bounce@50 (21x32,
-14x21) and cyclist@75, cyclist@50 (42x63, 28x42), each on a Mini at OBJECT_SCALE
+14x21) and cyclist@75, cyclist@50 (42x63, 28x42), each on a Mini at SCALE
 times the step; depths.py draws the steps between them.
 
 Usage:
@@ -48,7 +48,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from pixel import K, ROADS, Grid, edged, main  # noqa: E402
 import minis  # noqa: E402
 from minis import SCALES, Mini, scaled  # noqa: E402
-from road import OBJECT_SCALE, face_front, lean  # noqa: E402
+from road import SCALE, face_front, lean  # noqa: E402
 
 
 # ---------- squirrel-dash: side view, facing right ----------
@@ -298,13 +298,13 @@ def sway_rows(g, k, bottom):
 
 
 def cyclist_at(s, lf=36, rf=41, sway=0):
-    """cyclist on a Mini at OBJECT_SCALE x step s. At full size the rider leans (road.lean shears about the feet);
+    """cyclist on a Mini at SCALE x step s. At full size the rider leans (road.lean shears about the feet);
     smaller, the rows above the handlebar shift sideways, which keeps the bars and wheel put."""
-    g = minis.small(sys.modules[__name__], OBJECT_SCALE * s, cyclist, lf=lf, rf=rf)
+    g = minis.small(sys.modules[__name__], SCALE * s, cyclist, lf=lf, rf=rf)
     if s == 1:
         return edged(lean(g, sway)) if sway else g.g
     g = g.g
-    sway_rows(g, sway, scaled(26, OBJECT_SCALE * s))
+    sway_rows(g, sway, scaled(26, SCALE * s))
     return g
 
 
@@ -372,9 +372,9 @@ def snap(v, s):
 
 
 def small(s, q, offsets):
-    """Pose q at depth step s (1 for the full size): drawn on a Mini at OBJECT_SCALE x s, its offset keys
+    """Pose q at depth step s (1 for the full size): drawn on a Mini at SCALE x s, its offset keys
     snapped to whole pixels there."""
-    p = OBJECT_SCALE * s
+    p = SCALE * s
 
     def fit(v):
         return tuple(snap(x, p) for x in v) if isinstance(v, tuple) else snap(v, p)
