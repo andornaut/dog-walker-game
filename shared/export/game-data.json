@@ -372,7 +372,7 @@
       "id": "biscuit",
       "art": "biscuit",
       "breed": "Beagle",
-      "look": "Tricolour, floppy ears, green collar",
+      "look": "Tricolor, floppy ears, green collar",
       "name": "Biscuit",
       "owner": {
         "name": "Sam",
@@ -423,7 +423,7 @@
       "id": "koda",
       "art": "koda",
       "breed": "Alaskan Malamute",
-      "look": "Big and heavy, grey and white, blue eyes, harness",
+      "look": "Big and heavy, gray and white, blue eyes, harness",
       "name": "Koda",
       "owner": {
         "name": "Jesse",
@@ -474,7 +474,7 @@
     {
       "id": "penny",
       "art": "penny",
-      "breed": "Golden retriever mix",
+      "breed": "Golden Retriever mix",
       "look": "Smooth golden coat, blocky head, otter tail, blue collar",
       "name": "Penny",
       "owner": {
@@ -500,7 +500,7 @@
     {
       "id": "pierre",
       "art": "pierre",
-      "breed": "Miniature poodle",
+      "breed": "Miniature Poodle",
       "look": "Black coat, a white stripe from head to tail tip, show-clip pom-poms",
       "name": "Pepe",
       "owner": {
@@ -580,7 +580,7 @@
     {
       "id": "biscuitNeighbour",
       "kind": "lucky",
-      "name": "Generous neighbour",
+      "name": "Generous neighbor",
       "resolution": {
         "art": "card-biscuit-neighbour-take",
         "effects": [
@@ -796,7 +796,7 @@
     },
     {
       "id": "thief",
-      "hitLabel": "PICKPOCKETED!",
+      "hitLabel": "YOINK!",
       "kind": "obstacle",
       "movement": {
         "kind": "step",
@@ -867,7 +867,7 @@
       ],
       "name": "Lucky collar",
       "price": "luckyCollar",
-      "short": "+1 ♥ for every owner",
+      "short": "+1♥ max for every owner",
       "iconKey": "item-lucky-collar"
     },
     {
@@ -877,9 +877,9 @@
           "kind": "skipOption"
         }
       ],
-      "name": "Poop bags",
+      "name": "Hall pass",
       "price": "poopBags",
-      "short": "One free Skip a walk",
+      "short": "A free Walk on by each neighborhood",
       "iconKey": "item-poop-bags"
     },
     {
@@ -901,37 +901,32 @@
   "help": [
     {
       "art": "help-lanes",
-      "body": "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. A tap moves one lane toward that side. Keys: arrows, A/D or H/L.",
+      "body": "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. A tap moves one lane toward that side. Keys: arrows, A/D or H/L. The dogs follow you. Mostly.",
       "title": "Switch lanes"
     },
     {
       "art": "help-pickups",
-      "body": "Run into tips for $1 each. A dog that runs into a treat cheers its owner: +1♥.",
+      "body": "Tips are $1 each, and they're most of your money, so grab plenty. A dog that reaches a treat cheers its owner: +1♥. Aim for a lost wallet or a generous neighbor, too.",
       "title": "Tips and treats"
     },
     {
       "art": "help-cards",
-      "body": "Hit a skunk, puddle or thief and the walk pauses. Pick a card: pay up, or upset the owners. Every card shows its outcome; hold one for details. One always costs no money. Cones and bins cost the bumped dog's owner a heart. Some bumps are lucky, like a lost wallet.",
-      "title": "Bumps become cards"
+      "body": "Bump a puddle, skunk, squirrel, thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold a card for details. Muddy and Stinky wear off on their own.",
+      "title": "Some bumps bring cards"
     },
     {
       "art": "help-owners",
-      "body": "Each owner has a happiness meter: ♥, 3 for a small dog, 4 medium, 5 big. A bump costs the owner of the dog it touches, and big dogs get bumped most. At 0♥ the owner fires you, the dog goes home, and you lose its pay for the walk.",
+      "body": "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big. A plain bump costs 1♥ from the owner of the dog that touched it, often the leader's, so pick who leads. Small dogs dodge 1 in 4 plain bumps. At 0♥ the owner fires you.",
       "title": "Keep owners happy"
     },
     {
       "art": "help-pulls",
-      "body": "A bubble and a dotted line over a dog mean a pull. Every dog pulls toward squirrels: one lane at a time, never into an obstacle. Drag back any time.",
+      "body": "Every dog loves squirrels. A bubble and a line to a squirrel mean a dog is straining. Steer away and the pull is off; wait and the pack hops one lane toward it. A pull never drags you into a bump too close to dodge.",
       "title": "Watch for pulls"
     },
     {
-      "art": "help-needs",
-      "body": "Hydrants, lamp posts, trees, water bowls and waving strangers are heart spots. Steer into one and the dog that reaches it cheers its owner: +1♥.",
-      "title": "Heart spots"
-    },
-    {
       "art": "help-zones",
-      "body": "Walk 4 neighborhoods of Maplewood, picking the next at each fork. Each dog earns pay for each neighborhood, paid when it gets home. Between neighborhoods, pick an upgrade card. Head home any time from the pause menu.",
+      "body": "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. Each dog's pay is banked as you finish each one. At a fork, each path brings an upgrade, and harder ones pay more. Bring every dog home for the Full pack bonus.",
       "title": "Four neighborhoods"
     }
   ],
@@ -1165,6 +1160,7 @@
       "id": "bellyRubs",
       "art": "card-belly-rubs",
       "duration": "now",
+      "effect": "+1♥ for every owner",
       "effects": [
         {
           "amount": 1,
@@ -1181,6 +1177,7 @@
       "id": "bigTipper",
       "art": "card-big-tipper",
       "duration": "nextZone",
+      "effect": "+$1 per tip next neighborhood",
       "effects": [
         {
           "by": "bigTipperTipBonus",
@@ -1197,6 +1194,7 @@
       "id": "goodLeash",
       "art": "card-good-leash",
       "duration": "run",
+      "effect": "No squirrel cards or pulls all walk",
       "effects": [
         {
           "duration": "run",
@@ -1218,6 +1216,7 @@
       "id": "raincoats",
       "art": "card-raincoats",
       "duration": "run",
+      "effect": "No puddle cards all walk",
       "effects": [
         {
           "duration": "run",
@@ -1232,6 +1231,7 @@
       "id": "rushHour",
       "art": "card-rush-hour",
       "duration": "nextZone",
+      "effect": "Twice the tips and more obstacles next neighborhood",
       "effects": [
         {
           "by": "rushHourTips",
@@ -1255,6 +1255,7 @@
       "id": "sweetTalker",
       "art": "card-sweet-talker",
       "duration": "run",
+      "effect": "The first card each neighborhood costs nothing",
       "effects": [
         {
           "by": "sweetTalkerFreeCards",
@@ -1272,6 +1273,7 @@
     {
       "id": "ada",
       "agility": 1.1,
+      "greeting": "Tidy lane work. May I walk with you?",
       "name": "Ada",
       "perk": "calmVoice",
       "portraitKey": "face-walker-ada",
@@ -1282,6 +1284,7 @@
     {
       "id": "ben",
       "agility": 0.9,
+      "greeting": "Nice pack! Mind if I tag along?",
       "name": "Ben",
       "perk": "treatFinder",
       "portraitKey": "face-walker-ben",
@@ -1292,6 +1295,7 @@
     {
       "id": "casey",
       "agility": 1,
+      "greeting": "Nice pack! Mind if I walk with you sometime?",
       "name": "Casey",
       "perk": "kindWords",
       "portraitKey": "face-walker-casey",
@@ -1301,6 +1305,7 @@
     {
       "id": "trista",
       "agility": 1.2,
+      "greeting": "Great pace! Race you to the next one?",
       "name": "Trista",
       "perk": "longReach",
       "portraitKey": "face-walker-trista",

@@ -329,7 +329,11 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
   const { control } = walk.road;
   const { motion } = control;
   const moving = motion.kind === "moving";
-  const readyAt = moving ? motion.duration - motion.elapsed : 0;
+  // A pull during a lane change moves the target without turning the pack: it finishes the
+  // change, then heads for the target, a lane change per lane.
+  const lane = control.target;
+  const turns = moving ? Math.abs(lane - motion.to) : 0;
+  const readyAt = moving ? motion.duration - motion.elapsed + turns * motion.duration : 0;
   const lock = Math.max(control.lockSeconds, readyAt + (control.lockOnArrival ?? 0));
   const locked = lock > 0 ? lock + LOCK_MARGIN : 0;
   const moveSeconds = wholeSteps(laneMoveSeconds(road.data, walk.run));
@@ -344,7 +348,7 @@ function replan(bot: Bot, road: BotRoad, pulls: Pulls, walk: Walk): void {
       moveStep: Math.max(moveSeconds, laneChangeCooldown),
     },
     {
-      lane: moving ? motion.to : motion.lane,
+      lane,
       movableAt: Math.max(
         readyAt,
         locked,
