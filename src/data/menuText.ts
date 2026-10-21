@@ -46,7 +46,7 @@ export const MENU_TEXT = {
   settings: {
     effects: "Effects",
     motion: "Reduced motion",
-    motionNote: "Skips shakes, bobs, confetti, traffic",
+    motionNote: "Skips shakes, bobs, confetti, scenery",
     music: "Music",
     muted: "Muted",
     sound: "Sound",
