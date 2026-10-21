@@ -125,7 +125,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 | primary  | The call to action: Start walk, Resume, Got it, Nice!, and the Pet shop board | Raised green face on a forest lip (`ui-button` `go`; `ui-pet-shop`'s board) | ink (8.41:1)             |
 
 - Art inside a disabled tile draws from its grey copy in the neutral ramp, each colour at the step nearest its brightness, on an nslate box; a normal tile's box is tan, a selected one's amber. The padlock keeps its colours.
-- An item for sale is owned (no padlock, no plate), affordable (`icon-lock-open` and the green buy plate) or short (a `disabled` tile, `icon-lock` and the nlgrey short plate), told apart by face, padlock shape and plate, never by colour alone. An item not owned draws as itself, with its name, on the start screen and in the Pet shop. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
+- An item for sale is owned (no padlock, no plate), affordable (`icon-lock-open` and the green buy plate) or short (`icon-lock` and the nlgrey short plate), told apart by padlock shape and plate, never by colour alone. An item not owned draws on a `disabled` tile or row from its grey copy, with its name, on the start screen and in the Pet shop. A walker not owned and a slot that needs the one before it are short whatever the bank holds, with the goal plate.
 - The primary green marks a screen's call to action; on the start screen Start walk is the only full-width primary button. `go-disabled` matches `disabled`; `secondary` and `secondary-pressed` match `normal` and `pressed`.
 - Cards follow the same states: a disabled card is redrawn in the grey ramp, the selected one is outlined in amber.
 
@@ -133,7 +133,7 @@ Every tile, button, card, tab and switch row is in one of four states, drawn the
 
 - A press shows at once: the item dips 2px (a button into its lip) and `fx-tap` bursts under the finger.
 - Anything picked, equipped, toggled on or active shows three cues: the selected state's gold frame and yellow face (or a yellow face inside `ui-select`), a 2px lift onto a plum shadow, and a `ui-check` badge at its top-left.
-- `ui-afford` goes 2px outside the Pet shop building while something in the shop is affordable, and outside each affordable shop row; no start screen tile takes it.
+- `ui-afford` goes 2px outside the Pet shop building while something in the shop is affordable; no tile or shop row takes it.
 - With reduced motion, highlights stay and movement is skipped.
 
 ### Icon buttons and top bars
