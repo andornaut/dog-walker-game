@@ -16,6 +16,8 @@ import { focusDirectionForKey } from "../home/focus";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { MENU_TEXT_FIELDS } from "../home/menuText";
 import {
+  DETAIL_TEXT_WIDTH,
+  detailLineY,
   DOG_COLUMNS,
   type DogColumn,
   dogColumnRights,
@@ -38,6 +40,7 @@ import {
   addPixelText,
   type FontRole,
   inkSpan,
+  pixelFontMetrics,
   scalePixelText,
   setPixelText,
   wrapPixelText,
@@ -79,7 +82,7 @@ const WALL_TEXT = STATS_LAYOUT.wallText;
 const WALL_RECTS = wallRects(WALL, gameData.achievements.length);
 const DETAIL: Rect = STATS_LAYOUT.detail;
 const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
-const DETAIL_TEXT_WIDTH = DETAIL.width - 32;
+const DETAIL_TEXT = STATS_LAYOUT.detailText;
 // The badge and its confetti are drawn at 2x, so the burst shows around the bigger badge.
 const DETAIL_BADGE_SCALE = 2;
 const FIELDS = MENU_TEXT_FIELDS.stats;
@@ -396,7 +399,7 @@ export class StatsScene extends Scene {
     addPanel(this, DETAIL);
     addCloseButton(this, this.add.container(0, 0), DETAIL, false);
     const center = DETAIL.x + DETAIL.width / 2;
-    const badgeY = DETAIL.y + 48;
+    const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;
     if (badge.earned && (this.burst || reduced)) {
       addConfetti(this, reduced, DETAIL_BADGE_SCALE, center, badgeY);
     }
@@ -404,31 +407,25 @@ export class StatsScene extends Scene {
     addBadge(this, badge.art, badge.earned, center, badgeY)
       .setScale(DETAIL_BADGE_SCALE)
       .setDepth(1);
-    let y = badgeY + BADGE_SIZE + 12;
-    this.text(center, y, badge.name, { font: "title", originX: 0.5 });
-    y += 20;
+    this.text(center, DETAIL.y + DETAIL_TEXT.nameY, badge.name, { font: "title", originX: 0.5 });
     const words = gameData.menuText.stats;
-    this.text(center, y, badge.earned ? words.badgeEarned : words.badgeLocked, {
+    const status = badge.earned ? words.badgeEarned : words.badgeLocked;
+    this.text(center, DETAIL.y + DETAIL_TEXT.statusY, status, {
       color: badge.earned ? PALETTE.forest : PALETTE.darkBrown,
       originX: 0.5,
     });
-    y += 24;
-    const goal = this.wrap(badge.goal, DETAIL_TEXT_WIDTH);
-    this.lines(DETAIL.x + 16, y, goal, {});
-    y += goal.length * WALL_TEXT.lineHeight + 8;
+    const x = DETAIL.x + DETAIL_TEXT.x;
+    const goal = this.wrap(badge.goal);
+    this.text(x, DETAIL.y + DETAIL_TEXT.goalY, goal.join("\n"));
     const line = fillLine(FIELDS, words, "badgeLine", { line: badge.badgeLine });
-    this.lines(DETAIL.x + 16, y, this.wrap(line, DETAIL_TEXT_WIDTH), {
-      color: PALETTE.darkBrown,
-    });
+    const lineY = DETAIL.y + detailLineY(pixelFontMetrics(this, "body"), goal.length);
+    this.text(x, lineY, this.wrap(line).join("\n"), { color: PALETTE.darkBrown });
   }
 
-  // Body text at 2x broken into lines no wider than maxWidth.
-  private wrap(text: string, maxWidth: number): string[] {
-    return wrapPixelText(this, { color: PALETTE.plum, scale: TEXT_SCALE }, maxWidth, text);
-  }
-
-  private lines(x: number, y: number, lines: readonly string[], options: { color?: number }): void {
-    lines.forEach((line, i) => this.text(x, y + i * WALL_TEXT.lineHeight, line, options));
+  // Body text at 2x broken into lines no wider than the open badge's text.
+  private wrap(text: string): string[] {
+    const style = { color: PALETTE.plum, scale: TEXT_SCALE };
+    return wrapPixelText(this, style, DETAIL_TEXT_WIDTH, text);
   }
 }
 
