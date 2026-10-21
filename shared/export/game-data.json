@@ -23,34 +23,8 @@
         "id": "otherDog",
         "kind": "encounter"
       },
-      "text": "−1♥ each",
+      "text": "Zoomies: the pack drifts on its own for 20s",
       "title": "Other dog"
-    },
-    {
-      "art": "card-puddle-towel",
-      "frame": "encounter",
-      "id": "towel",
-      "index": 0,
-      "name": "Towel off",
-      "source": {
-        "id": "puddle",
-        "kind": "encounter"
-      },
-      "text": "−$5",
-      "title": "Puddle"
-    },
-    {
-      "art": "card-puddle-through",
-      "frame": "encounter",
-      "id": "through",
-      "index": 1,
-      "name": "Splash through",
-      "source": {
-        "id": "puddle",
-        "kind": "encounter"
-      },
-      "text": "Muddy: bumps cost 2♥ for 20s",
-      "title": "Puddle"
     },
     {
       "art": "card-skunk-grooming",
@@ -75,7 +49,7 @@
         "id": "skunk",
         "kind": "encounter"
       },
-      "text": "Stinky: half the tips for 20s",
+      "text": "Stinky: tips pay nothing for 20s",
       "title": "Skunk"
     },
     {
@@ -90,32 +64,6 @@
       },
       "text": "−1♥ each",
       "title": "Skunk"
-    },
-    {
-      "art": "card-squirrel-chase",
-      "frame": "encounter",
-      "id": "chase",
-      "index": 0,
-      "name": "Let them chase",
-      "source": {
-        "id": "squirrel",
-        "kind": "encounter"
-      },
-      "text": "−$5",
-      "title": "Squirrel"
-    },
-    {
-      "art": "card-squirrel-hold",
-      "frame": "encounter",
-      "id": "hold",
-      "index": 1,
-      "name": "Hold tight",
-      "source": {
-        "id": "squirrel",
-        "kind": "encounter"
-      },
-      "text": "−1♥ each",
-      "title": "Squirrel"
     },
     {
       "art": "card-thief-let-go",
@@ -257,7 +205,7 @@
         "id": "goodLeash",
         "kind": "upgrade"
       },
-      "text": "No Squirrel cards all walk, no pulls toward squirrels all walk",
+      "text": "No pulls toward squirrels all walk",
       "title": "Which way?"
     },
     {
@@ -331,14 +279,21 @@
       "id": "stinky",
       "modifiers": [
         {
-          "by": "stinkyTipSpawns",
+          "by": "stinkyTipValue",
           "operation": "multiply",
-          "stat": "tipSpawns"
+          "stat": "tipValue"
         }
       ],
       "name": "Stinky",
       "seconds": "stinkySeconds",
-      "stake": "half the tips for {seconds}s"
+      "stake": "tips pay nothing for {seconds}s"
+    },
+    {
+      "id": "zoomies",
+      "modifiers": [],
+      "name": "Zoomies",
+      "seconds": "zoomiesSeconds",
+      "stake": "the pack drifts on its own for {seconds}s"
     }
   ],
   "dogs": [
@@ -640,17 +595,15 @@
                 "kind": "money"
               }
             ],
-            "name": "Let them sniff"
+            "name": "Let them sniff",
+            "tally": "sniffs"
           },
           {
             "art": "card-other-dog-pull-away",
             "effects": [
               {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "affected"
-                }
+                "debuff": "zoomies",
+                "kind": "debuff"
               }
             ],
             "name": "Pull away"
@@ -665,34 +618,16 @@
     },
     {
       "id": "puddle",
-      "hitLabel": "SOAKED!",
       "kind": "obstacle",
       "name": "Puddle",
       "resolution": {
-        "kind": "card",
-        "options": [
+        "effects": [
           {
-            "art": "card-puddle-towel",
-            "effects": [
-              {
-                "amount": "encounterLow",
-                "change": "lose",
-                "kind": "money"
-              }
-            ],
-            "name": "Towel off"
-          },
-          {
-            "art": "card-puddle-through",
-            "effects": [
-              {
-                "debuff": "muddy",
-                "kind": "debuff"
-              }
-            ],
-            "name": "Splash through"
+            "debuff": "muddy",
+            "kind": "debuff"
           }
-        ]
+        ],
+        "kind": "contact"
       },
       "shape": {
         "lanes": 2,
@@ -752,41 +687,13 @@
     },
     {
       "id": "squirrel",
-      "hitLabel": "SQUIRREL!",
       "kind": "obstacle",
       "movement": {
         "kind": "dart"
       },
       "name": "Squirrel",
       "resolution": {
-        "kind": "card",
-        "options": [
-          {
-            "art": "card-squirrel-chase",
-            "chase": true,
-            "effects": [
-              {
-                "amount": "squirrelChase",
-                "change": "lose",
-                "kind": "money"
-              }
-            ],
-            "name": "Let them chase"
-          },
-          {
-            "art": "card-squirrel-hold",
-            "effects": [
-              {
-                "amount": -1,
-                "kind": "hearts",
-                "target": {
-                  "kind": "affected"
-                }
-              }
-            ],
-            "name": "Hold tight"
-          }
-        ]
+        "kind": "pull"
       },
       "shape": {
         "lanes": 1,
@@ -815,7 +722,8 @@
                 "kind": "money"
               }
             ],
-            "name": "Let them go"
+            "name": "Let them go",
+            "tally": "thievesLetGo"
           },
           {
             "art": "card-thief-chase",
@@ -906,12 +814,12 @@
     },
     {
       "art": "help-pickups",
-      "body": "Tips are $1 each, and they're most of your money, so grab plenty. A dog that reaches a treat cheers its owner: +1♥. Aim for a lost wallet or a generous neighbor, too.",
+      "body": "Tips are $1 each, and they're most of your earnings, so grab plenty. A dog that reaches a treat cheers its owner: +1♥. Aim for a lost wallet or a generous neighbor, too.",
       "title": "Tips and treats"
     },
     {
       "art": "help-cards",
-      "body": "Bump a puddle, skunk, squirrel, thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold a card for details. Muddy and Stinky wear off on their own.",
+      "body": "Bump a skunk, a thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold a card for details. A puddle opens no card, but makes the pack Muddy. Debuffs wear off on their own.",
       "title": "Some bumps bring cards"
     },
     {
@@ -921,7 +829,7 @@
     },
     {
       "art": "help-pulls",
-      "body": "Every dog loves squirrels. A bubble and a line to a squirrel mean a dog is straining. Steer away and the pull is off; wait and the pack hops one lane toward it. A pull never drags you into a bump too close to dodge.",
+      "body": "Every dog loves squirrels. Touching one does nothing, but a bubble and a line to it mean a dog is straining. Steer away and the pull is off; wait and the pack hops one lane toward it. A pull never drags you into a bump too close to dodge.",
       "title": "Watch for pulls"
     },
     {
@@ -1110,7 +1018,6 @@
         "snowball": 300,
         "zippy": 125
       },
-      "squirrelChase": 5,
       "startPurse": 5,
       "thiefLetGo": 10,
       "tip": 1
@@ -1124,7 +1031,7 @@
       "rushHourObstacles": 1.5,
       "rushHourTips": 2,
       "scrollSpeedGainPerZone": 0.15,
-      "stinkyTipSpawns": 0.5,
+      "stinkyTipValue": 0,
       "treatFinderSpawns": 1.5
     },
     "pixels": {
@@ -1152,7 +1059,9 @@
       "pullReactionWindow": 0.6,
       "pullTell": 1,
       "stinkySeconds": 20,
-      "zoneAtBaseSpeed": 144
+      "zoneAtBaseSpeed": 144,
+      "zoomiesDriftSeconds": 1,
+      "zoomiesSeconds": 20
     }
   },
   "upgrades": [
@@ -1194,13 +1103,8 @@
       "id": "goodLeash",
       "art": "card-good-leash",
       "duration": "run",
-      "effect": "No squirrel cards or pulls all walk",
+      "effect": "No pulls toward squirrels all walk",
       "effects": [
-        {
-          "duration": "run",
-          "encounter": "squirrel",
-          "kind": "immune"
-        },
         {
           "by": "goodLeashSquirrelPull",
           "duration": "run",
@@ -1216,7 +1120,7 @@
       "id": "raincoats",
       "art": "card-raincoats",
       "duration": "run",
-      "effect": "No puddle cards all walk",
+      "effect": "Puddles don't muddy the pack all walk",
       "effects": [
         {
           "duration": "run",
