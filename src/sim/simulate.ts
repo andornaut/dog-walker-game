@@ -341,8 +341,7 @@ function playBySkill(
       }
       observeRoad(bot, road, walk);
       const action = actBot(bot, road, session.pulls, walk);
-      const lanes = action.lanes.map((direction): SessionInput => ({ direction, kind: "lane" }));
-      const inputs = lanes;
+      const inputs = action.lanes.map((direction): SessionInput => ({ direction, kind: "lane" }));
       step = stepSession(data, streams, screenRoadGeometry, STEP_SECONDS, inputs, session);
       bot.clock += STEP_SECONDS;
       acted = action.walk;

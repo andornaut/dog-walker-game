@@ -185,8 +185,9 @@ export function parseRunSetup<DogId extends string, GearId extends string, Walke
   const route = read("route", (value) => {
     const ids = value === "" ? [] : value.split(",");
     const expected = `${startZone} to ${limits.zoneCount} different zone ids`;
-    if (ids.some((id) => !includes(limits.zoneIds, id))) {
-      return invalid("route", value, `known zone ids, not ${ids.join(", ")}`);
+    const unknown = ids.filter((id) => !includes(limits.zoneIds, id));
+    if (unknown.length > 0) {
+      return invalid("route", value, `known zone ids, not ${unknown.join(", ")}`);
     }
     return ids.length < startZone || ids.length > limits.zoneCount || new Set(ids).size < ids.length
       ? invalid("route", value, expected)

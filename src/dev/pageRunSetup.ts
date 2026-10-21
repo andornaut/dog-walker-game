@@ -1,11 +1,10 @@
 import { gameData } from "../data";
 import type { DogId, GameData, GearId, WalkerId } from "../data/types";
 import { walkLength } from "../rules/route";
+import { MAX_RUN_DOGS } from "../save/schema";
 import { homeRunSetup, stripDevParams } from "./devStart";
 import { type ParsedRunSetup, parseRunSetup, randomSeed, type RunSetupLimits } from "./runSetup";
 
-// The most dogs a pack holds, as PackDogs allows.
-const MAX_PACK_SIZE = 3;
 const SPEED_LIMITS = { max: 10, min: 0.1 };
 
 // A link or replay log that names a dog by a former id walks the dog it is now.
@@ -22,7 +21,7 @@ export function runSetupLimitsFor(
   return {
     dogIds: Object.keys(data.dogs) as DogId[],
     gearIds: Object.keys(data.shopGear) as GearId[],
-    maxPackSize: MAX_PACK_SIZE,
+    maxPackSize: MAX_RUN_DOGS,
     renamedDogIds: RENAMED_DOG_IDS,
     speed: SPEED_LIMITS,
     walkerIds: Object.keys(data.walkers) as WalkerId[],

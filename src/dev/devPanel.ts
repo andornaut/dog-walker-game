@@ -231,6 +231,9 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     setOpen(sheet.hidden !== false);
     if (sheet.hidden === false) {
       sheet.scrollIntoView({ block: "nearest" });
+    } else {
+      // A focused bar would take the game's next Enter or Space as a click.
+      bar.blur();
     }
   });
   // Phaser listens for keys on window, so keys typed here would move lanes or toggle the
