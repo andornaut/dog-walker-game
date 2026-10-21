@@ -70,6 +70,7 @@ import { DEBUFF_COLORS, DEBUFF_FALLBACK } from "./debuffColors";
 import { drawDashedRect, drawFramedRect, drawHeart, fillRect } from "./draw";
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
+import type { HudRun, HudWalk, RunHudView } from "./hudWalk";
 import { MESSAGE_EVENT, MessageStrip } from "./messageStripView";
 import { listenOnePress } from "./onePress";
 import { onSceneEvent } from "./overlay";
@@ -93,7 +94,6 @@ import {
   QUIPS_EVENT,
   type RaisedHint,
 } from "./run/runMoments";
-import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { soundboardOf } from "./soundboard";
@@ -143,21 +143,14 @@ interface DebuffBarView {
   rect: Rect;
 }
 
-// What the HUD reads of the walk: the run scene, or a still walk a picture shows.
-export type HudSource = Pick<
-  RunScene,
-  "dogPoint" | "events" | "hudView" | "reducedMotion" | "runPause"
->;
-
-// A picture of the HUD shows source's walk in view's strips, and takes no input or hints.
-export interface HudSceneData {
-  picture?: { source: HudSource; view: ScenePicture };
-}
+// The HUD shows run's walk and its buttons act on run; a picture of the HUD shows source's walk
+// in view's strips, and takes no input or hints.
+export type HudSceneData = { picture: { source: HudWalk; view: ScenePicture } } | { run: HudRun };
 
 // The walk bar, the debuff bars and the dog cards, drawn over the road for the whole walk and
-// kept in view while cards are up. It reads the run from RunScene every frame and redraws what
-// changed, and shows the run's change labels, first-time hints, owners' pop-ins and what a held
-// press explains. It keeps running while the walk is paused, so the bar's buttons and their
+// kept in view while cards are up. It reads the run every frame and redraws what changed, and
+// shows the run's change labels, first-time hints, owners' pop-ins and what a held press
+// explains. It keeps running while the walk is paused, so the bar's buttons and their
 // keys work in every state; its animations run on too, being the bar's and not the walk's.
 export class HudScene extends Scene {
   private bankLabels: ChangeLabel[] = [];
@@ -180,7 +173,8 @@ export class HudScene extends Scene {
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
   private soundHolder: GameObjects.Container | undefined;
-  private source: HudSource | undefined;
+  private picture: HudWalk | undefined;
+  private run: HudRun | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
   private zoneProgress: GameObjects.BitmapText | undefined;
 
@@ -194,10 +188,11 @@ export class HudScene extends Scene {
     return hudLanes(pixelFontMetrics(this, "body"), LAYOUT);
   }
 
-  create(data?: HudSceneData): void {
+  create(data: HudSceneData): void {
     const { dogRow, dogSlots, topBar } = LAYOUT;
-    const picture = data?.picture;
-    this.source = picture?.source;
+    const picture = "picture" in data ? data.picture : undefined;
+    this.picture = picture?.source;
+    this.run = "run" in data ? data.run : undefined;
     if (picture !== undefined) {
       showAsPicture(this, picture.view);
     }
@@ -319,20 +314,23 @@ export class HudScene extends Scene {
   // picture of the HUD has none.
   private overlayScene(): Scene {
     const key = [SCENE_KEYS.pause, SCENE_KEYS.card].find((overlay) => this.scene.isActive(overlay));
-    return key === undefined || this.source !== undefined ? this : this.scene.get(key);
+    return key === undefined || this.picture !== undefined ? this : this.scene.get(key);
   }
 
-  private runScene(): RunScene {
-    return this.scene.get(SCENE_KEYS.run) as RunScene;
-  }
-
-  // The walk the HUD shows: the run's, or a picture's.
-  private walk(): HudSource {
-    return this.source ?? this.runScene();
+  // The walk the HUD shows: a picture's, or the run's.
+  private walk(): HudWalk {
+    const walk = this.picture ?? this.run;
+    if (walk === undefined) {
+      throw new Error("The HUD shows a walk only once it is created");
+    }
+    return walk;
   }
 
   private press(via: "key" | "tap", button: TopBarPress): void {
-    const run = this.runScene();
+    const run = this.run;
+    if (run === undefined) {
+      return;
+    }
     switch (topBarAction(run.runPause(), via, button)) {
       case "confirmHome":
         run.openPause("homeQuestion");
@@ -475,7 +473,7 @@ export class HudScene extends Scene {
     }
     const pause = run.runPause();
     this.feedback?.update(view.run, pause);
-    if (this.source === undefined) {
+    if (this.picture === undefined) {
       this.raiseHints(runHintTriggers(view.run));
     }
     this.showExplanation(view);
@@ -807,7 +805,7 @@ export class HudScene extends Scene {
   private forgive(cue: ForgivenCue): void {
     const slot = this.slotOf(cue.dog);
     const rect = slot === undefined ? undefined : LAYOUT.dogSlots[slot];
-    const run = this.runScene().hudView()?.run;
+    const run = this.walk().hudView()?.run;
     if (rect === undefined || run === undefined) {
       return;
     }

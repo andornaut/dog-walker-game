@@ -16,9 +16,9 @@ import { arcControl, curvePoint } from "../hud/moments";
 import type { Point, Rect } from "../layout/rect";
 import { drawFramedRect } from "./draw";
 import { FEEDBACK_ART } from "./feedbackArt";
+import type { HudWalk } from "./hudWalk";
 import { PALETTE } from "./palette";
 import { addPixelText } from "./pixelText";
-import type { RunScene } from "./RunScene";
 import { playEffect, playTag, playTagOnce } from "./sprites";
 
 // Over the cards and the HUD's own labels.
@@ -273,7 +273,7 @@ export class HeartFeedback {
 // A pop for each heart change among labels, over its dog on the road, else over its card;
 // a dog's later changes in one batch wait their turn.
 export function heartPops(
-  hud: { lanes: readonly Rect[]; run: Pick<RunScene, "dogPoint" | "hudView"> },
+  hud: { lanes: readonly Rect[]; run: Pick<HudWalk, "dogPoint" | "hudView"> },
   labels: readonly ChangeLabel[],
   slotOf: (
     slot: number,

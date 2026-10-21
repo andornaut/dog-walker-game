@@ -46,9 +46,9 @@ import type { RunState } from "../state/runState";
 import { fillNames } from "../text/lines";
 import { addDisplayText } from "./displayText";
 import { drawFramedRect, drawRing } from "./draw";
+import type { HudWalk } from "./hudWalk";
 import { PALETTE } from "./palette";
 import { addPixelText, fitPixelText, pixelFontMetrics, placePixelText } from "./pixelText";
-import type { RunScene } from "./RunScene";
 import { firstTag, playEffect, playTag } from "./sprites";
 import { addPanel, artFits, tagFrame } from "./uiKit";
 
@@ -137,7 +137,7 @@ export class HudFeedback {
   private readonly firing = new TimedGroup();
   private readonly hooks: HudFeedbackHooks;
   private readonly moments = new TimedGroup();
-  private readonly run: Pick<RunScene, "events" | "hudView" | "reducedMotion">;
+  private readonly run: Pick<HudWalk, "events" | "hudView" | "reducedMotion">;
   private readonly scene: Scene;
   private readonly warnings: SlotWarning[] = LAYOUT.dogSlots.map(() => ({
     parts: [],
@@ -146,7 +146,7 @@ export class HudFeedback {
 
   constructor(
     scene: Scene,
-    run: Pick<RunScene, "events" | "hudView" | "reducedMotion">,
+    run: Pick<HudWalk, "events" | "hudView" | "reducedMotion">,
     hooks: HudFeedbackHooks,
   ) {
     this.hooks = hooks;

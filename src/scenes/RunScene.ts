@@ -18,7 +18,7 @@ import { effectItems } from "../hud/effectIcons";
 import { cardHintTriggers } from "../hud/hintTriggers";
 import { homeQuestionNote } from "../hud/homeQuestion";
 import { type RunPause, walkPaused } from "../hud/topBar";
-import { type ExplainShown, type ExplainTarget } from "../hud/walkHud";
+import { type ExplainShown } from "../hud/walkHud";
 import { type ZoneCelebration, zoneCelebration } from "../hud/zoneCelebration";
 import { isPhoneSideways, PHONE_EVENTS, startWakeLock, stopWakeLock } from "../pwa";
 import { AmbientView } from "../road/phaser/ambientView";
@@ -47,6 +47,8 @@ import {
 import { startRoad, type Walk, zoneLength } from "../runner/walk";
 import { checkpointOf, runResultOf } from "../save/runSlices";
 import { type Loadout, newRun, type RunState } from "../state/runState";
+import type { HudSceneData } from "./HudScene";
+import type { HudRun, RunHudView } from "./hudWalk";
 import { onWindowEvent } from "./overlay";
 import { colorFromHex } from "./palette";
 import type { PauseSceneData } from "./PauseScene";
@@ -82,16 +84,6 @@ export interface RunSceneData {
   loadout: Loadout;
   // The chosen walker's sprite key.
   walkerSprite: string;
-}
-
-// What the HUD draws: the run, the dogs the open card affects, what a held press explains, the
-// pack's centre across the screen, and how far through the zone.
-export interface RunHudView {
-  affected: readonly DogId[];
-  explaining: ExplainTarget | undefined;
-  packX: number;
-  run: RunState;
-  zoneFraction: number;
 }
 
 // Steps of 1/60 s. A frame catches up at most a second of steps (60), which covers a frame held
@@ -135,7 +127,7 @@ interface RunWorld {
 // The walk: backdrop, road, walker, pack and everything spawned on the road. The session steps
 // at a fixed rate and stops while walkPaused says so; the scene draws it, feeds it input and
 // plays its events.
-export class RunScene extends Scene {
+export class RunScene extends Scene implements HudRun {
   // The ambient movers' clock: the walk's simulated time less its firings' holds, in which
   // they stand still.
   private ambientMs = 0;
@@ -189,7 +181,8 @@ export class RunScene extends Scene {
     this.world.input.listen();
     this.listen();
 
-    this.scene.launch(SCENE_KEYS.hud);
+    const hud: HudSceneData = { run: this };
+    this.scene.launch(SCENE_KEYS.hud, hud);
     sound.setPaused(false);
     sound.startMusic();
     startWakeLock();

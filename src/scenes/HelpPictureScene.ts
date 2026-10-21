@@ -13,7 +13,8 @@ import { screenLayout } from "../layout/screenLayout";
 import { currentZone } from "../rules/route";
 import { laneMotionX } from "../runner/laneMotion";
 import type { CardSceneData } from "./CardScene";
-import type { HudSceneData, HudSource } from "./HudScene";
+import type { HudSceneData } from "./HudScene";
+import type { HudWalk } from "./hudWalk";
 import { colorFromHex, PALETTE } from "./palette";
 import { walkerSpriteKey } from "./profileStore";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
@@ -152,9 +153,9 @@ export class HelpPictureScene extends Scene {
   private showHud(picture: HelpPicture, view: ScenePicture, pack: PackView): void {
     const events = new Events.EventEmitter();
     const { walk } = picture;
-    const source: HudSource = {
+    const source: HudWalk = {
       dogPoint: (dog) => pack.dogPoint(dog),
-      events: events as HudSource["events"],
+      events,
       hudView: () => ({
         affected: [],
         explaining: undefined,
