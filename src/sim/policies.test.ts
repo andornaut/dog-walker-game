@@ -62,14 +62,26 @@ describe("chooseCardOption", () => {
     expect(thiefChoice("alwaysPay", state)).toBe(HEARTS);
   });
 
-  it("takes Hall pass's Skip whenever it is offered", () => {
-    const state = testState(
-      { duchess: 5 },
-      { money: cents(5000), skipPass: { gear: "hallPass", kind: "gear" } },
-    );
+  // A card with Hall pass's Skip: the encounter, the policy and the owner's hearts, and
+  // whether the policy's pick costs hearts or a debuff, so the policy walks on by.
+  it.each([
+    ["thief", "heartsUnlessLow", SAFE, "skip"],
+    ["thief", "alwaysPay", SAFE, PAY],
+    ["otherDog", "alwaysHearts", SAFE, "skip"],
+  ] as const)(
+    "on a %s card, %s at %i hearts takes %s with Hall pass",
+    (encounter, policy, hearts, expected) => {
+      const state = testState(
+        { duchess: hearts },
+        { money: cents(5000), skipPass: { gear: "hallPass", kind: "gear" } },
+      );
+      const source: CardSource = { affected: ["duchess"], encounter, kind: "encounter" };
 
-    expect(thiefChoice("alwaysPay", state)).toBe("skip");
-  });
+      expect(
+        chooseCardOption(gameData, NO_DRAWS, policy, state, cardFor(gameData, state, source)),
+      ).toBe(expected);
+    },
+  );
 });
 
 describe("the mixed policy", () => {

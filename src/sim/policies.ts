@@ -1,4 +1,5 @@
 import { chance, type Random } from "../lib/random";
+import { heartsForgiven } from "../rules/causes";
 import { type CardView, type Choice, type ChoiceData, chooseOption } from "../rules/choices";
 import type { Cents } from "../rules/units";
 import type { RunState } from "../state/runState";
@@ -61,6 +62,8 @@ interface OptionPreview {
   readonly cost: Cents;
   // An owner whose meter falls ends at LOW_HEARTS or less, or fires you.
   readonly endangers: boolean;
+  // An owner loses hearts, or a perk forgives the loss, or the pack gets a debuff.
+  readonly harms: boolean;
   // The sum of every owner's change.
   readonly heartsGained: number;
   readonly moneyDelta: Cents;
@@ -71,6 +74,8 @@ function previewOptions(data: ChoiceData, state: RunState, card: CardView): Opti
     .filter((option) => option.availability.enabled)
     .map((option) => {
       const outcome = chooseOption(data, () => 0, state, card, option.index);
+      const debuffsGot = (run: RunState) =>
+        Object.values(run.debuffsGot).reduce((sum, count) => sum + count, 0);
       return {
         choice: option.index,
         cost: option.cost,
@@ -79,6 +84,10 @@ function previewOptions(data: ChoiceData, state: RunState, card: CardView): Opti
           outcome.heartChanges.some(
             (change) => change.after < change.before && change.after <= LOW_HEARTS,
           ),
+        harms:
+          outcome.heartChanges.some(
+            (change) => change.after < change.before || heartsForgiven(change) > 0,
+          ) || debuffsGot(outcome.state) > debuffsGot(state),
         heartsGained: outcome.heartChanges.reduce(
           (sum, change) => sum + change.after - change.before,
           0,
@@ -162,8 +171,9 @@ const POLICIES: Readonly<Record<PolicyId, Policy>> = {
   mixed,
 };
 
-// An encounter card's choice. Every policy takes Hall pass's Skip when offered.
-// Only the mixed policy draws from random.
+// An encounter card's choice. Every policy takes Hall pass's Skip, when offered, in place of a
+// pick that costs hearts or a debuff, and keeps it for such a card otherwise. Only the mixed
+// policy draws from random.
 export function chooseCardOption(
   data: ChoiceData,
   random: Random,
@@ -171,12 +181,9 @@ export function chooseCardOption(
   state: RunState,
   card: CardView,
 ): Choice {
-  if (card.skip) {
-    return "skip";
-  }
   const picked = POLICIES[policy](random, previewOptions(data, state, card));
   if (picked === undefined) {
     throw new Error(`${card.title} has no option the ${policy} policy can take`);
   }
-  return picked.choice;
+  return card.skip && picked.harms ? "skip" : picked.choice;
 }
