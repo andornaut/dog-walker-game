@@ -35,9 +35,10 @@ export const HELP_PAGES = [
   {
     art: "owners",
     body:
-      "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {bigHearts}♥ big. " +
+      "Owners have {smallHearts}♥ small, {mediumHearts}♥ medium, {bigHearts}♥ big, " +
+      "and big dogs slow your lane changes. " +
       "A lone dog's owner gets +{loneBonus}♥, a pair's lead +{pairBonus}♥. " +
-      "A bump costs the touched dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. " +
+      "A plain bump costs that dog's owner {bumpHearts}♥; small dogs dodge 1 in {dodgeIn}. " +
       "At 0♥ the owner fires you.",
     title: "Keep owners happy",
   },

@@ -8,11 +8,11 @@ export const HINTS = {
     trigger: { kind: "card" },
   },
   drag: {
-    text: "Drag to steer, farther for more lanes.",
+    text: "Drag farther to move more lanes.",
     trigger: { kind: "drag" },
   },
   firedOwner: {
-    text: "At 0♥ an owner fires you. Treats help!",
+    text: "Owners fire you at 0♥. Treats help!",
     trigger: { kind: "firedOwner" },
   },
   fork: {
@@ -20,7 +20,7 @@ export const HINTS = {
     trigger: { kind: "fork" },
   },
   homeButton: {
-    text: "Head home ends the walk. Pay stays.",
+    text: "Head home ends the walk early.",
     trigger: { kind: "homeButton" },
   },
   luckyFind: {
@@ -28,19 +28,23 @@ export const HINTS = {
     trigger: { kind: "luckyFind" },
   },
   minorBump: {
-    text: "A plain bump costs that dog's owner 1♥.",
+    text: "A plain bump costs its owner 1♥.",
     trigger: { kind: "minorBump" },
   },
   moverCue: {
-    text: "Watch the arrow: that one's about to move.",
+    text: "Watch the arrow: it's about to move.",
     trigger: { kind: "moverCue" },
+  },
+  packBonus: {
+    text: "Small pack: extra ♥ for your lead.",
+    trigger: { kind: "packBonus" },
   },
   puddle: {
     text: "Puddles make the pack Muddy.",
     trigger: { encounter: "puddle", kind: "encounter" },
   },
   pull: {
-    text: "A dog is straining! Steer away to cancel.",
+    text: "Straining dog! Steer away to cancel.",
     trigger: { kind: "pull" },
   },
   skunk: {
@@ -48,7 +52,7 @@ export const HINTS = {
     trigger: { encounter: "skunk", kind: "encounter" },
   },
   squirrel: {
-    text: "Squirrels are safe. Other animals bump!",
+    text: "Squirrels are safe. Others bump!",
     trigger: { kind: "pullLanded" },
   },
   tip: {
