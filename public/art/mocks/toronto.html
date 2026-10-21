@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Toronto neighbourhoods</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/art/favicon.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/art/favicon-16.png" />
+    <link rel="stylesheet" href="/nav.css" />
+    <script src="/nav.js" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Silkscreen&family=Atkinson+Hyperlegible:wght@400;700&display=swap"
+    />
+    <style>
+      /* Six Toronto neighbourhood mocks, each a walk screen at 1x and 2x and a sheet of its roadside props. Drawn by art/tools/mock_toronto_*.py. */
+      :root {
+        --bg: #13101e;
+        --surface: #1d1a2c;
+        --fg: #dfe4ee;
+        --muted: #8b9bb4;
+        --line: #33304a;
+        --accent: #feae34;
+        --f-display: "Silkscreen", ui-monospace, monospace;
+        --f-body: "Atkinson Hyperlegible", system-ui, sans-serif;
+        color-scheme: dark;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--f-body);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1560px;
+        margin: 0 auto;
+        padding-block: 24px 56px;
+        padding-left: max(16px, env(safe-area-inset-left, 0px));
+        padding-right: max(16px, env(safe-area-inset-right, 0px));
+        display: grid;
+        gap: 32px;
+      }
+      h1 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: clamp(22px, 4vw, 32px);
+        line-height: 1.1;
+        margin: 0;
+      }
+      h2 {
+        font-family: var(--f-display);
+        font-weight: 400;
+        font-size: 18px;
+        margin: 0;
+        letter-spacing: 0.04em;
+        color: var(--accent);
+      }
+      p,
+      ul {
+        margin: 0;
+      }
+      ul {
+        padding-left: 18px;
+        display: grid;
+        gap: 4px;
+      }
+      .lede {
+        color: var(--muted);
+        max-width: 90ch;
+      }
+      section {
+        display: grid;
+        gap: 12px;
+      }
+      img {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+        display: block;
+        max-width: 100%;
+        height: auto;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-start;
+      }
+      figure {
+        margin: 0;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 12px;
+        display: grid;
+        gap: 8px;
+        min-width: 0;
+      }
+      figcaption {
+        font-size: 13px;
+        color: var(--muted);
+        max-width: 46ch;
+      }
+      .x2 {
+        width: 720px;
+      }
+      .scroll {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+      table {
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 6px 10px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      th {
+        font-family: var(--f-display);
+        font-weight: 400;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header style="display: grid; gap: 8px">
+        <h1>Toronto neighbourhoods</h1>
+        <p class="lede">
+          Canada as the first country, with Toronto's neighbourhoods as its six zones, easiest to hardest. Each mock is a walk
+          screen on the 20% tilt camera with the taller sky band (the message strip will sit over the flat sky at the top), new
+          skyline art for the neighbourhood, and roadside props on both verges that scroll with the road at their depth. Below
+          each is a sheet of its new props at 2x. Nothing here is built.
+        </p>
+      </header>
+
+      <section>
+        <h2>Cabbagetown: Easiest</h2>
+        <p class="lede">Cabbagetown, the easiest zone: a calm Victorian street that ends at the Necropolis chapel and Riverdale Farm&#x27;s red barn, with bay-and-gable rowhouses either side, Wellesley Park&#x27;s trees behind and the CN Tower far off.</p>
+        <p class="lede">Along the verges: red, buff and painted bay-and-gable rowhouses with white bargeboard, stained-glass transoms and coloured doors, a cat in a window, a neighbour on a stoop, maples, a picket garden of cabbages and kale, a sunflower plot and a goat pen with a hen on the post.</p>
+        <p class="lede">The sidewalk is narrowed to 184 road px so the porches show; the neighbour is the one person drawn in a roadside prop, which the current roadside rule does not allow.</p>
+        <div class="row">
+          <figure>
+            <img src="toronto/cabbagetown-walk.png" width="360" height="560" alt="Cabbagetown walk screen" />
+            <figcaption>1x</figcaption>
+          </figure>
+          <figure>
+            <img class="x2" src="toronto/cabbagetown-walk.png" width="360" height="560" alt="Cabbagetown walk screen, at 2x" />
+            <figcaption>2x</figcaption>
+          </figure>
+        </div>
+        <figure class="scroll">
+          <img src="toronto/cabbagetown-props.png" alt="Cabbagetown roadside props at 2x" />
+          <figcaption>Roadside props, 2x</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>High Park: Easy</h2>
+        <p class="lede">High Park, easy: a grey park drive dusted with cherry petals, Grenadier Pond and its cattails along the left verge, a dirt side trail with a jogger, the zoo&#x27;s bison, a maple leaf bed and black oaks on the right.</p>
+        <p class="lede">The backdrop has Bloor Street&#x27;s apartment slabs and the CN Tower far off, swans on the pond, cherry blossom on its east bank, Colborne Lodge on its hill, the Hillside Gardens maple leaf and the zoo&#x27;s bison, llama and capybaras.</p>
+        <p class="lede">A raccoon peers from an oak hollow with a black squirrel on the trunk, and a grey squirrel sits on a bench.</p>
+        <div class="row">
+          <figure>
+            <img src="toronto/high-park-walk.png" width="360" height="560" alt="High Park walk screen" />
+            <figcaption>1x</figcaption>
+          </figure>
+          <figure>
+            <img class="x2" src="toronto/high-park-walk.png" width="360" height="560" alt="High Park walk screen, at 2x" />
+            <figcaption>2x</figcaption>
+          </figure>
+        </div>
+        <figure class="scroll">
+          <img src="toronto/high-park-props.png" alt="High Park roadside props at 2x" />
+          <figcaption>Roadside props, 2x</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>Kensington Market: Medium</h2>
+        <p class="lede">Kensington Market: painted bay-and-gable houses turned shops (fruit, cheese, vintage, spices, coffee) under string lights, Bellevue Square&#x27;s parkette, and a mural wall with the CN Tower behind it.</p>
+        <p class="lede">The market street is worn asphalt with a narrow sidewalk and a brick forecourt, where fruit stands, clothing racks, spice sacks, post-and-ring bike racks, the garden car, a busker and shoppers scroll past.</p>
+        <p class="lede">Medium, crowded and quirky: the café patio and a sandwich board narrow the lanes.</p>
+        <div class="row">
+          <figure>
+            <img src="toronto/kensington-walk.png" width="360" height="560" alt="Kensington Market walk screen" />
+            <figcaption>1x</figcaption>
+          </figure>
+          <figure>
+            <img class="x2" src="toronto/kensington-walk.png" width="360" height="560" alt="Kensington Market walk screen, at 2x" />
+            <figcaption>2x</figcaption>
+          </figure>
+        </div>
+        <figure class="scroll">
+          <img src="toronto/kensington-props.png" alt="Kensington Market roadside props at 2x" />
+          <figcaption>Roadside props, 2x</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>Distillery District: Medium-hard</h2>
+        <p class="lede">The Distillery District: red-brick Gooderham and Worts warehouses with the painted sign, the chimney stack, an iron catwalk and a festoon of lights, the limestone distillery with the market sign, and the CN Tower and glass condos behind.</p>
+        <p class="lede">A cobbled granite lane between narrow brick walks; the verges carry barrels, cafe tables, iron lamps hung with lights, the Love Lock heart, the steel spider, a market chalet, and people with prams and coffee.</p>
+        <div class="row">
+          <figure>
+            <img src="toronto/distillery-walk.png" width="360" height="560" alt="Distillery District walk screen" />
+            <figcaption>1x</figcaption>
+          </figure>
+          <figure>
+            <img class="x2" src="toronto/distillery-walk.png" width="360" height="560" alt="Distillery District walk screen, at 2x" />
+            <figcaption>2x</figcaption>
+          </figure>
+        </div>
+        <figure class="scroll">
+          <img src="toronto/distillery-props.png" alt="Distillery District roadside props at 2x" />
+          <figcaption>Roadside props, 2x</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>Yonge Street: Hard</h2>
+        <p class="lede">Yonge Street at blue hour: the CN Tower over glass towers, Yonge-Dundas Square&#x27;s screens and billboards facing the street end, and a red TTC streetcar under its wire on Dundas.</p>
+        <p class="lede">The road is dark asphalt with two streetcar tracks; past the curb a furniture strip carries hot dog carts, newspaper boxes, a TTC stop and shelter, lamps with maple-leaf banners, drums and a hoarding.</p>
+        <p class="lede">Shoppers mill on the walk in front of neon shops (a record shop, a pizza place, a theatre marquee, souvenirs) that rise from behind the band as they scroll in.</p>
+        <div class="row">
+          <figure>
+            <img src="toronto/yonge-walk.png" width="360" height="560" alt="Yonge Street walk screen" />
+            <figcaption>1x</figcaption>
+          </figure>
+          <figure>
+            <img class="x2" src="toronto/yonge-walk.png" width="360" height="560" alt="Yonge Street walk screen, at 2x" />
+            <figcaption>2x</figcaption>
+          </figure>
+        </div>
+        <figure class="scroll">
+          <img src="toronto/yonge-props.png" alt="Yonge Street roadside props at 2x" />
+          <figcaption>Roadside props, 2x</figcaption>
+        </figure>
+      </section>
+
+      <section>
+        <h2>The Beaches: Hardest</h2>
+        <p class="lede">The Beaches: the walk runs down the boardwalk&#x27;s planks to the Martin Goodman Trail, with Lake Ontario to the horizon, sailboats, the Leuty lifeguard station and dogs on the far beach, the CN Tower far to the west and the R.C. Harris plant on its bluff to the east.</p>
+        <p class="lede">On the verges, sand with Muskoka chairs, a volleyball net, a kite flyer, a lifeguard stand, a sunbather and a ring buoy post, the lake&#x27;s waves on the right and the park&#x27;s lawn on the left.</p>
+        <div class="row">
+          <figure>
+            <img src="toronto/beaches-walk.png" width="360" height="560" alt="The Beaches walk screen" />
+            <figcaption>1x</figcaption>
+          </figure>
+          <figure>
+            <img class="x2" src="toronto/beaches-walk.png" width="360" height="560" alt="The Beaches walk screen, at 2x" />
+            <figcaption>2x</figcaption>
+          </figure>
+        </div>
+        <figure class="scroll">
+          <img src="toronto/beaches-props.png" alt="The Beaches roadside props at 2x" />
+          <figcaption>Roadside props, 2x</figcaption>
+        </figure>
+      </section>
+    </main>
+  </body>
+</html>

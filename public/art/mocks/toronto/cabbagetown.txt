@@ -1,3 +1,0 @@
-Cabbagetown, the easiest zone: a calm Victorian street that ends at the Necropolis chapel and Riverdale Farm's red barn, with bay-and-gable rowhouses either side, Wellesley Park's trees behind and the CN Tower far off.
-Along the verges: red, buff and painted bay-and-gable rowhouses with white bargeboard, stained-glass transoms and coloured doors, a cat in a window, a neighbour on a stoop, maples, a picket garden of cabbages and kale, a sunflower plot and a goat pen with a hen on the post.
-The sidewalk is narrowed to 184 road px so the porches show; the neighbour is the one person drawn in a roadside prop, which the current roadside rule does not allow.
