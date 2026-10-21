@@ -4,9 +4,10 @@ import { badgeKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import type { AchievementId } from "../data/types";
 import type { Rect } from "../layout/rect";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { addBadge, BADGE_SIZE } from "./badges";
 import { PALETTE } from "./palette";
-import { addPixelText, scalePixelText } from "./pixelText";
+import { addPixelText, fitPixelText, placePixelText } from "./pixelText";
 import { soundboardOf } from "./soundboard";
 import { addPanel } from "./uiKit";
 
@@ -56,9 +57,11 @@ export class AchievementToasts {
       color: PALETTE.plum,
       scale: 2,
     });
-    // A name too long for the banner at double size is set at single size.
-    if (name.width > x + lane.width - TOAST.padding - textX) {
-      scalePixelText(name, 1, textX, nameY + 3);
+    // A name too long for the banner at double size is drawn closer, then at single size,
+    // centred on the double-size line.
+    const room = x + lane.width - TOAST.padding - textX;
+    if (fitPixelText(name, { room, styles: TEXT_FIT_STYLES }, textX, nameY).scale === 1) {
+      placePixelText(name, textX, nameY + 3);
     }
     parts.push(
       addPixelText(scene, textX, top + 9, "Achievement!", { color: PALETTE.rust, font: "title" }),
