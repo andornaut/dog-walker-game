@@ -48,17 +48,18 @@ fx-accident        56x56  play (6 frames, 100ms)  a "!" pops over the dog, blush
                           dog's own 56x56 frame; the game then leaves accident-spot on the road
 accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground decal with no
                           outline drawn under everything, a fly circling it
-spot-tree          40x60  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
+spot-tree          56x84  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
                           canopy rustles, then a leaf falls
 spot-stranger      40x60  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
                           up in a wave, breathing (Friendly)
                           wave (2 frames, 300ms)  the raised hand waves
-spot-lamp-post     40x60  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
+spot-lamp-post     56x84  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
                           crosses the glass (Nosy)
-spot-water-bowl    40x40  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
+spot-water-bowl    56x56  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
                           falls and rings the water (Thirsty)
-                          The spots are drawn in 32px units on a minis.Mini at BIG (1.25x), so a
-                          32x48 drawing is 40x60, its pixel maps stamped pixel for pixel
+                          The spots are drawn in 32px units on a minis.Mini at BIG (1.75x), so a
+                          32x48 drawing is 56x84, its pixel maps stamped pixel for pixel; the
+                          stranger, a person, at the people's road.SCALE
 spot-<spot>@<step>  every spot redrawn the same way at BIG x each depth step in minis.STEPS (from
                    shared/depth-steps.json), floor(size x scale + 0.5): the same tags, frames and
                    durations, a full 1px outline, motion kept at 1px; below 1x the bowl drops its
@@ -638,17 +639,18 @@ def shrunk(module, s, draw, q):
     return small(module, s, lambda: draw(**{k: v / s if k in MOTION else v for k, v in q.items()}))
 
 
-# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is
-# 40x60.
-BIG = 1.25
+# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 56x84.
+# The stranger is a person, drawn at the people's scale, road.SCALE.
+BIG = road.OBJECT_SCALE
 # The pose arguments that move a whole part by pixels.
 MOTION = ("rustle", "wave", "bob")
-# Each spot's drawing function, the module whose Grid it draws on, and its tags as (tag, poses, ms).
+# Each spot's drawing function, the module whose Grid it draws on, its scale and its tags as (tag, poses, ms).
 SPOTS = {
-    "spot-tree": (tree, None, (("idle",) + TREE_IDLE,)),
-    "spot-stranger": (stranger, road, (("idle",) + STRANGER_IDLE, ("wave",) + STRANGER_WAVE)),
-    "spot-lamp-post": (lamp_post, None, (("idle", (dict(), dict(glint=True)), 500),)),
-    "spot-water-bowl": (water_bowl, None, (("idle", tuple(dict(drip=d) for d in BOWL_IDLE[0]), BOWL_IDLE[1]),)),
+    "spot-tree": (tree, None, BIG, (("idle",) + TREE_IDLE,)),
+    "spot-stranger": (stranger, road, road.SCALE, (("idle",) + STRANGER_IDLE, ("wave",) + STRANGER_WAVE)),
+    "spot-lamp-post": (lamp_post, None, BIG, (("idle", (dict(), dict(glint=True)), 500),)),
+    "spot-water-bowl": (water_bowl, None, BIG,
+                        (("idle", tuple(dict(drip=d) for d in BOWL_IDLE[0]), BOWL_IDLE[1]),)),
 }
 
 
@@ -671,10 +673,10 @@ def sprites():
     yield "fx-need-met", [(need, [need_met(need, i).outlined(False) for i in range(6)], 70) for need in NEEDS]
     yield "fx-accident", [("play", [accident(i).outlined(False) for i in range(6)], 100)]
     yield "accident-spot", [("idle", [accident_spot(f).outlined(False) for f in (0, 1)], 500)]
-    for key, (draw, module, tags) in SPOTS.items():
+    for key, (draw, module, scale, tags) in SPOTS.items():
         mod = module or sys.modules[__name__]
         for suffix, s in (("", 1), *(("@" + k, v) for k, v in STEPS)):
-            yield f"{key}{suffix}", [(tag, [shrunk(mod, BIG * s, draw, q).outlined() for q in poses], ms)
+            yield f"{key}{suffix}", [(tag, [shrunk(mod, scale * s, draw, q).outlined() for q in poses], ms)
                                      for tag, poses, ms in tags]
 
 
