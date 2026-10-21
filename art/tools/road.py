@@ -687,8 +687,8 @@ def skunk(sway=0):
     g.ell(20 + s, 11, 8, 8.5, "navy", "ink", "dslate")
     g.ell(20 + s, 11, 6, 6.5, "white", "lgrey")
     g.ell(22 + s, 13, 5, 5.5, "navy", "ink")
-    # body, low and wide
-    g.ell(16, 24, 9, 5, "ink", None, "dslate")
+    # body, low and wide, lit on its upper left so it reads as a body and not a shadow under the head
+    g.ell(16, 24, 8.5, 4.8, "navy", "ink", "dslate")
     # head: a dslate edge parts it from the body; pink-lined ears, the blaze, white-ringed eyes
     for x, top, inner in ((9, 10, 11), (19, 18, 17)):
         g.tri((x, 17), (top, 11), (2 * inner - x, 15), "dslate")
@@ -701,9 +701,10 @@ def skunk(sway=0):
         g.rect(x, 18, 2, 2, "white")
         g.rect(x + (1 if x < 13 else 0), 18, 1, 2, "ink")
     g.rect(13, 21, 2, 1, "pink")
-    # front paws
+    # front paws, set apart from the body by their dslate tops
     for x in (10, 16):
         g.rect(x, 27, 3, 2, "ink")
+        g.rect(x, 27, 3, 1, "dslate")
     return rim(g, LIT)
 
 
