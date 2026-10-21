@@ -84,7 +84,7 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 .tags { display: flex; flex-wrap: wrap; gap: 4px; }
 .tags button { font: inherit; font-family: var(--f-mono); font-size: 12px; background: var(--raise); color: var(--fg); border: 1px solid var(--line); border-radius: 4px; padding: 2px 8px; cursor: pointer; }
 .tags button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
-.tags button:focus-visible, .counts button:focus-visible, .toolbar :focus-visible, .sw:focus-visible, .jump a:focus-visible, .mock:focus-visible, .sound audio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tags button:focus-visible, .counts button:focus-visible, .toolbar :focus-visible, .sw:focus-visible, .jump a:focus-visible, .sound audio:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .strip { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 2px; }
 .strip canvas { background: rgba(255, 255, 255, 0.04); }
 .sounds { display: grid; gap: 8px; }
@@ -95,11 +95,6 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
 @media (max-width: 600px) { .sound { grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "key loop" "audio audio"; } }
 .empty { background: var(--surface); border: 1px dashed var(--line); border-radius: 6px; padding: 16px; color: var(--muted); font-size: 14px; }
 .empty code, .meta code { font-family: var(--f-mono); font-size: 13px; color: var(--fg); }
-.mocks { display: grid; gap: 8px; }
-.mock { display: grid; gap: 2px; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; text-decoration: none; color: var(--fg); }
-.mock:hover { border-color: var(--accent); }
-.mock b { color: var(--accent); }
-.mock span { color: var(--muted); font-size: 14px; }
 .palette { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 6px; }
 .sw { display: grid; gap: 4px; background: none; border: 0; padding: 0; color: var(--muted); font-family: var(--f-mono); font-size: 11px; cursor: pointer; text-align: left; }
 .sw i { display: block; height: 36px; border-radius: 4px; border: 1px solid var(--line); }
@@ -137,7 +132,6 @@ canvas, .view img { display: block; image-rendering: pixelated; image-rendering:
     </div>
   </div>
 
-  <section id="s-mocks" aria-labelledby="h-mocks"><h2 id="h-mocks">Mocks <small id="n-mocks"></small></h2><div class="mocks" id="mocks"></div></section>
   <section id="s-palette" aria-labelledby="h-palette"><h2 id="h-palette">Palette <small>Endesga 32</small></h2><div class="palette" id="palette"></div></section>
 </main>
 
@@ -301,13 +295,13 @@ async function addSound(host, s) {
 // One section per group, inserted before Mocks, plus its link in the jump list.
 for (const g of GROUPS) {
   const hint = g.hint || [...(g.prefixes || []).map(p => p + "*"), ...(g.keys || [])].join(" ");
-  $("s-mocks").before(el("section", { id: "s-" + g.id }, [
+  $("s-palette").before(el("section", { id: "s-" + g.id }, [
     el("h2", { id: "h-" + g.id }, [g.title + " ", el("small", { id: "n-" + g.id }), ...(hint ? [el("small", { textContent: hint })] : [])]),
     el("div", { className: g.list === "sounds" ? "sounds" : "grid", id: "g-" + g.id }),
   ]));
   $("s-" + g.id).setAttribute("aria-labelledby", "h-" + g.id);
 }
-const jumpTargets = [...GROUPS.map(g => [g.id, g.title]), ["mocks", "Mocks"], ["palette", "Palette"]];
+const jumpTargets = [...GROUPS.map(g => [g.id, g.title]), ["palette", "Palette"]];
 $("jump").replaceChildren(...jumpTargets.map(([id, title]) => el("li", { id: "j-" + id }, [el("a", { href: "#s-" + id }, [title, el("small", { id: "jn-" + id })])])));
 // Keep a jumped-to heading clear of the sticky toolbar, whose height changes as it wraps.
 new ResizeObserver(() => document.documentElement.style.setProperty("--bar", $("toolbar").offsetHeight + "px")).observe($("toolbar"));
@@ -323,13 +317,8 @@ async function main() {
   let manifest;
   try { manifest = await getJSON(BASE + "manifest.json"); } catch (err) { Object.assign($("status"), { hidden: false, textContent: `Could not read the manifest: ${err.message}` }); manifest = {}; }
   const sprites = manifest.sprites || [], images = manifest.images || [], fonts = manifest.fonts || [], sounds = manifest.sounds || [];
-  let mocks = [];
-  try { mocks = await getJSON(BASE + "mocks/index.json"); } catch (err) { /* no mocks listed */ }
-  const counts = { sprites: sprites.length, images: images.length, fonts: fonts.length, sounds: sounds.length, mocks: mocks.length };
+  const counts = { sprites: sprites.length, images: images.length, fonts: fonts.length, sounds: sounds.length };
   for (const b of pills) if (b.dataset.kind in counts) b.textContent = `${counts[b.dataset.kind]} ${b.dataset.kind}`;
-  $("n-mocks").textContent = $("jn-mocks").textContent = String(mocks.length);
-  if (mocks.length) $("mocks").replaceChildren(...mocks.map(m => el("a", { className: "mock", href: BASE + "mocks/" + m.path }, [el("b", { textContent: m.title }), el("span", { textContent: m.description || "" })])));
-  else emptyCard($("mocks"), "No mocks yet.");
   const lists = { fonts: fonts.map(s => [s, addFont, "fonts"]), sounds: sounds.map(s => [s, addSound, "sounds"]) };
   const families = Object.fromEntries(GROUPS.map(g => [g.id, lists[g.list] || []]));
   for (const s of sprites) families[familyOf(s.key).id].push([s, addSprite, "sprites"]);
@@ -348,9 +337,9 @@ $("palette").replaceChildren(...PAL.map((h, i) => {
 $("jn-palette").textContent = String(PAL.length);
 
 // The count pills show one kind at a time: sprites or images keep only those cards, in the groups
-// that hold any; fonts, sounds, mocks and palette keep their own section. ?show=<kind> holds the
+// that hold any; fonts, sounds and palette keep their own section. ?show=<kind> holds the
 // choice, so it can be linked and survives a reload, and leaves the #hash to the jump links.
-const KINDS = ["sprites", "images", "fonts", "sounds", "mocks", "palette"];
+const KINDS = ["sprites", "images", "fonts", "sounds", "palette"];
 let kind = new URLSearchParams(location.search).get("show");
 if (!KINDS.includes(kind)) kind = "";
 const pills = [["", "All"], ...KINDS.map(k => [k, k])].map(([k, label]) => {
@@ -386,7 +375,7 @@ function applyFilter() {
     const ofKind = !kind || (g.list ? kind === g.list : kind === "sprites" || kind === "images");
     $("s-" + g.id).hidden = $("j-" + g.id).hidden = !ofKind || ((!!q || (!!kind && !g.list)) && !shown);
   }
-  for (const id of ["mocks", "palette"]) $("s-" + id).hidden = $("j-" + id).hidden = !!kind && kind !== id;
+  for (const id of ["palette"]) $("s-" + id).hidden = $("j-" + id).hidden = !!kind && kind !== id;
 }
 markPills(); applyFilter();
 $("filter").addEventListener("input", applyFilter);
