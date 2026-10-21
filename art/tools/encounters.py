@@ -260,8 +260,8 @@ def goose(fa=0, fb=0, bob=0, flap=0, beak=1, thrust=0, new=Grid):
     # legs and webbed feet, the far one a shade darker
     for x, step, leg, foot in ((11, fb, "ochre", "rust"), (16, fa, "orange", "ochre")):
         g.rect(x + step / 2, 24 + b, 2, 4 - b, leg)
-        g.rect(x + step - 1, 28, 4, 1, leg)
-        g.rect(x + step - 1, 29, 5, 1, foot)
+        g.rect(x + step - 1, 28, 3, 1, leg)
+        g.rect(x + step - 1, 29, 4, 1, foot)
     # the far wing, raised behind the body
     g.tri((12, 15 + b), (21, 14 + b), (19, 2 + b + f), "lgrey")
     g.tri((15, 14 + b), (20, 14 + b), (19, 5 + b + f), "grey")
