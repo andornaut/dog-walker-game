@@ -181,6 +181,7 @@ export function moveMovers<Item extends MoverItem>(
 export interface MoverGeometry {
   readonly cellLength: number;
   readonly laneCount: number;
+  readonly packLength: number;
   readonly roadLength: number;
   readonly rowSpacing: number;
   readonly scrollSpeed: number;
@@ -194,13 +195,14 @@ export interface LaneSpan {
   readonly first: number;
 }
 
-// Where a mover stands as an obstacle, for the pack-fit gap: the distance its hit box meets
-// the pack as a standing obstacle's would, its leftmost lane, and the lanes and rows it covers.
+// Where a mover stands as an obstacle, for the pack-fit gap: the distance at which its hit box
+// meets the pack, its leftmost lane, the lanes it covers, and its contact with the pack less the
+// pack's length: the road behind it the pack cannot step into while it passes.
 export interface MoverStand {
   readonly distance: number;
   readonly lane: number;
   readonly lanes: number;
-  readonly rows: number;
+  readonly length: number;
 }
 
 // One way a mover can meet a row. Distances are relative to the row's distance; appears is
@@ -346,7 +348,14 @@ function crossPlacements(
         path,
         rows,
         screen: [appears, appears + warning + Math.min(across, passed)],
-        stands: [{ distance: 0, lane: lanes.first, lanes: lanes.count, rows }],
+        stands: [
+          {
+            distance: 0,
+            lane: lanes.first,
+            lanes: lanes.count,
+            length: contact - geometry.packLength,
+          },
+        ],
       });
     }
   }
@@ -395,7 +404,14 @@ function ridePlacements(
     },
     rows: blockRows,
     screen: [enters - warning, leaves],
-    stands: [{ distance: 0, lane, lanes: across, rows: blockRows }],
+    stands: [
+      {
+        distance: 0,
+        lane,
+        lanes: across,
+        length: (geometry.window + (rows - 1) * cellLength) / speedMultiplier - geometry.packLength,
+      },
+    ],
   }));
 }
 
@@ -458,7 +474,7 @@ function stepsPlacements(
           distance: maxTravel - position.travel,
           lane: start + position.lane,
           lanes: across,
-          rows,
+          length: window + (rows - 1) * cellLength - geometry.packLength,
         })),
       });
     }

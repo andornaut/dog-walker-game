@@ -138,8 +138,8 @@ describe("hitLength and blockingLength", () => {
 
 describe("packFitsBetween", () => {
   // A car three rows long in lane 1; road starts showing behind it at its hit box's far edge.
-  const car = { distance: 0, lane: 1, lanes: 1, rows: 3 };
-  const behind = hitLength(plan, car.rows);
+  const car = { distance: 0, lane: 1, lanes: 1, length: hitLength(plan, 3) };
+  const behind = car.length;
   it.each<{ far: { distance: number; lane: number; lanes: number }; fits: boolean; name: string }>([
     {
       far: { distance: behind + packGap(plan) - 1, lane: 2, lanes: 1 },
@@ -164,9 +164,20 @@ describe("packFitsBetween", () => {
       name: "over its lane and the one beside",
     },
   ])("with an obstacle $name, fits: $fits", ({ far, fits }) => {
-    const other = { ...far, rows: 1 };
+    const other = { ...far, length: hitLength(plan, 1) };
     expect(packFitsBetween(plan, car, other)).toBe(fits);
     expect(packFitsBetween(plan, other, car)).toBe(fits);
+  });
+
+  // A mover faster than the road is in contact with the pack for less than the pack's length,
+  // so road shows behind it while the obstacle met with it still passes.
+  it.each<{ fits: boolean; length: number; name: string }>([
+    { fits: true, length: hitLength(plan, 1), name: "a standing obstacle" },
+    { fits: false, length: -1, name: "a mover passing faster than the road" },
+  ])("with $name beside it, met at once, fits: $fits", ({ fits, length }) => {
+    const beside = { distance: 0, lane: 2, lanes: 1, length };
+    expect(packFitsBetween(plan, car, beside)).toBe(fits);
+    expect(packFitsBetween(plan, beside, car)).toBe(fits);
   });
 });
 

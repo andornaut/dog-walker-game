@@ -30,6 +30,7 @@ import { seededRandom } from "./random";
 const geometry: MoverGeometry = {
   cellLength: 50,
   laneCount: 5,
+  packLength: 40,
   roadLength: 600,
   rowSpacing: 150,
   scrollSpeed: 100,

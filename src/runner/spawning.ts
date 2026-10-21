@@ -143,13 +143,15 @@ export function laneReach(plan: SpawnPlan<string>): LaneReach {
   };
 }
 
-// A lane-blocking spawn standing on the road: the distance of its hit box's near edge, its
-// leftmost lane, and how many lanes and rows it covers.
+// A lane-blocking spawn as the pack meets it: the distance at which its hit box's near edge
+// reaches the pack, its leftmost lane, how many lanes it covers, and the length of road it
+// keeps the pack from stepping in behind it: a standing spawn's hit box, or a mover's contact
+// with the pack less the pack's length, which is shorter for one faster than the road.
 export interface BlockingPlace {
   distance: number;
   lane: number;
   lanes: number;
-  rows: number;
+  length: number;
 }
 
 // The least clear road, from the far edge of the nearer obstacle's hit box to the near edge of
@@ -178,9 +180,15 @@ export function packFitsBetween(
   a: BlockingPlace,
   b: BlockingPlace,
 ): boolean {
-  const [near, far] = a.distance <= b.distance ? [a, b] : [b, a];
-  const gap = far.distance - near.distance - hitLength(plan, near.rows);
-  return gap <= 0 || gap >= packGap(plan) - ROUNDING || !changesLanesBetween(near, far);
+  const fitsBehind = (near: BlockingPlace, far: BlockingPlace) => {
+    const gap = far.distance - near.distance - near.length;
+    return gap <= 0 || gap >= packGap(plan) - ROUNDING || !changesLanesBetween(near, far);
+  };
+  // Met at once, either may be the nearer one.
+  if (a.distance === b.distance) {
+    return fitsBehind(a, b) && fitsBehind(b, a);
+  }
+  return a.distance < b.distance ? fitsBehind(a, b) : fitsBehind(b, a);
 }
 
 // A set of lanes as a bit mask: bit n set means lane n is in it.
@@ -381,7 +389,12 @@ export function planSpawns<Kind extends string>(
     if (!blocksLane) {
       return true;
     }
-    const place = { distance: itemAt(rows, cell.row), lane: cell.lane, ...footprint };
+    const place = {
+      distance: itemAt(rows, cell.row),
+      lane: cell.lane,
+      lanes: footprint.lanes,
+      length: hitLength(plan, footprint.rows),
+    };
     return (
       placed.every((other) => packFitsBetween(plan, place, other)) &&
       tryBlock(cell, footprint, false)
@@ -444,6 +457,7 @@ export function planSpawns<Kind extends string>(
   const moverRoad = {
     cellLength: plan.cellLength,
     laneCount,
+    packLength: plan.packLength,
     roadLength: plan.roadLength,
     rowSpacing: spacing,
     scrollSpeed: plan.scrollSpeed,
@@ -496,7 +510,12 @@ export function planSpawns<Kind extends string>(
       }
       if (quota.blocksLane) {
         tryBlock(cell, footprint, true);
-        placed.push({ distance: itemAt(rows, cell.row), lane: cell.lane, ...footprint });
+        placed.push({
+          distance: itemAt(rows, cell.row),
+          lane: cell.lane,
+          lanes: footprint.lanes,
+          length: hitLength(plan, footprint.rows),
+        });
       }
       events.push({ distance: itemAt(rows, cell.row), kind: quota.kind, lane: cell.lane });
     }
