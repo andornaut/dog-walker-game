@@ -1,5 +1,4 @@
 import type { GameData } from "../data/types";
-import { isMoverObstacle } from "../runner/movers";
 import { isNeedSpot } from "../runner/needs";
 import type { WalkItemKind } from "../runner/walk";
 
@@ -19,7 +18,7 @@ export const FORCED_STOP_CUE: ItemCue = { bob: false, mark: true };
 
 // A need spot opens a card only at probability.needPayoffCard, so it carries the mark only when
 // that is certain. Tips, treats and lucky encounters with an instant resolution bob. Minor
-// obstacles and the movers' obstacles open no card and never bob.
+// obstacles open no card and never bob.
 export function itemCue(data: CueData, kind: WalkItemKind): ItemCue {
   if (kind === "tip" || kind === "treat") {
     return { bob: true, mark: false };
@@ -27,7 +26,7 @@ export function itemCue(data: CueData, kind: WalkItemKind): ItemCue {
   if (isNeedSpot(data, kind)) {
     return { bob: false, mark: data.tuning.probability.needPayoffCard >= 1 };
   }
-  if (isMoverObstacle(kind) || Object.hasOwn(data.minorObstacles, kind)) {
+  if (Object.hasOwn(data.minorObstacles, kind)) {
     return NONE;
   }
   const encounter = data.encounters[kind as keyof CueData["encounters"]];
