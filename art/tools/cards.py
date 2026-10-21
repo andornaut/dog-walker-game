@@ -1105,7 +1105,7 @@ def grumpy_top(g, b):
     g.rect(21, 29 + b, 3, 3, "skin2")
     g.rect(3, 26 + b, 1, 3, "navy")
     g.rect(28, 26 + b, 1, 3, "navy")
-    people.head(g, b, "skin2", "brown", "skin1")
+    people.head(g, b, "skin2", "brown")
     for x in (8, 22):
         g.rect(x, 10 + b, 2, 5, "lgrey")
     g.rect(13, 5 + b, 3, 1, "skin1")
