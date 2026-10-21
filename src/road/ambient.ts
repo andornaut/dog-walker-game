@@ -1,7 +1,7 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import type { AmbientGait, AmbientMover, ZoneId } from "../data/types";
+import { CROSS_STREET } from "../layout/crossStreet";
 import { project, type RoadProjection, scaleAt, scaleAtY } from "../layout/projection";
-import { CROSS_STREET } from "../layout/sceneryGags";
 import type { Random } from "../lib/random";
 import { noise, type Verge, VERGES, walkFrom } from "./roadside";
 

@@ -16,7 +16,6 @@ import {
   stripLevels,
   stripLines,
 } from "../../layout/roadRaster";
-import { perchRects, ZONE_GAGS } from "../../layout/sceneryGags";
 import { zoneAt } from "../../rules/route";
 import type { Walk } from "../../runner/walk";
 import { colorFromHex } from "../palette";
@@ -53,8 +52,7 @@ export class RoadArt {
   }
 
   // The backdrop's bottom rows, where the road's approach is drawn over it, across the road's
-  // view. The zone's perches are cleared from them, so the verge leaves the perches to the
-  // backdrop.
+  // view.
   approach(zone: Zone): Uint32Array | null {
     const key = backdropKey(zone);
     let rows = this.approaches.get(key);
@@ -62,9 +60,6 @@ export class RoadArt {
       rows = this.approachRows(key);
       const bottom = rows?.subarray(rows.length - LAYOUT.rasterView.width);
       this.bandRows.set(key, bottom === undefined ? null : bottom.slice());
-      if (rows !== null) {
-        clearPerches(rows, zone);
-      }
       this.approaches.set(key, rows);
     }
     return rows;
@@ -112,22 +107,6 @@ export class RoadArt {
     context.drawImage(image, cutX, cutY, width, height, 0, 0, width, height);
     const { data } = context.getImageData(0, 0, width, height);
     return { height, pixels: new Uint32Array(data.buffer), width };
-  }
-}
-
-// Clears the zone's perches from its approach rows, rasterView.width wide: a cleared pixel never
-// matches the verge's, so the backdrop's own perch shows there.
-function clearPerches(rows: Uint32Array, zone: Zone): void {
-  const { approach, backdrop, rasterView } = LAYOUT;
-  const firstBandRow = backdrop.height - approach.height;
-  const gags = ZONE_GAGS[zone.id as keyof typeof ZONE_GAGS];
-  for (const perch of perchRects(gags, backdrop.height)) {
-    const from = Math.max(0, perch.x - rasterView.x);
-    const to = Math.min(rasterView.width, perch.x + perch.width - rasterView.x);
-    for (let y = Math.max(perch.y, firstBandRow); y < perch.y + perch.height; y++) {
-      const offset = (y - firstBandRow) * rasterView.width;
-      rows.fill(0, offset + from, offset + to);
-    }
   }
 }
 

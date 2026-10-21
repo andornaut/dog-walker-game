@@ -12,14 +12,12 @@ import { profileSave, runLoadout, walkerInUse, walkerSpriteKey } from "../profil
 export interface RunRandom {
   ambient: Random;
   quips: Random;
-  scenery: Random;
 }
 
 export function runRandom(seed: number): RunRandom {
   return {
     ambient: randomStream(seed, "ambient"),
     quips: randomStream(seed, "quips"),
-    scenery: randomStream(seed, "scenery"),
   };
 }
 

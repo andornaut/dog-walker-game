@@ -46,7 +46,6 @@ import {
   rowScale,
 } from "../layout/projection";
 import type { Rect } from "../layout/rect";
-import { GAG_KEYS, GAG_SIZES, GAG_Y, KITE_AT, ZONE_GAGS } from "../layout/sceneryGags";
 import { screenLayout } from "../layout/screenLayout";
 import { MAX_CARD_OPTIONS } from "../rules/choices";
 import { read } from "../rules/units";
@@ -108,7 +107,6 @@ export function layoutExport(
       parts: DOG_CARD,
       slots: regions.dogSlots,
     },
-    gags: { keys: GAG_KEYS, kite: KITE_AT, sizes: GAG_SIZES, y: GAG_Y, zones: ZONE_GAGS },
     // The walk HUD's transient layers, each kept to its lane: money changes under the message
     // strip, the owners' tabs over the cards' tops, and heart changes by slot.
     hudLanes: hudLanes(body, regions),

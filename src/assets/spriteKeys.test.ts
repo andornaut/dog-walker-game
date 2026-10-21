@@ -68,7 +68,7 @@ describe("key names", () => {
 
   // A mover's cue stands on the road; faces, effects, badges and UI do not.
   it("stands road art on the ground, and nothing drawn over the road", () => {
-    const standing = ["dog-koda", "tip", "gag-cat", "dog-koda@50", WARNING_KEY];
+    const standing = ["dog-koda", "tip", "ambient-cat", "dog-koda@50", WARNING_KEY];
     const flat = ["face-dog-koda", "fx-bump", "badge-squirrel", "ui-button", "card-frame"];
     expect(standing.filter((key) => !standsOnGround(key))).toEqual([]);
     expect(flat.filter(standsOnGround)).toEqual([]);

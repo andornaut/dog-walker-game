@@ -25,8 +25,8 @@ interface MoverArt {
 
 const NO_ART: MoverArt = { keys: [], tag: null };
 
-// Band movers lie over the backdrop and under the gags, nearer rows in front; the rows add at
-// most this much to their depth, so they stay under the gags.
+// Band movers lie over the backdrop's approach, nearer rows in front; the rows add at most
+// this much to their depth, so they stay under the road.
 const BAND_ROW_DEPTH = 1 / 10000;
 
 // The ambient movers' sprites, one per slot, made once and reused. With reduced motion none
@@ -93,7 +93,7 @@ export class AmbientView {
         .setPosition(Math.round(place.x), Math.round(place.y - lift))
         .setFlipX(place.flip)
         .setDepth(
-          place.band ? DEPTH.gag - 0.5 + place.y * BAND_ROW_DEPTH : DEPTH.sprite + place.y + 1,
+          place.band ? DEPTH.bandMover + place.y * BAND_ROW_DEPTH : DEPTH.sprite + place.y + 1,
         );
       if (!place.band) {
         clipToRoad(sprite);

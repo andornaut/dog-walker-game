@@ -17,16 +17,17 @@ export const LAYOUT = screenLayout(SCREEN_CONFIG);
 export const PROJECTION = walkProjection(ROAD_CAMERA, LAYOUT.road);
 export const LANE_XS = laneCenterXs(LANE_COUNT, LAYOUT.road);
 
-// The backdrop band, the road's approach drawn over it and the band's gags lie under the road
-// and its sprites, which clipToRoad cuts off at the juncture: an item at the far edge of the
+// The backdrop band, the road's approach drawn over it and the band's movers lie under the
+// road and its sprites, which clipToRoad cuts off at the juncture: an item at the far edge of the
 // road stands over the approach, in view, and nothing of it shows past the cross street.
 export const DEPTH = {
   approach: -2,
   backdrop: -3,
+  // Movers on the band's cross street and sky lie over the approach; nearer rows in front.
+  bandMover: -1.5,
   banner: 3100,
   decal: 2,
   fx: 2500,
-  gag: -1,
   popup: 3000,
   road: 0,
   // Roadside props lie under every road sprite and ambient mover, so nothing on the road, the

@@ -233,7 +233,7 @@ export class RunScene extends Scene {
     picked: { loadout: Loadout; walkerSprite: string },
   ): RunWorld {
     const { random, recorder } = run;
-    const backdrop = new BackdropView(this, random.scenery);
+    const backdrop = new BackdropView(this);
     const ambient = new AmbientView(this, random.ambient);
     const road = new RoadView(this, this.roadArt, LAYOUT.rasterView);
     const roadside = new RoadsideView(this);
