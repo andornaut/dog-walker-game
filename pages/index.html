@@ -38,8 +38,8 @@
     <script src="/nav.js" defer></script>
     <style>
       /* Project home: the logo on The Long Way Home's banded sky, the pitch and Play, then five
-         highlights, each a cream chrome card with a navy band, game art at an integer scale
-         (1x on phones, 2x from 760px) and a line or two. Colours are Endesga 32. */
+         highlights, each a cream chrome card with a navy band, game art at an integer scale and a
+         line or two. Colours are Endesga 32. */
       :root {
         --amber: #feae34;
         --cream: #ead4aa;
@@ -208,11 +208,10 @@
         margin: 0;
         padding: 12px 14px 14px;
       }
-      /* A 344x236 help screen over a plum line, 1x on phones (cropped from the centre below 344px)
-         and 2x from 760px. */
+      /* A 360x560 game screenshot at 1x over a plum line, cropped from the centre on phones. */
       .shot {
         width: 100%;
-        height: 237px;
+        height: 560px;
         object-fit: none;
         background: var(--ink);
         border-bottom: 1px solid var(--plum);
@@ -225,78 +224,54 @@
         gap: 12px;
         padding: 16px 12px 0;
       }
-      /* Comic hit words: frame 0 of each play-word, cropped to the burst and shown at 2x. */
-      .word {
-        display: block;
-        background-repeat: no-repeat;
-        image-rendering: pixelated;
-        image-rendering: crisp-edges;
-      }
-      .w-skunk {
-        width: 98px;
-        height: 64px;
-        background-image: url("/art/sprites/fx-hit-skunk.png");
-        background-size: 2048px 128px;
-        background-position: -1040px -32px;
-      }
-      .w-puddle {
-        width: 84px;
-        height: 52px;
-        background-image: url("/art/sprites/fx-hit-puddle.png");
-        background-size: 1792px 128px;
-        background-position: -918px -54px;
-      }
-      .w-thief {
-        width: 70px;
-        height: 64px;
-        background-image: url("/art/sprites/fx-hit-thief.png");
-        background-size: 2048px 128px;
-        background-position: -1052px -48px;
-      }
-      .walkers {
-        display: flex;
-        gap: 12px;
-      }
-      /* A fork's three path cards, easiest on the left: zone art at 1x on phones, 2x from 760px. */
-      .fork {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        align-items: start;
-        gap: 8px;
-      }
-      .fork figure {
-        margin: 0;
-        display: grid;
-        justify-items: center;
-        gap: 6px;
-        text-align: center;
-        font-size: 14px;
-        line-height: 1.3;
-      }
-      .fork img {
-        outline: 1px solid var(--ink);
-      }
-      .fork b {
-        display: block;
-      }
       .dogs {
         display: grid;
         grid-template-columns: repeat(3, 64px);
         gap: 8px;
       }
-      /* Sprite sheets in an img: object-fit cover scales the sheet by the box's height, an
-         integer, and object-position left shows its first frame. */
-      .sheet {
-        object-fit: cover;
-        object-position: left top;
+      /* An owner's moods: frames of a 32x32 face sheet at 2x. */
+      .mood {
+        margin: 0;
+        display: grid;
+        justify-items: center;
+        gap: 4px;
+        font-size: 14px;
       }
-      .face {
+      .mood span {
         width: 64px;
         height: 64px;
+        background: url("/art/sprites/face-owner-koda.png") no-repeat 0 0 / 320px 64px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
-      .shop {
-        width: 240px;
-        height: 208px;
+      .m-neutral span {
+        background-position: -64px 0;
+      }
+      .m-upset span {
+        background-position: -128px 0;
+      }
+      .m-fired span {
+        background-position: -192px 0;
+      }
+      /* The six zones, easiest first, each a 16x16 zone icon at 2x beside its name. */
+      .zones {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px 12px;
+        margin: 0;
+        padding: 16px 14px 0;
+        list-style: none;
+        font-size: 14px;
+        line-height: 1.3;
+      }
+      .zones li {
+        display: grid;
+        grid-template-columns: 32px 1fr;
+        align-items: center;
+        gap: 8px;
+      }
+      .zones b {
+        display: block;
       }
       @media (min-width: 760px) {
         main {
@@ -325,20 +300,13 @@
           padding: 16px 20px 20px;
           font-size: 18px;
         }
-        .shot {
-          height: 473px;
-          object-fit: fill;
-        }
         .dogs {
           grid-template-columns: repeat(9, 64px);
         }
-        .fork {
-          grid-template-columns: repeat(3, 150px);
-          gap: 24px;
-        }
-        .fork img {
-          width: 150px;
-          height: 112px;
+        .zones {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          padding: 20px 20px 0;
+          font-size: 16px;
         }
       }
     </style>
@@ -366,19 +334,16 @@
         <h2 id="h-bump">Every bump, a choice</h2>
         <img
           class="shot"
-          src="/art/images/help-cards.png"
-          width="344"
-          height="236"
-          alt="The skunk card over the dimmed road, with three options: Full groom for $20, Quick rinse for $10 and Stinky, or Hold your nose for free at 2 hearts each"
+          src="/art/site/home-road.png"
+          width="360"
+          height="560"
+          alt="Elm Avenue: the walker and three dogs heading up the road, a tip coin in the next lane, and Koda pulling the pack toward a squirrel; the dogs' doghouses along the bottom"
         />
-        <div class="art" role="img" aria-label="Comic hit words: PEE-YEW!, SPLOSH! and YOINK!">
-          <span class="word w-skunk"></span>
-          <span class="word w-puddle"></span>
-          <span class="word w-thief"></span>
-        </div>
         <p>
-          Walk into a skunk, a puddle or a thief and a card opens: pay up, or upset the owners.
-          Every outcome is on the card, and a bump is never game over.
+          The road moves: cars and trucks drive down their lanes, people step out and animals dart
+          across. Bump into anything marked with a ! and a card opens: pay up, or upset the owners.
+          Every outcome is on the card. The cheap way out can leave the whole pack Muddy, Stinky or
+          Tangled for 20 seconds.
         </p>
       </section>
 
@@ -410,87 +375,68 @@
 
       <section class="hl" aria-labelledby="h-owners">
         <h2 id="h-owners">Keep the owners happy</h2>
-        <img
-          class="shot"
-          src="/art/images/help-owners.png"
-          width="344"
-          height="236"
-          alt="Koda's doghouse with Jesse's face and 4 of 10 hearts and a finger tapping it to give a treat, Jesse's happy, neutral and upset faces, and Nugget's empty doghouse with a FIRED! plate"
-        />
+        <div class="art" role="group" aria-label="Jesse, Koda's owner, in four moods">
+          <figure class="mood"><span></span>Happy</figure>
+          <figure class="mood m-neutral"><span></span>Neutral</figure>
+          <figure class="mood m-upset"><span></span>Upset</figure>
+          <figure class="mood m-fired"><span></span>Fired!</figure>
+        </div>
         <p>
-          Every dog comes with an owner and a row of hearts. Tap a doghouse to hand its owner a
-          treat. Let the hearts hit zero and the owner fires you and takes the dog home.
+          Every dog comes with an owner and a row of hearts: 3 for a small dog, 4 for a medium one
+          and 5 for a big one. A plain bump costs the owner of the dog that hit it a heart, and a
+          treat a dog picks up gives its owner one back. At zero, the owner fires you and takes the
+          dog home.
         </p>
       </section>
 
       <section class="hl" aria-labelledby="h-zones">
         <h2 id="h-zones">Pick your path</h2>
-        <div class="art fork" role="group" aria-label="A fork: three paths to the next zone">
-          <figure>
-            <img src="/art/images/card-zone-snooze-crescent.png" width="75" height="56" alt="" />
-            <figcaption><b>Willow Crescent</b>Easiest, fees ×0.7</figcaption>
-          </figure>
-          <figure>
-            <img src="/art/images/card-zone-sniff-street-shops.png" width="75" height="56" alt="" />
-            <figcaption><b>Main Street</b>Busy, fees ×1.25</figcaption>
-          </figure>
-          <figure>
-            <img src="/art/images/card-zone-the-long-way-home.png" width="75" height="56" alt="" />
-            <figcaption><b>The Long Way Home</b>Hard, fees ×1.5</figcaption>
-          </figure>
-        </div>
+        <ol class="zones" aria-label="Maplewood's six zones, easiest first">
+          <li>
+            <img src="/art/images/icon-zone-snooze-crescent.png" width="32" height="32" alt="" />
+            <span><b>Willow Crescent</b>Easiest</span>
+          </li>
+          <li>
+            <img src="/art/images/icon-zone-bark-park.png" width="32" height="32" alt="" />
+            <span><b>Fairview Park</b>Easy</span>
+          </li>
+          <li>
+            <img src="/art/images/icon-zone-woof-way.png" width="32" height="32" alt="" />
+            <span><b>Elm Avenue</b>Normal</span>
+          </li>
+          <li>
+            <img src="/art/images/icon-zone-sniff-street-shops.png" width="32" height="32" alt="" />
+            <span><b>Main Street</b>Busy</span>
+          </li>
+          <li>
+            <img src="/art/images/icon-zone-paws-promenade.png" width="32" height="32" alt="" />
+            <span><b>Riverside Path</b>Medium-hard</span>
+          </li>
+          <li>
+            <img src="/art/images/icon-zone-the-long-way-home.png" width="32" height="32" alt="" />
+            <span><b>The Long Way Home</b>Hard</span>
+          </li>
+        </ol>
         <p>
-          Every walk starts on Elm Avenue and covers four of Maplewood's six zones. Between zones
-          you pick an upgrade card, then the road forks: easiest on the left, hardest and best paid
-          on the right.
+          Every walk starts on Elm Avenue and covers four of Maplewood's six zones. Each zone ends
+          with a celebration and an upgrade card, then the road forks: easiest on the left, hardest
+          and best paid on the right.
         </p>
       </section>
 
       <section class="hl" aria-labelledby="h-shop">
         <h2 id="h-shop">Grow the business</h2>
-        <div class="art">
-          <img
-            class="sheet shop"
-            src="/art/sprites/ui-pet-shop.png"
-            width="240"
-            height="104"
-            alt="The Pet shop: a green storefront with a striped awning"
-          />
-          <div class="walkers" role="img" aria-label="The four walkers: Casey, Ben, Ada and Trista">
-            <img
-              class="sheet face"
-              src="/art/sprites/face-walker-casey.png"
-              width="64"
-              height="32"
-              alt=""
-            />
-            <img
-              class="sheet face"
-              src="/art/sprites/face-walker-ben.png"
-              width="64"
-              height="32"
-              alt=""
-            />
-            <img
-              class="sheet face"
-              src="/art/sprites/face-walker-ada.png"
-              width="64"
-              height="32"
-              alt=""
-            />
-            <img
-              class="sheet face"
-              src="/art/sprites/face-walker-trista.png"
-              width="64"
-              height="32"
-              alt=""
-            />
-          </div>
-        </div>
+        <img
+          class="shot"
+          src="/art/site/home-start.png"
+          width="360"
+          height="560"
+          alt="The start screen: the Pet shop beside the front gate, Trista picked from four walkers, Duchess, Biscuit and Koda picked from nine dogs, and the whistle in the Pocket"
+        />
         <p>
-          Spend your tips and fees at the Pet shop on new dogs, dog slots and gear, and pocket one
-          gear item for each walk. Casey walks first; Ben, Ada and Trista join when you first finish
-          zones 1, 2 and 3.
+          Pick a walker, your dogs and one gear item for your Pocket, then head out. Spend your tips
+          and fees at the Pet shop on new dogs, dog slots and gear. Casey walks first; Ben, Ada and
+          Trista join when you first finish zones 1, 2 and 3.
         </p>
       </section>
     </main>
