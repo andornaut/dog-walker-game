@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Rasterize the game's pixel fonts into BMFonts (XML .fnt plus a PNG atlas).
 
-- font-body: Tiny5 at 8px, for body text, quips and floating labels.
+- font-body: Tiny5 at 8px made a row taller, for body text, quips and floating labels.
 - font-title: Silkscreen at 8px, for titles, numbers and buttons.
 - font-display and font-display-cream: the yard sign logo's lettering, for big display words only
   (zone names, "WHICH WAY?", "FIRED!", "NEW BEST!", the end screen title, hit labels). Upright blocky
@@ -11,9 +11,14 @@
 
 font-body and font-title are SIL Open Font License fonts; the font files and licenses are in
 art/fonts/. Their glyphs are white on transparent so the game tints them. Printable ASCII, the
-middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has; font-body's $ is drawn
-too (DRAWN), as Tiny5's is too thin to read at 1x, and its ascenders (b d f h k l) rise a row above
-the capitals (ASCEND), so l reads apart from I.
+middle dot (U+00B7) and a drawn heart for ♥ (U+2665), which neither font has.
+
+font-body keeps Tiny5's 10-row line and its capitals' top on row 2, a row taller than Tiny5 so
+small text reads: capitals and digits 6 rows (rows 2 to 7, Tiny5's with one row drawn twice,
+REPEAT), a drawn lower case (LOWER) on a 5-row x-height (rows 3 to 7) with round letters 4 wide,
+ascenders a row above the capitals (row 1) and descenders one row (row 8), base 8. Marks that span
+the capitals get a row more; marks on the baseline or the x-height's middle move a row down
+(LOWERED). Its $ is drawn (DRAWN), as Tiny5's is too thin to read at 1x.
 
 font-display has A to Z, 0 to 9, ! ? , . ' - + $, space and ♥. Its line is 18px: the capitals'
 outline on rows 2 to 13 and their fill on rows 3 to 12 (base 13), with room above for the $ and
@@ -46,14 +51,53 @@ FONTS = {
 }
 CHARS = [chr(c) for c in range(32, 127)] + ["·", "♥"]
 HEART = [".11.11.", "1111111", "1111111", ".11111.", "..111..", "...1..."]
+TINY5 = "art/fonts/tiny5/Tiny5.ttf"
 # Glyphs drawn in place of a font's own, by font file: rows, then the top row's offset and the advance.
-# Tiny5's $ is a 3px S that reads as a stray mark at 1x: font-body draws a 4px S with 2px diagonals, its
-# stem a row above and below it.
-DRAWN = {"art/fonts/tiny5/Tiny5.ttf": {"$": (["..1.", ".111", "11..", "..11", "111.", ".1.."], 1, 5)}}
-# Tiny5's ascenders stop at the capitals' height, so l is I and b, d, h and k read as capitals at 1x.
-# font-body's rise a row above them, to the row i's dot, the $ and the heart already reach: the row
-# named here is drawn twice (the stem, or f's below its hook). Advances are unchanged.
-ASCEND = {"art/fonts/tiny5/Tiny5.ttf": {"b": 0, "d": 0, "f": 1, "h": 0, "k": 0, "l": 0}}
+DRAWN = {TINY5: {
+    # Tiny5's $ is a 3px S that reads as a stray mark at 1x: a 4px S with 2px diagonals, its stem a
+    # row above and below it.
+    "$": (["..1.", ".111", "11..", "11..", "..11", "111.", ".1.."], 1, 5),
+    # The lower case: x-height rows 3 to 7, ascenders from row 1, descenders on row 8.
+    "a": ([".11.", "...1", ".111", "1..1", ".111"], 3, 5),
+    "b": (["1...", "1...", "111.", "1..1", "1..1", "1..1", "111."], 1, 5),
+    "c": ([".111", "1...", "1...", "1...", ".111"], 3, 5),
+    "d": (["...1", "...1", ".111", "1..1", "1..1", "1..1", ".111"], 1, 5),
+    "e": ([".11.", "1..1", "1111", "1...", ".111"], 3, 5),
+    "f": ([".11", "1..", "111", "1..", "1..", "1..", "1.."], 1, 4),
+    "g": ([".111", "1..1", "1..1", ".111", "...1", "111."], 3, 5),
+    "h": (["1...", "1...", "111.", "1..1", "1..1", "1..1", "1..1"], 1, 5),
+    "i": (["1", ".", "1", "1", "1", "1", "1"], 1, 2),
+    "j": ([".1", "..", ".1", ".1", ".1", ".1", ".1", "1."], 1, 3),
+    "k": (["1...", "1...", "1..1", "1.1.", "11..", "1.1.", "1..1"], 1, 5),
+    "l": (["1.", "1.", "1.", "1.", "1.", "1.", ".1"], 1, 3),
+    "m": (["1111.", "1.1.1", "1.1.1", "1.1.1", "1.1.1"], 3, 6),
+    "n": (["111.", "1..1", "1..1", "1..1", "1..1"], 3, 5),
+    "o": ([".11.", "1..1", "1..1", "1..1", ".11."], 3, 5),
+    "p": (["111.", "1..1", "1..1", "1..1", "111.", "1..."], 3, 5),
+    "q": ([".111", "1..1", "1..1", "1..1", ".111", "...1"], 3, 5),
+    "r": (["1.11", "11..", "1...", "1...", "1..."], 3, 5),
+    "s": ([".111", "1...", ".11.", "...1", "111."], 3, 5),
+    "t": (["1..", "111", "1..", "1..", "1..", ".11"], 2, 4),
+    "u": (["1..1", "1..1", "1..1", "1..1", ".111"], 3, 5),
+    "v": (["1...1", "1...1", ".1.1.", ".1.1.", "..1.."], 3, 6),
+    "w": (["1...1", "1...1", "1.1.1", "1.1.1", ".1.1."], 3, 6),
+    "x": (["1...1", ".1.1.", "..1..", ".1.1.", "1...1"], 3, 6),
+    "y": (["1..1", "1..1", "1..1", ".111", "...1", "111."], 3, 5),
+    "z": (["1111", "...1", "..1.", ".1..", "1111"], 3, 5),
+}}
+# Tiny5's capitals, digits and the marks that span them, a row taller: the row named here is drawn
+# twice (a crossbar's lower half, a bowl's side, a diagonal's top).
+REPEAT = {TINY5: {
+    **{c: 3 for c in "ABEFHIJKLMNPRSTUY1356789"},
+    **{c: 2 for c in "CDGOQ04"},
+    **{c: 0 for c in "VWX"},
+    **{c: 1 for c in "Z2"},
+    **{c: 2 for c in "!?()[]{}/\\|#&@<>"},
+}}
+# Marks on the baseline or the x-height's middle, a row lower with them.
+LOWERED = {TINY5: set(".,;:-+=*~_%·♥")}
+# How many rows lower than the face's ascent the baseline is.
+BASE_DROP = {TINY5: 1}
 ATLAS_W = 128
 
 # ---------- the sign lettering ----------
@@ -208,7 +252,8 @@ def glyphs(path, size):
     ascent, descent = font.getmetrics()
     out = {}
     drawn = DRAWN.get(path, {})
-    ascend = ASCEND.get(path, {})
+    repeat = REPEAT.get(path, {})
+    lowered = LOWERED.get(path, set())
     for ch in CHARS:
         if ch in drawn:
             rows, top, adv = drawn[ch]
@@ -225,7 +270,7 @@ def glyphs(path, size):
                 for x, c in enumerate(row):
                     if c == "1":
                         im.putpixel((x, y), 255)
-            out[ch] = (im, 0, ascent - 6, 8)
+            out[ch] = (im, 0, ascent - 6 + (ch in lowered), 8)
             continue
         canvas = Image.new("L", (size * 3, ascent + descent + 2), 0)
         d = ImageDraw.Draw(canvas)
@@ -237,8 +282,10 @@ def glyphs(path, size):
             out[ch] = (None, 0, 0, adv)
             continue
         im, top = canvas.crop(box), box[1]
-        if ch in ascend:
-            im, top = repeat_row(im, ascend[ch]), top - 1
+        if ch in repeat:
+            im = repeat_row(im, repeat[ch])
+        if ch in lowered:
+            top += 1
         out[ch] = (im, box[0], top, adv)
     return out, ascent, descent
 
@@ -303,7 +350,7 @@ def write_font(key, face, size, line_height, base, gl, kerns=()):
 def build():
     for key, (face, path, size) in FONTS.items():
         gl, ascent, descent = glyphs(path, size)
-        write_font(key, face, size, ascent + descent + 1, ascent, gl)
+        write_font(key, face, size, ascent + descent + 1, ascent + BASE_DROP.get(path, 0), gl)
     for key, fill in DISPLAY.items():
         write_font(key, "Sign", 5 * DISPLAY_SCALE, LINE_HEIGHT, CAP_TOP + 5 * DISPLAY_SCALE,
                    display_glyphs(fill), kernings())
