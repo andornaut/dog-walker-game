@@ -32,7 +32,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
-from pixel import PALETTE, Grid  # noqa: E402
+from pixel import PALETTE64, Grid  # noqa: E402
 
 W, H = 320, 64
 LANE = 64
@@ -363,6 +363,209 @@ ZONES = {
 }
 
 
+# ---------- Toronto ----------
+# Each Toronto neighborhood's strip starts from the Maplewood zone it replaces and keeps that zone's
+# road colour, so the game's shadow, the leash colours and every road sprite's outline hold as before.
+
+def grit(g, rnd, n, cols):
+    """Sparse 2px grit spaced apart, 1x2 or 2x1."""
+    for x, y in scatter(rnd, n, 6, W - 7, 7):
+        col = rnd.choice(cols)
+        if rnd.random() < 0.7:
+            wrect(g, x, y, 1, 2, col)
+        else:
+            wrect(g, x, y, 2, 1, col)
+
+
+def cracks(g, rnd, runs, col):
+    """Cracks running along the road, 1 to 2px wide, kept inside lanes."""
+    for x, y, steps in runs:
+        for _ in range(steps):
+            wp(g, x, y, col)
+            if rnd.random() < 0.25:
+                x += rnd.choice((-1, 1))
+                wp(g, x, y, col)
+            y -= 1
+
+
+def cabbagetown_ground(g):
+    """Willow Crescent's pale asphalt with granite gutters in stone, their joints every 16 rows."""
+    rnd = random.Random("road-cabbagetown")
+    g.rect(0, 0, W, H, "grey")
+    grit(g, rnd, 60, ("slate", "slate", "dslate", "lgrey", "lgrey"))
+    cracks(g, rnd, ((43, 12, 10), (100, 40, 12), (160, 62, 9), (224, 50, 14), (286, 30, 8)), "dslate")
+    leaves(g, rnd, 4, 10, W - 10, tones=(("moss", "olive", "dolive"), ("gold", "ochre", "rust")))
+    for x0, edge in ((0, 4), (W - 4, W - 5)):
+        g.rect(x0, 0, 4, H, "stone")
+        g.rect(edge, 0, 1, H, "slate")
+        for y in range(0, H, 16):
+            g.rect(x0, y, 4, 2, "dstone")
+    g.rect(0, 0, 1, H, "lgrey")
+    g.rect(W - 1, 0, 1, H, "dstone")
+
+
+def high_park_ground(g):
+    """Fairview Park's dirt trail between High Park's dark undergrowth: pine edges with fir blades
+    and moss glints, bark-brown needles on the path."""
+    rnd = random.Random("road-high-park")
+    g.rect(0, 0, W, H, "tan")
+    specks(g, rnd, 150, "brown", 8, W - 8, 0.4)
+    specks(g, rnd, 60, "cream", 8, W - 8, 0.2)
+    # fallen needles in pairs along the trail, clear of the lane dividers
+    for x, y in scatter(rnd, 16, 10, W - 10, 9, ok=lambda x, y: (x + 4) % LANE >= 8):
+        wp(g, x, y, "bark")
+        wp(g, x + 1, y + 1, "bark")
+        wp(g, x + 2, y + 1, "bark")
+    for _ in range(12):
+        x, y = rnd.randrange(12, W - 14), rnd.randrange(H)
+        if (x + 3) % LANE < 6:
+            continue
+        wrect(g, x, y, 2, 2, "lgrey")
+        wp(g, x + 1, y + 1, "grey")
+        wp(g, x, y, "white")
+    for i in range(4):
+        x, y = 214 + (6 if i % 2 else 0), i * 16 + 10
+        for j, row in enumerate(PAW):
+            for k, ch in enumerate(row):
+                if ch == "x":
+                    wp(g, x + k, y + j, "brown")
+    for y in range(H):
+        for side, seed in ((0, 1.1), (1, 2.7)):
+            w = wave(y, seed, 6, 1.6)
+            x0 = 0 if side == 0 else W - w
+            g.rect(x0, y, w, 1, "pine")
+            g.p(w if side == 0 else W - w - 1, y, "bark")
+    for side in (0, 1):
+        y = side * 5
+        while y < H + side * 5 - 3:
+            x = 1 + rnd.randrange(4)
+            x = x if side == 0 else W - 1 - x
+            wrect(g, x, y, 1, 2, "fir")
+            y += rnd.randrange(2, 6)
+        for y in (9 + side * 28, 44 - side * 22):
+            wp(g, 2 if side == 0 else W - 3, y, "moss")
+
+
+def distillery_ground(g):
+    """Elm Avenue's dslate laid as cobbles: setts 15 wide in courses 8 rows deep, half-offset each
+    course, navy joints (2 rows across the road, 1px along it), a slate glint on some setts' top
+    left; brick gutters along both sides."""
+    rnd = random.Random("road-distillery-district")
+    g.rect(0, 0, W, H, "dslate")
+    for course in range(H // 8):
+        y, off = course * 8, 8 if course % 2 else 0
+        g.rect(0, y + 6, W, 2, "navy")
+        for x in range(off - 16, W, 16):
+            g.rect(x + 15, y, 1, 6, "navy")
+            if rnd.random() < 0.45:
+                g.rect(x + 1, y + 1, 3, 1, "slate")
+            if rnd.random() < 0.15:
+                g.p(x + rnd.randrange(4, 13), y + rnd.randrange(2, 5), "navy")
+    for x0, edge in ((0, 4), (W - 4, W - 5)):
+        g.rect(x0, 0, 4, H, "brick")
+        g.rect(edge, 0, 1, H, "navy")
+        for y in range(0, H, 8):
+            g.rect(x0, y + 6, 4, 2, "dbrick")
+    g.rect(0, 0, 1, H, "rust")
+
+
+def distillery_lines(g):
+    """A row of pale granite setts on each lane line: lgrey, 6 rows on and 2 off, a stone edge."""
+    for x in DIVIDERS:
+        for y in range(0, H, 8):
+            g.rect(x, y, 2, 6, "lgrey")
+            g.rect(x + 1, y, 1, 6, "stone")
+
+
+def kensington_ground(g):
+    """Main Street's pink, laid as offset flagstones between dark laneway gutters: shale stones on the outer 4 columns
+    inside a coal seam, an ash joint every 16 rows, peach and red flecks."""
+    rnd = random.Random("road-kensington-market")
+    g.rect(0, 0, W, H, "pink")
+    # flagstones half a lane wide in courses 16 rows deep, each course offset half a stone, so the
+    # lane dividers fall on joints of every other course
+    for course in range(H // 16):
+        y, off = course * 16, 16 if course % 2 else 0
+        g.rect(0, y + 14, W, 2, "skin1")
+        for x in range(off - 1, W, 32):
+            g.rect(x, y, 1, 14, "skin1")
+    specks(g, rnd, 20, "skin1", 6, W - 6)
+    specks(g, rnd, 10, "peach", 6, W - 6)
+    specks(g, rnd, 8, "red", 6, W - 6)
+    for x0, inner in ((0, 4), (W - 4, W - 5)):
+        g.rect(x0, 0, 4, H, "shale")
+        g.rect(inner, 0, 1, H, "coal")
+        for y in range(0, H, 16):
+            g.rect(x0, y, 4, 2, "ash")
+
+
+def beaches_ground(g):
+    """Riverside Path's boardwalk, weathered: some boards driftwood, sand blown in tan drifts along the
+    edge beams, the beams driftwood."""
+    rnd = random.Random("road-the-beaches")
+    g.rect(0, 0, W, H, "cream")
+    boards = range(0, W, 16)
+    tinted = False
+    for x0 in boards:
+        tinted = not tinted and rnd.random() < 0.05
+        if tinted:
+            g.rect(x0, 0, 15, H, "skin1")
+        for _ in range(rnd.randrange(1, 3)):
+            wrect(g, x0 + rnd.randrange(1, 14), rnd.randrange(H), 1, rnd.randrange(5, 12), "tan")
+    for x0 in boards[1:]:
+        g.rect(x0 - 1, 0, 1, H, "tan")
+    for x0 in boards:
+        y = rnd.randrange(H)
+        wrect(g, x0, y, 15, 2, "tan")
+        wp(g, x0 + 3, y - 2, "driftwood")
+        wp(g, x0 + 11, y + 3, "driftwood")
+    for x, y in scatter(rnd, 7, 8, W - 8, 20, ok=lambda x, y: x % 16 < 13):
+        wrect(g, x, y, 2, 2, "tan")
+        wp(g, x + 1, y + 1, "brown")
+    # sand drifted onto the boards beside each beam, 1 to 3 columns, wobbling down the strip
+    for y in range(H):
+        for side, seed in ((0, 0.8), (1, 3.3)):
+            w = wave(y, seed, 2, 1.2)
+            if w > 0:
+                g.rect(4 if side == 0 else W - 4 - w, y, w, 1, "skin1")
+    for x0, outer in ((0, 0), (W - 4, W - 1)):
+        g.rect(x0, 0, 4, H, "driftwood")
+        g.rect(outer, 0, 1, H, "stone")
+
+
+def yonge_ground(g):
+    """The Long Way Home's skin2 brick with lgrey granite curbs, their joints in stone every 16 rows."""
+    rnd = random.Random("road-yonge-street")
+    g.rect(0, 0, W, H, "skin2")
+    for row in range(H // 8):
+        y, off = row * 8, 8 if row % 2 else 0
+        g.rect(0, y + 6, W, 2, "brown")
+        for x in range(off - 16, W, 16):
+            g.rect(x + 15, y, 1, 6, "brown")
+            if rnd.random() < 0.10:
+                g.rect(x, y, 15, 6, "clay")
+            g.p(x + rnd.randrange(2, 14), y + rnd.randrange(2, 6), "brown")
+    for x0, line in ((0, 5), (W - 5, W - 6)):
+        g.rect(x0, 0, 5, H, "lgrey")
+        for y in range(0, H, 16):
+            g.rect(x0, y, 5, 2, "stone")
+        g.rect(line, 0, 1, H, "dbrown")
+    g.rect(0, 0, 1, H, "white")
+    g.rect(W - 1, 0, 1, H, "grey")
+
+
+# easiest to hardest, as the fork cards sort them
+TORONTO = {
+    "cabbagetown": (cabbagetown_ground, snooze_lines),
+    "high-park": (high_park_ground, bark_park_lines),
+    "distillery-district": (distillery_ground, distillery_lines),
+    "kensington-market": (kensington_ground, shops_lines),
+    "the-beaches": (beaches_ground, paws_lines),
+    "yonge-street": (yonge_ground, home_lines),
+}
+ZONES.update(TORONTO)
+
+
 def strip(zone, y0=0, y1=H):
     """The zone's strip; with y0..y1, only those rows are drawn (the rest stay empty)."""
     ground, lines = ZONES[zone]
@@ -430,7 +633,7 @@ def to_image(g):
 def check(key, g):
     """Every pixel is opaque and on the palette, at the inventory size."""
     assert (g.w, g.h) == (W, H), key
-    bad = {c for row in g.px for c in row if c not in PALETTE}
+    bad = {c for row in g.px for c in row if c not in PALETTE64}
     assert not bad, f"{key}: {bad}"
 
 
