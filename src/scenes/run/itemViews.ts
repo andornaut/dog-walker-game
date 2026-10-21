@@ -15,20 +15,14 @@ import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, HintTrigger, MinorObstacleId, ZoneId } from "../../data/types";
 import { moverHintTriggers } from "../../hud/hintTriggers";
+import { obstacleParts } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
 import { struckBy, type StruckItem, struckNow } from "../../road/struckScenery";
 import { currentZoneId } from "../../rules/route";
-import {
-  encounterLook,
-  minorObstacleLook,
-  skinnedArt,
-  skinnedCloudArt,
-  skinnedOwnerArt,
-} from "../../rules/skins";
+import { encounterLook, skinnedArt } from "../../rules/skins";
 import { moverTell } from "../../runner/movers";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import {
-  isMinorObstacle,
   itemCategory,
   type Walk,
   type WalkItem,
@@ -44,8 +38,6 @@ import { clipToRoad, DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./s
 // Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
 // less the lane's spare width beside a 1-lane sprite.
 const PLACEHOLDER_HEIGHT = ROAD_SPRITE_SIZE;
-// Road pixels the skunk stands behind its cloud's near edge, so it reads as inside the spray.
-const SKUNK_IN_CLOUD = 10;
 
 // One sprite of an item. dx is across the road from the item's centre and footY the flat
 // road row it stands on, both in road pixels. feet "bottom" stands it on its frame's bottom
@@ -251,14 +243,10 @@ export class ItemViews {
   }
 
   // Each item stands once at the near edge of its hit box, however many rows it covers, and a
-  // lucky find on its frame's bottom. A puddle lies flat under the rest, and a skunk stands just
-  // inside the front of its spray cloud, which lies flat too. An obstacle wears its skin for the
-  // zone, and the other dog's owner stands beside it in the skin's owner art.
+  // lucky find on its frame's bottom. An obstacle draws obstacleParts, which it collides as.
   private addView(zone: ZoneId, item: WalkItem): ItemView {
     const { scene } = this;
     const has = (key: string) => scene.textures.exists(key);
-    const encounterArt = (id: EncounterId) => skinnedArt(has, encounterLook(gameData, zone, id));
-    const otherDogOwner = () => skinnedOwnerArt(has, encounterLook(gameData, zone, "otherDog"));
     const bottom = (shown: WalkItem) => shown.y + shown.height;
     const lucky = itemCategory(gameData, item.kind) === "lucky";
     const part = (key: string, overrides: Partial<Omit<ItemPart, "key" | "sprite">> = {}) => {
@@ -277,24 +265,19 @@ export class ItemViews {
       }
       return made;
     };
-    const flat = { flat: true } as const;
     let parts: ItemPart[];
     if (item.mover !== undefined) {
       const body = moverBodyKey(scene, zone, item.kind as EncounterId | MinorObstacleId);
       parts = [part(body), part(WARNING_KEY), part(WARNING_ARROW_KEY), part(WARNING_WANDER_KEY)];
     } else if (item.kind === "tip" || item.kind === "treat") {
       parts = [part(item.kind)];
-    } else if (isMinorObstacle(gameData, item.kind)) {
-      parts = [part(skinnedArt(has, minorObstacleLook(gameData, zone, item.kind)))];
-    } else if (item.kind === "skunk") {
-      parts = [
-        part(skinnedCloudArt(has, encounterLook(gameData, zone, "skunk")), flat),
-        part(encounterArt("skunk"), { footY: (shown) => bottom(shown) - SKUNK_IN_CLOUD }),
-      ];
-    } else if (item.kind === "otherDog" && has(otherDogOwner())) {
-      parts = [part(encounterArt(item.kind), { dx: -10 }), part(otherDogOwner(), { dx: 13 })];
+    } else if (lucky) {
+      parts = [part(skinnedArt(has, encounterLook(gameData, zone, item.kind as EncounterId)))];
     } else {
-      parts = [part(encounterArt(item.kind), item.kind === "puddle" ? flat : {})];
+      const kind = item.kind as EncounterId | MinorObstacleId;
+      parts = obstacleParts(gameData, has, zone, kind, false).map(({ behind, dx, flat, key }) =>
+        part(key, { dx, flat, footY: (shown) => bottom(shown) - behind }),
+      );
     }
     const view = { parts };
     this.views.set(item.id, view);

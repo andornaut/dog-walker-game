@@ -167,10 +167,15 @@ export interface PartBox {
 
 // The pack's parts on the flat road: each part's opaque columns across from the walker's, a
 // dog's at the road's scale on its feet row, and its rows from its top row's top edge down to
-// its feet line as the road drawn there, y down the road from the walker's feet.
+// its feet line as the road drawn there, y down the road from the walker's feet. scale is the
+// road's on the part's feet row, which its columns are drawn at.
+export interface ScaledPartBox extends PartBox {
+  scale: number;
+}
+
 export interface PackParts {
-  dogs: PartBox[];
-  walker: PartBox;
+  dogs: ScaledPartBox[];
+  walker: ScaledPartBox;
 }
 
 // How far inside its drawn sprite a part's hit rectangle lies on every side, in screen pixels:
@@ -199,6 +204,7 @@ export function packParts(
         bottom: roadY(projection, footDy - inset),
         left: (dx - half) / scale,
         right: (dx + half) / scale,
+        scale,
         top: roadY(projection, footDy - silhouette.above + inset),
       };
     }),
@@ -206,6 +212,7 @@ export function packParts(
       bottom: roadY(projection, -inset),
       left: walker.left + inset,
       right: walker.right - inset,
+      scale: 1,
       top: roadY(projection, -walker.above + inset),
     },
   };

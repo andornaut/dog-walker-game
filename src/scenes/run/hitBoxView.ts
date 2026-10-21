@@ -1,9 +1,11 @@
 import type { GameObjects, Scene } from "phaser";
 
-import { project } from "../../layout/projection";
-import { type Box, itemBox } from "../../runner/collision";
+import { gameData } from "../../data";
+import { project, screenYAt } from "../../layout/projection";
+import { currentZoneId } from "../../rules/route";
+import { type Box, itemBox, type ScaledBox } from "../../runner/collision";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
-import { packBoxes, type Walk } from "../../runner/walk";
+import { isPickup, packBoxes, solidItemBox, type Walk } from "../../runner/walk";
 import { PALETTE } from "../palette";
 import { DEPTH, LAYOUT, PROJECTION } from "./stage";
 
@@ -13,9 +15,9 @@ const HIT_BOX_DEPTH = DEPTH.fx + 1;
 // focal point.
 const NEAREST_DISTANCE = -PROJECTION.focal / 2;
 
-// The dev panel's hit boxes cheat, drawn through the road's projection: the pack's outline,
-// which pickups touch, in green; its parts' hit rectangles, which obstacles hit, in yellow; and
-// every road item's hit box in red.
+// The dev panel's hit boxes cheat: the pack's outline, which pickups touch, in green, laid on the
+// road through its projection; its parts' hit rectangles, which obstacles hit, in yellow; and
+// every road item's hit box in red, a pickup's laid on the road and anything else's as drawn.
 export class HitBoxView {
   private readonly graphics: GameObjects.Graphics;
 
@@ -32,19 +34,24 @@ export class HitBoxView {
     const geometry = screenRoadGeometry(walk.run);
     const pack = packBoxes(geometry, walk.road.control.motion, walk.run);
     graphics.lineStyle(1, PALETTE.green);
-    this.box(pack.outline);
+    this.onRoad(pack.outline);
     graphics.lineStyle(1, PALETTE.yellow);
     for (const part of [pack.walker, ...pack.dogs]) {
-      this.box(part);
+      this.asDrawn(part);
     }
     graphics.lineStyle(1, PALETTE.red);
+    const zone = currentZoneId(gameData, walk.run);
     for (const item of walk.road.items) {
-      this.box(itemBox(geometry.cell, item));
+      if (isPickup(item.kind)) {
+        this.onRoad(itemBox(geometry.cell, item));
+      } else {
+        this.asDrawn(solidItemBox(gameData, geometry, zone, item));
+      }
     }
   }
 
   // A box on the road, from its left edge across and down its rows.
-  private box({ bottom, left: boxLeft, right: boxRight, top }: Box): void {
+  private onRoad({ bottom, left: boxLeft, right: boxRight, top }: Box): void {
     const { footY, visibleDistance } = PROJECTION;
     const near = Math.max(NEAREST_DISTANCE, footY - bottom);
     const far = Math.min(visibleDistance, footY - top);
@@ -66,5 +73,25 @@ export class HitBoxView {
     }
     graphics.closePath();
     graphics.strokePath();
+  }
+
+  // A box as it is drawn: the screen rectangle over its rows, its columns at its scale.
+  private asDrawn(box: ScaledBox): void {
+    const { footY, visibleDistance } = PROJECTION;
+    const near = Math.max(NEAREST_DISTANCE, footY - box.bottom);
+    const far = Math.min(visibleDistance, footY - box.top);
+    if (near >= far) {
+      return;
+    }
+    const centerX = LAYOUT.road.x + LAYOUT.road.width / 2;
+    const across = (x: number) => centerX + (LAYOUT.road.x + x - centerX) * box.scale;
+    const top = screenYAt(PROJECTION, far);
+    const left = across(box.left);
+    this.graphics.strokeRect(
+      left,
+      top,
+      across(box.right) - left,
+      screenYAt(PROJECTION, near) - top,
+    );
   }
 }

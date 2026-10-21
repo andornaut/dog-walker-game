@@ -4,7 +4,6 @@ import { itemAt } from "../../arrays";
 import { animationKey } from "../../assets/asepriteAnimations";
 import {
   IDLE_TAG,
-  MOVER_SPRITE_KEYS,
   moverBodyTag,
   WARNING_ARROW_KEY,
   WARNING_DOWN_TAG,
@@ -15,8 +14,8 @@ import {
 import { gameData } from "../../data";
 import { LANE_COUNT } from "../../data/screen";
 import type { EncounterId, MinorObstacleId, ZoneId } from "../../data/types";
+import { moverBodyArt } from "../../layout/obstacleArt";
 import { project } from "../../layout/projection";
-import { encounterLook, minorObstacleLook, skinnedArt } from "../../rules/skins";
 import { read } from "../../rules/units";
 import { facesLeft, inMotion, type MoverOnRoad, moverPlace, moverTell } from "../../runner/movers";
 import { firstTag, playTag, showAtDepth } from "../sprites";
@@ -42,20 +41,13 @@ function showBelowJuncture(sprite: GameObjects.Sprite): void {
   sprite.setVisible(sprite.visible && aboveJuncture(sprite) === 0);
 }
 
-// A mover's body sprite: its kind's road art, or the sprite MOVER_SPRITE_KEYS names for that art
-// once it is loaded.
+// A mover's body sprite (moverBodyArt), of the art loaded.
 export function moverBodyKey(
   scene: Scene,
   zone: ZoneId,
   kind: EncounterId | MinorObstacleId,
 ): string {
-  const has = (key: string) => scene.textures.exists(key);
-  const look = Object.hasOwn(gameData.minorObstacles, kind)
-    ? minorObstacleLook(gameData, zone, kind as MinorObstacleId)
-    : encounterLook(gameData, zone, kind as EncounterId);
-  const art = skinnedArt(has, look);
-  const sprite = MOVER_SPRITE_KEYS[art];
-  return sprite !== undefined && has(sprite) ? sprite : art;
+  return moverBodyArt(gameData, (key) => scene.textures.exists(key), zone, kind);
 }
 
 // Each position is the frame's blended one, rounded to whole pixels, and the body is cut off at

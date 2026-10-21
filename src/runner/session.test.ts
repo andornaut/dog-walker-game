@@ -5,6 +5,7 @@ import type { WalkerId } from "../data/types";
 import { firingTimeline } from "../hud/moments";
 import type { LaneDirection } from "../layout/lanes";
 import { cardFor, openCard } from "../rules/choices";
+import { currentZoneId } from "../rules/route";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack } from "../state/pack";
 import { type CardSource, newRun, type PackDogs } from "../state/runState";
@@ -444,7 +445,7 @@ describe("quick lane changes across a row", () => {
       startSession(gameData, runStreams(1), screenRoadGeometry, { road: startRoad(5), run }),
     );
     const road = screenRoadGeometry(run);
-    const height = itemHeight(gameData, road, kind);
+    const height = itemHeight(gameData, road, currentZoneId(gameData, run), kind, false);
     const items = lanes.map((lane, id) => ({
       height,
       id,

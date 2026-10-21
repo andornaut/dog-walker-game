@@ -7,11 +7,12 @@ import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
 import { screenYAt } from "../layout/projection";
 import { screenLayout } from "../layout/screenLayout";
+import { currentZoneId } from "../rules/route";
 import { testState } from "../testing/runState";
 import { hitDog, itemBox, pickupDog } from "./collision";
 import { stillInLane } from "./laneMotion";
 import { screenRoadGeometry } from "./screenGeometry";
-import { itemHeight, packBoxes, type WalkItemKind } from "./walk";
+import { isPickup, itemHeight, packBoxes, solidItemBox, type WalkItemKind } from "./walk";
 import { walkProjection } from "./walkGeometry";
 
 const DATA = { encounters: ENCOUNTERS, minorObstacles: MINOR_OBSTACLES };
@@ -41,16 +42,20 @@ describe("screenRoadGeometry", () => {
       );
       const run = testState(slots);
       const geometry = screenRoadGeometry(run);
-      const height = itemHeight(DATA, geometry, kind);
+      const zone = currentZoneId(gameData, run);
+      const height = itemHeight(DATA, geometry, zone, kind, false);
       const pack = packBoxes(geometry, stillInLane(0), run);
       const hitRows: number[] = [];
       // From where the item spawns until it has scrolled off the road and is dropped.
       for (let y = geometry.roadTop - height; y < geometry.roadBottom; y += SCROLL_STEP) {
         const item = { height, id: 0, kind, lane: 0, laneSpan: 1, y };
+        const solid = solidItemBox(DATA, geometry, zone, item);
         const box = itemBox(geometry.cell, item);
-        if (hitDog(pack, box) !== null || pickupDog(pack, box) !== null) {
+        const hit = isPickup(kind) ? pickupDog(pack, box) : hitDog(pack, solid);
+        if (hit !== null) {
           // Its far edge as the item views draw it, through the projection.
-          hitRows.push(screenYAt(PROJECTION, PROJECTION.footY - y));
+          const far = isPickup(kind) ? y : solid.top;
+          hitRows.push(screenYAt(PROJECTION, PROJECTION.footY - far));
         }
       }
       expect(hitRows.length).toBeGreaterThan(0);

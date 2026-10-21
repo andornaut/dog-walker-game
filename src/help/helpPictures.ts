@@ -15,7 +15,7 @@ import type { Point, Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import type { Change } from "../rules/causes";
 import { cardFor, type CardView, forkCard, MAX_CARD_OPTIONS } from "../rules/choices";
-import { firstZoneId, forkPaths } from "../rules/route";
+import { currentZoneId, firstZoneId, forkPaths } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { addCents, cents, clampHearts, pixels } from "../rules/units";
 import { laneControlIn } from "../runner/laneControl";
@@ -168,7 +168,8 @@ function itemAhead(
   item: { distance: number; id: number; kind: WalkItemKind; lane: number },
   mover?: MoverOnRoad,
 ): WalkItem {
-  const height = itemHeight(data, screenRoadGeometry(run), item.kind);
+  const zone = currentZoneId(data, run);
+  const height = itemHeight(data, screenRoadGeometry(run), zone, item.kind, mover !== undefined);
   const placed = {
     height,
     id: item.id,

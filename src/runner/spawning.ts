@@ -29,8 +29,9 @@ export interface SpawnQuota<Kind extends string> {
 }
 
 // Distances are scroll distances in pixels from the start of the zone. A spawn's footprint
-// is cellLength per row, and its hit box is the footprint less cellInset at each end; it
-// overlaps the pack over its hit box's length plus packLength. scrollSpeed (pixels per
+// is cellLength per row, and its hit box is planned as the footprint less cellInset at each end,
+// which is negative where obstacles are drawn longer than a row; it overlaps the pack over its
+// hit box's length plus packLength. scrollSpeed (pixels per
 // second), laneMoveSeconds and stepSeconds, the walk's step, set how far the pack can steer
 // between rows. sightLength is the road in view above the pack, so the next row shows before
 // the pack has to steer for it, and roadLength the whole road in view. reactionSeconds is the
@@ -138,8 +139,8 @@ export function rowSpacing(plan: SpawnPlan<string>): number {
 export function laneReach(plan: SpawnPlan<string>): LaneReach {
   const spacing = rowSpacing(plan);
   const window = blockingLength(plan, 1);
-  if (window > plan.minSpacing) {
-    throw new Error("minSpacing must be at least a row's blocking length, or rows overlap");
+  if (window > spacing) {
+    throw new Error("Rows must be at least a row's blocking length apart, or they overlap");
   }
   if (spacing > window + plan.sightLength) {
     throw new Error("Rows must keep the next row in sight before the pack steers for it");

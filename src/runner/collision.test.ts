@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
+import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { currentZoneId } from "../rules/route";
 import { testState } from "../testing/runState";
 import {
   boundingBox,
@@ -9,15 +11,17 @@ import {
   type DogBox,
   hitDog,
   itemBox,
+  type LanedBox,
   overlaps,
   type PackBoxes,
   pickupDog,
+  type ScaledBox,
   tickInvulnerability,
 } from "./collision";
 import { stillInLane } from "./laneMotion";
 import type { RoadItem } from "./roadItems";
 import { screenRoadGeometry } from "./screenGeometry";
-import { packBoxes } from "./walk";
+import { itemHeight, packBoxes, solidItemBox, type WalkItem } from "./walk";
 
 type Kind = "obstacle" | "tip";
 
@@ -27,11 +31,19 @@ const rules = {
   startsInvulnerability: () => true,
 };
 const CELL = { inset: 8, length: 64 };
-// A pack of parts, outlined by their bounding box.
-const packOf = (walker: Box, dogs: readonly DogBox[]): PackBoxes => ({
-  dogs,
+// A box drawn at scale 1, as every row of a flat road is.
+const flat = <Part extends Box>(box: Part): Part & ScaledBox => ({ ...box, scale: 1 });
+// An item's box on a flat road, in lanes wide enough never to cut it.
+const solid = (box: Box): LanedBox => ({
+  ...flat(box),
+  lanes: { left: -Infinity, right: Infinity },
+});
+// A pack of parts on a flat road, outlined by their bounding box.
+const packOf = (walker: Box, dogs: readonly Omit<DogBox, "scale">[]): PackBoxes => ({
+  centerX: 0,
+  dogs: dogs.map(flat),
   outline: boundingBox([walker, ...dogs]),
-  walker,
+  walker: flat(walker),
 });
 // A one-dog pack 40 wide centred on centreX, its dog over the walker's feet: in lane 2, or
 // halfway between lanes 2 and 3, as mid-move.
@@ -39,7 +51,8 @@ const single = (centreX: number) =>
   packOf({ bottom: 600, left: centreX - 20, right: centreX + 20, top: 585 }, [
     { bottom: 585, dog: "koda", left: centreX - 20, right: centreX + 20, top: 560 },
   ]);
-const touchingWith = (pack: PackBoxes) => (hit: RoadItem<Kind>) => hitDog(pack, itemBox(CELL, hit));
+const touchingWith = (pack: PackBoxes) => (hit: RoadItem<Kind>) =>
+  hitDog(pack, solid(itemBox(CELL, hit)));
 const still = touchingWith(single(160));
 const midMove = touchingWith(single(192));
 
@@ -127,12 +140,24 @@ describe("hitDog", () => {
     ["on nothing in the gap between the parts", GAP, null],
     ["on nothing outside the outline", { bottom: 10, left: 40, right: 60, top: -10 }, null],
   ])("lands an obstacle %s", (_, box, dog) => {
+    expect(hitDog(chevron, solid(box))).toBe(dog);
+  });
+
+  // Zippy's rectangle runs 12 to 30 across; the box reaches 20 to 40, its lanes 25 on.
+  it.each<[string, number, DogId | null]>([
+    ["on a dog its lanes reach", 15, "zippy"],
+    ["on no dog only the box's spill past its lanes reaches", 30, null],
+  ])("lands an obstacle %s", (_, laneLeft, dog) => {
+    const box = {
+      ...solid({ bottom: 30, left: 20, right: 40, top: 10 }),
+      lanes: { left: laneLeft, right: 60 },
+    };
     expect(hitDog(chevron, box)).toBe(dog);
   });
 
   it("lands on no dog when the pack has none", () => {
     const walker = { bottom: 100, left: -10, right: 10, top: 40 };
-    expect(hitDog(packOf(walker, []), walker)).toBeNull();
+    expect(hitDog(packOf(walker, []), solid(walker))).toBeNull();
   });
 });
 
@@ -165,24 +190,25 @@ describe("a settled pack", () => {
   const DOGS: DogId[] = ["koda", "biscuit", "zippy"];
   const runOf = (count: number) =>
     testState(Object.fromEntries(DOGS.slice(0, count).map((dog) => [dog, 3])));
-  // An obstacle level with the lead's rectangle, in lane.
-  const levelIn = (lane: number, count: number) => {
-    const { packParts } = screenRoadGeometry(runOf(count));
-    return {
-      height: 40,
-      id: 1,
-      kind: "obstacle" as const,
-      lane,
-      laneSpan: 1,
-      y: (packParts.dogs[0]?.top ?? 0) + 2,
-    };
+  // A goose, drawn about as wide as a lane's hit box, standing level with the lead's rectangle, in
+  // lane.
+  const levelIn = (lane: number, count: number): WalkItem => {
+    const run = runOf(count);
+    const geometry = screenRoadGeometry(run);
+    const height = itemHeight(gameData, geometry, currentZoneId(gameData, run), "goose", false);
+    const feetY = (geometry.packParts.dogs[0]?.top ?? 0) + 20;
+    return { height, id: 1, kind: "goose", lane, laneSpan: 1, y: feetY - height };
   };
   const contact = (count: number, motion: Parameters<typeof packBoxes>[1], lane: number) => {
     const run = runOf(count);
     const geometry = screenRoadGeometry(run);
     const pack = packBoxes(geometry, motion, run);
-    const box = itemBox(geometry.cell, levelIn(lane, count));
-    return [hitDog(pack, box), pickupDog(pack, box)];
+    const item = levelIn(lane, count);
+    const zone = currentZoneId(gameData, run);
+    return [
+      hitDog(pack, solidItemBox(gameData, geometry, zone, item)),
+      pickupDog(pack, itemBox(geometry.cell, item)),
+    ];
   };
 
   it.each([1, 2, 3])("never touches anything in the lane beside, for %i dogs", (count) => {

@@ -23,10 +23,10 @@ describe("walkGeometry", () => {
     expect(walkerFootY(gameRoad)).toBeGreaterThan(geometry.roadBottom - 10);
   });
 
-  // A 1-lane hit box is ROAD_HIT_SIZE wide whatever size the art is drawn, and each lane more
-  // adds a lane's width.
+  // A pickup's 1-lane hit box is ROAD_HIT_SIZE wide whatever size the art is drawn, and each lane
+  // more adds a lane's width.
   const { cell } = walkGeometry(LANE_COUNT, PACKS[0], projection, gameRoad);
-  it.each([1, 2, 3])("hits a %d-lane obstacle at the hit size, not the sprite size", (lanes) => {
+  it.each([1, 2, 3])("insets a %d-lane footprint to the hit size, not the sprite size", (lanes) => {
     const hit = lanes * cell.length - 2 * cell.inset;
     expect(hit).toBe(ROAD_HIT_SIZE + (lanes - 1) * cell.length);
     expect(hit).toBeLessThan(ROAD_SPRITE_SIZE + (lanes - 1) * cell.length);
@@ -54,12 +54,5 @@ describe("walkGeometry", () => {
       expect(part.left).toBeGreaterThan(outline.left);
       expect(part.right).toBeLessThan(outline.right);
     }
-  });
-
-  // A row's hit box and the longest pack fit between rows, or the planner cannot place them.
-  it("spaces rows of spawns far enough apart for a row and the longest pack", () => {
-    const { cell, tallestPackBand } = walkGeometry(5, PACKS[0], projection, gameRoad);
-    const row = cell.length - 2 * cell.inset;
-    expect(TUNING.pixels.spawnRowSpacing).toBeGreaterThanOrEqual(row + tallestPackBand);
   });
 });

@@ -3,11 +3,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import type { EncounterId, GameData, MinorObstacleId, Movement, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { currentZoneId } from "../rules/route";
 import { read } from "../rules/units";
 import { approachOutcomes } from "../runner/approach";
-import { hitDog, itemBox } from "../runner/collision";
+import { hitDog } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
-import { stillInLane } from "../runner/laneMotion";
+import { type LaneMotion, stillInLane } from "../runner/laneMotion";
 import {
   hasLeftRoad,
   type MoverDraws,
@@ -24,8 +25,11 @@ import {
   itemHeight,
   moverSpec,
   packBoxes,
+  plannedCellInset,
+  solidItemBox,
   startRoad,
   steerWalk,
+  sweptPackBoxes,
   type Walk,
   type WalkItem,
   type WalkItemKind,
@@ -224,9 +228,10 @@ describe("a mover's moves and hazards", () => {
     );
     const geometry = screenRoadGeometry(run);
     const speed = walkScrollSpeed(gameData, run);
-    const road: BotRoad = { data: gameData, geometry, speed };
+    const road: BotRoad = { data: gameData, geometry, speed, zone: currentZoneId(gameData, run) };
     const { cell, laneCount, roadBottom, roadTop, sightLength, tallestPackBand } = geometry;
-    const height = itemHeight(gameData, geometry, mover.kind);
+    const zone = currentZoneId(gameData, run);
+    const height = itemHeight(gameData, geometry, zone, mover.kind, true);
     const spec = moverSpec(gameData, seededRandom(1), mover.shape, mover.movement);
     const placements = moverPlacements(
       {
@@ -238,7 +243,11 @@ describe("a mover's moves and hazards", () => {
         scrollSpeed: speed,
         sightLength,
         window: blockingLength(
-          { cellInset: cell.inset, cellLength: cell.length, packLength: tallestPackBand },
+          {
+            cellInset: plannedCellInset(gameData, geometry, zone),
+            cellLength: cell.length,
+            packLength: tallestPackBand,
+          },
           1,
         ),
       },
@@ -281,9 +290,18 @@ describe("a mover's moves and hazards", () => {
       const packs = Array.from({ length: laneCount }, (_, lane) =>
         packBoxes(geometry, stillInLane(lane), run),
       );
-      // The lanes in which a pack standing there is hit at a time, of any way it moves; null
-      // once every way has left.
-      const hitLanes = (at: number): number[] | null => {
+      // The pack anywhere on the road within half a lane of its place in each lane.
+      const halfway = (lane: number, toward: number): LaneMotion =>
+        toward < 0 || toward >= laneCount
+          ? stillInLane(lane)
+          : { duration: 1, elapsed: 0.5, from: lane, kind: "moving", to: toward };
+      const nearPacks = Array.from({ length: laneCount }, (_, lane) =>
+        sweptPackBoxes(geometry, halfway(lane, lane - 1), halfway(lane, lane + 1), run),
+      );
+      // The lanes in which a pack standing there is hit at a time, of any way it moves, or with
+      // near, while the mover is between lanes, a pack within half a lane of there; null once
+      // every way has left.
+      const hitLanes = (at: number, near = false): number[] | null => {
         const lanes = new Set<number>();
         let onRoad = false;
         for (const outcome of outcomes) {
@@ -293,13 +311,13 @@ describe("a mover's moves and hazards", () => {
             continue;
           }
           onRoad = true;
-          const box = itemBox(cell, {
-            height,
-            lane: place.lanePosition,
-            laneSpan: mover.shape.lanes,
+          const box = solidItemBox(gameData, geometry, zone, {
+            ...item,
+            mover: { path: outcome, since: at * speed },
             y,
           });
-          packs.forEach((pack, lane) => {
+          const between = near && !Number.isInteger(place.lanePosition);
+          (between ? nearPacks : packs).forEach((pack, lane) => {
             if (place.solid && hitDog(pack, box) !== null) {
               lanes.add(lane);
             }
@@ -321,11 +339,12 @@ describe("a mover's moves and hazards", () => {
         }
         lanes = hitLanes(at + STEP_SECONDS / 4);
       }
-      // Searched a tenth of a pixel of scroll apart, finer than the bot's sampling.
+      // Searched a tenth of a pixel of scroll apart, finer than the bot's sampling: a pack in a
+      // hazard's lane, or changing lanes from it, is hit.
       for (const hazard of hazards) {
         let hit = false;
         for (let at = hazard.from; !hit && at < hazard.to; at += 0.1 / speed) {
-          hit = (hitLanes(at) ?? []).some((lane) => inLane(lane, hazard));
+          hit = (hitLanes(at, true) ?? []).some((lane) => inLane(lane, hazard));
         }
         expect(hit, `lanes ${hazard.lanes} from ${hazard.from.toFixed(4)}s`).toBe(true);
       }
@@ -359,7 +378,12 @@ describe("a mover's moves and hazards", () => {
 describe("a steering bot whose pack drifts", () => {
   const run = testState({ biscuit: 3, duchess: 3, snowball: 3 });
   const geometry = screenRoadGeometry(run);
-  const road: BotRoad = { data: gameData, geometry, speed: walkScrollSpeed(gameData, run) };
+  const road: BotRoad = {
+    data: gameData,
+    geometry,
+    speed: walkScrollSpeed(gameData, run),
+    zone: currentZoneId(gameData, run),
+  };
   const [kind] = (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).filter((id) => {
     const { movement, shape } = gameData.minorObstacles[id];
     return movement === undefined && shape.lanes * shape.rows === 1;
@@ -369,7 +393,7 @@ describe("a steering bot whose pack drifts", () => {
   }
   const start = startRoad(geometry.laneCount);
   const lane = start.control.target;
-  const height = itemHeight(gameData, geometry, kind);
+  const height = itemHeight(gameData, geometry, currentZoneId(gameData, run), kind, false);
   const ahead: WalkItem = {
     height,
     id: 1,

@@ -14,9 +14,9 @@ import type { RoadGeometry } from "./walk";
 // How far the walker's feet stand above the bottom of the road.
 const WALKER_FEET_ABOVE_ROAD_BOTTOM = 4;
 
-// An obstacle's hit box is its footprint less the inset at each end, a cell's spare length
-// beside ROAD_HIT_SIZE, so an n-lane, m-row obstacle is hit 64n-24 by 64m-24 on 64px lanes,
-// whatever size it is drawn.
+// A pickup's or lucky find's hit box is its lanes less the inset at each side, a cell's spare
+// width beside ROAD_HIT_SIZE, so one lane hits 40px wide on 64px lanes, whatever size it is
+// drawn.
 function footprintInset(cellLength: number): number {
   return (cellLength - ROAD_HIT_SIZE) / 2;
 }
@@ -50,7 +50,7 @@ export function walkGeometry(
   const footY = walkerFootY(road);
   const tallest = tallestPackLength(projection);
   const parts = packOnRoad(projection, PART_INSET, pack);
-  const along = (part: PartBox): PartBox => ({
+  const along = <Part extends PartBox>(part: Part): Part => ({
     ...part,
     bottom: footY + part.bottom,
     top: footY + part.top,
@@ -61,6 +61,12 @@ export function walkGeometry(
     cell: { inset: footprintInset(road.width / laneCount), length: road.width / laneCount },
     itemHeights: ITEM_HEIGHTS,
     laneCount,
+    lens: {
+      centerX: road.width / 2,
+      focal: projection.focal,
+      footY: projection.footY,
+      horizonY: projection.horizonY,
+    },
     packBand: { bottom: outline.bottom, top: outline.top },
     packParts: { dogs: parts.dogs.map(along), outline, walker: along(parts.walker) },
     roadBottom: road.y + road.height,

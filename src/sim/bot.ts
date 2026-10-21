@@ -1,7 +1,7 @@
-import type { DogId } from "../data/types";
+import type { DogId, ZoneId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { approachOutcomes } from "../runner/approach";
-import { type Box, itemBox, levelWithPack, overlaps } from "../runner/collision";
+import { type LanedBox, levelWithPack, touchesAsDrawn } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
 import type { PullEvent, Pulls } from "../runner/pulls";
@@ -13,6 +13,7 @@ import {
   laneMoveSeconds,
   pickupReach,
   type RoadGeometry,
+  solidItemBox,
   steerWalk,
   type Walk,
   type WalkData,
@@ -34,6 +35,7 @@ export interface BotRoad {
   readonly data: WalkData;
   readonly geometry: RoadGeometry;
   readonly speed: number;
+  readonly zone: ZoneId;
 }
 
 // A steering bot's state. clock is the seconds walked this run, hit stops included and cards
@@ -128,7 +130,7 @@ interface ScrollContact {
 
 type ContactGeometry = Pick<
   RoadGeometry,
-  "cell" | "laneCount" | "packBand" | "packParts" | "roadTop"
+  "cell" | "itemHeights" | "laneCount" | "lens" | "packBand" | "packParts" | "roadTop"
 >;
 
 const SCROLL_CONTACTS = new WeakMap<
@@ -136,24 +138,40 @@ const SCROLL_CONTACTS = new WeakMap<
   WeakMap<object, Map<string, readonly ScrollContact[]>>
 >();
 
-// Whether a hit box touches the pack standing in lane, as the walk's collision has it: one of
-// the pack's hit rectangles, placed at the lane's centre, overlaps it.
-function touchesPackIn(geometry: ContactGeometry, lane: number, box: Box): boolean {
-  const x = (lane + 0.5) * geometry.cell.length;
+// Whether a hit box touches the pack in lane, as the walk's collision has it: one of the pack's
+// hit rectangles touches it as drawn, placed at the lane's centre, or, for a box between lanes,
+// anywhere on the road within half a lane of it. A box as narrow as a cat's can pass between a
+// pack standing in either of two lanes and still meet it changing lanes, which the plan counts
+// as in both.
+function touchesPackIn(
+  geometry: ContactGeometry,
+  between: boolean,
+  lane: number,
+  box: LanedBox,
+): boolean {
+  const { cell, laneCount } = geometry;
+  const x = (lane + 0.5) * cell.length;
+  const left = between && lane > 0 ? cell.length / 2 : 0;
+  const right = between && lane < laneCount - 1 ? cell.length / 2 : 0;
   const { dogs, walker } = geometry.packParts;
   return [...dogs, walker].some((part) =>
-    overlaps({ ...part, left: part.left + x, right: part.right + x }, box),
+    touchesAsDrawn(
+      geometry.lens.centerX,
+      { ...part, left: part.left + x - left, right: part.right + x + right },
+      box,
+    ),
   );
 }
 
 function scrollContacts(
+  road: Pick<BotRoad, "data" | "zone">,
   geometry: ContactGeometry,
-  item: Pick<WalkItem, "height" | "laneSpan">,
+  item: WalkItem,
   path: NonNullable<WalkItem["mover"]>["path"],
 ): readonly ScrollContact[] {
-  const { cell, laneCount, packBand, roadTop } = geometry;
-  const { height, laneSpan } = item;
-  const key = `${height} ${laneSpan}`;
+  const { laneCount, packBand, roadTop } = geometry;
+  const { height, kind, laneSpan } = item;
+  const key = `${road.zone} ${kind} ${height} ${laneSpan}`;
   let byPath = SCROLL_CONTACTS.get(geometry);
   if (byPath === undefined) {
     byPath = new WeakMap();
@@ -179,9 +197,14 @@ function scrollContacts(
       break;
     }
     const level = place.solid && levelWithPack(packBand, { height, y });
-    const box = itemBox(cell, { height, lane: place.lanePosition, laneSpan, y });
+    const between = Math.abs(place.lanePosition - Math.round(place.lanePosition)) > 1e-9;
+    const box = solidItemBox(road.data, geometry, road.zone, {
+      ...item,
+      mover: { path, since },
+      y,
+    });
     for (let lane = 0; lane < laneCount; lane++) {
-      const touching = level && touchesPackIn(geometry, lane, box);
+      const touching = level && touchesPackIn(geometry, between, lane, box);
       const under = current.get(lane);
       if (touching && under !== undefined) {
         under.to = since;
@@ -208,7 +231,7 @@ export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): L
   }
   const contacts: LaneContact[] = [];
   for (const path of pathsAhead(mover.path)) {
-    for (const { from, lane, to } of scrollContacts(road.geometry, item, path)) {
+    for (const { from, lane, to } of scrollContacts(road, road.geometry, item, path)) {
       const start = (from - MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
       const end = (to + MOVER_SAMPLE_SCROLL - mover.since) / road.speed;
       if (end > 0 && start < horizon) {

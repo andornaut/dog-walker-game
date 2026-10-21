@@ -40,6 +40,7 @@ import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { modifiersOf, modifierValue } from "../rules/modifiers";
+import { currentZoneId } from "../rules/route";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
 import { mapPack, packDogs } from "../state/pack";
@@ -70,6 +71,7 @@ import {
   moverMovement,
   obstacleWeights,
   pickWeighted,
+  plannedCellInset,
   planZone,
   type RoadGeometry,
   startRoad,
@@ -207,26 +209,39 @@ const gcdOf = (values: readonly number[]): number =>
     }
     return x;
   }, 0);
+// The length the planner gives a spawn's hit box: its rows less the planned inset at each end,
+// which covers its drawn hit box (itemHeight) whatever obstacle it is.
+const plannedHeight = (
+  tuned: Real,
+  road: RoadGeometry,
+  zone: ZoneId,
+  kind: WalkItem["kind"],
+): number =>
+  blocksLane(tuned, kind)
+    ? footprintOf(tuned, kind).rows * road.cell.length - 2 * plannedCellInset(tuned, road, zone)
+    : itemHeight(tuned, road, zone, kind, false);
 // A standing spawn's span on the game's road.
 const standingSpan = (
   tuned: Real,
   road: RoadGeometry,
+  zone: ZoneId,
   { distance, kind, lane }: { distance: number; kind: WalkItem["kind"]; lane: number },
 ): BlockingSpan => ({
   distance,
   lane,
   laneSpan: footprintOf(tuned, kind).lanes,
-  length: itemHeight(tuned, road, kind) + road.tallestPackBand,
+  length: plannedHeight(tuned, road, zone, kind) + road.tallestPackBand,
 });
 // A pixel-long span for each pixel of scroll a mover overlaps the pack in each lane of the
 // game's road it covers.
 function moverSpans(
   tuned: Real,
   road: RoadGeometry,
+  zone: ZoneId,
   event: { distance: number; kind: WalkItem["kind"]; mover: MoverPath },
 ): BlockingSpan[] {
   const sight = road.sightLength;
-  const window = itemHeight(tuned, road, event.kind) + road.tallestPackBand;
+  const window = plannedHeight(tuned, road, zone, event.kind) + road.tallestPackBand;
   const across = footprintOf(tuned, event.kind).lanes;
   // A stalker's every way of choosing its steps.
   const paths = event.mover.motion === "approach" ? approachOutcomes(event.mover) : [event.mover];
@@ -251,14 +266,15 @@ function moverSpans(
 const blockingSpans = (
   tuned: Real,
   road: RoadGeometry,
+  zone: ZoneId,
   pending: Walk["road"]["pending"],
 ): BlockingSpan[] =>
   pending
     .filter((event) => blocksLane(tuned, event.kind))
     .flatMap((event) =>
       event.mover === undefined
-        ? [standingSpan(tuned, road, event)]
-        : moverSpans(tuned, road, { ...event, mover: event.mover }),
+        ? [standingSpan(tuned, road, zone, event)]
+        : moverSpans(tuned, road, zone, { ...event, mover: event.mover }),
     );
 // The scroll over which a mover is on the game's road: from its cue until it has left the road
 // or passed the bottom.
@@ -452,7 +468,7 @@ describe("planZone", { timeout: 15_000 }, () => {
             road: startRoad(LANE_COUNT),
             run: zoned,
           });
-          const spans = blockingSpans(base, GAME_ROAD, walk.road.pending);
+          const spans = blockingSpans(base, GAME_ROAD, zone, walk.road.pending);
           for (const start of [0, 2, 4]) {
             expect(lanesReachedAtEnd(walkwayOf(base, zoned), spans, start)).not.toEqual([]);
           }
@@ -502,7 +518,7 @@ describe("planZone", { timeout: 15_000 }, () => {
           road: startRoad(LANE_COUNT),
           run: zoned,
         });
-        const spans = blockingSpans(tuned, GAME_ROAD, walk.road.pending);
+        const spans = blockingSpans(tuned, GAME_ROAD, zone, walk.road.pending);
         for (const start of LANES) {
           const reached = lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start);
           expect(reached, `${zone}, seed ${seed}, from lane ${start}`).not.toEqual([]);
@@ -540,7 +556,8 @@ describe("planZone", { timeout: 15_000 }, () => {
           const nearLanes = lanesOf(near.kind, near.lane);
           for (const far of standing.filter(({ distance }) => distance > near.distance)) {
             const changes = laneChangesBehind(LANE_COUNT, nearLanes, lanesOf(far.kind, far.lane));
-            const gap = far.distance - near.distance - itemHeight(REAL, GAME_ROAD, near.kind);
+            const gap =
+              far.distance - near.distance - plannedHeight(REAL, GAME_ROAD, zone, near.kind);
             if (changes > 0 && gap > 0) {
               const fit = GAME_ROAD.tallestPackBand + changes * laneMove + margin;
               expect(gap, `seed ${seed}: ${near.kind} then ${far.kind}`).toBeGreaterThanOrEqual(
@@ -1402,7 +1419,7 @@ describe("movers", { timeout: 60_000 }, () => {
         run: zoned,
       });
       const blocking = walk.road.pending.filter((event) => blocksLane(tuned, event.kind));
-      const spans = blockingSpans(tuned, road, blocking);
+      const spans = blockingSpans(tuned, road, zone, blocking);
       for (const start of LANES) {
         const reached = lanesReachedAtEnd(walkwayOf(tuned, zoned), spans, start);
         expect(reached, `seed ${seed}, from lane ${start}`).not.toEqual([]);
@@ -1419,13 +1436,13 @@ describe("movers", { timeout: 60_000 }, () => {
         if (event.mover === undefined) {
           const { lanes } = footprintOf(tuned, event.kind);
           return {
-            end: event.distance + itemHeight(tuned, road, event.kind),
+            end: event.distance + plannedHeight(tuned, road, zone, event.kind),
             kind: event.kind,
             lanes: new Set(Array.from({ length: lanes }, (_, i) => event.lane + i)),
             start: event.distance,
           };
         }
-        const touched = moverSpans(tuned, road, { ...event, mover: event.mover });
+        const touched = moverSpans(tuned, road, zone, { ...event, mover: event.mover });
         const from = Math.min(...touched.map(({ distance }) => distance));
         const to = Math.max(...touched.map(({ distance }) => distance + 1));
         return {
@@ -1511,8 +1528,9 @@ describe("movers", { timeout: 60_000 }, () => {
       },
     };
     const [item] = step(due, 0.05).walk.road.items;
+    const height = itemHeight(data, geometry, currentZoneId(data, due.run), "squirrel", true);
     expect(item?.mover?.since).toBeCloseTo(3.5);
-    expect(item?.y).toBeCloseTo(40 - 32 + 450 + 3.5);
+    expect(item?.y).toBeCloseTo(40 - height + 450 + 3.5);
   });
 
   // A stalker in lane 2 that may step a lane either side and a row down chooses its step as

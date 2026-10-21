@@ -8,18 +8,27 @@ export interface Box {
   readonly top: number;
 }
 
+// A box drawn on a row of the road at scale: its columns are road pixels on that row, so it is
+// drawn from centerX + (left - centerX) * scale to centerX + (right - centerX) * scale across the
+// screen, centerX being the road's centre, which the projection leaves in place.
+export interface ScaledBox extends Box {
+  readonly scale: number;
+}
+
 // One dog's hit rectangle: inside its drawn sprite, on the road.
-export interface DogBox<Dog extends string = string> extends Box {
+export interface DogBox<Dog extends string = string> extends ScaledBox {
   readonly dog: Dog;
 }
 
 // The pack on the road: its outline, the bounding box of everything drawn for it (the walker,
 // the dogs and the leashes between them), which pickups touch; and its parts' hit rectangles,
-// each dog's in pack order and the walker's, which obstacles touch. A leash is not hit.
+// each dog's in pack order and the walker's, which obstacles touch. A leash is not hit. centerX
+// is the road's centre, where the parts' scales meet.
 export interface PackBoxes<Dog extends string = string> {
+  readonly centerX: number;
   readonly dogs: readonly DogBox<Dog>[];
   readonly outline: Box;
-  readonly walker: Box;
+  readonly walker: ScaledBox;
 }
 
 // The pack's band down the road, from its outline's top to its bottom.
@@ -38,6 +47,27 @@ export function levelWithPack(pack: PackBand, item: Pick<RoadItem, "height" | "y
 // Boxes that share any area overlap; boxes that only meet at an edge do not.
 export function overlaps(a: Box, b: Box): boolean {
   return a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom;
+}
+
+// A solid item's hit box as drawn, and the road columns of the lanes it stands in, left to right.
+export interface LanedBox extends ScaledBox {
+  readonly lanes: { readonly left: number; readonly right: number };
+}
+
+// Whether an item's box touches a part's as drawn: along the road, and across the screen, each
+// at its scale. The item's box is cut to its lanes as the road is drawn on the part's row, so it
+// never reaches a part settled in another lane however wide the projection draws it. Boxes that
+// only meet at an edge do not touch.
+export function touchesAsDrawn(centerX: number, part: ScaledBox, item: LanedBox): boolean {
+  const across = (scale: number, x: number) => centerX + (x - centerX) * scale;
+  const left = Math.max(across(item.scale, item.left), across(part.scale, item.lanes.left));
+  const right = Math.min(across(item.scale, item.right), across(part.scale, item.lanes.right));
+  return (
+    across(part.scale, part.left) < right &&
+    left < across(part.scale, part.right) &&
+    part.top < item.bottom &&
+    item.top < part.bottom
+  );
 }
 
 // An item's hit box: its lanes less the inset at each side, along its height.
@@ -108,17 +138,17 @@ export function pickupDog<Dog extends string>(pack: PackBoxes<Dog>, box: Box): D
     : nearest.dog;
 }
 
-// The dog an obstacle hits: the dog whose rectangle it touches, the one nearest the point of
-// contact of those it touches; or the front dog when it touches only the walker's. null when it
-// touches no part, even inside the outline, or the pack has no dogs.
-export function hitDog<Dog extends string>(pack: PackBoxes<Dog>, box: Box): Dog | null {
+// The dog an obstacle hits: the dog whose rectangle it touches as drawn, the one nearest the
+// point of contact of those it touches; or the front dog when it touches only the walker's. null
+// when it touches no part, even inside the outline, or the pack has no dogs.
+export function hitDog<Dog extends string>(pack: PackBoxes<Dog>, box: LanedBox): Dog | null {
   const [front] = pack.dogs;
   if (front === undefined) {
     return null;
   }
-  const touched = pack.dogs.filter((dog) => overlaps(dog, box));
+  const touched = pack.dogs.filter((dog) => touchesAsDrawn(pack.centerX, dog, box));
   if (touched.length === 0) {
-    return overlaps(pack.walker, box) ? front.dog : null;
+    return touchesAsDrawn(pack.centerX, pack.walker, box) ? front.dog : null;
   }
   return (nearestOf(touched, contactPoint(pack.outline, box)) ?? front).dog;
 }

@@ -309,9 +309,9 @@ describe("planSpawns", () => {
 
   it.each<{ error: RegExp; name: string; unplannable: SpawnPlan<Kind> }>([
     {
-      error: /minSpacing/,
-      name: "the rows are too close for the pack to pass between them",
-      unplannable: { ...plan, packLength: 81 },
+      error: /apart/,
+      name: "the rows, with no lane move to space them, are too close for the pack to pass between them",
+      unplannable: { ...plan, laneMoveSeconds: 0, packLength: 81 },
     },
     {
       error: /sight/,
@@ -467,6 +467,12 @@ describe("laneReach and rowSpacing", () => {
       reach: { betweenRows: 1, entry: 2 },
       spaced: { ...tight, scrollSpeed: 200 },
       spacing: 130,
+    },
+    {
+      name: "a hit box 30px longer than its row widens a 120px window's rows past minSpacing",
+      reach: { betweenRows: 1, entry: 4 },
+      spaced: { ...tight, cellInset: -20 },
+      spacing: 150,
     },
     // Never further than the road is wide.
     {

@@ -13,10 +13,12 @@ const FLAT_FOCAL = 1e7;
 
 // The game's pack of three on a flat test road, the walker's feet on walkerFootY: Casey with
 // Koda leading, Biscuit and Zippy. Its first dogs stand in for a smaller pack's.
-export function testPack(walkerFootY: number): Pick<RoadGeometry, "packBand" | "packParts"> {
+export function testPack(
+  walkerFootY: number,
+): Pick<RoadGeometry, "lens" | "packBand" | "packParts"> {
   const lens = { focal: FLAT_FOCAL, footY: walkerFootY, horizonY: walkerFootY - FLAT_FOCAL };
   const pack: PackSprites = { dogs: ["koda", "biscuit", "zippy"], walker: "casey" };
-  const along = (part: PartBox): PartBox => ({
+  const along = <Part extends PartBox>(part: Part): Part => ({
     ...part,
     bottom: walkerFootY + part.bottom,
     top: walkerFootY + part.top,
@@ -24,6 +26,8 @@ export function testPack(walkerFootY: number): Pick<RoadGeometry, "packBand" | "
   const parts = packOnRoad(lens, PART_INSET, pack);
   const outline = along(packOutline(packOnRoad(lens, 0, pack)));
   return {
+    // On a flat road every row is drawn at scale 1, so the road's centre moves nothing.
+    lens: { centerX: 0, ...lens },
     packBand: { bottom: outline.bottom, top: outline.top },
     packParts: { dogs: parts.dogs.map(along), outline, walker: along(parts.walker) },
   };

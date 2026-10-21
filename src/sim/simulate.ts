@@ -11,6 +11,7 @@ import type {
 import type { InputEvent } from "../dev/inputLog";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
 import { type CardView, type Choice, type ChoiceData, type ChoiceOutcome } from "../rules/choices";
+import { currentZoneId } from "../rules/route";
 import { addCents, type Cents, cents } from "../rules/units";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { destinationLane } from "../runner/laneMotion";
@@ -302,7 +303,13 @@ function noteChoice(
 // What the bot reads of the road: its geometry for the pack and the zone's scroll speed.
 function botRoadOf(data: SimData, walk: Walk): BotRoad & { readonly pack: RunState["pack"] } {
   const speed = walkScrollSpeed(data, walk.run) * walk.road.speedFactor;
-  return { data, geometry: screenRoadGeometry(walk.run), pack: walk.run.pack, speed };
+  return {
+    data,
+    geometry: screenRoadGeometry(walk.run),
+    pack: walk.run.pack,
+    speed,
+    zone: currentZoneId(data, walk.run),
+  };
 }
 
 // The bot plays the walk on the game's own session, a step of STEP_SECONDS at a time as the
