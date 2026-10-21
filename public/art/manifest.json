@@ -4946,6 +4946,14 @@
       "png": "images/ui-quip-tail-up.png"
     },
     {
+      "key": "ui-scroll-thumb",
+      "png": "images/ui-scroll-thumb.png"
+    },
+    {
+      "key": "ui-scroll-track",
+      "png": "images/ui-scroll-track.png"
+    },
+    {
       "key": "ui-stitch-h",
       "png": "images/ui-stitch-h.png"
     },
