@@ -6,12 +6,14 @@ import { project } from "../../layout/projection";
 import { screenRoadGeometry } from "../../runner/screenGeometry";
 import type { Walk } from "../../runner/walk";
 import { addStandingSprite, firstTag, playTag, showAtDepth } from "../sprites";
+import { CardMark } from "./itemCueViews";
 import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // A forced stop's figure stands in the middle of the road; a construction barrier is
 // repeated across every lane.
 export class ForcedStopView {
   private key = "";
+  private mark: CardMark | null = null;
   private readonly scene: Scene;
   private sprites: GameObjects.Sprite[] = [];
 
@@ -49,9 +51,17 @@ export class ForcedStopView {
       clipToRoad(sprite);
       shadow(key, drawn.depth, x, y);
     });
+    // Every forced stop opens a card: the mark stands over the middle sprite.
+    this.mark ??= new CardMark(this.scene);
+    const middle = this.sprites[Math.floor(this.sprites.length / 2)];
+    if (middle !== undefined) {
+      this.mark.place(middle);
+    }
   }
 
   private clear(): void {
+    this.mark?.destroy();
+    this.mark = null;
     this.sprites.forEach((sprite) => sprite.destroy());
     this.key = "";
     this.sprites = [];

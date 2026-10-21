@@ -31,6 +31,7 @@ import { walkGeometry } from "../../runner/walkGeometry";
 import { needIcon } from "../needSignals";
 import { PALETTE } from "../palette";
 import { addStandingSprite, ensurePlaceholder, firstTag, playTag, showAtDepth } from "../sprites";
+import { ItemCueViews } from "./itemCueViews";
 import { drawMover, moverBodyKey } from "./moverView";
 import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
@@ -80,6 +81,7 @@ export function ensureRoadPlaceholders(scene: Scene): void {
 
 // The sprites of everything spawned on the road, by item id.
 export class ItemViews {
+  private readonly cues: ItemCueViews;
   private readonly hint: (event: HintTrigger) => void;
   private readonly scene: Scene;
   private readonly views = new Map<number, ItemView>();
@@ -87,6 +89,7 @@ export class ItemViews {
   constructor(scene: Scene, hint: (event: HintTrigger) => void) {
     this.scene = scene;
     this.hint = hint;
+    this.cues = new ItemCueViews(scene);
   }
 
   // Each item's sprites stand on the road through the projection, sized for where they stand
@@ -128,7 +131,9 @@ export class ItemViews {
           shadow(part.key, drawn.depth, x, y);
         }
       }
+      this.cues.apply(item, view.parts, still);
     }
+    this.cues.prune(seen);
     for (const [id, view] of this.views) {
       if (!seen.has(id)) {
         view.parts.forEach(({ sprite }) => sprite.destroy());
