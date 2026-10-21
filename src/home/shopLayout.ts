@@ -11,33 +11,35 @@ import { SHOP_TABS } from "./shop";
 // lists scroll in the list area under the tabs, laid out here as they sit scrolled to the top.
 const PANEL = { height: 512, width: 352, x: 4, y: 44 };
 const ROW_X = PANEL.x + 12;
-const ROW_WIDTH = 314;
+// Rows run to the tabs' right edge, or with a scrollbar stop 6px short of its track.
+const ROW_WIDTH = 328;
+const ROW_SCROLL_WIDTH = 314;
 // The list area: from under the tabs to the card's inner edge, from the card's 8px frame to
-// 2px short of the scrollbar's track.
-const LIST = { height: 436, width: 322, x: PANEL.x + 8, y: 112 };
+// 2px short of the scrollbar's track, or with no scrollbar to the card's frame.
+const LIST = { height: 431, width: 322, x: PANEL.x + 8, y: 117 };
+const LIST_UNSCROLLED = { ...LIST, width: PANEL.width - 16 };
 
 export const SHOP_LAYOUT = {
   band: { height: 24, inset: 6, titleX: 16, titleY: 7 },
   close: closeControl(PANEL),
   // The Dogs tab: the slot heading and rows, then the dog heading and rows.
   dogs: {
-    dogHeadingY: 236,
-    dogRows: { height: 42, pitch: 48, y: 252 },
-    slotHeadingY: 118,
-    slotRows: { height: 42, pitch: 48, y: 134 },
+    dogHeadingY: 241,
+    dogRows: { height: 42, pitch: 48, y: 257 },
+    slotHeadingY: 123,
+    slotRows: { height: 42, pitch: 48, y: 139 },
   },
   // The Gear tab: its heading and rows.
   gear: {
-    headingY: 118,
-    rows: { height: 44, pitch: 54, y: 136 },
+    headingY: 123,
+    rows: { height: 44, pitch: 54, y: 141 },
   },
-  // Headings sit on the card at the row's left, a note right-aligned at its right.
-  headingRight: ROW_X + ROW_WIDTH,
+  // Headings sit on the card at the rows' left, a note right-aligned at their right.
   headingX: ROW_X,
   // The headings and rows scroll in rect, masked to it, with padBottom of card under the last
-  // row when scrolled to the bottom. A page key moves the list its height less pageOverlap,
-  // keeping the row at the edge in view.
-  list: { padBottom: 8, pageOverlap: 48, rect: LIST },
+  // row when scrolled to the bottom; a list with no scrollbar is masked to unscrolledRect. A
+  // page key moves the list its height less pageOverlap, keeping the row at the edge in view.
+  list: { padBottom: 8, pageOverlap: 48, rect: LIST, unscrolledRect: LIST_UNSCROLLED },
   // The last tap's message: one line on the ui-hint plate across the list's top, over the rows,
   // from textDx inside the plate's left and right edges, its capitals centred on the plate.
   // The plate's frame is frame pixels thick.
@@ -49,13 +51,15 @@ export const SHOP_LAYOUT = {
   panel: PANEL,
   // In a row: the 36x36 art box and the art in it, the padlock over the row's top-left
   // corner, the name and line, and the price plate or OWNED (ownedDx left of the tick's right
-  // edge) plateInset inside the right edge, the name and line keeping textGap clear of it.
+  // edge) plateInset inside the right edge, the name and line keeping textGap clear of it. A
+  // row is width wide, or scrollWidth beside a scrollbar.
   row: {
     art: 2,
     box: { dx: 4, size: 36 },
     lock: { dx: -2, dy: -3 },
     ownedDx: 20,
     plateInset: 6,
+    scrollWidth: ROW_SCROLL_WIDTH,
     textDx: 46,
     textGap: 6,
     width: ROW_WIDTH,
@@ -65,7 +69,7 @@ export const SHOP_LAYOUT = {
   // and in it a thumbWidth-wide thumb thumbInset inside the track's edges, at least thumbMin
   // tall.
   scrollbar: { thumbInset: 1, thumbMin: 16, thumbWidth: 6, trackWidth: 8, x: 336 },
-  tab: { drawHeight: 28, drawY: 80, gap: 8, height: 44, width: 160, x: ROW_X, y: 72 },
+  tab: { drawHeight: 28, drawY: 85, gap: 8, height: 44, width: 160, x: ROW_X, y: 77 },
 } as const;
 
 // The message on one line inside its plate, in the first of TEXT_FIT_STYLES whose ink fits.
@@ -94,6 +98,22 @@ export function shopScrollbar(max: number, y: number): { thumb: Rect; track: Rec
   return scrollbarRects(SHOP_LAYOUT.scrollbar, LIST, max, y);
 }
 
+// The open list's area (its mask and hit area), its rows' width and its heading note's right
+// edge, by whether it scrolls: a list with no scrollbar runs to the tabs' right edge.
+export function shopListFrame(scrolls: boolean): {
+  headingRight: number;
+  rect: Rect;
+  rowWidth: number;
+} {
+  const { list, row } = SHOP_LAYOUT;
+  const rowWidth = scrolls ? row.scrollWidth : row.width;
+  return {
+    headingRight: row.x + rowWidth,
+    rect: scrolls ? list.rect : list.unscrolledRect,
+    rowWidth,
+  };
+}
+
 // A tab's hit area; its face is drawHeight tall at drawY inside it.
 export function shopTabRects(): Rect[] {
   const { gap, height, width, x, y } = SHOP_LAYOUT.tab;
@@ -105,12 +125,13 @@ export function shopTabFace(hit: Rect): Rect {
   return { ...hit, height: drawHeight, y: drawY };
 }
 
-// Rows from top, pitch apart.
+// Rows width wide from top, pitch apart.
 export function rowRects(
+  width: number,
   spec: { height: number; pitch: number; y: number },
   count: number,
 ): Rect[] {
-  const { width, x } = SHOP_LAYOUT.row;
+  const { x } = SHOP_LAYOUT.row;
   return Array.from({ length: count }, (_, i) => ({
     height: spec.height,
     width,
@@ -119,9 +140,9 @@ export function rowRects(
   }));
 }
 
-// How wide a row's name and line may be beside the price plate or OWNED, rightWidth wide from
-// its left edge to the row's right edge less plateInset.
-export function shopRowTextRoom(rightWidth: number): number {
-  const { plateInset, textDx, textGap, width } = SHOP_LAYOUT.row;
-  return width - plateInset - rightWidth - textGap - textDx;
+// How wide the name and line of a row rowWidth wide may be beside the price plate or OWNED,
+// rightWidth wide from its left edge to the row's right edge less plateInset.
+export function shopRowTextRoom(rowWidth: number, rightWidth: number): number {
+  const { plateInset, textDx, textGap } = SHOP_LAYOUT.row;
+  return rowWidth - plateInset - rightWidth - textGap - textDx;
 }

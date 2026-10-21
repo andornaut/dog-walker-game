@@ -84,6 +84,10 @@ export const PLATE_LOOKS = {
   { edge: string; face: string; lit: string | null; shade: string | null; text: string }
 >;
 
+// ui-select sits this far outside a selected item on each side by default; its inner ink
+// line then lies on the item's edge.
+export const SELECT_OUTSET = 3;
+
 export function selectLook(state: TileState): SelectLook {
   return { ...LOOKS[state], state };
 }

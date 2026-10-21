@@ -13,6 +13,7 @@ import {
   BUTTON_COLORS,
   type ButtonLook,
   DISABLED_COLORS,
+  SELECT_OUTSET,
   type SelectLook,
   selectLook,
 } from "../ui/selection";
@@ -364,10 +365,6 @@ export function cogIcon(scene: Scene, x: number, y: number): Placed[] {
   });
   return [g];
 }
-
-// ui-select sits this far outside a selected item on each side by default; its inner ink
-// line then lies on the item's edge.
-const SELECT_OUTSET = 3;
 
 export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
   return insetRect(-outset, rect);

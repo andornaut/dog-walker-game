@@ -14,7 +14,9 @@ import { TEST_TUNING } from "../testing/tuning";
 import { readBitmapFont } from "../tools/fontFile";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
+import { SELECT_OUTSET } from "../ui/selection";
 import { TEXT_FIT_STYLES } from "../ui/textFit";
+import { FEEDBACK } from "./feedback";
 import { dollarText, type Purchase } from "./home";
 import { messageLine } from "./homeLines";
 import {
@@ -29,9 +31,11 @@ import {
   slotRows,
 } from "./shop";
 import {
+  rowRects,
   SHOP_LAYOUT,
   SHOP_MESSAGE_FIT,
   shopListBottom,
+  shopListFrame,
   shopMessageCapTop,
   shopRowTextRoom,
   shopScrollbar,
@@ -154,7 +158,8 @@ describe("shopRowId and shopTabOf", () => {
 });
 
 // Every row's name and line, with nothing bought and with every item owned, fit the room the
-// price plate or OWNED leaves them, both measured on the fonts at 2x.
+// price plate or OWNED leaves them in a row beside a scrollbar, the narrower, both measured on
+// the fonts at 2x.
 describe("a shop row's text", () => {
   // A label's width as Phaser gives it: its glyphs' advances at 2x.
   const advances = (font: string, text: string) => {
@@ -180,7 +185,7 @@ describe("a shop row's text", () => {
     const offenders = rows.flatMap((row) =>
       [row.name, row.line]
         .filter((text) => {
-          const room = shopRowTextRoom(rightWidth(row));
+          const room = shopRowTextRoom(SHOP_LAYOUT.row.scrollWidth, rightWidth(row));
           return (
             text !== "" &&
             fitInFont("font-body", TEXT_FIT_STYLES, room, plainMarks(text)).widest > room
@@ -235,6 +240,15 @@ describe("the shop's message", () => {
   });
 });
 
+// A selected tab, lifted and framed, keeps 6px of card clear under the title band.
+describe("the shop's tabs", () => {
+  it("clear the title band by 6px when selected", () => {
+    const { band, panel, tab } = SHOP_LAYOUT;
+    const bandBottom = panel.y + band.inset + band.height;
+    expect(tab.drawY - FEEDBACK.liftPx - SELECT_OUTSET - bandBottom).toBeGreaterThanOrEqual(6);
+  });
+});
+
 // Each tab's list, with nothing bought and with everything bought, scrolls far enough to bring
 // its last row inside the list area, and no further than its padding below it.
 describe("the shop's list", () => {
@@ -283,6 +297,30 @@ describe("the shop's list", () => {
 
   it("shows no scrollbar for a list that fits", () => {
     expect(shopScrollbar(0, 0)).toBeNull();
+  });
+
+  // Each list's rows and heading note end where its scrollbar allows: at the tabs' right edge
+  // with no scrollbar, else short of the track. A selected row's frame stays inside the list
+  // area, which stays inside the card's 8px frame.
+  it.each(lists)("%s: runs its rows to the right edge it is allowed", (_, spec, count) => {
+    const scrolls = scrollMax(rect, shopListBottom(spec, count)) > 0;
+    const frame = shopListFrame(scrolls);
+    const tabsRight = Math.max(...shopTabRects().map(({ width, x }) => x + width));
+    const track = shopScrollbar(scrolls ? 1 : 0, 0)?.track;
+    const { panel } = SHOP_LAYOUT;
+    for (const row of rowRects(frame.rowWidth, spec, count)) {
+      const right = row.x + row.width;
+      expect(frame.headingRight).toBe(right);
+      if (track === undefined) {
+        expect(right).toBe(tabsRight);
+      } else {
+        expect(right).toBeLessThan(track.x);
+      }
+      const outer = { left: row.x - SELECT_OUTSET, right: right + SELECT_OUTSET };
+      expect(outer.left).toBeGreaterThanOrEqual(frame.rect.x);
+      expect(outer.right).toBeLessThanOrEqual(frame.rect.x + frame.rect.width);
+      expect(frame.rect.x + frame.rect.width).toBeLessThanOrEqual(panel.x + panel.width - 8);
+    }
   });
 
   // The scrollbar stays clear of the list area, where the rows and their frames are clipped,

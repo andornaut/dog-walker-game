@@ -34,6 +34,7 @@ import {
   SHOP_LAYOUT,
   SHOP_MESSAGE_FIT,
   shopListBottom,
+  shopListFrame,
   shopMessageCapTop,
   shopRowTextRoom,
   shopScrollbar,
@@ -204,6 +205,8 @@ export class ShopScene extends Scene {
   private containers = new Map<string, GameObjects.Container>();
   private detail: Purchase | undefined;
   private focusId: string | null = null;
+  // The open list's area, rows' width and heading note's right edge, by whether it scrolls.
+  private frame = shopListFrame(false);
   private hold: HoldPress | undefined;
   // The scrolled headings and rows, and the scrollbar beside them.
   private list: GameObjects.Container | undefined;
@@ -469,7 +472,7 @@ export class ShopScene extends Scene {
     if (this.message !== null && containsPoint(PLATE, x, y)) {
       return undefined;
     }
-    if (!containsPoint(LIST, x, y)) {
+    if (!containsPoint(this.frame.rect, x, y)) {
       return undefined;
     }
     const listY = y + this.scroll.y;
@@ -644,18 +647,19 @@ export class ShopScene extends Scene {
     });
     this.drawCard(root);
     this.drawTabs(root);
+    // A bought dog leaves its list, so the list may now be shorter.
+    this.scroll = resizeScroll(scrollMax(LIST, this.listBottom(save)), this.scroll);
+    this.frame = shopListFrame(this.scroll.max > 0);
     // The headings and rows, clipped to the list area and moved up by the scroll.
     const list = this.add.container(0, 0);
     root.add(list);
     this.list = list;
-    maskToRect(this, LIST_MASK_KEY, LIST, list);
+    maskToRect(this, LIST_MASK_KEY, this.frame.rect, list);
     if (this.tab === "gear") {
       this.drawGear(list, save);
     } else {
       this.drawDogs(list, save);
     }
-    // A bought dog leaves its list, so the list may now be shorter.
-    this.scroll = resizeScroll(scrollMax(LIST, this.listBottom(save)), this.scroll);
     this.scrollbar = addScrollbar(this, root, shopScrollbar(this.scroll.max, this.scroll.y));
     this.placeList();
     if (this.message !== null) {
@@ -766,7 +770,7 @@ export class ShopScene extends Scene {
   private heading(root: GameObjects.Container, y: number, title: string, note?: string): void {
     this.text(root, { x: LAYOUT.headingX, y }, title, { font: "title" });
     if (note !== undefined) {
-      this.text(root, { x: LAYOUT.headingRight, y }, note, {
+      this.text(root, { x: this.frame.headingRight, y }, note, {
         color: PALETTE.darkBrown,
         originX: 1,
       });
@@ -779,7 +783,7 @@ export class ShopScene extends Scene {
     const { headingY, rows: spec } = LAYOUT.gear;
     this.heading(root, headingY, text.shop.tabs.gear, text.shop.gearNote);
     const rows = gearRows(gameData, save.owned);
-    const rects = rowRects(spec, rows.length);
+    const rects = rowRects(this.frame.rowWidth, spec, rows.length);
     rows.forEach((row, i) => {
       const rect = rects[i];
       if (rect !== undefined && row.purchase.kind === "gear") {
@@ -799,7 +803,7 @@ export class ShopScene extends Scene {
     });
     this.heading(root, slotHeadingY, text.shop.slots, owned);
     const slots = slotRows(gameData, save.owned);
-    rowRects(slotSpec, slots.length).forEach((rect, i) => {
+    rowRects(this.frame.rowWidth, slotSpec, slots.length).forEach((rect, i) => {
       const row = slots[i];
       if (row !== undefined) {
         this.drawRow(root, save, { rect, row }, purchaseArt(row.purchase));
@@ -812,7 +816,7 @@ export class ShopScene extends Scene {
         color: PALETTE.darkBrown,
       });
     }
-    rowRects(dogSpec, dogs.length).forEach((rect, i) => {
+    rowRects(this.frame.rowWidth, dogSpec, dogs.length).forEach((rect, i) => {
       const row = dogs[i];
       if (row?.purchase.kind === "dog") {
         this.drawRow(root, save, { rect, row }, purchaseArt(row.purchase));
@@ -864,7 +868,10 @@ export class ShopScene extends Scene {
     const right = rect.x + rect.width - ROW.plateInset;
     const rightLeft = this.drawRowRight(content, view.plate, row, { mid, right });
     // The name and line fit the room the price plate or Owned leaves them.
-    const fit = { room: shopRowTextRoom(right - rightLeft), styles: TEXT_FIT_STYLES };
+    const fit = {
+      room: shopRowTextRoom(rect.width, right - rightLeft),
+      styles: TEXT_FIT_STYLES,
+    };
     // A row with no second line centres its name.
     const nameY = row.line === "" ? mid - 5 : mid - 15;
     const name = this.text(content, { x: textX, y: nameY }, row.name, { color: ink });

@@ -2123,37 +2123,42 @@
         "y": 52
       },
       "dogs": {
-        "dogHeadingY": 236,
+        "dogHeadingY": 241,
         "dogRows": {
           "height": 42,
           "pitch": 48,
-          "y": 252
+          "y": 257
         },
-        "slotHeadingY": 118,
+        "slotHeadingY": 123,
         "slotRows": {
           "height": 42,
           "pitch": 48,
-          "y": 134
+          "y": 139
         }
       },
       "gear": {
-        "headingY": 118,
+        "headingY": 123,
         "rows": {
           "height": 44,
           "pitch": 54,
-          "y": 136
+          "y": 141
         }
       },
-      "headingRight": 330,
       "headingX": 16,
       "list": {
         "padBottom": 8,
         "pageOverlap": 48,
         "rect": {
-          "height": 436,
+          "height": 431,
           "width": 322,
           "x": 12,
-          "y": 112
+          "y": 117
+        },
+        "unscrolledRect": {
+          "height": 431,
+          "width": 336,
+          "x": 12,
+          "y": 117
         }
       },
       "message": {
@@ -2162,7 +2167,7 @@
           "height": 28,
           "width": 322,
           "x": 12,
-          "y": 112
+          "y": 117
         },
         "textDx": 10
       },
@@ -2184,9 +2189,10 @@
         },
         "ownedDx": 20,
         "plateInset": 6,
+        "scrollWidth": 314,
         "textDx": 46,
         "textGap": 6,
-        "width": 314,
+        "width": 328,
         "x": 16
       },
       "scrollbar": {
@@ -2198,25 +2204,25 @@
       },
       "tab": {
         "drawHeight": 28,
-        "drawY": 80,
+        "drawY": 85,
         "gap": 8,
         "height": 44,
         "width": 160,
         "x": 16,
-        "y": 72
+        "y": 77
       },
       "tabRects": [
         {
           "height": 44,
           "width": 160,
           "x": 16,
-          "y": 72
+          "y": 77
         },
         {
           "height": 44,
           "width": 160,
           "x": 184,
-          "y": 72
+          "y": 77
         }
       ]
     },
