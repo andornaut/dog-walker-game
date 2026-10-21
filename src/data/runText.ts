@@ -43,7 +43,6 @@ export const RUN_TEXT = {
     subtitle: "{walker} joins you!",
     title: "New walker!",
   },
-  outOfMoney: "out of cash",
   strip: {
     achievement: "Badge earned! {name}",
     debuffEnd: {

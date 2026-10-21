@@ -90,10 +90,10 @@ describe("a change label", () => {
       firedByText(gameData, dog),
     );
     // A heart change names any source or the owner who fires you, over its card; a money
-    // change names any source or running out of money, or a tip and what changed it, at the bank.
+    // change names any source, or a tip and what changed it, at the bank.
     const hearts = [...sources, ...firedBy].map((name) => `−10♥ ${name}`);
     const money = [
-      ...[...sources, gameData.runText.outOfMoney].map((name) => `+$999 ${name}`),
+      ...sources.map((name) => `+$999 ${name}`),
       // A zone names its pay, which is the pay per dog at its multiplier.
       ...gameData.world.zones.map(
         ({ fees, name }) => `${amountText("money", payFor(gameData.tuning) * fees)} ${name}`,

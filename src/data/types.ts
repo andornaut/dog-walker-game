@@ -687,8 +687,6 @@ export interface RunText {
     readonly pull: string;
     readonly treat: string;
   };
-  // Names a loss cut short because the money ran out.
-  readonly outOfMoney: string;
   // The walk bar's place in the walk beside the neighborhood's name: the zone's number, n, of
   // the walk's total.
   readonly zoneProgress: string;

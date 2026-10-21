@@ -133,11 +133,10 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
     case "treat":
       return cause.kind;
     case "limit":
-      if (change.kind === "money") {
-        return data.runText.outOfMoney;
-      }
-      // A meter held at 0 means its owner fires you.
-      return cause.bound === "max" ? "at max" : firedByText(data, change.dog);
+      // Only a meter is held at a limit; one held at 0 means its owner fires you.
+      return cause.bound === "min" && change.kind === "hearts"
+        ? firedByText(data, change.dog)
+        : "at max";
     case "zone":
       return cause.zone;
     default:
