@@ -4,6 +4,7 @@ import {
   DIRECTIVE_NAMES,
   type DirectiveName,
   type Directives,
+  HASHED_ASSET_PATH,
   type HeaderList,
   type PageRule,
 } from "./securityPolicy";
@@ -68,6 +69,17 @@ export function pathMatches(pattern: string, path: string): boolean {
     .map((part) => part.replace(/[.+?^${}()|[\]\\]/g, "\\$&"))
     .join(".*");
   return new RegExp(`^${source}$`).test(path);
+}
+
+// A Vite output name: the source's name, a dash and an 8-character content hash.
+const HASHED_NAME = /-[\w-]{8}\.\w+$/;
+
+// The build's files under the hashed asset path whose names carry no content hash, so a long
+// cache lifetime would keep a stale copy.
+export function unhashedAssets(fileNames: readonly string[]): string[] {
+  return fileNames.filter(
+    (fileName) => pathMatches(HASHED_ASSET_PATH, `/${fileName}`) && !HASHED_NAME.test(fileName),
+  );
 }
 
 // One directive per name in DIRECTIVE_NAMES order, each source once.

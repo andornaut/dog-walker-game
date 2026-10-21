@@ -10,17 +10,20 @@ import {
   type PageNeeds,
   pageRules,
   servedPath,
+  unhashedAssets,
 } from "./securityHeaders";
-import { BASE_DIRECTIVES, COMMON_RULE, PAGE_RULES } from "./securityPolicy";
+import { BASE_DIRECTIVES, COMMON_RULE, FILE_RULES, PAGE_RULES } from "./securityPolicy";
 
 const HEADERS_FILE_NAME = "_headers";
 const HEADING =
   "Written by the build from src/headers/securityPolicy.ts and the hashes of each page's inline " +
   "blocks.";
 
-// Writes dist/_headers: the common headers on every path and a Content-Security-Policy per
-// page rule, with the hashes of every inline <script> and <style> in the built pages and the
-// pages copied from public/. Fails the build for a page that loads nav.js without nav.css.
+// Writes dist/_headers: the common headers on every path, the file rules (a year's caching for
+// hashed build output, a type for font descriptors) and a Content-Security-Policy per page
+// rule, with the hashes of every inline <script> and <style> in the built pages and the pages
+// copied from public/. Fails the build for a page that loads nav.js without nav.css, and for an
+// unhashed file under the hashed asset path.
 export function securityHeadersPlugin(): Plugin {
   return {
     apply: "build",
@@ -71,6 +74,14 @@ export function securityHeadersPlugin(): Plugin {
           }
         }
 
+        const unhashed = unhashedAssets(Object.keys(bundle));
+        if (unhashed.length > 0) {
+          this.error(
+            `security headers: ${unhashed.join(", ")} would be cached for a year, but its name ` +
+              "has no content hash",
+          );
+        }
+
         const needs = new Map<string, PageNeeds>(
           await Promise.all(
             pages.map(async ({ fileName, html }) => {
@@ -92,7 +103,7 @@ export function securityHeadersPlugin(): Plugin {
         }
         this.emitFile({
           fileName: HEADERS_FILE_NAME,
-          source: headersFile(HEADING, [COMMON_RULE, ...rules]),
+          source: headersFile(HEADING, [COMMON_RULE, ...FILE_RULES, ...rules]),
           type: "asset",
         });
       },

@@ -24,6 +24,9 @@ export type DirectiveName = (typeof DIRECTIVE_NAMES)[number];
 
 export type Directives = Readonly<Partial<Record<DirectiveName, readonly string[]>>>;
 
+// Where the build writes its content-hashed files, as a _headers path pattern.
+export const HASHED_ASSET_PATH = "/assets/*";
+
 export type HeaderList = readonly (readonly [name: string, value: string])[];
 
 // A group of pages that share one Content-Security-Policy.
@@ -36,8 +39,9 @@ export interface PageRule {
   readonly path: string;
 }
 
-// On every response. No Cache-Control: every asset keeps the platform default (max-age=0,
-// must-revalidate), which the service worker relies on to see a new /sw.js on the next launch.
+// On every response. No Cache-Control: every file but FILE_RULES' hashed build output keeps the
+// platform default (max-age=0, must-revalidate), which the service worker relies on to see a
+// new /sw.js on the next launch.
 export const COMMON_RULE = {
   comment:
     "Every response. The game requests fullscreen and a screen wake lock; the clipboard (dev " +
@@ -53,6 +57,24 @@ export const COMMON_RULE = {
   ] satisfies HeaderList,
   path: "/*",
 } as const;
+
+// Headers for files rather than pages. Cloudflare sets a header a rule names, replacing its own.
+export const FILE_RULES = [
+  {
+    comment:
+      "Bitmap font descriptors, which are XML. Cloudflare types files by extension and serves " +
+      "an unknown one untyped, which it does not compress.",
+    headers: [["Content-Type", "text/xml; charset=utf-8"]] satisfies HeaderList,
+    path: "/art/fonts/*.fnt",
+  },
+  {
+    comment:
+      "Content-hashed build output: a changed file gets a new name, so a cached copy never " +
+      "needs revalidating.",
+    headers: [["Cache-Control", "public, max-age=31536000, immutable"]] satisfies HeaderList,
+    path: HASHED_ASSET_PATH,
+  },
+] as const;
 
 // Every page's policy before its rule's sources and hashes are added. Phaser loads images
 // through blob: URLs and its default textures as data: URIs.

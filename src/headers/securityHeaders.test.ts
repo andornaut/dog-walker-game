@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { isHashedAssetUrl } from "../pwa/cachePolicy";
 import {
   cspHash,
   headersFile,
@@ -9,8 +10,9 @@ import {
   pathMatches,
   renderPolicy,
   servedPath,
+  unhashedAssets,
 } from "./securityHeaders";
-import { PAGE_RULES, type PageRule } from "./securityPolicy";
+import { FILE_RULES, PAGE_RULES, type PageRule } from "./securityPolicy";
 
 describe("cspHash", () => {
   it.each([
@@ -89,6 +91,52 @@ describe("pathMatches", () => {
     ["/a.b", "/axb", false],
   ])("%s matches %s: %s", (pattern, path, expected) => {
     expect(pathMatches(pattern, path)).toBe(expected);
+  });
+});
+
+describe("FILE_RULES", () => {
+  // The headers the file rules set on a path, as Cloudflare applies them.
+  const headersAt = (path: string) =>
+    Object.fromEntries(
+      FILE_RULES.filter((rule) => pathMatches(rule.path, path)).flatMap(({ headers }) => headers),
+    );
+  const immutable = { "Cache-Control": "public, max-age=31536000, immutable" };
+  const xml = { "Content-Type": "text/xml; charset=utf-8" };
+
+  it.each([
+    ["/assets/play-Bq3x_9-Z.js", immutable],
+    ["/assets/main-0aZ9bQ1c.css", immutable],
+    ["/art/fonts/font-body.fnt", xml],
+    ["/art/fonts/font-body.png", {}],
+    ["/art/manifest.json", {}],
+    ["/play/", {}],
+    ["/sw.js", {}],
+  ])("gives %s %j", (path, headers) => {
+    expect(headersAt(path)).toEqual(headers);
+  });
+
+  // The service worker serves the same files cache-first, so the two must agree on which.
+  it.each(["/assets/play-Bq3x_9-Z.js", "/art/atlas/run-0.png", "/sw.js"])(
+    "caches %s for a year only if the service worker treats it as hashed",
+    (path) => {
+      expect("Cache-Control" in headersAt(path)).toBe(isHashedAssetUrl(path));
+    },
+  );
+});
+
+describe("unhashedAssets", () => {
+  it("lists the files under assets/ whose names carry no 8-character hash", () => {
+    expect(
+      unhashedAssets([
+        "assets/play-Bq3x_9-Z.js",
+        "assets/main-0aZ9bQ1c.css",
+        "assets/logo.png",
+        "assets/chunk-abc.js",
+        "sw.js",
+        "art/atlas/run-0.png",
+        "play/index.html",
+      ]),
+    ).toEqual(["assets/logo.png", "assets/chunk-abc.js"]);
   });
 });
 
