@@ -90,9 +90,11 @@
         --w: min(360px, 100vw);
         width: var(--w);
         margin-inline: calc((100% - var(--w)) / 2);
-        padding: 28px 0 138px;
+        padding: 28px 0 166px;
         background: var(--slate) url("/art/images/backdrop-yonge-street.png") no-repeat center
-          bottom / 360px 110px;
+          bottom / 360px 158px;
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
       }
       h1 {
         margin: 0;
@@ -112,6 +114,7 @@
         margin: 0;
         font-size: 19px;
         line-height: 1.4;
+        text-wrap: balance;
       }
       .sub,
       .keys {
@@ -279,8 +282,8 @@
         }
         .sky {
           --w: 720px;
-          padding: 48px 0 260px;
-          background-size: 720px 220px;
+          padding: 48px 0 328px;
+          background-size: 720px 316px;
         }
         .logo {
           width: 384px;
@@ -324,7 +327,7 @@
           Walk a pack of dogs through Toronto. Every bump in the road turns into a choice.
         </p>
         <p class="sub">
-          A cozy pixel-art lane runner for your phone. Four zones a walk, about 8 minutes.
+          A cozy pixel-art lane runner for your phone. Four neighborhoods a walk, about 8 minutes.
         </p>
         <a class="play" href="/play/">Play</a>
         <p class="keys">Drag or tap to steer, or use the arrow keys.</p>
@@ -337,18 +340,19 @@
           src="/art/site/home-road.png"
           width="360"
           height="560"
-          alt="High Park: Trista and three dogs heading up the path, a tip coin in the next lane, and Duchess pulling the pack toward a black squirrel; the dogs' doghouses along the bottom"
+          alt="High Park: Trista and three dogs heading up the path, a tip coin ahead, and Duchess pulling the pack toward a black squirrel; the dogs' doghouse cards along the bottom"
         />
         <p>
           The road moves: cars and trucks drive down their lanes, people step out and animals dart
-          across. Bump into anything marked with a ! and a card opens: pay up, or upset the owners.
-          Every outcome is on the card. The cheap way out can leave the whole pack Muddy, Stinky or
-          Tangled for 20 seconds.
+          across. A plain bump costs a heart. Bump into another dog, a skunk or a thief and a card
+          opens: pay up, lose hearts or take a debuff, with every outcome on the card. A puddle
+          leaves the pack Muddy, and a cheap way out can leave it Stinky or with the Zoomies, each
+          for 20 seconds.
         </p>
       </section>
 
       <section class="hl" aria-labelledby="h-dogs">
-        <h2 id="h-dogs">Nine dogs, nine quirks</h2>
+        <h2 id="h-dogs">Nine dogs to walk</h2>
         <div class="art">
           <div
             class="dogs"
@@ -367,9 +371,8 @@
           </div>
         </div>
         <p>
-          Koda the husky speeds up your lane changes, Biscuit the beagle sniffs out tips a lane
-          away, and nervous Penny lunges at other dogs. When a dog's need turns urgent, it pulls the
-          pack toward a hydrant, a lamp post or a water bowl.
+          Three small, three medium and three big. A small dog dodges 1 in 4 bumps, and each big dog
+          slows your lane changes. Every dog pulls the pack a lane toward a squirrel it spots.
         </p>
       </section>
 
@@ -382,10 +385,10 @@
           <figure class="mood m-fired"><span></span>Fired!</figure>
         </div>
         <p>
-          Every dog comes with an owner and a row of hearts: 3 for a small dog, 4 for a medium one
-          and 5 for a big one. A plain bump costs the owner of the dog that hit it a heart, and a
+          Every dog comes with an owner and a row of hearts: 2 for a small dog, 3 for a medium one
+          and 4 for a big one. A plain bump costs the owner of the dog that hit it a heart, and a
           treat a dog picks up gives its owner one back. At zero, the owner fires you and takes the
-          dog home.
+          dog home. Walk fewer dogs and your lead dog's owner starts with extra hearts.
         </p>
       </section>
 
@@ -423,9 +426,10 @@
           </li>
         </ol>
         <p>
-          Every walk starts in High Park and covers four of Toronto's six neighborhoods. Each one
-          ends with a celebration and an upgrade card, then the road forks: easiest on the left,
-          hardest and best paid on the right.
+          Every walk starts in High Park, ends on Yonge Street and covers four of Toronto's six
+          neighborhoods. After each one, a celebration banks your pay, then the road forks: each
+          path leads to a neighborhood and carries an upgrade card, easiest on the left, hardest and
+          best paid on the right.
         </p>
       </section>
 
@@ -436,12 +440,12 @@
           src="/art/site/home-start.png"
           width="360"
           height="560"
-          alt="The start screen: the Pet shop beside the front gate, Trista picked from four walkers, Duchess, Biscuit and Koda picked from nine dogs, and the running shoes in the Pocket"
+          alt="The start screen: the Pet shop beside the front gate, Trista picked from four walkers, Duchess, Biscuit and Koda picked from nine dogs, and Running shoes in the Pocket"
         />
         <p>
-          Pick a walker, your dogs and one gear item for your Pocket, then head out. Spend your tips
-          and fees at the Pet shop on new dogs, dog slots and gear. Casey walks first; Ben, Ada and
-          Trista join when you first finish zones 1, 2 and 3.
+          Pick a walker, your dogs and one gear item for your Pocket, then head out. Spend what you
+          earn at the Pet shop on new dogs, dog slots and gear. Casey walks first; Ben joins when
+          you first finish Cabbagetown, Ada The Beaches and Trista Yonge Street.
         </p>
       </section>
     </main>

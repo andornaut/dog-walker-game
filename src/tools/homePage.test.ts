@@ -9,6 +9,62 @@ import { gameData } from "../data";
 const HOME_PAGE = new URL("../../pages/index.html", import.meta.url);
 const SKY_BACKDROP = new URL("../../public/art/images/backdrop-yonge-street.png", import.meta.url);
 
+const NUMBER_WORDS = ["zero", "one", "two", "three", "four", "five", "six"];
+
+function capitalized(text: string): string {
+  return text.replace(/^./u, (letter) => letter.toUpperCase());
+}
+
+function listed(items: readonly string[]): string {
+  return `${items.slice(0, -1).join(", ")} and ${items.at(-1)}`;
+}
+
+// The page's sentences that restate a number or a name from the data, rebuilt from the data.
+function pageFacts(): [string, string][] {
+  const { debuffs, defaultWalker, dogs, tuning, walkers, world } = gameData;
+  const zoneIndex = (zoneId: string) => world.zones.findIndex(({ id }) => id === zoneId);
+  const zoneName = (zoneId: string) => world.zones[zoneIndex(zoneId)]?.name ?? zoneId;
+  const count = (n: number) => NUMBER_WORDS[n] ?? String(n);
+  const sizes = ["small", "medium", "big"] as const;
+  const perSize = sizes.map(
+    (size) => `${count(Object.values(dogs).filter((dog) => dog.size === size).length)} ${size}`,
+  );
+  const { big, medium, small } = tuning.hearts.maxBySize;
+  const debuffSeconds = [
+    ...new Set(Object.values(debuffs).map((debuff) => tuning.seconds[debuff.seconds])),
+  ];
+  const unlocks = Object.values(walkers)
+    .flatMap((walker) => (walker.unlock === "finishZone" ? [walker] : []))
+    .sort((a, b) => zoneIndex(a.zone) - zoneIndex(b.zone))
+    .map(
+      ({ name, zone }, i) => `${name} ${i ? "" : "joins when you first finish "}${zoneName(zone)}`,
+    );
+  return [
+    ["the world", `Walk a pack of dogs through ${world.name}.`],
+    ["the walk length", `${capitalized(count(world.walkLength))} neighborhoods a walk`],
+    [
+      "the first and last zones",
+      `Every walk starts in ${zoneName(world.firstZone)}, ends on ${zoneName(world.lastZone)} and ` +
+        `covers ${count(world.walkLength)} of ${world.name}'s ${count(world.zones.length)} neighborhoods.`,
+    ],
+    ["the dogs per size", `${capitalized(listed(perSize))}.`],
+    [
+      "the hearts per size",
+      `${small} for a small dog, ${medium} for a medium one and ${big} for a big one.`,
+    ],
+    [
+      "the small dog's dodge",
+      `A small dog dodges 1 in ${1 / tuning.probability.smallDodgeChance} bumps`,
+    ],
+    [
+      "the debuffs and their one duration",
+      `leaves the pack ${debuffs.muddy.name}, and a cheap way out can leave it ${debuffs.stinky.name} ` +
+        `or with the ${debuffs.zoomies.name}, each for ${debuffSeconds.join(" or ")} seconds.`,
+    ],
+    ["the walkers' unlocks", `${walkers[defaultWalker].name} walks first; ${listed(unlocks)}.`],
+  ];
+}
+
 // The home page is static HTML, so its roster is checked against the data here.
 describe("the home page's roster", () => {
   it("shows every dog's portrait once and names them in the same order", async () => {
@@ -37,12 +93,9 @@ describe("the home page's roster", () => {
     );
   });
 
-  it("names the world and the zone every walk starts in", async () => {
-    const html = await readFile(HOME_PAGE, "utf8");
-    const { firstZone, name, zones } = gameData.world;
-    const first = zones.find(({ id }) => id === firstZone)?.name ?? firstZone;
-    expect(html).toContain(`Every walk starts in ${first} and covers`);
-    expect(html).toContain(`Walk a pack of dogs through ${name}.`);
+  it.each(pageFacts())("states %s as the data has it", async (_fact, sentence) => {
+    const html = (await readFile(HOME_PAGE, "utf8")).replaceAll(/\s+/gu, " ");
+    expect(html).toContain(sentence);
   });
 });
 
