@@ -28,6 +28,7 @@ export const ENCOUNTERS = {
   },
   otherDog: {
     hitLabel: "NEW FRIEND!",
+    hitWord: "SNIFF!",
     kind: "obstacle",
     movement: { kind: "dart" },
     name: "Other dog",
@@ -53,6 +54,7 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
   },
   puddle: {
+    hitWord: "SPLOSH!",
     kind: "obstacle",
     name: "Puddle",
     resolution: {
@@ -64,6 +66,7 @@ export const ENCOUNTERS = {
   },
   skunk: {
     hitLabel: "SPRAYED!",
+    hitWord: "PHEW!",
     kind: "obstacle",
     name: "Skunk",
     resolution: {
@@ -95,6 +98,7 @@ export const ENCOUNTERS = {
     shape: { lanes: 2, rows: 2 },
   },
   squirrel: {
+    hitWord: "CHIRP!",
     kind: "obstacle",
     movement: { kind: "dart" },
     name: "Squirrel",
@@ -103,6 +107,7 @@ export const ENCOUNTERS = {
   },
   thief: {
     hitLabel: "YOINK!",
+    hitWord: "YOINK!",
     kind: "obstacle",
     movement: { kind: "step", steps: 2 },
     name: "Thief",

@@ -24,6 +24,7 @@ import {
   walkBarLayout,
 } from "../hud/walkHud";
 import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
+import { COMIC_WORDS } from "../layout/comicWords";
 import { gridRects } from "../layout/grid";
 import { laneCenterXs, laneDividerXs } from "../layout/lanes";
 import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
@@ -96,6 +97,8 @@ export function layoutExport(
       secondsInView: projection.visibleDistance / scrollSpeed,
       visibleDistance: projection.visibleDistance,
     },
+    // Where the comic words sit on the effects they letter, in effect frame pixels.
+    comicWords: COMIC_WORDS,
     // The depth steps table as the game reads it: each step's key suffix and scale.
     depthSteps: DEPTH_STEPS,
     // The dog cards: positions inside a card from its top-left corner, each card in its slot,

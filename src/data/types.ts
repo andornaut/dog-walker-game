@@ -304,13 +304,15 @@ export type Skins = Readonly<Partial<Record<string, Skin>>>;
 // shown large as it hits; a contact obstacle applies its effects as it is touched; a pull
 // obstacle does nothing when touched. An obstacle the pack is immune to is harmless. "lucky": a
 // good thing to bump into, applied on contact with no card. skins are its looks by zone. An
-// obstacle with a movement comes as a mover at the zone's moverShare.
+// obstacle with a movement comes as a mover at the zone's moverShare. hitWord is the comic
+// word drawn in font-comic over its hit burst: A to Z, ! ? - and space.
 export type Encounter = {
   readonly name: string;
   readonly skins?: Skins;
 } & (
   | { readonly kind: "lucky"; readonly resolution: InstantResolution }
   | ({
+      readonly hitWord: string;
       readonly kind: "obstacle";
       readonly movement?: Movement;
       readonly shape: Shape;
@@ -616,7 +618,10 @@ export interface RunText {
     // An upgrade card's plaque, by how long it lasts.
     readonly upgradeDuration: { readonly [D in UpgradeDuration]: string };
   };
-  // Over a small dog that dodged a hit.
+  // The comic words drawn in font-comic (A to Z, ! ? - and space): bark in place of a dog's
+  // bark, dodge over a small dog that dodged a hit.
+  readonly comicWords: { readonly bark: string; readonly dodge: string };
+  // Over a small dog that dodged a hit, with reduced motion or while fx-dodge is missing.
   readonly dodge: string;
   // What a still press held on the walk HUD shows in the message strip: an effect's name and
   // line, a debuff's name and stake (its {seconds} the seconds it has left), and a dog's size,

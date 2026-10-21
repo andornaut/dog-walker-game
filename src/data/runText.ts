@@ -16,6 +16,7 @@ export const RUN_TEXT = {
     skipHeld: "Walk on by: nothing happens.",
     upgradeDuration: { nextZone: "Next neighborhood", now: "Now", run: "Rest of walk" },
   },
+  comicWords: { bark: "WOOF!", dodge: "DODGE!" },
   dodge: "Dodge!",
   explain: {
     debuff: "{name}: {stake}",

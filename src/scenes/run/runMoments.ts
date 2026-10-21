@@ -29,6 +29,7 @@ import {
 } from "../../hud/stripLines";
 import { amountText, type Change, type MoneyChange } from "../../rules/causes";
 import { type ChoiceOutcome, type QuipCue, quipLine } from "../../rules/choices";
+import { hitWord } from "../../rules/encounters";
 import { hintFor } from "../../rules/hints";
 import { currentZoneId, walkLength } from "../../rules/route";
 import { encounterLook, minorObstacleLook } from "../../rules/skins";
@@ -347,6 +348,7 @@ export class RunMoments {
       labelX: road.x + road.width / 2,
       seconds: step.walk.road.hitStop?.seconds ?? 0,
       still: this.deps.still(),
+      word: hitWord(gameData.encounters[hit.encounter]),
     });
   }
 

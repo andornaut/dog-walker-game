@@ -20,13 +20,13 @@ import { laneMotionX } from "../../runner/laneMotion";
 import { pullPose, type Pulls } from "../../runner/pulls";
 import type { Walk } from "../../runner/walk";
 import { packDogs } from "../../state/pack";
+import { playBarkWord } from "../comicWord";
 import { drawPixelLine } from "../draw";
 import { trotOffRoad } from "../feedbackMoments";
 import { colorFromHex, PALETTE } from "../palette";
 import { type DogSignal, dogTop, iconArt, playPullFail, PullSignals } from "../pullSignals";
 import {
   addStandingSprite,
-  firstTag,
   playEffect,
   playTag,
   playTagOnce,
@@ -239,9 +239,11 @@ export class PackView {
       this.dogTags.set(dog, tag);
     }
     if (tag === "tell" && shown !== tag) {
-      // WOOF! in motion; the plain bark with reduced motion or without the word art.
-      const word = !still && firstTag(this.scene, "fx-bark-word", ["pop"]) !== undefined;
-      playEffect(this.scene, word ? "fx-bark-word" : "fx-bark", "pop", head, DEPTH.fx);
+      // The bark word in motion; the plain bark with reduced motion or without font-comic.
+      const word = gameData.runText.comicWords.bark;
+      if (still || !playBarkWord(this.scene, head, DEPTH.fx, word)) {
+        playEffect(this.scene, "fx-bark", "pop", head, DEPTH.fx);
+      }
     }
     sprite.setFlipX(pull?.direction === -1);
   }

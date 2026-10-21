@@ -3,14 +3,16 @@ import type { GameObjects, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { gameData } from "../data";
 import { FEEDBACK, type LabelAnchor } from "../hud/feedback";
+import { COMIC_WORDS } from "../layout/comicWords";
 import type { Point } from "../layout/rect";
+import { letterEffect } from "./comicWord";
 import { drawFramedRect } from "./draw";
 import { PALETTE } from "./palette";
 import { addPixelText, pixelFontMetrics } from "./pixelText";
 import { playEffect, playTagOnce } from "./sprites";
 import { fadeAway } from "./uiKit";
 
-// A sidestep puff lettered "DODGE!", 56x56, laid on the dog's frame.
+// A sidestep puff, 48x48, laid on the dog's frame and lettered with the dodge word.
 const DODGE_ART = { key: "fx-dodge", tag: "play" } as const;
 // A plain hit's impact over the dog.
 const BUMP_ART = { key: "fx-bump", tag: "play" } as const;
@@ -24,14 +26,17 @@ interface PackMoment {
   still: boolean;
 }
 
-// A small dog's dodge: fx-dodge's play tag laid on the dog's frame at its top-left, or, with
-// reduced motion or while that art is missing, the dodge label rising over the dog.
+// A small dog's dodge: fx-dodge's play tag laid on the dog's frame at its top-left with the
+// dodge word over its first frames, or, with reduced motion or while that art is missing, the
+// dodge label rising over the dog.
 export function playDodge(scene: Scene, moment: PackMoment, dog: GameObjects.Sprite): void {
   const art = !moment.still && scene.anims.exists(animationKey(DODGE_ART.key, DODGE_ART.tag));
   if (art) {
     const { x, y } = dog.getTopLeft();
     const sprite = scene.add.sprite(x, y, DODGE_ART.key).setOrigin(0).setDepth(moment.depth);
     playTagOnce(sprite, DODGE_ART.key, DODGE_ART.tag, () => sprite.destroy());
+    const { frames, ...place } = COMIC_WORDS.dodge;
+    letterEffect(sprite, place, frames, gameData.runText.comicWords.dodge);
     return;
   }
   const top = dog.getTopCenter();

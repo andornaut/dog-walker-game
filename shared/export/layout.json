@@ -10,6 +10,44 @@
     "secondsInView": 3.6,
     "visibleDistance": 720
   },
+  "comicWords": {
+    "bark": {
+      "frame": {
+        "height": 16,
+        "width": 32
+      },
+      "ms": [
+        60,
+        60,
+        140,
+        140
+      ],
+      "tops": [
+        4,
+        1,
+        2,
+        2
+      ],
+      "x": 0
+    },
+    "burst": {
+      "centreX": 38,
+      "frames": 6,
+      "ringAboveStar": 5,
+      "starRows": {
+        "otherDog": 46,
+        "puddle": 48,
+        "skunk": 38,
+        "squirrel": 38,
+        "thief": 48
+      }
+    },
+    "dodge": {
+      "frames": 4,
+      "x": 6,
+      "y": 0
+    }
+  },
   "depthSteps": [
     {
       "scale": 1,

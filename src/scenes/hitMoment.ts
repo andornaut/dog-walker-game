@@ -2,18 +2,21 @@ import type { GameObjects, Scene } from "phaser";
 
 import { kebabCase } from "../assets/spriteKeys";
 import type { Encounter, EncounterId } from "../data/types";
-import type { Rect } from "../layout/rect";
+import { burstWordPlace, COMIC_WORDS } from "../layout/comicWords";
+import type { Point, Rect } from "../layout/rect";
 import type { Look } from "../rules/skins";
+import { letterEffect, loadedComicWordWidth } from "./comicWord";
 import { addDisplayText } from "./displayText";
 import { PALETTE } from "./palette";
-import { firstTag, playEffect } from "./sprites";
+import { playEffect } from "./sprites";
 import { addNineSlice, tagFrame } from "./uiKit";
 
-// An encounter hit's moment, played over the hit stop before its card: a burst over the pack,
-// a flash down both edges of the field, the encounter's label on a plate above the pack, and
-// the caught dogs shaking off. A lucky find's moment has no flash and no shake. Reduced motion
-// keeps the flash (one still frame, faded out), the label (set in place) and the burst (its
-// first frame, held), and drops the shake.
+// An encounter hit's moment, played over the hit stop before its card: a burst over the pack
+// lettered with the obstacle's word, a flash down both edges of the field, the encounter's
+// label on a plate above the pack, and the caught dogs shaking off. A lucky find's moment has
+// no word, no flash and no shake. Reduced motion keeps the flash (one still frame, faded out),
+// the label (set in place) and the burst (its first frame, held), and drops the word and the
+// shake.
 export interface HitMoment {
   // The caught dogs' sprites.
   caught: readonly GameObjects.Sprite[];
@@ -31,6 +34,8 @@ export interface HitMoment {
   // How long the hit stop lasts: everything is gone before the card opens.
   seconds: number;
   still: boolean;
+  // The comic word over the burst; null for none.
+  word: string | null;
 }
 
 type FlashColour = "amber" | "green" | "mauve" | "orange" | "pink" | "sky" | "white";
@@ -47,8 +52,7 @@ const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
 const FLASH_FALLBACKS: Readonly<Record<string, string>> = {
   "ui-hit-flash-mauve": "ui-hit-flash-green",
 };
-// A moving burst plays its word tag (the sound word on the impact star) when the art has one.
-const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play", wordTag: "play-word" };
+const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play" };
 const PLATE = { height: 32, key: "ui-hit-label", width: 176 } as const;
 // The label's line starts this far below the plate's top; font-title's capitals start 4px
 // into the line.
@@ -94,7 +98,7 @@ export function hitBurstKey(scene: Scene, look: HitLook): string {
 export function playHitMoment(scene: Scene, moment: HitMoment): void {
   const totalMs = Math.max(0, moment.seconds * 1000 - END_MARGIN_MS);
   const look = hitLook(moment.kind, moment.encounter);
-  playBurst(scene, moment, hitBurstKey(scene, look), totalMs);
+  playBurst(scene, moment, look, totalMs);
   if (look.flash !== null) {
     playFlash(scene, moment, hitFlashKey(scene, look.flash));
   }
@@ -114,10 +118,15 @@ export function playMinorHitLabel(
   showLabel(scene, moment, "normal", totalMs);
 }
 
-function playBurst(scene: Scene, moment: HitMoment, key: string, totalMs: number): void {
+// A moving burst carries the word on its own art, not on fx-bump standing in for it.
+function playBurst(scene: Scene, moment: HitMoment, look: HitLook, totalMs: number): void {
+  const key = hitBurstKey(scene, look);
   if (!moment.still) {
-    const tag = firstTag(scene, key, [BURST.wordTag, BURST.tag]) ?? BURST.tag;
-    playEffect(scene, key, tag, moment.centre, moment.depth);
+    const burst = playEffect(scene, key, BURST.tag, moment.centre, moment.depth);
+    const place = key === look.burst ? burstWordOn(scene, moment) : undefined;
+    if (burst !== undefined && place !== undefined && moment.word !== null) {
+      letterEffect(burst, place, COMIC_WORDS.burst.frames, moment.word);
+    }
     return;
   }
   const frame = tagFrame(scene, key, BURST.tag);
@@ -128,6 +137,14 @@ function playBurst(scene: Scene, moment: HitMoment, key: string, totalMs: number
     .image(Math.round(moment.centre.x), Math.round(moment.centre.y), key, frame)
     .setDepth(moment.depth);
   scene.time.delayedCall(totalMs, () => burst.destroy());
+}
+
+// The word's place on the encounter's burst frame; undefined with no word, no star row, or a
+// word font-comic cannot draw.
+function burstWordOn(scene: Scene, moment: HitMoment): Point | undefined {
+  const starRow = COMIC_WORDS.burst.starRows[moment.encounter];
+  const width = moment.word === null ? undefined : loadedComicWordWidth(scene, moment.word);
+  return starRow === undefined || width === undefined ? undefined : burstWordPlace(width, starRow);
 }
 
 // The strip repeats every 4 rows, so it tiles down each edge; the right one is mirrored.

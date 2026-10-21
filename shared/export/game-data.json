@@ -571,6 +571,7 @@
     {
       "id": "otherDog",
       "hitLabel": "NEW FRIEND!",
+      "hitWord": "SNIFF!",
       "kind": "obstacle",
       "movement": {
         "kind": "dart"
@@ -618,6 +619,7 @@
     },
     {
       "id": "puddle",
+      "hitWord": "SPLOSH!",
       "kind": "obstacle",
       "name": "Puddle",
       "resolution": {
@@ -639,6 +641,7 @@
     {
       "id": "skunk",
       "hitLabel": "SPRAYED!",
+      "hitWord": "PHEW!",
       "kind": "obstacle",
       "name": "Skunk",
       "resolution": {
@@ -688,6 +691,7 @@
     },
     {
       "id": "squirrel",
+      "hitWord": "CHIRP!",
       "kind": "obstacle",
       "movement": {
         "kind": "dart"
@@ -705,6 +709,7 @@
     {
       "id": "thief",
       "hitLabel": "YOINK!",
+      "hitWord": "YOINK!",
       "kind": "obstacle",
       "movement": {
         "kind": "step",

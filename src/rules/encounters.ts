@@ -23,3 +23,8 @@ export function opensCard(
 export function hitLabel(encounter: Encounter): string | null {
   return "hitLabel" in encounter ? encounter.hitLabel : null;
 }
+
+// The comic word over an obstacle's hit burst; null for a lucky find, which has none.
+export function hitWord(encounter: Encounter): string | null {
+  return encounter.kind === "obstacle" ? encounter.hitWord : null;
+}
