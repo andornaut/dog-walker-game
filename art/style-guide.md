@@ -283,11 +283,11 @@ After zones 1 to 3, over the road view (rows 214 to 465) dimmed as under a card,
 - Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap, the body bobs on the passing frames with the ears lagging 1px behind it, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
 - Every road sprite that stands or waits, depth variants included, loops an `idle` with frame 0 the rest pose. Reduced motion shows frame 0.
 
-| Idle      | Frames | Timing       | Motion                                                                              |
-| --------- | ------ | ------------ | ----------------------------------------------------------------------------------- |
-| Dogs      | 4      | 300ms        | Tail at −1, 0, +1, 0; the right ear 1px higher on the last frame                    |
-| Obstacles | 2 to 4 | 350 to 500ms | A small event (glint, lid, drip, leaves, hazard lights); rest pose most of the loop |
-| People    | 2      | 400ms        | Breathing: the body 1px higher on frame 2, feet planted, arms at rest               |
+| Idle      | Frames | Timing       | Motion                                                                                                                |
+| --------- | ------ | ------------ | --------------------------------------------------------------------------------------------------------------------- |
+| Dogs      | 4      | 300ms        | Tail at −1, 0, +1, 0; the body 1px higher on frames 1 and 2, feet planted; the right ear 1px higher on the last frame |
+| Obstacles | 2 to 4 | 350 to 500ms | A small event (glint, lid, drip, leaves, hazard lights); rest pose most of the loop                                   |
+| People    | 2      | 400ms        | Breathing: the body 1px higher on frame 2, feet planted, arms at rest                                                 |
 
 ## Depth scaling
 

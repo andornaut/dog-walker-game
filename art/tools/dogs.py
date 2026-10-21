@@ -9,7 +9,7 @@ Each dog gets two sprites in Endesga 32 with coloured outlines:
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
   frames), react (2), pull (2, leaning right; the game mirrors it for left),
   tell (2, the lean before a pull; the game adds the fx-bark pop), idle (4,
-  standing while the walk pauses: a slow tail wag and a twitch of the right ear)
+  standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, a quick shake-off after an encounter hit, throwing droplets).
   A dog with a quirk has its quirk's tags after these (QUIRK_TAGS):
   dog-archie flourish (5 frames, 90ms; Acrobatic: a hop with a twist in the air,
@@ -67,11 +67,12 @@ TELL = [
     dict(bob=0, tail=1, lean=1, ears=-1),
     dict(bob=-1, tail=1, lean=2, ears=-1),
 ]
-# Standing still: the tail swings across and back, and the right ear lifts 1px as it comes home.
+# Standing still: the tail swings across and back, the body breathes 1px up over the middle two beats with
+# the feet planted, and the right ear lifts 1px as the tail comes home.
 IDLE = [
     dict(tail=-1),
-    dict(tail=0),
-    dict(tail=1),
+    dict(tail=0, bob=-1),
+    dict(tail=1, bob=-1),
     dict(tail=0, twitch=-1),
 ]
 # Shaking off after an encounter hit: the head whips 2px and the body 1px left and right (lean, with the
