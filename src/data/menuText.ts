@@ -58,6 +58,7 @@ export const MENU_TEXT = {
     badgeEarned: "Earned",
     badgeLine: '"{line}"',
     badgeLocked: "Locked",
+    badgeProgress: "{have}/{need}",
     badges: "Badges",
     dogColumns: {
       dog: "Dog",

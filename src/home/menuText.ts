@@ -8,6 +8,7 @@ export const MENU_TEXT_FIELDS = {
   settings: { volume: ["percent"] },
   stats: {
     badgeLine: ["line"],
+    badgeProgress: ["have", "need"],
     earnedCount: ["earned", "total"],
     timesFiredBy: ["count", "owner"],
   },

@@ -3,7 +3,14 @@ import { type GameObjects, Scene } from "phaser";
 import { dogFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
-import { type BadgeView, badgeWall, earnedText, wallRects } from "../home/badgesView";
+import {
+  badgeProgress,
+  type BadgeView,
+  badgeWall,
+  earnedText,
+  wallCellLines,
+  wallRects,
+} from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
 import { focusDirectionForKey } from "../home/focus";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
@@ -318,9 +325,11 @@ export class StatsScene extends Scene {
   }
 
   // Earned badges in colour with an amber name, locked ones greyed with a cream name; each
-  // with its goal, or its short goal where the full one does not fit under the name.
+  // with its goal, or its short goal where the full one does not fit under the name, and a
+  // locked one that counts across walks with its progress.
   private drawBadges(): void {
-    const badges = badgeWall(gameData, profileSave(this));
+    const save = profileSave(this);
+    const badges = badgeWall(gameData, save);
     this.text(12, PANEL.y + 4, gameData.menuText.stats.badges, {
       color: PALETTE.cream,
       font: "title",
@@ -332,7 +341,7 @@ export class StatsScene extends Scene {
     badges.forEach((badge, i) => {
       const rect = WALL_RECTS[i];
       if (rect !== undefined) {
-        this.drawWallBadge(badge, rect);
+        this.drawWallBadge(badge, badgeProgress(gameData, save, badge), rect);
       }
     });
     const open = this.detail === undefined ? undefined : badges[this.detail];
@@ -341,22 +350,18 @@ export class StatsScene extends Scene {
     }
   }
 
-  private drawWallBadge(badge: BadgeView, rect: Rect): void {
+  private drawWallBadge(badge: BadgeView, progress: string | undefined, rect: Rect): void {
     const half = BADGE_SIZE / 2;
     addBadge(this, badge.art, badge.earned, rect.x + half, rect.y + 2 + half);
     const x = rect.x + WALL_TEXT.x;
-    const name = this.wrap(badge.name, WALL_TEXT.width);
-    const fullGoal = this.wrap(badge.goal, WALL_TEXT.width);
-    const goal =
-      name.length + fullGoal.length <= WALL_TEXT.lines
-        ? fullGoal
-        : this.wrap(badge.shortGoal, WALL_TEXT.width);
+    const wrap = (text: string) => this.wrap(text, WALL_TEXT.width);
+    const cell = wallCellLines(WALL_TEXT.lines, wrap, badge, progress);
     const y = rect.y + WALL_TEXT.y;
-    this.lines(x, y, name, { color: badge.earned ? PALETTE.amber : PALETTE.cream });
-    const goalY = y + name.length * WALL_TEXT.lineHeight;
-    this.lines(x, goalY, goal.slice(0, WALL_TEXT.lines - name.length), {
-      color: PALETTE.lightGrey,
-    });
+    this.lines(x, y, cell.name, { color: badge.earned ? PALETTE.amber : PALETTE.cream });
+    const goalY = y + cell.name.length * WALL_TEXT.lineHeight;
+    this.lines(x, goalY, cell.goal, { color: PALETTE.lightGrey });
+    const progressY = goalY + cell.goal.length * WALL_TEXT.lineHeight;
+    this.lines(x, progressY, cell.progress, { color: PALETTE.cream });
   }
 
   // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts

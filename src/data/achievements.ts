@@ -78,6 +78,7 @@ export const ACHIEVEMENTS = [
     goal: "Finish 10 walks with nobody fired",
     id: "fiveStarService",
     name: "Five-Star Service",
+    shortGoal: "10 walks, no firing",
   },
   {
     badgeLine: "Treats are on you.",
@@ -162,7 +163,7 @@ export const ACHIEVEMENTS = [
     goal: "Get pulled toward 15 squirrels, across all walks",
     id: "squirrel",
     name: "Squirrel!",
-    shortGoal: "Get pulled by 15 squirrels",
+    shortGoal: "15 squirrel pulls",
   },
   {
     badgeLine: "They had a getaway scooter.",

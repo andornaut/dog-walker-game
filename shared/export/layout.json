@@ -2175,6 +2175,7 @@
       "wallText": {
         "lineHeight": 16,
         "lines": 3,
+        "scale": 2,
         "width": 132,
         "x": 36,
         "y": 4

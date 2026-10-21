@@ -175,6 +175,49 @@ export function conditionHolds(
   }
 }
 
+// How far a save has come toward a condition that counts across walks (a lifetime tally,
+// times fired, finished walks with no firing): have is capped at need. null for a condition
+// judged on one walk or on what the save owns.
+export function acrossWalksProgress(
+  save: Pick<SaveDocument, "stats">,
+  condition: AchievementCondition,
+): { readonly have: number; readonly need: number } | null {
+  const progress = (have: number, need: number) => ({ have: Math.min(have, need), need });
+  switch (condition.kind) {
+    case "tally":
+      return progress(save.stats.tallies[condition.tally] ?? 0, condition.count);
+    case "timesFired":
+      return progress(save.stats.timesFired, condition.count);
+    case "walksWithoutFiring":
+      return progress(save.stats.walksWithoutFiring, condition.count);
+    case "cleanZones":
+    case "debuffsGot":
+    case "dogSlotsOwned":
+    case "dogsFinishedWith":
+    case "dogsOwned":
+    case "earnings":
+    case "finishOnLastHeart":
+    case "fullPackBonus":
+    case "gearOwned":
+    case "packSize":
+    case "walkersUnlocked":
+    case "zonesFinished":
+      return null;
+    default:
+      return assertNever(condition);
+  }
+}
+
+// A badge's progress toward its one condition when that condition counts across walks; null
+// for a badge with any other condition, or with more than one.
+export function achievementProgress(
+  save: Pick<SaveDocument, "stats">,
+  achievement: Pick<Achievement, "conditions">,
+): { readonly have: number; readonly need: number } | null {
+  const [condition, ...rest] = achievement.conditions;
+  return rest.length === 0 ? acrossWalksProgress(save, condition) : null;
+}
+
 // The achievements a run end or a purchase earned, in wall order: those not yet earned in
 // before whose every condition holds for after, with runFacts for a run (null otherwise).
 export function newlyEarned(
