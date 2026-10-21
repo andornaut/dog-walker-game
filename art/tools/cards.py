@@ -5,11 +5,12 @@
   stop, upgrade, and route for a fork's path cards). The game draws the title
   in the band, the effect text in the body and the cost in the badge. Layout,
   in card pixels:
-    band 2..12 (title), art window 4,15 to 79,72 (illustration at 5,16, 75x56),
+    band 2..12 (title), art window 3,15 to 79,72 (illustration at 4,16, 75x56), 1px
+    of face or lip either side of it,
     body 6..77 x 76..118, badge spot 6,121, 71x13 (plain face; card-cost goes there on a paid option).
 - card-frame-large: a 166x280 sprite with the same tags, for the tap-to-enlarge
   view: the same layout doubled with 1px detail. Band 4..22 (title in font-title
-  x2, caps from row 9), art window 8,30, 154x116 (illustration at 2x at 10,32),
+  x2, caps from row 9), art window 6,30, 154x116 (illustration at 2x at 8,32),
   body 12..154 x 152..234, badge spot 12,242, 142x26.
 - card-cost: a 71x13 image, the cost plaque laid over the badge (at 2x on the
   large frame); the game writes the cost between its rivets.
@@ -67,9 +68,9 @@ def card_frame(kind):
     g.rect(2, 2, CW - 4, 11, band)
     g.rect(2, 12, CW - 4, 1, band_sh)
     # recessed art window
-    g.rect(4, 15, AW + 2, AH + 2, "plum")
-    g.rect(4, 15, AW + 2, 1, "ink")
-    g.rect(5, 16, AW, AH, "tan")
+    g.rect(3, 15, AW + 2, AH + 2, "plum")
+    g.rect(3, 15, AW + 2, 1, "ink")
+    g.rect(4, 16, AW, AH, "tan")
     # divider between the effect text and the badge
     for x in range(8, CW - 8, 3):
         g.p(x, 118, "tan")
@@ -92,9 +93,9 @@ def card_frame_large(kind):
     g.rect(4, 4, LW - 8, 21, band)
     g.rect(4, 23, LW - 8, 2, band_sh)
     # recessed art window, the illustration at 2x
-    g.rect(8, 30, 2 * AW + 4, 2 * AH + 4, "plum")
-    g.rect(8, 30, 2 * AW + 4, 2, "ink")
-    g.rect(10, 32, 2 * AW, 2 * AH, "tan")
+    g.rect(6, 30, 2 * AW + 4, 2 * AH + 4, "plum")
+    g.rect(6, 30, 2 * AW + 4, 2, "ink")
+    g.rect(8, 32, 2 * AW, 2 * AH, "tan")
     for x in range(16, LW - 16, 6):
         g.rect(x, 236, 3, 1, "tan")
     return g

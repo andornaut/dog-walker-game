@@ -1066,11 +1066,12 @@ def strip_well():
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash, and the neighbourhood with its name and "n of N"
 # on one line.
-WALK_WELLS = ((4, 4, 75, 40), (80, 4, 110, 13))
+WALK_WELLS = ((4, 5, 75, 37), (80, 5, 110, 12))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
 # the grain: five 22x22 wells side by side from x 80, each lip against the next well, on rows 20 to 41.
-# The neighbourhood well (rows 4 to 16) and the wells split the bar's height evenly: 4 rows above
-# the name well, 3 between, and 3 under the wells to the trim on row 45.
+# Between the trim lines (row 1 and row 45) the neighbourhood well (rows 5 to 16) and the wells
+# split the height evenly, 3 wood rows above the name well, 3 between and 3 under the wells, and
+# the cash well spans the same rows 5 to 41.
 EFFECT_ROW = (79, 17, 112, 26)
 EFFECT_WELL = 22
 
@@ -1078,7 +1079,7 @@ EFFECT_WELL = 22
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
     45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,4 75x40, sized for "$888" at 3x with no coin, and neighbourhood 80,4 110x13, one text line as wide
+    cash 4,5 75x37, sized for "$888" at 3x with no coin, and neighbourhood 80,5 110x12, one text line as wide
     as the five effect wells under it, which ends clear of the Home button's hit at x 190. The game
     draws the effect wells, the Home, Help, Sound, Settings and Pause buttons and every text and
     icon on it."""
@@ -1134,13 +1135,14 @@ def effect_well():
 # ui-section, so the eye stays on the road and the dogs' photos and hearts carry the row.
 DOG_CARD = (120, 74)
 DOG_CARD_FRAME = (1, 0, 118, 74)
-# The photo in the body's middle (the navy on rows 18 to 70): 8 rows above it and 9 below.
-DOG_PHOTO = (4, 26)
+# The photo in the body (the navy on x 3 to 115 and rows 18 to 70): 3 columns of navy to its left, as
+# the owner's column keeps to its right, 8 rows above it and 9 below.
+DOG_PHOTO = (6, 26)
 # The hearts area the heart-loss flash fills, as x, y, w, h: the only part of the card it touches,
 # so the warn rim stays the card's only border.
-DOG_CARD_HEARTS = (43, 35, 46, 18)
+DOG_CARD_HEARTS = (44, 35, 46, 18)
 # The empty card's FIRED plate, x and y: under the owner's name, clear of its descenders.
-DOG_CARD_FIRED = (44, 36)
+DOG_CARD_FIRED = (45, 36)
 # Each heart-loss frame: the flash's colour and how many of the area's pixels it fills (1 every
 # pixel, 2 a checkerboard, 4 one in four), so it bursts white and dithers away. White keeps the
 # hearts drawn over it readable (red 4.19:1, the grey outlines 2.82:1), where a red or pink flash
@@ -1152,11 +1154,11 @@ def dog_card(dog):
     """120x74, ui-dog-card: one of three cards in the walk's card row, in the neutral section look: a
     2px ink frame (the chrome with an ink inner line and an ink lip) round a navy face, the header
     (rows 1 to 16) split from the body by an ink rule on row 17. The game writes the name on the
-    header in cream (9.59:1), with no plate. The dog's photo is an ink frame (4,26 36x36) round a
-    cream mat round its colour (6,28 32x32), in the body's middle. The owner's name (tan, 6.61:1), the hearts under it
+    header in cream (9.59:1), with no plate. The dog's photo is an ink frame (6,26 36x36) round a
+    cream mat round its colour (8,28 32x32), in the body's middle. The owner's name (tan, 6.61:1), the hearts under it
     (ui-heart full-dark and empty-dark) and the LEAD tag go on the navy to its right. The empty card
     (a fired dog's) is dslate in the same frame, with a dslate photo, the owner's name (tan,
-    4.55:1) and a dred plate built as ui-fired-plate (44,36 68x17, its face 48,40 60x9) for FIRED."""
+    4.55:1) and a dred plate built as ui-fired-plate (45,36 68x17, its face 49,40 60x9) for FIRED."""
     empty = dog == "empty"
     face = "dslate" if empty else "navy"
     w, h = DOG_CARD
@@ -1205,7 +1207,7 @@ def dog_card_warn(step):
 
 def dog_card_heart_loss(step):
     """120x74, ui-dog-card's heart-loss frames, an overlay over the card and under the game's face,
-    hearts and text that fills only the hearts area (43,35 46x18, its corners cut 1px), never the
+    hearts and text that fills only the hearts area (44,35 46x18, its corners cut 1px), never the
     card's edge or header: frames 0 and 1 white (13.89:1 on navy), then white on a checkerboard and
     on one pixel in four, so the flash clears."""
     colour, every = DOG_CARD_HEART_LOSS[step]
