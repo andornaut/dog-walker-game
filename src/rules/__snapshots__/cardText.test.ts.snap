@@ -13,7 +13,7 @@ exports[`a card's text for the dogs it catches > matches the snapshot for the wh
   },
   "forks": {
     "fork: Fairview Park": "Belly rubs: +1♥ for every owner",
-    "fork: Willow Crescent": "Sweet talker: First card each neighborhood: cash options free",
+    "fork: Willow Crescent": "Sweet talker: First card: cash options free",
   },
 }
 `;

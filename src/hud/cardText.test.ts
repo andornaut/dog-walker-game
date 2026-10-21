@@ -99,6 +99,9 @@ describe.each(CASES)("the card for %s", (_, option) => {
   it("fits its firing warning and its effect in the effect box", () => {
     const width = (style: TextFitStyle, line: string) => inkWidth("font-body", style, body(line));
     const { box, effect, warning } = smallCardText(gameData, BODY, width, option);
+    // Every option's whole effect shows, a path card's upgrade line included.
+    const full = option?.text ?? gameData.runText.card.skipEffect;
+    expect(effect.lines.join(" ")).toBe(full.split(/\s+/).join(" "));
     const { effect: area, warningGap } = CARD_LAYOUT;
     const room = area.width;
     for (const fitted of warning === null ? [effect] : [effect, warning]) {

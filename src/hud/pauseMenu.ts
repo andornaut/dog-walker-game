@@ -20,7 +20,7 @@ export const PAUSE_NOTE_WIDTH = BUTTON.width;
 export const NOTE_PLATE = { gap: 4, pad: 4, padX: 4, scale: 2 } as const;
 
 // The pause menu's own note wraps onto this many lines.
-export const PAUSE_NOTE_LINES = 3;
+export const PAUSE_NOTE_LINES = 2;
 
 function notePlateHeight(body: FontMetrics, lines: number): number {
   const { pad, scale } = NOTE_PLATE;
