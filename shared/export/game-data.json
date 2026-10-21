@@ -820,7 +820,7 @@
     },
     {
       "art": "help-cards",
-      "body": "Bump a skunk, a thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold anything for details. A puddle opens no card, but makes the pack Muddy. Debuffs wear off on their own.",
+      "body": "Bump a skunk, a thief or another dog and the walk pauses for a card. Each option costs cash, hearts or a debuff, and one always costs no cash. Hold a card, an icon or a debuff bar for details. A puddle opens no card, but makes the pack Muddy. Debuffs wear off on their own.",
       "title": "Some bumps bring cards"
     },
     {
@@ -830,12 +830,12 @@
     },
     {
       "art": "help-pulls",
-      "body": "Every dog loves squirrels. Touching one does nothing, but a bubble and a line to it mean a dog is straining. Steer away and the pull is off; wait and the pack hops one lane toward it. A pull never drags you into a bump too close to dodge.",
+      "body": "Every dog loves squirrels. Touching one does nothing, but a bubble and a line to it mean a dog is straining. Steer away and the pull is off; wait and the pack lurches one lane toward it. A pull never drags you into a bump too close to dodge.",
       "title": "Watch for pulls"
     },
     {
       "art": "help-zones",
-      "body": "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. Each dog's pay is banked as you finish each one, and each is busier than the last. At a fork, each path brings an upgrade, and harder ones pay more. Bring every dog home for the Full pack bonus.",
+      "body": "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. Each neighborhood is busier than the last. Each dog's pay is banked as you finish one. At a fork, each path brings an upgrade, and harder ones pay more. Bring every dog home for the Full pack bonus.",
       "title": "Four neighborhoods"
     }
   ],
@@ -1172,8 +1172,8 @@
       "packSizeMax": 3,
       "packSizeMin": 1,
       "sweetTalkerFreeCards": 1,
-      "tipsFirstZone": 52,
-      "tipsGainPerZone": 7,
+      "tipsFirstZone": 40,
+      "tipsGainPerZone": 5,
       "treatsPerZone": 2,
       "upgradeChoiceCount": 3
     },

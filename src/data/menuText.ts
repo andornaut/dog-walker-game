@@ -38,7 +38,7 @@ export const MENU_TEXT = {
   pause: {
     headHome: "Head home",
     help: "Help",
-    note: "Keeps your cash and earlier neighborhoods' pay",
+    note: "Ends the walk. Cash and banked pay are kept.",
     resume: "Resume",
     settings: "Settings",
     title: "Paused",
@@ -73,7 +73,7 @@ export const MENU_TEXT = {
     },
     overall: {
       bestRun: "Best walk",
-      bestZone: "Best neighborhood completed",
+      bestZone: "Most neighborhoods in a walk",
       lifetime: "Lifetime earnings",
       runsPlayed: "Walks played",
       timesFired: "Times fired",

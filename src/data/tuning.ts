@@ -28,8 +28,8 @@ export const TUNING = {
     packSizeMin: 1,
     // Sweet talker makes this many encounter cards each zone cost no money.
     sweetTalkerFreeCards: 1,
-    tipsFirstZone: 52,
-    tipsGainPerZone: 7,
+    tipsFirstZone: 40,
+    tipsGainPerZone: 5,
     treatsPerZone: 2,
     upgradeChoiceCount: 3,
   },
