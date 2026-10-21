@@ -37,7 +37,7 @@ export { TEXT_SCALE };
 
 // The UI kit's nine-slice borders, in pixels from each edge.
 const SLICES = {
-  // The gold outline on anything the player can afford.
+  // The gold outline on the Pet shop while anything in it is affordable.
   "ui-afford": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-button": { bottom: 5, left: 3, right: 3, top: 3 },
   // The detail card a held dog or gear tile opens, and the title band across it.

@@ -28,8 +28,8 @@ import {
   TEXT_SCALE,
 } from "./uiKit";
 
-// The home screen's drawing beyond its tiles: the gold outline on what the player can
-// afford, and the detail card and logbook that open over the screen. Positions inside a
+// The home screen's drawing beyond its tiles: the gold outline on the Pet shop while the
+// player can afford something in it, and the detail card and logbook that open over the screen. Positions inside a
 // piece are the art's, from the style guide.
 
 const SCREEN = SCREEN_CONFIG;

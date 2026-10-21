@@ -104,10 +104,10 @@ export interface ItemLook {
 const OWNED_LOOK = { art: "full", padlock: null, plate: null } as const;
 
 // An item tile on the home screen. An owned item shows in full colour with no padlock or
-// plate, greyed while the pack is full. One not owned shows its own art, as the shop does: in
-// full colour on a normal tile with the open padlock and the buy plate while the bank covers
-// it; greyed on a disabled tile with the closed padlock and the short plate when not, or the
-// goal plate when a goal unlocks it.
+// plate, greyed while the pack is full. One not owned shows its own art greyed on a disabled
+// tile, as the shop does, whatever the bank holds: with the open padlock and the buy plate
+// while the bank covers it; the closed padlock and the short plate when not, or the goal plate
+// when a goal unlocks it.
 export function itemTileLook(tile: ItemTile): ItemLook {
   switch (tile.kind) {
     case "available":
@@ -118,7 +118,7 @@ export function itemTileLook(tile: ItemTile): ItemLook {
       return { ...OWNED_LOOK, art: "grey", state: "disabled" };
     case "locked":
       return tile.affordable
-        ? { art: "full", padlock: "open", plate: "buy", state: "normal" }
+        ? { art: "grey", padlock: "open", plate: "buy", state: "disabled" }
         : { art: "grey", padlock: "closed", plate: "short", state: "disabled" };
     case "goal":
       return { art: "grey", padlock: "closed", plate: "goal", state: "disabled" };

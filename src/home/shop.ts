@@ -26,8 +26,8 @@ export interface ShopRow {
   readonly purchase: Purchase;
 }
 
-// How a row draws: owned; blocked (greyed with its reason); affordable (the gold outline);
-// or short of the bank.
+// How a row draws: owned; blocked (with its reason); affordable (the buy plate); or short of
+// the bank.
 type ShopRowLook = "affordable" | "blocked" | "owned" | "short";
 
 export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
@@ -41,12 +41,12 @@ export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
 }
 
 // Everything a row's look sets. Owned shows its art in full colour with no padlock or plate.
-// Affordable keeps the full-colour art with the open padlock and the buy plate. Short is a
-// disabled row with the grey copy of its art, the closed padlock and the short plate. Blocked
-// is a disabled row with the grey copy of its art, the closed padlock and its price on the
-// goal plate.
+// A row not owned is a disabled row with the grey copy of its art whatever the bank holds; its
+// padlock and plate say whether it can be bought: affordable has the open padlock and the buy
+// plate, short the closed padlock and the short plate, and blocked the closed padlock and its
+// price on the goal plate.
 export const SHOP_ROW_VIEWS: Readonly<Record<ShopRowLook, ItemLook>> = {
-  affordable: { art: "full", padlock: "open", plate: "buy", state: "normal" },
+  affordable: { art: "grey", padlock: "open", plate: "buy", state: "disabled" },
   blocked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
   owned: { art: "full", padlock: null, plate: null, state: "normal" },
   short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },

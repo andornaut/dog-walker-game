@@ -24,7 +24,7 @@ type StateName = "affordable" | "locked" | "owned" | "short";
 
 // What each state shows on the start screen, from the shop states' table.
 const START_LOOKS: Readonly<Record<StateName, ItemLook>> = {
-  affordable: { art: "full", padlock: "open", plate: "buy", state: "normal" },
+  affordable: { art: "grey", padlock: "open", plate: "buy", state: "disabled" },
   locked: { art: "grey", padlock: "closed", plate: "goal", state: "disabled" },
   owned: { art: "full", padlock: null, plate: null, state: "normal" },
   short: { art: "grey", padlock: "closed", plate: "short", state: "disabled" },

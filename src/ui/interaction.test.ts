@@ -88,7 +88,7 @@ describe("itemTile", () => {
         "a locked item the bank covers",
         { bank: cents(800), price: cents(800) },
         locked(800, true),
-        "normal",
+        "disabled",
       ],
       [
         "a locked item short of the bank",

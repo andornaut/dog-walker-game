@@ -76,7 +76,7 @@ import {
 import { GREYED, type PlateKind } from "../ui/selection";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../ui/textFit";
 import type { CelebrationSceneData } from "./CelebrationScene";
-import { addAffordFrame, type DetailPicture, drawDetailCard } from "./homePanels";
+import { type DetailPicture, drawDetailCard } from "./homePanels";
 import {
   addLock,
   addPlate,
@@ -192,8 +192,8 @@ interface PlacedRow {
 
 // The Pet shop under the home screen's top bar: a Gear tab of gear for sale, and a Dogs tab
 // of dog slots and dogs. Tapping a row the bank covers asks to confirm the purchase, and only
-// the confirm's Buy buys it; a row it cannot pays a shake and says why. Anything affordable
-// wears the gold outline, and the row the shop opened on, or the last one tapped, is framed.
+// the confirm's Buy buys it; a row it cannot pays a shake and says why. The row the shop
+// opened on, or the last one tapped, is framed.
 // Holding a dog or gear row opens its detail card. A tab's headings and rows scroll in the list
 // area under the tabs, by a drag, the wheel or the page keys, with a scrollbar beside a list
 // longer than the view; a drag taps nothing. Left and right switch tabs, up and down move the
@@ -896,8 +896,7 @@ export class ShopScene extends Scene {
   }
 
   // A row: its art in a box, its name and line, and its price plate or Owned at the right,
-  // each as SHOP_ROW_VIEWS sets for its look. An affordable row wears the gold outline; the
-  // framed one ui-select.
+  // each as SHOP_ROW_VIEWS sets for its look. The framed one wears ui-select.
   private drawRow(
     root: GameObjects.Container,
     save: SaveDocument,
@@ -948,8 +947,6 @@ export class ShopScene extends Scene {
     this.drawRowLine(content, row, { fit, greyed: view.state === "disabled", mid, x: textX });
     if (this.focusId === row.id) {
       addSelectFrame(this, holder, rect, reducedMotion);
-    } else if (look === "affordable") {
-      addAffordFrame(this, holder, rect, reducedMotion);
     }
   }
 
