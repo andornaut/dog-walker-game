@@ -20,7 +20,8 @@ reads on them.
 - screen-stats: evening indoors. A panelled den wall that leaves the top left
   clear for the title (12,12 to 68,22); then, between the title and the close
   button and above the tabs (y 56), a framed dog photo, a low window onto
-  Elm Avenue at night under NIGHT_SKY's bands, and the leash hooks. Below the
+  Elm Avenue's houses at night (backdrop-woof-way's band rows 106 to 133, a
+  ramp step darker, the windows lit), and the leash hooks. Below the
   tabs the wall is open for the stats panel and the badge wall (8,108 to
   352,552).
 - screen-end: sunset on The Long Way Home. Between the logo (116,40) and the
@@ -35,11 +36,18 @@ reads on them.
   brick road under the button (48,512 264x44). The houses, trees and fences
   stay within x 8 to 352, so beside the badges panel (8,416 344x92) the
   margins show only sky, lawn and sidewalk.
-- screen-loading: Elm Avenue at night, shown while the game loads. The logo is
-  drawn in, centred at 116,92; NIGHT_SKY's bands (stars in the navy one)
-  above the houses and street lamps; the sidewalk at y 350 to 365 carries the
-  progress track, and the plain road below it (to y 450) leaves room for a
-  status line.
+- screen-loading: Elm Avenue at night, shown while the game loads, the gate
+  scene's street seen from the road. NIGHT_SKY's bands fill the sky down to
+  the far side's ground row (HORIZON, 356), stars and a crescent moon in the
+  navy band, and the logo drawn in at 2x (256x60 at 52,80). Across the
+  street, Elm Avenue's backdrop (the hill, the water tower, the slim houses)
+  two ramp steps darker with its windows lit; then the yard one step darker:
+  the lawn, the flower bed, the picket fence with the open gate (posts at
+  x 330 and 356) and ui-pet-shop's building on the left lot (4,306), its
+  board, display window and door pane left lit. The sidewalk (rows 414 to
+  469) carries the track and the pair, a street lamp at x 238; then the
+  curb, and the street, with no markings from the curb to row 500, where a
+  status line could sit (the game draws none).
 
 ui-pet-shop: a 120x108 sprite, tags normal, pressed and glint: the pet shop on
 the yard's right lot, which opens the shop. The game draws it at PET_SHOP_AT
@@ -59,12 +67,17 @@ frame; the game plays it every few seconds while idle, with a bob of at most
 row 82). An affordable item in the shop takes ui-afford 2px outside the frame
 (232,84 124x112).
 
-ui-loading-track: a 200x8 image, the dotted path the pair walks along, with a
-doghouse at the far end. The game draws it at TRACK_AT (80,357).
-ui-loading: a 48x32 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
-on, walking right on a pink leash. The game draws it at PAIR_AT (76,332) plus
-round(148 * progress) to the right, so Casey's heels start on the first dot and
-Biscuit's nose ends at the doghouse.
+ui-loading-track: a 316x8 image, the sidewalk being walked: Biscuit's paw
+prints in dslate, staggered on two rows from Casey's heel to the gate. The game
+draws it at TRACK_AT (16,456).
+ui-loading: a 98x84 sprite, tag walk (4 frames, 160ms): Casey and Biscuit side
+on, walking right on a plum leash, at the road sprites' size (Casey as tall as
+her 56x84 walker, Biscuit as his 56x56 dog), cel shaded with the road outline,
+Casey's face flat skin. Frames 0 and 2 plant the feet apart, 1 and 3 pass
+with the body 1px higher, a foot lifted, and Biscuit's diagonal pairs swap.
+The game draws it at PAIR_AT (6,379) plus round(228 * progress) to the right,
+its feet on row 460, so Casey's heel starts on the first paw print and
+Biscuit's nose ends at the gate.
 
 Usage:
   screens.py preview OUT.png   the logo, the ui-loading frames, then every screen,
@@ -81,6 +94,7 @@ build overwrites the .aseprite sources, so hand edits to them belong in this
 file instead.
 """
 
+import math
 import os
 import subprocess
 import sys
@@ -91,6 +105,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 import backdrops as bd  # noqa: E402
 import fonts  # noqa: E402
 import help as hp  # noqa: E402
+import minis  # noqa: E402
+import road  # noqa: E402
 from pixel import DARKER, Grid, K, build as build_sprites, edged  # noqa: E402
 from ui import STATES  # noqa: E402
 
@@ -539,9 +555,10 @@ def image_rows(img):
 
 # ---------- screen-stats ----------
 
-# Elm Avenue's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading
-# and through the window of screen-stats.
+# Elm Avenue's sky after dark, top to horizon: night falling over a last mauve glow, on screen-loading.
 NIGHT_SKY = ("navy", "purple", "mauve")
+# The first backdrop band row screen-stats' window shows: the houses' lit walls, their doors and the ground row.
+STATS_VIEW_TOP = 106
 
 
 def night(img, top=20, horizon=46):
@@ -593,9 +610,10 @@ def stats():
     cv.fill(0, 548, W, 1, "brown")
     cv.fill(0, 549, W, 10, "plum")
     cv.fill(0, 559, W, 1, "ink")
-    # a low window onto Elm Avenue at night, between the photo and the leash hooks, above the tabs
+    # a low window onto Elm Avenue at night, between the photo and the leash hooks, above the tabs: the
+    # houses across the street from STATS_VIEW_TOP, their windows lit, down past the ground row (band row 131)
     wx, wy, ww, wh = 140, 16, 100, 28
-    view = night(bd.woof_way().img).crop((120, 20, 120 + ww, 20 + wh))
+    view = night(bd.woof_way().img).crop((120, STATS_VIEW_TOP, 120 + ww, STATS_VIEW_TOP + wh))
     cv.fill(wx - 6, wy - 6, ww + 12, wh + 12, "plum")
     cv.fill(wx - 5, wy - 5, ww + 10, wh + 10, "tan")
     cv.fill(wx - 5, wy - 5, ww + 10, 1, "cream")
@@ -605,11 +623,6 @@ def stats():
     cv.fill(wx, wy + wh // 2 - 1, ww, 3, "tan")
     cv.fill(wx + ww // 2 + 1, wy, 1, wh, "brown")
     cv.fill(wx, wy + wh // 2 + 1, ww, 1, "brown")
-    # a crescent moon in the upper right pane
-    for dy in range(-4, 5):
-        for dx in range(-4, 5):
-            if dx * dx + dy * dy <= 16 and (dx + 2) ** 2 + (dy - 2) ** 2 > 10:
-                cv.fill(wx + ww - 12 + dx, wy + 7 + dy, 1, 1, "cream")
     # the sill
     cv.fill(wx - 10, wy + wh + 6, ww + 20, 3, "tan")
     cv.fill(wx - 10, wy + wh + 6, ww + 20, 1, "cream")
@@ -773,16 +786,25 @@ def end():
 
 # ---------- screen-loading, ui-loading-track, ui-loading ----------
 
-STREET = 220  # top of the night street strip on screen-loading
-LOADING_LOGO_AT = ((W - LOGO_W) // 2, 92)
-TRACK_W, TRACK_H = 200, 8
-TRACK_AT = (80, 357)
-PAIR_W, PAIR_H = 48, 32
-PAIR_FEET = 29  # the row the pair's feet stand on, in its frame
+HORIZON = 356  # the far side's ground row, where the far houses stand and NIGHT_SKY's bands end
+YARD_FOOT = 414  # the fence's and the Pet shop's bottom row: the sidewalk starts under it
+CURB = 470  # the sidewalk's last row is CURB - 1; the curb, then the street
+LOADING_LOGO_AT = ((W - 2 * LOGO_W) // 2, 80)  # the logo at 2x, 256x60
+GATE = (334, 356)
+# ui-pet-shop's display window and door pane in its frame, left lit on screen-loading
+SHOP_WINDOW = (9, 47, 67, 96)
+SHOP_DOOR_PANE = (82, 54, 100, 68)  # the open gate's posts, left and right
+LAMP_X = 238
+PAIR_W, PAIR_H = 98, 84
+PAIR_FEET = 81  # the pair's bottom opaque row (the shoes' and paws' outline) in its frame
+WALK_FOOT = 460  # the screen row the pair's feet stand on
+PAIR_HEEL, PAIR_NOSE = 10, 97  # Casey's rear heel on the contact frames and Biscuit's nose, opaque columns
+TRACK_AT = (16, WALK_FOOT - 4)
+TRACK_W, TRACK_H = GATE[0] - 2 - TRACK_AT[0], 8
 # Where the game draws ui-loading (origin top left) at progress 0, and how far right it walks by 1: Casey's
-# heels start on the first dot and Biscuit's nose ends at the doghouse door. Its feet stand on the dots' row.
-PAIR_AT = (TRACK_AT[0] - 4, TRACK_AT[1] + 4 - PAIR_FEET)
-PAIR_TRAVEL = 148
+# heel starts on the first paw print and Biscuit's nose ends at the gate. Its feet stand on WALK_FOOT.
+PAIR_AT = (TRACK_AT[0] - PAIR_HEEL, WALK_FOOT - PAIR_FEET)
+PAIR_TRAVEL = TRACK_AT[0] + TRACK_W - PAIR_NOSE - 1 - PAIR_AT[0]
 
 
 def after_dark(img, steps=2):
@@ -811,115 +833,147 @@ def after_dark(img, steps=2):
     return out
 
 
+def stars(cv, r, top, bottom, n):
+    """n single specks in lgrey and slate between rows top and bottom."""
+    for _ in range(n):
+        x, y = int(r() * W), top + int(r() * (bottom - top))
+        cv.fill(x, y, 1, 1, "lgrey" if r() < 0.7 else "slate")
+
+
+def picket_fence(cv, foot, x0, x1, gate=None):
+    """The start screen's picket fence standing on row foot, from x0 to x1: white pickets 14 tall on two lgrey
+    rails, and, with gate (left, right), an open gate between two posts."""
+    top = foot - 14
+    for x in range(x0, x1, 6):
+        if gate and gate[0] - 4 < x < gate[1] + 4:
+            continue
+        cv.fill(x, top, 4, 14, "white")
+        cv.fill(x + 3, top + 1, 1, 13, "lgrey")
+        cv.fill(x + 1, top - 1, 2, 1, "white")
+    cv.fill(x0, top + 4, (gate[0] if gate else x1) - x0, 2, "lgrey")
+    if gate:
+        cv.fill(gate[1] + 4, top + 4, x1 - gate[1] - 4, 2, "lgrey")
+        for px in (gate[0] - 4, gate[1]):
+            cv.fill(px, top - 4, 5, 18, "lgrey")
+            cv.fill(px, top - 4, 5, 1, "white")
+            cv.fill(px + 4, top - 3, 1, 17, "grey")
+        # the gate leaf swung open into the yard, seen edge on: three pickets foreshortened behind the right post
+        for i in range(3):
+            cv.fill(gate[1] - 6 + 2 * i, top - 2 + i, 2, 13 - i, "white" if i % 2 == 0 else "lgrey")
+
+
 def loading():
     cv = hp.Canvas(W, H)
     r = rand(13)
-    # the night sky in bands, navy down to a last mauve glow behind the roofs
-    cv.fill(0, 0, W, STREET + 104, NIGHT_SKY[-1])
-    rows = bd.bands(cv, 0, STREET + 60, NIGHT_SKY)
-    # stars in the navy band: single specks, and a few brighter crosses
-    for _ in range(90):
-        x, y = int(r() * W), int(r() * (rows[0][1] - 3))
-        cv.fill(x, y, 1, 1, "lgrey" if r() < 0.7 else "slate")
-    for x, y in ((40, 40), (176, 30), (64, 150), (330, 132), (210, 120), (20, 100)):
+    # the night sky in bands, navy down to a last mauve glow behind the far roofs, stars in the navy band
+    cv.fill(0, 0, W, HORIZON, NIGHT_SKY[-1])
+    rows = bd.bands(cv, 0, HORIZON, NIGHT_SKY)
+    stars(cv, r, 0, rows[0][1] - 3, 110)
+    for x, y in ((24, 36), (334, 132), (40, 190), (296, 214), (180, 30), (110, 224)):
         cv.fill(x - 1, y, 3, 1, "lgrey")
         cv.fill(x, y - 1, 1, 3, "lgrey")
         cv.fill(x, y, 1, 1, "white")
-    # a crescent moon, top right
+    # a crescent moon, top right, clear of the logo
     for dy in range(-10, 11):
         for dx in range(-10, 11):
             if dx * dx + dy * dy <= 100 and (dx + 5) ** 2 + (dy - 3) ** 2 > 64:
-                cv.fill(300 + dx, 48 + dy, 1, 1, "cream")
-    # Elm Avenue after dark, drawn by day and then taken two ramp steps down: trees, houses with front paths,
-    # fences and the sidewalk the pair walks along
-    strip = clear(W, 150)
-    for cx, top, rad in ((10, 44, 16), (180, 40, 16), (356, 50, 14)):
-        bd.tree(strip, cx, top, "dgreen", "forest", r=rad)
-    doors = []
-    for x, w, wall, roof, door, top in ((30, 66, "white", "sky", "red", 38), (112, 52, "pink", "red", "dgreen", 50),
-                                        (204, 70, "cream", "green", "blue", 34),
-                                        (290, 54, "lgrey", "mauve", "red", 48)):
-        bd.house(strip, x, w, wall, roof, door, top=top)
-        doors.append(x + w // 2 - 5)
-    bd.ground(strip)
-    # the sidewalk a step darker than ground() draws it, so by night it is Elm Avenue's dslate road colour,
-    # where the pink leash holds 3.5:1 and the track's cream dots 6.6:1
-    strip.fill(0, 130, W, 15, "grey")
+                cv.fill(318 + dx, 44 + dy, 1, 1, "cream")
+    # the far side of the street as Elm Avenue's backdrop has it, drawn by day and taken two ramp steps down:
+    # a hill with a water tower on its crest and a second row of houses up its slope, then the slim houses
+    # across the street on HORIZON with trees and shrubs between them
+    far = clear(W, H)
+    crest = bd.hills(far, HORIZON - 52, HORIZON, "dgreen", "green", 1.7, 10)
+    tx = 298
+    for lx in (tx - 6, tx + 5):
+        far.fill(lx, HORIZON - 50, 2, 16, "slate")
+    far.fill(tx - 6, HORIZON - 43, 13, 1, "slate")
+    far.fill(tx - 9, HORIZON - 62, 20, 12, "lgrey")
+    far.fill(tx + 7, HORIZON - 62, 4, 12, "grey")
+    far.fill(tx - 9, HORIZON - 51, 20, 1, "grey")
+    for k in range(4):
+        far.fill(tx - 7 + 2 * k, HORIZON - 63 - k, 16 - 4 * k, 1, "slate")
+    for cx, w, wall_c, roof in ((22, 20, "lgrey", "slate"), (90, 18, "skin1", "dred"),
+                                (208, 20, "cream", "dslate"), (332, 18, "white", "purple")):
+        bd.far_house(far, cx, w, min(HORIZON - 26, crest[cx] + 16), 12, wall_c, roof)
+    homes = ((0, 44, 22, "lgrey", "slate", "dred", False), (60, 46, 24, "tan", "brown", "dgreen", True),
+             (120, 44, 22, "pink", "purple", "white", False), (180, 48, 24, "sky", "navy", "red", True),
+             (240, 44, 22, "cream", "dred", "sky", False), (300, 46, 24, "skin1", "dslate", "forest", True),
+             (360, 44, 22, "white", "brown", "blue", False))
+    for cx, rad in ((30, 11), (150, 12), (270, 10)):
+        bd.tree(far, cx, HORIZON - 19 - 2 * rad, r=rad, base=HORIZON, girth=4)
+    for cx, w, wall_h, wall_c, roof, door, dormer in homes:
+        bd.house(far, cx - w // 2, w, wall_c, roof, door, top=HORIZON - 46, base=HORIZON, roof_h=46 - wall_h,
+                 parts=bd.SLIM, eave=2, rake=bd.LIT.get(roof), dormer=dormer)
+    for cx in (90, 210, 330):
+        bd.bush(far, cx - 5, HORIZON - 3, "dgreen", bd.SHRUB)
+    dark = after_dark(far.img)
+    cv.img.paste(dark, (0, 0), dark)
+    # the yard, one ramp step down: the lawn, a flower bed along the fence, the front path from the gate,
+    # the picket fence with the open gate, and the Pet shop's brick on the left lot, its PET SHOP board lit
+    near = clear(W, H)
+    near.fill(0, HORIZON, W, YARD_FOOT - HORIZON, "green")
+    for i in range(40):
+        near.fill((i * 53) % W, HORIZON + 4 + (i * 29) % (YARD_FOOT - HORIZON - 24), 1, 2, "dgreen")
+    near.fill(0, YARD_FOOT - 20, W, 5, "dbrown")
+    near.fill(0, YARD_FOOT - 20, W, 1, "plum")
+    bd.flowers(near, 2, W - 2, YARD_FOOT - 19, ("red", "yellow", "pink", "white"))
+    picket_fence(near, YARD_FOOT, 0, W, GATE)
+    shop = pet_shop().img
+    near.img.alpha_composite(shop, (4, YARD_FOOT - PET_SHOP_H))
+    lit = after_dark(near.img, 1)
+    for box in ((0, 0, PET_SHOP_W, BOARD[3]), SHOP_WINDOW, SHOP_DOOR_PANE):
+        lit.alpha_composite(shop.crop(box), (4 + box[0], YARD_FOOT - PET_SHOP_H + box[1]))
+    cv.img.paste(lit, (0, 0), lit)
+    # the sidewalk, a step darker than by day (Elm Avenue's road grey), slabs every 24px
+    walk = clear(W, CURB - YARD_FOOT)
+    walk.fill(0, 0, W, CURB - YARD_FOOT, "lgrey")
     for x in range(0, W, 24):
-        strip.fill(x, 130, 1, 15, "slate")
-    strip.fill(0, 145, W, 3, "lgrey")
-    strip.fill(0, 148, W, 2, "grey")
-    for dx in doors:
-        strip.fill(dx, 104, 10, 26, "tan")
-        strip.fill(dx, 112, 10, 1, "brown")
-        strip.fill(dx, 121, 10, 1, "brown")
-    edges = [0] + [e for dx in doors for e in (dx - 4, dx + 16)] + [W]
-    for x0, x1 in zip(edges[::2], edges[1::2]):
-        bd.fence(strip, 104, x0, x1)
-    lit, glow = after_dark(strip.img), after_dark(strip.img, 1)
-    # two street lamps, each leaving a pool one ramp step lighter on the lawn and the sidewalk, clear of the track
-    for lx in (34, 326):
-        for y in range(116, 150):
-            for x in range(lx - 30, lx + 31):
-                if 0 <= x < W and ((x - lx) / 30) ** 2 + ((y - 137) / 13) ** 2 <= 1:
-                    lit.putpixel((x, y), glow.getpixel((x, y)))
-    cv.paste(lit, 0, STREET)
-    for lx in (34, 326):
-        cv.fill(lx - 1, STREET + 46, 3, 88, "slate")
-        cv.fill(lx - 1, STREET + 46, 1, 88, "grey")
-        cv.fill(lx - 3, STREET + 132, 7, 2, "navy")
-        cv.fill(lx - 5, STREET + 38, 11, 2, "navy")
-        cv.fill(lx - 4, STREET + 40, 9, 5, "yellow")
-        cv.fill(lx - 4, STREET + 44, 9, 1, "amber")
-        cv.fill(lx - 2, STREET + 41, 2, 2, "cream")
-        cv.fill(lx - 3, STREET + 45, 7, 1, "navy")
-    # porch lights by the doors
-    for dx in doors:
-        cv.fill(dx - 3, STREET + 88, 2, 2, "yellow")
-    # the street, navy: specks and a dashed centre line, then the near curb, sidewalk and a hedge along the
-    # bottom. The road between the curb and y 450 has no markings, so a status line can sit there.
-    cv.fill(0, STREET + 150, W, 140, "navy")
-    for _ in range(320):
-        cv.fill(int(r() * W), STREET + 150 + int(r() * 140), 1, 1, "dslate" if r() < 0.6 else "ink")
+        walk.fill(x, 0, 1, CURB - YARD_FOOT, "grey")
+    walk.fill(0, 0, W, 2, "grey")
+    walk.fill(37, 30, 3, 1, "grey")
+    walk.fill(39, 31, 2, 1, "grey")
+    walk.fill(282, 18, 4, 1, "grey")
+    dim = after_dark(walk.img, 1)
+    cv.img.paste(dim, (0, YARD_FOOT))
+    # the street lamp at the back of the sidewalk
+    cv.fill(LAMP_X - 1, YARD_FOOT - 82, 3, 86, "slate")
+    cv.fill(LAMP_X - 1, YARD_FOOT - 82, 1, 86, "grey")
+    cv.fill(LAMP_X - 3, YARD_FOOT + 2, 7, 2, "navy")
+    cv.fill(LAMP_X - 5, YARD_FOOT - 90, 11, 2, "navy")
+    cv.fill(LAMP_X - 4, YARD_FOOT - 88, 9, 5, "yellow")
+    cv.fill(LAMP_X - 4, YARD_FOOT - 84, 9, 1, "amber")
+    cv.fill(LAMP_X - 2, YARD_FOOT - 87, 2, 2, "cream")
+    cv.fill(LAMP_X - 3, YARD_FOOT - 83, 7, 1, "navy")
+    # the curb, then the street: navy with specks and a dashed centre line, no other markings from the curb to
+    # row 500, the near curb and sidewalk along the bottom
+    cv.fill(0, CURB, W, 4, "slate")
+    cv.fill(0, CURB, W, 1, "grey")
+    cv.fill(0, CURB + 4, W, 2, "ink")
+    cv.fill(0, CURB + 6, W, 536 - CURB - 6, "navy")
+    for _ in range(300):
+        cv.fill(int(r() * W), CURB + 6 + int(r() * (536 - CURB - 6)), 1, 1, "dslate" if r() < 0.6 else "ink")
     for x in range(4, W, 28):
-        cv.fill(x, 460, 14, 2, "slate")
-    cv.fill(0, 510, W, 4, "dslate")
-    cv.fill(0, 510, W, 1, "slate")
-    cv.fill(0, 514, W, 18, "dslate")
+        cv.fill(x, 510, 14, 2, "slate")
+    cv.fill(0, 536, W, 4, "dslate")
+    cv.fill(0, 536, W, 1, "slate")
+    cv.fill(0, 540, W, 20, "dslate")
     for x in range(12, W, 24):
-        cv.fill(x, 514, 1, 18, "navy")
-    cv.fill(0, 532, W, 28, "forest")
-    for x in range(-6, W, 22):
-        bd.bush(cv, x, 548 - (x // 22) % 2, "teal")
-    cv.paste(logo().img, *LOADING_LOGO_AT)
+        cv.fill(x, 540, 1, 20, "navy")
+    big = logo().img.resize((2 * LOGO_W, 2 * LOGO_H), Image.NEAREST)
+    cv.img.paste(big, LOADING_LOGO_AT, big)
     return cv
 
 
-# The track's doghouse at the far end: a red roof and tan walls in a plum rim, and an ink door.
-DOGHOUSE = [
-    "...pppp...",
-    "..pRRRRp..",
-    ".pRRRRRRp.",
-    "pRRRRRRRRp",
-    ".pttkkttp.",
-    ".pttkkttp.",
-    ".pttkkttp.",
-    ".pppppppp.",
-]
-
-
 def loading_track():
-    """The dotted path the pair walks along: cream dots in plum rings every 6px, and a doghouse, home, at the end."""
+    """The sidewalk being walked: Biscuit's paw prints in dslate (3.39:1 on the night sidewalk's grey),
+    left and right paws 8px apart, staggered on two rows, from Casey's heel to the gate."""
     cv = clear(TRACK_W, TRACK_H)
-    for x in range(0, 184, 6):
-        cv.fill(x, 3, 4, 2, "plum")
-        cv.fill(x + 1, 2, 2, 4, "plum")
-        cv.fill(x + 1, 3, 2, 2, "cream")
-    cols = {"p": "plum", "R": "red", "t": "tan", "k": "ink"}
-    for j, row in enumerate(DOGHOUSE):
-        for i, c in enumerate(row):
-            if c in cols:
-                cv.fill(TRACK_W - 10 + i, j, 1, 1, cols[c])
+    for n, x in enumerate(range(0, TRACK_W - 4, 8)):
+        y = 0 if n % 2 else 4
+        for j, row in enumerate(PAW):
+            for i, c in enumerate(row):
+                if c == "#":
+                    cv.fill(x + i, y + j, 1, 1, "dslate")
     return cv
 
 
@@ -933,84 +987,136 @@ SCREENS = {
 }
 
 
-# Casey from the side, walking right: orange cap, dbrown hair, a face with one eye, and the blue hoodie
-# (sky, lit cyan, shaded blue) with the near arm reaching forward to hold the leash. The legs are drawn per frame.
-CASEY = [
-    "...aaaaa......",
-    "..ayyaaaa.....",
-    ".aaaaaaaao....",
-    ".ooooooooooo..",
-    ".hhhsssss.....",
-    ".hhhssskss....",
-    ".hhhsssssss...",
-    "..hhsssssm....",
-    "...msss.......",
-    "..bcccccb.....",
-    ".bcCCccccc....",
-    ".bcCcccbccc...",
-    ".bccccccbbcc..",
-    ".bcccccc..css.",
-    ".bbccccb......",
-    "..nnnnnn......",
+# ui-loading is drawn on a PAIR_DESIGN design grid at PAIR_SCALE, the road people's 1.75, on a minis.Mini that
+# keeps 1px lines and single pixels 1px, so Casey stands as tall as her 56x84 road sprite and Biscuit as his
+# 56x56 one.
+PAIR_DESIGN = (56, 48)
+PAIR_SCALE = 1.75
+# The pair's stride, one dict per frame: Casey's near and far feet (forward of the hip, in design px) and which
+# is lifted, the body's bob, Biscuit's near front and hind paws, his bob and his tail's wag. Contact frames (0, 2)
+# plant both feet apart; on the passing frames (1, 3) the swinging foot lifts 1px under the hip as the body
+# rises 1px, as the walkers' stride has it, and Biscuit's diagonal pairs swap with his ears lagging.
+PAIR_WALK = [
+    dict(near=4, far=-4, lift=None, bob=0, front=2, hind=-2, dbob=0, wag=-1, flop=0),
+    dict(near=0, far=0, lift="far", bob=-1, front=0, hind=0, dbob=-1, wag=0, flop=1),
+    dict(near=-4, far=4, lift=None, bob=0, front=-2, hind=2, dbob=0, wag=1, flop=0),
+    dict(near=0, far=0, lift="near", bob=-1, front=0, hind=0, dbob=-1, wag=0, flop=1),
 ]
-# Biscuit from the side, trotting right: tricolour (ochre, a navy saddle, white chest and muzzle), a long
-# rust ear, the green collar and a white-tipped tail. The legs are drawn per frame.
-BISCUIT = [
-    "...................",
-    "e...........eeee...",
-    ".e.........eeeeew..",
-    ".e........reeekeww.",
-    ".e.nnnnnnnrreeewwwk",
-    ".eennnnnnnrrreewww.",
-    ".eeennnnnngrrrww...",
-    "..eeeeeeeegrrw.....",
-    "..eeeeeeeeewww.....",
-    "..eeeeeeewwww......",
-]
-PAIR_COLS = dict(a="amber", y="yellow", o="orange", h="dbrown", s="skin1", m="skin2", k="ink", b="blue", c="sky",
-                 C="cyan", n="navy", e="ochre", r="rust", w="white", g="green")
+PAIR_WALK_MS = 160
+# Casey's hand and Biscuit's collar on the design grid, before the bob: the leash's two ends.
+HAND = (21, 28)
+COLLAR = (44, 28)
 
 
-def stamp(g, rows, x, y, cols=PAIR_COLS):
-    for j, row in enumerate(rows):
-        for i, c in enumerate(row):
-            if c in cols:
-                g.p(x + i, y + j, cols[c])
+def leg(g, hip, foot, lift, trouser, shade, shoe, sole):
+    """One of Casey's legs, from the hip (x, row) to its shoe on row 43, the foot lift rows up: 3 wide,
+    in 2-row steps so it stays unbroken at any scale, the shoe pointing right."""
+    (hx, hy), fx = hip, foot
+    end = 42 - lift
+    n = max(1, end - hy)
+    for k in range(0, n + 1, 1):
+        x = hx + (fx - hx) * k / n
+        g.rect(round(x), hy + k, 3, 2, trouser)
+        g.rect(round(x) + 2, hy + k, 1, 2, shade)
+    g.rect(fx, 43 - lift, 5, 2, shoe)
+    g.rect(fx, 45 - lift - 1, 5, 1, sole)
+
+
+def dog_leg(g, hip, paw, upper, sock, sock_shade):
+    """One of Biscuit's legs, from the hip or shoulder to its paw on row 45: the coat colour above a white
+    sock 3 rows deep."""
+    (hx, hy), px = hip, paw
+    n = max(1, 43 - hy)
+    for k in range(n + 1):
+        x = round(hx + (px - hx) * k / n)
+        g.rect(x, hy + k, 3, 2, upper if hy + k < 41 else sock)
+    g.rect(px, 44, 3, 2, sock)
+    g.p(px + 2, 45, sock_shade)
+
+
+def pair_design(near=0, far=0, lift=None, bob=0, front=0, hind=0, dbob=0, wag=0, flop=0):
+    """One frame of ui-loading on the PAIR_DESIGN grid: Casey side on, walking right, and Biscuit trotting
+    ahead of her, cel shaded with the road outline and the lit rim, as the road sprites."""
+    g = edged(Grid(*PAIR_DESIGN))
+    b = bob
+    ln, lf = (1 if lift == "near" else 0), (1 if lift == "far" else 0)
+    # Casey: the far leg and arm a shade darker, behind the body
+    leg(g, (10, 33 + b), 10 + far, lf, "navy", "navy", "lgrey", "grey")
+    g.rect(7 - near // 2, 23 + b, 3, 8, "blue")
+    g.rect(7 - near // 2, 31 + b, 3, 2, "skin2")
+    # the hoodie, its hood at the back of the neck, and a white drawstring at the front
+    g.cel(11.5, 27.5 + b, 6, 6.5, "sky", "blue", "cyan", power=4)
+    g.rect(6, 33 + b, 11, 1, "blue")
+    g.cel(7.5, 21.5 + b, 3, 2.5, "blue", "navy")
+    g.rect(15, 22 + b, 1, 4, "white")
+    leg(g, (10, 33 + b), 10 + near, ln, "blue", "navy", "white", "lgrey")
+    # head: the ponytail and hair behind a flat-skin face in profile, the ear, then the cap, its brim forward
+    g.rect(11, 19 + b, 3, 3, "skin2")
+    g.cel(4.5, 17 + b, 2, 3.5, "dbrown", "plum")
+    g.cel(12, 12.5 + b, 8, 8.5, "dbrown", "plum", "brown")
+    g.ell(15.5, 14.5 + b, 5.5, 5.5, "skin1")
+    g.p(21, 15 + b, "skin1")
+    g.rect(10, 13 + b, 2, 3, "skin1")
+    g.p(11, 14 + b, "skin2")
+    g.rect(17, 13 + b, 2, 2, "ink")
+    g.p(17, 13 + b, "white")
+    g.p(15, 16 + b, "pink")
+    g.rect(17, 18 + b, 2, 1, "dbrown")
+    g.p(19, 17 + b, "dbrown")
+    g.cel(12, 8 + b, 8.5, 5, "amber", "orange", "yellow")
+    g.rect(14, 10 + b, 9, 2, "orange")
+    g.rect(14, 11 + b, 9, 1, "rust")
+    g.p(12, 3 + b, "yellow")
+    # the near arm reaching forward to hold the leash
+    g.rect(10, 22 + b, 4, 5, "sky")
+    g.rect(10, 22 + b, 1, 5, "cyan")
+    g.rect(12, 25 + b, 7, 3, "sky")
+    g.rect(12, 27 + b, 7, 1, "blue")
+    g.rect(HAND[0] - 2, HAND[1] - 2 + b, 3, 3, "skin1")
+    g.p(HAND[0], HAND[1] + b, "skin2")
+    # Biscuit: far legs a shade darker, the tail flagged up with its white tip, then the tan body under the
+    # black saddle, white belly and chest, the near legs, and the head with a long rust ear
+    d = dbob
+    dog_leg(g, (33, 36 + d), 33 - hind, "rust", "lgrey", "grey")
+    dog_leg(g, (44, 36 + d), 44 - front, "rust", "lgrey", "grey")
+    for k in range(8):
+        g.rect(round(29.5 - k * 0.35 + wag * k / 7), 31 - k + d, 2, 2, "navy")
+    g.rect(round(29.5 - 7 * 0.35) + wag, 22 + d, 2, 2, "white")
+    g.cel(37.5, 34.5 + d, 9, 5, "ochre", "rust", "tan")
+    g.cel(36.5, 31.5 + d, 6.5, 2.6, "navy", "ink", "dslate")
+    g.cel(39, 38 + d, 6, 1.5, "white", "lgrey")
+    g.cel(45, 34.5 + d, 2.5, 3.5, "white", "lgrey")
+    dog_leg(g, (31, 36 + d), 31 + hind, "ochre", "white", "lgrey")
+    dog_leg(g, (42, 36 + d), 42 + front, "ochre", "white", "lgrey")
+    g.cel(48, 26 + d, 5.5, 5, "ochre", "rust", "tan")
+    g.cel(52.5, 28.5 + d, 3, 2.2, "white", "lgrey")
+    g.rect(50, 21 + d, 2, 4, "white")
+    g.rect(54, 26 + d, 2, 2, "ink")
+    g.rect(49, 24 + d, 2, 2, "ink")
+    g.p(49, 24 + d, "white")
+    g.p(52, 30 + d, "dbrown")
+    g.cel(45.5, 28.5 + d + flop, 2.2, 4.5, "rust", "dbrown")
+    g.rect(COLLAR[0] - 1, COLLAR[1] - 2 + d, 2, 6, "green")
+    g.rect(COLLAR[0], COLLAR[1] - 2 + d, 1, 6, "dgreen")
+    return road.rim(g, road.LIT)
 
 
 def pair(step):
-    """48x32, one frame of the walk: Casey and Biscuit side on, the leash slack between them. The far legs
-    are a shade darker. On the passing frames (1 and 3) the legs pass under the body and Casey bobs up 1px."""
-    g = Grid(PAIR_W, PAIR_H)
-    bob = step % 2
-    # Casey: hips at row 22, shoes on row PAIR_FEET
-    wx, wy = 4, PAIR_FEET - 23 - bob
-    # on a passing frame the leg swinging through lifts its foot 1px, its shin a pixel back
-    stride, swing = (3, 0, -3, 0)[step], (None, 0, None, 1)[step]
-    for i, (hip, sway, trouser, shoe) in enumerate(((3, -stride, "navy", "lgrey"), (5, stride, "dslate", "white"))):
-        up = 1 if swing == i else 0
-        n = 6 + bob - up
-        for k in range(n):
-            g.rect(wx + hip + round(sway * k / (n - 1)) - (up if k > 2 else 0), wy + 16 + k, 2, 1, trouser)
-        g.rect(wx + hip + sway - up, PAIR_FEET - up, 3, 1, shoe)
-    stamp(g, CASEY, wx, wy)
-    # Biscuit: diagonal leg pairs swap, legs from row 10 of the body to PAIR_FEET, and the tail tip wags
-    dx, dy = 27, PAIR_FEET - 12
-    reach = (1, 0, -1, 0)[step]
-    for hip, sway, col in ((2, reach, "lgrey"), (11, -reach, "lgrey"), (4, -reach, "white"), (13, reach, "white")):
-        for k in range(3):
-            g.rect(dx + hip + round(sway * k / 2), dy + 10 + k, 2, 1, col)
-    stamp(g, BISCUIT, dx, dy)
-    g.p(dx + 1 + (0, 1, 0, -1)[step], dy, "white")
+    """PAIR_W x PAIR_H, one frame of the walk: pair_design at PAIR_SCALE, outlined, then the leash sagging 1px
+    wide from Casey's hand to Biscuit's collar, over the outline: plum, as on Willow Crescent's grey road, since
+    the night sidewalk is grey (4.84:1)."""
+    q = PAIR_WALK[step]
+    g = minis.small(sys.modules[__name__], PAIR_SCALE, pair_design, **q)
     px = g.outlined()
-    # the leash, after the outline so it stays 1px: pink (3.5:1 on the night street), sagging from the hand
-    # to the collar
-    a, b = (wx + 13, wy + 13), (dx + 10, dy + 6)
-    for x in range(a[0], b[0] + 1):
-        t = (x - a[0]) / (b[0] - a[0])
-        y = round(a[1] + (b[1] - a[1]) * t + (2 + bob) * 4 * t * (1 - t))
+    s = PAIR_SCALE
+    a = (math.floor((HAND[0] + 0.5) * s), math.floor((HAND[1] - 1 + q["bob"] + 0.5) * s))
+    z = (math.floor((COLLAR[0] - 0.5) * s), math.floor((COLLAR[1] - 1 + q["dbob"] + 0.5) * s))
+    sag = 3 + (q["bob"] != 0)
+    for x in range(a[0] + 1, z[0]):
+        t = (x - a[0]) / (z[0] - a[0])
+        y = round(a[1] + (z[1] - a[1]) * t + sag * 4 * t * (1 - t))
         if g.px[y][x] is None:
-            px[y][x] = K["pink"]
+            px[y][x] = K["plum"]
     return px
 
 
@@ -1025,14 +1131,14 @@ def sprite_image(px):
 
 
 def sprites():
-    yield "ui-loading", [("walk", [pair(i) for i in range(4)], 160)]
+    yield "ui-loading", [("walk", [pair(i) for i in range(len(PAIR_WALK))], PAIR_WALK_MS)]
     yield "ui-pet-shop", [(tag, [image_rows(pet_shop(tag == "pressed").img)], 1000) for tag in ("normal", "pressed")] + [
         ("glint", [image_rows(pet_shop(glint=g).img) for g in GLINT_STEPS] + [image_rows(pet_shop().img)], 60)]
 
 
 def ui(cv, key):
     """Block in the UI that sits on a screen, for the preview only (layout from StartScene, StatsScene on its
-    badges tab, EndScene and loadingScreen.ts)."""
+    badges tab, EndScene and loadingScreen.ts, which draws no text)."""
     def panel(x, y, w, h, face="cream"):
         cv.fill(x, y, w, h, "plum")
         cv.fill(x + 1, y + 1, w - 2, h - 2, face)
@@ -1096,8 +1202,8 @@ def ui(cv, key):
         cv.fill(48, 512, 264, 40, "amber")
     elif key == "screen-loading":
         cv.paste(loading_track().img, *TRACK_AT)
-        cv.paste(sprite_image(pair(0)), PAIR_AT[0] + round(PAIR_TRAVEL * 0.4), PAIR_AT[1])
-        hp.text_c(cv, "LOADING 40%", 180, 390, "cream")
+        frame = sprite_image(pair(0))
+        cv.img.paste(frame, (PAIR_AT[0] + round(PAIR_TRAVEL * 0.4), PAIR_AT[1]), frame)
 
 
 def preview(out, scale=2):
@@ -1116,8 +1222,8 @@ def preview(out, scale=2):
     for i in range(4):
         bg = Image.new("RGBA", (PAIR_W, PAIR_H), hp.rgb("grey") + (255,))
         bg.alpha_composite(sprite_image(pair(i)))
-        sheet.paste(bg.resize((PAIR_W * 3 * scale, PAIR_H * 3 * scale), Image.NEAREST), (x * scale, 0))
-        x += PAIR_W * 3 + gap
+        sheet.paste(bg.resize((PAIR_W * scale, PAIR_H * scale), Image.NEAREST), (x * scale, 0))
+        x += PAIR_W + gap
     for i, (key, blocked) in enumerate(shots):
         cv = SCREENS[key]()
         if blocked:
