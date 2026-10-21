@@ -38,7 +38,7 @@ export const CARD_LAYOUT = {
 } as const;
 
 // How many lines of a font at scale fit height: the first line's ink, then a line each.
-export function linesInHeight(metrics: FontMetrics, scale: number, height: number): number {
+function linesInHeight(metrics: FontMetrics, scale: number, height: number): number {
   const ink = inkRowsFromCapTop(metrics) * scale;
   return height < ink ? 0 : Math.floor((height - ink) / (metrics.lineHeight * scale)) + 1;
 }

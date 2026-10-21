@@ -9,7 +9,7 @@ export function jsonText(value: unknown): string {
   return `${JSON.stringify(value, null, 2)}\n`;
 }
 
-export async function readText(path: string): Promise<string | null> {
+async function readText(path: string): Promise<string | null> {
   try {
     return await readFile(path, "utf8");
   } catch {
@@ -29,7 +29,7 @@ export async function writeIfChanged(path: string, text: string): Promise<boolea
 }
 
 // The names of the files directly in dir, sorted; none when dir does not exist.
-export async function fileNames(dir: string): Promise<string[]> {
+async function fileNames(dir: string): Promise<string[]> {
   try {
     const entries = await readdir(dir, { withFileTypes: true });
     return entries

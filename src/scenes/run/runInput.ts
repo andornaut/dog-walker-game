@@ -27,7 +27,7 @@ import { LAYOUT } from "./stage";
 
 // What the walk's input reads of the run. explainShown: what the HUD shows that a held press
 // can explain.
-export interface RunInputHost {
+interface RunInputHost {
   explainShown: () => ExplainShown;
   // Whether a replay drives the run, which then takes no live lane moves or treats.
   replaying: () => boolean;

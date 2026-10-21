@@ -32,9 +32,9 @@ export interface Awards {
   readonly now: () => number;
 }
 
-export type SettingsListener = (settings: Settings) => void;
+type SettingsListener = (settings: Settings) => void;
 
-export interface OpenedProfile {
+interface OpenedProfile {
   load: StoreLoadResult;
   session: ProfileSession;
 }

@@ -7,7 +7,7 @@ import { PALETTE } from "./palette";
 import { playEffect, playTag, playTagOnce, spriteTopY } from "./sprites";
 
 // A frame of a texture: its first frame when frame is absent.
-export interface IconArt {
+interface IconArt {
   readonly frame?: string | undefined;
   readonly key: string;
 }

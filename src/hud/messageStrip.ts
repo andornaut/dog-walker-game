@@ -51,7 +51,7 @@ export const MESSAGE_STRIP = {
   x: 8,
 } as const;
 
-export interface MessageStripLayout {
+interface MessageStripLayout {
   icon: Point;
   // The panel at its tallest, holding MESSAGE_STRIP.rows rows.
   panel: Rect;
@@ -107,7 +107,7 @@ export const MESSAGE_LINE = {
   textX: 26,
 } as const;
 
-export interface MessageLinePanel {
+interface MessageLinePanel {
   icon: Point;
   panel: Rect;
   room: number;
@@ -144,7 +144,7 @@ export interface MessageLine {
 
 // A line on the strip: id tells lines with the same text apart, and ageMs counts from when it
 // showed.
-export interface ShownLine extends MessageLine {
+interface ShownLine extends MessageLine {
   readonly ageMs: number;
   readonly id: number;
 }
@@ -161,7 +161,7 @@ export const EMPTY_MESSAGE_STRIP: MessageStripState = { nextId: 0, shown: null, 
 // dwellMs: the least a line shows before a waiting line takes its place. lifeMs: how long a
 // line lives from when it showed, its last fadeMs fading out. maxWaiting: lines said faster
 // than they can show beyond this many drop the oldest waiting one.
-export interface MessageTiming {
+interface MessageTiming {
   readonly dwellMs: number;
   readonly fadeMs: number;
   readonly lifeMs: number;

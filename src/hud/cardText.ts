@@ -47,7 +47,7 @@ export function largeBodyText(
 
 // What a card's small effect may say, longest first: its effect, or for a path card its
 // upgrade's name alone, which the enlarged card shows in full.
-export function smallEffectTexts(
+function smallEffectTexts(
   data: Pick<GameData, "runText" | "upgrades">,
   option?: OptionView,
 ): string[] {

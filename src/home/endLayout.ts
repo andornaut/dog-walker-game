@@ -88,7 +88,7 @@ export function breakdownLabelRoom(amountWidth: number): number {
 
 // An owner's bubble, from the row's top, with its closing line on lines lines of the body
 // font at 2x: down to the last line's lowest ink, and padBottom more.
-export function quipBubbleHeight(body: FontMetrics, lines: number): number {
+function quipBubbleHeight(body: FontMetrics, lines: number): number {
   const { bubble, textY } = END_LAYOUT.quips;
   const lineHeight = body.lineHeight * END_TEXT_SCALE;
   const ink = inkRowsFromCapTop(body) * END_TEXT_SCALE;
@@ -101,7 +101,7 @@ export function quipBubbleHeight(body: FontMetrics, lines: number): number {
 const QUIPS_GAP = 14;
 const PANEL_FOOT = 8;
 
-export interface EndPanelLayout {
+interface EndPanelLayout {
   panel: typeof PANEL;
   // Each owner's row: its top and its bubble's height.
   rows: { height: number; top: number }[];

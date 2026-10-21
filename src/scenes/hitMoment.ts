@@ -17,7 +17,7 @@ import { addNineSlice, tagFrame } from "./uiKit";
 // no word, no flash and no shake. Reduced motion keeps the flash (one still frame, faded out),
 // the label (set in place) and the burst (its first frame, held), and drops the word and the
 // shake.
-export interface HitMoment {
+interface HitMoment {
   // The caught dogs' sprites.
   caught: readonly GameObjects.Sprite[];
   // The burst's centre.
@@ -70,7 +70,7 @@ export function hitLabelOf(look: Look): string {
 // The art of a hit moment: an obstacle's burst is fx-hit-<encounter> with an edge flash in its
 // colour and the normal plate; a lucky find's is fx-<encounter>, with no flash and the lucky
 // plate.
-export interface HitLook {
+interface HitLook {
   readonly burst: string;
   readonly flash: string | null;
   readonly plate: "lucky" | "normal";

@@ -8,7 +8,7 @@ export interface HistoryLike {
 // The history state of the extra entry that back pops instead of leaving the game.
 export const BACK_GUARD_STATE = { dogWalkerBackGuard: true } as const;
 
-export function isBackGuardState(state: unknown): boolean {
+function isBackGuardState(state: unknown): boolean {
   return (state as { dogWalkerBackGuard?: unknown } | null)?.dogWalkerBackGuard === true;
 }
 

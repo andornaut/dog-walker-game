@@ -38,7 +38,7 @@ export interface Cheats {
   readonly slowMotion: boolean;
 }
 
-export type CheatToggle = Exclude<keyof Cheats, "on">;
+type CheatToggle = Exclude<keyof Cheats, "on">;
 
 export const CHEATS_OFF: Cheats = {
   fastForward: false,
@@ -58,7 +58,7 @@ export const CHEAT_TOGGLES: readonly { readonly id: CheatToggle; readonly label:
 
 // The walk's time scale under each speed cheat.
 export const SLOW_MOTION_SCALE = 0.5;
-export const FAST_FORWARD_SCALE = 3;
+const FAST_FORWARD_SCALE = 3;
 
 // The speed cheats exclude each other: turning one on turns the other off.
 const EXCLUDES: Readonly<Partial<Record<CheatToggle, CheatToggle>>> = {
@@ -141,7 +141,7 @@ export const SAVE_CHEATS: readonly { readonly edit: SaveEdit; readonly label: st
 
 export const RESET_SAVE: SaveEdit = { kind: "reset" };
 
-export function addMoney(amount: Cents, save: SaveDocument): SaveDocument {
+function addMoney(amount: Cents, save: SaveDocument): SaveDocument {
   return { ...save, bankCents: addCents(save.bankCents, amount) };
 }
 
@@ -151,7 +151,7 @@ function withAll<Id extends string>(all: readonly Id[], owned: readonly Id[]): I
 }
 
 // Every dog, gear item, dog slot and walker a run can use.
-export function unlockAll(
+function unlockAll(
   data: Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "walkers">,
   save: SaveDocument,
 ): SaveDocument {
@@ -218,7 +218,7 @@ export function decodeSaveEdits(text: string | null): SaveEdit[] {
 export const START_SCREEN = "startScreen";
 export type StartTarget = typeof START_SCREEN | ZoneId;
 
-export interface StartChoice {
+interface StartChoice {
   readonly label: string;
   readonly start: StartTarget;
 }

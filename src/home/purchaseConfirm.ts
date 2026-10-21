@@ -23,7 +23,7 @@ export interface PendingPurchase {
 
 export type ConfirmChoice = "buy" | "cancel";
 
-export type PurchaseRequest =
+type PurchaseRequest =
   | { readonly kind: "confirm"; readonly pending: PendingPurchase }
   | { readonly kind: "refused"; readonly reason: "cantAfford" | "notForSale" };
 

@@ -241,7 +241,7 @@ export function drawDetailCard(
   return rect;
 }
 
-export interface LogbookPanel {
+interface LogbookPanel {
   // The Badges button, in screen pixels.
   readonly badges: Rect;
   readonly panel: Rect;

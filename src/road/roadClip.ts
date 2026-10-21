@@ -5,7 +5,7 @@
 
 // A drawn sprite: its frame's top row on screen, its frame height in its own pixels and its
 // scale.
-export interface DrawnRows {
+interface DrawnRows {
   readonly height: number;
   readonly scale: number;
   readonly top: number;

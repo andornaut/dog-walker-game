@@ -12,7 +12,7 @@ export interface TargetPress<T> {
   readonly target: T;
 }
 
-export type TargetRelease<T> =
+type TargetRelease<T> =
   | { readonly kind: "none" }
   | { readonly delayMs: number; readonly kind: "tap"; readonly target: T };
 

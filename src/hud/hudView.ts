@@ -39,11 +39,11 @@ export function heartRows(perRow: number, hearts: number, max: number): boolean[
   return rows;
 }
 
-export type PipState = "current" | "done" | "todo";
+type PipState = "current" | "done" | "todo";
 
 // One pip per zone of the walk; fill is how far through it the walk is, from 0 to 1. zone is
 // the zone the route has at the pip's position, or null for a fork not yet taken.
-export interface ZonePip {
+interface ZonePip {
   readonly fill: number;
   readonly state: PipState;
   readonly zone: ZoneId | null;
@@ -51,7 +51,7 @@ export interface ZonePip {
 
 // What a pip draws: its ui-zone-pips tag, and the colour its well fills with as the current
 // zone goes by, the zone's road colour. A pip with no zone yet has no well colour.
-export interface PipLook {
+interface PipLook {
   readonly tag: string;
   readonly wellColor: string | null;
 }

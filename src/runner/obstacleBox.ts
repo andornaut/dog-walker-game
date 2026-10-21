@@ -26,7 +26,7 @@ export interface PlacedPart {
 
 // The obstacle's place: feetY, its near edge, the road row its sprites stand on, and x, its
 // centre across the road, both in road pixels.
-export interface ObstaclePlace {
+interface ObstaclePlace {
   readonly feetY: number;
   readonly x: number;
 }

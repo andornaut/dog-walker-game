@@ -20,7 +20,7 @@ export const HELP_BODY_FIELDS = [
   "world",
 ] as const;
 
-export type HelpBodyField = (typeof HELP_BODY_FIELDS)[number];
+type HelpBodyField = (typeof HELP_BODY_FIELDS)[number];
 
 // Each field's text. debuffSeconds is the debuffs' length, or their shortest to longest when
 // they differ; dodgeIn is the small dogs' dodge chance as one in so many; loneBonus and pairBonus

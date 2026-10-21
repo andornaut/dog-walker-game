@@ -6,7 +6,7 @@ import { kebabCase } from "./spriteKeys";
 
 // The names source code and game data could build a manifest key from: every string literal,
 // every template literal's fixed parts, and every string in the game data.
-export interface KeyNames {
+interface KeyNames {
   // Each template literal with a letter or digit in a fixed part, as a pattern whose holes stand
   // for any name. A template whose fixed parts are only separators, such as `${a}-${b}`, would
   // name nearly any key, so it is left out.

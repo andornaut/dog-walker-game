@@ -15,13 +15,13 @@ import { itemAt } from "../lib/arrays";
 // lots[(lotStart + k * lotStride) mod lots] or gaps[(gapStart + k * gapStride) mod gaps]. Each
 // prop stands at its slot's z plus its dz, nearer negative.
 
-export interface RoadsideProp {
+interface RoadsideProp {
   readonly across: number;
   readonly dz: number;
   readonly key: string;
 }
 
-export interface RoadsideSide {
+interface RoadsideSide {
   readonly gapStart: number;
   readonly gapStride: number;
   readonly lotStart: number;
@@ -48,11 +48,11 @@ export interface RoadsideTable {
 export const ROADSIDE: RoadsideTable = table;
 
 // The table's sides, each with the sign of its across: the left side is negative.
-export const ROADSIDE_SIDES = [
+const ROADSIDE_SIDES = [
   { name: "left", sign: -1 },
   { name: "right", sign: 1 },
 ] as const;
-export type RoadsideSign = (typeof ROADSIDE_SIDES)[number]["sign"];
+type RoadsideSign = (typeof ROADSIDE_SIDES)[number]["sign"];
 
 // No prop stands on a zone's start strip, so its cross street stays clear.
 export const START_STRIP_LENGTH = STRIP.height;
@@ -99,7 +99,7 @@ function dzReach(zone: RoadsideZone): { far: number; near: number } {
   return reach;
 }
 
-export type RoadsideVisit = (prop: RoadsideProp, sign: RoadsideSign, z: number) => void;
+type RoadsideVisit = (prop: RoadsideProp, sign: RoadsideSign, z: number) => void;
 
 // Visits every prop of a zone with its z in from..to (to excluded), on both sides, each with
 // the sign of its side and its z. A zone whose slot is not a positive length places none.

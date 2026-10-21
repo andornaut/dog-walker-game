@@ -21,7 +21,7 @@ export interface ContainerLike extends EventTarget {
 
 // A newer version than the one controlling the page: none found, still being checked for or
 // installing, or installed and waiting behind the running one.
-export type NewerVersion = "none" | "pending" | "waiting";
+type NewerVersion = "none" | "pending" | "waiting";
 
 export interface UpdateState {
   // A key, touch or click, or a walk, since the page loaded.
@@ -41,7 +41,7 @@ export interface UpdateState {
 // run: run the version the page loaded, with no notice.
 // switch: have the waiting version take over and reload into it.
 // prompt: show the update notice, whose Reload switches.
-export type UpdateAction = "prompt" | "run" | "switch" | "wait";
+type UpdateAction = "prompt" | "run" | "switch" | "wait";
 
 // Before the player has interacted, a waiting version takes over at once. On a fresh load the
 // boot waits for the check and install, so that reload comes before the game draws. Once they
@@ -104,7 +104,7 @@ export function activateWaitingWorker(
 const GAME = { height: 560, width: 360 } as const;
 const NOTICE = { maxWidth: 260, top: 48 } as const;
 
-export interface BoxLike {
+interface BoxLike {
   readonly height: number;
   readonly left: number;
   readonly top: number;

@@ -59,7 +59,7 @@ export interface TrackContext<Target> extends GestureContext {
 // explain: an explanation starts with its target, or the one showing ends.
 export type ExplainChange<Target> = { kind: "end" } | { kind: "start"; target: Target };
 
-export interface PointerResult<Target> {
+interface PointerResult<Target> {
   actions: GestureAction[];
   explain: ExplainChange<Target> | undefined;
   track: PointerTrack<Target>;

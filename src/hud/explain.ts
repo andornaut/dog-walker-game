@@ -10,7 +10,7 @@ import { messageIconKey } from "./messageStrip";
 import { RUN_TEXT_FIELDS } from "./runText";
 import type { ExplainTarget } from "./walkHud";
 
-export type ExplainData = Pick<
+type ExplainData = Pick<
   GameData,
   "debuffs" | "dogs" | "runText" | "shopGear" | "tuning" | "upgrades" | "walkerPerks" | "walkers"
 >;

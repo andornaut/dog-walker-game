@@ -9,13 +9,13 @@ export interface CrashReport {
 }
 
 // The fields of an ErrorEvent this reads.
-export interface ErrorEventLike {
+interface ErrorEventLike {
   readonly error?: unknown;
   readonly filename?: string;
   readonly message?: string;
 }
 
-export interface CrashView {
+interface CrashView {
   readonly action: string;
   readonly body: string;
   // The message and stack, in dev builds only.

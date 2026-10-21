@@ -10,7 +10,7 @@ const SPEED_LIMITS = { max: 10, min: 0.1 };
 // A link or replay log that names a dog by a former id walks the dog it is now.
 // CLEANUP (added 2026-10-19): empty this once no dev link or replay log in use names dash or
 // waffles.
-export const RENAMED_DOG_IDS: ReadonlyMap<string, DogId> = new Map<string, DogId>([
+const RENAMED_DOG_IDS: ReadonlyMap<string, DogId> = new Map<string, DogId>([
   ["dash", "archie"],
   ["waffles", "penny"],
 ]);

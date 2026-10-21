@@ -19,8 +19,7 @@ export type StoreLoadResult =
   | { reason: string; save: SaveDocument; status: "corrupt" | "unavailable" }
   | { save: SaveDocument; status: "loaded" | "new" };
 
-export type StoreSaveResult =
-  { reason: string; status: "invalid" | "unavailable" } | { status: "saved" };
+type StoreSaveResult = { reason: string; status: "invalid" | "unavailable" } | { status: "saved" };
 
 export interface SaveStore {
   load(context: SaveContext): Promise<StoreLoadResult>;

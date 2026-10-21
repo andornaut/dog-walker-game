@@ -5,7 +5,7 @@ export interface Migration {
   migrate(document: Record<string, unknown>): Record<string, unknown>;
 }
 
-export type MigrationResult =
+type MigrationResult =
   { document: Record<string, unknown>; ok: true } | { ok: false; reason: string };
 
 function isRecord(value: unknown): value is Record<string, unknown> {

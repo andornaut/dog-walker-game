@@ -67,10 +67,10 @@ export interface SimConfig {
   readonly walker: WalkerId;
 }
 
-export type CardFrom = "lucky" | "obstacle";
+type CardFrom = "lucky" | "obstacle";
 
 // One encounter or forced stop card and the option the policy took.
-export interface ChoiceRecord {
+interface ChoiceRecord {
   readonly cost: Cents;
   // Some enabled option cost money.
   readonly couldPay: boolean;
@@ -81,12 +81,12 @@ export interface ChoiceRecord {
   readonly zoneIndex: number;
 }
 
-export interface FiringRecord {
+interface FiringRecord {
   readonly dog: DogId;
   readonly zoneIndex: number;
 }
 
-export interface ZoneRecord {
+interface ZoneRecord {
   readonly fees: readonly { readonly amount: Cents; readonly dog: DogId }[];
   readonly zoneIndex: number;
 }
@@ -99,13 +99,13 @@ export interface ItemCount {
   touched: number;
 }
 
-export type ItemCounts = Partial<Record<WalkItemKind, ItemCount>>;
+type ItemCounts = Partial<Record<WalkItemKind, ItemCount>>;
 
 // Obstacle hits, minor ones and movers included, and those of them that came while a pull's
 // move, AFTER_PULL_REACTION_SECONDS and a lane move back had not
 // yet passed, from something not in the lane the pull moved the pack out of: hits the pull
 // left the player no time to avoid.
-export interface HitCounts {
+interface HitCounts {
   afterPull: number;
   all: number;
 }
@@ -115,7 +115,7 @@ export interface HitCounts {
 const AFTER_PULL_REACTION_SECONDS = 0.6;
 
 // Movers are counted by the kind they meet the pack as.
-export type MoverCounts = Partial<Record<WalkItemKind, ItemCount>>;
+type MoverCounts = Partial<Record<WalkItemKind, ItemCount>>;
 
 export interface RunResult {
   // The achievements the run earns on its own facts, whatever the profile holds.

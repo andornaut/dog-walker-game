@@ -135,7 +135,7 @@ export function shopBobOffset(reducedMotion: boolean, nowMs: number): number {
 }
 
 // The frame of a one-shot effect, or undefined once it has played out.
-export function effectFrame(
+function effectFrame(
   frameMs: number,
   frames: number,
   nowMs: number,

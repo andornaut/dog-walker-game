@@ -46,7 +46,7 @@ function optionId(sourceId: string, art: string): string | null {
   return art.startsWith(prefix) ? art.slice(prefix.length) : null;
 }
 
-export interface CardFace {
+interface CardFace {
   readonly art: string;
   readonly frame: string;
   readonly id: string | null;

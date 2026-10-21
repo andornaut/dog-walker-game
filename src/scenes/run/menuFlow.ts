@@ -12,7 +12,7 @@ import { soundboardOf } from "../soundboard";
 import type { ZoneCelebrationSceneData } from "../ZoneCelebrationScene";
 
 // What the menus need of the run.
-export interface MenuFlowHost {
+interface MenuFlowHost {
   dropPress: () => void;
   // Heads home from the pause menu, once it has closed.
   headHome: () => void;

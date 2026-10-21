@@ -41,7 +41,7 @@ export interface BotRoad {
 // null before it has. late holds mistimed lane changes still to come; noticeAt,
 // when set, is when the bot notices its mistake, and until then it does not replan. tellsAt is
 // when each leaning dog's tell started, and paths each mover's path as last seen.
-export interface Bot {
+interface Bot {
   readonly appearedAt: Map<number, number>;
   clock: number;
   readonly late: PlannedMove[];
@@ -62,7 +62,7 @@ export interface Bot {
 }
 
 // Times within this are the same moment.
-export const SAME_MOMENT = 1e-9;
+const SAME_MOMENT = 1e-9;
 // A mistimed lane change comes up to this late.
 const MISTIME_SECONDS = 0.25;
 // The soonest a mistake is noticed, so a bot with no reaction delay still takes a frame.
@@ -97,7 +97,7 @@ export function newBot(random: Random, skill: Skill): Bot {
 
 // When an item at y, height tall, starts and stops overlapping the pack's band, in seconds from
 // now: from its near edge reaching the band's top until its far edge passes the band's bottom.
-export function contactWindow(
+function contactWindow(
   band: RoadGeometry["packBand"],
   speed: number,
   y: number,
@@ -112,7 +112,7 @@ const MOVER_SAMPLE_SCROLL = 1;
 const MOVER_SCROLL_MAX = 10_000;
 
 // A stretch of walking time, from now, over which something touches the pack in lane.
-export interface LaneContact {
+interface LaneContact {
   readonly from: number;
   readonly lane: number;
   readonly to: number;
@@ -226,7 +226,7 @@ function scrollContacts(
 // The stretches over which a mover, once it moves, touches the pack standing in a lane, one
 // per lane and stretch, that start within horizon seconds. Its path is sampled, so each stretch is
 // widened by a sample at each end.
-export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneContact[] {
+function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneContact[] {
   const { mover } = item;
   if (mover === undefined) {
     return [];
@@ -271,12 +271,12 @@ export function moverHazards(road: BotRoad, horizon: number, item: WalkItem): La
 }
 
 // The lanes an item covers, as a lane mask.
-export function itemLanes(item: Pick<WalkItem, "lane" | "laneSpan">): number {
+function itemLanes(item: Pick<WalkItem, "lane" | "laneSpan">): number {
   return ((1 << item.laneSpan) - 1) << item.lane;
 }
 
 // The lane mask within reach lanes of the mask's lanes, on a road laneCount lanes wide.
-export function widenMask(laneCount: number, reach: number, mask: number): number {
+function widenMask(laneCount: number, reach: number, mask: number): number {
   let widened = mask;
   for (let step = 0; step < reach; step++) {
     widened |= (widened << 1) | (widened >> 1);
@@ -284,7 +284,7 @@ export function widenMask(laneCount: number, reach: number, mask: number): numbe
   return widened & ((1 << laneCount) - 1);
 }
 
-export function treatReachOf(data: WalkData, walk: Walk): number {
+function treatReachOf(data: WalkData, walk: Walk): number {
   return pickupReach(data, walk.run, "treat");
 }
 

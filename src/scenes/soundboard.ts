@@ -27,7 +27,7 @@ type AdjustableSound = Sound.BaseSound & { setVolume(value: number): unknown };
 
 // The game's one sound player, shared by every scene so the music outlives scene changes.
 // A key that did not load is skipped and logged once; no method throws.
-export class Soundboard {
+class Soundboard {
   private mix: Mix = INITIAL_MIX;
   private music: MusicState = MUSIC_STOPPED;
   private musicSound: AdjustableSound | undefined;

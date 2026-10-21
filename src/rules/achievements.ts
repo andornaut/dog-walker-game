@@ -179,7 +179,7 @@ export function conditionHolds(
 // times fired, finished walks with no firing, distinct dogs that finished a walk without firing
 // you): have is capped at need. null for a condition judged on one walk or on what the save
 // owns.
-export function acrossWalksProgress(
+function acrossWalksProgress(
   data: Pick<GameData, "dogs">,
   save: Pick<SaveDocument, "stats">,
   condition: AchievementCondition,

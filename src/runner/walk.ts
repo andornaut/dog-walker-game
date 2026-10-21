@@ -101,12 +101,12 @@ export type WalkData = Pick<
   | "world"
 >;
 
-export type PickupKind = "tip" | "treat";
+type PickupKind = "tip" | "treat";
 export type WalkItemKind = EncounterId | MinorObstacleId | PickupKind;
 export type WalkItem = MoverItem<WalkItemKind>;
 // What a road item is to the rules: an obstacle hit by accident, a minor obstacle that opens
 // no card, a lucky encounter, or a pickup.
-export type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
+type ItemCategory = "lucky" | "minor" | "obstacle" | PickupKind;
 
 // Everything on the road that the run state does not hold. pending is this zone's spawns
 // not yet in view, at zone distances. speedFactor scales the scroll speed, for testing.
@@ -154,7 +154,7 @@ export interface RoadGeometry {
 }
 
 // A lucky encounter that applied on contact, with no card.
-export interface InstantFind {
+interface InstantFind {
   encounter: EncounterId;
   outcome: ChoiceOutcome;
 }
@@ -171,7 +171,7 @@ export interface MinorBump {
 
 // A treat the pack grabbed: the dog whose owner it went to, by treatRecipient, and the hearts
 // that owner gained, or null at their max.
-export interface TreatGrab {
+interface TreatGrab {
   change: HeartChange | null;
   dog: DogId;
   item: WalkItem;
@@ -181,7 +181,7 @@ export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
 // A contact obstacle the pack touched, such as a puddle, the dog the touch landed on, and what
 // its effects did.
-export interface ContactHit {
+interface ContactHit {
   dog: DogId;
   encounter: EncounterId;
   item: WalkItem;
@@ -209,7 +209,7 @@ export interface WalkStep {
 
 // A zone's end: fees are the zone's pay, banked, and after the last zone the Full pack bonus;
 // run is the run after it.
-export interface ZoneEnd {
+interface ZoneEnd {
   fees: readonly MoneyChange[];
   run: RunState;
 }
@@ -755,7 +755,7 @@ export function plannedCellInset(
   return (length - over) / 2;
 }
 
-export function isPickup(kind: WalkItemKind): kind is PickupKind {
+function isPickup(kind: WalkItemKind): kind is PickupKind {
   return kind === "tip" || kind === "treat";
 }
 
@@ -780,11 +780,7 @@ export function collectTip(
 }
 
 // A treat grabbed: the dog's owner gains hearts.treat, up to their max.
-export function grabTreat(
-  data: WalkData,
-  dog: DogId,
-  run: RunState,
-): ReturnType<typeof changeHearts> {
+function grabTreat(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof changeHearts> {
   return changeHearts(
     data,
     [{ amount: read(data.tuning, "hearts", "treat"), kind: "treat" }],
@@ -794,11 +790,7 @@ export function grabTreat(
 }
 
 // A minor bump costs the dog's owner the hearts a bump costs now (bumpHearts).
-export function bumpDog(
-  data: WalkData,
-  dog: DogId,
-  run: RunState,
-): ReturnType<typeof changeHearts> {
+function bumpDog(data: WalkData, dog: DogId, run: RunState): ReturnType<typeof changeHearts> {
   return changeHearts(data, [{ amount: -bumpHearts(data, run), kind: "bump" }], dog, run);
 }
 

@@ -65,7 +65,7 @@ export type MoverPath = {
 
 // When a stalker's pending step starts: after, at a scroll since it spawned, after its cue;
 // near, with no cue of its own, once its travel reaches travel and the step before has ended.
-export type ApproachTiming =
+type ApproachTiming =
   | { readonly at: number; readonly kind: "after" }
   | { readonly kind: "near"; readonly travel: number };
 
@@ -77,7 +77,7 @@ export interface MoverOnRoad {
 
 // travel is how far the bottom of its hit box is below the top of the road. A solid mover can
 // be hit; one that is only its cue cannot.
-export interface MoverPlace {
+interface MoverPlace {
   readonly lanePosition: number;
   readonly solid: boolean;
   readonly travel: number;
@@ -261,7 +261,7 @@ export interface MoverStand {
 // steer around a sweep of several lanes. stands are each place it stands as an obstacle, by
 // distance from its row. screen is from its cue appearing until it is out of sight. Of the
 // placements that fit, the planner takes one of the highest rank, 0 when unset.
-export interface MoverPlacement {
+interface MoverPlacement {
   readonly appears: number;
   readonly cells: readonly { readonly lane: number; readonly row: number }[];
   readonly lane: number;
@@ -365,7 +365,7 @@ export type MoverMotion =
 
 // How much movers of a kind differ: each one's speed by up to speedShare of it either way, and
 // each of its steps, hops or darts up to delaySeconds later than its earliest moment.
-export interface MoverVariation {
+interface MoverVariation {
   readonly delaySeconds: number;
   readonly speedShare: number;
 }
@@ -387,7 +387,7 @@ export interface MoverDraws {
   readonly speed: number;
 }
 
-export const EVEN_DRAWS: MoverDraws = { delays: [0, 0], share: 0, speed: 0.5 };
+const EVEN_DRAWS: MoverDraws = { delays: [0, 0], share: 0, speed: 0.5 };
 
 // Every mover draws the same number of times, whatever it is and wherever it goes.
 export function drawMover(random: Random): MoverDraws {
@@ -395,7 +395,7 @@ export function drawMover(random: Random): MoverDraws {
 }
 
 // The factor a mover's speed is multiplied by, from 1 - speedShare to 1 + speedShare.
-export function speedFactor(variation: MoverVariation, draws: MoverDraws): number {
+function speedFactor(variation: MoverVariation, draws: MoverDraws): number {
   return 1 + variation.speedShare * (2 * draws.speed - 1);
 }
 
@@ -783,7 +783,7 @@ export function screenHasRoom(
 // leave too few for the spawns placed later that are never skipped. packFits is true when the
 // pack fits between each stand and every lane-blocking spawn placed so far, and stand records
 // the stands for the spawns placed later.
-export interface MoverGrid {
+interface MoverGrid {
   block(row: number, lanes: LaneSpan, rows: number, leadIn: boolean, keep: boolean): boolean;
   isFree(lane: number, row: number): boolean;
   leavesRoom(cells: readonly { readonly lane: number; readonly row: number }[]): boolean;
@@ -792,13 +792,13 @@ export interface MoverGrid {
   take(lane: number, row: number): void;
 }
 
-export interface MoverQuota<Kind extends string> {
+interface MoverQuota<Kind extends string> {
   readonly count: number;
   readonly kind: Kind;
   readonly spec: MoverSpec;
 }
 
-export interface MoverSpawn<Kind extends string> {
+interface MoverSpawn<Kind extends string> {
   readonly distance: number;
   readonly kind: Kind;
   readonly lane: number;
@@ -806,7 +806,7 @@ export interface MoverSpawn<Kind extends string> {
 }
 
 // The movers placed, and the kinds of those dropped, one entry each.
-export interface PlacedMovers<Kind extends string> {
+interface PlacedMovers<Kind extends string> {
   readonly dropped: readonly Kind[];
   readonly spawns: readonly MoverSpawn<Kind>[];
 }

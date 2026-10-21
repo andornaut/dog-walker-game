@@ -33,7 +33,7 @@ const SPARKLE = { key: "fx-sparkle", tag: "play" } as const;
 
 // One heart change to show: its label, the top of its dog on the road, its card's sprite
 // and the parts that shake with it, and the band its label lands on.
-export interface HeartPop {
+interface HeartPop {
   card: GameObjects.Sprite;
   delayMs: number;
   dogTop: Point;

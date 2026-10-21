@@ -4,7 +4,7 @@ import type { Point } from "../layout/rect";
 import { helpActionAt } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
 
-export const HELP_GESTURES = {
+const HELP_GESTURES = {
   swipeMinDistance: 40,
   tapMaxDistance: 10,
 };

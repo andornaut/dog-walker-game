@@ -4,7 +4,7 @@ import { COMIC_WORDS, type ComicGlyph, comicWordWidth } from "../layout/comicWor
 import type { Point } from "../layout/rect";
 
 // font-comic: the comic words' lettering, colours baked in, so drawn untinted.
-export const COMIC_FONT = "font-comic";
+const COMIC_FONT = "font-comic";
 
 // The word's drawn width in font-comic, or undefined while the font is missing or lacks one
 // of its characters, when no word is drawn.
@@ -22,7 +22,7 @@ export function loadedComicWordWidth(scene: Scene, word: string): number | undef
 // Draws the word with its ring's top-left at the point, at a whole scale; undefined while
 // font-comic cannot draw it. Glyphs draw left to right, each over the last, so each ring
 // lands on the gap before it.
-export function addComicWord(
+function addComicWord(
   scene: Scene,
   point: Point,
   depth: number,

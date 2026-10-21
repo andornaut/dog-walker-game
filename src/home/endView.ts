@@ -4,9 +4,9 @@ import { quipLine } from "../rules/choices";
 import { type Cents, cents } from "../rules/units";
 import type { LastWalk } from "../save/schema";
 
-export type EarningsKind = "cardCosts" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";
+type EarningsKind = "cardCosts" | "fees" | "fullPack" | "luckyFinds" | "start" | "tips";
 
-export interface EarningsLine {
+interface EarningsLine {
   readonly amount: Cents;
   readonly kind: EarningsKind;
   readonly label: string;
@@ -64,7 +64,7 @@ export function earningsBreakdown(
   });
 }
 
-export type ZonePip = "current" | "done" | "todo";
+type ZonePip = "current" | "done" | "todo";
 
 // One pip per zone of a walk: done for each zone finished, current for the zone a run that
 // ended early stopped in, todo for the rest.
@@ -80,7 +80,7 @@ export function zonePips(
   });
 }
 
-export interface ClosingLine {
+interface ClosingLine {
   readonly dog: DogId;
   readonly fired: boolean;
   readonly text: string;

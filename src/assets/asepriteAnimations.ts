@@ -44,14 +44,14 @@ const sheetSchema = record({
 
 // The parts of an Aseprite "hash" JSON export the animation builder reads.
 export type AsepriteSheet = v.InferOutput<typeof sheetSchema>;
-export type AsepriteTag = v.InferOutput<typeof tagSchema>;
+type AsepriteTag = v.InferOutput<typeof tagSchema>;
 
-export interface AnimationFrame {
+interface AnimationFrame {
   duration: number;
   frame: string;
 }
 
-export interface AnimationSpec {
+interface AnimationSpec {
   frames: AnimationFrame[];
   key: string;
 }

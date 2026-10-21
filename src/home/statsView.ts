@@ -41,7 +41,7 @@ export function overallRows(
   };
 }
 
-export interface DogStatsRow extends DogStats {
+interface DogStatsRow extends DogStats {
   readonly dog: DogId;
   readonly name: string;
 }

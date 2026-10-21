@@ -63,7 +63,7 @@ export function badgeProgress(
       });
 }
 
-export interface WallCellLines {
+interface WallCellLines {
   readonly goal: string[];
   readonly name: string[];
   readonly progress: string[];
@@ -133,7 +133,7 @@ export function wallCell(
   return sets.find(({ whole }) => whole) ?? (sets.at(-1) as ReturnType<typeof set>);
 }
 
-export interface WallSpec {
+interface WallSpec {
   readonly columnGap: number;
   readonly columnWidth: number;
   readonly rowHeight: number;
@@ -152,13 +152,13 @@ export function wallRects(spec: WallSpec, count: number): Rect[] {
   }));
 }
 
-export interface StripSlot {
+interface StripSlot {
   // The centre of the slot, where its badge sits.
   readonly centerX: number;
   readonly width: number;
 }
 
-export interface BadgeStrip {
+interface BadgeStrip {
   // Names fit under the badges only when few share the strip.
   readonly named: boolean;
   readonly slots: readonly StripSlot[];

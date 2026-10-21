@@ -15,7 +15,7 @@ export interface HitStop extends HeldStep {
   readonly seconds: number;
 }
 
-export interface HitStopLengths {
+interface HitStopLengths {
   readonly encounter: number;
   readonly minor: number;
 }

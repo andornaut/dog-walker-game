@@ -12,7 +12,7 @@ export interface BlockingSpan {
   length: number;
 }
 
-export interface Walkway {
+interface Walkway {
   laneCount: number;
   laneMoveSeconds: number;
   scrollSpeed: number;

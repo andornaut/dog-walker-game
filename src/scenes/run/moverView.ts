@@ -55,7 +55,7 @@ function showBelowJuncture(sprite: GameObjects.Sprite): void {
 export const MOVER_CUE_PARTS = 3;
 
 // What drawMover reads of a mover on the road.
-export type MoverItemView = Pick<WalkItem, "height" | "laneSpan" | "y"> & {
+type MoverItemView = Pick<WalkItem, "height" | "laneSpan" | "y"> & {
   readonly mover: MoverOnRoad;
 };
 

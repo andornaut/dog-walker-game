@@ -12,7 +12,7 @@ export type FetchStrategy = "cache-first" | "network-first" | "network-only";
 export const ART_BASE_URL = "/art";
 export const ART_MANIFEST_URL = `${ART_BASE_URL}/manifest.json`;
 
-export const ALWAYS_REVALIDATED_URLS: ReadonlySet<string> = new Set([
+const ALWAYS_REVALIDATED_URLS: ReadonlySet<string> = new Set([
   ART_MANIFEST_URL,
   "/manifest.webmanifest",
   "/nav.css",
@@ -32,7 +32,7 @@ export function precacheFetchOptions(url: string): RequestInit {
   return { cache: isHashedAssetUrl(url) ? "default" : "no-cache" };
 }
 
-export const CACHE_NAME_PREFIX = "dog-walker-";
+const CACHE_NAME_PREFIX = "dog-walker-";
 
 export function cacheNameFor(version: string): string {
   return `${CACHE_NAME_PREFIX}${version}`;

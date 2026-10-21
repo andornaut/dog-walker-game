@@ -10,7 +10,7 @@ import { SCALE_STEPS } from "../layout/projection";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
 // opaqueWidth how wide its drawn pixels are; both from its first frame.
-export interface SpriteMetrics {
+interface SpriteMetrics {
   feetY: number;
   frameHeight: number;
   frameWidth: number;

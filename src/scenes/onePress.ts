@@ -5,7 +5,7 @@ import type { PointerPhase } from "../input/pointerTracking";
 
 // cancelled: the browser called the press off (a system gesture, an incoming call), so its
 // release picks nothing. A release outside the canvas is an ordinary release.
-export interface OnePressHandlers {
+interface OnePressHandlers {
   down: (pointer: Input.Pointer) => void;
   move?: (pointer: Input.Pointer) => void;
   up: (pointer: Input.Pointer, cancelled: boolean) => void;

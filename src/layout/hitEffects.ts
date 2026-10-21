@@ -6,10 +6,10 @@ import type { Point } from "./rect";
 
 // A plain hit is on a standing obstacle; a moving hit is on a mover.
 export type HitKind = "moving" | "plain";
-export type Debris = "leaves" | "litter";
+type Debris = "leaves" | "litter";
 // How a struck obstacle moves: a cone rocks and tips over, a bin rocks back upright, and a wide
 // obstacle shakes sideways.
-export type ObstacleMotion = "rock" | "shake" | "tip";
+type ObstacleMotion = "rock" | "shake" | "tip";
 
 // Every effect plays its art's play tag once. peak is the frame reduced motion holds for the
 // stop. The splash's ground point, where the dog's feet meet the water, is on groundRow of its

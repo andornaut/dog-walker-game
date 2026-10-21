@@ -87,7 +87,7 @@ export function compactFrames(
 
 // What a caller has already read: the art manifest, else read from manifest.json, and PNGs
 // decoded by their paths.
-export interface AtlasInputs {
+interface AtlasInputs {
   decoded?: ReadonlyMap<string, RgbaImage>;
   // How each page's pixels become its PNG: encodePng unless given.
   encode?: (page: RgbaImage) => Uint8Array;

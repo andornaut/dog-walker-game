@@ -57,7 +57,7 @@ export function tipValue(data: Pick<GameData, "debuffs" | "tuning">, state: RunS
   return { amount: roundDollars(value.value), causes, dog: null, kind: "money" };
 }
 
-export interface Payments {
+interface Payments {
   readonly changes: readonly MoneyChange[];
   readonly state: RunState;
 }
@@ -102,7 +102,7 @@ export function fullPackBonus(data: Pick<GameData, "tuning">, state: RunState): 
   return { changes: [change], state: { ...state, money: addCents(state.money, amount) } };
 }
 
-export interface Firing {
+interface Firing {
   readonly fired: readonly DogId[];
   readonly state: RunState;
 }

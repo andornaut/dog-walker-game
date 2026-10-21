@@ -69,7 +69,7 @@ export const TOP_BAR_POINTS = {
 
 // An 8x6 tail under a bubble, pointing down at who is speaking: its top row sits over the
 // bubble's bottom rim, and tipX is the column it points from.
-export interface DownTail {
+interface DownTail {
   readonly height: number;
   readonly key: string;
   readonly tipX: number;
@@ -126,7 +126,7 @@ export function firedLineX(
 // or fades with reduced motion, over the whole hold (trotMs). A hold too short for every part
 // shortens the pop and the drop first, then the fade. Reduced motion sets the face and plate
 // in place at once and keeps the hold's length.
-export interface FiringTimeline {
+interface FiringTimeline {
   readonly fadeAtMs: number;
   readonly fadeMs: number;
   readonly plateMs: number;
@@ -206,7 +206,7 @@ export function lowHeartDogs(pack: Pack): DogId[] {
   );
 }
 
-export type CardOwnerMood = FaceMood | "fired" | "worried";
+type CardOwnerMood = FaceMood | "fired" | "worried";
 
 // The owner's face on their dog's card, out of max hearts: fired on a fired dog's card, worried
 // at lowHearts, else the mood the dog's face shows.

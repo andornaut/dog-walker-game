@@ -1,6 +1,6 @@
 // A bitmap font's glyph, in font pixels: its inked box from the pen position and the line's
 // top, and how far it moves the pen.
-export interface BitmapGlyph {
+interface BitmapGlyph {
   readonly advance: number;
   readonly height: number;
   readonly width: number;

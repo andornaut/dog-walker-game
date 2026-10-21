@@ -27,7 +27,7 @@ import {
 } from "./schema";
 
 // The content ids the game currently has.
-export interface KnownIds {
+interface KnownIds {
   achievements: ReadonlySet<AchievementId>;
   debuffs: ReadonlySet<DebuffId>;
   dogs: ReadonlySet<DogId>;
@@ -44,7 +44,7 @@ export interface SaveContext {
 
 // "new" when nothing was stored. "corrupt" carries the stored text so the caller can
 // keep it as a backup; its save is a fresh default.
-export type LoadResult =
+type LoadResult =
   | { raw: string; reason: string; save: SaveDocument; status: "corrupt" }
   | { save: SaveDocument; status: "loaded" | "new" };
 
@@ -52,7 +52,7 @@ function keysOf<Id extends string>(record: Readonly<Record<Id, unknown>>): Id[] 
   return Object.keys(record) as Id[];
 }
 
-export type SaveData = Pick<
+type SaveData = Pick<
   GameData,
   | "achievements"
   | "debuffs"
@@ -140,7 +140,7 @@ function clamp(min: number, max: number, value: number): number {
 // and walkers are always owned, and a walker not owned becomes the default. Dog slots are clamped to 1 to
 // MAX_RUN_DOGS and volumes to 0 to 1, and a best for a pack size outside them is dropped. A
 // loadout keeps at most one dog per slot, and may be empty.
-export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
+function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocument {
   const { defaults, known } = context;
   const owned: Owned = {
     dogSlots: clamp(1, MAX_RUN_DOGS, save.owned.dogSlots),

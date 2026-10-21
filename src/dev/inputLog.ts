@@ -24,7 +24,7 @@ export interface InputLog<DogId extends string = string, GearId extends string =
   readonly setup: RunSetup<DogId, GearId>;
 }
 
-export type DecodedInputLog<DogId extends string, GearId extends string> =
+type DecodedInputLog<DogId extends string, GearId extends string> =
   | { readonly errors: readonly string[]; readonly ok: false }
   | { readonly log: InputLog<DogId, GearId>; readonly ok: true };
 

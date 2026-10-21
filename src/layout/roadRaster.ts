@@ -37,7 +37,7 @@ export interface PixelImage {
 
 // A road strip and its copies shrunk 2x and 4x along the road, for rows that cover more road
 // than the strip has rows to show.
-export type StripLevels = readonly [PixelImage, PixelImage, PixelImage];
+type StripLevels = readonly [PixelImage, PixelImage, PixelImage];
 
 // The road x of each screen column, floored, and how far its centre is from the centre line,
 // or -1 on the strip, which covers columns roadStart to roadEnd (excluded). roadXFrom to
@@ -48,7 +48,7 @@ export type StripLevels = readonly [PixelImage, PixelImage, PixelImage];
 // seeded on, 2^dotLevel road pixels long, at least as long as the row's span, so every cell
 // shows on some row and the dots move down with the road rather than reshuffle. splits caches
 // verge edges by across.
-export interface RasterRow {
+interface RasterRow {
   readonly across: Float32Array;
   readonly distance: number;
   readonly dotLevel: number;
@@ -97,7 +97,7 @@ export interface RoadLook {
 // The pixels of a strip that lie on its lines along the road, such as lane marks: runs at
 // least LINE_RUN rows long, down one column, of a colour other than the strip's commonest.
 // columns marks each column holding any.
-export interface StripLines {
+interface StripLines {
   readonly columns: Uint8Array;
   readonly mask: Uint8Array;
 }

@@ -15,7 +15,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { onSceneEvent } from "./overlay";
 import { SCENE_KEYS } from "./sceneKeys";
 
-export const DEV_OVERLAY_SCENE_KEY = "dev-overlay";
+const DEV_OVERLAY_SCENE_KEY = "dev-overlay";
 
 const INSET = 2;
 const REDRAW_INTERVAL_MS = 250;

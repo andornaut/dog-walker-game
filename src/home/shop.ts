@@ -28,7 +28,7 @@ export interface ShopRow {
 
 // How a row draws: owned; blocked (greyed with its reason); affordable (the gold outline);
 // or short of the bank.
-export type ShopRowLook = "affordable" | "blocked" | "owned" | "short";
+type ShopRowLook = "affordable" | "blocked" | "owned" | "short";
 
 export function shopRowLook(bank: Cents, row: ShopRow): ShopRowLook {
   if (row.price === null) {

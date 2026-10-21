@@ -11,7 +11,7 @@ import { STRIP_LINE_FIELDS } from "./runText";
 
 // The message strip's lines for what just happened on the road, from the walk's events.
 
-export type StripData = Pick<GameData, "dogs" | "minorObstacles" | "runText">;
+type StripData = Pick<GameData, "dogs" | "minorObstacles" | "runText">;
 
 type StripKey = keyof typeof STRIP_LINE_FIELDS;
 

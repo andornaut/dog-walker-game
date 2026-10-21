@@ -53,7 +53,7 @@ export interface PlannedMove {
   readonly direction: LaneDirection;
 }
 
-export const HIT_COST = 1000;
+const HIT_COST = 1000;
 const MOVE_COST = 0.01;
 const SAME_TIME = 1e-9;
 // A lock is taken to last this much longer than it does, so rounding never has a lane change

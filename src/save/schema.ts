@@ -42,7 +42,7 @@ const volume = v.pipe(v.number(), v.finite());
 const contentId = v.pipe(v.string(), v.minLength(1));
 const ids = v.array(contentId);
 
-export const dogStatsSchema = v.object({
+const dogStatsSchema = v.object({
   timesFired: count,
   walks: count,
   zonesFinished: count,
@@ -76,7 +76,7 @@ const routeSchema = v.optional(ids, () => [...PRE_FORK_ROUTE]);
 // A run in progress, saved after each zone or as the tab hides. zonesFinished counts the zones
 // finished, 0 in the first.
 // counters is null in a checkpoint saved before achievements: its run earns no run badges.
-export const checkpointSchema = v.object({
+const checkpointSchema = v.object({
   counters: v.optional(v.nullable(runCountersSchema), null),
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,

@@ -21,7 +21,7 @@ export interface Figure {
 }
 
 // The leashes' colour, and the dog whose leash is taut, highlighted along its upper-left side.
-export interface LeashLook {
+interface LeashLook {
   color: number;
   taut: DogId | null;
 }

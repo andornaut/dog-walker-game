@@ -20,7 +20,7 @@ import { assertNever } from "./assertNever";
 import { modifierValue } from "./modifiers";
 import { type Cents, cents, read } from "./units";
 
-export type TextData = Pick<GameData, "debuffs" | "encounters" | "tuning">;
+type TextData = Pick<GameData, "debuffs" | "encounters" | "tuning">;
 
 export const SIZE_NAMES: { readonly [S in Size]: string } = {
   big: "big",
@@ -135,7 +135,7 @@ function withDuration({ duration, text }: Phrase): string {
 
 // One modifier, such as "+$1 per tip all walk", "tips +100% next neighborhood" or "no pulls
 // toward squirrels".
-export function modifierText(tuning: LiveTuning, modifier: Modifier): string {
+function modifierText(tuning: LiveTuning, modifier: Modifier): string {
   return withDuration({ duration: modifier.duration, text: modifierChange(tuning, modifier) });
 }
 
@@ -206,11 +206,7 @@ export function effectClause(data: TextData, effects: readonly Effect[]): string
 
 // A debuff's name and what it does for how long, as a card states its stake: "Muddy: bumps
 // cost 2♥ for 20s".
-export function debuffStake(
-  data: Pick<GameData, "debuffs">,
-  debuff: DebuffId,
-  seconds: number,
-): string {
+function debuffStake(data: Pick<GameData, "debuffs">, debuff: DebuffId, seconds: number): string {
   const { name, stake } = data.debuffs[debuff];
   return `${name}: ${fillNames(stake, { seconds: String(seconds) })}`;
 }
@@ -221,7 +217,7 @@ export function debuffText(tuning: LiveTuning, debuff: Debuff): string {
   return `${changes} for ${read(tuning, "seconds", debuff.seconds)} seconds`;
 }
 
-export type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
+type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 
 // What a card's text knows of the walk: the dogs a target reaches, in pack order, and a
 // money effect's total for the dogs it counts, after modifiers.

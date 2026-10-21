@@ -14,7 +14,7 @@ import { debuffLasting, lastingFor, longerLasting } from "./durations";
 import { modifiedStat } from "./modifiers";
 import { type Cents, cents, clampHearts, read, roundDollars } from "./units";
 
-export type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
+type RulesData = Pick<GameData, "debuffs" | "dogs" | "encounters" | "tuning">;
 
 export interface EffectContext {
   // The dogs the encounter affected, such as those caught by an area roll.
@@ -26,7 +26,7 @@ export interface EffectContext {
 }
 
 // The state after some effects, and every heart and money change they made, in order.
-export interface Applied {
+interface Applied {
   readonly changes: readonly Change[];
   readonly state: RunState;
 }

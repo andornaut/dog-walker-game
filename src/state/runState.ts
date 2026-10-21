@@ -23,13 +23,13 @@ import { packFor, packOrder } from "./pack";
 // A run in progress. Plain JSON throughout: arrays for sets, records for maps, numbers for
 // units, so a slice of it can be saved and loaded as it is.
 
-export type WalkingSlot = {
+type WalkingSlot = {
   readonly dog: DogId;
   readonly hearts: Hearts;
   readonly status: "walking";
 };
 // zoneIndex is the zone the owner fired you in; that zone pays nothing for the dog.
-export type FiredSlot = {
+type FiredSlot = {
   readonly dog: DogId;
   readonly status: "fired";
   readonly zoneIndex: number;
@@ -62,7 +62,7 @@ export type ActiveDebuff = Lasting & {
 };
 
 // No card opens for the encounter while the immunity lasts.
-export type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
+type ActiveImmunity = Lasting & { readonly encounter: EncounterId };
 
 // What opened a card: an obstacle the pack hit, with the dogs it affected, or a fork, whose
 // paths are the zones it leads to, left to right, each carrying the upgrade at its index.
@@ -80,7 +80,7 @@ export type CardSource =
 
 export type EndReason = "finished" | "noDogs" | "wentHome";
 
-export type Phase =
+type Phase =
   | { readonly kind: "card"; readonly source: CardSource }
   | { readonly kind: "ended"; readonly reason: EndReason }
   | { readonly kind: "walking" };

@@ -275,7 +275,7 @@ export const HOME_LAYOUT = {
   walkerTiles: GridSpec;
 };
 
-export type BankScale = (typeof HOME_LAYOUT.topBar.bank.scales)[number];
+type BankScale = (typeof HOME_LAYOUT.topBar.bank.scales)[number];
 
 // How wide the bank's ink may be.
 export const BANK_ROOM = HOME_LAYOUT.topBar.bank.ink.right + 1 - HOME_LAYOUT.topBar.bank.ink.left;

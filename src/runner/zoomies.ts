@@ -19,7 +19,7 @@ export type ZoomiesData = Pick<
 
 // seconds is the walking time since the last drift, or since the Zoomies began. drifted is the
 // way the pack drifted this step, or null.
-export interface ZoomiesStep {
+interface ZoomiesStep {
   readonly drifted: LaneDirection | null;
   readonly seconds: number;
   readonly walk: Walk;

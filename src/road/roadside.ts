@@ -31,13 +31,13 @@ const BAND_SCALE = 0.5;
 
 // Dots of other colours scattered over a band of the verge: share is the part of the band's
 // pixels they cover, which its colours split equally.
-export interface VergeDots {
+interface VergeDots {
   readonly colors: readonly number[];
   readonly share: number;
 }
 
 // A band of one colour, with its dots, running out to its to, across.
-export interface VergeStrip {
+interface VergeStrip {
   readonly color: number;
   readonly dots: readonly VergeDots[];
   readonly to: number;
@@ -67,7 +67,7 @@ export interface Verge {
 }
 
 // A tuft draws its own colour over the lawn's base or its marks, rather than darkening them.
-export type LawnColors = readonly [base: number, marks: number, tufts: number];
+type LawnColors = readonly [base: number, marks: number, tufts: number];
 
 // A verge as art writes it in shared/verges.json (art/tools/backdrops.py verges --write): the
 // same fields with colours by palette name, a null walkTo for paving out to the screen's edges,
@@ -156,7 +156,7 @@ export function walkFrom(verge: Verge): number {
 }
 
 // A band of the verge that carries dots, from and to across.
-export interface DottedBand {
+interface DottedBand {
   readonly dots: readonly VergeDots[];
   readonly from: number;
   readonly to: number;

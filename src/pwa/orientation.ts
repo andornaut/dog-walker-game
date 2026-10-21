@@ -2,7 +2,7 @@ import { dispatchPhoneEvent, PHONE_EVENTS } from "./events";
 
 // A landscape viewport at most this tall, under a touch screen, is a phone on its side. A
 // tablet in landscape is taller and keeps playing letterboxed; a desktop has a fine pointer.
-export const SIDEWAYS_MAX_HEIGHT = 500;
+const SIDEWAYS_MAX_HEIGHT = 500;
 
 // In CSS pixels.
 export interface Viewport {

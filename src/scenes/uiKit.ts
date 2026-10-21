@@ -201,7 +201,7 @@ function buttonFaces(
   });
 }
 
-export interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"> {
+interface MenuButtonInput extends Pick<InteractionInput, "available" | "primary"> {
   // An available button that is not primary wears the secondary look, as a card's own
   // controls do, in place of normal.
   readonly secondary?: boolean;
@@ -368,7 +368,7 @@ export function cogIcon(scene: Scene, x: number, y: number): Placed[] {
 
 // ui-select sits this far outside a selected item on each side by default; its inner ink
 // line then lies on the item's edge.
-export const SELECT_OUTSET = 3;
+const SELECT_OUTSET = 3;
 
 export function selectOuter(rect: Rect, outset = SELECT_OUTSET): Rect {
   return insetRect(-outset, rect);
@@ -432,7 +432,7 @@ export function addSelectFrame(
 
 // The ui-check badge at rect's top-left corner: tag is its art's tag, such as "tick". While the
 // art is missing, a green square with the tag, or a plus for a tick.
-export function addSelectBadge(
+function addSelectBadge(
   scene: Scene,
   parent: GameObjects.Container,
   rect: Rect,

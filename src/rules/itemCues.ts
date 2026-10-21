@@ -1,7 +1,7 @@
 import type { GameData } from "../data/types";
 import { blocksLane, type WalkItemKind } from "../runner/walk";
 
-export type CueData = Pick<GameData, "encounters" | "minorObstacles">;
+type CueData = Pick<GameData, "encounters" | "minorObstacles">;
 
 // Whether a road item bobs, which marks it as worth grabbing: tips, treats and lucky finds.
 // Obstacles carry no marker.

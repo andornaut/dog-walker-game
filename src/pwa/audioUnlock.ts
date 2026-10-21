@@ -1,5 +1,5 @@
 // The parts of an AudioContext this uses; Phaser's WebAudioSoundManager.context is one.
-export interface ResumableAudioContext {
+interface ResumableAudioContext {
   resume(): Promise<void>;
   readonly state: string;
 }

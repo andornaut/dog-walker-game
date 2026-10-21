@@ -11,7 +11,7 @@ export function fontFileMetrics(font: string): FontMetrics {
 // left edge, as Phaser lays it out: the pen moves by each glyph's advance, the pair's kerning
 // and the style's letterSpacing, all in font pixels before the style's scale. A glyph that inks
 // nothing, such as a space, is left out.
-export function glyphSpans(
+function glyphSpans(
   font: string,
   style: TextFitStyle,
   text: string,

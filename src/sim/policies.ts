@@ -56,7 +56,7 @@ export const LOW_HEARTS = 1;
 
 // What an enabled option would do, previewed on the current state. A random target is
 // previewed on the first owner in the pack, as the card shows it.
-export interface OptionPreview {
+interface OptionPreview {
   readonly choice: Choice;
   readonly cost: Cents;
   // An owner whose meter falls ends at LOW_HEARTS or less, or fires you.
@@ -66,7 +66,7 @@ export interface OptionPreview {
   readonly moneyDelta: Cents;
 }
 
-export function previewOptions(data: ChoiceData, state: RunState, card: CardView): OptionPreview[] {
+function previewOptions(data: ChoiceData, state: RunState, card: CardView): OptionPreview[] {
   return card.options
     .filter((option) => option.availability.enabled)
     .map((option) => {

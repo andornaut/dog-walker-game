@@ -3,7 +3,7 @@ import type { Input, Scene } from "phaser";
 import { pressDown, pressUp, type TargetPress } from "../input/targetPress";
 import { listenOnePress } from "./onePress";
 
-export interface TargetPressHandlers<T> {
+interface TargetPressHandlers<T> {
   // How long a tapped target stays pressed before onTap, counted from the press. 0 by default.
   dipMs?: (target: T) => number;
   // After onPressed, on each press: for a tap burst, or a hold timer.

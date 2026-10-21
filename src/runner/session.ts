@@ -45,7 +45,7 @@ export interface RunStreams {
 }
 
 // The road's geometry for the run's pack, which changes when an owner fires you.
-export type SessionGeometry = (run: RunState) => RoadGeometry;
+type SessionGeometry = (run: RunState) => RoadGeometry;
 
 // What a step applies before it walks, in order: a lane move, or heading home, which ends the
 // walk before the step.

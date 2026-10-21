@@ -51,7 +51,7 @@ const PROJECTION = walkProjection(ROAD_CAMERA, SCREEN.road);
 const LANES = laneCenterXs(LANE_COUNT, SCREEN.road);
 
 // The help screen's picture height: its strips fill it.
-export const HELP_PICTURE_HEIGHT = HELP_LAYOUT.illustration.height;
+const HELP_PICTURE_HEIGHT = HELP_LAYOUT.illustration.height;
 
 // A run of screen rows the picture shows.
 export interface PictureStrip {

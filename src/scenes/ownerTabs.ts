@@ -52,7 +52,7 @@ interface LaidQuip {
 // clearOf: what the HUD's moments cover over the owners' lane, which a quip reaching above
 // the lane must not lie under. packX: the pack's centre across the screen, which a quip
 // leans away from. still: reduced motion, which shows a tab without popping it in.
-export interface OwnerTabHooks {
+interface OwnerTabHooks {
   clearOf: () => readonly Rect[];
   packX: () => number;
   still: () => boolean;

@@ -54,7 +54,7 @@ export function walkerTile(
 }
 
 // An owned walker in words, as a pick or keyboard focus says it: "Ben: relaxed, Treat finder."
-export function walkerInfo(data: WalkerText, walker: WalkerId): string {
+function walkerInfo(data: WalkerText, walker: WalkerId): string {
   const { agility, name, perk } = data.walkers[walker];
   return homeLine(data.homeText, "walkerInfo", {
     agility: agilityWord(data.homeText, agility).toLowerCase(),

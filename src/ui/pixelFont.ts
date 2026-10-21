@@ -80,7 +80,7 @@ export function normalizePixelText(text: string): string {
   return plainMarks(text).toUpperCase();
 }
 
-export interface Glyph {
+interface Glyph {
   bits: string;
   char: string;
   width: number;
@@ -99,7 +99,7 @@ export function glyphAdvance(char: string): number {
   return (GLYPH_WIDTHS.get(char) ?? SPACE_WIDTH) + 1;
 }
 
-export interface AtlasGlyph {
+interface AtlasGlyph {
   advance: number;
   char: string;
   // Lit pixels, relative to the glyph's top-left corner in the atlas.
@@ -108,7 +108,7 @@ export interface AtlasGlyph {
   x: number;
 }
 
-export interface PixelFontAtlas {
+interface PixelFontAtlas {
   glyphs: readonly AtlasGlyph[];
   height: number;
   width: number;

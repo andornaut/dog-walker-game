@@ -5,7 +5,7 @@ import type { ScreenLayout } from "../layout/screenLayout";
 // Distances are in screen pixels. A lane-width is the road width over laneCount.
 // swipeStartDistance: the travel that takes a drag's first lane step, and the travel back that
 // turns it around.
-export interface GestureConfig {
+interface GestureConfig {
   laneCount: number;
   swipeStartDistance: number;
   tapMaxDistance: number;
@@ -25,7 +25,7 @@ export type GestureAction = { direction: LaneDirection; kind: "move" };
 // swipeStartDistance and the Nth at N lane-widths. direction is the way its steps
 // go, 0 before the first; steps is how many it has taken; peakX is the furthest x reached
 // that way. Travelling back swipeStartDistance from peakX starts a new leg there.
-export interface DragLeg {
+interface DragLeg {
   anchorX: number;
   direction: LaneDirection | 0;
   peakX: number;

@@ -41,7 +41,7 @@ export interface ListScroll {
   readonly y: number;
 }
 
-export function clampScroll(max: number, y: number): number {
+function clampScroll(max: number, y: number): number {
   return Math.min(Math.max(0, max), Math.max(0, y));
 }
 

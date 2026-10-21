@@ -12,7 +12,7 @@ import { addMenuButton, addNineSlice, type SliceKey, TEXT_SCALE } from "./uiKit"
 
 // Everything the purchase confirm draws from. The scene that opens it routes its taps and keys
 // through the model in home/purchaseConfirm; the view only draws.
-export interface PurchaseConfirmViewInput {
+interface PurchaseConfirmViewInput {
   readonly lines: ConfirmLines;
   // The item's picture in the well, as a detail card's.
   readonly picture: DetailPicture;

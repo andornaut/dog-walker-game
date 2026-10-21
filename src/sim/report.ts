@@ -36,7 +36,7 @@ export interface Matrix {
   readonly walkers: readonly WalkerId[];
 }
 
-export interface MatrixCell {
+interface MatrixCell {
   readonly gear: GearId | null;
   readonly pack: NamedPack;
   readonly player: MatrixPlayer;
@@ -100,7 +100,7 @@ const PACKS: readonly NamedPack[] = [
   { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
 ];
 
-export const SKILL_PLAYERS: readonly MatrixPlayer[] = SKILL_PRESET_IDS.map((preset) => ({
+const SKILL_PLAYERS: readonly MatrixPlayer[] = SKILL_PRESET_IDS.map((preset) => ({
   kind: "skill",
   preset,
 }));
@@ -114,11 +114,11 @@ export const DEFAULT_MATRIX: Matrix = {
   walkers: [DEFAULT_WALKER],
 };
 
-export function gearName(gear: GearId | null): string {
+function gearName(gear: GearId | null): string {
   return gear ?? "none";
 }
 
-export function playerName(player: MatrixPlayer): string {
+function playerName(player: MatrixPlayer): string {
   return player.preset;
 }
 
@@ -160,12 +160,7 @@ function simPlayer(player: MatrixPlayer): SimPlayer {
 // Run number run of a cell. It is seeded by the seed, the pack's dog ids in pack order and the
 // run number alone, so every policy, route policy, player, gear and walker meets the same first
 // zone plan and their rows differ by the choices and the play, not by the draw.
-export function simulateCellRun(
-  data: SimData,
-  seed: number,
-  cell: MatrixCell,
-  run: number,
-): RunResult {
+function simulateCellRun(data: SimData, seed: number, cell: MatrixCell, run: number): RunResult {
   return simulateRun(data, hashSeed(`${seed}:${cell.pack.dogs.join(",")}:${run}`), {
     gear: cell.gear,
     pack: cell.pack.dogs,
@@ -189,9 +184,7 @@ export function simulateCell(
 }
 
 // Every obstacle kind that can stand still, those that open a card first, then the minor ones.
-export function obstacleKinds(
-  data: Pick<GameData, "encounters" | "minorObstacles">,
-): WalkItemKind[] {
+function obstacleKinds(data: Pick<GameData, "encounters" | "minorObstacles">): WalkItemKind[] {
   const kinds = [
     ...Object.keys(data.encounters),
     ...Object.keys(data.minorObstacles),
@@ -207,7 +200,7 @@ function touchedShare(counts: readonly ItemCount[]): number | null {
   return met === 0 ? null : counts.reduce((sum, count) => sum + count.touched, 0) / met;
 }
 
-export function summarizeCell(
+function summarizeCell(
   data: Pick<GameData, "encounters" | "minorObstacles">,
   cell: MatrixCell,
   results: readonly RunResult[],

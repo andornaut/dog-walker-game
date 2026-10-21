@@ -60,7 +60,7 @@ export function soundVolumes(settings: Settings): { music: number; sfx: number }
   return { music: settings.musicVolume, sfx: settings.sfxVolume };
 }
 
-export type SettingsRowKind = "slider" | "switch";
+type SettingsRowKind = "slider" | "switch";
 
 export interface SettingsLayout {
   close: CloseControl;

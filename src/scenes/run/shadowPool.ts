@@ -5,13 +5,7 @@ import { spriteMetrics } from "../sprites";
 import { DEPTH, type Shadow } from "./stage";
 
 // A Shadow placer that takes each shadow's colour.
-export type ColoredShadow = (
-  color: number,
-  key: string,
-  depth: number,
-  x: number,
-  footY: number,
-) => void;
+type ColoredShadow = (color: number, key: string, depth: number, x: number, footY: number) => void;
 
 // Shadow images, reused frame to frame: the first `used` are in use this frame.
 export class ShadowPool {

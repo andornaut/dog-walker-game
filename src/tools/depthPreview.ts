@@ -15,7 +15,7 @@ export interface PreviewArt extends DepthArt {
 
 // Where the game draws the sprite at a distance ahead of the walker's feet: the projected
 // scale, what depthDraw picks there, and the drawn rect on screen.
-export interface SweepRow {
+interface SweepRow {
   readonly distance: number;
   readonly drawn: DepthDraw;
   // The screen row the sprite's feet stand on.

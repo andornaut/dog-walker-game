@@ -51,9 +51,9 @@ const extraSchema = strictRecord({
   ),
 });
 
-export type ArtManifestExtra = v.InferOutput<typeof extraSchema>;
+type ArtManifestExtra = v.InferOutput<typeof extraSchema>;
 
-export function parseArtManifestExtra(value: unknown): ArtManifestExtra {
+function parseArtManifestExtra(value: unknown): ArtManifestExtra {
   return parseOrThrow(ART_MANIFEST_EXTRA, extraSchema, value);
 }
 

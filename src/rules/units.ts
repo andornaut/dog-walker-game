@@ -7,11 +7,11 @@ type Unit<Name extends string> = number & { readonly [unit]: Name };
 export type Cents = Unit<"Cents">;
 // An owner's happiness meter, always within 0 and its dog's max.
 export type Hearts = Unit<"Hearts">;
-export type Multiplier = Unit<"Multiplier">;
+type Multiplier = Unit<"Multiplier">;
 // Pixels, or pixels per second for a speed.
 export type Pixels = Unit<"Pixels">;
 // A chance from 0 to 1.
-export type Probability = Unit<"Probability">;
+type Probability = Unit<"Probability">;
 export type Seconds = Unit<"Seconds">;
 
 export function cents(value: number): Cents {
@@ -39,7 +39,7 @@ export function clampHearts(max: number, value: number): Hearts {
   return Math.min(max, Math.max(0, value)) as Hearts;
 }
 
-export function multiplier(value: number): Multiplier {
+function multiplier(value: number): Multiplier {
   return value as Multiplier;
 }
 
@@ -60,7 +60,7 @@ export function seconds(value: number): Seconds {
 
 // What reading a value from each tuning group gives. Hearts values in the tuning are
 // amounts and caps, not meters, so they stay plain numbers until clampHearts.
-export interface UnitOf {
+interface UnitOf {
   readonly counts: number;
   readonly hearts: number;
   readonly money: Cents;

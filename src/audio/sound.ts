@@ -8,7 +8,7 @@ import { assertNever } from "../rules/assertNever";
 export type BaseCue =
   "badge" | "bark" | "bump" | "cardOpen" | "fired" | "newBest" | "tip" | "treat";
 // An encounter's hit moment, played with its own sound: an obstacle's or a lucky find's.
-export type HitCue = `hit:${EncounterId}` | `luckyHit:${EncounterId}`;
+type HitCue = `hit:${EncounterId}` | `luckyHit:${EncounterId}`;
 export type SoundCue = BaseCue | HitCue;
 
 const HIT_PREFIX = "hit:";
@@ -79,7 +79,7 @@ export interface Mix {
   volumes: Volumes;
 }
 
-export const FULL_VOLUMES: Volumes = { music: 1, sfx: 1 };
+const FULL_VOLUMES: Volumes = { music: 1, sfx: 1 };
 
 export const INITIAL_MIX: Mix = {
   hidden: false,
@@ -159,7 +159,7 @@ export function advanceMusic(state: MusicState, elapsedMs: number): MusicState {
 // The start times of recent plays, per cue.
 export type RecentPlays = Readonly<Partial<Record<SoundCue, readonly number[]>>>;
 
-export interface PlayDecision {
+interface PlayDecision {
   admitted: boolean;
   recent: RecentPlays;
 }

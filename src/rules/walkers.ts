@@ -5,7 +5,7 @@ import { isHeavy } from "./dogs";
 import { modifiedStat } from "./modifiers";
 import { read } from "./units";
 
-export type WalkerData = Pick<GameData, "walkerPerks" | "walkers">;
+type WalkerData = Pick<GameData, "walkerPerks" | "walkers">;
 
 // Every run the walker walks applies its perk's effects.
 export function walkerEffects(data: WalkerData, walker: WalkerId): readonly Effect[] {
@@ -13,7 +13,7 @@ export function walkerEffects(data: WalkerData, walker: WalkerId): readonly Effe
 }
 
 // What the pack's heavy dogs take off the walker's agility: bigDogAgility for each walking one.
-export function bigDogsAgility(
+function bigDogsAgility(
   data: Pick<GameData, "dogs" | "tuning">,
   run: Pick<RunState, "pack">,
 ): number {

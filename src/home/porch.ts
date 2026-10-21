@@ -3,7 +3,7 @@ import type { SaveStats } from "../save/schema";
 
 // A starter owner waiting at the gate, and whether their dog still waits with them: a dog
 // the player has picked has gone to the walker.
-export interface PorchOwner {
+interface PorchOwner {
   readonly dog: DogId;
   readonly withDog: boolean;
 }

@@ -11,7 +11,7 @@ import {
   reportFromRejection,
 } from "./crashModel";
 
-export interface CrashScreenOptions {
+interface CrashScreenOptions {
   // Shows the message and stack with a Copy button.
   readonly dev: boolean;
   // Stops the game under the screen. Any error it throws is logged and ignored.

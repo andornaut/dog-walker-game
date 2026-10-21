@@ -29,7 +29,7 @@ const ENDESGA = {
 
 // The neutral greys, outside Endesga 32 and allowed only for disabled and locked UI: the
 // neutral counterparts of lightGrey, grey, slate and darkSlate, with ink as their darkest step.
-export const NEUTRAL = {
+const NEUTRAL = {
   neutralDarkSlate: 0x4a4a4a,
   neutralGrey: 0xa4a4a4,
   neutralLightGrey: 0xd8d8d8,

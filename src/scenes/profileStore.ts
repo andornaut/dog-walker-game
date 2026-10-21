@@ -116,7 +116,7 @@ export function isMuted(scene: Scene): boolean {
 }
 
 // Mutes or unmutes all sound: saved, applied and told to every settings listener.
-export function setMuted(scene: Scene, muted: boolean): void {
+function setMuted(scene: Scene, muted: boolean): void {
   void setSettings(scene, { ...currentSettings(scene), muted });
 }
 

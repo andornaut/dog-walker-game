@@ -13,7 +13,7 @@ export const PHONE_EVENTS = {
   turnedUpright: "turned-upright",
 } as const;
 
-export type PhoneEventName = (typeof PHONE_EVENTS)[keyof typeof PHONE_EVENTS];
+type PhoneEventName = (typeof PHONE_EVENTS)[keyof typeof PHONE_EVENTS];
 
 export function dispatchPhoneEvent(target: EventTarget, name: PhoneEventName): void {
   target.dispatchEvent(new Event(name));

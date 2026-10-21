@@ -14,7 +14,7 @@ export type HelpAction =
 export type HelpOutcome =
   { readonly kind: "close" } | { readonly kind: "show"; readonly page: number };
 
-export interface HelpButtons {
+interface HelpButtons {
   readonly previousEnabled: boolean;
   // Which of menuText.help's labels the Next button shows.
   readonly next: "gotIt" | "next";

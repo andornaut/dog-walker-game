@@ -53,7 +53,7 @@ const PLATE_PAD = 3;
 
 // A plate's colours: its 1px edge, its face, the face's top (lit) and bottom (shade) rows
 // where they differ from it, and its text.
-export interface PlateColors {
+interface PlateColors {
   readonly edge: number;
   readonly face: number;
   readonly lit?: number;

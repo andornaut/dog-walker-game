@@ -141,12 +141,12 @@ export function showHint(scene: Scene, event: HintTrigger): void {
 
 // A zone's payout: how long until its coins have landed and their amounts faded, and every
 // change the zone made, its fees included.
-export interface ZonePayout {
+interface ZonePayout {
   readonly changes: readonly Change[];
   readonly ms: number;
 }
 
-export interface RunMomentsDeps {
+interface RunMomentsDeps {
   items: ItemViews;
   pack: PackView;
   quips: Random;

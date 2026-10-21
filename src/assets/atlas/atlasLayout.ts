@@ -21,12 +21,12 @@ export const EXTRUDE = 1;
 const PAGE_WIDTHS = [256, 512, 1024, 2048] as const;
 
 // Pages in load order: the loading screen's art first, so it shows while the rest loads.
-export const ATLAS_GROUPS = ["boot", "ui", "home", "run", "cards"] as const;
-export type AtlasGroup = (typeof ATLAS_GROUPS)[number];
+const ATLAS_GROUPS = ["boot", "ui", "home", "run", "cards"] as const;
+type AtlasGroup = (typeof ATLAS_GROUPS)[number];
 
 // The groups boot loads before the home screen shows. The rest load behind it, and a walk or
 // help waits for them.
-export const FIRST_ATLAS_GROUPS: readonly AtlasGroup[] = ["boot", "ui", "home"];
+const FIRST_ATLAS_GROUPS: readonly AtlasGroup[] = ["boot", "ui", "home"];
 
 const LOADING_KEYS: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
 const GROUP_PREFIXES: readonly (readonly [AtlasGroup, readonly string[]])[] = [
@@ -88,7 +88,7 @@ export interface SourceTexture {
 
 // A frame copied from a source PNG to the top-left corner at on a page, its extruded border
 // read inside bounds.
-export interface Blit {
+interface Blit {
   at: Point;
   bounds: Rect;
   from: Rect;
@@ -103,7 +103,7 @@ export interface PageLayout {
   width: number;
 }
 
-export interface AtlasLayout {
+interface AtlasLayout {
   pages: PageLayout[];
   // Keys with a frame too large for a page, left to load from their own files.
   skipped: string[];

@@ -13,7 +13,7 @@ export const DEV_OVERLAY_VISIBLE_KEY = "dev-overlay-visible";
 export const DEV_ROAD_FADE_KEY = "dev-road-fade";
 
 // The slice of a run the overlay shows. RunState fits it as it is.
-export interface DevRunView {
+interface DevRunView {
   readonly money: Cents;
   readonly pack: readonly (
     | { readonly dog: string; readonly hearts: number; readonly status: "walking" }

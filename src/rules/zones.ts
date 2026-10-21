@@ -1,7 +1,7 @@
 import type { LiveTuning, Zone } from "../data/types";
 import { type Pixels, pixels, read, type Seconds, seconds } from "./units";
 
-export interface ZoneStats {
+interface ZoneStats {
   // At base speed and before upgrades.
   readonly duration: Seconds;
   readonly luckyEncounters: number;

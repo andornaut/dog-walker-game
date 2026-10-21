@@ -62,14 +62,14 @@ export const OBSTACLE_SILHOUETTES: Readonly<Record<string, Silhouette>> = {
 export const hasObstacleArt: HasArt = (key) => Object.hasOwn(OBSTACLE_SILHOUETTES, key);
 
 // Road pixels the skunk stands behind its cloud's near edge, so it reads as inside the spray.
-export const SKUNK_IN_CLOUD = 10;
+const SKUNK_IN_CLOUD = 10;
 // Road pixels the other dog and its owner stand across from the item's centre.
-export const OTHER_DOG_DX = -10;
-export const OTHER_DOG_OWNER_DX = 13;
+const OTHER_DOG_DX = -10;
+const OTHER_DOG_OWNER_DX = 13;
 
 // One sprite of an obstacle: its key, dx across the road from the item's centre and behind up
 // the road from its near edge, both in road pixels, and whether it lies flat on the road.
-export interface ObstaclePart {
+interface ObstaclePart {
   readonly behind: number;
   readonly dx: number;
   readonly flat: boolean;

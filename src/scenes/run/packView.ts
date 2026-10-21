@@ -24,7 +24,7 @@ import { playEffect, playTag, playTagOnce, spriteMetrics } from "../sprites";
 import { DEPTH, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
 // What the pack is drawn with each frame besides the walk.
-export interface PackFrame {
+interface PackFrame {
   halted: boolean;
   // A road item's middle on screen, for the line a strain points along.
   itemPoint: (id: number) => { x: number; y: number } | null;

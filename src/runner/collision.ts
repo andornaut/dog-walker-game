@@ -32,7 +32,7 @@ export interface PackBoxes<Dog extends string = string> {
 }
 
 // The pack's band down the road, from its outline's top to its bottom.
-export interface PackBand {
+interface PackBand {
   readonly bottom: number;
   readonly top: number;
 }
@@ -154,13 +154,13 @@ export interface CollisionRules<Item extends RoadItem> {
 }
 
 // An item hit, with the dog the touch lands on.
-export interface Hit<Item extends RoadItem, Dog extends string> {
+interface Hit<Item extends RoadItem, Dog extends string> {
   readonly dog: Dog;
   readonly item: Item;
 }
 
 // hits are removed from remaining. invulnerableSeconds is the time left in the window.
-export interface CollisionResult<Item extends RoadItem, Dog extends string> {
+interface CollisionResult<Item extends RoadItem, Dog extends string> {
   hits: Hit<Item, Dog>[];
   invulnerableSeconds: number;
   remaining: Item[];

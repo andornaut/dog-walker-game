@@ -40,7 +40,7 @@ export function whenSettled(settleMs: number, run: () => Promise<void>): () => v
   };
 }
 
-export interface GeneratedFilesPluginOptions {
+interface GeneratedFilesPluginOptions {
   // The repository's root, which holds src/ and shared/export/. Vite's root is pages/.
   repoRoot: string;
 }

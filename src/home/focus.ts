@@ -8,7 +8,7 @@ export interface Focus {
   readonly row: number;
 }
 
-export type FocusDirection = "down" | "left" | "right" | "up";
+type FocusDirection = "down" | "left" | "right" | "up";
 
 const KEY_DIRECTIONS: Readonly<Record<string, FocusDirection>> = {
   ArrowDown: "down",

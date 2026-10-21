@@ -18,7 +18,7 @@ export interface StepClock {
   readonly lastTimeMs: number | null;
 }
 
-export interface FrameSteps {
+interface FrameSteps {
   readonly clock: StepClock;
   // Wall-clock time since the last frame, before the cap; 0 on the first frame.
   readonly frameMs: number;

@@ -12,7 +12,7 @@ import { relayVisibilityEvents } from "./visibility";
 import { createScreenWakeLock, type ScreenWakeLock } from "./wakeLock";
 
 export { AUDIO_UNLOCK_EVENTS, unlockAudioOnFirstGesture } from "./audioUnlock";
-export { PHONE_EVENTS, type PhoneEventName } from "./events";
+export { PHONE_EVENTS } from "./events";
 
 const SERVICE_WORKER_URL = "/sw.js";
 // Elements in pages/play/index.html.

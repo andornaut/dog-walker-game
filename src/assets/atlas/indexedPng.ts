@@ -13,9 +13,7 @@ const FILTER_NONE = 0;
 // Each pixel's palette index and the palette as RGBA values (R in the high byte), or undefined
 // when image has more than MAX_PALETTE distinct RGBA values. Entries that are not fully opaque
 // come first, so tRNS can end at the last of them, then the most used.
-export function paletteOf(
-  image: RgbaImage,
-): { indices: Uint8Array; palette: number[] } | undefined {
+function paletteOf(image: RgbaImage): { indices: Uint8Array; palette: number[] } | undefined {
   const view = new DataView(image.data.buffer, image.data.byteOffset, image.data.byteLength);
   const pixels = new Uint32Array(image.width * image.height);
   const counts = new Map<number, number>();

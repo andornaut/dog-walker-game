@@ -30,7 +30,7 @@ const BOTTOM = 17;
 // Each button's hit area reaches this far above and below its face.
 const HIT_REACH = 2;
 
-export interface PauseMenuLayout {
+interface PauseMenuLayout {
   buttons: Rect[];
   hits: Rect[];
   notePlate: Rect;

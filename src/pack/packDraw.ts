@@ -40,7 +40,7 @@ export function leashLine(walker: Feet, depth: number, dog: StandingDog): LeashL
   };
 }
 
-export type PackLayer = { dog: DogId; kind: "dog" } | { kind: "leash" } | { kind: "walker" };
+type PackLayer = { dog: DogId; kind: "dog" } | { kind: "leash" } | { kind: "walker" };
 
 // The pack's layers back to front, each with its depth over the pack's base depth: the dogs by
 // their feet rows, the later in formation order in front on a shared row; then the leashes, just

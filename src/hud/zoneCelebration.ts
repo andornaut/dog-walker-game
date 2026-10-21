@@ -22,7 +22,7 @@ export type ZoneCelebration =
       readonly zone: string;
     };
 
-export interface ZoneFinish {
+interface ZoneFinish {
   // The changes made since the zone began, its fees included.
   readonly changes: readonly Change[];
   // The zones the run has finished, in order, this one included.

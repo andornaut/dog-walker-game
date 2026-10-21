@@ -85,7 +85,7 @@ export interface BarButton {
   hit: Rect;
 }
 
-export interface WalkBarLayout {
+interface WalkBarLayout {
   buttons: Readonly<Record<WalkBarButtonId, BarButton>>;
   // Each effect well, left to right, and the press area that holds it: the well's column of
   // the bar, from the neighborhood well's top to the bar's bottom.
@@ -193,7 +193,7 @@ export const DOG_CARD = {
   },
 } as const;
 
-export interface CardLine {
+interface CardLine {
   text: string;
   // The top of the line's capitals, from the card's top.
   top: number;
@@ -215,7 +215,7 @@ export function ownerNameLines(rightEdge: (line: string) => number, name: string
   ];
 }
 
-export interface CardHeart extends Point {
+interface CardHeart extends Point {
   full: boolean;
 }
 
@@ -304,7 +304,7 @@ export const QUIP_STYLES: readonly TextFitStyle[] = [{ letterSpacing: 0, lines: 
 
 // A quip as drawn: its text's lines, lineHeight apart, the widest width wide, and its speaker's
 // name name wide.
-export interface QuipText {
+interface QuipText {
   lineHeight: number;
   lines: number;
   name: number;
@@ -433,7 +433,7 @@ export function explainTargetAt(
 
 // What a card slot shows: its dog, "Empty" for a slot the player owns but filled with no dog,
 // or nothing for a slot the player has not bought.
-export type SlotShown = "dog" | "empty" | "hidden";
+type SlotShown = "dog" | "empty" | "hidden";
 
 export function slotShown(ownedSlots: number, index: number, hasDog: boolean): SlotShown {
   if (hasDog) {

@@ -81,7 +81,7 @@ interface FiredLine {
 // The callbacks the HUD gives the moments: floatLabels shows change labels, popping a heart
 // change's owner in for ownerMs, firingShown runs once a firing moment is on screen, and
 // popOwner pops a dog's owner in on its card, in a mood, for ms.
-export interface HudFeedbackHooks {
+interface HudFeedbackHooks {
   firingShown: () => void;
   floatLabels: (ownerMs: number, labels: ChangeLabel[]) => void;
   popOwner: (dog: DogId, mood: string, ms: number) => void;

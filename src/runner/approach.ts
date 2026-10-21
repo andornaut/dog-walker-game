@@ -10,7 +10,7 @@ import type { MoverPath, MoverStep, StepShape } from "./movers";
 export type ApproachPath = Extract<MoverPath, { motion: "approach" }>;
 
 // The steps a stalker may take, in the order a tie goes.
-export const APPROACH_STEPS: readonly StepShape[] = [
+const APPROACH_STEPS: readonly StepShape[] = [
   { lanes: 0, travel: 1 },
   { lanes: -1, travel: 1 },
   { lanes: 1, travel: 1 },
@@ -86,7 +86,7 @@ export function takeStep(path: ApproachPath, shape: StepShape | null): ApproachP
 }
 
 // A point on the road, in road pixels: x across from the road's left edge, y down the screen.
-export interface RoadPoint {
+interface RoadPoint {
   readonly x: number;
   readonly y: number;
 }

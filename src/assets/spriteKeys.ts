@@ -14,7 +14,7 @@ import type { CardSource } from "../state/runState";
 import { depthStepOfScale } from "./depthSteps";
 
 export const CARD_FRAME_KEY = "card-frame";
-export type CardFrameTag = "encounter" | "route";
+type CardFrameTag = "encounter" | "route";
 
 // The card frame's colour comes from what opened the card: an obstacle, or a fork.
 export function cardFrameTag(source: CardSource): CardFrameTag {

@@ -38,7 +38,7 @@ export const DOG_SILHOUETTES: Readonly<Record<DogId, Silhouette>> = {
 };
 
 // How far a dog reaches either side of its column, mirrored too, as a pull draws it.
-export function dogHalfWidth(dog: Silhouette): number {
+function dogHalfWidth(dog: Silhouette): number {
   return Math.max(-dog.left, dog.right);
 }
 
@@ -128,14 +128,14 @@ function rowScale(projection: Lens, footDy: number): number {
 }
 
 // A dog's silhouette and size.
-export interface PackDog {
+interface PackDog {
   silhouette: Silhouette;
   size: Size;
 }
 
 // A side dog stands across from the lane's centre the lane's half width on its feet row less
 // half its opaque width, rounded in, so it is drawn inside its lane.
-export function sideDx(projection: Lens, footDy: number, dog: Silhouette): number {
+function sideDx(projection: Lens, footDy: number, dog: Silhouette): number {
   const width = dog.right - dog.left;
   return Math.floor(LANE_HALF_WIDTH * rowScale(projection, footDy) - Math.ceil(width / 2));
 }
@@ -166,11 +166,11 @@ export interface PartBox {
 // dog's at the road's scale on its feet row, and its rows from its top row's top edge down to
 // its feet line as the road drawn there, y down the road from the walker's feet. scale is the
 // road's on the part's feet row, which its columns are drawn at.
-export interface ScaledPartBox extends PartBox {
+interface ScaledPartBox extends PartBox {
   scale: number;
 }
 
-export interface PackParts {
+interface PackParts {
   dogs: ScaledPartBox[];
   walker: ScaledPartBox;
 }
@@ -186,7 +186,7 @@ function roadY(projection: Lens, dy: number): number {
 
 // The parts inset by inset screen pixels on every side: 0 for what is drawn. The dogs are in
 // formation order.
-export function packParts(
+function packParts(
   projection: Lens,
   inset: number,
   walker: Silhouette,

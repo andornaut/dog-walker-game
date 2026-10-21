@@ -39,7 +39,7 @@ export interface AtlasTexture {
   tags?: unknown[];
 }
 
-export interface AtlasPage {
+interface AtlasPage {
   // The PNG's size in bytes, which weights it on the loading bar.
   bytes: number;
   group: string;

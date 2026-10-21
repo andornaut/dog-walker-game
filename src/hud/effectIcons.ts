@@ -11,10 +11,7 @@ export type EffectItem =
   | { readonly kind: "perk"; readonly perk: WalkerPerkId }
   | { readonly kind: "upgrade"; readonly upgrade: UpgradeId };
 
-export type EffectRun = Pick<
-  RunState,
-  "gear" | "immunities" | "modifiers" | "upgradesPicked" | "walker"
->;
+type EffectRun = Pick<RunState, "gear" | "immunities" | "modifiers" | "upgradesPicked" | "walker">;
 
 // An effect's icon is this many pixels square.
 export const EFFECT_ICON_SIZE = 16;

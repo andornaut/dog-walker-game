@@ -59,7 +59,7 @@ export interface AmbientStage {
 // where it starts or leaves, in road pixels from the road's centre line, and z the road
 // distance from the walk's start where it set out. look, in [0, 1), picks among its art's
 // variants, such as a car's body.
-export interface AmbientSlot {
+interface AmbientSlot {
   across: number;
   active: boolean;
   bornAt: number;
@@ -72,7 +72,7 @@ export interface AmbientSlot {
   z: number;
 }
 
-export interface AmbientState {
+interface AmbientState {
   nextAt: number;
   readonly slots: readonly AmbientSlot[];
   zone: ZoneId | null;
@@ -189,7 +189,7 @@ function pickMover(
 
 // Where a mover beside the road walks along it: the middle of the sidewalk, or just past the
 // curb or paving's inner edge where the sidewalk has no width of its own.
-export function sidewalkAcross(verge: Verge): number {
+function sidewalkAcross(verge: Verge): number {
   const from = walkFrom(verge);
   return Number.isFinite(verge.walkTo) && verge.walkTo - from >= 2 * SIDEWALK_INSET
     ? (from + verge.walkTo) / 2
@@ -198,7 +198,7 @@ export function sidewalkAcross(verge: Verge): number {
 
 // The nearest a verge mover stops to the road: past the sidewalk on the lawn, or out on the
 // paving.
-export function vergeStop(verge: Verge): number {
+function vergeStop(verge: Verge): number {
   const from = walkFrom(verge);
   return (Number.isFinite(verge.walkTo) ? Math.max(from, verge.walkTo) : from) + VERGE_INSET;
 }
@@ -249,7 +249,7 @@ function setOut(
 }
 
 // How far a mover has gone seconds after it set out on its gait, and whether it is moving.
-export interface GaitTravel {
+interface GaitTravel {
   moving: boolean;
   travel: number;
 }

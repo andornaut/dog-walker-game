@@ -9,7 +9,7 @@ export type RouteData = Pick<GameData, "world">;
 export const PRE_FORK_ROUTE: readonly ZoneId[] = ["street", "park", "shops", "homeStretch"];
 
 // A fork's paths, left to right.
-export const PATH_SIDES = ["left", "straight", "right"] as const;
+const PATH_SIDES = ["left", "straight", "right"] as const;
 export type PathSide = (typeof PATH_SIDES)[number];
 
 // How many zones a walk visits: the world's walk length, or every zone if the world has fewer.
@@ -25,7 +25,7 @@ export function zoneById(data: RouteData, id: ZoneId): Zone {
   return zone;
 }
 
-export function isZoneId(data: RouteData, id: string): id is ZoneId {
+function isZoneId(data: RouteData, id: string): id is ZoneId {
   return data.world.zones.some((zone) => zone.id === id);
 }
 

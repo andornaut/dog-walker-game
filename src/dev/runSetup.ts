@@ -56,7 +56,7 @@ export interface ParsedRunSetup<
 // silently changed and the reported seed would not be the one used.
 export const MAX_SEED = 0xffffffff;
 
-export const NO_GEAR = "none";
+const NO_GEAR = "none";
 
 const PARAM_NAMES = [
   "dev",

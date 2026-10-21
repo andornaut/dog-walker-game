@@ -5,7 +5,7 @@ import { addPixelText, type PixelTextStyle } from "./pixelText";
 
 // The sign logo's lettering: capitals with the outline and shadow baked in, so it is never
 // tinted. yellow is for dark panels; cream is for where yellow clashes.
-export type DisplayVariant = "cream" | "yellow";
+type DisplayVariant = "cream" | "yellow";
 
 const DISPLAY_FONT_KEYS: Readonly<Record<DisplayVariant, string>> = {
   cream: "font-display-cream",
@@ -41,7 +41,7 @@ export function hasDisplayFont(
   return displayFontKey(scene, variant, plainMarks(text).toUpperCase()) !== undefined;
 }
 
-export interface DisplayTextStyle extends PixelTextStyle {
+interface DisplayTextStyle extends PixelTextStyle {
   variant?: DisplayVariant;
 }
 

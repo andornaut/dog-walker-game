@@ -48,7 +48,7 @@ export type CardData = ChoiceData & Pick<GameData, "runText" | "upgrades">;
 
 // A fork's path: the zone it leads to, the upgrade it carries, and what a path card shows of
 // them.
-export interface PathView {
+interface PathView {
   readonly difficulty: Difficulty;
   readonly difficultyName: string;
   readonly fees: number;
@@ -57,13 +57,13 @@ export interface PathView {
   readonly zone: ZoneId;
 }
 
-export type OptionAvailability =
+type OptionAvailability =
   { readonly enabled: false; readonly reason: "not enough money" } | { readonly enabled: true };
 
 // One line of an option's enlarged view: one cause of one change the option would make,
 // such as the base cost or a modifier. dog is the owner whose meter changes, or null for the
 // money. text is the amount, empty on the line saying an owner fires you.
-export interface BreakdownLine {
+interface BreakdownLine {
   readonly dog: DogId | null;
   readonly name: string;
   readonly text: string;
@@ -502,7 +502,7 @@ export function chooseOption(
 
 // Applies effects that open no card, such as an instant find's, to the dogs given,
 // with the same outcome events as a card choice. Throws for an ended run.
-export function applyEffectsNow(
+function applyEffectsNow(
   data: ChoiceData,
   random: () => number,
   state: RunState,

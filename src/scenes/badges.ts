@@ -45,12 +45,12 @@ export function addBadge(
 
 // A one-shot effect's play tag centred on a point: it plays once and is removed, or with
 // reduced motion holds one still frame.
-export interface Burst {
+interface Burst {
   readonly key: string;
   readonly stillFrame: number;
 }
 
-export const CONFETTI: Burst = { key: "fx-confetti", stillFrame: 4 };
+const CONFETTI: Burst = { key: "fx-confetti", stillFrame: 4 };
 export const NEW_BEST_BURST: Burst = { key: "fx-new-best", stillFrame: 3 };
 
 export function addBurst(

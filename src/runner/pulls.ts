@@ -34,7 +34,7 @@ export type PullGeometry = Pick<
   "cell" | "laneCount" | "lens" | "packBand" | "packParts" | "roadTop" | "walkerFootY"
 >;
 
-export type PullTargetKind = "squirrel";
+type PullTargetKind = "squirrel";
 
 // The dog straining toward a target on the road, toward direction, with tellSeconds of its
 // tell to go. pullsLeft is the pulls the target still draws. blocked is set while the lane it
@@ -53,7 +53,7 @@ export interface Strain {
 }
 
 // A pull at clock time at, toward a target of kind.
-export interface LastPull {
+interface LastPull {
   readonly at: number;
   readonly direction: LaneDirection;
   readonly dog: DogId;
@@ -81,7 +81,7 @@ export interface PullEvent {
 
 // A dog that started straining this step, or whose strain was blocked, toward the side it
 // will pull.
-export interface PullTell {
+interface PullTell {
   readonly direction: LaneDirection;
   readonly dog: DogId;
   readonly kind: PullTargetKind;
