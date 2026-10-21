@@ -17,7 +17,7 @@ import {
   waveOffset,
 } from "../home/returnHome";
 import { pipLook } from "../hud/hudView";
-import { isConfirmKey } from "../input/keyBindings";
+import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { COLLAR_HEIGHT, leashHand } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
@@ -29,6 +29,7 @@ import { fillLine } from "../text/lines";
 import { addBadgeCelebration, addBurst, addCheeringFace, NEW_BEST_BURST } from "./badges";
 import { addDisplayText } from "./displayText";
 import { drawPixelLine, drawShadow, fillRect } from "./draw";
+import { onBackPressed } from "./overlay";
 import { addOwnerFigure, ownerSpriteKey } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, fitPixelText } from "./pixelText";
@@ -220,11 +221,13 @@ export class EndScene extends Scene {
 
     const button = addMenuButton(this, BUTTON, words.backHome, { available: true, primary: true });
     listenButtonTap(this, button, goHome);
+    // Back home is the page's way out, so Escape, P and back take it too.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (isConfirmKey(event.key)) {
+      if (isConfirmKey(event.key) || isPauseKey(event.key)) {
         goHome();
       }
     });
+    onBackPressed(this, goHome);
   }
 
   // The walker and the dogs still walking come up the front path, then their owners wave.

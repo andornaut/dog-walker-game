@@ -1,5 +1,5 @@
 import { exceedsTapDistance, swipeDirection } from "../input/gestures";
-import { isConfirmKey, laneDirectionForKey } from "../input/keyBindings";
+import { isConfirmKey, isPauseKey, laneDirectionForKey } from "../input/keyBindings";
 import type { Point } from "../layout/rect";
 import { helpActionAt } from "./helpLayout";
 import type { HelpAction } from "./helpPaging";
@@ -9,11 +9,11 @@ export const HELP_GESTURES = {
   tapMaxDistance: 10,
 };
 
-// The lane keys turn pages: arrows, A/D and H/L. Enter and Space press Next; Escape closes.
+// The lane keys turn pages: arrows, A/D and H/L. Enter and Space press Next; Escape or P closes.
 // A key's auto-repeat turns pages but never presses Next or closes, so a held Enter cannot
 // run through the pages and out of the help.
 export function helpActionForKey(repeat: boolean, key: string): HelpAction | undefined {
-  if (key === "Escape") {
+  if (isPauseKey(key)) {
     return repeat ? undefined : { kind: "close" };
   }
   if (isConfirmKey(key)) {

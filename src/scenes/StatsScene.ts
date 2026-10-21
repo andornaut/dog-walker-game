@@ -108,15 +108,12 @@ export class StatsScene extends Scene {
       targetAt: (x, y) => (this.detail === undefined ? this.targetAt(x, y) : "dismiss"),
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
-      if (this.detail !== undefined) {
-        if (isPauseKey(event.key) || isConfirmKey(event.key)) {
-          this.detail = undefined;
-          this.render();
-        }
+      if (isPauseKey(event.key) || isConfirmKey(event.key)) {
+        this.back();
         return;
       }
       const direction = focusDirectionForKey(event.key);
-      if (direction === "left" || direction === "right") {
+      if (this.detail === undefined && (direction === "left" || direction === "right")) {
         const index = TABS.indexOf(this.tab);
         const next = Math.min(
           TABS.length - 1,
@@ -125,11 +122,25 @@ export class StatsScene extends Scene {
         if (next !== index) {
           this.openTabAfterDip(next);
         }
-      } else if (isPauseKey(event.key) || isConfirmKey(event.key)) {
-        this.close();
       }
     });
-    listenDismiss(this, [SCREEN], () => this.close());
+    // Back closes an open badge first, as Escape does.
+    listenDismiss(
+      this,
+      [SCREEN],
+      () => this.close(),
+      () => this.back(),
+    );
+  }
+
+  // An open badge closes, else the page.
+  private back(): void {
+    if (this.detail === undefined) {
+      this.close();
+      return;
+    }
+    this.detail = undefined;
+    this.render();
   }
 
   private targetAt(x: number, y: number): Target | undefined {

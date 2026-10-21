@@ -42,12 +42,29 @@ export function onWindowEvent(scene: Scene, type: string, listener: () => void):
   scene.events.once("shutdown", () => window.removeEventListener(type, listener));
 }
 
+// Calls back on the phone's back button while scene is running, so a screen paused under an
+// overlay leaves the press to the overlay.
+export function onBackPressed(scene: Scene, back: () => void): void {
+  onWindowEvent(scene, PHONE_EVENTS.backPressed, () => {
+    if (scene.sys.isActive()) {
+      back();
+    }
+  });
+}
+
 // Closes an overlay the ways every overlay closes besides its own controls: the phone's back
 // button, and a tap outside it (listenOutsideTap) on the screen around covered, its panel and
 // any control drawn outside the panel, or on the page beside the game. A full-screen page
-// covers the screen itself, so only the page beside the game counts.
-export function listenDismiss(scene: Scene, covered: readonly Rect[], close: () => void): void {
-  onWindowEvent(scene, PHONE_EVENTS.backPressed, close);
+// covers the screen itself, so only the page beside the game counts. back is what the back
+// button does, as Escape does (isPauseKey): close unless a card is open over the overlay, which
+// closes first.
+export function listenDismiss(
+  scene: Scene,
+  covered: readonly Rect[],
+  close: () => void,
+  back: () => void = close,
+): void {
+  onBackPressed(scene, back);
   const area = screenArea(SCREEN_CONFIG, covered);
   listenOutsideTap(scene, () => area, close);
 }

@@ -12,7 +12,7 @@ const previous: HelpAction = { kind: "previous" };
 describe("helpActionForKey", () => {
   it.each<[string, boolean, Record<string, HelpAction | undefined>]>([
     [
-      "turns pages with the lane keys, presses Next with Enter and Space, closes with Escape, and ignores other keys",
+      "turns pages with lane keys, presses Next with Enter or Space, closes with Escape or P, ignores the rest",
       false,
       {
         " ": advance,
@@ -25,13 +25,14 @@ describe("helpActionForKey", () => {
         D: next,
         Enter: advance,
         Escape: close,
+        P: close,
         e: undefined,
         h: previous,
         l: next,
       },
     ],
     [
-      "keeps turning pages on a held lane key, but ignores a held Enter, Space or Escape",
+      "keeps turning pages on a held lane key, but ignores a held Enter, Space, Escape or P",
       true,
       {
         " ": undefined,
@@ -39,6 +40,7 @@ describe("helpActionForKey", () => {
         ArrowRight: next,
         Enter: undefined,
         Escape: undefined,
+        p: undefined,
       },
     ],
   ])("%s", (_name, repeat, expected) => {

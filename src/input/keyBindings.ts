@@ -26,7 +26,8 @@ export function dogSlotForKey(slotCount: number, key: string): number | undefine
   return slotNumber === undefined ? undefined : slotNumber - 1;
 }
 
-// Escape or P opens the pause menu, and closes it again.
+// Escape or P opens the pause menu, and closes it again. Over any other overlay or card it
+// closes that, one level at a time, as the phone's back button does.
 export function isPauseKey(key: string): boolean {
   return key === "Escape" || key.toLowerCase() === "p";
 }

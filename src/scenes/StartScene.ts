@@ -74,7 +74,7 @@ import { tapWalker, walkerOrder, walkerTile } from "../home/walkers";
 import { downTail } from "../hud/moments";
 import { STRIP, stripIconFallback, stripIconKey, walkerStripItems } from "../hud/stateStrip";
 import { HOLD, type HoldPress, moveHold, releaseHold, startHold, tickHold } from "../input/hold";
-import { isConfirmKey, isMuteKey } from "../input/keyBindings";
+import { isConfirmKey, isMuteKey, isPauseKey } from "../input/keyBindings";
 import { screenArea } from "../input/outsideTap";
 import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
@@ -106,7 +106,7 @@ import {
   SHOP_ART,
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
-import { listenOutsideTap, openOverlay } from "./overlay";
+import { listenOutsideTap, onBackPressed, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
@@ -363,8 +363,8 @@ const LAST_VISIT_BANK_KEY = "homeLastVisitBank";
 // shop; the Walker, Dogs and Pocket sections and Start walk. Buying happens only in
 // the shop: tapping the building opens it, and tapping a locked dog, gear item or the Dogs
 // band's padlock opens it on that item. Holding a dog or gear tile opens its detail card.
-// The arrow keys move a focus ring, Enter or Space picks, Escape closes a card, ? opens help,
-// S settings, L the logbook and M mutes.
+// The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
+// opens help, S settings, L the logbook and M mutes.
 export class StartScene extends Scene {
   // The last action, for the message line and the bubble.
   private action: HomeAction = { kind: "none" };
@@ -513,6 +513,12 @@ export class StartScene extends Scene {
       },
       () => this.closeOverlay(),
     );
+    // Back closes an open panel, as Escape does.
+    onBackPressed(this, () => {
+      if (this.overlay !== undefined) {
+        this.closeOverlay();
+      }
+    });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     // Badges earned on launch: a scene can pause itself only once it is running.
     this.time.delayedCall(0, () => this.celebrate([]));
@@ -542,7 +548,7 @@ export class StartScene extends Scene {
 
   private onKey(key: string): void {
     if (this.overlay !== undefined) {
-      if (key === "Escape") {
+      if (isPauseKey(key)) {
         this.closeOverlay();
       } else if (isConfirmKey(key)) {
         const stats = this.overlay.kind === "logbook";

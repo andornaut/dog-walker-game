@@ -157,24 +157,36 @@ export class ShopScene extends Scene {
       }
     });
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
-    // The top bar and the margins around the card close the shop, card and all.
-    listenDismiss(this, [PANEL], () => this.close());
+    // The top bar and the margins around the card close the shop, card and all; back closes an
+    // open card first, as Escape does.
+    listenDismiss(
+      this,
+      [PANEL],
+      () => this.close(),
+      () => this.back(),
+    );
   }
 
   private save(): SaveDocument {
     return profileSave(this);
   }
 
-  private onKey(key: string): void {
-    if (this.detail !== undefined) {
-      if (isPauseKey(key) || isConfirmKey(key)) {
-        this.detail = undefined;
-        this.render();
-      }
+  // An open card closes, else the shop.
+  private back(): void {
+    if (this.detail === undefined) {
+      this.close();
       return;
     }
-    if (isPauseKey(key)) {
-      this.close();
+    this.detail = undefined;
+    this.render();
+  }
+
+  private onKey(key: string): void {
+    if (isPauseKey(key) || (this.detail !== undefined && isConfirmKey(key))) {
+      this.back();
+      return;
+    }
+    if (this.detail !== undefined) {
       return;
     }
     const direction = focusDirectionForKey(key);
