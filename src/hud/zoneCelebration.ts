@@ -9,9 +9,9 @@ import { fillLine, fillNames } from "../text/lines";
 import { perkIconKey } from "./effectIcons";
 import { RUN_TEXT_FIELDS as FIELDS } from "./runText";
 
-// What plays between a zone's fee coins and the upgrade card, after every zone but the last:
-// the walker that zone unlocks for the first time joins, or else the walker in use cheers over
-// the zone's fees and tips.
+// What plays once a zone's fee coins have landed: the walker that zone unlocks for the first
+// time joins, or else the walker in use cheers over the zone's fees and tips. After the last
+// zone only a joining walker plays, before the end screen.
 export type ZoneCelebration =
   | { readonly kind: "newWalker"; readonly walker: WalkerId }
   | {
