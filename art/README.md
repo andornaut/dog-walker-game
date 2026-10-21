@@ -35,7 +35,7 @@ The game's pixel art, effects and sound, drawn by script, and what is left to dr
 
 ### Consistency checks
 
-- Every export uses only Endesga 32, with alpha 0 or 255, at the frame size in `inventory.md`.
+- Every export uses only Endesga 32 (plus the neutral greys in disabled and locked UI, as the style guide's palette section says), with alpha 0 or 255, at the frame size in `inventory.md`.
 - Check proportion, outline and contrast on every zone's road colour in the script's `preview` and the `/art/` gallery, and road objects in a projected 360×560 view (`npm run art:depth-preview -- <key> [zone]`).
 - Run `npm run check:art` and `npm run art:manifest -- --check` before committing.
 

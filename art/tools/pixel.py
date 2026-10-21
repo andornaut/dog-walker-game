@@ -28,6 +28,12 @@ DARKER = dict(p.split(":") for p in (
     "8b9bb4:5a6988 5a6988:3a4466 3a4466:262b44 262b44:181425 181425:181425 ff0044:a22633 68386c:3e2731 "
     "b55088:68386c f6757a:b55088 e8b796:c28569 c28569:b86f50"
 ).split())
+# The neutral greys, outside Endesga 32 and allowed only for disabled and locked UI (a disabled tile,
+# button, slider or knob, a locked item's well): the neutral counterparts of lgrey, grey, slate and
+# dslate. Ink stays the darkest step.
+NEUTRAL = dict(nlgrey="d8d8d8", ngrey="a4a4a4", nslate="727272", ndslate="4a4a4a")
+K.update(NEUTRAL)
+DARKER.update({"d8d8d8": "a4a4a4", "a4a4a4": "727272", "727272": "4a4a4a", "4a4a4a": "181425"})
 # The road colours: Elm Avenue (dark), then Fairview Park, Main Street and The Long Way Home (light).
 ROADS = ("3a4466", "e4a672", "f6757a", "c28569")
 
@@ -225,11 +231,14 @@ def _lua(tags, out):
             frames.append("{" + ",".join(pts) + "}")
             durations.append(str(d / 1000))
         n += len(fs)
+    # A sprite drawn in the neutral greys carries them after Endesga 32 in its palette.
+    used = {c for _, fs, _ in tags for f in fs for row in f for c in row if c}
+    colours = PALETTE + [c for c in NEUTRAL.values() if used & set(NEUTRAL.values())]
     palette = "\n".join(
         f"pal:setColor({i}, Color{{ r = {int(c[0:2], 16)}, g = {int(c[2:4], 16)}, b = {int(c[4:6], 16)} }})"
-        for i, c in enumerate(PALETTE)
+        for i, c in enumerate(colours)
     )
-    return LUA.format(w=w, h=h, ncolors=len(PALETTE), palette=palette, frames="{" + ",\n".join(frames) + "}",
+    return LUA.format(w=w, h=h, ncolors=len(colours), palette=palette, frames="{" + ",\n".join(frames) + "}",
                       durations="{" + ",".join(durations) + "}", tags="\n".join(tag_lines), out=out)
 
 

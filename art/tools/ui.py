@@ -10,7 +10,7 @@ outlined with icon_edge); ui-panel, ui-hint
 (24x24 nine-slices, 8px corners), ui-hint-tail (8x6), ui-new-best (72x20 ribbon, text
 baked in with font-title); the home screen's ui-detail-card (24x24
 nine-slice, 8px corners), ui-detail-band (24x22 three-slice, 8px caps) and
-ui-detail-well (68x68) and ui-detail-well-locked (68x68, grey, for an item not owned); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
+ui-detail-well (68x68) and ui-detail-well-locked (68x68, neutral grey, for an item not owned); the walker section's ui-cork (32x32 seamless corkboard tile), the dogs section's ui-plaid (16x16 seamless tartan tile), the Pocket section's ui-denim (16x16 seamless twill tile), ui-stitch-h (8x2)
 and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the run screen's ui-strip-well (24x24
 nine-slice, the state strip's tab), ui-quip (24x24 nine-slice, 8px corners), ui-quip-name (12x12 three-slice, 4px caps, the speaking
 owner's name plate), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
@@ -409,15 +409,15 @@ def panel():
 # face's top highlight. normal is the chrome's cream, selected the gold of ui-section's complete
 # state, go the one primary action on a screen, disabled a flat grey with no lip.
 STATES = {"normal": ("cream", "tan", "white"), "selected": ("yellow", "amber", None),
-          "go": ("green", "forest", "yellow"), "disabled": ("grey", None, None)}
+          "go": ("green", "forest", "yellow"), "disabled": ("ngrey", None, None)}
 
 
 def button(state):
     """24x24 nine-slice, 3px top and sides and a 5px bottom: a face in a 1px ink line on its lip,
     in one of the interaction states (STATES). normal and pressed are the cream standard button,
     plum label (9.42:1); go and go-pressed the primary action, one per screen, ink label on green
-    (8.41:1); disabled and go-disabled are the same flat grey face sunk to the pressed depth with
-    no lip or highlight, dslate label (3.39:1; inactive, so exempt). secondary and
+    (8.41:1); disabled and go-disabled are the same flat ngrey face sunk to the pressed depth with
+    no lip or highlight, ndslate label (3.56:1; inactive, so exempt). secondary and
     secondary-pressed are copies of normal and pressed, kept so frame numbers hold.
     Raised, row 0 is ink, row 1 the highlight, the face runs to row 18, the lip fills rows 19 to
     22 and ink row 23. Sunk, rows 0 and 1 are clear, row 2 is ink and the face fills rows 3 to
@@ -445,8 +445,8 @@ def tile(state):
     interaction states. normal is the chrome: ink and plum lines, cream face, a tan lip 2px deep
     at the bottom and 1px at the right. selected is the gold of ui-section's complete state: an
     ink line, a 1px amber band and an orange line round a yellow face on a 1px amber lip.
-    disabled (locked and not affordable, the pack full, not available) is flat: an ink line, a
-    slate line and a grey face with no lip. Content sits from 3px in."""
+    disabled (not owned and short, the pack full, not available) is flat in the neutral greys: an
+    ink line, an nslate line and an ngrey face with no lip. Content sits from 3px in."""
     face, lip, _ = STATES[state]
     g = Grid(TILE, TILE)
     if state == "selected":
@@ -458,7 +458,7 @@ def tile(state):
         g.rect(3, TILE - 4, TILE - 6, 1, lip)
         g.rect(TILE - 4, 3, 1, TILE - 6, lip)
         return g
-    chrome(g, 0, 0, TILE, TILE, face=face, lip=lip or face, line="slate" if lip is None else "plum")
+    chrome(g, 0, 0, TILE, TILE, face=face, lip=lip or face, line="nslate" if lip is None else "plum")
     if lip:
         g.rect(2, TILE - 4, TILE - 4, 1, lip)
     return g
@@ -512,9 +512,9 @@ def slider_track(filled, on=True):
     cream. filled is a solid forest bar in a plum rim the full 10px tall; empty is a hollow plum
     groove 6px tall in rows 2 to 7, so the level reads by height and fill as well as colour. The
     plum rim holds 9.42:1 on cream and forest 5.39:1. Muted (on false), both keep their shapes
-    in slate and grey."""
+    in the neutral greys."""
     rim, face, hi, sh, inner = ("plum", "forest", "dgreen", "teal", "tan") if on else \
-        ("slate", "grey", "lgrey", "slate", "lgrey")
+        ("nslate", "ngrey", "nlgrey", "nslate", "nlgrey")
     g = Grid(24, 10)
     if filled:
         g.rect(1, 0, 22, 10, rim)
@@ -536,7 +536,7 @@ def slider_knob(state):
     face. Disabled while sound is muted."""
     rim, face, sh, grip = {"normal": ("plum", "cream", "tan", "brown"),
                            "pressed": ("plum", "yellow", "amber", "orange"),
-                           "disabled": ("slate", "lgrey", "grey", "grey")}[state]
+                           "disabled": ("nslate", "nlgrey", "ngrey", "ngrey")}[state]
     top = 2 if state == "pressed" else 0
     g = Grid(10, 16)
     g.rect(1, top, 8, 16 - top, rim)
@@ -903,16 +903,16 @@ def detail_well():
 
 
 def detail_well_locked():
-    """68x68: ui-detail-well for an item not owned, in the disabled tile's flat greys: ink and slate
-    lines round a grey recess shaded dslate under its top and left edges. The game draws the
-    portrait's navy silhouette at 2,2 (4.93:1 on grey), never the portrait."""
+    """68x68: ui-detail-well for an item not owned, in the disabled tile's neutral greys: ink and
+    nslate lines round an ngrey recess shaded ndslate under its top and left edges. The game draws
+    the portrait's ink silhouette at 2,2 (7.23:1 on ngrey), never the portrait."""
     g = Grid(68, 68)
     g.rect(1, 0, 66, 68, "ink")
     g.rect(0, 1, 68, 66, "ink")
-    g.rect(1, 1, 66, 66, "slate")
-    g.rect(2, 2, 64, 64, "grey")
-    g.rect(2, 2, 64, 1, "dslate")
-    g.rect(2, 2, 1, 64, "dslate")
+    g.rect(1, 1, 66, 66, "nslate")
+    g.rect(2, 2, 64, 64, "ngrey")
+    g.rect(2, 2, 64, 1, "ndslate")
+    g.rect(2, 2, 1, 64, "ndslate")
     return g
 
 
