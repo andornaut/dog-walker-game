@@ -1,8 +1,6 @@
 import type { HomeText } from "../data/types";
 import { type FieldTable, fillNames } from "../text/lines";
 
-export { placeholders } from "../text/lines";
-
 type LineKey = { [K in keyof HomeText]: HomeText[K] extends string ? K : never }[keyof HomeText];
 
 // The {name}s each home text line may use; a group's table lists only its lines with names.
