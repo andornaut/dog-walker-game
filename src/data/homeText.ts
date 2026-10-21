@@ -26,6 +26,8 @@ export const HOME_TEXT = {
     gearSubtitle: "Gear",
     priceBuy: "Price {price}, tap to buy",
     priceLocked: "Price {price}, locked",
+    walkerStatus: "Your walker",
+    walkerSubtitle: "Walker",
   },
   dogBought: "{dog} joins your clients!",
   dogCantAfford: "Save {amount} more for {dog}.",

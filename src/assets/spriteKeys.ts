@@ -8,6 +8,7 @@ import type {
   MinorObstacleId,
   MovementKind,
   NeedSpotId,
+  WalkerId,
   Zone,
 } from "../data/types";
 import type { CardSource } from "../state/runState";
@@ -73,6 +74,11 @@ export function dogFaceKey(data: Pick<GameData, "dogs">, dog: DogId): string {
 // A dog's 64x64 portrait, for the shop and its detail card.
 export function dogPortraitKey(data: Pick<GameData, "dogs">, dog: DogId): string {
   return `portrait-dog-${data.dogs[dog].art}`;
+}
+
+// A walker's 64x64 portrait, for its detail card.
+export function walkerPortraitKey(walker: WalkerId): string {
+  return `portrait-walker-${walker}`;
 }
 
 // An achievement's 32x32 badge, tagged earned and locked.

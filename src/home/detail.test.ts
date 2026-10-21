@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { WalkerId } from "../data/types";
 import { effectText } from "../rules/effectText";
 import { cents } from "../rules/units";
+import { walkerGoal } from "../rules/walkers";
 import type { Owned } from "../save/schema";
 import { TEST_TUNING } from "../testing/tuning";
-import { dogDetail, gearDetail } from "./detail";
+import { dogDetail, gearDetail, walkerDetail } from "./detail";
+import { homeLine } from "./homeText";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
@@ -62,5 +65,35 @@ describe("gearDetail", () => {
   it("shows a locked item's price", () => {
     const card = gearDetail(data, owned, dollars(0), { dogs: [], gear: null }, "poopBags");
     expect(card.status).toMatch(/^Price \$[\d,]+, locked$/);
+  });
+});
+
+describe("walkerDetail", () => {
+  const walkerIds = Object.keys(data.walkers) as WalkerId[];
+  const walkerOwned = (ids: WalkerId[]) => ({ walkers: ids });
+
+  it.each(walkerIds)("gives %s's name, description and owned status when owned", (walker) => {
+    const card = walkerDetail(data, walkerOwned([walker]), walker);
+    expect(card).toEqual({
+      lines: data.walkers[walker].detail ?? [],
+      locked: false,
+      status: data.homeText.detail.walkerStatus,
+      subtitle: data.homeText.detail.walkerSubtitle,
+      title: data.walkers[walker].name,
+    });
+  });
+
+  it.each(walkerIds)("gives %s's unlock goal when locked", (walker) => {
+    const card = walkerDetail(data, walkerOwned([]), walker);
+    const { name } = data.walkers[walker];
+    expect(card.locked).toBe(true);
+    expect(card.title).toBe(name);
+    expect(card.lines).toEqual(data.walkers[walker].detail ?? []);
+    expect(card.status).toBe(
+      homeLine(data.homeText, "walkerLocked", {
+        walker: name,
+        zone: String(walkerGoal(data.walkers[walker])),
+      }),
+    );
   });
 });

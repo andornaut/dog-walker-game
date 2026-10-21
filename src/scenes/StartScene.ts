@@ -3,7 +3,13 @@ import { type GameObjects, Scene, type Time } from "phaser";
 import { itemAt } from "../arrays";
 import { animationKey } from "../assets/asepriteAnimations";
 import { MONEY_ICON_KEY, quirkIconKey, temperamentIconKey, traitIconKey } from "../assets/iconKeys";
-import { dogFaceKey, dogPortraitKey, dogSpriteKey, gearIconKey } from "../assets/spriteKeys";
+import {
+  dogFaceKey,
+  dogPortraitKey,
+  dogSpriteKey,
+  gearIconKey,
+  walkerPortraitKey,
+} from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId, GearId, Size, TraitId, WalkerId } from "../data/types";
@@ -11,7 +17,7 @@ import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
 import { bubbleRect } from "../home/bubbleRect";
-import { dogDetail, gearDetail } from "../home/detail";
+import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "../home/detail";
 import {
   badgePopOffset,
   bobOffset,
@@ -212,6 +218,11 @@ function gearIds(): GearId[] {
   return Object.keys(gameData.shopGear) as GearId[];
 }
 
+type DetailTarget =
+  | { dog: DogId; kind: "dog" }
+  | { gear: GearId; kind: "gear" }
+  | { kind: "walker"; walker: WalkerId };
+
 type Target =
   | { dog: DogId; kind: "dog" }
   | { gear: GearId; kind: "gear" }
@@ -310,7 +321,7 @@ type Overlay =
   | {
       kind: "detail";
       rect: Rect | undefined;
-      target: { dog: DogId; kind: "dog" } | { gear: GearId; kind: "gear" };
+      target: DetailTarget;
     }
   | {
       badges: Rect | undefined;
@@ -444,7 +455,7 @@ export class StartScene extends Scene {
         this.pressedTarget = this.targetAt(pointer.x, pointer.y);
         const kind = this.pressedTarget?.kind;
         this.hold =
-          kind === "dog" || kind === "gear"
+          kind === "dog" || kind === "gear" || kind === "walker"
             ? startHold(HOLD, { x: pointer.x, y: pointer.y }, this.time.now)
             : undefined;
         this.press =
@@ -596,7 +607,7 @@ export class StartScene extends Scene {
   }
 
   private openDetail(target: Target): void {
-    if (target.kind !== "dog" && target.kind !== "gear") {
+    if (target.kind !== "dog" && target.kind !== "gear" && target.kind !== "walker") {
       return;
     }
     this.press = undefined;
@@ -1115,20 +1126,38 @@ export class StartScene extends Scene {
       return;
     }
     const { target } = overlay;
-    const card =
-      target.kind === "dog"
-        ? dogDetail(gameData, save.owned, save.bankCents, save.stats, target.dog)
-        : gearDetail(gameData, save.owned, save.bankCents, this.loadout, target.gear);
-    const picture: DetailPicture =
-      target.kind === "dog"
-        ? {
-            badge: quirkIconKey(gameData, target.dog),
-            key: dogPortraitKey(gameData, target.dog),
-            scale: 1,
-          }
-        : { key: gearIconKey(target.gear), scale: 2 };
+    const card = this.detailCard(save, target);
+    const picture = this.detailPicture(target);
     const rect = drawDetailCard(this, layer, this.closePressed(), card, picture, target.kind);
     this.overlay = { ...overlay, rect };
+  }
+
+  private detailCard(save: SaveDocument, target: DetailTarget): DetailCard {
+    if (target.kind === "dog") {
+      return dogDetail(gameData, save.owned, save.bankCents, save.stats, target.dog);
+    }
+    if (target.kind === "gear") {
+      return gearDetail(gameData, save.owned, save.bankCents, this.loadout, target.gear);
+    }
+    return walkerDetail(gameData, save.owned, target.walker);
+  }
+
+  private detailPicture(target: DetailTarget): DetailPicture {
+    if (target.kind === "dog") {
+      return {
+        badge: quirkIconKey(gameData, target.dog),
+        key: dogPortraitKey(gameData, target.dog),
+        scale: 1,
+      };
+    }
+    if (target.kind === "gear") {
+      return { key: gearIconKey(target.gear), scale: 2 };
+    }
+    return {
+      fallback: gameData.walkers[target.walker].portraitKey,
+      key: walkerPortraitKey(target.walker),
+      scale: 1,
+    };
   }
 
   // A container for one tappable tile, registered for its feedback.

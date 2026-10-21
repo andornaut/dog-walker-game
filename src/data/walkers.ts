@@ -52,6 +52,7 @@ export const WALKER_STYLES = {
 // manifest.
 export const WALKERS = {
   ada: {
+    detail: ["Walks fast, with more to meet each second.", "Charms owners, so they start happier."],
     name: "Ada",
     pace: "fast",
     portraitKey: "face-walker-ada",
@@ -61,6 +62,7 @@ export const WALKERS = {
     zone: 2,
   },
   ben: {
+    detail: ["Walks slow, with more time to react.", "Hustles for tips, so more appear."],
     name: "Ben",
     pace: "slow",
     portraitKey: "face-walker-ben",
@@ -70,6 +72,7 @@ export const WALKERS = {
     zone: 1,
   },
   casey: {
+    detail: ["Walks slow, with more time to react.", "Charms owners, so they start happier."],
     name: "Casey",
     pace: "slow",
     portraitKey: "face-walker-casey",
@@ -78,6 +81,7 @@ export const WALKERS = {
     unlock: "start",
   },
   trista: {
+    detail: ["Walks fast, with more to meet each second.", "Hustles for tips, so more appear."],
     name: "Trista",
     pace: "fast",
     portraitKey: "face-walker-trista",

@@ -496,6 +496,8 @@ export interface WalkerTrait {
 // A walker the player can pick, walking with the effects of its pace and style. spriteKey and
 // portraitKey are keys into the art manifest.
 export type Walker = WalkerUnlock & {
+  // Lines shown in the body of the walker's detail card.
+  readonly detail?: readonly string[];
   readonly name: string;
   readonly pace: WalkerPace;
   readonly style: WalkerStyle;
@@ -606,6 +608,8 @@ export interface HomeText {
     readonly gearSubtitle: string;
     readonly priceBuy: string;
     readonly priceLocked: string;
+    readonly walkerStatus: string;
+    readonly walkerSubtitle: string;
   };
   readonly dogBought: string;
   readonly dogCantAfford: string;

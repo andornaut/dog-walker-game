@@ -1,4 +1,4 @@
-import type { DogId, GameData, GearId, HomeText } from "../data/types";
+import type { DogId, GameData, GearId, HomeText, WalkerId } from "../data/types";
 import {
   capitalize,
   effectText,
@@ -8,11 +8,12 @@ import {
   TRAIT_NAMES,
 } from "../rules/effectText";
 import type { Cents } from "../rules/units";
+import { walkerGoal } from "../rules/walkers";
 import type { Owned, SaveStats } from "../save/schema";
 import { ZERO_DOG_STATS } from "../save/stats";
 import { fillLine } from "../text/lines";
 import { dogFeeText, dollarText, type HomeLoadout, purchasePrice } from "./home";
-import { HOME_TEXT_FIELDS } from "./homeText";
+import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
 
 type DetailData = Pick<
   GameData,
@@ -25,6 +26,7 @@ type DetailData = Pick<
   | "quirks"
   | "shopGear"
   | "tuning"
+  | "walkers"
 >;
 
 // What a held dog or gear tile's detail card says: a title, a line under it, rows of
@@ -111,5 +113,25 @@ export function gearDetail(
     status: priceLine(text, cost, bank) ?? status,
     subtitle: text.gearSubtitle,
     title: item.name,
+  };
+}
+
+// A walker's description lines from the data. An owned walker's status says so; one not owned
+// is locked, and its status is the zone that unlocks it.
+export function walkerDetail(
+  data: DetailData,
+  owned: Pick<Owned, "walkers">,
+  walker: WalkerId,
+): DetailCard {
+  const { detail, name } = data.walkers[walker];
+  const text = data.homeText;
+  const has = owned.walkers.includes(walker);
+  const zone = String(walkerGoal(data.walkers[walker]));
+  return {
+    lines: detail ?? [],
+    locked: !has,
+    status: has ? text.detail.walkerStatus : homeLine(text, "walkerLocked", { walker: name, zone }),
+    subtitle: text.detail.walkerSubtitle,
+    title: name,
   };
 }

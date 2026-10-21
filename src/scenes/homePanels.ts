@@ -104,10 +104,13 @@ function drawCardFrame(
   return content;
 }
 
-// What a detail card shows in its well: a dog's portrait or a gear item's icon, by key.
+// What a detail card shows in its well: a dog's or walker's portrait or a gear item's icon.
 export interface DetailPicture {
   // A dog's 16x16 quirk icon, drawn beside the portrait under the status where the art has it.
   readonly badge?: string;
+  // Drawn centred in the well at 1x while key has no texture, such as a walker's face before
+  // its portrait is drawn.
+  readonly fallback?: string;
   readonly key: string;
   // Drawn at this whole-number scale: 1 for a 64x64 portrait, 2 for a 32x32 icon.
   readonly scale: number;
@@ -115,7 +118,7 @@ export interface DetailPicture {
 
 const LINE_GAP = 8;
 
-// A held dog's or gear item's detail card over a dim layer. A dog's card puts its breed and
+// A held dog's, walker's or gear item's detail card over a dim layer. A dog's or walker's card puts its breed and
 // status beside the portrait and its rows below; a gear card is shorter, with its effect and
 // status beside the icon. Returns the card's rect, so a tap outside it or on its close
 // control closes it.
@@ -125,10 +128,10 @@ export function drawDetailCard(
   closePressed: boolean,
   card: DetailCard,
   picture: DetailPicture,
-  kind: "dog" | "gear",
+  kind: "dog" | "gear" | "walker",
 ): Rect {
   const rect =
-    kind === "dog"
+    kind !== "gear"
       ? DOG_CARD
       : {
           ...DOG_CARD,
@@ -153,6 +156,8 @@ export function drawDetailCard(
     content.add(
       scene.add.image(inner.x, inner.y, picture.key).setOrigin(0).setScale(picture.scale),
     );
+  } else if (picture.fallback !== undefined && scene.textures.exists(picture.fallback)) {
+    content.add(scene.add.image(well.x + well.size / 2, well.y + well.size / 2, picture.fallback));
   }
   const besideX = well.x + well.size + 10;
   const beside = (rows: readonly { color: number; value: string }[], top: number): number => {
