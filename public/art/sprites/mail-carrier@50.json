@@ -1,50 +1,50 @@
 { "frames": {
    "mail-carrier@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 28, "h": 42 },
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
-    "sourceSize": { "w": 28, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
     "duration": 100
    },
    "mail-carrier@50 1.aseprite": {
-    "frame": { "x": 28, "y": 0, "w": 28, "h": 42 },
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
-    "sourceSize": { "w": 28, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
     "duration": 100
    },
    "mail-carrier@50 2.aseprite": {
-    "frame": { "x": 56, "y": 0, "w": 28, "h": 42 },
+    "frame": { "x": 48, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
-    "sourceSize": { "w": 28, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
     "duration": 100
    },
    "mail-carrier@50 3.aseprite": {
-    "frame": { "x": 84, "y": 0, "w": 28, "h": 42 },
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
-    "sourceSize": { "w": 28, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
     "duration": 100
    },
    "mail-carrier@50 4.aseprite": {
-    "frame": { "x": 112, "y": 0, "w": 28, "h": 42 },
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
-    "sourceSize": { "w": 28, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
     "duration": 400
    },
    "mail-carrier@50 5.aseprite": {
-    "frame": { "x": 140, "y": 0, "w": 28, "h": 42 },
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 42 },
-    "sourceSize": { "w": 28, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 36 },
+    "sourceSize": { "w": 24, "h": 36 },
     "duration": 400
    }
  },
@@ -53,7 +53,7 @@
   "version": "1.2.30-x64",
   "image": "mail-carrier@50.png",
   "format": "RGBA8888",
-  "size": { "w": 168, "h": 42 },
+  "size": { "w": 144, "h": 36 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },

@@ -1,34 +1,34 @@
 { "frames": {
    "fx-status-stinky 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 22, "h": 22 },
+    "frame": { "x": 0, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 22, "h": 22 },
-    "sourceSize": { "w": 22, "h": 22 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
     "duration": 180
    },
    "fx-status-stinky 1.aseprite": {
-    "frame": { "x": 22, "y": 0, "w": 22, "h": 22 },
+    "frame": { "x": 19, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 22, "h": 22 },
-    "sourceSize": { "w": 22, "h": 22 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
     "duration": 180
    },
    "fx-status-stinky 2.aseprite": {
-    "frame": { "x": 44, "y": 0, "w": 22, "h": 22 },
+    "frame": { "x": 38, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 22, "h": 22 },
-    "sourceSize": { "w": 22, "h": 22 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
     "duration": 180
    },
    "fx-status-stinky 3.aseprite": {
-    "frame": { "x": 66, "y": 0, "w": 22, "h": 22 },
+    "frame": { "x": 57, "y": 0, "w": 19, "h": 19 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 22, "h": 22 },
-    "sourceSize": { "w": 22, "h": 22 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 19, "h": 19 },
+    "sourceSize": { "w": 19, "h": 19 },
     "duration": 180
    }
  },
@@ -37,7 +37,7 @@
   "version": "1.2.30-x64",
   "image": "fx-status-stinky.png",
   "format": "RGBA8888",
-  "size": { "w": 88, "h": 22 },
+  "size": { "w": 76, "h": 19 },
   "scale": "1",
   "frameTags": [
    { "name": "loop", "from": 0, "to": 3, "direction": "forward" }

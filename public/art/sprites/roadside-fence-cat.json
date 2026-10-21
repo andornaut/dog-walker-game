@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-fence-cat.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 175, "h": 70 },
+    "frame": { "x": 0, "y": 0, "w": 150, "h": 60 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 175, "h": 70 },
-    "sourceSize": { "w": 175, "h": 70 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 60 },
+    "sourceSize": { "w": 150, "h": 60 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-fence-cat.png",
   "format": "RGBA8888",
-  "size": { "w": 175, "h": 70 },
+  "size": { "w": 150, "h": 60 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

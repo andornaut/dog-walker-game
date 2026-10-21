@@ -43,22 +43,22 @@ fx-need-met        48x48  regular, playful, friendly, nosy, thirsty (6 frames, 7
                           round bubble pops up with the need's icon baked in, swells, hearts and
                           sparkles fly out, then it bursts into droplets. Bottom-centre on the
                           dog's feet
-fx-accident        56x56  play (6 frames, 100ms)  a "!" pops over the dog, blush lines and a
+fx-accident        48x48  play (6 frames, 100ms)  a "!" pops over the dog, blush lines and a
                           sweat drop come and stay, and a small pile plops out behind. Laid on the
-                          dog's own 56x56 frame; the game then leaves accident-spot on the road
+                          dog's own 48x48 frame; the game then leaves accident-spot on the road
 accident-spot      16x16  idle (2 frames, 500ms)  the pile left behind, a ground decal with no
                           outline drawn under everything, a fly circling it
-spot-tree          56x84  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
+spot-tree          48x72  idle (4 frames, 450ms)  a street tree on a grass patch (Regular); the
                           canopy rustles, then a leaf falls
-spot-stranger      56x84  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
+spot-stranger      48x72  idle (2 frames, 400ms)  a friendly stranger facing the player, one hand
                           up in a wave, breathing (Friendly)
                           wave (2 frames, 300ms)  the raised hand waves
-spot-lamp-post     56x84  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
+spot-lamp-post     48x72  idle (2 frames, 500ms)  a street lamp with an amber lantern; a sheen
                           crosses the glass (Nosy)
-spot-water-bowl    56x56  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
+spot-water-bowl    48x48  idle (4 frames, 350ms)  a red dog bowl under a tap: a drop forms,
                           falls and rings the water (Thirsty)
-                          The spots are drawn in 32px units on a minis.Mini at BIG (1.75x), so a
-                          32x48 drawing is 56x84, its pixel maps stamped pixel for pixel
+                          The spots are drawn in 32px units on a minis.Mini at BIG (1.5x), so a
+                          32x48 drawing is 48x72, its pixel maps stamped pixel for pixel
 spot-<spot>@<step>  every spot redrawn the same way at BIG x each depth step in minis.STEPS (from
                    shared/depth-steps.json), floor(size x scale + 0.5): the same tags, frames and
                    durations, a full 1px outline, motion kept at 1px; below 1x the bowl drops its
@@ -419,7 +419,9 @@ PILE_SMALL = ["..TB..", ".TBBD.", "DDDDD."]
 
 
 # fx-accident's frame: the dog road sprite's (dogs.ROAD_SIZE), so it lays over the dog's own frame.
-ACCIDENT = 56
+ACCIDENT = 48
+# The row the pile's last row sits on: the dogs' feet row in their 48x48 frame.
+ACCIDENT_FEET = 46
 # The sweat drop, as fx-status-spooked's at full size: c cyan, w white glint, s sky underside.
 ACCIDENT_DROP = [".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."]
 
@@ -427,27 +429,27 @@ ACCIDENT_DROP = [".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."]
 def accident(step):
     """Laid over the dog's own frame: a "!" pops up at the head's right, then two pink blush strokes on
     each side of the head and a sweat drop slide in and stay, and a small pile plops out behind the right hind
-    paw, its last row on row 53 by the dogs' feet."""
+    paw, its last row on ACCIDENT_FEET by the dogs' feet."""
     g = Grid(ACCIDENT, ACCIDENT)
     if step in (0, 1, 2, 3):
         def mark(p):
-            h = (4, 7, 7, 6)[step]
-            p.rect(47, 13 - h, 3, h, "red")
-            p.rect(47, 14, 3, 3, "red")
-            p.p(47, 13 - h, "pink")
+            h = (4, 6, 6, 5)[step]
+            p.rect(40, 11 - h, 3, h, "red")
+            p.rect(40, 12, 3, 3, "red")
+            p.p(40, 11 - h, "pink")
         piece(g, mark, size=ACCIDENT)
     if step >= 1:
         lift = 1 if step in (2, 4) else 0
-        for x0 in (5, 37):
-            piece(g, lambda p: [p.p(x0 + d + k, 21 + lift - k, "pink") for d in (0, 4) for k in range(3)],
+        for x0 in (4, 32):
+            piece(g, lambda p: [p.p(x0 + d + k, 18 + lift - k, "pink") for d in (0, 4) for k in range(3)],
                   size=ACCIDENT)
     if step >= 2:
         slide = min(step - 2, 2)
-        piece(g, lambda p: bitmap(p, 8, 4 + slide, ACCIDENT_DROP, {"c": "cyan", "w": "white", "s": "sky"}), "navy",
+        piece(g, lambda p: bitmap(p, 7, 3 + slide, ACCIDENT_DROP, {"c": "cyan", "w": "white", "s": "sky"}), "navy",
               size=ACCIDENT)
     if step >= 3:
         rows = PILE_SMALL if step == 3 else PILE
-        piece(g, lambda p: bitmap(p, 37, 54 - len(rows), rows, {"B": "brown", "D": "dbrown", "T": "tan"}),
+        piece(g, lambda p: bitmap(p, 32, ACCIDENT_FEET + 1 - len(rows), rows, {"B": "brown", "D": "dbrown", "T": "tan"}),
               size=ACCIDENT)
     return g
 
@@ -638,7 +640,7 @@ def shrunk(module, s, draw, q):
     return small(module, s, lambda: draw(**{k: v / s if k in MOTION else v for k, v in q.items()}))
 
 
-# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 56x84,
+# The spots are drawn in the 32px units of the old road sprites, BIG times larger: a 32x48 drawing is 48x72,
 # the people's size, which the stranger is drawn at too.
 BIG = road.SCALE
 # The pose arguments that move a whole part by pixels.

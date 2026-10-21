@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-bike@62.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 53, "h": 35 },
+    "frame": { "x": 0, "y": 0, "w": 45, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 53, "h": 35 },
-    "sourceSize": { "w": 53, "h": 35 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 45, "h": 30 },
+    "sourceSize": { "w": 45, "h": 30 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-bike@62.png",
   "format": "RGBA8888",
-  "size": { "w": 53, "h": 35 },
+  "size": { "w": 45, "h": 30 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

@@ -2,14 +2,14 @@
 """Draw everything on the road except the dogs, and build its Aseprite sources and exports.
 
 People (walkers, forced stops, lucky people, the thief and the other dog's owner)
-are 56x84, the other dog, skunk and squirrel 56x56, the stop sign 56x84 and the
-pickups 28x28: their drawing functions lay them out on 32x48, 32x32 and 16x16, and
-sprites() draws them SCALE (1.75) times bigger on a scaling grid, never upscaled.
-The bark pop is 16x16. The ice cream truck (120x77, two lanes, 64n-8 wide) and the
-construction barrier (64x56, one whole lane, repeated across the road) are drawn in
+are 48x72, the other dog, skunk and squirrel 48x48, the stop sign 48x72 and the
+pickups 24x24: their drawing functions lay them out on 32x48, 32x32 and 16x16, and
+sprites() draws them SCALE (1.5) times bigger on a scaling grid, never upscaled.
+The bark pop is 16x16. The ice cream truck (112x66, two lanes, 64n-16 wide) and the
+construction barrier (64x48, one whole lane, repeated across the road) are drawn in
 their own pixels at 104x55 and 64x40 on a grid that scales their columns to the
-lanes and their rows ROW_SCALE (1.4) times; the puddle (120x56) is drawn in its own
-pixels; the skunk's stink haze (120x70) is a ground decal laid out on an 88x40 design
+lanes and their rows ROW_SCALE (1.2) times; the puddle (112x48) is drawn in its own
+pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
 dogs, except in wave; everything coming down the road faces the player.
@@ -17,9 +17,9 @@ dogs, except in wave; everything coming down the road faces the player.
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
 as the back view, the left arm (screen right) raised and swinging from the shoulder, the hand
-1, 3, 5 and 3px right of it. At rest (idle frame 0) a 56x84 walker's feet (the outline under the
-shoes) are on row 79 (Ada's on row 80), and the hands' top rows 23 above them, their outer columns
-19 left and 18 right of the centre column (x 28). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
+1, 3, 5 and 3px right of it. At rest (idle frame 0) a 48x72 walker's feet (the outline under the
+shoes) are on row 68 (Ada's on row 69), and the hands' top rows 20 above them, their outer columns
+16 left and 16 right of the centre column (x 24). Then cheer (4 frames, 120ms, looping), drawn at 2x in the
 zone celebration: the front view with the hanging arm taken off and both arms raised from the
 shoulders in a V, the hands 1, 3, 4 and 3 design pixels out; a 2px crouch, a hop 2px and 3px up,
 then a 1px landing. Trista's tote stays on her shoulder. What stands on the road
@@ -118,15 +118,15 @@ LIT = dict(navy=("grey", "slate"), ink=("grey", "slate"), dslate=("grey", "slate
 
 
 # Road sprites are drawn SCALE times the size their drawing functions lay them out at: a person laid out on
-# 32x48, an animal on 32x32 and a pickup on 16x16 export at 56x84, 56x56 and 28x28. sprites() runs the functions
+# 32x48, an animal on 32x32 and a pickup on 16x16 export at 48x72, 48x48 and 24x24. sprites() runs the functions
 # on minis.Mini, which scales every shape before it rasterizes and keeps 1px lines 1px, so nothing is upscaled;
 # the depth variants (minis.py, depths.py) run them at SCALE times each depth step.
-SCALE = 1.75
+SCALE = 1.5
 # The ice cream truck and the construction barrier are drawn in their own pixels at 104x55 and 64x40, then on
-# a minis.Mini that scales their columns to their lanes (64n-8 across n lanes, a whole lane for the barrier)
+# a minis.Mini that scales their columns to their lanes (64n-16 across n lanes, a whole lane for the barrier)
 # and their rows ROW_SCALE times.
-ROW_SCALE = 1.4
-TRUCK_SCALE = ((64 * 2 - 8) / 104, ROW_SCALE)
+ROW_SCALE = 1.2
+TRUCK_SCALE = ((64 * 2 - 16) / 104, ROW_SCALE)
 CONSTRUCTION_SCALE = (1, ROW_SCALE)
 
 
@@ -780,8 +780,8 @@ def squirrel_run(gather):
     return rim(g, LIT)
 
 
-def puddle(f, w=120, h=56):
-    """The road's 2-lane puddle, 120x56 (64n-8 wide for n = 2); cards draw a 32x16 one. Wide puddles get a
+def puddle(f, w=112, h=48):
+    """The road's 2-lane puddle, 112x48 (64n-16 wide for n = 2); cards draw a 32x16 one. Wide puddles get a
     second lobe."""
     g = Grid(w, h)
     lobes = [(w / 2, h / 2, w / 2 - 2, h / 2 - 2)]
@@ -799,7 +799,7 @@ def puddle(f, w=120, h=56):
 
 
 # The stink haze's puffs as (centre x, centre y, radius across), laid out on an 88x40 design that the sprite
-# stretches to CLOUD_SIZE (2 lanes, 64n-8 wide, by 1.75 x 40 rows). The haze hugs the road: each puff is
+# stretches to CLOUD_SIZE (2 lanes, 64n-16 wide, by 1.5 x 40 rows). The haze hugs the road: each puff is
 # CLOUD_SQUASH as tall as it is wide, so together they make a low, wide bank with a lumpy top, its base on the
 # frame's last row. A swollen puff still stops a pixel short of the frame's top and sides, so no lobe is clipped
 # flat; along the bottom the frame's last row cuts them level, where the haze meets the road.
@@ -807,7 +807,7 @@ CLOUD_PUFFS = [(44, 28, 30), (22, 31, 15), (66, 31, 15), (31, 36, 15), (57, 36, 
                (44, 14, 9), (11, 35, 9), (77, 35, 9), (19, 24, 7), (70, 24, 7)]
 CLOUD_SQUASH = 0.42
 CLOUD_W, CLOUD_H = 88, 40
-CLOUD_SIZE = (120, 70)
+CLOUD_SIZE = (112, 60)
 # Where each stink wisp starts, trailing 6 design rows down.
 CLOUD_WISPS = ((22, 25), (62, 22), (72, 30), (14, 31), (42, 17))
 # The haze's colours: the outer and inner rim, the dithered fill and its darker pixels, and the wisps.

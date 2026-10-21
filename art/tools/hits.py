@@ -5,32 +5,32 @@ and the per-dog status overlays. Bursts carry a 1px rim (plum, navy for water,
 teal for green) so they hold 3:1 on the three light roads while
 their fills carry Elm Avenue. The flash strips pair a light ink with a dark
 fringe for the same reason. The encounters' hits match their road sprites in
-encounters.py. The bursts are laid out on a 64x64 design and drawn 90/64 times
+encounters.py. The bursts are laid out on a 64x64 design and drawn 77/64 times
 bigger on a minis.Mini, so they keep 1px lines 1px; their pixel maps, twinkles
 and comic words keep their pixels.
 
-fx-hit-skunk       90x90  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
+fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
-fx-hit-puddle      90x90  play (7 frames, 70ms)  splash crown and flying drops
-fx-hit-thief       90x90  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
-fx-hit-squirrel    90x90  play (7 frames, 70ms)  tail-flick sweep, motion lines, leaves
-fx-hit-other-dog   90x90  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
-fx-hit-picnic      90x90  play (8 frames, 70ms)  a poof, sandwiches, an apple and a cheese wedge
+fx-hit-puddle      77x77  play (7 frames, 70ms)  splash crown and flying drops
+fx-hit-thief       77x77  play (8 frames, 70ms)  coins and a wallet flying up out of a poof
+fx-hit-squirrel    77x77  play (7 frames, 70ms)  tail-flick sweep, motion lines, leaves
+fx-hit-other-dog   77x77  play (8 frames, 70ms)  tangle cloud, fur tufts and hearts
+fx-hit-picnic      77x77  play (8 frames, 70ms)  a poof, sandwiches, an apple and a cheese wedge
                                                   flying up and falling, crumbs
-fx-hit-goose       90x90  play (8 frames, 70ms)  a white star, sound waves arcing out to both sides,
+fx-hit-goose       77x77  play (8 frames, 70ms)  a white star, sound waves arcing out to both sides,
                                                   feathers seesawing down
-fx-hit-petunias    90x90  play (8 frames, 70ms)  a puff of soil, clods, three whole flowers tumbling,
+fx-hit-petunias    77x77  play (8 frames, 70ms)  a puff of soil, clods, three whole flowers tumbling,
                                                   falling petals
-fx-hit-trash       90x90  play (8 frames, 70ms)  a poof, the bin lid spinning, a can, a banana peel, a
+fx-hit-trash       77x77  play (8 frames, 70ms)  a poof, the bin lid spinning, a can, a banana peel, a
                                                   fish bone and paper flying, flies buzzing round
-fx-hit-cafe        90x90  play (8 frames, 70ms)  a latte splash, the cup flipping up, drops, the foam
+fx-hit-cafe        77x77  play (8 frames, 70ms)  a latte splash, the cup flipping up, drops, the foam
                                                   heart floating up
                    every fx-hit-* also has play-word, after play: the same frames and timing with
                    its comic word over frames 0 to 5 (420ms), centred on the impact star: cafe
                    SPLAT!, goose HONK!, other-dog SNIFF!, petunias SQUISH!, picnic CHOMP!, puddle
                    SPLOSH!, skunk PEE-YEW!, squirrel CHITTER!, thief YOINK!, trash CLANG!. The game
                    plays play-word, and play with reduced motion
-fx-lemonade        90x90  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
+fx-lemonade        77x77  play (8 frames, 70ms)  the lucky lemonade stand: a yellow star, a cup of
                                                   lemonade popping up, lemon slices, twinkles
 ui-hit-flash-green, -sky, -amber, -mauve, -orange, -pink, -white
                    16x64  play (4 frames, 70ms)  left screen-edge strip, solid at x=0,
@@ -41,14 +41,14 @@ ui-hit-label       24x24  normal, lucky (1 frame each)  nine-slice, 8px corners:
                           stretched to 176x32 for every label; white font-title text at 2x,
                           centred, its line top 3px below the plate's top so the 10px caps sit
                           in rows 11 to 20
-fx-status-stinky   22x22  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
-fx-status-soaked   22x22  loop (4 frames, 150ms) drips falling off
+fx-status-stinky   19x19  loop (4 frames, 180ms) pink stink lines, plum-rimmed, rising over a dog's head
+fx-status-soaked   19x19  loop (4 frames, 150ms) drips falling off
 fx-status-soaked-mud, fx-status-soaked-milkshake  the same drips after the mud and milkshake
                    Splash skins: brown mud spots, cream milkshake drips, each plum-rimmed
-fx-status-spooked  22x22  loop (4 frames, 150ms) sweat drop popping, surprise lines
-fx-status-tangled  22x22  loop (4 frames, 150ms) two interlocked loops of green leash, teal-rimmed,
+fx-status-spooked  19x19  loop (4 frames, 150ms) sweat drop popping, surprise lines
+fx-status-tangled  19x19  loop (4 frames, 150ms) two interlocked loops of green leash, teal-rimmed,
                                                   working loose and tight, the loose ends swinging
-fx-status-tuckered-out  22x22  loop (4 frames, 180ms) yellow z's, plum-rimmed, rising off the head
+fx-status-tuckered-out  19x19  loop (4 frames, 180ms) yellow z's, plum-rimmed, rising off the head
                    each status also has @88 (19x19), @75 (17x17), @62 (14x14) and @50
                    (11x11), the dogs' steps, each drawn in its own pixels, same tags and
                    timing; bottom-centre on the dog's centre column, a few pixels below the
@@ -79,11 +79,11 @@ WAVE = (0, 1, 1, 1, 0, -1, -1, -1)
 ROADS = ("3a4466", "e4a672", "c0cbdc", "c28569")
 
 
-# The bursts are laid out on a 64x64 design and drawn BURST_SCALE times bigger, 90x90, on a minis.Mini that
+# The bursts are laid out on a 64x64 design and drawn BURST_SCALE times bigger, 77x77, on a minis.Mini that
 # keeps 1px lines 1px (burst_frame). Pixel maps, twinkles, the rim and the comic word go on the drawn grid
 # pixel for pixel, at the drawn place of their design position, so they keep their pixels.
 BURST = 64
-BURST_SCALE = 90 / BURST
+BURST_SCALE = 77 / BURST
 
 
 def raster(g):
@@ -869,8 +869,8 @@ def status_stinky(size, step):
     so neighbouring rims never close the gap between them."""
     g = Grid(size, size)
     lines = {22: ((4, 0), (11, 1), (18, 0)), 19: ((3, 0), (9, 1), (15, 0)), 17: ((3, 0), (8, 1), (13, 0)),
-             14: ((3, 0), (9, 1)), 11: ((2, 0), (7, 1))}[size]
-    top, bottom = {22: (3, 20), 19: (2, 17), 17: (2, 15), 14: (1, 13), 11: (1, 10)}[size]
+             14: ((3, 0), (9, 1)), 12: ((2, 0), (8, 1)), 11: ((2, 0), (7, 1)), 10: ((2, 0), (7, 1))}[size]
+    top, bottom = {22: (3, 20), 19: (2, 17), 17: (2, 15), 14: (1, 13), 12: (1, 11), 11: (1, 10), 10: (1, 9)}[size]
     for x0, ph in lines:
         for y in range(top, bottom):
             k = (y + 2 * step + ph) % 8
@@ -881,7 +881,7 @@ def status_stinky(size, step):
 
 
 DRIP = {22: (".c..", ".cc.", "cwcc", "cwcs", ".ss."), 19: (".c.", "cwc", "ccs", ".s."), 17: (".c.", "cwc", "ccs", ".s."),
-        14: ("c.", "ws", "s."), 11: ("c.", "ws", "s.")}
+        14: ("c.", "ws", "s."), 12: ("c.", "ws", "s."), 11: ("c.", "ws", "s."), 10: ("c.", "ws", "s.")}
 
 
 # The drip colours per Splash skin: body, glint, underside, rim.
@@ -896,8 +896,9 @@ def status_soaked(size, step, look=""):
     body, glint, under, edge = SOAKS[look]
     g = Grid(size, size)
     drops = {22: ((1, 0), (9, 2), (17, 1)), 19: ((1, 0), (8, 2), (15, 1)), 17: ((1, 0), (7, 2), (13, 1)),
-             14: ((1, 0), (6, 2), (11, 1)), 11: ((2, 0), (7, 2))}[size]
-    fall, y0 = {22: (4, 1), 19: (4, 1), 17: (3, 1), 14: (3, 1), 11: (2, 1)}[size]
+             14: ((1, 0), (6, 2), (11, 1)), 12: ((1, 0), (5, 2), (9, 1)), 11: ((2, 0), (7, 2)),
+             10: ((2, 0), (6, 2))}[size]
+    fall, y0 = {22: (4, 1), 19: (4, 1), 17: (3, 1), 14: (3, 1), 12: (2, 1), 11: (2, 1), 10: (2, 1)}[size]
     shape = DRIP[size]
     for x, ph in drops:
         k = (step + ph) % 4
@@ -914,11 +915,13 @@ def status_soaked(size, step, look=""):
 
 SWEAT = {22: ("..c..", ".ccc.", ".ccc.", "cwccc", "cwccs", "ccccs", "ccsss", ".sss."),
          19: (".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."), 17: (".c..", ".cc.", "cwcc", "cwcs", "ccss", ".ss."),
-         14: (".c.", "cwc", "cws", ".s."), 11: (".c.", "cwc", "cws", ".s.")}
+         14: (".c.", "cwc", "cws", ".s."), 12: (".c.", "cwc", "cws", ".s."), 11: (".c.", "cwc", "cws", ".s."),
+         10: (".c.", "cwc", "cws", ".s.")}
 # Surprise lines: (start, end) radii out from a point at the head's top-left, and their angles.
 SURPRISE = {22: ((8, 21), (5.5, 10.5), (-160, -120, -80)), 19: ((7, 18), (5, 9), (-160, -120, -80)),
             17: ((6, 16), (4.5, 8), (-160, -120, -80)), 14: ((5, 13), (3.5, 6.5), (-160, -120, -80)),
-            11: ((4, 10), (3, 5.5), (-160, -120, -80))}
+            12: ((4, 11), (3, 6), (-160, -120, -80)), 11: ((4, 10), (3, 5.5), (-160, -120, -80)),
+            10: ((4, 9), (2.5, 5), (-160, -120, -80))}
 
 
 def status_spooked(size, step):
@@ -927,8 +930,8 @@ def status_spooked(size, step):
     g = Grid(size, size)
     drop = Grid(size, size)
     shape = SWEAT[size]
-    dx, dy = {22: (15, 4), 19: (13, 3), 17: (12, 3), 14: (10, 2), 11: (7, 2)}[size]
-    slide = {22: (0, 0, 1, 3), 11: (0, 0, 1, 1)}.get(size, (0, 0, 1, 2))[step]
+    dx, dy = {22: (15, 4), 19: (13, 3), 17: (12, 3), 14: (10, 2), 12: (8, 2), 11: (7, 2), 10: (6, 2)}[size]
+    slide = {22: (0, 0, 1, 3), 12: (0, 0, 1, 1), 11: (0, 0, 1, 1), 10: (0, 0, 1, 1)}.get(size, (0, 0, 1, 2))[step]
     if step == 0:
         drop.p(dx + len(shape[0]) // 2, dy + len(shape) - 2, "cyan")
         drop.p(dx + len(shape[0]) // 2, dy + len(shape) - 1, "sky")
@@ -963,7 +966,9 @@ TANGLE = {
          ((16, 11), (16, 12), (16, 13))),
     17: ((6, 6, 4.25, 3.8), (11, 9, 3.8, 3.5), ((3, 10), (3, 11), (2, 12), (2, 13)), ((14, 10), (14, 11), (14, 12))),
     14: ((4.5, 5, 3.6, 3.3), (9.5, 7.5, 3.3, 3.1), ((3, 8), (3, 9), (2, 10)), ((11, 8), (11, 9), (11, 10))),
+    12: ((4.5, 4.5, 3.2, 3), (7.5, 6.5, 3, 3), (), ()),
     11: ((4, 4.5, 3, 3), (7, 6, 3, 3), (), ()),
+    10: ((3.5, 4, 2.8, 2.7), (6.2, 5.5, 2.6, 2.6), (), ()),
 }
 TANGLE_RISE, TANGLE_DROP = (0, 1, 1, 0), (0, 0, 1, 1)
 
@@ -1020,7 +1025,9 @@ DRIFT = {22: (((1, 14, 5), (7, 8, 5), (13, 1, 6), None), 3),
          19: (((1, 12, 4), (6, 7, 5), (11, 1, 6), None), 3),
          17: (((1, 11, 4), (5, 6, 4), (10, 1, 5), None), 3),
          14: (((1, 9, 4), (4, 6, 4), (7, 3, 4), (9, 1, 4)), 2),
-         11: (((1, 6, 4), (3, 4, 4), (4, 2, 4), (6, 1, 4)), 2)}
+         12: (((1, 7, 4), (3, 5, 4), (5, 3, 4), (7, 1, 4)), 2),
+         11: (((1, 6, 4), (3, 4, 4), (4, 2, 4), (6, 1, 4)), 2),
+         10: (((1, 5, 4), (2, 3, 4), (4, 2, 4), (5, 1, 4)), 2)}
 
 
 def status_tuckered_out(size, step):
@@ -1068,8 +1075,8 @@ def worded(g, text, cy, step):
     return g
 
 
-# A status overlay's frame at full size and at each depth step: 22 x the step, as the game sizes it.
-STATUS_SIZES = ((22, ""), (19, "@88"), (17, "@75"), (14, "@62"), (11, "@50"))
+# A status overlay's frame at full size and at each depth step: 19 x the step (16 x 1.2, rounded), as the game sizes it.
+STATUS_SIZES = ((19, ""), (17, "@88"), (14, "@75"), (12, "@62"), (10, "@50"))
 
 
 def sizes(key, draw, ms):

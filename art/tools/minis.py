@@ -17,8 +17,8 @@ grow taller.
 frame is floor(original size x scale + 0.5). At every step: tip, treat,
 lost-wallet, cone, bin, hydrant, bench, skunk, squirrel, other-dog,
 skunk-cloud (no outline) and dog-<name> for every dog; a dog's design grid is
-drawn at dogs.ROAD_SCALE times the step, so its frame is 49x49 at @88, 42x42
-at @75, 35x35 at @62 and 28x28 at @50.
+drawn at dogs.ROAD_SCALE times the step, so its frame is 42x42 at @88, 36x36
+at @75, 30x30 at @62 and 24x24 at @50.
 
 Usage:
   minis.py preview OUT.png   every small frame on the street colours

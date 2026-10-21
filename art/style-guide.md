@@ -3,7 +3,7 @@
 ## Direction
 
 - Pixel art: simple, cute, a little retro, refined. Mood: casual, cozy, low-stress.
-- Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings on its 56×56 road sprite and 32×32 face. Small dogs sit well inside the frame; big dogs fill it. A dog's coat and accessory read on both its road sprite and its face.
+- Chibi: heads about as big as bodies, so a breed reads from head shape, ears and markings on its 48×48 road sprite and 32×32 face. Small dogs sit well inside the frame; big dogs fill it. A dog's coat and accessory read on both its road sprite and its face.
 - Everything, UI included, is pixel art at the 360×560 base resolution, scaled up with no smoothing.
 
 ## Layout and sizes
@@ -18,18 +18,18 @@
 | Sprite                                                                                                   | Frame                      |
 | -------------------------------------------------------------------------------------------------------- | -------------------------- |
 | Dog and owner faces                                                                                      | 32×32                      |
-| Road animals: dogs, the other dog, skunk, squirrel, goose, `loose-dog` and `squirrel-dash`               | 56×56                      |
-| Road people: walkers, the forced-stop and lucky people, the thief, the other dog's owner and the cyclist | 56×84 (kids drawn shorter) |
+| Road animals: dogs, the other dog, skunk, squirrel, goose, `loose-dog` and `squirrel-dash`               | 48×48                      |
+| Road people: walkers, the forced-stop and lucky people, the thief, the other dog's owner and the cyclist | 48×72 (kids drawn shorter) |
 | Owners                                                                                                   | 32×48                      |
-| Pickups                                                                                                  | 28×28                      |
+| Pickups                                                                                                  | 24×24                      |
 | Small effects, icons                                                                                     | 16×16                      |
-| Status overlays (`fx-status-<status>`)                                                                   | 22×22                      |
+| Status overlays (`fx-status-<status>`)                                                                   | 19×19                      |
 | Dog and walker portraits                                                                                 | 64×64                      |
-| Obstacle n lanes wide                                                                                    | (64n−8)×42                 |
+| Obstacle n lanes wide                                                                                    | (64n−16)×36                |
 
-Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.75× (their depth variants at 1.75× the step): every shape scales, while 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. The minor obstacles are laid out in their own pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn at 1.4×; the parked car, the delivery truck, the ice cream truck and the construction barrier are laid out in their own pixels and drawn with their rows 1.4× and their columns sized to their lanes. A 56px sprite leaves 4px of margin each side of its 64px lane; the game's hit box stays 40px. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 120×42, hedge and `barrier-3` 184×42, the parked car 56×49 and the delivery truck 56×63 (1 lane by 3 rows of footprint, centred with 4px to spare each side of its 64px lane), the two-lane encounters 120 wide (picnic, petunias and trash bins 120×56, the café patio 120×70), the goose, cone, bin, hydrant and water bowl 56×56, the stop sign, the lemonade stand and the need spots' tree, lamp post and stranger 56×84, the cyclist 56×84 and the bouncing ball 28×42, the two-lane ice cream truck 120×77 (a rear-view van) and construction 64×56, one whole lane, repeated across the road. Ground decals (puddle 120×56, the skunk cloud 120×70) stay low so they read as lying on the road.
+Road sprites are 1.2× the game's 40px hit box. Dogs, people, animals, pickups, movers and encounters are drawn on a 32-unit design grid and rasterized at 1.5× (their depth variants at 1.5× the step): every shape scales, while 1px lines and single pixels stay 1px, and feet keep to the frame's bottom rows. The minor obstacles are laid out in their own pixels (40 for one lane, 30 rows for a lane-spanning one) and drawn at 1.2×; the parked car, the delivery truck, the ice cream truck and the construction barrier are laid out in their own pixels and drawn with their rows 1.2× and their columns sized to their lanes. A 48px sprite leaves 8px of margin each side of its 64px lane. Obstacles follow the OutRun rule: billboards (a front or rear elevation, never their length along the road), squat, scaled uniformly by 1/Z normalised to 1× at the pack, the base on the scanline of the footprint's near edge, drawn back to front. A footprint longer than one row lives in data, not in the sprite. Sizes: bench and `barrier-2` 112×36, hedge and `barrier-3` 176×36, the parked car 56×42 and the delivery truck 56×54 (1 lane by 3 rows of footprint, centred with 4px to spare each side of its 64px lane), the two-lane encounters 112 wide (picnic, petunias and trash bins 112×48, the café patio 112×60), the goose, cone, bin, hydrant and water bowl 48×48, the stop sign, the lemonade stand and the need spots' tree, lamp post and stranger 48×72, the cyclist 48×72 and the bouncing ball 24×36, the two-lane ice cream truck 112×66 (a rear-view van) and construction 64×48, one whole lane, repeated across the road. Ground decals (puddle 112×48, the skunk cloud 112×60) stay low so they read as lying on the road.
 
-Zone skins are not drawn in play: the game draws only the base looks. Their files stay as they are, unmaintained, and `skins_animals.py` and `skins_minor.py` no longer build. The Chase and Social animal skins (`chase-`, `social-` keys), the minor obstacle skins (`minor-*`) and the area skins (`splash-`, `stink-` keys) are at the 40 px scale, smaller than their base kinds; the Snatch skins (`snatch-`) and the Social owners (`social-<skin>-owner`) are at the people's 56×84.
+Zone skins are not drawn in play: the game draws only the base looks. Their files stay as they are, unmaintained, and `skins_animals.py` and `skins_minor.py` no longer build. The Chase and Social animal skins (`chase-`, `social-` keys), the minor obstacle skins (`minor-*`) and the area skins (`splash-`, `stink-` keys) are at the 40 px scale, smaller than their base kinds; the Snatch skins (`snatch-`) and the Social owners (`social-<skin>-owner`) are at the old 56×84 people size.
 
 ## Palette and outlines
 
@@ -251,7 +251,7 @@ After zones 1 to 3, over the road view (rows 214 to 465) dimmed as under a card,
 | Big line        | Line top 152                                                                                                                            | Line top 192                                                                                     |
 | Small line      | Line top 184                                                                                                                            | Line top 224                                                                                     |
 | Burst           | 106,202                                                                                                                                 | 106,246                                                                                          |
-| Walker          | `cheer` at 2× (80×120) from 140,206, feet line 326; hops in from x 400 (its centre, past the screen's edge) to x 180                    | `cheer` at 2× from 140,250, feet line 370                                                        |
+| Walker          | `cheer` at 2× (96×144) from 140,206, feet line 326; hops in from x 400 (its centre, past the screen's edge) to x 180                    | `cheer` at 2× from 140,250, feet line 370                                                        |
 | Bubble or plate | `ui-quip` 24,332 312×76; `ui-quip-tail-up` at 176,327, its bottom row over the bubble's top rim                                         | `ui-panel` 40,380 280×32                                                                         |
 | Text            | The walker's line in `font-body` 2×, centred, wrapped to 296, line tops 336 and 354                                                     | "+$21 pay · +$26 tips" in `font-body` 2×, centred, line top 387, two spaces each side of the dot |
 | Rule            | Tan dots every 3px on row 375, x 36 to 323                                                                                              |                                                                                                  |
@@ -301,7 +301,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 - 320×64, tiling vertically with no seam: patterns repeat every 64 rows or a divisor of it.
 - The base is the zone's road colour (`src/data/world.ts`), so the game's shadow, one ramp step down, matches. Base (shadow): Willow Crescent grey (slate), Fairview Park tan (brown), Elm Avenue dslate (navy), Main Street pink (mauve), Riverside Path cream (tan), The Long Way Home skin2 (brown).
 - The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Willow Crescent; dbrown on Fairview Park; white dashes 12 rows long in 32 with a mauve edge on Main Street; dbrown dashes 20 rows long in 32 on Riverside Path; white outlined in plum on The Long Way Home.
-- Curbs and verges stay inside the outer 3 to 7px of the strip. A 56px sprite leaves 4px each side of its 64px lane, so an outer lane's sprite overlaps its curb or verge by up to 3px.
+- Curbs and verges stay inside the outer 3 to 7px of the strip, clear of the 8px each side of a 48px sprite in its 64px lane.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
 - The camera has its horizon at y −36 and the walker's feet at y 464; the road's far edge meets the backdrop at y 214 at scale 0.5. Its ratio r derives from speed (the visible distance is 3.6 s × `roadScrollSpeed`, 720 road px at 200 px/s, so r is 0.694). The rows from the far edge down to about y 222 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
 
@@ -309,7 +309,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 
 Houses, fences, trees and yard props stand on the lawns beyond the sidewalks. `art/tools/roadside.py` draws them and holds the per-zone placement table (`PLACEMENT`, keyed by zone art id; `python3 art/tools/roadside.py table` prints it as JSON). Only Elm Avenue (`woof-way`) has a table.
 
-- Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.75× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms.
+- Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms.
 - They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket (`spot-lamp-post` is a navy lantern), the street tree three round lobes (`spot-tree` is blocky), the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box (`petunias` has one), the gnome a blue hat and red coat (`minor-gnome` has a red hat and blue coat; a zone with `minor-gnome` does not take `roadside-gnome`), the mailbox blue with a yellow flag (the hydrant is red).
 
 ### Placement
@@ -322,20 +322,20 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 
 | Lot | Props: key `roadside-…`, across, dz                                                     |
 | --- | --------------------------------------------------------------------------------------- |
-| 0   | `house-cottage` 304, 0; `fence` 312, −32; `mailbox` 234, −38; `flowers` 303, −42        |
-| 1   | `house-tall` 297, 0; `hedge` 301, −32; `mailbox` 234, −38; `gnome` 268, −15             |
-| 2   | `house-porch` 318, 0; `fence-cat` 312, −32; `bike` 273, −45                             |
-| 3   | `house-cottage-pink` 304, 0; `fence` 312, −32; `mailbox` 234, −38; `sprinkler` 321, −15 |
-| 4   | `house-tall-grey` 297, 0; `fence` 312, −32; `gnome` 278, −15                            |
-| 5   | `house-porch-tan` 318, 0; `hedge` 301, −32; `mailbox` 234, −38; `flowers` 308, −42      |
+| 0   | `house-cottage` 292, 0; `fence` 299, −32; `mailbox` 231, −38; `flowers` 295, −42        |
+| 1   | `house-tall` 286, 0; `hedge` 290, −32; `mailbox` 231, −38; `gnome` 265, −15             |
+| 2   | `house-porch` 304, 0; `fence-cat` 299, −32; `bike` 267, −45                             |
+| 3   | `house-cottage-pink` 292, 0; `fence` 299, −32; `mailbox` 231, −38; `sprinkler` 314, −15 |
+| 4   | `house-tall-grey` 286, 0; `fence` 299, −32; `gnome` 275, −15                            |
+| 5   | `house-porch-tan` 304, 0; `hedge` 290, −32; `mailbox` 231, −38; `flowers` 300, −42      |
 
 | Gap | Props: key `roadside-…`, across, dz          |
 | --- | -------------------------------------------- |
-| 0   | `tree` 280, 0                                |
-| 1   | `lamp-post` 234, −12; `tree-blossom` 312, 12 |
-| 2   | `laundry` 327, 0                             |
-| 3   | `tree` 287, 0; `lamp-post` 234, −38          |
-| 4   | `tree-blossom` 282, 0                        |
+| 0   | `tree` 270, 0                                |
+| 1   | `lamp-post` 231, −12; `tree-blossom` 302, 12 |
+| 2   | `laundry` 313, 0                             |
+| 3   | `tree` 277, 0; `lamp-post` 231, −38          |
+| 4   | `tree-blossom` 272, 0                        |
 
 ### Drawing
 

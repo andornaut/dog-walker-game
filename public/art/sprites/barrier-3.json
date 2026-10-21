@@ -1,18 +1,18 @@
 { "frames": {
    "barrier-3 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 184, "h": 42 },
+    "frame": { "x": 0, "y": 0, "w": 176, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 184, "h": 42 },
-    "sourceSize": { "w": 184, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 36 },
+    "sourceSize": { "w": 176, "h": 36 },
     "duration": 500
    },
    "barrier-3 1.aseprite": {
-    "frame": { "x": 184, "y": 0, "w": 184, "h": 42 },
+    "frame": { "x": 176, "y": 0, "w": 176, "h": 36 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 184, "h": 42 },
-    "sourceSize": { "w": 184, "h": 42 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 176, "h": 36 },
+    "sourceSize": { "w": 176, "h": 36 },
     "duration": 500
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "barrier-3.png",
   "format": "RGBA8888",
-  "size": { "w": 368, "h": 42 },
+  "size": { "w": 352, "h": 36 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

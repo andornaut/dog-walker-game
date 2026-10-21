@@ -1,29 +1,29 @@
 #!/usr/bin/env python3
 """Draw the minor obstacles: things the pack bumps into with no card. Each
-spans whole lanes of the 64px road lanes: an n-lane obstacle is 64n-8 px wide,
-leaving a 4px margin in its outer lanes.
+spans whole lanes of the 64px road lanes: an n-lane obstacle is 64n-16 px wide,
+leaving an 8px margin in its outer lanes.
 
 They are billboards seen from a low camera, as roadside objects in OutRun are:
 a front elevation (or a car from straight behind), squat, with at most a sliver
 of top surface and never its length along the road. The game scales each one
 by distance with its base on the road line.
 
-cone                56x56   1 lane, a glint runs down its highlight
-bin                 56x56   1 lane, the lid lifts 1px in a breeze
-hydrant             56x56   the Regular dog's need spot (not an obstacle), a drip off the side cap
-bench               120x42  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
-barrier-2           120x42  2 lanes, a striped rail and plank on short legs; lamps blink (Willow
+cone                48x48   1 lane, a glint runs down its highlight
+bin                 48x48   1 lane, the lid lifts 1px in a breeze
+hydrant             48x48   the Regular dog's need spot (not an obstacle), a drip off the side cap
+bench               112x36  2 lanes, backrest and seat edge on short legs; a leaf on the seat stirs
+barrier-2           112x36  2 lanes, a striped rail and plank on short legs; lamps blink (Willow
                             Crescent, Elm Avenue, Main Street and Riverside Path)
-barrier-3           184x42  3 lanes, lamps blink (the same zones)
-hedge               184x42  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
+barrier-3           176x36  3 lanes, lamps blink (the same zones)
+hedge               176x36  3 lanes, a low hedge with a rounded, clumped top; leaves rustle 1px at three
                             spots in turn
-parked-car          56x49   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
+parked-car          56x42   1 lane by 3 rows of footprint, a minivan from straight behind, drawn at the
                             footprint's near edge; hazards blink. 56 wide, so it centres on its lane
                             with 4px to spare each side. pull-out (4 frames, 100ms): drawn pulling
                             right (the game mirrors it for left), tread lines climb the tyres and the
                             right indicator blinks amber; drive (4 frames, 100ms): driving down its
                             lane, the same tread roll with no indicator
-delivery-truck      56x63   1 lane by 3 rows of footprint, a brown box van from straight behind with a tan
+delivery-truck      56x54   1 lane by 3 rows of footprint, a brown box van from straight behind with a tan
                             roller door, drawn at the footprint's near edge; idle (4 frames,
                             400ms): an exhaust puff on frame 2. drive (4 frames, 100ms): tread lines
                             climb the tyres and the body dips 1px onto them on frames 1 and 2
@@ -31,7 +31,7 @@ delivery-truck      56x63   1 lane by 3 rows of footprint, a brown box van from 
 Every obstacle has a looping idle, so nothing on the road is frozen. Each idle
 frame is one argument to the drawing function, listed in the *_IDLE tuples;
 frame 0 is the rest pose. The drawings are in layout pixels, 40 for a 1-lane
-sprite and 30 rows for a lane-spanning one, drawn SCALE (1.4) times bigger on a
+sprite and 30 rows for a lane-spanning one, drawn SCALE (1.2) times bigger on a
 minis.Mini, which keeps 1px lines 1px; the parked car and the delivery truck keep
 their 56 layout columns and draw only their rows SCALE times taller. minis.py and depths.py run them at
 SCALE (or CAR_SCALE) times each depth step for the depth variants.
@@ -55,18 +55,18 @@ from road import LIT, rim  # noqa: E402
 
 # The drawings are in layout pixels: a 1-lane sprite's frame is SIZE square and a lane-spanning obstacle ROW
 # tall. sprites() draws them SCALE times bigger on a minis.Mini, which keeps 1px lines 1px, so a 1-lane sprite
-# exports at 56x56 and a lane-spanning one 42 rows tall. The parked car keeps its 56 layout columns, a lane
+# exports at 48x48 and a lane-spanning one 36 rows tall. The parked car keeps its 56 layout columns, a lane
 # less 4px each side, and draws only its rows SCALE times taller (CAR_SCALE).
 SIZE = 40
 ROW = 30
-SCALE = 1.4
+SCALE = 1.2
 CAR_SCALE = (1, SCALE)
 
 
 def span(lanes):
-    """The width in layout pixels of an obstacle across lanes lanes of 64px: 64n-8 drawn, 4px clear of each
+    """The width in layout pixels of an obstacle across lanes lanes of 64px: 64n-16 drawn, 8px clear of each
     outer lane edge."""
-    return (64 * lanes - 8) / SCALE
+    return (64 * lanes - 16) / SCALE
 
 
 def drawn(s, draw, *args, **q):

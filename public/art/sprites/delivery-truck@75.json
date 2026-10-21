@@ -1,66 +1,66 @@
 { "frames": {
    "delivery-truck@75 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 0, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 400
    },
    "delivery-truck@75 1.aseprite": {
-    "frame": { "x": 42, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 42, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 400
    },
    "delivery-truck@75 2.aseprite": {
-    "frame": { "x": 84, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 84, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 400
    },
    "delivery-truck@75 3.aseprite": {
-    "frame": { "x": 126, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 126, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 400
    },
    "delivery-truck@75 4.aseprite": {
-    "frame": { "x": 168, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 168, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 100
    },
    "delivery-truck@75 5.aseprite": {
-    "frame": { "x": 210, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 210, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 100
    },
    "delivery-truck@75 6.aseprite": {
-    "frame": { "x": 252, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 252, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 100
    },
    "delivery-truck@75 7.aseprite": {
-    "frame": { "x": 294, "y": 0, "w": 42, "h": 47 },
+    "frame": { "x": 294, "y": 0, "w": 42, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 47 },
-    "sourceSize": { "w": 42, "h": 47 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 41 },
+    "sourceSize": { "w": 42, "h": 41 },
     "duration": 100
    }
  },
@@ -69,7 +69,7 @@
   "version": "1.2.30-x64",
   "image": "delivery-truck@75.png",
   "format": "RGBA8888",
-  "size": { "w": 336, "h": 47 },
+  "size": { "w": 336, "h": 41 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 3, "direction": "forward" },

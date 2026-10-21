@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-house-tall.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 154, "h": 182 },
+    "frame": { "x": 0, "y": 0, "w": 132, "h": 156 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 154, "h": 182 },
-    "sourceSize": { "w": 154, "h": 182 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 132, "h": 156 },
+    "sourceSize": { "w": 132, "h": 156 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-house-tall.png",
   "format": "RGBA8888",
-  "size": { "w": 154, "h": 182 },
+  "size": { "w": 132, "h": 156 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

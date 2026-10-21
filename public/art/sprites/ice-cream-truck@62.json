@@ -1,18 +1,18 @@
 { "frames": {
    "ice-cream-truck@62 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 75, "h": 48 },
+    "frame": { "x": 0, "y": 0, "w": 70, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 75, "h": 48 },
-    "sourceSize": { "w": 75, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 70, "h": 41 },
+    "sourceSize": { "w": 70, "h": 41 },
     "duration": 400
    },
    "ice-cream-truck@62 1.aseprite": {
-    "frame": { "x": 75, "y": 0, "w": 75, "h": 48 },
+    "frame": { "x": 70, "y": 0, "w": 70, "h": 41 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 75, "h": 48 },
-    "sourceSize": { "w": 75, "h": 48 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 70, "h": 41 },
+    "sourceSize": { "w": 70, "h": 41 },
     "duration": 400
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "ice-cream-truck@62.png",
   "format": "RGBA8888",
-  "size": { "w": 150, "h": 48 },
+  "size": { "w": 140, "h": 41 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

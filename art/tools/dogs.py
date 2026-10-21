@@ -3,8 +3,8 @@
 
 Each dog gets two sprites in Endesga 32 with coloured outlines:
 
-- dog-<name>: the road sprite, 56x56 (ROAD_SIZE), seen from above and behind. Its drawing
-  functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.75),
+- dog-<name>: the road sprite, 48x48 (ROAD_SIZE), seen from above and behind. Its drawing
+  functions take 32-unit design coordinates and run on a minis.Mini at ROAD_SCALE (1.5),
   which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
   frames), react (2), pull (2, leaning right; the game mirrors it for left),
@@ -44,7 +44,7 @@ from pixel import K, Grid, edged, main, road_edge  # noqa: E402
 # The road sprites are drawn on a 32-unit design grid and rasterized at ROAD_SIZE, ROAD_SCALE times bigger, on
 # a minis.Mini that keeps 1px lines and single pixels 1px; their depth variants rasterize at ROAD_SCALE x the
 # step. Faces stay 32x32 at 1x.
-ROAD_SIZE = 56
+ROAD_SIZE = 48
 ROAD_SCALE = ROAD_SIZE / 32
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
@@ -349,8 +349,8 @@ def nugget_road(q):
     tl = (q["tilt"] > 0) - (q["tilt"] < 0)
     hx = 16 + ln + tl
     g.ell(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
-    g.ell(hx - 4.5, 12 + b - q["ears"] + q["flop"] - tl, 1.8, 1.5, "navy")
-    g.ell(hx + 4.5, 12 + b - q["ears"] + q["flop"] + q["twitch"] + tl, 1.8, 1.5, "navy")
+    g.ell(hx - 4.8, 12.3 + b - q["ears"] + q["flop"] - tl, 2, 1.7, "navy")
+    g.ell(hx + 4.8, 12.3 + b - q["ears"] + q["flop"] + q["twitch"] + tl, 2, 1.7, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
     sparkle(g, hx + 9, 6 + b, q["glint"])
     spray(g, q["spray"])

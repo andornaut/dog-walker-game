@@ -38,7 +38,7 @@ fx-hop-splash  32x32  splash (5 frames, 70ms)  a small puddle splash as an all-s
                       walker's feet. With splash-word the comic word is the label; with reduced
                       motion the game plays splash and writes "Hop!" centred on x 16, its line
                       bottom 2px above the frame's top row
-fx-dodge       56x56  play (5 frames, 70ms; 350ms)  laid on a small dog's 56x56 frame as it dodges a
+fx-dodge       48x48  play (5 frames, 70ms; 350ms)  laid on a small dog's 48x48 frame as it dodges a
                       hit: a dust puff kicked up at its left foot swells, drifts back and thins,
                       three speed lines trail on its left and shorten, and DODGE! in the comic
                       lettering sits centred over its head (ring top on row 0) on frames 0 to 3.
@@ -215,18 +215,18 @@ def worded(g, step):
 
 # ---------- the dodge ----------
 
-# fx-dodge is laid on a 56x56 dog's frame. The dog sidesteps right: its dust kicks up at the left foot and
+# fx-dodge is laid on a 48x48 dog's frame. The dog sidesteps right: its dust kicks up at the left foot and
 # speed lines trail it on the left (the game mirrors the frame for a sidestep left).
-DODGE = 56
+DODGE = 48
 DODGE_WORD = "DODGE!"
 # Per frame: each puff's (x, y, radius), the speed lines' length; the word shows over frames 0 to 3.
-DODGE_PUFFS = (((22, 50, 2), (17, 51, 1.5)),
-               ((20, 49, 3), (14, 50, 2.5), (25, 51, 2)),
-               ((18, 47, 3.5), (11, 49, 3), (24, 50, 2.5)),
-               ((16, 45, 3), (9, 47, 2.5), (22, 48, 2)),
-               ((14, 43, 2), (7, 45, 1.5)))
-DODGE_LINES = (12, 10, 7, 4, 0)
-DODGE_ROWS = (29, 35, 41)
+DODGE_PUFFS = (((19, 43, 2), (15, 44, 1.5)),
+               ((17, 42, 2.8), (12, 43, 2.3), (21, 44, 1.8)),
+               ((15, 40, 3.2), (9, 42, 2.8), (21, 43, 2.3)),
+               ((14, 39, 2.8), (8, 40, 2.3), (19, 41, 1.8)),
+               ((12, 37, 2), (6, 39, 1.5)))
+DODGE_LINES = (10, 9, 6, 3, 0)
+DODGE_ROWS = (25, 30, 35)
 
 
 def dodge(step, worded=True):
@@ -240,7 +240,7 @@ def dodge(step, worded=True):
     n = DODGE_LINES[step]
     for k, y in enumerate(DODGE_ROWS):
         if n:
-            g.rect(14 - n + (2 if k == 1 else 0), y, n - (2 if k == 1 else 0), 1, "white")
+            g.rect(12 - n + (2 if k == 1 else 0), y, n - (2 if k == 1 else 0), 1, "white")
     rim(g)
     if worded and step < 4:
         word(g, DODGE_WORD, DODGE // 2, 0)

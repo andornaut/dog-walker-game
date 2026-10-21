@@ -1,66 +1,66 @@
 { "frames": {
    "other-dog@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 100
    },
    "other-dog@50 1.aseprite": {
-    "frame": { "x": 28, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 100
    },
    "other-dog@50 2.aseprite": {
-    "frame": { "x": 56, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 48, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 100
    },
    "other-dog@50 3.aseprite": {
-    "frame": { "x": 84, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 100
    },
    "other-dog@50 4.aseprite": {
-    "frame": { "x": 112, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 300
    },
    "other-dog@50 5.aseprite": {
-    "frame": { "x": 140, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 300
    },
    "other-dog@50 6.aseprite": {
-    "frame": { "x": 168, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 144, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 300
    },
    "other-dog@50 7.aseprite": {
-    "frame": { "x": 196, "y": 0, "w": 28, "h": 28 },
+    "frame": { "x": 168, "y": 0, "w": 24, "h": 24 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 28 },
-    "sourceSize": { "w": 28, "h": 28 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 24 },
+    "sourceSize": { "w": 24, "h": 24 },
     "duration": 300
    }
  },
@@ -69,7 +69,7 @@
   "version": "1.2.30-x64",
   "image": "other-dog@50.png",
   "format": "RGBA8888",
-  "size": { "w": 224, "h": 28 },
+  "size": { "w": 192, "h": 24 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },

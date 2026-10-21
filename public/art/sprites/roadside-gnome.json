@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-gnome.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 35, "h": 49 },
+    "frame": { "x": 0, "y": 0, "w": 30, "h": 42 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 35, "h": 49 },
-    "sourceSize": { "w": 35, "h": 49 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 42 },
+    "sourceSize": { "w": 30, "h": 42 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-gnome.png",
   "format": "RGBA8888",
-  "size": { "w": 35, "h": 49 },
+  "size": { "w": 30, "h": 42 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

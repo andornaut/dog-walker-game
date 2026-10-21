@@ -1,18 +1,18 @@
 { "frames": {
    "lost-wallet@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 14, "h": 14 },
+    "frame": { "x": 0, "y": 0, "w": 12, "h": 12 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
-    "sourceSize": { "w": 14, "h": 14 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 12 },
+    "sourceSize": { "w": 12, "h": 12 },
     "duration": 450
    },
    "lost-wallet@50 1.aseprite": {
-    "frame": { "x": 14, "y": 0, "w": 14, "h": 14 },
+    "frame": { "x": 12, "y": 0, "w": 12, "h": 12 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 14, "h": 14 },
-    "sourceSize": { "w": 14, "h": 14 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 12, "h": 12 },
+    "sourceSize": { "w": 12, "h": 12 },
     "duration": 450
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "lost-wallet@50.png",
   "format": "RGBA8888",
-  "size": { "w": 28, "h": 14 },
+  "size": { "w": 24, "h": 12 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

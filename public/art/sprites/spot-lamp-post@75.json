@@ -1,18 +1,18 @@
 { "frames": {
    "spot-lamp-post@75 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 42, "h": 63 },
+    "frame": { "x": 0, "y": 0, "w": 36, "h": 54 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
-    "sourceSize": { "w": 42, "h": 63 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
     "duration": 500
    },
    "spot-lamp-post@75 1.aseprite": {
-    "frame": { "x": 42, "y": 0, "w": 42, "h": 63 },
+    "frame": { "x": 36, "y": 0, "w": 36, "h": 54 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 42, "h": 63 },
-    "sourceSize": { "w": 42, "h": 63 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 54 },
+    "sourceSize": { "w": 36, "h": 54 },
     "duration": 500
    }
  },
@@ -21,7 +21,7 @@
   "version": "1.2.30-x64",
   "image": "spot-lamp-post@75.png",
   "format": "RGBA8888",
-  "size": { "w": 84, "h": 63 },
+  "size": { "w": 72, "h": 54 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" }

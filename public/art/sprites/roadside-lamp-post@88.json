@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-lamp-post@88.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 37, "h": 153 },
+    "frame": { "x": 0, "y": 0, "w": 32, "h": 131 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 37, "h": 153 },
-    "sourceSize": { "w": 37, "h": 153 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 32, "h": 131 },
+    "sourceSize": { "w": 32, "h": 131 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-lamp-post@88.png",
   "format": "RGBA8888",
-  "size": { "w": 37, "h": 153 },
+  "size": { "w": 32, "h": 131 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

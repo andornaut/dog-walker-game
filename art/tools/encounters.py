@@ -4,32 +4,32 @@ petunias, trash day, the café patio and the lemonade stand. Each is a billboard
 like the minor obstacles (obstacles.py): a front elevation (the goose a side
 view), squat, its base on the last opaque row, 64n-8 px wide for n lanes.
 
-picnic              120x56  2 lanes, a gingham blanket, a basket, sandwiches on a plate and a
+picnic              112x48  2 lanes, a gingham blanket, a basket, sandwiches on a plate and a
                             picnicker sitting cross-legged mid-bite; idle (4 frames, 400ms): a bite
                             (the sandwich 1px lower), then a chew (the cheeks puff out 1px)
-goose               56x56   1 lane, a mover: a white goose, wings up, neck stretched, beak open
+goose               48x48   1 lane, a mover: a white goose, wings up, neck stretched, beak open
                             mid-honk; side view facing right, the game mirrors it for left.
                             run (4 frames, 110ms): a waddle, the feet swap and the body bobs 1px on
                             the passing frames, the wings flap 1px; idle (4 frames, 300ms): the honk,
                             the neck thrust 1px forward with the beak wide, then the beak shut
-petunias            120x56  2 lanes, a raised flower bed of petunias with a blue "1st prize" rosette
+petunias            112x48  2 lanes, a raised flower bed of petunias with a blue "1st prize" rosette
                             on a stake, a hedge behind and a scandalised gardener peeking over it;
                             idle (4 frames, 450ms): the flowers sway 1px right, back, left
-trash-bins          120x56  2 lanes, two metal bins on their sides spilling a banana peel, a can,
+trash-bins          112x48  2 lanes, two metal bins on their sides spilling a banana peel, a can,
                             paper and a pizza box, their lid on the ground with a ginger cat sitting on
                             it; idle (4 frames, 350ms): the cat's tail sways, as road.cat's
-cafe-patio          120x70  2 lanes, a striped awning on two poles over two bistro tables and two
+cafe-patio          112x60  2 lanes, a striped awning on two poles over two bistro tables and two
                             cooing patrons, a toppled cup with a foam heart in its spill on the left
                             table and a cup on a saucer on the right; idle (4 frames, 350ms): a steam
                             curl rises off the cup 1px a frame
-lemonade-stand      56x84   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
+lemonade-stand      48x72   1 lane, lucky: a cardboard stand, road.kid behind it, a sign over the kid
                             ("LEMON ADE") and on the front ("50c" with a lemon, a drop beside a coin), a pitcher and
                             cups on the counter; idle (4 frames, 400ms): the kid breathes, and the
                             pitcher glints on the third frame
 
 The drawings are in the 32px units of a 32x32 road sprite: the sprites draw them on a minis.Mini
-at BIG (1.75x), a 2-lane one TWO_LANES units wide, so 32 units are 56px and a 2-lane encounter
-is 120px wide. A 1px line stays 1px and motion moves whole pixels. Every encounter also has
+at BIG (1.5x, road.SCALE), a 2-lane one TWO_LANES units wide, so 32 units are 48px and a 2-lane
+encounter is 112px wide. A 1px line stays 1px and motion moves whole pixels. Every encounter also has
 <key>@<step> for each depth step in minis.STEPS (from shared/depth-steps.json), redrawn the same
 way at BIG x the step, floor(size x scale + 0.5), with the original's tags, frames and durations
 and a full outline. Sign letters are 3x5 pixels at 1x or more; smaller, they are scribbles.
@@ -57,10 +57,10 @@ from minis import STEPS, Mini, small  # noqa: E402
 from pixel import ROADS, Grid, edged, main  # noqa: E402
 from road import LIT  # noqa: E402
 
-# The drawings are in the 32px units of the old road sprites; the sprites draw them BIG times larger (56px
-# for a 32px unit frame), and a 2-lane one TWO_LANES units wide, so it is 120px (64n-8 for n lanes).
-BIG = 1.75
-TWO_LANES = (64 * 2 - 8) / BIG
+# The drawings are in the 32px units of the old road sprites; the sprites draw them BIG times larger (48px
+# for a 32px unit frame), and a 2-lane one TWO_LANES units wide, so it is 112px (64n-16 for n lanes).
+BIG = road.SCALE
+TWO_LANES = (64 * 2 - 16) / BIG
 
 # Every road the encounters stand on, for the preview: the four in pixel.ROADS, then Willow Crescent
 # and Riverside Path.

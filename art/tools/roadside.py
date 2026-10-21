@@ -12,28 +12,28 @@ the navy lantern of the need spot `spot-lamp-post`; the street tree is three rou
 flower border has no box, unlike `petunias`; the gnome wears a blue hat and a red coat, unlike
 `minor-gnome`; the mailbox is blue with a yellow flag, unlike the red hydrant.
 
-Each is laid out on a design grid and drawn SCALE (1.75) times larger, as the road objects are:
+Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the road objects are:
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
 every frame and depth variant is a whole size. Full size, then @88, @75, @62 and @50:
 
-roadside-house-cottage       168x154  a tan cottage under a brown gable, green door
-roadside-house-cottage-pink  168x154  a pink cottage under a purple gable, white door
-roadside-house-tall          154x182  a cream two-storey house under a dred gable, sky door
-roadside-house-tall-grey     154x182  a light grey two-storey house under a slate gable, dred door
-roadside-house-porch         196x140  a sky bungalow under a navy hipped roof, red porch awning
-roadside-house-porch-tan     196x140  a tan bungalow under a brown hipped roof
-roadside-fence               175x49   a white picket fence
-roadside-fence-cat           175x70   the fence with a plum cat sitting on the pickets
-roadside-hedge               154x56   a bumpy front hedge with white flowers
-roadside-mailbox             42x56    a blue mailbox on a post, its yellow flag up
-roadside-tree                133x182  a round street tree in three lobes
-roadside-tree-blossom        133x182  the tree in pink blossom
-roadside-lamp-post           42x175   a white globe lamp on a forest post with a flower basket
-roadside-gnome               35x49    a garden gnome in a blue hat and red coat
-roadside-flowers             105x35   a border of mixed blooms on their stems
-roadside-bike                84x56    a kid's red bike on its stand, side on, streamers
-roadside-sprinkler           91x49    a lawn sprinkler's fan of water; idle 2 frames x 200ms
-roadside-laundry             189x112  a washing line on two T posts: a shirt, a sheet, socks, a dress
+roadside-house-cottage       144x132  a tan cottage under a brown gable, green door
+roadside-house-cottage-pink  144x132  a pink cottage under a purple gable, white door
+roadside-house-tall          132x156  a cream two-storey house under a dred gable, sky door
+roadside-house-tall-grey     132x156  a light grey two-storey house under a slate gable, dred door
+roadside-house-porch         168x120  a sky bungalow under a navy hipped roof, red porch awning
+roadside-house-porch-tan     168x120  a tan bungalow under a brown hipped roof
+roadside-fence               150x42   a white picket fence
+roadside-fence-cat           150x60   the fence with a plum cat sitting on the pickets
+roadside-hedge               132x48   a bumpy front hedge with white flowers
+roadside-mailbox             36x48    a blue mailbox on a post, its yellow flag up
+roadside-tree                114x156  a round street tree in three lobes
+roadside-tree-blossom        114x156  the tree in pink blossom
+roadside-lamp-post           36x150   a white globe lamp on a forest post with a flower basket
+roadside-gnome               30x42    a garden gnome in a blue hat and red coat
+roadside-flowers             90x30    a border of mixed blooms on their stems
+roadside-bike                72x48    a kid's red bike on its stand, side on, streamers
+roadside-sprinkler           78x42    a lawn sprinkler's fan of water; idle 2 frames x 200ms
+roadside-laundry             162x96   a washing line on two T posts: a shirt, a sheet, socks, a dress
 
 Every prop has one tag, `idle`: one frame of 1000ms, or the sprinkler's two. The ground row is the
 last opaque row; the frame keeps a clear ring for the outline. Outlines are road_edge; there is no
@@ -60,7 +60,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, Mini, scaled  # noqa: E402
 from pixel import DARKER, K, edged, main  # noqa: E402
 
-SCALE = 1.75
+SCALE = 1.5
 GROUNDS = (K["green"], K["dgreen"], K["dslate"])
 STILL_MS = 1000
 SPRAY_MS = 200
