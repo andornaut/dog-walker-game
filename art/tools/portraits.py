@@ -395,45 +395,75 @@ def koda(g):
 
 # ---------- the walkers: head-and-shoulders busts ----------
 # The face turns toward the viewer's left like the dogs': the features sit left of the head's centre, the far
-# (left) eye is narrower, and only the near (right) ear shows.
+# (left) eye is narrower, and only the near (right) ear shows. Faces stay clean: flat skin with a blush, a
+# shadow only under the hair or cap and down the near edge beside the eyes, never across the jaw or mouth.
 
-def human_eye(g, x, y, w, sclera=False):
-    """An eye 5 tall, w wide, with a shine top-left and a glint bottom-right; sclera sets a white left of the
-    pupil, so the eye reads on dark skin."""
-    g.rect(x, y + 1, w, 4, "ink")
-    g.rect(x + 1, y, w - 2, 5, "ink")
-    g.p(x + 1, y + 1, "white")
-    if w > 3:
-        g.p(x + 1, y + 2, "white")
-    g.p(x + w - 2, y + 3, "white" if w > 3 else "ink")
+def human_eye(g, x, y, w, h=5, sclera=False):
+    """An eye h tall and w wide, rounded at the corners, with a shine top-left and a glint bottom-right;
+    sclera sets a white left of the pupil, so the eye reads on dark skin."""
+    g.rect(x, y + 1, w, h - 2, "ink")
+    g.rect(x + 1, y, w - 2, h, "ink")
+    s = 2 if w > 4 else 1
+    g.rect(x + 1, y + 1, s, s if h > 5 else 1, "white")
+    g.p(x + w - 2, y + h - 2, "white")
     if sclera:
         g.rect(x - 1, y + 2, 1, 2, "white")
 
 
-def human_face(g, skin_sh, brow, lips="ink", teeth="white", blush="pink", sclera=False, y=0):
-    """Eyes under brows, the nose's shadow on its right, and an open smile under rosy cheeks, turned left."""
+def smile(g, x, y, lips="ink", teeth="white"):
+    """A small open smile 7 wide, centred on x, its corners turned up."""
+    g.rect(x - 3, y, 7, 1, lips)
+    g.rect(x - 2, y + 1, 5, 1, lips)
+    g.p(x - 4, y - 1, lips)
+    g.p(x + 4, y - 1, lips)
+    g.rect(x - 2, y, 5, 1, teeth)
+
+
+def shade_under(g, skin, sh, x0, x1, top):
+    """A 1px shadow on the face just under whatever hair or cap sits over it, between columns x0 and x1."""
+    skin, sh = K[skin], K[sh]
+    for x in range(x0, x1 + 1):
+        for y in range(top, S):
+            if g.px[y][x] == skin:
+                if y > top and g.px[y - 1][x] not in (skin, None):
+                    g.p(x, y, sh)
+                break
+
+
+def shade_near(g, skin, sh, y0, y1):
+    """A 1px shadow down the near (right) edge of the face from row y0 to y1, beside the eyes."""
+    skin = K[skin]
+    for y in range(y0, y1 + 1):
+        xs = [x for x in range(S) if g.px[y][x] == skin]
+        if xs:
+            g.p(max(xs), y, sh)
+
+
+def ring(g, cx, cy, rx, ry, c):
+    """A 1px oval outline."""
+    for y in range(S):
+        for x in range(S):
+            d = math.hypot((x + 0.5 - cx) / rx, (y + 0.5 - cy) / ry)
+            if abs(d - 1) * min(rx, ry) < 0.5:
+                g.p(x, y, c)
+
+
+def bust(g, c, sh, li=None, neck="skin2", cx=32, cy=62, rx=27, ry=16, nx=25, nw=9):
+    """Shoulders cut by the bottom edge, and the neck."""
+    g.cel(cx, cy, rx, ry, c, sh, li)
+    g.rect(nx, 38, nw, 10, neck)
+
+
+def adult_face(g, brow, blush="pink", brow_y=23):
+    """Eyes under short brows, a dot of nose shadow, a blush on each cheek and a small smile."""
     for x, w in ((20, 3), (32, 4)):
-        human_eye(g, x, 26 + y, w, sclera)
-        g.rect(x, 23 + y, w, 1, brow)
-    g.p(31, 24 + y, brow)
-    g.rect(27, 31 + y, 1, 2, skin_sh)
-    g.rect(25, 33 + y, 3, 1, skin_sh)
+        human_eye(g, x, 26, w)
+        g.rect(x, brow_y, w, 1, brow)
+    g.p(26, 33, "skin2")
     if blush:
-        g.rect(17, 33 + y, 3, 1, blush)
-        g.rect(34, 33 + y, 4, 1, blush)
-    g.rect(22, 36 + y, 9, 1, lips)
-    g.rect(23, 37 + y, 7, 1, lips)
-    g.rect(24, 38 + y, 5, 1, lips)
-    g.p(21, 35 + y, lips)
-    g.p(31, 35 + y, lips)
-    g.rect(23, 36 + y, 7, 1, teeth)
-
-
-def bust(g, c, sh, li=None, neck=("skin2", "brown"), rx=27):
-    """Shoulders cut by the bottom edge, the near (right) one fuller, and the neck in the head's shadow."""
-    g.cel(32, 62, rx, 16, c, sh, li)
-    g.rect(24, 38, 11, 9, neck[0])
-    g.rect(24, 38, 11, 2, neck[1])
+        g.rect(17, 33, 3, 1, blush)
+        g.rect(34, 33, 3, 1, blush)
+    smile(g, 26, 36)
 
 
 def casey(g):
@@ -443,7 +473,7 @@ def casey(g):
     g.rect(18, 58, 26, 6, "blue")
     g.rect(20, 59, 22, 5, "sky")
     g.cel(30, 47, 13, 4.5, "blue", "navy")
-    g.rect(24, 44, 11, 3, "skin2")
+    g.rect(25, 44, 9, 3, "skin2")
     for x in (25, 33):
         g.rect(x, 49, 1, 7, "white")
         g.p(x, 56, "lgrey")
@@ -451,81 +481,83 @@ def casey(g):
     g.cel(31, 24, 15, 12, "dbrown", "plum", "brown")
     g.cel(44, 29, 2.5, 4, "skin1", "skin2")
     g.p(44, 29, "skin2")
-    g.cel(29, 28, 13, 13, "skin1", "skin2")
-    # the cap's crown, its yellow button, and the brim towards the camera, rust underneath
+    g.cel(29, 28, 13, 13, "skin1")
+    # the cap's crown, its button, and the brim towards the camera, rust underneath
     g.cel(31, 15, 15, 10, "amber", "orange", "yellow")
     g.rect(30, 5, 3, 2, "orange")
     g.ell(25, 20.5, 17, 3.5, "orange")
     g.rect(15, 18, 14, 1, "amber")
     g.rect(13, 22, 26, 1, "rust")
-    g.rect(16, 23, 20, 1, "dbrown")
-    human_face(g, "skin2", "dbrown")
+    shade_under(g, "skin1", "skin2", 16, 42, 22)
+    shade_near(g, "skin1", "skin2", 24, 31)
+    adult_face(g, "dbrown")
 
 
 def ada(g):
-    """Long black curls falling past her shoulders, lit dslate on the left, a pink clip, caramel skin, pink
-    tee."""
-    # the curls behind her, bunched into bumps along both edges
-    g.cel(30, 27, 20, 19, "navy", "ink", "dslate")
-    g.rect(10, 27, 41, 29, "navy")
-    g.rect(44, 27, 7, 29, "ink")
-    for y in range(24, 56, 6):
-        g.ell(9.5, y, 2.2, 2.6, "navy")
-        g.ell(51, y + 3, 2.2, 2.6, "ink")
-    for x in range(13, 50, 6):
-        g.ell(x, 56, 2.6, 2, "navy" if x < 44 else "ink")
-    for y in (30, 42):
-        g.cel(13.5, y, 2, 4, "dslate")
-        g.cel(47.5, y, 2, 4, "navy")
-    bust(g, "pink", "mauve", neck=("brown", "dbrown"), rx=22)
-    g.rect(24, 49, 11, 1, "mauve")
-    g.ell(30, 28.5, 13, 13, "navy")
-    g.cel(30, 28, 12, 12.5, "brown", "dbrown", "skin2")
-    # curls over the forehead, hanging in bumps along the brow, and locks framing the face
-    g.cel(30, 17, 15, 7.5, "navy", "ink", "dslate")
-    for x, y in ((19, 22), (24, 23), (30, 22), (36, 23), (41, 21)):
-        g.ell(x, y, 2.5, 2, "navy" if x < 38 else "ink")
-    g.cel(21, 14.5, 4, 2, "dslate")
-    g.rect(17, 22, 2, 12, "navy")
-    g.rect(42, 22, 2, 14, "ink")
-    g.cel(41, 13, 3.5, 2.5, "pink", "mauve")
-    human_face(g, "dbrown", "navy", lips="dbrown")
+    """11 and round-faced: a big head on small shoulders, long black curls in a few simple rounded locks with
+    a pink clip, caramel skin, big eyes set low, a small smile, pink tee."""
+    # the curls behind her, falling past her shoulders in a few rounded locks
+    g.cel(30, 29, 20, 19, "navy", "ink", "dslate")
+    g.rect(10, 29, 41, 23, "navy")
+    g.rect(45, 29, 6, 23, "ink")
+    for x, y, c in ((10, 36, "navy"), (10, 47, "navy"), (51, 40, "ink"), (51, 50, "ink")):
+        g.ell(x, y, 2.5, 4, c)
+    bust(g, "pink", "mauve", neck="brown", cx=31, cy=65, rx=21, ry=14, nx=26, nw=7)
+    g.rect(26, 51, 9, 1, "mauve")
+    g.p(25, 50, "mauve")
+    g.p(35, 50, "mauve")
+    # the round face, then the fringe in three rounded bumps along the brow
+    g.cel(30, 31, 14, 13.5, "brown")
+    g.cel(30, 18, 16, 8.5, "navy", "ink", "dslate")
+    for x, y, c in ((20, 23, "navy"), (28, 24, "navy"), (37, 23, "navy"), (43, 22, "ink")):
+        g.ell(x, y, 4.5, 3, c)
+    g.cel(41, 14, 3.5, 2.5, "pink", "mauve")
+    shade_under(g, "brown", "dbrown", 16, 44, 20)
+    shade_near(g, "brown", "dbrown", 27, 35)
+    # big eyes with two shines each, a blush, and a small smile
+    for x, w in ((20, 5), (32, 6)):
+        human_eye(g, x, 30, w, 7)
+    g.rect(18, 38, 3, 1, "pink")
+    g.rect(35, 38, 4, 1, "pink")
+    g.p(25, 40, "dbrown")
+    g.rect(26, 41, 3, 1, "dbrown")
+    g.p(29, 40, "dbrown")
 
 
 def ben(g):
     """Bald, a shine on the crown, the chin-strap beard along his jaw and under his chin with no moustache, the
     green tee with its dgreen collar."""
-    bust(g, "green", "dgreen", neck=("plum", "ink"))
+    bust(g, "green", "dgreen", neck="plum")
     g.rect(22, 46, 15, 1, "dgreen")
     g.p(21, 45, "dgreen")
     g.p(37, 45, "dgreen")
     g.cel(44, 29, 2.5, 4, "dbrown", "plum")
     g.rect(44, 28, 1, 3, "plum")
-    g.cel(30, 26, 13.5, 15.5, "dbrown", "plum", power=2.3)
-    g.rect(21, 14, 5, 1, "brown")
-    g.rect(20, 15, 2, 2, "brown")
+    g.cel(30, 26, 13.5, 15.5, "dbrown", power=2.3)
+    g.rect(22, 14, 4, 1, "brown")
+    g.rect(21, 15, 2, 1, "brown")
+    shade_near(g, "dbrown", "plum", 14, 30)
     # the beard: down both jaws and round under the chin, the upper lip bare
-    g.rect(17, 29, 2, 7, "ink")
-    g.rect(41, 29, 2, 9, "ink")
+    g.rect(17, 30, 2, 6, "ink")
+    g.rect(41, 30, 2, 8, "ink")
     g.ell(29, 39, 12, 4, "ink")
-    g.rect(20, 34, 18, 4, "dbrown")
-    g.rect(37, 34, 1, 4, "plum")
-    human_face(g, "plum", "ink", teeth="cream", blush=None, sclera=True)
-    g.rect(22, 36, 9, 1, "ink")
-    g.rect(23, 36, 7, 1, "cream")
+    g.rect(20, 34, 18, 3, "dbrown")
+    for x, w in ((20, 3), (32, 4)):
+        human_eye(g, x, 26, w, sclera=True)
+        g.rect(x, 23, w, 1, "ink")
+    g.p(26, 32, "plum")
+    smile(g, 26, 36, teeth="cream")
 
 
 def trista(g):
-    """A dirty blonde bob to the shoulders with amber streaks and a side-swept fringe, round glasses, the green
-    cardigan open over a white blouse, and the apple tote over her right shoulder."""
-    # the bob behind her face, flicking out at the shoulders
+    """A clean dirty blonde bob to the shoulders with a side-swept fringe and a few amber streaks, round
+    glasses, the green cardigan open over a white blouse, and the apple tote over her right shoulder."""
+    # the bob behind her face, curling under at the shoulders
     g.cel(30, 26, 17, 16, "brown", "dbrown", "tan")
-    g.rect(13, 26, 34, 18, "brown")
-    g.rect(41, 26, 6, 18, "dbrown")
-    g.rect(11, 42, 3, 2, "brown")
-    g.rect(46, 42, 3, 2, "dbrown")
-    for x, y, h in ((15, 26, 12), (18, 30, 10)):
-        g.rect(x, y, 1, h, "amber")
+    g.rect(13, 26, 34, 15, "brown")
+    g.rect(43, 26, 4, 15, "dbrown")
+    g.ell(17, 41, 5, 2.5, "brown")
+    g.ell(43, 41, 5, 2.5, "dbrown")
     bust(g, "dgreen", "forest", "green")
     g.rect(25, 46, 9, 18, "white")
     g.rect(33, 47, 1, 17, "lgrey")
@@ -533,20 +565,20 @@ def trista(g):
     g.tri((29, 46), (38, 45), (34, 52), "lgrey")
     for y in (53, 59):
         g.p(23, y, "amber")
-    g.cel(29, 28, 12.5, 12.5, "skin1", "skin2")
-    # the fringe sweeping down to the left over the brow, streaked amber
+    g.cel(29, 28, 12.5, 12.5, "skin1")
+    # the fringe sweeping down to the left over the brow, with a few amber streaks
     g.cel(31, 16, 15, 7.5, "brown", "dbrown", "tan")
-    g.tri((14, 16), (38, 19), (16, 26), "brown")
-    g.rect(15, 18, 2, 8, "brown")
-    g.rect(43, 18, 3, 12, "dbrown")
-    for x, y, h in ((20, 11, 4), (26, 9, 5), (33, 10, 4)):
+    g.tri((15, 15), (38, 18), (16, 24), "brown")
+    for x, y, h in ((21, 11, 3), (27, 9, 4), (34, 10, 3)):
         g.rect(x, y, 1, h, "amber")
-    human_face(g, "skin2", "dbrown")
-    # round glasses with a bridge, over the eyes
-    for cx, r in ((21.5, 3.5), (34, 4)):
-        for a in range(0, 360, 10):
-            g.p(cx + r * math.cos(math.radians(a)), 28.5 + (r + 0.5) * math.sin(math.radians(a)), "dbrown")
-    g.rect(25, 27, 5, 1, "dbrown")
+    shade_under(g, "skin1", "skin2", 16, 42, 18)
+    shade_near(g, "skin1", "skin2", 25, 31)
+    adult_face(g, "dbrown", brow_y=22)
+    # round glasses: thin frames round each eye, a bridge and the near arm back to the hair
+    ring(g, 21.5, 28.5, 3.6, 4.4, "dbrown")
+    ring(g, 34, 28.5, 4.4, 4.4, "dbrown")
+    g.rect(26, 27, 3, 1, "dbrown")
+    g.rect(39, 28, 3, 1, "dbrown")
     # the canvas tote hangs off her right shoulder by a brown strap, the apple facing out
     g.rect(15, 45, 1, 6, "brown")
     g.rect(3, 50, 15, 14, "cream")
