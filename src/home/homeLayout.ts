@@ -34,6 +34,11 @@ const TILE_OFFSET = 24;
 // The Pocket's denim carries a 2px stitch at its top, and its cells sit under that, 1px apart.
 const POCKET_CELLS_OFFSET = TILE_OFFSET + 3;
 const START_BUTTON: Rect = { height: 44, width: 352, x: 4, y: 514 };
+// A walker tile's cells, its portrait box, and the row a locked walker's plate and an owned
+// one's name put their caps on.
+const WALKER_TILES = { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 } as const;
+const WALKER_BOX = { dx: 3, dy: 4, size: 34 } as const;
+const WALKER_TEXT_Y = 28;
 
 // The sections stack from the bar down to Start walk, each SECTION_GAP apart; the Pocket takes
 // the rest.
@@ -208,16 +213,23 @@ export const HOME_LAYOUT = {
   walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
   // A walker tile: the portrait's box and the portrait in it, the walker's effect icons (its
   // perk) right of the box, one under another at icons.dy, and a locked walker's padlock over
-  // the tile's top-left corner and its name plate's caps, centred. The tiles sit 7px inside
-  // the section's inner frame edge, leaving the selected badge's overhang on screen.
+  // the tile's top-left corner and its name plate's caps, centred. An owned walker's name, in
+  // the 1x body font with its ink at most name.room wide, is centred at name.x between the
+  // box's right edge and the tile's last column, its caps on the plate's row. The tiles sit
+  // 7px inside the section's inner frame edge, leaving the selected badge's overhang on screen.
   walkerTile: {
-    box: { dx: 3, dy: 4, size: 34 },
+    box: WALKER_BOX,
     face: { dx: 4, dy: 5 },
     icons: { dx: 46, dy: [5, 23] },
     lock: { dx: -2, dy: -3 },
-    plateY: 28,
+    name: {
+      capY: WALKER_TEXT_Y,
+      room: 36,
+      x: Math.round((WALKER_BOX.dx + WALKER_BOX.size + WALKER_TILES.cellWidth - 1) / 2),
+    },
+    plateY: WALKER_TEXT_Y,
   },
-  walkerTiles: { cellHeight: 44, cellWidth: 77, columns: 4, gapX: GAP, gapY: 0 },
+  walkerTiles: WALKER_TILES,
 } as const satisfies Readonly<Record<string, unknown>> & {
   dogTiles: GridSpec;
   gateSpots: readonly PackPlacement[];

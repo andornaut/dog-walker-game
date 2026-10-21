@@ -1619,8 +1619,8 @@ export class StartScene extends Scene {
 
   // One tile per walker, in the shared tile states: the saved one is picked, and picking
   // another replaces it, so the walker choice is never full. An owned walker shows its
-  // portrait with its perk icon beside it; a locked one its silhouette, the padlock and its
-  // name plate.
+  // portrait with its perk icon and its name beside it; a locked one its silhouette, the
+  // padlock and its name plate.
   private drawWalkerPicker(root: GameObjects.Container, save: SaveDocument): void {
     const reduced = currentSettings(this).reducedMotion;
     const tiles = walkerTiles();
@@ -1635,7 +1635,7 @@ export class StartScene extends Scene {
         state,
         tile: true,
       });
-      const { box, face: faceAt, icons, lock, plateY } = WALKER_TILE;
+      const { box, face: faceAt, icons, lock, name, plateY } = WALKER_TILE;
       fillRect(this.graphics(content), PALETTE[look.box], {
         height: box.size,
         width: box.size,
@@ -1674,6 +1674,10 @@ export class StartScene extends Scene {
         this.lockedPlate(content, tile, plateAt);
         return;
       }
+      this.text(content, x + name.x, y + name.capY, walker.name, PALETTE.ink, {
+        originX: 0.5,
+        scale: 1,
+      });
       walkerEffectItems(gameData, id).forEach((item, n) => {
         const iconAt = { x: x + icons.dx, y: y + itemAt(icons.dy, n) };
         const key = effectIconKey(item);
