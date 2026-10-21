@@ -34,10 +34,11 @@ import { ItemCueViews } from "./itemCueViews";
 import { drawMover, moverBodyKey } from "./moverView";
 import { clipToRoad, DEPTH, ITEM_TAGS, LANE_XS, LAYOUT, PROJECTION, type Shadow } from "./stage";
 
-// Road art that may be missing is drawn as a box this tall, as wide as its hit box.
+// Road art that may be missing is drawn as a box this tall, as wide as its art: its lanes
+// less the lane's spare width beside a 1-lane sprite.
 const PLACEHOLDER_HEIGHT = ROAD_SPRITE_SIZE;
 // The icon of a need spot that shares an obstacle's art floats this high over it, at 1x.
-const SPOT_ICON_LIFT = 50;
+const SPOT_ICON_LIFT = ROAD_SPRITE_SIZE * 1.25;
 // Road pixels the skunk stands behind its cloud's near edge, so it reads as inside the spray.
 const SKUNK_IN_CLOUD = 10;
 
@@ -68,7 +69,7 @@ export function ensureRoadPlaceholders(scene: Scene): void {
     ensurePlaceholder(scene, key, {
       color: PALETTE.slate,
       height: PLACEHOLDER_HEIGHT,
-      width: lanes * cell.length - 2 * cell.inset,
+      width: lanes * cell.length - (cell.length - ROAD_SPRITE_SIZE),
     });
   for (const [id, obstacle] of Object.entries(gameData.minorObstacles)) {
     add(minorObstacleSpriteKey(id as MinorObstacleId), obstacle.shape.lanes);

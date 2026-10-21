@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import { walkerFootY } from "../runner/walkGeometry";
 import { PACK_DEPTH } from "./packFormation";
@@ -12,7 +12,6 @@ import {
   roadCameraFor,
   roadProjection,
   roadXAt,
-  rowScale,
   scaleAt,
   screenYAt,
   snapScale,
@@ -32,19 +31,12 @@ describe("roadProjection", () => {
     expect(screenYAt(projection, 0)).toBe(464);
   });
 
-  it("joins the backdrop's bottom row, band row 109, pixel for pixel", () => {
-    expect(bandRow).toBe(149);
-    expect(columnSpan(projection, bandRow, 40, 320)).toEqual({ first: 110, last: 249 });
-    expect(columnSpan(projection, bandRow, 36, 40)).toEqual({ first: 108, last: 109 });
-    expect(columnSpan(projection, bandRow, 320, 324)).toEqual({ first: 250, last: 251 });
-    expect([96, 152, 208, 264].map((x) => lineColumn(projection, bandRow, x))).toEqual([
-      138, 166, 193, 221,
-    ]);
-  });
-
-  it("reaches about 360 road pixels either side of the centre line at the band's edges", () => {
-    expect(roadXAt(projection, rowScale(projection, bandRow), 0.5)).toBeCloseTo(-179.6, 1);
-    expect(roadXAt(projection, rowScale(projection, bandRow), 359.5)).toBeCloseTo(539.6, 1);
+  it("joins the backdrop's bottom row with the road at the far scale, centred", () => {
+    expect(bandRow).toBe(road.y - 1);
+    const span = columnSpan(projection, bandRow, road.x, road.x + road.width);
+    const drawn = (span?.last ?? 0) - (span?.first ?? 0) + 1;
+    expect(Math.abs(drawn - ROAD_FAR_SCALE * road.width)).toBeLessThanOrEqual(2);
+    expect((span?.first ?? 0) + (span?.last ?? 0) + 1).toBe(SCREEN_CONFIG.width);
   });
 
   it("converges on the backdrop's vanishing point column", () => {
@@ -52,31 +44,37 @@ describe("roadProjection", () => {
     expect(project(projection, { distance: 1e9, x: 40 }).x).toBeCloseTo(180);
   });
 
-  it("shows the tuned look-ahead of road at the tuned base speed", () => {
-    const speed = TUNING.pixels.roadScrollSpeed;
-    const seconds = TUNING.seconds.lookAheadSeconds;
-    expect(projection.visibleDistance / speed).toBeCloseTo(seconds, 6);
+  // The camera derives from the band's bottom edge (farY), the feet (footY), the far scale and
+  // the tuned look-ahead: horizonY puts the far scale on farY, and focal shows the look-ahead.
+  const footY = walkerFootY(road);
+  const lookAhead = TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed;
+  it.each([
+    ["the far edge in view on the band's bottom edge", screenYAt(projection, lookAhead), road.y],
+    ["the far edge at the far scale", scaleAt(projection, lookAhead), ROAD_FAR_SCALE],
+    ["the feet at scale 1", scaleAt(projection, 0), 1],
+    ["the look-ahead in view", projection.visibleDistance, lookAhead],
+    [
+      "the horizon row",
+      ROAD_CAMERA.horizonY,
+      (road.y - ROAD_FAR_SCALE * footY) / (1 - ROAD_FAR_SCALE),
+    ],
+    ["the focal length", projection.focal, (lookAhead * ROAD_FAR_SCALE) / (1 - ROAD_FAR_SCALE)],
+  ])("derives %s from the screen layout and tuning", (_name, actual, expected) => {
+    expect(actual).toBeCloseTo(expected, 6);
   });
 
-  it("keeps the vanishing row at -164 and the join's columns whatever the speed", () => {
-    expect(ROAD_CAMERA.horizonY).toBeCloseTo(-164, 9);
-    const footY = walkerFootY(road);
-    for (const speed of [120, 150]) {
-      const camera = roadCameraFor({
-        farScale: 0.5,
-        farY: road.y,
-        footY,
-        visibleDistance: 5.25 * speed,
-      });
-      const other = roadProjection(camera, footY, road);
-      expect(other.visibleDistance).toBeCloseTo(5.25 * speed, 6);
-      expect(columnSpan(other, bandRow, 40, 320)).toEqual({ first: 110, last: 249 });
-    }
-  });
-
-  it("puts the far edge of the road in view at scale 0.5 on the band's bottom edge", () => {
-    expect(scaleAt(projection, projection.visibleDistance)).toBeCloseTo(0.5);
-    expect(screenYAt(projection, projection.visibleDistance)).toBeCloseTo(road.y);
+  it.each([120, 150, 200])("keeps the join's columns at a base speed of %d", (speed) => {
+    const camera = roadCameraFor({
+      farScale: ROAD_FAR_SCALE,
+      farY: road.y,
+      footY,
+      visibleDistance: TUNING.seconds.lookAheadSeconds * speed,
+    });
+    const other = roadProjection(camera, footY, road);
+    expect(other.visibleDistance / speed).toBeCloseTo(TUNING.seconds.lookAheadSeconds, 6);
+    expect(columnSpan(other, bandRow, road.x, road.x + road.width)).toEqual(
+      columnSpan(projection, bandRow, road.x, road.x + road.width),
+    );
   });
 
   it("keeps a lane step 56px wide at the pack", () => {

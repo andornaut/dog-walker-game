@@ -2951,7 +2951,7 @@
         "small": 0
       },
       "laneMove": 0.18,
-      "lookAheadSeconds": 4.5,
+      "lookAheadSeconds": 3.6,
       "minorHitStopSeconds": 0.6,
       "minorStumble": 0.3,
       "moverStepSeconds": 0.6,

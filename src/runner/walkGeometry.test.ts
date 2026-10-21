@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
 import { screenLayout } from "../layout/screenLayout";
 import { walkerFootY, walkGeometry, walkProjection } from "./walkGeometry";
@@ -16,8 +17,17 @@ describe("walkGeometry", () => {
     expect(walkerFootY(road)).toBeGreaterThan(620);
   });
 
-  it("brings spawns into view at the projected road's far edge, 5.25s ahead of the feet", () => {
-    const gameRoad = screenLayout(SCREEN_CONFIG).road;
+  // A 1-lane hit box is ROAD_HIT_SIZE wide whatever size the art is drawn, and each lane more
+  // adds a lane's width.
+  const gameRoad = screenLayout(SCREEN_CONFIG).road;
+  const { cell } = walkGeometry(LANE_COUNT, 1, flat, gameRoad);
+  it.each([1, 2, 3])("hits a %d-lane obstacle at the hit size, not the sprite size", (lanes) => {
+    const hit = lanes * cell.length - 2 * cell.inset;
+    expect(hit).toBe(ROAD_HIT_SIZE + (lanes - 1) * cell.length);
+    expect(hit).toBeLessThan(ROAD_SPRITE_SIZE + (lanes - 1) * cell.length);
+  });
+
+  it("brings spawns into view at the projected road's far edge, the look-ahead ahead", () => {
     const projection = walkProjection(ROAD_CAMERA, gameRoad);
     const geometry = walkGeometry(5, 3, projection, gameRoad);
     const lookAhead = TUNING.seconds.lookAheadSeconds * TUNING.pixels.roadScrollSpeed;

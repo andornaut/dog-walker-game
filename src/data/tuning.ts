@@ -166,7 +166,7 @@ export const TUNING = {
     inputLockBySize: { big: 0.5, medium: 0.25, small: 0 },
     laneMove: 0.18,
     // Road in view ahead of the walker at the base scroll speed. Read once at load.
-    lookAheadSeconds: 4.5,
+    lookAheadSeconds: 3.6,
     // A minor bump holds the road and the pack still this long.
     minorHitStopSeconds: 0.6,
     // Then lane input stays locked this long.

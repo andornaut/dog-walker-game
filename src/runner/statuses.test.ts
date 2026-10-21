@@ -6,6 +6,7 @@ import { FORCED_STOPS } from "../data/forcedStops";
 import { NEED_CARDS } from "../data/needs";
 import type { CardOption, DebuffId, DogId, EncounterId, ZoneId } from "../data/types";
 import { WORLD } from "../data/world";
+import { SCALE_STEPS } from "../layout/projection";
 import type { Choice } from "../rules/choices";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
@@ -16,6 +17,7 @@ import {
   markOverlayKey,
   shownStatus,
   startStatuses,
+  STATUS_OVERLAY_LIFT,
   type StatusData,
   statusesKey,
   statusesOf,
@@ -288,8 +290,13 @@ describe("dogDepthStep", () => {
 });
 
 describe("status overlays", () => {
-  it("draw fx-status-<status>, 6, 5, 4, 3 and 3px below the top row from 1 down to 0.5", () => {
+  it("draw fx-status-<status>", () => {
     expect(statusOverlayKey("stinky")).toBe("fx-status-stinky");
-    expect([1, 0.875, 0.75, 0.625, 0.5].map(statusOverlayLift)).toEqual([6, 5, 4, 3, 3]);
+  });
+
+  // The full-size lift at each depth step, rounded down, so a smaller step never lifts more.
+  it.each(SCALE_STEPS)("draw below the top row by the lift at step %d", (step) => {
+    expect(statusOverlayLift(step)).toBe(Math.floor(STATUS_OVERLAY_LIFT * step));
+    expect(statusOverlayLift(step)).toBeLessThanOrEqual(STATUS_OVERLAY_LIFT);
   });
 });

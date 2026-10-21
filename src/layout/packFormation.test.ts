@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { LANE_COUNT, SCREEN_CONFIG } from "../data/screen";
 import {
+  drawnPackBand,
+  hitPackPlacements,
   leashHand,
+  PACK_DRAW_SCALE,
   packBand,
   packPlacements,
   tallestPackBand,
@@ -10,19 +13,42 @@ import {
   WALKER_HANDS,
 } from "./packFormation";
 
-// The widest dog's drawn pixels across its 40px frame.
+// The widest dog's opaque pixels across a frame at the hit size.
 const WIDEST_DOG = 24;
 const LANE_WIDTH = SCREEN_CONFIG.roadWidth / LANE_COUNT;
+const FOOT_Y = 634;
 
 describe("packPlacements", () => {
-  // One dog per pack member, all ahead of the walker, each dog's drawn pixels within the lane.
+  // One dog per pack member, all ahead of the walker, each dog within the lane at the hit size.
   it.each([1, 2, 3])("places a pack of %d ahead of the walker, within the lane", (count) => {
-    const placements = packPlacements(count);
+    const placements = hitPackPlacements(count);
     expect(placements).toHaveLength(count);
     for (const { dx, footDy } of placements) {
       expect(footDy).toBeLessThan(0);
       expect(Math.abs(dx) + WIDEST_DOG / 2).toBeLessThanOrEqual(LANE_WIDTH / 2);
     }
+  });
+
+  it.each([1, 2, 3])("draws a pack of %d at its hit formation times the draw scale", (count) => {
+    const scaled = hitPackPlacements(count).map(({ dx, footDy }) => ({
+      dx: Math.round(dx * PACK_DRAW_SCALE),
+      footDy: Math.round(footDy * PACK_DRAW_SCALE),
+    }));
+    expect(packPlacements(count)).toEqual(scaled);
+  });
+
+  // The drawn band is the hit band times the draw scale, give or take each length's rounding.
+  it.each([1, 2, 3])("draws a pack of %d's band at the draw scale of its hit band", (count) => {
+    const hit = packBand(count, FOOT_Y);
+    const drawn = drawnPackBand(count, FOOT_Y);
+    expect(drawn.top).toBeLessThan(hit.top);
+    expect(drawn.bottom).toBeLessThan(hit.bottom);
+    expect(Math.abs(FOOT_Y - drawn.top - (FOOT_Y - hit.top) * PACK_DRAW_SCALE)).toBeLessThanOrEqual(
+      1,
+    );
+    expect(
+      Math.abs(FOOT_Y - drawn.bottom - (FOOT_Y - hit.bottom) * PACK_DRAW_SCALE),
+    ).toBeLessThanOrEqual(1);
   });
 
   it("staggers dogs side by side so no two share a spot", () => {

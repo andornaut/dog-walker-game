@@ -1,5 +1,6 @@
 import { DEPTH_STEPS } from "../assets/depthSteps";
-import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import { ROAD_HIT_SIZE, ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { LANE_COUNT, ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import type { GameData } from "../data/types";
 import { dotRects, HELP_LAYOUT } from "../help/helpLayout";
 import { END_LAYOUT } from "../home/endLayout";
@@ -17,7 +18,14 @@ import { CARD_LAYOUT, cardRows, largeCardRect } from "../layout/cardLayout";
 import { gridRects } from "../layout/grid";
 import { laneCenterXs, laneDividerXs } from "../layout/lanes";
 import { LOADING_ART, LOADING_TRACK, LOADING_WALKER } from "../layout/loadingScreen";
-import { COLLAR_HEIGHT, packPlacements, WALKER_HANDS } from "../layout/packFormation";
+import {
+  COLLAR_HEIGHT,
+  drawnPackBand,
+  PACK_DRAW_SCALE,
+  packBand,
+  packPlacements,
+  WALKER_HANDS,
+} from "../layout/packFormation";
 import {
   columnSpan,
   distanceAtY,
@@ -75,6 +83,7 @@ export function layoutExport(
     camera: {
       ...ROAD_CAMERA,
       centerX: projection.centerX,
+      farScale: ROAD_FAR_SCALE,
       farY: projection.farY,
       focal: projection.focal,
       footY: projection.footY,
@@ -107,14 +116,26 @@ export function layoutExport(
       dividers: laneDividerXs(LANE_COUNT, road),
       width: road.width / LANE_COUNT,
     },
+    // The pack as drawn, at the road sprite size: drawScale times its hit layout, rounded.
     pack: {
+      // By pack size, from 1: the band from the lead dog's head to the walker's feet, as drawn
+      // and as hit.
+      bands: packFormations().map((_, i) => ({
+        drawn: drawnPackBand(i + 1, walkerFootY(road)),
+        hit: packBand(i + 1, walkerFootY(road)),
+      })),
       collarHeight: COLLAR_HEIGHT,
+      drawScale: PACK_DRAW_SCALE,
       // By pack size, from 1: each dog's feet from the walker's feet, the first dog leading.
       formations: packFormations(),
       walkerFootY: walkerFootY(road),
       walkerHands: WALKER_HANDS,
     },
     regions,
+    // A 1-lane road sprite's drawn frame side, and its hit box side whatever size it is drawn.
+    // An object spanning n lanes is drawn n lanes wide less (lane width - drawSize), and hit n
+    // lanes wide less (lane width - hitSize).
+    roadSprites: { drawSize: ROAD_SPRITE_SIZE, hitSize: ROAD_HIT_SIZE },
     scenes: {
       cards: {
         ...CARD_LAYOUT,

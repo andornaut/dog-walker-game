@@ -161,10 +161,15 @@ export function standsOnGround(key: string): boolean {
   return GROUND_UI_KEYS.has(key) || !UNMEASURED_PREFIXES.some((prefix) => key.startsWith(prefix));
 }
 
-// A 1x road sprite's frame side: dogs, obstacles and encounters are this square, the walker
-// and the tall encounters this wide and half again as tall, and tips, treats and puddles this
-// wide and half as tall.
-export const ROAD_SPRITE_SIZE = 40;
+// A 1x road sprite's drawn frame side: dogs, obstacles and encounters are this square, the
+// walker and the tall encounters this wide and half again as tall, and tips, treats and
+// puddles this wide and half as tall. An object spanning n lanes is drawn n lanes wide less
+// the lane's spare width beside a 1-lane sprite.
+export const ROAD_SPRITE_SIZE = 56;
+
+// A 1-lane road object's hit box side, independent of how big it is drawn: an object spanning
+// n lanes is hit n lanes wide less the lane's spare width beside this.
+export const ROAD_HIT_SIZE = 40;
 
 // The skunk stands on its spray cloud, which is its hit box.
 export const SKUNK_CLOUD_KEY = "skunk-cloud";
