@@ -27,15 +27,35 @@ import {
   rowRects,
   SHOP_LAYOUT,
   SHOP_MESSAGE_FIT,
+  shopListBottom,
+  shopMessageCapTop,
   shopRowTextRoom,
+  shopScrollbar,
   shopTabFace,
   shopTabRects,
 } from "../home/shopLayout";
 import { HOLD, type HoldPress, moveHold, startHold, tickHold } from "../input/hold";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import {
+  dragScroll,
+  isDragging,
+  LIST_FLING,
+  type ListScroll,
+  listScroll,
+  pressScroll,
+  releaseScroll,
+  resizeScroll,
+  scrollBy,
+  scrollMax,
+  type ScrollRule,
+  scrollTo,
+  scrollToShow,
+  stepScroll,
+  wheelScroll,
+} from "../input/listScroll";
 import { containsPoint, type Rect } from "../layout/rect";
 import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
-import { cents } from "../rules/units";
+import { cents, read } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
@@ -49,20 +69,29 @@ import {
   plateColors,
   SHOP_ART,
 } from "./itemArt";
+import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss, openOverlay, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, type FontRole } from "./pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  type FontRole,
+  pixelFontMetrics,
+  placePixelText,
+} from "./pixelText";
 import { currentSettings, profileSave, purchaseInProfile, takeCelebrations } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import {
   addCloseButton,
   addNineSlice,
+  addPanel,
   addSelectFrame,
   addSelectTile,
   addTagImage,
   addTapBurst,
   clearScene,
+  selectOuter,
   tagFrame,
   TEXT_SCALE,
 } from "./uiKit";
@@ -97,6 +126,16 @@ const PANEL: Rect = LAYOUT.panel;
 const TAB_RECTS: readonly Rect[] = shopTabRects();
 const ROW = LAYOUT.row;
 const OWNED_DX = ROW.ownedDx;
+const LIST: Rect = LAYOUT.list.rect;
+const PLATE: Rect = LAYOUT.message.plate;
+const SCROLLBAR = LAYOUT.scrollbar;
+// A press that travels past the tap distance drags the list.
+const SCROLL_RULE: ScrollRule = {
+  ...LIST_FLING,
+  dragSlopPx: read(gameData.tuning, "pixels", "tapMaxDistance"),
+};
+// A screen-sized texture, white over the list area: the mask that clips the list to it.
+const LIST_MASK_KEY = "shop-list-mask";
 
 function sameTarget(a: Target, b: Target | undefined): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -111,21 +150,28 @@ interface PlacedRow {
 // The Pet shop under the home screen's top bar: a Gear tab of gear for sale, and a Dogs tab
 // of dog slots and dogs. Tapping a row the bank covers buys it; one it cannot pays a shake and
 // says why. Anything affordable wears the gold outline, and the row the shop opened on, or
-// the last one tapped, is framed. Holding a dog or gear row opens its detail card. Left and
-// right switch tabs, up and down move the frame, Enter or Space taps the framed row, and
-// Escape closes the card or the shop.
+// the last one tapped, is framed. Holding a dog or gear row opens its detail card. A tab's
+// headings and rows scroll in the list area under the tabs, by a drag, the wheel or the page
+// keys, with a scrollbar beside a list longer than the view; a drag taps nothing. Left and
+// right switch tabs, up and down move the frame and bring its row into view, Enter or Space
+// taps the framed row, and Escape closes the card or the shop.
 export class ShopScene extends Scene {
   private action: HomeAction = { kind: "none" };
   private containers = new Map<string, GameObjects.Container>();
   private detail: Purchase | undefined;
   private focusId: string | null = null;
   private hold: HoldPress | undefined;
-  // The last tap's message: a purchase in green, a refusal in dark red.
+  // The scrolled headings and rows, and the scrollbar beside them.
+  private list: GameObjects.Container | undefined;
+  // The last tap's message, on its plate over the list's top: a purchase in green, a refusal
+  // in dark red.
   private message: { readonly refused: boolean; readonly text: string } | null = null;
   private placed: PlacedRow[] = [];
   private pressed: Target | undefined;
   private presses: TargetPressListener | undefined;
   private resumeKey: SceneKey | undefined;
+  private scroll: ListScroll = listScroll(0);
+  private scrollbar: GameObjects.Graphics | undefined;
   private shakes = new Map<string, number>();
   private tab: ShopTab = "gear";
 
@@ -140,10 +186,12 @@ export class ShopScene extends Scene {
     this.hold = undefined;
     this.message = null;
     this.pressed = undefined;
+    this.scroll = listScroll(0);
     this.shakes = new Map();
     this.tab = data.focus === undefined ? (data.tab ?? "gear") : shopTabOf(data.focus);
     this.focusId = data.focus === undefined ? null : shopRowId(this.save().owned, data.focus);
     this.render();
+    this.showFocus();
 
     // A tap acts once its dip ends; holding a dog or gear row opens its detail card, and the
     // hold takes the press. With a card open, a tap anywhere closes it, as on Stats.
@@ -181,6 +229,7 @@ export class ShopScene extends Scene {
         this.hold = moveHold(this.hold, { x: pointer.x, y: pointer.y });
       }
     });
+    this.listenScroll();
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => this.onKey(event.key));
     // The top bar and the margins around the card close the shop, card and all; back closes an
     // open card first, as Escape does.
@@ -194,6 +243,88 @@ export class ShopScene extends Scene {
 
   private save(): SaveDocument {
     return profileSave(this);
+  }
+
+  // A finger or mouse that lands on the list drags it once it passes the tap distance: the
+  // press under way taps nothing and holds nothing. The wheel moves the list too.
+  private listenScroll(): void {
+    listenOnePress(this, {
+      down: (pointer) => {
+        if (this.detail === undefined && containsPoint(LIST, pointer.x, pointer.y)) {
+          this.scroll = pressScroll(pointer.y, this.time.now, this.scroll);
+        }
+      },
+      move: (pointer) => {
+        const was = isDragging(this.scroll);
+        this.scroll = dragScroll(SCROLL_RULE, pointer.y, this.time.now, this.scroll);
+        if (!isDragging(this.scroll)) {
+          return;
+        }
+        if (!was) {
+          this.presses?.cancel();
+          this.hold = undefined;
+          this.pressed = undefined;
+          this.render();
+        }
+        this.placeList();
+      },
+      up: () => {
+        const { reducedMotion } = currentSettings(this);
+        this.scroll = releaseScroll(SCROLL_RULE, reducedMotion, this.time.now, this.scroll);
+      },
+    });
+    this.input.on(
+      "wheel",
+      (_pointer: Input.Pointer, _over: unknown, _dx: number, deltaY: number) => {
+        if (this.detail === undefined) {
+          this.moveList(wheelScroll(SCROLL_RULE, deltaY, this.scroll));
+        }
+      },
+    );
+  }
+
+  private moveList(scroll: ListScroll): void {
+    this.scroll = scroll;
+    this.placeList();
+  }
+
+  // The list at its scroll, and the scrollbar's thumb beside it.
+  private placeList(): void {
+    this.list?.setY(-this.scroll.y);
+    const g = this.scrollbar;
+    if (g === undefined) {
+      return;
+    }
+    g.clear();
+    const bar = shopScrollbar(this.scroll.max, this.scroll.y);
+    if (bar === null) {
+      return;
+    }
+    fillRect(g, PALETTE[SCROLLBAR.trackColor], bar.track);
+    fillRect(g, PALETTE[SCROLLBAR.edgeColor], bar.thumb);
+    const edge = SCROLLBAR.edge;
+    fillRect(g, PALETTE[SCROLLBAR.thumbColor], {
+      height: bar.thumb.height - 2 * edge,
+      width: bar.thumb.width - 2 * edge,
+      x: bar.thumb.x + edge,
+      y: bar.thumb.y + edge,
+    });
+  }
+
+  // The framed row, with its frame, brought into view.
+  private showFocus(): void {
+    const focused = this.placed.find(({ row }) => row.id === this.focusId);
+    if (focused !== undefined) {
+      this.moveList(scrollToShow(LIST, selectOuter(focused.rect), this.scroll));
+    }
+  }
+
+  // The bottom of the open tab's list as laid out.
+  private listBottom(save: SaveDocument): number {
+    if (this.tab === "gear") {
+      return shopListBottom(LAYOUT.gear.rows, gearRows(gameData, save.owned).length);
+    }
+    return shopListBottom(LAYOUT.dogs.dogRows, dogRows(gameData, save.owned).length);
   }
 
   // An open card closes, else the shop.
@@ -230,6 +361,19 @@ export class ShopScene extends Scene {
       this.focusId = ids[next] ?? this.focusId;
       this.message = null;
       this.render();
+      this.showFocus();
+      return;
+    }
+    const page = LIST.height - LAYOUT.list.pageOverlap;
+    const pages: Readonly<Record<string, () => ListScroll>> = {
+      End: () => scrollTo(this.scroll.max, this.scroll),
+      Home: () => scrollTo(0, this.scroll),
+      PageDown: () => scrollBy(page, this.scroll),
+      PageUp: () => scrollBy(-page, this.scroll),
+    };
+    const paged = pages[key];
+    if (paged !== undefined) {
+      this.moveList(paged());
       return;
     }
     if (isConfirmKey(key) && this.focusId !== null) {
@@ -272,7 +416,15 @@ export class ShopScene extends Scene {
     if (tabId !== undefined) {
       return { kind: "tab", tab: tabId };
     }
-    const hit = this.placed.find(({ rect }) => containsPoint(rect, x, y));
+    // The message's plate lies over the rows; only the list area's part of a row is pressed.
+    if (this.message !== null && containsPoint(PLATE, x, y)) {
+      return undefined;
+    }
+    if (!containsPoint(LIST, x, y)) {
+      return undefined;
+    }
+    const listY = y + this.scroll.y;
+    const hit = this.placed.find(({ rect }) => containsPoint(rect, x, listY));
     return hit === undefined ? undefined : { id: hit.row.id, kind: "row" };
   }
 
@@ -294,7 +446,11 @@ export class ShopScene extends Scene {
     this.render();
   }
 
-  override update(): void {
+  override update(_time: number, deltaMs: number): void {
+    const flung = stepScroll(SCROLL_RULE, deltaMs, this.scroll);
+    if (flung !== this.scroll) {
+      this.moveList(flung);
+    }
     if (this.hold !== undefined) {
       const { fire, press } = tickHold(this.hold, this.time.now);
       this.hold = press;
@@ -318,6 +474,9 @@ export class ShopScene extends Scene {
         this.back();
         return;
       case "tab":
+        if (target.tab !== this.tab) {
+          this.scroll = listScroll(0);
+        }
         this.tab = target.tab;
         this.message = null;
         this.render();
@@ -418,18 +577,22 @@ export class ShopScene extends Scene {
     });
     this.drawCard(root);
     this.drawTabs(root);
+    // The headings and rows, clipped to the list area and moved up by the scroll.
+    const list = this.add.container(0, 0);
+    root.add(list);
+    this.list = list;
+    this.maskList(list);
     if (this.tab === "gear") {
-      this.drawGear(root, save);
+      this.drawGear(list, save);
     } else {
-      this.drawDogs(root, save);
+      this.drawDogs(list, save);
     }
+    // A bought dog leaves its list, so the list may now be shorter.
+    this.scroll = resizeScroll(scrollMax(LIST, this.listBottom(save)), this.scroll);
+    this.scrollbar = this.graphics(root);
+    this.placeList();
     if (this.message !== null) {
-      const { refused, text } = this.message;
-      const at = { x: LAYOUT.headingX, y: LAYOUT.message.y };
-      const label = this.text(root, at, text, {
-        color: refused ? PALETTE.darkRed : PALETTE.forest,
-      });
-      fitPixelText(label, SHOP_MESSAGE_FIT, at.x, at.y);
+      this.drawMessage(root, this.message);
     }
     if (this.detail !== undefined) {
       this.drawDetail(save, this.detail);
@@ -440,6 +603,39 @@ export class ShopScene extends Scene {
     const g = this.add.graphics();
     parent.add(g);
     return g;
+  }
+
+  // Clips list to the list area. Without WebGL there are no filters and the list is not clipped.
+  private maskList(list: GameObjects.Container): void {
+    if (!this.textures.exists(LIST_MASK_KEY)) {
+      const mask = this.textures.createCanvas(
+        LIST_MASK_KEY,
+        SCREEN_CONFIG.width,
+        SCREEN_CONFIG.height,
+      );
+      const context = mask?.getContext();
+      if (mask === null || context === undefined) {
+        return;
+      }
+      context.fillStyle = "#ffffff";
+      context.fillRect(LIST.x, LIST.y, LIST.width, LIST.height);
+      mask.refresh();
+    }
+    list.enableFilters().filters?.internal.addMask(LIST_MASK_KEY);
+  }
+
+  // The message on the ui-hint plate across the list's top, in one line fitted to the plate.
+  private drawMessage(
+    root: GameObjects.Container,
+    message: { readonly refused: boolean; readonly text: string },
+  ): void {
+    root.add(addPanel(this, PLATE, "ui-hint"));
+    const x = PLATE.x + LAYOUT.message.textDx;
+    const label = this.text(root, { x, y: PLATE.y }, message.text, {
+      color: message.refused ? PALETTE.darkRed : PALETTE.forest,
+    });
+    const { style } = fitPixelText(label, SHOP_MESSAGE_FIT, x, PLATE.y);
+    placePixelText(label, x, shopMessageCapTop(pixelFontMetrics(this, "body"), style.scale));
   }
 
   // The card, its title band and its close control.

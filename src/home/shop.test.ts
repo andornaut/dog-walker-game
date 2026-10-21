@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId } from "../data/types";
+import { scrollMax } from "../input/listScroll";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
 import { maxHearts } from "../rules/dogs";
 import { capitalize, SIZE_NAMES } from "../rules/effectText";
@@ -28,7 +29,15 @@ import {
   shopTabOf,
   slotRows,
 } from "./shop";
-import { SHOP_LAYOUT, SHOP_MESSAGE_FIT, shopRowTextRoom } from "./shopLayout";
+import {
+  SHOP_LAYOUT,
+  SHOP_MESSAGE_FIT,
+  shopListBottom,
+  shopMessageCapTop,
+  shopRowTextRoom,
+  shopScrollbar,
+  shopTabRects,
+} from "./shopLayout";
 
 const data = { ...gameData, tuning: TEST_TUNING };
 const dollars = (amount: number) => cents(amount * 100);
@@ -218,9 +227,9 @@ describe("a shop row's text", () => {
   });
 });
 
-// Every message a tap in the shop leaves fits on one line under the lists, its lowest ink inside
-// the card: each blocked row's reason, each priced row's "can't afford" with its whole price
-// short, and each purchase's thanks.
+// Every message a tap in the shop leaves fits on one line on its plate, its ink inside the
+// plate's frame: each blocked row's reason, each priced row's "can't afford" with its whole
+// price short, and each purchase's thanks.
 describe("the shop's message", () => {
   const everyRow = [
     ...gearRows(gameData, owned),
@@ -237,13 +246,87 @@ describe("the shop's message", () => {
     messageLine(gameData.homeText, { kind: "bought", name: row.name, purchase: row.purchase }),
   ]);
   const body = fontFileMetrics("font-body");
-  const { panel } = SHOP_LAYOUT;
+  const { frame, plate, textDx } = SHOP_LAYOUT.message;
 
-  it.each([...new Set(messages)])("sets %j on one line inside the card", (text) => {
+  it.each([...new Set(messages)])("sets %j on one line inside its plate's frame", (text) => {
     const { room, styles } = SHOP_MESSAGE_FIT;
     const fitted = fitInFont("font-body", styles, room, plainMarks(text ?? ""));
-    expect(fitted.widest).toBeLessThanOrEqual(room);
-    const inkBottom = SHOP_LAYOUT.message.y + inkRowsFromCapTop(body) * fitted.style.scale;
-    expect(inkBottom).toBeLessThanOrEqual(panel.y + panel.height);
+    expect(fitted.lines).toHaveLength(1);
+    expect(fitted.widest).toBeLessThanOrEqual(plate.width - 2 * textDx);
+    const capTop = shopMessageCapTop(body, fitted.style.scale);
+    expect(capTop).toBeGreaterThanOrEqual(plate.y + frame);
+    expect(capTop + inkRowsFromCapTop(body) * fitted.style.scale).toBeLessThanOrEqual(
+      plate.y + plate.height - frame,
+    );
+  });
+
+  // The plate sits at the top of the list area, under the tabs, across the list's width.
+  it("lies across the list's top, under the tabs", () => {
+    const { rect } = SHOP_LAYOUT.list;
+    const tabsBottom = Math.max(...shopTabRects().map(({ height, y }) => y + height));
+    expect(plate).toMatchObject({ width: rect.width, x: rect.x, y: rect.y });
+    expect(plate.y + plate.height).toBeGreaterThan(tabsBottom);
+    expect(SHOP_LAYOUT.tab.drawY + SHOP_LAYOUT.tab.drawHeight).toBeLessThanOrEqual(plate.y);
+  });
+});
+
+// Each tab's list, with nothing bought and with everything bought, scrolls far enough to bring
+// its last row inside the list area, and no further than its padding below it.
+describe("the shop's list", () => {
+  const { padBottom, rect } = SHOP_LAYOUT.list;
+  const listBottom = rect.y + rect.height;
+  const everything: Owned = {
+    dogSlots: data.dogSlots.length,
+    dogs: Object.keys(data.dogs) as DogId[],
+    gear: Object.keys(data.shopGear) as Owned["gear"],
+    walkers: [],
+  };
+  const lists = [
+    ["gear, nothing bought", SHOP_LAYOUT.gear.rows, gearRows(data, owned).length],
+    ["gear, everything bought", SHOP_LAYOUT.gear.rows, gearRows(data, everything).length],
+    ["dogs, nothing bought", SHOP_LAYOUT.dogs.dogRows, dogRows(data, owned).length],
+    ["dogs, everything bought", SHOP_LAYOUT.dogs.dogRows, dogRows(data, everything).length],
+  ] as const;
+
+  it.each(lists)("%s: scrolls its last row into view", (_, spec, count) => {
+    const bottom = shopListBottom(spec, count);
+    const max = scrollMax(rect, bottom);
+    const lastRowBottom = spec.y + (Math.max(1, count) - 1) * spec.pitch + spec.height;
+    expect(lastRowBottom - max).toBeLessThanOrEqual(listBottom - padBottom);
+    expect(bottom - max).toBeLessThanOrEqual(listBottom);
+  });
+
+  // max: how far the list moves; y: its scroll. The track runs the list area's height.
+  it.each<[string, number, number, "bottom" | "top"]>([
+    ["sits at the top scrolled to the top", 200, 0, "top"],
+    ["sits at the bottom scrolled to the bottom", 200, 200, "bottom"],
+    ["sits at the bottom of a long list scrolled to the bottom", 5000, 5000, "bottom"],
+  ])("the scrollbar's thumb %s", (_, max, y, end) => {
+    const bar = shopScrollbar(max, y);
+    expect(bar).not.toBeNull();
+    const { thumb, track } = bar ?? { thumb: rect, track: rect };
+    expect(track).toMatchObject({ height: rect.height, y: rect.y });
+    expect(thumb.height).toBeGreaterThanOrEqual(SHOP_LAYOUT.scrollbar.thumbMin);
+    if (end === "top") {
+      expect(thumb.y).toBe(track.y);
+    } else {
+      expect(thumb.y + thumb.height).toBe(track.y + track.height);
+    }
+  });
+
+  it("shows no scrollbar for a list that fits", () => {
+    expect(shopScrollbar(0, 0)).toBeNull();
+  });
+
+  // The scrollbar stays clear of the list area, where the rows and their frames are clipped,
+  // and inside the card.
+  it("puts the scrollbar between the list area and the card's edge", () => {
+    const bar = shopScrollbar(100, 0);
+    const { panel } = SHOP_LAYOUT;
+    const thumb = bar?.thumb ?? rect;
+    expect(thumb.x).toBeGreaterThanOrEqual(rect.x + rect.width);
+    expect(thumb.x + thumb.width).toBeLessThanOrEqual(
+      panel.x + panel.width - SHOP_LAYOUT.scrollbar.inset,
+    );
   });
 });

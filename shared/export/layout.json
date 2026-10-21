@@ -2161,8 +2161,25 @@
       },
       "headingRight": 344,
       "headingX": 16,
+      "list": {
+        "padBottom": 8,
+        "pageOverlap": 48,
+        "rect": {
+          "height": 436,
+          "width": 336,
+          "x": 12,
+          "y": 112
+        }
+      },
       "message": {
-        "y": 540
+        "frame": 3,
+        "plate": {
+          "height": 28,
+          "width": 336,
+          "x": 12,
+          "y": 112
+        },
+        "textDx": 10
       },
       "panel": {
         "height": 512,
@@ -2186,6 +2203,16 @@
         "textGap": 6,
         "width": 328,
         "x": 16
+      },
+      "scrollbar": {
+        "edge": 1,
+        "edgeColor": "ink",
+        "inset": 2,
+        "thumbColor": "tan",
+        "thumbMin": 16,
+        "thumbWidth": 5,
+        "trackColor": "plum",
+        "trackWidth": 3
       },
       "tab": {
         "drawHeight": 28,
