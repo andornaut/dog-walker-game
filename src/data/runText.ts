@@ -60,7 +60,7 @@ export const RUN_TEXT = {
     fullPackHome: "Full pack home! +{amount}",
     kindWords: "Second chance! {owner} lets it go.",
     lowHearts: "{owner} has 1♥ left!",
-    luckyNeighbor: "A neighbor shares treats! Everyone +1♥",
+    luckyNeighbor: "A neighbor pets the pack! Everyone +1♥",
     luckyWallet: "Found a wallet! +{amount}",
     muddyHearts: "{owner} has {hearts}♥ left! Muddy bumps cost {cost}♥.",
     plainHit: "{dog} bumped the {obstacle}! {owner} −{hearts}♥",

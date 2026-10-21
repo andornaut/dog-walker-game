@@ -8,15 +8,6 @@ import type { Encounter, EncounterId } from "./types";
 // Money amounts and modifier values are keys into tuning.ts; hearts are per owner.
 // art is a key into the art manifest's images.
 export const ENCOUNTERS = {
-  biscuitNeighbour: {
-    kind: "lucky",
-    name: "Generous neighbor",
-    resolution: {
-      art: "card-biscuit-neighbour-take",
-      effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
-      kind: "instant",
-    },
-  },
   lostWallet: {
     kind: "lucky",
     name: "Lost wallet",
@@ -52,6 +43,15 @@ export const ENCOUNTERS = {
       ],
     },
     shape: { lanes: 1, rows: 1 },
+  },
+  pettingNeighbor: {
+    kind: "lucky",
+    name: "Friendly neighbor",
+    resolution: {
+      art: "card-petting-neighbor-take",
+      effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
+      kind: "instant",
+    },
   },
   puddle: {
     hitWord: "SPLOSH!",

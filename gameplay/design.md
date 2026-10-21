@@ -157,7 +157,7 @@ Each debuff has one source: Muddy from a puddle, Stinky from the skunk's Quick r
 
 Good things to bump into on purpose. None opens a card: each bobs on the road and pays out on contact, with a short popup and a quip from the owners who gained.
 
-- **Generous neighbor:** a treat for each dog: +♥ to every owner, the hearts jackpot
+- **Friendly neighbor:** a pat for each dog: +♥ to every owner, the hearts jackpot
 - **Lost wallet:** +$$ found money, the money jackpot
 
 ### Moving hazards

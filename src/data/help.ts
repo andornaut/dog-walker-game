@@ -20,7 +20,7 @@ export const HELP_PAGES = [
     body:
       "Tips are {tip} each, and they're most of your earnings, so grab plenty. " +
       "A dog that reaches a treat cheers its owner: +{treatHearts}♥. " +
-      "Aim for a lost wallet or a generous neighbor, too.",
+      "Aim for a lost wallet or a friendly neighbor, too.",
     title: "Tips and treats",
   },
   {

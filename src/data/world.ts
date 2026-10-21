@@ -22,7 +22,7 @@ export const WORLD = {
       roadShadowColor: "#5a6988",
       speed: 1,
       weights: {
-        luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
+        luckyFinds: { lostWallet: 1, pettingNeighbor: 1 },
         minorObstacles: {
           ball: 1,
           barrier2: 1,
@@ -77,7 +77,7 @@ export const WORLD = {
       roadShadowColor: "#b86f50",
       speed: 1,
       weights: {
-        luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
+        luckyFinds: { lostWallet: 1, pettingNeighbor: 1 },
         minorObstacles: {
           ball: 1,
           barrier2: 0,
@@ -132,7 +132,7 @@ export const WORLD = {
       roadShadowColor: "#262b44",
       speed: 1,
       weights: {
-        luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
+        luckyFinds: { lostWallet: 1, pettingNeighbor: 1 },
         minorObstacles: {
           ball: 1,
           barrier2: 1,
@@ -187,7 +187,7 @@ export const WORLD = {
       roadShadowColor: "#2e2019",
       speed: 1,
       weights: {
-        luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
+        luckyFinds: { lostWallet: 1, pettingNeighbor: 1 },
         minorObstacles: {
           ball: 1,
           barrier2: 1,
@@ -242,7 +242,7 @@ export const WORLD = {
       roadShadowColor: "#e4a672",
       speed: 1,
       weights: {
-        luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
+        luckyFinds: { lostWallet: 1, pettingNeighbor: 1 },
         minorObstacles: {
           ball: 1,
           barrier2: 1,
@@ -297,7 +297,7 @@ export const WORLD = {
       roadShadowColor: "#26292f",
       speed: 0.94,
       weights: {
-        luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
+        luckyFinds: { lostWallet: 1, pettingNeighbor: 1 },
         minorObstacles: {
           ball: 1,
           barrier2: 0,
