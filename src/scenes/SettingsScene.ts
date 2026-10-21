@@ -15,6 +15,7 @@ import {
   type SettingsLayout,
   settingsLayout,
   setVolumeSteps,
+  SWITCH_NOTE_FIT,
   VOLUME_STEPS,
   type VolumeKey,
   volumePercent,
@@ -31,7 +32,7 @@ import { drawFocusRing, fillRect } from "./draw";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, wrapPixelText } from "./pixelText";
+import { addPixelText, fitPixelText } from "./pixelText";
 import { currentSettings, setSettings } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { soundboardOf } from "./soundboard";
@@ -344,11 +345,12 @@ export class SettingsScene extends Scene {
       font: "title",
       scale: TEXT_SCALE,
     });
-    const noteStyle = { color: PALETTE.darkBrown, scale: SWITCH_ROW.scale };
-    const lines = wrapPixelText(this, noteStyle, SWITCH_ROW.noteWidth, words[row.note]);
-    const note = addPixelText(this, x + LABEL_DX, y + SWITCH_ROW.noteDy, lines.join("\n"), {
-      ...noteStyle,
+    const noteAt = { x: x + LABEL_DX, y: y + SWITCH_ROW.noteDy };
+    const note = addPixelText(this, noteAt.x, noteAt.y, words[row.note], {
+      color: PALETTE.darkBrown,
+      scale: SWITCH_ROW.scale,
     });
+    fitPixelText(note, SWITCH_NOTE_FIT, noteAt.x, noteAt.y);
     tile.content.add(icon === undefined ? [label, note] : [icon, label, note]);
     const switchX = x + SWITCH.dx;
     const switchY = y + SWITCH.dy;

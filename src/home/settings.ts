@@ -1,6 +1,7 @@
 import { laneDirectionForKey } from "../input/keyBindings";
 import { type CloseControl, closeControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
+import { textFitStylesOnLines } from "../layout/textFit";
 import type { Settings } from "../save/schema";
 
 // The settings screen moves a volume in 5% steps, from 0 to 1.
@@ -90,6 +91,13 @@ export const SETTINGS_ROW = {
     switch: { dx: 188, dy: 23, height: 16, width: 32 },
   },
 } as const;
+
+// A switch row's note: up to noteLines lines at 2x within noteWidth, its glyphs closer or at
+// 1x where they would not fit.
+export const SWITCH_NOTE_FIT = {
+  room: SETTINGS_ROW.switch.noteWidth,
+  styles: textFitStylesOnLines(SETTINGS_ROW.switch.noteLines),
+};
 
 const PANEL = { width: 248 };
 // The rows start under the title; the panel ends this far under the last.

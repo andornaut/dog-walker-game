@@ -4,12 +4,12 @@ import { ownerFaceKey } from "../assets/spriteKeys";
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
 import type { DogId } from "../data/types";
-import { OWNER_TAB, ownerTabRect, quipPlace } from "../hud/walkHud";
+import { OWNER_TAB, ownerTabRect, QUIP_STYLES, quipPlace, quipRoom } from "../hud/walkHud";
 import type { Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { drawFramedRect } from "./draw";
 import { PALETTE } from "./palette";
-import { addPixelText, placePixelText } from "./pixelText";
+import { addPixelText, fitPixelText, pixelFontMetrics, placePixelText } from "./pixelText";
 import { firstTag, playTag } from "./sprites";
 import { addPanel, BUBBLE_FADE_MS, fadeAway } from "./uiKit";
 
@@ -125,9 +125,15 @@ export class OwnerTabs {
   }
 
   // The quip in its bubble beside the tab, leaning away from the pack, its tail toward the tab.
+  // A quip too wide for either side wraps onto a second line.
   private addQuip(tab: Rect, quip: string): GameObjects.GameObject[] {
     const text = addPixelText(this.scene, 0, 0, quip, { color: PALETTE.plum });
-    const place = quipPlace(LAYOUT.walkView, this.hooks.packX(), tab, Math.ceil(text.width));
+    // The bubble holds the label's width, which counts the last glyph's trailing pixel.
+    const room = quipRoom(LAYOUT.walkView, tab) - 1;
+    const { lines } = fitPixelText(text, { room, styles: QUIP_STYLES }, 0, 0);
+    const { lineHeight } = pixelFontMetrics(this.scene, "body");
+    const shown = { lineHeight, lines: lines.length, width: Math.ceil(text.width) };
+    const place = quipPlace(LAYOUT.walkView, this.hooks.packX(), tab, shown);
     placePixelText(text, place.textX, place.textY);
     const parts: GameObjects.GameObject[] = [addPanel(this.scene, place.bubble, "ui-quip")];
     if (this.scene.textures.exists(TAIL_KEY)) {

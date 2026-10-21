@@ -204,7 +204,7 @@
       "height": 24,
       "width": 93,
       "x": 4,
-      "y": 106
+      "y": 108
     },
     "heartLabels": [
       {
@@ -692,10 +692,10 @@
   "messageStrip": {
     "icon": {
       "x": 14,
-      "y": 61
+      "y": 62
     },
     "panel": {
-      "height": 50,
+      "height": 52,
       "width": 344,
       "x": 8,
       "y": 54

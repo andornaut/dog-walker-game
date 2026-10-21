@@ -2,8 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { DEFAULT_SETTINGS } from "../save/schema";
-import { bodyTextWidth } from "../testing/bodyFont";
-import { wrapWords } from "../text/lines";
+import { fitInFont } from "../testing/fontInk";
 import {
   knobX,
   SETTINGS_ROW,
@@ -11,6 +10,7 @@ import {
   setVolumeSteps,
   type SliderTrack,
   soundVolumes,
+  SWITCH_NOTE_FIT,
   volumePercent,
   volumeStepAt,
   volumeStepForKey,
@@ -125,15 +125,15 @@ describe("soundVolumes", () => {
 });
 
 describe("a switch row's note", () => {
-  const { noteLines, noteWidth, scale } = SETTINGS_ROW.switch;
+  const { noteLines, noteWidth } = SETTINGS_ROW.switch;
   const { motionNote, soundNote } = gameData.menuText.settings;
 
   it.each([
     ["motionNote", motionNote],
     ["soundNote", soundNote],
-  ])("wraps %s to at most noteLines lines within noteWidth", (_, note) => {
-    const lines = wrapWords((line) => bodyTextWidth(scale, line), noteWidth, note);
-    expect(lines.length).toBeLessThanOrEqual(noteLines);
-    expect(lines.every((line) => bodyTextWidth(scale, line) <= noteWidth)).toBe(true);
+  ])("sets %s on at most noteLines lines within noteWidth", (_, note) => {
+    const fitted = fitInFont("font-body", SWITCH_NOTE_FIT.styles, SWITCH_NOTE_FIT.room, note);
+    expect(fitted.lines.length).toBeLessThanOrEqual(noteLines);
+    expect(fitted.widest).toBeLessThanOrEqual(noteWidth);
   });
 });

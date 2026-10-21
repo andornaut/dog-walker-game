@@ -8,7 +8,7 @@ import { screenLayout } from "../layout/screenLayout";
 import { walkLength } from "../rules/route";
 import { read } from "../rules/units";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics, fontInk } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics, fontInk } from "../testing/fontInk";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { maxEffects } from "./effectIcons";
@@ -28,7 +28,9 @@ import {
   leadSlot,
   OWNER_TAB,
   ownerTabRect,
+  QUIP_STYLES,
   quipPlace,
+  quipRoom,
   TITLE_CAP_ROWS,
   WALK_BAR,
   WALK_BAR_BUTTONS,
@@ -272,7 +274,7 @@ describe("the owner's tab and quip", () => {
     ["left of card 1's tab with the pack right of centre", 1, middle + 1, short, "left"],
   ])("puts the quip %s", (_name, slot, packX, width, side) => {
     const tab = tabs[slot] ?? screen;
-    const place = quipPlace(screen, packX, tab, width);
+    const place = quipPlace(screen, packX, tab, { lineHeight: 10, lines: 1, width });
     expect(place.side).toBe(side);
     expect(place.bubble.width).toBe(width + 2 * quip.padX);
     expect(place.bubble.y).toBe(tab.y + quip.top);
@@ -287,10 +289,12 @@ describe("the owner's tab and quip", () => {
 });
 
 // Every owner's quip, at 1x in the body font as the tab's bubble measures it, keeps its bubble
-// on screen beside each card's tab, wherever the pack is.
+// on screen beside each card's tab, wherever the pack is, wrapping onto a second line, the
+// bubble growing up, where neither side has room for one.
 describe("an owner's quip bubble", () => {
   const screen = LAYOUT.walkView;
   const { quip } = OWNER_TAB;
+  const { lineHeight } = fontFileMetrics("font-body");
   const quips = Object.values(gameData.quips).flatMap((moments) => Object.values(moments).flat());
   const packs = [screen.x, screen.x + screen.width / 2, screen.x + screen.width - 1];
   it.each(
@@ -298,11 +302,17 @@ describe("an owner's quip bubble", () => {
       quips.map((text) => [slot, text, ownerTabRect(card)] as const),
     ),
   )("beside card %i's tab, keeps %j on screen", (_slot, text, tab) => {
-    const width = Math.ceil(bodyTextWidth(1, plainMarks(text)));
+    const room = quipRoom(screen, tab) - 1;
+    const { lines } = fitInFont("font-body", QUIP_STYLES, room, plainMarks(text));
+    expect(lines.length).toBeLessThanOrEqual(2);
+    const width = Math.max(...lines.map((line) => bodyTextWidth(1, line)));
     for (const packX of packs) {
-      const { bubble } = quipPlace(screen, packX, tab, width);
+      const place = quipPlace(screen, packX, tab, { lineHeight, lines: lines.length, width });
+      const { bubble } = place;
       expect(bubble.x).toBeGreaterThanOrEqual(screen.x + quip.margin);
       expect(bubble.x + bubble.width).toBeLessThanOrEqual(screen.x + screen.width - quip.margin);
+      expect(bubble.y + bubble.height).toBe(tab.y + quip.top + quip.height);
+      expect(place.textY - bubble.y).toBe(quip.capsY - quip.top);
     }
   });
 });

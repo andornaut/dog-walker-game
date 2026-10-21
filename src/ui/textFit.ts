@@ -18,6 +18,11 @@ export const TEXT_FIT_STYLES: readonly TextFitStyle[] = [
   { letterSpacing: 0, scale: 1 },
 ];
 
+// TEXT_FIT_STYLES, each wrapping onto up to lines lines.
+export function textFitStylesOnLines(lines: number): TextFitStyle[] {
+  return TEXT_FIT_STYLES.map((style) => ({ ...style, lines }));
+}
+
 // TEXT_FIT_STYLES with two lines at 2x tried before 1x, for text in a box that can grow a line.
 export const WRAPPING_TEXT_FIT_STYLES: readonly TextFitStyle[] = [
   { letterSpacing: 0, scale: 2 },

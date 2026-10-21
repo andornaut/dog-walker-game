@@ -2,6 +2,7 @@ import { gameData } from "../data";
 import type { DebuffId, DogId } from "../data/types";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
+import type { TextFitStyle } from "../layout/textFit";
 import { maxEffects } from "./effectIcons";
 import { heartRows } from "./hudView";
 
@@ -205,17 +206,37 @@ export interface QuipPlace {
   textY: number;
 }
 
+// How wide a quip's text may be beside tab: the room on its roomier side. A quip wider than
+// this wraps.
+export function quipRoom(screen: Pick<Rect, "width" | "x">, tab: Rect): number {
+  const { quip } = OWNER_TAB;
+  const right = screen.x + screen.width - quip.margin - (tab.x + tab.width + quip.gap);
+  const left = tab.x - quip.gap - (screen.x + quip.margin);
+  return Math.max(left, right) - 2 * quip.padX;
+}
+
+// A quip is 1x body text on up to two lines.
+export const QUIP_STYLES: readonly TextFitStyle[] = [{ letterSpacing: 0, lines: 2, scale: 1 }];
+
+// A quip's text as drawn: its lines, lineHeight apart, the widest width wide.
+export interface QuipText {
+  lineHeight: number;
+  lines: number;
+  width: number;
+}
+
 // The quip beside its tab: right of it while the pack's centre is at or left of the screen's
 // centre, else left of it, so it leans away from the pack. A side without room gives way to
-// the other.
+// the other. Each line past the first grows the bubble up by a line.
 export function quipPlace(
   screen: Pick<Rect, "width" | "x">,
   packX: number,
   tab: Rect,
-  textWidth: number,
+  text: QuipText,
 ): QuipPlace {
   const { quip } = OWNER_TAB;
-  const width = textWidth + 2 * quip.padX;
+  const width = text.width + 2 * quip.padX;
+  const grow = (Math.max(1, text.lines) - 1) * text.lineHeight;
   const right = tab.x + tab.width + quip.gap;
   const left = tab.x - quip.gap - width;
   const rightFits = right + width <= screen.x + screen.width - quip.margin;
@@ -232,11 +253,11 @@ export function quipPlace(
   const tailX =
     side === "right" ? x - quip.tail.width + quip.tail.overlap : x + width - quip.tail.overlap;
   return {
-    bubble: { height: quip.height, width, x, y: tab.y + quip.top },
+    bubble: { height: quip.height + grow, width, x, y: tab.y + quip.top - grow },
     side,
     tail: { x: tailX, y: tab.y + quip.tail.y },
     textX: x + quip.padX,
-    textY: tab.y + quip.capsY,
+    textY: tab.y + quip.capsY - grow,
   };
 }
 

@@ -1,7 +1,7 @@
 import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementId, GameData } from "../data/types";
 import type { Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { type TextFitStyle, textFitStylesOnLines } from "../layout/textFit";
 import type { SaveDocument } from "../save/schema";
 import { fillLine } from "../text/lines";
 import { MENU_TEXT_FIELDS } from "./menuText";
@@ -97,7 +97,7 @@ export function badgeNameFit(
 ): { room: number; styles: TextFitStyle[] } {
   return {
     room: slot.width - 4,
-    styles: TEXT_FIT_STYLES.map((style) => ({ ...style, lines: nameLines })),
+    styles: textFitStylesOnLines(nameLines),
   };
 }
 
