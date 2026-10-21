@@ -16,7 +16,7 @@ import type { DogId, GearId, Size, WalkerId } from "../data/types";
 import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
-import { bubbleRect } from "../home/bubbleRect";
+import { bubbleRect, speechLines } from "../home/bubbleRect";
 import {
   type DetailCard,
   dogDetail,
@@ -54,7 +54,16 @@ import {
   tapDog,
   tapGear,
 } from "../home/home";
-import { DOG_TILE_TEXT_ROOM, dogTileFeeY, HOME_LAYOUT, sectionFill } from "../home/homeLayout";
+import {
+  DOG_TILE_TEXT_ROOM,
+  dogTileFeeY,
+  HOME_LAYOUT,
+  LOGBOOK_TEXT_FIT,
+  logbookTextTops,
+  sectionFill,
+  SPEECH_ROOM,
+  speechBubbleHeight,
+} from "../home/homeLayout";
 import {
   bubbleSpeech,
   type HomeAction,
@@ -98,12 +107,12 @@ import { closeControl } from "../layout/closeControl";
 import { gridRects, rectIndexAt } from "../layout/grid";
 import { COLLAR_HEIGHTS, leashHand, type PackPlacement } from "../layout/packFormation";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
-import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
 import { startWakeLock, stopWakeLock } from "../pwa";
 import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
-import { fillLine, wrapWords } from "../text/lines";
+import { fillLine } from "../text/lines";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import {
   drawFocusRing,
@@ -134,7 +143,14 @@ import { listenOnePress } from "./onePress";
 import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, type FontRole, pixelFontMetrics } from "./pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  type FontRole,
+  pixelFontMetrics,
+  placePixelText,
+  setPixelText,
+} from "./pixelText";
 import {
   currentSettings,
   isMuted,
@@ -186,7 +202,6 @@ const GATE_SPOTS: readonly PackPlacement[] = HOME_LAYOUT.gateSpots;
 const PORCH_SPOTS: Readonly<Partial<Record<DogId, { footY: number; x: number }>>> =
   HOME_LAYOUT.porchSpots;
 const PORCH_DOG_OFFSET = HOME_LAYOUT.porchDogOffset;
-const GAP = HOME_LAYOUT.gap;
 const TOP_BAR = HOME_LAYOUT.topBar;
 const HELP_BUTTON: Rect = HOME_LAYOUT.help.hit;
 const HELP_ICON = HOME_LAYOUT.help.icon;
@@ -221,9 +236,7 @@ const FOCUS_OUTSET = 5;
 const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
 
 // The widest line the speech bubble holds, in characters, and how many lines it shows.
-const SPEECH_CHARS = 30;
-const SPEECH_LINES = 4;
-const SPEECH_LINE_HEIGHT = 15;
+const SPEECH = HOME_LAYOUT.speech;
 // ui-sticker: its word is centred on x 28 with its capitals from row 12, at most 36px wide.
 const STICKER = {
   height: 28,
@@ -954,6 +967,19 @@ export class StartScene extends Scene {
     return label;
   }
 
+  // Fits a body label at TEXT_SCALE in the first of fit's styles, its capitals' top at (x, y);
+  // a label set smaller is centred on the row its capitals take at TEXT_SCALE.
+  private fitOnRow(
+    label: GameObjects.BitmapText,
+    fit: { room: number; styles: readonly TextFitStyle[] },
+    x: number,
+    y: number,
+  ): void {
+    const { style } = fitPixelText(label, fit, x, y);
+    const { capHeight } = pixelFontMetrics(this, "body");
+    placePixelText(label, x, y + Math.floor((capHeight * (TEXT_SCALE - style.scale)) / 2));
+  }
+
   private graphics(parent: GameObjects.Container): GameObjects.Graphics {
     const g = this.add.graphics();
     parent.add(g);
@@ -1237,17 +1263,20 @@ export class StartScene extends Scene {
     const walks = walksPlayed(save.stats);
     const left = HOME_LAYOUT.logbook.textX;
     const words = gameData.homeText.topBar;
+    const tops = logbookTextTops(pixelFontMetrics(this, "body"), TEXT_SCALE);
+    const line = (value: string, top: number) =>
+      this.fitOnRow(this.text(root, left, top, value, PALETTE.cream), LOGBOOK_TEXT_FIT, left, top);
     if (bestWalk === null) {
-      this.text(root, left, textY.noWalks, words.noWalks, PALETTE.cream);
+      line(words.noWalks, tops.one);
     } else {
-      const best = fillLine(FIELDS.topBar, words, "best", {
-        amount: dollarText(bestWalk.earnedCents),
-      });
-      this.text(root, left, textY.best, best, PALETTE.cream);
+      line(
+        fillLine(FIELDS.topBar, words, "best", { amount: dollarText(bestWalk.earnedCents) }),
+        tops.first,
+      );
       const count = fillLine(FIELDS.topBar, words, walks === 1 ? "walkOne" : "walkMany", {
         count: String(walks),
       });
-      this.text(root, left, textY.walks, count, PALETTE.cream);
+      line(count, tops.second);
     }
     this.iconButton(root, "logbook", LOGBOOK_ICON, (x, y) => {
       const icon = imageIcon(this, "icon-logbook", x, y);
@@ -1351,27 +1380,28 @@ export class StartScene extends Scene {
       this.quips,
     );
     const unsaved = storageState(this) === "unavailable" ? [gameData.homeText.unsaved] : [];
-    const lines = [...unsaved, ...speech]
-      .flatMap((part) => wrapWords((line) => line.length, SPEECH_CHARS, part))
-      .slice(0, SPEECH_LINES);
-    const top = GATE.y + 6;
+    const probe = this.text(root, 0, 0, "", PALETTE.plum).setVisible(false);
+    const measure = (line: string) => {
+      setPixelText(probe, line);
+      return probe.width;
+    };
+    const lines = speechLines(measure, SPEECH_ROOM, SPEECH.lines, [...unsaved, ...speech]);
+    probe.destroy();
+    const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.
     const bubble = this.add.container(0, 0);
     root.add(bubble);
+    const body = pixelFontMetrics(this, "body");
+    const pitch = body.lineHeight * TEXT_SCALE;
     const labels = lines.map((line, i) =>
-      this.text(root, x, top + 4 + i * SPEECH_LINE_HEIGHT, line, PALETTE.plum, { originX: 0.5 }),
+      this.text(root, x, top + SPEECH.padTop + i * pitch, line, PALETTE.plum, { originX: 0.5 }),
     );
-    const width = Math.ceil(Math.max(...labels.map((label) => label.width))) + 10;
-    const height = lines.length * SPEECH_LINE_HEIGHT + 6;
+    const width = Math.ceil(Math.max(...labels.map((label) => label.width))) + 2 * SPEECH.padX;
+    const height = speechBubbleHeight(body, lines.length);
     // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.
     const board = PET_SHOP_BOARD;
     const centred = Math.round(x - width / 2);
-    const rect = bubbleRect(
-      board,
-      { clearance: 2, margin: GAP / 2 },
-      { x, y: top },
-      { height, width },
-    );
+    const rect = bubbleRect(board, SPEECH, { x, y: top }, { height, width });
     labels.forEach((label) => label.setX(label.x + rect.x - centred));
     const quip = addNineSlice(this, "ui-quip", rect);
     if (quip === undefined) {
@@ -1520,7 +1550,7 @@ export class StartScene extends Scene {
       const feeY = dogTileFeeY(pixelFontMetrics(this, "body"));
       const fitText = (value: string, top: number) => {
         const label = this.text(content, x + textX, top, value, ink);
-        fitPixelText(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
+        this.fitOnRow(label, { room: DOG_TILE_TEXT_ROOM, styles: TEXT_FIT_STYLES }, x + textX, top);
       };
       fitText(padlock === null ? dog.name : gameData.homeText.lockedName, y + nameY);
       if (padlock !== null) {

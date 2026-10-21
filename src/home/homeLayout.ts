@@ -2,7 +2,8 @@ import type { DogId } from "../data/types";
 import type { GridSpec } from "../layout/grid";
 import type { PackPlacement } from "../layout/packFormation";
 import type { Rect } from "../layout/rect";
-import { type FontMetrics, inkRowsFromCapTop } from "../ui/fontMetrics";
+import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { type FontMetrics, inkRowsFromCapTop, inkRowsOfLines } from "../ui/fontMetrics";
 import type { SectionId } from "./sections";
 
 // Every tappable thing is at least 44 game pixels (48 CSS pixels on a 390px-wide phone) on
@@ -12,8 +13,8 @@ const GAP = 8;
 const GATE = { height: 156, y: 40 };
 // The top bar's content lies above its 2px bottom rule; every control is centred on the
 // middle row of that area. A 16px icon is centred on its rows 7 and 8 (art centre at its
-// y + 8), and text is placed by its capitals, TOP_BAR_CAPS tall, two lines TOP_BAR_LINE_GAP
-// apart.
+// y + 8), and text is placed by its capitals: the bank's TOP_BAR_CAPS tall, the Logbook's
+// as tall as the body font draws them, two lines TOP_BAR_LINE_GAP apart.
 const TOP_BAR_HEIGHT = 40;
 const TOP_BAR_RULE = 2;
 const TOP_BAR_MID = (TOP_BAR_HEIGHT - TOP_BAR_RULE) / 2;
@@ -22,7 +23,6 @@ const TOP_BAR_CAPS = 10;
 const TOP_BAR_LINE_GAP = 6;
 const TOP_BAR_ICON_Y = TOP_BAR_MID - TOP_BAR_ICON / 2;
 const TOP_BAR_ONE_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS / 2;
-const TOP_BAR_FIRST_LINE_Y = TOP_BAR_MID - TOP_BAR_CAPS - TOP_BAR_LINE_GAP / 2;
 
 // The separator bar under the gate scene: 3 rows (the gate scene's last row is 195).
 const GATE_BAR = { height: 3, y: GATE.y + GATE.height };
@@ -184,6 +184,11 @@ export const HOME_LAYOUT = {
     walker: WALKER_SECTION,
   },
   settings: { hit: { height: 44, width: 44, x: 316, y: 0 }, icon: { x: 328, y: TOP_BAR_ICON_Y } },
+  // The walker's speech bubble, its top speech.top under the gate scene's: up to lines lines
+  // of 2x body text a line of the font apart, padX in from its sides, the first line's
+  // capitals padTop under its top and the last line's lowest ink padBottom over its bottom. It
+  // keeps clearance clear of the Pet shop's board and margin inside the screen's left edge.
+  speech: { clearance: 2, lines: 4, margin: GAP / 2, padBottom: 3, padTop: 4, padX: 5, top: 6 },
   startButton: START_BUTTON,
   // Start walk's label caps: on the raised face when ready, on the sunk face when not.
   startLabel: { notReadyY: 15, readyY: 12, scale: 3 },
@@ -202,12 +207,7 @@ export const HOME_LAYOUT = {
     iconSize: TOP_BAR_ICON,
     mid: TOP_BAR_MID,
     rule: TOP_BAR_RULE,
-    textY: {
-      bank: TOP_BAR_ONE_LINE_Y,
-      best: TOP_BAR_FIRST_LINE_Y,
-      noWalks: TOP_BAR_ONE_LINE_Y,
-      walks: TOP_BAR_FIRST_LINE_Y + TOP_BAR_CAPS + TOP_BAR_LINE_GAP,
-    },
+    textY: { bank: TOP_BAR_ONE_LINE_Y },
   },
   walkerAtGate: { footY: GATE.y + GATE.height, x: 180 },
   walkerOrigin: { x: 14, y: WALKER_SECTION.y + TILE_OFFSET },
@@ -240,6 +240,38 @@ export const HOME_LAYOUT = {
   sections: Readonly<Record<SectionId, Rect>>;
   walkerTiles: GridSpec;
 };
+
+// The Logbook's text after its icon, inside its hit area: the best walk over the walk count, or
+// the one line before any walk, each in the first of TEXT_FIT_STYLES whose ink fits.
+export const LOGBOOK_TEXT_FIT = {
+  room: HOME_LAYOUT.logbook.hit.x + HOME_LAYOUT.logbook.hit.width - HOME_LAYOUT.logbook.textX,
+  styles: TEXT_FIT_STYLES,
+} as const;
+
+// The capitals' tops of the Logbook's text in the body font at scale, centred on the bar's
+// middle row: one line alone, or the first and second of two.
+export function logbookTextTops(
+  body: FontMetrics,
+  scale: number,
+): { first: number; one: number; second: number } {
+  const caps = body.capHeight * scale;
+  const first = TOP_BAR_MID - caps - TOP_BAR_LINE_GAP / 2;
+  return { first, one: TOP_BAR_MID - caps / 2, second: first + caps + TOP_BAR_LINE_GAP };
+}
+
+// How wide a line of the walker's speech may be, as a label measures it: a bubble that wide
+// fits between the screen's margin and the Pet shop's board, so it never reaches the board.
+export const SPEECH_ROOM =
+  HOME_LAYOUT.petShop.board.x -
+  HOME_LAYOUT.speech.clearance -
+  HOME_LAYOUT.speech.margin -
+  2 * HOME_LAYOUT.speech.padX;
+
+// The speech bubble's height for lines lines of 2x body text.
+export function speechBubbleHeight(body: FontMetrics, lines: number): number {
+  const { padBottom, padTop } = HOME_LAYOUT.speech;
+  return padTop + inkRowsOfLines(body, lines) * 2 + padBottom;
+}
 
 // How wide a dog tile's name and fee may be: from its text column to padRight inside its edge.
 export const DOG_TILE_TEXT_ROOM =

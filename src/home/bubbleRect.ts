@@ -1,4 +1,5 @@
 import type { Rect } from "../layout/rect";
+import { wrapWords } from "../text/lines";
 
 // The walker's speech bubble: centred on x at the given top, moved left when it is tall enough
 // to reach the Pet shop's board so it ends clear of it by clearance, and kept margin from the
@@ -13,4 +14,24 @@ export function bubbleRect(
   const reaches = at.y + size.height >= keepClear.y;
   const left = reaches ? Math.min(centred, keepClear.x - sizes.clearance - size.width) : centred;
   return { ...size, x: Math.max(sizes.margin, left), y: at.y };
+}
+
+// The bubble's lines: each paragraph in turn wrapped at spaces to room as width measures a line,
+// each starting on a new line. A paragraph that would run past most lines is left out whole,
+// with those after it, so no paragraph is cut short.
+export function speechLines(
+  width: (line: string) => number,
+  room: number,
+  most: number,
+  paragraphs: readonly string[],
+): string[] {
+  const lines: string[] = [];
+  for (const paragraph of paragraphs) {
+    const wrapped = wrapWords(width, room, paragraph);
+    if (lines.length + wrapped.length > most) {
+      break;
+    }
+    lines.push(...wrapped);
+  }
+  return lines;
 }

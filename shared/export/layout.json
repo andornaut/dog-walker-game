@@ -1698,6 +1698,15 @@
           "y": 11
         }
       },
+      "speech": {
+        "clearance": 2,
+        "lines": 4,
+        "margin": 4,
+        "padBottom": 3,
+        "padTop": 4,
+        "padX": 5,
+        "top": 6
+      },
       "startButton": {
         "height": 44,
         "width": 352,
@@ -1726,10 +1735,7 @@
         "mid": 19,
         "rule": 2,
         "textY": {
-          "bank": 14,
-          "best": 6,
-          "noWalks": 14,
-          "walks": 22
+          "bank": 14
         }
       },
       "walkerAtGate": {

@@ -7,15 +7,19 @@ import { BADGE_OFFSET } from "../layout/badge";
 import { gridRects } from "../layout/grid";
 import { insetRect } from "../layout/rect";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { cents } from "../rules/units";
 import { fitInFont, fontFileMetrics } from "../testing/fontInk";
+import { fillNames } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
 import { FEEDBACK } from "./feedback";
-import { dogFeeText } from "./home";
+import { dogFeeText, dollarText } from "./home";
 import {
   DOG_TILE_TEXT_ROOM,
   dogTileFeeY,
   HOME_LAYOUT,
+  LOGBOOK_TEXT_FIT,
+  logbookTextTops,
   pocketLining,
   sectionFill,
 } from "./homeLayout";
@@ -184,6 +188,9 @@ describe("top bar", () => {
   const { caps, iconSize, mid, textY } = topBar;
   const iconCentre = (icon: { y: number }) => icon.y + iconSize / 2;
   const capsCentre = (y: number) => y + caps / 2;
+  const body = fontFileMetrics("font-body");
+  const logbookCaps = body.capHeight * 2;
+  const logbookLines = logbookTextTops(body, 2);
 
   it("puts the middle row at the middle of the area above its rule", () => {
     expect(mid).toBe((topBar.height - topBar.rule) / 2);
@@ -193,13 +200,38 @@ describe("top bar", () => {
     ["the coin", iconCentre(topBar.coin)],
     ["the bank text", capsCentre(textY.bank)],
     ["the logbook icon", iconCentre(logbook.icon)],
-    ["the logbook's two text lines", (textY.best + textY.walks + caps) / 2],
-    ["the logbook's single line", capsCentre(textY.noWalks)],
+    ["the logbook's two text lines", (logbookLines.first + logbookLines.second + logbookCaps) / 2],
+    ["the logbook's single line", logbookLines.one + logbookCaps / 2],
     ["the help button", iconCentre(help.icon)],
     ["the sound button", iconCentre(mute.icon)],
     ["the settings button", iconCentre(settings.icon)],
   ])("centres %s on the bar's middle row", (_, centre) => {
     expect(centre).toBe(mid);
+  });
+});
+
+// The Logbook's lines, at the largest best walk and walk count, fit its hit area at 2x in the
+// body font, the second line's lowest ink above the bar's rule.
+describe("the top bar's Logbook text", () => {
+  const body = fontFileMetrics("font-body");
+  const { topBar } = HOME_LAYOUT;
+  const words = gameData.homeText.topBar;
+  const most = dollarText(cents(9_999_900));
+  it.each([
+    words.noWalks,
+    fillNames(words.best, { amount: most }),
+    fillNames(words.walkMany, { count: "9999" }),
+    fillNames(words.walkOne, { count: "1" }),
+  ])("sets %j at 2x", (text) => {
+    const { room, styles } = LOGBOOK_TEXT_FIT;
+    const fitted = fitInFont("font-body", styles, room, plainMarks(text));
+    expect(fitted.widest).toBeLessThanOrEqual(room);
+    expect(fitted.style.scale).toBe(2);
+  });
+
+  it("keeps the second line's lowest ink above the rule", () => {
+    const { second } = logbookTextTops(body, 2);
+    expect(second + inkRowsFromCapTop(body) * 2).toBeLessThanOrEqual(topBar.height - topBar.rule);
   });
 });
 
