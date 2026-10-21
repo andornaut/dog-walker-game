@@ -225,7 +225,7 @@ export class PackView {
       const sprite = this.dogSprites.get(dog);
       const shown = drawn.get(dog);
       if (sprite !== undefined && shown !== undefined) {
-        this.poseDog(dog, sprite, shown.key, pose, frame, {
+        this.poseDog(walk, dog, sprite, shown.key, pose, frame, {
           x: feet.x,
           y: feet.footY - Math.round(spriteMetrics(shown.key).feetY * shown.scale),
         });
@@ -269,6 +269,7 @@ export class PackView {
   // pack's pose; the bark pops over its head as the tell starts, once, whether or not a
   // reaction holds back the lean. The pack's pose holds still only while the walk is halted.
   private poseDog(
+    walk: Walk,
     dog: DogId,
     sprite: GameObjects.Sprite,
     key: string,
@@ -277,7 +278,7 @@ export class PackView {
     head: { x: number; y: number },
   ): void {
     const { halted, still } = frame;
-    const pull = pullPose(gameData, frame.pulls, dog);
+    const pull = pullPose(gameData, walk.run, frame.pulls, dog);
     const tag = pull?.tag ?? pose;
     const shown = this.dogTags.get(dog);
     if (tag !== shown && !this.reacting.has(sprite)) {

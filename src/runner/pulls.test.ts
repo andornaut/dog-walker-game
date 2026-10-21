@@ -108,6 +108,17 @@ const item = (kind: WalkItem["kind"], id: number, lane: number, y = 100): WalkIt
   y,
 });
 
+// A squirrel darting left across the road, moving from 80px of scroll.
+const DARTING: MoverPath = {
+  direction: -1,
+  enterTravel: 200,
+  lanesPerPixel: 0.001,
+  motion: "cross",
+  movement: "dart",
+  tilt: 0,
+  warning: 80,
+};
+
 // Each frame steps the pulls, then the walk, as the run scene does.
 function after(walk: Walk, seconds: number, pulls: Pulls = NO_PULLS) {
   let walked = walk;
@@ -135,27 +146,24 @@ describe("what a dog pulls toward", () => {
     const straining = after(walk, 0.5);
     expect(straining.tells).toEqual([{ direction: -1, dog: "koda", kind: "squirrel" }]);
     expect(straining.walk.road.control.target).toBe(2);
-    expect(pullPose(data, straining.pulls, "koda")).toEqual({ direction: -1, tag: "tell" });
+    expect(pullPose(data, straining.walk.run, straining.pulls, "koda")).toEqual({
+      direction: -1,
+      tag: "tell",
+    });
     const pulled = after(walk, 1.1);
     expect(pulled.pulled).toEqual([{ direction: -1, dog: "koda", moved: true }]);
-    expect(pullPose(data, pulled.pulls, "koda")).toEqual({ direction: -1, tag: "pull" });
+    expect(pullPose(data, pulled.walk.run, pulled.pulls, "koda")).toEqual({
+      direction: -1,
+      tag: "pull",
+    });
     expect(isSteeringLocked(after(walk, 1.3).walk.road.control)).toBe(false);
     expect(after(walk, 3).walk.road.control.target).toBe(1);
   });
 
   it("pulls toward a darting squirrel from its cue, once it moves", () => {
-    const darting: MoverPath = {
-      direction: -1,
-      enterTravel: 200,
-      lanesPerPixel: 0.001,
-      motion: "cross",
-      movement: "dart",
-      tilt: 0,
-      warning: 80,
-    };
     const walk = walkWith(
       ["koda"],
-      [{ ...item("squirrel", 0, 4), mover: { path: darting, since: 0 } }],
+      [{ ...item("squirrel", 0, 4), mover: { path: DARTING, since: 0 } }],
     );
     expect(after(walk, 0.5).tells).toEqual([{ direction: 1, dog: "koda", kind: "squirrel" }]);
     // The tell runs out at 1s; the squirrel moves from 80px of scroll, at 1s.
@@ -187,8 +195,14 @@ describe("what a dog pulls toward", () => {
     expect(after(walkWith(["koda"], [item("squirrel", 0, 2)]), 2).tells).toEqual([]);
   });
 
-  it("ignores a target the pack has passed", () => {
-    expect(after(walkWith(["koda"], [item("squirrel", 0, 0, 600)]), 1.5).tells).toEqual([]);
+  it.each([
+    { squirrel: item("squirrel", 0, 0, 600), standing: "standing" },
+    {
+      squirrel: { ...item("squirrel", 0, 0, 600), mover: { path: DARTING, since: 600 } },
+      standing: "darting",
+    },
+  ])("ignores a $standing squirrel the pack has passed", ({ squirrel }) => {
+    expect(after(walkWith(["koda"], [squirrel]), 1.5).tells).toEqual([]);
   });
 
   // Of three dogs, the biggest leads, the next walks front-left and the smallest front-right.
@@ -228,7 +242,10 @@ describe("the fairness rule", () => {
     expect(held.pulled).toEqual([]);
     expect(held.walk.road.control.target).toBe(2);
     expect(held.pulls.strain?.blocked).toBe(true);
-    expect(pullPose(data, held.pulls, "koda")).toEqual({ direction: -1, tag: "tell" });
+    expect(pullPose(data, held.walk.run, held.pulls, "koda")).toEqual({
+      direction: -1,
+      tag: "tell",
+    });
     // The cone passes the pack's band at about 2.85s.
     const cleared = after(walk, 3.5);
     expect(cleared.pulled).toEqual([{ direction: -1, dog: "koda", moved: true }]);

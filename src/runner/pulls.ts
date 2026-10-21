@@ -4,6 +4,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { countTally } from "../rules/achievements";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
+import type { RunState } from "../state/runState";
 import { approachOutcomes } from "./approach";
 import { pullLane } from "./laneControl";
 import { destinationLane } from "./laneMotion";
@@ -134,14 +135,18 @@ interface Target {
   readonly y: number;
 }
 
-// A darting squirrel is a target from when its cue shows, in any lane; anything else while
-// it is wholly ahead of the pack and off the pack's lane.
+// Only what is wholly ahead of the pack is a target: nothing acts on the pack once it reaches
+// the pack's rows. A darting squirrel is one from when its cue shows, in any lane; anything else
+// while it is off the pack's lane.
 function targetOf(
   geometry: PullGeometry,
   lane: number,
   kind: PullTargetKind,
   item: WalkItem,
 ): Target | null {
+  if (item.y + item.height > geometry.packBand.top) {
+    return null;
+  }
   const centreAt = (lanePosition: number) => ({
     x: (lanePosition + item.laneSpan / 2) * geometry.cell.length,
     y: item.y + item.height / 2,
@@ -156,8 +161,7 @@ function targetOf(
       y: item.y,
     };
   }
-  const ahead = item.y + item.height <= geometry.packBand.top;
-  return ahead && item.lane !== lane
+  return item.lane !== lane
     ? {
         centre: centreAt(item.lane),
         itemId: item.id,
@@ -424,9 +428,11 @@ export function stepPulls(
   };
 }
 
-// The dog's tell while it strains, then its pull pose for one lane move after a pull.
+// The dog's tell while it strains, then its pull pose for one of the walker's lane moves after
+// a pull.
 export function pullPose(
-  data: Pick<GameData, "tuning">,
+  data: Pick<GameData, "debuffs" | "dogs" | "tuning" | "walkers">,
+  run: Pick<RunState, "debuffs" | "modifiers" | "pack" | "walker">,
   pulls: Pulls,
   dog: DogId,
 ): PullPose | null {
@@ -434,7 +440,7 @@ export function pullPose(
   if (strain?.dog === dog) {
     return { direction: strain.direction, tag: "tell" };
   }
-  const recent = last !== null && pulls.clock - last.at < read(data.tuning, "seconds", "laneMove");
+  const recent = last !== null && pulls.clock - last.at < laneMoveSeconds(data, run);
   if (!recent || last.dog !== dog) {
     return null;
   }
