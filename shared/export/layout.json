@@ -1165,11 +1165,9 @@
           "y": 400
         },
         "greeting": {
-          "lineTops": [
-            320,
-            338
-          ],
-          "maxWidth": 296
+          "lines": 2,
+          "maxWidth": 296,
+          "top": 320
         },
         "info": {
           "iconGap": 4,
@@ -2163,6 +2161,16 @@
         "width": 312,
         "x": 24,
         "y": 140
+      },
+      "detailText": {
+        "badgeY": 48,
+        "foot": 8,
+        "gap": 8,
+        "goalY": 136,
+        "nameY": 92,
+        "statusY": 112,
+        "textRight": 16,
+        "x": 16
       },
       "dogColumns": {
         "gap": 4
