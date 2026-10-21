@@ -21,7 +21,7 @@ import {
 const WALKER = { feetY: 68 };
 // A big, a medium and a small dog, as drawn.
 const DOGS: readonly DrawnDog[] = [
-  { feetY: 55, frameHeight: 58, opaqueWidth: 38 },
+  { feetY: 52, frameHeight: 54, opaqueWidth: 36 },
   { feetY: 45, frameHeight: 48, opaqueWidth: 24 },
   { feetY: 36, frameHeight: 38, opaqueWidth: 21 },
 ];

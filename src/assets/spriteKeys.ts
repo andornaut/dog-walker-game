@@ -123,7 +123,7 @@ export function standsOnGround(key: string): boolean {
 export const ROAD_SPRITE_SIZE = 48;
 
 // A dog's road sprite frame side by its size: a medium dog's is ROAD_SPRITE_SIZE.
-export const DOG_FRAME_SIDES: Readonly<Record<Size, number>> = { big: 58, medium: 48, small: 38 };
+export const DOG_FRAME_SIDES: Readonly<Record<Size, number>> = { big: 54, medium: 48, small: 38 };
 
 // A 1-lane road object's hit box side, independent of how big it is drawn: an object spanning
 // n lanes is hit n lanes wide less the lane's spare width beside this.

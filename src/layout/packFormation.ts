@@ -81,17 +81,17 @@ const WALKER_FEET_CLEARANCE = 5;
 
 // The walker sprite's hands, relative to its feet, as drawn at the sprite size.
 export const WALKER_HANDS = { heightAboveFeet: 20, leftDx: -16, rightDx: 16 };
-// Each dog's collar top, above its feet, as drawn on its road sprite: big dogs about 23,
+// Each dog's collar top, above its feet, as drawn on its road sprite: big dogs about 22,
 // medium 21 and small 17.
 export const COLLAR_HEIGHTS: Readonly<Record<DogId, number>> = {
   archie: 20,
   biscuit: 21,
   duchess: 17,
-  koda: 22,
+  koda: 21,
   nugget: 17,
-  penny: 23,
+  penny: 22,
   pierre: 21,
-  snowball: 23,
+  snowball: 22,
   zippy: 17,
 };
 
