@@ -1,0 +1,274 @@
+{
+  "rust": {
+    "hex": "be4a2f",
+    "darker": "dbrown"
+  },
+  "ochre": {
+    "hex": "d77643",
+    "darker": "rust"
+  },
+  "cream": {
+    "hex": "ead4aa",
+    "darker": "tan"
+  },
+  "tan": {
+    "hex": "e4a672",
+    "darker": "brown"
+  },
+  "brown": {
+    "hex": "b86f50",
+    "darker": "dbrown"
+  },
+  "dbrown": {
+    "hex": "733e39",
+    "darker": "plum"
+  },
+  "plum": {
+    "hex": "3e2731",
+    "darker": "ink"
+  },
+  "dred": {
+    "hex": "a22633",
+    "darker": "plum"
+  },
+  "red": {
+    "hex": "e43b44",
+    "darker": "dred"
+  },
+  "orange": {
+    "hex": "f77622",
+    "darker": "rust"
+  },
+  "amber": {
+    "hex": "feae34",
+    "darker": "orange"
+  },
+  "yellow": {
+    "hex": "fee761",
+    "darker": "amber"
+  },
+  "green": {
+    "hex": "63c74d",
+    "darker": "dgreen"
+  },
+  "dgreen": {
+    "hex": "3e8948",
+    "darker": "forest"
+  },
+  "forest": {
+    "hex": "265c42",
+    "darker": "teal"
+  },
+  "teal": {
+    "hex": "193c3e",
+    "darker": "ink"
+  },
+  "blue": {
+    "hex": "124e89",
+    "darker": "navy"
+  },
+  "sky": {
+    "hex": "0099db",
+    "darker": "blue"
+  },
+  "cyan": {
+    "hex": "2ce8f5",
+    "darker": "sky"
+  },
+  "white": {
+    "hex": "ffffff",
+    "darker": "lgrey"
+  },
+  "lgrey": {
+    "hex": "c0cbdc",
+    "darker": "grey"
+  },
+  "grey": {
+    "hex": "8b9bb4",
+    "darker": "slate"
+  },
+  "slate": {
+    "hex": "5a6988",
+    "darker": "dslate"
+  },
+  "dslate": {
+    "hex": "3a4466",
+    "darker": "navy"
+  },
+  "navy": {
+    "hex": "262b44",
+    "darker": "ink"
+  },
+  "ink": {
+    "hex": "181425",
+    "darker": "ink"
+  },
+  "hot": {
+    "hex": "ff0044",
+    "darker": "dred"
+  },
+  "purple": {
+    "hex": "68386c",
+    "darker": "plum"
+  },
+  "mauve": {
+    "hex": "b55088",
+    "darker": "purple"
+  },
+  "pink": {
+    "hex": "f6757a",
+    "darker": "mauve"
+  },
+  "skin1": {
+    "hex": "e8b796",
+    "darker": "skin2"
+  },
+  "skin2": {
+    "hex": "c28569",
+    "darker": "brown"
+  },
+  "nlgrey": {
+    "hex": "d8d8d8",
+    "darker": "ngrey"
+  },
+  "ngrey": {
+    "hex": "a4a4a4",
+    "darker": "nslate"
+  },
+  "nslate": {
+    "hex": "727272",
+    "darker": "ndslate"
+  },
+  "ndslate": {
+    "hex": "4a4a4a",
+    "darker": "ink"
+  },
+  "moss": {
+    "hex": "9cb04a",
+    "darker": "olive"
+  },
+  "olive": {
+    "hex": "6b8a35",
+    "darker": "dolive"
+  },
+  "dolive": {
+    "hex": "445a26",
+    "darker": "fir"
+  },
+  "canopy": {
+    "hex": "357a2f",
+    "darker": "pine"
+  },
+  "pine": {
+    "hex": "1e4d2b",
+    "darker": "fir"
+  },
+  "fir": {
+    "hex": "11301c",
+    "darker": "ink"
+  },
+  "brick": {
+    "hex": "8e3b2b",
+    "darker": "dbrick"
+  },
+  "dbrick": {
+    "hex": "5e2620",
+    "darker": "walnut"
+  },
+  "clay": {
+    "hex": "9a6a4a",
+    "darker": "bark"
+  },
+  "bark": {
+    "hex": "523a2c",
+    "darker": "walnut"
+  },
+  "walnut": {
+    "hex": "2e2019",
+    "darker": "ink"
+  },
+  "driftwood": {
+    "hex": "a99c86",
+    "darker": "stone"
+  },
+  "stone": {
+    "hex": "8a857c",
+    "darker": "dstone"
+  },
+  "dstone": {
+    "hex": "625e58",
+    "darker": "coal"
+  },
+  "ash": {
+    "hex": "57606a",
+    "darker": "shale"
+  },
+  "shale": {
+    "hex": "353b45",
+    "darker": "coal"
+  },
+  "coal": {
+    "hex": "26292f",
+    "darker": "ink"
+  },
+  "ttc": {
+    "hex": "da291c",
+    "darker": "dred"
+  },
+  "turquoise": {
+    "hex": "35c2a6",
+    "darker": "dturq"
+  },
+  "dturq": {
+    "hex": "1f8a7a",
+    "darker": "teal"
+  },
+  "lilac": {
+    "hex": "a77bd9",
+    "darker": "violet"
+  },
+  "violet": {
+    "hex": "6d4bb0",
+    "darker": "purple"
+  },
+  "lime": {
+    "hex": "b2d94a",
+    "darker": "green"
+  },
+  "foam": {
+    "hex": "a8e0e6",
+    "darker": "shallow"
+  },
+  "shallow": {
+    "hex": "58b8c9",
+    "darker": "lake"
+  },
+  "lake": {
+    "hex": "2f7fa6",
+    "darker": "dlake"
+  },
+  "dlake": {
+    "hex": "1d5576",
+    "darker": "navy"
+  },
+  "gold": {
+    "hex": "f9c74f",
+    "darker": "amber"
+  },
+  "peach": {
+    "hex": "ff9e6b",
+    "darker": "orange"
+  },
+  "haze": {
+    "hex": "cfe3ea",
+    "darker": "lgrey"
+  },
+  "azure": {
+    "hex": "3d86e0",
+    "darker": "cobalt"
+  },
+  "cobalt": {
+    "hex": "2654b0",
+    "darker": "blue"
+  }
+}

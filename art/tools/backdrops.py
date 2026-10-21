@@ -30,8 +30,8 @@ whose middles run from (87, 157) to (94, 138) and from
 Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
   backdrops.py gags              print the gag spots and the join for the current constants
-  backdrops.py verges            print the Toronto verges (TORONTO_VERGES) as JSON, in the
-                                 layout export's shape with colours as integers
+  backdrops.py verges [--write]  print the Toronto verges (TORONTO_VERGES) as JSON, or write
+                                 them to shared/verges.json, which build also writes
   backdrops.py build             write art/backdrops/*.aseprite and
                                  public/art/images/*.png
 
@@ -1241,10 +1241,12 @@ def paws_promenade():
 # Beaches and Yonge Street's pale paving to Kensington Market's dark laneways and High Park's
 # canopy, and each has its own sky.
 
-# The game's verge beside each Toronto road, in the layout export's shape with colours by K name:
+# The game's verge beside each Toronto road, keyed by art id, in the layout export's shape with colours
+# by K name (shared/verges.json):
 # the curb to curbTo, the strips (each to its to), the sidewalk or paving with a seam every
 # seamEvery to walkTo (None: paving on out, with no lawn), then the lawn, mown or rough. lawnColors
-# are the lawn's base, its mown stripes and rough patches, and its 2-row tufts. shadow is the colour
+# are the lawn's base, its mown stripes and rough patches, and its 2-row tufts, which draw their own
+# colour rather than darkening the pixel under them; None where there is no lawn. shadow is the colour
 # of the ground shadow under a free-standing roadside prop: the ground one ramp step darker.
 TORONTO_VERGES = {
     "cabbagetown": dict(curbColor="stone", curbTo=164, strips=[], walkColor="lgrey", walkDots=[],
@@ -1312,22 +1314,13 @@ def toronto_verge(zone, road, patches=()):
     return paint
 
 
-def toronto_verges():
-    """TORONTO_VERGES as the layout export writes verges: colours as 0xRRGGBB integers."""
-    def rgb(c):
-        return int(K[c], 16)
+VERGES_JSON = "shared/verges.json"
 
-    out = {}
-    for zone, v in TORONTO_VERGES.items():
-        out[zone] = {**v, "curbColor": rgb(v["curbColor"]), "walkColor": rgb(v["walkColor"]),
-                     "seamColor": rgb(v["seamColor"]), "shadow": rgb(v["shadow"]),
-                     "lawnColors": v["lawnColors"] and [rgb(c) for c in v["lawnColors"]],
-                     "strips": [{**s, "color": rgb(s["color"]),
-                                 "dots": [{**d, "colors": [rgb(c) for c in d["colors"]]} for d in s["dots"]]}
-                                for s in v["strips"]],
-                     "walkDots": [{**d, "colors": [rgb(c) for c in d["colors"]]} for d in v["walkDots"]]}
-    return out
 
+def write_verges():
+    """Write TORONTO_VERGES to VERGES_JSON, keyed by art id, colours by K name, for the game."""
+    with open(VERGES_JSON, "w") as f:
+        f.write(json.dumps(TORONTO_VERGES, indent=2) + "\n")
 
 def ledge(cv, x0, x1, z, face, top, joint):
     """A low wall facing the camera at the near-left corner, its top a ledge to perch on."""
@@ -2105,9 +2098,12 @@ if __name__ == "__main__":
         preview(sys.argv[2])
     elif len(sys.argv) == 2 and sys.argv[1] == "gags":
         gags()
-    elif len(sys.argv) == 2 and sys.argv[1] == "verges":
-        print(json.dumps(toronto_verges(), indent=2))
+    elif sys.argv[1:] == ["verges"]:
+        print(json.dumps(TORONTO_VERGES, indent=2))
+    elif sys.argv[1:] == ["verges", "--write"]:
+        write_verges()
     elif len(sys.argv) == 2 and sys.argv[1] == "build":
         build()
+        write_verges()
     else:
         sys.exit(__doc__)

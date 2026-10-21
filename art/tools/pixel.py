@@ -1,6 +1,11 @@
-"""Shared pixel-art tooling: an Endesga 32 drawing grid with coloured outlines,
+"""Shared pixel-art tooling: a drawing grid on the house palette with coloured outlines,
 and the step that turns frames into an Aseprite source and a PNG + JSON export.
-Run the art scripts from the repository root."""
+Run the art scripts from the repository root.
+
+Usage:
+  pixel.py palette   write shared/palette.json: every colour by K name, its hex and the name of
+                     the colour one ramp step darker (DARKER), for the game's dark ramp
+"""
 
 import json
 import math
@@ -573,3 +578,23 @@ def main(argv, sprites, src_dir, doc, grounds=("3a4466", "c0cbdc", "c28569"), or
         build(list(sprites()), src_dir, originals and originals())
     else:
         sys.exit(doc)
+
+
+PALETTE_JSON = "shared/palette.json"
+
+
+def palette_table():
+    """Every colour by K name (Endesga 32, the neutral greys, the Toronto colours): its hex and the
+    name of the colour one ramp step darker."""
+    names = {v: k for k, v in K.items()}
+    return {name: {"hex": hexed, "darker": names[DARKER[hexed]]} for name, hexed in K.items()}
+
+
+if __name__ == "__main__":
+    import sys
+
+    if sys.argv[1:] == ["palette"]:
+        with open(PALETTE_JSON, "w") as f:
+            f.write(json.dumps(palette_table(), indent=2) + "\n")
+    else:
+        sys.exit(__doc__)

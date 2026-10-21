@@ -1,0 +1,124 @@
+{
+  "cabbagetown": {
+    "curbColor": "stone",
+    "curbTo": 164,
+    "strips": [],
+    "walkColor": "lgrey",
+    "walkDots": [],
+    "seamColor": "grey",
+    "seamEvery": 32,
+    "walkTo": 208,
+    "lawn": "mown",
+    "lawnColors": ["dgreen", "canopy", "pine"],
+    "leaves": false,
+    "shadow": "canopy"
+  },
+  "high-park": {
+    "curbColor": "pine",
+    "curbTo": 160,
+    "strips": [],
+    "walkColor": "pine",
+    "walkDots": [],
+    "seamColor": "pine",
+    "seamEvery": 32,
+    "walkTo": 160,
+    "lawn": "rough",
+    "lawnColors": ["pine", "fir", "fir"],
+    "leaves": false,
+    "shadow": "fir"
+  },
+  "distillery-district": {
+    "curbColor": "stone",
+    "curbTo": 164,
+    "strips": [],
+    "walkColor": "brown",
+    "walkDots": [
+      {
+        "colors": ["brick"],
+        "share": 0.05
+      },
+      {
+        "colors": ["rust"],
+        "share": 0.02
+      }
+    ],
+    "seamColor": "brick",
+    "seamEvery": 16,
+    "walkTo": null,
+    "lawn": "none",
+    "lawnColors": null,
+    "leaves": false,
+    "shadow": "dbrown"
+  },
+  "kensington-market": {
+    "curbColor": "stone",
+    "curbTo": 162,
+    "strips": [
+      {
+        "color": "coal",
+        "dots": [],
+        "to": 166
+      }
+    ],
+    "walkColor": "shale",
+    "walkDots": [
+      {
+        "colors": ["coal"],
+        "share": 0.06
+      },
+      {
+        "colors": ["ash"],
+        "share": 0.02
+      }
+    ],
+    "seamColor": "coal",
+    "seamEvery": 32,
+    "walkTo": null,
+    "lawn": "none",
+    "lawnColors": null,
+    "leaves": false,
+    "shadow": "coal"
+  },
+  "the-beaches": {
+    "curbColor": "driftwood",
+    "curbTo": 164,
+    "strips": [],
+    "walkColor": "skin1",
+    "walkDots": [
+      {
+        "colors": ["tan"],
+        "share": 0.05
+      },
+      {
+        "colors": ["white"],
+        "share": 0.008
+      }
+    ],
+    "seamColor": "skin1",
+    "seamEvery": 32,
+    "walkTo": null,
+    "lawn": "none",
+    "lawnColors": null,
+    "leaves": false,
+    "shadow": "skin2"
+  },
+  "yonge-street": {
+    "curbColor": "white",
+    "curbTo": 164,
+    "strips": [],
+    "walkColor": "lgrey",
+    "walkDots": [
+      {
+        "colors": ["grey"],
+        "share": 0.015
+      }
+    ],
+    "seamColor": "grey",
+    "seamEvery": 32,
+    "walkTo": null,
+    "lawn": "none",
+    "lawnColors": null,
+    "leaves": false,
+    "shadow": "grey"
+  }
+}
