@@ -16,12 +16,12 @@ Each is laid out on a design grid and drawn SCALE (1.5) times larger, as the roa
 every rect, ellipse and triangle scales, 1px lines stay 1px. Design sizes are multiples of 4, so
 every frame and depth variant is a whole size. Full size, then @88, @75, @62 and @50:
 
-roadside-house-cottage       144x132  a tan cottage under a brown gable, green door
-roadside-house-cottage-pink  144x132  a pink cottage under a purple gable, white door
-roadside-house-tall          132x156  a cream two-storey house under a dred gable, sky door
-roadside-house-tall-grey     132x156  a light grey two-storey house under a slate gable, dred door
-roadside-house-porch         168x120  a sky bungalow under a navy hipped roof, red porch awning
-roadside-house-porch-tan     168x120  a tan bungalow under a brown hipped roof
+roadside-house-cottage       120x120  a tan cottage under a steep brown gable, green door
+roadside-house-cottage-pink  120x120  a pink cottage under a steep purple gable, white door
+roadside-house-tall          114x132  a cream two-storey house under a steep dred gable, sky door
+roadside-house-tall-grey     114x132  a light grey two-storey house under a steep slate gable, dred door
+roadside-house-porch         126x126  a sky house under a steep navy gable with a dormer, red porch awning
+roadside-house-porch-tan     126x126  a tan house under a steep brown gable with a dormer, the porch awning
 roadside-fence               150x42   a white picket fence
 roadside-fence-cat           150x60   the fence with a plum cat sitting on the pickets
 roadside-hedge               132x48   a bumpy front hedge with white flowers
@@ -76,102 +76,133 @@ def dk(c):
 
 def window(g, x, y, w=16, h=14, shutters=None, box=False):
     if shutters:
-        g.rect(x - 5, y, 4, h, shutters)
-        g.rect(x + w + 1, y, 4, h, shutters)
+        g.rect(x - 4, y, 3, h, shutters)
+        g.rect(x + w + 1, y, 3, h, shutters)
     g.rect(x, y, w, h, "plum")
     g.rect(x + 2, y + 2, w - 4, h - 4, "cyan")
-    g.rect(x + 2, y + 2, 3, 3, "white")
+    g.rect(x + 2, y + 2, 2, 2, "white")
     g.rect(x + w // 2 - 1, y + 2, 2, h - 4, "white")
     g.rect(x - 2, y + h, w + 4, 2, "white")
     if box:
         g.rect(x - 1, y + h + 2, w + 2, 4, "dbrown")
-        for i, c in enumerate(("red", "yellow", "pink", "red", "white")):
+        for i, c in enumerate(("red", "yellow", "pink", "red", "white")[:(w + 4) // 4]):
             g.rect(x + i * 4 - 1, y + h - 1 + (i % 2), 3, 3, c)
 
 
 def door(g, cx, base, col, h=26):
-    g.rect(cx - 8, base - h, 16, h, col)
-    g.rect(cx - 6, base - h + 3, 12, 6, dk(col))
-    g.rect(cx + 4, base - h // 2, 2, 2, "amber")
-    g.rect(cx - 11, base - 3, 22, 3, "lgrey")
+    g.rect(cx - 7, base - h, 14, h, col)
+    g.rect(cx - 5, base - h + 3, 10, 6, dk(col))
+    g.rect(cx + 3, base - h // 2, 2, 2, "amber")
+    g.rect(cx - 10, base - 3, 20, 3, "lgrey")
 
 
-def gable(g, x0, x1, base, top, roof):
-    g.tri((x0, base), (x1, base), ((x0 + x1) / 2, top), roof)
-    g.rect(x0, base - 3, x1 - x0, 3, dk(roof))
+# The lit left edge of a roof, a ramp step lighter, as on the backdrops' houses.
+RAKE = dict(brown="tan", dred="red", navy="dslate", purple="mauve", slate="grey")
+
+
+def gable(g, x0, ww, top, roof, ridge=None):
+    """A steep gable over a wall from column x0, ww wide, whose top row is top, drawn in whole pixels: its
+    eaves 2px past the walls in a 2px dark band, then a row up for each column it narrows on both sides,
+    its left edge a ramp step lighter and, given ridge, its right edge that colour (a dormer's cap, so it
+    stands out of the roof behind it). Returns the ridge's row in design units."""
+    eave = scaled(4 / 3, g.s)
+    left, right, y = scaled(x0, g.s) - eave, scaled(x0 + ww, g.s) + eave, scaled(top, g.s)
+    g.g.rect(left, y - eave, right - left, eave, dk(roof))
+    y -= eave
+    while right - left > 2:
+        left, right, y = left + 1, right - 1, y - 1
+        g.g.rect(left, y, right - left, 1, roof)
+        g.g.p(left, y, RAKE[roof])
+        if ridge:
+            g.g.p(right - 1, y, ridge)
+    return y / g.s
+
+
+def walls(g, x0, ww, top, base, wall):
+    """A wall from column x0, ww wide, rows top to base, its right 3px a step darker."""
+    g.rect(x0, top, ww, base - top, wall)
+    g.rect(x0 + ww - 2, top, 2, base - top, dk(wall))
 
 
 def chimney(g, x, top, h):
-    g.rect(x, top, 10, h, "brown")
-    g.rect(x - 1, top - 2, 12, 3, "dbrown")
+    g.rect(x, top, 8, h, "brown")
+    g.rect(x + 6, top, 2, h, "dbrown")
+    g.rect(x - 1, top - 2, 10, 3, "dbrown")
+
+
+def round_window(g, cx, cy, r, frame):
+    g.ell(cx, cy, r, r, frame)
+    g.ell(cx, cy, r - 2, r - 2, "cyan")
+
+
+def dormer(g, cx, top, bottom, wall, roof):
+    """A dormer centred on column cx, its cap from row top and its front down to row bottom: a small
+    steep gable over a wall front holding one window."""
+    gable(g, cx - 7, 14, top + 7, roof, ridge=dk(roof))
+    walls(g, cx - 7, 14, top + 7, bottom, wall)
+    window(g, cx - 4, top + 9, 8, bottom - top - 13)
 
 
 def cottage(wall, roof, door_c):
     """One storey under a steep gable: two shuttered windows with flower boxes, a door, a round attic
     window."""
-    w, h, ww, wall_h = 96, 88, 84, 44
+    w, h, ww, wall_h = 80, 80, 72, 34
 
     def draw(g, f=0):
-        x0, base = 6, h - 2
+        x0, base = 4, h - 2
         top = base - wall_h
-        chimney(g, x0 + ww - 24, 14, 22)
-        gable(g, x0 - 5, x0 + ww + 5, top + 1, 2, roof)
-        g.rect(x0, top, ww, wall_h, wall)
-        g.rect(x0 + ww - 4, top, 4, wall_h, dk(wall))
-        for x in (x0 + 10, x0 + ww - 26):
-            window(g, x, top + 8, shutters=roof, box=True)
+        chimney(g, x0 + ww - 20, top - 28, 14)
+        apex = gable(g, x0, ww, top, roof)
+        walls(g, x0, ww, top, base, wall)
+        for x in (x0 + 8, x0 + ww - 20):
+            window(g, x, top + 6, 12, 14, shutters=roof, box=True)
         door(g, x0 + ww // 2, base, door_c)
-        g.ell(x0 + ww / 2, 24, 5, 5, "plum")
-        g.ell(x0 + ww / 2, 24, 3, 3, "cyan")
+        round_window(g, x0 + ww / 2, apex + 22, 5, "plum")
     return w, h, draw
 
 
 def two_storey(wall, roof, door_c):
-    """Two storeys under a gable with a round attic window."""
-    w, h, ww, wall_h = 88, 104, 74, 66
+    """Two storeys under a steep gable with a round attic window."""
+    w, h, ww, wall_h = 76, 88, 68, 46
 
     def draw(g, f=0):
-        x0, base = 7, h - 2
+        x0, base = 4, h - 2
         top = base - wall_h
-        chimney(g, x0 + 8, 16, 18)
-        gable(g, x0 - 5, x0 + ww + 5, top + 1, 2, roof)
-        g.rect(x0, top, ww, wall_h, wall)
-        g.rect(x0 + ww - 4, top, 4, wall_h, dk(wall))
-        g.rect(x0, top + 30, ww, 2, dk(wall))
-        for x in (x0 + 9, x0 + ww - 25):
-            window(g, x, top + 8, shutters=roof)
-        window(g, x0 + 9, top + 40, box=True)
-        door(g, x0 + ww - 20, base, door_c)
-        g.ell(x0 + ww / 2, 22, 6, 6, "white")
-        g.ell(x0 + ww / 2, 22, 4, 4, "cyan")
+        chimney(g, x0 + 10, top - 26, 13)
+        apex = gable(g, x0, ww, top, roof)
+        walls(g, x0, ww, top, base, wall)
+        g.rect(x0, top + 20, ww, 2, dk(wall))
+        for x in (x0 + 8, x0 + ww - 22):
+            window(g, x, top + 4, 12, 12, shutters=roof)
+        window(g, x0 + 8, top + 25, 12, 12, box=True)
+        door(g, x0 + ww - 16, base, door_c, h=22)
+        round_window(g, x0 + ww / 2, apex + 22, 6, "white")
     return w, h, draw
 
 
 def porch_house(wall, roof, door_c):
-    """A wide bungalow under a hipped roof, a striped awning over the porch."""
-    w, h, ww, wall_h = 112, 80, 100, 46
+    """One storey under a steep gable with a dormer, a striped awning over the porch."""
+    w, h, ww, wall_h = 84, 84, 76, 36
 
     def draw(g, f=0):
-        x0, base = 6, h - 2
+        x0, base = 4, h - 2
         top = base - wall_h
-        chimney(g, x0 + ww - 26, 6, 18)
-        g.tri((x0 - 5, top + 1), (x0 + 22, top + 1), (x0 + 22, 3), roof)
-        g.tri((x0 + ww - 22, top + 1), (x0 + ww + 5, top + 1), (x0 + ww - 22, 3), roof)
-        g.rect(x0 + 22, 3, ww - 44, top - 2, roof)
-        g.rect(x0 - 5, top - 2, ww + 10, 3, dk(roof))
-        g.rect(x0, top, ww, wall_h, wall)
-        g.rect(x0 + ww - 4, top, 4, wall_h, dk(wall))
-        for x in (x0 + 10, x0 + ww - 26):
-            window(g, x, top + 10, box=True)
+        chimney(g, x0 + ww - 18, top - 26, 13)
+        apex = gable(g, x0, ww, top, roof)
+        walls(g, x0, ww, top, base, wall)
+        dormer(g, x0 + ww // 2, apex + 15, top - 2, wall, roof)
+        for x in (x0 + 6, x0 + ww - 20):
+            window(g, x, top + 9, 14, 13, box=True)
         cx = x0 + ww // 2
         door(g, cx, base - 2, door_c, h=24)
         # the porch: an awning in red and white stripes on two posts, a deck
-        for i in range(8):
-            g.rect(cx - 20 + i * 5, top + 4, 5, 8, "red" if i % 2 == 0 else "white")
-            g.rect(cx - 20 + i * 5 + 1, top + 12, 3, 2, "red" if i % 2 == 0 else "white")
-        for x in (cx - 19, cx + 16):
-            g.rect(x, top + 14, 3, wall_h - 16, "white")
-        g.rect(cx - 22, base - 3, 44, 3, "tan")
+        for i in range(6):
+            c = "red" if i % 2 == 0 else "white"
+            g.rect(cx - 15 + i * 5, top + 3, 5, 7, c)
+            g.rect(cx - 15 + i * 5 + 1, top + 10, 3, 2, c)
+        for x in (cx - 14, cx + 11):
+            g.rect(x, top + 12, 3, wall_h - 14, "white")
+        g.rect(cx - 17, base - 3, 34, 3, "tan")
     return w, h, draw
 
 

@@ -311,6 +311,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 Houses, fences, trees and yard props stand on the lawns beyond the sidewalks. `art/tools/roadside.py` draws them and holds the per-zone placement table (`PLACEMENT`, keyed by zone art id; `python3 art/tools/roadside.py table` prints it as JSON). Only Elm Avenue (`woof-way`) has a table.
 
 - Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms.
+- Houses follow the backdrops' slim houses: about as tall as they are wide (the two-storey house a little taller), under a steep gable that rises a row for each column it narrows, past 2px eaves in a 2px band a step darker than the roof. Light comes from the top left: the roof's left edge is a ramp step lighter and the wall's right 3 columns a step darker. Each has a chimney; the porch houses have a dormer, its cap's right edge a step darker so it stands out of the roof.
 - They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket (`spot-lamp-post` is a navy lantern), the street tree three round lobes (`spot-tree` is blocky), the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box (`petunias` has one), the gnome a blue hat and red coat (`minor-gnome` has a red hat and blue coat; a zone with `minor-gnome` does not take `roadside-gnome`), the mailbox blue with a yellow flag (the hydrant is red).
 
 ### Placement
@@ -323,12 +324,12 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 
 | Lot | Props: key `roadside-…`, across, dz                                                     |
 | --- | --------------------------------------------------------------------------------------- |
-| 0   | `house-cottage` 292, 0; `fence` 299, −32; `mailbox` 231, −38; `flowers` 295, −42        |
-| 1   | `house-tall` 286, 0; `hedge` 290, −32; `mailbox` 231, −38; `gnome` 265, −15             |
-| 2   | `house-porch` 304, 0; `fence-cat` 299, −32; `bike` 267, −45                             |
-| 3   | `house-cottage-pink` 292, 0; `fence` 299, −32; `mailbox` 231, −38; `sprinkler` 314, −15 |
-| 4   | `house-tall-grey` 286, 0; `fence` 299, −32; `gnome` 275, −15                            |
-| 5   | `house-porch-tan` 304, 0; `hedge` 290, −32; `mailbox` 231, −38; `flowers` 300, −42      |
+| 0   | `house-cottage` 280, 0; `fence` 299, −32; `mailbox` 231, −38; `flowers` 295, −42        |
+| 1   | `house-tall` 277, 0; `hedge` 290, −32; `mailbox` 231, −38; `gnome` 265, −15             |
+| 2   | `house-porch` 283, 0; `fence-cat` 299, −32; `bike` 267, −45                             |
+| 3   | `house-cottage-pink` 280, 0; `fence` 299, −32; `mailbox` 231, −38; `sprinkler` 314, −15 |
+| 4   | `house-tall-grey` 277, 0; `fence` 299, −32; `gnome` 275, −15                            |
+| 5   | `house-porch-tan` 283, 0; `hedge` 290, −32; `mailbox` 231, −38; `flowers` 300, −42      |
 
 | Gap | Props: key `roadside-…`, across, dz          |
 | --- | -------------------------------------------- |

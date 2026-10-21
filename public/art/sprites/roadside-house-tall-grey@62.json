@@ -1,10 +1,10 @@
 { "frames": {
    "roadside-house-tall-grey@62.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 83, "h": 98 },
+    "frame": { "x": 0, "y": 0, "w": 71, "h": 83 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 83, "h": 98 },
-    "sourceSize": { "w": 83, "h": 98 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 71, "h": 83 },
+    "sourceSize": { "w": 71, "h": 83 },
     "duration": 1000
    }
  },
@@ -13,7 +13,7 @@
   "version": "1.2.30-x64",
   "image": "roadside-house-tall-grey@62.png",
   "format": "RGBA8888",
-  "size": { "w": 83, "h": 98 },
+  "size": { "w": 71, "h": 83 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 0, "direction": "forward" }

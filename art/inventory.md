@@ -172,22 +172,22 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 
 Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside table. Each has `@88`, `@75`, `@62` and `@50` variants with the same tag and timing; one tag, `idle`.
 
-| Key                                                     | Type   | Size    | `@88`, `@75`, `@62`, `@50`     | Pri  | Note                                      |
-| ------------------------------------------------------- | ------ | ------- | ------------------------------ | ---- | ----------------------------------------- |
-| `roadside-bike`                                         | sprite | 72×48   | 63×42, 54×36, 45×30, 36×24     | core | A kid's red bike, side on                 |
-| `roadside-fence`                                        | sprite | 150×42  | 131×37, 113×32, 94×26, 75×21   | core | White pickets                             |
-| `roadside-fence-cat`                                    | sprite | 150×60  | 131×53, 113×45, 94×38, 75×30   | core | The fence with a plum cat on top          |
-| `roadside-flowers`                                      | sprite | 90×30   | 79×26, 68×23, 56×19, 45×15     | core | A flower border, no box                   |
-| `roadside-gnome`                                        | sprite | 30×42   | 26×37, 23×32, 19×26, 15×21     | core | Blue hat, red coat                        |
-| `roadside-hedge`                                        | sprite | 132×48  | 116×42, 99×36, 83×30, 66×24    | core | Bumped top, white flowers                 |
-| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 144×132 | 126×116, 108×99, 90×83, 72×66  | core | Tan and pink                              |
-| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 168×120 | 147×105, 126×90, 105×75, 84×60 | core | Sky and tan                               |
-| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 132×156 | 116×137, 99×117, 83×98, 66×78  | core | Cream and light grey                      |
-| `roadside-lamp-post`                                    | sprite | 36×150  | 32×131, 27×113, 23×94, 18×75   | core | White globe, forest post, a flower basket |
-| `roadside-laundry`                                      | sprite | 162×96  | 142×84, 122×72, 101×60, 81×48  | core | A washing line on two T posts             |
-| `roadside-mailbox`                                      | sprite | 36×48   | 32×42, 27×36, 23×30, 18×24     | core | Blue, a yellow flag                       |
-| `roadside-sprinkler`                                    | sprite | 78×42   | 68×37, 59×32, 49×26, 39×21     | core | `idle` 2 frames of 200ms: the spray runs  |
-| `roadside-tree`, `roadside-tree-blossom`                | sprite | 114×156 | 100×137, 86×117, 71×98, 57×78  | core | Green and pink blossom                    |
+| Key                                                     | Type   | Size    | `@88`, `@75`, `@62`, `@50`    | Pri  | Note                                      |
+| ------------------------------------------------------- | ------ | ------- | ----------------------------- | ---- | ----------------------------------------- |
+| `roadside-bike`                                         | sprite | 72×48   | 63×42, 54×36, 45×30, 36×24    | core | A kid's red bike, side on                 |
+| `roadside-fence`                                        | sprite | 150×42  | 131×37, 113×32, 94×26, 75×21  | core | White pickets                             |
+| `roadside-fence-cat`                                    | sprite | 150×60  | 131×53, 113×45, 94×38, 75×30  | core | The fence with a plum cat on top          |
+| `roadside-flowers`                                      | sprite | 90×30   | 79×26, 68×23, 56×19, 45×15    | core | A flower border, no box                   |
+| `roadside-gnome`                                        | sprite | 30×42   | 26×37, 23×32, 19×26, 15×21    | core | Blue hat, red coat                        |
+| `roadside-hedge`                                        | sprite | 132×48  | 116×42, 99×36, 83×30, 66×24   | core | Bumped top, white flowers                 |
+| `roadside-house-cottage`, `roadside-house-cottage-pink` | sprite | 120×120 | 105×105, 90×90, 75×75, 60×60  | core | Tan and pink                              |
+| `roadside-house-porch`, `roadside-house-porch-tan`      | sprite | 126×126 | 110×110, 95×95, 79×79, 63×63  | core | Sky and tan                               |
+| `roadside-house-tall`, `roadside-house-tall-grey`       | sprite | 114×132 | 100×116, 86×99, 71×83, 57×66  | core | Cream and light grey                      |
+| `roadside-lamp-post`                                    | sprite | 36×150  | 32×131, 27×113, 23×94, 18×75  | core | White globe, forest post, a flower basket |
+| `roadside-laundry`                                      | sprite | 162×96  | 142×84, 122×72, 101×60, 81×48 | core | A washing line on two T posts             |
+| `roadside-mailbox`                                      | sprite | 36×48   | 32×42, 27×36, 23×30, 18×24    | core | Blue, a yellow flag                       |
+| `roadside-sprinkler`                                    | sprite | 78×42   | 68×37, 59×32, 49×26, 39×21    | core | `idle` 2 frames of 200ms: the spray runs  |
+| `roadside-tree`, `roadside-tree-blossom`                | sprite | 114×156 | 100×137, 86×117, 71×98, 57×78 | core | Green and pink blossom                    |
 
 ## Doghouse row and top bar
 

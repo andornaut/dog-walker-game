@@ -3471,8 +3471,8 @@
       "png": "sprites/roadside-house-cottage.png",
       "json": "sprites/roadside-house-cottage.json",
       "anchor": {
-        "feetY": 129,
-        "opaqueWidth": 144
+        "feetY": 117,
+        "opaqueWidth": 114
       }
     },
     {
@@ -3480,8 +3480,8 @@
       "png": "sprites/roadside-house-cottage-pink.png",
       "json": "sprites/roadside-house-cottage-pink.json",
       "anchor": {
-        "feetY": 129,
-        "opaqueWidth": 144
+        "feetY": 117,
+        "opaqueWidth": 114
       }
     },
     {
@@ -3489,8 +3489,8 @@
       "png": "sprites/roadside-house-cottage-pink@50.png",
       "json": "sprites/roadside-house-cottage-pink@50.json",
       "anchor": {
-        "feetY": 65,
-        "opaqueWidth": 72
+        "feetY": 59,
+        "opaqueWidth": 57
       }
     },
     {
@@ -3498,8 +3498,8 @@
       "png": "sprites/roadside-house-cottage-pink@62.png",
       "json": "sprites/roadside-house-cottage-pink@62.json",
       "anchor": {
-        "feetY": 81,
-        "opaqueWidth": 90
+        "feetY": 74,
+        "opaqueWidth": 71
       }
     },
     {
@@ -3507,8 +3507,8 @@
       "png": "sprites/roadside-house-cottage-pink@75.png",
       "json": "sprites/roadside-house-cottage-pink@75.json",
       "anchor": {
-        "feetY": 97,
-        "opaqueWidth": 108
+        "feetY": 89,
+        "opaqueWidth": 86
       }
     },
     {
@@ -3516,8 +3516,8 @@
       "png": "sprites/roadside-house-cottage-pink@88.png",
       "json": "sprites/roadside-house-cottage-pink@88.json",
       "anchor": {
-        "feetY": 113,
-        "opaqueWidth": 126
+        "feetY": 103,
+        "opaqueWidth": 100
       }
     },
     {
@@ -3525,8 +3525,8 @@
       "png": "sprites/roadside-house-cottage@50.png",
       "json": "sprites/roadside-house-cottage@50.json",
       "anchor": {
-        "feetY": 65,
-        "opaqueWidth": 72
+        "feetY": 59,
+        "opaqueWidth": 57
       }
     },
     {
@@ -3534,8 +3534,8 @@
       "png": "sprites/roadside-house-cottage@62.png",
       "json": "sprites/roadside-house-cottage@62.json",
       "anchor": {
-        "feetY": 81,
-        "opaqueWidth": 90
+        "feetY": 74,
+        "opaqueWidth": 71
       }
     },
     {
@@ -3543,8 +3543,8 @@
       "png": "sprites/roadside-house-cottage@75.png",
       "json": "sprites/roadside-house-cottage@75.json",
       "anchor": {
-        "feetY": 97,
-        "opaqueWidth": 108
+        "feetY": 89,
+        "opaqueWidth": 86
       }
     },
     {
@@ -3552,8 +3552,8 @@
       "png": "sprites/roadside-house-cottage@88.png",
       "json": "sprites/roadside-house-cottage@88.json",
       "anchor": {
-        "feetY": 113,
-        "opaqueWidth": 126
+        "feetY": 103,
+        "opaqueWidth": 100
       }
     },
     {
@@ -3561,8 +3561,8 @@
       "png": "sprites/roadside-house-porch.png",
       "json": "sprites/roadside-house-porch.json",
       "anchor": {
-        "feetY": 117,
-        "opaqueWidth": 168
+        "feetY": 123,
+        "opaqueWidth": 120
       }
     },
     {
@@ -3570,8 +3570,8 @@
       "png": "sprites/roadside-house-porch-tan.png",
       "json": "sprites/roadside-house-porch-tan.json",
       "anchor": {
-        "feetY": 117,
-        "opaqueWidth": 168
+        "feetY": 123,
+        "opaqueWidth": 120
       }
     },
     {
@@ -3579,8 +3579,8 @@
       "png": "sprites/roadside-house-porch-tan@50.png",
       "json": "sprites/roadside-house-porch-tan@50.json",
       "anchor": {
-        "feetY": 59,
-        "opaqueWidth": 84
+        "feetY": 62,
+        "opaqueWidth": 60
       }
     },
     {
@@ -3588,8 +3588,8 @@
       "png": "sprites/roadside-house-porch-tan@62.png",
       "json": "sprites/roadside-house-porch-tan@62.json",
       "anchor": {
-        "feetY": 74,
-        "opaqueWidth": 105
+        "feetY": 78,
+        "opaqueWidth": 75
       }
     },
     {
@@ -3597,8 +3597,8 @@
       "png": "sprites/roadside-house-porch-tan@75.png",
       "json": "sprites/roadside-house-porch-tan@75.json",
       "anchor": {
-        "feetY": 89,
-        "opaqueWidth": 126
+        "feetY": 94,
+        "opaqueWidth": 90
       }
     },
     {
@@ -3606,8 +3606,8 @@
       "png": "sprites/roadside-house-porch-tan@88.png",
       "json": "sprites/roadside-house-porch-tan@88.json",
       "anchor": {
-        "feetY": 103,
-        "opaqueWidth": 147
+        "feetY": 108,
+        "opaqueWidth": 105
       }
     },
     {
@@ -3615,8 +3615,8 @@
       "png": "sprites/roadside-house-porch@50.png",
       "json": "sprites/roadside-house-porch@50.json",
       "anchor": {
-        "feetY": 59,
-        "opaqueWidth": 84
+        "feetY": 62,
+        "opaqueWidth": 60
       }
     },
     {
@@ -3624,8 +3624,8 @@
       "png": "sprites/roadside-house-porch@62.png",
       "json": "sprites/roadside-house-porch@62.json",
       "anchor": {
-        "feetY": 74,
-        "opaqueWidth": 105
+        "feetY": 78,
+        "opaqueWidth": 75
       }
     },
     {
@@ -3633,8 +3633,8 @@
       "png": "sprites/roadside-house-porch@75.png",
       "json": "sprites/roadside-house-porch@75.json",
       "anchor": {
-        "feetY": 89,
-        "opaqueWidth": 126
+        "feetY": 94,
+        "opaqueWidth": 90
       }
     },
     {
@@ -3642,8 +3642,8 @@
       "png": "sprites/roadside-house-porch@88.png",
       "json": "sprites/roadside-house-porch@88.json",
       "anchor": {
-        "feetY": 103,
-        "opaqueWidth": 147
+        "feetY": 108,
+        "opaqueWidth": 105
       }
     },
     {
@@ -3651,8 +3651,8 @@
       "png": "sprites/roadside-house-tall.png",
       "json": "sprites/roadside-house-tall.json",
       "anchor": {
-        "feetY": 153,
-        "opaqueWidth": 128
+        "feetY": 129,
+        "opaqueWidth": 108
       }
     },
     {
@@ -3660,8 +3660,8 @@
       "png": "sprites/roadside-house-tall-grey.png",
       "json": "sprites/roadside-house-tall-grey.json",
       "anchor": {
-        "feetY": 153,
-        "opaqueWidth": 128
+        "feetY": 129,
+        "opaqueWidth": 108
       }
     },
     {
@@ -3669,8 +3669,8 @@
       "png": "sprites/roadside-house-tall-grey@50.png",
       "json": "sprites/roadside-house-tall-grey@50.json",
       "anchor": {
-        "feetY": 77,
-        "opaqueWidth": 64
+        "feetY": 65,
+        "opaqueWidth": 54
       }
     },
     {
@@ -3678,8 +3678,8 @@
       "png": "sprites/roadside-house-tall-grey@62.png",
       "json": "sprites/roadside-house-tall-grey@62.json",
       "anchor": {
-        "feetY": 97,
-        "opaqueWidth": 80
+        "feetY": 82,
+        "opaqueWidth": 68
       }
     },
     {
@@ -3687,8 +3687,8 @@
       "png": "sprites/roadside-house-tall-grey@75.png",
       "json": "sprites/roadside-house-tall-grey@75.json",
       "anchor": {
-        "feetY": 116,
-        "opaqueWidth": 96
+        "feetY": 98,
+        "opaqueWidth": 81
       }
     },
     {
@@ -3696,8 +3696,8 @@
       "png": "sprites/roadside-house-tall-grey@88.png",
       "json": "sprites/roadside-house-tall-grey@88.json",
       "anchor": {
-        "feetY": 135,
-        "opaqueWidth": 112
+        "feetY": 114,
+        "opaqueWidth": 95
       }
     },
     {
@@ -3705,8 +3705,8 @@
       "png": "sprites/roadside-house-tall@50.png",
       "json": "sprites/roadside-house-tall@50.json",
       "anchor": {
-        "feetY": 77,
-        "opaqueWidth": 64
+        "feetY": 65,
+        "opaqueWidth": 54
       }
     },
     {
@@ -3714,8 +3714,8 @@
       "png": "sprites/roadside-house-tall@62.png",
       "json": "sprites/roadside-house-tall@62.json",
       "anchor": {
-        "feetY": 97,
-        "opaqueWidth": 80
+        "feetY": 82,
+        "opaqueWidth": 68
       }
     },
     {
@@ -3723,8 +3723,8 @@
       "png": "sprites/roadside-house-tall@75.png",
       "json": "sprites/roadside-house-tall@75.json",
       "anchor": {
-        "feetY": 116,
-        "opaqueWidth": 96
+        "feetY": 98,
+        "opaqueWidth": 81
       }
     },
     {
@@ -3732,8 +3732,8 @@
       "png": "sprites/roadside-house-tall@88.png",
       "json": "sprites/roadside-house-tall@88.json",
       "anchor": {
-        "feetY": 135,
-        "opaqueWidth": 112
+        "feetY": 114,
+        "opaqueWidth": 95
       }
     },
     {
