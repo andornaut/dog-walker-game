@@ -60,7 +60,7 @@ import type { PullPose } from "../runner/pulls";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { FEEDBACK_ART } from "./feedbackArt";
-import { hitBurstKey, hitFlashKey, hitLook } from "./hitMoment";
+import { hitBurstKey, hitLook } from "./hitMoment";
 import { DETAIL_WELL_KEYS } from "./homePanels";
 import { PADLOCK_KEYS, SHOP_ART } from "./itemArt";
 
@@ -371,7 +371,7 @@ describe("hit moment art", () => {
       return [
         ...missingTags(look.burst, ["play"]),
         ...missingTags("ui-hit-label", [look.plate]),
-        ...(look.flash === null ? [] : missingTags(hitFlashKey(loadedScene, look.flash), ["play"])),
+        ...(look.flash === null ? [] : missingTags(look.flash, ["play"])),
       ];
     });
     expect(hits).toEqual(expect.arrayContaining(["otherDog", "skunk"]));

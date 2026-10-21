@@ -72,14 +72,7 @@ import {
 } from "../../save/achievementPreview";
 import type { RunResult } from "../../save/checkpoint";
 import type { RunState } from "../../state/runState";
-import {
-  hitFlashKey,
-  hitLabelOf,
-  hitLook,
-  playEdgeFlash,
-  playHitMoment,
-  playMinorHitLabel,
-} from "../hitMoment";
+import { hitLabelOf, hitLook, playEdgeFlash, playHitMoment, playMinorHitLabel } from "../hitMoment";
 import { sayMessage } from "../messageStripView";
 import { playDodge, playForgiven } from "../packFeedback";
 import { earnedIfBanked, shownHints } from "../profileStore";
@@ -306,7 +299,7 @@ export class RunMoments {
       const { flash } = hitLook(kind, encounter);
       if (flash !== null) {
         const moment = { depth: DEPTH.popup, field: hitField(), still };
-        playEdgeFlash(this.scene, moment, hitFlashKey(this.scene, flash));
+        playEdgeFlash(this.scene, moment, flash);
       }
       this.deps.pack.stumble(still, DOG_REACTIONS.splash);
       this.addChanges([...outcome.heartChanges, ...outcome.moneyChanges]);

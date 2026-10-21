@@ -37,7 +37,7 @@ interface HitMoment {
   word: string | null;
 }
 
-type FlashColour = "amber" | "green" | "mauve" | "orange" | "pink" | "sky" | "white";
+type FlashColour = "amber" | "mauve" | "orange" | "pink" | "sky";
 
 const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   otherDog: "pink",
@@ -47,10 +47,6 @@ const FLASH_COLOURS: Readonly<Partial<Record<EncounterId, FlashColour>>> = {
   thief: "amber",
 };
 const FLASH = { frameMs: 70, frames: 4, stillFadeMs: 280, width: 16 };
-// The flash drawn while a colour's own strip is missing.
-const FLASH_FALLBACKS: Readonly<Record<string, string>> = {
-  "ui-hit-flash-mauve": "ui-hit-flash-green",
-};
 const BURST = { fallback: "fx-bump", gap: 8, size: 64, tag: "play" };
 const PLATE = { height: 32, key: "ui-hit-label", width: 176 } as const;
 // The label's line starts this far below the plate's top; font-title's capitals start 4px
@@ -83,11 +79,6 @@ export function hitLook(kind: Encounter["kind"], encounter: EncounterId): HitLoo
   return { burst: `fx-hit-${art}`, flash: `ui-hit-flash-${colour}`, plate: "normal" };
 }
 
-// The look's flash, or its fallback colour's when its art is missing.
-export function hitFlashKey(scene: Scene, flash: string): string {
-  return scene.textures.exists(flash) ? flash : (FLASH_FALLBACKS[flash] ?? flash);
-}
-
 // The look's burst, or fx-bump when its art is missing.
 export function hitBurstKey(scene: Scene, look: HitLook): string {
   return scene.textures.exists(look.burst) ? look.burst : BURST.fallback;
@@ -98,7 +89,7 @@ export function playHitMoment(scene: Scene, moment: HitMoment): void {
   const look = hitLook(moment.kind, moment.encounter);
   playBurst(scene, moment, look, totalMs);
   if (look.flash !== null) {
-    playEdgeFlash(scene, moment, hitFlashKey(scene, look.flash));
+    playEdgeFlash(scene, moment, look.flash);
   }
   showLabel(scene, moment, look.plate, totalMs);
   if (!moment.still && moment.kind === "obstacle") {
