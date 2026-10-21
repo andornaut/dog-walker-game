@@ -287,21 +287,27 @@ describe("planSpawns", () => {
     }
   });
 
+  // 9 rows of 5 lanes, each keeping minOpenLanes open.
+  it.each([
+    { minOpenLanes: 1, name: "more obstacles than the rows have room for" },
+    { minOpenLanes: 2, name: "obstacles that would leave fewer than minOpenLanes open" },
+  ])("places as many as fit and skips the rest, given $name", ({ minOpenLanes }) => {
+    const room = 9 * (5 - minOpenLanes);
+    const crowded: SpawnPlan<Kind> = {
+      ...plan,
+      minOpenLanes,
+      quotas: [{ blocksLane: true, count: room + 1, kind: "obstacle" }],
+    };
+    for (const seed of seeds.slice(0, 10)) {
+      const events = planSpawns(seededRandom(seed), crowded);
+      expect(countOf("obstacle", events)).toBe(room);
+      expect(openLanesByRow(crowded, events).every((lanes) => lanes.length >= minOpenLanes)).toBe(
+        true,
+      );
+    }
+  });
+
   it.each<{ error: RegExp; name: string; unplannable: SpawnPlan<Kind> }>([
-    {
-      error: /obstacle/,
-      name: "the zone has no room for the obstacles asked for",
-      unplannable: { ...plan, quotas: [{ blocksLane: true, count: 9 * 4 + 1, kind: "obstacle" }] },
-    },
-    {
-      error: /obstacle/,
-      name: "the obstacles asked for would leave fewer than minOpenLanes open",
-      unplannable: {
-        ...plan,
-        minOpenLanes: 2,
-        quotas: [{ blocksLane: true, count: 9 * 3 + 1, kind: "obstacle" }],
-      },
-    },
     {
       error: /minSpacing/,
       name: "the rows are too close for the pack to pass between them",

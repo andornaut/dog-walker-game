@@ -297,7 +297,9 @@ function blockingSpan(plan: SpawnPlan<string>, spacing: number, row: number, row
 // back. A mover with no room to move is placed as a standing obstacle, last of all. A mover, or an
 // obstacle bigger than one cell, that the earlier draws left no room for is skipped, which
 // uses no random draw; so is one that would leave fewer free cells than there are one-cell
-// spawns. A plan that cannot fit its one-cell spawns that way is a data error and throws.
+// spawns. A free cell can still be one no lane-blocking spawn may take, where the path rule or
+// the pack-fit gap around the movers rules it out, so a one-cell spawn with no room left is
+// skipped too, the same way: a zone never fails to plan for want of room.
 export function planSpawns<Kind extends string>(
   random: Random,
   plan: SpawnPlan<Kind>,
@@ -572,14 +574,14 @@ export function planSpawns<Kind extends string>(
   const standing = skipped.map((kind) => {
     const quota = plan.quotas.find((candidate) => candidate.kind === kind);
     const footprint = quota?.mover?.footprint ?? SINGLE_CELL;
-    return { blocksLane: true, count: 1, footprint, kind, skippable: true };
+    return { blocksLane: true, count: 1, footprint, kind };
   });
 
   // Sorting a copy leaves the plan alone; sort is stable, so equal areas keep their order.
-  const ordered = [
+  const ordered: SpawnQuota<Kind>[] = [
     ...[...statics].sort((a, b) => area(b) - area(a)),
     ...standing,
-  ] as (SpawnQuota<Kind> & { skippable?: boolean })[];
+  ];
   for (const quota of ordered) {
     const footprint = quota.footprint ?? SINGLE_CELL;
     for (let i = 0; i < quota.count; i++) {
@@ -590,11 +592,8 @@ export function planSpawns<Kind extends string>(
         Math.floor(((i + 1) * rows.length) / quota.count),
       );
       const cells = stretch.length > 0 ? stretch : freeCells(quota, footprint, 0, rows.length);
-      if (cells.length === 0 && (area(quota) > 1 || quota.skippable === true)) {
-        continue;
-      }
       if (cells.length === 0) {
-        throw new Error(`No room left in the zone to spawn ${quota.kind}`);
+        continue;
       }
       const cell = randomPick(random, cells);
       const covered = laneRun(cell.lane, footprint.lanes);
