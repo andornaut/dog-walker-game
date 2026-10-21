@@ -14,7 +14,7 @@ export const testContext: SaveContext = {
     walker: "casey",
   },
   known: {
-    achievements: new Set(["bigPayday", "firstSteps", "fullKennel", "squirrel"]),
+    achievements: new Set(["bigPayday", "dreamTeam", "firstSteps", "fullKennel", "squirrel"]),
     debuffs: new Set(["stinky"]),
     dogs: new Set([
       "archie",
@@ -78,10 +78,15 @@ export const newPlayerSave: SaveDocument = {
   walker: "casey",
 };
 
-// A player several runs in, with every field away from its default.
+// A player several runs in, with every field away from its default. It owns every walker, so it
+// holds the badge for unlocking them all.
 export function veteranSave(): SaveDocument {
   return {
-    achievements: { firstSteps: 1_700_000_000_000, squirrel: 1_700_000_100_000 },
+    achievements: {
+      dreamTeam: 1_700_000_200_000,
+      firstSteps: 1_700_000_000_000,
+      squirrel: 1_700_000_100_000,
+    },
     bankCents: cents(12_345),
     checkpoint: null,
     helpSeen: true,

@@ -222,6 +222,7 @@ describe("achievements at banking", () => {
     expect(save.stats.dogsFinishedWith).toEqual([]);
     expect(save.achievements).toEqual({
       cleanPaws: testAwards.now,
+      dreamTeam: testAwards.now,
       firstSteps: testAwards.now,
     });
   });
