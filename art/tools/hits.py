@@ -2,11 +2,12 @@
 """Draw the encounter hit moments: a burst over the pack per encounter, the screen-edge
 flash in the encounter's colour and the plate behind the big label. Bursts carry a 1px
 plum rim so they hold 3:1 on the three light roads while their fills carry the dslate
-road. The flash strips pair a light ink with a dark fringe for the same reason. The
-encounters' hits match their road sprites in road.py. The bursts are laid out on a 64x64
-design and drawn 77/64 times bigger on a minis.Mini, so they keep 1px lines 1px; their
-pixel maps and twinkles keep their pixels. Every burst opens on an impact frame (impact):
-an eight-point star in its colour with a white core and white speed lines.
+road. The flash strips pair a light ink (or, for mauve, a pink rim) with a dark fringe
+for the same reason. The encounters' hits match their road sprites in road.py. The
+bursts are laid out on a 64x64 design and drawn 77/64 times bigger on a minis.Mini, so
+they keep 1px lines 1px; their pixel maps and twinkles keep their pixels. Every burst
+opens on an impact frame (impact): an eight-point star in its colour with a white core
+and white speed lines.
 
 fx-hit-skunk       77x77  play (8 frames, 70ms)  lumpy mauve gas cloud that thins to a dither, wisps
                                                   and stink squiggles
@@ -332,17 +333,19 @@ def hit_other_dog(step):
 
 # ---------- edge flash ----------
 
-FLASH = {"green": ("green", "teal"), "sky": ("cyan", "navy"), "amber": ("amber", "plum"),
-         "mauve": ("mauve", "plum"), "orange": ("orange", "plum"), "pink": ("pink", "plum"),
-         "white": ("white", "plum")}
+# Each strip's ink, its dark fringe and, where the ink holds under 3:1 on the dark roads, a light rim one
+# step up its ramp (mauve's pink, 3.52:1 on dslate).
+FLASH = {"green": ("green", "teal", None), "sky": ("cyan", "navy", None), "amber": ("amber", "plum", None),
+         "mauve": ("mauve", "plum", "pink"), "orange": ("orange", "plum", None), "pink": ("pink", "plum", None),
+         "white": ("white", "plum", None)}
 
 
 def flash(colour, step):
     """16x64, the left screen edge: solid at x=0, an ordered 4x4 dither that clears inward. Each lit
-    pixel in the sparse inner half with a gap inward of it gets a dark fringe there; the light ink carries
-    the dslate road (all but mauve's, 2.0:1) and the dark fringe the light roads. Later frames recede toward
-    the edge."""
-    ink, fringe = FLASH[colour]
+    pixel in the sparse inner half with a gap inward of it gets a dark fringe there, and takes the light rim
+    itself where the strip has one; the light ink (or rim) carries the dark roads, 3:1 or more, and the dark
+    fringe the light roads. Later frames recede toward the edge."""
+    ink, fringe, light = FLASH[colour]
     width = (16, 11, 7, 4)[step]
     solid = 2 if step < 2 else 1
     g = Grid(16, 64)
@@ -356,6 +359,8 @@ def flash(colour, step):
         for x in range(max(1, width // 2), 16):
             if not lit[y][x] and lit[y][x - 1]:
                 g.p(x, y, fringe)
+                if light:
+                    g.p(x - 1, y, light)
     return g
 
 
