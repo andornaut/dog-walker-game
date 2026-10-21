@@ -192,6 +192,7 @@ The lawns and paving beyond the sidewalks, Elm Avenue's and every Toronto neighb
 | `roadside-gas-lamp`                                     | sprite | 36×150  | 32×131, 27×113, 23×94, 18×75    | core | A heritage lamp: a coal post, a lantern lit gold                 |
 | `roadside-gnome`                                        | sprite | 30×42   | 26×37, 23×32, 19×26, 15×21      | core | Blue hat, red coat                                               |
 | `roadside-hedge`                                        | sprite | 132×48  | 116×42, 99×36, 83×30, 66×24     | core | Bumped top, white flowers                                        |
+| `roadside-hot-dog-stand`                                | sprite | 90×126  | 79×110, 68×95, 56×79, 45×63     | core | A red park kiosk, a hot dog on its sign, ketchup and mustard     |
 | `roadside-house-bay-gable`                              | sprite | 114×144 | 100×126, 86×108, 71×90, 57×72   | core | Brick under a shale gable, white bargeboards, a two-storey bay   |
 | `roadside-house-bay-gable-cream`                        | sprite | 114×144 | 100×126, 86×108, 71×90, 57×72   | core | The bay-and-gable house painted cream under dslate               |
 | `roadside-house-bay-gable-dark`                         | sprite | 114×144 | 100×126, 86×108, 71×90, 57×72   | core | The bay-and-gable house in dbrick under slate                    |
@@ -202,8 +203,10 @@ The lawns and paving beyond the sidewalks, Elm Avenue's and every Toronto neighb
 | `roadside-iron-fence`                                   | sprite | 150×48  | 131×42, 113×36, 94×30, 75×24    | core | Wrought-iron bars with spear tips between two rails              |
 | `roadside-lamp-post`                                    | sprite | 36×150  | 32×131, 27×113, 23×94, 18×75    | core | White globe, forest post, a flower basket                        |
 | `roadside-laundry`                                      | sprite | 162×96  | 142×84, 122×72, 101×60, 81×48   | core | A washing line on two T posts                                    |
+| `roadside-leuty`                                        | sprite | 96×156  | 84×137, 72×117, 60×98, 48×78    | core | The Leuty Lifeguard Station: white clapboard on stilts, red roof |
 | `roadside-library`                                      | sprite | 48×96   | 42×84, 36×72, 30×60, 24×48      | core | A little free library: a red box of books on a post              |
 | `roadside-lifeguard-chair`                              | sprite | 72×150  | 63×131, 54×113, 45×94, 36×75    | core | A tall white lifeguard chair, a red cross on its back            |
+| `roadside-love-lock`                                    | sprite | 78×90   | 68×79, 59×68, 49×56, 39×45      | core | The love lock heart: a red steel heart of padlocks on a plinth   |
 | `roadside-mailbox`                                      | sprite | 36×48   | 32×42, 27×36, 23×30, 18×24      | core | Blue, a yellow flag                                              |
 | `roadside-market-house-lilac`                           | sprite | 114×150 | 100×131, 86×113, 71×94, 57×75   | core | A lilac Kensington house turned shop, amber awning               |
 | `roadside-market-house-lime`                            | sprite | 114×150 | 100×131, 86×113, 71×94, 57×75   | core | A lime Kensington house turned shop, pink awning                 |

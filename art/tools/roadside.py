@@ -45,10 +45,10 @@ roadside-well                60x84    a stone wishing well under a dred gable, i
 The Toronto neighborhoods' props, in the house palette's Toronto colours too:
 
 roadside-barrels, -clothes-rack, -dune-fence, -dune-grass, -fern, -fruit-stand, -gas-lamp,
--house-bay-gable (-cream, -dark), -house-beach, -iron-fence, -lifeguard-chair, -market-house-lilac
-(-lime, -turquoise), -muskoka-chair (-red), -planter-tree, -post-ring, -storefront (-red),
--street-lamp, -trail-sign, -transit-stop, -tree-maple, -tree-oak, -tree-pine, -umbrella
-(-turquoise), -warehouse (-stone); art/inventory.md lists their sizes.
+-hot-dog-stand, -house-bay-gable (-cream, -dark), -house-beach, -iron-fence, -leuty, -lifeguard-chair,
+-love-lock, -market-house-lilac (-lime, -turquoise), -muskoka-chair (-red), -planter-tree, -post-ring,
+-storefront (-red), -street-lamp, -trail-sign, -transit-stop, -tree-maple, -tree-oak, -tree-pine,
+-umbrella (-turquoise), -warehouse (-stone); art/inventory.md lists their sizes.
 
 Every prop has one tag, `idle`: one frame of 1000ms, or the sprinkler's two. Every other prop is
 static: one frame, no motion. PLACEMENT places static props only. The ground row is the
@@ -1127,6 +1127,121 @@ def planter_tree():
     return w, h, draw
 
 
+def hot_dog_stand():
+    """A park hot dog stand: a red kiosk under a flat white roof, a hot dog on its sign, a yellow and white
+    striped awning over the serving hatch, ketchup and mustard on the counter."""
+    w, h = 60, 84
+
+    def draw(g, f=0):
+        base = h - 2
+        for x in (18, 40):
+            g.rect(x, 18, 2, 11, "coal")
+        g.ell(30, 11, 27, 4, "dred")
+        g.ell(28, 10, 23, 2, "red")
+        g.ell(30, 15, 20, 5, "amber")
+        g.ell(31, 17, 18, 3, "ochre")
+        g.rect(11, 12, 38, 1, "tan")
+        for i in range(11):
+            g.rect(12 + i * 3.5, 7 + 2 * (i % 2), 2, 2, "yellow")
+        g.rect(2, 28, 56, 5, "white")
+        g.rect(2, 32, 56, 1, "lgrey")
+        walls(g, 6, 48, 33, base, "ttc")
+        for i in range(0, 48, 6):
+            g.rect(6 + i, 33, 3, 7, "yellow")
+            g.rect(9 + i, 33, 3, 7, "white")
+        g.rect(6, 40, 48, 1, "amber")
+        g.rect(10, 41, 40, 16, "coal")
+        g.rect(12, 43, 12, 8, "cream")
+        for y in (45, 48):
+            g.rect(14, y, 8, 1, "dbrown")
+        g.rect(30, 46, 16, 3, "lgrey")
+        g.rect(8, 57, 44, 3, "lgrey")
+        g.rect(8, 59, 44, 1, "grey")
+        for x, col in ((32, "ttc"), (37, "yellow")):
+            g.rect(x, 50, 3, 7, col)
+            g.rect(x + 1, 48, 1, 2, col)
+        g.rect(42, 53, 6, 4, "white")
+        g.rect(6, 68, 48, 3, "white")
+    return w, h, draw
+
+
+def love_lock():
+    """The Distillery's love lock heart: a red steel heart on a post, its middle a coal mesh hung with
+    padlocks, on a stone plinth."""
+    w, h = 52, 60
+
+    def heart(g, r, tip, col):
+        g.ell(17, 18, r, r, col)
+        g.ell(35, 18, r, r, col)
+        g.tri((26 - r - 9, 21), (26 + r + 9, 21), (26, tip), col)
+
+    def span(y, r, tip):
+        """The columns the inner heart covers on row y, as (x0, x1), or None."""
+        xs = [x for x in range(4, 48)
+              if (x + 0.5 - 17) ** 2 + (y + 0.5 - 18) ** 2 <= r * r or (x + 0.5 - 35) ** 2 + (y + 0.5 - 18) ** 2 <= r * r
+              or (y + 0.5 >= 21 and abs(x + 0.5 - 26) <= (tip - y - 0.5) * (r + 9) / (tip - 21))]
+        return (xs[0], xs[-1] + 1) if xs else None
+
+    def draw(g, f=0):
+        base = h - 2
+        g.rect(12, base - 8, 28, 9, "stone")
+        g.rect(36, base - 8, 4, 9, dk("stone"))
+        g.rect(12, base - 8, 28, 1, "lgrey")
+        g.rect(23, 40, 6, base - 47, "coal")
+        heart(g, 12, 47, "ttc")
+        g.ell(13, 13, 4, 3, "red")
+        heart(g, 7, 39, "coal")
+        for y in range(12, 38, 4):
+            sp = span(y, 6, 38)
+            if sp:
+                g.rect(sp[0], y, sp[1] - sp[0], 1, "shale")
+        for x in range(12, 42, 4):
+            ys = [y for y in range(8, 40) if (sp := span(y, 6, 38)) and sp[0] <= x < sp[1]]
+            if ys:
+                g.rect(x, ys[0], 1, ys[-1] + 1 - ys[0], "shale")
+        for x, y, col in ((14, 15, "gold"), (21, 20, "lgrey"), (32, 14, "turquoise"), (36, 21, "gold"),
+                          (25, 27, "pink"), (18, 26, "amber"), (30, 31, "lgrey"), (25, 15, "amber")):
+            g.rect(x, y + 1, 3, 3, col)
+            g.rect(x + 1, y, 1, 1, "grey")
+    return w, h, draw
+
+
+def leuty():
+    """The Leuty Lifeguard Station: a white clapboard house on driftwood stilts under a red hipped roof,
+    a windowed lookout on top under its own red cap, the flag up."""
+    w, h = 64, 104
+
+    def draw(g, f=0):
+        base = h - 2
+        for x in (12, 30, 49):
+            g.rect(x, 84, 3, base - 83, "driftwood")
+        bar(g, (14, 86), (49, base - 2), "driftwood")
+        g.rect(6, 82, 52, 3, "driftwood")
+        g.rect(10, 50, 44, 32, "white")
+        g.rect(50, 50, 4, 32, "lgrey")
+        for y in range(53, 82, 4):
+            g.rect(10, y, 40, 1, "lgrey")
+        g.rect(24, 58, 16, 14, "dlake")
+        g.rect(26, 60, 12, 10, "lake")
+        g.rect(27, 61, 3, 3, "foam")
+        g.rect(31, 58, 2, 14, "white")
+        g.tri((4, 50), (60, 50), (48, 38), "ttc")
+        g.tri((4, 50), (48, 38), (16, 38), "ttc")
+        g.tri((4, 50), (16, 38), (9, 50), "red")
+        g.rect(4, 48, 56, 2, "dred")
+        g.rect(22, 24, 20, 14, "white")
+        g.rect(38, 24, 4, 14, "lgrey")
+        g.rect(25, 27, 14, 7, "dlake")
+        g.rect(31, 27, 2, 7, "white")
+        g.rect(26, 28, 2, 2, "foam")
+        g.tri((19, 25), (45, 25), (32, 14), "ttc")
+        g.tri((19, 25), (32, 14), (24, 25), "red")
+        g.rect(19, 24, 26, 2, "dred")
+        g.rect(31, 4, 2, 11, "coal")
+        g.rect(33, 4, 9, 5, "ttc")
+    return w, h, draw
+
+
 # The houses' colourways, after backdrop-woof-way's row of houses: wall, roof, door.
 TAN, PINK, SKY, CREAM, GREY = (("tan", "brown", "dgreen"), ("pink", "purple", "white"), ("sky", "navy", "red"),
                                ("cream", "dred", "sky"), ("lgrey", "slate", "dred"))
@@ -1193,6 +1308,9 @@ PROPS = {
     "roadside-storefront-red": (storefront("brick", "ttc", "gold"), (0,), STILL_MS, False),
     "roadside-transit-stop": (transit_stop(), (0,), STILL_MS, True),
     "roadside-planter-tree": (planter_tree(), (0,), STILL_MS, True),
+    "roadside-hot-dog-stand": (hot_dog_stand(), (0,), STILL_MS, True),
+    "roadside-love-lock": (love_lock(), (0,), STILL_MS, True),
+    "roadside-leuty": (leuty(), (0,), STILL_MS, True),
 }
 
 
@@ -1243,7 +1361,8 @@ def gap(*props):
 # dz is road px from the slot's z, nearer negative.
 # Each table is sparse: an empty lot and six gaps, a prop in
 # gaps 0 and 3, so each side has a prop every 6 slots (840 px), the neighborhood's tree then its own
-# prop. The right side's gapStart of 2 puts its props 3 slots after the left's, so they alternate
+# prop (High Park's hot dog stand, the Distillery's love lock heart, Kensington's fruit stand,
+# The Beaches' Leuty). The right side's gapStart of 2 puts its props 3 slots after the left's, so they alternate
 # sides, one every 420 px. Each neighborhood's character comes from its backdrop, verges and road,
 # not from its roadside.
 SIDES = dict(
@@ -1259,10 +1378,10 @@ def sparse(tree, own):
 
 PLACEMENT = {
     "cabbagetown": sparse(("tree-maple", 220, 0), ("gas-lamp", 213, 0)),
-    "high-park": sparse(("tree-oak", 220, 0), ("tree-pine", 220, 0)),
-    "distillery-district": sparse(("gas-lamp", 213, 0), ("barrels", 220, 0)),
-    "kensington-market": sparse(("tree-maple", 220, 0), ("post-ring", 213, 0)),
-    "the-beaches": sparse(("lifeguard-chair", 220, 0), ("dune-grass", 213, 0)),
+    "high-park": sparse(("tree-oak", 220, 0), ("hot-dog-stand", 216, 0)),
+    "distillery-district": sparse(("gas-lamp", 213, 0), ("love-lock", 216, 0)),
+    "kensington-market": sparse(("tree-maple", 220, 0), ("fruit-stand", 216, 0)),
+    "the-beaches": sparse(("leuty", 220, 0), ("dune-grass", 213, 0)),
     "yonge-street": sparse(("planter-tree", 220, 0), ("transit-stop", 213, 0)),
 }
 # Each zone's ground shadow under a free-standing prop: its lawn or paving one ramp step darker.

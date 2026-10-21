@@ -404,7 +404,7 @@ The verges stay clean: bare lawn beyond the sidewalks, with the odd street tree.
 
 - Sprites are `roadside-<name>`, with `@88` to `@50` variants, laid out on a design grid and drawn at 1.5× as the road sprites are. They are front elevations (the bike side on), never flipped, outlined with `road_edge` and no light rim, since they stand on the lawn. One `idle` tag: one frame of 1000ms, or the sprinkler's two of 200ms. The placement table places static props only, one frame with no motion, so the verges never pull the eye from the road; the sprinkler is not placed.
 - Houses follow the backdrops' slim houses: about as tall as they are wide (the two-storey house a little taller), under a steep gable that rises a row for each column it narrows, past 2px eaves in a 2px band a step darker than the roof. Light comes from the top left: the roof's left edge is a ramp step lighter and the wall's right 3 columns a step darker. Each has a chimney; the porch houses have a dormer, its cap's right edge a step darker so it stands out of the roof.
-- They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket, the street tree three round lobes, the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box, the gnome a blue hat and red coat, the mailbox blue with a yellow flag (the hydrant is red), the bird bath a white basin on a pedestal, the shrub round and in bloom, and the little library a box on a post (the bench and the bin stand on the ground). In Toronto the bike post's bike is locked to its ring, side on, with no rider (the cyclist rides); the fruit stand is a tiered stand of crates under a striped awning on two posts, with no wheels (the hot dog cart rolls); the transit stop is a pole with a red and white sign and a timetable box, with no shelter; the street lamp lights both ways, since a prop is never flipped.
+- They never read as something on the road: no person, no animal on the ground, no coin or bone, and each differs from the road object it could be taken for. The lamp post is a white globe on a forest post with a flower basket, the street tree three round lobes, the hedge bumped and in flower (the obstacle `hedge` is a flat block), the flower border has no box, the gnome a blue hat and red coat, the mailbox blue with a yellow flag (the hydrant is red), the bird bath a white basin on a pedestal, the shrub round and in bloom, and the little library a box on a post (the bench and the bin stand on the ground). In Toronto the bike post's bike is locked to its ring, side on, with no rider (the cyclist rides); the fruit stand is a tiered stand of crates under a striped awning on two posts, with no wheels (the hot dog cart rolls); the hot dog stand is a red kiosk under a flat roof with a hot dog on its sign, standing square on the ground with no wheels or umbrella (the hot dog cart has both); the love lock heart stands on a stone plinth; the transit stop is a pole with a red and white sign and a timetable box, with no shelter; the street lamp lights both ways, since a prop is never flipped.
 
 ### Placement
 
@@ -414,22 +414,22 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 - The one lot is empty. Gap 0 holds `tree` and gap 3 `tree-blossom`, each at across 277 (inner edge 220), dz 0; the other four gaps are empty. So each side has a tree every 6 slots (840 px), alternating plain and blossom, and the right side's trees fall 3 slots after the left's, so the trees alternate sides, one every 420 px: about 2.4 trees per 1000 px of road over both sides, and always one in view.
 - At no k do the two sides take the same lot or gap that holds props.
 - Every frame's inner edge is at across 212 or more, past the sidewalk's outer edge at 208, so on screen a prop stays outside the sidewalk on its own row and every row above it.
-- Every Toronto neighborhood has a table in Elm Avenue's shape, its character coming from its backdrop, verges and road: the empty lot and six gaps, gap 0 holding the neighborhood's tree and gap 3 its own prop, the rest empty, with the same sides. So each side has a prop every 6 slots, and over both sides one stands every 420 px, always one in view.
+- Every Toronto neighborhood has a table in Elm Avenue's shape: the empty lot and six gaps, gap 0 holding the neighborhood's tree or street furniture and gap 3 its own prop, a landmark where it has one (High Park's hot dog stand, the Distillery District's love lock heart, Kensington Market's fruit stand, The Beaches' Leuty in gap 0), the rest empty, with the same sides. So each side has a prop every 6 slots, and over both sides one stands every 420 px, always one in view.
 
-| Neighborhood        | Gap 0: key `roadside-…`, inner edge, dz | Gap 3                 |
-| ------------------- | --------------------------------------- | --------------------- |
-| Cabbagetown         | `tree-maple` 220, 0                     | `gas-lamp` 213, 0     |
-| Distillery District | `gas-lamp` 213, 0                       | `barrels` 220, 0      |
-| High Park           | `tree-oak` 220, 0                       | `tree-pine` 220, 0    |
-| Kensington Market   | `tree-maple` 220, 0                     | `post-ring` 213, 0    |
-| The Beaches         | `lifeguard-chair` 220, 0                | `dune-grass` 213, 0   |
-| Yonge Street        | `planter-tree` 220, 0                   | `transit-stop` 213, 0 |
+| Neighborhood        | Gap 0: key `roadside-…`, inner edge, dz | Gap 3                  |
+| ------------------- | --------------------------------------- | ---------------------- |
+| Cabbagetown         | `tree-maple` 220, 0                     | `gas-lamp` 213, 0      |
+| Distillery District | `gas-lamp` 213, 0                       | `love-lock` 216, 0     |
+| High Park           | `tree-oak` 220, 0                       | `hot-dog-stand` 216, 0 |
+| Kensington Market   | `tree-maple` 220, 0                     | `fruit-stand` 216, 0   |
+| The Beaches         | `leuty` 220, 0                          | `dune-grass` 213, 0    |
+| Yonge Street        | `planter-tree` 220, 0                   | `transit-stop` 213, 0  |
 
 ### Drawing
 
 - A prop d road px ahead of the feet draws at the road camera's scale s, at x = 180 − across × s on the left and 180 + across × s on the right, its feet on the row of d, from the smallest of its steps at least its projected size, as the road objects.
 - Draw order: props draw in their own depth band, back to front by feet row, below the road sprites and the ambient movers; over the backdrop, cropped at the juncture (row 126), so a far prop shows in full from the cross street; and under the doghouses.
-- Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary, wishing well) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in the zone's `shadowColour` from the table, its lawn or paving one ramp step darker: canopy on Cabbagetown, fir in High Park, dbrown on the Distillery District, coal on Kensington Market, skin2 on The Beaches and grey on Yonge Street. The Toronto street furniture (lamps, the bike post, trees, ferns, the trail sign, barrels, the fruit stand, the clothes rack, chairs, umbrellas, dune grass, the transit stop) takes it too. Houses, fences, the hedge, the flower border, the washing line and the swing set take none.
+- Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary, wishing well) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in the zone's `shadowColour` from the table, its lawn or paving one ramp step darker: canopy on Cabbagetown, fir in High Park, dbrown on the Distillery District, coal on Kensington Market, skin2 on The Beaches and grey on Yonge Street. The Toronto street furniture (lamps, the bike post, trees, ferns, the trail sign, barrels, the fruit stand, the clothes rack, chairs, umbrellas, dune grass, the transit stop, the hot dog stand, the love lock heart, the Leuty) takes it too. Houses, fences, the hedge, the flower border, the washing line and the swing set take none.
 - With 20px of verge at the pack, a prop leaves the screen's side once its inner edge does, at about s 0.85; houses never show whole. No prop stands within the 64 rows of a zone's start strip, so the cross street stays clear.
 
 ## Ambient
@@ -449,14 +449,14 @@ Above the far side's front row the scenery goes back in depth, not taller: hills
 
 The six Toronto backdrops (`backdrop-<id>`), each started from the Maplewood backdrop it replaced:
 
-| Neighborhood        | Front row                                                                                 | Depth behind it                                                              |
-| ------------------- | ----------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| Cabbagetown         | Brick bay-and-gable houses round the crescent, white bargeboards, iron fences, gas lamps  | Dbrick roofs up a leafy rise, windows lit gold, a church spire               |
-| Distillery District | Brick warehouses and a limestone mill, arched windows lit gold, the DISTILLERY sign       | The chimney stack and a water tower; string lights between the buildings     |
-| High Park           | The park gate (HIGH PARK on a pine board), black lanterns, the trail on through it        | Grenadier Pond with reeds, a cherry in blossom, dense pine and canopy groves |
-| Kensington Market   | Painted Victorians turned shops (FRUIT, CHEESE, VINTAGE, SPICES, COFFEE), bunting, crates | Back-lane rooftops; shaded laneway walls at both ends of the street          |
-| The Beaches         | Sand with umbrellas, a volleyball net and the white lifeguard station under its red roof  | Lake Ontario to the horizon: dark far water, shallows, foam lines, sails     |
-| Yonge Street        | Shops with lit signs (SALE, EAT, MUSIC, BOOKS, SHOES), the TTC sign, a big screen         | Downtown towers and the CN Tower                                             |
+| Neighborhood        | Front row                                                                                                                                 | Depth behind it                                                                                                                                                        |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Cabbagetown         | Brick bay-and-gable houses round the crescent, white bargeboards, iron fences, gas lamps                                                  | The Necropolis chapel's brick tower and slate spire between the roofs; dbrick roofs up a leafy rise, windows lit gold                                                  |
+| Distillery District | Brick warehouses and a limestone mill, arched windows lit gold, the DISTILLERY sign; I.T., the steel spider, in the lane                  | The chimney stack and a water tower; string lights between the buildings                                                                                               |
+| High Park           | The park gate (HIGH PARK on a pine board), black lanterns, the trail on through it, a hot dog cart by the gate                            | Grenadier Pond with reeds, cherries in blossom along its far bank and petals on the water; the castle playground's towers over the trees; dense pine and canopy groves |
+| Kensington Market   | Painted Victorians turned shops (FRUIT, CHEESE, VINTAGE, SPICES, COFFEE), bunting, crates, the Garden Car overgrown with plants           | Back-lane rooftops; laneway walls at both ends of the street painted with murals, a dog's face in each                                                                 |
+| The Beaches         | Sand with umbrellas and the Leuty Lifeguard Station under its red roof; the R.C. Harris Water Treatment Plant on its lawn at the east end | Lake Ontario to the horizon: dark far water, shallows, foam lines, sails                                                                                               |
+| Yonge Street        | Shops with lit signs (SALE, EAT, MUSIC, BOOKS, SHOES), the TTC sign, a big screen                                                         | Downtown towers and the CN Tower                                                                                                                                       |
 
 Darkness varies between them: The Beaches and Yonge Street are bright and open, Cabbagetown and the Distillery District in between, Kensington Market dark either side of its road and High Park darkest, under its canopy.
 
@@ -488,7 +488,7 @@ Beside the kite's tree each backdrop draws a static ornament on the near-right l
 
 | Neighborhood        | Ornament                                                         |
 | ------------------- | ---------------------------------------------------------------- |
-| Cabbagetown         | A terracotta pot of flowers                                      |
+| Cabbagetown         | Three cabbages in a bed of dark soil                             |
 | Distillery District | An oak whisky barrel on its end, a tin cup on its head           |
 | High Park           | A round flower bed edged in stones                               |
 | Kensington Market   | Stacked crates of apples, oranges and limes                      |
@@ -519,7 +519,7 @@ Beside the kite's tree each backdrop draws a static ornament on the near-right l
 | The Long Way Home  | pink, orange, amber, yellow | Striped sun                           | `screen-end`                                    |
 | Toronto at night   | navy, purple, mauve         | Crescent moon, stars in the navy band | `screen-loading`                                |
 
-- Scenery standing against a band never shares its colour: Cabbagetown's far roofs and spire are dbrick against the peach and gold bands.
+- Scenery standing against a band never shares its colour: Cabbagetown's far roofs are dbrick and the chapel's spire dslate against the peach and gold bands.
 - Bands belong to skies only: never on sprites, UI or the road.
 
 ## Sound

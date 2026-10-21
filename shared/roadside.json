@@ -32,7 +32,10 @@
     "roadside-muskoka-chair-red",
     "roadside-dune-grass",
     "roadside-transit-stop",
-    "roadside-planter-tree"
+    "roadside-planter-tree",
+    "roadside-hot-dog-stand",
+    "roadside-love-lock",
+    "roadside-leuty"
   ],
   "zones": {
     "cabbagetown": {
@@ -95,8 +98,8 @@
         [],
         [
           {
-            "key": "roadside-tree-pine",
-            "across": 268,
+            "key": "roadside-hot-dog-stand",
+            "across": 261,
             "dz": 0
           }
         ],
@@ -138,8 +141,8 @@
         [],
         [
           {
-            "key": "roadside-barrels",
-            "across": 262,
+            "key": "roadside-love-lock",
+            "across": 255,
             "dz": 0
           }
         ],
@@ -181,8 +184,8 @@
         [],
         [
           {
-            "key": "roadside-post-ring",
-            "across": 249,
+            "key": "roadside-fruit-stand",
+            "across": 270,
             "dz": 0
           }
         ],
@@ -215,8 +218,8 @@
       "gaps": [
         [
           {
-            "key": "roadside-lifeguard-chair",
-            "across": 256,
+            "key": "roadside-leuty",
+            "across": 268,
             "dz": 0
           }
         ],

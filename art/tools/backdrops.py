@@ -1387,6 +1387,33 @@ def bay_gable(cv, cx, w, wall, roof, door, base, trim="white", curtains=None):
     cv.fill(bx - 1, top + roof_h + 14, bw + 2, 1, trim)
 
 
+def necropolis(cv, cx, top, base):
+    """The Necropolis chapel's tower between the roofs, from row top down to row base: red brick banded in
+    stone under its belfry, buttresses below, lit lancets, a pinnacle on each corner, a tall slate spire and a
+    cream cross."""
+    cv.fill(cx - 4, top, 9, base - top, "brick")
+    cv.fill(cx + 3, top, 2, base - top, "dbrick")
+    for y in (top + 2, top + 12, top + 13):
+        cv.fill(cx - 4, y, 9, 1, "stone")
+    for x in (cx - 5, cx + 5):
+        cv.fill(x, top + 14, 1, base - top - 14, "dbrick")
+    for y, col in ((top + 5, "gold"), (top + 18, "gold"), (base - 9, "walnut")):
+        cv.fill(cx - 1, y, 3, 6, col)
+        cv.fill(cx, y - 1, 1, 1, col)
+    cv.fill(cx - 5, top - 1, 11, 2, "dslate")
+    for x in (cx - 5, cx + 5):
+        cv.fill(x, top - 5, 1, 4, "dslate")
+    for k in range(17):
+        half = 3 - k // 5
+        cv.fill(cx - half, top - 2 - k, 2 * half + 1, 1, "dslate")
+        cv.fill(cx - half, top - 2 - k, 1, 1, "slate")
+    cv.fill(cx, top - 22, 1, 4, "cream")
+    cv.fill(cx - 1, top - 21, 3, 1, "cream")
+
+
+CHAPEL = 87   # the Necropolis chapel's column: the gap between the second and third houses, left treeless
+
+
 def cabbagetown():
     cv = sn.Canvas(W, H)
     # a lavender dusk, a last gold glow behind the roofs, a crescent moon and the first stars
@@ -1402,11 +1429,7 @@ def cabbagetown():
     hills(cv, BASE - 40, BASE, "canopy", "olive", 3.1, 6)
     roofline(cv, BASE - 28, ((10, 16, 8), (40, 14, 6), (150, 16, 8), (212, 16, 9), (258, 16, 7),
                              (282, 14, 9), (326, 18, 8)), "dbrick", "gold", step=1)
-    sx = 112
-    cv.fill(sx - 4, BASE - 50, 9, 26, "dbrick")
-    for k in range(16):
-        cv.fill(sx - 4 + k // 3, BASE - 51 - k, 9 - 2 * (k // 3), 1, "dbrick")
-    cv.fill(sx - 1, BASE - 46, 3, 4, "gold")
+    necropolis(cv, CHAPEL, BASE - 46, BASE)
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 4:
@@ -1419,6 +1442,8 @@ def cabbagetown():
              (366, 44, "brick", "dslate", "forest", None))
     for k in range(len(homes) - 1):
         cx = (homes[k][0] + homes[k + 1][0]) // 2
+        if cx == CHAPEL:
+            continue
         lift = crescent_bend(cx)
         tree(cv, cx, BASE - 34 - lift, "canopy", "pine", r=11, base=BASE - lift, girth=4)
     for cx, w, wall_c, roof, door, curtains in homes:
@@ -1443,8 +1468,64 @@ def cabbagetown():
     street(cv, toronto_verge("cabbagetown", road))
     lanes(cv, "white", "slate", dash=(8, 32))
     iron_perch(cv, *PERCH_X, PERCH)
-    ornament(cv, "pot")
+    ornament(cv, "cabbages")
     return cv
+
+
+def cherry(cv, cx, cy, r, base):
+    """A cherry tree in blossom on row base: a dark trunk forking under a wide crown of pink lobes,
+    mauve on the lower right, white petals picked out on the lit upper left."""
+    cv.fill(cx - 1, cy, 2, base - cy, "dbrown")
+    cv.fill(cx - 3, cy + 2, 2, 1, "dbrown")
+    cv.fill(cx + 2, cy + 1, 2, 1, "dbrown")
+    lobes = ((cx - r, cy + 1, r * 0.8), (cx + r, cy + 1, r * 0.8), (cx, cy - 2, r))
+    for px in range(cx - 2 * r - 1, cx + 2 * r + 2):
+        for py in range(cy - 2 * r, cy + r + 1):
+            d = min(((px + 0.5 - lx) ** 2 + (py + 0.5 - ly) ** 2) / lr ** 2 for lx, ly, lr in lobes)
+            if d <= 1:
+                lit = (px - cx) + 1.5 * (py - cy)
+                c = "mauve" if lit > r else "white" if lit < -r * 1.2 and hashed(px, py, 3) else "pink"
+                cv.fill(px, py, 1, 1, c)
+
+
+def castle(cv, cx, base):
+    """The castle playground's wooden towers over the trees, centred on cx and standing on row base: two
+    round-topped towers under red cones with pennants, a crenellated wall between them, a lookout door."""
+    cv.fill(cx - 10, base - 14, 20, 14, "brown")
+    for x in range(cx - 10, cx + 10, 4):
+        cv.fill(x, base - 16, 2, 2, "brown")
+    for x in range(cx - 9, cx + 10, 3):
+        cv.fill(x, base - 13, 1, 13, "dbrown")
+    cv.fill(cx - 2, base - 9, 4, 9, "walnut")
+    for tx, h in ((cx - 13, 26), (cx + 10, 22)):
+        cv.fill(tx - 3, base - h, 7, h, "tan")
+        cv.fill(tx + 2, base - h, 2, h, "brown")
+        cv.fill(tx - 1, base - h + 5, 3, 4, "walnut")
+        for k in range(7):
+            cv.fill(tx - 4 + k // 2, base - h - 1 - k, 9 - 2 * (k // 2), 1, "red")
+        cv.fill(tx - 4, base - h - 1, 9, 1, "dred")
+        cv.fill(tx, base - h - 11, 1, 4, "coal")
+        cv.fill(tx + 1, base - h - 11, 3, 2, "gold")
+
+
+def hot_dog_cart(cv, cx, base):
+    """A hot dog cart by the park gate, side on with its wheels on row base: a stainless box with a
+    counter, ketchup and mustard on it, under a red and yellow striped umbrella."""
+    for k in range(4):
+        for x in range(cx - 2 - 2 * k, cx + 3 + 2 * k):
+            cv.fill(x, base - 22 + k, 1, 1, "red" if ((x - cx + 9) // 3) % 2 else "yellow")
+    cv.fill(cx - 9, base - 18, 19, 1, "dred")
+    cv.fill(cx, base - 18, 1, 8, "coal")
+    cv.fill(cx - 7, base - 10, 15, 7, "lgrey")
+    cv.fill(cx + 5, base - 10, 3, 7, "grey")
+    cv.fill(cx - 7, base - 10, 15, 1, "white")
+    cv.fill(cx - 6, base - 7, 9, 2, "red")
+    cv.fill(cx - 5, base - 7, 2, 1, "yellow")
+    cv.fill(cx - 5, base - 12, 1, 2, "red")
+    cv.fill(cx - 3, base - 12, 1, 2, "yellow")
+    for x in (cx - 5, cx + 4):
+        cv.fill(x - 1, base - 3, 3, 3, "coal")
+        cv.fill(x, base - 2, 1, 1, "ash")
 
 
 def high_park():
@@ -1480,10 +1561,17 @@ def high_park():
     for cx, top, r, leaf, shade in ((8, BASE - 30, 10, "pink", "mauve"), (118, BASE - 30, 9, "pine", "fir"),
                                     (CX + 100, BASE - 30, 9, "olive", "dolive"), (352, BASE - 28, 9, "pine", "fir")):
         tree(cv, cx, top, leaf, shade, r=r, base=BASE - 14, girth=4)
-    for cx, r in ((CX - 30, 8), (CX + 30, 8), (CX + 64, 8), (CX + 122, 8), (CX + 84, 6), (CX + 136, 6),
-                  (CX + 166, 7), (40, 6), (72, 7)):
+    castle(cv, CX + 112, BASE - 15)
+    for cx, r in ((CX - 30, 8), (CX + 30, 8), (CX + 64, 8), (CX + 84, 6), (CX + 166, 7)):
         tree(cv, cx, BASE - 17 - 2 * r - (2 if r < 8 else 0), "canopy" if cx % 2 else "pine", "fir", r=r,
              base=BASE - 14 - (4 if r < 8 else 0), girth=3)
+    # the cherry trees in blossom along Grenadier Pond's far bank, their petals on the water
+    for cx, r in ((34, 6), (62, 7), (92, 6)):
+        cherry(cv, cx, BASE - 16 - r, r, BASE - 14)
+    for px in range(20, 104):
+        for py in range(BASE - 13, BASE - 9):
+            if hashed(px, py, 17) and abs((px - 20) % 29 - 14) < 9:
+                cv.fill(px, py, 1, 1, "pink")
     for cx, top, r, leaf, shade in ((CX - 80, BASE - 28, 13, "canopy", "pine"),
                                     (CX + 150, BASE - 30, 14, "canopy", "pine"),
                                     (-2, BASE - 24, 15, "olive", "dolive")):
@@ -1499,6 +1587,7 @@ def high_park():
         cv.fill(x, BASE - 18, 2, 24, "coal")
         cv.fill(x - 4, BASE - 24, 10, 7, "coal")
         cv.fill(x - 2, BASE - 22, 6, 4, "gold")
+    hot_dog_cart(cv, CX + 84, BASE + 3)
 
     def trail(x, z, span, px, py):
         a = abs(x)
@@ -1561,6 +1650,27 @@ def barrel(cv, x, y):
     cv.fill(x + 1, y - 10, 6, 1, "bark")
 
 
+def spider(cv, cx, base):
+    """I.T., the steel spider sculpture in the lane, standing on row base: a bulbous coal head pierced
+    with gold, lit ash on its upper left, on eight long jointed legs whose knees rise over it."""
+    legs = ((8, 40, 11), (13, 42, 18), (18, 39, 25), (22, 34, 31))
+    hip = base - 26
+    for kx, ky, fx in legs:
+        for side in (-1, 1):
+            knee = (cx + side * kx, base - ky)
+            cv.line(cx + side * 3, hip, *knee, "coal")
+            cv.line(*knee, cx + side * fx, base, "coal")
+            cv.line(knee[0] + side, knee[1], cx + side * (fx + 1), base, "coal")
+    for dy in range(-7, 8):
+        for dx in range(-9, 10):
+            if (dx / 9.5) ** 2 + (dy / 7.5) ** 2 <= 1:
+                lit = dx + dy < -8
+                cv.fill(cx + dx, hip - 3 + dy, 1, 1, "ash" if lit else "coal")
+    for dx, dy in ((-4, -4), (1, -5), (5, -2), (-1, -1), (-5, 1), (2, 2), (6, 2), (-2, 4)):
+        cv.fill(cx + dx, hip - 3 + dy, 1, 1, "gold")
+    cv.fill(cx - 2, hip + 4, 5, 2, "coal")
+
+
 def distillery():
     cv = sn.Canvas(W, H)
     # a warm peach evening over the old distillery, gulls
@@ -1599,8 +1709,9 @@ def distillery():
         return "brick" if hashed(px, py, 19) else "brown"
 
     yard(cv, BASE, FAR_WALK, paving)
-    for x in (CX - 120, CX - 104, CX + 70, CX + 150):
+    for x in (6, CX + 70, CX + 150):
         barrel(cv, x, FAR_WALK - 1)
+    spider(cv, 96, FAR_WALK - 1)
 
     def road(x, z, span, px, py):
         a = abs(x)
@@ -1628,6 +1739,58 @@ def market_house(cv, cx, w, wall, roof, awn, sign, board, letters, base=BASE):
     shopfront(cv, x, w, base - 33, base, wall, awn, sign, board, letters)
 
 
+MURAL = ("ttc", "gold", "lime", "turquoise", "lilac", "pink")
+
+
+def mural(cv, x0, top, base, flip):
+    """A laneway wall 16 wide, rows top to base, painted with a mural: diagonal bands of bright paint
+    under a walnut coping, a dog's face looking out of them, the paint stopping short of the ground."""
+    for py in range(top, base):
+        for px in range(x0, x0 + 16):
+            u = (px - x0) if not flip else (x0 + 15 - px)
+            c = MURAL[((u + py) // 5) % len(MURAL)] if py < base - 4 else "coal"
+            cv.fill(px, py, 1, 1, c)
+    cv.fill(x0, top, 16, 2, "walnut")
+    fy = top + 34
+    for dy in range(-6, 7):
+        for dx in range(-6, 7):
+            if (dx / 6.5) ** 2 + (dy / 6) ** 2 <= 1:
+                cv.fill(x0 + 8 + dx, fy + dy, 1, 1, "cream")
+    for dx in (-6, 4):
+        cv.fill(x0 + 8 + dx, fy - 7, 3, 7, "brown")
+    for dx in (-3, 2):
+        cv.fill(x0 + 8 + dx, fy - 2, 2, 2, "coal")
+    cv.fill(x0 + 7, fy + 2, 3, 2, "coal")
+    cv.fill(x0 + 8, fy + 5, 1, 2, "ttc")
+
+
+def garden_car(cv, x, base):
+    """The Garden Car, side on with its wheels on row base: an old sedan painted in patches of bright
+    colour, its windows and roof, hood and trunk overgrown with plants in flower."""
+    cv.fill(x, base - 9, 38, 6, "ttc")
+    for k, c in enumerate(("gold", "turquoise", "lime", "gold", "lilac", "turquoise", "lime")):
+        cv.fill(x + 2 + k * 5, base - 8 + (k % 2) * 2, 3, 2, c)
+    cv.fill(x, base - 4, 38, 1, "dred")
+    cv.fill(x + 9, base - 15, 20, 6, "ttc")
+    cv.fill(x + 7, base - 13, 2, 4, "ttc")
+    cv.fill(x + 29, base - 13, 2, 4, "ttc")
+    for wx in (x + 10, x + 20):
+        cv.fill(wx, base - 14, 8, 4, "moss")
+        cv.fill(wx + 2, base - 13, 2, 2, "forest")
+    for bx, by, rx in ((x + 4, base - 10, 4), (x + 19, base - 16, 9), (x + 34, base - 10, 4)):
+        for dy in range(-4, 1):
+            for dx in range(-rx, rx + 1):
+                if (dx / (rx + 0.5)) ** 2 + (dy / 4.5) ** 2 <= 1:
+                    cv.fill(bx + dx, by + dy, 1, 1, "forest" if dx + dy > rx // 2 else "green")
+    for fx, fy, c in ((x + 2, base - 13, "red"), (x + 6, base - 12, "yellow"), (x + 13, base - 20, "pink"),
+                      (x + 18, base - 21, "yellow"), (x + 23, base - 20, "red"), (x + 27, base - 18, "white"),
+                      (x + 33, base - 13, "pink"), (x + 37, base - 12, "yellow")):
+        cv.fill(fx, fy, 2, 2, c)
+    for wx in (x + 8, x + 30):
+        cv.fill(wx - 3, base - 6, 7, 6, "coal")
+        cv.fill(wx - 1, base - 4, 3, 2, "ash")
+
+
 def kensington():
     cv = sn.Canvas(W, H)
     # a bright aqua sunburst from the end of the street, flat cyan beyond its arc, two clouds
@@ -1652,17 +1815,15 @@ def kensington():
 
     yard(cv, BASE, FAR_WALK, paving)
     # produce out on the sidewalk: crates of fruit
-    for x, fruit in ((6, ("red", "amber")), (CX - 112, ("lime", "red")), (CX + 52, ("amber", "orange")),
-                     (CX + 108, ("red", "lime"))):
+    for x, fruit in ((6, ("red", "amber")), (CX + 52, ("amber", "orange")), (CX + 108, ("red", "lime"))):
         cv.fill(x, FAR_WALK - 6, 14, 5, "clay")
         cv.fill(x, FAR_WALK - 6, 14, 1, "bark")
         for k in range(6):
             cv.fill(x + 1 + k * 2, FAR_WALK - 8 + (k % 2), 2, 2, fruit[k % 2])
-    # the shaded laneways at both ends of the street
+    garden_car(cv, 58, FAR_WALK - 1)
+    # the laneway walls at both ends of the street, painted with murals
     for x0 in (0, W - 16):
-        for py in range(BASE - 66, FAR_WALK):
-            cv.fill(x0, py, 16, 1, "coal" if (py // 9) % 2 else "shale")
-        cv.fill(x0, BASE - 66, 16, 2, "walnut")
+        mural(cv, x0, BASE - 66, FAR_WALK, x0 > 0)
 
     def road(x, z, span, px, py):
         a = abs(x)
@@ -1711,6 +1872,28 @@ def umbrella(cv, cx, base, a, b):
             cv.fill(x, base - 13 - k, 1, 1, a if ((x - cx) // 3) % 2 else b)
 
 
+def rc_harris(cv, x0, base):
+    """The R.C. Harris Water Treatment Plant on its lawn at the east end of the beach, standing on row
+    base: buff brick Art Deco halls under hipped copper roofs, the middle hall raised over its wings,
+    tall arched windows, a stone plinth."""
+    cv.fill(x0 - 6, base - 1, W - x0 + 6, 4, "moss")
+    cv.fill(x0 - 6, base + 2, W - x0 + 6, 1, "olive")
+    for x, w, wall_h, roof_h in ((x0, 22, 11, 4), (x0 + 22, 26, 19, 6), (x0 + 48, 24, 11, 4)):
+        top = base - wall_h
+        cv.fill(x, top, w, wall_h, "cream")
+        cv.fill(x + w - 2, top, 2, wall_h, "tan")
+        cv.fill(x, base - 2, w, 2, "stone")
+        for k in range(roof_h):
+            cv.fill(x - 1 + k, top - 1 - k, w + 2 - 2 * k, 1, "turquoise" if k else "dturq")
+        cv.fill(x - 1 + roof_h - 1, top - roof_h, 2, 1, "foam")
+        for wx in range(x + 3, x + w - 4, 4):
+            cv.fill(wx, top + 3, 2, wall_h - 6, "dlake")
+            cv.fill(wx, top + 3, 2, 1, "cream")
+            cv.fill(wx, top + 4, 1, 1, "foam")
+    cv.fill(x0 + 33, base - 8, 4, 6, "walnut")
+    cv.fill(x0 + 31, base - 9, 8, 1, "tan")
+
+
 def beaches():
     cv = sn.Canvas(W, H)
     # a warm yellow late afternoon over the lake, small clouds and gulls
@@ -1724,7 +1907,7 @@ def beaches():
                 c = "shallow" if c == "lake" else "foam" if c == "shallow" else "lake"
             cv.fill(px, py, 1, 1, c)
     cv.fill(0, BASE - 41, W, 1, "lake")
-    for sx, sy in ((CX - 120, BASE - 36), (CX + 40, BASE - 38), (CX + 120, BASE - 30)):
+    for sx, sy in ((CX - 120, BASE - 36), (CX + 40, BASE - 38), (CX - 40, BASE - 30)):
         cv.fill(sx - 4, sy + 6, 10, 2, "white")
         for k in range(8):
             cv.fill(sx, sy - 2 + k, 1 + k // 2, 1, "white")
@@ -1737,13 +1920,7 @@ def beaches():
     leuty(cv, CX + 96, BASE - 2)
     for cx, a, b in ((CX - 130, "ttc", "white"), (CX - 60, "turquoise", "white"), (CX + 30, "gold", "dlake")):
         umbrella(cv, cx, BASE - 1, a, b)
-    # a volleyball net on the sand
-    cv.fill(CX + 130, BASE - 14, 1, 14, "dstone")
-    cv.fill(CX + 170, BASE - 14, 1, 14, "dstone")
-    for x in range(CX + 131, CX + 170):
-        cv.fill(x, BASE - 13, 1, 1, "white")
-        if x % 2:
-            cv.fill(x, BASE - 12, 1, 3, "white")
+    rc_harris(cv, CX + 116, BASE - 9)
 
     def sand(px, py):
         return "tan" if hashed(px, py, 43) else "white" if hashed(px, py + 7, 150) else "skin1"
@@ -1964,6 +2141,17 @@ def _barrel(g, base):
     g.rect(25, base - 22, 1, 4, "grey")
 
 
+def _cabbages(g, base):
+    """Three cabbages in a front-yard bed of dark soil, the neighborhood's namesake (Cabbagetown)."""
+    g.ell(17, base - 1, 15, 2.5, "dbrown")
+    for x, y, r in ((8, base - 5, 5), (26, base - 5, 5), (17, base - 8, 6)):
+        g.ell(x, y, r + 1.5, r, "green", sh="dgreen")
+        g.ell(x - 0.5, y - 0.5, r - 1.5, r - 2, "lime")
+        g.rect(int(x), int(y - r + 2), 1, r, "moss")
+        g.p(int(x - 2), int(y - 1), "moss")
+        g.p(int(x + 2), int(y), "moss")
+
+
 def _crates(g, base):
     """Two stacked crates of fruit on the paving, apples and oranges (Kensington Market)."""
     for x, y, w, fruit in ((4, base - 8, 16, ("red", "ttc")), (16, base - 8, 16, ("orange", "amber")),
@@ -2005,7 +2193,7 @@ def _ring(g, base):
 
 
 ORNAMENTS = dict(birdbath=_birdbath, bed=_bed, pot=_pot, pumpkins=_pumpkins, gnome=_gnome, boat=_boat,
-                 barrel=_barrel, crates=_crates, chair=_chair, ring=_ring)
+                 barrel=_barrel, cabbages=_cabbages, crates=_crates, chair=_chair, ring=_ring)
 
 
 def ornament(cv, kind):

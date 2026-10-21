@@ -3665,6 +3665,51 @@
       }
     },
     {
+      "key": "roadside-hot-dog-stand",
+      "png": "sprites/roadside-hot-dog-stand.png",
+      "json": "sprites/roadside-hot-dog-stand.json",
+      "anchor": {
+        "feetY": 123,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@50",
+      "png": "sprites/roadside-hot-dog-stand@50.png",
+      "json": "sprites/roadside-hot-dog-stand@50.json",
+      "anchor": {
+        "feetY": 62,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@62",
+      "png": "sprites/roadside-hot-dog-stand@62.png",
+      "json": "sprites/roadside-hot-dog-stand@62.json",
+      "anchor": {
+        "feetY": 78,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@75",
+      "png": "sprites/roadside-hot-dog-stand@75.png",
+      "json": "sprites/roadside-hot-dog-stand@75.json",
+      "anchor": {
+        "feetY": 94,
+        "opaqueWidth": 64
+      }
+    },
+    {
+      "key": "roadside-hot-dog-stand@88",
+      "png": "sprites/roadside-hot-dog-stand@88.png",
+      "json": "sprites/roadside-hot-dog-stand@88.json",
+      "anchor": {
+        "feetY": 108,
+        "opaqueWidth": 75
+      }
+    },
+    {
       "key": "roadside-house-bay-gable",
       "png": "sprites/roadside-house-bay-gable.png",
       "json": "sprites/roadside-house-bay-gable.json",
@@ -4250,6 +4295,51 @@
       }
     },
     {
+      "key": "roadside-leuty",
+      "png": "sprites/roadside-leuty.png",
+      "json": "sprites/roadside-leuty.json",
+      "anchor": {
+        "feetY": 155,
+        "opaqueWidth": 86
+      }
+    },
+    {
+      "key": "roadside-leuty@50",
+      "png": "sprites/roadside-leuty@50.png",
+      "json": "sprites/roadside-leuty@50.json",
+      "anchor": {
+        "feetY": 77,
+        "opaqueWidth": 42
+      }
+    },
+    {
+      "key": "roadside-leuty@62",
+      "png": "sprites/roadside-leuty@62.png",
+      "json": "sprites/roadside-leuty@62.json",
+      "anchor": {
+        "feetY": 97,
+        "opaqueWidth": 53
+      }
+    },
+    {
+      "key": "roadside-leuty@75",
+      "png": "sprites/roadside-leuty@75.png",
+      "json": "sprites/roadside-leuty@75.json",
+      "anchor": {
+        "feetY": 116,
+        "opaqueWidth": 64
+      }
+    },
+    {
+      "key": "roadside-leuty@88",
+      "png": "sprites/roadside-leuty@88.png",
+      "json": "sprites/roadside-leuty@88.json",
+      "anchor": {
+        "feetY": 136,
+        "opaqueWidth": 75
+      }
+    },
+    {
       "key": "roadside-library",
       "png": "sprites/roadside-library.png",
       "json": "sprites/roadside-library.json",
@@ -4337,6 +4427,51 @@
       "anchor": {
         "feetY": 130,
         "opaqueWidth": 52
+      }
+    },
+    {
+      "key": "roadside-love-lock",
+      "png": "sprites/roadside-love-lock.png",
+      "json": "sprites/roadside-love-lock.json",
+      "anchor": {
+        "feetY": 89,
+        "opaqueWidth": 66
+      }
+    },
+    {
+      "key": "roadside-love-lock@50",
+      "png": "sprites/roadside-love-lock@50.png",
+      "json": "sprites/roadside-love-lock@50.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 33
+      }
+    },
+    {
+      "key": "roadside-love-lock@62",
+      "png": "sprites/roadside-love-lock@62.png",
+      "json": "sprites/roadside-love-lock@62.json",
+      "anchor": {
+        "feetY": 55,
+        "opaqueWidth": 41
+      }
+    },
+    {
+      "key": "roadside-love-lock@75",
+      "png": "sprites/roadside-love-lock@75.png",
+      "json": "sprites/roadside-love-lock@75.json",
+      "anchor": {
+        "feetY": 67,
+        "opaqueWidth": 49
+      }
+    },
+    {
+      "key": "roadside-love-lock@88",
+      "png": "sprites/roadside-love-lock@88.png",
+      "json": "sprites/roadside-love-lock@88.json",
+      "anchor": {
+        "feetY": 78,
+        "opaqueWidth": 57
       }
     },
     {
