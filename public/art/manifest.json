@@ -10,6 +10,96 @@
       }
     },
     {
+      "key": "ambient-pedestrian",
+      "png": "sprites/ambient-pedestrian.png",
+      "json": "sprites/ambient-pedestrian.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back",
+      "png": "sprites/ambient-pedestrian-back.png",
+      "json": "sprites/ambient-pedestrian-back.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 35
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@50",
+      "png": "sprites/ambient-pedestrian-back@50.png",
+      "json": "sprites/ambient-pedestrian-back@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@62",
+      "png": "sprites/ambient-pedestrian-back@62.png",
+      "json": "sprites/ambient-pedestrian-back@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@75",
+      "png": "sprites/ambient-pedestrian-back@75.png",
+      "json": "sprites/ambient-pedestrian-back@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "ambient-pedestrian-back@88",
+      "png": "sprites/ambient-pedestrian-back@88.png",
+      "json": "sprites/ambient-pedestrian-back@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 30
+      }
+    },
+    {
+      "key": "ambient-pedestrian@50",
+      "png": "sprites/ambient-pedestrian@50.png",
+      "json": "sprites/ambient-pedestrian@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 18
+      }
+    },
+    {
+      "key": "ambient-pedestrian@62",
+      "png": "sprites/ambient-pedestrian@62.png",
+      "json": "sprites/ambient-pedestrian@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "ambient-pedestrian@75",
+      "png": "sprites/ambient-pedestrian@75.png",
+      "json": "sprites/ambient-pedestrian@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 26
+      }
+    },
+    {
+      "key": "ambient-pedestrian@88",
+      "png": "sprites/ambient-pedestrian@88.png",
+      "json": "sprites/ambient-pedestrian@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 30
+      }
+    },
+    {
       "key": "badge-big-payday",
       "png": "sprites/badge-big-payday.png",
       "json": "sprites/badge-big-payday.json"

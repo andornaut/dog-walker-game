@@ -168,6 +168,15 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 | `gag-kite`          | sprite | 36×40   | `flutter`       | core | A kite caught in a street tree, on the near-right lawn                                      |
 | `gag-sprinkler`     | sprite | 32×24   | `spray`         | core | Not placed: each backdrop draws a static ornament on its spot                               |
 
+### Ambient
+
+Cosmetic people and traffic with no collisions, drawn by `art/tools/ambient.py`. Each has `@88`, `@75`, `@62` and `@50` variants with the same tags and timing; the cross street draws from `@50`.
+
+| Key                       | Type   | Size  | `@88`, `@75`, `@62`, `@50` | Tags   | Pri  | Note                                                                                      |
+| ------------------------- | ------ | ----- | -------------------------- | ------ | ---- | ----------------------------------------------------------------------------------------- |
+| `ambient-pedestrian`      | sprite | 48×72 | 42×63, 36×54, 30×45, 24×36 | `walk` | core | A student in a red jacket, sky headphones and jeans, walking toward the walker; 4 × 100ms |
+| `ambient-pedestrian-back` | sprite | 48×72 | 42×63, 36×54, 30×45, 24×36 | `walk` | core | The student walking away: the green backpack, the ponytail; 4 × 100ms                     |
+
 ### Roadside props
 
 Elm Avenue's lawns beyond the sidewalks, placed by the style guide's Roadside table. Each has `@88`, `@75`, `@62` and `@50` variants with the same tag and timing; one tag, `idle`, one static frame except the sprinkler's, which is not placed.

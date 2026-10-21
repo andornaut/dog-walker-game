@@ -414,6 +414,13 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 - Free-standing props (mailbox, both trees, lamp post, gnome, bike, bird bath, flamingos, wheelbarrow, little library, urn, shrub, topiary, wishing well) take the road objects' ground shadow (sized from the prop's `opaqueWidth`) in dgreen, the lawn one ramp step darker. Houses, fences, the hedge, the flower border, the washing line and the swing set take none.
 - With 20px of verge at the pack, a prop leaves the screen's side once its inner edge does, at about s 0.85; houses never show whole. No prop stands within the 64 rows of a zone's start strip, so the cross street stays clear.
 
+## Ambient
+
+People and traffic that pass by with no collisions and no card. `art/tools/ambient.py` draws them as road sprites: laid out on a design grid and drawn at 1.5× with `@88` to `@50` variants, outlined with `road_edge` and lit with the rim on their dark parts.
+
+- The pedestrian is a student out alone: dark brown hair in a ponytail, sky headphones, a red jacket, a green backpack, sky jeans and white sneakers. No dog, no leash and nothing in hand, so it never reads as an owner, a walker, the mail carrier or a hazard. `ambient-pedestrian` faces the walker, `ambient-pedestrian-back` walks away.
+- Pedestrians stand on `road.person`'s legs, feet on row 68 at full size, and walk with the road people's stride: 4 frames at 100ms.
+
 ## Backdrops
 
 Backdrops are 360×174 on screen rows 40 to 213; band row y is screen row 40 + y. The band, its approach rows and the camera come from `shared/export/layout.json`. The street ends at a T-junction. Rows 155 to 173, the approach, continue the road's projection at its slope (at row 173 the road spans columns 100 to 259, 160 wide, lane dividers on 132, 164, 195 and 227); in play the road surface scrolls over them from the juncture, and only the cross street and the scenery above it stay still. Above them a flat cross street: far sidewalk 135 to 138, far curb 139 to 140, road 141 to 149 with its centre line on 145, near sidewalk 150 to 154. The far side faces the camera on ground row 131.
