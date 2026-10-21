@@ -35,6 +35,10 @@ icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a han
                             hearts on the wind), shortcut (two chevrons), sweet-talker (a speech
                             bubble with $ and a down arrow), treat-magnet (a magnet and a bone)
 icon-gear-<gear>            state strip, on ink: the shop's item art (icons.py) at 16x16
+icon-bump, icon-fired,      the walk's message strip, beside its lines, on cream: bump (an amber
+icon-hint, icon-last-heart, impact burst), fired (a pink slip under a dred stamp), hint (a white i
+icon-lucky                  on a sky disc), last-heart (a red heart cracked down from its notch),
+                            lucky (a four-leaf clover with a twinkle)
 The upgrade and gear ids are the data ids in kebab case. icon-stinky also reads on ink.
 
 Sprite: ui-difficulty (55x10; tags 1 to 5), a zone's difficulty under its name on a fork's path
@@ -61,7 +65,7 @@ from PIL import Image
 
 sys.path.insert(0, os.path.dirname(__file__))
 from pixel import DARKER, K, Grid, build as build_sprites, icon_edge  # noqa: E402
-from fx import star4  # noqa: E402
+from fx import burst, star4  # noqa: E402
 from needs import SCENT, Icon  # noqa: E402
 from ui import to_image  # noqa: E402
 
@@ -789,6 +793,76 @@ def gear_lucky_collar():
     return g
 
 
+# ---------- the message strip, on its cream panel beside each line ----------
+# Each differs from the status and trait icons it shares the strip with by shape and colour family.
+
+def bump():
+    """An impact burst, as fx-bump: an amber eight-point star round a yellow one and a white core."""
+    g = Grid(16, 16)
+    burst(g, 8, 8, 7.4, 3.6, 8, "amber", 22.5)
+    burst(g, 8, 8, 4.4, 2.2, 8, "yellow", 22.5)
+    g.rect(7, 7, 2, 2, "white")
+    return g
+
+
+def fired():
+    """A pink slip: a page with two lines of plum text and a folded corner, under a dred stamp
+    lettered in a white line, as ui-fired-plate's dred face."""
+    g = Grid(16, 16)
+    g.rect(3, 1, 10, 14, "pink")
+    g.rect(3, 1, 10, 1, "white")
+    g.rect(12, 2, 1, 13, "mauve")
+    for x, y in ((10, 1), (11, 1), (12, 1), (11, 2), (12, 2), (12, 3)):
+        g.p(x, y, None)
+    g.rect(10, 2, 1, 2, "mauve")
+    g.rect(11, 3, 1, 1, "mauve")
+    g.rect(5, 4, 4, 1, "plum")
+    g.rect(5, 6, 6, 1, "plum")
+    g.rect(2, 9, 12, 5, "dred")
+    g.rect(4, 11, 8, 1, "white")
+    return g
+
+
+def hint():
+    """A white i on a sky disc, lit cyan at its top left and shaded blue at its lower right."""
+    g = Grid(16, 16)
+    g.cel(8, 8, 6.6, 6.6, "sky", "blue", "cyan")
+    g.rect(7, 3, 2, 2, "white")
+    g.rect(7, 6, 2, 6, "white")
+    g.rect(6, 6, 1, 1, "white")
+    g.rect(6, 11, 4, 1, "white")
+    return g
+
+
+def last_heart():
+    """One big red heart, lit pink at its top left and shaded dred, cracked from its notch half way down."""
+    g = Grid(16, 16)
+    for cx in (5, 11):
+        g.cel(cx, 6, 3.8, 3.8, "red", "dred", "pink")
+    g.tri((1.2, 7.2), (14.8, 7.2), (8, 14.6), "red")
+    g.tri((8, 14.6), (14.8, 7.2), (12.6, 9.6), "dred")
+    for x, y in ((8, 3), (8, 4), (7, 5), (7, 6), (8, 7), (9, 8), (8, 9)):
+        g.p(x, y, "plum")
+    return g
+
+
+def lucky():
+    """A four-leaf clover on its stem, green shaded dgreen, each leaf notched at its tip and veined
+    dgreen to the centre, with a yellow twinkle at the top right."""
+    g = Grid(16, 16)
+    for i in range(5):
+        g.p(9 + i, 10 + i, "dgreen")
+    for cx, cy in ((4.5, 5.5), (9.5, 5.5), (4.5, 10.5), (9.5, 10.5)):
+        g.cel(cx, cy, 2.6, 2.6, "green", "dgreen")
+    for x, y in ((7, 2), (7, 13), (1, 8), (12, 8)):
+        g.p(x, y, None)
+    for x, y in ((7, 4), (7, 5), (7, 6), (7, 7), (7, 9), (7, 10), (7, 11), (3, 8), (4, 8), (5, 8), (6, 8),
+                 (8, 8), (9, 8), (10, 8)):
+        g.p(x, y, "dgreen")
+    g.p(7, 8, "yellow")
+    star4(g, 13, 3, 1, "yellow")
+    return g
+
 IMAGES = {
     "icon-trait-fancy": fancy,
     "icon-trait-food-driven": food_driven,
@@ -836,6 +910,11 @@ IMAGES = {
     "icon-gear-poop-bags": gear_poop_bags,
     "icon-gear-running-shoes": gear_running_shoes,
     "icon-gear-whistle": gear_whistle,
+    "icon-bump": bump,
+    "icon-fired": fired,
+    "icon-hint": hint,
+    "icon-last-heart": last_heart,
+    "icon-lucky": lucky,
 }
 
 

@@ -6179,6 +6179,10 @@
       "png": "images/help-zones.png"
     },
     {
+      "key": "icon-bump",
+      "png": "images/icon-bump.png"
+    },
+    {
       "key": "icon-close",
       "png": "images/icon-close.png"
     },
@@ -6197,6 +6201,10 @@
     {
       "key": "icon-energy-steady",
       "png": "images/icon-energy-steady.png"
+    },
+    {
+      "key": "icon-fired",
+      "png": "images/icon-fired.png"
     },
     {
       "key": "icon-gear-fanny-pack",
@@ -6223,8 +6231,16 @@
       "png": "images/icon-help.png"
     },
     {
+      "key": "icon-hint",
+      "png": "images/icon-hint.png"
+    },
+    {
       "key": "icon-home",
       "png": "images/icon-home.png"
+    },
+    {
+      "key": "icon-last-heart",
+      "png": "images/icon-last-heart.png"
     },
     {
       "key": "icon-lock",
@@ -6233,6 +6249,10 @@
     {
       "key": "icon-logbook",
       "png": "images/icon-logbook.png"
+    },
+    {
+      "key": "icon-lucky",
+      "png": "images/icon-lucky.png"
     },
     {
       "key": "icon-money",

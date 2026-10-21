@@ -196,6 +196,7 @@ On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 
 - `fx-status-<status>` loops over the dog's head, 6px below its top opaque row. Stinky shows per dog. Two statuses alternate every second, most recent first.
 - Each status has its own colour family and shape, apart from the leash's pink, dred and plum: soaked cyan drops, spooked white lines and a cyan drop, stinky pink lines, tangled green rope (teal rim) in two interlocked loops, tuckered-out yellow z's (plum rim). `icon-tangled` and `icon-tuckered-out` keep their overlay's colours and rim, which hold on cream, amber and the top bar's ink.
 - With reduced motion, bursts and stars play and the stumble is skipped.
+- Each message strip line leads with a 16×16 content icon: `icon-bump` (an amber impact burst) for a plain hit, `icon-treat` for a treat, `icon-last-heart` (a red heart cracked from its notch) for an owner's last heart, `icon-fired` (a pink slip under a dred stamp) for a firing, the status's own icon (`icon-spooked`, `icon-stinky`, `icon-tangled`, `icon-tuckered-out`) for a debuff's start and end, `icon-lucky` (a four-leaf clover with a twinkle) for a lucky neighbour, `icon-trait-chaser` (the squirrel) for a squirrel pull, and `icon-hint` (a white i on a sky disc) for a first-time hint.
 
 #### Comic words
 
