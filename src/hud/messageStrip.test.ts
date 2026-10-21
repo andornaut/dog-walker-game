@@ -4,19 +4,25 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
+import type { GearId, MinorObstacleId, UpgradeId, WalkerPerkId, ZoneId } from "../data/types";
 import { type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
 import { TEXT_FIT_STYLES } from "../layout/textFit";
+import { capitalize, SIZE_NAMES } from "../rules/effectText";
 import { bumpHearts } from "../rules/run";
+import { minorObstacleLook } from "../rules/skins";
 import { bodyTextWidth } from "../testing/bodyFont";
-import { fontFileMetrics } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { testState } from "../testing/runState";
-import { fillLine } from "../text/lines";
+import { fillLine, fillNames } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
+import { plainMarks } from "../ui/pixelFont";
+import { type EffectItem, effectLine, effectName } from "./effectIcons";
 import {
   EMPTY_MESSAGE_STRIP,
   lineAlpha,
   MESSAGE_ICONS,
+  MESSAGE_LINE,
   MESSAGE_STRIP,
   MESSAGE_TIMING,
   type MessageIcon,
@@ -32,7 +38,7 @@ import {
   sayLineAhead,
   stepMessageStrip,
 } from "./messageStrip";
-import { STRIP_LINE_FIELDS } from "./runText";
+import { RUN_TEXT_FIELDS, STRIP_LINE_FIELDS } from "./runText";
 import { debuffBarRects } from "./walkHud";
 
 const { dwellMs, fadeMs, lifeMs, maxWaiting } = MESSAGE_TIMING;
@@ -254,44 +260,100 @@ describe("messageLinePanel", () => {
   );
 });
 
-// Every hint and badge line wraps at 2x onto the strip's rows, each no wider than its room,
-// and none left out.
-describe("the strip's lines", () => {
-  const { room } = messageStripLayout(BODY);
-  const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
-  const longestName = gameData.achievements
-    .map(({ name }) => name)
-    .reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
-  const longestOwner = Object.values(gameData.dogs)
-    .map(({ owner }) => owner.name)
-    .reduce((a, b) => (bodyTextWidth(1, b) > bodyTextWidth(1, a) ? b : a), "");
+// Every line the strip can say: each hint and badge, each explanation a held press shows, and
+// each of the walk's lines for every dog, owner and obstacle as each neighborhood names it, with
+// two-digit counts and the largest amounts.
+function everyStripLine(): string[] {
+  const { explain, strip } = gameData.runText;
+  const line = (key: keyof typeof STRIP_LINE_FIELDS, fields: Record<string, string>) =>
+    fillLine(STRIP_LINE_FIELDS, strip, key, fields as never);
+  const dogs = Object.values(gameData.dogs).map((dog) => ({
+    dog: dog.name,
+    owner: dog.owner.name,
+  }));
+  const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
+  const obstacles = [
+    ...new Set(
+      zones.flatMap((zone) =>
+        (Object.keys(gameData.minorObstacles) as MinorObstacleId[]).map((obstacle) =>
+          minorObstacleLook(gameData, zone, obstacle).name.toLowerCase(),
+        ),
+      ),
+    ),
+  ];
+  const amount = "$9,999";
   const muddyCost = bumpHearts(
     gameData,
     testState({ koda: 5 }, { debuffs: [{ debuff: "muddy", secondsLeft: 20 }] }),
   );
-  it.each([
-    ...Object.entries(gameData.hints).map(([id, { text }]) => [`the ${id} hint`, text] as const),
-    [
-      "the longest achievement",
-      fillLine(STRIP_LINE_FIELDS, gameData.runText.strip, "achievement", {
-        name: longestName,
+  const items: EffectItem[] = [
+    ...(Object.keys(gameData.shopGear) as GearId[]).map(
+      (gear) => ({ gear, kind: "gear" }) as const,
+    ),
+    ...(Object.keys(gameData.walkerPerks) as WalkerPerkId[]).map(
+      (perk) => ({ kind: "perk", perk }) as const,
+    ),
+    ...(Object.keys(gameData.upgrades) as UpgradeId[]).map(
+      (upgrade) => ({ kind: "upgrade", upgrade }) as const,
+    ),
+  ];
+  const fields = RUN_TEXT_FIELDS.explain;
+  return [
+    ...Object.values(gameData.hints).map(({ text }) => text),
+    ...gameData.achievements.map(({ name }) => line("achievement", { name })),
+    ...items.map((item) =>
+      fillLine(fields, explain, "effect", {
+        effect: effectLine(gameData, item),
+        name: effectName(gameData, item),
       }),
-    ] as const,
-    [
-      "the Muddy warning for the longest owner",
-      fillLine(STRIP_LINE_FIELDS, gameData.runText.strip, "muddyHearts", {
-        cost: String(muddyCost),
-        hearts: String(muddyCost),
-        owner: longestOwner,
+    ),
+    ...Object.values(gameData.debuffs).map(({ name, stake }) =>
+      fillLine(fields, explain, "debuff", { name, stake: fillNames(stake, { seconds: "99" }) }),
+    ),
+    ...Object.values(gameData.dogs).map((dog) =>
+      fillLine(fields, explain, "dog", {
+        dog: dog.name,
+        hearts: "10",
+        max: "10",
+        owner: dog.owner.name,
+        size: capitalize(SIZE_NAMES[dog.size]),
       }),
-    ] as const,
-  ])("fits %s at 2x", (_name, text) => {
+    ),
+    ...Object.values(strip.debuffStart).map((start) => fillNames(start, { seconds: "99" })),
+    ...Object.values(strip.debuffEnd),
+    strip.luckyNeighbor,
+    line("fullPackHome", { amount }),
+    line("luckyWallet", { amount }),
+    ...dogs.flatMap(({ dog, owner }) => [
+      line("fired", { dog, owner }),
+      line("kindWords", { owner }),
+      line("lowHearts", { owner }),
+      line("muddyHearts", { cost: String(muddyCost), hearts: String(muddyCost), owner }),
+      line("pull", { dog }),
+      line("treat", { dog, hearts: "10", owner }),
+      ...obstacles.flatMap((obstacle) => [
+        line("dodge", { dog, obstacle }),
+        line("plainHit", { dog, hearts: "10", obstacle, owner }),
+      ]),
+    ]),
+  ];
+}
+
+// Every line wraps at 2x onto the strip's rows, each no wider than its room, none left out;
+// under the debuff bars, it fits the one-row strip in TEXT_FIT_STYLES.
+describe("the strip's lines", () => {
+  const { room } = messageStripLayout(BODY);
+  const width = (row: string) => bodyTextWidth(MESSAGE_STRIP.scale, row);
+  it.each([...new Set(everyStripLine())])("fits %j", (said) => {
+    const text = plainMarks(said);
     const rows = messageRows(width, room, text);
     expect(rows.join(" ")).toBe(text.split(/\s+/).join(" "));
     expect(rows.length).toBeLessThanOrEqual(MESSAGE_STRIP.rows);
     for (const row of rows) {
       expect(width(row)).toBeLessThanOrEqual(room);
     }
+    const one = fitInFont("font-body", TEXT_FIT_STYLES, MESSAGE_LINE.room, text);
+    expect(one.widest).toBeLessThanOrEqual(MESSAGE_LINE.room);
   });
 
   it("leaves out text past the last row", () => {

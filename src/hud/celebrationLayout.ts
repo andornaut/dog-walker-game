@@ -1,7 +1,8 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
 import { SCREEN_CONFIG } from "../data/screen";
 import { screenLayout } from "../layout/screenLayout";
-import type { TextFitStyle } from "../layout/textFit";
+import { type TextFitStyle, textFitStylesOnLines } from "../layout/textFit";
+import type { FontMetrics } from "../ui/fontMetrics";
 
 const SCREEN_WIDTH = SCREEN_CONFIG.width;
 const CENTER_X = SCREEN_WIDTH / 2;
@@ -68,8 +69,9 @@ export const CELEBRATION_LAYOUT = {
     ...headline(NEW_WALKER_FEET, 10),
     bubble: { height: 76, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: BUBBLE_TOP },
     button: { height: 44, width: 264, x: 48, y: BUBBLE_TOP + 84 },
-    // The walker's line, wrapped, one line top per line.
-    greeting: { lineTops: [BUBBLE_TOP + 4, BUBBLE_TOP + 22], maxWidth: 296 },
+    // The walker's line, its first line's top at top, wrapped within maxWidth onto up to lines
+    // lines a line of the body font apart, by GREETING_FIT.
+    greeting: { lines: 2, maxWidth: 296, top: BUBBLE_TOP + 4 },
     // The agility and perk row: an icon, iconGap, its word; itemGap between the rest.
     info: { iconGap: 4, iconY: BUBBLE_TOP + 51, itemGap: 10, y: BUBBLE_TOP + 50 },
     // Tan dots every step pixels along a row of the bubble.
@@ -95,3 +97,15 @@ export const CELEBRATION_LAYOUT = {
     plate: { height: 32, width: 280, x: 40, y: PLATE_TOP },
   },
 } as const;
+
+// The walker's greeting: on up to its lines at 2x, with its glyphs closer, or at 1x.
+export const GREETING_FIT = {
+  room: CELEBRATION_LAYOUT.newWalker.greeting.maxWidth,
+  styles: textFitStylesOnLines(CELEBRATION_LAYOUT.newWalker.greeting.lines),
+} as const;
+
+// The top of each of the greeting's lines lines at scale, a line of the body font apart.
+export function greetingLineTops(body: FontMetrics, scale: number, lines: number): number[] {
+  const { top } = CELEBRATION_LAYOUT.newWalker.greeting;
+  return Array.from({ length: lines }, (_, i) => top + i * body.lineHeight * scale);
+}

@@ -3,7 +3,11 @@ import { type GameObjects, Math as PhaserMath, Scene } from "phaser";
 import { animationKey } from "../assets/asepriteAnimations";
 import { ZONE_CELEBRATION_ART as ART } from "../assets/spriteKeys";
 import { gameData } from "../data";
-import { CELEBRATION_LAYOUT as LAYOUT } from "../hud/celebrationLayout";
+import {
+  CELEBRATION_LAYOUT as LAYOUT,
+  GREETING_FIT,
+  greetingLineTops,
+} from "../hud/celebrationLayout";
 import {
   type CelebrationText,
   celebrationText,
@@ -18,7 +22,7 @@ import { addDisplayText } from "./displayText";
 import { fillRect } from "./draw";
 import { closeOverlay, listenOutsideTap, onWindowEvent, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, fitPixelText, setPixelText, wrapPixelText } from "./pixelText";
+import { addPixelText, fitPixelText, pixelFontMetrics, setPixelText } from "./pixelText";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -177,12 +181,17 @@ export class ZoneCelebrationScene extends Scene {
     if (this.textures.exists(ART.tailUp)) {
       this.add.image(tail.x, tail.y, ART.tailUp).setOrigin(0);
     }
-    const lines = wrapPixelText(this, BODY, greeting.maxWidth, text.greeting);
-    greeting.lineTops.forEach((top, i) => {
-      const line = lines[i];
-      if (line !== undefined) {
-        atLineTop(addPixelText(this, centerX, 0, line, { ...BODY, originX: 0.5 }), top);
-      }
+    const probe = addPixelText(this, 0, 0, text.greeting, BODY).setVisible(false);
+    const { lines, style } = fitPixelText(probe, GREETING_FIT, 0, 0);
+    probe.destroy();
+    const tops = greetingLineTops(pixelFontMetrics(this, "body"), style.scale, lines.length);
+    lines.forEach((line, i) => {
+      const label = addPixelText(this, centerX, 0, line, {
+        ...BODY,
+        originX: 0.5,
+        scale: style.scale,
+      });
+      atLineTop(label.setLetterSpacing(style.letterSpacing), tops[i] ?? greeting.top);
     });
     const dots = this.add.graphics();
     for (let x = rule.fromX; x <= rule.toX; x += rule.step) {
