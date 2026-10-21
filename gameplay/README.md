@@ -30,10 +30,10 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 | Player  | Walks finished | Walks with a firing |
 | ------- | -------------- | ------------------- |
 | Novice  | 50 to 70%      | 50 to 80%           |
-| Typical | 75 to 90%      | 20 to 40%           |
-| Expert  | 90 to 98%      | 5 to 15%            |
+| Typical | 90 to 100%     | 5 to 15%            |
+| Expert  | 95 to 100%     | 0 to 10%            |
 
-- **Cards:** about 8 cards a walk at typical skill, one a minute; trim minor cards if walks run over
+- **Cards:** about 8 cards a walk at novice skill, one a minute; good dodgers meet fewer
 - **Mild bonuses:** a gear item or upgrade card shifts earnings or the finish rate by about 10% at most. The Lucky collar, the premium gear item and the highest priced, is the exception: it may shift the finish rate more
 - **Play-style window:** for a given player, every pack of a given size, gear item and card policy lands within 10 points of the median finish rate and 15% of the median earnings. Picking the "wrong" dogs or gear makes a walk a little harder or easier, never a lot
 - **Progression:** each extra dog raises a walk's earnings; about 50 walks buy every dog, slot and gear item; every gear item pays for itself over a reasonable number of walks
@@ -47,9 +47,7 @@ Some walks should fail: the road stays calm, so losing comes from bumps and choi
 Tuning against the targets, from a fresh baseline:
 
 - Big Payday: its threshold is rarely reached
-- Card obstacles: other dog, skunk and thief weights to hold about 8 cards a walk, including three-dog packs against the skunk
 - Economy: pay, card costs, lucky finds and shop prices
-- Firing: typical walks see a firing too rarely, and a novice with one dog finishes too few walks; measure with the mixed policy
 - Gear: each item within the window
 - Sizes: hearts against the small-dog dodge chance
 - Walkers: agility and each perk within the window
