@@ -48,12 +48,12 @@ ROAD_SIZE = 56
 ROAD_SCALE = ROAD_SIZE / 32
 
 # Road poses. Walk is a 4-beat trot: diagonal leg pairs swap on beats 0 and 2,
-# and the body bobs up on the passing beats 1 and 3.
+# and the body bobs up on the passing beats 1 and 3, the ears lagging 1px behind it.
 WALK = [
     dict(fl=-1, fr=1, bl=1, br=-1, bob=0, tail=-1),
-    dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0),
+    dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0, flop=1),
     dict(fl=1, fr=-1, bl=-1, br=1, bob=0, tail=1),
-    dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0),
+    dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0, flop=1),
 ]
 REACT = [
     dict(fl=-4, fr=-4, bl=-3, br=-3, bob=-3, tail=0, ears=-1),
@@ -149,7 +149,8 @@ def face_tags(name):
 
 
 def pose(q):
-    """Every pose key with its default. twitch moves the right ear alone (negative is up); spray is how far
+    """Every pose key with its default. flop lets both ears lag down behind the head (positive is down), as
+    they do on the walk's rising beats; twitch moves the right ear alone (negative is up); spray is how far
     the shake-off's droplets have flown from the flanks, 0 for none. The quirk keys: hop lifts the whole
     dog (negative is up); whirl draws a swoosh on the right (positive) or left (negative) flank; hackles
     raises a ridge of fur along the back; reach moves the head alone (negative is forward); tuck holds the
@@ -159,8 +160,8 @@ def pose(q):
     right; glint is a sparkle's size over the head; streak draws motion lines under a leap. The small
     versions round them to whole pixels, so draws read whirl, glance, scent, sit, tilt and streak by their
     sign."""
-    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, lean=0, twitch=0, spray=0, hop=0, whirl=0,
-                     hackles=0, reach=0, tuck=0, glance=0, nose=0, perk=0, scent=0, sit=0, tilt=0, glint=0,
+    return dict(dict(fl=0, fr=0, bl=0, br=0, bob=0, tail=0, ears=0, flop=0, lean=0, twitch=0, spray=0, hop=0,
+                     whirl=0, hackles=0, reach=0, tuck=0, glance=0, nose=0, perk=0, scent=0, sit=0, tilt=0, glint=0,
                      streak=0), **q)
 
 
@@ -190,7 +191,7 @@ def koda_road(q):
     g.ell(tx + 0.5, 28.5 + b, 1.8, 0.9, "white")
     # big head with white cheeks and upright ears
     hx = 16 + ln
-    e = q["ears"]
+    e = q["ears"] + q["flop"]
     tip = max(1, 1 + o + b + e)
     t = q["twitch"]
     g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "slate")
@@ -255,8 +256,8 @@ def biscuit_road(q):
     if n:
         g.ell(hx, 14 + b, 4, 2.5, "ochre")
     g.ell(hx, 11 + b - n / 2, 5.5 - n / 4, 5 - n * 0.75, "ochre", None, "tan")
-    g.ell(hx - 5, 13 + b - q["ears"], 2, 4.5, "rust", "dbrown")
-    g.ell(hx + 5, 13 + b - q["ears"] + q["twitch"], 2, 4.5, "rust", "dbrown")
+    g.ell(hx - 5, 13 + b - q["ears"] + q["flop"], 2, 4.5, "rust", "dbrown")
+    g.ell(hx + 5, 13 + b - q["ears"] + q["flop"] + q["twitch"], 2, 4.5, "rust", "dbrown")
     scent(g, hx, 5 + b - n, q["scent"])
     spray(g, q["spray"])
     return g
@@ -296,8 +297,8 @@ def duchess_road(q):
     g.ell(tx, 26.5 + b, 3, 2, "white", "lgrey", "white")
     g.p(tx + 1, 27 + b, "lgrey")
     hx = 16 + ln
-    g.ell(hx - 4.5, 18 + b - q["ears"], 2.2, 4, "white", "lgrey")
-    g.ell(hx + 4.5, 18 + b - q["ears"] + q["twitch"], 2.2, 4, "lgrey")
+    g.ell(hx - 4.5, 18 + b - q["ears"] + q["flop"], 2.2, 4, "white", "lgrey")
+    g.ell(hx + 4.5, 18 + b - q["ears"] + q["flop"] + q["twitch"], 2.2, 4, "lgrey")
     g.ell(hx, 15.5 + b, 5.5, 4.5, "white", "lgrey")
     bow(g, hx, 10 + b)
     underside(g)
@@ -346,8 +347,8 @@ def nugget_road(q):
     tl = (q["tilt"] > 0) - (q["tilt"] < 0)
     hx = 16 + ln + tl
     g.ell(hx, 15 + b, 5.5, 4.5, "skin1", "skin2", "cream")
-    g.ell(hx - 4.5, 12 + b - q["ears"] - tl, 1.8, 1.5, "navy")
-    g.ell(hx + 4.5, 12 + b - q["ears"] + q["twitch"] + tl, 1.8, 1.5, "navy")
+    g.ell(hx - 4.5, 12 + b - q["ears"] + q["flop"] - tl, 1.8, 1.5, "navy")
+    g.ell(hx + 4.5, 12 + b - q["ears"] + q["flop"] + q["twitch"] + tl, 1.8, 1.5, "navy")
     g.rect(hx - 2, 13 + b, 4, 1, "skin2")
     sparkle(g, hx + 9, 6 + b, q["glint"])
     spray(g, q["spray"])
@@ -396,7 +397,7 @@ def zippy_road(q):
     g.rect(bx - 4, 19 + b, 8, 1, "red")
     g.ell(hx, 15 + hb, 5, 4.5, "white", "lgrey")
     g.ell(hx + 2, 14 + hb, 2.5, 2, "ochre")
-    e = q["ears"]
+    e = q["ears"] + q["flop"]
     g.tri((hx - 5, 14 + hb), (hx - 4, 10 + hb + e), (hx - 1.5, 12.5 + hb), "ochre")
     t = q["twitch"]
     g.tri((hx + 5, 14 + hb + t), (hx + 4, 10 + hb + e + t), (hx + 1.5, 12.5 + hb + t), "ochre")
@@ -460,8 +461,8 @@ def pierre_road(q):
     puff(g, tx + 0.5, 28 + b, 2, 1.8)
     # ear puffs hanging behind a round topknot
     hx = 16 + ln
-    puff(g, hx - 5, 14.5 + b - q["ears"], 2, 3.5, ring=True)
-    puff(g, hx + 5, 14.5 + b - q["ears"] + q["twitch"], 2, 3.5, ring=True)
+    puff(g, hx - 5, 14.5 + b - q["ears"] + q["flop"], 2, 3.5, ring=True)
+    puff(g, hx + 5, 14.5 + b - q["ears"] + q["flop"] + q["twitch"], 2, 3.5, ring=True)
     puff(g, hx, 10.5 + b, 4, 3.8, ring=True)
     # the white stripe from the top of the topknot down the neck, the mane and the back to the tail's tip;
     # leaning, the head moves further than the body, so the neck steps it across halfway
@@ -538,7 +539,7 @@ def archie_road(q):
     g.ell(tx, 27.5 + b, 2, 1.6, *COAT)
     # ears set high and tipped forward, the folded tips darker
     hx = 16 + ln
-    e, t = q["ears"], q["twitch"]
+    e, t = q["ears"] + q["flop"], q["twitch"]
     g.tri((hx - 5.5, 10 + b), (hx - 5, 5 + b + e), (hx - 1.5, 7 + b), EAR[0])
     g.tri((hx + 5.5, 10 + b + t), (hx + 5, 5 + b + e + t), (hx + 1.5, 7 + b + t), EAR[0])
     g.rect(hx - 6, 5 + b + e, 2, 1, EAR[1])
@@ -609,7 +610,7 @@ def snowball_road(q):
     g.ell(tx, 23.5 + o + b, 4.5, 3.5, "white", "lgrey")
     g.ell(tx - 1, 23 + o + b, 2.5, 1.5, "lgrey")
     hx = 16 + ln
-    e = q["ears"]
+    e = q["ears"] + q["flop"]
     tip = max(1, 1 + o + b + e)
     t = q["twitch"]
     g.tri((hx - 7, 7 + o + b), (hx - 6, tip), (hx - 2, 4.5 + o + b), "white")
@@ -677,7 +678,7 @@ def penny_road(q):
         gold(g, (hx + bx) / 2, 13.5 + o + b + q["reach"] / 2, 5.5, 3 - q["reach"] / 2)
     gold(g, hx, 9.5 + o + hb, 6.5, 4.5, 2.8)
     for x, t in ((hx - 6.5, 0), (hx + 6.5, q["twitch"])):
-        g.blob(x, 10.5 + o + hb - q["ears"] + t, 1.8, 2.5, GOLD[1], power=3)
+        g.blob(x, 10.5 + o + hb - q["ears"] + q["flop"] + t, 1.8, 2.5, GOLD[1], power=3)
     if q["glance"]:
         glance(g, hx, 8.5 + o + hb, -1 if q["glance"] < 0 else 1)
     spray(g, q["spray"])

@@ -279,7 +279,7 @@ After zones 1 to 3, over the road view (rows 150 to 465) dimmed as under a card,
 - Walkers are seen from behind: `walk` 4, `react` 2, `stumble` 4 and `idle` 2 frames. No gear variants.
 - A walker's `wave` faces the camera: 4 frames at 150ms, looping, feet on the back view's rows, the left arm (screen right) raised and swinging from the shoulder.
 - A walker's `cheer` is the zone celebration's, drawn at 2×: the front view with both arms raised from the shoulders in a V, the thumbs inside, 4 frames at 120ms, looping: a crouch, take-off 2px up, the top of the hop 3px up, then the landing. Trista keeps her tote on her shoulder.
-- Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap, the body bobs on the passing frames, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
+- Dogs are seen from above and behind. `walk` is a trot: diagonal leg pairs swap, the body bobs on the passing frames with the ears lagging 1px behind it, the tail wags. `pull` leans right and is mirrored for left. `shake` runs at 60ms.
 - Every road sprite that stands or waits, depth variants included, loops an `idle` with frame 0 the rest pose. Reduced motion shows frame 0.
 
 | Idle      | Frames | Timing       | Motion                                                                              |
