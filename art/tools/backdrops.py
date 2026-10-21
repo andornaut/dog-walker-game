@@ -451,20 +451,9 @@ def kerb(px, py):
     return min(dx, dy)
 
 
-# Sidewalk slab seams across the cross street's sidewalks, at irregular world x.
-SLABS = (34, 30, 38, 32, 36, 29, 40, 31, 35, 33, 37)
-SEAMS = [sum(SLABS[i % len(SLABS)] for i in range(k)) - 600 for k in range(40)]
-
-
-def seam(px, py):
-    """Whether a slab seam crosses pixel px on sidewalk row py."""
-    s = scale(py + 0.5)
-    x0, x1 = (px - CX) / s, (px + 1 - CX) / s
-    return any(x0 <= x < x1 for x in SEAMS)
-
-
 def slabs(px, py):
-    return "grey" if seam(px, py) else "lgrey"
+    """The cross street's plain sidewalk, without seams."""
+    return "lgrey"
 
 
 def grass(lawn="green", rate=0.03):
@@ -877,7 +866,7 @@ def shops():
     bunting(cv, CX + 50, W, BASE - 47, 5, ("pink", "sky", "yellow", "red", "green"))
 
     def paving(px, py):
-        return "tan" if seam(px, py) or hashed(px, py, 41) else "cream"
+        return "tan" if hashed(px, py, 41) else "cream"
 
     yard(cv, BASE, FAR_WALK, paving)
     for x in (CX - 140, CX - 64, CX + 40, CX + 112):
@@ -1183,7 +1172,7 @@ def paws_promenade():
     cv.fill(0, water[1] + 2, W, BASE - water[1] - 2, "grey")
 
     def paving(px, py):
-        return "grey" if seam(px, py) or hashed(px, py, 29) else "lgrey"
+        return "grey" if hashed(px, py, 29) else "lgrey"
 
     yard(cv, BASE, FAR_WALK, paving)
     railing(cv, 0, W, BASE + 2)
