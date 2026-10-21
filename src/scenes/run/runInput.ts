@@ -29,14 +29,14 @@ import { LAYOUT } from "./stage";
 // can explain.
 interface RunInputHost {
   explainShown: () => ExplainShown;
-  // Whether a replay drives the run, which then takes no live lane moves or treats.
+  // Whether a replay drives the run, which then takes no live lane moves.
   replaying: () => boolean;
   runPause: () => RunPause;
   walk: () => Walk | undefined;
 }
 
-// Keys, the press driving the walk's gestures, the lane moves and treats they queue for the
-// next simulation step, and the HUD element a still press holds to explain.
+// Keys, the press driving the walk's gestures, the lane moves they queue for the next
+// simulation step, and the HUD element a still press holds to explain.
 export class RunInput {
   private explained: ExplainTarget | undefined;
   private readonly host: RunInputHost;
@@ -58,12 +58,12 @@ export class RunInput {
     input.on("pointerupoutside", (pointer: Input.Pointer) => this.onPointer("up", pointer));
   }
 
-  // The lane moves and treats queued for the next step, which the pack's drawing leads with.
+  // The lane moves queued for the next step, which the pack's drawing leads with.
   queued(): readonly SessionInput[] {
     return this.pending;
   }
 
-  // The lane moves and treats queued since the last step.
+  // The lane moves queued since the last step.
   takePending(): SessionInput[] {
     const inputs = this.pending;
     this.pending = [];
