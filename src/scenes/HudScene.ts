@@ -68,6 +68,7 @@ import { drawDashedRect, drawFramedRect, drawHeart, drawRing, fillRect } from ".
 import { HudFeedback } from "./feedbackMoments";
 import { HeartFeedback, heartPops } from "./heartFeedback";
 import { listenOnePress } from "./onePress";
+import { onSceneEvent } from "./overlay";
 import { colorFromHex, PALETTE } from "./palette";
 import {
   addPixelText,
@@ -258,21 +259,15 @@ export class HudScene extends Scene {
       quipTop: LANES.quip.y,
       still: () => run.reducedMotion(),
     });
-    const onLabels = (labels: ChangeLabel[]) => this.floatLabels(labels);
-    const onHint = (hint: RaisedHint) => this.hintRaised.push(hint);
-    const onQuips = (quips: QuipBubble[]) => this.queueQuips(quips);
     this.toasts = new AchievementToasts(this, LANES.toast, () => run.reducedMotion());
-    const onAchievements = (ids: AchievementId[]) => this.toastsWaiting.push(...ids);
-    run.events.on(ACHIEVEMENTS_EVENT, onAchievements);
-    run.events.on(CHANGE_LABELS_EVENT, onLabels);
-    run.events.on(HINT_EVENT, onHint);
-    run.events.on(QUIPS_EVENT, onQuips);
-    this.events.once("shutdown", () => {
-      run.events.off(CHANGE_LABELS_EVENT, onLabels);
-      run.events.off(HINT_EVENT, onHint);
-      run.events.off(QUIPS_EVENT, onQuips);
-      run.events.off(ACHIEVEMENTS_EVENT, onAchievements);
-    });
+    onSceneEvent(this, run.events, ACHIEVEMENTS_EVENT, (ids: AchievementId[]) =>
+      this.toastsWaiting.push(...ids),
+    );
+    onSceneEvent(this, run.events, CHANGE_LABELS_EVENT, (labels: ChangeLabel[]) =>
+      this.floatLabels(labels),
+    );
+    onSceneEvent(this, run.events, HINT_EVENT, (hint: RaisedHint) => this.hintRaised.push(hint));
+    onSceneEvent(this, run.events, QUIPS_EVENT, (quips: QuipBubble[]) => this.queueQuips(quips));
 
     // A button acts on the press, as the walk's gestures never see it. A press on the strip
     // taps it on release, and is the walk's drag if it travels. While the strip's bubble is

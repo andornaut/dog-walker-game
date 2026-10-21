@@ -1,4 +1,4 @@
-import type { Scene } from "phaser";
+import type { Events, Scene } from "phaser";
 
 import { gameData } from "../data";
 import { SCREEN_CONFIG } from "../data/screen";
@@ -40,6 +40,18 @@ export function closeOverlay(resume: SceneKey | undefined, overlay: Scene): void
 export function onWindowEvent(scene: Scene, type: string, listener: () => void): void {
   window.addEventListener(type, listener);
   scene.events.once("shutdown", () => window.removeEventListener(type, listener));
+}
+
+// Listens for an event on emitter, such as game.events, another scene's events or the scene's
+// own, until scene shuts down, so a scene started again never hears it twice.
+export function onSceneEvent<Args extends unknown[]>(
+  scene: Scene,
+  emitter: Events.EventEmitter,
+  type: string,
+  listener: (...args: Args) => void,
+): void {
+  emitter.on(type, listener);
+  scene.events.once("shutdown", () => emitter.off(type, listener));
 }
 
 // Calls back on the phone's back button while scene is running, so a screen paused under an

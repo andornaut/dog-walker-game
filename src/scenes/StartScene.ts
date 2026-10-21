@@ -112,7 +112,7 @@ import {
   SHOP_ART,
 } from "./itemArt";
 import { listenOnePress } from "./onePress";
-import { listenOutsideTap, onBackPressed, openOverlay } from "./overlay";
+import { listenOutsideTap, onBackPressed, onSceneEvent, openOverlay } from "./overlay";
 import { addOwnerFigure } from "./ownerFigure";
 import { PALETTE } from "./palette";
 import { addPixelText, type FontRole } from "./pixelText";
@@ -529,26 +529,18 @@ export class StartScene extends Scene {
     // Badges earned on launch: a scene can pause itself only once it is running.
     this.time.delayedCall(0, () => this.celebrate([]));
     // Settings can change reduced motion or mute, so the screen is drawn again.
-    const onSettingsClosed = () => this.render();
-    this.game.events.on(SETTINGS_CLOSED_EVENT, onSettingsClosed);
+    onSceneEvent(this, this.game.events, SETTINGS_CLOSED_EVENT, () => this.render());
     // The shop draws under the top bar, so the bank there follows each purchase; on close
     // the walker says the shop's last purchase or refusal.
-    const onShopChanged = () => this.render();
-    const onShopClosed = (closed: ShopClosed) => this.shopClosed(closed);
-    this.game.events.on(SHOP_CHANGED_EVENT, onShopChanged);
-    this.game.events.on(SHOP_CLOSED_EVENT, onShopClosed);
+    onSceneEvent(this, this.game.events, SHOP_CHANGED_EVENT, () => this.render());
+    onSceneEvent(this, this.game.events, SHOP_CLOSED_EVENT, (closed: ShopClosed) =>
+      this.shopClosed(closed),
+    );
     // A tap made while another tap's act opened help, settings or stats over this screen is
     // dropped, so it cannot act once the screen resumes.
-    const dropPending = () => {
+    onSceneEvent(this, this.events, "pause", () => {
       this.pending.forEach((timer) => timer.remove());
       this.pending.clear();
-    };
-    this.events.on("pause", dropPending);
-    this.events.once("shutdown", () => {
-      this.game.events.off(SETTINGS_CLOSED_EVENT, onSettingsClosed);
-      this.game.events.off(SHOP_CHANGED_EVENT, onShopChanged);
-      this.game.events.off(SHOP_CLOSED_EVENT, onShopClosed);
-      this.events.off("pause", dropPending);
     });
   }
 

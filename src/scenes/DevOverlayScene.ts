@@ -12,6 +12,7 @@ import {
 import { pageRunSetup } from "../dev/pageRunSetup";
 import { runSetupLink } from "../dev/runSetup";
 import { screenLayout } from "../layout/screenLayout";
+import { onSceneEvent } from "./overlay";
 import { SCENE_KEYS } from "./sceneKeys";
 
 export const DEV_OVERLAY_SCENE_KEY = "dev-overlay";
@@ -54,12 +55,12 @@ export class DevOverlayScene extends Scene {
 
     this.game.registry.set(DEV_OVERLAY_VISIBLE_KEY, this.wanted);
 
-    const onDevState = (state: DevState) => {
+    onSceneEvent(this, this.game.events, DEV_STATE_EVENT, (state: DevState) => {
       this.state = state;
-    };
-    const onToggle = (visible: boolean) => this.setVisible(visible);
-    this.game.events.on(DEV_STATE_EVENT, onDevState);
-    this.game.events.on(DEV_OVERLAY_TOGGLE_EVENT, onToggle);
+    });
+    onSceneEvent(this, this.game.events, DEV_OVERLAY_TOGGLE_EVENT, (visible: boolean) =>
+      this.setVisible(visible),
+    );
     const runEvents = this.scene.get(SCENE_KEYS.run).events;
     const runListeners: readonly (readonly [string, () => void])[] = [
       [Scenes.Events.START, () => this.setRunActive(true)],
@@ -68,15 +69,8 @@ export class DevOverlayScene extends Scene {
       [Scenes.Events.SLEEP, () => this.setRunActive(false)],
     ];
     for (const [event, listener] of runListeners) {
-      runEvents.on(event, listener);
+      onSceneEvent(this, runEvents, event, listener);
     }
-    this.events.once(Scenes.Events.SHUTDOWN, () => {
-      this.game.events.off(DEV_STATE_EVENT, onDevState);
-      this.game.events.off(DEV_OVERLAY_TOGGLE_EVENT, onToggle);
-      for (const [event, listener] of runListeners) {
-        runEvents.off(event, listener);
-      }
-    });
 
     // Matched on the physical key, so the toggle sits in the same place on every layout.
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
