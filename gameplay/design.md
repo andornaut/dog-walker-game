@@ -99,7 +99,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (zones, run s
 
 ### Dogs
 
-A roster of 9. You start with 1 dog slot and 3 dogs, and buy up to 2 more slots and the other 6 dogs at the Pet shop. Walking more dogs is the main progression: more fees and a longer-lasting run, but fewer tips, more owners to keep happy, more pulls and more dogs caught by area effects.
+A roster of 9. You start with 1 dog slot and 1 dog, Biscuit, and buy up to 2 more slots and the other 8 dogs at the Pet shop. Walking more dogs is the main progression: more fees and a longer-lasting run, but fewer tips, more owners to keep happy, more pulls and more dogs caught by area effects.
 
 Every dog is a fixed, named character with its own art, one value of each attribute, and one fixed owner, so players can have favourites.
 
@@ -123,7 +123,7 @@ Every dog is a fixed, named character with its own art, one value of each attrib
 | Penny    | Golden retriever mix | Friendly | Gadget, inspector              | Smooth golden coat, blocky head, otter tail, blue collar             |
 | Koda     | Husky                | Nosy     | Jesse, trail runner            | Grey and white, blue eyes, harness                                   |
 
-Each size and trait pairs once, and each energy and temperament appears three times. The three starters (Duchess, Biscuit, Koda) cover every size and trait; Sam and Jesse are laid-back and Rosa is dramatic, so the first walks are gentle but already show double heart swings. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
+Each size and trait pairs once, and each energy and temperament appears three times. The one starter, Biscuit, is a medium dog with a laid-back owner (Sam), so the first walks are gentle; the first purchases add the other sizes and temperaments. Each dog's attributes are in [`src/data/dogs.ts`](../src/data/dogs.ts).
 
 ### Quirks
 
@@ -249,7 +249,7 @@ Some things cross the road or come down it. Each gives about 1 second of warning
 - **Dog statuses:** shown on the dog and as an icon on its doghouse slot. Stinky lasts until the zone ends (half as many tips). Soaked (after Splash through; drawn by the Splash skin: water drops, mud spots or milkshake drips) is visual only and fades after 10 seconds. Debuffs show their own icon and look until they end
 - **Fee payout:** at each zone end, every remaining dog's fee flies as coins from its doghouse to the bank with its amount
 - **Firing moment:** when an owner fires you, their face pops up large over the dog's doghouse with their fired line, a "FIRED!" plate shows, and the dog trots off the road edge; it plays right after the card choice that fired you
-- **First visit:** on a brand-new save, the three starter owners wait at the gate in the gate scene until the first walk
+- **First visit:** on a brand-new save, the starter's owner waits at the gate in the gate scene until the first walk
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse, which flashes red and shakes. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every encounter hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", puddle "SOAKED!", skunk "SPRAYED!", squirrel "SQUIRREL!", thief "PICKPOCKETED!") and the caught dogs shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.6 seconds for a minor obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds without a card don't stop the walk; the lemonade stand plays its popup during a 1-second stop, then opens its card

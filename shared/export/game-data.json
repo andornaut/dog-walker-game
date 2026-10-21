@@ -1033,10 +1033,11 @@
         "role": "retired florist",
         "temperament": "dramatic"
       },
+      "price": "lockedDog",
       "quirk": "pampered",
       "size": "small",
       "trait": "fancy",
-      "unlock": "start",
+      "unlock": "shop",
       "figures": {
         "feeCents": 8000,
         "maxHearts": 6,
@@ -1064,10 +1065,11 @@
         "role": "trail runner",
         "temperament": "laidBack"
       },
+      "price": "lockedDog",
       "quirk": "sledDog",
       "size": "big",
       "trait": "chaser",
-      "unlock": "start",
+      "unlock": "shop",
       "figures": {
         "feeCents": 8000,
         "maxHearts": 10,
