@@ -9,7 +9,7 @@ import { cents, dollarsToCents } from "./units";
 
 const PACK: readonly DogId[] = ["koda", "duchess", "nugget"];
 const state = testState({ duchess: 5, koda: 5, nugget: 5 }, { money: cents(10_000) });
-const { encounterHigh, encounterLow, thiefLetGo } = gameData.tuning.money;
+const { encounterHigh, thiefLetGo } = gameData.tuning.money;
 
 const encounter = (id: EncounterId, affected: readonly DogId[]): CardSource => ({
   affected,
@@ -35,8 +35,8 @@ describe("a card's text for the dogs it catches", () => {
   it.each([
     {
       affected: ["duchess", "koda"],
-      id: "squirrel",
-      label: "Hold tight",
+      id: "thief",
+      label: "Chase them off",
       text: heartsText(["duchess", "koda"], -1),
       why: "names each dog it reaches, in pack order",
     },
@@ -61,8 +61,8 @@ describe("a card's text for the dogs it catches", () => {
   it.each([
     { affected: ["koda"], dollars: encounterHigh, id: "skunk", label: "Full groom" },
     { affected: PACK, dollars: encounterHigh, id: "skunk", label: "Full groom" },
-    { affected: PACK, dollars: encounterLow, id: "puddle", label: "Towel off" },
-    { affected: ["koda"], dollars: encounterLow, id: "puddle", label: "Towel off" },
+    { affected: PACK, dollars: thiefLetGo, id: "thief", label: "Let them go" },
+    { affected: ["koda"], dollars: thiefLetGo, id: "thief", label: "Let them go" },
   ] as const)("agrees with the cost plaque: $label for $affected.length", (row) => {
     const view = option(encounter(row.id, row.affected), row.label);
     expect(view.cost).toBe(dollarsToCents(row.dollars));
@@ -72,7 +72,7 @@ describe("a card's text for the dogs it catches", () => {
   it("matches the snapshot for the whole pack caught", () => {
     const encounters = Object.fromEntries(
       Object.entries(gameData.encounters).flatMap(([id, { resolution }]) =>
-        resolution.kind === "instant"
+        resolution.kind !== "card"
           ? []
           : cardFor(gameData, state, encounter(id as EncounterId, PACK)).options.map((view) => [
               `${id}: ${view.label}`,

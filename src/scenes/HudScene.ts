@@ -17,7 +17,7 @@ import { runHintTriggers } from "../hud/hintTriggers";
 import { centredInLane, hudLanes } from "../hud/hudLanes";
 import { type ChangeLabel, pipLook, zonePips } from "../hud/hudView";
 import type { MessageLine } from "../hud/messageStrip";
-import { RUN_TEXT_FIELDS } from "../hud/runText";
+import { STRIP_LINE_FIELDS } from "../hud/runText";
 import { stripItems } from "../hud/stateStrip";
 import {
   buttonIcon,
@@ -670,7 +670,7 @@ export class HudScene extends Scene {
     done: () => void = () => undefined,
   ): void {
     const text = addPixelText(this, at.x + 2, at.y + 4, label.text, {
-      color: label.gain ? PALETTE.forest : PALETTE.darkRed,
+      color: label.amount === 0 ? PALETTE.grey : label.gain ? PALETTE.forest : PALETTE.darkRed,
       scale: at.scale,
     });
     if (text.width + 4 > room) {
@@ -715,7 +715,7 @@ export class HudScene extends Scene {
   private sayAchievements(ids: readonly AchievementId[]): void {
     for (const id of ids) {
       const achievement = gameData.achievements.find((candidate) => candidate.id === id);
-      const text = fillLine(RUN_TEXT_FIELDS.strip, gameData.runText.strip, "achievement", {
+      const text = fillLine(STRIP_LINE_FIELDS, gameData.runText.strip, "achievement", {
         name: achievement?.name ?? id,
       });
       soundboardOf(this).play("badge");

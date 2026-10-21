@@ -1,5 +1,21 @@
 import type { FieldTable } from "../text/lines";
 
+// The message strip's single lines, filled with fillLine(STRIP_LINE_FIELDS,
+// gameData.runText.strip, key, fields); its debuff lines are filled by debuff id.
+export const STRIP_LINE_FIELDS = {
+  achievement: ["name"],
+  dodge: ["dog", "obstacle"],
+  fired: ["dog", "owner"],
+  fullPackHome: ["amount"],
+  kindWords: ["owner"],
+  lowHearts: ["owner"],
+  luckyWallet: ["amount"],
+  plainHit: ["dog", "hearts", "obstacle", "owner"],
+  pull: ["dog"],
+  pullCancel: ["dog"],
+  treat: ["dog", "hearts", "owner"],
+} as const;
+
 // The {name}s each walk text line may use, by group; a line left out uses none. A line is
 // filled with fillLine(RUN_TEXT_FIELDS.<group>, gameData.runText.<group>, key, fields).
 export const RUN_TEXT_FIELDS = {
@@ -22,7 +38,8 @@ export const RUN_TEXT_FIELDS = {
     subtitle: ["walker"],
   },
   strip: {
-    achievement: ["name"],
+    ...STRIP_LINE_FIELDS,
+    debuffStart: { muddy: ["seconds"], stinky: ["seconds"], zoomies: ["seconds"] },
   },
   zoneDone: {
     earnings: ["fees", "tips"],

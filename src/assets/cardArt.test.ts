@@ -14,7 +14,9 @@ describe("card art", () => {
       ...Object.values(encounters).flatMap(({ resolution }) =>
         resolution.kind === "instant"
           ? [resolution.art]
-          : resolution.options.map((option) => option.art),
+          : resolution.kind === "card"
+            ? resolution.options.map((option) => option.art)
+            : [],
       ),
       ...Object.values(upgrades).map((upgrade) => upgrade.art),
     ];

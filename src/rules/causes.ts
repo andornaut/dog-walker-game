@@ -138,9 +138,9 @@ export function causeName(data: CauseData, change: Change, cause: Cause): string
 }
 
 // Money in whole dollars, as the top bar shows it: rounded, and at least $1 so a change
-// never reads "$0".
+// never reads "$0", unless it is nothing at all, such as a tip while Stinky.
 function wholeDollarText(amount: number): string {
-  return `$${Math.max(1, Math.round(Math.abs(amount) / 100))}`;
+  return amount === 0 ? "$0" : `$${Math.max(1, Math.round(Math.abs(amount) / 100))}`;
 }
 
 // A signed amount in the change's unit, such as "−2♥" or "+$2".
@@ -150,8 +150,12 @@ export function amountText(kind: Change["kind"], amount: number): string {
     : `${sign(amount)}${wholeDollarText(amount)}`;
 }
 
-// A card choice's own effects need no name: the player just picked them.
-function namesBase(cause: Cause): boolean {
+// A card choice's own effects need no name: the player just picked them. A change cancelled
+// to nothing names only what cancelled it, as "+$0 Stinky".
+function namesBase(change: Change, cause: Cause): boolean {
+  if (changeAmount(change) === 0 && change.causes.length > 1) {
+    return false;
+  }
   if (cause.kind !== "effect") {
     return true;
   }
@@ -165,14 +169,22 @@ function namesBase(cause: Cause): boolean {
 export function causeLabel(data: CauseData, change: Change): string {
   const amount = amountText(change.kind, changeAmount(change));
   const [base, ...rest] = change.causes;
-  const head =
-    base !== undefined && namesBase(base) ? `${amount} ${causeName(data, change, base)}` : amount;
-  return [head, ...rest.map((cause) => causeName(data, change, cause))].join(", ");
+  const others = rest.map((cause) => causeName(data, change, cause));
+  if (base === undefined) {
+    return amount;
+  }
+  if (namesBase(change, base)) {
+    return [`${amount} ${causeName(data, change, base)}`, ...others].join(", ");
+  }
+  // A change cancelled to nothing reads as what cancelled it, as "+$0 Stinky".
+  return changeAmount(change) === 0 && others.length > 0
+    ? `${amount} ${others.join(", ")}`
+    : [amount, ...others].join(", ");
 }
 
 // The names the label gives after the amount, as ["dramatic"] or ["tip", "Big tipper"].
 export function causeNames(data: CauseData, change: Change): string[] {
   const [base, ...rest] = change.causes;
-  const named = base !== undefined && namesBase(base) ? change.causes : rest;
+  const named = base !== undefined && namesBase(change, base) ? change.causes : rest;
   return named.map((cause) => causeName(data, change, cause));
 }

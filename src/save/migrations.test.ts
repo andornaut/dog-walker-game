@@ -105,6 +105,43 @@ describe("migrateSave", () => {
 });
 
 describe("saveMigrations", () => {
+  const fromVersion3 = (document: Record<string, unknown>) =>
+    migrateSave(saveMigrations, 4, { ...document, version: 3 });
+
+  it.each<[string, Record<string, unknown>, Record<string, unknown>]>([
+    [
+      "moves the lifetime squirrel chases into the tallies",
+      { stats: { squirrelsChased: 4, timesFired: 1 } },
+      { stats: { tallies: { squirrelPulls: 4 }, timesFired: 1 } },
+    ],
+    [
+      "moves a checkpoint's run squirrel chases into its tallies",
+      { checkpoint: { counters: { bumpsByZone: [1], squirrelChases: 2 } } },
+      { checkpoint: { counters: { bumpsByZone: [1], tallies: { squirrelPulls: 2 } } } },
+    ],
+    [
+      "keeps a checkpoint with no counters",
+      { checkpoint: { counters: null } },
+      { checkpoint: { counters: null } },
+    ],
+    ["keeps a save with no checkpoint", { checkpoint: null }, { checkpoint: null }],
+  ])("from version 3 %s", (_, document, expected) => {
+    expect(fromVersion3(document)).toEqual({ document: { ...expected, version: 4 }, ok: true });
+  });
+
+  it("loads a version 3 veteran with its squirrel chases as squirrel pulls", () => {
+    const { stats, ...rest } = veteranSave();
+    const { tallies, ...older } = stats;
+    const stored = {
+      ...rest,
+      stats: { ...older, squirrelsChased: tallies.squirrelPulls },
+      version: 3,
+    };
+    const result = migrateSave(saveMigrations, SAVE_VERSION, stored);
+    const parsed = v.safeParse(saveSchema, result.ok ? result.document : null);
+    expect(parsed.output).toEqual(veteranSave());
+  });
+
   it("has one step per version, ending at the current version", () => {
     const froms = saveMigrations.map((migration) => migration.from);
     const expected = froms.map((_, index) => SAVE_VERSION - froms.length + index);

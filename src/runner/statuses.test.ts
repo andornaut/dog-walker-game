@@ -57,20 +57,18 @@ describe("startStatuses", () => {
 
   it("restarts a dog's status in place and drops marks from earlier zones", () => {
     const earlier: StatusMark[] = [
-      { dog: "koda", startMs: 1000, status: "muddy", zoneIndex: 1 },
-      { dog: "nugget", startMs: 1000, status: "muddy", zoneIndex: 1 },
-      { dog: "biscuit", startMs: 900, status: "stinky", zoneIndex: 0 },
+      { dog: "koda", startMs: 1000, status: "stinky", zoneIndex: 1 },
+      { dog: "nugget", startMs: 1000, status: "stinky", zoneIndex: 1 },
+      { dog: "biscuit", startMs: 900, status: "muddy", zoneIndex: 0 },
     ];
-    const splash = OPTION_ROWS.find(
-      ({ debuffs, encounter }) => encounter === "puddle" && debuffs.includes("muddy"),
+    const rinse = OPTION_ROWS.find(
+      ({ debuffs, encounter }) => encounter === "skunk" && debuffs.includes("stinky"),
     );
-    expect(splash).toBeDefined();
-    expect(startStatuses(data, card("puddle", ["koda"]), at, splash?.choice ?? 0, earlier)).toEqual(
-      [
-        { dog: "nugget", startMs: 1000, status: "muddy", zoneIndex: 1 },
-        { dog: "koda", startMs: 5000, status: "muddy", zoneIndex: 1 },
-      ],
-    );
+    expect(rinse).toBeDefined();
+    expect(startStatuses(data, card("skunk", ["koda"]), at, rinse?.choice ?? 0, earlier)).toEqual([
+      { dog: "nugget", startMs: 1000, status: "stinky", zoneIndex: 1 },
+      { dog: "koda", startMs: 5000, status: "stinky", zoneIndex: 1 },
+    ]);
   });
 });
 

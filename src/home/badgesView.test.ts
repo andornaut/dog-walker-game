@@ -7,13 +7,13 @@ import { badgeStrip, badgeWall, celebrationTitle, earnedText, wallRects } from "
 describe("badgeWall", () => {
   it("lists every badge in wall order, earned by the save or locked", () => {
     const wall = badgeWall(gameData, { achievements: { firstSteps: 1, squirrel: 2 } });
-    expect(wall).toHaveLength(15);
+    expect(wall).toHaveLength(gameData.achievements.length);
     expect(wall[0]).toMatchObject({ art: "badge-first-steps", earned: true, name: "First Steps" });
     expect(wall.filter(({ earned }) => earned).map(({ id }) => id)).toEqual([
       "firstSteps",
       "squirrel",
     ]);
-    expect(earnedText(gameData, wall)).toBe("2/15 earned");
+    expect(earnedText(gameData, wall)).toBe(`2/${gameData.achievements.length} earned`);
   });
 
   it("falls back to the full goal where there is no short one", () => {

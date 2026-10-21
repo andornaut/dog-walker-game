@@ -29,7 +29,17 @@ describe("tipValue", () => {
       testState(three, { modifiers: [bigTipper] }),
       tip + read(TEST_TUNING, "money", "bigTipperTipBonus"),
     ],
-    ["Stinky money.tip: it thins the tips instead", testState(three, stinky), tip],
+    [
+      "Stinky money.tip times stinkyTipValue",
+      testState(three, stinky),
+      tip * read(TEST_TUNING, "multipliers", "stinkyTipValue"),
+    ],
+    [
+      "Stinky with Big tipper money.tip times stinkyTipValue too",
+      testState(three, { ...stinky, modifiers: [bigTipper] }),
+      (tip + read(TEST_TUNING, "money", "bigTipperTipBonus")) *
+        read(TEST_TUNING, "multipliers", "stinkyTipValue"),
+    ],
     ["nothing with no dogs left", testState({ koda: "fired" }), 0],
   ])("pays %s", (_, state, amount) => {
     expect(tipValue(data, state).amount).toBe(amount);

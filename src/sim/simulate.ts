@@ -28,6 +28,7 @@ import {
 } from "../runner/session";
 import {
   blocksLane,
+  isPullObstacle,
   laneMoveSeconds,
   type RoadGeometry,
   startRoad,
@@ -36,6 +37,7 @@ import {
   type WalkItemKind,
   walkScrollSpeed,
 } from "../runner/walk";
+import { packDogs } from "../state/pack";
 import { type CardSource, newRun, type PackDogs, type RunState } from "../state/runState";
 import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";
 import { chooseCardOption, choosePath, type PolicyId, type RoutePolicyId } from "./policies";
@@ -215,7 +217,7 @@ function countLeaving(
       touched = !(hasLeftRoad(geometry.laneCount, place) || y >= geometry.roadBottom);
       countItem(tally, touched, { kind: item.kind, moving: true });
     }
-    if (touched && blocksLane(data, item.kind)) {
+    if (touched && blocksLane(data, item.kind) && !isPullObstacle(data, item.kind)) {
       const inFromLane =
         pulledFrom !== null && pulledFrom >= item.lane && pulledFrom < item.lane + item.laneSpan;
       tally.hits.all += 1;
@@ -429,6 +431,7 @@ export function simulateRun(data: SimData, seed: number, config: SimConfig): Run
   const paidChoices = tally.choices.filter((choice) => choice.cost > 0).length;
   const facts = {
     ...runCountersOf(tally.run),
+    dogsHome: packDogs(tally.run).length,
     earnedCents: tally.run.money,
     packSize: config.pack.length,
     zonesFinished: tally.zones.length,

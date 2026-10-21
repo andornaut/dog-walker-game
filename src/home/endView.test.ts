@@ -19,7 +19,7 @@ const card = (amount: number) =>
   money(amount, {
     amount,
     kind: "effect",
-    source: { encounter: "puddle", kind: "encounter", option: 0 },
+    source: { encounter: "thief", kind: "encounter", option: 0 },
   });
 const hearts: Change = {
   after: 3 as Hearts,

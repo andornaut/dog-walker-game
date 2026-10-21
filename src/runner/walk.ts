@@ -10,7 +10,7 @@ import type {
 } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
 import { dogHitCentre, hitPackPlacements } from "../layout/packFormation";
-import { countBump } from "../rules/achievements";
+import { countBump, countTally } from "../rules/achievements";
 import type { HeartChange, MoneyChange } from "../rules/causes";
 import { applyInstantEncounter, type ChoiceOutcome } from "../rules/choices";
 import { expireAtZoneEnd, tickDebuffs } from "../rules/durations";
@@ -153,15 +153,23 @@ export interface TreatGrab {
 
 export type EncounterCard = Extract<CardSource, { kind: "encounter" }>;
 
-// bumps, cards, instants and treats are in the order the pack met them; tips are the money
-// changes of the tips collected; fired the owners a bump left at 0 hearts; zoneEnded is set on
-// the step that reaches the end of the zone. encounterHits are the obstacles met this step,
-// which play a hit moment. A hit stop holds the step's cards and zone end back to the step it
-// ends on.
+// A contact obstacle the pack touched, such as a puddle, and what its effects did.
+export interface ContactHit {
+  encounter: EncounterId;
+  item: WalkItem;
+  outcome: ChoiceOutcome;
+}
+
+// bumps, cards, contacts, instants and treats are in the order the pack met them; tips are the
+// money changes of the tips collected; fired the owners a bump left at 0 hearts; zoneEnded is
+// set on the step that reaches the end of the zone. encounterHits are the card obstacles met
+// this step, which play a hit moment. A hit stop holds the step's cards and zone end back to the
+// step it ends on.
 export interface WalkStep {
   bumps: MinorBump[];
   cards: CardSource[];
   collected: WalkItem[];
+  contacts: ContactHit[];
   encounterHits: EncounterCard[];
   fired: readonly DogId[];
   instants: InstantFind[];
@@ -217,6 +225,17 @@ export function blocksLane(
 ): boolean {
   const category = itemCategory(data, kind);
   return category === "minor" || category === "obstacle";
+}
+
+// An obstacle touching does nothing to, such as a squirrel: dogs pull toward it instead.
+export function isPullObstacle(
+  data: Pick<GameData, "encounters" | "minorObstacles">,
+  kind: WalkItemKind,
+): boolean {
+  return (
+    itemCategory(data, kind) === "obstacle" &&
+    data.encounters[kind as EncounterId].resolution.kind === "pull"
+  );
 }
 
 // The last lane move time, scroll speed and zone length worked out, with the data groups and
@@ -779,11 +798,13 @@ export function stepWalk(
   const boxes = dogBoxes(geometry, control.motion, run);
   const touching = (item: WalkItem) => dogsTouching(boxes, walkItemBox(geometry, item));
   const invulnerable = tickInvulnerability(stepSeconds, road.invulnerableSeconds);
+  // A pull obstacle, such as a squirrel, passes through the pack: touching it does nothing.
+  const passing = solid.filter((item) => isPullObstacle(data, item.kind));
   const { hits, invulnerableSeconds, remaining } = collideWithPack(
     collisionRules(data, run),
     touching,
     invulnerable,
-    solid,
+    passing.length === 0 ? solid : solid.filter((item) => !passing.includes(item)),
   );
   // A pickup reached past its lanes, by Long reach, goes to the front dog: its dogs are only
   // those touching it in its own lanes.
@@ -804,6 +825,7 @@ export function stepWalk(
   const cards: CardSource[] = [];
   const collected: WalkItem[] = [];
   const encounterHits: EncounterCard[] = [];
+  const contacts: ContactHit[] = [];
   const instants: InstantFind[] = [];
   const tips: MoneyChange[] = [];
   const treats: TreatGrab[] = [];
@@ -816,13 +838,14 @@ export function stepWalk(
       collected.push(item);
     } else if (kind === "treat") {
       const dog = landsOn(control.motion, nextRun, dogs);
-      const grab = grabTreat(data, dog, nextRun);
+      const grab = grabTreat(data, dog, countTally("treats", nextRun));
       nextRun = grab.state;
       treats.push({ change: grab.change, dog, item });
       collected.push(item);
     } else if (isMinorObstacle(data, kind)) {
       const dog = landsOn(control.motion, nextRun, dogs);
       if (dodges(data, random, dog)) {
+        nextRun = countTally("dodges", nextRun);
         bumps.push({ change: null, dodged: true, dog, item });
         continue;
       }
@@ -834,11 +857,16 @@ export function stepWalk(
       if (!opensCard(affected, run, kind)) {
         continue;
       }
-      if (data.encounters[kind].resolution.kind === "instant") {
+      const { resolution } = data.encounters[kind];
+      if (resolution.kind === "instant") {
         const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
         nextRun = outcome.state;
         instants.push({ encounter: kind, outcome });
-      } else {
+      } else if (resolution.kind === "contact") {
+        const outcome = applyInstantEncounter(data, random, nextRun, kind, affected);
+        nextRun = outcome.state;
+        contacts.push({ encounter: kind, item, outcome });
+      } else if (resolution.kind === "card") {
         const card: EncounterCard = { affected, encounter: kind, kind: "encounter" };
         if (hitLabel(data.encounters[kind]) !== null) {
           encounterHits.push(card);
@@ -859,7 +887,10 @@ export function stepWalk(
         encounter: read(data.tuning, "seconds", "hitStopSeconds"),
         minor: read(data.tuning, "seconds", "minorHitStopSeconds"),
       },
-      { encounters: encounterHits.length, minors: bumps.filter(({ dodged }) => !dodged).length },
+      {
+        encounters: encounterHits.length,
+        minors: bumps.filter(({ dodged }) => !dodged).length + contacts.length,
+      },
     ),
     { cards, zoneEnded },
   );
@@ -867,6 +898,7 @@ export function stepWalk(
     bumps,
     cards: hitStop === null ? cards : [],
     collected,
+    contacts,
     encounterHits,
     fired: firing.fired,
     instants,
@@ -880,6 +912,7 @@ export function stepWalk(
         invulnerableSeconds,
         items: [
           ...remaining,
+          ...passing,
           ...cues,
           ...(pickupsHit.length === 0
             ? pickups
@@ -976,6 +1009,7 @@ function stillStep(held: HeldStep, walk: Walk): WalkStep {
     bumps: [],
     cards: [...held.cards],
     collected: [],
+    contacts: [],
     encounterHits: [],
     fired: [],
     instants: [],

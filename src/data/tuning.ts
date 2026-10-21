@@ -77,7 +77,6 @@ export const TUNING = {
       snowball: 300,
       zippy: 125,
     },
-    squirrelChase: 5,
     // The cash every walk starts with, before gear.
     startPurse: 5,
     thiefLetGo: 10,
@@ -98,8 +97,8 @@ export const TUNING = {
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     scrollSpeedGainPerZone: 0.15,
-    // How many tips appear while the pack is Stinky.
-    stinkyTipSpawns: 0.5,
+    // What a tip pays while the pack is Stinky.
+    stinkyTipValue: 0,
     // How many treats appear while Ben's Treat finder walks.
     treatFinderSpawns: 1.5,
   },
@@ -155,5 +154,9 @@ export const TUNING = {
     stinkySeconds: 20,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
     zoneAtBaseSpeed: 144,
+    // While the pack has the Zoomies, it drifts a lane every this many seconds of walking.
+    zoomiesDriftSeconds: 1,
+    // How long the Zoomies debuff lasts, in walking time.
+    zoomiesSeconds: 20,
   },
 } satisfies Tuning;

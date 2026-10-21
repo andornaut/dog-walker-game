@@ -371,13 +371,13 @@ describe("hints", () => {
       "drag",
       "encounter",
       "encounter",
-      "encounter",
       "firedOwner",
       "fork",
       "homeButton",
       "luckyFind",
       "minorBump",
       "pull",
+      "pullLanded",
       "tip",
       "treat",
     ]);
@@ -403,10 +403,9 @@ describe("help", () => {
 describe("achievements", () => {
   const { achievements } = gameData;
 
-  it("has the rulebook's 15 badges, each with its own id and name", () => {
-    expect(achievements).toHaveLength(15);
-    expect(new Set(achievements.map(({ id }) => id)).size).toBe(15);
-    expect(new Set(achievements.map(({ name }) => name)).size).toBe(15);
+  it("gives every badge its own id and name", () => {
+    expect(new Set(achievements.map(({ id }) => id)).size).toBe(achievements.length);
+    expect(new Set(achievements.map(({ name }) => name)).size).toBe(achievements.length);
   });
 
   it("gives every badge a goal and a one-line badge line", () => {
@@ -419,7 +418,15 @@ describe("achievements", () => {
 
   it("keeps every numeric threshold a positive whole number", () => {
     const thresholds = achievements.flatMap(({ conditions }) =>
-      conditions.map((condition) => ("count" in condition ? condition.count : condition.dollars)),
+      conditions.flatMap((condition) =>
+        "count" in condition
+          ? [condition.count]
+          : "dollars" in condition
+            ? [condition.dollars]
+            : "packSize" in condition
+              ? [condition.packSize]
+              : [],
+      ),
     );
     for (const threshold of thresholds) {
       expect(threshold === "all" || (Number.isInteger(threshold) && threshold > 0)).toBe(true);

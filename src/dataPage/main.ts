@@ -148,6 +148,12 @@ function encountersSection(data: GameData): Section {
     if (resolution.kind === "instant") {
       return [[...head, "Instant", effectText(data, resolution.effects), resolution.art]];
     }
+    if (resolution.kind === "contact") {
+      return [[...head, "On contact", effectText(data, resolution.effects), ""]];
+    }
+    if (resolution.kind === "pull") {
+      return [[...head, "Pulls only", "dogs pull toward it", ""]];
+    }
     return resolution.options.map((option, i) => [
       ...(i === 0 ? head : head.map(() => "")),
       option.name,

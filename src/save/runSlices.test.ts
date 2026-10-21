@@ -5,7 +5,7 @@ import { DOGS } from "../data/dogs";
 import { ENCOUNTERS } from "../data/encounters";
 import { SHOP_GEAR } from "../data/shop";
 import { WORLD } from "../data/world";
-import { cents } from "../rules/units";
+import { cents, clampHearts } from "../rules/units";
 import { newRun, type RunState } from "../state/runState";
 import { defined } from "../testing/defined";
 import { TEST_TUNING } from "../testing/tuning";
@@ -32,6 +32,11 @@ const midRun: RunState = {
   zoneIndex: 2,
 };
 
+const walking = defined(start.pack[0]);
+if (walking.status !== "walking") {
+  throw new Error("The run starts with koda walking");
+}
+
 describe("checkpointOf", () => {
   it("records the zones paid, the money and each dog's zones", () => {
     expect(checkpointOf(data, midRun)).toEqual({
@@ -47,19 +52,24 @@ describe("checkpointOf", () => {
   });
 
   it("copies the run's achievement counters", () => {
-    const counted = {
+    const counted: RunState = {
       ...midRun,
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
-      squirrelChases: 3,
+      pack: [
+        { ...walking, hearts: clampHearts(5, 1) },
+        { dog: "duchess", status: "fired", zoneIndex: 1 },
+      ],
       startMoney: cents(500),
+      tallies: { squirrelPulls: 3 },
     };
     expect(checkpointOf(data, counted).counters).toEqual({
       bumpsByZone: [0, 2],
       debuffsGot: { stinky: 1 },
       firstZone: 0,
-      squirrelChases: 3,
+      lastHeartOwners: 1,
       startCents: 500,
+      tallies: { squirrelPulls: 3 },
     });
   });
 

@@ -1,0 +1,173 @@
+import { describe, expect, it } from "vitest";
+
+import { gameData } from "../data";
+import { LANE_COUNT, ROAD_CAMERA, SCREEN_CONFIG } from "../data/screen";
+import type { ZoneId } from "../data/types";
+import type { LaneDirection } from "../layout/lanes";
+import { screenLayout } from "../layout/screenLayout";
+import { read } from "../rules/units";
+import { newRun, type RunState } from "../state/runState";
+import { STEP_SECONDS } from "./fixedStep";
+import { laneControlIn } from "./laneControl";
+import { destinationLane, stillInLane } from "./laneMotion";
+import { pullHorizon } from "./pulls";
+import { seededRandom } from "./random";
+import { planZone, startRoad, steerWalk, stepWalk, type Walk, type WalkItem } from "./walk";
+import { walkGeometry, walkProjection } from "./walkGeometry";
+import { hasZoomies, stepZoomies } from "./zoomies";
+
+const ROAD = (() => {
+  const road = screenLayout(SCREEN_CONFIG).road;
+  return walkGeometry(LANE_COUNT, 3, walkProjection(ROAD_CAMERA, road), road);
+})();
+const EVERY = read(gameData.tuning, "seconds", "zoomiesDriftSeconds");
+// Steps between the test player's steers, a little over three drifts.
+const STEER_EVERY = 200;
+const ZOOMIES = { debuff: "zoomies", secondsLeft: 20, untilZone: 0 } as const;
+
+const zoomed = (run: RunState): RunState => ({
+  ...run,
+  debuffs: [{ ...ZOOMIES, untilZone: run.zoneIndex }],
+});
+
+// A walk in lane, heading heading, with nothing on the road.
+function walkIn(lane: number, heading?: LaneDirection, items: readonly WalkItem[] = []): Walk {
+  const run = newRun(gameData, 3, { dogs: ["koda"], gear: null, walker: "casey" });
+  const control = laneControlIn(stillInLane(lane));
+  return {
+    road: {
+      ...startRoad(LANE_COUNT),
+      control: heading === undefined ? control : { ...control, heading },
+      items,
+    },
+    run: zoomed(run),
+  };
+}
+
+// The lane the pack heads for after one drift's worth of walking.
+function afterDrift(walk: Walk): number {
+  return destinationLane(stepZoomies(gameData, ROAD, EVERY, 0, walk).walk.road.control.motion);
+}
+
+describe("stepZoomies", () => {
+  it.each<[string, number, LaneDirection | undefined, number]>([
+    ["toward its heading", 2, 1, 3],
+    ["back toward its heading", 2, -1, 1],
+    ["to the right before the pack has moved", 2, undefined, 3],
+    ["nowhere at the right edge", LANE_COUNT - 1, 1, LANE_COUNT - 1],
+    ["nowhere at the left edge", 0, -1, 0],
+  ])("drifts the pack %s", (_, lane, heading, expected) => {
+    expect(afterDrift(walkIn(lane, heading))).toBe(expected);
+  });
+
+  it("waits zoomiesDriftSeconds of walking between drifts", () => {
+    const walk = walkIn(2, 1);
+    const early = stepZoomies(gameData, ROAD, EVERY / 2, 0, walk);
+    expect(early.drifted).toBeNull();
+    expect(stepZoomies(gameData, ROAD, EVERY / 2, early.seconds, early.walk).drifted).toBe(1);
+  });
+
+  it("rests its clock without the Zoomies", () => {
+    const walk = walkIn(2, 1);
+    const calm = { ...walk, run: { ...walk.run, debuffs: [] } };
+    expect(stepZoomies(gameData, ROAD, EVERY, 0.5, calm)).toEqual({
+      drifted: null,
+      seconds: 0,
+      walk: calm,
+    });
+  });
+
+  // A cone close ahead in a lane, as the pulls' rule sees it: too close to react to.
+  const coneIn = (lane: number, id: number): WalkItem => ({
+    height: 30,
+    id,
+    kind: "cone",
+    lane,
+    laneSpan: 1,
+    y: ROAD.packBand.top - 60,
+  });
+
+  it.each<[string, WalkItem[], number]>([
+    ["the other way from an obstacle it can't react to", [coneIn(3, 0)], 1],
+    ["nowhere with both lanes blocked", [coneIn(3, 0), coneIn(1, 1)], 2],
+  ])("drifts %s", (_, items, expected) => {
+    expect(afterDrift(walkIn(2, 1, items))).toBe(expected);
+  });
+});
+
+// With the Zoomies on all the time and nobody steering, the pack drifts about the road; no
+// obstacle may reach it in a lane it drifted into sooner than the pulls' rule allows.
+describe("the Zoomies on every zone's road", { timeout: 120_000 }, () => {
+  const zones = gameData.world.zones.map(({ id }) => id as ZoneId);
+
+  it.each(zones.flatMap((zone) => [1, 2].map((seed) => [zone, seed] as const)))(
+    "drift into no unavoidable hit on %s, seed %i",
+    (zone, seed) => {
+      const start = newRun(gameData, 3, {
+        dogs: ["koda", "biscuit", "duchess"],
+        gear: null,
+        walker: "casey",
+      });
+      const run: RunState = { ...start, invincible: true, route: [zone] };
+      let walk = planZone(gameData, ROAD, seededRandom(seed), { road: startRoad(LANE_COUNT), run });
+      const random = seededRandom(seed);
+      let seconds = 0;
+      let clock = 0;
+      let drifts = 0;
+      let lastDrift: { at: number; horizon: number; to: number } | null = null;
+      let steps = 0;
+      const unavoidable: string[] = [];
+      while (clock < 400) {
+        walk = { ...walk, run: zoomed(walk.run) };
+        // Every STEER_EVERY steps the player steers once toward the middle lane, turning the
+        // drift around; a hit after a steer is the player's, not the drift's.
+        steps += 1;
+        if (steps % STEER_EVERY === 0) {
+          const lane = destinationLane(walk.road.control.motion);
+          walk = steerWalk(gameData, LANE_COUNT, lane < LANE_COUNT / 2 ? 1 : -1, walk);
+          lastDrift = null;
+        }
+        const from = destinationLane(walk.road.control.motion);
+        const drift = stepZoomies(gameData, ROAD, STEP_SECONDS, seconds, walk);
+        seconds = drift.seconds;
+        if (drift.drifted !== null) {
+          drifts += 1;
+          const to = from + drift.drifted;
+          lastDrift = { at: clock, horizon: pullHorizon(gameData, drift.walk), to };
+        }
+        const step = stepWalk(gameData, ROAD, random, STEP_SECONDS, drift.walk);
+        // A card obstacle met this step is the one of its kind that left the road.
+        const cards = drift.walk.road.items.filter(
+          (item) =>
+            step.encounterHits.some(({ encounter }) => encounter === item.kind) &&
+            !step.walk.road.items.some(({ id }) => id === item.id),
+        );
+        const hit = [
+          ...step.bumps.map(({ item }) => item),
+          ...step.contacts.map(({ item }) => item),
+          ...cards,
+        ];
+        const recent = lastDrift;
+        if (recent !== null && clock - recent.at < recent.horizon) {
+          for (const item of hit) {
+            // The pulls' rule keeps the lane drifted into clear; the side dogs reach past it.
+            const inTo = recent.to >= item.lane && recent.to < item.lane + item.laneSpan;
+            if (inTo) {
+              unavoidable.push(
+                `${item.kind} ${(clock - recent.at).toFixed(2)}s after a drift, horizon ${recent.horizon}`,
+              );
+            }
+          }
+        }
+        walk = { ...step.walk, run: { ...step.walk.run, phase: { kind: "walking" } } };
+        clock += STEP_SECONDS;
+        if (step.zoneEnded) {
+          break;
+        }
+      }
+      expect(hasZoomies(walk)).toBe(true);
+      expect(drifts).toBeGreaterThan(10);
+      expect(unavoidable).toEqual([]);
+    },
+  );
+});

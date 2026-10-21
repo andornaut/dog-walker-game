@@ -37,13 +37,14 @@ export const testContext: SaveContext = {
 // Awards from the live game data, stamped at a fixed time.
 export const testAwards: AwardContext = { data: gameData, now: 1_800_000_000_000 };
 
-// A run with no bumps, debuffs, chases or starting money.
+// A run with no bumps, debuffs, tallies or starting money.
 export const quietCounters = (): RunCounters => ({
   bumpsByZone: [],
   debuffsGot: {},
   firstZone: 0,
-  squirrelChases: 0,
+  lastHeartOwners: 0,
   startCents: cents(0),
+  tallies: {},
 });
 
 // A new player: the free dogs, one slot, and no loadout until they pick a dog.
@@ -69,7 +70,7 @@ export const newPlayerSave: SaveDocument = {
     lastWalk: null,
     lifetimeCents: cents(0),
     runs: { finished: 0, noDogs: 0, wentHome: 0 },
-    squirrelsChased: 0,
+    tallies: {},
     timesFired: 0,
     walksWithoutFiring: 0,
   },
@@ -111,7 +112,7 @@ export function veteranSave(): SaveDocument {
       },
       lifetimeCents: cents(30_000),
       runs: { finished: 2, noDogs: 1, wentHome: 2 },
-      squirrelsChased: 5,
+      tallies: { squirrelPulls: 5 },
       timesFired: 1,
       walksWithoutFiring: 2,
     },

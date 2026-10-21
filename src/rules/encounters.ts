@@ -18,8 +18,8 @@ export function opensCard(
   );
 }
 
-// The label shown large as the pack meets an obstacle, before its card; null for a lucky find,
-// which plays no hit moment.
+// The label shown large as the pack meets a card obstacle, before its card; null for anything
+// else, which plays no hit moment.
 export function hitLabel(encounter: Encounter): string | null {
-  return encounter.kind === "obstacle" ? encounter.hitLabel : null;
+  return "hitLabel" in encounter ? encounter.hitLabel : null;
 }

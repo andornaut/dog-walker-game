@@ -21,7 +21,7 @@ describe("affectedDogs", () => {
 describe("hitLabel", () => {
   it.each(Object.keys(ENCOUNTERS) as EncounterId[])("labels %s from its data", (id) => {
     const encounter = ENCOUNTERS[id];
-    expect(hitLabel(encounter)).toBe(encounter.kind === "obstacle" ? encounter.hitLabel : null);
+    expect(hitLabel(encounter)).toBe("hitLabel" in encounter ? encounter.hitLabel : null);
   });
 });
 

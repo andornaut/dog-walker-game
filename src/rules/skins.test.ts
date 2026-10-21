@@ -20,7 +20,7 @@ const [skinnedZone, plainZone] = gameData.world.zones.map(({ id }) => id as Zone
 if (skinnedZone === undefined || plainZone === undefined) {
   throw new Error("The skin tests need two zones");
 }
-const { squirrel, thief } = ENCOUNTERS;
+const { otherDog, thief } = ENCOUNTERS;
 const { barrier2, cone } = MINOR_OBSTACLES;
 const CAT: Skin = {
   art: "cat-on-a-lawn",
@@ -36,7 +36,7 @@ const GNOME: Skin = { art: "garden-gnome", hitLabel: "CLONK!", name: "Garden gno
 const data: Pick<GameData, "encounters" | "minorObstacles"> = {
   encounters: {
     ...gameData.encounters,
-    squirrel: { ...squirrel, skins: { [skinnedZone]: CAT } },
+    otherDog: { ...otherDog, skins: { [skinnedZone]: CAT } },
     thief: { ...thief, skins: { [skinnedZone]: RACCOON } },
   },
   minorObstacles: {
@@ -55,24 +55,24 @@ const base = (art: string, prefix: string, hitLabel: string | null, name: string
   name,
   statusArt: null,
 });
-const squirrelBase = base(
-  encounterSpriteKey("squirrel"),
-  baseCardArtPrefix("squirrel"),
-  squirrel.hitLabel,
-  squirrel.name,
+const otherDogBase = base(
+  encounterSpriteKey("otherDog"),
+  baseCardArtPrefix("otherDog"),
+  otherDog.hitLabel,
+  otherDog.name,
 );
 
 describe("encounterLook and minorObstacleLook", () => {
   it.each<[string, () => Look, Look]>([
     [
-      "the squirrel in its skinned zone wears the whole skin",
-      () => encounterLook(data, skinnedZone, "squirrel"),
-      { ...squirrelBase, ...CAT },
+      "the other dog in its skinned zone wears the whole skin",
+      () => encounterLook(data, skinnedZone, "otherDog"),
+      { ...otherDogBase, ...CAT },
     ],
     [
-      "the squirrel in another zone keeps its base look",
-      () => encounterLook(data, plainZone, "squirrel"),
-      squirrelBase,
+      "the other dog in another zone keeps its base look",
+      () => encounterLook(data, plainZone, "otherDog"),
+      otherDogBase,
     ],
     [
       "a skin without a hit label or card prefix keeps the base's",
@@ -103,10 +103,10 @@ describe("encounterLook and minorObstacleLook", () => {
 });
 
 describe("the skinned art keys", () => {
-  const cat = encounterLook(data, skinnedZone, "squirrel");
-  const plain = encounterLook(data, plainZone, "squirrel");
-  const [hold] = squirrel.resolution.options;
-  const holdSuffix = hold.art.slice(baseCardArtPrefix("squirrel").length);
+  const cat = encounterLook(data, skinnedZone, "otherDog");
+  const plain = encounterLook(data, plainZone, "otherDog");
+  const [hold] = otherDog.resolution.options;
+  const holdSuffix = hold.art.slice(baseCardArtPrefix("otherDog").length);
   const all = () => true;
   const none = () => false;
 

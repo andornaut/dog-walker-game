@@ -12,7 +12,7 @@ import {
   zonesFinishedBy,
 } from "./checkpoint";
 import { newPlayerSave, quietCounters, testAwards, veteranSave } from "./fixtures";
-import type { Checkpoint, SaveDocument } from "./schema";
+import { type Checkpoint, type SaveDocument, TALLY_IDS } from "./schema";
 
 // veteranSave: bank 12,345, best walk 9,000 over 4 zones, lifetime 30,000, best zone 4, runs
 // finished 2 / noDogs 1 / wentHome 2, 1 firing; koda 1 fired / 5 walks / 12 zones, biscuit
@@ -226,10 +226,11 @@ describe("achievements at banking", () => {
     });
   });
 
-  it("adds the run's squirrel chases to the total", () => {
-    const counters = { ...quietCounters(), squirrelChases: 2 };
-    const { stats } = recordRunEnd(testAwards, newPlayerSave, runResult({ counters }));
-    expect(stats.squirrelsChased).toBe(2);
+  it.each(TALLY_IDS)("adds the run's %s to the lifetime tally", (tally) => {
+    const counters = { ...quietCounters(), tallies: { [tally]: 2 } };
+    const before = { ...newPlayerSave, stats: { ...newPlayerSave.stats, tallies: { [tally]: 3 } } };
+    const { stats } = recordRunEnd(testAwards, before, runResult({ counters }));
+    expect(stats.tallies).toEqual({ [tally]: 5 });
   });
 
   it("awards a checkpoint's run from its counters when it is banked", () => {

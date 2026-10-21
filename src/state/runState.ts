@@ -6,6 +6,7 @@ import type {
   GameData,
   GearId,
   Modifier,
+  TallyId,
   UpgradeId,
   WalkerId,
   ZoneId,
@@ -113,10 +114,10 @@ export interface RunState {
   // each zone's start clears.
   readonly skipPass: boolean;
   readonly skipUsed: boolean;
-  // Squirrel cards on which the pack was let chase.
-  readonly squirrelChases: number;
   // The money the run began with, which a money goal leaves out.
   readonly startMoney: Cents;
+  // This run's share of the lifetime tallies, banked into the save's at the run's end.
+  readonly tallies: Readonly<Partial<Record<TallyId, number>>>;
   // Picked upgrades leave the pool for the rest of the run.
   readonly upgradesPicked: readonly UpgradeId[];
   readonly walker: WalkerId;
@@ -175,8 +176,8 @@ export function newRun(
     route: [firstZoneId(data)],
     skipPass: false,
     skipUsed: false,
-    squirrelChases: 0,
     startMoney: cents(0),
+    tallies: {},
     upgradesPicked: [],
     walker,
     zoneDistance: pixels(0),

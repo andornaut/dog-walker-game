@@ -137,7 +137,7 @@ describe("moneyCost and applyEffects: money", () => {
     change: "lose",
     kind: "money",
   };
-  const chase: Effect = { amount: "squirrelChase", change: "lose", kind: "money" };
+  const letGo: Effect = { amount: "thiefLetGo", change: "lose", kind: "money" };
   const gain: Effect = {
     amount: "missedTips",
     change: "gain",
@@ -149,7 +149,7 @@ describe("moneyCost and applyEffects: money", () => {
     testState(slots, { cardsThisZone, modifiers: [sweetTalker] });
   const both: DogId[] = ["duchess", "koda"];
   const low = read(TEST_TUNING, "money", "encounterLow");
-  const chaseCost = read(TEST_TUNING, "money", "squirrelChase");
+  const letGoCost = read(TEST_TUNING, "money", "thiefLetGo");
 
   it.each<[string, DogId[], Effect, RunState, number]>([
     [
@@ -159,7 +159,7 @@ describe("moneyCost and applyEffects: money", () => {
       testState({ duchess: 5, koda: 5, nugget: 5 }),
       low,
     ],
-    ["another cost once too", both, chase, testState({ duchess: 5, koda: 5 }), chaseCost],
+    ["another cost once too", both, letGo, testState({ duchess: 5, koda: 5 }), letGoCost],
     [
       "nothing on the zone's first card with Sweet talker",
       both,
@@ -167,7 +167,7 @@ describe("moneyCost and applyEffects: money", () => {
       talked({ duchess: 5, koda: 5 }),
       0,
     ],
-    ["a flat cost free too on that card", ["duchess"], chase, talked({ duchess: 5 }), 0],
+    ["a flat cost free too on that card", ["duchess"], letGo, talked({ duchess: 5 }), 0],
     ["in full on the zone's next card", both, towel, talked({ duchess: 5, koda: 5 }, 1), low],
     ["nothing for a gain", [], gain, testState({ duchess: 5, koda: 5 }), 0],
   ])("charges %s", (_, affected, effect, state, cost) => {
@@ -178,7 +178,7 @@ describe("moneyCost and applyEffects: money", () => {
     const start = testState({ duchess: 5, koda: 5 }, { money: cents(5000) });
     const gained = read(TEST_TUNING, "money", "missedTips");
     expect(applyEffects(data, context([]), [gain], start).money).toBe(5000 + gained);
-    expect(applyEffects(data, context([]), [chase], start).money).toBe(5000 - chaseCost);
+    expect(applyEffects(data, context([]), [letGo], start).money).toBe(5000 - letGoCost);
   });
 });
 

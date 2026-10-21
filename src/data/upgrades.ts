@@ -32,9 +32,8 @@ export const UPGRADES = {
   goodLeash: {
     art: "card-good-leash",
     duration: "run",
-    effect: "No squirrel cards or pulls all walk",
+    effect: "No pulls toward squirrels all walk",
     effects: [
-      { duration: "run", encounter: "squirrel", kind: "immune" },
       {
         by: "goodLeashSquirrelPull",
         duration: "run",
@@ -49,7 +48,7 @@ export const UPGRADES = {
   raincoats: {
     art: "card-raincoats",
     duration: "run",
-    effect: "No puddle cards all walk",
+    effect: "Puddles don't muddy the pack all walk",
     effects: [{ duration: "run", encounter: "puddle", kind: "immune" }],
     kind: "boost",
     name: "Raincoats",

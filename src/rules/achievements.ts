@@ -5,6 +5,7 @@ import type {
   CardOption,
   DebuffId,
   GameData,
+  TallyId,
   Threshold,
 } from "../data/types";
 import type { SaveDocument } from "../save/schema";
@@ -20,33 +21,41 @@ export type AchievementData = Pick<
 
 // The counters a run keeps for its achievements, copied out of the run state for the save.
 // Zones before firstZone were skipped by a dev start: they are neither finished nor clean.
-// startCents is the money the run began with, which a money goal leaves out.
+// lastHeartOwners is how many walking owners are on their last heart. startCents is the money
+// the run began with, which a money goal leaves out. tallies are this run's share of the
+// lifetime tallies.
 export interface RunCounters {
   bumpsByZone: number[];
   debuffsGot: Partial<Record<DebuffId, number>>;
   firstZone: number;
-  squirrelChases: number;
+  lastHeartOwners: number;
   startCents: Cents;
+  tallies: Partial<Record<TallyId, number>>;
 }
 
 // What the run conditions judge: the run's counters, what it banked (starting money
-// included), how many dogs set out and how many zones it finished.
+// included), how many dogs set out and got home unfired, and how many zones it finished.
 export interface RunFacts extends RunCounters {
+  readonly dogsHome: number;
   readonly earnedCents: Cents;
   readonly packSize: number;
   readonly zonesFinished: number;
 }
 
 export function runCountersOf(
-  run: Pick<RunState, "bumpsByZone" | "debuffsGot" | "firstZone" | "squirrelChases" | "startMoney">,
+  run: Pick<
+    RunState,
+    "bumpsByZone" | "debuffsGot" | "firstZone" | "pack" | "startMoney" | "tallies"
+  >,
 ): RunCounters {
-  const { bumpsByZone, debuffsGot, firstZone, squirrelChases, startMoney } = run;
+  const { bumpsByZone, debuffsGot, firstZone, pack, startMoney, tallies } = run;
   return {
     bumpsByZone: [...bumpsByZone],
     debuffsGot: { ...debuffsGot },
     firstZone,
-    squirrelChases,
+    lastHeartOwners: pack.filter((slot) => slot.status === "walking" && slot.hearts === 1).length,
     startCents: startMoney,
+    tallies: { ...tallies },
   };
 }
 
@@ -80,9 +89,19 @@ export function countBump(state: RunState): RunState {
   return { ...state, bumpsByZone };
 }
 
-// A card option that lets the chasers chase counts one squirrel chase.
-export function countChase(option: Pick<CardOption, "chase">, state: RunState): RunState {
-  return option.chase === true ? { ...state, squirrelChases: state.squirrelChases + 1 } : state;
+// One more toward a lifetime tally, counted in the run until it is banked.
+export function countTally(tally: TallyId, state: RunState): RunState {
+  return { ...state, tallies: { ...state.tallies, [tally]: (state.tallies[tally] ?? 0) + 1 } };
+}
+
+// A card option that names a tally counts one toward it.
+export function countOptionTally(option: Pick<CardOption, "tally">, state: RunState): RunState {
+  return option.tally === undefined ? state : countTally(option.tally, state);
+}
+
+// Whether the walk was finished: every zone of it walked, none skipped by a dev start.
+function finishedWalk(facts: RunFacts, zones: number): boolean {
+  return walkedFromTheStart(facts) && facts.zonesFinished >= zones;
 }
 
 function needed(all: number, threshold: Threshold): number {
@@ -127,12 +146,26 @@ export function conditionHolds(
         save !== null &&
         save.owned.gear.length >= needed(Object.keys(data.shopGear).length, condition.count)
       );
+    case "finishOnLastHeart":
+      return facts !== null && finishedWalk(facts, zones) && facts.lastHeartOwners > 0;
+    case "fullPackBonus":
+      return (
+        facts !== null &&
+        finishedWalk(facts, zones) &&
+        facts.dogsHome === facts.packSize &&
+        facts.packSize >= condition.packSize
+      );
     case "packSize":
       return facts !== null && facts.packSize >= condition.count;
-    case "squirrelsChased":
-      return save !== null && save.stats.squirrelsChased >= condition.count;
+    case "tally":
+      return save !== null && (save.stats.tallies[condition.tally] ?? 0) >= condition.count;
     case "timesFired":
       return save !== null && save.stats.timesFired >= condition.count;
+    case "walkersUnlocked":
+      return (
+        save !== null &&
+        save.owned.walkers.length >= needed(Object.keys(data.walkers).length, condition.count)
+      );
     case "walksWithoutFiring":
       return save !== null && save.stats.walksWithoutFiring >= condition.count;
     case "zonesFinished":
@@ -169,6 +202,15 @@ export function earnedByRun(data: AchievementData, facts: RunFacts): Achievement
     .map(({ id }) => id);
 }
 
+// Each tally in plain words, for the data page.
+const TALLY_NAMES: Readonly<Record<TallyId, string>> = {
+  dodges: "small dog dodges",
+  sniffs: "other dogs let sniff",
+  squirrelPulls: "squirrel pulls landed",
+  thievesLetGo: "thieves let go",
+  treats: "treats grabbed",
+};
+
 function thresholdText(threshold: Threshold, unit: string): string {
   return threshold === "all" ? `all ${unit}` : `${threshold} ${unit}`;
 }
@@ -193,12 +235,18 @@ export function achievementConditionText(
       return `bank $${condition.dollars} in one run, net of starting money`;
     case "gearOwned":
       return `own ${thresholdText(condition.count, "gear items")}`;
+    case "finishOnLastHeart":
+      return "finish a walk with a walking owner on their last heart";
+    case "fullPackBonus":
+      return `finish a walk with every dog of a pack of ${condition.packSize} or more home`;
     case "packSize":
       return `start a run with ${condition.count} dogs`;
-    case "squirrelsChased":
-      return `${condition.count} squirrel chases in total`;
+    case "tally":
+      return `${condition.count} ${TALLY_NAMES[condition.tally]} in total`;
     case "timesFired":
       return `fired ${condition.count} times in total`;
+    case "walkersUnlocked":
+      return `unlock ${thresholdText(condition.count, "walkers")}`;
     case "walksWithoutFiring":
       return `${condition.count} finished walks with no firing`;
     case "zonesFinished":

@@ -12,8 +12,8 @@ describe("cardHintTriggers", () => {
     ["a fork", { kind: "fork", paths: [], upgrades: [] }, [{ kind: "fork" }]],
     [
       "a puddle",
-      { affected: ["koda"], encounter: "puddle", kind: "encounter" },
-      [{ encounter: "puddle", kind: "encounter" }, { kind: "card" }],
+      { affected: ["koda"], encounter: "skunk", kind: "encounter" },
+      [{ encounter: "skunk", kind: "encounter" }, { kind: "card" }],
     ],
     [
       "a skunk",

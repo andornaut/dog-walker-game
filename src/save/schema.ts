@@ -1,12 +1,29 @@
 import * as v from "valibot";
 
-import type { AchievementId, DogId, GearId, HintId, WalkerId, ZoneId } from "../data/types";
+import type {
+  AchievementId,
+  DogId,
+  GearId,
+  HintId,
+  TallyId,
+  WalkerId,
+  ZoneId,
+} from "../data/types";
 import type { RunCounters } from "../rules/achievements";
 import { PRE_FORK_ROUTE } from "../rules/route";
 import { cents as toCents } from "../rules/units";
 import type { EndReason } from "../state/runState";
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
+
+// Every tally the save keeps; a stored key outside it is dropped on load.
+export const TALLY_IDS = [
+  "dodges",
+  "sniffs",
+  "squirrelPulls",
+  "thievesLetGo",
+  "treats",
+] as const satisfies readonly TallyId[];
 
 // The most dogs a run can take.
 export const MAX_RUN_DOGS = 3;
@@ -45,9 +62,12 @@ const runCountersSchema = v.object({
   debuffsGot: v.optional(v.record(contentId, count), {}),
   // Checkpoints saved before it walked from the first zone.
   firstZone: v.optional(count, 0),
-  squirrelChases: count,
+  // Checkpoints saved before it had none on their last heart.
+  lastHeartOwners: v.optional(count, 0),
   // Checkpoints saved before it count the starting money toward money goals.
   startCents: v.optional(cents, 0),
+  // Keyed by TallyId.
+  tallies: v.optional(v.record(contentId, count), {}),
 });
 
 // The zones a run walked, in order, by id. A save from before forks walked the pre-fork route.
@@ -107,8 +127,8 @@ const statsSchema = v.object({
     noDogs: count,
     wentHome: count,
   }),
-  // Squirrel chases let happen, over every run.
-  squirrelsChased: v.optional(count, 0),
+  // Each tally over every run, keyed by TallyId.
+  tallies: v.optional(v.record(contentId, count), {}),
   timesFired: count,
   // Finished walks in which no owner fired you.
   walksWithoutFiring: v.optional(count, 0),
@@ -193,13 +213,14 @@ export interface LastWalk extends Walk {
 
 export interface SaveStats extends Omit<
   StoredStats,
-  "bestWalk" | "dogs" | "dogsFinishedWith" | "lastWalk" | "runs"
+  "bestWalk" | "dogs" | "dogsFinishedWith" | "lastWalk" | "runs" | "tallies"
 > {
   bestWalk: Walk | null;
   dogs: Partial<Record<DogId, DogStats>>;
   dogsFinishedWith: DogId[];
   lastWalk: LastWalk | null;
   runs: Record<EndReason, number>;
+  tallies: Partial<Record<TallyId, number>>;
 }
 
 export interface SaveDocument extends Omit<
@@ -258,7 +279,7 @@ export function createDefaultSave(defaults: SaveDefaults): SaveDocument {
       lastWalk: null,
       lifetimeCents: zero,
       runs: { finished: 0, noDogs: 0, wentHome: 0 },
-      squirrelsChased: 0,
+      tallies: {},
       timesFired: 0,
       walksWithoutFiring: 0,
     },

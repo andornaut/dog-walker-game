@@ -7,6 +7,7 @@ import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
   isPickup,
+  isPullObstacle,
   itemCategory,
   laneMoveSeconds,
   pickupReach,
@@ -266,7 +267,8 @@ function botView(
   const treatReach = treatReachOf(data, walk);
   const horizon = bot.skill.lookAheadSeconds;
   for (const item of walk.road.items) {
-    if (!bot.perceived.has(item.id)) {
+    // A pull obstacle is harmless to touch: only its pulls matter.
+    if (!bot.perceived.has(item.id) || isPullObstacle(data, item.kind)) {
       continue;
     }
     if (item.mover !== undefined) {

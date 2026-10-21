@@ -1,4 +1,4 @@
-import type { DogId, ZoneId } from "../data/types";
+import type { DogId, TallyId, ZoneId } from "../data/types";
 import { type RunCounters, type RunFacts, walkedFromTheStart } from "../rules/achievements";
 import { addCents, type Cents } from "../rules/units";
 import { newWalkers } from "../rules/walkers";
@@ -23,6 +23,18 @@ export interface RunResult {
 // Only finished zones count: heading home or running out of dogs in zone 3 finishes 2.
 export function zonesFinishedBy(result: Pick<RunResult, "outcome" | "zone">): number {
   return result.outcome === "finished" ? result.zone : result.zone - 1;
+}
+
+// The lifetime tallies with a run's added.
+function addTallies(
+  lifetime: SaveStats["tallies"],
+  run: RunCounters["tallies"],
+): SaveStats["tallies"] {
+  const sum = { ...lifetime };
+  for (const [tally, count] of Object.entries(run) as [TallyId, number][]) {
+    sum[tally] = (sum[tally] ?? 0) + count;
+  }
+  return sum;
 }
 
 // Whether a run banking earnedCents would be the best walk yet; the end screen flags it.
@@ -97,7 +109,7 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
       lastWalk,
       lifetimeCents: addCents(stats.lifetimeCents, earnedCents),
       runs: { ...stats.runs, [outcome]: stats.runs[outcome] + 1 },
-      squirrelsChased: stats.squirrelsChased + (run.counters?.squirrelChases ?? 0),
+      tallies: addTallies(stats.tallies, run.counters?.tallies ?? {}),
       timesFired: stats.timesFired + firedBy.length,
       walksWithoutFiring: stats.walksWithoutFiring + (finished && firedBy.length === 0 ? 1 : 0),
     },
@@ -105,7 +117,13 @@ function bankRun(context: AwardContext, run: BankedRun, save: SaveDocument): Sav
   const facts: RunFacts | null =
     run.counters === null
       ? null
-      : { ...run.counters, earnedCents, packSize: run.dogs.length, zonesFinished };
+      : {
+          ...run.counters,
+          dogsHome: stayed.length,
+          earnedCents,
+          packSize: run.dogs.length,
+          zonesFinished,
+        };
   return awardAchievements(context, facts, save, banked);
 }
 

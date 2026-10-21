@@ -6,7 +6,7 @@ import { ENCOUNTERS } from "../data/encounters";
 import { QUIPS } from "../data/quips";
 import { RUN_TEXT } from "../data/runText";
 import { SHOP_GEAR } from "../data/shop";
-import type { DogId, EncounterId, UpgradeId } from "../data/types";
+import type { CardOption, DogId, EncounterId, UpgradeId } from "../data/types";
 import { UPGRADES } from "../data/upgrades";
 import { type CardSource, newRun, type RunState } from "../state/runState";
 import { activeModifier, heartsByDog, testState } from "../testing/runState";
@@ -69,7 +69,7 @@ function heartsOf(id: EncounterId): number {
   const effect = option?.effects.find((candidate) => candidate.kind === "hearts");
   return effect?.kind === "hearts" ? effect.amount : 0;
 }
-const low = read(TEST_TUNING, "money", "encounterLow");
+const letGo = read(TEST_TUNING, "money", "thiefLetGo");
 const high = read(TEST_TUNING, "money", "encounterHigh");
 
 function choose(state: RunState, source: CardSource, choice: Choice, random = () => 0) {
@@ -79,16 +79,16 @@ function choose(state: RunState, source: CardSource, choice: Choice, random = ()
 
 describe("cardFor", () => {
   it("disables an option the player cannot afford, with the reason", () => {
-    const state = testState({ duchess: 5, koda: 5 }, { money: cents(low - 100) });
-    const card = cardFor(data, state, encounter("puddle", ["duchess", "koda"]));
-    const towel = optionWith("puddle", "money");
-    expect(card.title).toBe(ENCOUNTERS.puddle.name);
+    const state = testState({ duchess: 5, koda: 5 }, { money: cents(letGo - 100) });
+    const card = cardFor(data, state, encounter("thief", ["duchess", "koda"]));
+    const letGoOption = optionWith("thief", "money");
+    expect(card.title).toBe(ENCOUNTERS.thief.name);
     expect(card.options.map(({ availability }) => availability)).toEqual(
       card.options.map((_, index) =>
-        index === towel ? { enabled: false, reason: "not enough money" } : { enabled: true },
+        index === letGoOption ? { enabled: false, reason: "not enough money" } : { enabled: true },
       ),
     );
-    expect(card.options[towel]?.cost).toBe(low);
+    expect(card.options[letGoOption]?.cost).toBe(letGo);
   });
 
   it("keeps every card's free option enabled with no money", () => {
@@ -164,11 +164,26 @@ describe("applyInstantEncounter", () => {
     ]);
   });
 
-  it("refuses an encounter that opens a card, and an ended run", () => {
-    const state = testState({ koda: 5 });
-    expect(() => applyInstantEncounter(data, () => 0, state, "puddle", ["koda"])).toThrow(
-      "opens a card",
+  it.each(["thief", "squirrel"] as const)("refuses the %s, with no effects on contact", (id) => {
+    expect(() =>
+      applyInstantEncounter(data, () => 0, testState({ koda: 5 }), id, ["koda"]),
+    ).toThrow("no effects on contact");
+  });
+
+  it("applies a contact obstacle's effects to the pack", () => {
+    const outcome = applyInstantEncounter(data, () => 0, testState({ koda: 5 }), "puddle", [
+      "koda",
+    ]);
+    const { resolution } = ENCOUNTERS.puddle;
+    const debuffs = resolution.effects.flatMap((effect) =>
+      effect.kind === "debuff" ? [effect.debuff] : [],
     );
+    expect(outcome.state.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
+    expect(outcome.heartChanges).toEqual([]);
+  });
+
+  it("refuses an ended run", () => {
+    const state = testState({ koda: 5 });
     const ended = { ...state, phase: { kind: "ended", reason: "noDogs" } as const };
     expect(() => applyInstantEncounter(data, () => 0, ended, "lostWallet", ["koda"])).toThrow(
       "ended",
@@ -198,15 +213,21 @@ describe("chooseOption", () => {
   const groom = optionWith("skunk", "money");
   const lost = heartsOf("skunk");
 
-  it("counts a squirrel chase only when the chasers are let chase", () => {
+  // Each card option that names a tally, from the data, and one beside it that names none.
+  const tallied = (["otherDog", "thief"] as const).flatMap((id) => {
+    const { resolution } = ENCOUNTERS[id];
+    const options: readonly CardOption[] = resolution.kind === "card" ? resolution.options : [];
+    const counted = options.findIndex((option) => option.tally !== undefined);
+    const plain = options.findIndex((option) => option.tally === undefined);
+    return [{ counted, id, plain, tally: options[counted]?.tally }];
+  });
+
+  it.each(tallied)("counts $tally only for the $id option that names it", (row) => {
     const state = testState({ koda: 5 }, { money: cents(5_000) });
-    const squirrel = encounter("squirrel", ["koda"]);
-    const { resolution } = ENCOUNTERS.squirrel;
-    const options = resolution.kind === "card" ? resolution.options : [];
-    const chase = options.findIndex((option) => "chase" in option && option.chase === true);
-    const hold = options.findIndex((option) => !("chase" in option));
-    expect(choose(state, squirrel, chase).state.squirrelChases).toBe(1);
-    expect(choose(state, squirrel, hold).state.squirrelChases).toBe(0);
+    const card = encounter(row.id, ["koda"]);
+    expect(row.tally).toBeDefined();
+    expect(choose(state, card, row.counted).state.tallies).toEqual({ [row.tally ?? ""]: 1 });
+    expect(choose(state, card, row.plain).state.tallies).toEqual({});
   });
 
   it("applies an option only to the affected dogs, and reports each heart change", () => {
@@ -241,7 +262,7 @@ describe("chooseOption", () => {
   it("rejects a disabled option", () => {
     const state = testState({ duchess: 5, koda: 5 }, { money: cents(0) });
     expect(() =>
-      choose(state, encounter("puddle", ["duchess", "koda"]), optionWith("puddle", "money")),
+      choose(state, encounter("thief", ["duchess", "koda"]), optionWith("thief", "money")),
     ).toThrow("not enough money");
   });
 
@@ -329,7 +350,7 @@ describe("skip option", () => {
 
   it("is added beside the options of a card with fewer than three", () => {
     const withBags = newRun(data, 1, { dogs: ["koda"], gear: "poopBags", walker: "casey" });
-    const card = cardFor(data, withBags, encounter("squirrel", ["koda"]));
+    const card = cardFor(data, withBags, encounter("thief", ["koda"]));
     expect(card.options).toHaveLength(2);
     expect(card.skip).toBe(true);
   });

@@ -20,7 +20,7 @@ import {
 import { type RoadGeometry, startRoad, zoneLength } from "./walk";
 
 const SKUNK: CardSource = { affected: ["koda"], encounter: "skunk", kind: "encounter" };
-const STOP: CardSource = { affected: ["koda"], encounter: "puddle", kind: "encounter" };
+const STOP: CardSource = { affected: ["koda"], encounter: "thief", kind: "encounter" };
 const GEOMETRY: RoadGeometry = {
   cell: { inset: 12, length: 56 },
   itemHeights: { lucky: 20, tip: 12, treat: 12 },

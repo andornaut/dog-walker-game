@@ -85,6 +85,41 @@ function unlockWalkers(document: Record<string, unknown>): Record<string, unknow
   );
 }
 
+// A count kept under its own key in version 3 moves into tallies under its new name, and a
+// count already in tallies stays.
+function moveIntoTallies(from: string, tally: string, record: unknown): unknown {
+  if (!isRecord(record) || !(from in record)) {
+    return record;
+  }
+  const { [from]: moved, ...rest } = record;
+  const tallies = isRecord(rest.tallies) ? rest.tallies : {};
+  return { ...rest, tallies: { [tally]: moved, ...tallies } };
+}
+
+// Version 3 counted squirrel chases on their own; version 4 keeps them in the tallies as
+// squirrelPulls, both the lifetime count and a checkpoint's run count.
+function tallySquirrelPulls(document: Record<string, unknown>): Record<string, unknown> {
+  return updateFields(
+    [
+      [
+        "checkpoint",
+        (checkpoint) =>
+          updateFields(
+            [
+              [
+                "counters",
+                (counters) => moveIntoTallies("squirrelChases", "squirrelPulls", counters),
+              ],
+            ],
+            checkpoint,
+          ),
+      ],
+      ["stats", (stats) => moveIntoTallies("squirrelsChased", "squirrelPulls", stats)],
+    ],
+    document,
+  );
+}
+
 // One entry per version step, in order. A renamed dog or gear id needs one. Each step keeps
 // its own copy of what it renames, so a later rename adds a step rather than editing this one.
 export const saveMigrations: readonly Migration[] = [
@@ -100,6 +135,7 @@ export const saveMigrations: readonly Migration[] = [
       ),
   },
   { from: 2, migrate: unlockWalkers },
+  { from: 3, migrate: tallySquirrelPulls },
 ];
 
 // Runs each migration from the document's version up to targetVersion, in order. A

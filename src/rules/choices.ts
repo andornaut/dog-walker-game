@@ -14,7 +14,7 @@ import type {
 import { packDogs } from "../state/pack";
 import type { CardSource, EffectSource, RunState } from "../state/runState";
 import { fillNames } from "../text/lines";
-import { countChase } from "./achievements";
+import { countOptionTally } from "./achievements";
 import {
   amountText,
   type CauseData,
@@ -418,7 +418,7 @@ function takePath(
 }
 
 // Applies the chosen option. Owners at 0 hearts fire you; with no dogs left the run ends. An
-// option that lets the pack chase counts a chase. A fork's path takes its upgrade and sets the
+// option that names a tally counts one toward it. A fork's path takes its upgrade and sets the
 // next zone. Throws for a disabled option or an ended run.
 export function chooseOption(
   data: CardData,
@@ -468,7 +468,7 @@ export function chooseOption(
     state,
   );
   const counted = { ...outcome.state, cardsThisZone: state.cardsThisZone + 1 };
-  return { ...outcome, state: countChase(content.option, counted) };
+  return { ...outcome, state: countOptionTally(content.option, counted) };
 }
 
 // Applies effects that open no card, such as an instant find's, to the dogs given,
@@ -488,8 +488,9 @@ export function applyEffectsNow(
   return outcomeOf(data, { affected, random, source }, effects, state);
 }
 
-// Applies an instant encounter's effects on contact, to the dogs it caught, with the same
-// outcome events as a card choice. Throws for an encounter that opens a card or an ended run.
+// Applies the effects of a lucky find or a contact obstacle as it is touched, to the dogs it
+// caught, with the same outcome events as a card choice. Throws for an encounter with no
+// effects on contact or an ended run.
 export function applyInstantEncounter(
   data: ChoiceData,
   random: () => number,
@@ -498,8 +499,8 @@ export function applyInstantEncounter(
   caught: readonly DogId[],
 ): ChoiceOutcome {
   const { name, resolution } = data.encounters[encounter];
-  if (resolution.kind !== "instant") {
-    throw new Error(`${name} opens a card: use chooseOption`);
+  if (resolution.kind !== "instant" && resolution.kind !== "contact") {
+    throw new Error(`${name} has no effects on contact`);
   }
   const source = { encounter, kind: "instant" } as const;
   return applyEffectsNow(data, random, state, source, resolution.effects, caught);

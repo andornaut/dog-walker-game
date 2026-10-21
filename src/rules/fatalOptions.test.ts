@@ -5,7 +5,7 @@ import type { DogId } from "../data/types";
 import type { CardSource } from "../state/runState";
 import { testState } from "../testing/runState";
 import { TEST_TUNING } from "../testing/tuning";
-import { causeLabel } from "./causes";
+import { causeLabel, firedByText } from "./causes";
 import { cardFor, firesText } from "./choices";
 import { resolveEffects } from "./effects";
 
@@ -42,7 +42,7 @@ describe("an option that would fire an owner", () => {
     );
     expect(option?.breakdown.map(({ dog, name, text }) => [dog, text, name])).toEqual([
       ["koda", "−1♥", "Hold your nose"],
-      ["koda", "", "Jesse fires you"],
+      ["koda", "", firedByText(data, "koda")],
     ]);
   });
 });
@@ -69,6 +69,8 @@ describe("causeLabel at a firing", () => {
       [{ amount: -2, kind: "hearts", target: { kind: "affected" } }],
       testState({ koda: 1 }),
     );
-    expect(changes.map((change) => causeLabel(data, change))).toEqual(["−1♥, Jesse fires you"]);
+    expect(changes.map((change) => causeLabel(data, change))).toEqual([
+      `−1♥, ${firedByText(data, "koda")}`,
+    ]);
   });
 });

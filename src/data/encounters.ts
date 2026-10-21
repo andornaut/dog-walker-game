@@ -1,8 +1,10 @@
 import type { Encounter, EncounterId } from "./types";
 
-// Things the pack bumps into: obstacles by accident, each opening a card for the whole pack
-// with its options shown left to right in this order, and lucky finds on purpose, each
-// applying its effects on contact with a popup.
+// Things the pack bumps into: obstacles by accident and lucky finds on purpose. A card
+// obstacle opens a card for the whole pack with its options shown left to right in this order;
+// a contact obstacle applies its effects to the pack as it is touched; touching a pull obstacle
+// does nothing, and dogs pull toward it. A lucky find applies its effects on contact with a
+// popup.
 // Money amounts and modifier values are keys into tuning.ts; hearts are per owner.
 // art is a key into the art manifest's images.
 export const ENCOUNTERS = {
@@ -39,10 +41,11 @@ export const ENCOUNTERS = {
             { amount: "missedTips", change: "lose", kind: "money" },
           ],
           name: "Let them sniff",
+          tally: "sniffs",
         },
         {
           art: "card-other-dog-pull-away",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
+          effects: [{ debuff: "zoomies", kind: "debuff" }],
           name: "Pull away",
         },
       ],
@@ -50,24 +53,9 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
   },
   puddle: {
-    hitLabel: "SOAKED!",
     kind: "obstacle",
     name: "Puddle",
-    resolution: {
-      kind: "card",
-      options: [
-        {
-          art: "card-puddle-towel",
-          effects: [{ amount: "encounterLow", change: "lose", kind: "money" }],
-          name: "Towel off",
-        },
-        {
-          art: "card-puddle-through",
-          effects: [{ debuff: "muddy", kind: "debuff" }],
-          name: "Splash through",
-        },
-      ],
-    },
+    resolution: { effects: [{ debuff: "muddy", kind: "debuff" }], kind: "contact" },
     shape: { lanes: 2, rows: 1 },
   },
   skunk: {
@@ -103,26 +91,10 @@ export const ENCOUNTERS = {
     shape: { lanes: 2, rows: 2 },
   },
   squirrel: {
-    hitLabel: "SQUIRREL!",
     kind: "obstacle",
     movement: { kind: "dart" },
     name: "Squirrel",
-    resolution: {
-      kind: "card",
-      options: [
-        {
-          art: "card-squirrel-chase",
-          chase: true,
-          effects: [{ amount: "squirrelChase", change: "lose", kind: "money" }],
-          name: "Let them chase",
-        },
-        {
-          art: "card-squirrel-hold",
-          effects: [{ amount: -1, kind: "hearts", target: { kind: "affected" } }],
-          name: "Hold tight",
-        },
-      ],
-    },
+    resolution: { kind: "pull" },
     shape: { lanes: 1, rows: 1 },
   },
   thief: {
@@ -137,6 +109,7 @@ export const ENCOUNTERS = {
           art: "card-thief-let-go",
           effects: [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
           name: "Let them go",
+          tally: "thievesLetGo",
         },
         {
           art: "card-thief-chase",

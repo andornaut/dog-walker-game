@@ -35,6 +35,7 @@ import {
 import type { LaneDirection } from "../layout/lanes";
 import { screenLayout } from "../layout/screenLayout";
 import { earnedByRun, runCountersOf } from "../rules/achievements";
+import { causeLabel } from "../rules/causes";
 import { cardFor, type CardView, chooseOption, openCard } from "../rules/choices";
 import { tipValue } from "../rules/run";
 import { clampHearts, pixels, read } from "../rules/units";
@@ -51,6 +52,7 @@ import { hasLeftRoad, laneAt, type MoverPath, moverPlace, onScreenOf } from "./m
 import { seededRandom } from "./random";
 import {
   blocksLane,
+  collectTip,
   finishZone,
   footprintOf,
   headHome,
@@ -507,20 +509,30 @@ describe("planZone", { timeout: 15_000 }, () => {
 });
 
 describe("stepWalk", () => {
-  it("brings only Stinky's share of the tips due into view", () => {
+  const stinkyRun = (walk: Walk): Walk => ({
+    ...walk,
+    run: { ...walk.run, debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
+  });
+
+  it.each([
+    ["clean", (walk: Walk) => walk],
+    ["Stinky", stinkyRun],
+  ])("brings every tip due into view while %s", (_, debuffed) => {
     const walk = walkWith(["koda"]);
     const pending = [0, 1, 3, 4].map((lane) => ({ distance: 0.5, kind: "tip", lane }) as const);
-    const due: Walk = { ...walk, road: { ...walk.road, pending } };
-    const stinky: Walk = {
-      ...due,
-      run: { ...due.run, debuffs: [{ debuff: "stinky", secondsLeft: 20, untilZone: 0 }] },
-    };
-    const tipsInView = (from: Walk) =>
-      step(from, 0.05).walk.road.items.filter(({ kind }) => kind === "tip").length;
-    expect(tipsInView(due)).toBe(pending.length);
-    expect(tipsInView(stinky)).toBe(
-      pending.length * read(tuning, "multipliers", "stinkyTipSpawns"),
-    );
+    const due = debuffed({ ...walk, road: { ...walk.road, pending } });
+    const tips = step(due, 0.05).walk.road.items.filter(({ kind }) => kind === "tip");
+    expect(tips).toHaveLength(pending.length);
+  });
+
+  it.each([
+    ["clean", (walk: Walk) => walk, read(tuning, "money", "tip"), `+$${TEST_TUNING.money.tip} tip`],
+    ["Stinky", stinkyRun, 0, `+$0 ${DEBUFFS.stinky.name}`],
+  ])("pays a tip grabbed while %s its value, labelled", (_, debuffed, amount, label) => {
+    const { run } = debuffed(walkWith(["koda"]));
+    const { tip } = collectTip(data, run);
+    expect(tip.amount).toBe(amount);
+    expect(causeLabel(data, tip)).toBe(label);
   });
 
   it("brings a due spawn into view at the top of the road", () => {
@@ -654,11 +666,30 @@ describe("stepWalk", () => {
     expect(step(walkWith(["koda"], [atPack("lostWallet")])).walk.run.bumpsByZone).toEqual([]);
   });
 
-  it.each(["skunk", "puddle"] as const)("opens the %s's card for the whole pack", (encounter) => {
-    const dogs: PackDogs = ["koda", "duchess", "pierre"];
-    expect(step(walkWith(dogs, [atPack(encounter)])).encounterHits).toEqual([
-      { affected: dogs, encounter, kind: "encounter" },
-    ]);
+  it.each(["otherDog", "skunk", "thief"] as const)(
+    "opens the %s's card for the whole pack",
+    (encounter) => {
+      const dogs: PackDogs = ["koda", "duchess", "pierre"];
+      expect(step(walkWith(dogs, [atPack(encounter)])).encounterHits).toEqual([
+        { affected: dogs, encounter, kind: "encounter" },
+      ]);
+    },
+  );
+
+  it("muddies the whole pack on a puddle, with no card or heart and a plain obstacle's stop", () => {
+    const dogs: PackDogs = ["koda", "duchess"];
+    const walk = walkWith(dogs, [atPack("puddle")]);
+    const after = step(walk);
+    const { resolution } = ENCOUNTERS.puddle;
+    const debuffs = resolution.effects.flatMap((effect) =>
+      effect.kind === "debuff" ? [effect.debuff] : [],
+    );
+    expect(after.cards).toEqual([]);
+    expect(after.encounterHits).toEqual([]);
+    expect(after.contacts.map(({ encounter }) => encounter)).toEqual(["puddle"]);
+    expect(after.walk.run.debuffs.map(({ debuff }) => debuff)).toEqual(debuffs);
+    expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
+    expect(after.walk.road.hitStop?.seconds).toBe(read(tuning, "seconds", "minorHitStopSeconds"));
   });
 
   describe("a hit that opens no card", () => {
@@ -699,6 +730,7 @@ describe("stepWalk", () => {
       }
       const facts = {
         ...runCountersOf(walk.run),
+        dogsHome: 1,
         earnedCents: walk.run.money,
         packSize: 1,
         zonesFinished: data.world.walkLength,
@@ -773,7 +805,7 @@ describe("stepWalk", () => {
         ...walk.run,
         phase: {
           kind: "card",
-          source: { affected: ["koda"], encounter: "puddle", kind: "encounter" },
+          source: { affected: ["koda"], encounter: "thief", kind: "encounter" },
         },
       },
     };
@@ -1326,19 +1358,22 @@ describe("movers", { timeout: 60_000 }, () => {
     expect(after.walk.road.items).toHaveLength(1);
   });
 
+  it.each([
+    ["standing in the lane", atPack("squirrel")],
+    ["darting across it", moverAt("squirrel", crossing, 82)],
+  ])("passes through a squirrel %s: no card, heart, grace or stop", (_, item) => {
+    const walk = walkWith(["koda"], [item]);
+    const after = step(walk);
+    expect(after.cards).toEqual([]);
+    expect(after.encounterHits).toEqual([]);
+    expect(after.contacts).toEqual([]);
+    expect(heartsByDog(after.walk.run)).toEqual(heartsByDog(walk.run));
+    expect(after.walk.road.items.map(({ kind }) => kind)).toEqual(["squirrel"]);
+    expect(after.walk.road.hitStop).toBeNull();
+    expect(after.walk.road.invulnerableSeconds).toBe(0);
+  });
+
   it.each<{ dogs: PackDogs; encounter: EncounterId; item: WalkItem; name: string }>([
-    {
-      dogs: ["koda"],
-      encounter: "squirrel",
-      item: atPack("squirrel"),
-      name: "a squirrel standing in the lane, for a chaser",
-    },
-    {
-      dogs: ["koda"],
-      encounter: "squirrel",
-      item: moverAt("squirrel", crossing, 82),
-      name: "a darting squirrel, for a chaser",
-    },
     {
       dogs: ["duchess"],
       encounter: "otherDog",

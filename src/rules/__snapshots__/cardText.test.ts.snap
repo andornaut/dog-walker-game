@@ -4,14 +4,10 @@ exports[`a card's text for the dogs it catches > matches the snapshot for the wh
 {
   "encounters": {
     "otherDog: Let them sniff": "+1♥ Duchess, +1♥ Koda, +1♥ Nugget, −$4",
-    "otherDog: Pull away": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
-    "puddle: Splash through": "Muddy: bumps cost 2♥ for 20s",
-    "puddle: Towel off": "−$5",
+    "otherDog: Pull away": "Zoomies: the pack drifts on its own for 20s",
     "skunk: Full groom": "−$15",
     "skunk: Hold your nose": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
-    "skunk: Quick rinse": "Stinky: half the tips for 20s",
-    "squirrel: Hold tight": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
-    "squirrel: Let them chase": "−$5",
+    "skunk: Quick rinse": "Stinky: tips pay nothing for 20s",
     "thief: Chase them off": "−1♥ Duchess, −1♥ Koda, −1♥ Nugget",
     "thief: Let them go": "−$10",
   },

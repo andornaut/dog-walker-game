@@ -14,6 +14,9 @@ import type { WORLD } from "./world";
 export type EncounterId =
   "biscuitNeighbour" | "lostWallet" | "otherDog" | "puddle" | "skunk" | "squirrel" | "thief";
 export type Size = "big" | "medium" | "small";
+// Lifetime counts the save keeps across walks for the badges: small dogs' dodges, landed
+// squirrel pulls, treats grabbed, and the card options that name one as their tally.
+export type TallyId = "dodges" | "sniffs" | "squirrelPulls" | "thievesLetGo" | "treats";
 
 // Ids come from the data, so adding an entry to a value file is a data-only change.
 export type AchievementId = (typeof ACHIEVEMENTS)[number]["id"];
@@ -207,8 +210,8 @@ export interface CardOption {
   // What its changes name as their cause, such as "grumpy neighbour"; the option's name when
   // absent.
   readonly cause?: string;
-  // Picking it lets the pack chase, which counts toward squirrelsChased.
-  readonly chase?: true;
+  // Picking it counts one toward this lifetime tally.
+  readonly tally?: TallyId;
   readonly effects: readonly Effect[];
   readonly name: string;
 }
@@ -233,7 +236,20 @@ export interface InstantResolution {
   readonly kind: "instant";
 }
 
-export type Resolution = CardResolution | InstantResolution;
+// The obstacle applies its effects to the whole pack as it is touched, with a plain obstacle's
+// hit stop and no card.
+export interface ContactResolution {
+  readonly effects: NonEmptyEffects;
+  readonly kind: "contact";
+}
+
+// Touching the obstacle does nothing: its only cost is the dogs pulling toward it.
+export interface PullResolution {
+  readonly kind: "pull";
+}
+
+export type ObstacleResolution = CardResolution | ContactResolution | PullResolution;
+export type Resolution = InstantResolution | ObstacleResolution;
 
 // What an obstacle covers on the road: lanes across and rows along it. One row is a lane-width
 // of road. The rulebook allows no obstacle wider than 3 lanes.
@@ -276,22 +292,24 @@ export interface Skin {
 // each key is a zone's id.
 export type Skins = Readonly<Partial<Record<string, Skin>>>;
 
-// "obstacle": hit by accident, always a card for the whole pack, with hitLabel shown large as
-// it hits; no card opens while the pack is immune. "lucky": a good thing to bump into, applied
-// on contact with no card. skins are its looks by zone. An obstacle with a movement comes as a
-// mover at the zone's moverShare.
+// "obstacle": hit by accident. A card obstacle opens a card for the whole pack, with hitLabel
+// shown large as it hits; a contact obstacle applies its effects as it is touched; a pull
+// obstacle does nothing when touched. An obstacle the pack is immune to is harmless. "lucky": a
+// good thing to bump into, applied on contact with no card. skins are its looks by zone. An
+// obstacle with a movement comes as a mover at the zone's moverShare.
 export type Encounter = {
   readonly name: string;
   readonly skins?: Skins;
 } & (
   | { readonly kind: "lucky"; readonly resolution: InstantResolution }
-  | {
-      readonly hitLabel: string;
+  | ({
       readonly kind: "obstacle";
       readonly movement?: Movement;
-      readonly resolution: CardResolution;
       readonly shape: Shape;
-    }
+    } & (
+      | { readonly hitLabel: string; readonly resolution: CardResolution }
+      | { readonly resolution: ContactResolution | PullResolution }
+    ))
 );
 
 // An obstacle that opens no card: bumping it drops money.minorBump in tips, once for the
@@ -363,7 +381,8 @@ export type Walker = WalkerUnlock & {
 
 // A debuff lasts its seconds of walking, a time that stops during a hit stop and under a card,
 // and never past the zone's end. Nothing cures it. stake is what it does, as a card states it
-// after the debuff's name, its {seconds} filled with how long it would last.
+// after the debuff's name, its {seconds} filled with how long it would last. Its modifiers
+// change stats while it lasts; one the rules act on by id, such as Zoomies' drift, has none.
 export interface Debuff {
   readonly modifiers: readonly Modifier[];
   readonly name: string;
@@ -616,9 +635,23 @@ export interface RunText {
     readonly subtitle: string;
     readonly title: string;
   };
-  // The message strip's lines: achievement names a badge earned on the way.
+  // The message strip's lines: achievement names a badge earned on the way, debuffStart and
+  // debuffEnd announce each debuff, and the rest say what just happened on the road.
   readonly strip: {
     readonly achievement: string;
+    readonly debuffEnd: { readonly [D in DebuffId]: string };
+    readonly debuffStart: { readonly [D in DebuffId]: string };
+    readonly dodge: string;
+    readonly fired: string;
+    readonly fullPackHome: string;
+    readonly kindWords: string;
+    readonly lowHearts: string;
+    readonly luckyNeighbor: string;
+    readonly luckyWallet: string;
+    readonly plainHit: string;
+    readonly pull: string;
+    readonly pullCancel: string;
+    readonly treat: string;
   };
   // Names a loss cut short because the money ran out.
   readonly outOfMoney: string;
@@ -751,6 +784,7 @@ export type HintTrigger =
         | "luckyFind"
         | "minorBump"
         | "pull"
+        | "pullLanded"
         | "tip"
         | "treat";
     };
@@ -766,14 +800,16 @@ export type Threshold = number | "all";
 
 // What earns an achievement. Run conditions are judged on one run as it is banked: zones it
 // finished (all: every zone of a walk), zones it finished without a bump, dogs it set out
-// with, dollars it banked, and zones it finished with the debuff on. Profile conditions are
-// judged on the save after a run or a purchase: dogs, gear and dog slots owned (all: every
-// one in the data), finished walks with no owner firing you, times fired, distinct dogs that
-// finished a walk without firing you (all: every dog), and squirrel chases let happen.
+// with, dollars it banked, times it got the debuff, a finished walk with a walking owner on
+// their last heart, and a finished walk that paid the Full pack bonus for a pack of at least
+// packSize. Profile conditions are judged on the save after a run or a purchase: dogs, gear,
+// dog slots and walkers owned (all: every one in the data), finished walks with no owner
+// firing you, times fired, distinct dogs that finished a walk without firing you (all: every
+// dog), and a lifetime tally.
 export type AchievementCondition =
   | { readonly count: number; readonly debuff: DebuffId; readonly kind: "debuffsGot" }
   | { readonly count: number; readonly kind: "packSize" }
-  | { readonly count: number; readonly kind: "squirrelsChased" }
+  | { readonly count: number; readonly kind: "tally"; readonly tally: TallyId }
   | { readonly count: number; readonly kind: "timesFired" }
   | { readonly count: number; readonly kind: "walksWithoutFiring" }
   | { readonly count: Threshold; readonly kind: "cleanZones" }
@@ -781,8 +817,11 @@ export type AchievementCondition =
   | { readonly count: Threshold; readonly kind: "dogsFinishedWith" }
   | { readonly count: Threshold; readonly kind: "dogsOwned" }
   | { readonly count: Threshold; readonly kind: "gearOwned" }
+  | { readonly count: Threshold; readonly kind: "walkersUnlocked" }
   | { readonly count: Threshold; readonly kind: "zonesFinished" }
-  | { readonly dollars: number; readonly kind: "earnings" };
+  | { readonly dollars: number; readonly kind: "earnings" }
+  | { readonly kind: "finishOnLastHeart" }
+  | { readonly kind: "fullPackBonus"; readonly packSize: number };
 
 // A badge on the Stats page's wall, earned once every condition holds. Celebration only: it
 // changes nothing in play. The badge art is badge-<id in kebab case>.

@@ -30,12 +30,13 @@ import {
   type WalkStep,
   zoneLength,
 } from "./walk";
+import { stepZoomies, type ZoomiesData } from "./zoomies";
 
 // One walk's step order, shared by the run scene and the simulator: the inputs, the pulls, the
-// walk, the firing hold, then the queued cards, the zone's end and the next zone's plan. The
-// walk stands still while a card waits for its choice.
+// Zoomies' drift, the walk, the firing hold, then the queued cards, the zone's end and the next
+// zone's plan. The walk stands still while a card waits for its choice.
 
-export type SessionData = CardData & PullData & StatusData & WalkData;
+export type SessionData = CardData & PullData & StatusData & WalkData & ZoomiesData;
 
 // The run's random streams, each named from the seed, so a seed replays the same walk however
 // the walk is driven. Each zone is planned from a stream of its own, spawns-<zone index>.
@@ -69,6 +70,8 @@ export interface Session {
   readonly walk: Walk;
   // The zone's end waits behind the queued cards.
   readonly zoneEndPending: boolean;
+  // The Zoomies' clock: walking time since the pack last drifted.
+  readonly zoomiesSeconds: number;
 }
 
 // What a step or a choice did, in order. input and chosen are stamped with the run time they
@@ -76,6 +79,7 @@ export interface Session {
 // before included. zoneEnded has the run before and after the zone's fees.
 export type SessionEvent =
   | { readonly kind: "cardOpened"; readonly view: CardView }
+  | { readonly direction: LaneDirection; readonly kind: "drifted" }
   | {
       readonly choice: Choice;
       readonly kind: "chosen";
@@ -124,6 +128,7 @@ export function startSession(
     timeMs: 0,
     walk: planned(data, streams, geometry, walk),
     zoneEndPending: false,
+    zoomiesSeconds: 0,
   };
 }
 
@@ -153,7 +158,11 @@ export function stepSession(
   const road = geometry(walk.run);
   const pulled = stepPulls(data, road, seconds, session.pulls, walk);
   events.push({ kind: "pulled", step: pulled });
-  const step = stepWalk(data, road, streams.cards, seconds, pulled.walk);
+  const zoomies = stepZoomies(data, road, seconds, session.zoomiesSeconds, pulled.walk);
+  if (zoomies.drifted !== null) {
+    events.push({ direction: zoomies.drifted, kind: "drifted" });
+  }
+  const step = stepWalk(data, road, streams.cards, seconds, zoomies.walk);
   walk = step.walk;
   const distance = session.distanceBeforeZone + walk.run.zoneDistance;
   events.push({ distance, kind: "walked", step });
@@ -165,6 +174,7 @@ export function stepSession(
     timeMs: session.timeMs + seconds * 1000,
     walk,
     zoneEndPending: session.zoneEndPending || step.zoneEnded,
+    zoomiesSeconds: zoomies.seconds,
   };
   return continueWalk(data, streams, geometry, events, heldForFiring(data, fired, walked));
 }

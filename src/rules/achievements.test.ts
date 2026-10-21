@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
-import type { AchievementCondition } from "../data/types";
+import type { AchievementCondition, TallyId, WalkerId } from "../data/types";
 import { newPlayerSave, veteranSave } from "../save/fixtures";
-import type { SaveDocument } from "../save/schema";
+import { type SaveDocument, TALLY_IDS } from "../save/schema";
 import { earningsGoal } from "../testing/achievements";
 import { testState } from "../testing/runState";
 import {
   conditionHolds,
   countBump,
-  countChase,
+  countOptionTally,
+  countTally,
   earnedByRun,
   newlyEarned,
   type RunFacts,
@@ -20,11 +21,13 @@ import { cents } from "./units";
 const facts = (changes: Partial<RunFacts> = {}): RunFacts => ({
   bumpsByZone: [],
   debuffsGot: {},
+  dogsHome: 1,
   earnedCents: cents(0),
   firstZone: 0,
+  lastHeartOwners: 0,
   packSize: 1,
-  squirrelChases: 0,
   startCents: cents(0),
+  tallies: {},
   zonesFinished: 0,
   ...changes,
 });
@@ -49,6 +52,10 @@ const cleanZones = (count: Count) => ({ count, kind: "cleanZones" }) as const;
 const packOf2 = { count: 2, kind: "packSize" } as const;
 const payday = { dollars: 500, kind: "earnings" } as const;
 const stinky3 = { count: 3, debuff: "stinky", kind: "debuffsGot" } as const;
+const zoomies3 = { count: 3, debuff: "zoomies", kind: "debuffsGot" } as const;
+const closeShave = { kind: "finishOnLastHeart" } as const;
+const everybodyHome = { kind: "fullPackBonus", packSize: 3 } as const;
+const walked = { zonesFinished: 4 };
 const bumped = (bumpsByZone: number[], finished: number) => ({
   bumpsByZone,
   zonesFinished: finished,
@@ -97,6 +104,41 @@ describe("run conditions", () => {
     ],
     ["debuffsGot below the count", stinky3, { debuffsGot: { stinky: 2 } }, false],
     ["debuffsGot at the count", stinky3, { debuffsGot: { stinky: 3 } }, true],
+    ["debuffsGot counts one walk's zoomies", zoomies3, { debuffsGot: { zoomies: 3 } }, true],
+    ["debuffsGot counts no other debuff", zoomies3, { debuffsGot: { stinky: 3 } }, false],
+    ["finishOnLastHeart, finished on one", closeShave, { ...walked, lastHeartOwners: 1 }, true],
+    ["finishOnLastHeart, none on one", closeShave, { ...walked, lastHeartOwners: 0 }, false],
+    [
+      "finishOnLastHeart, headed home on one",
+      closeShave,
+      { lastHeartOwners: 1, zonesFinished: 3 },
+      false,
+    ],
+    ["finishOnLastHeart, dev start", closeShave, { ...fromZone3, lastHeartOwners: 1 }, false],
+    [
+      "fullPackBonus, every dog of 3 home",
+      everybodyHome,
+      { ...walked, dogsHome: 3, packSize: 3 },
+      true,
+    ],
+    [
+      "fullPackBonus, a dog of 3 fired",
+      everybodyHome,
+      { ...walked, dogsHome: 2, packSize: 3 },
+      false,
+    ],
+    [
+      "fullPackBonus, a smaller pack",
+      everybodyHome,
+      { ...walked, dogsHome: 2, packSize: 2 },
+      false,
+    ],
+    [
+      "fullPackBonus, headed home",
+      everybodyHome,
+      { dogsHome: 3, packSize: 3, zonesFinished: 3 },
+      false,
+    ],
   ])("%s", (_, condition, run, holds) => {
     expect(holdsForRun(condition, run)).toBe(holds);
   });
@@ -105,8 +147,10 @@ describe("run conditions", () => {
 describe("profile conditions", () => {
   const all = (kind: "dogSlotsOwned" | "dogsFinishedWith" | "dogsOwned" | "gearOwned") =>
     ({ count: "all", kind }) as const;
-  const count = (kind: "squirrelsChased" | "timesFired" | "walksWithoutFiring", n: number) =>
+  const count = (kind: "timesFired" | "walksWithoutFiring", n: number) =>
     ({ count: n, kind }) as const;
+  const tally = (name: TallyId, n: number) => ({ count: n, kind: "tally", tally: name }) as const;
+  const ALL_WALKERS = Object.keys(gameData.walkers) as WalkerId[];
   const veteran = veteranSave();
 
   it.each<[string, AchievementCondition, SaveDocument | null, boolean]>([
@@ -143,13 +187,28 @@ describe("profile conditions", () => {
       true,
     ],
     ["timesFired at the count", count("timesFired", 10), withStats({ timesFired: 10 }), true],
+    ...TALLY_IDS.flatMap((name): [string, AchievementCondition, SaveDocument, boolean][] => [
+      [`tally ${name} below`, tally(name, 5), withStats({ tallies: { [name]: 4 } }), false],
+      [`tally ${name} at`, tally(name, 5), withStats({ tallies: { [name]: 5 } }), true],
+    ]),
     [
-      "squirrelsChased below",
-      count("squirrelsChased", 5),
-      withStats({ squirrelsChased: 4 }),
+      "tally, another tally's count",
+      tally("dodges", 5),
+      withStats({ tallies: { treats: 9 } }),
       false,
     ],
-    ["squirrelsChased at", count("squirrelsChased", 5), withStats({ squirrelsChased: 5 }), true],
+    [
+      "walkersUnlocked all, one missing",
+      { count: "all", kind: "walkersUnlocked" },
+      withOwned({ walkers: ALL_WALKERS.slice(1) }),
+      false,
+    ],
+    [
+      "walkersUnlocked all, every walker",
+      { count: "all", kind: "walkersUnlocked" },
+      withOwned({ walkers: ALL_WALKERS }),
+      true,
+    ],
     [
       "dogsFinishedWith all, one missing",
       all("dogsFinishedWith"),
@@ -226,9 +285,14 @@ describe("counters", () => {
     expect(applyEffects(gameData, context, [stinky], once).debuffsGot).toEqual({ stinky: 2 });
   });
 
-  it("counts a chase only for an option that lets the chasers chase", () => {
+  it("counts a tally only for an option that names one", () => {
     const run = testState({ koda: 5 });
-    expect(countChase({ chase: true }, run).squirrelChases).toBe(1);
-    expect(countChase({}, run)).toBe(run);
+    expect(countOptionTally({ tally: "sniffs" }, run).tallies).toEqual({ sniffs: 1 });
+    expect(countOptionTally({}, run)).toBe(run);
+  });
+
+  it("adds to a tally already counted", () => {
+    const twice = countTally("treats", countTally("treats", testState({ koda: 5 })));
+    expect(twice.tallies).toEqual({ treats: 2 });
   });
 });

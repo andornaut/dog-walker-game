@@ -7,6 +7,7 @@ import type {
   GameData,
   GearId,
   HintId,
+  TallyId,
   WalkerId,
   ZoneId,
 } from "../data/types";
@@ -21,6 +22,7 @@ import {
   type SaveDocument,
   saveSchema,
   type StoredSave,
+  TALLY_IDS,
   type Walk,
 } from "./schema";
 
@@ -94,6 +96,8 @@ export function saveContextFrom(data: SaveData): SaveContext {
   };
 }
 
+const KNOWN_TALLIES: ReadonlySet<TallyId> = new Set(TALLY_IDS);
+
 function isKnown<Id extends string>(known: ReadonlySet<Id>, id: string): id is Id {
   return (known as ReadonlySet<string>).has(id);
 }
@@ -161,6 +165,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
                 : {
                     ...counters,
                     debuffsGot: keepKnownEntries(known.debuffs, counters.debuffsGot),
+                    tallies: keepKnownEntries(KNOWN_TALLIES, counters.tallies),
                   },
             dogs: checkpoint.dogs.flatMap(({ id, ...dog }) =>
               isKnown(known.dogs, id) ? [{ ...dog, id }] : [],
@@ -190,6 +195,7 @@ export function dropUnknownIds(context: SaveContext, save: StoredSave): SaveDocu
               ),
               route: keepKnown(known.zones, stats.lastWalk.route),
             },
+      tallies: keepKnownEntries(KNOWN_TALLIES, stats.tallies),
     },
     walker:
       save.walker === null

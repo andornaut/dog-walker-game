@@ -65,16 +65,16 @@ describe("loadSave", () => {
         delete untyped(document).achievements;
         const stats = document.stats as unknown as Record<string, unknown>;
         delete stats.dogsFinishedWith;
-        delete stats.squirrelsChased;
+        delete stats.tallies;
         delete stats.walksWithoutFiring;
       },
       ({ achievements, stats }) => [
         achievements,
         stats.dogsFinishedWith,
-        stats.squirrelsChased,
+        stats.tallies,
         stats.walksWithoutFiring,
       ],
-      [{}, [], 0, 0],
+      [{}, [], {}, 0],
     ],
     [
       "a save from before the mute setting, unmuted",
@@ -132,7 +132,7 @@ describe("loadSave", () => {
       "a checkpoint's run counters saved before the first zone, starting money and debuffs got",
       (document) => {
         document.checkpoint = {
-          counters: { bumpsByZone: [0, 3], squirrelChases: 2 },
+          counters: { bumpsByZone: [0, 3] },
           dogs: [{ fired: false, id: "koda", zonesFinished: 2 }],
           earnedCents: 4_250,
           zonesFinished: 2,
@@ -143,8 +143,9 @@ describe("loadSave", () => {
         bumpsByZone: [0, 3],
         debuffsGot: {},
         firstZone: 0,
-        squirrelChases: 2,
+        lastHeartOwners: 0,
         startCents: 0,
+        tallies: {},
       },
     ],
     [
@@ -155,7 +156,7 @@ describe("loadSave", () => {
         document.owned.gear = ["fannyPack", "whistle"];
         document.lastLoadout.gear = "whistle";
         document.checkpoint = {
-          counters: { bumpsByZone: [1], debuffZones: { stinky: 1 }, squirrelChases: 0 },
+          counters: { bumpsByZone: [1], debuffZones: { stinky: 1 } },
           dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
           earnedCents: 700,
           route: ["street"],
@@ -180,8 +181,9 @@ describe("loadSave", () => {
             bumpsByZone: [1],
             debuffsGot: {},
             firstZone: 0,
-            squirrelChases: 0,
+            lastHeartOwners: 0,
             startCents: 0,
+            tallies: {},
           },
           dogs: [{ fired: false, id: "koda", zonesFinished: 1 }],
           earnedCents: 700,

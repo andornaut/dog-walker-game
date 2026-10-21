@@ -22,8 +22,8 @@ describe("effectText", () => {
   it.each<[string, readonly Effect[], string]>([
     [
       "money once",
-      [{ amount: "squirrelChase", change: "lose", kind: "money" }],
-      `−${dollars("squirrelChase")}`,
+      [{ amount: "thiefLetGo", change: "lose", kind: "money" }],
+      `−${dollars("thiefLetGo")}`,
     ],
     [
       "a gain once",
@@ -90,12 +90,14 @@ describe("every card's text", () => {
       );
     const encounters = Object.fromEntries(
       Object.entries(gameData.encounters).flatMap(([id, { resolution }]) =>
-        resolution.kind === "instant"
-          ? [[`${id}: instant`, effectText(gameData, resolution.effects)]]
-          : resolution.options.map((option) => [
-              `${id}: ${option.name}`,
-              effectText(gameData, option.effects),
-            ]),
+        resolution.kind === "instant" || resolution.kind === "contact"
+          ? [[`${id}: ${resolution.kind}`, effectText(gameData, resolution.effects)]]
+          : resolution.kind === "pull"
+            ? []
+            : resolution.options.map((option) => [
+                `${id}: ${option.name}`,
+                effectText(gameData, option.effects),
+              ]),
       ),
     );
     expect({

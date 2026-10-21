@@ -1,5 +1,6 @@
 import type { DogId, GameData } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
+import { countTally } from "../rules/achievements";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
 import { pullLane } from "./laneControl";
@@ -8,6 +9,7 @@ import { laneAt, moverPlace } from "./movers";
 import {
   blocksLane,
   dogBoxes,
+  isPullObstacle,
   laneMotionConfig,
   laneMoveSeconds,
   type RoadGeometry,
@@ -221,8 +223,10 @@ export function laneBlockedWithin(
   walk: Walk,
 ): boolean {
   const { bottom, top } = geometry.packBand;
+  // A hit box's inset from its lanes' edges, in lanes.
+  const inset = geometry.cell.inset / geometry.cell.length;
   return walk.road.items.some((item) => {
-    if (!blocksLane(data, item.kind)) {
+    if (!blocksLane(data, item.kind) || isPullObstacle(data, item.kind)) {
       return false;
     }
     const { mover } = item;
@@ -237,8 +241,10 @@ export function laneBlockedWithin(
       const place = moverPlace(geometry.laneCount, mover.path, mover.since + scroll);
       const y = geometry.roadTop - item.height + place.travel;
       const touches = y + item.height > top && y < bottom;
-      const first = laneAt(place.lanePosition);
-      if (place.solid && touches && lane >= first && lane < first + item.laneSpan) {
+      // A mover between lanes touches both: it covers every lane its hit box overlaps.
+      const left = place.lanePosition + inset;
+      const inLane = left < lane + 1 && left + item.laneSpan - 2 * inset > lane;
+      if (place.solid && touches && inLane) {
         return true;
       }
     }
@@ -387,7 +393,10 @@ export function stepPulls(
       strain: again,
     },
     tells: again === null ? [] : [{ direction: again.direction, dog, kind: again.kind }],
-    walk: pull.walk,
+    // A pull that moved the pack counts toward the squirrel pulls tally.
+    walk: pull.moved
+      ? { ...pull.walk, run: countTally("squirrelPulls", pull.walk.run) }
+      : pull.walk,
   };
 }
 

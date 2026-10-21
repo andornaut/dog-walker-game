@@ -16,8 +16,11 @@ export const MESSAGE_ICONS = {
   hint: "icon-hint",
   lastHeart: "icon-last-heart",
   lucky: "icon-lucky",
+  muddy: "icon-muddy",
   pull: "icon-trait-chaser",
+  stinky: "icon-stinky",
   treat: "icon-treat",
+  zoomies: "icon-zoomies",
 } as const;
 export type MessageIcon = keyof typeof MESSAGE_ICONS;
 
