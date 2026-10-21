@@ -6008,6 +6008,10 @@
       "png": "images/ui-quip.png"
     },
     {
+      "key": "ui-quip-name",
+      "png": "images/ui-quip-name.png"
+    },
+    {
       "key": "ui-quip-tail",
       "png": "images/ui-quip-tail.png"
     },
