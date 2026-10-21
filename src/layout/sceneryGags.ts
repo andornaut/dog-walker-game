@@ -1,70 +1,52 @@
-import { itemAt } from "../arrays";
 import type { ZoneId } from "../data/types";
 import type { Point, Rect } from "./rect";
 
-// The scenery gags in the backdrop band: a cat on a perch, a lawn sprinkler and a ball rolling
-// along a sidewalk. They have no collision and no effect. Positions are band pixels; the cat
-// and sprinkler are placed by the top-left corner of their sprites. The street runs up from
-// the band's bottom edge to a cross street, and the gags sit on the lawns either side of it.
+// The scenery gags in the backdrop band: a cat on a perch and a kite snagged in a street tree.
+// They are still pictures, the first frame of their art, with no collision and no effect:
+// nothing in the band moves but the road. Positions are band pixels, by the top-left corner of
+// their sprites. The street runs up from the band's bottom edge to a cross street, and the gags
+// sit on the lawns either side of it.
 
-export const GAG_KEYS = { ball: "gag-ball", cat: "gag-cat", sprinkler: "gag-sprinkler" } as const;
+export const GAG_KEYS = { cat: "gag-cat", kite: "gag-kite" } as const;
 export const GAG_SIZES = {
-  ball: { height: 14, width: 14 },
   cat: { height: 24, width: 24 },
-  sprinkler: { height: 24, width: 32 },
+  kite: { height: 40, width: 36 },
 } as const;
+// The tag whose first frame each gag shows.
+export const GAG_TAGS = { cat: "idle", kite: "flutter" } as const;
 
 // The near-left perch's top rail, rows 158 and 159, on the band's approach rows.
 export const PERCH_RAIL_Y = 158;
 
-// The cat's paws, on its frame's bottom row, rest on the perch's top rail, and the sprinkler
-// stands on the near-right lawn from the near sidewalk, row 150, down to the band's bottom edge.
-export const GAG_Y = { cat: PERCH_RAIL_Y + 1 - GAG_SIZES.cat.height, sprinkler: 150 } as const;
+// The cat's paws, on its frame's bottom row, rest on the perch's top rail, and the kite's tree
+// stands on the near-right lawn, its crown over the cross street.
+export const GAG_Y = { cat: PERCH_RAIL_Y + 1 - GAG_SIZES.cat.height, kite: 133 } as const;
 
-// The ball's feet, rolling up the middle of a sidewalk from the band's bottom edge.
-export interface BallPath {
-  readonly from: Point;
-  readonly to: Point;
-}
-
-const BALL_PATHS: readonly BallPath[] = [
-  { from: { x: 97, y: 173 }, to: { x: 104, y: 154 } },
-  { from: { x: 263, y: 173 }, to: { x: 256, y: 154 } },
-];
-// The ball's feet, from the top-left of its sprite.
-const BALL_FEET = { x: 7, y: 13 } as const;
-
-// Band pixels per second, and the seconds between the starts of two rolls, which take the
-// left and right sidewalks in turn.
-export const BALL_ROLL = { period: 30, speed: 10 } as const;
-
-// How close to the cat, across the screen, the pack passes for the cat to sit up.
-const CAT_REACT_DISTANCE = 32;
+// The kite's tree on the near-right lawn, in every zone.
+export const KITE_AT: Point = { x: 284, y: GAG_Y.kite };
 
 export interface Span {
   readonly x0: number;
   readonly x1: number;
 }
 
-// perches: where a cat may sit; sprinklers: each sprinkler's centre.
+// perches: where a cat may sit.
 export interface ZoneGags {
   readonly perches: readonly Span[];
-  readonly sprinklers: readonly number[];
 }
 
 // Every backdrop has a perch along its near-left lawn: a picket fence, a park rail or a
-// planter's ledge. The shops zone is paved, so it has no sprinkler.
+// planter's ledge.
 const NEAR_LEFT_PERCH: Span = { x0: 0, x1: 72 };
-const NEAR_RIGHT_LAWN = 338;
 
 export const ZONE_GAGS: Readonly<Record<ZoneId, ZoneGags>> = {
-  homeStretch: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
-  park: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
+  homeStretch: { perches: [NEAR_LEFT_PERCH] },
+  park: { perches: [NEAR_LEFT_PERCH] },
   // The cat sits on the riverside railing, which takes the perch's rows.
-  pawsPromenade: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
-  shops: { perches: [NEAR_LEFT_PERCH], sprinklers: [] },
-  snoozeCrescent: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
-  street: { perches: [NEAR_LEFT_PERCH], sprinklers: [NEAR_RIGHT_LAWN] },
+  pawsPromenade: { perches: [NEAR_LEFT_PERCH] },
+  shops: { perches: [NEAR_LEFT_PERCH] },
+  snoozeCrescent: { perches: [NEAR_LEFT_PERCH] },
+  street: { perches: [NEAR_LEFT_PERCH] },
 };
 
 // Where the zone's cat sits, drawn from roll in [0, 1): a spot on one of its perches, or null
@@ -94,28 +76,4 @@ export function perchRects(gags: ZoneGags, bandHeight: number): Rect[] {
     x: x0,
     y: PERCH_RAIL_Y,
   }));
-}
-
-// The cat sits up while the pack passes below it.
-export function catReacts(catLeft: number, packX: number): boolean {
-  return Math.abs(catLeft + GAG_SIZES.cat.width / 2 - packX) <= CAT_REACT_DISTANCE;
-}
-
-// The top-left of the ball's sprite seconds into the zone: at the start of each period it
-// rolls up the next sidewalk, then is gone until the next roll. still holds it at the near
-// end of the left sidewalk.
-export function ballAt(seconds: number, still = false): Point | null {
-  const period = Math.floor(seconds / BALL_ROLL.period);
-  const sinceRoll = seconds - period * BALL_ROLL.period;
-  const side = still ? 0 : ((period % BALL_PATHS.length) + BALL_PATHS.length) % BALL_PATHS.length;
-  const path = itemAt(BALL_PATHS, side);
-  const length = Math.hypot(path.to.x - path.from.x, path.to.y - path.from.y);
-  const t = still ? 0 : (sinceRoll * BALL_ROLL.speed) / length;
-  if (t > 1) {
-    return null;
-  }
-  return {
-    x: Math.round(path.from.x + (path.to.x - path.from.x) * t - BALL_FEET.x),
-    y: Math.round(path.from.y + (path.to.y - path.from.y) * t - BALL_FEET.y),
-  };
 }

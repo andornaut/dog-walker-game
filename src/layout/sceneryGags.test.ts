@@ -3,11 +3,10 @@ import { describe, expect, it } from "vitest";
 import { SCREEN_CONFIG } from "../data/screen";
 import { WORLD } from "../data/world";
 import {
-  ballAt,
-  catReacts,
   catX,
   GAG_SIZES,
   GAG_Y,
+  KITE_AT,
   PERCH_RAIL_Y,
   perchRects,
   ZONE_GAGS,
@@ -19,16 +18,11 @@ const { approach, backdrop: BAND } = screenLayout(SCREEN_CONFIG);
 const APPROACH_ROW = approach.y - BAND.y;
 
 describe("ZONE_GAGS", () => {
-  it("places gags for every zone, inside the 360px band", () => {
+  it("places every zone's perches inside the 360px band", () => {
     for (const zone of WORLD.zones) {
-      const gags = ZONE_GAGS[zone.id];
-      for (const { x0, x1 } of gags.perches) {
+      for (const { x0, x1 } of ZONE_GAGS[zone.id].perches) {
         expect(x0).toBeGreaterThanOrEqual(0);
         expect(x1).toBeLessThanOrEqual(BAND.width);
-      }
-      for (const x of gags.sprinklers) {
-        expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(0);
-        expect(x + GAG_SIZES.sprinkler.width / 2).toBeLessThanOrEqual(BAND.width);
       }
     }
   });
@@ -50,16 +44,11 @@ describe("ZONE_GAGS", () => {
     }
   });
 
-  it("stands a sprinkler on the near-right lawn, x 284 to 359, down to the band's bottom, except at the shops", () => {
-    for (const zone of ["street", "park", "homeStretch"] as const) {
-      for (const x of ZONE_GAGS[zone].sprinklers) {
-        expect(x - GAG_SIZES.sprinkler.width / 2).toBeGreaterThanOrEqual(284);
-        expect(x + GAG_SIZES.sprinkler.width / 2).toBeLessThanOrEqual(360);
-      }
-    }
-    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height).toBeLessThanOrEqual(BAND.height);
-    expect(GAG_Y.sprinkler + GAG_SIZES.sprinkler.height).toBeGreaterThan(APPROACH_ROW);
-    expect(ZONE_GAGS.shops.sprinklers).toEqual([]);
+  it("stands the kite's tree on the near-right lawn, x 284 to 359, its foot on the approach rows", () => {
+    expect(KITE_AT.x).toBeGreaterThanOrEqual(284);
+    expect(KITE_AT.x + GAG_SIZES.kite.width).toBeLessThanOrEqual(BAND.width);
+    expect(KITE_AT.y + GAG_SIZES.kite.height).toBeLessThanOrEqual(BAND.height);
+    expect(KITE_AT.y + GAG_SIZES.kite.height).toBeGreaterThan(APPROACH_ROW);
   });
 });
 
@@ -76,39 +65,6 @@ describe("catX", () => {
   });
 
   it("finds no spot in a zone without perches", () => {
-    expect(catX({ perches: [], sprinklers: [] }, 0.5)).toBeNull();
-  });
-});
-
-describe("catReacts", () => {
-  it("sits up while the pack passes near the cat, not when it is far off", () => {
-    expect(catReacts(80, 108)).toBe(true);
-    expect(catReacts(80, 300)).toBe(false);
-  });
-});
-
-describe("ballAt", () => {
-  it("rolls up the near-left sidewalk from the band's bottom edge, then the right one", () => {
-    const start = ballAt(0);
-    const right = ballAt(30);
-    // The ball's feet, its frame's bottom row, start on the band's bottom row.
-    expect((start?.y ?? 0) + GAG_SIZES.ball.height).toBe(BAND.height);
-    expect((ballAt(1)?.y ?? 0) < (start?.y ?? 0)).toBe(true);
-    expect(right?.y).toBe(start?.y);
-    expect((right?.x ?? 0) > BAND.width / 2 && (start?.x ?? 0) < BAND.width / 2).toBe(true);
-  });
-
-  it("stays in the band, and is gone between rolls", () => {
-    for (let seconds = 0; seconds < 60; seconds += 0.25) {
-      const at = ballAt(seconds);
-      if (at !== null) {
-        expect(at.y + GAG_SIZES.ball.height).toBeLessThanOrEqual(BAND.height);
-      }
-    }
-    expect(ballAt(10)).toBeNull();
-  });
-
-  it("rests at the near end of the left sidewalk when still", () => {
-    expect(ballAt(17, true)).toEqual(ballAt(0));
+    expect(catX({ perches: [] }, 0.5)).toBeNull();
   });
 });
