@@ -82,8 +82,8 @@ export const ACHIEVEMENTS = [
   },
   {
     badgeLine: "Treats are on you.",
-    conditions: [{ dollars: 300, kind: "earnings" }],
-    goal: "Earn $300 in one walk",
+    conditions: [{ dollars: 450, kind: "earnings" }],
+    goal: "Earn $450 in one walk",
     id: "bigPayday",
     name: "Big Payday",
   },
