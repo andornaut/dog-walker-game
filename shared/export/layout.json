@@ -1468,6 +1468,7 @@
           "inset": 6,
           "titleY": 6
         },
+        "besideDy": 4,
         "besideX": 90,
         "pad": 12,
         "padlock": {
@@ -1475,6 +1476,7 @@
           "x": 8,
           "y": 29
         },
+        "rowGap": 8,
         "well": {
           "picture": 2,
           "size": 68,

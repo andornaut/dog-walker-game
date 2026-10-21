@@ -15,7 +15,7 @@ import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { fillNames, wrapWords } from "../text/lines";
 import { inkRowsFromCapTop } from "../ui/fontMetrics";
 import { plainMarks } from "../ui/pixelFont";
-import { dogDetail, gearDetail, walkerDetail } from "./detail";
+import { dogDetail, gearDetail, lockedDogDetail, lockedWalkerDetail, walkerDetail } from "./detail";
 import { FEEDBACK } from "./feedback";
 import { dogFeeText, dogNames, dollarText } from "./home";
 import {
@@ -295,8 +295,8 @@ const cardLines = (room: number, text: string) => {
 const fitsScreen = (height: number) =>
   expect(height).toBeLessThanOrEqual(SCREEN_CONFIG.height - 2 * HOME_LAYOUT.gap);
 
-// Every dog's, gear item's and walker's detail card, owned or not and with the largest counts,
-// wraps its rows on the body font and stays on screen.
+// Every dog's, gear item's and walker's detail card, owned, for sale or locked, with the largest
+// counts, wraps its rows on the body font and stays on screen.
 describe("a detail card", () => {
   const dogs = Object.keys(gameData.dogs) as DogId[];
   const gear = Object.keys(gameData.shopGear) as GearId[];
@@ -310,6 +310,14 @@ describe("a detail card", () => {
     ...dogs.map((dog) => ["dog", dogDetail(gameData, owned, cents(0), stats, dog)] as const),
     ...gear.map((item) => ["gear", gearDetail(gameData, owned, cents(0), loadout, item)] as const),
     ...walkers.map((walker) => ["walker", walkerDetail(gameData, owned, walker)] as const),
+    ...dogs.flatMap((dog) => {
+      const card = lockedDogDetail(gameData, owned, cents(0), dog);
+      return card === null ? [] : [["dog", card] as const];
+    }),
+    ...walkers.flatMap((walker) => {
+      const card = lockedWalkerDetail(gameData, owned, walker);
+      return card === null ? [] : [["walker", card] as const];
+    }),
   ]);
   it.each(cards.map(([kind, card]) => [card.title, kind, card] as const))(
     "holds %s's card",
