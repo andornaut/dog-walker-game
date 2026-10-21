@@ -3,6 +3,7 @@ import * as v from "valibot";
 import { LOADING_ART } from "../../layout/loadingScreen";
 import { itemAt } from "../../lib/arrays";
 import type { Point, Rect } from "../../lib/rect";
+import { splitDepthKey } from "../depthSteps";
 import { isPlainObject, parseOrThrow, record } from "../jsonSchema";
 import {
   ATLAS_DIR,
@@ -20,8 +21,12 @@ export const EXTRUDE = 1;
 const PAGE_WIDTHS = [256, 512, 1024, 2048] as const;
 
 // Pages in load order: the loading screen's art first, so it shows while the rest loads.
-export const ATLAS_GROUPS = ["boot", "ui", "run", "cards"] as const;
+export const ATLAS_GROUPS = ["boot", "ui", "home", "run", "cards"] as const;
 export type AtlasGroup = (typeof ATLAS_GROUPS)[number];
+
+// The groups boot loads before the home screen shows. The rest load behind it, and a walk or
+// help waits for them.
+export const FIRST_ATLAS_GROUPS: readonly AtlasGroup[] = ["boot", "ui", "home"];
 
 const LOADING_KEYS: ReadonlySet<string> = new Set(Object.values(LOADING_ART));
 const GROUP_PREFIXES: readonly (readonly [AtlasGroup, readonly string[]])[] = [
@@ -29,17 +34,38 @@ const GROUP_PREFIXES: readonly (readonly [AtlasGroup, readonly string[]])[] = [
   ["ui", ["badge-", "face-", "icon-", "item-", "logo", "portrait-", "screen-", "ui-"]],
 ];
 
-// boot is the loading screen; ui the home screen, menus, HUD and icons; cards the choice cards;
-// run everything on the road.
+// Road art the home screen and its menus draw too: each dog, owner and walker at full size
+// (not their depth steps), the coin, and the effects of a tap, a dog's hop and a celebration.
+const HOME_PREFIXES = ["dog-", "owner-", "walker-"];
+const HOME_KEYS: ReadonlySet<string> = new Set([
+  "fx-confetti",
+  "fx-dust",
+  "fx-new-best",
+  "fx-tap",
+  "tip",
+]);
+
+const isHomeArt = (key: string): boolean =>
+  HOME_KEYS.has(key) ||
+  (HOME_PREFIXES.some((prefix) => key.startsWith(prefix)) && splitDepthKey(key).base === key);
+
+// boot is the loading screen; ui the home screen, menus, HUD and icons; home the road art the
+// home screen draws too; cards the choice cards; run everything else on the road.
 export function atlasGroupOf(key: string): AtlasGroup {
   if (LOADING_KEYS.has(key)) {
     return "boot";
+  }
+  if (isHomeArt(key)) {
+    return "home";
   }
   const match = GROUP_PREFIXES.find(([, prefixes]) =>
     prefixes.some((prefix) => key.startsWith(prefix)),
   );
   return match?.[0] ?? "run";
 }
+
+// Whether boot loads key before the home screen shows.
+export const loadsFirst = (key: string): boolean => FIRST_ATLAS_GROUPS.includes(atlasGroupOf(key));
 
 // A frame of a source PNG, by the rect of it that is packed. A trimmed frame's rect holds only
 // its opaque pixels: bounds is then the whole frame it was cut from, and trim where it sits in

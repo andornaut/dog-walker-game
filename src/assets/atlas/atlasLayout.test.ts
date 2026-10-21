@@ -21,14 +21,20 @@ function sprite(key: string, count: number, width: number, height: number): Sour
 }
 
 describe("atlasGroupOf", () => {
-  // The loading screen's art is boot; the rest goes by key prefix, with the road as the rest.
+  // The loading screen's art is boot; the home screen's road art is home; the rest goes by key
+  // prefix, with the road as the rest.
   it.each<[string, string]>([
     ...Object.values(LOADING_ART).map((key): [string, string] => [key, "boot"]),
     ["card-skip", "cards"],
     ["screen-home", "ui"],
     ["icon-lock", "ui"],
     ["logo", "ui"],
-    ["dog-koda", "run"],
+    ["dog-koda", "home"],
+    ["owner-koda", "home"],
+    ["walker-ada", "home"],
+    ["fx-tap", "home"],
+    ["dog-koda@50", "run"],
+    ["other-dog-owner", "run"],
     ["fx-hit-skunk", "run"],
   ])("puts %s in %s", (key, group) => {
     expect(atlasGroupOf(key)).toBe(group);
@@ -87,6 +93,7 @@ describe("layoutAtlases", () => {
     sprite("dog-koda", 6, 32, 32),
     sprite("ui-loading", 4, 32, 32),
     sprite("fx-confetti", 10, 64, 64),
+    sprite("cone", 2, 32, 32),
   ];
 
   it("maps every frame of every texture, keeping names, sizes and durations", () => {
@@ -106,10 +113,11 @@ describe("layoutAtlases", () => {
     }
   });
 
-  it("orders pages boot, ui, run, cards, each named for its group", () => {
+  it("orders pages boot, ui, home, run, cards, each named for its group", () => {
     expect(layoutAtlases(textures).pages.map(({ group, png }) => [group, png])).toEqual([
       ["boot", "atlas/boot-0.png"],
       ["ui", "atlas/ui-0.png"],
+      ["home", "atlas/home-0.png"],
       ["run", "atlas/run-0.png"],
       ["cards", "atlas/cards-0.png"],
     ]);

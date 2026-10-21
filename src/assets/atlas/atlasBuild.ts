@@ -44,10 +44,12 @@ export function encodePng(image: RgbaImage): Uint8Array {
   return PNG.sync.write(png, { colorType: 6, deflateLevel: 9, deflateStrategy: 0, filterType: 0 });
 }
 
-// Whether a sprite's frames pack only their opaque pixels: the road's do. UI art and cards stay
-// whole, as do images, since a tile sprite and a nine-slice draw a frame's packed rect as the
-// whole frame, and the road reads a backdrop's pixels from its packed rect.
-export const trimsFrames = (key: string): boolean => atlasGroupOf(key) === "run";
+// Whether a sprite's frames pack only their opaque pixels: the road's do, those the home
+// screen draws too included. UI art and cards stay whole, as do images, since a tile sprite and
+// a nine-slice draw a frame's packed rect as the whole frame, and the road reads a backdrop's
+// pixels from its packed rect.
+const TRIMMED_GROUPS: ReadonlySet<string> = new Set(["home", "run"]);
+export const trimsFrames = (key: string): boolean => TRIMMED_GROUPS.has(atlasGroupOf(key));
 
 // A sprite's frames as the atlas packs them. With trim, each frame keeps only the rect that
 // holds its opaque pixels (a clear frame, its top-left pixel) and records where that sits in

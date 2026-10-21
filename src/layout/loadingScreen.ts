@@ -24,8 +24,9 @@ export const LOADING_WALKER = {
   y: 379,
 };
 
-// Boot loads every asset over the network, then processes them: each sprite's animations
-// and metrics, the placeholders and the fallback font. Each phase fills its share of the
+// Boot loads what the home screen needs over the network, then processes it: each sprite's
+// animations and metrics, the placeholders and the fallback font. The rest loads behind the
+// home screen, off the bar. Each phase fills its share of the
 // bar in proportion to measured boots, where processing takes under a tenth of the time.
 export type BootPhase = "network" | "processing";
 

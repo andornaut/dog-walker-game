@@ -2,6 +2,7 @@ import { type GameObjects, type Loader, Scene, Sound } from "phaser";
 
 import { itemAt } from "../arrays";
 import { animationSpecs, type AsepriteSheet } from "../assets/asepriteAnimations";
+import { loadsFirst } from "../assets/atlas/atlasLayout";
 import { type AssetManifest, assetUrl, parseManifest, type SpriteAsset } from "../assets/manifest";
 import {
   DOG_FRAME_SIDES,
@@ -11,6 +12,7 @@ import {
   ownerFaceKey,
   ROAD_SPRITE_SIZE,
 } from "../assets/spriteKeys";
+import { HOME_CUES, SOUND_KEYS } from "../audio/sound";
 import { gameData } from "../data";
 import type { DogId, EncounterId } from "../data/types";
 import { devRunLoadout, namesRunSetup } from "../dev/devStart";
@@ -24,6 +26,7 @@ import {
   stepFraction,
 } from "../layout/loadingScreen";
 import { browserSoundFormat, startWakeLock, unlockAudioOnFirstGesture } from "../pwa";
+import { markArtReady } from "./artReady";
 import { addFilledRect } from "./draw";
 import { onLoadProgress } from "./loadProgress";
 import {
@@ -48,8 +51,14 @@ import type { RunSceneData } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
 import { ensurePlaceholder, measureSprite, playTag } from "./sprites";
 
-// Processing yields to the next frame once a batch has run this long.
+// Processing yields to the next frame once a batch has run this long: less once the home
+// screen shows, which then shares the frame.
 const FRAME_BUDGET_MS = 8;
+const BEHIND_FRAME_BUDGET_MS = 4;
+
+const HOME_SOUND_KEYS: ReadonlySet<string> = new Set(HOME_CUES.map((cue) => SOUND_KEYS[cue]));
+const loadsSoundFirst = (key: string): boolean => HOME_SOUND_KEYS.has(key);
+const always = () => true;
 
 type Size = { color: number; height: number; width: number };
 const box = (width: number, height: number, color: number): Size => ({ color, height, width });
@@ -79,10 +88,13 @@ function placeholderSizes(): Map<string, Size> {
   return sizes;
 }
 
-// Loads the art manifest and the loading screen's art, shows the loading screen while
-// everything else in the manifest loads, then registers each sprite's animations and metrics
-// in batches, a frame apart, so the bar and the walker keep moving. A missing or broken asset
-// is logged and replaced by a placeholder box, never fatal. Then starts the home screen.
+// Loads the art manifest and the loading screen's art, shows the loading screen while what the
+// home screen and its menus need loads (the loadsFirst art, the fonts and the home cues'
+// sounds), then registers each of those sprites' animations and metrics in batches, a frame
+// apart, so the bar and the walker keep moving. A missing or broken asset is logged and
+// replaced by a placeholder box, never fatal. Then shows the home screen, and keeps running
+// behind it to load and register the rest the same way, then marks the art ready and stops. A
+// dev link that names a run loads everything before it starts the walk.
 export class BootScene extends Scene {
   private bar: GameObjects.Rectangle | undefined;
   private manifest: AssetManifest = { fonts: [], images: [], sounds: [], sprites: [] };
@@ -118,27 +130,37 @@ export class BootScene extends Scene {
     addAtlasTextures(this);
     this.showLoadingScreen();
 
-    const { fonts, sounds } = this.manifest;
-    queueManifestArt(this, this.manifest);
-    for (const { fnt, key, png } of fonts) {
+    const walkNow = namesRunSetup(globalThis.location.search);
+    const first = walkNow ? always : loadsFirst;
+    queueManifestArt(this, this.manifest, first);
+    for (const { fnt, key, png } of this.manifest.fonts) {
       this.load.bitmapFont(key, assetUrl(ART_BASE_URL, png), assetUrl(ART_BASE_URL, fnt));
     }
-    // One file per sound, in the format the service worker precaches.
-    const soundFormat = browserSoundFormat();
-    if (soundFormat !== undefined) {
-      for (const sound of sounds) {
-        this.load.audio(sound.key, assetUrl(ART_BASE_URL, sound[soundFormat]));
-      }
-    } else if (sounds.length > 0) {
+    if (this.manifest.sounds.length > 0 && browserSoundFormat() === undefined) {
       console.warn("This browser plays neither Ogg nor AAC, so the game is silent.");
     }
+    this.queueSounds(walkNow ? always : loadsSoundFirst);
     onLoadProgress(this, atlasPageBytes(this), (fraction) =>
       this.showProgress(bootProgress("network", fraction)),
     );
     this.load.once("complete", () =>
-      this.processAssets(() => void profileOpened.then(() => this.startFirstScene())),
+      this.processAssets(first, FRAME_BUDGET_MS, () => {
+        registerFallbackPixelFont(this);
+        void profileOpened.then(() => (walkNow ? this.startWalk() : this.showHome()));
+      }),
     );
     this.load.start();
+  }
+
+  // One file per sound that include accepts, in the format the service worker precaches.
+  private queueSounds(include: (key: string) => boolean): void {
+    const soundFormat = browserSoundFormat();
+    if (soundFormat === undefined) {
+      return;
+    }
+    for (const sound of this.manifest.sounds.filter(({ key }) => include(key))) {
+      this.load.audio(sound.key, assetUrl(ART_BASE_URL, sound[soundFormat]));
+    }
   }
 
   // The loading screen's art, its atlas page or its own three files, ahead of everything else.
@@ -181,23 +203,29 @@ export class BootScene extends Scene {
     this.bar?.setSize(loadingBarWidth(progress), LOADING_TRACK.height);
   }
 
-  // Runs each step in turn, yielding to the next frame once a frame's budget is spent, then
-  // calls done.
-  private processAssets(done: () => void): void {
+  // Registers the loaded sprites that include accepts and draws a placeholder for each such key
+  // that is missing, one step at a time, yielding to the next frame once budgetMs is spent,
+  // then calls done.
+  private processAssets(
+    include: (key: string) => boolean,
+    budgetMs: number,
+    done: () => void,
+  ): void {
     const steps: (() => void)[] = [() => addAtlasTextures(this)];
     for (const sprite of this.manifest.sprites) {
-      if (sprite.key !== LOADING_ART.walker) {
+      if (sprite.key !== LOADING_ART.walker && include(sprite.key)) {
         steps.push(() => this.registerSprite(sprite));
       }
     }
     for (const [key, size] of placeholderSizes()) {
-      steps.push(() => ensurePlaceholder(this, key, size));
+      if (include(key)) {
+        steps.push(() => ensurePlaceholder(this, key, size));
+      }
     }
-    steps.push(() => registerFallbackPixelFont(this));
     let next = 0;
     const runBatch = () => {
       const started = performance.now();
-      while (next < steps.length && performance.now() - started < FRAME_BUDGET_MS) {
+      while (next < steps.length && performance.now() - started < budgetMs) {
         itemAt(steps, next)();
         next += 1;
       }
@@ -228,12 +256,29 @@ export class BootScene extends Scene {
     }
   }
 
-  // A dev link that names a run starts it straight away; otherwise the home screen shows.
-  private startFirstScene(): void {
-    if (!namesRunSetup(globalThis.location.search)) {
-      this.scene.start(SCENE_KEYS.start);
-      return;
+  // Shows the home screen over this scene, clears the loading screen, then loads and registers
+  // the rest behind it.
+  private showHome(): void {
+    this.scene.launch(SCENE_KEYS.start);
+    for (const child of [...this.children.list]) {
+      child.destroy();
     }
+    [this.bar, this.walker] = [undefined, undefined];
+    const rest = (key: string) => !loadsFirst(key);
+    queueManifestArt(this, this.manifest, rest);
+    this.queueSounds((key) => !loadsSoundFirst(key));
+    this.load.once("complete", () =>
+      this.processAssets(rest, BEHIND_FRAME_BUDGET_MS, () => {
+        markArtReady(this);
+        this.scene.stop();
+      }),
+    );
+    this.load.start();
+  }
+
+  // Starts the walk a dev link names, with everything loaded.
+  private startWalk(): void {
+    markArtReady(this);
     const { lastLoadout, owned } = profileSave(this);
     const walker = walkerInUse(profileSave(this));
     const loadout = devRunLoadout(lastLoadout, walker, itemAt(owned.dogs, 0), pageRunSetup().setup);

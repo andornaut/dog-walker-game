@@ -25,6 +25,10 @@ export const SOUND_KEYS: Readonly<Record<BaseCue, string>> = {
   treat: "sfx-treat",
 };
 
+// The cues the home screen and the menus it opens play: Settings' volume preview and a
+// celebration's badge. Boot loads their sounds before the home screen shows, the rest after.
+export const HOME_CUES: readonly BaseCue[] = ["badge", "tip"];
+
 export function hitCue(kind: Encounter["kind"], encounter: EncounterId): HitCue {
   return kind === "lucky" ? `${LUCKY_HIT_PREFIX}${encounter}` : `${HIT_PREFIX}${encounter}`;
 }

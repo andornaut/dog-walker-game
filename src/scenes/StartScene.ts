@@ -113,6 +113,7 @@ import { type Cents, cents } from "../rules/units";
 import type { SaveDocument } from "../save/schema";
 import { walksPlayed } from "../save/stats";
 import { fillLine } from "../text/lines";
+import { artReady, whenArtReady } from "./artReady";
 import type { CelebrationSceneData } from "./CelebrationScene";
 import {
   drawFocusRing,
@@ -229,6 +230,8 @@ const DOG_TILE = HOME_LAYOUT.dogTile;
 const DOG_TILE_INSET = HOME_LAYOUT.dogTileInset;
 const TILE_SELECT_OUTSET = HOME_LAYOUT.tileSelectOutset;
 const START_BUTTON: Rect = HOME_LAYOUT.startButton;
+// Start walk's opacity while it waits for the rest of the art to load.
+const WAITING_ALPHA = 0.6;
 const START_LABEL = HOME_LAYOUT.startLabel;
 const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 // The keyboard ring sits outside the ui-select frame.
@@ -396,10 +399,14 @@ const LAST_VISIT_WALKERS_KEY = "homeLastVisitWalkers";
 // the shop: tapping the building opens it, and tapping a locked dog, gear item or the Dogs
 // band's padlock opens it on that item. Holding a dog or gear tile opens its detail card.
 // The arrow keys move a focus ring, Enter or Space picks, Escape, P or back closes a card, ?
-// opens help, S settings, L the logbook and M mutes.
+// opens help, S settings, L the logbook and M mutes. Start walk and help wait for boot to load
+// the rest of the art, which it does behind this screen.
 export class StartScene extends Scene {
   // The last action, for the message line and the bubble.
   private action: HomeAction = { kind: "none" };
+  // A press of Start walk or help made before boot has loaded the rest of the art: the latest
+  // runs once it has, and Start walk shows held down and dimmed while it waits.
+  private artWait: { action: () => void; kind: "help" | "start" } | undefined;
   private focus: Focus | null = null;
   private gateDogs: { dog: DogId; footY: number; sprite: GameObjects.Sprite }[] = [];
   // A press on a dog or gear tile that may become a hold.
@@ -439,6 +446,7 @@ export class StartScene extends Scene {
 
   create(): void {
     this.action = { kind: "none" };
+    this.artWait = undefined;
     this.focus = null;
     this.hold = undefined;
     this.overlay = undefined;
@@ -814,7 +822,7 @@ export class StartScene extends Scene {
         return;
       }
       case "help":
-        openHelp(this, SCENE_KEYS.start);
+        this.afterArt("help", () => openHelp(this, SCENE_KEYS.start));
         return;
       case "logbook":
         this.overlay = { badges: undefined, kind: "logbook", rect: undefined, stats: undefined };
@@ -884,6 +892,10 @@ export class StartScene extends Scene {
       this.shakes.set("start", this.time.now);
       return;
     }
+    if (!artReady(this)) {
+      this.afterArt("start", () => this.startWalk());
+      return;
+    }
     const data: RunSceneData = {
       loadout: { dogs, gear: this.loadout.gear, walker },
       walkerSprite: walkerSpriteKey(this, walker),
@@ -898,6 +910,24 @@ export class StartScene extends Scene {
     }
     this.game.events.once(HELP_CLOSED_EVENT, go);
     openHelp(this, SCENE_KEYS.start);
+  }
+
+  // Runs action now if every asset has loaded, else once it has, in place of any press already
+  // waiting.
+  private afterArt(kind: "help" | "start", action: () => void): void {
+    if (artReady(this)) {
+      action();
+      return;
+    }
+    const waiting = this.artWait !== undefined;
+    this.artWait = { action, kind };
+    if (!waiting) {
+      whenArtReady(this, () => {
+        const wait = this.artWait;
+        this.artWait = undefined;
+        wait?.action();
+      });
+    }
   }
 
   override update(): void {
@@ -940,7 +970,9 @@ export class StartScene extends Scene {
     }
     if (this.startButton !== undefined) {
       const { container, ready } = this.startButton;
-      const down = dip("start") > 0 && ready;
+      const waiting = this.artWait?.kind === "start";
+      const down = (dip("start") > 0 && ready) || waiting;
+      container.setAlpha(waiting ? WAITING_ALPHA : 1);
       container.setPosition(
         shakeOffset(reduced, now, this.shakes.get("start")),
         down ? 0 : bobOffset(reduced, now, ready),
