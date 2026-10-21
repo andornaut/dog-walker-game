@@ -14,7 +14,7 @@ and ui-stitch-v (2x8, seamless stitch runs), all repeated with TileSprite; the r
 nine-slice, 8px corners), ui-quip-tail (6x8), ui-quip-tail-down and ui-quip-tail-up (8x6),
 ui-celebrate-burst (148x132, the starburst behind the walker in the zone celebration), ui-zone-banner (248x48)
 ui-dog-band (360x94, drawn at (0, 466): the top bar's trim and plum
-wood behind the dog slots); the walk HUD's ui-walk-bar (360x48), ui-effect-well (18x18),
+wood behind the dog slots); the walk HUD's ui-walk-bar (360x48), ui-effect-well (22x22),
 ui-dog-card-band (360x64, drawn at (0, 496)), ui-lead-tag (27x11, LEAD baked in with
 font-title) and ui-owner-tab (36x36).
 Sprites: ui-doghouse (120x90, one of three dog slots in a row, drawn as a character file card;
@@ -1282,17 +1282,17 @@ def top_bar():
 
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash and the neighbourhood with its pips.
-WALK_WELLS = ((4, 4, 95, 40), (103, 4, 80, 21))
-# The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
-# the grain: four 18x18 wells, 20px apart from x 103, on rows 26 to 43.
-EFFECT_ROW = (102, 25, 82, 20)
-EFFECT_WELL = 18
+WALK_WELLS = ((4, 4, 95, 40), (103, 4, 80, 17))
+# The row of effect wells under the neighbourhood well, kept plain wood so the wells and the "+n"
+# beside them sit clear of the grain: three 22x22 wells, 23px apart from x 103, on rows 22 to 43.
+EFFECT_ROW = (102, 21, 82, 24)
+EFFECT_WELL = 22
 
 
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with the top bar's trim (dbrown on row 1; brown, dbrown and
     ink on rows 45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,4 95x40, sized for "$888" at 3x after the coin, and neighbourhood 103,4 80x21, which
+    cash 4,4 95x40, sized for "$888" at 3x after the coin, and neighbourhood 103,4 80x17, which
     ends clear of the Home button's hit at x 184. The game draws the effect wells, the Home, Sound,
     Settings and Pause buttons and every text and icon on it."""
     w, h = WALK_BAR
@@ -1320,7 +1320,7 @@ def walk_bar():
 
 
 def effect_well():
-    """18x18, ui-effect-well: an ink well for one active effect's 16x16 icon at (1, 1), with the
+    """22x22, ui-effect-well: an ink well for one active effect's 20x20 icon at (1, 1), with the
     walk bar's wells' clipped corners and dbrown lip."""
     g = Grid(EFFECT_WELL, EFFECT_WELL)
     well(g, 0, 0, EFFECT_WELL, EFFECT_WELL)

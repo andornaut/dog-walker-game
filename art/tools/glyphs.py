@@ -40,6 +40,9 @@ icon-upgrade-<upgrade>      state strip, on the top bar's ink: belly-rubs (a han
                             hearts on the wind), shortcut (two chevrons), sweet-talker (a speech
                             bubble with $ and a down arrow), treat-magnet (a magnet and a bone)
 icon-gear-<gear>            state strip, on ink: the shop's item art (icons.py) at 16x16
+<key>-20                    each icon-perk-*, icon-upgrade-* and icon-gear-* drawn again at 20x20 for
+                            the walk bar's 22x22 effect wells: the same subject and colours, with a 1px
+                            margin for the outline
 icon-bump, icon-fired,      the walk's message strip, beside its lines, on cream: bump (an amber
 icon-hint, icon-last-heart, impact burst), fired (a pink slip under a dred stamp), hint (a white i
 icon-lucky                  on a sky disc), last-heart (a red heart cracked down from its notch),
@@ -823,6 +826,284 @@ def gear_lucky_collar():
     return g
 
 
+# ---------- the walk bar's effect wells: each perk, gear and upgrade icon drawn again at 20x20 ----------
+# The same subject, colours and silhouette as its 16x16 icon, redrawn with a 1px margin for the
+# outline and the room spent on detail. Like the state strip's, every fill that carries a shape holds
+# 3:1 or more on the well's ink.
+
+BIG_HEART_20 = [".111...111.", "11111.11111", "11111111111", "1111111111p", ".11111111p.", "..111111p..",
+                "...1111p...", "....11p....", ".....p....."]
+
+
+def heart20(g, x, y):
+    """An 11x9 heart, red with a hot right side, lit white at the top of its left lobe."""
+    bitmap(g, x, y, BIG_HEART_20, {"1": "red", "p": "hot"})
+    g.p(x + 1, y + 1, "white")
+    g.p(x + 2, y + 1, "pink")
+
+
+def kind_words20():
+    """A pink speech bubble holding a red heart, its tail down to the right."""
+    g = Grid(20, 20)
+    g.rect(2, 1, 16, 13, "pink")
+    g.rect(1, 2, 18, 11, "pink")
+    g.rect(2, 13, 16, 1, "mauve")
+    g.rect(18, 3, 1, 9, "mauve")
+    g.tri((11, 13), (15.5, 19), (16, 13), "pink")
+    g.p(15, 14, "mauve")
+    g.p(15, 15, "mauve")
+    heart20(g, 4, 3)
+    return g
+
+
+def big_tipper20():
+    """A stack of four coins under a fifth seen from above, and a green arrow up beside it."""
+    g = Grid(20, 20)
+    for x, y in ((1, 16), (2, 14), (1, 12), (2, 10)):
+        g.rect(x, y, 10, 2, "amber")
+        g.rect(x, y + 1, 10, 1, "orange")
+        g.p(x + 1, y, "yellow")
+        g.p(x + 2, y, "yellow")
+    g.ell(7, 8, 5, 2.5, "yellow", "amber")
+    g.rect(5, 8, 4, 1, "amber")
+    g.tri((16, 0.5), (11.5, 6.5), (20.5, 6.5), "green")
+    g.rect(15, 6, 3, 12, "green")
+    g.rect(17, 6, 1, 12, "dgreen")
+    g.p(16, 3, "yellow")
+    return g
+
+
+def gear_running_shoes20():
+    """The running shoe side on, the toe to the left: a sky upper lit cyan along its top, white laces up
+    the instep, a navy collar, an orange heel tab and a white sole on an lgrey tread."""
+    g = Grid(20, 20)
+    bitmap(g, 0, 4, [
+        "............ccccc...",
+        "..........ccsnnnns..",
+        "........ccssssssooo.",
+        "......ccswsswsssoo..",
+        "....ccswsswssssooo..",
+        "..ccsssssssssssss...",
+        ".csssssssssssssssss.",
+        ".sssssssssssssssssb.",
+        ".bbbbbbbbbbbbbbbbbb.",
+        ".wwwwwwwwwwwwwwwwww.",
+        ".wwwwwwwwwwwwwwwwww.",
+        "..llllllllllllllll..",
+    ], {"c": "cyan", "s": "sky", "n": "navy", "w": "white", "o": "orange", "b": "blue", "l": "lgrey"})
+    return g
+
+
+def bubble20(g, fill, shade, lit=None):
+    """A 18x12 speech bubble with clipped corners, shaded along its foot and right side, its tail down to
+    the left."""
+    g.rect(2, 1, 16, 12, fill)
+    g.rect(1, 2, 18, 10, fill)
+    g.rect(2, 12, 16, 1, shade)
+    g.rect(18, 3, 1, 9, shade)
+    g.tri((4, 12), (4, 18.5), (9, 12), fill)
+    g.p(5, 13, shade)
+    if lit:
+        g.rect(2, 1, 16, 1, lit)
+        g.rect(1, 2, 1, 5, lit)
+
+
+def calm_voice20():
+    """A sky speech bubble, lit cyan along its top, holding a white wave: a soft, even tone."""
+    g = Grid(20, 20)
+    bubble20(g, "sky", "blue", "cyan")
+    bitmap(g, 2, 5, ["..ww......ww....", ".w..w....w..w...", "w....w..w....w..", "......ww......ww"],
+           {"w": "white"})
+    return g
+
+
+def long_reach20():
+    """An open hand, palm out, over a green arrow pointing both ways: a reach a lane to each side."""
+    g = Grid(20, 20)
+    bitmap(g, 4, 0, ["....ss.ss...", ".ss.ss.ss...", ".ss.ss.ss.ss", ".ss.ss.ss.ss", ".ss.ss.ss.ss",
+                     "s.ssssssssss", "ss.sssssssss", ".ssssssssssd", "..sssssssdd.", "...sssssdd.."],
+           {"s": "skin1", "d": "skin2"})
+    g.tri((1, 14.5), (5, 10.5), (5, 18.5), "green")
+    g.tri((19, 14.5), (15, 10.5), (15, 18.5), "green")
+    g.rect(5, 13, 10, 3, "green")
+    g.rect(5, 15, 10, 1, "dgreen")
+    return g
+
+
+def treat_finder20():
+    """A magnifying glass, its cyan lens over a cream treat, its brown handle down to the right."""
+    g = Grid(20, 20)
+    for i in range(5):
+        g.rect(13 + i, 13 + i, 2, 2, "brown")
+    g.ell(8, 8, 7, 7, "lgrey", "grey")
+    g.ell(8, 8, 5.2, 5.2, "cyan", None, "white")
+    bitmap(g, 4, 7, ["cc.....cc", ".ccccccc.", "cc.....cc"], {"c": "cream"})
+    return g
+
+
+HEART_20 = [".11...11.", "1111.1111", "111111111", "11111111p", ".111111p.", "..1111p..", "...11p...",
+            "....p...."]
+
+
+def belly_rubs20():
+    """A hand, palm up, rubbing below a heart."""
+    g = Grid(20, 20)
+    heart20(g, 6, 1)
+    bitmap(g, 1, 11, ["......sssss.....", "ssssssssssssss..", "sssssssdddddd...", "sssssssssssssss.",
+                      "ssssssdddddd....", "ssssssssssssss..", "sssssddddd......", "ssssssssssss...."],
+           {"s": "skin1", "d": "skin2"})
+    return g
+
+
+def second_wind20():
+    """Two hearts lifted on gusts of wind."""
+    g = Grid(20, 20)
+    for x, y in ((10, 2), (7, 10)):
+        bitmap(g, x, y, HEART_20, {"1": "red", "p": "hot"})
+        g.p(x + 1, y + 1, "pink")
+    for x, y, w in ((1, 5, 7), (1, 13, 5), (1, 18, 7)):
+        g.rect(x, y, w, 1, "white")
+    g.p(8, 4, "white")
+    g.p(6, 12, "white")
+    g.p(8, 17, "white")
+    return g
+
+
+def good_leash20():
+    """A leash: a handle loop, the line and its clip."""
+    g = Grid(20, 20)
+    g.ell(5.5, 5.5, 4.5, 4.5, "red", None, "pink")
+    g.ell(5.5, 5.5, 2.2, 2.2, None)
+    for i in range(7):
+        g.rect(9 + i, 9 + i, 2, 1, "red")
+    g.ell(16, 16, 2.8, 2.8, "lgrey", "grey", "white")
+    g.p(16, 16, "slate")
+    return g
+
+
+def raincoats20():
+    """A yellow raincoat with its hood up, buttoned down the front, and a drop of rain."""
+    g = Grid(20, 20)
+    bitmap(g, 4, 3, [
+        ".....yyyy.....",
+        "....yyyyyy....",
+        "...yyyyyyya...",
+        "...yy....ya...",
+        "...yy....ya...",
+        "..yyy....yaa..",
+        ".yyyyy..yyyaa.",
+        "yyyyyyyyyyyyaa",
+        "yyyy.yyyyy.yaa",
+        "yyy..yykyy..aa",
+        "yyy..yyyyy..aa",
+        "yy...yykyy...a",
+        ".....yyyyya...",
+        "....yyyyyyya..",
+        "....yyyyyyaa..",
+        "....yyyyyaaa..",
+    ], {"y": "yellow", "a": "amber", "k": "orange"})
+    drop(g, 2.5, 1, 1.6, "cyan", "sky")
+    return g
+
+
+def rush_hour20():
+    """An alarm clock ringing: two amber bells, a red case on lgrey feet and a white face."""
+    g = Grid(20, 20)
+    g.ell(4.5, 4.5, 3, 3, "amber", "orange", "yellow")
+    g.ell(15.5, 4.5, 3, 3, "amber", "orange", "yellow")
+    g.rect(4, 15, 2, 4, "lgrey")
+    g.rect(14, 15, 2, 4, "lgrey")
+    g.ell(10, 10.5, 7, 7, "red", None, "pink")
+    g.ell(10, 10.5, 5, 5, "white", "lgrey")
+    g.rect(9, 3, 2, 1, "lgrey")
+    g.rect(10, 7, 1, 4, "ink")
+    g.rect(11, 10, 3, 1, "ink")
+    return g
+
+
+def shortcut20():
+    """Two chevrons pointing ahead."""
+    g = Grid(20, 20)
+    for x0 in (1, 8):
+        for i in range(8):
+            g.rect(x0 + i, 2 + i, 3, 1, "amber")
+            g.rect(x0 + i, 17 - i, 3, 1, "orange" if i < 7 else "amber")
+    return g
+
+
+def sweet_talker20():
+    """A speech bubble saying money goes down: a forest $ and a dred arrow down."""
+    g = Grid(20, 20)
+    bubble20(g, "white", "lgrey")
+    bitmap(g, 3, 2, ["..s..", ".ssss", "s.s..", "s.s..", ".sss.", "..s.s", "..s.s", "ssss.", "..s.."],
+           {"s": "forest"})
+    bitmap(g, 10, 3, ["..ddd..", "..ddd..", "..ddd..", "..ddd..", "ddddddd", ".ddddd.", "..ddd..", "...d..."],
+           {"d": "dred"})
+    return g
+
+
+def treat_magnet20():
+    """A horseshoe magnet pulling a bone up from the lower left."""
+    g = Grid(20, 20)
+    g.ell(12, 8, 6, 6, "red", None, "pink")
+    g.ell(12, 8, 2.5, 2.5, None)
+    g.rect(6, 8, 14, 7, None)
+    g.rect(6, 8, 3, 5, "red")
+    g.rect(15, 8, 3, 5, "red")
+    g.rect(6, 13, 3, 2, "lgrey")
+    g.rect(15, 13, 3, 2, "lgrey")
+    bitmap(g, 1, 16, ["cc.....cc", ".ccccccc.", "cc.....cc"], {"c": "cream"})
+    return g
+
+
+def gear_fanny_pack20():
+    """The fanny pack: an amber pouch zipped in orange on a brown strap with an lgrey buckle."""
+    g = Grid(20, 20)
+    g.rect(1, 6, 18, 2, "brown")
+    g.rect(15, 5, 3, 4, "lgrey")
+    g.p(16, 6, "grey")
+    g.p(16, 7, "grey")
+    g.ell(9, 12.5, 7.5, 5.5, "amber", "orange", "yellow")
+    g.rect(4, 11, 10, 1, "orange")
+    g.p(14, 11, "lgrey")
+    g.p(14, 12, "lgrey")
+    return g
+
+
+def gear_whistle20():
+    """The whistle: an lgrey barrel with its slate hole and mouthpiece, on a red lanyard."""
+    g = Grid(20, 20)
+    g.ell(7, 12.5, 5.5, 5.5, "lgrey", "grey", "white")
+    g.rect(10, 7, 8, 5, "lgrey")
+    g.rect(10, 11, 8, 1, "grey")
+    g.rect(11, 7, 7, 1, "white")
+    g.rect(6, 12, 2, 2, "slate")
+    g.rect(2, 1, 2, 9, "red")
+    g.rect(2, 1, 9, 2, "red")
+    return g
+
+
+def gear_poop_bags20():
+    """The roll of poop bags: a green roll lit yellow round a forest core, a bag pulled off to the right."""
+    g = Grid(20, 20)
+    g.ell(8.5, 9, 7, 7, "green", "dgreen", "yellow")
+    g.ell(8.5, 9, 2.5, 2.5, "forest")
+    g.tri((12, 12), (18.5, 17.5), (13, 18.5), "green")
+    g.rect(13, 13, 3, 3, "green")
+    return g
+
+
+def gear_lucky_collar20():
+    """The lucky collar: a red collar lit pink with an amber tag stamped with a green clover."""
+    g = Grid(20, 20)
+    g.ell(10, 7, 8, 5.5, "red", None, "pink")
+    g.ell(10, 7, 5.5, 3, None)
+    g.ell(10, 14.5, 3.8, 3.8, "amber", "orange", "yellow")
+    for x, y in ((10, 13), (9, 14), (11, 14), (10, 15), (11, 16)):
+        g.p(x, y, "green")
+    return g
+
+
 # ---------- the message strip, on its cream panel beside each line ----------
 # Each differs from the status and trait icons it shares the strip with by shape and colour family.
 
@@ -943,6 +1224,24 @@ IMAGES = {
     "icon-gear-poop-bags": gear_poop_bags,
     "icon-gear-running-shoes": gear_running_shoes,
     "icon-gear-whistle": gear_whistle,
+    "icon-perk-calm-voice-20": calm_voice20,
+    "icon-perk-kind-words-20": kind_words20,
+    "icon-perk-long-reach-20": long_reach20,
+    "icon-perk-treat-finder-20": treat_finder20,
+    "icon-upgrade-belly-rubs-20": belly_rubs20,
+    "icon-upgrade-big-tipper-20": big_tipper20,
+    "icon-upgrade-good-leash-20": good_leash20,
+    "icon-upgrade-raincoats-20": raincoats20,
+    "icon-upgrade-rush-hour-20": rush_hour20,
+    "icon-upgrade-second-wind-20": second_wind20,
+    "icon-upgrade-shortcut-20": shortcut20,
+    "icon-upgrade-sweet-talker-20": sweet_talker20,
+    "icon-upgrade-treat-magnet-20": treat_magnet20,
+    "icon-gear-fanny-pack-20": gear_fanny_pack20,
+    "icon-gear-lucky-collar-20": gear_lucky_collar20,
+    "icon-gear-poop-bags-20": gear_poop_bags20,
+    "icon-gear-running-shoes-20": gear_running_shoes20,
+    "icon-gear-whistle-20": gear_whistle20,
     "icon-bump": bump,
     "icon-fired": fired,
     "icon-hint": hint,
@@ -1004,9 +1303,10 @@ def preview(out, scale=6):
     for i, draw in enumerate(IMAGES.values()):
         im = image(draw)
         for j, ground in enumerate(grounds):
-            tile = Image.new("RGB", (16, 16), ground)
+            tile = Image.new("RGB", im.size, ground)
             tile.paste(im, (0, 0), im)
-            sheet.paste(tile.resize((16 * scale, 16 * scale), Image.NEAREST), (i * 20 * scale, j * 20 * scale))
+            sheet.paste(tile.resize((im.width * scale, im.height * scale), Image.NEAREST),
+                        (i * 20 * scale, j * 20 * scale))
     # ui-difficulty, one row per ground
     for i, im in enumerate(marks):
         for j, ground in enumerate(grounds):

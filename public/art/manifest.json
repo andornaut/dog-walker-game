@@ -7200,20 +7200,40 @@
       "png": "images/icon-gear-fanny-pack.png"
     },
     {
+      "key": "icon-gear-fanny-pack-20",
+      "png": "images/icon-gear-fanny-pack-20.png"
+    },
+    {
       "key": "icon-gear-lucky-collar",
       "png": "images/icon-gear-lucky-collar.png"
+    },
+    {
+      "key": "icon-gear-lucky-collar-20",
+      "png": "images/icon-gear-lucky-collar-20.png"
     },
     {
       "key": "icon-gear-poop-bags",
       "png": "images/icon-gear-poop-bags.png"
     },
     {
+      "key": "icon-gear-poop-bags-20",
+      "png": "images/icon-gear-poop-bags-20.png"
+    },
+    {
       "key": "icon-gear-running-shoes",
       "png": "images/icon-gear-running-shoes.png"
     },
     {
+      "key": "icon-gear-running-shoes-20",
+      "png": "images/icon-gear-running-shoes-20.png"
+    },
+    {
       "key": "icon-gear-whistle",
       "png": "images/icon-gear-whistle.png"
+    },
+    {
+      "key": "icon-gear-whistle-20",
+      "png": "images/icon-gear-whistle-20.png"
     },
     {
       "key": "icon-help",
@@ -7280,16 +7300,32 @@
       "png": "images/icon-perk-calm-voice.png"
     },
     {
+      "key": "icon-perk-calm-voice-20",
+      "png": "images/icon-perk-calm-voice-20.png"
+    },
+    {
       "key": "icon-perk-kind-words",
       "png": "images/icon-perk-kind-words.png"
+    },
+    {
+      "key": "icon-perk-kind-words-20",
+      "png": "images/icon-perk-kind-words-20.png"
     },
     {
       "key": "icon-perk-long-reach",
       "png": "images/icon-perk-long-reach.png"
     },
     {
+      "key": "icon-perk-long-reach-20",
+      "png": "images/icon-perk-long-reach-20.png"
+    },
+    {
       "key": "icon-perk-treat-finder",
       "png": "images/icon-perk-treat-finder.png"
+    },
+    {
+      "key": "icon-perk-treat-finder-20",
+      "png": "images/icon-perk-treat-finder-20.png"
     },
     {
       "key": "icon-play",
@@ -7372,36 +7408,72 @@
       "png": "images/icon-upgrade-belly-rubs.png"
     },
     {
+      "key": "icon-upgrade-belly-rubs-20",
+      "png": "images/icon-upgrade-belly-rubs-20.png"
+    },
+    {
       "key": "icon-upgrade-big-tipper",
       "png": "images/icon-upgrade-big-tipper.png"
+    },
+    {
+      "key": "icon-upgrade-big-tipper-20",
+      "png": "images/icon-upgrade-big-tipper-20.png"
     },
     {
       "key": "icon-upgrade-good-leash",
       "png": "images/icon-upgrade-good-leash.png"
     },
     {
+      "key": "icon-upgrade-good-leash-20",
+      "png": "images/icon-upgrade-good-leash-20.png"
+    },
+    {
       "key": "icon-upgrade-raincoats",
       "png": "images/icon-upgrade-raincoats.png"
+    },
+    {
+      "key": "icon-upgrade-raincoats-20",
+      "png": "images/icon-upgrade-raincoats-20.png"
     },
     {
       "key": "icon-upgrade-rush-hour",
       "png": "images/icon-upgrade-rush-hour.png"
     },
     {
+      "key": "icon-upgrade-rush-hour-20",
+      "png": "images/icon-upgrade-rush-hour-20.png"
+    },
+    {
       "key": "icon-upgrade-second-wind",
       "png": "images/icon-upgrade-second-wind.png"
+    },
+    {
+      "key": "icon-upgrade-second-wind-20",
+      "png": "images/icon-upgrade-second-wind-20.png"
     },
     {
       "key": "icon-upgrade-shortcut",
       "png": "images/icon-upgrade-shortcut.png"
     },
     {
+      "key": "icon-upgrade-shortcut-20",
+      "png": "images/icon-upgrade-shortcut-20.png"
+    },
+    {
       "key": "icon-upgrade-sweet-talker",
       "png": "images/icon-upgrade-sweet-talker.png"
     },
     {
+      "key": "icon-upgrade-sweet-talker-20",
+      "png": "images/icon-upgrade-sweet-talker-20.png"
+    },
+    {
       "key": "icon-upgrade-treat-magnet",
       "png": "images/icon-upgrade-treat-magnet.png"
+    },
+    {
+      "key": "icon-upgrade-treat-magnet-20",
+      "png": "images/icon-upgrade-treat-magnet-20.png"
     },
     {
       "key": "icon-zone-bark-park",
