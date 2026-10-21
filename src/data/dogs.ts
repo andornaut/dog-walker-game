@@ -1,7 +1,6 @@
 import type { Dog } from "./types";
 
-// The roster: three dogs of each size. A dog's size sets its owner's hearts and its share of
-// the pack.
+// The roster: three dogs of each size. A dog's size sets its owner's hearts.
 export const DOGS = {
   archie: {
     art: "archie",
@@ -19,7 +18,7 @@ export const DOGS = {
   biscuit: {
     art: "biscuit",
     breed: "Beagle",
-    look: "Tricolour, floppy ears, green collar",
+    look: "Tricolor, floppy ears, green collar",
     name: "Biscuit",
     owner: {
       name: "Sam",
@@ -44,7 +43,7 @@ export const DOGS = {
   koda: {
     art: "koda",
     breed: "Alaskan Malamute",
-    look: "Big and heavy, grey and white, blue eyes, harness",
+    look: "Big and heavy, gray and white, blue eyes, harness",
     name: "Koda",
     owner: {
       name: "Jesse",
@@ -69,7 +68,7 @@ export const DOGS = {
   },
   penny: {
     art: "penny",
-    breed: "Golden retriever mix",
+    breed: "Golden Retriever mix",
     look: "Smooth golden coat, blocky head, otter tail, blue collar",
     name: "Penny",
     owner: {
@@ -82,7 +81,7 @@ export const DOGS = {
   },
   pierre: {
     art: "pierre",
-    breed: "Miniature poodle",
+    breed: "Miniature Poodle",
     look: "Black coat, a white stripe from head to tail tip, show-clip pom-poms",
     name: "Pepe",
     owner: {

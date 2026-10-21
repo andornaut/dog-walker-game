@@ -18,9 +18,9 @@ export const SHOP_GEAR = {
   },
   poopBags: {
     effects: [{ kind: "skipOption" }],
-    name: "Poop bags",
+    name: "Hall pass",
     price: "poopBags",
-    short: "One free Skip a walk",
+    short: "Skip one card a neighborhood",
   },
   runningShoes: {
     effects: [{ by: "runningShoesAgility", kind: "modifier", operation: "add", stat: "agility" }],

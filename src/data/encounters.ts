@@ -8,7 +8,7 @@ import type { Encounter, EncounterId } from "./types";
 export const ENCOUNTERS = {
   biscuitNeighbour: {
     kind: "lucky",
-    name: "Generous neighbour",
+    name: "Generous neighbor",
     resolution: {
       art: "card-biscuit-neighbour-take",
       effects: [{ amount: 1, kind: "hearts", target: { kind: "all" } }],
@@ -126,7 +126,7 @@ export const ENCOUNTERS = {
     shape: { lanes: 1, rows: 1 },
   },
   thief: {
-    hitLabel: "PICKPOCKETED!",
+    hitLabel: "YOINK!",
     kind: "obstacle",
     movement: { kind: "step", steps: 2 },
     name: "Thief",

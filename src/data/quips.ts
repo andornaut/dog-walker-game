@@ -1,20 +1,20 @@
 import type { DogId, Quips } from "./types";
 
-// What each dog's owner says, in their temperament: two lines per moment.
+// What each dog's owner says, in their own voice: two lines per moment.
 // "happier" and "upset" follow a choice that raised or lowered their hearts; "fired" is at 0;
 // "parting" is when the player picks their dog on the home screen.
 export const QUIPS = {
   archie: {
     fired: ["Oh, sweetheart. I have to let you go.", "No hard feelings, dear. You're fired."],
     happier: ["Look at him go! Lovely.", "You're a natural, pet."],
-    parting: ["He'll want to play with everyone. Let him.", "There's a cookie for you after."],
-    upset: ["Oh well, these things happen.", "Never mind, dear. Next time."],
+    parting: ["He'll want to say hello to everyone. Let him.", "There's a cookie for you after."],
+    upset: ["Oh well, these things happen.", "Never mind, dear. Tea fixes most things."],
   },
   biscuit: {
-    fired: ["No hard feelings, but you're fired.", "Last call, friend. You're fired."],
-    happier: ["Nice! Biscuit's tail says it all.", "That's brewing nicely."],
+    fired: ["Last call, friend. You're fired.", "That's the last drop. You're fired."],
+    happier: ["Nice! Biscuit's tail says it all.", "Now that's a perfect pour."],
     parting: ["He'll sniff every hedge. Let him.", "Snacks are in the left pocket."],
-    upset: ["Eh, bit of a bitter one.", "Not my favourite blend, man."],
+    upset: ["Oof. Bit of a bitter blend.", "Not my favorite roast, friend."],
   },
   duchess: {
     fired: ["My poor petal! You're fired!", "A catastrophe in full bloom! Fired!"],
@@ -23,8 +23,8 @@ export const QUIPS = {
     upset: ["She's wilting! I can't bear it!", "My heart! My poor petal!"],
   },
   koda: {
-    fired: ["No worries, but you're fired.", "We'll find another pace. Fired."],
-    happier: ["Good vibes!", "That's a personal best!"],
+    fired: ["No worries, but you're fired.", "This is where we split. You're fired."],
+    happier: ["Good form! Keep it up!", "That's a personal best!"],
     parting: ["He already did 10K. He's fine.", "He'll pull. Let him run it off."],
     upset: ["Eh, rough patch.", "Just a cramp. Shake it off."],
   },
@@ -35,22 +35,22 @@ export const QUIPS = {
     upset: ["Not the content I wanted!", "I can't post this!"],
   },
   penny: {
-    fired: ["Oh no, oh no. Sorry, but you're fired.", "I'm so sorry. You're fired."],
+    fired: ["Oh no, oh no. Sorry, but you're fired.", "So sorry! Here's a tissue. You're fired."],
     happier: ["Phew! Good, good.", "Oh, what a relief. Thank you!"],
     parting: [
-      "Is the leash tight? Check it twice, please.",
-      "She gets lonely. Don't leave her alone.",
+      "I inspected the leash. Twice. Maybe check it?",
+      "She gets lonely. Talk to her, please.",
     ],
     upset: ["Oh dear, oh dear.", "Was that safe? Was she scared?"],
   },
   pierre: {
     fired: ["Disqualified. You are fired.", "Pepe withdraws from your care."],
-    happier: ["Acceptable. Barely.", "Seven out of ten."],
+    happier: ["Acceptable. Barely.", "Seven out of ten. Très bien."],
     parting: ["No puddles. I will check his paws.", "Pepe walks on the left. Always."],
-    upset: ["Points deducted.", "That would never pass inspection."],
+    upset: ["Points deducted.", "That would never place at a show."],
   },
   snowball: {
-    fired: ["You've ruined everything! You're fired!", "The day is cancelled. So are you!"],
+    fired: ["You've ruined everything! You're fired!", "The day is canceled. So are you!"],
     happier: ["Picture perfect!", "Everything is going to plan!"],
     parting: ["Not a speck of mud. The whole day depends on it!", "She's the flower dog at two!"],
     upset: ["This is a disaster!", "Not today of all days!"],

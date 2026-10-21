@@ -34,14 +34,14 @@ export const ACHIEVEMENTS = [
   {
     badgeLine: "Not a speck on them.",
     conditions: [{ count: 1, kind: "cleanZones" }],
-    goal: "Finish a neighborhood without a bump",
+    goal: "Finish a neighborhood without a plain bump",
     id: "cleanPaws",
     name: "Clean Paws",
   },
   {
     badgeLine: "Spotless, start to finish.",
     conditions: [{ count: "all", kind: "cleanZones" }],
-    goal: "Finish a walk without a bump",
+    goal: "Finish a walk without a plain bump",
     id: "notAScratch",
     name: "Not a Scratch",
   },
@@ -67,7 +67,7 @@ export const ACHIEVEMENTS = [
     name: "Full Kennel",
   },
   {
-    badgeLine: "A pocket for everything.",
+    badgeLine: "A pocket for everything. Well, one thing.",
     conditions: [{ count: "all", kind: "gearOwned" }],
     goal: "Own every gear item",
     id: "kittedOut",
@@ -82,7 +82,7 @@ export const ACHIEVEMENTS = [
     shortGoal: "All 9 dogs finish",
   },
   {
-    badgeLine: "Maplewood's finest.",
+    badgeLine: "Maplewood's finest. Ask any dog.",
     conditions: [
       { count: "all", kind: "dogsOwned" },
       { count: "all", kind: "dogSlotsOwned" },

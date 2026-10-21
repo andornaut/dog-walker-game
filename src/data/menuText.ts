@@ -22,7 +22,7 @@ export const MENU_TEXT = {
     firedYou: "{owner} fired you",
     newBest: "New best!",
     titles: {
-      finished: "Walk done!",
+      finished: "What a walk!",
       noDogs: "Out of dogs",
       wentHome: "Headed home",
     },
@@ -46,7 +46,7 @@ export const MENU_TEXT = {
   settings: {
     effects: "Effects",
     motion: "Reduced motion",
-    motionNote: "Skips shakes, hops and bobs",
+    motionNote: "Skips shakes, hops, bobs and confetti",
     music: "Music",
     muted: "Muted",
     sound: "Sound",
