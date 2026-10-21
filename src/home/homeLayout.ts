@@ -94,18 +94,18 @@ export const HOME_LAYOUT = {
   bandText: { inset: 9, y: 8 },
   // The detail card that opens over the screen, centred and as tall as what it shows, in card
   // pixels: the paper starts 2px in, the band runs across its top 6px in with the title's caps
-  // 6px below the band's top, and the well sits under the band. Rows of 2x body text, each
+  // 7px below the band's top, and the well sits under the band. Rows of 2x body text, each
   // wrapped within the card less pad, rowGap between rows: a detail card's subtitle and status
   // beside the well from besideX, besideDy under its top. A locked card's padlock sits at 2x
   // over the well's top-left corner.
   card: {
-    band: { height: 22, inset: 6, titleY: 6 },
+    band: { height: 24, inset: 6, titleY: 7 },
     besideDy: 4,
     besideX: 90,
     pad: 12,
-    padlock: { scale: 2, x: 8, y: 29 },
+    padlock: { scale: 2, x: 8, y: 31 },
     rowGap: 8,
-    well: { picture: 2, size: 68, x: 12, y: 34 },
+    well: { picture: 2, size: 68, x: 12, y: 36 },
     width: 300,
   },
   dogOrigin: { x: 14, y: DOGS_SECTION.y + TILE_OFFSET },

@@ -11,7 +11,7 @@ import {
   selectLook,
 } from "../home/selection";
 import { BADGE_OFFSET } from "../layout/badge";
-import { type CloseControl, closeControl } from "../layout/closeControl";
+import type { CloseControl } from "../layout/closeControl";
 import { containsPoint, insetRect, type Rect } from "../layout/rect";
 import { TEXT_SCALE } from "../layout/textFit";
 import { drawFramedRect, drawRing, fillRect } from "./draw";
@@ -40,8 +40,8 @@ const SLICES = {
   // The gold outline on anything the player can afford.
   "ui-afford": { bottom: 8, left: 8, right: 8, top: 8 },
   "ui-button": { bottom: 5, left: 3, right: 3, top: 3 },
-  // The detail card a held dog or gear tile opens, and the three-slice title band across it.
-  "ui-detail-band": { bottom: 0, left: 8, right: 8, top: 0 },
+  // The detail card a held dog or gear tile opens, and the title band across it.
+  "ui-detail-band": { bottom: 2, left: 8, right: 8, top: 2 },
   "ui-detail-card": { bottom: 8, left: 8, right: 8, top: 8 },
   // The plate over a hit.
   "ui-hint": { bottom: 8, left: 8, right: 8, top: 8 },
@@ -51,6 +51,9 @@ const SLICES = {
   "ui-quip": { bottom: 8, left: 8, right: 8, top: 8 },
   // The speaking owner's name plate on their bubble: a three-slice, 4px caps.
   "ui-quip-name": { bottom: 0, left: 4, right: 4, top: 0 },
+  // The Pet shop list's scrollbar: vertical three-slices with 3px caps.
+  "ui-scroll-thumb": { bottom: 3, left: 0, right: 0, top: 3 },
+  "ui-scroll-track": { bottom: 3, left: 0, right: 0, top: 3 },
   // The home screen's section frames: the top slice holds the frame and the heading band.
   "ui-section": { bottom: 3, left: 3, right: 3, top: 24 },
   "ui-select": { bottom: 8, left: 8, right: 8, top: 8 },
@@ -317,15 +320,13 @@ export function soundIcon(scene: Scene, on: boolean, x: number, y: number): Plac
   ];
 }
 
-// The close control in frame's top-right corner: icon-close on a ui-icon-button, or an X
-// while the icon is missing. Returns where it sits, so the caller can hit-test its target.
+// The close control's face: icon-close on a ui-icon-button, or an X while the icon is missing.
 export function addCloseButton(
   scene: Scene,
   parent: GameObjects.Container,
-  frame: Rect,
+  control: CloseControl,
   pressed: boolean,
-): CloseControl {
-  const control = closeControl(frame);
+): void {
   const button = addIconButton(scene, parent, control.x, control.y, (x, y) => {
     const icon = imageIcon(scene, "icon-close", x, y);
     return icon.length > 0
@@ -333,7 +334,6 @@ export function addCloseButton(
       : [addPixelText(scene, x + 8, y + 4, "X", { color: PALETTE.plum, originX: 0.5 })];
   });
   button.setPressed(pressed);
-  return control;
 }
 
 // An image icon by key, or nothing while the art is missing.

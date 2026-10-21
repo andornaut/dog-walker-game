@@ -1,5 +1,5 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import { closeControl } from "../layout/closeControl";
+import { pageCloseControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
 import type { FontMetrics } from "../ui/fontMetrics";
 
@@ -18,7 +18,7 @@ const PANEL = { height: 444, width: 344, x: 8, y: 108 };
 // The Stats page's geometry, from the menus mock.
 export const STATS_LAYOUT = {
   // The close control, in the screen's corner.
-  close: closeControl({ height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
+  close: pageCloseControl({ height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 }),
   // The badge tapped open, over the wall.
   detail: { height: 268, width: 312, x: 24, y: PANEL.y + 32 },
   // In the open badge, from its top: the badge's centre at badgeY, the name's and the status's

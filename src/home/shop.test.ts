@@ -261,7 +261,8 @@ describe("the shop's list", () => {
     expect(bottom - max).toBeLessThanOrEqual(listBottom);
   });
 
-  // max: how far the list moves; y: its scroll. The track runs the list area's height.
+  // max: how far the list moves; y: its scroll. The track runs the list area's height, the
+  // thumb thumbInset inside it.
   it.each<[string, number, number, "bottom" | "top"]>([
     ["sits at the top scrolled to the top", 200, 0, "top"],
     ["sits at the bottom scrolled to the bottom", 200, 200, "bottom"],
@@ -271,11 +272,12 @@ describe("the shop's list", () => {
     expect(bar).not.toBeNull();
     const { thumb, track } = bar ?? { thumb: rect, track: rect };
     expect(track).toMatchObject({ height: rect.height, y: rect.y });
-    expect(thumb.height).toBeGreaterThanOrEqual(SHOP_LAYOUT.scrollbar.thumbMin);
+    const { thumbInset, thumbMin } = SHOP_LAYOUT.scrollbar;
+    expect(thumb.height).toBeGreaterThanOrEqual(thumbMin);
     if (end === "top") {
-      expect(thumb.y).toBe(track.y);
+      expect(thumb.y).toBe(track.y + thumbInset);
     } else {
-      expect(thumb.y + thumb.height).toBe(track.y + track.height);
+      expect(thumb.y + thumb.height).toBe(track.y + track.height - thumbInset);
     }
   });
 
@@ -284,14 +286,14 @@ describe("the shop's list", () => {
   });
 
   // The scrollbar stays clear of the list area, where the rows and their frames are clipped,
-  // and inside the card.
-  it("puts the scrollbar between the list area and the card's edge", () => {
+  // inside the card's 8px frame, with the thumb thumbInset inside the track.
+  it("puts the scrollbar between the list area and the card's frame", () => {
     const bar = shopScrollbar(100, 0);
-    const { panel } = SHOP_LAYOUT;
-    const thumb = bar?.thumb ?? rect;
-    expect(thumb.x).toBeGreaterThanOrEqual(rect.x + rect.width);
-    expect(thumb.x + thumb.width).toBeLessThanOrEqual(
-      panel.x + panel.width - SHOP_LAYOUT.scrollbar.inset,
-    );
+    const { panel, scrollbar } = SHOP_LAYOUT;
+    const { thumb, track } = bar ?? { thumb: rect, track: rect };
+    expect(track.x).toBeGreaterThanOrEqual(rect.x + rect.width);
+    expect(track.x + track.width).toBeLessThanOrEqual(panel.x + panel.width - 8);
+    expect(thumb.x - track.x).toBe(scrollbar.thumbInset);
+    expect(track.x + track.width - (thumb.x + thumb.width)).toBe(scrollbar.thumbInset);
   });
 });

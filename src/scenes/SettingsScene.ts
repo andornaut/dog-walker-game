@@ -100,7 +100,6 @@ const KNOB_HEIGHT = 16;
 const FOCUS_ROW_LENGTHS: readonly number[] = [...ROWS.map(() => 1), 1];
 // The ring stays inside the panel's 8px margin.
 const FOCUS_OUTSET = 3;
-const SCREEN: Rect = { height: SCREEN_CONFIG.height, width: SCREEN_CONFIG.width, x: 0, y: 0 };
 
 function rowIndex(key: SwitchKey | VolumeKey): number {
   return ROWS.findIndex((row) => row.key === key);
@@ -303,7 +302,7 @@ export class SettingsScene extends Scene {
     // Over the rows, since a switch row's face covers its top row.
     const separators = this.add.graphics();
     this.layout.separators.forEach((rect) => fillRect(separators, PALETTE.tan, rect));
-    addCloseButton(this, this.add.container(0, 0), SCREEN, this.pressed?.kind === "close");
+    addCloseButton(this, this.add.container(0, 0), close, this.pressed?.kind === "close");
     if (this.focus !== null) {
       const focused =
         this.focus.row < ROWS.length ? this.rowRect(this.focus.row) : closeFace(close);

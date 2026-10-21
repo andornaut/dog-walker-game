@@ -145,7 +145,7 @@ export class HelpScene extends Scene {
       font: "title",
       scale: TEXT_SCALE,
     });
-    addCloseButton(this, this.add.container(0, 0), layout.screen, this.pressed === "close");
+    addCloseButton(this, this.add.container(0, 0), layout.close, this.pressed === "close");
 
     const frame = layout.illustration;
     for (const y of [frame.y - 1, frame.y + frame.height]) {

@@ -7,6 +7,7 @@ import type { Logbook } from "../home/home";
 import { CARD_TEXT_ROOM, cardTextRows, detailCardLayout, HOME_LAYOUT } from "../home/homeLayout";
 import { HOME_TEXT_FIELDS } from "../home/homeText";
 import { GREYED } from "../home/selection";
+import { closeControl } from "../layout/closeControl";
 import { insetRect, type Rect } from "../layout/rect";
 import { WRAPPING_TEXT_FIT_STYLES } from "../layout/textFit";
 import { fillLine } from "../text/lines";
@@ -124,7 +125,7 @@ function drawCardFrame(
     font: "title",
     originX: 0.5,
   });
-  addCloseButton(scene, parent, rect, closePressed);
+  addCloseButton(scene, parent, closeControl(rect), closePressed);
   return content;
 }
 

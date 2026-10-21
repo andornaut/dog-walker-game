@@ -1,8 +1,12 @@
 import type { Rect } from "../lib/rect";
 
-// Every page's and overlay's close control: the 20x20 ui-icon-button face 8px in from its
-// frame's right edge and 10px down, tapped anywhere in the 44x44 square in that corner.
-const FACE = { fromRight: 28, size: 20, top: 10 } as const;
+// Every page's and overlay's close control: the 20x20 ui-icon-button face in its frame's
+// top-right corner, tapped anywhere in the 44x44 square in that corner. On a card or panel the
+// face sits 8px in from the right edge and 8px down; on a full-screen page, 7px in and 9px
+// down unless the page gives its own top.
+const FACE_SIZE = 20;
+const CARD_FACE = { right: 8, top: 8 } as const;
+const PAGE_FACE = { right: 7, top: 9 } as const;
 const HIT_SIZE = 44;
 
 export interface CloseControl {
@@ -12,18 +16,31 @@ export interface CloseControl {
   readonly y: number;
 }
 
-// The close control in frame's top-right corner: the screen for a full-screen page, the
-// card or panel for an overlay.
-export function closeControl(frame: Rect): CloseControl {
-  const right = frame.x + frame.width;
+function placeClose(frame: Rect, right: number, top: number): CloseControl {
+  const frameRight = frame.x + frame.width;
   return {
-    hit: { height: HIT_SIZE, width: HIT_SIZE, x: right - HIT_SIZE, y: frame.y },
-    x: right - FACE.fromRight,
-    y: frame.y + FACE.top,
+    hit: { height: HIT_SIZE, width: HIT_SIZE, x: frameRight - HIT_SIZE, y: frame.y },
+    x: frameRight - right - FACE_SIZE,
+    y: frame.y + top,
   };
+}
+
+// The close control in a card's or panel's top-right corner.
+export function closeControl(frame: Rect): CloseControl {
+  return placeClose(frame, CARD_FACE.right, CARD_FACE.top);
+}
+
+// The close control in a full-screen page's top-right corner, its face top px down.
+export function pageCloseControl(screen: Rect, top: number = PAGE_FACE.top): CloseControl {
+  return placeClose(screen, PAGE_FACE.right, top);
+}
+
+// The top that centres the face on a bar.
+export function closeTopOnBar(bar: Rect): number {
+  return bar.y + Math.round((bar.height - FACE_SIZE) / 2);
 }
 
 // The face's own rect, for a focus ring.
 export function closeFace(control: CloseControl): Rect {
-  return { height: FACE.size, width: FACE.size, x: control.x, y: control.y };
+  return { height: FACE_SIZE, width: FACE_SIZE, x: control.x, y: control.y };
 }

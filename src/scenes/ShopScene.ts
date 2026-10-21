@@ -139,7 +139,10 @@ const ROW = LAYOUT.row;
 const OWNED_DX = ROW.ownedDx;
 const LIST: Rect = LAYOUT.list.rect;
 const PLATE: Rect = LAYOUT.message.plate;
-const SCROLLBAR = LAYOUT.scrollbar;
+// The scrollbar as drawn: the art's thumb, or the fallback's graphics.
+type ScrollbarView =
+  | { readonly kind: "art"; readonly thumb: GameObjects.NineSlice }
+  | { readonly graphics: GameObjects.Graphics; readonly kind: "fallback" };
 // A press that travels past the tap distance drags the list.
 const SCROLL_RULE: ScrollRule = {
   ...LIST_FLING,
@@ -216,7 +219,7 @@ export class ShopScene extends Scene {
   private presses: TargetPressListener | undefined;
   private resumeKey: SceneKey | undefined;
   private scroll: ListScroll = listScroll(0);
-  private scrollbar: GameObjects.Graphics | undefined;
+  private scrollbar: ScrollbarView | undefined;
   private shakes = new Map<string, number>();
   private tab: ShopTab = "gear";
 
@@ -360,24 +363,36 @@ export class ShopScene extends Scene {
   // The list at its scroll, and the scrollbar's thumb beside it.
   private placeList(): void {
     this.list?.setY(-this.scroll.y);
-    const g = this.scrollbar;
-    if (g === undefined) {
+    const view = this.scrollbar;
+    const bar = shopScrollbar(this.scroll.max, this.scroll.y);
+    if (view === undefined || bar === null) {
       return;
     }
-    g.clear();
+    if (view.kind === "art") {
+      view.thumb.setPosition(bar.thumb.x, bar.thumb.y).setSize(bar.thumb.width, bar.thumb.height);
+      return;
+    }
+    view.graphics.clear();
+    fillRect(view.graphics, PALETTE.navy, bar.track);
+    fillRect(view.graphics, PALETTE.yellow, bar.thumb);
+  }
+
+  // Beside a list longer than its view: ui-scroll-track with ui-scroll-thumb in it, or a navy
+  // track and a yellow thumb while the art is missing. placeList moves the thumb.
+  private addScrollbar(root: GameObjects.Container): ScrollbarView | undefined {
     const bar = shopScrollbar(this.scroll.max, this.scroll.y);
     if (bar === null) {
-      return;
+      return undefined;
     }
-    fillRect(g, PALETTE[SCROLLBAR.trackColor], bar.track);
-    fillRect(g, PALETTE[SCROLLBAR.edgeColor], bar.thumb);
-    const edge = SCROLLBAR.edge;
-    fillRect(g, PALETTE[SCROLLBAR.thumbColor], {
-      height: bar.thumb.height - 2 * edge,
-      width: bar.thumb.width - 2 * edge,
-      x: bar.thumb.x + edge,
-      y: bar.thumb.y + edge,
-    });
+    const track = addNineSlice(this, "ui-scroll-track", bar.track);
+    const thumb = addNineSlice(this, "ui-scroll-thumb", bar.thumb);
+    if (track !== undefined && thumb !== undefined) {
+      root.add([track, thumb]);
+      return { kind: "art", thumb };
+    }
+    track?.destroy();
+    thumb?.destroy();
+    return { graphics: this.graphics(root), kind: "fallback" };
   }
 
   // The framed row, with its frame, brought into view.
@@ -694,7 +709,7 @@ export class ShopScene extends Scene {
     }
     // A bought dog leaves its list, so the list may now be shorter.
     this.scroll = resizeScroll(scrollMax(LIST, this.listBottom(save)), this.scroll);
-    this.scrollbar = this.graphics(root);
+    this.scrollbar = this.addScrollbar(root);
     this.placeList();
     if (this.message !== null) {
       this.drawMessage(root, this.message);
@@ -780,7 +795,7 @@ export class ShopScene extends Scene {
       color: PALETTE.white,
       font: "title",
     });
-    addCloseButton(this, root, PANEL, this.pressed?.kind === "close");
+    addCloseButton(this, root, LAYOUT.close, this.pressed?.kind === "close");
   }
 
   // The open tab is selected and the other normal.

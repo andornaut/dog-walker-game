@@ -1,5 +1,5 @@
 import { laneDirectionForKey } from "../input/keyBindings";
-import { type CloseControl, closeControl } from "../layout/closeControl";
+import { type CloseControl, pageCloseControl } from "../layout/closeControl";
 import type { Rect } from "../layout/rect";
 import { textFitStylesOnLines } from "../layout/textFit";
 import type { Settings } from "../save/schema";
@@ -124,7 +124,7 @@ export function settingsLayout(
     return row;
   });
   return {
-    close: closeControl({ height: screen.height, width: screen.width, x: 0, y: 0 }),
+    close: pageCloseControl({ height: screen.height, width: screen.width, x: 0, y: 0 }),
     panel: { ...PANEL, height, x, y },
     rows,
     separators: rows.slice(1).map((row) => ({

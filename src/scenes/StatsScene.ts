@@ -28,6 +28,7 @@ import {
 } from "../home/statsLayout";
 import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
+import { closeControl } from "../layout/closeControl";
 import { rectIndexAt } from "../layout/grid";
 import { containsPoint, type Rect } from "../layout/rect";
 import type { TextFitStyle } from "../layout/textFit";
@@ -231,8 +232,8 @@ export class StatsScene extends Scene {
       });
     }
     const words = gameData.menuText.stats;
-    this.text(12, 12, words.title, { color: PALETTE.cream, font: "title" });
-    addCloseButton(this, this.add.container(0, 0), SCREEN, this.pressed === "close");
+    this.text(12, 14, words.title, { color: PALETTE.cream, font: "title" });
+    addCloseButton(this, this.add.container(0, 0), CLOSE, this.pressed === "close");
     // The open tab is selected and the others normal.
     const tabs = this.add.container(0, 0);
     const { reducedMotion } = currentSettings(this);
@@ -397,7 +398,7 @@ export class StatsScene extends Scene {
     const reduced = currentSettings(this).reducedMotion;
     addDim(this, SCREEN);
     addPanel(this, DETAIL);
-    addCloseButton(this, this.add.container(0, 0), DETAIL, false);
+    addCloseButton(this, this.add.container(0, 0), closeControl(DETAIL), false);
     const center = DETAIL.x + DETAIL.width / 2;
     const badgeY = DETAIL.y + DETAIL_TEXT.badgeY;
     if (badge.earned && (this.burst || reduced)) {

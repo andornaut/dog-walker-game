@@ -1,5 +1,5 @@
 import { SCREEN_CONFIG } from "../data/screen";
-import { closeControl } from "../layout/closeControl";
+import { closeTopOnBar, pageCloseControl } from "../layout/closeControl";
 import { rectIndexAt } from "../layout/grid";
 import { containsPoint, type Point, type Rect } from "../layout/rect";
 import { screenLayout } from "../layout/screenLayout";
@@ -8,6 +8,7 @@ import type { HelpAction } from "./helpPaging";
 export type { Point } from "../layout/rect";
 
 const { height, width } = SCREEN_CONFIG;
+const TOP_BAR = screenLayout(SCREEN_CONFIG).topBar;
 
 // The smallest tap target, in render pixels: at least 44 CSS px on a phone 360 CSS px wide.
 export const MIN_TAP_SIZE = 44;
@@ -18,17 +19,18 @@ export const MIN_TAP_SIZE = 44;
 // screen's width, ruled off a row above and below.
 export const HELP_LAYOUT = {
   body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: 334 },
-  close: closeControl({ height, width, x: 0, y: 0 }),
+  // The close control's face is centred on the top bar.
+  close: pageCloseControl({ height, width, x: 0, y: 0 }, closeTopOnBar(TOP_BAR)),
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.
   dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
-  heading: { x: 12, y: 15 },
+  heading: { x: 12, y: 19 },
   illustration: { height: 236, width, x: 0, y: 48 },
   next: { height: MIN_TAP_SIZE, width: 110, x: 242, y: height - 56 },
   previous: { height: MIN_TAP_SIZE, width: 110, x: 8, y: height - 56 },
   screen: { height, width, x: 0, y: 0 },
   title: { scale: 2, x: 12, y: 310 },
-  topBar: screenLayout(SCREEN_CONFIG).topBar,
+  topBar: TOP_BAR,
   topBarEdge: 2,
 } as const;
 

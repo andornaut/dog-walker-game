@@ -10,13 +10,13 @@ import { SHOP_TABS } from "./shop";
 // lists scroll in the list area under the tabs, laid out here as they sit scrolled to the top.
 const PANEL = { height: 512, width: 352, x: 4, y: 44 };
 const ROW_X = PANEL.x + 12;
-const ROW_WIDTH = 328;
-// The list area: from under the tabs to the card's inner edge, as wide as the card inside its
-// 8px frame.
-const LIST = { height: 436, width: PANEL.width - 16, x: PANEL.x + 8, y: 112 };
+const ROW_WIDTH = 314;
+// The list area: from under the tabs to the card's inner edge, from the card's 8px frame to
+// 2px short of the scrollbar's track.
+const LIST = { height: 436, width: 322, x: PANEL.x + 8, y: 112 };
 
 export const SHOP_LAYOUT = {
-  band: { height: 22, inset: 6, titleX: 16, titleY: 6 },
+  band: { height: 24, inset: 6, titleX: 16, titleY: 7 },
   close: closeControl(PANEL),
   // The Dogs tab: the slot heading and rows, then the dog heading and rows.
   dogs: {
@@ -60,19 +60,10 @@ export const SHOP_LAYOUT = {
     width: ROW_WIDTH,
     x: ROW_X,
   },
-  // Beside a list longer than the view: a thumb in plum with an edge-wide ink edge, thumbWidth
-  // wide, inset from the panel's right edge and at least thumbMin tall, on a trackWidth-wide
-  // tan track, centred under it and as tall as the list area.
-  scrollbar: {
-    edge: 1,
-    edgeColor: "ink",
-    inset: 2,
-    thumbColor: "plum",
-    thumbMin: 16,
-    thumbWidth: 5,
-    trackColor: "tan",
-    trackWidth: 3,
-  },
+  // Beside a list longer than the view: a trackWidth-wide track at x, as tall as the list area,
+  // and in it a thumbWidth-wide thumb thumbInset inside the track's edges, at least thumbMin
+  // tall.
+  scrollbar: { thumbInset: 1, thumbMin: 16, thumbWidth: 6, trackWidth: 8, x: 336 },
   tab: { drawHeight: 28, drawY: 80, gap: 8, height: 44, width: 160, x: ROW_X, y: 72 },
 } as const;
 
@@ -98,29 +89,24 @@ export function shopListBottom(
 }
 
 // The scrollbar's track and thumb for a list max pixels taller than its view, scrolled y, or
-// null for a list that fits. The thumb is as tall a share of the track as the view is of the
-// list.
+// null for a list that fits. The thumb is as tall a share of the track's inside as the view is
+// of the list.
 export function shopScrollbar(max: number, y: number): { thumb: Rect; track: Rect } | null {
   if (max <= 0) {
     return null;
   }
-  const { inset, thumbMin, thumbWidth, trackWidth } = SHOP_LAYOUT.scrollbar;
-  const thumbX = PANEL.x + PANEL.width - inset - thumbWidth;
-  const height = Math.max(thumbMin, Math.round((LIST.height * LIST.height) / (LIST.height + max)));
+  const { thumbInset, thumbMin, thumbWidth, trackWidth, x } = SHOP_LAYOUT.scrollbar;
+  const inner = LIST.height - 2 * thumbInset;
+  const height = Math.max(thumbMin, Math.round((inner * LIST.height) / (LIST.height + max)));
   const share = Math.min(1, Math.max(0, y / max));
   return {
     thumb: {
       height,
       width: thumbWidth,
-      x: thumbX,
-      y: LIST.y + Math.round((LIST.height - height) * share),
+      x: x + thumbInset,
+      y: LIST.y + thumbInset + Math.round((inner - height) * share),
     },
-    track: {
-      height: LIST.height,
-      width: trackWidth,
-      x: thumbX + (thumbWidth - trackWidth) / 2,
-      y: LIST.y,
-    },
+    track: { height: LIST.height, width: trackWidth, x, y: LIST.y },
   };
 }
 

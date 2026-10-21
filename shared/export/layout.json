@@ -1308,8 +1308,8 @@
           "x": 316,
           "y": 0
         },
-        "x": 332,
-        "y": 10
+        "x": 333,
+        "y": 14
       },
       "dots": {
         "centerX": 180,
@@ -1357,7 +1357,7 @@
       },
       "heading": {
         "x": 12,
-        "y": 15
+        "y": 19
       },
       "illustration": {
         "height": 236,
@@ -1403,9 +1403,9 @@
       },
       "card": {
         "band": {
-          "height": 22,
+          "height": 24,
           "inset": 6,
-          "titleY": 6
+          "titleY": 7
         },
         "besideDy": 4,
         "besideX": 90,
@@ -1413,14 +1413,14 @@
         "padlock": {
           "scale": 2,
           "x": 8,
-          "y": 29
+          "y": 31
         },
         "rowGap": 8,
         "well": {
           "picture": 2,
           "size": 68,
           "x": 12,
-          "y": 34
+          "y": 36
         },
         "width": 300
       },
@@ -1982,8 +1982,8 @@
           "x": 316,
           "y": 0
         },
-        "x": 332,
-        "y": 10
+        "x": 333,
+        "y": 9
       },
       "panel": {
         "width": 248,
@@ -2051,10 +2051,10 @@
     },
     "shop": {
       "band": {
-        "height": 22,
+        "height": 24,
         "inset": 6,
         "titleX": 16,
-        "titleY": 6
+        "titleY": 7
       },
       "close": {
         "hit": {
@@ -2064,7 +2064,7 @@
           "y": 44
         },
         "x": 328,
-        "y": 54
+        "y": 52
       },
       "dogs": {
         "dogHeadingY": 236,
@@ -2088,14 +2088,14 @@
           "y": 136
         }
       },
-      "headingRight": 344,
+      "headingRight": 330,
       "headingX": 16,
       "list": {
         "padBottom": 8,
         "pageOverlap": 48,
         "rect": {
           "height": 436,
-          "width": 336,
+          "width": 322,
           "x": 12,
           "y": 112
         }
@@ -2104,7 +2104,7 @@
         "frame": 3,
         "plate": {
           "height": 28,
-          "width": 336,
+          "width": 322,
           "x": 12,
           "y": 112
         },
@@ -2130,18 +2130,15 @@
         "plateInset": 6,
         "textDx": 46,
         "textGap": 6,
-        "width": 328,
+        "width": 314,
         "x": 16
       },
       "scrollbar": {
-        "edge": 1,
-        "edgeColor": "ink",
-        "inset": 2,
-        "thumbColor": "plum",
+        "thumbInset": 1,
         "thumbMin": 16,
-        "thumbWidth": 5,
-        "trackColor": "tan",
-        "trackWidth": 3
+        "thumbWidth": 6,
+        "trackWidth": 8,
+        "x": 336
       },
       "tab": {
         "drawHeight": 28,
@@ -2175,8 +2172,8 @@
           "x": 316,
           "y": 0
         },
-        "x": 332,
-        "y": 10
+        "x": 333,
+        "y": 9
       },
       "detail": {
         "height": 268,
