@@ -37,7 +37,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 120
+    "duration": 60
    },
    "dog-koda@62 5.aseprite": {
     "frame": { "x": 180, "y": 0, "w": 36, "h": 36 },
@@ -45,7 +45,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 120
+    "duration": 60
    },
    "dog-koda@62 6.aseprite": {
     "frame": { "x": 216, "y": 0, "w": 36, "h": 36 },
@@ -53,7 +53,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 160
+    "duration": 60
    },
    "dog-koda@62 7.aseprite": {
     "frame": { "x": 252, "y": 0, "w": 36, "h": 36 },
@@ -61,7 +61,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 160
+    "duration": 60
    },
    "dog-koda@62 8.aseprite": {
     "frame": { "x": 288, "y": 0, "w": 36, "h": 36 },
@@ -69,7 +69,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 250
+    "duration": 80
    },
    "dog-koda@62 9.aseprite": {
     "frame": { "x": 324, "y": 0, "w": 36, "h": 36 },
@@ -77,7 +77,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 250
+    "duration": 80
    },
    "dog-koda@62 10.aseprite": {
     "frame": { "x": 360, "y": 0, "w": 36, "h": 36 },
@@ -85,7 +85,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 300
+    "duration": 80
    },
    "dog-koda@62 11.aseprite": {
     "frame": { "x": 396, "y": 0, "w": 36, "h": 36 },
@@ -93,7 +93,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 300
+    "duration": 80
    },
    "dog-koda@62 12.aseprite": {
     "frame": { "x": 432, "y": 0, "w": 36, "h": 36 },
@@ -101,7 +101,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 300
+    "duration": 125
    },
    "dog-koda@62 13.aseprite": {
     "frame": { "x": 468, "y": 0, "w": 36, "h": 36 },
@@ -109,7 +109,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 300
+    "duration": 125
    },
    "dog-koda@62 14.aseprite": {
     "frame": { "x": 504, "y": 0, "w": 36, "h": 36 },
@@ -117,7 +117,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 60
+    "duration": 125
    },
    "dog-koda@62 15.aseprite": {
     "frame": { "x": 540, "y": 0, "w": 36, "h": 36 },
@@ -125,7 +125,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 60
+    "duration": 125
    },
    "dog-koda@62 16.aseprite": {
     "frame": { "x": 576, "y": 0, "w": 36, "h": 36 },
@@ -133,10 +133,58 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
     "sourceSize": { "w": 36, "h": 36 },
-    "duration": 60
+    "duration": 300
    },
    "dog-koda@62 17.aseprite": {
     "frame": { "x": 612, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 300
+   },
+   "dog-koda@62 18.aseprite": {
+    "frame": { "x": 648, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 300
+   },
+   "dog-koda@62 19.aseprite": {
+    "frame": { "x": 684, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 300
+   },
+   "dog-koda@62 20.aseprite": {
+    "frame": { "x": 720, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 60
+   },
+   "dog-koda@62 21.aseprite": {
+    "frame": { "x": 756, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 60
+   },
+   "dog-koda@62 22.aseprite": {
+    "frame": { "x": 792, "y": 0, "w": 36, "h": 36 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
+    "sourceSize": { "w": 36, "h": 36 },
+    "duration": 60
+   },
+   "dog-koda@62 23.aseprite": {
+    "frame": { "x": 828, "y": 0, "w": 36, "h": 36 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 36, "h": 36 },
@@ -149,15 +197,15 @@
   "version": "1.2.30-x64",
   "image": "dog-koda@62.png",
   "format": "RGBA8888",
-  "size": { "w": 648, "h": 36 },
+  "size": { "w": 864, "h": 36 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "react", "from": 4, "to": 5, "direction": "forward" },
-   { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
-   { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
-   { "name": "idle", "from": 10, "to": 13, "direction": "forward" },
-   { "name": "shake", "from": 14, "to": 17, "direction": "forward" }
+   { "name": "react", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "pull", "from": 8, "to": 11, "direction": "forward" },
+   { "name": "tell", "from": 12, "to": 15, "direction": "forward" },
+   { "name": "idle", "from": 16, "to": 19, "direction": "forward" },
+   { "name": "shake", "from": 20, "to": 23, "direction": "forward" }
   ]
  }
 }

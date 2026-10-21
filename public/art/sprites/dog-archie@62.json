@@ -37,7 +37,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 120
+    "duration": 60
    },
    "dog-archie@62 5.aseprite": {
     "frame": { "x": 150, "y": 0, "w": 30, "h": 30 },
@@ -45,7 +45,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 120
+    "duration": 60
    },
    "dog-archie@62 6.aseprite": {
     "frame": { "x": 180, "y": 0, "w": 30, "h": 30 },
@@ -53,7 +53,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 160
+    "duration": 60
    },
    "dog-archie@62 7.aseprite": {
     "frame": { "x": 210, "y": 0, "w": 30, "h": 30 },
@@ -61,7 +61,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 160
+    "duration": 60
    },
    "dog-archie@62 8.aseprite": {
     "frame": { "x": 240, "y": 0, "w": 30, "h": 30 },
@@ -69,7 +69,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 250
+    "duration": 80
    },
    "dog-archie@62 9.aseprite": {
     "frame": { "x": 270, "y": 0, "w": 30, "h": 30 },
@@ -77,7 +77,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 250
+    "duration": 80
    },
    "dog-archie@62 10.aseprite": {
     "frame": { "x": 300, "y": 0, "w": 30, "h": 30 },
@@ -85,7 +85,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 300
+    "duration": 80
    },
    "dog-archie@62 11.aseprite": {
     "frame": { "x": 330, "y": 0, "w": 30, "h": 30 },
@@ -93,7 +93,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 300
+    "duration": 80
    },
    "dog-archie@62 12.aseprite": {
     "frame": { "x": 360, "y": 0, "w": 30, "h": 30 },
@@ -101,7 +101,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 300
+    "duration": 125
    },
    "dog-archie@62 13.aseprite": {
     "frame": { "x": 390, "y": 0, "w": 30, "h": 30 },
@@ -109,7 +109,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 300
+    "duration": 125
    },
    "dog-archie@62 14.aseprite": {
     "frame": { "x": 420, "y": 0, "w": 30, "h": 30 },
@@ -117,7 +117,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 60
+    "duration": 125
    },
    "dog-archie@62 15.aseprite": {
     "frame": { "x": 450, "y": 0, "w": 30, "h": 30 },
@@ -125,7 +125,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 60
+    "duration": 125
    },
    "dog-archie@62 16.aseprite": {
     "frame": { "x": 480, "y": 0, "w": 30, "h": 30 },
@@ -133,7 +133,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 60
+    "duration": 300
    },
    "dog-archie@62 17.aseprite": {
     "frame": { "x": 510, "y": 0, "w": 30, "h": 30 },
@@ -141,7 +141,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 60
+    "duration": 300
    },
    "dog-archie@62 18.aseprite": {
     "frame": { "x": 540, "y": 0, "w": 30, "h": 30 },
@@ -149,7 +149,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 90
+    "duration": 300
    },
    "dog-archie@62 19.aseprite": {
     "frame": { "x": 570, "y": 0, "w": 30, "h": 30 },
@@ -157,7 +157,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 90
+    "duration": 300
    },
    "dog-archie@62 20.aseprite": {
     "frame": { "x": 600, "y": 0, "w": 30, "h": 30 },
@@ -165,7 +165,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 90
+    "duration": 60
    },
    "dog-archie@62 21.aseprite": {
     "frame": { "x": 630, "y": 0, "w": 30, "h": 30 },
@@ -173,10 +173,58 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
     "sourceSize": { "w": 30, "h": 30 },
-    "duration": 90
+    "duration": 60
    },
    "dog-archie@62 22.aseprite": {
     "frame": { "x": 660, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 60
+   },
+   "dog-archie@62 23.aseprite": {
+    "frame": { "x": 690, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 60
+   },
+   "dog-archie@62 24.aseprite": {
+    "frame": { "x": 720, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 90
+   },
+   "dog-archie@62 25.aseprite": {
+    "frame": { "x": 750, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 90
+   },
+   "dog-archie@62 26.aseprite": {
+    "frame": { "x": 780, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 90
+   },
+   "dog-archie@62 27.aseprite": {
+    "frame": { "x": 810, "y": 0, "w": 30, "h": 30 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
+    "sourceSize": { "w": 30, "h": 30 },
+    "duration": 90
+   },
+   "dog-archie@62 28.aseprite": {
+    "frame": { "x": 840, "y": 0, "w": 30, "h": 30 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 30, "h": 30 },
@@ -189,16 +237,16 @@
   "version": "1.2.30-x64",
   "image": "dog-archie@62.png",
   "format": "RGBA8888",
-  "size": { "w": 690, "h": 30 },
+  "size": { "w": 870, "h": 30 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "react", "from": 4, "to": 5, "direction": "forward" },
-   { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
-   { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
-   { "name": "idle", "from": 10, "to": 13, "direction": "forward" },
-   { "name": "shake", "from": 14, "to": 17, "direction": "forward" },
-   { "name": "flourish", "from": 18, "to": 22, "direction": "forward" }
+   { "name": "react", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "pull", "from": 8, "to": 11, "direction": "forward" },
+   { "name": "tell", "from": 12, "to": 15, "direction": "forward" },
+   { "name": "idle", "from": 16, "to": 19, "direction": "forward" },
+   { "name": "shake", "from": 20, "to": 23, "direction": "forward" },
+   { "name": "flourish", "from": 24, "to": 28, "direction": "forward" }
   ]
  }
 }

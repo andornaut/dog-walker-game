@@ -37,7 +37,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 120
+    "duration": 60
    },
    "dog-nugget 5.aseprite": {
     "frame": { "x": 190, "y": 0, "w": 38, "h": 38 },
@@ -45,7 +45,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 120
+    "duration": 60
    },
    "dog-nugget 6.aseprite": {
     "frame": { "x": 228, "y": 0, "w": 38, "h": 38 },
@@ -53,7 +53,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 160
+    "duration": 60
    },
    "dog-nugget 7.aseprite": {
     "frame": { "x": 266, "y": 0, "w": 38, "h": 38 },
@@ -61,7 +61,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 160
+    "duration": 60
    },
    "dog-nugget 8.aseprite": {
     "frame": { "x": 304, "y": 0, "w": 38, "h": 38 },
@@ -69,7 +69,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 250
+    "duration": 80
    },
    "dog-nugget 9.aseprite": {
     "frame": { "x": 342, "y": 0, "w": 38, "h": 38 },
@@ -77,7 +77,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 250
+    "duration": 80
    },
    "dog-nugget 10.aseprite": {
     "frame": { "x": 380, "y": 0, "w": 38, "h": 38 },
@@ -85,7 +85,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 300
+    "duration": 80
    },
    "dog-nugget 11.aseprite": {
     "frame": { "x": 418, "y": 0, "w": 38, "h": 38 },
@@ -93,7 +93,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 300
+    "duration": 80
    },
    "dog-nugget 12.aseprite": {
     "frame": { "x": 456, "y": 0, "w": 38, "h": 38 },
@@ -101,7 +101,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 300
+    "duration": 125
    },
    "dog-nugget 13.aseprite": {
     "frame": { "x": 494, "y": 0, "w": 38, "h": 38 },
@@ -109,7 +109,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 300
+    "duration": 125
    },
    "dog-nugget 14.aseprite": {
     "frame": { "x": 532, "y": 0, "w": 38, "h": 38 },
@@ -117,7 +117,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 60
+    "duration": 125
    },
    "dog-nugget 15.aseprite": {
     "frame": { "x": 570, "y": 0, "w": 38, "h": 38 },
@@ -125,7 +125,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 60
+    "duration": 125
    },
    "dog-nugget 16.aseprite": {
     "frame": { "x": 608, "y": 0, "w": 38, "h": 38 },
@@ -133,7 +133,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 60
+    "duration": 300
    },
    "dog-nugget 17.aseprite": {
     "frame": { "x": 646, "y": 0, "w": 38, "h": 38 },
@@ -141,7 +141,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 60
+    "duration": 300
    },
    "dog-nugget 18.aseprite": {
     "frame": { "x": 684, "y": 0, "w": 38, "h": 38 },
@@ -149,7 +149,7 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 220
+    "duration": 300
    },
    "dog-nugget 19.aseprite": {
     "frame": { "x": 722, "y": 0, "w": 38, "h": 38 },
@@ -157,10 +157,58 @@
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
     "sourceSize": { "w": 38, "h": 38 },
-    "duration": 220
+    "duration": 300
    },
    "dog-nugget 20.aseprite": {
     "frame": { "x": 760, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 60
+   },
+   "dog-nugget 21.aseprite": {
+    "frame": { "x": 798, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 60
+   },
+   "dog-nugget 22.aseprite": {
+    "frame": { "x": 836, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 60
+   },
+   "dog-nugget 23.aseprite": {
+    "frame": { "x": 874, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 60
+   },
+   "dog-nugget 24.aseprite": {
+    "frame": { "x": 912, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 220
+   },
+   "dog-nugget 25.aseprite": {
+    "frame": { "x": 950, "y": 0, "w": 38, "h": 38 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
+    "sourceSize": { "w": 38, "h": 38 },
+    "duration": 220
+   },
+   "dog-nugget 26.aseprite": {
+    "frame": { "x": 988, "y": 0, "w": 38, "h": 38 },
     "rotated": false,
     "trimmed": false,
     "spriteSourceSize": { "x": 0, "y": 0, "w": 38, "h": 38 },
@@ -173,16 +221,16 @@
   "version": "1.2.30-x64",
   "image": "dog-nugget.png",
   "format": "RGBA8888",
-  "size": { "w": 798, "h": 38 },
+  "size": { "w": 1026, "h": 38 },
   "scale": "1",
   "frameTags": [
    { "name": "walk", "from": 0, "to": 3, "direction": "forward" },
-   { "name": "react", "from": 4, "to": 5, "direction": "forward" },
-   { "name": "pull", "from": 6, "to": 7, "direction": "forward" },
-   { "name": "tell", "from": 8, "to": 9, "direction": "forward" },
-   { "name": "idle", "from": 10, "to": 13, "direction": "forward" },
-   { "name": "shake", "from": 14, "to": 17, "direction": "forward" },
-   { "name": "pose", "from": 18, "to": 20, "direction": "forward" }
+   { "name": "react", "from": 4, "to": 7, "direction": "forward" },
+   { "name": "pull", "from": 8, "to": 11, "direction": "forward" },
+   { "name": "tell", "from": 12, "to": 15, "direction": "forward" },
+   { "name": "idle", "from": 16, "to": 19, "direction": "forward" },
+   { "name": "shake", "from": 20, "to": 23, "direction": "forward" },
+   { "name": "pose", "from": 24, "to": 26, "direction": "forward" }
   ]
  }
 }

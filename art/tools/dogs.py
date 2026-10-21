@@ -10,8 +10,9 @@ Each dog gets two sprites in Endesga 32 with coloured outlines:
   functions take 32-unit design coordinates and run on a minis.Mini at road_scale(name) (the side / 32),
   which keeps 1px lines and single pixels 1px; features drawn pixel by pixel take trail()
   or their own map at that size (HACKLES_BIG), so they stay unbroken. Tags: walk (4
-  frames), react (2), pull (2, leaning right; the game mirrors it for left),
-  tell (2, the lean before a pull; the game adds the fx-bark pop), idle (4,
+  frames, 150ms), react (4, 60ms: a startled hop), pull (4, 80ms, leaning right and
+  scrabbling; the game mirrors it for left), tell (4, 125ms, the lean before a pull; the
+  game adds the fx-bark pop), idle (4,
   standing while the walk pauses: a slow tail wag, a 1px breath and a twitch of the right ear)
   and shake (4, a quick shake-off after an encounter hit, throwing droplets).
   A dog with a quirk has its quirk's tags after these (QUIRK_TAGS):
@@ -59,17 +60,29 @@ WALK = [
     dict(fl=1, fr=-1, bl=-1, br=1, bob=0, tail=1),
     dict(fl=0, fr=0, bl=0, br=0, bob=-1, tail=0, flop=1),
 ]
+# Startled by a hit: a spring up, the top of the jump with the legs tucked, the fall with the ears floating
+# 1px behind, and the landing; 4 frames at 60ms.
 REACT = [
+    dict(fl=-2, fr=-2, bl=-1, br=-1, bob=-2, tail=0, ears=-1),
     dict(fl=-4, fr=-4, bl=-3, br=-3, bob=-3, tail=0, ears=-1),
+    dict(fl=-2, fr=-2, bl=-2, br=-2, bob=-2, tail=0, ears=-1, flop=-1),
     dict(fl=-1, fr=-1, bl=-1, br=-1, bob=-1, tail=0, ears=-1),
 ]
+# Straining at the leash, leaning right: the front paws scrabble one after the other with the hind legs
+# dug in, the lean surging 2px and 3px and the tail flicking; 4 frames at 80ms.
 PULL = [
     dict(fl=-1, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=2),
     dict(fl=-2, fr=-1, bl=1, br=1, bob=0, tail=-2, lean=3),
+    dict(fl=-1, fr=-2, bl=1, br=1, bob=0, tail=-1, lean=3),
+    dict(fl=-2, fr=-2, bl=1, br=1, bob=0, tail=-2, lean=2),
 ]
+# The tell before a pull: the dog leans toward what it wants, rising on its toes and settling, the tail
+# wagging high and the right ear flicking; 4 frames at 125ms.
 TELL = [
     dict(bob=0, tail=1, lean=1, ears=-1),
-    dict(bob=-1, tail=1, lean=2, ears=-1),
+    dict(bob=-1, tail=2, lean=2, ears=-1),
+    dict(bob=-1, tail=1, lean=2, ears=-1, twitch=-1),
+    dict(bob=0, tail=2, lean=1, ears=-1),
 ]
 # Standing still: the tail swings across and back, the body breathes 1px up over the middle two beats with
 # the feet planted, and the right ear lifts 1px as the tail comes home.
@@ -89,7 +102,7 @@ SHAKE = [
     dict(lean=2, tail=-1, ears=1),
 ]
 # Idle and shake go last so the frame indices of the other tags stay put.
-ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 120), ("pull", PULL, 160), ("tell", TELL, 250), ("idle", IDLE, 300),
+ROAD_TAGS = [("walk", WALK, 150), ("react", REACT, 60), ("pull", PULL, 80), ("tell", TELL, 125), ("idle", IDLE, 300),
              ("shake", SHAKE, 60)]
 FACE_TAGS = ["happy", "neutral", "upset"]
 
