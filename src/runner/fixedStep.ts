@@ -3,9 +3,12 @@
 // every whole step that fits, so a slow frame runs more steps and the walk keeps to real time.
 // A frame longer than maxFrameMs banks only maxFrameMs: after a stall the walk does not lurch
 // ahead, and a device too slow to run the steps cannot fall further and further behind.
+// timeScale multiplies the time each frame banks (1 when absent): the dev panel's slow motion
+// and fast forward.
 export interface FixedStepLimits {
   readonly maxFrameMs: number;
   readonly stepMs: number;
+  readonly timeScale?: number;
 }
 
 // bankedMs is wall-clock time not yet stepped; lastTimeMs the last frame's timestamp, or null
@@ -32,7 +35,7 @@ export const startStepClock: StepClock = { bankedMs: 0, lastTimeMs: null };
 // 120 frames after it regains focus or visibility, so a slow device would lose real time.
 export function frameSteps(limits: FixedStepLimits, timeMs: number, clock: StepClock): FrameSteps {
   const frameMs = clock.lastTimeMs === null ? 0 : Math.max(0, timeMs - clock.lastTimeMs);
-  const banked = clock.bankedMs + Math.min(limits.maxFrameMs, frameMs);
+  const banked = clock.bankedMs + Math.min(limits.maxFrameMs, frameMs) * (limits.timeScale ?? 1);
   // A step is due within a rounding error of its length: 1000 / 60 does not sum exactly.
   const steps = Math.floor(banked / limits.stepMs + 1e-9);
   return {

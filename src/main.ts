@@ -4,14 +4,9 @@ import { AUTO, Core, Game, Scale } from "phaser";
 
 import { installCrashScreen } from "./crash/crashScreen";
 import { SCREEN_CONFIG } from "./data/screen";
-import {
-  DEV_OVERLAY_TOGGLE_EVENT,
-  DEV_OVERLAY_VISIBLE_KEY,
-  DEV_ROAD_FADE_KEY,
-  DEV_STATE_EVENT,
-  type DevState,
-} from "./dev/devOverlay";
-import { type DevPanelHost, mountDevPanel } from "./dev/devPanel";
+import { DEV_OVERLAY_TOGGLE_EVENT, DEV_ROAD_FADE_KEY } from "./dev/devOverlay";
+import { applyPendingSaveEdits, type DevPanelHost, mountDevPanel } from "./dev/devPanel";
+import { DEV_CHEATS_KEY } from "./dev/devPanelModel";
 import { pageRunSetup, resetDevMode } from "./dev/pageRunSetup";
 import { noteKeyPress } from "./input/keyNumbers";
 import { lostTouches } from "./input/touches";
@@ -46,34 +41,19 @@ installCrashScreen({
   },
 });
 
-// The dev panel's view of the game. The panel asks the overlay to show or hide by an event, and
-// reads its visibility from the registry, which the backquote toggle also updates, so each
-// control sees the other's change. The road fade is a registry flag RunScene reads each frame.
+// The dev panel's view of the game. The cheats and the road fade are registry entries RunScene
+// reads each frame; the overlay hides on an event.
 function devPanelHost(game: Game): DevPanelHost {
-  let devState: DevState | undefined;
-  game.events.on(DEV_STATE_EVENT, (state: DevState) => {
-    devState = state;
-  });
   return {
-    currentSetup: () => devState?.setup ?? pageRunSetup().setup,
-    // Unset until the overlay scene has run create, which shows it when the URL has dev=1.
-    overlayVisible: () =>
-      (game.registry.get(DEV_OVERLAY_VISIBLE_KEY) as boolean | undefined) ??
-      pageRunSetup().setup.dev,
     // The panel does not use `dogWalkerGame`, and dev mode is off now, so the console handle goes.
-    reset: () => {
+    clearDevMode: () => {
       resetDevMode();
-      devState = undefined;
       game.events.emit(DEV_OVERLAY_TOGGLE_EVENT, false);
       game.registry.set(DEV_ROAD_FADE_KEY, false);
       Reflect.deleteProperty(globalThis, "dogWalkerGame");
     },
-    roadFade: () => game.registry.get(DEV_ROAD_FADE_KEY) === true,
-    setOverlayVisible: (visible) => {
-      game.events.emit(DEV_OVERLAY_TOGGLE_EVENT, visible);
-    },
-    setRoadFade: (on) => {
-      game.registry.set(DEV_ROAD_FADE_KEY, on);
+    setCheats: (cheats) => {
+      game.registry.set(DEV_CHEATS_KEY, cheats);
     },
   };
 }
@@ -177,7 +157,10 @@ function bootGame(): Game {
 }
 
 // The game boots once the service worker has had the chance to switch a fresh load to a newer
-// version, so it never draws the old one first.
-void setupPhoneApp().then(() => {
-  game = bootGame();
-});
+// version, so it never draws the old one first, and once the dev panel's queued save edits are
+// written, so the game loads the edited save.
+void setupPhoneApp()
+  .then(applyPendingSaveEdits)
+  .then(() => {
+    game = bootGame();
+  });

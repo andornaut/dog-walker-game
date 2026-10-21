@@ -42,11 +42,8 @@
     calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
   border-top: 2px solid var(--dev-accent);
   background: var(--dev-bg);
-  /* The page turns these off for the game; the sheet scrolls the page and its text can be
-     selected. */
+  /* The page turns these off for the game; the sheet scrolls the page. */
   touch-action: pan-y;
-  -webkit-user-select: text;
-  user-select: text;
 }
 
 .dev-sheet[hidden] {
@@ -63,21 +60,47 @@
   top: 0;
   /* Above the faded controls, whose opacity puts them in their own stacking contexts. */
   z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   padding: 8px 0;
   border-bottom: 1px solid var(--dev-line);
   background: var(--dev-bg);
 }
 
-.dev-header strong {
-  color: var(--dev-accent);
-  font-size: 15px;
+/* Two halves of one switch: the pressed half is the state. */
+.dev-switch {
+  display: flex;
+}
+
+.dev-switch .dev-button {
+  flex: 1;
+}
+
+.dev-switch .dev-button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.dev-switch .dev-button:last-child {
+  border-left: 0;
+  border-radius: 0 4px 4px 0;
+}
+
+.dev-switch .dev-button[aria-pressed="true"] {
+  background: var(--dev-accent);
+  color: var(--dev-bg);
+  font-weight: 700;
+}
+
+.dev-cheats {
+  margin: 0;
+  padding: 8px 0;
+  border: 0;
+}
+
+.dev-cheats:disabled {
+  opacity: 0.4;
 }
 
 .dev-sheet h2 {
-  margin: 16px 0 8px;
+  margin: 12px 0 8px;
   color: var(--dev-accent);
   font-size: 12px;
   letter-spacing: 0.06em;
@@ -119,41 +142,11 @@
   outline: none;
 }
 
-input.dev-field[readonly] {
-  width: 100%;
-  margin-top: 8px;
-}
-
-.dev-log {
-  width: 100%;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  resize: vertical;
-}
-
-.dev-pack {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 4px 8px;
-  margin: 8px 0;
-  padding: 6px 8px 8px;
-  border: 1px solid var(--dev-line);
-  border-radius: 4px;
-}
-
-.dev-pack legend {
-  padding: 0 4px;
-}
-
-.dev-pack label,
 .dev-check {
   display: flex;
   align-items: center;
   gap: 6px;
   min-height: 32px;
-}
-
-.dev-pack label:has(input:disabled) {
-  opacity: 0.5;
 }
 
 .dev-sheet input[type="checkbox"] {
@@ -175,16 +168,7 @@ input.dev-field[readonly] {
 }
 
 .dev-button:disabled {
-  opacity: 0.4;
   cursor: default;
-}
-
-.dev-primary {
-  width: 100%;
-  margin-top: 4px;
-  background: var(--dev-accent);
-  color: var(--dev-bg);
-  font-weight: 700;
 }
 
 .dev-danger {
@@ -198,37 +182,7 @@ input.dev-field[readonly] {
   gap: 8px;
 }
 
-.dev-warnings {
-  margin: 6px 0;
-  padding-left: 18px;
-  color: var(--dev-warn);
-}
-
-.dev-warnings:empty {
-  display: none;
-}
-
-.dev-note {
-  margin: 6px 0;
-}
-
-.dev-note:empty {
-  display: none;
-}
-
-.dev-note code {
-  overflow-wrap: anywhere;
-  color: var(--dev-accent);
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
-}
-
-.dev-readout {
-  margin: 0 0 8px;
-  padding: 8px;
-  border: 1px solid var(--dev-line);
-  border-radius: 4px;
-  font-family: ui-monospace, Menlo, Consolas, monospace;
-  font-size: 12px;
-  white-space: pre-wrap;
+.dev-footer {
+  padding-top: 12px;
+  border-top: 1px solid var(--dev-line);
 }

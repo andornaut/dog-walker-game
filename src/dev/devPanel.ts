@@ -1,44 +1,43 @@
-// The dev panel: plain HTML under the game canvas. A thin bar that opens a sheet with the run
-// setup, the overlay toggle, the run link, replay and save tools. The game reaches it only
-// through DevPanelHost, so this module needs no Phaser.
+// The dev panel: plain HTML under the game canvas. A thin bar that opens a sheet of cheats for
+// a person testing the game. The game reaches it only through DevPanelHost, so this module
+// needs no Phaser.
 import "./devPanel.css";
 
 import { gameData } from "../data";
-import { cents } from "../rules/units";
-import { loadSave, saveContextFrom } from "../save/load";
-import type { SaveDocument } from "../save/schema";
-import { browserStorage, SAVE_KEY, type SaveStore, saveStore } from "../save/storage";
+import type { ZoneId } from "../data/types";
+import { saveContextFrom } from "../save/load";
+import { browserStorage, saveStore } from "../save/storage";
 import {
-  addMoney,
-  checkRunForm,
-  describeLastLog,
-  DEV_LAST_LOG_KEY,
+  applySaveEdit,
+  CHEAT_TOGGLES,
+  type Cheats,
+  CHEATS_OFF,
+  cheatsOn,
+  decodeCheats,
+  decodeSaveEdits,
+  DEV_CHEATS_KEY,
   DEV_PANEL_OPEN_KEY,
-  DEV_REPLAY_KEY,
-  type DevRunForm,
-  formFromSetup,
-  planReplay,
-  SAVED_LOADOUT,
-  saveReadoutLines,
-  unlockAll,
+  DEV_SAVE_EDITS_KEY,
+  encodeCheats,
+  encodeSaveEdits,
+  RESET_SAVE,
+  SAVE_CHEATS,
+  type SaveEdit,
+  setCheat,
+  startAtSetup,
+  startChoices,
 } from "./devPanelModel";
-import { INPUT_LOG_VERSION } from "./inputLog";
-import { pageRunSetup, runSetupLimitsFor } from "./pageRunSetup";
-import { NO_GEAR, randomSeed, type RunSetup, runSetupLink } from "./runSetup";
+import { stripDevParams } from "./devStart";
+import { pageRunSetup } from "./pageRunSetup";
+import { randomSeed, runSetupLink } from "./runSetup";
 
 export interface DevPanelHost {
-  // The running scene's setup once it reports one, else the URL's.
-  currentSetup(): RunSetup;
-  overlayVisible(): boolean;
-  // Clears every dev cheat (run overrides, dev mode, overlay, road fade) on the current screen.
-  reset(): void;
-  roadFade(): boolean;
-  setOverlayVisible(visible: boolean): void;
-  setRoadFade(on: boolean): void;
+  // Turns dev mode off on the current screen: the URL's run overrides and `dev`, the overlay,
+  // the road fade and the console handle.
+  clearDevMode(): void;
+  // Hands the game the cheats it plays by.
+  setCheats(cheats: Cheats): void;
 }
-
-const BANK_TOP_UP = cents(100_000);
-const STORAGE_UNAVAILABLE = "storage unavailable";
 
 type Props<K extends keyof HTMLElementTagNameMap> = Partial<
   Omit<HTMLElementTagNameMap[K], "style">
@@ -60,44 +59,12 @@ function button(text: string, onClick: () => void, className = "dev-button"): HT
   return element;
 }
 
-function textInput(value: string, inputMode: string, placeholder = ""): HTMLInputElement {
-  return el("input", {
-    autocomplete: "off",
-    className: "dev-field",
-    inputMode,
-    placeholder,
-    spellcheck: false,
-    type: "text",
-    value,
-  });
-}
-
-function row(label: string, ...controls: Node[]): HTMLLabelElement {
-  return el("label", { className: "dev-row" }, el("span", { textContent: label }), ...controls);
-}
-
-function section(title: string, ...children: Node[]): HTMLElement {
-  return el("section", {}, el("h2", { textContent: title }), ...children);
-}
-
-function note(...children: (Node | string)[]): HTMLParagraphElement {
-  return el("p", { className: "dev-note" }, ...children);
-}
-
-function code(text: string): HTMLElement {
-  return el("code", { textContent: text });
-}
-
-function listInto(list: HTMLUListElement, items: readonly string[]): void {
-  list.replaceChildren(...items.map((item) => el("li", { textContent: item })));
-}
-
-// undefined when sessionStorage is unavailable, null when the key is unset.
-function sessionRead(key: string): string | null | undefined {
+// null when sessionStorage is unavailable or the key is unset.
+function sessionRead(key: string): string | null {
   try {
     return sessionStorage.getItem(key);
   } catch {
-    return undefined;
+    return null;
   }
 }
 
@@ -110,382 +77,81 @@ function sessionWrite(key: string, value: string): boolean {
   }
 }
 
-function playPageUrl(): string {
-  return new URL("/play/", globalThis.location.href).href;
-}
-
-function runSection(): { element: HTMLElement; refresh: () => void } {
-  const parsedUrl = pageRunSetup();
-  const { setup } = parsedUrl;
-  const urlWarnings = [...parsedUrl.warnings, ...parsedUrl.notices];
-  const limits = runSetupLimitsFor(gameData);
-  const initial = formFromSetup(setup);
-
-  const seed = textInput(initial.seed, "numeric");
-  // In the order they were checked, which is the pack's slot order.
-  let pack = [...initial.pack];
-  const dogs = limits.dogIds.map((id) => {
-    const box = el("input", { checked: pack.includes(id), type: "checkbox", value: id });
-    return { box, label: el("label", { title: id }, box, gameData.dogs[id].name) };
-  });
-  const gear = el(
-    "select",
-    { className: "dev-field" },
-    el("option", { textContent: "saved loadout", value: SAVED_LOADOUT }),
-    el("option", { textContent: "none", value: NO_GEAR }),
-    ...limits.gearIds.map((id) =>
-      el("option", { textContent: gameData.shopGear[id].name, value: id }),
-    ),
-  );
-  gear.value = initial.gear;
-  const zone = el(
-    "select",
-    { className: "dev-field" },
-    ...Array.from({ length: limits.zoneCount }, (_, index) =>
-      el("option", { textContent: String(index + 1), value: String(index + 1) }),
-    ),
-  );
-  zone.value = initial.zone;
-  const money = textInput(initial.moneyDollars, "decimal", "gear's starting money");
-  const speed = textInput(initial.speed, "decimal", "1");
-  const dev = el("input", { checked: initial.dev, type: "checkbox" });
-  const warnings = el("ul", { className: "dev-warnings" });
-  const start = el("button", {
-    className: "dev-button dev-primary",
-    textContent: "Start run",
-    type: "submit",
-  });
-
-  const read = (): DevRunForm => ({
-    dev: dev.checked,
-    gear: gear.value,
-    moneyDollars: money.value,
-    pack,
-    seed: seed.value,
-    speed: speed.value,
-    zone: zone.value,
-  });
-  const update = () => {
-    const checked = checkRunForm(limits, read());
-    listInto(warnings, checked.warnings);
-    start.disabled = checked.warnings.length > 0;
-    dogs.forEach(({ box }) => {
-      box.disabled = !box.checked && pack.length >= limits.maxPackSize;
-    });
-  };
-
-  // A box's own listener runs before the form's, so update sees the new pack.
-  dogs.forEach(({ box }) => {
-    box.addEventListener("change", () => {
-      pack = box.checked ? [...pack, box.value] : pack.filter((id) => id !== box.value);
-    });
-  });
-  const form = el(
-    "form",
-    { noValidate: true },
-    row(
-      "seed",
-      seed,
-      button("random", () => {
-        seed.value = String(randomSeed());
-        update();
-      }),
-    ),
-    el(
-      "fieldset",
-      { className: "dev-pack" },
-      el("legend", { textContent: `pack (1 to ${limits.maxPackSize}; none: saved loadout)` }),
-      ...dogs.map(({ label }) => label),
-    ),
-    row("gear", gear),
-    row("zone", zone),
-    row("money $", money),
-    row("speed x", speed),
-    el("label", { className: "dev-check" }, dev, "show overlay on start (dev=1)"),
-    warnings,
-    start,
-  );
-  form.addEventListener("input", update);
-  form.addEventListener("change", update);
-  form.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const checked = checkRunForm(limits, read());
-    if (checked.warnings.length === 0) {
-      globalThis.location.assign(runSetupLink(playPageUrl(), checked.setup));
-    }
-  });
-  update();
-
-  // Fills the form from the page's setup again, as after a reset cleared the overrides.
-  const refresh = () => {
-    const fresh = formFromSetup(pageRunSetup().setup);
-    seed.value = fresh.seed;
-    gear.value = fresh.gear;
-    zone.value = fresh.zone;
-    money.value = fresh.moneyDollars;
-    speed.value = fresh.speed;
-    dev.checked = fresh.dev;
-    pack = [...fresh.pack];
-    dogs.forEach(({ box }) => {
-      box.checked = pack.includes(box.value);
-    });
-    listInto(warnings, []);
-    update();
-  };
-
-  const urlNotes: Node[] = [];
-  if (urlWarnings.length > 0) {
-    const list = el("ul", { className: "dev-warnings" });
-    listInto(
-      list,
-      urlWarnings.map((warning) => `URL: ${warning}`),
-    );
-    urlNotes.push(list);
-  }
-  return { element: section("Run setup", ...urlNotes, form), refresh };
-}
-
-function overlaySection(host: DevPanelHost): { element: HTMLElement; refresh: () => void } {
-  const box = el("input", { type: "checkbox" });
-  box.addEventListener("change", () => host.setOverlayVisible(box.checked));
-  const refresh = () => {
-    box.checked = host.overlayVisible();
-  };
-  // The backquote key toggles the overlay too; Phaser has handled it by keyup.
-  globalThis.addEventListener("keyup", (event) => {
-    if (event.code === "Backquote") {
-      refresh();
-    }
-  });
-  const element = section(
-    "Overlay",
-    el("label", { className: "dev-check" }, box, "show the dev overlay"),
-    note("The backquote key also toggles it, and C copies the run link while it shows."),
-  );
-  return { element, refresh };
-}
-
-function roadSection(host: DevPanelHost): { element: HTMLElement; refresh: () => void } {
-  const box = el("input", { type: "checkbox" });
-  box.addEventListener("change", () => host.setRoadFade(box.checked));
-  const refresh = () => {
-    box.checked = host.roadFade();
-  };
-  const element = section(
-    "Road",
-    el("label", { className: "dev-check" }, box, "fade the far road into the backdrop"),
-    note("Dithers the farthest rows of the road into the band's bottom row. Off by default."),
-  );
-  return { element, refresh };
-}
-
-function linkSection(host: DevPanelHost): HTMLElement {
-  const field = el("input", { className: "dev-field", hidden: true, readOnly: true, type: "text" });
-  const status = note();
-  const fallback = (message: string) => {
-    status.textContent = message;
-    field.focus();
-    field.select();
-  };
-  const copy = () => {
-    const link = runSetupLink(globalThis.location.href, host.currentSetup());
-    field.value = link;
-    field.hidden = false;
-    // Undefined outside a secure context, such as the game served over plain http.
-    const clipboard: Clipboard | undefined = globalThis.navigator.clipboard;
-    if (clipboard === undefined) {
-      fallback("No clipboard over http: copy the link from the field.");
-      return;
-    }
-    clipboard.writeText(link).then(
-      () => {
-        status.textContent = "Copied.";
-      },
-      () => fallback("Copy failed: copy the link from the field."),
-    );
-  };
-  return section(
-    "Run link",
-    button("Copy link", copy),
-    field,
-    status,
-    note("The current run's setup with its seed, so the link reproduces it."),
-  );
-}
-
-function downloadText(fileName: string, text: string): void {
-  const url = URL.createObjectURL(new Blob([text], { type: "application/json" }));
-  const anchor = el("a", { download: fileName, href: url });
-  document.body.append(anchor);
-  anchor.click();
-  anchor.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
-
-function replaySection(): { element: HTMLElement; refresh: () => void } {
-  const limits = runSetupLimitsFor(gameData);
-  const input = el("textarea", {
-    className: "dev-field dev-log",
-    placeholder: "Paste an encoded input log",
-    rows: 4,
-    spellcheck: false,
-  });
-  const errors = el("ul", { className: "dev-warnings" });
-  const status = note();
-  const replay = button("Replay", () => {
-    const plan = planReplay(limits, playPageUrl(), input.value);
-    if (!plan.ok) {
-      return;
-    }
-    if (sessionWrite(DEV_REPLAY_KEY, plan.stored)) {
-      globalThis.location.assign(plan.url);
-    } else {
-      status.textContent = STORAGE_UNAVAILABLE;
-    }
-  });
-  const check = () => {
-    const plan = planReplay(limits, playPageUrl(), input.value);
-    replay.disabled = !plan.ok;
-    listInto(errors, plan.ok || input.value.trim() === "" ? [] : plan.errors);
-    status.textContent = plan.ok ? `Valid: seed ${plan.seed}, ${plan.eventCount} inputs.` : "";
-  };
-  input.addEventListener("input", check);
-  check();
-
-  const lastStatus = note();
-  const download = button("Download last run log", () => {
-    const stored = sessionRead(DEV_LAST_LOG_KEY);
-    if (stored === undefined) {
-      lastStatus.textContent = STORAGE_UNAVAILABLE;
-      return;
-    }
-    const last = describeLastLog(limits, stored);
-    if (last.status === "none" || stored === null) {
-      lastStatus.textContent = "No run recorded yet.";
-      return;
-    }
-    downloadText(last.fileName, stored);
-    lastStatus.textContent = `Downloaded ${last.fileName}: ${last.summary}.`;
-  });
-  const refresh = () => {
-    const stored = sessionRead(DEV_LAST_LOG_KEY);
-    if (stored === undefined) {
-      lastStatus.textContent = STORAGE_UNAVAILABLE;
-      return;
-    }
-    const last = describeLastLog(limits, stored);
-    lastStatus.textContent =
-      last.status === "none" ? "No run recorded yet." : `Last run: ${last.summary}.`;
-  };
-
-  const element = section(
-    "Replay",
-    note(
-      "Replay loads the game with the log's setup and plays its lane moves, treats, card " +
-        "choices and heading home at their recorded run times. Live lane moves and treats are " +
-        "ignored during it.",
-    ),
-    input,
-    errors,
-    status,
-    replay,
-    note(
-      "Replay writes sessionStorage ",
-      code(DEV_REPLAY_KEY),
-      ": the log as encodeInputLog writes it, ",
-      code(
-        `{"version":${INPUT_LOG_VERSION},"setup":"seed=…","events":[[timeMs,"l",-1|1] | ` +
-          `[timeMs,"c",index|"skip"] | [timeMs,"t",slot] | [timeMs,"h"]]}`,
-      ),
-      ". The run that plays it removes the key.",
-    ),
-    download,
-    lastStatus,
-    note(
-      "RunScene writes the finished run's log, in the same format, to sessionStorage ",
-      code(DEV_LAST_LOG_KEY),
-      " at run end.",
-    ),
-  );
-  return { element, refresh };
-}
-
-async function editSave(edit: (save: SaveDocument) => SaveDocument): Promise<string> {
+function sessionRemove(key: string): void {
   try {
-    const store: SaveStore = saveStore(browserStorage(globalThis.localStorage));
-    const loaded = await store.load(saveContextFrom(gameData));
-    if (loaded.status === "unavailable") {
-      return STORAGE_UNAVAILABLE;
-    }
-    const saved = await store.save(edit(loaded.save));
-    if (saved.status === "unavailable") {
-      return STORAGE_UNAVAILABLE;
-    }
-    if (saved.status === "invalid") {
-      return `save rejected: ${saved.reason}`;
-    }
+    sessionStorage.removeItem(key);
   } catch {
-    return STORAGE_UNAVAILABLE;
+    // Nothing stored is the same as nothing to remove.
   }
-  globalThis.location.reload();
-  return "saved: reloading";
 }
 
-function saveSection(): { element: HTMLElement; refresh: () => void } {
-  const readout = el("pre", { className: "dev-readout" });
-  const status = note();
-  const refresh = () => {
-    try {
-      const result = loadSave(saveContextFrom(gameData), globalThis.localStorage.getItem(SAVE_KEY));
-      const heading =
-        result.status === "corrupt"
-          ? `the save does not load (${result.reason}); the game starts fresh`
-          : result.status === "new"
-            ? "no save yet: a new player's"
-            : "the stored save";
-      readout.textContent = [heading, ...saveReadoutLines(gameData, result.save)].join("\n");
-    } catch {
-      readout.textContent = STORAGE_UNAVAILABLE;
-    }
-  };
-  const run = (edit: (save: SaveDocument) => SaveDocument) => () => {
-    status.textContent = "saving";
-    void editSave(edit).then((message) => {
-      status.textContent = message;
-    });
-  };
-  const reset = () => {
-    if (!globalThis.confirm("Reset the save? The bank, unlocks and stats are lost.")) {
+// Called before the game boots: the save edits the panel queued are written to the save
+// before the game loads it. They are removed first, so an edit that fails is not retried.
+export async function applyPendingSaveEdits(): Promise<void> {
+  const edits = decodeSaveEdits(sessionRead(DEV_SAVE_EDITS_KEY));
+  sessionRemove(DEV_SAVE_EDITS_KEY);
+  if (edits.length === 0) {
+    return;
+  }
+  try {
+    const context = saveContextFrom(gameData);
+    const store = saveStore(browserStorage(globalThis.localStorage));
+    const loaded = await store.load(context);
+    if (loaded.status === "unavailable") {
+      console.warn(`Dev panel: save edits not applied: ${loaded.reason}`);
       return;
     }
-    try {
-      globalThis.localStorage.removeItem(SAVE_KEY);
-    } catch {
-      status.textContent = STORAGE_UNAVAILABLE;
-      return;
+    const edited = edits.reduce(
+      (save, edit) => applySaveEdit(gameData, context.defaults, edit, save),
+      loaded.save,
+    );
+    const saved = await store.save(edited);
+    if (saved.status !== "saved") {
+      console.warn(`Dev panel: save edits not applied: ${saved.reason}`);
     }
+  } catch (error) {
+    console.warn("Dev panel: save edits not applied", error);
+  }
+}
+
+// Queues the edit for the next boot and loads the start screen, without the URL's run
+// overrides so no walk starts.
+function editSave(edit: SaveEdit): void {
+  const queued = decodeSaveEdits(sessionRead(DEV_SAVE_EDITS_KEY));
+  if (!sessionWrite(DEV_SAVE_EDITS_KEY, encodeSaveEdits([...queued, edit]))) {
+    console.warn("Dev panel: sessionStorage unavailable; the save is unchanged");
+    return;
+  }
+  const href = globalThis.location.href;
+  const home = stripDevParams(href, false);
+  if (home === href) {
     globalThis.location.reload();
-  };
-  const element = section(
-    "Save",
-    readout,
-    el(
-      "div",
-      { className: "dev-buttons" },
-      button(
-        "+$1,000",
-        run((save) => addMoney(BANK_TOP_UP, save)),
-      ),
-      button(
-        "Unlock all",
-        run((save) => unlockAll(gameData, save)),
-      ),
-      button("Reset save", reset, "dev-button dev-danger"),
+  } else {
+    globalThis.location.replace(home);
+  }
+}
+
+function startAt(zone: ZoneId): void {
+  const playUrl = new URL("/play/", globalThis.location.href).href;
+  const setup = startAtSetup(gameData, pageRunSetup().setup.dev, randomSeed(), zone);
+  globalThis.location.assign(runSetupLink(playUrl, setup));
+}
+
+function startAtRow(): HTMLElement {
+  const select = el(
+    "select",
+    { className: "dev-field" },
+    ...startChoices(gameData).map(({ label, zone }) =>
+      el("option", { textContent: label, value: zone }),
     ),
-    status,
-    note("Each edit writes the save and reloads the page."),
   );
-  return { element, refresh };
+  return el(
+    "label",
+    { className: "dev-row" },
+    el("span", { textContent: "Start at" }),
+    select,
+    button("Go", () => startAt(select.value as ZoneId)),
+  );
 }
 
 export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null): void {
@@ -493,36 +159,69 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     console.warn("Dev panel: the page has no #dev-panel element");
     return;
   }
-  const sheet = el("div", {
-    className: "dev-sheet",
-    hidden: true,
-    id: "dev-sheet",
-  });
+  let cheats = decodeCheats(sessionRead(DEV_CHEATS_KEY));
+  host.setCheats(cheats);
+
+  const sheet = el("div", { className: "dev-sheet", hidden: true, id: "dev-sheet" });
   sheet.setAttribute("role", "dialog");
-  sheet.setAttribute("aria-label", "Dev panel");
+  sheet.setAttribute("aria-label", "Cheats");
   const bar = el("button", { className: "dev-bar", type: "button" });
   bar.setAttribute("aria-controls", sheet.id);
-  const run = runSection();
-  const overlay = overlaySection(host);
-  const roadFade = roadSection(host);
-  const replay = replaySection();
-  const save = saveSection();
 
+  const toggles = CHEAT_TOGGLES.map(({ id, label }) => {
+    const box = el("input", { type: "checkbox" });
+    box.addEventListener("change", () => apply(setCheat(id, box.checked, cheats)));
+    return { box, id, label: el("label", { className: "dev-check" }, box, label) };
+  });
+  const controls = el(
+    "fieldset",
+    { className: "dev-cheats" },
+    startAtRow(),
+    ...toggles.map(({ label }) => label),
+    el("h2", { textContent: "Saved to progress" }),
+    el(
+      "div",
+      { className: "dev-buttons" },
+      ...SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit))),
+    ),
+  );
+  const on = button("Cheats on", () => apply(cheatsOn(cheats)));
+  const off = button("Cheats off", () => {
+    host.clearDevMode();
+    apply(CHEATS_OFF);
+    setOpen(false);
+  });
+
+  const render = () => {
+    on.setAttribute("aria-pressed", String(cheats.on));
+    off.setAttribute("aria-pressed", String(!cheats.on));
+    controls.disabled = !cheats.on;
+    toggles.forEach(({ box, id }) => {
+      box.checked = cheats[id];
+    });
+    const arrow = sheet.hidden ? "▸" : "▾";
+    bar.textContent = cheats.on ? `Dev ${arrow} cheats on` : `Dev ${arrow}`;
+  };
+  // Cheats off leaves nothing in sessionStorage, as a new tab starts.
+  const apply = (next: Cheats) => {
+    cheats = next;
+    host.setCheats(next);
+    if (next.on) {
+      sessionWrite(DEV_CHEATS_KEY, encodeCheats(next));
+    } else {
+      sessionRemove(DEV_CHEATS_KEY);
+    }
+    render();
+  };
   const setOpen = (open: boolean) => {
     sheet.hidden = !open;
-    bar.textContent = open ? "Dev ▾" : "Dev ▸";
     bar.setAttribute("aria-expanded", String(open));
     sessionWrite(DEV_PANEL_OPEN_KEY, open ? "1" : "0");
-    if (open) {
-      overlay.refresh();
-      roadFade.refresh();
-      replay.refresh();
-      save.refresh();
-    }
+    render();
   };
   bar.addEventListener("click", () => {
     setOpen(sheet.hidden !== false);
-    if (!sheet.hidden) {
+    if (sheet.hidden === false) {
       sheet.scrollIntoView({ block: "nearest" });
     }
   });
@@ -535,25 +234,19 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     }
   });
 
+  const reset = button(
+    "Reset save",
+    () => {
+      if (globalThis.confirm("Reset save to a new player?")) {
+        editSave(RESET_SAVE);
+      }
+    },
+    "dev-button dev-danger",
+  );
   sheet.append(
-    el(
-      "header",
-      { className: "dev-header" },
-      el("strong", { textContent: "Dev" }),
-      button("Reset", () => {
-        host.reset();
-        run.refresh();
-        overlay.refresh();
-        roadFade.refresh();
-        setOpen(false);
-      }),
-    ),
-    run.element,
-    overlay.element,
-    roadFade.element,
-    linkSection(host),
-    replay.element,
-    save.element,
+    el("header", { className: "dev-header" }, el("div", { className: "dev-switch" }, on, off)),
+    controls,
+    el("div", { className: "dev-footer" }, reset),
   );
   container.append(bar, sheet);
   setOpen(sessionRead(DEV_PANEL_OPEN_KEY) === "1");

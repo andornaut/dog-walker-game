@@ -8,7 +8,7 @@ export const DEV_STATE_EVENT = "dev-state";
 // Emitted on game.events with the overlay's wanted visibility, to show or hide it.
 export const DEV_OVERLAY_TOGGLE_EVENT = "dev-overlay-toggle";
 // Game registry keys: whether the overlay shows, which the overlay scene keeps current, and
-// whether the far end of the road fades into the backdrop band, which the dev panel sets.
+// whether the far end of the road fades into the backdrop band, which Cheats off clears.
 export const DEV_OVERLAY_VISIBLE_KEY = "dev-overlay-visible";
 export const DEV_ROAD_FADE_KEY = "dev-road-fade";
 
@@ -66,9 +66,7 @@ export function devOverlayLines(
   state: DevState | undefined,
 ): string[] {
   const lines = [`seed ${setup.seed}  fps ${Math.round(fps)}`];
-  if (state === undefined) {
-    lines.push("no dev-state yet");
-  } else {
+  if (state !== undefined) {
     lines.push(
       `zone ${state.zoneIndex + 1}  ${Math.floor(state.zoneDistance)}px`,
       `speed ${Math.round(state.scrollSpeed)}px/s x${setup.speed}`,
@@ -84,6 +82,8 @@ export function devOverlayLines(
       }
     }
   }
-  lines.push(status ?? "C copy link  ` hide");
+  if (status !== undefined) {
+    lines.push(status);
+  }
   return lines;
 }

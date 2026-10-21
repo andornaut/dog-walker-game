@@ -115,6 +115,8 @@ export interface RunState {
   readonly firstZone: number;
   readonly gear: GearId | null;
   readonly immunities: readonly ActiveImmunity[];
+  // The dev panel's cheat: no owner loses hearts. Absent in normal play.
+  readonly invincible?: boolean;
   readonly modifiers: readonly ActiveModifier[];
   readonly money: Cents;
   // Seconds each dog has walked this zone since its need was last met or went wrong.

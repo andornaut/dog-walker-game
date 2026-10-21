@@ -1,16 +1,17 @@
-// The dev panel's logic, free of the DOM: its run form, its save edits and the session keys
-// it shares with RunScene.
-import type { DogId, GameData, GearId, WalkerId } from "../data/types";
-import { addCents, type Cents } from "../rules/units";
-import { MAX_RUN_DOGS, type SaveDocument } from "../save/schema";
-import { decodeInputLog, encodeInputLog } from "./inputLog";
+// The dev panel's logic, free of the DOM: the cheats, the save edits and the session keys it
+// shares with the game.
+import type { DogId, GameData, GearId, WalkerId, ZoneId } from "../data/types";
+import { assertNever } from "../rules/assertNever";
+import { firstZoneId, type RouteData } from "../rules/route";
+import { addCents, type Cents, cents } from "../rules/units";
 import {
-  NO_GEAR,
-  parseRunSetup,
-  type RunSetup,
-  type RunSetupLimits,
-  runSetupLink,
-} from "./runSetup";
+  createDefaultSave,
+  MAX_RUN_DOGS,
+  type SaveDefaults,
+  type SaveDocument,
+} from "../save/schema";
+import type { RunState } from "../state/runState";
+import type { RunSetup } from "./runSetup";
 
 // sessionStorage, "1" while the panel is open.
 export const DEV_PANEL_OPEN_KEY = "dog-walker-game:dev-panel-open";
@@ -20,97 +21,124 @@ export const DEV_REPLAY_KEY = "dog-walker-game:dev-replay";
 // sessionStorage: the last finished run's input log, as encodeInputLog writes it. RunScene
 // writes it at run end.
 export const DEV_LAST_LOG_KEY = "dog-walker-game:dev-last-log";
+// sessionStorage and the game registry: the cheats, as encodeCheats writes them. They last
+// for the tab, so a walk the panel starts keeps them, and never reach the save.
+export const DEV_CHEATS_KEY = "dog-walker-game:dev-cheats";
+// sessionStorage: save edits, as encodeSaveEdits writes them, applied at the next boot before
+// the game loads the save, so the page being left cannot write its save over them.
+export const DEV_SAVE_EDITS_KEY = "dog-walker-game:dev-save-edits";
 
-// The form's gear value for "use the saved loadout's gear", which leaves gear out of the URL.
-export const SAVED_LOADOUT = "";
-
-// The run form's raw field values. An empty pack and an empty money or speed leave that
-// parameter out of the URL, so the run uses its normal value.
-export interface DevRunForm {
-  readonly dev: boolean;
-  // SAVED_LOADOUT, NO_GEAR or a gear id.
-  readonly gear: string;
-  readonly moneyDollars: string;
-  readonly pack: readonly string[];
-  readonly seed: string;
-  readonly speed: string;
-  readonly zone: string;
+// Every cheat is off unless `on` is too.
+export interface Cheats {
+  readonly fastForward: boolean;
+  readonly hitBoxes: boolean;
+  readonly invincible: boolean;
+  readonly on: boolean;
+  readonly slowMotion: boolean;
 }
 
-export interface CheckedRunForm<DogId extends string, GearId extends string> {
-  readonly setup: RunSetup<DogId, GearId>;
-  // Empty when the setup is exactly what the form says.
-  readonly warnings: readonly string[];
+export type CheatToggle = Exclude<keyof Cheats, "on">;
+
+export const CHEATS_OFF: Cheats = {
+  fastForward: false,
+  hitBoxes: false,
+  invincible: false,
+  on: false,
+  slowMotion: false,
+};
+
+// The panel's toggles, in its order.
+export const CHEAT_TOGGLES: readonly { readonly id: CheatToggle; readonly label: string }[] = [
+  { id: "invincible", label: "Invincible owners" },
+  { id: "hitBoxes", label: "Hit boxes" },
+  { id: "slowMotion", label: "Slow motion" },
+  { id: "fastForward", label: "Fast forward" },
+];
+
+// The walk's time scale under each speed cheat.
+export const SLOW_MOTION_SCALE = 0.5;
+export const FAST_FORWARD_SCALE = 3;
+
+// The speed cheats exclude each other: turning one on turns the other off.
+const EXCLUDES: Readonly<Partial<Record<CheatToggle, CheatToggle>>> = {
+  fastForward: "slowMotion",
+  slowMotion: "fastForward",
+};
+
+export function cheatActive(cheats: Cheats, id: CheatToggle): boolean {
+  return cheats.on && cheats[id];
 }
 
-const DOLLARS = /^(\d+)(?:\.(\d{1,2}))?$/;
-
-// Whole dollars and up to two decimals, without a float multiply: "0.29" is 29 cents.
-export function dollarsTextToCents(text: string): number | undefined {
-  const match = DOLLARS.exec(text.trim());
-  if (match === null) {
-    return undefined;
+// With cheats off, every toggle stays off.
+export function setCheat(id: CheatToggle, on: boolean, cheats: Cheats): Cheats {
+  if (!cheats.on) {
+    return cheats;
   }
-  const [, whole = "", fraction = ""] = match;
-  return Number(whole) * 100 + Number(fraction.padEnd(2, "0"));
+  const excluded = EXCLUDES[id];
+  return { ...cheats, [id]: on, ...(on && excluded !== undefined ? { [excluded]: false } : {}) };
 }
 
-export function centsToDollarsText(amount: number): string {
-  return `${Math.floor(amount / 100)}.${String(amount % 100).padStart(2, "0")}`;
+export function cheatsOn(cheats: Cheats): Cheats {
+  return { ...cheats, on: true };
 }
 
-export function formFromSetup(setup: RunSetup): DevRunForm {
-  return {
-    dev: setup.dev,
-    gear: setup.gear === undefined ? SAVED_LOADOUT : (setup.gear ?? NO_GEAR),
-    moneyDollars: setup.money === undefined ? "" : centsToDollarsText(setup.money),
-    pack: setup.pack ?? [],
-    seed: String(setup.seed),
-    speed: String(setup.speed),
-    zone: String(setup.zone),
-  };
+export function timeScaleOf(cheats: Cheats): number {
+  if (cheatActive(cheats, "slowMotion")) {
+    return SLOW_MOTION_SCALE;
+  }
+  return cheatActive(cheats, "fastForward") ? FAST_FORWARD_SCALE : 1;
 }
 
-// The form as a URL query, read back with parseRunSetup so the panel warns about exactly what
-// the game would ignore.
-export function checkRunForm<DogId extends string, GearId extends string>(
-  limits: RunSetupLimits<DogId, GearId>,
-  form: DevRunForm,
-): CheckedRunForm<DogId, GearId> {
-  const params = new URLSearchParams();
-  const warnings: string[] = [];
-  const seed = form.seed.trim();
-  if (seed === "") {
-    warnings.push("Enter a seed or press random");
-  } else {
-    params.set("seed", seed);
+function isCheats(value: unknown): value is Cheats {
+  if (typeof value !== "object" || value === null) {
+    return false;
   }
-  if (form.pack.length > 0) {
-    params.set("pack", form.pack.join(","));
-  }
-  if (form.gear !== SAVED_LOADOUT) {
-    params.set("gear", form.gear);
-  }
-  params.set("zone", form.zone.trim());
-  const money = form.moneyDollars.trim();
-  if (money !== "") {
-    const amount = dollarsTextToCents(money);
-    if (amount === undefined) {
-      warnings.push(`Invalid money "${money}": expected dollars with at most 2 decimals`);
-    } else {
-      params.set("money", String(amount));
-    }
-  }
-  const speed = form.speed.trim();
-  if (speed !== "") {
-    params.set("speed", speed);
-  }
-  if (form.dev) {
-    params.set("dev", "1");
-  }
-  const parsed = parseRunSetup(limits, () => 0, params.toString());
-  return { setup: parsed.setup, warnings: [...warnings, ...parsed.warnings] };
+  const fields = value as Record<string, unknown>;
+  return (Object.keys(CHEATS_OFF) as (keyof Cheats)[]).every(
+    (key) => typeof fields[key] === "boolean",
+  );
 }
+
+// Anything but a whole Cheats is every cheat off.
+export function cheatsFrom(value: unknown): Cheats {
+  return isCheats(value) ? value : CHEATS_OFF;
+}
+
+export function encodeCheats(cheats: Cheats): string {
+  return JSON.stringify(cheats);
+}
+
+export function decodeCheats(text: string | null): Cheats {
+  if (text === null) {
+    return CHEATS_OFF;
+  }
+  try {
+    return cheatsFrom(JSON.parse(text));
+  } catch {
+    return CHEATS_OFF;
+  }
+}
+
+// The run as the cheats leave it: invincible owners lose no hearts. A run with the cheat off
+// is returned as it is.
+export function withCheats(cheats: Cheats, run: RunState): RunState {
+  const invincible = cheatActive(cheats, "invincible");
+  return (run.invincible ?? false) === invincible ? run : { ...run, invincible };
+}
+
+export type SaveEdit =
+  | { readonly amount: Cents; readonly kind: "addMoney" }
+  | { readonly kind: "reset" }
+  | { readonly kind: "unlockAll" };
+
+// The cheats that change progress, in the panel's order.
+export const SAVE_CHEATS: readonly { readonly edit: SaveEdit; readonly label: string }[] = [
+  { edit: { amount: cents(10_000), kind: "addMoney" }, label: "+$100" },
+  { edit: { amount: cents(100_000), kind: "addMoney" }, label: "+$1,000" },
+  { edit: { kind: "unlockAll" }, label: "Unlock all" },
+];
+
+export const RESET_SAVE: SaveEdit = { kind: "reset" };
 
 export function addMoney(amount: Cents, save: SaveDocument): SaveDocument {
   return { ...save, bankCents: addCents(save.bankCents, amount) };
@@ -138,93 +166,71 @@ export function unlockAll(
   };
 }
 
-function bankText(amount: number): string {
-  const dollars = (amount / 100).toLocaleString("en-US", {
-    maximumFractionDigits: 2,
-    minimumFractionDigits: 2,
-  });
-  return `$${dollars}`;
-}
-
-function ownedText(all: number, owned: readonly string[]): string {
-  return `${owned.length} of ${all}${owned.length === 0 ? "" : `: ${owned.join(", ")}`}`;
-}
-
-export function saveReadoutLines(
-  data: Pick<GameData, "dogSlots" | "dogs" | "shopGear">,
+// A reset is a new player's save.
+export function applySaveEdit(
+  data: Pick<GameData, "dogSlots" | "dogs" | "shopGear" | "walkers">,
+  defaults: SaveDefaults,
+  edit: SaveEdit,
   save: SaveDocument,
-): string[] {
-  const slotCount = Math.min(MAX_RUN_DOGS, data.dogSlots.length);
-  return [
-    `bank ${bankText(save.bankCents)}`,
-    `slots ${save.owned.dogSlots} of ${slotCount}`,
-    `dogs ${ownedText(Object.keys(data.dogs).length, save.owned.dogs)}`,
-    `gear ${ownedText(Object.keys(data.shopGear).length, save.owned.gear)}`,
-  ];
+): SaveDocument {
+  switch (edit.kind) {
+    case "addMoney":
+      return addMoney(edit.amount, save);
+    case "reset":
+      return createDefaultSave(defaults);
+    case "unlockAll":
+      return unlockAll(data, save);
+    default:
+      return assertNever(edit);
+  }
 }
 
-export type ReplayPlan =
-  | { readonly errors: readonly string[]; readonly ok: false }
-  | {
-      readonly eventCount: number;
-      readonly ok: true;
-      readonly seed: number;
-      // The log to store under DEV_REPLAY_KEY, re-encoded so the stored form is canonical.
-      readonly stored: string;
-      // The game page with the log's setup.
-      readonly url: string;
-    };
-
-export function planReplay<DogId extends string, GearId extends string>(
-  limits: RunSetupLimits<DogId, GearId>,
-  playUrl: string,
-  text: string,
-): ReplayPlan {
-  if (text.trim() === "") {
-    return { errors: ["Paste an encoded input log"], ok: false };
-  }
-  const decoded = decodeInputLog(limits, text);
-  if (!decoded.ok) {
-    return decoded;
-  }
-  const { log } = decoded;
-  return {
-    eventCount: log.events.length,
-    ok: true,
-    seed: log.setup.seed,
-    stored: encodeInputLog(log),
-    url: runSetupLink(playUrl, log.setup),
-  };
+export function encodeSaveEdits(edits: readonly SaveEdit[]): string {
+  return JSON.stringify(edits);
 }
 
-export type LastLog =
-  | { readonly status: "none" }
-  | {
-      readonly fileName: string;
-      readonly status: "recorded";
-      // Describes the log, or why it does not decode; it downloads as stored either way.
-      readonly summary: string;
-    };
+function isSaveEdit(value: unknown): value is SaveEdit {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const { amount, kind } = value as Record<string, unknown>;
+  if (kind === "addMoney") {
+    return typeof amount === "number" && Number.isSafeInteger(amount) && amount > 0;
+  }
+  return kind === "reset" || kind === "unlockAll";
+}
 
-export function describeLastLog<DogId extends string, GearId extends string>(
-  limits: RunSetupLimits<DogId, GearId>,
-  stored: string | null,
-): LastLog {
-  if (stored === null || stored === "") {
-    return { status: "none" };
+// Unreadable text is no edits; an unreadable entry is dropped.
+export function decodeSaveEdits(text: string | null): SaveEdit[] {
+  if (text === null) {
+    return [];
   }
-  const decoded = decodeInputLog(limits, stored);
-  if (!decoded.ok) {
-    return {
-      fileName: "dog-walker-run.json",
-      status: "recorded",
-      summary: `does not decode: ${decoded.errors.join("; ")}`,
-    };
+  try {
+    const parsed: unknown = JSON.parse(text);
+    return Array.isArray(parsed) ? parsed.filter(isSaveEdit) : [];
+  } catch {
+    return [];
   }
-  const { events, setup } = decoded.log;
-  return {
-    fileName: `dog-walker-run-seed-${setup.seed}.json`,
-    status: "recorded",
-    summary: `seed ${setup.seed}, ${events.length} inputs`,
-  };
+}
+
+export interface StartChoice {
+  readonly label: string;
+  readonly zone: ZoneId;
+}
+
+// Every neighborhood, the first first, then the rest easiest first.
+export function startChoices(data: RouteData): StartChoice[] {
+  const first = firstZoneId(data);
+  const zoneById = new Map(data.world.zones.map((zone) => [zone.id as ZoneId, zone]));
+  const ids = [first, ...[...zoneById.keys()].filter((id) => id !== first)];
+  return ids.map((zone) => ({ label: zoneById.get(zone)?.name ?? zone, zone }));
+}
+
+// A walk that starts at zone: the first zone is walked first, any other second, after the
+// first, as if picked at the first fork.
+export function startAtSetup(data: RouteData, dev: boolean, seed: number, zone: ZoneId): RunSetup {
+  const first = firstZoneId(data);
+  return zone === first
+    ? { dev, seed, speed: 1, zone: 1 }
+    : { dev, route: [first, zone], seed, speed: 1, zone: 2 };
 }

@@ -1,15 +1,21 @@
 import { describe, expect, it } from "vitest";
 
-import { frameSteps, holdStepClock, startStepClock, type StepClock } from "./fixedStep";
+import {
+  type FixedStepLimits,
+  frameSteps,
+  holdStepClock,
+  startStepClock,
+  type StepClock,
+} from "./fixedStep";
 
 const LIMITS = { maxFrameMs: 250, stepMs: 1000 / 60 };
 
 // The steps run over frames at the given timestamps.
-function stepsOver(timestamps: readonly number[]): number {
+function stepsOver(timestamps: readonly number[], limits: FixedStepLimits = LIMITS): number {
   let clock: StepClock = startStepClock;
   let steps = 0;
   for (const time of timestamps) {
-    const frame = frameSteps(LIMITS, time, clock);
+    const frame = frameSteps(limits, time, clock);
     clock = frame.clock;
     steps += frame.steps;
   }
@@ -36,6 +42,14 @@ describe("frameSteps", () => {
     const frame = frameSteps(LIMITS, 10000, { bankedMs: 0, lastTimeMs: 0 });
     expect(frame).toMatchObject({ frameMs: 10000, steps: 15 });
     expect(frame.clock.bankedMs).toBeCloseTo(0);
+  });
+
+  it.each([
+    [0.5, 30],
+    [1, 60],
+    [3, 180],
+  ])("runs at time scale %d %i steps over a second at 60 FPS", (timeScale, expected) => {
+    expect(stepsOver(framesAt(60, 1), { ...LIMITS, timeScale })).toBe(expected);
   });
 
   it("carries what is left of a step into the next frame", () => {

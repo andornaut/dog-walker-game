@@ -3,6 +3,14 @@ import { Scene } from "phaser";
 import { gameData } from "../data";
 import { LANE_COUNT } from "../data/screen";
 import type { DogId } from "../data/types";
+import {
+  cheatActive,
+  type Cheats,
+  cheatsFrom,
+  DEV_CHEATS_KEY,
+  timeScaleOf,
+  withCheats,
+} from "../dev/devPanelModel";
 import type { RunSetup } from "../dev/runSetup";
 import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
@@ -53,6 +61,7 @@ import {
 import { AccidentSpots } from "./run/accidentSpots";
 import { BackdropView } from "./run/backdropView";
 import { ForcedStopView } from "./run/forcedStopView";
+import { HitBoxView } from "./run/hitBoxView";
 import { blendWalk, stepAlpha } from "./run/interpolate";
 import { ensureRoadPlaceholders, ItemViews } from "./run/itemViews";
 import { MenuFlow, type MenuPause } from "./run/menuFlow";
@@ -103,6 +112,7 @@ interface Celebration {
 interface RunWorld {
   backdrop: BackdropView;
   banner: ZoneBanner;
+  hitBoxes: HitBoxView;
   input: RunInput;
   items: ItemViews;
   menus: MenuFlow;
@@ -223,6 +233,7 @@ export class RunScene extends Scene {
       ...run,
       backdrop,
       banner: new ZoneBanner(this),
+      hitBoxes: new HitBoxView(this),
       input: new RunInput(this, {
         openPause: () => this.openPause(),
         replaying: () => recorder.replaying(),
@@ -308,7 +319,10 @@ export class RunScene extends Scene {
     if (session === undefined) {
       return;
     }
-    const frame = frameSteps(STEPPING, time, this.stepClock);
+    const timeScale = timeScaleOf(this.applyCheats());
+    this.time.timeScale = timeScale;
+    this.tweens.timeScale = timeScale;
+    const frame = frameSteps({ ...STEPPING, timeScale }, time, this.stepClock);
     this.stepClock = frame.clock;
     const halted = !this.walking();
     let roadMs = 0;
@@ -333,6 +347,19 @@ export class RunScene extends Scene {
     }
     this.draw();
     emitDevState(this.game, this.world?.setup, this.zoneClocks, this.session?.walk);
+  }
+
+  // The dev panel's cheats, from the registry, with the run set to match them.
+  private applyCheats(): Cheats {
+    const cheats = cheatsFrom(this.registry.get(DEV_CHEATS_KEY));
+    const session = this.session;
+    if (session !== undefined) {
+      const run = withCheats(cheats, session.walk.run);
+      if (run !== session.walk.run) {
+        this.session = { ...session, walk: { ...session.walk, run } };
+      }
+    }
+    return cheats;
   }
 
   private walking(): boolean {
@@ -580,6 +607,8 @@ export class RunScene extends Scene {
       still,
     });
     world.spots.draw(distanceBeforeZone + walk.run.zoneDistance);
+    const cheats = cheatsFrom(this.registry.get(DEV_CHEATS_KEY));
+    world.hitBoxes.draw(walk, cheatActive(cheats, "hitBoxes"));
     world.shadows.hideUnused();
   }
 }

@@ -9,12 +9,8 @@ const setup: RunSetup = { dev: true, seed: 42, speed: 1.5, zone: 1 };
 const state: DevState = { scrollSpeed: 180.4, setup, zoneDistance: 1234.9, zoneIndex: 1 };
 
 describe("devOverlayLines", () => {
-  it("shows the seed, FPS and key help before any dev-state arrives", () => {
-    expect(devOverlayLines(59.6, undefined, setup, undefined)).toEqual([
-      "seed 42  fps 60",
-      "no dev-state yet",
-      "C copy link  ` hide",
-    ]);
+  it("shows only the seed and FPS before any dev-state arrives", () => {
+    expect(devOverlayLines(59.6, undefined, setup, undefined)).toEqual(["seed 42  fps 60"]);
   });
 
   it("shows the zone, distance and speed from the dev-state", () => {
@@ -22,7 +18,6 @@ describe("devOverlayLines", () => {
       "seed 42  fps 60",
       "zone 2  1234px",
       "speed 180px/s x1.5",
-      "C copy link  ` hide",
     ]);
   });
 
@@ -67,7 +62,7 @@ describe("devOverlayLines", () => {
     ]);
   });
 
-  it("shows a status in place of the key help", () => {
+  it("ends with a status while one shows", () => {
     expect(devOverlayLines(60, "link copied", setup, undefined).at(-1)).toBe("link copied");
   });
 });

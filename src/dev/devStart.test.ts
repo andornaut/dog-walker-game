@@ -3,7 +3,6 @@ import { describe, expect, it } from "vitest";
 import type { DogId, GearId, WalkerId } from "../data/types";
 import type { HomeLoadout } from "../home/home";
 import type { Loadout } from "../state/runState";
-import { formFromSetup, SAVED_LOADOUT } from "./devPanelModel";
 import { devRunLoadout, homeRunSetup, namesRunSetup, stripDevParams } from "./devStart";
 import type { RunSetup } from "./runSetup";
 
@@ -61,28 +60,6 @@ describe("stripDevParams", () => {
     ["", false, ""],
   ])("strips %j (disable dev: %s) to %j", (search, disableDev, expected) => {
     expect(stripDevParams(`${base}${search}`, disableDev)).toBe(`${base}${expected}`);
-  });
-});
-
-describe("a reset's form", () => {
-  it.each<[string, keyof ReturnType<typeof formFromSetup>, unknown]>([
-    ["dev off", "dev", false],
-    ["no gear override", "gear", SAVED_LOADOUT],
-    ["no money override", "moneyDollars", ""],
-    ["no pack override", "pack", []],
-    ["speed 1", "speed", "1"],
-    ["zone 1", "zone", "1"],
-  ])("shows %s", (_name, field, expected) => {
-    const overridden: RunSetup<DogId, GearId, WalkerId> = {
-      dev: true,
-      gear: "whistle",
-      money: 5,
-      pack: ["koda"],
-      seed: 1,
-      speed: 3,
-      zone: 2,
-    };
-    expect(formFromSetup(homeRunSetup(overridden, 9, true))[field]).toEqual(expected);
   });
 });
 

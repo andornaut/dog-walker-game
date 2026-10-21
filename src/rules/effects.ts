@@ -230,7 +230,7 @@ export function moneyCost(
 
 // Changes one owner's meter by the sum of causes: the base cause, then any quirk's. The
 // owner's temperament multiplies it, then the meter is held within 0 and the dog's max. No
-// change is reported when the meter does not move.
+// change is reported when the meter does not move, or for a loss in an invincible run.
 export function changeHearts(
   data: Pick<GameData, "dogs" | "tuning">,
   given: readonly [Cause, ...Cause[]],
@@ -244,6 +244,9 @@ export function changeHearts(
   const dog = data.dogs[dogId];
   const { temperament } = dog.owner;
   const total = given.reduce((sum, cause) => sum + cause.amount, 0);
+  if (total < 0 && state.invincible === true) {
+    return { change: null, state };
+  }
   const multiplied =
     total * readTable(data.tuning, "multipliers", "heartsByTemperament", temperament);
   const unclamped = before + multiplied;
