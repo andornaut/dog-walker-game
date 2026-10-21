@@ -295,7 +295,7 @@ export const WORLD = {
       name: "Yonge Street",
       roadColor: "#353b45",
       roadShadowColor: "#26292f",
-      speed: 1.04,
+      speed: 0.94,
       weights: {
         luckyFinds: { biscuitNeighbour: 1, lostWallet: 1 },
         minorObstacles: {

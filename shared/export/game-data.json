@@ -1280,7 +1280,7 @@
       "rushHourObstacles": 1.5,
       "rushHourTips": 2,
       "rushHourTreats": 2,
-      "scrollSpeedGainPerZone": 0.15,
+      "scrollSpeedGainPerZone": 0.2,
       "stinkyTipValue": 0,
       "treatFinderSpawns": 2
     },
@@ -1313,7 +1313,7 @@
       "pullReactionWindow": 0.6,
       "pullTell": 1,
       "stinkySeconds": 20,
-      "zoneAtBaseSpeed": 144,
+      "zoneAtBaseSpeed": 148,
       "zoomiesDriftSeconds": 1,
       "zoomiesSeconds": 20
     }
@@ -1847,7 +1847,7 @@
       "name": "Yonge Street",
       "roadColor": "#353b45",
       "roadShadowColor": "#26292f",
-      "speed": 1.04,
+      "speed": 0.94,
       "weights": {
         "luckyFinds": {
           "biscuitNeighbour": 1,

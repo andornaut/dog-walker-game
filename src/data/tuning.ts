@@ -105,7 +105,7 @@ export const TUNING = {
     rushHourObstacles: 1.5,
     rushHourTips: 2,
     rushHourTreats: 2,
-    scrollSpeedGainPerZone: 0.15,
+    scrollSpeedGainPerZone: 0.2,
     // What a tip pays while the pack is Stinky.
     stinkyTipValue: 0,
     // How many treats appear while Ben's Treat finder walks.
@@ -171,7 +171,7 @@ export const TUNING = {
     // How long the Stinky debuff lasts, in walking time.
     stinkySeconds: 20,
     // Every zone is the same distance: zone 1 takes this long, later zones less as speed rises.
-    zoneAtBaseSpeed: 144,
+    zoneAtBaseSpeed: 148,
     // While the pack has the Zoomies, it drifts a lane every this many seconds of walking.
     zoomiesDriftSeconds: 1,
     // How long the Zoomies debuff lasts, in walking time.
