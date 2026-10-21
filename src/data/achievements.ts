@@ -113,8 +113,9 @@ export const ACHIEVEMENTS = [
     conditions: [
       { count: "all", kind: "dogsOwned" },
       { count: "all", kind: "dogSlotsOwned" },
+      { count: "all", kind: "gearOwned" },
     ],
-    goal: "Own every dog and all 3 dog slots",
+    goal: "Own every dog, slot and gear item",
     id: "topWalker",
     name: "Top Walker",
   },

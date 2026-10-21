@@ -73,7 +73,7 @@ export const TUNING = {
       penny: 250,
       pierre: 200,
       poopBags: 500,
-      runningShoes: 600,
+      runningShoes: 400,
       snowball: 300,
       zippy: 125,
     },

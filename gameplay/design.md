@@ -87,7 +87,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 - The walk ends after neighborhood 4, on Head home, or when no dogs are left. Your cash is banked
 - **Full pack home:** when every dog you set out with gets home at the end of neighborhood 4, the walk pays a Full pack bonus of $$ per dog into the bank, shown on the end screen. Heading home early or a firing loses it
-- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Full pack bonus, card costs, starting cash), neighborhoods walked and the bank; a new-best ribbon when it beats the best walk; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
+- **End screen:** the walk's total with a breakdown (pay, tips, lucky finds, Full pack bonus, card costs, starting cash), neighborhoods walked and the bank; a new-best ribbon when it beats the best walk with the same number of dogs; one closing line from each owner (a happier line from owners still walking, the fired line from owners who fired you)
 
 ### Choice cards
 
@@ -107,7 +107,7 @@ Reference points: Bowling Ballers (lane runner, but calmer), Hades (areas, run s
 
 ### Teaching, sound and settings
 
-- **First-time hints:** a one-line hint in the message strip the first time each thing appears (first puddle, first pull, first treat and so on); the help screen covers the rest. The low-hearts hint ("At 0♥ an owner fires you") jumps ahead of any waiting hint, so it shows before the first firing. Nothing teaches by overlaying the road: no tutorial overlays or swipe tips on the play area
+- **First-time hints:** a one-line hint in the message strip the first time each thing appears (first puddle, first pull, first treat, the first moving obstacle's cue and so on); the help screen covers the rest. The low-hearts hint ("At 0♥ an owner fires you") jumps ahead of any waiting hint, so it shows before the first firing. Nothing teaches by overlaying the road: no tutorial overlays or swipe tips on the play area
 - **Sound:** short effects (tip, treat, bump, bark, card open, fired), a sound for each card obstacle's hit (spray hiss, coin scatter, friendly woof), a splash on a puddle, a chitter when a dog strains toward a squirrel, a badge-earned jingle and a new-best fanfare, and one music loop for the walk. While the walk is paused by the player (the pause menu, Settings, Help or the Home question), the music drops to 30% volume and comes back on resume; it stays full under cards and the celebration, and goes silent while the tab is hidden
 - **Settings** (from pause and the home screen): sound on or off, music volume, effects volume, reduced motion
 - **Panels:** every page and overlay has one close control at the top right. Tapping the dimmed background outside a panel closes it (Help, the logbook, the Pet shop, Settings, Stats, the Nice! badge, the home screen's detail cards and the Neighborhood done celebration), and outside the pause menu resumes the walk; only taps count, not drags. Choice cards and the New walker celebration wait for a button. A tap on the page beside the game (left or right of it on a wide screen) counts as outside too; the nav bar and the dev panel don't
@@ -219,7 +219,7 @@ Each obstacle has one look everywhere. Some kinds can move, and every one that c
   - Effect starts: the effect line of an upgrade, the walker's perk or the Pocket item
   - Fired: "Jesse fired you! Koda heads home."
   - First-time hints (see Teaching)
-  - Last heart: "Jesse has 1♥ left!"
+  - Last heart: "Jesse has 1♥ left!"; while Muddy, also at 2♥, since one Muddy bump costs 2♥: "Jesse has 2♥ left! Muddy bumps cost 2♥."
   - Lucky find: "A neighbor shares treats! Everyone +1♥"
   - Plain hit: "Koda bumped the cone! Jesse −1♥"
   - Pull: "Koda spotted a squirrel!"
@@ -231,7 +231,7 @@ Each obstacle has one look everywhere. Some kinds can move, and every one that c
 - **Heart changes:** a lost heart pops over the dog on the road as a big broken heart with "−1", then arcs down into its doghouse card. A gained heart pops in pink and flies up from the dog the same way. Every heart change plays this, whatever its cause
 - **Hit moments:** every card obstacle's hit plays a big moment before its card: a burst over the pack, a brief flash at the screen edges, a large label (other dog "NEW FRIEND!", skunk "SPRAYED!", thief "YOINK!") and the pack shaking off
 - **Hit stop:** hitting an obstacle freezes the road and the pack briefly while its hit plays (about 1 second for an encounter, before its card; about 0.3 seconds for a plain obstacle). Input is ignored during the stop, and it doesn't count as walk time. Lucky finds don't stop the walk
-- **Low hearts:** an owner at 1♥ looks upset, and their doghouse card shows it
+- **Owner faces:** an owner looks happy at full hearts or one below, neutral down to 2♥, and upset at 1♥, and their doghouse card shows it
 - **Pay banked:** at each neighborhood's end, the celebration shows the pay banked for it
 - **Return home:** the end screen shows the walker and pack coming back up the front path while the owners wave; fired dogs are absent
 - **Treat grabbed:** the owner smiles and a "+1♥" label shows over the dog
@@ -292,7 +292,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 - **Owner parting line:** picking a dog shows a line from its owner (e.g. Jesse: "He already did 10K. He's fine.")
 - **Logbook** (a button in the top bar that opens a panel; nothing shows on the home screen until it's opened): best walk (amount, neighborhoods, dogs), totals (walks, dogs walked, times fired) and the last walk as one line ("Kevin fired you on Fairview Park.")
 - **Stats page** (behind the logbook, which also opens the badge wall directly; the screens say "walk", never "run"): walks played; walks finished, headed home or out of dogs; best walk earnings; lifetime earnings; total firings and the owner who fired you most; most neighborhoods finished in a walk (heading home mid-neighborhood doesn't count it). Each dog's roster card shows its walks, neighborhoods finished and times fired
-- **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal. Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting cash), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
+- **Achievements:** a badge wall on the Stats page, earned badges in color and locked ones grayed with their goal; a locked badge that counts across walks also shows its progress ("7/15"). Earning one plays a short celebration (owners cheer) wherever it happens; a money goal counts the walk's total on the end screen (net of starting cash), checked when it's banked; there is no other reward. Each badge shows its name, goal and one line:
 
 | Group      | Badge                 | Goal                                             | Line                                      |
 | ---------- | --------------------- | ------------------------------------------------ | ----------------------------------------- |
@@ -310,7 +310,7 @@ Everything bought at the Pet shop is permanent; upgrade cards are the walk-only 
 | Collection | Full Kennel           | Own all 9 dogs                                   | Every leash is spoken for.                |
 | Collection | Kitted Out            | Own every gear item                              | A pocket for everything. Well, one thing. |
 | Collection | Neighborhood Favorite | Finish a walk with each of the 9 dogs            | Everyone's met you now.                   |
-| Collection | Top Walker            | Own every dog and all 3 dog slots                | Maplewood's finest. Ask any dog.          |
+| Collection | Top Walker            | Own every dog, slot and gear item                | Maplewood's finest. Ask any dog.          |
 | Silly      | You're Fired!         | Get fired 10 times                               | They always come back.                    |
 | Silly      | Close Shave           | Finish a walk with an owner on 1♥                | Phew. Nobody saw that.                    |
 | Silly      | Eau de Skunk          | Get Stinky 3 times in one walk                   | You can smell this badge.                 |
