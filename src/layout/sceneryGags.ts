@@ -1,3 +1,4 @@
+import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import type { Point, Rect } from "./rect";
 
@@ -5,6 +6,8 @@ import type { Point, Rect } from "./rect";
 // They are still pictures, the first frame of their art, with no collision and no effect.
 // Positions are band pixels, by the top-left corner of their sprites. The street runs up from
 // the band's bottom edge to a cross street, and the gags sit on the lawns either side of it.
+// The backdrops draw the street and everything beside it at fixed rows over the band's bottom
+// edge, so those rows count up from it.
 
 export const GAG_KEYS = { cat: "gag-cat", kite: "gag-kite" } as const;
 export const GAG_SIZES = {
@@ -14,17 +17,29 @@ export const GAG_SIZES = {
 // The tag whose first frame each gag shows.
 export const GAG_TAGS = { cat: "idle", kite: "flutter" } as const;
 
-// The near-left perch's top rail, rows 158 and 159, on the band's approach rows.
-export const PERCH_RAIL_Y = 158;
+// The band row `rows` up from the band's bottom edge, where the band's last row is 1.
+const overBottom = (rows: number): number => SCREEN_CONFIG.backdropHeight - rows;
+
+// The near-left perch's top rail, its two rows 16 and 15 over the band's bottom edge, on the
+// band's approach rows.
+export const PERCH_RAIL_Y = overBottom(16);
 
 // The backdrops' cross street, as the band rows its ambient movers stand on: the bottom row of
-// each sidewalk and lane (far sidewalk 135 to 138, far lane 141 to 144, near lane 146 to 149,
-// near sidewalk 150 to 154).
-export const CROSS_STREET = { farLane: 144, farWalk: 138, nearLane: 149, nearWalk: 154 } as const;
+// each sidewalk and lane (far sidewalk 39 to 36 rows over the band's bottom edge, far lane 33 to
+// 30, near lane 28 to 25, near sidewalk 24 to 20).
+export const CROSS_STREET = {
+  farLane: overBottom(30),
+  farWalk: overBottom(36),
+  nearLane: overBottom(25),
+  nearWalk: overBottom(20),
+} as const;
 
 // The cat's paws, on its frame's bottom row, rest on the perch's top rail, and the kite's tree
 // stands on the near-right lawn, its crown over the cross street.
-export const GAG_Y = { cat: PERCH_RAIL_Y + 1 - GAG_SIZES.cat.height, kite: 133 } as const;
+export const GAG_Y = {
+  cat: PERCH_RAIL_Y + 1 - GAG_SIZES.cat.height,
+  kite: overBottom(41),
+} as const;
 
 // The kite's tree on the near-right lawn, in every zone.
 export const KITE_AT: Point = { x: 284, y: GAG_Y.kite };

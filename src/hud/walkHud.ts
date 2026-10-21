@@ -1,4 +1,5 @@
 import { gameData } from "../data";
+import { SCREEN_CONFIG } from "../data/screen";
 import type { DebuffId, DogId } from "../data/types";
 import { containsPoint, type Point, type Rect, rectsOverlap } from "../layout/rect";
 import type { ScreenLayout } from "../layout/screenLayout";
@@ -133,19 +134,22 @@ export function debuffFillWidth(secondsLeft: number, seconds: number): number {
   return Math.round(DEBUFF_BAR.fill.width * share);
 }
 
-// A dog card (ui-dog-card, 120x58). The name is centred on name.x at the largest of its scales
-// that fits name.room, its top by scale. The owner's name labels the hearts under it on every
-// card with a dog, a fired dog's included, within owner.room. Hearts sit in rows of perRow,
-// pitch apart. The LEAD tag is on the front dog's card, and FIRED is centred on fired.x on a
-// fired dog's.
+// A dog card (ui-dog-card, the size of a slot in the card row). The name is centred on name.x
+// at the largest of its scales that fits name.room, its top by scale. The owner's name labels
+// the hearts under it on every card with a dog, a fired dog's included, within owner.room.
+// Hearts sit in rows of perRow, pitch apart. The LEAD tag is on the front dog's card, and FIRED
+// is centred on fired.x on a fired dog's.
 export const DOG_CARD = {
-  dogFace: { x: 6, y: 21 },
-  fired: { x: 78, y: 38 },
-  hearts: { perRow: 5, pitch: 9, x: 44, y: 31 },
-  lead: { x: 88, y: 43 },
+  dogFace: { x: 6, y: 28 },
+  fired: { x: 78, y: 42 },
+  hearts: { perRow: 5, pitch: 9, x: 44, y: 36 },
+  lead: { x: 88, y: 51 },
   name: { room: 108, tops: { 1: 7, 2: 5 }, x: 60 },
-  owner: { room: 72, x: 44, y: 22 },
-  size: { height: 58, width: 120 },
+  owner: { room: 72, x: 44, y: 26 },
+  size: {
+    height: SCREEN_CONFIG.dogCardHeight,
+    width: SCREEN_CONFIG.width / SCREEN_CONFIG.dogSlotCount,
+  },
 } as const;
 
 export interface CardHeart extends Point {

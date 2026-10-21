@@ -1,7 +1,9 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import { SCREEN_CONFIG } from "../data/screen";
+import { screenLayout } from "../layout/screenLayout";
 import type { TextFitStyle } from "../layout/textFit";
 
-const SCREEN_WIDTH = 360;
+const SCREEN_WIDTH = SCREEN_CONFIG.width;
 const CENTER_X = SCREEN_WIDTH / 2;
 // The bubble's and the title's inset from either screen edge.
 const SIDE = 24;
@@ -14,6 +16,16 @@ const BURST_WIDTH = 148;
 const BURST_DROP = 6;
 // The big line's top over the small line's.
 const TITLE_OVER_SUBTITLE = 32;
+
+// The celebration moves with the road, its rows set from the road's top row: the dim from 72
+// rows over it, and each version's walker's feet line under it, with the new walker's bubble
+// 6 rows under its feet line and the parts in the bubble from the bubble's top.
+const ROAD_TOP = screenLayout(SCREEN_CONFIG).roadView.y;
+const DIM = { height: 316, width: SCREEN_WIDTH, x: 0, y: ROAD_TOP - 72 };
+const NEW_WALKER_FEET = ROAD_TOP + 104;
+const BUBBLE_TOP = NEW_WALKER_FEET + 6;
+const ZONE_DONE_FEET = ROAD_TOP + 148;
+const PLATE_TOP = ZONE_DONE_FEET + 10;
 
 // A version's headline from its feet line: the walker's frame at WALKER_SCALE, centred on
 // CENTER_X, standing on feetY; the burst behind it; and the small line's top subtitleGap rows
@@ -43,30 +55,30 @@ export const CELEBRATION_LAYOUT = {
     bits: 60,
     fallMs: 2000,
     fromX: 6,
-    fromY: 150,
+    fromY: DIM.y,
     sway: 4,
     swayMs: 320,
     toX: 348,
-    toY: 458,
+    toY: DIM.y + 308,
   },
-  dim: { height: 316, width: SCREEN_WIDTH, x: 0, y: 150 },
+  dim: DIM,
   // The burst's top-left; the walker, drawn at walkerScale, stands with its frame's bottom
   // centre on the feet line, its frame's top-left at walker.
   newWalker: {
-    ...headline(326, 10),
-    bubble: { height: 76, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: 332 },
-    button: { height: 44, width: 264, x: 48, y: 416 },
+    ...headline(NEW_WALKER_FEET, 10),
+    bubble: { height: 76, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: BUBBLE_TOP },
+    button: { height: 44, width: 264, x: 48, y: BUBBLE_TOP + 84 },
     // The walker's line, wrapped, one line top per line.
-    greeting: { lineTops: [336, 354], maxWidth: 296 },
+    greeting: { lineTops: [BUBBLE_TOP + 4, BUBBLE_TOP + 22], maxWidth: 296 },
     // The agility and perk row: an icon, iconGap, its word; itemGap between the rest.
-    info: { iconGap: 4, iconY: 383, itemGap: 10, y: 382 },
+    info: { iconGap: 4, iconY: BUBBLE_TOP + 51, itemGap: 10, y: BUBBLE_TOP + 50 },
     // Tan dots every step pixels along a row of the bubble.
-    rule: { fromX: 36, step: 3, toX: 323, y: 375 },
+    rule: { fromX: 36, step: 3, toX: 323, y: BUBBLE_TOP + 43 },
     // ui-quip-tail-up, its bottom row over the bubble's top rim.
-    tail: { x: 176, y: 327 },
+    tail: { x: 176, y: BUBBLE_TOP - 5 },
   },
   // A new walker's centre hops in from fromX, and fx-confetti bursts at burstY as they land.
-  runIn: { burstY: 266, durationMs: 600, fromX: 400 },
+  runIn: { burstY: ROAD_TOP + 44, durationMs: 600, fromX: 400 },
   // The big line is font-display at titleScale, or at the first of titleStyles whose ink fits
   // titleRoom: each whole scale down to 1, glyphs at the font's own spacing. The small line is
   // font-display-cream at 1x.
@@ -78,8 +90,8 @@ export const CELEBRATION_LAYOUT = {
   })),
   walkerScale: WALKER_SCALE,
   zoneDone: {
-    ...headline(370, 14),
-    earningsY: 387,
-    plate: { height: 32, width: 280, x: 40, y: 380 },
+    ...headline(ZONE_DONE_FEET, 14),
+    earningsY: PLATE_TOP + 7,
+    plate: { height: 32, width: 280, x: 40, y: PLATE_TOP },
   },
 } as const;
