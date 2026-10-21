@@ -5,6 +5,7 @@ import {
   dogPortraitKey,
   dogSpriteKey,
   gearIconKey,
+  ownerFaceKey,
   walkerPortraitKey,
 } from "../assets/spriteKeys";
 import { gameData } from "../data";
@@ -13,7 +14,7 @@ import type { DogId, GearId, Size, WalkerId } from "../data/types";
 import { clearRunOverrides } from "../dev/pageRunSetup";
 import { startWalkOpensHelp } from "../help/helpSeen";
 import { bankAtLastVisit, newlyAffordable } from "../home/afford";
-import { bubbleRect, speechLines } from "../home/bubbleRect";
+import { bubbleLines, bubbleRect, bubbleSize, ownerColumn, ownerPlace } from "../home/bubbleRect";
 import { type DetailCard, dogDetail, gearDetail, walkerDetail } from "../home/detail";
 import {
   badgePopOffset,
@@ -50,8 +51,6 @@ import {
   dogTilePlateY,
   HOME_LAYOUT,
   sectionFill,
-  SPEECH_ROOM,
-  speechBubbleHeight,
 } from "../home/homeLayout";
 import {
   bubbleSpeech,
@@ -173,6 +172,7 @@ import {
   imageIcon,
   type SelectTile,
   type SelectTileOptions,
+  showTag,
   soundIcon,
   tagFrame,
   TEXT_SCALE,
@@ -223,8 +223,7 @@ const GEAR_BADGE: Rect = HOME_LAYOUT.gearBadge;
 const FOCUS_OUTSET = 5;
 const SIZE_ORDER: readonly Size[] = ["small", "medium", "big"];
 
-// The walker's speech bubble: its place, padding and most lines. SPEECH_ROOM is its widest
-// line, in pixels.
+// The walker's speech bubble: its place, padding and most lines.
 const SPEECH = HOME_LAYOUT.speech;
 
 function walkerIds(): WalkerId[] {
@@ -723,6 +722,32 @@ export class StartScene extends Scene {
     }
     this.action = action;
     this.render();
+  }
+
+  // The speaking owner beside their parting line in the walker's bubble: their happy face over
+  // tan in a 1px ink frame, and their name, already set in name, centred under it.
+  private addSpeakingOwner(
+    root: GameObjects.Container,
+    reduced: boolean,
+    dog: DogId,
+    place: ReturnType<typeof ownerPlace>,
+    name: GameObjects.BitmapText | undefined,
+  ): void {
+    const { face } = place;
+    const g = this.graphics(root);
+    fillRect(g, PALETTE.tan, face);
+    const key = ownerFaceKey(gameData, dog);
+    if (this.textures.exists(key)) {
+      const sprite = this.add.sprite(face.x, face.y, key).setOrigin(0);
+      showTag(reduced, sprite, key, "happy");
+      root.add(sprite);
+    }
+    drawRing(this.graphics(root), PALETTE.ink, face, 1);
+    if (name !== undefined) {
+      const ink = inkSpan(name);
+      placePixelText(name, place.name.x - (ink.left + ink.right) / 2, place.name.capY);
+      root.bringToTop(name);
+    }
   }
 
   // A dog's owner says a parting line when it is picked or bought; it is drawn once a visit.
@@ -1408,7 +1433,18 @@ export class StartScene extends Scene {
       setPixelText(probe, line);
       return probe.width;
     };
-    const lines = speechLines(measure, SPEECH_ROOM, SPEECH.lines, [...notice, ...speech]);
+    // The speaking owner's name, at 1x, sets their column's width.
+    const ownerName = speech.owner === null ? undefined : gameData.dogs[speech.owner].owner.name;
+    const nameLabel =
+      ownerName === undefined
+        ? undefined
+        : this.text(root, 0, 0, ownerName, PALETTE.rust, { scale: 1 });
+    const nameInk = nameLabel === undefined ? undefined : inkSpan(nameLabel);
+    const column = nameInk === undefined ? null : ownerColumn(nameInk.right - nameInk.left);
+    const { faced, lines } = bubbleLines(measure, SPEECH.lines, column, [
+      ...notice,
+      ...speech.paragraphs,
+    ]);
     probe.destroy();
     const top = GATE.y + SPEECH.top;
     // The bubble goes under the words, which set its size.
@@ -1416,26 +1452,32 @@ export class StartScene extends Scene {
     root.add(bubble);
     const body = pixelFontMetrics(this, "body");
     const pitch = body.lineHeight * TEXT_SCALE;
-    const labels = lines.map((line, i) =>
-      this.text(root, x, top + SPEECH.padTop + i * pitch, line, PALETTE.plum, { originX: 0.5 }),
-    );
-    const width = Math.ceil(Math.max(...labels.map((label) => label.width))) + 2 * SPEECH.padX;
-    const height = speechBubbleHeight(body, lines.length);
+    const labels = lines.map((line) => this.text(root, 0, 0, line, PALETTE.plum, { originX: 0.5 }));
+    const widest = Math.ceil(Math.max(...labels.map((label) => label.width)));
+    const size = bubbleSize(body, lines.length, widest, faced ? column : null);
     // A bubble tall enough to reach the Pet shop's board moves left to keep clear of it.
     const board = PET_SHOP_BOARD;
-    const centred = Math.round(x - width / 2);
-    const rect = bubbleRect(board, SPEECH, { x, y: top }, { height, width });
-    labels.forEach((label) => label.setX(label.x + rect.x - centred));
+    const rect = bubbleRect(board, SPEECH, { x, y: top }, size);
+    // Each line centred across the text's columns, its capitals textTop and a line apart down.
+    labels.forEach((label, i) => {
+      placePixelText(label, 0, rect.y + size.textTop + i * pitch);
+      label.setX(rect.x + SPEECH.padX + widest / 2);
+    });
     const quip = addNineSlice(this, "ui-quip", rect);
     if (quip === undefined) {
       drawFramedRect(this.graphics(bubble), { border: PALETTE.plum, fill: PALETTE.cream }, rect);
     } else {
       bubble.add(quip);
     }
+    if (!faced || speech.owner === null || column === null) {
+      nameLabel?.destroy();
+    } else {
+      this.addSpeakingOwner(root, reduced, speech.owner, ownerPlace(rect, column), nameLabel);
+    }
     // The tail's top row lies over the bubble's bottom rim, its tip over the walker.
     const tail = downTail((key) => this.textures.exists(key));
     if (tail !== undefined) {
-      bubble.add(this.add.image(x - tail.tipX, top + height - 1, tail.key).setOrigin(0));
+      bubble.add(this.add.image(x - tail.tipX, top + size.height - 1, tail.key).setOrigin(0));
     }
 
     // Equipped gear shows as a badge beside the walker, moved right of any dog whose feet

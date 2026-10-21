@@ -141,26 +141,30 @@ export function storageNotice(text: HomeText, state: StorageState): string[] {
 // What the walker's bubble says, as paragraphs that each start on a new line, in priority
 // order: a bought dog's message with its owner's parting line; the last action's message;
 // the parting line of the most recently picked dog still in the pack; the walker's own line.
-// quips holds the owner lines drawn this visit as dogs were picked or bought.
+// quips holds the owner lines drawn this visit as dogs were picked or bought. owner is the dog
+// whose owner says the last paragraph, or null when the walker or a message has the last word.
 export function bubbleSpeech(
   text: HomeText,
   walkerLine: WalkerLine,
   state: { readonly action: HomeAction; readonly loadout: HomeLoadout },
   quips: ReadonlyMap<DogId, string>,
-): string[] {
+): { owner: DogId | null; paragraphs: string[] } {
   const { action, loadout } = state;
   if (action.kind === "bought" && action.purchase.kind === "dog") {
+    const { dog } = action.purchase;
     const joined = boughtLine(text, action.purchase, action.name);
-    const quip = quips.get(action.purchase.dog);
-    return quip === undefined ? [joined] : [joined, quip];
+    const quip = quips.get(dog);
+    return quip === undefined
+      ? { owner: null, paragraphs: [joined] }
+      : { owner: dog, paragraphs: [joined, quip] };
   }
   const message = messageLine(text, action);
   if (message !== null) {
-    return [message];
+    return { owner: null, paragraphs: [message] };
   }
-  const quip = [...loadout.dogs]
-    .reverse()
-    .map((dog) => quips.get(dog))
-    .find((line) => line !== undefined);
-  return [quip ?? text.bubble[walkerLine]];
+  const owner = [...loadout.dogs].reverse().find((dog) => quips.has(dog));
+  const quip = owner === undefined ? undefined : quips.get(owner);
+  return owner === undefined || quip === undefined
+    ? { owner: null, paragraphs: [text.bubble[walkerLine]] }
+    : { owner, paragraphs: [quip] };
 }

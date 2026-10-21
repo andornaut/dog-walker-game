@@ -115,9 +115,9 @@ describe("messageLine", () => {
 
 describe("bubbleSpeech", () => {
   const quips = new Map<DogId, string>([
-    ["koda", "Jesse: He already did 10K."],
-    ["biscuit", "Sam: Snacks are in the left pocket."],
-    ["nugget", "Ava: Tag me in everything."],
+    ["koda", "He already did 10K."],
+    ["biscuit", "Snacks are in the left pocket."],
+    ["nugget", "Tag me in everything."],
   ]);
   const none: HomeAction = { kind: "none" };
 
@@ -125,35 +125,35 @@ describe("bubbleSpeech", () => {
     const cases: readonly {
       action: HomeAction;
       dogs: HomeLoadout["dogs"];
-      expected: string[];
+      expected: { owner: DogId | null; paragraphs: string[] };
       line: WalkerLine;
       name: string;
     }[] = [
       {
         action: none,
         dogs: ["koda", "biscuit"],
-        expected: ["Sam: Snacks are in the left pocket."],
+        expected: { owner: "biscuit", paragraphs: ["Snacks are in the left pocket."] },
         line: "afterWalk",
         name: "lets the owner of the latest pick still in the pack speak",
       },
       {
         action: none,
         dogs: [],
-        expected: [text.bubble.howTo],
+        expected: { owner: null, paragraphs: [text.bubble.howTo] },
         line: "howTo",
         name: "returns to the walker's line once the speakers leave the pack",
       },
       {
         action: { kind: "bought", name: "Nugget", purchase: { dog: "nugget", kind: "dog" } },
         dogs: [],
-        expected: ["Nugget joined.", "Ava: Tag me in everything."],
+        expected: { owner: "nugget", paragraphs: ["Nugget joined.", "Tag me in everything."] },
         line: "firstVisit",
         name: "announces a just-bought dog, then lets its owner speak though the dog is not picked",
       },
       {
         action: { amount: dollars(480), kind: "cantAfford", name: "Nugget" },
         dogs: ["koda"],
-        expected: ["$480 short for Nugget."],
+        expected: { owner: null, paragraphs: ["$480 short for Nugget."] },
         line: "afterWalk",
         name: "puts the last action's message ahead of a picked dog's owner",
       },

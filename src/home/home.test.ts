@@ -320,9 +320,11 @@ describe("logbookOf", () => {
 });
 
 describe("partingSpeech", () => {
-  it("names the owner, then one of their parting lines", () => {
-    expect(partingSpeech(data, () => 0, "koda")).toBe(`${jesse}: ${QUIPS.koda.parting[0]}`);
-    expect(partingSpeech(data, () => 0.99, "koda")).toBe(`${jesse}: ${QUIPS.koda.parting[1]}`);
+  it.each([
+    [0, 0],
+    [0.99, 1],
+  ])("says the owner's parting line for a draw of %d, without their name", (draw, index) => {
+    expect(partingSpeech(data, () => draw, "koda")).toBe(QUIPS.koda.parting[index]);
   });
 });
 

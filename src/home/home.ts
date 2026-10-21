@@ -8,7 +8,7 @@ import { nextDogSlot, price, unlockPrice } from "../rules/shop";
 import { type Cents, cents, read } from "../rules/units";
 import type { LastWalk, Owned, SaveDocument, SaveStats } from "../save/schema";
 import { dogsWalked, walksPlayed } from "../save/stats";
-import { HOME_TEXT_FIELDS, homeLine } from "./homeText";
+import { HOME_TEXT_FIELDS } from "./homeText";
 
 // The pack being picked, in the order picked, and the gear to take.
 export interface HomeLoadout {
@@ -253,17 +253,14 @@ export function logbookOf(data: LogbookData, stats: SaveStats): Logbook | null {
   };
 }
 
-// What a dog's owner says when the player picks it: their name and one of their parting
-// lines.
+// What a dog's owner says when the player picks it: one of their parting lines. The bubble
+// shows the owner's face and name beside it.
 export function partingSpeech(
-  data: Pick<GameData, "dogs" | "homeText" | "quips">,
+  data: Pick<GameData, "dogs" | "quips">,
   random: () => number,
   dog: DogId,
 ): string {
-  return homeLine(data.homeText, "parting", {
-    line: quipLine(data, random, { dog, moment: "parting" }),
-    owner: data.dogs[dog].owner.name,
-  });
+  return quipLine(data, random, { dog, moment: "parting" });
 }
 
 type InfoData = ShopData & Pick<GameData, "debuffs" | "encounters" | "homeText">;

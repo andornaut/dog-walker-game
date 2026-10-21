@@ -1667,6 +1667,15 @@
         "clearance": 2,
         "lines": 4,
         "margin": 4,
+        "owner": {
+          "foot": 18,
+          "gap": 6,
+          "inset": 3,
+          "nameGap": 3,
+          "roomCut": 4,
+          "size": 32,
+          "top": 4
+        },
         "padBottom": 3,
         "padTop": 4,
         "padX": 5,

@@ -74,7 +74,6 @@ export const HOME_TEXT = {
   noticeSoundOn: "Sound on.",
   packBonus: "lead +{hearts}",
   packCount: "{count}/{max}",
-  parting: "{owner}: {line}",
   pocket: {
     note: "One per walk",
     title: "Pocket",

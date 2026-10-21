@@ -544,8 +544,6 @@ export interface HomeText {
   // picked dog's owner's max by.
   readonly packBonus: string;
   readonly packCount: string;
-  // What a dog's owner says when the player picks it: their name and a parting line.
-  readonly parting: string;
   // The Pocket section's heading, and its band's note while nothing is pocketed.
   readonly pocket: {
     readonly note: string;
