@@ -205,7 +205,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     state = stagePanel(action, state);
     render();
   };
-  // Closing discards what is staged, as Cancel does.
+  // Closing discards what is staged; Cancel discards it and leaves the panel open.
   const setOpen = (open: boolean) => {
     sheet.hidden = !open;
     bar.setAttribute("aria-expanded", String(open));
@@ -247,7 +247,7 @@ export function mountDevPanel(host: DevPanelHost, container: HTMLElement | null)
     ),
   );
   const saveCheats = SAVE_CHEATS.map(({ edit, label }) => button(label, () => editSave(edit)));
-  const cancel = button("Cancel", () => setOpen(false));
+  const cancel = button("Cancel", () => stage({ kind: "cancel" }));
   const apply = button("Apply", () => applyAndGo(state), "dev-button dev-primary");
   const reset = button(
     "Reset save",
