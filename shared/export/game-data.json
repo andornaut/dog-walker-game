@@ -1079,7 +1079,7 @@
     {
       "id": "jogger",
       "movement": {
-        "factor": 1.5,
+        "factor": 1.7,
         "kind": "inLane"
       },
       "name": "Jogger",
@@ -1092,7 +1092,7 @@
     {
       "id": "kidOnBike",
       "movement": {
-        "factor": 1.25,
+        "factor": 1.35,
         "kind": "inLane"
       },
       "name": "Kid on a bike",
@@ -1106,7 +1106,7 @@
       "id": "mailCarrier",
       "movement": {
         "kind": "step",
-        "steps": 1
+        "steps": 2
       },
       "name": "Mail carrier",
       "shape": {
@@ -1146,7 +1146,7 @@
       "id": "raccoon",
       "movement": {
         "kind": "hop",
-        "most": 1
+        "most": 2
       },
       "name": "Raccoon",
       "shape": {

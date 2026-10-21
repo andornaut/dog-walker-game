@@ -67,17 +67,17 @@ export const MINOR_OBSTACLES = {
     shape: { lanes: 1, rows: 3 },
   },
   jogger: {
-    movement: { factor: 1.5, kind: "inLane" },
+    movement: { factor: 1.7, kind: "inLane" },
     name: "Jogger",
     shape: { lanes: 1, rows: 1 },
   },
   kidOnBike: {
-    movement: { factor: 1.25, kind: "inLane" },
+    movement: { factor: 1.35, kind: "inLane" },
     name: "Kid on a bike",
     shape: { lanes: 1, rows: 1 },
   },
   mailCarrier: {
-    movement: { kind: "step", steps: 1 },
+    movement: { kind: "step", steps: 2 },
     name: "Mail carrier",
     shape: { lanes: 1, rows: 1 },
   },
@@ -91,7 +91,7 @@ export const MINOR_OBSTACLES = {
     name: "Pigeons",
     shape: { lanes: 1, rows: 1 },
   },
-  raccoon: { movement: { kind: "hop", most: 1 }, name: "Raccoon", shape: { lanes: 1, rows: 1 } },
+  raccoon: { movement: { kind: "hop", most: 2 }, name: "Raccoon", shape: { lanes: 1, rows: 1 } },
   scooter: {
     movement: { factor: 1.73, kind: "inLane" },
     name: "Scooter",

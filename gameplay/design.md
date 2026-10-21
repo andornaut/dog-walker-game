@@ -168,7 +168,7 @@ Each obstacle has one look everywhere. Some kinds can move (each kind's movement
 - **Hops:** quick hops at random to a lane on either side, a row up the road, or diagonally up, never down toward the pack, 1 or 2 spots at a time; some hop only sideways (the ducklings, and the parked car pulling out one lane)
 - **In-lane:** keep their lane and move down the road at their own speed, faster than it scrolls (bikes, cars, the jogger, the charging goose) or slower (the stroller, the garbage and ice cream trucks, the streetcar)
 - **Stalkers:** step toward the pack while still ahead of it: a lane to either side, a row down, or diagonally down, whichever brings it closest. The thief and the skunk each step once, a little after coming on screen; the coyote twice, once a little after it comes on and again right after, the second step with no cue of its own (in the faster neighborhoods it often reaches the pack first, so steps only once)
-- **Steps:** one slow step in any direction: a lane to either side, or a row up or down (the mail carrier)
+- **Steps:** two slow steps, each in any direction: a lane to either side, or a row up or down (the mail carrier)
 
 Barriers, benches, bins, cones, hedges and puddles never move.
 
