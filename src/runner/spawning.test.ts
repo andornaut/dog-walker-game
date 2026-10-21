@@ -8,7 +8,6 @@ import {
   everyLaneReaches,
   type Footprint,
   hitLength,
-  laneMask,
   type LaneReach,
   laneReach,
   packFitsBetween,
@@ -20,6 +19,11 @@ import {
   spawnRowDistances,
   takeDueSpawns,
 } from "./spawning";
+
+// A set of lanes as a bit mask: bit n set means lane n is in it.
+function laneMask(lanes: readonly number[]): number {
+  return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
+}
 
 type Kind = "bench" | "car" | "hedge" | "obstacle" | "skunk" | "tip" | "treat";
 

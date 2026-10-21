@@ -66,7 +66,7 @@ export interface SpawnEvent<Kind extends string> {
   mover?: MoverPath;
 }
 
-export interface DueSpawns<Kind extends string> {
+interface DueSpawns<Kind extends string> {
   due: SpawnEvent<Kind>[];
   pending: readonly SpawnEvent<Kind>[];
 }
@@ -159,7 +159,7 @@ export function laneReach(plan: SpawnPlan<string>): LaneReach {
 // reaches the pack, its leftmost lane, how many lanes it covers, and the length of road it
 // keeps the pack from stepping in behind it: a standing spawn's hit box, or a mover's contact
 // with the pack less the pack's length, which is shorter for one faster than the road.
-export interface BlockingPlace {
+interface BlockingPlace {
   distance: number;
   lane: number;
   lanes: number;
@@ -223,11 +223,6 @@ export function packFitsBetween(
     return fitsBehind(a, b) && fitsBehind(b, a);
   }
   return a.distance < b.distance ? fitsBehind(a, b) : fitsBehind(b, a);
-}
-
-// A set of lanes as a bit mask: bit n set means lane n is in it.
-export function laneMask(lanes: readonly number[]): number {
-  return lanes.reduce((mask, lane) => mask | (1 << lane), 0);
 }
 
 // The mask of count lanes from first on.

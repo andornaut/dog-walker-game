@@ -116,15 +116,6 @@ export function lockSteering(seconds: number, control: LaneControl): LaneControl
   return { ...control, lockSeconds: startLock(seconds, control.lockSeconds) };
 }
 
-// Sets a lock that starts when the pack stops, as a pull's does; a still pack locks at once.
-// A longer lock already waiting is kept.
-export function lockOnArrival(seconds: number, control: LaneControl): LaneControl {
-  if (control.motion.kind === "still") {
-    return lockSteering(seconds, control);
-  }
-  return { ...control, lockOnArrival: startLock(seconds, control.lockOnArrival ?? 0) };
-}
-
 // Steps from arrival to arrival, so a lock starts at the moment the pack stops and the time
 // left over counts it down. Arriving short of the target, the pack sets off for the next lane.
 export function advanceLaneControl(

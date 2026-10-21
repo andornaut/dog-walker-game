@@ -2,15 +2,16 @@ import { describe, expect, it } from "vitest";
 
 import { cents } from "../rules/units";
 import {
+  type ButtonState,
+  buttonState,
   type InteractionInput,
-  type InteractionState,
-  interactionState,
   type ItemTile,
   itemTile,
   type ItemTileInput,
   itemTileLook,
   PLAIN_ITEM,
   type TileState,
+  tileState,
 } from "./interaction";
 
 const locked = (price: number, bank: number): Partial<InteractionInput> => ({
@@ -18,13 +19,11 @@ const locked = (price: number, bank: number): Partial<InteractionInput> => ({
   price: cents(price),
 });
 
-describe("interactionState", () => {
-  it("shows each item as normal, primary, selected or disabled by its pick, room and price", () => {
+describe("tileState", () => {
+  it("shows each item as normal, selected or disabled by its pick, room and price", () => {
     for (const [, expected, input] of [
       ["an owned item with room", "normal", {}],
-      ["the call to action", "primary", { primary: true }],
       ["an unavailable item", "disabled", { available: false }],
-      ["an unavailable call to action", "disabled", { available: false, primary: true }],
       ["a picked item", "selected", { picked: true }],
       ["a picked item in a full choice", "selected", { full: true, picked: true }],
       ["a picked item made unavailable", "disabled", { available: false, picked: true }],
@@ -34,8 +33,21 @@ describe("interactionState", () => {
       ["a locked item the bank cannot cover", "disabled", locked(500, 499)],
       ["a locked, covered item in a full choice", "normal", { ...locked(500, 800), full: true }],
       ["a locked, uncovered item in a full choice", "disabled", { ...locked(500, 0), full: true }],
-    ] satisfies readonly [string, InteractionState, Partial<InteractionInput>][]) {
-      expect(interactionState({ ...PLAIN_ITEM, ...input })).toBe(expected);
+    ] satisfies readonly [string, TileState, Partial<InteractionInput>][]) {
+      expect(tileState({ ...PLAIN_ITEM, ...input })).toBe(expected);
+    }
+  });
+});
+
+describe("buttonState", () => {
+  it("shows a button as normal, primary or disabled", () => {
+    for (const [, expected, input] of [
+      ["an available button", "normal", {}],
+      ["the call to action", "primary", { primary: true }],
+      ["an unavailable button", "disabled", { available: false }],
+      ["an unavailable call to action", "disabled", { available: false, primary: true }],
+    ] satisfies readonly [string, ButtonState, Partial<InteractionInput>][]) {
+      expect(buttonState({ ...PLAIN_ITEM, ...input })).toBe(expected);
     }
   });
 });

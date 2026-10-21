@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import { ROAD_CAMERA, ROAD_FAR_SCALE, SCREEN_CONFIG } from "../data/screen";
 import { TUNING } from "../data/tuning";
-import { PACK_DEPTH } from "./packFormation";
 import {
   columnSpan,
   distanceAtY,
@@ -13,7 +12,6 @@ import {
   roadXAt,
   scaleAt,
   screenYAt,
-  snapScale,
 } from "./projection";
 import { screenLayout, walkerFootY } from "./screenLayout";
 
@@ -92,36 +90,5 @@ describe("inverses", () => {
   it("roadXAt undoes project's x", () => {
     const placed = project(projection, { distance: 300, x: 108 });
     expect(roadXAt(projection, placed.scale, placed.x)).toBeCloseTo(108);
-  });
-});
-
-describe("snapScale", () => {
-  // The nearest depth step by ratio, each pair either side of a boundary.
-  it("snaps a scale to the nearest depth step by ratio", () => {
-    for (const [scale, step] of [
-      [1.01, 1],
-      [0.94, 1],
-      [0.93, 0.875],
-      [0.82, 0.875],
-      [0.8, 0.75],
-      [0.69, 0.75],
-      [0.68, 0.625],
-      [0.56, 0.625],
-      [0.55, 0.5],
-      [0.3, 0.5],
-    ] as const) {
-      expect(snapScale(scale)).toBe(step);
-    }
-  });
-
-  it("draws the pack at 1 and the far edge at 0.5", () => {
-    expect(snapScale(PACK_DEPTH)).toBe(1);
-    expect(snapScale(scaleAt(projection, projection.visibleDistance))).toBe(0.5);
-  });
-
-  it("snaps a road sprite just ahead of the pack to 0.875, unlike the pack", () => {
-    // The far edge is at scale 0.5 (visibleDistance), so scale s is (1 / s - 1) of it ahead.
-    const justAhead = projection.visibleDistance * (1 / 0.9 - 1);
-    expect(snapScale(scaleAt(projection, justAhead))).toBe(0.875);
   });
 });

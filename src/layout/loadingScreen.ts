@@ -12,10 +12,6 @@ export const LOADING_TRACK: Rect = { height: 8, width: 316, x: 16, y: 456 };
 // ui-loading's frame size, 98x84, with its feet on screen row 460.
 export const LOADING_WALKER_SIZE = { height: 84, width: 98 };
 
-// The status line, if the scene draws one, sits in these rows, which the screen art leaves
-// plain.
-export const LOADING_STATUS_ROWS = { from: 476, to: 500 };
-
 // The walker's top-left at progress 0, and how far right it walks by 1: from the screen's
 // left margin until its right edge meets the track's end at the gate.
 export const LOADING_WALKER = {
@@ -28,7 +24,7 @@ export const LOADING_WALKER = {
 // animations and metrics, the placeholders and the fallback font. The rest loads behind the
 // home screen, off the bar. Each phase fills its share of the
 // bar in proportion to measured boots, where processing takes under a tenth of the time.
-export type BootPhase = "network" | "processing";
+type BootPhase = "network" | "processing";
 
 const PHASES: Readonly<Record<BootPhase, { from: number; to: number }>> = {
   network: { from: 0, to: 0.9 },

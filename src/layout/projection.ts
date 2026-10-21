@@ -14,12 +14,12 @@ export interface RoadCamera {
   readonly ratio: number;
 }
 
-export interface RoadPoint {
+interface RoadPoint {
   readonly distance: number;
   readonly x: number;
 }
 
-export interface ScreenPlacement {
+interface ScreenPlacement {
   readonly scale: number;
   readonly x: number;
   readonly y: number;
@@ -37,14 +37,13 @@ export interface RoadProjection {
 }
 
 // A run of screen columns, both ends included.
-export interface ColumnSpan {
+interface ColumnSpan {
   readonly first: number;
   readonly last: number;
 }
 
 // The scales road art is drawn at, 1 first, from the depth step table.
 export const SCALE_STEPS: readonly number[] = DEPTH_STEPS.map(({ scale }) => scale);
-export type ScaleStep = number;
 
 type Camera = Pick<RoadProjection, "focal" | "footY" | "horizonY">;
 
@@ -141,16 +140,4 @@ export function lineColumn(
 ): number {
   const { centerX } = projection;
   return Math.floor(centerX + (x - centerX) * rowScale(projection, row));
-}
-
-// The depth step nearest a scale, judged by ratio, so two steps' boundary is their geometric
-// mean: 0.935 between 1 and 0.875.
-export function snapScale(scale: number): ScaleStep {
-  let best = 1;
-  for (const step of SCALE_STEPS) {
-    if (Math.abs(Math.log(scale / step)) < Math.abs(Math.log(scale / best))) {
-      best = step;
-    }
-  }
-  return best;
 }

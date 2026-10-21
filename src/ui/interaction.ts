@@ -3,7 +3,7 @@ import type { PlateKind } from "./selection";
 
 // Every tappable item and button shows one of these. disabled cannot be chosen; normal can;
 // selected is picked, equipped or open; primary is the screen's one call to action.
-export type InteractionState = "disabled" | "normal" | "primary" | "selected";
+type InteractionState = "disabled" | "normal" | "primary" | "selected";
 
 // A tile is never the call to action, and a button is never picked.
 export type TileState = Exclude<InteractionState, "primary">;
@@ -130,9 +130,4 @@ export function buttonState(input: Pick<InteractionInput, "available" | "primary
     return "disabled";
   }
   return input.primary ? "primary" : "normal";
-}
-
-export function interactionState(input: InteractionInput): InteractionState {
-  const state = tileState(input);
-  return state === "normal" && input.primary ? "primary" : state;
 }

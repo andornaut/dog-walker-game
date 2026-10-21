@@ -35,7 +35,7 @@ export type ZoneId = (typeof WORLD)["zones"][number]["id"];
 type EncounterOfKind<Kind extends Encounter["kind"]> = {
   [Id in EncounterId]: (typeof ENCOUNTERS)[Id]["kind"] extends Kind ? Id : never;
 }[EncounterId];
-export type LuckyEncounterId = EncounterOfKind<"lucky">;
+type LuckyEncounterId = EncounterOfKind<"lucky">;
 export type ObstacleEncounterId = EncounterOfKind<"obstacle">;
 
 // The tuning as the game reads it: every value is a number, so a live edit type-checks.
@@ -48,8 +48,8 @@ export type NumberKeys<Group> = {
 }[keyof Group];
 
 // Keys into one unit group of the tuning, so a key from the wrong unit is a type error.
-export type CountKey = NumberKeys<LiveTuning["counts"]>;
-export type HeartsKey = NumberKeys<LiveTuning["hearts"]>;
+type CountKey = NumberKeys<LiveTuning["counts"]>;
+type HeartsKey = NumberKeys<LiveTuning["hearts"]>;
 export type MoneyKey = NumberKeys<LiveTuning["money"]>;
 export type MultiplierKey = NumberKeys<LiveTuning["multipliers"]>;
 export type SecondsKey = NumberKeys<LiveTuning["seconds"]>;
@@ -142,10 +142,10 @@ export type Duration = "nextZone" | "run" | "zone";
 // Stats a modifier changes. An "add" names a key in the stat's own unit group.
 // How many lanes beside the pack's tips and treats are grabbed from, and how many encounter
 // cards each zone cost no money.
-export type CountStat = "freeCards" | "tipReach" | "treatReach";
+type CountStat = "freeCards" | "tipReach" | "treatReach";
 // forgivenHearts: how many of the first hearts lost in each zone are forgiven.
-export type HeartsStat = "forgivenHearts" | "maxHearts";
-export type MoneyStat = "startMoney" | "tipValue";
+type HeartsStat = "forgivenHearts" | "maxHearts";
+type MoneyStat = "startMoney" | "tipValue";
 export type Stat =
   | CountStat
   | HeartsStat
@@ -173,7 +173,7 @@ export type Modifier = { readonly duration?: Duration } & (
   | { readonly by: MultiplierKey; readonly operation: "multiply"; readonly stat: Stat }
 );
 
-export type HeartsDelta = -3 | -2 | -1 | 1 | 2 | 3;
+type HeartsDelta = -3 | -2 | -1 | 1 | 2 | 3;
 
 // Applies once, whatever the pack size.
 export interface MoneyEffect {
@@ -189,13 +189,13 @@ export interface HeartsEffect {
   readonly target: Target;
 }
 
-export interface DebuffEffect {
+interface DebuffEffect {
   readonly debuff: DebuffId;
   readonly kind: "debuff";
 }
 
 // No card opens for the encounter while the pack is immune to it.
-export interface ImmuneEffect {
+interface ImmuneEffect {
   readonly duration: Duration;
   readonly encounter: EncounterId;
   readonly kind: "immune";
@@ -204,7 +204,7 @@ export interface ImmuneEffect {
 export type ModifierEffect = Modifier & { readonly kind: "modifier" };
 
 // A free Skip on every obstacle card until it is taken, once per walk.
-export interface SkipOptionEffect {
+interface SkipOptionEffect {
   readonly kind: "skipOption";
 }
 
@@ -227,17 +227,17 @@ export interface CardOption {
 export type CardOptions =
   readonly [CardOption, CardOption] | readonly [CardOption, CardOption, CardOption];
 
-export type NonEmptyEffects = readonly [Effect, ...Effect[]];
+type NonEmptyEffects = readonly [Effect, ...Effect[]];
 
 // The encounter opens a card of options.
-export interface CardResolution {
+interface CardResolution {
   readonly kind: "card";
   readonly options: CardOptions;
 }
 
 // The encounter applies its effects on contact, with a popup instead of a card. art is the
 // popup's illustration.
-export interface InstantResolution {
+interface InstantResolution {
   readonly art: string;
   readonly effects: NonEmptyEffects;
   readonly kind: "instant";
@@ -245,7 +245,7 @@ export interface InstantResolution {
 
 // The obstacle applies its effects to the whole pack as it is touched, with a plain obstacle's
 // hit stop and no card.
-export interface ContactResolution {
+interface ContactResolution {
   readonly effects: NonEmptyEffects;
   // What an immunity to the obstacle does, as an effect's text says it, lower case: "puddles
   // don't muddy the pack".
@@ -254,16 +254,13 @@ export interface ContactResolution {
 }
 
 // Touching the obstacle does nothing: its only cost is the dogs pulling toward it.
-export interface PullResolution {
+interface PullResolution {
   readonly kind: "pull";
 }
 
-export type ObstacleResolution = CardResolution | ContactResolution | PullResolution;
-export type Resolution = InstantResolution | ObstacleResolution;
-
 // What an obstacle covers on the road: lanes across and rows along it. One row is a lane-width
 // of road. The rulebook allows no obstacle wider than 3 lanes.
-export interface Shape {
+interface Shape {
   readonly lanes: 1 | 2 | 3;
   readonly rows: 1 | 2 | 3;
 }
@@ -374,7 +371,7 @@ export type DogSlot = Unlock;
 // "start": walks from the first run; "finishZone": unlocked the first time any walk finishes
 // its zone-th zone, counting from 1.
 // A walker walks from the start, or unlocks the first time a walk finishes zone.
-export type WalkerUnlock =
+type WalkerUnlock =
   { readonly unlock: "finishZone"; readonly zone: ZoneId } | { readonly unlock: "start" };
 
 // A walker's perk: its name, its effect in one line, and its effects, which last every walk the
@@ -472,7 +469,7 @@ export interface HelpPage {
   readonly title: string;
 }
 
-export interface AgilityWord {
+interface AgilityWord {
   readonly from: number;
   readonly word: string;
 }
@@ -899,7 +896,7 @@ export interface Achievement {
   readonly shortGoal?: string;
 }
 
-export type GameAchievement = Achievement & { readonly id: AchievementId };
+type GameAchievement = Achievement & { readonly id: AchievementId };
 
 // Where an ambient mover goes. Ambient movers are scenery: they never touch the road, collide,
 // or change anything in play.
@@ -912,7 +909,7 @@ export type GameAchievement = Achievement & { readonly id: AchievementId };
 //   feet on a row drawn from its rows.
 // - verge: on the lawn or paving beside the road. A steady mover darts in from the screen's
 //   side, stops, and darts back out; a hopper or flier starts there and leaves the same way.
-export type AmbientPath =
+type AmbientPath =
   "crossStreet" | "crossWalk" | "sidewalkAway" | "sidewalkToward" | "sky" | "verge";
 
 // How a mover covers its path: steadily, in bursts of one or two hops with a pause between
