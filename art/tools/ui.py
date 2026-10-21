@@ -1291,8 +1291,8 @@ EFFECT_WELL = 18
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with the top bar's trim (dbrown on row 1; brown, dbrown and
     ink on rows 45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,4 112x40 and neighbourhood 122,4 104x21, which ends clear of the Sound button's hit at
-    x 228. The game draws the effect wells, the Sound, Pause and Settings buttons (Settings rightmost) and every text
+    cash 4,4 112x40 and neighbourhood 122,4 104x21, which ends clear of the Pause button's hit at
+    x 228. The game draws the effect wells, the Pause, Sound and Settings buttons (Settings rightmost) and every text
     and icon on it."""
     w, h = WALK_BAR
     g = Grid(w, h)
