@@ -1,16 +1,28 @@
 #!/usr/bin/env python3
 """Draw the road effects for collisions and pickups, and the new-best burst on
-the end screen. fx-bump and fx-sparkle are warm light that
-holds 3:1 on Elm Avenue but fades into the three light roads, so each carries a
-1px plum rim (4.4:1 or more on those). fx-splash has no outline.
-fx-new-best carries the plum rim too, for the cream panel and
-the sunset sky of screen-end.
+the end screen. The bumps, debris and fx-sparkle are warm light or small that
+would fade into the three light roads, so each carries a 1px plum rim (4.4:1 or
+more on those); fx-splash carries a navy one. fx-new-best carries the plum rim
+too, for the cream panel and the sunset sky of screen-end. The pack is always
+drawn at full size, so the hit effects have no depth variants.
 
-fx-bump     32x32  play (5 frames)  impact star where the pack hits an obstacle
-fx-splash   32x32  play (5 frames)  water thrown up by a puddle
-fx-sparkle  16x16  play (4 frames)  twinkle where a treat or tip is collected
-fx-new-best 96x48  play (8 frames)  rays, sparkles and stars bursting from behind
-                                    the ui-new-best ribbon (centred on it)
+fx-bump          48x48  play (6 frames, 50ms)  impact star where a dog hits a standing
+                                               obstacle, white impact lines in its gaps,
+                                               breaking into chips; centred on the contact
+fx-bump-big      64x64  play (7 frames, 50ms)  a mover's impact: a four-layer star in a
+                                               ring of radial motion lines, a shock ring,
+                                               chips; centred on the contact
+fx-debris-leaves 48x48  play (6 frames, 70ms)  leaves and a twig knocked out of a hedge,
+                                               fluttering down; centred on the contact
+fx-debris-litter 48x48  play (6 frames, 70ms)  paper, a can and a banana peel thrown out
+                                               of a bin; centred on the contact
+fx-splash        64x48  play (8 frames, 60ms)  a puddle: a crown of spray rising from the
+                                               feet, droplets arcing out, mud kicked up and
+                                               two ripple rings; its ground point, row 40,
+                                               goes on the dog's feet
+fx-sparkle       16x16  play (4 frames, 60ms)  twinkle where a treat or tip is collected
+fx-new-best      96x48  play (8 frames, 70ms)  rays, sparkles and stars bursting from
+                                               behind the ui-new-best ribbon (centred on it)
 
 The comic lettering (LETTERS, word), which fonts.py exports as font-comic, is built like the
 sign logo: flat yellow letters, 7 rows with 2px stems, in a 1px ink ring that fills the
@@ -122,39 +134,198 @@ def word(g, text, cx, top, fill="yellow"):
     return g
 
 
+def line(g, x0, y0, x1, y1, col):
+    """A 1px line from (x0, y0) to (x1, y1)."""
+    n = max(abs(x1 - x0), abs(y1 - y0), 1)
+    for i in range(int(round(n)) + 1):
+        g.p(round(x0 + (x1 - x0) * i / n), round(y0 + (y1 - y0) * i / n), col)
+
+
+def rays(g, cx, cy, r0, r1, count, col, turn=0.0):
+    """count straight lines from radius r0 to r1 round (cx, cy): the comic impact lines."""
+    for i in range(count):
+        a = math.radians(i * 360 / count + turn - 90)
+        line(g, cx + math.cos(a) * r0, cy + math.sin(a) * r0, cx + math.cos(a) * r1, cy + math.sin(a) * r1, col)
+
+
+def chips(g, cx, cy, r, count, size, col, turn=11.0):
+    """count square chips of size px thrown r out from (cx, cy)."""
+    for i in range(count):
+        a = math.radians(i * 360 / count + turn - 90)
+        g.rect(round(cx + math.cos(a) * r - size / 2), round(cy + math.sin(a) * r - size / 2), size, size, col)
+
+
 def bump(step):
-    g = Grid(32, 32)
+    """48x48, centred on the contact point: a white pip, the full amber star with white impact lines in its
+    gaps, a hotter orange star, then the star breaking into chips that fly out."""
+    g = Grid(48, 48)
+    c = 24
     if step == 0:
-        burst(g, 16, 16, 6, 2.5, 4, "white")
-    elif step == 1:
-        burst(g, 16, 16, 13, 5, 8, "amber", 11)
-        burst(g, 16, 16, 9, 3.5, 8, "yellow", 11)
-        g.ell(16, 16, 3, 3, "white")
-    elif step == 2:
-        burst(g, 16, 16, 14, 6, 8, "orange", 11)
-        burst(g, 16, 16, 10, 4, 8, "yellow", 11)
-        g.ell(16, 16, 3.5, 3.5, "amber")
+        burst(g, c, c, 11, 4, 4, "white")
+        rays(g, c, c, 14, 18, 4, "white", 45)
+    elif step in (1, 2):
+        burst(g, c, c, 20 + step, 8, 8, ("amber", "orange")[step - 1], 11)
+        burst(g, c, c, 14 + step, 6, 8, "yellow", 11)
+        g.ell(c, c, 6 - step, 6 - step, ("white", "amber")[step - 1])
+        if step == 1:
+            rays(g, c, c, 15, 22, 8, "white", 33.5)
     else:
-        r, col = (11, 13)[step - 3], ("amber", "orange")[step - 3]
-        for i in range(8):
-            a = math.radians(i * 45 + 11 - 90)
-            x, y = 16 + math.cos(a) * r, 16 + math.sin(a) * r
-            g.rect(x - (step == 3), y - (step == 3), 2 if step == 3 else 1, 2 if step == 3 else 1, col)
+        if step == 3:
+            burst(g, c, c, 9, 4, 8, "yellow", 11)
+        chips(g, c, c, (16, 19, 22)[step - 3], 8, (3, 2, 1)[step - 3], ("orange", "amber", "amber")[step - 3])
     return g
 
 
+def bump_big(step):
+    """64x64, centred on the contact point, for a mover: a white star inside a ring of impact lines, a
+    four-layer star (orange, amber, yellow, white core) with the lines thrown wide, a shock ring, and
+    chips flying out."""
+    g = Grid(64, 64)
+    c = 32
+    if step == 0:
+        burst(g, c, c, 14, 5, 8, "white", 11)
+        rays(g, c, c, 18, 25, 16, "white", 5)
+    elif step in (1, 2):
+        turn = 11 + 9 * (step - 1)
+        burst(g, c, c, 29, 12, 10, ("orange", "red")[step - 1], turn)
+        burst(g, c, c, 23, 9, 10, "amber", turn)
+        burst(g, c, c, 16, 6, 10, "yellow", turn)
+        g.ell(c, c, 6 - step, 6 - step, "white")
+        rays(g, c, c, (25, 28)[step - 1], 31, 16, "white", 5)
+    else:
+        if step < 5:
+            burst(g, c, c, (20, 11)[step - 3], (8, 5)[step - 3], 10, ("amber", "yellow")[step - 3], 20)
+            r = (25, 29)[step - 3]
+            for y in range(64):
+                for x in range(64):
+                    d = math.hypot(x + 0.5 - c, y + 0.5 - c)
+                    if r - 1 <= d < r and (step == 3 or (x + y) % 2 == 0):
+                        g.p(x, y, "white")
+        chips(g, c, c, (22, 26, 29, 31)[step - 3], 10, (3, 2, 2, 1)[step - 3],
+              ("orange", "amber", "amber", "yellow")[step - 3], 2)
+    return g
+
+
+def ring(g, cx, cy, rx, ry, front, back, sparse=False):
+    """A 1px ripple ring: front on its near (lower) half, back on its far half; sparse keeps every other
+    pixel, for a ring that is fading."""
+    for y in range(g.h):
+        for x in range(g.w):
+            dx, dy = x + 0.5 - cx, y + 0.5 - cy
+            if (dx / rx) ** 2 + (dy / ry) ** 2 <= 1 and (dx / (rx - 1.3)) ** 2 + (dy / (ry - 1)) ** 2 > 1:
+                if not sparse or (x + y) % 2 == 0:
+                    g.p(x, y, front if dy > 0 else back)
+
+
+# The splash's crown: spikes of water from the feet (base dx, tip dx, tip height) at full growth.
+CROWN = ((-7, -21, 14), (-4, -12, 24), (0, -1, 19), (4, 12, 24), (7, 21, 14))
+# How far the crown has grown, by frame: it rises over 3 frames and sinks over 2.
+CROWN_GROWTH = (0.4, 0.8, 1.0, 0.65, 0.3)
+# Droplets broken off the crown's tips (launch dx, dy per frame, size), from frame 2, under gravity.
+DROPS = ((-5, -4, 2), (-3.4, -6, 2), (-1, -7, 1), (1.6, -6.5, 2), (3.6, -5, 2), (5.4, -3, 1), (-6, -2, 1),
+         (0.4, -8, 2), (-2, -3, 1), (2.6, -2.5, 1))
+# Mud kicked up from the puddle's bed (dx, dy per frame), from frame 1: short low hops by the feet.
+MUD = ((-4, -3), (-2.4, -4), (2.8, -3.6), (4.4, -2.6), (-5.6, -1.6), (5.8, -2))
+# The splash's ground point, where the dog's feet meet the water: the frame's centre column, row 40.
+SPLASH_GROUND = (32, 40)
+
+
 def splash(step):
-    g = Grid(32, 32)
-    if step < 2:
-        g.ell(16, 26, 7 + step * 4, 2 + step, "sky", "blue", "cyan")
-        g.ell(16, 26, 4 + step * 3, 1 + step * 0.6, None)
-    for i, (vx, vy) in enumerate(((-3, -5), (-1.6, -7), (0, -8), (1.6, -7), (3, -5), (-4.4, -3), (4.4, -3))):
-        t = step + 0.8
-        x, y = 16 + vx * t * 0.9, 25 + vy * t + 1.6 * t * t
-        if y < 31:
-            g.rect(x, y, 2 if i % 2 else 1, 2, "cyan" if step < 3 else "sky")
-            if step < 2:
-                g.p(x, y - 1, "white")
+    """64x48, its ground point 8px above the frame's bottom: a crown of water rising from the feet and
+    sinking, droplets arcing out and falling, mud kicked up, and two ripple rings spreading and fading."""
+    g = Grid(64, 48)
+    cx, gy = SPLASH_GROUND
+    rings = ((12, 16, 20, 24, 27, 29, 31, 31)[step], (0, 0, 0, 0, 12, 16, 20, 24)[step])
+    for k, rx in enumerate(rings):
+        if rx:
+            ring(g, cx, gy, rx, max(3, rx * 0.28), "white" if k == 0 else "cyan", "cyan" if k == 0 else "sky",
+                 sparse=step >= 6 + k)
+    if step < 3:
+        g.ell(cx, gy, 8 + step * 3, 2.5, "cyan", None, "white")
+    if step < len(CROWN_GROWTH):
+        k = CROWN_GROWTH[step]
+        for bx, tx, h in CROWN:
+            spread = 1 + 0.4 * (step >= 3)
+            tip = (cx + bx + tx * k * spread, gy - h * k)
+            g.tri((cx + bx * k - 3, gy), (cx + bx * k + 3, gy), tip, "cyan")
+            g.tri((cx + bx * k - 1, gy), (cx + bx * k + 1, gy), tip, "sky")
+            g.rect(round(tip[0]) - 1, round(tip[1]) + 1, 2, 2, "white")
+            if step < 3:
+                g.rect(round(tip[0]) - 1, round(tip[1]) - 3, 2, 2, "white")
+    if step >= 2:
+        t = step - 1.4
+        for vx, vy, size in DROPS:
+            x, y = cx + vx * 1.8 * t, gy - 20 + vy * t + 2.4 * t * t
+            if y < gy + 1:
+                g.rect(round(x), round(y), size, size + 1, "cyan")
+                g.p(round(x), round(y), "white")
+    if 1 <= step <= 4:
+        t = step - 0.6
+        for vx, vy in MUD:
+            x, y = cx + vx * t, gy - 3 + vy * t + 1.6 * t * t
+            if y < gy + 2:
+                g.rect(round(x), round(y), 2, 1 + (step < 3), "dbrown")
+    return g
+
+
+def leaf(g, x, y, flip, col="dgreen", lit="green"):
+    """A 4x3 leaf (3x4 when flip) with clipped corners and a lit tip."""
+    w, h = (3, 4) if flip else (4, 3)
+    x, y = round(x), round(y)
+    g.rect(x, y, w, h, col)
+    g.p(x + w - 1, y, None)
+    g.p(x, y + h - 1, None)
+    g.p(x + 1, y + 1, lit)
+
+
+# Leaves knocked out of a hedge (dx, dy per frame), the frame's centre on the contact point.
+LEAVES = ((-6, -5), (-3.5, -7), (-1, -6), (2, -7.5), (4.5, -5.5), (7, -3), (-7.5, -2), (5.5, -1), (0.5, -3))
+
+
+def debris_leaves(step):
+    """48x48, centred on the contact point: leaves knocked out of a hedge, flung up and out, then
+    fluttering down as they turn, with a twig."""
+    g = Grid(48, 48)
+    t = step + 1
+    for i, (vx, vy) in enumerate(LEAVES):
+        drag = (1 - 0.72 ** t) / 0.28
+        x, y = 24 + vx * drag, 24 + vy * drag + 0.5 * t * t
+        flip = (i + step) % 2 == 1
+        leaf(g, x, y, flip, ("dgreen", "green", "forest")[i % 3], ("green", "yellow", "dgreen")[i % 3])
+    a = math.radians(step * 50)
+    x, y = 24 + 3 * t, 24 - 4 * t + 0.9 * t * t
+    line(g, x - 2 * math.cos(a), y - 2 * math.sin(a), x + 2 * math.cos(a), y + 2 * math.sin(a), "dbrown")
+    return g
+
+
+def debris_litter(step):
+    """48x48, centred on the contact point: litter thrown out of a bin, arcing up and falling, each piece
+    turning as it goes: two paper balls, a crumpled sheet, a can and a banana peel."""
+    g = Grid(48, 48)
+    t = step + 1
+    for i, (vx, vy) in enumerate(((-5.5, -6.5), (-2, -8), (2.5, -7.5), (5.5, -6), (0.5, -5))):
+        x, y = round(22 + vx * t), round(20 + vy * t + 1.5 * t * t)
+        turn = (i + step) % 2
+        if i in (0, 3):  # paper ball
+            g.rect(x, y, 4, 4, "cream")
+            g.p(x + 3 * turn, y, None)
+            g.p(x + 3 - 3 * turn, y + 3, None)
+            g.p(x + 1, y + 1, "white")
+            g.p(x + 2, y + 2, "tan")
+        elif i == 1:  # crumpled sheet
+            g.rect(x, y, 5 - turn, 3 + turn, "white")
+            g.p(x + 1, y + 1, "lgrey")
+            g.p(x + 3 - turn, y + 1 + turn, "lgrey")
+        elif i == 2:  # can
+            w, h = (5, 3) if turn else (3, 5)
+            g.rect(x, y, w, h, "red")
+            g.rect(x, y, 1 if turn else 3, 3 if turn else 1, "lgrey")
+            g.p(x + (2 if turn else 1), y + (1 if turn else 2), "white")
+        else:  # banana peel
+            g.rect(x + 1, y + 1, 3, 2, "yellow")
+            g.p(x, y + 3 * turn, "yellow")
+            g.p(x + 4, y + 3 * turn, "yellow")
+            g.p(x + 2, y + 3 - 3 * turn, "amber")
     return g
 
 
@@ -228,8 +399,11 @@ def new_best(step):
 
 def sprites():
     """Yield (key, [(tag, [frame pixels], duration_ms)]) for every sprite."""
-    yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(5)], 60)]
-    yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(5)], 70)]
+    yield "fx-bump", [("play", [rim(bump(i)).outlined(False) for i in range(6)], 50)]
+    yield "fx-bump-big", [("play", [rim(bump_big(i)).outlined(False) for i in range(7)], 50)]
+    yield "fx-debris-leaves", [("play", [rim(debris_leaves(i)).outlined(False) for i in range(6)], 70)]
+    yield "fx-debris-litter", [("play", [rim(debris_litter(i)).outlined(False) for i in range(6)], 70)]
+    yield "fx-splash", [("play", [rim(splash(i), "navy").outlined(False) for i in range(8)], 60)]
     yield "fx-sparkle", [("play", [rim(sparkle(i)).outlined(False) for i in range(4)], 60)]
     yield "fx-new-best", [("play", [new_best(i).outlined(False) for i in range(8)], 70)]
 

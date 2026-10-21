@@ -115,13 +115,15 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 | Key                     | Type   | Size             | Tags              | Pri  | Note                                                                                                                   |
 | ----------------------- | ------ | ---------------- | ----------------- | ---- | ---------------------------------------------------------------------------------------------------------------------- |
 | `fx-bark`               | sprite | 16×16            | `pop`             | core | Pull tell                                                                                                              |
-| `fx-bump`               | sprite | 32×32            | `play`            | core | Impact star on any hit                                                                                                 |
+| `fx-bump`               | sprite | 48×48            | `play`            | core | Impact star on a plain hit                                                                                             |
+| `fx-bump-big`           | sprite | 64×64            | `play`            | core | A mover's hit: a bigger star in radial motion lines                                                                    |
+| `fx-debris-<material>`  | sprite | 48×48            | `play`            | core | Leaves (hedge), litter (bin); over the bump                                                                            |
 | `fx-dodge`              | sprite | 48×48            | `play`            | core | A small dog dodges a hit: a sidestep puff laid on its frame, DODGE! set over it; mirrored for a sidestep left          |
 | `fx-heart-gain`         | sprite | 32×32            | `pop`, `fly`      | core | Pink heart over a dog on +♥; `fly` is tweened into its doghouse                                                        |
 | `fx-heart-loss`         | sprite | 32×32            | `pop`, `fly`      | core | Broken heart over a dog on −♥; `fly` is tweened into its doghouse                                                      |
 | `fx-hit-<encounter>`    | sprite | 77×77            | `play`            | core | other-dog, skunk, thief; the comic word is set over it                                                                 |
 | `fx-sparkle`            | sprite | 16×16            | `play`            | core | Pickup collected                                                                                                       |
-| `fx-splash`             | sprite | 32×32            | `play`            | core | Puddle                                                                                                                 |
+| `fx-splash`             | sprite | 64×48            | `play`            | core | Puddle: spray, droplets, mud and ripples from the touching dog's feet                                                  |
 | `fx-status-<status>`    | sprite | 19×19            | `loop`            | core | soaked, stinky; over a dog's head                                                                                      |
 | `ui-hit-flash-<colour>` | sprite | 16×64            | `play`            | core | amber, green, mauve, orange, pink, sky, white (per encounter in `style-guide.md`); left edge strip, mirrored for right |
 | `ui-hit-label`          | sprite | 24×24 nine-slice | `normal`, `lucky` | core | Stretched to 176×32; `lucky` for lucky encounters                                                                      |

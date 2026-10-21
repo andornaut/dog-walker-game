@@ -1871,6 +1871,11 @@
       "json": "sprites/fx-bump.json"
     },
     {
+      "key": "fx-bump-big",
+      "png": "sprites/fx-bump-big.png",
+      "json": "sprites/fx-bump-big.json"
+    },
+    {
       "key": "fx-coin-fly",
       "png": "sprites/fx-coin-fly.png",
       "json": "sprites/fx-coin-fly.json"
@@ -1884,6 +1889,16 @@
       "key": "fx-confetti-bit",
       "png": "sprites/fx-confetti-bit.png",
       "json": "sprites/fx-confetti-bit.json"
+    },
+    {
+      "key": "fx-debris-leaves",
+      "png": "sprites/fx-debris-leaves.png",
+      "json": "sprites/fx-debris-leaves.json"
+    },
+    {
+      "key": "fx-debris-litter",
+      "png": "sprites/fx-debris-litter.png",
+      "json": "sprites/fx-debris-litter.json"
     },
     {
       "key": "fx-dodge",
