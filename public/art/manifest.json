@@ -5458,6 +5458,11 @@
       "json": "sprites/ui-doghouse.json"
     },
     {
+      "key": "ui-doghouse-debuff",
+      "png": "sprites/ui-doghouse-debuff.png",
+      "json": "sprites/ui-doghouse-debuff.json"
+    },
+    {
       "key": "ui-doghouse-warn",
       "png": "sprites/ui-doghouse-warn.png",
       "json": "sprites/ui-doghouse-warn.json"

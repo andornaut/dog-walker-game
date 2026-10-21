@@ -171,6 +171,23 @@ At 1 ♥, `ui-doghouse-warn` pulses over the card: a 2px rim inside its outline 
 
 On a heart loss the game draws `ui-doghouse` `heart-loss` (4 frames: 60, 60, 80 and 80ms) over the card and under its faces, hearts and text: two red flashes of the header, face and foot stripe inside a plum edge that leave the name plate, photos, hearts box, ID line, quirk icon, status boxes and badge clear, then a 2px and a 1px red rim. It shakes the whole slot 1px right, left, right, then back, one offset per frame. With reduced motion it plays the flash without the shake.
 
+While a debuff (spooked, stinky, tangled or tuckered out) lasts, its dog's card shows it, and the message strip carries its line. The game draws `ui-doghouse-debuff` (120×21, tag = the debuff) at the slot's origin over the card and under the warn and heart-loss overlays, the name, faces and text. It repaints the header band, its shade and the name plate's face, and is clear everywhere else, so the card's lines and the plate's shadow show through; every dog's card shares those rows. Over the status spots the game draws the timer, in slot pixels:
+
+| Debuff       | Band   | Shade  | Plate  | Name | Bar fill |
+| ------------ | ------ | ------ | ------ | ---- | -------- |
+| Spooked      | sky    | blue   | cyan   | ink  | cyan     |
+| Stinky       | mauve  | purple | pink   | plum | pink     |
+| Tangled      | dgreen | teal   | green  | ink  | green    |
+| Tuckered out | purple | plum   | yellow | ink  | yellow   |
+
+| Element      | Position                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| Box          | Amber rect at (96,60) 20×20, over the second status spot                                        |
+| Icon         | `icon-<debuff>` (16×16) at (78,62), in the first status spot                                    |
+| Bar frame    | Ink rect at (96,63) 20×7                                                                        |
+| Bar          | Tan rect at (97,64) 18×5, then the bar fill from its left, `round(18 × seconds left / 20)` wide |
+| Seconds left | "12s", plum, `font-body` 1×, centred on x 106, line top 70 (digits on rows 72 to 76)            |
+
 ### Choice cards
 
 - Band colour by card type: dred encounter, amber forced stop, blue lucky, forest upgrade.
