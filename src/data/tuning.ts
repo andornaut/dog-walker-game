@@ -101,12 +101,12 @@ export const TUNING = {
     bigDogAgility: -0.1,
     // How long a debuff lasts while Ada's Calm voice walks.
     calmVoiceDebuffFactor: 0.5,
-    // Each dart sets off a share of the road ahead of the pack drawn per dart between these: at
-    // the low end the pack still has pathReactionMargin after the cue at the fastest pace, and at
-    // the high end the cue still shows wholly on the road at the base pace. The planner raises
-    // the low end and lowers the high end where the zone's pace or a dart's tilt needs it.
-    dartStartRoadShareMax: 0.66,
-    dartStartRoadShareMin: 0.3,
+    // Each dart sets off a share of the road ahead of the pack drawn per dart between these. The
+    // planner raises the low end so the pack still has pathReactionMargin after the cue, and
+    // lowers the high end so the cue still shows wholly on the road, at the zone's pace and the
+    // dart's tilt.
+    dartStartRoadShareMax: 0.45,
+    dartStartRoadShareMin: 0.15,
     goodLeashSquirrelPull: 0,
     // Each mover's speed, an in-lane mover's or a dart's, is its kind's times a factor drawn per
     // mover up to this far from 1 either way.
