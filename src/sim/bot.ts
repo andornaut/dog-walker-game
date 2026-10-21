@@ -1,6 +1,6 @@
 import type { DogId } from "../data/types";
 import type { LaneDirection } from "../layout/lanes";
-import { levelWithPack } from "../runner/collision";
+import { type Box, itemBox, levelWithPack, overlaps } from "../runner/collision";
 import { STEP_SECONDS } from "../runner/fixedStep";
 import { hasLeftRoad, moverPlace } from "../runner/movers";
 import type { PullEvent, Pulls } from "../runner/pulls";
@@ -36,7 +36,8 @@ export interface BotRoad {
 }
 
 // A steering bot's state. clock is the seconds walked this run, hit stops included and cards
-// not. Moves are at clock times. late holds mistimed lane changes still to come; noticeAt,
+// not. Moves are at clock times. target is the lane the pack headed for when the bot last acted,
+// null before it has. late holds mistimed lane changes still to come; noticeAt,
 // when set, is when the bot notices its mistake, and until then it does not replan. tellsAt is
 // when each leaning dog's tell started.
 export interface Bot {
@@ -54,6 +55,7 @@ export interface Bot {
   recoversAt: number;
   replan: boolean;
   readonly skill: Skill;
+  target: number | null;
   readonly tellsAt: Map<DogId, number>;
 }
 
@@ -85,6 +87,7 @@ export function newBot(random: Random, skill: Skill): Bot {
     recoversAt: -Infinity,
     replan: true,
     skill,
+    target: null,
     tellsAt: new Map(),
   };
 }
@@ -105,43 +108,66 @@ const MOVER_SAMPLE_SCROLL = 1;
 // How far a mover is followed at most: well past any road length.
 const MOVER_SCROLL_MAX = 10_000;
 
-// A stretch of walking time, from now, over which something overlaps the pack's band in lane.
+// A stretch of walking time, from now, over which something touches the pack in lane.
 export interface LaneContact {
   readonly from: number;
   readonly lane: number;
   readonly to: number;
 }
 
-// A mover's contacts with the pack's band, by its scroll since its cue appeared: they depend
-// on its path, its height and the band alone, so each is worked out once.
+// A mover's contacts with the pack, by its scroll since its cue appeared: they depend on its
+// path, its size and the pack's geometry alone, so each is worked out once.
 interface ScrollContact {
   readonly from: number;
   readonly lane: number;
   to: number;
 }
 
-const SCROLL_CONTACTS = new WeakMap<object, Map<string, readonly ScrollContact[]>>();
+type ContactGeometry = Pick<
+  RoadGeometry,
+  "cell" | "laneCount" | "packBand" | "packParts" | "roadTop"
+>;
+
+const SCROLL_CONTACTS = new WeakMap<
+  ContactGeometry,
+  WeakMap<object, Map<string, readonly ScrollContact[]>>
+>();
+
+// Whether a hit box touches the pack standing in lane, as the walk's collision has it: one of
+// the pack's hit rectangles, placed at the lane's centre, overlaps it.
+function touchesPackIn(geometry: ContactGeometry, lane: number, box: Box): boolean {
+  const x = (lane + 0.5) * geometry.cell.length;
+  const { dogs, walker } = geometry.packParts;
+  return [...dogs, walker].some((part) =>
+    overlaps({ ...part, left: part.left + x, right: part.right + x }, box),
+  );
+}
 
 function scrollContacts(
-  geometry: Pick<RoadGeometry, "laneCount" | "packBand" | "roadTop">,
+  geometry: ContactGeometry,
   item: Pick<WalkItem, "height" | "laneSpan">,
   path: NonNullable<WalkItem["mover"]>["path"],
 ): readonly ScrollContact[] {
-  const { laneCount, packBand, roadTop } = geometry;
+  const { cell, laneCount, packBand, roadTop } = geometry;
   const { height, laneSpan } = item;
-  const key = `${packBand.top} ${packBand.bottom} ${height} ${laneSpan}`;
-  let byBand = SCROLL_CONTACTS.get(path);
-  if (byBand === undefined) {
-    byBand = new Map();
-    SCROLL_CONTACTS.set(path, byBand);
+  const key = `${height} ${laneSpan}`;
+  let byPath = SCROLL_CONTACTS.get(geometry);
+  if (byPath === undefined) {
+    byPath = new WeakMap();
+    SCROLL_CONTACTS.set(geometry, byPath);
   }
-  const known = byBand.get(key);
+  let bySize = byPath.get(path);
+  if (bySize === undefined) {
+    bySize = new Map();
+    byPath.set(path, bySize);
+  }
+  const known = bySize.get(key);
   if (known !== undefined) {
     return known;
   }
   const contacts: ScrollContact[] = [];
-  // The contact under way in each lane, by lane. Between lanes, a mover's box covers part of
-  // each lane it straddles, so it can touch a dog in any of them.
+  // The contact under way in each lane, by lane. Between lanes, a mover's box can touch the
+  // pack standing in either lane it straddles.
   const current = new Map<number, ScrollContact>();
   for (let since = 0; since < MOVER_SCROLL_MAX; since += MOVER_SAMPLE_SCROLL) {
     const place = moverPlace(laneCount, path, since);
@@ -150,10 +176,9 @@ function scrollContacts(
       break;
     }
     const level = place.solid && levelWithPack(packBand, { height, y });
-    const first = Math.floor(place.lanePosition + 1e-9);
-    const last = Math.ceil(place.lanePosition + laneSpan - 1e-9) - 1;
+    const box = itemBox(cell, { height, lane: place.lanePosition, laneSpan, y });
     for (let lane = 0; lane < laneCount; lane++) {
-      const touching = level && lane >= first && lane <= last;
+      const touching = level && touchesPackIn(geometry, lane, box);
       const under = current.get(lane);
       if (touching && under !== undefined) {
         under.to = since;
@@ -166,12 +191,12 @@ function scrollContacts(
       }
     }
   }
-  byBand.set(key, contacts);
+  bySize.set(key, contacts);
   return contacts;
 }
 
-// The stretches over which a mover, once it moves, overlaps the pack's band, one per lane it
-// is in meanwhile, that start within horizon seconds. Its path is sampled, so each stretch is
+// The stretches over which a mover, once it moves, touches the pack standing in a lane, one
+// per lane and stretch, that start within horizon seconds. Its path is sampled, so each stretch is
 // widened by a sample at each end.
 export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): LaneContact[] {
   const { mover } = item;
@@ -189,7 +214,7 @@ export function moverContacts(road: BotRoad, horizon: number, item: WalkItem): L
   return contacts;
 }
 
-// The hazards a mover makes, one per lane it is in while it overlaps the pack's band, each
+// The hazards a mover makes, one per lane and stretch it touches the pack in, each
 // widened a walk step at each end as a standing obstacle's is.
 export function moverHazards(road: BotRoad, horizon: number, item: WalkItem): LaneHazard[] {
   return moverContacts(road, horizon, item).map(({ from, lane, to }) => ({
@@ -448,9 +473,9 @@ export function observePulls(
 }
 
 // Everything the bot does at its clock time: perceives the items and tells due, notices a
-// mistake, replans when it has something new, and makes the lane changes due: the lane moves
-// it makes, in order, and the walk they steer. Nothing during a hit stop, which drops lane
-// changes.
+// mistake, replans when it has something new or the pack heads for a lane it did not steer
+// for, such as after a Zoomies drift, and makes the lane changes due: the lane moves it makes,
+// in order, and the walk they steer. Nothing during a hit stop, which drops lane changes.
 export function actBot(
   bot: Bot,
   road: BotRoad,
@@ -462,6 +487,9 @@ export function actBot(
     return { lanes, walk };
   }
   const due = bot.clock + SAME_MOMENT;
+  if (bot.target !== null && bot.target !== walk.road.control.target) {
+    bot.replan = true;
+  }
   let acted = walk;
   for (const item of acted.road.items) {
     if (!bot.perceived.has(item.id) && perceiveAt(bot, road, item) <= due) {
@@ -492,6 +520,7 @@ export function actBot(
     }
     const move = bot.plan[0];
     if (move === undefined || move.at > due) {
+      bot.target = acted.road.control.target;
       return { lanes, walk: acted };
     }
     bot.plan.shift();
