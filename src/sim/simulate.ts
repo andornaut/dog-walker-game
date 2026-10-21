@@ -38,7 +38,7 @@ import {
   walkScrollSpeed,
 } from "../runner/walk";
 import { packDogs } from "../state/pack";
-import { type CardSource, newRun, type PackDogs, type RunState } from "../state/runState";
+import { newRun, type PackDogs, type RunState } from "../state/runState";
 import { actBot, type BotRoad, newBot, observePulls, observeRoad } from "./bot";
 import { chooseCardOption, choosePath, type PolicyId, type RoutePolicyId } from "./policies";
 import type { Skill } from "./skills";
@@ -66,15 +66,12 @@ export interface SimConfig {
   readonly walker: WalkerId;
 }
 
-type CardFrom = "lucky" | "obstacle";
-
 // One encounter or forced stop card and the option the policy took.
 interface ChoiceRecord {
   readonly cost: Cents;
   // Some enabled option cost money.
   readonly couldPay: boolean;
   readonly fired: readonly DogId[];
-  readonly from: CardFrom;
   readonly option: string;
   readonly title: string;
   readonly zoneIndex: number;
@@ -246,12 +243,6 @@ function notePulls(
   }
 }
 
-function cardFrom(data: SimData, source: CardSource): CardFrom {
-  return source.kind === "encounter" && data.encounters[source.encounter].kind === "lucky"
-    ? "lucky"
-    : "obstacle";
-}
-
 // The policies' choice on the open card: the route policy's path at a fork, or the card
 // policy's option.
 function policyChoice(
@@ -271,7 +262,6 @@ function policyChoice(
 // A choice's record: the upgrade a fork's path carried, or an encounter card seen, and the
 // firings it brought about.
 function noteChoice(
-  data: SimData,
   tally: Tally,
   run: RunState,
   event: Extract<SessionEvent, { kind: "chosen" }>,
@@ -292,7 +282,6 @@ function noteChoice(
     cost: option?.cost ?? cents(0),
     couldPay: view.options.some((option) => option.availability.enabled && option.cost > 0),
     fired: outcome.fired,
-    from: cardFrom(data, source),
     option: option?.label ?? "Skip",
     title: view.title,
     zoneIndex: run.zoneIndex,
@@ -357,7 +346,7 @@ function playBySkill(
           bot.replan = true;
           break;
         case "chosen":
-          noteChoice(data, tally, walk.run, event);
+          noteChoice(tally, walk.run, event);
           tally.inputs.push({ choice: event.choice, kind: "card", timeMs: event.timeMs });
           break;
         case "input":
