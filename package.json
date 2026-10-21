@@ -13,7 +13,7 @@
     "dev": "vite",
     "prebuild": "npm run export:data",
     "build": "vite build",
-    "build:deploy": "npm run check && npm test && npm run build",
+    "build:deploy": "npm run build",
     "preview": "npm run build && wrangler dev",
     "check": "tsc",
     "lint": "prettier --check . && eslint --max-warnings 0 . && markdownlint-cli2",
