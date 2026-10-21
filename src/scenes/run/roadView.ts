@@ -148,14 +148,14 @@ export class RoadView {
   // One texture the size of the road, kept across runs, that the road is drawn into. Under
   // WebGL its pixel buffer uploads straight to the GPU; the Canvas renderer, which cannot draw
   // a buffer, gets a canvas texture instead. Its approach rows are a second image of it, over
-  // the backdrop.
-  constructor(scene: Scene, art: RoadArt, road: Rect) {
+  // the backdrop. Another view of the road names its own texture.
+  constructor(scene: Scene, art: RoadArt, road: Rect, textureKey: string = ROAD_TEXTURE) {
     this.scene = scene;
     this.art = art;
     const raster = roadRaster(PROJECTION, road);
-    this.road = roadPixels(scene, raster, road);
+    this.road = roadPixels(scene, { key: textureKey, raster }, road);
     const near = road.height - raster.approachRows;
-    const image = () => scene.add.image(road.x, road.y, ROAD_TEXTURE).setOrigin(0);
+    const image = () => scene.add.image(road.x, road.y, textureKey).setOrigin(0);
     image().setCrop(0, raster.approachRows, road.width, near).setDepth(DEPTH.road);
     image().setCrop(0, 0, road.width, raster.approachRows).setDepth(DEPTH.approach);
   }
@@ -204,13 +204,17 @@ export class RoadView {
   }
 }
 
-function roadPixels(scene: Scene, raster: RoadRaster, road: Rect): RoadPixels | undefined {
+function roadPixels(
+  scene: Scene,
+  { key, raster }: { key: string; raster: RoadRaster },
+  road: Rect,
+): RoadPixels | undefined {
   const { textures } = scene;
   if (scene.renderer.type === WEBGL) {
-    const texture = textures.exists(ROAD_TEXTURE)
-      ? textures.get(ROAD_TEXTURE)
+    const texture = textures.exists(key)
+      ? textures.get(key)
       : textures.addUint8Array(
-          ROAD_TEXTURE,
+          key,
           new Uint8Array(road.width * road.height * 4),
           road.width,
           road.height,
@@ -222,9 +226,9 @@ function roadPixels(scene: Scene, raster: RoadRaster, road: Rect): RoadPixels | 
     }
     return undefined;
   }
-  const canvas = textures.exists(ROAD_TEXTURE)
-    ? (textures.get(ROAD_TEXTURE) as Textures.CanvasTexture)
-    : textures.createCanvas(ROAD_TEXTURE, road.width, road.height);
+  const canvas = textures.exists(key)
+    ? (textures.get(key) as Textures.CanvasTexture)
+    : textures.createCanvas(key, road.width, road.height);
   if (canvas === null) {
     return undefined;
   }

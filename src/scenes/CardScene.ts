@@ -36,6 +36,7 @@ import { addPixelText, fontHasGlyphs, type FontRole, scalePixelText } from "./pi
 import { currentSettings } from "./profileStore";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
+import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { addStandingSprite, playTag } from "./sprites";
 import { listenTargetPress, type TargetPressListener } from "./targetPress";
 import { addMenuButton, addNineSlice, listenButtonTap, tagFrame } from "./uiKit";
@@ -45,6 +46,8 @@ export interface CardSceneData {
   onChoose: (choice: Choice) => void;
   // A fork card's Head home button, under the paths.
   onHeadHome: () => void;
+  // Set to draw the card as a still picture, such as the help's, which takes no input.
+  picture?: ScenePicture;
   view: CardView;
   // The zone the card opened in, which picks an encounter's look.
   zone: ZoneId;
@@ -145,11 +148,15 @@ export class CardScene extends Scene {
   private zone: ZoneId | undefined;
   private readonly hasArt: HasArt = (key) => this.textures.exists(key);
 
-  constructor() {
-    super(SCENE_KEYS.card);
+  // key names a second card scene, such as the help's picture of one.
+  constructor(key: string = SCENE_KEYS.card) {
+    super(key);
   }
 
-  create({ onChoose, onHeadHome, view, zone }: CardSceneData): void {
+  create({ onChoose, onHeadHome, picture, view, zone }: CardSceneData): void {
+    if (picture !== undefined) {
+      showAsPicture(this, picture);
+    }
     this.onChoose = onChoose;
     this.chosen = false;
     this.pressed = undefined;
@@ -172,7 +179,7 @@ export class CardScene extends Scene {
       ...(view.skip ? [{ choice: "skip" as const, enabled: true }] : []),
     ];
     this.cardRects = cardRowRects(CARD_ROW, this.entries.length, road);
-    const keys = keyNumbersShown();
+    const keys = picture === undefined && keyNumbersShown();
     const header = cardHeader(keys, this.cardRects);
     const centerX = road.x + road.width / 2;
     const title = { font: "title", scale: 2 } as const;
@@ -214,7 +221,12 @@ export class CardScene extends Scene {
       };
       const label = gameData.runText.homeQuestion.headHome;
       const button = addMenuButton(this, rect, label, { available: true, primary: false });
-      listenButtonTap(this, button, onHeadHome);
+      if (picture === undefined) {
+        listenButtonTap(this, button, onHeadHome);
+      }
+    }
+    if (picture !== undefined) {
+      return;
     }
 
     // A tap picks a card; holding one enlarges it until the finger lifts, and picks nothing.

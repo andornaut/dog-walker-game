@@ -42,6 +42,7 @@ import type {
   WalkerPerkId,
   ZoneId,
 } from "../data/types";
+import { helpPicture, TOUCH_DRAG } from "../help/helpPictures";
 import { badgeWall } from "../home/badgesView";
 import { HOME_LAYOUT } from "../home/homeLayout";
 import { effectIconKey, type EffectItem, walkBarIconKey } from "../hud/effectIcons";
@@ -230,9 +231,20 @@ describe("image art", () => {
       "every section's fill and the Pocket's stitch",
       () => [...Object.values(HOME_LAYOUT.sectionFillKeys), "ui-stitch-h", "ui-stitch-v"],
     ],
-    ["a help illustration for every help page", () => gameData.help.map(({ art }) => art)],
   ])("names %s", (_, keys) => {
     expect(missingImages(keys())).toEqual([]);
+  });
+});
+
+describe("help art", () => {
+  it("tags ui-touch-drag with the drag frame the lanes page shows", () => {
+    const { key, tag } = TOUCH_DRAG;
+    const frame = helpPicture(gameData, "lanes").touch?.frame ?? -1;
+    const drag = animationSpecs(key, sheetOf(key)).find(
+      (spec) => spec.key === animationKey(key, tag),
+    );
+    expect(missingTags(key, [tag])).toEqual([]);
+    expect(frame).toBeLessThan(drag?.frames.length ?? 0);
   });
 });
 

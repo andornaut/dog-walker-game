@@ -452,9 +452,12 @@ export interface World {
 }
 
 // One page of the "How to walk" help screen, shown in list order.
+// The help pages' pictures of the walk screen, each drawn by the game.
+export type HelpPictureId = "cards" | "lanes" | "owners" | "pickups" | "pulls" | "zones";
+
 export interface HelpPage {
-  // Key of the page's illustration in the art manifest's images.
-  readonly art: string;
+  // The picture the page shows.
+  readonly art: HelpPictureId;
   readonly body: string;
   readonly title: string;
 }

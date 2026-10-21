@@ -1,13 +1,14 @@
 import type { HelpPage } from "./types";
 
 // The "How to walk" help screen: one page per entry, in this order.
-// - art: the key of the page's illustration in public/art/manifest.json "images".
-// - body: wrapped to fit the screen, so keep it to about four short sentences.
-//   A long sentence can be split into quoted pieces joined with +, each ending in a space.
+// - art: which picture of the walk screen the page shows (src/help/helpPictures.ts).
+// - body: wrapped to fit the screen in at most six lines. A long sentence can be split into
+//   quoted pieces joined with +, each ending in a space. The {name}s it may use are listed in
+//   src/help/helpBody.ts and filled from the game data.
 // - title: shown in capitals above the body.
 export const HELP_PAGES = [
   {
-    art: "help-lanes",
+    art: "lanes",
     body:
       "Drag anywhere: a short drag moves the pack a lane, and each lane-width more moves one more. " +
       "A tap moves one lane toward that side. Keys: arrows, A/D or H/L. " +
@@ -15,32 +16,33 @@ export const HELP_PAGES = [
     title: "Switch lanes",
   },
   {
-    art: "help-pickups",
+    art: "pickups",
     body:
-      "Tips are $1 each, and they're most of your earnings, so grab plenty. " +
-      "A dog that reaches a treat cheers its owner: +1♥. " +
+      "Tips are {tip} each, and they're most of your earnings, so grab plenty. " +
+      "A dog that reaches a treat cheers its owner: +{treatHearts}♥. " +
       "Aim for a lost wallet or a generous neighbor, too.",
     title: "Tips and treats",
   },
   {
-    art: "help-cards",
+    art: "cards",
     body:
-      "Bump a skunk, a thief or another dog and the walk pauses for a card. " +
+      "A skunk, a thief or another dog opens a card. " +
       "Each option costs cash, hearts or a debuff, and one always costs no cash. " +
-      "Hold a card, an icon or a debuff bar for details. A puddle opens no card, but makes the pack Muddy. " +
-      "Debuffs wear off on their own.",
+      "A puddle makes the pack Muddy. Debuffs wear off after {debuffSeconds}s. " +
+      "Hold a card, an icon or a bar for details.",
     title: "Some bumps bring cards",
   },
   {
-    art: "help-owners",
+    art: "owners",
     body:
-      "Each owner has hearts: 3♥ small, 4♥ medium, 5♥ big, but big dogs slow your lane changes. " +
-      "A plain bump costs 1♥ from the owner of the dog that touched it. " +
-      "Small dogs dodge 1 in 4 plain bumps. At 0♥ the owner fires you.",
+      "Each owner has hearts: {smallHearts}♥ small, {mediumHearts}♥ medium, {bigHearts}♥ big, " +
+      "but big dogs slow your lane changes. " +
+      "A plain bump costs {bumpHearts}♥ from the owner of the dog that touched it. " +
+      "Small dogs dodge 1 in {dodgeIn} plain bumps. At 0♥ the owner fires you.",
     title: "Keep owners happy",
   },
   {
-    art: "help-pulls",
+    art: "pulls",
     body:
       "Every dog loves squirrels. Touching one does nothing, but a bubble and a line to it mean a dog is straining. " +
       "Steer away and the pull is off; wait and the pack lurches one lane toward it. " +
@@ -48,12 +50,12 @@ export const HELP_PAGES = [
     title: "Watch for pulls",
   },
   {
-    art: "help-zones",
+    art: "zones",
     body:
-      "Walk 4 neighborhoods of Maplewood, from Elm Avenue to The Long Way Home. " +
-      "Each neighborhood is busier than the last. Each dog's pay is banked as you finish one. " +
+      "Walk {walkLength} neighborhoods of {world}, each busier than the last. " +
+      "Each dog's pay is banked as you finish one. " +
       "At a fork, each path brings an upgrade, and harder ones pay more. " +
       "Bring every dog home for the Full pack bonus.",
-    title: "Four neighborhoods",
+    title: "Neighborhoods",
   },
 ] as const satisfies readonly [HelpPage, ...HelpPage[]];

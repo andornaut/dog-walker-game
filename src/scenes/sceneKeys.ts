@@ -4,6 +4,10 @@ export const SCENE_KEYS = {
   celebration: "celebration",
   end: "end",
   help: "help",
+  // The help pages' pictures: the walk, and the HUD and a card over it.
+  helpCard: "helpCard",
+  helpHud: "helpHud",
+  helpPicture: "helpPicture",
   hud: "hud",
   pause: "pause",
   run: "run",

@@ -113,7 +113,7 @@ export class HudFeedback {
   private moneyTick: MoneyTick | undefined;
   private paused = false;
   private readonly hooks: HudFeedbackHooks;
-  private readonly run: RunScene;
+  private readonly run: Pick<RunScene, "events" | "hudView" | "reducedMotion">;
   private readonly scene: Scene;
   private readonly timers = new Set<Time.TimerEvent>();
   private readonly tweens = new Set<Tweens.Tween>();
@@ -122,7 +122,11 @@ export class HudFeedback {
     pulse: undefined,
   }));
 
-  constructor(scene: Scene, run: RunScene, hooks: HudFeedbackHooks) {
+  constructor(
+    scene: Scene,
+    run: Pick<RunScene, "events" | "hudView" | "reducedMotion">,
+    hooks: HudFeedbackHooks,
+  ) {
     this.hooks = hooks;
     this.run = run;
     this.scene = scene;

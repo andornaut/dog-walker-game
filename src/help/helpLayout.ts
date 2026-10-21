@@ -14,18 +14,20 @@ export const MIN_TAP_SIZE = 44;
 
 // The help screen's geometry at the render resolution. A text position is the top-left of
 // its first line.
+// The body's lines, at most maxLines of them, are lineHeight apart. The picture is the walk
+// screen's width, ruled off a row above and below.
 export const HELP_LAYOUT = {
-  body: { lineHeight: 15, scale: 2, width: 336, x: 12, y: 334 },
+  body: { lineHeight: 18, maxLines: 6, scale: 2, width: 336, x: 12, y: 334 },
   close: closeControl({ height, width, x: 0, y: 0 }),
   // A tap target apart, so each dot's target is its own slot, ending above Previous's and
   // Next's.
   dots: { centerX: width / 2, size: 8, spacing: MIN_TAP_SIZE, y: height - 84 },
   heading: { x: 12, y: 15 },
-  illustration: { height: 236, width: 344, x: 8, y: 48 },
+  illustration: { height: 236, width, x: 0, y: 48 },
   next: { height: MIN_TAP_SIZE, width: 110, x: 242, y: height - 56 },
   previous: { height: MIN_TAP_SIZE, width: 110, x: 8, y: height - 56 },
   screen: { height, width, x: 0, y: 0 },
-  title: { x: 12, y: 310 },
+  title: { scale: 2, x: 12, y: 310 },
   topBar: screenLayout(SCREEN_CONFIG).topBar,
   topBarEdge: 2,
 } as const;

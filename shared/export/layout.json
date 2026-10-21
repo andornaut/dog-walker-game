@@ -1317,7 +1317,8 @@
     },
     "help": {
       "body": {
-        "lineHeight": 15,
+        "lineHeight": 18,
+        "maxLines": 6,
         "scale": 2,
         "width": 336,
         "x": 12,
@@ -1383,8 +1384,8 @@
       },
       "illustration": {
         "height": 236,
-        "width": 344,
-        "x": 8,
+        "width": 360,
+        "x": 0,
         "y": 48
       },
       "next": {
@@ -1406,6 +1407,7 @@
         "y": 0
       },
       "title": {
+        "scale": 2,
         "x": 12,
         "y": 310
       },

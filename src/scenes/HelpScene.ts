@@ -1,13 +1,16 @@
-import { Scene } from "phaser";
+import { Scene, Scenes } from "phaser";
 
 import { itemAt } from "../arrays";
 import { gameData } from "../data";
+import type { HelpPictureId } from "../data/types";
+import { helpBody } from "../help/helpBody";
 import { helpActionForKey, helpActionForPointer } from "../help/helpInput";
 import { dotRects, HELP_LAYOUT, helpActionAt, type Point } from "../help/helpLayout";
 import { applyHelpAction, clampPage, type HelpAction, helpButtons } from "../help/helpPaging";
 import { closeHelp } from "../help/helpSeen";
 import { insetRect, type Rect } from "../layout/rect";
 import { addFilledRect } from "./draw";
+import type { HelpPictureData } from "./HelpPictureScene";
 import { listenOnePress } from "./onePress";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
@@ -44,9 +47,11 @@ function pressedBy(action: HelpAction | undefined): Pressed | undefined {
   }
 }
 
-// A full-screen overlay listed last in the game config, so it draws over every scene.
+// A full-screen overlay listed after every scene but its picture's, so it draws over them.
 export class HelpScene extends Scene {
   private page = 0;
+  // The page whose picture shows.
+  private picturePage: number | undefined;
   private pressed: Pressed | undefined;
   private pressStart: Point | undefined;
   private resumeKey: SceneKey | undefined;
@@ -57,9 +62,11 @@ export class HelpScene extends Scene {
 
   create(data?: HelpSceneData): void {
     this.page = 0;
+    this.picturePage = undefined;
     this.pressed = undefined;
     this.pressStart = undefined;
     this.resumeKey = data?.resume;
+    this.events.once(Scenes.Events.SHUTDOWN, () => this.scene.stop(SCENE_KEYS.helpPicture));
     this.draw();
 
     this.input.keyboard?.on("keydown", (event: KeyboardEvent) => {
@@ -140,13 +147,16 @@ export class HelpScene extends Scene {
     });
     addCloseButton(this, this.add.container(0, 0), layout.screen, this.pressed === "close");
 
-    addFilledRect(this, PALETTE.plum, insetRect(-1, layout.illustration));
-    this.drawIllustration(page.art, layout.illustration);
+    const frame = layout.illustration;
+    for (const y of [frame.y - 1, frame.y + frame.height]) {
+      addFilledRect(this, PALETTE.plum, { height: 1, width: frame.width, x: frame.x, y });
+    }
+    this.showPicture(page.art, frame);
 
     addPixelText(this, layout.title.x, layout.title.y, page.title, {
       color: PALETTE.amber,
       font: "title",
-      scale: TEXT_SCALE,
+      scale: layout.title.scale,
     });
     this.drawBody(page.body);
 
@@ -170,25 +180,26 @@ export class HelpScene extends Scene {
     );
   }
 
-  // The art is exported at the frame's size; a key not in the manifest yet shows a box.
-  private drawIllustration(key: string, frame: Rect): void {
-    if (this.textures.exists(key)) {
-      this.add.image(frame.x, frame.y, key).setOrigin(0).setCrop(0, 0, frame.width, frame.height);
+  // The page's picture of the walk screen in frame, drawn over this scene by the picture
+  // scenes; started again only when the page changes.
+  private showPicture(page: HelpPictureId, frame: Rect): void {
+    if (this.picturePage === this.page) {
       return;
     }
-    addFilledRect(this, PALETTE.navy, frame);
-    addPixelText(this, frame.x + frame.width / 2, frame.y + frame.height / 2, key.toUpperCase(), {
-      color: PALETTE.lightGrey,
-      font: "title",
-      originX: 0.5,
-      originY: 0.5,
-    });
+    this.picturePage = this.page;
+    const data: HelpPictureData = { frame, page };
+    this.scene.launch(SCENE_KEYS.helpPicture, data);
   }
 
-  // Wrapped by Phaser at the body's width, with the line pitch set to the layout's.
+  // Wrapped by Phaser at the body's width, with the line pitch set to the layout's, its names
+  // filled from the game data.
   private drawBody(body: string): void {
     const { lineHeight, scale, width, x, y } = HELP_LAYOUT.body;
-    const text = addPixelText(this, x, y, body, { color: PALETTE.cream, maxWidth: width, scale });
+    const text = addPixelText(this, x, y, helpBody(gameData, { body }), {
+      color: PALETTE.cream,
+      maxWidth: width,
+      scale,
+    });
     text.setLineSpacing(lineHeight / scale - text.fontData.lineHeight);
   }
 }

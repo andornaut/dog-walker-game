@@ -82,6 +82,7 @@ import {
 } from "./run/runMoments";
 import type { RunHudView, RunScene } from "./RunScene";
 import { SCENE_KEYS } from "./sceneKeys";
+import { type ScenePicture, showAsPicture } from "./scenePicture";
 import { soundboardOf } from "./soundboard";
 import { playTag } from "./sprites";
 import { addTagImage, artFits, cogIcon, fadeAway, imageIcon, soundIcon } from "./uiKit";
@@ -136,6 +137,17 @@ interface DebuffBarView {
   rect: Rect;
 }
 
+// What the HUD reads of the walk: the run scene, or a still walk a picture shows.
+export type HudSource = Pick<
+  RunScene,
+  "dogPoint" | "events" | "hudView" | "reducedMotion" | "runPause"
+>;
+
+// A picture of the HUD shows source's walk in view's strips, and takes no input or hints.
+export interface HudSceneData {
+  picture?: { source: HudSource; view: ScenePicture };
+}
+
 // The walk bar, the debuff bars and the dog cards, drawn over the road for the whole walk and
 // kept in view while cards are up. It reads the run from RunScene every frame and redraws what
 // changed, and shows the run's change labels, first-time hints, owners' pop-ins and what a held
@@ -163,10 +175,12 @@ export class HudScene extends Scene {
   private quips: { quip: QuipBubble; raisedMs: number }[] = [];
   private quipShowing = false;
   private soundHolder: GameObjects.Container | undefined;
+  private source: HudSource | undefined;
   private zoneLabel: GameObjects.BitmapText | undefined;
 
-  constructor() {
-    super(SCENE_KEYS.hud);
+  // key names a second HUD, such as the help's picture of one.
+  constructor(key: string = SCENE_KEYS.hud) {
+    super(key);
   }
 
   // The HUD's lanes, under the message strip as tall as the body font draws it.
@@ -174,8 +188,13 @@ export class HudScene extends Scene {
     return hudLanes(pixelFontMetrics(this, "body"), LAYOUT);
   }
 
-  create(): void {
+  create(data?: HudSceneData): void {
     const { dogRow, dogSlots, topBar } = LAYOUT;
+    const picture = data?.picture;
+    this.source = picture?.source;
+    if (picture !== undefined) {
+      showAsPicture(this, picture.view);
+    }
     this.drawn = {};
     this.debuffBars = [];
     this.effectParts = [];
@@ -230,7 +249,7 @@ export class HudScene extends Scene {
     this.debuffFills = this.add.graphics().setDepth(1);
     this.cards = dogSlots.map((rect) => this.createCard(rect));
 
-    const run = this.runScene();
+    const run = this.walk();
     this.owners = new OwnerTabs(this, {
       packX: () => run.hudView()?.packX ?? LAYOUT.road.x + LAYOUT.road.width / 2,
       still: () => run.reducedMotion(),
@@ -257,6 +276,9 @@ export class HudScene extends Scene {
       this.messages.say(icon, text),
     );
     onSceneEvent(this, run.events, QUIPS_EVENT, (quips: QuipBubble[]) => this.queueQuips(quips));
+    if (picture !== undefined) {
+      return;
+    }
 
     // A button acts on the press, as the walk's gestures never see it.
     listenOnePress(this, {
@@ -276,14 +298,20 @@ export class HudScene extends Scene {
     });
   }
 
-  // The topmost overlay over the walk, the pause menu or the card, else the HUD itself.
+  // The topmost overlay over the walk, the pause menu or the card, else the HUD itself. A
+  // picture of the HUD has none.
   private overlayScene(): Scene {
     const key = [SCENE_KEYS.pause, SCENE_KEYS.card].find((overlay) => this.scene.isActive(overlay));
-    return key === undefined ? this : this.scene.get(key);
+    return key === undefined || this.source !== undefined ? this : this.scene.get(key);
   }
 
   private runScene(): RunScene {
     return this.scene.get(SCENE_KEYS.run) as RunScene;
+  }
+
+  // The walk the HUD shows: the run's, or a picture's.
+  private walk(): HudSource {
+    return this.source ?? this.runScene();
   }
 
   private press(via: "key" | "tap", button: TopBarPress): void {
@@ -411,14 +439,16 @@ export class HudScene extends Scene {
   }
 
   override update(_time: number, delta: number): void {
-    const run = this.runScene();
+    const run = this.walk();
     const view = run.hudView();
     if (view === undefined) {
       return;
     }
     const pause = run.runPause();
     this.feedback?.update(view.run, pause);
-    this.raiseHints(runHintTriggers(view.run));
+    if (this.source === undefined) {
+      this.raiseHints(runHintTriggers(view.run));
+    }
     this.showExplanation(view);
     this.showDebuffBars(view.run);
     const overlay = this.overlayScene();
@@ -704,7 +734,7 @@ export class HudScene extends Scene {
 
   private slotOf(dog: DogId): number | undefined {
     const index =
-      this.runScene()
+      this.walk()
         .hudView()
         ?.run.pack.findIndex((slot) => slot.dog === dog) ?? -1;
     return index < 0 ? undefined : index;
@@ -714,7 +744,7 @@ export class HudScene extends Scene {
   // time); a heart change pops over its dog and flies into its card (heartFeedback.ts), its
   // label then fading in place on the card's bottom rows, while its owner pops in on the card.
   private floatLabels(labels: ChangeLabel[]): void {
-    const run = this.runScene();
+    const run = this.walk();
     this.bankLabels.push(...labels.filter((label) => label.target.kind === "bank"));
     if (!this.bankShowing) {
       this.showNextBankLabel();
@@ -741,7 +771,7 @@ export class HudScene extends Scene {
     }
     const lane = this.lanes().bank;
     const y = lane.y + lane.height - LABEL.height;
-    const rise = this.runScene().reducedMotion() ? 0 : y - lane.y;
+    const rise = this.walk().reducedMotion() ? 0 : y - lane.y;
     this.showLabel(label, { scale: 2, x: lane.x, y }, rise, lane.width, () =>
       this.showNextBankLabel(),
     );
@@ -840,7 +870,7 @@ export class HudScene extends Scene {
   // give. False when the dog has no card.
   private sayQuip(quip: QuipBubble): boolean {
     const slot = this.slotOf(quip.dog);
-    const packSlot = this.runScene().hudView()?.run.pack[slot ?? -1];
+    const packSlot = this.walk().hudView()?.run.pack[slot ?? -1];
     const hearts = packSlot?.status === "walking" ? packSlot.hearts : 0;
     if (slot === undefined || this.owners === undefined) {
       return false;
