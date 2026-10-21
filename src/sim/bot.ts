@@ -7,7 +7,6 @@ import { hasLeftRoad, type MoverPath, moverPlace } from "../runner/movers";
 import type { PullEvent, Pulls } from "../runner/pulls";
 import { chance, type Random } from "../runner/random";
 import {
-  isPickup,
   isPullObstacle,
   itemCategory,
   laneMoveSeconds,
@@ -18,7 +17,6 @@ import {
   type Walk,
   type WalkData,
   type WalkItem,
-  type WalkItemKind,
 } from "../runner/walk";
 import {
   type LaneHazard,
@@ -280,13 +278,6 @@ export function widenMask(laneCount: number, reach: number, mask: number): numbe
     widened |= (widened << 1) | (widened >> 1);
   }
   return widened & ((1 << laneCount) - 1);
-}
-
-// The lane mask from which the pack collects a pickup of kind, or touches anything else.
-export function reachMask(road: BotRoad, walk: Walk, kind: WalkItemKind, occupied: number): number {
-  return isPickup(kind)
-    ? widenMask(road.geometry.laneCount, pickupReach(road.data, walk.run, kind), occupied)
-    : occupied;
 }
 
 export function treatReachOf(data: WalkData, walk: Walk): number {

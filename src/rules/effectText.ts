@@ -219,12 +219,6 @@ export function debuffText(tuning: LiveTuning, debuff: Debuff): string {
   return `${changes} for ${read(tuning, "seconds", debuff.seconds)} seconds`;
 }
 
-// A named item and its effect, lower case after the colon: "Big tipper: tip value +50% for
-// the run."
-export function namedEffectText(data: TextData, name: string, effects: readonly Effect[]): string {
-  return `${name}: ${effectClause(data, effects)}.`;
-}
-
 export type CardTextData = TextData & Pick<GameData, "dogs" | "runText">;
 
 // What a card's text knows of the walk: the dogs a target reaches, in pack order, and a

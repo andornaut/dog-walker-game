@@ -6,7 +6,7 @@ import { spriteAnchor } from "../assets/spriteAnchor";
 import { depthVariantKey, ROAD_SPRITE_SIZE, standsOnGround } from "../assets/spriteKeys";
 import { type DepthArt, type DepthDraw, depthDraw } from "../layout/depthScale";
 import { opaqueBoundsOfRgba, type PixelBounds } from "../layout/pixelShapes";
-import { SCALE_STEPS, type ScaleStep } from "../layout/projection";
+import { SCALE_STEPS } from "../layout/projection";
 
 // feetY is the line the sprite stands on, measured from the top of its frame, and
 // opaqueWidth how wide its drawn pixels are; both from its first frame.
@@ -70,20 +70,6 @@ export function spriteTopY(scene: Scene, key: string): number {
     tops.set(key, top);
   }
   return top;
-}
-
-// How an overlay shows at a depth step: its hand-drawn variant when one is loaded, else the
-// sprite scaled at runtime.
-export interface DepthLook {
-  key: string;
-  scale: number;
-}
-
-export function depthLook(scene: Scene, key: string, step: ScaleStep): DepthLook {
-  const variant = depthVariantKey(key, step);
-  return variant !== null && scene.textures.exists(variant)
-    ? { key: variant, scale: 1 }
-    : { key, scale: step };
 }
 
 const depthArts = new Map<string, DepthArt[]>();

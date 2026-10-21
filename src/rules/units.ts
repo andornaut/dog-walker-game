@@ -34,10 +34,6 @@ export function addCents(a: Cents, b: Cents): Cents {
   return (a + b) as Cents;
 }
 
-export function nonNegativeCents(amount: Cents): Cents {
-  return Math.max(0, amount) as Cents;
-}
-
 // The only way to make Hearts.
 export function clampHearts(max: number, value: number): Hearts {
   return Math.min(max, Math.max(0, value)) as Hearts;

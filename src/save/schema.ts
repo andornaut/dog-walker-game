@@ -73,14 +73,15 @@ const runCountersSchema = v.object({
 // The zones a run walked, in order, by id. A save from before forks walked the pre-fork route.
 const routeSchema = v.optional(ids, () => [...PRE_FORK_ROUTE]);
 
-// A run in progress, saved after each zone. zonesFinished is the zone that just ended.
+// A run in progress, saved after each zone or as the tab hides. zonesFinished counts the zones
+// finished, 0 in the first.
 // counters is null in a checkpoint saved before achievements: its run earns no run badges.
 export const checkpointSchema = v.object({
   counters: v.optional(v.nullable(runCountersSchema), null),
   dogs: v.pipe(v.array(dogRunSchema), v.maxLength(MAX_RUN_DOGS)),
   earnedCents: cents,
   route: routeSchema,
-  zonesFinished: zoneNumber,
+  zonesFinished: count,
 });
 
 // A new player's holds the starter dogs, as many as their slots walk.

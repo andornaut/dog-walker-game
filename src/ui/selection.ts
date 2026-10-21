@@ -86,11 +86,6 @@ export const PLATE_LOOKS = {
   { edge: string; face: string; lit: string | null; shade: string | null; text: string }
 >;
 
-// A choice is full when nothing more can be picked: the pack holds its capacity.
-export function choiceFull(picked: number, capacity: number): boolean {
-  return picked >= capacity;
-}
-
 export function selectLook(state: TileState): SelectLook {
   return { ...LOOKS[state], state };
 }

@@ -24,14 +24,15 @@ function dogRuns(data: RunSliceData, run: RunState): DogRun[] {
 }
 
 // The run so far, for the save after a zone's pay is banked (finishZone has moved zoneIndex on
-// to the next zone, whose fork is not yet taken).
+// to the next zone, whose fork is not yet taken) or as the tab hides mid-zone, which counts only
+// the zones before it.
 export function checkpointOf(data: RunSliceData, run: RunState): Checkpoint {
   return {
     counters: runCountersOf(run),
     dogs: dogRuns(data, run),
     earnedCents: run.money,
     route: [...run.route],
-    zonesFinished: Math.max(1, zonesDone(data, run)),
+    zonesFinished: zonesDone(data, run),
   };
 }
 
