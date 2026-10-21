@@ -1312,22 +1312,23 @@ export class StartScene extends Scene {
         playEffect(this, "fx-dust", "play", { x: x + dx, y: dogFoot - 6 }, 0);
       }
     }
+    // The leashes run from the walker's hand to each collar; with no walker picked, there are
+    // none.
     if (walkerKey !== undefined) {
       const walker = addStandingSprite(this, walkerKey, x, footY);
       showTag(reduced, walker, walkerKey, "walk");
       root.add(walker);
+      const leash = this.graphics(root);
+      dogs.forEach(({ dog, dx, footY: dogFoot }, i) => {
+        const hand = leashHand(itemAt(placements, i));
+        drawPixelLine(
+          leash,
+          PALETTE.darkRed,
+          { x: x + hand.dx, y: footY + hand.dy },
+          { x: x + dx, y: dogFoot - COLLAR_HEIGHTS[dog] },
+        );
+      });
     }
-
-    const leash = this.graphics(root);
-    dogs.forEach(({ dog, dx, footY: dogFoot }, i) => {
-      const hand = leashHand(itemAt(placements, i));
-      drawPixelLine(
-        leash,
-        PALETTE.darkRed,
-        { x: x + hand.dx, y: footY + hand.dy },
-        { x: x + dx, y: dogFoot - COLLAR_HEIGHTS[dog] },
-      );
-    });
 
     const state = { action: this.action, loadout: this.loadout };
     const speech = bubbleSpeech(
