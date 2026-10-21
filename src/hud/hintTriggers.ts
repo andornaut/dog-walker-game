@@ -1,5 +1,7 @@
-import type { HintTrigger } from "../data/types";
+import type { HintTrigger, LiveTuning } from "../data/types";
+import { packSizeBonus } from "../rules/dogs";
 import type { MoverTell } from "../runner/movers";
+import { placeInPack } from "../state/pack";
 import type { CardSource, RunState } from "../state/runState";
 import { lowHeartDogs } from "./moments";
 
@@ -25,4 +27,11 @@ export function moverHintTriggers(tell: MoverTell | null): HintTrigger[] {
 // The hint triggers the run's state raises while it lasts: an owner down to their last heart.
 export function runHintTriggers(run: Pick<RunState, "pack">): HintTrigger[] {
   return lowHeartDogs(run.pack).length > 0 ? [{ kind: "firedOwner" }] : [];
+}
+
+// The hint triggers a walk raises as it starts: the pack-size bonus when the lead dog's owner
+// gets one.
+export function startHintTriggers(tuning: LiveTuning, run: Pick<RunState, "pack">): HintTrigger[] {
+  const lead = run.pack[0].dog;
+  return packSizeBonus(tuning, placeInPack(run, lead)) > 0 ? [{ kind: "packBonus" }] : [];
 }

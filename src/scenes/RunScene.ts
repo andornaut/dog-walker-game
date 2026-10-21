@@ -16,7 +16,7 @@ import type { RunSetup } from "../dev/runSetup";
 import { withSetupStart } from "../dev/setupRun";
 import { startZoneClocks, tickZoneClocks, type ZoneClocks } from "../dev/zoneClock";
 import { effectItems } from "../hud/effectIcons";
-import { cardHintTriggers } from "../hud/hintTriggers";
+import { cardHintTriggers, startHintTriggers } from "../hud/hintTriggers";
 import { homeQuestionNote } from "../hud/homeQuestion";
 import { type RunPause, walkPaused } from "../hud/topBar";
 import { type ExplainShown } from "../hud/walkHud";
@@ -190,11 +190,13 @@ export class RunScene extends Scene implements HudRun {
     sound.startMusic();
     startWakeLock();
     this.world.banner.show(this.session.walk.run, this.reducedMotion());
-    // The first hints wait for the zone banner to leave: how to steer, then the Home button.
+    // The first hints wait for the zone banner to leave: how to steer, the lead dog's
+    // pack-size bonus, then the Home button.
     this.time.delayedCall(zoneBannerMs(this.reducedMotion()), () => {
       if (this.sys.game.device.input.touch) {
         showHint(this, { kind: "drag" });
       }
+      startHintTriggers(gameData.tuning, run).forEach((trigger) => showHint(this, trigger));
       showHint(this, { kind: "homeButton" });
     });
     this.draw();

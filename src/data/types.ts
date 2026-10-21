@@ -810,7 +810,8 @@ export type QuipMoment = "fired" | "happier" | "parting" | "upset";
 export type Quips = Readonly<Record<QuipMoment, readonly [string, string, ...string[]]>>;
 
 // What a first-time hint waits for: an encounter, a debuff, or another event happening for
-// the first time (moverCue: a mover's arrow cue showing on the road).
+// the first time (moverCue: a mover's arrow cue showing on the road; packBonus: a walk
+// starting with a pack-size bonus for its lead dog's owner).
 export type HintTrigger =
   | { readonly encounter: EncounterId; readonly kind: "encounter" }
   | {
@@ -823,6 +824,7 @@ export type HintTrigger =
         | "luckyFind"
         | "minorBump"
         | "moverCue"
+        | "packBonus"
         | "pull"
         | "pullLanded"
         | "tip"

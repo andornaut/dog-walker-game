@@ -3,7 +3,12 @@ import { describe, expect, it } from "vitest";
 import { gameData } from "../data";
 import { hintFor } from "../rules/hints";
 import { testState } from "../testing/runState";
-import { cardHintTriggers, moverHintTriggers, runHintTriggers } from "./hintTriggers";
+import {
+  cardHintTriggers,
+  moverHintTriggers,
+  runHintTriggers,
+  startHintTriggers,
+} from "./hintTriggers";
 
 describe("cardHintTriggers", () => {
   it("raises the fork hint for a fork, and the encounter's and the card's for an encounter", () => {
@@ -38,4 +43,21 @@ describe("runHintTriggers", () => {
     expect(kinds(testState({ duchess: 5, koda: 1 }))).toEqual(["firedOwner"]);
     expect(kinds(testState({ duchess: 5, koda: "fired" }))).toEqual([]);
   });
+});
+
+describe("startHintTriggers", () => {
+  const { packSizeBonus } = gameData.tuning.hearts;
+
+  it.each([
+    ["a lone dog", testState({ koda: 5 }), packSizeBonus[1]],
+    ["a pair", testState({ duchess: 5, koda: 5 }), packSizeBonus[2]],
+    ["a full pack", testState({ biscuit: 5, duchess: 5, koda: 5 }), packSizeBonus[3]],
+  ])(
+    "raises the pack-bonus hint for %s only when its lead's owner gets a bonus",
+    (_, run, bonus) => {
+      expect(startHintTriggers(gameData.tuning, run)).toEqual(
+        bonus > 0 ? [{ kind: "packBonus" }] : [],
+      );
+    },
+  );
 });
