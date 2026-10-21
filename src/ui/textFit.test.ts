@@ -13,6 +13,7 @@ describe("fittingText", () => {
     ["on two lines at 2x", 30, "abc def", ["abc", "def"], WRAPPING_TEXT_FIT_STYLES[2]],
     ["at 1x when two lines at 2x are too few", 32, "ab cd ef", ["ab cd ef"], undefined],
     ["at 1x when a word is too wide for 2x", 24, "abcdef", ["abcdef"], undefined],
+    ["a paragraph a line at 2x", 30, "ab\ncd", ["ab", "cd"], WRAPPING_TEXT_FIT_STYLES[2]],
   ])("sets text %s", (_name, room, text, lines, style) => {
     const fitted = fittingText(WRAPPING_TEXT_FIT_STYLES, width, room, text);
     expect(fitted.lines).toEqual(lines);

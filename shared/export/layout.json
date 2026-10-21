@@ -1016,6 +1016,7 @@
       },
       "band": {
         "height": 11,
+        "room": 77,
         "y": 2
       },
       "effect": {
@@ -1023,6 +1024,11 @@
         "width": 71,
         "x": 6,
         "y": 76
+      },
+      "fires": {
+        "size": 16,
+        "x": 4,
+        "y": 119
       },
       "height": 140,
       "large": {
@@ -1038,6 +1044,7 @@
         },
         "band": {
           "height": 18,
+          "room": 154,
           "y": 4
         },
         "body": {
@@ -1046,12 +1053,23 @@
           "x": 12,
           "y": 152
         },
+        "fires": {
+          "x": 8,
+          "y": 238
+        },
         "height": 280,
+        "warningGap": 4,
         "width": 166
       },
+      "paws": {
+        "gap": 4,
+        "height": 10
+      },
+      "plaquePadX": 2,
       "row": {
         "gap": 8
       },
+      "warningGap": 2,
       "width": 83,
       "largeRect": {
         "height": 280,

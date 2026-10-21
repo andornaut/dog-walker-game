@@ -2,10 +2,9 @@ import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
 import type { DogId, EncounterId } from "../data/types";
-import { CARD_LAYOUT } from "../layout/cardLayout";
+import { boxStyles, CARD_LAYOUT } from "../layout/cardLayout";
 import type { CardSource } from "../state/runState";
-import { BODY_LINE_HEIGHT } from "../testing/bodyFont";
-import { fitInFont } from "../testing/fontInk";
+import { fitInFont, fontFileMetrics } from "../testing/fontInk";
 import { activeModifier, testState } from "../testing/runState";
 import { fillNames } from "../text/lines";
 import { plainMarks } from "../ui/pixelFont";
@@ -100,11 +99,7 @@ describe("a card's text for the dogs it catches", () => {
 
     // The small card's effect, in the body font at 2x on the lines its height holds, else 1x.
     const { effect } = CARD_LAYOUT;
-    const styles = [2, 1].map((scale) => ({
-      letterSpacing: 0,
-      lines: Math.floor(effect.height / (BODY_LINE_HEIGHT * scale)),
-      scale,
-    }));
+    const styles = boxStyles(fontFileMetrics("font-body"), effect.height);
 
     it.each(Object.keys(gameData.dogs) as DogId[])(
       "fits %s's forgiven loss in a card's effect",

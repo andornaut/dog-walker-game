@@ -8,11 +8,20 @@ import { SCREEN_CONFIG } from "../data/screen";
 import type { ZoneId } from "../data/types";
 import { PLAIN_ITEM, tileState } from "../home/interaction";
 import { DISABLED_COLORS, GREYED } from "../home/selection";
-import { RUN_TEXT_FIELDS } from "../hud/runText";
+import { largeBodyText, plaqueTexts, smallCardText } from "../hud/cardText";
 import { type HoldPress, type HoldRule, startHold, tickHold } from "../input/hold";
 import { cardNumberForKey } from "../input/keyBindings";
 import { keyNumbersShown } from "../input/keyNumbers";
-import { CARD_LAYOUT, cardRowSpec, largeCardHeight, largeCardRect } from "../layout/cardLayout";
+import {
+  boxStyles,
+  CARD_LAYOUT,
+  cardRowSpec,
+  FIRES_FIT,
+  largeBodyBox,
+  largeCardHeight,
+  largeCardRect,
+  plaqueRoom,
+} from "../layout/cardLayout";
 import { cardHeader, cardRowRects } from "../layout/cardRow";
 import { rectIndexAt } from "../layout/grid";
 import { insetRect, type Rect } from "../layout/rect";
@@ -24,15 +33,24 @@ import {
   MAX_CARD_OPTIONS,
   type OptionView,
 } from "../rules/choices";
-import { formatDollars } from "../rules/effectText";
 import { encounterLook, type HasArt, type Look, skinnedArt, skinnedCardArt } from "../rules/skins";
 import type { CardSource } from "../state/runState";
-import { fillLine } from "../text/lines";
+import { inkRowsOfLines } from "../ui/fontMetrics";
 import { addDisplayText, hasDisplayFont } from "./displayText";
 import { drawRing, fillRect } from "./draw";
 import { greyTextureKey } from "./greyTextures";
 import { PALETTE } from "./palette";
-import { addPixelText, fontHasGlyphs, type FontRole, scalePixelText } from "./pixelText";
+import {
+  addPixelText,
+  fitPixelText,
+  fontHasGlyphs,
+  type FontRole,
+  inkSpan,
+  labelInkWidth,
+  pixelFontMetrics,
+  setFittedText,
+  setPixelText,
+} from "./pixelText";
 import { currentSettings } from "./profileStore";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -73,7 +91,6 @@ const LARGE_BODY_GAP = 4;
 // Marks an option that would fire an owner, over the plaque's left rivet: card-frame
 // pixels, and card-frame-large pixels where it is drawn at 2x.
 const FIRES_KEY = "ui-fires";
-const FIRES_AT = { large: { x: 8, y: 238 }, small: { x: 4, y: 119 } };
 // A fork card's Head home button, centred under the paths, gap rows below them.
 const FORK_HOME = { gap: 6, height: 44, width: 160 };
 
@@ -371,7 +388,7 @@ export class CardScene extends Scene {
     }
     const label = bandLabel(entry);
     this.centered(x + LARGE.width / 2, y + LARGE.band.y + 5, label, this.bandColor(tag), {
-      font: fontHasGlyphs(this, "title", label) ? "title" : "body",
+      font: this.bandLabelFits("title", label, LARGE.band.room) ? "title" : "body",
     });
     const art = illustrationKey(this.hasArt, this.zone, view.source, option);
     if (this.textures.exists(art)) {
@@ -390,59 +407,40 @@ export class CardScene extends Scene {
     }
     const marker =
       option !== undefined && option.fires.length > 0
-        ? this.addFiresMarker(x + FIRES_AT.large.x, y + FIRES_AT.large.y + shift, 2, false)
+        ? this.addFiresMarker(x + LARGE.fires.x, y + LARGE.fires.y + shift, 2, false)
         : undefined;
-    this.centered(
-      this.plaqueCenter(badge.x, badge.width, marker),
-      badge.y + 9,
-      this.costText(entry),
-      PALETTE.plum,
-      {
-        font: "title",
-      },
-    );
+    this.addPlaqueText(badge, marker, 9, PALETTE.plum, entry);
     this.enlarged = this.children.list.slice(before);
   }
 
   // The enlarged card's body from (x, top): an option that would fire an owner says so first,
   // in dark red, then each change it makes, at 2x where it fits the frame's body and else at
-  // 1x. Returns its parts and the height they take.
+  // 1x, measured on the font. Returns its parts and the height their ink takes.
   private addLargeBody(
     option: OptionView | undefined,
     x: number,
     top: number,
   ): { height: number; parts: GameObjects.BitmapText[] } {
-    const lines =
-      option === undefined
-        ? [gameData.runText.card.skipHeld]
-        : option.breakdown.length === 0
-          ? [option.text]
-          : option.breakdown.map(({ dog, name, text }) =>
-              [dog === null ? "" : `${gameData.dogs[dog].name}:`, text, name]
-                .filter((part) => part !== "")
-                .join(" "),
-            );
     const parts: GameObjects.BitmapText[] = [];
-    let used = 0;
+    let fireLines = 0;
     if (option !== undefined && option.fires.length > 0) {
       const warning = addPixelText(this, x, top, firesText(gameData, option.fires), {
         color: PALETTE.darkRed,
         font: "title",
-        maxWidth: LARGE.body.width,
       });
+      fireLines = fitPixelText(warning, FIRES_FIT.large, x, top).lines.length;
       parts.push(warning);
-      used = Math.ceil(warning.height) + 4;
     }
-    const body = addPixelText(this, x, top + used, lines.join("\n"), {
+    const box = largeBodyBox(pixelFontMetrics(this, "title"), fireLines);
+    const body = addPixelText(this, x, top + box.top, largeBodyText(gameData, option), {
       color: PALETTE.plum,
-      maxWidth: LARGE.body.width,
       scale: 2,
     });
-    if (body.height > LARGE.body.height - used) {
-      scalePixelText(body, 1, x, top + used);
-    }
+    const metrics = pixelFontMetrics(this, "body");
+    const fit = { room: LARGE.body.width, styles: boxStyles(metrics, box.height) };
+    const { lines, style } = fitPixelText(body, fit, x, top + box.top);
     parts.push(body);
-    return { height: used + Math.ceil(body.height), parts };
+    return { height: box.top + inkRowsOfLines(metrics, lines.length) * style.scale, parts };
   }
 
   private showRow(visible: boolean): void {
@@ -467,29 +465,39 @@ export class CardScene extends Scene {
     return x + marker.displayWidth;
   }
 
-  // The plaque text's centre: the plaque's, or the part right of the fires marker.
-  private plaqueCenter(left: number, width: number, marker: number | undefined): number {
-    return marker === undefined ? left + width / 2 : (marker + left + width) / 2;
+  // The plaque's text in the title font, centred in the plaque or its part right of the fires
+  // marker, capsY under its top: the first of plaqueTexts that fits there.
+  private addPlaqueText(
+    badge: Rect,
+    marker: number | undefined,
+    capsY: number,
+    color: number,
+    entry: Entry,
+  ): GameObjects.BitmapText {
+    const center =
+      marker === undefined ? badge.x + badge.width / 2 : (marker + badge.x + badge.width) / 2;
+    const room = plaqueRoom(badge.x, badge.width, marker);
+    const texts = plaqueTexts(gameData, entry.option);
+    const label = this.centered(center, badge.y + capsY, texts[0] ?? "", color, { font: "title" });
+    for (const text of texts) {
+      setPixelText(label, text);
+      const ink = inkSpan(label);
+      if (ink.right - ink.left <= room) {
+        break;
+      }
+    }
+    return snapCentre(label, center);
   }
 
-  // A plaque shows its option's price, greyed with the card when the player cannot afford it, or
-  // card.free for an option that costs no money. A path card's plaque shows its zone's pay
-  // multiplier instead, and how long its upgrade lasts.
-  private costText(entry: Entry): string {
-    const option = entry.option;
-    const text = gameData.runText.card;
-    if (option?.path !== undefined) {
-      const pay = fillLine(RUN_TEXT_FIELDS.card, text, "forkFees", {
-        fees: String(option.path.fees),
-      });
-      return option.duration === undefined
-        ? pay
-        : `${pay} · ${text.upgradeDuration[option.duration]}`;
+  // Whether label inks no wider than room in role's font at 1x, which has its every glyph.
+  private bandLabelFits(role: FontRole, label: string, room: number): boolean {
+    if (!fontHasGlyphs(this, role, label)) {
+      return false;
     }
-    if (option === undefined || option.cost === 0) {
-      return text.free;
-    }
-    return fillLine(RUN_TEXT_FIELDS.card, text, "need", { amount: formatDollars(option.cost) });
+    const probe = addPixelText(this, 0, 0, label, { color: PALETTE.white, font: role });
+    const ink = inkSpan(probe);
+    probe.destroy();
+    return ink.right - ink.left <= room;
   }
 
   // The forced-stop band is amber, so its label is plum; every other band's is white.
@@ -508,18 +516,12 @@ export class CardScene extends Scene {
   }
 
   // The row's band labels share one font: the title font where it has every glyph of every
-  // label and each fits its band, else the narrower body font.
+  // label and each fits its band, else the narrower body font, which every label fits.
   private bandFont(): FontRole {
-    const fits = (label: string) => {
-      if (!fontHasGlyphs(this, "title", label)) {
-        return false;
-      }
-      const probe = addPixelText(this, 0, 0, label, { color: PALETTE.white, font: "title" });
-      const width = probe.width;
-      probe.destroy();
-      return width <= CARD.width - 6;
-    };
-    return this.entries.map(bandLabel).every(fits) ? "title" : "body";
+    const labels = this.entries.map(bandLabel);
+    return labels.every((label) => this.bandLabelFits("title", label, BAND.room))
+      ? "title"
+      : "body";
   }
 
   private drawCard(
@@ -587,44 +589,35 @@ export class CardScene extends Scene {
 
     // A path card shows its zone's difficulty as paws, then in words.
     const path = entry.option?.path;
-    let effectY = y + EFFECT.y;
+    const centreX = x + EFFECT.x + EFFECT.width / 2;
     if (path !== undefined) {
       const paws = tagFrame(this, DIFFICULTY_KEY, String(path.difficulty));
       if (paws !== undefined) {
-        const image = this.add.image(x + CARD.width / 2, effectY, DIFFICULTY_KEY, paws);
-        image.setOrigin(0.5, 0);
-        effectY += image.height + 4;
+        this.add.image(x + CARD.width / 2, y + EFFECT.y, DIFFICULTY_KEY, paws).setOrigin(0.5, 0);
       }
     }
 
-    // An option that would fire an owner says so at the foot of its effect, in dark red.
+    // An option that would fire an owner says so at the foot of its effect, in dark red, where
+    // the effect still fits over it; the effect at 2x where it fits the card, else at 1x. Holding
+    // the card shows both larger.
     const fires = entry.option?.fires ?? [];
-    let effectHeight: number = EFFECT.height;
-    if (fires.length > 0) {
-      const warning = this.centered(
-        x + EFFECT.x + EFFECT.width / 2,
-        y + EFFECT.y + EFFECT.height,
-        firesText(gameData, fires),
-        grey ? PALETTE[GREYED.text] : PALETTE.darkRed,
-        { maxWidth: EFFECT.width },
-      ).setOrigin(0, 1);
-      effectHeight -= Math.ceil(warning.height) + 2;
-    }
-
-    // The effect at 2x where it fits the card, else at 1x; holding the card shows it larger.
-    const text = entry.option?.text ?? gameData.runText.card.skipEffect;
-    const effect = this.centered(
-      x + EFFECT.x + EFFECT.width / 2,
-      effectY,
-      text,
-      grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum,
-      { maxWidth: EFFECT.width, scale: 2 },
+    const probe = addPixelText(this, 0, 0, "", { color: PALETTE.plum });
+    const shown = smallCardText(
+      gameData,
+      pixelFontMetrics(this, "body"),
+      labelInkWidth(probe),
+      entry.option,
     );
-    // A word too long to wrap, such as a difficulty, is wider than its wrap width.
-    if (effect.height > effectHeight || effect.width > EFFECT.width) {
-      scalePixelText(effect, 1, x + EFFECT.x + EFFECT.width / 2, effectY);
-      snapCentre(effect, x + EFFECT.x + EFFECT.width / 2);
+    probe.destroy();
+    if (shown.warning !== null) {
+      const warning = this.centered(centreX, 0, "", grey ? PALETTE[GREYED.text] : PALETTE.darkRed);
+      setFittedText(warning, shown.warning, centreX, y + shown.box.warningY);
+      snapCentre(warning, centreX);
     }
+    const effectColor = grey ? PALETTE[DISABLED_COLORS.text] : PALETTE.plum;
+    const effect = this.centered(centreX, 0, "", effectColor);
+    setFittedText(effect, shown.effect, centreX, y + shown.box.y);
+    snapCentre(effect, centreX);
 
     const badge = { ...BADGE, x: x + BADGE.x, y: y + BADGE.y };
     if (this.textures.exists(COST_KEY)) {
@@ -635,16 +628,10 @@ export class CardScene extends Scene {
     }
     const marker =
       fires.length > 0
-        ? this.addFiresMarker(x + FIRES_AT.small.x, y + FIRES_AT.small.y, 1, grey)
+        ? this.addFiresMarker(x + CARD.fires.x, y + CARD.fires.y, 1, grey)
         : undefined;
     this.badges.push(
-      this.centered(
-        this.plaqueCenter(badge.x, badge.width, marker),
-        badge.y + 4,
-        this.costText(entry),
-        grey ? PALETTE[GREYED.plateText] : PALETTE.plum,
-        { font: "title" },
-      ),
+      this.addPlaqueText(badge, marker, 4, grey ? PALETTE[GREYED.plateText] : PALETTE.plum, entry),
     );
   }
 

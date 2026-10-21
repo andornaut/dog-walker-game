@@ -251,6 +251,33 @@ export function fitPixelText(
   return fitted;
 }
 
+// A line's ink width in label's font at a style, measured by setting it on label; set the
+// label's text afterwards with setFittedText.
+export function labelInkWidth(
+  label: GameObjects.BitmapText,
+): (style: TextFitStyle, line: string) => number {
+  return (style, line) => {
+    setPixelText(label, line);
+    label.setLetterSpacing(style.letterSpacing);
+    scalePixelText(label, style.scale, label.x, label.y);
+    const ink = inkSpan(label);
+    return ink.right - ink.left;
+  };
+}
+
+// Sets text fitted as fittingText gives it on label, keeping (x, y) its origin's x and the top
+// of its first line's capitals.
+export function setFittedText(
+  label: GameObjects.BitmapText,
+  fitted: FittedText,
+  x: number,
+  y: number,
+): void {
+  setPixelText(label, fitted.lines.join("\n"));
+  label.setLetterSpacing(fitted.style.letterSpacing);
+  scalePixelText(label, fitted.style.scale, x, y);
+}
+
 // Sets new text, in the characters the label's font has, only when it changed.
 export function setPixelText(label: GameObjects.BitmapText, text: string): void {
   const role = (label.getData("fontRole") as FontRole | undefined) ?? "body";

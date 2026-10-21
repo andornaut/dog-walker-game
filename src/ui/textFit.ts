@@ -40,20 +40,24 @@ export interface FittedText {
   style: TextFitStyle;
 }
 
-// The first style that sets text in at most its lines, broken at spaces, each line's ink no
-// wider than room as inkWidth measures it; else the last style on one line.
+// The first style that sets text in at most its lines, each paragraph (split at "\n") starting a
+// line and broken at spaces, each line's ink no wider than room as inkWidth measures it; else
+// the last style, a line per paragraph.
 export function fittingText(
   styles: readonly TextFitStyle[],
   inkWidth: (style: TextFitStyle, line: string) => number,
   room: number,
   text: string,
 ): FittedText {
+  const paragraphs = text.split("\n");
   for (const style of styles) {
     const most = style.lines ?? 1;
-    const lines = most === 1 ? [text] : wrapWords((line) => inkWidth(style, line), room, text);
+    const lines = paragraphs.flatMap((paragraph) =>
+      most === 1 ? [paragraph] : wrapWords((line) => inkWidth(style, line), room, paragraph),
+    );
     if (lines.length <= most && lines.every((line) => inkWidth(style, line) <= room)) {
       return { lines, style };
     }
   }
-  return { lines: [text], style: styles.at(-1) as TextFitStyle };
+  return { lines: paragraphs, style: styles.at(-1) as TextFitStyle };
 }
