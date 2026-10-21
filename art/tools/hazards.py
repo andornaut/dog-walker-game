@@ -278,7 +278,7 @@ def cyclist(lf=36, rf=41):
     # head: face, then a cyan helmet with vents and a dark visor
     face_disc(g, 16, 13.5, 7.5, 6.5, "skin1", "skin2")
     face_front(g, 16, 13)
-    g.ell(16, 7.5, 9, 5, "cyan", "sky", "white")
+    g.cel(16, 7.5, 9, 5, "cyan", "sky", "white")
     g.rect(7, 10, 18, 2, "cyan")
     g.rect(22, 10, 3, 2, "sky")
     g.rect(8, 12, 16, 1, "ink")

@@ -527,9 +527,9 @@ def stranger_top(wave):
         g.rect(28 + w, 5 + b, 1, 2, "skin2")
         road.face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
         # curly ginger hair: a round crop with bumps along its top and sides
-        g.ell(16, 7 + b, 8.5, 4.5, "orange", "ochre", "amber")
+        g.cel(16, 7 + b, 8.5, 4.5, "orange", "ochre", "amber")
         for x, y in ((9, 5), (12, 3), (16, 2.5), (20, 3), (23, 5), (8, 9)):
-            g.ell(x, y + b, 2, 2, "orange", "ochre", "amber")
+            g.cel(x, y + b, 2, 2, "orange", "ochre", "amber")
         g.p(12, 6 + b, "rust")
         g.p(17, 5 + b, "rust")
         g.p(21, 7 + b, "rust")

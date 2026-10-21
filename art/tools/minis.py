@@ -154,7 +154,10 @@ class Mini:
             self._set(self.g.ell, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li)
 
     def cel(self, cx, cy, rx, ry, c, sh=None, li=None, power=2):
+        """As ell, a little squarer under 3px of radius so it grows no nub at its tips."""
         s, sy = self.s, self.sy
+        if min(rx * s, ry * sy) < 3:
+            power = max(power, 3)
         self._set(self.g.cel, cx, cy, c, cx * s, cy * sy, rx * s, ry * sy, c, sh, li, power)
 
     def blob(self, cx, cy, rx, ry, c, sh=None, li=None, power=2.6):
