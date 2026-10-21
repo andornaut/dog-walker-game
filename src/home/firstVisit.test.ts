@@ -8,7 +8,7 @@ import { homeSections, startReady } from "./sections";
 describe("a first visit", () => {
   it.each([
     { dogs: [], ready: false },
-    { dogs: ["koda"], ready: true },
+    { dogs: newPlayerSave.owned.dogs.slice(0, 1), ready: true },
   ] as const)("is ready to start with $dogs.length dogs: the saved walker counts", (row) => {
     const sections = homeSections(gameData, newPlayerSave.owned, {
       loadout: { dogs: row.dogs as readonly DogId[], gear: null },

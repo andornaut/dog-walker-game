@@ -158,7 +158,7 @@ describe("buy", () => {
       bank: 2_000,
       expected: {
         bankCents: dollars(1_400),
-        owned: { ...start, dogs: ["biscuit", "duchess", "koda", "nugget"] },
+        owned: { ...start, dogs: [...start.dogs, "nugget"] },
       },
       name: "takes the price from the bank and adds a dog",
       purchase: { dog: "nugget", kind: "dog" },
@@ -191,7 +191,7 @@ describe("buy", () => {
       bank: 2_000,
       expected: { kind: "refused", reason: "notForSale" },
       name: "refuses what is not for sale",
-      purchase: { dog: "koda", kind: "dog" },
+      purchase: { dog: "biscuit", kind: "dog" },
     },
   ])("$name", ({ bank, expected, purchase }) => {
     expect(outcome(buy(data, purchase, { ...newPlayerSave, bankCents: dollars(bank) }))).toEqual(

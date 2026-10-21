@@ -2,6 +2,7 @@ import * as v from "valibot";
 import { describe, expect, it } from "vitest";
 
 import { gameData } from "../data";
+import type { DogId } from "../data/types";
 import { defined, present } from "../testing/defined";
 import { newPlayerSave, testContext, veteranSave } from "./fixtures";
 import { loadSave, saveContextFrom } from "./load";
@@ -24,11 +25,29 @@ function withChanges(change: (document: StoredInput) => void): string {
 const loaded = (change: (document: StoredInput) => void): SaveDocument =>
   loadSave(testContext, withChanges(change)).save;
 
+const STARTER_DOGS = (Object.keys(gameData.dogs) as DogId[]).filter(
+  (id) => gameData.dogs[id].unlock === "start",
+);
+
 const PRE_FORK_ROUTE = ["street", "park", "shops", "homeStretch"];
 
 describe("loadSave", () => {
   it("gives a new player the free dogs, the default walker and no loadout", () => {
     expect(loadSave(testContext, null)).toEqual({ save: newPlayerSave, status: "new" });
+  });
+
+  // A save from when Duchess and Koda were starters: what it owns wins, and loading never
+  // takes a dog away.
+  it.each<[string, DogId[]]>([
+    ["all three old starters", ["biscuit", "duchess", "koda"]],
+    ["the old starters in another order", ["koda", "duchess", "biscuit"]],
+    ["the old starters and a bought dog", ["biscuit", "duchess", "koda", "penny"]],
+    ["two old starters without the new one", ["duchess", "koda"]],
+  ])("keeps every dog an old save owns: %s", (_name, dogs) => {
+    const save = loaded((document) => {
+      document.owned.dogs = dogs;
+    });
+    expect(new Set(save.owned.dogs)).toEqual(new Set([...STARTER_DOGS, ...dogs]));
   });
 
   it("loads a valid save unchanged", () => {
@@ -175,7 +194,7 @@ describe("loadSave", () => {
       (save) => save.owned,
       {
         dogSlots: 2,
-        dogs: ["biscuit", "duchess", "koda", "penny"],
+        dogs: ["biscuit", "koda", "penny"],
         gear: ["whistle"],
         walkers: ["casey", "ben"],
       },
@@ -449,7 +468,7 @@ describe("saveContextFrom", () => {
   it("starts a new player with one dog slot, the starter dogs and walkers, and the default walker", () => {
     expect(context.defaults).toEqual({
       dogSlots: 1,
-      freeDogs: ["biscuit", "duchess", "koda"],
+      freeDogs: STARTER_DOGS,
       freeWalkers: ["casey"],
       walker: gameData.defaultWalker,
     });

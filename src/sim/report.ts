@@ -104,7 +104,7 @@ const PACKS: readonly NamedPack[] = [
   namedByDogs(["koda", "biscuit"]),
   // Camera ready and show dog, the quirks no other pack walks.
   namedByDogs(["nugget", "pierre"]),
-  { dogs: ["duchess", "biscuit", "koda"], name: "Starters" },
+  namedByDogs(["duchess", "biscuit", "koda"]),
   { dogs: ["zippy", "archie", "snowball"], name: "Risky trio" },
 ];
 

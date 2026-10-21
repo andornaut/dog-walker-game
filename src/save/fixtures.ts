@@ -9,7 +9,7 @@ import { SAVE_VERSION, type SaveDocument } from "./schema";
 export const testContext: SaveContext = {
   defaults: {
     dogSlots: 1,
-    freeDogs: ["biscuit", "duchess", "koda"],
+    freeDogs: ["biscuit"],
     freeWalkers: ["casey"],
     walker: "casey",
   },
@@ -55,7 +55,7 @@ export const newPlayerSave: SaveDocument = {
   lastLoadout: { dogs: [], gear: null },
   owned: {
     dogSlots: 1,
-    dogs: ["biscuit", "duchess", "koda"],
+    dogs: ["biscuit"],
     gear: [],
     walkers: ["casey"],
   },

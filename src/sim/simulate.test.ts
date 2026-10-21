@@ -10,7 +10,7 @@ import type { PackDogs } from "../state/runState";
 import type { PolicyId } from "./policies";
 import { DEFAULT_RATES, type RunResult, type SimConfig, simulateRun } from "./simulate";
 
-const STARTERS: PackDogs = ["duchess", "biscuit", "koda"];
+const TRIO: PackDogs = ["duchess", "biscuit", "koda"];
 const RISKY: PackDogs = ["zippy", "archie", "snowball"];
 
 // A config whose player hits and collects at fixed rates, the rates given with the rest.
@@ -25,7 +25,7 @@ function config(overrides: Overrides = {}): SimConfig {
   const { hitRate = 0.1, luckyRate, tipRate, treatRate, ...rest } = overrides;
   return {
     gear: null,
-    pack: STARTERS,
+    pack: TRIO,
     player: {
       hitRate,
       kind: "rates",

@@ -112,7 +112,18 @@ describe("profile conditions", () => {
   it.each<[string, AchievementCondition, SaveDocument | null, boolean]>([
     ["a run condition, without a run", zonesFinished(1), veteran, false],
     ["packSize, without a run", { count: 1, kind: "packSize" }, veteran, false],
-    ["dogsOwned at the count", { count: 3, kind: "dogsOwned" }, newPlayerSave, true],
+    [
+      "dogsOwned at the count",
+      { count: newPlayerSave.owned.dogs.length, kind: "dogsOwned" },
+      newPlayerSave,
+      true,
+    ],
+    [
+      "dogsOwned below the count",
+      { count: newPlayerSave.owned.dogs.length + 1, kind: "dogsOwned" },
+      newPlayerSave,
+      false,
+    ],
     ["dogsOwned all, the starters", all("dogsOwned"), newPlayerSave, false],
     ["dogsOwned all, every dog", all("dogsOwned"), withOwned({ dogs: ALL_DOGS }), true],
     ["gearOwned all, one missing", all("gearOwned"), withOwned({ gear: ALL_GEAR.slice(1) }), false],

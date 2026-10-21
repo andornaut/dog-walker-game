@@ -132,11 +132,12 @@ describe("roster", () => {
     expect(sniff).toMatchObject({ amount: 1, kind: "hearts", quirkAmounts: { nervous: -1 } });
   });
 
-  it("starts with 3 dogs covering every size and trait", () => {
+  it("starts with at least one dog, and sells every other dog", () => {
     const starters = dogList.filter((dog) => dog.unlock === "start");
-    expect(starters).toHaveLength(3);
-    expect(new Set(starters.map((dog) => dog.size)).size).toBe(SIZES.length);
-    expect(new Set(starters.map((dog) => dog.trait)).size).toBe(TRAITS.length);
+    expect(starters.length).toBeGreaterThan(0);
+    expect(
+      dogList.filter((dog) => dog.unlock !== "start").every((dog) => dog.unlock === "shop"),
+    ).toBe(true);
   });
 
   it("gives every dog and owner a distinct name", () => {

@@ -135,7 +135,9 @@ describe("save edits", () => {
     expect(unlocked.owned.dogSlots).toBe(3);
     expect(new Set(unlocked.owned.dogs)).toEqual(new Set(Object.keys(gameData.dogs)));
     expect(new Set(unlocked.owned.gear)).toEqual(new Set(Object.keys(gameData.shopGear)));
-    expect(unlocked.owned.dogs.slice(0, 3)).toEqual(newPlayerSave.owned.dogs);
+    expect(unlocked.owned.dogs.slice(0, newPlayerSave.owned.dogs.length)).toEqual(
+      newPlayerSave.owned.dogs,
+    );
     expect(await store.save(unlocked)).toEqual({ status: "saved" });
     const loaded = await store.load(context);
     expect(loaded.status).toBe("loaded");
