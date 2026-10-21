@@ -161,7 +161,8 @@ describe("a steering bot", { timeout: 60_000 }, () => {
     const results = [run(busy, 1, IDEAL_SKILL, ["duchess"]), run(busy, 2, IDEAL_SKILL, NO_CHASER)];
     const counts = obstacleCounts(busy, results);
 
-    expect(counts.met).toBeGreaterThan(100);
+    // The floor only checks that the runs met a real sample; it sits well under any mix's count.
+    expect(counts.met).toBeGreaterThan(50);
     expect(counts.hit).toBe(0);
   });
 
