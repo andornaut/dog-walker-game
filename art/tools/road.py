@@ -13,7 +13,11 @@ their rows ROW_SCALE (1.2) times; the puddle (112x48) is drawn in its own
 pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
-dogs, except in wave; everything coming down the road faces the player.
+dogs, except in wave; everything coming down the road faces the player, and
+the movers going up it ahead of the pack are seen from behind too: stroller
+(48x72, walk: 4 frames at 160ms, the walkers' stride and pace) is a dad pushing
+a stroller one-handed, a takeaway coffee in his other hand, the stroller
+rolling ahead on his right.
 
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
@@ -1493,6 +1497,73 @@ def mail_carrier(**q):
                        ink=("grey", "slate"), sky=("cyan", None), blue=("sky", None)))
 
 
+# ---------- road movers going the pack's way (back view) ----------
+
+# Pushing the stroller: the walkers' stride with the arms held on the grips, a 1px bob as he passes over each
+# foot; 4 frames at 160ms, the walkers' pace.
+STROLLER_WALK = [dict(lf=-2), dict(lf=-1, rf=-1, bob=-1), dict(rf=-2), dict(lf=-1, rf=-1, bob=-1)]
+STROLLER_WALK_MS = 160
+
+
+def stroller(lf=0, rf=0, bob=0, arms=0):
+    """A dad pushing a stroller up the road, seen from behind as the pack sees it: short ginger hair, a purple
+    puffer jacket quilted across, jeans and brown shoes, a takeaway coffee in his left hand. The stroller rolls
+    ahead of him on his right, so it stands higher in the frame: a green hood ribbed where it folds, the seat
+    and basket under it, the rear wheels wide and the front ones inside them, his right hand on the
+    handlebar. It rolls steadily while he bobs. The road outline and the lit rim."""
+    g = edged(Grid(32, 48))
+    b = bob
+    # the stroller: the basket, the seat, the hood with a rib arching over it, then the handlebar, its two
+    # tubes down to the rear wheels' hubs and the rear wheels
+    g.rect(19, 30, 9, 5, "dslate")
+    g.rect(25, 30, 3, 5, "navy")
+    g.blob(23.5, 27, 6, 4, "green", "dgreen")
+    g.cel(23.5, 21.5, 6.5, 9, "green", "dgreen", "yellow", power=2.2)
+    g.cel(23.5, 24, 4, 5, "dgreen", power=2.2)
+    g.cel(23.5, 25, 3, 4, "green", power=2.2)
+    g.rect(18, 26, 11, 2, "green")
+    g.rect(26, 26, 3, 2, "dgreen")
+    g.rect(16, 25, 13, 1, "lgrey")
+    g.rect(27, 24, 2, 2, "ink")
+    for x in (18, 28):
+        g.rect(x, 26, 1, 13, "lgrey")
+        g.blob(x + 0.5, 39.5, 2, 3.2, "ink")
+        g.rect(x, 39, 1, 1, "lgrey")
+    # the dad, left of the stroller: legs walking and shoes
+    for x, f in ((7, lf), (13, rf)):
+        g.rect(x, 33 + b, 4, 10 + f - b, "blue")
+        g.rect(x + 3, 33 + b, 1, 10 + f - b, "navy")
+        g.rect(x, 43 + f, 4, 2, "brown")
+        g.rect(x, 44 + f, 4, 1, "dbrown")
+    # the left arm swings and holds the coffee; the right reaches out to the handlebar
+    g.rect(1, 22 + b - arms, 4, 9, "purple")
+    g.rect(4, 22 + b - arms, 1, 9, "plum")
+    g.rect(1, 29 + b - arms, 4, 1, "white")
+    g.rect(1, 30 + b - arms, 4, 5, "cream")
+    g.rect(4, 30 + b - arms, 1, 5, "tan")
+    g.rect(1, 32 + b - arms, 4, 1, "brown")
+    g.rect(19, 22 + b, 3, 4, "purple")
+    g.rect(19, 25 + b, 3, 1, "plum")
+    g.rect(19, 26 + b, 2, 2, "skin1")
+    g.rect(21, 26 + b, 1, 2, "skin2")
+    # the puffer, lit down its left side and quilted across
+    g.rect(5, 21 + b, 14, 13, "purple")
+    g.rect(16, 21 + b, 3, 13, "plum")
+    g.rect(5, 21 + b, 1, 12, "mauve")
+    for y in (25, 29):
+        g.rect(6, y + b, 12, 1, "plum")
+    g.p(5, 21 + b, None)
+    g.p(18, 21 + b, None)
+    g.ell(12, 22 + b, 6, 2, "purple", "plum")
+    # head: the back of short ginger hair, ears and the nape
+    g.rect(10, 19 + b, 4, 3, "skin1")
+    g.rect(3, 13 + b, 2, 3, "skin1")
+    g.rect(19, 13 + b, 2, 3, "skin2")
+    g.cel(12, 12.5 + b, 8, 8, "rust", "dbrown", "ochre")
+    g.rect(8, 19 + b, 8, 1, "rust")
+    return rim(g, LIT)
+
+
 # ---------- scenery gags (front view, in the backdrop band) ----------
 
 def cat(tail=0, blink=False, alert=False):
@@ -1688,6 +1759,7 @@ def sprites():
     yield "construction", [("idle", frames([drawn(CONSTRUCTION_SCALE, construction, f) for f in (0, 1)]), 500)]
     yield "mail-carrier", [("walk", frames(big(mail_carrier, **q) for q in PERSON_WALK), PERSON_WALK_MS),
                            ("idle", frames(big(mail_carrier, bob=bb) for bb in BREATH), BREATH_MS)]
+    yield "stroller", [("walk", frames(big(stroller, **q) for q in STROLLER_WALK), STROLLER_WALK_MS)]
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ minis.Mini, so it follows any redraw of the full-size sprite and gets its own
 full outline at the small size (see minis.py).
 
 At every step here: other-dog-owner, thief, biscuit-neighbour, chatty-neighbour,
-kid, mail-carrier, photo-op, stop-sign, ice-cream-truck, construction, puddle
+kid, mail-carrier, photo-op, stop-sign, stroller, ice-cream-truck, construction, puddle
 (no outline), hedge, barrier-2, barrier-3, parked-car and delivery-truck. Walkers are the
 pack, always drawn at 1x, and have none.
 
@@ -99,6 +99,9 @@ def own(s):
                                      for q in road.PERSON_WALK], road.PERSON_WALK_MS),
                            ("idle", [small(road, p, road.mail_carrier, **snap(dict(bob=b), p)).outlined()
                                      for b in breath], ms)]
+    yield "stroller", [("walk", [small(road, p, road.stroller, **snap(q, p)).outlined() for q in road.STROLLER_WALK],
+                        road.STROLLER_WALK_MS)]
+
     def times(q):
         return tuple(v * s for v in q)
 

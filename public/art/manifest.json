@@ -6092,6 +6092,51 @@
       }
     },
     {
+      "key": "stroller",
+      "png": "sprites/stroller.png",
+      "json": "sprites/stroller.json",
+      "anchor": {
+        "feetY": 68,
+        "opaqueWidth": 46
+      }
+    },
+    {
+      "key": "stroller@50",
+      "png": "sprites/stroller@50.png",
+      "json": "sprites/stroller@50.json",
+      "anchor": {
+        "feetY": 35,
+        "opaqueWidth": 22
+      }
+    },
+    {
+      "key": "stroller@62",
+      "png": "sprites/stroller@62.png",
+      "json": "sprites/stroller@62.json",
+      "anchor": {
+        "feetY": 44,
+        "opaqueWidth": 28
+      }
+    },
+    {
+      "key": "stroller@75",
+      "png": "sprites/stroller@75.png",
+      "json": "sprites/stroller@75.json",
+      "anchor": {
+        "feetY": 52,
+        "opaqueWidth": 34
+      }
+    },
+    {
+      "key": "stroller@88",
+      "png": "sprites/stroller@88.png",
+      "json": "sprites/stroller@88.json",
+      "anchor": {
+        "feetY": 60,
+        "opaqueWidth": 40
+      }
+    },
+    {
       "key": "thief",
       "png": "sprites/thief.png",
       "json": "sprites/thief.json",
