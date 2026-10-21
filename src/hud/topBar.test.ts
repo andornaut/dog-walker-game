@@ -1,8 +1,7 @@
-import { readFileSync } from "node:fs";
-
 import { describe, expect, it } from "vitest";
 
 import { fittingTextStyle, TEXT_FIT_STYLES, type TextFitStyle } from "../layout/textFit";
+import { fontInk } from "../testing/fontInk";
 import {
   buttonIcon,
   DOLLAR_GAP,
@@ -179,35 +178,8 @@ describe("topBarButtonAt", () => {
   });
 });
 
-// The title font's glyphs, from its .fnt: each one's left side bearing, inked width and advance.
-const TITLE_FNT = new URL("../../public/art/fonts/font-title.fnt", import.meta.url);
-const TITLE_GLYPHS = new Map(
-  [
-    ...readFileSync(TITLE_FNT, "utf8").matchAll(
-      /<char id="(\d+)"[^>]*\bwidth="(\d+)"[^>]*\bxoffset="(-?\d+)"[^>]*\bxadvance="(\d+)"/g,
-    ),
-  ].map(([, id, width, xOffset, advance]) => [
-    String.fromCodePoint(Number(id)),
-    { advance: Number(advance), width: Number(width), xOffset: Number(xOffset) },
-  ]),
-);
-
-// The screen columns text inks at a style, from its left edge, as Phaser lays it out.
-function titleInk(style: TextFitStyle, text: string): { left: number; right: number } {
-  let x = 0;
-  const spans = [...text].map((char) => {
-    const glyph = TITLE_GLYPHS.get(char);
-    if (glyph === undefined) {
-      throw new Error(`font-title has no ${char}`);
-    }
-    const span = { left: x + glyph.xOffset, right: x + glyph.xOffset + glyph.width };
-    x += glyph.advance + style.letterSpacing;
-    return span;
-  });
-  const left = Math.min(...spans.map((span) => span.left));
-  const right = Math.max(...spans.map((span) => span.right));
-  return { left: left * style.scale, right: right * style.scale };
-}
+// The screen columns text inks in the title font at a style.
+const titleInk = (style: TextFitStyle, text: string) => fontInk("font-title", style, text);
 
 describe("the money well", () => {
   const dollarRight = MONEY_WELL.dollarX + titleInk({ letterSpacing: 0, scale: 2 }, "$").right;

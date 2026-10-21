@@ -165,16 +165,16 @@ export function placePixelText(label: GameObjects.BitmapText, x: number, y: numb
   label.setPosition(Math.round(x), Math.round(y - capTop));
 }
 
-// Rescales a label made by addPixelText, keeping (x, y) its origin's x and the top of its
-// capitals.
+// Rescales a label made by addPixelText or addDisplayText, keeping (x, y) its origin's x and
+// the top of its capitals.
 export function scalePixelText(
   label: GameObjects.BitmapText,
   scale: number,
   x: number,
   y: number,
 ): void {
-  const role = (label.getData("fontRole") as FontRole | undefined) ?? "body";
-  const capTop = label.font === FALLBACK_FONT_KEY ? 0 : CAP_TOP[role];
+  // The capitals' top at 1x, as the label's maker set it for its font and origin.
+  const capTop = ((label.getData("capTop") as number | undefined) ?? 0) / label.scaleY;
   label.setScale(scale).setData("capTop", capTop * scale);
   placePixelText(label, x, y);
 }

@@ -18,7 +18,7 @@ import { addDisplayText } from "./displayText";
 import { fillRect } from "./draw";
 import { closeOverlay, listenOutsideTap, onWindowEvent, type OverlayData } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, setPixelText, wrapPixelText } from "./pixelText";
+import { addPixelText, fitPixelText, setPixelText, wrapPixelText } from "./pixelText";
 import { currentSettings, walkerSpriteKey } from "./profileStore";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
@@ -103,13 +103,16 @@ export class ZoneCelebrationScene extends Scene {
     this.addButton(text.button, finish);
   }
 
-  // The title in font-display at 2x, and the subtitle in font-display-cream under it.
+  // The title in font-display at 2x, or smaller where it would not fit the screen, and the
+  // subtitle in font-display-cream under it.
   private addHeadline(version: Version, text: CelebrationText): void {
-    const { centerX } = LAYOUT;
+    const { centerX, titleRoom, titleScale, titleStyles } = LAYOUT;
     const title = { color: PALETTE.yellow, font: "title", originX: 0.5 } as const;
     // addDisplayText draws the display font at 1x, so the title is scaled after.
-    const big = addDisplayText(this, centerX, 0, text.title, title).setScale(LAYOUT.titleScale);
-    atLineTop(big, version.titleY);
+    const big = addDisplayText(this, centerX, 0, text.title, title);
+    const { scale } = fitPixelText(big, { room: titleRoom, styles: titleStyles }, centerX, 0);
+    // A smaller title keeps its line's bottom row, so it stays over the subtitle.
+    atLineTop(big, version.titleY + (big.height / scale) * (titleScale - scale));
     const subtitle = { ...title, color: PALETTE.cream, variant: "cream" } as const;
     atLineTop(addDisplayText(this, centerX, 0, text.subtitle, subtitle), version.subtitleY);
   }

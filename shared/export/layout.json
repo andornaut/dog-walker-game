@@ -1053,7 +1053,18 @@
         "durationMs": 600,
         "fromX": 400
       },
+      "titleRoom": 312,
       "titleScale": 2,
+      "titleStyles": [
+        {
+          "letterSpacing": 0,
+          "scale": 2
+        },
+        {
+          "letterSpacing": 0,
+          "scale": 1
+        }
+      ],
       "walkerScale": 2,
       "zoneDone": {
         "burst": {

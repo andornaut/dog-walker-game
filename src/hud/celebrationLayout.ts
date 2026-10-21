@@ -1,6 +1,11 @@
 import { ROAD_SPRITE_SIZE } from "../assets/spriteKeys";
+import type { TextFitStyle } from "../layout/textFit";
 
-const CENTER_X = 180;
+const SCREEN_WIDTH = 360;
+const CENTER_X = SCREEN_WIDTH / 2;
+// The bubble's and the title's inset from either screen edge.
+const SIDE = 24;
+const TITLE_SCALE = 2;
 const WALKER_SCALE = 2;
 // A walker's frame at 1x: ROAD_SPRITE_SIZE wide and half again as tall.
 const WALKER_FRAME = { height: ROAD_SPRITE_SIZE * 1.5, width: ROAD_SPRITE_SIZE };
@@ -44,12 +49,12 @@ export const CELEBRATION_LAYOUT = {
     toX: 348,
     toY: 458,
   },
-  dim: { height: 316, width: 360, x: 0, y: 150 },
+  dim: { height: 316, width: SCREEN_WIDTH, x: 0, y: 150 },
   // The burst's top-left; the walker, drawn at walkerScale, stands with its frame's bottom
   // centre on the feet line, its frame's top-left at walker.
   newWalker: {
     ...headline(326, 10),
-    bubble: { height: 76, width: 312, x: 24, y: 332 },
+    bubble: { height: 76, width: SCREEN_WIDTH - SIDE * 2, x: SIDE, y: 332 },
     button: { height: 44, width: 264, x: 48, y: 416 },
     // The walker's line, wrapped, one line top per line.
     greeting: { lineTops: [336, 354], maxWidth: 296 },
@@ -62,8 +67,15 @@ export const CELEBRATION_LAYOUT = {
   },
   // A new walker's centre hops in from fromX, and fx-confetti bursts at burstY as they land.
   runIn: { burstY: 266, durationMs: 600, fromX: 400 },
-  // The big line is font-display at this scale; the small line is font-display-cream at 1x.
-  titleScale: 2,
+  // The big line is font-display at titleScale, or at the first of titleStyles whose ink fits
+  // titleRoom: each whole scale down to 1, glyphs at the font's own spacing. The small line is
+  // font-display-cream at 1x.
+  titleRoom: SCREEN_WIDTH - SIDE * 2,
+  titleScale: TITLE_SCALE,
+  titleStyles: Array.from({ length: TITLE_SCALE }, (_, i): TextFitStyle => ({
+    letterSpacing: 0,
+    scale: TITLE_SCALE - i,
+  })),
   walkerScale: WALKER_SCALE,
   zoneDone: {
     ...headline(370, 14),
