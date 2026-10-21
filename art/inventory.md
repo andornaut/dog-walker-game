@@ -161,7 +161,7 @@ Each zone's look for the Chase, Snatch and Social encounters, drawn by `art/tool
 | ------------------- | ------ | ------- | --------------- | ---- | ------------------------------------------------------------------------------------------- |
 | `road-<zone>`       | image  | 320×64  |                 | core | snooze-crescent, bark-park, woof-way, sniff-street-shops, paws-promenade, the-long-way-home |
 | `road-<zone>-start` | image  | 320×64  |                 | core | Every zone: a neutral cross street on rows 20 to 63, the zone on rows 0 to 19               |
-| `backdrop-<zone>`   | image  | 360×110 |                 | core | Every zone; screen rows 40 to 149                                                           |
+| `backdrop-<zone>`   | image  | 360×174 |                 | core | Every zone; screen rows 40 to 213                                                           |
 | `gag-cat`           | sprite | 24×24   | `idle`, `react` | core | On a fence                                                                                  |
 | `gag-sprinkler`     | sprite | 32×24   | `spray`         | core |                                                                                             |
 | `gag-ball`          | sprite | 14×14   | `roll`          | core | Rolls along the sidewalk                                                                    |

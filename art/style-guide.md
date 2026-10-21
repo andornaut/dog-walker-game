@@ -11,8 +11,8 @@
 | Band         | Screen rows | Contents                                                                                                                                                                                            |
 | ------------ | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Top bar      | 0 to 39     | `ui-top-bar` wells: money 4,8 88×26, treats 96,8 32×26, zone 212,5 144×29; `ui-icon-button` Home 130,10, sound 152,10 and pause 174,10; `ui-strip-well` under the zone well, right aligned at x 356 |
-| Backdrop     | 40 to 149   | `backdrop-<zone>`, 360×110                                                                                                                                                                          |
-| Road         | 150 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180                                                                                                                               |
+| Backdrop     | 40 to 213   | `backdrop-<zone>`, 360×174                                                                                                                                                                          |
+| Road         | 214 to 469  | 5 lanes of 64px; at the pack the road spans x 20 to 340, centre x 180                                                                                                                               |
 | Doghouse row | 466 to 559  | `ui-dog-band` (360×94) at 0,466; three 120×90 `ui-doghouse` slots at x 0, 120 and 240, rows 470 to 559                                                                                              |
 
 | Sprite                                                                                                   | Frame                      |
@@ -244,7 +244,7 @@ One word per moment, built like the sign logo: flat yellow letters 7 rows tall w
 
 ### Zone celebration
 
-After zones 1 to 3, over the road view (rows 150 to 465) dimmed as under a card, so the top bar, the backdrop and the doghouse row stay in view. The walker cheers at 2× in front of `ui-celebrate-burst` while `fx-confetti-bit` falls. Two lines head it: the big one in `font-display` drawn at 2× ("NEW WALKER!" or "NEIGHBORHOOD DONE!"), the small one under it in `font-display-cream` at 1× ("BEN JOINS YOU!" or the zone's name), both centred on x 180. Text on the bubble and the plate is plum on cream, money forest. Screen pixels; text y is the font line's top.
+After zones 1 to 3, over the road view (rows 214 to 465) dimmed as under a card, so the top bar, the backdrop and the doghouse row stay in view. The walker cheers at 2× in front of `ui-celebrate-burst` while `fx-confetti-bit` falls. Two lines head it: the big one in `font-display` drawn at 2× ("NEW WALKER!" or "NEIGHBORHOOD DONE!"), the small one under it in `font-display-cream` at 1× ("BEN JOINS YOU!" or the zone's name), both centred on x 180. Text on the bubble and the plate is plum on cream, money forest. Screen pixels; text y is the font line's top.
 
 | Element         | New walker                                                                                                                              | Zone done                                                                                        |
 | --------------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
@@ -302,7 +302,7 @@ Road sprites have redrawn depth variants at the steps in `shared/depth-steps.jso
 - The four lane dividers sit at x = 64k−1, 2px wide, one look per zone. Lane marks are faded white with a slate edge on Willow Crescent; dbrown on Fairview Park; white dashes 12 rows long in 32 with a mauve edge on Main Street; dbrown dashes 20 rows long in 32 on Riverside Path; white outlined in plum on The Long Way Home.
 - Curbs and verges stay inside the outer 3 to 7px of the strip. A 56px sprite leaves 4px each side of its 64px lane, so an outer lane's sprite overlaps its curb or verge by up to 3px.
 - Every zone has a start strip: a neutral cross street (near kerb, asphalt with a zebra, far kerb) on rows 20 to 63 and the zone's strip on rows 0 to 19, so it follows any zone at a fork.
-- The camera has its horizon at y −164 and the walker's feet at y 464; the road's far edge meets the backdrop at y 150 at scale 0.5. Its ratio r derives from speed (the visible distance is 3.6 s × `roadScrollSpeed`, 720 road px at 200 px/s, so r is 0.872). The rows from the far edge down to about y 170 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
+- The camera has its horizon at y −36 and the walker's feet at y 464; the road's far edge meets the backdrop at y 214 at scale 0.5. Its ratio r derives from speed (the visible distance is 3.6 s × `roadScrollSpeed`, 720 road px at 200 px/s, so r is 0.694). The rows from the far edge down to about y 222 sample the strip shrunk 4×, so: lane dashes and texture along the road repeat every 8 rows or more; lines across the road are at least 2 rows tall and low in contrast; fine detail runs along the road; small texture is spaced irregularly.
 
 ## Roadside
 
@@ -345,9 +345,20 @@ Road px: across is the distance from the road's centre line to the prop frame's 
 
 ## Backdrops
 
-Backdrops are 360×110 on screen rows 40 to 149; band row y is screen row 40 + y. The street ends at a T-junction. Rows 86 to 109 continue the road's projection at its slope (at row 109 the road spans columns 100 to 259, 160 wide, lane dividers on 132, 164, 195 and 227). Above them a flat cross street: far sidewalk 66 to 69, far curb 70 to 71, road 72 to 80 with its centre line on 76, near sidewalk 81 to 85. The far side faces the camera on ground row 62.
+Backdrops are 360×174 on screen rows 40 to 213; band row y is screen row 40 + y. The band, its approach rows and the camera come from `shared/export/layout.json`. The street ends at a T-junction. Rows 155 to 173, the approach, continue the road's projection at its slope (at row 173 the road spans columns 100 to 259, 160 wide, lane dividers on 132, 164, 195 and 227); in play the road surface scrolls over them from the juncture, and only the cross street and the scenery above it stay still. Above them a flat cross street: far sidewalk 135 to 138, far curb 139 to 140, road 141 to 149 with its centre line on 145, near sidewalk 150 to 154. The far side faces the camera on ground row 131.
 
-Where row 149 meets the road, left side (the right mirrors it):
+Above the far side's front row the scenery goes back in depth, not taller: hills, a second row of houses, the town, the park's meadow or the river's far bank, then the sky. The message strip lies over band rows 4 to 60 (screen rows 44 to 100), so the sky above row 61 is one flat colour with no clouds, stars, rays or scenery, and clouds, the moon, birds and the tallest scenery stay below it.
+
+| Zone              | Depth behind the front row                                                           |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| Willow Crescent   | Dark far houses up a slate hill, a few windows lit, and a church spire               |
+| Fairview Park     | Wooded hills, a far tree line and a meadow with a bandstand; a kite in the sky       |
+| Elm Avenue        | A green hill with a second row of houses up its slope and a water tower on its crest |
+| Main Street       | The town's blocks and a clock tower over the toy shop                                |
+| Riverside Path    | A wider river with a dinghy; on the far bank hills, a village and a spire            |
+| The Long Way Home | Dbrown hills the sun sets behind; birds in the pink band                             |
+
+Where row 213 meets the road, left side (the right mirrors it):
 
 | Zone              | Edge                           | Curb    | Road from  |
 | ----------------- | ------------------------------ | ------- | ---------- |
@@ -358,12 +369,12 @@ Where row 149 meets the road, left side (the right mirrors it):
 | Riverside Path    | Paving 76 to 99                | none    | 100        |
 | The Long Way Home | Sidewalk 76 to 97              | 98..99  | 100        |
 
-Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 93 to 95, x 0 to 72), the near-right lawn (x 284 to 359, rows 86 to 109), and both sidewalks.
+Gag spots, kept clear (`python3 art/tools/backdrops.py gags` prints them): the near-left perch's top rail (rows 158 to 159, x 0 to 72), the near-right lawn (x 284 to 359, rows 155 to 173), and both sidewalks.
 
 ## Skies
 
-- Daytime skies (Fairview Park, Riverside Path, Elm Avenue) stay cyan over sky with clouds. Main Street's sky is a sunburst: flat rays of sky and cyan, seven of each, from the end of the street (`sunburst` in `art/tools/backdrops.py`), with a cloud either side; its zone card repeats it with five of each.
-- Sunset and night skies are hard-edged horizontal bands of flat colour (`bands` in `art/tools/backdrops.py`), each 0.7 times the height of the band above it, so they shrink toward the horizon. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.
+- Daytime skies (Fairview Park, Riverside Path, Elm Avenue) stay cyan over sky with clouds: flat cyan down to row 61, then sky. Main Street's sky is a sunburst: flat rays of sky and cyan, seven of each, from the end of the street (`sunburst` in `art/tools/backdrops.py`), ending on an arc below row 61 with flat cyan beyond it, and a cloud either side; its zone card repeats it with five of each.
+- Sunset and night skies are hard-edged horizontal bands of flat colour (`bands` in `art/tools/backdrops.py`), each 0.7 times the height of the band above it, so they shrink toward the horizon. On a backdrop the bands run from row 61 to the far side's ground row and the top band also fills the rows above (`sunset`); stars sit in the top band below row 61. Above each seam the lower band's colour runs a 1-row line 2 rows up, and another 5 rows up on a band 12 rows or taller. No gradients, no dither.
 - The sun is a flat yellow disc (`sun`) whose visible lower half is cut by horizontal gaps that widen toward the horizon as the bars between them thin; the bands show through the gaps. It sits over the orange band, so the gaps hold against the yellow.
 - Bands, top to horizon:
 

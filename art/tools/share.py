@@ -44,7 +44,7 @@ TAGLINE = ("A COZY", "PIXEL-ART", "DOG-WALKING", "LANE RUNNER")
 # The window onto Elm Avenue: its left edge, and the backdrop rows it shows above the road
 VIEW_X = 152
 VIEW_W = W - 1 - VIEW_X
-BAND_TOP = 16              # the first backdrop row shown; the far side stands on band row bd.BASE
+BAND_TOP = bd.BASE - 46    # the first backdrop row shown, 46 rows over the far side's ground row
 BAND_ROWS = bd.H - BAND_TOP
 STREET = next(z for z, zone in hp.ZONES.items() if zone["art"] == "woof-way")   # Elm Avenue's zone id
 

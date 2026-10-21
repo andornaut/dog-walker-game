@@ -1,22 +1,25 @@
 #!/usr/bin/env python3
 """Draw the six zone backdrops: the neighbourhood band between the top bar and the road.
 
-backdrop-<zone>: 360x110 images in Endesga 32, drawn on screen rows 40 to 149.
+backdrop-<zone>: 360x174 images in Endesga 32, drawn on screen rows 40 to 213.
 The street ends at a T-junction: the bottom rows continue the pseudo-3D road
 below the band (the same projection, so the same road, curb and sidewalk edges
 at the same slope) up to a cross street that runs flat across the band. Beyond it the far side faces the camera: the
-zone's houses, park or shops under the sky. The scenery gags (cat on a perch,
-sprinkler, rolling ball) are separate sprites the game places in this band, on
-the near corners either side of the street.
+zone's houses, park or shops, the scenery behind them (hills, a second row of houses, a
+town, a river) and the sky. The band, the approach and the camera come from the game's
+layout export. The scenery gags (cat on a perch, sprinkler, rolling ball) are separate
+sprites the game places in this band, on the near corners either side of the street.
 
-Rows, in band rows (0 to 109): the far side's ground row 62 (BASE), the far sidewalk 66 to
-69, the far curb 70 to 71, the cross street 72 to 80 with its centre line on row 76, the near
-sidewalk 81 to 85, and the stub from row 86 (STUB) to the bottom row, 109, which continues the
-game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and 227,
-verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
-the current constants): the near-left perch's top rail on rows 93 to 95, x 0 to 72; the
-near-right lawn, x 284 to 359 on rows 86 to 109 (the sprinkler at x 322 to 353); and the two
-sidewalks, whose middles run from (87, 109) to (94, 85) and from (273, 109) to (266, 85).
+Rows, in band rows (0 to 173): the sky is one flat colour above row 61 (CALM), under the
+message strip; the far side's ground row 131 (BASE), the far sidewalk 135 to 138, the far curb
+139 to 140, the cross street 141 to 149 with its centre line on row 145, the near sidewalk 150
+to 154, and the stub from row 155 (STUB, the approach) to the bottom row, 173, which continues
+the game's road (the 320-wide strip on columns 100 to 259, lane dividers on 132, 164, 195 and
+227, verge outside). Gag spots, kept clear (python3 art/tools/backdrops.py gags prints them for
+the current constants): the near-left perch's top rail on rows 158 to 159, x 0 to 72; the
+near-right lawn, x 284 to 359 on rows 155 to 173 (the sprinkler at x 322 to 353, its sprite's
+top row 150); and the two sidewalks, whose middles run from (87, 173) to (94, 154) and from
+(273, 173) to (266, 154).
 
 Usage:
   backdrops.py preview OUT.png   all six, stacked, scaled up
@@ -70,11 +73,12 @@ def word(cv, s, mid, y, col):
 
 
 def sky(cv, top="cyan", low="sky", clouds=()):
-    """The sky, with clouds given as (x, base row, width, puff): puff is the tallest lobe's radius."""
+    """The sky: top, flat, down to row CALM, then low, with clouds given as (x, base row, width,
+    puff): puff is the tallest lobe's radius, and a cloud's top stays below CALM."""
     cv.fill(0, 0, W, FAR_WALK, low)
-    cv.fill(0, 0, W, 10, top)
+    cv.fill(0, 0, W, CALM, top)
     for i in range(0, W, 5):
-        cv.fill(i, 10 + (i // 5) % 2, 5, 1, top)
+        cv.fill(i, CALM + (i // 5) % 2, 5, 1, top)
     for k, (x, y, w, puff) in enumerate(clouds):
         cloud(cv, x, y, w, puff, k)
 
@@ -98,6 +102,52 @@ def cloud(cv, x, y, w, puff, seed):
                 continue
             shade = py == y or (dome is not None and dome[0] + dome[1] > dome[2] * 0.6 and py > y - body - 2)
             cv.fill(px, py, 1, 1, "lgrey" if shade else "white")
+
+
+def sunset(cv, cols, bottom):
+    """A banded sky down to row bottom whose top band also fills the calm rows above CALM."""
+    cv.fill(0, 0, W, CALM, cols[0])
+    return bands(cv, CALM, bottom, cols)
+
+
+def hills(cv, top, bottom, col, edge, seed, amp=8):
+    """Far rolling hills: a silhouette of col from about row top (up to amp rows lower) down
+    to row bottom, edge on its top row."""
+    for x in range(W):
+        t = 0.5 + 0.5 * math.sin(x * 0.017 + seed) * math.cos(x * 0.006 + seed * 1.7)
+        y = top + round(amp * t)
+        cv.fill(x, y, 1, bottom - y, col)
+        cv.fill(x, y, 1, 1, edge)
+
+
+def block(cv, x, w, top, base, wall, line="plum", win="cyan"):
+    """A far building facing the camera, rows top to base, drawn as a toy box: a flat wall in a
+    1px line with a shaded right side and rows of small windows."""
+    cv.fill(x, top, w, base - top, wall)
+    cv.fill(x + w - 3, top, 3, base - top, dk(wall))
+    outline_box(cv, x, top, w, base - top + 1, line)
+    for wy in range(top + 4, base - 6, 9):
+        for wx in range(x + 4, x + w - 8, 8):
+            cv.fill(wx, wy, 4, 5, line)
+            cv.fill(wx + 1, wy + 1, 2, 3, win)
+
+
+def roofline(cv, base, roofs, col, lit=None):
+    """Far houses as one silhouette of col standing on row base: (x, w, wall rows) each under a
+    gable a quarter as tall as it is wide, with a lit window of lit in the wall when lit is given."""
+    for x, w, wall_h in roofs:
+        cv.fill(x, base - wall_h, w, wall_h, col)
+        for k in range(w // 4 + 1):
+            cv.fill(x - 1 + 2 * k, base - wall_h - 1 - k, w + 2 - 4 * k, 1, col)
+        if lit:
+            cv.fill(x + w // 2 - 1, base - wall_h + 2, 2, 2, lit)
+
+
+def birds(cv, spots, col="plum"):
+    """Gulls far off: a 5px wing pair each, at (x, y)."""
+    for x, y in spots:
+        for dx, dy in ((0, 1), (1, 0), (2, 1), (3, 0), (4, 1)):
+            cv.fill(x + dx, y + dy, 1, 1, col)
 
 
 def band_rows(top, bottom, n, ratio=0.7):
@@ -254,11 +304,14 @@ DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider l
 # cross street over most of the band; across, they keep the projection's scale per row, so
 # lines along the street (curbs, slab seams) still lean toward the road's centre line.
 # The stub is the band's part of the approach region, where the game's road raster starts.
-FAR_WALK, FAR_CURB, CROSS, NEAR_CURB = 66, 70, 72, 81
 STUB = LAYOUT["regions"]["approach"]["y"] - BAR
-LINE = 76                      # the cross street's centre line
+FAR_WALK, FAR_CURB, CROSS, NEAR_CURB = STUB - 20, STUB - 16, STUB - 14, STUB - 5
+LINE = STUB - 10               # the cross street's centre line
 CORNER = 5                     # the near corners' curb radius, in pixels
-BASE = 62                      # the far side's ground row: the houses stand on it
+BASE = STUB - 24               # the far side's ground row: the houses stand on it
+# The message strip lies over band rows 4 to 60 (screen rows 44 to 100), so the sky above row
+# CALM is one flat colour, with no clouds, stars or scenery.
+CALM = 61
 PERCH = round(Z0) + 3          # the near-left perch's z: its foot on the bottom row, for the cat
 PERCH_H = 30                   # the perch's height: its top rail is h 27 to 30
 PERCH_X = (-(WALK + 8), -600)  # the perch, across: from just past the sidewalk out off screen
@@ -523,8 +576,25 @@ def flat(road):
 
 def woof_way():
     cv = hp.Canvas(W, H)
-    # fair-weather puffs of mixed sizes, spread unevenly above the rooftops
-    sky(cv, clouds=((8, 13, 40, 7), (110, 9, 18, 3), (232, 7, 30, 5), (318, 15, 18, 3)))
+    # fair-weather puffs of mixed sizes, spread unevenly above the hill
+    sky(cv, clouds=((8, BASE - 50, 40, 7), (110, BASE - 58, 18, 3), (232, BASE - 56, 30, 5),
+                    (318, BASE - 48, 18, 3)))
+    # the neighbourhood climbs a hill behind the street: a water tower on its crest, a second
+    # row of houses up the slope, showing between and above the near ones
+    hills(cv, BASE - 52, BASE, "dgreen", "green", 1.7, 10)
+    tx = CX + 118
+    for lx in (tx - 6, tx + 5):
+        cv.fill(lx, BASE - 50, 2, 16, "slate")
+    cv.fill(tx - 6, BASE - 43, 13, 1, "slate")
+    cv.fill(tx - 9, BASE - 62, 20, 12, "lgrey")
+    cv.fill(tx + 7, BASE - 62, 4, 12, "grey")
+    cv.fill(tx - 9, BASE - 51, 20, 1, "grey")
+    for k in range(4):
+        cv.fill(tx - 7 + 2 * k, BASE - 63 - k, 16 - 4 * k, 1, "slate")
+    for x, wall_c, roof in ((14, "lgrey", "slate"), (102, "skin1", "dred"), (188, "cream", "dslate"),
+                            (274, "tan", "brown")):
+        house(cv, x, 40, wall_c, roof, "plum", top=BASE - 46, base=BASE - 20, roof_h=10,
+              parts=(2, 6, 5, 7))
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 3:
@@ -536,9 +606,9 @@ def woof_way():
              (CX - 31, 62, "sky", "navy", "red"), (CX + 57, 60, "cream", "dred", "sky"),
              (CX + 143, 62, "lgrey", "slate", "dred"))
     for x, w, *_ in homes[1:]:
-        tree(cv, x - 13, 34, r=11, base=BASE, girth=4)
+        tree(cv, x - 13, BASE - 28, r=11, base=BASE, girth=4)
     for x, w, wall_c, roof, door in homes:
-        house(cv, x, w, wall_c, roof, door, top=24, base=BASE, roof_h=16, parts=SMALL)
+        house(cv, x, w, wall_c, roof, door, top=BASE - 38, base=BASE, roof_h=16, parts=SMALL)
     yard(cv, BASE, FAR_WALK, grass())
     for x, w, *_ in homes:
         path(cv, x + w // 2 - 6, BASE, FAR_WALK)
@@ -560,46 +630,63 @@ def woof_way():
 
 def bark_park():
     cv = hp.Canvas(W, H)
-    # two big billowing clouds clear of the gate, and a small one
-    sky(cv, clouds=((2, 17, 52, 9), (CX - 66, 8, 16, 3), (CX + 82, 15, 56, 10)))
-    treeline(cv, 44, ("dgreen", "green"), 2.5, 3, 8)
+    # two big billowing clouds clear of the gate, a small one and a kite
+    sky(cv, clouds=((2, BASE - 50, 52, 9), (CX - 66, BASE - 62, 16, 3), (CX + 82, BASE - 52, 56, 10)))
+    kx, ky = CX + 34, BASE - 62
+    for dy in range(-4, 5):
+        cv.fill(kx - (4 - abs(dy)) // 2, ky + dy, (4 - abs(dy)) // 2 * 2 + 1, 1, "red" if dy < 0 else "yellow")
+    for k in range(6):
+        cv.fill(kx + (k % 2), ky + 5 + k, 1, 1, "plum")
+    # the park runs back to wooded hills: a far tree line, an open meadow with a bandstand, then
+    # the near tree line behind the pond
+    hills(cv, BASE - 46, BASE - 18, "dgreen", "green", 0.4, 6)
+    treeline(cv, BASE - 32, ("forest", "dgreen"), 0.9, 2, 5)
     # an unmown park: flat rough patches on the far lawn, tufts thinning toward the trees
-    patches = [(CX - 50, 50, 26, 3), (CX - 24, 52, 20, 2), (CX + 100, 57, 30, 3), (CX + 128, 60, 18, 3),
-               (40, 68, 24, 2)]
+    patches = [(60, BASE - 26, 30, 2), (CX + 40, BASE - 24, 24, 2), (CX - 50, BASE - 12, 26, 3),
+               (CX - 24, BASE - 10, 20, 2), (CX + 100, BASE - 5, 30, 3), (CX + 128, BASE - 2, 18, 3),
+               (40, BASE + 6, 24, 2)]
 
     def lawn(px, py):
         c = "green"
         if any(((px - qx) / rx) ** 2 + ((py - qy) / ry) ** 2 <= 1 for qx, qy, rx, ry in patches):
             c = "dgreen"
-        return grass(c, 0.03 * ((py - 34) / 76) ** 2)(px, py)
+        return grass(c, 0.03 * (max(0, py - (BASE - 40)) / (H - BASE + 40)) ** 2)(px, py)
 
-    yard(cv, 44, CROSS, lawn)
+    yard(cv, BASE - 31, CROSS, lawn)
+    # the bandstand out on the meadow
+    bx, by = CX + 76, BASE - 22
+    cv.fill(bx - 9, by - 2, 19, 2, "lgrey")
+    for x in (bx - 8, bx - 1, bx + 6):
+        cv.fill(x, by - 9, 2, 7, "white")
+    for k in range(5):
+        cv.fill(bx - 10 + 2 * k, by - 10 - k, 21 - 4 * k, 1, "red" if k < 4 else "dred")
+    treeline(cv, BASE - 18, ("dgreen", "green"), 2.5, 3, 8)
     # the pond, on the left
-    for py in range(50, 62):
+    for py in range(BASE - 12, BASE):
         for px in range(6, 92):
-            e = ((px + 0.5 - 48) / 40) ** 2 + ((py + 0.5 - 56) / 5) ** 2
+            e = ((px + 0.5 - 48) / 40) ** 2 + ((py + 0.5 - (BASE - 6)) / 5) ** 2
             if e <= 1:
                 cv.fill(px, py, 1, 1, "white" if hashed(px, py, 17) else "sky" if e > 0.5 else "cyan")
-    for cx, top, r in ((8, 36, 8), (96, 34, 9), (CX + 98, 36, 8), (352, 38, 7)):
-        tree(cv, cx, top, r=r, base=48, girth=4)
-    for cx, top, r in ((CX - 78, 36, 12), (CX + 148, 34, 13), (-2, 40, 14)):
-        tree(cv, cx, top, r=r, base=66)
+    for cx, top, r in ((8, BASE - 26, 8), (96, BASE - 28, 9), (CX + 98, BASE - 26, 8), (352, BASE - 24, 7)):
+        tree(cv, cx, top, r=r, base=BASE - 14, girth=4)
+    for cx, top, r in ((CX - 78, BASE - 26, 12), (CX + 148, BASE - 28, 13), (-2, BASE - 22, 14)):
+        tree(cv, cx, top, r=r, base=BASE + 4)
     # the park gate at the end of the path, its sign facing the street
     for x in (CX - 48, CX + 46):
-        cv.fill(x, 30, 3, 38, "dbrown")
-    cv.fill(CX - 62, 20, 124, 16, "dgreen")
-    cv.fill(CX - 62, 20, 124, 1, "green")
-    cv.fill(CX - 62, 35, 124, 1, "forest")
-    word(cv, "FAIRVIEW PARK", CX, 24, "yellow")
+        cv.fill(x, BASE - 32, 3, 38, "dbrown")
+    cv.fill(CX - 62, BASE - 42, 124, 16, "dgreen")
+    cv.fill(CX - 62, BASE - 42, 124, 1, "green")
+    cv.fill(CX - 62, BASE - 27, 124, 1, "forest")
+    word(cv, "FAIRVIEW PARK", CX, BASE - 38, "yellow")
     for x in (CX - 68, CX + 68):
-        cv.fill(x, 44, 2, 24, "slate")
-        cv.fill(x - 4, 38, 10, 7, "navy")
-        cv.fill(x - 2, 40, 6, 4, "yellow")
+        cv.fill(x, BASE - 18, 2, 24, "slate")
+        cv.fill(x - 4, BASE - 24, 10, 7, "navy")
+        cv.fill(x - 2, BASE - 22, 6, 4, "yellow")
     # a bench facing the street
-    cv.fill(CX + 106, 59, 24, 2, "brown")
-    cv.fill(CX + 106, 62, 24, 2, "brown")
-    cv.fill(CX + 108, 64, 2, 3, "dbrown")
-    cv.fill(CX + 126, 64, 2, 3, "dbrown")
+    cv.fill(CX + 106, BASE - 3, 24, 2, "brown")
+    cv.fill(CX + 106, BASE, 24, 2, "brown")
+    cv.fill(CX + 108, BASE + 2, 2, 3, "dbrown")
+    cv.fill(CX + 126, BASE + 2, 2, 3, "dbrown")
 
     def trail(x, z, span, px, py):
         a = abs(x)
@@ -608,8 +695,8 @@ def bark_park():
         return "brown" if hashed(px, py, 13) else "cream" if hashed(px, py + 5, 23) else "tan"
 
     # the path on into the park, through the gate
-    for py in range(54, CROSS):
-        half = 18 + (py - 54) // 3
+    for py in range(BASE - 8, CROSS):
+        half = 18 + (py - BASE + 8) // 3
         cv.fill(CX - half, py, 2 * half, 1, "brown")
         for px in range(CX - half + 1, CX + half - 1):
             cv.fill(px, py, 1, 1, trail(0, 0, 99, px, py))
@@ -643,10 +730,14 @@ SHOP_FLOWERS = ("red", "yellow", "white", "amber")
 PLANTER = (CURB, CURB + 16)
 
 
-def sunburst(cv, cx, cy, n, a, b, y1, w=W):
-    """Flat rays of a and b from cx, cy over rows 0 to y1: n of each round the half turn."""
+def sunburst(cv, cx, cy, n, a, b, y1, w=W, r=None):
+    """Flat rays of a and b from cx, cy over rows 0 to y1: n of each round the half turn. With r,
+    (rx, ry), the rays end on that ellipse round cx, cy and b fills the rest."""
     for py in range(y1):
         for px in range(w):
+            if r is not None and ((px + 0.5 - cx) / r[0]) ** 2 + ((py + 0.5 - cy) / r[1]) ** 2 > 1:
+                cv.fill(px, py, 1, 1, b)
+                continue
             ang = math.atan2(px + 0.5 - cx, cy - py - 0.5)
             cv.fill(px, py, 1, 1, a if math.floor(ang / (math.pi / (2 * n)) + 0.5) % 2 else b)
 
@@ -695,20 +786,32 @@ def shops_verge(x, z, span, px, py):
 def shops():
     cv = hp.Canvas(W, H)
     # a sunburst of sky and cyan rays from the end of the street, a cloud either side
-    sunburst(cv, CX, BASE + 6, 7, "sky", "cyan", FAR_WALK)
-    for x, y, w, p in ((10, 9, 30, 4), (300, 13, 38, 5)):
+    # the rays end on an arc below the calm rows, where flat cyan carries on
+    sunburst(cv, CX, BASE + 6, 7, "sky", "cyan", FAR_WALK, r=(W * 0.65, BASE + 6 - CALM))
+    for x, y, w, p in ((10, BASE - 54, 30, 4), (300, BASE - 50, 38, 5)):
         cloud(cv, x, y, w, p, f"shops-{x}")
+    # the town behind the shops: apartment blocks and the clock tower over the toy shop
+    for x, w, top, wall_c in ((16, 54, BASE - 54, "tan"), (84, 44, BASE - 62, "lgrey"),
+                              (226, 50, BASE - 58, "skin1"), (292, 60, BASE - 50, "lgrey")):
+        block(cv, x, w, top, BASE, wall_c)
+    block(cv, CX - 15, 30, BASE - 66, BASE, "cream")
+    for dy in range(-6, 7):
+        for dx in range(-6, 7):
+            if dx * dx + dy * dy <= 36:
+                cv.fill(CX + dx, BASE - 56 + dy, 1, 1, "plum" if dx * dx + dy * dy > 25 else "white")
+    cv.fill(CX, BASE - 61, 1, 6, "plum")
+    cv.fill(CX, BASE - 56, 4, 1, "plum")
     # colour-blocked shopfronts across the street, the toy shop at the end of it
     for x, w, top, wall_c, awn, sign, board, letters in (
-            (-4, 64, 22, "cream", "pink", "BAKERY", "dred", "yellow"),
-            (CX - 116, 66, 16, "sky", "amber", "PETS", "navy", "yellow"),
-            (CX - 50, 100, 6, "yellow", "red", "TOYS", "blue", "white"),
-            (CX + 50, 70, 14, "green", "pink", "SCOOPS", "forest", "white"),
-            (CX + 120, 66, 20, "purple", "cyan", "RECORDS", "plum", "cyan")):
+            (-4, 64, BASE - 40, "cream", "pink", "BAKERY", "dred", "yellow"),
+            (CX - 116, 66, BASE - 46, "sky", "amber", "PETS", "navy", "yellow"),
+            (CX - 50, 100, BASE - 56, "yellow", "red", "TOYS", "blue", "white"),
+            (CX + 50, 70, BASE - 48, "green", "pink", "SCOOPS", "forest", "white"),
+            (CX + 120, 66, BASE - 42, "purple", "cyan", "RECORDS", "plum", "cyan")):
         shopfront(cv, x, w, top, BASE, wall_c, awn, sign, board, letters)
     # bunting from roof to roof either side of the toy shop, above the sign boards
-    bunting(cv, 0, CX - 50, 15, 5, ("red", "yellow", "sky", "green", "pink"))
-    bunting(cv, CX + 50, W, 15, 5, ("pink", "sky", "yellow", "red", "green"))
+    bunting(cv, 0, CX - 50, BASE - 47, 5, ("red", "yellow", "sky", "green", "pink"))
+    bunting(cv, CX + 50, W, BASE - 47, 5, ("pink", "sky", "yellow", "red", "green"))
 
     def paving(px, py):
         return "tan" if seam(px, py) or hashed(px, py, 41) else "cream"
@@ -798,15 +901,18 @@ def long_way_home():
     cv = hp.Canvas(W, H)
     # a banded sunset, warm all the way up, and the low sun at the end of the street, striped,
     # setting behind the trees beyond the back yards
-    bands(cv, 0, BASE, LONG_WAY_SKY)
-    sun(cv, CX, 46, 24, "yellow", low=45)
-    treeline(cv, 50, ("rust", "orange"), 4.0, 2, 7)
+    sunset(cv, LONG_WAY_SKY, BASE)
+    birds(cv, ((52, BASE - 62), (64, BASE - 58), (284, BASE - 66)))
+    sun(cv, CX, BASE - 21, 26, "yellow", low=BASE - 25)
+    # far hills the sun is setting behind, then the trees beyond the back yards
+    hills(cv, BASE - 30, BASE - 12, "dbrown", "brown", 2.2, 7)
+    treeline(cv, BASE - 12, ("rust", "orange"), 4.0, 2, 7)
     leaves = grass()
 
     def lawn(px, py):
         return "orange" if hashed(px, py, 211) else leaves(px, py)
 
-    yard(cv, 50, FAR_WALK, lawn)
+    yard(cv, BASE - 12, FAR_WALK, lawn)
 
     def road(x, z, span, px, py):
         a = abs(x)
@@ -815,7 +921,7 @@ def long_way_home():
         return "skin1" if hashed(px, py, 31) else "skin2"
 
     # the porch houses across the street either side of the sunset, orange trees beside them
-    for cx, top, r in ((8, 32, 15), (352, 34, 15), (CX - 46, 42, 9)):
+    for cx, top, r in ((8, BASE - 30, 15), (352, BASE - 28, 15), (CX - 46, BASE - 20, 9)):
         tree(cv, cx, top, "rust", "dbrown", r=r, base=BASE, girth=4 if r < 12 else 6)
     for x, w, wall_c, roof, door in ((CX - 150, 76, "white", "dred", "dgreen"),
                                      (CX + 72, 78, "skin1", "navy", "red")):
@@ -834,7 +940,7 @@ def long_way_home():
     return cv
 
 
-def porch_house(cv, x, w, wall_c, roof, door, top=20):
+def porch_house(cv, x, w, wall_c, roof, door, top=BASE - 42):
     """A house with a porch along its front under its windows, a lamp lit by the door."""
     house(cv, x, w, wall_c, roof, door, top=top, base=BASE, roof_h=16, parts=SMALL[:3] + (10,))
     cv.fill(x + 4, BASE - 12, w - 8, 2, "brown")
@@ -870,13 +976,25 @@ def snooze_crescent():
     road_c = SNOOZE_ROAD
     # a banded dusk sky, purple down to a last peach glow behind the roofs, a crescent moon and
     # the first stars
-    bands(cv, 0, BASE, SNOOZE_SKY)
+    rows = sunset(cv, SNOOZE_SKY, BASE)
     for dy in range(-6, 7):
         for dx in range(-6, 7):
             if dx * dx + dy * dy <= 36 and (dx + 3) ** 2 + (dy - 2) ** 2 > 25:
-                cv.fill(CX + 128 + dx, 12 + dy, 1, 1, "cream")
-    for x, y in ((40, 4), (96, 8), (150, 3), (212, 6), (262, 2), (344, 7), (120, 15)):
-        cv.fill(x, y, 1, 1, "white")
+                cv.fill(CX + 128 + dx, CALM + 10 + dy, 1, 1, "cream")
+    for x, y in ((40, 4), (96, 9), (150, 2), (212, 7), (262, 1), (344, 11), (120, 16), (18, 14),
+                 (290, 18), (176, 13)):
+        if CALM + y < rows[0][1] - 6:
+            cv.fill(x, CALM + y, 1, 1, "white")
+    # the crescent's far houses up the hill behind, dark against the glow, a few windows lit,
+    # and the church spire over them
+    hills(cv, BASE - 34, BASE, "dslate", "slate", 3.1, 6)
+    sx = 58
+    cv.fill(sx - 4, BASE - 44, 9, 20, "navy")
+    for k in range(14):
+        cv.fill(sx - 4 + k // 3, BASE - 45 - k, 9 - 2 * (k // 3), 1, "navy")
+    cv.fill(sx - 1, BASE - 40, 3, 4, "amber")
+    roofline(cv, BASE - 22, ((4, 30, 8), (96, 34, 9), (150, 28, 7), (210, 36, 9), (262, 30, 8),
+                             (318, 40, 9)), "navy", "amber")
 
     def road(x, z, span, px, py):
         if abs(x) >= ROAD - 3:
@@ -890,9 +1008,10 @@ def snooze_crescent():
              (CX + 50, 62, "sky", "dslate", "white", "pink"),
              (CX + 134, 64, "skin1", "purple", "dgreen", "mauve"))
     for x, w, *_ in homes[1:]:
-        tree(cv, x - 10, 36, "dgreen", "forest", r=10, base=BASE, girth=4)
+        tree(cv, x - 10, BASE - 26, "dgreen", "forest", r=10, base=BASE, girth=4)
     for x, w, wall_c, roof, door, curtain in homes:
-        house(cv, x, w, wall_c, roof, door, top=26, base=BASE, roof_h=15, parts=SMALL, curtains=curtain)
+        house(cv, x, w, wall_c, roof, door, top=BASE - 36, base=BASE, roof_h=15, parts=SMALL,
+              curtains=curtain)
     yard(cv, BASE, FAR_WALK, grass())
     for x, w, *_ in homes:
         path(cv, x + w // 2 - 6, BASE, FAR_WALK)
@@ -936,31 +1055,49 @@ def fence_rail(cv, x0, x1, z, col="lgrey"):
 def paws_promenade():
     cv = hp.Canvas(W, H)
     road_c = PROMENADE_ROAD
-    sky(cv, clouds=((14, 12, 36, 6), (CX - 20, 8, 24, 4), (CX + 96, 14, 48, 7)))
-    # the far bank: trees over a grassy bank, a stone edge and the river
-    for cx, top, r in ((20, 26, 11), (CX - 60, 24, 12), (CX + 20, 28, 9), (CX + 150, 25, 12)):
-        tree(cv, cx, top, "dgreen", "forest", r=r, base=36, girth=4)
-    treeline(cv, 36, ("dgreen", "green"), 1.3, 2, 6)
-    cv.fill(0, 36, W, 3, "green")
-    cv.fill(0, 39, W, 2, "grey")
-    water = 41, 56
+    sky(cv, clouds=((14, BASE - 52, 36, 6), (CX - 20, BASE - 58, 24, 4), (CX + 96, BASE - 50, 48, 7)))
+    # the far bank: hills, a village and trees along a grassy bank, a stone edge and the river
+    hills(cv, BASE - 46, BASE - 30, "dgreen", "green", 5.0, 6)
+    for x, w, wall_c, roof in ((34, 18, "cream", "dred"), (58, 14, "skin1", "slate"), (210, 16, "lgrey", "red"),
+                               (232, 20, "cream", "navy"), (300, 14, "tan", "dred")):
+        cv.fill(x, BASE - 38, w, 8, wall_c)
+        cv.fill(x + w - 2, BASE - 38, 2, 8, dk(wall_c))
+        for k in range(w // 4 + 1):
+            cv.fill(x - 1 + 2 * k, BASE - 39 - k, w + 2 - 4 * k, 1, roof)
+        cv.fill(x + w // 2 - 1, BASE - 36, 3, 3, "sky")
+    cv.fill(136, BASE - 52, 6, 22, "lgrey")
+    cv.fill(140, BASE - 52, 2, 22, "grey")
+    for k in range(6):
+        cv.fill(136 + k // 2, BASE - 53 - k, 6 - 2 * (k // 2), 1, "slate")
+    for cx, top, r in ((12, BASE - 38, 7), (CX - 70, BASE - 39, 8), (CX + 12, BASE - 37, 6),
+                       (CX + 152, BASE - 38, 7)):
+        tree(cv, cx, top, "dgreen", "forest", r=r, base=BASE - 30, girth=2)
+    treeline(cv, BASE - 30, ("dgreen", "green"), 1.3, 1, 4)
+    cv.fill(0, BASE - 30, W, 2, "green")
+    cv.fill(0, BASE - 28, W, 2, "grey")
+    water = BASE - 26, BASE - 6
     for py in range(*water):
         for px in range(W):
-            c = "blue" if py < 44 else "sky"
+            c = "blue" if py < BASE - 20 else "sky"
             if hashed(px // 3, py, 9) and py % 3 == 0:
-                c = "cyan" if py > 46 else "sky"
+                c = "cyan" if py > BASE - 16 else "sky"
             if hashed(px, py, 61):
                 c = "white"
             cv.fill(px, py, 1, 1, c)
-    # ducks on the river and a rowboat
+    # a sailing dinghy out on the river, ducks and a rowboat nearer
+    cv.fill(CX + 120, BASE - 22, 14, 2, "red")
+    cv.fill(CX + 121, BASE - 20, 12, 1, "dred")
+    for k in range(10):
+        cv.fill(CX + 126, BASE - 32 + k, 1 + k // 2, 1, "white")
+    cv.fill(CX + 125, BASE - 32, 1, 10, "dbrown")
     for x in (CX - 120, CX - 110):
-        cv.fill(x, 50, 5, 2, "white")
-        cv.fill(x + 3, 48, 2, 2, "white")
-        cv.fill(x + 5, 49, 1, 1, "amber")
-        cv.fill(x, 52, 5, 1, "blue")
-    cv.fill(CX + 50, 46, 22, 3, "brown")
-    cv.fill(CX + 52, 49, 18, 1, "dbrown")
-    cv.fill(CX + 59, 44, 2, 2, "red")
+        cv.fill(x, BASE - 12, 5, 2, "white")
+        cv.fill(x + 3, BASE - 14, 2, 2, "white")
+        cv.fill(x + 5, BASE - 13, 1, 1, "amber")
+        cv.fill(x, BASE - 10, 5, 1, "blue")
+    cv.fill(CX + 50, BASE - 16, 22, 3, "brown")
+    cv.fill(CX + 52, BASE - 13, 18, 1, "dbrown")
+    cv.fill(CX + 59, BASE - 18, 2, 2, "red")
     # the near embankment's stone wall, the promenade paving and its railing over the water
     cv.fill(0, water[1], W, 2, "lgrey")
     cv.fill(0, water[1] + 2, W, BASE - water[1] - 2, "grey")
