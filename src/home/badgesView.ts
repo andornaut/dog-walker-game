@@ -1,10 +1,10 @@
 import { badgeKey } from "../assets/spriteKeys";
 import type { AchievementId, GameData } from "../data/types";
 import type { Rect } from "../layout/rect";
-import { type TextFitStyle, textFitStylesOnLines } from "../layout/textFit";
+import { TEXT_FIT_STYLES, type TextFitStyle, textFitStylesOnLines } from "../layout/textFit";
 import { achievementProgress } from "../rules/achievements";
 import type { SaveDocument } from "../save/schema";
-import { fillLine } from "../text/lines";
+import { fillLine, wrapWords } from "../text/lines";
 import { MENU_TEXT_FIELDS } from "./menuText";
 
 export interface BadgeView {
@@ -62,6 +62,14 @@ export function badgeProgress(
       });
 }
 
+export interface WallCellLines {
+  readonly goal: string[];
+  readonly name: string[];
+  readonly progress: string[];
+  // Whether the name, a whole goal and any progress all fit the lines.
+  readonly whole: boolean;
+}
+
 // A wall cell's text, broken into lines by wrap: the name, then the goal, then the progress
 // when there is one. The goal is the full one when it fits the lines left, else the short one.
 // When neither fits with the progress on a line of its own, the progress ends the goal's last
@@ -71,27 +79,57 @@ export function wallCellLines(
   wrap: (text: string) => string[],
   badge: Pick<BadgeView, "goal" | "name" | "shortGoal">,
   progress: string | undefined,
-): { goal: string[]; name: string[]; progress: string[] } {
+): WallCellLines {
   const name = wrap(badge.name);
   const left = lines - name.length;
   const own = progress === undefined ? [] : [progress];
   const goals = [badge.goal, badge.shortGoal];
   const whole = goals.map(wrap).find((goal) => goal.length + own.length <= left);
   if (whole !== undefined) {
-    return { goal: whole, name, progress: own };
+    return { goal: whole, name, progress: own, whole: true };
   }
   const inline =
     progress === undefined
       ? undefined
       : goals.map((goal) => wrap(`${goal} ${progress}`)).find((goal) => goal.length <= left);
   if (inline !== undefined) {
-    return { goal: inline, name, progress: [] };
+    return { goal: inline, name, progress: [], whole: true };
   }
   return {
     goal: wrap(badge.shortGoal).slice(0, Math.max(0, left - own.length)),
-    name,
+    name: name.slice(0, lines),
     progress: own,
+    whole: false,
   };
+}
+
+// A wall cell's text set in the first of TEXT_FIT_STYLES that holds it whole (wallCellLines),
+// each line's ink no wider than the cell's width as inkWidth measures it; else in the last
+// style, cut to its lines. The cell holds lines lines at scale, and more at a smaller scale.
+export function wallCell(
+  cell: { readonly lines: number; readonly scale: number; readonly width: number },
+  inkWidth: (style: TextFitStyle, line: string) => number,
+  badge: Pick<BadgeView, "goal" | "name" | "shortGoal">,
+  progress: string | undefined,
+): WallCellLines & { readonly style: TextFitStyle } {
+  const set = (style: TextFitStyle) => {
+    const width = (line: string) => inkWidth(style, line);
+    const lines = Math.floor((cell.lines * cell.scale) / style.scale);
+    const fitted = wallCellLines(
+      lines,
+      (text) => wrapWords(width, cell.width, text),
+      badge,
+      progress,
+    );
+    const drawn = [...fitted.name, ...fitted.goal, ...fitted.progress];
+    return {
+      ...fitted,
+      style,
+      whole: fitted.whole && drawn.every((line) => width(line) <= cell.width),
+    };
+  };
+  const sets = TEXT_FIT_STYLES.map(set);
+  return sets.find(({ whole }) => whole) ?? (sets.at(-1) as ReturnType<typeof set>);
 }
 
 export interface WallSpec {

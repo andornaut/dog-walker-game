@@ -8,7 +8,7 @@ import {
   type BadgeView,
   badgeWall,
   earnedText,
-  wallCellLines,
+  wallCell,
   wallRects,
 } from "../home/badgesView";
 import { FEEDBACK } from "../home/feedback";
@@ -28,12 +28,20 @@ import { dogRows, overallRows, type StatsRow } from "../home/statsView";
 import { isConfirmKey, isPauseKey } from "../input/keyBindings";
 import { rectIndexAt } from "../layout/grid";
 import { containsPoint, type Rect } from "../layout/rect";
+import type { TextFitStyle } from "../layout/textFit";
 import { fillLine } from "../text/lines";
 import { addBadge, addConfetti, BADGE_SIZE } from "./badges";
 import { addDim, fillRect } from "./draw";
 import { closeOverlay, listenDismiss } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, type FontRole, inkSpan, wrapPixelText } from "./pixelText";
+import {
+  addPixelText,
+  type FontRole,
+  inkSpan,
+  scalePixelText,
+  setPixelText,
+  wrapPixelText,
+} from "./pixelText";
 import { currentSettings, profileSave } from "./profileStore";
 import { SCENE_KEYS, type SceneKey } from "./sceneKeys";
 import { listenTargetPress } from "./targetPress";
@@ -354,14 +362,30 @@ export class StatsScene extends Scene {
     const half = BADGE_SIZE / 2;
     addBadge(this, badge.art, badge.earned, rect.x + half, rect.y + 2 + half);
     const x = rect.x + WALL_TEXT.x;
-    const wrap = (text: string) => this.wrap(text, WALL_TEXT.width);
-    const cell = wallCellLines(WALL_TEXT.lines, wrap, badge, progress);
-    const y = rect.y + WALL_TEXT.y;
-    this.lines(x, y, cell.name, { color: badge.earned ? PALETTE.amber : PALETTE.cream });
-    const goalY = y + cell.name.length * WALL_TEXT.lineHeight;
-    this.lines(x, goalY, cell.goal, { color: PALETTE.lightGrey });
-    const progressY = goalY + cell.goal.length * WALL_TEXT.lineHeight;
-    this.lines(x, progressY, cell.progress, { color: PALETTE.cream });
+    const probe = this.text(0, 0, "").setVisible(false);
+    const inkWidth = (style: TextFitStyle, line: string) => {
+      setPixelText(probe, line);
+      probe.setLetterSpacing(style.letterSpacing);
+      scalePixelText(probe, style.scale, 0, 0);
+      const ink = inkSpan(probe);
+      return ink.right - ink.left;
+    };
+    const cell = wallCell(WALL_TEXT, inkWidth, badge, progress);
+    probe.destroy();
+    const { style } = cell;
+    const lineHeight = (WALL_TEXT.lineHeight * style.scale) / WALL_TEXT.scale;
+    let y = rect.y + WALL_TEXT.y;
+    const draw = (lines: readonly string[], color: number) => {
+      for (const line of lines) {
+        addPixelText(this, x, y, line, { color, scale: style.scale }).setLetterSpacing(
+          style.letterSpacing,
+        );
+        y += lineHeight;
+      }
+    };
+    draw(cell.name, badge.earned ? PALETTE.amber : PALETTE.cream);
+    draw(cell.goal, PALETTE.lightGrey);
+    draw(cell.progress, PALETTE.cream);
   }
 
   // The tapped badge at 2x over a panel, with its name, goal and line; an earned one bursts
