@@ -24,7 +24,7 @@ import { HELP_CLOSED_EVENT } from "./HelpScene";
 import { openHelp } from "./helpScreen";
 import { listenOutsideTap, openOverlay } from "./overlay";
 import { PALETTE } from "./palette";
-import { addPixelText, wrapPixelText } from "./pixelText";
+import { addPixelText, pixelFontMetrics, wrapPixelText } from "./pixelText";
 import { addRampDim } from "./rampDim";
 import { SCENE_KEYS } from "./sceneKeys";
 import { SETTINGS_CLOSED_EVENT, type SettingsSceneData } from "./SettingsScene";
@@ -106,7 +106,8 @@ export class PauseScene extends Scene {
     });
     const noteLines = noteParts.reduce((sum, part) => sum + part.lines.length, 0);
     const parts = { buttonCount: this.entries.length, noteLines };
-    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(walkView, parts);
+    const body = pixelFontMetrics(this, "body");
+    const layout = (asking ? homeQuestionLayout : pauseMenuLayout)(body, walkView, parts);
     const { panel } = layout;
 
     addRimmedPanel(this, panel);
@@ -126,6 +127,7 @@ export class PauseScene extends Scene {
     );
     fillRect(this.add.graphics(), PALETTE.tan, layout.notePlate);
     const tops = notePartTops(
+      body,
       layout.notePlate,
       noteParts.map((part) => part.lines.length),
     );

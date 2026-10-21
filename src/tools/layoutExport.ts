@@ -11,7 +11,7 @@ import { STATS_LAYOUT, statsTabRects } from "../home/statsLayout";
 import { CELEBRATION_LAYOUT } from "../hud/celebrationLayout";
 import { hudLanes } from "../hud/hudLanes";
 import { messageLinePanel, messageStripLayout } from "../hud/messageStrip";
-import { PAUSE_MENU_ITEMS, pauseMenuLayout } from "../hud/pauseMenu";
+import { PAUSE_MENU_ITEMS, PAUSE_NOTE_LINES, pauseMenuLayout } from "../hud/pauseMenu";
 import { buttonIcon, TOP_BAR_BUTTONS, type TopBarButton } from "../hud/topBar";
 import {
   DEBUFF_BAR,
@@ -192,7 +192,10 @@ export function layoutExport(
       pause: {
         labels: PAUSE_MENU_ITEMS.map((item) => data.menuText.pause[item]),
         // The note wraps to two lines at 2x on the plate.
-        ...pauseMenuLayout(walkView, { buttonCount: PAUSE_MENU_ITEMS.length, noteLines: 2 }),
+        ...pauseMenuLayout(body, walkView, {
+          buttonCount: PAUSE_MENU_ITEMS.length,
+          noteLines: PAUSE_NOTE_LINES,
+        }),
       },
       // SettingsScene's rows: sound, music, effects and reduced motion.
       settings: settingsLayout(SCREEN_CONFIG, ["switch", "slider", "slider", "switch"]),
