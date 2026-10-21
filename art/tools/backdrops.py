@@ -356,7 +356,7 @@ VISIBLE = F * KS / (BAR + H - YH) - F   # road in view below the band, to its bo
 Z0 = F / S0 - F                 # the road distance on the band's bottom row
 # half the road, its curb and its sidewalk, as the game draws Elm Avenue's verge
 ROAD = LAYOUT["regions"]["road"]["width"] // 2
-CURB, WALK = LAYOUT["verges"]["distilleryDistrict"]["curbTo"], LAYOUT["verges"]["distilleryDistrict"]["walkTo"]
+CURB, WALK = LAYOUT["verges"]["street"]["curbTo"], LAYOUT["verges"]["street"]["walkTo"]
 DIVIDERS = tuple(x - CX for x in LAYOUT["lanes"]["dividers"])   # lane divider lines, from the road's centre
 # The cross street, in band rows from the far side down: the far sidewalk, the far curb, the
 # road, the near curb and the near sidewalk, which the street's stub (rows STUB to the bottom)
@@ -1596,7 +1596,7 @@ def distillery():
     string_lights(cv, CX + 60, W, BASE - 36, 4)
 
     def paving(px, py):
-        return "brick" if seam(px, py) or hashed(px, py, 19) else "brown"
+        return "brick" if hashed(px, py, 19) else "brown"
 
     yard(cv, BASE, FAR_WALK, paving)
     for x in (CX - 120, CX - 104, CX + 70, CX + 150):
@@ -1648,7 +1648,7 @@ def kensington():
     bunting(cv, CX + 36, W, BASE - 37, 5, ("lime", "lilac", "gold", "ttc", "turquoise"))
 
     def paving(px, py):
-        return "coal" if seam(px, py) or hashed(px, py, 23) else "shale"
+        return "coal" if hashed(px, py, 23) else "shale"
 
     yard(cv, BASE, FAR_WALK, paving)
     # produce out on the sidewalk: crates of fruit
@@ -1825,7 +1825,7 @@ def yonge():
     word(cv, "TTC", sx + 1, BASE - 12, "white")
 
     def paving(px, py):
-        return "grey" if seam(px, py) or hashed(px, py, 67) else "lgrey"
+        return "grey" if hashed(px, py, 67) else "lgrey"
 
     yard(cv, BASE, FAR_WALK, paving)
 
