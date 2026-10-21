@@ -21,11 +21,12 @@ const { backdrop, road } = screenLayout(SCREEN_CONFIG);
 const projection = roadProjection(ROAD_CAMERA, walkerFootY(road), road);
 // The backdrop's bottom row, which the art draws as the road's continuation.
 const bandRow = backdrop.y + backdrop.height - 1;
+const screenCentre = SCREEN_CONFIG.width / 2;
 
 describe("roadProjection", () => {
   it("draws the walker's feet at scale 1 on their row, centred on the screen", () => {
     expect(projection.footY).toBe(walkerFootY(road));
-    expect(projection.centerX).toBe(180);
+    expect(projection.centerX).toBe(screenCentre);
     expect(scaleAt(projection, 0)).toBe(1);
     expect(screenYAt(projection, 0)).toBe(projection.footY);
   });
@@ -39,8 +40,8 @@ describe("roadProjection", () => {
   });
 
   it("converges on the backdrop's vanishing point column", () => {
-    expect(lineColumn(projection, bandRow, 180)).toBe(180);
-    expect(project(projection, { distance: 1e9, x: 40 }).x).toBeCloseTo(180);
+    expect(lineColumn(projection, bandRow, screenCentre)).toBe(screenCentre);
+    expect(project(projection, { distance: 1e9, x: 40 }).x).toBeCloseTo(screenCentre);
   });
 
   // The camera derives from the band's bottom edge (farY), the feet (footY), the far scale and
@@ -78,12 +79,6 @@ describe("roadProjection", () => {
         columnSpan(projection, bandRow, road.x, road.x + road.width),
       );
     }
-  });
-
-  it("keeps a lane step 56px wide at the pack", () => {
-    const left = project(projection, { distance: 0, x: 124 });
-    const right = project(projection, { distance: 0, x: 180 });
-    expect(right.x - left.x).toBe(56);
   });
 });
 

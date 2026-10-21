@@ -30,7 +30,7 @@ describe("forkPaths", () => {
   });
 
   it("offers only the last zone at the fork before it", () => {
-    const route = ["street", "park", "shops"] as const;
+    const route = order.filter((zone) => zone !== last).slice(0, WORLD.walkLength - 1);
     expect(forkPaths(data, seededRandom(1), route)).toEqual([last]);
   });
 
@@ -50,8 +50,9 @@ describe("forkPaths", () => {
 
 describe("the walk's zones", () => {
   it("is the world's walk length, or every zone when there are fewer", () => {
-    expect(walkLength(data)).toBe(4);
-    expect(walkLength({ world: { ...WORLD, walkLength: 9 } })).toBe(WORLD.zones.length);
+    const zones = WORLD.zones.length;
+    expect(walkLength({ world: { ...WORLD, walkLength: zones - 1 } })).toBe(zones - 1);
+    expect(walkLength({ world: { ...WORLD, walkLength: zones + 1 } })).toBe(zones);
   });
 
   it("is the last zone walked between a zone's end and the fork after it", () => {

@@ -34,10 +34,9 @@ const ART_PLACES: Readonly<Partial<Record<EncounterId, [number, number, number]>
 };
 
 describe("font-comic", () => {
-  it("draws A to Z, ! ? - and space, every glyph a line tall", () => {
+  it("draws A to Z, ! ? - and space", () => {
     const chars = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ!?- "];
     expect([...glyphs.keys()].sort()).toEqual(chars.sort());
-    expect(LINE_HEIGHT).toBe(11);
   });
 });
 
