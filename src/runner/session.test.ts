@@ -8,6 +8,7 @@ import { type CardSource, newRun } from "../state/runState";
 import { STEP_SECONDS } from "./fixedStep";
 import {
   chooseCard,
+  chooseShownCard,
   headHomeSession,
   runStreams,
   type Session,
@@ -194,5 +195,34 @@ describe("a firing in the walk", () => {
     expect(kinds(released.events)).toEqual(["pulled", "walked", "needs", "cardOpened"]);
     expect(released.session.card?.source).toEqual(STOP);
     expect(released.session.zoneEndPending).toBe(true);
+  });
+});
+
+describe("chooseShownCard", () => {
+  // A press reaches a card's scene until it stops, a frame after its choice closed it.
+  const shown = (source: CardSource): Session => {
+    const session = emptyRoad(started());
+    const run = openCard(source, session.walk.run);
+    return { ...session, card: cardFor(gameData, run, source), walk: { ...session.walk, run } };
+  };
+  const skunk = shown(SKUNK);
+  const view = skunk.card;
+  if (view === null) {
+    throw new Error("The skunk card did not open");
+  }
+
+  it.each([
+    ["no card is open", { ...skunk, card: null }],
+    ["the next card is open", shown(STOP)],
+  ])("picks nothing when %s", (_, session) => {
+    const step = chooseShownCard(gameData, runStreams(1), geometry, view, 0, session);
+    expect(step).toEqual({ events: [], session });
+  });
+
+  it("chooses on the card it shows", () => {
+    const choice = view.options.find((option) => option.availability.enabled)?.index ?? "skip";
+    const step = chooseShownCard(gameData, runStreams(1), geometry, view, choice, skunk);
+    expect(kinds(step.events)[0]).toBe("chosen");
+    expect(step.session.card).toBeNull();
   });
 });

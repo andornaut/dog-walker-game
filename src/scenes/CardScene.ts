@@ -132,6 +132,9 @@ function illustrationKey(
 // the HUD marks the dogs the card affects. A disabled option is drawn in greys.
 export class CardScene extends Scene {
   private cardRects: Rect[] = [];
+  // Set by the card's choice: its scene stops a frame later, and a press before then picks
+  // nothing.
+  private chosen = false;
   private entries: Entry[] = [];
   private onChoose: (choice: Choice) => void = () => undefined;
   private badges: (GameObjects.BitmapText | undefined)[] = [];
@@ -152,6 +155,7 @@ export class CardScene extends Scene {
 
   create({ onChoose, view, zone }: CardSceneData): void {
     this.onChoose = onChoose;
+    this.chosen = false;
     this.pressed = undefined;
     this.view = view;
     this.zone = zone;
@@ -266,8 +270,12 @@ export class CardScene extends Scene {
   }
 
   private choose(index: number): void {
+    if (this.chosen) {
+      return;
+    }
     const entry = this.entries[index];
     if (entry?.enabled) {
+      this.chosen = true;
       this.onChoose(entry.choice);
     } else if (entry !== undefined) {
       this.refuse(index);

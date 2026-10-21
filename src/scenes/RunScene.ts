@@ -32,7 +32,7 @@ import {
 } from "../runner/fixedStep";
 import { screenRoadGeometry } from "../runner/screenGeometry";
 import {
-  chooseCard,
+  chooseShownCard,
   headHomeSession,
   type RunStreams,
   runStreams,
@@ -511,20 +511,21 @@ export class RunScene extends Scene {
     cardHintTriggers(gameData, view.source).forEach((trigger) => showHint(this, trigger));
     const replayed = world.recorder.cardChoice();
     if (replayed !== undefined) {
-      this.choose(replayed);
+      this.choose(view, replayed);
       return;
     }
     const zone = currentZoneId(gameData, run);
-    world.menus.showCard(zone, view, (choice) => this.choose(choice));
+    world.menus.showCard(zone, view, (choice) => this.choose(view, choice));
   }
 
-  private choose(choice: Choice): void {
+  // A choice on a card that is no longer open picks nothing.
+  private choose(view: CardView, choice: Choice): void {
     const session = this.session;
     const world = this.world;
     if (session === undefined || world === undefined) {
       return;
     }
-    this.apply(chooseCard(gameData, world.streams, screenRoadGeometry, choice, session));
+    this.apply(chooseShownCard(gameData, world.streams, screenRoadGeometry, view, choice, session));
   }
 
   // What holds the walk still, for the walk's steps, the HUD's top bar, and lane moves and

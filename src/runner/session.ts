@@ -235,6 +235,21 @@ export function chooseCard(
   return continueWalk(data, streams, geometry, events, heldForFiring(data, outcome.fired, chosen));
 }
 
+// The choice made on the card that view shows, or nothing once that card is no longer open: a
+// press on a card can arrive after its choice closed it, before its scene stops.
+export function chooseShownCard(
+  data: SessionData,
+  streams: RunStreams,
+  geometry: SessionGeometry,
+  view: CardView,
+  choice: Choice,
+  session: Session,
+): SessionStep {
+  return session.card === view
+    ? chooseCard(data, streams, geometry, choice, session)
+    : { events: [], session };
+}
+
 // Heading home keeps what was earned; it is stamped at the run time of the step it comes
 // before.
 export function headHomeSession(session: Session): SessionStep {
