@@ -1066,12 +1066,13 @@ def strip_well():
 WALK_BAR = (360, 48)
 # The walk bar's wells, in screen pixels: the cash, and the neighbourhood with its name and "n of N"
 # on one line.
-WALK_WELLS = ((4, 5, 75, 37), (80, 5, 110, 12))
+WALK_WELLS = ((5, 5, 70, 37), (80, 5, 110, 12))
 # The row of effect wells under the neighbourhood well, kept plain wood so the wells sit clear of
 # the grain: five 22x22 wells side by side from x 80, each lip against the next well, on rows 20 to 41.
 # Between the trim lines (row 1 and row 45) the neighbourhood well (rows 5 to 16) and the wells
 # split the height evenly, 3 wood rows above the name well, 3 between and 3 under the wells, and
-# the cash well spans the same rows 5 to 41.
+# the cash well spans the same rows 5 to 41. Across the bar the cash well, the neighbourhood column
+# (x 80 to 189) and the buttons' faces (x 195 to 354) sit 5 columns apart and 5 from each edge.
 EFFECT_ROW = (79, 17, 112, 26)
 EFFECT_WELL = 22
 
@@ -1079,7 +1080,7 @@ EFFECT_WELL = 22
 def walk_bar():
     """360x48, ui-walk-bar: plum wood with a trim (dbrown on row 1; brown, dbrown and ink on rows
     45 to 47) and two ink wells, the grain kept 1px clear of each and of the effect row:
-    cash 4,5 75x37, sized for "$888" at 3x with no coin, and neighbourhood 80,5 110x12, one text line as wide
+    cash 5,5 70x37, sized for "$888" at 3x with no coin, and neighbourhood 80,5 110x12, one text line as wide
     as the five effect wells under it, which ends clear of the Home button's hit at x 190. The game
     draws the effect wells, the Home, Help, Sound, Settings and Pause buttons and every text and
     icon on it."""
