@@ -4,6 +4,7 @@ import type { LaneDirection } from "../layout/lanes";
 import { countTally } from "../rules/achievements";
 import { modifiedStat } from "../rules/modifiers";
 import { read } from "../rules/units";
+import { packDogs } from "../state/pack";
 import type { RunState } from "../state/runState";
 import { approachOutcomes } from "./approach";
 import { pullLane } from "./laneControl";
@@ -201,15 +202,11 @@ function nearestTarget(
 }
 
 // The strained-for target where it is now, or null once it has gone, passed the pack or, if
-// it does not move, been reached.
-function currentTarget(
-  data: PullData,
-  geometry: PullGeometry,
-  strain: Strain,
-  walk: Walk,
-): Target | null {
+// it does not move, been reached, or once the straining dog has left the pack: a fired dog
+// never pulls.
+function currentTarget(geometry: PullGeometry, strain: Strain, walk: Walk): Target | null {
   const item = walk.road.items.find(({ id }) => id === strain.itemId);
-  if (item === undefined || !walk.run.pack.some(({ dog }) => dog === strain.dog)) {
+  if (item === undefined || !packDogs(walk.run).includes(strain.dog)) {
     return null;
   }
   return targetOf(geometry, destinationLane(walk.road.control.motion), strain.kind, item);
@@ -352,7 +349,7 @@ export function stepPulls(
   const lane = destinationLane(walk.road.control.motion);
 
   let strain = pulls.strain;
-  let target = strain === null ? null : currentTarget(data, geometry, strain, walk);
+  let target = strain === null ? null : currentTarget(geometry, strain, walk);
   const failed: DogId[] = [];
   if (strain !== null && target === null) {
     if (strain.blocked) {

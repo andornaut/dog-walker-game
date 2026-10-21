@@ -11,6 +11,7 @@ import { UPGRADES } from "../data/upgrades";
 import { WORLD } from "../data/world";
 import { recordInput, replayInputs, startInputLog } from "../dev/inputLog";
 import type { LaneDirection } from "../layout/lanes";
+import { mapPack } from "../state/pack";
 import { newRun, type PackDogs } from "../state/runState";
 import { testPack } from "../testing/packGeometry";
 import { TEST_TUNING } from "../testing/tuning";
@@ -217,6 +218,26 @@ describe("what a dog pulls toward", () => {
       ["biscuit", -1],
       ["zippy", 1],
     ]);
+  });
+
+  it("ends the strain without a pull once the straining dog's owner fires you", () => {
+    const straining = after(walkWith(["koda", "biscuit"], [item("squirrel", 0, 0)]), 0.3);
+    const dog = straining.pulls.strain?.dog;
+    const { run } = straining.walk;
+    const fired = {
+      ...straining.walk,
+      run: {
+        ...run,
+        pack: mapPack(
+          (slot) => (slot.dog === dog ? { dog: slot.dog, status: "fired", zoneIndex: 0 } : slot),
+          run.pack,
+        ),
+      },
+    };
+    const rest = after(fired, 2, straining.pulls);
+    expect(dog).toBeDefined();
+    expect(rest.pulled).toEqual([]);
+    expect(rest.walk.road.control.target).toBe(2);
   });
 
   it("cancels the pull when the pack steers away from the squirrel during the strain", () => {
