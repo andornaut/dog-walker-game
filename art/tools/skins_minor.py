@@ -27,10 +27,11 @@ minor-scooter         Main Street      48x72, a sky scooter from behind on its s
 The 1x3 skins also have parked-car's pull-out (4 frames, 100ms), drawn pulling
 right: the scooter as the car (tread lines climb the tyre, the right indicator
 blinks), the tricycles' hub pips and the log's face crack turning clockwise. The
-scooter also has ride (4 frames, 100ms): ridden up its lane away from the pack, a
-rider in a white helmet with a sky stripe and a purple jacket on it, the tread
-climbing the tyre 1px a frame and the scooter and rider dipping 1px onto it on
-frames 1 and 2.
+scooter also has ride (4 frames, 100ms): ridden down its lane at the pack,
+facing the player as hazards.cyclist does, a rider in an open white helmet with
+a sky stripe and a purple jacket on it behind the leg shield and headlight, the
+tread falling down the tyre 1px a frame and the scooter and rider dipping 1px
+onto it on frames 1 and 2.
 
 Every sprite has one looping idle, frame 0 the rest pose. Each drawing function
 takes the idle frame's argument and u, one pixel at the drawn size in full-size
@@ -54,7 +55,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 from minis import STEPS, small  # noqa: E402
 from obstacles import PULL_OUT, SIZE, lit, treads  # noqa: E402
 from pixel import Grid, edged, main  # noqa: E402
-from road import SCALE  # noqa: E402
+from road import SCALE, face_disc, face_front  # noqa: E402
 
 # The parked car's frame: 1 lane by 3 rows of footprint, drawn at its near edge.
 CAR_W, CAR_H = 56, 35
@@ -189,21 +190,19 @@ def log(sway=0, u=1, roll=None):
 # The scooter is laid out on 32x48 and drawn at road.SCALE, 48x72, as hazards.cyclist is: a two-wheeler a
 # rider sits on, so the rider is a road person's size.
 SCOOTER_W, SCOOTER_H = 32, 48
-# The ride's 4 frames, each this long: the tyre's tread climbs 1px a frame, as obstacles.DRIVE's.
+# The ride's 4 frames, each this long: the tyre's tread falls 1px a frame, as the garbage truck's reverse.
 SCOOTER_RIDE_MS = 100
 
 
-def scooter(blink=False, u=1, roll=None, rider=False):
+def scooter(blink=False, u=1, roll=None):
     """A sky scooter from behind: its tyre between the two round side cowls, the tail light and plate under
     the seat, the leg shield and handlebar with its mirrors over it. Parked (roll None), it stands on its
-    stand and blink lights both indicators on the cowls. roll (0 to 3) is a pull-out or ride frame: tread
+    stand and blink lights both indicators on the cowls. roll (0 to 3) is a pull-out frame: tread
     lines climb the tyre 1px a frame (obstacles.treads) and the stand is up; pulling out, the right
-    indicator is lit on frames 0 and 1. rider seats its rider: a white helmet with a sky stripe, a purple
-    jacket, jeans, the arms out to the grips; riding, the scooter and rider dip 1px onto the tyre on frames
-    1 and 2. u is one pixel at the drawn size, in layout units."""
+    indicator is lit on frames 0 and 1. u is one pixel at the drawn size, in layout units."""
     g = frame(SCOOTER_W, SCOOTER_H)
     px = getattr(g, "g", g)
-    # the tyre first, so the body can dip over it
+    # the tyre first, so the body lies over it
     g.rect(14, 38, 4, 9, "ink")
     g.rect(14, 38, 1, 8, "dslate")
     if roll is not None:
@@ -237,31 +236,11 @@ def scooter(blink=False, u=1, roll=None, rider=False):
     g.rect(13.5, 36, 5, 3, "lgrey")
     g.rect(14.5, 37, 3, 1, "grey")
     for x in (5, 25):
-        on = blink or (roll is not None and not rider and roll < 2 and x > SCOOTER_W / 2)
+        on = blink or (roll is not None and roll < 2 and x > SCOOTER_W / 2)
         g.rect(x, 35, 2, 2, "yellow" if on else "orange")
         if on:
             g.rect(x, 35, 2, 1, "white")
-    if rider:
-        # jeans on the seat
-        g.rect(10, 27, 12, 3, "navy")
-        g.rect(19, 27, 3, 3, "ink")
-        # the arms reaching forward to the grips, then the jacket, lit on the left and shaded down the right
-        for x, c in ((7.5, "purple"), (21.5, "plum")):
-            g.rect(x, 17, 3, 5, c)
-        g.rect(6, 21, 3, 2, "dbrown")
-        g.rect(23, 21, 3, 2, "dbrown")
-        g.cel(16, 21, 6.5, 7, "purple", "plum", "mauve")
-        g.rect(9.5, 21, 13, 7, "purple")
-        g.rect(9.5, 21, 1, 7, "mauve")
-        g.rect(19.5, 21, 3, 7, "plum")
-        g.rect(14.5, 13, 3, 2, "skin2")
-        # the helmet from behind, a sky stripe over the crown
-        g.cel(16, 9, 6, 6, "white", "lgrey")
-        g.rect(15, 3, 2, 11, "sky")
-        g.rect(11, 14, 10, 1, "dslate")
-    dip = 1 if rider and roll in (1, 2) else 0
-    body = px.px
-    px.px = [[(body[y - dip][x] if y >= dip else None) or wheel[y][x] for x in range(px.w)] for y in range(px.h)]
+    px.px = [[body or wheel[y][x] for x, body in enumerate(row)] for y, row in enumerate(px.px)]
     return lit(g)
 
 
@@ -271,8 +250,61 @@ def scooter_pulling(roll, u=1):
 
 
 def scooter_riding(roll, u=1):
-    """scooter's ride frame roll: ridden up its lane, away from the pack."""
-    return scooter(False, u, roll, rider=True)
+    """scooter's ride frame roll: ridden down its lane at the pack, facing the player as hazards.cyclist does.
+    The front tyre edge-on under the front mudguard, tread lines falling 1px a frame as it rolls toward the
+    player (obstacles.treads, back); the sky leg shield across the front with a chrome horn badge, the
+    headlight on the headset over it, the handlebar with its orange indicators at the ends and the mirrors
+    on stalks. Its rider, behind the shield: an open white helmet with a sky stripe over the face, a purple
+    jacket, brown gloves on the grips. The scooter and rider dip 1px onto the tyre on frames 1 and 2. u is
+    one pixel at the drawn size, in layout units."""
+    g = frame(SCOOTER_W, SCOOTER_H)
+    px = getattr(g, "g", g)
+    # the tyre first, so the body can dip over it
+    g.rect(14, 38, 4, 9, "ink")
+    g.rect(14, 38, 1, 8, "dslate")
+    treads(g, 15, 40, 3, 7, roll, u, back=True)
+    wheel = [row[:] for row in px.px]
+    px.px = [[None] * px.w for _ in range(px.h)]
+    # the rider: the jacket and arms out to the grips, the face under the helmet
+    g.rect(14.5, 15, 3, 2, "skin2")
+    g.cel(16, 21, 6.5, 7, "purple", "plum", "mauve")
+    g.rect(9.5, 18, 13, 6, "purple")
+    g.rect(9.5, 18, 1, 6, "mauve")
+    g.rect(19.5, 18, 3, 6, "plum")
+    for x, c in ((6.5, "purple"), (22.5, "plum")):
+        g.rect(x, 17, 3, 5, c)
+    face_disc(g, 16, 11, 5.5, 5, "skin1", "skin2")
+    g.cel(16, 6.5, 6.5, 4, "white", "lgrey")
+    g.rect(9.5, 6, 1.5, 7, "white")
+    g.rect(21, 6, 1.5, 7, "lgrey")
+    g.rect(15, 2.5, 2, 5, "sky")
+    g.rect(11, 8, 10, 1, "dslate")
+    face_front(g, 16, 10)
+    # mirrors on stalks, the handlebar, the gloves on the grips, the indicators at its ends
+    for x in (5, 24):
+        g.rect(x, 13, 3, 2, "lgrey")
+        g.rect(x + 1, 14, 2, 1, "grey")
+        g.rect(x + 1, 15, 1, 5, "dslate")
+    g.rect(6, 21, 20, 2, "dslate")
+    g.rect(6, 21, 20, 1, "slate")
+    g.rect(6, 20, 3, 3, "dbrown")
+    g.rect(23, 20, 3, 3, "dbrown")
+    g.rect(4, 21, 2, 2, "orange")
+    g.rect(26, 21, 2, 2, "orange")
+    # the leg shield across the front, lit down its left, a chrome horn badge on it, the headlight on top
+    g.cel(16, 31, 7.5, 9, "sky", "blue", "cyan", power=2.6)
+    g.rect(12, 22, 8, 3, "sky")
+    g.rect(18, 22, 2, 3, "blue")
+    g.rect(14, 27, 4, 3, "lgrey")
+    g.rect(14, 27, 4, 1, "white")
+    g.rect(15, 29, 2, 1, "grey")
+    g.cel(16, 21, 2.5, 2, "yellow", "amber", "white")
+    # the front mudguard over the tyre
+    g.cel(16, 38.5, 3, 2, "sky", "blue", "cyan")
+    dip = 1 if roll in (1, 2) else 0
+    body = px.px
+    px.px = [[(body[y - dip][x] if y >= dip else None) or wheel[y][x] for x in range(px.w)] for y in range(px.h)]
+    return lit(g)
 
 
 # Each sprite: (key, drawing, idle frame arguments, ms per frame, base kind, zone). Most hold the rest

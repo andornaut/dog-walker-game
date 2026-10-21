@@ -13,16 +13,16 @@ their rows ROW_SCALE (1.2) times; the puddle (112x48) is drawn in its own
 pixels; the skunk's stink haze (112x60) is a ground decal laid out on an 88x40 design
 and stretched to its frame on the drawn grid. All are chibi and in Endesga 32 with
 coloured outlines. The walker is seen from behind, like the
-dogs, except in wave; everything coming down the road faces the player, and
-the movers going up it ahead of the pack are seen from behind too: stroller
-(48x72, walk: 4 frames at 160ms, the walkers' stride and pace) is a dad pushing
-a stroller one-handed, a takeaway coffee in his other hand, the stroller
-rolling ahead on his right; jogger (48x72, run: 4 frames at 100ms, a heel
-kicked up behind, sole showing, then that knee passing through, each side in
-turn, the ponytail swinging against the stride) wears an orange racerback
-singlet with a white race bib on its back; kid-on-bike (48x72, ride: 4 frames
-at 100ms, the pedals going round, a 1px sway and the streamers fluttering) is
-a kid in a red helmet on a mauve bike with training wheels.
+dogs, except in wave; everything coming down the road faces the player:
+jogger (48x72, run: 4 frames at 100ms, a knee driven up, then that foot passing
+down, each side in turn, the ponytail swinging out from behind the head) wears
+an orange racerback singlet with a white race bib on its front; kid-on-bike
+(48x72, ride: 4 frames at 100ms, the pedals going round, a 1px sway and the
+streamers fluttering) is a kid in a red helmet on a mauve bike with training
+wheels. The movers going up the road ahead of the pack are seen from behind
+too: stroller (48x72, walk: 4 frames at 160ms, the walkers' stride and pace)
+is a dad pushing a stroller one-handed, a takeaway coffee in his other hand,
+the stroller rolling ahead on his right.
 
 walker-<name> tags: walk (4 frames, 160ms), react (2, 120ms), stumble (4, 90ms), idle (2,
 400ms), then wave (4 frames, 150ms, looping): the walker facing the camera, feet on the same rows
@@ -1418,66 +1418,71 @@ def stroller(lf=0, rf=0, bob=0, arms=0):
     return rim(g, LIT)
 
 
-# Running: the left heel kicked up behind as the right foot plants, the left knee passing through, the same on
-# the right, each kick 1px higher as the stride pushes off; the ponytail swings against the shoulders. 4 frames
-# at 100ms.
-JOGGER_RUN = [dict(kick="left", bob=-1, tail=1), dict(passing="left"), dict(kick="right", bob=-1, tail=-1),
+# Running at the player: the left knee driven up as the right foot plants and the body rises 1px, the left foot
+# passing down under the body, then the same on the right; the ponytail swings out from behind the head away
+# from the raised knee. 4 frames at 100ms.
+JOGGER_RUN = [dict(knee="left", bob=-1, tail="right"), dict(passing="left"), dict(knee="right", bob=-1, tail="left"),
               dict(passing="right")]
 JOGGER_RUN_MS = 100
 
 
-def jogger(kick=None, passing=None, bob=0, tail=0):
-    """A jogger running up the road, seen from behind: a black ponytail tied high with a cyan band, an orange
-    racerback singlet with a white race bib pinned to its back, bare arms pumping, navy capri tights and cyan
-    shoes. kick is the side ("left" or "right") whose heel is kicked up behind, sole showing, while the other
-    foot plants; passing is the side whose knee is passing through, its foot just off the ground. The arm on the
-    kicking side is bent forward out of sight, the other swung back. The road outline and the lit rim."""
+def jogger(knee=None, passing=None, bob=0, tail=None):
+    """A jogger running down the road at the pack, facing the player: a black ponytail tied high (it swings
+    out from behind the head to the side tail, "left" or "right", or hangs hidden behind it), a black fringe, an orange racerback singlet with a white race bib
+    pinned on its front, bare arms pumping, navy capri tights and cyan shoes. knee is the side ("left" or
+    "right", screen left and right) whose knee is driven up, the foot lifted and the knee lit, while the
+    other foot plants; passing is the side whose foot is passing down under the body, just off the ground.
+    The arm on the raised knee's side swings back, half hidden; the other is bent forward, the fist up in
+    front of the chest. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     b = bob
-    # legs: the kicked one folds up behind, its sole to us at the knee; the passing one lifts its foot a little
+    # the ponytail behind the head, out to one side
+    if tail:
+        g.cel(16 + (7 if tail == "right" else -7), 17 + b, 2.2, 4, "navy", "ink", "dslate")
+    # legs: the raised knee comes at us, lit, its foot lifted; the passing foot just off the ground
     for x, side in ((11, "left"), (17, "right")):
-        if kick == side:
-            g.rect(x, 33 + b, 4, 4, "navy")
-            g.rect(x + 3, 33 + b, 1, 4, "ink")
-            g.rect(x, 37 + b, 4, 2, "cyan")
-            g.rect(x, 39 + b, 4, 1, "white")
+        f = -4 if knee == side else -1 if passing == side else 0
+        g.rect(x, 31 + b, 4, 10 + f - b, "navy")
+        g.rect(x + 3, 31 + b, 1, 10 + f - b, "ink")
+        if knee == side:
+            g.rect(x, 33 + b, 4, 2, "dslate")
+        g.rect(x + 1, 41 + f, 2, 2, "skin1")
+        g.rect(x, 43 + f, 4, 2, "cyan")
+        g.rect(x, 44 + f, 4, 1, "white")
+    # arms: swung back and down on the raised knee's side, the upper arm bent forward on the other
+    for x, side in ((5, "left"), (24, "right")):
+        if knee == side:
+            g.rect(x, 22 + b, 3, 8, "skin1")
+            g.rect(x + 2, 22 + b, 1, 8, "skin2")
         else:
-            f = -2 if passing == side else 0
-            g.rect(x, 33 + b, 4, 8 + f - b, "navy")
-            g.rect(x + 3, 33 + b, 1, 8 + f - b, "ink")
-            g.rect(x + 1, 41 + f, 2, 2, "skin1")
-            g.rect(x, 43 + f, 4, 2, "cyan")
-            g.rect(x, 44 + f, 4, 1, "sky")
-    # arms, 3px thin: bent forward on the kicking side, so only the upper arm and elbow show, swung back
-    # and low on the other
-    for x, side in ((6, "left"), (23, "right")):
-        if kick == side:
-            g.rect(x, 22 + b, 3, 5, "skin1")
-            g.rect(x + 2, 22 + b, 1, 5, "skin2")
-        else:
-            g.rect(x, 22 + b, 3, 10, "skin1")
-            g.rect(x + 2, 22 + b, 1, 10, "skin2")
-    # the racerback singlet: bare shoulder blades either side of its back panel, the bib pinned on
-    g.rect(9, 21 + b, 14, 12, "orange")
-    g.rect(20, 21 + b, 3, 12, "rust")
-    g.rect(9, 23 + b, 1, 9, "amber")
-    g.tri((9, 21 + b), (12, 21 + b), (9, 24 + b), "skin1")
-    g.tri((20, 21 + b), (23, 21 + b), (23, 24 + b), "skin2")
-    g.rect(9, 32 + b, 14, 1, "rust")
-    g.rect(12, 25 + b, 8, 6, "white")
-    g.rect(18, 25 + b, 2, 6, "lgrey")
-    g.rect(12, 25 + b, 8, 1, "sky")
-    bib(g, 16, 28.5 + b)
-    # the back of the head, the ears and the nape, then the ponytail tied high, hanging to the shoulders and
-    # swinging
+            g.rect(x, 22 + b, 3, 4, "skin1")
+            g.rect(x + 2, 22 + b, 1, 4, "skin2")
+    # the racerback singlet, bare shoulders either side, the bib pinned on its front, the tights' waistband
+    g.rect(9, 21 + b, 14, 11, "orange")
+    g.rect(20, 21 + b, 3, 11, "rust")
+    g.rect(9, 23 + b, 1, 8, "amber")
+    g.rect(9, 21 + b, 3, 2, "skin1")
+    g.rect(20, 21 + b, 3, 2, "skin2")
+    g.rect(12, 24 + b, 8, 6, "white")
+    g.rect(18, 24 + b, 2, 6, "lgrey")
+    g.rect(12, 24 + b, 8, 1, "sky")
+    bib(g, 16, 27.5 + b)
+    g.rect(9, 31 + b, 14, 1, "ink")
+    # the forearm bent up and in over the singlet's edge, the fist in front of the chest
+    for x, side in ((5, "left"), (24, "right")):
+        if knee != side:
+            fx = x + (3 if side == "left" else -3)
+            g.rect(fx, 23 + b, 3, 3, "skin1")
+            g.rect(fx, 25 + b, 3, 1, "skin2")
+    # the head: the neck, the face, black hair over the crown with a fringe and down the sides
     g.rect(14, 19 + b, 4, 3, "skin1")
-    g.rect(7, 13 + b, 2, 3, "skin1")
-    g.rect(23, 13 + b, 2, 3, "skin2")
-    g.cel(16, 12.5 + b, 8, 8, "navy", "ink", "dslate")
-    g.cel(16 + tail * 1.5, 15.5 + b, 2.5, 4.5, "navy", "ink", "dslate")
-    g.cel(16 + tail * 3.5, 21 + b, 2, 3.5, "navy", "ink", "dslate")
-    g.rect(14, 10 + b, 4, 2, "cyan")
-    g.rect(17, 10 + b, 1, 2, "sky")
+    face_disc(g, 16, 12.5 + b, 8, 8, "skin1", "skin2")
+    g.cel(16, 8.5 + b, 9, 5, "navy", "ink", "dslate")
+    g.rect(7, 9 + b, 2, 7, "navy")
+    g.rect(23, 9 + b, 2, 7, "ink")
+    g.rect(9, 9 + b, 14, 2, "navy")
+    g.rect(10, 9 + b, 4, 1, "dslate")
+    face_front(g, 16, 13 + b)
     return rim(g, LIT)
 
 
@@ -1502,7 +1507,7 @@ def bib(g, cx, cy):
                     px.p(x0 + i * 4 + k, y0 + j, "ink")
 
 
-# Pedalling: each foot's lift above the bottom of the pedal's turn (the pedals go round), the kid's sway over
+# Pedalling at the player: each foot's lift above the bottom of the pedal's turn (the pedals go round), the kid's sway over
 # the bars and the streamers' flutter, the column each 2-row piece of a streamer swings out by from its grip.
 # 4 frames at 100ms.
 KID_BIKE_RIDE = [dict(lf=-5, rf=0, sway=-1, flutter=(0, 1, 1)), dict(lf=-3, rf=-2, flutter=(0, 0, 1)),
@@ -1511,56 +1516,57 @@ KID_BIKE_RIDE_MS = 100
 
 
 def kid_on_bike(lf=0, rf=0, sway=0, flutter=(0, 0, 0)):
-    """A kid riding a little bike up the road, seen from behind: a yellow tee, sky shorts, red shoes and
-    ochre hair under a red helmet with a white stripe. The bike is mauve, on training wheels,
-    with a red reflector under the saddle and streamers trailing from the grips. Shorter than an adult rider:
-    the helmet's top is 7 rows lower than the cyclist's. The road outline and the lit rim."""
+    """A kid riding a little bike down the road at the pack, facing the player as the cyclist does: a yellow
+    tee, sky shorts, red shoes and ochre hair under a red helmet with a white stripe and a dark visor. The
+    bike is mauve, its front tyre edge-on under a mudguard with a white reflector, the training wheels
+    showing either side behind, streamers trailing from the grips. Shorter than an adult rider: the helmet's
+    top is 7 rows lower than the cyclist's. The road outline and the lit rim."""
     g = edged(Grid(32, 48))
     w = sway
-    # the bike: training wheels on a strut, the rear tyre edge-on, the stays, the mudguard and reflector
+    # the training wheels behind, on their strut, then the front tyre, fork, mudguard and reflector
     for x in (9.5, 22.5):
-        g.blob(x, 43, 1.5, 2.5, "ink")
-    g.rect(10, 41, 13, 1, "grey")
-    g.blob(16, 40.5, 2, 4.5, "ink")
-    for x in (13, 18):
-        g.rect(x, 33, 1, 8, "mauve")
-    g.rect(14, 34, 4, 2, "lgrey")
-    g.rect(15, 36, 2, 2, "red")
-    # legs either side of the wheel, pedalling, shoes on the pedals
+        g.blob(x, 42, 1.5, 2.5, "ink")
+    g.rect(10, 40, 13, 1, "grey")
+    g.blob(16, 40.5, 2, 5, "ink")
+    g.rect(15.5, 34, 1, 6, "lgrey")
+    g.rect(14, 33, 4, 2, "mauve")
+    g.rect(14, 33, 4, 1, "pink")
+    g.rect(15, 35, 2, 1, "white")
+    # legs either side of the wheel, pedalling: shorts, bare knees and shins, shoes on the pedals
     for x, f in ((10, lf), (19, rf)):
-        g.rect(x, 31, 3, 11 + f, "skin1")
-        g.rect(x + 2, 31, 1, 11 + f, "skin2")
+        g.rect(x, 29, 3, 3, "sky")
+        g.rect(x, 32, 3, 10 + f, "skin1")
+        g.rect(x + 2, 32, 1, 10 + f, "skin2")
         g.rect(x - (1 if x < 16 else 0), 42 + f, 4, 2, "red")
         g.rect(x - (1 if x < 16 else 0), 43 + f, 4, 1, "dred")
-    # shorts on the saddle
-    g.rect(11, 29, 10, 4, "sky")
-    g.rect(18, 29, 3, 4, "blue")
-    # the handlebar's ends and grips, wider than the kid, the streamers trailing from them
-    g.rect(6, 25, 20, 1, "grey")
-    for x, c in ((5, "pink"), (6, "cyan"), (7, "yellow"), (24, "yellow"), (25, "cyan"), (26, "pink")):
-        side = -1 if x < 16 else 1
-        for k, dx in enumerate(flutter):
-            g.rect(x + side * dx, 27 + 2 * k, 1, 2, c)
-    g.rect(5, 24, 3, 3, "ink")
-    g.rect(24, 24, 3, 3, "ink")
-    # the tee, leaning to the bars, its sleeves and the arms reaching out to the grips
-    for x in (8, 21):
-        g.rect(x + w, 21, 3, 3, "yellow")
-        g.rect(x + w + (-1 if x < 16 else 0), 23, 4, 2, "skin1")
+    # the tee, its sleeves and the arms down to the grips
     g.rect(11 + w, 20, 10, 10, "yellow")
     g.rect(18 + w, 20, 3, 10, "amber")
     g.rect(11 + w, 20, 1, 9, "white")
     g.p(11 + w, 20, None)
     g.p(20 + w, 20, None)
-    # head: the nape, ears, the hair under the helmet, then the helmet, a white stripe over its crown and
-    # its rim shaded
-    g.rect(14 + w, 18, 4, 3, "skin1")
-    g.rect(9 + w, 15, 2, 3, "skin1")
-    g.rect(21 + w, 15, 2, 3, "skin2")
-    g.cel(16 + w, 16.5, 5.5, 3, "ochre", "rust", "tan")
-    g.cel(16 + w, 12.5, 7, 5.5, "red", "dred", "pink", power=2.2)
-    g.rect(15.5 + w, 7, 1, 8, "white")
-    g.rect(9 + w, 15, 14, 1, "dred")
+    for x in (8, 21):
+        g.rect(x + w, 21, 3, 3, "yellow")
+        g.rect(x + w, 24, 3, 1, "skin1")
+    # the handlebar across in front, the streamers trailing from the grips, the hands on the grips
+    g.rect(6, 26, 20, 1, "grey")
+    for x, c in ((5, "pink"), (6, "cyan"), (7, "yellow"), (24, "yellow"), (25, "cyan"), (26, "pink")):
+        side = -1 if x < 16 else 1
+        for k, dx in enumerate(flutter):
+            g.rect(x + side * dx, 28 + 2 * k, 1, 2, c)
+    g.rect(5, 25, 3, 3, "ink")
+    g.rect(24, 25, 3, 3, "ink")
+    g.rect(6, 25, 3, 2, "skin1")
+    g.rect(23, 25, 3, 2, "skin1")
+    # head: the face under the helmet, ochre hair at the sides, then the helmet, its stripe and visor
+    g.rect(14 + w, 19, 4, 2, "skin1")
+    face_disc(g, 16 + w, 15.5, 6.5, 5.5, "skin1", "skin2")
+    g.rect(9 + w, 13, 2, 5, "ochre")
+    g.rect(21 + w, 13, 2, 5, "ochre")
+    g.cel(16 + w, 11.5, 7, 5, "red", "dred", "pink", power=2.2)
+    g.rect(15.5 + w, 7, 1, 6, "white")
+    g.rect(9 + w, 13, 14, 1, "ink")
+    face_front(g, 16 + w, 15)
     return rim(g, LIT)
 
 

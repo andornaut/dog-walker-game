@@ -2249,7 +2249,7 @@
       "json": "sprites/jogger.json",
       "anchor": {
         "feetY": 68,
-        "opaqueWidth": 32
+        "opaqueWidth": 35
       }
     },
     {
@@ -2258,7 +2258,7 @@
       "json": "sprites/jogger@50.json",
       "anchor": {
         "feetY": 35,
-        "opaqueWidth": 16
+        "opaqueWidth": 18
       }
     },
     {
@@ -2267,7 +2267,7 @@
       "json": "sprites/jogger@62.json",
       "anchor": {
         "feetY": 44,
-        "opaqueWidth": 20
+        "opaqueWidth": 22
       }
     },
     {
@@ -2276,7 +2276,7 @@
       "json": "sprites/jogger@75.json",
       "anchor": {
         "feetY": 52,
-        "opaqueWidth": 24
+        "opaqueWidth": 26
       }
     },
     {
@@ -2285,7 +2285,7 @@
       "json": "sprites/jogger@88.json",
       "anchor": {
         "feetY": 60,
-        "opaqueWidth": 28
+        "opaqueWidth": 30
       }
     },
     {
