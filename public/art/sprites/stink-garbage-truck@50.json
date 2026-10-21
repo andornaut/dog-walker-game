@@ -1,50 +1,50 @@
 { "frames": {
    "stink-garbage-truck@50 0.aseprite": {
-    "frame": { "x": 0, "y": 0, "w": 28, "h": 23 },
+    "frame": { "x": 0, "y": 0, "w": 28, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
-    "sourceSize": { "w": 28, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 30 },
+    "sourceSize": { "w": 28, "h": 30 },
     "duration": 400
    },
    "stink-garbage-truck@50 1.aseprite": {
-    "frame": { "x": 28, "y": 0, "w": 28, "h": 23 },
+    "frame": { "x": 28, "y": 0, "w": 28, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
-    "sourceSize": { "w": 28, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 30 },
+    "sourceSize": { "w": 28, "h": 30 },
     "duration": 400
    },
    "stink-garbage-truck@50 2.aseprite": {
-    "frame": { "x": 56, "y": 0, "w": 28, "h": 23 },
+    "frame": { "x": 56, "y": 0, "w": 28, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
-    "sourceSize": { "w": 28, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 30 },
+    "sourceSize": { "w": 28, "h": 30 },
     "duration": 100
    },
    "stink-garbage-truck@50 3.aseprite": {
-    "frame": { "x": 84, "y": 0, "w": 28, "h": 23 },
+    "frame": { "x": 84, "y": 0, "w": 28, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
-    "sourceSize": { "w": 28, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 30 },
+    "sourceSize": { "w": 28, "h": 30 },
     "duration": 100
    },
    "stink-garbage-truck@50 4.aseprite": {
-    "frame": { "x": 112, "y": 0, "w": 28, "h": 23 },
+    "frame": { "x": 112, "y": 0, "w": 28, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
-    "sourceSize": { "w": 28, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 30 },
+    "sourceSize": { "w": 28, "h": 30 },
     "duration": 100
    },
    "stink-garbage-truck@50 5.aseprite": {
-    "frame": { "x": 140, "y": 0, "w": 28, "h": 23 },
+    "frame": { "x": 140, "y": 0, "w": 28, "h": 30 },
     "rotated": false,
     "trimmed": false,
-    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 23 },
-    "sourceSize": { "w": 28, "h": 23 },
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 28, "h": 30 },
+    "sourceSize": { "w": 28, "h": 30 },
     "duration": 100
    }
  },
@@ -53,7 +53,7 @@
   "version": "1.2.30-x64",
   "image": "stink-garbage-truck@50.png",
   "format": "RGBA8888",
-  "size": { "w": 168, "h": 23 },
+  "size": { "w": 168, "h": 30 },
   "scale": "1",
   "frameTags": [
    { "name": "idle", "from": 0, "to": 1, "direction": "forward" },

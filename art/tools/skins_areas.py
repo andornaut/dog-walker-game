@@ -27,9 +27,11 @@ stink-fish-crate    40x40   Main Street: a slatted wooden crate on crushed ice, 
                             one flipping its tail; stink-fish-crate-cloud
 stink-seaweed       40x40   Riverside Path: a heap of kelp ribbons with a pink shell and a crab on
                             top that raises its claws; skunk-cloud
-stink-garbage-truck 56x45   The Long Way Home: a garbage truck from behind, its hopper open on
-                            bags and a banana peel, hazard lights blinking, two flies; skunk-cloud.
-                            56 wide like parked-car, so it centres on a lane with 4px to spare.
+stink-garbage-truck 56x60   The Long Way Home: a rear-loader garbage truck from behind, its hopper
+                            open on bags and a banana peel, the beacon blinking, two flies;
+                            skunk-cloud. Laid out on 56x50 and drawn as obstacles.delivery_truck is
+                            (56 columns, rows 1.2x), so it centres on a lane with 4px to spare, taller
+                            than the delivery truck (56x54) and as tall as the ice cream truck.
                             drive (4 frames, 100ms): reversing down the lane at the pack, tread
                             lines fall down the tyres, the body dips 1px onto them on frames 1
                             and 2, the beacon blinks
@@ -39,9 +41,9 @@ stink-fish-crate-cloud      104x50, loop (4 frames, 220ms) like skunk-cloud: the
                             pixels, plum wisps. Main Street's road is pink and its shadow mauve,
                             so skunk-cloud's mauve fill would vanish into it.
 
-The drawings are in the 32px units of a 32x32 road sprite, drawn on a minis.Mini at BIG (1.25x),
-as encounters.py draws: a 2-lane decal is TWO_LANES units wide, so 104px. A 1px line stays 1px and
-motion moves whole pixels. The hazes are drawn in pixels at their own size (haze). Every key also
+The drawings, the garbage truck's aside, are in the 32px units of a 32x32 road sprite, drawn on a
+minis.Mini at BIG (1.25x), as encounters.py draws: a 2-lane decal is TWO_LANES units wide, so 104px. A
+1px line stays 1px and motion moves whole pixels. The hazes are drawn in pixels at their own size (haze). Every key also
 has <key>@<step> for each depth step in minis.STEPS, redrawn at BIG x the step (the haze at the
 step), floor(size x scale + 0.5), with the original's tags, frames and durations.
 
@@ -60,14 +62,18 @@ import sys
 
 sys.path.insert(0, os.path.dirname(__file__))
 import road  # noqa: E402
-from minis import STEPS, Mini, scaled  # noqa: E402
-from obstacles import treads  # noqa: E402
+import obstacles  # noqa: E402
+from minis import STEPS, Mini, scaled, small  # noqa: E402
+from obstacles import treads, unit  # noqa: E402
 from pixel import K, Grid, edged, main  # noqa: E402
 
 BIG = 1.25
 TWO_LANES = (64 * 2 - 24) / BIG
-# The garbage truck is 56px wide, like the parked car, and 45 tall.
-TRUCK_W, TRUCK_H = 56 / BIG, 36
+# The garbage truck is laid out on 56x50 and drawn as obstacles.delivery_truck is, its columns kept (a lane less
+# 4px each side) and its rows TRUCK_SCALE times taller: 56x60, taller than the delivery truck's 54 and as tall
+# as road.ice_cream_truck.
+TRUCK_W, TRUCK_H = 56, 50
+TRUCK_SCALE = obstacles.CAR_SCALE
 # The stink haze's frame at full size: 2 lanes wide, skunk-cloud's 40 rows x 1.25.
 HAZE_W, HAZE_H = 104, 50
 # The zone roads, for the preview: Willow Crescent, Fairview Park, Main Street, Riverside Path and The
@@ -412,72 +418,93 @@ def seaweed(f, new=Grid):
     return lit(g)
 
 
-def garbage_truck(f, new=Grid, roll=None):
-    """The Long Way Home's stink: a rear-loader garbage truck from straight behind, as obstacles.parked_car
-    is: a green tailgate with a rounded top, ribbed in forest with a white stripe, its hopper open on a
-    bag, a sack, a can and a banana peel under the grey packer blade, grab bars either side, red tail
-    lights, a bumper step and an amber beacon on the roof that blinks (f 1 off). Two flies circle over it
-    (TRUCK_FLIES). roll (0 to 3) is a drive frame, reversing down the lane at the pack: tread lines fall
-    down the tyres 1px a frame in place of the hubs, and the body dips 1px onto them on frames 1 and 2."""
+def garbage_truck(f, roll=None):
+    """The Long Way Home's stink: a rear-loader garbage truck from straight behind, a lane wide and taller
+    than obstacles.delivery_truck, laid out on TRUCK_W x TRUCK_H and drawn at TRUCK_SCALE as it is: a green
+    packer body with a rounded top, ribbed in forest with a white stripe, its hopper open on a bag, a sack, a
+    can and a banana peel under the grey packer blade, grab bars either side, red tail lights, the bumper
+    step, both rear wheels and an amber beacon on the roof that blinks (f 1 off). roll (0 to 3) is a drive
+    frame, reversing down the lane at the pack: tread lines fall down the tyres 1px a frame and the body
+    dips 1px onto them on frames 1 and 2."""
     w = TRUCK_W
-    cx = w / 2
-    g = edged(new(w, TRUCK_H))
+    g = edged(Grid(TRUCK_W, TRUCK_H))
     px = raster(g)
+    uy = unit(g)[1]
     # wheels first, so the body can dip over them
-    for x in (6, w - 13):
-        g.rect(x, 29, 7, 4, "ink")
-        if roll is None:
-            g.rect(x + 2, 30, 3, 2, "slate")
-        else:
-            treads(g, x + 1, 29, 5, 4, roll, 1 / scale_of(g), back=True)
+    for x in (5, 42):
+        g.rect(x, 39, 9, 10, "ink")
+        g.rect(x, 39, 2, 9, "dslate")
+        if roll is not None:
+            treads(g, x + 2, 42, 7, 7, roll, uy, back=True)
     wheels = [row[:] for row in px.px]
     px.px = [[None] * px.w for _ in range(px.h)]
-    # the tailgate: a rounded top over a box
-    g.ell(cx, 13, cx - 5, 9, "dgreen", "forest", "green")
-    g.rect(5, 12, w - 10, 16, "dgreen")
-    g.rect(5, 12, 1, 16, "green")
-    g.rect(w - 8, 12, 3, 16, "forest")
-    for x in (14, cx, w - 14):
-        g.rect(x, 7, 1, 7, "forest")
-    g.rect(6, 13, w - 12, 1, "white")
+    # the packer body: a rounded top over a box, lit along the left, shaded down the right
+    g.cel(w / 2, 15, 23, 13, "dgreen", "forest", "green")
+    g.rect(5, 15, w - 10, 23, "dgreen")
+    g.rect(5, 15, 1, 23, "green")
+    g.rect(w - 9, 15, 4, 23, "forest")
+    for x in (15, 28, 41):
+        g.rect(x, 4, 1, 11, "forest")
+    g.rect(6, 16, w - 12, 1, "white")
     # the beacon
-    g.rect(cx - 2, 2, 4, 2, "amber" if f == 0 else "rust")
+    g.rect(w / 2 - 2, 1, 4, 2, "amber" if f == 0 else "rust")
     if f == 0:
-        g.p(cx - 2, 2, "yellow")
+        g.p(w / 2 - 2, 1, "yellow")
     # the hopper: its mouth, the trash and the packer blade
-    g.rect(8, 16, w - 16, 9, "ink")
-    g.ell(15, 22, 4.5, 3.5, "lgrey", "grey", "white")
-    g.rect(14.5, 18, 1, 2, "slate")
-    g.ell(23.5, 22.5, 4, 3, "purple", "plum", "mauve")
-    g.rect(28, 20, 3, 5, "red")
-    g.rect(28, 20, 3, 1, "pink")
-    g.tri((31, 25), (35, 25), (34, 20.5), "yellow")
-    g.rect(8, 16, w - 16, 2, "grey")
-    g.rect(8, 16, w - 16, 1, "lgrey")
+    g.rect(9, 21, w - 18, 12, "ink")
+    g.cel(16, 29, 5, 3.5, "lgrey", "grey", "white")
+    g.rect(15.5, 25, 1, 2, "slate")
+    g.cel(25.5, 29.5, 4.5, 3, "purple", "plum", "mauve")
+    g.rect(31, 26.5, 3, 6, "red")
+    g.rect(31, 26.5, 3, 1, "pink")
+    g.tri((35, 32.5), (40, 32.5), (38.5, 27), "yellow")
+    g.p(38, 27.5, "dbrown")
+    g.rect(9, 21, w - 18, 3, "grey")
+    g.rect(9, 21, w - 18, 1, "lgrey")
+    g.rect(9, 23, w - 18, 1, "slate")
     # grab bars and tail lights
-    for x in (3, w - 4):
-        g.rect(x, 14, 1, 10, "lgrey")
-    for x in (6, w - 8):
-        g.rect(x, 21, 2, 3, "red")
-        g.p(x, 21, "pink")
-    # bumper step
-    g.rect(3, 27, w - 6, 2, "grey")
-    g.rect(3, 27, w - 6, 1, "lgrey")
+    for x in (2, w - 3):
+        g.rect(x, 17, 1, 17, "lgrey")
+    for x in (5, w - 9):
+        g.rect(x, 29, 4, 6, "red")
+        g.rect(x, 29, 4, 1, "pink")
+        g.rect(x, 34, 4, 1, "dred")
+    # the bumper step across the full width
+    g.rect(1, 37, w - 2, 3, "dslate")
+    g.rect(1, 37, w - 2, 1, "slate")
+    g.rect(1, 37, 1, 3, "grey")
     dip = 1 if roll in (1, 2) else 0
     body = px.px
     px.px = [[(body[y - dip][x] if y >= dip else None) or wheels[y][x] for x in range(px.w)] for y in range(px.h)]
     return lit(g)
 
 
-def truck_driving(roll, new=Grid):
+def truck_driving(roll):
     """garbage_truck's drive frame roll, its beacon lit on frames 0 and 1."""
-    return garbage_truck(0 if roll < 2 else 1, new, roll)
+    return garbage_truck(0 if roll < 2 else 1, roll)
 
 
+# Two flies circling over the truck's roof, (x, y) per idle frame in layout pixels.
+TRUCK_FLIES = (((12, 4), (14, 2)), ((44, 2), (42, 1)))
 
 
+def truck(draw, f, step):
+    """A garbage truck frame f at depth step step on a minis.Mini at TRUCK_SCALE x step, outlined, with its
+    flies on it after the outline: one ink pixel below 0.75x, else a 2x1 ink body under a white wing."""
+    sx, sy = TRUCK_SCALE[0] * step, TRUCK_SCALE[1] * step
+    out = small(sys.modules[__name__], (sx, sy), draw, f).outlined()
+    for frames in TRUCK_FLIES:
+        x, y = frames[f % 2]
+        x0, y0 = math.floor((x + 0.5) * sx), math.floor((y + 0.5) * sy)
+        if step < 0.75:
+            out[y0][x0] = K["ink"]
+            continue
+        for xx in (x0, x0 + 1):
+            out[y0][xx] = K["ink"]
+        out[y0 - 1][x0 + (1 if f % 2 else 0)] = K["white"]
+        out[y0 - 1][x0 + (0 if f % 2 else 1)] = K["lgrey"]
+    return out
 
-TRUCK_FLIES = (((10, 3), (12, 1)), ((33, 1), (31, 3)))
 
 
 # ---------- the haze ----------
@@ -554,9 +581,8 @@ def sprites():
         yield f"stink-compost{suffix}", [("idle", [source(compost, f, s, COMPOST_FLIES) for f in (0, 1)], 400)]
         yield f"stink-fish-crate{suffix}", [("idle", [source(fish_crate, f, s) for f in (0, 1)], 400)]
         yield f"stink-seaweed{suffix}", [("idle", [source(seaweed, f, s) for f in (0, 1)], 400)]
-        yield f"stink-garbage-truck{suffix}", [
-            ("idle", [source(garbage_truck, f, s, TRUCK_FLIES, TRUCK_W, TRUCK_H) for f in (0, 1)], 400),
-            ("drive", [source(truck_driving, f, s, TRUCK_FLIES, TRUCK_W, TRUCK_H) for f in range(4)], 100)]
+        yield f"stink-garbage-truck{suffix}", [("idle", [truck(garbage_truck, f, step) for f in (0, 1)], 400),
+                                               ("drive", [truck(truck_driving, f, step) for f in range(4)], 100)]
         hw, hh = scaled(HAZE_W, step), scaled(HAZE_H, step)
         yield f"stink-fish-crate-cloud{suffix}", [
             ("loop", [haze(hw, hh, i, FISH_HAZE).outlined(False) for i in range(4)], 220)]

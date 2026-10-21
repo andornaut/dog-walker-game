@@ -230,10 +230,11 @@ def rinse(skin):
 
 
 # card-skunk-ignore's layout: the source's centre and feet row, its stink lines, the dog's centre and feet
-# row, and its stink lines. The garbage truck is wider and taller than a 40x40 source, so it runs off the
-# card's left edge and the dog walks nearer.
+# row, and its stink lines. The garbage truck is taller than the card, so it stands further up the road, drawn
+# at its @75 depth step (IGNORE_SPRITE), and the dog walks nearer.
 IGNORE = {"": (18, 44, (30, 6), 54, 40, (46, 4)),
-          "stink-garbage-truck": (16, 45, (29, 1), 58, 52, (50, 12))}
+          "stink-garbage-truck": (21, 47, (43, 8), 58, 52, (50, 12))}
+IGNORE_SPRITE = {"stink-garbage-truck": "stink-garbage-truck@75"}
 
 
 def ignore(skin):
@@ -244,7 +245,7 @@ def ignore(skin):
     def card():
         a = Art()
         a.ground(zone)
-        a.put(skin, "idle", sx, sfoot)
+        a.put(IGNORE_SPRITE.get(skin, skin), "idle", sx, sfoot)
         stink(a, lx, ly, 2, ink)
         a.put("dog-koda", "walk", dx, dfoot, 2)
         stink(a, mx, my, 2, ink)

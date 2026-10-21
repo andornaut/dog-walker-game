@@ -5601,8 +5601,8 @@
       "png": "sprites/stink-garbage-truck.png",
       "json": "sprites/stink-garbage-truck.json",
       "anchor": {
-        "feetY": 41,
-        "opaqueWidth": 50
+        "feetY": 59,
+        "opaqueWidth": 56
       }
     },
     {
@@ -5610,8 +5610,8 @@
       "png": "sprites/stink-garbage-truck@50.png",
       "json": "sprites/stink-garbage-truck@50.json",
       "anchor": {
-        "feetY": 21,
-        "opaqueWidth": 26
+        "feetY": 29,
+        "opaqueWidth": 28
       }
     },
     {
@@ -5619,8 +5619,8 @@
       "png": "sprites/stink-garbage-truck@62.png",
       "json": "sprites/stink-garbage-truck@62.json",
       "anchor": {
-        "feetY": 26,
-        "opaqueWidth": 33
+        "feetY": 37,
+        "opaqueWidth": 35
       }
     },
     {
@@ -5628,8 +5628,8 @@
       "png": "sprites/stink-garbage-truck@75.png",
       "json": "sprites/stink-garbage-truck@75.json",
       "anchor": {
-        "feetY": 31,
-        "opaqueWidth": 38
+        "feetY": 44,
+        "opaqueWidth": 42
       }
     },
     {
@@ -5637,8 +5637,8 @@
       "png": "sprites/stink-garbage-truck@88.png",
       "json": "sprites/stink-garbage-truck@88.json",
       "anchor": {
-        "feetY": 36,
-        "opaqueWidth": 45
+        "feetY": 52,
+        "opaqueWidth": 49
       }
     },
     {
